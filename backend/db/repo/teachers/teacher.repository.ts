@@ -1,5 +1,5 @@
-import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
-import { db, queryDb, queryWithPagination } from "@/backend/db";
+import { and, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { caseInsensitiveLike, db, queryDb, queryWithPagination } from "@/backend/db";
 import { teachers, users } from "@/backend/db/schema";
 import { AccountStatus, type Gender } from "@/backend/enum";
 import type {
@@ -112,7 +112,7 @@ export namespace TeacherRepository {
         and(
           isNull(users.deletedAt),
           eq(users.status, AccountStatus.ACTIVATED),
-          searchQuery ? ilike(users.name, `%${escapeLikeWildcards(searchQuery)}%`) : undefined
+          searchQuery ? caseInsensitiveLike(users.name, `%${escapeLikeWildcards(searchQuery)}%`) : undefined
         )
       )
       .limit(limit);
@@ -129,8 +129,8 @@ export namespace TeacherRepository {
       isNull(users.deletedAt),
       search
         ? or(
-            ilike(users.name, `%${escapeLikeWildcards(search)}%`),
-            ilike(users.email, `%${escapeLikeWildcards(search)}%`)
+            caseInsensitiveLike(users.name, `%${escapeLikeWildcards(search)}%`),
+            caseInsensitiveLike(users.email, `%${escapeLikeWildcards(search)}%`)
           )
         : undefined
     );

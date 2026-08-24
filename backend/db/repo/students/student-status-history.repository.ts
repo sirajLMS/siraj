@@ -1,7 +1,12 @@
 import { eq, inArray } from "drizzle-orm";
-import { db, queryDb } from "@/backend/db";
+import { db, isSqlite, queryDb } from "@/backend/db";
 import { studentStatusHistory } from "@/backend/db/schema";
-import type { CreateInitialStatusHistoryInput, DBTransaction, StudentStatusHistorySelectType } from "@/backend/types";
+import type {
+  CreateInitialStatusHistoryInput,
+  DBTransaction,
+  LogStatusTransitionInput,
+  StudentStatusHistorySelectType,
+} from "@/backend/types";
 export namespace StudentStatusHistoryRepository {
   export async function findByStudentIds(
     studentIds: string[],
@@ -58,5 +63,29 @@ export namespace StudentStatusHistoryRepository {
       .where(eq(studentStatusHistory.studentId, studentId))
       .limit(1);
     return row ?? null;
+  }
+
+  /**
+   * App-layer SQLite fallback for the PG-only `trg_log_student_status_history` trigger.
+   *
+   * On PostgreSQL, the trigger auto-logs status transitions on UPDATE. SQLite cannot
+   * register the trigger (it uses `current_user_id()` session var + plpgsql), so the
+   * app layer must log the transition explicitly.
+   *
+   * This is a NO-OP on PostgreSQL (the trigger handles it; avoids double-logging).
+   * Service-layer callers should invoke this after a successful student status update
+   * when running on SQLite, passing the OLD and NEW status + the acting user.
+   */
+  export async function logTransitionIfSqlite(input: LogStatusTransitionInput, tx?: DBTransaction): Promise<void> {
+    if (!isSqlite()) return;
+    if (input.oldStatus === input.newStatus) return;
+    const executor = tx ?? db;
+    await executor.insert(studentStatusHistory).values({
+      studentId: input.studentId,
+      oldStatus: input.oldStatus,
+      newStatus: input.newStatus,
+      changedByUserId: input.changedByUserId,
+      createdAt: input.createdAt,
+    });
   }
 }

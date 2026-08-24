@@ -1,5 +1,5 @@
-import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
-import { type db, isSqlite, type QueryDbHandle, queryDb, queryWithPagination } from "@/backend/db";
+import { and, count, desc, eq, isNull, type SQL, sql } from "drizzle-orm";
+import { caseInsensitiveLike, type db, isSqlite, type QueryDbHandle, queryDb, queryWithPagination } from "@/backend/db";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { ComplaintStatus } from "@/backend/enum";
 import { assertComplaintCategory, assertComplaintStatus } from "@/backend/lib";
@@ -29,7 +29,7 @@ function buildComplaintQueueConditions(
   }
 
   if (options.search) {
-    conditions.push(ilike(users.name, `%${escapeLikeWildcards(options.search)}%`));
+    conditions.push(caseInsensitiveLike(users.name, `%${escapeLikeWildcards(options.search)}%`));
   }
 
   return and(...conditions);

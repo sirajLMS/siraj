@@ -314,6 +314,16 @@ export namespace RecurringClassService {
 
       const result = await createScheduleAndDeductCredits(userId, input, tErrors);
 
+      // App-layer SQLite fallback for the PG-only hours-per-week recalculation triggers.
+      // On PG the triggers auto-recalc students.hours_per_week; on SQLite this is a no-op.
+      await StudentRepository.recalcHoursPerWeekIfSqlite(input.studentId).catch(error => {
+        logger.error("Failed to recalc student hours_per_week (SQLite fallback)", {
+          studentId: input.studentId,
+          recurringScheduleId: result.recurringScheduleId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      });
+
       await dispatchClassScheduledNotifications(result.classInstanceIds, input.studentId, input.locale);
 
       // Best-effort meeting URL generation — never fails the booking. Each
@@ -698,6 +708,10 @@ export namespace RecurringClassService {
 
       // 3. Update the schedule mode (V3-021: delegated to repository)
       await RecurringScheduleRepository.updateSchedulingMode(recurringScheduleId, newMode, t);
+
+      // App-layer SQLite fallback for the PG-only hours-per-week recalculation triggers.
+      // On PG the triggers auto-recalc students.hours_per_week; on SQLite this is a no-op.
+      await StudentRepository.recalcHoursPerWeekIfSqlite(schedule.studentId, t);
 
       return { archivedInstanceIds, quotaReleased, creditsRefunded };
     };

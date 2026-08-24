@@ -17,7 +17,7 @@ export function resolveSqliteUrl(): string {
   if (databaseUrl && /^(file:|libsql:|https?:|wss?:)/i.test(databaseUrl)) {
     return databaseUrl;
   }
-  const fileName = getStringEnv("DB_FILE_NAME", "./siraj.sqlite") ?? "./siraj.sqlite";
+  const fileName = getStringEnv("DB_FILE_NAME", "./db/siraj.sqlite") ?? "./db/siraj.sqlite";
   return fileName.startsWith("file:") ? fileName : `file:${fileName}`;
 }
 

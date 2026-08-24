@@ -39,7 +39,7 @@ declare global {
       DB_CONNECTION_MODE?: "auto" | "pg" | "neon";
       DATABASE_URL: string;
       DATABASE_ENCRYPTION_KEY: string;
-      /** SQLite database file name/path (e.g. ./siraj.sqlite) */
+      /** SQLite database file name/path (e.g. ./db/siraj.sqlite) */
       DB_FILE_NAME?: string;
       /** Neon integration test database URL (loaded from .env.test, not for production use) */
       NEON_TEST_DATABASE_URL?: string;

@@ -1,9 +1,17 @@
 import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { db, queryDb, queryWithPagination } from "@/backend/db";
+import { db, isSqlite, queryDb, queryWithPagination } from "@/backend/db";
 import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
-import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
+import {
+  parents,
+  recurringScheduleDays,
+  recurringSchedules,
+  students,
+  teacherAssignments,
+  teachers,
+  users,
+} from "@/backend/db/schema";
 import { OrderSortDirection, StudentStatus } from "@/backend/enum";
 import { StudentsOrderByColumn } from "@/backend/enum/students";
 import type * as Types from "@/backend/types";
@@ -400,6 +408,41 @@ export namespace StudentRepository {
     tx?: DBTransaction
   ): Promise<Types.StudentSelectType> =>
     runStudentUpdate(studentId, () => ({ primaryTeacherId: newTeacherId }), tErrors, expectedVersion, tx);
+  /**
+   * App-layer SQLite fallback for the PG-only hours-per-week recalculation triggers:
+   * `trg_recalc_hours_recurring_schedules` + `trg_recalc_hours_recurring_schedule_days`.
+   *
+   * On PostgreSQL, these triggers auto-recalc `students.hours_per_week` whenever a
+   * recurring schedule or its days are inserted/updated/deleted. SQLite cannot register
+   * the plpgsql `update_student_hours_per_week()` function, so the app layer must
+   * recalc explicitly after mutations.
+   *
+   * Recalculates `hours_per_week = SUM(recurring_schedules.duration_minutes) / 60.0`
+   * across active recurring_schedule_days for the given student, then UPDATEs the
+   * students row. NO-OP on PostgreSQL (the triggers handle it; avoids double-work).
+   *
+   * Service callers should invoke this after inserting/updating/deleting a recurring
+   * schedule or recurring_schedule_days row when running on SQLite.
+   */
+  export const recalcHoursPerWeekIfSqlite = async (studentId: string, tx?: DBTransaction): Promise<void> => {
+    if (!isSqlite()) return;
+    const executor = tx ?? db;
+    const [row] = await executor
+      .select({
+        totalMinutes: sql<number>`COALESCE(SUM(${recurringSchedules.durationMinutes}), 0)`,
+      })
+      .from(recurringSchedules)
+      .innerJoin(recurringScheduleDays, eq(recurringScheduleDays.recurringScheduleId, recurringSchedules.id))
+      .where(
+        and(
+          eq(recurringSchedules.studentId, studentId),
+          isNull(recurringSchedules.deletedAt),
+          eq(recurringScheduleDays.isActive, true)
+        )
+      );
+    const hoursPerWeek = ((row?.totalMinutes ?? 0) / 60).toFixed(2);
+    await executor.update(students).set({ hoursPerWeek, updatedAt: new Date() }).where(eq(students.id, studentId));
+  };
 
   export const changeStatus = async (
     studentId: string,

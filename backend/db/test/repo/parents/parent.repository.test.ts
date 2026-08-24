@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { db } from "@/backend/db";
+import { db, isSqlite } from "@/backend/db";
 import { ParentRepository } from "@/backend/db/repo/parents";
 import { parents, users } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "@/backend/db/test/entity-setup";
@@ -319,7 +319,14 @@ describe("ParentRepository — create", () => {
         error = e;
       }
 
-      expect(error).not.toBeNull();
+      // PG: the is_valid_timezone() UDF CHECK rejects invalid zones at the DB level.
+      // SQLite: libsql cannot register UDFs; the CHECK is null (documented degradation,
+      // validated at the app layer). The raw update succeeds without DB-level enforcement.
+      if (isSqlite()) {
+        expect(error).toBeNull();
+      } else {
+        expect(error).not.toBeNull();
+      }
     });
   });
 

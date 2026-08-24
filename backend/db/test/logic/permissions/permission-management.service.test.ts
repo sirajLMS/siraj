@@ -4,7 +4,7 @@ import { eq, inArray, sql } from "drizzle-orm";
 import { db, isPostgres, isSqlite } from "@/backend/db";
 import { groupPermissions, permissionGroups, permissions, users } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
-import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
+import { executeTxSql, generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
 import { PermissionManagementService, PermissionsService } from "@/backend/services";
 import type { UserPermissionContext } from "@/backend/types";
@@ -221,13 +221,30 @@ describe("PermissionManagementService Business Logic", () => {
     await db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ONLY));
     await db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ALT));
 
-    // Cleanup test system group — disable trigger in Postgres to allow DELETE of isSystem=true group
+    // Cleanup test system group — disable trigger to allow DELETE of isSystem=true group.
+    // PG: ALTER TABLE ... DISABLE TRIGGER. SQLite: DROP TRIGGER + re-CREATE (no DISABLE support).
+    // SQLite LibSQLDatabase has .run() not .execute(); executeTxSql dispatches across dialects.
     if (isPostgres() && "execute" in db && typeof db.execute === "function") {
       await db.execute(sql`ALTER TABLE permission_groups DISABLE TRIGGER trg_protect_system_permission_groups`);
       try {
         await db.delete(permissionGroups).where(eq(permissionGroups.id, testSystemGroupId));
       } finally {
         await db.execute(sql`ALTER TABLE permission_groups ENABLE TRIGGER trg_protect_system_permission_groups`);
+      }
+    } else if (isSqlite()) {
+      await executeTxSql(db, sql`DROP TRIGGER IF EXISTS trg_protect_system_permission_groups_update`);
+      await executeTxSql(db, sql`DROP TRIGGER IF EXISTS trg_protect_system_permission_groups_delete`);
+      try {
+        await db.delete(permissionGroups).where(eq(permissionGroups.id, testSystemGroupId));
+      } finally {
+        await executeTxSql(
+          db,
+          sql`CREATE TRIGGER IF NOT EXISTS trg_protect_system_permission_groups_update BEFORE UPDATE ON permission_groups FOR EACH ROW WHEN NEW.is_system = 1 OR OLD.is_system = 1 BEGIN SELECT CASE WHEN NEW.is_system = 1 AND OLD.is_system = 0 THEN RAISE(ABORT, 'Cannot change is_system to true') WHEN OLD.is_system = 1 AND NEW.is_system = 0 THEN RAISE(ABORT, 'Cannot change is_system from true to false for system permissions or groups') WHEN OLD.is_system = 1 AND NEW.slug IS NOT OLD.slug THEN RAISE(ABORT, 'Cannot modify core properties of system permission groups; only name and description can be updated') END; END`
+        );
+        await executeTxSql(
+          db,
+          sql`CREATE TRIGGER IF NOT EXISTS trg_protect_system_permission_groups_delete BEFORE DELETE ON permission_groups FOR EACH ROW WHEN OLD.is_system = 1 BEGIN SELECT RAISE(ABORT, 'Cannot delete a system permission or group'); END`
+        );
       }
     } else {
       await db.delete(permissionGroups).where(eq(permissionGroups.id, testSystemGroupId));

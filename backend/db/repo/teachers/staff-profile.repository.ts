@@ -1,5 +1,5 @@
-import { and, count, eq, ilike, or } from "drizzle-orm";
-import { db, queryDb } from "@/backend/db";
+import { and, count, eq, or } from "drizzle-orm";
+import { caseInsensitiveLike, db, queryDb } from "@/backend/db";
 import { UserRepository } from "@/backend/db/repo/users";
 import {
   permissionGroups,
@@ -148,13 +148,13 @@ export namespace StaffProfileRepository {
 
   function resolveRoleCondition(filters?: ManagerDirectoryFilters) {
     if (filters?.roleFilter === "admin") {
-      return ilike(permissionGroups.slug, "%admin%");
+      return caseInsensitiveLike(permissionGroups.slug, "%admin%");
     }
     if (filters?.roleFilter === "supervisor") {
-      return ilike(permissionGroups.slug, "%supervisor%");
+      return caseInsensitiveLike(permissionGroups.slug, "%supervisor%");
     }
     if (filters?.roleFilter === "manager") {
-      return ilike(permissionGroups.slug, "%admin%");
+      return caseInsensitiveLike(permissionGroups.slug, "%admin%");
     }
     return undefined;
   }
@@ -253,8 +253,8 @@ export namespace StaffProfileRepository {
     if (trimmedSearch) {
       searchConditions.push(
         or(
-          ilike(users.name, `%${escapeLikeWildcards(trimmedSearch)}%`),
-          ilike(users.email, `%${escapeLikeWildcards(trimmedSearch)}%`)
+          caseInsensitiveLike(users.name, `%${escapeLikeWildcards(trimmedSearch)}%`),
+          caseInsensitiveLike(users.email, `%${escapeLikeWildcards(trimmedSearch)}%`)
         )
       );
     }

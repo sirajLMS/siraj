@@ -106,3 +106,56 @@ BEGIN
         ) THEN RAISE(ABORT, 'Leave quota exceeded. Maximum allowed leaves is exceeded')
     END;
 END;
+
+-- 5. System Permission Protection Triggers
+-- Mirrors PG's protect_system_permissions() function (3-system_permissions_and_groups.sql).
+-- System permissions are bootstrapped in migration 20260824050000_system_bootstrap_data
+-- (before this trigger exists), so the INSERT guard only blocks runtime app/test inserts.
+
+CREATE TRIGGER IF NOT EXISTS trg_protect_system_permissions_insert
+BEFORE INSERT ON permissions
+FOR EACH ROW
+WHEN NEW.is_system = 1
+BEGIN
+    SELECT RAISE(ABORT, 'Cannot create system permissions');
+END;
+--> statement-breakpoint
+CREATE TRIGGER IF NOT EXISTS trg_protect_system_permissions_update
+BEFORE UPDATE ON permissions
+FOR EACH ROW
+WHEN NEW.is_system = 1 OR OLD.is_system = 1
+BEGIN
+    SELECT CASE
+        WHEN NEW.is_system = 1 AND OLD.is_system = 0 THEN RAISE(ABORT, 'Cannot change is_system to true')
+        WHEN OLD.is_system = 1 AND NEW.is_system = 0 THEN RAISE(ABORT, 'Cannot change is_system from true to false for system permissions or groups')
+        WHEN OLD.is_system = 1 AND (NEW.key IS NOT OLD.key OR NEW.resource IS NOT OLD.resource OR NEW.action IS NOT OLD.action) THEN RAISE(ABORT, 'Cannot modify core properties of system permissions; only description and category can be updated')
+    END;
+END;
+--> statement-breakpoint
+CREATE TRIGGER IF NOT EXISTS trg_protect_system_permissions_delete
+BEFORE DELETE ON permissions
+FOR EACH ROW
+WHEN OLD.is_system = 1
+BEGIN
+    SELECT RAISE(ABORT, 'Cannot delete a system permission or group');
+END;
+--> statement-breakpoint
+CREATE TRIGGER IF NOT EXISTS trg_protect_system_permission_groups_update
+BEFORE UPDATE ON permission_groups
+FOR EACH ROW
+WHEN NEW.is_system = 1 OR OLD.is_system = 1
+BEGIN
+    SELECT CASE
+        WHEN NEW.is_system = 1 AND OLD.is_system = 0 THEN RAISE(ABORT, 'Cannot change is_system to true')
+        WHEN OLD.is_system = 1 AND NEW.is_system = 0 THEN RAISE(ABORT, 'Cannot change is_system from true to false for system permissions or groups')
+        WHEN OLD.is_system = 1 AND NEW.slug IS NOT OLD.slug THEN RAISE(ABORT, 'Cannot modify core properties of system permission groups; only name and description can be updated')
+    END;
+END;
+--> statement-breakpoint
+CREATE TRIGGER IF NOT EXISTS trg_protect_system_permission_groups_delete
+BEFORE DELETE ON permission_groups
+FOR EACH ROW
+WHEN OLD.is_system = 1
+BEGIN
+    SELECT RAISE(ABORT, 'Cannot delete a system permission or group');
+END;

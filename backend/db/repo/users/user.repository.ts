@@ -1,5 +1,5 @@
-import { and, asc, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
-import { db, queryDb } from "@/backend/db";
+import { and, asc, count, eq, inArray, or, type SQL } from "drizzle-orm";
+import { caseInsensitiveLike, db, queryDb } from "@/backend/db";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
 import type { AccountStatus } from "@/backend/enum";
@@ -195,8 +195,8 @@ export namespace UserRepository {
     if (trimmedSearch) {
       conditions.push(
         or(
-          ilike(users.name, `%${escapeLikeWildcards(trimmedSearch)}%`),
-          ilike(users.email, `%${escapeLikeWildcards(trimmedSearch)}%`)
+          caseInsensitiveLike(users.name, `%${escapeLikeWildcards(trimmedSearch)}%`),
+          caseInsensitiveLike(users.email, `%${escapeLikeWildcards(trimmedSearch)}%`)
         )
       );
     }

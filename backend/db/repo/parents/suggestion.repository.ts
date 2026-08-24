@@ -1,5 +1,5 @@
-import { aliasedTable, and, count, desc, eq, gte, ilike, isNull, ne, sql } from "drizzle-orm";
-import { db, isSqlite, queryDb } from "@/backend/db";
+import { aliasedTable, and, count, desc, eq, gte, isNull, ne, sql } from "drizzle-orm";
+import { caseInsensitiveLike, db, isSqlite, queryDb } from "@/backend/db";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { SuggestionStatus } from "@/backend/enum";
 import { NotFoundError } from "@/backend/lib/errors";
@@ -161,7 +161,7 @@ export namespace SuggestionRepository {
     }
 
     if (options.search) {
-      conditions.push(ilike(users.name, `%${escapeLikeWildcards(options.search)}%`));
+      conditions.push(caseInsensitiveLike(users.name, `%${escapeLikeWildcards(options.search)}%`));
     }
 
     const whereClause = and(...conditions);
@@ -339,7 +339,7 @@ export namespace SuggestionRepository {
       .from(suggestions)
       .where(
         and(
-          ilike(suggestions.body, `%${escapeLikeWildcards(query)}%`),
+          caseInsensitiveLike(suggestions.body, `%${escapeLikeWildcards(query)}%`),
           ne(suggestions.id, excludeId),
           isNull(suggestions.deletedAt),
           ne(suggestions.status, SuggestionStatus.DUPLICATE)

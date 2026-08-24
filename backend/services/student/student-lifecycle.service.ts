@@ -1,5 +1,6 @@
 import { ParentRepository } from "@/backend/db/repo/parents";
 import { StudentRepository } from "@/backend/db/repo/students";
+import { StudentStatusHistoryRepository } from "@/backend/db/repo/students/student-status-history.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
 import { ALLOWED_STATUS_TRANSITIONS, AppPermission, NotificationEventType, StudentStatus } from "@/backend/enum";
@@ -104,6 +105,29 @@ export namespace StudentLifecycleService {
         previousStatus: oldStatus,
         newStatus: updated.status,
       });
+
+      // App-layer SQLite fallback for the PG-only trg_log_student_status_history trigger.
+      // On PG the trigger auto-logs; on SQLite this method is a no-op when oldStatus === newStatus
+      // or when running on PG (avoids double-logging).
+      const parsedOldStatus = parseStudentStatus(oldStatus);
+      const parsedNewStatus = parseStudentStatus(updated.status);
+      if (parsedOldStatus && parsedNewStatus) {
+        await StudentStatusHistoryRepository.logTransitionIfSqlite({
+          studentId,
+          oldStatus: parsedOldStatus,
+          newStatus: parsedNewStatus,
+          changedByUserId: actorUserId,
+          createdAt: new Date(),
+        }).catch(error => {
+          logger.error("Failed to log student status transition (SQLite fallback)", {
+            actorUserId,
+            studentId,
+            oldStatus,
+            newStatus: updated.status,
+            error,
+          });
+        });
+      }
 
       await dispatchStudentStatusChangedNotifications(studentId, current.name, oldStatus, updated.status, locale).catch(
         error => {

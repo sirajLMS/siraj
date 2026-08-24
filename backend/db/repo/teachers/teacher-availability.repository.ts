@@ -1,5 +1,5 @@
-import { and, eq, gte, ilike, inArray, isNull, lte, sql } from "drizzle-orm";
-import { db } from "@/backend/db";
+import { and, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
+import { caseInsensitiveLike, db } from "@/backend/db";
 import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import {
   classInstances,
@@ -257,7 +257,7 @@ export namespace TeacherAvailabilityRepository {
     }
     if (teacherNameSearch?.trim()) {
       const escapedSearch = escapeLikeWildcards(teacherNameSearch.trim());
-      conditions.push(ilike(users.name, `%${escapedSearch}%`));
+      conditions.push(caseInsensitiveLike(users.name, `%${escapedSearch}%`));
     }
     return conditions;
   }

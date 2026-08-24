@@ -1,5 +1,5 @@
-import { and, asc, count, desc, eq, gt, ilike, inArray, lte, sql } from "drizzle-orm";
-import { db, queryDb } from "@/backend/db";
+import { and, asc, count, desc, eq, gt, inArray, lte, sql } from "drizzle-orm";
+import { caseInsensitiveLike, db, isSqlite, queryDb } from "@/backend/db";
 import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { cronHeartbeats, cronRuns, cronSchedules } from "@/backend/db/schema";
 import {
@@ -183,7 +183,7 @@ export namespace CronRepository {
     if (jobKind) conditions.push(eq(cronSchedules.jobKind, jobKind));
     if (name) {
       const escapedName = escapeLikeWildcards(name);
-      conditions.push(ilike(cronSchedules.name, `%${escapedName}%`));
+      conditions.push(caseInsensitiveLike(cronSchedules.name, `%${escapedName}%`));
     }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
@@ -398,6 +398,16 @@ export namespace CronRepository {
 
   export const reconcileStuckRuns = async (now: Date, batch: number, tx?: DBTransaction): Promise<number> => {
     return withTx(tx, async t => {
+      // Dialect-aware "stuck run" predicate.
+      // PG: ::timestamptz cast + INTERVAL '1 second' arithmetic.
+      // SQLite: unixepoch() converts ISO/text timestamps to integer seconds for correct
+      // numeric comparison (avoids lexicographic string-compare pitfalls across formats).
+      // SQLite stores timestamptz as integer epoch-ms (mode: timestamp_ms).
+      // Compare directly in ms; timeouts are in seconds so multiply by 1000.
+      const nowMs = now.getTime();
+      const stuckCondition = isSqlite()
+        ? sql`CASE WHEN ${cronRuns.status} = ${CronRunStatus.PENDING} THEN ${cronRuns.createdAt} < ${nowMs} - ${PENDING_STUCK_TIMEOUT_SECONDS * 1000} ELSE ${cronRuns.startedAt} < ${nowMs} - COALESCE(${cronSchedules.timeoutSeconds}, 1) * 1000 AND COALESCE(hb.last_beat_at, ${cronRuns.startedAt}) < ${nowMs} - COALESCE(${cronSchedules.timeoutSeconds}, 1) * 1000 END`
+        : sql`CASE WHEN ${cronRuns.status} = ${CronRunStatus.PENDING}::text::cron_run_status THEN ${cronRuns.createdAt} < (${now}::timestamptz) - ${PENDING_STUCK_TIMEOUT_SECONDS} * INTERVAL '1 second' ELSE ${cronRuns.startedAt} < (${now}::timestamptz) - (COALESCE(${cronSchedules.timeoutSeconds}, 1)) * INTERVAL '1 second' AND COALESCE(hb.last_beat_at, ${cronRuns.startedAt}) < (${now}::timestamptz) - (COALESCE(${cronSchedules.timeoutSeconds}, 1)) * INTERVAL '1 second' END`;
       // Single LEFT JOIN against an aggregated heartbeat subquery — replaces correlated subqueries
       const stuckRuns = await t
         .select({
@@ -413,7 +423,7 @@ export namespace CronRepository {
         .where(
           and(
             inArray(cronRuns.status, [CronRunStatus.PENDING, CronRunStatus.RUNNING, CronRunStatus.RETRYING]),
-            sql`CASE WHEN ${cronRuns.status} = ${CronRunStatus.PENDING}::text::cron_run_status THEN ${cronRuns.createdAt} < (${now}::timestamptz) - ${PENDING_STUCK_TIMEOUT_SECONDS} * INTERVAL '1 second' ELSE ${cronRuns.startedAt} < (${now}::timestamptz) - (COALESCE(${cronSchedules.timeoutSeconds}, 1)) * INTERVAL '1 second' AND COALESCE(hb.last_beat_at, ${cronRuns.startedAt}) < (${now}::timestamptz) - (COALESCE(${cronSchedules.timeoutSeconds}, 1)) * INTERVAL '1 second' END`
+            stuckCondition
           )
         )
         .limit(batch);

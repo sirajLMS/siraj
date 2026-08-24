@@ -4,6 +4,7 @@ import {
   classLifecycleAffectedUserIds,
   SchedulingRepository,
 } from "@/backend/db/repo/scheduling";
+import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { ForbiddenError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
@@ -149,6 +150,11 @@ export namespace ScheduleDeletionService {
         const idempotencyKey = `credit-refund:${deleted.id}`;
         await CreditService.refundOnCancel(deleted.studentId, deleted.id, actorUserId, idempotencyKey, tx, tErrors);
       }
+
+      // App-layer SQLite fallback for the PG-only hours-per-week recalculation triggers.
+      // On PG the triggers auto-recalc students.hours_per_week; on SQLite this is a no-op.
+      // Runs inside the tx so the recalc is atomic with the soft-delete.
+      await StudentRepository.recalcHoursPerWeekIfSqlite(deleted.studentId, tx);
       return true;
     });
 

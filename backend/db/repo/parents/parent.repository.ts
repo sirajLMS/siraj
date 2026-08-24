@@ -1,5 +1,5 @@
-import { and, count, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
-import { db, queryDb, queryWithPagination } from "@/backend/db";
+import { and, count, desc, eq, gte, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
+import { caseInsensitiveLike, db, queryDb, queryWithPagination } from "@/backend/db";
 import { UserRepository } from "@/backend/db/repo/users";
 import {
   classInstancePerformance,
@@ -137,8 +137,8 @@ export namespace ParentRepository {
     if (options.search) {
       conditions.push(
         or(
-          ilike(users.name, `%${escapeLikeWildcards(options.search)}%`),
-          ilike(users.email, `%${escapeLikeWildcards(options.search)}%`)
+          caseInsensitiveLike(users.name, `%${escapeLikeWildcards(options.search)}%`),
+          caseInsensitiveLike(users.email, `%${escapeLikeWildcards(options.search)}%`)
         )
       );
     }
@@ -662,7 +662,10 @@ export namespace ParentRepository {
 
     if (input.search) {
       const searchPattern = `%${escapeLikeWildcards(input.search)}%`;
-      const searchCondition = or(ilike(students.name, searchPattern), ilike(users.name, searchPattern));
+      const searchCondition = or(
+        caseInsensitiveLike(students.name, searchPattern),
+        caseInsensitiveLike(users.name, searchPattern)
+      );
       if (searchCondition) {
         conditions.push(searchCondition);
       }

@@ -18,6 +18,6 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL?.startsWith("file:")
       ? process.env.DATABASE_URL
-      : `file:${process.env.DB_FILE_NAME ?? "./siraj.sqlite"}`,
+      : `file:${process.env.DB_FILE_NAME ?? "./db/siraj.sqlite"}`,
   },
 });

@@ -11,6 +11,19 @@ export type CreateInitialStatusHistoryInput = {
   createdAt: Date;
 };
 
+/**
+ * Input for logging a status transition (UPDATE path).
+ * Used by the app-layer SQLite fallback for `trg_log_student_status_history`
+ * (PG-only trigger; SQLite has no session vars / plpgsql).
+ */
+export type LogStatusTransitionInput = {
+  studentId: string;
+  oldStatus: StudentStatus;
+  newStatus: StudentStatus;
+  changedByUserId: string | null;
+  createdAt: Date;
+};
+
 export type SessionSummary = {
   id: string;
   title: string;

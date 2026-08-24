@@ -1,4 +1,5 @@
-import { and, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { caseInsensitiveLike } from "@/backend/db";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { ClassInstanceSelectType, DailyScheduleResult, DBTransaction } from "@/backend/types";
@@ -110,9 +111,9 @@ export async function fetchDailyScheduleBaseRows(
         and(
           dayConditions,
           or(
-            ilike(students.name, searchPattern),
-            ilike(users.name, searchPattern),
-            ilike(sql`CAST(${classInstances.id} AS TEXT)`, searchPattern)
+            caseInsensitiveLike(students.name, searchPattern),
+            caseInsensitiveLike(users.name, searchPattern),
+            caseInsensitiveLike(sql`CAST(${classInstances.id} AS TEXT)`, searchPattern)
           )
         )
       )

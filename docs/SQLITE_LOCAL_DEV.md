@@ -29,7 +29,7 @@ The dialect is resolved once at process start from `DB_PROVIDER`. All schema def
    bun db --env-file .env.sqlite push
    ```
 
-   This runs `drizzle-kit push --force --config=drizzle.config.sqlite.ts` against `./siraj.sqlite`. The PG-only `ensureExtensions` step (pg_trgm, is_valid_timezone) is skipped automatically for SQLite.
+   This runs `drizzle-kit push --force --config=drizzle.config.sqlite.ts` against `./db/siraj.sqlite` (under the gitignored `./db/` folder). The PG-only `ensureExtensions` step (pg_trgm, is_valid_timezone) is skipped automatically for SQLite.
 
 4. **Seed the SQLite database:**
 
@@ -81,7 +81,7 @@ The dialect is resolved once at process start from `DB_PROVIDER`. All schema def
 9. Change Environment
 0. Exit
 
-Using env file: .env.sqlite [sqlite] (file://./siraj.sqlite)
+Using env file: .env.sqlite [sqlite] (file://./db/siraj.sqlite)
 ```
 
 All drizzle-kit actions (generate/drop/push/studio) automatically pick the right config (`drizzle.config.sqlite.ts` vs `drizzle.config.ts`) based on the selected env file dialect.
@@ -130,10 +130,35 @@ These are documented with `// PG-only:` comments in the schema files:
 | `date` / `time` | `text` (ISO 8601 string) |
 | `smallint` | `integer` (both return number) |
 | `jsonb_typeof()` CHECK | `null` (app-layer validation) |
-| `is_valid_timezone()` UDF in CHECKs | `null` (app-layer validation) |
+| `is_valid_timezone()` UDF in CHECKs | `null` (app-layer validation) — tests guard with `isSqlite()` |
+| `ilike` operator | `caseInsensitiveLike()` helper (`like` for SQLite — ASCII case-insensitive; drizzle-orm#3075) |
+| `INTERVAL`/`::timestamptz` arithmetic | epoch-ms integer comparison (`timestampColumn` stores ms; e.g. cron `reconcileStuckRuns`) |
 | Row-Level Security (RLS) policies | repo-layer soft-delete filtering (already in place) |
 | standalone `foreignKey()` (extras) | inline `.references()` (cross-dialect) |
 | Custom SQL migrations (`backend/db/migration/*.sql`) | skipped for SQLite — only schema migration runs |
+| PG trigger functions (`protect_system_permissions()`, audit immutability, status transitions) | native SQLite triggers (`backend/drizzle-sqlite/20260824050100_sqlite_triggers/migration.sql`) — full parity |
+
+## Trigger parity (PG vs SQLite)
+
+Siraj uses PG trigger functions (`backend/db/migration/*.sql`) for data integrity. Portable triggers are mirrored as native SQLite triggers in `backend/drizzle-sqlite/20260824050100_sqlite_triggers/migration.sql`. Triggers that depend on PG-only features (session variables, `plpgsql`, `INTERVAL` arithmetic) are PG-only — their tests use `describe.skipIf(isSqlite())` / `test.skipIf(isSqlite())` and the app layer enforces the invariant on SQLite.
+
+| PG trigger | SQLite | Rationale |
+|-----------|--------|----------|
+| `prevent_audit_log_mod_trigger` | `prevent_audit_log_update_trigger` + `_delete_trigger` | Ported — pure RAISE(ABORT), no PG deps |
+| `prevent_admin_audit_log_mod_trigger` | `prevent_admin_audit_log_update_trigger` + `_delete_trigger` | Ported — pure RAISE(ABORT), no PG deps |
+| `trg_prevent_student_created_at_update` | same name | Ported — WHEN clause on `created_at` change |
+| `trg_enforce_student_status_transition` | same name | Ported — state-machine CASE/RAISE |
+| `trg_enforce_class_instance_transition` | same name | Ported — state-machine CASE/RAISE |
+| `trg_enforce_leave_quota_limits` | `_insert` + `_update` | Ported — quota enforcement via subquery COUNT |
+| `trg_protect_system_permissions` | `_insert` + `_update` + `_delete` | Ported — system-permission immutability |
+| `trg_protect_system_permission_groups` | `_update` + `_delete` | Ported — system-group immutability |
+| `trg_log_student_status_history` | — (PG-only) | Uses `current_user_id()` session var; app-layer logs history on SQLite |
+| `trg_recalc_hours_recurring_schedules` | — (PG-only) | `update_student_hours_per_week()` plpgsql function; app-layer recalcs on SQLite |
+| `trg_recalc_hours_recurring_schedule_days` | — (PG-only) | Same plpgsql recalc; app-layer on SQLite |
+| `trg_class_instances_timezone_snapshot` | — (PG-only) | `adjust_for_dst()` + `get_utc_offset_mins()` interval math; app-layer on SQLite |
+| `trg_recurring_schedules_timezone_snapshot` | — (PG-only) | Same DST/offset math; app-layer on SQLite |
+
+**Coverage: 8/8 portable triggers ported; 5 PG-only triggers documented + skipped in tests + app-layer enforced.**
 
 ## Migration lifecycle
 
