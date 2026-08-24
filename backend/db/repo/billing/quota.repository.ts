@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { and, count, desc, eq, gt, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
 
-import { type db, queryDb, queryWithPagination } from "@/backend/db";
+import { type db, queryDb, queryWithPagination, withForUpdate } from "@/backend/db";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { classInstances, quotaLedger, quotas } from "@/backend/db/schema";
 import { QuotaLedgerReason, QuotaStatus } from "@/backend/enum";
@@ -451,21 +451,21 @@ export namespace QuotaRepository {
     studentId: string
   ): Promise<QuotaSelectType | null> => {
     const todayStr = new Date().toISOString().slice(0, 10);
-    const [quotaRow] = await tx
-      .select()
-      .from(quotas)
-      .where(
-        and(
-          eq(quotas.studentId, studentId),
-          eq(quotas.status, QuotaStatus.ACTIVE),
-          gt(quotas.remaining, 0),
-          isNull(quotas.deletedAt),
-          or(isNull(quotas.validUntil), gte(quotas.validUntil, todayStr))
+    const [quotaRow] = await withForUpdate(
+      tx
+        .select()
+        .from(quotas)
+        .where(
+          and(
+            eq(quotas.studentId, studentId),
+            eq(quotas.status, QuotaStatus.ACTIVE),
+            gt(quotas.remaining, 0),
+            isNull(quotas.deletedAt),
+            or(isNull(quotas.validUntil), gte(quotas.validUntil, todayStr))
+          )
         )
-      )
-      .orderBy(desc(quotas.priority), quotas.validUntil, quotas.createdAt)
-      .for("update")
-      .limit(1);
+        .orderBy(desc(quotas.priority), quotas.validUntil, quotas.createdAt)
+    ).limit(1);
 
     return quotaRow ?? null;
   };
@@ -612,20 +612,20 @@ export namespace QuotaRepository {
   ): Promise<QuotaSelectType> => {
     // Lock the quota row for the duration of this transaction to prevent TOCTOU
     // races between the balance check and the deduction UPDATE below.
-    const [locked] = await tx
-      .select()
-      .from(quotas)
-      .where(
-        and(
-          eq(quotas.id, input.quotaId),
-          eq(quotas.studentId, input.studentId),
-          eq(quotas.status, QuotaStatus.ACTIVE),
-          gt(quotas.remaining, 0),
-          isNull(quotas.deletedAt)
+    const [locked] = await withForUpdate(
+      tx
+        .select()
+        .from(quotas)
+        .where(
+          and(
+            eq(quotas.id, input.quotaId),
+            eq(quotas.studentId, input.studentId),
+            eq(quotas.status, QuotaStatus.ACTIVE),
+            gt(quotas.remaining, 0),
+            isNull(quotas.deletedAt)
+          )
         )
-      )
-      .for("update")
-      .limit(1);
+    ).limit(1);
 
     if (!locked) throw new QuotaNotFoundError("Failed to redeem quota class: quota may be depleted or inactive");
 
@@ -732,7 +732,7 @@ export namespace QuotaRepository {
       .update(quotas)
       .set({
         remaining: sql<number>`${quotas.remaining} + 1`,
-        usedThisPeriod: sql<number>`GREATEST(${quotas.usedThisPeriod} - 1, 0)`,
+        usedThisPeriod: sql<number>`CASE WHEN ${quotas.usedThisPeriod} > 1 THEN ${quotas.usedThisPeriod} - 1 ELSE 0 END`,
         version: sql<number>`${quotas.version} + 1`,
         updatedAt: now,
       })
@@ -892,7 +892,7 @@ export namespace QuotaRepository {
       .update(quotas)
       .set({
         remaining: sql<number>`${quotas.remaining} + ${releasedCount}`,
-        usedThisPeriod: sql<number>`GREATEST(${quotas.usedThisPeriod} - ${releasedCount}, 0)`,
+        usedThisPeriod: sql<number>`CASE WHEN ${quotas.usedThisPeriod} > ${releasedCount} THEN ${quotas.usedThisPeriod} - ${releasedCount} ELSE 0 END`,
         version: sql<number>`${quotas.version} + 1`,
         updatedAt: now,
       })
@@ -929,12 +929,15 @@ export namespace QuotaRepository {
     // Defensive LIMIT: caps the number of rows locked per cron tick to avoid
     // unbounded row locking. Remaining overdue quotas are picked up on the next
     // tick (sweeper runs on a recurring schedule).
-    const expiredQuotas = await tx
-      .select()
-      .from(quotas)
-      .where(and(eq(quotas.status, QuotaStatus.ACTIVE), lt(quotas.validUntil, checkDateStr), isNull(quotas.deletedAt)))
-      .limit(MAX_EXPIRING_QUOTAS_PER_RUN)
-      .for("update");
+    const expiredQuotas = await withForUpdate(
+      tx
+        .select()
+        .from(quotas)
+        .where(
+          and(eq(quotas.status, QuotaStatus.ACTIVE), lt(quotas.validUntil, checkDateStr), isNull(quotas.deletedAt))
+        )
+        .limit(MAX_EXPIRING_QUOTAS_PER_RUN)
+    );
 
     if (expiredQuotas.length === 0) return [];
 
@@ -1125,19 +1128,20 @@ export namespace QuotaRepository {
     }
   ): Promise<number> => {
     // Lock quota rows for the duration of this transaction to prevent TOCTOU races (RB-10).
-    const activeQuotas = await tx
-      .select()
-      .from(quotas)
-      .where(
-        and(
-          eq(quotas.studentId, input.studentId),
-          eq(quotas.status, QuotaStatus.ACTIVE),
-          gt(quotas.remaining, 0),
-          isNull(quotas.deletedAt)
+    const activeQuotas = await withForUpdate(
+      tx
+        .select()
+        .from(quotas)
+        .where(
+          and(
+            eq(quotas.studentId, input.studentId),
+            eq(quotas.status, QuotaStatus.ACTIVE),
+            gt(quotas.remaining, 0),
+            isNull(quotas.deletedAt)
+          )
         )
-      )
-      .orderBy(desc(quotas.priority))
-      .for("update");
+        .orderBy(desc(quotas.priority))
+    );
 
     // Pre-compute the per-quota deductions sequentially (no awaits) so the loop
     // can break early once the requested count is fully allocated across quotas
@@ -1216,12 +1220,12 @@ export namespace QuotaRepository {
     actorUserId?: string | null,
     locale?: string
   ): Promise<QuotaSelectType> => {
-    const [existing] = await tx
-      .select()
-      .from(quotas)
-      .where(and(eq(quotas.id, quotaId), isNull(quotas.deletedAt)))
-      .for("update")
-      .limit(1);
+    const [existing] = await withForUpdate(
+      tx
+        .select()
+        .from(quotas)
+        .where(and(eq(quotas.id, quotaId), isNull(quotas.deletedAt)))
+    ).limit(1);
     if (!existing) throw new QuotaNotFoundError("Quota not found");
 
     const [updated] = await tx

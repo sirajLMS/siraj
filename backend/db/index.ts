@@ -1,4 +1,5 @@
 export * from "./connection-strategy";
+export * from "./dialect";
 // db.types moved to backend/types/ — import DBTransaction/DBQueryExecutor from @/backend/types
 export * from "./drizzleDb";
 export * from "./drizzleRelations";

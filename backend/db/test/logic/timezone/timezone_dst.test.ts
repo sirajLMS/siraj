@@ -2,7 +2,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { db } from "@/backend/db";
+import { db, isSqlite } from "@/backend/db";
 import { DstMigrationRepository } from "@/backend/db/repo/classes";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, teacherAssignments, teachers, users } from "@/backend/db/schema";
@@ -63,7 +63,7 @@ describe("Timezone Handling & DST Adjustment", () => {
     }
   });
 
-  test("Class creation snapshots timezone and UTC offset via trigger", async () => {
+  test.skipIf(isSqlite())("Class creation snapshots timezone and UTC offset via trigger", async () => {
     await runInRollback(async tx => {
       const { teacher } = await setupTeacher(tx, {
         name: "TZ Test User",
@@ -108,7 +108,7 @@ describe("Timezone Handling & DST Adjustment", () => {
     });
   });
 
-  test("auto_adjust_dst_bookings detects and fixes DST drift", async () => {
+  test.skipIf(isSqlite())("auto_adjust_dst_bookings detects and fixes DST drift", async () => {
     await runInRollback(async tx => {
       const { teacher } = await setupTeacher(tx, {
         name: "TZ DST Teacher",

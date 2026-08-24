@@ -1,5 +1,5 @@
 import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
-import { type QueryDbHandle, queryDb } from "@/backend/db";
+import { isSqlite, type QueryDbHandle, queryDb } from "@/backend/db";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
 import { ReportGroupingMode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
@@ -37,9 +37,9 @@ async function fetchPaidAmountsByGroup(
   const paidRows = studentJoin
     ? await q
         .select({
-          groupKey: sql<string>`${groupKeyExpr}::text`,
+          groupKey: sql<string>`CAST(${groupKeyExpr} AS TEXT)`,
           currency: classInstances.rateCurrency,
-          amount: sql<string>`SUM(${classInstances.rateAmount}::numeric)::text`,
+          amount: sql<string>`CAST(SUM(CAST(${classInstances.rateAmount} AS REAL)) AS TEXT)`,
         })
         .from(classInstances)
         .leftJoin(students, eq(students.id, classInstances.studentId))
@@ -49,9 +49,9 @@ async function fetchPaidAmountsByGroup(
         .groupBy(groupKeyExpr, classInstances.rateCurrency)
     : await q
         .select({
-          groupKey: sql<string>`${groupKeyExpr}::text`,
+          groupKey: sql<string>`CAST(${groupKeyExpr} AS TEXT)`,
           currency: classInstances.rateCurrency,
-          amount: sql<string>`SUM(${classInstances.rateAmount}::numeric)::text`,
+          amount: sql<string>`CAST(SUM(CAST(${classInstances.rateAmount} AS REAL)) AS TEXT)`,
         })
         .from(classInstances)
         .leftJoin(teachers, eq(teachers.id, classInstances.teacherId))
@@ -89,8 +89,8 @@ function buildAttendanceSelectQuery(
   groupLabelExpr: ReturnType<typeof buildGroupingExpressions>["groupLabelExpr"]
 ) {
   return q.select({
-    groupKey: sql<string>`${groupKeyExpr}::text`,
-    groupLabel: sql<string>`COALESCE(${groupLabelExpr}, ${groupKeyExpr}::text)`,
+    groupKey: sql<string>`CAST(${groupKeyExpr} AS TEXT)`,
+    groupLabel: sql<string>`COALESCE(${groupLabelExpr}, CAST(${groupKeyExpr} AS TEXT))`,
     takenClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)`.mapWith(Number),
     absentClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)`.mapWith(Number),
     leaveClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)`.mapWith(Number),
@@ -101,6 +101,12 @@ function buildAttendanceSelectQuery(
 
 function buildGroupingExpressions(groupBy: ReportGroupingMode) {
   if (groupBy === ReportGroupingMode.DATE) {
+    if (isSqlite()) {
+      return {
+        groupKeyExpr: sql<string>`strftime('%Y-%m-%d', datetime(${classInstances.scheduledStartAt} / 1000, 'unixepoch'))`,
+        groupLabelExpr: sql<string>`strftime('%Y-%m-%d', datetime(MIN(${classInstances.scheduledStartAt}) / 1000, 'unixepoch'))`,
+      };
+    }
     return {
       groupKeyExpr: sql<string>`DATE_TRUNC('day', ${classInstances.scheduledStartAt})`,
       groupLabelExpr: sql<string>`TO_CHAR(MIN(${classInstances.scheduledStartAt}), 'YYYY-MM-DD')`,

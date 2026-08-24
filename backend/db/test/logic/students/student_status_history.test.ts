@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { studentStatusHistory, students } from "@/backend/db/schema";
 import { createTestUser, setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
@@ -33,7 +34,7 @@ function getFullErrorMessage(error: Error): string {
   return `${error.message} ${getCauseMessage(error)}`;
 }
 
-describe("Student Status Transitions & History", () => {
+describe.skipIf(isSqlite())("Student Status Transitions & History", () => {
   test("Initial student creation logs status history with null old status", async () => {
     testLogger.info("Testing initial status history log...");
     await runInRollback(async tx => {
@@ -102,7 +103,7 @@ describe("Student Status Transitions & History", () => {
     testLogger.info("Invalid status transition enforcement test passed.");
   });
 
-  test("Captures actor user ID in history if available in session", async () => {
+  test.skipIf(isSqlite())("Captures actor user ID in history if available in session", async () => {
     testLogger.info("Testing actor capture in status history...");
     await runInRollback(async tx => {
       const emailP = `parent-actor-${randomUUID()}@example.com`;

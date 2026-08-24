@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import {
   classInstances,
   parents,
@@ -113,7 +114,7 @@ async function setupTestEnvironment(tx: DBTransaction, now: Date) {
   return { userP, parent, userT, teacher, student, classInst };
 }
 
-describe("Student Progress Tracking", () => {
+describe.skipIf(isSqlite())("Student Progress Tracking", () => {
   const ROLE_NAME = "test_rls_user_prog";
 
   beforeAll(async () => {

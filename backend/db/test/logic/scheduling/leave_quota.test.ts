@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
@@ -142,7 +143,7 @@ async function runWithEntity(
   }
 }
 
-describe("Leave Quota Limits Trigger", () => {
+describe.skipIf(isSqlite())("Leave Quota Limits Trigger", () => {
   test("Allows inserting leave quota usage within the default limit of two", async () => {
     testLogger.info("Testing default leave limit check (success)...");
     await runInRollback(async tx => {

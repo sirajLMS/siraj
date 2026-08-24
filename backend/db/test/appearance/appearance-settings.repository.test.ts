@@ -114,6 +114,7 @@ describe("AppearanceSettingsRepository — Tier 1 (100% line coverage)", () => {
       await clearAppearanceRow(tx);
       const user = await createTestUser(tx);
       const initial = await AppearanceSettingsRepository.upsert(buildRow(buildDraft()), user.id, tx);
+      await new Promise(resolve => setTimeout(resolve, 5));
 
       const updatedDraft = buildDraft({
         siteName: "Updated Brand",

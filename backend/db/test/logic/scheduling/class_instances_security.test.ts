@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { classInstances, students } from "@/backend/db/schema";
 import { ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
@@ -112,7 +113,7 @@ describe("Class Instances Security Logic", () => {
       expect(getErrorMessage(error)).toMatch(/Invalid transition: Cannot reactivate a COMPLETED class instance/);
     }));
 
-  it("should enforce RLS policies for teachers blocking unauthorized SELECT", async () => {
+  it.skipIf(isSqlite())("should enforce RLS policies for teachers blocking unauthorized SELECT", async () => {
     await runInRollback(async tx => {
       const scenario1 = await setupTestEntities(tx, "SecLogic", { skipInstance: true });
       const otherTeacher = await setupTestEntities(tx, "SecLogicOther", { skipInstance: true });

@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, inArray, sql } from "drizzle-orm";
-import { db } from "@/backend/db";
+import { db, isPostgres, isSqlite } from "@/backend/db";
 import { groupPermissions, permissionGroups, permissions, users } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
@@ -221,12 +221,16 @@ describe("PermissionManagementService Business Logic", () => {
     await db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ONLY));
     await db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ALT));
 
-    // Cleanup test system group — disable trigger to allow DELETE of isSystem=true group
-    await db.execute(sql`ALTER TABLE permission_groups DISABLE TRIGGER trg_protect_system_permission_groups`);
-    try {
+    // Cleanup test system group — disable trigger in Postgres to allow DELETE of isSystem=true group
+    if (isPostgres() && "execute" in db && typeof db.execute === "function") {
+      await db.execute(sql`ALTER TABLE permission_groups DISABLE TRIGGER trg_protect_system_permission_groups`);
+      try {
+        await db.delete(permissionGroups).where(eq(permissionGroups.id, testSystemGroupId));
+      } finally {
+        await db.execute(sql`ALTER TABLE permission_groups ENABLE TRIGGER trg_protect_system_permission_groups`);
+      }
+    } else {
       await db.delete(permissionGroups).where(eq(permissionGroups.id, testSystemGroupId));
-    } finally {
-      await db.execute(sql`ALTER TABLE permission_groups ENABLE TRIGGER trg_protect_system_permission_groups`);
     }
   });
 
@@ -484,7 +488,7 @@ describe("PermissionManagementService Business Logic", () => {
     );
   });
 
-  describe("System Permission Database Constraints", () => {
+  describe.skipIf(isSqlite())("System Permission Database Constraints", () => {
     test("should prevent creating a new system permission", async () => {
       await runInRollback(async tx => {
         let err: unknown = null;

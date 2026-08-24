@@ -112,7 +112,7 @@ export async function fetchDailyScheduleBaseRows(
           or(
             ilike(students.name, searchPattern),
             ilike(users.name, searchPattern),
-            ilike(sql`${classInstances.id}::text`, searchPattern)
+            ilike(sql`CAST(${classInstances.id} AS TEXT)`, searchPattern)
           )
         )
       )

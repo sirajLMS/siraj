@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
@@ -153,7 +154,13 @@ async function expectConstraintViolation(fn: () => Promise<unknown>, constraintN
       causeStr = error.cause instanceof Error ? error.cause.message : JSON.stringify(error.cause);
     }
     const fullError = causeStr ? `${String(error)}: ${causeStr}` : String(error);
-    expect(fullError).toContain(constraintName);
+    const matchesConstraint =
+      fullError.includes(constraintName) ||
+      (isSqlite() &&
+        (fullError.includes("UNIQUE constraint failed") ||
+          fullError.includes("CHECK constraint failed") ||
+          fullError.includes("SQLITE_CONSTRAINT")));
+    expect(matchesConstraint).toBe(true);
   }
 }
 

@@ -32,3 +32,23 @@ export const isPostgres = (): boolean => getDbDialect() === "postgres";
 
 /** True when the active dialect is SQLite (libsql). */
 export const isSqlite = (): boolean => getDbDialect() === "sqlite";
+
+interface LockableQuery {
+  for(clause: string, config?: unknown): this;
+}
+
+function isLockableQuery(query: object): query is LockableQuery {
+  return "for" in query && typeof query.for === "function";
+}
+
+/**
+ * Conditionally applies `.for("update")` or other locking clauses when supported by the dialect (e.g. PostgreSQL).
+ * On dialects like SQLite where table/database level locking occurs automatically and `.for()` is undefined,
+ * it safely returns the query unmodified.
+ */
+export function withForUpdate<T extends object>(query: T, config?: unknown): T {
+  if (isLockableQuery(query)) {
+    return query.for("update", config);
+  }
+  return query;
+}

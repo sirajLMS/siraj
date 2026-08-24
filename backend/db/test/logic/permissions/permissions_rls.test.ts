@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { parents, students, users } from "@/backend/db/schema";
 import {
   generateTestPassword,
@@ -80,7 +81,7 @@ async function setupTestData(tx: DBTransaction) {
   return { parentAUser, parentBUser, studentA, studentB };
 }
 
-describe("Row Level Security for Students", () => {
+describe.skipIf(isSqlite())("Row Level Security for Students", () => {
   beforeAll(async () => {
     await setupRlsRole();
     await setupRlsPolicies([

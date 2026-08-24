@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { teachers, userMeetingConfigs, users } from "@/backend/db/schema";
 import { createTestMeetingConfig, createTestMeetingProvider } from "@/backend/db/test/entity-setup";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { executeTxSql, runInRollback } from "@/backend/db/test/test-utils";
 import type { DBTransaction, TeacherInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -73,11 +73,12 @@ describe("Column-Level Encryption", () => {
         encryptedSecret: plainPassword,
       });
 
-      const rawTeacherResult = await tx.execute(sql`SELECT national_id FROM teachers WHERE id = ${teacher.id}`);
+      const rawTeacherResult = await executeTxSql(tx, sql`SELECT national_id FROM teachers WHERE id = ${teacher.id}`);
       const teacherRows = extractRows(rawTeacherResult);
       verifyCiphertext(teacherRows[0]?.national_id, plainNationalId);
 
-      const rawConfigResult = await tx.execute(
+      const rawConfigResult = await executeTxSql(
+        tx,
         sql`SELECT encrypted_secret FROM user_meeting_configs WHERE id = ${config.id}`
       );
       const configRows = extractRows(rawConfigResult);
@@ -106,8 +107,8 @@ describe("Column-Level Encryption", () => {
       const user2 = await createTestUser(tx, uniqueSuffix2, now);
       const teacher2 = await insertTeacherDetails({ tx, userId: user2.id, plainNationalId, now });
 
-      const raw1 = await tx.execute(sql`SELECT national_id FROM teachers WHERE id = ${teacher1.id}`);
-      const raw2 = await tx.execute(sql`SELECT national_id FROM teachers WHERE id = ${teacher2.id}`);
+      const raw1 = await executeTxSql(tx, sql`SELECT national_id FROM teachers WHERE id = ${teacher1.id}`);
+      const raw2 = await executeTxSql(tx, sql`SELECT national_id FROM teachers WHERE id = ${teacher2.id}`);
       const row1 = extractRows(raw1);
       const row2 = extractRows(raw2);
 

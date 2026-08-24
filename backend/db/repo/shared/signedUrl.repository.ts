@@ -1,5 +1,5 @@
 import { and, eq, gt, lt, sql } from "drizzle-orm";
-import { db } from "@/backend/db";
+import { db, withForUpdate } from "@/backend/db";
 import { signedUrls } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type { SignedUrlInsertType, SignedUrlSelectType } from "@/backend/types";
@@ -46,18 +46,19 @@ export namespace SignedUrlRepository {
       // Use a transaction with row-level locking
       const result = await db.transaction(async tx => {
         // SELECT FOR UPDATE SKIP LOCKED - atomic claim
-        const [token] = await tx
-          .select()
-          .from(signedUrls)
-          .where(
-            and(
-              eq(signedUrls.id, id),
-              eq(signedUrls.used, false),
-              gt(signedUrls.expiresAt, now) // expiresAt is greater than now (not expired)
-            )
-          )
-          .for("update", { skipLocked: true })
-          .limit(1);
+        const [token] = await withForUpdate(
+          tx
+            .select()
+            .from(signedUrls)
+            .where(
+              and(
+                eq(signedUrls.id, id),
+                eq(signedUrls.used, false),
+                gt(signedUrls.expiresAt, now) // expiresAt is greater than now (not expired)
+              )
+            ),
+          { skipLocked: true }
+        ).limit(1);
 
         if (token.expiresAt <= now) {
           return null;

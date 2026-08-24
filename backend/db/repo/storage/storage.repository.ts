@@ -335,21 +335,24 @@ export namespace StorageDbRepository {
     const file = await fileByPath(filePath);
     if (!file) return false;
 
-    const result = await db.execute(sql`
-      SELECT 1 FROM (
-        (SELECT id FROM user_files WHERE file_id = ${file.id} LIMIT 1)
-        UNION ALL (SELECT id FROM teacher_files WHERE file_id = ${file.id} LIMIT 1)
-        UNION ALL (SELECT id FROM student_files WHERE file_id = ${file.id} LIMIT 1)
-        UNION ALL (SELECT id FROM parent_files WHERE file_id = ${file.id} LIMIT 1)
-        UNION ALL (SELECT id FROM invoice_files WHERE file_id = ${file.id} LIMIT 1)
-        UNION ALL (SELECT id FROM complaint_files WHERE file_id = ${file.id} LIMIT 1)
-        UNION ALL (SELECT id FROM learning_resource_files WHERE file_id = ${file.id} LIMIT 1)
-        UNION ALL (SELECT id FROM staff_profile_files WHERE file_id = ${file.id} LIMIT 1)
-        UNION ALL (SELECT id FROM recurring_schedule_files WHERE file_id = ${file.id} LIMIT 1)
-        UNION ALL (SELECT id FROM class_instance_files WHERE file_id = ${file.id} LIMIT 1)
-      ) sub LIMIT 1
-    `);
-    return result.rows.length > 0;
+    const tables = [
+      userFiles,
+      teacherFiles,
+      studentFiles,
+      parentFiles,
+      invoiceFiles,
+      complaintFiles,
+      learningResourceFiles,
+      staffProfileFiles,
+      recurringScheduleFiles,
+      classInstanceFiles,
+    ];
+
+    const results = await Promise.all(
+      tables.map(table => db.select({ id: table.id }).from(table).where(eq(table.fileId, file.id)).limit(1))
+    );
+
+    return results.some(rows => rows.length > 0);
   };
 
   export const registerFileUsage = async (

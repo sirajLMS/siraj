@@ -1,5 +1,5 @@
 import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
-import { type db, type QueryDbHandle, queryDb, queryWithPagination } from "@/backend/db";
+import { type db, isSqlite, type QueryDbHandle, queryDb, queryWithPagination } from "@/backend/db";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { ComplaintStatus } from "@/backend/enum";
 import { assertComplaintCategory, assertComplaintStatus } from "@/backend/lib";
@@ -330,13 +330,13 @@ export namespace ComplaintRepository {
   export const getComplaintAvgResolutionHours = async (txOrDb?: DBTransaction | typeof db): Promise<number> => {
     const q = queryDb(typeof txOrDb === "function" ? undefined : txOrDb);
 
+    const epochExpr = isSqlite()
+      ? sql<number>`((${complaints.updatedAt} - ${complaints.createdAt}) / 1000.0 / 3600.0)`
+      : sql<number>`EXTRACT(EPOCH FROM (${complaints.updatedAt} - ${complaints.createdAt})) / 3600`;
+
     const [avgResult] = await q
       .select({
-        avgHours: sql<number>`COALESCE(
-          AVG(
-            EXTRACT(EPOCH FROM (${complaints.updatedAt} - ${complaints.createdAt})) / 3600
-          ), 0
-        )`.mapWith(Number),
+        avgHours: sql<number>`COALESCE(AVG(${epochExpr}), 0)`.mapWith(Number),
       })
       .from(complaints)
       .where(and(eq(complaints.status, ComplaintStatus.ANSWERED), isNull(complaints.deletedAt)));

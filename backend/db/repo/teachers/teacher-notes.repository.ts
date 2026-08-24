@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, or } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { teacherImportantNotes } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
@@ -17,7 +17,7 @@ export namespace TeacherNotesRepository {
   ): Promise<TeacherImportantNoteSelectType[]> {
     try {
       const client = queryDb(tx);
-      const now = sql`NOW()`;
+      const now = new Date();
       const conditions = [
         eq(teacherImportantNotes.isPublished, true),
         isNull(teacherImportantNotes.deletedAt),

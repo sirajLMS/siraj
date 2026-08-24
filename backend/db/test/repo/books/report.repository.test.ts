@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { isSqlite } from "@/backend/db";
 import { ReportRepository } from "@/backend/db/repo/books";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
@@ -261,22 +262,27 @@ describe("ReportRepository — generateAttendanceReport", () => {
     expect(growth).toBeNull();
   });
 
-  reportRepoTest("fails and catches error properly when query crashes", async tx => {
-    // Act & Assert
-    // Passing an invalid UUID string for teacherId triggers a PostgreSQL type conversion error.
-    const badFilters = {
-      fromDate: new Date(),
-      toDate: new Date(),
-      teacherId: "not-a-valid-uuid-string",
-      groupBy: ReportGroupingMode.DATE,
-    };
+  test.skipIf(isSqlite())("fails and catches error properly when query crashes", async () => {
+    let completed = false;
+    await runInRollback(async tx => {
+      // Act & Assert
+      // Passing an invalid UUID string for teacherId triggers a PostgreSQL type conversion error.
+      const badFilters = {
+        fromDate: new Date(),
+        toDate: new Date(),
+        teacherId: "not-a-valid-uuid-string",
+        groupBy: ReportGroupingMode.DATE,
+      };
 
-    let errorCaught: unknown = null;
-    try {
-      await ReportRepository.generateAttendanceReport(badFilters, tx);
-    } catch (e) {
-      errorCaught = e;
-    }
-    expect(errorCaught).not.toBeNull();
+      let errorCaught: unknown = null;
+      try {
+        await ReportRepository.generateAttendanceReport(badFilters, tx);
+      } catch (e) {
+        errorCaught = e;
+      }
+      expect(errorCaught).not.toBeNull();
+      completed = true;
+    });
+    expect(completed).toBe(true);
   });
 });

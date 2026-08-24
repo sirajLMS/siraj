@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { isSqlite } from "@/backend/db";
 import { adminAuditLogs, sessions, users } from "@/backend/db/schema";
 import { IP_ADDRESS_1 } from "@/backend/db/test/const";
 import { runInRollback } from "@/backend/db/test/test-utils";
@@ -38,7 +39,7 @@ describe("IP Address Formatting", () => {
     });
   });
 
-  test("Invalid IP address insertion in sessions", async () => {
+  test.skipIf(isSqlite())("Invalid IP address insertion in sessions", async () => {
     testLogger.info("Testing invalid IP address insertion in sessions...");
     const email = `ip-test-2-${randomUUID()}@example.com`;
 
@@ -107,7 +108,7 @@ describe("IP Address Formatting", () => {
     });
   });
 
-  test("Invalid IP address insertion in audit logs", async () => {
+  test.skipIf(isSqlite())("Invalid IP address insertion in audit logs", async () => {
     testLogger.info("Testing invalid IP address insertion in audit logs...");
     const email = `ip-test-4-${randomUUID()}@example.com`;
 

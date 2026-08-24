@@ -1,4 +1,4 @@
-import { and, desc, eq, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gt, lte } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { acquireAdvisoryLock } from "@/backend/db/repo/shared/advisory-lock";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
@@ -150,7 +150,10 @@ export namespace SessionRepository {
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
   };
 
-  export const findSessionById = async (rawSessionId: string): Promise<SessionSelectType | null> => {
+  export const findSessionById = async (
+    rawSessionId: string,
+    tx?: DBTransaction
+  ): Promise<SessionSelectType | null> => {
     const hashedId = hashSessionId(rawSessionId);
     try {
       if (redisSessionsEnabled()) {
@@ -159,7 +162,8 @@ export namespace SessionRepository {
         if (redisSession) return mapRedisSession(redisSession);
       }
 
-      return await db
+      const runner = tx ?? db;
+      return await runner
         .select()
         .from(sessions)
         .where(eq(sessions.hashedId, hashedId))
@@ -420,23 +424,25 @@ export namespace SessionRepository {
    */
   export const validate = async (
     rawSessionId: string,
-    roleName: string = "default"
+    roleName: string = "default",
+    tx?: DBTransaction
   ): Promise<SessionSelectType | null> => {
+    const runner = tx ?? db;
     const hashedId = hashSessionId(rawSessionId);
     if (!redisSessionsEnabled()) {
-      const session = await findSessionById(rawSessionId);
+      const session = await findSessionById(rawSessionId, tx);
       if (!session) return null;
 
-      const config = await getSessionConfig(roleName);
+      const config = await getSessionConfig(roleName, tx);
       const now = BigInt(Math.floor(Date.now() / 1000));
       const isExpired = Number(now - BigInt(session.lastActivity)) > config.ttlSeconds;
 
       if (isExpired) {
-        await db.delete(sessions).where(eq(sessions.hashedId, hashedId));
+        await runner.delete(sessions).where(eq(sessions.hashedId, hashedId));
         return null;
       }
 
-      await db.update(sessions).set({ lastActivity: now }).where(eq(sessions.hashedId, hashedId));
+      await runner.update(sessions).set({ lastActivity: now }).where(eq(sessions.hashedId, hashedId));
       return { ...session, lastActivity: now };
     }
 
@@ -444,13 +450,13 @@ export namespace SessionRepository {
     const session = await redisService.getSession(hashedId);
     if (!session) return null;
 
-    const config = await getSessionConfig(roleName);
+    const config = await getSessionConfig(roleName, tx);
     await redisService.touchSession(hashedId, config.ttlSeconds);
 
     const now = new Date();
     const expiresAt = new Date(now.getTime() + config.ttlSeconds * 1000);
 
-    await db
+    await runner
       .update(sessionMetadata)
       .set({ lastActivityAt: now, expiresAt })
       .where(eq(sessionMetadata.sessionId, hashedId));
@@ -551,8 +557,8 @@ export namespace SessionRepository {
     return await runner
       .select()
       .from(sessionMetadata)
-      .where(and(eq(sessionMetadata.userId, userId), sql`${sessionMetadata.expiresAt} > NOW()`))
-      .orderBy(sql`${sessionMetadata.lastActivityAt} DESC`);
+      .where(and(eq(sessionMetadata.userId, userId), gt(sessionMetadata.expiresAt, new Date())))
+      .orderBy(desc(sessionMetadata.lastActivityAt));
   };
 
   export const countUserSessions = async (userId: string): Promise<number> => {

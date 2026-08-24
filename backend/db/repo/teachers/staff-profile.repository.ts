@@ -1,4 +1,4 @@
-import { and, count, eq, ilike, or, sql } from "drizzle-orm";
+import { and, count, eq, ilike, or } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { UserRepository } from "@/backend/db/repo/users";
 import {
@@ -29,9 +29,9 @@ import type {
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { parseAccountStatus, parseCurrencyCodeOrNull, parseOverrideState } from "@/shared/lib/enum";
-import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import { getServerTranslations } from "@/shared/locale";
-import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
+import type { LocalizedString } from "@/shared/types";
 
 export namespace StaffProfileRepository {
   export async function create(
@@ -279,59 +279,81 @@ export namespace StaffProfileRepository {
   }
 
   async function getManagerDirectoryMetrics(executor: typeof db | DBTransaction): Promise<ManagerDirectoryMetrics> {
-    const metricsResult = await executor
+    const rows = await executor
       .select({
-        totalAdmin:
-          sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${permissionGroups.slug} ILIKE '%admin%')`.mapWith(
-            Number
-          ),
-        systemStaff:
-          sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${permissionGroups.slug} NOT ILIKE '%admin%')`.mapWith(
-            Number
-          ),
-        activeNow: sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${users.status} = 'ACTIVATED')`.mapWith(
-          Number
-        ),
-        alerts: sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${users.status} != 'ACTIVATED')`.mapWith(Number),
+        userId: users.id,
+        userStatus: users.status,
+        groupSlug: permissionGroups.slug,
       })
       .from(staffProfiles)
       .innerJoin(users, eq(staffProfiles.userId, users.id))
       .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
       .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id));
 
-    const m = metricsResult[0];
+    const adminUserIds = new Set<string>();
+    const nonAdminUserIds = new Set<string>();
+    const activeUserIds = new Set<string>();
+    const alertUserIds = new Set<string>();
+
+    for (const r of rows) {
+      const slug = r.groupSlug?.toLowerCase() ?? "";
+      if (slug.includes("admin")) {
+        adminUserIds.add(r.userId);
+      } else {
+        nonAdminUserIds.add(r.userId);
+      }
+      if (r.userStatus === "ACTIVATED") {
+        activeUserIds.add(r.userId);
+      } else {
+        alertUserIds.add(r.userId);
+      }
+    }
+
     return {
       id: "manager-directory-metrics",
-      totalAdmin: m?.totalAdmin ?? 0,
-      systemStaff: m?.systemStaff ?? 0,
-      activeNow: m?.activeNow ?? 0,
-      alerts: m?.alerts ?? 0,
+      totalAdmin: adminUserIds.size,
+      systemStaff: nonAdminUserIds.size,
+      activeNow: activeUserIds.size,
+      alerts: alertUserIds.size,
     };
   }
 
   export async function getOnboardingMetrics(tx?: DBTransaction): Promise<OnboardingMetricsResult> {
     const q = queryDb(tx) ?? db;
 
-    const ninetyDaysAgo = sql`NOW() - INTERVAL '90 days'`;
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
-    const result = await q
+    const rows = await q
       .select({
-        activeStaff: sql<number>`COUNT(*) FILTER (WHERE ${users.status} = 'ACTIVATED')`.mapWith(Number),
-        pendingApproval: sql<number>`COUNT(*) FILTER (WHERE ${users.status} = 'DEACTIVATED')`.mapWith(Number),
-        avgOnboardingDays:
-          sql<number>`COALESCE(AVG(EXTRACT(EPOCH FROM (${staffProfiles.updatedAt} - ${staffProfiles.createdAt})) / 86400) FILTER (WHERE ${staffProfiles.createdAt} >= ${ninetyDaysAgo}), 0)`.mapWith(
-            Number
-          ),
+        status: users.status,
+        createdAt: staffProfiles.createdAt,
+        updatedAt: staffProfiles.updatedAt,
       })
       .from(staffProfiles)
       .innerJoin(users, eq(staffProfiles.userId, users.id));
 
-    const r = result[0];
+    let activeStaff = 0;
+    let pendingApproval = 0;
+    let totalDays = 0;
+    let countInNinetyDays = 0;
+
+    for (const row of rows) {
+      if (row.status === "ACTIVATED") activeStaff++;
+      if (row.status === "DEACTIVATED") pendingApproval++;
+      if (row.createdAt && row.createdAt >= ninetyDaysAgo && row.updatedAt) {
+        const diffMs = row.updatedAt.getTime() - row.createdAt.getTime();
+        totalDays += diffMs / (1000 * 86400);
+        countInNinetyDays++;
+      }
+    }
+
+    const avgOnboardingDays = countInNinetyDays > 0 ? totalDays / countInNinetyDays : 0;
+
     return {
       id: "onboarding-metrics",
-      activeStaff: r?.activeStaff ?? 0,
-      pendingApproval: r?.pendingApproval ?? 0,
-      avgOnboardingDays: Math.round((r?.avgOnboardingDays ?? 0) * 10) / 10,
+      activeStaff,
+      pendingApproval,
+      avgOnboardingDays: Math.round(avgOnboardingDays * 10) / 10,
     };
   }
 
@@ -453,7 +475,6 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction
   ): Promise<StaffPermissionGroupReturnType[]> {
     const q = queryDb(tx) ?? db;
-    const key = localeJsonKey(locale);
 
     const rows = await q
       .select({
@@ -464,10 +485,9 @@ export namespace StaffProfileRepository {
       })
       .from(userPermissionGroups)
       .innerJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
-      .where(eq(userPermissionGroups.userId, userId))
-      .orderBy(sql`coalesce(${permissionGroups.name}->>${key}, ${permissionGroups.name}->>${DEFAULT_CONTENT_LOCALE})`);
+      .where(eq(userPermissionGroups.userId, userId));
 
-    return rows.map(row => {
+    const result = rows.map(row => {
       const description = resolveLocalizedString(row.description, locale);
       return {
         id: row.id,
@@ -476,6 +496,8 @@ export namespace StaffProfileRepository {
         description: description === "" ? null : description,
       };
     });
+
+    return result.toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
   export async function getUserPermissionOverrides(

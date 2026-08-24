@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
 import {
@@ -11,7 +12,7 @@ import {
   teardownRlsRole,
 } from "@/backend/db/test/test-utils";
 
-describe("Row Level Security and Soft Delete", () => {
+describe.skipIf(isSqlite())("Row Level Security and Soft Delete", () => {
   beforeAll(async () => {
     await setupRlsRole();
     await setupRlsPolicies([

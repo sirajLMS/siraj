@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, isNull, lte, ne, or, type SQL, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNull, lte, ne, or, type SQL, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import {
@@ -351,7 +351,7 @@ export namespace BillingRepository {
     const whereCondition = and(
       eq(currencyExchangeRates.fromCurrency, from),
       eq(currencyExchangeRates.toCurrency, to),
-      sql`${currencyExchangeRates.effectiveDate} >= NOW() - make_interval(days => ${maxDays})`
+      gte(currencyExchangeRates.effectiveDate, new Date(Date.now() - maxDays * 24 * 60 * 60 * 1000))
     );
 
     const historyId = `exchange-rate-history-${from}-${to}`;
@@ -502,6 +502,12 @@ export namespace BillingRepository {
       overdueAmountsByCurrency: [],
       items: [],
     };
+  }
+
+  function formatSqlAmount(val: string | number | null | undefined): string {
+    if (val === null || val === undefined) return "0.00";
+    const num = typeof val === "number" ? val : Number.parseFloat(val);
+    return Number.isFinite(num) ? num.toFixed(2) : "0.00";
   }
 
   function groupAmountsByCurrency(
@@ -692,9 +698,9 @@ export namespace BillingRepository {
     }
     const escapedPattern = `%${escapeLikeWildcards(normalized).toLowerCase()}%`;
     return or(
-      sql`LOWER(${invoices.id}::text) LIKE ${escapedPattern}`,
-      sql`LOWER(COALESCE(${students.name}, '')::text) LIKE ${escapedPattern}`,
-      sql`LOWER(${invoices.amount}::text) LIKE ${escapedPattern}`
+      sql`LOWER(CAST(${invoices.id} AS TEXT)) LIKE ${escapedPattern}`,
+      sql`LOWER(COALESCE(${students.name}, '')) LIKE ${escapedPattern}`,
+      sql`LOWER(CAST(${invoices.amount} AS TEXT)) LIKE ${escapedPattern}`
     );
   }
 
@@ -1024,14 +1030,14 @@ export namespace BillingRepository {
 
     return {
       id: `parent-billing-summary-${parentId}`,
-      outstandingBalance: unpaidResult[0]?.totalAmount ?? "0.00",
-      paidThisTerm: paidResult[0]?.totalAmount ?? "0.00",
+      outstandingBalance: formatSqlAmount(unpaidResult[0]?.totalAmount),
+      paidThisTerm: formatSqlAmount(paidResult[0]?.totalAmount),
       nextDueDate: unpaidResult[0]?.nextDueDate ?? null,
       activeStudents: activeStudentsResult[0]?.activeStudents ?? 0,
       nextUnpaidInvoice: nextUnpaidRow
         ? {
             id: nextUnpaidRow.id,
-            amount: nextUnpaidRow.amount,
+            amount: formatSqlAmount(nextUnpaidRow.amount),
             currency: nextUnpaidRow.currency,
             dueDate: nextUnpaidRow.dueDate,
             studentName: nextUnpaidRow.studentName ?? null,
@@ -1041,12 +1047,12 @@ export namespace BillingRepository {
       outstandingByCurrency: unpaidByCurrency.map(row => ({
         id: `outstanding-${row.currency}`,
         currency: row.currency,
-        amount: row.amount,
+        amount: formatSqlAmount(row.amount),
       })),
       paidThisTermByCurrency: paidByCurrency.map(row => ({
         id: `paid-${row.currency}`,
         currency: row.currency,
-        amount: row.amount,
+        amount: formatSqlAmount(row.amount),
       })),
     };
   };

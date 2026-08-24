@@ -103,7 +103,7 @@ export namespace CacheDbRepository {
         .onConflictDoUpdate({
           target: table.key,
           set: {
-            value: sql`(${table.value}::int + 1)::text`,
+            value: sql`CAST((CAST(${table.value} AS INTEGER) + 1) AS TEXT)`,
             expiresAt: sql`EXCLUDED.expires_at`,
           },
         })

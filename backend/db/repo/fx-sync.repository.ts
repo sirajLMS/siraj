@@ -1,4 +1,4 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { fxSyncRuns } from "@/backend/db/schema";
 import { type FxProvider, FxSyncStatus } from "@/backend/enum/fx/fx-provider.enum";
@@ -104,7 +104,10 @@ export namespace FxSyncRepository {
       .select({ id: fxSyncRuns.id })
       .from(fxSyncRuns)
       .where(
-        sql`${fxSyncRuns.status} = ${FxSyncStatus.Success} AND ${fxSyncRuns.finishedAt} >= NOW() - (${withinMinutes}) * INTERVAL '1 minute'`
+        and(
+          eq(fxSyncRuns.status, FxSyncStatus.Success),
+          gte(fxSyncRuns.finishedAt, new Date(Date.now() - withinMinutes * 60 * 1000))
+        )
       )
       .limit(1);
     return rows.length > 0;

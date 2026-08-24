@@ -1,5 +1,5 @@
 import { and, eq, isNull } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db, withForUpdate } from "@/backend/db";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
@@ -768,12 +768,11 @@ export namespace QuotaService {
    * Data-access-only helper used by {@link refreshPeriodic}.
    */
   async function lockQuotaForRefresh(tx: DBTransaction, quotaId: string): Promise<QuotaSelectType | null> {
-    const [row] = await tx
+    const query = tx
       .select()
       .from(quotas)
-      .where(and(eq(quotas.id, quotaId), isNull(quotas.deletedAt)))
-      .for("update")
-      .limit(1);
+      .where(and(eq(quotas.id, quotaId), isNull(quotas.deletedAt)));
+    const [row] = await withForUpdate(query).limit(1);
     return row ?? null;
   }
 

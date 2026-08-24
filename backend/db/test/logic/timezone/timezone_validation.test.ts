@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { isSqlite } from "@/backend/db";
 import { recurringSchedules, users } from "@/backend/db/schema";
 import { ensureTestSubjectId, setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
@@ -32,7 +33,7 @@ async function expectConstraintError(insertFn: () => Promise<unknown>): Promise<
   throw new Error(String(errorCaught));
 }
 
-describe("Timezone Validation Constraints", () => {
+describe.skipIf(isSqlite())("Timezone Validation Constraints", () => {
   test("Allows valid timezones for users", async () => {
     testLogger.info("Testing valid timezones for users...");
     await runInRollback(async tx => {

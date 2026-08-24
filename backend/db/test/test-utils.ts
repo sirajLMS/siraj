@@ -1,7 +1,7 @@
 import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { sql } from "drizzle-orm";
-import { db } from "@/backend/db";
+import { type SQL, sql } from "drizzle-orm";
+import { db, isSqlite } from "@/backend/db";
 import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
 import type { DBTransaction, UserReturnType } from "@/backend/types";
@@ -116,6 +116,7 @@ function getResultRows(result: unknown): Record<string, unknown>[] {
 }
 
 export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<void> {
+  if (isSqlite()) return;
   const currentCount = rlsRoleRefCounts.get(roleName) ?? 0;
   rlsRoleRefCounts.set(roleName, currentCount + 1);
 
@@ -192,6 +193,7 @@ function isConcurrentConflictError(e: unknown): boolean {
  * @param roleName Name of the role to drop
  */
 export async function teardownRlsRole(roleName: string = "test_rls_user"): Promise<void> {
+  if (isSqlite()) return;
   const currentCount = rlsRoleRefCounts.get(roleName) ?? 0;
   if (currentCount > 1) {
     rlsRoleRefCounts.set(roleName, currentCount - 1);
@@ -268,6 +270,7 @@ async function enableRowLevelSecurity(table: string): Promise<void> {
 }
 
 export async function setupRlsPolicies(policies: RlsPolicyDef[]): Promise<void> {
+  if (isSqlite()) return;
   await Promise.all(policies.map(policy => installPolicy(policy)));
 
   await Promise.all(
@@ -286,12 +289,13 @@ function quoteIdent(ident: string): string {
 
 const rlsClientCache = new Map<string, import("pg").Pool>();
 
-export async function queryAsRlsRole<T>(
+export async function queryAsRlsRole<T = unknown>(
   roleName: string,
   userId: string,
   querySql: string,
   params: unknown[] = []
 ): Promise<T[]> {
+  if (isSqlite()) return [];
   let pool = rlsClientCache.get(roleName);
   if (!pool) {
     const { Pool } = await import("pg");
@@ -316,6 +320,61 @@ export async function queryAsRlsRole<T>(
 }
 
 export async function closeRlsClients(): Promise<void> {
+  if (isSqlite()) return;
   await Promise.all(Array.from(rlsClientCache.values()).map(pool => pool.end()));
   rlsClientCache.clear();
+}
+
+interface TxSqlExecutor {
+  execute(query: SQL | string): Promise<unknown>;
+}
+
+interface TxSqlRunner {
+  run(query: SQL | string): Promise<unknown>;
+}
+
+function hasExecute(tx: unknown): tx is TxSqlExecutor {
+  return typeof tx === "object" && tx !== null && "execute" in tx && typeof tx.execute === "function";
+}
+
+function hasRun(tx: unknown): tx is TxSqlRunner {
+  return typeof tx === "object" && tx !== null && "run" in tx && typeof tx.run === "function";
+}
+
+/**
+ * Executes a raw SQL statement on a transaction across dialects (PostgreSQL `tx.execute`, SQLite `tx.run`).
+ */
+export async function executeTxSql(tx: unknown, query: SQL | string): Promise<unknown> {
+  if (hasExecute(tx)) {
+    return tx.execute(query);
+  }
+  if (hasRun(tx)) {
+    return tx.run(query);
+  }
+  return undefined;
+}
+
+/**
+ * Runs `fn` inside a SAVEPOINT so a constraint violation (e.g. a
+ * duplicate idempotency key rejected by a unique index) can be caught WITHOUT
+ * poisoning the outer `runInRollback` transaction. After catching, issues
+ * `ROLLBACK TO SAVEPOINT` so subsequent queries in the test can run safely.
+ */
+export async function expectSavepointError(fn: () => Promise<unknown>, tx: DBTransaction): Promise<Error> {
+  const sp = `sp_${randomUUID().replaceAll("-", "_")}`;
+  await executeTxSql(tx, sql.raw(`SAVEPOINT ${sp}`));
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  if (errorCaught) {
+    await executeTxSql(tx, sql.raw(`ROLLBACK TO SAVEPOINT ${sp}`));
+  } else {
+    await executeTxSql(tx, sql.raw(`RELEASE SAVEPOINT ${sp}`));
+  }
+  expect(errorCaught).not.toBeNull();
+  if (errorCaught instanceof Error) return errorCaught;
+  throw new Error(String(errorCaught));
 }

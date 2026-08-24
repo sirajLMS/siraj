@@ -1,5 +1,5 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
-import { db, queryDb } from "@/backend/db";
+import { db, queryDb, withForUpdate } from "@/backend/db";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { DBTransaction, UpcomingClassRow } from "@/backend/types";
@@ -50,12 +50,9 @@ async function setStudentClassesFrozenState(
 
   const runner = async (t: DBTransaction): Promise<number> => {
     const processNextBatch = async (totalUpdated: number): Promise<number> => {
-      const batch = await t
-        .select({ id: classInstances.id })
-        .from(classInstances)
-        .where(conditions)
-        .limit(BATCH_SIZE)
-        .for("update");
+      const batch = await withForUpdate(
+        t.select({ id: classInstances.id }).from(classInstances).where(conditions).limit(BATCH_SIZE)
+      );
 
       if (batch.length === 0) return totalUpdated;
 

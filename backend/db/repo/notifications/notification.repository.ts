@@ -1,5 +1,5 @@
 import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
-import { db, queryDb } from "@/backend/db";
+import { db, queryDb, withForUpdate } from "@/backend/db";
 import {
   DELIVERY_STATUS_RANK,
   isValidStatusTransition,
@@ -306,12 +306,13 @@ export namespace NotificationRepository {
     // new providerMessageId, check whether a webhook-created row already owns
     // it. If so, merge the status transition into THAT row instead of failing.
     if (incomingProviderMessageId && incomingProviderMessageId !== current.providerMessageId) {
-      const conflicting = await t
-        .select()
-        .from(notificationDeliveries)
-        .where(eq(notificationDeliveries.providerMessageId, incomingProviderMessageId))
-        .limit(1)
-        .for("update");
+      const conflicting = await withForUpdate(
+        t
+          .select()
+          .from(notificationDeliveries)
+          .where(eq(notificationDeliveries.providerMessageId, incomingProviderMessageId))
+          .limit(1)
+      );
 
       if (conflicting.length > 0) {
         return updateConflictingWebhookRow(t, conflicting[0], input, statusTimestamps, now);
@@ -694,12 +695,13 @@ export namespace NotificationRepository {
       // TOCTOU fix: acquire FOR UPDATE row lock so concurrent webhooks for the
       // same providerMessageId serialize — preventing double-apply or downgrade
       // via interleaved read-then-write.
-      const existing = await t
-        .select()
-        .from(notificationDeliveries)
-        .where(eq(notificationDeliveries.providerMessageId, providerMessageId))
-        .limit(1)
-        .for("update");
+      const existing = await withForUpdate(
+        t
+          .select()
+          .from(notificationDeliveries)
+          .where(eq(notificationDeliveries.providerMessageId, providerMessageId))
+          .limit(1)
+      );
 
       if (existing.length > 0) {
         return updateExistingWebhookDelivery(t, existing[0], status, webhookPayload, failureReason, now);
@@ -865,7 +867,7 @@ export namespace NotificationRepository {
         and(
           eq(notificationDeliveries.userId, userId),
           eq(notificationDeliveries.channel, NotificationChannel.SMS),
-          gt(notificationDeliveries.createdAt, sql`NOW() - INTERVAL '1 hour'`)
+          gt(notificationDeliveries.createdAt, new Date(Date.now() - 60 * 60 * 1000))
         )
       );
 

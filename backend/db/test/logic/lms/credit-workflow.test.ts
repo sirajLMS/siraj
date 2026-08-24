@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { CreditRepository } from "@/backend/db/repo/billing";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { creditTransactions } from "@/backend/db/schema";
@@ -11,9 +11,9 @@ import {
   setupTeacher,
   setupTestEntities,
 } from "@/backend/db/test/entity-setup";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { expectSavepointError, runInRollback } from "@/backend/db/test/test-utils";
 import { CreditReason } from "@/backend/enum";
-import type { ClassInstanceSelectType, DBTransaction } from "@/backend/types";
+import type { ClassInstanceSelectType } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
@@ -26,33 +26,6 @@ function requireInstance(instance: ClassInstanceSelectType | null): ClassInstanc
     throw new Error("setupTestEntities returned a null instance — pass skipInstance:false");
   }
   return instance;
-}
-
-/**
- * Runs `fn` inside a PostgreSQL SAVEPOINT so a constraint violation (e.g. a
- * duplicate idempotency key rejected by a unique index) can be caught WITHOUT
- * poisoning the outer `runInRollback` transaction. After catching, issues
- * `ROLLBACK TO SAVEPOINT` so subsequent queries in the test can run safely.
- * Without this, the unique-index rejection aborts the whole transaction and
- * every later statement fails with `25P02 "current transaction is aborted"`.
- */
-async function expectSavepointError(fn: () => Promise<unknown>, tx: DBTransaction): Promise<Error> {
-  const sp = `sp_${randomUUID().replaceAll("-", "_")}`;
-  await tx.execute(sql.raw(`SAVEPOINT ${sp}`));
-  let errorCaught: unknown = null;
-  try {
-    await fn();
-  } catch (error) {
-    errorCaught = error;
-  }
-  if (errorCaught) {
-    await tx.execute(sql.raw(`ROLLBACK TO SAVEPOINT ${sp}`));
-  } else {
-    await tx.execute(sql.raw(`RELEASE SAVEPOINT ${sp}`));
-  }
-  expect(errorCaught).not.toBeNull();
-  if (errorCaught instanceof Error) return errorCaught;
-  throw new Error(String(errorCaught));
 }
 
 describe("Credit workflow — purchase, deduct, refund, idempotency", () => {

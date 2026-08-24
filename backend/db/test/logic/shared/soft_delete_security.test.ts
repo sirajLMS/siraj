@@ -2,7 +2,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "@/backend/db";
+import { db, isSqlite } from "@/backend/db";
 import { AuditRepository } from "@/backend/db/repo/audit";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { auditLogs, users } from "@/backend/db/schema";
@@ -48,7 +48,7 @@ describe("Soft Delete Security (Issue #2)", () => {
     await teardownRlsRole(SOFT_DELETE_RLS_ROLE);
   });
 
-  test("Removes the SECURITY DEFINER soft_delete_row_trigger_fn function", async () => {
+  test.skipIf(isSqlite())("Removes the SECURITY DEFINER soft_delete_row_trigger_fn function", async () => {
     testLogger.info("Verifying SECURITY DEFINER trigger function is removed...");
     await runInRollback(async tx => {
       const result = await tx.execute(sql`
@@ -64,21 +64,24 @@ describe("Soft Delete Security (Issue #2)", () => {
     });
   });
 
-  test("Verifies no SECURITY DEFINER functions remain in public schema for soft delete", async () => {
-    testLogger.info("Scanning public schema for SECURITY DEFINER functions...");
-    await runInRollback(async tx => {
-      const result = await tx.execute(sql`
+  test.skipIf(isSqlite())(
+    "Verifies no SECURITY DEFINER functions remain in public schema for soft delete",
+    async () => {
+      testLogger.info("Scanning public schema for SECURITY DEFINER functions...");
+      await runInRollback(async tx => {
+        const result = await tx.execute(sql`
         SELECT proname
         FROM pg_proc
         JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid
         WHERE nspname = 'public' AND prosecdef = true AND proname LIKE '%soft_delete%'
       `);
 
-      const rows = getResultRows(result);
-      expect(rows).toHaveLength(0);
-      testLogger.info("No soft-delete SECURITY DEFINER functions found.");
-    });
-  });
+        const rows = getResultRows(result);
+        expect(rows).toHaveLength(0);
+        testLogger.info("No soft-delete SECURITY DEFINER functions found.");
+      });
+    }
+  );
 
   test("Soft delete via repository creates audit log entry", async () => {
     testLogger.info("Testing audit trail on repository soft delete...");
@@ -105,7 +108,7 @@ describe("Soft Delete Security (Issue #2)", () => {
     });
   });
 
-  test("RLS role cannot hard delete or directly set deleted_at", async () => {
+  test.skipIf(isSqlite())("RLS role cannot hard delete or directly set deleted_at", async () => {
     testLogger.info("Testing RLS hard delete block and direct soft-delete block...");
     // RLS test: user must be created outside runInRollback because the RLS
     // transaction uses SET LOCAL ROLE which requires a real committed row.

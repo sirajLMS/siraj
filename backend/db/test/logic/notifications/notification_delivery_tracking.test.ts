@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { notificationDeliveries, userDeviceTokens } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
@@ -195,7 +196,7 @@ describe("Notification Delivery Tracking", () => {
     testLogger.info("Analytics test passed.");
   });
 
-  test("RLS prevents users from seeing others' deliveries and tokens", async () => {
+  test.skipIf(isSqlite())("RLS prevents users from seeing others' deliveries and tokens", async () => {
     testLogger.info("Testing RLS on notification delivery tracking...");
     await runInRollback(async tx => {
       const userA = await createTestUser(tx, { name: "UserA" });

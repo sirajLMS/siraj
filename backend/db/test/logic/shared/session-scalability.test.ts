@@ -193,7 +193,7 @@ describe("Session Scalability and Redis Integration", () => {
       await runInRollback(async tx => {
         const { user, sessionId, hashedSessionId } = await setupTestSession(tx, "redis-validate");
 
-        const validated = await SessionRepository.validate(sessionId);
+        const validated = await SessionRepository.validate(sessionId, "default", tx);
 
         expect(validated).not.toBeNull();
         expect(validated?.hashedId).toBe(hashedSessionId);

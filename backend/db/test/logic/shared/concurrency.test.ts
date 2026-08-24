@@ -4,7 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { BillingRepository } from "@/backend/db/repo/billing";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { invoices, parents, students, users } from "@/backend/db/schema";
-import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
+import { executeTxSql, generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import type { DBTransaction } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
@@ -111,7 +111,7 @@ async function expectSavepointError(
   expectedError: string
 ): Promise<void> {
   const sp = `sp_${randomUUID().replaceAll("-", "_")}`;
-  await tx.execute(sql.raw(`SAVEPOINT ${sp}`));
+  await executeTxSql(tx, sql.raw(`SAVEPOINT ${sp}`));
   let errorCaught: unknown = null;
   try {
     await fn();
@@ -119,9 +119,9 @@ async function expectSavepointError(
     errorCaught = error;
   }
   if (errorCaught) {
-    await tx.execute(sql.raw(`ROLLBACK TO SAVEPOINT ${sp}`));
+    await executeTxSql(tx, sql.raw(`ROLLBACK TO SAVEPOINT ${sp}`));
   } else {
-    await tx.execute(sql.raw(`RELEASE SAVEPOINT ${sp}`));
+    await executeTxSql(tx, sql.raw(`RELEASE SAVEPOINT ${sp}`));
   }
   expect(errorCaught).not.toBeNull();
   expect(errorCaught).toBeInstanceOf(Error);

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { CreditRepository } from "@/backend/db/repo/billing";
 import { creditTransactions, invoices, payments, students } from "@/backend/db/schema";
 import {
@@ -10,7 +10,7 @@ import {
   setupTeacher,
   setupTestEntities,
 } from "@/backend/db/test/entity-setup";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { expectSavepointError, runInRollback } from "@/backend/db/test/test-utils";
 import { CreditReason, PaymentMethodType } from "@/backend/enum";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import {
@@ -80,34 +80,6 @@ async function createTestPayment(tx: DBTransaction, parentId: string, studentId:
   };
   const [payment] = await tx.insert(payments).values(paymentInput).returning();
   return payment.id;
-}
-
-/**
- * Runs `fn` inside a PostgreSQL SAVEPOINT so that a constraint violation
- * (e.g. a duplicate idempotency key rejected by a unique index) can be caught
- * WITHOUT poisoning the outer `runInRollback` transaction. After catching,
- * issues `ROLLBACK TO SAVEPOINT` to restore the transaction to a usable state
- * so subsequent queries can run.
- */
-async function expectSavepointError(fn: () => Promise<unknown>, tx: DBTransaction): Promise<Error> {
-  const sp = `sp_${randomUUID().replaceAll("-", "_")}`;
-  await tx.execute(sql.raw(`SAVEPOINT ${sp}`));
-  let errorCaught: Error | null = null;
-  try {
-    await fn();
-  } catch (error) {
-    errorCaught = error instanceof Error ? error : new Error(String(error));
-  }
-  if (errorCaught) {
-    await tx.execute(sql.raw(`ROLLBACK TO SAVEPOINT ${sp}`));
-  } else {
-    await tx.execute(sql.raw(`RELEASE SAVEPOINT ${sp}`));
-  }
-  expect(errorCaught).not.toBeNull();
-  if (!errorCaught) {
-    throw new Error("expectSavepointError: expected an error to be thrown, but none was caught");
-  }
-  return errorCaught;
 }
 
 describe("CreditRepository.getBalance", () => {

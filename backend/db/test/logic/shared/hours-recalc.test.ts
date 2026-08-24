@@ -1,8 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
-import { recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
+import { recurringScheduleDays, recurringSchedules, students } from "@/backend/db/schema";
 import { ensureTestSubjectId, setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { DBTransaction } from "@/backend/types";
@@ -10,12 +11,12 @@ import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function verifyStudentHours(tx: DBTransaction, studentId: string, expected: number): Promise<void> {
-  const result = await tx.execute<{ hours_per_week: string | number }>(
-    sql`SELECT id, hours_per_week FROM students WHERE id = ${studentId}`
-  );
-  const row = result.rows[0];
+  const [row] = await tx
+    .select({ hoursPerWeek: students.hoursPerWeek })
+    .from(students)
+    .where(eq(students.id, studentId));
   if (!row) throw new Error("Student not found");
-  expect(Number(row.hours_per_week)).toBe(expected);
+  expect(Number(row.hoursPerWeek)).toBe(expected);
 }
 
 async function setupRecalcTestEntities(tx: DBTransaction): Promise<{ studentId: string; teacherId: string }> {
@@ -73,7 +74,7 @@ async function insertActiveDay(
   return day.id;
 }
 
-describe("hoursPerWeek Recalculation Triggers", () => {
+describe.skipIf(isSqlite())("hoursPerWeek Recalculation Triggers", () => {
   test("hoursPerWeek recalculation across schedule insert, day activation, deactivation, duration update, deletion, and soft delete", async () => {
     await runInRollback(async tx => {
       const { studentId, teacherId } = await setupRecalcTestEntities(tx);

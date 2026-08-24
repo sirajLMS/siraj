@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { and, eq, gt, lt, or, sql } from "drizzle-orm";
+import { and, count, eq, gt, lt, or, sql } from "drizzle-orm";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { students } from "@/backend/db/schema";
 import { createTestUser, setupStudent } from "@/backend/db/test/entity-setup";
@@ -131,14 +131,14 @@ function decodeCursor(after: string): { createdAt: string; id: string } | null {
 }
 
 function timedSpecs(
-  count: number,
+  specCount: number,
   baseTimeMs: number,
   stepMs: number,
   namePrefix: string,
   gender: Gender | ((index: number) => Gender),
   classes: number
 ): StudentSeedSpec[] {
-  return Array.from({ length: count }, (_, index) => {
+  return Array.from({ length: specCount }, (_, index) => {
     const at = new Date(baseTimeMs + index * stepMs);
     return {
       name:
@@ -399,10 +399,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
 
     await runInRollback(async tx => {
       const { parent } = await setupStudent(tx);
-      const existingCount = await tx
-        .select({ count: sql<number>`count(*)::int` })
-        .from(students)
-        .where(eq(students.parentId, parent.id));
+      const existingCount = await tx.select({ count: count() }).from(students).where(eq(students.parentId, parent.id));
       const existingCountValue = existingCount[0]?.count ?? 0;
       testLogger.info(`Existing students for this parent: ${existingCountValue}`);
 
@@ -421,10 +418,7 @@ describe("Issue #25: Student Pagination Cursor Stability", () => {
       createdIds.push(...createdStudents.map(s => s.id));
 
       const expectedTotal = existingCountValue + 20;
-      const countResult = await tx
-        .select({ count: sql<number>`count(*)::int` })
-        .from(students)
-        .where(eq(students.parentId, parent.id));
+      const countResult = await tx.select({ count: count() }).from(students).where(eq(students.parentId, parent.id));
       const allStudentsCount = countResult[0]?.count ?? 0;
       expect(allStudentsCount).toBe(expectedTotal);
 

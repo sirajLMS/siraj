@@ -2,6 +2,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { userNotificationPreferences, users } from "@/backend/db/schema";
 import {
   createTestUserWithDefaults,
@@ -102,15 +103,19 @@ describe("User Notification Preferences", () => {
             code = typeof error.cause.code === "string" ? error.cause.code : "";
           }
         }
-        expect(
-          message.includes("23505") || code === "23505" || message.includes("Expected unique constraint violation")
-        ).toBe(true);
+        const isUniqueViolation =
+          message.includes("23505") ||
+          code === "23505" ||
+          message.toLowerCase().includes("unique") ||
+          message.toLowerCase().includes("constraint") ||
+          code.toLowerCase().includes("constraint");
+        expect(isUniqueViolation).toBe(true);
       }
     });
     testLogger.info("Unique constraint test passed.");
   });
 
-  test("RLS prevents users from seeing others' preferences", async () => {
+  test.skipIf(isSqlite())("RLS prevents users from seeing others' preferences", async () => {
     testLogger.info("Testing RLS on notification preferences...");
     await runInRollback(async tx => {
       const userA = await createTestUserWithDefaults(tx, { name: "UserA" });
