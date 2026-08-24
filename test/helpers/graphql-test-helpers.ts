@@ -29,11 +29,14 @@ import {
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import { DEFAULT_SEED_ADMIN_PASSWORD } from "@/shared/demo-users";
+import { resolveAdminPassword } from "@/shared/demo-users";
 import { testClient } from "@/test/helpers/test-client";
 import { isTestServerRunning } from "@/test/helpers/test-server";
 
-export const TEST_USER_PASSWORD = DEFAULT_SEED_ADMIN_PASSWORD;
+// Matches the server-side demo/test-user password: resolveAdminPassword()
+// resolves ADMIN_PASSWORD when set (supplied to the test process via .env.test
+// or by TEST_ADMIN_PASSWORD below), mirroring the server-side resolution.
+export const TEST_USER_PASSWORD = resolveAdminPassword();
 
 let demoUsersReadyPromise: Promise<void> | null = null;
 

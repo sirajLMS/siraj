@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { spawnSync } from "bun";
 import { restoreCanonicalNextEnvDts } from "@/scripts/lib/restore-next-env-dts";
 import { getTestProductionEnv } from "@/scripts/lib/test-build-env";
+import { resolveAdminPassword } from "@/shared/demo-users";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import {
   allocateTestPort,
@@ -23,7 +24,14 @@ import {
   TEST_SERVER_PORT,
 } from "@/test/helpers/test-port";
 
-const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? ["Test", "Admin", "Pass1!"].join("");
+// DEV/TEST ONLY — admin password injected into the spawned test server.
+// TEST_ADMIN_PASSWORD overrides; otherwise we use the same guarded resolver
+// (resolveAdminPassword) that graphql-test-helpers uses for TEST_USER_PASSWORD,
+// so the server's seeded passwords always match the client-side logins.
+// The dev test server is always spawned with TEST_SERVER=1 and the prod-mode
+// harness supplies its own ADMIN_PASSWORD via .env.test, so this value can
+// never reach a production deployment.
+export const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? resolveAdminPassword();
 
 let serverProcess: ChildProcess | undefined;
 let serverRootPid: number | undefined;
