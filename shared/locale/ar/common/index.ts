@@ -1,4 +1,4 @@
-import type { CommonLabels } from "../../types/common";
+import type { CommonLabels } from "@/shared/locale/types/common";
 
 export const commonAr: CommonLabels = {
   title: "سراج",

@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, isNull } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lte } from "drizzle-orm";
 import { db, queryDb, withForUpdate } from "@/backend/db";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
@@ -107,10 +107,21 @@ export const getStudentFutureClasses = async (
 
 export const getUpcomingClassesForStudent = async (
   studentId: string,
+  range?: { from?: Date; to?: Date } | null,
   tx?: DBTransaction
 ): Promise<UpcomingClassRow[]> => {
   const q = queryDb(tx);
-  const fromDate = new Date();
+  const fromDate = range?.from ?? new Date();
+  const toDate = range?.to ?? null;
+  const conditions = [
+    eq(classInstances.studentId, studentId),
+    isNull(classInstances.deletedAt),
+    gte(classInstances.scheduledStartAt, fromDate),
+    inArray(classInstances.executionState, ["NOT_ACTIVATED", "ACTIVATED"]),
+  ];
+  if (toDate) {
+    conditions.push(lte(classInstances.scheduledStartAt, toDate));
+  }
   const rows = await q
     .select({
       id: classInstances.id,
@@ -133,14 +144,7 @@ export const getUpcomingClassesForStudent = async (
     .innerJoin(users, eq(teachers.userId, users.id))
     .leftJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
     .leftJoin(recurringSchedules, eq(classInstances.recurringScheduleId, recurringSchedules.id))
-    .where(
-      and(
-        eq(classInstances.studentId, studentId),
-        isNull(classInstances.deletedAt),
-        gte(classInstances.scheduledStartAt, fromDate),
-        inArray(classInstances.executionState, ["NOT_ACTIVATED", "ACTIVATED"])
-      )
-    )
+    .where(and(...conditions))
     .orderBy(classInstances.scheduledStartAt)
     .limit(100);
 

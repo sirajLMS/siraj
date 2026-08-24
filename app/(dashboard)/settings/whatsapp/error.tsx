@@ -9,7 +9,7 @@ export default function WhatsAppError({ error, reset }: Readonly<{ error: Error;
       error={error}
       reset={reset}
       translation={Translation.Whatsapp}
-      errorScope="WhatsApp settings"
+      errorScope="whatsapp-settings"
     />
   );
 }

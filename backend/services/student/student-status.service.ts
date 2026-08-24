@@ -13,7 +13,8 @@ export namespace StudentStatusService {
   export async function getUpcomingClasses(
     actorUserId: string,
     studentId: string,
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    range?: { from?: Date | null; to?: Date | null } | null
   ): Promise<StudentUpcomingClassesResult> {
     const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
     try {
@@ -27,7 +28,14 @@ export namespace StudentStatusService {
       throw new Error(tErrors.studentNotFound(studentId));
     }
 
-    const classes = await SchedulingRepository.getUpcomingClassesForStudent(studentId);
+    const normalizedRange = range
+      ? {
+          from: range.from ?? undefined,
+          to: range.to ?? undefined,
+        }
+      : null;
+
+    const classes = await SchedulingRepository.getUpcomingClassesForStudent(studentId, normalizedRange);
 
     const enrichedClasses = await Promise.all(
       classes.map(async c => {

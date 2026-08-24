@@ -2,6 +2,7 @@
 
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 import { getServerTranslations } from "@/shared/locale";
+import { defaultLocale } from "@/shared/locale/AppLocale";
 
 export type LoginResponse =
   | {
@@ -31,7 +32,7 @@ function secureRandom(): number {
  * Mock login action that simulates authentication with random responses
  * This is for UI demonstration purposes only
  */
-export async function mockLogin(data: LoginFormData, locale: string = "en"): Promise<LoginResponse> {
+export async function mockLogin(data: LoginFormData, locale: string = defaultLocale): Promise<LoginResponse> {
   const translations = getServerTranslations(locale);
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 1000 + secureRandom() * 1000));

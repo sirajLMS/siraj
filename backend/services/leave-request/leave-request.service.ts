@@ -166,7 +166,7 @@ export namespace LeaveRequestService {
    * The proposed new start time is stored for supervisor review; approval triggers
    * the existing `ClassSessionService.reschedule()` flow (meeting URL regenerated).
    */
-  export async function createStudentDelayRequest(
+  export function createStudentDelayRequest(
     callerUserId: string,
     classInstanceId: string,
     proposedStartAt: Date,
@@ -189,21 +189,15 @@ export namespace LeaveRequestService {
    * No proposed time is needed; approval triggers the cancel+refund flow
    * (quota-exempt per R3 design decision — no `leave_quota_usage` write).
    */
-  export async function createStudentCancelRequest(
+  export function createStudentCancelRequest(
     callerUserId: string,
     classInstanceId: string,
     reason: string | null,
     locale?: string
   ): Promise<LeaveRequestSelectType> {
-    return createStudentRequest(
-      callerUserId,
-      AppPermission.SESSION_SELF_CANCEL,
-      classInstanceId,
-      LeaveRequestType.CANCEL,
-      null,
-      reason,
-      locale
-    );
+    const perm = AppPermission.SESSION_SELF_CANCEL;
+    const type = LeaveRequestType.CANCEL;
+    return createStudentRequest(callerUserId, perm, classInstanceId, type, null, reason, locale);
   }
 
   /** Supervisor/admin rejects a pending request. */

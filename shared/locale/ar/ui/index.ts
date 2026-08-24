@@ -1,4 +1,4 @@
-import type { UiLabels } from "../../types/ui";
+import type { UiLabels } from "@/shared/locale/types/ui";
 import { uiCatalogImageUploadAr as catalogImageUpload } from "./catalog-image-upload";
 import { uiCountrySelectAr as countrySelect } from "./country-select";
 import { uiCurrencySelectAr as currencySelect } from "./currency-select";

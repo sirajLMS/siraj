@@ -3639,7 +3639,7 @@ type Query {
   Paginated lesson reports for the logged-in student (student portal dashboard)
   """
   studentRecentLessonReports(paginationArgs: PaginationArgs): PendingLessonReportsPayload
-  studentUpcomingClasses(studentId: String!): StudentUpcomingClassesResult
+  studentUpcomingClasses(from: DateTime, studentId: String!, to: DateTime): StudentUpcomingClassesResult
   students(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentsWithFiltersResponse!
 
   """Lightweight student list for autocomplete (id, name, avatarUrl)."""

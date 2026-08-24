@@ -1,3 +1,22 @@
+/**
+ * General system-setting definitions (server-side admin configuration).
+ *
+ * IMPORTANT -- these `label` / `description` strings are NON-LOCALIZED admin
+ * configuration metadata. They are:
+ *   - Persisted as the canonical human-readable identifier for each setting
+ *     in the database seed, admin tooling, audit logs, and feature-flag
+ *     catalogs. They MUST remain in English so that operators across regions
+ *     share a single, stable vocabulary for system configuration.
+ *   - NOT rendered to end users. The user-facing admin UI labels/descriptions
+ *     for these settings live in the `dashboard.settings.general` translation
+ *     namespace (see `shared/locale/{ar,en}/dashboard/settings/general*`).
+ *
+ * Do NOT route these constants through the i18n layer -- doing so would couple
+ * server-side persistence keys to translation drift and break cross-locale
+ * audit-log readability. If a new setting is added here, also add its
+ * user-facing label to the `dashboard.settings.general` namespace so the
+ * admin UI can render it in the operator's locale.
+ */
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 export interface GeneralSettingDefinition {

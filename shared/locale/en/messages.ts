@@ -49,10 +49,10 @@ import { dashboardPaymentCatalogsParentEn } from "@/shared/locale/en/dashboard/p
 import { dashboardPermissionsEn } from "@/shared/locale/en/dashboard/permissions/main.ts";
 import { dashboardReportsEn } from "@/shared/locale/en/dashboard/reports/main.ts";
 import { monthlyAppraisalEn } from "@/shared/locale/en/dashboard/reports/monthly-appraisal";
-import { selfServiceRescheduleEn } from "@/shared/locale/en/dashboard/scheduling/self-service-reschedule";
 import { dashboardBooksAndBagsEn } from "@/shared/locale/en/dashboard/resources/booksAndBags.ts";
 import { dashboardResourcesEn } from "@/shared/locale/en/dashboard/resources/main.ts";
 import { dashboardScheduleTrackingParentEn } from "@/shared/locale/en/dashboard/schedule-tracking/main.ts";
+import { selfServiceRescheduleEn } from "@/shared/locale/en/dashboard/scheduling/self-service-reschedule";
 import { dashboardSettingsEn } from "@/shared/locale/en/dashboard/settings/main.ts";
 import { dashboardStaffDirectoryEn } from "@/shared/locale/en/dashboard/staff/directory.ts";
 import { dashboardStaffOnboardingEn } from "@/shared/locale/en/dashboard/staff/onboarding.ts";

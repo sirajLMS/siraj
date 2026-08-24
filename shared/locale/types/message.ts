@@ -50,9 +50,9 @@ import type { PaymentCatalogsParentLabels } from "@/shared/locale/types/dashboar
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main.ts";
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports/main.ts";
 import type { MonthlyAppraisalLabels } from "@/shared/locale/types/dashboard/reports/monthly-appraisal";
-import type { SelfServiceRescheduleLabels } from "@/shared/locale/types/dashboard/scheduling/self-service-reschedule";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
 import type { ScheduleTrackingParentLabels } from "@/shared/locale/types/dashboard/schedule-tracking/main.ts";
+import type { SelfServiceRescheduleLabels } from "@/shared/locale/types/dashboard/scheduling/self-service-reschedule";
 import type { SettingsLabels } from "@/shared/locale/types/dashboard/settings/main.ts";
 import type { StaffDirectoryLabels } from "@/shared/locale/types/dashboard/staff/directory.ts";
 import type { StaffOnboardingLabels } from "@/shared/locale/types/dashboard/staff/onboarding.ts";
@@ -179,7 +179,7 @@ export interface DashboardTranslations {
   scheduleTrackingParent: ScheduleTrackingParentLabels;
   permissions: PermissionsLabels;
   settings: SettingsLabels;
-  selfServiceReschedule: SelfServiceRescheduleLabels,
+  selfServiceReschedule: SelfServiceRescheduleLabels;
   monthlyAppraisal: MonthlyAppraisalLabels;
   reports: ReportsLabels;
   resources: ResourcesLabels;

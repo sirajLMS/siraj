@@ -9,7 +9,7 @@ export default function QuotasError({ error, reset }: Readonly<{ error: Error; r
       error={error}
       reset={reset}
       translation={Translation.Dashboard.BillingQuota}
-      errorScope="Quotas page"
+      errorScope="quotas"
     />
   );
 }

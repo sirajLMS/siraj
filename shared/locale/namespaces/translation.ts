@@ -49,10 +49,10 @@ import { DashboardPaymentCatalogsParent } from "@/shared/locale/namespaces/dashb
 import { DashboardPermissions } from "@/shared/locale/namespaces/dashboard/permissions/main.namespace";
 import { DashboardReports } from "@/shared/locale/namespaces/dashboard/reports/main.namespace";
 import { DashboardMonthlyAppraisal } from "@/shared/locale/namespaces/dashboard/reports/monthly-appraisal.namespace";
-import { DashboardSchedulingSelfServiceReschedule } from "@/shared/locale/namespaces/dashboard/scheduling/self-service-reschedule.namespace";
 import { DashboardBooksAndBags } from "@/shared/locale/namespaces/dashboard/resources/booksAndBags.namespace";
 import { DashboardResources } from "@/shared/locale/namespaces/dashboard/resources/main.namespace";
 import { DashboardScheduleTrackingParent } from "@/shared/locale/namespaces/dashboard/schedule-tracking/main.namespace";
+import { DashboardSchedulingSelfServiceReschedule } from "@/shared/locale/namespaces/dashboard/scheduling/self-service-reschedule.namespace";
 import { DashboardSettingsEnvironment } from "@/shared/locale/namespaces/dashboard/settings/environment.namespace";
 import { DashboardSettingsGeneral } from "@/shared/locale/namespaces/dashboard/settings/general.namespace";
 import { DashboardSettings } from "@/shared/locale/namespaces/dashboard/settings/main.namespace";

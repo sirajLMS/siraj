@@ -1,4 +1,4 @@
-import type { AuthLabels } from "../../types/auth";
+import type { AuthLabels } from "@/shared/locale/types/auth";
 import { authGroupSimulationEn } from "./groupSimulation";
 import { authImpersonationEn } from "./impersonation";
 import { authLoginEn } from "./login";

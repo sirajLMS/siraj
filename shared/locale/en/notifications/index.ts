@@ -1,4 +1,4 @@
-import type { NotificationsLabels } from "../../types/notifications";
+import type { NotificationsLabels } from "@/shared/locale/types/notifications";
 
 export const notificationsEn: NotificationsLabels = {
   invoiceGenerated: {

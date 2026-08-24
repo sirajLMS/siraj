@@ -1,4 +1,4 @@
-import type { ErrorsLabels } from "../../types/errors";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 const category = {
   categoryNotFound: (id: string) => `Category not found: ${id}`,

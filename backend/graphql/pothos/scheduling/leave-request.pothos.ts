@@ -73,13 +73,14 @@ gqlSchemaBuilder.mutationField("requestSessionDelay", t =>
     args: {
       input: t.arg({ type: RequestSessionDelayInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx): Promise<LeaveRequestSelectType> => {
+    resolve: async (_root, { input }, ctx): Promise<LeaveRequestSelectType> => {
+      const { classInstanceId, proposedStartAt, reason } = input;
       const userId = await requireAuth(ctx);
       return LeaveRequestService.createStudentDelayRequest(
         userId,
-        args.input.classInstanceId,
-        args.input.proposedStartAt,
-        args.input.reason ?? null,
+        classInstanceId,
+        proposedStartAt,
+        reason ?? null,
         ctx.locale
       );
     },
@@ -96,12 +97,8 @@ gqlSchemaBuilder.mutationField("requestSessionCancel", t =>
     },
     resolve: async (_root, args, ctx): Promise<LeaveRequestSelectType> => {
       const userId = await requireAuth(ctx);
-      return LeaveRequestService.createStudentCancelRequest(
-        userId,
-        args.input.classInstanceId,
-        args.input.reason ?? null,
-        ctx.locale
-      );
+      const reason = args.input.reason ?? null;
+      return LeaveRequestService.createStudentCancelRequest(userId, args.input.classInstanceId, reason, ctx.locale);
     },
   })
 );

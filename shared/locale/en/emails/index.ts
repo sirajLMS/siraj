@@ -1,4 +1,4 @@
-import type { EmailsLabels } from "../../types/emails";
+import type { EmailsLabels } from "@/shared/locale/types/emails";
 
 export const emailsEn: EmailsLabels = {
   complaintResponse: {

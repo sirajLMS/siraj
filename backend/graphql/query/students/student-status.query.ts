@@ -7,6 +7,8 @@ gqlSchemaBuilder.queryField("studentUpcomingClasses", t =>
     type: StudentUpcomingClassesResultPothosObject,
     args: {
       studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      from: t.arg({ type: "DateTime", required: false }),
+      to: t.arg({ type: "DateTime", required: false }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -14,7 +16,10 @@ gqlSchemaBuilder.queryField("studentUpcomingClasses", t =>
       if (!ctx.user) {
         throw new Error(tErrors.unauthorized);
       }
-      return StudentStatusService.getUpcomingClasses(ctx.user.id, args.studentId, tErrors);
+      return StudentStatusService.getUpcomingClasses(ctx.user.id, args.studentId, tErrors, {
+        from: args.from ?? null,
+        to: args.to ?? null,
+      });
     },
   })
 );

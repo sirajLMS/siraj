@@ -1,7 +1,7 @@
 "use client";
 
-import type { MutateResult, OperationVariables } from "@apollo/client";
-import type { MutationTuple } from "@apollo/client/react";
+import type { ApolloClient, OperationVariables } from "@apollo/client";
+import type { useMutation } from "@apollo/client/react";
 import { useCallback } from "react";
 
 /**
@@ -19,8 +19,11 @@ import { useCallback } from "react";
  *   await run({ id: "1" });
  */
 export function useMutationWrapper<TData, TVariables extends OperationVariables>(
-  mutationResult: MutationTuple<TData, TVariables>
-): (variables: TVariables) => Promise<MutateResult<TData>> {
+  mutationResult: useMutation.ResultTuple<TData, TVariables>
+): (variables: TVariables) => Promise<ApolloClient.MutateResult<TData>> {
   const [mutate] = mutationResult;
-  return useCallback((variables: TVariables): Promise<MutateResult<TData>> => mutate({ variables }), [mutate]);
+  return useCallback(
+    (variables: TVariables): Promise<ApolloClient.MutateResult<TData>> => mutate({ variables }),
+    [mutate]
+  );
 }
