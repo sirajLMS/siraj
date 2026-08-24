@@ -245,6 +245,8 @@ enum AppPermission {
   SESSION_OVERRIDE_ACTIONS
   SESSION_RESCHEDULE
   SESSION_RESET
+  SESSION_SELF_CANCEL
+  SESSION_SELF_DELAY
   SESSION_UPDATE_STATUS_ABSENT
   SESSION_UPDATE_STATUS_LEAVE
   SESSION_UPDATE_STATUS_START
@@ -2089,12 +2091,39 @@ type LeaveProcessResult {
   rescheduledInstanceId: String
 }
 
+"""A self-service leave/delay/cancel request from a student or parent."""
+type LeaveRequest {
+  classInstanceId: ID
+  createdAt: DateTime
+  id: ID
+  processedAt: DateTime
+  processedByUserId: ID
+  proposedStartAt: DateTime
+  reason: String
+  requestType: String
+  requestedByUserId: ID
+  requesterType: String
+  status: String
+}
+
 enum LeaveRequestStatus {
   APPROVED
   CANCELLED
   PENDING
   REJECTED
   RESCHEDULED
+}
+
+enum LeaveRequestType {
+  CANCEL
+  DELAY
+}
+
+enum LeaveRequesterType {
+  ADMIN
+  PARENT
+  STUDENT
+  TEACHER
 }
 
 """
@@ -2640,12 +2669,21 @@ type Mutation {
   refreshExchangeRates(force: Boolean = false): RefreshExchangeRatesResult
   refreshToken: RefreshTokenResponse
 
+  """Supervisor/admin rejects a pending leave request."""
+  rejectLeaveRequest(requestId: String!): LeaveRequest
+
   """
   Reject a pending lesson report with a rejection reason (supervisor/manager action)
   """
   rejectLessonReport(rejectionReason: String!, reportId: ID!): LessonReport
   rejectPaymentProof(expectedVersion: Int, invoiceId: String!, rejectionReason: String): MarkInvoicePaidResult
   renameFile(input: FileRenameInput!): FileOperationResult
+
+  """Student/parent requests a cancellation for an upcoming session."""
+  requestSessionCancel(input: RequestSessionCancelInput!): LeaveRequest
+
+  """Student/parent requests a delay (reschedule) for an upcoming session."""
+  requestSessionDelay(input: RequestSessionDelayInput!): LeaveRequest
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
   resendClassNotifications(classInstanceId: String!): SupportRequestResult
 
@@ -3443,6 +3481,9 @@ type Query {
   meetingProviders(activeOnly: Boolean = true): [MeetingProvider!]
   myConnectedMeetingProviders: [MyConnectedMeetingProvider!]
 
+  """Returns the authenticated user's own leave requests (delay/cancel)."""
+  myLeaveRequests: [LeaveRequest!]
+
   """
   Returns the authenticated student's monthly appraisal for a given month (or null if none).
   """
@@ -3891,6 +3932,19 @@ enum ReportGroupingMode {
   DATE
   STUDENT
   TEACHER
+}
+
+"""Input for a student/parent requesting a session cancellation."""
+input RequestSessionCancelInput {
+  classInstanceId: String!
+  reason: String
+}
+
+"""Input for a student/parent requesting a session delay (reschedule)."""
+input RequestSessionDelayInput {
+  classInstanceId: String!
+  proposedStartAt: DateTime!
+  reason: String
 }
 
 input RescheduleClassInput {

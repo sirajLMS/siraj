@@ -156,9 +156,15 @@ async function validateRefreshTokenJti(
 
   const refreshPayload = refreshToken ? await verifyToken(refreshToken) : null;
 
+  // M6: enforce the stored refresh-token JTI on every validation path, including
+  // when the session_id cookie resolved the session. Previously this branch
+  // short-circuited and only warned on mismatch, leaving a replay window when
+  // both the refresh_token and session_id cookies were stolen together (the
+  // common case). Now the JTI match check runs unconditionally below; legacy
+  // sessions (pre-M6, no stored refreshTokenJti in payload) remain accepted
+  // as a grace period until they rotate.
   if (resolvedViaSessionId) {
     warnIfStaleRefreshTokenJti(refreshToken, refreshPayload, session);
-    return true;
   }
 
   return jtiMatchesSession(refreshPayload, session);

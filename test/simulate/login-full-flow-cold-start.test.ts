@@ -17,11 +17,13 @@ describe("Cold-start: Full login flow via GraphQL", () => {
 
   test("demo login → token valid → me query returns same user", async () => {
     clearCookies();
+    // H9 security fix: demoLogin("super_admin") is blocked — use academy_admin
+    // (a non-excluded demo group) to exercise the cold-start demoLogin flow.
     const loginResult = await testClient.mutate({
       mutation: demoLoginMutationDocument,
       variables: {
         input: {
-          groupSlug: "super_admin",
+          groupSlug: "academy_admin",
         },
       },
     });
@@ -57,11 +59,12 @@ describe("Cold-start: Full login flow via GraphQL", () => {
 
   test("demo login → logout completes the auth lifecycle", async () => {
     clearCookies();
+    // H9 security fix: demoLogin("super_admin") is blocked — use academy_admin.
     const loginResult = await testClient.mutate({
       mutation: demoLoginMutationDocument,
       variables: {
         input: {
-          groupSlug: "super_admin",
+          groupSlug: "academy_admin",
         },
       },
     });

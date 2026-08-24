@@ -7,7 +7,7 @@ import {
   AccountStatus as GraphQLAccountStatus,
   ParentStatus as GraphQLParentStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import { ParentLifecycleContainer } from "@/frontend/common/views/dashboard/parents/lifecycle/ParentLifecycleContainer";
+import { ParentLifecycleClientContainer } from "@/frontend/common/views/dashboard/parents/lifecycle/ParentLifecycleClientContainer";
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildTranslatedMetadata(t => t.dashboardTranslations.parentLifecycle.pageTitle);
@@ -50,7 +50,7 @@ export default withPageAuth<{ readonly params: Promise<{ readonly id: string }> 
   const graphqlAccountStatus = getGraphqlAccountStatus(parent.accountStatus);
 
   return (
-    <ParentLifecycleContainer
+    <ParentLifecycleClientContainer
       parent={{
         id: parent.id,
         userId: parent.userId,
@@ -60,8 +60,6 @@ export default withPageAuth<{ readonly params: Promise<{ readonly id: string }> 
         accountStatus: graphqlAccountStatus,
         avatarUrl: parent.avatarUrl,
       }}
-      isUpdating={false}
-      onUpdateLifecycle={async () => {}}
     />
   );
 });

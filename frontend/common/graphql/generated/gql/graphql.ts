@@ -195,6 +195,8 @@ export enum AppPermission {
   SessionOverrideActions = 'SESSION_OVERRIDE_ACTIONS',
   SessionReschedule = 'SESSION_RESCHEDULE',
   SessionReset = 'SESSION_RESET',
+  SessionSelfCancel = 'SESSION_SELF_CANCEL',
+  SessionSelfDelay = 'SESSION_SELF_DELAY',
   SessionUpdateStatusAbsent = 'SESSION_UPDATE_STATUS_ABSENT',
   SessionUpdateStatusLeave = 'SESSION_UPDATE_STATUS_LEAVE',
   SessionUpdateStatusStart = 'SESSION_UPDATE_STATUS_START',

@@ -34,3 +34,4 @@ export * from "./teacher";
 export * from "./user";
 export * from "./users";
 export * from "./whatsapp";
+export * from "./leave-request";

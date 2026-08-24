@@ -2,6 +2,7 @@ export * from "./attendance-status.enum";
 export * from "./auth.enum";
 export * from "./availability-status.enum";
 export * from "./billing.enum";
+export * from "./brand-tokens";
 export * from "./class-instance-detail.enum";
 export * from "./credit.enum";
 export * from "./currency.enum";

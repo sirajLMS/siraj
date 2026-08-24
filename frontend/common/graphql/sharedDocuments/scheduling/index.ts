@@ -8,3 +8,4 @@ export * from "./recurring-schedule.documents";
 export * from "./schedule.documents";
 export * from "./schedule-deletion.documents";
 export * from "./weekly-schedule.documents";
+export * from "./leave-request.documents";

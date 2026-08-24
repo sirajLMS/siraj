@@ -24,7 +24,9 @@ import {
   InvoicePaymentSubmissionStatus,
   InvoiceStatus,
   InvoiceType,
+  LeaveRequesterType,
   LeaveRequestStatus,
+  LeaveRequestType,
   LessonReportStatus,
   ManagerAccountType,
   MeetingConnectionTestMode,
@@ -124,6 +126,12 @@ export const ClassExecutionStatePothosObject = gqlSchemaBuilder.enumType(ClassEx
 
 export const LeaveRequestStatusPothosObject = gqlSchemaBuilder.enumType(LeaveRequestStatus, {
   name: "LeaveRequestStatus",
+});
+export const LeaveRequesterTypePothosObject = gqlSchemaBuilder.enumType(LeaveRequesterType, {
+  name: "LeaveRequesterType",
+});
+export const LeaveRequestTypePothosObject = gqlSchemaBuilder.enumType(LeaveRequestType, {
+  name: "LeaveRequestType",
 });
 
 export const RescheduleDateLabelPothosObject = gqlSchemaBuilder.enumType(RescheduleDateLabel, {

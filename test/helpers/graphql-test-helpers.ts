@@ -29,7 +29,7 @@ import {
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import { resolveAdminPassword } from "@/shared/demo-users";
+import { ADMIN_EMAIL, resolveAdminPassword } from "@/shared/demo-users";
 import { testClient } from "@/test/helpers/test-client";
 import { isTestServerRunning } from "@/test/helpers/test-server";
 
@@ -52,18 +52,22 @@ async function waitForServerRecovery(): Promise<void> {
 }
 
 async function attemptEnsureDemoUsers(attempt: number, maxAttempts: number): Promise<boolean> {
+  // H9 security fix (demo-auth.service.ts EXCLUDED_DEMO_LOGIN_GROUP_SLUGS) blocks
+  // demoLogin("super_admin"), so bootstrap uses a standard password login as the
+  // canonical super-admin demo user (admin@siraj.local + resolveAdminPassword()).
   const loginResult = await testClient.mutate({
-    mutation: demoLoginMutationDocument,
+    mutation: loginMutationDocument,
     variables: {
       input: {
-        groupSlug: "super_admin",
+        email: ADMIN_EMAIL,
+        password: TEST_USER_PASSWORD,
       },
     },
   });
 
-  const token = loginResult.data?.demoLogin?.token;
+  const token = loginResult.data?.login?.token;
   if (!token) {
-    const loginError = `demoLogin for super_admin failed: ${loginResult.error?.message ?? "unknown GraphQL error"}`;
+    const loginError = `login for ${ADMIN_EMAIL} failed: ${loginResult.error?.message ?? "unknown GraphQL error"}`;
     if (attempt >= maxAttempts) {
       throw new Error(loginError);
     }
@@ -228,6 +232,19 @@ export async function assertOperationDenied<TData = unknown, TVars extends Opera
 }
 
 /**
+ * Logs in the canonical super-admin demo user (admin@siraj.local) via a standard
+ * password login against the `login` mutation.
+ *
+ * Required because `demoLogin("super_admin")` is blocked by the H9 security fix
+ * (EXCLUDED_DEMO_LOGIN_GROUP_SLUGS in demo-auth.service.ts short-circuits to
+ * demoGroupNotFound before the group lookup). Tests that need a super-admin
+ * session must use direct password login (email + plainPassword), not demoLogin.
+ */
+export async function loginSuperAdmin(): Promise<string> {
+  return loginUser(ADMIN_EMAIL, TEST_USER_PASSWORD);
+}
+
+/**
  * Logs in a standard user using email and password, returning their auth token.
  */
 export async function loginUser(email: string, password: string): Promise<string> {
@@ -327,7 +344,7 @@ export async function provisionTestEntities(
  * @returns A promise resolving to the data returned by the GraphQL operation.
  */
 export async function loginAndProvision(prefix: string): Promise<LoginAndProvisionResult> {
-  const superAdminToken = await loginDemoUser("super_admin");
+  const superAdminToken = await loginSuperAdmin();
   expect(superAdminToken).not.toBeNull();
   const result = await provisionTestEntities(superAdminToken, prefix);
   expect(result.teacherToken).not.toBeNull();

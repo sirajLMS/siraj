@@ -16,12 +16,13 @@ describe("Cold-start: Rate limiter fail-open via GraphQL", () => {
     // In production cold-start, checkRateLimit would throw (cache cold),
     // and the fail-open try/catch in auth.mutation.ts catches it and proceeds
     // — same behavior as DISABLE_RATE_LIMITING=true.
+    // H9 security fix: demoLogin("super_admin") is blocked — use academy_admin.
     clearCookies();
     const result = await testClient.mutate({
       mutation: demoLoginMutationDocument,
       variables: {
         input: {
-          groupSlug: "super_admin",
+          groupSlug: "academy_admin",
         },
       },
     });

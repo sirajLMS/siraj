@@ -87,3 +87,18 @@ const entityNameMutationDocument = gql`
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
 
+
+## Embedded type normalization policy
+
+Types that lack an `id` field (value-type / embedded objects) must opt out of
+normalization via `keyFields: false` in `frontend/common/providers/apollo/apolloCache.ts`.
+This prevents Apollo's "Cache data may be lost" warnings when the same shape is
+written through different parent objects.
+
+Current embedded types:
+- `AdminNoteInfo` (fields: `content`, `lastUpdated`) — no `id`.
+- `OnlineMeetingInfo` (fields: `joinUrl`, `logoUrl`, `meetingId`, `platform`,
+  `providerName`, `source`) — no `id`.
+
+If you add a new GraphQL type without an `id` field, add it to `typePolicies`
+in `apolloCache.ts` with `keyFields: false` and list it here.

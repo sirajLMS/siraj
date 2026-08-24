@@ -15,12 +15,13 @@ describe("Cold-start: env-config fallback via GraphQL", () => {
     // resolveEnvConfig falls back to process.env. This test verifies
     // the cache service initializes correctly (via env fallback or DB)
     // and the login flow completes.
+    // H9 security fix: demoLogin("super_admin") is blocked — use academy_admin.
     clearCookies();
     const result = await testClient.mutate({
       mutation: demoLoginMutationDocument,
       variables: {
         input: {
-          groupSlug: "super_admin",
+          groupSlug: "academy_admin",
         },
       },
     });
@@ -35,11 +36,12 @@ describe("Cold-start: env-config fallback via GraphQL", () => {
 
   test("me query works after login — env-config not blocking session verification", async () => {
     clearCookies();
+    // H9 security fix: demoLogin("super_admin") is blocked — use academy_admin.
     const loginResult = await testClient.mutate({
       mutation: demoLoginMutationDocument,
       variables: {
         input: {
-          groupSlug: "super_admin",
+          groupSlug: "academy_admin",
         },
       },
     });
