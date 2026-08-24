@@ -48,6 +48,7 @@ import { dashboardPaymentCatalogsEn } from "@/shared/locale/en/dashboard/payment
 import { dashboardPaymentCatalogsParentEn } from "@/shared/locale/en/dashboard/payment-catalogs/parent.ts";
 import { dashboardPermissionsEn } from "@/shared/locale/en/dashboard/permissions/main.ts";
 import { dashboardReportsEn } from "@/shared/locale/en/dashboard/reports/main.ts";
+import { monthlyAppraisalEn } from "@/shared/locale/en/dashboard/reports/monthly-appraisal";
 import { dashboardBooksAndBagsEn } from "@/shared/locale/en/dashboard/resources/booksAndBags.ts";
 import { dashboardResourcesEn } from "@/shared/locale/en/dashboard/resources/main.ts";
 import { dashboardScheduleTrackingParentEn } from "@/shared/locale/en/dashboard/schedule-tracking/main.ts";
@@ -201,6 +202,7 @@ export const enMessages: Translations = {
     usersCreateUser: dashboardUsersCreateUserEn,
     permissions: dashboardPermissionsEn,
     settings: dashboardSettingsEn,
+    monthlyAppraisal: monthlyAppraisalEn,
     reports: dashboardReportsEn,
     resources: dashboardResourcesEn,
     booksAndBags: dashboardBooksAndBagsEn,

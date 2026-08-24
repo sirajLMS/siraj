@@ -48,6 +48,7 @@ import { dashboardPaymentCatalogsAr } from "@/shared/locale/ar/dashboard/payment
 import { dashboardPaymentCatalogsParentAr } from "@/shared/locale/ar/dashboard/payment-catalogs/parent.ts";
 import { dashboardPermissionsAr } from "@/shared/locale/ar/dashboard/permissions/main.ts";
 import { dashboardReportsAr } from "@/shared/locale/ar/dashboard/reports/main.ts";
+import { monthlyAppraisalAr } from "@/shared/locale/ar/dashboard/reports/monthly-appraisal";
 import { dashboardBooksAndBagsAr } from "@/shared/locale/ar/dashboard/resources/booksAndBags.ts";
 import { dashboardResourcesAr } from "@/shared/locale/ar/dashboard/resources/main.ts";
 import { dashboardScheduleTrackingParentAr } from "@/shared/locale/ar/dashboard/schedule-tracking/main.ts";
@@ -201,6 +202,7 @@ export const arMessages: Translations = {
     usersCreateUser: dashboardUsersCreateUserAr,
     permissions: dashboardPermissionsAr,
     settings: dashboardSettingsAr,
+    monthlyAppraisal: monthlyAppraisalAr,
     reports: dashboardReportsAr,
     resources: dashboardResourcesAr,
     booksAndBags: dashboardBooksAndBagsAr,

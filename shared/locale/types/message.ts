@@ -49,6 +49,7 @@ import type { PaymentCatalogsLabels } from "@/shared/locale/types/dashboard/paym
 import type { PaymentCatalogsParentLabels } from "@/shared/locale/types/dashboard/payment-catalogs/parent.ts";
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main.ts";
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports/main.ts";
+import type { MonthlyAppraisalLabels } from "@/shared/locale/types/dashboard/reports/monthly-appraisal";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
 import type { ScheduleTrackingParentLabels } from "@/shared/locale/types/dashboard/schedule-tracking/main.ts";
 import type { SettingsLabels } from "@/shared/locale/types/dashboard/settings/main.ts";
@@ -177,6 +178,7 @@ export interface DashboardTranslations {
   scheduleTrackingParent: ScheduleTrackingParentLabels;
   permissions: PermissionsLabels;
   settings: SettingsLabels;
+  monthlyAppraisal: MonthlyAppraisalLabels;
   reports: ReportsLabels;
   resources: ResourcesLabels;
   booksAndBags: BooksAndBagsLabels;

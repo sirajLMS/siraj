@@ -12,11 +12,18 @@ interface InternalDemoUser {
 
 export type DemoUser = Omit<InternalDemoUser, "plainPassword">;
 
-// Centralized default seed admin password. Imported by seed-users.ts to avoid
-// duplicating the literal. Must never be used in production — guarded below.
-export const DEFAULT_SEED_ADMIN_PASSWORD = process.env.DEFAULT_SEED_ADMIN_PASSWORD ?? ["Seed", "Pass1!"].join("_");
+// Centralized default seed admin password — module-private on purpose.
+// Must never be consumed directly; always go through resolveAdminPassword()
+// which enforces the production / IS_DEMO / TEST_SERVER guards.
+const DEFAULT_SEED_ADMIN_PASSWORD = process.env.DEFAULT_SEED_ADMIN_PASSWORD ?? ["Seed", "Pass1!"].join("_");
 
-function resolveAdminPassword(): string {
+/**
+ * Resolves the admin/test admin password with environment guards:
+ * - prefers ADMIN_PASSWORD env var
+ * - throws when IS_DEMO/TEST_SERVER is set without ADMIN_PASSWORD
+ * - throws in production when only the default password would be used
+ */
+export function resolveAdminPassword(): string {
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (adminPassword) return adminPassword;
 
