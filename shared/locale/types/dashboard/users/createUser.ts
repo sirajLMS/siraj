@@ -21,6 +21,11 @@ export interface CreateUserLabels {
   readonly passwordWeak: string;
   readonly passwordMinLength: string;
   readonly passwordWeakComplexity: string;
+  // Password strength meter labels (UX)
+  readonly passwordStrength: string;
+  readonly strengthWeak: string;
+  readonly strengthFair: string;
+  readonly strengthStrong: string;
   readonly permissionGroupRequired: string;
   readonly specializedGroupNotAllowed: string;
   readonly permissionGroupNotFound: string;

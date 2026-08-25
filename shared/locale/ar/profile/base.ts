@@ -47,6 +47,13 @@ export const profileBaseAr: ProfileLabels = {
     confirmPassword: "تأكيد كلمة المرور الجديدة",
     submit: "تحديث كلمة المرور",
     success: "تم تحديث كلمة المرور بنجاح",
+    showPassword: "إظهار كلمة المرور",
+    hidePassword: "إخفاء كلمة المرور",
+    passwordStrength: "قوة كلمة المرور",
+    strengthWeak: "ضعيفة",
+    strengthFair: "مقبولة",
+    strengthStrong: "قوية",
+    passwordMismatch: "كلمتا المرور غير متطابقتين",
   },
   adminResetPassword: {
     title: "إعادة تعيين كلمة المرور",

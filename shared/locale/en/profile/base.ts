@@ -47,6 +47,13 @@ export const profileBaseEn: ProfileLabels = {
     confirmPassword: "Confirm New Password",
     submit: "Update Password",
     success: "Password updated successfully",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    passwordStrength: "Password strength",
+    strengthWeak: "Weak",
+    strengthFair: "Fair",
+    strengthStrong: "Strong",
+    passwordMismatch: "Passwords do not match",
   },
   adminResetPassword: {
     title: "Reset Password",

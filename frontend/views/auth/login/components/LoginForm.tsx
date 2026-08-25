@@ -4,8 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Person, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Alert, Box, Button, CircularProgress, IconButton, InputAdornment, Link, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useState } from "react";
-import { type Control, Controller, type FieldErrors, useForm } from "react-hook-form";
+import { useCallback, useState } from "react";
+import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
+import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
 import { mockLogin } from "@/frontend/views/auth/login/actions/mockLogin";
 import { createLoginSchema, type LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 import type { AuthLoginLabels } from "@/shared/locale/types/auth";
@@ -42,6 +43,9 @@ const FormFields = ({
   isSubmitting,
   showPassword,
   setShowPassword,
+  passwordValue,
+  capsLockOn,
+  onPasswordKeyDown,
 }: {
   labels: AuthLoginLabels;
   control: Control<LoginFormData>;
@@ -49,6 +53,9 @@ const FormFields = ({
   isSubmitting: boolean;
   showPassword: boolean;
   setShowPassword: (show: boolean) => void;
+  passwordValue: string;
+  capsLockOn: boolean;
+  onPasswordKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }) => {
   return (
     <>
@@ -81,38 +88,50 @@ const FormFields = ({
         name="password"
         control={control}
         render={({ field }) => (
-          <TextField
-            {...field}
-            label={labels.password}
-            type={showPassword ? "text" : "password"}
-            error={!!errors.password}
-            helperText={errors.password?.message}
-            disabled={isSubmitting}
-            fullWidth
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <StyledLockIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => {
-                        setShowPassword(!showPassword);
-                      }}
-                      edge="end"
-                      disabled={isSubmitting}
-                      aria-label={showPassword ? labels.hidePassword : labels.showPassword}
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
+          <Box>
+            <TextField
+              {...field}
+              label={labels.password}
+              type={showPassword ? "text" : "password"}
+              error={!!errors.password || capsLockOn}
+              helperText={errors.password?.message ?? (capsLockOn ? labels.capsLockOn : " ")}
+              disabled={isSubmitting}
+              fullWidth
+              onKeyDown={onPasswordKeyDown}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <StyledLockIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => {
+                          setShowPassword(!showPassword);
+                        }}
+                        edge="end"
+                        disabled={isSubmitting}
+                        aria-label={showPassword ? labels.hidePassword : labels.showPassword}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+            <PasswordStrengthMeter
+              password={passwordValue}
+              labels={{
+                strength: labels.passwordStrength,
+                weak: labels.strengthWeak,
+                fair: labels.strengthFair,
+                strong: labels.strengthStrong,
+              }}
+            />
+          </Box>
         )}
       />
     </>
@@ -139,6 +158,7 @@ export interface LoginFormProps {
 export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetrying }: Readonly<LoginFormProps>) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [capsLockOn, setCapsLockOn] = useState(false);
   const [loginResult, setLoginResult] = useState<{
     type: "success" | "error";
     message: string;
@@ -161,6 +181,17 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
       password: "",
     },
   });
+
+  // Watch the password value so the strength meter updates live without
+  // re-rendering the whole form on every keystroke.
+  const passwordValue = useWatch({ control, name: "password" }) ?? "";
+
+  // Caps Lock detector — fires on every keydown in the password field.
+  // `getModifierState` is the spec-compliant way to read Caps Lock regardless
+  // of the physical key (handles macOS + non-US layouts).
+  const handlePasswordKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    setCapsLockOn(e.getModifierState("CapsLock"));
+  }, []);
 
   const onSubmit = (data: LoginFormData) => {
     setIsSubmitting(true);
@@ -238,6 +269,9 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
         isSubmitting={isSubmitting}
         showPassword={showPassword}
         setShowPassword={setShowPassword}
+        passwordValue={passwordValue}
+        capsLockOn={capsLockOn}
+        onPasswordKeyDown={handlePasswordKeyDown}
       />
 
       <FormActions labels={labels} />

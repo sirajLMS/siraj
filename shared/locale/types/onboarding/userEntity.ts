@@ -24,5 +24,13 @@ export interface UserEntityOnboardingLabels {
     readonly currencyRequired: string;
     readonly nameMinLength: string;
     readonly passwordMinLength: string;
+    readonly passwordWeakComplexity: string;
+    // Password strength meter + show/hide toggle (UX)
+    readonly passwordStrength: string;
+    readonly strengthWeak: string;
+    readonly strengthFair: string;
+    readonly strengthStrong: string;
+    readonly showPassword: string;
+    readonly hidePassword: string;
   };
 }

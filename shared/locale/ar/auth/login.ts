@@ -33,4 +33,9 @@ export const authLoginAr: AuthLoginLabels = {
   showPassword: "إظهار كلمة المرور",
   hidePassword: "إخفاء كلمة المرور",
   retrying: "إعادة المحاولة...",
+  passwordStrength: "قوة كلمة المرور",
+  strengthWeak: "ضعيفة",
+  strengthFair: "مقبولة",
+  strengthStrong: "قوية",
+  capsLockOn: "مفتاح الأحرف الكبيرة مفعل",
 };

@@ -33,4 +33,9 @@ export const authLoginEn: AuthLoginLabels = {
   showPassword: "Show password",
   hidePassword: "Hide password",
   retrying: "Retrying...",
+  passwordStrength: "Password strength",
+  strengthWeak: "Weak",
+  strengthFair: "Fair",
+  strengthStrong: "Strong",
+  capsLockOn: "Caps Lock is on",
 };

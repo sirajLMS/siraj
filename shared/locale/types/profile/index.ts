@@ -403,6 +403,14 @@ export interface ProfileChangePasswordLabels {
   readonly confirmPassword: string;
   readonly submit: string;
   readonly success: string;
+  // Password strength meter + show/hide toggle (UX)
+  readonly showPassword: string;
+  readonly hidePassword: string;
+  readonly passwordStrength: string;
+  readonly strengthWeak: string;
+  readonly strengthFair: string;
+  readonly strengthStrong: string;
+  readonly passwordMismatch: string;
 }
 
 export interface ProfileAdminResetPasswordLabels {

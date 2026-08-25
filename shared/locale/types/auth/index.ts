@@ -32,6 +32,12 @@ export interface AuthLoginLabels {
   readonly showPassword: string;
   readonly hidePassword: string;
   readonly retrying: string;
+  // Password strength meter + Caps Lock indicator (UX improvement)
+  readonly passwordStrength: string;
+  readonly strengthWeak: string;
+  readonly strengthFair: string;
+  readonly strengthStrong: string;
+  readonly capsLockOn: string;
 }
 
 // AuthImpersonationLabels: fields with {name}/{email} are now typed functions

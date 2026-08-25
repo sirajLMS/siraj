@@ -1,9 +1,21 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Autocomplete, Box, Grid, MenuItem, type SxProps, TextField, type Theme } from "@mui/material";
-import type { ComponentType, ReactNode } from "react";
-import { type Control, Controller, type FieldErrors, FormProvider } from "react-hook-form";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+  Autocomplete,
+  Box,
+  Grid,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  type SxProps,
+  TextField,
+  type Theme,
+} from "@mui/material";
+import { type ComponentType, type ReactNode, useState } from "react";
+import { type Control, Controller, type FieldErrors, FormProvider, useWatch } from "react-hook-form";
+import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -75,6 +87,9 @@ function validationMessage(labels: VmLabels, error: unknown): string | undefined
   if (msg === "emailExists") return labels.emailExists;
   if (msg === "passwordRequired") return labels.passwordRequired;
   if (msg === "passwordWeak") return labels.passwordWeak;
+  // H5/M5 unified schema emits these keys (createPasswordFieldSchema):
+  if (msg === "passwordMinLength") return labels.passwordMinLength;
+  if (msg === "passwordWeakComplexity") return labels.passwordWeakComplexity;
   if (msg === "permissionGroupRequired") return labels.permissionGroupRequired;
   if (msg === "specializedGroupNotAllowed") return labels.specializedGroupNotAllowed;
   if (msg === "permissionGroupNotFound") return labels.permissionGroupNotFound;
@@ -164,22 +179,54 @@ function PasswordField({
   errors: FieldErrors<GeneralUserCreateFormData>;
   labels: VmLabels;
 }>) {
+  const [showPassword, setShowPassword] = useState(false);
+  // Watch the password value so the strength meter updates live without
+  // re-rendering the whole form on every keystroke.
+  const passwordValue = useWatch({ control, name: "password" }) ?? "";
   return (
     <Grid size={{ xs: 12, md: 6 }}>
       <Controller
         name="password"
         control={control}
         render={({ field }) => (
-          <TextField
-            {...field}
-            label={labels.password}
-            type="password"
-            required
-            fullWidth
-            sx={outlinedInputSx}
-            error={!!errors.password}
-            helperText={validationMessage(labels, errors.password)}
-          />
+          <Box>
+            <TextField
+              {...field}
+              label={labels.password}
+              type={showPassword ? "text" : "password"}
+              required
+              fullWidth
+              sx={outlinedInputSx}
+              error={!!errors.password}
+              helperText={validationMessage(labels, errors.password)}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => {
+                          setShowPassword(!showPassword);
+                        }}
+                        edge="end"
+                        aria-label={labels.password}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+            <PasswordStrengthMeter
+              password={passwordValue}
+              labels={{
+                strength: labels.passwordStrength,
+                weak: labels.strengthWeak,
+                fair: labels.strengthFair,
+                strong: labels.strengthStrong,
+              }}
+            />
+          </Box>
         )}
       />
     </Grid>
