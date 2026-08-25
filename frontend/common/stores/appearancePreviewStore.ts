@@ -6,6 +6,7 @@ import type {
   AppearanceColorsInput,
   AppearanceDraftInput,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+import { pickOnPrimary } from "@/shared/lib/color-contrast.utils";
 
 /**
  * CSS custom property names written on `<html>` to override MUI palette
@@ -15,6 +16,7 @@ import type {
  */
 const CSS_VAR_PRIMARY_MAIN = "--mui-palette-primary-main";
 const CSS_VAR_SECONDARY_MAIN = "--mui-palette-secondary-main";
+const CSS_VAR_ON_PRIMARY = "--mui-palette-onPrimary";
 
 /**
  * Maximum number of draft snapshots retained for the undo/redo stack.
@@ -75,6 +77,11 @@ function writeActiveModeCssVars(draft: AppearanceDraftInput, isDark: boolean): v
   const root = document.documentElement;
   if (pair.primaryMain) {
     root.style.setProperty(CSS_VAR_PRIMARY_MAIN, pair.primaryMain);
+    // AC-32: derive --mui-palette-onPrimary from primaryMain so foreground
+    // text on brand-colored surfaces (buttons, chips) meets WCAG AA. Computed
+    // in JS via pickOnPrimary (not CSS color-mix) to guarantee the 4.5:1
+    // threshold even for mid-gray primaries.
+    root.style.setProperty(CSS_VAR_ON_PRIMARY, pickOnPrimary(pair.primaryMain));
   }
   if (pair.secondaryMain) {
     root.style.setProperty(CSS_VAR_SECONDARY_MAIN, pair.secondaryMain);
@@ -93,6 +100,7 @@ function clearActiveModeCssVars(): void {
   const root = document.documentElement;
   root.style.removeProperty(CSS_VAR_PRIMARY_MAIN);
   root.style.removeProperty(CSS_VAR_SECONDARY_MAIN);
+  root.style.removeProperty(CSS_VAR_ON_PRIMARY);
 }
 
 /**
@@ -173,7 +181,9 @@ interface AppearancePreviewState {
 const initialState = {
   draft: DEFAULT_APPEARANCE_DRAFT,
   isCustomizeMode: false,
-  isDark: false,
+  // BUG-C fix: isDark must match defaultColorScheme so the customizer starts
+  // in the same mode as the app (dark by default), not always light.
+  isDark: DEFAULT_APPEARANCE_DRAFT.defaultColorScheme === "dark",
   hydrated: false,
   dirty: false,
   past: [] as ReadonlyArray<AppearanceDraftInput>,
@@ -194,7 +204,16 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
     set({ isDark });
     writeActiveModeCssVars(get().draft, isDark);
   },
-  enterCustomizeMode: () => set({ isCustomizeMode: true }),
+  enterCustomizeMode: () => {
+    // BUG-C fix: detect the current app color scheme from <html> so the
+    // customizer starts in the same mode the user is viewing (dark or light),
+    // not always the default isDark. This ensures color edits apply to the
+    // mode the user actually sees.
+    const currentScheme = typeof document !== "undefined" ? document.documentElement.dataset.muiColorScheme : undefined;
+    const isDark = currentScheme !== "light";
+    set({ isCustomizeMode: true, isDark });
+    writeActiveModeCssVars(get().draft, isDark);
+  },
   exitCustomizeMode: () => {
     clearActiveModeCssVars();
     set({ isCustomizeMode: false });

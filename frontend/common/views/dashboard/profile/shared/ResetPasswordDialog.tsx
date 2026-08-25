@@ -16,8 +16,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
 import type { ResetPasswordDialogProps } from "@/frontend/common/components/ui/dialog/types/resetPasswordDialog.types";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import { countPasswordClasses, PASSWORD_MIN_LENGTH } from "@/shared/utils/password-schema";
 
 export function ResetPasswordDialog({
   open,
@@ -40,8 +42,10 @@ export function ResetPasswordDialog({
 
     if (!password) {
       newErrors.password = t.adminResetPassword.passwordRequired;
-    } else if (password.length < 8) {
+    } else if (password.length < PASSWORD_MIN_LENGTH) {
       newErrors.password = t.adminResetPassword.passwordMinLength;
+    } else if (countPasswordClasses(password) < 2) {
+      newErrors.password = t.adminResetPassword.passwordWeakComplexity;
     }
 
     if (password !== confirmPassword) {
@@ -131,6 +135,15 @@ export function ResetPasswordDialog({
                 },
               }}
               disabled={isLoading}
+            />
+            <PasswordStrengthMeter
+              password={password}
+              labels={{
+                strength: t.adminResetPassword.passwordStrength,
+                weak: t.adminResetPassword.strengthWeak,
+                fair: t.adminResetPassword.strengthFair,
+                strong: t.adminResetPassword.strengthStrong,
+              }}
             />
           </FormControl>
 

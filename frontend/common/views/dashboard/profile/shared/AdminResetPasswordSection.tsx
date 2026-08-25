@@ -1,10 +1,21 @@
 "use client";
 
 import { KeyOutlined, VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Checkbox, FormControlLabel, IconButton, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { type Ref, useCallback, useImperativeHandle, useState } from "react";
+import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import { countPasswordClasses, PASSWORD_MIN_LENGTH } from "@/shared/utils/password-schema";
 
 export interface AdminResetPasswordData {
   readonly newPassword: string;
@@ -46,15 +57,18 @@ export function AdminResetPasswordSection({
       if (password.length === 0) {
         return { password: t.passwordRequired };
       }
-      if (password.length < 8) {
+      if (password.length < PASSWORD_MIN_LENGTH) {
         return { password: t.passwordMinLength };
+      }
+      if (countPasswordClasses(password) < 2) {
+        return { password: t.passwordWeakComplexity };
       }
       if (password !== confirm) {
         return { confirm: t.passwordsDoNotMatch };
       }
       return {};
     },
-    [t.passwordRequired, t.passwordMinLength, t.passwordsDoNotMatch]
+    [t.passwordRequired, t.passwordMinLength, t.passwordWeakComplexity, t.passwordsDoNotMatch]
   );
 
   useImperativeHandle(ref, () => ({
@@ -78,6 +92,16 @@ export function AdminResetPasswordSection({
     },
   }));
 
+  // Live mismatch detection — shows a helper warning before submit so the user
+  // catches typos early instead of after a failed round-trip.
+  const liveMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
+  let confirmHelperText: string | undefined;
+  if (confirmPasswordError.length > 0) {
+    confirmHelperText = confirmPasswordError;
+  } else if (liveMismatch) {
+    confirmHelperText = t.passwordsDoNotMatch;
+  }
+
   return (
     <SectionPanel title={t.title}>
       <Stack spacing={2}>
@@ -85,32 +109,43 @@ export function AdminResetPasswordSection({
           <KeyOutlined sx={theme => ({ color: theme.palette.primary.main })} />
           <Typography variant="bodyMd">{t.description(userName, userEmail)}</Typography>
         </Stack>
-        <TextField
-          label={t.newPassword}
-          type={showNewPassword ? "text" : "password"}
-          value={newPassword}
-          onChange={e => {
-            setNewPassword(e.target.value);
-            if (newPasswordError) setNewPasswordError("");
-          }}
-          error={newPasswordError.length > 0}
-          helperText={newPasswordError}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowNewPassword(prev => !prev)}
-                    edge="end"
-                    aria-label={showNewPassword ? t.hidePassword : t.showPassword}
-                  >
-                    {showNewPassword ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
+        <Box>
+          <TextField
+            label={t.newPassword}
+            type={showNewPassword ? "text" : "password"}
+            value={newPassword}
+            onChange={e => {
+              setNewPassword(e.target.value);
+              if (newPasswordError) setNewPasswordError("");
+            }}
+            error={newPasswordError.length > 0}
+            helperText={newPasswordError}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowNewPassword(prev => !prev)}
+                      edge="end"
+                      aria-label={showNewPassword ? t.hidePassword : t.showPassword}
+                    >
+                      {showNewPassword ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+          <PasswordStrengthMeter
+            password={newPassword}
+            labels={{
+              strength: t.passwordStrength,
+              weak: t.strengthWeak,
+              fair: t.strengthFair,
+              strong: t.strengthStrong,
+            }}
+          />
+        </Box>
         <TextField
           label={t.confirmPassword}
           type={showConfirmPassword ? "text" : "password"}
@@ -119,8 +154,8 @@ export function AdminResetPasswordSection({
             setConfirmPassword(e.target.value);
             if (confirmPasswordError) setConfirmPasswordError("");
           }}
-          error={confirmPasswordError.length > 0}
-          helperText={confirmPasswordError}
+          error={confirmPasswordError.length > 0 || liveMismatch}
+          helperText={confirmHelperText}
           slotProps={{
             input: {
               endAdornment: (

@@ -59,6 +59,7 @@ export function NavbarStaticShell({ appTitle, roleLabel, logoAriaLabel, children
               alignItems: "center",
               justifyContent: "center",
             }}
+            data-appearance-target="brand-logo"
           >
             <SchoolOutlined sx={{ fontSize: 24 }} aria-label={logoAriaLabel} />
           </Box>
@@ -69,6 +70,7 @@ export function NavbarStaticShell({ appTitle, roleLabel, logoAriaLabel, children
                 color: "var(--mui-palette-onHeaderContainer)",
                 lineHeight: 1.2,
               }}
+              data-appearance-target="brand-name"
             >
               {appTitle}
             </Typography>

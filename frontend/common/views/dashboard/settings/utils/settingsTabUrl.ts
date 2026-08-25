@@ -11,6 +11,7 @@ const SETTINGS_TAB_IDS: readonly SettingsTabId[] = [
   "siteContent",
   "timezones",
   "meetingIntegrations",
+  "appearance",
 ] as const;
 
 export function isSettingsTabId(value: string): value is SettingsTabId {

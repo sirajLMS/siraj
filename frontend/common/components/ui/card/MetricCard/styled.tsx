@@ -10,6 +10,7 @@ import {
   filledIconWrapSx,
   type MetricCardDensity,
   type MetricCardVariant,
+  tintedIconWrapSx,
   valueColor,
 } from "@/frontend/common/components/ui/card/MetricCard/utils";
 
@@ -52,8 +53,18 @@ export const StyledLabel = styled(Typography, {
   color: isError ? theme.palette.error.main : theme.palette.primary.main,
   marginBottom: mbOverride ?? theme.spacing(density === "compact" ? 0.25 : 0.5),
   overflow: "hidden",
-  textOverflow: "ellipsis",
+  // Keep labels on a single line (no wrapping) — the prior 2-line clamp caused
+  // ugly mid-word splits like "REGUL-AR" and "RESCHE-DULED". Instead, use a
+  // small font + negative letter-spacing to compress the text so long labels
+  // like "RESCHEDULED" fit within the card width. If a label is still too long,
+  // it overflows hidden (cleanly cut, no split).
   whiteSpace: "nowrap",
+  overflowWrap: "normal",
+  wordBreak: "normal",
+  lineHeight: 1.2,
+  fontSize: density === "compact" ? "0.6rem" : "0.65rem",
+  letterSpacing: "-0.3px",
+  textOverflow: "clip",
 }));
 
 export interface StyledValueProps {
@@ -99,7 +110,10 @@ export const StyledIconWrap = styled(Box, {
     duration: 200,
     easing: "ease",
   }),
-  ...(isHighlight && filledIconWrapSx(theme, isError)),
+  // Default state: soft tinted background (instead of a bare bordered circle)
+  // so the icon reads as a colored "chip". Highlight state uses the solid
+  // filled background (filledIconWrapSx) for stronger emphasis.
+  ...(isHighlight ? filledIconWrapSx(theme, isError) : tintedIconWrapSx(theme, isError)),
 }));
 
 export interface StyledIconProps {

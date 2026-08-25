@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, type PaletteMode, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 import type { AppearanceColorPairInput, AppearanceColorsInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 import { WcagBadge } from "@/frontend/common/views/dashboard/components/customize/WcagBadge";
@@ -39,11 +40,27 @@ const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
  * component only needs to compose the next `{ primaryMain, secondaryMain }`
  * pair and dispatch.
  */
+/**
+ * Direct DOM sync for the MUI color-scheme attributes. Acts as a fallback
+ * when useColorScheme().setMode is undefined (first render before CssVarsProvider
+ * hydrates) or when the ColorSchemeStateBridge useLayoutEffect does not re-fire.
+ * Ensures data-mui-color-scheme + colorScheme CSS property match the active
+ * customizer tab so the MUI stylesheet repaints in the correct mode (AC-13).
+ */
+function syncColorSchemeDom(mode: PaletteMode): void {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  root.dataset.muiColorScheme = mode;
+  root.dataset.theme = mode;
+  root.style.colorScheme = mode;
+}
+
 export function ColorEditorSection() {
   const isDark = useAppearancePreviewStore(s => s.isDark);
   const colors = useAppearancePreviewStore(s => s.draft.colors);
   const setMode = useAppearancePreviewStore(s => s.setMode);
   const setModeColors = useAppearancePreviewStore(s => s.setModeColors);
+  const { setMode: setMuiColorScheme } = useColorScheme();
 
   const activeMode: AppearanceMode = isDark ? "dark" : "light";
   const activePair = colors[activeMode];
@@ -54,8 +71,16 @@ export function ColorEditorSection() {
   };
 
   const handleTabChange = (_e: unknown, value: PaletteMode | null): void => {
-    if (value === "dark") setMode(true);
-    if (value === "light") setMode(false);
+    if (value === "dark") {
+      setMode(true);
+      setMuiColorScheme("dark");
+      syncColorSchemeDom("dark");
+    }
+    if (value === "light") {
+      setMode(false);
+      setMuiColorScheme("light");
+      syncColorSchemeDom("light");
+    }
   };
 
   return (

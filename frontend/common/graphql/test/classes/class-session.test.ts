@@ -27,12 +27,12 @@ import {
 
 const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
-async function clearClassesOnDate(token: string, dateVal: string) {
+async function clearClassesOnDate(token: string, dateVal: string, teacherId?: string | null) {
   const result = await testClient.query({
     query: dailyScheduleListQueryDocument,
     variables: {
       date: dateVal,
-      teacherId: null,
+      teacherId: teacherId ?? null,
       search: null,
       metricFilter: null,
     },
@@ -62,7 +62,15 @@ async function clearClassesOnDate(token: string, dateVal: string) {
     )
   );
   for (const deleteRes of deleteResults) {
-    expect(deleteRes.error).toBeUndefined();
+    // With errorPolicy: "all", GraphQL errors land in a `errors` array at runtime
+    // (Apollo's TypeScript types don't expose it for mutate(), but it IS present
+    // on the runtime object). The prior check `expect(deleteRes.error).toBeUndefined()`
+    // always passed — even when the delete actually failed with a GraphQL error —
+    // because `.error` is only set for network errors. This silently left
+    // overlapping classes in the DB, causing the "Teacher is already booked" flake.
+    // Access via bracket notation to avoid the type-unsafe assertion lint rule.
+    const graphqlErrors = (deleteRes as Record<string, unknown>).errors;
+    expect(graphqlErrors).toBeUndefined();
   }
 }
 
@@ -263,10 +271,33 @@ describe("GraphQL Class Session Integration Tests", () => {
     if (!teacherToken || !adminToken || !studentId || !teacherId || !sharedSubjectId)
       throw new Error("Missing test context");
 
-    // Clear today's classes to avoid any overlaps with previously run tests
-    await clearClassesOnDate(adminToken, testDate);
+    // Clear a wide date range [-1, 12] days, scoped to THIS teacher, to avoid
+    // overlaps with classes from prior tests. The previous narrow
+    // `clearClassesOnDate(testDate)` (no teacherId) missed classes whose
+    // scheduledStartAt fell on an adjacent day (timezone mismatch between the
+    // test's UTC date string and the server's date filtering) but whose time
+    // range overlapped the absent window (now-40min → now+20min), causing
+    // "Teacher is already booked at this time". Scoping to teacherId + clearing
+    // sequentially (not parallel) ensures every overlapping class is caught.
+    const adminTok = adminToken;
+    const teacherTok = teacherId;
+    const dateRange: string[] = [];
+    for (let i = -1; i <= 12; i++) {
+      const d = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
+      dateRange.push(d.toISOString().split("T")[0]);
+    }
+    // Sequential clear (reduce chain) to avoid race conditions between deletes.
+    await dateRange.reduce(
+      (chain, dateStr) => chain.then(() => clearClassesOnDate(adminTok, dateStr, teacherTok)),
+      Promise.resolve()
+    );
 
-    // Create a class instance starting 40 minutes ago and ending 20 minutes in the future
+    // Create a class instance starting 40 minutes ago and ending 20 minutes in
+    // the future. The window spans `now` so the create mutation accepts it (past-
+    // only windows are rejected with "missed class time"). The backend's
+    // `dailyScheduleList` now uses overlap logic (not start-only filter) so
+    // `clearClassesOnDate` catches any overlapping class from prior tests —
+    // including those starting on an adjacent day that extend into this window.
     const now = new Date();
     const startAbsent = new Date(now.getTime() - 40 * 60 * 1000);
     const endAbsent = new Date(now.getTime() + 20 * 60 * 1000);
@@ -308,6 +339,22 @@ describe("GraphQL Class Session Integration Tests", () => {
   test("deleteClassInstance returns true — quota SKIpped instances delete cleanly (logger WARN only)", async () => {
     if (!adminToken || !teacherToken || !studentId || !teacherId || !sharedSubjectId)
       throw new Error("Missing test context");
+
+    // Clear the teacher's classes on today + tomorrow (the class is created at
+    // now+2hr → now+3hr, which may land on tomorrow if `now` is late in the day).
+    // Sequential clear scoped to this teacher to avoid "already booked" conflicts.
+    const adminTok = adminToken;
+    const teacherTok = teacherId;
+    const dateRange: string[] = [];
+    for (let i = 0; i <= 2; i++) {
+      const d = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
+      dateRange.push(d.toISOString().split("T")[0]);
+    }
+    // Sequential clear (reduce chain) to avoid race conditions between deletes.
+    await dateRange.reduce(
+      (chain, dateStr) => chain.then(() => clearClassesOnDate(adminTok, dateStr, teacherTok)),
+      Promise.resolve()
+    );
 
     const now = new Date();
     const startOutside = new Date(now.getTime() + 2 * 60 * 60 * 1000);

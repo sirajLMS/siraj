@@ -1,6 +1,8 @@
 "use client";
 
-import { Grid, TextField } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Box, Grid, IconButton, InputAdornment, TextField } from "@mui/material";
+import { useState } from "react";
 import {
   type Control,
   Controller,
@@ -8,7 +10,9 @@ import {
   type FieldValues,
   type Path,
   type UseFormRegister,
+  useWatch,
 } from "react-hook-form";
+import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
 import type { UserEntityOnboardingFieldsShape } from "@/frontend/common/components/onboarding/sections/types";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
@@ -172,7 +176,10 @@ function createTextFieldComponent(
 
 const NameField = createTextFieldComponent("name", "fullName", "fullName", "name");
 const EmailField = createTextFieldComponent("email", "email", "email", "email", "email");
-const PasswordField = createTextFieldComponent("password", "password", "password", "password");
+// PasswordField is a DEDICATED component (not created via createTextFieldComponent)
+// because it needs: type="password" (masking — the generic factory defaulted to
+// "text" which rendered passwords in plaintext), a show/hide toggle, and a live
+// PasswordStrengthMeter below the field. Defined after the generic helpers.
 
 interface PhoneFieldProps<T extends OnboardingFields> {
   readonly control: Control<T>;
@@ -249,6 +256,82 @@ function CurrencyField<T extends OnboardingFields>({ control, labels }: Currency
   );
 }
 
+/**
+ * Dedicated password field for onboarding forms (parent/student/teacher/manager).
+ *
+ * Fixes a prior bug where the generic `createTextFieldComponent` factory was
+ * used without passing `type="password"`, so the default `"text"` type rendered
+ * the password in PLAINTEXT. This component:
+ *   - masks the input with `type="password"` (toggleable to "text" via show/hide);
+ *   - adds a Visibility/VisibilityOff IconButton to reveal/hide the value;
+ *   - renders a `PasswordStrengthMeter` below the field (reuses the unified
+ *     `countPasswordClasses` + `PASSWORD_MIN_LENGTH` helper so the meter stays
+ *     aligned with the Zod schema's notion of strength).
+ */
+function OnboardingPasswordField<T extends OnboardingFields>({
+  control,
+  errors,
+  labels,
+}: {
+  readonly control: Control<T>;
+  readonly errors: FieldErrors<T>;
+  readonly labels: UserEntityOnboardingLabels;
+}) {
+  const [showPassword, setShowPassword] = useState(false);
+  const passwordField = fieldPath<T>("password");
+  const passwordValue = (useWatch({ control, name: passwordField }) as string | undefined) ?? "";
+
+  return (
+    <Grid size={{ xs: 12, md: 6 }}>
+      <Controller
+        name={passwordField}
+        control={control}
+        render={({ field }) => (
+          <Box>
+            <TextField
+              {...field}
+              label={labels.fields.password}
+              placeholder={labels.placeholders.password}
+              required
+              type={showPassword ? "text" : "password"}
+              error={!!errors.password}
+              helperText={validationMessage(labels, getErrorMessage(errors.password))}
+              fullWidth
+              sx={outlinedInputSx}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => {
+                          setShowPassword(!showPassword);
+                        }}
+                        edge="end"
+                        aria-label={showPassword ? labels.validation.hidePassword : labels.validation.showPassword}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+            <PasswordStrengthMeter
+              password={passwordValue}
+              labels={{
+                strength: labels.validation.passwordStrength,
+                weak: labels.validation.strengthWeak,
+                fair: labels.validation.strengthFair,
+                strong: labels.validation.strengthStrong,
+              }}
+            />
+          </Box>
+        )}
+      />
+    </Grid>
+  );
+}
+
 export interface UserEntityFieldsSectionProps<T extends OnboardingFields> {
   readonly register: UseFormRegister<T>;
   readonly control: Control<T>;
@@ -270,7 +353,7 @@ export function UserEntityFieldsSection<T extends OnboardingFields>({
       <AvatarField control={control} labels={labels} onUploadAvatar={onUploadAvatar} />
       <NameField control={control} errors={errors} labels={labels} />
       <EmailField control={control} errors={errors} labels={labels} />
-      <PasswordField control={control} errors={errors} labels={labels} />
+      <OnboardingPasswordField control={control} errors={errors} labels={labels} />
       <PhoneField control={control} errors={errors} labels={labels} phoneRequired={phoneRequired} />
       <TimezoneField control={control} errors={errors} labels={labels} />
       <CurrencyField control={control} labels={labels} />

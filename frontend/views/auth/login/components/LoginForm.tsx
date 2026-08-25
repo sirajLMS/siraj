@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Person, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Alert, Box, Button, CircularProgress, IconButton, InputAdornment, Link, TextField } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { alpha, styled } from "@mui/material/styles";
 import { useCallback, useState } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
@@ -31,10 +31,28 @@ const StyledForgotPasswordLink = styled(Link)(({ theme }) => ({
   fontWeight: 500,
 }));
 
-const StyledSubmitButton = styled(Button)({
+const StyledSubmitButton = styled(Button)(({ theme }) => ({
   paddingTop: 12,
   paddingBottom: 12,
-});
+  // Gradient background + hover lift for a polished, tactile submit button.
+  // Uses theme palette channels (no hardcoded hex) so it adapts to light/dark.
+  backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+  transition: theme.transitions.create(["transform", "box-shadow"], {
+    duration: theme.transitions.duration.short,
+  }),
+  "&:hover": {
+    backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+    boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
+    transform: "translateY(-1px)",
+  },
+  "&:active": {
+    transform: "translateY(0)",
+  },
+  "&.Mui-disabled": {
+    backgroundImage: "none",
+  },
+}));
 
 const FormFields = ({
   labels,

@@ -1,8 +1,10 @@
 "use client";
 
 import { Box } from "@mui/material";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
+import { useAppearanceLivePreview } from "@/frontend/common/hooks/useAppearanceLivePreview";
 import { useCustomizeMode } from "@/frontend/common/hooks/useCustomizeMode";
+import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 import { CustomizeOverlay } from "@/frontend/common/views/dashboard/components/customize/CustomizeOverlay";
 
 const CUSTOMIZE_TOOLBAR_HEIGHT = "48px";
@@ -30,10 +32,46 @@ const CUSTOMIZE_SIDEBAR_WIDTH = 300;
  *  - `.MuiAppBar-root` is pushed below the toolbar and inset beside the
  *    sidebar so the navbar never spans the full viewport width on desktop.
  *
+ * ## Live preview (BUG-C fix)
+ *
+ * `useAppearanceLivePreview` is mounted unconditionally (before the early
+ * return) so its `useEffect` hooks run on every render. The hook itself
+ * checks `store.isCustomizeMode` and only touches the DOM when customize
+ * mode is active. On exit, its cleanup restores the original DOM values
+ * (brand name, title, logo) so the dashboard reverts to the published state.
+ *
+ * ## Store sync (BUG-D fix)
+ *
+ * The `useEffect` below syncs the store's `isCustomizeMode` flag with the
+ * URL-based `useCustomizeMode()` result. When `?customize=1` is present +
+ * the user has permission, `enterCustomizeMode()` is called — which sets
+ * the flag + writes the draft's CSS vars. On exit (URL changes), the cleanup
+ * calls `exitCustomizeMode()` — which clears the inline CSS vars so the
+ * published theme stylesheet resumes control.
+ *
  * Outside customize mode this renders children unchanged.
  */
 export function CustomizeModeShell({ children }: Readonly<{ children: ReactNode }>): ReactNode {
   const customizeMode = useCustomizeMode();
+  const enterCustomizeMode = useAppearancePreviewStore(s => s.enterCustomizeMode);
+  const exitCustomizeMode = useAppearancePreviewStore(s => s.exitCustomizeMode);
+
+  // Live preview hook — updates DOM (document.title, brand name, logo) from
+  // the draft store. Must be called before any early return (Rules of Hooks).
+  useAppearanceLivePreview();
+
+  // Sync the store's isCustomizeMode flag with the URL-based customizeMode.
+  // On enter: set flag + write CSS vars from draft. On exit: clear flag +
+  // clear CSS vars so published theme takes over (BUG-D revert to current).
+  useEffect(() => {
+    if (customizeMode) {
+      enterCustomizeMode();
+      return () => {
+        exitCustomizeMode();
+      };
+    }
+    return undefined;
+  }, [customizeMode, enterCustomizeMode, exitCustomizeMode]);
 
   if (!customizeMode) {
     return <>{children}</>;
@@ -41,10 +79,13 @@ export function CustomizeModeShell({ children }: Readonly<{ children: ReactNode 
 
   return (
     <CustomizeOverlay>
-      {/* Reserve space for the fixed-position toolbar. */}
-      <Box aria-hidden sx={{ height: CUSTOMIZE_TOOLBAR_HEIGHT }} />
+      {/* Reserve space for the fixed-position toolbar. flexShrink:0 prevents the
+          body flex-column from collapsing this spacer to 0 when the dashboard
+          content exceeds the viewport height (the root cause of BUG-A/B header
+          overlap). */}
+      <Box aria-hidden sx={{ height: CUSTOMIZE_TOOLBAR_HEIGHT, flexShrink: 0 }} />
       <CustomizeOverlay.Toolbar />
-      <Box sx={{ display: "flex", alignItems: "stretch" }}>
+      <Box sx={{ display: "flex", alignItems: "stretch", flex: 1, minHeight: 0 }}>
         {/* The customize sidebar is `position: fixed; top: 0` (see
             CustomizeSidebar.tsx) — pull it below the toolbar so its top
             controls aren't hidden behind it. */}

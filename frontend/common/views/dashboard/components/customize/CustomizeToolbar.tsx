@@ -34,9 +34,11 @@ import {
   resetAppearanceDraftMutationDocument,
   saveAppearanceDraftMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/settings/site-appearance-settings.documents";
+import { useAppearanceLogoUpload } from "@/frontend/common/hooks/useAppearanceLogoUpload";
 import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { exportAppearanceJson } from "@/frontend/common/views/dashboard/appearance/shared/exportAppearanceJson";
+import { resolveDraftLogoForSave } from "@/frontend/common/views/dashboard/appearance/shared/resolveDraftLogoForSave";
 import { useCustomizeOverlayAnnounce } from "@/frontend/common/views/dashboard/components/customize/customizeOverlayContext";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -162,6 +164,8 @@ export function CustomizeToolbar() {
   const redo = useAppearancePreviewStore(s => s.redo);
   const markSaved = useAppearancePreviewStore(s => s.markSaved);
   const loadFromServer = useAppearancePreviewStore(s => s.loadFromServer);
+  const setField = useAppearancePreviewStore(s => s.setField);
+  const { uploadLogo } = useAppearanceLogoUpload();
 
   const canUndo = pastLength > 0;
   const canRedo = futureLength > 0;
@@ -237,7 +241,13 @@ export function CustomizeToolbar() {
 
   const handleSaveDraft = async () => {
     try {
-      await saveDraft({ variables: { input: draft, expectedUpdatedAt: serverUpdatedAt } });
+      // BUG-E: If the draft logo is a data URL (in-memory preview), upload it
+      // to storage first + update the store with the canonical URL.
+      const resolvedDraft = await resolveDraftLogoForSave(draft, uploadLogo);
+      if (resolvedDraft.logoUrl !== draft.logoUrl) {
+        setField("logoUrl", resolvedDraft.logoUrl);
+      }
+      await saveDraft({ variables: { input: resolvedDraft, expectedUpdatedAt: serverUpdatedAt } });
       markSaved();
       notifications.show(t.saveDraftSuccess, { severity: "success" });
       announce(t.saveDraftSuccess);
@@ -261,12 +271,17 @@ export function CustomizeToolbar() {
 
   const handlePublish = async () => {
     try {
+      // BUG-E: Resolve any data-URL logo before saving + publishing.
+      const resolvedDraft = await resolveDraftLogoForSave(draft, uploadLogo);
+      if (resolvedDraft.logoUrl !== draft.logoUrl) {
+        setField("logoUrl", resolvedDraft.logoUrl);
+      }
       // Save the in-memory edits into the server draft first so the
       // publish actually reflects what the admin sees on screen; without
       // this, clicking PUBLISH with unsaved changes would live-publish the
       // previous server state instead of the current preview.
       if (dirty) {
-        await saveDraft({ variables: { input: draft, expectedUpdatedAt: serverUpdatedAt } });
+        await saveDraft({ variables: { input: resolvedDraft, expectedUpdatedAt: serverUpdatedAt } });
       }
       await publish({ variables: { expectedUpdatedAt: serverUpdatedAt } });
       markSaved();

@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { caseInsensitiveLike } from "@/backend/db";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
@@ -14,10 +14,19 @@ export function buildDailyScheduleDayConditions(
 ) {
   const { startOfDayUtc, endOfDayUtc } = getDayBoundaries(date, viewerTimezone);
 
+  // Use OVERLAP logic (not start-only filter) so classes that START on an
+  // adjacent day but EXTEND into this day are included. The prior filter
+  // (`scheduledStartAt >= startOfDayUtc AND scheduledStartAt < endOfDayUtc`)
+  // missed classes starting late on day N-1 whose time range extended into day N,
+  // causing a discrepancy with the `checkOverlaps` booking-conflict check (which
+  // uses `scheduledStartAt < endTime AND scheduledEndAt > startTime`). This
+  // discrepancy caused the "Teacher is already booked" test flake —
+  // `clearClassesOnDate` didn't list the overlapping class (so it wasn't deleted)
+  // but `checkOverlaps` found it (so the create was rejected).
   return and(
     isNull(classInstances.deletedAt),
-    gte(classInstances.scheduledStartAt, startOfDayUtc),
     lt(classInstances.scheduledStartAt, endOfDayUtc),
+    gt(classInstances.scheduledEndAt, startOfDayUtc),
     teacherId ? eq(classInstances.teacherId, teacherId) : undefined
   );
 }

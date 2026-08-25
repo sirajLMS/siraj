@@ -430,6 +430,12 @@ export interface ProfileAdminResetPasswordLabels {
   readonly passwordRequired: string;
   readonly passwordMinLength: string;
   readonly passwordsDoNotMatch: string;
+  // Password strength meter + complexity (M5 policy alignment)
+  readonly passwordWeakComplexity: string;
+  readonly passwordStrength: string;
+  readonly strengthWeak: string;
+  readonly strengthFair: string;
+  readonly strengthStrong: string;
   readonly accountStatus: string;
   readonly statusActivated: string;
   readonly statusDeactivated: string;

@@ -1,14 +1,34 @@
 "use client";
 
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
+import { useMutation } from "@apollo/client/react";
+import {
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  publishAppearanceMutationDocument,
+  resetAppearanceDraftMutationDocument,
+  saveAppearanceDraftMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments/settings/site-appearance-settings.documents";
+import { useAppearanceLogoUpload } from "@/frontend/common/hooks/useAppearanceLogoUpload";
 import { APPEARANCE_PRESETS, type AppearancePreset } from "@/frontend/common/providers/theme/presets";
 import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
+import { logger } from "@/frontend/common/utils/logger";
 import { exportAppearanceJson } from "@/frontend/common/views/dashboard/appearance/shared/exportAppearanceJson";
+import { resolveDraftLogoForSave } from "@/frontend/common/views/dashboard/appearance/shared/resolveDraftLogoForSave";
 import { PresetSwatch } from "@/frontend/common/views/dashboard/components/customize/PresetThemeSection";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -23,13 +43,15 @@ import { Translation, useAppTranslation } from "@/shared/locale";
  * overlay via the `?customize=1` search param, and an action bar with
  * Save Draft / Publish Now / Reset to Defaults / Export JSON buttons.
  *
- * Action handlers are stubs that fire toast notifications using the i18n
- * strings defined in `SettingsAppearanceTabLabels`. The actual GraphQL
- * mutations (save draft, publish, reset) are wired in Phase 6 — see
- * implementation.md §11 (AppearanceSettings service).
- *
- * The customizer overlay UI (sidebar, toolbar, live preview) is scoped to
- * Task 9; this tab is only the landing/form view.
+ * The action bar wires to the same `saveAppearanceDraft` /
+ * `publishAppearance` / `resetAppearanceDraft` GraphQL mutations used by
+ * the customize overlay toolbar (Task 6.2). Because this form view does
+ * not track the server `updatedAt` snapshot (it has no live query), the
+ * mutations are sent with `expectedUpdatedAt: undefined` — i.e. the
+ * optimistic-concurrency check (AC-33) is bypassed here; the full
+ * conflict Reload/Overwrite dialog is owned by the customize overlay.
+ * The customizer overlay UI (sidebar, toolbar, live preview) is scoped
+ * to Task 9; this tab is only the landing/form view.
  */
 export function AppearanceSettingsTab() {
   const t = useAppTranslation(Translation.Dashboard.Settings).appearance;
@@ -37,7 +59,14 @@ export function AppearanceSettingsTab() {
   const notifications = useNotifications();
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const draft = useAppearancePreviewStore(s => s.draft);
+  const dirty = useAppearancePreviewStore(s => s.dirty);
+  const markSaved = useAppearancePreviewStore(s => s.markSaved);
   const setModeColors = useAppearancePreviewStore(s => s.setModeColors);
+  const setField = useAppearancePreviewStore(s => s.setField);
+  const { uploadLogo } = useAppearanceLogoUpload();
+  const [saveDraft, { loading: saveLoading }] = useMutation(saveAppearanceDraftMutationDocument);
+  const [publish, { loading: publishLoading }] = useMutation(publishAppearanceMutationDocument);
+  const [resetDraft, { loading: resetLoading }] = useMutation(resetAppearanceDraftMutationDocument);
 
   const handleEnterCustomizeMode = () => {
     const url = new URL(window.location.href);
@@ -58,14 +87,41 @@ export function AppearanceSettingsTab() {
     });
   };
 
-  const handleSaveDraft = () => {
-    // Phase 6: wire to `saveAppearanceDraft` GraphQL mutation.
-    notifications.show(t.saveDraftSuccess, { severity: "success" });
+  const handleSaveDraft = async () => {
+    try {
+      // BUG-E: Resolve any data-URL logo before saving.
+      const resolvedDraft = await resolveDraftLogoForSave(draft, uploadLogo);
+      if (resolvedDraft.logoUrl !== draft.logoUrl) {
+        setField("logoUrl", resolvedDraft.logoUrl);
+      }
+      await saveDraft({ variables: { input: resolvedDraft, expectedUpdatedAt: undefined } });
+      markSaved();
+      notifications.show(t.saveDraftSuccess, { severity: "success" });
+    } catch (error) {
+      logger.error("Failed to save appearance draft from settings tab", { error });
+      notifications.show(t.saveDraftError, { severity: "error" });
+    }
   };
 
-  const handlePublish = () => {
-    // Phase 6: wire to `publishAppearance` GraphQL mutation.
-    notifications.show(t.publishSuccess, { severity: "success" });
+  const handlePublish = async () => {
+    try {
+      // BUG-E: Resolve any data-URL logo before publishing.
+      const resolvedDraft = await resolveDraftLogoForSave(draft, uploadLogo);
+      if (resolvedDraft.logoUrl !== draft.logoUrl) {
+        setField("logoUrl", resolvedDraft.logoUrl);
+      }
+      // Save the in-memory edits into the server draft first so the
+      // publish actually reflects what the admin sees on screen.
+      if (dirty) {
+        await saveDraft({ variables: { input: resolvedDraft, expectedUpdatedAt: undefined } });
+      }
+      await publish({ variables: { expectedUpdatedAt: undefined } });
+      markSaved();
+      notifications.show(t.publishSuccess, { severity: "success" });
+    } catch (error) {
+      logger.error("Failed to publish appearance from settings tab", { error });
+      notifications.show(t.publishError, { severity: "error" });
+    }
   };
 
   const handleExportJson = () => {
@@ -78,10 +134,21 @@ export function AppearanceSettingsTab() {
     notifications.show(t.exportJson, { severity: "success" });
   };
 
-  const handleResetConfirm = () => {
+  const handleResetConfirm = async () => {
     setResetDialogOpen(false);
-    // Phase 6: wire to `resetAppearanceDraft` GraphQL mutation.
-    notifications.show(t.resetSuccess, { severity: "success" });
+    try {
+      await resetDraft();
+      // Mark saved - the server's draft_fields now match the published
+      // columns, so the local `dirty` flag should clear. The customizer
+      // provider (Task 9) will re-sync the local draft from the refetched
+      // `appearanceSettings` query; until then, the user can still undo
+      // via the store's history stack if needed.
+      markSaved();
+      notifications.show(t.resetSuccess, { severity: "success" });
+    } catch (error) {
+      logger.error("Failed to reset appearance draft from settings tab", { error });
+      notifications.show(t.resetError, { severity: "error" });
+    }
   };
 
   return (
@@ -130,7 +197,24 @@ export function AppearanceSettingsTab() {
         </Typography>
 
         <Box>
-          <Typography sx={{ typography: "titleSm", mb: 1 }}>Quick Presets</Typography>
+          <Typography sx={{ typography: "titleSm", mb: 1.5 }}>Current Brand Colors</Typography>
+          <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary, mb: 2 })}>
+            A snapshot of your draft palette. Enter customize mode to fine-tune individual colors.
+          </Typography>
+          <Stack direction={{ xs: "column", sm: "row" }} sx={{ gap: 2 }}>
+            <BrandColorPreviewCard
+              label="Light Mode"
+              primary={draft.colors.light.primaryMain}
+              secondary={draft.colors.light.secondaryMain}
+            />
+            <BrandColorPreviewCard
+              label="Dark Mode"
+              primary={draft.colors.dark.primaryMain}
+              secondary={draft.colors.dark.secondaryMain}
+            />
+          </Stack>
+          <Divider sx={{ mt: 3, mb: 2 }} />
+          <Typography sx={{ typography: "titleSm", mb: 1.5 }}>Quick Presets</Typography>
           <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary, mb: 2 })}>
             Click a preset to preview it instantly. Open customize mode to fine-tune.
           </Typography>
@@ -148,13 +232,13 @@ export function AppearanceSettingsTab() {
         </Box>
 
         <Stack direction={{ xs: "column", sm: "row" }} sx={{ gap: 2, mt: 2 }}>
-          <Button variant="outlined" color="primary" onClick={handleSaveDraft}>
+          <Button variant="outlined" color="primary" onClick={handleSaveDraft} disabled={!dirty || saveLoading}>
             {t.saveDraft}
           </Button>
-          <Button variant="contained" color="primary" onClick={handlePublish}>
+          <Button variant="contained" color="primary" onClick={handlePublish} disabled={publishLoading}>
             {t.publishNow}
           </Button>
-          <Button variant="text" color="inherit" onClick={() => setResetDialogOpen(true)}>
+          <Button variant="text" color="inherit" onClick={() => setResetDialogOpen(true)} disabled={resetLoading}>
             {t.resetToDefaults}
           </Button>
           <Box sx={{ flexGrow: 1 }} />
@@ -169,11 +253,96 @@ export function AppearanceSettingsTab() {
         <DialogContent>{t.resetConfirmBody}</DialogContent>
         <DialogActions>
           <Button onClick={() => setResetDialogOpen(false)}>{t.resetConfirmCancel}</Button>
-          <Button onClick={handleResetConfirm} color="error" variant="contained">
+          <Button onClick={handleResetConfirm} color="error" variant="contained" disabled={resetLoading}>
             {t.resetConfirmConfirm}
           </Button>
         </DialogActions>
       </Dialog>
     </RequirePermission>
+  );
+}
+
+/**
+ * BrandColorPreviewCard — visual swatch card showing the primary + secondary
+ * brand colors for one mode, with hex labels.
+ *
+ * Added as a styling enhancement (mandatory feature improvement): gives
+ * admins an at-a-glance visual reference of their current draft palette
+ * without needing to enter the full customize overlay.
+ */
+function BrandColorPreviewCard({
+  label,
+  primary,
+  secondary,
+}: {
+  readonly label: string;
+  readonly primary: string;
+  readonly secondary: string;
+}) {
+  return (
+    <Box
+      sx={{
+        flex: 1,
+        p: 2,
+        borderRadius: 2,
+        border: "1px solid var(--mui-palette-outlineVariant)",
+        backgroundColor: "var(--mui-palette-background-paper)",
+      }}
+    >
+      <Typography
+        sx={{
+          typography: "caption",
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "var(--mui-palette-text-secondary)",
+          mb: 1.5,
+        }}
+      >
+        {label}
+      </Typography>
+      <Stack direction="row" sx={{ gap: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5 }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 1.5,
+              backgroundColor: primary,
+              border: "2px solid var(--mui-palette-outlineVariant)",
+              boxShadow: theme => `0 2px 8px ${theme.palette.mode === "dark" ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"}`,
+            }}
+          />
+          <Typography
+            sx={{ typography: "caption", fontFamily: "monospace", color: "var(--mui-palette-text-secondary)" }}
+          >
+            {primary}
+          </Typography>
+          <Typography sx={{ typography: "caption", color: "var(--mui-palette-text-disabled)", fontSize: 10 }}>
+            Primary
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5 }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 1.5,
+              backgroundColor: secondary,
+              border: "2px solid var(--mui-palette-outlineVariant)",
+              boxShadow: theme => `0 2px 8px ${theme.palette.mode === "dark" ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"}`,
+            }}
+          />
+          <Typography
+            sx={{ typography: "caption", fontFamily: "monospace", color: "var(--mui-palette-text-secondary)" }}
+          >
+            {secondary}
+          </Typography>
+          <Typography sx={{ typography: "caption", color: "var(--mui-palette-text-disabled)", fontSize: 10 }}>
+            Secondary
+          </Typography>
+        </Box>
+      </Stack>
+    </Box>
   );
 }

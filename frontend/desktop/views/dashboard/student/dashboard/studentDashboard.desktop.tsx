@@ -4,8 +4,6 @@ import { HistoryOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-ma
 import { Box, Typography } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { StudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
-import { OpenRequestsWidget } from "@/frontend/common/views/dashboard/widgets/OpenRequestsWidget";
-import { QuickActionStrip } from "@/frontend/common/views/dashboard/widgets/QuickActionStrip";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel, desktopSectionContentInsetSx } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
@@ -83,29 +81,6 @@ function NoUpcomingClassesBanner({ label }: Readonly<{ label: string }>) {
   );
 }
 
-function StudentOpenRequestsWidget() {
-  return (
-    <OpenRequestsWidget
-      labels={{
-        title: "Open Requests",
-        emptyState: "No requests yet",
-        emptyStateDescription: "You haven't submitted any delay or cancel requests.",
-        viewAll: "View All Requests",
-      }}
-      statusLabels={{
-        pending: "Pending",
-        approved: "Approved",
-        rejected: "Rejected",
-        rescheduled: "Rescheduled",
-        cancelled: "Cancelled",
-      }}
-      requestTypeLabels={{
-        delay: "Delay",
-        cancel: "Cancel",
-      }}
-    />
-  );
-}
 
 export function StudentDashboardDesktopView({
   userName,
@@ -136,17 +111,6 @@ export function StudentDashboardDesktopView({
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.welcomeMessage(userName ?? "")} subtitle={labels.pageTitle} />
 
-      <Box sx={{ mb: 3 }}>
-        <QuickActionStrip
-          labels={{
-            complaints: "Complaints",
-            payments: "Payments",
-            calendar: "Calendar",
-            appraisals: "Appraisals",
-          }}
-        />
-      </Box>
-
       {nextLesson ? (
         <Box sx={{ mb: 3 }}>
           <NextClassJoinCard lesson={nextLesson} labels={labels} locale={locale} onJoin={onJoinLesson} />
@@ -174,7 +138,6 @@ export function StudentDashboardDesktopView({
         />
       </DesktopSectionPanel>
 
-      <StudentOpenRequestsWidget />
     </DesktopPageContainer>
   );
 }
