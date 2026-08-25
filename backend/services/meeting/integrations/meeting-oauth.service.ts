@@ -21,6 +21,7 @@ import { AppPermission } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
 import type { MeetingProvider } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { AuditService } from "@/backend/services/system/audit.service";
@@ -86,7 +87,8 @@ function isOAuthStatePayload(payload: JoseJWTPayload): payload is MeetingOAuthSt
     typeof payload.providerSlug === "string" &&
     isMeetingProvider(payload.providerSlug) &&
     typeof payload.returnPath === "string" &&
-    typeof payload.nonce === "string"
+    typeof payload.nonce === "string" &&
+    typeof payload.sessionId === "string"
   );
 }
 
@@ -95,13 +97,30 @@ function getStateSigningSecret(): Uint8Array {
   return new TextEncoder().encode(config.jwtSecret);
 }
 
-async function signOAuthState(userId: string, providerSlug: MeetingProvider, returnPath: string): Promise<string> {
+/** H1 fix: single-use nonce window — matches OAUTH_STATE_EXPIRY (10m) in ms. */
+const OAUTH_STATE_NONCE_TTL_MS = 10 * 60 * 1000;
+
+async function signOAuthState(
+  userId: string,
+  providerSlug: MeetingProvider,
+  returnPath: string,
+  sessionId: string
+): Promise<string> {
   const nonce = randomUUID();
+  // H1 fix: claim the nonce in the cache so collisions (a second state minted
+  // with the same nonce) are rejected at signing time. setNx is atomic —
+  // returns "OK" on success, null if the key already exists.
+  const nonceKey = `oauth:nonce:${nonce}`;
+  const claimed = await cacheService.setNx(nonceKey, "1", OAUTH_STATE_NONCE_TTL_MS);
+  if (claimed === null) {
+    throw new GraphQLError("oauthStateCollision");
+  }
   return new SignJWT({
     userId,
     providerSlug,
     returnPath,
     nonce,
+    sessionId,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -109,10 +128,45 @@ async function signOAuthState(userId: string, providerSlug: MeetingProvider, ret
     .sign(getStateSigningSecret());
 }
 
-export async function verifyOAuthState(state: string): Promise<MeetingOAuthStatePayload | null> {
+/**
+ * Verifies a state JWT AND enforces H1 single-use + session binding:
+ * - the JWT signature must be valid (proves we minted it);
+ * - `payload.sessionId` must equal `expectedSessionId` (binds to the caller's
+ *   browser session — a stolen state replayed from a different browser is
+ *   rejected);
+ * - the nonce must not have been consumed before (atomic single-use via
+ *   setNx of a consumed-marker — `cacheService.del` returns void so the
+ *   del-then-get pattern would be racy).
+ *
+ * Returns the payload on success, or null on any failure (expired, bad sig,
+ * session mismatch, replayed nonce). Callers treat null as invalid state.
+ */
+export async function verifyAndConsumeOAuthState(
+  state: string,
+  expectedSessionId: string | undefined
+): Promise<MeetingOAuthStatePayload | null> {
   try {
     const { payload } = await jwtVerify(state, getStateSigningSecret());
     if (!isOAuthStatePayload(payload)) return null;
+    // H1 fix: bind state to the caller's session cookie. A state minted for
+    // session A must not be redeemable by session B.
+    if (!expectedSessionId || payload.sessionId !== expectedSessionId) {
+      logger.warn("OAuth state rejected: session mismatch", {
+        stateSessionId: payload.sessionId,
+        hasExpected: Boolean(expectedSessionId),
+      });
+      return null;
+    }
+    // H1 fix: atomic single-use consume. setNx returns "OK" only the first
+    // time the consumed-marker is set; a second call (replay) returns null.
+    const consumedKey = `oauth:nonce:consumed:${payload.nonce}`;
+    const consumed = await cacheService.setNx(consumedKey, "1", OAUTH_STATE_NONCE_TTL_MS);
+    if (consumed === null) {
+      logger.warn("OAuth state rejected: nonce already consumed (replay)", {
+        nonce: payload.nonce,
+      });
+      return null;
+    }
     return payload;
   } catch {
     return null;
@@ -291,13 +345,21 @@ export namespace MeetingOAuthService {
   export async function connectProviderOAuth(
     input: ConnectMeetingProviderOAuthSubmitInput,
     actorUserId: string,
+    sessionId: string | undefined,
     tErrors: ErrorsLabels
   ): Promise<ConnectMeetingProviderOAuthReturnType> {
     await assertCanManageOwnMeetingConfigs(actorUserId, tErrors);
 
     validateReturnPath(input.returnPath, tErrors);
 
-    const state = await signOAuthState(actorUserId, input.providerSlug, input.returnPath);
+    // H1 fix: require a session so the signed state can be bound to it.
+    // Anonymous callers cannot reach here (authScopes: { loggedIn: true }),
+    // but sessionId may still be absent for token-only auth — reject defensively.
+    if (!sessionId) {
+      throw new GraphQLError(tErrors.unauthorizedAction);
+    }
+
+    const state = await signOAuthState(actorUserId, input.providerSlug, input.returnPath, sessionId);
     const redirectUri = buildRedirectUri(input.providerSlug);
     const authorizeUrl = buildAuthorizeUrl(input.providerSlug, redirectUri, state);
 

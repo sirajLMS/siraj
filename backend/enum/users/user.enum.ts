@@ -1,4 +1,1 @@
-export enum Gender {
-  MALE = "MALE",
-  FEMALE = "FEMALE",
-}
+export { Gender } from "@/shared/constants/gender.enum";

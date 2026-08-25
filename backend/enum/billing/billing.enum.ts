@@ -1,16 +1,6 @@
-export enum InvoiceStatus {
-  UNPAID = "UNPAID",
-  PAYMENT_PENDING = "PAYMENT_PENDING",
-  PAID = "PAID",
-  CANCELLED = "CANCELLED",
-}
+export { InvoiceStatus, InvoiceType } from "@/shared/constants/billing.enum";
 
-export enum InvoiceType {
-  PER_CLASSES = "PER_CLASSES",
-  MONTHLY = "MONTHLY",
-  MANUAL = "MANUAL",
-}
-
+/** Backend-only submission status for invoice payment proofs (no shared equivalent). */
 export enum InvoicePaymentSubmissionStatus {
   PENDING = "pending",
   APPROVED = "approved",

@@ -4,7 +4,7 @@ export * from "./availability-status.enum";
 export * from "./billing.enum";
 export * from "./brand-tokens";
 export * from "./class-instance-detail.enum";
-export * from "./credit.enum";
+export * from "./billing/credit.enum";
 export * from "./currency.enum";
 export * from "./day-of-week.enum";
 export * from "./gender.enum";

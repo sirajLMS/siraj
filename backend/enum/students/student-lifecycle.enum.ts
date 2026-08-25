@@ -1,11 +1,11 @@
-export enum StudentStatus {
-  REGULAR = "REGULAR",
-  ON_LEAVE = "ON_LEAVE",
-  SUSPENDED = "SUSPENDED",
-  ON_TRIAL = "ON_TRIAL",
-  DEACTIVATED = "DEACTIVATED",
-}
+import { StudentStatus } from "@/shared/constants/student-lifecycle.enum";
+export { StudentStatus };
 
+/**
+ * Allowed lifecycle transitions for a student.
+ * Backend-only policy map (no shared equivalent); kept here alongside the
+ * re-exported StudentStatus enum it indexes.
+ */
 export const ALLOWED_STATUS_TRANSITIONS: Record<StudentStatus, readonly StudentStatus[]> = {
   [StudentStatus.ON_TRIAL]: [StudentStatus.REGULAR, StudentStatus.DEACTIVATED],
   [StudentStatus.REGULAR]: [StudentStatus.SUSPENDED, StudentStatus.ON_LEAVE, StudentStatus.DEACTIVATED],

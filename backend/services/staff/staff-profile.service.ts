@@ -5,7 +5,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { invalidateTeacherWrite } from "@/backend/services/cache";
 import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
-import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types";
+import type { TeacherProfileReturnType, TeacherProfileUpdateInput } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 function maskNationalId(value: string | null): string | null {
@@ -47,7 +47,7 @@ export namespace StaffProfileService {
   export async function updateTeacherProfile(
     actorUserId: string,
     teacherId: string,
-    input: TeacherProfileUpdateInputType,
+    input: TeacherProfileUpdateInput,
     locale?: string
   ): Promise<TeacherProfileReturnType> {
     assertPermission(

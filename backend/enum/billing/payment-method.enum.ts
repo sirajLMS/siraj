@@ -1,18 +1,6 @@
-export enum PaymentMethodType {
-  MOBILE_WALLET = "MOBILE_WALLET",
-  PAYMENT_LINK = "PAYMENT_LINK",
-  ONLINE_ACCOUNT = "ONLINE_ACCOUNT",
-  BANK_TRANSFER = "BANK_TRANSFER",
-  CASH = "CASH",
-  PROOF_UPLOAD = "PROOF_UPLOAD",
-}
+export { PaymentMethodType, PaymentDirection } from "@/shared/constants/billing.enum";
 
-export enum PaymentDirection {
-  PAYIN = "PAYIN",
-  PAYOUT = "PAYOUT",
-  BOTH = "BOTH",
-}
-
+/** Backend-only identifier kind for payment-method lookups (no shared equivalent). */
 export enum IdentifierKind {
   EMAIL = "EMAIL",
   HANDLE = "HANDLE",

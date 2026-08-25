@@ -12,7 +12,7 @@ import type {
   TeacherOwnProfileReturnType,
   TeacherOwnProfileUpdateInput,
   TeacherProfileReturnType,
-  TeacherProfileUpdateInputType,
+  TeacherProfileUpdateInput,
   UserMeetingConfigReturnType,
   UserPaymentMethodReturnType,
   UserPermissionContext,
@@ -99,7 +99,7 @@ export type UpdateOwnProfileInput = {
 
 export type UpdateUserProfileInput = {
   readonly core?: CoreUserProfileFields;
-  readonly teacher?: TeacherProfileUpdateInputType;
+  readonly teacher?: TeacherProfileUpdateInput;
   readonly parent?: ParentAdminProfileUpdateInput;
   readonly staff?: StaffAdminProfileUpdateInput;
 };

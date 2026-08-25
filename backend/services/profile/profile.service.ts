@@ -27,18 +27,18 @@ import { AuditService } from "@/backend/services/system/audit.service";
 import type {
   ParentAdminProfileUpdateInput,
   ParentOwnProfileUpdateInput,
+  ParentProfileUpdateInput,
   ProfileAccessOptions,
   ProfilePageContext,
   ProfilePageResolution,
   ProfilePermissionContext,
+  TeacherProfileUpdateInput,
   UnifiedProfileReturnType,
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
+  UserMeetingConfigReturnType,
   UserPermissionContext,
 } from "@/backend/types";
-import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
-import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
-import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
@@ -718,7 +718,7 @@ export namespace ProfileService {
     }
 
     if (scope === ProfileScope.OTHER && "timezone" in teacherInput) {
-      const teacherTimezone = (teacherInput as TeacherProfileUpdateInputType).timezone;
+      const teacherTimezone = (teacherInput as TeacherProfileUpdateInput).timezone;
       if (teacherTimezone != null) {
         await UserRepository.updateTimezone(targetUserId, teacherTimezone, undefined, locale);
       }
@@ -730,8 +730,8 @@ export namespace ProfileService {
     }
 
     const teacherUpdate = Object.fromEntries(
-      Object.entries(teacherInput as TeacherProfileUpdateInputType).filter(([key]) => key !== "timezone")
-    ) as TeacherProfileUpdateInputType;
+      Object.entries(teacherInput as TeacherProfileUpdateInput).filter(([key]) => key !== "timezone")
+    ) as TeacherProfileUpdateInput;
     if (Object.keys(teacherUpdate).length > 0) {
       await StaffProfileService.updateTeacherProfile(actorUserId, roleIds.teacherId, teacherUpdate, locale);
     }

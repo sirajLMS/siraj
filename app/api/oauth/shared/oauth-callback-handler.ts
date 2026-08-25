@@ -23,7 +23,7 @@ import {
   buildCallbackRedirectUri,
   MeetingOAuthService,
   type OAuthCallbackConfig,
-  verifyOAuthState,
+  verifyAndConsumeOAuthState,
 } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -60,7 +60,7 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
     return NextResponse.json({ error: tErrors.missingCodeOrState }, { status: 400 });
   }
 
-  const statePayload = await verifyOAuthState(state);
+  const statePayload = await verifyAndConsumeOAuthState(state, request.cookies.get("session_id")?.value);
   if (!statePayload) {
     return NextResponse.json({ error: tErrors.invalidOrExpiredOAuthState }, { status: 400 });
   }

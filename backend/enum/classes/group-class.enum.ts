@@ -1,6 +1,1 @@
-export enum GroupClassAttendanceStatus {
-  PENDING = "pending",
-  PRESENT = "present",
-  ABSENT = "absent",
-  LATE = "late",
-}
+export { GroupClassAttendanceStatus } from "@/shared/constants/group-class.enum";

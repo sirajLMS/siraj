@@ -10,7 +10,7 @@ import type {
   TeacherDirectoryRow,
   TeacherInsertType,
   TeacherProfileReturnType,
-  TeacherProfileUpdateInputType,
+  TeacherProfileUpdateInput,
   TeacherSelectType,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
@@ -290,14 +290,14 @@ export namespace TeacherRepository {
 
   export const updateTeacherProfile = async (
     teacherId: string,
-    input: TeacherProfileUpdateInputType,
+    input: TeacherProfileUpdateInput,
     tx?: DBTransaction
   ): Promise<boolean> => {
     const executor = tx ?? db;
     const now = new Date();
     const restInput = Object.fromEntries(
       Object.entries(input).filter(([key]) => key !== "timezone" && key !== "status")
-    ) as Omit<TeacherProfileUpdateInputType, "timezone" | "status">;
+    ) as Omit<TeacherProfileUpdateInput, "timezone" | "status">;
     const setInput = {
       ...restInput,
       updatedAt: now,

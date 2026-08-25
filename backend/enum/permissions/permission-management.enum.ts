@@ -1,4 +1,1 @@
-export enum OverrideState {
-  GRANTED = "GRANTED",
-  DENIED = "DENIED",
-}
+export { OverrideState } from "@/shared/constants/override-state.enum";

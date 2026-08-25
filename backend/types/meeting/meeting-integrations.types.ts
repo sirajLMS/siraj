@@ -141,13 +141,17 @@ export interface RefreshedToken {
 
 /**
  * Payload of the signed state JWT minted by `MeetingOAuthService.connectProviderOAuth`.
- * Carries `userId`, `providerSlug`, `returnPath`, and a random `nonce`.
+ * Carries `userId`, `providerSlug`, `returnPath`, a random `nonce`, and the
+ * `sessionId` of the browser session that initiated the flow (H1 fix: binds
+ * the signed state to the caller's session so a stolen state cannot be
+ * replayed from a different browser).
  */
 export interface MeetingOAuthStatePayload extends JoseJWTPayload {
   userId: string;
   providerSlug: MeetingProvider;
   returnPath: string;
   nonce: string;
+  sessionId: string;
 }
 
 /**

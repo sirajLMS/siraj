@@ -97,7 +97,7 @@ export type TeacherProfileReturnType = Omit<
   displayAmount?: DisplayAmountReturnType | null;
 };
 
-export type TeacherProfileUpdateInputType = Partial<
+export type TeacherProfileUpdateInput = Partial<
   Omit<TeacherInsertType, "id" | "userId" | "createdAt" | "updatedAt" | "gender" | "paymentMethod">
 > & {
   readonly status?: AccountStatus | null;

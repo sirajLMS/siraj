@@ -1,11 +1,1 @@
-export enum ParentStatus {
-  REGULAR = "REGULAR",
-  ON_LEAVE = "ON_LEAVE",
-  SUSPENDED = "SUSPENDED",
-  ON_TRIAL = "ON_TRIAL",
-}
-
-export enum BookingStatus {
-  CONFIRMED = "confirmed",
-  RESCHEDULED = "rescheduled",
-}
+export { ParentStatus, BookingStatus } from "@/shared/constants/parent.enum";

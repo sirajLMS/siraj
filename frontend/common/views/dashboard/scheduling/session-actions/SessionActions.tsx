@@ -21,13 +21,13 @@ import {
   requestSessionCancelMutationDocument,
   requestSessionDelayMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { type SelfServiceRescheduleLabels, Translation, useAppTranslation } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale/client/use-app-translation";
+import { Translation } from "@/shared/locale/namespaces/translation";
+import type { SelfServiceRescheduleLabels } from "@/shared/locale/types/dashboard/scheduling/self-service-reschedule";
 
 interface SessionActionsProps {
   /** The class instance ID for this session. */
   readonly classInstanceId: string;
-  /** The scheduled start time of the session (ISO string). */
-  readonly scheduledStartAt: string;
   /** Whether the session is within the time-lock window (disables actions). */
   readonly locked: boolean;
   /** Compact mode for mobile (icon-only buttons). */
@@ -266,12 +266,7 @@ function ActionButtons({
   );
 }
 
-export function SessionActions({
-  classInstanceId,
-  scheduledStartAt: _scheduledStartAt,
-  locked,
-  compact = false,
-}: Readonly<SessionActionsProps>) {
+export function SessionActions({ classInstanceId, locked, compact = false }: Readonly<SessionActionsProps>) {
   const labels = useAppTranslation(Translation.Dashboard.SelfServiceReschedule);
   const [dialogMode, setDialogMode] = useState<DialogMode>(null);
   const [error, setError] = useState<string | null>(null);

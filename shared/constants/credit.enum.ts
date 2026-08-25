@@ -1,6 +1,0 @@
-export enum CreditReason {
-  PURCHASE = "PURCHASE",
-  DEDUCTION = "DEDUCTION",
-  REFUND = "REFUND",
-  ADJUSTMENT = "ADJUSTMENT",
-}

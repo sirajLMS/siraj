@@ -72,7 +72,7 @@ function assertShape<T>(value: unknown, guard: (v: unknown) => v is T, message: 
 gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
   t.field({
     type: UserPaymentMethodPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       input: t.arg({ type: UserPaymentMethodCreateInputPothos, required: true }),
     },
@@ -98,7 +98,7 @@ gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
 gqlSchemaBuilder.mutationField("updateUserPaymentMethod", t =>
   t.field({
     type: UserPaymentMethodPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       id: t.arg.id({ required: true }),
       input: t.arg({ type: UserPaymentMethodUpdateInputPothos, required: true }),
@@ -134,7 +134,7 @@ gqlSchemaBuilder.mutationField("updateUserPaymentMethod", t =>
 gqlSchemaBuilder.mutationField("deleteUserPaymentMethod", t =>
   t.field({
     type: "Boolean",
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       id: t.arg.id({ required: true }),
     },
@@ -165,7 +165,7 @@ makePaymentMethodIdMutationField({
 gqlSchemaBuilder.mutationField("createSupportedMobileWallet", t =>
   t.field({
     type: SupportedMobileWalletPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       input: t.arg({ type: SupportedMobileWalletCreateInputPothos, required: true }),
     },
@@ -183,7 +183,7 @@ gqlSchemaBuilder.mutationField("createSupportedMobileWallet", t =>
 gqlSchemaBuilder.mutationField("updateSupportedMobileWallet", t =>
   t.field({
     type: SupportedMobileWalletPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       id: t.arg.id({ required: true }),
       input: t.arg({ type: SupportedMobileWalletUpdateInputPothos, required: true }),
@@ -203,7 +203,7 @@ gqlSchemaBuilder.mutationField("updateSupportedMobileWallet", t =>
 gqlSchemaBuilder.mutationField("deactivateSupportedMobileWallet", t =>
   t.field({
     type: SupportedMobileWalletPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       id: t.arg.id({ required: true }),
     },
@@ -217,7 +217,7 @@ gqlSchemaBuilder.mutationField("deactivateSupportedMobileWallet", t =>
 gqlSchemaBuilder.mutationField("createSupportedPaymentLink", t =>
   t.field({
     type: SupportedPaymentLinkPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       input: t.arg({ type: SupportedPaymentLinkCreateInputPothos, required: true }),
     },
@@ -235,7 +235,7 @@ gqlSchemaBuilder.mutationField("createSupportedPaymentLink", t =>
 gqlSchemaBuilder.mutationField("updateSupportedPaymentLink", t =>
   t.field({
     type: SupportedPaymentLinkPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       id: t.arg.id({ required: true }),
       input: t.arg({ type: SupportedPaymentLinkUpdateInputPothos, required: true }),
@@ -255,7 +255,7 @@ gqlSchemaBuilder.mutationField("updateSupportedPaymentLink", t =>
 gqlSchemaBuilder.mutationField("deactivateSupportedPaymentLink", t =>
   t.field({
     type: SupportedPaymentLinkPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       id: t.arg.id({ required: true }),
     },
@@ -269,7 +269,7 @@ gqlSchemaBuilder.mutationField("deactivateSupportedPaymentLink", t =>
 gqlSchemaBuilder.mutationField("createSupportedOnlineAccount", t =>
   t.field({
     type: SupportedOnlineAccountPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       input: t.arg({ type: SupportedOnlineAccountCreateInputPothos, required: true }),
     },
@@ -287,7 +287,7 @@ gqlSchemaBuilder.mutationField("createSupportedOnlineAccount", t =>
 gqlSchemaBuilder.mutationField("updateSupportedOnlineAccount", t =>
   t.field({
     type: SupportedOnlineAccountPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       id: t.arg.id({ required: true }),
       input: t.arg({ type: SupportedOnlineAccountUpdateInputPothos, required: true }),
@@ -307,7 +307,7 @@ gqlSchemaBuilder.mutationField("updateSupportedOnlineAccount", t =>
 gqlSchemaBuilder.mutationField("deactivateSupportedOnlineAccount", t =>
   t.field({
     type: SupportedOnlineAccountPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { loggedIn: true, notImpersonating: true },
     args: {
       id: t.arg.id({ required: true }),
     },

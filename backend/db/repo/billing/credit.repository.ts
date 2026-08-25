@@ -5,7 +5,7 @@ import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
 import { DomainError } from "@/backend/lib/errors";
 import {
-  type CreditInsertType,
+  type CreditTransactionInsertType,
   type CreditTransactionSelectType,
   type DBTransaction,
   PaginationArgs,
@@ -85,7 +85,7 @@ export namespace CreditRepository {
 
   const insertCreditTransaction = async (
     tx: DBTransaction,
-    input: CreditInsertType
+    input: CreditTransactionInsertType
   ): Promise<CreditTransactionSelectType> => {
     const now = new Date();
     const [row] = await tx
@@ -174,7 +174,7 @@ export namespace CreditRepository {
    */
   export const insertBatch = async (
     tx: DBTransaction,
-    rows: CreditInsertType[]
+    rows: CreditTransactionInsertType[]
   ): Promise<CreditTransactionSelectType[]> => {
     if (rows.length === 0) return [];
 

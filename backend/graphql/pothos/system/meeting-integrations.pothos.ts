@@ -331,7 +331,7 @@ gqlSchemaBuilder.mutationField("connectMeetingProviderOAuth", t =>
       const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       assertCanManageOwnMeetingConfigs(ctx, tErrors);
       try {
-        return await MeetingOAuthService.connectProviderOAuth(args.input, actorUserId, tErrors);
+        return await MeetingOAuthService.connectProviderOAuth(args.input, actorUserId, ctx.sessionId, tErrors);
       } catch (err) {
         handleMeetingChannelError(err, tErrors);
       }

@@ -5,7 +5,7 @@ import { AppPermission } from "@/backend/enum";
 import { ForbiddenError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
+import { cachedRead, invalidateTags } from "@/backend/services/cache";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**
@@ -46,9 +46,12 @@ export async function assertAssociatedOrManage(
   }
 }
 
-// M3 fix: TTL'd association cache via cacheService (Redis/Postgres) instead of
-// a permanent in-memory Map. Prevents revoked teachers/parents from retaining
-// access until process restart. TTL: 60 seconds.
+// H2 fix: association cache via `cachedRead` (tag-indexed) so invalidation
+// actually works. The prior direct-cacheService.get/set approach cached reads
+// correctly but its invalidation helpers deleted a literal prefix key
+// (`billing:viewer:${userId}:`) that never existed (per-student keys are
+// `billing:viewer:${userId}:${studentId}`), making invalidation a no-op.
+// Tag-based invalidation drops every key tagged `user:${userId}` in one call.
 const VIEWER_CACHE_TTL_SECONDS = 60;
 const VIEWER_CACHE_PREFIX = "billing:viewer:";
 
@@ -62,60 +65,29 @@ const VIEWER_CACHE_PREFIX = "billing:viewer:";
  * The parent and teacher lookups are independent of each other, so they run
  * in parallel via `Promise.all` to reduce sequential query latency. The
  * student-self check uses the profile already fetched before those lookups.
+ * Result is cached with tags `user:${actorUserId}` + `student:${studentId}`
+ * so reassignment/revocation invalidates within the TTL window.
  */
 export async function resolveAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
-  const cacheKey = `${VIEWER_CACHE_PREFIX}${actorUserId}:${studentId}`;
-  try {
-    const cached = await cacheService.get(cacheKey);
-    if (cached !== null) {
-      return cached === "1";
-    }
-  } catch {
-    // Cache miss/failure is non-fatal — fall through to DB lookup.
-  }
-
-  const profile = await StudentRepository.findProfileById(studentId);
-  if (!profile) {
-    await setViewerCacheSafe(cacheKey, false);
-    return false;
-  }
-
-  // (b) The user IS the student themselves
-  if (profile.userId === actorUserId) {
-    await setViewerCacheSafe(cacheKey, true);
-    return true;
-  }
-
-  const [parent, teacher] = await Promise.all([
-    ParentRepository.findByUserId(actorUserId),
-    TeacherRepository.findByUserId(actorUserId),
-  ]);
-
-  // (a) The user is the student's parent
-  if ((parent?.id ?? null) === profile.parentId) {
-    await setViewerCacheSafe(cacheKey, true);
-    return true;
-  }
-  // The user is the student's primary teacher
-  if ((teacher?.id ?? null) === profile.primaryTeacherId) {
-    await setViewerCacheSafe(cacheKey, true);
-    return true;
-  }
-
-  await setViewerCacheSafe(cacheKey, false);
-  return false;
+  return cachedRead(
+    `${VIEWER_CACHE_PREFIX}${actorUserId}:${studentId}`,
+    VIEWER_CACHE_TTL_SECONDS,
+    async () => {
+      const profile = await StudentRepository.findProfileById(studentId);
+      if (!profile) return false;
+      if (profile.userId === actorUserId) return true;
+      const [parent, teacher] = await Promise.all([
+        ParentRepository.findByUserId(actorUserId),
+        TeacherRepository.findByUserId(actorUserId),
+      ]);
+      return (parent?.id ?? null) === profile.parentId || (teacher?.id ?? null) === profile.primaryTeacherId;
+    },
+    [`user:${actorUserId}`, `student:${studentId}`]
+  );
 }
 
-/** Best-effort cache set — never throws (cache failures are non-fatal). */
-async function setViewerCacheSafe(cacheKey: string, value: boolean): Promise<void> {
-  try {
-    await cacheService.set(cacheKey, value ? "1" : "0", { ex: VIEWER_CACHE_TTL_SECONDS });
-  } catch (err) {
-    logger.warn("Failed to set viewer cache entry", { cacheKey, err: String(err) });
-  }
-}
-
-// M3 fix: TTL'd student-IDs cache via cacheService instead of permanent Map.
+// H2 fix: TTL'd student-IDs cache via `cachedRead` (tag-indexed on
+// `user:${actorUserId}`) so invalidation actually drops the entry.
 const STUDENT_IDS_CACHE_TTL_SECONDS = 60;
 const STUDENT_IDS_CACHE_PREFIX = "billing:studentIds:";
 
@@ -131,62 +103,40 @@ const STUDENT_IDS_CACHE_PREFIX = "billing:studentIds:";
  * and `teacher_assignments` tables.
  *
  * Returns an empty array if the user is neither a student, a parent,
- * nor a teacher.
+ * nor a teacher. Result is cached with tag `user:${actorUserId}`.
  */
 export async function resolveAssociatedStudentIds(actorUserId: string): Promise<string[]> {
-  const cacheKey = `${STUDENT_IDS_CACHE_PREFIX}${actorUserId}`;
-  try {
-    const cached = await cacheService.get(cacheKey);
-    if (cached !== null) {
-      return cached ? JSON.parse(cached) : [];
-    }
-  } catch {
-    // Cache miss/failure is non-fatal — fall through to DB lookup.
-  }
+  return cachedRead(
+    `${STUDENT_IDS_CACHE_PREFIX}${actorUserId}`,
+    STUDENT_IDS_CACHE_TTL_SECONDS,
+    async () => {
+      const [parent, teacher, ownStudentId] = await Promise.all([
+        ParentRepository.findByUserId(actorUserId),
+        TeacherRepository.findByUserId(actorUserId),
+        StudentRepository.getStudentIdByUserId(actorUserId),
+      ]);
 
-  const [parent, teacher, ownStudentId] = await Promise.all([
-    ParentRepository.findByUserId(actorUserId),
-    TeacherRepository.findByUserId(actorUserId),
-    StudentRepository.getStudentIdByUserId(actorUserId),
-  ]);
+      const studentIds: string[] = [];
+      if (ownStudentId) studentIds.push(ownStudentId);
+      if (!parent && !teacher && studentIds.length === 0) return [];
 
-  const studentIds: string[] = [];
-
-  // (b) The user IS a student — include their own student ID
-  if (ownStudentId) {
-    studentIds.push(ownStudentId);
-  }
-
-  if (!parent && !teacher && studentIds.length === 0) {
-    await setStudentIdsCacheSafe(cacheKey, []);
-    return [];
-  }
-
-  const associatedIds = await StudentRepository.findIdsByParentOrTeacher(parent?.id ?? null, teacher?.id ?? null);
-  const merged = [...new Set([...studentIds, ...associatedIds])];
-
-  await setStudentIdsCacheSafe(cacheKey, merged);
-  return [...merged];
-}
-
-/** Best-effort cache set — never throws. */
-async function setStudentIdsCacheSafe(cacheKey: string, value: string[]): Promise<void> {
-  try {
-    await cacheService.set(cacheKey, JSON.stringify(value), { ex: STUDENT_IDS_CACHE_TTL_SECONDS });
-  } catch (err) {
-    logger.warn("Failed to set studentIds cache entry", { cacheKey, err: String(err) });
-  }
+      const associatedIds = await StudentRepository.findIdsByParentOrTeacher(parent?.id ?? null, teacher?.id ?? null);
+      return [...new Set([...studentIds, ...associatedIds])];
+    },
+    [`user:${actorUserId}`]
+  );
 }
 
 /**
- * M3 fix: invalidation hooks called when a teacher/parent is reassigned or
- * deactivated. Clears the TTL'd cache entries so the next access re-queries
- * the DB instead of using stale association data.
+ * H2 fix: invalidation hooks called when a teacher/parent is reassigned or
+ * deactivated. Drops every cache entry tagged `user:${actorUserId}` (both the
+ * per-student viewer cache and the student-IDs cache) so the next access
+ * re-queries the DB instead of using stale association data. Tag-based
+ * invalidation replaces the prior no-op `cacheService.del(prefix-key)`.
  */
 export async function invalidateTeacherViewerCache(actorUserId: string): Promise<void> {
   try {
-    await cacheService.del(`${VIEWER_CACHE_PREFIX}${actorUserId}:`);
-    await cacheService.del(`${STUDENT_IDS_CACHE_PREFIX}${actorUserId}`);
+    await invalidateTags([`user:${actorUserId}`]);
   } catch (err) {
     logger.warn("Failed to invalidate teacher cache", { actorUserId, err: String(err) });
   }
@@ -194,8 +144,7 @@ export async function invalidateTeacherViewerCache(actorUserId: string): Promise
 
 export async function invalidateParentViewerCache(actorUserId: string): Promise<void> {
   try {
-    await cacheService.del(`${VIEWER_CACHE_PREFIX}${actorUserId}:`);
-    await cacheService.del(`${STUDENT_IDS_CACHE_PREFIX}${actorUserId}`);
+    await invalidateTags([`user:${actorUserId}`]);
   } catch (err) {
     logger.warn("Failed to invalidate parent cache", { actorUserId, err: String(err) });
   }

@@ -6,7 +6,7 @@ import {
   CurrencyCodePothosObject,
   GenderPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types";
+import type { TeacherProfileReturnType, TeacherProfileUpdateInput } from "@/backend/types";
 
 const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileReturnType>("TeacherProfileResult");
 
@@ -61,7 +61,7 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
 });
 
 export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
-  .inputRef<TeacherProfileUpdateInputType>("TeacherProfileUpdateInput")
+  .inputRef<TeacherProfileUpdateInput>("TeacherProfileUpdateInput")
   .implement({
     fields: t => ({
       nationalId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
