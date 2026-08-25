@@ -1,6 +1,6 @@
 "use client";
 
-import { alpha, Box, Card, CardContent } from "@mui/material";
+import { alpha, Box, Card, Stack } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DemoFastLogin } from "@/frontend/views/auth/login/components/DemoFastLogin";
 import { LoginFooter } from "@/frontend/views/auth/login/components/LoginFooter";
@@ -15,8 +15,6 @@ const StyledPageContainer = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "center",
   position: "relative",
-  // Layered gradient background: primary tint + subtle radial highlight.
-  // Adapts to light/dark via palette channels (no hardcoded hex).
   background: `linear-gradient(135deg, ${theme.palette.primary.main}22 0%, ${theme.palette.background.default} 45%, ${theme.palette.background.default} 100%)`,
   "&::before": {
     content: '""',
@@ -50,27 +48,25 @@ export function LoginView({
       <Card
         sx={theme => ({
           width: "100%",
-          maxWidth: theme.layout?.authWidth || 400,
-          // Glassmorphism: translucent surface + subtle backdrop blur + soft border.
-          // Uses alpha() on background.paper so it adapts to light/dark themes
-          // (no hardcoded rgba hex values — passes local/no-hardcoded-colors).
-          backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === "dark" ? 0.04 : 0.85),
+          maxWidth: 460,
+          mx: "auto",
+          p: { xs: 3, sm: 5 },
+          borderRadius: { xs: 3, sm: 4 },
+          backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === "dark" ? 0.04 : 0.92),
           backdropFilter: "blur(12px)",
           border: `1px solid ${theme.palette.divider}`,
-          boxShadow: theme.palette.shadow?.card || "0 8px 32px rgba(0,0,0,0.12)",
-          // Entrance animation: subtle fade + lift on mount.
-          animation: "sirajLoginEntrance 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+          boxShadow: `
+            0 1px 2px ${alpha(theme.palette.common.black, 0.08)},
+            0 8px 24px ${alpha(theme.palette.common.black, 0.12)},
+            0 24px 64px ${alpha(theme.palette.primary.main, 0.1)}`,
+          animation: "sirajLoginEntrance 360ms cubic-bezier(0.2, 0, 0, 1) both",
           "@keyframes sirajLoginEntrance": {
             "0%": { opacity: "0", transform: "translateY(12px)" },
             "100%": { opacity: "1", transform: "translateY(0)" },
           },
         })}
       >
-        <CardContent
-          sx={theme => ({
-            p: theme.layout?.cardPadding || 4,
-          })}
-        >
+        <Stack spacing={{ xs: 3, sm: 4 }}>
           <LoginHeader labels={labels} />
           <LoginForm
             labels={labels}
@@ -82,7 +78,7 @@ export function LoginView({
             <DemoFastLogin labels={labels} onFastLogin={onFastLogin} groups={demoGroups ?? []} />
           )}
           <LoginFooter />
-        </CardContent>
+        </Stack>
       </Card>
     </StyledPageContainer>
   );

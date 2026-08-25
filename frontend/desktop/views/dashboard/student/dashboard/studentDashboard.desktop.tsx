@@ -81,7 +81,6 @@ function NoUpcomingClassesBanner({ label }: Readonly<{ label: string }>) {
   );
 }
 
-
 export function StudentDashboardDesktopView({
   userName,
   locale,
@@ -137,7 +136,6 @@ export function StudentDashboardDesktopView({
           onAddReflection={onAddReflection}
         />
       </DesktopSectionPanel>
-
     </DesktopPageContainer>
   );
 }

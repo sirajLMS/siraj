@@ -89,6 +89,6 @@ export function cardFeedbackSx(theme: Theme, isHighlight: boolean, isError: bool
     }),
     "&:hover .metric-icon-wrap": interactiveIconHoverSx(theme, isError),
     "&:active .metric-icon-wrap": interactiveIconActiveSx(theme, isError),
-    borderRadius: theme.layout.radius.card,
+    borderRadius: 12,
   };
 }

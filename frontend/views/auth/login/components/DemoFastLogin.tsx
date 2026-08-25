@@ -32,28 +32,32 @@ const RoleIconWrapper = styled(Box, {
 }));
 
 const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
-  paddingTop: theme.spacing(1),
-  paddingBottom: theme.spacing(1),
+  paddingTop: theme.spacing(1.5),
+  paddingBottom: theme.spacing(1.5),
   paddingLeft: theme.spacing(1.5),
   paddingRight: theme.spacing(1.5),
+  minHeight: 48,
   textTransform: "none",
-  borderRadius: theme.shape.borderRadius,
+  borderRadius: 12,
   borderColor: theme.palette.divider,
   color: theme.palette.text.primary,
   display: "flex",
   justifyContent: "flex-start",
   alignItems: "center",
-  gap: theme.spacing(0.5),
+  gap: theme.spacing(0.75),
   fontSize: theme.typography.bodyMd.fontSize,
-  fontWeight: 500,
+  fontWeight: 600,
   transition: theme.transitions.create(["all"], {
     duration: theme.transitions.duration.shorter,
   }),
   "&:hover": {
-    borderColor: theme.palette.primary.main,
-    backgroundColor: theme.palette.action.hover,
+    borderColor: alpha(theme.palette.primary.main, 0.55),
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
     transform: "translateY(-2px)",
-    boxShadow: theme.palette.shadow.card,
+    boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.18)}`,
+  },
+  "&:active": {
+    transform: "translateY(0)",
   },
 }));
 
@@ -102,8 +106,8 @@ export function DemoFastLogin({ labels, groups, onFastLogin }: Readonly<DemoFast
   if (!groups || groups.length === 0) return null;
 
   return (
-    <StyledContainer sx={{ mt: 3, mb: 1 }}>
-      <Divider sx={{ mb: 2 }}>
+    <StyledContainer sx={{ mt: 4, mb: 2 }}>
+      <Divider sx={{ mb: 2.5 }}>
         <StyledDividerLabel variant="bodyMd" sx={{ px: 1 }}>
           {labels.orQuickLogin}
         </StyledDividerLabel>

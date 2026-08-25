@@ -183,8 +183,19 @@ function PasswordField({
   // Watch the password value so the strength meter updates live without
   // re-rendering the whole form on every keystroke.
   const passwordValue = useWatch({ control, name: "password" }) ?? "";
+  const toggleShowPassword = () => {
+    setShowPassword(prev => !prev);
+  };
+  const passwordAdornment = (
+    <InputAdornment position="end">
+      <IconButton onClick={toggleShowPassword} edge="end" aria-label={labels.password}>
+        {showPassword ? <VisibilityOff /> : <Visibility />}
+      </IconButton>
+    </InputAdornment>
+  );
+
   return (
-    <Grid size={{ xs: 12, md: 6 }}>
+    <Grid size={{ xs: 12, sm: 6 }}>
       <Controller
         name="password"
         control={control}
@@ -199,23 +210,7 @@ function PasswordField({
               sx={outlinedInputSx}
               error={!!errors.password}
               helperText={validationMessage(labels, errors.password)}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => {
-                          setShowPassword(!showPassword);
-                        }}
-                        edge="end"
-                        aria-label={labels.password}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
+              slotProps={{ input: { endAdornment: passwordAdornment } }}
             />
             <PasswordStrengthMeter
               password={passwordValue}

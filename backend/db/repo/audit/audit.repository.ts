@@ -33,7 +33,7 @@ export namespace AuditRepository {
    * Maps a single CreateAuditLogInput to an insert row object.
    * Shared by `createAuditLog` (single insert) and `mapAuditLogRows` (bulk insert).
    */
-  function mapSingleAuditLogRow(input: Types.CreateAuditLogInput) {
+  function mapSingleAuditLogRow(input: Types.CreateAuditLogInput, defaultDate?: Date) {
     return {
       actorUserId: input.actorUserId ?? null,
       actorType: input.actorType,
@@ -47,32 +47,16 @@ export namespace AuditRepository {
       ipAddress: sanitizeIpAddress(input.ipAddress),
       userAgent: input.userAgent ?? null,
       metadata: input.metadata ?? null,
-      createdAt: input.createdAt ?? new Date(),
+      createdAt: input.createdAt ?? defaultDate ?? new Date(),
     };
   }
 
   /**
    * Maps CreateAuditLogInput[] to insert row objects.
-   * NOTE: keep in sync with mapCreateAuditLogRow — the single-row mapper includes
-   * `changes`, `userAgent`, and `metadata`; the bulk mapper must insert all fields.
    */
   function mapAuditLogRows(inputs: readonly Types.CreateAuditLogInput[]) {
     const now = new Date();
-    return inputs.map(input => ({
-      actorUserId: input.actorUserId ?? null,
-      actorType: input.actorType,
-      entityType: input.entityType,
-      entityId: input.entityId,
-      action: input.action,
-      description: input.description ?? null,
-      previousState: input.previousState ?? null,
-      newState: input.newState ?? null,
-      changes: input.changes ?? null,
-      ipAddress: sanitizeIpAddress(input.ipAddress),
-      userAgent: input.userAgent ?? null,
-      metadata: input.metadata ?? null,
-      createdAt: input.createdAt ?? now,
-    }));
+    return inputs.map(input => mapSingleAuditLogRow(input, now));
   }
 
   /**

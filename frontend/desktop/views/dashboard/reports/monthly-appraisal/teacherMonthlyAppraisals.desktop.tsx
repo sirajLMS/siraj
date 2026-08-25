@@ -16,24 +16,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { TeacherNoStudentsCard } from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/TeacherNoStudentsCard";
+import { DESKTOP_MONTH_OPTIONS } from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/teacherMonthlyAppraisalConstants";
 import type {
   MonthlyAppraisalStudentRow,
   MonthlyAppraisalTeacherViewModel,
 } from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/useTeacherMonthlyAppraisalsViewModel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-
-const MONTH_OPTIONS = (() => {
-  const now = new Date();
-  const opts: { value: string; label: string }[] = [];
-  for (let i = -6; i <= 6; i += 1) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    opts.push({
-      value: d.toISOString(),
-      label: d.toLocaleDateString("en", { month: "long", year: "numeric" }),
-    });
-  }
-  return opts;
-})();
 
 function StudentRow({
   student,
@@ -91,15 +80,7 @@ function StudentList({
   onOpenForm: (id: string) => void;
 }>) {
   if (students.length === 0) {
-    return (
-      <Card variant="outlined" sx={{ borderStyle: "dashed" }}>
-        <CardContent sx={{ textAlign: "center", py: 6 }}>
-          <Typography sx={theme => ({ color: theme.palette.text.secondary })}>
-            {labels.teacherView.noStudents}
-          </Typography>
-        </CardContent>
-      </Card>
-    );
+    return <TeacherNoStudentsCard message={labels.teacherView.noStudents} />;
   }
   return (
     <Stack spacing={2}>
@@ -129,7 +110,7 @@ export function TeacherMonthlyAppraisalsDesktopView({
             {labels.teacherView.selectMonth}
           </InputLabel>
           <TextField select fullWidth size="small" value={selectedMonth} onChange={e => onMonthChange(e.target.value)}>
-            {MONTH_OPTIONS.map(opt => (
+            {DESKTOP_MONTH_OPTIONS.map(opt => (
               <MenuItem key={opt.value} value={opt.value}>
                 {opt.label}
               </MenuItem>

@@ -1,18 +1,7 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import {
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -27,8 +16,9 @@ import { useAppearanceLogoUpload } from "@/frontend/common/hooks/useAppearanceLo
 import { APPEARANCE_PRESETS, type AppearancePreset } from "@/frontend/common/providers/theme/presets";
 import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 import { logger } from "@/frontend/common/utils/logger";
+import { AppearanceResetDialog } from "@/frontend/common/views/dashboard/appearance/shared/AppearanceResetDialog";
 import { exportAppearanceJson } from "@/frontend/common/views/dashboard/appearance/shared/exportAppearanceJson";
-import { resolveDraftLogoForSave } from "@/frontend/common/views/dashboard/appearance/shared/resolveDraftLogoForSave";
+import { prepareDraftForAction } from "@/frontend/common/views/dashboard/appearance/shared/resolveDraftLogoForSave";
 import { PresetSwatch } from "@/frontend/common/views/dashboard/components/customize/PresetThemeSection";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -85,12 +75,8 @@ export function AppearanceSettingsTab() {
 
   const handleSaveDraft = async () => {
     try {
-      // BUG-E: Resolve any data-URL logo before saving.
-      const resolvedDraft = await resolveDraftLogoForSave(draft, uploadLogo);
-      if (resolvedDraft.logoUrl !== draft.logoUrl) {
-        setField("logoUrl", resolvedDraft.logoUrl);
-      }
-      await saveDraft({ variables: { input: resolvedDraft, expectedUpdatedAt: undefined } });
+      const input = await prepareDraftForAction(draft, uploadLogo, setField);
+      await saveDraft({ variables: { input, expectedUpdatedAt: undefined } });
       markSaved();
       notifications.show(t.saveDraftSuccess, { severity: "success" });
     } catch (error) {
@@ -101,15 +87,11 @@ export function AppearanceSettingsTab() {
 
   const handlePublish = async () => {
     try {
-      // BUG-E: Resolve any data-URL logo before publishing.
-      const resolvedDraft = await resolveDraftLogoForSave(draft, uploadLogo);
-      if (resolvedDraft.logoUrl !== draft.logoUrl) {
-        setField("logoUrl", resolvedDraft.logoUrl);
-      }
+      const input = await prepareDraftForAction(draft, uploadLogo, setField);
       // Save the in-memory edits into the server draft first so the
       // publish actually reflects what the admin sees on screen.
       if (dirty) {
-        await saveDraft({ variables: { input: resolvedDraft, expectedUpdatedAt: undefined } });
+        await saveDraft({ variables: { input, expectedUpdatedAt: undefined } });
       }
       await publish({ variables: { expectedUpdatedAt: undefined } });
       markSaved();
@@ -248,16 +230,13 @@ export function AppearanceSettingsTab() {
         </Stack>
       </Stack>
 
-      <Dialog open={resetDialogOpen} onClose={() => setResetDialogOpen(false)}>
-        <DialogTitle>{t.resetConfirmTitle}</DialogTitle>
-        <DialogContent>{t.resetConfirmBody}</DialogContent>
-        <DialogActions>
-          <Button onClick={() => setResetDialogOpen(false)}>{t.resetConfirmCancel}</Button>
-          <Button onClick={handleResetConfirm} color="error" variant="contained" disabled={resetLoading}>
-            {t.resetConfirmConfirm}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AppearanceResetDialog
+        open={resetDialogOpen}
+        loading={resetLoading}
+        labels={t}
+        onClose={() => setResetDialogOpen(false)}
+        onConfirm={handleResetConfirm}
+      />
     </RequirePermission>
   );
 }

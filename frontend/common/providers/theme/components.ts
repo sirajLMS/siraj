@@ -83,6 +83,9 @@ const getMuiCssBaseline = (): Components<Omit<Theme, "components">>["MuiCssBasel
       backgroundColor: "var(--mui-palette-background-default)",
       color: "var(--mui-palette-onBackground)",
     },
+    ".MuiCard-root": {
+      borderRadius: "12px !important",
+    },
     /**
      * Autofill rules use CSS variable references so the browser resolves the
      * correct colors at runtime for the active color scheme. Hardcoded literals
@@ -191,12 +194,11 @@ const getMuiPaper = (): Components<Omit<Theme, "components">>["MuiPaper"] => ({
 
 const getMuiCard = (): Components<Omit<Theme, "components">>["MuiCard"] => ({
   styleOverrides: {
-    root: ({ theme }) => ({
-      borderRadius: 8, // Data containers use modern rounded-xl (1rem/16px) standard
-      boxShadow: theme.palette.shadow.card,
-      border: `1px solid ${theme.palette.border.light}`,
-      backgroundColor: theme.palette.background.paper,
-    }),
+    root: {
+      borderRadius: 12,
+      border: "1px solid var(--mui-palette-border-light)",
+      backgroundColor: "var(--mui-palette-background-paper)",
+    },
   },
 });
 

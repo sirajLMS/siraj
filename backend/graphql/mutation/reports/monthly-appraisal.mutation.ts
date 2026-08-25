@@ -24,21 +24,10 @@ gqlSchemaBuilder.mutationField("submitMonthlyAppraisal", t =>
     },
     resolve: async (_root, args, ctx): Promise<MonthlyAppraisalReturnType> => {
       const userId = await requireAuth(ctx);
-      const input = args.input;
       return MonthlyAppraisalService.submitAppraisal(
         {
-          studentId: input.studentId,
+          ...args.input,
           teacherId: "", // service resolves from auth context; placeholder satisfies the type
-          month: input.month,
-          behaviorGrade: input.behaviorGrade ?? null,
-          behaviorComment: input.behaviorComment ?? null,
-          attendanceGrade: input.attendanceGrade ?? null,
-          attendanceComment: input.attendanceComment ?? null,
-          punctualityGrade: input.punctualityGrade ?? null,
-          punctualityComment: input.punctualityComment ?? null,
-          overallGrade: input.overallGrade ?? null,
-          overallComment: input.overallComment ?? null,
-          learningTargets: input.learningTargets,
         },
         userId,
         ctx.locale

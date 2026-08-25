@@ -1,44 +1,14 @@
 "use client";
 
-import {
-  AccessTimeOutlined,
-  CancelOutlined,
-  CheckCircleOutlined,
-  EventBusyOutlined,
-  HourglassEmptyOutlined,
-  SwapHorizOutlined,
-} from "@mui/icons-material";
+import { AccessTimeOutlined } from "@mui/icons-material";
 import { Alert, Box, Card, CardContent, Chip, CircularProgress, Stack, Typography } from "@mui/material";
-import type { ReactElement } from "react";
+import { LeaveRequestReasonBox } from "@/frontend/common/views/dashboard/scheduling/leave-requests/components/LeaveRequestReasonBox";
+import { LeaveRequestStatusBadge } from "@/frontend/common/views/dashboard/scheduling/leave-requests/components/LeaveRequestStatusBadge";
 import type {
   LeaveRequestRow,
   LeaveRequestsViewModel,
 } from "@/frontend/common/views/dashboard/scheduling/leave-requests/useLeaveRequestsViewModel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-
-function StatusBadge({ status, labels }: Readonly<{ status: string; labels: LeaveRequestsViewModel["labels"] }>) {
-  const statusMap: Record<
-    string,
-    { label: string; color: "default" | "success" | "error" | "warning" | "info"; icon: ReactElement }
-  > = {
-    PENDING: { label: labels.statusBadge.pending, color: "warning", icon: <HourglassEmptyOutlined /> },
-    APPROVED: { label: labels.statusBadge.approved, color: "success", icon: <CheckCircleOutlined /> },
-    REJECTED: { label: labels.statusBadge.rejected, color: "error", icon: <CancelOutlined /> },
-    RESCHEDULED: { label: labels.statusBadge.rescheduled, color: "info", icon: <SwapHorizOutlined /> },
-    CANCELLED: { label: labels.statusBadge.cancelled, color: "default", icon: <EventBusyOutlined /> },
-  };
-  const entry = statusMap[status] ?? statusMap.PENDING;
-  return (
-    <Chip
-      size="small"
-      color={entry.color}
-      variant="outlined"
-      icon={entry.icon}
-      label={entry.label}
-      sx={{ borderRadius: 2 }}
-    />
-  );
-}
 
 function RequestTypeChip({
   requestType,
@@ -75,7 +45,7 @@ function RequestCard({
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <RequestTypeChip requestType={request.requestType} labels={labels} />
-            <StatusBadge status={request.status} labels={labels} />
+            <LeaveRequestStatusBadge status={request.status} labels={labels} />
           </Stack>
           <AccessTimeOutlined sx={theme => ({ fontSize: 18, color: theme.palette.text.disabled })} />
         </Stack>
@@ -87,14 +57,7 @@ function RequestCard({
             {labels.requestsList.processedAt}: {processedDate}
           </Typography>
         ) : null}
-        {request.reason ? (
-          <Box sx={theme => ({ mt: 1, p: 1.5, borderRadius: 1.5, bgcolor: theme.palette.action.hover })}>
-            <Typography variant="caption" sx={{ fontWeight: 600 }}>
-              {labels.requestsList.reason}
-            </Typography>
-            <Typography variant="body2">{request.reason}</Typography>
-          </Box>
-        ) : null}
+        <LeaveRequestReasonBox reason={request.reason} label={labels.requestsList.reason} />
       </CardContent>
     </Card>
   );

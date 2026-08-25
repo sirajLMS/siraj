@@ -143,19 +143,21 @@ function AppraisalCard({
   );
 }
 
+interface DesktopAppraisalListBodyProps {
+  readonly labels: StudentParentAppraisalViewModel["labels"];
+  readonly appraisals: readonly MonthlyAppraisalRow[];
+  readonly loading: boolean;
+  readonly onSelectAppraisal: (id: string) => void;
+  readonly onOpenFeedbackModal: () => void;
+}
+
 function AppraisalListBody({
   labels,
   appraisals,
   loading,
   onSelectAppraisal,
   onOpenFeedbackModal,
-}: Readonly<{
-  labels: StudentParentAppraisalViewModel["labels"];
-  appraisals: readonly MonthlyAppraisalRow[];
-  loading: boolean;
-  onSelectAppraisal: (id: string) => void;
-  onOpenFeedbackModal: () => void;
-}>) {
+}: Readonly<DesktopAppraisalListBodyProps>) {
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>

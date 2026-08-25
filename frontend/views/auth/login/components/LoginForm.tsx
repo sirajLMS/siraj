@@ -45,19 +45,26 @@ const StyledForgotPasswordLink = styled(Link)(({ theme }) => ({
 }));
 
 const StyledSubmitButton = styled(Button)(({ theme }) => ({
-  paddingTop: 12,
-  paddingBottom: 12,
-  // Gradient background + hover lift for a polished, tactile submit button.
-  // Uses theme palette channels (no hardcoded hex) so it adapts to light/dark.
+  paddingTop: 14,
+  paddingBottom: 14,
+  minHeight: 52,
+  borderRadius: 12,
+  fontSize: "0.875rem",
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: theme.palette.onPrimary,
   backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
-  transition: theme.transitions.create(["transform", "box-shadow"], {
+  boxShadow: `0 8px 20px ${alpha(theme.palette.primary.main, 0.32)}`,
+  transition: theme.transitions.create(["transform", "box-shadow", "filter"], {
     duration: theme.transitions.duration.short,
+    easing: theme.transitions.easing.easeOut,
   }),
   "&:hover": {
-    backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
-    boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
+    backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+    boxShadow: `0 12px 28px ${alpha(theme.palette.primary.main, 0.42)}`,
     transform: "translateY(-1px)",
+    filter: "brightness(1.04)",
   },
   "&:active": {
     transform: "translateY(0)",
@@ -172,11 +179,7 @@ const FormFields = ({
 const FormActions = ({ labels }: { labels: AuthLoginLabels }) => {
   const [forgotOpen, setForgotOpen] = useState(false);
   return (
-    <StyledFormActionsContainer>
-      {/* The forgot-password self-service flow is not yet implemented (no
-          backend mutation or route exists). Instead of a dead `href="#"` link,
-          show a dialog explaining the feature is coming soon + directing the
-          user to contact their admin. */}
+    <StyledFormActionsContainer sx={{ mt: 0.5, minHeight: 44 }}>
       <StyledForgotPasswordLink
         href="#"
         underline="hover"
@@ -184,6 +187,13 @@ const FormActions = ({ labels }: { labels: AuthLoginLabels }) => {
           event.preventDefault();
           setForgotOpen(true);
         }}
+        sx={theme => ({
+          fontSize: "0.85rem",
+          fontWeight: 600,
+          color: theme.palette.primary.main,
+          transition: theme.transitions.create("color"),
+          "&:hover": { color: theme.palette.primary.dark, textDecoration: "underline" },
+        })}
       >
         {labels.forgotPassword}
       </StyledForgotPasswordLink>
@@ -300,7 +310,7 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 2.5,
+        gap: 3,
       }}
     >
       {isRetrying && (
@@ -334,7 +344,7 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
         size="large"
         disabled={isSubmitting || isRetrying}
         fullWidth
-        sx={{ mt: 1 }}
+        sx={{ mt: 2 }}
       >
         {isSubmitting || isRetrying ? <CircularProgress size={24} color="inherit" /> : labels.signIn}
       </StyledSubmitButton>

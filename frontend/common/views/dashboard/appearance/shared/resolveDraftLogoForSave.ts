@@ -94,3 +94,18 @@ export async function resolveDraftLogoForSave(
     return { ...draft, logoUrl: null };
   }
 }
+
+/**
+ * Resolves draft logo data URLs and synchronizes the draft store if changed.
+ */
+export async function prepareDraftForAction(
+  draft: AppearanceDraftInput,
+  uploadLogo: (file: File) => Promise<{ url: string; path: string }>,
+  setField: (field: "logoUrl", value: string | null) => void
+): Promise<AppearanceDraftInput> {
+  const resolved = await resolveDraftLogoForSave(draft, uploadLogo);
+  if (resolved.logoUrl !== draft.logoUrl) {
+    setField("logoUrl", resolved.logoUrl ?? null);
+  }
+  return resolved;
+}
