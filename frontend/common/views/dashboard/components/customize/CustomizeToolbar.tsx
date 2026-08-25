@@ -261,6 +261,13 @@ export function CustomizeToolbar() {
 
   const handlePublish = async () => {
     try {
+      // Save the in-memory edits into the server draft first so the
+      // publish actually reflects what the admin sees on screen; without
+      // this, clicking PUBLISH with unsaved changes would live-publish the
+      // previous server state instead of the current preview.
+      if (dirty) {
+        await saveDraft({ variables: { input: draft, expectedUpdatedAt: serverUpdatedAt } });
+      }
       await publish({ variables: { expectedUpdatedAt: serverUpdatedAt } });
       markSaved();
       notifications.show(t.publishSuccess, { severity: "success" });

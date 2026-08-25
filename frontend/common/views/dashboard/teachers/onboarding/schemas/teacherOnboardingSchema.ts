@@ -9,13 +9,18 @@ import { validateMeetingProviderFields } from "@/frontend/common/views/dashboard
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { TeacherOnboardingLabels } from "@/shared/locale";
+import { createPasswordFieldSchema } from "@/shared/utils/password-schema";
 
 export const teacherOnboardingSchema = (validationLabels: TeacherOnboardingLabels["validation"]) =>
   z
     .object({
       name: z.string().min(1, validationLabels.fullNameRequired),
       email: z.email({ message: validationLabels.emailInvalid }),
-      password: z.string().min(8, validationLabels.passwordRequired),
+      password: createPasswordFieldSchema({
+        required: validationLabels.passwordRequired,
+        minLength: validationLabels.passwordMinLength,
+        weakComplexity: validationLabels.passwordWeakComplexity,
+      }),
       avatarUrl: z.string().optional(),
       nationality: z.string().optional(),
       nationalId: z.string().optional(),

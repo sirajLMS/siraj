@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CurrencyCode, ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
+import { createPasswordFieldSchema } from "@/shared/utils/password-schema";
 
 const MANAGER_ACCOUNT_TYPES = new Set<string>(Object.values(ManagerAccountType) as readonly string[]);
 
@@ -19,5 +20,9 @@ export const managerOnboardingSchema = z.object({
     .refine(value => isValidIanaTimezoneId(value), { message: "timezoneRequired" }),
   displayCurrency: z.enum(CurrencyCode).optional().nullable(),
   accountType: z.custom<ManagerAccountType>(val => isManagerAccountType(val)),
-  password: z.string().min(8, "passwordMinLength"),
+  password: createPasswordFieldSchema({
+    required: "passwordRequired",
+    minLength: "passwordMinLength",
+    weakComplexity: "passwordWeakComplexity",
+  }),
 });

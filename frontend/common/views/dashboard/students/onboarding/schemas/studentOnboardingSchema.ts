@@ -1,12 +1,17 @@
 import { z } from "zod";
 import { AppLanguage, CurrencyCode, Gender, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+import { createPasswordFieldSchema } from "@/shared/utils/password-schema";
 
 export const studentOnboardingSchema = z.object({
   parentId: z.string().optional().nullable(),
   name: z.string().min(3, "nameMinLength"),
   email: z.email({ message: "emailInvalid" }),
-  password: z.string().min(8, "passwordRequired"),
+  password: createPasswordFieldSchema({
+    required: "passwordRequired",
+    minLength: "passwordMinLength",
+    weakComplexity: "passwordWeakComplexity",
+  }),
   avatarUrl: z.string().optional(),
   phone: z.string().optional(),
   timezone: z.custom<IanaTimezone>(

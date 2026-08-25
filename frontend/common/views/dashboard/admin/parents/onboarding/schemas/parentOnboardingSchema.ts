@@ -7,12 +7,17 @@ import {
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { validateMeetingProviderFields } from "@/frontend/common/views/dashboard/profile/shared/meetingProviderValidation";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
+import { createPasswordFieldSchema } from "@/shared/utils/password-schema";
 
 export const parentOnboardingSchema = z
   .object({
     name: z.string().min(1, "fullNameRequired"),
     email: z.email({ message: "emailInvalid" }),
-    password: z.string().min(8, "passwordRequired"),
+    password: createPasswordFieldSchema({
+      required: "passwordRequired",
+      minLength: "passwordMinLength",
+      weakComplexity: "passwordWeakComplexity",
+    }),
     avatarUrl: z.string().optional(),
     phone: z.string().optional(),
     nationality: z.string().optional(),

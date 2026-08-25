@@ -2635,7 +2635,7 @@ type Mutation {
   ensureDemoUsers: Boolean
   executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
   generateMeetingUrl(input: GenerateMeetingUrlInput!): GenerateMeetingUrlResult
-  linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocument
+  linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocumentRow
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
@@ -3087,7 +3087,7 @@ type ParentDirectoryRow {
   userId: String
 }
 
-type ParentDocument {
+type ParentDocumentRow {
   createdAt: DateTime
   fileId: String
   filePath: String
@@ -3523,7 +3523,7 @@ type Query {
   parentDashboardMetrics: ParentDashboardMetricsResult
   parentDashboardSchedule(date: String, paginationArgs: PaginationArgs, search: String): ParentDashboardScheduleResult
   parentDirectory(lifecycleStatusFilter: ParentStatus, paginationArgs: PaginationArgs, search: String): ParentDirectory
-  parentDocuments(parentId: String!): [ParentDocument!]
+  parentDocuments(parentId: String!): [ParentDocumentRow!]
   parentHandbookUrl: ParentHandbookUrl
   parentInvoiceHistory(paginationArgs: PaginationArgs, parentId: String, search: String, userId: String): ParentInvoiceHistoryResult
   parentOwnProfile: ParentOwnProfile

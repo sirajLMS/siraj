@@ -148,7 +148,6 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
     emailRequired: labels.emailRequired,
     emailInvalid: labels.emailInvalid,
     passwordRequired: labels.passwordRequired,
-    passwordMinLength: labels.passwordMinLength,
   });
 
   const {
