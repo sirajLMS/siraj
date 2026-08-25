@@ -22,7 +22,10 @@ export interface DesktopMetricCardGridProps {
   readonly density?: MetricCardDensity;
 }
 
-const defaultSize = { xs: 6, sm: 4, md: 3, lg: 2 };
+// lg: 2.4 gives 5 columns on large screens (instead of 6), giving each card
+// more width so long labels like "RESCHEDULED" + "ACTIVATED" fit on one line
+// without mid-word wrapping. xs: 6 = 2 cols, sm: 4 = 3 cols, md: 3 = 4 cols.
+const defaultSize = { xs: 6, sm: 4, md: 3, lg: 2.4 };
 
 function renderMetricCard({
   metric,

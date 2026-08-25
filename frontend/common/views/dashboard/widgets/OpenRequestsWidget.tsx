@@ -105,7 +105,7 @@ export function OpenRequestsWidget({ labels, statusLabels, requestTypeLabels }: 
     );
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <Card variant="outlined" sx={{ borderRadius: 3 }}>
         <CardContent>

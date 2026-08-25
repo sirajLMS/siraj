@@ -78,3 +78,11 @@ FROM permission_groups g
 JOIN permissions p ON p.key IN ('session.self_delay', 'session.self_cancel')
 WHERE g.slug = 'supervisor_default'
   AND NOT EXISTS (SELECT 1 FROM group_permissions gp WHERE gp.group_id = g.id AND gp.permission_id = p.id);
+
+-- supervisor_default + teacher_default: session.reschedule (needed for rejectLeaveRequest mutation)
+INSERT INTO group_permissions (group_id, permission_id)
+SELECT g.id, p.id
+FROM permission_groups g
+JOIN permissions p ON p.key = 'session.reschedule'
+WHERE g.slug IN ('supervisor_default', 'teacher_default')
+  AND NOT EXISTS (SELECT 1 FROM group_permissions gp WHERE gp.group_id = g.id AND gp.permission_id = p.id);

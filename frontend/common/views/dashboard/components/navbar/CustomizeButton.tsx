@@ -28,6 +28,14 @@ export function CustomizeButton() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  // AC-19: hide the Customize button when already in customize mode — the
+  // amber toolbar (CustomizeToolbar) replaces it as the exit/publish surface.
+  // Showing both would be redundant + confusing (two amber entry points).
+  const alreadyCustomizing = searchParams?.get("customize") === "1";
+  if (alreadyCustomizing) {
+    return null;
+  }
+
   const customizeParams = new URLSearchParams(searchParams?.toString() ?? "");
   customizeParams.set("customize", "1");
   const href = `${pathname}?${customizeParams.toString()}`;

@@ -143,8 +143,9 @@ export function LeaveRequestsDesktopView({ labels, requests, loading, error }: R
         <Alert severity="error" sx={{ mb: 2 }}>
           {labels.errors.requestFailed}
         </Alert>
-      ) : null}
-      <RequestListBody labels={labels} requests={requests} loading={loading} />
+      ) : (
+        <RequestListBody labels={labels} requests={requests} loading={loading} />
+      )}
     </DesktopPageContainer>
   );
 }

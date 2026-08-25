@@ -117,8 +117,9 @@ export function LeaveRequestsMobileView({ labels, requests, loading, error }: Re
         <Alert severity="error" sx={{ mb: 2 }}>
           {labels.errors.requestFailed}
         </Alert>
-      ) : null}
-      <MobileRequestListBody labels={labels} requests={requests} loading={loading} />
+      ) : (
+        <MobileRequestListBody labels={labels} requests={requests} loading={loading} />
+      )}
     </MobilePageContainer>
   );
 }

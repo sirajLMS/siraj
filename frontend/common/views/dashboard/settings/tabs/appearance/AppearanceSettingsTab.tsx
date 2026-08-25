@@ -61,7 +61,7 @@ export function AppearanceSettingsTab() {
   const draft = useAppearancePreviewStore(s => s.draft);
   const dirty = useAppearancePreviewStore(s => s.dirty);
   const markSaved = useAppearancePreviewStore(s => s.markSaved);
-  const setModeColors = useAppearancePreviewStore(s => s.setModeColors);
+  const setColors = useAppearancePreviewStore(s => s.setColors);
   const setField = useAppearancePreviewStore(s => s.setField);
   const { uploadLogo } = useAppearanceLogoUpload();
   const [saveDraft, { loading: saveLoading }] = useMutation(saveAppearanceDraftMutationDocument);
@@ -75,13 +75,9 @@ export function AppearanceSettingsTab() {
   };
 
   const handleApplyPreset = (preset: AppearancePreset): void => {
-    // Writes both per-mode pairs into the draft. The store's `setModeColors`
-    // also writes the active-mode brand CSS vars on `<html>` for instant
-    // visual preview even before the admin enters customize mode. Undo
-    // history is preserved (each `setModeColors` pushes the prior draft
-    // onto the undo stack).
-    setModeColors("light", { ...preset.light });
-    setModeColors("dark", { ...preset.dark });
+    // Set both mode pairs in a single undo step (uses setColors instead of
+    // two setModeColors calls which would create 2 undo entries).
+    setColors({ light: { ...preset.light }, dark: { ...preset.dark } });
     notifications.show(`${preset.name} preset applied — enter customize mode to refine`, {
       severity: "success",
     });

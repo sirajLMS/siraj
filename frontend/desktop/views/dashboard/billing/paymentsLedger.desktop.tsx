@@ -21,6 +21,15 @@ import {
 import { myPaymentsLedgerQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
+function formatGatewayLabel(gateway: string): string {
+  if (!gateway) return "—";
+  return gateway
+    .toLowerCase()
+    .split("_")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 interface PaymentRow {
   id: string;
   studentName: string | null;
@@ -79,12 +88,17 @@ function PaymentTable({ rows }: Readonly<{ rows: readonly PaymentRow[] }>) {
                 </Typography>
               </TableCell>
               <TableCell>
-                <Chip size="small" variant="outlined" label={row.packageName ?? "—"} sx={{ borderRadius: 2 }} />
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={row.packageName ? row.packageName.charAt(0) + row.packageName.slice(1).toLowerCase() : "—"}
+                  sx={{ borderRadius: 2 }}
+                />
               </TableCell>
               <TableCell>
                 <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
                   <CreditCardOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
-                  <Typography variant="caption">{row.paymentGateway}</Typography>
+                  <Typography variant="caption">{formatGatewayLabel(row.paymentGateway)}</Typography>
                 </Stack>
               </TableCell>
               <TableCell>
@@ -150,7 +164,7 @@ export function PaymentsLedgerContainer() {
   return (
     <DesktopPageContainer>
       <DesktopPageHeader title="Payments Ledger" subtitle="Your payment history and purchased credits" />
-      {error ? (
+      {error && !data ? (
         <Alert severity="error" sx={{ mb: 2 }}>
           Failed to load payments.
         </Alert>

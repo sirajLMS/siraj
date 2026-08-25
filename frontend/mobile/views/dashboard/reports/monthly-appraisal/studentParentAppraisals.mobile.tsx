@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatBubbleOutlineOutlined, CloseOutlined, SendOutlined, Star, StarBorderOutlined } from "@mui/icons-material";
+import { ChatBubbleOutlineOutlined, Star, StarBorderOutlined } from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -9,14 +9,8 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
-  IconButton,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import type {
@@ -180,11 +174,6 @@ export function StudentParentAppraisalsMobileView({
   appraisals,
   loading,
   error,
-  feedbackModalOpen,
-  onCloseFeedbackModal,
-  onSubmitFeedback,
-  feedbackSubmitting,
-  feedbackError,
   onSelectAppraisal,
   onOpenFeedbackModal,
 }: Readonly<StudentParentAppraisalViewModel>) {
@@ -196,59 +185,15 @@ export function StudentParentAppraisalsMobileView({
         <Alert severity="error" sx={{ mb: 2 }}>
           {labels.errors.loadFailed}
         </Alert>
-      ) : null}
-
-      <MobileAppraisalListBody
-        labels={labels}
-        appraisals={appraisals}
-        loading={loading}
-        onSelectAppraisal={onSelectAppraisal}
-        onOpenFeedbackModal={onOpenFeedbackModal}
-      />
-
-      <Dialog open={feedbackModalOpen} onClose={onCloseFeedbackModal} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          {labels.studentParentView.feedbackModal.title}
-          <IconButton size="small" onClick={onCloseFeedbackModal} aria-label="close">
-            <CloseOutlined fontSize="small" />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          {feedbackError ? (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {feedbackError}
-            </Alert>
-          ) : null}
-          <TextField
-            autoFocus
-            fullWidth
-            multiline
-            rows={3}
-            label={labels.studentParentView.feedbackModal.bodyLabel}
-            placeholder={labels.studentParentView.feedbackModal.bodyPlaceholder}
-            id="appraisal-feedback-body-mobile"
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 2.5, pb: 2 }}>
-          <Button onClick={onCloseFeedbackModal} sx={{ textTransform: "none" }}>
-            {labels.studentParentView.feedbackModal.cancel}
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<SendOutlined />}
-            disabled={feedbackSubmitting}
-            onClick={() => {
-              const el = document.getElementById("appraisal-feedback-body-mobile");
-              const body = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value.trim() : "";
-              if (body) onSubmitFeedback(body);
-            }}
-            sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
-          >
-            {labels.studentParentView.feedbackModal.submit}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      ) : (
+        <MobileAppraisalListBody
+          labels={labels}
+          appraisals={appraisals}
+          loading={loading}
+          onSelectAppraisal={onSelectAppraisal}
+          onOpenFeedbackModal={onOpenFeedbackModal}
+        />
+      )}
     </MobilePageContainer>
   );
 }

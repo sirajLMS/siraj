@@ -29,11 +29,10 @@ import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePr
  * same exemption as `ColorEditorSection` swatches.
  */
 export function PresetThemeSection() {
-  const setModeColors = useAppearancePreviewStore(s => s.setModeColors);
+  const setColors = useAppearancePreviewStore(s => s.setColors);
 
   const applyPreset = (preset: AppearancePreset): void => {
-    setModeColors("light", { ...preset.light });
-    setModeColors("dark", { ...preset.dark });
+    setColors({ light: { ...preset.light }, dark: { ...preset.dark } });
   };
 
   return (

@@ -46,7 +46,7 @@ export function LeaveRequestsContainer() {
     labels,
     requests,
     loading,
-    error: Boolean(error),
+    error: Boolean(error) && !data,
   };
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;

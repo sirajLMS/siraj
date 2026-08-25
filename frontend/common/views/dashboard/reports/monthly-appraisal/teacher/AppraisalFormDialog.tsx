@@ -1,10 +1,54 @@
 "use client";
 
-import { useMutation } from "@apollo/client/react";
+import { gql, type TypedDocumentNode } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { CloseOutlined, SaveOutlined, Star, StarBorderOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, IconButton, Rating, Stack, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Rating,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import { submitMonthlyAppraisalMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+
+interface ExistingAppraisal {
+  behaviorGrade: number | null;
+  behaviorComment: string | null;
+  attendanceGrade: number | null;
+  attendanceComment: string | null;
+  punctualityGrade: number | null;
+  punctualityComment: string | null;
+  overallGrade: number | null;
+  overallComment: string | null;
+  learningTargets: string;
+}
+
+const STUDENT_APPRAISAL_DETAIL_QUERY: TypedDocumentNode<{ studentMonthlyAppraisals: ExistingAppraisal[] | null }> = gql`
+  query StudentAppraisalDetailForForm($studentId: String!) {
+    studentMonthlyAppraisals(studentId: $studentId) {
+      id
+      behaviorGrade
+      behaviorComment
+      attendanceGrade
+      attendanceComment
+      punctualityGrade
+      punctualityComment
+      overallGrade
+      overallComment
+      learningTargets
+    }
+  }
+`;
 
 interface AppraisalFormData {
   studentId: string;
@@ -26,6 +70,17 @@ interface AppraisalFormDialogProps {
   studentId: string;
   studentName: string;
   month: string;
+  initialGrades?: {
+    behaviorGrade: number | null;
+    behaviorComment: string;
+    attendanceGrade: number | null;
+    attendanceComment: string;
+    punctualityGrade: number | null;
+    punctualityComment: string;
+    overallGrade: number | null;
+    overallComment: string;
+    learningTargets: string;
+  } | null;
   onClose: () => void;
   onSubmitted: () => void;
 }
@@ -53,7 +108,9 @@ function RubricField({
   return (
     <Box sx={{ mb: 2 }}>
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>{label}</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {label}
+        </Typography>
         <Rating
           value={grade}
           onChange={(_, newValue) => onGradeChange(newValue)}
@@ -82,22 +139,30 @@ export function AppraisalFormDialog({
   studentId,
   studentName,
   month,
+  initialGrades,
   onClose,
   onSubmitted,
 }: Readonly<AppraisalFormDialogProps>) {
+  const { data: existingData } = useQuery(STUDENT_APPRAISAL_DETAIL_QUERY, {
+    variables: { studentId },
+    skip: !open || !studentId,
+    fetchPolicy: "cache-and-network",
+  });
+  const existingAppraisal = existingData?.studentMonthlyAppraisals?.[0];
+
   const [formData, setFormData] = useState<AppraisalFormData>({
     studentId,
     studentName,
     month,
-    behaviorGrade: null,
-    behaviorComment: "",
-    attendanceGrade: null,
-    attendanceComment: "",
-    punctualityGrade: null,
-    punctualityComment: "",
-    overallGrade: null,
-    overallComment: "",
-    learningTargets: "",
+    behaviorGrade: initialGrades?.behaviorGrade ?? existingAppraisal?.behaviorGrade ?? null,
+    behaviorComment: initialGrades?.behaviorComment ?? existingAppraisal?.behaviorComment ?? "",
+    attendanceGrade: initialGrades?.attendanceGrade ?? existingAppraisal?.attendanceGrade ?? null,
+    attendanceComment: initialGrades?.attendanceComment ?? existingAppraisal?.attendanceComment ?? "",
+    punctualityGrade: initialGrades?.punctualityGrade ?? existingAppraisal?.punctualityGrade ?? null,
+    punctualityComment: initialGrades?.punctualityComment ?? existingAppraisal?.punctualityComment ?? "",
+    overallGrade: initialGrades?.overallGrade ?? existingAppraisal?.overallGrade ?? null,
+    overallComment: initialGrades?.overallComment ?? existingAppraisal?.overallComment ?? "",
+    learningTargets: initialGrades?.learningTargets ?? existingAppraisal?.learningTargets ?? "",
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -143,7 +208,7 @@ export function AppraisalFormDialog({
         onSubmitted();
         onClose();
       },
-      onError: (err) => {
+      onError: err => {
         setSubmitting(false);
         setError(err.message);
       },
@@ -156,7 +221,9 @@ export function AppraisalFormDialog({
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Box>
-          <Typography variant="h6">{studentName} — {monthLabel}</Typography>
+          <Typography variant="h6">
+            {studentName} — {monthLabel}
+          </Typography>
           <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
             Grades 1-5 (optional) · Learning targets required
           </Typography>
@@ -166,7 +233,11 @@ export function AppraisalFormDialog({
         </IconButton>
       </DialogTitle>
       <DialogContent>
-        {error ? <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert> : null}
+        {error ? (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        ) : null}
         {RUBRIC_FIELDS.map(field => (
           <RubricField
             key={field.key}
@@ -179,7 +250,9 @@ export function AppraisalFormDialog({
         ))}
         <Divider sx={{ my: 2 }} />
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>Learning Targets *</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+            Learning Targets *
+          </Typography>
           <TextField
             fullWidth
             size="small"
@@ -194,7 +267,9 @@ export function AppraisalFormDialog({
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5 }}>
-        <Button onClick={onClose} sx={{ textTransform: "none" }}>Cancel</Button>
+        <Button onClick={onClose} sx={{ textTransform: "none" }}>
+          Cancel
+        </Button>
         <Button
           variant="contained"
           color="primary"

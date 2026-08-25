@@ -28,7 +28,7 @@ export function buildSupportedCurrencyColumns(
     {
       field: "flagEmoji",
       headerName: labels.flag,
-      width: 60,
+      width: 80,
       sortable: false,
       renderCell: ({ row }) => (
         <Box component="span" aria-hidden sx={theme => ({ fontSize: theme.typography.headlineMd.fontSize })}>

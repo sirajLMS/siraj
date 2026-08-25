@@ -212,15 +212,15 @@ export function StudentParentAppraisalsDesktopView({
         <Alert severity="error" sx={{ mb: 2 }}>
           {labels.errors.loadFailed}
         </Alert>
-      ) : null}
-
-      <AppraisalListBody
-        labels={labels}
-        appraisals={appraisals}
-        loading={loading}
-        onSelectAppraisal={onSelectAppraisal}
-        onOpenFeedbackModal={onOpenFeedbackModal}
-      />
+      ) : (
+        <AppraisalListBody
+          labels={labels}
+          appraisals={appraisals}
+          loading={loading}
+          onSelectAppraisal={onSelectAppraisal}
+          onOpenFeedbackModal={onOpenFeedbackModal}
+        />
+      )}
     </DesktopPageContainer>
   );
 }

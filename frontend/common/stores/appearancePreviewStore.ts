@@ -156,6 +156,8 @@ interface AppearancePreviewState {
   readonly setField: <K extends keyof AppearanceDraftInput>(key: K, value: AppearanceDraftInput[K]) => void;
   /** Replace the color pair for one mode (light or dark). */
   readonly setModeColors: (mode: AppearanceMode, pair: AppearanceColorPairInput) => void;
+  /** Replace both mode color pairs at once (single undo step — used by preset application). */
+  readonly setColors: (colors: AppearanceColorsInput) => void;
   /** Toggle the active per-mode tab + re-write CSS vars for the new mode. */
   readonly setMode: (isDark: boolean) => void;
   /** Enter customize mode (mounts the overlay). Does NOT touch CSS vars. */
@@ -198,6 +200,13 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
       commitEdit(state, {
         ...state.draft,
         colors: { ...state.draft.colors, [mode]: pair },
+      })
+    ),
+  setColors: colors =>
+    set(state =>
+      commitEdit(state, {
+        ...state.draft,
+        colors,
       })
     ),
   setMode: isDark => {

@@ -53,18 +53,14 @@ export const StyledLabel = styled(Typography, {
   color: isError ? theme.palette.error.main : theme.palette.primary.main,
   marginBottom: mbOverride ?? theme.spacing(density === "compact" ? 0.25 : 0.5),
   overflow: "hidden",
-  // Keep labels on a single line (no wrapping) — the prior 2-line clamp caused
-  // ugly mid-word splits like "REGUL-AR" and "RESCHE-DULED". Instead, use a
-  // small font + negative letter-spacing to compress the text so long labels
-  // like "RESCHEDULED" fit within the card width. If a label is still too long,
-  // it overflows hidden (cleanly cut, no split).
+  // Single-line label with nowrap + small font + compression.
+  // The metric grid now uses 5 columns on large screens (lg: 2.4 instead of 2)
+  // so each card is wide enough for labels like "RESCHEDULED" to fit on one line.
   whiteSpace: "nowrap",
-  overflowWrap: "normal",
-  wordBreak: "normal",
+  textOverflow: "clip",
   lineHeight: 1.2,
   fontSize: density === "compact" ? "0.6rem" : "0.65rem",
   letterSpacing: "-0.3px",
-  textOverflow: "clip",
 }));
 
 export interface StyledValueProps {
