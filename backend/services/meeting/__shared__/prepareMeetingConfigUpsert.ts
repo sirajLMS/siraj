@@ -1,37 +1,15 @@
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { safeMaybeGenerateUrl } from "@/backend/services/meeting/__shared__/meetingConfigHelpers";
-import type { DBTransaction, MeetingConfigDetails, MeetingProviderSelectType } from "@/backend/types";
+import type {
+  DBTransaction,
+  MeetingProviderSelectType,
+  PrepareMeetingConfigInput,
+  PrepareTransformCtx,
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
-/**
- * Minimal shape that every input to
- * {@link prepareMeetingConfigUpsert} must satisfy. Both
- * `UserMeetingConfigSubmitInput` and `ClassMeetingConfigInsertType` extend
- * `MeetingConfigBaseInsertType` / `MeetingConfigBaseSubmitInput`, which
- * guarantees these fields exist.
- */
-interface PrepareMeetingConfigInput {
-  readonly providerId: string;
-  readonly label?: string | null;
-  readonly details: MeetingConfigDetails;
-}
-
-/**
- * Context passed to the `transform` callback of
- * {@link prepareMeetingConfigUpsert}.
- *
- * The provider, parsed details, and the result of `safeMaybeGenerateUrl`
- * (normalised details, provider metadata, optional encrypted secret) are
- * provided so callers can build their entity-specific upsert payload without
- * duplicating the batch-fetch / validate / generate pipeline.
- */
-interface PrepareTransformCtx {
-  readonly provider: MeetingProviderSelectType;
-  readonly details: MeetingConfigDetails;
-  readonly providerMetadata: Record<string, unknown> | null;
-  readonly encryptedSecret?: string | null;
-}
+export type { PrepareMeetingConfigInput, PrepareTransformCtx };
 
 /**
  * Capture the duplicated "prepare" pipeline shared by

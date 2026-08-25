@@ -3,21 +3,18 @@ import type { AppPermission } from "@/backend/enum";
 import { NotFoundError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { assertHasPermission } from "@/backend/services/shared";
-import type { BaseEntity, DBTx, ResolutionResult } from "@/backend/types";
+import type {
+  BaseEntity,
+  DBTx,
+  ResolutionResult,
+  ResolveEntityByIdArgs,
+  ResolveNotFoundErrorKey,
+  SoftDeleteEntityLogArgs,
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
 
-/**
- * Shared helpers for {@link ComplaintService} and {@link SuggestionService}.
- * The two services have different entity types but identical management flow:
- * permission gate → parent lookup → resolve-by-id → soft-delete / response.
- *
- * Helpers here are *generic-only* — call sites supply their own permission
- * constants, repository functions, error-message keys and log labels so that
- * i18n, logging and entity-specific behaviour stay intact at the call site.
- */
-
-// ─── Permission & parent resolution ────────────────────────────────────────
+export type { ResolveEntityByIdArgs, ResolveNotFoundErrorKey, SoftDeleteEntityLogArgs };
 
 /** Permission gate shared by every endpoint in both services. */
 export async function assertPermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
@@ -27,10 +24,7 @@ export async function assertPermission(actorUserId: string, permission: AppPermi
 
 /**
  * Permission gate + parent lookup used for parent-side operations
- * (submit, list own history, etc.). Equivalent to:
- *   - {@link ComplaintService.getParentIdForComplaints}
- *   - the inline permission+parent blocks in `submitComplaint`,
- *     `getParentComplaints`, `submitSuggestion`, `getParentSuggestions`.
+ * (submit, list own history, etc.).
  */
 export async function requireParentByActorUserId(
   actorUserId: string,
@@ -47,43 +41,10 @@ export async function requireParentByActorUserId(
   return parent;
 }
 
-// ─── Entity lookup (the "resolveEntity" flow) ──────────────────────────────
-
 /** Resolves a localized not-found message by key, falling back to the key. */
 function resolveNotFoundMessage(key: ResolveNotFoundErrorKey, tErrors: ErrorsLabels): string {
   const value = tErrors[key];
   return typeof value === "string" ? value : key;
-}
-
-/** Union of the two top-level not-found error keys used by both services. */
-type ResolveNotFoundErrorKey = "complaintNotFound" | "suggestionNotFound";
-
-/** Re-exports the union for typed call sites. */
-export type { ResolveNotFoundErrorKey };
-
-interface ResolveEntityByIdArgs<T extends BaseEntity> {
-  actorUserId: string;
-  permission: AppPermission;
-  entityId: string;
-  /** Repository function that returns the entity by id, e.g. `ComplaintRepository.getComplaintById`. */
-  findFn: (id: string, tx?: DBTx) => Promise<T | null>;
-  /**
-   * Top-level {@link ErrorsLabels} key used for the localized
-   * "not found" message. Both communication services use
-   * `complaintNotFound` or `suggestionNotFound` from the root of
-   * {@link ErrorsLabels}.
-   */
-  notFoundErrorKey: ResolveNotFoundErrorKey;
-  /** Entity prefix for the DomainError code (e.g. "SUGGESTION" → "SUGGESTION_NOT_FOUND"). */
-  entityCode: string;
-  /** Optional transaction to share with downstream writes. */
-  tx?: DBTx;
-  locale?: string;
-  /**
-   * Informational label used in resolution logs. When provided, an
-   * info-level log statement is emitted on the resolved entity.
-   */
-  logLabel?: string;
 }
 
 /**
@@ -114,17 +75,6 @@ export async function resolveEntityById<T extends BaseEntity>(args: ResolveEntit
 }
 
 // ─── Soft-delete template (deleteComplaint / deleteSuggestion) ─────────────
-
-interface SoftDeleteEntityLogArgs {
-  actorUserId: string;
-  /** Short human-readable label used in log messages (`Complaint` / `Suggestion`). */
-  entityLabel: string;
-  /** Lowercase identifier key used in structured logs (`complaintId` / `suggestionId`). */
-  idKey: string;
-  entityId: string;
-  /** Void soft-delete function that returns `{ deletedAt: Date }`. */
-  deleteFn: (entityId: string, actorUserId: string) => Promise<{ deletedAt: Date }>;
-}
 
 /**
  * Executes a soft delete, emits an info log on success, and re-throws any

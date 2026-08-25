@@ -136,9 +136,8 @@ export const ConnectMeetingProviderOAuthResultRef = gqlSchemaBuilder.objectRef<C
 
 export const ConnectMeetingProviderOAuthResultPothosObject = ConnectMeetingProviderOAuthResultRef.implement({
   fields: t => ({
-    id: t.field({
-      type: "String",
-      resolve: result => result.state,
+    id: t.string({
+      resolve: res => res.state,
     }),
     authorizeUrl: t.exposeString("authorizeUrl"),
     state: t.exposeString("state"),
@@ -152,7 +151,7 @@ export const DisconnectMeetingProviderOAuthResultPothosObject = DisconnectMeetin
   fields: t => ({
     id: t.field({
       type: "String",
-      resolve: result => result.providerSlug,
+      resolve: ({ providerSlug }) => providerSlug,
     }),
     ok: t.exposeBoolean("ok"),
     providerSlug: t.exposeString("providerSlug"),

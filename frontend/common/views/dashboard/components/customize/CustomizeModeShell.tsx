@@ -45,7 +45,12 @@ export function CustomizeModeShell({ children }: Readonly<{ children: ReactNode 
       <Box aria-hidden sx={{ height: CUSTOMIZE_TOOLBAR_HEIGHT }} />
       <CustomizeOverlay.Toolbar />
       <Box sx={{ display: "flex", alignItems: "stretch" }}>
-        <CustomizeOverlay.Sidebar />
+        {/* The customize sidebar is `position: fixed; top: 0` (see
+            CustomizeSidebar.tsx) — pull it below the toolbar so its top
+            controls aren't hidden behind it. */}
+        <Box sx={{ "& [data-appearance-customize='sidebar']": { top: CUSTOMIZE_TOOLBAR_HEIGHT } }}>
+          <CustomizeOverlay.Sidebar />
+        </Box>
         <Box
           sx={{
             flex: 1,

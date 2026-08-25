@@ -4,9 +4,9 @@ import { learningResourceFiles, learningResources } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type {
   DBTransaction,
-  LearningResourceCreateInput,
   LearningResourceListResult,
   LearningResourceReturnType,
+  LearningResourceSubmitInput,
   PaginationArgs,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
@@ -116,10 +116,16 @@ export namespace LearningResourceRepository {
   }
 
   export async function createResource(
-    input: LearningResourceCreateInput,
+    input: LearningResourceSubmitInput,
     locale?: string,
     tx?: DBTransaction
   ): Promise<LearningResourceReturnType> {
+    const { uploadedByUserId } = input;
+    if (!uploadedByUserId) {
+      const { resource: resourceErrors } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(resourceErrors.createFailed);
+    }
+
     const createTx = async (t: DBTransaction): Promise<LearningResourceReturnType> => {
       const now = new Date();
 
@@ -128,7 +134,7 @@ export namespace LearningResourceRepository {
         .values({
           displayName: input.displayName,
           filePath: input.filePath,
-          uploadedByUserId: input.uploadedByUserId,
+          uploadedByUserId,
           createdAt: now,
         })
         .returning();

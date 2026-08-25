@@ -12,6 +12,101 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 import { NextClassJoinCard } from "@/frontend/desktop/views/dashboard/student/dashboard/components/nextClassJoinCard.desktop";
 import { StudentRecentReportsCardListDesktop } from "@/frontend/desktop/views/dashboard/student/dashboard/components/studentRecentReportsCardList.desktop";
 
+function StudentMetricsSection({
+  creditBalance,
+  upcomingTodayCount,
+  labels,
+  onViewCredits,
+}: Readonly<{
+  creditBalance: StudentDashboardViewModel["creditBalance"];
+  upcomingTodayCount: number;
+  labels: StudentDashboardViewModel["labels"];
+  onViewCredits: () => void;
+}>) {
+  const metrics: MetricItem[] = [
+    {
+      key: "classes-remaining",
+      count: creditBalance.classesRemaining,
+      labelKey: "classes-remaining",
+      label: labels.classesRemaining,
+      icon: PaymentsOutlined,
+      subLabel: `${creditBalance.classesTotal} ${labels.classesTotal.toLowerCase()}`,
+    },
+    {
+      key: "classes-total",
+      count: creditBalance.classesTotal,
+      labelKey: "classes-total",
+      label: labels.classesTotal,
+      icon: SchoolOutlined,
+    },
+    {
+      key: "upcoming-today",
+      count: upcomingTodayCount,
+      labelKey: "upcoming-today",
+      label: labels.upcomingToday,
+      icon: HistoryOutlined,
+    },
+  ];
+
+  return (
+    <Box sx={{ mb: 3 }}>
+      <DesktopMetricCardGrid
+        metrics={metrics}
+        size={{ xs: 12, md: 4 }}
+        onMetricClick={key => {
+          if (key === "classes-remaining") {
+            onViewCredits();
+          }
+        }}
+      />
+    </Box>
+  );
+}
+
+function NoUpcomingClassesBanner({ label }: Readonly<{ label: string }>) {
+  return (
+    <Box sx={{ ...desktopSectionContentInsetSx, py: 0, mb: 3 }}>
+      <Box
+        sx={theme => ({
+          px: 1.5,
+          py: 1.25,
+          borderRadius: 2,
+          backgroundColor: theme.palette.surfaceContainer,
+          border: `1px solid ${theme.palette.outlineVariant}`,
+        })}
+      >
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+          {label}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+function StudentOpenRequestsWidget() {
+  return (
+    <OpenRequestsWidget
+      labels={{
+        title: "Open Requests",
+        emptyState: "No requests yet",
+        emptyStateDescription: "You haven't submitted any delay or cancel requests.",
+        viewAll: "View All Requests",
+      }}
+      statusLabels={{
+        pending: "Pending",
+        approved: "Approved",
+        rejected: "Rejected",
+        rescheduled: "Rescheduled",
+        cancelled: "Cancelled",
+      }}
+      requestTypeLabels={{
+        delay: "Delay",
+        cancel: "Cancel",
+      }}
+    />
+  );
+}
+
 export function StudentDashboardDesktopView({
   userName,
   locale,
@@ -58,60 +153,14 @@ export function StudentDashboardDesktopView({
         </Box>
       ) : null}
 
-      <Box sx={{ mb: 3 }}>
-        <DesktopMetricCardGrid
-          metrics={
-            [
-              {
-                key: "classes-remaining",
-                count: creditBalance.classesRemaining,
-                labelKey: "classes-remaining",
-                label: labels.classesRemaining,
-                icon: PaymentsOutlined,
-                subLabel: `${creditBalance.classesTotal} ${labels.classesTotal.toLowerCase()}`,
-              },
-              {
-                key: "classes-total",
-                count: creditBalance.classesTotal,
-                labelKey: "classes-total",
-                label: labels.classesTotal,
-                icon: SchoolOutlined,
-              },
-              {
-                key: "upcoming-today",
-                count: upcomingTodayCount,
-                labelKey: "upcoming-today",
-                label: labels.upcomingToday,
-                icon: HistoryOutlined,
-              },
-            ] satisfies MetricItem[]
-          }
-          size={{ xs: 12, md: 4 }}
-          onMetricClick={key => {
-            if (key === "classes-remaining") {
-              onViewCredits();
-            }
-          }}
-        />
-      </Box>
+      <StudentMetricsSection
+        creditBalance={creditBalance}
+        upcomingTodayCount={upcomingTodayCount}
+        labels={labels}
+        onViewCredits={onViewCredits}
+      />
 
-      {nextLesson ? null : (
-        <Box sx={{ ...desktopSectionContentInsetSx, py: 0, mb: 3 }}>
-          <Box
-            sx={theme => ({
-              px: 1.5,
-              py: 1.25,
-              borderRadius: 2,
-              backgroundColor: theme.palette.surfaceContainer,
-              border: `1px solid ${theme.palette.outlineVariant}`,
-            })}
-          >
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-              {labels.noUpcomingClasses}
-            </Typography>
-          </Box>
-        </Box>
-      )}
+      {nextLesson ? null : <NoUpcomingClassesBanner label={labels.noUpcomingClasses} />}
 
       <DesktopSectionPanel contentPadding={false} title={labels.recentLessonReports} sx={{ mb: 3 }}>
         <StudentRecentReportsCardListDesktop
@@ -125,25 +174,7 @@ export function StudentDashboardDesktopView({
         />
       </DesktopSectionPanel>
 
-      <OpenRequestsWidget
-        labels={{
-          title: "Open Requests",
-          emptyState: "No requests yet",
-          emptyStateDescription: "You haven't submitted any delay or cancel requests.",
-          viewAll: "View All Requests",
-        }}
-        statusLabels={{
-          pending: "Pending",
-          approved: "Approved",
-          rejected: "Rejected",
-          rescheduled: "Rescheduled",
-          cancelled: "Cancelled",
-        }}
-        requestTypeLabels={{
-          delay: "Delay",
-          cancel: "Cancel",
-        }}
-      />
+      <StudentOpenRequestsWidget />
     </DesktopPageContainer>
   );
 }

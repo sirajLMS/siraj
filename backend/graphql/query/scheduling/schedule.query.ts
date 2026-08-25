@@ -1,4 +1,5 @@
-import type { BaseContext } from "@/backend/graphql/gqlContext";
+import { AppPermission } from "@/backend/enum";
+import { type BaseContext, requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { RecurringScheduleDetailPothosObject } from "@/backend/graphql/pothos/scheduling/recurring-schedule.pothos";
 import {
@@ -8,6 +9,7 @@ import {
   DailyScheduleMetricsPothosObject,
   RescheduleTrackingMetricsPothosObject,
   RescheduleTrackingResultPothosObject,
+  StatusTrackingScheduleRowRef,
 } from "@/backend/graphql/pothos/scheduling/schedule.pothos";
 import {
   WeeklyScheduleGridPothosObject,
@@ -22,6 +24,7 @@ import {
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { RecurringScheduleDetailService, ScheduleService, WeeklyScheduleService } from "@/backend/services";
+import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
 import type { DailyScheduleArgs } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
@@ -178,3 +181,26 @@ gqlSchemaBuilder.queryField("recurringSchedule", t =>
 );
 
 makeTeacherWorkloadMetricsField(WeeklyWorkloadMetricsPothosObject, WeeklyScheduleService.getWorkloadMetrics);
+
+gqlSchemaBuilder.queryField("statusTrackingSchedule", t =>
+  t.field({
+    type: [StatusTrackingScheduleRowRef],
+    authScopes: (_parent, _args, ctx) =>
+      ctx.isSuperAdmin ||
+      ctx.permissions.includes(AppPermission.SCHEDULE_VIEW_ALL) ||
+      ctx.permissions.includes(AppPermission.DASHBOARD_VIEW_METRICS),
+    args: {
+      date: t.arg.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+      viewerTimezone: t.arg({ type: "IanaTimezone", required: false }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const tErrors = ctx.t().errorsTranslations;
+      const date = new Date(args.date);
+      return ScheduleQueryService.getStatusTrackingSchedule(requireUserId(ctx), date, tErrors, {
+        search: args.search ?? undefined,
+        viewerTimezone: args.viewerTimezone ?? undefined,
+      });
+    },
+  })
+);

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { DashboardRoleSkeleton } from "@/frontend/common/views/dashboard/dashboard/DashboardRoleSkeleton";
 import type { DashboardContainerViewModel } from "@/frontend/common/views/dashboard/dashboard/useDashboardContainerViewModel";
+import { StudentDashboardWidgets } from "@/frontend/common/views/dashboard/widgets/StudentDashboardWidgets";
 
 const LazyParentDashboardContainer = dynamic(
   () =>
@@ -66,6 +67,7 @@ export function DashboardContainerView(viewModel: Readonly<DashboardContainerVie
     case "student":
       return (
         <Suspense fallback={<DashboardRoleSkeleton />}>
+          <StudentDashboardWidgets />
           <LazyStudentDashboardContainer />
         </Suspense>
       );
