@@ -1,4 +1,7 @@
-ALTER TABLE "suggestions" RENAME CONSTRAINT "suggestions_duplicate_of_id_fkey" TO "suggestions_duplicate_of_id_suggestions_id_fkey";--> statement-breakpoint
+DO $$ BEGIN
+    ALTER TABLE "suggestions" RENAME CONSTRAINT "suggestions_duplicate_of_id_fkey" TO "suggestions_duplicate_of_id_suggestions_id_fkey";
+EXCEPTION WHEN undefined_object OR duplicate_object OR duplicate_table THEN NULL;
+END $$;--> statement-breakpoint
 ALTER TABLE "currency_exchange_audit_logs" ALTER COLUMN "old_rate" SET DATA TYPE text USING "old_rate"::text;--> statement-breakpoint
 ALTER TABLE "currency_exchange_audit_logs" ALTER COLUMN "new_rate" SET DATA TYPE text USING "new_rate"::text;--> statement-breakpoint
 ALTER TABLE "currency_exchange_rates" ALTER COLUMN "rate" SET DATA TYPE text USING "rate"::text;--> statement-breakpoint

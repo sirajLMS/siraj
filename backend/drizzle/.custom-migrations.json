@@ -1,5 +1,5 @@
 {
-  "manifestHash": "37ef1fddb4ef388beb80eb7f2f9cc467bb201d2258f2ae2e27cba4bed3ba462a",
+  "manifestHash": "42c24cec74ef48c3a509dcf3831226bc1a324af5352ce3b6d1c44a28c73bd8c6",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -158,6 +158,10 @@
       "sha256": "df08892369cd8d47e8a894a5d6eaaeea1f3a90dd8c983d0a183df074e56dc4af"
     },
     {
+      "file": "extended_rls_policies.sql",
+      "sha256": "be2884cdb07ec66a539d46893299e30891772b29afdfcf2840e5984e1ed57211"
+    },
+    {
       "file": "hours_per_week_recalculation.sql",
       "sha256": "d8cea49df8d8d187f59a7ccf57672450503fac371a070899b563d7084adfb159"
     },
@@ -170,12 +174,20 @@
       "sha256": "05afd09f7aae890bd32386c4619f0c6108f9f0e5d4c14914f55ebaeb4a83c239"
     },
     {
+      "file": "payments_ledger_permissions.sql",
+      "sha256": "609cf202bda0b419863985570c5e7182a4f6c66d2c9ed79a52bfd7330dce1c82"
+    },
+    {
       "file": "permissions_rls_policies.sql",
       "sha256": "ac3ef8fc4d503e5ae5f3d69404bd65b94dab47474384b552ffed98c65fb83f3b"
     },
     {
       "file": "profile_permissions.sql",
       "sha256": "d1330e98b8ec8f864b96566570e31af1c6a0e2677f85d1bf882ee7ba9adad16b"
+    },
+    {
+      "file": "self_service_reschedule_permissions.sql",
+      "sha256": "c26b404de91f0c60a2ee4ff42de868a1cda9bbe76acec5712d806182c5fe275b"
     },
     {
       "file": "soft_delete_rls_policies.sql",
@@ -269,6 +281,9 @@
     "20260822054900_custom_7c-appearance-permissions-enum",
     "20260822054901_custom_7d-appearance-permissions-data",
     "20260824192824_custom_appraisal_permissions",
-    "20260824210526_custom_appraisal_permissions"
+    "20260824210526_custom_appraisal_permissions",
+    "20260825020600_custom_extended_rls_policies",
+    "20260825020601_custom_payments_ledger_permissions",
+    "20260825020602_custom_self_service_reschedule_permissions"
   ]
 }
