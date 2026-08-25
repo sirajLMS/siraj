@@ -17,7 +17,7 @@ import type {
   TeacherProgressFeedItem,
 } from "@/backend/types";
 
-const TeacherDashboardScheduleRowRef =
+export const TeacherDashboardScheduleRowRef =
   gqlSchemaBuilder.objectRef<TeacherDashboardScheduleRow>("TeacherDashboardScheduleRow");
 
 export const TeacherDashboardScheduleRowPothosObject = TeacherDashboardScheduleRowRef.implement({
@@ -45,7 +45,8 @@ export const TeacherDashboardScheduleRowPothosObject = TeacherDashboardScheduleR
   }),
 });
 
-const TeacherProgressFeedItemRef = gqlSchemaBuilder.objectRef<TeacherProgressFeedItem>("TeacherProgressFeedItem");
+export const TeacherProgressFeedItemRef =
+  gqlSchemaBuilder.objectRef<TeacherProgressFeedItem>("TeacherProgressFeedItem");
 
 export const TeacherProgressFeedItemPothosObject = TeacherProgressFeedItemRef.implement({
   fields: t => ({
@@ -59,7 +60,7 @@ export const TeacherProgressFeedItemPothosObject = TeacherProgressFeedItemRef.im
   }),
 });
 
-const TeacherDashboardMetricsRef = gqlSchemaBuilder.objectRef<ClassSessionMetrics>("TeacherDashboardMetrics");
+export const TeacherDashboardMetricsRef = gqlSchemaBuilder.objectRef<ClassSessionMetrics>("TeacherDashboardMetrics");
 
 export const TeacherDashboardMetricsPothosObject = TeacherDashboardMetricsRef.implement({
   fields: t => ({
@@ -78,7 +79,7 @@ export const TeacherDashboardMetricsPothosObject = TeacherDashboardMetricsRef.im
   }),
 });
 
-const TeacherDashboardRef = gqlSchemaBuilder.objectRef<TeacherDashboardPaginatedResult>("TeacherDashboard");
+export const TeacherDashboardRef = gqlSchemaBuilder.objectRef<TeacherDashboardPaginatedResult>("TeacherDashboard");
 
 export const TeacherDashboardPothosObject = TeacherDashboardRef.implement({
   fields: t => ({
@@ -113,7 +114,7 @@ export const LogSupportRequestInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-const TeacherHandbookUrlRef = gqlSchemaBuilder.objectRef<TeacherHandbookUrl>("TeacherHandbookUrl");
+export const TeacherHandbookUrlRef = gqlSchemaBuilder.objectRef<TeacherHandbookUrl>("TeacherHandbookUrl");
 
 export const TeacherHandbookUrlPothosObject = TeacherHandbookUrlRef.implement({
   fields: t => ({

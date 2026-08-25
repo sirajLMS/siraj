@@ -7,7 +7,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { StudentUpcomingClass, StudentUpcomingClassesResult } from "@/backend/types";
 
-const StudentUpcomingClassRef = gqlSchemaBuilder.objectRef<StudentUpcomingClass>("StudentUpcomingClass");
+export const StudentUpcomingClassRef = gqlSchemaBuilder.objectRef<StudentUpcomingClass>("StudentUpcomingClass");
 
 export const StudentUpcomingClassPothosObject = StudentUpcomingClassRef.implement({
   fields: t => ({
@@ -29,7 +29,7 @@ export const StudentUpcomingClassPothosObject = StudentUpcomingClassRef.implemen
   }),
 });
 
-const StudentUpcomingClassesResultRef =
+export const StudentUpcomingClassesResultRef =
   gqlSchemaBuilder.objectRef<StudentUpcomingClassesResult>("StudentUpcomingClassesResult");
 
 export const StudentUpcomingClassesResultPothosObject = StudentUpcomingClassesResultRef.implement({

@@ -1,11 +1,8 @@
-import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
-import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
-import { ReferenceDataService } from "@/backend/services";
+import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type { SettingsTimezonesPaginatedResult, TimezoneSelectType } from "@/backend/types";
 
-const SettingsTimezoneRef = gqlSchemaBuilder.objectRef<TimezoneSelectType>("SettingsTimezone");
+export const SettingsTimezoneRef = gqlSchemaBuilder.objectRef<TimezoneSelectType>("SettingsTimezone");
 
 export const SettingsTimezonePothosObject = SettingsTimezoneRef.implement({
   fields: t => ({
@@ -24,7 +21,7 @@ export const SettingsTimezonePothosObject = SettingsTimezoneRef.implement({
   }),
 });
 
-const SettingsTimezonesResultRef =
+export const SettingsTimezonesResultRef =
   gqlSchemaBuilder.objectRef<SettingsTimezonesPaginatedResult>("SettingsTimezonesResult");
 
 export const SettingsTimezonesResultPothosObject = SettingsTimezonesResultRef.implement({
@@ -35,15 +32,3 @@ export const SettingsTimezonesResultPothosObject = SettingsTimezonesResultRef.im
     pageInfo: t.expose("pageInfo", { type: PageInfoObject, nullable: true }),
   }),
 });
-
-gqlSchemaBuilder.queryField("settingsTimezones", t =>
-  t.field({
-    type: SettingsTimezonesResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_TIMEZONES_VIEW },
-
-    args: {
-      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
-    },
-    resolve: (_root, args) => ReferenceDataService.listTimezonesPaginated(parsePaginationArgs(args.paginationArgs)),
-  })
-);

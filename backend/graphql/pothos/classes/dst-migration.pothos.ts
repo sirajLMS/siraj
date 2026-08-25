@@ -7,7 +7,7 @@ import type {
   DstUpdatedSessionReturnType,
 } from "@/backend/types";
 
-const DstUpdatedSessionRef = gqlSchemaBuilder.objectRef<DstUpdatedSessionReturnType>("DstUpdatedSession");
+export const DstUpdatedSessionRef = gqlSchemaBuilder.objectRef<DstUpdatedSessionReturnType>("DstUpdatedSession");
 
 export const DstUpdatedSessionPothosObject = DstUpdatedSessionRef.implement({
   fields: t => ({
@@ -21,7 +21,7 @@ export const DstUpdatedSessionPothosObject = DstUpdatedSessionRef.implement({
   }),
 });
 
-const DstConflictItemRef = gqlSchemaBuilder.objectRef<DstConflictItemReturnType>("DstConflictItem");
+export const DstConflictItemRef = gqlSchemaBuilder.objectRef<DstConflictItemReturnType>("DstConflictItem");
 
 export const DstConflictItemPothosObject = DstConflictItemRef.implement({
   fields: t => ({
@@ -31,7 +31,7 @@ export const DstConflictItemPothosObject = DstConflictItemRef.implement({
   }),
 });
 
-const DstConflictGroupRef = gqlSchemaBuilder.objectRef<DstConflictGroupReturnType>("DstConflictGroup");
+export const DstConflictGroupRef = gqlSchemaBuilder.objectRef<DstConflictGroupReturnType>("DstConflictGroup");
 
 export const DstConflictGroupPothosObject = DstConflictGroupRef.implement({
   fields: t => ({
@@ -41,7 +41,7 @@ export const DstConflictGroupPothosObject = DstConflictGroupRef.implement({
   }),
 });
 
-const DstCheckedEmptyItemRef = gqlSchemaBuilder.objectRef<DstCheckedEmptyItemReturnType>("DstCheckedEmptyItem");
+export const DstCheckedEmptyItemRef = gqlSchemaBuilder.objectRef<DstCheckedEmptyItemReturnType>("DstCheckedEmptyItem");
 
 export const DstCheckedEmptyItemPothosObject = DstCheckedEmptyItemRef.implement({
   fields: t => ({
@@ -51,7 +51,7 @@ export const DstCheckedEmptyItemPothosObject = DstCheckedEmptyItemRef.implement(
   }),
 });
 
-const DstMigrationReportRef = gqlSchemaBuilder.objectRef<DstMigrationReportReturnType>("DstMigrationReport");
+export const DstMigrationReportRef = gqlSchemaBuilder.objectRef<DstMigrationReportReturnType>("DstMigrationReport");
 
 export const DstMigrationReportPothosObject = DstMigrationReportRef.implement({
   fields: t => ({

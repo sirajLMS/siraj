@@ -6,7 +6,7 @@ import type {
   StartPermissionGroupSimulationReturnType,
 } from "@/backend/types";
 
-const SimulatablePermissionGroupPothosObjectRef =
+export const SimulatablePermissionGroupPothosObjectRef =
   gqlSchemaBuilder.objectRef<SimulatablePermissionGroupReturnType>("SimulatablePermissionGroup");
 
 export const SimulatablePermissionGroupPothosObject = SimulatablePermissionGroupPothosObjectRef.implement({
@@ -18,7 +18,7 @@ export const SimulatablePermissionGroupPothosObject = SimulatablePermissionGroup
   }),
 });
 
-const PermissionGroupSimulationStatusPothosObjectRef =
+export const PermissionGroupSimulationStatusPothosObjectRef =
   gqlSchemaBuilder.objectRef<PermissionGroupSimulationStatusReturnType>("PermissionGroupSimulationStatus");
 
 export const PermissionGroupSimulationStatusPothosObject = PermissionGroupSimulationStatusPothosObjectRef.implement({
@@ -31,7 +31,7 @@ export const PermissionGroupSimulationStatusPothosObject = PermissionGroupSimula
   }),
 });
 
-const StartPermissionGroupSimulationResponsePothosObjectRef =
+export const StartPermissionGroupSimulationResponsePothosObjectRef =
   gqlSchemaBuilder.objectRef<StartPermissionGroupSimulationReturnType>("StartPermissionGroupSimulationResponse");
 
 export const StartPermissionGroupSimulationResponsePothosObject =
@@ -43,7 +43,7 @@ export const StartPermissionGroupSimulationResponsePothosObject =
     }),
   });
 
-const EndPermissionGroupSimulationResponsePothosObjectRef =
+export const EndPermissionGroupSimulationResponsePothosObjectRef =
   gqlSchemaBuilder.objectRef<EndPermissionGroupSimulationReturnType>("EndPermissionGroupSimulationResponse");
 
 export const EndPermissionGroupSimulationResponsePothosObject =

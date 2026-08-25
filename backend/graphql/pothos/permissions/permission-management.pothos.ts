@@ -21,7 +21,7 @@ import type { ErrorsLabels } from "@/shared/locale/types/errors";
  * @param state The state value to validate.
  * @returns True if the state is a valid OverrideState, false otherwise.
  */
-function isOverrideState(state: string): state is OverrideState {
+export function isOverrideState(state: string): state is OverrideState {
   return (Object.values(OverrideState) as readonly string[]).includes(state);
 }
 
@@ -31,7 +31,7 @@ function isOverrideState(state: string): state is OverrideState {
  * @returns Array of user overrides with validated OverrideState values.
  * @throws Error if any state is not a valid OverrideState.
  */
-function mapUserOverridesSafely(
+export function mapUserOverridesSafely(
   overrides: UserPermissionOverrideSelectType[],
   tErrors: ErrorsLabels
 ): UserOverrideReturnType[] {
@@ -45,7 +45,7 @@ function mapUserOverridesSafely(
   });
 }
 
-function resolveActorId(ctx: PermissionCtx & ErrorsTranslationsHolder): string {
+export function resolveActorId(ctx: PermissionCtx & ErrorsTranslationsHolder): string {
   if (!ctx.user) {
     throw new GraphQLError(ctx.t().errorsTranslations.permissionManagement.unauthorized, {
       extensions: { code: "UNAUTHENTICATED" },
@@ -54,11 +54,11 @@ function resolveActorId(ctx: PermissionCtx & ErrorsTranslationsHolder): string {
   return ctx.user.id;
 }
 
-function resolveErrorsTranslations(ctx: ErrorsTranslationsHolder): ErrorsLabels {
+export function resolveErrorsTranslations(ctx: ErrorsTranslationsHolder): ErrorsLabels {
   return ctx.t().errorsTranslations;
 }
 
-async function runGroupMembershipMutation<T extends GroupMembershipInput>(
+export async function runGroupMembershipMutation<T extends GroupMembershipInput>(
   ctx: PermissionCtx & ErrorsTranslationsHolder,
   input: T,
   service: (actorId: string, body: T, tErrors: ErrorsLabels) => Promise<unknown>
@@ -67,7 +67,7 @@ async function runGroupMembershipMutation<T extends GroupMembershipInput>(
   return true;
 }
 
-async function runBulkGroupMembershipMutation<T extends BulkGroupMembershipInput>(
+export async function runBulkGroupMembershipMutation<T extends BulkGroupMembershipInput>(
   ctx: PermissionCtx & ErrorsTranslationsHolder,
   input: T,
   service: (actorId: string, body: T, tErrors: ErrorsLabels) => Promise<unknown>
@@ -128,7 +128,7 @@ export const UserOverrideObject = gqlSchemaBuilder.objectRef<UserOverrideReturnT
 
 // ─── Input Types ──────────────────────────────────────────────────────────────
 
-const CreatePermissionGroupInput = gqlSchemaBuilder.inputType("CreatePermissionGroupInput", {
+export const CreatePermissionGroupInput = gqlSchemaBuilder.inputType("CreatePermissionGroupInput", {
   fields: t => ({
     name: t.field({ type: "LocalizedString", required: true }),
     description: t.field({ type: "LocalizedString", required: false }),
@@ -136,7 +136,7 @@ const CreatePermissionGroupInput = gqlSchemaBuilder.inputType("CreatePermissionG
   }),
 });
 
-const UpdatePermissionGroupInput = gqlSchemaBuilder.inputType("UpdatePermissionGroupInput", {
+export const UpdatePermissionGroupInput = gqlSchemaBuilder.inputType("UpdatePermissionGroupInput", {
   fields: t => ({
     groupId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     name: t.field({ type: "LocalizedString", required: false }),
@@ -145,21 +145,21 @@ const UpdatePermissionGroupInput = gqlSchemaBuilder.inputType("UpdatePermissionG
   }),
 });
 
-const AssignPermissionGroupToUserInput = gqlSchemaBuilder.inputType("AssignPermissionGroupToUserInput", {
+export const AssignPermissionGroupToUserInput = gqlSchemaBuilder.inputType("AssignPermissionGroupToUserInput", {
   fields: t => ({
     userId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     groupId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
   }),
 });
 
-const RevokePermissionGroupFromUserInput = gqlSchemaBuilder.inputType("RevokePermissionGroupFromUserInput", {
+export const RevokePermissionGroupFromUserInput = gqlSchemaBuilder.inputType("RevokePermissionGroupFromUserInput", {
   fields: t => ({
     userId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     groupId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
   }),
 });
 
-const UserOverrideInputRef = gqlSchemaBuilder.inputType("UserOverrideInput", {
+export const UserOverrideInputRef = gqlSchemaBuilder.inputType("UserOverrideInput", {
   fields: t => ({
     permissionId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     state: t.field({ type: OverrideStatePothosObject, required: true }),

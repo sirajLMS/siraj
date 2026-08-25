@@ -1,5 +1,3 @@
-import { AppPermission } from "@/backend/enum";
-import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
@@ -7,7 +5,6 @@ import {
   CurrencyCodePothosObject,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { ParentProfileService, StudentManagementService } from "@/backend/services";
 import type {
   AssociatedStudentResult,
   DeactivateParentResult,
@@ -18,7 +15,7 @@ import type {
 
 // ─── ParentProfile Object ───────────────────────────────────────────────────
 
-const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileResult>("ParentProfile");
+export const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileResult>("ParentProfile");
 
 export const ParentProfilePothosObject = ParentProfileRef.implement({
   fields: t => ({
@@ -50,7 +47,7 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
 
 // ─── AssociatedStudent Object ────────────────────────────────────────────────
 
-const AssociatedStudentRef = gqlSchemaBuilder.objectRef<AssociatedStudentResult>("AssociatedStudent");
+export const AssociatedStudentRef = gqlSchemaBuilder.objectRef<AssociatedStudentResult>("AssociatedStudent");
 
 export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
   fields: t => ({
@@ -73,7 +70,7 @@ export const AssociatedStudentPothosObject = AssociatedStudentRef.implement({
 
 // ─── DeactivateParentResult Object ──────────────────────────────────────────
 
-const DeactivateParentResultRef = gqlSchemaBuilder.objectRef<DeactivateParentResult>("DeactivateParentResult");
+export const DeactivateParentResultRef = gqlSchemaBuilder.objectRef<DeactivateParentResult>("DeactivateParentResult");
 
 export const DeactivateParentResultPothosObject = DeactivateParentResultRef.implement({
   fields: t => ({
@@ -83,7 +80,7 @@ export const DeactivateParentResultPothosObject = DeactivateParentResultRef.impl
   }),
 });
 
-const ReactivateParentResultRef = gqlSchemaBuilder.objectRef<ReactivateParentResult>("ReactivateParentResult");
+export const ReactivateParentResultRef = gqlSchemaBuilder.objectRef<ReactivateParentResult>("ReactivateParentResult");
 
 export const ReactivateParentResultPothosObject = ReactivateParentResultRef.implement({
   fields: t => ({
@@ -95,7 +92,7 @@ export const ReactivateParentResultPothosObject = ReactivateParentResultRef.impl
 
 // ─── EditQuotaResult Object ──────────────────────────────────────────────────
 
-const EditQuotaResultRef = gqlSchemaBuilder.objectRef<EditQuotaResult>("EditQuotaResult");
+export const EditQuotaResultRef = gqlSchemaBuilder.objectRef<EditQuotaResult>("EditQuotaResult");
 
 export const EditQuotaResultPothosObject = EditQuotaResultRef.implement({
   fields: t => ({
@@ -108,96 +105,4 @@ export const EditQuotaResultPothosObject = EditQuotaResultRef.implement({
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
-gqlSchemaBuilder.queryField("parentProfile", t =>
-  t.field({
-    type: ParentProfileRef,
-    authScopes: { loggedIn: true },
-    nullable: true,
-    args: {
-      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      return ParentProfileService.getProfile(requireUserId(ctx), args.parentId, ctx.locale);
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("parentAssociatedStudents", t =>
-  t.field({
-    type: [AssociatedStudentRef],
-    authScopes: { loggedIn: true },
-    args: {
-      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      return ParentProfileService.getAssociatedStudents(requireUserId(ctx), args.parentId, ctx.locale);
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("studentById", t =>
-  t.field({
-    type: AssociatedStudentRef,
-    authScopes: { loggedIn: true },
-    nullable: true,
-    args: {
-      studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      // Reusing AssociatedStudentRef but fetching a single one.
-      // Need a student-specific service method or repository call.
-      // AssociatedStudentResult is defined as { id, name, status, teacherName, ... }
-      return ParentProfileService.getStudentById(requireUserId(ctx), args.studentId, ctx.locale);
-    },
-  })
-);
-
 // ─── Mutations ───────────────────────────────────────────────────────────────
-
-gqlSchemaBuilder.mutationField("deactivateParent", t =>
-  t.field({
-    type: DeactivateParentResultRef,
-    authScopes: { permission: AppPermission.PARENT_MANAGE_STATUS },
-    args: {
-      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      return ParentProfileService.deactivateAccount(requireUserId(ctx), args.parentId, ctx.locale);
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("reactivateParent", t =>
-  t.field({
-    type: ReactivateParentResultRef,
-    authScopes: { permission: AppPermission.PARENT_MANAGE_STATUS },
-    args: {
-      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      return ParentProfileService.reactivateAccount(requireUserId(ctx), args.parentId, ctx.locale);
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("updateStudentQuota", t =>
-  t.field({
-    type: EditQuotaResultRef,
-    authScopes: { permission: AppPermission.STUDENT_QUOTA_EDIT_EDIT_OTHER },
-    args: {
-      studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-      newClassesRemaining: t.arg.int({ required: true, directives: { constraint: { min: 0, max: 1000000 } } }),
-      expectedVersion: t.arg.int({ required: false }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      return StudentManagementService.editQuota(
-        requireUserId(ctx),
-        args.studentId,
-        tErrors,
-        args.newClassesRemaining,
-        args.expectedVersion ?? undefined
-      );
-    },
-  })
-);

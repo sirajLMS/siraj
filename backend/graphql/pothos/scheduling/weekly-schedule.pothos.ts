@@ -7,7 +7,7 @@ import type {
   WeeklyWorkloadMetricsReturnType,
 } from "@/backend/types";
 
-const WeeklyScheduleClassRef = gqlSchemaBuilder.objectRef<WeeklyScheduleClassReturnType>("WeeklyScheduleClass");
+export const WeeklyScheduleClassRef = gqlSchemaBuilder.objectRef<WeeklyScheduleClassReturnType>("WeeklyScheduleClass");
 
 export const WeeklyScheduleClassPothosObject = WeeklyScheduleClassRef.implement({
   fields: t => ({
@@ -24,7 +24,7 @@ export const WeeklyScheduleClassPothosObject = WeeklyScheduleClassRef.implement(
   }),
 });
 
-const WeeklyScheduleGridRef = gqlSchemaBuilder.objectRef<WeeklyScheduleGridReturnType>("WeeklyScheduleGrid");
+export const WeeklyScheduleGridRef = gqlSchemaBuilder.objectRef<WeeklyScheduleGridReturnType>("WeeklyScheduleGrid");
 
 export const WeeklyScheduleGridPothosObject = WeeklyScheduleGridRef.implement({
   fields: t => ({
@@ -37,7 +37,8 @@ export const WeeklyScheduleGridPothosObject = WeeklyScheduleGridRef.implement({
   }),
 });
 
-const WeeklyWorkloadMetricsRef = gqlSchemaBuilder.objectRef<WeeklyWorkloadMetricsReturnType>("WeeklyWorkloadMetrics");
+export const WeeklyWorkloadMetricsRef =
+  gqlSchemaBuilder.objectRef<WeeklyWorkloadMetricsReturnType>("WeeklyWorkloadMetrics");
 
 export const WeeklyWorkloadMetricsPothosObject = WeeklyWorkloadMetricsRef.implement({
   fields: t => ({

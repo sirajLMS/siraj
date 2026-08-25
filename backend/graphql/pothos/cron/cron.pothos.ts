@@ -26,7 +26,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 // ─── Object Types ────────────────────────────────────────────────────────────
 
-const CronScheduleObject = gqlSchemaBuilder.objectRef<CronScheduleReturnType>("CronSchedule").implement({
+export const CronScheduleObject = gqlSchemaBuilder.objectRef<CronScheduleReturnType>("CronSchedule").implement({
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
@@ -51,7 +51,7 @@ const CronScheduleObject = gqlSchemaBuilder.objectRef<CronScheduleReturnType>("C
   }),
 });
 
-const CronRunObject = gqlSchemaBuilder.objectRef<CronRunReturnType>("CronRun").implement({
+export const CronRunObject = gqlSchemaBuilder.objectRef<CronRunReturnType>("CronRun").implement({
   fields: t => ({
     id: t.exposeString("id"),
     scheduleId: t.exposeString("scheduleId"),
@@ -74,7 +74,7 @@ const CronRunObject = gqlSchemaBuilder.objectRef<CronRunReturnType>("CronRun").i
   }),
 });
 
-const CronQueueStatsObject = gqlSchemaBuilder.objectRef<CronQueueStats>("CronQueueStats").implement({
+export const CronQueueStatsObject = gqlSchemaBuilder.objectRef<CronQueueStats>("CronQueueStats").implement({
   fields: t => ({
     // CronQueueStats has no natural id — this synthetic field exists solely for Apollo cache normalization.
     id: t.string({ resolve: () => "cron-queue-stats" }),
@@ -89,7 +89,7 @@ const CronQueueStatsObject = gqlSchemaBuilder.objectRef<CronQueueStats>("CronQue
   }),
 });
 
-const CronPaginatedSchedulesObject = gqlSchemaBuilder
+export const CronPaginatedSchedulesObject = gqlSchemaBuilder
   .objectRef<CronScheduleListResult>("CronPaginatedSchedules")
   .implement({
     fields: t => ({
@@ -98,7 +98,7 @@ const CronPaginatedSchedulesObject = gqlSchemaBuilder
     }),
   });
 
-const CronPaginatedRunsObject = gqlSchemaBuilder.objectRef<CronRunListResult>("CronPaginatedRuns").implement({
+export const CronPaginatedRunsObject = gqlSchemaBuilder.objectRef<CronRunListResult>("CronPaginatedRuns").implement({
   fields: t => ({
     rows: t.expose("rows", { type: [CronRunObject] }),
     totalCount: t.exposeInt("totalCount"),
@@ -114,7 +114,7 @@ const CronPaginatedRunsObject = gqlSchemaBuilder.objectRef<CronRunListResult>("C
 // a TypeScript interface/type, so these definitions are intentionally maintained in
 // parallel. Keep them in sync with the canonical types when fields change.
 
-const CronScheduleListInput = gqlSchemaBuilder.inputType("CronScheduleListInput", {
+export const CronScheduleListInput = gqlSchemaBuilder.inputType("CronScheduleListInput", {
   fields: t => ({
     status: t.field({ type: CronScheduleStatusPothosEnum, required: false }),
     jobKind: t.field({ type: CronJobKindPothosEnum, required: false }),
@@ -124,7 +124,7 @@ const CronScheduleListInput = gqlSchemaBuilder.inputType("CronScheduleListInput"
   }),
 });
 
-const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
+export const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
   fields: t => ({
     scheduleId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     status: t.field({ type: CronRunStatusPothosEnum, required: false }),
@@ -137,7 +137,9 @@ const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
 });
 
 /** Fields shared by both submit and update input types — all optional. */
-function commonScheduleOptionalFields(t: Parameters<Parameters<typeof gqlSchemaBuilder.inputType>[1]["fields"]>[0]) {
+export function commonScheduleOptionalFields(
+  t: Parameters<Parameters<typeof gqlSchemaBuilder.inputType>[1]["fields"]>[0]
+) {
   return {
     description: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
     payload: t.field({ type: "JSON", required: false }),
@@ -149,7 +151,7 @@ function commonScheduleOptionalFields(t: Parameters<Parameters<typeof gqlSchemaB
   };
 }
 
-const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmitInput", {
+export const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmitInput", {
   fields: t => ({
     name: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
     cronExpression: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
@@ -158,7 +160,7 @@ const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmi
   }),
 });
 
-const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronScheduleUpdateInput", {
+export const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronScheduleUpdateInput", {
   fields: t => ({
     name: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     cronExpression: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
@@ -167,21 +169,21 @@ const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronScheduleUpdat
   }),
 });
 
-const CronScheduleDeleteInput = gqlSchemaBuilder.inputType("CronScheduleDeleteInput", {
+export const CronScheduleDeleteInput = gqlSchemaBuilder.inputType("CronScheduleDeleteInput", {
   fields: t => ({
     id: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     hard: t.boolean({ required: false }),
   }),
 });
 
-const CronRunTriggerInput = gqlSchemaBuilder.inputType("CronRunTriggerInput", {
+export const CronRunTriggerInput = gqlSchemaBuilder.inputType("CronRunTriggerInput", {
   fields: t => ({
     id: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     payload: t.field({ type: "JSON", required: false }),
   }),
 });
 
-const CronRunRetryInput = gqlSchemaBuilder.inputType("CronRunRetryInput", {
+export const CronRunRetryInput = gqlSchemaBuilder.inputType("CronRunRetryInput", {
   fields: t => ({
     runId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     attempt: t.int({ required: false }),
@@ -190,14 +192,14 @@ const CronRunRetryInput = gqlSchemaBuilder.inputType("CronRunRetryInput", {
 
 // ─── Type Guards ──────────────────────────────────────────────────────────────
 
-function isRecordOrNull(value: unknown): value is Record<string, unknown> | null {
+export function isRecordOrNull(value: unknown): value is Record<string, unknown> | null {
   if (value === null) return true;
   return typeof value === "object" && !Array.isArray(value);
 }
 
 // ─── Error Handler ────────────────────────────────────────────────────────────
 
-function handleNotFoundError(result: unknown, id: string, tErrors: ErrorsLabels): asserts result {
+export function handleNotFoundError(result: unknown, id: string, tErrors: ErrorsLabels): asserts result {
   if (result == null) {
     throw new GraphQLError(tErrors.notFound, {
       extensions: { code: "NOT_FOUND", id },
@@ -206,42 +208,6 @@ function handleNotFoundError(result: unknown, id: string, tErrors: ErrorsLabels)
 }
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
-
-gqlSchemaBuilder.queryField("cronSchedule", t =>
-  t.field({
-    type: CronScheduleObject,
-    nullable: true,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
-    args: {
-      id: t.arg.id({ required: true }),
-    },
-    description: "Fetch a single cron schedule by ID.",
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      const result = await CronService.getSchedule(args.id);
-      handleNotFoundError(result, args.id, tErrors);
-      return result;
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("cronRun", t =>
-  t.field({
-    type: CronRunObject,
-    nullable: true,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
-    args: {
-      id: t.arg.id({ required: true }),
-    },
-    description: "Fetch a single cron run by ID.",
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      const result = await CronService.getRunById(args.id);
-      handleNotFoundError(result, args.id, tErrors);
-      return result;
-    },
-  })
-);
 
 gqlSchemaBuilder.queryFields(t => ({
   cronSchedules: t.field({

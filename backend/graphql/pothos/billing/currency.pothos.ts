@@ -1,19 +1,17 @@
-import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CountryCodePothosObject, CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { CurrencyCatalogService as CurrencyService } from "@/backend/services";
 import type { SupportedCurrencyReturnType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
-async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
+export async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
   const actorUserId = await requireAuth(ctx);
   const tErrors = ctx.t().errorsTranslations;
   return { actorUserId, tErrors };
 }
 
-const SupportedCurrencyRef = gqlSchemaBuilder.objectRef<SupportedCurrencyReturnType>("SupportedCurrency");
+export const SupportedCurrencyRef = gqlSchemaBuilder.objectRef<SupportedCurrencyReturnType>("SupportedCurrency");
 
 export const SupportedCurrencyPothosObject = SupportedCurrencyRef.implement({
   fields: t => ({
@@ -36,50 +34,3 @@ export const SupportedCurrencyUpsertInputPothos = gqlSchemaBuilder.inputType("Su
     sortOrder: t.int({ required: false, directives: { constraint: { min: 0, max: 999 } } }),
   }),
 });
-
-gqlSchemaBuilder.queryField("supportedCurrencies", t =>
-  t.field({
-    type: [SupportedCurrencyPothosObject],
-    authScopes: { loggedIn: true },
-    args: {
-      activeOnly: t.arg.boolean({ required: false }),
-    },
-    resolve: (_root, args) =>
-      (args.activeOnly ?? true) ? CurrencyService.listActiveCurrencies() : CurrencyService.listAllCurrencies(),
-  })
-);
-
-gqlSchemaBuilder.mutationField("activateSupportedCurrency", t =>
-  t.field({
-    type: SupportedCurrencyPothosObject,
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCIES, notImpersonating: true },
-    args: {
-      input: t.arg({ type: SupportedCurrencyUpsertInputPothos, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      return CurrencyService.activateCurrency(
-        actorUserId,
-        {
-          ...args.input,
-          sortOrder: args.input.sortOrder ?? undefined,
-        },
-        tErrors
-      );
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("deactivateSupportedCurrency", t =>
-  t.field({
-    type: "Boolean",
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCIES, notImpersonating: true },
-    args: {
-      code: t.arg({ type: CurrencyCodePothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      return CurrencyService.deactivateCurrency(actorUserId, args.code, tErrors);
-    },
-  })
-);

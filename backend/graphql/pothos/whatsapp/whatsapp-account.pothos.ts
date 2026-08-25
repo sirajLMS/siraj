@@ -14,7 +14,7 @@ import type {
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
-const WhatsappAccountRef = gqlSchemaBuilder.objectRef<WhatsappAccountReturnType>("WhatsappAccount");
+export const WhatsappAccountRef = gqlSchemaBuilder.objectRef<WhatsappAccountReturnType>("WhatsappAccount");
 
 export const WhatsappAccountPothosObject = WhatsappAccountRef.implement({
   fields: t => ({
@@ -66,7 +66,8 @@ export const WhatsappAccountUpdateInputPothosObject = gqlSchemaBuilder.inputType
 // WhatsappTemplateSnapshot and WhatsappSyncFromMetaReturnType are defined
 // in @/backend/types/whatsapp/whatsapp-account.types.ts (REQ-8.1 — no local type defs in Pothos).
 
-const WhatsappTemplateSnapshotRef = gqlSchemaBuilder.objectRef<WhatsappTemplateSnapshot>("WhatsappTemplateSnapshot");
+export const WhatsappTemplateSnapshotRef =
+  gqlSchemaBuilder.objectRef<WhatsappTemplateSnapshot>("WhatsappTemplateSnapshot");
 
 export const WhatsappTemplateSnapshotPothosObject = WhatsappTemplateSnapshotRef.implement({
   fields: t => ({
@@ -79,7 +80,7 @@ export const WhatsappTemplateSnapshotPothosObject = WhatsappTemplateSnapshotRef.
   }),
 });
 
-const WhatsappSyncFromMetaResultRef =
+export const WhatsappSyncFromMetaResultRef =
   gqlSchemaBuilder.objectRef<WhatsappSyncFromMetaReturnType>("WhatsappSyncFromMetaResult");
 
 export const WhatsappSyncFromMetaResultPothosObject = WhatsappSyncFromMetaResultRef.implement({

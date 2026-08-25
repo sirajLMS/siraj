@@ -145,9 +145,17 @@ function transformCreateIndex(trimmed: string): string | null {
   return null;
 }
 
+function transformRenameConstraint(trimmed: string): string | null {
+  if (/\bRENAME\s+CONSTRAINT\b/i.test(trimmed) && !/DO\s+\$\$/i.test(trimmed)) {
+    const body = trimmed.endsWith(";") ? trimmed : `${trimmed};`;
+    return `DO $$ BEGIN\n    ${body}\nEXCEPTION WHEN undefined_object OR duplicate_object OR duplicate_table THEN NULL;\nEND $$;`;
+  }
+  return null;
+}
+
 /**
  * Transforms a single SQL statement to be idempotent for PostgreSQL.
- * Handles `CREATE TYPE`, `CREATE TABLE`, `CREATE [UNIQUE] INDEX`, `ADD COLUMN`, `ADD CONSTRAINT`, `ALTER TYPE ... ADD VALUE`, `ALTER COLUMN ... TYPE`, and join-table `INSERT`s.
+ * Handles `CREATE TYPE`, `CREATE TABLE`, `CREATE [UNIQUE] INDEX`, `ADD COLUMN`, `ADD CONSTRAINT`, `RENAME CONSTRAINT`, `ALTER TYPE ... ADD VALUE`, `ALTER COLUMN ... TYPE`, and join-table `INSERT`s.
  *
  * @param stmt The SQL statement string to transform.
  * @returns The transformed, idempotent SQL statement.
@@ -173,6 +181,9 @@ export function transformStatementIdempotent(stmt: string): string {
 
   const dropObject = transformDropObject(trimmed);
   if (dropObject) return dropObject;
+
+  const renameConstraint = transformRenameConstraint(trimmed);
+  if (renameConstraint) return renameConstraint;
 
   const withColumn = transformAddColumn(trimmed);
 

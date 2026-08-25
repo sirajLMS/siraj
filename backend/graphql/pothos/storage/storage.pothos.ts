@@ -64,13 +64,15 @@ export const FileUsageInfoPothosObject = gqlSchemaBuilder.objectRef<Types.FileUs
   }),
 });
 
-const StorageItemPothosInterface = gqlSchemaBuilder.interfaceRef<Types.StorageObject>("StorageObject").implement({
-  fields: t => ({
-    path: t.exposeString("path", { nullable: false }),
-    name: t.exposeString("name"),
-    isProtected: t.exposeBoolean("isProtected"),
-  }),
-});
+export const StorageItemPothosInterface = gqlSchemaBuilder
+  .interfaceRef<Types.StorageObject>("StorageObject")
+  .implement({
+    fields: t => ({
+      path: t.exposeString("path", { nullable: false }),
+      name: t.exposeString("name"),
+      isProtected: t.exposeBoolean("isProtected"),
+    }),
+  });
 
 export const FileInfoPothosObject = gqlSchemaBuilder.objectRef<Types.FileInfo>("FileInfo").implement({
   interfaces: [StorageItemPothosInterface],

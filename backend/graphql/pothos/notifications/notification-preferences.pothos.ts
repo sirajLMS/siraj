@@ -5,7 +5,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { NotificationPreferenceReturnType, NotificationPreferenceUpdateInput } from "@/backend/types";
 
-const NotificationPreferenceRef =
+export const NotificationPreferenceRef =
   gqlSchemaBuilder.objectRef<NotificationPreferenceReturnType>("NotificationPreference");
 
 export const NotificationPreferencePothosObject = NotificationPreferenceRef.implement({

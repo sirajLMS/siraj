@@ -69,7 +69,7 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-const TeacherOnboardingRef = gqlSchemaBuilder.objectRef<TeacherOnboardingReturnType>("TeacherOnboarding");
+export const TeacherOnboardingRef = gqlSchemaBuilder.objectRef<TeacherOnboardingReturnType>("TeacherOnboarding");
 
 export const TeacherOnboardingPothosObject = TeacherOnboardingRef.implement({
   description: "Teacher onboarding profile with resolved metadata",

@@ -3,13 +3,7 @@ import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import {
-  auditEnvConfigChange,
-  deleteEnvConfigOverride,
-  EnvConfigServiceError,
-  listEnvConfigEntries,
-  upsertEnvConfigOverride,
-} from "@/backend/services";
+import { auditEnvConfigChange, EnvConfigServiceError, listEnvConfigEntries } from "@/backend/services";
 import type {
   EnvConfigDeleteReturnType,
   EnvConfigEntry,
@@ -20,7 +14,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
-const EnvConfigEntryRef = gqlSchemaBuilder.objectRef<EnvConfigEntry>("EnvConfigEntry");
+export const EnvConfigEntryRef = gqlSchemaBuilder.objectRef<EnvConfigEntry>("EnvConfigEntry");
 
 export const EnvConfigEntryPothosObject = EnvConfigEntryRef.implement({
   fields: t => ({
@@ -41,7 +35,7 @@ export const EnvConfigEntryPothosObject = EnvConfigEntryRef.implement({
   }),
 });
 
-const EnvConfigUpsertResultRef = gqlSchemaBuilder.objectRef<EnvConfigUpsertReturnType>("EnvConfigUpsertResult");
+export const EnvConfigUpsertResultRef = gqlSchemaBuilder.objectRef<EnvConfigUpsertReturnType>("EnvConfigUpsertResult");
 
 export const EnvConfigUpsertResultPothosObject = EnvConfigUpsertResultRef.implement({
   fields: t => ({
@@ -56,7 +50,7 @@ export const EnvConfigUpsertResultPothosObject = EnvConfigUpsertResultRef.implem
   }),
 });
 
-const EnvConfigDeleteResultRef = gqlSchemaBuilder.objectRef<EnvConfigDeleteReturnType>("EnvConfigDeleteResult");
+export const EnvConfigDeleteResultRef = gqlSchemaBuilder.objectRef<EnvConfigDeleteReturnType>("EnvConfigDeleteResult");
 
 export const EnvConfigDeleteResultPothosObject = EnvConfigDeleteResultRef.implement({
   fields: t => ({
@@ -83,12 +77,12 @@ export const EnvConfigUpsertInputPothosObject = gqlSchemaBuilder
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-async function findEnvConfigEntry(key: string): Promise<EnvConfigEntry | null> {
+export async function findEnvConfigEntry(key: string): Promise<EnvConfigEntry | null> {
   const entries = await listEnvConfigEntries();
   return entries.find(entry => entry.key === key) ?? null;
 }
 
-function handleEnvConfigServiceError(error: unknown, tErrors: ErrorsLabels): never {
+export function handleEnvConfigServiceError(error: unknown, tErrors: ErrorsLabels): never {
   if (error instanceof EnvConfigServiceError) {
     const message = error.code === "ENOT_IN_REGISTRY" ? tErrors.notFound : tErrors.invalidInput;
     throw new GraphQLError(message, {
@@ -99,13 +93,15 @@ function handleEnvConfigServiceError(error: unknown, tErrors: ErrorsLabels): nev
   throw error;
 }
 
-async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
+export async function resolveEnvConfigAuthCtx(
+  ctx: BaseContext
+): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
   const actorUserId = await requireAuth(ctx);
   const tErrors = ctx.t().errorsTranslations;
   return { actorUserId, tErrors };
 }
 
-function canViewEnvironmentConfig(ctx: BaseContext): boolean {
+export function canViewEnvironmentConfig(ctx: BaseContext): boolean {
   return (
     ctx.isSuperAdmin ||
     ctx.permissions.includes(AppPermission.SETTINGS_VIEW) ||
@@ -113,7 +109,7 @@ function canViewEnvironmentConfig(ctx: BaseContext): boolean {
   );
 }
 
-function assertCanViewEnvironmentConfig(ctx: BaseContext, tErrors: ErrorsLabels): void {
+export function assertCanViewEnvironmentConfig(ctx: BaseContext, tErrors: ErrorsLabels): void {
   if (!canViewEnvironmentConfig(ctx)) {
     throw new GraphQLError(tErrors.insufficientPermissions, {
       extensions: { code: "FORBIDDEN" },
@@ -125,7 +121,7 @@ function assertCanViewEnvironmentConfig(ctx: BaseContext, tErrors: ErrorsLabels)
  * Executes an env config mutation with standard auth, audit, and error handling.
  * Extracts the common pattern from upsert/delete mutations to eliminate duplication.
  */
-async function executeEnvConfigMutation<TResult>(
+export async function executeEnvConfigMutation<TResult>(
   ctx: BaseContext,
   key: string,
   operation: "upsert" | "delete",
@@ -133,7 +129,7 @@ async function executeEnvConfigMutation<TResult>(
   auditValue?: string,
   priorValue?: string
 ): Promise<TResult> {
-  const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
+  const { actorUserId, tErrors } = await resolveEnvConfigAuthCtx(ctx);
   const priorEntry = await findEnvConfigEntry(key);
 
   try {
@@ -147,49 +143,4 @@ async function executeEnvConfigMutation<TResult>(
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
-gqlSchemaBuilder.queryField("envConfigEntries", t =>
-  t.field({
-    type: [EnvConfigEntryPothosObject],
-    authScopes: { loggedIn: true },
-    resolve: async (_root, _args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      await requireAuth(ctx);
-      assertCanViewEnvironmentConfig(ctx, tErrors);
-      return listEnvConfigEntries();
-    },
-  })
-);
-
 // ─── Mutations ────────────────────────────────────────────────────────────────
-
-gqlSchemaBuilder.mutationField("upsertEnvConfigEntry", t =>
-  t.field({
-    type: EnvConfigUpsertResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_ENV, notImpersonating: true },
-    args: {
-      input: t.arg({ type: EnvConfigUpsertInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      return executeEnvConfigMutation(
-        ctx,
-        args.input.key,
-        "upsert",
-        () => upsertEnvConfigOverride(args.input),
-        args.input.value
-      );
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("deleteEnvConfigEntry", t =>
-  t.field({
-    type: EnvConfigDeleteResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_ENV, notImpersonating: true },
-    args: {
-      key: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      return executeEnvConfigMutation(ctx, args.key, "delete", () => deleteEnvConfigOverride(args.key));
-    },
-  })
-);

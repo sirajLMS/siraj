@@ -211,3 +211,11 @@ export interface CronDefinition {
   defaultSchedule: string;
   alwaysInclude: boolean;
 }
+
+// ── Cron queue adapter types (relocated from service layer, R2) ──
+
+/** Adapter-internal interface for a pg-compatible connection pool. */
+export interface QueryablePool {
+  query(text: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[]; rowCount: number }>;
+  end(): Promise<void>;
+}

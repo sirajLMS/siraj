@@ -9,7 +9,7 @@ import type {
   StartImpersonationReturnType,
 } from "@/backend/types";
 
-const ImpersonationStatusPothosObjectRef =
+export const ImpersonationStatusPothosObjectRef =
   gqlSchemaBuilder.objectRef<ImpersonationStatusReturnType>("ImpersonationStatus");
 
 export const ImpersonationStatusPothosObject = ImpersonationStatusPothosObjectRef.implement({
@@ -34,7 +34,7 @@ export const ImpersonationStatusPothosObject = ImpersonationStatusPothosObjectRe
   }),
 });
 
-const StartImpersonationResponsePothosObjectRef = gqlSchemaBuilder.objectRef<
+export const StartImpersonationResponsePothosObjectRef = gqlSchemaBuilder.objectRef<
   StartImpersonationReturnType & { targetUserId: string }
 >("StartImpersonationResponse");
 
@@ -52,7 +52,7 @@ export const StartImpersonationResponsePothosObject = StartImpersonationResponse
   }),
 });
 
-const EndImpersonationResponsePothosObjectRef =
+export const EndImpersonationResponsePothosObjectRef =
   gqlSchemaBuilder.objectRef<EndImpersonationReturnType>("EndImpersonationResponse");
 
 export const EndImpersonationResponsePothosObject = EndImpersonationResponsePothosObjectRef.implement({

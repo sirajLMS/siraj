@@ -13,16 +13,16 @@ import type {
 } from "@/backend/types";
 
 // Extract the actual SchemaTypes from the builder instance
-type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
-type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
-type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
+export type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
+export type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
+export type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
 
-type MeetingConfigBaseShape = Pick<
+export type MeetingConfigBaseShape = Pick<
   ClassMeetingConfigReturnType,
   "providerId" | "provider" | "details" | "hasSecret" | "providerMetadata" | "createdAt" | "updatedAt"
 >;
 
-const MeetingProviderFieldSchemaRef =
+export const MeetingProviderFieldSchemaRef =
   gqlSchemaBuilder.objectRef<MeetingProviderFieldSchema>("MeetingProviderFieldSchema");
 
 export const MeetingProviderFieldSchemaPothosObject = MeetingProviderFieldSchemaRef.implement({
@@ -35,7 +35,7 @@ export const MeetingProviderFieldSchemaPothosObject = MeetingProviderFieldSchema
   }),
 });
 
-const MeetingProviderRef = gqlSchemaBuilder.objectRef<MeetingProviderSelectType>("MeetingProvider");
+export const MeetingProviderRef = gqlSchemaBuilder.objectRef<MeetingProviderSelectType>("MeetingProvider");
 
 export const MeetingProviderPothosObject = MeetingProviderRef.implement({
   fields: t => ({
@@ -55,7 +55,7 @@ export const MeetingProviderPothosObject = MeetingProviderRef.implement({
   }),
 });
 
-const MeetingConfigDetailsRef = gqlSchemaBuilder.objectRef<MeetingConfigDetails>("MeetingConfigDetails");
+export const MeetingConfigDetailsRef = gqlSchemaBuilder.objectRef<MeetingConfigDetails>("MeetingConfigDetails");
 
 export const MeetingConfigDetailsPothosObject = MeetingConfigDetailsRef.implement({
   fields: t => ({
@@ -66,7 +66,7 @@ export const MeetingConfigDetailsPothosObject = MeetingConfigDetailsRef.implemen
   }),
 });
 
-function meetingConfigSharedFields(t: PothosObjectFieldBuilder<MeetingConfigBaseShape>) {
+export function meetingConfigSharedFields(t: PothosObjectFieldBuilder<MeetingConfigBaseShape>) {
   return {
     details: t.field({ type: MeetingConfigDetailsPothosObject, resolve: parent => parent.details }),
     hasSecret: t.exposeBoolean("hasSecret", { nullable: true }),
@@ -96,7 +96,7 @@ function meetingConfigSharedFields(t: PothosObjectFieldBuilder<MeetingConfigBase
   };
 }
 
-const UserMeetingConfigRef = gqlSchemaBuilder.objectRef<UserMeetingConfigReturnType>("UserMeetingConfig");
+export const UserMeetingConfigRef = gqlSchemaBuilder.objectRef<UserMeetingConfigReturnType>("UserMeetingConfig");
 
 export const UserMeetingConfigPothosObject = UserMeetingConfigRef.implement({
   fields: t => ({
@@ -122,7 +122,7 @@ export const UserMeetingConfigPothosObject = UserMeetingConfigRef.implement({
   }),
 });
 
-const MeetingProviderFieldSchemaInputRef = gqlSchemaBuilder.inputRef<MeetingProviderFieldSchemaInput>(
+export const MeetingProviderFieldSchemaInputRef = gqlSchemaBuilder.inputRef<MeetingProviderFieldSchemaInput>(
   "MeetingProviderFieldSchemaInput"
 );
 
@@ -136,7 +136,8 @@ export const MeetingProviderFieldSchemaInputPothos = MeetingProviderFieldSchemaI
   }),
 });
 
-const MeetingConfigDetailsInputRef = gqlSchemaBuilder.inputRef<MeetingConfigDetails>("MeetingConfigDetailsInput");
+export const MeetingConfigDetailsInputRef =
+  gqlSchemaBuilder.inputRef<MeetingConfigDetails>("MeetingConfigDetailsInput");
 
 export const MeetingConfigDetailsInputPothos = MeetingConfigDetailsInputRef.implement({
   fields: t => ({
@@ -146,7 +147,7 @@ export const MeetingConfigDetailsInputPothos = MeetingConfigDetailsInputRef.impl
   }),
 });
 
-function meetingProviderInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
+export function meetingProviderInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
     slug: t.string({ required, directives: { constraint: { maxLength: 100 } } }),
     name: t.field({ type: "LocalizedString", required }),
@@ -161,14 +162,14 @@ function meetingProviderInputCommonFields(t: PothosInputFieldBuilder, required: 
   };
 }
 
-function meetingConfigDetailsInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
+export function meetingConfigDetailsInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
     password: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
     details: t.field({ type: MeetingConfigDetailsInputPothos, required }),
   };
 }
 
-function meetingConfigLabelInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
+export function meetingConfigLabelInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
     providerId: t.string({ required }),
     label: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
@@ -199,7 +200,7 @@ export const UserMeetingConfigUpdateInputPothos = gqlSchemaBuilder.inputType("Us
   }),
 });
 
-const ClassMeetingConfigRef = gqlSchemaBuilder.objectRef<ClassMeetingConfigReturnType>("ClassMeetingConfig");
+export const ClassMeetingConfigRef = gqlSchemaBuilder.objectRef<ClassMeetingConfigReturnType>("ClassMeetingConfig");
 
 export const ClassMeetingConfigPothosObject = ClassMeetingConfigRef.implement({
   fields: t => ({
@@ -243,7 +244,8 @@ export const GenerateMeetingUrlInputPothos = gqlSchemaBuilder.inputType("Generat
   }),
 });
 
-const GenerateMeetingUrlResultRef = gqlSchemaBuilder.objectRef<GenerateMeetingUrlResult>("GenerateMeetingUrlResult");
+export const GenerateMeetingUrlResultRef =
+  gqlSchemaBuilder.objectRef<GenerateMeetingUrlResult>("GenerateMeetingUrlResult");
 
 export const GenerateMeetingUrlResultPothosObject = GenerateMeetingUrlResultRef.implement({
   fields: t => ({

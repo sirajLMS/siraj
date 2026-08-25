@@ -1,10 +1,9 @@
-import { getServerTranslations } from "@/shared/locale";
 import type { UrgentComplaintResponseSmsData } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale";
 
 function sanitizeSms(text: string): string {
   return text.replace(/[\r\n\t]/g, " ").trim();
 }
-
 
 export const renderUrgentComplaintResponseSms = async (
   data: UrgentComplaintResponseSmsData,

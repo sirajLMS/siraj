@@ -16,7 +16,7 @@ import type {
   TeacherOwnProfileReturnType,
 } from "@/backend/types";
 
-const TeacherAssignedStudentRef =
+export const TeacherAssignedStudentRef =
   gqlSchemaBuilder.objectRef<TeacherAssignedStudentReturnType>("TeacherAssignedStudent");
 
 export const TeacherAssignedStudentPothosObject = TeacherAssignedStudentRef.implement({
@@ -36,7 +36,7 @@ export const TeacherAssignedStudentPothosObject = TeacherAssignedStudentRef.impl
   }),
 });
 
-const TeacherAssignedStudentsResultRef = gqlSchemaBuilder.objectRef<TeacherAssignedStudentsResult>(
+export const TeacherAssignedStudentsResultRef = gqlSchemaBuilder.objectRef<TeacherAssignedStudentsResult>(
   "TeacherAssignedStudentsResult"
 );
 
@@ -48,7 +48,7 @@ export const TeacherAssignedStudentsResultPothosObject = TeacherAssignedStudents
   }),
 });
 
-const TeacherOwnProfileRef = gqlSchemaBuilder.objectRef<TeacherOwnProfileReturnType>("TeacherOwnProfile");
+export const TeacherOwnProfileRef = gqlSchemaBuilder.objectRef<TeacherOwnProfileReturnType>("TeacherOwnProfile");
 
 export const TeacherOwnProfilePothosObject = TeacherOwnProfileRef.implement({
   fields: t => ({
@@ -73,7 +73,8 @@ export const TeacherOwnProfilePothosObject = TeacherOwnProfileRef.implement({
   }),
 });
 
-const TeacherAssignedClassRef = gqlSchemaBuilder.objectRef<TeacherAssignedClassReturnType>("TeacherAssignedClass");
+export const TeacherAssignedClassRef =
+  gqlSchemaBuilder.objectRef<TeacherAssignedClassReturnType>("TeacherAssignedClass");
 
 export const TeacherAssignedClassPothosObject = TeacherAssignedClassRef.implement({
   fields: t => ({
@@ -90,7 +91,7 @@ export const TeacherAssignedClassPothosObject = TeacherAssignedClassRef.implemen
   }),
 });
 
-const TeacherAssignedClassesResultRef =
+export const TeacherAssignedClassesResultRef =
   gqlSchemaBuilder.objectRef<TeacherAssignedClassesResult>("TeacherAssignedClassesResult");
 
 export const TeacherAssignedClassesResultPothosObject = TeacherAssignedClassesResultRef.implement({

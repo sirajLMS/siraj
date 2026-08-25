@@ -2,7 +2,8 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { teacherNoteInputFields } from "@/backend/graphql/pothos/teachers/__shared__/teacherNoteFieldHelpers";
 import type { SupportContactReturnType, TeacherImportantNoteReturnType } from "@/backend/types";
 
-const TeacherImportantNoteRef = gqlSchemaBuilder.objectRef<TeacherImportantNoteReturnType>("TeacherImportantNote");
+export const TeacherImportantNoteRef =
+  gqlSchemaBuilder.objectRef<TeacherImportantNoteReturnType>("TeacherImportantNote");
 
 export const TeacherImportantNotePothosObject = TeacherImportantNoteRef.implement({
   fields: t => ({
@@ -17,7 +18,7 @@ export const TeacherImportantNotePothosObject = TeacherImportantNoteRef.implemen
   }),
 });
 
-const SupportContactRef = gqlSchemaBuilder.objectRef<SupportContactReturnType>("SupportContact");
+export const SupportContactRef = gqlSchemaBuilder.objectRef<SupportContactReturnType>("SupportContact");
 
 export const SupportContactPothosObject = SupportContactRef.implement({
   fields: t => ({

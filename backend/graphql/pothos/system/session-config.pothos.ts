@@ -3,15 +3,14 @@ import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import {
-  SessionConfigService,
-  SessionConfigValidationError,
-  type SessionConfigValidationErrorCode,
-} from "@/backend/services";
+import { SessionConfigValidationError, type SessionConfigValidationErrorCode } from "@/backend/services";
 import type { SessionConfigSelectType, SessionConfigUpsertInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
-function resolveSessionConfigValidationMessage(code: SessionConfigValidationErrorCode, tErrors: ErrorsLabels): string {
+export function resolveSessionConfigValidationMessage(
+  code: SessionConfigValidationErrorCode,
+  tErrors: ErrorsLabels
+): string {
   switch (code) {
     case "EROLE_NAME_REQUIRED":
       return tErrors.sessionConfig.roleNameRequired;
@@ -24,7 +23,7 @@ function resolveSessionConfigValidationMessage(code: SessionConfigValidationErro
   }
 }
 
-function handleSessionConfigServiceError(error: unknown, tErrors: ErrorsLabels): never {
+export function handleSessionConfigServiceError(error: unknown, tErrors: ErrorsLabels): never {
   if (error instanceof SessionConfigValidationError) {
     throw new GraphQLError(resolveSessionConfigValidationMessage(error.code, tErrors), {
       extensions: { code: error.code },
@@ -38,7 +37,7 @@ function handleSessionConfigServiceError(error: unknown, tErrors: ErrorsLabels):
  * Helper to execute a session-config service operation with standard auth + error handling.
  * Extracts common pattern from mutation resolvers to eliminate CodeScene duplication warnings.
  */
-async function executeSessionConfigMutation<T>(
+export async function executeSessionConfigMutation<T>(
   ctx: BaseContext,
   operation: (userId: string, tErrors: ErrorsLabels) => Promise<T>
 ): Promise<T> {
@@ -56,14 +55,14 @@ async function executeSessionConfigMutation<T>(
 /**
  * Helper for query fields that need auth + permission check but no mutation.
  */
-async function executeSessionConfigQuery<T>(ctx: BaseContext, operation: () => Promise<T>): Promise<T> {
+export async function executeSessionConfigQuery<T>(ctx: BaseContext, operation: () => Promise<T>): Promise<T> {
   const tErrors = ctx.t().errorsTranslations;
   await requireAuth(ctx);
   assertCanViewSessionConfig(ctx, tErrors);
   return operation();
 }
 
-const SessionConfigRef = gqlSchemaBuilder.objectRef<SessionConfigSelectType>("SessionConfig");
+export const SessionConfigRef = gqlSchemaBuilder.objectRef<SessionConfigSelectType>("SessionConfig");
 
 export const SessionConfigPothosObject = SessionConfigRef.implement({
   description: "Per-role session TTL and concurrent-session limits for the Settings Session & Security tab.",
@@ -88,7 +87,7 @@ export const SessionConfigUpsertInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-function canViewSessionConfig(ctx: BaseContext): boolean {
+export function canViewSessionConfig(ctx: BaseContext): boolean {
   return (
     ctx.isSuperAdmin ||
     ctx.permissions.includes(AppPermission.SETTINGS_VIEW) ||
@@ -96,75 +95,10 @@ function canViewSessionConfig(ctx: BaseContext): boolean {
   );
 }
 
-function assertCanViewSessionConfig(ctx: BaseContext, tErrors: ErrorsLabels): void {
+export function assertCanViewSessionConfig(ctx: BaseContext, tErrors: ErrorsLabels): void {
   if (!canViewSessionConfig(ctx)) {
     throw new GraphQLError(tErrors.insufficientPermissions, {
       extensions: { code: "FORBIDDEN" },
     });
   }
 }
-
-gqlSchemaBuilder.queryField("sessionConfigs", t =>
-  t.field({
-    type: [SessionConfigPothosObject],
-    // Read access = loggedIn here; the SETTINGS_VIEW / SETTINGS_EDIT_SESSION OR
-    // gate lives in assertCanViewSessionConfig (via executeSessionConfigQuery).
-    // The authScopes plugin only supports AND-composed single permissions, so
-    // the OR view rule cannot be expressed declaratively.
-    authScopes: { loggedIn: true },
-    description: "Lists all per-role session configurations.",
-    resolve: async (_root, _args, ctx) => {
-      return executeSessionConfigQuery(ctx, () => SessionConfigService.listSessionConfigs());
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("sessionConfig", t =>
-  t.field({
-    type: SessionConfigPothosObject,
-    nullable: true,
-    // Same as sessionConfigs: loggedIn declared here; the SETTINGS_VIEW /
-    // SETTINGS_EDIT_SESSION OR gate is enforced by assertCanViewSessionConfig.
-    authScopes: { loggedIn: true },
-    description: "Fetches the session configuration for a single role.",
-    args: {
-      roleName: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      return executeSessionConfigQuery(ctx, () => SessionConfigService.getSessionConfig(args.roleName));
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("upsertSessionConfig", t =>
-  t.field({
-    type: SessionConfigPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_SESSION, notImpersonating: true },
-    description: "Creates or updates a per-role session configuration.",
-    args: {
-      input: t.arg({ type: SessionConfigUpsertInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      return executeSessionConfigMutation(ctx, (userId, tErrors) =>
-        SessionConfigService.upsertSessionConfig(args.input, userId, tErrors)
-      );
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("deleteSessionConfig", t =>
-  t.field({
-    type: "Boolean",
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_SESSION, notImpersonating: true },
-    description: "Deletes a per-role session configuration.",
-    args: {
-      roleName: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      await executeSessionConfigMutation(ctx, async (userId, tErrors) => {
-        await SessionConfigService.deleteSessionConfig(args.roleName, userId, tErrors);
-      });
-      return true;
-    },
-  })
-);

@@ -1,13 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { SupportRequestResultPothosObject } from "@/backend/graphql/pothos/classes/class-session.pothos";
 import {
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
   GroupClassAttendanceStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { requireAuthWithRateLimit } from "@/backend/graphql/shared";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { GroupClassService } from "@/backend/services";
 import type {
   GroupClassAdminNoteReturnType,
   GroupClassAuditReturnType,
@@ -16,7 +12,7 @@ import type {
   GroupClassStudentReturnType,
 } from "@/backend/types";
 
-const GroupClassStudentRef = gqlSchemaBuilder.objectRef<GroupClassStudentReturnType>("GroupClassStudent");
+export const GroupClassStudentRef = gqlSchemaBuilder.objectRef<GroupClassStudentReturnType>("GroupClassStudent");
 
 export const GroupClassStudentPothosObject = GroupClassStudentRef.implement({
   fields: t => ({
@@ -29,7 +25,8 @@ export const GroupClassStudentPothosObject = GroupClassStudentRef.implement({
   }),
 });
 
-const OnlineMeetingInfoRef = gqlSchemaBuilder.objectRef<GroupClassOnlineMeetingInfoReturnType>("OnlineMeetingInfo");
+export const OnlineMeetingInfoRef =
+  gqlSchemaBuilder.objectRef<GroupClassOnlineMeetingInfoReturnType>("OnlineMeetingInfo");
 
 export const OnlineMeetingInfoPothosObject = OnlineMeetingInfoRef.implement({
   fields: t => ({
@@ -42,7 +39,7 @@ export const OnlineMeetingInfoPothosObject = OnlineMeetingInfoRef.implement({
   }),
 });
 
-const CommunicationLogEntryRef =
+export const CommunicationLogEntryRef =
   gqlSchemaBuilder.objectRef<GroupClassCommunicationLogEntryReturnType>("CommunicationLogEntry");
 
 export const CommunicationLogEntryPothosObject = CommunicationLogEntryRef.implement({
@@ -57,7 +54,7 @@ export const CommunicationLogEntryPothosObject = CommunicationLogEntryRef.implem
   }),
 });
 
-const AdminNoteRef = gqlSchemaBuilder.objectRef<GroupClassAdminNoteReturnType>("AdminNoteInfo");
+export const AdminNoteRef = gqlSchemaBuilder.objectRef<GroupClassAdminNoteReturnType>("AdminNoteInfo");
 
 export const AdminNotePothosObject = AdminNoteRef.implement({
   fields: t => ({
@@ -66,7 +63,7 @@ export const AdminNotePothosObject = AdminNoteRef.implement({
   }),
 });
 
-const GroupClassAuditRef = gqlSchemaBuilder.objectRef<GroupClassAuditReturnType>("GroupClassAudit");
+export const GroupClassAuditRef = gqlSchemaBuilder.objectRef<GroupClassAuditReturnType>("GroupClassAudit");
 
 export const GroupClassAuditPothosObject = GroupClassAuditRef.implement({
   fields: t => ({
@@ -103,48 +100,3 @@ export const GroupClassAuditPothosObject = GroupClassAuditRef.implement({
     }),
   }),
 });
-
-gqlSchemaBuilder.queryField("groupClassAudit", t =>
-  t.field({
-    type: GroupClassAuditRef,
-    authScopes: { superAdmin: true },
-    args: {
-      classInstanceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return GroupClassService.getGroupClassAudit(userId, args.classInstanceId, tErrors);
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("updateClassAdminNote", t =>
-  t.field({
-    type: GroupClassAuditRef,
-    authScopes: { superAdmin: true },
-    args: {
-      classInstanceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-      content: t.arg.string({ required: true, directives: { constraint: { maxLength: 10000 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return GroupClassService.updateAdminNote(userId, args.classInstanceId, args.content, tErrors);
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("resendClassNotifications", t =>
-  t.field({
-    type: SupportRequestResultPothosObject,
-    authScopes: { superAdmin: true },
-    args: {
-      classInstanceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
-      return GroupClassService.resendNotifications(userId, args.classInstanceId, tErrors);
-    },
-  })
-);

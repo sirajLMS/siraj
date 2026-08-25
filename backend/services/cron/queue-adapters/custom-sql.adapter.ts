@@ -13,16 +13,7 @@ import { createPool } from "@/backend/db/factory";
 import { logger } from "@/backend/lib/logger";
 import { safeCronJobKind } from "@/backend/services/cron/cron.helpers";
 import { pruneMaps } from "@/backend/services/cron/queue-adapters/bullmq-shared";
-import type { CronJobPayload, CronQueueAdapter, CronQueueRow, CronQueueStats } from "@/backend/types";
-
-/**
- * Adapter-internal interface for a pg-compatible connection pool.
- * Used to type the pool returned by `createPool()` without coupling to `pg` types directly.
- */
-interface QueryablePool {
-  query(text: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[]; rowCount: number }>;
-  end(): Promise<void>;
-}
+import type { CronJobPayload, CronQueueAdapter, CronQueueRow, CronQueueStats, QueryablePool } from "@/backend/types";
 
 /**
  * Adapter-internal table DDL for the custom-SQL queue adapter.

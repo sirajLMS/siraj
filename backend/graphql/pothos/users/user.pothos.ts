@@ -7,7 +7,7 @@ import {
 import { ParentPortalService, PermissionsService, TeacherPortalService, UserService } from "@/backend/services";
 import type { UserReturnType } from "@/backend/types";
 
-const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserReturnType>("User");
+export const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserReturnType>("User");
 
 export const UserPothosObject = gqlSchemaBuilder.loadableObject<
   UserReturnType | Error,

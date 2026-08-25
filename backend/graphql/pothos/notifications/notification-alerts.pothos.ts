@@ -5,7 +5,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { NotificationAlertReturnType, NotificationAlertsPaginatedReturnType } from "@/backend/types";
 
-const SystemAlertRef = gqlSchemaBuilder.objectRef<NotificationAlertReturnType>("SystemAlert");
+export const SystemAlertRef = gqlSchemaBuilder.objectRef<NotificationAlertReturnType>("SystemAlert");
 
 export const SystemAlertPothosObject = SystemAlertRef.implement({
   fields: t => ({
@@ -23,7 +23,7 @@ export const SystemAlertPothosObject = SystemAlertRef.implement({
   }),
 });
 
-const NotificationAlertsResultRef =
+export const NotificationAlertsResultRef =
   gqlSchemaBuilder.objectRef<NotificationAlertsPaginatedReturnType>("NotificationAlertsResult");
 
 export const NotificationAlertsResultPothosObject = NotificationAlertsResultRef.implement({

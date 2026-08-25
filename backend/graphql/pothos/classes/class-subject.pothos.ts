@@ -5,7 +5,7 @@ import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.p
 import { ClassCategoryService } from "@/backend/services";
 import type { ClassSubjectReturnType, SubjectResourceReturnType } from "@/backend/types";
 
-const SubjectResourceRef = gqlSchemaBuilder.objectRef<SubjectResourceReturnType>("SubjectResource");
+export const SubjectResourceRef = gqlSchemaBuilder.objectRef<SubjectResourceReturnType>("SubjectResource");
 
 export const SubjectResourcePothosObject = SubjectResourceRef.implement({
   fields: t => ({
@@ -19,7 +19,7 @@ export const SubjectResourcePothosObject = SubjectResourceRef.implement({
   }),
 });
 
-const ClassSubjectRef = gqlSchemaBuilder.objectRef<ClassSubjectReturnType>("ClassSubject");
+export const ClassSubjectRef = gqlSchemaBuilder.objectRef<ClassSubjectReturnType>("ClassSubject");
 
 export const ClassSubjectPothosObject = ClassSubjectRef.implement({
   fields: t => ({

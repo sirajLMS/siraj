@@ -11,7 +11,7 @@ import type {
   PendingReviewCountReturnType,
 } from "@/backend/types";
 
-const LessonReportRef = gqlSchemaBuilder.objectRef<LessonReportReturnType>("LessonReport");
+export const LessonReportRef = gqlSchemaBuilder.objectRef<LessonReportReturnType>("LessonReport");
 
 export const LessonReportPothosObject = LessonReportRef.implement({
   description: "A teacher-submitted lesson report for a completed class instance, with review workflow",
@@ -67,7 +67,7 @@ export const LessonReviewInput = gqlSchemaBuilder.inputRef<LessonReviewInputType
   }),
 });
 
-const PendingReviewCountRef = gqlSchemaBuilder.objectRef<PendingReviewCountReturnType>("PendingReviewCount");
+export const PendingReviewCountRef = gqlSchemaBuilder.objectRef<PendingReviewCountReturnType>("PendingReviewCount");
 
 export const PendingReviewCountPothosObject = PendingReviewCountRef.implement({
   description: "Count of pending lesson reports awaiting review",
@@ -78,7 +78,7 @@ export const PendingReviewCountPothosObject = PendingReviewCountRef.implement({
 
 // ─── PendingLessonReportsPayload (paginated list wrapper) ─────────────────────
 
-const PendingLessonReportsPayloadRef =
+export const PendingLessonReportsPayloadRef =
   gqlSchemaBuilder.objectRef<PendingLessonReportsPayload>("PendingLessonReportsPayload");
 
 export const PendingLessonReportsPayloadPothosObject = PendingLessonReportsPayloadRef.implement({

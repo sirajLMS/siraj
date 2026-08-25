@@ -18,21 +18,21 @@ import type {
   StudentsWithFiltersResponse,
 } from "@/backend/types";
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function getDateField(value: unknown, field: string): Date | null {
+export function getDateField(value: unknown, field: string): Date | null {
   if (!isRecord(value)) return null;
   const v = value[field];
   return v instanceof Date ? v : null;
 }
 
-type InputFieldBuilder = Parameters<
+export type InputFieldBuilder = Parameters<
   NonNullable<Parameters<ReturnType<typeof gqlSchemaBuilder.inputRef<StudentCreateInput>>["implement"]>[0]["fields"]>
 >[0];
 
-function optionalStudentInputFields(t: InputFieldBuilder) {
+export function optionalStudentInputFields(t: InputFieldBuilder) {
   return {
     primaryTeacherId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     dateOfBirth: t.field({ type: "DateTime", required: false }),

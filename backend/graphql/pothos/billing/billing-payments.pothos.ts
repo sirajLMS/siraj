@@ -2,7 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { paymentFields } from "@/backend/graphql/pothos/billing/__shared__/paymentFieldHelpers";
 import type { PaymentReturnType, TeacherPaymentReturnType } from "@/backend/types";
 
-const PaymentRef = gqlSchemaBuilder.objectRef<PaymentReturnType>("Payment");
+export const PaymentRef = gqlSchemaBuilder.objectRef<PaymentReturnType>("Payment");
 
 export const PaymentPothosObject = PaymentRef.implement({
   fields: t => ({
@@ -13,7 +13,7 @@ export const PaymentPothosObject = PaymentRef.implement({
   }),
 });
 
-const TeacherPaymentRef = gqlSchemaBuilder.objectRef<TeacherPaymentReturnType>("TeacherPayment");
+export const TeacherPaymentRef = gqlSchemaBuilder.objectRef<TeacherPaymentReturnType>("TeacherPayment");
 
 export const TeacherPaymentPothosObject = TeacherPaymentRef.implement({
   fields: t => ({

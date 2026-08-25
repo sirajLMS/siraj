@@ -109,7 +109,11 @@ async function seedOnDemandSchedule(
         schedulingMode: SchedulingMode.ON_DEMAND,
         durationMinutes: 60,
         defaultStartTime: "10:00",
-        timezone: IanaTimezone.Asia_Dubai,
+        // demoTeacher (index 0) is seeded with UTC timezone and Mon 08:00–20:00
+        // availability windows (see seed-teachers.ts / availability-factory.ts);
+        // booking in UTC keeps 10:00 inside the window. Using the teacher's
+        // local timezone shifts the slot out of the window in UTC terms.
+        timezone: IanaTimezone.UTC,
         days: [{ dayOfWeek: DayOfWeek.MONDAY, startTime: "10:00", isActive: true }],
       },
       tErrors

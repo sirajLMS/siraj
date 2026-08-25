@@ -15,3 +15,7 @@ import "./storage";
 import "./students";
 import "./teachers";
 import "./whatsapp";
+import "./system";
+import "./books";
+import "./reports";
+import "./parents";

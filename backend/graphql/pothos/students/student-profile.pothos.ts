@@ -9,7 +9,7 @@ import { StudentClassHistoryPothosObject } from "@/backend/graphql/pothos/studen
 import { StudentUpcomingClassesResultPothosObject } from "@/backend/graphql/pothos/students/student-status.pothos";
 import type { StudentProfileReturnType } from "@/backend/types";
 
-const StudentProfileRef = gqlSchemaBuilder.objectRef<StudentProfileReturnType>("StudentProfile");
+export const StudentProfileRef = gqlSchemaBuilder.objectRef<StudentProfileReturnType>("StudentProfile");
 
 export const StudentProfilePothosObject = StudentProfileRef.implement({
   fields: t => ({

@@ -2,7 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { TeacherPendingDuesSummaryPothosObject } from "@/backend/graphql/pothos/teachers/teacher-due.pothos";
 import type { SupervisorDashboardReturnType, SupervisorMonthlySnapshotReturnType } from "@/backend/types";
 
-const SupervisorMonthlySnapshotRef =
+export const SupervisorMonthlySnapshotRef =
   gqlSchemaBuilder.objectRef<SupervisorMonthlySnapshotReturnType>("SupervisorMonthlySnapshot");
 
 export const SupervisorMonthlySnapshotPothosObject = SupervisorMonthlySnapshotRef.implement({
@@ -14,7 +14,7 @@ export const SupervisorMonthlySnapshotPothosObject = SupervisorMonthlySnapshotRe
   }),
 });
 
-const SupervisorDashboardRef = gqlSchemaBuilder.objectRef<SupervisorDashboardReturnType>("SupervisorDashboard");
+export const SupervisorDashboardRef = gqlSchemaBuilder.objectRef<SupervisorDashboardReturnType>("SupervisorDashboard");
 
 export const SupervisorDashboardPothosObject = SupervisorDashboardRef.implement({
   description: "Aggregated supervisor portal dashboard data",

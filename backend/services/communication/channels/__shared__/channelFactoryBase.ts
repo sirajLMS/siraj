@@ -1,6 +1,7 @@
 import { logger } from "@/backend/lib/logger";
 import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system";
 import type { ChannelFactory, ChannelFactoryConfig, ChannelLifecycle } from "@/backend/types";
+
 export type { ChannelFactory, ChannelFactoryConfig, ChannelLifecycle };
 
 /**

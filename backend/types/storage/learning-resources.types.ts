@@ -10,17 +10,11 @@ export type LearningResourceReturnType = Omit<LearningResourceSelectType, "delet
 };
 
 export type LearningResourceSubmitInput = {
-  displayName: string;
-  filePath: string;
-  fileId: string;
-};
-
-export interface LearningResourceCreateInput {
   readonly displayName: string;
   readonly filePath: string;
-  readonly uploadedByUserId: string;
   readonly fileId: string;
-}
+  readonly uploadedByUserId?: string;
+};
 
 export interface LearningResourceListResult {
   readonly rows: LearningResourceReturnType[];

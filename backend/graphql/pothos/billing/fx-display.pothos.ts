@@ -6,7 +6,7 @@ import type { DisplayAmountReturnType } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCode } from "@/shared/lib/enum";
 
-const DisplayAmountRef = gqlSchemaBuilder.objectRef<DisplayAmountReturnType>("DisplayAmount");
+export const DisplayAmountRef = gqlSchemaBuilder.objectRef<DisplayAmountReturnType>("DisplayAmount");
 
 export const DisplayAmountPothosObject = DisplayAmountRef.implement({
   fields: t => ({

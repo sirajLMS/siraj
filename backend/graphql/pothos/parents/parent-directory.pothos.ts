@@ -8,7 +8,7 @@ import type {
   ParentDirectoryRow,
 } from "@/backend/types";
 
-const ParentDirectoryMetricsRef = gqlSchemaBuilder.objectRef<ParentDirectoryMetrics>("ParentDirectoryMetrics");
+export const ParentDirectoryMetricsRef = gqlSchemaBuilder.objectRef<ParentDirectoryMetrics>("ParentDirectoryMetrics");
 
 export const ParentDirectoryMetricsPothosObject = ParentDirectoryMetricsRef.implement({
   fields: t => ({
@@ -20,7 +20,7 @@ export const ParentDirectoryMetricsPothosObject = ParentDirectoryMetricsRef.impl
   }),
 });
 
-const ParentDirectoryRowRef = gqlSchemaBuilder.objectRef<ParentDirectoryRow>("ParentDirectoryRow");
+export const ParentDirectoryRowRef = gqlSchemaBuilder.objectRef<ParentDirectoryRow>("ParentDirectoryRow");
 
 export const ParentDirectoryRowPothosObject = ParentDirectoryRowRef.implement({
   fields: t => ({
@@ -38,7 +38,7 @@ export const ParentDirectoryRowPothosObject = ParentDirectoryRowRef.implement({
   }),
 });
 
-const ParentDirectoryRef = gqlSchemaBuilder.objectRef<ParentDirectoryResult>("ParentDirectory");
+export const ParentDirectoryRef = gqlSchemaBuilder.objectRef<ParentDirectoryResult>("ParentDirectory");
 
 export const ParentDirectoryPothosObject = ParentDirectoryRef.implement({
   fields: t => ({
@@ -50,7 +50,7 @@ export const ParentDirectoryPothosObject = ParentDirectoryRef.implement({
   }),
 });
 
-const ParentDirectoryAutocompleteRowRef = gqlSchemaBuilder.objectRef<ParentDirectoryAutocompleteRow>(
+export const ParentDirectoryAutocompleteRowRef = gqlSchemaBuilder.objectRef<ParentDirectoryAutocompleteRow>(
   "ParentDirectoryAutocompleteRow"
 );
 

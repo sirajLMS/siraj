@@ -1,11 +1,7 @@
-import { GraphQLError } from "graphql";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  DisplayAmountPothosObject,
-  resolveDisplayAmountFields,
-} from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { ReportGroupingMode, ReportService } from "@/backend/services";
+import { ReportGroupingMode } from "@/backend/services";
 import type {
   AttendanceReportPaidAmountReturnType,
   AttendanceReportResult,
@@ -27,7 +23,7 @@ export const AttendanceReportFiltersInput = gqlSchemaBuilder.inputType("Attendan
   }),
 });
 
-const AttendanceReportPaidAmountRef =
+export const AttendanceReportPaidAmountRef =
   gqlSchemaBuilder.objectRef<AttendanceReportPaidAmountReturnType>("AttendanceReportPaidAmount");
 
 export const AttendanceReportPaidAmountObj = AttendanceReportPaidAmountRef.implement({
@@ -44,7 +40,7 @@ export const AttendanceReportPaidAmountObj = AttendanceReportPaidAmountRef.imple
   }),
 });
 
-const AttendanceReportRowRef = gqlSchemaBuilder.objectRef<AttendanceReportRowReturnType>("AttendanceReportRow");
+export const AttendanceReportRowRef = gqlSchemaBuilder.objectRef<AttendanceReportRowReturnType>("AttendanceReportRow");
 
 export const AttendanceReportRowObj = AttendanceReportRowRef.implement({
   description: "A single row of the aggregated attendance report.",
@@ -65,7 +61,7 @@ export const AttendanceReportRowObj = AttendanceReportRowRef.implement({
   }),
 });
 
-const AttendanceReportPayloadRef = gqlSchemaBuilder.objectRef<AttendanceReportResult>("AttendanceReportPayload");
+export const AttendanceReportPayloadRef = gqlSchemaBuilder.objectRef<AttendanceReportResult>("AttendanceReportPayload");
 
 export const AttendanceReportPayloadObj = AttendanceReportPayloadRef.implement({
   description: "The full attendance report result including rows and growth metric.",
@@ -82,44 +78,3 @@ export const AttendanceReportPayloadObj = AttendanceReportPayloadRef.implement({
     }),
   }),
 });
-
-gqlSchemaBuilder.queryField("generateAttendanceReport", t =>
-  t.field({
-    type: AttendanceReportPayloadObj,
-    authScopes: { superAdmin: true },
-    description: "Generates dynamic attendance and financial reports.",
-    args: {
-      filters: t.arg({ type: AttendanceReportFiltersInput, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        const tErrors = ctx.t().errorsTranslations;
-        throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
-      }
-
-      const filters = {
-        fromDate: new Date(args.filters.fromDate),
-        toDate: new Date(args.filters.toDate),
-        teacherId: args.filters.teacherId ?? undefined,
-        groupBy: args.filters.groupBy,
-      };
-
-      const result = await ReportService.generateAttendanceReport(filters, ctx.user.id, ctx.locale);
-
-      const allPaidAmounts = result.rows.flatMap(row => row.paidAmounts);
-      const displayAmounts = await resolveDisplayAmountFields(allPaidAmounts, ctx, "amount", "currency");
-
-      return {
-        ...result,
-        rows: result.rows.map(row =>
-          Object.assign(row, {
-            paidAmounts: row.paidAmounts.map(pa => ({
-              ...pa,
-              displayAmount: displayAmounts.get(pa.id) ?? null,
-            })),
-          })
-        ),
-      };
-    },
-  })
-);

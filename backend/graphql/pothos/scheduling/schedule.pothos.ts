@@ -1,5 +1,3 @@
-import { AppPermission } from "@/backend/enum";
-import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { classExecutionFields } from "@/backend/graphql/pothos/scheduling/__shared__/classExecutionFields";
 import { classSessionMetricsFields } from "@/backend/graphql/pothos/scheduling/__shared__/classSessionMetricsFields";
@@ -10,7 +8,6 @@ import {
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
-import { ScheduleQueryService } from "@/backend/services";
 import type {
   AdminDashboardScheduleInput,
   AdminDashboardScheduleReturnType,
@@ -24,7 +21,7 @@ import type {
   StatusTrackingScheduleRow,
 } from "@/backend/types";
 
-const DailyScheduleMetricsObjectRef = gqlSchemaBuilder.objectRef<ClassSessionMetrics>("DailyScheduleMetrics");
+export const DailyScheduleMetricsObjectRef = gqlSchemaBuilder.objectRef<ClassSessionMetrics>("DailyScheduleMetrics");
 
 export const DailyScheduleMetricsPothosObject = DailyScheduleMetricsObjectRef.implement({
   fields: t => ({
@@ -41,8 +38,9 @@ export const DailyScheduleMetricsPothosObject = DailyScheduleMetricsObjectRef.im
   }),
 });
 
-const DailyScheduleListUserItemRef = gqlSchemaBuilder.objectRef<DailyScheduleListUserItem>("DailyScheduleListUserItem");
-const DailyScheduleListUserItemObject = DailyScheduleListUserItemRef.implement({
+export const DailyScheduleListUserItemRef =
+  gqlSchemaBuilder.objectRef<DailyScheduleListUserItem>("DailyScheduleListUserItem");
+export const DailyScheduleListUserItemObject = DailyScheduleListUserItemRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
@@ -50,7 +48,7 @@ const DailyScheduleListUserItemObject = DailyScheduleListUserItemRef.implement({
   }),
 });
 
-const DailyScheduleListObjectRef = gqlSchemaBuilder.objectRef<DailyScheduleListReturnType>("DailyScheduleList");
+export const DailyScheduleListObjectRef = gqlSchemaBuilder.objectRef<DailyScheduleListReturnType>("DailyScheduleList");
 
 export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implement({
   fields: t => ({
@@ -84,7 +82,7 @@ export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-const AdminDashboardScheduleResultRef =
+export const AdminDashboardScheduleResultRef =
   gqlSchemaBuilder.objectRef<AdminDashboardScheduleReturnType>("AdminDashboardScheduleResult");
 
 export const AdminDashboardScheduleResultPothosObject = AdminDashboardScheduleResultRef.implement({
@@ -97,7 +95,7 @@ export const AdminDashboardScheduleResultPothosObject = AdminDashboardScheduleRe
   }),
 });
 
-const RescheduleTrackingRowRef = gqlSchemaBuilder.objectRef<RescheduleTrackingRow>("RescheduleTrackingRow");
+export const RescheduleTrackingRowRef = gqlSchemaBuilder.objectRef<RescheduleTrackingRow>("RescheduleTrackingRow");
 
 export const RescheduleTrackingRowPothosObject = RescheduleTrackingRowRef.implement({
   fields: t => ({
@@ -116,7 +114,8 @@ export const RescheduleTrackingRowPothosObject = RescheduleTrackingRowRef.implem
   }),
 });
 
-const RescheduleTrackingMetricsRef = gqlSchemaBuilder.objectRef<RescheduleTrackingMetrics>("RescheduleTrackingMetrics");
+export const RescheduleTrackingMetricsRef =
+  gqlSchemaBuilder.objectRef<RescheduleTrackingMetrics>("RescheduleTrackingMetrics");
 
 export const RescheduleTrackingMetricsPothosObject = RescheduleTrackingMetricsRef.implement({
   fields: t => ({
@@ -135,7 +134,7 @@ export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-const RescheduleTrackingResultRef =
+export const RescheduleTrackingResultRef =
   gqlSchemaBuilder.objectRef<RescheduleTrackingPaginatedResult>("RescheduleTrackingResult");
 export const RescheduleTrackingResultPothosObject = RescheduleTrackingResultRef.implement({
   fields: t => ({
@@ -155,7 +154,8 @@ export const RescheduleTrackingResultPothosObject = RescheduleTrackingResultRef.
  * Fields include student status and isFrozen flag to support the
  * frontend's mapToSessionStatus() logic in StatusTrackingContainer.
  */
-const StatusTrackingScheduleRowRef = gqlSchemaBuilder.objectRef<StatusTrackingScheduleRow>("StatusTrackingScheduleRow");
+export const StatusTrackingScheduleRowRef =
+  gqlSchemaBuilder.objectRef<StatusTrackingScheduleRow>("StatusTrackingScheduleRow");
 
 export const StatusTrackingScheduleRowPothosObject = StatusTrackingScheduleRowRef.implement({
   fields: t => ({
@@ -178,26 +178,3 @@ export const StatusTrackingScheduleRowPothosObject = StatusTrackingScheduleRowRe
 });
 
 // ─── Status Tracking Schedule Query ───────────────────────────────────────────
-
-gqlSchemaBuilder.queryField("statusTrackingSchedule", t =>
-  t.field({
-    type: [StatusTrackingScheduleRowRef],
-    authScopes: (_parent, _args, ctx) =>
-      ctx.isSuperAdmin ||
-      ctx.permissions.includes(AppPermission.SCHEDULE_VIEW_ALL) ||
-      ctx.permissions.includes(AppPermission.DASHBOARD_VIEW_METRICS),
-    args: {
-      date: t.arg.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
-      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-      viewerTimezone: t.arg({ type: "IanaTimezone", required: false }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      const date = new Date(args.date);
-      return ScheduleQueryService.getStatusTrackingSchedule(requireUserId(ctx), date, tErrors, {
-        search: args.search ?? undefined,
-        viewerTimezone: args.viewerTimezone ?? undefined,
-      });
-    },
-  })
-);

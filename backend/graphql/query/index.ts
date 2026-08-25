@@ -18,3 +18,6 @@ import "./students";
 import "./supervisor";
 import "./teachers";
 import "./whatsapp";
+import "./system";
+import "./books";
+import "./cron";

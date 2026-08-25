@@ -29,12 +29,7 @@ import { GraphQLError } from "graphql";
 import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import {
-  APPEARANCE_CONFLICT_ERROR_CODE,
-  AppearanceSettingsService,
-  isAppearanceConflictError,
-} from "@/backend/services";
+import { APPEARANCE_CONFLICT_ERROR_CODE, isAppearanceConflictError } from "@/backend/services";
 import type {
   AppearanceFields,
   AppearanceSettingsReturnType,
@@ -49,7 +44,7 @@ import type { ErrorsLabels } from "@/shared/locale";
  * Brand color pair for a single mode (primary + secondary main colors).
  * Used as a nested field on `AppearanceColors` and `AppearanceColorsInput`.
  */
-const AppearanceColorPairRef = gqlSchemaBuilder.objectRef<{
+export const AppearanceColorPairRef = gqlSchemaBuilder.objectRef<{
   primaryMain: string;
   secondaryMain: string;
 }>("AppearanceColorPair");
@@ -65,7 +60,7 @@ export const AppearanceColorPairPothosObject = AppearanceColorPairRef.implement(
 /**
  * Per-mode brand colors (light + dark pairs). Nested under `AppearanceFields`.
  */
-const AppearanceColorsRef = gqlSchemaBuilder.objectRef<PerModeColors>("AppearanceColors");
+export const AppearanceColorsRef = gqlSchemaBuilder.objectRef<PerModeColors>("AppearanceColors");
 
 export const AppearanceColorsPothosObject = AppearanceColorsRef.implement({
   description: "Per-mode brand colors (light + dark).",
@@ -79,7 +74,7 @@ export const AppearanceColorsPothosObject = AppearanceColorsRef.implement({
  * Full appearance field bundle — the shape of `draft_fields` JSONB. Used as
  * the nested `draftFields` field on `AppearanceSettings`.
  */
-const AppearanceFieldsRef = gqlSchemaBuilder.objectRef<AppearanceFields>("AppearanceFields");
+export const AppearanceFieldsRef = gqlSchemaBuilder.objectRef<AppearanceFields>("AppearanceFields");
 
 export const AppearanceFieldsPothosObject = AppearanceFieldsRef.implement({
   description: "Full appearance field bundle (per-mode colors + scalar brand fields).",
@@ -98,7 +93,7 @@ export const AppearanceFieldsPothosObject = AppearanceFieldsRef.implement({
  * {@link AppearanceSettingsReturnType} row including `id` (Apollo cache
  * normalization per `backend/graphql/AGENTS.md`).
  */
-const AppearanceSettingsRef = gqlSchemaBuilder.objectRef<AppearanceSettingsReturnType>("AppearanceSettings");
+export const AppearanceSettingsRef = gqlSchemaBuilder.objectRef<AppearanceSettingsReturnType>("AppearanceSettings");
 
 export const AppearanceSettingsPothosObject = AppearanceSettingsRef.implement({
   description: "Site appearance settings (single global row, no tenant scoping).",
@@ -124,7 +119,7 @@ export const AppearanceSettingsPothosObject = AppearanceSettingsRef.implement({
  * Input pair of brand colors for a single mode. Mirrors the inner shape of
  * {@link PerModeColors.light} / {@link PerModeColors.dark}.
  */
-const AppearanceColorPairInputRef = gqlSchemaBuilder
+export const AppearanceColorPairInputRef = gqlSchemaBuilder
   .inputRef<{ primaryMain: string; secondaryMain: string }>("AppearanceColorPairInput")
   .implement({
     description: "Input pair of brand colors (primary + secondary) for a single mode.",
@@ -137,7 +132,7 @@ const AppearanceColorPairInputRef = gqlSchemaBuilder
 /**
  * Input for per-mode brand colors. Mirrors {@link PerModeColors}.
  */
-const AppearanceColorsInputRef = gqlSchemaBuilder.inputRef<PerModeColors>("AppearanceColorsInput").implement({
+export const AppearanceColorsInputRef = gqlSchemaBuilder.inputRef<PerModeColors>("AppearanceColorsInput").implement({
   description: "Input for per-mode brand colors (light + dark).",
   fields: t => ({
     light: t.field({ type: AppearanceColorPairInputRef, required: true }),
@@ -155,7 +150,7 @@ const AppearanceColorsInputRef = gqlSchemaBuilder.inputRef<PerModeColors>("Appea
  *   - `logoUrl` is `string | null | undefined` (omittable + nullable). The
  *     resolver normalizes `undefined` to `null` to match the service shape.
  */
-type AppearanceDraftInputShape = Omit<AppearanceSettingsSubmitInput, "defaultColorScheme" | "logoUrl"> & {
+export type AppearanceDraftInputShape = Omit<AppearanceSettingsSubmitInput, "defaultColorScheme" | "logoUrl"> & {
   defaultColorScheme: string;
   logoUrl?: string | null;
 };
@@ -176,11 +171,11 @@ export const AppearanceDraftInputPothosRef = gqlSchemaBuilder
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function resolveErrors(ctx: BaseContext): ErrorsLabels {
+export function resolveAppearanceErrors(ctx: BaseContext): ErrorsLabels {
   return ctx.t().errorsTranslations;
 }
 
-function canViewAppearanceSettings(ctx: BaseContext): boolean {
+export function canViewAppearanceSettings(ctx: BaseContext): boolean {
   return (
     ctx.isSuperAdmin ||
     ctx.permissions.includes(AppPermission.SETTINGS_VIEW) ||
@@ -188,7 +183,7 @@ function canViewAppearanceSettings(ctx: BaseContext): boolean {
   );
 }
 
-function assertCanViewAppearanceSettings(ctx: BaseContext, tErrors: ErrorsLabels): void {
+export function assertCanViewAppearanceSettings(ctx: BaseContext, tErrors: ErrorsLabels): void {
   if (!canViewAppearanceSettings(ctx)) {
     throw new GraphQLError(tErrors.insufficientPermissions, {
       extensions: { code: "FORBIDDEN" },
@@ -196,7 +191,7 @@ function assertCanViewAppearanceSettings(ctx: BaseContext, tErrors: ErrorsLabels
   }
 }
 
-function assertCanManageAppearance(ctx: BaseContext, tErrors: ErrorsLabels): void {
+export function assertCanManageAppearance(ctx: BaseContext, tErrors: ErrorsLabels): void {
   if (!ctx.isSuperAdmin && !ctx.permissions.includes(AppPermission.SETTINGS_APPEARANCE_MANAGE)) {
     throw new GraphQLError(tErrors.insufficientPermissions, {
       extensions: { code: "FORBIDDEN" },
@@ -215,7 +210,7 @@ function assertCanManageAppearance(ctx: BaseContext, tErrors: ErrorsLabels): voi
  * can immediately retry with the new value (Overwrite) without an extra
  * refetch round-trip.
  */
-async function runAppearanceMutation<T>(fn: () => Promise<T>): Promise<T> {
+export async function runAppearanceMutation<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (error) {
@@ -237,7 +232,7 @@ async function runAppearanceMutation<T>(fn: () => Promise<T>): Promise<T> {
  * long garbage strings; a follow-up enum migration will eliminate this
  * coercion — see the outcome file's "Carry-Forward" section).
  */
-function coercePaletteMode(value: string): PaletteMode {
+export function coercePaletteMode(value: string): PaletteMode {
   return value === "light" ? "light" : "dark";
 }
 
@@ -247,7 +242,7 @@ function coercePaletteMode(value: string): PaletteMode {
  * `logoUrl` (`undefined` → `null`) and coerces `defaultColorScheme` to
  * {@link PaletteMode} via {@link coercePaletteMode}.
  */
-function toAppearanceSubmitInput(input: AppearanceDraftInputShape): AppearanceSettingsSubmitInput {
+export function toAppearanceSubmitInput(input: AppearanceDraftInputShape): AppearanceSettingsSubmitInput {
   return {
     colors: input.colors,
     logoUrl: input.logoUrl ?? null,
@@ -260,113 +255,4 @@ function toAppearanceSubmitInput(input: AppearanceDraftInputShape): AppearanceSe
 
 // ─── Query ────────────────────────────────────────────────────────────────────
 
-gqlSchemaBuilder.queryField("appearanceSettings", t =>
-  t.field({
-    type: AppearanceSettingsPothosObject,
-    nullable: true,
-    authScopes: { loggedIn: true },
-    args: {
-      draft: t.arg.boolean({ required: false, defaultValue: false }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = resolveErrors(ctx);
-      await requireAuth(ctx);
-
-      // `draft=true` requests the live (possibly unpublished) draft state —
-      // requires SETTINGS_APPEARANCE_MANAGE (decision #5). `draft=false`
-      // (default) is the general admin view — SETTINGS_VIEW suffices.
-      if (args.draft) {
-        assertCanManageAppearance(ctx, tErrors);
-      } else {
-        assertCanViewAppearanceSettings(ctx, tErrors);
-      }
-
-      const actorUserId = ctx.user?.id;
-      return AppearanceSettingsService.getAppearance({ actorUserId, draft: args.draft ?? false });
-    },
-    description:
-      "Returns the single `appearance_settings` row (or null if unseeded). " +
-      "Pass `draft: true` to indicate an admin draft-view request — requires " +
-      "SETTINGS_APPEARANCE_MANAGE. The service always returns the full row " +
-      "(including draftFields); `draft` is a permission-gate marker.",
-  })
-);
-
 // ─── Mutations ────────────────────────────────────────────────────────────────
-
-gqlSchemaBuilder.mutationField("saveAppearanceDraft", t =>
-  t.field({
-    type: AppearanceSettingsPothosObject,
-    authScopes: {
-      permission: AppPermission.SETTINGS_APPEARANCE_MANAGE,
-      notImpersonating: true,
-    },
-    args: {
-      input: t.arg({ type: AppearanceDraftInputPothosRef, required: true }),
-      // AC-33 - optional optimistic-concurrency guard. When provided, the
-      // service throws AppearanceConflictError if the current row updatedAt
-      // does not match. Omit to force the write (frontend Overwrite path).
-      expectedUpdatedAt: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = resolveErrors(ctx);
-      const input = toAppearanceSubmitInput(args.input);
-      const expectedUpdatedAt = args.expectedUpdatedAt ?? undefined;
-      return runAppearanceMutation(() =>
-        AppearanceSettingsService.saveDraft(input, actorUserId, tErrors, undefined, expectedUpdatedAt)
-      );
-    },
-    description:
-      "Saves a draft — replaces `draftFields` with `input`. Published " +
-      "columns are preserved unchanged (AC-8). Requires " +
-      "SETTINGS_APPEARANCE_MANAGE. Pass `expectedUpdatedAt` for optimistic " +
-      "concurrency control (AC-33).",
-  })
-);
-
-gqlSchemaBuilder.mutationField("publishAppearance", t =>
-  t.field({
-    type: AppearanceSettingsPothosObject,
-    authScopes: {
-      permission: AppPermission.SETTINGS_APPEARANCE_MANAGE,
-      notImpersonating: true,
-    },
-    args: {
-      // AC-33 - same optimistic-concurrency guard as saveAppearanceDraft.
-      expectedUpdatedAt: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = resolveErrors(ctx);
-      const expectedUpdatedAt = args.expectedUpdatedAt ?? undefined;
-      return runAppearanceMutation(() =>
-        AppearanceSettingsService.publish(actorUserId, tErrors, undefined, expectedUpdatedAt)
-      );
-    },
-    description:
-      "Publishes the draft — copies `draftFields` into the published " +
-      "columns (AC-9) and invalidates the appearance SSR cache (AC-22). " +
-      "Requires SETTINGS_APPEARANCE_MANAGE. Pass `expectedUpdatedAt` for " +
-      "optimistic concurrency control (AC-33).",
-  })
-);
-
-gqlSchemaBuilder.mutationField("resetAppearanceDraft", t =>
-  t.field({
-    type: AppearanceSettingsPothosObject,
-    authScopes: {
-      permission: AppPermission.SETTINGS_APPEARANCE_MANAGE,
-      notImpersonating: true,
-    },
-    resolve: async (_root, _args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = resolveErrors(ctx);
-      return AppearanceSettingsService.resetDraft(actorUserId, tErrors);
-    },
-    description:
-      "Resets the draft — sets `draftFields` to match the published " +
-      "columns (discard unpublished draft changes). Requires " +
-      "SETTINGS_APPEARANCE_MANAGE.",
-  })
-);

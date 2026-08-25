@@ -4,7 +4,7 @@ import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-d
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { UnpaidInvoiceSummaryItem, UnpaidInvoicesSummaryResult } from "@/backend/types";
 
-const UnpaidInvoiceItemRef = gqlSchemaBuilder.objectRef<UnpaidInvoiceSummaryItem>("UnpaidInvoiceItem");
+export const UnpaidInvoiceItemRef = gqlSchemaBuilder.objectRef<UnpaidInvoiceSummaryItem>("UnpaidInvoiceItem");
 
 export const UnpaidInvoiceItemPothosObject = UnpaidInvoiceItemRef.implement({
   fields: t => ({
@@ -24,7 +24,8 @@ export const UnpaidInvoiceItemPothosObject = UnpaidInvoiceItemRef.implement({
   }),
 });
 
-const UnpaidInvoicesSummaryRef = gqlSchemaBuilder.objectRef<UnpaidInvoicesSummaryResult>("UnpaidInvoicesSummary");
+export const UnpaidInvoicesSummaryRef =
+  gqlSchemaBuilder.objectRef<UnpaidInvoicesSummaryResult>("UnpaidInvoicesSummary");
 
 export const UnpaidInvoicesSummaryPothosObject = UnpaidInvoicesSummaryRef.implement({
   fields: t => ({

@@ -19,7 +19,7 @@ import type {
   QuotaUpdateInput,
 } from "@/backend/types";
 
-const QuotaRef = gqlSchemaBuilder.objectRef<QuotaReturnType>("Quota");
+export const QuotaRef = gqlSchemaBuilder.objectRef<QuotaReturnType>("Quota");
 
 export const QuotaPothosObject = QuotaRef.implement({
   description: "A class quota allocation for a student",
@@ -50,7 +50,7 @@ export const QuotaPothosObject = QuotaRef.implement({
   }),
 });
 
-const QuotaLedgerRef = gqlSchemaBuilder.objectRef<QuotaLedgerReturnType>("QuotaLedger");
+export const QuotaLedgerRef = gqlSchemaBuilder.objectRef<QuotaLedgerReturnType>("QuotaLedger");
 
 export const QuotaLedgerPothosObject = QuotaLedgerRef.implement({
   description: "An append-only transaction ledger row for a quota",
@@ -68,7 +68,7 @@ export const QuotaLedgerPothosObject = QuotaLedgerRef.implement({
   }),
 });
 
-const QuotaPaginatedResultRef = gqlSchemaBuilder.objectRef<QuotaPaginatedResult>("QuotaPaginatedResult");
+export const QuotaPaginatedResultRef = gqlSchemaBuilder.objectRef<QuotaPaginatedResult>("QuotaPaginatedResult");
 
 export const QuotaPaginatedResultPothosObject = QuotaPaginatedResultRef.implement({
   description: "Paginated result set of quotas",
@@ -78,7 +78,7 @@ export const QuotaPaginatedResultPothosObject = QuotaPaginatedResultRef.implemen
   }),
 });
 
-const QuotaLedgerPaginatedResultRef =
+export const QuotaLedgerPaginatedResultRef =
   gqlSchemaBuilder.objectRef<QuotaLedgerPaginatedResult>("QuotaLedgerPaginatedResult");
 
 export const QuotaLedgerPaginatedResultPothosObject = QuotaLedgerPaginatedResultRef.implement({
@@ -89,7 +89,8 @@ export const QuotaLedgerPaginatedResultPothosObject = QuotaLedgerPaginatedResult
   }),
 });
 
-const QuotaRolloverPolicyInputPothosRef = gqlSchemaBuilder.inputRef<QuotaRolloverPolicy>("QuotaRolloverPolicyInput");
+export const QuotaRolloverPolicyInputPothosRef =
+  gqlSchemaBuilder.inputRef<QuotaRolloverPolicy>("QuotaRolloverPolicyInput");
 
 export const QuotaRolloverPolicyInputPothosObject = QuotaRolloverPolicyInputPothosRef.implement({
   description: "Rollover policy configuration for periodic quotas",
@@ -141,7 +142,7 @@ export const QuotaPaginatedFilterPothosRef = gqlSchemaBuilder
     }),
   });
 
-const AvailableClassSlotRef = gqlSchemaBuilder.objectRef<AvailableClassSlot>("AvailableClassSlot");
+export const AvailableClassSlotRef = gqlSchemaBuilder.objectRef<AvailableClassSlot>("AvailableClassSlot");
 
 export const AvailableClassSlotPothosObject = AvailableClassSlotRef.implement({
   description: "An available class slot for a student on a given date",
@@ -155,7 +156,8 @@ export const AvailableClassSlotPothosObject = AvailableClassSlotRef.implement({
   }),
 });
 
-const QuotaExpirationBreakdownRef = gqlSchemaBuilder.objectRef<QuotaExpirationBreakdown>("QuotaExpirationBreakdown");
+export const QuotaExpirationBreakdownRef =
+  gqlSchemaBuilder.objectRef<QuotaExpirationBreakdown>("QuotaExpirationBreakdown");
 
 export const QuotaExpirationBreakdownPothosObject = QuotaExpirationBreakdownRef.implement({
   description: "Per-quota breakdown of remaining classes by expiration date",
@@ -169,7 +171,7 @@ export const QuotaExpirationBreakdownPothosObject = QuotaExpirationBreakdownRef.
   }),
 });
 
-const QuotaBalanceRef = gqlSchemaBuilder.objectRef<QuotaBalanceReturnType>("QuotaBalance");
+export const QuotaBalanceRef = gqlSchemaBuilder.objectRef<QuotaBalanceReturnType>("QuotaBalance");
 
 export const QuotaBalancePothosObject = QuotaBalanceRef.implement({
   description: "Aggregated quota balance summary for a student",

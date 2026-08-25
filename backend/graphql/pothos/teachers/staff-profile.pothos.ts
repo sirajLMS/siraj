@@ -8,7 +8,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInput } from "@/backend/types";
 
-const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileReturnType>("TeacherProfileResult");
+export const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileReturnType>("TeacherProfileResult");
 
 export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implement({
   fields: t => ({

@@ -1,8 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject, ManagerAccountTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type { ManagerOnboardingInput, ManagerOnboardingResult, ManagerOnboardingReturnType } from "@/backend/types";
+import type { ManagerOnboardingInput, ManagerOnboardingResult } from "@/backend/types";
 
-const ManagerOnboardingRef = gqlSchemaBuilder.objectRef<ManagerOnboardingReturnType>("ManagerOnboarding");
+export const ManagerOnboardingRef = gqlSchemaBuilder.objectRef<ManagerOnboardingResult>("ManagerOnboarding");
 
 export const ManagerOnboardingPothosObject = ManagerOnboardingRef.implement({
   description: "Manager/Staff account details",
@@ -12,7 +12,7 @@ export const ManagerOnboardingPothosObject = ManagerOnboardingRef.implement({
     staffProfileId: t.exposeString("staffProfileId"),
     name: t.exposeString("name"),
     email: t.string({
-      resolve: parent => parent.email.value,
+      resolve: parent => parent.email,
       nullable: false,
     }),
     status: t.exposeString("status"),

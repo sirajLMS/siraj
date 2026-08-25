@@ -1,11 +1,8 @@
-import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { CurrencyHedgeService } from "@/backend/services";
 import type { CurrencyHedgeSelectType } from "@/backend/types";
 
-const CurrencyHedgeRef = gqlSchemaBuilder.objectRef<CurrencyHedgeSelectType>("CurrencyHedge");
+export const CurrencyHedgeRef = gqlSchemaBuilder.objectRef<CurrencyHedgeSelectType>("CurrencyHedge");
 
 export const CurrencyHedgePothosObject = CurrencyHedgeRef.implement({
   fields: t => ({
@@ -18,86 +15,3 @@ export const CurrencyHedgePothosObject = CurrencyHedgeRef.implement({
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
   }),
 });
-
-gqlSchemaBuilder.queryField("currencyHedges", t =>
-  t.field({
-    type: [CurrencyHedgePothosObject],
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES },
-    resolve: async (_root, _args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return CurrencyHedgeService.listHedges(userId, tErrors);
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("createCurrencyHedge", t =>
-  t.field({
-    type: CurrencyHedgePothosObject,
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true },
-    args: {
-      currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
-      amount: t.arg.string({ required: true, directives: { constraint: { maxLength: 64 } } }),
-      hedgeType: t.arg.string({ required: true, directives: { constraint: { maxLength: 64 } } }),
-      notes: t.arg.string({ required: false, directives: { constraint: { maxLength: 10000 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return CurrencyHedgeService.createHedge(
-        userId,
-        {
-          currency: args.currency,
-          amount: args.amount,
-          hedgeType: args.hedgeType,
-          notes: args.notes ?? null,
-        },
-        tErrors
-      );
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("updateCurrencyHedge", t =>
-  t.field({
-    type: CurrencyHedgePothosObject,
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true },
-    args: {
-      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-      currency: t.arg({ type: CurrencyCodePothosObject, required: false }),
-      amount: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
-      hedgeType: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
-      notes: t.arg.string({ required: false, directives: { constraint: { maxLength: 10000 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return CurrencyHedgeService.updateHedge(
-        userId,
-        args.id,
-        {
-          currency: args.currency ?? undefined,
-          amount: args.amount ?? undefined,
-          hedgeType: args.hedgeType ?? undefined,
-          notes: args.notes ?? undefined,
-        },
-        tErrors
-      );
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("deleteCurrencyHedge", t =>
-  t.field({
-    type: "Boolean",
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true },
-    args: {
-      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return CurrencyHedgeService.deleteHedge(userId, args.id, tErrors);
-    },
-  })
-);

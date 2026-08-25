@@ -6,14 +6,14 @@ import type {
   CreditTransactionSubmitInput,
 } from "@/backend/types";
 
-const CreditTransactionRef = gqlSchemaBuilder.objectRef<CreditTransactionReturnType>("CreditTransaction");
+export const CreditTransactionRef = gqlSchemaBuilder.objectRef<CreditTransactionReturnType>("CreditTransaction");
 
 export const CreditTransactionPothosObject = CreditTransactionRef.implement({
   description: "A credit ledger transaction for a student (purchase, deduction, refund, or adjustment)",
   fields: t => creditTransactionFields(t),
 });
 
-const CreditBalanceRef = gqlSchemaBuilder.objectRef<CreditBalanceReturnType>("CreditBalance");
+export const CreditBalanceRef = gqlSchemaBuilder.objectRef<CreditBalanceReturnType>("CreditBalance");
 
 export const CreditBalancePothosObject = CreditBalanceRef.implement({
   description: "Credit balance summary for a student (total classes purchased and remaining)",
@@ -25,7 +25,7 @@ export const CreditBalancePothosObject = CreditBalanceRef.implement({
   }),
 });
 
-const PurchaseResultRef = gqlSchemaBuilder.objectRef<CreditTransactionReturnType>("CreditPurchaseResult");
+export const PurchaseResultRef = gqlSchemaBuilder.objectRef<CreditTransactionReturnType>("CreditPurchaseResult");
 
 export const CreditPurchaseResultPothosObject = PurchaseResultRef.implement({
   description: "Result of recording a credit purchase for a student",

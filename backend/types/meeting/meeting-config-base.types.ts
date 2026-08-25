@@ -87,3 +87,18 @@ export interface MeetingConfigUpdateInput {
   readonly encryptedSecret?: string | null;
   readonly providerMetadata?: Record<string, unknown> | null;
 }
+
+/** Minimal shape for prepareMeetingConfigUpsert input. */
+export interface PrepareMeetingConfigInput {
+  readonly providerId: string;
+  readonly label?: string | null;
+  readonly details: MeetingConfigDetails;
+}
+
+/** Context passed to the transform callback of prepareMeetingConfigUpsert. */
+export interface PrepareTransformCtx {
+  readonly provider: MeetingProviderSelectType;
+  readonly details: MeetingConfigDetails;
+  readonly providerMetadata: Record<string, unknown> | null;
+  readonly encryptedSecret?: string | null;
+}

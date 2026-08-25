@@ -46,7 +46,8 @@ import type {
   UpdateUserProfileInput,
 } from "@/backend/types";
 
-const StaffPermissionGroupRef = gqlSchemaBuilder.objectRef<StaffPermissionGroupReturnType>("StaffPermissionGroup");
+export const StaffPermissionGroupRef =
+  gqlSchemaBuilder.objectRef<StaffPermissionGroupReturnType>("StaffPermissionGroup");
 
 export const StaffPermissionGroupPothosObject = StaffPermissionGroupRef.implement({
   fields: t => ({
@@ -57,7 +58,7 @@ export const StaffPermissionGroupPothosObject = StaffPermissionGroupRef.implemen
   }),
 });
 
-const StaffPermissionOverrideRef =
+export const StaffPermissionOverrideRef =
   gqlSchemaBuilder.objectRef<StaffPermissionOverrideReturnType>("StaffPermissionOverride");
 
 export const StaffPermissionOverridePothosObject = StaffPermissionOverrideRef.implement({
@@ -71,7 +72,7 @@ export const StaffPermissionOverridePothosObject = StaffPermissionOverrideRef.im
   }),
 });
 
-const UnifiedProfileRef = gqlSchemaBuilder.objectRef<UnifiedProfileReturnType>("UnifiedProfile");
+export const UnifiedProfileRef = gqlSchemaBuilder.objectRef<UnifiedProfileReturnType>("UnifiedProfile");
 
 export const UnifiedProfilePothosObject = UnifiedProfileRef.implement({
   fields: t => ({

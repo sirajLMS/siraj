@@ -10,7 +10,7 @@ import type {
   TeacherPendingDuesSummaryReturnType,
 } from "@/backend/types";
 
-const TeacherDueRef = gqlSchemaBuilder.objectRef<TeacherDueReturnType>("TeacherDue");
+export const TeacherDueRef = gqlSchemaBuilder.objectRef<TeacherDueReturnType>("TeacherDue");
 
 export const TeacherDuePothosObject = TeacherDueRef.implement({
   description: "A per-lesson earning accrued to a teacher when a lesson report is approved",
@@ -38,7 +38,8 @@ export const TeacherDuePothosObject = TeacherDueRef.implement({
   }),
 });
 
-const TeacherMonthlyReportRef = gqlSchemaBuilder.objectRef<TeacherMonthlyReportReturnType>("TeacherMonthlyReport");
+export const TeacherMonthlyReportRef =
+  gqlSchemaBuilder.objectRef<TeacherMonthlyReportReturnType>("TeacherMonthlyReport");
 
 export const TeacherMonthlyReportPothosObject = TeacherMonthlyReportRef.implement({
   description: "Monthly earnings summary for a teacher (lessons, counts, totals)",
@@ -60,7 +61,7 @@ export const TeacherMonthlyReportPothosObject = TeacherMonthlyReportRef.implemen
   }),
 });
 
-const TeacherPendingDuesSummaryRef =
+export const TeacherPendingDuesSummaryRef =
   gqlSchemaBuilder.objectRef<TeacherPendingDuesSummaryReturnType>("TeacherPendingDuesSummary");
 
 export const TeacherPendingDuesSummaryPothosObject = TeacherPendingDuesSummaryRef.implement({

@@ -5,7 +5,7 @@ import { EffectiveMeetingService } from "@/backend/services";
 import type { EffectiveMeetingReturnType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
-const EffectiveMeetingRef = gqlSchemaBuilder.objectRef<EffectiveMeetingReturnType>("EffectiveMeeting");
+export const EffectiveMeetingRef = gqlSchemaBuilder.objectRef<EffectiveMeetingReturnType>("EffectiveMeeting");
 
 export const EffectiveMeetingPothosObject = EffectiveMeetingRef.implement({
   fields: t => ({

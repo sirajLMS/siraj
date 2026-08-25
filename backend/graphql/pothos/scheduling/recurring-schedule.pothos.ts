@@ -1,11 +1,10 @@
-import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   recurringScheduleDetailFields,
   recurringScheduleListItemFields,
 } from "@/backend/graphql/pothos/scheduling/__shared__/recurringScheduleSharedFields";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
   RecurringScheduleDayDetailReturnType,
   RecurringScheduleDetailReturnType,
@@ -13,7 +12,7 @@ import type {
   RecurringSchedulesPaginatedResult,
 } from "@/backend/types";
 
-const RecurringScheduleDayDetailRef =
+export const RecurringScheduleDayDetailRef =
   gqlSchemaBuilder.objectRef<RecurringScheduleDayDetailReturnType>("RecurringScheduleDayDetail");
 
 export const RecurringScheduleDayDetailPothosObject = RecurringScheduleDayDetailRef.implement({
@@ -25,7 +24,7 @@ export const RecurringScheduleDayDetailPothosObject = RecurringScheduleDayDetail
   }),
 });
 
-const RecurringScheduleDetailRef =
+export const RecurringScheduleDetailRef =
   gqlSchemaBuilder.objectRef<RecurringScheduleDetailReturnType>("RecurringScheduleDetail");
 
 export const RecurringScheduleDetailPothosObject = RecurringScheduleDetailRef.implement({
@@ -34,7 +33,8 @@ export const RecurringScheduleDetailPothosObject = RecurringScheduleDetailRef.im
   }),
 });
 
-const RecurringScheduleListItemRef = gqlSchemaBuilder.objectRef<RecurringScheduleListItem>("RecurringScheduleListItem");
+export const RecurringScheduleListItemRef =
+  gqlSchemaBuilder.objectRef<RecurringScheduleListItem>("RecurringScheduleListItem");
 
 export const RecurringScheduleListItemPothosObject = RecurringScheduleListItemRef.implement({
   fields: t => ({
@@ -42,7 +42,7 @@ export const RecurringScheduleListItemPothosObject = RecurringScheduleListItemRe
   }),
 });
 
-const RecurringSchedulesPaginatedResultRef = gqlSchemaBuilder.objectRef<RecurringSchedulesPaginatedResult>(
+export const RecurringSchedulesPaginatedResultRef = gqlSchemaBuilder.objectRef<RecurringSchedulesPaginatedResult>(
   "RecurringSchedulesPaginatedResult"
 );
 
@@ -64,60 +64,3 @@ export const UpdateRecurringClassRateInputPothos = gqlSchemaBuilder.inputType("U
 });
 
 // ─── Recurring Schedules Query ──────────────────────────────────────────────────
-
-gqlSchemaBuilder.queryField("recurringSchedules", t =>
-  t.field({
-    type: RecurringSchedulesPaginatedResultRef,
-    authScopes: { loggedIn: true },
-    args: {
-      pagination: t.arg({ type: PaginationArgsObject, required: false }),
-      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      const userId = requireUserId(ctx);
-
-      const { RecurringScheduleDetailService } = await import(
-        "@/backend/services/schedule/recurring-schedule-detail.service"
-      );
-
-      const page = args.pagination?.page ?? 1;
-      const pageSize = args.pagination?.first ?? 20;
-
-      const result = await RecurringScheduleDetailService.listAll(userId, tErrors, {
-        page,
-        pageSize,
-        search: args.search ?? undefined,
-      });
-
-      return {
-        id: "recurring-schedules-list",
-        rows: result.rows.map(row => ({
-          id: row.id,
-          studentId: row.studentId,
-          studentName: row.studentName,
-          teacherId: row.teacherId,
-          teacherName: row.teacherUserName,
-          durationMinutes: row.durationMinutes,
-          defaultStartTime: row.defaultStartTime.slice(0, 5),
-          timezone: row.timezone,
-          hourlyRate: row.hourlyRate,
-          rateCurrency: row.rateCurrency,
-          createdAt: row.createdAt,
-          updatedAt: row.updatedAt,
-        })),
-        totalCount: result.totalCount,
-        pageInfo: {
-          count: result.rows.length,
-          currentPage: page,
-          firstItem: result.totalCount > 0 ? (page - 1) * pageSize + 1 : null,
-          hasMorePages: page * pageSize < result.totalCount,
-          lastItem: result.totalCount > 0 ? Math.min(page * pageSize, result.totalCount) : null,
-          lastPage: Math.ceil(result.totalCount / pageSize),
-          perPage: pageSize,
-          total: result.totalCount,
-        },
-      };
-    },
-  })
-);

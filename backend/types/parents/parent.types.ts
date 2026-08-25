@@ -246,12 +246,3 @@ export interface ChangeParentLifecycleResult {
   readonly id: string;
   readonly lifecycleStatus: ParentStatus;
 }
-
-export type ParentDocument = {
-  id: string;
-  fileId: string;
-  filePath: string;
-  isProtected: boolean;
-  usageType: string;
-  createdAt: Date;
-};

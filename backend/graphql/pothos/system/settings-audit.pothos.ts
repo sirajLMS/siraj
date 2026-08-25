@@ -1,6 +1,4 @@
-import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { AuditService } from "@/backend/services";
 import type {
   AuditAction,
   AuditEntityType,
@@ -9,7 +7,7 @@ import type {
   AuditLogReturnType,
 } from "@/backend/types";
 
-const VALID_ENTITY_TYPES = new Set<string>([
+export const VALID_ENTITY_TYPES = new Set<string>([
   "SYSTEM",
   "STUDENT",
   "INVOICE",
@@ -36,7 +34,7 @@ const VALID_ENTITY_TYPES = new Set<string>([
   "WHATSAPP_ACCOUNT",
 ]);
 
-const VALID_ACTIONS = new Set<string>([
+export const VALID_ACTIONS = new Set<string>([
   "CREATE",
   "UPDATE",
   "DELETE",
@@ -56,15 +54,15 @@ const VALID_ACTIONS = new Set<string>([
   "WHATSAPP_OPT_IN",
 ]);
 
-function isAuditEntityType(value: string): value is AuditEntityType {
+export function isAuditEntityType(value: string): value is AuditEntityType {
   return VALID_ENTITY_TYPES.has(value);
 }
 
-function isAuditAction(value: string): value is AuditAction {
+export function isAuditAction(value: string): value is AuditAction {
   return VALID_ACTIONS.has(value);
 }
 
-const AuditLogRef = gqlSchemaBuilder.objectRef<AuditLogReturnType>("AuditLog");
+export const AuditLogRef = gqlSchemaBuilder.objectRef<AuditLogReturnType>("AuditLog");
 
 export const AuditLogPothosObject = AuditLogRef.implement({
   description: "An immutable audit log entry recording a system change.",
@@ -86,7 +84,7 @@ export const AuditLogPothosObject = AuditLogRef.implement({
   }),
 });
 
-const SettingsAuditLogsResultRef = gqlSchemaBuilder.objectRef<AuditLogQueryResult>("SettingsAuditLogsResult");
+export const SettingsAuditLogsResultRef = gqlSchemaBuilder.objectRef<AuditLogQueryResult>("SettingsAuditLogsResult");
 
 export const SettingsAuditLogsResultPothosObject = SettingsAuditLogsResultRef.implement({
   description: "Paginated audit log entries for the settings audit tab.",
@@ -114,7 +112,7 @@ export const SettingsAuditLogFilterPothosObject = gqlSchemaBuilder.inputRef("Set
   }),
 });
 
-function toAuditLogFilterInput(
+export function toAuditLogFilterInput(
   filter:
     | {
         entityType?: string | null;
@@ -138,17 +136,3 @@ function toAuditLogFilterInput(
     offset: filter?.offset ?? undefined,
   };
 }
-
-gqlSchemaBuilder.queryField("settingsAuditLogs", t =>
-  t.field({
-    type: SettingsAuditLogsResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_AUDIT_VIEW },
-    description: "Returns paginated audit logs for the settings audit tab.",
-    args: {
-      filter: t.arg({ type: SettingsAuditLogFilterPothosObject, required: false }),
-    },
-    resolve: async (_root, args): Promise<AuditLogQueryResult> => {
-      return AuditService.queryAuditLogs(toAuditLogFilterInput(args.filter));
-    },
-  })
-);

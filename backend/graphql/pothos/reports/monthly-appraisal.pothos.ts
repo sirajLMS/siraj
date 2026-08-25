@@ -1,7 +1,4 @@
-import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { MonthlyAppraisalService } from "@/backend/services";
 import type {
   AppraisalFeedbackInput,
   AppraisalFeedbackReturnType,
@@ -16,7 +13,8 @@ import type {
 // UI can render sparse reports (R1.3).
 // ---------------------------------------------------------------------------
 
-const MonthlyAppraisalFeedbackRef = gqlSchemaBuilder.objectRef<AppraisalFeedbackReturnType>("MonthlyAppraisalFeedback");
+export const MonthlyAppraisalFeedbackRef =
+  gqlSchemaBuilder.objectRef<AppraisalFeedbackReturnType>("MonthlyAppraisalFeedback");
 
 export const MonthlyAppraisalFeedbackPothosObject = MonthlyAppraisalFeedbackRef.implement({
   description: "A parent/student feedback entry appended to a monthly appraisal.",
@@ -30,7 +28,7 @@ export const MonthlyAppraisalFeedbackPothosObject = MonthlyAppraisalFeedbackRef.
   }),
 });
 
-const MonthlyAppraisalRef = gqlSchemaBuilder.objectRef<MonthlyAppraisalReturnType>("MonthlyAppraisal");
+export const MonthlyAppraisalRef = gqlSchemaBuilder.objectRef<MonthlyAppraisalReturnType>("MonthlyAppraisal");
 
 export const MonthlyAppraisalPothosObject = MonthlyAppraisalRef.implement({
   description: "A teacher's monthly appraisal of a student — sparse rubric (1..5 grades, nullable) + feedback thread.",
@@ -54,7 +52,7 @@ export const MonthlyAppraisalPothosObject = MonthlyAppraisalRef.implement({
   }),
 });
 
-const MonthlyAppraisalForMonthRef =
+export const MonthlyAppraisalForMonthRef =
   gqlSchemaBuilder.objectRef<NonNullable<MonthlyAppraisalStudentEntry["appraisalForMonth"]>>(
     "MonthlyAppraisalForMonth"
   );
@@ -68,7 +66,7 @@ export const MonthlyAppraisalForMonthPothosObject = MonthlyAppraisalForMonthRef.
   }),
 });
 
-const MonthlyAppraisalStudentEntryRef =
+export const MonthlyAppraisalStudentEntryRef =
   gqlSchemaBuilder.objectRef<MonthlyAppraisalStudentEntry>("MonthlyAppraisalStudentEntry");
 
 export const MonthlyAppraisalStudentEntryPothosObject = MonthlyAppraisalStudentEntryRef.implement({
@@ -130,110 +128,6 @@ export const AddAppraisalFeedbackInputPothosObject = gqlSchemaBuilder
 // Queries
 // ---------------------------------------------------------------------------
 
-gqlSchemaBuilder.queryField("myMonthlyAppraisal", t =>
-  t.field({
-    type: MonthlyAppraisalPothosObject,
-    authScopes: { permission: AppPermission.APPRAISAL_VIEW },
-    description: "Returns the authenticated student's monthly appraisal for a given month (or null if none).",
-    args: {
-      month: t.arg({ type: "DateTime", required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      return MonthlyAppraisalService.getMyMonthlyAppraisal(userId, args.month, ctx.locale);
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("studentMonthlyAppraisals", t =>
-  t.field({
-    type: [MonthlyAppraisalPothosObject],
-    authScopes: { permission: AppPermission.APPRAISAL_VIEW },
-    description:
-      "Returns all monthly appraisals for a student. Caller must be the student, their parent, or an assigned teacher.",
-    args: {
-      studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      return MonthlyAppraisalService.getStudentMonthlyAppraisals(userId, args.studentId, ctx.locale);
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("teacherMonthlyAppraisalStudents", t =>
-  t.field({
-    type: [MonthlyAppraisalStudentEntryPothosObject],
-    authScopes: { permission: AppPermission.APPRAISAL_SUBMIT },
-    description:
-      "Returns the teacher's assigned students with an optional appraisal summary for the given month (teacher appraisal list view).",
-    args: {
-      month: t.arg({ type: "DateTime", required: false }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      return MonthlyAppraisalService.getTeacherMonthlyAppraisalStudents(userId, args.month ?? undefined, ctx.locale);
-    },
-  })
-);
-
 // ---------------------------------------------------------------------------
 // Mutations
 // ---------------------------------------------------------------------------
-
-gqlSchemaBuilder.mutationField("submitMonthlyAppraisal", t =>
-  t.field({
-    type: MonthlyAppraisalPothosObject,
-    authScopes: { permission: AppPermission.APPRAISAL_SUBMIT },
-    description:
-      "Submits or updates (upsert) a teacher's monthly appraisal for a student. Teacher identity from auth context.",
-    args: {
-      input: t.arg({ type: SubmitMonthlyAppraisalInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx): Promise<MonthlyAppraisalReturnType> => {
-      const userId = await requireAuth(ctx);
-      const input = args.input;
-      return MonthlyAppraisalService.submitAppraisal(
-        {
-          studentId: input.studentId,
-          teacherId: "", // service resolves from auth context; placeholder satisfies the type
-          month: input.month,
-          behaviorGrade: input.behaviorGrade ?? null,
-          behaviorComment: input.behaviorComment ?? null,
-          attendanceGrade: input.attendanceGrade ?? null,
-          attendanceComment: input.attendanceComment ?? null,
-          punctualityGrade: input.punctualityGrade ?? null,
-          punctualityComment: input.punctualityComment ?? null,
-          overallGrade: input.overallGrade ?? null,
-          overallComment: input.overallComment ?? null,
-          learningTargets: input.learningTargets,
-        },
-        userId,
-        ctx.locale
-      );
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("addAppraisalFeedback", t =>
-  t.field({
-    type: MonthlyAppraisalFeedbackPothosObject,
-    authScopes: { permission: AppPermission.APPRAISAL_FEEDBACK },
-    description: "Appends parent/student feedback to a published monthly appraisal.",
-    args: {
-      input: t.arg({ type: AddAppraisalFeedbackInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      return MonthlyAppraisalService.addFeedback(
-        {
-          appraisalId: args.input.appraisalId,
-          authorUserId: "", // service resolves from auth context
-          body: args.input.body,
-        },
-        userId,
-        ctx.locale
-      );
-    },
-  })
-);

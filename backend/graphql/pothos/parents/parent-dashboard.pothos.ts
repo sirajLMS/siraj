@@ -15,7 +15,7 @@ import type {
   WorkshopPromoReturnType,
 } from "@/backend/types";
 
-const ParentDashboardScheduleRowRef =
+export const ParentDashboardScheduleRowRef =
   gqlSchemaBuilder.objectRef<ParentDashboardScheduleRow>("ParentDashboardScheduleRow");
 
 export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRowRef.implement({
@@ -46,7 +46,7 @@ export const ParentDashboardScheduleRowPothosObject = ParentDashboardScheduleRow
   }),
 });
 
-const ParentDashboardScheduleResultRef = gqlSchemaBuilder.objectRef<ParentDashboardSchedulePaginatedResult>(
+export const ParentDashboardScheduleResultRef = gqlSchemaBuilder.objectRef<ParentDashboardSchedulePaginatedResult>(
   "ParentDashboardScheduleResult"
 );
 
@@ -59,7 +59,8 @@ export const ParentDashboardScheduleResultPothosObject = ParentDashboardSchedule
   }),
 });
 
-const ParentDashboardMetricsRef = gqlSchemaBuilder.objectRef<ParentDashboardMetricsType>("ParentDashboardMetrics");
+export const ParentDashboardMetricsRef =
+  gqlSchemaBuilder.objectRef<ParentDashboardMetricsType>("ParentDashboardMetrics");
 
 export const ParentDashboardMetricsPothosObject = ParentDashboardMetricsRef.implement({
   fields: t => ({
@@ -74,7 +75,7 @@ export const ParentDashboardMetricsPothosObject = ParentDashboardMetricsRef.impl
   }),
 });
 
-const StudentProgressRef = gqlSchemaBuilder.objectRef<StudentProgressReturnType>("StudentProgress");
+export const StudentProgressRef = gqlSchemaBuilder.objectRef<StudentProgressReturnType>("StudentProgress");
 
 export const StudentProgressPothosObject = StudentProgressRef.implement({
   fields: t => ({
@@ -84,7 +85,7 @@ export const StudentProgressPothosObject = StudentProgressRef.implement({
   }),
 });
 
-const WorkshopPromoRef = gqlSchemaBuilder.objectRef<WorkshopPromoReturnType>("WorkshopPromo");
+export const WorkshopPromoRef = gqlSchemaBuilder.objectRef<WorkshopPromoReturnType>("WorkshopPromo");
 
 export const WorkshopPromoPothosObject = WorkshopPromoRef.implement({
   fields: t => ({
@@ -95,7 +96,7 @@ export const WorkshopPromoPothosObject = WorkshopPromoRef.implement({
   }),
 });
 
-const ParentDashboardMetricsResultRef =
+export const ParentDashboardMetricsResultRef =
   gqlSchemaBuilder.objectRef<ParentDashboardMetricsReturnType>("ParentDashboardMetricsResult");
 
 export const ParentDashboardMetricsResultPothosObject = ParentDashboardMetricsResultRef.implement({

@@ -7,9 +7,8 @@ import {
   MeetingIntegrationConnectedAccountStatusPothosEnum,
   MeetingIntegrationProviderSlugPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { handleMeetingChannelError } from "@/backend/graphql/utils/handle-meeting-channel-error";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { MeetingIntegrationService, MeetingOAuthService, type MeetingProvider } from "@/backend/services";
+import type { MeetingProvider } from "@/backend/services";
 import type {
   AdminRevokeTokenReturnType,
   AdminRevokeTokenSubmitInput,
@@ -25,15 +24,15 @@ import type {
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
-const MEETING_PROVIDERS = new Set<string>(Object.values(MeetingIntegrationProviderSlug));
+export const MEETING_PROVIDERS = new Set<string>(Object.values(MeetingIntegrationProviderSlug));
 
-function isMeetingProvider(value: string): value is MeetingProvider {
+export function isMeetingProvider(value: string): value is MeetingProvider {
   return MEETING_PROVIDERS.has(value);
 }
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
-const MeetingIntegrationProviderRef =
+export const MeetingIntegrationProviderRef =
   gqlSchemaBuilder.objectRef<MeetingIntegrationProviderReturnType>("MeetingIntegrationProvider");
 
 export const MeetingIntegrationProviderPothosObject = MeetingIntegrationProviderRef.implement({
@@ -55,9 +54,8 @@ export const MeetingIntegrationProviderPothosObject = MeetingIntegrationProvider
   }),
 });
 
-const MeetingIntegrationConnectedAccountRef = gqlSchemaBuilder.objectRef<MeetingIntegrationConnectedAccountReturnType>(
-  "MeetingIntegrationConnectedAccount"
-);
+export const MeetingIntegrationConnectedAccountRef =
+  gqlSchemaBuilder.objectRef<MeetingIntegrationConnectedAccountReturnType>("MeetingIntegrationConnectedAccount");
 
 export const MeetingIntegrationConnectedAccountPothosObject = MeetingIntegrationConnectedAccountRef.implement({
   fields: t => ({
@@ -76,7 +74,7 @@ export const MeetingIntegrationConnectedAccountPothosObject = MeetingIntegration
   }),
 });
 
-const TestMeetingConnectionResultRef =
+export const TestMeetingConnectionResultRef =
   gqlSchemaBuilder.objectRef<TestMeetingConnectionReturnType>("TestMeetingConnectionResult");
 
 export const TestMeetingConnectionResultPothosObject = TestMeetingConnectionResultRef.implement({
@@ -99,7 +97,8 @@ export const TestMeetingConnectionResultPothosObject = TestMeetingConnectionResu
   }),
 });
 
-const AdminRevokeTokenResultRef = gqlSchemaBuilder.objectRef<AdminRevokeTokenReturnType>("AdminRevokeTokenResult");
+export const AdminRevokeTokenResultRef =
+  gqlSchemaBuilder.objectRef<AdminRevokeTokenReturnType>("AdminRevokeTokenResult");
 
 export const AdminRevokeTokenResultPothosObject = AdminRevokeTokenResultRef.implement({
   fields: t => ({
@@ -115,7 +114,7 @@ export const AdminRevokeTokenResultPothosObject = AdminRevokeTokenResultRef.impl
 
 // ─── OAuth Connect / Disconnect object types ──────────────────────────────────
 
-const MyConnectedMeetingProviderRef =
+export const MyConnectedMeetingProviderRef =
   gqlSchemaBuilder.objectRef<MyConnectedMeetingProviderReturnType>("MyConnectedMeetingProvider");
 
 export const MyConnectedMeetingProviderPothosObject = MyConnectedMeetingProviderRef.implement({
@@ -131,7 +130,7 @@ export const MyConnectedMeetingProviderPothosObject = MyConnectedMeetingProvider
   }),
 });
 
-const ConnectMeetingProviderOAuthResultRef = gqlSchemaBuilder.objectRef<ConnectMeetingProviderOAuthReturnType>(
+export const ConnectMeetingProviderOAuthResultRef = gqlSchemaBuilder.objectRef<ConnectMeetingProviderOAuthReturnType>(
   "ConnectMeetingProviderOAuthResult"
 );
 
@@ -146,9 +145,8 @@ export const ConnectMeetingProviderOAuthResultPothosObject = ConnectMeetingProvi
   }),
 });
 
-const DisconnectMeetingProviderOAuthResultRef = gqlSchemaBuilder.objectRef<DisconnectMeetingProviderOAuthReturnType>(
-  "DisconnectMeetingProviderOAuthResult"
-);
+export const DisconnectMeetingProviderOAuthResultRef =
+  gqlSchemaBuilder.objectRef<DisconnectMeetingProviderOAuthReturnType>("DisconnectMeetingProviderOAuthResult");
 
 export const DisconnectMeetingProviderOAuthResultPothosObject = DisconnectMeetingProviderOAuthResultRef.implement({
   fields: t => ({
@@ -200,7 +198,7 @@ export const DisconnectMeetingProviderOAuthInputPothosObject = gqlSchemaBuilder
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function canViewMeetingIntegrations(ctx: BaseContext): boolean {
+export function canViewMeetingIntegrations(ctx: BaseContext): boolean {
   return (
     ctx.isSuperAdmin ||
     ctx.permissions.includes(AppPermission.SETTINGS_VIEW) ||
@@ -208,7 +206,7 @@ function canViewMeetingIntegrations(ctx: BaseContext): boolean {
   );
 }
 
-function assertCanViewMeetingIntegrations(ctx: BaseContext, tErrors: ErrorsLabels): void {
+export function assertCanViewMeetingIntegrations(ctx: BaseContext, tErrors: ErrorsLabels): void {
   if (!canViewMeetingIntegrations(ctx)) {
     throw new GraphQLError(tErrors.insufficientPermissions, {
       extensions: { code: "FORBIDDEN" },
@@ -216,13 +214,13 @@ function assertCanViewMeetingIntegrations(ctx: BaseContext, tErrors: ErrorsLabel
   }
 }
 
-async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
+export async function resolveMeetingAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
   const actorUserId = await requireAuth(ctx);
   const tErrors = ctx.t().errorsTranslations;
   return { actorUserId, tErrors };
 }
 
-function hasManageOwnMeetingConfigs(ctx: BaseContext): boolean {
+export function hasManageOwnMeetingConfigs(ctx: BaseContext): boolean {
   return (
     ctx.isSuperAdmin ||
     ctx.permissions.includes(AppPermission.MEETING_CONFIGS_MANAGE_OWN) ||
@@ -230,7 +228,7 @@ function hasManageOwnMeetingConfigs(ctx: BaseContext): boolean {
   );
 }
 
-function assertCanManageOwnMeetingConfigs(ctx: BaseContext, tErrors: ErrorsLabels): void {
+export function assertCanManageOwnMeetingConfigs(ctx: BaseContext, tErrors: ErrorsLabels): void {
   if (!hasManageOwnMeetingConfigs(ctx)) {
     throw new GraphQLError(tErrors.insufficientPermissions, {
       extensions: { code: "FORBIDDEN" },
@@ -240,117 +238,4 @@ function assertCanManageOwnMeetingConfigs(ctx: BaseContext, tErrors: ErrorsLabel
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
-gqlSchemaBuilder.queryField("meetingIntegrationProviders", t =>
-  t.field({
-    type: [MeetingIntegrationProviderPothosObject],
-    authScopes: { loggedIn: true },
-    resolve: async (_root, _args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      assertCanViewMeetingIntegrations(ctx, tErrors);
-      return MeetingIntegrationService.listIntegrationProviders(actorUserId, tErrors);
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("meetingIntegrationConnectedAccounts", t =>
-  t.field({
-    type: [MeetingIntegrationConnectedAccountPothosObject],
-    authScopes: { loggedIn: true },
-    args: {
-      providerSlug: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      assertCanViewMeetingIntegrations(ctx, tErrors);
-      const providerSlug: MeetingProvider | null = isMeetingProvider(args.providerSlug) ? args.providerSlug : null;
-      if (!providerSlug) {
-        throw new GraphQLError(tErrors.meetingProvider.meetingProviderNotFound(args.providerSlug), {
-          extensions: { code: "BAD_USER_INPUT" },
-        });
-      }
-      return MeetingIntegrationService.listConnectedAccounts(actorUserId, providerSlug, tErrors);
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("myConnectedMeetingProviders", t =>
-  t.field({
-    type: [MyConnectedMeetingProviderPothosObject],
-    authScopes: { loggedIn: true },
-    resolve: async (_root, _args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      assertCanManageOwnMeetingConfigs(ctx, tErrors);
-      return MeetingOAuthService.listOwnConnectedProviders(actorUserId, tErrors);
-    },
-  })
-);
-
 // ─── Mutations ────────────────────────────────────────────────────────────────
-
-gqlSchemaBuilder.mutationField("testMeetingProviderConnection", t =>
-  t.field({
-    type: TestMeetingConnectionResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_MEETING_INTEGRATIONS, notImpersonating: true },
-    args: {
-      input: t.arg({ type: TestMeetingConnectionInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      try {
-        return await MeetingIntegrationService.testConnection(actorUserId, args.input, tErrors);
-      } catch (err) {
-        handleMeetingChannelError(err, tErrors);
-      }
-      return undefined;
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("adminRevokeMeetingProviderToken", t =>
-  t.field({
-    type: AdminRevokeTokenResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_MEETING_INTEGRATIONS, notImpersonating: true },
-    args: {
-      input: t.arg({ type: AdminRevokeTokenInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      return MeetingIntegrationService.revokeToken(actorUserId, args.input, tErrors);
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("connectMeetingProviderOAuth", t =>
-  t.field({
-    type: ConnectMeetingProviderOAuthResultPothosObject,
-    authScopes: { loggedIn: true },
-    args: {
-      input: t.arg({ type: ConnectMeetingProviderOAuthInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      assertCanManageOwnMeetingConfigs(ctx, tErrors);
-      try {
-        return await MeetingOAuthService.connectProviderOAuth(args.input, actorUserId, ctx.sessionId, tErrors);
-      } catch (err) {
-        handleMeetingChannelError(err, tErrors);
-      }
-      return undefined;
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("disconnectMeetingProviderOAuth", t =>
-  t.field({
-    type: DisconnectMeetingProviderOAuthResultPothosObject,
-    authScopes: { loggedIn: true },
-    args: {
-      input: t.arg({ type: DisconnectMeetingProviderOAuthInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-      assertCanManageOwnMeetingConfigs(ctx, tErrors);
-      return MeetingOAuthService.disconnectProviderOAuth(args.input, actorUserId, tErrors);
-    },
-  })
-);

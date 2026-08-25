@@ -51,7 +51,7 @@ export const CreateRecurringClassInputPothosObject = gqlSchemaBuilder
     }),
   });
 
-const CreateRecurringClassResultRef =
+export const CreateRecurringClassResultRef =
   gqlSchemaBuilder.objectRef<CreateRecurringClassReturnType>("CreateRecurringClassResult");
 
 export const CreateRecurringClassResultPothosObject = CreateRecurringClassResultRef.implement({

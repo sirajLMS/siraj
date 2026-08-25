@@ -1,11 +1,7 @@
-import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enum";
+import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponsePothosObject } from "@/backend/graphql/pothos/complaints/complaintResponses.pothos";
-import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
-import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { isComplaintCategory, isComplaintStatus } from "@/backend/lib";
-import { ComplaintService } from "@/backend/services";
+import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
   ComplaintFileMetadataInput,
   ComplaintFileReturnType,
@@ -14,7 +10,6 @@ import type {
   ComplaintQueuePaginatedResult,
   ComplaintQueueResult,
   ComplaintReturnType,
-  ComplaintSelectType,
   ComplaintSubmitWithFilesInput,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
@@ -29,7 +24,7 @@ export const ComplaintStatusPothosEnum = gqlSchemaBuilder.enumType(ComplaintStat
   description: "Status of a complaint in the support queue.",
 });
 
-const ComplaintFileRef = gqlSchemaBuilder.objectRef<ComplaintFileReturnType>("ComplaintFile");
+export const ComplaintFileRef = gqlSchemaBuilder.objectRef<ComplaintFileReturnType>("ComplaintFile");
 
 export const ComplaintFilePothosObject = ComplaintFileRef.implement({
   description: "A file attached to a complaint.",
@@ -43,7 +38,7 @@ export const ComplaintFilePothosObject = ComplaintFileRef.implement({
   }),
 });
 
-const ComplaintRef = gqlSchemaBuilder.objectRef<ComplaintReturnType>("Complaint");
+export const ComplaintRef = gqlSchemaBuilder.objectRef<ComplaintReturnType>("Complaint");
 
 export const ComplaintPothosObject = ComplaintRef.implement({
   description: "A parent complaint with full details and responses.",
@@ -62,7 +57,7 @@ export const ComplaintPothosObject = ComplaintRef.implement({
   }),
 });
 
-const ComplaintMetricsRef = gqlSchemaBuilder.objectRef<ComplaintMetrics>("ComplaintMetrics");
+export const ComplaintMetricsRef = gqlSchemaBuilder.objectRef<ComplaintMetrics>("ComplaintMetrics");
 
 export const ComplaintMetricsPothosObject = ComplaintMetricsRef.implement({
   description: "Aggregate metrics for the complaint queue.",
@@ -76,7 +71,7 @@ export const ComplaintMetricsPothosObject = ComplaintMetricsRef.implement({
   }),
 });
 
-const AdminComplaintQueueResultRef = gqlSchemaBuilder.objectRef<ComplaintQueueResult>("ComplaintQueueResult");
+export const AdminComplaintQueueResultRef = gqlSchemaBuilder.objectRef<ComplaintQueueResult>("ComplaintQueueResult");
 
 export const ComplaintQueueResultPothosObject = AdminComplaintQueueResultRef.implement({
   description: "Paginated admin complaint queue with metrics.",
@@ -90,7 +85,8 @@ export const ComplaintQueueResultPothosObject = AdminComplaintQueueResultRef.imp
   }),
 });
 
-const ParentComplaintsResultRef = gqlSchemaBuilder.objectRef<ParentComplaintPaginatedResult>("ParentComplaintsResult");
+export const ParentComplaintsResultRef =
+  gqlSchemaBuilder.objectRef<ParentComplaintPaginatedResult>("ParentComplaintsResult");
 
 export const ParentComplaintsResultPothosObject = ParentComplaintsResultRef.implement({
   description: "Paginated parent complaints with page info.",
@@ -102,7 +98,7 @@ export const ParentComplaintsResultPothosObject = ParentComplaintsResultRef.impl
   }),
 });
 
-const ComplaintQueuePaginatedResultRef = gqlSchemaBuilder.objectRef<ComplaintQueuePaginatedResult>(
+export const ComplaintQueuePaginatedResultRef = gqlSchemaBuilder.objectRef<ComplaintQueuePaginatedResult>(
   "ComplaintQueuePaginatedResult"
 );
 
@@ -115,7 +111,7 @@ export const ComplaintQueuePaginatedResultPothosObject = ComplaintQueuePaginated
   }),
 });
 
-const ComplaintFileMetadataInputRef =
+export const ComplaintFileMetadataInputRef =
   gqlSchemaBuilder.inputRef<ComplaintFileMetadataInput>("ComplaintFileMetadataInput");
 
 export const ComplaintFileMetadataInputPothosObject = ComplaintFileMetadataInputRef.implement({
@@ -150,7 +146,7 @@ export const ComplaintQueueFilterPothosObject = gqlSchemaBuilder
     }),
   });
 
-function normalizeComplaint(complaint: ComplaintReturnType): ComplaintReturnType {
+export function normalizeComplaint(complaint: ComplaintReturnType): ComplaintReturnType {
   return {
     ...complaint,
     parentName: complaint.parentName ?? null,
@@ -160,145 +156,3 @@ function normalizeComplaint(complaint: ComplaintReturnType): ComplaintReturnType
     files: complaint.files ?? [],
   };
 }
-
-gqlSchemaBuilder.queryField("parentComplaints", t =>
-  t.field({
-    type: ParentComplaintsResultPothosObject,
-    authScopes: { loggedIn: true },
-    description: "Returns the authenticated parent's complaint history with pagination.",
-    args: {
-      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
-    },
-    resolve: async (_root, args, ctx): Promise<ParentComplaintPaginatedResult> => {
-      const userId = await requireAuth(ctx);
-
-      const pagination = parsePaginationArgs(args.paginationArgs);
-
-      const result = await ComplaintService.getParentComplaints(userId, pagination, ctx.locale);
-
-      return {
-        id: result.id,
-        complaints: result.complaints.map(normalizeComplaint),
-        totalCount: result.totalCount,
-        pageInfo: result.pageInfo,
-      };
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
-  t.field({
-    type: ComplaintQueueResultPothosObject,
-    authScopes: { permission: AppPermission.COMPLAINTS_LIST },
-    description: "Returns the paginated admin complaint queue with metrics.",
-    args: {
-      filter: t.arg({ type: ComplaintQueueFilterPothosObject, required: true }),
-      paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
-    },
-    resolve: async (_root, args, ctx): Promise<ComplaintQueueResult> => {
-      const userId = await requireAuth(ctx);
-
-      const paginationArgs = parsePaginationArgs(args.paginationArgs);
-
-      const result = await ComplaintService.getQueueWithMetricsPaginated(
-        userId,
-        {
-          status: args.filter.status ?? null,
-          search: args.filter.search ?? null,
-        },
-        paginationArgs,
-        ctx.locale
-      );
-
-      return {
-        id: result.id,
-        complaints: result.rows.map(normalizeComplaint),
-        metrics: {
-          id: result.metrics.id,
-          unanswered: result.metrics.unanswered,
-          answered: result.metrics.answered,
-          avgResolutionHours: result.metrics.avgResolutionHours,
-          avgResolutionTime: null,
-          totalCount: result.metrics.totalCount,
-        },
-        totalCount: result.totalCount,
-        pageInfo: result.pageInfo,
-      };
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("complaintFiles", t =>
-  t.field({
-    type: [ComplaintFilePothosObject],
-    authScopes: { loggedIn: true },
-    description: "Returns file attachments for a specific complaint. Accessible by the owning parent or admins.",
-    args: {
-      complaintId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      return await ComplaintService.getComplaintFiles(userId, args.complaintId, ctx.locale);
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("submitComplaint", t =>
-  t.field({
-    type: ComplaintPothosObject,
-    authScopes: { loggedIn: true },
-    description: "Submits a new complaint from the authenticated parent.",
-    args: {
-      input: t.arg({ type: SubmitComplaintInputPothosObject, required: true }),
-    },
-    resolve: async (_root, args, ctx): Promise<ComplaintReturnType> => {
-      const userId = await requireAuth(ctx);
-
-      const created: ComplaintSelectType = await ComplaintService.submitComplaint(
-        userId,
-        {
-          studentId: args.input.studentId ?? null,
-          category: args.input.category,
-          submitterEmail: args.input.submitterEmail,
-          body: args.input.body,
-          files: args.input.files ?? [],
-        },
-        ctx.locale
-      );
-
-      const category = isComplaintCategory(created.category) ? created.category : ComplaintCategory.OTHER;
-      const status = isComplaintStatus(created.status) ? created.status : ComplaintStatus.UNANSWERED;
-
-      return normalizeComplaint({
-        id: created.id,
-        category,
-        body: created.body,
-        status,
-        createdAt: created.createdAt,
-        updatedAt: created.updatedAt,
-        parentName: null,
-        studentName: null,
-        responseCount: 0,
-        responses: [],
-        files: [],
-      });
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("deleteComplaint", t =>
-  t.field({
-    type: "Boolean",
-    authScopes: { permission: AppPermission.COMPLAINTS_DELETE },
-    description: "Soft-deletes a complaint (admin only). Returns true on success.",
-    args: {
-      complaintId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      await ComplaintService.deleteComplaint(userId, args.complaintId, ctx.locale);
-
-      return true;
-    },
-  })
-);

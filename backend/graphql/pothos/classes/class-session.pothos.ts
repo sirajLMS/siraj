@@ -26,7 +26,7 @@ import type {
 
 // ─── Performance ─────────────────────────────────────────────────────────────
 
-const ClassInstancePerformanceRef =
+export const ClassInstancePerformanceRef =
   gqlSchemaBuilder.objectRef<ClassInstancePerformanceReturnType>("ClassInstancePerformance");
 
 export const ClassInstancePerformancePothosObject = ClassInstancePerformanceRef.implement({
@@ -52,7 +52,8 @@ export const ClassInstancePerformancePothosObject = ClassInstancePerformanceRef.
 
 // ─── Student Info ─────────────────────────────────────────────────────────────
 
-const ClassInstanceStudentRef = gqlSchemaBuilder.objectRef<ClassInstanceStudentReturnType>("ClassInstanceStudentInfo");
+export const ClassInstanceStudentRef =
+  gqlSchemaBuilder.objectRef<ClassInstanceStudentReturnType>("ClassInstanceStudentInfo");
 
 export const ClassInstanceStudentPothosObject = ClassInstanceStudentRef.implement({
   fields: t => ({
@@ -66,7 +67,8 @@ export const ClassInstanceStudentPothosObject = ClassInstanceStudentRef.implemen
 
 // ─── Teacher Info ─────────────────────────────────────────────────────────────
 
-const ClassInstanceTeacherRef = gqlSchemaBuilder.objectRef<ClassInstanceTeacherReturnType>("ClassInstanceTeacherInfo");
+export const ClassInstanceTeacherRef =
+  gqlSchemaBuilder.objectRef<ClassInstanceTeacherReturnType>("ClassInstanceTeacherInfo");
 
 export const ClassInstanceTeacherPothosObject = ClassInstanceTeacherRef.implement({
   fields: t => ({
@@ -79,7 +81,7 @@ export const ClassInstanceTeacherPothosObject = ClassInstanceTeacherRef.implemen
 
 // ─── Class Instance Detail ────────────────────────────────────────────────────
 
-const ClassInstanceDetailRef = gqlSchemaBuilder.objectRef<ClassInstanceDetailReturnType>("ClassInstanceDetail");
+export const ClassInstanceDetailRef = gqlSchemaBuilder.objectRef<ClassInstanceDetailReturnType>("ClassInstanceDetail");
 
 export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement({
   fields: t => ({
@@ -130,7 +132,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
 
 // ─── Class Status Event ───────────────────────────────────────────────────────
 
-const ClassStatusEventRef = gqlSchemaBuilder.objectRef<ClassStatusEventReturnType>("ClassStatusEvent");
+export const ClassStatusEventRef = gqlSchemaBuilder.objectRef<ClassStatusEventReturnType>("ClassStatusEvent");
 
 export const ClassStatusEventPothosObject = ClassStatusEventRef.implement({
   fields: t => ({
@@ -155,7 +157,8 @@ export const RescheduleClassInputPothosObject = gqlSchemaBuilder
 
 // ─── Support Request Result ───────────────────────────────────────────────────
 
-const SupportRequestResultRef = gqlSchemaBuilder.objectRef<SupportRequestResultReturnType>("SupportRequestResult");
+export const SupportRequestResultRef =
+  gqlSchemaBuilder.objectRef<SupportRequestResultReturnType>("SupportRequestResult");
 
 export const SupportRequestResultPothosObject = SupportRequestResultRef.implement({
   fields: t => ({
@@ -166,7 +169,7 @@ export const SupportRequestResultPothosObject = SupportRequestResultRef.implemen
 
 // ─── Future Class ────────────────────────────────────────────────────────────
 
-const FutureClassRef = gqlSchemaBuilder.objectRef<FutureClassReturnType>("FutureClass");
+export const FutureClassRef = gqlSchemaBuilder.objectRef<FutureClassReturnType>("FutureClass");
 
 export const FutureClassPothosObject = FutureClassRef.implement({
   fields: t => ({
@@ -200,7 +203,8 @@ export const FutureClassPothosObject = FutureClassRef.implement({
 
 // ─── Teacher Future Schedule ─────────────────────────────────────────────────
 
-const TeacherFutureScheduleRef = gqlSchemaBuilder.objectRef<TeacherFutureScheduleReturnType>("TeacherFutureSchedule");
+export const TeacherFutureScheduleRef =
+  gqlSchemaBuilder.objectRef<TeacherFutureScheduleReturnType>("TeacherFutureSchedule");
 
 export const TeacherFutureSchedulePothosObject = TeacherFutureScheduleRef.implement({
   fields: t => ({
@@ -226,7 +230,7 @@ export const TeacherFutureSchedulePothosObject = TeacherFutureScheduleRef.implem
 
 // ─── Delete Class Instance Result ────────────────────────────────────────────
 
-const DeleteClassInstanceResultRef = gqlSchemaBuilder.objectRef<{ success: boolean; warnings: string[] }>(
+export const DeleteClassInstanceResultRef = gqlSchemaBuilder.objectRef<{ success: boolean; warnings: string[] }>(
   "DeleteClassInstanceResult"
 );
 
@@ -239,7 +243,7 @@ export const DeleteClassInstanceResultPothosObject = DeleteClassInstanceResultRe
 
 // ─── Leave Process Result ───────────────────────────────────────────────────
 
-const LeaveProcessResultRef = gqlSchemaBuilder.objectRef<LeaveProcessResultReturnType>("LeaveProcessResult");
+export const LeaveProcessResultRef = gqlSchemaBuilder.objectRef<LeaveProcessResultReturnType>("LeaveProcessResult");
 
 export const LeaveProcessResultPothosObject = LeaveProcessResultRef.implement({
   fields: t => ({

@@ -6,7 +6,8 @@ import type {
   ParentOwnProfileReturnType,
 } from "@/backend/types";
 
-const ParentAssignedStudentRef = gqlSchemaBuilder.objectRef<ParentAssignedStudentReturnType>("ParentAssignedStudent");
+export const ParentAssignedStudentRef =
+  gqlSchemaBuilder.objectRef<ParentAssignedStudentReturnType>("ParentAssignedStudent");
 
 export const ParentAssignedStudentPothosObject = ParentAssignedStudentRef.implement({
   fields: t => ({
@@ -24,7 +25,7 @@ export const ParentAssignedStudentPothosObject = ParentAssignedStudentRef.implem
   }),
 });
 
-const ParentAssignedStudentsResultRef =
+export const ParentAssignedStudentsResultRef =
   gqlSchemaBuilder.objectRef<ParentAssignedStudentsResult>("ParentAssignedStudentsResult");
 
 export const ParentAssignedStudentsResultPothosObject = ParentAssignedStudentsResultRef.implement({
@@ -35,7 +36,7 @@ export const ParentAssignedStudentsResultPothosObject = ParentAssignedStudentsRe
   }),
 });
 
-const ParentOwnProfileRef = gqlSchemaBuilder.objectRef<ParentOwnProfileReturnType>("ParentOwnProfile");
+export const ParentOwnProfileRef = gqlSchemaBuilder.objectRef<ParentOwnProfileReturnType>("ParentOwnProfile");
 
 export const ParentOwnProfilePothosObject = ParentOwnProfileRef.implement({
   fields: t => ({
@@ -51,7 +52,7 @@ export const ParentOwnProfilePothosObject = ParentOwnProfileRef.implement({
   }),
 });
 
-const ParentHandbookUrlRef = gqlSchemaBuilder.objectRef<ParentHandbookUrlReturnType>("ParentHandbookUrl");
+export const ParentHandbookUrlRef = gqlSchemaBuilder.objectRef<ParentHandbookUrlReturnType>("ParentHandbookUrl");
 
 export const ParentHandbookUrlPothosObject = ParentHandbookUrlRef.implement({
   fields: t => ({

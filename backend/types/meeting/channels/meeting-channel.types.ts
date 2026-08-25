@@ -26,4 +26,3 @@ export interface CachedToken {
   readonly accessToken: string;
   readonly expiresAt: number;
 }
-

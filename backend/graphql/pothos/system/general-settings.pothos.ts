@@ -4,17 +4,16 @@ import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { SystemSettingCategoryPothos, SystemSettingDataTypePothos } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { SystemSettingsService } from "@/backend/services";
 import type { SystemSettingSelectType, SystemSettingUpsertInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
-const ENV_SETTING_KEY_PREFIX = "env::";
+export const ENV_SETTING_KEY_PREFIX = "env::";
 
-function resolveErrors(ctx: BaseContext): ErrorsLabels {
+export function resolveErrors(ctx: BaseContext): ErrorsLabels {
   return ctx.t().errorsTranslations;
 }
 
-function canViewGeneralSettings(ctx: BaseContext): boolean {
+export function canViewGeneralSettings(ctx: BaseContext): boolean {
   return (
     ctx.isSuperAdmin ||
     ctx.permissions.includes(AppPermission.SETTINGS_VIEW) ||
@@ -22,7 +21,7 @@ function canViewGeneralSettings(ctx: BaseContext): boolean {
   );
 }
 
-function assertCanViewGeneralSettings(ctx: BaseContext, tErrors: ErrorsLabels): void {
+export function assertCanViewGeneralSettings(ctx: BaseContext, tErrors: ErrorsLabels): void {
   if (!canViewGeneralSettings(ctx)) {
     throw new GraphQLError(tErrors.insufficientPermissions, {
       extensions: { code: "FORBIDDEN" },
@@ -30,16 +29,18 @@ function assertCanViewGeneralSettings(ctx: BaseContext, tErrors: ErrorsLabels): 
   }
 }
 
-function isGeneralSettingKey(key: string): boolean {
+export function isGeneralSettingKey(key: string): boolean {
   return !key.startsWith(ENV_SETTING_KEY_PREFIX);
 }
 
-async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
+export async function resolveGeneralSettingsAuthCtx(
+  ctx: BaseContext
+): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
   const actorUserId = await requireAuth(ctx);
   return { actorUserId, tErrors: resolveErrors(ctx) };
 }
 
-const SystemSettingRef = gqlSchemaBuilder.objectRef<SystemSettingSelectType>("SystemSetting");
+export const SystemSettingRef = gqlSchemaBuilder.objectRef<SystemSettingSelectType>("SystemSetting");
 
 export const SystemSettingPothosObject = SystemSettingRef.implement({
   fields: t => ({
@@ -68,98 +69,3 @@ export const SystemSettingUpsertInputPothos = gqlSchemaBuilder
       category: t.field({ type: SystemSettingCategoryPothos, required: false }),
     }),
   });
-
-gqlSchemaBuilder.queryField("systemSettings", t =>
-  t.field({
-    type: [SystemSettingPothosObject],
-    // Read access = loggedIn here; the effective SETTINGS_VIEW /
-    // SETTINGS_EDIT_GENERAL gate lives in assertCanViewGeneralSettings below.
-    // The authScopes plugin only supports AND-composed single permissions, so
-    // the OR view rule cannot be expressed declaratively — keep the resolver
-    // guard as the source of truth.
-    authScopes: { loggedIn: true },
-    resolve: async (_root, _args, ctx) => {
-      const tErrors = resolveErrors(ctx);
-      assertCanViewGeneralSettings(ctx, tErrors);
-
-      const settings = await SystemSettingsService.listAllSettings();
-      return settings.filter(setting => isGeneralSettingKey(setting.key));
-    },
-  })
-);
-
-gqlSchemaBuilder.queryField("systemSetting", t =>
-  t.field({
-    type: SystemSettingPothosObject,
-    nullable: true,
-    // Same as systemSettings: loggedIn declared here; the SETTINGS_VIEW /
-    // SETTINGS_EDIT_GENERAL OR gate is enforced by assertCanViewGeneralSettings.
-    authScopes: { loggedIn: true },
-    args: {
-      key: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const tErrors = resolveErrors(ctx);
-      assertCanViewGeneralSettings(ctx, tErrors);
-
-      if (!isGeneralSettingKey(args.key)) {
-        return null;
-      }
-
-      return SystemSettingsService.getSettingByKey(args.key);
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("upsertSystemSetting", t =>
-  t.field({
-    type: SystemSettingPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_GENERAL, notImpersonating: true },
-    args: {
-      input: t.arg({ type: SystemSettingUpsertInputPothos, required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-
-      if (!isGeneralSettingKey(args.input.key)) {
-        throw new GraphQLError(tErrors.invalidInput, {
-          extensions: { code: "EENV_SCOPE_REJECTED" },
-        });
-      }
-
-      return SystemSettingsService.upsertGenericSetting(
-        {
-          key: args.input.key,
-          value: args.input.value,
-          dataType: args.input.dataType ?? undefined,
-          description: args.input.description ?? undefined,
-          category: args.input.category ?? undefined,
-        },
-        actorUserId,
-        tErrors
-      );
-    },
-  })
-);
-
-gqlSchemaBuilder.mutationField("deleteSystemSetting", t =>
-  t.field({
-    type: "Boolean",
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_GENERAL, notImpersonating: true },
-    args: {
-      key: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
-
-      if (!isGeneralSettingKey(args.key)) {
-        throw new GraphQLError(tErrors.invalidInput, {
-          extensions: { code: "EENV_SCOPE_REJECTED" },
-        });
-      }
-
-      await SystemSettingsService.deleteSettingByKey(args.key, actorUserId, tErrors);
-      return true;
-    },
-  })
-);

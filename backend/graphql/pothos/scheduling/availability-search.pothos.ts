@@ -12,7 +12,7 @@ import type {
   TeacherAvailabilityGap,
 } from "@/backend/types";
 
-const TeacherAvailabilityGapRef = gqlSchemaBuilder.objectRef<TeacherAvailabilityGap>("TeacherAvailabilityGap");
+export const TeacherAvailabilityGapRef = gqlSchemaBuilder.objectRef<TeacherAvailabilityGap>("TeacherAvailabilityGap");
 
 export const TeacherAvailabilityGapPothosObject = TeacherAvailabilityGapRef.implement({
   fields: t => ({
@@ -28,7 +28,8 @@ export const TeacherAvailabilityGapPothosObject = TeacherAvailabilityGapRef.impl
   }),
 });
 
-const AvailabilitySearchTeacherRef = gqlSchemaBuilder.objectRef<AvailabilitySearchTeacher>("AvailabilitySearchTeacher");
+export const AvailabilitySearchTeacherRef =
+  gqlSchemaBuilder.objectRef<AvailabilitySearchTeacher>("AvailabilitySearchTeacher");
 
 export const AvailabilitySearchTeacherPothosObject = AvailabilitySearchTeacherRef.implement({
   fields: t => ({
@@ -41,7 +42,8 @@ export const AvailabilitySearchTeacherPothosObject = AvailabilitySearchTeacherRe
   }),
 });
 
-const AvailabilitySearchResultRef = gqlSchemaBuilder.objectRef<AvailabilitySearchResult>("AvailabilitySearchResult");
+export const AvailabilitySearchResultRef =
+  gqlSchemaBuilder.objectRef<AvailabilitySearchResult>("AvailabilitySearchResult");
 
 export const AvailabilitySearchResultPothosObject = AvailabilitySearchResultRef.implement({
   fields: t => ({

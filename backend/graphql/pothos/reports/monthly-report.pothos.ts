@@ -1,7 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { StudentMonthlyReportReturnType } from "@/backend/types";
 
-const StudentMonthlyReportRef = gqlSchemaBuilder.objectRef<StudentMonthlyReportReturnType>("StudentMonthlyReport");
+export const StudentMonthlyReportRef =
+  gqlSchemaBuilder.objectRef<StudentMonthlyReportReturnType>("StudentMonthlyReport");
 
 export const StudentMonthlyReportPothosObject = StudentMonthlyReportRef.implement({
   description: "Monthly report aggregating student attendance, lessons, and credit ledger activity.",
