@@ -5,7 +5,7 @@ import {
   clearCookies,
   getTestCookie,
   getTestGraphqlUrl,
-  loginDemoUser,
+  loginSuperAdmin,
   setupTestServerLifecycle,
 } from "@/test/helpers";
 
@@ -89,7 +89,7 @@ describe("GraphQL HTTP Batching Integration Tests", () => {
   setupTestServerLifecycle();
 
   test("server accepts a batched array body and returns array of responses", async () => {
-    await loginDemoUser("super_admin");
+    await loginSuperAdmin();
     const cookieHeader = buildAuthCookieHeader();
 
     const batch = [{ query: "{ me { id } }" }, { query: "{ me { id name } }" }];
@@ -122,7 +122,7 @@ describe("GraphQL HTTP Batching Integration Tests", () => {
   });
 
   test("single-element batched request still works after enabling batching", async () => {
-    await loginDemoUser("super_admin");
+    await loginSuperAdmin();
     const cookieHeader = buildAuthCookieHeader();
 
     const response = await sendBatchedRequest([{ query: "{ me { id } }" }], cookieHeader);
@@ -135,7 +135,7 @@ describe("GraphQL HTTP Batching Integration Tests", () => {
   });
 
   test("APQ works with batched requests — persisted query hash is resolved", async () => {
-    await loginDemoUser("super_admin");
+    await loginSuperAdmin();
     const cookieHeader = buildAuthCookieHeader();
 
     // Use a unique query alias per test run so the APQ cache (which persists
@@ -183,7 +183,7 @@ describe("GraphQL HTTP Batching Integration Tests", () => {
   });
 
   test("authenticated batched request returns valid user data for multiple queries", async () => {
-    await loginDemoUser("super_admin");
+    await loginSuperAdmin();
     const cookieHeader = buildAuthCookieHeader();
 
     const batch = [{ query: "{ me { id } }" }, { query: "{ me { id name } }" }, { query: "{ me { id name role } }" }];
@@ -236,8 +236,9 @@ describe("Client-side BatchHttpLink configuration", () => {
     expect(pqIdx).toBeLessThan(batchIdx);
   });
 
-  test("ApolloServer constructor has allowBatchedHttpRequests: true", async () => {
+  test("ApolloServer constructor gates allowBatchedHttpRequests on !isProduction (H3 security fix)", async () => {
     const source = await readFile("app/api/graphql/route.ts", "utf8");
-    expect(source).toContain("allowBatchedHttpRequests: true");
+    // H3 fix: array-batching is disabled in production to prevent request amplification.
+    expect(source).toContain("allowBatchedHttpRequests: !isProduction");
   });
 });

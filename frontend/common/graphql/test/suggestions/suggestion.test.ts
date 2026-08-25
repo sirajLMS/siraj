@@ -9,6 +9,7 @@ import {
   authenticatedRequest,
   extractGqlErrorCode,
   loginDemoUser,
+  loginSuperAdmin,
   setupTestServerLifecycle,
   testClient,
 } from "@/test/helpers";
@@ -39,7 +40,7 @@ describe("GraphQL: adminSuggestions query", () => {
     adminToken = await loginDemoUser("academy_admin");
     expect(adminToken).not.toBeNull();
 
-    superAdminToken = await loginDemoUser("super_admin");
+    superAdminToken = await loginSuperAdmin();
     expect(superAdminToken).not.toBeNull();
   });
 
@@ -134,7 +135,7 @@ describe("GraphQL: submitSuggestion mutation", () => {
   });
 
   test("submitted suggestion appears in admin listing", async () => {
-    const adminToken = await loginDemoUser("super_admin");
+    const adminToken = await loginSuperAdmin();
 
     const suggestionId = await submitTestSuggestion(parentToken, "Visible in admin listing test");
 
@@ -155,7 +156,7 @@ describe("GraphQL: markSuggestionReviewed mutation", () => {
   let suggestionToReviewId = "";
 
   test("login as super_admin and create a suggestion to review", async () => {
-    superAdminToken = await loginDemoUser("super_admin");
+    superAdminToken = await loginSuperAdmin();
     expect(superAdminToken).not.toBeNull();
 
     const parentToken = await loginDemoUser("parent_default");

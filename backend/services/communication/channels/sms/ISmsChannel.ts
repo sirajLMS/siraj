@@ -1,25 +1,3 @@
-import type { NotificationEventType } from "@/backend/enum";
-import type { NotificationMetadata } from "@/backend/types";
-
-export interface SmsPayload {
-  readonly to: string;
-  readonly body: string;
-  readonly eventType: NotificationEventType;
-  readonly userId: string;
-  readonly metadata?: NotificationMetadata | null;
-}
-
-export interface SmsSendResult {
-  readonly success: boolean;
-  readonly providerMessageId?: string;
-  readonly error?: string;
-  readonly rateLimited?: boolean;
-}
-
-export interface ISmsChannel {
-  send(payload: SmsPayload, locale?: string): Promise<SmsSendResult>;
-  validateConfig(): Promise<boolean>;
-  disconnect(): Promise<void>;
-}
-
-export type SmsProvider = "twilio";
+// Relocated to @/backend/types/communication (types-review R2).
+// This file re-exports for backward compatibility; new imports should use @/backend/types.
+export type { SmsPayload, SmsSendResult, ISmsChannel, SmsProvider } from "@/backend/types";

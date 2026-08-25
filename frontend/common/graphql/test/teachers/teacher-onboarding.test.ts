@@ -14,6 +14,7 @@ import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
   loginDemoUser,
+  loginSuperAdmin,
   provisionTestSuperAdmin,
   setupTestServerLifecycle,
   testClient,
@@ -98,8 +99,8 @@ describe("Teacher Onboarding GraphQL API", () => {
   let superAdminUserId = "";
 
   test("provision super admin for onboarding tests", async () => {
-    // createTestSuperAdmin requires superAdmin scope, so use demoLogin("super_admin")
-    const existingSaToken = await loginDemoUser("super_admin");
+    // createTestSuperAdmin requires superAdmin scope, so use loginSuperAdmin (password login)
+    const existingSaToken = await loginSuperAdmin();
     const sa = await provisionTestSuperAdmin(existingSaToken, "tchrOnboard");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;

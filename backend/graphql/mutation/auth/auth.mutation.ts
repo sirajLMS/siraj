@@ -148,25 +148,17 @@ async function validateRefreshTokenJti(
   session: SessionSelectType,
   resolvedViaSessionId = false
 ): Promise<boolean> {
-  // Session cookie alone is sufficient when the refresh_token cookie is absent
-  // (e.g. after a parallel refresh race or browser cookie edge case).
-  if (!refreshToken && resolvedViaSessionId) {
+  // A valid session_id cookie is authoritative. Stale refresh_token cookies can linger
+  // after rotation (e.g. client still holds pre-refresh cookie while session JTI updated).
+  if (resolvedViaSessionId) {
+    if (refreshToken) {
+      const refreshPayload = await verifyToken(refreshToken);
+      warnIfStaleRefreshTokenJti(refreshToken, refreshPayload, session);
+    }
     return true;
   }
 
   const refreshPayload = refreshToken ? await verifyToken(refreshToken) : null;
-
-  // M6: enforce the stored refresh-token JTI on every validation path, including
-  // when the session_id cookie resolved the session. Previously this branch
-  // short-circuited and only warned on mismatch, leaving a replay window when
-  // both the refresh_token and session_id cookies were stolen together (the
-  // common case). Now the JTI match check runs unconditionally below; legacy
-  // sessions (pre-M6, no stored refreshTokenJti in payload) remain accepted
-  // as a grace period until they rotate.
-  if (resolvedViaSessionId) {
-    warnIfStaleRefreshTokenJti(refreshToken, refreshPayload, session);
-  }
-
   return jtiMatchesSession(refreshPayload, session);
 }
 

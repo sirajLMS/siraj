@@ -14,6 +14,7 @@ import {
   clearCookies,
   getTestCookie,
   loginDemoUser,
+  loginSuperAdmin,
   setupTestServerLifecycle,
   testClient,
 } from "@/test/helpers";
@@ -42,31 +43,25 @@ describe("GraphQL Auth Integration Tests", () => {
 
   let superAdminToken = "";
 
-  test("obtain super admin token for auth tests via demoLogin", async () => {
-    // Use demoLogin("super_admin") — DemoAuthService finds the existing super admin in DB
-    const result = await testClient.mutate({
-      mutation: demoLoginMutationDocument,
-      variables: {
-        input: {
-          groupSlug: "super_admin",
-        },
-      },
-    });
-
-    expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
-
-    if (!result.data?.demoLogin?.token) throw new Error("Failed to obtain super admin token");
-    superAdminToken = result.data.demoLogin.token;
+  test("obtain super admin token for auth tests", async () => {
+    // H9 security fix: demoLogin("super_admin") is blocked (excluded group slug) —
+    // obtain the token via standard password login as the canonical super admin.
+    superAdminToken = await loginSuperAdmin();
+    expect(superAdminToken).toBeTruthy();
   });
 
   test("returns token and user on demoLogin with academy_admin", async () => {
     await expectDemoLoginSucceeds("academy_admin");
   });
 
-  test("returns token and user on demoLogin with super_admin", async () => {
-    // demoLogin("super_admin") works directly — DemoAuthService finds existing super admin in DB
-    await expectDemoLoginSucceeds("super_admin");
+  test("rejects demoLogin with super_admin (H9 security fix)", async () => {
+    // H9 fix: super_admin is excluded from demo login (EXCLUDED_DEMO_LOGIN_GROUP_SLUGS)
+    // so demoLogin("super_admin") must NOT return a token.
+    const result = await testClient.mutate({
+      mutation: demoLoginMutationDocument,
+      variables: { input: { groupSlug: "super_admin" } },
+    });
+    expect(result.data?.demoLogin ?? null).toBeNull();
   });
 
   test("returns current user via me query", async () => {

@@ -4,6 +4,7 @@ import {
   authenticatedRequest,
   clearCookies,
   loginDemoUser,
+  loginSuperAdmin,
   setupTestServerLifecycle,
   testClient,
 } from "@/test/helpers";
@@ -22,7 +23,7 @@ describe("GraphQL notificationAlerts Integration Tests", () => {
   setupTestServerLifecycle();
 
   test("returns alert feed for authenticated user with permissions", async () => {
-    const token = await loginDemoUser("super_admin");
+    const token = await loginSuperAdmin();
 
     const data = await authenticatedRequest(token, "query", notificationAlertsQueryDocument);
     const alerts = data.notificationAlerts;

@@ -9,6 +9,7 @@ import {
   assertOperationDenied,
   authenticatedRequest,
   loginDemoUser,
+  loginSuperAdmin,
   provisionTestEntities,
   setupTestServerLifecycle,
   testClient,
@@ -30,7 +31,7 @@ async function expectMutationError<TData, TVars extends OperationVariables>(
 }
 
 async function loginAndProvisionAsSuperAdmin(prefix: string) {
-  const superAdminToken = await loginDemoUser("super_admin");
+  const superAdminToken = await loginSuperAdmin();
   expect(superAdminToken).not.toBeNull();
   const entities = await provisionTestEntities(superAdminToken, prefix);
   if (!entities.studentId) throw new Error("No studentId provisioned");

@@ -57,6 +57,7 @@ export function CustomizeModeShell({ children }: Readonly<{ children: ReactNode 
             "& .MuiAppBar-root": {
               top: CUSTOMIZE_TOOLBAR_HEIGHT,
               insetInlineStart: { xs: 0, md: `${CUSTOMIZE_SIDEBAR_WIDTH}px` },
+              width: { xs: "100%", md: `calc(100% - ${CUSTOMIZE_SIDEBAR_WIDTH}px)` },
             },
           }}
         >

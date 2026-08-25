@@ -17,7 +17,7 @@ import type {
   NotificationDeliveryStatusCount,
   NotificationMetadata,
   RegisterDeviceTokenInput,
-  SetNotificationPreferenceInput,
+  NotificationPreferenceUpdateInput,
   UpdateDeliveryStatusInput,
   UserDeliveryHistoryResult,
   UserDeviceTokenSelectType,
@@ -799,7 +799,7 @@ export namespace NotificationRepository {
 
   export const setPreference = async (
     userId: string,
-    input: SetNotificationPreferenceInput,
+    input: NotificationPreferenceUpdateInput,
     tx?: DBTransaction
   ): Promise<UserNotificationPreferenceSelectType> => {
     const runner = async (t: DBTransaction) => {

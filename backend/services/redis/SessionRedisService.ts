@@ -1,16 +1,7 @@
 // cspell:ignore: SADD, SREM, smembers, SCARD
 import { logger } from "@/backend/lib/logger";
 import type { IRedisService } from "@/backend/services/redis/IRedisService";
-import type { ISessionRedisService, RedisSessionData } from "@/backend/types";
-
-/**
- * Options for storing a session in Redis
- */
-export interface SetSessionOptions {
-  sessionId: string;
-  data: RedisSessionData;
-  ttlSeconds: number;
-}
+import type { ISessionRedisService, RedisSessionData, SessionRedisSetOptions } from "@/backend/types";
 
 /**
  * Session Redis Service
@@ -53,7 +44,7 @@ export class SessionRedisService implements ISessionRedisService {
   /**
    * Store session in Redis with TTL
    */
-  async setSession(options: SetSessionOptions): Promise<void> {
+  async setSession(options: SessionRedisSetOptions): Promise<void> {
     const { sessionId, data, ttlSeconds } = options;
     const key = this.getSessionKey(sessionId);
     const value = JSON.stringify(data);

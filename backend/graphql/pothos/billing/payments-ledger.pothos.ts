@@ -11,7 +11,8 @@ import type { PaymentLedgerEntry } from "@/backend/services/payments-ledger/paym
 const PaymentLedgerEntryRef = gqlSchemaBuilder.objectRef<PaymentLedgerEntry>("PaymentLedgerEntry");
 
 export const PaymentLedgerEntryPothosObject = PaymentLedgerEntryRef.implement({
-  description: "A single payment ledger entry for a parent/student, derived from payments + invoices + credit_transactions.",
+  description:
+    "A single payment ledger entry for a parent/student, derived from payments + invoices + credit_transactions.",
   fields: t => ({
     id: t.exposeID("id"),
     studentId: t.exposeID("studentId", { nullable: true }),

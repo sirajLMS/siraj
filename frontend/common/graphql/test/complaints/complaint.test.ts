@@ -12,6 +12,7 @@ import {
   authenticatedRequest,
   expectMutationError,
   loginDemoUser,
+  loginSuperAdmin,
   setupTestServerLifecycle,
 } from "@/test/helpers";
 
@@ -121,7 +122,7 @@ describe("GraphQL: adminComplaintQueue query", () => {
   let superAdminToken = "";
 
   test("login as super_admin to provision and query", async () => {
-    superAdminToken = await loginDemoUser("super_admin");
+    superAdminToken = await loginSuperAdmin();
     expect(superAdminToken).not.toBeNull();
   });
 
@@ -298,7 +299,7 @@ describe("GraphQL: respondToComplaint mutation", () => {
   let complaintId = "";
 
   test("login as super_admin and create a complaint to respond to", async () => {
-    superAdminToken = await loginDemoUser("super_admin");
+    superAdminToken = await loginSuperAdmin();
     expect(superAdminToken).not.toBeNull();
 
     const parentToken = await loginDemoUser("parent_default");
@@ -362,7 +363,7 @@ describe("GraphQL: deleteComplaint mutation", () => {
   let alreadyDeletedId = "";
 
   test("login as super_admin and create complaints for deletion tests", async () => {
-    superAdminToken = await loginDemoUser("super_admin");
+    superAdminToken = await loginSuperAdmin();
     expect(superAdminToken).not.toBeNull();
 
     const parentToken = await loginDemoUser("parent_default");

@@ -31,7 +31,3 @@ export const sessionCache = createTable(
   },
   table => [index("session_cache_expires_at_idx").on(table.expiresAt), index("session_cache_value_idx").on(table.value)]
 );
-
-// Export types
-export type RateLimitCacheEntry = typeof rateLimitCache.$inferSelect;
-export type SessionCacheEntry = typeof sessionCache.$inferSelect;

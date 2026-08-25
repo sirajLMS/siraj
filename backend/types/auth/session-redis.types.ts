@@ -22,3 +22,9 @@ export interface ISessionRedisService {
   enforceConcurrentLimit(userId: string, maxSessions: number): Promise<void>;
   getSessionTTL(sessionId: string): Promise<number>;
 }
+
+import type { rateLimitCache, sessionCache } from "@/backend/db/schema/shared/cache";
+
+/** Cache entry types relocated from backend/db/schema/shared/cache.ts (R4 — schema files should export tables only). */
+export type RateLimitCacheEntry = typeof rateLimitCache.$inferSelect;
+export type SessionCacheEntry = typeof sessionCache.$inferSelect;

@@ -1,26 +1,3 @@
-import type { NotificationEventType } from "@/backend/enum";
-import type { NotificationMetadata } from "@/backend/types";
-
-export interface EmailPayload {
-  readonly to: string;
-  readonly subject: string;
-  readonly html: string;
-  readonly eventType: NotificationEventType;
-  readonly userId: string;
-  readonly metadata?: NotificationMetadata | null;
-}
-
-export interface EmailSendResult {
-  readonly success: boolean;
-  readonly providerMessageId?: string;
-  readonly error?: string;
-  readonly rateLimited?: boolean;
-}
-
-export interface IEmailChannel {
-  send(payload: EmailPayload, locale?: string): Promise<EmailSendResult>;
-  validateConfig(): Promise<boolean>;
-  disconnect(): Promise<void>;
-}
-
-export type EmailProvider = "resend";
+// Relocated to @/backend/types/communication (types-review R2).
+// This file re-exports for backward compatibility; new imports should use @/backend/types.
+export type { EmailPayload, EmailSendResult, IEmailChannel, EmailProvider } from "@/backend/types";

@@ -9,6 +9,7 @@ import {
   cleanupTestSuperAdmin,
   loginAndProvision,
   loginDemoUser,
+  loginSuperAdmin,
   provisionTestSuperAdmin,
   setupTestServerLifecycle,
   testClient,
@@ -61,7 +62,7 @@ describe("Student Onboarding GraphQL API", () => {
   let superAdminUserId = "";
 
   test("provision super admin for student onboarding tests", async () => {
-    const existingSaToken = await loginDemoUser("super_admin");
+    const existingSaToken = await loginSuperAdmin();
     const sa = await provisionTestSuperAdmin(existingSaToken, "stuOnboard");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;

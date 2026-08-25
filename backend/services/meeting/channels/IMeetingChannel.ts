@@ -1,52 +1,6 @@
-/**
- * Adapter interface for automatic meeting URL generation.
- *
- * Mirrors the `IEmailChannel` / `EmailChannelFactory` pattern in
- * `backend/services/communication/channels/`. Each provider (Zoom, Google Meet,
- * Microsoft Teams) implements this interface. The `MeetingChannelFactory` lazy-
- * imports and memoises adapter instances per provider slug.
- */
-
-// ============================================================================
-// Provider slug union — the three adapters that support auto-generation
-// ============================================================================
-
-export type { MeetingProvider } from "@/backend/types";
-
-// ============================================================================
-// Input / Output shapes
-// ============================================================================
-
-export interface GenerateMeetingInput {
-  readonly topic: string;
-  readonly startDateTime?: string;
-  readonly durationMinutes?: number;
-  readonly actorUserId?: string;
-  readonly providerUserId?: string;
-}
-
-export interface GenerateMeetingResult {
-  readonly joinUrl: string;
-  readonly meetingId?: string;
-  readonly password?: string;
-  readonly hostUrl?: string;
-  readonly providerMetadata: Record<string, unknown>;
-}
-
-// ============================================================================
-// Adapter interface
-// ============================================================================
-
-export interface IMeetingChannel {
-  generateMeeting(input: GenerateMeetingInput): Promise<GenerateMeetingResult>;
-  deleteMeeting?(meetingId: string): Promise<void>;
-  validateConfig(): Promise<boolean>;
-  disconnect(token?: { accessToken: string; refreshToken: string | null }): Promise<void>;
-}
-
-// ============================================================================
-// Typed error hierarchy
-// ============================================================================
+// Type contracts relocated to @/backend/types/meeting/channels/meeting-channel.types.ts (R2).
+// Error class hierarchy remains here (runtime classes belong in the service layer).
+export type { GenerateMeetingInput, GenerateMeetingResult, IMeetingChannel, CachedToken, MeetingProvider } from "@/backend/types";
 
 export class MeetingChannelError extends Error {
   readonly code: string;

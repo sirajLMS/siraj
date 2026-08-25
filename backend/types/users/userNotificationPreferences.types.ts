@@ -3,8 +3,3 @@ import type { NotificationChannel, NotificationEventType } from "@/backend/enum"
 export type UserNotificationPreferenceSelectType = typeof userNotificationPreferences.$inferSelect;
 export type UserNotificationPreferenceInsertType = typeof userNotificationPreferences.$inferInsert;
 
-export type SetNotificationPreferenceInput = {
-  channel: NotificationChannel;
-  eventType: NotificationEventType;
-  enabled: boolean;
-};

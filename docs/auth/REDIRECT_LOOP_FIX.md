@@ -55,20 +55,34 @@ This document describes the authentication architecture in Siraj, explains the i
 
 ### The Infinite Redirect Loop
 
+**Original loop (fixed)**: The server-side `getServerUserContext()` required an `access_token` cookie that was never set by the auth flow, while the client authenticated successfully via `refreshToken` → client/server desync ping-pong between `/login` and `/dashboard`. Fixed by the session-only SSR fallback (below) and the `app/(auth)/layout.tsx` bounce guard.
+
+**Current loop (post-M6)**: With the session-only fallback in place, symmetric desync can still occur on the refresh path itself:
+
 ```
-/dashboard (Server SSR)
-  └─ getServerUserContext() → no access_token cookie → redirect /login
+/dashboard (Client)
+  └─ me / notificationAlerts → UNAUTHENTICATED (no/expired access token)
+  └─ errorLink → refreshToken mutation
+       └─ session_id valid ✅, but refresh_token cookie JTI is STALE
+          (racing tabs both rotated tokens; one cookie is out of date)
+       └─ validateRefreshTokenJti: logs "allowing rotation" but
+          jtiMatchesSession returns false → resolver returns null
+  └─ Client: "refresh failed — redirecting to /login"
        │
-/login (Client hydration)
-  └─ AuthProvider.checkAuth() → refreshTokenMutation SUCCESS → isAuthenticated=true
-  └─ LoginContainer useEffect → router.replace("/dashboard")
+/login (Server SSR)
+  └─ getServerUserContext() → session_id valid → session-only auth ✅
+  └─ app/(auth)/layout.tsx bounces "authenticated" user back → /dashboard
        │
-/dashboard (Server SSR) ─── same failure ───→ redirect /login
-       │
-     ♻️ INFINITE LOOP
+     ♻️ INFINITE LOOP (plus client-logs rate-limit floods and
+        MaxListenersExceededWarning on the dev-server Gzip from the storm)
 ```
 
-**Root cause**: The server-side `getServerUserContext()` requires an `access_token` cookie that is **never set** by any part of the auth flow. The `access_token` is intentionally stored only in React memory for XSS protection, but this creates a fundamental desync — the client thinks the user is authenticated (via `refreshToken` mutation), while the server always sees the user as unauthenticated (no `access_token` cookie).
+**Root cause**: The resolver *warns* "Stale refresh_token JTI with valid session_id; allowing rotation" yet the subsequent `jtiMatchesSession` check **rejects** the same case — the code contradicts its own log. The M6 hardening made JTI matching unconditional (to close the stolen-cookies replay window), which broke the legitimate stale-cookie-after-parallel-rotation scenario: one tab's refresh rotates `session.payload.refreshTokenJti`, leaving the other tab's `refresh_token` cookie permanently stale while its `session_id` stays valid.
+
+### Fix direction
+
+- **Primary**: In `validateRefreshTokenJti`, when the session resolved via `session_id` and the `refresh_token` JWT *verifies* (same user, valid signature, `type: "refresh"`) but has a stale JTI, honor the "allowing rotation" contract — allow rotation and let `rotateTokensAndSession` write the fresh JTI. This converges both racing tabs onto a valid token pair instead of returning `null` forever. Strict JTI equality still applies on the non-`session_id` path (M6 replay protection).
+- **Defense-in-depth**: keep the errorLink SSR/`/login` guards (no refresh-or-redirect while server-rendering or already on the login page) so a failed refresh can never bounce recursively.
 
 ## Fix Strategy
 

@@ -1,4 +1,6 @@
 import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
+import type { CachedToken } from "@/backend/types";
+export type { CachedToken };
 import { logger } from "@/backend/lib/logger";
 import {
   type GenerateMeetingInput,
@@ -22,10 +24,6 @@ export const MAX_GENERATE_RETRIES = 2;
 // Shared types (internal to the base class — not exported for consumers)
 // ============================================================================
 
-export interface CachedToken {
-  readonly accessToken: string;
-  readonly expiresAt: number;
-}
 
 // ============================================================================
 // Shared utility functions

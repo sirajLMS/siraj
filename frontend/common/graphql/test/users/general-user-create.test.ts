@@ -13,6 +13,7 @@ import {
   cleanupTestSuperAdmin,
   clearCookies,
   loginDemoUser,
+  loginSuperAdmin,
   loginUser,
   provisionTestSuperAdmin,
   setupTestServerLifecycle,
@@ -116,7 +117,7 @@ describe("createGeneralUser GraphQL Mutation", () => {
 
     // Now provision the test super admin — loginUser sets SA session cookies
     clearCookies();
-    const existingSaToken = await loginDemoUser("super_admin");
+    const existingSaToken = await loginSuperAdmin();
     const sa = await provisionTestSuperAdmin(existingSaToken, "genUserCreate");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;

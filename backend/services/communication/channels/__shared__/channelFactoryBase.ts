@@ -1,60 +1,7 @@
 import { logger } from "@/backend/lib/logger";
 import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system";
-
-/**
- * Minimal channel interface shared by all communication channels.
- * Every channel adapter (email, push, sms, whatsapp) implements these three methods.
- */
-export interface ChannelLifecycle {
-  send(payload: unknown, locale?: string): Promise<unknown>;
-  validateConfig(): Promise<boolean>;
-  disconnect(): Promise<void>;
-}
-
-/**
- * Configuration for the generic channel factory.
- *
- * @template TChannel - The channel interface (e.g. `IEmailChannel`, `IPushChannel`)
- */
-export interface ChannelFactoryConfig<TChannel extends ChannelLifecycle> {
-  /** Human-readable channel name for log messages (e.g. "Email", "Push", "SMS"). */
-  readonly channelName: string;
-  /** Environment variable key for provider selection (e.g. "EMAIL_PROVIDER"). */
-  readonly providerEnvKey: string;
-  /** Default provider when the env key is unset (e.g. "resend", "fcm", "twilio"). */
-  readonly defaultProvider: string;
-  /** Env-config keys to invalidate on reset (e.g. ["EMAIL_PROVIDER", "RESEND_API_KEY", ...]). */
-  readonly cacheKeysToInvalidate: readonly string[];
-  /**
-   * Creates the channel adapter for the resolved provider.
-   * Receives `resolveEnvConfig` and `resolveEnvConfigMany` for credential resolution.
-   * Should dynamic-import the adapter module and resolve required env vars.
-   */
-  readonly createAdapter: () => Promise<TChannel>;
-  /**
-   * Optional custom provider validator.
-   * When provided, receives the raw resolved provider string and should return
-   * the validated provider or throw/return a fallback.
-   * When omitted, the default validation checks that the provider matches `defaultProvider`.
-   */
-  readonly validateProvider?: (rawProvider: string) => string;
-}
-
-/**
- * Return type of {@link createChannelFactory} — the public API of a channel factory.
- */
-export interface ChannelFactory<TChannel extends ChannelLifecycle> {
-  /** Lazy singleton accessor — returns the cached instance or initializes it. */
-  readonly getChannel: () => Promise<TChannel>;
-  /** Tears down the singleton and invalidates env-config caches. */
-  readonly resetChannel: () => void;
-  /** Facade delegating `send`/`validateConfig`/`disconnect` to the singleton. */
-  readonly channel: {
-    send: TChannel["send"];
-    validateConfig: TChannel["validateConfig"];
-    disconnect: TChannel["disconnect"];
-  };
-}
+import type { ChannelFactory, ChannelFactoryConfig, ChannelLifecycle } from "@/backend/types";
+export type { ChannelFactory, ChannelFactoryConfig, ChannelLifecycle };
 
 /**
  * Default provider validation: logs a warning and falls back to `defaultProvider`
@@ -71,16 +18,6 @@ function defaultValidateProvider(rawProvider: string, defaultProvider: string, p
   return provider;
 }
 
-/**
- * Creates a complete channel factory with singleton lifecycle, provider resolution,
- * reset/cache-invalidation, and a facade that delegates to the underlying adapter.
- *
- * This eliminates the ~80 lines of boilerplate duplicated across email, push,
- * and SMS channel factories. Each channel-specific factory calls this function
- * with its config, keeping only the adapter-creation logic.
- *
- * @template TChannel - The channel interface type
- */
 export function createChannelFactory<TChannel extends ChannelLifecycle>(
   config: ChannelFactoryConfig<TChannel>
 ): ChannelFactory<TChannel> {

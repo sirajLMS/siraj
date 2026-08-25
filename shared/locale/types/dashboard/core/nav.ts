@@ -79,6 +79,9 @@ export interface DashboardNavigationLabels {
   readonly studentLessonHistory: string;
   readonly studentSessions: string;
   readonly studentCredits: string;
+  readonly studentWeekSchedule: string;
+  readonly studentMonthlyAppraisals: string;
+  readonly studentRequests: string;
   readonly studentProfile: string;
   readonly lessonReports: string;
   readonly supervisorHome: string;

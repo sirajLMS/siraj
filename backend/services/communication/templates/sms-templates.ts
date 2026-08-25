@@ -1,14 +1,10 @@
 import { getServerTranslations } from "@/shared/locale";
+import type { UrgentComplaintResponseSmsData } from "@/backend/types";
 
 function sanitizeSms(text: string): string {
   return text.replace(/[\r\n\t]/g, " ").trim();
 }
 
-interface UrgentComplaintResponseSmsData {
-  readonly parentName: string;
-  readonly complaintTitle: string;
-  readonly responseSummary: string;
-}
 
 export const renderUrgentComplaintResponseSms = async (
   data: UrgentComplaintResponseSmsData,
