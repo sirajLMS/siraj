@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { teacherMonthlyAppraisalStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { AppraisalFormDialog } from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/AppraisalFormDialog";
 import type {
   MonthlyAppraisalStudentRow,
   MonthlyAppraisalTeacherViewModel,
@@ -30,9 +31,9 @@ function firstOfMonthISO(date: Date): string {
 export function TeacherMonthlyAppraisalsContainer() {
   const labels = useAppTranslation(Translation.Dashboard.MonthlyAppraisal);
   const [selectedMonth, setSelectedMonth] = useState(firstOfMonthISO(new Date()));
-  const [, setOpenFormStudentId] = useState<string | null>(null);
+  const [openFormStudentId, setOpenFormStudentId] = useState<string | null>(null);
 
-  const { data, loading, error } = useQuery(teacherMonthlyAppraisalStudentsQueryDocument, {
+  const { data, loading, error, refetch } = useQuery(teacherMonthlyAppraisalStudentsQueryDocument, {
     variables: { month: selectedMonth },
     fetchPolicy: "cache-and-network",
   });
@@ -61,5 +62,22 @@ export function TeacherMonthlyAppraisalsContainer() {
     error: Boolean(error),
   };
 
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+  const selectedStudent = students.find(s => s.id === openFormStudentId);
+  const selectedMonthDate = new Date(selectedMonth);
+
+  return (
+    <>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
+      <AppraisalFormDialog
+        open={openFormStudentId !== null}
+        studentId={openFormStudentId ?? ""}
+        studentName={selectedStudent?.name ?? ""}
+        month={selectedMonthDate.toISOString()}
+        onClose={() => setOpenFormStudentId(null)}
+        onSubmitted={() => {
+          void refetch();
+        }}
+      />
+    </>
+  );
 }

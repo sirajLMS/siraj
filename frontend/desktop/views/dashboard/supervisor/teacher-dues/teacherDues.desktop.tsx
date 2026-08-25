@@ -101,7 +101,20 @@ function buildColumns({
       headerName: labels.classDateColumn,
       flex: 1,
       minWidth: 150,
-      valueGetter: (_, row) => row.classDate || "-",
+      valueGetter: (_, row) => {
+        if (!row.classDate) return "-";
+        // Format the ISO date string as a readable date (e.g. "Feb 2, 2026")
+        // instead of showing the raw "2026-02-02T08:00:00.000Z" timestamp.
+        try {
+          return new Date(row.classDate).toLocaleDateString("en", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        } catch {
+          return row.classDate;
+        }
+      },
     },
     {
       field: "studentName",
@@ -144,7 +157,18 @@ function buildColumns({
       headerName: labels.approvedDateColumn,
       flex: 1,
       minWidth: 150,
-      valueGetter: (_, row) => row.approvedAt || "-",
+      valueGetter: (_, row) => {
+        if (!row.approvedAt) return "-";
+        try {
+          return new Date(row.approvedAt).toLocaleDateString("en", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        } catch {
+          return row.approvedAt;
+        }
+      },
     },
     {
       field: "actions",

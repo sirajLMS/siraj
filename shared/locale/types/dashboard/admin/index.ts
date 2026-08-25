@@ -69,6 +69,8 @@ export interface AdminDashboardLabels {
 
   /** e.g. "Page 3 of 9"  |  "صفحة ٣ من ٩" */
   readonly pageOf: (current: number, total: number) => string;
+  /** e.g. "No data" | "لا توجد بيانات" — shown when pageCount is 0 */
+  readonly noData: string;
 
   /** e.g. "Showing 10 of 87 classes" — replaces {shown}/{total} */
   readonly showingOf: (shown: number, total: number) => string;

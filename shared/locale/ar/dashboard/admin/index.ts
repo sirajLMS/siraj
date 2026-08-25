@@ -58,6 +58,7 @@ export const dashboardAdminAr: AdminDashboardLabels = {
 
   // "صفحة {current} من {total}"
   pageOf: (current, total) => `صفحة ${current} من ${total}`,
+  noData: "لا توجد بيانات",
 
   // "عرض {shown} من {total} حصة"
   showingOf: (shown, total) => `عرض ${shown} من ${total} حصة`,

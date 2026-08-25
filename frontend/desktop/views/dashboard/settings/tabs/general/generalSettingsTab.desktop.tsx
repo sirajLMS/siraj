@@ -39,6 +39,11 @@ export function GeneralSettingsTabDesktopView({
           getRowId={row => row.code}
           autoHeight
           paginationOptions={{ mode: "client" }}
+          sx={{
+            // Enable horizontal scroll so the DESCRIPTION column (which has long
+            // text) is fully accessible instead of being clipped at the right edge.
+            "& .MuiDataGrid-virtualScroller": { overflowX: "auto" },
+          }}
         />
       </DesktopSectionPanel>
     </Box>

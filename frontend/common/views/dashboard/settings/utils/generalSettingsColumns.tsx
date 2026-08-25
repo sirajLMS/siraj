@@ -69,10 +69,23 @@ export function buildGeneralSettingsColumns(
     {
       field: "description",
       headerName: labels.descriptionColumn,
-      flex: 1.5,
-      minWidth: 200,
+      flex: 2,
+      minWidth: 300,
       renderCell: ({ row }) => (
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, whiteSpace: "normal" }}>
+        <Typography
+          sx={{
+            typography: "bodyMd",
+            color: theme => theme.palette.text.secondary,
+            whiteSpace: "normal",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            wordBreak: "break-word",
+          }}
+          title={row.description}
+        >
           {row.description}
         </Typography>
       ),

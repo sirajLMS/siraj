@@ -94,6 +94,10 @@ export function CustomizeOverlay({ children }: Readonly<CustomizeOverlayProps>) 
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const resetToDefaults = useAppearancePreviewStore(s => s.resetToDefaults);
+  const undo = useAppearancePreviewStore(s => s.undo);
+  const redo = useAppearancePreviewStore(s => s.redo);
+  const canUndo = useAppearancePreviewStore(s => s.canUndo());
+  const canRedo = useAppearancePreviewStore(s => s.canRedo());
 
   const announce = useCallback(
     (message: string) => {
@@ -144,6 +148,37 @@ export function CustomizeOverlay({ children }: Readonly<CustomizeOverlayProps>) 
     document.addEventListener("keydown", handleKeyDown, true);
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [customizeMode, closeOverlay]);
+
+  // Tab focus trap: cycle within overlay surfaces only.
+  // Undo/Redo keyboard shortcuts (Ctrl+Z / Ctrl+Shift+Z / Ctrl+Y) — AC-35.
+  // Skipped when focus is inside a text input/textarea so the browser's native
+  // undo works in text fields (deferred-items #6).
+  useEffect(() => {
+    if (!customizeMode) return undefined;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const isMac = typeof navigator !== "undefined" && /Mac/i.test(navigator.platform);
+      const ctrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
+      if (!ctrlOrCmd) return;
+      const active = document.activeElement;
+      const isTextInput = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement;
+      if (isTextInput) return;
+      if (event.key === "z" && !event.shiftKey) {
+        event.preventDefault();
+        if (canUndo) {
+          undo();
+          announce("Undo");
+        }
+      } else if ((event.key === "z" && event.shiftKey) || event.key === "y") {
+        event.preventDefault();
+        if (canRedo) {
+          redo();
+          announce("Redo");
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [customizeMode, undo, redo, canUndo, canRedo, announce]);
 
   // Tab focus trap: cycle within overlay surfaces only.
   useEffect(() => {

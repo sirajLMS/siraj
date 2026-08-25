@@ -5,6 +5,7 @@ import { useColorScheme } from "@mui/material/styles";
 import type { AppearanceColorPairInput, AppearanceColorsInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 import { WcagBadge } from "@/frontend/common/views/dashboard/components/customize/WcagBadge";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 /**
  * Per-mode color key ("primary" | "secondary" via the codegen pair shape).
@@ -56,6 +57,7 @@ function syncColorSchemeDom(mode: PaletteMode): void {
 }
 
 export function ColorEditorSection() {
+  const t = useAppTranslation(Translation.Dashboard.Settings).appearance.customize;
   const isDark = useAppearancePreviewStore(s => s.isDark);
   const colors = useAppearancePreviewStore(s => s.draft.colors);
   const setMode = useAppearancePreviewStore(s => s.setMode);
@@ -112,13 +114,13 @@ export function ColorEditorSection() {
       </ToggleButtonGroup>
       <ColorField
         key={`primary-${activePair.primaryMain}`}
-        label="Primary"
+        label={t.primaryColor}
         hex={activePair.primaryMain}
         onChange={hex => updateColor("primaryMain", hex)}
       />
       <ColorField
         key={`secondary-${activePair.secondaryMain}`}
-        label="Secondary"
+        label={t.secondaryColor}
         hex={activePair.secondaryMain}
         onChange={hex => updateColor("secondaryMain", hex)}
       />

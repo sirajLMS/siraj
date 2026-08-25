@@ -53,15 +53,20 @@ export const StyledScheduleSessionCardActions = styled(Box)(({ theme }) => ({
   border: `1px solid ${theme.palette.outlineVariant}`,
 }));
 
-export const StyledScheduleSessionTimeHighlight = styled(Box)(({ theme }) => ({
+export const StyledScheduleSessionTimeHighlight = styled(Box, {
+  shouldForwardProp: prop => prop !== "isAbsent",
+})<{ isAbsent?: boolean }>(({ theme, isAbsent }) => ({
   display: "flex",
   alignItems: "center",
   gap: theme.spacing(1),
   marginBottom: theme.spacing(1.5),
   padding: theme.spacing(1.25, 1.5),
   borderRadius: theme.layout.radius.card,
-  backgroundColor: theme.palette.primaryContainer,
-  border: `1px solid ${theme.palette.outlineVariant}`,
+  // Status-aware background: absent classes use errorContainer (red) so the
+  // time bar doesn't show a misleading green/teal "active" color for a class
+  // that was marked absent. Fixes the VLM-flagged conflicting visual signal.
+  backgroundColor: isAbsent ? theme.palette.errorContainer : theme.palette.primaryContainer,
+  border: `1px solid ${isAbsent ? theme.palette.error.light : theme.palette.outlineVariant}`,
   minWidth: 0,
   overflow: "hidden",
 }));
@@ -75,15 +80,19 @@ export const StyledScheduleSessionTimeHighlightContent = styled(Box)({
   overflow: "hidden",
 });
 
-export const StyledScheduleSessionTimeHighlightLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onPrimaryContainer,
+export const StyledScheduleSessionTimeHighlightLabel = styled(Typography, {
+  shouldForwardProp: prop => prop !== "isAbsent",
+})<{ isAbsent?: boolean }>(({ theme, isAbsent }) => ({
+  color: isAbsent ? theme.palette.onErrorContainer : theme.palette.onPrimaryContainer,
   flexShrink: 0,
   whiteSpace: "nowrap",
   opacity: 0.8,
 }));
 
-export const StyledScheduleSessionTimeHighlightText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onPrimaryContainer,
+export const StyledScheduleSessionTimeHighlightText = styled(Typography, {
+  shouldForwardProp: prop => prop !== "isAbsent",
+})<{ isAbsent?: boolean }>(({ theme, isAbsent }) => ({
+  color: isAbsent ? theme.palette.onErrorContainer : theme.palette.onPrimaryContainer,
   fontWeight: 700,
   minWidth: 0,
   overflow: "hidden",

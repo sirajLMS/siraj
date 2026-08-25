@@ -38,6 +38,9 @@ export interface AuthLoginLabels {
   readonly strengthFair: string;
   readonly strengthStrong: string;
   readonly capsLockOn: string;
+  readonly forgotPasswordComingSoonTitle: string;
+  readonly forgotPasswordComingSoonBody: string;
+  readonly close: string;
 }
 
 // AuthImpersonationLabels: fields with {name}/{email} are now typed functions

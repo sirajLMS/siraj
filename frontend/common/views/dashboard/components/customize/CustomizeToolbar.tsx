@@ -164,6 +164,7 @@ export function CustomizeToolbar() {
   const redo = useAppearancePreviewStore(s => s.redo);
   const markSaved = useAppearancePreviewStore(s => s.markSaved);
   const loadFromServer = useAppearancePreviewStore(s => s.loadFromServer);
+  const resetToDefaults = useAppearancePreviewStore(s => s.resetToDefaults);
   const setField = useAppearancePreviewStore(s => s.setField);
   const { uploadLogo } = useAppearanceLogoUpload();
 
@@ -306,12 +307,14 @@ export function CustomizeToolbar() {
   const handleResetConfirm = async () => {
     setResetDialogOpen(false);
     try {
-      await resetDraft();
-      // Mark saved - the server's draft_fields now match the published
-      // columns, so the local `dirty` flag should clear. The customizer
-      // provider (Task 9) will re-sync the local draft from the refetched
-      // `appearanceSettings` query; until then, the user can still undo
-      // via the store's history stack if needed.
+      const result = await resetDraft();
+      const draftFields = result.data?.resetAppearanceDraft?.draftFields ?? null;
+      const synced = toAppearanceDraftInput(draftFields);
+      if (synced) {
+        loadFromServer(synced);
+      } else {
+        resetToDefaults();
+      }
       markSaved();
       notifications.show(t.resetSuccess, { severity: "success" });
       announce(t.resetSuccess);

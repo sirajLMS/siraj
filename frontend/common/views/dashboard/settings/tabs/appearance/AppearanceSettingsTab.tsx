@@ -197,26 +197,30 @@ export function AppearanceSettingsTab() {
         </Typography>
 
         <Box>
-          <Typography sx={{ typography: "titleSm", mb: 1.5 }}>Current Brand Colors</Typography>
+          <Typography sx={{ typography: "titleSm", mb: 1.5 }}>{t.currentBrandColors}</Typography>
           <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary, mb: 2 })}>
-            A snapshot of your draft palette. Enter customize mode to fine-tune individual colors.
+            {t.currentBrandColorsHint}
           </Typography>
           <Stack direction={{ xs: "column", sm: "row" }} sx={{ gap: 2 }}>
             <BrandColorPreviewCard
-              label="Light Mode"
+              label={t.lightMode}
+              primaryLabel={t.primaryColor}
+              secondaryLabel={t.secondaryColor}
               primary={draft.colors.light.primaryMain}
               secondary={draft.colors.light.secondaryMain}
             />
             <BrandColorPreviewCard
-              label="Dark Mode"
+              label={t.darkMode}
+              primaryLabel={t.primaryColor}
+              secondaryLabel={t.secondaryColor}
               primary={draft.colors.dark.primaryMain}
               secondary={draft.colors.dark.secondaryMain}
             />
           </Stack>
           <Divider sx={{ mt: 3, mb: 2 }} />
-          <Typography sx={{ typography: "titleSm", mb: 1.5 }}>Quick Presets</Typography>
+          <Typography sx={{ typography: "titleSm", mb: 1.5 }}>{t.quickPresets}</Typography>
           <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary, mb: 2 })}>
-            Click a preset to preview it instantly. Open customize mode to fine-tune.
+            {t.quickPresetsHint}
           </Typography>
           <Box
             sx={{
@@ -272,10 +276,14 @@ export function AppearanceSettingsTab() {
  */
 function BrandColorPreviewCard({
   label,
+  primaryLabel,
+  secondaryLabel,
   primary,
   secondary,
 }: {
   readonly label: string;
+  readonly primaryLabel: string;
+  readonly secondaryLabel: string;
   readonly primary: string;
   readonly secondary: string;
 }) {
@@ -319,7 +327,7 @@ function BrandColorPreviewCard({
             {primary}
           </Typography>
           <Typography sx={{ typography: "caption", color: "var(--mui-palette-text-disabled)", fontSize: 10 }}>
-            Primary
+            {primaryLabel}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0.5 }}>
@@ -339,7 +347,7 @@ function BrandColorPreviewCard({
             {secondary}
           </Typography>
           <Typography sx={{ typography: "caption", color: "var(--mui-palette-text-disabled)", fontSize: 10 }}>
-            Secondary
+            {secondaryLabel}
           </Typography>
         </Box>
       </Stack>

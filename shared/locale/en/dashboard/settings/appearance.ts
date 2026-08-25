@@ -14,6 +14,15 @@ export const dashboardSettingsAppearanceEn: SettingsAppearanceTabLabels = {
   enterCustomizeMode: "Enter Customize Mode",
   enterCustomizeModeHint: "Open the live customizer to edit colors, logo, and brand identity in real time.",
 
+  currentBrandColors: "Current Brand Colors",
+  currentBrandColorsHint: "A snapshot of your draft palette. Enter customize mode to fine-tune individual colors.",
+  quickPresets: "Quick Presets",
+  quickPresetsHint: "Click a preset to preview it instantly. Open customize mode to fine-tune.",
+  primaryColor: "Primary",
+  secondaryColor: "Secondary",
+  lightMode: "Light Mode",
+  darkMode: "Dark Mode",
+
   saveDraft: "Save Draft",
   publishNow: "Publish Now",
   resetToDefaults: "Reset to Defaults",
@@ -69,5 +78,16 @@ export const dashboardSettingsAppearanceEn: SettingsAppearanceTabLabels = {
     published: "Published",
     draft: "Draft",
     exportJson: "Export JSON",
+
+    logoUploadButton: "Upload logo",
+    logoLoading: "Loading…",
+    logoFileHint: "PNG/JPEG/WebP · max 2MB",
+    logoInMemoryPreview: "In-memory preview",
+    logoRemove: "Remove",
+    logoLoadedToast: "Logo loaded — save draft or publish to persist",
+    logoFileTooLarge: "Logo file exceeds 2MB limit",
+    logoLoadFailed: "Logo load failed",
+    primaryColor: "Primary",
+    secondaryColor: "Secondary",
   },
 };

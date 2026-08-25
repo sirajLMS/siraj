@@ -2,7 +2,20 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Person, Visibility, VisibilityOff } from "@mui/icons-material";
-import { Alert, Box, Button, CircularProgress, IconButton, InputAdornment, Link, TextField } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  InputAdornment,
+  Link,
+  TextField,
+} from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import { useCallback, useState } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
@@ -157,11 +170,32 @@ const FormFields = ({
 };
 
 const FormActions = ({ labels }: { labels: AuthLoginLabels }) => {
+  const [forgotOpen, setForgotOpen] = useState(false);
   return (
     <StyledFormActionsContainer>
-      <StyledForgotPasswordLink href="#" underline="hover">
+      {/* The forgot-password self-service flow is not yet implemented (no
+          backend mutation or route exists). Instead of a dead `href="#"` link,
+          show a dialog explaining the feature is coming soon + directing the
+          user to contact their admin. */}
+      <StyledForgotPasswordLink
+        href="#"
+        underline="hover"
+        onClick={event => {
+          event.preventDefault();
+          setForgotOpen(true);
+        }}
+      >
         {labels.forgotPassword}
       </StyledForgotPasswordLink>
+      <Dialog open={forgotOpen} onClose={() => setForgotOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{labels.forgotPasswordComingSoonTitle}</DialogTitle>
+        <DialogContent>{labels.forgotPasswordComingSoonBody}</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setForgotOpen(false)} variant="contained">
+            {labels.close}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </StyledFormActionsContainer>
   );
 };

@@ -193,13 +193,19 @@ export function ScheduleOverviewCard({
         />
       </StyledScheduleSessionCardHeader>
 
-      <StyledScheduleSessionTimeHighlight>
-        <AccessTimeOutlined sx={theme => ({ fontSize: 18, color: theme.palette.onPrimaryContainer, flexShrink: 0 })} />
+      <StyledScheduleSessionTimeHighlight isAbsent={isAbsent}>
+        <AccessTimeOutlined
+          sx={theme => ({
+            fontSize: 18,
+            color: isAbsent ? theme.palette.onErrorContainer : theme.palette.onPrimaryContainer,
+            flexShrink: 0,
+          })}
+        />
         <StyledScheduleSessionTimeHighlightContent>
-          <StyledScheduleSessionTimeHighlightLabel variant="labelMd">
+          <StyledScheduleSessionTimeHighlightLabel variant="labelMd" isAbsent={isAbsent}>
             {headers.yourTime}
           </StyledScheduleSessionTimeHighlightLabel>
-          <StyledScheduleSessionTimeHighlightText variant="bodyLg" title={yourTime}>
+          <StyledScheduleSessionTimeHighlightText variant="bodyLg" title={yourTime} isAbsent={isAbsent}>
             {yourTime}
           </StyledScheduleSessionTimeHighlightText>
         </StyledScheduleSessionTimeHighlightContent>

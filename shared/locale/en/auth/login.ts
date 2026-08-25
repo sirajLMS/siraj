@@ -38,4 +38,8 @@ export const authLoginEn: AuthLoginLabels = {
   strengthFair: "Fair",
   strengthStrong: "Strong",
   capsLockOn: "Caps Lock is on",
+  forgotPasswordComingSoonTitle: "Password Reset — Coming Soon",
+  forgotPasswordComingSoonBody:
+    "The self-service password reset flow is not yet available. Please contact your system administrator to reset your password.",
+  close: "Close",
 };

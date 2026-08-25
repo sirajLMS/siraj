@@ -192,7 +192,7 @@ export function PaginationControlsScaffold({
         </Tooltip>
 
         <Typography variant="labelMd" sx={labelSx}>
-          {t.pageOf(safePageCount === 0 ? 0 : page + 1, safePageCount)}
+          {safePageCount === 0 ? t.noData : t.pageOf(page + 1, safePageCount)}
         </Typography>
       </Box>
     </Box>

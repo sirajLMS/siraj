@@ -1,24 +1,7 @@
 "use client";
 
-import { ChatBubbleOutlineOutlined, CloseOutlined, SendOutlined, Star, StarBorderOutlined } from "@mui/icons-material";
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { ChatBubbleOutlineOutlined, Star, StarBorderOutlined } from "@mui/icons-material";
+import { Alert, Box, Card, CardContent, Chip, Divider, Stack, Typography } from "@mui/material";
 import type {
   MonthlyAppraisalRow,
   StudentParentAppraisalViewModel,
@@ -131,79 +114,32 @@ function AppraisalCard({
           </Stack>
         )}
 
-        <Button
-          variant="outlined"
-          color="primary"
-          startIcon={<ChatBubbleOutlineOutlined />}
+        <Box
+          component="button"
           onClick={onOpenFeedback}
-          sx={{ mt: 2, borderRadius: 2, textTransform: "none", fontWeight: 600 }}
+          sx={{
+            mt: 2,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 1,
+            border: 1,
+            borderColor: theme => theme.palette.primary.main,
+            borderRadius: 2,
+            py: 1,
+            px: 2,
+            bgcolor: "transparent",
+            color: theme => theme.palette.primary.main,
+            cursor: "pointer",
+            fontWeight: 600,
+            textTransform: "none",
+            "&:hover": { bgcolor: theme => theme.palette.action.hover },
+          }}
         >
+          <ChatBubbleOutlineOutlined fontSize="small" />
           {labels.studentParentView.addFeedback}
-        </Button>
+        </Box>
       </CardContent>
     </Card>
-  );
-}
-
-function FeedbackModal({
-  labels,
-  open,
-  onClose,
-  onSubmit,
-  submitting,
-  error,
-}: Readonly<{
-  labels: StudentParentAppraisalViewModel["labels"];
-  open: boolean;
-  onClose: () => void;
-  onSubmit: (body: string) => void;
-  submitting: boolean;
-  error: string | null;
-}>) {
-  return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        {labels.studentParentView.feedbackModal.title}
-        <IconButton size="small" onClick={onClose} aria-label="close">
-          <CloseOutlined fontSize="small" />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        {error ? (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        ) : null}
-        <TextField
-          autoFocus
-          fullWidth
-          multiline
-          rows={4}
-          label={labels.studentParentView.feedbackModal.bodyLabel}
-          placeholder={labels.studentParentView.feedbackModal.bodyPlaceholder}
-          id="appraisal-feedback-body"
-        />
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2.5 }}>
-        <Button onClick={onClose} sx={{ textTransform: "none" }}>
-          {labels.studentParentView.feedbackModal.cancel}
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<SendOutlined />}
-          disabled={submitting}
-          onClick={() => {
-            const el = document.getElementById("appraisal-feedback-body");
-            const body = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value.trim() : "";
-            if (body) onSubmit(body);
-          }}
-          sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
-        >
-          {labels.studentParentView.feedbackModal.submit}
-        </Button>
-      </DialogActions>
-    </Dialog>
   );
 }
 
@@ -223,7 +159,9 @@ function AppraisalListBody({
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-        <CircularProgress />
+        <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
+          Loading...
+        </Typography>
       </Box>
     );
   }
@@ -263,13 +201,8 @@ export function StudentParentAppraisalsDesktopView({
   appraisals,
   loading,
   error,
-  feedbackModalOpen,
-  onOpenFeedbackModal,
-  onCloseFeedbackModal,
-  onSubmitFeedback,
-  feedbackSubmitting,
-  feedbackError,
   onSelectAppraisal,
+  onOpenFeedbackModal,
 }: Readonly<StudentParentAppraisalViewModel>) {
   return (
     <DesktopPageContainer>
@@ -287,15 +220,6 @@ export function StudentParentAppraisalsDesktopView({
         loading={loading}
         onSelectAppraisal={onSelectAppraisal}
         onOpenFeedbackModal={onOpenFeedbackModal}
-      />
-
-      <FeedbackModal
-        labels={labels}
-        open={feedbackModalOpen}
-        onClose={onCloseFeedbackModal}
-        onSubmit={onSubmitFeedback}
-        submitting={feedbackSubmitting}
-        error={feedbackError}
       />
     </DesktopPageContainer>
   );

@@ -38,4 +38,8 @@ export const authLoginAr: AuthLoginLabels = {
   strengthFair: "مقبولة",
   strengthStrong: "قوية",
   capsLockOn: "مفتاح الأحرف الكبيرة مفعل",
+  forgotPasswordComingSoonTitle: "إعادة تعيين كلمة المرور — قريباً",
+  forgotPasswordComingSoonBody:
+    "خدمة إعادة تعيين كلمة المرور الذاتية غير متاحة بعد. يرجى الاتصال بمسؤول النظام لإعادة تعيين كلمة المرور الخاصة بك.",
+  close: "إغلاق",
 };

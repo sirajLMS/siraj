@@ -20,7 +20,7 @@ function DefaultTabNavDesktop({
         borderBottom: `1px solid ${theme.palette.divider}`,
       })}
     >
-      <Tabs value={activeTab}>
+      <Tabs value={activeTab} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile>
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
 
@@ -38,6 +38,11 @@ function DefaultTabNavDesktop({
               sx={theme => ({
                 fontSize: theme.typography.bodyMd.fontSize,
                 textDecoration: "none",
+                // Allow tabs to shrink to fit content instead of enforcing the
+                // default 160px minWidth (which caused "Manual Invoice" to be
+                // truncated to "MANUAL INV" when 6 tabs exceeded the container).
+                minWidth: 0,
+                textTransform: "none",
                 ...(isActive ? { color: theme.palette.primary.main } : { color: theme.palette.text.secondary }),
               })}
             />

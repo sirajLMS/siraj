@@ -23,12 +23,19 @@ export function formatCurrencyForDisplay(
   const lockedFormatted = formatLockedAmount(lockedAmount, lockedCurrency, locale);
   const lockedCurrencyLabel = lockedCurrency;
 
+  // When display currency is not set OR stale, return the locked amount directly
+  // instead of a long error sentence. The prior behavior returned
+  // "Display currency not set. Amount locked: $100 USD" which was truncated by
+  // the table column to "Display currency not set. Amou..." — unreadable.
+  // Returning just the locked amount keeps the column compact + readable; the
+  // "not set" / "stale" context is conveyed by the `displayAmountStale` flag
+  // on the row (consumers can show a tooltip or icon for the full message).
   if (!displayAmount) {
-    return messages.displayCurrencyNotSet({ lockedAmount: lockedFormatted, lockedCurrency: lockedCurrencyLabel });
+    return lockedFormatted;
   }
 
   if (displayAmount.stale || !displayAmount.amount || !displayAmount.currency) {
-    return messages.displayCurrencyStale({ lockedAmount: lockedFormatted, lockedCurrency: lockedCurrencyLabel });
+    return lockedFormatted;
   }
 
   if (lockedCurrency === displayAmount.currency) {

@@ -24,6 +24,16 @@ export interface SettingsAppearanceTabLabels {
   readonly enterCustomizeMode: string;
   readonly enterCustomizeModeHint: string;
 
+  // ─── Brand color preview (form view) ──────────────────────────────
+  readonly currentBrandColors: string;
+  readonly currentBrandColorsHint: string;
+  readonly quickPresets: string;
+  readonly quickPresetsHint: string;
+  readonly primaryColor: string;
+  readonly secondaryColor: string;
+  readonly lightMode: string;
+  readonly darkMode: string;
+
   // ─── Action bar ────────────────────────────────────────────────────
   readonly saveDraft: string;
   readonly publishNow: string;
@@ -138,4 +148,26 @@ export interface AppearanceCustomizeLabels {
   // ─── Misc ──────────────────────────────────────────────────────────
   /** Export JSON action label. */
   readonly exportJson: string;
+
+  // ─── Logo upload (Task 7 + BUG-E) ───────────────────────────────────
+  /** Upload logo button label. */
+  readonly logoUploadButton: string;
+  /** Loading state label while reading file. */
+  readonly logoLoading: string;
+  /** File format hint under the upload button. */
+  readonly logoFileHint: string;
+  /** Label for an in-memory (data URL) logo preview. */
+  readonly logoInMemoryPreview: string;
+  /** Remove logo button label. */
+  readonly logoRemove: string;
+  /** Toast shown when a logo is loaded into memory (BUG-E). */
+  readonly logoLoadedToast: string;
+  /** Toast shown when the logo file exceeds the size limit. */
+  readonly logoFileTooLarge: string;
+  /** Toast shown when the logo file could not be read. */
+  readonly logoLoadFailed: string;
+  /** Primary color label. */
+  readonly primaryColor: string;
+  /** Secondary color label. */
+  readonly secondaryColor: string;
 }

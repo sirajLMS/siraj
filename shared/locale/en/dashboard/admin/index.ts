@@ -58,6 +58,7 @@ export const dashboardAdminEn: AdminDashboardLabels = {
 
   // "Page {current} of {total}"
   pageOf: (current, total) => `Page ${current} of ${total}`,
+  noData: "No data",
 
   // "Showing {shown} of {total} classes"
   showingOf: (shown, total) => `Showing ${shown} of ${total} classes`,
