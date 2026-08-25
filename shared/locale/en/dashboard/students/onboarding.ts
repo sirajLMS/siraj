@@ -45,5 +45,8 @@ export const dashboardStudentOnboardingEn: StudentOnboardingLabels = {
     parentRequired: "Parent is required",
     nameRequired: "Student name is required",
     nameMinLength: "Name must be at least 3 characters",
+    passwordRequired: "Password is required",
+    passwordMinLength: "Password must be at least 12 characters long.",
+    passwordWeakComplexity: "Password must contain at least 2 of: lowercase, uppercase, digits, symbols",
   },
 };

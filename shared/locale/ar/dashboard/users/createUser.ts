@@ -21,6 +21,8 @@ export const dashboardUsersCreateUserAr: CreateUserLabels = {
   emailExists: "يوجد حساب بهذا البريد الإلكتروني بالفعل",
   passwordRequired: "كلمة المرور مطلوبة",
   passwordWeak: "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+  passwordMinLength: "يجب أن تكون كلمة المرور ١٢ حرفاً على الأقل.",
+  passwordWeakComplexity: "يجب أن تحتوي كلمة المرور على فئتين على الأقل من: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
   permissionGroupRequired: "مجموعة الصلاحيات مطلوبة",
   specializedGroupNotAllowed: "هذه المجموعة تتطلب تدفقاً متخصصاً. يرجى استخدام النموذج المخصص.",
   permissionGroupNotFound: "مجموعة الصلاحيات المحددة غير موجودة",

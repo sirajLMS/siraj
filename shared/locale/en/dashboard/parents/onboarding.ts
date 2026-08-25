@@ -87,6 +87,8 @@ export const dashboardParentOnboardingEn: ParentOnboardingLabels = {
     emailRequired: "Email is required",
     emailInvalid: "Email is invalid",
     passwordRequired: "Password is required",
+    passwordMinLength: "Password must be at least 12 characters long.",
+    passwordWeakComplexity: "Password must contain at least 2 of: lowercase, uppercase, digits, symbols",
     phoneRequired: "Phone is required",
     addressRequired: "Address is required",
     feeAmountRequired: "Fee amount is required",

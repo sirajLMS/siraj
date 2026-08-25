@@ -53,5 +53,8 @@ export interface StaffOnboardingLabels {
     readonly fullNameRequired: string;
     readonly emailInvalid: string;
     readonly departmentRequired: string;
+    readonly passwordRequired: string;
+    readonly passwordMinLength: string;
+    readonly passwordWeakComplexity: string;
   };
 }

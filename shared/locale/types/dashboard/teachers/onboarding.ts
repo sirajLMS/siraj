@@ -57,6 +57,8 @@ export interface TeacherOnboardingLabels {
     readonly emailRequired: string;
     readonly emailInvalid: string;
     readonly passwordRequired: string;
+    readonly passwordMinLength: string;
+    readonly passwordWeakComplexity: string;
     readonly nationalIdRequired: string;
     readonly phoneRequired: string;
     readonly phoneMaxLength: string;

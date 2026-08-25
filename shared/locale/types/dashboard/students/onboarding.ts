@@ -43,5 +43,8 @@ export interface StudentOnboardingLabels {
     readonly parentRequired: string;
     readonly nameRequired: string;
     readonly nameMinLength: string;
+    readonly passwordRequired: string;
+    readonly passwordMinLength: string;
+    readonly passwordWeakComplexity: string;
   };
 }

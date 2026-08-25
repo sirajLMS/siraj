@@ -69,6 +69,9 @@ export interface DashboardNavigationLabels {
   readonly invoices: string;
   readonly parentRules: string;
   readonly socialMedia: string;
+  readonly parentPaymentsLedger: string;
+  readonly parentMonthlyAppraisals: string;
+  readonly parentRequests: string;
   readonly cron: string;
   readonly permissions: string;
   readonly settings: string;

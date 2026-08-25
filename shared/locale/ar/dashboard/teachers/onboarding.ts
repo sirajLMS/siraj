@@ -59,6 +59,8 @@ export const dashboardTeacherOnboardingAr: TeacherOnboardingLabels = {
     emailRequired: "البريد الإلكتروني مطلوب",
     emailInvalid: "البريد الإلكتروني غير صالح",
     passwordRequired: "كلمة المرور مطلوبة",
+    passwordMinLength: "يجب أن تكون كلمة المرور ١٢ حرفاً على الأقل.",
+    passwordWeakComplexity: "يجب أن تحتوي كلمة المرور على فئتين على الأقل من: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
     nationalIdRequired: "الرقم القومي مطلوب",
     phoneRequired: "الهاتف مطلوب",
     phoneMaxLength: "يجب ألا يزيد رقم الهاتف عن 50 حرف",

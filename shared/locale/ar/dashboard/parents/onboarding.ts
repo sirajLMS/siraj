@@ -87,6 +87,8 @@ export const dashboardParentOnboardingAr: ParentOnboardingLabels = {
     emailRequired: "البريد الإلكتروني مطلوب",
     emailInvalid: "البريد الإلكتروني غير صالح",
     passwordRequired: "كلمة المرور مطلوبة",
+    passwordMinLength: "يجب أن تكون كلمة المرور ١٢ حرفاً على الأقل.",
+    passwordWeakComplexity: "يجب أن تحتوي كلمة المرور على فئتين على الأقل من: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
     phoneRequired: "رقم الهاتف مطلوب",
     addressRequired: "العنوان السكني مطلوب",
     feeAmountRequired: "مبلغ الرسوم مطلوب",

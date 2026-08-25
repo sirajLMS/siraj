@@ -55,5 +55,8 @@ export const dashboardStaffOnboardingAr: StaffOnboardingLabels = {
     fullNameRequired: "الاسم الكامل مطلوب",
     emailInvalid: "البريد الإلكتروني غير صالح",
     departmentRequired: "القسم الرئيسي مطلوب",
+    passwordRequired: "كلمة المرور مطلوبة",
+    passwordMinLength: "يجب أن تكون كلمة المرور ١٢ حرفاً على الأقل.",
+    passwordWeakComplexity: "يجب أن تحتوي كلمة المرور على فئتين على الأقل من: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
   },
 };

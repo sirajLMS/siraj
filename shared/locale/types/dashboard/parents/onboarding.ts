@@ -71,6 +71,8 @@ export interface ParentOnboardingLabels {
     readonly emailRequired: string;
     readonly emailInvalid: string;
     readonly passwordRequired: string;
+    readonly passwordMinLength: string;
+    readonly passwordWeakComplexity: string;
     readonly phoneRequired: string;
     readonly addressRequired: string;
     readonly feeAmountRequired: string;

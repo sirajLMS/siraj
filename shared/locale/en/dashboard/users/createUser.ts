@@ -21,6 +21,8 @@ export const dashboardUsersCreateUserEn: CreateUserLabels = {
   emailExists: "An account with this email already exists",
   passwordRequired: "Password is required",
   passwordWeak: "Password must be at least 8 characters",
+  passwordMinLength: "Password must be at least 12 characters long.",
+  passwordWeakComplexity: "Password must contain at least 2 of: lowercase, uppercase, digits, symbols",
   permissionGroupRequired: "Permission group is required",
   specializedGroupNotAllowed: "This group requires a specialized onboarding flow. Please use the dedicated form.",
   permissionGroupNotFound: "The selected permission group was not found",

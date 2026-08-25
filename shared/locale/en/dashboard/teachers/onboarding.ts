@@ -59,6 +59,8 @@ export const dashboardTeacherOnboardingEn: TeacherOnboardingLabels = {
     emailRequired: "Email is required",
     emailInvalid: "Invalid email format",
     passwordRequired: "Password is required",
+    passwordMinLength: "Password must be at least 12 characters long.",
+    passwordWeakComplexity: "Password must contain at least 2 of: lowercase, uppercase, digits, symbols",
     nationalIdRequired: "National ID is required",
     phoneRequired: "Phone is required",
     phoneMaxLength: "Phone number must be at most 50 characters",

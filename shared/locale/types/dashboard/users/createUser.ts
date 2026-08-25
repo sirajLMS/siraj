@@ -19,6 +19,8 @@ export interface CreateUserLabels {
   readonly emailExists: string;
   readonly passwordRequired: string;
   readonly passwordWeak: string;
+  readonly passwordMinLength: string;
+  readonly passwordWeakComplexity: string;
   readonly permissionGroupRequired: string;
   readonly specializedGroupNotAllowed: string;
   readonly permissionGroupNotFound: string;
