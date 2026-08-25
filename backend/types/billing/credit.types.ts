@@ -20,4 +20,3 @@ export interface CreditBalanceReturnType {
   classesTotal: number;
   classesRemaining: number;
 }
-

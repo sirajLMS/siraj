@@ -154,6 +154,7 @@ enum AppPermission {
   PARENT_VIEW_OWN_PROFILE
   PARENT_VIEW_PROFILE
   PARENT_VIEW_STUDENTS
+  PAYMENTS_LEDGER_VIEW
   PAYMENT_METHODS_MANAGE_CATALOGS
   PAYMENT_METHODS_VERIFY_BANK_TRANSFER
   PERMISSION_GROUPS_ASSIGN
@@ -3249,6 +3250,21 @@ enum PaymentDirection {
   PAYOUT
 }
 
+"""
+A single payment ledger entry for a parent/student, derived from payments + invoices + credit_transactions.
+"""
+type PaymentLedgerEntry {
+  amount: String
+  creditsPurchased: Int
+  currency: String
+  id: ID
+  packageName: String
+  paymentDate: DateTime
+  paymentGateway: String
+  studentId: ID
+  studentName: String
+}
+
 type PaymentMethodCatalogSnapshot {
   catalogId: String
   catalogName: LocalizedString
@@ -3488,6 +3504,11 @@ type Query {
   Returns the authenticated student's monthly appraisal for a given month (or null if none).
   """
   myMonthlyAppraisal(month: DateTime!): MonthlyAppraisal
+
+  """
+  Returns the authenticated user's payment ledger (parent sees all children; student sees own).
+  """
+  myPaymentsLedger: [PaymentLedgerEntry!]
   notificationAlerts: NotificationAlertsResult
   notificationPreferences: [NotificationPreference!]
 

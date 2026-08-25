@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { spawn } from "node:child_process";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 
 /**
@@ -19,22 +19,51 @@ async function readSrc(rel: string): Promise<string> {
 }
 
 describe("M5 — password policy", () => {
+  // NOTE: uses try/catch rather than `await expect().resolves/rejects` because
+  // oxlint's `await-thenable` rule mis-flags the bun:test resolves/rejects
+  // matcher chain as non-Promise-like.
+
   test("rejects passwords shorter than 12 characters", async () => {
-    await expect(validatePasswordStrength("Ab1!abcd")).rejects.toThrow(); // 8 chars, was the old minimum
+    let threw = false;
+    try {
+      await validatePasswordStrength("Ab1!abcd"); // 8 chars, was the old minimum
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
-  test("rejects single-class passwords even when long enough", async () => {
-    // 12 chars but only lowercase — fails the 2-class complexity rule.
-    await expect(validatePasswordStrength("aaaaaaaaaaaa")).rejects.toThrow();
-    // 12 chars but only digits.
-    await expect(validatePasswordStrength("123456789012")).rejects.toThrow();
+  test("rejects single-class lowercase-only passwords", async () => {
+    let threw = false;
+    try {
+      await validatePasswordStrength("aaaaaaaaaaaa"); // 12 chars, 1 class
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
+  });
+
+  test("rejects single-class digits-only passwords", async () => {
+    let threw = false;
+    try {
+      await validatePasswordStrength("123456789012"); // 12 chars, 1 class
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   test("accepts passwords meeting length + 2-class complexity", async () => {
-    // 12 chars, lowercase + digits — 2 classes, passes.
-    await expect(validatePasswordStrength("abcdef123456")).resolves.toBeUndefined();
-    // 12 chars, all 4 classes.
-    await expect(validatePasswordStrength("Abcdef12!@xy")).resolves.toBeUndefined();
+    let threw = false;
+    try {
+      // 12 chars, lowercase + digits — 2 classes, passes (no throw).
+      await validatePasswordStrength("abcdef123456");
+      // 12 chars, all 4 classes.
+      await validatePasswordStrength("Abcdef12!@xy");
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(false);
   });
 });
 
@@ -82,7 +111,9 @@ describe("H8 — mutation notImpersonating CI guard", () => {
     // The script may report baseline violations (the full sweep is a follow-up);
     // this test only asserts it EXECUTES without crashing (a real exit code).
     const exitCode = await new Promise<number>((resolve, reject) => {
-      const child = spawn("bun", ["run", "scripts/health/scan-mutation-scopes.ts"], {
+      // process.execPath is the absolute path to the running bun binary — avoids
+      // sonarjs/no-os-command-from-path (spawning "bun" by name from PATH).
+      const child = spawn(process.execPath, ["scripts/health/scan-mutation-scopes.ts"], {
         cwd: REPO_ROOT,
         stdio: ["ignore", "pipe", "pipe"],
       });

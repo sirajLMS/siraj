@@ -1,4 +1,4 @@
-import { type AppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
+import { ProfileAudience, ProfileScope } from "@/backend/enum";
 import {
   hasProfileGroupEditPermission,
   hasProfileGroupViewPermission,
@@ -7,23 +7,9 @@ import {
 } from "@/backend/services/profile/profile-field-filter-bridge";
 import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
 import { STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
-import type { ProfileFieldGroupDefinition } from "@/backend/types";
+import type { FieldFilterContext, ProfileFieldGroupDefinition, StudentFieldFilterContext } from "@/backend/types";
 
-export type FieldFilterContext = {
-  readonly actorUserId: string;
-  readonly targetUserId: string;
-  readonly scope: ProfileScope;
-  readonly audience: ProfileAudience;
-  readonly permissions: ReadonlySet<AppPermission>;
-};
-
-export type StudentFieldFilterContext = {
-  readonly actorUserId: string;
-  readonly studentId: string;
-  /** LMS user id of the student whose profile is being viewed or edited. */
-  readonly studentUserId: string;
-  readonly permissions: ReadonlySet<AppPermission>;
-};
+export type { FieldFilterContext, StudentFieldFilterContext };
 
 function isStringRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

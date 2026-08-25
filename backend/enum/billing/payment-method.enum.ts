@@ -1,4 +1,4 @@
-export { PaymentMethodType, PaymentDirection } from "@/shared/constants/billing.enum";
+export { PaymentDirection, PaymentMethodType } from "@/shared/constants/billing.enum";
 
 /** Backend-only identifier kind for payment-method lookups (no shared equivalent). */
 export enum IdentifierKind {

@@ -62,14 +62,17 @@ async function walkTsFiles(dir: string, acc: string[] = []): Promise<string[]> {
   } catch {
     return acc;
   }
+  const subdirs: string[] = [];
   for (const entry of entries) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
-      await walkTsFiles(full, acc);
+      subdirs.push(full);
     } else if (entry.isFile() && (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx"))) {
       acc.push(full);
     }
   }
+  // Recurse into subdirectories in parallel (avoids no-await-in-loop).
+  await Promise.all(subdirs.map(sub => walkTsFiles(sub, acc)));
   return acc;
 }
 
@@ -79,7 +82,7 @@ async function walkTsFiles(dir: string, acc: string[] = []): Promise<string[]> {
  * has an `authScopes` key, plus records for mutation fields that have NO
  * authScopes key (those are flagged as "missing authScopes").
  */
-function extractMutations(source: string, filePath: string): Array<{
+function extractMutations(source: string): Array<{
   mutation: string;
   line: number;
   hasNotImpersonating: boolean;
@@ -89,8 +92,8 @@ function extractMutations(source: string, filePath: string): Array<{
   // Match mutationField("name", ... up to the closing of the options object.
   // We use a relaxed regex to find the call, then scan forward for authScopes.
   const callRegex = /\.mutationField\s*\(\s*["'`]([^"'`]+)["'`]/g;
-  let match: RegExpExecArray | null;
-  while ((match = callRegex.exec(source)) !== null) {
+  let match = callRegex.exec(source);
+  while (match !== null) {
     const mutationName = match[1];
     const callStart = match.index;
     const lineNum = source.slice(0, callStart).split("\n").length;
@@ -103,6 +106,7 @@ function extractMutations(source: string, filePath: string): Array<{
     // it is almost certainly inside authScopes (the only place it's valid).
     const hasNotImpersonating = /notImpersonating\b/.test(window);
     results.push({ mutation: mutationName, line: lineNum, hasNotImpersonating, hasAuthScopes });
+    match = callRegex.exec(source);
   }
   return results;
 }
@@ -121,11 +125,15 @@ async function main(): Promise<number> {
   }
 
   const files = await walkTsFiles(MUTATION_DIR);
+  // Read all files in parallel to avoid `await` inside the processing loop
+  // (oxlint no-await-in-loop). Process synchronously after contents resolve.
+  const sources = await Promise.all(files.map(f => readFile(f, "utf8")));
   const violations: Violation[] = [];
 
-  for (const file of files) {
-    const source = await readFile(file, "utf8");
-    const mutations = extractMutations(source, file);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const source = sources[i];
+    const mutations = extractMutations(source);
     for (const m of mutations) {
       if (ALLOW_LIST.has(m.mutation)) continue;
       if (!m.hasAuthScopes) {

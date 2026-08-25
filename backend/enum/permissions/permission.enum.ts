@@ -280,6 +280,7 @@ export enum AppPermission {
   APPRAISAL_FEEDBACK = "appraisal.feedback",
   SESSION_SELF_DELAY = "session.self_delay",
   SESSION_SELF_CANCEL = "session.self_cancel",
+  PAYMENTS_LEDGER_VIEW = "payments.ledger_view",
 }
 
 const appPermissionValues = Object.values(AppPermission) as readonly AppPermission[];

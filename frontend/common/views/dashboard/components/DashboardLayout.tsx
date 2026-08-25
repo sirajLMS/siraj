@@ -2,6 +2,7 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import { CustomizeModeShell } from "@/frontend/common/views/dashboard/components/customize/CustomizeModeShell";
 import { DashboardLayoutLoading } from "@/frontend/common/views/dashboard/components/DashboardLayoutLoading";
 import type { DashboardLayoutProps } from "@/frontend/common/views/dashboard/components/dashboardLayoutTypes";
 
@@ -19,6 +20,16 @@ const lazyViews = createLazyView<DashboardLayoutProps>(
   { loading: () => <DashboardLayoutLoading /> }
 );
 
+/**
+ * Dashboard layout entrypoint. In customize mode (`?customize=1`) the whole
+ * dashboard renders inside {@link CustomizeModeShell} — the customization
+ * layout that owns the toolbar, sidebar, and all dashboard offsets — so the
+ * desktop/mobile dashboard layouts stay completely customize-agnostic.
+ */
 export function DashboardLayout(props: Readonly<DashboardLayoutProps>) {
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
+  return (
+    <CustomizeModeShell>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />
+    </CustomizeModeShell>
+  );
 }

@@ -104,6 +104,7 @@ export enum AppPermission {
   ParentViewOwnProfile = 'PARENT_VIEW_OWN_PROFILE',
   ParentViewProfile = 'PARENT_VIEW_PROFILE',
   ParentViewStudents = 'PARENT_VIEW_STUDENTS',
+  PaymentsLedgerView = 'PAYMENTS_LEDGER_VIEW',
   PaymentMethodsManageCatalogs = 'PAYMENT_METHODS_MANAGE_CATALOGS',
   PaymentMethodsVerifyBankTransfer = 'PAYMENT_METHODS_VERIFY_BANK_TRANSFER',
   PermissionGroupsAssign = 'PERMISSION_GROUPS_ASSIGN',

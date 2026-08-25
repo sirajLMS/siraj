@@ -142,13 +142,22 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
   const now = new Date();
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: 600 }}>
-      <Box sx={{ display: "flex", borderBottom: 1, borderColor: "divider" }}>
+      <Box sx={theme => ({ display: "flex", borderBottom: 1, borderColor: theme.palette.divider })}>
         <Box sx={{ minWidth: 60, p: 1 }} />
         {DAYS.map((day, idx) => {
           const dayDate = addDays(weekStart, idx);
           const isToday = sameDay(dayDate, now);
           return (
-            <Box key={day} sx={{ flex: 1, p: 1, textAlign: "center", borderLeft: 1, borderColor: "divider" }}>
+            <Box
+              key={day}
+              sx={theme => ({
+                flex: 1,
+                p: 1,
+                textAlign: "center",
+                borderLeft: 1,
+                borderColor: theme.palette.divider,
+              })}
+            >
               <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
                 {day}
               </Typography>
@@ -175,7 +184,16 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
       <Box sx={{ display: "flex", flex: 1, overflow: "hidden" }}>
         <Box sx={{ minWidth: 60, display: "flex", flexDirection: "column" }}>
           {HOURS.map(hour => (
-            <Box key={hour} sx={{ height: 60, p: 0.5, textAlign: "right", borderBottom: 1, borderColor: "divider" }}>
+            <Box
+              key={hour}
+              sx={theme => ({
+                height: 60,
+                p: 0.5,
+                textAlign: "right",
+                borderBottom: 1,
+                borderColor: theme.palette.divider,
+              })}
+            >
               <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled })}>
                 {formatHour(hour)}
               </Typography>
@@ -186,9 +204,24 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
           const dayDate = addDays(weekStart, idx);
           const dayClasses = classes.filter(c => sameDay(new Date(c.scheduledStartAt), dayDate));
           return (
-            <Box key={day} sx={{ flex: 1, borderLeft: 1, borderColor: "divider", position: "relative" }}>
+            <Box
+              key={day}
+              sx={theme => ({
+                flex: 1,
+                borderLeft: 1,
+                borderColor: theme.palette.divider,
+                position: "relative",
+              })}
+            >
               {HOURS.map(hour => (
-                <Box key={hour} sx={{ height: 60, borderBottom: 1, borderColor: "divider" }} />
+                <Box
+                  key={hour}
+                  sx={theme => ({
+                    height: 60,
+                    borderBottom: 1,
+                    borderColor: theme.palette.divider,
+                  })}
+                />
               ))}
               {dayClasses.map(cls => {
                 const startDate = new Date(cls.scheduledStartAt);

@@ -1,1 +1,1 @@
-export { LessonReportStatus, AttendanceEvaluation } from "@/shared/constants/lesson-report.enum";
+export { AttendanceEvaluation, LessonReportStatus } from "@/shared/constants/lesson-report.enum";

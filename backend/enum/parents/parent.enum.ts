@@ -1,1 +1,1 @@
-export { ParentStatus, BookingStatus } from "@/shared/constants/parent.enum";
+export { BookingStatus, ParentStatus } from "@/shared/constants/parent.enum";
