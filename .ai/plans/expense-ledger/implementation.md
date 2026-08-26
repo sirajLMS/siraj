@@ -129,9 +129,9 @@ export const expenses = createTable(
     teacherName: varcharColumn("teacher_name", { length: 200 }),
     title: varcharColumn("title", { length: 200 }).notNull(),
     type: expenseTypeEnum("type").notNull().$type<ExpenseType>(),
-    expenseValue: numericColumn("expense_value", { precision: 12, scale: 2 }).notNull(),
+    expenseValue: textColumn("expense_value", { precision: 12, scale: 2 }).notNull(),
     expenseCurrency: currencyCodeEnum("expense_currency").notNull().$type<CurrencyCode>(),
-    paymentDate: date("payment_date").notNull(),
+    paymentDate: textColumn("payment_date").notNull(),
     // YYYY-MM string — the accounting month the expense belongs to.
     expenseDate: varcharColumn("expense_date", { length: 7 }).notNull(),
     note: textColumn("note"),
@@ -763,7 +763,7 @@ Defines: `EXPENSES_QUERY`, `EXPENSE_QUERY`,
 
 ### 5.3 Expense Ledger list page
 
-**Component:** `frontend/common/views/dashboard/accounting/expenses/ExpenseLedgerContainer.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/expenses/ExpenseLedgerContainer.tsx`
 
 - MUI `DataGrid` (v9) with columns: title, type chip, teacher (when set),
   value + currency, payment date, expense month, source chip (Manual /
@@ -774,7 +774,7 @@ Defines: `EXPENSES_QUERY`, `EXPENSE_QUERY`,
 
 ### 5.4 Add New / Edit modal
 
-**Component:** `frontend/common/views/dashboard/accounting/expenses/ExpenseFormDialog.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/expenses/ExpenseFormDialog.tsx`
 
 Fields per AC-3.1. The `type` dropdown hides `Salaries` (AC-2.5). When
 editing a `Salaries` expense (rare — only via drill-down), the `type`
@@ -787,7 +787,7 @@ and `expenseValue` fields are disabled (AC-3.3 + Q5). Validation:
 
 ### 5.5 Filter bar
 
-**Component:** `frontend/common/views/dashboard/accounting/expenses/ExpenseFilterBar.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/expenses/ExpenseFilterBar.tsx`
 
 Title search (debounced 300 ms), type multi-select, expense month
 picker (`YYYY-MM`), payment date range picker, "Include deleted"
@@ -795,7 +795,7 @@ toggle (default off), Clear button.
 
 ### 5.6 Source chip + drill-down
 
-**Component:** `frontend/common/views/dashboard/accounting/expenses/ExpenseSourceChip.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/expenses/ExpenseSourceChip.tsx`
 
 Renders "Manual" (grey, no click) when `sourceEntity IS NULL`; renders
 "From Carryover" (blue, clickable) when `sourceEntity = 'carryover_balances'`.
@@ -848,7 +848,7 @@ accountingExpensesManage: [AppPermission.ACCOUNTING_EXPENSES_MANAGE] as PagePerm
 
 ### 7.1 Namespace
 
-**File:** `shared/locale/types/dashboard/accounting/expenses.ts`
+**File:** `shared/locale/types/dashboard/billing/expenses.ts`
 
 New namespace `dashboard.accounting.expenses` with keys:
 

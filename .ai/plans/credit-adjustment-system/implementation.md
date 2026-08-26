@@ -677,7 +677,7 @@ Both routes register `ACCOUNTING_CREDITS_MANAGE` in the page-permissions map
 
 ### 5.3 Student Credits list page
 
-**Component:** `frontend/common/views/dashboard/accounting/credits/StudentCreditsList.tsx` 🆕
+**Component:** `frontend/common/views/dashboard/billing/accounting/credits/StudentCreditsList.tsx` 🆕
 
 - MUI `DataGrid` (v9) showing: name, parent, `classesRemaining`, `classesTotal`, last-tx-at.
 - Toolbar: search input (debounced), "Adjust Credits" primary button.
@@ -689,7 +689,7 @@ Both routes register `ACCOUNTING_CREDITS_MANAGE` in the page-permissions map
 
 ### 5.4 Credit Adjustment form
 
-**Component:** `frontend/common/views/dashboard/accounting/credits/CreditAdjustForm.tsx` 🆕
+**Component:** `frontend/common/views/dashboard/billing/accounting/credits/CreditAdjustForm.tsx` 🆕
 
 Layout (top-to-bottom):
 
@@ -721,7 +721,7 @@ switch (edge case E3) without losing student/hours selection.
 
 ### 5.5 Carryover banner component
 
-**Component:** `frontend/common/views/dashboard/accounting/credits/CarryoverBanner.tsx` 🆕
+**Component:** `frontend/common/views/dashboard/billing/accounting/credits/CarryoverBanner.tsx` 🆕
 
 ```tsx
 <Alert severity="success" icon={<SwapHorizIcon />} sx={{ backgroundColor: "successContainer" }}>

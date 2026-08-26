@@ -188,8 +188,8 @@ export const packagePlans = createTable(
     codename: varcharColumn("codename", { length: 50 }).notNull(),
     displayName: varcharColumn("display_name", { length: 255 }).notNull(),
     description: textColumn("description"),
-    creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }).notNull(),
-    priceAmount: numericColumn("price_amount", { precision: 12, scale: 2 }).notNull(),
+    creditHours: textColumn("credit_hours", { precision: 12, scale: 2 }).notNull(),
+    priceAmount: textColumn("price_amount", { precision: 12, scale: 2 }).notNull(),
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     active: booleanColumn("active").notNull().default(true),
     sortOrder: integerColumn("sort_order").notNull().default(0),
@@ -214,7 +214,7 @@ Add `changeAmountHours` numeric column + XOR CHECK constraint; relax `changeAmou
 
 ```typescript
 changeAmount: integerColumn("change_amount"),  // REMOVED .notNull() — now nullable
-changeAmountHours: numericColumn("change_amount_hours", { precision: 12, scale: 2 }),  // NEW
+changeAmountHours: textColumn("change_amount_hours", { precision: 12, scale: 2 }),  // NEW
 // ...existing columns...
 // New check:
 check(
@@ -236,7 +236,7 @@ Add index: `index("credit_transactions_change_amount_hours_idx").on(table.studen
 ```typescript
 packagePlanId: uuidColumn("package_plan_id").references(() => packagePlans.id, { onDelete: "set null" }),
 paymentGateway: paymentGatewayEnum("payment_gateway").notNull().default("NONE").$type<PaymentGateway>(),
-creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }),
+creditHours: textColumn("credit_hours", { precision: 12, scale: 2 }),
 isPaidStatusOn: booleanColumn("is_paid_status_on").notNull().default(false),
 paymentNote: textColumn("payment_note"),
 ```
@@ -246,7 +246,7 @@ Add indexes: `(paymentGateway)`, `(packagePlanId)`, `(isPaidStatusOn)`.
 **`invoices` table — add column:**
 
 ```typescript
-creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }),
+creditHours: textColumn("credit_hours", { precision: 12, scale: 2 }),
 ```
 
 ### 1.4 Extend `backend/db/schema/students/students.ts`
@@ -254,8 +254,8 @@ creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }),
 Add two columns + two CHECKs:
 
 ```typescript
-creditHoursRemaining: numericColumn("credit_hours_remaining", { precision: 12, scale: 2 }).notNull().default("0.00"),
-creditHoursTotal: numericColumn("credit_hours_total", { precision: 12, scale: 2 }).notNull().default("0.00"),
+creditHoursRemaining: textColumn("credit_hours_remaining").notNull().default("0.00"),
+creditHoursTotal: textColumn("credit_hours_total").notNull().default("0.00"),
 // New checks:
 check("students_credit_hours_remaining_non_negative_chk", sql`${table.creditHoursRemaining} >= 0`),
 check("students_credit_hours_total_non_negative_chk", sql`${table.creditHoursTotal} >= 0`),
@@ -732,7 +732,7 @@ bun run generate:gqlSchema && bun run codegen
 
 > **PATTERN COMPLIANCE:** Per `frontend/common/graphql/AGENTS.md`, GraphQL documents are organized by domain in `frontend/common/graphql/sharedDocuments/<domain>/<domain>.documents.ts`. Each domain has its own directory + `index.ts` barrel; the root `frontend/common/graphql/sharedDocuments/index.ts` re-exports each domain.
 
-### `frontend/common/graphql/sharedDocuments/accounting/accounting.documents.ts` (new)
+### `frontend/common/graphql/sharedDocuments/billing/accounting-payments.documents.ts` (new)
 
 Define all queries + mutations above as typed Apollo documents. Follow the existing pattern from `frontend/common/graphql/sharedDocuments/billing/credit-lms.documents.ts`:
 - Import: `import { gql, type TypedDocumentNode } from "@apollo/client";` (NOT from `@apollo/client/react` — that's for hooks only)
@@ -740,7 +740,7 @@ Define all queries + mutations above as typed Apollo documents. Follow the exist
 - Document naming convention: `<operationName>QueryDocument` / `<operationName>MutationDocument` (camelCase)
 - Every document MUST include the `id` field on every selection set
 
-### `frontend/common/graphql/sharedDocuments/accounting/index.ts` (new barrel)
+### `frontend/common/graphql/sharedDocuments/billing/index.ts` (new barrel)
 
 ```typescript
 export * from "./accounting.documents";
@@ -760,7 +760,7 @@ The hooks (`usePackagePlansQuery`, `usePackagePlanQuery`, `useCreatePackagePlanM
 
 ## Phase 7: i18n Namespace
 
-### New locale directory: `shared/locale/types/dashboard/accounting/`
+### New locale directory: `shared/locale/types/dashboard/billing/`
 
 Files (mirror existing `dashboard/billing/` structure — each tab/feature gets its own file):
 
@@ -799,17 +799,17 @@ export interface PackageErrors {
 3. Add `readonly package: PackageErrors;` to `ErrorsLabels`
 4. Add EN + AR implementations under `shared/locale/en/errors/*.json` + `shared/locale/ar/errors/*.json`
 
-### Payment gateway labels — add to `shared/locale/types/dashboard/accounting/payments.ts`
+### Payment gateway labels — add to `shared/locale/types/dashboard/billing/payments.ts`
 
 Include a `gateways` record: `{ NONE, PAYPAL, WESTERN_UNION, BANK, OTHER }` keyed by `PaymentGateway` enum value. (NOT in `shared/locale/types/ui/index.ts` — keep all accounting labels co-located.)
 
 ### Root barrel — edit `shared/locale/types/index.ts`
 
-> **PATTERN COMPLIANCE:** The dashboard namespace barrel is `shared/locale/types/index.ts` (NOT `shared/locale/types/dashboard/index.ts`, which does not exist). Add `export * from "./dashboard/accounting";` alongside the existing `export * from "./dashboard/billing";` line.
+> **PATTERN COMPLIANCE:** The dashboard namespace barrel is `shared/locale/types/index.ts` (NOT `shared/locale/types/dashboard/index.ts`, which does not exist). Add `export * from "./dashboard/billing";` alongside the existing `export * from "./dashboard/billing";` line.
 
 ### EN + AR implementations
 
-`shared/locale/en/dashboard/accounting/*.json` + `shared/locale/ar/dashboard/accounting/*.json` — RTL-compliant strings.
+`shared/locale/en/dashboard/billing/*.json` + `shared/locale/ar/dashboard/billing/*.json` — RTL-compliant strings.
 
 Key labels required (full list in trackable-tasks.md):
 - `payments.title`, `payments.add`, `payments.filter.student`, `payments.filter.parent`, `payments.filter.fromDate`, `payments.filter.toDate`, `payments.filter.unpaidOnly`, `payments.columns.studentName`, `payments.columns.credit`, `payments.columns.paid`, `payments.columns.currency`, `payments.columns.package`, `payments.columns.gateway`, `payments.columns.paymentDate`, `payments.columns.createdAt`, `payments.columns.actions`, `payments.empty`, `payments.paidToggle.on`, `payments.paidToggle.off`
@@ -837,7 +837,7 @@ Edit `frontend/common/views/dashboard/config/navigationConfig.ts`:
 - Add `PAGE_PERMISSIONS.accountingPaymentsView = ACCOUNTING_PAYMENTS_VIEW`, `PAGE_PERMISSIONS.accountingPaymentsManage = ACCOUNTING_PAYMENTS_MANAGE`
 - Mobile: add `accounting-payments` to `BOTTOM_NAV_ITEMS` for STAFF+
 
-### Desktop views — `frontend/desktop/views/dashboard/accounting/`
+### Desktop views — `frontend/desktop/views/dashboard/billing/accounting/`
 
 > **PATTERN COMPLIANCE:** Per `frontend/desktop/AGENTS.md`, desktop views live under `frontend/desktop/views/dashboard/<domain>/*.desktop.tsx`. The `dashboard/` segment is mandatory.
 
@@ -849,11 +849,11 @@ Edit `frontend/common/views/dashboard/config/navigationConfig.ts`:
 | `PackagePlansListView.desktop.tsx` | Catalog DataGrid |
 | `PackagePlanFormView.desktop.tsx` | Add/Edit form |
 
-### Mobile views — `frontend/mobile/views/dashboard/accounting/`
+### Mobile views — `frontend/mobile/views/dashboard/billing/accounting/`
 
-Mirror desktop with card-list layouts under `frontend/mobile/views/dashboard/accounting/*.mobile.tsx`. Shared ViewModels under `frontend/common/views/dashboard/accounting/`.
+Mirror desktop with card-list layouts under `frontend/mobile/views/dashboard/billing/accounting/*.mobile.tsx`. Shared ViewModels under `frontend/common/views/dashboard/billing/accounting/`.
 
-### ViewModels — `frontend/common/views/dashboard/accounting/`
+### ViewModels — `frontend/common/views/dashboard/billing/accounting/`
 
 > **PATTERN COMPLIANCE:** Existing ViewModels are hooks named `useXxxViewModel.ts` located directly under `frontend/common/views/dashboard/<domain>/` (e.g. `frontend/common/views/dashboard/billing/quota/useQuotaFormViewModel.ts`). There is NO `viewmodels/` subdirectory and the `ViewModel` suffix comes AFTER the `use...ViewModel` hook name.
 

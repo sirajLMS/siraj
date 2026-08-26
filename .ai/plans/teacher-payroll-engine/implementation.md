@@ -52,7 +52,7 @@
 │                          PostgreSQL                                          │
 │   class_instances (EXTENDED)                                                │
 │     + calculatedDuration     integer NULL                                   │
-│     + teacherPaidAmount       numericColumn(12,2) NULL                             │
+│     + teacherPaidAmount       textColumn (stored as text) NULL                             │
 │     + teacherPaidCurrency     currency_code NULL                             │
 │     + calculationStatus       calculation_status_enum NOT NULL DEFAULT 'NOT_CALCULATED'│
 │     + isPartialPercentage     smallint NULL  (0–100, set only when PARTIALLY)│
@@ -139,7 +139,7 @@ export const classInstances = createTable("class_instances", {
   // ... existing columns unchanged ...
   // ── Plan 3 additions ───────────────────────────────────────────────
   calculatedDuration: integerColumn("calculated_duration"), // minutes; null until calc runs
-  teacherPaidAmount: numericColumn("teacher_paid_amount", { precision: 12, scale: 2 }),
+  teacherPaidAmount: textColumn("teacher_paid_amount", { precision: 12, scale: 2 }),
   teacherPaidCurrency: currencyCodeEnum("teacher_paid_currency").$type<CurrencyCode>(),
   calculationStatus: calculationStatusEnum("calculation_status")
     .notNull()
@@ -730,7 +730,7 @@ clause so they cost nothing extra.
 
 ### 4.1 New enum + input + object types
 
-**File:** `backend/graphql/pothos/teachers/payroll.pothos.ts`
+**File:** `backend/graphql/pothos/billing/payroll.pothos.ts`
 
 ```ts
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -826,7 +826,7 @@ export const PayrollOverrideResultPothosObject = gqlSchemaBuilder
 
 ### 4.2 Extend `ClassInstanceDetailPothosObject`
 
-**File:** `backend/graphql/pothos/classes/class-session.pothos.ts` (additive)
+**File:** `backend/graphql/pothos/billing/class-session-payroll.pothos.ts` (additive)
 
 ```ts
 fields: (t) => ({
@@ -843,7 +843,7 @@ fields: (t) => ({
 
 ### 4.3 New query + mutation
 
-**File:** `backend/graphql/query/teachers/payroll.query.ts`
+**File:** `backend/graphql/query/billing/payroll.query.ts`
 
 ```ts
 gqlSchemaBuilder.queryField("payrollReport", (t) =>
@@ -870,7 +870,7 @@ gqlSchemaBuilder.queryField("payrollReport", (t) =>
 );
 ```
 
-**File:** `backend/graphql/mutation/teachers/payroll.mutation.ts`
+**File:** `backend/graphql/mutation/billing/payroll.mutation.ts`
 
 ```ts
 gqlSchemaBuilder.mutationField("applyPayrollOverride", (t) =>
@@ -909,7 +909,7 @@ A thin Next.js Route Handler that:
 
 ### 5.1 Apollo documents
 
-**File:** `frontend/common/graphql/sharedDocuments/teachers/payroll.documents.ts` 🆕
+**File:** `frontend/common/graphql/sharedDocuments/billing/payroll.documents.ts` 🆕
 
 Follows the project's `TypedDocumentNode` + camelCase + `Document` suffix convention (see `frontend/common/graphql/sharedDocuments/AGENTS.md`):
 
@@ -977,7 +977,7 @@ export const applyPayrollOverrideMutationDocument: TypedDocumentNode<
 `;
 ```
 
-- Re-export from `frontend/common/graphql/sharedDocuments/teachers/index.ts` via `export * from "./payroll.documents";`.
+- Re-export from `frontend/common/graphql/sharedDocuments/billing/index.ts` via `export * from "./payroll.documents";`.
 - Run `bun run generate:gqlSchema && bun codegen` after the schema changes land
   so `Operations.PayrollReportQuery` + `Operations.ApplyPayrollOverrideMutation`
   + their `Types.Args` exist.
@@ -996,7 +996,7 @@ wrapper enforces it before render.
 
 ### 5.3 Payroll Reports page
 
-**Component:** `frontend/common/views/dashboard/accounting/payroll/PayrollReportsContainer.tsx` 🆕
+**Component:** `frontend/common/views/dashboard/billing/accounting/payroll/PayrollReportsContainer.tsx` 🆕
 
 - MUI `DataGrid` (v9) with columns from §4.1.
 - Toolbar: search input (debounced 300 ms), **reuse the existing `TeacherAutocomplete`**
@@ -1013,7 +1013,7 @@ wrapper enforces it before render.
 
 ### 5.4 Override dialog
 
-**Component:** `frontend/common/views/dashboard/accounting/payroll/OverrideDialog.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/payroll/OverrideDialog.tsx`
 
 Layout (top-to-bottom):
 
@@ -1336,7 +1336,7 @@ Covers:
 
 ### 8.3 GraphQL tests
 
-**File:** `backend/graphql/query/teachers/payroll.query.test.ts` + `payroll.mutation.test.ts`
+**File:** `backend/graphql/query/billing/payroll.query.test.ts` + `payroll.mutation.test.ts`
 
 - Query returns the page shape; respects `limit`/`offset`.
 - Permission denied → GraphQL error.

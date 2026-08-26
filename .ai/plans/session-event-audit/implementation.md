@@ -465,7 +465,7 @@ picks it up. Then build the input + object types in the domain-specific file:
 ```ts
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { SessionAuditStatus } from "@/shared/constants/classes/session-audit-status";
-import { CalculationStatusPothosEnum } from "@/backend/graphql/pothos/teachers/payroll.pothos"; // Plan 3
+import { CalculationStatusPothosEnum } from "@/backend/graphql/pothos/billing/payroll.pothos"; // Plan 3
 
 export const SessionAuditStatusPothosEnum = gqlSchemaBuilder.enumType(
   SessionAuditStatus,
@@ -634,7 +634,7 @@ A thin Next.js Route Handler that:
 
 ### 5.1 Apollo documents
 
-**File:** `frontend/common/graphql/sharedDocuments/accounting/session-audit.documents.ts` 🆕
+**File:** `frontend/common/graphql/sharedDocuments/billing/session-audit.documents.ts` 🆕
 
 Follows the project's `TypedDocumentNode` + camelCase + `Document` suffix convention (see `frontend/common/graphql/sharedDocuments/AGENTS.md`):
 
@@ -688,7 +688,7 @@ export const sessionAuditReportQueryDocument: TypedDocumentNode<
 `;
 ```
 
-- Re-export from `frontend/common/graphql/sharedDocuments/accounting/index.ts` via `export * from "./session-audit.documents";` (create the directory + barrel if missing — see `sharedDocuments/AGENTS.md` §Layout).
+- Re-export from `frontend/common/graphql/sharedDocuments/billing/index.ts` via `export * from "./session-audit.documents";` (create the directory + barrel if missing — see `sharedDocuments/AGENTS.md` §Layout).
 - Re-export the accounting barrel from `frontend/common/graphql/sharedDocuments/index.ts` via `export * from "./accounting";` (add if it's a new sub-directory).
 - Run `bun run generate:gqlSchema && bun codegen` after the schema changes land
   so `Operations.SessionAuditReportQuery` + `Types.QuerySessionAuditReportArgs` exist.
@@ -706,7 +706,7 @@ wrapper enforces it before render.
 
 ### 5.3 Session Audit Reports page
 
-**Component:** `frontend/common/views/dashboard/accounting/reports/SessionAuditReportsContainer.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/reports/SessionAuditReportsContainer.tsx`
 
 - MUI `DataGrid` (v9) with columns from §4.1.
 - Toolbar: search input (debounced 300 ms), teacher autocomplete,
@@ -723,7 +723,7 @@ wrapper enforces it before render.
 
 ### 5.4 Status chip + payroll-status chip components
 
-**Component:** `frontend/common/views/dashboard/accounting/reports/SessionAuditStatusChip.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/reports/SessionAuditStatusChip.tsx`
 
 MUI `Chip` with colored variant per `SessionAuditStatus`:
 - `open` → blue (with pulse animation when the row is within the last
@@ -737,7 +737,7 @@ Reuses Plan 3's `CalculationStatusChip` component for the
 
 ### 5.5 Cell formatters
 
-**File:** `frontend/common/views/dashboard/accounting/reports/formatters/sessionAuditCellFormatters.ts`
+**File:** `frontend/common/views/dashboard/billing/accounting/reports/formatters/sessionAuditCellFormatters.ts`
 
 - `formatOpenSessionTime(actualStartAt, bookingTimezone, locale)` →
   localized date-time string, or "Not joined" muted text.
@@ -751,7 +751,7 @@ Reuses Plan 3's `CalculationStatusChip` component for the
 
 ### 5.6 Filter bar component
 
-**Component:** `frontend/common/views/dashboard/accounting/reports/SessionAuditFilterBar.tsx` 🆕
+**Component:** `frontend/common/views/dashboard/billing/accounting/reports/SessionAuditFilterBar.tsx` 🆕
 
 - **Reuse the existing `TeacherAutocomplete`** from `@/frontend/common/components/ui/input/userSelect/TeacherAutocomplete` (do NOT create a new component or reference a non-existent `TEACHERS_SEARCH_QUERY` document — the existing component wraps `useTeacherAutocomplete` and is the canonical teacher picker).
 - **Reuse the existing `StudentAutocomplete`** from `@/frontend/common/components/ui/input/userSelect/StudentAutocomplete` (do NOT create a new component or reference a non-existent `STUDENTS_SEARCH_QUERY` document — the existing component wraps `useStudentAutocomplete` and is the canonical student picker).

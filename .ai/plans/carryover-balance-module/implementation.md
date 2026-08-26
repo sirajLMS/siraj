@@ -134,16 +134,16 @@ export const carryoverBalances = createTable(
     studentsCount: integerColumn("students_count"),
     studentsText: varcharColumn("students_text", { length: 500 }),
     // Total billable hours across the aggregated sessions.
-    totalDuration: numericColumn("total_duration", { precision: 8, scale: 2 }),
+    totalDuration: textColumn("total_duration", { precision: 8, scale: 2 }),
     // Aggregate amount owed to the teacher, in teacherCurrency.
-    payable: numericColumn("payable", { precision: 12, scale: 2 }).notNull(),
+    payable: textColumn("payable", { precision: 12, scale: 2 }).notNull(),
     teacherCurrency: currencyCodeEnum("teacher_currency").notNull().$type<CurrencyCode>(),
     // Amount paid so far. Equals `payable` once isPaid = true; 0 otherwise.
-    paid: numericColumn("paid", { precision: 12, scale: 2 }).notNull().default("0"),
-    fromDate: date("from_date"),
-    toDate: date("to_date"),
+    paid: textColumn("paid", { precision: 12, scale: 2 }).notNull().default("0"),
+    fromDate: textColumn("from_date"),
+    toDate: textColumn("to_date"),
     // Operator-supplied at "Bulk To Expense" time.
-    paymentDate: date("payment_date"),
+    paymentDate: textColumn("payment_date"),
     // Snapshot at creation time — refresh deferred to a future plan.
     isDisabledTeacher: booleanColumn("is_disabled_teacher").notNull().default(false),
     isPaid: booleanColumn("is_paid").notNull().default(false),
@@ -190,14 +190,14 @@ export const carryoverBalanceItems = createTable(
       .notNull()
       .references(() => classInstances.id, { onDelete: "cascade" }),
     // Snapshot of the session's amount + currency at carryover-create time.
-    originalAmount: numericColumn("original_amount", { precision: 12, scale: 2 }).notNull(),
+    originalAmount: textColumn("original_amount", { precision: 12, scale: 2 }).notNull(),
     originalCurrency: currencyCodeEnum("original_currency").notNull().$type<CurrencyCode>(),
     // Snapshot of the session's calculationStatus at carryover-create time
     // (so delete can revert to the prior state).
     originalStatus: varcharColumn("original_status", { length: 32 }).notNull(),
     // Converted amount in the carryover's dominant currency (NULL when
     // originalCurrency === teacherCurrency — no conversion needed).
-    convertedAmount: numericColumn("converted_amount", { precision: 12, scale: 2 }),
+    convertedAmount: textColumn("converted_amount", { precision: 12, scale: 2 }),
     convertedCurrency: currencyCodeEnum("converted_currency").$type<CurrencyCode>(),
     createdAt: timestampColumn("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
   },
@@ -835,7 +835,7 @@ export async function getReport(
 
 ### 4.1 New types
 
-**File:** `backend/graphql/pothos/teachers/carryover.pothos.ts`
+**File:** `backend/graphql/pothos/billing/carryover.pothos.ts`
 
 ```ts
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -1017,7 +1017,7 @@ Defines: `CARRYOVER_BALANCES_QUERY`, `CARRYOVER_BALANCE_QUERY`,
 
 ### 5.3 Carryover list page
 
-**Component:** `frontend/common/views/dashboard/accounting/carryover/CarryoverContainer.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/carryover/CarryoverContainer.tsx`
 
 - MUI `DataGrid` (v9) with columns: teacher, students count, students text,
   total duration (hours), payable + currency, paid + currency, from / to dates,
@@ -1030,7 +1030,7 @@ Defines: `CARRYOVER_BALANCES_QUERY`, `CARRYOVER_BALANCE_QUERY`,
 
 ### 5.4 Add New / Edit modal
 
-**Component:** `frontend/common/views/dashboard/accounting/carryover/CarryoverFormDialog.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/carryover/CarryoverFormDialog.tsx`
 
 Fields per AC-4.1. The `teacher` autocomplete is disabled in edit mode
 (AC-4.3). Validation:
@@ -1041,7 +1041,7 @@ Fields per AC-4.1. The `teacher` autocomplete is disabled in edit mode
 
 ### 5.5 Bulk To Expense modal
 
-**Component:** `frontend/common/views/dashboard/accounting/carryover/BulkToExpenseModal.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/carryover/BulkToExpenseModal.tsx`
 
 Two required fields: Payment Date (MUI DatePicker), Expense Date
 (MUI month picker, `YYYY-MM`). Optional note. Shows a summary of selected
@@ -1050,7 +1050,7 @@ carryovers: total amount + currency + count. Submit button calls
 
 ### 5.6 Filter bar
 
-**Component:** `frontend/common/views/dashboard/accounting/carryover/CarryoverFilterBar.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/carryover/CarryoverFilterBar.tsx`
 
 Teacher autocomplete, paid-status radio (`Paid` / `Unpaid` / `Both`),
 date-range picker (fromDate / toDate on the carryover), disabled-teachers
@@ -1059,7 +1059,7 @@ button.
 
 ### 5.7 Bulk Carryover action on Plan 4's audit grid
 
-**Component (edit Plan 4):** `frontend/common/views/dashboard/accounting/reports/SessionAuditDataGrid.tsx`
+**Component (edit Plan 4):** `frontend/common/views/dashboard/billing/accounting/reports/SessionAuditDataGrid.tsx`
 
 Adds a bulk-action button "Carryover Balance" (gated on
 `ACCOUNTING_CARRYOVER_MANAGE`) that opens a confirmation dialog showing
@@ -1109,7 +1109,7 @@ accountingCarryoverManage: [AppPermission.ACCOUNTING_CARRYOVER_MANAGE] as PagePe
 
 ### 7.1 Namespace
 
-**File:** `shared/locale/types/dashboard/accounting/carryover.ts`
+**File:** `shared/locale/types/dashboard/billing/carryover.ts`
 
 New namespace `dashboard.accounting.carryover` with keys including:
 `title`, `filters.*`, `column.*`, `chip.paid`, `chip.unpaid`,

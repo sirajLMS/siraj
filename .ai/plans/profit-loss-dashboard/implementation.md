@@ -675,7 +675,7 @@ Route Handlers, each calling `ProfitLossService.getReport(...)` with
 
 ### 5.1 Apollo documents
 
-**File:** `frontend/common/graphql/sharedDocuments/accounting/profit-loss.documents.ts`
+**File:** `frontend/common/graphql/sharedDocuments/billing/profit-loss.documents.ts`
 
 ```ts
 import { gql } from "@apollo/client";
@@ -724,7 +724,7 @@ map so the server-side auth wrapper enforces it before render.
 
 ### 5.3 Dashboard shell
 
-**Component:** `frontend/common/views/dashboard/accounting/profit-loss/ProfitLossDashboard.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/profit-loss/ProfitLossDashboard.tsx`
 
 - Top: `GlobalFilterBar` (month picker + currency picker + FX-warning
   chip).
@@ -736,7 +736,7 @@ map so the server-side auth wrapper enforces it before render.
 
 ### 5.4 Global filter bar
 
-**Component:** `frontend/common/views/dashboard/accounting/profit-loss/GlobalFilterBar.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/profit-loss/GlobalFilterBar.tsx`
 
 - MUI `DatePicker` (month mode) for `YYYY-MM`.
 - MUI `Autocomplete` for currency (defaults to the platform's default
@@ -749,7 +749,7 @@ map so the server-side auth wrapper enforces it before render.
 
 ### 5.5 Payments tab
 
-**Component:** `frontend/common/views/dashboard/accounting/profit-loss/PaymentsTab.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/profit-loss/PaymentsTab.tsx`
 
 - MUI `DataGrid` v9 with columns per AC-3.2.
 - Footer card: Total Payments + dominant currency + excluded row count
@@ -758,7 +758,7 @@ map so the server-side auth wrapper enforces it before render.
 
 ### 5.6 Expenses tab
 
-**Component:** `frontend/common/views/dashboard/accounting/profit-loss/ExpensesTab.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/profit-loss/ExpensesTab.tsx`
 
 - MUI `DataGrid` v9 with columns per AC-4.2 (reuses Plan 6's
   `ExpenseTypeChip` + `ExpenseSourceChip` components).
@@ -769,7 +769,7 @@ map so the server-side auth wrapper enforces it before render.
 
 ### 5.7 Income Payments tab
 
-**Component:** `frontend/common/views/dashboard/accounting/profit-loss/IncomePaymentsTab.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/profit-loss/IncomePaymentsTab.tsx`
 
 - MUI `DataGrid` v9 with columns per AC-5.2.
 - Footer card: Total Income Payments + dominant currency + excluded
@@ -779,7 +779,7 @@ map so the server-side auth wrapper enforces it before render.
 
 ### 5.8 Profits tab
 
-**Component:** `frontend/common/views/dashboard/accounting/profit-loss/ProfitsTab.tsx`
+**Component:** `frontend/common/views/dashboard/billing/accounting/profit-loss/ProfitsTab.tsx`
 
 - Single summary table with 4 rows: Income Payments, Total Payments,
   Total Expenses, Net Profit.
@@ -857,7 +857,7 @@ redirect `/reports` → `/accounting/profits` or deprecate it.
 
 ### 7.1 Namespace
 
-**File:** `shared/locale/types/dashboard/accounting/profit-loss.ts`
+**File:** `shared/locale/types/dashboard/billing/profit-loss.ts`
 
 New namespace `dashboard.accounting.profitLoss` with keys:
 
