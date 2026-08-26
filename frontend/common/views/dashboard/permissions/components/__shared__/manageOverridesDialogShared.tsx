@@ -78,7 +78,7 @@ export function ManageOverridesDialogShared({ labels, props, slots }: Readonly<M
             Configuring explicit rules for {user.name} ({user.email})
           </StyledSubtitle>
         </Box>
-        <IconButton onClick={onClose} disabled={isDialogLoading} size="small">
+        <IconButton onClick={onClose} disabled={isDialogLoading} size="small" aria-label={t.cancel}>
           <CloseOutlined />
         </IconButton>
       </StyledDialogTitle>
