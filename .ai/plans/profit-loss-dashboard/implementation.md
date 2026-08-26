@@ -127,7 +127,7 @@ migration is needed for this plan.
 
 ### 3.1 New input/output types
 
-**File:** `backend/types/accounting/profit-loss.types.ts`
+**File:** `backend/types/billing/profit-loss.types.ts`
 
 ```ts
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -613,7 +613,7 @@ export const ProfitLossReportPothosObject = gqlSchemaBuilder
 
 ### 4.2 New query (single, multi-tab)
 
-**File:** `backend/graphql/query/accounting/profit-loss.query.ts`
+**File:** `backend/graphql/query/billing/profit-loss.query.ts`
 
 ```ts
 gqlSchemaBuilder.queryField("profitLossReport", (t) =>
@@ -942,7 +942,7 @@ Covers:
 
 ### 8.3 GraphQL tests
 
-**File:** `backend/graphql/query/accounting/profit-loss.query.test.ts`
+**File:** `backend/graphql/query/billing/profit-loss.query.test.ts`
 
 - Query returns the 4-tab payload shape; respects pagination args.
 - Permission denied → GraphQL error.
