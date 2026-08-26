@@ -14,6 +14,7 @@
  * `backend/services/appearance/appearance-settings.service.ts` so that a
  * cold-start manifest matches the dark-mode default the UI ships with.
  */
-// theme-token-allow: server-manifest only; never use in sx or styled()
+// theme-token-allow: SSR bootstrap fallbacks only (manifest/PWA). Do not import in components.
+// server-manifest only; never use in sx or styled()
 export const FALLBACK_BG_TOKEN = "#121212";
 export const FALLBACK_THEME_TOKEN = "#2DD4BF";

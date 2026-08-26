@@ -10,8 +10,8 @@ import { useAuthToken } from "@/frontend/common/hooks/useAuthToken";
 import { logger } from "@/frontend/common/lib/logger";
 import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/common/lib/safeRedirect";
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
-import { Translation, useAppTranslation } from "@/shared/locale";
 import { parseEnvConfigBoolean } from "@/shared/constants/features/sidebarFeatures.constants";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
 const MAX_FRONTEND_RETRIES = 2;
@@ -119,12 +119,6 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
     globalThis.location.replace(targetUrl);
   }, [isAuthenticated, searchParams]);
 
-  useEffect(() => {
-    if (authError) {
-      setLoginResult({ type: "error", message: authError });
-    }
-  }, [authError]);
-
   const performLoginRef = useRef<(email: string, password: string) => Promise<boolean>>(async () => false);
 
   const performLogin = useCallback(
@@ -214,10 +208,11 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
   };
 
   const isDemo = parseEnvConfigBoolean(process.env.NEXT_PUBLIC_IS_DEMO);
+  const effectiveLoginResult = loginResult ?? (authError ? { type: "error" as const, message: authError } : null);
 
   return {
     labels,
-    loginResult,
+    loginResult: effectiveLoginResult,
     isDemo,
     isRetrying,
     demoGroups,

@@ -6,6 +6,13 @@ import type {
   AppearanceColorsInput,
   AppearanceDraftInput,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  type AppearancePreset,
+  type AppearancePresetId,
+  extractCssVarsFromPalette,
+  matchPresetByColors,
+  resolvePresetPalette,
+} from "@/frontend/common/providers/theme/presets";
 import { pickOnPrimary } from "@/shared/lib/color-contrast.utils";
 
 /**
@@ -58,49 +65,69 @@ export const DEFAULT_APPEARANCE_DRAFT: AppearanceDraftInput = {
   defaultColorScheme: "dark",
 };
 
+/** Track all CSS variable names written on `document.documentElement` during customize mode. */
+const activeCustomizedCssVars = new Set<string>();
+
 /**
- * Write the active-mode brand color CSS vars on `<html>`.
+ * Write the active-mode brand color CSS vars and preset palette tokens on `<html>`.
  *
  * Called by store setters for instant preview feedback (design §8 —
- * "updates draft + writes CSS var"). The `useAppearanceCssVars` hook
- * (Task 4.1) re-applies these on mount and owns the `@supports` fallback
- * + `nativeColor: true` context per design §9.
+ * "updates draft + writes CSS var"). When a preset is selected, its complete
+ * palette (backgrounds, surfaces, headers, sidebars, borders, text, status) is
+ * flattened into `--mui-palette-*` inline CSS variables on `<html>` so the entire
+ * page theme immediately shifts to that preset.
+ *
+ * Custom brand color picks (`primaryMain` / `secondaryMain`) layer on top of the
+ * preset's baseline palette.
  *
  * Guarded by `typeof document` so the store can be imported in SSR / tests
  * without touching the DOM.
  */
-function writeActiveModeCssVars(draft: AppearanceDraftInput, isDark: boolean): void {
+export function writeActiveModeCssVars(
+  draft: AppearanceDraftInput,
+  isDark: boolean,
+  presetId?: AppearancePresetId
+): void {
   if (typeof document === "undefined") return;
+  const root = document.documentElement;
   const modeKey: AppearanceMode = isDark ? "dark" : "light";
   const pair: AppearanceColorPairInput | undefined = draft.colors?.[modeKey];
-  if (!pair) return;
-  const root = document.documentElement;
-  if (pair.primaryMain) {
-    root.style.setProperty(CSS_VAR_PRIMARY_MAIN, pair.primaryMain);
-    // AC-32: derive --mui-palette-onPrimary from primaryMain so foreground
-    // text on brand-colored surfaces (buttons, chips) meets WCAG AA. Computed
-    // in JS via pickOnPrimary (not CSS color-mix) to guarantee the 4.5:1
-    // threshold even for mid-gray primaries.
-    root.style.setProperty(CSS_VAR_ON_PRIMARY, pickOnPrimary(pair.primaryMain));
+
+  const activePresetId = presetId ?? matchPresetByColors(draft.colors);
+  const palette = resolvePresetPalette(modeKey, activePresetId);
+  const presetVars = extractCssVarsFromPalette(palette);
+
+  for (const [varName, varValue] of Object.entries(presetVars)) {
+    root.style.setProperty(varName, varValue);
+    activeCustomizedCssVars.add(varName);
   }
-  if (pair.secondaryMain) {
+
+  if (pair?.primaryMain) {
+    root.style.setProperty(CSS_VAR_PRIMARY_MAIN, pair.primaryMain);
+    root.style.setProperty(CSS_VAR_ON_PRIMARY, pickOnPrimary(pair.primaryMain));
+    activeCustomizedCssVars.add(CSS_VAR_PRIMARY_MAIN);
+    activeCustomizedCssVars.add(CSS_VAR_ON_PRIMARY);
+  }
+  if (pair?.secondaryMain) {
     root.style.setProperty(CSS_VAR_SECONDARY_MAIN, pair.secondaryMain);
+    activeCustomizedCssVars.add(CSS_VAR_SECONDARY_MAIN);
   }
 }
 
 /**
- * Remove the inline brand color CSS vars from `<html>`.
+ * Remove all appearance-managed inline CSS vars from `<html>`.
  *
  * Called on `exitCustomizeMode` so the app falls back to the published
  * tokens emitted by `server-theme-css.ts` (Task 8.1) once the admin leaves
  * the customizer.
  */
-function clearActiveModeCssVars(): void {
+export function clearActiveModeCssVars(): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  root.style.removeProperty(CSS_VAR_PRIMARY_MAIN);
-  root.style.removeProperty(CSS_VAR_SECONDARY_MAIN);
-  root.style.removeProperty(CSS_VAR_ON_PRIMARY);
+  for (const varName of activeCustomizedCssVars) {
+    root.style.removeProperty(varName);
+  }
+  activeCustomizedCssVars.clear();
 }
 
 /**
@@ -109,10 +136,16 @@ function clearActiveModeCssVars(): void {
  * `setModeColors`, and `resetToDefaults` to keep the history semantics
  * consistent (any new edit invalidates the redo chain).
  */
-function commitEdit(state: AppearancePreviewState, nextDraft: AppearanceDraftInput): Partial<AppearancePreviewState> {
-  writeActiveModeCssVars(nextDraft, state.isDark);
+function commitEdit(
+  state: AppearancePreviewState,
+  nextDraft: AppearanceDraftInput,
+  presetId?: AppearancePresetId
+): Partial<AppearancePreviewState> {
+  const activePresetId = presetId ?? state.presetId ?? matchPresetByColors(nextDraft.colors);
+  writeActiveModeCssVars(nextDraft, state.isDark, activePresetId);
   return {
     draft: nextDraft,
+    presetId: activePresetId,
     dirty: true,
     past: [...state.past, state.draft].slice(-MAX_HISTORY),
     future: [],
@@ -144,6 +177,8 @@ interface AppearancePreviewState {
   readonly isCustomizeMode: boolean;
   /** Active per-mode tab in the customizer (true = dark, false = light). */
   readonly isDark: boolean;
+  /** Currently active preset ID (ocean, emerald, violet, crimson, slate, default). */
+  readonly presetId: AppearancePresetId;
   /** Whether `loadFromServer` has run at least once. */
   readonly hydrated: boolean;
   /** Whether the draft has unsaved changes (cleared by `markSaved` / `loadFromServer`). */
@@ -157,10 +192,12 @@ interface AppearancePreviewState {
   /** Replace the color pair for one mode (light or dark). */
   readonly setModeColors: (mode: AppearanceMode, pair: AppearanceColorPairInput) => void;
   /** Replace both mode color pairs at once (single undo step — used by preset application). */
-  readonly setColors: (colors: AppearanceColorsInput) => void;
+  readonly setColors: (colors: AppearanceColorsInput, presetId?: AppearancePresetId) => void;
+  /** Apply a preset theme: updates draft colors and immediately switches the active theme. */
+  readonly applyPreset: (preset: AppearancePreset) => void;
   /** Toggle the active per-mode tab + re-write CSS vars for the new mode. */
   readonly setMode: (isDark: boolean) => void;
-  /** Enter customize mode (mounts the overlay). Does NOT touch CSS vars. */
+  /** Enter customize mode (mounts the overlay). */
   readonly enterCustomizeMode: () => void;
   /** Exit customize mode + clear inline CSS vars so published tokens apply. */
   readonly exitCustomizeMode: () => void;
@@ -186,6 +223,7 @@ const initialState = {
   // BUG-C fix: isDark must match defaultColorScheme so the customizer starts
   // in the same mode as the app (dark by default), not always light.
   isDark: DEFAULT_APPEARANCE_DRAFT.defaultColorScheme === "dark",
+  presetId: "default" as AppearancePresetId,
   hydrated: false,
   dirty: false,
   past: [] as ReadonlyArray<AppearanceDraftInput>,
@@ -194,24 +232,46 @@ const initialState = {
 
 export const useAppearancePreviewStore = create<AppearancePreviewState>((set, get) => ({
   ...initialState,
-  setField: (key, value) => set(state => commitEdit(state, { ...state.draft, [key]: value })),
+  setField: (key, value) => set(state => commitEdit(state, { ...state.draft, [key]: value }, state.presetId)),
   setModeColors: (mode, pair) =>
     set(state =>
-      commitEdit(state, {
-        ...state.draft,
-        colors: { ...state.draft.colors, [mode]: pair },
-      })
+      commitEdit(
+        state,
+        {
+          ...state.draft,
+          colors: { ...state.draft.colors, [mode]: pair },
+        },
+        state.presetId
+      )
     ),
-  setColors: colors =>
+  setColors: (colors, presetId) =>
     set(state =>
-      commitEdit(state, {
-        ...state.draft,
-        colors,
-      })
+      commitEdit(
+        state,
+        {
+          ...state.draft,
+          colors,
+        },
+        presetId ?? matchPresetByColors(colors)
+      )
+    ),
+  applyPreset: preset =>
+    set(state =>
+      commitEdit(
+        state,
+        {
+          ...state.draft,
+          colors: {
+            light: { ...preset.light },
+            dark: { ...preset.dark },
+          },
+        },
+        preset.id
+      )
     ),
   setMode: isDark => {
     set({ isDark });
-    writeActiveModeCssVars(get().draft, isDark);
+    writeActiveModeCssVars(get().draft, isDark, get().presetId);
   },
   enterCustomizeMode: () => {
     // BUG-C fix: detect the current app color scheme from <html> so the
@@ -220,27 +280,41 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
     // mode the user actually sees.
     const currentScheme = typeof document !== "undefined" ? document.documentElement.dataset.muiColorScheme : undefined;
     const isDark = currentScheme !== "light";
-    set({ isCustomizeMode: true, isDark });
-    writeActiveModeCssVars(get().draft, isDark);
+    const presetId = get().presetId ?? matchPresetByColors(get().draft.colors);
+    set({ isCustomizeMode: true, isDark, presetId });
+    writeActiveModeCssVars(get().draft, isDark, presetId);
   },
   exitCustomizeMode: () => {
     clearActiveModeCssVars();
     set({ isCustomizeMode: false });
   },
   loadFromServer: draft => {
-    writeActiveModeCssVars(draft, get().isDark);
-    set({ draft, hydrated: true, dirty: false, past: [], future: [] });
+    const presetId = matchPresetByColors(draft.colors);
+    writeActiveModeCssVars(draft, get().isDark, presetId);
+    set({ draft, presetId, hydrated: true, dirty: false, past: [], future: [] });
   },
-  resetToDefaults: () => set(state => commitEdit(state, DEFAULT_APPEARANCE_DRAFT)),
+  resetToDefaults: () =>
+    set(state => {
+      writeActiveModeCssVars(DEFAULT_APPEARANCE_DRAFT, state.isDark, "default");
+      return {
+        draft: DEFAULT_APPEARANCE_DRAFT,
+        presetId: "default",
+        dirty: true,
+        past: [...state.past, state.draft].slice(-MAX_HISTORY),
+        future: [],
+      };
+    }),
   markSaved: () => set({ dirty: false }),
   undo: () =>
     set(state => {
       if (state.past.length === 0) return state;
       const previous = state.past[state.past.length - 1];
       const nextPast = state.past.slice(0, -1);
-      writeActiveModeCssVars(previous, state.isDark);
+      const matched = matchPresetByColors(previous.colors);
+      writeActiveModeCssVars(previous, state.isDark, matched);
       return {
         draft: previous,
+        presetId: matched,
         past: nextPast,
         future: [state.draft, ...state.future].slice(0, MAX_HISTORY),
         dirty: true,
@@ -251,9 +325,11 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
       if (state.future.length === 0) return state;
       const next = state.future[0];
       const nextFuture = state.future.slice(1);
-      writeActiveModeCssVars(next, state.isDark);
+      const matched = matchPresetByColors(next.colors);
+      writeActiveModeCssVars(next, state.isDark, matched);
       return {
         draft: next,
+        presetId: matched,
         past: [...state.past, state.draft].slice(-MAX_HISTORY),
         future: nextFuture,
         dirty: true,

@@ -41,18 +41,14 @@ function getDb(): Promise<IDBDatabase | null> {
 }
 
 export function reviver(_key: string, val: unknown): unknown {
+  // Security: forbid function resurrection from IndexedDB payloads.
+  // A tampered IndexedDB (XSS, devtools, third-party script) could inject
+  // arbitrary code via the __fn property. Functions must only ever live in
+  // the in-memory compile-time namespace loaders, never in cache.
+  // Returning undefined causes JSON.parse to omit the key, signaling a
+  // poisoned snapshot that readSnapshot will reject.
   if (val && typeof val === "object" && FN_PROP in val) {
-    const fnValue = val[FN_PROP as keyof typeof val];
-    if (typeof fnValue === "string") {
-      try {
-        const fnObj: unknown = Reflect.construct(globalThis.Function, [`return (${fnValue})`]);
-        if (typeof fnObj === "function") {
-          return fnObj();
-        }
-      } catch {
-        return val;
-      }
-    }
+    return undefined;
   }
   return val;
 }
@@ -88,6 +84,13 @@ export async function readSnapshot<TLabels>(
     }
 
     const labels: TLabels = JSON.parse(result.json, reviver);
+    // Fail-closed: if the reviver detected any __fn payloads (returning undefined),
+    // the parsed object will be missing function-typed labels. Discard the snapshot
+    // and fall through to the compile-time namespace loader (config.load[locale]()).
+    if (labels && typeof labels === "object" && Object.values(labels).some(v => v === undefined)) {
+      stats.misses++;
+      return undefined;
+    }
     stats.hits++;
     return labels;
   } catch {

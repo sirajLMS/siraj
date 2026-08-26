@@ -50,8 +50,9 @@ export function AppearanceSettingsTab() {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const draft = useAppearancePreviewStore(s => s.draft);
   const dirty = useAppearancePreviewStore(s => s.dirty);
+  const presetId = useAppearancePreviewStore(s => s.presetId);
   const markSaved = useAppearancePreviewStore(s => s.markSaved);
-  const setColors = useAppearancePreviewStore(s => s.setColors);
+  const applyPreset = useAppearancePreviewStore(s => s.applyPreset);
   const setField = useAppearancePreviewStore(s => s.setField);
   const { uploadLogo } = useAppearanceLogoUpload();
   const [saveDraft, { loading: saveLoading }] = useMutation(saveAppearanceDraftMutationDocument);
@@ -65,9 +66,7 @@ export function AppearanceSettingsTab() {
   };
 
   const handleApplyPreset = (preset: AppearancePreset): void => {
-    // Set both mode pairs in a single undo step (uses setColors instead of
-    // two setModeColors calls which would create 2 undo entries).
-    setColors({ light: { ...preset.light }, dark: { ...preset.dark } });
+    applyPreset(preset);
     notifications.show(`${preset.name} preset applied — enter customize mode to refine`, {
       severity: "success",
     });
@@ -208,7 +207,12 @@ export function AppearanceSettingsTab() {
             }}
           >
             {APPEARANCE_PRESETS.map(preset => (
-              <PresetSwatch key={preset.id} preset={preset} onSelect={() => handleApplyPreset(preset)} />
+              <PresetSwatch
+                key={preset.id}
+                preset={preset}
+                selected={preset.id === presetId}
+                onSelect={() => handleApplyPreset(preset)}
+              />
             ))}
           </Box>
         </Box>

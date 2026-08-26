@@ -86,8 +86,8 @@ export const APPEARANCE_PRESETS: ReadonlyArray<AppearancePreset> = [
   {
     id: "default",
     name: "Default",
-    light: { primaryMain: "#1976D2", secondaryMain: "#3F51B5" },
-    dark: { primaryMain: "#42A5F5", secondaryMain: "#7986CB" },
+    light: { primaryMain: "#0D9488", secondaryMain: "#4F46E5" },
+    dark: { primaryMain: "#2DD4BF", secondaryMain: "#818CF8" },
   },
   {
     id: "ocean",
@@ -136,3 +136,13 @@ export const APPEARANCE_PRESETS: ReadonlyArray<AppearancePreset> = [
 export function findAppearancePreset(id: string): AppearancePreset | undefined {
   return APPEARANCE_PRESETS.find(preset => preset.id === id);
 }
+
+export {
+  DEFAULT_PRESET_ID,
+  extractCssVarsFromPalette,
+  getActivePresetId,
+  matchPresetByColors,
+  type PresetPalettes,
+  resolvePresetPalette,
+  resolvePresetPalettes,
+} from "./paletteFactory";

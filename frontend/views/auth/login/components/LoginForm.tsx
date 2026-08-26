@@ -181,11 +181,14 @@ const FormFields = ({
               label={labels.password}
               type={showPassword ? "text" : "password"}
               error={!!errors.password || capsLockOn}
-              helperText={errors.password?.message ?? (capsLockOn ? labels.capsLockOn : " ")}
+              helperText={errors.password?.message ?? (capsLockOn ? labels.capsLockOn : undefined)}
               disabled={isSubmitting}
               fullWidth
               onKeyDown={onPasswordKeyDown}
               slotProps={{
+                formHelperText: {
+                  sx: { minHeight: theme.spacing(2.5) },
+                },
                 input: {
                   startAdornment: (
                     <InputAdornment position="start">

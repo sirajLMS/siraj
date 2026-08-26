@@ -273,10 +273,12 @@ export function CustomizeToolbar() {
       // publish actually reflects what the admin sees on screen; without
       // this, clicking PUBLISH with unsaved changes would live-publish the
       // previous server state instead of the current preview.
+      let latestUpdatedAt: string | undefined = serverUpdatedAt ?? undefined;
       if (dirty) {
-        await saveDraft({ variables: { input, expectedUpdatedAt: serverUpdatedAt } });
+        const saveResult = await saveDraft({ variables: { input, expectedUpdatedAt: serverUpdatedAt } });
+        latestUpdatedAt = saveResult.data?.saveAppearanceDraft?.updatedAt ?? undefined;
       }
-      await publish({ variables: { expectedUpdatedAt: serverUpdatedAt } });
+      await publish({ variables: { expectedUpdatedAt: latestUpdatedAt } });
       markSaved();
       notifications.show(t.publishSuccess, { severity: "success" });
       announce(t.publishSuccess);

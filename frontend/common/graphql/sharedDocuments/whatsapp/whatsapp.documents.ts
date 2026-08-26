@@ -86,9 +86,10 @@ export const updateWhatsappAccountMutationDocument: TypedDocumentNode<
   UpdateWhatsappAccountMutation,
   UpdateWhatsappAccountMutationVariables
 > = gql`
+  ${WHATSAPP_ACCOUNT_FIELDS}
   mutation updateWhatsappAccount($id: String!, $input: WhatsappAccountUpdateInput!) {
     updateWhatsappAccount(id: $id, input: $input) {
-      id
+      ...WhatsappAccountFields
     }
   }
 `;
@@ -97,9 +98,10 @@ export const deleteWhatsappAccountMutationDocument: TypedDocumentNode<
   DeleteWhatsappAccountMutation,
   DeleteWhatsappAccountMutationVariables
 > = gql`
+  ${WHATSAPP_ACCOUNT_FIELDS}
   mutation deleteWhatsappAccount($id: String!) {
     deleteWhatsappAccount(id: $id) {
-      id
+      ...WhatsappAccountFields
     }
   }
 `;
@@ -108,9 +110,10 @@ export const setWhatsappAccessTokenMutationDocument: TypedDocumentNode<
   SetWhatsappAccessTokenMutation,
   SetWhatsappAccessTokenMutationVariables
 > = gql`
+  ${WHATSAPP_ACCOUNT_FIELDS}
   mutation setWhatsappAccessToken($id: String!, $accessToken: String!) {
     setWhatsappAccessToken(id: $id, accessToken: $accessToken) {
-      id
+      ...WhatsappAccountFields
     }
   }
 `;
@@ -119,9 +122,10 @@ export const setWhatsappTwoStepPinMutationDocument: TypedDocumentNode<
   SetWhatsappTwoStepPinMutation,
   SetWhatsappTwoStepPinMutationVariables
 > = gql`
+  ${WHATSAPP_ACCOUNT_FIELDS}
   mutation setWhatsappTwoStepPin($id: String!, $twoStepPin: String!) {
     setWhatsappTwoStepPin(id: $id, twoStepPin: $twoStepPin) {
-      id
+      ...WhatsappAccountFields
     }
   }
 `;
@@ -130,9 +134,10 @@ export const setUserWhatsappOptInMutationDocument: TypedDocumentNode<
   SetUserWhatsappOptInMutation,
   SetUserWhatsappOptInMutationVariables
 > = gql`
+  ${WHATSAPP_ACCOUNT_FIELDS}
   mutation setUserWhatsappOptIn($userId: String!, $enabled: Boolean!, $source: String) {
     setUserWhatsappOptIn(userId: $userId, enabled: $enabled, source: $source) {
-      id
+      ...WhatsappAccountFields
     }
   }
 `;

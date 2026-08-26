@@ -2,6 +2,8 @@
 
 import { Box, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
+import { Translation } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale/client";
 
 const StyledFooterContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -21,10 +23,11 @@ const StyledFooterText = styled(Typography)(({ theme }) => ({
 }));
 
 export function LoginFooter() {
+  const tCommon = useAppTranslation(Translation.Common);
   const year = new Date().getFullYear();
   return (
     <StyledFooterContainer sx={{ pt: 4, mt: 3 }}>
-      <StyledFooterText sx={{ mt: 1 }}>© {year} Siraj LMS · All rights reserved</StyledFooterText>
+      <StyledFooterText sx={{ mt: 1 }}>{tCommon.footerCopyright(tCommon.title, year)}</StyledFooterText>
     </StyledFooterContainer>
   );
 }

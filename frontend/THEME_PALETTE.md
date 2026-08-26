@@ -128,3 +128,27 @@ MUI's `common.white` / `common.black` are absolute, non-themeable colors. They b
 > `common.*` is hardcoded absolute color and violates the project's "No Hardcoded Hex/RGB" rule (Rule 8) and the M3 `on<Color>` contrast model (Rules 4–6). It does NOT adapt to light/dark mode and will produce illegible text on light surfaces. **RARELY — effectively never — use it.** Prefer the M3 `on<Color>` siblings: `onPrimary`, `onSecondary`, `onSurface`, `onBackground`, etc. These are designed to provide legibility across their family's `main`/`light`/`dark` tones in both modes.
 
 **Historical note:** A single `theme.palette.common.white` usage previously existed at `frontend/views/dashboard/teachers/onboarding/TeacherOnboardingView.tsx:49` (banner text on a `scrim` gradient). An audit flagged it for removal; it has since been replaced with the theme-aware `theme.palette.onSurface`. Future readers should NOT re-introduce `common.white` there — `onSurface` (or `onScrim` if added later) is the correct contrast-safe token for text over a scrim.
+
+## Color Keyword Allowlist
+
+The following CSS keywords are allowed in `styled()` and `sx` blocks because they are CSS rendering primitives, not brand colors:
+
+- `transparent` — Required for gradient-text cutout effect (`backgroundClip: text` + `WebkitTextFillColor: transparent`). Used in `LoginHeader.tsx`. This is a CSS rendering primitive, not a brand color.
+
+## SSR Bootstrap Fallback Allowlist
+
+The following hex literals are allowed in `shared/constants/brand-tokens.ts` because they are SSR-only fallbacks for the PWA manifest (no MUI theme context available at manifest generation time):
+
+- `FALLBACK_BG_TOKEN = "#121212"` — Dark-mode background fallback for `manifest.ts`.
+- `FALLBACK_THEME_TOKEN = "#2DD4BF"` — Dark-mode theme-color fallback for `manifest.ts`.
+
+These must NEVER be imported into components. They are annotated with `// theme-token-allow: SSR bootstrap fallbacks only`.
+
+## WCAG Computation Constants
+
+The following hex literals are allowed in `shared/lib/color-contrast.utils.ts` because they are WCAG contrast-ratio computation constants (pure math, not UI styling):
+
+- `CONTRAST_WHITE = "#ffffff"` — Pure white reference for luminance computation.
+- `CONTRAST_BLACK = "#000000"` — Pure black reference for luminance computation.
+
+These are module-internal and never exported to components.

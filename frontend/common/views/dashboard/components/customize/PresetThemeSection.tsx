@@ -29,11 +29,8 @@ import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePr
  * same exemption as `ColorEditorSection` swatches.
  */
 export function PresetThemeSection() {
-  const setColors = useAppearancePreviewStore(s => s.setColors);
-
-  const applyPreset = (preset: AppearancePreset): void => {
-    setColors({ light: { ...preset.light }, dark: { ...preset.dark } });
-  };
+  const applyPreset = useAppearancePreviewStore(s => s.applyPreset);
+  const activePresetId = useAppearancePreviewStore(s => s.presetId);
 
   return (
     <Stack sx={{ gap: 2 }}>
@@ -56,16 +53,22 @@ export function PresetThemeSection() {
         }}
       >
         {APPEARANCE_PRESETS.map(preset => (
-          <PresetSwatch key={preset.id} preset={preset} onSelect={() => applyPreset(preset)} />
+          <PresetSwatch
+            key={preset.id}
+            preset={preset}
+            selected={preset.id === activePresetId}
+            onSelect={() => applyPreset(preset)}
+          />
         ))}
       </Box>
     </Stack>
   );
 }
 
-interface PresetSwatchProps {
+export interface PresetSwatchProps {
   readonly preset: AppearancePreset;
   readonly onSelect: () => void;
+  readonly selected?: boolean;
 }
 
 /**
@@ -82,18 +85,20 @@ interface PresetSwatchProps {
  * Exported so the Settings tab (`AppearanceSettingsTab.tsx`) can reuse
  * the same card without duplicating the color-grid markup.
  */
-export function PresetSwatch({ preset, onSelect }: PresetSwatchProps) {
+export function PresetSwatch({ preset, onSelect, selected }: PresetSwatchProps) {
   return (
     <ButtonBase
       onClick={onSelect}
       aria-label={`${preset.name} preset (applies light and dark colors)`}
+      aria-pressed={selected}
       sx={{
         display: "flex",
         flexDirection: "column",
         gap: 1,
         p: 1,
         borderRadius: "12px",
-        border: "1px solid var(--mui-palette-outlineVariant)",
+        border: selected ? "2px solid var(--mui-palette-primary-main)" : "1px solid var(--mui-palette-outlineVariant)",
+        backgroundColor: selected ? "var(--mui-palette-action-selected)" : "transparent",
         "&:hover": { backgroundColor: "var(--mui-palette-action-hover)" },
         "&:focus-visible": { outline: "2px solid var(--mui-palette-primary-main)" },
       }}
@@ -115,7 +120,13 @@ export function PresetSwatch({ preset, onSelect }: PresetSwatchProps) {
         <ColorChip hex={preset.dark.primaryMain} />
         <ColorChip hex={preset.dark.secondaryMain} />
       </Box>
-      <Typography variant="caption" sx={{ color: "var(--mui-palette-text-secondary)" }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: selected ? "var(--mui-palette-primary-main)" : "var(--mui-palette-text-secondary)",
+          fontWeight: selected ? 700 : 400,
+        }}
+      >
         {preset.name}
       </Typography>
     </ButtonBase>

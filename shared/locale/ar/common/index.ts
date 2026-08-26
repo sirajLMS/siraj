@@ -42,4 +42,5 @@ export const commonAr: CommonLabels = {
   ariaUserProfileMenu: "قائمة ملف المستخدم",
   ariaProfileSections: "أقسام الملف الشخصي",
   noEntriesFound: "لا توجد إدخالات",
+  footerCopyright: (brand: string, year: number) => `© ${year} ${brand} · جميع الحقوق محفوظة`,
 };

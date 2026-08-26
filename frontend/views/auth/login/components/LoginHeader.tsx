@@ -44,6 +44,8 @@ const StyledTitle = styled(Typography)(({ theme }) => ({
   backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
   backgroundClip: "text",
   WebkitBackgroundClip: "text",
+  // CSS keyword "transparent" is required for gradient-text cutout (backgroundClip: text).
+  // This is NOT a brand color — it is a CSS rendering primitive.
   WebkitTextFillColor: "transparent",
 }));
 

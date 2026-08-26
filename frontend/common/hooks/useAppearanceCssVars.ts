@@ -4,7 +4,6 @@ import type { PaletteMode } from "@mui/material/styles";
 import { useContext, useEffect } from "react";
 import type { AppearanceFields } from "@/backend/types/appearance.types";
 import { AppearanceCustomizeContext } from "@/frontend/common/context/AppearanceCustomizeContext";
-import { pickOnPrimary } from "@/shared/lib/color-contrast.utils";
 
 /**
  * Inline CSS variables on `<html>` managed by {@link useAppearanceCssVars}.
@@ -24,32 +23,6 @@ import { pickOnPrimary } from "@/shared/lib/color-contrast.utils";
  * color functions (decision #3) — so updating just the two primitives here is
  * enough for the whole palette to re-tint in-browser with zero JS color math.
  */
-const PRIMARY_MAIN_VAR = "--mui-palette-primary-main";
-const SECONDARY_MAIN_VAR = "--mui-palette-secondary-main";
-
-/**
- * Derived foreground token for text placed on top of `primaryMain` (e.g.
- * button labels, chip text, app-bar titles). Computed by {@link pickOnPrimary}
- * from the WCAG contrast ratio of `primaryMain` against pure white vs pure
- * black — whichever produces the higher ratio wins (AC-32). Ties prefer white
- * (MUI default `palette.primary.contrastText` convention).
- *
- * MUI v9 `nativeColor` would otherwise derive `*-contrastText` via CSS
- * `color-mix()` (decision #3), but `onPrimary` is a Material 3 token (per
- * `frontend/AGENTS.md` "Universal Contrast" rule) and the browser-side
- * `color-mix()` derivation does not guarantee WCAG AA — a near-mid-gray
- * primary can produce an `onPrimary` that fails 4.5:1. Computing it in JS via
- * the WCAG 2.1 relative-luminance formula guarantees the threshold.
- */
-const ON_PRIMARY_VAR = "--mui-palette-onPrimary";
-
-/**
- * The full set of CSS vars managed by this hook. Used by
- * {@link clearAppearanceCssVars} to remove every property we previously wrote
- * (so the production MUI stylesheet resumes control on customize exit /
- * `resetToDefaults()`).
- */
-const MANAGED_CSS_VARS: readonly string[] = [PRIMARY_MAIN_VAR, SECONDARY_MAIN_VAR, ON_PRIMARY_VAR] as const;
 
 /**
  * The two atomic brand primitives for the active editing mode. Read from
@@ -95,37 +68,29 @@ export function readActiveModeColors(draft: AppearanceFields, activeMode: Palett
  *    takes precedence over the published palette without needing to re-mount
  *    the `CssVarsProvider`.
  */
-export function writeAppearanceCssVars(colors: AppearanceActiveModeColors): void {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
-  root.style.setProperty(PRIMARY_MAIN_VAR, colors.primaryMain);
-  root.style.setProperty(SECONDARY_MAIN_VAR, colors.secondaryMain);
-  // AC-32: derive `--mui-palette-onPrimary` from `primaryMain` so foreground
-  // text on brand-colored surfaces (buttons, chips, app bar) meets WCAG AA.
-  // `pickOnPrimary` returns `#ffffff` or `#000000` based on whichever has the
-  // higher WCAG 2.1 contrast ratio against `primaryMain`. Computed in JS
-  // (rather than relying on MUI `nativeColor` `color-mix()` derivation) to
-  // guarantee the 4.5:1 threshold for normal text — a near-mid-gray primary
-  // can produce an `onPrimary` that fails AA when derived via CSS alone.
-  root.style.setProperty(ON_PRIMARY_VAR, pickOnPrimary(colors.primaryMain));
+import { clearActiveModeCssVars, writeActiveModeCssVars } from "@/frontend/common/stores/appearancePreviewStore";
+
+export function writeAppearanceCssVars(
+  colors: AppearanceActiveModeColors,
+  isDark = true,
+  draft?: AppearanceFields
+): void {
+  const effectiveDraft = draft ?? {
+    colors: {
+      light: { primaryMain: colors.primaryMain, secondaryMain: colors.secondaryMain },
+      dark: { primaryMain: colors.primaryMain, secondaryMain: colors.secondaryMain },
+    },
+    logoUrl: null,
+    siteName: "Siraj",
+    siteTitle: "Siraj",
+    siteDescription: "Siraj education management",
+    defaultColorScheme: isDark ? "dark" : "light",
+  };
+  writeActiveModeCssVars(effectiveDraft, isDark);
 }
 
-/**
- * Remove all appearance-managed inline CSS vars from `<html>`.
- *
- * Called on:
- *  - Customize overlay unmount (the hook's cleanup effect).
- *  - `resetToDefaults()` in the Zustand store (Task 4) — clears the inline
- *    override so the production MUI stylesheet rules resume control.
- *
- * SSR-safe: no-ops when `document` is undefined.
- */
 export function clearAppearanceCssVars(): void {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
-  for (const varName of MANAGED_CSS_VARS) {
-    root.style.removeProperty(varName);
-  }
+  clearActiveModeCssVars();
 }
 
 /**

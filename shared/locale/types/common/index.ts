@@ -49,4 +49,5 @@ export interface CommonLabels {
   readonly ariaUserProfileMenu: string;
   readonly ariaProfileSections: string;
   readonly noEntriesFound: string;
+  readonly footerCopyright: (brand: string, year: number) => string;
 }

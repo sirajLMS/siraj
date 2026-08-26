@@ -102,3 +102,13 @@ Current embedded types:
 
 If you add a new GraphQL type without an `id` field, add it to `typePolicies`
 in `apolloCache.ts` with `keyFields: false` and list it here.
+
+## Apollo Client Conventions (verified 2026-08-26)
+
+1. **`id` selection mandate**: `id` is required on every object type that declares it in the schema. Types without an `id` field (e.g. `PageInfo`, `TeacherDashboardMetrics`, `StudentHistoryMetrics`) are exempt — selecting `id` where the schema doesn't declare one is a validation error.
+
+2. **Mutation payload expansion**: Mutations that return an entity type (e.g. `WhatsappAccount`) must select the full entity fragment (`...WhatsappAccountFields`) rather than `{ id }` only. This ensures Apollo's normalized cache receives fresh field values (`isActive`, `displayName`, etc.) for instant UI write-back without a follow-up query.
+
+3. **Hook imports**: `useQuery`, `useMutation`, `useLazyQuery` must be imported from `@apollo/client/react` (not `@apollo/client` root). `useLazyQuery` is banned — use `useQuery` with `skip` + manual refetch instead.
+
+4. **TypedDocumentNode style**: Export documents as `export const xDocument: TypedDocumentNode<XQuery> = gql\`...\`` (type annotation, not `as` cast).

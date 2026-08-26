@@ -152,8 +152,13 @@ export function wcagGrade(ratio: number): "AAA" | "AA" | "AA Large" | "Fail" {
  * pickOnPrimary("#767676") // → "#ffffff" (tie → default white)
  */
 // theme-token-allow: contrast-math only; never use in sx or styled()
+// WCAG computation constants — not UI colors. Used internally by pickOnPrimary
+// to compute the highest-contrast text color against a given primary background.
+const CONTRAST_WHITE = "#ffffff";
+const CONTRAST_BLACK = "#000000";
+
 export function pickOnPrimary(primaryMain: string): "#ffffff" | "#000000" {
-  const againstWhite = contrastRatio(primaryMain, "#ffffff");
-  const againstBlack = contrastRatio(primaryMain, "#000000");
-  return againstBlack > againstWhite ? "#000000" : "#ffffff";
+  const againstWhite = contrastRatio(primaryMain, CONTRAST_WHITE);
+  const againstBlack = contrastRatio(primaryMain, CONTRAST_BLACK);
+  return againstBlack > againstWhite ? CONTRAST_BLACK : CONTRAST_WHITE;
 }

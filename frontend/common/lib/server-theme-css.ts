@@ -2,8 +2,7 @@ import type { PaletteColorOptions, PaletteMode } from "@mui/material/styles";
 import { logger } from "@/backend/lib/logger";
 import { AppearanceSettingsService } from "@/backend/services";
 import type { AppearanceFields } from "@/backend/types";
-import { darkPalette } from "@/frontend/common/providers/theme/palette/darkPalette";
-import { lightPalette } from "@/frontend/common/providers/theme/palette/lightPalette";
+import { resolvePresetPalettes } from "@/frontend/common/providers/theme/presets/paletteFactory";
 
 function hasMain(color: PaletteColorOptions | undefined): color is { main: string } {
   return color !== undefined && "main" in color;
@@ -97,7 +96,8 @@ async function fetchPublishedAppearance(): Promise<AppearanceFields | null> {
 
 function extractTokens(mode: PaletteMode, appearance?: AppearanceFields | null): ServerThemeTokens {
   const isDark = mode === "dark";
-  const palette = isDark ? darkPalette : lightPalette;
+  const palettes = resolvePresetPalettes();
+  const palette = isDark ? palettes.dark : palettes.light;
   const fallbacks = isDark ? DARK_FALLBACKS : LIGHT_FALLBACKS;
   const publishedPrimary = appearance?.colors[mode].primaryMain;
 

@@ -4,8 +4,7 @@ import { arEG as muiArEg, enUS as muiEnUS } from "@mui/material/locale";
 import { arSD as dataGridArSD, enUS as dataGridEnUS } from "@mui/x-data-grid/locales";
 import { components } from "@/frontend/common/providers/theme/components";
 import { layoutSettings } from "@/frontend/common/providers/theme/layoutSettings";
-import { darkPalette } from "@/frontend/common/providers/theme/palette/darkPalette";
-import { lightPalette } from "@/frontend/common/providers/theme/palette/lightPalette";
+import { resolvePresetPalette, resolvePresetPalettes } from "@/frontend/common/providers/theme/presets/paletteFactory";
 import { typography } from "@/frontend/common/providers/theme/typography";
 
 const locales = (locale: string = "en") => {
@@ -58,28 +57,25 @@ export function createAppCssVarsTheme(
   defaultColorScheme: PaletteMode = "dark"
 ) {
   const isLight = defaultColorScheme === "light";
+  const palettes = resolvePresetPalettes();
 
   const themeWithLocale = createTheme(
     {
       cssVariables: {
-        // Use a `data-*` attribute selector (rather than the default `media`)
-        // so `useColorScheme().setMode()` can toggle the mode manually. The
-        // matching `attribute="data"` on `<InitColorSchemeScript />` in the
-        // root layout keeps SSR and client in sync without flicker.
         colorSchemeSelector: "data",
       },
       palette: {
         mode: defaultColorScheme,
-        ...(isLight ? lightPalette : darkPalette),
+        ...(isLight ? palettes.light : palettes.dark),
       },
       colorSchemes: isLight
         ? {
-            light: { palette: { mode: "light", ...lightPalette } },
-            dark: { palette: { mode: "dark", ...darkPalette } },
+            light: { palette: { mode: "light", ...palettes.light } },
+            dark: { palette: { mode: "dark", ...palettes.dark } },
           }
         : {
-            dark: { palette: { mode: "dark", ...darkPalette } },
-            light: { palette: { mode: "light", ...lightPalette } },
+            dark: { palette: { mode: "dark", ...palettes.dark } },
+            light: { palette: { mode: "light", ...palettes.light } },
           },
 
       ...sharedFoundation(direction),
@@ -100,8 +96,7 @@ export function createAppCssVarsTheme(
  * cssVars / InitColorSchemeScript SSR machinery.
  */
 export function createAppTheme(mode: PaletteMode, direction: "rtl" | "ltr" = "ltr", locale: string = "en") {
-  const isLight = mode === "light";
-  const palette = isLight ? lightPalette : darkPalette;
+  const palette = resolvePresetPalette(mode);
 
   const themeWithLocale = createTheme(
     {

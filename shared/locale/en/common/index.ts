@@ -42,4 +42,5 @@ export const commonEn: CommonLabels = {
   ariaUserProfileMenu: "User profile menu",
   ariaProfileSections: "Profile sections",
   noEntriesFound: "No entries found",
+  footerCopyright: (brand: string, year: number) => `\u00a9 ${year} ${brand} \u00b7 All rights reserved`,
 };
