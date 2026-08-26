@@ -1,16 +1,24 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import {
-  type CachedToken,
   isRecord,
   isTokenExpired,
   MeetingAdapterBase,
   REQUEST_TIMEOUT_MS,
   withTimeout,
 } from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
-import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/types";
-import { InsufficientScopesError, MicrosoftTeamsApiError, NoAppAccessPolicyError, NoOrgCredentialsNoUserTokenError, ProviderUnavailableError, RateLimitedError } from "@/backend/services/meeting/channels/IMeetingChannel";;
+import {
+  InsufficientScopesError,
+  MicrosoftTeamsApiError,
+  NoAppAccessPolicyError,
+  NoOrgCredentialsNoUserTokenError,
+  ProviderUnavailableError,
+  RateLimitedError,
+} from "@/backend/services/meeting/channels/IMeetingChannel";
 import type {
+  CachedToken,
+  GenerateMeetingInput,
+  GenerateMeetingResult,
   MicrosoftTeamsErrorResponse,
   MicrosoftTeamsMeetingResponse,
   MicrosoftTeamsTokenResponse,

@@ -64,11 +64,5 @@ export type RecurringScheduleRepositoryRow = RecurringScheduleSelectType & {
   readonly teacherUserName: string;
 };
 
-/**
- * Service-level list row — same shape as {@link RecurringScheduleRepositoryRow}
- * but used for the `listAll` return value.
- */
-export type RecurringScheduleListRow = RecurringScheduleSelectType & {
-  readonly studentName: string;
-  readonly teacherUserName: string;
-};
+/** Service-level list row — alias for {@link RecurringScheduleRepositoryRow}. */
+export type RecurringScheduleListRow = RecurringScheduleRepositoryRow;

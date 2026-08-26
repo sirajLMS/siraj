@@ -28,5 +28,3 @@ export interface IFxRateProvider {
    */
   validateConfig(): boolean;
 }
-
-export type { FxProviderFetchResult };

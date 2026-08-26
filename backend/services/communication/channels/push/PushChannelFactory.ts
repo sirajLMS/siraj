@@ -1,6 +1,6 @@
 import { createChannelFactory } from "@/backend/services/communication/channels/__shared__/channelFactoryBase";
-import type { IPushChannel } from "@/backend/types";
 import { resolveEnvConfigMany } from "@/backend/services/system";
+import type { IPushChannel } from "@/backend/types";
 
 async function createFcmAdapter(): Promise<IPushChannel> {
   const { FcmPushAdapter } = await import("@/backend/services/communication/channels/push/fcm/FcmPushAdapter");

@@ -1,6 +1,6 @@
 import type { NextRequest, NextResponse } from "next/server";
-
-import { handleOAuthCallback, type OAuthCallbackConfig } from "@/app/api/oauth/shared/oauth-callback-handler";
+import { handleOAuthCallback } from "@/app/api/oauth/shared/oauth-callback-handler";
+import type { OAuthCallbackConfig } from "@/backend/types";
 
 /**
  * Microsoft Teams OAuth callback — receives the `code`/`state` query params

@@ -10,14 +10,6 @@ export type ImpersonationSessionReturnType = Omit<ImpersonationSessionSelectType
 
 export type ImpersonationSessionSubmitInput = Omit<ImpersonationSessionInsertType, "id" | "startedAt" | "isActive">;
 
-export type RedisImpersonationData = {
-  targetUserId: string;
-  startedAt: string;
-  expiresAt: string;
-  reason?: string;
-  impersonationSessionId: string;
-};
-
 export type StartImpersonationInput = {
   actorUserId: string;
   targetUserId: string;

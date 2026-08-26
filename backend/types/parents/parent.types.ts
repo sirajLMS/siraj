@@ -1,12 +1,13 @@
+import type { parents } from "@/backend/db/schema";
 import type { AccountStatus, BookingStatus, ParentStatus, StudentStatus } from "@/backend/enum";
 import type { DisplayAmountReturnType, EffectiveMeetingReturnType, PageInfo } from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
-export type ParentSelectType = typeof import("@/backend/db/schema").parents.$inferSelect;
+export type ParentSelectType = typeof parents.$inferSelect;
 
-export type ParentInsertType = typeof import("@/backend/db/schema").parents.$inferInsert;
+export type ParentInsertType = typeof parents.$inferInsert;
 
 export type ParentCreateResult = Pick<
   ParentSelectType,

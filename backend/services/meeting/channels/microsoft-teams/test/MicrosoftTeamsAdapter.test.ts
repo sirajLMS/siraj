@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
-import { NoAppAccessPolicyError, NoOrgCredentialsNoUserTokenError, ProviderReauthRequiredError, RateLimitedError } from "@/backend/services/meeting/channels/IMeetingChannel";;
+import {
+  NoAppAccessPolicyError,
+  NoOrgCredentialsNoUserTokenError,
+  ProviderReauthRequiredError,
+  RateLimitedError,
+} from "@/backend/services/meeting/channels/IMeetingChannel";
+
 import { MicrosoftTeamsAdapter } from "@/backend/services/meeting/channels/microsoft-teams/MicrosoftTeamsAdapter";
 import * as tokenRefreshModule from "@/backend/services/meeting/integrations/token-refresh";
 import type { MeetingProviderTokenSelectType } from "@/backend/types";

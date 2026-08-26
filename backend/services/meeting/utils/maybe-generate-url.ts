@@ -1,5 +1,6 @@
 import { logger } from "@/backend/lib/logger";
-import { MeetingChannelError } from "@/backend/services/meeting/channels/IMeetingChannel";;
+import { MeetingChannelError } from "@/backend/services/meeting/channels/IMeetingChannel";
+
 import { meetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import type { MeetingConfigDetails, MeetingProviderSelectType } from "@/backend/types";
 

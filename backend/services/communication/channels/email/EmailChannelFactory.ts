@@ -1,6 +1,6 @@
 import { createChannelFactory } from "@/backend/services/communication/channels/__shared__/channelFactoryBase";
-import type { IEmailChannel } from "@/backend/types";
 import { resolveEnvConfigMany } from "@/backend/services/system";
+import type { IEmailChannel } from "@/backend/types";
 
 async function createResendAdapter(): Promise<IEmailChannel> {
   const { ResendEmailAdapter } = await import(

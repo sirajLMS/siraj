@@ -12,8 +12,8 @@ import {
   MyConnectedMeetingProviderPothosObject,
   resolveMeetingAuthCtx,
 } from "@/backend/graphql/pothos/system/meeting-integrations.pothos";
-import type {MeetingProvider } from "@/backend/types";
-import { MeetingIntegrationService, MeetingOAuthService } from "@/backend/services";;
+import { MeetingIntegrationService, MeetingOAuthService } from "@/backend/services";
+import type { MeetingProvider } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("meetingIntegrationProviders", t =>
   t.field({

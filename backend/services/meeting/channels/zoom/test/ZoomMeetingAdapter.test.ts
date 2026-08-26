@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
-import { InsufficientScopesError, NoOrgCredentialsNoUserTokenError, ProviderReauthRequiredError, RateLimitedError, ZoomApiError } from "@/backend/services/meeting/channels/IMeetingChannel";;
+import {
+  InsufficientScopesError,
+  NoOrgCredentialsNoUserTokenError,
+  ProviderReauthRequiredError,
+  RateLimitedError,
+  ZoomApiError,
+} from "@/backend/services/meeting/channels/IMeetingChannel";
+
 import { ZoomMeetingAdapter } from "@/backend/services/meeting/channels/zoom/ZoomMeetingAdapter";
 import * as tokenRefreshModule from "@/backend/services/meeting/integrations/token-refresh";
 import type { MeetingProviderTokenSelectType } from "@/backend/types";

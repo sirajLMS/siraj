@@ -5,7 +5,6 @@ import { logger } from "@/backend/lib/logger";
 import { assertHasPermission } from "@/backend/services/shared";
 import type {
   BaseEntity,
-  DBTx,
   ResolutionResult,
   ResolveEntityByIdArgs,
   ResolveNotFoundErrorKey,
@@ -13,7 +12,6 @@ import type {
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
-
 
 /** Permission gate shared by every endpoint in both services. */
 export async function assertPermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
@@ -121,5 +119,3 @@ export function buildResolutionResponse(resolved: boolean, resolution: string | 
 }
 
 // ─── Internal helpers status ──────────────────────────────────────────────
-
-export type { BaseEntity, DBTx };

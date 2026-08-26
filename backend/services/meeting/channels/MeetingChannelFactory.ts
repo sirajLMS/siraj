@@ -1,7 +1,7 @@
 import { logger } from "@/backend/lib/logger";
-import type {GenerateMeetingInput, GenerateMeetingResult, IMeetingChannel, MeetingProvider } from "@/backend/types";
-import { UnsupportedProviderKindError } from "@/backend/services/meeting/channels/IMeetingChannel";;;
+import { UnsupportedProviderKindError } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { invalidateEnvConfigCache, resolveEnvConfigMany } from "@/backend/services/system";
+import type { GenerateMeetingInput, GenerateMeetingResult, IMeetingChannel, MeetingProvider } from "@/backend/types";
 
 // ============================================================================
 // Env keys per provider slug

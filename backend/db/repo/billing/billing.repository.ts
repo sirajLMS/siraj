@@ -18,7 +18,7 @@ import type {
   CurrencyExchangeRateSubmitInput,
   DBQueryExecutor,
   DBTransaction,
-  ExchangeRateHistorySelectRow,
+  ExchangeRateHistoryRow,
   ManualInvoiceInsertType,
   OverdueInvoiceRow,
   ParentUserRow,
@@ -329,7 +329,7 @@ export namespace BillingRepository {
     effectiveDate: currencyExchangeRates.effectiveDate,
   };
 
-  function mapExchangeRateHistoryRow(r: ExchangeRateHistorySelectRow): Types.ExchangeRateHistoryRow {
+  function mapExchangeRateHistoryRow(r: ExchangeRateHistoryRow): Types.ExchangeRateHistoryRow {
     return {
       id: r.id,
       fromCurrency: r.fromCurrency,

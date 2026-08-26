@@ -1,5 +1,5 @@
-import type { PothosObjectFieldBuilder, PothosInputFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { PothosInputFieldBuilder, PothosObjectFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import {
   CountryCodePothosObject,
   CurrencyCodePothosObject,
@@ -21,7 +21,6 @@ import type {
   UserPaymentMethodReturnType,
   UserPaymentMethodSubmitGqlInput,
 } from "@/backend/types";
-
 
 export function isRecordLike(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;

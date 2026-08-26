@@ -45,7 +45,7 @@ const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
   justifyContent: "flex-start",
   alignItems: "center",
   gap: theme.spacing(0.75),
-  fontSize: "0.8rem",
+  fontSize: "0.85rem",
   fontWeight: 600,
   transition: theme.transitions.create(["border-color", "background-color", "color", "transform", "box-shadow"], {
     duration: theme.transitions.duration.short,
@@ -108,8 +108,16 @@ export function DemoFastLogin({ labels, groups, onFastLogin }: Readonly<DemoFast
 
   return (
     <StyledContainer sx={{ mt: 2.5, mb: 1.5 }}>
-      <Divider sx={{ mb: 2 }}>
-        <StyledDividerLabel variant="bodyMd" sx={{ px: 1 }}>
+      <Divider
+        sx={t => ({
+          mb: 2,
+          borderColor: alpha(t.palette.divider, 0.8),
+          "&::before, &::after": {
+            borderColor: alpha(t.palette.divider, 0.8),
+          },
+        })}
+      >
+        <StyledDividerLabel variant="bodyMd" sx={{ px: 1.5 }}>
           {labels.orQuickLogin}
         </StyledDividerLabel>
       </Divider>

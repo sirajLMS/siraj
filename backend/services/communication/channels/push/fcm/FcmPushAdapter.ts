@@ -8,13 +8,15 @@ import {
   FCM_INVALID_TOKEN_ERROR,
   FCM_TOKEN_EXPIRED_ERROR,
 } from "@/backend/services/communication/channels/push/fcm/fcm.helpers";
+import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 import type {
+  FcmPushContext,
   IPushChannel,
+  NotificationDeliverySelectType,
   PushPayload,
   PushSendResult,
+  UserDeviceTokenSelectType,
 } from "@/backend/types";
-import { deliveryFailedMessage } from "@/backend/services/communication/utils";
-import type { FcmPushContext, NotificationDeliverySelectType, UserDeviceTokenSelectType } from "@/backend/types";
 
 export class FcmPushAdapter implements IPushChannel {
   private readonly context: FcmPushContext;

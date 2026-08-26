@@ -1,5 +1,5 @@
-import type { PothosObjectFieldBuilder, PothosInputFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { PothosInputFieldBuilder, PothosObjectFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { logger } from "@/backend/lib/logger";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import type {

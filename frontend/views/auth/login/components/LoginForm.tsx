@@ -37,7 +37,7 @@ const StyledFormActionsContainer = styled(Box)({
   display: "flex",
   justifyContent: "flex-end",
   alignItems: "center",
-  marginTop: "-0.5rem",
+  marginTop: "-0.75rem",
 });
 
 // Shared focus + error styling for all login TextFields — gives inputs a clear focus
@@ -50,7 +50,7 @@ const textFieldFocusSx = (theme: Theme) => ({
       duration: theme.transitions.duration.short,
     }),
     "& fieldset": {
-      borderColor: alpha(theme.palette.text.primary, 0.4),
+      borderColor: alpha(theme.palette.text.primary, 0.6),
       borderWidth: 2,
     },
     "&:hover fieldset": {

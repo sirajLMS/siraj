@@ -52,10 +52,11 @@ export function LoginView({
           mx: "auto",
           p: { xs: 3, sm: 4 },
           borderRadius: { xs: 3, sm: 4 },
-          backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === "dark" ? 0.1 : 0.92),
+          backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === "dark" ? 0.15 : 0.92),
           backdropFilter: "blur(14px)",
-          border: `1px solid ${alpha(theme.palette.divider, theme.palette.mode === "dark" ? 0.18 : 1)}`,
+          border: `1px solid ${alpha(theme.palette.divider, theme.palette.mode === "dark" ? 0.25 : 1)}`,
           boxShadow: `
+            inset 0 1px 0 0 ${alpha(theme.palette.common.white, theme.palette.mode === "dark" ? 0.06 : 0.5)},
             0 1px 2px ${alpha(theme.palette.common.black, 0.1)},
             0 8px 24px ${alpha(theme.palette.common.black, 0.14)},
             0 24px 64px ${alpha(theme.palette.primary.main, 0.14)}`,

@@ -142,35 +142,11 @@ export namespace AvailabilityService {
   };
 
   // Type guard: checks if a value is a FindAvailableSlotsOptions object.
-  function isFindAvailableSlotsOptions(value: unknown): value is FindAvailableSlotsOptions {
-    if (typeof value !== "object" || value === null) return false;
-    return "studentId" in value && typeof value.studentId === "string" && "date" in value && value.date instanceof Date;
-  }
 
   // Type guard: checks if a value is a Drizzle-compatible query executor.
-  function isReadExecutor(value: unknown): value is ReadExecutor {
-    return typeof value === "object" && value !== null;
-  }
 
-  // Backwards-compatible wrapper: single rest-parameter to reduce function parameter count
-  export const findAvailableSlots = async (...args: unknown[]): Promise<AvailableClassSlot[]> => {
-    let opts: FindAvailableSlotsOptions;
-
-    if (args.length === 1 && isFindAvailableSlotsOptions(args[0])) {
-      // Called with an options object
-      opts = args[0];
-    } else {
-      // Legacy positional arguments: (studentId, date, teacherId?, durationMinutes?, tx?, locale?)
-      const studentId = typeof args[0] === "string" ? args[0] : "";
-      const date = args[1] instanceof Date ? args[1] : new Date(0);
-      const teacherId = typeof args[2] === "string" ? args[2] : null;
-      const durationMinutes = typeof args[3] === "number" ? args[3] : 60;
-      const tx = isReadExecutor(args[4]) ? args[4] : undefined;
-      const locale = typeof args[5] === "string" ? args[5] : "en";
-      opts = { studentId, date, teacherId, durationMinutes, tx, locale };
-    }
-
-    return findAvailableSlotsImpl(opts);
+  export const findAvailableSlots = async (options: FindAvailableSlotsOptions): Promise<AvailableClassSlot[]> => {
+    return findAvailableSlotsImpl(options);
   };
 
   // Implementation that accepts a single options object (keeps logic isolated and testable)

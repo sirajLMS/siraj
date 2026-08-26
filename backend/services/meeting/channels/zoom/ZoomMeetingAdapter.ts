@@ -1,15 +1,26 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import {
-  type CachedToken,
   fetchWithTimeout,
   isRecord,
   isTokenExpired,
   MeetingAdapterBase,
 } from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
-import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/types";
-import { InsufficientScopesError, NoOrgCredentialsNoUserTokenError, ProviderUnavailableError, RateLimitedError, ZoomApiError } from "@/backend/services/meeting/channels/IMeetingChannel";;
-import type { ZoomErrorResponse, ZoomMeetingResponse, ZoomTokenResponse } from "@/backend/types";
+import {
+  InsufficientScopesError,
+  NoOrgCredentialsNoUserTokenError,
+  ProviderUnavailableError,
+  RateLimitedError,
+  ZoomApiError,
+} from "@/backend/services/meeting/channels/IMeetingChannel";
+import type {
+  CachedToken,
+  GenerateMeetingInput,
+  GenerateMeetingResult,
+  ZoomErrorResponse,
+  ZoomMeetingResponse,
+  ZoomTokenResponse,
+} from "@/backend/types";
 
 export interface ZoomMeetingAdapterOptions {
   readonly accountId?: string;

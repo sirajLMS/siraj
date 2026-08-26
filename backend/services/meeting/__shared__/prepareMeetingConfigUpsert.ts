@@ -9,7 +9,6 @@ import type {
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
-
 /**
  * Capture the duplicated "prepare" pipeline shared by
  * `upsertManyUserMeetingConfigs` and `upsertManyClassMeetingConfigs`.

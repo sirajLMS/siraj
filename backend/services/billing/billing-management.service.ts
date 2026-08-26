@@ -240,7 +240,7 @@ async function dispatchUnpaidInvoicesForStudent(studentId: string, locale?: stri
  * and logs its own errors, never throwing back into the mutation path
  * (specs.md B3/B4/B5/B6 — dispatch failure must not fail the mutation).
  *
- * Returns the unchanged {@link Types.MarkInvoicePaidResult} so callers can
+ * Returns the unchanged {@link Types.MarkInvoicePaidReturnType} so callers can
  * forward it transparently.
  */
 async function finalizePaymentStatusChangeWithDispatch(
@@ -251,7 +251,7 @@ async function finalizePaymentStatusChangeWithDispatch(
   tErrors: ErrorsLabels,
   postCommitDispatch: (updatedInvoice: Types.InvoiceSelectType) => Promise<void>,
   locale?: string
-): Promise<Types.MarkInvoicePaidResult> {
+): Promise<Types.MarkInvoicePaidReturnType> {
   try {
     const updated = await db.transaction(tx => txnWork(tx, tErrors));
     const notificationSummaryUpdated = await syncNotificationsAfterPaymentChange(locale);
@@ -270,15 +270,13 @@ async function finalizePaymentStatusChangeWithDispatch(
 function mapMarkPaidResult(
   invoice: Types.InvoiceSelectType,
   notificationSummaryUpdated: boolean
-): Types.MarkInvoicePaidResult {
+): Types.MarkInvoicePaidReturnType {
   return {
-    invoice: {
-      id: invoice.id,
-      parentId: invoice.parentId,
-      status: parseInvoiceStatus(invoice.status),
-      paidDate: invoice.paidDate ?? null,
-      version: invoice.version,
-    },
+    id: invoice.id,
+    parentId: invoice.parentId,
+    status: parseInvoiceStatus(invoice.status),
+    paidDate: invoice.paidDate ?? null,
+    version: invoice.version,
     notificationSummaryUpdated,
   };
 }
@@ -373,7 +371,7 @@ export namespace BillingManagementService {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     locale?: string
-  ): Promise<Types.MarkInvoicePaidResult> {
+  ): Promise<Types.MarkInvoicePaidReturnType> {
     await requirePermission(actorUserId, AppPermission.BILLING_SUBMIT_PAYMENT_PROOF, tErrors);
 
     const existingInvoice = await BillingRepository.getInvoiceById(invoiceId);
@@ -435,7 +433,7 @@ export namespace BillingManagementService {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     locale?: string
-  ): Promise<Types.MarkInvoicePaidResult> {
+  ): Promise<Types.MarkInvoicePaidReturnType> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, tErrors);
 
     await fetchInvoicePendingReview(invoiceId, tErrors);
@@ -487,7 +485,7 @@ export namespace BillingManagementService {
     rejectionReason?: string | null,
     expectedVersion?: number,
     locale?: string
-  ): Promise<Types.MarkInvoicePaidResult> {
+  ): Promise<Types.MarkInvoicePaidReturnType> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, tErrors);
 
     await fetchInvoicePendingReview(invoiceId, tErrors);
@@ -537,7 +535,7 @@ export namespace BillingManagementService {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     locale?: string
-  ): Promise<Types.MarkInvoicePaidResult> {
+  ): Promise<Types.MarkInvoicePaidReturnType> {
     await requirePermission(actorUserId, AppPermission.BILLING_UPDATE_STATUS_PAID, tErrors);
 
     if (!proofFileId.trim()) {
@@ -574,7 +572,7 @@ export namespace BillingManagementService {
     actorUserId: string,
     invoiceId: string,
     tErrors: ErrorsLabels
-  ): Promise<Types.DeleteInvoiceResult> {
+  ): Promise<Types.DeleteInvoiceReturnType> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.BILLING_DELETE_INVOICE);
     if (!hasPermission) {
       throw new Error(tErrors.insufficientPermissions);
@@ -604,12 +602,9 @@ export namespace BillingManagementService {
       });
 
       return {
-        invoice: {
-          id: deleted.id,
-          parentId: deleted.parentId,
-          deletedAt: deleted.deletedAt?.toISOString() ?? null,
-          version: deleted.version,
-        },
+        id: deleted.id,
+        parentId: deleted.parentId,
+        version: deleted.version,
         notificationSummaryUpdated: syncResult !== null,
       };
     } catch (error) {

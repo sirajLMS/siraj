@@ -19,17 +19,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getServerUserContext } from "@/backend/lib";
 import { ensureEnvironmentValidated } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import {
-  buildCallbackRedirectUri,
-  MeetingOAuthService,
-  type OAuthCallbackConfig,
-  verifyAndConsumeOAuthState,
-} from "@/backend/services";
+import { buildCallbackRedirectUri, MeetingOAuthService, verifyAndConsumeOAuthState } from "@/backend/services";
+import type { OAuthCallbackConfig } from "@/backend/types";
+
 import { getServerTranslations } from "@/shared/locale";
 
 // Re-export the config type so the three route files that import it from this
 // module continue to work without changing their import paths.
-export type { OAuthCallbackConfig } from "@/backend/services";
 
 ensureEnvironmentValidated();
 

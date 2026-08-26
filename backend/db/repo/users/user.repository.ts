@@ -7,7 +7,7 @@ import { logger } from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
 import {
   type DBTransaction,
-  type PaginatedUsersResponseSelectType,
+  type PaginatedUsersResponse,
   PaginationArgsDefault,
   type PaginationInput,
   type UserCreateInput,
@@ -228,7 +228,7 @@ export namespace UserRepository {
 
   export const findUsersPaginated = async (
     paginationArgs?: PaginationInput | null
-  ): Promise<PaginatedUsersResponseSelectType> => {
+  ): Promise<PaginatedUsersResponse> => {
     const { first, skip, page, maxCount } = paginationArgs ?? {};
 
     const total = await usersTotalCount();

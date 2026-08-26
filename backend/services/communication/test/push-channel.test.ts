@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { DevicePlatform, NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
-import type { PushSendResult } from "@/backend/types";
-import { pushChannel, resetPushChannel } from "@/backend/services/communication/channels/push";;
-import type { NotificationDeliverySelectType, UserDeviceTokenSelectType } from "@/backend/types";
+import { pushChannel, resetPushChannel } from "@/backend/services/communication/channels/push";
+import type { NotificationDeliverySelectType, PushSendResult, UserDeviceTokenSelectType } from "@/backend/types";
 
 const MOCK_USER_ID = "user-uuid-0001";
 

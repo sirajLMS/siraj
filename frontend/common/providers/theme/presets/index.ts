@@ -145,7 +145,7 @@ export function findAppearancePreset(id: string): AppearancePreset | undefined {
 export {
   extractCssVarsFromPalette,
   matchPresetByColors,
+  type PresetPalettes,
   resolvePresetPalette,
   resolvePresetPalettes,
-  type PresetPalettes,
 } from "./paletteFactory";

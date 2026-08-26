@@ -1,7 +1,5 @@
 import { type AppPermission, isAppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
-import type { FieldGroupScope, ProfileFieldGroupDefinition, ProfileFieldGroupKey } from "@/backend/types";
-
-export type { FieldGroupScope, ProfileFieldGroupDefinition, ProfileFieldGroupKey };
+import type { ProfileFieldGroupDefinition, ProfileFieldGroupKey } from "@/backend/types";
 
 function profilePerm(
   group: ProfileFieldGroupKey,

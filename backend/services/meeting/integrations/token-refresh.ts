@@ -16,15 +16,12 @@
 
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type { MeetingProvider } from "@/backend/types";
-import { ProviderReauthRequiredError } from "@/backend/services/meeting/channels/IMeetingChannel";;
-import type { RefreshedToken } from "@/backend/types";
+import { ProviderReauthRequiredError } from "@/backend/services/meeting/channels/IMeetingChannel";
+import type { MeetingProvider, RefreshedToken } from "@/backend/types";
 
 // ============================================================================
 // Types
 // ============================================================================
-
-export type { RefreshedToken };
 
 interface TokenEndpointResponse {
   access_token: string;

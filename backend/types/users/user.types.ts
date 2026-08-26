@@ -93,11 +93,6 @@ export type UserCreateProfileFieldsInput = {
   readonly displayCurrency?: string | null;
 };
 
-export type PaginatedUsersResponseSelectType = {
-  data: UserReturnType[];
-  pageInfo: PageInfo;
-};
-
 export type PaginatedUsersResponse = {
   data: UserReturnType[];
   pageInfo: PageInfo;

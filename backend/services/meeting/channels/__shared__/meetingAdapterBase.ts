@@ -1,12 +1,17 @@
 import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
-import type { CachedToken } from "@/backend/types";
-
-export type { CachedToken };
-
 import { logger } from "@/backend/lib/logger";
-import type {GenerateMeetingInput, GenerateMeetingResult, IMeetingChannel, MeetingProvider } from "@/backend/types";
-import { NoOrgCredentialsNoUserTokenError, ProviderUnavailableError } from "@/backend/services/meeting/channels/IMeetingChannel";;;;
+import {
+  NoOrgCredentialsNoUserTokenError,
+  ProviderUnavailableError,
+} from "@/backend/services/meeting/channels/IMeetingChannel";
 import { refreshAccessToken } from "@/backend/services/meeting/integrations/token-refresh";
+import type {
+  CachedToken,
+  GenerateMeetingInput,
+  GenerateMeetingResult,
+  IMeetingChannel,
+  MeetingProvider,
+} from "@/backend/types";
 
 // ============================================================================
 // Shared constants

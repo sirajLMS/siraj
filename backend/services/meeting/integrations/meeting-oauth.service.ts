@@ -22,7 +22,6 @@ import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
-import type { MeetingProvider } from "@/backend/types";;
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type {
@@ -32,6 +31,7 @@ import type {
   DisconnectMeetingProviderOAuthReturnType,
   DisconnectMeetingProviderOAuthSubmitInput,
   MeetingOAuthStatePayload,
+  MeetingProvider,
   MeetingProviderTokenSelectType,
   MeetingProviderTokenUpsertInput,
   MyConnectedMeetingProviderReturnType,
@@ -250,8 +250,6 @@ function buildAuthorizeUrl(providerSlug: MeetingProvider, redirectUri: string, s
 // ============================================================================
 // OAuth callback (code-for-tokens exchange + persistence)
 // ============================================================================
-
-export type { OAuthCallbackConfig, OAuthTokenResponse };
 
 /**
  * Type guard that validates a token-endpoint response conforms to the minimal

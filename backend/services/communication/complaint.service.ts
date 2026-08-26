@@ -188,7 +188,14 @@ export namespace ComplaintService {
   ): Promise<{
     id: string;
     complaints: ReadonlyArray<ComplaintReturnType>;
-    metrics: { id: string; unanswered: number; answered: number; avgResolutionHours: number; avgResolutionTime: string | null; totalCount: number };
+    metrics: {
+      id: string;
+      unanswered: number;
+      answered: number;
+      avgResolutionHours: number;
+      avgResolutionTime: string | null;
+      totalCount: number;
+    };
   }> {
     await assertPermission(actorUserId, AppPermission.COMPLAINTS_LIST, locale);
 
@@ -234,7 +241,14 @@ export namespace ComplaintService {
     rows: ComplaintQueuePaginatedResult["rows"];
     totalCount: number;
     pageInfo: ComplaintQueuePaginatedResult["pageInfo"];
-    metrics: { id: string; unanswered: number; answered: number; avgResolutionHours: number; avgResolutionTime: string | null; totalCount: number };
+    metrics: {
+      id: string;
+      unanswered: number;
+      answered: number;
+      avgResolutionHours: number;
+      avgResolutionTime: string | null;
+      totalCount: number;
+    };
   }> {
     await assertPermission(actorUserId, AppPermission.COMPLAINTS_LIST, locale);
 

@@ -160,19 +160,6 @@ export type ExchangeRateHistoryRow = {
 };
 
 /**
- * Repository-level select row for exchange-rate history queries.
- * Maps 1:1 to {@link ExchangeRateHistoryRow} via `mapExchangeRateHistoryRow`.
- */
-export type ExchangeRateHistorySelectRow = {
-  readonly id: string;
-  readonly fromCurrency: CurrencyCode;
-  readonly toCurrency: CurrencyCode;
-  readonly rate: string;
-  readonly source: string | null;
-  readonly effectiveDate: Date;
-};
-
-/**
  * Repository-level row for overdue invoice queries (unpaid + past due).
  */
 export type OverdueInvoiceRow = {
@@ -334,27 +321,6 @@ export type ManualInvoiceResult = {
   readonly version: number;
   readonly createdAt: Date;
   readonly displayAmount?: DisplayAmountReturnType | null;
-};
-
-export type MarkInvoicePaidResult = {
-  readonly invoice: {
-    readonly id: string;
-    readonly parentId: string;
-    readonly status: InvoiceStatus;
-    readonly paidDate: string | null;
-    readonly version: number;
-  };
-  readonly notificationSummaryUpdated: boolean;
-};
-
-export type DeleteInvoiceResult = {
-  readonly invoice: {
-    readonly id: string;
-    readonly parentId: string;
-    readonly deletedAt: string | null;
-    readonly version: number;
-  };
-  readonly notificationSummaryUpdated: boolean;
 };
 
 export type SendPaymentReminderResult = {

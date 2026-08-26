@@ -1,8 +1,8 @@
+export { getEntityCacheStats } from "@/backend/services/cache/__shared__/cacheStats";
+
 import { logger } from "@/backend/lib/logger";
 import { recordHitForKey, recordMissForKey } from "@/backend/services/cache/__shared__/cacheStats";
 import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
-
-export { getEntityCacheStats } from "@/backend/services/cache/__shared__/cacheStats";
 
 export const CACHE_VERSION = 1;
 

@@ -5,11 +5,13 @@ import { UserRepository } from "@/backend/db/repo/users";
 import { type AppLanguage, AppPermission, type Gender, StudentStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
-import type { StudentFieldFilterContext } from "@/backend/types";
-import { canEditStudentFieldGroup, filterStudentProfileByFieldGroups } from "@/backend/services/profile/profile-field-filter";;
+import {
+  canEditStudentFieldGroup,
+  filterStudentProfileByFieldGroups,
+} from "@/backend/services/profile/profile-field-filter";
 import { STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
-import type { StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types";
+import type { StudentFieldFilterContext, StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types";
 import {
   parseAppLanguage,
   parseCurrencyCodeOrNull,

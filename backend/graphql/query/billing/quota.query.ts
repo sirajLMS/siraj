@@ -147,14 +147,13 @@ gqlSchemaBuilder.queryField("availableClassSlots", t =>
       const tErrors = ctx.t().errorsTranslations;
       await assertAssociatedOrManage(actorUserId, args.studentId, tErrors);
       try {
-        return await AvailabilityService.findAvailableSlots(
-          args.studentId,
-          args.date,
-          args.teacherId ?? null,
-          args.durationMinutes ?? 60,
-          undefined,
-          ctx.locale
-        );
+        return await AvailabilityService.findAvailableSlots({
+          studentId: args.studentId,
+          date: args.date,
+          teacherId: args.teacherId ?? null,
+          durationMinutes: args.durationMinutes ?? 60,
+          locale: ctx.locale,
+        });
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }

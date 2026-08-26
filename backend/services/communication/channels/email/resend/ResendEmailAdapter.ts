@@ -3,13 +3,8 @@ import { NotificationRepository } from "@/backend/db/repo/notifications/notifica
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type {
-  EmailPayload,
-  EmailSendResult,
-  IEmailChannel,
-} from "@/backend/types";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
-import type { ResendEmailContext } from "@/backend/types";
+import type { EmailPayload, EmailSendResult, IEmailChannel, ResendEmailContext } from "@/backend/types";
 
 /** Resend simulator inboxes — integration tests send here intentionally; never redirect. */
 const RESEND_SIMULATOR_DOMAIN = "@resend.dev";

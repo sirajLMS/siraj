@@ -8,14 +8,9 @@ import {
   LogSupportRequestInputPothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-dashboard.pothos";
 import { ClassSessionService, TeacherDashboardService } from "@/backend/services";
+import { parseClassTypeOrNull } from "@/shared/lib/enum";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
-
-const VALID_CLASS_TYPES = new Set(["REGULAR", "TRIAL", "PROMOTION"]);
-
-function isValidClassType(value: unknown): value is "REGULAR" | "TRIAL" | "PROMOTION" {
-  return typeof value === "string" && VALID_CLASS_TYPES.has(value);
-}
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
@@ -42,7 +37,7 @@ gqlSchemaBuilder.mutationField("createTeacherManualClassEntry", t =>
           scheduledStartAt: args.input.scheduledStartAt,
           scheduledEndAt: args.input.scheduledEndAt,
           durationMinutes: args.input.durationMinutes,
-          classType: isValidClassType(args.input.classType) ? args.input.classType : undefined,
+          classType: parseClassTypeOrNull(args.input.classType) ?? undefined,
         },
         tErrors
       );

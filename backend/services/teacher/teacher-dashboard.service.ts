@@ -14,7 +14,13 @@ import { QuotaService } from "@/backend/services/billing/quota.service";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { ClassInstanceExpiryService } from "@/backend/services/session/class-instance-expiry.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
-import type { ClassInstanceInsertType, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
+import type {
+  ClassInstanceInsertType,
+  CreateAuditLogInput,
+  CreateManualClassEntryInput,
+  LogSupportRequestInput,
+  PaginationArgs,
+} from "@/backend/types";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/shared/lib/enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
@@ -71,17 +77,7 @@ export namespace TeacherDashboardService {
     };
   }
 
-  export interface ManualEntryInput {
-    studentId: string;
-    teacherId: string;
-    subjectId: string;
-    scheduledStartAt: string;
-    scheduledEndAt: string;
-    durationMinutes: number;
-    classType?: "REGULAR" | "TRIAL" | "PROMOTION";
-  }
-
-  export async function createManualEntry(userId: string, input: ManualEntryInput, tErrors: ErrorsLabels) {
+  export async function createManualEntry(userId: string, input: CreateManualClassEntryInput, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
 
     // H3 fix: verify the actor owns the teacherId and has assignment to the studentId.
@@ -152,12 +148,7 @@ export namespace TeacherDashboardService {
     return createdInstance;
   }
 
-  export interface SupportRequestInput {
-    reason: string;
-    [key: string]: unknown;
-  }
-
-  export async function logSupportRequest(userId: string, input: SupportRequestInput, tErrors: ErrorsLabels) {
+  export async function logSupportRequest(userId: string, input: LogSupportRequestInput, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
 
     const auditLog: CreateAuditLogInput = {

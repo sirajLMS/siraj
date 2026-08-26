@@ -1,9 +1,3 @@
-export type RedisGroupSimulationData = {
-  groupSlug: string;
-  startedAt: string;
-  expiresAt: string;
-};
-
 export type StartPermissionGroupSimulationInput = {
   actorUserId: string;
   groupSlug: string;

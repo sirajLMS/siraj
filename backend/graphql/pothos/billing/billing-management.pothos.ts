@@ -9,11 +9,9 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import type {
-  DeleteInvoiceResult,
   DeleteInvoiceReturnType,
   InvoicePaymentSubmissionReturnType,
   ManualInvoiceResult,
-  MarkInvoicePaidResult,
   MarkInvoicePaidReturnType,
   SendPaymentReminderResult,
 } from "@/backend/types";
@@ -23,31 +21,19 @@ import type { ErrorsLabels } from "@/shared/locale";
 // Services return nested { invoice: {...}, notificationSummaryUpdated } shapes.
 // GraphQL objects expose flat top-level fields, so these helpers perform the mapping.
 
-export function flattenMarkInvoicePaidResult(result: MarkInvoicePaidResult): MarkInvoicePaidReturnType {
-  return {
-    id: result.invoice.id,
-    parentId: result.invoice.parentId,
-    status: result.invoice.status,
-    paidDate: result.invoice.paidDate,
-    version: result.invoice.version,
-    notificationSummaryUpdated: result.notificationSummaryUpdated,
-  };
+export function flattenMarkInvoicePaidResult(result: MarkInvoicePaidReturnType): MarkInvoicePaidReturnType {
+  return result;
 }
 
-export function flattenDeleteInvoiceResult(result: DeleteInvoiceResult): DeleteInvoiceReturnType {
-  return {
-    id: result.invoice.id,
-    parentId: result.invoice.parentId,
-    version: result.invoice.version,
-    notificationSummaryUpdated: result.notificationSummaryUpdated,
-  };
+export function flattenDeleteInvoiceResult(result: DeleteInvoiceReturnType): DeleteInvoiceReturnType {
+  return result;
 }
 
 // Shared resolver helper: authenticates and calls the service, then flattens the result.
 // Eliminates duplicated resolver bodies across the four MarkInvoicePaid mutations.
 
 export function markInvoicePaidResolver<TArgs extends Record<string, unknown>>(
-  serviceCall: (userId: string, args: TArgs, tErrors: ErrorsLabels) => Promise<MarkInvoicePaidResult>
+  serviceCall: (userId: string, args: TArgs, tErrors: ErrorsLabels) => Promise<MarkInvoicePaidReturnType>
 ) {
   return async (_root: unknown, args: TArgs, ctx: BaseContext): Promise<MarkInvoicePaidReturnType> => {
     const userId = await requireAuth(ctx);

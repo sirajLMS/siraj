@@ -2,16 +2,26 @@ import { SignJWT } from "jose";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import {
-  type CachedToken,
   isRecord,
   isTokenExpired,
   MeetingAdapterBase,
   REQUEST_TIMEOUT_MS,
   withTimeout,
 } from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
-import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/types";
-import { GoogleMeetApiError, InvalidServiceAccountJsonError, MeetingChannelError, MissingImpersonationSubjectError, NoOrgCredentialsNoUserTokenError, PermissionDeniedError, ProviderUnavailableError, RateLimitedError } from "@/backend/services/meeting/channels/IMeetingChannel";;
+import {
+  GoogleMeetApiError,
+  InvalidServiceAccountJsonError,
+  MeetingChannelError,
+  MissingImpersonationSubjectError,
+  NoOrgCredentialsNoUserTokenError,
+  PermissionDeniedError,
+  ProviderUnavailableError,
+  RateLimitedError,
+} from "@/backend/services/meeting/channels/IMeetingChannel";
 import type {
+  CachedToken,
+  GenerateMeetingInput,
+  GenerateMeetingResult,
   GoogleMeetErrorResponse,
   GoogleMeetServiceAccountJson,
   GoogleMeetSpaceResponse,

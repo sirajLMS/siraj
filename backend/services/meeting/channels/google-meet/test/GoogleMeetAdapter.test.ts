@@ -1,7 +1,15 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
 import { GoogleMeetAdapter } from "@/backend/services/meeting/channels/google-meet/GoogleMeetAdapter";
-import { InvalidServiceAccountJsonError, MeetingChannelError, MissingImpersonationSubjectError, NoOrgCredentialsNoUserTokenError, PermissionDeniedError, ProviderReauthRequiredError } from "@/backend/services/meeting/channels/IMeetingChannel";;
+import {
+  InvalidServiceAccountJsonError,
+  MeetingChannelError,
+  MissingImpersonationSubjectError,
+  NoOrgCredentialsNoUserTokenError,
+  PermissionDeniedError,
+  ProviderReauthRequiredError,
+} from "@/backend/services/meeting/channels/IMeetingChannel";
+
 import * as tokenRefreshModule from "@/backend/services/meeting/integrations/token-refresh";
 import type { MeetingProviderTokenSelectType } from "@/backend/types";
 

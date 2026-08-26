@@ -40,13 +40,7 @@ const StyledSchoolIcon = styled(School)(({ theme }) => ({
 const StyledTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.primary,
   fontWeight: 700,
-  // Gradient text fill for the title — adapts to light/dark via palette.
-  backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-  backgroundClip: "text",
-  WebkitBackgroundClip: "text",
-  // CSS keyword "transparent" is required for gradient-text cutout (backgroundClip: text).
-  // This is NOT a brand color — it is a CSS rendering primitive.
-  WebkitTextFillColor: "transparent",
+  letterSpacing: "-0.02em",
 }));
 
 // Subtitle uses text.primary with reduced opacity so it remains legible on dark

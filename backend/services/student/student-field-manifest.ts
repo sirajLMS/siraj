@@ -1,8 +1,6 @@
 import { type AppPermission, isAppPermission } from "@/backend/enum";
 import type { StudentFieldGroupDefinition, StudentFieldGroupKey } from "@/backend/types";
 
-export type { StudentFieldGroupDefinition, StudentFieldGroupKey };
-
 function studentPerm(
   group: StudentFieldGroupKey,
   action: "view_own" | "view_other" | "edit_own" | "edit_other"

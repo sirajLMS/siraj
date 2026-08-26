@@ -6,7 +6,7 @@ import type {
   AuditLogQueryResult,
   AuditLogReturnType,
 } from "@/backend/types";
-import { AUDIT_ENTITY_TYPE_VALUES, AUDIT_ACTION_VALUES } from "@/backend/types";
+import { AUDIT_ACTION_VALUES, AUDIT_ENTITY_TYPE_VALUES } from "@/backend/types";
 
 const VALID_ENTITY_TYPES = new Set<string>(AUDIT_ENTITY_TYPE_VALUES);
 

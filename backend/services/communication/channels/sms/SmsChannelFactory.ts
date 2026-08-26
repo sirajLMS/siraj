@@ -1,6 +1,6 @@
 import { createChannelFactory } from "@/backend/services/communication/channels/__shared__/channelFactoryBase";
-import type { ISmsChannel } from "@/backend/types";
 import { resolveEnvConfigMany } from "@/backend/services/system";
+import type { ISmsChannel } from "@/backend/types";
 
 async function createTwilioAdapter(): Promise<ISmsChannel> {
   const { TwilioSmsAdapter } = await import("@/backend/services/communication/channels/sms/twilio/TwilioSmsAdapter");

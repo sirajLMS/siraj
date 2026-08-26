@@ -86,7 +86,7 @@ const activeCustomizedCssVars = new Set<string>();
 export function writeActiveModeCssVars(
   draft: AppearanceDraftInput,
   isDark: boolean,
-  presetId?: AppearancePresetId
+  presetId?: AppearancePresetId | null
 ): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
@@ -94,7 +94,7 @@ export function writeActiveModeCssVars(
   const pair: AppearanceColorPairInput | undefined = draft.colors?.[modeKey];
 
   const activePresetId = presetId ?? matchPresetByColors(draft.colors);
-  const palette = resolvePresetPalette(modeKey, activePresetId);
+  const palette = resolvePresetPalette(modeKey, activePresetId ?? undefined);
   const presetVars = extractCssVarsFromPalette(palette);
 
   for (const [varName, varValue] of Object.entries(presetVars)) {
@@ -139,7 +139,7 @@ export function clearActiveModeCssVars(): void {
 function commitEdit(
   state: AppearancePreviewState,
   nextDraft: AppearanceDraftInput,
-  presetId?: AppearancePresetId
+  presetId?: AppearancePresetId | null
 ): Partial<AppearancePreviewState> {
   const activePresetId = presetId ?? state.presetId ?? matchPresetByColors(nextDraft.colors);
   writeActiveModeCssVars(nextDraft, state.isDark, activePresetId);
@@ -178,7 +178,7 @@ interface AppearancePreviewState {
   /** Active per-mode tab in the customizer (true = dark, false = light). */
   readonly isDark: boolean;
   /** Currently active preset ID (ocean, emerald, violet, crimson, slate, default). */
-  readonly presetId: AppearancePresetId;
+  readonly presetId: AppearancePresetId | null;
   /** Whether `loadFromServer` has run at least once. */
   readonly hydrated: boolean;
   /** Whether the draft has unsaved changes (cleared by `markSaved` / `loadFromServer`). */
@@ -192,7 +192,7 @@ interface AppearancePreviewState {
   /** Replace the color pair for one mode (light or dark). */
   readonly setModeColors: (mode: AppearanceMode, pair: AppearanceColorPairInput) => void;
   /** Replace both mode color pairs at once (single undo step — used by preset application). */
-  readonly setColors: (colors: AppearanceColorsInput, presetId?: AppearancePresetId) => void;
+  readonly setColors: (colors: AppearanceColorsInput, presetId?: AppearancePresetId | null) => void;
   /** Apply a preset theme: updates draft colors and immediately switches the active theme. */
   readonly applyPreset: (preset: AppearancePreset) => void;
   /** Toggle the active per-mode tab + re-write CSS vars for the new mode. */

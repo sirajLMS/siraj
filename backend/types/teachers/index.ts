@@ -1,4 +1,3 @@
-export * from "./staff-profile.types";
 export * from "./teacher.types";
 export * from "./teacher-availability.types";
 export * from "./teacher-due.types";

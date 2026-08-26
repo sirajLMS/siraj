@@ -1,3 +1,5 @@
+export { ReportGroupingMode } from "@/backend/enum";
+
 import { ReportRepository } from "@/backend/db/repo/books/report.repository";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
@@ -5,7 +7,6 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import type { AttendanceReportFilters, AttendanceReportResult } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
-export { ReportGroupingMode } from "@/backend/enum";
 export type {
   AttendanceReportFilters,
   AttendanceReportRow,

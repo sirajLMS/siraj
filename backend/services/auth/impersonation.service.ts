@@ -65,7 +65,7 @@ async function getActiveDbImpersonation(rawSessionId: string, actorUserId: strin
 
 async function syncOptionalRedisImpersonation(
   rawSessionId: string,
-  impersonation: Types.RedisImpersonationData
+  impersonation: Types.RedisImpersonationSessionData
 ): Promise<void> {
   await SessionRepository.updateRedisSessionData(rawSessionId, data => ({
     ...data,
