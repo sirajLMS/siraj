@@ -17,6 +17,7 @@ export const studentClassHistoryQueryDocument: TypedDocumentNode<
       id
       studentName
       metrics {
+        id
         totalClasses
         attendanceRate
         hoursStudied

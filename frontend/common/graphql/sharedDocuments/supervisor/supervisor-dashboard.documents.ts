@@ -4,14 +4,17 @@ import type { SupervisorDashboardQuery } from "@/frontend/common/graphql/generat
 export const supervisorDashboardQueryDocument: TypedDocumentNode<SupervisorDashboardQuery> = gql`
   query supervisorDashboard {
     supervisorDashboard {
+      id
       supervisorName
       pendingReviewCount
       pendingDuesSummary {
+        id
         totalCount
         totalAmount
         currency
       }
       monthlySnapshot {
+        id
         year
         month
         label

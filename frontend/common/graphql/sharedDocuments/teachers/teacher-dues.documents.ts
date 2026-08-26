@@ -42,6 +42,7 @@ export const teacherPendingDuesQueryDocument: TypedDocumentNode<
 export const teacherPendingDuesSummaryQueryDocument: TypedDocumentNode<TeacherPendingDuesSummaryQuery> = gql`
   query TeacherPendingDuesSummary {
     teacherPendingDuesSummary {
+      id
       totalCount
       totalAmount
       currency

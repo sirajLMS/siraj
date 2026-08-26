@@ -4,7 +4,6 @@ import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   RecurringScheduleDetailReturnType,
-  RecurringScheduleListRow,
   RecurringScheduleRepositoryRow,
   RecurringScheduleSelectType,
 } from "@/backend/types";
@@ -84,7 +83,7 @@ export namespace RecurringScheduleDetailService {
       pageSize?: number;
       search?: string;
     }
-  ): Promise<{ rows: RecurringScheduleListRow[]; totalCount: number }> {
+  ): Promise<{ rows: RecurringScheduleRepositoryRow[]; totalCount: number }> {
     const canViewList = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_LIST);
     const canViewAll = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_ALL);
 
@@ -95,14 +94,14 @@ export namespace RecurringScheduleDetailService {
     const result = await RecurringScheduleRepository.findAll(undefined, options);
     // Repository returns rows with studentName and teacherUserName attached via Object.assign
     // but typed as RecurringScheduleSelectType[]. Use type guard to narrow safely.
-    const rows: RecurringScheduleListRow[] = result.rows.map(row => {
+    const rows: RecurringScheduleRepositoryRow[] = result.rows.map(row => {
       if (!isRecurringScheduleRepositoryRow(row)) {
         // Should never happen if repository is correct, but fallback for safety
         return {
           ...row,
           studentName: "",
           teacherUserName: "",
-        } satisfies RecurringScheduleListRow;
+        } satisfies RecurringScheduleRepositoryRow;
       }
       return {
         id: row.id,
@@ -129,7 +128,7 @@ export namespace RecurringScheduleDetailService {
         deletedAt: row.deletedAt,
         studentName: row.studentName,
         teacherUserName: row.teacherUserName,
-      } satisfies RecurringScheduleListRow;
+      } satisfies RecurringScheduleRepositoryRow;
     });
     return {
       rows,

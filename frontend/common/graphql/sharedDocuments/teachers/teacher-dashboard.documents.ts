@@ -19,6 +19,7 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<TeacherDashboardQu
     teacherDashboard(date: $date, pagination: $pagination) {
       id
       metrics {
+        id
         total
         regular
         trial

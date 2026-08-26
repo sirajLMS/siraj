@@ -42,6 +42,7 @@ const STUDENT_UPCOMING_CLASS_FIELDS = gql`
 
 const STUDENT_HISTORY_METRICS_FIELDS = gql`
   fragment StudentHistoryMetricsFields on StudentHistoryMetrics {
+    id
     totalClasses
     attendanceRate
     hoursStudied

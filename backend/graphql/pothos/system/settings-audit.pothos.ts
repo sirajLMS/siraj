@@ -1,12 +1,13 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import type {
-  AuditAction,
-  AuditEntityType,
-  AuditLogFilterInput,
-  AuditLogQueryResult,
-  AuditLogReturnType,
+import {
+  AUDIT_ACTION_VALUES,
+  AUDIT_ENTITY_TYPE_VALUES,
+  type AuditAction,
+  type AuditEntityType,
+  type AuditLogFilterInput,
+  type AuditLogQueryResult,
+  type AuditLogReturnType,
 } from "@/backend/types";
-import { AUDIT_ACTION_VALUES, AUDIT_ENTITY_TYPE_VALUES } from "@/backend/types";
 
 const VALID_ENTITY_TYPES = new Set<string>(AUDIT_ENTITY_TYPE_VALUES);
 

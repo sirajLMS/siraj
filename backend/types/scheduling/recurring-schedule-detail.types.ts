@@ -63,6 +63,3 @@ export type RecurringScheduleRepositoryRow = RecurringScheduleSelectType & {
   readonly studentName: string;
   readonly teacherUserName: string;
 };
-
-/** Service-level list row — alias for {@link RecurringScheduleRepositoryRow}. */
-export type RecurringScheduleListRow = RecurringScheduleRepositoryRow;
