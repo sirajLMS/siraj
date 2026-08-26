@@ -175,35 +175,69 @@ After quality loop passes, validate the file against ALL applicable AGENTS.md an
 
 ### 1.1 New schema file: `backend/db/schema/billing/package-plans.ts`
 
+> **SE Pattern Compliance (R2):**
+> - `uuidColumn("id")` already applies `.defaultRandom().primaryKey()` inside the helper (see `dialectAwareBuilder.ts` lines 97-105). Do NOT chain those calls — they are not exposed on the return type.
+> - `numericColumn(name, { precision, scale })` is the dialect-aware helper for decimal/numeric columns. On PG it produces `numeric(p, s)` (returned as `string`); on SQLite it stores as `text` to preserve precision (mirrors the existing `students.hoursPerWeek` + `payments.amount` pattern). `textColumn(name)` does NOT accept precision/scale options — using it for monetary amounts with options is a TypeScript error.
+> - `checkConstraint(name, pgSql, sqliteSql)` is the dialect-aware CHECK helper. `check(name, sql)` from `drizzle-orm` is PG-only and silently no-ops on SQLite (the existing codebase NEVER uses raw `check(...)` — verified via grep). Pass `null` for `sqliteSql` when SQLite cannot enforce the predicate (e.g. PG-only UDFs).
+> - CHECK constraints on `numericColumn` values must use raw SQL comparison operators that work on both `numeric` (PG) and `text` (SQLite). For SQLite, the comparison uses lexicographic ordering — for non-negative numbers stored in fixed-precision form (e.g. `"0.00"`, `"12.50"`), the comparison works correctly because all values share the same scale. For mixed-scale values, prefer a service-layer validation in addition to the DB CHECK.
+
 ```typescript
-import { boolean, index, integer, jsonb, numeric, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-import { check, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
+import {
+  booleanColumn,
+  checkConstraint,
+  createTable,
+  index,
+  integerColumn,
+  jsonbColumn,
+  numericColumn,
+  textColumn,
+  timestampColumn,
+  uniqueIndex,
+  uuidColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { currencyCodeEnum } from "@/backend/db/schema/enums";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export const packagePlans = createTable(
   "package_plans",
   {
-    id: uuidColumn("id").defaultRandom().primaryKey(),
+    id: uuidColumn("id"), // helper already applies .defaultRandom().primaryKey()
     codename: varcharColumn("codename", { length: 50 }).notNull(),
     displayName: varcharColumn("display_name", { length: 255 }).notNull(),
     description: textColumn("description"),
-    creditHours: textColumn("credit_hours", { precision: 12, scale: 2 }).notNull(),
-    priceAmount: textColumn("price_amount", { precision: 12, scale: 2 }).notNull(),
+    // numericColumn: PG produces numeric(12,2) (returned as string); SQLite stores as text.
+    creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }).notNull(),
+    priceAmount: numericColumn("price_amount", { precision: 12, scale: 2 }).notNull(),
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     active: booleanColumn("active").notNull().default(true),
     sortOrder: integerColumn("sort_order").notNull().default(0),
     metadata: jsonbColumn("metadata"),
-    createdAt: timestampColumn("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestampColumn("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    deletedAt: timestampColumn("deleted_at", { withTimezone: true, precision: 3 }),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
     uniqueIndex("package_plans_codename_unique_idx").on(table.codename).where(sql`deleted_at IS NULL`),
     index("package_plans_active_sort_idx").on(table.active, table.sortOrder).where(sql`deleted_at IS NULL`),
-    check("package_plans_credit_hours_positive_chk", sql`${table.creditHours} > 0`),
-    check("package_plans_price_amount_positive_chk", sql`${table.priceAmount} > 0`),
-    check("package_plans_sort_order_non_negative_chk", sql`${table.sortOrder} >= 0`),
+    // checkConstraint(name, pgSql, sqliteSql) — dialect-aware. SQLite enforces the
+    // same predicate via raw text comparison (works because all values share scale=2).
+    checkConstraint(
+      "package_plans_credit_hours_positive_chk",
+      sql`${table.creditHours} > 0`,
+      sql`${table.creditHours} > 0`
+    ),
+    checkConstraint(
+      "package_plans_price_amount_positive_chk",
+      sql`${table.priceAmount} > 0`,
+      sql`${table.priceAmount} > 0`
+    ),
+    checkConstraint(
+      "package_plans_sort_order_non_negative_chk",
+      sql`${table.sortOrder} >= 0`,
+      sql`${table.sortOrder} >= 0`
+    ),
   ]
 );
 ```
@@ -213,12 +247,18 @@ export const packagePlans = createTable(
 Add `changeAmountHours` numeric column + XOR CHECK constraint; relax `changeAmount` to nullable:
 
 ```typescript
+// Use numericColumn (NOT textColumn w/ options) — textColumn does not accept precision/scale.
 changeAmount: integerColumn("change_amount"),  // REMOVED .notNull() — now nullable
-changeAmountHours: textColumn("change_amount_hours", { precision: 12, scale: 2 }),  // NEW
+changeAmountHours: numericColumn("change_amount_hours", { precision: 12, scale: 2 }),  // NEW
 // ...existing columns...
-// New check:
-check(
+// New XOR CHECK — use checkConstraint (NOT raw check) for SQLite compatibility.
+checkConstraint(
   "credit_transactions_change_amount_xor_chk",
+  sql`
+    (${table.changeAmount} IS NOT NULL AND ${table.changeAmountHours} IS NULL)
+    OR
+    (${table.changeAmount} IS NULL AND ${table.changeAmountHours} IS NOT NULL)
+  `,
   sql`
     (${table.changeAmount} IS NOT NULL AND ${table.changeAmountHours} IS NULL)
     OR
@@ -231,12 +271,17 @@ Add index: `index("credit_transactions_change_amount_hours_idx").on(table.studen
 
 ### 1.3 Extend `backend/db/schema/billing/billing.ts` (payments + invoices)
 
+> **SE Pattern Compliance (R2):**
+> - FK columns use `uuidDefaultColumn(name).references(...)` (NOT `uuidColumn(name).references(...)`) — `uuidColumn` is reserved for PK columns (it applies `.defaultRandom().primaryKey()` internally). All FK columns in the existing schema (`payments.invoiceId`, `invoices.parentId`, etc.) use `uuidDefaultColumn`.
+
 **`payments` table — add columns:**
 
 ```typescript
-packagePlanId: uuidColumn("package_plan_id").references(() => packagePlans.id, { onDelete: "set null" }),
+// FK column — use uuidDefaultColumn (matches existing payments.invoiceId pattern).
+packagePlanId: uuidDefaultColumn("package_plan_id").references(() => packagePlans.id, { onDelete: "set null" }),
 paymentGateway: paymentGatewayEnum("payment_gateway").notNull().default("NONE").$type<PaymentGateway>(),
-creditHours: textColumn("credit_hours", { precision: 12, scale: 2 }),
+// numericColumn (NOT textColumn w/ options) — textColumn does not accept precision/scale.
+creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }),
 isPaidStatusOn: booleanColumn("is_paid_status_on").notNull().default(false),
 paymentNote: textColumn("payment_note"),
 ```
@@ -246,7 +291,7 @@ Add indexes: `(paymentGateway)`, `(packagePlanId)`, `(isPaidStatusOn)`.
 **`invoices` table — add column:**
 
 ```typescript
-creditHours: textColumn("credit_hours", { precision: 12, scale: 2 }),
+creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }),
 ```
 
 ### 1.4 Extend `backend/db/schema/students/students.ts`
@@ -254,11 +299,22 @@ creditHours: textColumn("credit_hours", { precision: 12, scale: 2 }),
 Add two columns + two CHECKs:
 
 ```typescript
-creditHoursRemaining: textColumn("credit_hours_remaining").notNull().default("0.00"),
-creditHoursTotal: textColumn("credit_hours_total").notNull().default("0.00"),
-// New checks:
-check("students_credit_hours_remaining_non_negative_chk", sql`${table.creditHoursRemaining} >= 0`),
-check("students_credit_hours_total_non_negative_chk", sql`${table.creditHoursTotal} >= 0`),
+// numericColumn — PG produces numeric(12,2) (returned as string); SQLite stores as text.
+// Default to "0.00" (string literal — both PG and SQLite accept string defaults on numeric columns).
+creditHoursRemaining: numericColumn("credit_hours_remaining", { precision: 12, scale: 2 }).notNull().default("0.00"),
+creditHoursTotal: numericColumn("credit_hours_total", { precision: 12, scale: 2 }).notNull().default("0.00"),
+// New checks — use checkConstraint (NOT raw check) for SQLite compatibility.
+// Both predicates work on SQLite via lexicographic comparison (all values share scale=2 → consistent ordering).
+checkConstraint(
+  "students_credit_hours_remaining_non_negative_chk",
+  sql`${table.creditHoursRemaining} >= 0`,
+  sql`${table.creditHoursRemaining} >= 0`
+),
+checkConstraint(
+  "students_credit_hours_total_non_negative_chk",
+  sql`${table.creditHoursTotal} >= 0`,
+  sql`${table.creditHoursTotal} >= 0`
+),
 ```
 
 ### 1.5 Extend `backend/db/schema/classes/scheduling.ts` (class_instances)
@@ -268,6 +324,9 @@ Add `billedUnit` column:
 ```typescript
 billedUnit: billedUnitEnum("billed_unit"),  // nullable
 ```
+
+> **R2 SE NOTE — Dead Code in v1:** The `billedUnit` column is added in v1 as schema scaffolding only. No v1 code path writes `HOUR_CREDIT` — the only writers (`recurring-schedule` generation + `class-instance` activation) are deferred to Epic 6 (`student.billingMode` discriminator). The dedicated `CreditService.deductHoursForBooking` / `refundHoursOnCancel` methods (Phase 3.2) are also dead code in v1 — they are unit-tested (Phase 10.3) but no production code path invokes them until Epic 6 lands. This is intentional (de-risking the CreditService extension before the scheduling integration re-touches it), but should be documented in the outcome file so a future agent doesn't remove them as "unused".
+
 
 ### 1.6 Enum additions to `backend/db/schema/enums.ts`
 
@@ -454,6 +513,20 @@ export interface AccountingPaymentUpdateInput {
   isPaidStatusOn?: boolean;
   paymentNote?: string | null;
   creditHours?: number;  // triggers ADJUSTMENT ledger row
+  // R2 SE: optimistic lock on the parent invoice (which has `version`).
+  // Required when `isPaidStatusOn` or `creditHours` is set (those mutate invoice status / ledger).
+  // Optional for `paymentGateway` / `paymentNote`-only edits (no invoice mutation).
+  expectedInvoiceVersion?: number;
+}
+
+export interface AccountingPaymentTogglePaidInput {
+  paymentId: string;
+  isPaidStatusOn: boolean;
+  // R2 SE: required for the invoice status cascade — concurrent `togglePaidStatus`
+  // calls on payments of the same invoice would otherwise race on the invoice row.
+  // The service acquires `acquireInvoiceLock(tx, invoiceId)` BEFORE reading the
+  // invoice (mirrors `BillingRepository.updateInvoiceStatus`).
+  expectedInvoiceVersion?: number;
 }
 
 export interface AccountingPaymentFilter {
@@ -536,9 +609,99 @@ Extend with hour-based variants:
 ### `backend/db/repo/students/student.repository.ts` (edit)
 
 Add hour-balance mutators (mirror existing `addClasses` / `deductClasses` — note that existing signatures use `export const xxx = async (studentId, tErrors, amount=1, expectedVersion?, tx?)` and write via `adjustClassesQuota` helper):
-- `addCreditHours(studentId, tErrors, hours, expectedVersion?, tx?)` — bumps `creditHoursRemaining` and `creditHoursTotal` by `hours` (numeric, not integer)
-- `deductCreditHours(studentId, tErrors, hours, expectedVersion?, tx?)` — decrements `creditHoursRemaining` by `hours`; throws `INSUFFICIENT_HOURS` if it would go negative
-- `getCreditHourBalance(studentId, tx?)` — returns `{ creditHoursRemaining, creditHoursTotal }`
+
+> **R2 SE Pattern Compliance (verified against existing `addClasses`/`deductClasses` in `student.repository.ts` lines 318-401):**
+> - Both `addCreditHours` and `deductCreditHours` reuse the existing `adjustClassesQuota` private helper which already: (1) acquires `acquireStudentLock(tx, studentId)` advisory lock, (2) reads the current row, (3) checks `expectedVersion?` for optimistic lock, (4) performs atomic SQL increment via `sql\`${students.creditHoursRemaining} + ${hours}\``, (5) bumps `version: sql\`${students.version} + 1\``.
+> - `deductCreditHours` MUST pre-check `current.creditHoursRemaining - hours >= 0` BEFORE the SQL decrement — throw `ConflictError(tErrors.credit.insufficientHours({ studentId, remaining: current.creditHoursRemaining, required: hours }))` if insufficient (mirrors the existing `CreditService.deductForBooking` pre-check at line 250-252; the DB-level CHECK `students_credit_hours_remaining_non_negative_chk` is the safety net).
+> - Numeric values are passed as `number` (TypeScript) but rendered as `sql\`... + ${hours}\`` so Drizzle serializes them safely into the SQL string. The `numericColumn` returns `string` from the DB on read — `addCreditHours`/`deductCreditHours` accept `number` for ergonomics; the SQL arithmetic coerces correctly.
+
+```typescript
+export namespace StudentRepository {
+  // ...existing exports unchanged...
+
+  /**
+   * Bumps creditHoursRemaining + creditHoursTotal atomically. Reuses adjustClassesQuota
+   * (acquires acquireStudentLock, checks expectedVersion, atomic SQL increment + version bump).
+   */
+  export const addCreditHours = async (
+    studentId: string,
+    tErrors: ErrorsLabels,
+    hours: number,
+    expectedVersion?: number,
+    tx?: DBTransaction
+  ): Promise<Types.StudentSelectType> =>
+    runStudentUpdate(
+      studentId,
+      () => ({
+        creditHoursRemaining: sql`${students.creditHoursRemaining} + ${hours}`,
+        creditHoursTotal: sql`${students.creditHoursTotal} + ${hours}`,
+      }),
+      tErrors,
+      expectedVersion,
+      tx
+    );
+
+  /**
+   * Decrements creditHoursRemaining by `hours` atomically. Pre-checks for sufficient
+   * balance (throws ConflictError on insufficient) — the DB CHECK is a safety net only.
+   *
+   * NOTE: Unlike deductClasses (which subtracts a fixed integer), this version must
+   * subtract a decimal `hours` value AND pre-check `current.creditHoursRemaining >= hours`.
+   * The pre-check is OUTSIDE the SQL — done inside the tx after acquiring the lock.
+   */
+  export const deductCreditHours = async (
+    studentId: string,
+    tErrors: ErrorsLabels,
+    hours: number,
+    expectedVersion?: number,
+    tx?: DBTransaction
+  ): Promise<Types.StudentSelectType> => {
+    const runner = async (t: DBTransaction) => {
+      await acquireStudentLock(t, studentId); // from existing private helper
+      const [current] = await t.select().from(students).where(eq(students.id, studentId)).limit(1);
+      if (!current) throw new NotFoundError("STUDENT", tErrors.studentNotFound(studentId));
+      if (expectedVersion !== undefined && current.version !== expectedVersion) {
+        throw new ConflictError(tErrors.studentVersionMismatch({ id: studentId, expectedVersion, gotVersion: current.version }));
+      }
+      const currentRemaining = Number(current.creditHoursRemaining); // numericColumn returns string
+      if (currentRemaining < hours) {
+        throw new ConflictError(tErrors.credit.insufficientHours({ studentId, remaining: currentRemaining, required: hours }));
+      }
+      const [updated] = await t
+        .update(students)
+        .set({
+          creditHoursRemaining: sql`${students.creditHoursRemaining} - ${hours}`,
+          version: sql`${students.version} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(students.id, studentId))
+        .returning();
+      return updated;
+    };
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  /** Read-only — returns the hour balance from the students table. Uses queryDb(tx). */
+  export const getCreditHourBalance = async (
+    studentId: string,
+    tx?: DBTransaction
+  ): Promise<{ creditHoursRemaining: number; creditHoursTotal: number }> => {
+    const q = queryDb(tx);
+    const [row] = await q
+      .select({
+        creditHoursRemaining: students.creditHoursRemaining,
+        creditHoursTotal: students.creditHoursTotal,
+      })
+      .from(students)
+      .where(eq(students.id, studentId))
+      .limit(1);
+    return {
+      creditHoursRemaining: row ? Number(row.creditHoursRemaining) : 0,
+      creditHoursTotal: row ? Number(row.creditHoursTotal) : 0,
+    };
+  };
+}
+```
 
 Re-export from `backend/db/repo/billing/index.ts` (for accounting repositories) and `backend/db/repo/students/index.ts` (for student mutators).
 
@@ -563,18 +726,53 @@ Permission: `ACCOUNTING_PAYMENTS_MANAGE` for write ops; no permission check on `
 
 ### `backend/services/billing/accounting-payment.service.ts` (new) — THE ORCHESTRATOR
 
+> **R2 SE Pattern Compliance (verified against `billing-management.service.ts` + `credit.service.ts`):**
+>
+> **Transaction boundaries:**
+> - `recordPayment`, `togglePaidStatus`, `update` (when `creditHours` changes) ALL wrap their multi-table writes in a single `db.transaction(async tx => { ... })`. Every repo call inside the tx passes `tx`.
+> - Repo reads inside the tx use `queryDb(tx)` (stateless reads reuse the tx's snapshot).
+>
+> **Advisory locks (defense-in-depth against lost updates):**
+> - `recordPayment`: acquire `acquireAdvisoryLock(tx, \`student_\${studentId}\`)` BEFORE bumping `students.creditHoursRemaining` — two concurrent `recordPayment` calls with DIFFERENT idempotency keys (e.g. admin changes `paymentDate` by 1 second) would otherwise race on the balance bump (atomic SQL increment + version bump mitigates but doesn't prevent the ledger from showing two simultaneous purchases for a momentarily stale balance). The advisory lock serializes balance-affecting ops per student.
+> - `update` (creditHours change): same `acquireAdvisoryLock(tx, \`student_\${studentId}\`)` for the same reason.
+> - `togglePaidStatus`: acquire `acquireAdvisoryLock(tx, \`invoice_\${invoiceId}\`)` BEFORE reading the invoice (mirrors `BillingRepository.acquireInvoiceLock` + `updateInvoiceStatus`).
+>
+> **Idempotency:**
+> - `recordPayment`: deterministic SHA-256 key derived from `studentId|packagePlanId|amount|currency|paymentDate|gateway`. Idempotency check is INSIDE the tx (eliminates TOCTOU race — matches `CreditService.recordPurchaseIfMissing` pattern). On duplicate-key: RETURN the existing row (do NOT throw `ConflictError`). This DIVERGES from the public `CreditService.recordPurchase` (which throws on duplicate) — `recordPayment` follows the `recordPurchaseIfMissing` "return existing" pattern per US-2.1 AC#4. Raw Postgres 23505 unique violations are also caught at the tx boundary and resolved to the existing row (matches `recordPurchaseIfMissing`).
+> - `update`, `togglePaidStatus`: idempotent via the optimistic-lock `version` check on the invoice (a concurrent call's `version` mismatch surfaces as `tErrors.billing.invoiceVersionMismatch`).
+>
+> **Error handling:**
+> - `NotFoundError("STUDENT", tErrors.studentNotFound(studentId))` when student missing.
+> - `NotFoundError("PACKAGE_PLAN", tErrors.package.planArchived(id))` when package archived between form-open and submit.
+> - `ValidationError(tErrors.package.invalidInput)` for `creditHours <= 0` / `priceAmount <= 0`.
+> - `ConflictError(tErrors.package.codenameAlreadyExists)` on duplicate codename (PG 23505 from the partial unique index).
+> - `ConflictError(tErrors.credit.insufficientHours({ studentId, remaining }))` when `deductCreditHours` would push `creditHoursRemaining < 0`.
+> - `ConflictError(tErrors.credit.duplicatePurchase)` NOT thrown by `recordPayment` (returns existing row instead — see above).
+>
+> **Permission checks (defense in depth):**
+> - Service calls `requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors)` at the top of `recordPayment` / `togglePaidStatus` / `update`.
+> - Service calls `requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_VIEW, tErrors)` at the top of `getById` / `listPaginated` / `getStudentBalance`, PLUS `assertAssociatedOrManage(actorUserId, studentId, tErrors, AppPermission.ACCOUNTING_PAYMENTS_MANAGE)` for student-scoped variants (IDOR protection — matches `CreditService.getStudentBalance`).
+> - GraphQL resolver additionally calls `PermissionsService.hasPermission(actorUserId, AppPermission.XXX)` (matches `credit.mutation.ts` pattern) so unauthorized users get a friendly `insufficientPermissions` error before reaching the service.
+
 ```typescript
 export namespace AccountingPaymentService {
   /**
    * Records an accounting payment:
-   * 1. Validates student + package plan active
-   * 2. In one db.transaction:
-   *    a. Creates invoice (invoiceType=CREDIT_HOURS_PACKAGE, status=UNPAID|PAID based on toggle)
-   *    b. Creates payment row with package_plan_id, payment_gateway, credit_hours, is_paid_status_on
-   *    c. Calls CreditService.recordHourPurchase (inserts credit_transactions row + bumps student balance)
-   * 3. Returns the joined AccountingPaymentReturnType
+   * 1. Validates student exists + package plan active (pre-tx read; not racy because the
+   *    service rejects mid-tx archival via the `active=false` snapshot check inside the tx)
+   * 2. Derives idempotency key from input
+   * 3. In one db.transaction(async tx => { ... }):
+   *    a. acquireAdvisoryLock(tx, `student_${studentId}`)
+   *    b. Check for existing row by idempotencyKey — if found, return it (return-existing-on-dup)
+   *    c. Re-validate student + package plan active inside the tx (catches mid-tx archival)
+   *    d. Insert invoice (invoiceType=CREDIT_HOURS_PACKAGE, status=UNPAID|PAID based on toggle)
+   *    e. Insert payment row with package_plan_id, payment_gateway, credit_hours, is_paid_status_on
+   *    f. Call CreditService.recordHourPurchase(tx, ...) — inserts credit_transactions row + bumps
+   *       student balance via atomic SQL increment (CreditService handles the ledger insert)
+   * 4. AFTER commit (non-blocking): dispatch ACCOUNTING_PAYMENT_RECORDED notification
+   * 5. Return the joined AccountingPaymentReturnType
    *
-   * Idempotency: deterministic sha256 key; duplicate returns existing row.
+   * Idempotency: deterministic sha256 key; duplicate returns existing row (NOT throw).
    */
   export async function recordPayment(
     actorUserId: string,
@@ -585,20 +783,31 @@ export namespace AccountingPaymentService {
   /**
    * Toggles paid status on an existing payment:
    * - If flipping ON → invoice.status = PAID, paidDate = paymentDate (or NOW())
-   * - If flipping OFF → check no other paid siblings; if none, invoice.status = UNPAID, paidDate = NULL
-   * - Respects system_setting `accounting_paid_toggle_auto_flips_invoice`
+   * - If flipping OFF → check no other paid siblings via findPaidSiblingsByInvoice;
+   *   if none, invoice.status = UNPAID, paidDate = NULL
+   * - Respects system_setting `accounting_paid_toggle_auto_flips_invoice` (read INSIDE the tx
+   *   via SystemSettingsService.getSettingByKey(key, tx))
+   * - acquires `acquireAdvisoryLock(tx, invoice_${invoiceId})` before reading invoice
    */
   export async function togglePaidStatus(
     actorUserId: string,
-    paymentId: string,
-    isPaidStatusOn: boolean,
+    input: AccountingPaymentTogglePaidInput,
     tErrors: ErrorsLabels
   ): Promise<AccountingPaymentReturnType>;
 
   /**
    * Edits a payment's gateway/note/creditHours.
-   * - creditHours change → inserts ADJUSTMENT credit_transaction row with delta
-   * - creditHours decrease rejected if it would push student.creditHoursRemaining < 0
+   * - For gateway/note-only edits: single UPDATE on payment row (no tx, no invoice mutation,
+   *   no optimistic lock required).
+   * - For creditHours change: in db.transaction(async tx => { ... }):
+   *   a. acquireAdvisoryLock(tx, `student_${studentId}`)
+   *   b. Read payment + invoice + student inside tx
+   *   c. If creditHours increase: insert ADJUSTMENT credit_transaction with deltaHours=+(new-old);
+   *      bump student.creditHoursRemaining + creditHoursTotal atomically.
+   *   d. If creditHours decrease: pre-check current.creditHoursRemaining >= (old-new);
+   *      if insufficient, throw ConflictError(tErrors.credit.insufficientHours(...));
+   *      else insert ADJUSTMENT row with deltaHours=-(old-new); decrement student.creditHoursRemaining.
+   *   e. Update payment.creditHours to the new value (snapshot of plan at edit time).
    */
   export async function update(
     actorUserId: string,
@@ -606,34 +815,66 @@ export namespace AccountingPaymentService {
     tErrors: ErrorsLabels
   ): Promise<AccountingPaymentReturnType>;
 
-  export async function getById(actorUserId, paymentId, tErrors): Promise<AccountingPaymentReturnType>;
+  export async function getById(
+    actorUserId: string,
+    paymentId: string,
+    tErrors: ErrorsLabels
+  ): Promise<AccountingPaymentReturnType>;
   export async function listPaginated(
-    actorUserId, filter, pagination, tErrors
+    actorUserId: string,
+    filter: AccountingPaymentFilter,
+    pagination: PaginationArgs | null,
+    tErrors: ErrorsLabels
   ): Promise<{ rows: AccountingPaymentReturnType[]; totalCount: number }>;
   export async function getStudentBalance(
-    actorUserId, studentId, tErrors
+    actorUserId: string,
+    studentId: string,
+    tErrors: ErrorsLabels
   ): Promise<AccountingPaymentBalanceReturnType>;
 }
 ```
 
-Permission: `ACCOUNTING_PAYMENTS_MANAGE` for `recordPayment` / `togglePaidStatus` / `update`; `ACCOUNTING_PAYMENTS_VIEW` (or `assertAssociatedOrManage`) for `getById` / `listPaginated` / `getStudentBalance`.
+Permission: `ACCOUNTING_PAYMENTS_MANAGE` for `recordPayment` / `togglePaidStatus` / `update`; `ACCOUNTING_PAYMENTS_VIEW` + `assertAssociatedOrManage` for `getById` / `listPaginated` (when filtered by studentId) / `getStudentBalance`. `listPaginated` without studentId filter requires plain `ACCOUNTING_PAYMENTS_VIEW` (admin views all).
 
 ### `backend/services/billing/credit.service.ts` (edit) — extend with hour variants
 
 Add new methods alongside existing class-based ones (do NOT modify existing `recordPurchase`, `deductForBooking`, `refundOnCancel`):
 
+> **R2 SE Pattern Compliance (verified against existing `CreditService`):**
+> - `recordHourPurchase` mirrors `recordPurchaseIfMissing` (NOT `recordPurchase`) — it's an internal helper called from `AccountingPaymentService.recordPayment`'s transaction. It takes `tx: DBTransaction` as its first param (NOT a top-level `db.transaction`) — the caller owns the tx. It does NOT call `requirePermission` itself (the caller's permission check covers it).
+> - `deductHoursForBooking` / `refundHoursOnCancel` mirror the existing `deductForBooking` / `refundOnCancel` (line 240-306 of `credit.service.ts`) — they accept `tx: DBTransaction` as a positional parameter, do NOT call `requirePermission`, and reuse the shared `runIdempotentBookingLedgerOp` helper. Refactor the helper to accept either `deltaClasses` OR `deltaHours` (one is non-null per the XOR constraint enforced by the DB CHECK).
+> - `deductHoursForBooking` MUST pre-check `current.creditHoursRemaining >= hours` BEFORE the SQL decrement — throw `ConflictError(tErrors.credit.insufficientHours({ studentId, remaining: current.creditHoursRemaining, required: hours }))` if insufficient (mirrors the existing `deductForBooking`'s pre-check at line 250-252).
+
 ```typescript
 export namespace CreditService {
   // ...existing exports unchanged...
 
-  /** Records an hour-based credit purchase. Mirrors recordPurchase but writes change_amount_hours. */
+  /**
+   * Records an hour-based credit purchase. Internal helper — called inside
+   * AccountingPaymentService.recordPayment's transaction. Mirrors recordPurchaseIfMissing
+   * (return-existing-on-dup) but writes change_amount_hours instead of change_amount.
+   *
+   * IMPORTANT: Does NOT call requirePermission (caller owns the tx + permission check).
+   * Does NOT wrap in db.transaction (caller owns the tx).
+   */
   export async function recordHourPurchase(
     actorUserId: string,
     input: CreditHourTransactionSubmitInput,
+    idempotencyKey: string, // derived by caller — needed for return-existing-on-dup
+    tx: DBTransaction,
     tErrors: ErrorsLabels
   ): Promise<CreditTransactionReturnType>;
 
-  /** Deducts hours for a class booking. Called by class-instance activation when billedUnit=HOUR_CREDIT. */
+  /**
+   * Deducts hours for a class booking. Called by class-instance activation when
+   * billedUnit=HOUR_CREDIT (deferred to Epic 6 — dead code in v1, unit-tested only).
+   *
+   * Pre-checks current.creditHoursRemaining >= hours; throws ConflictError
+   * (tErrors.credit.insufficientHours) if insufficient.
+   *
+   * Mirrors deductForBooking: takes tx as positional param, reuses
+   * runIdempotentBookingLedgerOp, does NOT call requirePermission.
+   */
   export async function deductHoursForBooking(
     studentId: string,
     classInstanceId: string,
@@ -645,7 +886,7 @@ export namespace CreditService {
     locale?: string
   ): Promise<void>;
 
-  /** Refunds hours on class cancellation. Idempotent via ledger key. */
+  /** Refunds hours on class cancellation. Idempotent via ledger key. Mirrors refundOnCancel. */
   export async function refundHoursOnCancel(
     studentId: string,
     classInstanceId: string,
@@ -656,7 +897,7 @@ export namespace CreditService {
     tErrors: ErrorsLabels
   ): Promise<void>;
 
-  /** Returns student's hour balance (creditHoursRemaining + creditHoursTotal). */
+  /** Returns student's hour balance (creditHoursRemaining + creditHoursTotal). Read-only. */
   export async function getStudentHourBalance(
     actorUserId: string,
     studentId: string,
@@ -680,9 +921,14 @@ Extend `backend/services/billing/permission-utils.ts`:
 
 ## Phase 5: GraphQL Layer
 
-> **PATTERN COMPLIANCE:** The existing Pothos layer uses FLAT files per feature inside `backend/graphql/pothos/billing/` (e.g. `billing-alerts.pothos.ts`, `billing-history.pothos.ts`, `billing-management.pothos.ts`, `credit.pothos.ts`). There are NO `types/billing/`, `queries/billing/`, or `mutations/billing/` subdirectories — types, queries, and mutations for a feature live together in a single `.pothos.ts` file. The new accounting feature follows this pattern.
+> **R2 SE Pattern Compliance (verified against the actual codebase):**
+> - The existing Pothos layer uses FLAT files per feature inside `backend/graphql/pothos/billing/` for OBJECT TYPES ONLY (e.g. `billing-alerts.pothos.ts`, `billing-history.pothos.ts`, `billing-management.pothos.ts`, `credit.pothos.ts`). QUERIES live in `backend/graphql/query/billing/<name>.query.ts` (using `gqlSchemaBuilder.queryField(...)` singular form — see `backend/graphql/query/billing/credit.query.ts`). MUTATIONS live in `backend/graphql/mutation/billing/<name>.mutation.ts` (using `gqlSchemaBuilder.mutationField(...)` singular form — see `backend/graphql/mutation/billing/credit.mutation.ts`).
+> - The previous plan revision (R1) incorrectly prescribed putting types + queries + mutations ALL in one `accounting.pothos.ts` file. That's WRONG — split into 3 files matching the existing pattern.
+> - Resolver pattern (verified from `credit.mutation.ts` + `credit.query.ts`): `authScopes: { loggedIn: true }` (basic auth at Pothos layer) + `await requireAuth(ctx)` for caller userId + `await PermissionsService.hasPermission(actorUserId, AppPermission.XXX)` manual check inside resolver + service-side `requirePermission` (defense in depth — matches `credit.service.ts` line 153). Do NOT use `authScopes: { permission: AppPermission.XXX }` as the sole gate (that pattern is only used in `permission-management.pothos.ts`, not billing).
 
-### New Pothos file: `backend/graphql/pothos/billing/accounting.pothos.ts`
+### New files (3, not 1):
+
+#### 5.1 `backend/graphql/pothos/billing/accounting.pothos.ts` — Object + Input types ONLY
 
 Define ALL of the following in this single file:
 
@@ -694,22 +940,214 @@ Define ALL of the following in this single file:
 **Input types:**
 - `AccountingPaymentFilterInput` — input type for filter
 - `PackagePlanInput`, `PackagePlanUpdateInput` — input types
-- `AccountingPaymentInput`, `AccountingPaymentUpdateInput` — input types
+- `AccountingPaymentInput`, `AccountingPaymentTogglePaidInput`, `AccountingPaymentUpdateInput` — input types (mirror the service-layer types from Phase 2)
 
-**Queries:**
-- `packagePlans(activeOnly: Boolean)` → `[PackagePlan!]!`
-- `packagePlan(id: ID!)` → `PackagePlan`
-- `accountingPayments(filter: AccountingPaymentFilterInput, pagination: PaginationInput)` → `AccountingPaymentConnection!`
-- `accountingPayment(id: ID!)` → `AccountingPayment`
-- `studentCreditHourBalance(studentId: ID!)` → `AccountingPaymentBalance!`
+```typescript
+// Example skeleton — full field list per Phase 2 type definitions:
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  BilledUnitPothosEnum,
+  CurrencyCodePothosObject,
+  InvoiceStatusPothosObject,
+  InvoiceTypePothosObject,
+  PaymentGatewayPothosEnum,
+} from "@/backend/graphql/pothos/shared/enum.pothos";
+import { packagePlanFields } from "@/backend/graphql/pothos/billing/__shared__/packagePlanFieldHelpers"; // NEW shared helper file (see Phase 5.4)
+import type {
+  AccountingPaymentBalanceReturnType,
+  AccountingPaymentReturnType,
+  AccountingPaymentSubmitInput,
+  AccountingPaymentTogglePaidInput,
+  AccountingPaymentUpdateInput,
+  AccountingPaymentFilter,
+  PackagePlanReturnType,
+  PackagePlanSubmitInput,
+  PackagePlanUpdateInput,
+} from "@/backend/types";
 
-**Mutations:**
-- `createPackagePlan(input: PackagePlanInput!)` → `PackagePlan!` (perm: `ACCOUNTING_PAYMENTS_MANAGE`)
-- `updatePackagePlan(input: PackagePlanUpdateInput!)` → `PackagePlan!` (perm: `ACCOUNTING_PAYMENTS_MANAGE`)
-- `archivePackagePlan(id: ID!)` → `PackagePlan!` (perm: `ACCOUNTING_PAYMENTS_MANAGE`)
-- `recordAccountingPayment(input: AccountingPaymentInput!)` → `AccountingPayment!` (perm: `ACCOUNTING_PAYMENTS_MANAGE`)
-- `updateAccountingPayment(input: AccountingPaymentUpdateInput!)` → `AccountingPayment!` (perm: `ACCOUNTING_PAYMENTS_MANAGE`)
-- `toggleAccountingPaymentPaidStatus(id: ID!, isPaidStatusOn: Boolean!)` → `AccountingPayment!` (perm: `ACCOUNTING_PAYMENTS_MANAGE`)
+export const PackagePlanRef = gqlSchemaBuilder.objectRef<PackagePlanReturnType>("PackagePlan");
+export const PackagePlanPothosObject = PackagePlanRef.implement({
+  fields: t => packagePlanFields(t),
+});
+
+export const AccountingPaymentRef = gqlSchemaBuilder.objectRef<AccountingPaymentReturnType>("AccountingPayment");
+export const AccountingPaymentPothosObject = AccountingPaymentRef.implement({
+  fields: t => ({
+    id: t.exposeString("id"),
+    invoiceId: t.exposeString("invoiceId"),
+    studentId: t.exposeString("studentId", { nullable: true }),
+    studentName: t.exposeString("studentName", { nullable: true }),
+    packagePlanId: t.exposeString("packagePlanId", { nullable: true }),
+    packageCodename: t.exposeString("packageCodename", { nullable: true }),
+    amount: t.exposeString("amount"),
+    currency: t.expose("currency", { type: CurrencyCodePothosObject }),
+    creditHours: t.exposeString("creditHours", { nullable: true }),
+    paymentGateway: t.expose("paymentGateway", { type: PaymentGatewayPothosEnum }),
+    paymentDate: t.expose("paymentDate", { type: "DateTime" }),
+    isPaidStatusOn: t.exposeBoolean("isPaidStatusOn"),
+    paymentNote: t.exposeString("paymentNote", { nullable: true }),
+    createdAt: t.expose("createdAt", { type: "DateTime" }),
+  }),
+});
+
+export const AccountingPaymentBalanceRef =
+  gqlSchemaBuilder.objectRef<AccountingPaymentBalanceReturnType>("AccountingPaymentBalance");
+export const AccountingPaymentBalancePothosObject = AccountingPaymentBalanceRef.implement({
+  fields: t => ({
+    id: t.string({ resolve: parent => parent.studentId }),
+    studentId: t.exposeString("studentId"),
+    creditHoursRemaining: t.exposeString("creditHoursRemaining"), // numeric returned as string per Drizzle
+    creditHoursTotal: t.exposeString("creditHoursTotal"),
+  }),
+});
+
+export const PackagePlanInput = gqlSchemaBuilder
+  .inputRef<PackagePlanSubmitInput>("PackagePlanInput")
+  .implement({
+    fields: t => ({
+      codename: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
+      displayName: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+      description: t.string({ required: false }),
+      creditHours: t.float({ required: true, directives: { constraint: { min: 0.01 } } }),
+      priceAmount: t.float({ required: true, directives: { constraint: { min: 0.01 } } }),
+      currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
+      active: t.boolean({ required: false }),
+      sortOrder: t.int({ required: false }),
+    }),
+  });
+
+export const PackagePlanUpdateInput = gqlSchemaBuilder
+  .inputRef<PackagePlanUpdateInput>("PackagePlanUpdateInput")
+  .implement({
+    fields: t => ({
+      id: t.id({ required: true }),
+      codename: t.string({ required: false }),
+      displayName: t.string({ required: false }),
+      description: t.string({ required: false }),
+      creditHours: t.float({ required: false }),
+      priceAmount: t.float({ required: false }),
+      currency: t.arg({ type: CurrencyCodePothosObject, required: false }),
+      active: t.boolean({ required: false }),
+      sortOrder: t.int({ required: false }),
+      version: t.int({ required: true }), // optimistic lock
+    }),
+  });
+
+export const AccountingPaymentInput = gqlSchemaBuilder
+  .inputRef<AccountingPaymentSubmitInput>("AccountingPaymentInput")
+  .implement({ /* ...fields... */ });
+
+export const AccountingPaymentTogglePaidInput = gqlSchemaBuilder
+  .inputRef<AccountingPaymentTogglePaidInput>("AccountingPaymentTogglePaidInput")
+  .implement({
+    fields: t => ({
+      paymentId: t.id({ required: true }),
+      isPaidStatusOn: t.boolean({ required: true }),
+      expectedInvoiceVersion: t.int({ required: false }), // optimistic lock
+    }),
+  });
+
+export const AccountingPaymentUpdateInput = gqlSchemaBuilder
+  .inputRef<AccountingPaymentUpdateInput>("AccountingPaymentUpdateInput")
+  .implement({
+    fields: t => ({
+      id: t.id({ required: true }),
+      paymentGateway: t.arg({ type: PaymentGatewayPothosEnum, required: false }),
+      isPaidStatusOn: t.boolean({ required: false }),
+      paymentNote: t.string({ required: false }),
+      creditHours: t.float({ required: false }),
+      expectedInvoiceVersion: t.int({ required: false }), // required when isPaidStatusOn or creditHours set
+    }),
+  });
+
+export const AccountingPaymentFilterInput = gqlSchemaBuilder
+  .inputRef<AccountingPaymentFilter>("AccountingPaymentFilterInput")
+  .implement({ /* ...fields... */ });
+```
+
+#### 5.2 `backend/graphql/query/billing/accounting.query.ts` — Queries ONLY
+
+```typescript
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  AccountingPaymentBalancePothosObject,
+  AccountingPaymentFilterInput,
+  AccountingPaymentPothosObject,
+  PackagePlanPothosObject,
+} from "@/backend/graphql/pothos/billing/accounting.pothos";
+import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { AccountingPaymentService, PackagePlanService, PermissionsService } from "@/backend/services";
+import { AppPermission } from "@/backend/enum";
+
+gqlSchemaBuilder.queryField("packagePlans", t =>
+  t.field({
+    type: [PackagePlanPothosObject],
+    authScopes: { loggedIn: true },
+    args: { activeOnly: t.arg.boolean({ required: false }) },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      const tErrors = ctx.t().errorsTranslations;
+      // View permission OR manage (admin auto-fill dropdown)
+      const hasPermission =
+        (await PermissionsService.hasPermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_VIEW)) ||
+        (await PermissionsService.hasPermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE));
+      if (!hasPermission) throw new Error(tErrors.insufficientPermissions);
+      return args.activeOnly
+        ? PackagePlanService.listActive()
+        : PackagePlanService.listPaginated(actorUserId, {}, null, tErrors).then(r => r.rows);
+    },
+  })
+);
+
+// ...similar pattern for: packagePlan(id), accountingPayments(filter, pagination),
+// accountingPayment(id), studentCreditHourBalance(studentId)...
+```
+
+#### 5.3 `backend/graphql/mutation/billing/accounting.mutation.ts` — Mutations ONLY
+
+```typescript
+import { AppPermission } from "@/backend/enum";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import {
+  AccountingPaymentPothosObject,
+  AccountingPaymentInput,
+  AccountingPaymentTogglePaidInput,
+  AccountingPaymentUpdateInput,
+  PackagePlanInput,
+  PackagePlanPothosObject,
+  PackagePlanUpdateInput,
+} from "@/backend/graphql/pothos/billing/accounting.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { AccountingPaymentService, PackagePlanService, PermissionsService } from "@/backend/services";
+
+gqlSchemaBuilder.mutationField("createPackagePlan", t =>
+  t.field({
+    type: PackagePlanPothosObject,
+    description: "Create a new package plan (admin-only).",
+    authScopes: { loggedIn: true },
+    args: { input: t.arg({ type: PackagePlanInput, required: true }) },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      const tErrors = ctx.t().errorsTranslations;
+      const hasPermission = await PermissionsService.hasPermission(
+        actorUserId,
+        AppPermission.ACCOUNTING_PAYMENTS_MANAGE
+      );
+      if (!hasPermission) throw new Error(tErrors.insufficientPermissions);
+      return PackagePlanService.create(actorUserId, args.input, tErrors);
+    },
+  })
+);
+
+// ...similar pattern for: updatePackagePlan, archivePackagePlan,
+// recordAccountingPayment, updateAccountingPayment, toggleAccountingPaymentPaidStatus...
+```
+
+#### 5.4 Shared field helpers — `backend/graphql/pothos/billing/__shared__/packagePlanFieldHelpers.ts`
+
+Mirror existing `__shared__/creditFieldHelpers.ts` + `__shared__/paymentFieldHelpers.ts` pattern. Define a `packagePlanFields(t)` helper that returns the field map for `PackagePlan` (id, codename, displayName, description, creditHours, priceAmount, currency, active, sortOrder, metadata, createdAt, updatedAt). This enables field reuse in detail/list/nested-resolver contexts.
 
 ### Barrel registration
 
@@ -718,7 +1156,17 @@ Edit `backend/graphql/pothos/billing/index.ts` — add:
 export * from "./accounting.pothos";
 ```
 
-The root barrel `backend/graphql/pothos/index.ts` already re-exports `./billing`, so no change there.
+Edit `backend/graphql/query/billing/index.ts` — add:
+```typescript
+export * from "./accounting.query";
+```
+
+Edit `backend/graphql/mutation/billing/index.ts` — add:
+```typescript
+export * from "./accounting.mutation";
+```
+
+The root barrels (`backend/graphql/pothos/index.ts`, `backend/graphql/query/index.ts`, `backend/graphql/mutation/index.ts`) already re-export `./billing`, so no root change needed.
 
 ### Schema regen
 
@@ -899,21 +1347,36 @@ Tests:
 
 Tests:
 - `recordHourPurchase` bumps `students.creditHoursRemaining` + `creditHoursTotal` correctly
-- `deductHoursForBooking` rejects on insufficient balance with `INSUFFICIENT_HOURS`
-- `refundHoursOnCancel` is idempotent (same idempotency key returns existing row)
-- Hour + class ledgers coexist without interference
+- `deductHoursForBooking` rejects on insufficient balance with `ConflictError(tErrors.credit.insufficientHours)` (NOT a generic `INSUFFICIENT_HOURS` — must be a typed `ConflictError` with the `remaining` + `required` payload)
+- `refundHoursOnCancel` is idempotent (same idempotency key returns existing row, no duplicate insert)
+- Hour + class ledgers coexist without interference (one row with `changeAmount` set + `changeAmountHours` NULL, another with the reverse — both pass the XOR CHECK)
+- `deductHoursForBooking` with `hours=0` rejected with `ValidationError` (must be > 0)
+- `deductHoursForBooking` with `hours=0.5` (fractional) succeeds when `creditHoursRemaining >= 0.5`
 
 ### `backend/db/test/logic/lms/accounting-payment-workflow.test.ts` (new)
 
-Tests:
-- `recordPayment` creates invoice + payment + credit_transaction in one tx
-- `recordPayment` idempotency: duplicate returns first row
+Tests (all under `runInRollback`):
+- `recordPayment` creates invoice + payment + credit_transaction in one tx — verify all 3 rows exist after commit, all referencing each other via FK
+- `recordPayment` idempotency: duplicate input (same studentId|packagePlanId|amount|currency|paymentDate|gateway) returns the existing payment row (NOT throws `ConflictError`)
+- `recordPayment` with package plan archived between form-open and submit → rejects with `NotFoundError(tErrors.package.planArchived(id))` (re-checks `active=true` INSIDE the tx)
+- `recordPayment` with student deleted mid-tx → rejects with `NotFoundError(tErrors.studentNotFound(id))`
+- `recordPayment` with `isPaidStatusOn=true` → invoice `status=PAID`, `paidDate=paymentDate`
+- `recordPayment` with `isPaidStatusOn=false` → invoice `status=UNPAID`, `paidDate=NULL`
 - `togglePaidStatus` ON → invoice PAID; OFF → invoice UNPAID (when no siblings)
-- `togglePaidStatus` OFF with paid sibling → invoice stays PAID
-- `update` creditHours increase → ADJUSTMENT row inserted, balance bumped
-- `update` creditHours decrease past balance → rejected with `INSUFFICIENT_HOURS`
+- `togglePaidStatus` OFF with paid sibling → invoice stays PAID (sibling check via `findPaidSiblingsByInvoice`)
+- `togglePaidStatus` respects `accounting_paid_toggle_auto_flips_invoice=false` → only the payment row's toggle changes; invoice untouched
+- `togglePaidStatus` with stale `expectedInvoiceVersion` → `ConflictError(tErrors.billing.invoiceVersionMismatch)` (optimistic lock)
+- `togglePaidStatus` acquires `acquireAdvisoryLock(tx, invoice_${invoiceId})` — verify by running two concurrent toggles (one ON, one OFF) on payments of the same invoice; the second waits for the first to commit
+- `update` with `paymentNote` change only → no ADJUSTMENT row, no balance change, no tx needed (or single-statement UPDATE)
+- `update` with `paymentGateway` change only → no ADJUSTMENT row
+- `update` with `creditHours` increase → ADJUSTMENT row inserted with `changeAmountHours=+(new-old)`, balance bumped atomically
+- `update` with `creditHours` decrease (within balance) → ADJUSTMENT row inserted with `changeAmountHours=-(old-new)`, balance decremented atomically
+- `update` with `creditHours` decrease past balance → `ConflictError(tErrors.credit.insufficientHours)` (pre-check inside tx, after acquiring student lock)
+- `update` acquires `acquireAdvisoryLock(tx, student_${studentId})` — verify by running concurrent creditHours edits on two payments of the same student; second waits
+- `getStudentBalance` IDOR: caller without `ACCOUNTING_PAYMENTS_VIEW` AND not associated with student → `Error(tErrors.insufficientPermissions)`
+- `listPaginated` with no student filter (admin view-all) requires `ACCOUNTING_PAYMENTS_VIEW` only (not `assertAssociatedOrManage`)
 
-All tests use `runInRollback` wrapper.
+All tests use `runInRollback` wrapper; never `expect().rejects.toThrow()` inside `runInRollback` per `backend/db/test/AGENTS.md`.
 
 ---
 
