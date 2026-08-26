@@ -40,5 +40,8 @@
   "ariaMenu": "القائمة",
   "ariaUserProfileMenu": "قائمة ملف المستخدم",
   "ariaProfileSections": "أقسام الملف الشخصي",
-  "noEntriesFound": "لا توجد إدخالات"
+  "noEntriesFound": "لا توجد إدخالات",
+  "footerCopyright": {
+    "__fn": "(brand, year) => `\\xA9 ${year} ${brand} \\xB7 \\u062C\\u0645\\u064A\\u0639 \\u0627\\u0644\\u062D\\u0642\\u0648\\u0642 \\u0645\\u062D\\u0641\\u0648\\u0638\\u0629`"
+  }
 }

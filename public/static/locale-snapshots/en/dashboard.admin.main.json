@@ -52,6 +52,7 @@
   "pageOf": {
     "__fn": "(current, total) => `Page ${current} of ${total}`"
   },
+  "noData": "No data",
   "showingOf": {
     "__fn": "(shown, total) => `Showing ${shown} of ${total} classes`"
   },

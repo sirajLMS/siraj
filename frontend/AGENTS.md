@@ -8,6 +8,7 @@
 - **Universal Contrast**: Use Material 3 `on<Color>` siblings instead of `contrastText` (e.g., `theme.palette.onPrimary`).
 - **NO DELETION**: Never delete existing theme values like `boxShadow`. Map them to `theme.palette.shadow.card`.
 - Refer to **THEME_PALETTE.md** for all color tokens and access patterns.
+- **Emotion RTL**: Never pass stylis’s `prefixer` into RTL Emotion caches (`stylisPlugins: [rtlPlugin]` only). See `docs/frontend/emotion-rtl-stylis.md`.
 
 ## Code Style Rules
 

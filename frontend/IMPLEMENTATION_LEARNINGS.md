@@ -90,3 +90,15 @@ This document records the learning outcomes from encountering errors during impl
   });
   ```
 
+## 8. Emotion RTL + stylis `prefixer` + `::placeholder`
+- **Error:** `TypeError: Cannot read properties of undefined (reading 'push')` during Emotion style insert (often blamed on `TextField` / `LoginForm`). Stack includes `stylis` `append` / `prefixer`.
+- **Cause:** RTL Emotion caches that pass stylis’s `prefixer` alongside `stylis-plugin-rtl`, especially when app `stylis` ≠ `@emotion/cache`’s nested `4.2.0`. Prefixer expands `::placeholder` via `append()` and crashes.
+- **Fix:** RTL `stylisPlugins: [rtlPlugin]` only — never import stylis `prefixer`. Keep `stylis@4.2.0`. Avoid `::placeholder` in `sx`/`styled` when possible.
+- **Canonical doc:** [`docs/frontend/emotion-rtl-stylis.md`](../docs/frontend/emotion-rtl-stylis.md)
+
+## 9. Soft-delete via `updateInstanceState` must allow `deletedAt`
+- **Error:** GraphQL `deleteClassInstance` returned `success: true`, but booking still failed with "Teacher is already booked at this time."
+- **Cause:** H7 mass-assignment whitelist in `updateInstanceState` omitted `deletedAt`. `SchedulingRepository.softDeleteClassInstance` passed `{ deletedAt }` which was stripped — only `updatedAt` changed.
+- **Fix:** Include `"deletedAt"` in `ALLOWED_STATE_KEYS` in `backend/db/repo/scheduling/state-changes.ts`.
+- **Test note:** Apollo Client v4 + `errorPolicy: "all"` surfaces failures on `.error`, not `.errors`.
+

@@ -1,0 +1,70 @@
+{
+  "teacherView": {
+    "pageTitle": "التقييمات الشهرية",
+    "pageSubtitle": "قيّم أداء طلابك كل شهر.",
+    "selectStudent": "اختر الطالب",
+    "selectMonth": "اختر الشهر",
+    "noStudents": "لا يوجد طلاب معيّنون بعد.",
+    "openForm": "فتح التقييم",
+    "appraisalExists": "تم تقديم التقييم",
+    "noAppraisalYet": "لم يتم التقييم بعد"
+  },
+  "form": {
+    "title": "تقييم شهري جديد",
+    "titleEdit": "تعديل التقييم الشهري",
+    "student": "الطالب",
+    "month": "الشهر",
+    "rubric": {
+      "behavior": "السلوك",
+      "attendance": "الحضور",
+      "punctuality": "الالتزام بالمواعيد",
+      "overall": "التقييم العام",
+      "grade": "التقدير (1–5)",
+      "comment": "التعليق",
+      "gradePlaceholder": "1–5 (اختياري)",
+      "commentPlaceholder": "تعليق اختياري",
+      "gradeHint": "اتركه فارغاً لحذف هذا الحقل من بطاقة التقرير."
+    },
+    "learningTargets": "أهداف التعلّم",
+    "learningTargetsPlaceholder": "صف أهداف التعلّم للشهر القادم...",
+    "learningTargetsRequired": "أهداف التعلّم مطلوبة.",
+    "submit": "حفظ التقييم",
+    "cancel": "إلغاء",
+    "successMessage": "تم حفظ التقييم بنجاح."
+  },
+  "studentParentView": {
+    "pageTitle": "التقييمات الشهرية",
+    "pageSubtitle": "اطّلع على تقارير التقييم الشهرية وأضف ملاحظاتك.",
+    "emptyState": "لا توجد تقييمات بعد",
+    "emptyStateDescription": "لم يقدّم معلّمك تقييماً لهذا الشهر.",
+    "month": "الشهر",
+    "teacher": "المعلّم",
+    "addFeedback": "إضافة ملاحظة",
+    "feedbackModal": {
+      "title": "إضافة ملاحظة",
+      "bodyLabel": "ملاحظتك",
+      "bodyPlaceholder": "اكتب ردّك على التقييم...",
+      "submit": "إرسال الملاحظة",
+      "cancel": "إلغاء",
+      "successMessage": "تمت إضافة الملاحظة بنجاح.",
+      "bodyRequired": "لا يمكن أن تكون الملاحظة فارغة."
+    },
+    "rubricLabels": {
+      "behavior": "السلوك",
+      "attendance": "الحضور",
+      "punctuality": "الالتزام بالمواعيد",
+      "overall": "العام"
+    },
+    "learningTargets": "أهداف التعلّم",
+    "feedbackThread": "الملاحظات",
+    "noFeedback": "لا توجد ملاحظات بعد.",
+    "feedbackAuthor": "أنت"
+  },
+  "errors": {
+    "loadFailed": "فشل تحميل التقييمات.",
+    "submitFailed": "فشل حفظ التقييم.",
+    "feedbackFailed": "فشل إضافة الملاحظة.",
+    "gradeOutOfRange": "يجب أن تكون التقديرات بين 1 و 5.",
+    "monthRequired": "يرجى اختيار شهر."
+  }
+}

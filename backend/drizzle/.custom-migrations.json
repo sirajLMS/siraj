@@ -1,5 +1,5 @@
 {
-  "manifestHash": "42c24cec74ef48c3a509dcf3831226bc1a324af5352ce3b6d1c44a28c73bd8c6",
+  "manifestHash": "6d283bf1844596909967006d029a1a0aa25e6ae2df4c1ce0e2784e38cb7512d2",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -187,7 +187,7 @@
     },
     {
       "file": "self_service_reschedule_permissions.sql",
-      "sha256": "c26b404de91f0c60a2ee4ff42de868a1cda9bbe76acec5712d806182c5fe275b"
+      "sha256": "9902fccee8d53b2622d15d1140d71c4e6d9d0cffca47d78a3fa852ccaa6c28f8"
     },
     {
       "file": "soft_delete_rls_policies.sql",
@@ -284,6 +284,7 @@
     "20260824210526_custom_appraisal_permissions",
     "20260825020600_custom_extended_rls_policies",
     "20260825020601_custom_payments_ledger_permissions",
-    "20260825020602_custom_self_service_reschedule_permissions"
+    "20260825020602_custom_self_service_reschedule_permissions",
+    "20260826162257_custom_self_service_reschedule_permissions"
   ]
 }

@@ -10,7 +10,7 @@
   "languageSwitcher": "Switch language",
   "langAr": "Arabic",
   "langEn": "English",
-  "langArShort": "EN",
+  "langArShort": "AR",
   "langEnShort": "EN",
   "themeDark": "Dark",
   "themeLight": "Light",
@@ -40,5 +40,8 @@
   "ariaMenu": "Menu",
   "ariaUserProfileMenu": "User profile menu",
   "ariaProfileSections": "Profile sections",
-  "noEntriesFound": "No entries found"
+  "noEntriesFound": "No entries found",
+  "footerCopyright": {
+    "__fn": "(brand, year) => `\\xA9 ${year} ${brand} \\xB7 All rights reserved`"
+  }
 }

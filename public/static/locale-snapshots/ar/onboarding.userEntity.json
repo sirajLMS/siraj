@@ -18,11 +18,18 @@
   "validation": {
     "fullNameRequired": "الاسم الكامل مطلوب",
     "emailInvalid": "أدخل بريد إلكتروني صالح",
-    "passwordRequired": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+    "passwordRequired": "كلمة المرور مطلوبة",
     "phoneRequired": "رقم الهاتف مطلوب",
     "timezoneRequired": "المنطقة الزمنية مطلوبة",
     "currencyRequired": "العملة مطلوبة",
     "nameMinLength": "يجب أن يكون الاسم 3 أحرف على الأقل",
-    "passwordMinLength": "يجب أن تكون كلمة المرور 8 أحرف على الأقل"
+    "passwordMinLength": "يجب أن تكون كلمة المرور ١٢ حرفاً على الأقل.",
+    "passwordWeakComplexity": "يجب أن تحتوي كلمة المرور على فئتين على الأقل من: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
+    "passwordStrength": "قوة كلمة المرور",
+    "strengthWeak": "ضعيفة",
+    "strengthFair": "مقبولة",
+    "strengthStrong": "قوية",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   }
 }

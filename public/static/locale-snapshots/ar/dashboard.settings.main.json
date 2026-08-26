@@ -81,6 +81,14 @@
     "draftUpdatedJustNow": "تم تحديث المسودة للتو",
     "enterCustomizeMode": "دخول وضع التخصيص",
     "enterCustomizeModeHint": "افتح أداة التخصيص المباشرة لتحرير الألوان والشعار وهوية العلامة التجارية في الوقت الفعلي.",
+    "currentBrandColors": "ألوان العلامة التجارية الحالية",
+    "currentBrandColorsHint": "لقطة من لوحة ألوان المسودة الخاصة بك. ادخل وضع التخصيص لضبط الألوان الفردية.",
+    "quickPresets": "الإعدادات المسبقة السريعة",
+    "quickPresetsHint": "انقر على إعداد مسبق لمعاينته فوراً. افتح وضع التخصيص للضبط الدقيق.",
+    "primaryColor": "أساسي",
+    "secondaryColor": "ثانوي",
+    "lightMode": "الوضع الفاتح",
+    "darkMode": "الوضع الداكن",
     "saveDraft": "حفظ المسودة",
     "publishNow": "نشر الآن",
     "resetToDefaults": "إعادة التعيين إلى الافتراضي",
@@ -126,7 +134,17 @@
       "defaultMode": "الوضع الافتراضي",
       "published": "منشور",
       "draft": "مسودة",
-      "exportJson": "تصدير JSON"
+      "exportJson": "تصدير JSON",
+      "logoUploadButton": "رفع شعار",
+      "logoLoading": "جارٍ التحميل…",
+      "logoFileHint": "PNG/JPEG/WebP · الحد الأقصى 2 ميجابايت",
+      "logoInMemoryPreview": "معاينة في الذاكرة",
+      "logoRemove": "إزالة",
+      "logoLoadedToast": "تم تحميل الشعار — احفظ المسودة أو انشر للتثبيت",
+      "logoFileTooLarge": "حجم ملف الشعار يتجاوز 2 ميجابايت",
+      "logoLoadFailed": "فشل تحميل الشعار",
+      "primaryColor": "أساسي",
+      "secondaryColor": "ثانوي"
     }
   },
   "environment": {

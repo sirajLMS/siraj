@@ -52,6 +52,7 @@
   "pageOf": {
     "__fn": "(current, total) => `\\u0635\\u0641\\u062D\\u0629 ${current} \\u0645\\u0646 ${total}`"
   },
+  "noData": "لا توجد بيانات",
   "showingOf": {
     "__fn": "(shown, total) => `\\u0639\\u0631\\u0636 ${shown} \\u0645\\u0646 ${total} \\u062D\\u0635\\u0629`"
   },

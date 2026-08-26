@@ -62,16 +62,36 @@ async function clearClassesOnDate(token: string, dateVal: string, teacherId?: st
     )
   );
   for (const deleteRes of deleteResults) {
-    // With errorPolicy: "all", GraphQL errors land in a `errors` array at runtime
-    // (Apollo's TypeScript types don't expose it for mutate(), but it IS present
-    // on the runtime object). The prior check `expect(deleteRes.error).toBeUndefined()`
-    // always passed — even when the delete actually failed with a GraphQL error —
-    // because `.error` is only set for network errors. This silently left
-    // overlapping classes in the DB, causing the "Teacher is already booked" flake.
-    // Access via bracket notation to avoid the type-unsafe assertion lint rule.
-    const graphqlErrors = (deleteRes as Record<string, unknown>).errors;
-    expect(graphqlErrors).toBeUndefined();
+    // Apollo Client v4 + errorPolicy: "all" surfaces GraphQL failures on `.error`
+    // (ErrorLike), not a top-level `.errors` array. Checking `.errors` always
+    // passed and left overlapping instances in the DB → "Teacher is already booked".
+    expect(deleteRes.error).toBeUndefined();
+    expect(deleteRes.data?.deleteClassInstance?.success).toBe(true);
   }
+}
+
+/** Soft-delete known class instance IDs (best-effort clear when schedule listing misses them). */
+async function deleteClassInstanceIds(token: string, ids: readonly (string | null | undefined)[]) {
+  const uniqueIds = [...new Set(ids.filter((id): id is string => Boolean(id)))];
+  await uniqueIds.reduce(async (prev, classInstanceId) => {
+    await prev;
+    const deleteRes = await testClient.mutate({
+      mutation: deleteClassInstanceMutationDocument,
+      variables: { classInstanceId },
+      errorPolicy: "all",
+      context: { headers: { Authorization: `Bearer ${token}` } },
+    });
+    // Already-deleted rows throw NotFound as a GraphQL error; treat that as ok.
+    // A successful soft-delete must report success:true (deletedAt must be set).
+    if (deleteRes.error) {
+      const message = deleteRes.error.message ?? "";
+      if (!/not found|recordNotFound/i.test(message)) {
+        expect(deleteRes.error).toBeUndefined();
+      }
+      return;
+    }
+    expect(deleteRes.data?.deleteClassInstance?.success).toBe(true);
+  }, Promise.resolve());
 }
 
 describe("GraphQL Class Session Integration Tests", () => {
@@ -89,6 +109,8 @@ describe("GraphQL Class Session Integration Tests", () => {
   let parentId: string | null = null;
   let outsideClassInstanceId: string | null = null;
   let outsideDate: string | null = null;
+  /** Class created in the "within window" activation test — overlaps the absent window. */
+  let withinWindowClassInstanceId: string | null = null;
 
   async function activateAndVerifyExecutionState(
     activateMutation: typeof activateClassMutationDocument | typeof activateOverrideClassMutationDocument,
@@ -163,6 +185,7 @@ describe("GraphQL Class Session Integration Tests", () => {
       60 * 60 * 1000,
       sharedSubjectId
     );
+    withinWindowClassInstanceId = classInstanceId;
 
     // 2. Activate as teacher and verify executionState changes to ACTIVATED
     await activateAndVerifyExecutionState(
@@ -271,14 +294,14 @@ describe("GraphQL Class Session Integration Tests", () => {
     if (!teacherToken || !adminToken || !studentId || !teacherId || !sharedSubjectId)
       throw new Error("Missing test context");
 
-    // Clear a wide date range [-1, 12] days, scoped to THIS teacher, to avoid
-    // overlaps with classes from prior tests. The previous narrow
-    // `clearClassesOnDate(testDate)` (no teacherId) missed classes whose
-    // scheduledStartAt fell on an adjacent day (timezone mismatch between the
-    // test's UTC date string and the server's date filtering) but whose time
-    // range overlapped the absent window (now-40min → now+20min), causing
-    // "Teacher is already booked at this time". Scoping to teacherId + clearing
-    // sequentially (not parallel) ensures every overlapping class is caught.
+    // Explicitly drop known prior instances first — the within-window class
+    // (now → now+1h) overlaps the absent window (now-40m → now+20m). Schedule
+    // listing can miss rows across timezone day boundaries; ID deletes cannot.
+    await deleteClassInstanceIds(adminToken, [withinWindowClassInstanceId, outsideClassInstanceId]);
+
+    // Clear a wide date range [-1, 12] days, scoped to THIS teacher, to catch
+    // leave-reschedule successors (+7d) and any other leftovers. Sequential
+    // clears avoid delete races.
     const adminTok = adminToken;
     const teacherTok = teacherId;
     const dateRange: string[] = [];
@@ -286,7 +309,6 @@ describe("GraphQL Class Session Integration Tests", () => {
       const d = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
       dateRange.push(d.toISOString().split("T")[0]);
     }
-    // Sequential clear (reduce chain) to avoid race conditions between deletes.
     await dateRange.reduce(
       (chain, dateStr) => chain.then(() => clearClassesOnDate(adminTok, dateStr, teacherTok)),
       Promise.resolve()

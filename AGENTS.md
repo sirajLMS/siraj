@@ -417,6 +417,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `frontend/IMPLEMENTATION_LEARNINGS.md` - Error resolutions from past mistakes
 - `frontend/NEW_PAGE_WORKFLOW.md` - Required workflow for new pages
 - `frontend/THEME_PALETTE.md` - Color tokens and access patterns
+- `docs/frontend/emotion-rtl-stylis.md` - Emotion RTL cache rules (never pass stylis `prefixer`; `::placeholder` crash)
 - `docs/IDEMPOTENCY.md` - Idempotency patterns
 - `docs/drizzle/prepared-statements.md` - Drizzle Prepared Statements 2.0 pattern reference
 - `docs/drizzle/neon-http-client.md` - Neon HTTP Client & Provider-Agnostic Stateless Queries reference

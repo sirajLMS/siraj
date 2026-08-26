@@ -40,6 +40,10 @@ export async function updateInstanceState(
     "isRescheduled",
     "remarks",
     "adminNotes",
+    // Soft-delete path (`SchedulingRepository.softDeleteClassInstance`) sets deletedAt
+    // through this helper. Omitting it made deletes appear to succeed while leaving
+    // deletedAt NULL — checkOverlaps then kept rejecting new bookings ("already booked").
+    "deletedAt",
   ]);
   const safe: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(state)) {

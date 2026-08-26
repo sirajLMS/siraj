@@ -1,0 +1,49 @@
+{
+  "buttons": {
+    "delay": "تأجيل",
+    "cancel": "إلغاء"
+  },
+  "delayModal": {
+    "title": "طلب تأجيل الجلسة",
+    "proposedStartAt": "وقت البدء المقترح الجديد",
+    "reason": "السبب (اختياري)",
+    "reasonPlaceholder": "اشرح لماذا تحتاج إلى تأجيل هذه الجلسة...",
+    "submit": "إرسال طلب التأجيل",
+    "cancel": "إلغاء",
+    "successMessage": "تم إرسال طلب التأجيل بنجاح."
+  },
+  "cancelConfirm": {
+    "title": "طلب إلغاء الجلسة",
+    "message": "هل أنت متأكد من رغبتك في إلغاء هذه الجلسة؟ سيتم مراجعة طلبك من قبل المشرف.",
+    "reason": "السبب (اختياري)",
+    "reasonPlaceholder": "اشرح لماذا تحتاج إلى إلغاء هذه الجلسة...",
+    "confirm": "إرسال طلب الإلغاء",
+    "cancel": "إبقاء الجلسة",
+    "successMessage": "تم إرسال طلب الإلغاء بنجاح."
+  },
+  "statusBadge": {
+    "pending": "قيد الانتظار",
+    "approved": "موافق عليه",
+    "rejected": "مرفوض",
+    "rescheduled": "تمت إعادة الجدولة",
+    "cancelled": "ملغى"
+  },
+  "requestType": {
+    "delay": "تأجيل",
+    "cancel": "إلغاء"
+  },
+  "errors": {
+    "sessionLocked": "هذه الجلسة مقفلة للتغييرات (ضمن نافذة القفل الزمني).",
+    "duplicateRequest": "يوجد طلب قيد الانتظار بالفعل لهذه الجلسة.",
+    "requestFailed": "فشل إرسال الطلب. يرجى المحاولة مرة أخرى."
+  },
+  "requestsList": {
+    "title": "طلباتي",
+    "emptyState": "لا توجد طلبات بعد",
+    "emptyStateDescription": "لم تقم بإرسال أي طلبات تأجيل أو إلغاء.",
+    "sessionDate": "تاريخ الجلسة",
+    "reason": "السبب",
+    "submittedAt": "تم الإرسال",
+    "processedAt": "تمت المعالجة"
+  }
+}

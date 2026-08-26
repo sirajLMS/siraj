@@ -399,7 +399,8 @@ gqlSchemaBuilder.mutationFields(t => ({
         };
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
-        logger.error("Demo login failed", { error: err });
+        // Expected rejections (excluded group slug, missing demo user, etc.) — not crashes.
+        logger.logDomainError("Demo login failed", { error: err, groupSlug });
         throw new GraphQLError(tErrors.auth.demoLoginFailed, {
           // ← compile-time ✅
           extensions: { code: "UNAUTHENTICATED" },

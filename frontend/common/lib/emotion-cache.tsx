@@ -3,7 +3,7 @@
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { useServerInsertedHTML } from "next/navigation";
-import { useMemo, type ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 import rtlPlugin from "stylis-plugin-rtl";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 
@@ -11,10 +11,6 @@ interface EmotionCacheProviderProps {
   readonly children: ReactNode;
   readonly nonce?: string;
 }
-
-// stylis-plugin-rtl can be exported as default or CJS module depending on bundler
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const resolvedRtlPlugin = (typeof rtlPlugin === "function" ? rtlPlugin : (rtlPlugin as any)?.default) ?? rtlPlugin;
 
 function createLtrCache(nonce?: string) {
   const cache = createCache({ key: "ltr", prepend: true, nonce });
@@ -29,7 +25,7 @@ function createRtlCache(nonce?: string) {
     key: "rtl",
     prepend: true,
     nonce,
-    stylisPlugins: [resolvedRtlPlugin],
+    stylisPlugins: [rtlPlugin],
   });
   cache.compat = true;
   return cache;
