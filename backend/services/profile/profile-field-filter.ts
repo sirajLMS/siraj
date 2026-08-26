@@ -9,7 +9,6 @@ import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-m
 import { STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
 import type { FieldFilterContext, ProfileFieldGroupDefinition, StudentFieldFilterContext } from "@/backend/types";
 
-export type { FieldFilterContext, StudentFieldFilterContext };
 
 function isStringRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

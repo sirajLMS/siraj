@@ -7,7 +7,7 @@ import type {
   EmailPayload,
   EmailSendResult,
   IEmailChannel,
-} from "@/backend/services/communication/channels/email/IEmailChannel";
+} from "@/backend/types";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 import type { ResendEmailContext } from "@/backend/types";
 

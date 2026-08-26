@@ -13,6 +13,7 @@ export const StudentHistoryMetricsRef = gqlSchemaBuilder.objectRef<StudentHistor
 
 export const StudentHistoryMetricsPothosObject = StudentHistoryMetricsRef.implement({
   fields: t => ({
+    id: t.field({ type: "ID", resolve: () => "student-history-metrics" }),
     totalClasses: t.exposeInt("totalClasses"),
     attendanceRate: t.exposeInt("attendanceRate"),
     hoursStudied: t.field({

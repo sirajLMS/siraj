@@ -1,7 +1,7 @@
 import { logger } from "@/backend/lib/logger";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import { isMeetingChannelError, maybeGenerateUrl } from "@/backend/services/meeting/utils/maybe-generate-url";
-import type { MeetingConfigDetails, MeetingProviderSelectType } from "@/backend/types";
+import type { MeetingConfigDetails, MeetingProviderSelectType } from "@/backend/types";;
 
 /**
  * Options shared between class and user meeting config URL generation.

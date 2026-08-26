@@ -22,7 +22,7 @@ import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
-import type { MeetingProvider } from "@/backend/services/meeting/channels/IMeetingChannel";
+import type { MeetingProvider } from "@/backend/types";;
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type {

@@ -16,12 +16,8 @@ import {
 } from "@/backend/services";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
-import {
-  canEditProfileFieldGroup,
-  collectProfileEditGroupsFromUpdate,
-  type FieldFilterContext,
-  filterProfileByFieldGroups,
-} from "@/backend/services/profile/profile-field-filter";
+import type { FieldFilterContext } from "@/backend/types";
+import { canEditProfileFieldGroup, collectProfileEditGroupsFromUpdate, filterProfileByFieldGroups } from "@/backend/services/profile/profile-field-filter";
 import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type {

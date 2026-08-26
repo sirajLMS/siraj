@@ -1,5 +1,5 @@
 import { createChannelFactory } from "@/backend/services/communication/channels/__shared__/channelFactoryBase";
-import type { ISmsChannel } from "@/backend/services/communication/channels/sms/ISmsChannel";
+import type { ISmsChannel } from "@/backend/types";
 import { resolveEnvConfigMany } from "@/backend/services/system";
 
 async function createTwilioAdapter(): Promise<ISmsChannel> {

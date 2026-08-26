@@ -3,7 +3,7 @@ import { NotificationRepository } from "@/backend/db/repo/notifications/notifica
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type { ISmsChannel, SmsPayload, SmsSendResult } from "@/backend/services/communication/channels/sms/ISmsChannel";
+import type { ISmsChannel, SmsPayload, SmsSendResult } from "@/backend/types";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 import type { TwilioRateLimitConfig, TwilioSmsContext } from "@/backend/types";
 

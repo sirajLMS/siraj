@@ -7,11 +7,8 @@ import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meet
 import { classInstances, teachers } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
-import {
-  type GenerateMeetingResult,
-  MeetingChannelError,
-  type MeetingProvider,
-} from "@/backend/services/meeting/channels/IMeetingChannel";
+import type { GenerateMeetingResult, MeetingProvider } from "@/backend/types";
+import { MeetingChannelError } from "@/backend/services/meeting/channels/IMeetingChannel";;
 import { getMeetingChannel, providerKindToSlug } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { buildMeetingProviderCatalogSnapshot } from "@/backend/services/meeting/meeting-config-mask";
 import type { DBTransaction, MeetingConfigDetails, MeetingConfigSnapshot } from "@/backend/types";

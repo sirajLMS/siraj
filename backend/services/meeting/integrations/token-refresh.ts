@@ -16,7 +16,8 @@
 
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import { type MeetingProvider, ProviderReauthRequiredError } from "@/backend/services/meeting/channels/IMeetingChannel";
+import type { MeetingProvider } from "@/backend/types";
+import { ProviderReauthRequiredError } from "@/backend/services/meeting/channels/IMeetingChannel";;
 import type { RefreshedToken } from "@/backend/types";
 
 // ============================================================================

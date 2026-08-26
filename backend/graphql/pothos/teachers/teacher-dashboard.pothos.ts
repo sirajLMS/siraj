@@ -64,6 +64,7 @@ export const TeacherDashboardMetricsRef = gqlSchemaBuilder.objectRef<ClassSessio
 
 export const TeacherDashboardMetricsPothosObject = TeacherDashboardMetricsRef.implement({
   fields: t => ({
+    id: t.field({ type: "ID", resolve: () => "teacher-dashboard-metrics" }),
     total: t.exposeInt("total"),
     regular: t.exposeInt("regular"),
     trial: t.exposeInt("trial"),

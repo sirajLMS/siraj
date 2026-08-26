@@ -1,7 +1,7 @@
 import { logger } from "@/backend/lib/logger";
 import { getEntityCacheStats } from "@/backend/services/cache/__shared__/cacheStats";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
-import type { CacheStats } from "@/backend/services/shared/CacheInterface";
+import type { CacheStats } from "@/backend/types";
 
 /**
  * Abstract base class for cache adapters implementing {@link ICacheService}.

@@ -1,5 +1,5 @@
 import { GraphQLError } from "graphql";
-import { MeetingChannelError } from "@/backend/services";
+import { MeetingChannelError } from "@/backend/services/meeting/channels/IMeetingChannel";;
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 type StringKeys<T> = { [K in keyof T]: T[K] extends string ? K : never }[keyof T];

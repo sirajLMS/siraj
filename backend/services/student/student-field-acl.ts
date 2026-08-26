@@ -1,10 +1,7 @@
 import { StudentRepository } from "@/backend/db/repo/students";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import {
-  canEditStudentFieldGroup,
-  canViewStudentFieldGroup,
-  type StudentFieldFilterContext,
-} from "@/backend/services/profile/profile-field-filter";
+import type { StudentFieldFilterContext } from "@/backend/types";
+import { canEditStudentFieldGroup, canViewStudentFieldGroup } from "@/backend/services/profile/profile-field-filter";;
 import { getServerTranslations } from "@/shared/locale";
 
 /**

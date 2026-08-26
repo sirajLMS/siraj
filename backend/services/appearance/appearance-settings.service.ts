@@ -169,10 +169,7 @@ function assertExpectedUpdatedAt(existing: AppearanceSettingsRow | null, expecte
  * plain hex lookup (no MUI imports) so the backend service layer can
  * read it without crossing the frontend/backend boundary.
  */
-const PRESET_BRAND_COLORS: Record<
-  string,
-  { light: { primaryMain: string; secondaryMain: string }; dark: { primaryMain: string; secondaryMain: string } }
-> = {
+const PRESET_BRAND_COLORS: Record<string, { light: { primaryMain: string; secondaryMain: string }; dark: { primaryMain: string; secondaryMain: string } }> = {
   default: {
     light: { primaryMain: "#0D9488", secondaryMain: "#4F46E5" },
     dark: { primaryMain: "#2DD4BF", secondaryMain: "#818CF8" },

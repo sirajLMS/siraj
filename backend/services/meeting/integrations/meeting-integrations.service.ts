@@ -19,12 +19,8 @@ import {
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { GoogleMeetAdapter } from "@/backend/services/meeting/channels/google-meet/GoogleMeetAdapter";
-import {
-  type IMeetingChannel,
-  InsufficientScopesError,
-  MeetingChannelError,
-  type MeetingProvider,
-} from "@/backend/services/meeting/channels/IMeetingChannel";
+import type { IMeetingChannel, MeetingProvider } from "@/backend/types";
+import { InsufficientScopesError, MeetingChannelError } from "@/backend/services/meeting/channels/IMeetingChannel";;
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { MicrosoftTeamsAdapter } from "@/backend/services/meeting/channels/microsoft-teams/MicrosoftTeamsAdapter";
 import { ZoomMeetingAdapter } from "@/backend/services/meeting/channels/zoom/ZoomMeetingAdapter";

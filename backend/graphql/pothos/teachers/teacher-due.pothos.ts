@@ -67,6 +67,7 @@ export const TeacherPendingDuesSummaryRef =
 export const TeacherPendingDuesSummaryPothosObject = TeacherPendingDuesSummaryRef.implement({
   description: "Summary of pending teacher dues (total count and amount)",
   fields: t => ({
+    id: t.field({ type: "ID", resolve: () => "teacher-pending-dues-summary" }),
     totalCount: t.exposeInt("totalCount"),
     totalAmount: t.exposeFloat("totalAmount"),
     currency: t.expose("currency", { type: CurrencyCodePothosObject }),

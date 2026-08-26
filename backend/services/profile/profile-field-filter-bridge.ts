@@ -1,5 +1,5 @@
 import { ProfileScope } from "@/backend/enum";
-import type { FieldFilterContext, StudentFieldFilterContext } from "@/backend/services/profile/profile-field-filter";
+import type { FieldFilterContext, StudentFieldFilterContext } from "@/backend/types";
 import { getProfileEditPermission, getProfileViewPermission } from "@/backend/services/profile/profile-field-manifest";
 import type { ProfileFieldGroupDefinition, StudentFieldGroupDefinition } from "@/backend/types";
 

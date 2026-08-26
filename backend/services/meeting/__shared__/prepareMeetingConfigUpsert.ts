@@ -9,7 +9,6 @@ import type {
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
-export type { PrepareMeetingConfigInput, PrepareTransformCtx };
 
 /**
  * Capture the duplicated "prepare" pipeline shared by

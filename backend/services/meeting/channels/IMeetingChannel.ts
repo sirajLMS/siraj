@@ -1,13 +1,3 @@
-// Type contracts relocated to @/backend/types/meeting/channels/meeting-channel.types.ts (R2).
-// Error class hierarchy remains here (runtime classes belong in the service layer).
-export type {
-  CachedToken,
-  GenerateMeetingInput,
-  GenerateMeetingResult,
-  IMeetingChannel,
-  MeetingProvider,
-} from "@/backend/types";
-
 export class MeetingChannelError extends Error {
   readonly code: string;
   readonly upstreamMessage?: string;

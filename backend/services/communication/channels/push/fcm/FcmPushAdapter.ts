@@ -12,7 +12,7 @@ import type {
   IPushChannel,
   PushPayload,
   PushSendResult,
-} from "@/backend/services/communication/channels/push/IPushChannel";
+} from "@/backend/types";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 import type { FcmPushContext, NotificationDeliverySelectType, UserDeviceTokenSelectType } from "@/backend/types";
 

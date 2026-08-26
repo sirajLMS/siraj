@@ -8,6 +8,7 @@ export const SupervisorMonthlySnapshotRef =
 export const SupervisorMonthlySnapshotPothosObject = SupervisorMonthlySnapshotRef.implement({
   description: "Current calendar month snapshot for the supervisor dashboard",
   fields: t => ({
+    id: t.field({ type: "ID", resolve: () => "supervisor-monthly-snapshot" }),
     year: t.exposeInt("year"),
     month: t.exposeInt("month"),
     label: t.exposeString("label"),
@@ -19,6 +20,7 @@ export const SupervisorDashboardRef = gqlSchemaBuilder.objectRef<SupervisorDashb
 export const SupervisorDashboardPothosObject = SupervisorDashboardRef.implement({
   description: "Aggregated supervisor portal dashboard data",
   fields: t => ({
+    id: t.field({ type: "ID", resolve: () => "supervisor-dashboard" }),
     supervisorName: t.exposeString("supervisorName"),
     pendingReviewCount: t.exposeInt("pendingReviewCount"),
     pendingDuesSummary: t.expose("pendingDuesSummary", {

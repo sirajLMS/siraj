@@ -14,7 +14,6 @@ import type {
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
 
-export type { ResolveEntityByIdArgs, ResolveNotFoundErrorKey, SoftDeleteEntityLogArgs };
 
 /** Permission gate shared by every endpoint in both services. */
 export async function assertPermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {

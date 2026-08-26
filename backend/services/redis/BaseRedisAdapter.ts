@@ -1,7 +1,7 @@
 import { getEntityCacheStats } from "@/backend/services/cache/__shared__/cacheStats";
 import type { IRedisService } from "@/backend/services/redis/IRedisService";
 import { buildRedisPipeline } from "@/backend/services/redis/redis-utils";
-import type { CacheStats } from "@/backend/services/shared/CacheInterface";
+import type { CacheStats } from "@/backend/types";
 
 /**
  * Common interface for Redis clients (ioredis, upstash) to allow safe delegation
