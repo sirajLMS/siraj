@@ -1,4 +1,4 @@
-import type { InputFieldBuilder, ObjectFieldBuilder } from "@pothos/core";
+import type { PothosObjectFieldBuilder, PothosInputFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CountryCodePothosObject,
@@ -22,9 +22,6 @@ import type {
   UserPaymentMethodSubmitGqlInput,
 } from "@/backend/types";
 
-export type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
-export type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
-export type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
 
 export function isRecordLike(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;

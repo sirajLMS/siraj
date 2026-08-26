@@ -104,6 +104,18 @@ export const darkPalette: PaletteOptions = {
   onSurfaceVariant: "#80DEEA",
   outline: "#2A4A5E",
   outlineVariant: "#1A3040",
+  // Tinted divider — uses cyan at low opacity so separators feel "ocean"
+  // instead of neutral grey. Without this MUI defaults to rgba(255,255,255,0.12).
+  divider: "rgba(38, 198, 218, 0.12)",
+  // Tinted action states — hover/selected lean cyan, not neutral grey.
+  action: {
+    active: "#80DEEA",
+    hover: "rgba(38, 198, 218, 0.08)",
+    selected: "rgba(38, 198, 218, 0.12)",
+    disabled: "rgba(128, 222, 234, 0.3)",
+    disabledBackground: "rgba(38, 198, 218, 0.05)",
+    focus: "rgba(38, 198, 218, 0.12)",
+  },
   scrim: "#000000",
   inverseSurface: "#E0F7FA",
   inverseOnSurface: "#0A1929",

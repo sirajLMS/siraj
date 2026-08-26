@@ -61,6 +61,15 @@ export type AuditAction =
   | "DEACTIVATE"
   | "RESTORE"
   | "TEACHER_SUPPORT_REQUEST"
+  | "WHATSAPP_OPT_IN"
+  | "ASSIGN"
+  | "UNASSIGN"
+  | "APPROVE"
+  | "REJECT"
+  | "ACTIVATE"
+  | "DEACTIVATE"
+  | "RESTORE"
+  | "TEACHER_SUPPORT_REQUEST"
   | "WHATSAPP_OPT_IN";
 
 /**
@@ -117,3 +126,20 @@ export type CreateAdminAuditLogInput = {
   readonly ipAddress?: string | null;
   readonly createdAt?: Date;
 };
+
+// Single-source const arrays for runtime validation (derived from the unions above).
+export const AUDIT_ENTITY_TYPE_VALUES = [
+  "SYSTEM", "STUDENT", "INVOICE", "PAYMENT", "PERMISSION", "PERMISSION_GROUP",
+  "USER_PERMISSION", "EXCHANGE_RATE", "SYSTEM_SETTING", "SITE_CONTENT",
+  "SESSION_CONFIG", "ENV_CONFIG", "USER", "TEACHER", "PARENT",
+  "CLASS_INSTANCE", "RECURRING_SCHEDULE", "LEAVE_REQUEST", "COMPLAINT",
+  "LEARNING_RESOURCE", "SUGGESTION", "BOOK", "MEETING_PROVIDER_TOKEN",
+  "WHATSAPP_ACCOUNT",
+] as const satisfies readonly AuditEntityType[];
+
+export const AUDIT_ACTION_VALUES = [
+  "CREATE", "UPDATE", "DELETE", "UPSERT", "STATUS_CHANGE",
+  "REFUND", "GRANT", "REVOKE", "ASSIGN", "UNASSIGN",
+  "APPROVE", "REJECT", "ACTIVATE", "DEACTIVATE", "RESTORE",
+  "TEACHER_SUPPORT_REQUEST", "WHATSAPP_OPT_IN",
+] as const satisfies readonly AuditAction[];

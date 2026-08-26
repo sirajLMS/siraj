@@ -38,7 +38,7 @@ const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
   paddingRight: theme.spacing(1.25),
   minHeight: 42,
   textTransform: "none",
-  borderRadius: 12,
+  borderRadius: Number(theme.shape.borderRadius) * 3,
   borderColor: alpha(theme.palette.divider, 0.5),
   color: theme.palette.text.secondary,
   display: "flex",

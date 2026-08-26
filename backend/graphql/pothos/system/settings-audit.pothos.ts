@@ -6,53 +6,11 @@ import type {
   AuditLogQueryResult,
   AuditLogReturnType,
 } from "@/backend/types";
+import { AUDIT_ENTITY_TYPE_VALUES, AUDIT_ACTION_VALUES } from "@/backend/types";
 
-export const VALID_ENTITY_TYPES = new Set<string>([
-  "SYSTEM",
-  "STUDENT",
-  "INVOICE",
-  "PAYMENT",
-  "PERMISSION",
-  "PERMISSION_GROUP",
-  "USER_PERMISSION",
-  "EXCHANGE_RATE",
-  "SYSTEM_SETTING",
-  "SITE_CONTENT",
-  "SESSION_CONFIG",
-  "ENV_CONFIG",
-  "USER",
-  "TEACHER",
-  "PARENT",
-  "CLASS_INSTANCE",
-  "RECURRING_SCHEDULE",
-  "LEAVE_REQUEST",
-  "COMPLAINT",
-  "LEARNING_RESOURCE",
-  "SUGGESTION",
-  "BOOK",
-  "MEETING_PROVIDER_TOKEN",
-  "WHATSAPP_ACCOUNT",
-]);
+const VALID_ENTITY_TYPES = new Set<string>(AUDIT_ENTITY_TYPE_VALUES);
 
-export const VALID_ACTIONS = new Set<string>([
-  "CREATE",
-  "UPDATE",
-  "DELETE",
-  "UPSERT",
-  "STATUS_CHANGE",
-  "REFUND",
-  "GRANT",
-  "REVOKE",
-  "ASSIGN",
-  "UNASSIGN",
-  "APPROVE",
-  "REJECT",
-  "ACTIVATE",
-  "DEACTIVATE",
-  "RESTORE",
-  "TEACHER_SUPPORT_REQUEST",
-  "WHATSAPP_OPT_IN",
-]);
+const VALID_ACTIONS = new Set<string>(AUDIT_ACTION_VALUES);
 
 export function isAuditEntityType(value: string): value is AuditEntityType {
   return VALID_ENTITY_TYPES.has(value);

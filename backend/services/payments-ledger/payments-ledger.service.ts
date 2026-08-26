@@ -6,25 +6,8 @@ import { AppPermission } from "@/backend/enum";
 import { UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { DBTransaction } from "@/backend/types";
+import type { DBTransaction, PaymentLedgerEntry, PaymentLedgerResult } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-
-export interface PaymentLedgerEntry {
-  id: string;
-  studentId: string | null;
-  studentName: string | null;
-  creditsPurchased: number;
-  amount: string;
-  currency: string;
-  packageName: string | null;
-  paymentGateway: string;
-  paymentDate: string;
-}
-
-export interface PaymentLedgerResult {
-  entries: PaymentLedgerEntry[];
-  totalCount: number;
-}
 
 export namespace PaymentsLedgerService {
   async function resolveCallerStudentIds(callerUserId: string, tx?: DBTransaction): Promise<string[]> {

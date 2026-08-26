@@ -26,3 +26,4 @@ export * from "./supervisor";
 export * from "./teachers";
 export * from "./users";
 export * from "./whatsapp";
+export * from "./payments-ledger";

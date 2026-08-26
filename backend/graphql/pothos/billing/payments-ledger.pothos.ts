@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import type { PaymentLedgerEntry } from "@/backend/services/payments-ledger/payments-ledger.service";
+import type { PaymentLedgerEntry } from "@/backend/types";
 
 // ---------------------------------------------------------------------------
 // Object types — single canonical, includes `id` (Apollo cache normalization).

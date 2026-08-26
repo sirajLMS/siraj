@@ -27,25 +27,13 @@
  * overrides `--mui-palette-primary-main` on top of the preset's full palette).
  */
 import type { PaletteOptions } from "@mui/material/styles";
-import { APPEARANCE_PRESETS, type AppearancePresetId } from "@/frontend/common/providers/theme/presets";
-import {
-  darkPalette as crimsonDark,
-  lightPalette as crimsonLight,
-} from "@/frontend/common/providers/theme/presets/crimson";
-import {
-  darkPalette as defaultDark,
-  lightPalette as defaultLight,
-} from "@/frontend/common/providers/theme/presets/default";
-import {
-  darkPalette as emeraldDark,
-  lightPalette as emeraldLight,
-} from "@/frontend/common/providers/theme/presets/emerald";
+import { darkPalette as defaultDark, lightPalette as defaultLight } from "@/frontend/common/providers/theme/presets/default";
 import { darkPalette as oceanDark, lightPalette as oceanLight } from "@/frontend/common/providers/theme/presets/ocean";
+import { darkPalette as emeraldDark, lightPalette as emeraldLight } from "@/frontend/common/providers/theme/presets/emerald";
+import { darkPalette as violetDark, lightPalette as violetLight } from "@/frontend/common/providers/theme/presets/violet";
+import { darkPalette as crimsonDark, lightPalette as crimsonLight } from "@/frontend/common/providers/theme/presets/crimson";
 import { darkPalette as slateDark, lightPalette as slateLight } from "@/frontend/common/providers/theme/presets/slate";
-import {
-  darkPalette as violetDark,
-  lightPalette as violetLight,
-} from "@/frontend/common/providers/theme/presets/violet";
+import type { AppearancePresetId } from "@/frontend/common/providers/theme/presets";
 
 /** A resolved preset palette pair (both modes bundled together). */
 export interface PresetPalettes {
@@ -118,63 +106,4 @@ export function resolvePresetPalettes(presetId?: string): PresetPalettes {
 export function resolvePresetPalette(mode: "light" | "dark", presetId?: string): PaletteOptions {
   const pair = resolvePresetPalettes(presetId);
   return mode === "light" ? pair.light : pair.dark;
-}
-
-function isPlainRecord(val: unknown): val is Record<string, unknown> {
-  return typeof val === "object" && val !== null && !Array.isArray(val);
-}
-
-/**
- * Recursively flatten a MUI `PaletteOptions` object into a key-value record
- * of `--mui-palette-*` CSS variable names and their CSS string values.
- */
-export function extractCssVarsFromPalette(palette: PaletteOptions, prefix = "--mui-palette"): Record<string, string> {
-  const vars: Record<string, string> = {};
-
-  for (const [key, val] of Object.entries(palette)) {
-    if (typeof val === "string") {
-      vars[`${prefix}-${key}`] = val;
-    } else if (isPlainRecord(val)) {
-      for (const [subKey, subVal] of Object.entries(val)) {
-        if (typeof subVal === "string") {
-          vars[`${prefix}-${key}-${subKey}`] = subVal;
-        }
-      }
-    }
-  }
-
-  return vars;
-}
-
-/**
- * Match draft colors to a preset by light/dark primaryMain and secondaryMain hex values.
- */
-export function matchPresetByColors(
-  colors:
-    | {
-        light?: { primaryMain?: string | null; secondaryMain?: string | null } | null;
-        dark?: { primaryMain?: string | null; secondaryMain?: string | null } | null;
-      }
-    | null
-    | undefined
-): AppearancePresetId {
-  if (!colors?.light?.primaryMain || !colors.dark?.primaryMain) return DEFAULT_PRESET_ID;
-
-  const lightPrimary = colors.light.primaryMain.toLowerCase();
-  const lightSecondary = (colors.light.secondaryMain ?? "").toLowerCase();
-  const darkPrimary = colors.dark.primaryMain.toLowerCase();
-  const darkSecondary = (colors.dark.secondaryMain ?? "").toLowerCase();
-
-  for (const preset of APPEARANCE_PRESETS) {
-    if (
-      preset.light.primaryMain.toLowerCase() === lightPrimary &&
-      preset.light.secondaryMain.toLowerCase() === lightSecondary &&
-      preset.dark.primaryMain.toLowerCase() === darkPrimary &&
-      preset.dark.secondaryMain.toLowerCase() === darkSecondary
-    ) {
-      return preset.id;
-    }
-  }
-
-  return DEFAULT_PRESET_ID;
 }

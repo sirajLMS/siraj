@@ -15,12 +15,12 @@ const StyledPageContainer = styled(Box)(({ theme }) => ({
   alignItems: "center",
   justifyContent: "center",
   position: "relative",
-  background: `linear-gradient(135deg, ${theme.palette.primary.main}22 0%, ${theme.palette.background.default} 45%, ${theme.palette.background.default} 100%)`,
+  background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.13)} 0%, ${theme.palette.background.default} 45%, ${theme.palette.background.default} 100%)`,
   "&::before": {
     content: '""',
     position: "absolute",
     inset: 0,
-    background: `radial-gradient(circle at 20% 20%, ${theme.palette.primary.main}1a 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${theme.palette.secondary.main}1a 0%, transparent 50%)`,
+    background: `radial-gradient(circle at 20% 20%, ${alpha(theme.palette.primary.main, 0.1)} 0%, transparent 50%), radial-gradient(circle at 80% 80%, ${alpha(theme.palette.secondary.main, 0.1)} 0%, transparent 50%)`,
     pointerEvents: "none",
   },
 }));

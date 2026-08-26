@@ -159,18 +159,62 @@ function assertExpectedUpdatedAt(existing: AppearanceSettingsRow | null, expecte
 }
 
 /**
- * Default appearance fields — a snapshot of the current theme palette.
+ * Preset brand-color lookup — maps each preset id to its atomic
+ * `primaryMain` + `secondaryMain` pairs (light + dark). Used to derive
+ * {@link DEFAULT_APPEARANCE_FIELDS} from the active preset (via
+ * `APP_THEME_PRESET` env var) instead of hardcoding teal/indigo.
  *
- * Used to seed the `appearance_settings` row on first access (both published
- * columns and `draft_fields` JSONB are seeded from this). Matches the values
- * in `createAppCssVarsTheme` (decision #2, implementation.md §4 "Open
- * Implementation Details" #1).
+ * This is a backend-safe mirror of the frontend preset catalog
+ * (`frontend/common/providers/theme/presets/index.ts`). Kept as a
+ * plain hex lookup (no MUI imports) so the backend service layer can
+ * read it without crossing the frontend/backend boundary.
  */
-export const DEFAULT_APPEARANCE_FIELDS: AppearanceFields = {
-  colors: {
+const PRESET_BRAND_COLORS: Record<
+  string,
+  { light: { primaryMain: string; secondaryMain: string }; dark: { primaryMain: string; secondaryMain: string } }
+> = {
+  default: {
     light: { primaryMain: "#0D9488", secondaryMain: "#4F46E5" },
     dark: { primaryMain: "#2DD4BF", secondaryMain: "#818CF8" },
   },
+  ocean: {
+    light: { primaryMain: "#00838F", secondaryMain: "#0277BD" },
+    dark: { primaryMain: "#26C6DA", secondaryMain: "#4FC3F7" },
+  },
+  emerald: {
+    light: { primaryMain: "#2E7D32", secondaryMain: "#558B2F" },
+    dark: { primaryMain: "#4CAF50", secondaryMain: "#9CCC65" },
+  },
+  violet: {
+    light: { primaryMain: "#7B1FA2", secondaryMain: "#C2185B" },
+    dark: { primaryMain: "#BA68C8", secondaryMain: "#F06292" },
+  },
+  crimson: {
+    light: { primaryMain: "#C62828", secondaryMain: "#EF6C00" },
+    dark: { primaryMain: "#EF5350", secondaryMain: "#FFA726" },
+  },
+  slate: {
+    light: { primaryMain: "#455A64", secondaryMain: "#607D8B" },
+    dark: { primaryMain: "#78909C", secondaryMain: "#B0BEC5" },
+  },
+};
+
+/** The active preset's brand colors, read from `APP_THEME_PRESET` env var. */
+function getActivePresetBrandColors() {
+  const presetId = process.env.APP_THEME_PRESET ?? "default";
+  return PRESET_BRAND_COLORS[presetId] ?? PRESET_BRAND_COLORS.default;
+}
+
+/**
+ * Default appearance fields — derived from the active preset's brand colors.
+ *
+ * Used to seed the `appearance_settings` row on first access (both published
+ * columns and `draft_fields` JSONB are seeded from this). When
+ * `APP_THEME_PRESET` is set (e.g. "ocean"), the defaults match that preset's
+ * primary/secondary colors instead of the hardcoded teal/indigo.
+ */
+export const DEFAULT_APPEARANCE_FIELDS: AppearanceFields = {
+  colors: getActivePresetBrandColors(),
   logoUrl: null,
   siteName: "Siraj",
   siteTitle: "Siraj",

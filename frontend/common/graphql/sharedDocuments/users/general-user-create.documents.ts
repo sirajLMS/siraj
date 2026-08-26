@@ -3,7 +3,7 @@ import type {
   CreateGeneralUserMutation,
   CreateGeneralUserMutationVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import { UserFieldsFragmentDoc } from "@/frontend/common/graphql/sharedDocuments/users/userFields.documents";
+import { UserFieldsFragmentDoc } from "@/frontend/common/graphql/sharedDocuments/users/user-fields.documents";
 
 export const createGeneralUserMutationDocument: TypedDocumentNode<
   CreateGeneralUserMutation,

@@ -1,4 +1,4 @@
-import type { InputFieldBuilder, ObjectFieldBuilder } from "@pothos/core";
+import type { PothosObjectFieldBuilder, PothosInputFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { logger } from "@/backend/lib/logger";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
@@ -13,9 +13,6 @@ import type {
 } from "@/backend/types";
 
 // Extract the actual SchemaTypes from the builder instance
-export type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
-export type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
-export type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
 
 export type MeetingConfigBaseShape = Pick<
   ClassMeetingConfigReturnType,

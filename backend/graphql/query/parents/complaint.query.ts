@@ -73,7 +73,7 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
           unanswered: result.metrics.unanswered,
           answered: result.metrics.answered,
           avgResolutionHours: result.metrics.avgResolutionHours,
-          avgResolutionTime: null,
+          avgResolutionTime: result.metrics.avgResolutionTime,
           totalCount: result.metrics.totalCount,
         },
         totalCount: result.totalCount,

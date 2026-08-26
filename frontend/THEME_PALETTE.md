@@ -152,3 +152,11 @@ The following hex literals are allowed in `shared/lib/color-contrast.utils.ts` b
 - `CONTRAST_BLACK = "#000000"` — Pure black reference for luminance computation.
 
 These are module-internal and never exported to components.
+
+## Custom Palette Tokens (Verified)
+
+The following custom palette augmentation tokens are registered in BOTH light and dark palettes across all presets (default, ocean, emerald, violet, crimson):
+
+- `headerContainer` — Background color for header/navigation containers. Used in `ThemeLanguageControls.tsx`. Light: `#FFFFFF`, Dark: varies by preset.
+
+These are safe to use via `theme.palette.headerContainer` in `styled()` and `sx` blocks.
