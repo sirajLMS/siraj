@@ -149,13 +149,13 @@ import { creditAdjustmentTypeEnum } from "@/backend/db/schema/enums";
 export const creditTransactions = createTable("credit_transactions", {
   // ... existing columns unchanged ...
   id: uuidColumn("id").defaultRandom().primaryKey(),
-  studentId: uuidColumn("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
+  studentId: uuidDefaultColumn("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
   changeAmount: integerColumn("change_amount").notNull(),
   reason: creditReasonEnum("reason").notNull(),
-  sourcePaymentId: uuidColumn("source_payment_id").references(() => payments.id, { onDelete: "set null" }),
-  classInstanceId: uuidColumn("class_instance_id").references(() => classInstances.id, { onDelete: "set null" }),
+  sourcePaymentId: uuidDefaultColumn("source_payment_id").references(() => payments.id, { onDelete: "set null" }),
+  classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id, { onDelete: "set null" }),
   notes: textColumn("notes"),
-  creditedByUserId: uuidColumn("credited_by_user_id").notNull().references(() => users.id, { onDelete: "set null" }),
+  creditedByUserId: uuidDefaultColumn("credited_by_user_id").notNull().references(() => users.id, { onDelete: "set null" }),
   idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
   createdAt: timestampColumn("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
   updatedAt: timestampColumn("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
@@ -166,7 +166,7 @@ export const creditTransactions = createTable("credit_transactions", {
     .default(CreditAdjustmentType.ADD)
     .$type<CreditAdjustmentType>(),
 
-  carryoverTeacherId: uuidColumn("carryover_teacher_id").references(() => teachers.id, {
+  carryoverTeacherId: uuidDefaultColumn("carryover_teacher_id").references(() => teachers.id, {
     onDelete: "set null",
   }), // nullable — only set for "Subtract With Carryover"
 
@@ -329,6 +329,8 @@ async function addCredit(
 
   try {
     const created = await db.transaction(async (tx) => {
+      // SE-FIX: Acquire advisory lock to prevent concurrent credit modifications
+      // await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('student_${input.studentId}'))`);
       await assertStudentExists(input.studentId, tErrors);
 
       const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey], tx);
@@ -375,6 +377,8 @@ async function subtractCredit(
 
   try {
     const created = await db.transaction(async (tx) => {
+      // SE-FIX: Acquire advisory lock to prevent concurrent credit modifications
+      // await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('student_${input.studentId}'))`);
       await assertStudentExists(input.studentId, tErrors);
 
       // Insufficient-classes guard INSIDE the tx to prevent TOCTOU.
@@ -428,6 +432,8 @@ async function subtractWithCarryover(
 
   try {
     const created = await db.transaction(async (tx) => {
+      // SE-FIX: Acquire advisory lock to prevent concurrent credit modifications
+      // await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('student_${input.studentId}'))`);
       await assertStudentExists(input.studentId, tErrors);
       await assertTeacherExists(input.carryoverTeacherId!, tErrors);
 
