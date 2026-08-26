@@ -58,6 +58,8 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BUILD_ID: buildId,
     NEXT_PUBLIC_LOCALE_SNAPSHOT_BASE: "/static/locale-snapshots",
+    APP_THEME_PRESET: getEnv("APP_THEME_PRESET", "default"),
+    NEXT_PUBLIC_APP_THEME_PRESET: getEnv("APP_THEME_PRESET", "default"),
   },
   serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions", "newrelic"],
   // Ensure the full newrelic package is traced into serverless function bundles on Vercel.

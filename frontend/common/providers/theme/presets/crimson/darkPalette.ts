@@ -94,7 +94,7 @@ export const darkPalette: PaletteOptions = {
   onSidebarContainer: "#FEE2E2",
 
   background: {
-    default: "#150404", // Very deep maroon
+    default: "#100303", // Abyssal maroon — darker than paper for depth
     paper: "#1F0808",
   },
   onBackground: "#FEE2E2",
@@ -104,24 +104,24 @@ export const darkPalette: PaletteOptions = {
   onSurfaceVariant: "#FCA5A5",
   outline: "#3D1818",
   outlineVariant: "#2A1010",
-  divider: "rgba(239, 83, 80, 0.12)",
+  divider: "rgba(239, 83, 80, 0.14)",
   action: {
     active: "#FCA5A5",
-    hover: "rgba(239, 83, 80, 0.08)",
-    selected: "rgba(239, 83, 80, 0.12)",
+    hover: "rgba(239, 83, 80, 0.10)",
+    selected: "rgba(239, 83, 80, 0.16)",
     disabled: "rgba(252, 165, 165, 0.3)",
     disabledBackground: "rgba(239, 83, 80, 0.05)",
-    focus: "rgba(239, 83, 80, 0.12)",
+    focus: "rgba(239, 83, 80, 0.14)",
   },
   scrim: "#000000",
   inverseSurface: "#FEE2E2",
   inverseOnSurface: "#1F0808",
   inversePrimary: "#C62828",
-  surfaceDim: "#0F0303",
+  surfaceDim: "#0C0202",
   surfaceBright: "#2A1010",
 
-  surfaceContainerLowest: "#0A0202",
-  surfaceContainerLow: "#150404",
+  surfaceContainerLowest: "#070101",
+  surfaceContainerLow: "#100303",
   surfaceContainer: "#1F0808",
   surfaceContainerHigh: "#2A1010",
   surfaceContainerHighest: "#3D1818",
@@ -130,11 +130,12 @@ export const darkPalette: PaletteOptions = {
     light: "#2A1010",
     main: "#3D1818",
   },
+  // Red-tinted shadows — deep maroon with subtle crimson glow.
   shadow: {
-    card: "0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.5)",
-    cardHover: "0 10px 15px -3px rgba(0, 0, 0, 0.8), 0 4px 6px -2px rgba(0, 0, 0, 0.5)",
-    button: "0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px 0 rgba(0, 0, 0, 0.3)",
-    buttonHover: "0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.4)",
+    card: "0 4px 6px -1px rgba(21, 4, 4, 0.7), 0 2px 4px -2px rgba(21, 4, 4, 0.5), 0 0 0 1px rgba(239, 83, 80, 0.04)",
+    cardHover: "0 10px 20px -3px rgba(21, 4, 4, 0.8), 0 4px 8px -2px rgba(21, 4, 4, 0.5), 0 0 0 1px rgba(239, 83, 80, 0.08)",
+    button: "0 1px 3px 0 rgba(21, 4, 4, 0.5), 0 1px 2px 0 rgba(21, 4, 4, 0.3)",
+    buttonHover: "0 4px 8px -1px rgba(239, 83, 80, 0.15), 0 2px 4px -2px rgba(21, 4, 4, 0.4)",
   },
 
   status: {

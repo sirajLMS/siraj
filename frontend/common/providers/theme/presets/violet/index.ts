@@ -1,2 +1,2 @@
-export { darkPalette } from "./darkPalette";
 export { lightPalette } from "./lightPalette";
+export { darkPalette } from "./darkPalette";

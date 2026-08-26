@@ -27,25 +27,13 @@
  * overrides `--mui-palette-primary-main` on top of the preset's full palette).
  */
 import type { PaletteOptions } from "@mui/material/styles";
-import { APPEARANCE_PRESETS, type AppearancePresetId } from "@/frontend/common/providers/theme/presets";
-import {
-  darkPalette as crimsonDark,
-  lightPalette as crimsonLight,
-} from "@/frontend/common/providers/theme/presets/crimson";
-import {
-  darkPalette as defaultDark,
-  lightPalette as defaultLight,
-} from "@/frontend/common/providers/theme/presets/default";
-import {
-  darkPalette as emeraldDark,
-  lightPalette as emeraldLight,
-} from "@/frontend/common/providers/theme/presets/emerald";
+import { darkPalette as defaultDark, lightPalette as defaultLight } from "@/frontend/common/providers/theme/presets/default";
 import { darkPalette as oceanDark, lightPalette as oceanLight } from "@/frontend/common/providers/theme/presets/ocean";
+import { darkPalette as emeraldDark, lightPalette as emeraldLight } from "@/frontend/common/providers/theme/presets/emerald";
+import { darkPalette as violetDark, lightPalette as violetLight } from "@/frontend/common/providers/theme/presets/violet";
+import { darkPalette as crimsonDark, lightPalette as crimsonLight } from "@/frontend/common/providers/theme/presets/crimson";
 import { darkPalette as slateDark, lightPalette as slateLight } from "@/frontend/common/providers/theme/presets/slate";
-import {
-  darkPalette as violetDark,
-  lightPalette as violetLight,
-} from "@/frontend/common/providers/theme/presets/violet";
+import { APPEARANCE_PRESETS, type AppearancePresetId } from "@/frontend/common/providers/theme/presets";
 
 /** A resolved preset palette pair (both modes bundled together). */
 export interface PresetPalettes {
@@ -134,15 +122,10 @@ const normalizeHex = (hex: string | undefined): string => hex?.toLowerCase().tri
  * "active" when the admin enters customization mode with an existing
  * published color pair.
  */
-export function matchPresetByColors(
-  colors:
-    | {
-        light?: { primaryMain?: string; secondaryMain?: string } | null;
-        dark?: { primaryMain?: string; secondaryMain?: string } | null;
-      }
-    | null
-    | undefined
-): AppearancePresetId | null {
+export function matchPresetByColors(colors: {
+  light?: { primaryMain?: string; secondaryMain?: string } | null;
+  dark?: { primaryMain?: string; secondaryMain?: string } | null;
+} | null | undefined): AppearancePresetId | null {
   if (!colors?.light?.primaryMain || !colors?.dark?.primaryMain) return null;
   const target = {
     lightPrimary: normalizeHex(colors.light?.primaryMain),

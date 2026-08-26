@@ -94,7 +94,7 @@ export const darkPalette: PaletteOptions = {
   onSidebarContainer: "#E0F7FA",
 
   background: {
-    default: "#06121E", // Very deep ocean navy
+    default: "#050E1A", // Abyssal deep — darker than paper for depth
     paper: "#0A1929",
   },
   onBackground: "#E0F7FA",
@@ -106,25 +106,27 @@ export const darkPalette: PaletteOptions = {
   outlineVariant: "#1A3040",
   // Tinted divider — uses cyan at low opacity so separators feel "ocean"
   // instead of neutral grey. Without this MUI defaults to rgba(255,255,255,0.12).
-  divider: "rgba(38, 198, 218, 0.12)",
+  divider: "rgba(38, 198, 218, 0.14)",
   // Tinted action states — hover/selected lean cyan, not neutral grey.
   action: {
     active: "#80DEEA",
-    hover: "rgba(38, 198, 218, 0.08)",
-    selected: "rgba(38, 198, 218, 0.12)",
+    hover: "rgba(38, 198, 218, 0.10)",
+    selected: "rgba(38, 198, 218, 0.16)",
     disabled: "rgba(128, 222, 234, 0.3)",
     disabledBackground: "rgba(38, 198, 218, 0.05)",
-    focus: "rgba(38, 198, 218, 0.12)",
+    focus: "rgba(38, 198, 218, 0.14)",
   },
   scrim: "#000000",
   inverseSurface: "#E0F7FA",
   inverseOnSurface: "#0A1929",
   inversePrimary: "#00838F",
-  surfaceDim: "#050F1A",
+  surfaceDim: "#040B14",
   surfaceBright: "#1A3040",
 
-  surfaceContainerLowest: "#030C15",
-  surfaceContainerLow: "#06121E",
+  // Material 3 surface layering — each level is progressively lighter + more cyan-tinted
+  // so cards/panels/elevated surfaces have visible depth (not flat grey).
+  surfaceContainerLowest: "#020810",
+  surfaceContainerLow: "#050E1A",
   surfaceContainer: "#0A1929",
   surfaceContainerHigh: "#102A43",
   surfaceContainerHighest: "#1A3040",
@@ -133,11 +135,14 @@ export const darkPalette: PaletteOptions = {
     light: "#102A43",
     main: "#1A3040",
   },
+  // Cyan-tinted shadows — deep navy with a subtle cyan glow instead of muddy black.
+  // This makes cards feel "underwater" rather than floating on grey.
   shadow: {
-    card: "0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.5)",
-    cardHover: "0 10px 15px -3px rgba(0, 0, 0, 0.8), 0 4px 6px -2px rgba(0, 0, 0, 0.5)",
-    button: "0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px 0 rgba(0, 0, 0, 0.3)",
-    buttonHover: "0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.4)",
+    card: "0 4px 6px -1px rgba(6, 18, 30, 0.7), 0 2px 4px -2px rgba(6, 18, 30, 0.5), 0 0 0 1px rgba(38, 198, 218, 0.04)",
+    cardHover:
+      "0 10px 20px -3px rgba(6, 18, 30, 0.8), 0 4px 8px -2px rgba(6, 18, 30, 0.5), 0 0 0 1px rgba(38, 198, 218, 0.08)",
+    button: "0 1px 3px 0 rgba(6, 18, 30, 0.5), 0 1px 2px 0 rgba(6, 18, 30, 0.3)",
+    buttonHover: "0 4px 8px -1px rgba(38, 198, 218, 0.15), 0 2px 4px -2px rgba(6, 18, 30, 0.4)",
   },
 
   status: {

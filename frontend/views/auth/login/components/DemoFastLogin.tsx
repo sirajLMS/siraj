@@ -75,7 +75,7 @@ const StyledDividerLabel = styled(Typography)(({ theme }) => ({
 const StyledButtonGrid = styled(Box)(({ theme }) => ({
   display: "grid",
   gridTemplateColumns: "repeat(2, 1fr)",
-  gap: theme.spacing(1.5),
+  gap: theme.spacing(2),
 }));
 
 export interface DemoFastLoginProps {

@@ -37,7 +37,7 @@ const StyledFormActionsContainer = styled(Box)({
   display: "flex",
   justifyContent: "flex-end",
   alignItems: "center",
-  marginTop: "-0.75rem",
+  marginTop: "-0.5rem",
 });
 
 // Shared focus + error styling for all login TextFields — gives inputs a clear focus
@@ -75,12 +75,19 @@ const textFieldFocusSx = (theme: Theme) => ({
 const textFieldLabelSlotProps = (theme: Theme) => ({
   inputLabel: {
     sx: {
-      color: theme.palette.text.secondary,
+      color: alpha(theme.palette.text.primary, 0.7),
       fontWeight: 500,
       "&.Mui-focused": { color: theme.palette.primary.main },
       "&.Mui-error": { color: theme.palette.error.main },
       "&.Mui-error.Mui-focused": { color: theme.palette.error.main },
     },
+  },
+});
+
+const inputPlaceholderSx = (theme: Theme) => ({
+  "& .MuiInputBase-input::placeholder": {
+    color: alpha(theme.palette.text.primary, 0.5),
+    opacity: 1,
   },
 });
 
@@ -166,7 +173,7 @@ const FormFields = ({
               },
               ...textFieldLabelSlotProps(theme),
             }}
-            sx={textFieldFocusSx(theme)}
+            sx={theme => ({ ...textFieldFocusSx(theme), ...inputPlaceholderSx(theme) })}
           />
         )}
       />
@@ -212,7 +219,7 @@ const FormFields = ({
                 },
                 ...textFieldLabelSlotProps(theme),
               }}
-              sx={textFieldFocusSx(theme)}
+              sx={theme => ({ ...textFieldFocusSx(theme), ...inputPlaceholderSx(theme) })}
             />
             <PasswordStrengthMeter
               password={passwordValue}
