@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock, Person, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -15,8 +15,9 @@ import {
   InputAdornment,
   Link,
   TextField,
+  useTheme,
 } from "@mui/material";
-import { alpha, styled } from "@mui/material/styles";
+import { alpha, styled, type Theme } from "@mui/material/styles";
 import { useCallback, useState } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
@@ -24,7 +25,8 @@ import { mockLogin } from "@/frontend/views/auth/login/actions/mockLogin";
 import { createLoginSchema, type LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
-const StyledPersonIcon = styled(Person)(({ theme }) => ({
+// Semantic envelope icon for the email field — signals "email" not "username".
+const StyledEmailIcon = styled(Email)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
@@ -36,6 +38,51 @@ const StyledFormActionsContainer = styled(Box)({
   display: "flex",
   justifyContent: "flex-end",
   alignItems: "center",
+  marginTop: "-0.5rem",
+});
+
+// Shared focus + error styling for all login TextFields — gives inputs a clear focus
+// ring (accessibility), consistent border radius, and a red focus ring on error.
+// Reused by both the email and password fields to avoid duplication (jscpd).
+const textFieldFocusSx = (theme: Theme) => ({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 1.5,
+    transition: theme.transitions.create(["box-shadow", "border-color"], {
+      duration: theme.transitions.duration.short,
+    }),
+    "& fieldset": {
+      borderColor: alpha(theme.palette.text.primary, 0.4),
+      borderWidth: 2,
+    },
+    "&:hover fieldset": {
+      borderColor: alpha(theme.palette.primary.main, 0.6),
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: theme.palette.primary.main,
+      borderWidth: 2,
+    },
+    "&.Mui-focused": {
+      boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.15)}`,
+    },
+    "&.Mui-focused.Mui-error": {
+      boxShadow: `0 0 0 4px ${alpha(theme.palette.error.main, 0.2)}`,
+    },
+    "&.Mui-error .MuiInputAdornment-root": {
+      color: theme.palette.error.main,
+    },
+  },
+});
+
+const textFieldLabelSlotProps = (theme: Theme) => ({
+  inputLabel: {
+    sx: {
+      color: theme.palette.text.secondary,
+      fontWeight: 500,
+      "&.Mui-focused": { color: theme.palette.primary.main },
+      "&.Mui-error": { color: theme.palette.error.main },
+      "&.Mui-error.Mui-focused": { color: theme.palette.error.main },
+    },
+  },
 });
 
 const StyledForgotPasswordLink = styled(Link)(({ theme }) => ({
@@ -95,6 +142,7 @@ const FormFields = ({
   capsLockOn: boolean;
   onPasswordKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }) => {
+  const theme = useTheme();
   return (
     <>
       <Controller
@@ -113,11 +161,13 @@ const FormFields = ({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <StyledPersonIcon />
+                    <StyledEmailIcon />
                   </InputAdornment>
                 ),
               },
+              ...textFieldLabelSlotProps(theme),
             }}
+            sx={textFieldFocusSx(theme)}
           />
         )}
       />
@@ -158,7 +208,9 @@ const FormFields = ({
                     </InputAdornment>
                   ),
                 },
+                ...textFieldLabelSlotProps(theme),
               }}
+              sx={textFieldFocusSx(theme)}
             />
             <PasswordStrengthMeter
               password={passwordValue}
@@ -179,7 +231,7 @@ const FormFields = ({
 const FormActions = ({ labels }: { labels: AuthLoginLabels }) => {
   const [forgotOpen, setForgotOpen] = useState(false);
   return (
-    <StyledFormActionsContainer sx={{ mt: 0.5, minHeight: 44 }}>
+    <StyledFormActionsContainer sx={{ minHeight: 44 }}>
       <StyledForgotPasswordLink
         href="#"
         underline="hover"
@@ -303,6 +355,7 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
   return (
     <Box
       component="form"
+      noValidate
       onSubmit={e => {
         e.preventDefault();
         void handleSubmit(onSubmit)(e);
@@ -344,7 +397,7 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
         size="large"
         disabled={isSubmitting || isRetrying}
         fullWidth
-        sx={{ mt: 2 }}
+        sx={{ mt: 1.5 }}
       >
         {isSubmitting || isRetrying ? <CircularProgress size={24} color="inherit" /> : labels.signIn}
       </StyledSubmitButton>

@@ -267,7 +267,7 @@ function BrandColorPreviewCard({
       sx={{
         flex: 1,
         p: 2,
-        borderRadius: 2,
+        borderRadius: "12px",
         border: "1px solid var(--mui-palette-outlineVariant)",
         backgroundColor: "var(--mui-palette-background-paper)",
       }}
@@ -290,7 +290,7 @@ function BrandColorPreviewCard({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 1.5,
+              borderRadius: "8px",
               backgroundColor: primary,
               border: "2px solid var(--mui-palette-outlineVariant)",
               boxShadow: theme => `0 2px 8px ${theme.palette.mode === "dark" ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"}`,
@@ -310,7 +310,7 @@ function BrandColorPreviewCard({
             sx={{
               width: 48,
               height: 48,
-              borderRadius: 1.5,
+              borderRadius: "8px",
               backgroundColor: secondary,
               border: "2px solid var(--mui-palette-outlineVariant)",
               boxShadow: theme => `0 2px 8px ${theme.palette.mode === "dark" ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"}`,

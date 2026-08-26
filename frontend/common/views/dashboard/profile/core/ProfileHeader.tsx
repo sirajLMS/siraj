@@ -17,11 +17,12 @@ export function ProfileHeader({ name, email, roleLabel, avatarUrl, showAvatar = 
   return (
     <Stack
       direction={{ xs: "column", sm: "row" }}
-      spacing={2}
+      spacing={3}
       sx={{
         alignItems: { xs: "stretch", sm: "center" },
         width: "100%",
         pt: { xs: 0.5, md: 0 },
+        pb: 1,
       }}
     >
       <Stack

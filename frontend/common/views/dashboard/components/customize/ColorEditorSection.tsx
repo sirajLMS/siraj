@@ -175,7 +175,7 @@ export function ColorField({ label, hex, onChange }: ColorFieldProps) {
           sx={{
             width: 36,
             height: 36,
-            borderRadius: 1,
+            borderRadius: "8px",
             border: "2px solid var(--mui-palette-outlineVariant)",
             backgroundColor: safeHex,
             flexShrink: 0,

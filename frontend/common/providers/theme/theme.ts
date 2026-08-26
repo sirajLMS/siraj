@@ -28,7 +28,11 @@ const sharedFoundation = (direction: "rtl" | "ltr") => ({
     return `${factor * 8}px`; // Conserve 8px scale step while retaining easy access
   },
   shape: {
-    borderRadius: 16, // Use rounded system
+    // FIX-26: Reduced from 16 to 8. MUI v9 multiplies numeric borderRadius
+    // by this value — 16 produced 16px/32px/48px for borderRadius: 1/2/3 which
+    // was way too round. 8 produces 8px/16px/24px which is professional + consistent.
+    // String borderRadius values (e.g. "12px") are unaffected by this multiplier.
+    borderRadius: 8,
   },
   typography,
 });

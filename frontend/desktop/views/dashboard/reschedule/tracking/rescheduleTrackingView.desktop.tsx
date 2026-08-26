@@ -42,7 +42,7 @@ export function RescheduleTrackingViewDesktop({
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.pageTitle} />
 
-      <DesktopMetricCardGrid metrics={metrics} size={{ md: 4, lg: "grow" }} />
+      <DesktopMetricCardGrid metrics={metrics} size={{ md: 4, lg: 3 }} />
 
       <DesktopSectionPanel
         contentPadding={false}

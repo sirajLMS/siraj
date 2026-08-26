@@ -66,7 +66,7 @@ export function LogoUploadSection() {
       <Box
         sx={{
           border: "2px dashed var(--mui-palette-outlineVariant)",
-          borderRadius: 2,
+          borderRadius: "12px",
           p: 2,
           textAlign: "center",
         }}

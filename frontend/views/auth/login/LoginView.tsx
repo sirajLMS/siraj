@@ -50,15 +50,15 @@ export function LoginView({
           width: "100%",
           maxWidth: 460,
           mx: "auto",
-          p: { xs: 3, sm: 5 },
+          p: { xs: 3, sm: 4 },
           borderRadius: { xs: 3, sm: 4 },
-          backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === "dark" ? 0.04 : 0.92),
-          backdropFilter: "blur(12px)",
-          border: `1px solid ${theme.palette.divider}`,
+          backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === "dark" ? 0.1 : 0.92),
+          backdropFilter: "blur(14px)",
+          border: `1px solid ${alpha(theme.palette.divider, theme.palette.mode === "dark" ? 1.8 : 1)}`,
           boxShadow: `
-            0 1px 2px ${alpha(theme.palette.common.black, 0.08)},
-            0 8px 24px ${alpha(theme.palette.common.black, 0.12)},
-            0 24px 64px ${alpha(theme.palette.primary.main, 0.1)}`,
+            0 1px 2px ${alpha(theme.palette.common.black, 0.1)},
+            0 8px 24px ${alpha(theme.palette.common.black, 0.14)},
+            0 24px 64px ${alpha(theme.palette.primary.main, 0.14)}`,
           animation: "sirajLoginEntrance 360ms cubic-bezier(0.2, 0, 0, 1) both",
           "@keyframes sirajLoginEntrance": {
             "0%": { opacity: "0", transform: "translateY(12px)" },
@@ -66,7 +66,7 @@ export function LoginView({
           },
         })}
       >
-        <Stack spacing={{ xs: 3, sm: 4 }}>
+        <Stack spacing={{ xs: 2.5, sm: 3 }}>
           <LoginHeader labels={labels} />
           <LoginForm
             labels={labels}

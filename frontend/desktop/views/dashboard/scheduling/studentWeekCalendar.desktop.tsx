@@ -15,6 +15,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { alpha, type Theme } from "@mui/material/styles";
 import { useState } from "react";
 import { SessionActions } from "@/frontend/common/views/dashboard/scheduling/session-actions/SessionActions";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
@@ -110,27 +111,51 @@ function SessionCard({ cls }: Readonly<{ cls: StudentClassRow }>) {
       sx={theme => ({
         borderColor: theme.palette.primary.light,
         borderWidth: 1.5,
-        borderRadius: 2,
+        borderRadius: 1.5,
         transition: "box-shadow 0.2s",
-        "&:hover": { boxShadow: 3 },
+        backgroundColor: alpha(theme.palette.primary.main, 0.08),
+        "&:hover": { boxShadow: 3, borderColor: theme.palette.primary.main },
       })}
     >
-      <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
-        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Box>
-            <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 600 })}>
+      <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
+        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", gap: 0.5 }}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography
+              variant="caption"
+              sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700, fontSize: "0.7rem" })}
+            >
               {startDate.toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" })}
             </Typography>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                display: "block",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontSize: "0.75rem",
+              }}
+            >
               {cls.subjectName ?? "Session"}
             </Typography>
-            <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
+            <Typography
+              variant="caption"
+              sx={theme => ({
+                color: theme.palette.text.secondary,
+                fontSize: "0.7rem",
+                display: "block",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              })}
+            >
               {cls.instructor}
             </Typography>
           </Box>
           <OutcomeChip outcome={cls.outcome} />
         </Stack>
-        <Box sx={{ mt: 1 }}>
+        <Box sx={{ mt: 0.5 }}>
           <SessionActions classInstanceId={cls.id} locked={locked || startDate < now} compact />
         </Box>
       </CardContent>
@@ -138,11 +163,15 @@ function SessionCard({ cls }: Readonly<{ cls: StudentClassRow }>) {
   );
 }
 
+// Visible-but-subtle grid line color — derived from text.primary so it adapts
+// to light/dark themes. Kept at module scope (no parent vars needed).
+const gridLineColor = (theme: Theme) => alpha(theme.palette.text.primary, 0.08);
+
 function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[]; weekStart: Date }>) {
   const now = new Date();
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: 600 }}>
-      <Box sx={theme => ({ display: "flex", borderBottom: 1, borderColor: theme.palette.divider })}>
+      <Box sx={theme => ({ display: "flex", borderBottom: `1px solid ${gridLineColor(theme)}` })}>
         <Box sx={{ minWidth: 60, p: 1 }} />
         {DAYS.map((day, idx) => {
           const dayDate = addDays(weekStart, idx);
@@ -154,25 +183,32 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
                 flex: 1,
                 p: 1,
                 textAlign: "center",
-                borderLeft: 1,
-                borderColor: theme.palette.divider,
+                borderLeft: `1px solid ${gridLineColor(theme)}`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 0.5,
               })}
             >
-              <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
+              <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 600 })}>
                 {day}
               </Typography>
               <Typography
                 variant="h6"
                 sx={theme => ({
-                  fontWeight: 600,
-                  bgcolor: isToday ? theme.palette.primary.main : theme.palette.background.default,
-                  color: isToday ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                  fontWeight: 700,
+                  bgcolor: isToday ? theme.palette.primary.main : "transparent",
+                  color: isToday ? theme.palette.onPrimary : theme.palette.text.primary,
                   borderRadius: "50%",
-                  width: 32,
-                  height: 32,
+                  width: 34,
+                  height: 34,
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  fontSize: "0.95rem",
+                  transition: theme.transitions.create(["background-color", "color"], {
+                    duration: theme.transitions.duration.short,
+                  }),
                 })}
               >
                 {dayDate.getDate()}
@@ -190,11 +226,10 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
                 height: 60,
                 p: 0.5,
                 textAlign: "right",
-                borderBottom: 1,
-                borderColor: theme.palette.divider,
+                borderBottom: `1px solid ${gridLineColor(theme)}`,
               })}
             >
-              <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled })}>
+              <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled, fontSize: "0.7rem" })}>
                 {formatHour(hour)}
               </Typography>
             </Box>
@@ -208,8 +243,7 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
               key={day}
               sx={theme => ({
                 flex: 1,
-                borderLeft: 1,
-                borderColor: theme.palette.divider,
+                borderLeft: `1px solid ${gridLineColor(theme)}`,
                 position: "relative",
               })}
             >
@@ -218,8 +252,7 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
                   key={hour}
                   sx={theme => ({
                     height: 60,
-                    borderBottom: 1,
-                    borderColor: theme.palette.divider,
+                    borderBottom: `1px solid ${gridLineColor(theme)}`,
                   })}
                 />
               ))}
@@ -231,7 +264,7 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
                 return (
                   <Box
                     key={cls.id}
-                    sx={{ position: "absolute", top: hourIndex * 60 + 4, left: 4, right: 4, zIndex: 1 }}
+                    sx={{ position: "absolute", top: hourIndex * 60 + 2, left: 2, right: 2, zIndex: 1 }}
                   >
                     <SessionCard cls={cls} />
                   </Box>
@@ -260,23 +293,32 @@ export function StudentWeekCalendarContainer() {
   return (
     <DesktopPageContainer>
       <DesktopPageHeader title="Weekly Schedule" />
-      <Stack direction="row" sx={{ alignItems: "center", mb: 2, gap: 2 }}>
-        <IconButton onClick={() => setWeekStart(addDays(weekStart, -7))}>
+      <Stack direction="row" sx={{ alignItems: "center", mb: 2, gap: 1 }}>
+        <IconButton onClick={() => setWeekStart(addDays(weekStart, -7))} aria-label="Previous week">
           <ChevronLeftOutlined />
         </IconButton>
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
           {weekStart.toLocaleDateString("en", { month: "long", day: "numeric" })} —{" "}
           {addDays(weekStart, 6).toLocaleDateString("en", { month: "long", day: "numeric", year: "numeric" })}
         </Typography>
-        <IconButton onClick={() => setWeekStart(addDays(weekStart, 7))}>
+        <IconButton onClick={() => setWeekStart(addDays(weekStart, 7))} aria-label="Next week">
           <ChevronRightOutlined />
         </IconButton>
-        <Box sx={{ flexGrow: 1 }} />
         <Button
           variant="outlined"
           size="small"
           onClick={() => setWeekStart(startOfWeek(new Date()))}
-          sx={{ borderRadius: 2, textTransform: "none" }}
+          sx={theme => ({
+            borderRadius: 2,
+            textTransform: "none",
+            ml: 1,
+            borderColor: theme.palette.primary.main,
+            color: theme.palette.primary.main,
+            "&:hover": {
+              borderColor: theme.palette.primary.dark,
+              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+            },
+          })}
         >
           Today
         </Button>

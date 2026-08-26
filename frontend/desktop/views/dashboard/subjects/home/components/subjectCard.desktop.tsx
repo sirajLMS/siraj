@@ -12,6 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { ClassAvatar } from "@/frontend/common/components/ui/avatar/ClassAvatar";
 import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subjects/home/types";
@@ -38,10 +39,16 @@ export function SubjectCardDesktop({
       sx={theme => ({
         borderRadius: theme.layout.radius.card,
         border: `1px solid ${theme.palette.outlineVariant}`,
-        boxShadow: theme.palette.shadow.card,
+        boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.08)}`,
         display: "flex",
         flexDirection: "column",
         height: "100%",
+        transition: theme.transitions.create(["box-shadow", "transform", "border-color"], { duration: 200 }),
+        "&:hover": {
+          boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.12)}, 0 2px 8px ${alpha(theme.palette.common.black, 0.08)}`,
+          borderColor: theme.palette.primary.main,
+          transform: "translateY(-2px)",
+        },
       })}
     >
       <CardActionArea onClick={onClick} sx={{ flex: 1 }}>

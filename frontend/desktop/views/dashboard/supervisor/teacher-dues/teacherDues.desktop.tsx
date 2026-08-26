@@ -137,7 +137,7 @@ function buildColumns({
     {
       field: "currency",
       headerName: labels.currencyColumn,
-      width: 100,
+      width: 130,
       valueGetter: (_, row) => row.currency ?? "",
     },
     {

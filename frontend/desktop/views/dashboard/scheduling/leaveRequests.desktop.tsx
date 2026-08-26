@@ -1,6 +1,5 @@
 "use client";
 
-import { AccessTimeOutlined } from "@mui/icons-material";
 import { Alert, Box, Card, CardContent, Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { LeaveRequestReasonBox } from "@/frontend/common/views/dashboard/scheduling/leave-requests/components/LeaveRequestReasonBox";
 import { LeaveRequestStatusBadge } from "@/frontend/common/views/dashboard/scheduling/leave-requests/components/LeaveRequestStatusBadge";
@@ -26,7 +25,6 @@ function RequestCard({
   const createdDate = new Date(request.createdAt).toLocaleDateString("en", {
     day: "numeric",
     month: "short",
-    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -40,24 +38,34 @@ function RequestCard({
     : null;
 
   return (
-    <Card variant="outlined" sx={{ transition: "box-shadow 0.2s", "&:hover": { boxShadow: 3 } }}>
+    <Card
+      variant="outlined"
+      sx={theme => ({ transition: theme.transitions.create("box-shadow"), "&:hover": { boxShadow: 3 } })}
+    >
       <CardContent sx={{ p: 2.5 }}>
-        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+        {/* Header row: type + status badges on left, created date on right */}
+        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 1.5, gap: 1 }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
             <RequestTypeChip requestType={request.requestType} labels={labels} />
             <LeaveRequestStatusBadge status={request.status} labels={labels} />
           </Stack>
-          <AccessTimeOutlined sx={theme => ({ fontSize: 18, color: theme.palette.text.disabled })} />
+          <Typography
+            variant="caption"
+            sx={theme => ({ color: theme.palette.text.disabled, fontSize: "0.75rem", whiteSpace: "nowrap" })}
+          >
+            {createdDate}
+          </Typography>
         </Stack>
-        <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {labels.requestsList.submittedAt}: {createdDate}
-        </Typography>
+        {/* Body: reason box */}
+        <LeaveRequestReasonBox reason={request.reason} label={labels.requestsList.reason} />
         {processedDate ? (
-          <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
+          <Typography
+            variant="caption"
+            sx={theme => ({ color: theme.palette.text.secondary, fontSize: "0.7rem", mt: 1, display: "block" })}
+          >
             {labels.requestsList.processedAt}: {processedDate}
           </Typography>
         ) : null}
-        <LeaveRequestReasonBox reason={request.reason} label={labels.requestsList.reason} />
       </CardContent>
     </Card>
   );

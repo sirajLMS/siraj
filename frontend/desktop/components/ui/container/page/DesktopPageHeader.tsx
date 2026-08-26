@@ -59,7 +59,7 @@ export function DesktopPageHeader({
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: 0.5,
+          gap: 1,
         }}
       >
         {resolvedBreadcrumbs.length > 0 ? (
@@ -106,7 +106,7 @@ export function DesktopPageHeader({
           {title}
         </Typography>
         {subtitle ? (
-          <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.text.secondary, marginInlineStart: 2 })}>
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.primary, opacity: 0.7 })}>
             {subtitle}
           </Typography>
         ) : null}

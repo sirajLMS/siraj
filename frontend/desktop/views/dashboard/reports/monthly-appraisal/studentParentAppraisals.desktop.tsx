@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatBubbleOutlineOutlined, Star, StarBorderOutlined } from "@mui/icons-material";
+import { ChatBubbleOutlineOutlined, RateReviewOutlined, Star, StarBorderOutlined } from "@mui/icons-material";
 import { Alert, Box, Card, CardContent, Chip, Divider, Stack, Typography } from "@mui/material";
 import type {
   MonthlyAppraisalRow,
@@ -169,12 +169,16 @@ function AppraisalListBody({
   }
   if (appraisals.length === 0) {
     return (
-      <Card variant="outlined" sx={{ borderStyle: "dashed" }}>
-        <CardContent sx={{ textAlign: "center", py: 6 }}>
-          <Typography variant="h6" sx={theme => ({ color: theme.palette.text.secondary })}>
+      <Card variant="outlined" sx={{ borderStyle: "dashed", borderRadius: 3 }}>
+        <CardContent sx={{ textAlign: "center", py: 6, px: 3 }}>
+          <RateReviewOutlined sx={theme => ({ fontSize: 56, color: theme.palette.text.disabled, mb: 2 })} />
+          <Typography variant="h6" sx={theme => ({ color: theme.palette.text.primary, fontWeight: 600 })}>
             {labels.studentParentView.emptyState}
           </Typography>
-          <Typography variant="body2" sx={theme => ({ color: theme.palette.text.disabled, mt: 1 })}>
+          <Typography
+            variant="body2"
+            sx={theme => ({ color: theme.palette.text.secondary, mt: 1, maxWidth: 420, mx: "auto" })}
+          >
             {labels.studentParentView.emptyStateDescription}
           </Typography>
         </CardContent>

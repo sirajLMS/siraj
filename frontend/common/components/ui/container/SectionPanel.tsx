@@ -27,9 +27,16 @@ export function SectionPanel({ id, title, subTitle, actions, children, edgeToEdg
       sx={mergeSx(
         {
           backgroundColor: theme => alpha(theme.palette.surfaceContainer, 0.95),
-          // borderRadius: theme => theme.layout.radius.section,
-          // border: theme => `1px solid ${theme.palette.outlineVariant}`,
+          borderRadius: "16px",
+          border: theme => `1px solid ${theme.palette.outlineVariant}`,
+          boxShadow: theme =>
+            `0 2px 8px ${alpha(theme.palette.common.black, 0.08)}, 0 1px 3px ${alpha(theme.palette.common.black, 0.06)}`,
           overflow: "hidden",
+          transition: theme => theme.transitions.create("box-shadow", { duration: 200 }),
+          "&:hover": {
+            boxShadow: theme =>
+              `0 4px 16px ${alpha(theme.palette.common.black, 0.1)}, 0 2px 6px ${alpha(theme.palette.common.black, 0.08)}`,
+          },
         },
         edgeToEdge ? edgeToEdgeSx : undefined,
         sx

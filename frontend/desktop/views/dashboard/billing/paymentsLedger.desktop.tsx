@@ -18,6 +18,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { alpha, type Theme } from "@mui/material/styles";
 import { myPaymentsLedgerQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
@@ -44,77 +45,104 @@ interface PaymentRow {
 function PaymentTable({ rows }: Readonly<{ rows: readonly PaymentRow[] }>) {
   return (
     <TableContainer component={Card} variant="outlined" sx={{ borderRadius: 3, overflow: "hidden" }}>
-      <Table>
+      <Table size="small">
         <TableHead>
-          <TableRow sx={theme => ({ bgcolor: theme.palette.action.hover })}>
-            <TableCell sx={{ fontWeight: 600 }}>Student</TableCell>
-            <TableCell sx={{ fontWeight: 600 }} align="center">
-              Credits
-            </TableCell>
-            <TableCell sx={{ fontWeight: 600 }} align="right">
-              Amount
-            </TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Package</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Gateway</TableCell>
-            <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+          <TableRow
+            sx={theme => ({ bgcolor: theme.palette.action.hover, borderBottom: `2px solid ${theme.palette.divider}` })}
+          >
+            <HeaderCell label="Student" />
+            <HeaderCell label="Credits" align="center" />
+            <HeaderCell label="Amount" align="right" />
+            <HeaderCell label="Package" />
+            <HeaderCell label="Gateway" />
+            <HeaderCell label="Date" />
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(row => (
-            <TableRow
-              key={row.id}
-              sx={theme => ({
-                transition: "background-color 0.2s",
-                "&:hover": { bgcolor: theme.palette.action.hover },
-              })}
-            >
-              <TableCell>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {row.studentName ?? "—"}
-                </Typography>
-              </TableCell>
-              <TableCell align="center">
-                <Chip
-                  size="small"
-                  color="success"
-                  variant="outlined"
-                  label={`+${row.creditsPurchased}`}
-                  sx={{ borderRadius: 2, fontWeight: 600 }}
-                />
-              </TableCell>
-              <TableCell align="right">
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {row.amount} {row.currency}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Chip
-                  size="small"
-                  variant="outlined"
-                  label={row.packageName ? row.packageName.charAt(0) + row.packageName.slice(1).toLowerCase() : "—"}
-                  sx={{ borderRadius: 2 }}
-                />
-              </TableCell>
-              <TableCell>
-                <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-                  <CreditCardOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
-                  <Typography variant="caption">{formatGatewayLabel(row.paymentGateway)}</Typography>
-                </Stack>
-              </TableCell>
-              <TableCell>
-                <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-                  {new Date(row.paymentDate).toLocaleDateString("en", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </Typography>
-              </TableCell>
-            </TableRow>
+          {rows.map((row, idx) => (
+            <PaymentRowCells key={row.id} row={row} zebra={idx % 2 === 1} />
           ))}
         </TableBody>
       </Table>
     </TableContainer>
+  );
+}
+
+const headerCellSx = (theme: Theme) => ({
+  fontWeight: 700,
+  color: theme.palette.text.primary,
+  py: 1.5,
+  fontSize: "0.8rem",
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+});
+
+function HeaderCell({ label, align }: Readonly<{ label: string; align?: "left" | "center" | "right" }>) {
+  return (
+    <TableCell sx={headerCellSx} align={align}>
+      {label}
+    </TableCell>
+  );
+}
+
+function PaymentRowCells({ row, zebra }: Readonly<{ row: PaymentRow; zebra: boolean }>) {
+  return (
+    <TableRow
+      sx={theme => ({
+        transition: theme.transitions.create("background-color"),
+        bgcolor: zebra ? alpha(theme.palette.action.hover, 0.4) : "transparent",
+        "&:hover": { bgcolor: theme.palette.action.hover },
+      })}
+    >
+      <TableCell sx={{ py: 1.5 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {row.studentName ?? "—"}
+        </Typography>
+      </TableCell>
+      <TableCell align="center" sx={{ py: 1.5 }}>
+        <Chip
+          size="small"
+          color="success"
+          variant="outlined"
+          label={`+${row.creditsPurchased}`}
+          sx={{ borderRadius: 2, fontWeight: 600 }}
+        />
+      </TableCell>
+      <TableCell align="right" sx={{ py: 1.5 }}>
+        <Typography
+          variant="body2"
+          sx={theme => ({ fontWeight: 700, fontVariantNumeric: "tabular-nums", color: theme.palette.text.primary })}
+        >
+          {row.amount} {row.currency}
+        </Typography>
+      </TableCell>
+      <TableCell sx={{ py: 1.5 }}>
+        <Chip
+          size="small"
+          variant="outlined"
+          label={row.packageName ? row.packageName.charAt(0) + row.packageName.slice(1).toLowerCase() : "—"}
+          sx={{ borderRadius: 2 }}
+        />
+      </TableCell>
+      <TableCell sx={{ py: 1.5 }}>
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+          <CreditCardOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
+          <Typography variant="caption">{formatGatewayLabel(row.paymentGateway)}</Typography>
+        </Stack>
+      </TableCell>
+      <TableCell sx={{ py: 1.5 }}>
+        <Typography
+          variant="caption"
+          sx={theme => ({ color: theme.palette.text.secondary, fontVariantNumeric: "tabular-nums" })}
+        >
+          {new Date(row.paymentDate).toLocaleDateString("en", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </Typography>
+      </TableCell>
+    </TableRow>
   );
 }
 

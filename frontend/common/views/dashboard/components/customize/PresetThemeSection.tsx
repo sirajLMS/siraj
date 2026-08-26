@@ -92,7 +92,7 @@ export function PresetSwatch({ preset, onSelect }: PresetSwatchProps) {
         flexDirection: "column",
         gap: 1,
         p: 1,
-        borderRadius: 1,
+        borderRadius: "12px",
         border: "1px solid var(--mui-palette-outlineVariant)",
         "&:hover": { backgroundColor: "var(--mui-palette-action-hover)" },
         "&:focus-visible": { outline: "2px solid var(--mui-palette-primary-main)" },
@@ -106,7 +106,7 @@ export function PresetSwatch({ preset, onSelect }: PresetSwatchProps) {
           gridTemplateRows: "1fr 1fr",
           width: "100%",
           height: 48,
-          borderRadius: 0.5,
+          borderRadius: "8px",
           overflow: "hidden",
         }}
       >

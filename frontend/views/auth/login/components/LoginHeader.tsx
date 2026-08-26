@@ -47,10 +47,14 @@ const StyledTitle = styled(Typography)(({ theme }) => ({
   WebkitTextFillColor: "transparent",
 }));
 
+// Subtitle uses text.primary with reduced opacity so it remains legible on dark
+// backgrounds while still feeling secondary to the gradient title above it.
 const StyledSubtitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
+  color: alpha(theme.palette.text.primary, 0.85),
   textTransform: "uppercase",
-  letterSpacing: "0.1em",
+  letterSpacing: "0.12em",
+  fontWeight: 600,
+  fontSize: "0.7rem",
 }));
 
 export interface LoginHeaderProps {
@@ -59,8 +63,8 @@ export interface LoginHeaderProps {
 
 export function LoginHeader({ labels }: Readonly<LoginHeaderProps>) {
   return (
-    <StyledHeaderContainer sx={{ mb: 4 }}>
-      <StyledIconContainer sx={{ mb: 2 }}>
+    <StyledHeaderContainer sx={{ mb: 3 }}>
+      <StyledIconContainer sx={{ mb: 1.5 }}>
         <StyledSchoolIcon />
       </StyledIconContainer>
       <StyledTitle variant="headlineLg" sx={{ mb: 0.5 }}>

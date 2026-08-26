@@ -85,6 +85,104 @@ const getMuiCssBaseline = (): Components<Omit<Theme, "components">>["MuiCssBasel
     },
     ".MuiCard-root": {
       borderRadius: "12px !important",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08) !important",
+    },
+    ".MuiDataGrid-root": {
+      borderRadius: "12px !important",
+      border: "1px solid var(--mui-palette-divider) !important",
+      overflow: "hidden",
+    },
+    ".MuiDataGrid-columnHeader": {
+      backgroundColor: "var(--mui-palette-surfaceContainer, var(--mui-palette-background-paper)) !important",
+      borderBottom: "1px solid var(--mui-palette-divider) !important",
+    },
+    ".MuiDataGrid-row": {
+      borderBottom: "1px solid var(--mui-palette-divider) !important",
+      transition: "background-color 150ms ease !important",
+      "&:hover": {
+        backgroundColor: "var(--mui-palette-action-hover) !important",
+      },
+      "&.Mui-selected": {
+        backgroundColor: "var(--mui-palette-action-selected) !important",
+      },
+    },
+    ".MuiDataGrid-cell": {
+      padding: "8px 10px !important",
+    },
+    ".MuiDialog-paper": {
+      borderRadius: "12px !important",
+    },
+    ".MuiListItemButton-root": {
+      borderRadius: "8px !important",
+      minHeight: "44px !important",
+    },
+    ".MuiAppBar-root": {
+      borderBottom: "1px solid var(--mui-palette-divider) !important",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08) !important",
+    },
+    ".MuiTabs-indicator": {
+      borderRadius: "2px !important",
+    },
+    ".MuiTab-root": {
+      minHeight: "48px !important",
+      "&:hover": {
+        color: "var(--mui-palette-primary-main) !important",
+      },
+    },
+    ".MuiButton-root": {
+      borderRadius: "8px !important",
+      fontWeight: "700 !important",
+    },
+    ".MuiAlert-root": {
+      borderRadius: "8px !important",
+    },
+    ".MuiSnackbar-root": {
+      borderRadius: "8px !important",
+    },
+    ".MuiTooltip-tooltip": {
+      borderRadius: "6px !important",
+      fontSize: "0.75rem !important",
+    },
+    ".MuiSwitch-track": {
+      borderRadius: "16px !important",
+    },
+    ".MuiSwitch-thumb": {
+      borderRadius: "50% !important",
+    },
+    ".MuiCheckbox-root": {
+      borderRadius: "4px !important",
+    },
+    ".MuiButton-root:focus-visible, .MuiIconButton-root:focus-visible": {
+      outline: "2px solid var(--mui-palette-primary-main) !important",
+      outlineOffset: "2px !important",
+    },
+    ".MuiMenu-paper, .MuiPopover-paper": {
+      borderRadius: "12px !important",
+      boxShadow: "0 4px 16px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.12) !important",
+    },
+    ".MuiMenuItem-root": {
+      minHeight: "40px !important",
+      "&:hover": {
+        backgroundColor: "var(--mui-palette-action-hover) !important",
+      },
+    },
+    ".MuiChip-root": {
+      borderRadius: "8px !important",
+    },
+    ".MuiBadge-badge": {
+      borderRadius: "8px !important",
+    },
+    ".MuiDivider-root": {
+      borderTopWidth: "1px !important",
+    },
+    ".MuiDialogTitle-root": {
+      fontWeight: "600 !important",
+    },
+    ".MuiCheckbox-root .MuiSvgIcon-root": {
+      borderRadius: "4px !important",
+    },
+    ".MuiSkeleton-root": {
+      borderRadius: "8px !important",
     },
     /**
      * Autofill rules use CSS variable references so the browser resolves the
@@ -163,11 +261,12 @@ const getMuiCssBaseline = (): Components<Omit<Theme, "components">>["MuiCssBasel
 const getMuiButton = (): Components<Omit<Theme, "components">>["MuiButton"] => ({
   styleOverrides: {
     root: ({ ownerState, theme }) => ({
-      borderRadius: 8, // Rounded buttons
+      borderRadius: "8px",
       boxShadow: "none",
       fontWeight: 700,
       textTransform: "uppercase",
       letterSpacing: "0.1em",
+      minHeight: 40,
       "&:hover": {
         boxShadow: "none",
       },

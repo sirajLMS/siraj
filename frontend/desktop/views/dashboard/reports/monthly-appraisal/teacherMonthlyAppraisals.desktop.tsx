@@ -16,6 +16,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { TeacherNoStudentsCard } from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/TeacherNoStudentsCard";
 import { DESKTOP_MONTH_OPTIONS } from "@/frontend/common/views/dashboard/reports/monthly-appraisal/teacher/teacherMonthlyAppraisalConstants";
 import type {
@@ -35,14 +36,37 @@ function StudentRow({
 }>) {
   const hasAppraisal = Boolean(student.appraisalForMonth);
   return (
-    <Card variant="outlined" sx={{ transition: "box-shadow 0.2s", "&:hover": { boxShadow: 3 } }}>
+    <Card
+      variant="outlined"
+      sx={theme => ({
+        transition: theme.transitions.create(["box-shadow", "border-color", "background-color"]),
+        "&:hover": {
+          boxShadow: 3,
+          borderColor: hasAppraisal ? theme.palette.success.light : theme.palette.primary.light,
+          bgcolor: alpha(theme.palette.primary.main, 0.02),
+        },
+      })}
+    >
       <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, py: 2 }}>
-        <Avatar src={student.studentAvatarUrl ?? undefined} alt={student.name} sx={{ width: 48, height: 48 }} />
+        <Avatar
+          src={student.studentAvatarUrl ?? undefined}
+          alt={student.name}
+          sx={theme => ({
+            width: 44,
+            height: 44,
+            bgcolor: alpha(theme.palette.primary.main, 0.15),
+            color: theme.palette.primary.main,
+            fontWeight: 600,
+            border: `1px solid ${theme.palette.divider}`,
+          })}
+        >
+          {student.name.charAt(0).toUpperCase()}
+        </Avatar>
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600 }}>
             {student.name}
           </Typography>
-          <Stack direction="row" spacing={1} sx={{ mt: 0.5, alignItems: "center" }}>
+          <Box sx={{ mt: 0.5 }}>
             {hasAppraisal ? (
               <Chip
                 size="small"
@@ -50,18 +74,33 @@ function StudentRow({
                 variant="outlined"
                 icon={<CheckCircleOutlined />}
                 label={labels.teacherView.appraisalExists}
+                sx={{ borderRadius: 2, px: 0.5, py: 0.25 }}
               />
             ) : (
-              <Chip size="small" color="warning" variant="outlined" label={labels.teacherView.noAppraisalYet} />
+              <Chip
+                size="small"
+                color="warning"
+                variant="outlined"
+                label={labels.teacherView.noAppraisalYet}
+                sx={{ borderRadius: 2, px: 0.5, py: 0.25 }}
+              />
             )}
-          </Stack>
+          </Box>
         </Box>
         <Button
           variant={hasAppraisal ? "outlined" : "contained"}
           color="primary"
           startIcon={<EditOutlined />}
           onClick={() => onOpenForm(student.id)}
-          sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
+          sx={theme => ({
+            borderRadius: 2,
+            textTransform: "none",
+            fontWeight: 600,
+            px: 2,
+            py: 1,
+            "&:hover": { transform: "translateY(-1px)" },
+            transition: theme.transitions.create("transform"),
+          })}
         >
           {labels.teacherView.openForm}
         </Button>

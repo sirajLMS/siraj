@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import CloseIcon from "@mui/icons-material/CloseOutlined";
 import { Alert, Button, IconButton } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { userQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDisplayCurrencyHintDismissed } from "@/frontend/common/hooks/useDisplayCurrencyHintDismissed";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -76,7 +77,22 @@ export function DisplayCurrencyHint({
     }
 
     return (
-      <Alert severity="info" sx={{ mb: 2 }} action={action}>
+      <Alert
+        severity="info"
+        sx={theme => ({
+          mb: 2,
+          borderRadius: "12px",
+          border: `1px solid ${alpha(theme.palette.info.main, 0.3)}`,
+          backgroundColor: alpha(theme.palette.info.main, 0.08),
+          "& .MuiAlert-icon": {
+            color: theme.palette.info.main,
+          },
+          "& .MuiAlert-action": {
+            alignItems: "center",
+          },
+        })}
+        action={action}
+      >
         <strong>{t.title}</strong>
         <br />
         {t.body}

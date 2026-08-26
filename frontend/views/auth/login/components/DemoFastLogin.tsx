@@ -32,39 +32,43 @@ const RoleIconWrapper = styled(Box, {
 }));
 
 const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
-  paddingTop: theme.spacing(1.5),
-  paddingBottom: theme.spacing(1.5),
-  paddingLeft: theme.spacing(1.5),
-  paddingRight: theme.spacing(1.5),
-  minHeight: 48,
+  paddingTop: theme.spacing(1),
+  paddingBottom: theme.spacing(1),
+  paddingLeft: theme.spacing(1.25),
+  paddingRight: theme.spacing(1.25),
+  minHeight: 42,
   textTransform: "none",
   borderRadius: 12,
-  borderColor: theme.palette.divider,
-  color: theme.palette.text.primary,
+  borderColor: alpha(theme.palette.divider, 0.5),
+  color: theme.palette.text.secondary,
   display: "flex",
   justifyContent: "flex-start",
   alignItems: "center",
   gap: theme.spacing(0.75),
-  fontSize: theme.typography.bodyMd.fontSize,
+  fontSize: "0.8rem",
   fontWeight: 600,
-  transition: theme.transitions.create(["all"], {
-    duration: theme.transitions.duration.shorter,
+  transition: theme.transitions.create(["border-color", "background-color", "color", "transform", "box-shadow"], {
+    duration: theme.transitions.duration.short,
   }),
   "&:hover": {
-    borderColor: alpha(theme.palette.primary.main, 0.55),
-    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-    transform: "translateY(-2px)",
-    boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.18)}`,
+    borderColor: alpha(theme.palette.primary.main, 0.5),
+    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    color: theme.palette.text.primary,
+    transform: "translateY(-1px)",
+    boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.15)}`,
   },
   "&:active": {
     transform: "translateY(0)",
+    boxShadow: "none",
   },
 }));
 
 const StyledDividerLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  fontWeight: 500,
-  letterSpacing: "0.5px",
+  color: alpha(theme.palette.text.primary, 0.6),
+  fontWeight: 600,
+  letterSpacing: "0.05em",
+  textTransform: "uppercase",
+  fontSize: "0.75rem",
 }));
 
 // Responsive grid: 2 columns on narrow, expands to 3 on wider cards.
@@ -106,8 +110,8 @@ export function DemoFastLogin({ labels, groups, onFastLogin }: Readonly<DemoFast
   if (!groups || groups.length === 0) return null;
 
   return (
-    <StyledContainer sx={{ mt: 4, mb: 2 }}>
-      <Divider sx={{ mb: 2.5 }}>
+    <StyledContainer sx={{ mt: 2.5, mb: 1.5 }}>
+      <Divider sx={{ mb: 2 }}>
         <StyledDividerLabel variant="bodyMd" sx={{ px: 1 }}>
           {labels.orQuickLogin}
         </StyledDividerLabel>

@@ -16,7 +16,7 @@ export const standardInputSx: SxProps<Theme> = theme => ({
 });
 
 export const outlinedInputSx: SxProps<Theme> = {
-  borderRadius: 3,
+  borderRadius: "8px",
 };
 
 export const timeInputStandardSx: SxProps<Theme> = theme => ({
@@ -26,5 +26,5 @@ export const timeInputStandardSx: SxProps<Theme> = theme => ({
 });
 
 export const timeInputOutlinedSx: SxProps<Theme> = {
-  "& .MuiOutlinedInput-root": { borderRadius: 3 },
+  "& .MuiOutlinedInput-root": { borderRadius: "8px" },
 };
