@@ -6,7 +6,8 @@ description: >
   (1) generating, editing, or creating variants of UI screens using Stitch,
   (2) managing Stitch design systems and DESIGN.md specifications,
   (3) orchestrating iterative multi-page website development via the build loop,
-  (4) converting Stitch designs to React, Next.js, or HTML components.
+  (4) converting Stitch designs to React, Next.js, or HTML components,
+  (5) creating interactive prototypes from an implementation plan (e.g. `.ai/plans/<feature>/`) — see the "Plan-to-Prototype Recipe" below.
 license: MIT
 compatibility: Requires Stitch MCP server configured with STITCH_API_KEY and GOOGLE_CLOUD_PROJECT
 metadata:
@@ -56,6 +57,27 @@ When invoking Stitch tools, call them directly or via `call_mcp_tool` with `Serv
 | **Download assets** | `download_assets` | `{ projectId, outputDir: ".stitch/designs" }` |
 | **Manage design system** | `create_design_system` / `upload_design_md` | `{ projectId, designSystem }` / `{ projectId, designMdBase64 }` |
 | **Apply design system** | `apply_design_system` | `{ projectId, assetId, selectedScreenInstances: [{ id, sourceScreen }] }` |
+
+---
+
+## Plan-to-Prototype Recipe
+
+When asked to "create a prototype for a plan" (e.g. `.ai/plans/<feature>/specs.md` or `implementation.md`), follow this exact sequence:
+
+1. **Read the plan** (`view`; use `view_range` for large files). Extract:
+   - Every distinct **screen/page** the plan describes (lists, forms, detail views, dialogs, per-role views, mobile variants).
+   - UI details worth prompting: filters, columns, status badges, autocomplete, auto-fill behavior, per-audience differences.
+2. **Auth probe**: call `list_projects` first. A 401 means the token is expired — ask the user to re-authenticate before generating anything.
+3. **Always create a NEW project**: `create_project` with a title like `"Siraj — <Feature> Prototypes"`. Record the numeric `projectId`. Never reuse an existing plan-prototype project for a different plan — one project per plan keeps screens organized.
+4. **Design system** (optional consistency step): call `list_design_systems` on a previous prototype project (or globally) to find a matching system; pass its `designSystem` ID (`assets/...`) to `generate_screen_from_text` for visual consistency across plan prototypes. Fall back to defaults if none fit.
+5. **Generate one screen per identified page**, sequential calls with a detailed, self-contained prompt per screen (layout, sidebar, fields, states, badges, data examples from the plan). Use `GEMINI_3_FLASH` for wireframe-speed, `GEMINI_3_1_PRO` for polish. Match `deviceType` to the view (DESKTOP for admin dashboards, MOBILE for self-service/student views).
+6. **After each generation, immediately capture** the new screen's `name`/`id`/title from the response (grep the temp output file if needed — see Ground Rules). Do **not** rely on `list_screens` for fresh screens.
+7. **Save artifacts locally** under `<plan-dir>/prototype/`:
+   - `mkdir -p <plan-dir>/prototype`
+   - Per screen: `curl -sL -o <kebab-case-name>.html "<htmlCode.downloadUrl>"` and `curl -sL -o <kebab-case-name>.png "<screenshot.downloadUrl>=s0"` (note the `=s0`).
+   - Re-fetch URLs with `get_screen` for any screen not in a fresh `list_screens` result.
+   - Verify: `file *.html *.png` → HTML/PNG, sizes >1KB, PNG dimensions match the render (2560×2048 desktop).
+8. **Report**: list saved files + the Stitch project resource name so the user can iterate via `edit_screens` / `generate_variants`.
 
 ---
 

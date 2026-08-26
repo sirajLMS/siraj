@@ -17,4 +17,8 @@ export const ActionIconLink = styled(Link)(({ theme }) => ({
     backgroundColor: alpha(theme.palette.primary.main, 0.08),
     color: theme.palette.primary.main,
   },
+  "&:focus-visible": {
+    outline: `2px solid ${theme.palette.primary.main}`,
+    outlineOffset: 2,
+  },
 }));
