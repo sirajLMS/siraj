@@ -173,7 +173,7 @@ const FormFields = ({
               },
               ...textFieldLabelSlotProps(theme),
             }}
-            sx={theme => ({ ...textFieldFocusSx(theme), ...inputPlaceholderSx(theme) })}
+            sx={t => ({ ...textFieldFocusSx(t), ...inputPlaceholderSx(t) })}
           />
         )}
       />
@@ -219,7 +219,7 @@ const FormFields = ({
                 },
                 ...textFieldLabelSlotProps(theme),
               }}
-              sx={theme => ({ ...textFieldFocusSx(theme), ...inputPlaceholderSx(theme) })}
+              sx={t => ({ ...textFieldFocusSx(t), ...inputPlaceholderSx(t) })}
             />
             <PasswordStrengthMeter
               password={passwordValue}

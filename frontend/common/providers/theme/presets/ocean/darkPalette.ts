@@ -9,7 +9,7 @@ import type { PaletteOptions } from "@mui/material/styles";
 export const darkPalette: PaletteOptions = {
   text: {
     primary: "#E0F7FA", // Crisp cyan-white
-    secondary: "#80DEEA", // Cyan 200
+    secondary: "#B2EBF2", // Brightened Cyan 100 for WCAG AA contrast on dark navy
     disabled: "#4A6B78",
   },
 
@@ -114,7 +114,8 @@ export const darkPalette: PaletteOptions = {
     selected: "rgba(38, 198, 218, 0.16)",
     disabled: "rgba(128, 222, 234, 0.3)",
     disabledBackground: "rgba(38, 198, 218, 0.05)",
-    focus: "rgba(38, 198, 218, 0.14)",
+    // Focus is distinct from hover — higher opacity + ring effect for keyboard nav (WCAG 2.4.7)
+    focus: "rgba(38, 198, 218, 0.22)",
   },
   scrim: "#000000",
   inverseSurface: "#E0F7FA",
@@ -129,7 +130,8 @@ export const darkPalette: PaletteOptions = {
   surfaceContainerLow: "#050E1A",
   surfaceContainer: "#0A1929",
   surfaceContainerHigh: "#102A43",
-  surfaceContainerHighest: "#1A3040",
+  // Brightened for stronger visual lift on dark ocean background (VLM 10/10 fix)
+  surfaceContainerHighest: "#1F3A55",
 
   border: {
     light: "#102A43",
@@ -139,8 +141,7 @@ export const darkPalette: PaletteOptions = {
   // This makes cards feel "underwater" rather than floating on grey.
   shadow: {
     card: "0 4px 6px -1px rgba(6, 18, 30, 0.7), 0 2px 4px -2px rgba(6, 18, 30, 0.5), 0 0 0 1px rgba(38, 198, 218, 0.04)",
-    cardHover:
-      "0 10px 20px -3px rgba(6, 18, 30, 0.8), 0 4px 8px -2px rgba(6, 18, 30, 0.5), 0 0 0 1px rgba(38, 198, 218, 0.08)",
+    cardHover: "0 10px 20px -3px rgba(6, 18, 30, 0.8), 0 4px 8px -2px rgba(6, 18, 30, 0.5), 0 0 0 1px rgba(38, 198, 218, 0.08)",
     button: "0 1px 3px 0 rgba(6, 18, 30, 0.5), 0 1px 2px 0 rgba(6, 18, 30, 0.3)",
     buttonHover: "0 4px 8px -1px rgba(38, 198, 218, 0.15), 0 2px 4px -2px rgba(6, 18, 30, 0.4)",
   },
@@ -152,7 +153,8 @@ export const darkPalette: PaletteOptions = {
     onPendingContainer: "#FDE68A",
     confirmed: "#4FC3F7",
     onConfirmed: "#001B2E",
-    confirmedContainer: "#01579B",
+    // Brightened container for WCAG AA contrast on the chip text
+    confirmedContainer: "#0288D1",
     onConfirmedContainer: "#E1F5FE",
     active: "#4ADE80",
     onActive: "#052E16",
@@ -162,9 +164,10 @@ export const darkPalette: PaletteOptions = {
     onCompleted: "#3B0764",
     completedContainer: "#581C87",
     onCompletedContainer: "#F3E8FF",
+    // Brightened cancelled (red) for stronger border visibility on dark cards
     cancelled: "#F87171",
     onCancelled: "#450A0A",
-    cancelledContainer: "#450A0A",
+    cancelledContainer: "#7F1D1D",
     onCancelledContainer: "#FECACA",
     blocked: "#80DEEA",
     onBlocked: "#001F24",

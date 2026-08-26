@@ -9,7 +9,7 @@ import type { PaletteOptions } from "@mui/material/styles";
 export const darkPalette: PaletteOptions = {
   text: {
     primary: "#F1F5F9", // Slate 100
-    secondary: "#CBD5E1", // Slate 300
+    secondary: "#E2E8F0", // Slate 300
     disabled: "#64748B",
   },
 
@@ -111,7 +111,7 @@ export const darkPalette: PaletteOptions = {
     selected: "rgba(120, 144, 156, 0.16)",
     disabled: "rgba(203, 213, 225, 0.3)",
     disabledBackground: "rgba(120, 144, 156, 0.05)",
-    focus: "rgba(120, 144, 156, 0.14)",
+    focus: "rgba(120, 144, 156, 0.22)",
   },
   scrim: "#000000",
   inverseSurface: "#F1F5F9",
@@ -124,7 +124,7 @@ export const darkPalette: PaletteOptions = {
   surfaceContainerLow: "#0B1120",
   surfaceContainer: "#1E293B",
   surfaceContainerHigh: "#334155",
-  surfaceContainerHighest: "#475569",
+  surfaceContainerHighest: "#53627A",
 
   border: {
     light: "#334155",
@@ -145,7 +145,7 @@ export const darkPalette: PaletteOptions = {
     onPendingContainer: "#FDE68A",
     confirmed: "#94A3B8",
     onConfirmed: "#0F172A",
-    confirmedContainer: "#334155",
+    confirmedContainer: "#475569",
     onConfirmedContainer: "#E2E8F0",
     active: "#4ADE80",
     onActive: "#052E16",
@@ -157,7 +157,7 @@ export const darkPalette: PaletteOptions = {
     onCompletedContainer: "#F3E8FF",
     cancelled: "#F87171",
     onCancelled: "#450A0A",
-    cancelledContainer: "#450A0A",
+    cancelledContainer: "#7F1D1D",
     onCancelledContainer: "#FECACA",
     blocked: "#CBD5E1",
     onBlocked: "#0F172A",
