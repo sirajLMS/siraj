@@ -8,10 +8,9 @@ const StyledFooterContainer = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   alignItems: "center",
   gap: theme.spacing(1),
-  // Separator + breathing room above the copyright so it never overlaps the
-  // Quick Login grid on small viewports (where vertical space is tight).
-  pt: theme.spacing(2),
-  mt: theme.spacing(0.5),
+  // Substantial breathing room above the separator and copyright line
+  pt: theme.spacing(6),
+  mt: theme.spacing(4),
   borderTop: `1px solid ${alpha(theme.palette.divider, 0.4)}`,
 }));
 
@@ -24,8 +23,8 @@ const StyledFooterText = styled(Typography)(({ theme }) => ({
 export function LoginFooter() {
   const year = new Date().getFullYear();
   return (
-    <StyledFooterContainer>
-      <StyledFooterText>© {year} Siraj LMS · All rights reserved</StyledFooterText>
+    <StyledFooterContainer sx={{ pt: 4, mt: 3 }}>
+      <StyledFooterText sx={{ mt: 1 }}>© {year} Siraj LMS · All rights reserved</StyledFooterText>
     </StyledFooterContainer>
   );
 }

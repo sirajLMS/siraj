@@ -172,9 +172,6 @@ const getMuiCssBaseline = (): Components<Omit<Theme, "components">>["MuiCssBasel
     ".MuiBadge-badge": {
       borderRadius: "8px !important",
     },
-    ".MuiDivider-root": {
-      borderTopWidth: "1px !important",
-    },
     ".MuiDialogTitle-root": {
       fontWeight: "600 !important",
     },

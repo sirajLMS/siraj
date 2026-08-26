@@ -71,14 +71,11 @@ const StyledDividerLabel = styled(Typography)(({ theme }) => ({
   fontSize: "0.75rem",
 }));
 
-// Responsive grid: 2 columns on narrow, expands to 3 on wider cards.
+// Responsive grid: max 2 columns per row.
 const StyledButtonGrid = styled(Box)(({ theme }) => ({
   display: "grid",
   gridTemplateColumns: "repeat(2, 1fr)",
   gap: theme.spacing(1.5),
-  [theme.breakpoints.up("sm")]: {
-    gridTemplateColumns: "repeat(3, 1fr)",
-  },
 }));
 
 export interface DemoFastLoginProps {
