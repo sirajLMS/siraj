@@ -4359,6 +4359,7 @@ input StudentFilterArgs {
 type StudentHistoryMetrics {
   attendanceRate: Int
   hoursStudied: Float
+  id: ID
   performance: Int
   totalClasses: Int
 }
@@ -4673,6 +4674,7 @@ enum SuggestionStatus {
 
 """Aggregated supervisor portal dashboard data"""
 type SupervisorDashboard {
+  id: ID
   monthlySnapshot: SupervisorMonthlySnapshot
   pendingDuesSummary: TeacherPendingDuesSummary
   pendingReviewCount: Int
@@ -4681,6 +4683,7 @@ type SupervisorDashboard {
 
 """Current calendar month snapshot for the supervisor dashboard"""
 type SupervisorMonthlySnapshot {
+  id: ID
   label: String
   month: Int
   year: Int
@@ -4961,6 +4964,7 @@ type TeacherDashboardMetrics {
   absent: Int
   activated: Int
   advance: Int
+  id: ID
   leave: Int
   pending: Int
   regular: Int
@@ -5209,6 +5213,7 @@ type TeacherPayment {
 """Summary of pending teacher dues (total count and amount)"""
 type TeacherPendingDuesSummary {
   currency: CurrencyCode
+  id: ID
   totalAmount: Float
   totalCount: Int
 }

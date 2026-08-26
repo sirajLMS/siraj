@@ -27,13 +27,25 @@
  * overrides `--mui-palette-primary-main` on top of the preset's full palette).
  */
 import type { PaletteOptions } from "@mui/material/styles";
-import { darkPalette as defaultDark, lightPalette as defaultLight } from "@/frontend/common/providers/theme/presets/default";
+import { APPEARANCE_PRESETS, type AppearancePresetId } from "@/frontend/common/providers/theme/presets";
+import {
+  darkPalette as crimsonDark,
+  lightPalette as crimsonLight,
+} from "@/frontend/common/providers/theme/presets/crimson";
+import {
+  darkPalette as defaultDark,
+  lightPalette as defaultLight,
+} from "@/frontend/common/providers/theme/presets/default";
+import {
+  darkPalette as emeraldDark,
+  lightPalette as emeraldLight,
+} from "@/frontend/common/providers/theme/presets/emerald";
 import { darkPalette as oceanDark, lightPalette as oceanLight } from "@/frontend/common/providers/theme/presets/ocean";
-import { darkPalette as emeraldDark, lightPalette as emeraldLight } from "@/frontend/common/providers/theme/presets/emerald";
-import { darkPalette as violetDark, lightPalette as violetLight } from "@/frontend/common/providers/theme/presets/violet";
-import { darkPalette as crimsonDark, lightPalette as crimsonLight } from "@/frontend/common/providers/theme/presets/crimson";
 import { darkPalette as slateDark, lightPalette as slateLight } from "@/frontend/common/providers/theme/presets/slate";
-import type { AppearancePresetId } from "@/frontend/common/providers/theme/presets";
+import {
+  darkPalette as violetDark,
+  lightPalette as violetLight,
+} from "@/frontend/common/providers/theme/presets/violet";
 
 /** A resolved preset palette pair (both modes bundled together). */
 export interface PresetPalettes {
@@ -106,4 +118,78 @@ export function resolvePresetPalettes(presetId?: string): PresetPalettes {
 export function resolvePresetPalette(mode: "light" | "dark", presetId?: string): PaletteOptions {
   const pair = resolvePresetPalettes(presetId);
   return mode === "light" ? pair.light : pair.dark;
+}
+
+/** Normalize a hex string for case-insensitive comparison. */
+const normalizeHex = (hex: string | undefined): string => hex?.toLowerCase().trim() ?? "";
+
+/**
+ * Find the preset whose brand-color pairs match the given `PerModeColors`.
+ *
+ * Compares `primaryMain` + `secondaryMain` for both light + dark modes
+ * against the `APPEARANCE_PRESETS` catalog (case-insensitive hex match).
+ * Returns `null` when no preset matches (e.g. custom admin-edited colors).
+ *
+ * Used by `appearancePreviewStore` to detect which preset swatch is
+ * "active" when the admin enters customization mode with an existing
+ * published color pair.
+ */
+export function matchPresetByColors(
+  colors:
+    | {
+        light?: { primaryMain?: string; secondaryMain?: string } | null;
+        dark?: { primaryMain?: string; secondaryMain?: string } | null;
+      }
+    | null
+    | undefined
+): AppearancePresetId | null {
+  if (!colors?.light?.primaryMain || !colors?.dark?.primaryMain) return null;
+  const target = {
+    lightPrimary: normalizeHex(colors.light?.primaryMain),
+    lightSecondary: normalizeHex(colors.light?.secondaryMain),
+    darkPrimary: normalizeHex(colors.dark?.primaryMain),
+    darkSecondary: normalizeHex(colors.dark?.secondaryMain),
+  };
+  for (const preset of APPEARANCE_PRESETS) {
+    if (
+      normalizeHex(preset.light.primaryMain) === target.lightPrimary &&
+      normalizeHex(preset.light.secondaryMain) === target.lightSecondary &&
+      normalizeHex(preset.dark.primaryMain) === target.darkPrimary &&
+      normalizeHex(preset.dark.secondaryMain) === target.darkSecondary
+    ) {
+      return preset.id;
+    }
+  }
+  return null;
+}
+
+/** Type guard — narrows `unknown` to `Record<string, unknown>` for object walking. */
+const isStringRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+/**
+ * Extract MUI CSS custom property name→value pairs from a `PaletteOptions`.
+ *
+ * Used by `appearancePreviewStore` to inject live-preview CSS vars on
+ * `<html>` when the admin drags the color picker. Each top-level palette
+ * key becomes `--mui-palette-<key>` (e.g. `primary.main` →
+ * `--mui-palette-primary-main`).
+ *
+ * Only string values are emitted — nested objects are recursed with a
+ * hyphen separator (matching MUI's CSS var naming convention).
+ */
+export function extractCssVarsFromPalette(palette: PaletteOptions): Record<string, string> {
+  const vars: Record<string, string> = {};
+  const walk = (obj: object, prefix: string): void => {
+    for (const [key, value] of Object.entries(obj)) {
+      const varName = prefix ? `${prefix}-${key}` : `--mui-palette-${key}`;
+      if (typeof value === "string" && value.length > 0) {
+        vars[varName] = value;
+      } else if (isStringRecord(value)) {
+        walk(value, varName);
+      }
+    }
+  };
+  walk(palette, "");
+  return vars;
 }

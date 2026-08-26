@@ -86,8 +86,8 @@ export const APPEARANCE_PRESETS: ReadonlyArray<AppearancePreset> = [
   {
     id: "default",
     name: "Default",
-    light: { primaryMain: "#0D9488", secondaryMain: "#4F46E5" },
-    dark: { primaryMain: "#2DD4BF", secondaryMain: "#818CF8" },
+    light: { primaryMain: "#1976D2", secondaryMain: "#3F51B5" },
+    dark: { primaryMain: "#42A5F5", secondaryMain: "#7986CB" },
   },
   {
     id: "ocean",
@@ -137,12 +137,15 @@ export function findAppearancePreset(id: string): AppearancePreset | undefined {
   return APPEARANCE_PRESETS.find(preset => preset.id === id);
 }
 
+// Re-export the palette factory functions so consumers can import everything
+// from the barrel (`@/frontend/common/providers/theme/presets`). The factory
+// module (`paletteFactory.ts`) imports `APPEARANCE_PRESETS` from this barrel —
+// the re-export is safe because `APPEARANCE_PRESETS` is defined above (before
+// this re-export line), so the factory sees a fully-evaluated catalog at runtime.
 export {
-  DEFAULT_PRESET_ID,
   extractCssVarsFromPalette,
-  getActivePresetId,
   matchPresetByColors,
-  type PresetPalettes,
   resolvePresetPalette,
   resolvePresetPalettes,
+  type PresetPalettes,
 } from "./paletteFactory";
