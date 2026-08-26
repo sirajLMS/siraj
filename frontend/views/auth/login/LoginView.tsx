@@ -46,20 +46,20 @@ export function LoginView({
       <ThemeLanguageControls />
 
       <Card
-        sx={theme => ({
+        sx={t => ({
           width: "100%",
           maxWidth: 460,
           mx: "auto",
           p: { xs: 3, sm: 4 },
           borderRadius: { xs: 3, sm: 4 },
-          backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === "dark" ? 0.2 : 0.92),
-          backdropFilter: "blur(16px)",
-          border: `1px solid ${alpha(theme.palette.divider, theme.palette.mode === "dark" ? 0.3 : 1)}`,
+          backgroundColor: alpha(t.palette.background.paper, t.palette.mode === "dark" ? 0.42 : 0.96),
+          backdropFilter: "blur(20px)",
+          border: `1px solid ${alpha(t.palette.divider, t.palette.mode === "dark" ? 0.42 : 1)}`,
           boxShadow: `
-            inset 0 1px 0 0 ${alpha(theme.palette.common.white, theme.palette.mode === "dark" ? 0.08 : 0.5)},
-            0 2px 4px ${alpha(theme.palette.common.black, 0.12)},
-            0 8px 24px ${alpha(theme.palette.common.black, 0.16)},
-            0 24px 64px ${alpha(theme.palette.primary.main, 0.16)}`,
+            inset 0 1px 0 0 ${alpha(t.palette.common.white, t.palette.mode === "dark" ? 0.12 : 0.6)},
+            0 2px 4px ${alpha(t.palette.common.black, 0.14)},
+            0 10px 30px ${alpha(t.palette.common.black, 0.22)},
+            0 32px 80px ${alpha(t.palette.primary.main, 0.22)}`,
           animation: "sirajLoginEntrance 360ms cubic-bezier(0.2, 0, 0, 1) both",
           "@keyframes sirajLoginEntrance": {
             "0%": { opacity: "0", transform: "translateY(12px)" },

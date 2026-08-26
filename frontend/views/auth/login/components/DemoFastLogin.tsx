@@ -39,7 +39,9 @@ const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
   minHeight: 42,
   textTransform: "none",
   borderRadius: Number(theme.shape.borderRadius) * 3,
-  borderColor: alpha(theme.palette.divider, 0.5),
+  borderColor: alpha(theme.palette.divider, 0.32),
+  borderWidth: 1,
+  backgroundColor: alpha(theme.palette.background.paper, theme.palette.mode === "dark" ? 0.18 : 0.4),
   color: theme.palette.text.secondary,
   display: "flex",
   justifyContent: "flex-start",
@@ -47,15 +49,20 @@ const FastLoginButton = styled(Button)<ButtonProps>(({ theme }) => ({
   gap: theme.spacing(0.75),
   fontSize: "0.85rem",
   fontWeight: 600,
-  transition: theme.transitions.create(["border-color", "background-color", "color", "transform", "box-shadow"], {
-    duration: theme.transitions.duration.short,
-  }),
+  opacity: 0.92,
+  transition: theme.transitions.create(
+    ["border-color", "background-color", "color", "transform", "box-shadow", "opacity"],
+    {
+      duration: theme.transitions.duration.short,
+    }
+  ),
   "&:hover": {
-    borderColor: alpha(theme.palette.primary.main, 0.5),
-    backgroundColor: alpha(theme.palette.primary.main, 0.08),
+    borderColor: alpha(theme.palette.primary.main, 0.45),
+    backgroundColor: alpha(theme.palette.primary.main, 0.1),
     color: theme.palette.text.primary,
+    opacity: 1,
     transform: "translateY(-1px)",
-    boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.15)}`,
+    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.18)}`,
   },
   "&:active": {
     transform: "translateY(0)",

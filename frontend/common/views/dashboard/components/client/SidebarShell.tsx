@@ -62,14 +62,15 @@ interface SidebarNavItemProps {
 function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter = false): SxProps<Theme> {
   return (theme: Theme) => ({
     borderRadius: 0,
-    py: isCollapsed ? 1 : 1.25,
+    py: isCollapsed ? 1 : 1.5,
     px: isCollapsed ? 0 : 2,
     justifyContent: isCollapsed ? "center" : "flex-start",
-    // Active item: primaryContainer background + left accent border + bold text.
-    // Enhanced for better visibility in dark mode (the prior primaryContainer
-    // alone was too subtle per VLM analysis). borderRadius: 0 so the left border
-    // isn't clipped.
-    backgroundColor: isActive ? "var(--mui-palette-primaryContainer)" : "transparent",
+    // Active item: primaryContainer background + a primary-tinted overlay for
+    // stronger dark-mode visibility + left accent bar with a soft glow + bold text.
+    // borderRadius: 0 so the left accent bar isn't clipped.
+    backgroundColor: isActive
+      ? `color-mix(in srgb, var(--mui-palette-primaryContainer) 70%, var(--mui-palette-primary-main) 10%)`
+      : "transparent",
     color: isActive ? "var(--mui-palette-primary-main)" : "var(--mui-palette-onSurfaceVariant)",
     ...(isActive && !isFooter
       ? {
@@ -78,11 +79,12 @@ function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter =
             content: '""',
             position: "absolute",
             left: 0,
-            top: 4,
-            bottom: 4,
-            width: 3,
+            top: 6,
+            bottom: 6,
+            width: 4,
             borderRadius: 2,
             backgroundColor: "var(--mui-palette-primary-main)",
+            boxShadow: `0 0 8px color-mix(in srgb, var(--mui-palette-primary-main) 60%, transparent)`,
           },
         }
       : {}),

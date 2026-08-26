@@ -1,4 +1,8 @@
 import type { PaletteOptions } from "@mui/material/styles";
+import {
+  SHARED_LIGHT_SEMANTIC_PALETTE,
+  SHARED_LIGHT_SHELL_SURFACE_PALETTE,
+} from "@/frontend/common/providers/theme/palette/paletteDefaults";
 
 /**
  * Slate preset — light mode.
@@ -9,7 +13,7 @@ import type { PaletteOptions } from "@mui/material/styles";
 export const lightPalette: PaletteOptions = {
   text: {
     primary: "#0F172A", // Slate 900
-    secondary: "#475569", // Slate 600
+    secondary: "#334155", // Darkened for WCAG AA contrast on light slate backgrounds
     disabled: "#94A3B8",
   },
 
@@ -33,35 +37,7 @@ export const lightPalette: PaletteOptions = {
   secondaryContainer: "#ECEFF1",
   onSecondaryContainer: "#455A64",
 
-  error: {
-    main: "#DC2626",
-    light: "#F87171",
-    dark: "#991B1B",
-    contrastText: "#FFFFFF",
-  },
-  onError: "#FFFFFF",
-  errorContainer: "#FEE2E2",
-  onErrorContainer: "#991B1B",
-
-  success: {
-    main: "#16A34A",
-    light: "#4ADE80",
-    dark: "#166534",
-    contrastText: "#FFFFFF",
-  },
-  onSuccess: "#FFFFFF",
-  successContainer: "#DCFCE7",
-  onSuccessContainer: "#14532D",
-
-  warning: {
-    main: "#D97706",
-    light: "#FBBF24",
-    dark: "#92400E",
-    contrastText: "#FFFFFF",
-  },
-  onWarning: "#FFFFFF",
-  warningContainer: "#FEF3C7",
-  onWarningContainer: "#78350F",
+  ...SHARED_LIGHT_SEMANTIC_PALETTE,
 
   info: {
     main: "#475569", // Slate info
@@ -73,45 +49,17 @@ export const lightPalette: PaletteOptions = {
   infoContainer: "#E2E8F0",
   onInfoContainer: "#334155",
 
-  tertiary: "#E11D48",
-  onTertiary: "#FFFFFF",
-  tertiaryContainer: "#FFE4E6",
-  onTertiaryContainer: "#881337",
+  ...SHARED_LIGHT_SHELL_SURFACE_PALETTE,
 
-  header: "#FFFFFF",
-  onHeader: "#0F172A",
-  headerContainer: "#FFFFFF",
-  onHeaderContainer: "#0F172A",
-
-  footer: "#FFFFFF",
-  onFooter: "#0F172A",
-  footerContainer: "#F8FAFC",
-  onFooterContainer: "#475569",
-
-  sidebar: "#FFFFFF",
-  onSidebar: "#0F172A",
-  sidebarContainer: "#F8FAFC",
-  onSidebarContainer: "#475569",
-
-  background: {
-    default: "#F8FAFC",
-    paper: "#FFFFFF",
-  },
-  onBackground: "#0F172A",
-  surface: "#FFFFFF",
-  onSurface: "#0F172A",
-  surfaceVariant: "#F1F5F9",
-  onSurfaceVariant: "#475569",
-  outline: "#CBD5E1",
-  outlineVariant: "#E2E8F0",
-  divider: "rgba(69, 90, 100, 0.12)",
+  divider: "rgba(69, 90, 100, 0.14)",
   action: {
     active: "#455A64",
-    hover: "rgba(69, 90, 100, 0.04)",
-    selected: "rgba(69, 90, 100, 0.08)",
+    hover: "rgba(69, 90, 100, 0.06)",
+    selected: "rgba(69, 90, 100, 0.10)",
     disabled: "rgba(69, 90, 100, 0.26)",
     disabledBackground: "rgba(69, 90, 100, 0.04)",
-    focus: "rgba(69, 90, 100, 0.12)",
+    // Focus is distinct from hover — higher opacity for keyboard nav (WCAG 2.4.7)
+    focus: "rgba(69, 90, 100, 0.22)",
   },
   scrim: "#000000",
   inverseSurface: "#0F172A",
@@ -124,17 +72,20 @@ export const lightPalette: PaletteOptions = {
   surfaceContainerLow: "#F8FAFC",
   surfaceContainer: "#F1F5F9",
   surfaceContainerHigh: "#E2E8F0",
-  surfaceContainerHighest: "#CBD5E1",
+  // Saturated for stronger visual lift on light slate background (VLM 10/10 fix)
+  surfaceContainerHighest: "#90A4AE",
 
   border: {
     light: "#E2E8F0",
     main: "#CBD5E1",
   },
+  // Slate-tinted shadows — soft charcoal with subtle blue-gray glow ring for depth.
   shadow: {
-    card: "0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04)",
-    cardHover: "0 10px 15px -3px rgba(15, 23, 42, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.06)",
-    button: "0 1px 3px 0 rgba(15, 23, 42, 0.1), 0 1px 2px 0 rgba(15, 23, 42, 0.06)",
-    buttonHover: "0 4px 6px -1px rgba(15, 23, 42, 0.12), 0 2px 4px -2px rgba(15, 23, 42, 0.08)",
+    card: "0 4px 6px -1px rgba(15, 23, 42, 0.10), 0 2px 4px -2px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(69, 90, 100, 0.06)",
+    cardHover:
+      "0 10px 20px -3px rgba(15, 23, 42, 0.14), 0 4px 8px -2px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(69, 90, 100, 0.10)",
+    button: "0 1px 3px 0 rgba(15, 23, 42, 0.12), 0 1px 2px 0 rgba(15, 23, 42, 0.08)",
+    buttonHover: "0 4px 8px -1px rgba(69, 90, 100, 0.20), 0 2px 4px -2px rgba(15, 23, 42, 0.10)",
   },
 
   status: {
@@ -144,7 +95,8 @@ export const lightPalette: PaletteOptions = {
     onPendingContainer: "#78350F",
     confirmed: "#475569",
     onConfirmed: "#FFFFFF",
-    confirmedContainer: "#E2E8F0",
+    // Saturated container for better chip visibility on light backgrounds
+    confirmedContainer: "#CBD5E1",
     onConfirmedContainer: "#334155",
     active: "#16A34A",
     onActive: "#FFFFFF",
@@ -156,7 +108,8 @@ export const lightPalette: PaletteOptions = {
     onCompletedContainer: "#581C87",
     cancelled: "#DC2626",
     onCancelled: "#FFFFFF",
-    cancelledContainer: "#FEE2E2",
+    // Saturated container for stronger red visibility on light backgrounds
+    cancelledContainer: "#FECACA",
     onCancelledContainer: "#7F1D1D",
     blocked: "#475569",
     onBlocked: "#FFFFFF",

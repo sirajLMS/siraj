@@ -188,7 +188,7 @@
     "react-zoom-pan-pinch": "^4.0.4",
     "recharts": "^3.10.1",
     "resend": "^6.22.1",
-    "stylis": "^4.4.0",
+    "stylis": "4.2.0",
     "stylis-plugin-rtl": "^2.1.1",
     "tsconfig-paths": "^4.2.0",
     "twilio": "^6.1.0",
@@ -296,7 +296,8 @@
     "sharp"
   ],
   "overrides": {
-    "eslint-import-resolver-typescript": "3.7.0"
+    "eslint-import-resolver-typescript": "3.7.0",
+    "stylis": "4.2.0"
   },
   "msw": {
     "workerDirectory": [

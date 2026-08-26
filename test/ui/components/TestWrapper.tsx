@@ -6,7 +6,6 @@ import { CacheProvider } from "@emotion/react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { type RenderResult, render } from "@testing-library/react";
 import { type ReactElement, type ReactNode, useEffect, useMemo } from "react";
-import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 import type { ViewportTier } from "@/frontend/common/context/ViewportContext";
@@ -21,10 +20,11 @@ const cacheLtr = createCache({
   prepend: true,
 });
 
+// Omit stylis `prefixer` — it crashes on `::placeholder` when paired with RTL (see emotion-cache.tsx).
 const cacheRtl = createCache({
   key: "test-rtl",
   prepend: true,
-  stylisPlugins: [prefixer, rtlPlugin],
+  stylisPlugins: [rtlPlugin],
 });
 
 const DEFAULT_PERMISSIONS: readonly AppPermission[] = [];

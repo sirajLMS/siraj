@@ -70,22 +70,29 @@ export function interactiveIconActiveSx(theme: Theme, isError: boolean) {
  * avoid duplicating these blocks across tiers.
  *
  * Enhancements: subtle lift on hover (translateY) + a gradient ring glow on the
- * highlight state.
+ * highlight state + a faint red background tint for error cards so alert status
+ * is scannable at a glance + a stronger primary-tinted hover glow.
  */
 export function cardFeedbackSx(theme: Theme, isHighlight: boolean, isError: boolean) {
   return {
+    // Resting-state depth: layered shadow so cards read as elevated surfaces
+    // even before hover. Primary-tinted ambient glow ties to the brand accent.
+    boxShadow: `0 2px 4px ${alpha(theme.palette.common.black, 0.1)}, 0 8px 24px ${alpha(theme.palette.primary.main, isError ? 0 : 0.12)}`,
     "&:hover": {
-      borderColor: theme.palette.primary.main,
-      boxShadow: theme.palette.shadow.cardHover,
+      borderColor: isError ? theme.palette.error.main : theme.palette.primary.main,
+      boxShadow: `0 6px 12px ${alpha(theme.palette.common.black, 0.14)}, 0 16px 36px ${alpha(isError ? theme.palette.error.main : theme.palette.primary.main, 0.26)}`,
       transform: "translateY(-2px)",
     },
     ...(isHighlight && {
       borderColor: theme.palette.primary.main,
       backgroundColor: theme.palette.action.hover,
-      boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.15)}`,
+      boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.18)}, 0 8px 20px ${alpha(theme.palette.primary.main, 0.18)}`,
     }),
     ...(isError && {
       borderColor: theme.palette.error.light,
+      // Faint red background tint so alert cards (Suspended/Absent) are
+      // scannable at a glance without being aggressive.
+      backgroundColor: alpha(theme.palette.error.main, 0.06),
     }),
     "&:hover .metric-icon-wrap": interactiveIconHoverSx(theme, isError),
     "&:active .metric-icon-wrap": interactiveIconActiveSx(theme, isError),

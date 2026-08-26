@@ -1,4 +1,5 @@
 import type { PaletteOptions } from "@mui/material/styles";
+import { SHARED_LIGHT_SEMANTIC_PALETTE } from "@/frontend/common/providers/theme/palette/paletteDefaults";
 
 /**
  * Violet preset — light mode.
@@ -9,7 +10,7 @@ import type { PaletteOptions } from "@mui/material/styles";
 export const lightPalette: PaletteOptions = {
   text: {
     primary: "#1E1033", // Deep violet-slate
-    secondary: "#5B3A7A",
+    secondary: "#3B1A5E", // Darkened for WCAG AA contrast on light violet backgrounds
     disabled: "#B39BC9",
   },
 
@@ -33,35 +34,7 @@ export const lightPalette: PaletteOptions = {
   secondaryContainer: "#F8BBD0",
   onSecondaryContainer: "#880E4F",
 
-  error: {
-    main: "#DC2626",
-    light: "#F87171",
-    dark: "#991B1B",
-    contrastText: "#FFFFFF",
-  },
-  onError: "#FFFFFF",
-  errorContainer: "#FEE2E2",
-  onErrorContainer: "#991B1B",
-
-  success: {
-    main: "#16A34A",
-    light: "#4ADE80",
-    dark: "#166534",
-    contrastText: "#FFFFFF",
-  },
-  onSuccess: "#FFFFFF",
-  successContainer: "#DCFCE7",
-  onSuccessContainer: "#14532D",
-
-  warning: {
-    main: "#D97706",
-    light: "#FBBF24",
-    dark: "#92400E",
-    contrastText: "#FFFFFF",
-  },
-  onWarning: "#FFFFFF",
-  warningContainer: "#FEF3C7",
-  onWarningContainer: "#78350F",
+  ...SHARED_LIGHT_SEMANTIC_PALETTE,
 
   info: {
     main: "#7C3AED", // Violet info
@@ -72,11 +45,6 @@ export const lightPalette: PaletteOptions = {
   onInfo: "#FFFFFF",
   infoContainer: "#EDE9FE",
   onInfoContainer: "#5B21B6",
-
-  tertiary: "#E11D48",
-  onTertiary: "#FFFFFF",
-  tertiaryContainer: "#FFE4E6",
-  onTertiaryContainer: "#881337",
 
   header: "#FFFFFF",
   onHeader: "#1E1033",
@@ -104,14 +72,15 @@ export const lightPalette: PaletteOptions = {
   onSurfaceVariant: "#5B3A7A",
   outline: "#CE93D8",
   outlineVariant: "#F3E8FF",
-  divider: "rgba(123, 31, 162, 0.12)",
+  divider: "rgba(123, 31, 162, 0.14)",
   action: {
     active: "#7B1FA2",
-    hover: "rgba(123, 31, 162, 0.04)",
-    selected: "rgba(123, 31, 162, 0.08)",
+    hover: "rgba(123, 31, 162, 0.06)",
+    selected: "rgba(123, 31, 162, 0.10)",
     disabled: "rgba(123, 31, 162, 0.26)",
     disabledBackground: "rgba(123, 31, 162, 0.04)",
-    focus: "rgba(123, 31, 162, 0.12)",
+    // Focus is distinct from hover — higher opacity for keyboard nav (WCAG 2.4.7)
+    focus: "rgba(123, 31, 162, 0.22)",
   },
   scrim: "#000000",
   inverseSurface: "#1E1033",
@@ -124,17 +93,20 @@ export const lightPalette: PaletteOptions = {
   surfaceContainerLow: "#FAF5FF",
   surfaceContainer: "#F3E8FF",
   surfaceContainerHigh: "#E1BEE7",
-  surfaceContainerHighest: "#CE93D8",
+  // Saturated for stronger visual lift on light violet background (VLM 10/10 fix)
+  surfaceContainerHighest: "#BA68C8",
 
   border: {
     light: "#F3E8FF",
     main: "#CE93D8",
   },
+  // Violet-tinted shadows — soft purple with subtle violet glow ring for depth.
   shadow: {
-    card: "0 4px 6px -1px rgba(30, 16, 51, 0.08), 0 2px 4px -2px rgba(30, 16, 51, 0.04)",
-    cardHover: "0 10px 15px -3px rgba(30, 16, 51, 0.12), 0 4px 6px -2px rgba(30, 16, 51, 0.06)",
-    button: "0 1px 3px 0 rgba(30, 16, 51, 0.1), 0 1px 2px 0 rgba(30, 16, 51, 0.06)",
-    buttonHover: "0 4px 6px -1px rgba(30, 16, 51, 0.12), 0 2px 4px -2px rgba(30, 16, 51, 0.08)",
+    card: "0 4px 6px -1px rgba(30, 16, 51, 0.10), 0 2px 4px -2px rgba(30, 16, 51, 0.06), 0 0 0 1px rgba(123, 31, 162, 0.06)",
+    cardHover:
+      "0 10px 20px -3px rgba(30, 16, 51, 0.14), 0 4px 8px -2px rgba(30, 16, 51, 0.08), 0 0 0 1px rgba(123, 31, 162, 0.10)",
+    button: "0 1px 3px 0 rgba(30, 16, 51, 0.12), 0 1px 2px 0 rgba(30, 16, 51, 0.08)",
+    buttonHover: "0 4px 8px -1px rgba(123, 31, 162, 0.20), 0 2px 4px -2px rgba(30, 16, 51, 0.10)",
   },
 
   status: {
@@ -144,7 +116,8 @@ export const lightPalette: PaletteOptions = {
     onPendingContainer: "#78350F",
     confirmed: "#7C3AED",
     onConfirmed: "#FFFFFF",
-    confirmedContainer: "#EDE9FE",
+    // Saturated container for better chip visibility on light backgrounds
+    confirmedContainer: "#DDD6FE",
     onConfirmedContainer: "#5B21B6",
     active: "#16A34A",
     onActive: "#FFFFFF",
@@ -156,7 +129,8 @@ export const lightPalette: PaletteOptions = {
     onCompletedContainer: "#581C87",
     cancelled: "#DC2626",
     onCancelled: "#FFFFFF",
-    cancelledContainer: "#FEE2E2",
+    // Saturated container for stronger red visibility on light backgrounds
+    cancelledContainer: "#FECACA",
     onCancelledContainer: "#7F1D1D",
     blocked: "#5B3A7A",
     onBlocked: "#FFFFFF",

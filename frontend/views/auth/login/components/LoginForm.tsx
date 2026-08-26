@@ -61,33 +61,21 @@ const textFieldFocusSx = (theme: Theme) => ({
       borderWidth: 2,
     },
     "&.Mui-focused": {
-      boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.15)}`,
+      boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.22)}`,
     },
     "&.Mui-focused.Mui-error": {
-      boxShadow: `0 0 0 4px ${alpha(theme.palette.error.main, 0.2)}`,
+      boxShadow: `0 0 0 4px ${alpha(theme.palette.error.main, 0.25)}`,
     },
     "&.Mui-error .MuiInputAdornment-root": {
       color: theme.palette.error.main,
     },
   },
-});
-
-const textFieldLabelSlotProps = (theme: Theme) => ({
-  inputLabel: {
-    sx: {
-      color: alpha(theme.palette.text.primary, 0.7),
-      fontWeight: 500,
-      "&.Mui-focused": { color: theme.palette.primary.main },
-      "&.Mui-error": { color: theme.palette.error.main },
-      "&.Mui-error.Mui-focused": { color: theme.palette.error.main },
-    },
-  },
-});
-
-const inputPlaceholderSx = (theme: Theme) => ({
-  "& .MuiInputBase-input::placeholder": {
-    color: alpha(theme.palette.text.primary, 0.5),
-    opacity: 1,
+  "& .MuiInputLabel-root": {
+    color: alpha(theme.palette.text.primary, 0.7),
+    fontWeight: 500,
+    "&.Mui-focused": { color: theme.palette.primary.main },
+    "&.Mui-error": { color: theme.palette.error.main },
+    "&.Mui-error.Mui-focused": { color: theme.palette.error.main },
   },
 });
 
@@ -108,19 +96,20 @@ const StyledSubmitButton = styled(Button)(({ theme }) => ({
   textTransform: "uppercase",
   color: theme.palette.onPrimary,
   backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-  boxShadow: `0 8px 20px ${alpha(theme.palette.primary.main, 0.32)}`,
+  boxShadow: `0 8px 20px ${alpha(theme.palette.primary.main, 0.32)}, inset 0 1px 0 ${alpha(theme.palette.common.white, 0.2)}`,
   transition: theme.transitions.create(["transform", "box-shadow", "filter"], {
     duration: theme.transitions.duration.short,
     easing: theme.transitions.easing.easeOut,
   }),
   "&:hover": {
     backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-    boxShadow: `0 12px 28px ${alpha(theme.palette.primary.main, 0.42)}`,
-    transform: "translateY(-1px)",
-    filter: "brightness(1.04)",
+    boxShadow: `0 14px 32px ${alpha(theme.palette.primary.main, 0.46)}, inset 0 1px 0 ${alpha(theme.palette.common.white, 0.28)}`,
+    transform: "translateY(-2px)",
+    filter: "brightness(1.06)",
   },
   "&:active": {
     transform: "translateY(0)",
+    boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.28)}, inset 0 1px 0 ${alpha(theme.palette.common.white, 0.16)}`,
   },
   "&.Mui-disabled": {
     backgroundImage: "none",
@@ -171,9 +160,8 @@ const FormFields = ({
                   </InputAdornment>
                 ),
               },
-              ...textFieldLabelSlotProps(theme),
             }}
-            sx={t => ({ ...textFieldFocusSx(t), ...inputPlaceholderSx(t) })}
+            sx={textFieldFocusSx(theme)}
           />
         )}
       />
@@ -217,9 +205,8 @@ const FormFields = ({
                     </InputAdornment>
                   ),
                 },
-                ...textFieldLabelSlotProps(theme),
               }}
-              sx={t => ({ ...textFieldFocusSx(t), ...inputPlaceholderSx(t) })}
+              sx={textFieldFocusSx(theme)}
             />
             <PasswordStrengthMeter
               password={passwordValue}
@@ -379,7 +366,7 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
         size="large"
         disabled={isSubmitting || isRetrying}
         fullWidth
-        sx={{ mt: 1.5 }}
+        sx={{ mt: 0.5 }}
       >
         {isSubmitting || isRetrying ? <CircularProgress size={24} color="inherit" /> : labels.signIn}
       </StyledSubmitButton>

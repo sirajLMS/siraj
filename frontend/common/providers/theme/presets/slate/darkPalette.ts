@@ -1,4 +1,5 @@
 import type { PaletteOptions } from "@mui/material/styles";
+import { SHARED_DARK_SEMANTIC_PALETTE } from "@/frontend/common/providers/theme/palette/paletteDefaults";
 
 /**
  * Slate preset — dark mode.
@@ -33,35 +34,7 @@ export const darkPalette: PaletteOptions = {
   secondaryContainer: "#455A64",
   onSecondaryContainer: "#ECEFF1",
 
-  error: {
-    main: "#F87171",
-    light: "#FCA5A5",
-    dark: "#DC2626",
-    contrastText: "#450A0A",
-  },
-  onError: "#450A0A",
-  errorContainer: "#450A0A",
-  onErrorContainer: "#FECACA",
-
-  success: {
-    main: "#4ADE80",
-    light: "#86EFAC",
-    dark: "#16A34A",
-    contrastText: "#052E16",
-  },
-  onSuccess: "#052E16",
-  successContainer: "#14532D",
-  onSuccessContainer: "#DCFCE7",
-
-  warning: {
-    main: "#FBBF24",
-    light: "#FDE047",
-    dark: "#D97706",
-    contrastText: "#451A03",
-  },
-  onWarning: "#451A03",
-  warningContainer: "#78350F",
-  onWarningContainer: "#FEF3C7",
+  ...SHARED_DARK_SEMANTIC_PALETTE,
 
   info: {
     main: "#94A3B8", // Slate info
@@ -72,11 +45,6 @@ export const darkPalette: PaletteOptions = {
   onInfo: "#0F172A",
   infoContainer: "#334155",
   onInfoContainer: "#E2E8F0",
-
-  tertiary: "#F43F5E",
-  onTertiary: "#4C0519",
-  tertiaryContainer: "#881337",
-  onTertiaryContainer: "#FFE4E6",
 
   header: "#1E293B", // Slate 800
   onHeader: "#F1F5F9",
@@ -133,7 +101,8 @@ export const darkPalette: PaletteOptions = {
   // Slate-tinted shadows — deep charcoal with subtle blue-gray glow.
   shadow: {
     card: "0 4px 6px -1px rgba(15, 23, 42, 0.7), 0 2px 4px -2px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(120, 144, 156, 0.04)",
-    cardHover: "0 10px 20px -3px rgba(15, 23, 42, 0.8), 0 4px 8px -2px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(120, 144, 156, 0.08)",
+    cardHover:
+      "0 10px 20px -3px rgba(15, 23, 42, 0.8), 0 4px 8px -2px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(120, 144, 156, 0.08)",
     button: "0 1px 3px 0 rgba(15, 23, 42, 0.5), 0 1px 2px 0 rgba(15, 23, 42, 0.3)",
     buttonHover: "0 4px 8px -1px rgba(120, 144, 156, 0.15), 0 2px 4px -2px rgba(15, 23, 42, 0.4)",
   },

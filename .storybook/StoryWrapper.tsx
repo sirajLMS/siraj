@@ -5,7 +5,6 @@ import { Box, CssBaseline, GlobalStyles, type PaletteMode } from "@mui/material"
 import { ThemeProvider, useColorScheme } from "@mui/material/styles";
 import type { StoryContext, StoryFn } from "@storybook/nextjs-vite";
 import { type ReactNode, useEffect, useMemo } from "react";
-import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 import {
@@ -25,10 +24,11 @@ const cacheLtr = createCache({
   prepend: true,
 });
 
+// Omit stylis `prefixer` — it crashes on `::placeholder` when paired with RTL (see emotion-cache.tsx).
 const cacheRtl = createCache({
   key: "sb-rtl",
   prepend: true,
-  stylisPlugins: [prefixer, rtlPlugin],
+  stylisPlugins: [rtlPlugin],
 });
 
 function isLocale(value: unknown): value is "ar" | "en" {
