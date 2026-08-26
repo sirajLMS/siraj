@@ -153,7 +153,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-canvas/t
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: `@/` path aliases, no `console.*`, discriminated union pattern (inline type-specific props, NOT `props: Record<string, unknown>`)
 
 ---
@@ -220,7 +220,7 @@ bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/canva
 
 **Instruction Verification:**
 - Read `shared/AGENTS.md` — critical: shared layer MUST NOT import from `@/frontend/**`, `@/backend/**`, or `@/app/**`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: nested TS object fields (NOT dot-nested strings), `@/shared/` imports only, compile-time type safety
 
 ---
@@ -338,7 +338,7 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/certCanvasStore.ts --l
 **Instruction Verification:**
 - Read `frontend/common/stores/AGENTS.md`
 - Read `frontend/AGENTS.md`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: NO `Set` (use `string[]`), NO `persist` middleware (session-only), NO non-serializable values in state (use `useRef` for refs), `@/` path aliases, no `console.*`
 
 ---
@@ -1864,7 +1864,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
-**Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`.
+**Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`.
 
 **Tests:**
 - `test/ui/components/canvas/useDragOverlap.test.tsx` — unit test AABB intersection logic
@@ -2025,7 +2025,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
-**Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`. Note MUI v9: NO style props (use `sx` prop), Outlined icon names.
+**Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`. Note MUI v9: NO style props (use `sx` prop), Outlined icon names.
 
 **Tests:**
 - `test/ui/components/canvas/nodes/ResizableNodeWrapper.test.tsx` — verify 8 handles render on selected node, no handles on unselected
@@ -2500,7 +2500,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| R5-T1 | `renderers/FillRenderer.tsx`, `renderers/meshRasterizer.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| R5-T1 | `renderers/FillRenderer.tsx`, `renderers/meshRasterizer.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T2 | `overlays/GradientEditorOverlay.tsx` | same as above | same as above |
 | R5-T3 | `overlays/PatternTileBoundaryOverlay.tsx` | same | same |
 | R5-T4 | `overlays/ImageFillOverlay.tsx` | same | same |
@@ -2508,7 +2508,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 | R5-T6 | `renderers/StrokeRenderer.tsx` (modify — extends T5) | same | same |
 | R5-T7 | `FillRenderer.tsx` (modify), `StrokeRenderer.tsx` (modify), `ToolbarBlendModeToggle.tsx`, `utils/fillStrokeCache.ts` | same | same |
 | R5-T8 | `useCanvasStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | same |
-| R5-T9 | `test/ui/components/canvas/{FillRenderer,GradientEditorOverlay,MultiStrokeRenderer}.test.tsx`, `test/unit/{meshRasterizer,fillStrokeCache}.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| R5-T9 | `test/ui/components/canvas/{FillRenderer,GradientEditorOverlay,MultiStrokeRenderer}.test.tsx`, `test/unit/{meshRasterizer,fillStrokeCache}.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5-T10 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 11)
@@ -2742,14 +2742,14 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| R5S-T1 | `frontend/views/dashboard/cert/templates/editor/snap/{snapEngine,snapCandidates}.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T2 | `frontend/views/dashboard/cert/templates/editor/snap/useSnapFeedback.ts`, `useCanvasInteractions.ts` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T3 | `frontend/views/dashboard/cert/templates/editor/overlays/SmartGuideOverlay.tsx`, `canvas/CanvasArea.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T4 | `frontend/views/dashboard/cert/templates/editor/overlays/{ResizeHandles,RotationHandle}.tsx` (modify), `rotationCursor.ts` (new), `MeasurementBadge.tsx` (new) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T5 | `frontend/views/dashboard/cert/templates/editor/overlays/GroupTransformFrame.tsx` (new), `useCanvasInteractions.ts` (modify), `canvas/CanvasArea.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T6 | `frontend/common/stores/useCanvasStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T7 | `shared/locale/types/.../templateEditor.ts`, `shared/locale/{en,ar}/.../templateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T8 | `test/unit/snapEngine.test.ts`, `test/ui/components/canvas/{SmartGuideOverlay,MeasurementBadge,GroupTransformFrame,useAlignDistributeActions,useSnapFeedback}.test.{ts,tsx}` | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| R5S-T1 | `frontend/views/dashboard/cert/templates/editor/snap/{snapEngine,snapCandidates}.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T2 | `frontend/views/dashboard/cert/templates/editor/snap/useSnapFeedback.ts`, `useCanvasInteractions.ts` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T3 | `frontend/views/dashboard/cert/templates/editor/overlays/SmartGuideOverlay.tsx`, `canvas/CanvasArea.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T4 | `frontend/views/dashboard/cert/templates/editor/overlays/{ResizeHandles,RotationHandle}.tsx` (modify), `rotationCursor.ts` (new), `MeasurementBadge.tsx` (new) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T5 | `frontend/views/dashboard/cert/templates/editor/overlays/GroupTransformFrame.tsx` (new), `useCanvasInteractions.ts` (modify), `canvas/CanvasArea.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T6 | `frontend/common/stores/useCanvasStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T7 | `shared/locale/types/.../templateEditor.ts`, `shared/locale/{en,ar}/.../templateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T8 | `test/unit/snapEngine.test.ts`, `test/ui/components/canvas/{SmartGuideOverlay,MeasurementBadge,GroupTransformFrame,useAlignDistributeActions,useSnapFeedback}.test.{ts,tsx}` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5S-T9 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Snap & Align Execution Order (Plan 11)
@@ -2870,7 +2870,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
   - `AGENTS.md` root (`@/*` path alias, NEVER hardcode colors, PERFORMANCE: virtualization/debounce patterns)
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/certificates/template-editor/canvas/CanvasLayerCompositor.ts`:
   - Pure TypeScript module — no React imports
@@ -2903,7 +2903,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
   - `frontend/views/AGENTS.md`, `frontend/AGENTS.md` root
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/certificates/template-editor/canvas/useLayerRenderOrder.ts`:
   - `useTemplateElementEditorStore` selectors via `useShallow`: `layers`, `groups`, `clipRelations`, `layerMasks`, `transientLayerOrder`
@@ -2932,7 +2932,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
   - `frontend/views/AGENTS.md`, `AGENTS.md` root
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `frontend/views/dashboard/certificates/template-editor/canvas/CanvasInteractionLayer.tsx` (extend R3-T09):
   - Replace the hit-test candidate source: instead of `template.elements`, use the compositor's `effectiveOrder` filtered to `visible === true && ancestorGroupsAllVisible`
@@ -2959,7 +2959,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `frontend/views/dashboard/certificates/template-editor/canvas/CanvasLayerCompositor.ts` (extend LYC-T01):
   - Add `composeGroup(group, children, ctx): GroupComposePlan` — returns either inline children (each with their own `blendMode`/`opacity`) or an isolated composite plan (`{ kind: 'isolated-group', groupId, opaqueChildren, groupBlendMode, groupOpacity }`)
@@ -2988,7 +2988,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/certificates/template-editor/canvas/useGroupThumbnail.ts`:
   - `useTemplateElementEditorStore` selectors: `groupThumbnails`, the group + its direct children's `visible`/`opacity`/`blendMode` (via `useShallow` on a per-group slice)
@@ -3016,7 +3016,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `frontend/views/dashboard/certificates/template-editor/canvas/CanvasLayerCompositor.ts` (extend):
   - Add `composeClippingGroup(baseLayer, clippedLayers, ctx): ClipComposePlan` — returns `{ kind: 'clipping-group', baseLayerId, clippedLayerIds, baseAlphaFromBase: true }`
@@ -3048,7 +3048,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `frontend/views/dashboard/certificates/template-editor/canvas/CanvasLayerCompositor.ts` (extend):
   - Add `applyLayerMask(layer, offscreen, maskDescriptor)` — multiplies the layer's alpha by the mask's luminance using `destination-in` compositing
@@ -3075,7 +3075,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `frontend/views/dashboard/certificates/template-editor/canvas/CanvasLayerCompositor.ts` (extend):
   - Add `applyBlendMode(ctx, blendMode)` — sets `ctx.globalCompositeOperation` for the 25 modes that map to Canvas 2D directly
@@ -3103,7 +3103,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md` (PERF / lazy init patterns)
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/certificates/template-editor/canvas/WebGLBlendPipeline.ts`:
   - Lazy-init `WebGL2RenderingContext` on a hidden offscreen canvas; cached on first non-Canvas2D blend request
@@ -3133,7 +3133,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, root `AGENTS.md`
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `frontend/views/dashboard/certificates/template-editor/canvas/CanvasRenderer.tsx` (extend R3-T06):
   - Replace the flat `.map(elements)` with `useLayerRenderOrder()` → `composePlan`
@@ -3200,7 +3200,7 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
   - `AGENTS.md` root
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/tests.instructions.md`
+  - `.agents/instructions/tests.instructions.md`
 
 - [ ] Create `test/ui/components/canvas/CanvasLayerCompositor.test.ts`:
   - Test `compose(...)` skips `visible === false` layers
@@ -3329,7 +3329,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ### TR-T01 — Canonical Transform Types File
 
-- [ ] Read `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/common/stores/cert/transformTypes.ts` (per design.md R6.1):
   - `export type FreeTransformMode = 'scale' | 'rotate' | 'skew' | 'distort' | 'perspective' | 'warp'`
   - `export type ReferencePointPosition = 'topLeft' | 'topCenter' | 'topRight' | 'leftCenter' | 'center' | 'rightCenter' | 'bottomLeft' | 'bottomCenter' | 'bottomRight'`
@@ -3347,7 +3347,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ### TR-T02 — `FreeTransformController` Lifecycle & Pointer Logic
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/FreeTransformController.ts` (per design.md R6.2):
   - Lifecycle hook `useFreeTransformController()`:
     - Activates when `activeTool === 'freeTransform'` and ≥ 1 element selected
@@ -3365,7 +3365,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 > **Parallelizable**: This task runs as a subagent in Wave 5 (TR) alongside TR-T10, TR-T11, TR-T12. All wait on TR-T02 (FreeTransformController). Each targets a separate component module.
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/FreeTransformOverlay.tsx` (per design.md R6.3):
   - Renders an SVG overlay on top of the selected element(s) bounding box
   - 8 handles: 4 corners (`nwse-resize` cursor) + 4 edges (`ns-resize` / `ew-resize`)
@@ -3387,7 +3387,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 > **Parallelizable**: This task runs as a subagent in Wave 2 (TR) alongside TR-T05, TR-T06, and TR-T09 (warp presets math). All depend on TR-T01. Each targets a separate transform utility module.
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/transform/transformScale.ts` (per design.md R6.4):
   - `computeScaleFromHandle(handle: HandlePosition, dragDx, dragDy, originalBox, modifiers: { shift, alt }): { scaleX, scaleY }`
   - `Shift`: proportional — `scaleY = scaleX` (locks aspect ratio)
@@ -3403,7 +3403,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 > **Parallelizable**: This task runs as a subagent in Wave 2 (TR) alongside TR-T04, TR-T06, and TR-T09 (warp presets math). All depend on TR-T01. Each targets a separate transform utility module.
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/transform/transformRotate.ts` (per design.md R6.5):
   - `computeRotationAngle(handlePos, cursorPos, referencePoint): number` (returns degrees, range -180..+180)
   - `Shift` constraint: snap to nearest 15° increment (`Math.round(angle / 15) * 15`)
@@ -3423,7 +3423,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 > **Parallelizable**: This task runs as a subagent in Wave 2 (TR) alongside TR-T04, TR-T05, and TR-T09 (warp presets math). All depend on TR-T01. Each targets a separate transform utility module.
 
-- [ ] Read `frontend/views/AGMENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGMENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/transform/transformSkew.ts` (per design.md R6.7):
   - `computeSkewFromDrag(edgeHandle, dragDx, dragDy, originalBox): { skewX: number; skewY: number }` (in degrees, -45..+45)
   - Dragging top edge sideways → `skewX` (horizontal shear)
@@ -3434,7 +3434,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ### TR-T07 — Distort Transform Utils + `solveProjective`
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/transform/transformDistort.ts` (per design.md R6.8):
   - `solveProjective(src: CornerPositions, dest: CornerPositions): DOMMatrixReadOnly` — solves for the 8-coefficient projective matrix mapping `src` → `dest` via a 8×8 linear system (Gaussian elimination)
   - `computeDistortFromCornerDrag(cornerKey, dragDx, dragDy, originalBox): CornerPositions` — returns new corner positions; corners independent (no constraint)
@@ -3444,7 +3444,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 ### TR-T08 — Perspective Transform Utils (Symmetric Corner Mirror)
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/transform/transformPerspective.ts` (per design.md R6.8 perspective):
   - `computePerspectiveFromCornerDrag(cornerKey, dragDx, dragDy, originalBox): CornerPositions`
   - Top-left drag → top-right mirrors (`reflect(P_new_left, axis=vertical_center_of_box)` → `P_new_right`)
@@ -3458,7 +3458,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 > **Parallelizable**: The warp presets math portion of this task runs as a subagent in Wave 2 (TR) alongside TR-T04, TR-T05, TR-T06. The component-level portion (WarpGridOverlay + WarpRenderer) runs in Wave 6 after TR-T02 (FreeTransformController) is complete. All depend on TR-T01.
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/warp/WarpGridOverlay.tsx` (per design.md R6.9):
   - Renders a 3×3 grid overlay on the element
   - 9 handles; each has bezier `cpIn` / `cpOut` control arms
@@ -3480,7 +3480,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 > **Parallelizable**: This task runs as a subagent in Wave 5 (TR) alongside TR-T03, TR-T11, TR-T12. All wait on TR-T02 (FreeTransformController). Each targets a separate component module.
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/canvas/FreeTransformOptionsBar.tsx` (per design.md R6.10):
   - Mode toggle `ButtonGroup`: Scale / Rotate / Skew / Distort / Perspective / Warp — labelles from `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)`: `transform.scale`, `transform.rotate`, etc.
   - `W`/`H` numeric `TextField`s with `InputAdornment` for `%` or `px` toggle (`IconButton` chain link icon — check if `ChainLockButton` exists in `frontend/components/ui/` before recreating)
@@ -3495,7 +3495,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 > **Parallelizable**: This task runs as a subagent in Wave 5 (TR) alongside TR-T03, TR-T10, TR-T12. All wait on TR-T02 (FreeTransformController). Each targets a separate component module.
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Modify `frontend/views/dashboard/cert/templates/editor/canvas/ElementRenderer.tsx`:
   - When `activeTool === 'freeTransform'` and this element is in `selectedElementIds` AND the controller has a `workingState.liveTransform`, apply that transform as a `CSS transform` (or SVG matrix for SVG elements) to the rendered output as the user drags
   - Use `will-change: transform` and `pointer-events: none` on the live transform child (avoid 60Hz layout thrashing)
@@ -3507,7 +3507,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 > **Parallelizable**: This task runs as a subagent in Wave 5 (TR) alongside TR-T03, TR-T10, TR-T11. All wait on TR-T02 (FreeTransformController). Each targets a separate component module.
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Modify `frontend/views/dashboard/cert/templates/editor/canvas/FreeTransformController.ts` (final piece of TR-T02):
   - On mount when `activeTool === 'freeTransform'`:
     - `certTemplateEditorStore.getState().registerTransformHandlers({ setMode: (mode) => setWorkingState({ mode }), applyRotate九十: (payload) => applyRotate九十Immediate(payload, selectedIds, workingState.referencePoint), applyFlip: (horizontal) => applyFlipImmediate(horizontal, selectedIds, workingState.referencePoint), repeatTransform: (record) => applyMatrixToElements(record.matrix, selectedIds) })`
@@ -3520,7 +3520,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 
 > **Parallelizable**: This task runs as a subagent in Wave 7 (TR). The test suite waits on all TR components (T01–T12) being complete.
 
-- [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `test/ui/components/editor/canvas/FreeTransformOverlay.test.tsx`:
   - Renders 8 handles + rotation handle in scale mode
   - Shows only edge handles in skew mode
@@ -4085,16 +4085,16 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| R5-T1 | `contextMenus/useCanvasContextMenu.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T2 | `contextMenus/canvasContextMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T3 | `contextMenus/elementContextMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T4 | `contextMenus/elementTypeMenuItems.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T5 | `contextMenus/rulerContextMenu.ts`, `EditorRulerTop.tsx` (modify), `EditorRulerSide.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T6 | `dialogs/DuplicateSpecialDialog.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T7 | `dialogs/NumericTransformDialog.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T8 | `contextMenus/contextMenuBehavior.ts`, `frontend/common/stores/cert/canvasStore.ts` (modify), `frontend/common/stores/cert/uiStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T9 | `CanvasArea.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T10 | `test/ui/components/editor/contextMenus/{useCanvasContextMenu,canvasContextMenu,elementContextMenu,elementTypeMenuItems,rulerContextMenu}.test.ts`, `test/ui/components/editor/dialogs/{DuplicateSpecialDialog,NumericTransformDialog}.test.tsx`, `test/unit/canvasStoreContextActions.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| R5-T1 | `contextMenus/useCanvasContextMenu.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T2 | `contextMenus/canvasContextMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T3 | `contextMenus/elementContextMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T4 | `contextMenus/elementTypeMenuItems.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T5 | `contextMenus/rulerContextMenu.ts`, `EditorRulerTop.tsx` (modify), `EditorRulerSide.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T6 | `dialogs/DuplicateSpecialDialog.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T7 | `dialogs/NumericTransformDialog.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T8 | `contextMenus/contextMenuBehavior.ts`, `frontend/common/stores/cert/canvasStore.ts` (modify), `frontend/common/stores/cert/uiStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T9 | `CanvasArea.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T10 | `test/ui/components/editor/contextMenus/{useCanvasContextMenu,canvasContextMenu,elementContextMenu,elementTypeMenuItems,rulerContextMenu}.test.ts`, `test/ui/components/editor/dialogs/{DuplicateSpecialDialog,NumericTransformDialog}.test.tsx`, `test/unit/canvasStoreContextActions.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5-T11 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 11 Context Menus)
@@ -4588,7 +4588,7 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 
 ### Subtasks
 
-1. Read `.github/instructions/tests.instructions.md`, `test/ui/AGENTS.md`
+1. Read `.agents/instructions/tests.instructions.md`, `test/ui/AGENTS.md`
 2. Create all test files per specs in T-R5-01 through T-R5-09
 3. Use Happy DOM + mocked stores (no server)
 4. Mock `useCanvasStore` and `useTemplateEditorStore` for component tests
@@ -5490,7 +5490,7 @@ MASK-T02 (store additions from Plan 10)                                         
   - `frontend/views/AGENTS.md`, `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/renderers/ClippingMaskRenderer.tsx`:
   - `renderClippingMaskToSvg(clippedElements, baseShape, zoom)` → `{ clipPathId, svgDefs }`
@@ -5733,7 +5733,7 @@ MASK-T02 (store additions from Plan 10)                                         
   - `test/ui/AGENTS.md`, `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `test/ui/components/editor/mask/renderers/{ClippingMaskRenderer,LayerMaskRenderer,VectorMaskPathOverlay,MaskEditingOverlay,QuickMaskOverlay,ClipGroupRenderer,OpacityMaskRenderer,MaskThumbnailCanvas,RefineEdgePreviewOverlay,ClipIndicatorOverlay}.test.tsx`:
   - Clipping mask: rect/ellipse/path/text/image/group base shapes → correct `<clipPath>` generated; multiple clipped elements share same clip; transform follows base
@@ -5767,18 +5767,18 @@ MASK-T02 (store additions from Plan 10)                                         
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |------|-----------------------|-------------------|----------------------|
-| MASK-C01 | `ClippingMaskRenderer.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C02 | `LayerMaskRenderer.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C03 | `VectorMaskPathOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C04 | `MaskEditingOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C05 | `useMaskBrushPointerEvents.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C06 | `QuickMaskOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C07 | `ClipGroupRenderer.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C08 | `OpacityMaskRenderer.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C09 | `MaskThumbnailCanvas.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C10 | `RefineEdgePreviewOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C11 | `ClippingMaskRenderer.tsx` (modify), `ClipIndicatorOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-C12 | `test/ui/components/editor/mask/renderers/*.test.tsx`, `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| MASK-C01 | `ClippingMaskRenderer.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C02 | `LayerMaskRenderer.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C03 | `VectorMaskPathOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C04 | `MaskEditingOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C05 | `useMaskBrushPointerEvents.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C06 | `QuickMaskOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C07 | `ClipGroupRenderer.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C08 | `OpacityMaskRenderer.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C09 | `MaskThumbnailCanvas.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C10 | `RefineEdgePreviewOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C11 | `ClippingMaskRenderer.tsx` (modify), `ClipIndicatorOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-C12 | `test/ui/components/editor/mask/renderers/*.test.tsx`, `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 
 ### Round 5 Execution Order (Plan 11 — Masking)
 

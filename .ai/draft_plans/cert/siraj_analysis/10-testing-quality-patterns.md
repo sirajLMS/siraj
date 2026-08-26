@@ -531,7 +531,7 @@ tsgo (project-wide, filtered for this file) → biome:check (file) → lint (que
 
 - `--lifecycle <tsgo|biome|lint|codescene|sonar-results>` controls depth (`LIFECYCLE_ORDER`).
 - **Subagents NEVER run Sonar** — hardcoded exclusion in the sub-loop; "no flag to enable it" (`sub-loop.ts:14-15`). Sonar is reserved for the orchestrator (cost).
-- `printApplicableRuleFiles()` maps the target file to applicable `.github/instructions/*.instructions.md` + layer-specific `AGENTS.md` files, plus the root `AGENTS.md`, and prints a "Fix-Or-Report" rule (fix in-file only; cross-file deps get reported up).
+- `printApplicableRuleFiles()` maps the target file to applicable `.agents/instructions/*.instructions.md` + layer-specific `AGENTS.md` files, plus the root `AGENTS.md`, and prints a "Fix-Or-Report" rule (fix in-file only; cross-file deps get reported up).
 - Exit codes: 0 pass, 1 stopped at failure, 2 invalid args / queue server unavailable.
 
 ### 8.3 CodeScene health checker (`scripts/health/codescene/`)

@@ -170,8 +170,20 @@ You are an elite Application Security Engineer, Principal Architect, and Penetra
 - **Auth cookies**: `session_id` (7-day), `access_token` (15-min JWT), `refresh_token` — set via `setAuthCookies()` from `backend/lib/auth/cookies.ts`.
 - **Edge middleware**: Next.js 16 uses `proxy.ts` (NOT `middleware.ts`).
 - **LIKE escaping**: `escapeLikeWildcards(input: string)` in `backend/utils/db.utils.ts:15`, exported via `@/backend/utils`.
-- **Logging**: `import { logger } from "@/backend/lib/logger"` (methods: `info`, `warn`, `error`, `debug`, `logDomainError`). NEVER use `console.*`.
-- **i18n**: Compile-time TypeScript system in `shared/locale/`. Never import legacy `next-intl`.
+## Non-Negotiable Execution Protocol for All Planned Fix Tasks
+1. **Per-File Quality Verification Loop (Immediate post-edit)**:
+   Whenever ANY file is modified during implementation, the executing agent MUST run:
+   ```bash
+   bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
+   ```
+   This executes `tsgo → oxlint → biome:check → lint:type-aware → check:duplicates → codescene --file` in strict progressive order, short-circuiting at the first failing check, and auto-discovering applicable `AGENTS.md` and `.agents/instructions/*.instructions.md`. Exit code 0 is mandatory.
+2. **Mandatory 5-Subtask Breakdown for Every Task (X.Y)**:
+   Every fix item in the plan MUST be broken down with:
+   - `- [ ] X.Y.QL **Quality Loop**: bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene (exit code 0)`
+   - `- [ ] X.Y.TE **Test Engineering**: Author/expand tests using 4-Tier framework (statement/branch, boundary, chaos, security/abuse)`
+   - `- [ ] X.Y.SEC **Security & Tenancy Audit**: Probe for BOLA/IDOR, BOPLA mass assignment, BFLA, and injection defenses`
+   - `- [ ] X.Y.SR **Semantic Review**: Pre-completion gate (no unvalidated inputs, explicit tenancy filters, no dead code, etc.)`
+   - `- [ ] X.Y.IV **Instruction Verification**: Validate against auto-discovered AGENTS.md and .agents/instructions/ files`
 """
 
 
@@ -182,7 +194,7 @@ You are an elite Application Security Engineer, Principal Architect, and Penetra
 def build_system_prompt() -> str:
     return f"""{EMBEDDED_SECURITY_REVIEW_SKILL}
 
-You must analyze the provided repository codebase thoroughly, identify all concrete security vulnerabilities across the 7 audit groups, and produce the comprehensive, structured implementation plan."""
+You must analyze the provided repository codebase thoroughly, identify all concrete security vulnerabilities across the 7 audit groups, and produce the comprehensive, structured implementation plan with mandatory quality subloop and test engineering constraints."""
 
 
 def build_user_prompt(backend_xml_content: str) -> str:
@@ -206,9 +218,10 @@ Output each finding on a dedicated line:
 
 # 3. Backend Security Fixes — Implementation Plan
 Format as `# Backend Security Fixes — Implementation Plan` containing:
-- `## HIGH Severity` (H1, H2, ... with File, verified Line, Layer, Problem, Fix, and exact TypeScript Code Change snippet)
-- `## MEDIUM Severity` (M1, M2, ... with same structure)
-- `## LOW Severity` (L1, L2, ... with same structure)
+- `## Non-Negotiable Execution Protocol` (Mandating `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` on every edit)
+- `## HIGH Severity` (H1, H2, ... with File, verified Line, Layer, Problem, Fix, exact TypeScript Code Change snippet, and the mandatory 5 subtasks: QL, TE, SEC, SR, IV)
+- `## MEDIUM Severity` (M1, M2, ... with same structure and subtasks)
+- `## LOW Severity` (L1, L2, ... with same structure and subtasks)
 - `## VERIFY Items` (V1, V2, ...)
 - `## Risks & Refinements` (R1, R2, ... potential test breakage, circular dependencies, bootstrap order)
 - `## Testing Strategy` (affected tests, regression checks, new security tests to add)
@@ -478,6 +491,13 @@ def main():
         help="Maximum model context window limit (default: 1000000)",
     )
     parser.add_argument(
+        "--thinking-level",
+        type=str,
+        choices=["low", "high", "max"],
+        default="max",
+        help="Thinking level for reasoning models (choices: low, high, max; default: max)",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Only run repomix and assemble prompt without sending API request",
@@ -562,8 +582,19 @@ def main():
     collected_chunks = []
 
     extra_body = {}
-    if "kimi" in resolved_model.lower() or "nemotron" in resolved_model.lower():
-        extra_body = {"chat_template_kwargs": {"enable_thinking": True}}
+    if any(k in resolved_model.lower() for k in ["kimi", "nemotron", "deepseek", "qwq", "think"]):
+        extra_body = {
+            "chat_template_kwargs": {
+                "enable_thinking": True,
+                "thinking_level": args.thinking_level,
+            }
+        }
+        if args.thinking_level == "max":
+            extra_body["reasoning_budget"] = 32768
+        elif args.thinking_level == "high":
+            extra_body["reasoning_budget"] = 16384
+        elif args.thinking_level == "low":
+            extra_body["reasoning_budget"] = 4096
 
     try:
         response = client.chat.completions.create(

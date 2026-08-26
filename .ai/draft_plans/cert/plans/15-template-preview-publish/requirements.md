@@ -726,8 +726,8 @@ The following AGENTS.md files apply to this plan's implementation:
 
 | File | Path | Relevance |
 |------|------|-----------|
-| Frontend | `.github/instructions/frontend.instructions.md` | MUI v9, React 19, Apollo Client v4, Zustand patterns |
-| Backend | `.github/instructions/backend.instructions.md` | Service patterns, repository patterns, Pothos patterns |
+| Frontend | `.agents/instructions/frontend.instructions.md` | MUI v9, React 19, Apollo Client v4, Zustand patterns |
+| Backend | `.agents/instructions/backend.instructions.md` | Service patterns, repository patterns, Pothos patterns |
 
 ---
 

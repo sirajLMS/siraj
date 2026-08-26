@@ -43,7 +43,7 @@ bun run scripts/health/sub-loop.ts {{FILE_PATH}} --lifecycle codescene
 ```
 
 The script will fail (exit 1) and print an "Applicable Rule Files" section listing:
-- Instruction files (`.github/instructions/*.instructions.md`) applying to this file
+- Instruction files (`.agents/instructions/*.instructions.md`) applying to this file
 - AGENTS.md files (root + layer-specific) applying to this file
 
 Read ALL listed rule files. Your fixes MUST comply with these rules.

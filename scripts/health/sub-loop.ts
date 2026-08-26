@@ -61,7 +61,7 @@ const PROJECT_ROOT = process.cwd();
 // ─── Instruction & AGENTS.md Discovery ──────────────────────────────────────
 
 /**
- * Map a file path to the applicable `.github/instructions/*.instructions.md` file(s).
+ * Map a file path to the applicable `.agents/instructions/*.instructions.md` file(s).
  * Multiple instruction files can apply (e.g., a backend test file needs both
  * `backend.instructions.md` and `tests.instructions.md`).
  */
@@ -75,17 +75,17 @@ function getInstructionFiles(filePath: string): string[] {
     /\.spec\.tsx?$/.exec(normalized) ||
     normalized.includes("scripts/run-test/")
   ) {
-    instructions.push(".github/instructions/tests.instructions.md");
+    instructions.push(".agents/instructions/tests.instructions.md");
   }
 
   // Frontend files → frontend.instructions.md
   if (normalized.startsWith("frontend/") || normalized.startsWith("app/")) {
-    instructions.push(".github/instructions/frontend.instructions.md");
+    instructions.push(".agents/instructions/frontend.instructions.md");
   }
 
   // Backend files → backend.instructions.md
   if (normalized.startsWith("backend/")) {
-    instructions.push(".github/instructions/backend.instructions.md");
+    instructions.push(".agents/instructions/backend.instructions.md");
   }
 
   // De-duplicate (e.g., a backend test file gets both backend + tests instructions)

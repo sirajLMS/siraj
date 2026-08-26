@@ -171,7 +171,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: Safe server-side generated theme CSS variables */}
         <style id="server-theme-css" dangerouslySetInnerHTML={{ __html: serverThemeCss }} />
       </head>
-      <body style={{ overflow: "hidden" }}>
+      <body className="app-shell-body">
         {/* Must come before the main content. Sets the initial color-scheme
             attribute on <html> from localStorage/cookie before hydration so the
             cssVars-aware ThemeProvider paints the user's preferred mode on the

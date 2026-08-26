@@ -82,8 +82,8 @@ Read BEFORE starting:
 - `backend/db/repo/AGENTS.md` — Repository layer rules
 - `backend/db/test/repo/AGENTS.md` — Test repo rules (if exists)
 - `backend/db/test/logic/AGENTS.md` — Test logic rules
-- `.github/instructions/tests.instructions.md` — Test instruction patterns
-- `.github/instructions/backend.instructions.md` — Backend instruction patterns
+- `.agents/instructions/tests.instructions.md` — Test instruction patterns
+- `.agents/instructions/backend.instructions.md` — Backend instruction patterns
 - `siraj_analysis/10-testing-quality-patterns.md` — Testing patterns reference
 - `siraj_analysis/03-repository-patterns.md` — Repository patterns reference
 - `backend/db/test/entity-setup.ts` — Helper signatures (verify before use)
@@ -152,8 +152,8 @@ Read BEFORE starting:
 - `AGENTS.md` (root) — Database Testing Critical Rules
 - `backend/services/AGENTS.md` — Service layer rules
 - `backend/db/test/logic/AGENTS.md` — Test logic rules
-- `.github/instructions/tests.instructions.md` — Test patterns
-- `.github/instructions/backend.instructions.md` — Backend patterns
+- `.agents/instructions/tests.instructions.md` — Test patterns
+- `.agents/instructions/backend.instructions.md` — Backend patterns
 - `siraj_analysis/10-testing-quality-patterns.md` — Test patterns reference
 - `siraj_analysis/04-services-graphql-patterns.md` — Service patterns reference
 - `backend/db/test/logic/billing/payment-idempotency.test.ts` — Reference logic test
@@ -225,8 +225,8 @@ Read BEFORE starting:
 - `frontend/common/graphql/test/billing/billing-management.test.ts` — Reference GraphQL test
 - `frontend/common/graphql/sharedDocuments/AGENTS.md` — Document conventions
 - `frontend/AGENTS.md` — Frontend rules
-- `.github/instructions/tests.instructions.md` — Test patterns
-- `.github/instructions/frontend.instructions.md` — Frontend patterns
+- `.agents/instructions/tests.instructions.md` — Test patterns
+- `.agents/instructions/frontend.instructions.md` — Frontend patterns
 - `siraj_analysis/10-testing-quality-patterns.md` — Test patterns reference
 - `siraj_analysis/04-services-graphql-patterns.md` — GraphQL patterns reference
 - Read Task 2 outcome file: `outcome/task02-outcome.md`
@@ -666,17 +666,17 @@ Update the root AGENTS.md Important References section to link to the new certif
   - `docs/certificates/verification.md` - Public certificate verification system
   ```
 
-- [ ] 10.2 Update `.github/instructions/backend.instructions.md` (if new backend conventions)
+- [ ] 10.2 Update `.agents/instructions/backend.instructions.md` (if new backend conventions)
   - Add certificate namespace pattern if it introduces conventions not already covered
   - Add idempotency Key note if new convention
   - Only update if genuinely new patterns were established (don't duplicate existing rules)
 
-- [ ] 10.3 Update `.github/instructions/frontend.instructions.md` (if new frontend conventions)
+- [ ] 10.3 Update `.agents/instructions/frontend.instructions.md` (if new frontend conventions)
   - Add certificate Apollo document import patterns if new
   - Add certificate MUI component patterns if new
   - Only update if genuinely new patterns (don't duplicate)
 
-- [ ] 10.4 Update `.github/instructions/tests.instructions.md` (if new test patterns)
+- [ ] 10.4 Update `.agents/instructions/tests.instructions.md` (if new test patterns)
   - Add: "Certificate tests use `runInRollback` + `tx` propagation; GraphQL tests in `test/certificates/` subdirectory"
   - Add: "Repository tests must achieve 100% method coverage"
   - Add: "Use `run-test.ts` script for DB tests (not raw `bun test`)"
@@ -689,16 +689,16 @@ bun biome:check
 # Lint root AGENTS.md:
 curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   -H "Content-Type: application/json" \
-  -d '{"id":"task10","files":["AGENTS.md",".github/instructions/backend.instructions.md",".github/instructions/frontend.instructions.md",".github/instructions/tests.instructions.md"]}'
+  -d '{"id":"task10","files":["AGENTS.md",".agents/instructions/backend.instructions.md",".agents/instructions/frontend.instructions.md",".agents/instructions/tests.instructions.md"]}'
 ```
 
 ### Instruction Verification
 
 Read BEFORE starting:
 - `AGENTS.md` (root) — Current Important References section
-- `.github/instructions/backend.instructions.md` — Current backend instructions
-- `.github/instructions/frontend.instructions.md` — Current frontend instructions
-- `.github/instructions/tests.instructions.md` — Current test instructions
+- `.agents/instructions/backend.instructions.md` — Current backend instructions
+- `.agents/instructions/frontend.instructions.md` — Current frontend instructions
+- `.agents/instructions/tests.instructions.md` — Current test instructions
 - All Task 5–9 outcome files — for insights on what patterns were established
 - Read Task 9 outcome file: `outcome/task09-outcome.md`
 

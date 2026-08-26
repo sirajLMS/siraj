@@ -77,6 +77,7 @@ export const SITE_DESCRIPTION_MAX_LENGTH = 300;
  * malformed string (which could break CSS var injection downstream), and
  * it should not be `null` (the schema requires a non-null hex string).
  */
+// theme-token-allow: hex-schema-input-validation only; never use in sx or styled()
 export const INVALID_HEX_FALLBACK = "#000000";
 
 /**

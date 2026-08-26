@@ -109,7 +109,7 @@ All tasks in this plan touch frontend files. The following AGENTS.md files are a
 
 | File Path Pattern | Instruction File |
 |-------------------|------------------|
-| `frontend/**/*.ts(x)` | `.github/instructions/frontend.instructions.md` |
+| `frontend/**/*.ts(x)` | `.agents/instructions/frontend.instructions.md` |
 | `shared/**/*.ts` | (no instruction file — shared layer rules in `shared/AGENTS.md`) |
 
 ---
@@ -170,7 +170,7 @@ Consolidate `frontend/common/lib/enum.ts` (84 tokens duplicate) with `shared/lib
 8. **IV:** `bun check:duplicates` — verify cross-layer pair eliminated.
 
 **AGENTS.md to read:** `shared/AGENTS.md`, `frontend/AGENTS.md`, root `AGENTS.md`
-**Instruction file:** `.github/instructions/frontend.instructions.md` (if touching frontend files)
+**Instruction file:** `.agents/instructions/frontend.instructions.md` (if touching frontend files)
 
 ---
 

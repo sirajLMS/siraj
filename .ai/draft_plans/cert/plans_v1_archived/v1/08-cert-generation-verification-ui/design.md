@@ -1363,7 +1363,7 @@ After implementation, document the following patterns discovered/used:
 | `frontend/AGENTS.md` | Certificate frontend patterns: three-location split, dialog pattern, public route pattern |
 | `frontend/views/AGENTS.md` | Certificate domain-specific notes if non-obvious patterns discovered |
 | `app/AGENTS.md` | Public route pattern (no auth, service call, standalone layout) — if not already documented |
-| `.github/instructions/frontend.instructions.md` | Certificate domain-specific instructions if needed |
+| `.agents/instructions/frontend.instructions.md` | Certificate domain-specific instructions if needed |
 | `frontend/COMPONENT_PATTERNS.md` | Generate dialog multi-step pattern, status badge component, QR code component |
 
 ### 12.3 Knowledge Propagation Verification

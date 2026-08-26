@@ -89,7 +89,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: `@/` path aliases, no `console.*`, discriminated union pattern (inline type-specific props, NOT `props: Record<string, unknown>`)
 
 ---
@@ -156,7 +156,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Instruction Verification:**
 - Read `shared/AGENTS.md` — critical: shared layer MUST NOT import from `@/frontend/**`, `@/backend/**`, or `@/app/**`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: nested TS object fields (NOT dot-nested strings), `@/shared/` imports only, compile-time type safety
 
 ---
@@ -276,7 +276,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Instruction Verification:**
 - Read `frontend/common/stores/AGENTS.md`
 - Read `frontend/AGENTS.md`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: NO `Set` (use `string[]`), NO `persist` middleware (session-only), NO non-serializable values in state (use `useRef` for refs), `@/` path aliases, no `console.*`
 
 ---

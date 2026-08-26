@@ -257,7 +257,7 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
 
 **Instruction verification:**
 - `shared/AGENTS.md` — i18n rules, no cross-layer imports, compile-time system rules
-- `.github/instructions/frontend.instructions.md` — frontend conventions
+- `.agents/instructions/frontend.instructions.md` — frontend conventions
 - Read all before implementing
 
 ---
@@ -331,7 +331,7 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
 **Instruction verification:**
 - `frontend/common/graphql/sharedDocuments/AGENTS.md` — document naming, id field requirement, no useLazyQuery
 - `frontend/common/graphql/AGENTS.md` — Apollo hook conventions
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -402,7 +402,7 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
 **Instruction verification:**
 - `frontend/common/stores/AGENTS.md` — Zustand store conventions, persist middleware usage, mock store patterns
 - `frontend/AGENTS.md` — frontend general rules
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -501,7 +501,7 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 - `frontend/views/AGENTS.md` — view conventions, ViewModel pattern
 - `frontend/common/graphql/AGENTS.md` — `useQuery`/`useMutation` from `@apollo/client/react`
 - `frontend/common/stores/AGENTS.md` — Zustand store usage in views
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -636,7 +636,7 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 - `frontend/views/AGENTS.md` — view conventions, tier isolation
 - `frontend/AGENTS.md` — MUI v9 rules (sx prop only, icon naming `*Outlined`), React 19 rules (SubmitEvent, FormData casting)
 - `frontend/desktop/AGENTS.md` — desktop-specific rules (if exists)
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -734,7 +734,7 @@ These tasks build the visible UI: the App Router page, the container orchestrati
 - `frontend/views/AGENTS.md` — view conventions, tier isolation
 - `frontend/AGENTS.md` — MUI v9 rules, React 19 rules
 - `frontend/mobile/AGENTS.md` — mobile-specific rules (if exists)
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -813,7 +813,7 @@ These tasks implement user interactions: the create template dialog, card action
 **Instruction verification:**
 - `frontend/views/AGENTS.md` — dialog conventions
 - `frontend/AGENTS.md` — MUI v9 form conventions, React 19 event handling (SubmitEvent, FormData casting)
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -884,7 +884,7 @@ These tasks implement user interactions: the create template dialog, card action
 **Instruction verification:**
 - `frontend/views/AGENTS.md` — component conventions
 - `frontend/AGENTS.md` — MUI v9 rules, React 19 rules
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -991,7 +991,7 @@ These tasks implement user interactions: the create template dialog, card action
 **Instruction verification:**
 - `frontend/views/AGENTS.md` — component conventions
 - `frontend/AGENTS.md` — MUI v9 rules (Autocomplete, Popover, Drawer)
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -1096,7 +1096,7 @@ These tasks add the sidebar navigation and capture all learnings in the knowledg
 **Instruction verification:**
 - `app/AGENTS.md` — App Router navigation conventions, `usePathname`, `useSelectedLayoutSegment`
 - `frontend/AGENTS.md` — MUI v9 icon naming (`*Outlined`), hasPermission pattern
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -1301,7 +1301,7 @@ These tasks cover component testing (Happy DOM), E2E testing (Playwright), and i
 **Instruction verification:**
 - `test/ui/components/AGENTS.md` — Happy DOM patterns, MockedProvider
 - `test/ui/e2e/AGENTS.md` — Playwright patterns, login helpers
-- `.github/instructions/tests.instructions.md`
+- `.agents/instructions/tests.instructions.md`
 
 ---
 
@@ -1385,7 +1385,7 @@ showSorting `outlined` for inactive
 - `frontend/AGENTS.md` — MUI v9 style system, React 19 event handling
 - `frontend/common/stores/AGENTS.md` — store hydration pattern, selector hooks
 - `frontend/common/graphql/sharedDocuments/AGENTS.md` — query document pattern, field selection
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ---
 
@@ -2195,7 +2195,7 @@ done
    ```
 2. The sub-loop runs progressive checks (tsgo → biome → lint → codescene) and short-circuits at the first failing check. The in-process lint queue client handles serialized lint automatically — no server startup needed.
 3. Fix any issues found, re-run the sub-loop until exit code 0.
-4. For instruction-file / AGENTS.md discovery: the sub-loop automatically prints applicable instruction files (`.github/instructions/*.instructions.md`) and AGENTS.md files. Read ALL listed files before fixing.
+4. For instruction-file / AGENTS.md discovery: the sub-loop automatically prints applicable instruction files (`.agents/instructions/*.instructions.md`) and AGENTS.md files. Read ALL listed files before fixing.
 5. After all individual files pass, run `bun quality-gate` for full-project verification.
 6. If CODESCENE fails on a file: run `bun run codescene --file <path>` to get detailed report and fix.
 7. If SONAR_RESULTS fails: use `bun scripts/sonar-manager.ts` (read-only queries) — but sub-agents never run sonar-scan.
@@ -2348,7 +2348,7 @@ T06 (types) ─────────────┼────────�
   - Add `prefers-reduced-motion` media query for animations
   - _sx prop usage: `sx={{ '& .MuiCard-root:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' } }}`_
   - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-list/components/AccessibleList.tsx --lifecycle codescene`
-  - **Instructions**: Read `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+  - **Instructions**: Read `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 
 ### R4-T2: Loading & Skeleton States
 - [ ] Create `frontend/views/dashboard/certificates/template-list/components/ListSkeleton.tsx`

@@ -9,7 +9,7 @@ import type {
   TestMeetingProviderConnectionMutationVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
-const MEETING_INTEGRATION_PROVIDER_FIELDS = gql`
+const MEETING_INTEGRATION_PROVIDER_FIELDS: TypedDocumentNode<MeetingIntegrationProvidersQuery> = gql`
   fragment MeetingIntegrationProviderFields on MeetingIntegrationProvider {
     id
     slug
@@ -62,38 +62,38 @@ const ADMIN_REVOKE_TOKEN_RESULT_FIELDS = gql`
   }
 `;
 
-export const meetingIntegrationProvidersQueryDocument = gql`
+export const meetingIntegrationProvidersQueryDocument: TypedDocumentNode<MeetingIntegrationProvidersQuery> = gql`
   ${MEETING_INTEGRATION_PROVIDER_FIELDS}
   query meetingIntegrationProviders {
     meetingIntegrationProviders {
       ...MeetingIntegrationProviderFields
     }
   }
-` as TypedDocumentNode<MeetingIntegrationProvidersQuery>;
+`;
 
-export const meetingIntegrationConnectedAccountsQueryDocument = gql`
+export const meetingIntegrationConnectedAccountsQueryDocument: TypedDocumentNode<MeetingIntegrationConnectedAccountsQuery, MeetingIntegrationConnectedAccountsQueryVariables> = gql`
   ${MEETING_INTEGRATION_CONNECTED_ACCOUNT_FIELDS}
   query meetingIntegrationConnectedAccounts($providerSlug: String!) {
     meetingIntegrationConnectedAccounts(providerSlug: $providerSlug) {
       ...MeetingIntegrationConnectedAccountFields
     }
   }
-` as TypedDocumentNode<MeetingIntegrationConnectedAccountsQuery, MeetingIntegrationConnectedAccountsQueryVariables>;
+`;
 
-export const testMeetingProviderConnectionMutationDocument = gql`
+export const testMeetingProviderConnectionMutationDocument: TypedDocumentNode<TestMeetingProviderConnectionMutation, TestMeetingProviderConnectionMutationVariables> = gql`
   ${TEST_MEETING_CONNECTION_RESULT_FIELDS}
   mutation testMeetingProviderConnection($input: TestMeetingConnectionInput!) {
     testMeetingProviderConnection(input: $input) {
       ...TestMeetingConnectionResultFields
     }
   }
-` as TypedDocumentNode<TestMeetingProviderConnectionMutation, TestMeetingProviderConnectionMutationVariables>;
+`;
 
-export const adminRevokeMeetingProviderTokenMutationDocument = gql`
+export const adminRevokeMeetingProviderTokenMutationDocument: TypedDocumentNode<AdminRevokeMeetingProviderTokenMutation, AdminRevokeMeetingProviderTokenMutationVariables> = gql`
   ${ADMIN_REVOKE_TOKEN_RESULT_FIELDS}
   mutation adminRevokeMeetingProviderToken($input: AdminRevokeTokenInput!) {
     adminRevokeMeetingProviderToken(input: $input) {
       ...AdminRevokeTokenResultFields
     }
   }
-` as TypedDocumentNode<AdminRevokeMeetingProviderTokenMutation, AdminRevokeMeetingProviderTokenMutationVariables>;
+`;

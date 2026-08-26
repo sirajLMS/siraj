@@ -89,12 +89,12 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend Stores | `frontend/common/stores/AGENTS.md`, `frontend/common/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| Backend GraphQL | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| Backend Types | `backend/types/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend Stores | `frontend/common/stores/AGENTS.md`, `frontend/common/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| Backend GraphQL | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| Backend Types | `backend/types/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 
 ---
@@ -155,7 +155,7 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/index.ts --lifecycle c
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Frontend Stores | `frontend/common/stores/AGENTS.md`, `frontend/common/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Frontend Stores | `frontend/common/stores/AGENTS.md`, `frontend/common/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 
 ---
@@ -214,10 +214,10 @@ bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certi
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| Backend GraphQL | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| Backend Types | `backend/types/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| Backend GraphQL | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| Backend Types | `backend/types/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 
 ---
 
@@ -290,8 +290,8 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 
 ---
@@ -359,9 +359,9 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend Stores | `frontend/common/stores/AGENTS.md`, `frontend/common/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend Stores | `frontend/common/stores/AGENTS.md`, `frontend/common/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 
 ---
@@ -424,7 +424,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 
 ---
@@ -486,7 +486,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 
 ---
@@ -553,7 +553,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 
 ---
@@ -619,8 +619,8 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 
 ---
@@ -684,9 +684,9 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| Backend GraphQL | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| Backend GraphQL | `backend/graphql/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 
 ---
@@ -749,8 +749,8 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
 **Instruction Verification:**
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend Stores | `frontend/common/stores/AGENTS.md`, `frontend/common/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend Stores | `frontend/common/stores/AGENTS.md`, `frontend/common/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | App Router | `app/AGENTS.md` | — |
 | Shared | `shared/AGENTS.md` | — |
 
@@ -781,7 +781,7 @@ Create documentation for the certificate variable system, update relevant AGENTS
 | 3 | Update frontend/AGENTS.md | Add MUI patterns used by variable components (Chip for preview, RadioGroup for type selector, SwipeableDrawer for mobile, Badge for system variables); note on `@dnd-kit/sortable` usage |
 | 4 | Update frontend/common/graphql/AGENTS.md | List all variable GraphQL documents (file path, constant names, operation types, variables, returns); Apollo cache update patterns specific to variables |
 | 5 | Update shared/AGENTS.md | List all variable i18n namespaces (certificates.variables.list, form, type, system, delete, name, select, date); Arabic pluralization rules for binding count; interpolation keys |
-| 6 | Update .github/instructions/frontend.instructions.md | Add instruction: "When creating variable components, always use variablePanelStore for form state, never use Apollo cache for form drafts; system variables are immutable in name/type; always include `id` field in GraphQL documents for cache normalization" |
+| 6 | Update .agents/instructions/frontend.instructions.md | Add instruction: "When creating variable components, always use variablePanelStore for form state, never use Apollo cache for form drafts; system variables are immutable in name/type; always include `id` field in GraphQL documents for cache normalization" |
 | 7 | Cross-reference Plan 5 and Plan 10 | In documentation, reference how Plan 5 GraphQL API connects to variable CRUD and how Plan 10 Template Editor integrates the variable panel |
 
 **Acceptance:**
@@ -1079,7 +1079,7 @@ bun run scripts/health/sub-loop.ts docs/frontend/certificate-variables.md --life
   - Interpolation keys: {name}, {count}, {fileName}, {fileSize}, {validCount}, {errorCount}, {row}, {value}, {field}, {templateName}, {elementLabel}, {elementType}, {imported}, {failed}
   - **Estimated:** 1 hr
 
-- [ ] **6.2.5** Update `.github/instructions/frontend.instructions.md`
+- [ ] **6.2.5** Update `.agents/instructions/frontend.instructions.md`
   - Add instruction: "When creating variable components, always use variablePanelStore for form state, never use Apollo cache for form drafts; system variables are immutable in name/type; always include `id` field in GraphQL documents for cache normalization; use `useQuery` with `skip` for conditional fetching; CSV import uses PapaParse with row-level validation"
   - **Estimated:** 30 min
 
@@ -1346,7 +1346,7 @@ Before marking any task complete, verify:
   - List keys and Arabic pluralization requirements
   - **Estimated:** 1 hr
 
-- [ ] **T27.5** Update `.github/instructions/frontend.instructions.md`
+- [ ] **T27.5** Update `.agents/instructions/frontend.instructions.md`
   - Add instruction: "Variable components use useVariableStore for state; VariableAutocomplete triggers on `{{`; type badge colors: text=blue, date=green, number=purple, boolean=orange, image=red; deleted variables render as `{{DELETED:name}}`"
   - **Estimated:** 30 min
 

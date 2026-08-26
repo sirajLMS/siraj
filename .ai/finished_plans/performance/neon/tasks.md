@@ -57,7 +57,7 @@
     - _Requirements: Spec 3, 4, 15, 16, 17, 18, 19_
   - [x] 2.2 **Repository Layer Rollout & Test Verification (Dynamic 16-Worker Pool Watcher)**
     - Read all existing files in `.ai/plans/neon/outcome/`.
-    - Gather context from `backend/db/repo/AGENTS.md` and `.github/instructions/backend.instructions.md`.
+    - Gather context from `backend/db/repo/AGENTS.md` and `.agents/instructions/backend.instructions.md`.
     - Spawn **Parent Orchestration Subagent** to manage the rollout across `backend/db/repo/`.
     - Parent Orchestrator creates and manages tracking state file `.ai/plans/neon/repo-rollout-tracker.json`.
     - Parent Orchestrator maintains a **continuous watcher loop** to maximize concurrency at **exactly 16 running subagents**:
@@ -93,7 +93,7 @@
     - _Requirements: Spec 10, 11, 15, 16, 17, 18, 19_
   - [x] 3.2 **GraphQL Layer Rollout & Integration Verification (Dynamic 16-Worker Pool Watcher)**
     - Read all existing files in `.ai/plans/neon/outcome/`.
-    - Gather context from `backend/graphql/AGENTS.md` and `.github/instructions/backend.instructions.md`.
+    - Gather context from `backend/graphql/AGENTS.md` and `.agents/instructions/backend.instructions.md`.
     - Spawn **Parent Orchestration Subagent** to manage the GraphQL rollout across `backend/graphql/pothos/`.
     - Parent Orchestrator creates and manages tracking state file `.ai/plans/neon/graphql-rollout-tracker.json`.
     - Parent Orchestrator maintains a **continuous watcher loop** to maximize concurrency at **exactly 16 running subagents**:

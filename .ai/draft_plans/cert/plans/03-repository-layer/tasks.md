@@ -78,7 +78,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
    - `AGENTS.md` root — path alias conventions
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Modify the `ErrorsLabels` aggregate type at `shared/locale/types/errors/index.ts`** — verified single backend error-translation registry (~308 lines, with sub-interfaces per domain `BillingErrors`, `StudentErrors`, etc., plus a flattened backward-compat section for legacy keys like `studentCreateFailed`). DO NOT create a flat per-domain file — verified reality: the backend errors layer uses the single aggregate `shared/locale/types/errors/index.ts` (no flat-file per-domain scheme exists in `shared/locale/`). Instead:
    - Append a new `CertificateRepoErrors` interface (or `CertificateErrors` to match existing siblings) with one function-signature per key listed in `requirements.md` §3.2.
@@ -161,7 +161,7 @@ bun run scripts/health/sub-loop.ts backend/db/repo/certificates/index.ts --lifec
    - `backend/types/AGENTS.md` — type usage
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/03-repository-patterns.md` §1.4 (prepared statements), §5 (pagination), §7 (FTS)
@@ -570,17 +570,17 @@ Per-file quality loop run in subtask 1 above — all cert repo files pass `sub-l
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| T01 | `shared/locale/types/errors/index.ts`, `shared/locale/en/errors/index.ts`, `shared/locale/ar/errors/index.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T02 | `backend/db/repo/certificates/index.ts` | `backend/db/repo/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T03 | `backend/db/repo/certificates/certificate.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T04 | `backend/db/repo/certificates/template.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T05 | `backend/db/repo/certificates/template-element.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T06 | `backend/db/repo/certificates/template-variable.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T07 | `backend/db/repo/certificates/recipient-group.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T08 | `backend/db/repo/certificates/verification.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T09 | `backend/db/repo/certificates/category.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T10 | `backend/db/repo/shared/soft-delete.repository.ts` (modify) | `backend/db/repo/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| T11 | `backend/db/repo/index.ts` (modify) | `backend/db/repo/AGENTS.md` | `.github/instructions/backend.instructions.md` |
+| T01 | `shared/locale/types/errors/index.ts`, `shared/locale/en/errors/index.ts`, `shared/locale/ar/errors/index.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T02 | `backend/db/repo/certificates/index.ts` | `backend/db/repo/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T03 | `backend/db/repo/certificates/certificate.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T04 | `backend/db/repo/certificates/template.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T05 | `backend/db/repo/certificates/template-element.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T06 | `backend/db/repo/certificates/template-variable.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T07 | `backend/db/repo/certificates/recipient-group.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T08 | `backend/db/repo/certificates/verification.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T09 | `backend/db/repo/certificates/category.repository.ts` | `AGENTS.md`, `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T10 | `backend/db/repo/shared/soft-delete.repository.ts` (modify) | `backend/db/repo/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| T11 | `backend/db/repo/index.ts` (modify) | `backend/db/repo/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
 | T12 | (verification only — no file changes) | — | — |
 | T13 | (knowledge propagation — no file changes except inline comments) | `AGENTS.md` | — |
 

@@ -641,7 +641,7 @@ Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on 20
 - **spec-driven-development skill**: `.agents/skills/spec-driven-development/SKILL.md` matches the methodology described (three-phase Requirements/Design/Tasks, EARS format, outcome knowledge base under `.ai/plans/<feature>/outcome/`). Note: actual spec-plan location here is `.ai/draft_plans/cert/plans/` (the `draft_plans` variant), but the skill's `outcome/` protocol is preserved.
 
 ### Corrections Made
-1. **Instruction files location**: Every reference to `.github/instructions/*.instructions.md` was changed to `.agents/instructions/*.instructions.md`. The actual instruction directory is `.agents/instructions/` (contains `backend.instructions.md`, `frontend.instructions.md`, `mobile-desktop.instructions.md`, `sonarqube_mcp.instructions.md`, `tests.instructions.md`). NO `.github/instructions/` directory exists. Affected files: requirements.md, design.md, tasks.md (T10 tasks, cross-reference tables, acceptance criteria).
+1. **Instruction files location**: Every reference to `.agents/instructions/*.instructions.md` was changed to `.agents/instructions/*.instructions.md`. The actual instruction directory is `.agents/instructions/` (contains `backend.instructions.md`, `frontend.instructions.md`, `mobile-desktop.instructions.md`, `sonarqube_mcp.instructions.md`, `tests.instructions.md`). NO `.agents/instructions/` directory exists. Affected files: requirements.md, design.md, tasks.md (T10 tasks, cross-reference tables, acceptance criteria).
 2. **Frontend stores AGENTS.md path**: All `frontend/stores/AGENTS.md` references changed to `frontend/common/stores/AGENTS.md`. The stores AGENTS.md actually lives at `frontend/common/stores/AGENTS.md` (verified); `frontend/stores/` does NOT exist as a top-level dir. (Note: the root `AGENTS.md` and `MASTER_ARCHITECTURE.md` line 151 contain the same stale `frontend/stores/AGENTS.md` reference — that is a pre-existing repo bug, but the canonical file is at `frontend/common/stores/`.) The `frontend/stores/**/certificate*.ts` file-pattern glob was likewise corrected to `frontend/common/stores/**/certificate*.ts`.
 3. **Public verify route segment**: `app/[locale]/verify/**/*.tsx` (design.md §file-pattern table) changed to `app/verify/**/*.tsx`. Siraj uses a custom **compile-time TypeScript i18n system** (`shared/locale/`), NOT Next.js native `[locale]` dynamic route segments. Plan 19 confirms the verification page lives at `app/verify/[code]/page.tsx` with no `[locale]` segment.
 
@@ -649,7 +649,7 @@ Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on 20
 
 ### Notes
 - `frontend/views/AGENTS.md` itself declares `frontend/views/` is DEPRECATED (switchers/containers/moved to `frontend/common/views/`), but the file still exists and remains the documented home for view-layer rules referenced by the frontend instructions file. Updating it for cert view patterns is appropriate.
-- The existing `.agents/instructions/tests.instructions.md` is the correct cross-reference target for `TESTING_PATTERNS.md` (was wrongly `.github/instructions/tests.instructions.md`).
+- The existing `.agents/instructions/tests.instructions.md` is the correct cross-reference target for `TESTING_PATTERNS.md` (was wrongly `.agents/instructions/tests.instructions.md`).
 
 
 ---

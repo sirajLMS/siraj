@@ -389,7 +389,7 @@ Every subagent MUST:
 1. Read ALL files in `.ai/plans/neon/outcome/`
 2. Read `docs/graphql/dataloader-batching.md`
 3. Read `backend/graphql/AGENTS.md` and `backend/graphql/pothos/AGENTS.md`
-4. Read `.github/instructions/backend.instructions.md`
+4. Read `.agents/instructions/backend.instructions.md`
 
 ### 7.2 Per-File Quality Verification (After Every Edit)
 

@@ -1138,7 +1138,7 @@ Both `ar/errors/` and `en/errors/` updated with implementations.
 
 | File | Update |
 |------|--------|
-| `.github/instructions/frontend.instructions.md` | Add rule: "Recursive tree components must use hooks-safe per-node useQuery with skip" |
+| `.agents/instructions/frontend.instructions.md` | Add rule: "Recursive tree components must use hooks-safe per-node useQuery with skip" |
 
 ---
 

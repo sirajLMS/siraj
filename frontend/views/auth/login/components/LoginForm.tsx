@@ -21,7 +21,6 @@ import { alpha, styled, type Theme } from "@mui/material/styles";
 import { useCallback, useState } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
-import { mockLogin } from "@/frontend/views/auth/login/actions/mockLogin";
 import { createLoginSchema, type LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
@@ -264,7 +263,7 @@ const FormActions = ({ labels }: { labels: AuthLoginLabels }) => {
 
 export interface LoginFormProps {
   readonly labels: AuthLoginLabels;
-  readonly onSubmitAction?: (data: LoginFormData) => Promise<void>;
+  readonly onSubmitAction: (data: LoginFormData) => Promise<void>;
   readonly externalLoginResult?: { type: "success" | "error"; message: string } | null;
   readonly isRetrying?: boolean;
 }
@@ -311,43 +310,16 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
     setIsSubmitting(true);
     setLoginResult(null);
 
-    if (onSubmitAction) {
-      onSubmitAction(data)
-        .catch(() => {
-          setLoginResult({
-            type: "error",
-            message: labels.loginError,
-          });
-        })
-        .finally(() => {
-          setIsSubmitting(false);
+    onSubmitAction(data)
+      .catch(() => {
+        setLoginResult({
+          type: "error",
+          message: labels.loginError,
         });
-    } else {
-      mockLogin(data)
-        .then(response => {
-          if (response.success) {
-            setLoginResult({
-              type: "success",
-              message: labels.loginSuccess,
-            });
-          } else {
-            setLoginResult({
-              type: "error",
-              message: labels.invalidCredentials,
-            });
-          }
-          return undefined;
-        })
-        .catch(() => {
-          setLoginResult({
-            type: "error",
-            message: labels.loginError,
-          });
-        })
-        .finally(() => {
-          setIsSubmitting(false);
-        });
-    }
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   const finalLoginResult = externalLoginResult ?? loginResult;

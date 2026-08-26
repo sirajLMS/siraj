@@ -578,7 +578,7 @@ DO NOT CREATE flat per-domain files like `shared/locale/certificates.errors.repo
 - **AC-23**: `backend/db/repo/index.ts` top-level barrel re-exports the
   `certificates` sub-barrel.
 - **AC-24**: This plan's tasks file references applicable `AGENTS.md` and
-  `.github/instructions/*.instructions.md` files per task.
+  `.agents/instructions/*.instructions.md` files per task.
 
 ---
 

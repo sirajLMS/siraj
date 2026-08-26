@@ -555,7 +555,7 @@ Writing a plan file without validating it against the project's architecture rul
 
 ### ❌ Mistake 13: Implementing fixes without loading instruction files
 
-The project has `.github/instructions/*.md` files that define mandatory rules per file type (MUI v9, React 19, backend architecture, test safety, etc.). These are automatically loaded by Copilot CLI for the main agent, **but subagents don't auto-load them**. You must paste instruction rules into subagent prompts.
+The project has `.agents/instructions/*.md` files that define mandatory rules per file type (MUI v9, React 19, backend architecture, test safety, etc.). These are automatically loaded by Copilot CLI for the main agent, **but subagents don't auto-load them**. You must paste instruction rules into subagent prompts.
 
 **Wrong:**
 ```markdown
@@ -573,7 +573,7 @@ Task: fix-mui-prop
     - Style props are NOT valid direct props. Always use `sx`:
       - `<Typography sx={{ fontWeight: 700, mb: 1 }}>` not `<Typography fontWeight={700}>`
     - Icon naming: `*Outline` → `*Outlined`
-    ... (paste relevant sections from .github/instructions/frontend.instructions.md)
+    ... (paste relevant sections from .agents/instructions/frontend.instructions.md)
 ```
 
 ### ❌ Mistake 14: Dispatching subagents sequentially instead of in parallel
@@ -826,7 +826,7 @@ After a review phase, the orchestrator batches independent fixes into parallel g
 Key rules:
 - **Fix subagents use `general-purpose` agent_type** — full tools (execute, read, edit, search, web, agent)
 - **No two parallel fixes should target the same file** — causes race conditions
-- **Paste instruction file content into fix subagent prompts** — subagents don't auto-load `.github/instructions/`
+- **Paste instruction file content into fix subagent prompts** — subagents don't auto-load `.agents/instructions/`
 - **Batch up to 8 per parallel group** — practical limit for credit/rate management
 - **Sequential groups if many fixes** — group 1 runs, completes, then group 2
 
@@ -1026,7 +1026,7 @@ repo-review (orchestrator)
 | 2026-06-30 | Context Window Discipline Rules | Orchestrator never runs git/diff/search/reads for analysis — ALL investigation delegated to subagents |
 | 2026-06-30 | Plan-review skill integration | After writing plan, agent invokes `plan-review` skill for AGENTS.md compliance validation |
 | 2026-06-30 | Review+Fix+Verify pipeline | Agent now implements fixes (Phase 6) using instruction files as guardrails, verifies via quality-loop skill (Phase 7), and commits via commit-scoped skill (Phase 8) |
-| 2026-06-30 | Instruction file integration | Fixes use `.github/instructions/*.md` (frontend, backend, tests, sonarqube) based on `applyTo` patterns — pasted into subagent prompts |
+| 2026-06-30 | Instruction file integration | Fixes use `.agents/instructions/*.md` (frontend, backend, tests, sonarqube) based on `applyTo` patterns — pasted into subagent prompts |
 | 2026-06-30 | Added `agent` tool to all 5 review subagents | Enables nested parallel discovery — each review subagent can spawn up to 8 `explore` subagents |
 | 2026-06-30 | Added Parallel Discovery sections to all 5 subagents | Dynamic sizing: large scope → 8 nested, medium → 2-4, small → 0-1 |
 | 2026-06-30 | Updated repo-review Phase 2 for parallel batch dispatch | All review subagents launched in SINGLE response for maximum parallelism |

@@ -11,7 +11,7 @@ export const commonEn: CommonLabels = {
   languageSwitcher: "Switch language",
   langAr: "Arabic",
   langEn: "English",
-  langArShort: "EN",
+  langArShort: "AR",
   langEnShort: "EN",
   themeDark: "Dark",
   themeLight: "Light",

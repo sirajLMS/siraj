@@ -48,9 +48,9 @@ Your context window is a scarce resource. Violating these rules will degrade you
 
 | Instruction File | `applyTo` Pattern | Covers |
 |---|---|---|
-| `.github/instructions/backend.instructions.md` | `backend/**/*.ts` | Architecture layers, types, Pothos, i18n, logging, repos |
-| `.github/instructions/frontend.instructions.md` | `frontend/**/*.ts, frontend/**/*.tsx, app/**/*.ts, app/**/*.tsx` | MUI v9, React 19, Apollo, Zustand, theme, i18n |
-| `.github/instructions/sonarqube_mcp.instructions.md` | `**/*` (all files) | SonarQube analysis rules |
+| `.agents/instructions/backend.instructions.md` | `backend/**/*.ts` | Architecture layers, types, Pothos, i18n, logging, repos |
+| `.agents/instructions/frontend.instructions.md` | `frontend/**/*.ts, frontend/**/*.tsx, app/**/*.ts, app/**/*.tsx` | MUI v9, React 19, Apollo, Zustand, theme, i18n |
+| `.agents/instructions/sonarqube_mcp.instructions.md` | `**/*` (all files) | SonarQube analysis rules |
 
 **When dispatching fix subagents**: Paste the relevant instruction file content into the subagent's prompt.
 
@@ -380,9 +380,9 @@ If "adjust some fix approaches", loop back to the relevant issues. If "cancel fi
 
 | File Pattern | Instruction File | When to Load |
 |---|---|---|
-| `backend/**/*.ts` | `.github/instructions/backend.instructions.md` | Before any backend fix |
-| `frontend/**/*.ts`, `frontend/**/*.tsx` | `.github/instructions/frontend.instructions.md` | Before any frontend fix |
-| `**/*` | `.github/instructions/sonarqube_mcp.instructions.md` | Before SonarQube-related fixes |
+| `backend/**/*.ts` | `.agents/instructions/backend.instructions.md` | Before any backend fix |
+| `frontend/**/*.ts`, `frontend/**/*.tsx` | `.agents/instructions/frontend.instructions.md` | Before any frontend fix |
+| `**/*` | `.agents/instructions/sonarqube_mcp.instructions.md` | Before SonarQube-related fixes |
 
 **Workflow for each fix:**
 1. Identify which files need editing

@@ -2174,7 +2174,7 @@ export interface CachedFillStroke {
 3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5-<file>","files":["<path>"]}'`
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+**Instruction files to read**: `.agents/instructions/frontend.instructions.md` (all new files are frontend).
 
 **Cross-plan contracts**:
 - **Plan 11**: Canvas must render all `FillType` and `StrokeConfig` variants from §R5.8 types. See Plan 11 §R5 for rendering details.
@@ -2617,7 +2617,7 @@ export interface QuickEffectPreset {
 3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5fx-<file>","files":["<path>"]}'`
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+**Instruction files to read**: `.agents/instructions/frontend.instructions.md` (all new files are frontend).
 
 **Cross-plan contracts**:
 - **Plan 11**: Canvas must render all CSS and SVG effect filters specified in Plan 11 §R5. The Quick Effects button must dispatch preset application via `useTemplateElementEditorStore.getState().applyPresetToSelected(presetId)` — the store owner is Plan 11/12 shared canvas module.
@@ -2869,7 +2869,7 @@ AR/EN implementations go in `shared/locale/{ar,en}/dashboard/certificates/templa
 3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r6tr-<file>","files":["<path>"]}'`
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+**Instruction files to read**: `.agents/instructions/frontend.instructions.md` (all new files are frontend).
 
 **Cross-plan contracts**:
 - **Plan 11**: The `FreeTransformController` (Plan 11 R6.2) registers handler bodies for `setFreeTransformMode`, `applyRotate九十`, `applyFlip`, `repeatLastTransform` via `registerTransformHandlers`. Plan 10's store shim must tolerate `transformHandlers === undefined` (defensive no-op + `logger.warn`).
@@ -3182,7 +3182,7 @@ The derived layer data (`layers`, `groups`, `topLevelLayerCount`, layer actions)
    ```
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+**Instruction files**: `.agents/instructions/frontend.instructions.md` (all new files are frontend).
 
 **Cross-plan contracts**:
 - **Plan 11**: Plan 11 §R5 H owns the canvas-side layer rendering order + visibility behaviour; the panel surfaces the visibility toggle that Plan 11 applies.
@@ -3911,7 +3911,7 @@ export interface ImportSettings {
 3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5al-<file>","files":["<path>"]}'`
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+**Instruction files to read**: `.agents/instructions/frontend.instructions.md` (all new files are frontend).
 
 **Cross-plan contracts**:
 - **Plan 11**: Canvas must accept drag-drop from the library panel and render placed assets. `useCanvasStore.getState().placeAsset(asset, position)` is the receiver. Plan 11 §R5 defines the canvas drop zone handlers and `AssetElementRenderer`.
@@ -4427,7 +4427,7 @@ The `contextMenuService` store (new — see §R5.1) is created in `frontend/comm
 3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5ctx-<file>","files":["<path>"]}'`
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+**Instruction files to read**: `.agents/instructions/frontend.instructions.md` (all new files are frontend).
 
 **Cross-plan contracts**:
 - **Plan 11**: The canvas right-click menu, element right-click menus, and ruler right-click menu live in Plan 11 §R5. Plan 11 imports the `contextMenuService` store, `ContextMenuItem` type, and `<ContextMenuHost>` (created here) — it does not redefine them.
@@ -4852,7 +4852,7 @@ Badge colour: `sx={(theme) => ({ bgcolor: theme.palette.primary.main, color: the
    ```
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all frontend files).
+**Instruction files to read**: `.agents/instructions/frontend.instructions.md` (all frontend files).
 
 **Lint queue server**: must be running (`bun run scripts/lint-queue-server.ts` as a detached background process) before any lint call. See `AGENTS.md` §"Lint Queue Server".
 
@@ -5467,8 +5467,8 @@ typography: {
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 **Instruction files to read** before working on Round 5 files:
-- `.github/instructions/frontend.instructions.md` (all frontend files)
-- `.github/instructions/tests.instructions.md` (test files)
+- `.agents/instructions/frontend.instructions.md` (all frontend files)
+- `.agents/instructions/tests.instructions.md` (test files)
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md` (view components)
 - `frontend/common/stores/AGENTS.md` (store modifications)
 - `shared/AGENTS.md` (shared types and constants)
@@ -7058,7 +7058,7 @@ All keys live under `certificateEditor.*` (defined by Plan 12 §R5-CS15 for the 
 3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5cs-<file>","files":["<path>"]}'`
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+**Instruction files to read**: `.agents/instructions/frontend.instructions.md` (all new files are frontend).
 
 **Cross-plan contracts**:
 - **Plan 11**: The eyedropper tool's `activeTool='eyedropper'` flag in the canvas store is read by Plan 11's `useEyedropperOverlay` (Plan 11 R5-CS) to render the loupe overlay on the canvas. The Plan 11 overlay reads from the same store but does not create the tool state.

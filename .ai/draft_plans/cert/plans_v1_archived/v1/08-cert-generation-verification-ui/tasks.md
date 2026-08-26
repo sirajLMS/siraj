@@ -37,7 +37,7 @@
 **Before starting any task:**
 
 1. Read the following instruction files:
-   - `.github/instructions/frontend.instructions.md` — Frontend-specific rules (MUI v9, Apollo, Path aliases, zustand patterns)
+   - `.agents/instructions/frontend.instructions.md` — Frontend-specific rules (MUI v9, Apollo, Path aliases, zustand patterns)
    - `frontend/AGENTS.md` — Frontend layer rules
    - `frontend/views/AGENTS.md` — Views layer rules
    - `frontend/common/graphql/sharedDocuments/AGENTS.md` — GraphQL document conventions
@@ -241,7 +241,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Read `frontend/views/AGENTS.md` — verify Container+ViewModel pattern, createLazyView, ResponsiveViewSwitch
 - [ ] Read `frontend/stores/AGENTS.md` — verify Zustand store patterns (filter setters reset page)
 - [ ] Read `app/AGENTS.md` — verify Server Component ceremony (getServerUserContext → requirePermissionForPage → render Container)
-- [ ] Read `.github/instructions/frontend.instructions.md` — verify Apollo imports from `@apollo/client/react`, no `useLazyQuery`, `fetchPolicy: "cache-and-network"`
+- [ ] Read `.agents/instructions/frontend.instructions.md` — verify Apollo imports from `@apollo/client/react`, no `useLazyQuery`, `fetchPolicy: "cache-and-network"`
 - [ ] Verify no `console.*` — use `logger` from `@/frontend/common/utils/logger`
 - [ ] Verify no hardcoded strings — all labels from `useAppTranslation(Translation.Dashboard.Certificates)`
 - [ ] Verify `id` field included in all GraphQL documents (Apollo cache normalization)
@@ -292,7 +292,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### Instruction Verification
 
 - [ ] Read `frontend/AGENTS.md` — verify MUI v9 Dialog usage, sx prop, Stepper component
-- [ ] Read `.github/instructions/frontend.instructions.md` — verify Apollo `useMutation` import from `@apollo/client/react`, `refetchQueries` usage
+- [ ] Read `.agents/instructions/frontend.instructions.md` — verify Apollo `useMutation` import from `@apollo/client/react`, `refetchQueries` usage
 - [ ] Verify no `console.*` — use `logger`
 - [ ] Verify no hardcoded strings — all labels from translation system
 - [ ] Verify dialog state is local `useState` (not Zustand — ephemeral state per store rules)
@@ -375,7 +375,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Read `frontend/AGENTS.md` — verify MUI v9 rules, Split layout pattern, sx prop
 - [ ] Read `frontend/views/AGENTS.md` — verify Container+ViewModel pattern, createLazyView
 - [ ] Read `app/AGENTS.md` — verify Server Component params handling (Promise in Next.js 15+)
-- [ ] Read `.github/instructions/frontend.instructions.md` — verify Apollo imports, useQuery, fetchPolicy
+- [ ] Read `.agents/instructions/frontend.instructions.md` — verify Apollo imports, useQuery, fetchPolicy
 - [ ] Verify no `console.*` — use `logger`
 - [ ] Verify no hardcoded strings — all labels from `useAppTranslation(Translation.Dashboard.Certificates).detail`
 - [ ] Verify `id` field in detail query document (Apollo cache normalization)
@@ -425,7 +425,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 ### Instruction Verification
 
 - [ ] Read `frontend/AGENTS.md` — verify MUI v9 Dialog usage, Alert, TextField, sx prop
-- [ ] Read `.github/instructions/frontend.instructions.md` — verify Apollo `useMutation` from `@apollo/client/react`
+- [ ] Read `.agents/instructions/frontend.instructions.md` — verify Apollo `useMutation` from `@apollo/client/react`
 - [ ] Verify no `console.*` — use `logger`
 - [ ] Verify no hardcoded strings — all labels from translation system
 - [ ] Verify reason validation (min 10 chars) — use helperText or error state
@@ -494,7 +494,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Read `app/AGENTS.md` — verify Server Component rules (no hooks, service calls allowed, translations via `getTranslations(locale)`)
 - [ ] Read `shared/AGENTS.md` — verify `getTranslations` usage from `@/shared/locale`
 - [ ] Read `frontend/AGENTS.md` — verify MUI v9 rules for the client component
-- [ ] Read `.github/instructions/frontend.instructions.md` — verify client component patterns
+- [ ] Read `.agents/instructions/frontend.instructions.md` — verify client component patterns
 - [ ] Verify NO `getServerUserContext()` — this is a public route
 - [ ] Verify NO `requirePermissionForPage()` — no auth needed
 - [ ] Verify `getTranslations(locale)` is called synchronously (NOT awaited — returns property chain)
@@ -599,8 +599,8 @@ Run a comprehensive quality check on ALL files created in Tasks 1–7:
    ```
 
 4. **Instruction file verification:** For each file, check against the applicable instruction files:
-   - `frontend/**/*.tsx` → `.github/instructions/frontend.instructions.md`
-   - `app/**/*.tsx` → `.github/instructions/frontend.instructions.md` + `app/AGENTS.md`
+   - `frontend/**/*.tsx` → `.agents/instructions/frontend.instructions.md`
+   - `app/**/*.tsx` → `.agents/instructions/frontend.instructions.md` + `app/AGENTS.md`
    - All files → root `AGENTS.md`
 
 5. **AGENTS.md verification per file:**
@@ -636,7 +636,7 @@ Run a comprehensive quality check on ALL files created in Tasks 1–7:
 - [ ] `bun biome:check` passes with no issues
 - [ ] Lint queue client returns `success: true` for all certificate files
 - [ ] All files compliant with their applicable AGENTS.md files
-- [ ] All files compliant with `.github/instructions/frontend.instructions.md`
+- [ ] All files compliant with `.agents/instructions/frontend.instructions.md`
 - [ ] No `console.*` in any file
 - [ ] No `useLazyQuery` in any file
 - [ ] All GraphQL documents include `id` field
@@ -673,7 +673,7 @@ Run a comprehensive quality check on ALL files created in Tasks 1–7:
    - `getTranslations(locale)` is synchronous — returns property chain, NOT awaited
    - Service call: `CertificateManagementService.getByVerificationCode(code)` — direct, no GraphQL
 
-4. **Update `.github/instructions/frontend.instructions.md`:** If certificate-specific instructions are needed:
+4. **Update `.agents/instructions/frontend.instructions.md`:** If certificate-specific instructions are needed:
    - Certificate domain GraphQL document conventions
    - Certificate dialog multi-step pattern
    - Only add if the patterns represent new , undocumented rules
@@ -700,7 +700,7 @@ Run a comprehensive quality check on ALL files created in Tasks 1–7:
 
 - [ ] Verify `frontend/AGENTS.md` accurately reflects the implemented patterns
 - [ ] Verify `app/AGENTS.md` accurately documents the public route pattern (if updated)
-- [ ] Verify `.github/instructions/frontend.instructions.md` additions are accurate (if any)
+- [ ] Verify `.agents/instructions/frontend.instructions.md` additions are accurate (if any)
 - [ ] Verify `frontend/COMPONENT_PATTERNS.md` additions are accurate (if any)
 - [ ] Verify no summary/markdown files created (per AGENTS.md rules — no SUMMARY.md, CHANGES.md, REPORT.md)
 - [ ] Verify documentation is in the correct files (AGENTS.md, instructions, COMPONENT_PATTERNS.md — NOT new markdown files)

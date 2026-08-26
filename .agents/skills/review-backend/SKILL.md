@@ -49,9 +49,9 @@ Your context window is a scarce resource. Violating these rules will degrade you
 
 | Instruction File | `applyTo` Pattern | Covers |
 |---|---|---|
-| `.github/instructions/backend.instructions.md` | `backend/**/*.ts` | Architecture layers, types, Pothos, i18n, logging, repos, seeds |
-| `.github/instructions/tests.instructions.md` | `**/*.test.ts, **/*.spec.ts, scripts/run-test/**/*.ts` | DB test safety, runInRollback, tx patterns, entity setup |
-| `.github/instructions/sonarqube_mcp.instructions.md` | `**/*` (all files) | SonarQube analysis rules |
+| `.agents/instructions/backend.instructions.md` | `backend/**/*.ts` | Architecture layers, types, Pothos, i18n, logging, repos, seeds |
+| `.agents/instructions/tests.instructions.md` | `**/*.test.ts, **/*.spec.ts, scripts/run-test/**/*.ts` | DB test safety, runInRollback, tx patterns, entity setup |
+| `.agents/instructions/sonarqube_mcp.instructions.md` | `**/*` (all files) | SonarQube analysis rules |
 
 **When dispatching fix subagents**: Paste the relevant instruction file content into the subagent's prompt.
 
@@ -546,9 +546,9 @@ If "adjust some fix approaches", loop back to the relevant issues. If "cancel fi
 
 | File Pattern | Instruction File | When to Load |
 |---|---|---|
-| `backend/**/*.ts` | `.github/instructions/backend.instructions.md` | Before any backend fix |
-| `**/*.test.ts`, `**/*.spec.ts`, `scripts/run-test/**/*.ts` | `.github/instructions/tests.instructions.md` | Before any test fix |
-| `**/*` | `.github/instructions/sonarqube_mcp.instructions.md` | Before SonarQube-related fixes |
+| `backend/**/*.ts` | `.agents/instructions/backend.instructions.md` | Before any backend fix |
+| `**/*.test.ts`, `**/*.spec.ts`, `scripts/run-test/**/*.ts` | `.agents/instructions/tests.instructions.md` | Before any test fix |
+| `**/*` | `.agents/instructions/sonarqube_mcp.instructions.md` | Before SonarQube-related fixes |
 
 **Workflow for each fix:**
 1. Identify which files need editing

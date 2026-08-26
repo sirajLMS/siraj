@@ -1593,7 +1593,7 @@ Files created/modified in this plan must comply with the following:
 
 | File | Applies To |
 |---|---|
-| `.github/instructions/frontend.instructions.md` | All `frontend/**/*.ts(x)` and `app/**/*.tsx` files |
+| `.agents/instructions/frontend.instructions.md` | All `frontend/**/*.ts(x)` and `app/**/*.tsx` files |
 
 ### Relevant Quality Commands
 

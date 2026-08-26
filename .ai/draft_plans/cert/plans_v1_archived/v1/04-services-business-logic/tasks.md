@@ -77,7 +77,7 @@ Create `backend/services/certificates/template-management.service.ts` implementi
 1. **Read instruction files**:
    - `backend/services/AGENTS.md`
    - `backend/AGENTS.md`
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 2. **Read reference files**:
    - `backend/services/billing/billing-management.service.ts` — namespace + idempotency + permission pattern
@@ -157,7 +157,7 @@ Create `backend/services/certificates/recipient-group.service.ts` implementing t
 1. **Read instruction files**:
    - `backend/services/AGENTS.md`
    - `backend/AGENTS.md`
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 2. **Read reference files**:
    - `backend/services/billing/billing-management.service.ts` — batch pattern, permission helper
@@ -235,7 +235,7 @@ Create `backend/services/certificates/certificate-management.service.ts` impleme
 1. **Read instruction files**:
    - `backend/services/AGENTS.md`
    - `backend/AGENTS.md`
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 2. **Read reference files**:
    - `backend/services/billing/billing-management.service.ts` — notification dispatch, cache, audit
@@ -325,7 +325,7 @@ Create `backend/services/certificates/certificate-generation.service.ts` impleme
 1. **Read instruction files**:
    - `backend/services/AGENTS.md`
    - `backend/AGENTS.md`
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 2. **Read reference files**:
    - `backend/services/billing/billing-management.service.ts` — `deriveIdempotencyKey` pattern, duplicate key detection
@@ -426,7 +426,7 @@ Create `backend/services/certificates/certificate-verification.service.ts` imple
 1. **Read instruction files**:
    - `backend/services/AGENTS.md`
    - `backend/AGENTS.md`
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 2. **Read reference files**:
    - `.ai/draft_plans/cert/siraj_analysis/04-services-graphql-patterns.md` — §D.6 (verification blueprint), §B.3 (SSR-safe)
@@ -743,7 +743,7 @@ Task 8 (knowledge propagation) ─────────── Requires Tasks 
 
 - [ ] Read `backend/services/AGENTS.md` before coding
 - [ ] Read `backend/AGENTS.md` before coding
-- [ ] Read `.github/instructions/backend.instructions.md` before coding
+- [ ] Read `.agents/instructions/backend.instructions.md` before coding
 - [ ] All errors via `tErrors.cert.*` (no hardcoded strings)
 - [ ] No `console.*` — use `logger`
 - [ ] No `GraphQLError` in service files

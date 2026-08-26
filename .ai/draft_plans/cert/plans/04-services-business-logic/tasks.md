@@ -101,7 +101,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
    - `AGENTS.md` root — path alias conventions
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference file**:
    - `shared/locale/<existing-namespace>.errors.ts` — existing type schema for pattern reference (e.g., billing errors)
@@ -200,7 +200,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `backend/types/AGENTS.md` — type usage
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §B (Service Layer patterns), §D (Certificate Integration Blueprint)
@@ -259,7 +259,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §D (batch generation blueprint)
@@ -305,7 +305,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §D (revocation blueprint)
@@ -349,7 +349,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §D (verification blueprint), §B (caching rules)
@@ -402,7 +402,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference file**:
    - `cgvs_analysis/01-generation-logic.md` §7 (Lifecycle — expiry section)
@@ -443,7 +443,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §B (template service patterns), §D (template lifecycle)
@@ -493,7 +493,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §D (element service blueprint)
@@ -543,7 +543,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §D (variable service blueprint)
@@ -591,7 +591,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §D (recipient group blueprint)
@@ -639,7 +639,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/types/AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §D (category blueprint)
@@ -684,7 +684,7 @@ bun run scripts/health/sub-loop.ts backend/services/cert/index.ts --lifecycle co
    - `AGENTS.md` (root), `backend/services/AGENTS.md` — caching rules (fail-open, permission before cache)
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Read reference files**:
    - `siraj_analysis/04-services-graphql-patterns.md` §B (Caching section), §D (cache strategy)

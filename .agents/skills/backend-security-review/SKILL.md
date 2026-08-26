@@ -44,8 +44,8 @@ Your context window is a scarce resource. Violating these rules will degrade you
 
 | Instruction File | `applyTo` Pattern | Covers |
 |---|---|---|
-| `.github/instructions/backend.instructions.md` | `backend/**/*.ts` | Architecture layers, types, Pothos, i18n, logging, repos, seeds |
-| `.github/instructions/tests.instructions.md` | `**/*.test.ts, **/*.spec.ts` | DB test safety, runInRollback, tx patterns, entity setup |
+| `.agents/instructions/backend.instructions.md` | `backend/**/*.ts` | Architecture layers, types, Pothos, i18n, logging, repos, seeds |
+| `.agents/instructions/tests.instructions.md` | `**/*.test.ts, **/*.spec.ts` | DB test safety, runInRollback, tx patterns, entity setup |
 
 ---
 

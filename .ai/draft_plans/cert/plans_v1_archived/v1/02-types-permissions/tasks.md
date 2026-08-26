@@ -18,7 +18,7 @@
 
 Before starting ANY task, read the applicable instruction files and AGENTS.md files:
 
-### Instruction Files (`.github/instructions/*.instructions.md`)
+### Instruction Files (`.agents/instructions/*.instructions.md`)
 
 | File Pattern | Instruction File |
 |---|---|
@@ -48,7 +48,7 @@ Before starting ANY task, read the applicable instruction files and AGENTS.md fi
 - [ ] Read `backend/enum/permissions/permission.enum.ts` — existing permission pattern
 - [ ] Read `backend/graphql/pothos/shared/enum.pothos.ts` — existing Pothos registration pattern
 - [ ] Read `backend/types/billing/billing.types.ts` — canonical type pattern reference
-- [ ] Read `.github/instructions/backend.instructions.md` — backend instruction file
+- [ ] Read `.agents/instructions/backend.instructions.md` — backend instruction file
 - [ ] Verify lint queue server is running: `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background)
 
 ---
@@ -132,7 +132,7 @@ After all 8 type files are created:
 ### Instruction Verification
 
 - [ ] Read `backend/types/AGENTS.md` — verify canonical naming is followed
-- [ ] Read `.github/instructions/backend.instructions.md` — verify backend conventions
+- [ ] Read `.agents/instructions/backend.instructions.md` — verify backend conventions
 - [ ] Verify all types use `@/backend/db/schema` and `@/backend/enum` imports (never relative)
 - [ ] Verify all types use `import type` for type-only imports
 - [ ] Verify `ReturnType` types `Omit` internal fields and re-apply enums
@@ -218,7 +218,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 - [ ] Read `backend/enum/AGENTS.md` — verify enum naming and structure rules
 - [ ] Read `backend/enum/permissions/AGENTS.md` (if exists) — verify permission-specific rules
-- [ ] Read `.github/instructions/backend.instructions.md` — verify backend conventions
+- [ ] Read `.agents/instructions/backend.instructions.md` — verify backend conventions
 - [ ] Verify all permission values use 2-segment dot-path convention (`certificates.<action>`)
 - [ ] Verify section comment format matches existing style
 - [ ] Verify no typos in enum key names (e.g., `CERTIFICATES_MANAGE_TEMPLATE` not `CERTIFICATES_MANAGE_TEMPLATES`)
@@ -313,7 +313,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 - [ ] Read `backend/graphql/AGENTS.md` — verify Pothos enum registration rules
 - [ ] Read `backend/graphql/pothos/shared/AGENTS.md` (if exists) — verify shared Pothos rules
-- [ ] Read `.github/instructions/backend.instructions.md` — verify backend conventions
+- [ ] Read `.agents/instructions/backend.instructions.md` — verify backend conventions
 - [ ] Verify enums are imported from `@/backend/enum/certificates` (not from DB schema)
 - [ ] Verify `gqlSchemaBuilder.enumType(Enum, { name })` pattern — no hardcoded value arrays
 - [ ] Verify enum `name` property matches the TS enum name exactly
@@ -394,7 +394,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 - [ ] Read `backend/types/AGENTS.md` — verify barrel pattern
 - [ ] Read `backend/enum/AGENTS.md` — verify enum barrel pattern
-- [ ] Read `.github/instructions/backend.instructions.md` — verify backend conventions
+- [ ] Read `.agents/instructions/backend.instructions.md` — verify backend conventions
 - [ ] Verify barrel exports are in `export * from "./<file>"` format (no `export type` — `export *` handles both)
 - [ ] Verify no circular dependencies — type files import from `@/backend/db/schema` and `@/backend/enum`, never from `@/backend/types`
 - [ ] Verify alphabetical placement in parent `index.ts`
@@ -479,7 +479,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Read `backend/types/AGENTS.md` — verify type-specific quality rules
 - [ ] Read `backend/enum/AGENTS.md` — verify enum-specific quality rules
 - [ ] Read `backend/graphql/AGENTS.md` — verify GraphQL-specific quality rules
-- [ ] Read `.github/instructions/backend.instructions.md` — verify all backend conventions are met
+- [ ] Read `.agents/instructions/backend.instructions.md` — verify all backend conventions are met
 - [ ] Verify the verification loop is progressive: tsgo → biome → lint → codegen (no skipping)
 
 ### Task 5 Completion Criteria

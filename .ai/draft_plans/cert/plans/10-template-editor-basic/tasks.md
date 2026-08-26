@@ -114,7 +114,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
    - `AGENTS.md` root — path aliases, logging
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create type schema** `shared/locale/types/dashboard/certificates/templateEditor.ts`:
    - One function type per key listed in requirements.md §3 i18n table (~60 keys)
@@ -278,7 +278,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
    - `AGENTS.md` root — path aliases, shared constants
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md` (shared constants consumed by frontend)
+   - `.agents/instructions/frontend.instructions.md` (shared constants consumed by frontend)
 
 3. **Create** `shared/constants/certificate.constants.ts`:
    - `CERT_CANVAS_DPI = 72` — DPI constant for all certificate canvas dimensions (per design.md §7, SWE Review §D)
@@ -333,7 +333,7 @@ bun run scripts/health/sub-loop.ts shared/constants/certificate.constants.ts --l
   - `AGENTS.md` root — path aliases, `id` on all objects, no `useLazyQuery`
 
 2. **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/graphql/sharedDocuments/certificates/templateEditor.documents.ts`:
   - Fragment: `TemplateEditorFragment` — all template fields needed for editor:
@@ -429,7 +429,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root — logging, Apollo cache update patterns
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/templateEditor/useTemplateEditorViewModel.ts`:
    - Accept `templateId: string` as parameter
@@ -480,7 +480,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/templateEditor/TemplateEditorContainer.tsx`:
    - Accept `templateId: string` as prop (from page params)
@@ -520,7 +520,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root — theme palette, i18n
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/templateEditor/sections/BasicInfoSection.tsx`:
    - Props: `viewModel: TemplateEditorViewModel`
@@ -563,7 +563,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/templateEditor/sections/DimensionsSection.tsx`:
    - Fields:
@@ -611,7 +611,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/templateEditor/sections/BackgroundSection.tsx`:
    - Fields:
@@ -660,7 +660,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/templateEditor/sections/CertificateTitleSection.tsx`:
    - Fields:
@@ -704,7 +704,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/templateEditor/sections/ValidityPeriodSection.tsx`:
    - Fields:
@@ -746,7 +746,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/desktop/views/dashboard/certificates/templateEditor/templateEditorView.desktop.tsx`:
    - `DesktopPageHeader` with title (`labels.pageTitle(templateName)` interpolated), back button to templates list
@@ -788,7 +788,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/mobile/views/dashboard/certificates/templateEditor/templateEditorView.mobile.tsx`:
    - `MobilePageHeader` with title (`labels.pageTitle(templateName)`), back button
@@ -829,7 +829,7 @@ bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `app/(dashboard)/certificates/templates/[id]/page.tsx`:
    - Async server component
@@ -1246,23 +1246,23 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| T01 | `shared/locale/types/dashboard/certificates/templateEditor.ts`, error types | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T02 | `shared/locale/ar/dashboard/certificates/templateEditor.ts`, AR errors | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T03 | `shared/locale/en/dashboard/certificates/templateEditor.ts`, EN errors | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T04 | `shared/locale/namespaces/.../templateEditor.namespace.ts`, `translation.ts`, `message.ts`, `ar/messages.ts`, `en/messages.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T05 | `frontend/common/graphql/sharedDocuments/cert/templateEditor-documents.ts`, `cert/index.ts` (modify) | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T06 | `frontend/common/stores/templateEditorStore.ts` | `frontend/common/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T07 | `frontend/common/views/dashboard/certificates/templateEditor/types/index.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T08 | `frontend/common/views/dashboard/certificates/templateEditor/useTemplateEditorViewModel.ts` | `frontend/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T09 | `frontend/common/views/dashboard/certificates/templateEditor/TemplateEditorContainer.tsx` | `frontend/views/AGENTS.md`, `app/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T10 | `frontend/common/views/dashboard/certificates/templateEditor/sections/BasicInfoSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T11 | `frontend/common/views/dashboard/certificates/templateEditor/sections/DimensionsSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T12 | `frontend/common/views/dashboard/certificates/templateEditor/sections/BackgroundSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T13 | `frontend/common/views/dashboard/certificates/templateEditor/sections/CertificateTitleSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T14 | `frontend/common/views/dashboard/certificates/templateEditor/sections/ValidityPeriodSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T15 | `frontend/desktop/views/dashboard/certificates/templateEditor/templateEditorView.desktop.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T16 | `frontend/mobile/views/dashboard/certificates/templateEditor/templateEditorView.mobile.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T17 | `app/(dashboard)/certificates/templates/[id]/page.tsx` | `app/AGENTS.md`, `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| T01 | `shared/locale/types/dashboard/certificates/templateEditor.ts`, error types | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T02 | `shared/locale/ar/dashboard/certificates/templateEditor.ts`, AR errors | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T03 | `shared/locale/en/dashboard/certificates/templateEditor.ts`, EN errors | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T04 | `shared/locale/namespaces/.../templateEditor.namespace.ts`, `translation.ts`, `message.ts`, `ar/messages.ts`, `en/messages.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T05 | `frontend/common/graphql/sharedDocuments/cert/templateEditor-documents.ts`, `cert/index.ts` (modify) | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T06 | `frontend/common/stores/templateEditorStore.ts` | `frontend/common/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T07 | `frontend/common/views/dashboard/certificates/templateEditor/types/index.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T08 | `frontend/common/views/dashboard/certificates/templateEditor/useTemplateEditorViewModel.ts` | `frontend/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T09 | `frontend/common/views/dashboard/certificates/templateEditor/TemplateEditorContainer.tsx` | `frontend/views/AGENTS.md`, `app/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T10 | `frontend/common/views/dashboard/certificates/templateEditor/sections/BasicInfoSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T11 | `frontend/common/views/dashboard/certificates/templateEditor/sections/DimensionsSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T12 | `frontend/common/views/dashboard/certificates/templateEditor/sections/BackgroundSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T13 | `frontend/common/views/dashboard/certificates/templateEditor/sections/CertificateTitleSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T14 | `frontend/common/views/dashboard/certificates/templateEditor/sections/ValidityPeriodSection.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T15 | `frontend/desktop/views/dashboard/certificates/templateEditor/templateEditorView.desktop.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T16 | `frontend/mobile/views/dashboard/certificates/templateEditor/templateEditorView.mobile.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T17 | `app/(dashboard)/certificates/templates/[id]/page.tsx` | `app/AGENTS.md`, `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | T18 | (verification only — no file changes) | — | — |
 | T19 | (knowledge propagation — no file changes except inline comments) | `AGENTS.md` | — |
 
@@ -1391,7 +1391,7 @@ T44 (knowledge propagation) depends on T43
 
 - `AGENTS.md` (root — always)
 - `frontend/stores/AGENTS.md` (Zustand persist + File/Blob rules)
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 
 ### Quality Loop
 
@@ -1421,7 +1421,7 @@ bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts -
 ### Subtasks
 
 1. Read AGENTS.md: `frontend/views/AGENTS.md`, `frontend/AGENTS.md` (MUI v9 sx prop, icon naming `*Outlined`)
-2. Read `.github/instructions/frontend.instructions.md`
+2. Read `.agents/instructions/frontend.instructions.md`
 3. Create `ToolbarOverflow.tsx`:
    - Export a component `ToolbarOverflow` that accepts `children: React.ReactNode` and renders them in a flex `Box` with `ref` for `ResizeObserver`.
    - Each child must be a `ToolbarOverflowItem` — a component that accepts `id: string`, `priority: number`, `label: string`, `tooltip: string`, and `children` (the actual button).
@@ -1524,7 +1524,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Subtasks
 
 1. Read AGENTS.md: `frontend/views/AGENTS.md`, `AGENTS.md`
-2. Read `.github/instructions/frontend.instructions.md`
+2. Read `.agents/instructions/frontend.instructions.md`
 3. Create `ShortcutManager.ts`:
    - Module-level singleton with a `Map<string, { combo: string; handler: () => void; scope: string; priority: number }>` registry.
    - `registerShortcut(combo, handler, scope, priority)`: returns `boolean`. On conflict (same combo, overlapping scope):
@@ -1587,7 +1587,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Subtasks
 
 1. Read AGENTS.md: `frontend/views/AGENTS.md`, `AGENTS.md` (React 19 changes — `React.SyntheticEvent`)
-2. Read `.github/instructions/frontend.instructions.md`
+2. Read `.agents/instructions/frontend.instructions.md`
 3. Create `useUnsavedChangesGuard.ts`:
    - A hook called once in the editor container: `useUnsavedChangesGuard({ router, save, reset }).`
    - Registers `beforeunload` listener: if `isDirty` (read from store via `useCertTemplateEditorStore.getState().isDirty`), call `event.preventDefault()` and set `event.returnValue = ''`.
@@ -1650,7 +1650,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Subtasks
 
 1. Read AGENTS.md: `frontend/views/AGENTS.md`, `AGENTS.md`
-2. Read `.github/instructions/frontend.instructions.md`
+2. Read `.agents/instructions/frontend.instructions.md`
 3. Create `useAutosave.ts`:
    - Hook called once in the editor container: `useAutosave({ save })`.
    - Debounce: `useRef<ReturnType<typeof setTimeout>>`. On each `isDirty` → `true` transition (via `useEffect` watching `isDirty`), set a timeout for `autoSaveDelay` (from store, default 3000ms). Clear and re-set on each subsequent field change.
@@ -1816,7 +1816,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Subtasks
 
 1. Read AGENTS.md: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/AGENTS.md` accessibility section
-2. Read `.github/instructions/frontend.instructions.md`
+2. Read `.agents/instructions/frontend.instructions.md`
 3. Create `SrLiveRegion.tsx`:
    - A `<div aria-live="polite" aria-atomic="true" className="sr-only" />` — the `sr-only` class must be defined via `sx={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}` (the visually-hidden CSS pattern).
    - Props: `message: string`. A `useEffect` updates the `ref.current.textContent = message` when `message` changes.
@@ -2069,7 +2069,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 ### Subtasks
 
 1. Read AGENTS.md: `shared/AGENTS.md` (i18n rules — compile-time system, `defineNamespace`, AR/EN interfaces must match the type schema)
-2. Read `.github/instructions/frontend.instructions.md`
+2. Read `.agents/instructions/frontend.instructions.md`
 3. Modify `TemplateEditorLabels` interface (in `shared/locale/types/dashboard/certificates/templateEditor.ts`):
    - Add nested key blocks per `design.md` §R4.17:
      - `toolbar.moreActions`, `toolbar.overflowPriority`
@@ -2134,7 +2134,7 @@ bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templ
 ### Subtasks
 
 1. Read AGENTS.md: `test/ui/AGENTS.md`, `AGENTS.md`
-2. Read `.github/instructions/tests.instructions.md`
+2. Read `.agents/instructions/tests.instructions.md`
 3. **ToolbarOverflow.test.tsx**: render `ToolbarOverflow` with 3 mock `ToolbarOverflowItem`s, simulate `ResizeObserver` (mock via `window.ResizeObserver` override in test setup) where container width = 300px — assert 1 item moved to overflow `Menu`. Test keyboard: `Tab` focuses overflow trigger, `Enter` opens menu, `Escape` closes. Assert `aria-label` on each item and the trigger.
 4. **UnsavedChangesDialog.test.tsx**: render dialog with `open=true`, assert title, assert 3 buttons (Save, Don't Save, Cancel). Click "Save" → assert `onSave` callback called. Click "Don't Save" → `onDontSave`. Click "Cancel" → `onCancel`. Assert focus trap works (Tab cycles within dialog). Assert `Escape` does NOT close (override MUI default for a submission-required dialog).
 5. **AutosaveIndicator.test.tsx**: render with store mock in 4 states (`idle+isDirty`, `saving`, `saved`, `error`). Assert correct icon + text in each. Assert `aria-live` attribute. Assert no re-render when an unrelated store field changes (perf).
@@ -2212,21 +2212,21 @@ bun run scripts/health/sub-loop.ts test/ui/e2e/editor-prod-hardening.spec.ts --l
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| T29 | `frontend/stores/cert/templateEditorStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T30 | `frontend/views/dashboard/cert/templates/editor/ToolbarOverflow.tsx`, `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T31 | `EditorLayout.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T32 | `ShortcutManager.ts`, `ShortcutSettingsDialog.tsx`, `useEditorShortcuts.ts` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T33 | `useUnsavedChangesGuard.ts`, `UnsavedChangesDialog.tsx`, `AutosaveIndicator.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T34 | `useAutosave.ts`, `ConflictDialog.tsx`, `templateEditorStore.ts` (modify) | `frontend/views/AGENTS.md`, `frontend/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T35 | `EditorSkeletons.tsx`, `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T36 | `CanvasErrorBoundary.tsx`, `PanelErrorBoundary.tsx`, `EditorLayout.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T37 | `SrLiveRegion.tsx`, `EditorLayout.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T38 | `EditorMobileLayout.tsx`, `EditorTabletLayout.tsx`, `EditorLayout.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T39 | `templateEditorStore.ts` (modify), `useAutosave.ts` (modify), `frontend/COMPONENT_PATTERNS.md` (append-only) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T40 | `EditorTabBar.tsx`, `RecentTemplatesList.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T41 | `EditorStatusBar.tsx` (modify), `utils/formatRelativeTime.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T42 | `shared/locale/types/dashboard/certificates/templateEditor.ts` (modify), `shared/locale/ar/.../templateEditor.ts` (modify), `shared/locale/en/.../templateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T43 | All test files in `test/ui/components/editor/` + `test/ui/e2e/editor-prod-hardening.spec.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| T29 | `frontend/stores/cert/templateEditorStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T30 | `frontend/views/dashboard/cert/templates/editor/ToolbarOverflow.tsx`, `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T31 | `EditorLayout.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T32 | `ShortcutManager.ts`, `ShortcutSettingsDialog.tsx`, `useEditorShortcuts.ts` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T33 | `useUnsavedChangesGuard.ts`, `UnsavedChangesDialog.tsx`, `AutosaveIndicator.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T34 | `useAutosave.ts`, `ConflictDialog.tsx`, `templateEditorStore.ts` (modify) | `frontend/views/AGENTS.md`, `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T35 | `EditorSkeletons.tsx`, `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T36 | `CanvasErrorBoundary.tsx`, `PanelErrorBoundary.tsx`, `EditorLayout.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T37 | `SrLiveRegion.tsx`, `EditorLayout.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T38 | `EditorMobileLayout.tsx`, `EditorTabletLayout.tsx`, `EditorLayout.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T39 | `templateEditorStore.ts` (modify), `useAutosave.ts` (modify), `frontend/COMPONENT_PATTERNS.md` (append-only) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T40 | `EditorTabBar.tsx`, `RecentTemplatesList.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T41 | `EditorStatusBar.tsx` (modify), `utils/formatRelativeTime.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T42 | `shared/locale/types/dashboard/certificates/templateEditor.ts` (modify), `shared/locale/ar/.../templateEditor.ts` (modify), `shared/locale/en/.../templateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T43 | All test files in `test/ui/components/editor/` + `test/ui/e2e/editor-prod-hardening.spec.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | T44 | Inline comments only (per Knowledge Propagation subtask) | `AGENTS.md` | — |
 
 ### Verification
@@ -2309,7 +2309,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
   - `frontend/AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/common/stores/cert/effectTypes.ts`:
   - `EffectCategory` union: `'shadow' | 'glow' | 'blur' | 'colorAdjust' | 'stylize' | 'overlay'`
@@ -2348,7 +2348,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/toolbar/QuickEffectsButton.tsx`:
   - `IconButton` with `sx={(theme) => ({ color: theme.palette.text.primary })}`
@@ -2381,7 +2381,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/toolbar/QuickEffectsMenu.tsx`:
   - Anatomy: `Popover` with `Paper sx={{ width: 360, p: 2 }}`
@@ -2413,7 +2413,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
 
 - [ ] **Read applicable AGENTS.md**: `frontend/stores/AGENTS.md` (store additions), `frontend/views/AGENTS.md`, `AGENTS.md`
 
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/toolbar/useQuickToggleEffects.ts`:
   - State persists in the existing `useCanvasStore` (Plan 11) or `useTemplateElementEditorStore` (Plan 12) — single Zustand store for session state. Pick the smaller of the two and add `lastShadowPresetId: string | null` and `lastGlowPresetId: string | null` fields.
@@ -2447,7 +2447,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
 **Requirements**: design.md §R5.4
 
 - [ ] **Read applicable AGENTS.md**: `shared/AGENTS.md` (i18n compile-time rules — function-per-key for interpolation/pluralization; both locales must match type schema exactly)
-- [ ] **Read applicable instruction files**: `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Extend** `shared/locale/types/dashboard/certificates/templateEditor.ts`:
   - Add `effects: { ... }` sub-tree per design §R5.4 type listing
@@ -2502,7 +2502,7 @@ FX-T01 (effectTypes.ts shared types + preset factories)
 **Depends on**: FX-T06 (passes integration verification)
 
 - [ ] **Read applicable AGENTS.md**: `test/ui/AGENTS.md`, `AGENTS.md`
-- [ ] **Read applicable instruction files**: `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md`
+- [ ] **Read applicable instruction files**: `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `test/ui/components/editor/effectToolbar/QuickEffectsButton.test.tsx`:
   - Disabled when `selectedElementId === null`
@@ -2738,13 +2738,13 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| R5-T1 | `frontend/common/stores/cert/fillStrokeTypes.ts`, `fillStrokeUtils.ts`, `shared/locale/types/dashboard/certificates/templateEditor.ts`, `shared/locale/{ar,en}/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T2 | `frontend/common/stores/cert/fillStrokeStore.ts`, `gradientPresets.config.ts`, `patternLibrary.config.ts` | `frontend/stores/AGENTS.md` (or equivalent `frontend/common/stores/AGENTS.md`), `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T3 | `frontend/views/dashboard/cert/templates/editor/ToolbarFillSwatch.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T4 | `ToolbarStrokeSwatch.tsx`, `ToolbarStrokeWidthInput.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T5 | `ToolbarFillStrokeToggle.tsx`, `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T6 | `useFillStrokeShortcuts.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T7 | `test/ui/components/editor/{ToolbarFillSwatch,ToolbarStrokeSwatch,ToolbarFillStrokeToggle,useFillStrokeShortcuts}.test.tsx`, `test/unit/fillStrokeUtils.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| R5-T1 | `frontend/common/stores/cert/fillStrokeTypes.ts`, `fillStrokeUtils.ts`, `shared/locale/types/dashboard/certificates/templateEditor.ts`, `shared/locale/{ar,en}/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T2 | `frontend/common/stores/cert/fillStrokeStore.ts`, `gradientPresets.config.ts`, `patternLibrary.config.ts` | `frontend/stores/AGENTS.md` (or equivalent `frontend/common/stores/AGENTS.md`), `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T3 | `frontend/views/dashboard/cert/templates/editor/ToolbarFillSwatch.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T4 | `ToolbarStrokeSwatch.tsx`, `ToolbarStrokeWidthInput.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T5 | `ToolbarFillStrokeToggle.tsx`, `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T6 | `useFillStrokeShortcuts.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T7 | `test/ui/components/editor/{ToolbarFillSwatch,ToolbarStrokeSwatch,ToolbarFillStrokeToggle,useFillStrokeShortcuts}.test.tsx`, `test/unit/fillStrokeUtils.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5-T8 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (all append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 10)
@@ -3088,7 +3088,7 @@ bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templ
 
 ### Subtasks
 
-- [ ] Read `test/ui/AGENTS.md`, `.github/instructions/tests.instructions.md`
+- [ ] Read `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`
 - [ ] Create `test/ui/components/template-editor-toolbar/PenToolGroup.test.tsx`:
   - Test renders 6 menu items when dropdown opened
   - Test clicking a menu item calls `setActiveTool` with correct tool
@@ -3351,16 +3351,16 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| R5-T1 | `contextMenus/contextMenuService.ts`, `contextMenus/ContextMenuHost.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T2 | `contextMenus/menuItemBuilders.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T3 | `contextMenus/menuItemFilter.ts`, `contextMenus/useMenuContextDescriptor.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T4 | `contextMenus/useMenuKeyboardNav.ts`, `contextMenus/SubmenuTrigger.tsx` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T5 | `contextMenus/ToolbarContextMenu.tsx`, `dialogs/CustomizeToolbarDialog.tsx`, `contextMenus/useToolbarContextMenu.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T6 | `contextMenus/SwatchesContextMenu.tsx`, `utils/swatchImportExport.ts`, `frontend/common/stores/cert/swatchStore.ts` | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T7 | `contextMenus/PropertiesPanelContextMenu.tsx`, `contextMenus/ColorPanelContextMenu.tsx`, `utils/colorFormatUtils.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T8 | `contextMenus/MenuBarContextMenu.tsx`, `contextMenus/useOutsideClickClose.ts`, `contextMenus/contextMenuTheme.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T9 | `contextMenus/useContextMenuShortcuts.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T10 | `test/ui/components/editor/contextMenus/{ContextMenuHost,menuItemFilter,SubmenuTrigger,ToolbarContextMenu,SwatchesContextMenu,ColorPanelContextMenu}.test.tsx`, `test/unit/{colorFormatUtils,swatchImportExport}.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| R5-T1 | `contextMenus/contextMenuService.ts`, `contextMenus/ContextMenuHost.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T2 | `contextMenus/menuItemBuilders.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T3 | `contextMenus/menuItemFilter.ts`, `contextMenus/useMenuContextDescriptor.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T4 | `contextMenus/useMenuKeyboardNav.ts`, `contextMenus/SubmenuTrigger.tsx` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T5 | `contextMenus/ToolbarContextMenu.tsx`, `dialogs/CustomizeToolbarDialog.tsx`, `contextMenus/useToolbarContextMenu.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T6 | `contextMenus/SwatchesContextMenu.tsx`, `utils/swatchImportExport.ts`, `frontend/common/stores/cert/swatchStore.ts` | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T7 | `contextMenus/PropertiesPanelContextMenu.tsx`, `contextMenus/ColorPanelContextMenu.tsx`, `utils/colorFormatUtils.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T8 | `contextMenus/MenuBarContextMenu.tsx`, `contextMenus/useOutsideClickClose.ts`, `contextMenus/contextMenuTheme.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T9 | `contextMenus/useContextMenuShortcuts.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T10 | `test/ui/components/editor/contextMenus/{ContextMenuHost,menuItemFilter,SubmenuTrigger,ToolbarContextMenu,SwatchesContextMenu,ColorPanelContextMenu}.test.tsx`, `test/unit/{colorFormatUtils,swatchImportExport}.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5-T11 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (all append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 10 Context Menus)
@@ -3420,7 +3420,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - `frontend/AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `frontend/common/stores/certificates/templateElementEditorStore.ts`:
   - Add `LayerPanelOptions` interface: `{ thumbnailSize: 'small' | 'medium' | 'large'; showGroupThumbnails: boolean; sortOrder: 'top-to-bottom' | 'bottom-to-top' }`
@@ -3454,7 +3454,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - `AGENTS.md` root (`@/*` path alias, MUI v9: `sx={}` ban on style props, NEVER hardcode colors)
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/certificates/template-editor/workspace/LayersWorkspacePanel.tsx`:
   - Imports `useTemplateElementEditorStore` (selectors: `panelDock`, `panelWidth`, `panelHeight`) via `useShallow` from `zustand/react/shallow`
@@ -3495,7 +3495,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - `AGENTS.md` root
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/certificates/template-editor/layersPanel/AdvancedLayersPanelHeader.tsx`:
   - `useAppTranslation(Translation.Dashboard.CertificateTemplateEditor)` from `@/shared/locale/client`
@@ -3529,7 +3529,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - `AGENTS.md` root §"Verification Loop"
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/certificates/template-editor/layersPanel/AdvancedLayersList.tsx`:
   - `useTemplateElementEditorStore` selectors via `useShallow`: `selectFilteredLayerIds`, `selectTopLevelLayerCount`, `selectedElementIds`, `layerPanelOptions.sortOrder`
@@ -3620,7 +3620,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - `AGENTS.md` root
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/certificates/template-editor/layersPanel/LayerPanelOptionsDialog.tsx`:
   - `useTemplateElementEditorStore` selectors: `layerPanelOptions`, `setLayerPanelOption`, `panelDock`, `setPanelDock`
@@ -3656,7 +3656,7 @@ LY-T01 (store: panel-chrome state + derived selectors)
   - `AGENTS.md` root
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/tests.instructions.md`
+  - `.agents/instructions/tests.instructions.md`
 
 - [ ] Create `test/ui/components/layersPanel/LayersWorkspacePanel.test.tsx`:
   - Test dock positions: render with each of `right`/`left`/`floating`/`collapsed` — assert the appropriate slot class/styles
@@ -3888,14 +3888,14 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| R5S-T1 | `frontend/common/stores/cert/snapAlignTypes.ts`, `shared/locale/types/.../templateEditor.ts`, `shared/locale/{en,ar}/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T2 | `frontend/views/dashboard/cert/templates/editor/toolbar/{AlignToolbarCluster,AlignToSelect}.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T3 | `frontend/views/dashboard/cert/templates/editor/toolbar/DistributeToolbarCluster.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T4 | `frontend/views/dashboard/cert/templates/editor/toolbar/{ViewMenuSnapSection,SnapSettingsDialog}.tsx`, `ViewMenu.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T5 | `frontend/views/dashboard/cert/templates/editor/toolbar/KeyObjectBadge.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T6 | `frontend/views/dashboard/cert/templates/editor/useAlignShortcuts.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T7 | `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5S-T8 | `test/ui/components/editor/{AlignToolbarCluster,AlignToSelect,DistributeToolbarCluster,ViewMenuSnapSection,SnapSettingsDialog,useAlignShortcuts,KeyObjectBadge}.test.tsx` | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| R5S-T1 | `frontend/common/stores/cert/snapAlignTypes.ts`, `shared/locale/types/.../templateEditor.ts`, `shared/locale/{en,ar}/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T2 | `frontend/views/dashboard/cert/templates/editor/toolbar/{AlignToolbarCluster,AlignToSelect}.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T3 | `frontend/views/dashboard/cert/templates/editor/toolbar/DistributeToolbarCluster.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T4 | `frontend/views/dashboard/cert/templates/editor/toolbar/{ViewMenuSnapSection,SnapSettingsDialog}.tsx`, `ViewMenu.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T5 | `frontend/views/dashboard/cert/templates/editor/toolbar/KeyObjectBadge.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T6 | `frontend/views/dashboard/cert/templates/editor/useAlignShortcuts.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T7 | `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5S-T8 | `test/ui/components/editor/{AlignToolbarCluster,AlignToSelect,DistributeToolbarCluster,ViewMenuSnapSection,SnapSettingsDialog,useAlignShortcuts,KeyObjectBadge}.test.tsx` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5S-T9 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Snap & Align Execution Order (Plan 10)
@@ -4228,7 +4228,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 
 ### TR-T01 — `useLastTransformRecord` Hook
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/useLastTransformRecord.ts`
   - Returns `{ lastTransform, commitTransform, clearLastTransform }`
   - `lastTransform: TransformOperationRecord | null` — read via `useShallow` from `certTemplateEditorStore`
@@ -4240,7 +4240,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 
 ### TR-T02 — `ToolbarFreeTransformButton` Component
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/ToolbarFreeTransformButton.tsx` (per design.md R6.2):
   - `IconButton` + `Tooltip`
   - Read `activeTool`, `selectedElementIds` from `certTemplateEditorStore` via `useShallow`
@@ -4252,7 +4252,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 
 ### TR-T03 — `EditorEditMenu` with Transform Submenu
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/EditorEditMenu.tsx` (per design.md R6.3):
   - `Button` ("Edit") + nested `Menu` `Transform` submenu:
     - Free Transform (`Ctrl+T`)
@@ -4272,7 +4272,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 
 ### TR-T04 — `useEditorShortcuts` — Transform Shortcuts
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Modify `frontend/views/dashboard/cert/templates/editor/useEditorShortcuts.ts` (already exists from Round 5 pen tool):
   - Add `ShortcutBinding`s to the existing `ShortcutManager`:
     - `Ctrl+T` → `setActiveTool('freeTransform')` (predicate: `selectedElementIds.length === 1 && activeTool !== 'freeTransform'`)
@@ -4285,7 +4285,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 
 ### TR-T05 — Transform i18n Keys (Plan 10 Surface — AR + EN)
 
-- [ ] Read `shared/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `shared/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Modify `shared/locale/types/dashboard/certificates/templateEditor.ts` — append to `certificateEditor` namespace:
   - `transform: { freeTransform: { tooltip: string; ariaLabel: string; disabledHint: string }; submenuLabel: string; scale: string; rotate: string; skew: string; distort: string; perspective: string; warp: string; rotate九十Cw: string; rotate九十Ccw: string; rotate180: string; flipHorizontal: string; flipVertical: string; numeric: string; again: string }; editMenu: { label: string }`
   - All plain `string` (no interpolation, no pluralization per design.md R6.7)
@@ -4296,7 +4296,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 
 ### TR-T06 — `certTemplateEditorStore` Transform Action Shims + Handler Surface
 
-- [ ] Read `frontend/stores/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/stores/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Modify `frontend/common/stores/cert/certTemplateEditorStore.ts` (per design.md R6.6):
   - Extend `CertTemplateEditorState` interface:
     - `lastTransform: TransformOperationRecord | null`
@@ -4323,7 +4323,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 
 ### TR-T07 — Component Tests: Toolbar Free Transform + Edit Menu
 
-- [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `test/ui/components/editor/ToolbarFreeTransformButton.test.tsx`:
   - Renders disabled when 0 selected
   - Renders disabled when 2+ selected
@@ -4736,7 +4736,7 @@ bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/canva
 
 **Instruction Verification:**
 - Read `shared/AGENTS.md` — shared layer must never import from `@/frontend/**` or `@/backend/**`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: no `next-intl` imports, compile-time type system pattern (interface + implementation), interpolation as `(param: string) => string`, pluralization as `(count: number) => string`
 
 **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
@@ -4788,7 +4788,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: `@/` path aliases, no `console.*` (use `logger`), discriminated `ShortcutDefinition` type
 
 **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
@@ -4856,7 +4856,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — MUI v9: `sx={{}}` only, no style props
 - Read `frontend/views/AGENTS.md`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: `useAppTranslation(Translation.Dashboard.CertificateCanvas)` pattern, `ListItemIcon` imports from `@mui/material`, icon names end with `Outlined` (MUI v9), `sx={{ color: theme => theme.palette.text.primary }}` pattern
 
 **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
@@ -4899,7 +4899,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — MUI v9 icon names end with `Outlined`, `sx={{}}` only, no hardcoded colors
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 
 **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
@@ -4959,7 +4959,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-canvas/u
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — no `console.*`, `sx={{}}` only
 - Read `frontend/views/AGENTS.md`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 - Verify: `useAppTranslation(Translation.Dashboard.CertificateCanvas)` for i18n, `@/` path aliases, no hardcoded colors
 
 **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
@@ -5008,7 +5008,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-canvas/c
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — no hardcoded colors, use `theme.palette.*`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 
 **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
@@ -5050,7 +5050,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — no `console.*`
-- Read `.github/instructions/frontend.instructions.md`
+- Read `.agents/instructions/frontend.instructions.md`
 
 **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
@@ -5090,7 +5090,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template
 
 **Instruction Verification:**
 - Read `frontend/AGENTS.md` — use test runner `bun run scripts/run-test/run-test.ts`
-- Read `.github/instructions/tests.instructions.md`
+- Read `.agents/instructions/tests.instructions.md`
 
 **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
@@ -5207,7 +5207,7 @@ T45–T57 ─> T58 (knowledge propagation)
 ### Subtasks
 
 1. Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md` for component conventions
-2. Read `.github/instructions/frontend.instructions.md`
+2. Read `.agents/instructions/frontend.instructions.md`
 3. Create `ShapeToolGroup.tsx`:
    - `ToggleButtonGroup` with `exclusive` mode
    - 8 `ToggleButton`s: rectangle, roundedRectangle, ellipse, polygon, star, triangle, line, custom
@@ -5288,7 +5288,7 @@ T45–T57 ─> T58 (knowledge propagation)
 
 ### Subtasks
 
-1. Read `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+1. Read `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 2. Create `BooleanToolbar.tsx`:
    - Wrapped in MUI `Collapse` — `in={selectedShapeCount >= 2}` with `timeout={200}`
    - Contains `Paper` with `display: flex`, `gap: 0.5`, `p: 0.5`
@@ -5358,7 +5358,7 @@ T45–T57 ─> T58 (knowledge propagation)
 
 ### Subtasks
 
-1. Read `.github/instructions/frontend.instructions.md` for keyboard event handling
+1. Read `.agents/instructions/frontend.instructions.md` for keyboard event handling
 2. Add shape tool shortcuts to `useEditorShortcuts`:
    - `R` → `setActiveShapeTool('rectangle')`
    - `Shift+R` → `setActiveShapeTool('roundedRectangle')`
@@ -5546,7 +5546,7 @@ T45–T57 ─> T58 (knowledge propagation)
 
 ### Subtasks
 
-1. Read `.github/instructions/tests.instructions.md`, `test/ui/AGENTS.md`
+1. Read `.agents/instructions/tests.instructions.md`, `test/ui/AGENTS.md`
 2. Create test files per the test specs in tasks T46–T54
 3. Use Happy DOM + mocked Apollo (no server)
 4. Mock `useTemplateEditorStore` and `useCanvasStore` for component tests
@@ -5610,19 +5610,19 @@ T45–T57 ─> T58 (knowledge propagation)
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| T45 | `frontend/common/stores/templateEditorStore.ts` (modify), `shared/types/cert/shapeTypes.ts` (new), `shared/constants/cert/shapeCategories.ts` (new) | `frontend/common/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T46 | `frontend/views/dashboard/cert/templates/editor/toolbar/ShapeToolGroup.tsx` (new), `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T47 | `ShapeLibraryPanel.tsx` (new), `EditorLayout.tsx` (modify), `shared/constants/cert/shapePresets/*.ts` (new) | `frontend/views/AGENTS.md`, `shared/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T48 | `BooleanToolbar.tsx` (new), `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T49 | `ShapeToolSettingsDialog.tsx` (new), `ShapeToolGroup.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T50 | `useEditorShortcuts.ts` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T51 | `svgImport.ts` (new), `SvgImportDialog.tsx` (new), `ShapeLibraryPanel.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T52 | `svgUrlImport.ts` (new), `UrlImportDialog.tsx` (new), `ShapeLibraryPanel.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T53 | `ShapeToolGroup.tsx` (modify), `ShapeToolSettingsDialog.tsx` (wire) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T54 | `useEditorShortcuts.ts` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T55 | `shared/locale/types/cert/certificateTemplateEditor.ts` (modify), `shared/locale/ar/.../certificateTemplateEditor.ts` (modify), `shared/locale/en/.../certificateTemplateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T56 | All test files in `test/ui/components/editor/` | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
-| T57 | `test/ui/e2e/editor-shapes.spec.ts` (new) | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md` |
+| T45 | `frontend/common/stores/templateEditorStore.ts` (modify), `shared/types/cert/shapeTypes.ts` (new), `shared/constants/cert/shapeCategories.ts` (new) | `frontend/common/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T46 | `frontend/views/dashboard/cert/templates/editor/toolbar/ShapeToolGroup.tsx` (new), `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T47 | `ShapeLibraryPanel.tsx` (new), `EditorLayout.tsx` (modify), `shared/constants/cert/shapePresets/*.ts` (new) | `frontend/views/AGENTS.md`, `shared/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T48 | `BooleanToolbar.tsx` (new), `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T49 | `ShapeToolSettingsDialog.tsx` (new), `ShapeToolGroup.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T50 | `useEditorShortcuts.ts` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T51 | `svgImport.ts` (new), `SvgImportDialog.tsx` (new), `ShapeLibraryPanel.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T52 | `svgUrlImport.ts` (new), `UrlImportDialog.tsx` (new), `ShapeLibraryPanel.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T53 | `ShapeToolGroup.tsx` (modify), `ShapeToolSettingsDialog.tsx` (wire) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T54 | `useEditorShortcuts.ts` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T55 | `shared/locale/types/cert/certificateTemplateEditor.ts` (modify), `shared/locale/ar/.../certificateTemplateEditor.ts` (modify), `shared/locale/en/.../certificateTemplateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T56 | All test files in `test/ui/components/editor/` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| T57 | `test/ui/e2e/editor-shapes.spec.ts` (new) | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md` |
 | T58 | `frontend/COMPONENT_PATTERNS.md` (append), `frontend/IMPLEMENTATION_LEARNINGS.md` (append) | `AGENTS.md` | — |
 
 ### Verification
@@ -5885,7 +5885,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - `frontend/AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/common/stores/cert/maskTypes.ts`:
   - `MaskType` union: `'pixel' | 'vector' | 'clipping'`
@@ -5925,7 +5925,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - `frontend/AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `frontend/common/stores/cert/certTemplateEditorStore.ts` (or the applicable store — coordinate with existing store architecture):
   - Add state fields:
@@ -5962,7 +5962,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/toolbar/ToolbarMaskButtons.tsx`:
   - `IconButton` + `Tooltip` cluster: Add Layer Mask (`AddCircleOutlineOutlined`), Add Vector Mask (`GestureOutlined`), Toggle Mask Visibility (`VisibilityOutlined`/`VisibilityOffOutlined`), Enter Mask Mode (`BrushOutlined`)
@@ -6132,7 +6132,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `shared/locale/types/templateEditor.ts` (type schema):
   - Append `mask` namespace keys (see design §R5.11):
@@ -6162,7 +6162,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - `test/ui/AGENTS.md`, `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `test/ui/components/editor/mask/{ToolbarMaskButtons,EditorLayerMenu,ToolbarQuickMaskButton,QuickMaskOptionsPopover,ToolbarMaskBrushTools,LayersPanelMaskAddButtons,LayersPanelAltClickHandler,LayerRowMaskThumbnail,useMaskShortcuts,MaskIcon}.test.tsx`:
   - Each test:
@@ -6198,16 +6198,16 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |------|-----------------------|-------------------|----------------------|
-| MASK-T01 | `maskTypes.ts`, `MaskIcon.tsx` | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-T02 | `certTemplateEditorStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-T03 | `ToolbarMaskButtons.tsx`, `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-T04 | `EditorLayerMenu.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-T05 | `ToolbarQuickMaskButton.tsx`, `QuickMaskOptionsPopover.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-T06 | `ToolbarMaskBrushTools.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-T07 | `LayersPanelMaskAddButtons.tsx`, `LayerRowMaskThumbnail.tsx`, `LayersPanelAltClickHandler.tsx`, `LayerRow.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-T08 | `useMaskShortcuts.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-T09 | `shared/locale/types/templateEditor.ts`, `shared/locale/ar/.../templateEditor.ts`, `shared/locale/en/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-T10 | `test/ui/components/editor/mask/*.test.tsx`, `test/ui/e2e/editor-mask-toolbar.test.tsx`, `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| MASK-T01 | `maskTypes.ts`, `MaskIcon.tsx` | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-T02 | `certTemplateEditorStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-T03 | `ToolbarMaskButtons.tsx`, `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-T04 | `EditorLayerMenu.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-T05 | `ToolbarQuickMaskButton.tsx`, `QuickMaskOptionsPopover.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-T06 | `ToolbarMaskBrushTools.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-T07 | `LayersPanelMaskAddButtons.tsx`, `LayerRowMaskThumbnail.tsx`, `LayersPanelAltClickHandler.tsx`, `LayerRow.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-T08 | `useMaskShortcuts.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-T09 | `shared/locale/types/templateEditor.ts`, `shared/locale/ar/.../templateEditor.ts`, `shared/locale/en/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-T10 | `test/ui/components/editor/mask/*.test.tsx`, `test/ui/e2e/editor-mask-toolbar.test.tsx`, `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 
 ### Round 5 Execution Order (Plan 10 — Masking)
 

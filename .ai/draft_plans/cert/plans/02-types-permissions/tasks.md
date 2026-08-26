@@ -84,7 +84,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
    - `shared/AGENTS.md` — shared layer constraints (enums cross-layer)
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Create** the certificate TS enum files under **`backend/enum/certificates/`** (the subtask title below previously said "Define TypeScript re-exports for all 11 pgEnums from Plan 1's schema" — CORRECTED: `backend/enum/` houses **TypeScript** enums, which are the SOURCE OF TRUTH that `createPgEnumFromEnum` derives PG values from; the PG pgEnums themselves live in `backend/db/schema/enums.ts` per Plan 1). Verified pattern: `backend/enum/students/student-lifecycle.enum.ts` is a bare `export enum X {...}` plus an optional `ALLOWED_*_TRANSITIONS` const — NO inline display-label metadata (display labels live in the i18n layer per T12).
    - Create `backend/enum/certificates/index.ts` as a barrel that `export * from "./certificate.enum"; export * from "./template.enum";` (matching the verified `backend/enum/billing/index.ts` barrel pattern).

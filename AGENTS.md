@@ -335,7 +335,7 @@ The `scripts/health/sub-loop.ts` script automatically discovers and prints which
 files and AGENTS.md files apply to the target file. Subagents MUST read ALL listed files before
 fixing. The mapping is:
 
-**Instruction files** (`.github/instructions/*.instructions.md`):
+**Instruction files** (`.agents/instructions/*.instructions.md`):
 
 | File Path Pattern | Instruction File |
 |---|---|

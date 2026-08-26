@@ -971,7 +971,7 @@ This plan depends on the following tables and PG enums from Plan 1:
 
 | File | Rules Applied |
 |---|---|
-| `.github/instructions/backend.instructions.md` | Backend coding conventions, import ordering, no console.log, error handling patterns |
+| `.agents/instructions/backend.instructions.md` | Backend coding conventions, import ordering, no console.log, error handling patterns |
 
 ### 9.3 Key Rules Enforced
 

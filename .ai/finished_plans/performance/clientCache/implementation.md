@@ -62,11 +62,11 @@ This feature touches the following layers. Executing agents MUST read the corres
 
 | Layer | AGENTS.md Path | Instruction File |
 |-------|---------------|-----------------|
-| App Router | `app/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Shared | `shared/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| Backend Types | `backend/types/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
+| App Router | `app/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Shared | `shared/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Backend Services | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| Backend Types | `backend/types/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
 
 ---
 

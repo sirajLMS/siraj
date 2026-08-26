@@ -77,10 +77,10 @@ The project has 4 instruction files that define mandatory rules per file type. T
 
 | Instruction File | `applyTo` Pattern | Covers |
 |---|---|---|
-| `.github/instructions/frontend.instructions.md` | `frontend/**/*.ts, frontend/**/*.tsx, app/**/*.ts, app/**/*.tsx` | MUI v9, React 19, Next.js 16, Apollo, Zustand, theme, i18n, logging |
-| `.github/instructions/backend.instructions.md` | `backend/**/*.ts` | Architecture layers, types, Pothos, i18n, logging, repos, seeds |
-| `.github/instructions/tests.instructions.md` | `**/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/*.spec.tsx, scripts/run-test/**/*.ts` | DB test safety, runInRollback, tx patterns, entity setup, coverage |
-| `.github/instructions/sonarqube_mcp.instructions.md` | `**/*` (all files) | SonarQube analysis rules, toggle_automatic_analysis, analyze_file_list |
+| `.agents/instructions/frontend.instructions.md` | `frontend/**/*.ts, frontend/**/*.tsx, app/**/*.ts, app/**/*.tsx` | MUI v9, React 19, Next.js 16, Apollo, Zustand, theme, i18n, logging |
+| `.agents/instructions/backend.instructions.md` | `backend/**/*.ts` | Architecture layers, types, Pothos, i18n, logging, repos, seeds |
+| `.agents/instructions/tests.instructions.md` | `**/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/*.spec.tsx, scripts/run-test/**/*.ts` | DB test safety, runInRollback, tx patterns, entity setup, coverage |
+| `.agents/instructions/sonarqube_mcp.instructions.md` | `**/*` (all files) | SonarQube analysis rules, toggle_automatic_analysis, analyze_file_list |
 
 **When dispatching fix subagents**: Paste the relevant instruction file content into the subagent's prompt so it follows the rules.
 
@@ -385,10 +385,10 @@ The project has instruction files that define mandatory rules. Each instruction 
 
 | File Pattern | Instruction File | When to Load |
 |---|---|---|
-| `frontend/**/*.ts`, `frontend/**/*.tsx`, `app/**/*.ts`, `app/**/*.tsx` | `.github/instructions/frontend.instructions.md` | Before any frontend/app fix |
-| `backend/**/*.ts` | `.github/instructions/backend.instructions.md` | Before any backend fix |
-| `**/*.test.ts`, `**/*.test.tsx`, `**/*.spec.ts`, `**/*.spec.tsx`, `scripts/run-test/**/*.ts` | `.github/instructions/tests.instructions.md` | Before any test fix |
-| `**/*` (all files) | `.github/instructions/sonarqube_mcp.instructions.md` | Before SonarQube-related fixes |
+| `frontend/**/*.ts`, `frontend/**/*.tsx`, `app/**/*.ts`, `app/**/*.tsx` | `.agents/instructions/frontend.instructions.md` | Before any frontend/app fix |
+| `backend/**/*.ts` | `.agents/instructions/backend.instructions.md` | Before any backend fix |
+| `**/*.test.ts`, `**/*.test.tsx`, `**/*.spec.ts`, `**/*.spec.tsx`, `scripts/run-test/**/*.ts` | `.agents/instructions/tests.instructions.md` | Before any test fix |
+| `**/*` (all files) | `.agents/instructions/sonarqube_mcp.instructions.md` | Before SonarQube-related fixes |
 
 **Workflow for each fix:**
 1. Identify which files need editing

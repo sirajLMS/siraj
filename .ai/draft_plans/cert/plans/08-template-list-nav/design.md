@@ -2119,7 +2119,7 @@ Plan 09 (Categories) consumes:
 
 | File | Update |
 |------|--------|
-| `.github/instructions/frontend.instructions.md` | Add rule: "List pages must persist filter/search/pagination state in URL search params; view mode preference in localStorage via Zustand persist middleware" |
+| `.agents/instructions/frontend.instructions.md` | Add rule: "List pages must persist filter/search/pagination state in URL search params; view mode preference in localStorage via Zustand persist middleware" |
 
 ---
 
@@ -2144,7 +2144,7 @@ Files created/modified in this plan must comply with the following:
 
 | File | Applies To |
 |---|---|
-| `.github/instructions/frontend.instructions.md` | All `frontend/**/*.ts(x)` and `app/**/*.tsx` files |
+| `.agents/instructions/frontend.instructions.md` | All `frontend/**/*.ts(x)` and `app/**/*.tsx` files |
 
 ### Relevant Quality Commands
 

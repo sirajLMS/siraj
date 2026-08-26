@@ -151,6 +151,7 @@ export function wcagGrade(ratio: number): "AAA" | "AA" | "AA Large" | "Fail" {
  * pickOnPrimary("#ffd600") // → "#000000" (yellow → black text)
  * pickOnPrimary("#767676") // → "#ffffff" (tie → default white)
  */
+// theme-token-allow: contrast-math only; never use in sx or styled()
 export function pickOnPrimary(primaryMain: string): "#ffffff" | "#000000" {
   const againstWhite = contrastRatio(primaryMain, "#ffffff");
   const againstBlack = contrastRatio(primaryMain, "#000000");

@@ -123,7 +123,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
    - `AGENTS.md` root — path alias conventions, logging rules
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create type schema** `shared/locale/types/dashboard/certificates/categories.ts`:
    - One function type per key listed in requirements.md §4.2 (40+ keys)
@@ -291,7 +291,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
    - `AGENTS.md` root — path aliases, no `useLazyQuery` rule
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/graphql/sharedDocuments/certificates/certificateCategory.documents.ts`:
    - Fragments:
@@ -347,7 +347,7 @@ bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/
    - `AGENTS.md` root — logging, path aliases
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/stores/certificateCategoryStore.ts`:
    - Store name: `useCertificateCategoryStore`
@@ -439,7 +439,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root — logging, path aliases, Apollo cache update patterns
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/categories/useCertificateCategoryViewModel.ts`:
    - Uses `useQuery(categoryRootsQueryDocument)` for root categories
@@ -491,7 +491,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/categories/CertificateCategoryContainer.tsx`:
    - Calls `useCertificateCategoryViewModel()`
@@ -536,7 +536,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root — theme palette, i18n
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/categories/components/CreateCategoryDialog.tsx`:
    - Props: ViewModel fields (`createDialogOpen`, `parentForCreate`, `openCreateDialog`, `closeCreateDialog`, `onCreateCategory`, `labels`, `loading`, `canManage`)
@@ -624,7 +624,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
    - `AGENTS.md` root — theme, i18n
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/common/views/dashboard/certificates/categories/components/CategoryPicker.tsx`:
    - MUI `Autocomplete` using `categoryListQueryDocument` to populate a flat list of categories (with parent path breadcrumb for nested display)
@@ -662,7 +662,7 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/
    - `AGENTS.md` root — path aliases, i18n
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/desktop/views/dashboard/certificates/categories/components/CategoryTree.desktop.tsx`:
    - Root component wrapping `DndContext` + `SortableContext` (vertical)
@@ -744,7 +744,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/desktop/views/dashboard/certificates/categories/components/TemplatePane.desktop.tsx`:
    - Shows templates for the selected category via `templates` from ViewModel
@@ -785,7 +785,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/desktop/views/dashboard/certificates/categories/certificateCategoryView.desktop.tsx`:
    - Props: `Readonly<CertificateCategoryViewModel>` — entire ViewModel passed through
@@ -832,7 +832,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/mobile/views/dashboard/certificates/categories/components/CategoryList.mobile.tsx`:
    - Flat expandable list using `Collapse` / `Accordion`-style (not a drag tree)
@@ -909,7 +909,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
    - `AGENTS.md` root
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `app/(dashboard)/certificates/categories/page.tsx`:
    - Async server component
@@ -1176,22 +1176,22 @@ bun run scripts/health/sub-loop.ts test/ui/e2e/certificates/categories/ --lifecy
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| T01 | `shared/locale/types/dashboard/certificates/categories.ts`, error types | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T02 | `shared/locale/ar/dashboard/certificates/categories.ts`, AR errors | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T03 | `shared/locale/en/dashboard/certificates/categories.ts`, EN errors | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T04 | `shared/locale/namespaces/.../categories.namespace.ts`, `translation.ts`, `message.ts`, `ar/messages.ts`, `en/messages.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T05 | `frontend/common/graphql/sharedDocuments/certificates/certificateCategory.documents.ts`, `frontend/common/graphql/sharedDocuments/certificates/index.ts` (modify) | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T06 | `frontend/common/stores/certificateCategoryStore.ts` | `frontend/common/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T07 | `frontend/common/views/dashboard/certificates/categories/types/index.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T08 | `frontend/common/views/dashboard/certificates/categories/useCertificateCategoryViewModel.ts` | `frontend/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T09 | `frontend/common/views/dashboard/certificates/categories/CertificateCategoryContainer.tsx`, `CertificateCategoryView.tsx` (switcher) | `frontend/views/AGENTS.md`, `app/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T10 | `frontend/common/views/dashboard/certificates/categories/components/CreateCategoryDialog.tsx`, `EditCategoryDialog.tsx`, `DeleteCategoryConfirmDialog.tsx`, `MoveTemplateToCategoryDialog.tsx`, `CategoryAvatar.tsx`, `ColorSwatchPicker.tsx`, `IconPicker.tsx`, `shared/constants/certificate-category-colors.ts`, `shared/constants/certificate-category-icons.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T11 | `frontend/common/views/dashboard/certificates/categories/components/CategoryPicker.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T12 | `frontend/desktop/views/dashboard/certificates/categories/components/CategoryTree.desktop.tsx`, `CategoryTreeNode.desktop.tsx`, `CategoryTreeDropIndicator.desktop.tsx`, `InlineEditableLabel.desktop.tsx`, `CategoryActionMenu.desktop.tsx`, `CategorySearchBar.desktop.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T13 | `frontend/desktop/views/dashboard/certificates/categories/components/TemplatePane.desktop.tsx`, `TemplatePaneColumns.desktop.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T14 | `frontend/desktop/views/dashboard/certificates/categories/certificateCategoryView.desktop.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T15 | `frontend/mobile/views/dashboard/certificates/categories/components/CategoryList.mobile.tsx`, `CategoryMobileNodeCard.mobile.tsx`, `CategoryMobileActionMenu.mobile.tsx`, `TemplateCardList.mobile.tsx`, `TemplateCardListItem.mobile.tsx`, `CategorySearchBar.mobile.tsx`, `certificateCategoryView.mobile.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| T16 | `app/(dashboard)/certificates/categories/page.tsx` | `app/AGENTS.md`, `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| T01 | `shared/locale/types/dashboard/certificates/categories.ts`, error types | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T02 | `shared/locale/ar/dashboard/certificates/categories.ts`, AR errors | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T03 | `shared/locale/en/dashboard/certificates/categories.ts`, EN errors | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T04 | `shared/locale/namespaces/.../categories.namespace.ts`, `translation.ts`, `message.ts`, `ar/messages.ts`, `en/messages.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T05 | `frontend/common/graphql/sharedDocuments/certificates/certificateCategory.documents.ts`, `frontend/common/graphql/sharedDocuments/certificates/index.ts` (modify) | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T06 | `frontend/common/stores/certificateCategoryStore.ts` | `frontend/common/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T07 | `frontend/common/views/dashboard/certificates/categories/types/index.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T08 | `frontend/common/views/dashboard/certificates/categories/useCertificateCategoryViewModel.ts` | `frontend/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T09 | `frontend/common/views/dashboard/certificates/categories/CertificateCategoryContainer.tsx`, `CertificateCategoryView.tsx` (switcher) | `frontend/views/AGENTS.md`, `app/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T10 | `frontend/common/views/dashboard/certificates/categories/components/CreateCategoryDialog.tsx`, `EditCategoryDialog.tsx`, `DeleteCategoryConfirmDialog.tsx`, `MoveTemplateToCategoryDialog.tsx`, `CategoryAvatar.tsx`, `ColorSwatchPicker.tsx`, `IconPicker.tsx`, `shared/constants/certificate-category-colors.ts`, `shared/constants/certificate-category-icons.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T11 | `frontend/common/views/dashboard/certificates/categories/components/CategoryPicker.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T12 | `frontend/desktop/views/dashboard/certificates/categories/components/CategoryTree.desktop.tsx`, `CategoryTreeNode.desktop.tsx`, `CategoryTreeDropIndicator.desktop.tsx`, `InlineEditableLabel.desktop.tsx`, `CategoryActionMenu.desktop.tsx`, `CategorySearchBar.desktop.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T13 | `frontend/desktop/views/dashboard/certificates/categories/components/TemplatePane.desktop.tsx`, `TemplatePaneColumns.desktop.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T14 | `frontend/desktop/views/dashboard/certificates/categories/certificateCategoryView.desktop.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T15 | `frontend/mobile/views/dashboard/certificates/categories/components/CategoryList.mobile.tsx`, `CategoryMobileNodeCard.mobile.tsx`, `CategoryMobileActionMenu.mobile.tsx`, `TemplateCardList.mobile.tsx`, `TemplateCardListItem.mobile.tsx`, `CategorySearchBar.mobile.tsx`, `certificateCategoryView.mobile.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| T16 | `app/(dashboard)/certificates/categories/page.tsx` | `app/AGENTS.md`, `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | T17 | (verification only — no file changes) | — | — |
 | T18 | (knowledge propagation — no file changes except inline comments) | `AGENTS.md` | — |
 
@@ -1252,7 +1252,7 @@ bun quality-gate
    - `AGENTS.md` root — logging, path aliases, i18n
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx`:
    - Container component wiring PageHeader + two-column body (left 30% `CategoryTree`, right 70% `CategoryDetailPanel`).
@@ -1290,7 +1290,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
    - `frontend/views/AGENTS.md`, `frontend/desktop/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create shared wrapper** `frontend/views/dashboard/cert/templates/categories/CategoryTree.tsx`:
    - ViewModel-style hook extracting tree data from Apollo (`categoryList` query for roots + lazy `categoryChildren` on expand) per §7.
@@ -1336,7 +1336,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templat
    - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 3. **Create** `frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx`:
    - **Category Info Card**: `IconPicker` (grid, read-only when `!canManage`), `InlineEditableLabel` name (double-click to edit), multiline description `TextField`, parent `Select` (nullable, excludes self+descendants per AC-08), active `Switch` (disabled for `isSystem`).
@@ -1475,7 +1475,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 
 1. **Read applicable AGENTS.md + instruction files**:
    - `test/ui/AGENTS.md` — component test conventions
-   - `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 
 2. **Create 4 test files** under `test/ui/components/cert/templates/categories/`:
    - **`CategoryManagementPage.test.tsx`**: PageHeader renders translated title + permission-gated Create button; two-column layout on desktop, stacked on mobile; empty-state card when no selection; reads store for loading/error.
@@ -1520,7 +1520,7 @@ bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/
 
 1. **Read applicable AGENTS.md + instruction files**:
    - `test/ui/AGENTS.md` — E2E test conventions
-   - `.github/instructions/tests.instructions.md`
+   - `.agents/instructions/tests.instructions.md`
 
 2. **Create 4 E2E spec files** under `test/ui/e2e/cert/templates/categories/`:
    - **`create-category.spec.ts`** — Open category page → click "Create Category" → fill name/description/parent/icon/color → save → tree refreshes showing new node → confirm URL unchanged (create stays on categories page).
@@ -1654,7 +1654,7 @@ bun quality-gate
 
 1. **Read applicable AGENTS.md + instruction files**:
    - `frontend/common/stores/AGENTS.md` — store conventions, Set serialization
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
    - `frontend/AGENTS.md`
 
 2. **Expand `CategoryState` interface** (additive to §12.5):
@@ -1708,7 +1708,7 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategorySto
 
 1. **Read applicable AGENTS.md + instruction files**:
    - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/desktop/AGENTS.md`
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 2. **Create `DragPreviewGhost.tsx`** (§13.1.4):
    - Props: `{ categoryName: string; icon: string; childCount: number }`
@@ -1755,7 +1755,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templat
 1. **Read applicable AGENTS.md + instruction files**:
    - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
    - `frontend/common/graphql/sharedDocuments/AGENTS.md`
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 2. **Add bulk GraphQL mutation documents** to `category-documents.ts` (§13.2.6/§13.16):
    - `BulkReorderCategoriesDocument` — `{ ids: [ID!]!, newParentId: ID, beforeId: ID, afterId: ID }`
@@ -1816,7 +1816,7 @@ bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/cert/
 
 1. **Read applicable AGENTS.md + instruction files**:
    - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 2. **Create `SkeletonTreeItem.tsx`** (§13.3.1):
    - Props: `{ depth: number }` — renders `Skeleton` at indentation `sx={{ ml: depth * 2 }}`
@@ -1911,7 +1911,7 @@ bun run scripts/health/sub-loop.ts shared/locale/dashboard/certificates/categori
 1. **Read applicable AGENTS.md + instruction files**:
    - `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
    - `frontend/common/hooks/AGENTS.md` (if exists)
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 2. **Create `useOnlineStatus.ts`** (§13.5.4):
    - Returns `{ isOnline: boolean }` — uses `navigator.onLine` + `window.addEventListener('online'/'offline')`
@@ -1972,7 +1972,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 
 1. **Read applicable AGENTS.md + instruction files**:
    - `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md`
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 2. **Install `react-window`** (if not already present):
    - `bun add react-window @types/react-window`
@@ -2027,7 +2027,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templat
 
 1. **Read applicable AGENTS.md + instruction files**:
    - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 2. **Create `highlightMatch.ts`** (§13.7.5):
    - Export `highlightMatch(text: string, term: string): ReactNode[]`
@@ -2137,7 +2137,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 
 1. **Read applicable AGENTS.md + instruction files**:
    - `frontend/mobile/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 2. **Mobile (< 768px)** — tree as accordion (§13.9.1):
    - `CategoryList.mobile.tsx`: MUI `Accordion` per root category — `AccordionSummary` with expand icon + name; `AccordionDetails` with child list (one level deep visible; tap child navigates deeper)
@@ -2240,7 +2240,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 1. **Read applicable AGENTS.md + instruction files**:
    - `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`
    - `frontend/common/graphql/sharedDocuments/AGENTS.md`
-   - `.github/instructions/frontend.instructions.md`
+   - `.agents/instructions/frontend.instructions.md`
 
 2. **Add GraphQL query** to `category-documents.ts` (§13.16):
    - `CategoryAuditLogQueryDocument` — `{ categoryId: ID! } → { id, categoryId, action, userId, timestamp, beforeData, afterData, user { id displayName avatarUrl } }`

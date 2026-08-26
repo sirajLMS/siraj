@@ -41,7 +41,7 @@
 - [x] 1. **Foundation — Service Worker (Primary Cache, Secure Contexts)**
   - [x] 1.1 Create `public/sw.js`
     - _Applicable AGENTS.md:_ `app/AGENTS.md`, `shared/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Create `public/sw.js` implementing:
       - `install` handler calling `self.skipWaiting()`.
@@ -55,14 +55,14 @@
       bun biome:check
       ```
       (SW file is not linted by repo ESLint — SW scope.)
-    - **Instruction Verification:** Validate against `app/AGENTS.md`, `shared/AGENTS.md`, `.github/instructions/frontend.instructions.md`.
+    - **Instruction Verification:** Validate against `app/AGENTS.md`, `shared/AGENTS.md`, `.agents/instructions/frontend.instructions.md`.
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/clientCache/outcome/1.1-sw-file-outcome.md`.
     - Update progress: Mark task 1.1 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-CACHE-SW_
   - [x] 1.2 Register Service Worker in `app/layout.tsx`
     - _Applicable AGENTS.md:_ `app/AGENTS.md`, `shared/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Modify `app/layout.tsx` `RootLayout`:
       - Add an inline `<script>` inside `<head>` immediately after `InitColorSchemeScript` and before the existing `<style>` tag.
@@ -77,7 +77,7 @@
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["app/layout.tsx"]}'
       ```
-    - **Instruction Verification:** Validate against `app/AGENTS.md`, `shared/AGENTS.md`, `.github/instructions/frontend.instructions.md`.
+    - **Instruction Verification:** Validate against `app/AGENTS.md`, `shared/AGENTS.md`, `.agents/instructions/frontend.instructions.md`.
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/clientCache/outcome/1.2-sw-registration-outcome.md`.
     - Update progress: Mark task 1.2 as `[x]` in `trackable-tasks.md`.
@@ -86,7 +86,7 @@
 - [x] 2. **Build ID Stamping — `next.config.ts`**
   - [x] 2.1 Add `resolveBuildId` + `generateBuildId` + env vars to `next.config.ts`
     - _Applicable AGENTS.md:_ `app/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Modify `next.config.ts`:
       - Add a top-level `resolveBuildId()` helper following the resolution order from Spec REQ-BUILD-ID:
@@ -103,7 +103,7 @@
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["next.config.ts"]}'
       ```
-    - **Instruction Verification:** Validate against `app/AGENTS.md`, `.github/instructions/frontend.instructions.md`.
+    - **Instruction Verification:** Validate against `app/AGENTS.md`, `.agents/instructions/frontend.instructions.md`.
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/clientCache/outcome/2.1-build-id-stamping-outcome.md`.
     - Update progress: Mark task 2.1 as `[x]` in `trackable-tasks.md`.
@@ -112,7 +112,7 @@
 - [x] 3. **Stable Namespace IDs — `defineNamespace` Overload**
   - [x] 3.1 Add ID overload to `shared/locale/namespaces/define-namespace.ts`
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Modify `shared/locale/namespaces/define-namespace.ts`:
       - Add an overload: `defineNamespace<TLabels>(id: string, config: NamespaceLoaderConfig<TLabels>): NamespaceHandle<TLabels>`.
@@ -127,14 +127,14 @@
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["shared/locale/namespaces/define-namespace.ts"]}'
       ```
-    - **Instruction Verification:** Validate against `shared/AGENTS.md`, `.github/instructions/frontend.instructions.md`.
+    - **Instruction Verification:** Validate against `shared/AGENTS.md`, `.agents/instructions/frontend.instructions.md`.
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/clientCache/outcome/3.1-define-namespace-id-overload-outcome.md`.
     - Update progress: Mark task 3.1 as `[x]` in `trackable-tasks.md`.
     - _Requirements: Spec REQ-FALLBACK-IDB, REQ-NO-REGRESSION_
   - [x] 3.2 Pass stable string IDs to all `*.namespace.ts` files (mechanical rollout)
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Spawn **Parent Orchestration Subagent** to manage the mechanical rollout across `shared/locale/namespaces/**/*.namespace.ts` (~109 files).
     - Parent Orchestrator creates and manages tracking state file `.ai/plans/clientCache/cache-rollout-tracker.json`.
@@ -156,7 +156,7 @@
 - [x] 4. **Build-Time Snapshot Codegen — `scripts/locale-snapshots.ts`**
   - [x] 4.1 Create `scripts/locale-snapshots.ts`
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `backend/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/backend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/backend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Create `scripts/locale-snapshots.ts` that:
       - Walks `shared/locale/namespaces/**/*.namespace.ts` to enumerate every `(namespaceId, locale)` pair (using the stable IDs from task 3.x).
@@ -173,7 +173,7 @@
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["scripts/locale-snapshots.ts"]}'
       ```
-    - **Instruction Verification:** Validate against `shared/AGENTS.md`, `backend/AGENTS.md`, `.github/instructions/backend.instructions.md`.
+    - **Instruction Verification:** Validate against `shared/AGENTS.md`, `backend/AGENTS.md`, `.agents/instructions/backend.instructions.md`.
     - Run the script manually: `bun run scripts/locale-snapshots.ts` and verify `.next-locale-snapshots-version` + snapshot files are created.
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/clientCache/outcome/4.1-snapshot-codegen-outcome.md`.
@@ -181,7 +181,7 @@
     - _Requirements: Spec REQ-SNAPSHOTS_
   - [x] 4.2 Wire `locale:snapshots` + `prebuild` scripts into `package.json`
     - _Applicable AGENTS.md:_ (root `AGENTS.md` only — `package.json` is project-level config)
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Modify `package.json`:
       - Add `"locale:snapshots": "bun run scripts/locale-snapshots.ts"` to `scripts`.
@@ -191,7 +191,7 @@
       bun biome:check
       ```
       (`package.json` is not linted by ESLint.)
-    - **Instruction Verification:** Validate against `.github/instructions/frontend.instructions.md`.
+    - **Instruction Verification:** Validate against `.agents/instructions/frontend.instructions.md`.
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/clientCache/outcome/4.2-script-wiring-outcome.md`.
     - Update progress: Mark task 4.2 as `[x]` in `trackable-tasks.md`.
@@ -200,7 +200,7 @@
 - [x] 5. **IndexedDB Fallback Module — `shared/locale/client/snapshot-cache.ts`**
   - [x] 5.1 Create the snapshot cache module
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `frontend/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Create `shared/locale/client/snapshot-cache.ts` implementing:
       - Open IndexedDB database `siraj-locale-snapshots` (version 1) with object store `snapshots` keyed by `${BUILD_ID}:${namespaceId}:${locale}`.
@@ -221,7 +221,7 @@
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["shared/locale/client/snapshot-cache.ts"]}'
       ```
-    - **Instruction Verification:** Validate against `shared/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`.
+    - **Instruction Verification:** Validate against `shared/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`.
     - Write unit tests for the reviver, read/write/wipe logic, and the try/catch fallback (mock `indexedDB`).
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/clientCache/outcome/5.1-snapshot-cache-module-outcome.md`.
@@ -231,7 +231,7 @@
 - [x] 6. **Integration — Wire fallback into `translation-cache-store.ts`**
   - [x] 6.1 Integrate the IndexedDB snapshot branch into `startNamespaceLoad`
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `frontend/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Modify `shared/locale/client/translation-cache-store.ts`:
       - Compute a module-scope boolean:
@@ -257,7 +257,7 @@
         -H "Content-Type: application/json" \
         -d '{"id":"verify","files":["shared/locale/client/translation-cache-store.ts"]}'
       ```
-    - **Instruction Verification:** Validate against `shared/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`.
+    - **Instruction Verification:** Validate against `shared/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`.
     - Write integration test: mock `useSnapshotFallback = true`, verify snapshot hit bypasses `config.load[locale]()`; verify miss falls through; verify writeSnapshot is called after `config.load` resolves.
     - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings).
     - Write outcome file: `.ai/plans/clientCache/outcome/6.1-integration-outcome.md`.
@@ -267,7 +267,7 @@
 - [x] 7. **End-to-End Smoke Verification**
   - [x] 7.1 HTTPS Smoke — Service Worker Cache Path
     - _Applicable AGENTS.md:_ `app/AGENTS.md`, `shared/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Run `bun run build` — confirm `.next-locale-snapshots-version` generated, `NEXT_PUBLIC_BUILD_ID` stamped, and snapshot JSON files emitted.
     - Start production server (`bun start` or `vercel preview`).
@@ -281,7 +281,7 @@
     - _Requirements: Spec REQ-CACHE-SW_
   - [x] 7.2 HTTP Staging Smoke — IndexedDB Fallback Path
     - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `frontend/AGENTS.md`
-    - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+    - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
     - Read all existing files in `.ai/plans/clientCache/outcome/`.
     - Build with `NODE_ENV=production bun run build` and serve on plain HTTP: `bun start -- -H 0.0.0.0` (or `next start -H 0.0.0.0`).
     - Open DevTools → Application → Service Workers → confirm NO service worker registers (`window.isSecureContext === false`).
@@ -295,7 +295,7 @@
 
 - [x] 8. **Knowledge Propagation & Documentation (MANDATORY Final Task)**
   - _Applicable AGENTS.md:_ `shared/AGENTS.md`, `app/AGENTS.md`
-  - _Applicable Instructions:_ `.github/instructions/frontend.instructions.md`
+  - _Applicable Instructions:_ `.agents/instructions/frontend.instructions.md`
   - Read all outcome files in `.ai/plans/clientCache/outcome/` to synthesize all learnings from the plan.
   - Update [shared/AGENTS.md](../../../shared/AGENTS.md) with a new "Browser translation cache" section explaining:
     - SW caches all static chunks including locale leaves via `caches.open("siraj-static-chunks-v1")`.

@@ -194,7 +194,7 @@ These files are NOT `.mobile.tsx`/`.desktop.tsx`; their cross-tier dynamic `impo
 
 ### MUI v9 Compliance
 
-**MANDATORY:** Follow all MUI v9 breaking changes documented in `frontend/AGENTS.md` and `.github/instructions/frontend.instructions.md`.
+**MANDATORY:** Follow all MUI v9 breaking changes documented in `frontend/AGENTS.md` and `.agents/instructions/frontend.instructions.md`.
 
 **Key Rules (repeated for emphasis):**
 - **NEVER** use style props directly on MUI components (`fontWeight`, `textAlign`, `mb`, `mt`, `p`, `display`, `gap`, `alignItems`, `justifyContent`, `flexWrap`, `component`, etc.)
@@ -214,7 +214,7 @@ These files are NOT `.mobile.tsx`/`.desktop.tsx`; their cross-tier dynamic `impo
 
 ### Testing
 
-**MANDATORY:** Follow all test rules in `.github/instructions/tests.instructions.md` and `tests.instructions.md`.
+**MANDATORY:** Follow all test rules in `.agents/instructions/tests.instructions.md` and `tests.instructions.md`.
 
 **UI Component Test Rules:**
 - **ALWAYS** write component tests in `test/ui/components/` mirroring the component structure

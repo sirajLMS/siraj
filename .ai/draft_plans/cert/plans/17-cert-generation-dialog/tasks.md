@@ -640,7 +640,7 @@ T20 ──► T21 (Integration: wire wizard into cert list)
 - [ ] Store creation pattern: `create<GenerationState>()(...)` without persist (ephemeral wizard state)
 - [ ] Export typed selector hooks: `useGenerationStep()`, `useSelectedTemplateId()`, `useRecipients()`, `useVariableMapping()`, `useGenerationOptions()`, `useIsGenerating()`, `useGenerationProgress()`, `useGenerationLog()`
 - [ ] Run quality loop
-- [ ] Verify against: `frontend/stores/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/stores/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-17.9 (state preservation across navigation)
 - **Files created**: `frontend/stores/useGenerationStore.ts`
 - **Dependencies**: Plan 2 (types — TemplateVariable, Recipient)
@@ -1018,7 +1018,7 @@ T20 ──► T21 (Integration: wire wizard into cert list)
 - [ ] Update `frontend/AGENTS.md` with 4-step wizard pattern reference
 - [ ] Update `frontend/views/AGENTS.md` with variable mapping + CSV upload patterns
 - [ ] Update root `AGENTS.md` Important References section with new doc
-- [ ] Update `.github/instructions/frontend.instructions.md` if new conventions emerged (e.g., drag-drop zone pattern, auto-scroll log pattern)
+- [ ] Update `.agents/instructions/frontend.instructions.md` if new conventions emerged (e.g., drag-drop zone pattern, auto-scroll log pattern)
 - [ ] Mark all Phase 6 + Phase 7 tasks as `[x]` in this file
 - **Requirements**: Feature 6 (Outcome Knowledge Base)
 - **Files created**: `docs/frontend/certificate-generation-wizard.md`, outcome file
@@ -1090,7 +1090,7 @@ Round 4 tasks implement the production hardening features described in the Round
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/certificates/generate/CsvColumnMapperDialog.tsx --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md` and verify all rules followed
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md` and verify all rules followed
 - [ ] Import types from `backend/types/csvMapping.types.ts` — create this file with `ColumnMapping`, `CsvMappingValidation` interfaces
 - [ ] **Dependencies**: T-R4-08 (store slice), T18 (CsvUploadZone from Phase 6)
 - [ ] **Estimated**: 8h
@@ -1142,7 +1142,7 @@ Round 4 tasks implement the production hardening features described in the Round
   ~/.bun/bin/bun run scripts/health/sub-loop.ts \
     frontend/views/dashboard/cert/certificates/generate/DuplicateDetectionPanel.tsx --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`
 - [ ] Create `backend/types/duplicateDetection.types.ts` with `DuplicateGroup`, `DuplicateResolution` types
 - [ ] **Dependencies**: T-R4-09 (store slice), T17 (Step2RecipientSelection)
 - [ ] **Estimated**: 5h
@@ -1202,7 +1202,7 @@ Round 4 tasks implement the production hardening features described in the Round
   ~/.bun/bin/bun run scripts/health/sub-loop.ts \
     frontend/views/dashboard/cert/certificates/generate/RecipientValidationPanel.tsx --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`
 - [ ] Create `backend/types/recipientValidation.types.ts` with `RowValidation`, `ValidationError` types
 - [ ] **Dependencies**: T-R4-10 (store slice), T17
 - [ ] **Estimated**: 6h
@@ -1271,7 +1271,7 @@ Round 4 tasks implement the production hardening features described in the Round
   ~/.bun/bin/bun run scripts/health/sub-loop.ts \
     backend/types/generationWebSocket.types.ts --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `frontend/stores/AGENTS.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`, `frontend/stores/AGENTS.md`
 - [ ] **Dependencies**: T19, T-R4-11 (store slice)
 - [ ] **Estimated**: 6h
 
@@ -1308,7 +1308,7 @@ Round 4 tasks implement the production hardening features described in the Round
   ~/.bun/bin/bun run scripts/health/sub-loop.ts \
     backend/types/failureRecovery.types.ts --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `backend/types/AGENTS.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`, `backend/types/AGENTS.md`
 - [ ] **Dependencies**: T-R4-07, T-R4-12 (store slice)
 - [ ] **Estimated**: 5h
 
@@ -1386,7 +1386,7 @@ Round 4 tasks implement the production hardening features described in the Round
     ~/.bun/bin/bun run scripts/health/sub-loop.ts "$f" --lifecycle codescene
   done
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `backend.instructions.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`, `backend.instructions.md`
 - [ ] After GraphQL schema changes: `bun run generate:gqlSchema && bun codegen`
 - [ ] Create `backend/types/generationQueue.types.ts` with `GenerationJob`, `JobStatus`, `JobPriority` types
 - [ ] **Dependencies**: T-R4-13 (store slice), T19, T-R4-07
@@ -1445,7 +1445,7 @@ Round 4 tasks implement the production hardening features described in the Round
     ~/.bun/bin/bun run scripts/health/sub-loop.ts "$f" --lifecycle codescene
   done
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `backend.instructions.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`, `backend.instructions.md`
 - [ ] After GraphQL schema changes: `bun run generate:gqlSchema && bun codegen`
 - [ ] **Dependencies**: T-R4-14 (store slice), T19
 - [ ] **Estimated**: 6h
@@ -1495,7 +1495,7 @@ Round 4 tasks implement the production hardening features described in the Round
   ~/.bun/bin/bun run scripts/health/sub-loop.ts \
     frontend/views/dashboard/cert/certificates/generate/PreFlightCheckDialog.tsx --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`
 - [ ] Create `backend/types/preFlight.types.ts` with `PreFlightCheck` interface
 - [ ] **Dependencies**: T-R4-15 (store slice), T19
 - [ ] **Estimated**: 5h
@@ -1525,7 +1525,7 @@ Round 4 tasks implement the production hardening features described in the Round
   ~/.bun/bin/bun run scripts/health/sub-loop.ts \
     frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`
 - [ ] Create `backend/types/batchControl.types.ts` with `BatchConfig`, `BatchGroup` types
 - [ ] **Dependencies**: T-R4-07, T-R4-16 (store slice)
 - [ ] **Estimated**: 5h
@@ -1568,7 +1568,7 @@ Round 4 tasks implement the production hardening features described in the Round
     ~/.bun/bin/bun run scripts/health/sub-loop.ts "$f" --lifecycle codescene
   done
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`
 - [ ] **Dependencies**: T14–T21 (all wizard + step components), T-R4-07
 - [ ] **Estimated**: 6h
 
@@ -1604,7 +1604,7 @@ Round 4 tasks implement the production hardening features described in the Round
     ~/.bun/bin/bun run scripts/health/sub-loop.ts "$f" --lifecycle codescene
   done
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`
 - [ ] **Dependencies**: T14–T21, T-R4-07
 - [ ] **Estimated**: 5h
 
@@ -1636,7 +1636,7 @@ Round 4 tasks implement the production hardening features described in the Round
   ~/.bun/bin/bun run scripts/health/sub-loop.ts \
     frontend/views/dashboard/cert/certificates/generate/csvParseWorker.ts --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`
 - [ ] Create `backend/types/performance.types.ts` with `PerformanceMetric` interface
 - [ ] **Dependencies**: T-R4-18 (store slice), T18 (CSV)
 - [ ] **Estimated**: 5h
@@ -1716,7 +1716,7 @@ Round 4 tasks implement the production hardening features described in the Round
   ```bash
   ~/.bun/bin/bun run scripts/health/sub-loop.ts frontend/stores/useGenerationStore.ts --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `.github/instructions/frontend.instructions.md`, `frontend/stores/AGENTS.md`
+- [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`, `frontend/stores/AGENTS.md`
 - [ ] **Dependencies**: T14 (store from Phase 6), all T-R4-01 through T-R4-18
 - [ ] **Estimated**: 4h
 
@@ -1845,7 +1845,7 @@ Round 4 tasks implement the production hardening features described in the Round
   - Zustand slice composition pattern for large stores
   - Mock store pattern for Round 4 state
 - [ ] Update root `AGENTS.md` Important References section with Round 4 additions
-- [ ] Update `.github/instructions/frontend.instructions.md` with new conventions:
+- [ ] Update `.agents/instructions/frontend.instructions.md` with new conventions:
   - HTML5 Drag-and-Drop API pattern (no external library)
   - Web Worker for CPU-intensive parsing pattern
   - aria-live region pattern for progress announcements

@@ -11,6 +11,7 @@ import { logger } from "@/frontend/common/lib/logger";
 import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/common/lib/safeRedirect";
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import { parseEnvConfigBoolean } from "@/shared/constants/features/sidebarFeatures.constants";
 import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
 const MAX_FRONTEND_RETRIES = 2;
@@ -100,7 +101,6 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
   const [isRetrying, setIsRetrying] = useState(false);
   const redirectedRef = useRef(false);
   const retryCountRef = useRef(0);
-  const [prevAuthError, setPrevAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || redirectedRef.current) {
@@ -119,12 +119,11 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
     globalThis.location.replace(targetUrl);
   }, [isAuthenticated, searchParams]);
 
-  if (authError !== prevAuthError) {
-    setPrevAuthError(authError);
+  useEffect(() => {
     if (authError) {
       setLoginResult({ type: "error", message: authError });
     }
-  }
+  }, [authError]);
 
   const performLoginRef = useRef<(email: string, password: string) => Promise<boolean>>(async () => false);
 
@@ -214,7 +213,7 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
     }
   };
 
-  const isDemo = Boolean(process.env.NEXT_PUBLIC_IS_DEMO);
+  const isDemo = parseEnvConfigBoolean(process.env.NEXT_PUBLIC_IS_DEMO);
 
   return {
     labels,

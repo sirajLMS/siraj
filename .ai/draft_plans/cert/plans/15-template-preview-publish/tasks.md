@@ -96,10 +96,10 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificatePreview/index.ts --lifecycle codescene
   bun run scripts/health/sub-loop.ts test/ui/components/cert-preview/i18n.types.test.ts --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `shared/AGENTS.md` and `.github/instructions/frontend.instructions.md` before editing; confirm no forbidden imports from `@/frontend/**`, `@/backend/**`, `@/app/**`
+- [ ] **Instruction verification**: read `shared/AGENTS.md` and `.agents/instructions/frontend.instructions.md` before editing; confirm no forbidden imports from `@/frontend/**`, `@/backend/**`, `@/app/**`
 - [ ] **Testing**: add unit test in `test/ui/components/cert-preview/i18n.types.test.ts` verifying type signatures compile and pluralization functions execute correctly for EN/AR
 - [ ] **Knowledge propagation**: document i18n namespace structure in outcome file; add reference to `frontend/AGENTS.md` Important References
-- [ ] Verify against: `shared/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `shared/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: AC-I18N-01 (all keys in both EN/AR, pluralization follows Arabic rules, interpolation uses typed functions), REQ-PREVIEW-03, REQ-PUBLISH-01, REQ-ARCHIVE-02, REQ-REVERT-02, REQ-VERSION-01
 - **Files created**: `shared/locale/types/dashboard/certificatePreview/index.ts`, `shared/locale/namespaces/dashboard/certificatePreview/index.ts`, `shared/locale/en/dashboard/certificatePreview/index.ts`, `shared/locale/ar/dashboard/certificatePreview/index.ts`, `test/ui/components/cert-preview/i18n.types.test.ts`
 - **Files modified**: Main `Translations` type file, `shared/locale/types/index.ts` barrel (if needed)
@@ -125,10 +125,10 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   bun run scripts/health/sub-loop.ts frontend/common/graphql/test/preview.test.ts --lifecycle codescene
   bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/index.ts --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.github/instructions/frontend.instructions.md` before editing; confirm all documents include `id` field, no `useLazyQuery`, naming convention `{entityName}QueryDocument` / `{entityName}MutationDocument`
+- [ ] **Instruction verification**: read `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.agents/instructions/frontend.instructions.md` before editing; confirm all documents include `id` field, no `useLazyQuery`, naming convention `{entityName}QueryDocument` / `{entityName}MutationDocument`
 - [ ] **Testing**: add integration test in `frontend/common/graphql/test/preview.test.ts` verifying documents parse and match expected shape; verify `TemplateForPreviewQueryDocument` includes all required fields for preview rendering
 - [ ] **Knowledge propagation**: document GraphQL document structure in outcome file; add to `frontend/common/graphql/AGENTS.md` if new patterns emerged
-- [ ] Verify against: `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-06 (dedicated preview page fetches template), REQ-PUBLISH-02 (version snapshot), REQ-PUBLISH-03 (cache invalidation), REQ-ARCHIVE-01, REQ-ARCHIVE-03, REQ-REVERT-01, REQ-VERSION-01
 - **Files created**: `frontend/common/graphql/sharedDocuments/certificates/preview.documents.ts`, `frontend/common/graphql/test/preview.test.ts`
 - **Files modified**: `frontend/common/graphql/sharedDocuments/certificates/index.ts` (barrel re-exports)
@@ -153,11 +153,11 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   bun run scripts/health/sub-loop.ts test/ui/components/cert-preview/certPreviewStore.test.ts --lifecycle codescene
   bun run scripts/health/sub-loop.ts test/ui/components/cert-preview/certPublishStore.test.ts --lifecycle codescene
   ```
-- [ ] **Instruction verification**: read `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md` before editing; confirm NO `persist` middleware, state fields are properly typed, actions follow naming conventions
+- [ ] **Instruction verification**: read `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md` before editing; confirm NO `persist` middleware, state fields are properly typed, actions follow naming conventions
 - [ ] **Testing**: add unit tests in `test/ui/components/cert-preview/certPreviewStore.test.ts` and `certPublishStore.test.ts` verifying initial state, action mutations, and type safety
 - [ ] **Knowledge propagation**: document store patterns in outcome file; update `frontend/common/stores/AGENTS.md` if new conventions emerged
 - [ ] Run quality loop on both store files
-- [ ] Verify against: `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-STATE-01 (interaction states — store tracks all dialog/panel open state), REQ-PREVIEW-03 (testValues state), REQ-PREVIEW-04 (zoom state)
 - **Files created**: `frontend/common/stores/certPreviewStore.ts`, `frontend/common/stores/certPublishStore.ts`, `test/ui/components/cert-preview/certPreviewStore.test.ts`, `test/ui/components/cert-preview/certPublishStore.test.ts`
 - **Dependencies**: T01 (types from i18n), T02 (generated GraphQL types for TemplateVersionType)
@@ -185,11 +185,11 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - `formatCertificateCount(count: number): string` — pluralized count display
 - [ ] Create `frontend/common/views/dashboard/cert-preview/schemas/publishSchema.ts` — Zod schema for publish form validation (`versionNotes` optional string, max 500 chars)
 - [ ] **Quality loop per file**: run `bun tsgo`, `bun biome:check`, `bun run lint` (via lint queue client), `bun run codescene --file <file>` on each created file
-- [ ] **Instruction verification**: read `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md` before editing; confirm all types follow canonical patterns, utilities are pure functions, no side effects
+- [ ] **Instruction verification**: read `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md` before editing; confirm all types follow canonical patterns, utilities are pure functions, no side effects
 - [ ] **Testing**: add unit tests in `test/ui/components/cert-preview/sampleDataResolver.test.ts`, `previewElementRenderer.test.ts`, `versionUtils.test.ts`, `publishSchema.test.ts` verifying all utility functions work correctly with edge cases
 - [ ] **Knowledge propagation**: document utility function contracts in outcome file; add shared renderer reference to `frontend/AGENTS.md` Important References for Plan 11 sharing
 - [ ] Run quality loop on all utility files
-- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-02 (element positioning & rendering), REQ-PREVIEW-03 (variable resolution)
 - **Files created**: `frontend/common/views/dashboard/cert-preview/types/preview.types.ts`, `frontend/common/views/dashboard/cert-preview/types/previewLabelTypes.ts`, `frontend/common/views/dashboard/cert-preview/utils/sampleDataResolver.ts`, `frontend/common/views/dashboard/cert-preview/utils/previewElementRenderer.ts`, `frontend/common/views/dashboard/cert-preview/utils/versionUtils.ts`, `frontend/common/views/dashboard/cert-preview/schemas/publishSchema.ts`, `test/ui/components/cert-preview/sampleDataResolver.test.ts`, `test/ui/components/cert-preview/previewElementRenderer.test.ts`, `test/ui/components/cert-preview/versionUtils.test.ts`, `test/ui/components/cert-preview/publishSchema.test.ts`
 - **Dependencies**: T01 (i18n — label types reference translation keys), T02 (GraphQL types for TemplateElementType, TemplateVariableType), T03 (store types)
@@ -220,7 +220,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - `frontend/common/views/dashboard/cert-preview/components/EmptyTemplateState.tsx` — centered `InboxOutlined` icon with `previewCanvas.emptyTemplate` text
   - `frontend/common/views/dashboard/cert-preview/components/NoVariablesState.tsx` — "no variables" message
 - [ ] Run quality loop on all created files
-- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-06 (dedicated preview page), REQ-LAYOUT-01 (desktop layout), REQ-LAYOUT-02 (mobile layout), REQ-PERM-01 (permission flags), REQ-STATE-01 (all interaction states)
 - **Files created**: `usePreviewViewModel.ts`, `previewContainer.tsx`, `previewView.tsx`, `components/EmptyTemplateState.tsx`, `components/NoVariablesState.tsx`
 - **Dependencies**: T01 (i18n), T02 (GraphQL documents), T03 (Zustand stores), T04 (types & utils)
@@ -260,7 +260,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] Create `frontend/desktop/views/dashboard/cert-preview/components/DesktopZoomControls.tsx` — desktop-specific zoom sub-component for toolbar
 - [ ] Create `frontend/common/views/dashboard/cert-preview/hooks/usePreviewZoom.ts` — zoom/pan state hook (desktop: CSS transform-based zoom with `transform: scale(zoomLevel/100)`; handles clamp 10–200)
 - [ ] Run quality loop on all created files
-- [ ] Verify against: `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-01 (background display), REQ-PREVIEW-02 (element rendering), REQ-PREVIEW-04 (desktop zoom controls 10–200%), REQ-LAYOUT-01 (desktop split layout), AC-PREVIEW-04 (zoom in/out, fit-to-screen, actual size, pannable)
 - **Files created**: `CertificatePreviewCanvas.tsx`, element renderer sub-components, `PreviewToolbar.tsx`, `preview.desktop.tsx`, `DesktopZoomControls.tsx`, `usePreviewZoom.ts`
 - **Dependencies**: T05 (container + ViewModel)
@@ -285,7 +285,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] No rotation preview on mobile — rotation shown as text note (design T03 original)
 - [ ] Horizontal scroll for landscape templates
 - [ ] Run quality loop on all created files
-- [ ] Verify against: `frontend/mobile/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/mobile/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-05 (mobile preview scaled to screen width), REQ-LAYOUT-02 (mobile stacked layout, pinch zoom, bottom sheet, FAB, full-screen dialogs), AC-PREVIEW-05
 - **Files created**: `preview.mobile.tsx`, `MobileSampleDataSheet.tsx`, `MobileVersionDialog.tsx`, `MobileFloatingBar.tsx`
 - **Dependencies**: T06 (shared canvas + toolbar)
@@ -310,7 +310,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] Create `frontend/desktop/views/dashboard/cert-preview/components/DesktopSampleDataPanel.tsx` — right sidebar wrapper (360px fixed width, `overflowY: 'auto'`)
 - [ ] Create `frontend/common/views/dashboard/cert-preview/hooks/useSampleData.ts` — sample recipient selection + custom data management hook
 - [ ] Run quality loop on all created files
-- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-03 (variable preview with test values), REQ-PREVIEW-06a (sample data panel)
 - **Files created**: `SampleDataPanel.tsx`, `DesktopSampleDataPanel.tsx`, `useSampleData.ts`
 - **Dependencies**: T06 (desktop view rendering the panel), T07 (mobile view rendering the panel as bottom sheet)
@@ -332,7 +332,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] Add `PreviewModal` component at `frontend/common/views/dashboard/cert-preview/components/previewModal.tsx` — lightweight inline modal preview (Dialog `maxWidth="lg"` `fullWidth`) that reuses `CertificatePreviewCanvas` but does NOT include publish/archive/version history (design §7.5.5). Props: `templateId`, `open`, `onClose`
 - [ ] Back navigation: `PreviewToolbar` includes "Back to Editor" button → `router.push(`/certificates/templates/${templateId}/edit`)`
 - [ ] Run quality loop on all created/modified files
-- [ ] Verify against: `app/AGENTS.md`, root `AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `app/AGENTS.md`, root `AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-06 (dedicated preview page route, back navigation, metadata), AC-PREVIEW-06
 - **Files created**: `app/(dashboard)/certificates/templates/[templateId]/preview/page.tsx`, `frontend/common/views/dashboard/cert-preview/components/previewModal.tsx`
 - **Files modified**: Template editor page (Plan 11 — add "Preview" button), template list view (Plan 10 — add "Preview" menu item)
@@ -364,7 +364,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - Displays: template name, dimensions (W×H) using `publishDialog.dimensions` interpolation, element count (pluralized `publishDialog.elementCount`), variable count (pluralized `publishDialog.variableCount`), next version number
 - [ ] i18n keys: all from `validation.*` and `publishDialog.*` sections of the certificatePreview namespace (created in T01)
 - [ ] Run quality loop on all created files
-- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PUBLISH-01 (publish validation — collect-all), AC-PUBLISH-01 (all 5 validation checks fire; failures collected and displayed together; blocking stops publish)
 - **Files created**: `publishValidationChecker.ts`, `PublishValidationResults.tsx`, `PublishSummary.tsx`
 - **Dependencies**: T01 (i18n validation keys), T04 (types — ValidationErrorType, ValidationWarningType), T09 (page route for context)
@@ -393,7 +393,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - If `cacheInvalidated === false` → show `publishDialog.cacheInvalidationFailed` warning toast (SWE review #7 — missing i18n key added in T01)
 - [ ] Apollo cache update strategy (design §9.1): `cache.updateQuery` for `TemplateVersionsQueryDocument` (add new version to list), `cache.modify` on template's `status` to "published"
 - [ ] Run quality loop on all created/modified files
-- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PUBLISH-01 (publish validation), REQ-PUBLISH-02 (version snapshot created on publish), REQ-PUBLISH-03 (cache invalidation — `cacheInvalidated` in response), REQ-PUBLISH-04 (publish dialog with summary, notes, warnings, confirm/cancel), AC-PUBLISH-02, AC-PUBLISH-03, AC-PUBLISH-04, AC-STATUS-01 (idempotent)
 - **Files created**: `PublishDialog.tsx`
 - **Files modified**: `usePreviewViewModel.ts` (confirmPublish action)
@@ -417,7 +417,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - Teacher ownership: Archive button additionally gated by `isTemplateOwner` — teachers can only archive their own templates (SWE review #6)
 - [ ] After archive/unarchive: Archive button replaced by Unarchive button (and vice versa) in toolbar
 - [ ] Run quality loop on all created/modified files
-- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-ARCHIVE-01 (archive transitions published→archived, existing certs valid), REQ-ARCHIVE-02 (archive confirmation dialog), REQ-ARCHIVE-03 (unarchive transitions archived→published), AC-ARCHIVE-01, AC-ARCHIVE-02, AC-ARCHIVE-03
 - **Files created**: `ArchiveDialog.tsx`, `UnarchiveDialog.tsx`
 - **Files modified**: `usePreviewViewModel.ts` (confirmArchive, confirmUnarchive actions), `PreviewToolbar.tsx` (conditional archive/unarchive buttons)
@@ -438,7 +438,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - **Permission**: requires `CertificateTemplateView` permission
 - [ ] Integrate `downloadPreview` action in ViewModel: calls the appropriate download mechanism based on `downloadFormat` state field
 - [ ] Run quality loop on all created files
-- [ ] Verify against: `frontend/common/views/AGENTS.md`, `app/AGENTS.md`, root `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/views/AGENTS.md`, `app/AGENTS.md`, root `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-06b (download preview as PDF — server endpoint, returns blob), REQ-PREVIEW-06c (download preview as image — client-side canvas capture, PNG, no server round-trip), AC-PREVIEW-06b, AC-PREVIEW-06c
 - **Files created**: `DownloadPreviewButton.tsx`, `app/api/certificates/templates/[templateId]/preview-pdf/route.ts`
 - **Files modified**: `usePreviewViewModel.ts` (downloadPreview action)
@@ -468,7 +468,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - Revert button exposed when `canManage === true` and `isHistoricalVersion === true` (used by T15)
 - [ ] Integrate `loadVersionHistory` action in ViewModel: sets `selectedVersionId`, loads version data into preview canvas, sets `isHistoricalVersion = true`
 - [ ] Run quality loop on all created files
-- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-VERSION-01 (view all published versions with metadata — version number, timestamp, created-by, version notes), REQ-VERSION-02 (select version to preview historical state — read-only), AC-VERSION-01, AC-VERSION-02
 - **Files created**: `VersionHistory.tsx`, `VersionHistoryItem.tsx`
 - **Files modified**: `usePreviewViewModel.ts` (loadVersionHistory, closeVersionHistory actions)
@@ -491,7 +491,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] After revert: new version appears at top of version history (created-by current user, timestamp now)
 - [ ] Revert button in `VersionHistoryItem` triggers `RevertDialog` open (from T14)
 - [ ] Run quality loop on all created/modified files
-- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-REVERT-01 (revert to previous version — server creates new version with old content), REQ-REVERT-02 (revert confirmation dialog with warning), AC-REVERT-01, AC-REVERT-02, AC-STATUS-01 (revert is idempotent — multiple clicks do not create duplicate versions)
 - **Files created**: `RevertDialog.tsx`
 - **Files modified**: `usePreviewViewModel.ts` (confirmRevert action), `VersionHistoryItem.tsx` (revert button triggers dialog)
@@ -546,7 +546,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - Test: archive button visible when `templateStatus === "published"` and `canManage`
   - Test: unarchive button visible when `templateStatus === "archived"` and `canManage`
 - [ ] Run quality loop on all test files
-- [ ] Verify against: `test/ui/AGENTS.md`, `test/ui/components/AGENTS.md` (if exists), `.github/instructions/tests.instructions.md`
+- [ ] Verify against: `test/ui/AGENTS.md`, `test/ui/components/AGENTS.md` (if exists), `.agents/instructions/tests.instructions.md`
 - **Requirements**: All ACs (component-level verification of all preview, publish, archive, version, and revert acceptance criteria)
 - **Files created**: 8 test files in `test/ui/components/cert-preview/`
 - **Dependencies**: T01–T15 (all component tasks must be complete)
@@ -579,7 +579,7 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - Test: download preview as image → file download triggered (PNG)
   - Test: download preview as PDF → server endpoint returns blob → file download triggered (PDF)
 - [ ] Run quality loop on all test files
-- [ ] Verify against: `test/ui/AGENTS.md`, `test/ui/e2e/AGENTS.md` (if exists), `.github/instructions/tests.instructions.md`
+- [ ] Verify against: `test/ui/AGENTS.md`, `test/ui/e2e/AGENTS.md` (if exists), `.agents/instructions/tests.instructions.md`
 - **Requirements**: All ACs end-to-end (full user workflow verification)
 - **Prerequisite**: Run `bun run build:test` before E2E tests (produces `.next-test-prod`)
 - **Files created**: 5 spec files in `test/ui/e2e/cert-preview/`
@@ -607,15 +607,15 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] Update `frontend/AGENTS.md` with preview/publish patterns and document reference (tier-isolated views, ViewModel pattern, store pattern)
 - [ ] Update `frontend/views/AGENTS.md` with cert preview/publish specific patterns (desktop/mobile isolation, `labelsBySection` typing)
 - [ ] Update root `AGENTS.md` Important References section with new doc path
-- [ ] Update `.github/instructions/frontend.instructions.md` if new frontend conventions emerged (ViewModel pattern, collect-all validation)
+- [ ] Update `.agents/instructions/frontend.instructions.md` if new frontend conventions emerged (ViewModel pattern, collect-all validation)
 - [ ] Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
 - [ ] Run full test suite: `bun run test:ui` (component + E2E tests all pass)
 - [ ] Write outcome file: `.ai/plans/cert-template-preview-publish/outcome/T18-knowledge-propagation-outcome.md`
 - [ ] Update progress: Mark all tasks as `[x]` in this file
-- [ ] Verify against: root `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: root `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: Feature 6 (Outcome Knowledge Base), all REQs and ACs documented
 - **Files created**: `docs/frontend/certificate-template-preview.md`, outcome file
-- **Files modified**: `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, root `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- **Files modified**: `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, root `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Dependencies**: T17 (all tests pass), T01–T16 (all implementation tasks complete)
 - **Estimated**: 4h
 
@@ -644,8 +644,8 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] **React 19 compliance**: no `FormEvent`; use `React.SyntheticEvent<HTMLFormElement>` if any form
 - [ ] **Path aliases**: all imports use `@/` prefix (e.g. `@/frontend/views/dashboard/cert/templates/preview/PreviewCanvas`)
 - [ ] **Quality loop per file**: run `bun tsgo`, `bun biome:check`, lint queue client for the file, `bun run codescene --file <file>`; fix all errors before proceeding
-- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md` before editing; confirm desktop/mobile isolation, MUI v9 rules, ViewModel pattern
-- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md` before editing; confirm desktop/mobile isolation, MUI v9 rules, ViewModel pattern
+- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-06 (dedicated preview page with template name + back to editor), design §12.1
 - **Files created**: `frontend/views/dashboard/cert/templates/preview/TemplatePreviewPage.tsx`
 - **Files modified**: Preview page route (T09 already wires the route; this T19 is the enhanced page container that can be referenced from the same route)
@@ -683,8 +683,8 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] **No `useLazyQuery`**; any GraphQL is pre-fetched by the ViewModel
 - [ ] **MUI v9**: all style props via `sx={{ ... }}`; icon names use `*Outlined` suffix
 - [ ] **Quality loop per file** as in T19
-- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`; confirm no forbidden style props
-- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`; confirm no forbidden style props
+- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-01 (background image at template dimensions), REQ-PREVIEW-02 (all element types positioned), REQ-PREVIEW-04 (zoom), design §12.2
 - **Files created**: `frontend/views/dashboard/cert/templates/preview/PreviewCanvas.tsx`
 - **Files modified**: none (composed by T19)
@@ -724,8 +724,8 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] **MUI v9**: `Select` uses `inputProps` via `sx` (no direct `fontFamily` etc. on `Select`); dialog uses `sx` everywhere
 - [ ] **Path aliases**: import `SampleData` + built-in profiles from the sibling file using `@/` prefix
 - [ ] **Quality loop per file** as in T19
-- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`; confirm MUI v9 Select usage and dialog accessibility
-- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`; confirm MUI v9 Select usage and dialog accessibility
+- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-03 (variable test values update preview in real-time), design §12.3
 - **Files created**: `frontend/views/dashboard/cert/templates/preview/SampleDataSelector.tsx`, `frontend/views/dashboard/cert/templates/preview/sampleDataProfiles.ts` (built-in profiles + types)
 - **Files modified**: none
@@ -759,8 +759,8 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] i18n: table headers use existing `sampleData.*` keys; column header labels from i18n
 - [ ] **MUI v9**: `Table` uses `sx` on `TableContainer` / `TableHead` / `TableBody` / `TableCell`; no bare `fontSize` etc. on table cells — use `sx={{ fontSize: 14 }}` if needed
 - [ ] **Quality loop per file** as in T19
-- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`; confirm MUI Table + Chip pattern
-- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`; confirm MUI Table + Chip pattern
+- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-03 (real-time override), design §12.4
 - **Files created**: `frontend/views/dashboard/cert/templates/preview/VariableOverridePanel.tsx`
 - **Files modified**: none
@@ -802,8 +802,8 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] **MUI v9**: all style props via `sx`; icons use `*Outlined` suffix; `LoadingButton` is from `@mui/lab/LoadingButton`
 - [ ] **React 19**: form submission uses `React.SyntheticEvent<HTMLFormElement>` if any (verbatim from AGENTS.md)
 - [ ] **Quality loop per file** as in T19
-- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`; confirm Stepper + LoadingButton + AlertDialog pattern
-- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`; confirm Stepper + LoadingButton + AlertDialog pattern
+- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PUBLISH-01 (validation dialog), REQ-PUBLISH-02 (version notes + active toggle), AC-PUBLISH-02 (validation errors displayed together), design §12.5
 - **Files created**: `frontend/views/dashboard/cert/templates/publish/PublishDialog.tsx`
 - **Files modified**: none
@@ -840,8 +840,8 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] **MUI v9**: `Timeline`, `TimelineItem`, `TimelineContent`, `TimelineDot` — all styling via `sx`; icons use `*Outlined` suffix; no style props directly on `TimelineContent` (use `sx`)
 - [ ] **Path aliases**: stores + components imported via `@/` prefix
 - [ ] **Quality loop per file** as in T19
-- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`; confirm MUI Timeline API and dialog accessibility
-- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`; confirm MUI Timeline API and dialog accessibility
+- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-VERSION-01 (version history query), REQ-VERSION-02 (preview historical version), AC-VERSION-01, AC-VERSION-02, design §12.6
 - **Files created**: `frontend/views/dashboard/cert/templates/publish/VersionHistoryPanel.tsx`
 - **Files modified**: none
@@ -869,8 +869,8 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] **MUI v9**: `Grid`, `List`, `ListItem`, `ListItemText`, `ListItemIcon` — all styling via `sx`; color tokens via `theme.palette.<semantic>.main`/`contrastText`; no hardcoded colors (per `frontend/THEME_PALETTE.md`)
 - [ ] **Path aliases**: import the diff utility + stores via `@/` prefix
 - [ ] **Quality loop per file** as in T19
-- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`; confirm Grid/List usage and RTL support
-- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`; confirm Grid/List usage and RTL support
+- [ ] Verify against: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-VERSION-03 (fast visual diff), design §12.7
 - **Files created**: `frontend/views/dashboard/cert/templates/publish/VersionDiffView.tsx`, `frontend/views/dashboard/cert/templates/publish/versionDiffUtils.ts`
 - **Files modified**: none
@@ -905,8 +905,8 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - `openDiff` / `closeDiff` lifecycle
   - Mock Apollo client (verify no `useLazyQuery`, use `MockedProvider` or direct client mock)
 - [ ] **Quality loop per file** on the 3 store files + barrel
-- [ ] **Instruction verification**: read `frontend/common/stores/AGENTS.md`, `.github/instructions/frontend.instructions.md`; confirm no `persist`, GraphQL types import path, no `useLazyQuery`
-- [ ] Verify against: `frontend/common/stores/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] **Instruction verification**: read `frontend/common/stores/AGENTS.md`, `.agents/instructions/frontend.instructions.md`; confirm no `persist`, GraphQL types import path, no `useLazyQuery`
+- [ ] Verify against: `frontend/common/stores/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: all §12 components depend on these stores; design §12.8.1 / §12.8.2 / §12.8.3
 - **Files created**: `frontend/common/stores/certVersionStore.ts`
 - **Files modified**: `frontend/common/stores/certPreviewStore.ts` (extend per §12.8.1), `frontend/common/stores/certPublishStore.ts` (extend per §12.8.2), barrel exports
@@ -988,9 +988,9 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - No `persist` middleware used (Verify with `expect(`store` to not have `persist` keys)
 
 - [ ] Mock Apollo for all tests with `MockedProvider` (per `test/ui/components/` conventions); mock `window.print`, `localStorage` (Happy DOM provides it but guard edge cases), `matchMedia` for `useMediaQuery`
-- [ ] **Instruction verification**: read `test/ui/AGENTS.md`, `.github/instructions/tests.instructions.md`; follow existing test conventions (mock stores, Apollo mocks, no real network)
+- [ ] **Instruction verification**: read `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`; follow existing test conventions (mock stores, Apollo mocks, no real network)
 - [ ] **Quality loop per file**: run `bun tsgo`, `bun biome:check`, lint queue client, `codescene --file` on each of the 8 test files
-- [ ] Verify against: `test/ui/AGENTS.md`, `.github/instructions/tests.instructions.md`
+- [ ] Verify against: `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`
 - **Requirements**: AC-PREVIEW-01..06, AC-PUBLISH-01..05, AC-VERSION-01..02, AC-REVERT-01..02, design §12.1–§12.8
 - **Files created**: 8 test files listed above (T27.1–T27.8)
 - **Files modified**: none
@@ -1054,9 +1054,9 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - Close the diff dialog; verify the v1 (or another) diff can be opened again cleanly
 
 - [ ] Mocking: tests run against the production-like server (build:test); use `localStorage` for the recently-used samples assertion where appropriate
-- [ ] **Instruction verification**: read `test/ui/AGENTS.md`, `.github/instructions/tests.instructions.md`; follow Playwright conventions (selectors via role/label; no flaky waits — use `page.getByRole` / `page.waitForURL`)
+- [ ] **Instruction verification**: read `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`; follow Playwright conventions (selectors via role/label; no flaky waits — use `page.getByRole` / `page.waitForURL`)
 - [ ] **Quality loop per file** on each of the 6 spec files
-- [ ] Verify against: `test/ui/AGENTS.md`, `.github/instructions/tests.instructions.md`
+- [ ] Verify against: `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`
 - **Requirements**: AC-PREVIEW-01..06, AC-PUBLISH-01..05, AC-VERSION-01..02, AC-REVERT-01..02, design §12.1–§12.8
 - **Files created**: 6 spec files listed above (T28.1–T28.6)
 - **Files modified**: none
@@ -1110,16 +1110,16 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - Side-by-side diff view (Grid 2-col + List with semantic-color rows, no hardcoded colors — `theme.palette.<semantic>`)
   - Note: localStorage recently-used samples pattern keyed by `templateId`
 - [ ] Update `frontend/views/AGENTS.md` with: cert-preview/publish tier-isolated paths under `frontend/views/dashboard/cert/templates/{preview,publish}/`; MUI Stepper wizard (PublishDialog); MUI Timeline usage; VersionDiffView Grid+List diff strategy
-- [ ] Update `.github/instructions/frontend.instructions.md` IF new conventions emerged (e.g. always key variable maps by `variableId`, not `name`; structured diff utility pattern) — do NOT rewrite existing rules
+- [ ] Update `.agents/instructions/frontend.instructions.md` IF new conventions emerged (e.g. always key variable maps by `variableId`, not `name`; structured diff utility pattern) — do NOT rewrite existing rules
 - [ ] Update root `AGENTS.md` Important References section with the new `docs/frontend/certificate-template-preview.md` section reference (only added, not replacing existing entries)
 - [ ] Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
 - [ ] Run relevant test suites: `bun run test:ui:components` (T27 component tests pass), `bun run test:ui:e2e` (T28 E2E tests pass) — only enhanced scope, do not regress T16/T17 tests
 - [ ] Write outcome file: `.ai/plans/cert-template-preview-publish/outcome/T30-knowledge-propagation-enhanced-outcome.md`
 - [ ] Update progress: Mark all T19–T30 tasks as `[x]` in this tasks.md file
-- [ ] Verify against: root `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Verify against: root `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: Feature 6 (Outcome Knowledge Base), all enhanced REQs and ACs documented
 - **Files created**: outcome file
-- **Files modified**: `docs/frontend/certificate-template-preview.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.github/instructions/frontend.instructions.md`, root `AGENTS.md`
+- **Files modified**: `docs/frontend/certificate-template-preview.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`, root `AGENTS.md`
 - **Dependencies**: T18 (Phase 5 — base knowledge propagation must be complete; we only extend it), T29 (quality loop green for all enhanced files), T27 (component tests green), T28 (E2E tests green)
 - **Estimated**: 4h
 
@@ -1277,14 +1277,14 @@ Fix all errors before proceeding to next task.
 
 | Layer | AGENTS.md | Instruction File |
 |---|---|---|
-| Frontend Views | `frontend/views/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend Common | `frontend/common/views/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend General | `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend Stores | `frontend/stores/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| Frontend Views | `frontend/views/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend Common | `frontend/common/views/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend General | `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend Stores | `frontend/stores/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
-| App Router | `app/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| Testing | `test/ui/AGENTS.md` | `.github/instructions/tests.instructions.md` |
+| App Router | `app/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| Testing | `test/ui/AGENTS.md` | `.agents/instructions/tests.instructions.md` |
 
 ---
 

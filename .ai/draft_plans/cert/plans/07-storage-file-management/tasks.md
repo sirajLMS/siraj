@@ -112,7 +112,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 - Read `backend/db/repo/AGENTS.md` (schema patterns)
 - Read `backend/AGENTS.md`
-- Read `.github/instructions/backend.instructions.md`
+- Read `.agents/instructions/backend.instructions.md`
 - Verify: junction tables follow the exact same shape as existing junctions (10 reference tables)
 - Verify: `onDelete: "cascade"` on BOTH foreign keys (file + entity)
 
@@ -158,7 +158,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 - Read `backend/types/AGENTS.md`
 - Read `backend/AGENTS.md`
-- Read `.github/instructions/backend.instructions.md`
+- Read `.agents/instructions/backend.instructions.md`
 - Verify: types use `$inferSelect` / `$inferInsert` from Drizzle (no hand-written interface duplicating schema)
 - Verify: `ValidReferenceTable` union is exhaustive — TypeScript will catch missing switch arms in `performJunctionInsert` after this change
 
@@ -219,7 +219,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Read `backend/db/repo/AGENTS.md`
 - Read root `AGENTS.md` (database testing critical rules: `queryDb(tx)` for reads, `tx ?? db` for writes)
 - Read `backend/AGENTS.md`
-- Read `.github/instructions/backend.instructions.md`
+- Read `.agents/instructions/backend.instructions.md`
 - Verify: `queryDb(tx)` pattern used for reads (stateless)
 - Verify: `tx ?? db` pattern used for writes (allows optional parent transaction)
 - Verify: `prepareStatement` is NOT used for dynamic-conditional queries (only for fixed-ID lookups)
@@ -301,7 +301,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 - Read `backend/services/AGENTS.md`
 - Read `backend/AGENTS.md`
-- Read `.github/instructions/backend.instructions.md`
+- Read `.agents/instructions/backend.instructions.md`
 - Verify: uses `import { logger } from "@/backend/lib/logger"` — NEVER `console.*`
 - Verify: all user-facing error messages use the i18n translation system (`getServerTranslations`)
 - Verify: uses `@/` import alias (never relative paths)
@@ -349,7 +349,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 - Read `backend/services/AGENTS.md`
 - Read `backend/AGENTS.md`
-- Read `.github/instructions/backend.instructions.md`
+- Read `.agents/instructions/backend.instructions.md`
 - Verify: existing access checks (users, teachers, parents) are NOT modified — only a new branch is added
 - Verify: super admin check is first (short-circuit)
 - Verify: localized error messages for denial
@@ -455,7 +455,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 - Read `app/AGENTS.md` (App Router conventions, API route patterns)
 - Read root `AGENTS.md` (logging: NEVER `console.*`, always `logger`)
-- Read `.github/instructions/frontend.instructions.md` (includes App Router rules)
+- Read `.agents/instructions/frontend.instructions.md` (includes App Router rules)
 - Verify: uses `import { logger } from "@/backend/lib/logger"` — NEVER `console.*`
 - Verify: `cronSecret` comparison uses constant-time comparison (not `===` if security concern is high — but matching existing pattern in the repo)
 - Verify: returning proper HTTP status codes (401 for auth fail, 200 for success/disabled, 500 for error)
@@ -588,5 +588,5 @@ This IS the quality loop — if any step fails, fix the offending file from the 
 
 ### Instruction Files to Read (Cumulative)
 
-- `.github/instructions/backend.instructions.md` (for all `backend/**` files)
-- `.github/instructions/frontend.instructions.md` (for `app/**` files, covers App Router)
+- `.agents/instructions/backend.instructions.md` (for all `backend/**` files)
+- `.agents/instructions/frontend.instructions.md` (for `app/**` files, covers App Router)

@@ -43,7 +43,7 @@ DEFAULT_INCLUDE_PATTERNS = (
     "backend/graphql/AGENTS.md,"
     "backend/services/AGENTS.md,"
     "frontend/common/graphql/AGENTS.md,"
-    ".github/instructions/backend.instructions.md"
+    ".agents/instructions/backend.instructions.md"
 )
 
 
@@ -81,16 +81,34 @@ All layers must use standard types from `backend/types/{entity}.types.ts`:
 
 ---
 
+## Non-Negotiable Execution Protocol for All Planned Fix Tasks
+1. **Per-File Quality Verification Loop (Immediate post-edit)**:
+   Whenever ANY file is modified during implementation, the executing agent MUST run:
+   ```bash
+   bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
+   ```
+   This executes `tsgo → oxlint → biome:check → lint:type-aware → check:duplicates → codescene --file` in strict progressive order, short-circuiting at the first failing check, and auto-discovering applicable `AGENTS.md` and `.agents/instructions/*.instructions.md`. Exit code 0 is mandatory.
+2. **Mandatory 5-Subtask Breakdown for Every Task (X.Y)**:
+   Every fix item in the plan MUST be broken down with:
+   - `- [ ] X.Y.QL **Quality Loop**: bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene (exit code 0)`
+   - `- [ ] X.Y.TE **Test Engineering**: Type-checking assertions (`tsgo`, type regression tests)`
+   - `- [ ] X.Y.SEC **Security & Tenancy Audit**: Verify database types do not expose sensitive internal attributes`
+   - `- [ ] X.Y.SR **Semantic Review**: Pre-completion gate (no service .types.ts, no local pothos types, canonical naming)`
+   - `- [ ] X.Y.IV **Instruction Verification**: Validate against auto-discovered AGENTS.md and .agents/instructions/backend.instructions.md`
+
+---
+
 ## Output Format & Plan Structure
 
 1. **Executive Summary**: Tally of type violations (Service .types.ts files, local Pothos types, naming non-compliance, duplicate types).
 2. **Findings Log**:
    `FINDING|[SEVERITY]|[FILE:LINE]|[RULE_VIOLATED]|[DESCRIPTION]|[REMEDIATION]`
 3. **# Type System Refactoring Plan**:
-   - `## Service .types.ts Elimination & Relocation` (exact mapping of files to move/delete)
-   - `## Pothos Resolver Type Externalization` (replacing local interfaces with `@/backend/types`)
-   - `## Canonical Naming Alignments` ({Entity}SelectType, {Entity}InsertType)
-   - `## Deduplication & Shared Type Unification`
+   - `## Non-Negotiable Execution Protocol` (Mandating `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` on every edit)
+   - `## Service .types.ts Elimination & Relocation` (exact mapping of files to move/delete, with mandatory 5 subtasks: QL, TE, SEC, SR, IV)
+   - `## Pothos Resolver Type Externalization` (replacing local interfaces with `@/backend/types`, with 5 subtasks)
+   - `## Canonical Naming Alignments` ({Entity}SelectType, {Entity}InsertType, with 5 subtasks)
+   - `## Deduplication & Shared Type Unification` (with 5 subtasks)
    - `## Files Changed Summary Table`
 """
 
@@ -98,7 +116,7 @@ All layers must use standard types from `backend/types/{entity}.types.ts`:
 def build_system_prompt() -> str:
     return f"""{EMBEDDED_TYPES_SKILL}
 
-Forensically audit the provided TypeScript types, schemas, and GraphQL operations for all architectural type violations. Produce a prioritized, actionable refactoring plan."""
+Forensically audit the provided TypeScript types, schemas, and GraphQL operations for all architectural type violations. Produce a prioritized, actionable refactoring plan with mandatory quality subloop and test engineering constraints."""
 
 
 def build_user_prompt(types_xml_content: str) -> str:
@@ -264,6 +282,13 @@ def main():
     parser.add_argument("--max-tokens", type=int, default=65536)
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--context-limit", type=int, default=1000000)
+    parser.add_argument(
+        "--thinking-level",
+        type=str,
+        choices=["low", "high", "max"],
+        default="max",
+        help="Thinking level for reasoning models (choices: low, high, max; default: max)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Dry run only")
 
     args = parser.parse_args()
@@ -338,8 +363,19 @@ def main():
     collected_chunks = []
 
     extra_body = {}
-    if "kimi" in resolved_model.lower() or "nemotron" in resolved_model.lower():
-        extra_body = {"chat_template_kwargs": {"enable_thinking": True}}
+    if any(k in resolved_model.lower() for k in ["kimi", "nemotron", "deepseek", "qwq", "think"]):
+        extra_body = {
+            "chat_template_kwargs": {
+                "enable_thinking": True,
+                "thinking_level": args.thinking_level,
+            }
+        }
+        if args.thinking_level == "max":
+            extra_body["reasoning_budget"] = 32768
+        elif args.thinking_level == "high":
+            extra_body["reasoning_budget"] = 16384
+        elif args.thinking_level == "low":
+            extra_body["reasoning_budget"] = 4096
 
     try:
         response = client.chat.completions.create(

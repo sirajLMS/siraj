@@ -115,7 +115,7 @@ bun run scripts/health/sub-loop.ts test/integration/communication/resend.integra
 bun run test:integration
 ```
 
-Instruction file for integration tests: `.github/instructions/tests.instructions.md` (when present).
+Instruction file for integration tests: `.agents/instructions/tests.instructions.md` (when present).
 
 ## Linting Rules
 

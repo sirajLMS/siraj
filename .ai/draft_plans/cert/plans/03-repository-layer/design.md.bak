@@ -686,7 +686,7 @@ Files created/modified in this plan must comply with:
 
 | File | Applies To |
 |---|---|
-| `.github/instructions/backend.instructions.md` | All `backend/**/*.ts` files |
+| `.agents/instructions/backend.instructions.md` | All `backend/**/*.ts` files |
 
 ### 13.3 Relevant Quality Commands
 

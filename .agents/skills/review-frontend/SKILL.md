@@ -85,8 +85,8 @@ repository. Follow these rules to avoid interference:
 
 | Instruction File | `applyTo` Pattern | Covers |
 |---|---|---|
-| `.github/instructions/frontend.instructions.md` | `frontend/**/*.ts, frontend/**/*.tsx, app/**/*.ts, app/**/*.tsx` | MUI v9, React 19, Next.js 16, Apollo, Zustand, theme, i18n, logging |
-| `.github/instructions/sonarqube_mcp.instructions.md` | `**/*` (all files) | SonarQube analysis rules |
+| `.agents/instructions/frontend.instructions.md` | `frontend/**/*.ts, frontend/**/*.tsx, app/**/*.ts, app/**/*.tsx` | MUI v9, React 19, Next.js 16, Apollo, Zustand, theme, i18n, logging |
+| `.agents/instructions/sonarqube_mcp.instructions.md` | `**/*` (all files) | SonarQube analysis rules |
 
 **When dispatching fix subagents**: Paste the relevant instruction file content into the subagent's prompt so it follows the rules.
 
@@ -620,8 +620,8 @@ If "adjust some fix approaches", loop back to the relevant issues. If "cancel fi
 
 | File Pattern | Instruction File | When to Load |
 |---|---|---|
-| `frontend/**/*.ts`, `frontend/**/*.tsx`, `app/**/*.ts`, `app/**/*.tsx` | `.github/instructions/frontend.instructions.md` | Before any frontend/app fix |
-| `**/*` | `.github/instructions/sonarqube_mcp.instructions.md` | Before SonarQube-related fixes |
+| `frontend/**/*.ts`, `frontend/**/*.tsx`, `app/**/*.ts`, `app/**/*.tsx` | `.agents/instructions/frontend.instructions.md` | Before any frontend/app fix |
+| `**/*` | `.agents/instructions/sonarqube_mcp.instructions.md` | Before SonarQube-related fixes |
 
 **Workflow for each fix:**
 1. Identify which files need editing

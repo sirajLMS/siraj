@@ -47,7 +47,7 @@ T01 (pgEnums) ──→ T02 (categories table) ──→ T03 (templates table)
    - `AGENTS.md` root — path alias conventions, Bun runtime note
 
 2. **Read applicable instruction files**:
-   - `.github/instructions/backend.instructions.md`
+   - `.agents/instructions/backend.instructions.md`
 
 3. **Append 11 certificate pgEnums** to the existing top-level **`backend/db/schema/enums.ts`** registry (DO NOT create a per-domain `backend/db/schema/certificates/enums.ts` file):
    - Register each via the canonical helper `createPgEnumFromEnum("snake_case_name", TsEnum)` imported from `@/backend/utils/db.utils`, where `TsEnum` is imported from `@/backend/enum/certificates` (these TS enums are created in Plan 02 / T01 of that plan; if Plan 02 is not yet complete, use placeholder TS enum imports and reconcile later — the TS enum is the single source of truth for PG values).

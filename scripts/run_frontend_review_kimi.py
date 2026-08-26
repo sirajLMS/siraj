@@ -42,7 +42,7 @@ DEFAULT_INCLUDE_PATTERNS = (
     "frontend/common/graphql/AGENTS.md,"
     "shared/AGENTS.md,"
     "app/AGENTS.md,"
-    ".github/instructions/frontend.instructions.md"
+    ".agents/instructions/frontend.instructions.md"
 )
 
 
@@ -89,16 +89,34 @@ You are an expert Frontend Architect and Code Reviewer auditing the Siraj LMS fr
 
 ---
 
+## Non-Negotiable Execution Protocol for All Planned Fix Tasks
+1. **Per-File Quality Verification Loop (Immediate post-edit)**:
+   Whenever ANY file is modified during implementation, the executing agent MUST run:
+   ```bash
+   bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
+   ```
+   This executes `tsgo → oxlint → biome:check → lint:type-aware → check:duplicates → codescene --file` in strict progressive order, short-circuiting at the first failing check, and auto-discovering applicable `AGENTS.md` and `.agents/instructions/*.instructions.md`. Exit code 0 is mandatory.
+2. **Mandatory 5-Subtask Breakdown for Every Task (X.Y)**:
+   Every fix item in the plan MUST be broken down with:
+   - `- [ ] X.Y.QL **Quality Loop**: bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene (exit code 0)`
+   - `- [ ] X.Y.TE **Test Engineering**: Author/expand frontend unit/component tests (Happy DOM)`
+   - `- [ ] X.Y.SEC **Security & Tenancy Audit**: Probe for client-side permission leaks, unescaped HTML, or sensitive state exposure`
+   - `- [ ] X.Y.SR **Semantic Review**: Pre-completion gate (no hardcoded colors, no direct MUI v9 style props, no raw strings)`
+   - `- [ ] X.Y.IV **Instruction Verification**: Validate against auto-discovered AGENTS.md and .agents/instructions/frontend.instructions.md`
+
+---
+
 ## Output Format & Plan Structure
 
 1. **Executive Summary**: Tally of findings by category (MUI v9, React 19, Apollo, Theme, i18n, Zustand).
 2. **Findings Log**:
    `FINDING|[SEVERITY]|[FILE:LINE]|[CATEGORY]|[DESCRIPTION]|[RECOMMENDED_FIX]`
 3. **# Frontend Refactoring Plan**:
-   - `## MUI v9 & React 19 Migration Fixes` (with exact line references and JSX diffs)
-   - `## Apollo Client & GraphQL Cache Normalization Fixes` (adding missing IDs, fixing hook imports)
-   - `## Theme Token & Hardcoded Color Replacements`
-   - `## i18n & Store Optimization Fixes`
+   - `## Non-Negotiable Execution Protocol` (Mandating `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` on every edit)
+   - `## MUI v9 & React 19 Migration Fixes` (with exact line references, JSX diffs, and mandatory 5 subtasks: QL, TE, SEC, SR, IV)
+   - `## Apollo Client & GraphQL Cache Normalization Fixes` (adding missing IDs, fixing hook imports, with 5 subtasks)
+   - `## Theme Token & Hardcoded Color Replacements` (with 5 subtasks)
+   - `## i18n & Store Optimization Fixes` (with 5 subtasks)
    - `## Files Changed Summary Table`
 """
 
@@ -106,7 +124,7 @@ You are an expert Frontend Architect and Code Reviewer auditing the Siraj LMS fr
 def build_system_prompt() -> str:
     return f"""{EMBEDDED_FRONTEND_SKILL}
 
-Forensically audit the provided frontend codebase for all MUI v9, React 19, Apollo v4, theme tokens, and i18n violations. Produce a prioritized, actionable refactoring plan."""
+Forensically audit the provided frontend codebase for all MUI v9, React 19, Apollo v4, theme tokens, and i18n violations. Produce a prioritized, actionable refactoring plan with mandatory quality subloop and test engineering constraints."""
 
 
 def build_user_prompt(frontend_xml_content: str) -> str:
@@ -271,6 +289,13 @@ def main():
     parser.add_argument("--max-tokens", type=int, default=65536)
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--context-limit", type=int, default=1000000)
+    parser.add_argument(
+        "--thinking-level",
+        type=str,
+        choices=["low", "high", "max"],
+        default="max",
+        help="Thinking level for reasoning models (choices: low, high, max; default: max)",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Dry run only")
 
     args = parser.parse_args()
@@ -345,8 +370,19 @@ def main():
     collected_chunks = []
 
     extra_body = {}
-    if "kimi" in resolved_model.lower() or "nemotron" in resolved_model.lower():
-        extra_body = {"chat_template_kwargs": {"enable_thinking": True}}
+    if any(k in resolved_model.lower() for k in ["kimi", "nemotron", "deepseek", "qwq", "think"]):
+        extra_body = {
+            "chat_template_kwargs": {
+                "enable_thinking": True,
+                "thinking_level": args.thinking_level,
+            }
+        }
+        if args.thinking_level == "max":
+            extra_body["reasoning_budget"] = 32768
+        elif args.thinking_level == "high":
+            extra_body["reasoning_budget"] = 16384
+        elif args.thinking_level == "low":
+            extra_body["reasoning_budget"] = 4096
 
     try:
         response = client.chat.completions.create(

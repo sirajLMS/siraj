@@ -10,7 +10,7 @@
 | Stakeholders | Backend, GraphQL, Frontend |
 | Related Docs | MASTER_ARCHITECTURE.md, siraj_analysis/02-types-enums-patterns.md, siraj_analysis/09-auth-permissions.md, cgvs_analysis/02-database-schema.md (Type System section), cgvs_analysis/07-auth-security-config.md (§12 Admin RBAC) |
 | AGENTS.md References | `backend/types/AGENTS.md`, `backend/enum/AGENTS.md`, `backend/AGENTS.md` (root), `shared/AGENTS.md` |
-| Instruction Files | `.github/instructions/backend.instructions.md` |
+| Instruction Files | `.agents/instructions/backend.instructions.md` |
 
 ---
 

@@ -148,7 +148,7 @@ Verification relies on the reviewer's diligence, not an automated check.
 
 ### 3.8 Instruction File Path Assumption Was Wrong
 
-The skill references `.agents/instructions/*.md` for instruction files, but this repo uses `.github/instructions/*.md`. Task 30.6 was marked N/A because the directory didn't exist at the expected path. The skill should auto-detect the instruction file directory.
+The skill references `.agents/instructions/*.md` for instruction files, but this repo uses `.agents/instructions/*.md`. Task 30.6 was marked N/A because the directory didn't exist at the expected path. The skill should auto-detect the instruction file directory.
 
 ### 3.9 Final Knowledge-Propagation Quality Check Was Left Pending
 
@@ -342,7 +342,7 @@ Or simpler: compare `git diff --name-only` against lint output to filter for fil
 
 ### 5.7 Auto-Detect Instruction File Directory
 
-The skill currently hardcodes `.agents/instructions/*.md`. Some repos use `.github/instructions/`. Add:
+The skill currently hardcodes `.agents/instructions/*.md`. Some repos use `.agents/instructions/`. Add:
 
 ```bash
 INSTRUCTIONS_DIR=$(find . -path '*/instructions/*.instructions.md' -type f | head -1 | xargs dirname | xargs dirname)

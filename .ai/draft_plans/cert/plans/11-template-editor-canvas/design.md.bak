@@ -3842,7 +3842,7 @@ These coordinate with `fillStrokeStore.gradientEditorActive` to ensure only one 
 
 **Per-file verification**: same loop as Plan 10 R5 §R5.9 — tsgo → biome → lint queue client → sub-loop.
 
-**Instruction files**: `.github/instructions/frontend.instructions.md`.
+**Instruction files**: `.agents/instructions/frontend.instructions.md`.
 
 **Cross-plan contracts**:
 - **Plan 10**: Imports `FillConfig`, `StrokeConfig`, `GradientValue`, `PatternDef`, `ColorStop`, `MeshPoint`, `BlendMode`, `GradientPreset`, `CachedFillStroke` from `@/frontend/common/stores/cert/fillStrokeTypes`.
@@ -4216,7 +4216,7 @@ When the property panel commits new params (after debounce), it calls `useCanvas
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 **Instruction files to read before working on Round 5 files**:
-- `.github/instructions/frontend.instructions.md` (all frontend files)
+- `.agents/instructions/frontend.instructions.md` (all frontend files)
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md` (view components)
 - `frontend/common/stores/AGENTS.md` (store modifications — `useCanvasStore`)
 - `frontend/common/graphql/AGENTS.md` (if any new GraphQL documents needed for effects field)
@@ -5751,7 +5751,7 @@ AR labels are **read by screen readers** — the live region must NOT spam; use 
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 **Instruction files**:
-- `.github/instructions/frontend.instructions.md` (all frontend)
+- `.agents/instructions/frontend.instructions.md` (all frontend)
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md` (views)
 - `frontend/stores/AGENTS.md` (store modifications — `useCanvasStore`)
 - `frontend/common/graphql/AGENTS.md` — **no GraphQL changes** in R5S (client-only); listed here for completeness only.
@@ -7503,7 +7503,7 @@ const textShadow = element.settings.textShadow
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 **Instruction files to read**:
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
 - `frontend/common/stores/AGENTS.md`
 
@@ -8081,7 +8081,7 @@ Double-click on the ruler corner (where horizontal + vertical meet) resets the r
 3. Lint via queue client: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"r5ctx-canvas-<file>","files":["<path>"]}'`
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files to read**: `.github/instructions/frontend.instructions.md` (all new files are frontend).
+**Instruction files to read**: `.agents/instructions/frontend.instructions.md` (all new files are frontend).
 
 **Cross-plan contracts**:
 - **Plan 10**: Plan 11 imports `useContextMenuService`, `ContextMenuItem`, `<ContextMenuHost>`, `SubmenuTrigger`, `contextMenuPaperSx`, `filterMenuItems`, `useMenuContextDescriptor`, and `useOutsideClickClose` from `@/frontend/views/dashboard/cert/templates/editor/contextMenus/*`. These are all created in Plan 10 §R5.
@@ -8495,7 +8495,7 @@ export interface CanvasElementBase {
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 **Instruction files to read before working on R5 files**:
-- `.github/instructions/frontend.instructions.md` (all frontend files)
+- `.agents/instructions/frontend.instructions.md` (all frontend files)
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md` (view components)
 - `frontend/common/stores/AGENTS.md` (store modifications)
 
@@ -9464,7 +9464,7 @@ When the eyedropper picks a color:
 
 **Per-file verification**: tsgo → biome → lint queue client → sub-loop.
 
-**Instruction files**: `.github/instructions/frontend.instructions.md`.
+**Instruction files**: `.agents/instructions/frontend.instructions.md`.
 
 **Cross-plan contracts**:
 - **Plan 10**: imports `ColorValue`, `EyedropperSampleSource`, `EyedropperSampleSize`, `useColorSystemStore` from `@/frontend/common/stores/cert/colorSystemTypes` and `@/frontend/common/stores/cert/colorSystemStore`. Plan 11 also imports `sampleColorAt` and the `SceneRenderer` from Plan 10's canvas render pipeline.

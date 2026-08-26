@@ -3718,8 +3718,8 @@ interface CanvasElement {
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 **Instruction files to read** before working on Round 4 files:
-- `.github/instructions/frontend.instructions.md` (all frontend files)
-- `.github/instructions/tests.instructions.md` (test files)
+- `.agents/instructions/frontend.instructions.md` (all frontend files)
+- `.agents/instructions/tests.instructions.md` (test files)
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md` (view components)
 - `frontend/common/stores/AGENTS.md` (store modifications)
 - `frontend/common/graphql/AGENTS.md` (if any new GraphQL documents needed)
@@ -4269,7 +4269,7 @@ setActiveStrokeLayerId: (id: string | null) => void;
 
 **Per-file verification**: tsgo → biome → lint queue client → sub-loop.
 
-**Instruction files**: `.github/instructions/frontend.instructions.md`
+**Instruction files**: `.agents/instructions/frontend.instructions.md`
 
 **Cross-plan contracts**:
 - **Plan 10**: imports `FillConfig`, `StrokeConfig`, and all sub-types from `@/frontend/common/stores/cert/fillStrokeTypes` (created by Plan 10 R5.8).
@@ -4582,7 +4582,7 @@ Append to `shared/locale/types/dashboard/certificates/templateEditor.ts` (the `c
 
 **Per-file verification**: tsgo → biome → lint queue client → sub-loop.
 
-**Instruction files**: `.github/instructions/frontend.instructions.md`
+**Instruction files**: `.agents/instructions/frontend.instructions.md`
 
 **Cross-plan contracts**:
 - **Plan 10**: imports `TransformOrigin` from `@/frontend/common/stores/cert/transformTypes` (Plan 11 R6.1 file) for the origin-selector type — single source of truth.
@@ -5968,7 +5968,7 @@ The color picker dialog reads from / writes to these store properties. When `ope
 
 **Per-file verification**: tsgo → biome → lint queue client → sub-loop.
 
-**Instruction files**: `.github/instructions/frontend.instructions.md`
+**Instruction files**: `.agents/instructions/frontend.instructions.md`
 
 **Cross-plan contracts**:
 - **Plan 10**: imports `ColorValue`, `ColorSpace`, `ColorPickerContext`, `HarmonyScheme`, `ColorProfile`, and all color conversion utilities from `@/frontend/common/stores/cert/colorSystemTypes.ts` (created by Plan 10 R5-CS store). Swatches store: `colorSystemStore` (Plan 10 R5-CS).
@@ -7364,7 +7364,7 @@ All keys MUST be implemented in both `shared/locale/en/.../templateEditor.ts` an
    ```
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
-**Instruction files**: `.github/instructions/frontend.instructions.md`.
+**Instruction files**: `.agents/instructions/frontend.instructions.md`.
 
 **Cross-plan contracts**:
 - **Plan 10**: imports `AlignAxis`, `AlignTarget`, `DistributeMode`, `DistributeFrom`, `SnapSettings`, `SmartGuideColorToken` from `@/frontend/common/stores/cert/snapAlignTypes` (Plan 10's file). Plan 12 must NOT redefine these.
@@ -8008,7 +8008,7 @@ typography: {
 4. `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`
 
 **Instruction files to read**:
-- `.github/instructions/frontend.instructions.md`
+- `.agents/instructions/frontend.instructions.md`
 - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
 - `frontend/common/stores/AGENTS.md`
 

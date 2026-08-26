@@ -431,7 +431,7 @@ This task IS the quality loop. No additional verification needed beyond successf
 
 ### Instruction Verification
 
-Read ALL applicable AGENTS.md files (root, backend, backend/services) and instruction files (`.github/instructions/backend.instructions.md`). Verify each new file complies with all applicable rules.
+Read ALL applicable AGENTS.md files (root, backend, backend/services) and instruction files (`.agents/instructions/backend.instructions.md`). Verify each new file complies with all applicable rules.
 
 ### _Requirements_
 

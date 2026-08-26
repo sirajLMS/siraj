@@ -32,7 +32,7 @@ Read the applicable instruction files **before editing each file** (per root `AG
 
 | File pattern | Instruction files | AGENTS.md |
 |---|---|---|
-| `frontend/views/**/*.tsx` | [`.github/instructions/frontend.instructions.md`](.github/instructions/frontend.instructions.md) | [`frontend/views/AGENTS.md`](frontend/views/AGENTS.md), [`frontend/AGENTS.md`](frontend/AGENTS.md) |
+| `frontend/views/**/*.tsx` | [`.agents/instructions/frontend.instructions.md`](.agents/instructions/frontend.instructions.md) | [`frontend/views/AGENTS.md`](frontend/views/AGENTS.md), [`frontend/AGENTS.md`](frontend/AGENTS.md) |
 | `frontend/stores/**/*.ts` | frontend.instructions.md | [`frontend/stores/AGENTS.md`](frontend/stores/AGENTS.md), frontend/AGENTS.md |
 | `shared/messages/**` | frontend.instructions.md (i18n section) | root `AGENTS.md` (localized errors / next-intl) |
 

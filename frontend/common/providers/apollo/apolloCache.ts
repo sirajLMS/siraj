@@ -31,6 +31,20 @@ export function createApolloCache(): InMemoryCache {
       OnlineMeetingInfo: {
         keyFields: false,
       },
+      // Metrics/embedded result types without a stable `id` field (types-review FIX-4).
+      // Opting out of normalization prevents Apollo "Cache data may be lost" warnings.
+      TeacherPendingDuesSummary: {
+        keyFields: false,
+      },
+      TeacherDashboardMetrics: {
+        keyFields: false,
+      },
+      StudentHistoryMetrics: {
+        keyFields: false,
+      },
+      SupervisorMonthlySnapshot: {
+        keyFields: false,
+      },
     },
   });
 }

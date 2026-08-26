@@ -630,7 +630,7 @@ bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 | `sonar-results` | same as `codescene` (subagents never run sonar-scan — hardcoded exclusion) |
 
 **What the script handles automatically (no manual steps needed):**
-- ✅ Discovers and prints ALL applicable `.github/instructions/*.instructions.md` files for the target file
+- ✅ Discovers and prints ALL applicable `.agents/instructions/*.instructions.md` files for the target file
 - ✅ Discovers and prints ALL applicable layer `AGENTS.md` files for the target file
 - ✅ Enforces the Fix-Or-Report rule (fix within same file; report cross-file dependencies to orchestrator)
 - ✅ Runs `check:duplicates` for single-file duplication detection (duplicates and codescene lifecycles)
@@ -681,7 +681,7 @@ Before marking ANY subtask `[x]`, verify (the sub-loop script handles mechanical
 Fix all errors reported by `sub-loop.ts` and resolve all semantic checklist findings before proceeding to next file/subtask.
 
 ### 3. Instruction Verification Per Subtask (Default in Every Subtask)
-After the `sub-loop.ts` quality loop passes, the agent MUST read and validate the file against ALL applicable instruction files. **The `sub-loop.ts` script automatically discovers and prints** the applicable `.github/instructions/*.instructions.md` and layer `AGENTS.md` files for the target file — the agent reads those printed paths (no manual lookup needed):
+After the `sub-loop.ts` quality loop passes, the agent MUST read and validate the file against ALL applicable instruction files. **The `sub-loop.ts` script automatically discovers and prints** the applicable `.agents/instructions/*.instructions.md` and layer `AGENTS.md` files for the target file — the agent reads those printed paths (no manual lookup needed):
 - **Layer AGENTS.md**: Printed by `sub-loop.ts` under the "AGENTS.md files (read before fixing)" section
 - **.agents/instructions/*.md**: Printed by `sub-loop.ts` under the "Instruction files (read before fixing)" section
 

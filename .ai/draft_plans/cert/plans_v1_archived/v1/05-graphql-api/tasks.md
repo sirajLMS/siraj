@@ -9,7 +9,7 @@
 > - Pothos reference: `backend/graphql/pothos/billing/billing-management.pothos.ts`
 > - Pothos reference: `backend/graphql/pothos/students/student.pothos.ts`
 >
-> **Instruction File**: Before starting ANY task, read `backend/graphql/AGENTS.md` and `.github/instructions/backend.instructions.md`. These contain mandatory rules for Pothos code: enum registration, single canonical object type, type definition pattern, no business logic in resolvers, DataLoader batch patterns.
+> **Instruction File**: Before starting ANY task, read `backend/graphql/AGENTS.md` and `.agents/instructions/backend.instructions.md`. These contain mandatory rules for Pothos code: enum registration, single canonical object type, type definition pattern, no business logic in resolvers, DataLoader batch patterns.
 
 ---
 
@@ -74,7 +74,7 @@ Create the core Pothos object type definitions for certificates, templates, temp
 
 Before writing code, read:
 - `backend/graphql/AGENTS.md` — rules on single canonical object type, enum registration, type definition pattern
-- `.github/instructions/backend.instructions.md` — backend Pothos rules
+- `.agents/instructions/backend.instructions.md` — backend Pothos rules
 - `shared/AGENTS.md` — shared layer rules (if importing shared types)
 
 Key rules to verify:
@@ -178,7 +178,7 @@ Use `objectRef` with fields: `id: string`, `success: boolean`, `message: string 
 
 Before writing code, read:
 - `backend/graphql/AGENTS.md` — rules on object type definition, id field requirement
-- `.github/instructions/backend.instructions.md` — backend Pothos rules
+- `.agents/instructions/backend.instructions.md` — backend Pothos rules
 
 Key rules to verify:
 - ✅ `CertificateVerificationResultPothosObject` uses `objectRef` (not `loadableObjectRef` — no DataLoader needed for verification results)
@@ -327,7 +327,7 @@ gqlSchemaBuilder.queryField("verifyCertificate", t =>
 
 Before writing code, read:
 - `backend/graphql/AGENTS.md` — rules on query resolver patterns, auth scopes
-- `.github/instructions/backend.instructions.md` — backend resolver rules
+- `.agents/instructions/backend.instructions.md` — backend resolver rules
 
 Key rules to verify:
 - ✅ `verifyCertificate` has NO `authScopes` — public query
@@ -413,7 +413,7 @@ Create mutation resolvers for certificate template CRUD, certificate generation,
 
 Before writing code, read:
 - `backend/graphql/AGENTS.md` — rules on mutation resolvers, auth scopes, notImpersonating
-- `.github/instructions/backend.instructions.md` — backend mutation rules
+- `.agents/instructions/backend.instructions.md` — backend mutation rules
 
 Key rules to verify:
 - ✅ All mutations use `authScopes: { permission: AppPermission.X, notImpersonating: true }`
@@ -483,7 +483,7 @@ Create mutation resolvers for certificate recipient group CRUD operations.
 
 Before writing code, read:
 - `backend/graphql/AGENTS.md` — rules on mutation resolvers, delete result pattern
-- `.github/instructions/backend.instructions.md` — backend mutation rules
+- `.agents/instructions/backend.instructions.md` — backend mutation rules
 
 Key rules to verify:
 - ✅ All mutations use `authScopes: { permission: AppPermission.CERTIFICATES_MANAGE, notImpersonating: true }`
@@ -602,7 +602,7 @@ export * from "@/backend/graphql/pothos/certificates";
 
 Before writing code, read:
 - `backend/graphql/AGENTS.md` — rules on barrel registration, alphabetical ordering
-- `.github/instructions/backend.instructions.md` — backend barrel rules
+- `.agents/instructions/backend.instructions.md` — backend barrel rules
 
 Key rules to verify:
 - ✅ `pothos/certificates/index.ts` exports all 3 Pothos files

@@ -288,15 +288,15 @@ components/
 
 | File Path Pattern | AGENTS.md Files | Instruction Files |
 |---|---|---|
-| `app/(dashboard)/certificates/templates/[templateId]/preview/page.tsx` | `app/AGENTS.md`, root `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| `frontend/common/views/dashboard/cert-preview/**` | `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| `frontend/{desktop,mobile}/views/dashboard/cert-preview/**` | `frontend/{desktop,mobile}/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| `frontend/common/stores/certPreviewStore.ts` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| `frontend/common/graphql/sharedDocuments/certificates/preview.documents.ts` | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| `app/(dashboard)/certificates/templates/[templateId]/preview/page.tsx` | `app/AGENTS.md`, root `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| `frontend/common/views/dashboard/cert-preview/**` | `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| `frontend/{desktop,mobile}/views/dashboard/cert-preview/**` | `frontend/{desktop,mobile}/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| `frontend/common/stores/certPreviewStore.ts` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| `frontend/common/graphql/sharedDocuments/certificates/preview.documents.ts` | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | `shared/locale/.../certificatePreview/` | `shared/AGENTS.md` | — |
-| `backend/types/templateVersion.types.ts` | `backend/types/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| `backend/services/.../templatePublish.service.ts` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
-| `backend/db/repo/.../templateVersion.repository.ts` | `backend/db/repo/AGENTS.md`, `backend/AGENTS.md` | `.github/instructions/backend.instructions.md` |
+| `backend/types/templateVersion.types.ts` | `backend/types/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| `backend/services/.../templatePublish.service.ts` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
+| `backend/db/repo/.../templateVersion.repository.ts` | `backend/db/repo/AGENTS.md`, `backend/AGENTS.md` | `.agents/instructions/backend.instructions.md` |
 
 ---
 

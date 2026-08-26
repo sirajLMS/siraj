@@ -1063,7 +1063,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 **Files to Create/Modify:**
 - `frontend/COMPONENT_PATTERNS.md` (add property panel + layer panel pattern documentation)
-- Update `.github/instructions/frontend.instructions.md` if new patterns emerge
+- Update `.agents/instructions/frontend.instructions.md` if new patterns emerge
 
 **Subtasks:**
 1. Document the polymorphic form pattern (type-specific form dispatch on discriminated union type) as a reusable pattern for Plans 13 (variable forms) and 14 (recipient group forms)
@@ -1074,7 +1074,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 6. Document react-color ChromePicker in MUI Popover pattern for color picker fields
 7. Document the mini-canvas thumbnail pattern for mobile spatial context
 8. If the property panel + layer panel layout becomes a standard, add a note to `frontend/views/AGENTS.md`
-9. Update any relevant `.github/instructions/` files if new patterns emerge
+9. Update any relevant `.agents/instructions/` files if new patterns emerge
 
 **Requirements References**: All (cross-cutting knowledge)
 
@@ -1115,7 +1115,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 **Requirements References**: REQ-12.13, REQ-12.2, REQ-12.4
 
 **Instruction Verification:**
-- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - MUI v9: use `sx` prop for all style values (no style props on Typography/Stack/Box/Grid)
 - All inputs must have `label` prop (MUI a11y requirement)
 - Import `useAppTranslation(Translation.Dashboard.CertificateTemplateElements)` for i18n
@@ -1155,7 +1155,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 **Requirements References**: NFR-12.1 (performance — memoize), REQ-11 visual aids
 
 **Instruction Verification:**
-- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - No `console.*` — use `logger` from `@/frontend/utils/logger` (only if debug logging needed)
 - No hardcoded colors — guide color from `theme.palette.primary.main`
 - Pure functions in `alignmentEngine.ts` are unit-testable without React
@@ -1188,7 +1188,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 **Requirements References**: REQ-12.16, REQ-12.17, REQ-12.18
 
 **Instruction Verification:**
-- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - MUI v9 `Menu` / `MenuItem` — use `sx` for styling, no style props
 - All labels from i18n namespace — no hardcoded strings
 - Each `MenuItem` with `IconButton` must have `aria-label`
@@ -1228,7 +1228,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 **Requirements References**: REQ-12.17, NFR-12.10
 
 **Instruction Verification:**
-- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - MUI v9: use `sx` prop, no style props
 - No hardcoded colors — all from `theme.palette`
 - All `IconButton` components have `aria-label`
@@ -1263,7 +1263,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 **Requirements References**: REQ-12.1 (element creation), REQ-12.7-12.12
 
 **Instruction Verification:**
-- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - MUI v9: use `sx` prop for all style values
 - i18n: `useAppTranslation(Translation.Dashboard.CertificateTemplateElements)`
 - No hardcoded colors — all from `theme.palette`
@@ -1302,7 +1302,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 **Requirements References**: REQ-12.18, REQ-12.21, REQ-12.17, REQ-12.5
 
 **Instruction Verification:**
-- Read: `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- Read: `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - Read: `frontend/common/stores/createRecurringClassStore.ts` (reference for complex form store pattern)
 - Strict typing with GraphQL generated types from `graphql-types.ts`
 - No `useMediaQuery` / `useViewport` in stores
@@ -1335,7 +1335,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 **Requirements References**: REQ-12.1 (element creation via palette)
 
 **Instruction Verification:**
-- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- Read: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - Coordinate with Plan 11's React Flow canvas container for the drop event contract
 - No hardcoded colors — use `theme.palette`
 
@@ -1419,8 +1419,8 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 **Instruction Verification:**
 - Read: `test/ui/AGENTS.md` — component tests use Happy DOM, no server
-- Read: `.github/instructions/tests.instructions.md`
-- Read: `.github/instructions/frontend.instructions.md`
+- Read: `.agents/instructions/tests.instructions.md`
+- Read: `.agents/instructions/frontend.instructions.md`
 - Mock Apollo with `MockedProvider`; mock Zustand store with `createMockStore` pattern
 - No `console.*` in tests (use `logger`)
 - All test files follow naming convention: `*.test.tsx`
@@ -1504,7 +1504,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 **Instruction Verification:**
 - Read: `test/ui/AGENTS.md` — E2E tests use production server (.next-test-prod)
-- Read: `.github/instructions/tests.instructions.md`
+- Read: `.agents/instructions/tests.instructions.md`
 - `bun run build:test` MUST run before `bun run test:ui:e2e`
 - Playwright selectors use `getByRole` / `getByLabel` (a11y-friendly, per test/ui/AGENTS.md)
 - No `console.*` in tests
@@ -1546,7 +1546,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 **Files to Create/Modify:**
 - `frontend/COMPONENT_PATTERNS.md` (add: alignment guide overlay pattern, context menu pattern, multi-select toolbar pattern, drag-and-drop palette pattern, history command undo/redo pattern)
-- Update `.github/instructions/frontend.instructions.md` if new reusable patterns emerge
+- Update `.agents/instructions/frontend.instructions.md` if new reusable patterns emerge
 - Update `frontend/views/AGENTS.md` if the canvas overlay pattern becomes a standard
 
 **Subtasks:**
@@ -2237,7 +2237,7 @@ After all **27 tasks** complete, verify:
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| R5-T1 | `panels/fill-stroke/FillPropertyPanel.tsx`, `panels/fill-stroke/FillTypeDropdown.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
+| R5-T1 | `panels/fill-stroke/FillPropertyPanel.tsx`, `panels/fill-stroke/FillTypeDropdown.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T2 | `panels/fill-stroke/SolidFillEditor.tsx` | same | same |
 | R5-T3 | `panels/fill-stroke/GradientFillEditor.tsx`, `controls/CircularDial.tsx` | same | same |
 | R5-T4 | `panels/fill-stroke/PatternFillEditor.tsx` | same | same |
@@ -2249,8 +2249,8 @@ After all **27 tasks** complete, verify:
 | R5-T10 | `panels/fill-stroke/StrokeLayersList.tsx` | same | same |
 | R5-T11 | `dialogs/GradientEditorDialog.tsx` | same | same |
 | R5-T12 | `dialogs/PatternPickerDialog.tsx` | same | same |
-| R5-T13 | `frontend/common/stores/cert/templateElementEditorStore.ts` (modify) | `frontend/common/stores/AGENTS.md` (if exists) or `frontend/stores/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T14 | `test/ui/components/panels/{FillPropertyPanel,StrokePropertyPanel}.test.tsx`, `test/ui/components/dialogs/{GradientEditorDialog,PatternPickerDialog}.test.tsx`, `test/unit/fillStrokeUtils.test.ts`, `frontend/IMPLEMENTATION_LEARNINGS.md` (append), `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| R5-T13 | `frontend/common/stores/cert/templateElementEditorStore.ts` (modify) | `frontend/common/stores/AGENTS.md` (if exists) or `frontend/stores/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T14 | `test/ui/components/panels/{FillPropertyPanel,StrokePropertyPanel}.test.tsx`, `test/ui/components/dialogs/{GradientEditorDialog,PatternPickerDialog}.test.tsx`, `test/unit/fillStrokeUtils.test.ts`, `frontend/IMPLEMENTATION_LEARNINGS.md` (append), `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 
 ### Round 5 Execution Order (Plan 12)
 
@@ -3542,16 +3542,16 @@ Phase R5-C-g (sequential):   R5-C17 knowledge propagation (depends on all)
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |---|---|---|---|
-| R5-T1 | `contextMenus/layersPanelContextMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T2 | `dialogs/LayerPropertiesDialog.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T3 | `contextMenus/propertiesPanelContextMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T4 | `dialogs/PropertiesPanelOptionsDialog.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T5 | `contextMenus/composeElementMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T6 | `frontend/common/stores/cert/canvasStore.ts` (modify), `frontend/common/stores/cert/uiStore.ts` (modify), `frontend/common/stores/cert/contextMenuStore.ts` (modify) | `frontend/stores/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T7 | `shared/locale/types/certificateTemplateEditor.ts` (modify), `shared/locale/<locale>/<domain>.ts` files (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T8 | `EditorLayersPanel.tsx` (modify from Plan 11 R4) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T9 | `EditorPropertiesPanel.tsx` (modify from Plan 11 R4) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| R5-T10 | `test/ui/components/editor/contextMenus/{layersPanelContextMenu,propertiesPanelContextMenu,composeElementMenu}.test.ts`, `test/ui/components/editor/dialogs/{LayerPropertiesDialog,PropertiesPanelOptionsDialog}.test.tsx`, `test/unit/canvasStoreLayersActions.test.ts`, `test/ui/components/editor/{EditorLayersPanel.integration,EditorPropertiesPanel.integration}.test.tsx` | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| R5-T1 | `contextMenus/layersPanelContextMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T2 | `dialogs/LayerPropertiesDialog.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T3 | `contextMenus/propertiesPanelContextMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T4 | `dialogs/PropertiesPanelOptionsDialog.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T5 | `contextMenus/composeElementMenu.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T6 | `frontend/common/stores/cert/canvasStore.ts` (modify), `frontend/common/stores/cert/uiStore.ts` (modify), `frontend/common/stores/cert/contextMenuStore.ts` (modify) | `frontend/stores/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T7 | `shared/locale/types/certificateTemplateEditor.ts` (modify), `shared/locale/<locale>/<domain>.ts` files (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T8 | `EditorLayersPanel.tsx` (modify from Plan 11 R4) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T9 | `EditorPropertiesPanel.tsx` (modify from Plan 11 R4) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| R5-T10 | `test/ui/components/editor/contextMenus/{layersPanelContextMenu,propertiesPanelContextMenu,composeElementMenu}.test.ts`, `test/ui/components/editor/dialogs/{LayerPropertiesDialog,PropertiesPanelOptionsDialog}.test.tsx`, `test/unit/canvasStoreLayersActions.test.ts`, `test/ui/components/editor/{EditorLayersPanel.integration,EditorPropertiesPanel.integration}.test.tsx` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5-T11 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 12 Context Menus)
@@ -3677,7 +3677,7 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
 
 ### TR-T01 — `TransformPropertyPanelSection` + `OriginSelector`
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/property-panel/TransformPropertyPanelSection.tsx` (per design.md R6.2):
   - Reuse `CollapsiblePanelShell` (Round 5 R5.2 pattern — check `frontend/components/ui/` first)
   - Section fields (all `TextField`s read from selected element's `transform`):
@@ -3700,7 +3700,7 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
 
 ### TR-T02 — `ChainLockButton` Reuse Check
 
-- [ ] Read `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Grep `frontend/` for `ChainLockButton`, `chainLock`, `proportional` (search composited in case it was added during R5 fill/stroke)
 - [ ] If found — reuse the existing one; don't recreate (DRY per AGENTS.md rule "single canonical")
 - [ ] If not found — define `ChainLockButton` inline within `TransformPropertyPanelSection.tsx` (keep it local; no separate file unless reused elsewhere); once reused elsewhere, refactor to `frontend/components/ui/ChainLockButton.tsx` (and update this task's checklist reference)
@@ -3709,7 +3709,7 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
 
 ### TR-T03 — `NumericTransformDialog`
 
-- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `frontend/views/dashboard/cert/templates/editor/property-panel/NumericTransformDialog.tsx` (per design.md R6.3):
   - `Dialog` opened when `useTemplateElementEditorStore.getState().numericTransformDialogOpen === true`
   - Fields:
@@ -3727,7 +3727,7 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
 
 ### TR-T04 — `useTemplateElementEditorStore` Numeric Dialog State + Reset Handler
 
-- [ ] Read `frontend/stores/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `frontend/stores/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Modify `frontend/common/stores/cert/useTemplateElementEditorStore.ts`:
   - Add `numericTransformDialogOpen: boolean` (default `false`)
   - `setNumericTransformDialogOpen(open: boolean): void`
@@ -3741,7 +3741,7 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
 
 ### TR-T05 — Transform i18n Keys (Plan 12 Panel + Dialog)
 
-- [ ] Read `shared/AGENTS.md`, `AGENTS.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `shared/AGENTS.md`, `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Modify `shared/locale/types/dashboard/certificates/templateEditor.ts` — append to `certificateEditor.transform`:
   - `panel: { title: string; position: { x: string; y: string }; size: { width: string; height: string }; rotation: string; skewX: string; skewY: string; flipH: string; flipV: string; reset: string; origin: { topLeft: string; center: string; bottomRight: string } }`
   - `dialog: { title: string; absolute: string; relative: string; apply: string; copyTransformed: string; cancel: string }`
@@ -3753,7 +3753,7 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
 
 ### TR-T06 — Tests: Transform Property Panel + Numeric Dialog + Reset
 
-- [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md`
+- [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 - [ ] Create `test/ui/components/panels/TransformPropertyPanelSection.test.tsx`:
   - Renders position X/Y from selected element's transform
   - Renders W/H with chain-lock; clicking chain toggles `proportionalLock`
@@ -3858,7 +3858,7 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/panels/MaskPropertyPanel.tsx`:
   - `MaskPropertyPanelProps: { elementId, mask: LayerMaskData | null, maskType, viewMode, on*Change callbacks }`
@@ -3898,7 +3898,7 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - `frontend/views/AGENTS.md`, `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `frontend/views/dashboard/cert/templates/editor/panels/RefineEdgeDialog.tsx`:
   - `RefineEdgeDialogProps: { open, onClose, onApply, elementId, initialSettings? }`
@@ -4031,7 +4031,7 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Modify** `shared/locale/types/templateEditor.ts` (type schema — extend the `mask` namespace from Plan 10):
   - Append Plan 12-specific keys (see design §R5.7):
@@ -4068,7 +4068,7 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - `frontend/stores/AGENTS.md`, `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Verify/Modify** `frontend/common/stores/cert/certTemplateEditorStore.ts` (coordinate with Plan 10 MASK-T02):
   - Ensure all mask actions used by Plan 12 panels exist: `setMaskProperty`, `setMaskViewMode`, `invertMask`, `applyMask` (destructive), `deleteMask`, `toggleMaskEnabled`, `setMaskMode`, `setActiveMaskTarget`
@@ -4092,7 +4092,7 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   - `test/ui/AGENTS.md`, `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
-  - `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md`
+  - `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 
 - [ ] **Create** `test/ui/components/editor/mask/panels/{MaskPropertyPanel,RefineEdgeDialog,OpacityMaskEditor,ClippingMaskProperties,MaskBrushSettings,QuickMaskPanel}.test.tsx`:
   - Each test:
@@ -4133,15 +4133,15 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
 
 | Task | Files Created/Modified | AGENTS.md to Read | Instructions to Read |
 |------|-----------------------|-------------------|----------------------|
-| MASK-P01 | `MaskPropertyPanel.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-P02 | `RefineEdgeDialog.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-P03 | `OpacityMaskEditor.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-P04 | `ClippingMaskProperties.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-P05 | `MaskBrushSettings.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-P06 | `QuickMaskPanel.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-P07 | `shared/locale/types/templateEditor.ts`, `shared/locale/ar/.../templateEditor.ts`, `shared/locale/en/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-P08 | `certTemplateEditorStore.ts` (verify/modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.github/instructions/frontend.instructions.md` |
-| MASK-P09 | `test/ui/components/editor/mask/panels/*.test.tsx`, `test/ui/e2e/editor-mask-panel.test.tsx`, `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `AGENTS.md` | `.github/instructions/tests.instructions.md`, `.github/instructions/frontend.instructions.md` |
+| MASK-P01 | `MaskPropertyPanel.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-P02 | `RefineEdgeDialog.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-P03 | `OpacityMaskEditor.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-P04 | `ClippingMaskProperties.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-P05 | `MaskBrushSettings.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-P06 | `QuickMaskPanel.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-P07 | `shared/locale/types/templateEditor.ts`, `shared/locale/ar/.../templateEditor.ts`, `shared/locale/en/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-P08 | `certTemplateEditorStore.ts` (verify/modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
+| MASK-P09 | `test/ui/components/editor/mask/panels/*.test.tsx`, `test/ui/e2e/editor-mask-panel.test.tsx`, `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 
 ### Round 5 Execution Order (Plan 12 — Masking)
 

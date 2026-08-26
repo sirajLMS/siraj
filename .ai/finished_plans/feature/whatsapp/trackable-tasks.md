@@ -372,7 +372,7 @@ Tasks 14-17 below are kept for i18n and GraphQL documents which are still needed
   - [x] 30.3 Update `backend/services/AGENTS.md` with WhatsApp channel patterns and reference to the new doc
   - [x] 30.4 Update `backend/AGENTS.md` with WhatsApp integration reference
   - [x] 30.5 Update `backend/graphql/AGENTS.md` if GraphQL patterns were introduced
-  - [x] 30.6 Update `.agents/instructions/backend.instructions.md` if new conventions should be enforced — N/A (`.github/instructions/` directory does not exist)
+  - [x] 30.6 Update `.agents/instructions/backend.instructions.md` if new conventions should be enforced — N/A (`.agents/instructions/` directory does not exist)
   - [x] 30.7 Update root `AGENTS.md` Important References section with the new doc
   - [x] 30.8 Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
   - [x] 30.9 Write outcome file: `.ai/plans/whatsapp/outcome/30.1-knowledge-propagation-outcome.md`
