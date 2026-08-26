@@ -128,18 +128,18 @@ export const carryoverBalances = createTable(
   "carryover_balances",
   {
     id: uuidColumn("id").defaultRandom().primaryKey(),
-    teacherId: uuidColumn("teacher_id")
+    teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
       .references(() => teachers.id, { onDelete: "restrict" }),
     studentsCount: integerColumn("students_count"),
     studentsText: varcharColumn("students_text", { length: 500 }),
     // Total billable hours across the aggregated sessions.
-    totalDuration: textColumn("total_duration", { precision: 8, scale: 2 }),
+    totalDuration: textColumn("total_duration"),
     // Aggregate amount owed to the teacher, in teacherCurrency.
-    payable: textColumn("payable", { precision: 12, scale: 2 }).notNull(),
+    payable: textColumn("payable").notNull(),
     teacherCurrency: currencyCodeEnum("teacher_currency").notNull().$type<CurrencyCode>(),
     // Amount paid so far. Equals `payable` once isPaid = true; 0 otherwise.
-    paid: textColumn("paid", { precision: 12, scale: 2 }).notNull().default("0"),
+    paid: textColumn("paid").notNull().default("0"),
     fromDate: textColumn("from_date"),
     toDate: textColumn("to_date"),
     // Operator-supplied at "Bulk To Expense" time.
@@ -148,12 +148,12 @@ export const carryoverBalances = createTable(
     isDisabledTeacher: booleanColumn("is_disabled_teacher").notNull().default(false),
     isPaid: booleanColumn("is_paid").notNull().default(false),
     // FK to the expenses row created by "Bulk To Expense" (Plan 6).
-    expenseId: uuidColumn("expense_id"),
+    expenseId: uuidDefaultColumn("expense_id"),
     note: textColumn("note"),
-    createdByUserId: uuidColumn("created_by_user_id")
+    createdByUserId: uuidDefaultColumn("created_by_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "set null" }),
-    paidByUserId: uuidColumn("paid_by_user_id")
+    paidByUserId: uuidDefaultColumn("paid_by_user_id")
       .references(() => users.id, { onDelete: "set null" }),
     paidAt: timestampColumn("paid_at", { withTimezone: true, precision: 3 }),
     createdAt: timestampColumn("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
@@ -183,21 +183,21 @@ export const carryoverBalanceItems = createTable(
   "carryover_balance_items",
   {
     id: uuidColumn("id").defaultRandom().primaryKey(),
-    carryoverId: uuidColumn("carryover_id")
+    carryoverId: uuidDefaultColumn("carryover_id")
       .notNull()
       .references(() => carryoverBalances.id, { onDelete: "cascade" }),
-    classInstanceId: uuidColumn("class_instance_id")
+    classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
       .references(() => classInstances.id, { onDelete: "cascade" }),
     // Snapshot of the session's amount + currency at carryover-create time.
-    originalAmount: textColumn("original_amount", { precision: 12, scale: 2 }).notNull(),
+    originalAmount: textColumn("original_amount").notNull(),
     originalCurrency: currencyCodeEnum("original_currency").notNull().$type<CurrencyCode>(),
     // Snapshot of the session's calculationStatus at carryover-create time
     // (so delete can revert to the prior state).
     originalStatus: varcharColumn("original_status", { length: 32 }).notNull(),
     // Converted amount in the carryover's dominant currency (NULL when
     // originalCurrency === teacherCurrency — no conversion needed).
-    convertedAmount: textColumn("converted_amount", { precision: 12, scale: 2 }),
+    convertedAmount: textColumn("converted_amount"),
     convertedCurrency: currencyCodeEnum("converted_currency").$type<CurrencyCode>(),
     createdAt: timestampColumn("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
   },
@@ -218,7 +218,7 @@ import { carryoverBalances } from "@/backend/db/schema/teachers/carryover-balanc
 export const classInstances = createTable("class_instances", {
   // ... existing columns unchanged ...
   // ── Plan 5 additions ───────────────────────────────────────────────
-  carryoverBalanceId: uuidColumn("carryover_balance_id").references(
+  carryoverBalanceId: uuidDefaultColumn("carryover_balance_id").references(
     () => carryoverBalances.id,
     { onDelete: "set null" },
   ),
@@ -273,7 +273,7 @@ export const classInstancesRelations = relations(classInstances, ({ one }) => ({
 
 ### 3.1 New input/output types
 
-**File:** `backend/types/teachers/carryover-balance.types.ts`
+**File:** `backend/types/billing/carryover-balance.types.ts`
 
 ```ts
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -405,7 +405,7 @@ export async function bulkCreateCarryoverBalances(
   );
 
   if (input.instanceIds.length === 0) {
-    throw new DomainError("CARRYOVER_NO_INSTANCES", tErrors.carryover.noInstances);
+    throw new ValidationError(tErrors.carryover.noInstances);
   }
 
   const idempotencyKey = deriveBulkCreateIdempotencyKey(input);
@@ -425,7 +425,7 @@ export async function bulkCreateCarryoverBalances(
       input.instanceIds, tx,
     );
     if (instances.length !== input.instanceIds.length) {
-      throw new DomainError("CLASS_INSTANCE_NOT_FOUND", tErrors.classes.notFound);
+      throw new NotFoundError("CLASS_INSTANCE", tErrors.classes.notFound);
     }
 
     // AC-2.3 — all instances must be in an audited state.
@@ -453,7 +453,7 @@ export async function bulkCreateCarryoverBalances(
 
     for (const [teacherId, groupInstances] of groups) {
       const teacher = await TeacherRepository.getById(teacherId, tx);
-      if (!teacher) throw new DomainError("TEACHER_NOT_FOUND", tErrors.teachers.notFound);
+      if (!teacher) throw new NotFoundError("TEACHER", tErrors.teachers.notFound);
 
       const dominantCurrency = resolveDominantCurrency(groupInstances, teacher.rateCurrency);
       const studentNames = await fetchStudentNamesForInstances(groupInstances, tx);
@@ -608,7 +608,7 @@ export async function bulkCarryoverToExpense(
       input.carryoverIds, tx,
     );
     if (carryovers.length !== input.carryoverIds.length) {
-      throw new DomainError("CARRYOVER_NOT_FOUND", tErrors.carryover.notFound);
+      throw new NotFoundError("CARRYOVER", tErrors.carryover.notFound);
     }
 
     // AC-3.3 — all must be unpaid.
@@ -717,7 +717,7 @@ export async function unpayCarryoverBalance(
   return db.transaction(async (tx) => {
     const [carryover] = await tx.select().from(carryoverBalances)
       .where(eq(carryoverBalances.id, input.id)).forUpdate();
-    if (!carryover) throw new DomainError("CARRYOVER_NOT_FOUND", tErrors.carryover.notFound);
+    if (!carryover) throw new NotFoundError("CARRYOVER", tErrors.carryover.notFound);
     if (!carryover.isPaid) {
       throw new DomainError("CARRYOVER_NOT_PAID", tErrors.carryover.notPaid);
     }
@@ -938,7 +938,7 @@ export const UpdateCarryoverInputPothos = gqlSchemaBuilder.inputType("UpdateCarr
 
 ### 4.2 New queries
 
-**File:** `backend/graphql/query/teachers/carryover.query.ts`
+**File:** `backend/graphql/query/billing/carryover.query.ts`
 
 ```ts
 gqlSchemaBuilder.queryField("carryoverBalances", (t) =>
@@ -980,7 +980,7 @@ gqlSchemaBuilder.queryField("carryoverBalance", (t) =>
 
 ### 4.3 New mutations
 
-**File:** `backend/graphql/mutation/teachers/carryover.mutation.ts`
+**File:** `backend/graphql/mutation/billing/carryover.mutation.ts`
 
 Six mutation fields: `bulkCreateCarryoverBalances`, `bulkCarryoverToExpense`,
 `createCarryoverBalance`, `updateCarryoverBalance`, `deleteCarryoverBalance`,
@@ -1000,7 +1000,7 @@ identical in shape to the payroll export (Plan 3 §4.4).
 
 ### 5.1 Apollo documents
 
-**File:** `frontend/common/graphql/sharedDocuments/teachers/carryover.documents.ts`
+**File:** `frontend/common/graphql/sharedDocuments/billing/carryover.documents.ts`
 
 Defines: `CARRYOVER_BALANCES_QUERY`, `CARRYOVER_BALANCE_QUERY`,
 `BULK_CREATE_CARRYOVER_MUTATION`, `BULK_TO_EXPENSE_MUTATION`,
@@ -1204,7 +1204,7 @@ all guards (`CARRYOVER_PAID_CANNOT_DELETE`, `CARRYOVER_TEACHER_IMMUTABLE`,
 
 ### 8.3 GraphQL tests
 
-**File:** `backend/graphql/query/teachers/carryover.query.test.ts` + `carryover.mutation.test.ts`
+**File:** `backend/graphql/query/billing/carryover.query.test.ts` + `carryover.mutation.test.ts`
 
 - Query returns page shape; respects `limit`/`offset`.
 - Permission denied → GraphQL error.
