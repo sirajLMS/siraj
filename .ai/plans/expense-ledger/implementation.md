@@ -122,14 +122,14 @@ export const expenses = createTable(
   {
     id: uuidColumn("id").defaultRandom().primaryKey(),
     // Nullable — set for Salaries (always) and some Logistics (reimbursement).
-    teacherId: uuidColumn("teacher_id").references(() => teachers.id, {
+    teacherId: uuidDefaultColumn("teacher_id").references(() => teachers.id, {
       onDelete: "set null",
     }),
     // Snapshot at creation time — survives teacher rename / deactivate.
     teacherName: varcharColumn("teacher_name", { length: 200 }),
     title: varcharColumn("title", { length: 200 }).notNull(),
     type: expenseTypeEnum("type").notNull().$type<ExpenseType>(),
-    expenseValue: textColumn("expense_value", { precision: 12, scale: 2 }).notNull(),
+    expenseValue: textColumn("expense_value").notNull(),
     expenseCurrency: currencyCodeEnum("expense_currency").notNull().$type<CurrencyCode>(),
     paymentDate: textColumn("payment_date").notNull(),
     // YYYY-MM string — the accounting month the expense belongs to.
@@ -137,13 +137,13 @@ export const expenses = createTable(
     note: textColumn("note"),
     // Provenance — null for manual, 'carryover_balances' for Plan 5.
     sourceEntity: varcharColumn("source_entity", { length: 64 }),
-    sourceEntityId: uuidColumn("source_entity_id"),
-    createdByUserId: uuidColumn("created_by_user_id")
+    sourceEntityId: uuidDefaultColumn("source_entity_id"),
+    createdByUserId: uuidDefaultColumn("created_by_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "set null" }),
     // Soft-delete (AC-6.1).
     deletedAt: timestampColumn("deleted_at", { withTimezone: true, precision: 3 }),
-    deletedByUserId: uuidColumn("deleted_by_user_id").references(() => users.id, {
+    deletedByUserId: uuidDefaultColumn("deleted_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     deletedReason: varcharColumn("deleted_reason", { length: 500 }),
@@ -193,7 +193,7 @@ export const expensesRelations = relations(expenses, ({ one }) => ({
 
 ### 3.1 New input/output types
 
-**File:** `backend/types/expenses/expense.types.ts`
+**File:** `backend/types/billing/expense.types.ts`
 
 ```ts
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -356,7 +356,7 @@ export async function createInternal(
     })
     .returning();
 
-  if (!row) throw new DomainError("EXPENSE_CREATE_FAILED", "expenses insert returned no row");
+  if (!row) logger.error("Expense insert returned no row"); throw new DomainError("EXPENSE_CREATE_FAILED", "Failed to create expense");
 
   await AuditLogRepository.create(tx, {
     actorUserId: input.createdByUserId,
@@ -385,10 +385,10 @@ export async function createInternal(
 }
 
 function validateCreateInput(input: CreateExpenseInput, tErrors: ErrorsLabels) {
-  if (!input.title?.trim()) throw new DomainError("EXPENSE_TITLE_REQUIRED", tErrors.expenses.titleRequired);
-  if (!input.expenseValue) throw new DomainError("EXPENSE_VALUE_REQUIRED", tErrors.expenses.valueRequired);
-  if (Number(input.expenseValue) < 0) throw new DomainError("EXPENSE_VALUE_NEGATIVE", tErrors.expenses.valueNegative);
-  if (!input.expenseCurrency) throw new DomainError("EXPENSE_CURRENCY_REQUIRED", tErrors.expenses.currencyRequired);
+  if (!input.title?.trim()) throw new ValidationError(tErrors.expenses.titleRequired);
+  if (!input.expenseValue) throw new ValidationError(tErrors.expenses.valueRequired);
+  if (Number(input.expenseValue) < 0) throw new ValidationError(tErrors.expenses.valueNegative);
+  if (!input.expenseCurrency) throw new ValidationError(tErrors.expenses.currencyRequired);
   if (!input.paymentDate) throw new DomainError("PAYMENT_DATE_INVALID", tErrors.expenses.paymentDateInvalid);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.paymentDate)) throw new DomainError("PAYMENT_DATE_INVALID", tErrors.expenses.paymentDateInvalid);
   if (!input.expenseDate || !/^\d{4}-\d{2}$/.test(input.expenseDate)) throw new DomainError("EXPENSE_DATE_INVALID", tErrors.expenses.expenseDateInvalid);
@@ -685,7 +685,7 @@ export const UpdateExpenseInputPothos = gqlSchemaBuilder.inputType("UpdateExpens
 
 ### 4.2 New queries
 
-**File:** `backend/graphql/query/expenses/expense.query.ts`
+**File:** `backend/graphql/query/billing/expense.query.ts`
 
 ```ts
 gqlSchemaBuilder.queryField("expenses", (t) =>
@@ -725,7 +725,7 @@ gqlSchemaBuilder.queryField("expense", (t) =>
 
 ### 4.3 New mutations
 
-**File:** `backend/graphql/mutation/expenses/expense.mutation.ts`
+**File:** `backend/graphql/mutation/billing/expense.mutation.ts`
 
 Four mutation fields: `createExpense`, `updateExpense`, `deleteExpense`,
 `bulkDeleteExpenses`. Each follows the standard shape:
@@ -748,7 +748,7 @@ carryover export (Plan 5 §4.4).
 
 ### 5.1 Apollo documents
 
-**File:** `frontend/common/graphql/sharedDocuments/expenses/expense.documents.ts`
+**File:** `frontend/common/graphql/sharedDocuments/billing/expense.documents.ts`
 
 Defines: `EXPENSES_QUERY`, `EXPENSE_QUERY`,
 `CREATE_EXPENSE_MUTATION`, `UPDATE_EXPENSE_MUTATION`,
@@ -946,7 +946,7 @@ Covers:
 
 ### 8.3 GraphQL tests
 
-**File:** `backend/graphql/query/expenses/expense.query.test.ts` + `expense.mutation.test.ts`
+**File:** `backend/graphql/query/billing/expense.query.test.ts` + `expense.mutation.test.ts`
 
 - Query returns page shape; respects `limit`/`offset`.
 - Permission denied → GraphQL error.
