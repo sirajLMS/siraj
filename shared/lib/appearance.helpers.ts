@@ -12,13 +12,39 @@
  *
  *  2. **Metadata HTML** (`siteDescription` when rendered as a
  *     `<meta name="description">` or OpenGraph tag value):
- *     {@link sanitizeMetadataHtml} runs the input through DOMPurify to strip
- *     `<script>`, `onload=`, `javascript:`, and other XSS vectors. The
- *     result is plain text or a tight subset of inline formatting tags.
+ *     {@link sanitizeMetadataHtml} strips `<script>`, `onload=`,
+ *     `javascript:`, and other XSS vectors with a pure allowlist rewrite.
+ *     The result is plain text or a tight subset of inline formatting tags.
  *
  *  3. **Site name / title** (rendered in `<title>`, `og:site_name`):
  *     {@link sanitizeSiteName} strips all HTML tags (these fields are plain
  *     text) and truncates to the schema's `maxLength`.
+ *
+ * ---------------------------------------------------------------------------
+ * SECURITY REVIEW / AGENTS — DO NOT REINTRODUCE DOMPurify / jsdom
+ * ---------------------------------------------------------------------------
+ *
+ * This module MUST remain a zero-dependency, pure-TypeScript sanitizer.
+ *
+ * Banned (do not suggest, do not re-add to package.json, do not import):
+ *   - `isomorphic-dompurify`
+ *   - `dompurify` + `jsdom` (or happy-dom / linkedom wired for DOMPurify)
+ *   - any other sanitizer that pulls `jsdom` / `html-encoding-sniffer` /
+ *     `@exodus/bytes` into the Next.js server / Vercel serverless graph
+ *
+ * Why (production incident 2026-08-26):
+ *   Vercel’s Node function runtime disables Node’s
+ *   `require(ESM)` (`--no-experimental-require-module` equivalent).
+ *   `isomorphic-dompurify` → `jsdom@30+` → `html-encoding-sniffer@6` →
+ *   `@exodus/bytes` (ESM-only). Loading that chain from CommonJS
+ *   (instrumentation / server handler) throws `ERR_REQUIRE_ESM` and
+ *   takes down the entire Web Handler before any request is served.
+ *
+ * If a review finds gaps in this allowlist sanitizer, fix THIS file
+ * (tighten tags/attrs/href rules) — do not “upgrade” to DOMPurify/jsdom.
+ * For richer HTML elsewhere, prefer a package that is ESM-clean on
+ * Vercel without jsdom, or sanitize in a browser-only path.
+ * ---------------------------------------------------------------------------
  *
  * Layer note: lives in `shared/lib/` so both
  * `backend/services/appearance/` (the canonical saveDraft integration
@@ -38,7 +64,6 @@
  * final guard; this module is the upstream guard.
  */
 
-import { sanitize } from "isomorphic-dompurify";
 import { APPEARANCE_HEX_PATTERN } from "@/shared/schemas/appearance.zod";
 
 /**
@@ -82,7 +107,7 @@ export const INVALID_HEX_FALLBACK = "#000000";
 
 /**
  * HTML tag stripper — used by {@link sanitizeSiteName} to coerce to plain
- * text after DOMPurify has already neutralized any nested malformations
+ * text after HTML sanitization has already neutralized any nested malformations
  * (e.g. `<scr<script>ipt>`).
  *
  * Pattern rationale: `<[^<>]*>` is strictly linear (no backtracking) and
@@ -94,26 +119,109 @@ export const INVALID_HEX_FALLBACK = "#000000";
 const HTML_TAG_PATTERN = /<[^<>]*>/g;
 
 /**
+ * Dangerous container tags whose open+close pair (and contents) are removed
+ * before allowlist rewriting. IndexOf-based so we avoid `[\s\S]*?` regexes.
+ */
+const DANGEROUS_CONTAINER_TAGS = ["script", "style", "iframe", "object", "embed", "svg", "math"] as const;
+
+/**
+ * Strip one container element (and its contents) using linear indexOf scans.
+ */
+function stripContainerBlocks(html: string, tagName: string): string {
+  const openPrefix = `<${tagName}`;
+  const closeTag = `</${tagName}>`;
+  let result = html;
+  let searchFrom = 0;
+  for (;;) {
+    const lower = result.toLowerCase();
+    const openIdx = lower.indexOf(openPrefix, searchFrom);
+    if (openIdx === -1) {
+      return result;
+    }
+    const afterNameIdx = openIdx + openPrefix.length;
+    if (afterNameIdx >= result.length) {
+      return result.slice(0, openIdx);
+    }
+    const boundary = result.charCodeAt(afterNameIdx);
+    // Require a real tag boundary so `<script>` matches but `<scripter>` does not.
+    const isBoundary = boundary === 62 /* > */ || boundary <= 32 || boundary === 47 /* / */;
+    if (!isBoundary) {
+      searchFrom = afterNameIdx;
+      continue;
+    }
+    const gtIdx = result.indexOf(">", afterNameIdx);
+    if (gtIdx === -1) {
+      return result.slice(0, openIdx);
+    }
+    const closeIdx = result.toLowerCase().indexOf(closeTag, gtIdx + 1);
+    if (closeIdx === -1) {
+      return result.slice(0, openIdx);
+    }
+    result = result.slice(0, openIdx) + result.slice(closeIdx + closeTag.length);
+    searchFrom = openIdx;
+  }
+}
+
+/**
+ * Extract `href` attribute value from tag attributes string without regex.
+ */
+function extractHref(attrs: string): string | null {
+  const hrefIndex = attrs.toLowerCase().indexOf("href");
+  if (hrefIndex === -1) {
+    return null;
+  }
+  const afterHref = attrs.slice(hrefIndex + 4).trimStart();
+  if (!afterHref.startsWith("=")) {
+    return null;
+  }
+  const afterEqual = afterHref.slice(1).trimStart();
+  if (afterEqual.startsWith('"')) {
+    const end = afterEqual.indexOf('"', 1);
+    return end !== -1 ? afterEqual.slice(1, end) : null;
+  }
+  if (afterEqual.startsWith("'")) {
+    const end = afterEqual.indexOf("'", 1);
+    return end !== -1 ? afterEqual.slice(1, end) : null;
+  }
+  let end = afterEqual.length;
+  for (let i = 0; i < afterEqual.length; i++) {
+    const code = afterEqual.charCodeAt(i);
+    if (code <= 32 || code === 60 || code === 62) {
+      end = i;
+      break;
+    }
+  }
+  return afterEqual.slice(0, end);
+}
+
+/**
+ * Check if a URL uses a safe protocol for metadata links.
+ */
+function isSafeHref(href: string): boolean {
+  const normalized = href.trim();
+  let withoutControls = "";
+  for (let i = 0; i < normalized.length; i++) {
+    const code = normalized.charCodeAt(i);
+    if (code > 32) {
+      withoutControls += normalized[i];
+    }
+  }
+  if (/^(?:javascript|data|vbscript):/i.test(withoutControls)) {
+    return false;
+  }
+  return /^(?:https?:\/\/|mailto:|tel:|\/|\.\/|#)/i.test(normalized);
+}
+
+/**
  * Allowlist of inline formatting tags preserved by
  * {@link sanitizeMetadataHtml} when sanitizing `siteDescription`.
  *
  * Metadata contexts (`<meta name="description">`, `og:description`) render
  * as plain text in most consumers (search engines, social previews), so
  * preserving inline formatting tags is harmless — they're stripped by the
- * renderer. We keep a tight allowlist so the sanitized output is auditable;
- * the default DOMPurify config preserves many more tags (`<table>`,
- * `<h1>`, `<div>`, …) which are unnecessary for a description blurb.
+ * renderer. We keep a tight allowlist so the sanitized output is auditable.
  */
 const METADATA_ALLOWED_TAGS = ["b", "i", "em", "strong", "a", "p", "br"] as const;
-
-/**
- * Allowlist of attributes preserved by {@link sanitizeMetadataHtml}.
- *
- * DOMPurify's default allowlist includes `class`, `style`, etc.; for
- * metadata HTML we only need `href` on `<a>` tags (and DOMPurify already
- * strips `javascript:` / `data:` URIs from `href` by default).
- */
-const METADATA_ALLOWED_ATTR = ["href"] as const;
 
 /**
  * Normalize a hex color input to the canonical `#rrggbb` shape (AC-34).
@@ -152,16 +260,70 @@ export function normalizeHexColor(input: unknown): string {
 }
 
 /**
+ * Build the sanitized opening tag for an allowlisted element.
+ */
+function buildOpeningTag(tagName: string, rawAttrs: string): string {
+  if (tagName === "br") {
+    return "<br>";
+  }
+  if (tagName === "a") {
+    const rawHref = rawAttrs ? extractHref(rawAttrs) : null;
+    if (rawHref && isSafeHref(rawHref)) {
+      return `<a href="${rawHref.replace(/"/g, "&quot;")}">`;
+    }
+    return "<a>";
+  }
+  return `<${tagName}>`;
+}
+
+/**
+ * Extract tag name and attributes from the inside of an HTML tag.
+ */
+function parseTagParts(inside: string): { rawTagName: string; rawAttrs: string } {
+  let spaceIndex = -1;
+  for (let i = 0; i < inside.length; i++) {
+    const code = inside.charCodeAt(i);
+    if (code <= 32 || code === 47 /* / */) {
+      spaceIndex = i;
+      break;
+    }
+  }
+  return {
+    rawTagName: spaceIndex === -1 ? inside : inside.slice(0, spaceIndex),
+    rawAttrs: spaceIndex === -1 ? "" : inside.slice(spaceIndex),
+  };
+}
+
+/**
+ * Transform a matched HTML tag into an allowed/sanitized tag representation.
+ */
+function transformHtmlTag(match: string): string {
+  const isClosing = match.startsWith("</");
+  const inside = match.slice(isClosing ? 2 : 1, -1).trim();
+  const { rawTagName, rawAttrs } = parseTagParts(inside);
+  const tagName = rawTagName.toLowerCase();
+  const isAllowed = (METADATA_ALLOWED_TAGS as readonly string[]).includes(tagName);
+  if (!isAllowed) {
+    return "";
+  }
+  if (isClosing) {
+    return tagName === "br" ? "<br>" : `</${tagName}>`;
+  }
+  return buildOpeningTag(tagName, rawAttrs);
+}
+
+/**
  * Sanitize a metadata HTML payload by stripping dangerous tags/attributes
  * (AC-34).
  *
- * Uses `isomorphic-dompurify` (declared in `package.json`) — the
- * isomorphic build of DOMPurify that works on both server (Node + jsdom)
- * and browser (native DOMParser). The default config strips:
- *   - `<script>`, `<iframe>`, `<object>`, `<embed>`, `<form>` tags.
+ * Pure zero-dependency allowlist rewriter — compatible with Vercel serverless,
+ * AWS Lambda, Node, and Bun. Intentionally NOT DOMPurify / isomorphic-dompurify
+ * / jsdom (see file-header ban for security reviewers).
+ *
+ * Strips:
+ *   - `<script>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<style>` tags and their contents.
  *   - All `on*` event-handler attributes (`onload`, `onerror`, …).
- *   - `javascript:` URIs in `href` / `src`.
- *   - `data:` URIs in `href` (which can be used for phishing).
+ *   - `javascript:`, `data:`, `vbscript:` URIs in `href`.
  *
  * For metadata contexts (`<meta name="description">`, OpenGraph tags) the
  * returned value preserves a tight allowlist of inline formatting tags
@@ -170,11 +332,7 @@ export function normalizeHexColor(input: unknown): string {
  * Callers that need a stricter plain-text form should pipe the result
  * through {@link sanitizeSiteName}.
  *
- * The function never throws — on any internal failure (e.g. jsdom
- * unavailable in a stripped-down runtime) it falls back to a regex-based
- * tag strip so the function always returns a string. An empty input
- * returns an empty string (the SSR `generateMetadata` path already treats
- * empty descriptions as "fall back to default").
+ * The function never throws. An empty input returns an empty string.
  *
  * @example
  * sanitizeMetadataHtml("Safe description with <b>bold</b>")
@@ -191,14 +349,12 @@ export function sanitizeMetadataHtml(html: unknown): string {
     return "";
   }
   try {
-    return sanitize(html, {
-      ALLOWED_TAGS: [...METADATA_ALLOWED_TAGS],
-      ALLOWED_ATTR: [...METADATA_ALLOWED_ATTR],
-    });
+    let clean = html;
+    for (const tagName of DANGEROUS_CONTAINER_TAGS) {
+      clean = stripContainerBlocks(clean, tagName);
+    }
+    return clean.replace(HTML_TAG_PATTERN, transformHtmlTag);
   } catch {
-    // DOMPurify should never throw on a string input, but if jsdom is
-    // unavailable (e.g. a stripped-down runtime), fall back to a
-    // regex-based tag strip so the function never throws.
     return html.replace(HTML_TAG_PATTERN, "");
   }
 }
@@ -228,9 +384,9 @@ export function sanitizeSiteName(name: unknown, maxLength: number = SITE_NAME_MA
   if (typeof name !== "string" || name.length === 0) {
     return "";
   }
-  // First sanitize via DOMPurify to neutralize any tag that could survive
-  // a naive `<[^>]*>` strip (e.g. malformed `<scr<script>ipt>`), then
-  // strip any remaining tags, then truncate to the schema's maxLength.
+  // First sanitize to neutralize any tag that could survive a naive
+  // `<[^>]*>` strip (e.g. malformed `<scr<script>ipt>`), then strip any
+  // remaining tags, then truncate to the schema's maxLength.
   const sanitized = sanitizeMetadataHtml(name).replace(HTML_TAG_PATTERN, "");
   return sanitized.length > maxLength ? sanitized.slice(0, maxLength) : sanitized;
 }
