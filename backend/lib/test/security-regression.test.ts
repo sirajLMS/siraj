@@ -173,3 +173,11 @@ describe("M3 — extended RLS migration file", () => {
     expect(src).toContain("FORCE ROW LEVEL SECURITY");
   });
 });
+
+describe("Storage route — sandbox security header", () => {
+  test("app/api/storage/files/[[...path]]/route.ts includes CSP sandbox header", async () => {
+    const src = await readSrc("app/api/storage/files/[[...path]]/route.ts");
+    expect(src).toContain('"Content-Security-Policy": "default-src \'none\'; sandbox"');
+    expect(src).toContain('"X-Content-Type-Options": "nosniff"');
+  });
+});
