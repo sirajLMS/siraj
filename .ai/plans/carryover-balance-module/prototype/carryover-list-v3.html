@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Siraj LMS - Carryover Balances</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700;900&amp;family=Inter:wght@400;500;600&amp;family=Public+Sans:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#a83836",
+                        "tertiary-fixed-dim": "#a8d9ef",
+                        "on-error": "#fff7f6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#e7f0ed",
+                        "primary-fixed-dim": "#7ae7d8",
+                        "on-secondary": "#fbf7ff",
+                        "on-tertiary": "#f2faff",
+                        "error-dim": "#67040d",
+                        "primary-dim": "#005e56",
+                        "on-tertiary-fixed-variant": "#2e6073",
+                        "outline": "#727d7b",
+                        "tertiary-fixed": "#b6e7fe",
+                        "surface-bright": "#f6faf8",
+                        "primary": "#006b62",
+                        "primary-container": "#89f5e7",
+                        "surface": "#f6faf8",
+                        "on-primary-fixed-variant": "#00675e",
+                        "surface-dim": "#d1dcd9",
+                        "on-secondary-container": "#3f33d6",
+                        "tertiary-container": "#b6e7fe",
+                        "surface-container-highest": "#d9e5e2",
+                        "secondary-container": "#e2dfff",
+                        "on-primary": "#e2fff9",
+                        "surface-container-high": "#e1eae7",
+                        "background": "#f6faf8",
+                        "surface-tint": "#006b62",
+                        "inverse-primary": "#91feef",
+                        "tertiary": "#346578",
+                        "secondary-dim": "#4135d8",
+                        "on-surface": "#2a3433",
+                        "secondary": "#4e45e4",
+                        "surface-container-low": "#eef5f3",
+                        "on-surface-variant": "#56615f",
+                        "tertiary-dim": "#27596c",
+                        "inverse-surface": "#0a0f0e",
+                        "on-primary-container": "#005c54",
+                        "on-background": "#2a3433",
+                        "secondary-fixed": "#e2dfff",
+                        "on-error-container": "#6e0a12",
+                        "surface-variant": "#d9e5e2",
+                        "secondary-fixed-dim": "#d2d0ff",
+                        "on-tertiary-fixed": "#084355",
+                        "on-secondary-fixed-variant": "#4a40e0",
+                        "error-container": "#fa746f",
+                        "outline-variant": "#a9b4b1",
+                        "on-tertiary-container": "#235669",
+                        "on-secondary-fixed": "#2a13c5",
+                        "inverse-on-surface": "#999e9c",
+                        "primary-fixed": "#89f5e7",
+                        "on-primary-fixed": "#004841"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Hanken Grotesk"],
+                        "display": ["Hanken Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Public Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .data-grid th {
+            @apply px-4 py-3 text-left font-label text-xs font-semibold text-on-surface-variant uppercase tracking-wider border-b border-outline-variant bg-surface-container-lowest sticky top-0 z-10;
+        }
+        .data-grid td {
+            @apply px-4 py-3 whitespace-nowrap text-sm text-on-surface border-b border-surface-variant bg-surface-container-lowest;
+        }
+        .data-grid tr:hover td {
+            @apply bg-surface-container-low transition-colors duration-150;
+        }
+        
+        /* Custom Scrollbar for the table container */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: theme('colors.surface-container-low');
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: theme('colors.outline-variant');
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline');
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body text-sm antialiased flex h-screen overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Shared Component JSON Source of Truth) -->
+<nav class="bg-surface-container-low border-r border-outline-variant h-screen w-64 fixed left-0 top-0 flex flex-col h-full p-4 overflow-y-auto z-20">
+<div class="mb-8 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xl shrink-0">
+                S
+            </div>
+<div>
+<h1 class="text-2xl font-headline font-bold text-primary">Siraj</h1>
+<p class="text-xs text-on-surface-variant font-label">LMS Dashboard</p>
+</div>
+</div>
+<div class="mb-4 text-xs font-semibold text-outline tracking-wider uppercase px-2">Finance</div>
+<div class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-label text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+<span class="font-label text-sm font-medium">Payroll</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+<span class="font-label text-sm font-medium">Session Audit</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span class="font-label text-sm">Carryover</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span class="font-label text-sm font-medium">Expenses</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 flex flex-col h-screen overflow-hidden bg-background">
+<!-- TopNavBar (Shared Component JSON Source of Truth) -->
+<header class="bg-surface border-b border-outline-variant docked full-width top-0 sticky flex justify-between items-center h-16 px-6 z-10 shrink-0">
+<div class="flex items-center w-1/3">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-full py-2 pl-10 pr-4 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-70 text-sm font-medium">
+<span class="material-symbols-outlined text-[20px]">language</span>
+                    EN
+                </button>
+<div class="w-px h-6 bg-outline-variant"></div>
+<button class="text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-70 relative">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant ml-2 cursor-pointer active:opacity-70">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Professional headshot of a female administrative user in bright, modern office setting, smiling slightly. High key lighting, clean crisp aesthetic, teal and indigo accents in background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXRkRkGo81-D11BP7DBcJl5YesRBQaF1-9n6l7FAqZ-xm1ocVKeqnZSZs1jjkNXsWz-r4j0A45-_Fjzpu6GoqbThbARoB17kGMN-rvtZweQvykCciDU9zuXZbW7f1ooM_cVjcKlwwojvI4nIdYg2wab9EhUKpBgVuIYQkibTwRTkq7x7r0d1RkGTebpGkHJ7kxT29eBuRHik3VmOKqe25ZbYz6WPXD_RfMMQgAgToFvtfmQJ9yzLAL1tX0Vw8EQZ7q8oztKK1wLxE"/>
+</button>
+</div>
+</header>
+<!-- Scrollable Page Content -->
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<h2 class="text-2xl font-headline font-black text-on-surface tracking-tight">Carryover Balances</h2>
+<p class="text-on-surface-variant text-sm">Settle aggregate teacher payouts and convert them to expenses</p>
+</div>
+<!-- Filter Bar Card -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-4 shadow-sm flex flex-col gap-4">
+<div class="flex flex-wrap items-end gap-4">
+<!-- Teacher Autocomplete -->
+<div class="flex flex-col gap-1.5 w-48">
+<label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Teacher</label>
+<div class="relative">
+<input class="w-full bg-surface border border-outline-variant rounded-md py-1.5 px-3 text-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-colors cursor-pointer" readonly="" type="text" value="All teachers"/>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline text-[18px] pointer-events-none">arrow_drop_down</span>
+</div>
+</div>
+<!-- Status Segmented Control -->
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Status</label>
+<div class="flex bg-surface-container-low rounded-md p-1 border border-outline-variant">
+<button class="px-4 py-1 text-sm font-medium rounded text-on-surface-variant hover:text-on-surface transition-colors">Paid</button>
+<button class="px-4 py-1 text-sm font-medium rounded text-on-surface-variant hover:text-on-surface transition-colors">Unpaid</button>
+<button class="px-4 py-1 text-sm font-medium rounded bg-surface-container-lowest text-on-surface shadow-sm border border-outline-variant/50 transition-all">Both</button>
+</div>
+</div>
+<!-- Date Range -->
+<div class="flex flex-col gap-1.5 w-32">
+<label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">From</label>
+<input class="w-full bg-surface border border-outline-variant rounded-md py-1.5 px-3 text-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-colors" type="date"/>
+</div>
+<div class="flex flex-col gap-1.5 w-32">
+<label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">To</label>
+<input class="w-full bg-surface border border-outline-variant rounded-md py-1.5 px-3 text-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-colors" type="date"/>
+</div>
+<!-- Search Field -->
+<div class="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+<label class="text-xs font-semibold text-on-surface-variant uppercase tracking-wide">Search</label>
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full bg-surface border border-outline-variant rounded-md py-1.5 pl-9 pr-3 text-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-colors" placeholder="Search teacher or students..." type="text"/>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between border-t border-surface-variant pt-3">
+<label class="flex items-center gap-2 cursor-pointer group">
+<div class="relative">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-outline-variant after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-outline-variant group-hover:bg-outline/50"></div>
+</div>
+<span class="text-sm text-on-surface-variant font-medium select-none">Show disabled teachers</span>
+</label>
+<button class="text-sm font-semibold text-primary hover:text-primary-dim transition-colors px-2 py-1 rounded hover:bg-primary-container/20 active:scale-95">Clear filters</button>
+</div>
+</div>
+<!-- Data Table Section -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm flex flex-col flex-1 overflow-hidden">
+<!-- Bulk Action Toolbar -->
+<div class="p-3 border-b border-outline-variant bg-surface-container flex items-center justify-between shrink-0">
+<div class="flex items-center gap-4">
+<span class="text-sm font-semibold text-primary bg-primary-container px-3 py-1 rounded-full">3 selected</span>
+<div class="w-px h-4 bg-outline-variant"></div>
+<button class="text-sm font-semibold text-on-primary bg-primary hover:bg-primary-dim transition-colors px-4 py-1.5 rounded-md shadow-sm active:scale-95 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                            Add New
+                        </button>
+<button class="text-sm font-semibold text-on-surface bg-surface border border-outline-variant hover:bg-surface-container transition-colors px-3 py-1.5 rounded-md active:scale-95">
+                            Bulk To Expense
+                        </button>
+<button class="text-sm font-semibold text-error bg-surface border border-error-container hover:bg-error-container hover:text-on-error-container transition-colors px-3 py-1.5 rounded-md active:scale-95 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+                            Bulk Delete
+                        </button>
+</div>
+<button class="text-sm font-semibold text-primary border border-primary hover:bg-primary-container/20 transition-colors px-4 py-1.5 rounded-md active:scale-95 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        Export CSV
+                    </button>
+</div>
+<!-- Scrollable Table -->
+<div class="overflow-auto table-container flex-1">
+<table class="w-full text-left border-collapse data-grid">
+<thead>
+<tr>
+<th class="w-12 text-center !px-2">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</th>
+<th>Teacher</th>
+<th class="text-center">Students</th>
+<th>Students List</th>
+<th class="text-right">Duration (h)</th>
+<th class="text-right">Payable</th>
+<th class="text-right">Paid</th>
+<th>From</th>
+<th>To</th>
+<th>Payment Date</th>
+<th class="text-center">Status</th>
+<th class="text-center">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-variant font-body">
+<!-- Row 1 (Selected, Unpaid) -->
+<tr class="bg-primary-container/10 hover:!bg-primary-container/20">
+<td class="text-center !px-2">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs shrink-0">
+                                            AH
+                                        </div>
+<span class="font-semibold text-on-surface">Ahmed Hassan</span>
+</div>
+</td>
+<td class="text-center"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-container-high text-xs font-semibold text-on-surface-variant">12</span></td>
+<td class="max-w-[150px] truncate text-on-surface-variant text-xs" title="Sarah A., Khalid J., Mona M.">Sarah A., Khalid J., Mona M.</td>
+<td class="text-right font-mono text-xs">18.50</td>
+<td class="text-right font-semibold text-on-surface">4,250.00 <span class="text-[10px] text-on-surface-variant font-normal">SAR</span></td>
+<td class="text-right text-on-surface-variant">0.00 <span class="text-[10px] font-normal">SAR</span></td>
+<td class="text-xs text-on-surface-variant">2026-07-01</td>
+<td class="text-xs text-on-surface-variant">2026-07-31</td>
+<td class="text-center text-outline-variant font-medium">—</td>
+<td class="text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-tertiary-container text-on-tertiary-container border border-tertiary-container">Unpaid</span>
+</td>
+<td>
+<div class="flex items-center justify-center gap-1">
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 2 (Paid) -->
+<tr>
+<td class="text-center !px-2">
+<input class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td>
+<div class="flex items-center gap-3">
+<img class="w-8 h-8 rounded-full object-cover shrink-0" data-alt="Professional headshot of a male teacher in a bright modern classroom setting, subtle teal accents. Clean and crisp." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqoXbygD-BFStp5hrPUM_9eJmcLxC1_7XoS31Bgd2LkmDSXPNM1_djjS-yeg7GkAiIySOPe-FWb7LvAMyVQlr4VAYAqqZ6eCd2gZqBVvxtO31-nD10iGlTilvd_WY8hokp9OGnBFUDrA9ge4VRIHCGZdvTlUlbuNvDQtxdsfKf3S9iqcgnKNoM634Gmysy9oTCIfDllLv40rHtZY-HUcgXdbNEyb_MZEto-r_DULDroUEtphc02_OZIsWGCs8ROiEHBAKKXscGHP8"/>
+<span class="font-semibold text-on-surface">Tariq Mahmoud</span>
+</div>
+</td>
+<td class="text-center"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-container-high text-xs font-semibold text-on-surface-variant">8</span></td>
+<td class="max-w-[150px] truncate text-on-surface-variant text-xs" title="Omar F., Laila S.">Omar F., Laila S.</td>
+<td class="text-right font-mono text-xs">12.00</td>
+<td class="text-right font-semibold text-on-surface">3,100.00 <span class="text-[10px] text-on-surface-variant font-normal">SAR</span></td>
+<td class="text-right text-on-surface">3,100.00 <span class="text-[10px] text-on-surface-variant font-normal">SAR</span></td>
+<td class="text-xs text-on-surface-variant">2026-07-01</td>
+<td class="text-xs text-on-surface-variant">2026-07-31</td>
+<td class="text-xs text-on-surface-variant">2026-08-05</td>
+<td class="text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-surface-container-high text-primary-dim border border-primary-fixed-dim/50">Paid</span>
+</td>
+<td>
+<div class="flex items-center justify-center gap-1">
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="p-1 text-on-surface-variant hover:text-error rounded hover:bg-surface-container transition-colors" title="Unpay"><span class="material-symbols-outlined text-[18px]">undo</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 3 (Selected, Unpaid USD) -->
+<tr class="bg-primary-container/10 hover:!bg-primary-container/20">
+<td class="text-center !px-2">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs shrink-0">
+                                            SA
+                                        </div>
+<span class="font-semibold text-on-surface">Sarah Al-Dosari</span>
+</div>
+</td>
+<td class="text-center"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-container-high text-xs font-semibold text-on-surface-variant">22</span></td>
+<td class="max-w-[150px] truncate text-on-surface-variant text-xs" title="Faisal K., Nora H., Yasser T., ...">Faisal K., Nora H., ...</td>
+<td class="text-right font-mono text-xs">45.25</td>
+<td class="text-right font-semibold text-on-surface">1,250.00 <span class="text-[10px] text-on-surface-variant font-normal">USD</span></td>
+<td class="text-right text-on-surface-variant">0.00 <span class="text-[10px] font-normal">USD</span></td>
+<td class="text-xs text-on-surface-variant">2026-06-15</td>
+<td class="text-xs text-on-surface-variant">2026-07-15</td>
+<td class="text-center text-outline-variant font-medium">—</td>
+<td class="text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-tertiary-container text-on-tertiary-container border border-tertiary-container">Unpaid</span>
+</td>
+<td>
+<div class="flex items-center justify-center gap-1">
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+</div>
+</td>
+</tr>
+<!-- Row 4 (Disabled Teacher) -->
+<tr>
+<td class="text-center !px-2">
+<input class="rounded border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox"/>
+</td>
+<td>
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-variant text-outline flex items-center justify-center font-bold text-xs shrink-0 grayscale opacity-70">
+                                            MK
+                                        </div>
+<span class="font-medium text-on-surface-variant line-through decoration-outline-variant">Mahmoud Khalil</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-outline bg-surface-variant px-1.5 py-0.5 rounded ml-1">Disabled</span>
+</div>
+</td>
+<td class="text-center"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-container-high text-xs font-semibold text-outline-variant">3</span></td>
+<td class="max-w-[150px] truncate text-outline-variant text-xs" title="Ziad M.">Ziad M.</td>
+<td class="text-right font-mono text-xs text-outline-variant">4.50</td>
+<td class="text-right font-medium text-outline-variant">850.00 <span class="text-[10px] font-normal">EGP</span></td>
+<td class="text-right text-outline-variant">850.00 <span class="text-[10px] font-normal">EGP</span></td>
+<td class="text-xs text-outline-variant">2026-05-01</td>
+<td class="text-xs text-outline-variant">2026-05-31</td>
+<td class="text-xs text-outline-variant">2026-06-10</td>
+<td class="text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-surface-container text-outline border border-outline-variant/50">Paid</span>
+</td>
+<td>
+<div class="flex items-center justify-center gap-1 opacity-50 pointer-events-none">
+<button class="p-1 text-on-surface-variant rounded"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+<button class="p-1 text-on-surface-variant rounded"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Aggregate Footer -->
+<div class="p-3 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between shrink-0 font-label text-sm text-on-surface-variant">
+<div class="flex items-center gap-3">
+<span class="font-semibold text-on-surface">Total payable: <span class="font-mono font-normal">18,940.00 SAR</span></span>
+<div class="w-px h-4 bg-outline-variant"></div>
+<span>Total paid: <span class="font-mono">9,300.00 SAR</span></span>
+<div class="w-px h-4 bg-outline-variant"></div>
+<span><span class="text-tertiary-dim font-bold">6</span> unpaid · <span class="text-primary-dim font-bold">4</span> paid</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span>Rows per page:</span>
+<select class="bg-transparent border-none text-on-surface font-medium focus:ring-0 cursor-pointer py-0 pl-1 pr-6 text-sm">
+<option>50</option>
+<option>100</option>
+</select>
+</div>
+<span class="font-medium text-on-surface">1–10 of 47</span>
+<div class="flex items-center gap-1">
+<button class="p-1 text-outline hover:text-on-surface disabled:opacity-30 rounded hover:bg-surface-container transition-colors" disabled="">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="p-1 text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

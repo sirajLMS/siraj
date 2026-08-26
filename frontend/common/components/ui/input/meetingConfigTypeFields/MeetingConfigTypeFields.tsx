@@ -10,7 +10,6 @@ import {
 export type {
   MeetingConfigDetailsFormValue,
   MeetingConfigTypeFieldsProps,
-  MeetingProviderFieldsFragment,
 } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFieldsShared";
 
 export function MeetingConfigTypeFields(props: Readonly<MeetingConfigTypeFieldsProps>): React.ReactNode {

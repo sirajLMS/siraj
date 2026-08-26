@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Siraj LMS - Class Session Audit</title>
+<!-- Tailwind CSS with specific configuration requested -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed": "#1b1c1c",
+                      "on-secondary-container": "#656464",
+                      "secondary-fixed-dim": "#c8c6c6",
+                      "error": "#ba1a1a",
+                      "surface-container-lowest": "#ffffff",
+                      "outline-variant": "#c1c6d4",
+                      "on-tertiary-fixed-variant": "#733600",
+                      "surface": "#f9f9f9",
+                      "on-error-container": "#93000a",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#a5c8ff",
+                      "on-surface": "#1a1c1c",
+                      "on-tertiary-container": "#fffeff",
+                      "secondary-container": "#e4e2e1",
+                      "surface-bright": "#f9f9f9",
+                      "inverse-primary": "#a5c8ff",
+                      "inverse-surface": "#2f3131",
+                      "tertiary": "#944700",
+                      "surface-container-high": "#e8e8e8",
+                      "surface-container-highest": "#e2e2e2",
+                      "primary-container": "#1976d2",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed": "#e4e2e1",
+                      "outline": "#717783",
+                      "surface-container-low": "#f3f3f3",
+                      "on-background": "#1a1c1c",
+                      "surface-dim": "#dadada",
+                      "primary-fixed": "#d4e3ff",
+                      "tertiary-fixed": "#ffdbc7",
+                      "background": "#f9f9f9",
+                      "on-tertiary-fixed": "#311300",
+                      "on-primary-fixed": "#001c3a",
+                      "surface-variant": "#e2e2e2",
+                      "surface-tint": "#005faf",
+                      "secondary": "#5f5e5e",
+                      "inverse-on-surface": "#f1f1f1",
+                      "on-primary-container": "#fffdff",
+                      "primary": "#005dac",
+                      "tertiary-container": "#ba5b00",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed-variant": "#474747",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed-variant": "#004786",
+                      "tertiary-fixed-dim": "#ffb688",
+                      "on-secondary": "#ffffff",
+                      "surface-container": "#eeeeee",
+                      "on-surface-variant": "#414752"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem",
+                      "cards": "16px"
+              },
+              "spacing": {
+                      "content-padding": "24px",
+                      "base": "8px",
+                      "sidebar-expanded": "280px",
+                      "sidebar-collapsed": "72px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "h2": ["Inter", "sans-serif"],
+                      "body-md": ["Inter", "sans-serif"],
+                      "caption": ["Inter", "sans-serif"],
+                      "h1": ["Inter", "sans-serif"],
+                      "label-md": ["Inter", "sans-serif"],
+                      "h3": ["Inter", "sans-serif"],
+                      "body-lg": ["Inter", "sans-serif"],
+                      "label-lg": ["Inter", "sans-serif"]
+              },
+              "fontSize": {
+                      "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                      "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+</head>
+<body class="bg-[#F5F5F5] font-body-md text-on-surface antialiased">
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter h-16 bg-surface-bright dark:bg-surface-dim shadow-sm docked full-width">
+<div class="flex items-center gap-4">
+<!-- Mobile Menu Trigger -->
+<button class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<!-- Logo -->
+<div class="text-h2 font-h2 text-primary dark:text-primary-fixed-dim">Siraj LMS</div>
+</div>
+<div class="flex items-center gap-4">
+<!-- Trailing Actions -->
+<button class="p-2 text-on-surface-variant dark:text-outline hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors rounded-full cursor-pointer active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant dark:text-outline hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors rounded-full cursor-pointer active:scale-95">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+<!-- Profile Avatar Image (Visual only if no icon) -->
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden cursor-pointer">
+<img alt="User profile avatar" class="object-cover w-full h-full" data-alt="A small, professional portrait of a confident middle-aged man with short hair, wearing a neat button-down shirt. The lighting is soft and high-key, fitting a corporate modern light-mode LMS UI. The image is cropped in a tight circle." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCq5_PHV1d2eZ82y_yjwCbk31ivREGsnNsccO9ltuBWlPnVP1Rv3vbUJoRt8iIHI5zLnRM6UmQcS3HzEKuR0FreUv7KD1KoBavVI_pFuX5RYOhi46EsbUbACyJes7iIGYhcjnZXurWTkcURD25aLh-XO9vCHT56IXLIkVeO269IKMbMa6-UwaJ1nd4BIl7bOdBiz9v7i3Q8PXmy4pmOh6HgmEnbNWBKv8sz5V1SOE8x7lpNK6UA5l4QSQ-Lx6ywZ4FW5TIz7-5Tq32p"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="hidden md:flex fixed left-0 top-0 h-full w-[280px] flex-col py-base z-40 bg-surface-container-low dark:bg-surface-container-lowest docked mt-16 shadow-none">
+<!-- Header Info (If separate from top nav in sidebar) -->
+<div class="px-content-padding py-base mb-4 border-b border-surface-container-high">
+<h2 class="text-h3 font-h3 text-primary dark:text-primary-fixed-dim">Siraj LMS</h2>
+<p class="font-label-md text-label-md text-on-surface-variant">Admin Portal</p>
+</div>
+<nav class="flex-1 px-base space-y-1">
+<!-- Tab: Dashboard -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all duration-200 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<!-- Tab: Accounting (ACTIVE) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary dark:text-primary-fixed-dim border-r-4 border-primary dark:border-primary-fixed-dim bg-primary-container/10 transition-all duration-200 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined fill" data-icon="account_balance">account_balance</span>
+                Accounting
+            </a>
+<!-- Tab: Reports -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all duration-200 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined" data-icon="assessment">assessment</span>
+                Reports
+            </a>
+<!-- Tab: Settings -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all duration-200 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="mt-auto px-base pb-base space-y-1">
+<!-- Footer Tabs -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all duration-200 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                Help
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-outline hover:bg-surface-container-high dark:hover:bg-surface-variant transition-all duration-200 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-[280px] pt-16 min-h-screen px-content-padding py-content-padding flex flex-col gap-6">
+<!-- Breadcrumb & Header -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center text-sm font-label-md text-outline">
+<span>Accounting</span>
+<span class="material-symbols-outlined text-[16px] mx-1">chevron_right</span>
+<span>Full Reports</span>
+<span class="material-symbols-outlined text-[16px] mx-1">chevron_right</span>
+<span class="text-on-surface">Session Audit</span>
+</div>
+<div class="flex justify-between items-end">
+<div>
+<h1 class="font-h1 text-h1 text-on-surface">Class Session Audit</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-1">Session ID <span class="font-mono bg-surface-container px-2 py-1 rounded text-primary">#CI-88234</span></p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface hover:bg-surface-container-low transition-colors font-label-lg text-label-lg">
+<span class="material-symbols-outlined text-[18px]">download</span> Export Audit
+                    </button>
+</div>
+</div>
+</div>
+<!-- Session Metadata Card (Full Width) -->
+<div class="bg-surface-container-lowest rounded-cards p-6 shadow-[0px_2px_4px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 bg-primary-container/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">function</span>
+</div>
+<div>
+<h2 class="font-h3 text-h3 text-on-surface">Mathematics — Grade 10</h2>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px]">event</span>
+                            Aug 26, 2026, 10:00 AM — 11:00 AM
+                        </p>
+</div>
+</div>
+</div>
+<div class="flex gap-8 border-t md:border-t-0 md:border-l border-outline-variant/30 pt-4 md:pt-0 md:pl-8">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container overflow-hidden">
+<img alt="Teacher" class="object-cover w-full h-full" data-alt="A professional headshot of a male teacher in his 30s wearing a smart casual jacket. Soft studio lighting, neutral background, reflecting an enterprise LMS light-mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnIs3zk15xOgZEHTDZjbkP_RoX2aGYPhguJM_Fg6a07N_eVZlBIg_Gx1E1Mo78kl3PtFd0p8ZERSikP8bFL4vv2DalRngsXUFYNrwjCiEcb-kpoX3XJN3AUv5XJ92eO3r4mmQctUcxzYYyU212Hzpn97v45qe0kjI31mk7VvlkDT2BbD15tSRV_KTpUHWDj8YPWRJmATPZPnxlr1E544hzNcAtwSGBDHw7EjSE-xcsEPV__44uP_nFx44S3PUsJywTUlI_L-E6AC34"/>
+</div>
+<div>
+<p class="font-label-md text-label-md text-outline uppercase">Teacher</p>
+<p class="font-body-lg text-body-lg text-on-surface font-medium">Ahmed Hassan</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-container/20 overflow-hidden">
+<img alt="Student" class="object-cover w-full h-full" data-alt="A portrait of a cheerful female high school student looking attentive. Bright, optimistic lighting, clean white background, suitable for a modern educational platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLHOCr0WA0lSK4_g1o87_TcAq1XP7pCp1e3r9z1FMalquSvYGMNmax1ZRzJ0vY8haVoOzvgkATiYXPWC_Bt6YPXyHAlQmTi-OEMH8Hl5P2GHwC-yDtsd9GHdoRj_WzI-csEZFdk3jn7V30VXxC1TSRY37RNM5eOQIcM1ZxxwHzXYMKLHBnf5swfTyKuJcXhP2LMlo7WSdYN0YWmfts51gW347CSMPyrz-Lkab6aAyIHR0ngVTlkqakgR1Xr3BrhJF3Cr-ekv3lsNxr"/>
+</div>
+<div>
+<p class="font-label-md text-label-md text-outline uppercase">Student</p>
+<p class="font-body-lg text-body-lg text-on-surface font-medium">Sarah Ahmed</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Two Column Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- LEFT COLUMN (60%) -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<!-- Session Timeline -->
+<div class="bg-surface-container-lowest rounded-cards p-6 shadow-[0px_2px_4px_rgba(0,0,0,0.05)] border border-outline-variant/30">
+<h3 class="font-h3 text-h3 text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">history</span>
+                        Session Timeline
+                    </h3>
+<div class="relative border-l-2 border-surface-container-high ml-4 space-y-8 pb-4">
+<!-- Item 1 (Green) -->
+<div class="relative pl-6">
+<div class="absolute w-4 h-4 bg-surface-container-lowest border-4 border-[#4CAF50] rounded-full -left-[9px] top-1"></div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface flex items-center gap-2">
+                                        Session ended
+                                        <span class="text-[#4CAF50] bg-[#4CAF50]/10 px-2 py-0.5 rounded text-[10px] font-bold">END</span>
+</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Teacher left the room</p>
+<p class="font-caption text-caption text-outline mt-1">by <span class="font-medium text-on-surface">Ahmed Hassan</span></p>
+</div>
+<span class="font-caption text-caption text-outline whitespace-nowrap">Aug 26, 2026, 10:58 AM</span>
+</div>
+</div>
+<!-- Item 2 (Yellow) -->
+<div class="relative pl-6">
+<div class="absolute w-4 h-4 bg-surface-container-lowest border-4 border-[#FFC107] rounded-full -left-[9px] top-1"></div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface">Session in progress</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Teacher joined the room</p>
+<p class="font-caption text-caption text-outline mt-1">by <span class="font-medium text-on-surface">Ahmed Hassan</span></p>
+</div>
+<span class="font-caption text-caption text-outline whitespace-nowrap">Aug 26, 2026, 10:02 AM</span>
+</div>
+</div>
+<!-- Item 3 (Blue) -->
+<div class="relative pl-6">
+<div class="absolute w-4 h-4 bg-surface-container-lowest border-4 border-primary rounded-full -left-[9px] top-1"></div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface">Session scheduled</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Booked by admin</p>
+<p class="font-caption text-caption text-outline mt-1">by <span class="font-medium text-on-surface">System</span></p>
+</div>
+<span class="font-caption text-caption text-outline whitespace-nowrap">Aug 26, 2026, 9:00 AM</span>
+</div>
+</div>
+<!-- Item 4 (Gray) -->
+<div class="relative pl-6">
+<div class="absolute w-4 h-4 bg-surface-container-lowest border-4 border-outline rounded-full -left-[9px] top-1"></div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface text-outline">Class created</h4>
+<p class="font-body-md text-body-md text-outline mt-1">Recurring series generated</p>
+<p class="font-caption text-caption text-outline/70 mt-1">by <span class="font-medium">System</span></p>
+</div>
+<span class="font-caption text-caption text-outline whitespace-nowrap">Aug 20, 2026, 3:00 PM</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Communication Log -->
+<div class="bg-surface-container-lowest rounded-cards p-6 shadow-[0px_2px_4px_rgba(0,0,0,0.05)] border border-outline-variant/30 overflow-hidden">
+<h3 class="font-h3 text-h3 text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-outline">forum</span>
+                        Communication Log
+                    </h3>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#FAFAFA] border-b border-outline-variant/30">
+<th class="py-3 px-4 font-label-md text-label-md text-outline uppercase tracking-wider">Time</th>
+<th class="py-3 px-4 font-label-md text-label-md text-outline uppercase tracking-wider">Sender</th>
+<th class="py-3 px-4 font-label-md text-label-md text-outline uppercase tracking-wider">Message/Remark</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md text-on-surface divide-y divide-outline-variant/20">
+<tr class="hover:bg-primary-fixed/30 transition-colors h-[52px]">
+<td class="py-3 px-4 whitespace-nowrap text-on-surface-variant">10:05 AM</td>
+<td class="py-3 px-4"><span class="bg-surface-container px-2 py-1 rounded text-xs font-medium text-on-surface-variant">System</span></td>
+<td class="py-3 px-4">Connection stable. Ping: 24ms.</td>
+</tr>
+<tr class="hover:bg-primary-fixed/30 transition-colors h-[52px]">
+<td class="py-3 px-4 whitespace-nowrap text-on-surface-variant">10:45 AM</td>
+<td class="py-3 px-4"><span class="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-medium">Sarah A.</span></td>
+<td class="py-3 px-4">Student asked for more exercises via chat.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN (40%) -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<!-- Payroll Calculation Card -->
+<div class="bg-surface-container-lowest rounded-cards p-6 shadow-[0px_8px_16px_rgba(0,0,0,0.05)] border border-outline-variant/30">
+<div class="flex justify-between items-start mb-6">
+<h3 class="font-h3 text-h3 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">payments</span>
+                            Payroll Calculation
+                        </h3>
+<span class="bg-[#4CAF50]/10 text-[#4CAF50] font-label-md text-label-md px-3 py-1 rounded-full uppercase">PAID</span>
+</div>
+<div class="bg-[#FAFAFA] rounded-lg p-4 border border-outline-variant/50 mb-6 relative overflow-hidden">
+<!-- Decorative bg -->
+<div class="absolute right-0 top-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-10 -mt-10 pointer-events-none"></div>
+<p class="font-label-md text-label-md text-outline uppercase mb-1">Calculated Amount</p>
+<div class="text-h1 font-h1 text-on-surface">$45.00 USD</div>
+<p class="font-caption text-caption text-on-surface-variant mt-1">Plan 3 • Processed Aug 28, 2026</p>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between items-center border-b border-outline-variant/20 pb-3">
+<span class="font-body-md text-body-md text-on-surface-variant">Scheduled Duration</span>
+<span class="font-label-lg text-label-lg text-on-surface">60 min</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant/20 pb-3">
+<span class="font-body-md text-body-md text-on-surface-variant">Calculated Duration</span>
+<div class="flex items-center gap-2">
+<input class="w-16 h-8 text-center border border-outline-variant rounded bg-surface-container-lowest font-label-lg text-label-lg text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" type="text" value="55"/>
+<span class="font-label-lg text-label-lg text-on-surface">min</span>
+</div>
+</div>
+<div class="bg-error-container/20 border border-error/20 rounded p-3 text-error flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] mt-0.5">info</span>
+<span class="font-caption text-caption font-medium">Teacher left 5 minutes early. Adjusted to 55 min.</span>
+</div>
+</div>
+<div class="flex gap-3 pt-2">
+<button class="flex-1 py-2.5 px-4 border border-outline text-on-surface font-label-lg text-label-lg rounded-lg hover:bg-surface-container transition-colors">
+                            Recalculate
+                        </button>
+<button class="flex-1 py-2.5 px-4 bg-[#1976D2] hover:bg-[#1565C0] text-white font-label-lg text-label-lg rounded-lg transition-colors shadow-sm">
+                            Override Payroll
+                        </button>
+</div>
+</div>
+<!-- Audit Override History (Expandable) -->
+<div class="bg-surface-container-lowest rounded-cards shadow-[0px_2px_4px_rgba(0,0,0,0.05)] border border-outline-variant/30 overflow-hidden" x-data="{ expanded: false }">
+<button class="w-full p-4 flex justify-between items-center bg-surface-container-lowest hover:bg-surface-container-low transition-colors" onclick="this.parentElement.classList.toggle('is-expanded')">
+<h3 class="font-label-lg text-label-lg text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[20px]">manage_history</span>
+                            Audit Override History
+                        </h3>
+<span class="material-symbols-outlined text-outline transform transition-transform duration-200" style="transition: transform 0.2s; .is-expanded &amp; { transform: rotate(180deg); }">expand_more</span>
+</button>
+<div class="border-t border-outline-variant/30 p-0 hidden" style="display: block; /* simulating expanded state for design purposes */">
+<table class="w-full text-left border-collapse text-sm">
+<thead>
+<tr class="bg-[#FAFAFA] border-b border-outline-variant/30">
+<th class="py-2 px-4 font-caption text-caption text-outline uppercase">Date</th>
+<th class="py-2 px-4 font-caption text-caption text-outline uppercase">Old/New</th>
+<th class="py-2 px-4 font-caption text-caption text-outline uppercase">Reason</th>
+</tr>
+</thead>
+<tbody class="font-caption text-caption text-on-surface divide-y divide-outline-variant/20">
+<tr class="h-10">
+<td class="py-2 px-4 text-on-surface-variant">Aug 27, 2026</td>
+<td class="py-2 px-4"><span class="line-through text-outline mr-1">60</span> 55</td>
+<td class="py-2 px-4 truncate max-w-[120px]" title="System auto-adjust based on room exit.">Sys auto-adjust</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Info Row (Grid of small cards) -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-2">
+<!-- Room Entry -->
+<div class="bg-surface-container-lowest rounded-lg p-4 border border-outline-variant/30 shadow-sm flex flex-col items-start">
+<span class="material-symbols-outlined text-outline mb-2 text-[20px]">login</span>
+<span class="font-label-md text-label-md text-outline uppercase mb-1">Room Entry</span>
+<span class="font-body-md text-body-md text-on-surface font-medium leading-tight">10:02 AM<br/><span class="text-xs text-on-surface-variant font-normal">Aug 26, 2026</span></span>
+</div>
+<!-- Room Exit -->
+<div class="bg-surface-container-lowest rounded-lg p-4 border border-outline-variant/30 shadow-sm flex flex-col items-start">
+<span class="material-symbols-outlined text-outline mb-2 text-[20px]">logout</span>
+<span class="font-label-md text-label-md text-outline uppercase mb-1">Room Exit</span>
+<span class="font-body-md text-body-md text-on-surface font-medium leading-tight">10:58 AM<br/><span class="text-xs text-on-surface-variant font-normal">Aug 26, 2026</span></span>
+</div>
+<!-- Timezone -->
+<div class="bg-surface-container-lowest rounded-lg p-4 border border-outline-variant/30 shadow-sm flex flex-col items-start justify-between">
+<span class="material-symbols-outlined text-outline mb-2 text-[20px]">language</span>
+<span class="font-label-md text-label-md text-outline uppercase mb-1">Timezone</span>
+<span class="bg-surface-container px-2 py-1 rounded text-xs font-medium text-on-surface-variant mt-auto">Africa/Cairo</span>
+</div>
+<!-- Session Status -->
+<div class="bg-surface-container-lowest rounded-lg p-4 border border-outline-variant/30 shadow-sm flex flex-col items-start justify-between">
+<span class="material-symbols-outlined text-outline mb-2 text-[20px]">check_circle</span>
+<span class="font-label-md text-label-md text-outline uppercase mb-1">Status</span>
+<span class="bg-[#4CAF50]/10 text-[#4CAF50] px-2 py-1 rounded text-xs font-bold mt-auto">END</span>
+</div>
+<!-- Rescheduled -->
+<div class="bg-surface-container-lowest rounded-lg p-4 border border-outline-variant/30 shadow-sm flex flex-col items-start justify-between">
+<span class="material-symbols-outlined text-outline mb-2 text-[20px]">calendar_month</span>
+<span class="font-label-md text-label-md text-outline uppercase mb-1">Rescheduled</span>
+<span class="font-body-md text-body-md text-on-surface font-medium mt-auto">No</span>
+</div>
+<!-- Frozen -->
+<div class="bg-surface-container-lowest rounded-lg p-4 border border-outline-variant/30 shadow-sm flex flex-col items-start justify-between">
+<span class="material-symbols-outlined text-outline mb-2 text-[20px]">ac_unit</span>
+<span class="font-label-md text-label-md text-outline uppercase mb-1">Frozen</span>
+<span class="font-body-md text-body-md text-on-surface font-medium mt-auto">No</span>
+</div>
+</div>
+</main>
+</body></html>

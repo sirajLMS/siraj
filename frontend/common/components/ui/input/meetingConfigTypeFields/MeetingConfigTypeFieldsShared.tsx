@@ -5,30 +5,9 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getVisibleMeetingConfigFields } from "@/frontend/common/lib/meeting-config";
 import { Translation, useAppTranslation } from "@/shared/locale";
-
-export type MeetingProviderFieldsFragment = {
-  readonly id: string | null;
-  readonly slug: string | null;
-  readonly name: Partial<Record<"ar" | "en", string>> | null;
-  readonly description: Partial<Record<"ar" | "en", string>> | null;
-  readonly instructions: Partial<Record<"ar" | "en", string>> | null;
-  readonly urlAllowlist: readonly string[] | null;
-  readonly urlExample: string | null;
-  readonly logoUrl: string | null;
-  readonly isActive: boolean | null;
-  readonly createdAt: string | null;
-  readonly updatedAt: string | null;
-  readonly fieldSchema: {
-    readonly requiresMeetingUrl: boolean | null;
-    readonly supportsAutoGeneration: boolean | null;
-    readonly supportsUsername: boolean | null;
-    readonly supportsPassword: boolean | null;
-    readonly supportsTenantId: boolean | null;
-  } | null;
-  readonly providerKind: string | null;
-};
 
 export type MeetingConfigDetailsFormValue = {
   meetingUrl: string;

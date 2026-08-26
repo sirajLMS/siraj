@@ -10,7 +10,6 @@ import { MobileContentStack } from "@/frontend/mobile/components/ui/container";
 export type {
   MeetingConfigDetailsFormValue,
   MeetingConfigTypeFieldsProps,
-  MeetingProviderFieldsFragment,
 } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFieldsShared";
 
 function MobileMeetingConfigContainer({
