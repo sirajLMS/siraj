@@ -129,7 +129,7 @@ separate so read-only auditors can be granted view-only access.
 
 ### 3.1 New types
 
-**File:** `backend/types/accounting/session-audit.types.ts`
+**File:** `backend/types/billing/session-audit.types.ts`
 
 ```ts
 import type { CalculationStatus } from "@/backend/enum";
@@ -585,7 +585,7 @@ export const SessionAuditReportPagePothosObject = gqlSchemaBuilder
 
 ### 4.2 New query
 
-**File:** `backend/graphql/query/accounting/session-audit.query.ts`
+**File:** `backend/graphql/query/billing/session-audit.query.ts`
 
 ```ts
 gqlSchemaBuilder.queryField("sessionAuditReport", (t) =>
@@ -1046,7 +1046,7 @@ Covers every `mapToSessionAuditStatus` branch (specs AC-2.2 … AC-2.8):
 
 ### 8.4 GraphQL tests
 
-**File:** `backend/graphql/query/accounting/session-audit.query.test.ts`
+**File:** `backend/graphql/query/billing/session-audit.query.test.ts`
 
 - Query returns the page shape; respects `limit`/`offset`/`sort`.
 - Permission denied → GraphQL error.
