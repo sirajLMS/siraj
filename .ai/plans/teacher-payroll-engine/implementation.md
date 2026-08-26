@@ -139,7 +139,7 @@ export const classInstances = createTable("class_instances", {
   // ... existing columns unchanged ...
   // ── Plan 3 additions ───────────────────────────────────────────────
   calculatedDuration: integerColumn("calculated_duration"), // minutes; null until calc runs
-  teacherPaidAmount: textColumn("teacher_paid_amount", { precision: 12, scale: 2 }),
+  teacherPaidAmount: textColumn("teacher_paid_amount"),
   teacherPaidCurrency: currencyCodeEnum("teacher_paid_currency").$type<CurrencyCode>(),
   calculationStatus: calculationStatusEnum("calculation_status")
     .notNull()
@@ -148,7 +148,7 @@ export const classInstances = createTable("class_instances", {
   isPartialPercentage: smallint("is_partial_percentage"), // 0–100; null unless status=PARTIALLY
   payrollNote: varcharColumn("payroll_note", { length: 2000 }),
   payrollCalculatedAt: timestampColumn("payroll_calculated_at", { withTimezone: true, precision: 3 }),
-  payrollCalculatedBy: uuidColumn("payroll_calculated_by").references(() => users.id, {
+  payrollCalculatedBy: uuidDefaultColumn("payroll_calculated_by").references(() => users.id, {
     onDelete: "set null",
   }),
 },
@@ -160,13 +160,13 @@ export const classInstances = createTable("class_instances", {
   index("class_instances_teacher_status_scheduled_idx").on(
     table.teacherId, table.calculationStatus, table.scheduledStartAt
   ),
-  check(
+  checkConstraint(
     "class_instances_partial_percentage_chk",
     sql`(${table.calculationStatus} != 'PARTIALLY' OR ${table.isPartialPercentage} IS NOT NULL) AND
          (${table.calculationStatus} = 'PARTIALLY' OR ${table.isPartialPercentage} IS NULL) AND
          (${table.isPartialPercentage} IS NULL OR (${table.isPartialPercentage} >= 0 AND ${table.isPartialPercentage} <= 100))`
   ),
-  check(
+  checkConstraint(
     "class_instances_calculated_status_amount_chk",
     sql`(${table.calculationStatus} != 'REFUND' OR ${table.teacherPaidAmount} = 0) AND
          (${table.calculationStatus} != 'CALCULATED' OR ${table.calculatedDuration} IS NOT NULL)`
@@ -419,7 +419,7 @@ export async function calculateForInstance(
 
   return db.transaction(async (tx) => {
     const instance = await ClassInstanceRepository.getById(input.instanceId, tx, { forUpdate: true });
-    if (!instance) throw new DomainError("CLASS_INSTANCE_NOT_FOUND", tErrors.classes.notFound);
+    if (!instance) throw new NotFoundError("CLASS_INSTANCE", tErrors.classes.notFound);
 
     // US-2.6 — never auto-recalc rows in a sticky override state.
     const stickyStates: CalculationStatus[] = [
@@ -455,7 +455,7 @@ export async function calculateForInstance(
       ClassSubjectRepository.findById(instance.subjectId, tx),
       TeacherRepository.findByUserId(instance.teacherId, tx),
     ]);
-    if (!teacher) throw new DomainError("TEACHER_NOT_FOUND", tErrors.teacherNotFound(instance.teacherId));
+    if (!teacher) throw new NotFoundError("TEACHER", tErrors.teacherNotFound(instance.teacherId));
     const resolvedRate = resolveClassRate({
       classInstance: instance,
       recurringSchedule,
@@ -549,7 +549,7 @@ export async function applyOverride(
 
   return db.transaction(async (tx) => {
     const instance = await ClassInstanceRepository.getById(input.instanceId, tx, { forUpdate: true });
-    if (!instance) throw new DomainError("CLASS_INSTANCE_NOT_FOUND", tErrors.classes.notFound);
+    if (!instance) throw new NotFoundError("CLASS_INSTANCE", tErrors.classes.notFound);
 
     // AC-6.7 / AC-6.8 — state guards.
     if (instance.calculationStatus === CalculationStatus.PAID) {
