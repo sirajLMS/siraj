@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Siraj LMS - Profit &amp; Loss</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-container-highest": "#32353c",
+                "secondary-fixed": "#d4e4fa",
+                "on-secondary-fixed-variant": "#39485a",
+                "on-primary-container": "#00422b",
+                "background": "#10131a",
+                "tertiary-container": "#9da2b2",
+                "primary-fixed": "#6ffbbe",
+                "secondary-fixed-dim": "#b9c8de",
+                "on-error-container": "#ffdad6",
+                "inverse-primary": "#006c49",
+                "inverse-on-surface": "#2e3037",
+                "secondary-container": "#39485a",
+                "on-secondary-fixed": "#0d1c2d",
+                "on-primary-fixed-variant": "#005236",
+                "error": "#ffb4ab",
+                "tertiary-fixed": "#dde2f3",
+                "on-secondary": "#233143",
+                "surface-container-lowest": "#0b0e14",
+                "surface-bright": "#363940",
+                "primary-container": "#10b981",
+                "on-tertiary-fixed-variant": "#414754",
+                "on-primary": "#003824",
+                "surface-container-low": "#191c22",
+                "outline-variant": "#3c4a42",
+                "on-surface": "#e1e2eb",
+                "on-secondary-container": "#a7b6cc",
+                "on-error": "#690005",
+                "error-container": "#93000a",
+                "surface": "#10131a",
+                "surface-container-high": "#272a31",
+                "surface-tint": "#4edea3",
+                "on-tertiary-container": "#333946",
+                "on-primary-fixed": "#002113",
+                "on-surface-variant": "#bbcabf",
+                "secondary": "#b9c8de",
+                "outline": "#86948a",
+                "surface-container": "#1d2026",
+                "on-tertiary-fixed": "#161c28",
+                "primary-fixed-dim": "#4edea3",
+                "tertiary-fixed-dim": "#c1c6d7",
+                "surface-dim": "#10131a",
+                "on-tertiary": "#2a303d",
+                "surface-variant": "#32353c",
+                "inverse-surface": "#e1e2eb",
+                "primary": "#4edea3",
+                "on-background": "#e1e2eb",
+                "tertiary": "#c1c6d7"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+        },
+        "spacing": {
+                "lg": "24px",
+                "base": "4px",
+                "xl": "48px",
+                "container-max": "1440px",
+                "xs": "4px",
+                "sm": "8px",
+                "md": "16px",
+                "gutter": "16px"
+        },
+        "fontFamily": {
+                "headline-sm": [
+                        "Inter"
+                ],
+                "data-tabular": [
+                        "Inter"
+                ],
+                "label-caps": [
+                        "Inter"
+                ],
+                "display-lg": [
+                        "Inter"
+                ],
+                "body-sm": [
+                        "Inter"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "headline-md": [
+                        "Inter"
+                ],
+                "mono-label": [
+                        "JetBrains Mono"
+                ],
+                "body-lg": [
+                        "Inter"
+                ]
+        },
+        "fontSize": {
+                "headline-sm": [
+                        "18px",
+                        {
+                                "lineHeight": "1.4",
+                                "fontWeight": "600"
+                        }
+                ],
+                "data-tabular": [
+                        "14px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "500"
+                        }
+                ],
+                "label-caps": [
+                        "11px",
+                        {
+                                "lineHeight": "1",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "1.2",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-sm": [
+                        "12px",
+                        {
+                                "lineHeight": "1.4",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-md": [
+                        "14px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "1.3",
+                                "fontWeight": "600"
+                        }
+                ],
+                "mono-label": [
+                        "12px",
+                        {
+                                "lineHeight": "1",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased">
+<!-- TopNavBar -->
+<header class="bg-background dark:bg-background docked full-width top-0 border-b border-outline-variant dark:border-outline-variant flat no shadows transition-colors duration-200 flex justify-between items-center w-full px-md h-16 shrink-0 z-50">
+<div class="flex items-center gap-md">
+<!-- Mobile Menu Toggle (Visible only on small screens) -->
+<button class="md:hidden text-primary dark:text-primary p-sm rounded-full hover:bg-surface-container dark:hover:bg-surface-container">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary">
+                Financial Insights
+            </div>
+<div class="hidden md:flex items-center ml-lg gap-sm text-body-md font-body-md">
+<span class="text-on-surface-variant font-medium">Profit &amp; Loss</span>
+<span class="text-outline-variant mx-xs">/</span>
+<button class="flex items-center gap-xs hover:bg-surface-container px-sm py-xs rounded-DEFAULT border border-outline-variant transition-colors">
+<span>2026-01</span>
+<span class="material-symbols-outlined text-[16px]">arrow_drop_down</span>
+</button>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="hidden lg:flex flex-1 max-w-md mx-md relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 transform -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full bg-surface-container border border-outline-variant rounded-full py-xs pl-xl pr-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary transition-colors focus:ring-0" placeholder="Search insights..." type="text"/>
+</div>
+<div class="flex items-center gap-sm">
+<button class="text-primary dark:text-primary p-sm rounded-full hover:bg-surface-container dark:hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+</button>
+<button class="text-primary dark:text-primary p-sm rounded-full hover:bg-surface-container dark:hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+</button>
+<button class="text-primary dark:text-primary p-sm rounded-full hover:bg-surface-container dark:hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">notifications</span>
+</button>
+<button class="hidden sm:flex items-center gap-xs text-on-surface-variant hover:text-primary text-label-caps font-label-caps ml-sm mr-md hover:bg-surface-container px-sm py-xs rounded-DEFAULT border border-outline-variant transition-colors">
+<span>USD</span>
+<span class="material-symbols-outlined text-[14px]">expand_more</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant ml-sm shrink-0">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A macro shot of a sleek, dark metallic server rack with a single blinking emerald green LED, emphasizing security and technical precision in a modern corporate data center setting, illuminated by cool, high-contrast spotlighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBV4apX6D8zpzo6Cn7hHkZYLotynltNBY93npTcU8Bi4LKl4wWUzQ_fIsIQBKed3BF-y0QiWjV8F_Nmj8AO2XBI077SJVrf0cT9laCbOLNWVF-tGxYy-bJJGlM-jwoN04_CfThZGR4W2SXqJ_SA6R3fmDLvicOOUObsSbrHQLf9Z0_jmHvUEIlHM4yy9P4z4dy28I3gGkQeMoxJWsKrjlN5bN9RJ-0lCqb54kagKfihyhb6bLxrRxMOpJXsiLSfmdQQIMAx5lgUjWs"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<!-- SideNavBar -->
+<nav class="hidden md:flex bg-surface-container-lowest dark:bg-surface-container-lowest fixed left-0 top-16 h-[calc(100vh-64px)] w-[240px] border-r border-outline-variant dark:border-outline-variant flat no shadows transition-all duration-150 ease-in-out flex-col py-md z-40 overflow-y-auto">
+<div class="px-md mb-lg">
+<div class="flex items-center gap-sm mb-xs">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center shrink-0 border border-outline-variant overflow-hidden">
+<img alt="Finance Dept" class="w-full h-full object-cover" data-alt="Abstract geometric composition featuring a stylized, razor-sharp emerald green chevron pointing right, set against a matte black obsidian background, representing growth and financial trajectory in a high-end, minimalist corporate identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0_BSOj-196ATZwr0PLtMzotn6nQ_dcEYjA5f7v5AF0OKvwAUD7cnPUr5oyFTza1sDDUTmqDmGYEUIOvlFd5tublfvYsJryuvz8EjEH7JJ_tP6rlk2SNkNUL3d2Xti1r3_w6TpQrg4VahseGBsnyXZ9erVnvaX-oyMlxsLQfANmE1FolwhOuZhqJuuVifHuNSD7dL8B6KJpKymYGmhRAKfyaFvvlbPTYi6Am1BbSOLONT1uH8oQlmqlopoaEIeF4B5BJ6bS8l-obo"/>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-primary">Finance</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Management</div>
+</div>
+</div>
+</div>
+<div class="flex-1 px-sm space-y-1">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+                    Payments
+                </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">account_balance</span>
+                    Balances
+                </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+                    Credit Hours
+                </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                    Expenses
+                </a>
+<!-- Active Item -->
+<a class="flex items-center gap-md px-md py-sm rounded-lg bg-secondary-container dark:bg-secondary-container text-on-secondary-container dark:text-on-secondary-container border-l-2 border-primary transition-colors font-label-caps text-label-caps relative" href="#">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">insights</span>
+                    P&amp;L
+                </a>
+</div>
+<div class="mt-auto px-sm pt-md border-t border-outline-variant space-y-1">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+                    Settings
+                </a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-variant transition-colors font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span>
+                    Support
+                </a>
+<div class="px-md mt-sm">
+<button class="w-full bg-surface-container border border-outline-variant hover:border-primary text-primary font-label-caps text-label-caps py-sm rounded-DEFAULT transition-colors flex justify-center items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">download</span>
+                        Export Report
+                    </button>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-[240px] mb-[56px] md:mb-[52px] p-md lg:p-lg overflow-y-auto bg-surface-container-lowest relative">
+<!-- Tab Navigation -->
+<div class="border-b border-outline-variant mb-md flex overflow-x-auto no-scrollbar">
+<button class="px-md py-sm text-body-md font-body-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">Overview</button>
+<button class="px-md py-sm text-body-md font-body-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">Income</button>
+<button class="px-md py-sm text-body-md font-body-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">Expenses</button>
+<button class="px-md py-sm text-body-md font-body-md text-primary border-b-2 border-primary font-medium transition-colors whitespace-nowrap">Profits</button>
+<button class="px-md py-sm text-body-md font-body-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">Projections</button>
+</div>
+<!-- Warning Chip -->
+<div class="mb-lg inline-flex items-center gap-xs px-sm py-1 bg-error-container/20 border border-error/30 rounded-full">
+<span class="material-symbols-outlined text-error text-[14px]">warning</span>
+<span class="font-mono-label text-mono-label text-error">3 rows excluded (FX rate missing)</span>
+</div>
+<!-- P&L Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg max-w-container-max mx-auto">
+<!-- Main Summary Card -->
+<div class="lg:col-span-8">
+<div class="bg-surface border border-outline-variant rounded-lg p-md lg:p-lg hover:border-outline transition-colors relative overflow-hidden group">
+<!-- Subtle gradient highlight on hover (Level 2 concept) -->
+<div class="absolute inset-0 bg-gradient-to-b from-[#1E293B] to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
+<div class="flex justify-between items-start mb-xl relative z-10">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Profit Summary — January 2026</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Consolidated view across all operating entities.</p>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container px-2 py-1 rounded border border-outline-variant">ACTUALS</span>
+</div>
+</div>
+<!-- Data Table Style Rows -->
+<div class="space-y-sm relative z-10">
+<div class="flex justify-between items-center py-sm border-b border-[#2C323F] hover:bg-[#1E293B]/30 transition-colors px-xs -mx-xs rounded-sm">
+<div class="font-body-md text-body-md text-on-surface flex items-center gap-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+                                    Income Payments
+                                </div>
+<div class="font-data-tabular text-data-tabular text-on-surface">$12,400.00</div>
+</div>
+<div class="flex justify-between items-center py-sm border-b border-[#2C323F] hover:bg-[#1E293B]/30 transition-colors px-xs -mx-xs rounded-sm">
+<div class="font-body-md text-body-md text-on-surface flex items-center gap-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary inline-block"></span>
+                                    Total Payments
+                                </div>
+<div class="font-data-tabular text-data-tabular text-on-surface">$9,750.00</div>
+</div>
+<div class="flex justify-between items-center py-sm border-b border-[#2C323F] hover:bg-[#1E293B]/30 transition-colors px-xs -mx-xs rounded-sm">
+<div class="font-body-md text-body-md text-on-surface flex items-center gap-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-error inline-block"></span>
+                                    Total Expenses
+                                </div>
+<div class="font-data-tabular text-data-tabular text-error">$16,220.00</div>
+</div>
+</div>
+<!-- Divider Line -->
+<div class="h-px bg-outline-variant w-full my-lg relative z-10"></div>
+<!-- Net Profit Result -->
+<div class="relative z-10">
+<div class="flex justify-between items-end">
+<div class="font-headline-sm text-headline-sm text-on-surface">Net Profit</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-error text-[24px]">trending_down</span>
+<span class="font-display-lg text-display-lg text-error tabular-nums tracking-tight">-$6,470.00</span>
+</div>
+</div>
+<div class="flex justify-between items-center mt-md">
+<div class="font-body-sm text-body-sm text-on-surface-variant">Net Profit Margin</div>
+<div class="inline-flex items-center gap-xs px-2 py-0.5 bg-error/10 border border-error/20 rounded-full">
+<span class="font-mono-label text-mono-label text-error">-66.4%</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-md flex items-center gap-xs font-body-sm text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">info</span>
+                         Net Profit renders green when positive, red when negative, grey when zero
+                    </div>
+<div class="mt-xl flex justify-start">
+<button class="bg-transparent border border-outline-variant text-on-surface font-body-md text-body-md px-lg py-sm rounded-DEFAULT hover:border-primary hover:text-primary transition-all duration-200 flex items-center gap-sm group">
+<span class="material-symbols-outlined text-[18px] group-hover:translate-y-0.5 transition-transform">download</span>
+                            Export CSV
+                        </button>
+</div>
+</div>
+<!-- Secondary Context / Minimalist visual interest -->
+<div class="lg:col-span-4 space-y-lg">
+<!-- Context Card -->
+<div class="bg-surface-container border border-outline-variant rounded-lg p-md">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md">Key Drivers</h3>
+<div class="space-y-sm">
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface">Server Infrastructure</span>
+<span class="font-mono-label text-mono-label text-error">↑ 14%</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface">Marketing Spend</span>
+<span class="font-mono-label text-mono-label text-error">↑ 8.2%</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface">New Subscriptions</span>
+<span class="font-mono-label text-mono-label text-outline-variant">↓ 2.1%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-surface-container-low docked full-width bottom-0 border-t border-outline-variant dark:border-outline-variant flat no shadows transition-opacity duration-200 fixed bottom-0 md:left-[240px] left-0 right-0 flex justify-between items-center px-md py-sm z-40 h-[52px]">
+<div class="font-label-caps text-label-caps text-on-surface">
+            © 2024 Financial Systems
+        </div>
+<div class="flex gap-md font-body-sm text-body-sm">
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary dark:hover:text-primary transition-colors" href="#">Terms of Service</a>
+</div>
+</footer>
+</body></html>
