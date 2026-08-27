@@ -1,27 +1,21 @@
 "use client";
 
 import { SaveOutlined, SyncOutlined } from "@mui/icons-material";
-import {
-  Box,
-  CircularProgress,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Switch,
-  TextField,
-} from "@mui/material";
+import { Box, CircularProgress, FormControlLabel, FormHelperText, Stack, Switch, TextField } from "@mui/material";
 import Link from "next/link";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
+import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
-import { CurrencyCode, PaymentGateway } from "@/frontend/common/graphql/generated/gql/graphql";
+import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import { PackagePlanSelectShared } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanSelectShared";
+import {
+  CurrencyMismatchAlert,
+  GatewaySelectField,
+  PaymentNoteField,
+} from "@/frontend/common/views/dashboard/accounting/components/PaymentFormFields";
 import type { UsePaymentFormViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentFormViewModel";
 import { DesktopFormErrorSnackbar } from "@/frontend/desktop/components/ui";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
@@ -29,28 +23,6 @@ import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date";
 import { StudentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
-
-const GATEWAY_OPTIONS: readonly PaymentGateway[] = [
-  PaymentGateway.None,
-  PaymentGateway.Paypal,
-  PaymentGateway.WesternUnion,
-  PaymentGateway.Bank,
-  PaymentGateway.Other,
-];
-
-const CURRENCY_OPTIONS: readonly CurrencyCode[] = [
-  CurrencyCode.Egp,
-  CurrencyCode.Usd,
-  CurrencyCode.Sar,
-  CurrencyCode.Aed,
-];
-
-const CURRENCY_LABELS: Record<string, string> = {
-  Egp: "EGP",
-  Usd: "USD",
-  Sar: "SAR",
-  Aed: "AED",
-};
 
 const spinIcon = (
   <SyncOutlined
@@ -99,6 +71,8 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
     showSuccess,
     submitError,
     existing,
+    lastPaymentCurrency,
+    currencyMismatch,
     onSubmit,
     onEditSubmit,
     onDismissSuccess,
@@ -122,6 +96,8 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
 
   const title = isEditing ? t.editPayment : t.addPayment;
 
+  const gatewayFieldArgs = { label: t.form.paymentGateway, localizedGateways: t.gateways };
+
   const breadcrumbs = [
     { label: t.pageTitle, href: "/accounting/payments" },
     { label: title, current: true },
@@ -129,11 +105,16 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={title} subtitle={t.pageSubtitle} breadcrumbs={breadcrumbs} />
+      <DesktopPageHeader title={title} subtitle={t.formSubtitle} breadcrumbs={breadcrumbs} />
 
       {isEditing ? (
         /* ── EDIT: only hours / gateway / note stay mutable (invoice snapshot locked) ── */
-        <Box component="form" onSubmit={handleEditSubmit(onEditSubmit)} noValidate sx={{ maxWidth: 680 }}>
+        <Box
+          component="form"
+          onSubmit={handleEditSubmit(onEditSubmit)}
+          noValidate
+          sx={{ maxWidth: 860, width: "100%", mx: "auto" }}
+        >
           <Stack spacing={3}>
             <DesktopSectionPanel title={t.paymentDetails}>
               <Stack spacing={3}>
@@ -172,39 +153,28 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                 />
 
                 <Controller
-                  name="paymentGateway"
+                  name="paymentNote"
                   control={editControl}
                   render={({ field }) => (
-                    <FormControl size="small" sx={{ minWidth: 240 }}>
-                      <InputLabel>{t.form.paymentGateway}</InputLabel>
-                      <Select<PaymentGateway>
-                        value={field.value}
-                        label={t.form.paymentGateway}
-                        onChange={e => field.onChange(e.target.value)}
-                      >
-                        {GATEWAY_OPTIONS.map(gw => (
-                          <MenuItem key={gw} value={gw}>
-                            {t.gateways[gw]}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    <PaymentNoteField
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      label={t.form.note}
+                      placeholder={t.form.notePlaceholder}
+                    />
                   )}
                 />
 
                 <Controller
-                  name="paymentNote"
+                  name="paymentGateway"
                   control={editControl}
                   render={({ field }) => (
-                    <TextField
-                      value={field.value ?? ""}
+                    <GatewaySelectField
+                      value={field.value}
                       onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      size="small"
-                      multiline
-                      minRows={3}
-                      label={t.form.note}
-                      placeholder={t.form.notePlaceholder}
+                      {...gatewayFieldArgs}
+                      sx={{ minWidth: 240 }}
                     />
                   )}
                 />
@@ -221,7 +191,12 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
         </Box>
       ) : (
         /* ── CREATE: full form with package auto-fill (hours/amount/currency stay editable) ── */
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ maxWidth: 780 }}>
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          sx={{ maxWidth: 860, width: "100%", mx: "auto" }}
+        >
           <Stack spacing={3}>
             <DesktopSectionPanel title={t.form.student}>
               <Controller
@@ -300,23 +275,26 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                     name="currency"
                     control={control}
                     render={({ field }) => (
-                      <FormControl size="small" sx={{ minWidth: 130 }}>
-                        <InputLabel>{t.form.currency}</InputLabel>
-                        <Select<CurrencyCode>
-                          value={field.value}
+                      <Box sx={{ minWidth: 190 }}>
+                        <CurrencySelect
+                          currency={getCurrencyByCode(field.value) ?? null}
+                          setCurrencyAction={selected => field.onChange(selected.code)}
+                          onBlurAction={field.onBlur}
                           label={t.form.currency}
-                          onChange={e => field.onChange(e.target.value)}
-                        >
-                          {CURRENCY_OPTIONS.map(code => (
-                            <MenuItem key={code} value={code}>
-                              {CURRENCY_LABELS[code] ?? code}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                          error={Boolean(errors.currency)}
+                          helperText={errors.currency?.message}
+                          fullWidth
+                        />
+                      </Box>
                     )}
                   />
                 </Stack>
+
+                <CurrencyMismatchAlert
+                  active={currencyMismatch}
+                  lastPaymentCurrency={lastPaymentCurrency}
+                  message={t.currencyWarning}
+                />
               </Stack>
             </DesktopSectionPanel>
 
@@ -327,20 +305,12 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                     name="paymentGateway"
                     control={control}
                     render={({ field }) => (
-                      <FormControl size="small" sx={{ minWidth: 220 }}>
-                        <InputLabel>{t.form.paymentGateway}</InputLabel>
-                        <Select<PaymentGateway>
-                          value={field.value}
-                          label={t.form.paymentGateway}
-                          onChange={e => field.onChange(e.target.value)}
-                        >
-                          {GATEWAY_OPTIONS.map(gw => (
-                            <MenuItem key={gw} value={gw}>
-                              {t.gateways[gw]}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <GatewaySelectField
+                        value={field.value}
+                        onChange={field.onChange}
+                        {...gatewayFieldArgs}
+                        sx={{ minWidth: 220 }}
+                      />
                     )}
                   />
 
@@ -373,13 +343,10 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                   name="paymentNote"
                   control={control}
                   render={({ field }) => (
-                    <TextField
-                      value={field.value ?? ""}
+                    <PaymentNoteField
+                      value={field.value}
                       onChange={field.onChange}
                       onBlur={field.onBlur}
-                      size="small"
-                      multiline
-                      minRows={3}
                       label={t.form.note}
                       placeholder={t.form.notePlaceholder}
                     />

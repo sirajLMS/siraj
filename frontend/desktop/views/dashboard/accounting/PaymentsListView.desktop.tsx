@@ -8,7 +8,6 @@ import {
   PendingActionsOutlined,
 } from "@mui/icons-material";
 import {
-  Avatar,
   Box,
   Chip,
   FormControl,
@@ -24,6 +23,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
@@ -65,13 +65,6 @@ function CellLine(props: Readonly<{ children: React.ReactNode; secondary?: boole
       {children}
     </Box>
   );
-}
-
-/** Two-letter initials for the student avatar chip (falls back to a dot). */
-function studentInitials(name: string | null | undefined): string {
-  if (!name) return "·";
-  const parts = name.trim().split(/\s+/).slice(0, 2);
-  return parts.map(part => part.charAt(0).toUpperCase()).join("");
 }
 
 function FiltersBar(props: Readonly<PaymentsListViewModel>) {
@@ -187,18 +180,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         minWidth: 190,
         renderCell: params => (
           <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", minWidth: 0, width: "100%" }}>
-            <Avatar
-              sx={theme => ({
-                width: 30,
-                height: 30,
-                fontSize: 12,
-                fontWeight: 600,
-                bgcolor: theme.palette.secondaryContainer,
-                color: theme.palette.onSecondaryContainer,
-              })}
-            >
-              {studentInitials(params.row.studentName)}
-            </Avatar>
+            <BaseAvatar label={params.row.studentName ?? undefined} size={30} />
             <Box sx={{ minWidth: 0 }}>
               <CellLine>{params.row.studentName ?? "—"}</CellLine>
               {params.row.parentName ? <CellLine secondary>{params.row.parentName}</CellLine> : null}

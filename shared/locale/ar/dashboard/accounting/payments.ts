@@ -3,6 +3,7 @@ import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/
 export const dashboardAccountingPaymentsAr: PaymentsLabels = {
   pageTitle: "المدفوعات",
   pageSubtitle: "تتبع مدفوعات باقات الساعات المعتمدة وحالة السداد.",
+  formSubtitle: "تسجيل عملية دفعة جديدة لطالب.",
   addPayment: "إضافة دفعة",
   editPayment: "تعديل الدفعة",
   paymentDetails: "تفاصيل الدفعة",

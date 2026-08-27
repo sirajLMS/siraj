@@ -90,6 +90,10 @@ export interface AccountingPaymentBalanceReturnType {
   studentId: string;
   creditHoursTotal: string;
   creditHoursRemaining: string;
+  /** Configured low-hours warning threshold (system setting with fallback). */
+  lowHoursThreshold: number;
+  /** Currency of the student's most recent payment (null when none recorded). */
+  lastPaymentCurrency: string | null;
 }
 
 /** Derived (non-persisted) history event for the payment detail timeline. */

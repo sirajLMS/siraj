@@ -6,6 +6,7 @@
 export interface PaymentsLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
+  readonly formSubtitle: string;
   readonly addPayment: string;
   readonly editPayment: string;
   readonly paymentDetails: string;

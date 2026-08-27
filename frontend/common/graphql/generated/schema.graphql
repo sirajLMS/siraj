@@ -37,6 +37,16 @@ type AccountingPaymentBalance {
   creditHoursRemaining: String
   creditHoursTotal: String
   id: String
+
+  """
+  Currency of the student's most recent payment (null when none recorded)
+  """
+  lastPaymentCurrency: String
+
+  """
+  Configured remaining-hours threshold below which the low-balance warning applies
+  """
+  lowHoursThreshold: Float
   studentId: String
 }
 
