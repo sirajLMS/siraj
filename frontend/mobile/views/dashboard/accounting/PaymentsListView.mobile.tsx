@@ -4,6 +4,8 @@ import { AddOutlined, ClearOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, FormControlLabel, Skeleton, Stack, Switch, TextField, Typography } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import {
   formatAccountingDate,
   formatAccountingMoney,
@@ -11,6 +13,7 @@ import {
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import type { PaymentsListViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentsListViewModel";
 import { MobileFab, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { ParentAutocompleteMobile, StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 
 const SKELETON_KEYS = ["skeleton-0", "skeleton-1", "skeleton-2"] as const;
 
@@ -24,13 +27,42 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
     fromDate,
     toDate,
     unpaidOnly,
+    studentId,
+    parentId,
     setFromDate,
     setToDate,
     setUnpaidOnly,
+    setStudentId,
+    setParentId,
     resetFilters,
     hasActiveFilters,
   } = props;
   const router = useRouter();
+
+  const [studentOption, setStudentOption] = useState<PersonOption | null>(null);
+  const [parentOption, setParentOption] = useState<PersonOption | null>(null);
+
+  // The store persists only ids; derive the displayed facades from the active
+  // ids so an externally cleared filter (e.g. resetFilters) can never show a
+  // stale name. Rows provide the student label fallback after a reload.
+  const studentValue = useMemo<PersonOption | null>(() => {
+    if (studentId === null || studentId === "") return null;
+    if (studentOption?.id === studentId) return studentOption;
+    const match = rows.find(row => row.studentId === studentId);
+    return match ? { id: studentId, name: match.studentName ?? "" } : null;
+  }, [rows, studentId, studentOption]);
+
+  const parentValue = parentId !== null && parentOption?.id === parentId ? parentOption : null;
+
+  const handleStudentChange = (next: PersonOption | null) => {
+    setStudentOption(next);
+    setStudentId(next?.id ?? null);
+  };
+
+  const handleParentChange = (next: PersonOption | null) => {
+    setParentOption(next);
+    setParentId(next?.id ?? null);
+  };
 
   return (
     <MobilePageContainer>
@@ -51,6 +83,18 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
 
         {/* Filters */}
         <Stack spacing={1.5} sx={{ px: 2 }}>
+          <StudentAutocompleteMobile
+            size="small"
+            label={t.filters.student}
+            value={studentValue}
+            onChange={handleStudentChange}
+          />
+          <ParentAutocompleteMobile
+            size="small"
+            label={t.filters.parent}
+            value={parentValue}
+            onChange={handleParentChange}
+          />
           <Stack direction="row" spacing={1.5}>
             <TextField
               size="small"
