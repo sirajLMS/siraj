@@ -91,6 +91,11 @@ export interface PaymentsLabels {
     readonly documentPreview: string;
     readonly documentEmpty: string;
     readonly downloadPdf: string;
+    readonly zoomIn: string;
+    readonly zoomOut: string;
+    readonly rotate: string;
+    readonly expand: string;
+    readonly close: string;
     readonly historyTitle: string;
     readonly historyEmpty: string;
     readonly hoursCredited: string;

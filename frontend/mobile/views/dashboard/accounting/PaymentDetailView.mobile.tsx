@@ -1,14 +1,16 @@
 "use client";
 
-import { EditOutlined, LockOpenOutlined, LockOutlined } from "@mui/icons-material";
-import { Alert, Box, Chip, CircularProgress, Divider, Stack, Typography } from "@mui/material";
+import { DownloadOutlined, EditOutlined, LockOpenOutlined, LockOutlined } from "@mui/icons-material";
+import { Alert, Box, Button, Chip, CircularProgress, Divider, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import {
   formatAccountingDate,
   formatAccountingMoney,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { PaymentHistoryTimeline } from "@/frontend/common/views/dashboard/accounting/components/PaymentHistoryTimeline";
 import type { PaymentDetailViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentDetailViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
@@ -21,7 +23,7 @@ function MobileField({ label, value }: Readonly<{ label: string; value: ReactNod
       <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
         {label}
       </Typography>
-      <Typography variant="bodyMd" sx={{ fontWeight: 500, textAlign: "end" }}>
+      <Typography variant="bodyMd" component="div" sx={{ fontWeight: 500, textAlign: "end" }}>
         {value}
       </Typography>
     </Stack>
@@ -98,9 +100,12 @@ function PaymentDetailFields({
           label={t.columns.studentName}
           value={
             payment.studentId ? (
-              <Link href={`/students/${payment.studentId}/profile`} style={{ textDecoration: "none" }}>
-                {payment.studentName ?? payment.studentId}
-              </Link>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "flex-end" }}>
+                <BaseAvatar label={payment.studentName ?? undefined} size={24} />
+                <Link href={`/students/${payment.studentId}/profile`} style={{ textDecoration: "none" }}>
+                  {payment.studentName ?? payment.studentId}
+                </Link>
+              </Stack>
             ) : (
               "—"
             )
@@ -177,20 +182,52 @@ export function PaymentDetailMobile(props: Readonly<PaymentDetailViewModel>) {
 
             <PaymentDetailFields t={t} payment={payment} />
 
+            <MobileCardShell>
+              <PaymentHistoryTimeline
+                events={payment.history ?? []}
+                labels={t.historyKinds}
+                emptyLabel={t.detail.historyEmpty}
+              />
+            </MobileCardShell>
+
             <PaymentAuditFields t={t} payment={payment} />
 
             <Stack direction="row" spacing={1.5}>
-              <Chip
-                icon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
-                label={payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
                 onClick={() => void onTogglePaid()}
                 disabled={toggling}
-                sx={{ flex: 1, py: 2 }}
-              />
-              <Link href={`/accounting/payments/${payment.id}/edit`} style={{ textDecoration: "none", flex: 1 }}>
-                <Chip icon={<EditOutlined />} label={t.detail.editAction} sx={{ width: "100%", py: 2 }} />
-              </Link>
+                sx={{ flex: 1 }}
+              >
+                {payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                component={Link}
+                href={`/accounting/payments/${payment.id}/edit`}
+                startIcon={<EditOutlined />}
+                sx={{ flex: 1 }}
+              >
+                {t.detail.editAction}
+              </Button>
             </Stack>
+
+            {payment.invoiceId ? (
+              <Button
+                variant="contained"
+                component="a"
+                href={`/api/invoices/${payment.invoiceId}/download`}
+                target="_blank"
+                rel="noopener"
+                startIcon={<DownloadOutlined />}
+                fullWidth
+              >
+                {t.detail.downloadPdf}
+              </Button>
+            ) : null}
           </>
         ) : null}
       </Stack>

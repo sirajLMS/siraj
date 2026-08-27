@@ -4,11 +4,13 @@ import { EditOutlined, LockOpenOutlined, LockOutlined } from "@mui/icons-materia
 import { Alert, Box, Chip, CircularProgress, Divider, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import {
   formatAccountingDate,
   formatAccountingMoney,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { PaymentHistoryTimeline } from "@/frontend/common/views/dashboard/accounting/components/PaymentHistoryTimeline";
 import type { PaymentDetailViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentDetailViewModel";
 import {
   DesktopPrimaryPageAction,
@@ -17,7 +19,6 @@ import {
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { PaymentDocumentPreview } from "@/frontend/desktop/views/dashboard/accounting/components/PaymentDocumentPreview";
-import { PaymentHistoryTimeline } from "@/frontend/desktop/views/dashboard/accounting/components/PaymentHistoryTimeline";
 
 function DetailField({ label, value }: Readonly<{ label: string; value: ReactNode }>) {
   return (
@@ -25,7 +26,7 @@ function DetailField({ label, value }: Readonly<{ label: string; value: ReactNod
       <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 0.5 })}>
         {label}
       </Typography>
-      <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
+      <Typography variant="bodyMd" component="div" sx={{ fontWeight: 500 }}>
         {value}
       </Typography>
     </Box>
@@ -57,10 +58,10 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={`${t.paymentDetails} · ${String(payment.invoiceId ?? payment.id)}`}
+        title={`${t.paymentDetails} · ${String(payment.invoiceId ?? payment.id).slice(0, 8)}`}
         breadcrumbs={[
           { label: t.pageTitle, href: "/accounting/payments" },
-          { label: String(payment.invoiceId ?? payment.id), current: true },
+          { label: String(payment.invoiceId ?? payment.id).slice(0, 8), current: true },
         ]}
         actions={
           <Stack direction="row" spacing={1.5}>
@@ -121,9 +122,12 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
                 label={t.columns.studentName}
                 value={
                   payment.studentId ? (
-                    <MuiLink component={Link} href={`/students/${payment.studentId}/profile`} underline="hover">
-                      {payment.studentName ?? payment.studentId}
-                    </MuiLink>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                      <BaseAvatar label={payment.studentName ?? undefined} size={28} />
+                      <MuiLink component={Link} href={`/students/${payment.studentId}/profile`} underline="hover">
+                        {payment.studentName ?? payment.studentId}
+                      </MuiLink>
+                    </Stack>
                   ) : (
                     "—"
                   )
@@ -175,6 +179,11 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
           title={t.detail.documentPreview}
           emptyLabel={t.detail.documentEmpty}
           downloadLabel={t.detail.downloadPdf}
+          zoomInLabel={t.detail.zoomIn}
+          zoomOutLabel={t.detail.zoomOut}
+          rotateLabel={t.detail.rotate}
+          expandLabel={t.detail.expand}
+          closeLabel={t.detail.close}
           src={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
           downloadHref={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
         />
