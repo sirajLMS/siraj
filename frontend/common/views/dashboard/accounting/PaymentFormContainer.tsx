@@ -6,12 +6,12 @@ import { usePaymentFormViewModel } from "@/frontend/common/views/dashboard/accou
 
 const lazyViews = createLazyView<ReturnType<typeof usePaymentFormViewModel>>(
   () =>
-    import("@/frontend/desktop/views/dashboard/accounting/PaymentFormView.desktop").then(m => ({
-      default: m.PaymentFormDesktop,
-    })),
-  () =>
     import("@/frontend/mobile/views/dashboard/accounting/PaymentFormView.mobile").then(m => ({
       default: m.PaymentFormMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/accounting/PaymentFormView.desktop").then(m => ({
+      default: m.PaymentFormDesktop,
     }))
 );
 

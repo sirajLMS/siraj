@@ -9,12 +9,12 @@ import {
 
 const lazyViews = createLazyView<PaymentDetailViewModel>(
   () =>
-    import("@/frontend/desktop/views/dashboard/accounting/PaymentDetailView.desktop").then(m => ({
-      default: m.PaymentDetailDesktop,
-    })),
-  () =>
     import("@/frontend/mobile/views/dashboard/accounting/PaymentDetailView.mobile").then(m => ({
       default: m.PaymentDetailMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/accounting/PaymentDetailView.desktop").then(m => ({
+      default: m.PaymentDetailDesktop,
     }))
 );
 

@@ -6,12 +6,12 @@ import { usePaymentsListViewModel } from "@/frontend/common/views/dashboard/acco
 
 const lazyViews = createLazyView<ReturnType<typeof usePaymentsListViewModel>>(
   () =>
-    import("@/frontend/desktop/views/dashboard/accounting/PaymentsListView.desktop").then(m => ({
-      default: m.PaymentsListDesktop,
-    })),
-  () =>
     import("@/frontend/mobile/views/dashboard/accounting/PaymentsListView.mobile").then(m => ({
       default: m.PaymentsListMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/accounting/PaymentsListView.desktop").then(m => ({
+      default: m.PaymentsListDesktop,
     }))
 );
 

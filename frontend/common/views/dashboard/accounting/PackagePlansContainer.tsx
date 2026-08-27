@@ -6,12 +6,12 @@ import { usePackagePlansListViewModel } from "@/frontend/common/views/dashboard/
 
 const lazyViews = createLazyView<ReturnType<typeof usePackagePlansListViewModel>>(
   () =>
-    import("@/frontend/desktop/views/dashboard/accounting/PackagePlansListView.desktop").then(m => ({
-      default: m.PackagePlansListDesktop,
-    })),
-  () =>
     import("@/frontend/mobile/views/dashboard/accounting/PackagePlansListView.mobile").then(m => ({
       default: m.PackagePlansListMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/accounting/PackagePlansListView.desktop").then(m => ({
+      default: m.PackagePlansListDesktop,
     }))
 );
 
