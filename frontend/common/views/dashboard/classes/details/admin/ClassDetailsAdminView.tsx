@@ -30,7 +30,10 @@ import { ClassInfoCard } from "@/frontend/common/views/dashboard/classes/details
 import { LivePerformanceGrid } from "@/frontend/common/views/dashboard/classes/details/admin/LivePerformanceGrid";
 import { MetadataCard } from "@/frontend/common/views/dashboard/classes/details/admin/MetadataCard";
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
-import type { AdminViewProps } from "@/frontend/common/views/dashboard/classes/details/types";
+import type {
+  AdminViewProps,
+  ClassDetailsMetricGridSlot,
+} from "@/frontend/common/views/dashboard/classes/details/types";
 import type { AdminViewLabels } from "@/shared/locale";
 
 const CURRENCY_CODE_VALUES = new Set<string>(Object.values(CurrencyCode).map((v): string => v));
@@ -41,6 +44,7 @@ function isCurrencyCode(value: string): value is CurrencyCode {
 
 interface ClassDetailsAdminViewProps extends AdminViewProps {
   readonly labels: AdminViewLabels;
+  readonly livePerformanceMetricGrid: ClassDetailsMetricGridSlot;
 }
 
 // HeatmapData is typed as JSON[] on the GraphQL side; ActivityHeatmap expects number[].
@@ -154,10 +158,11 @@ interface ClassDetailsPerformanceGridProps {
   readonly metrics: readonly LivePerformanceMetricRow[];
   readonly hasData: boolean;
   readonly labels: AdminViewLabels;
+  readonly metricGrid: ClassDetailsMetricGridSlot;
 }
 
 function ClassDetailsPerformanceGrid(props: Readonly<ClassDetailsPerformanceGridProps>) {
-  const { heatmapData, metrics, hasData, labels } = props;
+  const { heatmapData, metrics, hasData, labels, metricGrid } = props;
 
   return (
     <Grid container spacing={{ xs: 2, lg: 3 }}>
@@ -165,7 +170,7 @@ function ClassDetailsPerformanceGrid(props: Readonly<ClassDetailsPerformanceGrid
         <ActivityHeatmap data={heatmapData} labels={labels.heatmap} />
       </Grid>
       <Grid size={{ xs: 12, lg: 5 }}>
-        <LivePerformanceGrid metrics={metrics} hasData={hasData} labels={labels.performance} />
+        <LivePerformanceGrid metrics={metrics} hasData={hasData} labels={labels.performance} MetricGrid={metricGrid} />
       </Grid>
     </Grid>
   );
@@ -301,6 +306,7 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
     onReschedule,
     onDelete,
     formattedScheduledDate,
+    livePerformanceMetricGrid,
   } = props;
 
   const overrideRateDialog = useOverrideRateDialog(instance, handlers);
@@ -340,7 +346,13 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
         labels={labels}
       />
 
-      <ClassDetailsPerformanceGrid heatmapData={heatmapData} metrics={metrics} hasData={hasData} labels={labels} />
+      <ClassDetailsPerformanceGrid
+        heatmapData={heatmapData}
+        metrics={metrics}
+        hasData={hasData}
+        labels={labels}
+        metricGrid={livePerformanceMetricGrid}
+      />
 
       <OverrideRateDialog
         open={overrideRateDialog.isOverrideDialogOpen}

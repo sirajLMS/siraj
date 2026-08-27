@@ -4,6 +4,7 @@ import { ArchiveOutlined, SaveOutlined, SyncOutlined } from "@mui/icons-material
 import {
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -200,17 +201,42 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
               name="validityMonths"
               control={control}
               render={({ field }) => (
-                <TextField
-                  value={field.value ?? ""}
-                  onChange={e => field.onChange(e.target.value === "" ? null : e.target.value)}
-                  size="small"
-                  type="number"
-                  label={t.form.validityMonths}
-                  error={Boolean(errors.validityMonths)}
-                  helperText={errors.validityMonths?.message}
-                  slotProps={{ htmlInput: { step: 1, min: 1, max: 120 } }}
-                  sx={{ flex: 1 }}
-                />
+                <Stack spacing={1} sx={{ flex: 1 }}>
+                  <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
+                    {[1, 3, 6, 12].map(months => (
+                      <Chip
+                        key={months}
+                        size="small"
+                        clickable
+                        label={String(months)}
+                        aria-pressed={field.value === months}
+                        color={field.value === months ? "primary" : "default"}
+                        variant={field.value === months ? "filled" : "outlined"}
+                        onClick={() => field.onChange(months)}
+                      />
+                    ))}
+                    <Chip
+                      size="small"
+                      clickable
+                      label={t.form.validityUnlimited}
+                      aria-pressed={field.value == null}
+                      color={field.value == null ? "primary" : "default"}
+                      variant={field.value == null ? "filled" : "outlined"}
+                      onClick={() => field.onChange(null)}
+                    />
+                  </Stack>
+                  <TextField
+                    value={field.value ?? ""}
+                    onChange={e => field.onChange(e.target.value === "" ? null : e.target.value)}
+                    size="small"
+                    type="number"
+                    label={t.form.validityMonths}
+                    error={Boolean(errors.validityMonths)}
+                    helperText={errors.validityMonths?.message}
+                    slotProps={{ htmlInput: { step: 1, min: 1, max: 120 } }}
+                    sx={{ width: "100%" }}
+                  />
+                </Stack>
               )}
             />
           </Stack>

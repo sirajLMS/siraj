@@ -11,9 +11,21 @@ export interface EntityLinkTargets {
 }
 
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { ClassInstance } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { ClassDetailsLabels, SessionLabels } from "@/shared/locale";
+
+/**
+ * Props accepted by a tier-injected metric grid (DesktopMetricCardGrid on desktop,
+ * MobileMetricCardGrid on mobile). Common class-details views never import the grid
+ * primitives directly; tier composition files inject them through this slot.
+ */
+export interface ClassDetailsMetricGridSlotProps {
+  readonly metrics: readonly MetricItem[];
+}
+
+export type ClassDetailsMetricGridSlot = React.ComponentType<ClassDetailsMetricGridSlotProps>;
 
 export interface ClassDetailsHeaderLabels {
   readonly pageSubtitleAdmin: string;

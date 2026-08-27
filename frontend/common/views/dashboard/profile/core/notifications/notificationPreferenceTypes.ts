@@ -1,9 +1,9 @@
+import type { AppSnackbarState } from "@/frontend/common/components/ui/state";
 import {
   NotificationChannel,
   NotificationEventType,
   type NotificationPreferencesQuery,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import { preferenceKey } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceUtils";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
@@ -176,7 +176,7 @@ export interface NotificationPreferencesTabVariantProps {
   readonly loading: boolean;
   readonly snackbarOpen: boolean;
   readonly snackbarMessage: string;
-  readonly snackbarSeverity: SnackbarSeverity;
+  readonly snackbarSeverity: AppSnackbarState["severity"];
   readonly onSnackbarClose: () => void;
   readonly errorLoading: boolean;
   readonly activeChannel?: NotificationChannel;

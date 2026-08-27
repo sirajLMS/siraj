@@ -1,6 +1,5 @@
 "use client";
 
-import { type Theme, useMediaQuery } from "@mui/material";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
@@ -22,7 +21,6 @@ export function MeetingConfigDeleteDialog({
   onConfirm,
 }: MeetingConfigDeleteDialogProps) {
   const t = labels;
-  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"), { noSsr: true });
 
   return (
     <BaseDeleteDialog
@@ -30,7 +28,6 @@ export function MeetingConfigDeleteDialog({
       onClose={onClose}
       onConfirm={onConfirm}
       isLoading={isLoading}
-      fullScreen={isMobile}
       title={t.deleteTitle}
       body={t.deleteBody(configLabel)}
       cancelLabel={t.cancel}

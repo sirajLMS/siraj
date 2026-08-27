@@ -1,5 +1,6 @@
 "use client";
 
+import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
@@ -20,8 +21,21 @@ function hasClassAuditLabels(labels: object): labels is NonNullable<ClassAuditVi
   return "pageTitle" in labels && "breadcrumbs" in labels;
 }
 
+/**
+ * Renders shell states for non-ready statuses (LoadingState / ErrorState)
+ * before delegating to the tier views, so the page never paints a blank screen.
+ */
 export function ClassAuditView(props: Readonly<ClassAuditViewModel>) {
-  if (props.status !== "ready" || !props.audit || !hasClassAuditLabels(props.labels)) {
+  if (props.status === "loading") {
+    return <LoadingState />;
+  }
+  if (props.status === "error") {
+    return <ErrorState onRetry={props.onRetry} />;
+  }
+  if (props.status === "invalidId") {
+    return <ErrorState />;
+  }
+  if (!props.audit || !hasClassAuditLabels(props.labels)) {
     return null;
   }
 

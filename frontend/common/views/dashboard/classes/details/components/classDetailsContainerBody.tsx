@@ -1,16 +1,7 @@
 "use client";
 
-import { Box } from "@mui/material";
-import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
-import { LoadingState } from "@/frontend/common/components/ui/state/LoadingState";
+import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import type { ClassDetailsContainerBodyProps } from "@/frontend/common/views/dashboard/classes/details/components/types/classDetailsContainerShared.types";
-import type { InvalidIdStateProps } from "@/frontend/common/views/dashboard/classes/details/types";
-
-function InvalidIdState({ t }: Readonly<InvalidIdStateProps>) {
-  return (
-    <Box sx={theme => ({ p: 3, textAlign: "center", color: theme.palette.onSurfaceVariant })}>{t.invalidClassId}</Box>
-  );
-}
 
 export function ClassDetailsContainerBody({ viewModel, slots }: Readonly<ClassDetailsContainerBodyProps>) {
   const { status, t } = viewModel;
@@ -21,7 +12,7 @@ export function ClassDetailsContainerBody({ viewModel, slots }: Readonly<ClassDe
   }
 
   if (status === "invalidId") {
-    return <InvalidIdState t={t} />;
+    return <ErrorState embedded message={t.invalidClassId} />;
   }
 
   if (status === "error" || !viewModel.instance) {

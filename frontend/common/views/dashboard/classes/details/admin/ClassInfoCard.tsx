@@ -3,20 +3,16 @@
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import LanguageIcon from "@mui/icons-material/Language";
 import MenuBookOutlined from "@mui/icons-material/MenuBookOutlined";
-import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
+import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { BaseCard } from "@/frontend/common/components/ui";
+import { BaseCard, PersonProfileLink, StatusBadge } from "@/frontend/common/components/ui";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import type {
   ClassInstanceQuery_classInstance_student,
   ClassInstanceQuery_classInstance_teacher,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
-import {
-  StudentEntityLink,
-  TeacherEntityLink,
-} from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
 import { Link } from "@/shared/i18n";
 import type { AdminViewLabels } from "@/shared/locale";
 
@@ -38,11 +34,6 @@ interface ClassInfoCardProps {
   };
 }
 
-const StyledLiveInstanceChip = styled(Chip)(() => ({
-  typography: "labelUppercase",
-  opacity: 0.8,
-}));
-
 const StyledCourseNameHeading = styled(Typography)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
@@ -56,11 +47,6 @@ const StyledActiveConnectionCaption = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   textTransform: "uppercase",
   letterSpacing: "0.05em",
-}));
-
-const StyledPersonRoleCaption = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  display: "block",
 }));
 
 const StyledPersonDetailCaption = styled(Typography)(({ theme }) => ({
@@ -77,87 +63,28 @@ const StyledDecorativeIconWrapper = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
 
-function LinkedAvatar({
-  href,
-  name,
-  avatarUrl,
-  size = 64,
-}: {
-  readonly href?: string;
-  readonly name: string;
-  readonly avatarUrl?: string;
-  readonly size?: number;
-}) {
-  const avatar = <UserAvatar src={avatarUrl} label={name} size={size} />;
-
-  // Prefer a positive condition for readability and to satisfy static analysis rules.
-  if (href) {
-    return (
-      <Link href={href} style={{ textDecoration: "none" }}>
-        <Box sx={{ display: "inline-flex", flexShrink: 0 }}>{avatar}</Box>
-      </Link>
-    );
-  }
-
-  return avatar;
-}
-
-function PersonBlock({
-  href,
-  name,
-  avatarUrl,
-  roleLabel,
-  nameNode,
-  detail,
-}: {
+interface PersonBlockProps {
   readonly href?: string;
   readonly name: string;
   readonly avatarUrl?: string;
   readonly roleLabel: string;
-  readonly nameNode: ReactNode;
   readonly detail?: ReactNode;
-}) {
+}
+
+function PersonBlock({ href, name, avatarUrl, roleLabel, detail }: PersonBlockProps) {
   return (
-    <Stack
-      direction="row"
-      sx={{
-        alignItems: "center",
-        gap: { xs: 1.5, sm: 2 },
-        flex: 1,
-        minWidth: 0,
-        width: "100%",
-      }}
-    >
-      <Box
-        sx={{
-          flexShrink: 0,
-          width: { xs: 48, sm: 64 },
-          height: { xs: 48, sm: 64 },
-          "& .MuiAvatar-root": { width: "100%", height: "100%" },
-        }}
-      >
-        <LinkedAvatar href={href} name={name} avatarUrl={avatarUrl} size={64} />
-      </Box>
-      <Box sx={{ minWidth: 0, overflow: "hidden" }}>
-        <StyledPersonRoleCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {roleLabel}
-        </StyledPersonRoleCaption>
-        <Box
-          sx={{
-            minWidth: 0,
-            "& a, & .MuiTypography-root": {
-              display: "block",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            },
-          }}
-        >
-          {nameNode}
-        </Box>
-        {detail}
-      </Box>
-    </Stack>
+    <Box sx={theme => ({ flex: 1, minWidth: 0, width: "100%", mt: theme.spacing(0.5) })}>
+      <PersonProfileLink
+        href={href}
+        name={name}
+        avatarUrl={avatarUrl}
+        avatarSize={64}
+        label={roleLabel}
+        typographyVariant="bodyLg"
+        fontWeight={600}
+      />
+      {detail}
+    </Box>
   );
 }
 
@@ -167,6 +94,7 @@ function SubjectHeaderBlock({
   subjectName,
   subjectAvatarUrl,
   courseName,
+  isActive,
   labels,
 }: {
   readonly subjectId: string;
@@ -174,8 +102,11 @@ function SubjectHeaderBlock({
   readonly subjectName: string;
   readonly subjectAvatarUrl: string | undefined;
   readonly courseName: string;
+  readonly isActive: boolean;
   readonly labels: ClassInfoCardProps["labels"]["classInfo"];
 }) {
+  const subjectAvatar = <UserAvatar src={subjectAvatarUrl} label={subjectName || courseName} size={64} />;
+
   return (
     <Stack
       direction="row"
@@ -187,30 +118,22 @@ function SubjectHeaderBlock({
       })}
     >
       {subjectId || subjectName ? (
-        <Box
-          sx={{
-            flexShrink: 0,
-            width: { xs: 48, sm: 64 },
-            height: { xs: 48, sm: 64 },
-            "& .MuiAvatar-root": { width: "100%", height: "100%" },
-          }}
-        >
-          <LinkedAvatar href={subjectHref} name={subjectName || courseName} avatarUrl={subjectAvatarUrl} size={64} />
+        <Box sx={{ flexShrink: 0 }}>
+          {subjectHref ? (
+            <Link href={subjectHref} style={{ textDecoration: "none" }}>
+              {subjectAvatar}
+            </Link>
+          ) : (
+            subjectAvatar
+          )}
         </Box>
       ) : null}
       <Box sx={{ minWidth: 0 }}>
-        <StyledLiveInstanceChip
-          label={labels.liveInstance}
-          size="small"
-          sx={theme => ({
-            mb: theme.spacing(1.5),
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            "& .MuiChip-label": {
-              paddingInline: theme.spacing(1.5),
-            },
-          })}
-        />
+        {isActive ? (
+          <Box sx={theme => ({ mb: theme.spacing(1.5) })}>
+            <StatusBadge category="classInstance" status="ACTIVATED" label={labels.liveInstance} />
+          </Box>
+        ) : null}
         <StyledCourseNameHeading
           variant="h3"
           sx={theme => ({
@@ -276,21 +199,6 @@ function PersonRow({
   readonly teacher: ClassInfoCardProps["teacher"];
   readonly labels: ClassInfoCardProps["labels"]["classInfo"];
 }) {
-  // Extract nodes before returning JSX to avoid nested/inline ternaries and improve readability.
-  const studentNameNode = student.id ? (
-    <StudentEntityLink studentId={student.id} name={student.name ?? ""} variant="bodyLg" />
-  ) : (
-    <Typography variant="bodyLg" sx={{ fontWeight: 700 }}>
-      {student.name ?? ""}
-    </Typography>
-  );
-
-  const teacherNameNode = teacher.id ? (
-    <TeacherEntityLink teacherId={teacher.id} name={teacher.name ?? ""} variant="bodyLg" />
-  ) : (
-    <Typography variant="bodyLg">{teacher.name ?? ""}</Typography>
-  );
-
   const teacherDetail = teacher.title ? (
     <StyledPersonDetailCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
       {teacher.title}
@@ -312,7 +220,6 @@ function PersonRow({
         name={student.name ?? ""}
         avatarUrl={student.avatarUrl ?? undefined}
         roleLabel={labels.student}
-        nameNode={studentNameNode}
       />
 
       <Divider orientation="vertical" flexItem sx={{ display: { xs: "none", sm: "block" } }} />
@@ -323,7 +230,6 @@ function PersonRow({
         name={teacher.name ?? ""}
         avatarUrl={teacher.avatarUrl ?? undefined}
         roleLabel={labels.moduleInstructor}
-        nameNode={teacherNameNode}
         detail={teacherDetail}
       />
     </Stack>
@@ -387,6 +293,7 @@ export function ClassInfoCard({
           subjectName={subjectName}
           subjectAvatarUrl={subjectAvatarUrl ?? undefined}
           courseName={courseName}
+          isActive={isActive}
           labels={labels.classInfo}
         />
         {isActive && <ActiveConnectionIndicator activeConnection={labels.classInfo.activeConnection} />}

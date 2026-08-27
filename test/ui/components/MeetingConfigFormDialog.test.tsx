@@ -132,4 +132,14 @@ describe("MeetingConfigFormDialog", () => {
     renderDialog();
     expect(screen.queryByText(enhancementLabels.testConfig)).not.toBeInTheDocument();
   });
+
+  test("renders inline (non-full-screen) dialog by default", () => {
+    const { baseElement } = renderDialog();
+    expect(baseElement.querySelector(".MuiDialog-paperFullScreen")).not.toBeInTheDocument();
+  });
+
+  test("renders full-screen dialog when fullScreen prop is set by the tier caller", () => {
+    const { baseElement } = renderDialog({ fullScreen: true });
+    expect(baseElement.querySelector(".MuiDialog-paperFullScreen")).toBeInTheDocument();
+  });
 });

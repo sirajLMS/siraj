@@ -2,13 +2,16 @@
 import { InfoOutlined, MenuBookOutlined } from "@mui/icons-material";
 import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { BaseCard } from "@/frontend/common/components/ui";
+import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { StudentEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
 import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/types/dashboard";
 import { Link } from "@/shared/i18n";
 
-const STATUS_COLOR_MAP: Record<ClassInstanceStatus, "active" | "confirmed" | "pending" | "completed" | "cancelled"> = {
+type SessionBadgeStatus = "active" | "confirmed" | "pending" | "completed" | "cancelled";
+
+// Maps class-instance lifecycle status to the badge status tokens of the `session` category.
+const SESSION_BADGE_STATUS: Record<ClassInstanceStatus, SessionBadgeStatus> = {
   active: "active",
   scheduled: "confirmed",
   pending: "pending",
@@ -69,13 +72,6 @@ const StyledCardHeading = styled(Typography)(() => ({
 
 const StyledHeadingInfoIcon = styled(InfoOutlined)(() => ({}));
 
-// Small status dot; bg color is set per-call via sx based on status key
-const StyledStatusDot = styled(Box)({
-  width: 10,
-  height: 10,
-  borderRadius: "50%",
-});
-
 function DetailField({ label, value }: DetailFieldProps) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
@@ -111,7 +107,7 @@ interface ClassInstanceDetailsFieldsProps {
   readonly startTime: string;
   readonly endTime: string;
   readonly durationMinutes: number;
-  readonly statusKey: "active" | "confirmed" | "pending" | "completed" | "cancelled";
+  readonly statusKey: SessionBadgeStatus;
   readonly statusLabel: string;
   readonly hideStudentField?: boolean;
   readonly labels: ClassInstanceDetailsCardProps["labels"];
@@ -201,14 +197,7 @@ function ClassInstanceDetailsFields({
       <Grid size={{ xs: 12, sm: 6 }}>
         <DetailField
           label={labels.status}
-          value={
-            <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-              <StyledStatusDot sx={theme => ({ backgroundColor: theme.palette.status[statusKey] })} />
-              <Typography variant="bodyLg" sx={theme => ({ fontWeight: theme.typography.fontWeightBold })}>
-                {statusLabel}
-              </Typography>
-            </Stack>
-          }
+          value={<StatusBadge category="session" status={statusKey} label={statusLabel} />}
         />
       </Grid>
     </Grid>
@@ -291,7 +280,7 @@ export function ClassInstanceDetailsCard({
   hideRateSection = false,
   labels,
 }: ClassInstanceDetailsCardProps) {
-  const statusKey = STATUS_COLOR_MAP[status];
+  const statusKey = SESSION_BADGE_STATUS[status];
   const statusLabel = labels.statusLabels[status];
   const displaySubjectName = subjectName || courseModule;
   const rateSourceLabel = resolveRateSourceLabel(isRateOverridden, rateSource, labels);

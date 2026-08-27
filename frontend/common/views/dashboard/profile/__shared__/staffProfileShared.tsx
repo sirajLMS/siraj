@@ -1,7 +1,8 @@
 "use client";
 
-import { Alert, Box, Button, Typography } from "@mui/material";
+import { Alert, Typography } from "@mui/material";
 import type React from "react";
+import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import { toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { StaffExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/StaffExtensionProfileSection";
@@ -22,6 +23,10 @@ export interface StaffProfileSharedSlots {
   readonly ViewContentWrapper: React.ComponentType<{ readonly children: React.ReactNode }>;
 }
 
+type StaffProfileSharedViewProps = Omit<StaffProfileViewModel, "staffData"> &
+  Readonly<{ staffData: StaffProfileViewModel["staffData"] | null }> &
+  Readonly<StaffProfileSharedSlots>;
+
 export function StaffProfileSharedView({
   labels,
   scope,
@@ -29,6 +34,7 @@ export function StaffProfileSharedView({
   isAdminScope,
   loading,
   error,
+  refetch,
   isSaving,
   onSubmitOwn,
   onSubmitAdmin,
@@ -43,7 +49,7 @@ export function StaffProfileSharedView({
   activeTab,
   canView,
   ViewContentWrapper,
-}: Readonly<StaffProfileViewModel> & Readonly<StaffProfileSharedSlots>): React.JSX.Element | null {
+}: Readonly<StaffProfileSharedViewProps>): React.JSX.Element | null {
   const translations = labels;
   const st = labels.staff;
 
@@ -53,6 +59,7 @@ export function StaffProfileSharedView({
     isAdminScope,
     loading,
     error,
+    onRetry: refetch,
     staffData,
     permissionGroups,
     permissionOverrides,
@@ -61,6 +68,10 @@ export function StaffProfileSharedView({
   });
   if (guard !== null) {
     return guard;
+  }
+
+  if (!staffData) {
+    return null;
   }
 
   const sectionLabels = {
@@ -173,6 +184,7 @@ interface StaffProfileGuardProps {
   readonly isAdminScope: boolean;
   readonly loading: boolean;
   readonly error: Error | undefined;
+  readonly onRetry: StaffProfileViewModel["refetch"];
   readonly staffData: StaffProfileViewModel["staffData"] | null | undefined;
   readonly permissionGroups: StaffProfileViewModel["permissionGroups"];
   readonly permissionOverrides: StaffProfileViewModel["permissionOverrides"];
@@ -187,6 +199,7 @@ function staffProfileGuard(props: Readonly<StaffProfileGuardProps>): React.JSX.E
     isAdminScope,
     loading,
     error,
+    onRetry,
     staffData,
     permissionGroups,
     permissionOverrides,
@@ -208,22 +221,11 @@ function staffProfileGuard(props: Readonly<StaffProfileGuardProps>): React.JSX.E
   }
 
   if (loading && !staffData) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-        <div className="loading-spinner" />
-      </Box>
-    );
+    return <LoadingState />;
   }
 
   if (error && !staffData) {
-    return (
-      <Alert severity="error" sx={{ my: 2 }} onClose={() => {}}>
-        {t.errors.failedToLoad}
-        <Button color="inherit" size="small" onClick={() => {}}>
-          {t.actions.retry}
-        </Button>
-      </Alert>
-    );
+    return <ErrorState embedded message={t.errors.failedToLoad} retryLabel={t.actions.retry} onRetry={onRetry} />;
   }
 
   if (!staffData) {

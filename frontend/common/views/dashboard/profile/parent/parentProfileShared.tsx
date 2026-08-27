@@ -1,7 +1,8 @@
 "use client";
 
-import { Alert, Box, Button, Typography } from "@mui/material";
+import { Alert, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import { toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
@@ -79,22 +80,11 @@ export function ParentProfileShared({
   }
 
   if (loading && !parentData) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-        <div className="loading-spinner" />
-      </Box>
-    );
+    return <LoadingState />;
   }
 
   if (error && !parentData) {
-    return (
-      <Alert severity="error" sx={{ my: 2 }} onClose={() => {}}>
-        {t.errors.failedToLoad}
-        <Button color="inherit" size="small" onClick={onRetry}>
-          {t.actions.retry}
-        </Button>
-      </Alert>
-    );
+    return <ErrorState embedded message={t.errors.failedToLoad} retryLabel={t.actions.retry} onRetry={onRetry} />;
   }
 
   if (!parentData) {

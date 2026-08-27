@@ -197,13 +197,24 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
 
       <DesktopSectionPanel contentPadding={false} title={t.pageTitle} sx={{ mt: 3 }}>
         <DesktopListStateGate error={error} loading={loading} hasRows={rows.length > 0} errorMessage={t.loadError}>
-          <Box sx={{ width: "100%", height: 540, p: 2 }}>
+          <Box
+            sx={{
+              width: "100%",
+              height: 540,
+              p: 2,
+              "& .archived-plan-row": {
+                opacity: 0.62,
+                filter: "grayscale(0.45)",
+              },
+            }}
+          >
             <AppDataGrid
               rows={rows}
               columns={columns}
               loading={loading}
               ariaLabel={t.pageTitle}
               emptyMessage={t.empty}
+              getRowClassName={params => (params.row.active ? "" : "archived-plan-row")}
               autoHeight
               disableColumnMenu
               paginationOptions={{ mode: "client" }}

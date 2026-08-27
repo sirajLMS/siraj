@@ -9,6 +9,7 @@ import { ClassDetailsStudentView } from "@/frontend/common/views/dashboard/class
 import { ClassDetailsTeacherView } from "@/frontend/common/views/dashboard/classes/details/teacher/ClassDetailsTeacherView";
 import type {
   AdminViewProps,
+  ClassDetailsMetricGridSlot,
   StudentViewProps,
   TeacherViewProps,
 } from "@/frontend/common/views/dashboard/classes/details/types";
@@ -18,13 +19,21 @@ import {
   useTeacherViewLabels,
 } from "@/frontend/common/views/dashboard/classes/details/useClassDetailsLabels";
 
-const AdminView = (props: AdminViewProps) => {
+interface AdminViewWrapperProps extends AdminViewProps {
+  readonly livePerformanceMetricGrid: ClassDetailsMetricGridSlot;
+}
+
+const AdminView = (props: AdminViewWrapperProps) => {
   const labels = useAdminViewLabels(props.instance.studentTimezone ?? "");
   const instance = useLocalizedClassInstance(props.instance);
   return <ClassDetailsAdminView {...props} instance={instance} labels={labels} />;
 };
 
-const TeacherView = (props: TeacherViewProps) => {
+interface TeacherViewWrapperProps extends TeacherViewProps {
+  readonly performanceMetricGrid: ClassDetailsMetricGridSlot;
+}
+
+const TeacherView = (props: TeacherViewWrapperProps) => {
   const labels = useTeacherViewLabels(props.instance.studentTimezone ?? "");
   const instance = useLocalizedClassInstance(props.instance);
   return <ClassDetailsTeacherView {...props} instance={instance} labels={labels} />;
@@ -57,7 +66,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
     formattedStartTime,
     formattedEndTime,
   } = props;
-  const { Header } = slots;
+  const { Header, TeacherPerformanceMetricGrid, LivePerformanceMetricGrid } = slots;
 
   const viewContent = (() => {
     if (canOverride) {
@@ -72,6 +81,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
           onReschedule={handlers.handleReschedule}
           onDelete={() => {}}
           handlers={handlers}
+          livePerformanceMetricGrid={LivePerformanceMetricGrid}
           formattedScheduledDate={formattedScheduledDate}
           formattedStartTime={formattedStartTime}
           formattedEndTime={formattedEndTime}
@@ -105,6 +115,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
           onStop={handlers.handleStop}
           onInfoEdit={handlers.handleInfoEdit}
           onDelete={() => {}}
+          performanceMetricGrid={TeacherPerformanceMetricGrid}
           formattedScheduledDate={formattedScheduledDate}
           formattedStartTime={formattedStartTime}
           formattedEndTime={formattedEndTime}

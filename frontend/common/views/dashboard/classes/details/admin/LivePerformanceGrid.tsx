@@ -1,37 +1,21 @@
 "use client";
 
-import type { SvgIconComponent } from "@mui/icons-material";
-import ChecklistIcon from "@mui/icons-material/Checklist";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
 import { SectionPanel } from "@/frontend/common/components/ui/container";
-import type { PerformanceMetric } from "@/frontend/common/views/dashboard/types/dashboard";
-
-const METRIC_ICONS: Record<string, SvgIconComponent> = {
-  engagement: TrendingUpIcon,
-  assessment: ChecklistIcon,
-  focus: VisibilityIcon,
-  health: FavoriteIcon,
-};
-
+import {
+  buildLivePerformanceMetricItems,
+  type LivePerformanceLabels,
+} from "@/frontend/common/views/dashboard/classes/details/admin/livePerformanceMetrics";
 import { classDetailsContentPaddingSx } from "@/frontend/common/views/dashboard/classes/details/classDetailsMobileLayout";
+import type { ClassDetailsMetricGridSlot } from "@/frontend/common/views/dashboard/classes/details/types";
+import type { PerformanceMetric } from "@/frontend/common/views/dashboard/types/dashboard";
 
 interface LivePerformanceGridProps {
   readonly metrics: readonly PerformanceMetric[];
   readonly hasData: boolean;
-  readonly labels: {
-    readonly livePerformanceOverview: string;
-    readonly last30Mins: string;
-    readonly engagementScore: string;
-    readonly assessmentProgress: string;
-    readonly focusLevel: string;
-    readonly sessionHealth: string;
-    readonly noData: string;
-  };
+  readonly labels: LivePerformanceLabels;
+  readonly MetricGrid: ClassDetailsMetricGridSlot;
 }
 
 const StyledSectionTitle = styled(Typography)(() => ({}));
@@ -40,22 +24,8 @@ const StyledTimeRangeChip = styled(Box)(() => ({}));
 
 const StyledTimeRangeCaption = styled(Typography)(() => ({}));
 
-export function LivePerformanceGrid({ metrics, hasData, labels }: LivePerformanceGridProps) {
-  const labelMap: Record<string, string> = {
-    engagementScore: labels.engagementScore,
-    assessmentProgress: labels.assessmentProgress,
-    focusLevel: labels.focusLevel,
-    sessionHealth: labels.sessionHealth,
-  };
-
-  const metricItems = metrics.map(m => ({
-    key: m.key,
-    count: m.value,
-    labelKey: m.key,
-    label: labelMap[m.labelKey] ?? m.labelKey,
-    icon: METRIC_ICONS[m.key] ?? TrendingUpIcon,
-    variant: "highlight" as const,
-  }));
+export function LivePerformanceGrid({ metrics, hasData, labels, MetricGrid }: LivePerformanceGridProps) {
+  const metricItems = buildLivePerformanceMetricItems(metrics, labels);
 
   return (
     <Box sx={classDetailsContentPaddingSx}>
@@ -85,7 +55,7 @@ export function LivePerformanceGrid({ metrics, hasData, labels }: LivePerformanc
         }
       >
         {hasData ? (
-          <MetricCardGrid metrics={metricItems} layout="scroll" />
+          <MetricGrid metrics={metricItems} />
         ) : (
           <Typography
             variant="body2"

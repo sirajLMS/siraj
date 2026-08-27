@@ -22,6 +22,8 @@ export interface ClassAuditViewModel extends Omit<ClassAuditViewProps, "audit" |
   readonly status: "loading" | "invalidId" | "error" | "ready";
   readonly audit: NonNullable<GroupClassAuditQuery_groupClassAudit> | null;
   readonly labels: ClassAuditLabels | Record<string, never>;
+  /** Re-runs the audit query; used by the switcher to recover from a failed fetch. */
+  readonly onRetry: () => void;
 }
 
 export type UseClassAuditViewModelProps = Record<string, never>;
@@ -36,7 +38,7 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
   const params = useParams();
   const id = typeof params?.id === "string" ? params.id : "";
 
-  const { audit, loading, error, resendNotifications, isResending } = useClassAuditData(id);
+  const { audit, loading, error, refetch, resendNotifications, isResending } = useClassAuditData(id);
   const handlers = useClassAuditHandlers({ id, audit, router, resendNotifications, t });
 
   if (loading && !audit) {
@@ -47,7 +49,7 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
   }
   if (error || !audit) {
     logger.error("Error fetching class audit:", error);
-    return createStubClassAuditViewModel("error");
+    return createStubClassAuditViewModel("error", refetch);
   }
 
   return {
@@ -56,12 +58,13 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
     labels: buildClassAuditLabels(t, audit),
     ...handlers,
     isResending,
+    onRetry: refetch,
   };
 }
 
 type StubStatus = "loading" | "invalidId" | "error";
 
-function createStubClassAuditViewModel(status: StubStatus): ClassAuditViewModel {
+function createStubClassAuditViewModel(status: StubStatus, onRetry = noopAdminNoteHandler): ClassAuditViewModel {
   return {
     status,
     audit: null,
@@ -74,11 +77,12 @@ function createStubClassAuditViewModel(status: StubStatus): ClassAuditViewModel 
     onUpdateAdminNote: noopAdminNoteHandler,
     onEditAdminNote: noopAdminNoteHandler,
     isResending: false,
+    onRetry,
   };
 }
 
 function useClassAuditData(id: string) {
-  const { data, loading, error } = useQuery(groupClassAuditQueryDocument, {
+  const { data, loading, error, refetch } = useQuery(groupClassAuditQueryDocument, {
     variables: { classInstanceId: id },
     skip: !id,
   });
@@ -87,6 +91,7 @@ function useClassAuditData(id: string) {
     audit: data?.groupClassAudit,
     loading,
     error,
+    refetch,
     resendNotifications,
     isResending,
   };

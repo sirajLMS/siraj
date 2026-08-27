@@ -14,7 +14,7 @@ export type DesktopMeetingConfigListItem = MeetingConfigListItem;
 export type DesktopMeetingConfigListProps = MeetingConfigListProps;
 
 const DESKTOP_OPTIONS = {
-  wrapUrlInTooltip: false,
+  wrapUrlInTooltip: true,
 } as const satisfies MeetingConfigListSharedOptions;
 
 export function DesktopMeetingConfigList(props: DesktopMeetingConfigListProps): React.ReactNode {

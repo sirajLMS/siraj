@@ -3,6 +3,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
+import { StatusBadge } from "@/frontend/common/components/ui/badge";
 
 export type ProfileHeaderProps = {
   readonly name: string;
@@ -51,23 +52,7 @@ export function ProfileHeader({ name, email, roleLabel, avatarUrl, showAvatar = 
             >
               {name}
             </Typography>
-            {roleLabel ? (
-              <Box
-                sx={theme => ({
-                  bgcolor: theme.palette.info.main,
-                  color: theme.palette.onInfo,
-                  px: 1.25,
-                  py: 0.5,
-                  borderRadius: "9999px",
-                  fontSize: theme.typography.labelSm.fontSize,
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                  whiteSpace: "nowrap",
-                })}
-              >
-                {roleLabel}
-              </Box>
-            ) : null}
+            {roleLabel ? <StatusBadge category="session" status="active" label={roleLabel} size="small" /> : null}
           </Stack>
           <Typography
             sx={theme => ({

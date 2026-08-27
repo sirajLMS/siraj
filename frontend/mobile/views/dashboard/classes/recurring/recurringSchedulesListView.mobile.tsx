@@ -1,8 +1,9 @@
 "use client";
 
-import { Box, Stack, TextField, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { RecurringViewShellShared } from "@/frontend/common/views/dashboard/classes/recurring/__shared__/recurringViewShellShared";
 import type { RecurringSchedulesListViewModel } from "@/frontend/common/views/dashboard/classes/recurring/types/recurringSchedulesListViewModel.types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
@@ -37,14 +38,9 @@ export function RecurringSchedulesListMobileView({
       mobileBreadcrumbs={shell.breadcrumbs}
     >
       <MobileContentInset>
-        <TextField
-          fullWidth
-          size="small"
-          placeholder={filters.searchPlaceholder}
-          value={searchValue}
-          onChange={e => onSearchChange(e.target.value)}
-          sx={{ mb: 2 }}
-        />
+        <Box sx={{ mb: 2 }}>
+          <SearchBarField value={searchValue} placeholder={filters.searchPlaceholder} onChange={onSearchChange} />
+        </Box>
       </MobileContentInset>
       <MobileCardList
         rows={rows}

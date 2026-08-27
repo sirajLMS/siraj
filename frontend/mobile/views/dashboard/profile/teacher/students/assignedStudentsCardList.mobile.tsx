@@ -1,12 +1,12 @@
 "use client";
 
 import { Stack, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui/badge";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
 import { formatStatusLabel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsStatusFormatters";
 import type { AssignedStudentsListLabels } from "@/frontend/common/views/dashboard/profile/teacher/students/types/assignedStudentsList.types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
@@ -37,7 +37,7 @@ export function AssignedStudentsCardList({ rows, labels, paginationOptions }: Re
                 name={row.studentName}
                 fallbackInitial="S"
               />
-              <StatusBadge category="studentAccount" status={row.status} label={formatStatusLabel(row.status)} />
+              <MobileStatusBadge category="studentAccount" status={row.status} label={formatStatusLabel(row.status)} />
             </Stack>
             <MobilePersonProfileLink
               href={profileHrefForParent({

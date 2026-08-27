@@ -2,11 +2,12 @@
 
 import type { ReactNode } from "react";
 import { toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/CompensationSection";
-import { StatsSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/StatsSection";
+import { buildTeacherStatsMetrics } from "@/frontend/common/views/dashboard/profile/teacher/sections/StatsSection";
 import {
   toTeacherPersonalFieldLabels,
   toTeacherSectionLabels,
@@ -33,6 +34,11 @@ export interface TeacherProfileSharedSections {
 
 export interface TeacherProfileSharedOptions {
   readonly renderView: (sections: TeacherProfileSharedSections) => ReactNode;
+  /**
+   * Tier slot that renders the teacher stats metric descriptors through the
+   * tier metric grid primitive (DesktopMetricCardGrid / MobileMetricCardGrid).
+   */
+  readonly renderStats: (metrics: readonly MetricItem[]) => ReactNode;
 }
 
 export interface TeacherProfileSharedProps {
@@ -92,6 +98,7 @@ export function TeacherProfileShared({ vm, options }: Readonly<TeacherProfileSha
       targetUserId,
       isAdminScope,
       renderView: options.renderView,
+      renderStats: options.renderStats,
     });
   }
 
@@ -110,6 +117,7 @@ function renderTeacherProfileViewSections(params: {
   readonly targetUserId: TeacherProfileViewModel["targetUserId"];
   readonly isAdminScope: TeacherProfileViewModel["isAdminScope"];
   readonly renderView: TeacherProfileSharedOptions["renderView"];
+  readonly renderStats: TeacherProfileSharedOptions["renderStats"];
 }): ReactNode {
   const {
     labels,
@@ -123,6 +131,7 @@ function renderTeacherProfileViewSections(params: {
     targetUserId,
     isAdminScope,
     renderView,
+    renderStats,
   } = params;
 
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
@@ -167,7 +176,7 @@ function renderTeacherProfileViewSections(params: {
     ) : null,
     adminOnly:
       showAdminOnly && adminData ? <AdminOnlySection labels={sectionLabels} mode="view" adminData={adminData} /> : null,
-    stats: showStats ? <StatsSection labels={labels} teacherData={teacherData} isAdminScope={isAdminScope} /> : null,
+    stats: showStats ? renderStats(buildTeacherStatsMetrics({ labels, teacherData, isAdminScope })) : null,
   };
 
   return renderView(sections);

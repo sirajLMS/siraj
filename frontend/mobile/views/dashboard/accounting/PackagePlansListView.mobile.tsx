@@ -1,6 +1,6 @@
 "use client";
 
-import { AddOutlined } from "@mui/icons-material";
+import { AddOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,12 +51,19 @@ export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel
                     <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
                       {row.displayName}
                     </Typography>
-                    <Chip
-                      size="small"
-                      color={planActiveTone(Boolean(row.active))}
-                      variant={row.active ? "filled" : "outlined"}
-                      label={row.active ? t.columns.active : t.archived}
-                    />
+                    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                      <Chip
+                        size="small"
+                        color={planActiveTone(Boolean(row.active))}
+                        variant={row.active ? "filled" : "outlined"}
+                        label={row.active ? t.columns.active : t.archived}
+                      />
+                      <EditOutlined
+                        fontSize="small"
+                        sx={theme => ({ color: theme.palette.onSurfaceVariant })}
+                        aria-hidden
+                      />
+                    </Stack>
                   </Stack>
                   <Stack
                     direction="row"

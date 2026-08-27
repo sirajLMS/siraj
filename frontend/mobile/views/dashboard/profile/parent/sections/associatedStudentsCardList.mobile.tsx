@@ -30,7 +30,15 @@ function studentStatusLabel(
   return isStudentStatusKey(key) ? labels[key] : labels.regular;
 }
 
-export function AssociatedStudentsCardListMobile({ rows, labels }: Readonly<BaseAssociatedStudentsListProps>) {
+type AssociatedStudentsCardListMobileProps = BaseAssociatedStudentsListProps & {
+  readonly loading?: boolean;
+};
+
+export function AssociatedStudentsCardListMobile({
+  rows,
+  labels,
+  loading,
+}: Readonly<AssociatedStudentsCardListMobileProps>) {
   const { parent: t, base: tProfile } = labels;
 
   return (
@@ -39,6 +47,7 @@ export function AssociatedStudentsCardListMobile({ rows, labels }: Readonly<Base
       getKey={row => row.id ?? ""}
       paginationOptions={false}
       layout="edge-to-edge"
+      loading={loading}
       emptyMessage={t.students.mobileListLabel}
       renderItem={row => (
         <MobileCardListItem variant="edge-to-edge">
