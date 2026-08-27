@@ -121,12 +121,22 @@ export namespace ParentRepository {
       .from(parents)
       .groupBy(parents.status);
 
-    return {
-      regular: metricsResult.find(m => m.status === "REGULAR")?.count ?? 0,
-      onLeave: metricsResult.find(m => m.status === "ON_LEAVE")?.count ?? 0,
-      suspended: metricsResult.find(m => m.status === "SUSPENDED")?.count ?? 0,
-      onTrial: metricsResult.find(m => m.status === "ON_TRIAL")?.count ?? 0,
+    // Performance Optimization (Bolt ⚡): Single-pass aggregation map instead of multiple array traversals via .find()
+    const metrics: ParentDirectoryMetrics = {
+      regular: 0,
+      onLeave: 0,
+      suspended: 0,
+      onTrial: 0,
     };
+
+    for (const m of metricsResult) {
+      if (m.status === "REGULAR") metrics.regular = m.count;
+      else if (m.status === "ON_LEAVE") metrics.onLeave = m.count;
+      else if (m.status === "SUSPENDED") metrics.suspended = m.count;
+      else if (m.status === "ON_TRIAL") metrics.onTrial = m.count;
+    }
+
+    return metrics;
   }
 
   function buildDirectoryConditions(options: {
@@ -163,7 +173,14 @@ export namespace ParentRepository {
       .where(and(inArray(invoices.parentId, parentIds), eq(invoices.status, "UNPAID")))
       .groupBy(invoices.parentId);
 
-    return new Map(unpaidCounts.map(r => [r.parentId, r.cnt]));
+    // Performance Optimization (Bolt ⚡): Populate Map directly in a loop to avoid allocating intermediate key-value arrays via .map()
+    const map = new Map<string, number>();
+    for (const r of unpaidCounts) {
+      if (r.parentId) {
+        map.set(r.parentId, r.cnt);
+      }
+    }
+    return map;
   }
 
   export const getParentDirectory = async (
