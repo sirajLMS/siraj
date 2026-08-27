@@ -1,7 +1,7 @@
 "use client";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { IconButton, InputAdornment, TextField } from "@mui/material";
+import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import { useEnvironmentConfigSettingsStore } from "@/frontend/common/stores/environmentConfigSettingsStore";
 
 type EnvSecretFieldProps = {
@@ -52,6 +52,8 @@ export function EnvSecretField({
     );
   }
 
+  const tooltipLabel = revealed ? hideValueLabel : showValueLabel;
+
   if (readOnly) {
     const displayValue = revealed ? ((value || placeholder) ?? HIDDEN_SECRET_PLACEHOLDER) : HIDDEN_SECRET_PLACEHOLDER;
 
@@ -67,16 +69,18 @@ export function EnvSecretField({
             readOnly: true,
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton
-                  edge="end"
-                  aria-label={revealed ? hideValueLabel : showValueLabel}
-                  onClick={() => {
-                    toggleSecretRevealed(configKey);
-                  }}
-                  disabled={disabled}
-                >
-                  {revealed ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                </IconButton>
+                <Tooltip title={tooltipLabel}>
+                  <IconButton
+                    edge="end"
+                    aria-label={tooltipLabel}
+                    onClick={() => {
+                      toggleSecretRevealed(configKey);
+                    }}
+                    disabled={disabled}
+                  >
+                    {revealed ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                  </IconButton>
+                </Tooltip>
               </InputAdornment>
             ),
           },
@@ -100,16 +104,18 @@ export function EnvSecretField({
         input: {
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton
-                edge="end"
-                aria-label={revealed ? hideValueLabel : showValueLabel}
-                onClick={() => {
-                  toggleSecretRevealed(configKey);
-                }}
-                disabled={disabled}
-              >
-                {revealed ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-              </IconButton>
+              <Tooltip title={tooltipLabel}>
+                <IconButton
+                  edge="end"
+                  aria-label={tooltipLabel}
+                  onClick={() => {
+                    toggleSecretRevealed(configKey);
+                  }}
+                  disabled={disabled}
+                >
+                  {revealed ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                </IconButton>
+              </Tooltip>
             </InputAdornment>
           ),
         },
