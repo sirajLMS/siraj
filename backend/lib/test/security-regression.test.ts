@@ -173,3 +173,11 @@ describe("M3 — extended RLS migration file", () => {
     expect(src).toContain("FORCE ROW LEVEL SECURITY");
   });
 });
+
+describe("M11 — storage file responses are sandboxed", () => {
+  test("route.ts sets CSP sandbox header on full and range responses", async () => {
+    const src = await readSrc("app/api/storage/files/[[...path]]/route.ts");
+    expect(src).toContain('"Content-Security-Policy": "default-src \'none\'; sandbox"');
+    expect(src).toContain('"X-Content-Type-Options": "nosniff"');
+  });
+});

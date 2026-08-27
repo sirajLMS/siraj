@@ -11,6 +11,9 @@ import { dashboardBillingManualEn } from "@/shared/locale/en/dashboard/billing/m
 import { dashboardBillingPaymentEn } from "@/shared/locale/en/dashboard/billing/payment.ts";
 import { quotaEn } from "@/shared/locale/en/dashboard/billing/quota.ts";
 import { dashboardBillingSupportedCurrenciesEn } from "@/shared/locale/en/dashboard/billing/supportedCurrencies.ts";
+import { dashboardAccountingPackagePlansEn } from "@/shared/locale/en/dashboard/accounting/package-plans.ts";
+import { dashboardAccountingPaymentsEn } from "@/shared/locale/en/dashboard/accounting/payments.ts";
+import { dashboardAccountingStudentCreditHoursEn } from "@/shared/locale/en/dashboard/accounting/student-credit-hours.ts";
 
 import { dashboardClassAuditEn } from "@/shared/locale/en/dashboard/classes/audit.ts";
 import { dashboardCreateRecurringClassEn } from "@/shared/locale/en/dashboard/classes/createRecurringClass.ts";
@@ -159,6 +162,9 @@ export const enMessages: Translations = {
     billingManual: dashboardBillingManualEn,
     billingQuota: quotaEn,
     billingPayment: dashboardBillingPaymentEn,
+    accountingPayments: dashboardAccountingPaymentsEn,
+    accountingPackages: dashboardAccountingPackagePlansEn,
+    accountingStudentCreditHours: dashboardAccountingStudentCreditHoursEn,
 
     billingExchangeRates: dashboardBillingExchangeRatesEn,
     billingCurrencyHedges: dashboardBillingCurrencyHedgesEn,

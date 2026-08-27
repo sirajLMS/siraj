@@ -1,8 +1,10 @@
 import {
+  booleanColumn,
   createTable,
   index,
   integerColumn,
   jsonbColumn,
+  numericColumn,
   primaryKey,
   textColumn,
   timestampColumn,
@@ -12,11 +14,19 @@ import {
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { userPaymentMethods } from "@/backend/db/schema/billing/user-payment-methods";
-import { currencyCodeEnum, invoiceStatusEnum, invoiceTypeEnum, paymentMethodTypeEnum } from "@/backend/db/schema/enums";
+import { packagePlans } from "@/backend/db/schema/billing/package-plans";
+import {
+  currencyCodeEnum,
+  invoiceStatusEnum,
+  invoiceTypeEnum,
+  paymentGatewayEnum,
+  paymentMethodTypeEnum,
+} from "@/backend/db/schema/enums";
 import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
 import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import type { PaymentGateway } from "@/backend/enum/billing/package-plan.enum";
 import type { PaymentMethodTransactionSnapshot, PaymentProofTransactionSnapshot } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
@@ -37,6 +47,9 @@ export const invoices = createTable(
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     status: invoiceStatusEnum("status").notNull(),
     invoiceType: invoiceTypeEnum("invoice_type").notNull(),
+    // Hours granted via this invoice (denormalized from the payment row for
+    // fast filtering). NULL for legacy class/monthly/manual invoices.
+    creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }),
     version: integerColumn("version").notNull().default(0),
     exchangeRateSnapshot: textColumn("exchange_rate_snapshot"), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
     exchangeRateSource: varcharColumn("exchange_rate_source", { length: 50 }),
@@ -91,6 +104,18 @@ export const payments = createTable(
       "payment_method_snapshot"
     ).notNull(),
     transactionId: varcharColumn("transaction_id", { length: 255 }),
+    // Accounting credit-hours extension columns (all nullable/defaulted for
+    // full backward compatibility with existing payment rows).
+    packagePlanId: uuidDefaultColumn("package_plan_id").references(() => packagePlans.id, {
+      onDelete: "set null",
+    }),
+    paymentGateway: paymentGatewayEnum("payment_gateway")
+      .notNull()
+      .default("NONE")
+      .$type<PaymentGateway>(),
+    creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }),
+    isPaidStatusOn: booleanColumn("is_paid_status_on").notNull().default(false),
+    paymentNote: textColumn("payment_note"),
     gatewayResponse: textColumn("gateway_response"),
     refundedAmount: textColumn("refunded_amount").notNull().default("0.00"), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
     exchangeRateSnapshot: textColumn("exchange_rate_snapshot"), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
@@ -104,6 +129,9 @@ export const payments = createTable(
     index("payments_transaction_id_idx").on(table.transactionId),
     index("payments_user_payment_method_id_idx").on(table.userPaymentMethodId),
     index("payments_payment_method_type_idx").on(table.paymentMethodType),
+    index("payments_package_plan_id_idx").on(table.packagePlanId),
+    index("payments_payment_gateway_idx").on(table.paymentGateway),
+    index("payments_is_paid_status_on_idx").on(table.isPaidStatusOn),
     uniqueIndex("payments_idempotency_key_unique_idx").on(table.idempotencyKey),
     index("payments_payment_date_idx").on(table.paymentDate),
     index("payments_created_at_idx").on(table.createdAt),

@@ -14,6 +14,7 @@ import {
 } from "@/backend/db/schema";
 import { OrderSortDirection, StudentStatus } from "@/backend/enum";
 import { StudentsOrderByColumn } from "@/backend/enum/students";
+import { ConflictError } from "@/backend/lib/errors";
 import type * as Types from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
@@ -392,6 +393,76 @@ export namespace StudentRepository {
     return tx ? runner(tx) : db.transaction(runner);
   }
 
+  // ─── Credit-hours parallel balance methods ────────────────────────────────
+  // Mirror of addClasses/deductClasses on the numeric(12,2) creditHours
+  // columns. adjustClassesQuota already acquires acquireStudentLock inside the
+  // tx, so the insufficient-hours pre-check runs INSIDE the tx after the lock.
+
+  export const addCreditHours = async (
+    studentId: string,
+    tErrors: ErrorsLabels,
+    amount: number,
+    expectedVersion?: number,
+    tx?: DBTransaction
+  ): Promise<Types.StudentSelectType> => {
+    const runner = (t: DBTransaction) =>
+      adjustClassesQuota(
+        t,
+        studentId,
+        () => ({
+          creditHoursRemaining: sql`${students.creditHoursRemaining} + ${amount}`,
+          creditHoursTotal: sql`${students.creditHoursTotal} + ${amount}`,
+        }),
+        tErrors,
+        expectedVersion
+      );
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  export const deductCreditHours = async (
+    studentId: string,
+    tErrors: ErrorsLabels,
+    amount: number,
+    expectedVersion?: number,
+    tx?: DBTransaction
+  ): Promise<Types.StudentSelectType> => {
+    const runner = (t: DBTransaction) =>
+      adjustClassesQuota(
+        t,
+        studentId,
+        current => {
+          const remaining = Number(current.creditHoursRemaining);
+          if (remaining < amount) {
+            throw new ConflictError(tErrors.credit.insufficientHours({ studentId, remaining, required: amount }));
+          }
+          return { creditHoursRemaining: sql`${students.creditHoursRemaining} - ${amount}` };
+        },
+        tErrors,
+        expectedVersion
+      );
+    return tx ? runner(tx) : db.transaction(runner);
+  };
+
+  export const getCreditHourBalance = async (
+    studentId: string,
+    tx?: DBTransaction
+  ): Promise<Types.CreditHourBalanceReturnType> => {
+    const q = queryDb(tx);
+    const [row] = await q
+      .select({
+        creditHoursTotal: students.creditHoursTotal,
+        creditHoursRemaining: students.creditHoursRemaining,
+      })
+      .from(students)
+      .where(eq(students.id, studentId))
+      .limit(1);
+    return {
+      studentId,
+      creditHoursTotal: row?.creditHoursTotal ?? "0",
+      creditHoursRemaining: row?.creditHoursRemaining ?? "0",
+    };
+  };
+
   export const setClassesRemaining = async (
     studentId: string,
     newClassesRemaining: number,
@@ -475,6 +546,8 @@ export namespace StudentRepository {
         status: students.status,
         classesRemaining: students.classesRemaining,
         classesTotal: students.classesTotal,
+        creditHoursRemaining: students.creditHoursRemaining,
+        creditHoursTotal: students.creditHoursTotal,
         hoursPerWeek: students.hoursPerWeek,
         parentName: sql<string>`COALESCE(${parentUsers.name}, '')`,
         primaryTeacherId: students.primaryTeacherId,

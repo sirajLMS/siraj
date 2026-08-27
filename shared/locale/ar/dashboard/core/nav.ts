@@ -90,6 +90,7 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   monthlyReports: "التقارير الشهرية",
   supervisorProfile: "ملفي",
   navGroupHome: "الرئيسية",
+  navGroupAccounting: "المحاسبة",
   navGroupPeople: "الأشخاص",
   navGroupUsers: "المستخدمون",
   navGroupContent: "المحتوى",
@@ -114,4 +115,6 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
     },
   },
   toggleGroupAriaLabel: label => `تبديل مجموعة ${label}`,
+  accountingPayments: "المدفوعات",
+  accountingPackages: "الباقات",
 };

@@ -140,4 +140,7 @@ export const PAGE_PERMISSIONS = {
   quotas: [AppPermission.QuotasView] as PagePermissions,
   quotasCreate: [AppPermission.QuotasManage] as PagePermissions,
   quotasInsights: [AppPermission.QuotasView] as PagePermissions,
+  // Accounting (credit-hours payments + package plans) — plan Phase 7.
+  accountingPaymentsView: [AppPermission.AccountingPaymentsView] as PagePermissions,
+  accountingPaymentsManage: [AppPermission.AccountingPaymentsManage] as PagePermissions,
 } as const;

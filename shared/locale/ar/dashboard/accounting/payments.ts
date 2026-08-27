@@ -1,0 +1,87 @@
+import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments";
+
+export const dashboardAccountingPaymentsAr: PaymentsLabels = {
+  pageTitle: "المدفوعات",
+  pageSubtitle: "تتبع مدفوعات باقات الساعات المعتمدة وحالة السداد.",
+  addPayment: "إضافة دفعة",
+  editPayment: "تعديل الدفعة",
+  paymentDetails: "تفاصيل الدفعة",
+
+  columns: {
+    studentName: "اسم الطالب",
+    credit: "الرصيد",
+    paid: "المدفوع",
+    currency: "العملة",
+    package: "الباقة",
+    paymentGateway: "وسيلة الدفع",
+    paymentDate: "تاريخ الدفع",
+    createdAt: "تاريخ الإنشاء",
+    actions: "الإجراءات",
+    status: "الحالة",
+  },
+
+  filters: {
+    title: "التصفية",
+    student: "الطالب",
+    parent: "ولي الأمر",
+    fromDate: "من تاريخ",
+    toDate: "إلى تاريخ",
+    unpaidOnly: "غير مدفوعة فقط",
+    apply: "تطبيق",
+    clear: "مسح",
+  },
+
+  form: {
+    student: "الطالب",
+    studentPlaceholder: "اختر طالباً",
+    packagePlan: "الباقة",
+    packagePlanPlaceholder: "اختر باقة (اختياري)",
+    packagePlanAdhoc: "دفعة يدوية",
+    credit: "الرصيد (ساعات)",
+    paid: "المدفوع (المبلغ)",
+    currency: "العملة",
+    paymentGateway: "وسيلة الدفع",
+    paymentDate: "تاريخ الدفع",
+    paidToggle: "مدفوعة",
+    paidToggleOn: "مدفوعة",
+    paidToggleOff: "غير مدفوعة",
+    note: "ملاحظة",
+    notePlaceholder: "ملاحظة اختيارية عن هذه الدفعة",
+    submit: "حفظ الدفعة",
+    cancel: "إلغاء",
+    saving: "جارٍ الحفظ…",
+  },
+
+  gateways: {
+    NONE: "بدون",
+    PAYPAL: "PayPal",
+    WESTERN_UNION: "Western Union",
+    BANK: "بنك",
+    OTHER: "أخرى",
+  },
+
+  status: {
+    paid: "مدفوعة",
+    unpaid: "غير مدفوعة",
+  },
+
+  currencyWarning: currency =>
+    `تنبيه: هذه الدفعة بعملة ${currency} وهي تختلف عن عملة آخر دفعة للطالب. الساعات من العملات المختلفة تشترك في رصيد واحد.`,
+  empty: "لا توجد مدفوعات مطابقة للتصفية الحالية.",
+    loadError: "فشل تحميل المدفوعات. حاول مرة أخرى.",
+  auditUpdatedAt: "آخر تحديث",
+  saveSuccess: "تم حفظ الدفعة بنجاح.",
+  saveError: "فشل حفظ الدفعة. راجع البيانات وحاول مرة أخرى.",
+  togglePaidSuccessOn: "تم تعليم الدفعة كمدفوعة.",
+  togglePaidSuccessOff: "تم تعليم الدفعة كغير مدفوعة.",
+  deleteTitle: "حذف الدفعة",
+  detail: {
+    invoiceStatus: "حالة الفاتورة",
+    invoiceId: "معرّف الفاتورة",
+    parent: "ولي الأمر",
+    editAction: "تعديل",
+    togglePaidAction: "تبديل حالة السداد",
+    markPaid: "تعليم كمدفوعة",
+    markUnpaid: "تعليم كغير مدفوعة",
+  },
+};

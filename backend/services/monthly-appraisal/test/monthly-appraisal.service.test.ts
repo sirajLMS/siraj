@@ -62,6 +62,8 @@ function buildMockStudentSelect() {
     status: StudentStatus.REGULAR,
     classesTotal: 20,
     classesRemaining: 12,
+    creditHoursTotal: "0",
+    creditHoursRemaining: "0",
     version: 1,
     hoursPerWeek: "4",
     idempotencyKey: "student-idempotency-key-0001",

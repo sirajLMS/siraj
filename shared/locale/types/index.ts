@@ -22,6 +22,7 @@ export * from "./dashboard/lms";
 export * from "./dashboard/meeting-providers";
 export * from "./dashboard/parents";
 export * from "./dashboard/payment-catalogs";
+export * from "./dashboard/accounting";
 export * from "./dashboard/permissions";
 export * from "./dashboard/reports";
 export * from "./dashboard/resources";

@@ -1,5 +1,5 @@
 {
-  "manifestHash": "6d283bf1844596909967006d029a1a0aa25e6ae2df4c1ce0e2784e38cb7512d2",
+  "manifestHash": "5ababe5c4373de32b4b3d79fabd00d2a6563b8404fc4d9437141bed0f19b6368",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -28,6 +28,14 @@
     {
       "file": "32-user-admin-reset-password-data.sql",
       "sha256": "9b4ee33bc88f6b21f3cfc4d99cee8ee12217d7981656b8bab5b96484ff2d1b84"
+    },
+    {
+      "file": "33-accounting-permissions-and-enums.sql",
+      "sha256": "fca19c36e1f31c2bcf164c42c33d359634eb17f4b34c2640f4c4f9c6d63de5d6"
+    },
+    {
+      "file": "34-credit-hours-system-settings-seed.sql",
+      "sha256": "3d2836e49dfb736c0ba2f4be9e0b786e49765453b241173514570fd2700a1c57"
     },
     {
       "file": "4-class_categories_and_subjects.sql",
@@ -285,6 +293,8 @@
     "20260825020600_custom_extended_rls_policies",
     "20260825020601_custom_payments_ledger_permissions",
     "20260825020602_custom_self_service_reschedule_permissions",
-    "20260826162257_custom_self_service_reschedule_permissions"
+    "20260826162257_custom_self_service_reschedule_permissions",
+    "20260827015543_custom_33-accounting-permissions-and-enums",
+    "20260827015544_custom_34-credit-hours-system-settings-seed"
   ]
 }

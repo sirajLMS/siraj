@@ -21,6 +21,7 @@ export type NavIconKey =
   | "menuBook"
   | "noteAdd"
   | "notificationsActive"
+  | "packages"
   | "payments"
   | "personAddAlt"
   | "personOutline"

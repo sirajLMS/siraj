@@ -14,7 +14,10 @@ export function creditTransactionFields(t: PothosObjectFieldBuilder) {
   return {
     id: t.exposeString("id"),
     studentId: t.exposeString("studentId"),
-    changeAmount: t.exposeInt("changeAmount"),
+        changeAmount: t.exposeInt("changeAmount"),
+    // Hour-ledger amount for hour-based rows (XOR with changeAmount).
+    // numeric(12,2) surfaces as a string at the driver boundary — consumers parse.
+    changeAmountHours: t.exposeString("changeAmountHours", { nullable: true }),
     reason: t.expose("reason", { type: CreditReasonPothosEnum }),
     sourcePaymentId: t.exposeString("sourcePaymentId", { nullable: true }),
     classInstanceId: t.exposeString("classInstanceId", { nullable: true }),

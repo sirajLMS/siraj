@@ -8,6 +8,7 @@ import { assertAssociatedOrManage, requirePermission } from "@/backend/services/
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type {
   CreditBalanceReturnType,
+  CreditHourBalanceReturnType,
   CreditTransactionReturnType,
   CreditTransactionSelectType,
   CreditTransactionSubmitInput,
@@ -20,8 +21,11 @@ function deriveBookingIdempotencyKey(input: {
   studentId: string;
   classInstanceId: string;
   operation: "deduct" | "refund";
+  /** Ledger discriminator — hour keys must never collide with class keys. */
+  unit?: "classes" | "hours";
 }): string {
   const parts = [input.studentId, input.classInstanceId, input.operation];
+  if (input.unit === "hours") parts.push("hour-unit");
   return createHash("sha256").update(parts.join(":")).digest("hex");
 }
 
@@ -145,6 +149,139 @@ export namespace CreditService {
     }
   }
 
+  // ─── Hour-based parallel ledger extensions (credit-hours system) ──────────
+  // v1: unit-tested only — production callers arrive with Plan 6. Do NOT
+  // remove as "unused"; they are the intended extension point.
+
+  /**
+   * Caller-owned-tx purchase into the HOUR ledger. Does NOT check permissions
+   * and does NOT open a transaction (mirrors recordPurchaseIfMissing):
+   * duplicates RETURN the existing row instead of throwing.
+   */
+  export async function recordHourPurchase(
+    input: {
+      studentId: string;
+      hours: number;
+      creditedByUserId: string;
+      sourcePaymentId?: string | null;
+      notes?: string | null;
+    },
+    idempotencyKey: string,
+    tx: DBTransaction,
+    tErrors: ErrorsLabels
+  ): Promise<CreditTransactionReturnType | null> {
+    if (!Number.isFinite(input.hours) || input.hours <= 0) {
+      throw new ValidationError(tErrors.credit.invalidInput);
+    }
+
+    const existing = await CreditRepository.findByIdempotencyKeys([idempotencyKey], tx);
+    if (existing.length > 0 && existing[0]) return mapToReturnType(existing[0]);
+
+    const row = await CreditRepository.createHourPurchase(tx, {
+      studentId: input.studentId,
+      hours: input.hours,
+      sourcePaymentId: input.sourcePaymentId ?? null,
+      notes: input.notes ?? null,
+      creditedByUserId: input.creditedByUserId,
+      idempotencyKey,
+    });
+    await StudentRepository.addCreditHours(input.studentId, tErrors, input.hours, undefined, tx);
+    return mapToReturnType(row);
+  }
+
+  /** Consumes HOURS for an hour-billed class instance (Plan 6 wiring point). */
+  export async function deductHoursForBooking(
+    studentId: string,
+    classInstanceId: string,
+    hours: number,
+    creditedByUserId: string,
+    idempotencyKey: string,
+    tx: DBTransaction,
+    tErrors: ErrorsLabels,
+    _locale = "en"
+  ): Promise<void> {
+    if (!Number.isFinite(hours) || hours <= 0) {
+      throw new ValidationError(tErrors.credit.invalidInput);
+    }
+
+    const balance = await CreditRepository.getHourBalance(tx, studentId);
+    const remaining = Number(balance.creditHoursRemaining);
+    if (remaining < hours) {
+      throw new ConflictError(tErrors.credit.insufficientHours({ studentId, remaining, required: hours }));
+    }
+
+    await runIdempotentBookingLedgerOp({
+      studentId,
+      classInstanceId,
+      creditedByUserId,
+      idempotencyKey,
+      tx,
+      operation: "deduct",
+      unit: "hours",
+      successLogMessage: "Credit hours deducted for booking",
+      errorLogMessage: "Failed to deduct credit hours for booking",
+      applyLedgerChange: async effectiveIdempotencyKey =>
+        CreditRepository.deductHoursForBooking(tx, {
+          studentId,
+          classInstanceId,
+          hours,
+          creditedByUserId,
+          idempotencyKey: effectiveIdempotencyKey,
+        }),
+      adjustStudentClasses: async () => {
+        await StudentRepository.deductCreditHours(studentId, tErrors, hours, undefined, tx);
+      },
+    });
+  }
+
+  /** Restores HOURS when an hour-billed instance is cancelled pre-start. */
+  export async function refundHoursOnCancel(
+    studentId: string,
+    classInstanceId: string,
+    hours: number,
+    creditedByUserId: string,
+    idempotencyKey: string,
+    tx: DBTransaction,
+    tErrors: ErrorsLabels
+  ): Promise<void> {
+    if (!Number.isFinite(hours) || hours <= 0) {
+      throw new ValidationError(tErrors.credit.invalidInput);
+    }
+
+    await runIdempotentBookingLedgerOp({
+      studentId,
+      classInstanceId,
+      creditedByUserId,
+      idempotencyKey,
+      tx,
+      operation: "refund",
+      unit: "hours",
+      successLogMessage: "Credit hours refunded on cancel",
+      errorLogMessage: "Failed to refund credit hours on cancel",
+      applyLedgerChange: async effectiveIdempotencyKey =>
+        CreditRepository.refundHoursOnCancel(tx, {
+          studentId,
+          classInstanceId,
+          hours,
+          creditedByUserId,
+          idempotencyKey: effectiveIdempotencyKey,
+        }),
+      adjustStudentClasses: async () => {
+        await StudentRepository.addCreditHours(studentId, tErrors, hours, undefined, tx);
+      },
+    });
+  }
+
+  export async function getStudentHourBalance(
+    actorUserId: string,
+    studentId: string,
+    tErrors: ErrorsLabels
+  ): Promise<CreditHourBalanceReturnType> {
+    await assertStudentExists(studentId, tErrors);
+    await assertAssociatedOrManage(actorUserId, studentId, tErrors, AppPermission.CREDITS_MANAGE);
+    return await StudentRepository.getCreditHourBalance(studentId);
+  }
+
   export async function recordPurchase(
     actorUserId: string,
     input: CreditTransactionSubmitInput,
@@ -219,7 +356,8 @@ export namespace CreditService {
     actorUserId: string,
     studentId: string,
     paginationArgs: PaginationArgs | null,
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    opts?: { hoursOnly?: boolean }
   ): Promise<{ rows: CreditTransactionReturnType[]; totalCount: number }> {
     await assertStudentExists(studentId, tErrors);
 
@@ -227,8 +365,8 @@ export namespace CreditService {
     await assertAssociatedOrManage(actorUserId, studentId, tErrors, AppPermission.CREDITS_MANAGE);
 
     const [rows, totalCount] = await Promise.all([
-      CreditRepository.getTransactions(db, studentId, paginationArgs),
-      CreditRepository.countTransactions(db, studentId),
+      CreditRepository.getTransactions(db, studentId, paginationArgs, opts),
+      CreditRepository.countTransactions(db, studentId, opts),
     ]);
 
     return {
@@ -477,6 +615,7 @@ interface IdempotentBookingLedgerOp {
   idempotencyKey: string;
   tx: DBTransaction;
   operation: "deduct" | "refund";
+  unit?: "classes" | "hours";
   successLogMessage: string;
   errorLogMessage: string;
   applyLedgerChange: (effectiveIdempotencyKey: string) => Promise<unknown>;
@@ -488,6 +627,7 @@ async function runIdempotentBookingLedgerOp(op: IdempotentBookingLedgerOp): Prom
     studentId: op.studentId,
     classInstanceId: op.classInstanceId,
     operation: op.operation,
+    unit: op.unit,
   });
 
   const logContext = {

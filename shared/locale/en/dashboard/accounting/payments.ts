@@ -1,0 +1,87 @@
+import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments";
+
+export const dashboardAccountingPaymentsEn: PaymentsLabels = {
+  pageTitle: "Payments",
+  pageSubtitle: "Track credit-hour package payments and their paid status.",
+  addPayment: "Add Payment",
+  editPayment: "Edit Payment",
+  paymentDetails: "Payment Details",
+
+  columns: {
+    studentName: "Student Name",
+    credit: "Credit",
+    paid: "Paid",
+    currency: "Currency",
+    package: "Package",
+    paymentGateway: "Payment Gateway",
+    paymentDate: "Payment Date",
+    createdAt: "Created At",
+    actions: "Actions",
+    status: "Status",
+  },
+
+  filters: {
+    title: "Filters",
+    student: "Student",
+    parent: "Parent",
+    fromDate: "From Date",
+    toDate: "To Date",
+    unpaidOnly: "Unpaid only",
+    apply: "Apply",
+    clear: "Clear",
+  },
+
+  form: {
+    student: "Student",
+    studentPlaceholder: "Select a student",
+    packagePlan: "Package Plan",
+    packagePlanPlaceholder: "Select a package (optional)",
+    packagePlanAdhoc: "Ad-hoc payment",
+    credit: "Credit (hours)",
+    paid: "Paid (amount)",
+    currency: "Currency",
+    paymentGateway: "Payment Gateway",
+    paymentDate: "Payment Date",
+    paidToggle: "Paid",
+    paidToggleOn: "Paid",
+    paidToggleOff: "Unpaid",
+    note: "Note",
+    notePlaceholder: "Optional note about this payment",
+    submit: "Save Payment",
+    cancel: "Cancel",
+    saving: "Saving…",
+  },
+
+  gateways: {
+    NONE: "None",
+    PAYPAL: "PayPal",
+    WESTERN_UNION: "Western Union",
+    BANK: "Bank",
+    OTHER: "Other",
+  },
+
+  status: {
+    paid: "Paid",
+    unpaid: "Unpaid",
+  },
+
+  currencyWarning: currency =>
+    `Note: this payment is in ${currency}, which differs from the student's most recent payment currency. Hours from mixed currencies share one balance.`,
+  empty: "No payments match the current filters.",
+    loadError: "Failed to load payments. Please try again.",
+  auditUpdatedAt: "Last Updated",
+  saveSuccess: "Payment saved successfully.",
+  saveError: "Failed to save the payment. Please review and try again.",
+  togglePaidSuccessOn: "Payment marked as paid.",
+  togglePaidSuccessOff: "Payment marked as unpaid.",
+  deleteTitle: "Delete Payment",
+  detail: {
+    invoiceStatus: "Invoice Status",
+    invoiceId: "Invoice ID",
+    parent: "Parent",
+    editAction: "Edit",
+    togglePaidAction: "Toggle Paid",
+    markPaid: "Mark as Paid",
+    markUnpaid: "Mark as Unpaid",
+  },
+};

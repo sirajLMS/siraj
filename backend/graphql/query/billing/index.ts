@@ -1,3 +1,4 @@
+import "./accounting.query";
 import "./billing-alerts.query";
 import "./credit.query";
 import "./payment-method.query";

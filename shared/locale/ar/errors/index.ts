@@ -204,6 +204,17 @@ export const errorsAr: ErrorsLabels = {
     insufficientBalance: ({ studentId, remaining }: { studentId: string; remaining: number }) =>
       `رصيد الطالب ${studentId} غير كافٍ. المتبقي: ${remaining}`,
     invalidInput: "إدخال غير صالح.",
+    insufficientHours: ({
+      studentId,
+      remaining,
+      required,
+    }: { studentId: string; remaining: number; required: number }) =>
+      `ساعات معتمدة غير كافية للطالب ${studentId}. المتبقي: ${remaining}، المطلوب: ${required}`,
+  },
+  package: {
+    codenameAlreadyExists: (codename: string) => `توجد باقة بالاسم المميز "${codename}" بالفعل.`,
+    invalidInput: "إدخال الباقة غير صالح.",
+    planArchived: (id: string) => `الباقة ${id} مؤرشفة.`,
   },
   file: {
     recordNotFound: ({ tableName, entityId }: { tableName: string; entityId: string }) =>

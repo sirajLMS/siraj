@@ -20,3 +20,18 @@ export interface CreditBalanceReturnType {
   classesTotal: number;
   classesRemaining: number;
 }
+
+/** Input for the hour-based parallel ledger (changeAmountHours rows). */
+export interface CreditHourTransactionSubmitInput {
+  studentId: string;
+  hours: number;
+  notes?: string | null;
+  sourcePaymentId?: string | null;
+}
+
+/** Hour balance mirrors CreditBalanceReturnType with decimal strings. */
+export interface CreditHourBalanceReturnType {
+  studentId: string;
+  creditHoursTotal: string;
+  creditHoursRemaining: string;
+}

@@ -99,6 +99,7 @@ export interface DashboardNavigationLabels {
    * the labels are admin/supervisor-facing.
    */
   readonly navGroupHome: string;
+  readonly navGroupAccounting: string;
   readonly navGroupPeople: string;
   readonly navGroupUsers: string;
   readonly navGroupContent: string;
@@ -123,4 +124,6 @@ export interface DashboardNavigationLabels {
     };
   };
   readonly toggleGroupAriaLabel: (label: string) => string;
+  readonly accountingPayments: string;
+  readonly accountingPackages: string;
 }

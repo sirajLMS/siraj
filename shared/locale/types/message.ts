@@ -12,6 +12,9 @@ import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual.ts";
 import type { PaymentComponentLabels } from "@/shared/locale/types/dashboard/billing/payment.ts";
 import type { QuotaLabels as BillingQuotaLabels } from "@/shared/locale/types/dashboard/billing/quota.ts";
+import type { PackagePlansLabels as AccountingPackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans.ts";
+import type { PaymentsLabels as AccountingPaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments.ts";
+import type { StudentCreditHoursLabels as AccountingStudentCreditHoursLabels } from "@/shared/locale/types/dashboard/accounting/student-credit-hours.ts";
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies.ts";
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/audit.ts";
 import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass.ts";
@@ -135,6 +138,9 @@ export interface DashboardTranslations {
   billingManual: BillingManualLabels;
   billingQuota: BillingQuotaLabels;
   billingPayment: PaymentComponentLabels;
+  accountingPayments: AccountingPaymentsLabels;
+  accountingPackages: AccountingPackagePlansLabels;
+  accountingStudentCreditHours: AccountingStudentCreditHoursLabels;
 
   billingExchangeRates: ExchangeRatesLabels;
   billingCurrencyHedges: CurrencyHedgesLabels;

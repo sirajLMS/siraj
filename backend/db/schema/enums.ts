@@ -4,6 +4,7 @@ import {
   AppPermission,
   AttendanceEvaluation,
   AvailabilityStatus,
+  BilledUnit,
   ComplaintCategory,
   ComplaintStatus,
   CountryCode,
@@ -32,6 +33,7 @@ import {
   OnDemandNoCreditsOutcome,
   OnDemandStatus,
   ParentStatus,
+  PaymentGateway,
   QuotaKind,
   QuotaLedgerReason,
   QuotaPeriodType,
@@ -156,3 +158,7 @@ export const cronTriggerSourceEnum = createPgEnumFromEnum("cron_trigger_source",
 export const cronConcurrencyPolicyEnum = createPgEnumFromEnum("cron_concurrency_policy", CronConcurrencyPolicy);
 
 export const cronQueueBackendEnum = createPgEnumFromEnum("cron_queue_backend", CronQueueBackend);
+
+export const paymentGatewayEnum = createPgEnumFromEnum("payment_gateway", PaymentGateway);
+
+export const billedUnitEnum = createPgEnumFromEnum("billed_unit", BilledUnit);

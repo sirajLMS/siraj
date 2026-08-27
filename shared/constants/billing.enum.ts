@@ -9,6 +9,7 @@ export enum InvoiceType {
   PER_CLASSES = "PER_CLASSES",
   MONTHLY = "MONTHLY",
   MANUAL = "MANUAL",
+  CREDIT_HOURS_PACKAGE = "CREDIT_HOURS_PACKAGE",
 }
 
 export enum PaymentMethodType {

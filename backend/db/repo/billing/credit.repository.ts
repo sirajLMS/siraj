@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { type db, queryDb, queryWithPagination } from "@/backend/db";
 import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
@@ -45,7 +45,8 @@ export namespace CreditRepository {
   export const getTransactions = async (
     tx: ReadExecutor | string,
     studentId?: string | PaginationArgs | null,
-    paginationArgs?: PaginationArgs | null
+    paginationArgs?: PaginationArgs | null,
+    opts?: { hoursOnly?: boolean }
   ): Promise<CreditTransactionSelectType[]> => {
     const actualTx = typeof tx === "string" ? undefined : tx;
     const actualStudentId = typeof tx === "string" ? tx : studentId;
@@ -59,27 +60,39 @@ export namespace CreditRepository {
       actualPagination = paginationArgs ?? null;
     }
     const q = queryDb(actualTx);
+    // hoursOnly narrows to the hour-based parallel ledger rows (XOR: exactly
+    // one of changeAmount / changeAmountHours is set — Task 8.9).
+    const whereClause = opts?.hoursOnly
+      ? and(eq(creditTransactions.studentId, actualStudentId), isNotNull(creditTransactions.changeAmountHours))
+      : eq(creditTransactions.studentId, actualStudentId);
     const baseQuery = q
       .select()
       .from(creditTransactions)
-      .where(eq(creditTransactions.studentId, actualStudentId))
+      .where(whereClause)
       .orderBy(desc(creditTransactions.createdAt))
       .$dynamic();
     const paginated = queryWithPagination(baseQuery, actualPagination);
     return paginated;
   };
 
-  export const countTransactions = async (tx: ReadExecutor | string, studentId?: string): Promise<number> => {
+  export const countTransactions = async (
+    tx: ReadExecutor | string,
+    studentId?: string,
+    opts?: { hoursOnly?: boolean }
+  ): Promise<number> => {
     const actualTx = typeof tx === "string" ? undefined : tx;
     const actualStudentId = typeof tx === "string" ? tx : studentId;
     if (typeof actualStudentId !== "string") {
       throw new DomainError("INVALID_ARGS", "studentId must be a string when tx is not a string");
     }
     const q = queryDb(actualTx);
+    const whereClause = opts?.hoursOnly
+      ? and(eq(creditTransactions.studentId, actualStudentId), isNotNull(creditTransactions.changeAmountHours))
+      : eq(creditTransactions.studentId, actualStudentId);
     const [row] = await q
       .select({ value: count() })
       .from(creditTransactions)
-      .where(eq(creditTransactions.studentId, actualStudentId));
+      .where(whereClause);
     return row?.value ?? 0;
   };
 
@@ -87,12 +100,23 @@ export namespace CreditRepository {
     tx: DBTransaction,
     input: CreditTransactionInsertType
   ): Promise<CreditTransactionSelectType> => {
+    // XOR invariant: a row must carry EITHER classes OR hours — never both,
+    // never neither (mirrors the DB CHECK constraint as an early failure).
+    const hasClasses = input.changeAmount !== undefined && input.changeAmount !== null;
+    const hasHours = input.changeAmountHours !== undefined && input.changeAmountHours !== null;
+    if (hasClasses === hasHours) {
+      throw new DomainError(
+        "CREDIT_XOR_VIOLATION",
+        "credit_transaction must set exactly one of changeAmount / changeAmountHours"
+      );
+    }
     const now = new Date();
     const [row] = await tx
       .insert(creditTransactions)
       .values({
         studentId: input.studentId,
-        changeAmount: input.changeAmount,
+        changeAmount: input.changeAmount ?? null,
+        changeAmountHours: input.changeAmountHours ?? null,
         reason: input.reason,
         sourcePaymentId: input.sourcePaymentId ?? null,
         classInstanceId: input.classInstanceId ?? null,
@@ -153,6 +177,128 @@ export namespace CreditRepository {
       sourcePaymentId: null,
       notes: null,
     });
+
+  // ─── Hour-based parallel ledger (credit-hours system) ────────────────────────
+  // Mirror of createPurchase/deductForBooking/refundOnCancel. These write NULL
+  // to changeAmount and store hours in changeAmountHours. NOTE: v1 has no
+  // production caller for booking variants (Plan 6 wires them) — intentional.
+
+  export const createHourPurchase = async (
+    tx: DBTransaction,
+    input: {
+      studentId: string;
+      hours: number;
+      sourcePaymentId?: string | null;
+      notes?: string | null;
+      creditedByUserId: string;
+      idempotencyKey: string;
+    }
+  ): Promise<CreditTransactionSelectType> => {
+    const { hours, ...rest } = input;
+    return insertCreditTransaction(tx, {
+      ...rest,
+      studentId: rest.studentId,
+      reason: CreditReason.PURCHASE,
+      classInstanceId: null,
+      changeAmount: null,
+      changeAmountHours: String(hours),
+    });
+  };
+
+  export const deductHoursForBooking = async (
+    tx: DBTransaction,
+    input: {
+      studentId: string;
+      classInstanceId: string;
+      /** Positive duration in hours; stored negated in the ledger. */
+      hours: number;
+      creditedByUserId: string;
+      idempotencyKey: string;
+      notes?: string | null;
+    }
+  ): Promise<CreditTransactionSelectType> => {
+    const { hours, notes, ...rest } = input;
+    return insertCreditTransaction(tx, {
+      ...rest,
+      reason: CreditReason.DEDUCTION,
+      sourcePaymentId: null,
+      notes: notes ?? null,
+      changeAmount: null,
+      changeAmountHours: String(-Math.abs(hours)),
+    });
+  };
+
+  export const refundHoursOnCancel = async (
+    tx: DBTransaction,
+    input: {
+      studentId: string;
+      classInstanceId: string;
+      /** Positive hours to restore; stored positive in the ledger. */
+      hours: number;
+      creditedByUserId: string;
+      idempotencyKey: string;
+    }
+  ): Promise<CreditTransactionSelectType> => {
+    const { hours, ...rest } = input;
+    return insertCreditTransaction(tx, {
+      ...rest,
+      reason: CreditReason.REFUND,
+      sourcePaymentId: null,
+      notes: null,
+      changeAmount: null,
+      changeAmountHours: String(Math.abs(hours)),
+    });
+  };
+
+  export const getHourBalance = async (
+    tx?: ReadExecutor,
+    studentId?: string
+  ): Promise<{ creditHoursTotal: string; creditHoursRemaining: string }> => {
+    const targetStudentId = studentId ?? (typeof tx === "string" ? tx : undefined);
+    if (!targetStudentId) {
+      throw new DomainError("INVALID_ARGS", "studentId is required when tx is not a string");
+    }
+    const q = queryDb(typeof tx === "string" ? undefined : tx);
+    const [row] = await q
+      .select({
+        creditHoursTotal: students.creditHoursTotal,
+        creditHoursRemaining: students.creditHoursRemaining,
+      })
+      .from(students)
+      .where(eq(students.id, targetStudentId))
+      .limit(1);
+    return {
+      creditHoursTotal: row?.creditHoursTotal ?? "0",
+      creditHoursRemaining: row?.creditHoursRemaining ?? "0",
+    };
+  };
+
+  /** ADJUSTMENT delta row for admin edits (delta may be negative). */
+  export const createHourAdjustment = async (
+    tx: DBTransaction,
+    input: {
+      studentId: string;
+      /** Positive = grant hours back; negative = reclaim hours. */
+      delta: number;
+      sourcePaymentId?: string | null;
+      notes?: string | null;
+      creditedByUserId: string;
+      idempotencyKey: string;
+    }
+  ): Promise<CreditTransactionSelectType> => {
+    const { delta, ...rest } = input;
+    return insertCreditTransaction(tx, {
+      studentId: rest.studentId,
+      changeAmount: null,
+      changeAmountHours: String(delta),
+      reason: CreditReason.ADJUSTMENT,
+      classInstanceId: null,
+      sourcePaymentId: rest.sourcePaymentId ?? null,
+      notes: rest.notes ?? null,
+      creditedByUserId: rest.creditedByUserId,
+      idempotencyKey: rest.idempotencyKey,
+    });
+  };
 
   export const findByIdempotencyKeys = async (
     keys: string[],

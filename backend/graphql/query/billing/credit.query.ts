@@ -37,6 +37,9 @@ gqlSchemaBuilder.queryField("studentCreditTransactions", t =>
     args: {
       studentId: t.arg.id({ required: true }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
+      // When true, returns only the hour-based parallel ledger rows
+      // (changeAmountHours IS NOT NULL) — Task 8.9 student credit-hours tab.
+      hoursOnly: t.arg.boolean({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
@@ -44,7 +47,9 @@ gqlSchemaBuilder.queryField("studentCreditTransactions", t =>
       const pagination = parsePaginationArgs(args.paginationArgs);
 
       try {
-        const result = await CreditService.getStudentTransactions(actorUserId, args.studentId, pagination, tErrors);
+        const result = await CreditService.getStudentTransactions(actorUserId, args.studentId, pagination, tErrors, {
+          hoursOnly: args.hoursOnly ?? false,
+        });
         return result.rows;
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);

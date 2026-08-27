@@ -26,11 +26,12 @@ export const studentCreditTransactionsQueryDocument: TypedDocumentNode<
   StudentCreditTransactionsQuery,
   StudentCreditTransactionsQueryVariables
 > = gql`
-  query StudentCreditTransactions($studentId: ID!, $paginationArgs: PaginationArgs) {
-    studentCreditTransactions(studentId: $studentId, paginationArgs: $paginationArgs) {
+  query StudentCreditTransactions($studentId: ID!, $paginationArgs: PaginationArgs, $hoursOnly: Boolean) {
+    studentCreditTransactions(studentId: $studentId, paginationArgs: $paginationArgs, hoursOnly: $hoursOnly) {
       id
       studentId
       changeAmount
+      changeAmountHours
       reason
       sourcePaymentId
       classInstanceId

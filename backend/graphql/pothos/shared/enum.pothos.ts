@@ -6,6 +6,7 @@ import {
   AttendanceStatus,
   AvailabilitySearchSortBy,
   AvailabilityStatus,
+  BilledUnit,
   BookingStatus,
   CountryCode,
   CreditReason,
@@ -39,6 +40,7 @@ import {
   OrderSortDirection,
   OverrideState,
   ParentStatus,
+  PaymentGateway,
   ProfileAudience,
   ProfileMode,
   ProfileScope,
@@ -66,6 +68,14 @@ import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants
 
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
   name: "AppPermission",
+});
+
+export const PaymentGatewayPothosObject = gqlSchemaBuilder.enumType(PaymentGateway, {
+  name: "PaymentGateway",
+});
+
+export const BilledUnitPothosObject = gqlSchemaBuilder.enumType(BilledUnit, {
+  name: "BilledUnit",
 });
 
 export const ManagerAccountTypePothosEnum = gqlSchemaBuilder.enumType(ManagerAccountType, {

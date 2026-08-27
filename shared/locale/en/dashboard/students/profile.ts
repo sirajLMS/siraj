@@ -13,6 +13,7 @@ export const dashboardStudentProfileEn: StudentProfileLabels = {
     status: "Status",
     classes: "Classes",
     quota: "Quota",
+    creditHours: "Credit Hours",
     history: "History",
   },
 };

@@ -6,6 +6,7 @@ import {
   createTable,
   index,
   integerColumn,
+  numericColumn,
   textColumn,
   timestampColumn,
   uniqueIndex,
@@ -65,6 +66,14 @@ export const students = createTable(
     status: studentStatusEnum("status").notNull(),
     classesTotal: integerColumn("classes_total").notNull().default(0),
     classesRemaining: integerColumn("classes_remaining").notNull().default(0),
+    // Credit-hours parallel balances (numeric(12,2) on PG; TEXT on SQLite).
+    // Mirror classesTotal/classesRemaining for hour-billed academies.
+    creditHoursTotal: numericColumn("credit_hours_total", { precision: 12, scale: 2 })
+      .notNull()
+      .default("0.00"),
+    creditHoursRemaining: numericColumn("credit_hours_remaining", { precision: 12, scale: 2 })
+      .notNull()
+      .default("0.00"),
     version: integerColumn("version").notNull().default(0),
     // NOTE: PostgreSQL triggers automatically recalculate hoursPerWeek (SUM(duration_minutes)/60 of active days)
     // whenever recurring_schedules or recurring_schedule_days are inserted, updated, or deleted.
@@ -97,6 +106,16 @@ export const students = createTable(
       sql`${table.classesRemaining} >= 0`
     ),
     checkConstraint("students_classes_total_chk", sql`${table.classesTotal} >= 0`, sql`${table.classesTotal} >= 0`),
+    checkConstraint(
+      "students_credit_hours_remaining_chk",
+      sql`${table.creditHoursRemaining} >= 0`,
+      sql`${table.creditHoursRemaining} >= 0`
+    ),
+    checkConstraint(
+      "students_credit_hours_total_chk",
+      sql`${table.creditHoursTotal} >= 0`,
+      sql`${table.creditHoursTotal} >= 0`
+    ),
     // PG-only CHECK: calls the is_valid_timezone() UDF. SQLite cannot register
     // JS UDFs via libsql — timezone validation is handled at the app layer.
     checkConstraint(

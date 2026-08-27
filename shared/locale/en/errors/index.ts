@@ -203,6 +203,17 @@ export const errorsEn: ErrorsLabels = {
     insufficientBalance: ({ studentId, remaining }: { studentId: string; remaining: number }) =>
       `Insufficient balance for student ${studentId}. Remaining: ${remaining}`,
     invalidInput: "Invalid input.",
+    insufficientHours: ({
+      studentId,
+      remaining,
+      required,
+    }: { studentId: string; remaining: number; required: number }) =>
+      `Insufficient credit hours for student ${studentId}. Remaining: ${remaining}, required: ${required}`,
+  },
+  package: {
+    codenameAlreadyExists: (codename: string) => `A package plan with codename "${codename}" already exists.`,
+    invalidInput: "Invalid package plan input.",
+    planArchived: (id: string) => `Package plan ${id} is archived.`,
   },
   file: {
     recordNotFound: ({ tableName, entityId }: { tableName: string; entityId: string }) =>

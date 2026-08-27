@@ -18,6 +18,7 @@ import {
 import { quotas } from "@/backend/db/schema/billing/quotas";
 import { classSubjects } from "@/backend/db/schema/classes/class-subject";
 import {
+  billedUnitEnum,
   classExecutionStateEnum,
   classOutcomeEnum,
   classTypeEnum,
@@ -173,6 +174,12 @@ export const classInstances = createTable(
     classType: classTypeEnum("class_type").notNull(),
     outcome: classOutcomeEnum("outcome").notNull().default("PENDING"),
     executionState: classExecutionStateEnum("execution_state").notNull().default("NOT_ACTIVATED"),
+    // Billing discriminator for the credit-hours ledger extension.
+    // NULL = legacy class-credit instance (deductForBooking path).
+    // HOUR_CREDIT = instance consumes students.creditHoursRemaining via
+    // CreditService.deductHoursForBooking (intentional v1 scaffolding — the
+    // writer arrives with Plan 6 `student.billingMode`; see plan outcome notes).
+    billedUnit: billedUnitEnum("billed_unit"),
     isRescheduled: booleanColumn("is_rescheduled").notNull().default(false),
     isFrozen: booleanColumn("is_frozen").notNull().default(false),
     meetingJoinUrl: varcharColumn("meeting_join_url", { length: 1024 }),

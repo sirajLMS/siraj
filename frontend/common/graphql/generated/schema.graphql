@@ -5,6 +5,75 @@ enum AccountStatus {
   DEACTIVATED
 }
 
+"""An accounting payment that credits credit-hours to a student"""
+type AccountingPayment {
+  amount: String
+  createdAt: DateTime
+  creditHours: String
+  currency: String
+  id: String
+  invoiceId: String
+  invoiceStatus: String
+  isPaidStatusOn: Boolean
+  packageCodename: String
+  packageName: String
+  packagePlanId: String
+  parentId: String
+  parentName: String
+  paymentDate: DateTime
+  paymentGateway: PaymentGateway
+  paymentNote: String
+  studentId: String
+  studentName: String
+  updatedAt: DateTime
+}
+
+"""Credit-hours balance summary for a student"""
+type AccountingPaymentBalance {
+  creditHoursRemaining: String
+  creditHoursTotal: String
+  id: String
+  studentId: String
+}
+
+"""Input for editing an accounting payment"""
+input AccountingPaymentEditInput {
+  creditHours: Float
+  expectedInvoiceVersion: Int
+  id: ID!
+  paymentGateway: PaymentGateway
+  paymentNote: String
+}
+
+"""AND-combined filters for the accounting payments list"""
+input AccountingPaymentFilterInput {
+  fromDate: String
+  parentId: ID
+  studentId: ID
+  toDate: String
+  unpaidOnly: Boolean
+}
+
+"""Input for recording an accounting payment (hour purchase)"""
+input AccountingPaymentInput {
+  amount: Float!
+  creditHours: Float!
+  currency: CurrencyCode!
+  isPaidStatusOn: Boolean
+  packagePlanId: ID
+  paymentDate: DateTime!
+  paymentGateway: PaymentGateway!
+  paymentNote: String
+  studentId: ID!
+}
+
+"""Input for toggling the paid status of an accounting payment"""
+input AccountingPaymentTogglePaidInput {
+  expectedInvoiceVersion: Int
+  id: ID!
+  isPaidStatusOn: Boolean!
+}
+
 """
 Input for a parent/student appending feedback to a published monthly appraisal.
 """
@@ -90,6 +159,8 @@ enum AppLanguage {
 }
 
 enum AppPermission {
+  ACCOUNTING_PAYMENTS_MANAGE
+  ACCOUNTING_PAYMENTS_VIEW
   APPRAISAL_FEEDBACK
   APPRAISAL_SUBMIT
   APPRAISAL_VIEW
@@ -564,6 +635,11 @@ type AvailableClassSlot {
   id: String
   startAt: DateTime
   teacherId: String
+}
+
+enum BilledUnit {
+  CLASS_CREDIT
+  HOUR_CREDIT
 }
 
 type BillingCurrencyTotal {
@@ -1262,6 +1338,7 @@ type CreditBalance {
 """Result of recording a credit purchase for a student"""
 type CreditPurchaseResult {
   changeAmount: Int
+  changeAmountHours: String
   classInstanceId: String
   createdAt: DateTime
   creditedByUserId: String
@@ -1286,6 +1363,7 @@ A credit ledger transaction for a student (purchase, deduction, refund, or adjus
 """
 type CreditTransaction {
   changeAmount: Int
+  changeAmountHours: String
   classInstanceId: String
   createdAt: DateTime
   creditedByUserId: String
@@ -2065,6 +2143,7 @@ enum InvoiceStatus {
 }
 
 enum InvoiceType {
+  CREDIT_HOURS_PACKAGE
   MANUAL
   MONTHLY
   PER_CLASSES
@@ -2486,6 +2565,9 @@ type Mutation {
   """Approve a pending lesson report (supervisor/manager action)"""
   approveLessonReport(reportId: ID!): LessonReport
   approvePaymentProof(expectedVersion: Int, invoiceId: String!): MarkInvoicePaidResult
+
+  """Soft-archive a package plan (hidden from catalogs, history intact)"""
+  archivePackagePlan(id: ID!): PackagePlan
   assignPermissionGroupToUser(input: AssignPermissionGroupToUserInput!): Boolean
   attachSubjectResource(input: AttachSubjectResourceInput!): SubjectResource
   bulkAssignUsersToGroup(groupId: String!, userIds: [String!]!): Boolean
@@ -2513,6 +2595,9 @@ type Mutation {
   createManager(input: ManagerOnboardingInput!): ManagerOnboardingResult
   createManualInvoice(amount: String!, billingMonths: [BillingMonthInput!], currency: CurrencyCode!, dueDate: String!, exchangeRateSnapshot: String, exchangeRateSource: String, invoiceType: InvoiceType!, issueDate: String!, parentId: String!, sendEmail: Boolean, studentId: String): ManualInvoiceResult
   createMeetingProvider(input: MeetingProviderCreateInput!): MeetingProvider
+
+  """Create a credit-hour package plan"""
+  createPackagePlan(input: PackagePlanInput!): PackagePlan
 
   """Create a new parent account with billing configuration"""
   createParent(input: ParentOnboardingInput!): ParentOnboardingResult
@@ -2663,6 +2748,9 @@ type Mutation {
   reactivateParent(parentId: String!): ReactivateParentResult
   reassignStudentTeacher(expectedVersion: Int, newTeacherId: String!, studentId: String!): ReassignStudentTeacherResult
 
+  """Record an accounting payment that credits hours to a student"""
+  recordAccountingPayment(input: AccountingPaymentInput!): AccountingPayment
+
   """Record a credit purchase for a student (adds classes to their balance)"""
   recordCreditPurchase(hours: Int!, notes: String, studentId: ID!): CreditPurchaseResult
   recordPayment(amount: String!, currency: CurrencyCode!, invoiceId: ID!, transactionId: String, userPaymentMethodId: ID!): Payment
@@ -2752,6 +2840,12 @@ type Mutation {
   """
   syncWhatsappAccountsFromMeta: WhatsappSyncFromMetaResult
   testMeetingProviderConnection(input: TestMeetingConnectionInput!): TestMeetingConnectionResult
+
+  """Toggle the Paid status on an accounting payment (cascades to invoice)"""
+  toggleAccountingPaymentPaidStatus(input: AccountingPaymentTogglePaidInput!): AccountingPayment
+
+  """Edit an accounting payment (gateway/note-only or creditHours delta)"""
+  updateAccountingPayment(input: AccountingPaymentEditInput!): AccountingPayment
   updateClassAdminNote(classInstanceId: String!, content: String!): GroupClassAudit
   updateClassCategory(id: ID!, input: ClassCategoryUpdateInput!): ClassCategory
   updateClassMeetingConfig(id: ID!, input: ClassMeetingConfigUpdateInput!): ClassMeetingConfig
@@ -2765,6 +2859,9 @@ type Mutation {
   updateMeetingProvider(id: ID!, input: MeetingProviderUpdateInput!): MeetingProvider
   updateNotificationPreferences(input: [NotificationPreferenceInput!]!): [NotificationPreference!]
   updateOwnProfile(input: UpdateOwnProfileInput!): UnifiedProfile
+
+  """Update a credit-hour package plan (snapshot-invariant)"""
+  updatePackagePlan(input: PackagePlanUpdateInput!): PackagePlan
   updatePermissionGroup(input: UpdatePermissionGroupInput!): PermissionGroup
 
   """Update an existing student quota allocation"""
@@ -2926,6 +3023,47 @@ enum OrderSortDirection {
 enum OverrideState {
   DENIED
   GRANTED
+}
+
+"""A predefined credit-hour package plan in the accounting catalog"""
+type PackagePlan {
+  active: Boolean
+  codename: String
+  createdAt: DateTime
+  creditHours: String
+  currency: String
+  description: String
+  displayName: String
+  id: String
+  priceAmount: String
+  sortOrder: Int
+  updatedAt: DateTime
+  version: Int
+}
+
+"""Input for creating a package plan"""
+input PackagePlanInput {
+  active: Boolean
+  codename: String!
+  creditHours: Float!
+  currency: CurrencyCode!
+  description: String
+  displayName: String!
+  priceAmount: Float!
+  sortOrder: Int
+}
+
+"""Input for updating a package plan (optimistic-lock aware)"""
+input PackagePlanUpdateInput {
+  active: Boolean
+  creditHours: Float
+  currency: CurrencyCode
+  description: String
+  displayName: String
+  id: ID!
+  priceAmount: Float
+  sortOrder: Int
+  version: Int
 }
 
 type PageInfo {
@@ -3250,6 +3388,14 @@ enum PaymentDirection {
   PAYOUT
 }
 
+enum PaymentGateway {
+  BANK
+  NONE
+  OTHER
+  PAYPAL
+  WESTERN_UNION
+}
+
 """
 A single payment ledger entry for a parent/student, derived from payments + invoices + credit_transactions.
 """
@@ -3390,6 +3536,11 @@ enum ProfileScope {
 }
 
 type Query {
+  """Get a single accounting payment by id"""
+  accountingPayment(id: ID!): AccountingPayment
+
+  """Paginated accounting payments with AND-combined filters"""
+  accountingPayments(filter: AccountingPaymentFilterInput, paginationArgs: PaginationArgs): [AccountingPayment!]
   adminBillingSummary: AdminBillingSummary
 
   """Returns the paginated admin complaint queue with metrics."""
@@ -3514,6 +3665,12 @@ type Query {
 
   """Returns onboarding metrics for staff accounts."""
   onboardingMetrics: OnboardingMetrics
+
+  """Get a single package plan by id"""
+  packagePlan(id: ID!): PackagePlan
+
+  """List credit-hour package plans (active-only optional)"""
+  packagePlans(activeOnly: Boolean, paginationArgs: PaginationArgs): [PackagePlan!]
   parentAssignedStudents: ParentAssignedStudentsResult
   parentAssociatedStudents(parentId: String!): [AssociatedStudent!]
   parentBillingSummary(parentId: String, userId: String): ParentBillingSummary
@@ -3627,12 +3784,15 @@ type Query {
 
   """Get the credit balance (classes total and remaining) for a student"""
   studentCreditBalance(studentId: ID!): CreditBalance
+
+  """Get the credit-hours balance for a student"""
+  studentCreditHourBalance(studentId: ID!): AccountingPaymentBalance
   studentCreditStatus: [StudentCreditRow!]
 
   """
   Get the credit transaction history for a student with optional pagination
   """
-  studentCreditTransactions(paginationArgs: PaginationArgs, studentId: ID!): [CreditTransaction!]
+  studentCreditTransactions(hoursOnly: Boolean, paginationArgs: PaginationArgs, studentId: ID!): [CreditTransaction!]
 
   """Fetches the global student directory with cross-relational data."""
   studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentDirectoryPayload

@@ -13,6 +13,7 @@ export const dashboardStudentProfileAr: StudentProfileLabels = {
     status: "الحالة",
     classes: "الحصص القادمة",
     quota: "الحصص",
+    creditHours: "الساعات الائتمانية",
     history: "السجل",
   },
 };

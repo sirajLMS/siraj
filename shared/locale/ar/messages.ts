@@ -11,6 +11,9 @@ import { dashboardBillingManualAr } from "@/shared/locale/ar/dashboard/billing/m
 import { dashboardBillingPaymentAr } from "@/shared/locale/ar/dashboard/billing/payment.ts";
 import { quotaAr } from "@/shared/locale/ar/dashboard/billing/quota.ts";
 import { dashboardBillingSupportedCurrenciesAr } from "@/shared/locale/ar/dashboard/billing/supportedCurrencies.ts";
+import { dashboardAccountingPackagePlansAr } from "@/shared/locale/ar/dashboard/accounting/package-plans.ts";
+import { dashboardAccountingPaymentsAr } from "@/shared/locale/ar/dashboard/accounting/payments.ts";
+import { dashboardAccountingStudentCreditHoursAr } from "@/shared/locale/ar/dashboard/accounting/student-credit-hours.ts";
 
 import { dashboardClassAuditAr } from "@/shared/locale/ar/dashboard/classes/audit.ts";
 import { dashboardCreateRecurringClassAr } from "@/shared/locale/ar/dashboard/classes/createRecurringClass.ts";
@@ -159,6 +162,9 @@ export const arMessages: Translations = {
     billingManual: dashboardBillingManualAr,
     billingQuota: quotaAr,
     billingPayment: dashboardBillingPaymentAr,
+    accountingPayments: dashboardAccountingPaymentsAr,
+    accountingPackages: dashboardAccountingPackagePlansAr,
+    accountingStudentCreditHours: dashboardAccountingStudentCreditHoursAr,
 
     billingExchangeRates: dashboardBillingExchangeRatesAr,
     billingCurrencyHedges: dashboardBillingCurrencyHedgesAr,

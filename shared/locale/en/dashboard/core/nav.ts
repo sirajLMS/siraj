@@ -90,6 +90,7 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   monthlyReports: "Monthly Reports",
   supervisorProfile: "My Profile",
   navGroupHome: "Dashboard",
+  navGroupAccounting: "Accounting",
   navGroupPeople: "People",
   navGroupUsers: "Users",
   navGroupContent: "Content",
@@ -114,4 +115,6 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
     },
   },
   toggleGroupAriaLabel: label => `Toggle ${label} group`,
+  accountingPayments: "Payments",
+  accountingPackages: "Packages",
 };

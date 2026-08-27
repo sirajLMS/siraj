@@ -4,6 +4,7 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import Autocomplete from "@mui/material/Autocomplete";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
+import { useMemo } from "react";
 import type { AudienceAutocompleteProps, PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { UserSelectOptionRow } from "@/frontend/common/components/ui/input/userSelect/UserSelectOptionRow";
 
@@ -29,14 +30,20 @@ export function AudienceAutocomplete({
   fullWidth = true,
   excludeIds,
 }: AudienceAutocompleteProps) {
-  const visibleOptions =
-    excludeIds && excludeIds.length > 0 ? options.filter(option => !excludeIds.includes(option.id)) : options;
+  // Pre-convert excludeIds to a Set for O(1) lookups, memoized to avoid re-filtering on every render.
+  const visibleOptions = useMemo(() => {
+    if (!excludeIds || excludeIds.length === 0) {
+      return options;
+    }
+    const excludeSet = new Set(excludeIds);
+    return options.filter(option => !excludeSet.has(option.id));
+  }, [options, excludeIds]);
 
   return (
     <Autocomplete<PersonOption>
       fullWidth={fullWidth}
       size={size}
-      options={[...visibleOptions]}
+      options={visibleOptions}
       loading={loading}
       disabled={disabled}
       value={value}

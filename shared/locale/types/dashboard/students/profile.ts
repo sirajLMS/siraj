@@ -11,6 +11,7 @@ export interface StudentProfileLabels {
     readonly status: string;
     readonly classes: string;
     readonly quota: string;
+    readonly creditHours: string;
     readonly history: string;
   };
 }

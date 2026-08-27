@@ -114,6 +114,7 @@ function useStudentCreditQueries(): UseCreditQueriesState {
   const { data: transactionsData, loading: transactionsLoading } = useQuery(studentCreditTransactionsQueryDocument, {
     variables: {
       studentId: studentId ?? "",
+      hoursOnly: null,
       paginationArgs: {
         first: 100,
         skip: null,
@@ -139,7 +140,9 @@ function useStudentCreditQueries(): UseCreditQueriesState {
   const allTransactions = useMemo<readonly StudentCreditTransactionRow[]>(() => {
     const rows = transactionsData?.studentCreditTransactions;
     if (!rows) return [];
-    return rows.map(mapTransaction);
+    // Apollo masks the TypedDocumentNode rows (MaybeMasked union) — cast at
+    // the resolver boundary (documented repo convention for generated types).
+    return (rows as readonly TransactionItem[]).map(mapTransaction);
   }, [transactionsData]);
 
   const loading = profileLoading || balanceLoading || transactionsLoading;

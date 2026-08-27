@@ -213,7 +213,7 @@ export function PermissionGroupFormShared({
       <DialogTitle id={options.ariaLabelledBy}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="titleLg">{group ? t.editGroupTitle : t.createGroupTitle}</Typography>
-          <IconButton onClick={onClose} disabled={isLoading} size="small">
+          <IconButton onClick={onClose} disabled={isLoading} size="small" aria-label={t.cancel}>
             <Close />
           </IconButton>
         </Box>

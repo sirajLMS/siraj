@@ -93,7 +93,18 @@ export interface BillingErrors {
 export interface CreditErrors {
   readonly duplicatePurchase: string;
   readonly insufficientBalance: (params: { studentId: string; remaining: number }) => string;
+  /** Hour-ledger variant of insufficientBalance (credit-hours module). */
+  readonly insufficientHours: (params: { studentId: string; remaining: number; required: number }) => string;
   readonly invalidInput: string;
+}
+
+/**
+ * PackageErrors — package plan catalog errors (credit-hours module).
+ */
+export interface PackageErrors {
+  readonly codenameAlreadyExists: (codename: string) => string;
+  readonly invalidInput: string;
+  readonly planArchived: (id: string) => string;
 }
 
 /**
@@ -493,6 +504,7 @@ export interface ErrorsLabels
   readonly permissionManagement: PermissionManagementErrors;
   readonly billing: BillingErrors;
   readonly credit: CreditErrors;
+  readonly package: PackageErrors;
   readonly file: FileErrors;
   readonly meetingProvider: MeetingProviderErrors;
   readonly teacher: TeacherErrors;

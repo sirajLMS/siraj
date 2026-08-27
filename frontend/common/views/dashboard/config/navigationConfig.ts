@@ -167,7 +167,8 @@ function makeStudentSupervisorNavItems(includeGroupId: boolean): readonly NavIte
  * grp_home                  | home, search-schedule, schedule-tracking, status-tracking, schedule-alerts | per-item (admin)
  * grp_people                | teachers, parents, students, staff  | StaffViewDirectory / ParentsList / TeacherViewStudents / StudentsList
  * grp_schedule              | schedule-tracking* (after Phase 3), schedule-alerts | per-item
- * grp_billing               | (Phase 3 merged billing parent)       | BillingViewHistory / BillingManageCurrencyHedges / BillingCreateInvoice
+  * grp_billing               | (Phase 3 merged billing parent)       | BillingViewHistory / BillingManageCurrencyHedges / BillingCreateInvoice
+ * grp_accounting            | payments, payments-new, packages, packages-new | AccountingPaymentsView / AccountingPaymentsManage
  * grp_catalogs              | payment-catalogs, meeting-providers   | PaymentMethodsManageCatalogs / MeetingProvidersManageCatalog
  * grp_feedback              | complaints-manage, suggestions-manage | ComplaintsRespond|ComplaintsList / SuggestionsList
  * grp_reports               | reports, monthly-reports, teacher-dues, lesson-reports | per-item
@@ -235,6 +236,14 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     separator: true,
   },
 
+  {
+    id: "grp_accounting",
+    labelKey: "navGroupAccounting",
+    iconKey: "payments",
+    section: "main",
+        permission: [AppPermission.AccountingPaymentsView, AppPermission.AccountingPaymentsManage],
+    separator: true,
+  },
   {
     id: "grp_reports",
     labelKey: "navGroupReports",
@@ -569,6 +578,42 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
 
   {
+    key: "payments",
+    labelKey: "accountingPayments",
+    iconKey: "payments",
+    href: "/accounting/payments",
+    section: "main",
+    permission: PAGE_PERMISSIONS.accountingPaymentsView,
+    groupId: "grp_accounting",
+  },
+  {
+    key: "payments-new",
+    labelKey: "accountingPayments",
+    iconKey: "noteAdd",
+    href: "/accounting/payments/new",
+    section: "main",
+    permission: PAGE_PERMISSIONS.accountingPaymentsManage,
+    groupId: "grp_accounting",
+  },
+  {
+    key: "packages",
+    labelKey: "accountingPackages",
+    iconKey: "packages",
+    href: "/accounting/packages",
+    section: "main",
+    permission: PAGE_PERMISSIONS.accountingPaymentsView,
+    groupId: "grp_accounting",
+  },
+  {
+    key: "packages-new",
+    labelKey: "accountingPackages",
+    iconKey: "noteAdd",
+    href: "/accounting/packages/new",
+    section: "main",
+    permission: PAGE_PERMISSIONS.accountingPaymentsManage,
+    groupId: "grp_accounting",
+  },
+  {
     key: "feedback-manage",
     labelKey: "feedbackManage",
     iconKey: "reportProblem",
@@ -747,6 +792,14 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     href: "/quotas/insights",
     section: "main",
     permission: PAGE_PERMISSIONS.quotasInsights,
+  },
+  {
+    key: "accounting-payments",
+    labelKey: "accountingPayments",
+    iconKey: "payments",
+    href: "/accounting/payments",
+    section: "main",
+    permission: PAGE_PERMISSIONS.accountingPaymentsView,
   },
 
   {

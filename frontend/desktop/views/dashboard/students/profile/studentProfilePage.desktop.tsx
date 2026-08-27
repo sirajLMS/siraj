@@ -4,6 +4,7 @@ import { Box, CircularProgress, Tab, Tabs, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StudentHistoryContainer } from "@/frontend/common/views/dashboard/students/history/StudentHistoryContainer";
+import { StudentCreditHoursTab } from "@/frontend/common/views/dashboard/students/profile/StudentCreditHoursTab";
 import { StudentManagerProfileTab } from "@/frontend/common/views/dashboard/students/profile/StudentManagerProfileTab";
 import type { StudentProfilePageViewModel } from "@/frontend/common/views/dashboard/students/profile/useStudentProfilePageViewModel";
 import { StudentQuotaView } from "@/frontend/common/views/dashboard/students/quota/StudentQuotaContainer";
@@ -80,6 +81,7 @@ export function StudentProfilePageDesktopView({
         {visibleTabs.includes("status") ? <Tab value="status" label={tabs.status} /> : null}
         {visibleTabs.includes("classes") ? <Tab value="classes" label={tabs.classes} /> : null}
         {visibleTabs.includes("quota") ? <Tab value="quota" label={tabs.quota} /> : null}
+        {visibleTabs.includes("credit-hours") ? <Tab value="credit-hours" label={tabs.creditHours} /> : null}
         {visibleTabs.includes("history") ? <Tab value="history" label={tabs.history} /> : null}
       </Tabs>
 
@@ -88,6 +90,7 @@ export function StudentProfilePageDesktopView({
         {currentTab === "status" ? <StudentStatusView studentId={studentId} /> : null}
         {currentTab === "classes" ? <StudentClassesView studentId={studentId} /> : null}
         {currentTab === "quota" ? <StudentQuotaView studentId={studentId} /> : null}
+        {currentTab === "credit-hours" ? <StudentCreditHoursTab studentId={studentId} /> : null}
         {currentTab === "history" ? <StudentHistoryContainer studentId={studentId} /> : null}
       </Box>
     </DesktopPageContainer>
