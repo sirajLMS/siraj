@@ -30,7 +30,7 @@ function applyLocaleCookie(response: NextResponse, locale: string): void {
 
 /** Only allow same-origin relative paths (block open redirects). */
 function safeRedirectPath(raw: string | null, fallback = "/"): string {
-  if (!raw?.startsWith("/") || raw.startsWith("//") || raw.includes("://")) {
+  if (!raw?.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\") || raw.includes("://")) {
     return fallback;
   }
   return raw;

@@ -85,7 +85,7 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
   const redirectUri = buildCallbackRedirectUri(providerSlug);
 
   // Defense-in-depth: validate returnPath to prevent open redirect
-  if (!returnPath.startsWith("/") || returnPath.startsWith("//")) {
+  if (!returnPath.startsWith("/") || returnPath.startsWith("//") || returnPath.startsWith("/\\")) {
     logger.warn(`${logTag}: invalid return path detected`, { returnPath });
     return NextResponse.json({ error: tErrors.meetingProvider.invalidReturnPath }, { status: 400 });
   }

@@ -46,7 +46,7 @@ import type { ErrorsLabels } from "@/shared/locale";
  * NOT start with `//` (protocol-relative URLs like `//evil.com`).
  */
 function validateReturnPath(returnPath: string, tErrors: ErrorsLabels): void {
-  if (!returnPath.startsWith("/") || returnPath.startsWith("//")) {
+  if (!returnPath.startsWith("/") || returnPath.startsWith("//") || returnPath.startsWith("/\\")) {
     throw new GraphQLError(tErrors.meetingProvider.invalidReturnPath);
   }
 }
