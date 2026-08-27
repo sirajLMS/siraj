@@ -48,6 +48,14 @@ export type InvoiceSubmitInput = Omit<
 export type PaymentSelectType = typeof payments.$inferSelect;
 export type PaymentInsertType = typeof payments.$inferInsert;
 
+/** Result of resolving the accounting low-hours threshold system setting. */
+export interface LowHoursThresholdResolution {
+  /** Unparsed setting string (or built-in default) for message interpolation. */
+  rawValue: string;
+  /** Parsed threshold applied by notifiers and the balance payload; null when unparseable. */
+  value: number | null;
+}
+
 export type PaymentReturnType = PaymentSelectType & {
   readonly displayAmount?: DisplayAmountReturnType | null;
   readonly precomputedPaymentMethodSnapshot?: unknown;

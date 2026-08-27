@@ -19,11 +19,12 @@ await mockNextNavigation("/accounting/payments/pay-1", {
 import type { MockLink } from "@apollo/client/testing";
 import {
   AccountingPaymentHistoryKind,
+  type AccountingPaymentQuery,
   PaymentGateway,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { accountingPaymentQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting";
-import { PaymentDetailMobile } from "@/frontend/mobile/views/dashboard/accounting/PaymentDetailView.mobile";
 import { usePaymentDetailViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentDetailViewModel";
+import { PaymentDetailMobile } from "@/frontend/mobile/views/dashboard/accounting/PaymentDetailView.mobile";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { DashboardAccountingPayments } from "@/shared/locale/namespaces";
@@ -39,7 +40,9 @@ function PaymentDetailMobileImpl() {
   return <PaymentDetailMobile {...viewModel} />;
 }
 
-const paymentData = {
+type AccountingPaymentDetail = NonNullable<AccountingPaymentQuery["accountingPayment"]>;
+
+const paymentData: AccountingPaymentDetail = {
   id: paymentId,
   invoiceId: "inv-1",
   amount: "300.00",
@@ -78,7 +81,7 @@ const paymentData = {
   ],
 };
 
-function detailMock(payment: typeof paymentData): MockLink.MockedResponse[] {
+function detailMock(payment: AccountingPaymentDetail): MockLink.MockedResponse[] {
   return [
     {
       request: {
@@ -128,15 +131,12 @@ describe("accounting payment detail (mobile variant)", () => {
   });
 
   test("falls back to the empty copy without invoice or history", async () => {
-    renderWithWrapper(
-      <PaymentDetailMobileImpl />,
-      {
-        locale,
-        permissions: [],
-        mocks: detailMock({ ...paymentData, invoiceId: null, history: [] }),
-        viewport: "mobile",
-      }
-    );
+    renderWithWrapper(<PaymentDetailMobileImpl />, {
+      locale,
+      permissions: [],
+      mocks: detailMock({ ...paymentData, invoiceId: null, history: [] }),
+      viewport: "mobile",
+    });
 
     expect(await screen.findByText(labels.detail.historyEmpty)).toBeVisible();
     expect(screen.getByText(labels.detail.documentEmpty)).toBeVisible();
