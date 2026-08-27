@@ -86,5 +86,18 @@ export interface PaymentsLabels {
     readonly togglePaidAction: string;
     readonly markPaid: string;
     readonly markUnpaid: string;
+    readonly transactionRef: string;
+    readonly documentPreview: string;
+    readonly documentEmpty: string;
+    readonly downloadPdf: string;
+    readonly historyTitle: string;
+    readonly historyEmpty: string;
+    readonly hoursCredited: string;
+  };
+  readonly historyKinds: {
+    readonly PAYMENT_RECORDED: string;
+    readonly HOURS_CREDITED: string;
+    readonly HOURS_ADJUSTED: string;
+    readonly MARKED_PAID: string;
   };
 }

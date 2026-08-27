@@ -1,11 +1,13 @@
 import { createHash } from "node:crypto";
 import { and, desc, eq, gte, inArray, lte, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { queryDb, queryWithPagination } from "@/backend/db";
+import { type QueryDbHandle, queryDb, queryWithPagination } from "@/backend/db";
 import { invoices, packagePlans, parents, payments, students, users } from "@/backend/db/schema";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type * as Types from "@/backend/types";
 import type { DBTransaction, PaginationArgs } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
+
 type PaymentFilter = Types.AccountingPaymentFilter;
 
 const buildFilterConditions = (filter: PaymentFilter) => {
@@ -27,7 +29,7 @@ export namespace AccountingPaymentRepository {
     input: {
       invoiceId: string;
       amount: string;
-      currency: string;
+      currency: CurrencyCode;
       paymentDate: Date;
       packagePlanId?: string | null;
       paymentGateway: Types.AccountingPaymentReturnType["paymentGateway"];
@@ -43,7 +45,7 @@ export namespace AccountingPaymentRepository {
       .values({
         invoiceId: input.invoiceId,
         amount: input.amount,
-        currency: input.currency as Types.AccountingPaymentSelectType["currency"],
+        currency: input.currency,
         paymentDate: input.paymentDate,
         userPaymentMethodId: null,
         // Accounting payments are recorded by staff: always a recorded pay-in.
@@ -88,6 +90,7 @@ export namespace AccountingPaymentRepository {
     packagePlanId: payments.packagePlanId,
     packageCodename: packagePlans.codename,
     packageName: packagePlans.displayName,
+    transactionId: payments.transactionId,
     paymentGateway: payments.paymentGateway,
     creditHours: payments.creditHours,
     isPaidStatusOn: payments.isPaidStatusOn,
@@ -99,22 +102,21 @@ export namespace AccountingPaymentRepository {
     invoiceStatus: invoices.status,
   });
 
-  export const findById = async (
-    id: string,
-    tx?: DBTransaction
-  ): Promise<Types.AccountingPaymentReturnType | null> => {
-    const parentUsers = alias(users, "acct_parent_users_detail");
-    const q = queryDb(tx);
-    const [row] = await q
+  /** Shared payments⋈invoices⋈students⋈parents⋈plans join used by all readers. */
+  const joinedRowsQuery = (q: QueryDbHandle | DBTransaction, parentUsers: ReturnType<typeof alias>) =>
+    q
       .select(joinedSelection(parentUsers))
       .from(payments)
       .innerJoin(invoices, eq(payments.invoiceId, invoices.id))
       .leftJoin(students, eq(invoices.studentId, students.id))
       .leftJoin(parents, eq(students.parentId, parents.id))
       .leftJoin(parentUsers, eq(parents.userId, parentUsers.id))
-      .leftJoin(packagePlans, eq(payments.packagePlanId, packagePlans.id))
-      .where(eq(payments.id, id))
-      .limit(1);
+      .leftJoin(packagePlans, eq(payments.packagePlanId, packagePlans.id));
+
+  export const findById = async (id: string, tx?: DBTransaction): Promise<Types.AccountingPaymentReturnType | null> => {
+    const parentUsers = alias(users, "acct_parent_users_detail");
+    const q = queryDb(tx);
+    const [row] = await joinedRowsQuery(q, parentUsers).where(eq(payments.id, id)).limit(1);
     return row ?? null;
   };
 
@@ -125,15 +127,7 @@ export namespace AccountingPaymentRepository {
   ): Promise<Types.AccountingPaymentReturnType[]> => {
     const parentUsers = alias(users, "acct_parent_users_list");
     const q = queryDb(tx);
-    let baseQuery = q
-      .select(joinedSelection(parentUsers))
-      .from(payments)
-      .innerJoin(invoices, eq(payments.invoiceId, invoices.id))
-      .leftJoin(students, eq(invoices.studentId, students.id))
-      .leftJoin(parents, eq(students.parentId, parents.id))
-      .leftJoin(parentUsers, eq(parents.userId, parentUsers.id))
-      .leftJoin(packagePlans, eq(payments.packagePlanId, packagePlans.id))
-      .$dynamic();
+    let baseQuery = joinedRowsQuery(q, parentUsers).$dynamic();
 
     const conditions = buildFilterConditions(filter);
     if (conditions.length > 0) {
@@ -166,13 +160,13 @@ export namespace AccountingPaymentRepository {
         and(eq(payments.invoiceId, invoiceId), eq(payments.isPaidStatusOn, true), ne(payments.id, excludePaymentId))
       );
 
-  export const findByIds = async (
-    ids: string[],
-    tx?: DBTransaction
-  ): Promise<Types.AccountingPaymentSelectType[]> => {
+  export const findByIds = async (ids: string[], tx?: DBTransaction): Promise<Types.AccountingPaymentSelectType[]> => {
     if (ids.length === 0) return [];
     const q = queryDb(tx);
-    return q.select().from(payments).where(inArray(payments.id, [...ids]));
+    return q
+      .select()
+      .from(payments)
+      .where(inArray(payments.id, [...ids]));
   };
 
   export const update = async (

@@ -68,9 +68,7 @@ export const students = createTable(
     classesRemaining: integerColumn("classes_remaining").notNull().default(0),
     // Credit-hours parallel balances (numeric(12,2) on PG; TEXT on SQLite).
     // Mirror classesTotal/classesRemaining for hour-billed academies.
-    creditHoursTotal: numericColumn("credit_hours_total", { precision: 12, scale: 2 })
-      .notNull()
-      .default("0.00"),
+    creditHoursTotal: numericColumn("credit_hours_total", { precision: 12, scale: 2 }).notNull().default("0.00"),
     creditHoursRemaining: numericColumn("credit_hours_remaining", { precision: 12, scale: 2 })
       .notNull()
       .default("0.00"),

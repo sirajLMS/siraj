@@ -137,6 +137,16 @@ export const notificationsAr: NotificationsLabels = {
     title: "تم تعليم الاقتراح كمكرر",
     body: ({ duplicateId }) => `تم تعليم اقتراحك كمكرر للاقتراح رقم #${duplicateId.slice(0, 8)}`,
   },
+  accountingPaymentRecorded: {
+    title: "تم تسجيل باقة ساعات تعليمية",
+    body: ({ packageName, creditHours, amount, currency }) =>
+      `تم تسجيل الدفعة الخاصة باقة "${packageName}" (${creditHours} ساعات تعليمية، بمبلغ ${amount} ${currency}) وتم تحديث رصيد الساعات الخاص بك.`,
+  },
+  accountingLowHours: {
+    title: "رصيد ساعات منخفض",
+    body: ({ remaining, threshold }) =>
+      `انخفض رصيد الساعات المتبقية لديك إلى ${remaining} وهو أقل من الحد الأدنى (${threshold}). يُرجى شراء باقة جديدة لمواصلة حجز الفصول.`,
+  },
   quotaExpiringSoon: {
     title: "حصة تنتهي قريبًا",
     body: ({ quotaName, validUntil, remaining }) =>

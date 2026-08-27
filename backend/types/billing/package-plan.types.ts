@@ -13,9 +13,6 @@ export type PackagePlanSelectType = typeof packagePlans.$inferSelect;
 /** Drizzle insert type (creditHours/priceAmount as decimal strings). */
 export type PackagePlanInsertType = typeof packagePlans.$inferInsert;
 
-/** Public return shape (alias kept explicit for GraphQL mapping later). */
-export type PackagePlanReturnType = PackagePlanSelectType;
-
 export interface PackagePlanSubmitInput {
   codename: string;
   displayName: string;
@@ -23,6 +20,8 @@ export interface PackagePlanSubmitInput {
   creditHours: number;
   priceAmount: number;
   currency: CurrencyCode;
+  /** Optional purchase validity window in months. */
+  validityMonths?: number | null;
   active?: boolean;
   sortOrder?: number;
   metadata?: Record<string, unknown> | null;
@@ -35,6 +34,7 @@ export interface PackagePlanUpdateInput {
   creditHours?: number;
   priceAmount?: number;
   currency?: CurrencyCode;
+  validityMonths?: number | null;
   active?: boolean;
   sortOrder?: number;
   metadata?: Record<string, unknown> | null;

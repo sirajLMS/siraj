@@ -7,6 +7,7 @@ import {
   seedOrGetInvoiceCoverageMonths,
   seedOrGetInvoicePaymentSubmissions,
   seedOrGetInvoices,
+  seedOrGetPackagePlans,
   seedOrGetPayments,
   seedOrGetQuotas,
   seedOrGetSupportedCurrencies,
@@ -77,6 +78,7 @@ import type {
   GroupWithPermissionIds,
   InvoiceSelectType,
   LessonReportReturnType,
+  PackagePlanSelectType,
   ParentSelectType,
   RecurringScheduleDaySelectType,
   RecurringScheduleSelectType,
@@ -93,6 +95,7 @@ export type SeedContext = {
   config?: SeedConfig;
   systemSettings?: SystemSettingSelectType[];
   timezones?: TimezoneSelectType[];
+  packagePlans?: PackagePlanSelectType[];
   permissionGroups?: GroupWithPermissionIds[];
   users?: UserSelectType[];
   teachers?: TeacherSelectType[];
@@ -390,6 +393,9 @@ async function runBillingSeeds(context: SeedContext, step: RunStep, config: Seed
     seedOrGetCurrencyExchangeAuditLogs(context.exchangeRates ?? [], context.users ?? [], config)
   );
   await step("currency-hedges", () => seedOrGetCurrencyHedges(config));
+
+  const packagePlans = await step("package-plans", () => seedOrGetPackagePlans());
+  if (packagePlans) context.packagePlans = packagePlans;
 
   const invoices = await step("invoices", () =>
     seedOrGetInvoices(context.parents ?? [], context.students ?? [], context.users ?? [], config)

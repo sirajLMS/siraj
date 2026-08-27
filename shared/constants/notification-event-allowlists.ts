@@ -31,7 +31,9 @@ export type NotificationEventTypeKey =
   | "ON_DEMAND_INSTANCE_REMINDER_T1"
   | "ON_DEMAND_TEACHER_DAILY_DIGEST"
   | "PASSWORD_RESET_BY_ADMIN"
-  | "USER_STATUS_CHANGED";
+  | "USER_STATUS_CHANGED"
+  | "ACCOUNTING_PAYMENT_RECORDED"
+  | "ACCOUNTING_LOW_HOURS";
 
 export type NotificationPreferenceRole = "student" | "supervisor" | "parent" | "teacher" | "staff" | "admin";
 
@@ -50,6 +52,8 @@ export const STUDENT_NOTIFICATION_EVENTS: readonly NotificationEventTypeKey[] = 
   "QUOTA_EXPIRING_SOON",
   "QUOTA_EXPIRED",
   "QUOTA_LOW_BALANCE",
+  "ACCOUNTING_PAYMENT_RECORDED",
+  "ACCOUNTING_LOW_HOURS",
   "ON_DEMAND_INSTANCE_PENDING_CREDIT",
   "ON_DEMAND_INSTANCE_REMINDER_T3",
   "ON_DEMAND_INSTANCE_REMINDER_T1",

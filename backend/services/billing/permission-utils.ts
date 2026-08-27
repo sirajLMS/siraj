@@ -80,7 +80,13 @@ export async function resolveAssociatedViewer(actorUserId: string, studentId: st
         ParentRepository.findByUserId(actorUserId),
         TeacherRepository.findByUserId(actorUserId),
       ]);
-      return (parent?.id ?? null) === profile.parentId || (teacher?.id ?? null) === profile.primaryTeacherId;
+      // Null-normalizing BOTH sides would make a caller with no parent/teacher
+      // row "match" every student that has no primaryTeacherId assigned yet
+      // (null === null). Absence must never count as an association.
+      const matchesAsParent = parent !== null && parent.id === profile.parentId;
+      const matchesAsTeacher =
+        teacher !== null && profile.primaryTeacherId !== null && teacher.id === profile.primaryTeacherId;
+      return matchesAsParent || matchesAsTeacher;
     },
     [`user:${actorUserId}`, `student:${studentId}`]
   );

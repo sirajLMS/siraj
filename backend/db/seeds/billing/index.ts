@@ -8,6 +8,7 @@ export { seedOrGet as seedOrGetCurrencyHedges } from "./seed-currency-hedges";
 export { seedOrGet as seedOrGetInvoiceCoverageMonths } from "./seed-invoice-coverage-months";
 export { seedOrGet as seedOrGetInvoicePaymentSubmissions } from "./seed-invoice-payment-submissions";
 export { seedOrGet as seedOrGetInvoices } from "./seed-invoices";
+export { seedOrGet as seedOrGetPackagePlans } from "./seed-package-plans";
 export { seedOrGet as seedOrGetPayments } from "./seed-payments";
 export { seedOrGet as seedOrGetQuotas } from "./seed-quotas";
 export { seedOrGet as seedOrGetSupportedMobileWallets } from "./seed-supported-mobile-wallets";

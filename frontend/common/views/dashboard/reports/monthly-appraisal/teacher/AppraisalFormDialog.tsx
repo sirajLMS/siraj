@@ -1,6 +1,5 @@
 "use client";
 
-import { gql, type TypedDocumentNode } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { CloseOutlined, SaveOutlined, Star, StarBorderOutlined } from "@mui/icons-material";
 import {
@@ -19,36 +18,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { submitMonthlyAppraisalMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
-
-interface ExistingAppraisal {
-  behaviorGrade: number | null;
-  behaviorComment: string | null;
-  attendanceGrade: number | null;
-  attendanceComment: string | null;
-  punctualityGrade: number | null;
-  punctualityComment: string | null;
-  overallGrade: number | null;
-  overallComment: string | null;
-  learningTargets: string;
-}
-
-const STUDENT_APPRAISAL_DETAIL_QUERY: TypedDocumentNode<{ studentMonthlyAppraisals: ExistingAppraisal[] | null }> = gql`
-  query StudentAppraisalDetailForForm($studentId: String!) {
-    studentMonthlyAppraisals(studentId: $studentId) {
-      id
-      behaviorGrade
-      behaviorComment
-      attendanceGrade
-      attendanceComment
-      punctualityGrade
-      punctualityComment
-      overallGrade
-      overallComment
-      learningTargets
-    }
-  }
-`;
+import {
+  studentAppraisalDetailForFormQueryDocument,
+  submitMonthlyAppraisalMutationDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
 
 interface AppraisalFormData {
   studentId: string;
@@ -143,7 +116,7 @@ export function AppraisalFormDialog({
   onClose,
   onSubmitted,
 }: Readonly<AppraisalFormDialogProps>) {
-  const { data: existingData } = useQuery(STUDENT_APPRAISAL_DETAIL_QUERY, {
+  const { data: existingData } = useQuery(studentAppraisalDetailForFormQueryDocument, {
     variables: { studentId },
     skip: !open || !studentId,
     fetchPolicy: "cache-and-network",

@@ -3,13 +3,8 @@
  */
 
 /** Gateway through which an accounting payment was received. */
-export enum PaymentGateway {
-  NONE = "NONE",
-  PAYPAL = "PAYPAL",
-  WESTERN_UNION = "WESTERN_UNION",
-  BANK = "BANK",
-  OTHER = "OTHER",
-}
+/** Derived (non-persisted) history event kinds for the payment detail timeline. */
+export { AccountingPaymentHistoryKind, PaymentGateway } from "@/shared/constants/billing.enum";
 
 /**
  * Discriminator for which ledger a class instance bills against.

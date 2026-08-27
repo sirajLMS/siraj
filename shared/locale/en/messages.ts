@@ -1,6 +1,9 @@
 /** Canonical static leaf assembler for server getTranslations (Phase 4). Same leaf modules as defineNamespace loaders. */
 import { authEn } from "@/shared/locale/en/auth";
 import { commonEn } from "@/shared/locale/en/common";
+import { dashboardAccountingPackagePlansEn } from "@/shared/locale/en/dashboard/accounting/package-plans.ts";
+import { dashboardAccountingPaymentsEn } from "@/shared/locale/en/dashboard/accounting/payments.ts";
+import { dashboardAccountingStudentCreditHoursEn } from "@/shared/locale/en/dashboard/accounting/student-credit-hours.ts";
 import { dashboardAdminEn } from "@/shared/locale/en/dashboard/admin";
 import { dashboardDstMigrationEn } from "@/shared/locale/en/dashboard/admin/dstMigration.ts";
 import { dashboardAdminViewEn } from "@/shared/locale/en/dashboard/admin/view.ts";
@@ -11,9 +14,6 @@ import { dashboardBillingManualEn } from "@/shared/locale/en/dashboard/billing/m
 import { dashboardBillingPaymentEn } from "@/shared/locale/en/dashboard/billing/payment.ts";
 import { quotaEn } from "@/shared/locale/en/dashboard/billing/quota.ts";
 import { dashboardBillingSupportedCurrenciesEn } from "@/shared/locale/en/dashboard/billing/supportedCurrencies.ts";
-import { dashboardAccountingPackagePlansEn } from "@/shared/locale/en/dashboard/accounting/package-plans.ts";
-import { dashboardAccountingPaymentsEn } from "@/shared/locale/en/dashboard/accounting/payments.ts";
-import { dashboardAccountingStudentCreditHoursEn } from "@/shared/locale/en/dashboard/accounting/student-credit-hours.ts";
 
 import { dashboardClassAuditEn } from "@/shared/locale/en/dashboard/classes/audit.ts";
 import { dashboardCreateRecurringClassEn } from "@/shared/locale/en/dashboard/classes/createRecurringClass.ts";

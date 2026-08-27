@@ -11,6 +11,9 @@ type AccountingPayment {
   createdAt: DateTime
   creditHours: String
   currency: String
+
+  """Derived timeline events (creation, ledger effects, paid state)"""
+  history: [AccountingPaymentHistoryEvent!]
   id: String
   invoiceId: String
   invoiceStatus: String
@@ -25,6 +28,7 @@ type AccountingPayment {
   paymentNote: String
   studentId: String
   studentName: String
+  transactionId: String
   updatedAt: DateTime
 }
 
@@ -52,6 +56,22 @@ input AccountingPaymentFilterInput {
   studentId: ID
   toDate: String
   unpaidOnly: Boolean
+}
+
+"""A derived timeline event for an accounting payment"""
+type AccountingPaymentHistoryEvent {
+  hoursDelta: String
+  id: String
+  kind: AccountingPaymentHistoryKind
+  notes: String
+  occurredAt: DateTime
+}
+
+enum AccountingPaymentHistoryKind {
+  HOURS_ADJUSTED
+  HOURS_CREDITED
+  MARKED_PAID
+  PAYMENT_RECORDED
 }
 
 """Input for recording an accounting payment (hour purchase)"""
@@ -2935,6 +2955,8 @@ enum NotificationChannel {
 }
 
 enum NotificationEventType {
+  ACCOUNTING_LOW_HOURS
+  ACCOUNTING_PAYMENT_RECORDED
   CLASS_ACTIVATED
   CLASS_CANCELLED
   CLASS_COMPLETED
@@ -3038,6 +3060,7 @@ type PackagePlan {
   priceAmount: String
   sortOrder: Int
   updatedAt: DateTime
+  validityMonths: Int
   version: Int
 }
 
@@ -3051,6 +3074,7 @@ input PackagePlanInput {
   displayName: String!
   priceAmount: Float!
   sortOrder: Int
+  validityMonths: Int
 }
 
 """Input for updating a package plan (optimistic-lock aware)"""
@@ -3063,6 +3087,7 @@ input PackagePlanUpdateInput {
   id: ID!
   priceAmount: Float
   sortOrder: Int
+  validityMonths: Int
   version: Int
 }
 

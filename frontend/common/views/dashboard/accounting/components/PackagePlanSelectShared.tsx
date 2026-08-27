@@ -19,6 +19,22 @@ export interface PackagePlanSelectSharedProps {
   readonly sx?: SxProps<Theme>;
 }
 
+/** Merges the default minWidth with caller sx (scalar | array | callback). */
+function composeSelectSx(sx: SxProps<Theme> | undefined, minWidth: number): SxProps<Theme> {
+  if (typeof sx === "function") {
+    return [sx];
+  }
+  let rest: SxProps<Theme>[] = [];
+  if (Array.isArray(sx)) {
+    rest = sx;
+  } else if (sx) {
+    rest = [sx];
+  }
+  // MUI’s recursive SxProps union defeats narrow inference for composed arrays;
+  // the result is a valid sx value at runtime.
+  return [{ minWidth }, ...rest] as SxProps<Theme>;
+}
+
 /**
  * Active package-plan picker used by the Add Payment form. Lists ACTIVE plans
  * (sorted by sortOrder) so newly recorded payments always snapshot a live
@@ -44,12 +60,12 @@ export function PackagePlanSelectShared({
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
 
   return (
-    <FormControl size={size} sx={{ minWidth, ...sx }} disabled={disabled} error={error}>
+    <FormControl size={size} sx={composeSelectSx(sx, minWidth)} disabled={disabled} error={error}>
       <InputLabel>{label}</InputLabel>
       <Select
         value={value ?? ""}
         label={label}
-        onChange={e => onChange((e.target.value as string) || null)}
+        onChange={e => onChange(e.target.value || null)}
         disabled={disabled || loading}
       >
         <MenuItem value="">{adhocLabel}</MenuItem>

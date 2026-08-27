@@ -158,7 +158,10 @@ export function OnboardingPaymentMethodSection<T extends FieldValues>({
             }}
           />
           {typeErrorMessage ? (
-            <Box component="span" sx={theme => ({ color: theme.palette.error.main, fontSize: 12 })}>
+            <Box
+              component="span"
+              sx={theme => ({ color: theme.palette.error.main, fontSize: theme.typography.labelMd.fontSize })}
+            >
               {typeErrorMessage}
             </Box>
           ) : null}

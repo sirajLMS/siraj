@@ -117,4 +117,6 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   toggleGroupAriaLabel: label => `تبديل مجموعة ${label}`,
   accountingPayments: "المدفوعات",
   accountingPackages: "الباقات",
+  accountingPaymentsNew: "إضافة دفعة",
+  accountingPackagesNew: "إنشاء باقة",
 };

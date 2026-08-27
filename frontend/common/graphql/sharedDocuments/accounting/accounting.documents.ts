@@ -1,17 +1,17 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type {
-  AccountingPaymentsQuery,
-  AccountingPaymentsQueryVariables,
   AccountingPaymentQuery,
   AccountingPaymentQueryVariables,
+  AccountingPaymentsQuery,
+  AccountingPaymentsQueryVariables,
   ArchivePackagePlanMutation,
   ArchivePackagePlanMutationVariables,
-  PackagePlansQuery,
-  PackagePlansQueryVariables,
-  PackagePlanQuery,
-  PackagePlanQueryVariables,
   CreatePackagePlanMutation,
   CreatePackagePlanMutationVariables,
+  PackagePlanQuery,
+  PackagePlanQueryVariables,
+  PackagePlansQuery,
+  PackagePlansQueryVariables,
   RecordAccountingPaymentMutation,
   RecordAccountingPaymentMutationVariables,
   StudentCreditHourBalanceQuery,
@@ -26,10 +26,7 @@ import type {
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
-export const packagePlansQueryDocument: TypedDocumentNode<
-  PackagePlansQuery,
-  PackagePlansQueryVariables
-> = gql`
+export const packagePlansQueryDocument: TypedDocumentNode<PackagePlansQuery, PackagePlansQueryVariables> = gql`
   query PackagePlans($activeOnly: Boolean, $paginationArgs: PaginationArgs) {
     packagePlans(activeOnly: $activeOnly, paginationArgs: $paginationArgs) {
       id
@@ -41,6 +38,7 @@ export const packagePlansQueryDocument: TypedDocumentNode<
       currency
       active
       sortOrder
+      validityMonths
       version
       createdAt
       updatedAt
@@ -48,10 +46,7 @@ export const packagePlansQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const packagePlanQueryDocument: TypedDocumentNode<
-  PackagePlanQuery,
-  PackagePlanQueryVariables
-> = gql`
+export const packagePlanQueryDocument: TypedDocumentNode<PackagePlanQuery, PackagePlanQueryVariables> = gql`
   query PackagePlan($id: ID!) {
     packagePlan(id: $id) {
       id
@@ -63,6 +58,7 @@ export const packagePlanQueryDocument: TypedDocumentNode<
       currency
       active
       sortOrder
+      validityMonths
       version
       createdAt
       updatedAt
@@ -122,8 +118,16 @@ export const accountingPaymentQueryDocument: TypedDocumentNode<
       parentId
       parentName
       invoiceStatus
+      transactionId
       createdAt
       updatedAt
+      history {
+        id
+        kind
+        occurredAt
+        hoursDelta
+        notes
+      }
     }
   }
 `;

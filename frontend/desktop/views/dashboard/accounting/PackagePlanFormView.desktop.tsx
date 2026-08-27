@@ -207,7 +207,7 @@ export function PackagePlanFormDesktop(props: Readonly<UsePackagePlanFormViewMod
                       <Select<CurrencyCode>
                         value={field.value}
                         label={t.form.currency}
-                        onChange={e => field.onChange(e.target.value as CurrencyCode)}
+                        onChange={e => field.onChange(e.target.value)}
                       >
                         {CURRENCY_OPTIONS.map(code => (
                           <MenuItem key={code} value={code}>
@@ -234,6 +234,23 @@ export function PackagePlanFormDesktop(props: Readonly<UsePackagePlanFormViewMod
                       helperText={errors.sortOrder?.message}
                       slotProps={{ htmlInput: { step: 1, min: 0 } }}
                       sx={{ width: 150 }}
+                    />
+                  )}
+                />
+                <Controller
+                  name="validityMonths"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      value={field.value ?? ""}
+                      onChange={e => field.onChange(e.target.value === "" ? null : e.target.value)}
+                      size="small"
+                      type="number"
+                      label={t.form.validityMonths}
+                      error={Boolean(errors.validityMonths)}
+                      helperText={errors.validityMonths?.message}
+                      slotProps={{ htmlInput: { step: 1, min: 1, max: 120 } }}
+                      sx={{ width: 170 }}
                     />
                   )}
                 />

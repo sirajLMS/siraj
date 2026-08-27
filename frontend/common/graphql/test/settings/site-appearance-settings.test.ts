@@ -184,6 +184,7 @@ describe("GraphQL Site Appearance Settings Integration Tests", () => {
     await authenticatedRequest(superAdminToken, "mutate", publishAppearanceMutationDocument, {
       expectedUpdatedAt: undefined,
     });
-    await authenticatedRequest(superAdminToken, "mutate", resetAppearanceDraftMutationDocument, {});
+    const reset = await authenticatedRequest(superAdminToken, "mutate", resetAppearanceDraftMutationDocument, {});
+    expect(reset).toBeDefined();
   });
 });

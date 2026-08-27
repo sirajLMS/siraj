@@ -532,11 +532,13 @@ After all implementation tasks are complete, the final task in every plan MUST:
 ### AGENTS.md & Instructions Content Policy (CRITICAL)
 
 AGENTS.md files and `.agents/instructions/*.md` files MUST contain ONLY:
-1. **Layer-specific architectural rules** — constraints unique to that layer (e.g., "shared/ must never import from frontend/backend")
-2. **Decisions** — architectural choices and their rationale (1-2 lines, no code)
-3. **References** — one-line pointers to `docs/` for detailed patterns, code examples, and fix recipes
+1. **Global & Layer-Specific Architectural Rules** — permanent invariants and constraints unique to that layer (e.g., "shared/ must never import from frontend/backend", "all types must live in backend/types/", "pass tx to all repository calls inside runInRollback").
+2. **Library & Runtime Battle-Tested Gotchas** — non-obvious breaking changes and bug-inducing patterns with libraries (e.g. Next.js 16 breaking changes, React 19 FormEvent removal, MUI v9 style props in sx, Emotion RTL stylis plugin crash, Postgres inArray limitation with prepared statements).
+3. **Decisions** — global architectural choices and their rationale (1-2 lines, no code).
+4. **References** — one-line pointers to `docs/` for detailed patterns, code examples, domain guides, and fix recipes.
 
 AGENTS.md and instructions files MUST NOT contain:
+- **Plan-specific constraints & feature notes** (e.g., entity column lists, temporary migration steps, feature-specific business logic)
 - Implementation details (code examples, fix recipes, step-by-step patterns)
 - Tool usage guides (e.g., SonarQube MCP server docs)
 - Duplicated content from other AGENTS.md files or instructions files
@@ -544,8 +546,9 @@ AGENTS.md and instructions files MUST NOT contain:
 - Generic workflow documentation (e.g., quality-gate lifecycle, SonarQube issue management)
 
 When propagating learnings from a plan:
-- Full patterns, code examples, and implementation details → `docs/<domain>/<topic>.md`
-- Layer rules and decisions → AGENTS.md / instructions (1-2 lines + doc reference)
+- Plan details and task outcomes → `.ai/plans/<feature-name>/outcome/`
+- Full patterns, code examples, domain architecture, and implementation details → `docs/<domain>/<topic>.md`
+- Permanent, global architectural rules and library battle-tested gotchas → AGENTS.md / instructions (1-2 lines + doc reference in Important References)
 
 ### Knowledge Propagation Task Template
 
@@ -663,10 +666,14 @@ Before marking ANY subtask `[x]`, verify (the sub-loop script handles mechanical
 - [ ] All `resetX()` / cache-invalidation functions invalidate ALL keys resolved via `resolveEnvConfig`
 - [ ] No credential/secret setters accepting empty strings
 
-**Code Quality:**
+**Code Quality & Clean Comments:**
 - [ ] No dead branches (all `if` paths reachable, every `throw` reachable)
 - [ ] No cross-layer imports (frontend → backend, shared → frontend/backend)
 - [ ] No manual ReturnType construction (use `toReturnType` helper where applicable)
+- [ ] **Clean Comments & JSDocs (CRITICAL)**:
+  - ZERO references to internal plan artifacts (e.g. NEVER write `REQ-1`, `REQ-2.1`, `Task 3.2`, `Phase 4`, or cite `.ai/plans/...` / `specs.md` / `tasks.md` in code comments or JSDoc).
+  - Code comments and JSDoc MUST describe the *what*, *why*, and *domain behavior* of the code in clean, production-grade technical terms without mentioning planning meta-artifacts.
+  - No noisy or trivial comments repeating the obvious (e.g. `// calculate total` above `calculateTotal()`).
 
 **Schema & Types:**
 - [ ] Schema columns in migrations exist in Drizzle schema (and vice versa)

@@ -292,10 +292,14 @@ Before marking ANY subtask `[x]`, the executing subagent MUST verify:
 - [ ] All `resetX()` / cache-invalidation functions invalidate ALL keys resolved via `resolveEnvConfig`
 - [ ] No credential/secret setters accepting empty strings
 
-### Code Quality
+### Code Quality & Clean Comments
 - [ ] No dead branches (all `if` paths reachable, every `throw` reachable)
 - [ ] No cross-layer imports (frontend → backend, shared → frontend/backend)
 - [ ] No manual ReturnType construction (use `toReturnType` helper where applicable)
+- [ ] **Clean Comments & JSDocs (CRITICAL)**:
+  - ZERO references to internal plan artifacts (e.g. NEVER write `REQ-1`, `REQ-2.1`, `Task 3.2`, `Phase 4`, or cite `.ai/plans/...` / `specs.md` / `tasks.md` in code comments or JSDoc).
+  - Code comments and JSDoc MUST describe the *what*, *why*, and *domain behavior* of the code in clean, production-grade technical terms without mentioning planning meta-artifacts.
+  - No noisy or trivial comments repeating the obvious (e.g. `// calculate total` above `calculateTotal()`).
 
 ### Schema & Types
 - [ ] Schema columns in migrations exist in Drizzle schema (and vice versa)
@@ -512,18 +516,22 @@ After all implementation tasks and post-implementation review are complete, exec
 ### Process
 
 1. **Read ALL outcome files** in `.ai/plans/<feature-name>/outcome/`
-2. **Extract recurring patterns/gotchas** — things that appeared 2+ times across tasks
-3. **Identify knowledge propagation targets** using the domain-to-artifacts mapping (below)
-4. **Propagate learnings** to permanent project knowledge:
+2. **Extract recurring patterns/gotchas** — non-obvious engineering gotchas, library/runtime breaking behaviors, or architectural invariants discovered across tasks
+3. **Filter for Global Battle-Tested Knowledge (CRITICAL)**:
+   - **DO NOT add to AGENTS.md / instructions**: Plan-specific constraints, feature business logic, temporary migration steps, entity-specific database schemas/columns, or one-off feature instructions.
+   - **DO add to AGENTS.md / instructions**: Permanent, codebase-wide architectural rules, library/tooling breaking pitfalls (Next.js 16, React 19, MUI v9, Drizzle, Apollo, Bun), concurrency/deadlock rules, or cross-cutting safety invariants that every future developer/agent must follow.
+   - **DO add to `docs/<domain>/<topic>.md`**: Deep domain architecture guides, pattern catalogs, and feature references.
+4. **Identify knowledge propagation targets** using the domain-to-artifacts mapping (below)
+5. **Propagate learnings** to permanent project knowledge:
 
 ### What Gets Updated
 
 | Artifact | Action |
 |---|---|
-| **Canonical reference doc** | Create `docs/<domain>/<topic>.md` consolidating patterns, rules, gotchas |
-| **Layer AGENTS.md** | Add new rules/patterns and reference to the new doc |
+| **Canonical reference doc** | Create `docs/<domain>/<topic>.md` consolidating patterns, rules, gotchas, architecture diagrams |
+| **Layer AGENTS.md** | Add ONLY permanent, global, battle-tested architectural rules (1-2 lines, no code) and a one-line pointer to the doc in `Important References`. NEVER add plan-specific constraints or entity rules. |
 | **Skills** | Update `.agents/skills/<skill>/SKILL.md` if new patterns affect the skill's domain |
-| **Instructions** | Update `.agents/instructions/<layer>.instructions.md` if new conventions should be enforced |
+| **Instructions** | Update `.agents/instructions/<layer>.instructions.md` if new permanent conventions should be enforced |
 | **Root AGENTS.md** | Add new doc to "Important References" section |
 
 ### Domain-to-Artifacts Mapping

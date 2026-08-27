@@ -72,7 +72,7 @@ const LAZY_ICONS: LazyIconMap = {
   logout: lazy(ICON_LOADERS.logout),
   menuBook: lazy(ICON_LOADERS.menuBook),
   noteAdd: lazy(ICON_LOADERS.noteAdd),
-    notificationsActive: lazy(ICON_LOADERS.notificationsActive),
+  notificationsActive: lazy(ICON_LOADERS.notificationsActive),
   packages: lazy(ICON_LOADERS.packages),
   payments: lazy(ICON_LOADERS.payments),
   personAddAlt: lazy(ICON_LOADERS.personAddAlt),

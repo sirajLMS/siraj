@@ -56,78 +56,20 @@ Each integration file gets **one** smoke test (single API call) to confirm the a
 - **Zoom refresh-token re-auth**: Treat `invalid_grant` as the sole authoritative trigger for re-auth — do NOT build proactive renewal on a hardcoded 90-day clock. See `docs/services/zoom-token-types.md`.
 - See `docs/services/meeting-providers.md` for the complete pattern reference (interface, factory, adapter examples, deployment prerequisites, rollout summary).
 
-## WhatsApp Cloud API Integration
+## Important References
 
-- **Canonical reference**: `docs/services/whatsapp-cloud-api.md` — covers the full integration (adapter, factory, webhook, dispatch, schema, opt-in, frontend).
-- **Service modules**: `backend/services/whatsapp/` — `WhatsappChannelFactory.ts` (lazy singleton + `resetWhatsappChannel()`), `MetaCloudApiAdapter.ts`, `whatsapp-account.service.ts`, `whatsapp-template.service.ts`.
-- **Channel dispatch**: WhatsApp has its **own dispatch branch** (`dispatchWhatsapp` in `notification-dispatch.helpers.ts`) — never routed through email/SMS-shaped `dispatchRecipientChannel`. Extracts `whatsappTemplate` from `payload.metadata`, fails fast if absent.
-- **Template-only sends (B1)**: `WhatsappPayload` has no free-text `body` field — only `template` + `components[]`. Free-text deferred to v2.
-- **Rate limiting**: Pair-rate-limit via Redis (`whatsapp:pair:<e164>`, TTL 60s, 6s min interval). Concurrency cap (P1) via `activeCalls` semaphore (max 10). Never marks FAILED on guard hit — only defers.
-- **Credentials**: `encryptedAccessToken`/`encryptedTwoStepPin` use `encryptedText` Drizzle type (auto-encrypt/decrypt). `ReturnType` types `Omit` encrypted columns — never leak to API. `resolveCredentials()` decrypts per-send; never holds plaintext on singleton.
-- **Q4 Budget accounting**: `sendAttempted: boolean` on `WhatsappSendResult` — `true` whenever a Graph API fetch was executed (including errors). `dispatchMulti` counts these for `whatsappBudgetConsumed`.
-- **Webhook**: Route at `app/api/webhooks/whatsapp` — GET verification (timingSafeEqual, S5), POST with HMAC-SHA256 body validation (S2). Returns 200 immediately, defers via `after()` (C3, not `queueMicrotask`). Strips `messages[]` defensively (S3).
-- **B3 Forward-only status**: `STATUS_RANK` enforces monotonic transitions. `tryB3Resurrection()` for edge-case FAILED→DELIVERED.
-- **Opt-in (REQ-10)**: Per-user via existing `userNotificationPreferences` table across all `NotificationEventType` values with `NotificationChannel.WHATSAPP`. Gate applied in `dispatchWithPreferences`, not in builders (builders are pure/no I/O).
-
-## Hot-resolver & Read Caching (`EntityCacheService`)
-
-- **Cache Keys**: Always use identity+role-scoped key formats:
-  - User profile / context: `ec:user:${userId}:${roleId}`
-  - Teacher by User ID: `ec:teacher:byUserId:${userId}:${roleId}`
-  - Parent by User ID: `ec:parent:byUserId:${userId}:${roleId}`
-  - Staff Directory: `ec:teacher:dir:${roleId}:${stableStringify(queryArgs)}`
-  - Parent Directory: `ec:parent:dir:${roleId}:${stableStringify(queryArgs)}`
-  - Parent Dashboard: `ec:parent:dash:metrics:${parentId}`
-  - Supervisor Dashboard: `ec:supervisor:dash:${actorUserId}`
-- **Fail-Open Contract**: All cache reads and invalidation calls MUST wrap provider errors in `try/catch` and fall through gracefully to the underlying data source / database without crashing caller requests.
-- **Permission Checking**: Keep permission gating (e.g. `assertDirectoryAccess`, `hasPermission`) OUTSIDE `cachedRead` — authorization checks must execute before cache lookups so unauthorized users never receive cached payloads or execute cache queries.
-- **Tag Invalidation**: Use named helpers (`invalidateParentWrite`, `invalidateTeacherWrite`, `invalidateClassLifecycle`, `invalidateRoleChange`) in mutation write paths.
-
-## Cron Service (`backend/services/cron/`)
-
-- **Pluggable Queue Backends**: Queue adapters are loaded lazily via `await import(...)` in `queue-adapter.factory.ts`. The active backend is resolved from `CRON_QUEUE_BACKEND` env config (default `PG_BOSS`). See `docs/services/cron-service.md` for the complete pattern reference.
-- **Hybrid Trigger Model**: Vercel ticker (`/api/cron/ticker`) dispatches due schedules + runs drain loop; manual trigger via GraphQL `cronRunTrigger` mutation or `/api/cron/execute` route.
-- **Idempotent Dispatch**: `CronService.dispatchDueSchedules()` claims schedules atomically by advancing `nextRunAt` before enqueueing. Handlers MUST be idempotent.
-- **Concurrency Policy**: `CronConcurrencyPolicy` enum (`ALLOW`, `REPLACE`, `SKIP`) controls behavior when a previous run is still in-flight.
-- **Worker Runtime**: `cron-worker.runtime.ts` `runDrainLoop()` fetches batches, sets `RUNNING`, writes heartbeats, invokes `JobHandlerRegistry.getHandler()`, and handles success/retry/fail with max-retries exhaustion.
-- **Handler Registry**: `job-handler-registry.ts` maps `CronJobKind` → handler function. The `NOOP` handler is auto-registered. Unregistered kinds fail the run with "No handler registered for jobKind=<X>".
-
-## Quota System Integration
-
-The Quota System (`QuotaService`, `QuotaNotificationService`, `AvailabilityService`) is an append-only ledger-based class credit tracking system. See `docs/billing/quota-system.md` for the complete architecture reference. Key service-level rules:
-
-### QuotaService (`backend/services/billing/quota.service.ts`)
-
-- **All methods are permission-gated**: `QUOTAS_VIEW` for reads, `QUOTAS_MANAGE` for writes via `requireManagePermission` / `requireViewPermission`
-- **Single-writer principle**: QuotaService is the ONLY service authorized to call `QuotaRepository` write methods. Other services (CreditService, RecurringClassService, ClassSessionService) call QuotaService — never QuotaRepository directly.
-- **FIFO auto-selection**: `selectQuotaForBooking(studentId, tx?)` uses `QuotaRepository.selectQuotaForBookingFIFO` internally
-- **On-demand refresh**: `refreshStudentOndemandInstances(studentId, tx)` must be called by CreditService after ANY credit change
-
-### AvailabilityService (`backend/services/scheduling/availability.service.ts`)
-
-- Provides point-in-time slot availability checks using `class_instances` lookups + `TeacherAvailabilityRepository.validateBookingAvailability`
-- Used by: RecurringClassService (create/update schedule), on-demand instance generator script
-
-### QuotaNotificationService (`backend/services/billing/quota-notification.service.ts`)
-
-- 7 notification methods: `sendQuotaExpiringSoon`, `sendQuotaExpired`, `sendQuotaLowBalance`, `sendOndemandInstancePendingCredit`, `sendOndemandInstanceReminderT3`, `sendOndemandInstanceReminderT1`, `sendOndemandTeacherDailyDigest`
-- All dispatch via `dispatchWithPreferences`, not raw `CommunicationService.dispatch`
-- Each event has a `NotificationEventCategory` tag (info/reminder/urgent/digest)
-
-### Service Integration Rules
-
-- **CancelSchedule**: `RecurringClassService.cancelSchedule` releases quota reservations via `QuotaService.releaseForRecurringSchedule`
-- **Mode Switch**: `switchSchedulingMode` adjusts quota reservations based on mode transitions (SCHEDULED → ON_DEMAND releases; ON_DEMAND → SCHEDULED reverts)
-- **Session Start**: `ClassSessionService` calls `QuotaService.redeemForInstance` for ON_DEMAND PENDING_CREDIT instances
-- **Manual Entry**: `TeacherDashboardService.createManualEntry` delegates to `QuotaService.redeemForInstance` when quota-backed (prevents double deduction)
-
-## Canonical Service Pattern (Duplication Elimination)
-
-When utility functions in `backend/lib/` duplicate service-layer logic, the service file is canonical. Delete the `lib/` duplicate and update importers to use `@/backend/services/<module>` barrel. See `docs/frontend/duplication-elimination-patterns.md` Pattern 4.
-
-Completed consolidations:
-- `backend/lib/auth/permissions.ts` → `backend/services/auth/permissions.service.ts` (Task 2.18)
-- `backend/lib/env-config-resolver.ts` → `backend/services/system/environment-config.service.ts` (Task 2.19)
+- `docs/services/meeting-providers.md` - Meeting provider adapter/factory pattern reference
+- `docs/services/zoom-token-types.md` - Zoom token kinds semantics and constraints
+- `docs/services/whatsapp-cloud-api.md` - WhatsApp Cloud API integration reference
+- `docs/billing/quota-system.md` - Quota System architecture reference
+- `docs/services/cron-service.md` - Cron service pattern reference
+- `docs/services/entity-cache-service.md` - Entity Cache Service pattern reference
+- `docs/services/general-user-creation.md` - General user creation pattern
+- `docs/backend/service-base-pattern.md` - Service base and shared helpers reference
+- `docs/backend/meeting-adapter-base.md` - Meeting provider adapter base class pattern reference
+- `docs/auth/manager-role-mapping.md` - Manager role mapping architecture & permission group slug convention
+- `docs/backend/serverless-cold-start-optimization.md` - Serverless cold-start optimization patterns
+- `docs/quality/linting-rules.md` - Oxlint & ESLint/sonarjs fix recipes
 
 ## Meeting Provider Adapter Base Class (Duplication Elimination)
 

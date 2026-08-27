@@ -45,10 +45,9 @@ function DateSquare({ date, isRescheduled }: Readonly<{ date: string; isReschedu
         {dayNum}
       </Typography>
       <Typography
-        variant="labelUppercase"
+        variant="labelSm"
         sx={theme => ({
           color: isRescheduled ? theme.palette.status.onBlockedContainer : theme.palette.onSurfaceVariant,
-          fontSize: 10,
           opacity: 0.8,
         })}
       >
@@ -139,7 +138,7 @@ function ActionButtons({ item, onRequestLeave, labels, style }: Readonly<ActionB
           startIcon={item.leaveRequestDisabledReason === "quota" ? <BlockOutlined /> : <EventBusyOutlined />}
           sx={theme => ({
             borderRadius: 2,
-            fontSize: 11,
+            fontSize: theme.typography.labelUppercase.fontSize,
             fontWeight: 700,
             letterSpacing: "0.05em",
             backgroundColor: theme.palette.surfaceContainerLow,
@@ -158,7 +157,7 @@ function ActionButtons({ item, onRequestLeave, labels, style }: Readonly<ActionB
           onClick={onRequestLeave}
           sx={theme => ({
             borderRadius: 2,
-            fontSize: 11,
+            fontSize: theme.typography.labelUppercase.fontSize,
             fontWeight: 700,
             letterSpacing: "0.05em",
             color: theme.palette.primary.main,
@@ -180,7 +179,7 @@ function ActionButtons({ item, onRequestLeave, labels, style }: Readonly<ActionB
             disabled
             sx={theme => ({
               borderRadius: 2,
-              fontSize: 11,
+              fontSize: theme.typography.labelUppercase.fontSize,
               fontWeight: 700,
               letterSpacing: "0.05em",
               backgroundColor: theme.palette.primary.main,

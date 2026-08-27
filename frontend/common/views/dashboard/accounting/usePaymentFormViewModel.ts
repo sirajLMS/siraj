@@ -113,6 +113,10 @@ export function usePaymentFormViewModel({
 
   // Package auto-fill: when a plan is selected on the CREATE path, snapshot
   // its hours/price/currency onto the form. Fields stay editable afterwards.
+  // react-hook-form watch() returns fresh functions each render, which React
+  // Compiler cannot memoize — expected for form bindings and render-safe here,
+  // so skip that single check (the value is only used as a query variable).
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedPlanId = createForm.watch("packagePlanId");
 
   const { data: planData } = useQuery(packagePlanQueryDocument, {
@@ -125,9 +129,10 @@ export function usePaymentFormViewModel({
     if (isEditing || !plan) return;
     createForm.setValue("creditHours", Number(plan.creditHours ?? 1));
     createForm.setValue("amount", Number(plan.priceAmount ?? 0));
-    if (plan.currency) {
-      createForm.setValue("currency", plan.currency as CurrencyCode);
-    }
+    const rawCurrency = plan.currency ?? null;
+    const mappedCurrency =
+      rawCurrency != null ? Object.values(CurrencyCode).find(member => String(member) === rawCurrency) : undefined;
+    createForm.setValue("currency", mappedCurrency ?? CurrencyCode.Egp);
   }, [isEditing, planData, createForm]);
 
   const [recordPaymentMutation, { loading: creating }] = useMutation(recordAccountingPaymentMutationDocument);
@@ -137,7 +142,9 @@ export function usePaymentFormViewModel({
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!showSuccess) return;
+    if (!showSuccess) {
+      return undefined;
+    }
     const timer = setTimeout(() => setShowSuccess(false), SUCCESS_AUTO_DISMISS_MS);
     return () => clearTimeout(timer);
   }, [showSuccess]);
@@ -159,7 +166,9 @@ export function usePaymentFormViewModel({
               amount: data.amount,
               currency: data.currency,
               paymentGateway: data.paymentGateway,
-              paymentDate: data.paymentDate,
+              // GraphQL DateTime scalar requires a full ISO-8601 timestamp;
+              // the date input yields a bare YYYY-MM-DD string.
+              paymentDate: new Date(`${data.paymentDate}T12:00:00`).toISOString(),
               isPaidStatusOn: data.isPaidStatusOn,
               paymentNote: data.paymentNote || null,
             },

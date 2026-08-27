@@ -15,6 +15,7 @@ export namespace PackagePlanRepository {
       creditHours: string;
       priceAmount: string;
       currency: Types.PackagePlanSelectType["currency"];
+      validityMonths?: number | null;
       active?: boolean;
       sortOrder?: number;
       metadata?: Record<string, unknown> | null;
@@ -30,6 +31,7 @@ export namespace PackagePlanRepository {
         creditHours: input.creditHours,
         priceAmount: input.priceAmount,
         currency: input.currency,
+        validityMonths: input.validityMonths ?? null,
         active: input.active ?? true,
         sortOrder: input.sortOrder ?? 0,
         metadata: input.metadata ?? null,
@@ -93,6 +95,7 @@ export namespace PackagePlanRepository {
       creditHours?: string;
       priceAmount?: string;
       currency?: Types.PackagePlanSelectType["currency"];
+      validityMonths?: number | null;
       active?: boolean;
       sortOrder?: number;
       metadata?: Record<string, unknown> | null;
@@ -107,7 +110,13 @@ export namespace PackagePlanRepository {
     }
     const [row] = await tx
       .update(packagePlans)
-      .set({ ...patch, updatedAt: new Date() })
+      // Self-increment drives the optimistic-lock contract: every guarded
+      // write must invalidate stale expectedVersion snapshots.
+      .set({
+        ...patch,
+        version: (current.version ?? 0) + 1,
+        updatedAt: new Date(),
+      })
       .where(eq(packagePlans.id, id))
       .returning();
     return row ?? null;

@@ -305,7 +305,7 @@ function BrandColorPreviewCard({
           >
             {primary}
           </Typography>
-          <Typography sx={{ typography: "caption", color: "var(--mui-palette-text-disabled)", fontSize: 10 }}>
+          <Typography sx={{ typography: "labelSm", color: "var(--mui-palette-text-disabled)" }}>
             {primaryLabel}
           </Typography>
         </Box>
@@ -325,7 +325,7 @@ function BrandColorPreviewCard({
           >
             {secondary}
           </Typography>
-          <Typography sx={{ typography: "caption", color: "var(--mui-palette-text-disabled)", fontSize: 10 }}>
+          <Typography sx={{ typography: "labelSm", color: "var(--mui-palette-text-disabled)" }}>
             {secondaryLabel}
           </Typography>
         </Box>

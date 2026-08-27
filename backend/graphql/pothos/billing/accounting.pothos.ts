@@ -1,37 +1,74 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { mapQuotaErrorToGraphQLError } from "@/backend/graphql/mutation/billing/quota.mutation";
 import {
   accountingPaymentFields,
   packagePlanFields,
 } from "@/backend/graphql/pothos/billing/__shared__/accountingFieldHelpers";
-import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { PaymentGatewayPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  AccountingPaymentHistoryKindPothosObject,
+  CurrencyCodePothosObject,
+  PaymentGatewayPothosObject,
+} from "@/backend/graphql/pothos/shared/enum.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { AccountingPaymentService } from "@/backend/services";
 import type {
   AccountingPaymentBalanceReturnType,
   AccountingPaymentFilter,
+  AccountingPaymentHistoryEventReturnType,
   AccountingPaymentReturnType,
   AccountingPaymentSubmitInput,
   AccountingPaymentTogglePaidInput,
   AccountingPaymentUpdateInput,
-  PackagePlanReturnType,
+  PackagePlanSelectType,
   PackagePlanSubmitInput,
   PackagePlanUpdateInput,
 } from "@/backend/types";
 
 // ─── OBJECT TYPES (queries/mutations live in query|mutation/billing) ──────────
 
-export const PackagePlanRef = gqlSchemaBuilder.objectRef<PackagePlanReturnType>("PackagePlan");
+export const PackagePlanRef = gqlSchemaBuilder.objectRef<PackagePlanSelectType>("PackagePlan");
 
 export const PackagePlanPothosObject = PackagePlanRef.implement({
   description: "A predefined credit-hour package plan in the accounting catalog",
   fields: t => packagePlanFields(t),
 });
 
-export const AccountingPaymentRef =
-  gqlSchemaBuilder.objectRef<AccountingPaymentReturnType>("AccountingPayment");
+export const AccountingPaymentRef = gqlSchemaBuilder.objectRef<AccountingPaymentReturnType>("AccountingPayment");
+
+export const AccountingPaymentHistoryEventRef = gqlSchemaBuilder.objectRef<AccountingPaymentHistoryEventReturnType>(
+  "AccountingPaymentHistoryEvent"
+);
+
+export const AccountingPaymentHistoryEventPothosObject = AccountingPaymentHistoryEventRef.implement({
+  description: "A derived timeline event for an accounting payment",
+  fields: t => ({
+    id: t.exposeString("id"),
+    kind: t.field({ type: AccountingPaymentHistoryKindPothosObject, resolve: parent => parent.kind }),
+    occurredAt: t.expose("occurredAt", { type: "DateTime" }),
+    hoursDelta: t.exposeString("hoursDelta", { nullable: true }),
+    notes: t.exposeString("notes", { nullable: true }),
+  }),
+});
 
 export const AccountingPaymentPothosObject = AccountingPaymentRef.implement({
   description: "An accounting payment that credits credit-hours to a student",
-  fields: t => accountingPaymentFields(t),
+  fields: t => ({
+    ...accountingPaymentFields(t),
+    transactionId: t.exposeString("transactionId", { nullable: true }),
+    history: t.field({
+      type: [AccountingPaymentHistoryEventPothosObject],
+      description: "Derived timeline events (creation, ledger effects, paid state)",
+      resolve: async (parent, _args, ctx) => {
+        const actorUserId = await requireAuth(ctx);
+        const tErrors = ctx.t().errorsTranslations;
+        try {
+          return await AccountingPaymentService.getHistory(actorUserId, parent.id, tErrors);
+        } catch (error) {
+          throw mapQuotaErrorToGraphQLError(error);
+        }
+      },
+    }),
+  }),
 });
 
 export const AccountingPaymentBalanceRef =
@@ -62,27 +99,26 @@ export const AccountingPaymentFilterInput = gqlSchemaBuilder
     }),
   });
 
-export const PackagePlanInput = gqlSchemaBuilder
-  .inputRef<PackagePlanSubmitInput>("PackagePlanInput")
-  .implement({
-    description: "Input for creating a package plan",
-    fields: t => ({
-      codename: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
-      displayName: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
-      description: t.string({ required: false }),
-      creditHours: t.float({
-        required: true,
-        directives: { constraint: { min: 0.01, max: 100000 } },
-      }),
-      priceAmount: t.float({
-        required: true,
-        directives: { constraint: { min: 0.01, max: 99999999 } },
-      }),
-      currency: t.field({ type: CurrencyCodePothosObject, required: true }),
-      active: t.boolean({ required: false }),
-      sortOrder: t.int({ required: false }),
+export const PackagePlanInput = gqlSchemaBuilder.inputRef<PackagePlanSubmitInput>("PackagePlanInput").implement({
+  description: "Input for creating a package plan",
+  fields: t => ({
+    codename: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
+    displayName: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+    description: t.string({ required: false }),
+    creditHours: t.float({
+      required: true,
+      directives: { constraint: { min: 0.01, max: 100000 } },
     }),
-  });
+    priceAmount: t.float({
+      required: true,
+      directives: { constraint: { min: 0.01, max: 99999999 } },
+    }),
+    currency: t.field({ type: CurrencyCodePothosObject, required: true }),
+    validityMonths: t.int({ required: false }),
+    active: t.boolean({ required: false }),
+    sortOrder: t.int({ required: false }),
+  }),
+});
 
 export const PackagePlanUpdateInputType = gqlSchemaBuilder
   .inputRef<PackagePlanUpdateInput>("PackagePlanUpdateInput")
@@ -95,6 +131,7 @@ export const PackagePlanUpdateInputType = gqlSchemaBuilder
       creditHours: t.float({ required: false }),
       priceAmount: t.float({ required: false }),
       currency: t.field({ type: CurrencyCodePothosObject, required: false }),
+      validityMonths: t.int({ required: false }),
       active: t.boolean({ required: false }),
       sortOrder: t.int({ required: false }),
       version: t.int({ required: false }),

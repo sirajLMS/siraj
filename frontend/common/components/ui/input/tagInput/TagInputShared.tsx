@@ -68,16 +68,16 @@ const baseLabelSx: SxProps<Theme> = (theme: Theme) => ({
   color: theme.palette.text.primary,
 });
 
-const baseInputSx: SxProps<Theme> = {
+const baseInputSx: SxProps<Theme> = (theme: Theme) => ({
   flex: 1,
-  fontSize: 16,
+  fontSize: theme.typography.bodyLg.fontSize,
   padding: 0.5,
   minWidth: "120px",
   height: "32px",
-};
+});
 
 const baseChipEditInputSx: SxProps<Theme> = (theme: Theme) => ({
-  fontSize: 14,
+  fontSize: theme.typography.bodyMd.fontSize,
   padding: theme.spacing(0.25, 0.5),
   margin: theme.spacing(0.5),
   border: `1px solid ${theme.palette.primary.main}`,

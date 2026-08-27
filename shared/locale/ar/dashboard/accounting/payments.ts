@@ -68,7 +68,7 @@ export const dashboardAccountingPaymentsAr: PaymentsLabels = {
   currencyWarning: currency =>
     `تنبيه: هذه الدفعة بعملة ${currency} وهي تختلف عن عملة آخر دفعة للطالب. الساعات من العملات المختلفة تشترك في رصيد واحد.`,
   empty: "لا توجد مدفوعات مطابقة للتصفية الحالية.",
-    loadError: "فشل تحميل المدفوعات. حاول مرة أخرى.",
+  loadError: "فشل تحميل المدفوعات. حاول مرة أخرى.",
   auditUpdatedAt: "آخر تحديث",
   saveSuccess: "تم حفظ الدفعة بنجاح.",
   saveError: "فشل حفظ الدفعة. راجع البيانات وحاول مرة أخرى.",
@@ -83,5 +83,18 @@ export const dashboardAccountingPaymentsAr: PaymentsLabels = {
     togglePaidAction: "تبديل حالة السداد",
     markPaid: "تعليم كمدفوعة",
     markUnpaid: "تعليم كغير مدفوعة",
+    transactionRef: "رقم المرجع",
+    documentPreview: "معاينة المستند",
+    documentEmpty: "لا يوجد مستند إيصال مرفق بهذه الدفعة.",
+    downloadPdf: "تنزيل PDF",
+    historyTitle: "السجل",
+    historyEmpty: "لا توجد أحداث بعد.",
+    hoursCredited: "الساعات المُضافة",
+  },
+  historyKinds: {
+    PAYMENT_RECORDED: "تم تسجيل الدفعة",
+    HOURS_CREDITED: "تمت إضافة ساعات لرصيد الطالب",
+    HOURS_ADJUSTED: "تم تعديل الساعات",
+    MARKED_PAID: "تم تعليم الدفعة كمدفوعة",
   },
 };

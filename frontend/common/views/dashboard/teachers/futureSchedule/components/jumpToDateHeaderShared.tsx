@@ -97,10 +97,7 @@ function LeaveQuotaStat({
         minWidth: 140,
       })}
     >
-      <Typography
-        variant="labelUppercase"
-        sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700, fontSize: 10 })}
-      >
+      <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700 })}>
         {labels.leaveQuotaDesc(leaveQuotaTotal)}
       </Typography>
       <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
@@ -122,10 +119,7 @@ function TotalClassesStat({ totalClasses, labels }: Readonly<Pick<JumpToDateHead
         minWidth: 140,
       })}
     >
-      <Typography
-        variant="labelUppercase"
-        sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700, fontSize: 10 })}
-      >
+      <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontWeight: 700 })}>
         {labels.totalClassesDesc(totalClasses)}
       </Typography>
       <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.header, fontWeight: 700 })}>

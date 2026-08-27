@@ -126,4 +126,6 @@ export interface DashboardNavigationLabels {
   readonly toggleGroupAriaLabel: (label: string) => string;
   readonly accountingPayments: string;
   readonly accountingPackages: string;
+  readonly accountingPaymentsNew: string;
+  readonly accountingPackagesNew: string;
 }

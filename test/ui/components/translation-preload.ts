@@ -12,10 +12,18 @@
  */
 import { locales } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import {
+  DashboardAccountingPackagePlans,
+  DashboardAccountingPayments,
+  DashboardAccountingStudentCreditHours,
+} from "@/shared/locale/namespaces/dashboard/accounting";
 import type { NamespaceHandle } from "@/shared/locale/namespaces/define-namespace";
 import { Translation } from "@/shared/locale/namespaces/translation";
 
 const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
+  DashboardAccountingPackagePlans,
+  DashboardAccountingPayments,
+  DashboardAccountingStudentCreditHours,
   Translation.Common,
   Translation.Whatsapp,
   Translation.Dashboard.Cron,

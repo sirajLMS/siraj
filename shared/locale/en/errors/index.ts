@@ -207,8 +207,11 @@ export const errorsEn: ErrorsLabels = {
       studentId,
       remaining,
       required,
-    }: { studentId: string; remaining: number; required: number }) =>
-      `Insufficient credit hours for student ${studentId}. Remaining: ${remaining}, required: ${required}`,
+    }: {
+      studentId: string;
+      remaining: number;
+      required: number;
+    }) => `Insufficient credit hours for student ${studentId}. Remaining: ${remaining}, required: ${required}`,
   },
   package: {
     codenameAlreadyExists: (codename: string) => `A package plan with codename "${codename}" already exists.`,

@@ -15,6 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
@@ -66,6 +67,11 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
     onDismissSuccess,
   } = props;
   const router = useRouter();
+
+  // Keep the resolved student option (id + display name) in local state so the
+  // autocomplete shows the human-readable name instead of the raw id after
+  // re-renders triggered by other form fields (e.g. package auto-fill).
+  const [selectedStudent, setSelectedStudent] = useState<PersonOption | null>(null);
 
   if (isEditing && loadingExisting) {
     return (
@@ -119,7 +125,7 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
                   <Select<PaymentGateway>
                     value={field.value}
                     label={t.form.paymentGateway}
-                    onChange={e => field.onChange(e.target.value as PaymentGateway)}
+                    onChange={e => field.onChange(e.target.value)}
                   >
                     {GATEWAY_OPTIONS.map(gw => (
                       <MenuItem key={gw} value={gw}>
@@ -170,8 +176,11 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
               control={control}
               render={({ field }) => (
                 <StudentAutocompleteMobile
-                  value={field.value ? ({ id: field.value, name: field.value } as PersonOption) : null}
-                  onChange={option => field.onChange(option?.id ?? "")}
+                  value={selectedStudent}
+                  onChange={option => {
+                    setSelectedStudent(option ?? null);
+                    field.onChange(option?.id ?? "");
+                  }}
                   label={t.form.student}
                   placeholder={t.form.studentPlaceholder}
                   error={Boolean(errors.studentId)}
@@ -242,7 +251,7 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
                     <Select<CurrencyCode>
                       value={field.value}
                       label={t.form.currency}
-                      onChange={e => field.onChange(e.target.value as CurrencyCode)}
+                      onChange={e => field.onChange(e.target.value)}
                     >
                       {CURRENCY_OPTIONS.map(code => (
                         <MenuItem key={code} value={code}>
@@ -262,7 +271,7 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
                     <Select<PaymentGateway>
                       value={field.value}
                       label={t.form.paymentGateway}
-                      onChange={e => field.onChange(e.target.value as PaymentGateway)}
+                      onChange={e => field.onChange(e.target.value)}
                     >
                       {GATEWAY_OPTIONS.map(gw => (
                         <MenuItem key={gw} value={gw}>

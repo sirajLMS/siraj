@@ -169,6 +169,10 @@ applyTo: "backend/**/*.ts"
 ### Code Style
 
 - No nested ternary operators - extract into if/else or separate functions (SonarJS code smell)
+- **Clean Comments & JSDoc Standards (CRITICAL)**:
+  - NEVER write internal planning or tracking tags in code comments or JSDoc (e.g. no `REQ-xx`, `Task x.x`, `Phase x`, or citing `.ai/plans/`).
+  - Code comments and JSDoc MUST describe the *what*, *why*, and *domain behavior* of the code in clean, production-grade technical terms.
+  - Avoid redundant comments that simply restate function or variable names.
 
 ### Cron Service Conventions
 

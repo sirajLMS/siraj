@@ -2,6 +2,9 @@
 
 import type { AuthLabels } from "@/shared/locale/types/auth";
 import type { CommonLabels } from "@/shared/locale/types/common";
+import type { PackagePlansLabels as AccountingPackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans.ts";
+import type { PaymentsLabels as AccountingPaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments.ts";
+import type { StudentCreditHoursLabels as AccountingStudentCreditHoursLabels } from "@/shared/locale/types/dashboard/accounting/student-credit-hours.ts";
 // ─── dashboard/leaf interfaces (collected into DashboardTranslations) ────
 import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration.ts";
@@ -12,9 +15,6 @@ import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual.ts";
 import type { PaymentComponentLabels } from "@/shared/locale/types/dashboard/billing/payment.ts";
 import type { QuotaLabels as BillingQuotaLabels } from "@/shared/locale/types/dashboard/billing/quota.ts";
-import type { PackagePlansLabels as AccountingPackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans.ts";
-import type { PaymentsLabels as AccountingPaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments.ts";
-import type { StudentCreditHoursLabels as AccountingStudentCreditHoursLabels } from "@/shared/locale/types/dashboard/accounting/student-credit-hours.ts";
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies.ts";
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/audit.ts";
 import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass.ts";

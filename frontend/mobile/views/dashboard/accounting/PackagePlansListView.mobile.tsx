@@ -23,7 +23,7 @@ export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel
 
       <Stack spacing={2} sx={{ pb: 10 }}>
         {error && rows.length === 0 ? (
-          <Typography variant="bodyMd" sx={{ px: 2, color: "error.main" }}>
+          <Typography variant="bodyMd" sx={theme => ({ px: 2, color: theme.palette.error.main })}>
             {t.loadError}
           </Typography>
         ) : null}
@@ -71,7 +71,10 @@ export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel
                     </Typography>
                   </Stack>
                   <Stack direction="row" spacing={1.5} sx={{ mt: 1, justifyContent: "space-between" }}>
-                    <Typography variant="labelSm" sx={{ fontFamily: "monospace", color: "text.secondary" }}>
+                    <Typography
+                      variant="labelSm"
+                      sx={theme => ({ fontFamily: "monospace", color: theme.palette.text.secondary })}
+                    >
                       {row.codename}
                     </Typography>
                     <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>

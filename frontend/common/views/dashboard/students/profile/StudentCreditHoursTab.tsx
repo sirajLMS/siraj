@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { type ReactNode, useMemo } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
+import { AppPermission, type StudentCreditTransactionsQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { studentCreditHourBalanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting";
 import { studentCreditTransactionsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -35,6 +35,16 @@ const RECENT_TRANSACTIONS = 10;
 const LOW_BALANCE_RATIO = 0.25;
 
 type CreditHoursAudience = "admin" | "teacher" | "parent" | null;
+
+type HourTransaction = NonNullable<StudentCreditTransactionsQuery["studentCreditTransactions"]>[number];
+
+/** Formats an hour delta as "+1.50 h" / "−0.50 h" / em-dash when unknown. */
+function formatHourChange(hours: number | null): string {
+  if (hours == null) {
+    return "—";
+  }
+  return `${hours > 0 ? "+" : "−"}${Math.abs(hours).toFixed(2)} h`;
+}
 
 /**
  * Client-side mirror of the server helper `resolveStudentsPageAudience`
@@ -132,7 +142,7 @@ export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: strin
 
       {isLowBalance ? (
         <Alert severity="warning" icon={<AccessTimeFilledOutlined fontSize="inherit" />}>
-          {t.lowBalanceAlert(remaining.toFixed(2), `${(total * LOW_BALANCE_RATIO).toFixed(2)}`)}
+          {t.lowBalanceAlert(remaining.toFixed(2), (total * LOW_BALANCE_RATIO).toFixed(2))}
         </Alert>
       ) : null}
 
@@ -146,7 +156,7 @@ export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: strin
         />
         <BalanceCard
           icon={<TrendingDownOutlined />}
-          label={t.remainingLabel}
+          label={t.consumedLabel}
           value={t.hoursUnit(consumed.toFixed(2))}
           highlight={false}
         />
@@ -161,7 +171,7 @@ export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: strin
 
       {total > 0 && remainingRatio > LOW_BALANCE_RATIO ? (
         <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t.nextClassConsumes(t.hoursUnit("1.00"))}
+          {t.nextClassConsumes("1.00")}
         </Typography>
       ) : null}
 
@@ -171,88 +181,110 @@ export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: strin
           {t.recentPurchasesTitle}
         </Typography>
 
-        {txLoading && transactions.length === 0 ? (
-          <LinearProgress sx={{ my: 2 }} />
-        ) : transactions.length === 0 ? (
-          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 2 })}>
-            {t.recentPurchasesEmpty}
-          </Typography>
-        ) : txError ? (
-          <Alert severity="error">{t.loadError}</Alert>
-        ) : (
-          <TableContainer
-            sx={theme => ({
-              borderRadius: 2,
-              border: 1,
-              borderColor: theme.palette.outlineVariant,
-              maxHeight: 420,
-            })}
-          >
-            <Table size="small" stickyHeader aria-label={t.recentPurchasesTitle}>
-              <TableHead>
-                <TableRow>
-                  <TableCell>{t.columns.date}</TableCell>
-                  <TableCell align="right">{t.columns.change}</TableCell>
-                  <TableCell>{t.columns.reason}</TableCell>
-                  <TableCell>{t.columns.note}</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {transactions.map(tx => {
-                  const hours = tx.changeAmountHours != null ? Number(tx.changeAmountHours) : null;
-                  const isPositive = hours != null && hours > 0;
-                  return (
-                    <TableRow key={tx.id} hover>
-                      <TableCell>
-                        {tx.createdAt
-                          ? new Date(tx.createdAt).toLocaleDateString("en-GB", {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            })
-                          : "—"}
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography
-                          variant="labelSm"
-                          sx={{ fontWeight: 600, color: isPositive ? "success.main" : "error.main" }}
-                        >
-                          {hours == null ? "—" : `${isPositive ? "+" : "−"}${Math.abs(hours).toFixed(2)} h`}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          size="small"
-                          variant="outlined"
-                          label={reasonLabel(t, tx.reason)}
-                          color={isPositive ? "success" : "default"}
-                        />
-                      </TableCell>
-                      <TableCell sx={{ maxWidth: 260 }}>
-                        <Box
-                          component="span"
-                          sx={theme => ({
-                            color: theme.palette.onSurfaceVariant,
-                            display: "inline-block",
-                            maxWidth: 260,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            verticalAlign: "bottom",
-                          })}
-                        >
-                          {tx.notes ?? "—"}
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+        <RecentHourTransactions t={t} rows={transactions} loading={txLoading} hasError={Boolean(txError)} />
       </Box>
     </Stack>
+  );
+}
+
+function RecentHourTransactions({
+  t,
+  rows,
+  loading,
+  hasError,
+}: Readonly<{
+  t: StudentCreditHoursLabels;
+  rows: HourTransaction[];
+  loading: boolean;
+  hasError: boolean;
+}>) {
+  if (hasError) {
+    return <Alert severity="error">{t.loadError}</Alert>;
+  }
+  if (loading && rows.length === 0) {
+    return <LinearProgress sx={{ my: 2 }} />;
+  }
+  if (rows.length === 0) {
+    return (
+      <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 2 })}>
+        {t.recentPurchasesEmpty}
+      </Typography>
+    );
+  }
+  return (
+    <TableContainer
+      sx={theme => ({
+        borderRadius: 2,
+        border: 1,
+        borderColor: theme.palette.outlineVariant,
+        maxHeight: 420,
+      })}
+    >
+      <Table size="small" stickyHeader aria-label={t.recentPurchasesTitle}>
+        <TableHead>
+          <TableRow>
+            <TableCell>{t.columns.date}</TableCell>
+            <TableCell align="right">{t.columns.change}</TableCell>
+            <TableCell>{t.columns.reason}</TableCell>
+            <TableCell>{t.columns.note}</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.map(tx => {
+            const hours = tx.changeAmountHours != null ? Number(tx.changeAmountHours) : null;
+            const isPositive = hours != null && hours > 0;
+            return (
+              <TableRow key={tx.id} hover>
+                <TableCell>
+                  {tx.createdAt
+                    ? new Date(tx.createdAt).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "—"}
+                </TableCell>
+                <TableCell align="right">
+                  <Typography
+                    variant="labelSm"
+                    sx={theme => ({
+                      fontWeight: 600,
+                      color: isPositive ? theme.palette.success.main : theme.palette.error.main,
+                    })}
+                  >
+                    {formatHourChange(hours)}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={reasonLabel(t, tx.reason)}
+                    color={isPositive ? "success" : "default"}
+                  />
+                </TableCell>
+                <TableCell sx={{ maxWidth: 260 }}>
+                  <Box
+                    component="span"
+                    sx={theme => ({
+                      color: theme.palette.onSurfaceVariant,
+                      display: "inline-block",
+                      maxWidth: 260,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      verticalAlign: "bottom",
+                    })}
+                  >
+                    {tx.notes ?? "—"}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 

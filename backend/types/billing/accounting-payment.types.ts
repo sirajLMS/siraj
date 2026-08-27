@@ -1,5 +1,5 @@
 import type { payments } from "@/backend/db/schema";
-import type { PaymentGateway } from "@/backend/enum";
+import type { AccountingPaymentHistoryKind, PaymentGateway } from "@/backend/enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
@@ -78,6 +78,7 @@ export interface AccountingPaymentReturnType {
   creditHours: string | null;
   isPaidStatusOn: boolean;
   paymentNote: string | null;
+  transactionId: string | null;
   studentId: string | null;
   studentName: string | null;
   parentId: string | null;
@@ -89,4 +90,16 @@ export interface AccountingPaymentBalanceReturnType {
   studentId: string;
   creditHoursTotal: string;
   creditHoursRemaining: string;
+}
+
+/** Derived (non-persisted) history event for the payment detail timeline. */
+export interface AccountingPaymentHistoryEventReturnType {
+  /** Synthetic deterministic id (event kind + occurrence timestamp). */
+  id: string;
+  kind: AccountingPaymentHistoryKind;
+  occurredAt: Date;
+  /** Hour delta for HOURS_CREDITED / HOURS_ADJUSTED events. */
+  hoursDelta: string | null;
+  /** Free-text note attached to the ledger row (may be null). */
+  notes: string | null;
 }

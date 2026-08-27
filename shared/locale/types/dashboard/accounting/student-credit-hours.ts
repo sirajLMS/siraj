@@ -6,6 +6,7 @@ export interface StudentCreditHoursLabels {
   readonly tabTitle: string;
   readonly balanceCardTitle: string;
   readonly remainingLabel: string;
+  readonly consumedLabel: string;
   readonly totalLabel: string;
   readonly hoursUnit: (hours: string) => string;
   readonly recentPurchasesTitle: string;

@@ -60,11 +60,10 @@ export function MiniCalendarShared({
         {weekdayLabels.map(day => (
           <Grid size={{ xs: 1 }} key={day}>
             <Typography
-              variant="labelMd"
+              variant="labelSm"
               sx={theme => ({
                 fontWeight: 700,
                 color: theme.palette.onSurfaceVariant,
-                fontSize: 9,
               })}
             >
               {day}
@@ -171,9 +170,8 @@ function MiniCalendarDayCell({
         })}
       >
         <Typography
-          variant="labelMd"
+          variant="labelSm"
           sx={theme => ({
-            fontSize: 10,
             position: "relative",
             zIndex: 1,
             ...(date.selected && {

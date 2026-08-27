@@ -13,8 +13,8 @@ import {
   uuidDefaultColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-import { userPaymentMethods } from "@/backend/db/schema/billing/user-payment-methods";
 import { packagePlans } from "@/backend/db/schema/billing/package-plans";
+import { userPaymentMethods } from "@/backend/db/schema/billing/user-payment-methods";
 import {
   currencyCodeEnum,
   invoiceStatusEnum,
@@ -25,8 +25,8 @@ import {
 import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
-import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { PaymentGateway } from "@/backend/enum/billing/package-plan.enum";
+import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { PaymentMethodTransactionSnapshot, PaymentProofTransactionSnapshot } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
@@ -109,10 +109,7 @@ export const payments = createTable(
     packagePlanId: uuidDefaultColumn("package_plan_id").references(() => packagePlans.id, {
       onDelete: "set null",
     }),
-    paymentGateway: paymentGatewayEnum("payment_gateway")
-      .notNull()
-      .default("NONE")
-      .$type<PaymentGateway>(),
+    paymentGateway: paymentGatewayEnum("payment_gateway").notNull().default("NONE").$type<PaymentGateway>(),
     creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }),
     isPaidStatusOn: booleanColumn("is_paid_status_on").notNull().default(false),
     paymentNote: textColumn("payment_note"),

@@ -56,6 +56,8 @@ export enum NotificationEventType {
   ON_DEMAND_TEACHER_DAILY_DIGEST = "ON_DEMAND_TEACHER_DAILY_DIGEST",
   PASSWORD_RESET_BY_ADMIN = "PASSWORD_RESET_BY_ADMIN",
   USER_STATUS_CHANGED = "USER_STATUS_CHANGED",
+  ACCOUNTING_PAYMENT_RECORDED = "ACCOUNTING_PAYMENT_RECORDED",
+  ACCOUNTING_LOW_HOURS = "ACCOUNTING_LOW_HOURS",
 }
 
 export const NOTIFICATION_EVENT_CATEGORY: Readonly<Record<NotificationEventType, NotificationEventCategory>> =
@@ -87,6 +89,8 @@ export const NOTIFICATION_EVENT_CATEGORY: Readonly<Record<NotificationEventType,
     [NotificationEventType.QUOTA_EXPIRING_SOON]: NotificationEventCategory.REMINDER,
     [NotificationEventType.QUOTA_EXPIRED]: NotificationEventCategory.INFO,
     [NotificationEventType.QUOTA_LOW_BALANCE]: NotificationEventCategory.REMINDER,
+    [NotificationEventType.ACCOUNTING_PAYMENT_RECORDED]: NotificationEventCategory.INFO,
+    [NotificationEventType.ACCOUNTING_LOW_HOURS]: NotificationEventCategory.REMINDER,
     [NotificationEventType.ON_DEMAND_INSTANCE_PENDING_CREDIT]: NotificationEventCategory.URGENT,
     [NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T3]: NotificationEventCategory.REMINDER,
     [NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T1]: NotificationEventCategory.URGENT,

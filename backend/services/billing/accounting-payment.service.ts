@@ -8,13 +8,15 @@ import {
 } from "@/backend/db/repo/billing";
 import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { StudentRepository } from "@/backend/db/repo/students";
-import { AppPermission } from "@/backend/enum";
+import { AccountingPaymentHistoryKind, AppPermission, CreditReason } from "@/backend/enum";
 import { ConflictError, logger, NotFoundError, ValidationError } from "@/backend/lib";
+import { AccountingNotificationService } from "@/backend/services/billing/accounting-notification.service";
 import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type {
   AccountingPaymentBalanceReturnType,
   AccountingPaymentFilter,
+  AccountingPaymentHistoryEventReturnType,
   AccountingPaymentReturnType,
   AccountingPaymentSubmitInput,
   AccountingPaymentTogglePaidInput,
@@ -37,6 +39,9 @@ function hasErrorCode(error: unknown): error is { code: string } {
 const isUniqueViolation = (error: unknown): boolean => hasErrorCode(error) && error.code === "23505";
 const isoDateOnly = (date: Date): string => date.toISOString().slice(0, 10);
 
+/** String view of the purchase reason — avoids enum-vs-string comparison lint. */
+const PURCHASE_REASON: string = CreditReason.PURCHASE;
+
 /** Deterministic invoice idempotency key (content-addressed, replay-safe). */
 function deriveInvoiceIdempotencyKey(input: AccountingPaymentSubmitInput): string {
   const content = JSON.stringify([
@@ -58,7 +63,7 @@ export namespace AccountingPaymentService {
   ) {
     if (!planId) return null;
     const plan = await PackagePlanRepository.findById(planId, tx);
-    if (!plan || !plan.active || plan.deletedAt !== null) {
+    if (!plan?.active || plan.deletedAt !== null) {
       throw new NotFoundError("PACKAGE_PLAN", tErrors.package.planArchived(planId ?? ""));
     }
     return plan;
@@ -71,8 +76,7 @@ export namespace AccountingPaymentService {
   ): Promise<AccountingPaymentReturnType> {
     await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
 
-    if (!Number.isFinite(input.amount) || input.amount <= 0)
-      throw new ValidationError(tErrors.package.invalidInput);
+    if (!Number.isFinite(input.amount) || input.amount <= 0) throw new ValidationError(tErrors.package.invalidInput);
     if (!Number.isFinite(input.creditHours) || input.creditHours <= 0)
       throw new ValidationError(tErrors.package.invalidInput);
 
@@ -110,7 +114,14 @@ export namespace AccountingPaymentService {
           if (joined) return joined;
         }
 
-        const invoice = await AccountingPaymentSupport.createInvoice(tx, {
+        // Gateway-varied submissions share one content-derived invoice
+        // (deriveInvoiceIdempotencyKey excludes the gateway): reuse it instead
+        // of racing into the unique index; fresh content creates its own.
+        let invoice = await AccountingPaymentSupport.findInvoiceByIdempotencyKey(
+          deriveInvoiceIdempotencyKey(input),
+          tx
+        );
+        invoice ??= await AccountingPaymentSupport.createInvoice(tx, {
           parentId,
           studentId: input.studentId,
           issueDate: isoDateOnly(input.paymentDate),
@@ -162,6 +173,15 @@ export namespace AccountingPaymentService {
         return joined;
       });
 
+      // Fire-and-forget (non-blocking) notification after a committed purchase.
+      void AccountingNotificationService.notifyPaymentRecorded({
+        studentId: input.studentId,
+        packageName: created.packageName ?? input.packagePlanId ?? "",
+        creditHours: String(input.creditHours),
+        amount: String(input.amount),
+        currency: input.currency,
+      });
+
       return created;
     } catch (error) {
       // EC-1 concurrent duplicate: unique-violation → return the winner's row.
@@ -200,7 +220,7 @@ export namespace AccountingPaymentService {
       const invoice = await AccountingPaymentSupport.findInvoiceById(current.invoiceId, tx);
       if (!invoice) throw new NotFoundError("PAYMENT", tErrors.billing.invoiceNotFound(current.invoiceId));
 
-            // `!= null` (not `!== undefined`): GraphQL codegen requires the KEY in
+      // `!= null` (not `!== undefined`): GraphQL codegen requires the KEY in
       // Exact variable objects, so clients pass explicit null to SKIP the lock.
       if (input.expectedInvoiceVersion != null && invoice.version !== input.expectedInvoiceVersion) {
         throw new ConflictError(
@@ -212,10 +232,7 @@ export namespace AccountingPaymentService {
         );
       }
 
-      const setting = await SystemSettingsService.getSettingByKey(
-        "accounting_paid_toggle_auto_flips_invoice",
-        tx
-      );
+      const setting = await SystemSettingsService.getSettingByKey("accounting_paid_toggle_auto_flips_invoice", tx);
       const autoFlip = setting ? setting.value !== "false" : true;
 
       await AccountingPaymentRepository.update(tx, current.id, { isPaidStatusOn: input.isPaidStatusOn });
@@ -272,7 +289,14 @@ export namespace AccountingPaymentService {
     }
 
     const oldHours = current.creditHours === null ? 0 : Number(current.creditHours);
-    const hoursChanged = input.creditHours !== undefined && Math.abs(input.creditHours - oldHours) > 1e-9;
+    const requestedHours = typeof input.creditHours === "number" ? input.creditHours : null;
+    const hoursChanged = requestedHours !== null && Math.abs(requestedHours - oldHours) > 1e-9;
+    if (!current.studentId) {
+      // Accounting payments always reference a student; a missing id means the
+      // row was tampered with outside supported flows.
+      throw new NotFoundError("PAYMENT", tErrors.billing.invoiceNotFound(input.id));
+    }
+    const studentId: string = current.studentId;
 
     if (!hoursChanged) {
       // Gateway/note-only edits: single-statement update, no ledger effects.
@@ -287,26 +311,22 @@ export namespace AccountingPaymentService {
       return joined;
     }
 
-    const newHours = input.creditHours as number;
+    const newHours = requestedHours ?? oldHours;
     const updated = await db.transaction(async tx => {
       // EC-15/EC-16: serialized per student alongside recordPayment.
       await acquireAdvisoryLock(tx, `student_${current.studentId ?? ""}`);
 
       const delta = Number((newHours - oldHours).toFixed(2));
       if (delta > 0) {
-        await StudentRepository.addCreditHours(current.studentId as string, tErrors, delta, undefined, tx);
+        await StudentRepository.addCreditHours(studentId, tErrors, delta, undefined, tx);
       } else if (delta < 0) {
-        await StudentRepository.deductCreditHours(
-          current.studentId as string,
-          tErrors,
-          Math.abs(delta),
-          undefined,
-          tx
-        );
+        await StudentRepository.deductCreditHours(studentId, tErrors, Math.abs(delta), undefined, tx);
+        // Low-balance probe after a successful deduction (fire-and-forget).
+        void AccountingNotificationService.maybeNotifyLowHours(studentId);
       }
 
       await CreditRepository.createHourAdjustment(tx, {
-        studentId: current.studentId as string,
+        studentId,
         delta,
         sourcePaymentId: current.id,
         creditedByUserId: actorUserId,
@@ -381,5 +401,58 @@ export namespace AccountingPaymentService {
   ): Promise<AccountingPaymentBalanceReturnType> {
     await assertAssociatedOrManage(actorUserId, studentId, tErrors, AppPermission.ACCOUNTING_PAYMENTS_VIEW);
     return await StudentRepository.getCreditHourBalance(studentId);
+  }
+
+  /**
+   * Derived timeline for the payment detail page (v1 has no persisted event
+   * log): payment creation, hour-ledger effects, and the invoice paid state.
+   * Chronological ascending, so the view renders newest-first.
+   */
+  export async function getHistory(
+    actorUserId: string,
+    paymentId: string,
+    tErrors: ErrorsLabels
+  ): Promise<AccountingPaymentHistoryEventReturnType[]> {
+    const payment = await getById(actorUserId, paymentId, tErrors);
+
+    const events: AccountingPaymentHistoryEventReturnType[] = [
+      {
+        id: `recorded-${payment.id}`,
+        kind: AccountingPaymentHistoryKind.PAYMENT_RECORDED,
+        occurredAt: payment.createdAt,
+        hoursDelta: null,
+        notes: payment.paymentNote,
+      },
+    ];
+
+    if (payment.isPaidStatusOn) {
+      events.push({
+        id: `paid-${payment.id}`,
+        kind: AccountingPaymentHistoryKind.MARKED_PAID,
+        occurredAt: payment.updatedAt,
+        hoursDelta: null,
+        notes: null,
+      });
+    }
+
+    const ledgerRows = await CreditRepository.listBySourcePaymentId(paymentId);
+    for (const row of ledgerRows) {
+      const delta = row.changeAmountHours ?? row.changeAmount;
+      const numericDelta = delta === null ? null : Number(delta);
+      const isAdjustment = row.reason !== PURCHASE_REASON;
+      const isNegative = numericDelta !== null && numericDelta < 0;
+      events.push({
+        id: row.id,
+        kind:
+          isNegative || isAdjustment
+            ? AccountingPaymentHistoryKind.HOURS_ADJUSTED
+            : AccountingPaymentHistoryKind.HOURS_CREDITED,
+        occurredAt: row.createdAt,
+        hoursDelta: delta === null ? null : String(delta),
+        notes: row.notes,
+      });
+    }
+
+    return events.toSorted((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime());
   }
 }

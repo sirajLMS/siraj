@@ -15,10 +15,44 @@ export function formatAccountingMoney(value: string | number | null | undefined)
 }
 
 /** ISO DateTime / date → localized short date (locale-safe for AR via Intl). */
+/** Grid-safe numeric coercion — MUI hands columns untyped `unknown` cells. */
+export function numericCell(value: unknown): number {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : 0;
+  }
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+/** Grid-safe text coercion with a localized-ready fallback. */
+export function textCell(value: unknown, fallback = "—"): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  return fallback;
+}
+
+/** Grid-safe date coercion for the shared accounting date formatter. */
+export function dateCell(value: unknown): string | null {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString();
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  return null;
+}
+
 export function formatAccountingDate(value: string | null | undefined): string {
   if (!value) return "—";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
+  if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 

@@ -148,6 +148,16 @@ export const notificationsEn: NotificationsLabels = {
     body: ({ duplicateId }) =>
       `Your suggestion has been marked as a duplicate of suggestion #${duplicateId.slice(0, 8)}`,
   },
+  accountingPaymentRecorded: {
+    title: "Credit Hours Package Recorded",
+    body: ({ packageName, creditHours, amount, currency }) =>
+      `A payment for the "${packageName}" package (${creditHours} credit hours, ${amount} ${currency}) has been recorded. Your credit-hour balance has been updated.`,
+  },
+  accountingLowHours: {
+    title: "Low Credit-Hour Balance",
+    body: ({ remaining, threshold }) =>
+      `Your remaining credit hours are down to ${remaining}, below the low-balance threshold of ${threshold}. Please purchase a new package to keep booking classes.`,
+  },
   quotaExpiringSoon: {
     title: "Quota Expiring Soon",
     body: ({ quotaName, validUntil, remaining }) =>

@@ -362,6 +362,10 @@ function renderStudentLifecycle(
   }
 }
 
+export {
+  buildAccountingLowHoursPayloads,
+  buildAccountingPaymentRecordedPayloads,
+} from "@/backend/services/notification/accounting-notification.builders";
 // ─── Quota & on-demand event builder registry ─────────────────────────
 //
 // The quota/on-demand notification builders live in `quota-notification.builders.ts`

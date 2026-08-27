@@ -61,6 +61,8 @@ export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, Noti
     NotificationChannel.EMAIL,
   ],
   [NotificationEventType.PASSWORD_RESET_BY_ADMIN]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
+  [NotificationEventType.ACCOUNTING_PAYMENT_RECORDED]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
+  [NotificationEventType.ACCOUNTING_LOW_HOURS]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
 };
 
 // String arrays for O(1) type guard lookup (avoids unsafe casts in includes)

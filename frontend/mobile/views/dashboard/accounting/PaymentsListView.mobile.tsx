@@ -86,7 +86,7 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
 
         {/* Cards */}
         {error && rows.length === 0 ? (
-          <Typography variant="bodyMd" sx={{ px: 2, color: "error.main" }}>
+          <Typography variant="bodyMd" sx={theme => ({ px: 2, color: theme.palette.error.main })}>
             {t.loadError}
           </Typography>
         ) : null}

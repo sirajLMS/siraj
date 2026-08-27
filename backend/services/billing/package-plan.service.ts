@@ -4,10 +4,10 @@ import { AppPermission } from "@/backend/enum";
 import { ConflictError, logger, NotFoundError, ValidationError } from "@/backend/lib";
 import { requirePermission } from "@/backend/services/billing/permission-utils";
 import type {
-  PaginationArgs,
-  PackagePlanReturnType,
+  PackagePlanSelectType,
   PackagePlanSubmitInput,
   PackagePlanUpdateInput,
+  PaginationArgs,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -32,14 +32,14 @@ export namespace PackagePlanService {
     actorUserId: string,
     input: PackagePlanSubmitInput,
     tErrors: ErrorsLabels
-  ): Promise<PackagePlanReturnType> {
+  ): Promise<PackagePlanSelectType> {
     await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
     validateSubmitInput(input, tErrors);
 
     // Case-insensitive uniqueness (DB partial-unique is case-sensitive; this
     // service-side check is the safety net per EC-10).
     const duplicate = await PackagePlanRepository.findByCodename(input.codename.trim());
-    if (duplicate && duplicate.deletedAt === null) {
+    if (duplicate?.deletedAt === null) {
       throw new ConflictError(tErrors.package.codenameAlreadyExists(input.codename.trim()));
     }
 
@@ -51,6 +51,7 @@ export namespace PackagePlanService {
         creditHours: String(input.creditHours),
         priceAmount: String(input.priceAmount),
         currency: input.currency,
+        validityMonths: input.validityMonths ?? null,
         active: input.active ?? true,
         sortOrder: input.sortOrder ?? 0,
         metadata: input.metadata ?? null,
@@ -73,11 +74,11 @@ export namespace PackagePlanService {
     actorUserId: string,
     input: PackagePlanUpdateInput,
     tErrors: ErrorsLabels
-  ): Promise<PackagePlanReturnType> {
+  ): Promise<PackagePlanSelectType> {
     await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
 
     const existing = await PackagePlanRepository.findById(input.id);
-    if (!existing || existing.deletedAt !== null) {
+    if (existing?.deletedAt !== null) {
       // v1 reuses the planArchived label for missing-or-archived lookups.
       throw new NotFoundError("PACKAGE_PLAN", tErrors.package.planArchived(input.id));
     }
@@ -88,14 +89,13 @@ export namespace PackagePlanService {
       creditHours: input.creditHours !== undefined ? String(input.creditHours) : undefined,
       priceAmount: input.priceAmount !== undefined ? String(input.priceAmount) : undefined,
       currency: input.currency,
+      validityMonths: input.validityMonths,
       active: input.active,
       sortOrder: input.sortOrder,
       metadata: input.metadata,
     };
 
-    const updated = await db.transaction(async tx =>
-      PackagePlanRepository.update(tx, input.id, patch, input.version)
-    );
+    const updated = await db.transaction(async tx => PackagePlanRepository.update(tx, input.id, patch, input.version));
     if (!updated) {
       throw new NotFoundError("PACKAGE_PLAN", tErrors.package.planArchived(input.id));
     }
@@ -109,7 +109,7 @@ export namespace PackagePlanService {
     await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
 
     const existing = await PackagePlanRepository.findById(id);
-    if (!existing || existing.deletedAt !== null) {
+    if (existing?.deletedAt !== null) {
       throw new NotFoundError("PACKAGE_PLAN", tErrors.package.planArchived(id));
     }
 
@@ -120,18 +120,47 @@ export namespace PackagePlanService {
     logger.info("Package plan archived", { actorUserId, planId: id, codename: existing.codename });
   }
 
-  export async function getById(planId: string): Promise<PackagePlanReturnType | null> {
+  export async function getById(planId: string): Promise<PackagePlanSelectType | null> {
     return PackagePlanRepository.findById(planId);
   }
 
+  /** Bootstrap/seed entry: idempotent ensure-by-codename (actor-less catalog bootstrap). */
+  export async function ensureManyByCodename(
+    inputs: readonly PackagePlanSubmitInput[]
+  ): Promise<PackagePlanSelectType[]> {
+    const ensured: PackagePlanSelectType[] = [];
+    for (const input of inputs) {
+      const existing = await PackagePlanRepository.findByCodename(input.codename);
+      if (existing !== null && existing.deletedAt === null) {
+        ensured.push(existing);
+        continue;
+      }
+      const created = await db.transaction(async tx =>
+        PackagePlanRepository.create(tx, {
+          codename: input.codename.trim().toUpperCase(),
+          displayName: input.displayName,
+          description: input.description ?? null,
+          creditHours: String(input.creditHours),
+          priceAmount: String(input.priceAmount),
+          currency: input.currency,
+          validityMonths: input.validityMonths ?? null,
+          active: input.active ?? true,
+          sortOrder: input.sortOrder ?? 0,
+          metadata: input.metadata ?? null,
+        })
+      );
+      ensured.push(created);
+      logger.info("Package plan ensured (bootstrap)", { planId: created.id, codename: created.codename });
+    }
+    return ensured;
+  }
+
   /** Active-only list for the Add Payment auto-fill dropdown (post-login caller). */
-  export async function listActive(): Promise<PackagePlanReturnType[]> {
+  export async function listActive(): Promise<PackagePlanSelectType[]> {
     return PackagePlanRepository.listActive();
   }
 
-  export async function listPaginated(
-    paginationArgs: PaginationArgs | null
-  ): Promise<PackagePlanReturnType[]> {
+  export async function listPaginated(paginationArgs: PaginationArgs | null): Promise<PackagePlanSelectType[]> {
     return PackagePlanRepository.listAllPaginated(paginationArgs);
   }
 }

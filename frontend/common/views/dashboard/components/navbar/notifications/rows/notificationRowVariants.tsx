@@ -210,6 +210,16 @@ export const EVENT_VARIANT_CONFIG: Record<NotificationEventType, EventVariantCon
     iconColor: infoAccent,
     accentColor: infoAccent,
   },
+  [NotificationEventType.AccountingPaymentRecorded]: {
+    icon: <PaymentOutlined fontSize="small" />,
+    iconColor: successAccent,
+    accentColor: successAccent,
+  },
+  [NotificationEventType.AccountingLowHours]: {
+    icon: <WarningAmberOutlined fontSize="small" />,
+    iconColor: warningAccent,
+    accentColor: warningAccent,
+  },
 };
 
 export const COMPLAINT_BUCKET_VARIANT: EventVariantConfig = {

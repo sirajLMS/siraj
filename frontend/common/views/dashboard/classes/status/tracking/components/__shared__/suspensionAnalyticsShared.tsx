@@ -175,7 +175,7 @@ function CtaUrgentBadge({ label, mb }: { readonly label: string; readonly mb: nu
     >
       <WarningAmberOutlined
         sx={theme => ({
-          fontSize: 14,
+          fontSize: theme.typography.bodyMd.fontSize,
           color: theme.palette.warning.main,
         })}
       />

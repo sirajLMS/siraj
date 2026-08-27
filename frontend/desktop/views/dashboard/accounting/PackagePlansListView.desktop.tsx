@@ -8,17 +8,18 @@ import {
   StarOutlined,
   TrendingUpOutlined,
 } from "@mui/icons-material";
-import { Box, Chip, CircularProgress, IconButton, Stack, Tooltip } from "@mui/material";
+import { Box, Chip, IconButton, Stack, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {
   formatAccountingMoney,
+  numericCell,
   planActiveTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { DesktopListStateGate } from "@/frontend/common/views/dashboard/accounting/components/DesktopListStateGate";
 import type { PackagePlansListViewModel } from "@/frontend/common/views/dashboard/accounting/usePackagePlansListViewModel";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
@@ -41,7 +42,10 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
         headerName: t.columns.codename,
         width: 170,
         renderCell: params => (
-          <Box component="span" sx={{ fontFamily: "monospace", fontSize: 13, fontWeight: 600 }}>
+          <Box
+            component="span"
+            sx={theme => ({ fontFamily: "monospace", fontSize: theme.typography.labelMd.fontSize, fontWeight: 600 })}
+          >
             {params.row.codename}
           </Box>
         ),
@@ -57,14 +61,14 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
             {params.row.description ? (
               <Box
                 component="div"
-                sx={{
-                  color: "text.secondary",
+                sx={theme => ({
+                  color: theme.palette.text.secondary,
                   fontSize: 11,
                   maxWidth: 320,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                }}
+                })}
               >
                 {params.row.description}
               </Box>
@@ -77,7 +81,7 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
         headerName: t.columns.creditHours,
         width: 130,
         type: "number",
-        valueFormatter: (value: unknown) => t.hoursUnit(Number(String(value ?? 0)).toFixed(2)),
+        valueFormatter: (value: unknown) => t.hoursUnit(numericCell(value ?? 0).toFixed(2)),
       },
       {
         field: "priceAmount",
@@ -91,7 +95,7 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
             <Box component="span" sx={{ fontWeight: 600 }}>
               {formatAccountingMoney(params.row.priceAmount)}
             </Box>
-            <Box component="span" sx={{ color: "text.secondary", fontSize: 12 }}>
+            <Box component="span" sx={theme => ({ color: theme.palette.text.secondary, fontSize: 12 })}>
               {params.row.currency ?? ""}
             </Box>
           </Stack>
@@ -192,16 +196,15 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
       <DesktopMetricCardGrid metrics={metricItems} size={{ md: 3, lg: 3 }} />
 
       <DesktopSectionPanel contentPadding={false} title={t.pageTitle} sx={{ mt: 3 }}>
-        {error && rows.length === 0 ? (
-          <ErrorState message={t.loadError} embedded />
-        ) : loading && rows.length === 0 ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-            <CircularProgress size={32} />
-          </Box>
-        ) : (
+        <DesktopListStateGate
+          error={Boolean(error)}
+          loading={loading}
+          hasRows={rows.length > 0}
+          errorMessage={t.loadError}
+        >
           <Box sx={{ width: "100%", height: 540, p: 2 }}>
             <AppDataGrid
-              rows={rows as never}
+              rows={rows}
               columns={columns}
               loading={loading}
               ariaLabel={t.pageTitle}
@@ -211,7 +214,7 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
               paginationOptions={{ mode: "client" }}
             />
           </Box>
-        )}
+        </DesktopListStateGate>
       </DesktopSectionPanel>
     </DesktopPageContainer>
   );

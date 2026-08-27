@@ -15,6 +15,10 @@
 - **Review [IMPLEMENTATION_LEARNINGS.md](IMPLEMENTATION_LEARNINGS.md)** for detailed error resolutions to prevent repeating previous mistakes.
 - **No nested ternary operators** - SonarJS will flag them as code smells
 - Extract nested ternaries into if/else statements or separate functions
+- **Clean Comments & JSDoc Standards (CRITICAL)**:
+  - NEVER write internal planning or tracking tags in code comments or JSDoc (e.g. no `REQ-xx`, `Task x.x`, `Phase x`, or citing `.ai/plans/`).
+  - Code comments and JSDoc MUST describe the *what*, *why*, and *domain behavior* of the code in clean, production-grade technical terms.
+  - Avoid redundant comments that simply restate function or component names.
 
 ## Commit Message Rules
 
@@ -100,13 +104,14 @@ When eliminating desktop↔mobile code duplication, use the `*Shared.tsx` / `__s
 - See `docs/frontend/duplication-elimination-patterns.md` for all Patterns A-G
 - NEVER use `jscpd:ignore` — fix the root cause instead
 
-## WhatsApp UI Patterns
+## Important References
 
-- **Canonical reference**: See `docs/frontend/whatsapp-ui-patterns.md` for the full pattern catalog (ViewModel hooks, URL-synced tabs, dialog state, per-row loading, i18n label helpers, animations, accessibility, testing, gotchas).
-
-## Quota UI Patterns
-
-- **Canonical reference**: See `docs/frontend/quota-ui-patterns.md` for the full pattern catalog (tier isolation with container switchers, RHF 3-generic `useForm` pattern, `cache.updateQuery` for paginated lists, StatusBadge quota categories, MetricCard animated prop, reduced-motion CSS in sx, Storybook `ErrorState` naming, component test tier-view mocking, i18n CLDR plurals, CodeScene 150-line limit, `QuotaFormAccessProvider` field-level RBAC).
+- `docs/frontend/meeting-integrations-ui.md` - Meeting integration UI patterns canonical reference
+- `docs/frontend/whatsapp-ui-patterns.md` - WhatsApp UI patterns canonical reference
+- `docs/frontend/quota-ui-patterns.md` - Quota UI patterns canonical reference
+- `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern
+- `docs/frontend/duplication-elimination-patterns.md` - Duplication elimination patterns
+- `docs/frontend/emotion-rtl-stylis.md` - Emotion RTL stylis cache rules
 
 ### New MUI v9 Patterns
 

@@ -208,8 +208,11 @@ export const errorsAr: ErrorsLabels = {
       studentId,
       remaining,
       required,
-    }: { studentId: string; remaining: number; required: number }) =>
-      `ساعات معتمدة غير كافية للطالب ${studentId}. المتبقي: ${remaining}، المطلوب: ${required}`,
+    }: {
+      studentId: string;
+      remaining: number;
+      required: number;
+    }) => `ساعات معتمدة غير كافية للطالب ${studentId}. المتبقي: ${remaining}، المطلوب: ${required}`,
   },
   package: {
     codenameAlreadyExists: (codename: string) => `توجد باقة بالاسم المميز "${codename}" بالفعل.`,

@@ -1,13 +1,10 @@
 import type { ObjectFieldBuilder } from "@pothos/core";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaymentGatewayPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type {
-  AccountingPaymentReturnType,
-  PackagePlanReturnType,
-} from "@/backend/types";
+import type { AccountingPaymentReturnType, PackagePlanSelectType } from "@/backend/types";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
-type PackagePlanFieldBuilder = ObjectFieldBuilder<BuilderTypes, PackagePlanReturnType>;
+type PackagePlanFieldBuilder = ObjectFieldBuilder<BuilderTypes, PackagePlanSelectType>;
 type AccountingPaymentFieldBuilder = ObjectFieldBuilder<BuilderTypes, AccountingPaymentReturnType>;
 
 /** Shared field map for the PackagePlan object (catalog views). */
@@ -17,9 +14,10 @@ export function packagePlanFields(t: PackagePlanFieldBuilder) {
     codename: t.exposeString("codename"),
     displayName: t.exposeString("displayName"),
     description: t.exposeString("description", { nullable: true }),
-    creditHours: t.string({ resolve: parent => String(parent.creditHours) }),
-    priceAmount: t.string({ resolve: parent => String(parent.priceAmount) }),
+    creditHours: t.string({ resolve: parent => parent.creditHours }),
+    priceAmount: t.string({ resolve: parent => parent.priceAmount }),
     currency: t.exposeString("currency"),
+    validityMonths: t.exposeInt("validityMonths", { nullable: true }),
     active: t.exposeBoolean("active"),
     sortOrder: t.exposeInt("sortOrder"),
     version: t.exposeInt("version"),
@@ -40,6 +38,7 @@ export function accountingPaymentFields(t: AccountingPaymentFieldBuilder) {
     packageCodename: t.exposeString("packageCodename", { nullable: true }),
     packageName: t.exposeString("packageName", { nullable: true }),
     paymentGateway: t.expose("paymentGateway", { type: PaymentGatewayPothosObject }),
+    transactionId: t.exposeString("transactionId", { nullable: true }),
     creditHours: t.exposeString("creditHours", { nullable: true }),
     isPaidStatusOn: t.exposeBoolean("isPaidStatusOn"),
     paymentNote: t.exposeString("paymentNote", { nullable: true }),

@@ -4,6 +4,8 @@ import type {
   AddAppraisalFeedbackMutationVariables,
   MyMonthlyAppraisalQuery,
   MyMonthlyAppraisalQueryVariables,
+  StudentAppraisalDetailForFormQuery,
+  StudentAppraisalDetailForFormQueryVariables,
   StudentMonthlyAppraisalsQuery,
   StudentMonthlyAppraisalsQueryVariables,
   SubmitMonthlyAppraisalMutation,
@@ -11,6 +13,28 @@ import type {
   TeacherMonthlyAppraisalStudentsQuery,
   TeacherMonthlyAppraisalStudentsQueryVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+
+// ─── Query: studentAppraisalDetailForForm ───────────────────────────────────
+
+export const studentAppraisalDetailForFormQueryDocument: TypedDocumentNode<
+  StudentAppraisalDetailForFormQuery,
+  StudentAppraisalDetailForFormQueryVariables
+> = gql`
+  query StudentAppraisalDetailForForm($studentId: String!) {
+    studentMonthlyAppraisals(studentId: $studentId) {
+      id
+      behaviorGrade
+      behaviorComment
+      attendanceGrade
+      attendanceComment
+      punctualityGrade
+      punctualityComment
+      overallGrade
+      overallComment
+      learningTargets
+    }
+  }
+`;
 
 // ─── Query: myMonthlyAppraisal ──────────────────────────────────────────────
 

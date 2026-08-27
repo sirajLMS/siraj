@@ -1,16 +1,37 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { mapQuotaErrorToGraphQLError } from "@/backend/graphql/mutation/billing/quota.mutation";
 import {
   AccountingPaymentBalancePothosObject,
   AccountingPaymentFilterInput,
   AccountingPaymentPothosObject,
   PackagePlanPothosObject,
 } from "@/backend/graphql/pothos/billing/accounting.pothos";
-import { mapQuotaErrorToGraphQLError } from "@/backend/graphql/mutation/billing/quota.mutation";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { AccountingPaymentService, PackagePlanService } from "@/backend/services";
 import type { AccountingPaymentFilter } from "@/backend/types";
+
+/** Local shape mirroring the Pothos filter object (nullable optionals). */
+type AccountingFilterShape = {
+  readonly studentId?: string | null;
+  readonly parentId?: string | null;
+  readonly fromDate?: string | null;
+  readonly toDate?: string | null;
+  readonly unpaidOnly?: boolean | null;
+};
+
+/** Maps the Pothos filter object onto the canonical service filter. */
+function normalizeAccountingFilter(filter?: AccountingFilterShape | null): AccountingPaymentFilter | null {
+  if (filter == null) return null;
+  const mapped: AccountingPaymentFilter = {};
+  if (filter.studentId != null) mapped.studentId = filter.studentId;
+  if (filter.parentId != null) mapped.parentId = filter.parentId;
+  if (filter.fromDate != null) mapped.fromDate = filter.fromDate;
+  if (filter.toDate != null) mapped.toDate = filter.toDate;
+  if (filter.unpaidOnly != null) mapped.unpaidOnly = filter.unpaidOnly;
+  return Object.keys(mapped).length > 0 ? mapped : null;
+}
 
 gqlSchemaBuilder.queryField("packagePlans", t =>
   t.field({
@@ -44,7 +65,7 @@ gqlSchemaBuilder.queryField("packagePlan", t =>
     resolve: async (_root, args, ctx) => {
       await requireAuth(ctx);
       try {
-        const plan = await PackagePlanService.getById(String(args.id));
+        const plan = await PackagePlanService.getById(args.id);
         if (!plan) throw new Error("Package plan not found");
         return plan;
       } catch (error) {
@@ -69,7 +90,7 @@ gqlSchemaBuilder.queryField("accountingPayments", t =>
       try {
         const result = await AccountingPaymentService.listPaginated(
           actorUserId,
-          (args.filter ?? {}) as AccountingPaymentFilter,
+          normalizeAccountingFilter(args.filter) ?? {},
           parsePaginationArgs(args.paginationArgs),
           tErrors
         );
@@ -91,7 +112,7 @@ gqlSchemaBuilder.queryField("accountingPayment", t =>
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
       try {
-        return await AccountingPaymentService.getById(actorUserId, String(args.id), tErrors);
+        return await AccountingPaymentService.getById(actorUserId, args.id, tErrors);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }
@@ -109,11 +130,7 @@ gqlSchemaBuilder.queryField("studentCreditHourBalance", t =>
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
       try {
-        return await AccountingPaymentService.getStudentBalance(
-          actorUserId,
-          String(args.studentId),
-          tErrors
-        );
+        return await AccountingPaymentService.getStudentBalance(actorUserId, args.studentId, tErrors);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }

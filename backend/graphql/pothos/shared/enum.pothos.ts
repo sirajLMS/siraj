@@ -1,4 +1,5 @@
 import {
+  AccountingPaymentHistoryKind,
   AccountStatus,
   AppLanguage,
   AppPermission,
@@ -76,6 +77,10 @@ export const PaymentGatewayPothosObject = gqlSchemaBuilder.enumType(PaymentGatew
 
 export const BilledUnitPothosObject = gqlSchemaBuilder.enumType(BilledUnit, {
   name: "BilledUnit",
+});
+
+export const AccountingPaymentHistoryKindPothosObject = gqlSchemaBuilder.enumType(AccountingPaymentHistoryKind, {
+  name: "AccountingPaymentHistoryKind",
 });
 
 export const ManagerAccountTypePothosEnum = gqlSchemaBuilder.enumType(ManagerAccountType, {

@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import {
   type MeetingConfigDetailsFormValue,
   MeetingConfigTypeFieldsMobile,
   type MeetingConfigTypeFieldsProps,
-  type MeetingProviderFieldsFragment,
 } from "@/frontend/mobile/components/ui/input/meetingConfigTypeFields/meetingConfigTypeFields.mobile";
 
 const zoomProvider: MeetingProviderFieldsFragment = {

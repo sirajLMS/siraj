@@ -11,6 +11,7 @@
 // ─── Top-level directories (alphabetical) ──────────────────────────
 export * from "./auth";
 export * from "./common";
+export * from "./dashboard/accounting";
 // ─── dashboard/<group> ─────────────────────────────────────────────
 export * from "./dashboard/admin";
 export * from "./dashboard/billing";
@@ -22,7 +23,6 @@ export * from "./dashboard/lms";
 export * from "./dashboard/meeting-providers";
 export * from "./dashboard/parents";
 export * from "./dashboard/payment-catalogs";
-export * from "./dashboard/accounting";
 export * from "./dashboard/permissions";
 export * from "./dashboard/reports";
 export * from "./dashboard/resources";

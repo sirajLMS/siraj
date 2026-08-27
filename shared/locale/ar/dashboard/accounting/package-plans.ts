@@ -30,6 +30,7 @@ export const dashboardAccountingPackagePlansAr: PackagePlansLabels = {
     active: "نشطة",
     activeHelp: "الباقات غير النشطة تختفي من قائمة إضافة الدفعة مع الاحتفاظ بسجلها.",
     sortOrder: "ترتيب العرض",
+    validityMonths: "مدة الصلاحية (بالأشهر)",
     submit: "حفظ الباقة",
     cancel: "إلغاء",
     saving: "جارٍ الحفظ…",

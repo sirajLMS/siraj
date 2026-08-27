@@ -54,7 +54,7 @@ export function WcagBadge({ hex }: WcagBadgeProps) {
       <Box
         component="span"
         aria-label={`WCAG ${grade}`}
-        sx={{
+        sx={theme => ({
           display: "inline-flex",
           alignItems: "center",
           px: 0.75,
@@ -62,13 +62,13 @@ export function WcagBadge({ hex }: WcagBadgeProps) {
           borderRadius: 0.5,
           backgroundColor: pillBg,
           color: pillFg,
-          fontSize: 10,
+          fontSize: theme.typography.labelSm.fontSize,
           fontWeight: 700,
           lineHeight: 1.4,
           letterSpacing: "0.02em",
           minWidth: 22,
           justifyContent: "center",
-        }}
+        })}
       >
         {grade}
       </Box>

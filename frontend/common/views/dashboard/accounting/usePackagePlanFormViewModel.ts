@@ -35,6 +35,7 @@ const CREATE_DEFAULT_VALUES: PackagePlanFormInput = {
   currency: CurrencyCode.Egp,
   active: true,
   sortOrder: 0,
+  validityMonths: null,
 };
 
 export interface UsePackagePlanFormViewModel {
@@ -90,15 +91,23 @@ export function usePackagePlanFormViewModel({
 
   useEffect(() => {
     if (isEditing && existing) {
+      const editCurrencyFallback = CurrencyCode.Egp;
+      const editCurrencyRaw = existing.currency ?? null;
+      const editCurrencyMapped =
+        editCurrencyRaw != null
+          ? Object.values(CurrencyCode).find(member => String(member) === editCurrencyRaw)
+          : undefined;
+
       form.reset({
         codename: existing.codename ?? "",
         displayName: existing.displayName ?? "",
         description: existing.description ?? null,
         creditHours: Number(existing.creditHours ?? 1),
         priceAmount: Number(existing.priceAmount ?? 0),
-        currency: (existing.currency as CurrencyCode | null) ?? CurrencyCode.Egp,
+        currency: editCurrencyMapped ?? editCurrencyFallback,
         active: existing.active ?? true,
         sortOrder: existing.sortOrder ?? 0,
+        validityMonths: existing.validityMonths ?? null,
       });
     }
   }, [isEditing, existing, form]);
@@ -112,7 +121,9 @@ export function usePackagePlanFormViewModel({
   const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (!showSuccess) return;
+    if (!showSuccess) {
+      return undefined;
+    }
     const timer = setTimeout(() => setShowSuccess(false), SUCCESS_AUTO_DISMISS_MS);
     return () => clearTimeout(timer);
   }, [showSuccess]);
@@ -155,6 +166,7 @@ export function usePackagePlanFormViewModel({
                 currency: data.currency,
                 active: data.active,
                 sortOrder: data.sortOrder,
+                validityMonths: data.validityMonths ?? null,
                 // Optimistic lock: version from the loaded plan.
                 version: existing?.version ?? null,
               },
@@ -172,6 +184,7 @@ export function usePackagePlanFormViewModel({
                 currency: data.currency,
                 active: data.active,
                 sortOrder: data.sortOrder,
+                validityMonths: data.validityMonths ?? null,
               },
             },
           });

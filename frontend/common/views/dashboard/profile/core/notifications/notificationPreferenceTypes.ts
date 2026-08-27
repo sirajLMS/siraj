@@ -45,6 +45,8 @@ export const NOTIFICATION_EVENT_CATEGORY: Record<NotificationEventType, Notifica
   [NotificationEventType.OnDemandTeacherDailyDigest]: "digest",
   [NotificationEventType.PasswordResetByAdmin]: "info",
   [NotificationEventType.UserStatusChanged]: "info",
+  [NotificationEventType.AccountingLowHours]: "reminder",
+  [NotificationEventType.AccountingPaymentRecorded]: "info",
 };
 
 export const NOTIFICATION_CHANNELS = [

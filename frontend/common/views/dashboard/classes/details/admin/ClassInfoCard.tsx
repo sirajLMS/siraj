@@ -48,7 +48,7 @@ const StyledCourseNameHeading = styled(Typography)(({ theme }) => ({
 }));
 
 const StyledActiveStatusDot = styled(FiberManualRecordIcon)(({ theme }) => ({
-  fontSize: 12,
+  fontSize: theme.typography.labelMd.fontSize,
   color: theme.palette.status.active,
 }));
 

@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   checkConstraint,
   createTable,
@@ -16,7 +17,6 @@ import { classInstances } from "@/backend/db/schema/classes/scheduling";
 import { creditReasonEnum } from "@/backend/db/schema/enums";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
-import { sql } from "drizzle-orm";
 
 export const creditTransactions = createTable(
   "credit_transactions",

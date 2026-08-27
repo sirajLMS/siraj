@@ -4,12 +4,13 @@ import type {
   AdminRevokeMeetingProviderTokenMutationVariables,
   MeetingIntegrationConnectedAccountsQuery,
   MeetingIntegrationConnectedAccountsQueryVariables,
+  MeetingIntegrationProviderFieldsFragment,
   MeetingIntegrationProvidersQuery,
   TestMeetingProviderConnectionMutation,
   TestMeetingProviderConnectionMutationVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
-const MEETING_INTEGRATION_PROVIDER_FIELDS: TypedDocumentNode<MeetingIntegrationProvidersQuery> = gql`
+const MEETING_INTEGRATION_PROVIDER_FIELDS: TypedDocumentNode<MeetingIntegrationProviderFieldsFragment> = gql`
   fragment MeetingIntegrationProviderFields on MeetingIntegrationProvider {
     id
     slug

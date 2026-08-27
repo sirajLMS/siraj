@@ -233,7 +233,8 @@ export function StudentParentAppraisalContainer({ studentId }: Readonly<StudentP
       variables: { input: { appraisalId: selectedAppraisalId, body } },
       onCompleted: () => {
         setFeedbackModalOpen(false);
-        void (isStudentSelfView ? myQuery.refetch() : parentQuery.refetch());
+        const refetch = isStudentSelfView ? myQuery.refetch : parentQuery.refetch;
+        void refetch();
       },
       onError: err => {
         setFeedbackError(err.message);

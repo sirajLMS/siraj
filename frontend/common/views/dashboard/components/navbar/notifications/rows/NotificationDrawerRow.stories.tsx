@@ -14,6 +14,14 @@ import type {
 const stubBody = (): string => "Storybook mock body";
 
 const mockLabels: NotificationsDrawerViewModel["labels"] = {
+  accountingPaymentRecorded: {
+    title: "Credit hours package recorded",
+    body: stubBody,
+  },
+  accountingLowHours: {
+    title: "Low credit-hour balance",
+    body: stubBody,
+  },
   invoiceGenerated: { title: "Invoice generated", body: stubBody },
   invoiceStatusChanged: {
     proofSubmitted: { title: "Proof submitted", body: stubBody },

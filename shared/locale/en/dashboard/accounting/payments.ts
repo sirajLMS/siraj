@@ -68,7 +68,7 @@ export const dashboardAccountingPaymentsEn: PaymentsLabels = {
   currencyWarning: currency =>
     `Note: this payment is in ${currency}, which differs from the student's most recent payment currency. Hours from mixed currencies share one balance.`,
   empty: "No payments match the current filters.",
-    loadError: "Failed to load payments. Please try again.",
+  loadError: "Failed to load payments. Please try again.",
   auditUpdatedAt: "Last Updated",
   saveSuccess: "Payment saved successfully.",
   saveError: "Failed to save the payment. Please review and try again.",
@@ -83,5 +83,18 @@ export const dashboardAccountingPaymentsEn: PaymentsLabels = {
     togglePaidAction: "Toggle Paid",
     markPaid: "Mark as Paid",
     markUnpaid: "Mark as Unpaid",
+    transactionRef: "Transfer Ref",
+    documentPreview: "Document Preview",
+    documentEmpty: "No receipt document attached to this payment.",
+    downloadPdf: "Download PDF",
+    historyTitle: "History",
+    historyEmpty: "No timeline events yet.",
+    hoursCredited: "Hours Credited",
+  },
+  historyKinds: {
+    PAYMENT_RECORDED: "Payment recorded",
+    HOURS_CREDITED: "Hours credited to student balance",
+    HOURS_ADJUSTED: "Hours adjusted",
+    MARKED_PAID: "Payment marked as Paid",
   },
 };

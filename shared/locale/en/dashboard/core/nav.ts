@@ -117,4 +117,6 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   toggleGroupAriaLabel: label => `Toggle ${label} group`,
   accountingPayments: "Payments",
   accountingPackages: "Packages",
+  accountingPaymentsNew: "Add Payment",
+  accountingPackagesNew: "Create Package Plan",
 };

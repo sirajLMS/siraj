@@ -204,6 +204,16 @@ export interface QuotaLowBalanceLabels {
   readonly body: (params: { studentName: string; remaining: number; totalClasses: number }) => string;
 }
 
+export interface AccountingPaymentRecordedLabels {
+  readonly title: string;
+  readonly body: (params: { packageName: string; creditHours: string; amount: string; currency: string }) => string;
+}
+
+export interface AccountingLowHoursLabels {
+  readonly title: string;
+  readonly body: (params: { remaining: string; threshold: string }) => string;
+}
+
 export interface OnDemandInstancePendingCreditLabels {
   readonly title: string;
   readonly body: (params: { studentName: string; scheduledStartAt: string }) => string;
@@ -258,6 +268,8 @@ export interface NotificationsLabels {
   readonly quotaExpiringSoon: QuotaExpiringSoonLabels;
   readonly quotaExpired: QuotaExpiredLabels;
   readonly quotaLowBalance: QuotaLowBalanceLabels;
+  readonly accountingPaymentRecorded: AccountingPaymentRecordedLabels;
+  readonly accountingLowHours: AccountingLowHoursLabels;
   readonly onDemandInstancePendingCredit: OnDemandInstancePendingCreditLabels;
   readonly onDemandInstanceReminderT3: OnDemandInstanceReminderT3Labels;
   readonly onDemandInstanceReminderT1: OnDemandInstanceReminderT1Labels;

@@ -16,6 +16,8 @@ import {
 } from "@/frontend/desktop/components/ui/button";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { PaymentDocumentPreview } from "@/frontend/desktop/views/dashboard/accounting/components/PaymentDocumentPreview";
+import { PaymentHistoryTimeline } from "@/frontend/desktop/views/dashboard/accounting/components/PaymentHistoryTimeline";
 
 function DetailField({ label, value }: Readonly<{ label: string; value: ReactNode }>) {
   return (
@@ -140,6 +142,7 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
                 label={t.columns.paymentGateway}
                 value={payment.paymentGateway ? t.gateways[payment.paymentGateway] : "—"}
               />
+              <DetailField label={t.detail.transactionRef} value={payment.transactionId ?? "—"} />
               <DetailField label={t.detail.invoiceStatus} value={payment.invoiceStatus} />
             </Stack>
 
@@ -152,13 +155,30 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
           </Stack>
         </DesktopSectionPanel>
 
-        <DesktopSectionPanel title={t.detail.invoiceStatus} sx={{ flex: 1, minWidth: 260 }}>
-          <Stack spacing={2}>
-            <DetailField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt)} />
-            <DetailField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt)} />
+        <DesktopSectionPanel title={t.detail.historyTitle} sx={{ flex: 1, minWidth: 260 }}>
+          <Stack spacing={3}>
+            <PaymentHistoryTimeline
+              events={payment.history ?? []}
+              labels={t.historyKinds}
+              emptyLabel={t.detail.historyEmpty}
+            />
+            <Stack spacing={2}>
+              <DetailField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt)} />
+              <DetailField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt)} />
+            </Stack>
           </Stack>
         </DesktopSectionPanel>
       </Stack>
+
+      <Box sx={{ mt: 3 }}>
+        <PaymentDocumentPreview
+          title={t.detail.documentPreview}
+          emptyLabel={t.detail.documentEmpty}
+          downloadLabel={t.detail.downloadPdf}
+          src={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
+          downloadHref={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
+        />
+      </Box>
     </DesktopPageContainer>
   );
 }

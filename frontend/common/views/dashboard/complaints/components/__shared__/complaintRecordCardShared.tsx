@@ -85,7 +85,7 @@ const StyledAdminResponseHeader = styled(Box)(({ theme }) => ({
 
 const StyledVerifiedIcon = styled(VerifiedUserOutlined)(({ theme }) => ({
   color: theme.palette.primary.main,
-  fontSize: 18,
+  fontSize: theme.typography.titleLg.fontSize,
 }));
 
 const StyledAdminResponseLabel = styled(Typography)(({ theme }) => ({

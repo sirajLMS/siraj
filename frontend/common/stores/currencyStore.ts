@@ -1,14 +1,14 @@
 "use client";
 
 import { create } from "zustand";
-import type { SupportedCurrencyFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { CurrencyCode, SupportedCurrencyFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type CurrencyOption, currencies } from "@/frontend/common/lib/currency";
 import { countryCodeToEmoji } from "@/frontend/common/lib/locale";
 
 export type SupportedCurrencyRow = Pick<
   SupportedCurrencyFieldsFragment,
   "code" | "symbol" | "countryCode" | "decimals" | "sortOrder" | "isActive"
-> & { readonly code: NonNullable<SupportedCurrencyFieldsFragment["code"]> };
+> & { readonly code: CurrencyCode };
 
 export interface CurrencyCatalogState {
   options: readonly CurrencyOption[];

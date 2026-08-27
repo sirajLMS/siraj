@@ -35,15 +35,11 @@ export function usePaymentDetailViewModel(paymentId: string): PaymentDetailViewM
   });
 
   const [togglePaidMutation, { loading: toggling }] = useMutation(toggleAccountingPaymentPaidStatusMutationDocument, {
-    update: (cache, { data: mutationData }) => {
-      const updated = mutationData?.toggleAccountingPaymentPaidStatus;
-      if (!updated?.id) return;
-      cache.writeQuery({
-        query: accountingPaymentQueryDocument,
-        variables: { id: paymentId },
-        data: { accountingPayment: updated },
-      });
-    },
+    // The toggle payload selects fewer fields than accountingPaymentQuery
+    // (no transactionId/history), so writing it straight into the detail
+    // cache slot would poison the typed shape — refetch instead.
+    refetchQueries: [{ query: accountingPaymentQueryDocument, variables: { id: paymentId } }],
+    awaitRefetchQueries: true,
   });
 
   const [toggleError, setToggleError] = useState<string | null>(null);

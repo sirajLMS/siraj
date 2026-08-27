@@ -21,6 +21,15 @@ export const createPackagePlanFormSchema = (messages: PackagePlansLabels) =>
     currency: z.enum(CurrencyCode),
     active: z.boolean(),
     sortOrder: z.coerce.number().int().min(0, messages.form.sortOrder),
+    validityMonths: z.preprocess(
+      value => (value === "" || value === null || value === undefined ? null : value),
+      z.coerce
+        .number()
+        .int(messages.form.validityMonths)
+        .min(1, messages.form.validityMonths)
+        .max(120, messages.form.validityMonths)
+        .nullable()
+    ),
   });
 
 export type PackagePlanFormData = z.infer<ReturnType<typeof createPackagePlanFormSchema>>;

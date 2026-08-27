@@ -10,7 +10,6 @@ import {
 import {
   Box,
   Chip,
-  CircularProgress,
   FormControl,
   IconButton,
   InputLabel,
@@ -25,13 +24,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {
+  dateCell,
   formatAccountingDate,
   formatAccountingMoney,
+  numericCell,
   paymentStatusTone,
+  textCell,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { DesktopListStateGate } from "@/frontend/common/views/dashboard/accounting/components/DesktopListStateGate";
 import type { PaymentsListViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentsListViewModel";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
@@ -99,7 +101,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
           <Box>
             <Box component="div">{params.row.studentName ?? "—"}</Box>
             {params.row.parentName ? (
-              <Box component="div" sx={{ color: "text.secondary", fontSize: 11 }}>
+              <Box component="div" sx={theme => ({ color: theme.palette.text.secondary, fontSize: 11 })}>
                 {params.row.parentName}
               </Box>
             ) : null}
@@ -111,7 +113,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         headerName: t.columns.credit,
         width: 105,
         type: "number",
-        valueFormatter: (value: unknown) => (value == null ? "—" : `${Number(String(value)).toFixed(2)} h`),
+        valueFormatter: (value: unknown) => (value == null ? "—" : `${numericCell(value).toFixed(2)} h`),
       },
       {
         field: "amount",
@@ -125,7 +127,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
             <Box component="span" sx={{ fontWeight: 600 }}>
               {formatAccountingMoney(params.row.amount)}
             </Box>
-            <Box component="span" sx={{ color: "text.secondary", fontSize: 12 }}>
+            <Box component="span" sx={theme => ({ color: theme.palette.text.secondary, fontSize: 12 })}>
               {params.row.currency ?? ""}
             </Box>
           </Stack>
@@ -141,7 +143,10 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
             <Box>
               <Box component="div">{params.row.packageName}</Box>
               {params.row.packageCodename ? (
-                <Box component="div" sx={{ color: "text.secondary", fontSize: 11, fontFamily: "monospace" }}>
+                <Box
+                  component="div"
+                  sx={theme => ({ color: theme.palette.text.secondary, fontSize: 11, fontFamily: "monospace" })}
+                >
                   {params.row.packageCodename}
                 </Box>
               ) : null}
@@ -154,19 +159,22 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         field: "paymentGateway",
         headerName: t.columns.paymentGateway,
         width: 150,
-        valueGetter: (value: unknown) => (t.gateways as Record<string, string>)[String(value)] ?? String(value ?? "—"),
+        valueGetter: (value: unknown) => {
+          const localized = Object.entries(t.gateways).find(([gatewayKey]) => gatewayKey === value);
+          return localized?.[1] ?? textCell(value);
+        },
       },
       {
         field: "paymentDate",
         headerName: t.columns.paymentDate,
         width: 120,
-        valueFormatter: (value: unknown) => formatAccountingDate(value == null ? null : String(value)),
+        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value)),
       },
       {
         field: "createdAt",
         headerName: t.columns.createdAt,
         width: 120,
-        valueFormatter: (value: unknown) => formatAccountingDate(value == null ? null : String(value)),
+        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value)),
       },
       {
         field: "isPaidStatusOn",
@@ -254,16 +262,15 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         actions={<FiltersBar {...props} />}
         sx={{ mt: 3 }}
       >
-        {error && rows.length === 0 ? (
-          <ErrorState message={t.loadError} embedded />
-        ) : loading && rows.length === 0 ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-            <CircularProgress size={32} />
-          </Box>
-        ) : (
+        <DesktopListStateGate
+          error={Boolean(error)}
+          loading={loading}
+          hasRows={rows.length > 0}
+          errorMessage={t.loadError}
+        >
           <Box sx={{ width: "100%", height: 560, p: 2 }}>
             <AppDataGrid
-              rows={rows as never}
+              rows={rows}
               columns={columns}
               loading={loading}
               ariaLabel={t.pageTitle}
@@ -274,7 +281,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
               onRowClick={params => router.push(`/accounting/payments/${String(params.row.id)}`)}
             />
           </Box>
-        )}
+        </DesktopListStateGate>
       </DesktopSectionPanel>
     </DesktopPageContainer>
   );

@@ -4,6 +4,7 @@ export const dashboardAccountingStudentCreditHoursAr: StudentCreditHoursLabels =
   tabTitle: "الساعات المعتمدة",
   balanceCardTitle: "رصيد الساعات المعتمدة",
   remainingLabel: "المتبقي",
+  consumedLabel: "المستهلك",
   totalLabel: "إجمالي المشترى",
   hoursUnit: hours => `${hours} ساعة`,
   recentPurchasesTitle: "نشاط الساعات الأخير",
@@ -29,7 +30,7 @@ export const dashboardAccountingStudentCreditHoursAr: StudentCreditHoursLabels =
     studentHint: "تُستهلك الساعات لكل حصة حسب مدتها.",
     parentHint: "يمكنك شحن ساعات ابنك بشراء باقة من الأكاديمية.",
     teacherHint: "أرصدة ساعات الطلاب المسندين إليك. الحصة القادمة ستستهلك الساعات الموضحة.",
-    supervisorHint: "ملخص أرصدة الساعات المعتمدة لجميع الطلاب.",
+    supervisorHint: "رصيد الساعات المعتمدة للطالب وأحدث نشاطه الساعي.",
   },
 
   nextClassConsumes: hours => `الحصة القادمة تستهلك ~${hours} ساعة`,

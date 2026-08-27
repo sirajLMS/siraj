@@ -4,7 +4,10 @@ import type {
   AvailableClassSlotsQueryVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const availableClassSlotsQueryDocument = gql`
+export const availableClassSlotsQueryDocument: TypedDocumentNode<
+  AvailableClassSlotsQuery,
+  AvailableClassSlotsQueryVariables
+> = gql`
   query AvailableClassSlots($studentId: ID!, $date: DateTime!, $teacherId: ID, $durationMinutes: Int) {
     availableClassSlots(studentId: $studentId, date: $date, teacherId: $teacherId, durationMinutes: $durationMinutes) {
       id
@@ -14,4 +17,4 @@ export const availableClassSlotsQueryDocument = gql`
       available
     }
   }
-` as TypedDocumentNode<AvailableClassSlotsQuery, AvailableClassSlotsQueryVariables>;
+`;

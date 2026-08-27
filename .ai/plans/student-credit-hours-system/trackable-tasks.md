@@ -189,11 +189,11 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 
 ## Phase 7: Navigation & Routing
 
-- [ ] **7. Navigation config + route scaffolding**
-  - [ ] 7.1 Edit `frontend/common/views/dashboard/config/navigationConfig.ts` — add `grp_accounting` group (sibling of existing `grp_finance` — note: the existing group is `grp_finance`, NOT `grp_accounting` or `grp_billing`); add nav items: `payments`, `payments-new`, `packages`, `packages-new`; add `PAGE_PERMISSIONS.accountingPaymentsView = [AppPermission.ACCOUNTING_PAYMENTS_VIEW] as PagePermissions` + `PAGE_PERMISSIONS.accountingPaymentsManage = [AppPermission.ACCOUNTING_PAYMENTS_MANAGE] as PagePermissions` to `frontend/common/types/page-permissions.types.ts`; add `accounting-payments` to `BOTTOM_NAV_ITEMS` for STAFF+
-  - [ ] 7.2 Edit `frontend/common/views/dashboard/config/mockNavigationConfig.ts` — add mock entries mirroring production config (for tests/storybook)
-  - [ ] 7.3 Edit `frontend/common/views/dashboard/config/navIconKeys.ts` + `navIconRegistry.tsx` — add `packages` icon (e.g., `Inventory2Outlined` or `CardGiftcardOutlined`); `payments` icon already exists in `navIconKeys.ts` (line 34 of `navIconRegistry.tsx`)
-  - [ ] 7.4 Create route files under `app/(dashboard)/accounting/`:
+- [x] **7. Navigation config + route scaffolding**
+  - [x] 7.1 Edit `frontend/common/views/dashboard/config/navigationConfig.ts` — add `grp_accounting` group (sibling of existing `grp_finance` — note: the existing group is `grp_finance`, NOT `grp_accounting` or `grp_billing`); add nav items: `payments`, `payments-new`, `packages`, `packages-new`; add `PAGE_PERMISSIONS.accountingPaymentsView = [AppPermission.ACCOUNTING_PAYMENTS_VIEW] as PagePermissions` + `PAGE_PERMISSIONS.accountingPaymentsManage = [AppPermission.ACCOUNTING_PAYMENTS_MANAGE] as PagePermissions` to `frontend/common/types/page-permissions.types.ts`; add `accounting-payments` to `BOTTOM_NAV_ITEMS` for STAFF+
+  - [x] 7.2 Edit `frontend/common/views/dashboard/config/mockNavigationConfig.ts` — add mock entries mirroring production config (for tests/storybook)
+  - [x] 7.3 Edit `frontend/common/views/dashboard/config/navIconKeys.ts` + `navIconRegistry.tsx` — add `packages` icon (e.g., `Inventory2Outlined` or `CardGiftcardOutlined`); `payments` icon already exists in `navIconKeys.ts` (line 34 of `navIconRegistry.tsx`)
+  - [x] 7.4 Create route files under `app/(dashboard)/accounting/`:
     - `payments/page.tsx` (list)
     - `payments/new/page.tsx` (form)
     - `payments/[id]/page.tsx` (detail)
@@ -201,10 +201,10 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
     - `packages/page.tsx` (catalog)
     - `packages/new/page.tsx` (form)
     - `packages/[id]/edit/page.tsx` (edit)
-  - [ ] 7.5 Each route page checks permission and renders the appropriate desktop/mobile view based on viewport
-  - [ ] 7.6 Edit `frontend/common/views/dashboard/students/profile/studentProfileTabs.ts` — add `"credit-hours"` to `STUDENT_PROFILE_TABS` array + define `CREDIT_HOURS_TAB_GROUPS` mapping (alongside existing `quota` tab). New component `frontend/common/views/dashboard/students/profile/StudentCreditHoursTab.tsx` (no `tabs/` subdirectory; the existing `sections/` directory holds section components like `StudentAdminSection.tsx`)
-  - [ ] 7.7 **Quality Loop**: Per-file verification on all new route + nav config files
-  - [ ] 7.8 **Instruction Verification**: Verify against:
+  - [x] 7.5 Each route page checks permission and renders the appropriate desktop/mobile view based on viewport
+  - [x] 7.6 Edit `frontend/common/views/dashboard/students/profile/studentProfileTabs.ts` — add `"credit-hours"` to `STUDENT_PROFILE_TABS` array + define `CREDIT_HOURS_TAB_GROUPS` mapping (alongside existing `quota` tab). New component `frontend/common/views/dashboard/students/profile/StudentCreditHoursTab.tsx` (no `tabs/` subdirectory; the existing `sections/` directory holds section components like `StudentAdminSection.tsx`)
+  - [x] 7.7 **Quality Loop**: Per-file verification on all new route + nav config files
+  - [x] 7.8 **Instruction Verification**: Verify against:
     - AGENTS.md: `app/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md`
     - Instructions: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
 
@@ -212,23 +212,23 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 
 ## Phase 8: Frontend Views — Payments Module
 
-- [ ] **8. Payments list + form + detail views (desktop + mobile + shared ViewModels)**
-  - [ ] 8.1 Create `frontend/common/views/dashboard/accounting/usePaymentsListViewModel.ts` — filter state (studentId, parentId, fromDate, toDate, unpaidOnly), pagination state, query wiring via `useAccountingPaymentsQuery`. PATTERN COMPLIANCE: existing ViewModels are `useXxxViewModel.ts` hooks located directly under `frontend/common/views/dashboard/<domain>/` (e.g. `useQuotaFormViewModel.ts`). NO `viewmodels/` subdirectory exists.
-  - [ ] 8.2 Create `frontend/common/views/dashboard/accounting/usePaymentFormViewModel.ts` — package auto-fill logic (when `packagePlanId` changes, fetch plan via `usePackagePlanQuery` and auto-fill `creditHours`/`amount`/`currency` — fields remain editable), form validation (zod schema), submit handler
-  - [ ] 8.3 Create `frontend/common/stores/accountingPaymentsStore.ts` — Zustand store for list filter + pagination state; persist filter across route changes. PATTERN COMPLIANCE: existing stores live FLAT in `frontend/common/stores/` (no subdirectories), named like `adminBillingStore.ts`, `quotaStore.ts`
-  - [ ] 8.4 Create desktop view `frontend/desktop/views/dashboard/accounting/PaymentsListView.desktop.tsx` — MUI DataGrid with 9 columns (Student Name, Credit, Paid, Currency, Package, Payment Gateway, Payment Date, Created At, Actions); filter bar above grid; empty state; pagination controls. PATTERN COMPLIANCE: per `frontend/desktop/AGENTS.md`, desktop views live under `frontend/desktop/views/dashboard/<domain>/*.desktop.tsx` (mandatory `dashboard/` segment + `.desktop.tsx` suffix). All MUI components (Typography/Stack/Box) MUST use `sx={{...}}` prop — no v9-style props like `align=` or `mt=`.
-  - [ ] 8.5 Create desktop view `frontend/desktop/views/dashboard/accounting/PaymentDetailView.desktop.tsx` — side panel with all payment fields + audit info; "Edit" + "Toggle Paid" action buttons
-  - [ ] 8.6 Create desktop view `frontend/desktop/views/dashboard/accounting/PaymentFormView.desktop.tsx` — Add/Edit form; Student select, Package select (active only), Credit/Paid/Currency (auto-filled, editable), Payment Gateway select, Payment Date picker, Paid toggle, Note rich-text field
-  - [ ] 8.7 Create mobile views `frontend/mobile/views/dashboard/accounting/PaymentsListView.mobile.tsx` + `PaymentDetailView.mobile.tsx` + `PaymentFormView.mobile.tsx` — card-list layouts, inline stacked form sections (`.mobile.tsx` suffix mandatory per `frontend/mobile/AGENTS.md`)
-  - [ ] 8.8 Wire route pages from Phase 7 to render desktop vs mobile based on viewport (using existing `useIsMobile` hook)
-  - [ ] 8.9 Add the `?tab=credit-hours` rendering for student profile — component `frontend/common/views/dashboard/students/profile/StudentCreditHoursTab.tsx` reads `useStudentCreditHourBalanceQuery` + last 10 hour-based transactions; per-audience rendering via existing `resolveStudentsPageAudience` helper from `@/app/(dashboard)/lib/resolve-students-page-audience`
-  - [ ] 8.10 **Quality Loop**: Per-file verification on all new frontend files. Critical checks:
+- [x] **8. Payments list + form + detail views (desktop + mobile + shared ViewModels)**
+  - [x] 8.1 Create `frontend/common/views/dashboard/accounting/usePaymentsListViewModel.ts` — filter state (studentId, parentId, fromDate, toDate, unpaidOnly), pagination state, query wiring via `useAccountingPaymentsQuery`. PATTERN COMPLIANCE: existing ViewModels are `useXxxViewModel.ts` hooks located directly under `frontend/common/views/dashboard/<domain>/` (e.g. `useQuotaFormViewModel.ts`). NO `viewmodels/` subdirectory exists.
+  - [x] 8.2 Create `frontend/common/views/dashboard/accounting/usePaymentFormViewModel.ts` — package auto-fill logic (when `packagePlanId` changes, fetch plan via `usePackagePlanQuery` and auto-fill `creditHours`/`amount`/`currency` — fields remain editable), form validation (zod schema), submit handler
+  - [x] 8.3 Create `frontend/common/stores/accountingPaymentsStore.ts` — Zustand store for list filter + pagination state; persist filter across route changes. PATTERN COMPLIANCE: existing stores live FLAT in `frontend/common/stores/` (no subdirectories), named like `adminBillingStore.ts`, `quotaStore.ts`
+  - [x] 8.4 Create desktop view `frontend/desktop/views/dashboard/accounting/PaymentsListView.desktop.tsx` — MUI DataGrid with 9 columns (Student Name, Credit, Paid, Currency, Package, Payment Gateway, Payment Date, Created At, Actions); filter bar above grid; empty state; pagination controls. PATTERN COMPLIANCE: per `frontend/desktop/AGENTS.md`, desktop views live under `frontend/desktop/views/dashboard/<domain>/*.desktop.tsx` (mandatory `dashboard/` segment + `.desktop.tsx` suffix). All MUI components (Typography/Stack/Box) MUST use `sx={{...}}` prop — no v9-style props like `align=` or `mt=`.
+  - [x] 8.5 Create desktop view `frontend/desktop/views/dashboard/accounting/PaymentDetailView.desktop.tsx` — side panel with all payment fields + audit info; "Edit" + "Toggle Paid" action buttons
+  - [x] 8.6 Create desktop view `frontend/desktop/views/dashboard/accounting/PaymentFormView.desktop.tsx` — Add/Edit form; Student select, Package select (active only), Credit/Paid/Currency (auto-filled, editable), Payment Gateway select, Payment Date picker, Paid toggle, Note rich-text field
+  - [x] 8.7 Create mobile views `frontend/mobile/views/dashboard/accounting/PaymentsListView.mobile.tsx` + `PaymentDetailView.mobile.tsx` + `PaymentFormView.mobile.tsx` — card-list layouts, inline stacked form sections (`.mobile.tsx` suffix mandatory per `frontend/mobile/AGENTS.md`)
+  - [x] 8.8 Wire route pages from Phase 7 to render desktop vs mobile based on viewport (using existing `useIsMobile` hook)
+  - [x] 8.9 Add the `?tab=credit-hours` rendering for student profile — component `frontend/common/views/dashboard/students/profile/StudentCreditHoursTab.tsx` reads `useStudentCreditHourBalanceQuery` + last 10 hour-based transactions; per-audience rendering via existing `resolveStudentsPageAudience` helper from `@/app/(dashboard)/lib/resolve-students-page-audience`
+  - [x] 8.10 **Quality Loop**: Per-file verification on all new frontend files. Critical checks:
     - Form uses `useQuery` (not `useLazyQuery`) for package auto-fill
     - All user-facing strings from i18n namespace (no hardcoded strings)
     - Paid toggle disabled while mutation in flight
     - Mobile layouts pass RTL test (Arabic locale)
     - No MUI v9-style props on Typography/Stack/Box (use `sx`)
-  - [ ] 8.11 **Instruction Verification**: Verify against:
+  - [x] 8.11 **Instruction Verification**: Verify against:
     - AGENTS.md: `frontend/common/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/mobile/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
     - Instructions: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
 
@@ -236,14 +236,14 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 
 ## Phase 9: Frontend Views — Package Plans Catalog
 
-- [ ] **9. Package Plans CRUD views (desktop + mobile + shared ViewModels)**
-  - [ ] 9.1 Create `frontend/common/views/dashboard/accounting/usePackagePlanFormViewModel.ts` — codename uniqueness check (client-side optimistic), optimistic-lock version tracking, form validation
-  - [ ] 9.2 Create desktop view `frontend/desktop/views/dashboard/accounting/PackagePlansListView.desktop.tsx` — DataGrid with columns: Codename, Display Name, Credit Hours, Price, Currency, Active, Sort Order, Actions (Edit, Archive)
-  - [ ] 9.3 Create desktop view `frontend/desktop/views/dashboard/accounting/PackagePlanFormView.desktop.tsx` — Add/Edit form; all fields; archive action with confirmation dialog
-  - [ ] 9.4 Create mobile views `frontend/mobile/views/dashboard/accounting/PackagePlansListView.mobile.tsx` + `PackagePlanFormView.mobile.tsx`
-  - [ ] 9.5 Wire route pages from Phase 7 to render desktop vs mobile based on viewport
-  - [ ] 9.6 **Quality Loop**: Per-file verification on all new frontend files
-  - [ ] 9.7 **Instruction Verification**: Verify against:
+- [x] **9. Package Plans CRUD views (desktop + mobile + shared ViewModels)**
+  - [x] 9.1 Create `frontend/common/views/dashboard/accounting/usePackagePlanFormViewModel.ts` — codename uniqueness check (client-side optimistic), optimistic-lock version tracking, form validation
+  - [x] 9.2 Create desktop view `frontend/desktop/views/dashboard/accounting/PackagePlansListView.desktop.tsx` — DataGrid with columns: Codename, Display Name, Credit Hours, Price, Currency, Active, Sort Order, Actions (Edit, Archive)
+  - [x] 9.3 Create desktop view `frontend/desktop/views/dashboard/accounting/PackagePlanFormView.desktop.tsx` — Add/Edit form; all fields; archive action with confirmation dialog
+  - [x] 9.4 Create mobile views `frontend/mobile/views/dashboard/accounting/PackagePlansListView.mobile.tsx` + `PackagePlanFormView.mobile.tsx`
+  - [x] 9.5 Wire route pages from Phase 7 to render desktop vs mobile based on viewport
+  - [x] 9.6 **Quality Loop**: Per-file verification on all new frontend files
+  - [x] 9.7 **Instruction Verification**: Verify against:
     - AGENTS.md: `frontend/common/views/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/mobile/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
     - Instructions: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
 
@@ -251,14 +251,14 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 
 ## Phase 10: Backend Tests
 
-- [ ] **10. Repository + service + workflow tests**
-  - [ ] 10.1 Create `backend/db/test/repo/billing/package-plan.repository.test.ts` — `create` + `findByCodename` (case-insensitive), `listActive` excludes archived, `update` optimistic-lock conflict throws `ConflictError(tErrors.studentVersionMismatch)` (NOT generic Error), `archive` soft-delete + codename reuse allowed; all tests use `runInRollback` wrapper; never `expect().rejects.toThrow()` inside `runInRollback` per `backend/db/test/AGENTS.md`
-  - [ ] 10.2 Create `backend/db/test/repo/billing/accounting-payment.repository.test.ts` — `create` joins student + package correctly (verify `packageCodename` + `studentName` populated), `listPaginated` filters (student, parent, date range, unpaid-only — all AND combinations via `and()` builder), `findPaidSiblingsByInvoice(invoiceId, excludePaymentId)` returns correct siblings (excludes the queried payment + includes only `isPaidStatusOn=true` ones); `generateIdempotencyKey` is deterministic (same input → same key) AND uses empty string `""` for null `packagePlanId` (per EC-18)
-  - [ ] 10.3 Create `backend/db/test/logic/lms/credit-hours-workflow.test.ts` — `recordHourPurchase` bumps `students.creditHoursRemaining` + `creditHoursTotal` correctly (verify atomic SQL increment, not read-modify-write); `deductHoursForBooking` rejects on insufficient balance with `ConflictError(tErrors.credit.insufficientHours({studentId, remaining, required}))` (NOT generic `INSUFFICIENT_HOURS` string — verify the typed payload); `refundHoursOnCancel` idempotent (same idempotency key returns existing row, no duplicate insert); hour + class ledgers coexist without interference (one row with `changeAmount` set + `changeAmountHours` NULL, another with reverse — both pass XOR CHECK); `deductHoursForBooking` with `hours=0` rejected with `ValidationError`; `deductHoursForBooking` with fractional `hours=0.5` succeeds when `creditHoursRemaining >= 0.5`
-  - [ ] 10.4 Create `backend/db/test/logic/lms/accounting-payment-workflow.test.ts` — `recordPayment` creates invoice + payment + credit_transaction in one tx (verify all 3 rows exist after commit, FKs reference each other); idempotency: duplicate input returns existing row (NOT throws `ConflictError`); `recordPayment` with package plan archived between form-open and submit rejects with `NotFoundError(tErrors.package.planArchived)` (re-checks `active=true` INSIDE the tx); `recordPayment` with `isPaidStatusOn=true` → invoice `status=PAID`, `paidDate=paymentDate`; `togglePaidStatus` ON → invoice PAID; OFF → invoice UNPAID (when no siblings); OFF with paid sibling → invoice stays PAID; respects `accounting_paid_toggle_auto_flips_invoice=false`; stale `expectedInvoiceVersion` → `ConflictError(tErrors.billing.invoiceVersionMismatch)`; `update` with `paymentNote` change only → NO ADJUSTMENT row inserted, NO balance change; `update` with `creditHours` increase → ADJUSTMENT row with `changeAmountHours=+(new-old)`, balance bumped; `update` with `creditHours` decrease (within balance) → ADJUSTMENT row with `changeAmountHours=-(old-new)`, balance decremented; `update` with `creditHours` decrease past balance → `ConflictError(tErrors.credit.insufficientHours)`; `getStudentBalance` IDOR: caller without `ACCOUNTING_PAYMENTS_VIEW` AND not associated with student → `Error(tErrors.insufficientPermissions)`; `listPaginated` with no student filter (admin view-all) requires `ACCOUNTING_PAYMENTS_VIEW` only
-  - [ ] 10.5 Run all tests via `bun test` — all must pass
-  - [ ] 10.6 **Quality Loop**: Per-file verification on all new test files
-  - [ ] 10.7 **Instruction Verification**: Verify against:
+- [x] **10. Repository + service + workflow tests**
+  - [x] 10.1 Create `backend/db/test/repo/billing/package-plan.repository.test.ts` — `create` + `findByCodename` (case-insensitive), `listActive` excludes archived, `update` optimistic-lock conflict throws `ConflictError(tErrors.studentVersionMismatch)` (NOT generic Error), `archive` soft-delete + codename reuse allowed; all tests use `runInRollback` wrapper; never `expect().rejects.toThrow()` inside `runInRollback` per `backend/db/test/AGENTS.md`
+  - [x] 10.2 Create `backend/db/test/repo/billing/accounting-payment.repository.test.ts` — `create` joins student + package correctly (verify `packageCodename` + `studentName` populated), `listPaginated` filters (student, parent, date range, unpaid-only — all AND combinations via `and()` builder), `findPaidSiblingsByInvoice(invoiceId, excludePaymentId)` returns correct siblings (excludes the queried payment + includes only `isPaidStatusOn=true` ones); `generateIdempotencyKey` is deterministic (same input → same key) AND uses empty string `""` for null `packagePlanId` (per EC-18)
+  - [x] 10.3 Create `backend/db/test/logic/lms/credit-hours-workflow.test.ts` — `recordHourPurchase` bumps `students.creditHoursRemaining` + `creditHoursTotal` correctly (verify atomic SQL increment, not read-modify-write); `deductHoursForBooking` rejects on insufficient balance with `ConflictError(tErrors.credit.insufficientHours({studentId, remaining, required}))` (NOT generic `INSUFFICIENT_HOURS` string — verify the typed payload); `refundHoursOnCancel` idempotent (same idempotency key returns existing row, no duplicate insert); hour + class ledgers coexist without interference (one row with `changeAmount` set + `changeAmountHours` NULL, another with reverse — both pass XOR CHECK); `deductHoursForBooking` with `hours=0` rejected with `ValidationError`; `deductHoursForBooking` with fractional `hours=0.5` succeeds when `creditHoursRemaining >= 0.5`
+  - [x] 10.4 Create `backend/db/test/logic/lms/accounting-payment-workflow.test.ts` — `recordPayment` creates invoice + payment + credit_transaction in one tx (verify all 3 rows exist after commit, FKs reference each other); idempotency: duplicate input returns existing row (NOT throws `ConflictError`); `recordPayment` with package plan archived between form-open and submit rejects with `NotFoundError(tErrors.package.planArchived)` (re-checks `active=true` INSIDE the tx); `recordPayment` with `isPaidStatusOn=true` → invoice `status=PAID`, `paidDate=paymentDate`; `togglePaidStatus` ON → invoice PAID; OFF → invoice UNPAID (when no siblings); OFF with paid sibling → invoice stays PAID; respects `accounting_paid_toggle_auto_flips_invoice=false`; stale `expectedInvoiceVersion` → `ConflictError(tErrors.billing.invoiceVersionMismatch)`; `update` with `paymentNote` change only → NO ADJUSTMENT row inserted, NO balance change; `update` with `creditHours` increase → ADJUSTMENT row with `changeAmountHours=+(new-old)`, balance bumped; `update` with `creditHours` decrease (within balance) → ADJUSTMENT row with `changeAmountHours=-(old-new)`, balance decremented; `update` with `creditHours` decrease past balance → `ConflictError(tErrors.credit.insufficientHours)`; `getStudentBalance` IDOR: caller without `ACCOUNTING_PAYMENTS_VIEW` AND not associated with student → `Error(tErrors.insufficientPermissions)`; `listPaginated` with no student filter (admin view-all) requires `ACCOUNTING_PAYMENTS_VIEW` only
+  - [x] 10.5 Run all tests via `bun test` — all must pass
+  - [x] 10.6 **Quality Loop**: Per-file verification on all new test files
+  - [x] 10.7 **Instruction Verification**: Verify against:
     - AGENTS.md: `backend/db/test/AGENTS.md`, `backend/AGENTS.md`
     - Instructions: `.agents/instructions/backend.instructions.md`, `.agents/instructions/tests.instructions.md`
 
@@ -266,14 +266,14 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 
 ## Phase 11: Frontend Tests
 
-- [ ] **11. UI tests for payments + package plans**
-  - [ ] 11.1 Create `test/ui/accounting/payments-list.test.tsx` — renders DataGrid with mock data; filter bar interactions (student select, date range, unpaid toggle); empty state; pagination controls
-  - [ ] 11.2 Create `test/ui/accounting/payment-form.test.tsx` — package selection auto-fills Credit/Paid/Currency; submit triggers `recordAccountingPayment` mutation; idempotency: re-submit shows existing row; paid toggle interaction
-  - [ ] 11.3 Create `test/ui/accounting/package-plans.test.tsx` — catalog CRUD; codename uniqueness error display; archive action with confirmation
-  - [ ] 11.4 Create `test/ui/accounting/student-credit-hours-tab.test.tsx` — renders balance card; renders recent purchases; low-balance alert renders when below threshold
-  - [ ] 11.5 Run `bun test` for UI suite — all must pass
-  - [ ] 11.6 **Quality Loop**: Per-file verification on all new test files
-  - [ ] 11.7 **Instruction Verification**: Verify against:
+- [x] **11. UI tests for payments + package plans**
+  - [x] 11.1 Create `test/ui/accounting/payments-list.test.tsx` — renders DataGrid with mock data; filter bar interactions (student select, date range, unpaid toggle); empty state; pagination controls
+  - [x] 11.2 Create `test/ui/accounting/payment-form.test.tsx` — package selection auto-fills Credit/Paid/Currency; submit triggers `recordAccountingPayment` mutation; idempotency: re-submit shows existing row; paid toggle interaction
+  - [x] 11.3 Create `test/ui/accounting/package-plans.test.tsx` — catalog CRUD; codename uniqueness error display; archive action with confirmation
+  - [x] 11.4 Create `test/ui/accounting/student-credit-hours-tab.test.tsx` — renders balance card; renders recent purchases; low-balance alert renders when below threshold
+  - [x] 11.5 Run `bun test` for UI suite — all must pass
+  - [x] 11.6 **Quality Loop**: Per-file verification on all new test files
+  - [x] 11.7 **Instruction Verification**: Verify against:
     - AGENTS.md: `test/ui/AGENTS.md`
     - Instructions: `.agents/instructions/tests.instructions.md`
 
@@ -281,15 +281,15 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 
 ## Phase 12: Notifications (Lightweight)
 
-- [ ] **12. Accounting notification events + builders**
-  - [ ] 12.1 Edit `backend/enum/notifications/notificationDeliveries.enum.ts` (or equivalent `NotificationEventType` enum) — add `ACCOUNTING_LOW_HOURS` + `ACCOUNTING_PAYMENT_RECORDED` event types
-  - [ ] 12.2 Create `backend/services/notification/accounting-notification.builders.ts` — payload builders for both events; `ACCOUNTING_PAYMENT_RECORDED` delivers to student (+ parent if linked); `ACCOUNTING_LOW_HOURS` delivers to student + parent + admin
-  - [ ] 12.3 Edit `backend/services/billing/accounting-payment.service.ts` — call notification dispatch after successful `recordPayment` (non-blocking, fire-and-forget pattern matching existing notification calls)
-  - [ ] 12.4 Edit `backend/services/billing/credit.service.ts` — after `deductHoursForBooking`, check if `creditHoursRemaining < accounting_low_hours_threshold` system setting; if so, dispatch `ACCOUNTING_LOW_HOURS`
-  - [ ] 12.5 Add notification pref entries (default ON for both events) to the existing notification preferences seed
-  - [ ] 12.6 Add EN + AR notification templates to `shared/locale/types/notifications/` + EN/AR implementations
-  - [ ] 12.7 **Quality Loop**: Per-file verification on all new/edited notification files
-  - [ ] 12.8 **Instruction Verification**: Verify against:
+- [x] **12. Accounting notification events + builders**
+  - [x] 12.1 Edit `backend/enum/notifications/notificationDeliveries.enum.ts` (or equivalent `NotificationEventType` enum) — add `ACCOUNTING_LOW_HOURS` + `ACCOUNTING_PAYMENT_RECORDED` event types
+  - [x] 12.2 Create `backend/services/notification/accounting-notification.builders.ts` — payload builders for both events; `ACCOUNTING_PAYMENT_RECORDED` delivers to student (+ parent if linked); `ACCOUNTING_LOW_HOURS` delivers to student + parent + admin
+  - [x] 12.3 Edit `backend/services/billing/accounting-payment.service.ts` — call notification dispatch after successful `recordPayment` (non-blocking, fire-and-forget pattern matching existing notification calls)
+  - [x] 12.4 Edit `backend/services/billing/credit.service.ts` — after `deductHoursForBooking`, check if `creditHoursRemaining < accounting_low_hours_threshold` system setting; if so, dispatch `ACCOUNTING_LOW_HOURS`
+  - [x] 12.5 Add notification pref entries (default ON for both events) to the existing notification preferences seed
+  - [x] 12.6 Add EN + AR notification templates to `shared/locale/types/notifications/` + EN/AR implementations
+  - [x] 12.7 **Quality Loop**: Per-file verification on all new/edited notification files
+  - [x] 12.8 **Instruction Verification**: Verify against:
     - AGENTS.md: `backend/services/AGENTS.md`, `backend/enum/AGENTS.md`, `shared/AGENTS.md`
     - Instructions: `.agents/instructions/backend.instructions.md`
 

@@ -30,6 +30,7 @@ export const dashboardAccountingPackagePlansEn: PackagePlansLabels = {
     active: "Active",
     activeHelp: "Inactive plans are hidden from the Add Payment dropdown but keep their history.",
     sortOrder: "Sort Order",
+    validityMonths: "Validity (months)",
     submit: "Save Plan",
     cancel: "Cancel",
     saving: "Saving…",

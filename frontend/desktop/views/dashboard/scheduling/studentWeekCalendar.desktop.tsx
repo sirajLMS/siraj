@@ -1,6 +1,5 @@
 "use client";
 
-import { gql, type TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import {
@@ -17,6 +16,7 @@ import {
 } from "@mui/material";
 import { alpha, type Theme } from "@mui/material/styles";
 import { useState } from "react";
+import { studentClassesRangeQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { SessionActions } from "@/frontend/common/views/dashboard/scheduling/session-actions/SessionActions";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
@@ -29,30 +29,6 @@ interface StudentClassRow {
   outcome: string;
   executionState: string;
 }
-
-interface StudentClassesQuery {
-  studentUpcomingClasses: {
-    id: string;
-    classes: StudentClassRow[];
-  } | null;
-}
-
-const STUDENT_CLASSES_RANGE_QUERY: TypedDocumentNode<StudentClassesQuery> = gql`
-  query StudentClassesRange($studentId: String!, $from: DateTime, $to: DateTime) {
-    studentUpcomingClasses(studentId: $studentId, from: $from, to: $to) {
-      id
-      classes {
-        id
-        scheduledStartAt
-        scheduledEndAt
-        subjectName
-        instructor
-        outcome
-        executionState
-      }
-    }
-  }
-`;
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 7);
@@ -283,12 +259,20 @@ export function StudentWeekCalendarContainer() {
   const [studentId] = useState("741f9933-8c5f-4507-acb8-fca09adcbe58");
 
   const weekEnd = addDays(weekStart, 7);
-  const { data, loading, error } = useQuery(STUDENT_CLASSES_RANGE_QUERY, {
+  const { data, loading, error } = useQuery(studentClassesRangeQueryDocument, {
     variables: { studentId, from: weekStart.toISOString(), to: weekEnd.toISOString() },
     fetchPolicy: "cache-and-network",
   });
 
-  const classes = data?.studentUpcomingClasses?.classes ?? [];
+  const classes: StudentClassRow[] = (data?.studentUpcomingClasses?.classes ?? []).map(cls => ({
+    id: cls.id ?? "",
+    scheduledStartAt: cls.scheduledStartAt ?? "",
+    scheduledEndAt: cls.scheduledEndAt ?? "",
+    subjectName: cls.subjectName ?? null,
+    instructor: cls.instructor ?? "",
+    outcome: cls.outcome ?? "",
+    executionState: cls.executionState ?? "",
+  }));
 
   return (
     <DesktopPageContainer>

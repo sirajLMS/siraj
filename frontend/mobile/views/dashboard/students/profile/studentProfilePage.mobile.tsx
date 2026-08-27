@@ -81,31 +81,59 @@ export function StudentProfilePageMobileView({
       />
 
       <Stack sx={{ gap: 2, px: 2, pb: 3 }}>
-        <Tabs
-          value={currentTab}
-          onChange={onTabChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          allowScrollButtonsMobile
-          sx={{ mb: 1, minHeight: 40 }}
-        >
-          {visibleTabs.includes("profile") ? <Tab value="profile" label={tabs.profile} /> : null}
-          {visibleTabs.includes("status") ? <Tab value="status" label={tabs.status} /> : null}
-          {visibleTabs.includes("classes") ? <Tab value="classes" label={tabs.classes} /> : null}
-          {visibleTabs.includes("quota") ? <Tab value="quota" label={tabs.quota} /> : null}
-          {visibleTabs.includes("credit-hours") ? <Tab value="credit-hours" label={tabs.creditHours} /> : null}
-          {visibleTabs.includes("history") ? <Tab value="history" label={tabs.history} /> : null}
-        </Tabs>
+        <MobileProfileTabBar visibleTabs={visibleTabs} currentTab={currentTab} onTabChange={onTabChange} tabs={tabs} />
 
-        <Stack sx={{ gap: 2 }}>
-          {currentTab === "profile" ? <StudentManagerProfileTab /> : null}
-          {currentTab === "status" ? <StudentStatusView studentId={studentId} /> : null}
-          {currentTab === "classes" ? <StudentClassesView studentId={studentId} /> : null}
-          {currentTab === "quota" ? <StudentQuotaView studentId={studentId} /> : null}
-          {currentTab === "credit-hours" ? <StudentCreditHoursTab studentId={studentId} /> : null}
-          {currentTab === "history" ? <StudentHistoryContainer studentId={studentId} /> : null}
-        </Stack>
+        <MobileProfileTabPanels studentId={studentId} currentTab={currentTab} />
       </Stack>
     </MobilePageContainer>
+  );
+}
+
+function MobileProfileTabBar({
+  visibleTabs,
+  currentTab,
+  onTabChange,
+  tabs,
+}: Readonly<{
+  visibleTabs: StudentProfilePageViewModel["visibleTabs"];
+  currentTab: StudentProfilePageViewModel["activeTab"];
+  onTabChange: StudentProfilePageViewModel["onTabChange"];
+  tabs: StudentProfilePageViewModel["labelsBySection"]["tabs"];
+}>) {
+  return (
+    <Tabs
+      value={currentTab}
+      onChange={onTabChange}
+      variant="scrollable"
+      scrollButtons="auto"
+      allowScrollButtonsMobile
+      sx={{ mb: 1, minHeight: 40 }}
+    >
+      {visibleTabs.includes("profile") ? <Tab value="profile" label={tabs.profile} /> : null}
+      {visibleTabs.includes("status") ? <Tab value="status" label={tabs.status} /> : null}
+      {visibleTabs.includes("classes") ? <Tab value="classes" label={tabs.classes} /> : null}
+      {visibleTabs.includes("quota") ? <Tab value="quota" label={tabs.quota} /> : null}
+      {visibleTabs.includes("credit-hours") ? <Tab value="credit-hours" label={tabs.creditHours} /> : null}
+      {visibleTabs.includes("history") ? <Tab value="history" label={tabs.history} /> : null}
+    </Tabs>
+  );
+}
+
+function MobileProfileTabPanels({
+  studentId,
+  currentTab,
+}: Readonly<{
+  studentId: string;
+  currentTab: StudentProfilePageViewModel["activeTab"];
+}>) {
+  return (
+    <Stack sx={{ gap: 2 }}>
+      {currentTab === "profile" ? <StudentManagerProfileTab /> : null}
+      {currentTab === "status" ? <StudentStatusView studentId={studentId} /> : null}
+      {currentTab === "classes" ? <StudentClassesView studentId={studentId} /> : null}
+      {currentTab === "quota" ? <StudentQuotaView studentId={studentId} /> : null}
+      {currentTab === "credit-hours" ? <StudentCreditHoursTab studentId={studentId} /> : null}
+      {currentTab === "history" ? <StudentHistoryContainer studentId={studentId} /> : null}
+    </Stack>
   );
 }

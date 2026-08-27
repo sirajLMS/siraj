@@ -10,9 +10,8 @@ import { STUDENT_FIELD_GROUP_BY_KEY, STUDENT_FIELD_GROUPS } from "@/backend/serv
 import type {
   FieldFilterContext,
   ProfileFieldGroupDefinition,
-  ProfileFieldGroupKey,
   StudentFieldFilterContext,
-  StudentFieldGroupKey,
+  StudentFieldGroupDefinition,
 } from "@/backend/types";
 
 function isStringRecord(value: unknown): value is Record<string, unknown> {
@@ -99,8 +98,22 @@ export function filterStudentProfileByFieldGroups<T extends Record<string, unkno
   return filtered;
 }
 
+/**
+ * Assertion-free dictionary lookup so arbitrary client strings can never be
+ * smuggled past the field-group gates (oxlint no-unsafe-type-assertion).
+ */
+function lookupProfileGroup(key: string): ProfileFieldGroupDefinition | undefined {
+  const found = Object.entries(PROFILE_FIELD_GROUP_BY_KEY).find(([entryKey]) => entryKey === key);
+  return found?.[1];
+}
+
+function lookupStudentGroup(key: string): StudentFieldGroupDefinition | undefined {
+  const found = Object.entries(STUDENT_FIELD_GROUP_BY_KEY).find(([entryKey]) => entryKey === key);
+  return found?.[1];
+}
+
 export function canViewProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {
-  const group = PROFILE_FIELD_GROUP_BY_KEY[groupKey as ProfileFieldGroupKey];
+  const group = lookupProfileGroup(groupKey);
   if (!group || !shouldApplyProfileGroup(group, ctx)) {
     return false;
   }
@@ -108,7 +121,7 @@ export function canViewProfileFieldGroup(ctx: FieldFilterContext, groupKey: stri
 }
 
 export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {
-  const group = PROFILE_FIELD_GROUP_BY_KEY[groupKey as ProfileFieldGroupKey];
+  const group = lookupProfileGroup(groupKey);
   if (!group || !shouldApplyProfileGroup(group, ctx)) {
     return false;
   }
@@ -116,7 +129,7 @@ export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: stri
 }
 
 export function canViewStudentFieldGroup(ctx: StudentFieldFilterContext, groupKey: string): boolean {
-  const group = STUDENT_FIELD_GROUP_BY_KEY[groupKey as StudentFieldGroupKey];
+  const group = lookupStudentGroup(groupKey);
   if (!group) {
     return false;
   }
@@ -124,7 +137,7 @@ export function canViewStudentFieldGroup(ctx: StudentFieldFilterContext, groupKe
 }
 
 export function canEditStudentFieldGroup(ctx: StudentFieldFilterContext, groupKey: string): boolean {
-  const group = STUDENT_FIELD_GROUP_BY_KEY[groupKey as StudentFieldGroupKey];
+  const group = lookupStudentGroup(groupKey);
   if (!group) {
     return false;
   }

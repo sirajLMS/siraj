@@ -40,6 +40,9 @@ export const packagePlans = createTable(
     creditHours: numericColumn("credit_hours", { precision: 12, scale: 2 }).notNull(),
     priceAmount: numericColumn("price_amount", { precision: 12, scale: 2 }).notNull(),
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
+    // Optional purchase validity window in months (catalog metadata; the
+    // purchase-time snapshot on payments stays authoritative for history).
+    validityMonths: integerColumn("validity_months"),
     active: booleanColumn("active").notNull().default(true),
     sortOrder: integerColumn("sort_order").notNull().default(0),
     // Optimistic-lock counter (mirrors invoices/students pattern).

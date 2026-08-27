@@ -167,7 +167,7 @@ function makeStudentSupervisorNavItems(includeGroupId: boolean): readonly NavIte
  * grp_home                  | home, search-schedule, schedule-tracking, status-tracking, schedule-alerts | per-item (admin)
  * grp_people                | teachers, parents, students, staff  | StaffViewDirectory / ParentsList / TeacherViewStudents / StudentsList
  * grp_schedule              | schedule-tracking* (after Phase 3), schedule-alerts | per-item
-  * grp_billing               | (Phase 3 merged billing parent)       | BillingViewHistory / BillingManageCurrencyHedges / BillingCreateInvoice
+ * grp_billing               | (Phase 3 merged billing parent)       | BillingViewHistory / BillingManageCurrencyHedges / BillingCreateInvoice
  * grp_accounting            | payments, payments-new, packages, packages-new | AccountingPaymentsView / AccountingPaymentsManage
  * grp_catalogs              | payment-catalogs, meeting-providers   | PaymentMethodsManageCatalogs / MeetingProvidersManageCatalog
  * grp_feedback              | complaints-manage, suggestions-manage | ComplaintsRespond|ComplaintsList / SuggestionsList
@@ -241,7 +241,7 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     labelKey: "navGroupAccounting",
     iconKey: "payments",
     section: "main",
-        permission: [AppPermission.AccountingPaymentsView, AppPermission.AccountingPaymentsManage],
+    permission: [AppPermission.AccountingPaymentsView, AppPermission.AccountingPaymentsManage],
     separator: true,
   },
   {
@@ -588,7 +588,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "payments-new",
-    labelKey: "accountingPayments",
+    labelKey: "accountingPaymentsNew",
     iconKey: "noteAdd",
     href: "/accounting/payments/new",
     section: "main",
@@ -606,7 +606,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
   },
   {
     key: "packages-new",
-    labelKey: "accountingPackages",
+    labelKey: "accountingPackagesNew",
     iconKey: "noteAdd",
     href: "/accounting/packages/new",
     section: "main",

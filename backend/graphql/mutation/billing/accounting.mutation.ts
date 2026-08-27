@@ -1,9 +1,9 @@
 import { AppPermission } from "@/backend/enum";
-import { mapQuotaErrorToGraphQLError } from "@/backend/graphql/mutation/billing/quota.mutation";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { mapQuotaErrorToGraphQLError } from "@/backend/graphql/mutation/billing/quota.mutation";
 import {
-  AccountingPaymentPothosObject,
   AccountingPaymentInput,
+  AccountingPaymentPothosObject,
   AccountingPaymentTogglePaidInputObject,
   AccountingPaymentUpdateInputObject,
   PackagePlanInput,
@@ -19,6 +19,131 @@ import type {
   PackagePlanSubmitInput,
   PackagePlanUpdateInput,
 } from "@/backend/types";
+import { currencyOf, gatewayOf, isSharedCurrency, isSharedGateway } from "@/shared/constants/enum-guards";
+
+/**
+ * Field-by-field normalizers bridging Pothos-generated input objects (whose
+ * optional fields may carry explicit nulls) onto the canonical service input
+ * shapes — mirrors the meeting.mutation normalize* convention.
+ */
+type PackagePlanInputShape = {
+  readonly codename?: string | null;
+  readonly displayName?: string | null;
+  readonly description?: string | null;
+  readonly creditHours?: number | null;
+  readonly priceAmount?: number | null;
+  readonly currency?: string | null;
+  readonly active?: boolean | null;
+  readonly sortOrder?: number | null;
+  readonly metadata?: Record<string, unknown> | null;
+};
+
+type PackagePlanUpdateShape = {
+  readonly id?: string | null;
+  readonly displayName?: string | null;
+  readonly description?: string | null;
+  readonly creditHours?: number | null;
+  readonly priceAmount?: number | null;
+  readonly currency?: string | null;
+  readonly active?: boolean | null;
+  readonly sortOrder?: number | null;
+  readonly version?: number | null;
+};
+
+type AccountingPaymentSubmitShape = {
+  readonly studentId: string;
+  readonly packagePlanId?: string | null;
+  readonly creditHours: number;
+  readonly amount: number;
+  readonly currency: string | null;
+  readonly paymentGateway: string | null;
+  readonly paymentDate: string | Date;
+  readonly isPaidStatusOn?: boolean | null;
+  readonly paymentNote?: string | null;
+};
+
+type AccountingPaymentUpdateShape = {
+  readonly id: string;
+  readonly paymentGateway?: string | null;
+  readonly paymentNote?: string | null;
+  readonly creditHours?: number | null;
+  readonly expectedInvoiceVersion?: number | null;
+};
+
+type AccountingPaymentTogglePaidShape = {
+  readonly id: string;
+  readonly isPaidStatusOn: boolean;
+  readonly expectedInvoiceVersion?: number | null;
+};
+
+function requireString(value: string | null | undefined, message: string): string {
+  if (value == null || value === "") {
+    throw new Error(message);
+  }
+  return value;
+}
+
+function normalizePackagePlanSubmit(input: PackagePlanInputShape): PackagePlanSubmitInput {
+  return {
+    codename: requireString(input.codename ?? "", "codename required"),
+    displayName: requireString(input.displayName ?? "", "displayName required"),
+    description: input.description ?? null,
+    creditHours: input.creditHours ?? 0,
+    priceAmount: input.priceAmount ?? 0,
+    currency: currencyOf(input.currency),
+    active: input.active ?? true,
+    sortOrder: input.sortOrder ?? 0,
+    metadata: input.metadata ?? null,
+  };
+}
+
+function normalizePackagePlanUpdate(input: PackagePlanUpdateShape): PackagePlanUpdateInput {
+  const patch: PackagePlanUpdateInput = { id: requireString(input.id ?? "", "id required") };
+  if (input.displayName != null) patch.displayName = input.displayName;
+  if (input.description !== undefined && input.description !== null) patch.description = input.description;
+  if (typeof input.creditHours === "number") patch.creditHours = input.creditHours;
+  if (typeof input.priceAmount === "number") patch.priceAmount = input.priceAmount;
+  const currencyRaw = input.currency ?? null;
+  if (currencyRaw != null && isSharedCurrency(currencyRaw)) patch.currency = currencyRaw;
+  if (input.active != null) patch.active = input.active;
+  if (input.sortOrder != null) patch.sortOrder = input.sortOrder;
+  if (input.version != null) patch.version = input.version;
+  return patch;
+}
+
+function normalizeAccountingPaymentSubmit(input: AccountingPaymentSubmitShape): AccountingPaymentSubmitInput {
+  return {
+    studentId: input.studentId,
+    packagePlanId: input.packagePlanId ?? null,
+    creditHours: input.creditHours ?? 0,
+    amount: input.amount ?? 0,
+    currency: currencyOf(input.currency),
+    paymentGateway: gatewayOf(input.paymentGateway),
+    paymentDate: new Date(input.paymentDate),
+    isPaidStatusOn: input.isPaidStatusOn ?? true,
+    paymentNote: input.paymentNote ?? null,
+  };
+}
+
+function normalizeAccountingPaymentUpdate(input: AccountingPaymentUpdateShape): AccountingPaymentUpdateInput {
+  const payload: AccountingPaymentUpdateInput = {
+    id: input.id,
+    expectedInvoiceVersion: input.expectedInvoiceVersion ?? undefined,
+  };
+  const gatewayRaw = input.paymentGateway ?? null;
+  if (gatewayRaw != null && isSharedGateway(gatewayRaw)) payload.paymentGateway = gatewayRaw;
+  if (input.paymentNote !== undefined && input.paymentNote !== null) payload.paymentNote = input.paymentNote;
+  if (typeof input.creditHours === "number") payload.creditHours = input.creditHours;
+  return payload;
+}
+
+function normalizeTogglePaid(input: AccountingPaymentTogglePaidShape): AccountingPaymentTogglePaidInput {
+  return {
+    id: input.id,
+    isPaidStatusOn: input.isPaidStatusOn,
+    expectedInvoiceVersion: input.expectedInvoiceVersion ?? undefined,
+  };
+}
 
 gqlSchemaBuilder.mutationField("createPackagePlan", t =>
   t.field({
@@ -37,11 +162,7 @@ gqlSchemaBuilder.mutationField("createPackagePlan", t =>
       }
       const tErrors = ctx.t().errorsTranslations;
       try {
-        return await PackagePlanService.create(
-          actorUserId,
-          args.input as PackagePlanSubmitInput,
-          tErrors
-        );
+        return await PackagePlanService.create(actorUserId, normalizePackagePlanSubmit(args.input), tErrors);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }
@@ -66,11 +187,7 @@ gqlSchemaBuilder.mutationField("updatePackagePlan", t =>
       }
       const tErrors = ctx.t().errorsTranslations;
       try {
-        return await PackagePlanService.update(
-          actorUserId,
-          args.input as unknown as PackagePlanUpdateInput,
-          tErrors
-        );
+        return await PackagePlanService.update(actorUserId, normalizePackagePlanUpdate(args.input), tErrors);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }
@@ -95,8 +212,8 @@ gqlSchemaBuilder.mutationField("archivePackagePlan", t =>
       }
       const tErrors = ctx.t().errorsTranslations;
       try {
-        await PackagePlanService.archive(actorUserId, String(args.id), tErrors);
-        const plan = await PackagePlanService.getById(String(args.id));
+        await PackagePlanService.archive(actorUserId, args.id, tErrors);
+        const plan = await PackagePlanService.getById(args.id);
         if (!plan) throw new Error("Package plan not found after archive");
         return plan;
       } catch (error) {
@@ -125,7 +242,7 @@ gqlSchemaBuilder.mutationField("recordAccountingPayment", t =>
       try {
         return await AccountingPaymentService.recordPayment(
           actorUserId,
-          { ...args.input, paymentDate: new Date(args.input.paymentDate) } as AccountingPaymentSubmitInput,
+          normalizeAccountingPaymentSubmit(args.input),
           tErrors
         );
       } catch (error) {
@@ -154,7 +271,7 @@ gqlSchemaBuilder.mutationField("updateAccountingPayment", t =>
       try {
         return await AccountingPaymentService.update(
           actorUserId,
-          args.input as AccountingPaymentUpdateInput,
+          normalizeAccountingPaymentUpdate(args.input),
           tErrors
         );
       } catch (error) {
@@ -181,11 +298,7 @@ gqlSchemaBuilder.mutationField("toggleAccountingPaymentPaidStatus", t =>
       }
       const tErrors = ctx.t().errorsTranslations;
       try {
-        return await AccountingPaymentService.togglePaidStatus(
-          actorUserId,
-          args.input as AccountingPaymentTogglePaidInput,
-          tErrors
-        );
+        return await AccountingPaymentService.togglePaidStatus(actorUserId, normalizeTogglePaid(args.input), tErrors);
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }

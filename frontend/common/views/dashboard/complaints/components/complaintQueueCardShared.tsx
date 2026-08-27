@@ -118,7 +118,7 @@ const StyledAnsweredResponseHeader = styled(Box)(({ theme }) => ({
 
 const StyledAnsweredIcon = styled(CheckCircleOutlined)(({ theme }) => ({
   color: theme.palette.primary.main,
-  fontSize: 18,
+  fontSize: theme.typography.titleLg.fontSize,
 }));
 
 const StyledAnsweredResponseLabel = styled(Typography)(({ theme }) => ({

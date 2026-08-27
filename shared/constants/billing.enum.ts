@@ -26,3 +26,20 @@ export enum PaymentDirection {
   PAYOUT = "PAYOUT",
   BOTH = "BOTH",
 }
+
+/** Gateway through which an accounting (credit-hours) payment was received. */
+export enum PaymentGateway {
+  NONE = "NONE",
+  PAYPAL = "PAYPAL",
+  WESTERN_UNION = "WESTERN_UNION",
+  BANK = "BANK",
+  OTHER = "OTHER",
+}
+
+/** Derived (non-persisted) history event kinds for the payment detail timeline. */
+export enum AccountingPaymentHistoryKind {
+  PAYMENT_RECORDED = "PAYMENT_RECORDED",
+  HOURS_CREDITED = "HOURS_CREDITED",
+  HOURS_ADJUSTED = "HOURS_ADJUSTED",
+  MARKED_PAID = "MARKED_PAID",
+}
