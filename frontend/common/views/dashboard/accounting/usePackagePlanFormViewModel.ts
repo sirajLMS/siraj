@@ -6,6 +6,18 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { type Control, type FieldErrors, type UseFormHandleSubmit, useForm } from "react-hook-form";
 import { CurrencyCode, type PackagePlanQuery } from "@/frontend/common/graphql/generated/gql/graphql";
+
+const VALID_CURRENCY_CODES = new Set<string>(Object.values(CurrencyCode));
+
+function isCurrencyCodeValue(value: string): value is CurrencyCode {
+  return VALID_CURRENCY_CODES.has(value);
+}
+
+/** Resolves a raw wire string to its matching CurrencyCode member (undefined when unknown). */
+function asCurrencyCode(value: string | null): CurrencyCode | undefined {
+  return value !== null && isCurrencyCodeValue(value) ? value : undefined;
+}
+
 import {
   archivePackagePlanMutationDocument,
   createPackagePlanMutationDocument,
@@ -93,10 +105,7 @@ export function usePackagePlanFormViewModel({
     if (isEditing && existing) {
       const editCurrencyFallback = CurrencyCode.Egp;
       const editCurrencyRaw = existing.currency ?? null;
-      const editCurrencyMapped =
-        editCurrencyRaw != null
-          ? Object.values(CurrencyCode).find(member => String(member) === editCurrencyRaw)
-          : undefined;
+      const editCurrencyMapped = asCurrencyCode(editCurrencyRaw);
 
       form.reset({
         codename: existing.codename ?? "",
@@ -135,8 +144,9 @@ export function usePackagePlanFormViewModel({
   const checkCodenameUniqueness = useCallback(
     (codename: string): string | null => {
       const plans = catalogData?.packagePlans ?? [];
+      const targetCodename = codename.trim().toLowerCase();
       const clash = plans.find(
-        plan => (plan.codename ?? "").toLowerCase() === codename.trim().toLowerCase() && plan.id !== planId
+        plan => (plan.codename ?? "").toLowerCase() === targetCodename && (!planId || plan.id !== planId)
       );
       return clash ? t.saveError : null;
     },
@@ -160,7 +170,7 @@ export function usePackagePlanFormViewModel({
               input: {
                 id: planId,
                 displayName: data.displayName,
-                description: data.description || null,
+                description: data.description ?? null,
                 creditHours: data.creditHours,
                 priceAmount: data.priceAmount,
                 currency: data.currency,
@@ -178,7 +188,7 @@ export function usePackagePlanFormViewModel({
               input: {
                 codename: data.codename,
                 displayName: data.displayName,
-                description: data.description || null,
+                description: data.description ?? null,
                 creditHours: data.creditHours,
                 priceAmount: data.priceAmount,
                 currency: data.currency,

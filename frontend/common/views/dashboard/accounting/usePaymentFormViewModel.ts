@@ -10,6 +10,18 @@ import {
   CurrencyCode,
   PaymentGateway,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+
+const VALID_CURRENCY_CODES = new Set<string>(Object.values(CurrencyCode));
+
+function isCurrencyCodeValue(value: string): value is CurrencyCode {
+  return VALID_CURRENCY_CODES.has(value);
+}
+
+/** Resolves a raw wire string to its matching CurrencyCode member (undefined when unknown). */
+function asCurrencyCode(value: string | null): CurrencyCode | undefined {
+  return value !== null && isCurrencyCodeValue(value) ? value : undefined;
+}
+
 import {
   accountingPaymentQueryDocument,
   packagePlanQueryDocument,
@@ -130,8 +142,7 @@ export function usePaymentFormViewModel({
     createForm.setValue("creditHours", Number(plan.creditHours ?? 1));
     createForm.setValue("amount", Number(plan.priceAmount ?? 0));
     const rawCurrency = plan.currency ?? null;
-    const mappedCurrency =
-      rawCurrency != null ? Object.values(CurrencyCode).find(member => String(member) === rawCurrency) : undefined;
+    const mappedCurrency = asCurrencyCode(rawCurrency);
     createForm.setValue("currency", mappedCurrency ?? CurrencyCode.Egp);
   }, [isEditing, planData, createForm]);
 
@@ -161,7 +172,7 @@ export function usePaymentFormViewModel({
           variables: {
             input: {
               studentId: data.studentId,
-              packagePlanId: data.packagePlanId || null,
+              packagePlanId: data.packagePlanId ?? null,
               creditHours: data.creditHours,
               amount: data.amount,
               currency: data.currency,
@@ -170,7 +181,7 @@ export function usePaymentFormViewModel({
               // the date input yields a bare YYYY-MM-DD string.
               paymentDate: new Date(`${data.paymentDate}T12:00:00`).toISOString(),
               isPaidStatusOn: data.isPaidStatusOn,
-              paymentNote: data.paymentNote || null,
+              paymentNote: data.paymentNote ?? null,
             },
           },
         });
@@ -195,7 +206,7 @@ export function usePaymentFormViewModel({
               id: paymentId,
               creditHours: data.creditHours,
               paymentGateway: data.paymentGateway,
-              paymentNote: data.paymentNote || null,
+              paymentNote: data.paymentNote ?? null,
               // Explicit null = skip the optimistic-lock check (service uses
               // `!= null`). The payment object does not yet expose the live
               // invoice version (carry-forward: expose invoiceVersion field).

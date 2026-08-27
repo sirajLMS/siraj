@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, screen } from "@testing-library/react";
+import { act, cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
@@ -111,9 +111,16 @@ describe("student profile — credit hours tab (component)", () => {
 
     // Balance cards show the translated labels with hour-formatted values.
     expect(await screen.findByText(labels.totalLabel)).toBeVisible();
-    expect(screen.getByText(labels.remainingLabel)).toBeVisible();
+    // Two mocked queries settle independently — pump an act() turn so the
+    // transactions observable commit lands before synchronous assertions.
+    await act(async () => {});
+    expect(screen.getByText(labels.consumedLabel)).toBeVisible();
+    expect(screen.getByText("6.00 hrs")).toBeVisible(); // consumed = total − remaining
     expect(screen.getByText(labels.balanceCardTitle)).toBeVisible();
     expect(screen.getByText("20.00 hrs")).toBeVisible();
+    expect(screen.getByText("14.00 hrs")).toBeVisible(); // remaining card (highlight)
+    const remainingBar = screen.getByRole("progressbar");
+    expect(remainingBar).toHaveAttribute("aria-valuenow", "70"); // 14/20
 
     // Recent purchases table renders the positive purchase row (+10.00 h).
     expect(screen.getByText(labels.recentPurchasesTitle)).toBeVisible();
@@ -129,6 +136,7 @@ describe("student profile — credit hours tab (component)", () => {
     });
 
     // 4/20 = 0.2 ≤ 0.25 → alert visible with remaining + threshold hours.
+    await act(async () => {});
     const alertText = labels.lowBalanceAlert("4.00", (20 * 0.25).toFixed(2));
     expect(await screen.findByText(alertText)).toBeVisible();
   });

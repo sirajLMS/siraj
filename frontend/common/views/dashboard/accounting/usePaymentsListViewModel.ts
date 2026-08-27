@@ -12,6 +12,23 @@ import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/
 /** Hard transport cap per fetch — the catalog stays small; client paginates. */
 const MAX_FETCH_ROWS = 500;
 
+/** True when at least one list filter is actively constraining the query. */
+function hasAnyListFilter(v: {
+  readonly studentId: string | null;
+  readonly parentId: string | null;
+  readonly fromDate: string | null;
+  readonly toDate: string | null;
+  readonly unpaidOnly: boolean | null;
+}): boolean {
+  return [
+    v.studentId !== null && v.studentId !== "",
+    v.parentId !== null && v.parentId !== "",
+    v.fromDate !== null && v.fromDate !== "",
+    v.toDate !== null && v.toDate !== "",
+    v.unpaidOnly === true,
+  ].includes(true);
+}
+
 /** One row of the accounting payments list (denormalized payment view). */
 export type AccountingPaymentRow = NonNullable<
   NonNullable<
@@ -27,52 +44,36 @@ export interface PaymentsListMetrics {
   readonly creditHours: number;
 }
 
-export interface PaymentsListViewModel {
+export interface PaymentsListViewModel extends PaymentsFilterSlice {
   readonly t: PaymentsLabels;
   readonly rows: readonly AccountingPaymentRow[];
   readonly loading: boolean;
   readonly error: boolean;
   readonly metrics: PaymentsListMetrics;
-  readonly studentId: string | null;
-  readonly parentId: string | null;
-  readonly fromDate: string | null;
-  readonly toDate: string | null;
-  readonly unpaidOnly: boolean;
-  readonly setStudentId: (studentId: string | null) => void;
-  readonly setParentId: (parentId: string | null) => void;
-  readonly setFromDate: (fromDate: string | null) => void;
-  readonly setToDate: (toDate: string | null) => void;
-  readonly setUnpaidOnly: (unpaidOnly: boolean) => void;
-  readonly resetFilters: () => void;
   readonly hasActiveFilters: boolean;
 }
 
 export function usePaymentsListViewModel(): PaymentsListViewModel {
   const t = useAppTranslation(DashboardAccountingPayments);
+  const filterSlice = useAccountingPaymentsFilterSlice();
+  const {
+    studentId,
+    parentId,
+    fromDate,
+    toDate,
+    unpaidOnly,
+    setStudentId,
+    setParentId,
+    setFromDate,
+    setToDate,
+    setUnpaidOnly,
+    resetFilters,
+  } = filterSlice;
 
-  const studentId = useAccountingPaymentsStore(s => s.studentId);
-  const parentId = useAccountingPaymentsStore(s => s.parentId);
-  const fromDate = useAccountingPaymentsStore(s => s.fromDate);
-  const toDate = useAccountingPaymentsStore(s => s.toDate);
-  const unpaidOnly = useAccountingPaymentsStore(s => s.unpaidOnly);
-  const setStudentId = useAccountingPaymentsStore(s => s.setStudentId);
-  const setParentId = useAccountingPaymentsStore(s => s.setParentId);
-  const setFromDate = useAccountingPaymentsStore(s => s.setFromDate);
-  const setToDate = useAccountingPaymentsStore(s => s.setToDate);
-  const setUnpaidOnly = useAccountingPaymentsStore(s => s.setUnpaidOnly);
-  const resetFilters = useAccountingPaymentsStore(s => s.resetFilters);
-
-  const filter = useMemo<AccountingPaymentFilterInput | null>(() => {
-    const f: AccountingPaymentFilterInput = {
-      studentId: studentId ?? null,
-      parentId: parentId ?? null,
-      fromDate: fromDate ?? null,
-      toDate: toDate ?? null,
-      unpaidOnly: unpaidOnly || null,
-    };
-    const hasAny = Boolean(studentId || parentId || fromDate || toDate || unpaidOnly);
-    return hasAny ? f : null;
-  }, [studentId, parentId, fromDate, toDate, unpaidOnly]);
+  const filter = useMemo(
+    () => buildPaymentListFilter({ studentId, parentId, fromDate, toDate, unpaidOnly }),
+    [studentId, parentId, fromDate, toDate, unpaidOnly]
+  );
 
   const { data, loading, error } = useQuery(accountingPaymentsQueryDocument, {
     variables: {
@@ -92,22 +93,9 @@ export function usePaymentsListViewModel(): PaymentsListViewModel {
 
   const rows = useMemo<readonly AccountingPaymentRow[]>(() => data?.accountingPayments ?? [], [data]);
 
-  const metrics = useMemo<PaymentsListMetrics>(() => {
-    let paid = 0;
-    let creditHours = 0;
-    for (const row of rows) {
-      if (row.isPaidStatusOn) paid += 1;
-      creditHours += Number(row.creditHours ?? 0);
-    }
-    return {
-      total: rows.length,
-      paid,
-      unpaid: rows.length - paid,
-      creditHours,
-    };
-  }, [rows]);
+  const metrics = useMemo(() => computePaymentListMetrics(rows), [rows]);
 
-  const hasActiveFilters = Boolean(studentId || parentId || fromDate || toDate || unpaidOnly);
+  const hasActiveFilters = hasAnyListFilter({ studentId, parentId, fromDate, toDate, unpaidOnly });
 
   return {
     t,
@@ -127,5 +115,73 @@ export function usePaymentsListViewModel(): PaymentsListViewModel {
     setUnpaidOnly,
     resetFilters,
     hasActiveFilters,
+  };
+}
+
+/** Pure aggregation over fetched rows for the payments summary strip. */
+function computePaymentListMetrics(rows: readonly AccountingPaymentRow[]): PaymentsListMetrics {
+  let paid = 0;
+  let creditHours = 0;
+  for (const row of rows) {
+    if (row.isPaidStatusOn) paid += 1;
+    creditHours += Number(row.creditHours ?? 0);
+  }
+  return { total: rows.length, paid, unpaid: rows.length - paid, creditHours };
+}
+
+/** Narrow store slice for the payments list (fields + actions). */
+interface PaymentsFilterSlice {
+  readonly studentId: string | null;
+  readonly parentId: string | null;
+  readonly fromDate: string | null;
+  readonly toDate: string | null;
+  readonly unpaidOnly: boolean;
+  readonly setStudentId: (studentId: string | null) => void;
+  readonly setParentId: (parentId: string | null) => void;
+  readonly setFromDate: (fromDate: string | null) => void;
+  readonly setToDate: (toDate: string | null) => void;
+  readonly setUnpaidOnly: (unpaidOnly: boolean) => void;
+  readonly resetFilters: () => void;
+}
+
+function useAccountingPaymentsFilterSlice(): PaymentsFilterSlice {
+  const studentId = useAccountingPaymentsStore(s => s.studentId);
+  const parentId = useAccountingPaymentsStore(s => s.parentId);
+  const fromDate = useAccountingPaymentsStore(s => s.fromDate);
+  const toDate = useAccountingPaymentsStore(s => s.toDate);
+  const unpaidOnly = useAccountingPaymentsStore(s => s.unpaidOnly);
+  const setStudentId = useAccountingPaymentsStore(s => s.setStudentId);
+  const setParentId = useAccountingPaymentsStore(s => s.setParentId);
+  const setFromDate = useAccountingPaymentsStore(s => s.setFromDate);
+  const setToDate = useAccountingPaymentsStore(s => s.setToDate);
+  const setUnpaidOnly = useAccountingPaymentsStore(s => s.setUnpaidOnly);
+  const resetFilters = useAccountingPaymentsStore(s => s.resetFilters);
+  return {
+    studentId,
+    parentId,
+    fromDate,
+    toDate,
+    unpaidOnly,
+    setStudentId,
+    setParentId,
+    setFromDate,
+    setToDate,
+    setUnpaidOnly,
+    resetFilters,
+  };
+}
+
+/** Fields-only view of the slice consumed by the GraphQL filter mapping. */
+type PaymentsFilterFields = Pick<PaymentsFilterSlice, "studentId" | "parentId" | "fromDate" | "toDate" | "unpaidOnly">;
+
+/** Maps the raw filter fields onto the GraphQL filter input (null when inactive). */
+function buildPaymentListFilter(v: PaymentsFilterFields): AccountingPaymentFilterInput | null {
+  if (!hasAnyListFilter(v)) return null;
+  return {
+    studentId: v.studentId ?? null,
+    parentId: v.parentId ?? null,
+    fromDate: v.fromDate ?? null,
+    toDate: v.toDate ?? null,
+    unpaidOnly: v.unpaidOnly || null,
   };
 }

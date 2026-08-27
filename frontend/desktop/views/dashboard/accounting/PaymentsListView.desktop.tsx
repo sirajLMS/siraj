@@ -262,12 +262,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         actions={<FiltersBar {...props} />}
         sx={{ mt: 3 }}
       >
-        <DesktopListStateGate
-          error={Boolean(error)}
-          loading={loading}
-          hasRows={rows.length > 0}
-          errorMessage={t.loadError}
-        >
+        <DesktopListStateGate error={error} loading={loading} hasRows={rows.length > 0} errorMessage={t.loadError}>
           <Box sx={{ width: "100%", height: 560, p: 2 }}>
             <AppDataGrid
               rows={rows}

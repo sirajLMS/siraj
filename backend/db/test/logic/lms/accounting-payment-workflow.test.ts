@@ -21,6 +21,22 @@ import type { AccountingPaymentSubmitInput } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
+async function catchError(fn: () => Promise<unknown>): Promise<Error> {
+  try {
+    await fn();
+  } catch (error) {
+    expect(error).toBeInstanceOf(Error);
+    const safeError = error instanceof Error ? error : new Error("Unexpected rejection shape");
+    return safeError;
+  }
+  throw new Error("expected the wrapped service call to throw");
+}
+
+async function creditHourCountFor(studentId: string): Promise<number> {
+  const rows = await db.select().from(creditTransactions).where(eq(creditTransactions.studentId, studentId));
+  return rows.length;
+}
+
 /**
  * Service-level workflows spawn their own top-level transactions and resolve
  * permissions against committed rows, so fixtures are created COMMITTED in
@@ -139,22 +155,6 @@ describe("Accounting payment workflow", () => {
       paymentNote: `${UNIQUE} note`,
       ...overrides,
     };
-  }
-
-  async function catchError(fn: () => Promise<unknown>): Promise<Error> {
-    try {
-      await fn();
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error);
-      const safeError = error instanceof Error ? error : new Error("Unexpected rejection shape");
-      return safeError;
-    }
-    throw new Error("expected the wrapped service call to throw");
-  }
-
-  async function creditHourCountFor(studentId: string): Promise<number> {
-    const rows = await db.select().from(creditTransactions).where(eq(creditTransactions.studentId, studentId));
-    return rows.length;
   }
 
   test("recordPayment creates invoice + payment + hour ledger in one tx and bumps the live balance", async () => {

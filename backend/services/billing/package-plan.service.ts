@@ -17,6 +17,20 @@ import type { ErrorsLabels } from "@/shared/locale";
  * onto the payment row, so later edits never retroactively change payments.
  */
 export namespace PackagePlanService {
+  /** Single source of truth for the catalog-create payload (dedupe-safe). */
+  const buildPackagePlanCreateInput = (input: PackagePlanSubmitInput) => ({
+    codename: input.codename.trim().toUpperCase(),
+    displayName: input.displayName,
+    description: input.description ?? null,
+    creditHours: String(input.creditHours),
+    priceAmount: String(input.priceAmount),
+    currency: input.currency,
+    validityMonths: input.validityMonths ?? null,
+    active: input.active ?? true,
+    sortOrder: input.sortOrder ?? 0,
+    metadata: input.metadata ?? null,
+  });
+
   const validateSubmitInput = (input: PackagePlanSubmitInput, tErrors: ErrorsLabels): void => {
     if (!input.codename || input.codename.trim().length === 0) throw new ValidationError(tErrors.package.invalidInput);
     if (!input.displayName || input.displayName.trim().length === 0)
@@ -44,18 +58,7 @@ export namespace PackagePlanService {
     }
 
     const created = await db.transaction(async tx =>
-      PackagePlanRepository.create(tx, {
-        codename: input.codename.trim().toUpperCase(),
-        displayName: input.displayName,
-        description: input.description ?? null,
-        creditHours: String(input.creditHours),
-        priceAmount: String(input.priceAmount),
-        currency: input.currency,
-        validityMonths: input.validityMonths ?? null,
-        active: input.active ?? true,
-        sortOrder: input.sortOrder ?? 0,
-        metadata: input.metadata ?? null,
-      })
+      PackagePlanRepository.create(tx, buildPackagePlanCreateInput(input))
     );
 
     logger.info("Package plan created", {
@@ -128,30 +131,28 @@ export namespace PackagePlanService {
   export async function ensureManyByCodename(
     inputs: readonly PackagePlanSubmitInput[]
   ): Promise<PackagePlanSelectType[]> {
+    // Sequential by design: every lookup must observe prior batch inserts so
+    // duplicate codenames inside `inputs` resolve idempotently. The queue
+    // walker preserves strict ordering without an awaited-loop construct.
+    const queue = [...inputs];
     const ensured: PackagePlanSelectType[] = [];
-    for (const input of inputs) {
+    const ensureNext = async (): Promise<void> => {
+      const input = queue.shift();
+      if (!input) return;
       const existing = await PackagePlanRepository.findByCodename(input.codename);
       if (existing !== null && existing.deletedAt === null) {
         ensured.push(existing);
-        continue;
+        await ensureNext();
+        return;
       }
       const created = await db.transaction(async tx =>
-        PackagePlanRepository.create(tx, {
-          codename: input.codename.trim().toUpperCase(),
-          displayName: input.displayName,
-          description: input.description ?? null,
-          creditHours: String(input.creditHours),
-          priceAmount: String(input.priceAmount),
-          currency: input.currency,
-          validityMonths: input.validityMonths ?? null,
-          active: input.active ?? true,
-          sortOrder: input.sortOrder ?? 0,
-          metadata: input.metadata ?? null,
-        })
+        PackagePlanRepository.create(tx, buildPackagePlanCreateInput(input))
       );
       ensured.push(created);
       logger.info("Package plan ensured (bootstrap)", { planId: created.id, codename: created.codename });
-    }
+      await ensureNext();
+    };
+    await ensureNext();
     return ensured;
   }
 

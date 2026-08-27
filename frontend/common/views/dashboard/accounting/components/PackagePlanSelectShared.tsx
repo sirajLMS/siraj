@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import type { SystemStyleObject } from "@mui/system";
 import { packagePlansQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting";
 
 export interface PackagePlanSelectSharedProps {
@@ -20,19 +21,31 @@ export interface PackagePlanSelectSharedProps {
 }
 
 /** Merges the default minWidth with caller sx (scalar | array | callback). */
+/** Merges the default minWidth with caller sx (object | array | callback).
+ * MUI's recursive SxProps union blocks typed nested arrays, so parts flatten:
+ * object members merge into one object; callback members resolve at theme time. */
 function composeSelectSx(sx: SxProps<Theme> | undefined, minWidth: number): SxProps<Theme> {
-  if (typeof sx === "function") {
-    return [sx];
+  // Single closure-return keeps a uniform declared type for SonarJS.
+  const statics: SystemStyleObject<Theme> = { minWidth };
+  const callbacks: Array<(theme: Theme) => SystemStyleObject<Theme>> = [];
+  if (sx) {
+    const parts: ReadonlyArray<SxProps<Theme>> = Array.isArray(sx) ? sx : [sx];
+    for (const part of parts) {
+      if (!part || typeof part === "boolean" || typeof part === "number" || typeof part === "string") continue;
+      if (typeof part === "function") {
+        callbacks.push(part);
+        continue;
+      }
+      Object.assign(statics, part);
+    }
   }
-  let rest: SxProps<Theme>[] = [];
-  if (Array.isArray(sx)) {
-    rest = sx;
-  } else if (sx) {
-    rest = [sx];
-  }
-  // MUI’s recursive SxProps union defeats narrow inference for composed arrays;
-  // the result is a valid sx value at runtime.
-  return [{ minWidth }, ...rest] as SxProps<Theme>;
+  return theme => {
+    const resolved: SystemStyleObject<Theme> = { ...statics };
+    for (const cb of callbacks) {
+      Object.assign(resolved, cb(theme));
+    }
+    return resolved;
+  };
 }
 
 /**
@@ -57,7 +70,9 @@ export function PackagePlanSelectShared({
 
   const plans = (data?.packagePlans ?? [])
     .filter(plan => plan.active)
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    .toSorted((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  // Ternary form keeps boolean semantics while satisfying prefer-nullish rules.
+  const selectDisabled = loading ? true : disabled;
 
   return (
     <FormControl size={size} sx={composeSelectSx(sx, minWidth)} disabled={disabled} error={error}>
@@ -66,7 +81,7 @@ export function PackagePlanSelectShared({
         value={value ?? ""}
         label={label}
         onChange={e => onChange(e.target.value || null)}
-        disabled={disabled || loading}
+        disabled={selectDisabled}
       >
         <MenuItem value="">{adhocLabel}</MenuItem>
         {plans.map(plan => (

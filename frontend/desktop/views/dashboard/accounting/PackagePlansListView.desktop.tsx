@@ -196,12 +196,7 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
       <DesktopMetricCardGrid metrics={metricItems} size={{ md: 3, lg: 3 }} />
 
       <DesktopSectionPanel contentPadding={false} title={t.pageTitle} sx={{ mt: 3 }}>
-        <DesktopListStateGate
-          error={Boolean(error)}
-          loading={loading}
-          hasRows={rows.length > 0}
-          errorMessage={t.loadError}
-        >
+        <DesktopListStateGate error={error} loading={loading} hasRows={rows.length > 0} errorMessage={t.loadError}>
           <Box sx={{ width: "100%", height: 540, p: 2 }}>
             <AppDataGrid
               rows={rows}

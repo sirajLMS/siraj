@@ -65,13 +65,8 @@ function PaymentStatusCard({
   );
 }
 
-function PaymentDetailFields({
-  t,
-  payment,
-}: Readonly<{
-  t: DetailLabels;
-  payment: DetailPayment;
-}>) {
+/** Shared card shell so grouped field blocks keep one identical visual frame. */
+function MobileCardShell({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <Box
       sx={theme => ({
@@ -82,6 +77,20 @@ function PaymentDetailFields({
         borderColor: theme.palette.outlineVariant,
       })}
     >
+      {children}
+    </Box>
+  );
+}
+
+function PaymentDetailFields({
+  t,
+  payment,
+}: Readonly<{
+  t: DetailLabels;
+  payment: DetailPayment;
+}>) {
+  return (
+    <MobileCardShell>
       <Stack spacing={1.5}>
         <MobileField label={t.detail.invoiceId} value={payment.invoiceId ?? "—"} />
         <MobileField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate)} />
@@ -98,7 +107,7 @@ function PaymentDetailFields({
           }
         />
         <MobileField label={t.detail.parent} value={payment.parentName ?? "—"} />
-        <MobileField label={t.columns.package} value={payment.packageName ? payment.packageName : "—"} />
+        <MobileField label={t.columns.package} value={payment.packageName ?? "—"} />
         <MobileField
           label={t.columns.credit}
           value={payment.creditHours ? `${Number(payment.creditHours).toFixed(2)} h` : "—"}
@@ -119,7 +128,7 @@ function PaymentDetailFields({
           <Typography variant="bodyMd">{payment.paymentNote}</Typography>
         </>
       ) : null}
-    </Box>
+    </MobileCardShell>
   );
 }
 
@@ -131,20 +140,12 @@ function PaymentAuditFields({
   payment: DetailPayment;
 }>) {
   return (
-    <Box
-      sx={theme => ({
-        p: 2.5,
-        borderRadius: 3,
-        bgcolor: theme.palette.surfaceContainerLow,
-        border: 1,
-        borderColor: theme.palette.outlineVariant,
-      })}
-    >
+    <MobileCardShell>
       <Stack spacing={1.5}>
         <MobileField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt)} />
         <MobileField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt)} />
       </Stack>
-    </Box>
+    </MobileCardShell>
   );
 }
 
