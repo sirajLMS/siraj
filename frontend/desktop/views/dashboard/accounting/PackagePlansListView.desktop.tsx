@@ -56,7 +56,7 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
         flex: 1.2,
         minWidth: 180,
         renderCell: params => (
-          <Box>
+          <Box sx={{ lineHeight: 1.35, py: 0.5 }}>
             <Box component="div">{params.row.displayName}</Box>
             {params.row.description ? (
               <Box
