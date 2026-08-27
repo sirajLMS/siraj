@@ -2,6 +2,7 @@ import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/
 
 export const dashboardAccountingPaymentsAr: PaymentsLabels = {
   pageTitle: "المدفوعات",
+  metricsBasis: max => `أحدث ${max} دفعة`,
   pageSubtitle: "تتبع مدفوعات باقات الساعات المعتمدة وحالة السداد.",
   formSubtitle: "تسجيل عملية دفعة جديدة لطالب.",
   addPayment: "إضافة دفعة",

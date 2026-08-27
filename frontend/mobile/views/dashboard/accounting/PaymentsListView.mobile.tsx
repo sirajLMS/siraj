@@ -14,16 +14,19 @@ import {
 import type { PaymentsListViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentsListViewModel";
 import { MobileFab, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ParentAutocompleteMobile, StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
+import { useAppLocale } from "@/shared/locale/localeContext";
 
 const SKELETON_KEYS = ["skeleton-0", "skeleton-1", "skeleton-2"] as const;
 
 export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
+  const locale = useAppLocale();
   const {
     t,
     rows,
     loading,
     error,
     metrics,
+    metricsBasis,
     fromDate,
     toDate,
     unpaidOnly,
@@ -80,6 +83,12 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
             label={`${t.status.unpaid}: ${metrics.unpaid}`}
           />
         </Stack>
+
+        {metricsBasis ? (
+          <Typography variant="labelSm" sx={theme => ({ px: 2, color: theme.palette.onSurfaceVariant })}>
+            {metricsBasis}
+          </Typography>
+        ) : null}
 
         {/* Filters */}
         <Stack spacing={1.5} sx={{ px: 2 }}>
@@ -183,7 +192,7 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
                       {row.packageName ?? "—"}
                     </Typography>
                     <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                      {formatAccountingDate(row.paymentDate)}
+                      {formatAccountingDate(row.paymentDate, locale)}
                     </Typography>
                   </Stack>
                 </Box>

@@ -50,6 +50,7 @@ export interface PaymentsListViewModel extends PaymentsFilterSlice {
   readonly loading: boolean;
   readonly error: boolean;
   readonly metrics: PaymentsListMetrics;
+  readonly metricsBasis: string | null;
   readonly hasActiveFilters: boolean;
 }
 
@@ -94,6 +95,7 @@ export function usePaymentsListViewModel(): PaymentsListViewModel {
   const rows = useMemo<readonly AccountingPaymentRow[]>(() => data?.accountingPayments ?? [], [data]);
 
   const metrics = useMemo(() => computePaymentListMetrics(rows), [rows]);
+  const metricsBasis = rows.length >= MAX_FETCH_ROWS ? t.metricsBasis(MAX_FETCH_ROWS) : null;
 
   const hasActiveFilters = hasAnyListFilter({ studentId, parentId, fromDate, toDate, unpaidOnly });
 
@@ -103,6 +105,7 @@ export function usePaymentsListViewModel(): PaymentsListViewModel {
     loading,
     error: Boolean(error),
     metrics,
+    metricsBasis,
     studentId,
     parentId,
     fromDate,

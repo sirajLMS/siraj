@@ -142,6 +142,7 @@ export const studentCreditHourBalanceQueryDocument: TypedDocumentNode<
       studentId
       creditHoursTotal
       creditHoursRemaining
+      lowHoursThreshold
       lastPaymentCurrency
     }
   }

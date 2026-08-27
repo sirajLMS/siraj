@@ -16,6 +16,7 @@ interface PaymentHistoryTimelineProps {
   readonly events: readonly HistoryEvent[];
   readonly labels: Readonly<Record<string, string>>;
   readonly emptyLabel: string;
+  readonly locale: string;
 }
 
 const kindDotTone: Readonly<Record<string, "info" | "success" | "warning" | "primary">> = {
@@ -29,7 +30,7 @@ const toMillis = (value: string | Date | null): number =>
   value instanceof Date ? value.getTime() : new Date(String(value ?? 0)).getTime();
 
 /** Vertical timeline of derived payment events (newest first). */
-export function PaymentHistoryTimeline({ events, labels, emptyLabel }: Readonly<PaymentHistoryTimelineProps>) {
+export function PaymentHistoryTimeline({ events, labels, emptyLabel, locale }: Readonly<PaymentHistoryTimelineProps>) {
   if (events.length === 0) {
     return (
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
@@ -82,7 +83,8 @@ export function PaymentHistoryTimeline({ events, labels, emptyLabel }: Readonly<
                 <HistoryOutlined sx={theme => ({ fontSize: 14, color: theme.palette.onSurfaceVariant })} />
                 <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                   {formatAccountingDate(
-                    event.occurredAt instanceof Date ? event.occurredAt.toISOString() : event.occurredAt
+                    event.occurredAt instanceof Date ? event.occurredAt.toISOString() : event.occurredAt,
+                    locale
                   )}
                 </Typography>
               </Stack>

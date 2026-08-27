@@ -45,6 +45,7 @@ import {
   ParentAutocompleteDesktop,
   StudentAutocompleteDesktop,
 } from "@/frontend/desktop/components/ui/input/userSelect";
+import { useAppLocale } from "@/shared/locale/localeContext";
 
 /** One-line truncating text block that never overflows its grid cell. */
 function CellLine(props: Readonly<{ children: React.ReactNode; secondary?: boolean; mono?: boolean }>) {
@@ -168,7 +169,8 @@ function FiltersBar(props: Readonly<PaymentsListViewModel>) {
 }
 
 export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
-  const { t, rows, loading, error, metrics } = props;
+  const { t, rows, loading, error, metrics, metricsBasis } = props;
+  const locale = useAppLocale();
   const router = useRouter();
 
   const columns = useMemo<GridColDef[]>(() => {
@@ -245,13 +247,13 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         field: "paymentDate",
         headerName: t.columns.paymentDate,
         width: 120,
-        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value)),
+        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value), locale),
       },
       {
         field: "createdAt",
         headerName: t.columns.createdAt,
         width: 120,
-        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value)),
+        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value), locale),
       },
       {
         field: "isPaidStatusOn",
@@ -281,7 +283,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
       },
     ];
     return cols;
-  }, [t]);
+  }, [t, locale]);
 
   const metricItems = useMemo<MetricItem[]>(
     () => [
@@ -291,6 +293,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         label: t.pageTitle,
         labelKey: "dashboard.accounting.payments.pageTitle",
         icon: PaymentsOutlined,
+        subLabel: metricsBasis ?? undefined,
       },
       {
         key: "payments-paid",
@@ -316,7 +319,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         variant: "highlight",
       },
     ],
-    [t, metrics]
+    [t, metrics, metricsBasis]
   );
 
   return (

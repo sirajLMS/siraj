@@ -2,6 +2,7 @@ import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/
 
 export const dashboardAccountingPaymentsEn: PaymentsLabels = {
   pageTitle: "Payments",
+  metricsBasis: max => `Most recent ${max} payments`,
   pageSubtitle: "Track credit-hour package payments and their paid status.",
   formSubtitle: "Record a new payment transaction for a student.",
   addPayment: "Add Payment",

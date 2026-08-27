@@ -5,6 +5,7 @@
  */
 export interface PaymentsLabels {
   readonly pageTitle: string;
+  readonly metricsBasis: (max: number) => string;
   readonly pageSubtitle: string;
   readonly formSubtitle: string;
   readonly addPayment: string;

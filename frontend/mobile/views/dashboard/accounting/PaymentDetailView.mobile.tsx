@@ -13,6 +13,7 @@ import {
 import { PaymentHistoryTimeline } from "@/frontend/common/views/dashboard/accounting/components/PaymentHistoryTimeline";
 import type { PaymentDetailViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentDetailViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { useAppLocale } from "@/shared/locale/localeContext";
 
 type DetailLabels = PaymentDetailViewModel["t"];
 type DetailPayment = NonNullable<PaymentDetailViewModel["payment"]>;
@@ -91,11 +92,12 @@ function PaymentDetailFields({
   t: DetailLabels;
   payment: DetailPayment;
 }>) {
+  const locale = useAppLocale();
   return (
     <MobileCardShell>
       <Stack spacing={1.5}>
         <MobileField label={t.detail.invoiceId} value={payment.invoiceId ?? "—"} />
-        <MobileField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate)} />
+        <MobileField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate, locale)} />
         <MobileField
           label={t.columns.studentName}
           value={
@@ -144,11 +146,12 @@ function PaymentAuditFields({
   t: DetailLabels;
   payment: DetailPayment;
 }>) {
+  const locale = useAppLocale();
   return (
     <MobileCardShell>
       <Stack spacing={1.5}>
-        <MobileField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt)} />
-        <MobileField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt)} />
+        <MobileField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt, locale)} />
+        <MobileField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt, locale)} />
       </Stack>
     </MobileCardShell>
   );
@@ -156,6 +159,7 @@ function PaymentAuditFields({
 
 export function PaymentDetailMobile(props: Readonly<PaymentDetailViewModel>) {
   const { t, payment, loading, notFound, toggling, toggleError, onTogglePaid, onDismissToggleError } = props;
+  const locale = useAppLocale();
 
   return (
     <MobilePageContainer>
@@ -187,6 +191,7 @@ export function PaymentDetailMobile(props: Readonly<PaymentDetailViewModel>) {
                 events={payment.history ?? []}
                 labels={t.historyKinds}
                 emptyLabel={t.detail.historyEmpty}
+                locale={locale}
               />
             </MobileCardShell>
 

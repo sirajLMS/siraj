@@ -19,6 +19,7 @@ import {
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { PaymentDocumentPreview } from "@/frontend/desktop/views/dashboard/accounting/components/PaymentDocumentPreview";
+import { useAppLocale } from "@/shared/locale/localeContext";
 
 function DetailField({ label, value }: Readonly<{ label: string; value: ReactNode }>) {
   return (
@@ -35,6 +36,7 @@ function DetailField({ label, value }: Readonly<{ label: string; value: ReactNod
 
 export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
   const { t, payment, loading, notFound, toggling, toggleError, onTogglePaid, onDismissToggleError } = props;
+  const locale = useAppLocale();
 
   if (loading) {
     return (
@@ -117,7 +119,7 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
 
             <Stack direction="row" spacing={3} sx={{ flexWrap: "wrap", rowGap: 2 }}>
               <DetailField label={t.detail.invoiceId} value={payment.invoiceId ?? "—"} />
-              <DetailField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate)} />
+              <DetailField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate, locale)} />
               <DetailField
                 label={t.columns.studentName}
                 value={
@@ -165,10 +167,11 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
               events={payment.history ?? []}
               labels={t.historyKinds}
               emptyLabel={t.detail.historyEmpty}
+              locale={locale}
             />
             <Stack spacing={2}>
-              <DetailField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt)} />
-              <DetailField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt)} />
+              <DetailField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt, locale)} />
+              <DetailField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt, locale)} />
             </Stack>
           </Stack>
         </DesktopSectionPanel>
