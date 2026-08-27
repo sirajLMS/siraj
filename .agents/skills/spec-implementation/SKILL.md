@@ -61,6 +61,7 @@ Also check for:
 - `outcome/` directory — existing outcome files to read
 - `deferred-items.md` — deferred-items ledger
 - `ui-spec/` or `ui/` — nested sub-plans
+- `prototype/` directory — Stitch MCP UI prototypes (see §Prototype-Aware Implementation)
 - `skill-improvement-observations.md` or `skill-improvement-outcome.md` — prior learnings
 
 ### Step 2: Validate Plan Readiness
@@ -84,6 +85,49 @@ Which scope would you like to implement?
 ```
 
 Parse the task list and build an in-memory execution queue. Group tasks by phase and dependency.
+
+## Prototype-Aware Implementation
+
+If the plan directory contains a `prototype/` subdirectory (typically produced by the `stitch` skill's Plan-to-Prototype Recipe — kebab-case `.html` + `.png` pairs, one per screen), treat it as a **first-class input to UI implementation**.
+
+### Intake (Step 1 extension)
+
+- List `.ai/plans/<feature-name>/prototype/`. If present, build the screen inventory: each kebab-case name maps to a UI surface (page, modal/tab state, drawer, mobile variant — `*-modal`, `*-drawer`, `*-mobile` suffixes are state/view variants of the base screen, not separate routes).
+- If prototypes are missing AND the plan has meaningful UI work, offer to generate them via the `stitch` skill before starting (ask the user once; do not block on it).
+
+### Before implementing any UI task
+
+Dispatch the executing subagent with the matching prototype artifacts attached to its prompt:
+
+1. **Screenshot first (`*.png`)** — the subagent reads the screenshot to form a visual imagination of the target: layout structure, hierarchy, section ordering, density, and interaction affordances.
+2. **HTML second (`*.html`)** — extract concrete details: element order, labels/copy, colors, spacing rhythm, component structure. Strip the Tailwind-CDN classes mentally; translate to the project's MUI + theme-palette conventions (never hardcode prototype colors; map to `theme.palette` tokens per `frontend/THEME_PALETTE.md`).
+3. **Spec remains the authority** — prototype vs. spec conflicts are always resolved in favor of the plan's specs/design. The prototype is a visualization of the spec, not a source of new requirements.
+
+### Prototype fidelity rules (CRITICAL)
+
+- **Prototype data is 100% FAKE** — every name, row, metric, count, date, currency amount, and status in the screenshot/HTML is invented placeholder data. **Zero fake data may survive into the implementation.** EVERY rendered value must come from a real data source end-to-end: mock state is prohibited even temporarily — wire the actual path at implementation time (GraphQL document → generated Apollo hook → Pothos resolver → service → repository → Drizzle query; or server-component → service), never leaving hardcoded literals in JSX, fixtures, or stores. The only permitted exception is recognized scaffolding state (`AppSkeleton` placeholders, empty states via `AppEmptyState`, error states) — never fabricated rows.
+- A prototype is an **imagination aid, not the final target**. The final implementation must be **equal or better** than the prototype: same information architecture and UX flow, but upgraded to project standards (MUI components, theme palette tokens, i18n via `shared/locale`, RTL support, accessibility, AppDataGrid/PageContainer/shared-scaffold patterns).
+- **Never copy prototype HTML/CSS verbatim** — no Tailwind classes, no inline hex colors, no hardcoded strings. Translate, don't transplant.
+- **Respect domain conventions over prototype shorthand** — e.g. if the prototype shows a table, implement `AppDataGrid` with the established grid patterns; if it shows a dialog, follow the existing dialog/form (RHF + Zod) patterns.
+- Matches between prototype copy and i18n keys are hints for which translation namespaces/keys to create — still follow `shared/AGENTS.md` i18n rules.
+
+### Subagent prompt integration
+
+For every UI task, add to the per-subagent prompt:
+
+```
+Prototype reference (visual imagination aid — final must be equal or better, translated to MUI/theme/i18n conventions):
+- Screenshot: .ai/plans/<feature-name>/prototype/<screen>.png (READ FIRST)
+- HTML: .ai/plans/<feature-name>/prototype/<screen>.html
+- State variants if present: <screen>-modal, <screen>-drawer, <screen>-mobile
+ALL data in prototypes is fake placeholder content — implement real data flows only; zero hardcoded fixtures in components/stores.
+Spec and design documents remain authoritative on any conflict.
+```
+
+### Review integration
+
+- **Mid-point review + post-implementation review waves**: when reviewing UI tasks, reviewers compare the implementation against the corresponding prototype (layout/flow parity check) in addition to the spec — flag regressions where the result is worse than the prototype without a functional reason. Reviewers MUST also scan for leftover fake data: every hardcoded name, row, metric, or literal entity value in a component/store is a CRITICAL finding unless it is an approved skeleton/empty/error scaffolding state.
+- **Execution Summary**: list which screens followed prototypes and note any intentional divergences (with reasons).
 
 ## Phase 0: Pre-Implementation Baseline (MANDATORY)
 
@@ -622,6 +666,12 @@ After each phase or logical task group completes:
 9. **Skipping plan-review gate**: Running `@plan-review` before implementation caught 28 issues in auto-meeting-url (requiring only 3 review rounds). Skipping it in quota/whatsapp/cron required 5-12 post-implementation rounds.
 
 10. **Not filtering pre-existing issues in review**: Post-implementation review must compare against Phase 0 baseline. Reporting pre-existing issues as new wastes fix cycles.
+
+11. **Ignoring the `prototype/` directory**: When prototypes exist, subagents that never open the screenshot arrive at generic layouts and lose layout/flow parity with what was already designed. Conversely, copying prototype Tailwind/hex colors verbatim violates MUI/theme conventions — translate, don't transplant.
+
+12. **Letting prototype fake data leak into code**: Every row/name/amount in a prototype is invented. Hardcoding any of it into components, stores, or "temporary" fixtures is a critical defect — wire real data flows (GraphQL → hook → resolver → service → repository) from the start or use approved loading/empty/error scaffolding states only.
+
+12. **Treating prototypes as spec**: The prototype visualizes the spec; it does not extend it. New fields/buttons seen only in a prototype are not requirements — check specs/`implementation.md` first.
 
 ## Execution Summary Template
 

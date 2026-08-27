@@ -229,9 +229,10 @@ export namespace StudentRepository {
     const q = queryDb();
     const foundStudents = await q.select().from(students).where(inArray(students.id, ids));
     const { studentNotFound } = getServerTranslations(locale ?? "en").errorsTranslations.student;
+    const studentMap = new Map(foundStudents.map(s => [s.id, s]));
 
     return ids.map(id => {
-      const s = foundStudents.find(c => c.id === id);
+      const s = studentMap.get(id);
       if (!s) return new Error(studentNotFound(id));
       return StudentUtils.mapEntityToDto(s) ?? new Error(studentNotFound(id));
     });

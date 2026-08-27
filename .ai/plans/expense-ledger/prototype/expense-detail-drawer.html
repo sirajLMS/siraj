@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Siraj LMS - Expense Detail Drawer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#b9c8de",
+                      "on-surface": "#dee3e8",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "on-background": "#dee3e8",
+                      "surface-tint": "#7bd0ff",
+                      "surface": "#0f1418",
+                      "tertiary-fixed": "#ffddb8",
+                      "surface-container-high": "#252b2e",
+                      "secondary": "#b9c8de",
+                      "on-tertiary": "#472a00",
+                      "inverse-primary": "#00668a",
+                      "secondary-container": "#39485a",
+                      "on-tertiary-container": "#613b00",
+                      "on-tertiary-fixed": "#2a1700",
+                      "error-container": "#93000a",
+                      "on-surface-variant": "#bdc8d1",
+                      "outline": "#87929a",
+                      "surface-dim": "#0f1418",
+                      "on-primary-fixed": "#001e2c",
+                      "surface-container-lowest": "#0a0f12",
+                      "inverse-on-surface": "#2c3135",
+                      "primary-container": "#38bdf8",
+                      "primary": "#8ed5ff",
+                      "on-secondary": "#233143",
+                      "inverse-surface": "#dee3e8",
+                      "tertiary-container": "#f1a02b",
+                      "tertiary": "#ffc176",
+                      "surface-variant": "#303539",
+                      "surface-bright": "#343a3e",
+                      "error": "#ffb4ab",
+                      "surface-container-low": "#171c20",
+                      "primary-fixed-dim": "#7bd0ff",
+                      "on-error-container": "#ffdad6",
+                      "surface-container-highest": "#303539",
+                      "outline-variant": "#3e484f",
+                      "on-primary-fixed-variant": "#004c69",
+                      "background": "#0f1418",
+                      "tertiary-fixed-dim": "#ffb960",
+                      "on-error": "#690005",
+                      "on-primary-container": "#004965",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "on-primary": "#00354a",
+                      "on-secondary-container": "#a7b6cc",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "surface-container": "#1b2024",
+                      "secondary-fixed": "#d4e4fa",
+                      "primary-fixed": "#c4e7ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "gutter": "16px",
+                      "sm": "8px",
+                      "container-margin": "24px",
+                      "lg": "24px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "data-mono": [
+                              "JetBrains Mono"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "data-mono": [
+                              "13px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "11px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .drawer-glow {
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.7);
+        }
+        .inner-glow-top {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Dimmed Background Overlay -->
+<div class="fixed inset-0 z-40 bg-black/60 backdrop-blur-[2px] transition-opacity"></div>
+<!-- Background Screen (Dimmed) -->
+<div class="fixed inset-0 z-30 opacity-40 pointer-events-none grayscale-[30%]">
+<img alt="Expense Ledger Dashboard" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAahW4CKUmC37vJRvr0kbpHHbQ06lqcV3aHzX0Y3H4VfAcYJXYmLd1QT0dxWTzX1zODCN5CQ_s_cV8Ja0IHU4gRxs6upkp-CtaKrcuaN_PHTEdc4pFOfvhntnCnp6vdZE9cDN7euJL-pInMlbyq-52SGSM-38IUZxDnofI9j2G7BEUGwG5N_5DbzUhfLW4YkpZPt8A28rmp7-wYuoIVeNOS6Lqab93ATXTII38kr-S-BUbZg85Hxc_w5JxGV3lTDxx6NccBMTTaFIv"/>
+</div>
+<!-- Side Navigation (Shared Component implementation for context - disabled interaction) -->
+<aside class="h-screen w-64 flex flex-col fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant z-20 opacity-40 pointer-events-none">
+<div class="flex flex-col h-full py-lg">
+<div class="px-md mb-xl">
+<h1 class="font-display-lg text-display-lg font-bold text-primary tracking-tight">Siraj LMS</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Financial Controller</p>
+</div>
+<nav class="flex-1 space-y-sm px-sm">
+<!-- Navigation Items -->
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">payments</span>
+<span>Payments</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+<span>Carryover Balances</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history_edu</span>
+<span>Credit Hours</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">monetization_on</span>
+<span>Cost Rates</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm bg-secondary-container text-on-secondary-container rounded-lg border-l-4 border-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt</span>
+<span>Expenses</span>
+</a>
+</nav>
+<div class="px-md mt-auto pt-lg border-t border-outline-variant">
+<button class="w-full py-sm px-md bg-primary-container text-on-primary-container rounded-lg font-body-md flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined text-sm">add</span>
+                    Generate Report
+                </button>
+</div>
+</div>
+</aside>
+<!-- Top App Bar (Shared Component implementation for context - disabled interaction) -->
+<header class="docked full-width top-0 sticky z-20 bg-surface border-b border-outline-variant opacity-40 pointer-events-none h-16 px-xl ml-64 flex justify-between items-center">
+<div class="flex items-center gap-lg">
+<!-- Search would go here -->
+</div>
+<nav class="hidden md:flex items-center gap-lg h-full">
+<a class="text-on-surface-variant hover:text-on-surface flex items-center h-full" href="#">Finance</a>
+<a class="text-on-surface-variant hover:text-on-surface flex items-center h-full" href="#">Audit Log</a>
+<a class="text-on-surface-variant hover:text-on-surface flex items-center h-full" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="text-on-surface-variant"><span class="material-symbols-outlined">notifications</span></button>
+<button class="text-on-surface-variant"><span class="material-symbols-outlined">help_outline</span></button>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-label-caps ml-sm">FC</div>
+</div>
+</header>
+<!-- DRAWER COMPONENT -->
+<div aria-labelledby="drawer-title" aria-modal="true" class="fixed top-0 right-0 h-screen w-[480px] bg-[#1e293b] border-l border-[#475569] z-50 drawer-glow inner-glow-top flex flex-col transform transition-transform duration-300 ease-out translate-x-0" role="dialog">
+<!-- Drawer Header -->
+<header class="px-lg py-lg border-b border-[#334155] flex-shrink-0 flex justify-between items-start">
+<div class="flex-1 pr-md">
+<div class="flex items-center gap-sm mb-sm flex-wrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-label-caps bg-tertiary-container/15 text-tertiary-container border border-tertiary-container/20">Salaries</span>
+<button class="inline-flex items-center px-2 py-0.5 rounded text-xs font-label-caps bg-primary-container/15 text-primary-container border border-primary-container/30 hover:bg-primary-container/25 transition-colors cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary-container">From Carryover</button>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight" id="drawer-title">April salaries payout — Nadia Karim</h2>
+</div>
+<button aria-label="Close drawer" class="text-on-surface-variant hover:text-on-surface transition-colors p-sm -mr-sm -mt-sm rounded hover:bg-surface-variant focus:outline-none focus:ring-1 focus:ring-outline-variant">
+<span class="material-symbols-outlined">close</span>
+</button>
+</header>
+<!-- Drawer Body (Scrollable) -->
+<div class="flex-1 overflow-y-auto px-lg py-lg space-y-xl custom-scrollbar">
+<!-- Section: Details -->
+<section>
+<h3 class="font-label-caps text-label-caps text-outline uppercase tracking-widest mb-md">Details</h3>
+<div class="space-y-sm bg-[#0f172a] rounded-lg p-md border border-[#334155]">
+<!-- Field Row: Teacher -->
+<div class="flex py-sm border-b border-[#334155]/50 last:border-0">
+<div class="w-1/3 text-on-surface-variant font-body-sm text-body-sm">Teacher</div>
+<div class="w-2/3 text-on-surface font-body-sm text-body-sm font-medium">Nadia Karim</div>
+</div>
+<!-- Field Row: Value -->
+<div class="flex py-sm border-b border-[#334155]/50 last:border-0">
+<div class="w-1/3 text-on-surface-variant font-body-sm text-body-sm">Value</div>
+<div class="w-2/3 text-on-surface font-body-sm text-body-sm font-medium">$3,400.00 USD</div>
+</div>
+<!-- Field Row: Payment Date -->
+<div class="flex py-sm border-b border-[#334155]/50 last:border-0">
+<div class="w-1/3 text-on-surface-variant font-body-sm text-body-sm">Payment Date</div>
+<div class="w-2/3 text-on-surface font-data-mono text-data-mono">2026-04-05</div>
+</div>
+<!-- Field Row: Expense Month -->
+<div class="flex py-sm border-b border-[#334155]/50 last:border-0">
+<div class="w-1/3 text-on-surface-variant font-body-sm text-body-sm">Expense Month</div>
+<div class="w-2/3 text-on-surface font-data-mono text-data-mono">2026-04</div>
+</div>
+<!-- Field Row: Source -->
+<div class="flex py-sm border-b border-[#334155]/50 last:border-0 flex-col">
+<div class="flex">
+<div class="w-1/3 text-on-surface-variant font-body-sm text-body-sm">Source</div>
+<div class="w-2/3 text-on-surface font-body-sm text-body-sm">
+                                From Carryover 
+                                <span class="text-outline text-xs block mt-xs font-data-mono">(carryover #CB-2041)</span>
+</div>
+</div>
+<div class="mt-md pl-1/3 flex justify-end">
+<button class="inline-flex items-center gap-xs text-xs font-body-sm text-primary-container hover:text-primary transition-colors focus:outline-none">
+                                View Source Carryover 
+                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Field Row: Deleted -->
+<div class="flex py-sm pt-sm last:border-0">
+<div class="w-1/3 text-on-surface-variant font-body-sm text-body-sm">Deleted</div>
+<div class="w-2/3 text-on-surface font-body-sm text-body-sm">No</div>
+</div>
+</div>
+</section>
+<!-- Section: Audit Timeline -->
+<section>
+<h3 class="font-label-caps text-label-caps text-outline uppercase tracking-widest mb-md">Audit Timeline</h3>
+<div class="relative pl-sm">
+<!-- Vertical Line -->
+<div class="absolute left-[15px] top-4 bottom-4 w-px bg-[#334155]"></div>
+<ul class="space-y-lg relative z-10">
+<!-- Timeline Item 1: Create -->
+<li class="flex gap-md group">
+<div class="w-8 h-8 rounded-full bg-[#0f172a] border border-[#334155] flex items-center justify-center flex-shrink-0 group-hover:border-primary-container/50 transition-colors">
+<span class="material-symbols-outlined text-sm text-secondary-fixed-dim" style="font-size: 16px;">add</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">EXPENSE_CREATE</span>
+<span class="font-data-mono text-[11px] text-outline">2026-04-05 09:12</span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mb-xs">By <span class="text-on-surface">Rania Adel</span></div>
+<div class="bg-[#0f172a] rounded p-sm border border-[#334155] font-body-sm text-sm text-on-surface-variant italic text-[13px]">
+                                    "Created via carryover payout"
+                                </div>
+</div>
+</li>
+<!-- Timeline Item 2: Update -->
+<li class="flex gap-md group">
+<div class="w-8 h-8 rounded-full bg-[#0f172a] border border-[#334155] flex items-center justify-center flex-shrink-0 group-hover:border-tertiary-container/50 transition-colors">
+<span class="material-symbols-outlined text-sm text-tertiary-container" style="font-size: 16px;">edit</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">EXPENSE_UPDATE</span>
+<span class="font-data-mono text-[11px] text-outline">2026-04-05 09:15</span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mb-xs">By <span class="text-on-surface">Rania Adel</span></div>
+<div class="bg-[#0f172a] rounded p-sm border border-[#334155] font-body-sm text-sm">
+<p class="text-on-surface-variant italic text-[13px] mb-xs">"note changed: previous value shown"</p>
+<div class="flex items-center gap-sm mt-xs">
+<span class="inline-block px-1.5 py-0.5 rounded bg-error-container/20 text-error border border-error-container/30 text-[10px] font-data-mono line-through opacity-80">Old: $3,200.00</span>
+<span class="material-symbols-outlined text-outline text-[12px]">arrow_right_alt</span>
+<span class="inline-block px-1.5 py-0.5 rounded bg-primary-container/10 text-primary-container border border-primary-container/20 text-[10px] font-data-mono">New: $3,400.00</span>
+</div>
+</div>
+</div>
+</li>
+<!-- Timeline Item 3: Delete (Soft) -->
+<li class="flex gap-md group">
+<div class="w-8 h-8 rounded-full bg-[#0f172a] border border-[#334155] flex items-center justify-center flex-shrink-0 group-hover:border-error/50 transition-colors">
+<span class="material-symbols-outlined text-sm text-error" style="font-size: 16px;">delete</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-body-sm text-body-sm font-semibold text-error">EXPENSE_DELETE</span>
+<span class="font-data-mono text-[11px] text-outline">2026-04-05 09:20</span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mb-xs">By <span class="text-on-surface">Monir Haggag</span></div>
+<div class="bg-error-container/10 rounded p-sm border border-error-container/30 font-body-sm text-sm text-on-error-container/90 italic text-[13px]">
+                                    "Soft-deleted. Reason: duplicate entry"
+                                </div>
+</div>
+</li>
+</ul>
+</div>
+</section>
+</div>
+<!-- Drawer Footer -->
+<footer class="p-lg border-t border-[#334155] bg-[#0f172a] flex justify-end gap-md flex-shrink-0 inner-glow-top">
+<button class="px-md py-sm rounded-lg border border-[#334155] text-on-surface bg-transparent hover:bg-surface-variant transition-colors font-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-outline-variant">
+                Edit
+            </button>
+<button class="px-md py-sm rounded-lg bg-error text-on-error hover:bg-error/90 transition-colors font-body-sm font-medium inner-glow-top shadow-[0_0_10px_rgba(239,68,68,0.2)] focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-2 focus:ring-offset-[#0f172a]">
+                Delete
+            </button>
+</footer>
+</div>
+<style>
+        /* Custom scrollbar for drawer to keep it looking clean in obsidian theme */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #334155;
+            border-radius: 20px;
+        }
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+    </style>
+</body></html>

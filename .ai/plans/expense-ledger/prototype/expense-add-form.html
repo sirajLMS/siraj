@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Expense Modal - Siraj LMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#7bd0ff",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-dim": "#0f1418",
+                        "on-tertiary": "#472a00",
+                        "secondary": "#b9c8de",
+                        "on-background": "#dee3e8",
+                        "background": "#0f1418",
+                        "surface": "#0f1418",
+                        "on-surface-variant": "#bdc8d1",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "error-container": "#93000a",
+                        "surface-container-low": "#171c20",
+                        "tertiary-fixed-dim": "#ffb960",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-error": "#690005",
+                        "on-surface": "#dee3e8",
+                        "surface-container-lowest": "#0a0f12",
+                        "surface-variant": "#303539",
+                        "primary": "#8ed5ff",
+                        "inverse-surface": "#dee3e8",
+                        "surface-bright": "#343a3e",
+                        "surface-container-highest": "#303539",
+                        "on-primary-fixed-variant": "#004c69",
+                        "outline": "#87929a",
+                        "primary-container": "#38bdf8",
+                        "on-primary": "#00354a",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "inverse-primary": "#00668a",
+                        "tertiary-container": "#f1a02b",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#39485a",
+                        "surface-container-high": "#252b2e",
+                        "inverse-on-surface": "#2c3135",
+                        "on-primary-fixed": "#001e2c",
+                        "secondary-fixed": "#d4e4fa",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#004965",
+                        "tertiary": "#ffc176",
+                        "primary-fixed": "#c4e7ff",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "outline-variant": "#3e484f",
+                        "on-secondary": "#233143",
+                        "primary-fixed-dim": "#7bd0ff",
+                        "on-tertiary-container": "#613b00",
+                        "surface-container": "#1b2024",
+                        "on-tertiary-fixed": "#2a1700"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "md": "16px",
+                        "gutter": "16px",
+                        "container-margin": "24px",
+                        "base": "4px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "data-mono": ["13px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .inner-glow {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .modal-glow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+        /* Custom scrollbar for dropdown */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #171c20; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3e484f; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #87929a; 
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface h-screen w-screen overflow-hidden font-body-md text-body-md antialiased flex flex-col relative">
+<!-- Background Screen Context (Expense Ledger) -->
+<div class="absolute inset-0 z-0">
+<iframe class="w-full h-full border-none pointer-events-none opacity-50 grayscale-[50%] blur-[2px]" src="{{DATA:SCREEN:SCREEN_2}}"></iframe>
+</div>
+<!-- Overlay -->
+<div class="absolute inset-0 bg-background/80 backdrop-blur-sm z-40 flex items-center justify-center p-md">
+<!-- Modal Dialog -->
+<div class="bg-[#1e293b] w-full max-w-[560px] rounded-xl border border-[#475569] modal-glow flex flex-col shadow-2xl relative overflow-visible transform transition-all">
+<!-- Header -->
+<div class="px-lg py-md border-b border-[#334155] flex justify-between items-center bg-[#1e293b] rounded-t-xl z-10 relative">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Add New Expense</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Record an operational expense</p>
+</div>
+<button aria-label="Close modal" class="text-on-surface-variant hover:text-on-surface p-sm rounded-lg hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Form Body -->
+<div class="p-lg flex flex-col gap-md bg-[#1e293b] overflow-y-auto max-h-[716px]">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Title -->
+<div class="col-span-1 md:col-span-2 flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-[#94a3b8] uppercase" for="expense-title">Title</label>
+<input class="bg-[#0f172a] border border-[#334155] text-on-surface font-body-md text-body-md rounded-lg px-md py-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-full inner-glow placeholder-on-surface-variant/50" id="expense-title" type="text" value="Google Ads — April campaign"/>
+</div>
+<!-- Type Dropdown (OPEN STATE) -->
+<div class="col-span-1 flex flex-col gap-xs relative z-20">
+<label class="font-label-caps text-label-caps text-[#94a3b8] uppercase" for="expense-type">Type</label>
+<div class="relative w-full">
+<button class="w-full bg-[#0f172a] border border-primary text-on-surface font-body-md text-body-md rounded-lg px-md py-sm outline-none transition-all inner-glow flex justify-between items-center shadow-[0_0_0_2px_rgba(56,189,248,0.2)]" type="button">
+<span>Marketing</span>
+<span class="material-symbols-outlined text-[16px] text-primary transition-transform rotate-180">expand_more</span>
+</button>
+<!-- Dropdown Menu Options -->
+<div class="absolute top-full left-0 mt-xs w-full bg-[#1e293b] border border-[#475569] rounded-lg shadow-xl overflow-hidden z-30 py-xs animate-in fade-in slide-in-from-top-1">
+<button class="w-full text-left px-md py-sm font-body-md text-body-md bg-primary-container/10 text-primary hover:bg-[#334155] transition-colors flex justify-between items-center group">
+<span>Marketing</span>
+<span class="material-symbols-outlined text-[18px]">check</span>
+</button>
+<button class="w-full text-left px-md py-sm font-body-md text-body-md text-on-surface hover:bg-[#334155] transition-colors">
+<span>Logistics</span>
+</button>
+<button class="w-full text-left px-md py-sm font-body-md text-body-md text-on-surface hover:bg-[#334155] transition-colors">
+<span>Technology</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Teacher Autocomplete -->
+<div class="col-span-1 flex flex-col gap-xs relative z-10">
+<label class="font-label-caps text-label-caps text-[#94a3b8] uppercase" for="expense-teacher">Teacher (Optional)</label>
+<div class="relative w-full">
+<input class="bg-[#0f172a] border border-[#334155] text-on-surface font-body-md text-body-md rounded-lg pl-md pr-xl py-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-full inner-glow placeholder-on-surface-variant/50" id="expense-teacher" placeholder="Search teachers" type="text"/>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant pointer-events-none">search</span>
+</div>
+</div>
+<!-- Value -->
+<div class="col-span-1 flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-[#94a3b8] uppercase" for="expense-value">Value</label>
+<input class="bg-[#0f172a] border border-[#334155] text-on-surface font-data-mono text-data-mono rounded-lg px-md py-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-full inner-glow" id="expense-value" type="number" value="1240.00"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-1 text-[10px]">≥ 0, up to 12 digits + 2 decimals</span>
+</div>
+<!-- Currency -->
+<div class="col-span-1 flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-[#94a3b8] uppercase" for="expense-currency">Currency</label>
+<div class="relative w-full">
+<select class="appearance-none bg-[#0f172a] border border-[#334155] text-on-surface font-body-md text-body-md rounded-lg px-md py-sm pr-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-full inner-glow cursor-pointer" id="expense-currency">
+<option selected="" value="usd">USD — US Dollar</option>
+<option value="eur">EUR — Euro</option>
+<option value="gbp">GBP — British Pound</option>
+</select>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Payment Date -->
+<div class="col-span-1 flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-[#94a3b8] uppercase" for="expense-date">Payment Date</label>
+<div class="relative w-full">
+<input class="appearance-none bg-[#0f172a] border border-[#334155] text-on-surface font-data-mono text-data-mono rounded-lg px-md py-sm pr-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-full inner-glow cursor-text [color-scheme:dark]" id="expense-date" type="date" value="2026-04-15"/>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant pointer-events-none">calendar_today</span>
+</div>
+</div>
+<!-- Expense Month -->
+<div class="col-span-1 flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-[#94a3b8] uppercase" for="expense-month">Expense Month</label>
+<div class="relative w-full">
+<input class="appearance-none bg-[#0f172a] border border-[#334155] text-on-surface font-data-mono text-data-mono rounded-lg px-md py-sm pr-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-full inner-glow cursor-text [color-scheme:dark]" id="expense-month" type="month" value="2026-04"/>
+<span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant pointer-events-none">event</span>
+</div>
+</div>
+<!-- Note -->
+<div class="col-span-1 md:col-span-2 flex flex-col gap-xs">
+<label class="font-label-caps text-label-caps text-[#94a3b8] uppercase flex justify-between items-center w-full" for="expense-note">
+<span>Note</span>
+<span class="text-on-surface-variant text-[10px] lowercase normal-case tracking-normal">0/2000</span>
+</label>
+<textarea class="bg-[#0f172a] border border-[#334155] text-on-surface font-body-md text-body-md rounded-lg px-md py-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all w-full inner-glow placeholder-on-surface-variant/50 resize-y min-h-[80px]" id="expense-note" placeholder="Optional note (max 2000 chars)" rows="3"></textarea>
+</div>
+</div>
+</div>
+<!-- Footer Area -->
+<div class="border-t border-[#334155] bg-[#1e293b] rounded-b-xl relative z-10">
+<!-- Info Banner -->
+<div class="px-lg py-sm bg-[#334155]/30 flex items-center gap-sm border-b border-[#334155]">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">info</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">This expense will be recorded as source: <strong>Manual</strong></span>
+</div>
+<!-- Action Buttons -->
+<div class="px-lg py-md flex justify-end items-center gap-md">
+<button class="font-body-md text-body-md font-medium text-on-surface-variant hover:text-on-surface px-md py-sm rounded-lg hover:bg-surface-variant transition-colors" type="button">
+                        Cancel
+                    </button>
+<button class="font-body-md text-body-md font-medium bg-primary-container text-on-primary-container px-lg py-sm rounded-lg transition-all btn-glow inner-glow hover:bg-primary-container/90 active:scale-95 flex items-center gap-sm" type="button">
+                        Create Expense
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

@@ -87,6 +87,7 @@
   "monthlyReports": "Monthly Reports",
   "supervisorProfile": "My Profile",
   "navGroupHome": "Dashboard",
+  "navGroupAccounting": "Accounting",
   "navGroupPeople": "People",
   "navGroupUsers": "Users",
   "navGroupContent": "Content",
@@ -112,5 +113,7 @@
   },
   "toggleGroupAriaLabel": {
     "__fn": "(label) => `Toggle ${label} group`"
-  }
+  },
+  "accountingPayments": "Payments",
+  "accountingPackages": "Packages"
 }

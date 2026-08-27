@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Siraj Station - Student Credits</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#93000a",
+                        "surface-container-highest": "#2d3449",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "inverse-on-surface": "#283044",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface-dim": "#0b1326",
+                        "tertiary-container": "#bc4800",
+                        "surface-container-low": "#131b2e",
+                        "surface-container-lowest": "#060e20",
+                        "on-primary-fixed": "#00174b",
+                        "outline-variant": "#434655",
+                        "on-secondary": "#213145",
+                        "on-primary": "#002a78",
+                        "outline": "#8d90a0",
+                        "on-background": "#dae2fd",
+                        "surface-bright": "#31394d",
+                        "on-tertiary-fixed": "#360f00",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-tint": "#b4c5ff",
+                        "primary-container": "#2563eb",
+                        "background": "#0b1326",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#0053db",
+                        "on-surface": "#dae2fd",
+                        "surface": "#0b1326",
+                        "on-tertiary": "#581e00",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "secondary-container": "#3a4a5f",
+                        "tertiary": "#ffb596",
+                        "primary": "#b4c5ff",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary-container": "#a9bad3",
+                        "error": "#ffb4ab",
+                        "surface-container": "#171f33",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "inverse-surface": "#dae2fd",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-primary-container": "#eeefff",
+                        "on-tertiary-container": "#ffede6",
+                        "secondary": "#b7c8e1",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface-variant": "#2d3449",
+                        "surface-container-high": "#222a3d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "table-row-height": "48px",
+                        "stack-sm": "8px",
+                        "header-height": "64px",
+                        "stack-md": "16px",
+                        "gutter": "24px",
+                        "container-padding": "32px",
+                        "sidebar-width": "260px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "data-table": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "title-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "data-table": ["13px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "title-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .swipe-reveal-container {
+            overflow: hidden;
+            position: relative;
+        }
+        .swipe-reveal-content {
+            transform: translateX(-80px);
+            transition: transform 0.3s ease;
+        }
+        .swipe-reveal-action {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #10b981; /* Custom green for action */
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Hide scrollbar for clean mobile look */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        * {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface h-screen w-full flex flex-col font-body-md overflow-hidden max-w-md mx-auto relative shadow-2xl">
+<!-- Top App Bar -->
+<header class="bg-surface-container-high h-header-height sticky top-0 z-40 w-full flex items-center justify-between px-4 border-b border-outline-variant/30 shrink-0">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2 -ml-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back_ios_new</span>
+</button>
+<h1 class="font-title-sm text-title-sm font-bold text-on-surface flex-1 text-center truncate px-2">Student Credits</h1>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-2 -mr-2 rounded-full">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search</span>
+</button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-background relative pb-24">
+<!-- Pull to refresh indicator -->
+<div class="flex justify-center py-4 text-on-surface-variant opacity-70">
+<span class="material-symbols-outlined animate-spin" style="font-variation-settings: 'FILL' 0;">refresh</span>
+</div>
+<!-- Student List -->
+<div class="flex flex-col gap-1 px-4">
+<!-- Card 1: Swipe to reveal state -->
+<div class="swipe-reveal-container rounded-lg bg-surface-container border border-outline-variant/20 mb-2">
+<div class="swipe-reveal-action rounded-r-lg font-body-sm">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">edit_square</span>
+                        Adjust
+                    </div>
+</div>
+<div class="swipe-reveal-content bg-surface-container p-4 rounded-lg flex items-center gap-4 relative z-10">
+<img class="w-12 h-12 rounded-full object-cover border border-outline-variant/50 shrink-0" data-alt="Close up portrait photo of a young elementary school female student with dark hair, looking cheerful. Dark background context matching a sleek educational app interface. Soft lighting, high contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB88b5J6UYXnALnTpVBkCg04-OWZdUITh3RRqN2vLC3JG6frRz3tFqjPwNQ_3M5DPpv1lZ4Vqo8n-VAU0Ae4VLWBQjxngSBG2MYjxOQPWBt62oEUAb1HRVG-Xudg49pJ8WxqGKHGQuhtHT-sv_kbavGmmoKycN6R7Pkbnjuxcs8P5UHy_OUw7dRQXXWVbC7Grzrcw-GYMOVWvxjBSmYxuNg9YaA6fpR3nB-qzMVZbRp2Xn9-voaNgIya22T5_7ojqjuYCs7jp_2fchJ"/>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-1">
+<h2 class="font-title-sm text-title-sm text-on-surface truncate">Layla Haddad</h2>
+<span class="text-on-surface-variant font-body-sm text-[11px]">2 days ago</span>
+</div>
+<div class="flex items-center justify-between">
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate pr-2">Parent: Omar Haddad</p>
+<div class="bg-primary/20 text-primary px-2 py-0.5 rounded-full font-label-caps text-label-caps flex items-center gap-1 shrink-0 border border-primary/30">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                                16 / 22 classes
+                            </div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant shrink-0 ml-1 opacity-50" style="font-variation-settings: 'FILL' 0;">chevron_right</span>
+</div>
+</div>
+<!-- Card 2: Long press selected state -->
+<div class="p-4 rounded-lg bg-primary/10 border border-primary relative mb-2 flex items-center gap-4 transition-colors">
+<div class="absolute -left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full"></div>
+<img class="w-12 h-12 rounded-full object-cover border-2 border-primary shrink-0" data-alt="Close up portrait photo of a young middle school male student with short hair, wearing glasses. Dark background context matching a sleek educational app interface. Soft lighting, high contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXvYpJdjLKuJUIutdId8mpZxKJBS9y4rQm3dWKYnk6qzNal7AFIAWdZbOYQXIYckYfCSByIszjYiBFgiPtBoGaeYOQbDY4h4V8twG6DzKRWv3LVkPBu2hkVeZLX4Dzd3_8AxbLkssodABLZJiCaYrEnSrHqPBbkxBPk7NvrNt7DyWNt5Kj7hqPZw16a2W4zehWf0kiIvLoI-ohcF0q9psRZ9YuMxKAlD600BW78IceFExwL2AKlFH-KaQotlH1L7Z2Qa3g5mxE7wZv"/>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-1">
+<h2 class="font-title-sm text-title-sm text-on-surface truncate">Zaid Al-Fayed</h2>
+<span class="text-on-surface-variant font-body-sm text-[11px]">Today</span>
+</div>
+<div class="flex items-center justify-between">
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate pr-2">Parent: Fatima Al-Fayed</p>
+<div class="bg-surface-variant text-on-surface-variant px-2 py-0.5 rounded-full font-label-caps text-label-caps flex items-center gap-1 shrink-0 border border-outline-variant/50">
+<div class="w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
+                            4 / 10 classes
+                        </div>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary shrink-0 ml-1" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Card 3: Normal state -->
+<div class="p-4 rounded-lg bg-surface-container border border-outline-variant/20 mb-2 flex items-center gap-4 hover:bg-surface-variant/50 transition-colors">
+<img class="w-12 h-12 rounded-full object-cover border border-outline-variant/50 shrink-0" data-alt="Close up portrait photo of a teenage female student with wavy hair. Dark background context matching a sleek educational app interface. Soft lighting, high contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeNk9-IjQXiWdgmN2F9-Xxw0JSY61mjQO0msw57s4LYHAvmpUTd2m13exh5YUl_rEz_s3ggTC7bDuiAdAgTCj2tcw3CWB-CYnKMYoPlABdAEG_vnalu0mFQwAxxwdd6UYHWGe53ZuVhNuvSs4BpQzcI1KVlMGiLQXeE7glmMlv_EHADaKu6UbOlILxh_zWa_JKGinx0JQJxU2rtmWctE72EEqN00s8IEF2rQycw-U-chzJNBFqufohwScjdu-pOdEmjxHDdWhvyAz-"/>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-1">
+<h2 class="font-title-sm text-title-sm text-on-surface truncate">Nour Ibrahim</h2>
+<span class="text-on-surface-variant font-body-sm text-[11px]">1 week ago</span>
+</div>
+<div class="flex items-center justify-between">
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate pr-2">Parent: Tariq Ibrahim</p>
+<div class="bg-error-container/20 text-error px-2 py-0.5 rounded-full font-label-caps text-label-caps flex items-center gap-1 shrink-0 border border-error/30">
+<div class="w-1.5 h-1.5 rounded-full bg-error"></div>
+                            0 / 12 classes
+                        </div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant shrink-0 ml-1" style="font-variation-settings: 'FILL' 0;">chevron_right</span>
+</div>
+<!-- Card 4: Normal state -->
+<div class="p-4 rounded-lg bg-surface-container border border-outline-variant/20 mb-2 flex items-center gap-4 hover:bg-surface-variant/50 transition-colors">
+<div class="w-12 h-12 rounded-full bg-surface-variant border border-outline-variant/50 shrink-0 flex items-center justify-center font-title-sm text-on-surface-variant">
+                    KA
+                </div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-1">
+<h2 class="font-title-sm text-title-sm text-on-surface truncate">Karim Amin</h2>
+<span class="text-on-surface-variant font-body-sm text-[11px]">3 days ago</span>
+</div>
+<div class="flex items-center justify-between">
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate pr-2">Parent: Salma Amin</p>
+<div class="bg-primary/20 text-primary px-2 py-0.5 rounded-full font-label-caps text-label-caps flex items-center gap-1 shrink-0 border border-primary/30">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                            8 / 8 classes
+                        </div>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant shrink-0 ml-1" style="font-variation-settings: 'FILL' 0;">chevron_right</span>
+</div>
+<!-- Footer aggregate -->
+<div class="py-6 flex justify-center items-center">
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-70 uppercase tracking-wider">
+                    24 students · 312 classes remaining
+                </p>
+</div>
+</div>
+</main>
+<!-- FAB -->
+<div class="absolute bottom-[88px] right-4 z-50">
+<button class="bg-primary-container text-on-primary-container hover:bg-primary transition-colors duration-200 px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 font-title-sm text-[14px]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+            Adjust Credits
+        </button>
+</div>
+<!-- Bottom Navigation Bar (App Chrome) -->
+<nav class="bg-surface-container-highest border-t border-outline-variant/20 h-20 w-full shrink-0 flex justify-around items-center px-2 pb-2 relative z-40">
+<button class="flex flex-col items-center justify-center w-16 gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-caps text-[10px]">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center w-16 gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">group</span>
+<span class="font-label-caps text-[10px]">Students</span>
+</button>
+<button class="flex flex-col items-center justify-center w-16 gap-1 text-primary relative">
+<div class="absolute -top-3 w-12 h-1 rounded-b-md bg-primary opacity-20"></div>
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+<span class="font-label-caps text-[10px] font-bold">Accounting</span>
+</button>
+<button class="flex flex-col items-center justify-center w-16 gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 0;">more_horiz</span>
+<span class="font-label-caps text-[10px]">More</span>
+</button>
+</nav>
+<script>
+        // Simple script to reset the swipe reveal if clicked elsewhere
+        document.addEventListener('click', function(e) {
+            const swipeContent = document.querySelector('.swipe-reveal-content');
+            if (swipeContent && !e.target.closest('.swipe-reveal-container')) {
+                swipeContent.style.transform = 'translateX(0)';
+            }
+        });
+    </script>
+</body></html>

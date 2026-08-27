@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Siraj LMS - Expense Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "surface": "#0f1418",
+                        "surface-container-low": "#171c20",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "surface-container-highest": "#303539",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-variant": "#303539",
+                        "surface-dim": "#0f1418",
+                        "on-primary-container": "#004965",
+                        "error": "#ffb4ab",
+                        "outline": "#87929a",
+                        "secondary": "#b9c8de",
+                        "on-primary-fixed": "#001e2c",
+                        "surface-container-lowest": "#0a0f12",
+                        "surface-container": "#1b2024",
+                        "on-tertiary-container": "#613b00",
+                        "primary-fixed": "#c4e7ff",
+                        "inverse-surface": "#dee3e8",
+                        "on-primary": "#00354a",
+                        "inverse-primary": "#00668a",
+                        "on-tertiary": "#472a00",
+                        "tertiary-container": "#f1a02b",
+                        "on-secondary-container": "#a7b6cc",
+                        "primary": "#8ed5ff",
+                        "on-background": "#dee3e8",
+                        "on-primary-fixed-variant": "#004c69",
+                        "primary-fixed-dim": "#7bd0ff",
+                        "on-secondary": "#233143",
+                        "background": "#0f1418",
+                        "secondary-fixed": "#d4e4fa",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#2c3135",
+                        "primary-container": "#38bdf8",
+                        "on-surface-variant": "#bdc8d1",
+                        "outline-variant": "#3e484f",
+                        "tertiary": "#ffc176",
+                        "surface-tint": "#7bd0ff",
+                        "surface-bright": "#343a3e",
+                        "surface-container-high": "#252b2e",
+                        "on-surface": "#dee3e8",
+                        "secondary-container": "#39485a",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-tertiary-fixed": "#2a1700",
+                        "tertiary-fixed-dim": "#ffb960"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "container-margin": "24px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "data-mono": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "data-mono": ["13px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .inner-glow { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+        .btn-glow:hover { box-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        
+        /* Custom Checkbox styles for dark theme */
+        [type="checkbox"] {
+            appearance: none;
+            background-color: #0f172a;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.15em;
+            height: 1.15em;
+            border: 1px solid #334155;
+            border-radius: 0.15em;
+            display: grid;
+            place-content: center;
+        }
+        [type="checkbox"]::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em #38bdf8;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        [type="checkbox"]:checked::before {
+            transform: scale(1);
+        }
+        [type="checkbox"]:focus {
+            outline: 2px solid #38bdf8;
+            outline-offset: 2px;
+        }
+        
+        /* Scrollbar styles for dark theme */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="h-screen w-64 flex flex-col fixed left-0 top-0 bg-surface bg-surface-container-low border-r border-outline-variant z-50">
+<div class="flex flex-col h-full py-lg">
+<!-- Brand / Header -->
+<div class="px-lg pb-xl border-b border-outline-variant/50 mb-md flex items-center gap-md">
+<div class="w-10 h-10 rounded bg-primary-container/10 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary" data-icon="account_balance">account_balance</span>
+</div>
+<div>
+<h1 class="font-display-lg text-display-lg font-bold text-primary text-[20px] leading-tight">Siraj LMS</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Financial Controller</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 px-md space-y-sm overflow-y-auto">
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+                    Payments
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+                    Carryover Balances
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+                    Credit Hours
+                </a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors rounded" href="#">
+<span class="material-symbols-outlined" data-icon="monetization_on">monetization_on</span>
+                    Cost Rates
+                </a>
+<a class="flex items-center gap-md px-md py-sm bg-secondary-container text-on-secondary-container rounded-lg border-l-4 border-primary" href="#">
+<span class="material-symbols-outlined" data-icon="receipt" data-weight="fill" style="font-variation-settings: 'FILL' 1;">receipt</span>
+                    Expenses
+                </a>
+</div>
+<!-- Footer / CTA -->
+<div class="px-md pt-md mt-auto">
+<button class="w-full py-sm px-md bg-surface-variant text-on-surface hover:bg-surface-variant/80 transition-all rounded flex items-center justify-center gap-sm border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="summarize">summarize</span>
+                    Generate Report
+                </button>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 flex flex-col min-h-screen bg-background relative overflow-hidden">
+<!-- Subtle Ambient Background -->
+<div class="absolute top-0 right-0 w-[800px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+<!-- TopAppBar (Simulated as Page Header for Dashboard context) -->
+<header class="docked full-width top-0 sticky z-40 bg-surface/90 backdrop-blur-md border-b border-outline-variant flex justify-between items-center h-16 px-xl">
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="finance">finance</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Accounting Module</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-all p-sm rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-all p-sm rounded-full">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full border border-outline-variant overflow-hidden ml-sm cursor-pointer">
+<img alt="Controller Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGRL0nblUf60hhpDoYuGdb0td4OeCNBKo4NToMW4yJVizqazqTzJTyV2QICWOM3aPYXyUbF3FDUqieA19-0ISPVbdvGrevRK4RA6-3lG_4KNSGm7XpCeFkQ7x21fX3AymZNIYvmqnHYrSxCplCt61QKkl3vLrjan6KFT82p4JCcgWf3vAGrdWFjA7CCtJccyX-MV1aNtI3MjS4jE11shBMkjmP1Vwl5eVBopmHshHxnXMp_mva3aBL2Kejsu6LvpPo5v6vLqHV1Oqj"/>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-xl flex-1 flex flex-col max-w-[1600px] w-full mx-auto relative z-10">
+<!-- Page Header Area -->
+<div class="flex justify-between items-end mb-lg">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-xs flex items-center gap-sm">
+                        Expense Ledger
+                    </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Audit, manage, and report all outgoing payments.</p>
+</div>
+<div class="flex items-center gap-md">
+<button class="px-md py-sm bg-error/10 text-error border border-error/20 hover:bg-error/20 transition-all rounded font-body-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+                        Bulk Delete (2)
+                    </button>
+<button class="px-md py-sm bg-transparent border border-outline-variant text-on-surface hover:bg-surface-variant/50 transition-all rounded font-body-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]" data-icon="download">download</span>
+                        Export CSV
+                    </button>
+<button class="px-md py-sm bg-primary-container text-[#000] border border-primary-container hover:bg-primary-container/90 btn-glow transition-all rounded font-body-sm font-medium flex items-center gap-xs inner-glow">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+                        Add New
+                    </button>
+</div>
+</div>
+<!-- Filter Bar Card (Bento Style) -->
+<div class="glass-panel rounded-xl p-md mb-lg inner-glow">
+<div class="flex flex-wrap gap-md items-center">
+<!-- Search -->
+<div class="relative flex-1 min-w-[250px]">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full bg-[#0f172a] border border-[#334155] text-on-surface rounded pl-xl pr-sm py-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all text-sm font-body-sm" placeholder="Search by title..." type="text"/>
+</div>
+<!-- Multi-select Chips (Simulated Dropdown/Input) -->
+<div class="flex items-center gap-sm bg-[#0f172a] border border-[#334155] rounded p-xs overflow-x-auto max-w-[400px]">
+<div class="flex items-center gap-xs bg-[#334155] text-on-surface px-sm py-xs rounded text-xs font-body-sm cursor-pointer hover:bg-[#475569] transition-colors">
+                            Marketing
+                            <span class="material-symbols-outlined text-[14px]" data-icon="close">close</span>
+</div>
+<div class="flex items-center gap-xs bg-[#334155] text-on-surface px-sm py-xs rounded text-xs font-body-sm cursor-pointer hover:bg-[#475569] transition-colors">
+                            Logistics
+                            <span class="material-symbols-outlined text-[14px]" data-icon="close">close</span>
+</div>
+<div class="flex items-center gap-xs bg-[#334155] text-on-surface px-sm py-xs rounded text-xs font-body-sm cursor-pointer hover:bg-[#475569] transition-colors">
+                            Technology
+                            <span class="material-symbols-outlined text-[14px]" data-icon="close">close</span>
+</div>
+<button class="p-xs text-on-surface-variant hover:text-on-surface ml-auto">
+<span class="material-symbols-outlined text-[16px]" data-icon="add_circle">add_circle</span>
+</button>
+</div>
+<!-- Month / Range -->
+<div class="flex items-center gap-0 border border-[#334155] rounded bg-[#0f172a] text-sm font-body-sm text-on-surface">
+<div class="px-md py-sm border-r border-[#334155] flex items-center gap-xs cursor-pointer hover:bg-[#1e293b] transition-colors">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="calendar_month">calendar_month</span>
+                            2026-04
+                        </div>
+<div class="px-md py-sm flex items-center gap-xs text-on-surface-variant">
+                            Apr 1 → Apr 30, 2026
+                        </div>
+</div>
+<!-- Toggle & Clear -->
+<div class="flex items-center gap-md ml-auto">
+<label class="flex items-center gap-sm cursor-pointer text-sm font-body-sm text-on-surface-variant">
+<div class="relative">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-[#334155] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-outline-variant"></div>
+</div>
+                            Include deleted
+                        </label>
+<div class="w-px h-6 bg-[#334155]"></div>
+<button class="text-on-surface-variant hover:text-on-surface text-sm font-body-sm transition-colors">
+                            Clear
+                        </button>
+</div>
+</div>
+</div>
+<!-- Data Table Card -->
+<div class="flex-1 bg-[#1e293b] border border-[#334155] rounded-xl flex flex-col overflow-hidden inner-glow shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#0f172a] border-b border-[#334155]">
+<th class="p-sm pl-md w-10">
+<input checked="" class="cursor-pointer" type="checkbox"/>
+</th>
+<th class="p-sm font-label-caps text-label-caps text-[#94a3b8] uppercase tracking-wider">Title</th>
+<th class="p-sm font-label-caps text-label-caps text-[#94a3b8] uppercase tracking-wider">Category</th>
+<th class="p-sm font-label-caps text-label-caps text-[#94a3b8] uppercase tracking-wider">Recipient</th>
+<th class="p-sm font-label-caps text-label-caps text-[#94a3b8] uppercase tracking-wider text-right">Amount</th>
+<th class="p-sm font-label-caps text-label-caps text-[#94a3b8] uppercase tracking-wider">Date</th>
+<th class="p-sm font-label-caps text-label-caps text-[#94a3b8] uppercase tracking-wider">Period</th>
+<th class="p-sm font-label-caps text-label-caps text-[#94a3b8] uppercase tracking-wider">Source</th>
+<th class="p-sm pr-md w-24"></th>
+</tr>
+</thead>
+<tbody class="font-body-sm">
+<!-- Row 1 -->
+<tr class="border-b border-[#334155] hover:bg-[#334155]/30 transition-colors group">
+<td class="p-sm pl-md">
+<input class="cursor-pointer" type="checkbox"/>
+</td>
+<td class="p-sm text-on-surface font-medium">Google Ads — April campaign</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-tertiary-container/15 text-tertiary-container border border-tertiary-container/20 text-[10px] font-bold uppercase tracking-wide">Marketing</span>
+</td>
+<td class="p-sm text-on-surface-variant font-data-mono">—</td>
+<td class="p-sm text-right font-data-mono text-on-surface">$1,240.00</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04-15</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-[#334155] text-on-surface-variant text-[11px]">Manual</span>
+</td>
+<td class="p-sm pr-md text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-on-surface-variant hover:text-primary p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span></button>
+<button class="text-on-surface-variant hover:text-error p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span></button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-[#334155] bg-[#334155]/20 hover:bg-[#334155]/40 transition-colors group">
+<td class="p-sm pl-md">
+<input checked="" class="cursor-pointer" type="checkbox"/>
+</td>
+<td class="p-sm text-on-surface font-medium">April salaries — Nadia Karim</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-secondary/15 text-secondary border border-secondary/20 text-[10px] font-bold uppercase tracking-wide">Salaries</span>
+</td>
+<td class="p-sm text-on-surface flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-[#334155] flex items-center justify-center text-[10px] text-on-surface font-bold">NK</div>
+                                    Nadia Karim
+                                </td>
+<td class="p-sm text-right font-data-mono text-on-surface">$3,400.00</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04-05</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04</td>
+<td class="p-sm">
+<span class="inline-flex items-center gap-xs px-2 py-1 rounded bg-primary/10 text-primary border border-primary/20 text-[11px] cursor-pointer hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-[12px]" data-icon="link">link</span>
+                                        From Carryover
+                                    </span>
+</td>
+<td class="p-sm pr-md text-right opacity-0 group-hover:opacity-100 transition-opacity flex justify-end gap-xs">
+<button class="text-on-surface-variant hover:text-primary p-xs" title="View Source"><span class="material-symbols-outlined text-[18px]" data-icon="visibility">visibility</span></button>
+<button class="text-on-surface-variant hover:text-primary p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span></button>
+<button class="text-on-surface-variant hover:text-error p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span></button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-[#334155] bg-[#334155]/20 hover:bg-[#334155]/40 transition-colors group">
+<td class="p-sm pl-md">
+<input checked="" class="cursor-pointer" type="checkbox"/>
+</td>
+<td class="p-sm text-on-surface font-medium">April salaries — Omar Fawzy</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-secondary/15 text-secondary border border-secondary/20 text-[10px] font-bold uppercase tracking-wide">Salaries</span>
+</td>
+<td class="p-sm text-on-surface flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-[#334155] flex items-center justify-center text-[10px] text-on-surface font-bold">OF</div>
+                                    Omar Fawzy
+                                </td>
+<td class="p-sm text-right font-data-mono text-on-surface">$2,850.00</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04-05</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04</td>
+<td class="p-sm">
+<span class="inline-flex items-center gap-xs px-2 py-1 rounded bg-primary/10 text-primary border border-primary/20 text-[11px] cursor-pointer hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-[12px]" data-icon="link">link</span>
+                                        From Carryover
+                                    </span>
+</td>
+<td class="p-sm pr-md text-right opacity-0 group-hover:opacity-100 transition-opacity flex justify-end gap-xs">
+<button class="text-on-surface-variant hover:text-primary p-xs" title="View Source"><span class="material-symbols-outlined text-[18px]" data-icon="visibility">visibility</span></button>
+<button class="text-on-surface-variant hover:text-primary p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span></button>
+<button class="text-on-surface-variant hover:text-error p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span></button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="border-b border-[#334155] hover:bg-[#334155]/30 transition-colors group">
+<td class="p-sm pl-md">
+<input class="cursor-pointer" type="checkbox"/>
+</td>
+<td class="p-sm text-on-surface font-medium">Office rent — Q2</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-[#eab308]/15 text-[#fde047] border border-[#eab308]/20 text-[10px] font-bold uppercase tracking-wide">Logistics</span>
+</td>
+<td class="p-sm text-on-surface-variant font-data-mono">—</td>
+<td class="p-sm text-right font-data-mono text-on-surface">$6,000.00</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04-01</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-[#334155] text-on-surface-variant text-[11px]">Manual</span>
+</td>
+<td class="p-sm pr-md text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-on-surface-variant hover:text-primary p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span></button>
+<button class="text-on-surface-variant hover:text-error p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span></button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="border-b border-[#334155] hover:bg-[#334155]/30 transition-colors group">
+<td class="p-sm pl-md">
+<input class="cursor-pointer" type="checkbox"/>
+</td>
+<td class="p-sm text-on-surface font-medium">Teacher transport reimbursement</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-[#eab308]/15 text-[#fde047] border border-[#eab308]/20 text-[10px] font-bold uppercase tracking-wide">Logistics</span>
+</td>
+<td class="p-sm text-on-surface flex items-center gap-xs">
+<div class="w-5 h-5 rounded-full bg-[#334155] flex items-center justify-center text-[10px] text-on-surface font-bold">LH</div>
+                                    Layla Haddad
+                                </td>
+<td class="p-sm text-right font-data-mono text-on-surface">$180.00</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04-20</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-[#334155] text-on-surface-variant text-[11px]">Manual</span>
+</td>
+<td class="p-sm pr-md text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-on-surface-variant hover:text-primary p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span></button>
+<button class="text-on-surface-variant hover:text-error p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span></button>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="hover:bg-[#334155]/30 transition-colors group">
+<td class="p-sm pl-md">
+<input class="cursor-pointer" type="checkbox"/>
+</td>
+<td class="p-sm text-on-surface font-medium">Vercel + Neon infra</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-[#a855f7]/15 text-[#d8b4fe] border border-[#a855f7]/20 text-[10px] font-bold uppercase tracking-wide">Technology</span>
+</td>
+<td class="p-sm text-on-surface-variant font-data-mono">—</td>
+<td class="p-sm text-right font-data-mono text-on-surface">$420.50</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04-10</td>
+<td class="p-sm text-on-surface-variant font-data-mono">2026-04</td>
+<td class="p-sm">
+<span class="inline-flex items-center px-2 py-1 rounded bg-[#334155] text-on-surface-variant text-[11px]">Manual</span>
+</td>
+<td class="p-sm pr-md text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="text-on-surface-variant hover:text-primary p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span></button>
+<button class="text-on-surface-variant hover:text-error p-xs"><span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Footer / Aggregates / Pagination -->
+<div class="mt-auto border-t border-[#334155] bg-[#0f172a] p-sm px-md flex justify-between items-center text-xs font-body-sm text-on-surface-variant">
+<div class="flex items-center gap-md">
+<span class="font-medium text-on-surface">Total: <span class="font-data-mono text-primary">$14,090.50</span> <span class="text-on-surface-variant opacity-70">(USD dominant)</span></span>
+<div class="w-px h-4 bg-[#334155]"></div>
+<div class="flex items-center gap-sm">
+<span class="flex items-center gap-xs"><div class="w-2 h-2 rounded-full bg-tertiary-container"></div> Marketing 1</span>
+<span class="flex items-center gap-xs"><div class="w-2 h-2 rounded-full bg-[#fde047]"></div> Logistics 2</span>
+<span class="flex items-center gap-xs"><div class="w-2 h-2 rounded-full bg-[#d8b4fe]"></div> Technology 1</span>
+<span class="flex items-center gap-xs"><div class="w-2 h-2 rounded-full bg-secondary"></div> Salaries 2</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span>Page 1 of 3 · 25 per page</span>
+<div class="flex items-center gap-xs">
+<button class="p-xs bg-[#334155] rounded text-on-surface hover:bg-[#475569] transition-colors disabled:opacity-50"><span class="material-symbols-outlined text-[16px]" data-icon="chevron_left">chevron_left</span></button>
+<button class="p-xs bg-[#334155] rounded text-on-surface hover:bg-[#475569] transition-colors"><span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

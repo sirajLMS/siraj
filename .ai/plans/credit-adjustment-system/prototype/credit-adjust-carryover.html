@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Siraj Station - Adjust Credits</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#d3e4fe",
+                        "background": "#0b1326",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-tint": "#b4c5ff",
+                        "surface-dim": "#0b1326",
+                        "on-primary": "#002a78",
+                        "on-tertiary-container": "#ffede6",
+                        "on-tertiary": "#581e00",
+                        "on-secondary-container": "#a9bad3",
+                        "surface-container": "#171f33",
+                        "on-surface-variant": "#c3c6d7",
+                        "primary-container": "#2563eb",
+                        "outline-variant": "#434655",
+                        "primary": "#b4c5ff",
+                        "on-secondary-fixed": "#0b1c30",
+                        "secondary-container": "#3a4a5f",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-variant": "#2d3449",
+                        "inverse-surface": "#dae2fd",
+                        "primary-fixed": "#dbe1ff",
+                        "on-primary-container": "#eeefff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "surface-bright": "#31394d",
+                        "on-background": "#dae2fd",
+                        "surface-container-lowest": "#060e20",
+                        "tertiary": "#ffb596",
+                        "surface-container-high": "#222a3d",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-tertiary-fixed": "#360f00",
+                        "error-container": "#93000a",
+                        "secondary": "#b7c8e1",
+                        "surface-container-highest": "#2d3449",
+                        "outline": "#8d90a0",
+                        "on-secondary": "#213145",
+                        "inverse-primary": "#0053db",
+                        "tertiary-container": "#bc4800",
+                        "on-surface": "#dae2fd",
+                        "on-error": "#690005",
+                        "surface-container-low": "#131b2e",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "inverse-on-surface": "#283044",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-primary-fixed": "#00174b",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#0b1326"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "sidebar-width": "260px",
+                        "table-row-height": "48px",
+                        "stack-md": "16px",
+                        "header-height": "64px",
+                        "gutter": "24px",
+                        "container-padding": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "data-table": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "title-sm": ["Plus Jakarta Sans"],
+                        "label-caps": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "data-table": ["13px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "title-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col md:flex-row overflow-x-hidden">
+<!-- SideNavBar -->
+<nav class="hidden md:flex bg-surface-container dark:bg-surface-container font-body-md text-body-md w-sidebar-width h-screen fixed left-0 top-0 border-r border-outline-variant flex-col gap-1 py-4 z-50">
+<div class="px-6 mb-8 mt-2 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-on-primary font-bold">S</div>
+<div>
+<h1 class="font-title-sm text-title-sm font-bold text-on-surface">Siraj Station</h1>
+<p class="text-xs text-on-surface-variant">LMS Accounting</p>
+</div>
+</div>
+<div class="flex flex-col gap-1 px-3">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span>Payments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span>Packages</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-variant/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span>Carryover Balance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-primary-container/10 border-l-4 border-primary font-bold transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span>Credits</span>
+</a>
+</div>
+</nav>
+<!-- TopAppBar (Mobile) -->
+<header class="md:hidden bg-surface-container-high dark:bg-surface-container-high text-primary font-title-sm text-title-sm h-header-height sticky top-0 z-40 w-full flex items-center justify-between px-4 border-b border-outline-variant">
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface">Siraj Station</h1>
+<button class="text-on-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-sidebar-width p-4 md:p-container-padding flex justify-center items-start min-h-screen pt-8">
+<!-- Form Card -->
+<div class="w-full max-w-4xl bg-surface-container-high rounded-xl border border-outline-variant shadow-lg flex flex-col relative overflow-hidden">
+<!-- Header -->
+<div class="px-8 py-6 border-b border-outline-variant flex items-center justify-between">
+<div>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Adjust Credits</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Modify student balances and manage carryover obligations.</p>
+</div>
+</div>
+<!-- Body -->
+<div class="p-8 flex flex-col gap-8">
+<!-- 1. Student Picker -->
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Student</label>
+<div class="flex items-center gap-4 bg-surface rounded-lg border border-outline-variant p-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center font-bold text-on-surface">LH</div>
+<div class="flex-1">
+<div class="font-title-sm text-title-sm text-on-surface">Layla Haddad</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Student ID: #99281</div>
+</div>
+<div class="bg-primary-container/20 border border-primary text-primary px-3 py-1 rounded-full flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="font-data-table text-data-table">14 classes remaining</span>
+</div>
+</div>
+</div>
+<!-- 2. Adjustment Type -->
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Adjustment Type</label>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Add -->
+<div class="flex items-center gap-3 p-4 rounded-lg border border-outline-variant bg-surface hover:bg-surface-variant/30 cursor-pointer transition-colors">
+<div class="w-5 h-5 rounded-full border border-outline flex items-center justify-center"></div>
+<span class="material-symbols-outlined text-on-surface-variant">add_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Add</span>
+</div>
+<!-- Subtract -->
+<div class="flex items-center gap-3 p-4 rounded-lg border border-outline-variant bg-surface hover:bg-surface-variant/30 cursor-pointer transition-colors">
+<div class="w-5 h-5 rounded-full border border-outline flex items-center justify-center"></div>
+<span class="material-symbols-outlined text-on-surface-variant">remove_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Subtract</span>
+</div>
+<!-- Subtract With Carryover (Selected) -->
+<div class="flex items-center gap-3 p-4 rounded-lg border-2 border-tertiary bg-tertiary/10 cursor-pointer transition-colors relative">
+<div class="w-5 h-5 rounded-full border border-tertiary flex items-center justify-center">
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary"></div>
+</div>
+<span class="material-symbols-outlined text-tertiary">swap_horiz</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold">Subtract With Carryover</span>
+</div>
+</div>
+</div>
+<!-- 3. Carryover Banner -->
+<div class="bg-[#0f291e] border border-[#1b5e20] rounded-lg p-6 flex flex-col gap-6 relative overflow-hidden">
+<!-- Deco pattern -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-50 pointer-events-none"></div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#1b5e20] flex items-center justify-center">
+<span class="material-symbols-outlined text-[#81c784] text-sm">swap_horiz</span>
+</div>
+<h3 class="font-title-sm text-title-sm text-[#c8e6c9]">Carryover to Teacher</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-[#81c784] uppercase">Teacher</label>
+<input class="w-full bg-[#0d2218] border border-[#2e7d32] rounded px-3 py-2 text-sm text-[#e8f5e9] focus:outline-none focus:border-[#4caf50]" readonly="" type="text" value="Karim Mansour — Math Teacher"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-[#81c784] uppercase">From Date</label>
+<input class="w-full bg-[#0d2218] border border-[#2e7d32] rounded px-3 py-2 text-sm text-[#e8f5e9] focus:outline-none focus:border-[#4caf50]" type="date" value="2026-08-01"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-[#81c784] uppercase">To Date</label>
+<input class="w-full bg-[#0d2218] border border-[#2e7d32] rounded px-3 py-2 text-sm text-[#e8f5e9] focus:outline-none focus:border-[#4caf50]" type="date" value="2026-08-15"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps text-[#81c784] uppercase">Payment Date</label>
+<input class="w-full bg-[#0d2218] border border-[#2e7d32] rounded px-3 py-2 text-sm text-[#e8f5e9] focus:outline-none focus:border-[#4caf50]" type="date" value="2026-08-28"/>
+</div>
+</div>
+<p class="text-xs text-[#a5d6a7]">The deducted value becomes a payout obligation recorded in the teacher's Carryover Balance.</p>
+</div>
+<!-- 4. Hours Input -->
+<div class="flex flex-col gap-2 w-full md:w-1/3">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Hours to Adjust</label>
+<div class="relative">
+<input class="w-full bg-surface border border-outline-variant rounded-lg px-4 py-3 font-title-sm text-title-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary pl-12" type="number" value="4"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">schedule</span>
+</div>
+</div>
+<!-- 5. Reason (Rich Text) -->
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Reason</label>
+<div class="border border-outline-variant rounded-lg bg-surface overflow-hidden flex flex-col">
+<div class="bg-surface-variant/50 border-b border-outline-variant px-3 py-2 flex items-center gap-2">
+<button class="p-1.5 rounded hover:bg-surface text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">format_bold</span></button>
+<button class="p-1.5 rounded hover:bg-surface text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">format_italic</span></button>
+<button class="p-1.5 rounded hover:bg-surface text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">format_underlined</span></button>
+<div class="w-px h-4 bg-outline-variant mx-1"></div>
+<button class="p-1.5 rounded hover:bg-surface text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">format_list_bulleted</span></button>
+<button class="p-1.5 rounded hover:bg-surface text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">format_list_numbered</span></button>
+</div>
+<div class="p-4 min-h-[120px] font-body-sm text-body-sm text-on-surface focus:outline-none" contenteditable="true">
+<strong>Customer dispute — lessons 2026-08-10 and 2026-08-12</strong><br/><br/>
+<ul>
+<li>Parent claims teacher arrived late.</li>
+<li>Agreed to refund 4 hours to student balance.</li>
+<li>Transferring payout obligation to teacher's carryover.</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- 6. Notes -->
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Internal Notes (Optional)</label>
+<textarea class="w-full bg-surface border border-outline-variant rounded-lg px-4 py-3 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-h-[80px]" placeholder="Add any private notes here..."></textarea>
+</div>
+</div>
+<!-- Footer & Summary Strip -->
+<div class="mt-auto border-t border-outline-variant bg-surface-container-highest">
+<!-- Summary Strip -->
+<div class="px-8 py-3 border-b border-outline-variant flex items-center justify-center gap-2 text-xs font-data-table text-on-surface-variant">
+<span class="text-error font-bold">-4 hours</span> → <span>Layla Haddad</span> <span class="mx-2 opacity-50">·</span>
+<span class="text-[#81c784] font-bold">+carryover 4h</span> → <span>Karim Mansour</span> <span class="mx-2 opacity-50">·</span>
+<span>payment 2026-08-28</span>
+</div>
+<!-- Actions -->
+<div class="px-8 py-4 flex items-center justify-end gap-4">
+<button class="px-6 py-2 rounded-lg font-title-sm text-title-sm text-on-surface-variant border border-outline-variant hover:bg-surface-variant transition-colors">
+                        Cancel
+                    </button>
+<button class="px-6 py-2 rounded-lg font-title-sm text-title-sm text-[#581e00] bg-tertiary hover:bg-[#ffc6b0] transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(255,181,150,0.2)]">
+<span class="material-symbols-outlined text-sm">check</span>
+                        Apply Adjustment
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

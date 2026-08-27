@@ -99,7 +99,19 @@
     "insufficientBalance": {
       "__fn": "({ studentId, remaining }) => `Insufficient balance for student ${studentId}. Remaining: ${remaining}`"
     },
-    "invalidInput": "Invalid input."
+    "invalidInput": "Invalid input.",
+    "insufficientHours": {
+      "__fn": "({\n      studentId,\n      remaining,\n      required\n    }) => `Insufficient credit hours for student ${studentId}. Remaining: ${remaining}, required: ${required}`"
+    }
+  },
+  "package": {
+    "codenameAlreadyExists": {
+      "__fn": "(codename) => `A package plan with codename \"${codename}\" already exists.`"
+    },
+    "invalidInput": "Invalid package plan input.",
+    "planArchived": {
+      "__fn": "(id) => `Package plan ${id} is archived.`"
+    }
   },
   "file": {
     "recordNotFound": {

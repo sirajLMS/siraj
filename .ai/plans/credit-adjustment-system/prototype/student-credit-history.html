@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Siraj Station - Credit Hours Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#ffb596",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-error": "#690005",
+                        "tertiary-container": "#bc4800",
+                        "secondary": "#b7c8e1",
+                        "on-tertiary-container": "#ffede6",
+                        "on-background": "#dae2fd",
+                        "on-primary-container": "#eeefff",
+                        "outline-variant": "#434655",
+                        "inverse-on-surface": "#283044",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface": "#0b1326",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "background": "#0b1326",
+                        "surface-container-lowest": "#060e20",
+                        "inverse-primary": "#0053db",
+                        "on-primary-fixed": "#00174b",
+                        "primary": "#b4c5ff",
+                        "outline": "#8d90a0",
+                        "secondary-container": "#3a4a5f",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "on-surface": "#dae2fd",
+                        "on-secondary": "#213145",
+                        "primary-container": "#2563eb",
+                        "inverse-surface": "#dae2fd",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbcd",
+                        "surface-variant": "#2d3449",
+                        "surface-dim": "#0b1326",
+                        "on-surface-variant": "#c3c6d7",
+                        "on-secondary-fixed": "#0b1c30",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "on-primary": "#002a78",
+                        "on-tertiary-fixed": "#360f00",
+                        "on-error-container": "#ffdad6",
+                        "surface-bright": "#31394d",
+                        "surface-container-low": "#131b2e",
+                        "surface-container": "#171f33",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "surface-container-high": "#222a3d",
+                        "on-tertiary": "#581e00",
+                        "on-secondary-container": "#a9bad3",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-tint": "#b4c5ff",
+                        "surface-container-highest": "#2d3449"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "table-row-height": "48px",
+                        "stack-sm": "8px",
+                        "gutter": "24px",
+                        "container-padding": "32px",
+                        "header-height": "64px",
+                        "stack-md": "16px",
+                        "sidebar-width": "260px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "title-sm": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "data-table": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "data-table": ["13px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen">
+<!-- TopAppBar -->
+<header class="h-header-height sticky top-0 z-40 w-full flex items-center justify-between px-container-padding ml-sidebar-width bg-surface-container-high dark:bg-surface-container-high border-b border-outline-variant transition-colors">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Siraj Station</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<input class="bg-surface-variant text-on-surface-variant border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none w-64 placeholder-on-surface-variant/50 transition-all" placeholder="Search..." type="text"/>
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-on-surface-variant text-sm">search</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-all scale-95 active:opacity-80 p-1.5 rounded hover:bg-surface-variant/50"><span class="material-symbols-outlined">notifications</span></button>
+<button class="text-on-surface-variant hover:text-primary transition-all scale-95 active:opacity-80 p-1.5 rounded hover:bg-surface-variant/50"><span class="material-symbols-outlined">settings</span></button>
+<div class="w-8 h-8 rounded-full border border-outline-variant overflow-hidden">
+<img alt="Accounting Operator Avatar" class="w-full h-full object-cover" data-alt="A small, professional headshot of an accounting operator in a modern corporate setting. Crisp lighting, shallow depth of field, focused on the person's face. The mood is confident and efficient." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoGkIRGD4OADEz_lNYXlx1yg1TANOpLgFcQFs24gDM4zDxEwQCgz-R3B3jWBG47mx4CbDZ9P4GH1OwzLPUiRWXi_aPT5pzWRLxCgjfNLEG-RMhM24LQHoe9MDCkFFNGyd2h1o49avVgIs_ixXq4t5Jmtju-RyxaHQVZKHQTJ1mazW7FF1WvXoDk--8gaQPN-ffLm6uQY-mo8QsK6mJaYqYCpfVODumGyanmVJ6wz-lFmmJrdtjdagXS7O8vnpss_FPoU6KD6FPuCQO"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface-container dark:bg-surface-container border-r border-outline-variant flex flex-col gap-1 py-4 z-50">
+<div class="px-6 mb-6 flex items-center gap-3">
+<div class="w-10 h-10 rounded border border-outline-variant overflow-hidden flex items-center justify-center bg-surface-container-high">
+<img alt="Siraj Station Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1U64ZMntKKpiyxs-8M1MUGfVUUlJcSkgTQFyMB6SQtKg2l56--vqx7gyEJkDQ5X9rOE5uaxcihvwyiHeLExIDN_nNP9R9QOFLQtNjN5vEWOY3hN5ZNSiz8l1JWPMqog1Yw8OrTQ1gq9432Mv3dOQR8SPPZAYZy455iK_zOKJrDV0QzG8efh-owfZYczD3z6c9opgI7R1IrJKu89PFYf54qm3XFix4NxWSw20BfFVu0nTixIOUP9JxJ7YZs"/>
+</div>
+<div>
+<h1 class="font-title-sm text-title-sm font-bold text-on-surface leading-tight">Siraj Station</h1>
+<p class="text-xs text-on-surface-variant mt-0.5">LMS Accounting</p>
+</div>
+</div>
+<a class="px-6 py-2.5 mx-2 rounded flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-body-md text-body-md">Overview</span>
+</a>
+<a class="px-6 py-2.5 mx-2 rounded flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+<span class="font-body-md text-body-md">Payments</span>
+</a>
+<a class="px-6 py-2.5 mx-2 rounded flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-body-md text-body-md">Packages</span>
+</a>
+<a class="px-6 py-2.5 mx-2 rounded flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span class="font-body-md text-body-md">Carryover Balance</span>
+</a>
+<a class="px-6 py-2.5 mx-2 rounded flex items-center gap-3 text-primary bg-primary-container/10 border-l-4 border-primary font-bold hover:bg-surface-variant transition-colors duration-200 relative left-[-2px]" href="#">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+<span class="font-body-md text-body-md">Credits</span>
+</a>
+</nav>
+<!-- Main Content -->
+<main class="ml-sidebar-width p-container-padding max-w-[1440px] mx-auto min-h-[calc(100vh-64px)]">
+<!-- Breadcrumbs & Header -->
+<div class="mb-gutter">
+<div class="flex items-center text-sm text-on-surface-variant mb-2">
+<a class="hover:text-primary transition-colors" href="#">Students</a>
+<span class="material-symbols-outlined text-sm mx-1 opacity-50">chevron_right</span>
+<span class="text-on-surface">Layla Haddad</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<h2 class="font-display-lg text-display-lg text-on-surface mb-1">Layla Haddad</h2>
+<p class="text-on-surface-variant font-body-sm text-body-sm flex items-center gap-2">
+                        Grade 7 <span class="w-1 h-1 rounded-full bg-outline-variant"></span> Student ID: #99281
+                    </p>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded bg-surface-container-high border border-outline-variant text-on-surface font-body-sm text-body-sm hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit</span> Edit Student
+                     </button>
+<button class="px-4 py-2 rounded bg-primary text-on-primary font-body-sm text-body-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span> Add Credits
+                     </button>
+</div>
+</div>
+</div>
+<!-- Balance Summary Cards (Bento Grid Style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-gutter">
+<!-- Card 1 -->
+<div class="bg-surface-container-high border border-outline-variant rounded-xl p-5 relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent pointer-events-none"></div>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-2">Classes Remaining</p>
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-display-lg font-bold text-green-400">16</span>
+<span class="text-sm text-on-surface-variant flex items-center"><span class="material-symbols-outlined text-green-400 text-sm mr-1">trending_up</span> Good standing</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container border border-outline-variant/50 rounded-xl p-5 flex flex-col justify-between">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-2 flex justify-between items-center">
+                    Classes Total
+                    <span class="material-symbols-outlined text-outline text-[16px]">info</span>
+</p>
+<div class="text-3xl font-display-lg font-bold text-on-surface">22</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container border border-outline-variant/50 rounded-xl p-5 flex flex-col justify-between">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-2 flex justify-between items-center">
+                    Next Renewal
+                    <span class="material-symbols-outlined text-outline text-[16px]">calendar_today</span>
+</p>
+<div class="text-xl font-headline-md text-on-surface font-medium">Sep 12, 2026</div>
+<div class="w-full bg-surface-variant h-1 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary h-full w-[80%] rounded-full"></div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container border border-outline-variant/50 rounded-xl p-5 flex flex-col justify-between">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-2 flex justify-between items-center">
+                    On-demand Quota
+                    <span class="material-symbols-outlined text-outline text-[16px]">bolt</span>
+</p>
+<div class="flex items-end gap-2">
+<span class="text-3xl font-display-lg font-bold text-on-surface">2</span>
+<span class="text-on-surface-variant mb-1">/ 5 used</span>
+</div>
+</div>
+</div>
+<!-- Section Tabs -->
+<div class="border-b border-outline-variant mb-6 flex gap-6 overflow-x-auto no-scrollbar">
+<a class="py-3 font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" href="#">Overview</a>
+<a class="py-3 font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" href="#">Payments</a>
+<a class="py-3 font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" href="#">Packages</a>
+<a class="py-3 font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap" href="#">Carryover Balance</a>
+<a class="py-3 font-body-sm text-body-sm text-primary border-b-2 border-primary font-medium whitespace-nowrap" href="#">Credits</a>
+</div>
+<!-- Filters -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+<div class="flex flex-wrap gap-2">
+<button class="px-3 py-1.5 rounded-full border border-primary bg-primary/10 text-primary font-body-sm text-body-sm transition-colors">All</button>
+<button class="px-3 py-1.5 rounded-full border border-outline-variant text-on-surface-variant font-body-sm text-body-sm hover:border-outline hover:text-on-surface transition-colors">Purchase</button>
+<button class="px-3 py-1.5 rounded-full border border-outline-variant text-on-surface-variant font-body-sm text-body-sm hover:border-outline hover:text-on-surface transition-colors">Booking</button>
+<button class="px-3 py-1.5 rounded-full border border-outline-variant text-on-surface-variant font-body-sm text-body-sm hover:border-outline hover:text-on-surface transition-colors">Adjustment</button>
+<button class="px-3 py-1.5 rounded-full border border-outline-variant text-on-surface-variant font-body-sm text-body-sm hover:border-outline hover:text-on-surface transition-colors">Refund</button>
+</div>
+<div class="relative">
+<input class="bg-surface-container border border-outline-variant rounded px-3 py-1.5 pl-9 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none w-[240px] cursor-pointer" readonly="" type="text" value="Aug 1, 2026 - Aug 31, 2026"/>
+<span class="material-symbols-outlined absolute left-2.5 top-1.5 text-on-surface-variant text-sm pointer-events-none">calendar_month</span>
+</div>
+</div>
+<!-- Transaction Table -->
+<div class="bg-surface-container rounded-lg border border-outline-variant/50 overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-high border-b border-outline-variant/50">
+<tr>
+<th class="px-4 py-3 font-label-caps text-label-caps text-on-surface-variant uppercase sticky top-0 bg-surface-container-high z-10 w-32">Date</th>
+<th class="px-4 py-3 font-label-caps text-label-caps text-on-surface-variant uppercase sticky top-0 bg-surface-container-high z-10 w-48">Type</th>
+<th class="px-4 py-3 font-label-caps text-label-caps text-on-surface-variant uppercase sticky top-0 bg-surface-container-high z-10 text-right w-24">Change</th>
+<th class="px-4 py-3 font-label-caps text-label-caps text-on-surface-variant uppercase sticky top-0 bg-surface-container-high z-10 text-right w-32">Balance After</th>
+<th class="px-4 py-3 font-label-caps text-label-caps text-on-surface-variant uppercase sticky top-0 bg-surface-container-high z-10 w-40">Teacher</th>
+<th class="px-4 py-3 font-label-caps text-label-caps text-on-surface-variant uppercase sticky top-0 bg-surface-container-high z-10">Reason</th>
+<th class="px-4 py-3 font-label-caps text-label-caps text-on-surface-variant uppercase sticky top-0 bg-surface-container-high z-10 w-32">Notes</th>
+</tr>
+</thead>
+<tbody class="font-data-table text-data-table">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/30 transition-colors group h-table-row-height">
+<td class="px-4 py-2 text-on-surface whitespace-nowrap">Aug 29, 2026</td>
+<td class="px-4 py-2">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Purchase
+                                </span>
+</td>
+<td class="px-4 py-2 text-right font-medium text-emerald-400">+10</td>
+<td class="px-4 py-2 text-right text-on-surface font-medium">16</td>
+<td class="px-4 py-2 text-on-surface-variant text-center">-</td>
+<td class="px-4 py-2 text-on-surface truncate max-w-[200px]" title="New package purchase">New package purchase</td>
+<td class="px-4 py-2 text-on-surface-variant text-center">-</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/30 transition-colors group h-table-row-height">
+<td class="px-4 py-2 text-on-surface whitespace-nowrap">Aug 28, 2026</td>
+<td class="px-4 py-2">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-variant border border-outline-variant text-on-surface-variant text-xs font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Booking
+                                </span>
+</td>
+<td class="px-4 py-2 text-right font-medium text-red-400">-1</td>
+<td class="px-4 py-2 text-right text-on-surface font-medium">6</td>
+<td class="px-4 py-2">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full border border-outline-variant overflow-hidden bg-surface-container-high shrink-0">
+<img class="w-full h-full object-cover" data-alt="A small avatar of a male teacher, professional, looking directly at camera, neutral background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCMuA_nOVH1E-NuQbc7LsCGIE5eINrL0U4g6-tSPDpv2fzCm_3lWMF3qXb-qYWgAtTBiaMeLSQsmzJ2tvM5eha6V-rb89EJcwwnIqwklypgQTuC4uYoXAVk_NG2EDaOXahbWfaS2keK9C9AkBE5yrY2wq0EIJjRlG3clTxWVdImCEvmRsEWZEmJ7-b1Pd57oZjW5CGjy4K3L5vi7VRjcinD7hj2Mn0Sm1OHSfyK_lsAxwM4cuz0Up7Lbg0hPW2_NJcPqoPkYxYdBKe"/>
+</div>
+<span class="text-on-surface whitespace-nowrap">Karim Mansour</span>
+</div>
+</td>
+<td class="px-4 py-2 text-on-surface truncate max-w-[200px]" title="Math Class 1">Math Class 1</td>
+<td class="px-4 py-2 text-on-surface-variant text-center">-</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/30 transition-colors group h-table-row-height bg-emerald-900/5">
+<td class="px-4 py-2 text-on-surface whitespace-nowrap">Aug 27, 2026</td>
+<td class="px-4 py-2">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Adjustment · Add
+                                </span>
+</td>
+<td class="px-4 py-2 text-right font-medium text-emerald-400">+2</td>
+<td class="px-4 py-2 text-right text-on-surface font-medium">7</td>
+<td class="px-4 py-2 text-on-surface-variant text-center">-</td>
+<td class="px-4 py-2 text-on-surface truncate max-w-[200px]" title="Bonus credits">Bonus credits</td>
+<td class="px-4 py-2 text-on-surface font-medium text-xs bg-surface-container-high px-2 py-1 rounded inline-block">Bonus for referral</td>
+</tr>
+<!-- Row 4 -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/30 transition-colors group h-table-row-height bg-red-900/5">
+<td class="px-4 py-2 text-on-surface whitespace-nowrap">Aug 25, 2026</td>
+<td class="px-4 py-2">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/15 border border-red-500/20 text-red-400 text-xs font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> Adjustment · Subtract
+                                </span>
+</td>
+<td class="px-4 py-2 text-right font-medium text-red-400">-3</td>
+<td class="px-4 py-2 text-right text-on-surface font-medium">5</td>
+<td class="px-4 py-2 text-on-surface-variant text-center">-</td>
+<td class="px-4 py-2 text-on-surface truncate max-w-[200px]" title="Missed lessons dispute">Missed lessons dispute</td>
+<td class="px-4 py-2 text-on-surface-variant text-center">-</td>
+</tr>
+<!-- Row 5 (Expanded View Concept) -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/30 transition-colors group h-table-row-height bg-surface-container-high/50 border-l-2 border-l-amber-500">
+<td class="px-4 py-2 text-on-surface whitespace-nowrap pt-3 align-top">Aug 20, 2026</td>
+<td class="px-4 py-2 pt-3 align-top">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/20 text-amber-400 text-xs font-medium mb-2 block w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Adjustment · Carryover
+                                </span>
+</td>
+<td class="px-4 py-2 text-right font-medium text-red-400 pt-3 align-top">-4</td>
+<td class="px-4 py-2 text-right text-on-surface font-medium pt-3 align-top">8</td>
+<td class="px-4 py-2 pt-3 align-top">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full border border-outline-variant overflow-hidden bg-surface-container-high shrink-0">
+<img class="w-full h-full object-cover" data-alt="A small avatar of a male teacher, professional, looking directly at camera, neutral background, same as previous row." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOhlsc9_lqUgZg1FAsbERB_ZHL6kn1zqEMIw83rFtM66tVdYO_HKdNGsEh-_SKAsFpkF3JNexZEro5HyoCQz2iCN_uvMmWfvFFvX__YPHUO8BJzgSqMkVtOgCvSRmgy0dIhBq-nq_hVTetzj9LMsm69QhMqW6B4G0znfgruMoKH22fCxJcIzN0GU2FpoLKkzO0cvzCSNYIrmrfMFhsXDhCZ532oVcwt_HUg5nnPOg1J8UAOf48jSRJCQ9UouTWnANWs2WCgdQDjIEj"/>
+</div>
+<span class="text-on-surface whitespace-nowrap">Karim Mansour</span>
+</div>
+</td>
+<td class="px-4 py-2 pt-3 pb-3" colspan="2">
+<div class="text-on-surface mb-2">Transfer to teacher carryover</div>
+<div class="flex flex-wrap gap-2 mt-1 bg-surface-container p-2 rounded border border-outline-variant/30">
+<span class="text-[10px] text-on-surface-variant bg-surface-variant px-1.5 py-0.5 rounded flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">calendar_today</span> From: 2026-08-01</span>
+<span class="text-[10px] text-on-surface-variant bg-surface-variant px-1.5 py-0.5 rounded flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">event</span> To: 2026-08-15</span>
+<span class="text-[10px] text-on-surface-variant bg-surface-variant px-1.5 py-0.5 rounded flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">receipt_long</span> Payment: 2026-08-28</span>
+</div>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/30 transition-colors group h-table-row-height">
+<td class="px-4 py-2 text-on-surface whitespace-nowrap">Aug 15, 2026</td>
+<td class="px-4 py-2">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/20 text-blue-400 text-xs font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> Refund
+                                </span>
+</td>
+<td class="px-4 py-2 text-right font-medium text-emerald-400">+1</td>
+<td class="px-4 py-2 text-right text-on-surface font-medium">12</td>
+<td class="px-4 py-2 text-on-surface-variant text-center">-</td>
+<td class="px-4 py-2 text-on-surface truncate max-w-[200px]" title="Technical issue refund">Technical issue refund</td>
+<td class="px-4 py-2 text-on-surface-variant text-center">-</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="border-t border-outline-variant/50 bg-surface-container p-3 flex items-center justify-between">
+<div class="text-xs text-on-surface-variant">Showing 1 to 6 of 72 entries</div>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant disabled:opacity-50 transition-colors" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-on-primary font-bold text-sm">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant text-sm transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant text-sm transition-colors">3</button>
+<span class="w-8 h-8 flex items-center justify-center text-on-surface-variant text-sm">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant text-sm transition-colors">12</button>
+<button class="h-8 px-2 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant text-sm transition-colors gap-1">
+                        Next <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

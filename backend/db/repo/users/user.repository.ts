@@ -218,9 +218,10 @@ export namespace UserRepository {
     if (ids.length === 0) return [];
     const filteredUsers = await db.select().from(users).where(inArray(users.id, ids));
     const { userNotFound } = getServerTranslations(locale ?? "en").errorsTranslations;
+    const userMap = new Map(filteredUsers.map(u => [u.id, u]));
 
     return ids.map(id => {
-      const matchingUser = filteredUsers.find(c => c.id === id);
+      const matchingUser = userMap.get(id);
       if (!matchingUser) return new Error(userNotFound(id));
       return AuthUtils.toUserReturnType(matchingUser);
     });
