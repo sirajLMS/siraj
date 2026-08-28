@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
+import { buildHeaderActions } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildHeaderActions";
 import { teacherDashboardPageContainerSx } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 import {
   MobileCardList,
@@ -185,7 +186,22 @@ export function TeacherDashboardMobileView({
   subjectsLoading,
   onManualEntryClose,
   onManualEntrySubmit,
+  canManualEntry,
+  canPrintSchedule,
+  onPrintSchedule,
+  onManualEntry,
+  onNewSession,
 }: Readonly<TeacherDashboardViewModel>) {
+  const headerActions = buildHeaderActions({
+    labels,
+    canManualEntry,
+    canPrintSchedule,
+    canActivate,
+    onPrintSchedule,
+    onManualEntry,
+    onNewSession,
+  });
+
   return (
     <>
       {missedAlert && (
@@ -202,7 +218,11 @@ export function TeacherDashboardMobileView({
         )}
 
         <MobileContentStack>
-          <MobilePageHeader title={labels.activeWelcome.title(userName)} subtitle={lastUpdated} />
+          <MobilePageHeader
+            title={labels.activeWelcome.title(userName)}
+            subtitle={lastUpdated}
+            actions={headerActions}
+          />
 
           <MobileSectionTitleRow
             title={

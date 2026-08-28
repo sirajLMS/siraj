@@ -31,14 +31,16 @@ export function MiniCalendarShared({
   const [{ year, month }, shiftMonth] = useViewingMonth(selectedDate);
   const dates = getCalendarGrid(year, month, classDates, selectedDate);
   const monthName = new Date(year, month).toLocaleString(locale === "ar" ? "ar-EG" : "en-US", { month: "long" });
+  // Distinct slot keys: abbreviated weekday labels repeat (S/S, T/T), so the
+  // label alone is not a valid React key.
   const weekdayLabels = [
-    labels.weekdays.sun,
-    labels.weekdays.mon,
-    labels.weekdays.tue,
-    labels.weekdays.wed,
-    labels.weekdays.thu,
-    labels.weekdays.fri,
-    labels.weekdays.sat,
+    { key: "sun", label: labels.weekdays.sun },
+    { key: "mon", label: labels.weekdays.mon },
+    { key: "tue", label: labels.weekdays.tue },
+    { key: "wed", label: labels.weekdays.wed },
+    { key: "thu", label: labels.weekdays.thu },
+    { key: "fri", label: labels.weekdays.fri },
+    { key: "sat", label: labels.weekdays.sat },
   ];
 
   const handleDateClick = (num: number, muted?: boolean) => {
@@ -57,8 +59,8 @@ export function MiniCalendarShared({
         labels={labels}
       />
       <Grid container columns={7} sx={{ textAlign: "center" }}>
-        {weekdayLabels.map(day => (
-          <Grid size={{ xs: 1 }} key={day}>
+        {weekdayLabels.map(({ key, label }) => (
+          <Grid size={{ xs: 1 }} key={key}>
             <Typography
               variant="labelSm"
               sx={theme => ({
@@ -66,7 +68,7 @@ export function MiniCalendarShared({
                 color: theme.palette.onSurfaceVariant,
               })}
             >
-              {day}
+              {label}
             </Typography>
           </Grid>
         ))}

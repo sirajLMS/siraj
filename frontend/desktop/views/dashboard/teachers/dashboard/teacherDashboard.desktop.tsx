@@ -3,6 +3,7 @@
 import { Box } from "@mui/material";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
+import { buildHeaderActions } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildHeaderActions";
 import { teacherDashboardPageContainerSx } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 import { DesktopFormErrorSnackbar, DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
@@ -51,13 +52,32 @@ export function TeacherDashboardDesktopView({
   subjectsLoading,
   onManualEntryClose,
   onManualEntrySubmit,
+  canManualEntry,
+  canPrintSchedule,
+  onPrintSchedule,
+  onManualEntry,
+  onNewSession,
 }: Readonly<TeacherDashboardViewModel>) {
+  const headerActions = buildHeaderActions({
+    labels,
+    canManualEntry,
+    canPrintSchedule,
+    canActivate,
+    onPrintSchedule,
+    onManualEntry,
+    onNewSession,
+  });
+
   return (
     <>
       {missedAlert && <MissedClassAlertBannerDesktop alert={missedAlert} labels={labels.alert} fixed />}
 
       <DesktopPageContainer sx={mergeSx(teacherDashboardPageContainerSx, missedAlert ? { pt: 10 } : undefined)}>
-        <DesktopPageHeader title={labels.activeWelcome.title(userName)} subtitle={lastUpdated} />
+        <DesktopPageHeader
+          title={labels.activeWelcome.title(userName)}
+          subtitle={lastUpdated}
+          actions={headerActions}
+        />
 
         <Box sx={{ mb: 3 }}>
           <DesktopMetricCardGrid metrics={metricItems} size={{ xs: 6, sm: 6, md: 3 }} />
