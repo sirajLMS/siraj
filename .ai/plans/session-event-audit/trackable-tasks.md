@@ -420,3 +420,40 @@ If any of the above are not yet merged, Plan 4 still proceeds — the
 graceful-degradation behavior means the grid renders `—` for payroll
 cells and the `currentStatus` mapper still works on the existing
 `execution_state + outcome` pair.
+
+---
+
+## Test Coverage Backfill: Cross-Actor Journeys & 4-Tier Enforcement
+
+> Closes the gap between this plan and the enforced test kinds added later to the spec process
+> (.agents/skills/spec-implementation/SKILL.md → "Plan Intake" items 5-7 + "Test-Layer Coverage
+> Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
+> additive and execute before this plan is treated as test-complete.
+
+- [ ] TB.1 Journey: teacher joins/leaves session (meeting webhook writes `actual_start_at`/`actual_end_at`, `execution_state`, `outcome` on `class_instances`) → accounting operator sees the row evolve in `/accounting/reports` (status `open` → `end` / `Absent` / `absent_student` via `mapToSessionAuditStatus`); teacher-facing and student-facing views must NOT expose the accounting-only payroll columns
+  - Create `test/workflows/accounting/session-audit-session-lifecycle.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; no notification dispatch in this plan — assert dispatch is NOT triggered for session-audit reads via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
+  - Assert: shared-state transitions on `class_instances` (join → `open`, leave → `end`, never-joined → `Absent`), cross-actor visibility (accounting operator with `ACCOUNTING_REPORTS_VIEW` sees it; teacher/student roles must not see payroll columns), side effects (payroll columns surface once Plan 3 calculation runs; no ledger/dues mutation from this plan — grid is read-only), denial paths (operator without `ACCOUNTING_REPORTS_VIEW` rejected with `INSUFFICIENT_PERMISSIONS`)
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/accounting/session-audit-session-lifecycle.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: AC-1.x, AC-2.x, AC-3.x, AC-7.x_
+- [ ] TB.2 Journey: Plan 3 payroll calculation + admin payroll override (system/Plan-3 actors write `calculation_status`, `teacher_paid_amount`, `payroll_note` on `class_instances`; admin applies override via `applyPayrollOverride`) → accounting operator observes updated payroll columns, aggregates, and payment-date tooltip in the grid and CSV export
+  - Create `test/workflows/accounting/session-audit-payroll-visibility.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; if Plan 3 emits any notification on override, spy via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
+  - Assert: shared-state transitions (`NOT_CALCULATED` → `PAID`/`WAITING_PAID`/`PARTIALLY` visible in grid + CSV after override, `teacher_dues` payment-date tooltip populated only when `calculation_status = 'PAID'`), cross-actor visibility (accounting operator sees override result incl. `payrollNote`; operators without `ACCOUNTING_REPORTS_VIEW` denied; the `?openOverride=1` deep-link honors `ACCOUNTING_PAYROLL_MANAGE` separately from `ACCOUNTING_REPORTS_MANAGE`), side effects (aggregate footer totals update; CSV export reflects post-override values)
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/accounting/session-audit-payroll-visibility.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: AC-6.x, AC-7.x, AC-8.x, AC-9.x_
+- [ ] TB.3 Journey: accounting operator filters/exports session audit data (including filters scoped to a specific teacher/student) → unauthorized/non-accounting actors must be denied and must not observe another teacher's or student's audit slice
+  - Create `test/workflows/accounting/session-audit-access-isolation.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`)
+  - Assert: cross-actor visibility (operator with `ACCOUNTING_REPORTS_VIEW` gets the scoped rows; teacher role calling `sessionAuditReport` or the export route for their own or another teacher's data is denied; export route returns 401 unauthenticated / 403 without permission), side effects (structured log emits `actorUserId` + filters per NFR-11; `X-Export-Truncated` header set past 10 000 rows), denial paths for every non-authorized role
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/accounting/session-audit-access-isolation.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: AC-1.2, AC-7.x, AC-8.5, AC-8.6, NFR-5, NFR-11_
+- [ ] TB.4 4-Tier verification for session-audit service/repository/shared files
+  - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/services/accounting/session-audit.service.ts`, `backend/services/accounting/session-audit-status-predicate.ts`, `backend/services/accounting/session-audit-csv.serializer.ts`, `backend/db/repo/scheduling/session-audit.repository.ts`, `shared/constants/classes/session-audit-status.ts`, `app/api/accounting/reports/export/route.ts`
+  - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels
+  - Verify with `bun run test/scripts/run-test.ts <each test file>`
+  - _Requirements: cross-cutting_
+- [ ] TB.5 Penetration verification (plan adds the `sessionAuditReport` GraphQL query and the `GET /api/accounting/reports/export` route — both are new endpoints)
+  - BOLA/IDOR across the roles in this plan (teacher/student/parent/admin/accounting-operator access to another actor's audit slice via `filter.teacherId`/`filter.studentId`); permission denial on the query and export route without `ACCOUNTING_REPORTS_VIEW`; wildcard/ILIKE injection on the free-text `search` filter; formula-injection (`=`, `+`, `-`, `@` leading bytes) and header-injection hardening on the CSV export
+  - Via `.agents/skills/pentester/SKILL.md`
+  - _Requirements: AC-7.x, AC-8.x, NFR-5_

@@ -53,6 +53,7 @@ bun run test:ui:components     # UI component tests (Happy DOM, no server)
 bun run test:ui:e2e            # End-to-end tests (dev/production server — test/scripts/run-server-tests.ts --e2e)
 bun run test:ui                # All UI tests (components + e2e + static)
 bun run test:ui:kill           # Kill test servers on port 3099 only (never dev:3000 or start:4000)
+bun run test:workflows         # Cross-actor journey/workflow tests (test/workflows/; real services, committed fixtures)
 
 # Authenticate an agent-driven browser (agent-browser / Playwright) with .env credentials.
 # REQUIRED for super-admin flows — the AI layer redacts emails in prompts, so typing
@@ -423,6 +424,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `test/ui/` - UI tests — see `test/ui/AGENTS.md`
 - `test/ui/components/` - Component tests per domain subdir (Happy DOM + mocked Apollo; no server) - see `test/ui/AGENTS.md` + `test/ui/components/AGENTS.md`
 - `test/ui/e2e/` - End-to-end tests (production server; requires `bun run build:test` first)
+- `test/workflows/` - Cross-actor journey/workflow tests (real services, real DB, committed fixtures, no `runInRollback`) - see `test/workflows/AGENTS.md` + `docs/testing/workflow-journey-tests.md`
 
 ## Important References
 
@@ -450,6 +452,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/frontend/whatsapp-ui-patterns.md` - WhatsApp UI canonical reference (ViewModel composable hooks, URL-synced tabs, dialog state, per-row loading, i18n label helpers, StatusBadge, animations, accessibility, testing patterns, gotchas)
 - `docs/frontend/quota-ui-patterns.md` - Quota UI canonical reference (tier isolation, RHF 3-generic pattern, cache.updateQuery for paginated lists, StatusBadge categories, MetricCard animations, reduced-motion CSS in sx, Storybook ErrorState naming, component test tier-view mocking, i18n CLDR plurals, CodeScene 150-line limit, QuotaFormAccessProvider RBAC)
 - `docs/testing/shared-test-runner.md` - Shared parallel test runner pattern
+- `docs/testing/workflow-journey-tests.md` - Cross-actor journey test layer conventions (`test/workflows/`: committed fixtures, no `runInRollback`, honest permissions, notification spying)
 - `docs/backend/shared-types-pattern.md` - Cross-layer shared types in shared/types/
 - `docs/backend/meeting-adapter-base.md` - Meeting provider adapter base class pattern reference
 - `docs/backend/billing-repo-factory.md` - Billing repo factory with configurable hooks pattern reference

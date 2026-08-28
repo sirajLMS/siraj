@@ -35,6 +35,7 @@
     "test:graphql": "bun run scripts/lib/run-locked-cmd.ts test:graphql bun run test/scripts/run-server-tests.ts",
     "test:graphql:coverage": "bun run scripts/lib/run-locked-cmd.ts test:graphql:coverage bun run test/scripts/run-server-tests.ts --coverage",
     "test:simulate": "bun run scripts/lib/run-locked-cmd.ts test:simulate bun --env-file=.env.test test --parallel=1 test/simulate/ --timeout=120000",
+    "test:workflows": "bun run scripts/lib/run-locked-cmd.ts test:workflows bun --env-file=.env.test test test/workflows/ --timeout=120000",
     "test:ui": "bun run test:ui:components && bun run test:ui:e2e && bun run test:ui:static",
     "test:ui:components": "bun run scripts/lib/run-locked-cmd.ts test:ui:components TEST_SERVER_MODE=production bun --env-file=.env.test test --parallel=1 test/ui/components/ --preload ./test/ui/test-env.ts --preload ./test/ui/components/happydom-preload.ts --preload ./test/ui/components/translation-preload.ts --preload ./test/ui/components/next-dynamic-mock.ts",
     "test:ui:components:coverage": "bun run scripts/lib/run-locked-cmd.ts test:ui:components:coverage TEST_SERVER_MODE=production bun --env-file=.env.test test --parallel=1 --coverage test/ui/components/ --preload ./test/ui/test-env.ts --preload ./test/ui/components/happydom-preload.ts --preload ./test/ui/components/translation-preload.ts --preload ./test/ui/components/next-dynamic-mock.ts",

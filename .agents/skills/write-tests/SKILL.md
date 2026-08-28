@@ -19,7 +19,8 @@ This skill provides step-by-step guidance and templates for authoring high-quali
 Which layer are you testing?
  ├── Database Layer (Repositories & DB logic)      → See Section 2
  ├── Backend Services Layer (Business logic & API) → See Section 3
- └── GraphQL Layer (Resolvers & Schema operations) → See Section 4
+ ├── GraphQL Layer (Resolvers & Schema operations) → See Section 4
+ └── Cross-Actor Journey Tests (`test/workflows/`) → See docs/testing/workflow-journey-tests.md
 ```
 
 ---

@@ -464,3 +464,44 @@ Final manual smoke test (post-quality-gate):
 7. Switch language to Arabic; verify all strings localize
 
 If any step fails, debug and re-run the per-file verification loop on the failing file.
+
+---
+
+## Test Coverage Backfill: Cross-Actor Journeys & 4-Tier Enforcement
+
+> Closes the gap between this plan and the enforced test kinds added later to the spec process
+> (.agents/skills/spec-implementation/SKILL.md → "Plan Intake" items 5-7 + "Test-Layer Coverage
+> Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
+> additive and execute before this plan is treated as test-complete.
+
+- [ ] TB.1 Journey: admin configures schedule lifecycle → system ticker claims and dispatches → admin observes run history and queue stats
+  - Create `test/workflows/cron/schedule-lifecycle-dispatch.journey.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`)
+  - Assert: create → `ACTIVE` with computed `nextRunAt`; pause → ticker never claims it and `nextRunAt` stays stale; resume → `nextRunAt` recomputed + `ACTIVE`; dispatch produces a `PENDING` run with `triggerSource = VERCEL_TICKER`; run completion transitions visible via `cronRuns` query; queue stats reflect the drain; delete (soft → `DISABLED`) removes it from dispatch while history stays readable; non-`CRON_MANAGE` actors are denied at every query/mutation touchpoint
+  - No notification/dues side effects exist in this domain — assert absence of cross-domain writes (no notification dispatch, no ledger) as part of the isolation contract
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/cron/schedule-lifecycle-dispatch.journey.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: REQ-2, REQ-3, REQ-9, REQ-10, REQ-15_
+- [ ] TB.2 Journey: admin manual trigger → concurrency policy resolution → worker executes → admin observes run lifecycle
+  - Create `test/workflows/cron/manual-trigger-concurrency.journey.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`)
+  - Assert: `cronRunTrigger` with an in-flight run — `ALLOW` creates a second run; `SKIP` returns the existing in-flight run without creating a new one (admin gets the info response the UI toasts on); `REPLACE` marks the in-flight run `CANCELLED` with `errorMessage = "Replaced by manual trigger"` and creates a fresh run that the worker then drives to `COMPLETED`; cancelled runs remain visible in history and never re-execute; `triggerSource = MANUAL` on all produced runs; denial path for unauthorized actors
+  - No notification dispatch involved — assert no cross-domain side effects
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/cron/manual-trigger-concurrency.journey.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: REQ-3 AC1-AC8, REQ-8, REQ-10 AC7, REQ-15 AC4_
+- [ ] TB.3 Journey: system ticker dispatch → worker stalls (no heartbeat) → reconciliation marks TIMEOUT → next tick re-claims per concurrency policy → admin observes TIMEOUT/RETRYING in run history
+  - Create `test/workflows/cron/stuck-run-reconciliation.journey.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; simulate the stuck run by seeding a `RUNNING` row with a stale heartbeat rather than a real stalled worker)
+  - Assert: stuck run flips to `TIMEOUT` during `dispatchDueSchedules` reconciliation; the next tick re-claims the schedule (or holds it when policy forbids); retry-backoff schedule (`now + retryBackoffSeconds * 2^(attempt-1)`) honored on failure paths; a run exhausting `maxRetries` lands `FAILED` with `errorMessage`/`errorStack`; run history reflects every transition for the admin
+  - No notification dispatch involved — assert no cross-domain side effects
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/cron/stuck-run-reconciliation.journey.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: REQ-3 AC3, AC5-AC7, REQ-8 AC5_
+- [ ] TB.4 4-Tier verification for cron service/repository/route/pothos files
+  - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/db/repo/cron/cron.repository.ts`, `backend/services/cron/cron.service.ts`, `backend/services/cron/cron-scheduler.engine.ts`, `backend/services/cron/queue-adapters/queue-adapter.factory.ts`, `backend/services/cron/queue-adapters/pgboss.adapter.ts`, `backend/services/cron/queue-adapters/custom-sql.adapter.ts`, `backend/services/cron/worker/cron-worker.runtime.ts`, `backend/services/cron/job-handlers/job-handler.registry.ts`, `backend/graphql/pothos/cron/cron.pothos.ts`, `app/api/cron/ticker/route.ts`, `app/api/cron/execute/route.ts`
+  - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels (pg, redis, boss)
+  - Verify with `bun run test/scripts/run-test.ts <each test file>`
+  - _Requirements: REQ-2, REQ-3, REQ-4, REQ-5, REQ-6, REQ-7, REQ-8, REQ-9, REQ-10, REQ-13_
+- [ ] TB.5 Penetration verification
+  - BOLA/IDOR across the roles in this plan (verify `CRON_MANAGE` gating cannot be bypassed for `cronSchedules`/`cronRuns` queries or any mutation by non-privileged roles; supervisor/teacher/student tokens reject all cron resolvers)
+  - Permission denial on all cron mutations; `verifyCronSecretAuth` hard checks on `/api/cron/ticker` and `/api/cron/execute` (no bearer → 401, bad method → 405, missing secret in prod → 500, no fail-open); wildcard/LIKE injection on the `cronSchedules` `name` substring filter; payload injection via `cronRunTrigger` `payload` JSON reaching handlers unsanitized
+  - Via `.agents/skills/pentester/SKILL.md`
+  - _Requirements: REQ-9 AC3-AC4, REQ-10 AC8, REQ-15 AC7 (security NFRs)_

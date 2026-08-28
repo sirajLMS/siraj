@@ -457,3 +457,40 @@ bun run scripts/health/sub-loop.ts <file-path> --lifecycle duplicates
 - [ ] `applyPayrollOverride` mutation live.
 - [ ] `/api/payroll/export` route returns CSV.
 - [ ] EN + AR locale snapshots for `dashboard.accounting.payroll`.
+
+---
+
+## Test Coverage Backfill: Cross-Actor Journeys & 4-Tier Enforcement
+
+> Closes the gap between this plan and the enforced test kinds added later to the spec process
+> (.agents/skills/spec-implementation/SKILL.md → "Plan Intake" items 5-7 + "Test-Layer Coverage
+> Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
+> additive and execute before this plan is treated as test-complete.
+
+- [ ] TB.1 Journey: session reaches terminal state (teacher attendance telemetry) → auto-calculation runs → accounting operator sees the calculated row (+ teacher absence / student absence money outcome) 
+  - Create `test/workflows/payroll/auto-calculation-to-payroll-visibility.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
+  - Assert: shared-state transitions (terminal `executionState` → `calculationStatus = CALCULATED` with `teacherPaidAmount`/`teacherPaidCurrency` persisted in the same tx), cross-actor visibility (accounting operator with `ACCOUNTING_PAYROLL_VIEW` reads the row via `payrollReport`; the teacher and student-facing surfaces must not expose the payroll amounts), side effects (grace/on-time/student-absent/teacher-absent amount outcomes; `PAYROLL_STATUS_TRANSITION`/override event history remains empty on auto-calc), denial paths for unauthorized actors
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/payroll/auto-calculation-to-payroll-visibility.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: US-2, US-3, US-4, US-5, AC-2.1–AC-2.6, AC-9.1_
+- [ ] TB.2 Journey: accounting operator applies override → lesson-report approval accrues `teacher_dues` from `teacherPaidAmount` (status flips to `WAITING_PAID`) → operator marks dues paid (status flips to `PAID`, further overrides rejected)
+  - Create `test/workflows/payroll/override-to-settlement-lifecycle.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
+  - Assert: shared-state transitions (`CALCULATED` → overridden state → `WAITING_PAID` → `PAID` across `class_instances` + `teacher_dues` in the same transactions), cross-actor visibility (audit drawer surfaces `PAYROLL_OVERRIDE` + `PAYROLL_STATUS_TRANSITION` events with the operator's `actorUserId`; the teacher sees only their settled dues, never the override internals), side effects (`teacher_dues` amount equals `teacherPaidAmount`; `class_status_events` rows appended; duplicate override submission within the idempotency window produces no second event), denial paths for unauthorized actors (override on `PAID` rejected with `PAYROLL_ALREADY_PAID`; `WAITING_PAID` requires `force`)
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/payroll/override-to-settlement-lifecycle.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: US-6, US-9, AC-6.1–AC-6.10, AC-9.4, AC-9.5_
+- [ ] TB.3 Journey: unauthorized actors (teacher / parent / student / non-accounting staff) attempt payroll query, override mutation, and CSV export → all denied without touching state
+  - Create `test/workflows/payroll/payroll-permission-denials.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
+  - Assert: shared-state transitions (none — rows unchanged under denial), cross-actor visibility (`payrollReport` query, `applyPayrollOverride` mutation, and `/api/payroll/export` each reject with `INSUFFICIENT_PERMISSIONS` for actors lacking `ACCOUNTING_PAYROLL_VIEW`/`ACCOUNTING_PAYROLL_MANAGE`; `VIEW`-only actor cannot override), side effects (no `class_status_events` / `audit_logs` rows from denied calls), denial paths for unauthorized actors
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/payroll/payroll-permission-denials.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: US-7, AC-7.1–AC-7.5, E19_
+- [ ] TB.4 4-Tier verification for payroll service + repository files
+  - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/services/teachers/payroll-calculation.service.ts`, `backend/services/teachers/payroll-grace-settings.ts`, `backend/services/teachers/payroll-override.idempotency.ts`, `backend/services/teachers/teacher-due.service.ts` (payroll-amount consumption + status flips), `backend/services/scheduling/scheduling.service.ts` (auto-trigger wiring), `backend/db/repo/scheduling/class-instances.ts` (`getById` forUpdate / `updatePayrollCalculation` / `findPayrollReportRows`), `backend/db/repo/scheduling/class-status-events.repository.ts` (`findRecentByInstanceAndHash`), `backend/lib/sanitize/richTextSanitizer.ts` (`sanitizePlainText`)
+  - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels
+  - Verify with `bun run test/scripts/run-test.ts <each test file>`
+  - _Requirements: cross-cutting (US-2–US-7, AC-6.7–AC-6.8, E15–E16)_
+- [ ] TB.5 Penetration verification (skip only if plan has no new endpoints/mutations)
+  - BOLA/IDOR across the roles in this plan (teacher / accounting operator / admin against other teachers' payroll rows via `payrollReport` filters and `applyPayrollOverride` on arbitrary `instanceId`s); permission denial on `applyPayrollOverride` and `payrollReport`; wildcard injection on the report search/text filters and CSV export query string; `payrollNote` XSS/sanitizer bypass attempts against `sanitizePlainText`; `force` flag escalation without `ACCOUNTING_PAYROLL_MANAGE`
+  - Via `.agents/skills/pentester/SKILL.md`
+  - _Requirements: US-7, AC-7.1–AC-7.5, E15, E16_
