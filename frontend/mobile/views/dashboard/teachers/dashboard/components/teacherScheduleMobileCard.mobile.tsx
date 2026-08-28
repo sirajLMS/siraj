@@ -1,8 +1,7 @@
 "use client";
 
 import { AccessTimeOutlined, AcUnitOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Box, Button, Paper, Tooltip, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, Button, Tooltip, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig/MeetingUrlCell";
 import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -16,7 +15,13 @@ import {
   getStatusLabel,
   resolveTeacherStatusBadge,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/sessionStatusUtils";
-import { MobileActionIconLink, MobileStatusBadge, MobileUserAvatar } from "@/frontend/mobile/components/ui";
+import {
+  MobileActionIconLink,
+  MobileCardListItem,
+  type MobileCardListItemProps,
+  MobileStatusBadge,
+  MobileUserAvatar,
+} from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { SessionActivateButtonMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/sessionActivateButton.mobile";
 import { TeacherActiveSessionControlsMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherActiveSessionControls.mobile";
@@ -24,19 +29,21 @@ import { TeacherScheduleStatusContentMobile } from "@/frontend/mobile/views/dash
 import { Link } from "@/shared/i18n";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
 
-const StyledScheduleCard = styled(Paper, {
-  shouldForwardProp: prop => prop !== "isLive",
-})<{ isLive: boolean }>(({ theme, isLive }) => ({
-  paddingBlock: theme.spacing(2),
-  paddingInline: theme.spacing(2),
-  borderRadius: 0,
-  backgroundColor: theme.palette.surfaceContainerLowest,
-  boxShadow: "none",
-  overflow: "hidden",
-  width: "100%",
-  opacity: 1,
-  borderInlineStart: isLive ? `4px solid ${theme.palette.primary.main}` : undefined,
-}));
+type ScheduleCardAccentBorder = MobileCardListItemProps["accentBorder"];
+
+/**
+ * Accent precedence mirrors the historical shell: a frozen row always shows the
+ * info accent; otherwise a live row shows the primary accent.
+ */
+function resolveScheduleCardAccentBorder(isFrozen: boolean, isLive: boolean): ScheduleCardAccentBorder {
+  if (isFrozen) {
+    return { color: "info", side: "inline-start" };
+  }
+  if (isLive) {
+    return { color: "primary", side: "inline-start" };
+  }
+  return undefined;
+}
 
 interface TeacherScheduleMobileCardProps {
   readonly row: TeacherScheduleRow;
@@ -387,13 +394,11 @@ export function TeacherScheduleMobileCardItem({
   });
 
   return (
-    <StyledScheduleCard
-      elevation={0}
-      isLive={isLive}
-      sx={theme => ({
-        opacity: isCompleted ? 0.7 : 1,
-        borderInlineStart: isFrozen ? `4px solid ${theme.palette.info.main}` : undefined,
-      })}
+    <MobileCardListItem
+      variant="edge-to-edge"
+      dimmed={isCompleted}
+      dimmedOpacity={0.7}
+      accentBorder={resolveScheduleCardAccentBorder(isFrozen, isLive)}
     >
       <CardHeader row={row} labels={labels} canActivate={canActivate} isLive={isLive} studentHref={studentHrefValue} />
       <TimeHighlight row={row} labels={labels} />
@@ -434,7 +439,7 @@ export function TeacherScheduleMobileCardItem({
         onMarkAbsent={onMarkAbsent}
         onRequestLeave={onRequestLeave}
       />
-    </StyledScheduleCard>
+    </MobileCardListItem>
   );
 }
 

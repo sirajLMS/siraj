@@ -1,17 +1,19 @@
 "use client";
 
-import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutlined } from "@mui/icons-material";
-import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
+import { CalendarTodayOutlined, MoreVertOutlined, VideoChatOutlined } from "@mui/icons-material";
+import { Box, Button, Tooltip, Typography } from "@mui/material";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import {
   AccountStatus,
   type TeacherDirectoryQuery_teacherDirectory_rows as TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileActionIconLink } from "@/frontend/mobile/components/ui/button";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
-import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
+import { MobileCardList, MobileContentInset } from "@/frontend/mobile/components/ui/container";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
@@ -25,54 +27,9 @@ interface TeacherCardListProps {
   readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
-function TeacherSearchField({
-  searchQuery,
-  onSearchChange,
-  placeholder,
-}: {
-  readonly searchQuery: string;
-  readonly onSearchChange: (query: string) => void;
-  readonly placeholder: string;
-}) {
-  return (
-    <TextField
-      fullWidth
-      placeholder={placeholder}
-      value={searchQuery}
-      onChange={e => {
-        onSearchChange(e.target.value);
-      }}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <SearchOutlined
-              sx={theme => ({
-                color: theme.palette.text.disabled,
-                marginInlineEnd: theme.spacing(1),
-              })}
-            />
-          ),
-          sx: theme => ({
-            borderRadius: 0,
-            backgroundColor: theme.palette.background.paper,
-          }),
-        },
-      }}
-    />
-  );
-}
+function TeacherCard({ row, t }: { readonly row: TeacherDirectoryRow; readonly t: TeachersDirectoryLabels }) {
+  const profileHref = profileHrefForTeacher({ userId: row.userId, teacherId: row.id });
 
-function TeacherCard({
-  row,
-  t,
-  onNavigateToSchedule,
-  onNavigateToProfile,
-}: {
-  readonly row: TeacherDirectoryRow;
-  readonly t: TeachersDirectoryLabels;
-  readonly onNavigateToSchedule: (teacherId: string) => void;
-  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
-}) {
   return (
     <MobileCardListItem variant="edge-to-edge" dimmed={row.status === AccountStatus.Deactivated}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
@@ -90,8 +47,8 @@ function TeacherCard({
           </Typography>
         </Box>
         <MobileStatusBadge
-          category="studentAccount"
-          status={row.status === AccountStatus.Activated ? "regular" : "deactivated"}
+          category="staffAccount"
+          status={row.status === AccountStatus.Activated ? "activated" : "deactivated"}
           label={row.status === AccountStatus.Activated ? t.status.active : t.status.offline}
         />
       </Box>
@@ -121,22 +78,20 @@ function TeacherCard({
           {row.userId ? (
             <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name ?? row.email ?? ""} />
           ) : null}
-          <IconButton
-            sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
-            onClick={() => {
-              if (row.id) {
-                onNavigateToSchedule(row.id);
-              }
-            }}
-          >
-            <CalendarTodayOutlined sx={{ fontSize: 20 }} />
-          </IconButton>
-          <IconButton
-            sx={theme => ({ border: `1px solid ${theme.palette.border.main}` })}
-            onClick={() => onNavigateToProfile(row)}
-          >
-            <MoreVertOutlined sx={{ fontSize: 20 }} />
-          </IconButton>
+          {row.id ? (
+            <Tooltip title={t.actions.viewSchedule}>
+              <MobileActionIconLink href={`/teachers/${row.id}/schedule/weekly`} aria-label={t.actions.viewSchedule}>
+                <CalendarTodayOutlined fontSize="small" />
+              </MobileActionIconLink>
+            </Tooltip>
+          ) : null}
+          {profileHref ? (
+            <Tooltip title={t.actions.options}>
+              <MobileActionIconLink href={profileHref} aria-label={t.actions.options}>
+                <MoreVertOutlined fontSize="small" />
+              </MobileActionIconLink>
+            </Tooltip>
+          ) : null}
         </Box>
       </Box>
     </MobileCardListItem>
@@ -149,30 +104,19 @@ export function TeacherCardList({
   onSearchChange,
   paginationOptions,
   labels,
-  onNavigateToSchedule,
-  onNavigateToProfile,
 }: Readonly<TeacherCardListProps>) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <TeacherSearchField
-        searchQuery={searchQuery}
-        onSearchChange={onSearchChange}
-        placeholder={labels.fields.searchTeachers}
-      />
+      <MobileContentInset>
+        <SearchBarField value={searchQuery} placeholder={labels.fields.searchTeachers} onChange={onSearchChange} />
+      </MobileContentInset>
 
       <MobileCardList
         rows={rows}
         getKey={row => row.id ?? ""}
         paginationOptions={paginationOptions}
         layout="edge-to-edge"
-        renderItem={row => (
-          <TeacherCard
-            row={row}
-            t={labels}
-            onNavigateToSchedule={onNavigateToSchedule}
-            onNavigateToProfile={onNavigateToProfile}
-          />
-        )}
+        renderItem={row => <TeacherCard row={row} t={labels} />}
       />
     </Box>
   );

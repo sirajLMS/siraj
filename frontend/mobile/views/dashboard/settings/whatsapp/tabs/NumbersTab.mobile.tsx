@@ -24,7 +24,6 @@ import {
   Stack,
   TextField,
   Typography,
-  useMediaQuery,
 } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
@@ -36,15 +35,11 @@ import {
   NumbersListItemTransition,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/__shared__";
 import { NumbersSnackbar } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/components/NumbersSnackbar";
-import { NumberCard } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCard";
-import {
-  ROW_DELETE_DURATION,
-  ROW_ENTER_DURATION,
-  syncPulseSx,
-} from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/whatsappAnimations";
+import { NumberCardContent } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCardContent";
+import { syncPulseSx } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/whatsappAnimations";
 import type { NumbersTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
 import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
-import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 type CredentialField = "accessToken" | "twoStepPin";
@@ -285,44 +280,18 @@ function AccountsListMobile({
   onMenuOpen,
   onAddAccount,
 }: Readonly<AccountsListMobileProps>) {
-  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
-  const enterTimeout = reducedMotion ? 0 : ROW_ENTER_DURATION;
-  const deleteTimeout = reducedMotion ? 0 : ROW_DELETE_DURATION;
-
-  if (accounts.length === 0) {
-    return (
-      <Box sx={{ textAlign: "center", py: 4 }}>
-        <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mb: 2 }}>
-          {labels.noAccounts}
-        </Typography>
-        <RequirePermission permissions={AppPermission.WhatsappConfigManage}>
-          <MobilePrimaryPageAction startIcon={<AddOutlined />} onClick={onAddAccount}>
-            {labels.addFirstNumber}
-          </MobilePrimaryPageAction>
-        </RequirePermission>
-      </Box>
-    );
-  }
-
-  return (
-    <Stack spacing={1.5}>
-      {accounts.map((account, index) => {
-        const isDeleting = deletingId === account.id;
-        const isSyncing = syncingId !== null;
-        const isBusy = isCardBusy(account.id, deletingId, updatingId, editingTokenForId, editingPinForId);
-        return (
-          <NumbersListItemTransition
-            key={account.id ?? account.phoneNumberId ?? index}
-            visible={!isDeleting}
-            enterTimeout={enterTimeout}
-            deleteTimeout={deleteTimeout}
-            ariaBusy={isBusy}
-          >
+  const renderItem = useCallback(
+    (account: WhatsappAccountRow) => {
+      const isDeleting = deletingId === account.id;
+      const isSyncing = syncingId !== null;
+      const isBusy = isCardBusy(account.id, deletingId, updatingId, editingTokenForId, editingPinForId);
+      return (
+        <NumbersListItemTransition visible={!isDeleting} ariaBusy={isBusy}>
+          <MobileCardListItem variant="rounded">
             {isBusy ? <LinearProgress sx={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 1 }} /> : null}
-            <NumberCard
+            <NumberCardContent
               account={account}
               labels={labels}
-              chipGap={0.5}
               action={
                 <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
                   <IconButton
@@ -341,10 +310,40 @@ function AccountsListMobile({
                 </Box>
               }
             />
-          </NumbersListItemTransition>
-        );
-      })}
-    </Stack>
+          </MobileCardListItem>
+        </NumbersListItemTransition>
+      );
+    },
+    [deletingId, syncingId, updatingId, editingTokenForId, editingPinForId, labels, onMenuOpen]
+  );
+
+  const renderEmptyState = useCallback(
+    (message: string) => (
+      <Box sx={{ textAlign: "center", py: 4 }}>
+        <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mb: 2 }}>
+          {message}
+        </Typography>
+        <RequirePermission permissions={AppPermission.WhatsappConfigManage}>
+          <MobilePrimaryPageAction startIcon={<AddOutlined />} onClick={onAddAccount}>
+            {labels.addFirstNumber}
+          </MobilePrimaryPageAction>
+        </RequirePermission>
+      </Box>
+    ),
+    [labels, onAddAccount]
+  );
+
+  return (
+    <MobileCardList
+      rows={accounts}
+      renderItem={renderItem}
+      getKey={account => account.id ?? account.phoneNumberId ?? account.displayPhoneNumber ?? ""}
+      emptyMessage={labels.noAccounts}
+      renderEmptyState={renderEmptyState}
+      paginationOptions={{ mode: "client", pageSize: 10 }}
+      gap={1.5}
+      layout="rounded"
+    />
   );
 }
 

@@ -186,15 +186,7 @@ function PaymentAuditFields({
 }
 
 export function PaymentDetailMobile(props: Readonly<PaymentDetailViewModel>) {
-  const {
-    t,
-    payment,
-    loading,
-    notFound,
-    toggleError,
-    onDismissToggleError,
-    canManagePayments,
-  } = props;
+  const { t, payment, loading, notFound, toggleError, onDismissToggleError, canManagePayments } = props;
   const locale = useAppLocale();
 
   return (

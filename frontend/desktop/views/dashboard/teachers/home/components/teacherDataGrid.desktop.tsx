@@ -1,9 +1,11 @@
 "use client";
 
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import type { ReactNode } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { ActionIconLink } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherDirectoryQuery_teacherDirectory_rows as TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
@@ -21,31 +23,44 @@ interface TeacherDataGridProps {
   readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
-interface TeacherActionButtonProps {
-  readonly icon: React.ReactNode;
-  readonly variant: "primary" | "error";
-  readonly onClick: () => void;
-}
-
 function isStringValue(value: unknown): value is string {
   return typeof value === "string";
 }
 
-function TeacherActionButton({ icon, variant, onClick }: TeacherActionButtonProps) {
+function renderScheduleCell(params: GridRenderCellParams<TeacherDirectoryRow>, viewScheduleLabel: string): ReactNode {
+  if (!params.row.id) {
+    return null;
+  }
   return (
-    <IconButton
-      onClick={onClick}
-      sx={theme => ({
-        backgroundColor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
-        color: variant === "primary" ? theme.palette.onPrimaryContainer : theme.palette.onErrorContainer,
-        "&:hover": {
-          backgroundColor: variant === "primary" ? theme.palette.primaryContainer : theme.palette.errorContainer,
-          opacity: 0.8,
-        },
-      })}
-    >
-      {icon}
-    </IconButton>
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
+      <Tooltip title={viewScheduleLabel}>
+        <ActionIconLink href={`/teachers/${params.row.id}/schedule/weekly`} aria-label={viewScheduleLabel}>
+          <CalendarMonthOutlined fontSize="small" />
+        </ActionIconLink>
+      </Tooltip>
+    </Box>
+  );
+}
+
+function renderOptionsCell(params: GridRenderCellParams<TeacherDirectoryRow>, optionsLabel: string): ReactNode {
+  const profileHref = profileHrefForTeacher({ userId: params.row.userId, teacherId: params.row.id });
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, width: "100%" }}>
+      {params.row.userId ? (
+        <ViewAsUserButton
+          variant="link"
+          targetUserId={params.row.userId}
+          targetUserName={params.row.name ?? params.row.email ?? ""}
+        />
+      ) : null}
+      {profileHref ? (
+        <Tooltip title={optionsLabel}>
+          <ActionIconLink href={profileHref} aria-label={optionsLabel}>
+            <SettingsOutlined fontSize="small" />
+          </ActionIconLink>
+        </Tooltip>
+      ) : null}
+    </Box>
   );
 }
 
@@ -56,8 +71,6 @@ export function TeacherDataGrid({
   pageSize = 10,
   totalCount,
   onPageChange,
-  onNavigateToSchedule,
-  onNavigateToProfile,
 }: Readonly<TeacherDataGridProps>) {
   const t = labels;
 
@@ -119,19 +132,8 @@ export function TeacherDataGrid({
       align: "center",
       headerAlign: "center",
       sortable: false,
-      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}>
-          <TeacherActionButton
-            icon={<CalendarMonthOutlined />}
-            variant="error"
-            onClick={() => {
-              if (params.row.id) {
-                onNavigateToSchedule(params.row.id);
-              }
-            }}
-          />
-        </Box>
-      ),
+      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) =>
+        renderScheduleCell(params, t.actions.viewSchedule),
     },
     {
       field: "options",
@@ -140,22 +142,7 @@ export function TeacherDataGrid({
       align: "center",
       headerAlign: "center",
       sortable: false,
-      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => (
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, width: "100%" }}>
-          {params.row.userId ? (
-            <ViewAsUserButton
-              variant="link"
-              targetUserId={params.row.userId}
-              targetUserName={params.row.name ?? params.row.email ?? ""}
-            />
-          ) : null}
-          <TeacherActionButton
-            icon={<SettingsOutlined />}
-            variant="primary"
-            onClick={() => onNavigateToProfile(params.row)}
-          />
-        </Box>
-      ),
+      renderCell: (params: GridRenderCellParams<TeacherDirectoryRow>) => renderOptionsCell(params, t.actions.options),
     },
   ];
 

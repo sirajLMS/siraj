@@ -15,6 +15,9 @@ import {
   TextField,
 } from "@mui/material";
 import { type ReactNode, useMemo, useState } from "react";
+import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
+import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
+import { AppTimePicker } from "@/frontend/common/components/ui/form/time";
 import { logger } from "@/frontend/common/utils/logger";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import type { ClassSubjectOption } from "@/frontend/common/views/dashboard/classes/recurring/types";
@@ -23,23 +26,29 @@ import type { TeacherDashboardLabels } from "@/shared/locale";
 
 type ManualClassEntryLabels = TeacherDashboardLabels["manualClassEntry"];
 
-interface ManualClassEntryDialogProps {
+export interface ManualClassEntrySubmitData {
+  readonly studentId: string;
+  readonly subjectId: string;
+  readonly scheduledStartAt: string;
+  readonly scheduledEndAt: string;
+  readonly durationMinutes: number;
+  readonly classType: string;
+}
+
+export interface ManualClassEntryDialogProps {
   readonly open: boolean;
   readonly onClose: () => void;
-  readonly onSubmit: (data: {
-    studentId: string;
-    subjectId: string;
-    scheduledStartAt: string;
-    scheduledEndAt: string;
-    durationMinutes: number;
-    classType: string;
-  }) => Promise<void>;
+  readonly onSubmit: (data: ManualClassEntrySubmitData) => Promise<void>;
   readonly defaultActive?: boolean;
   readonly studentSelect: ReactNode;
   readonly subjects: readonly ClassSubjectOption[];
   readonly subjectsLoading: boolean;
   readonly labels: ManualClassEntryLabels;
+  /** Renders the dialog edge-to-edge; the mobile tier wrapper sets this. */
+  readonly fullScreen?: boolean;
 }
+
+const MANUAL_CLASS_ENTRY_TITLE_ID = "manual-class-entry-dialog-title";
 
 export function ManualClassEntryDialog({
   open,
@@ -50,9 +59,16 @@ export function ManualClassEntryDialog({
   subjects,
   subjectsLoading,
   labels,
+  fullScreen = false,
 }: Readonly<ManualClassEntryDialogProps>) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      {...DialogPresets.info}
+      fullScreen={fullScreen}
+      open={open}
+      onClose={onClose}
+      aria-labelledby={MANUAL_CLASS_ENTRY_TITLE_ID}
+    >
       <ManualClassEntryForm
         key={open ? "open" : "closed"}
         onClose={onClose}
@@ -69,14 +85,7 @@ export function ManualClassEntryDialog({
 
 interface ManualClassEntryFormProps {
   readonly onClose: () => void;
-  readonly onSubmit: (data: {
-    studentId: string;
-    subjectId: string;
-    scheduledStartAt: string;
-    scheduledEndAt: string;
-    durationMinutes: number;
-    classType: string;
-  }) => Promise<void>;
+  readonly onSubmit: (data: ManualClassEntrySubmitData) => Promise<void>;
   readonly defaultActive: boolean;
   readonly studentSelect: ReactNode;
   readonly subjects: readonly ClassSubjectOption[];
@@ -102,6 +111,33 @@ function getInitialStartTime(defaultActive: boolean): string {
   const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
   const hh = String(nextHour.getHours()).padStart(2, "0");
   return `${hh}:00`;
+}
+
+function parseDateValue(value: string): Date | null {
+  if (!value) return null;
+  const parsed = new Date(`${value}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatDateValue(value: Date | null): string {
+  if (!value || Number.isNaN(value.getTime())) return "";
+  const yyyy = value.getFullYear();
+  const mm = String(value.getMonth() + 1).padStart(2, "0");
+  const dd = String(value.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function parseTimeValue(value: string): Date | null {
+  if (!value) return null;
+  const parsed = new Date(`1970-01-01T${value}`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatTimeValue(value: Date | null): string {
+  if (!value || Number.isNaN(value.getTime())) return "";
+  const hh = String(value.getHours()).padStart(2, "0");
+  const mm = String(value.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
 }
 
 function ManualClassEntryForm({
@@ -167,7 +203,7 @@ function ManualClassEntryForm({
 
   return (
     <form onSubmit={handleFormSubmit}>
-      <DialogTitle sx={{ typography: "titleLg" }}>
+      <DialogTitle id={MANUAL_CLASS_ENTRY_TITLE_ID} sx={{ typography: "titleLg" }}>
         {defaultActive ? labels.titleCreateActive : labels.titleCreate}
       </DialogTitle>
       <DialogContent dividers>
@@ -259,27 +295,31 @@ function ManualClassEntryFormFields({
         disabled={submitting}
       />
 
-      <TextField
+      <AppDatePicker
         label={labels.scheduledDate}
-        type="date"
-        required
-        fullWidth
-        value={date}
-        onChange={e => setDate(e.target.value)}
+        value={parseDateValue(date)}
+        disabled={submitting}
+        onChange={(value: Date | null) => setDate(formatDateValue(value))}
         slotProps={{
-          inputLabel: { shrink: true },
+          textField: {
+            required: true,
+            fullWidth: true,
+            slotProps: { htmlInput: { autoComplete: "off" } },
+          },
         }}
       />
 
-      <TextField
+      <AppTimePicker
         label={labels.startTime}
-        type="time"
-        required
-        fullWidth
-        value={startTime}
-        onChange={e => setStartTime(e.target.value)}
+        value={parseTimeValue(startTime)}
+        disabled={submitting}
+        onChange={(value: Date | null) => setStartTime(formatTimeValue(value))}
         slotProps={{
-          inputLabel: { shrink: true },
+          textField: {
+            required: true,
+            fullWidth: true,
+            slotProps: { htmlInput: { autoComplete: "off" } },
+          },
         }}
       />
 

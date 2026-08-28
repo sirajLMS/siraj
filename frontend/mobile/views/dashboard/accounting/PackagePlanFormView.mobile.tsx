@@ -270,7 +270,7 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
               onClick={() => setArchiveDialogOpen(true)}
               disabled={archiving || !(existing?.active ?? true)}
             >
-              {t.archived}
+              {t.archiveConfirm}
             </Button>
           ) : null}
 

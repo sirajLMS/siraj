@@ -2,12 +2,12 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CloseOutlined, VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Box, Chip, CircularProgress, IconButton, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { Box, Chip, CircularProgress, Stack, TextField, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { type Control, Controller, useForm } from "react-hook-form";
+import { SecretTextField, TagInput } from "@/frontend/common/components/ui/input";
 import {
   type EnvConfigEntryFieldsFragment,
   MeetingIntegrationProviderSlug,
@@ -80,61 +80,35 @@ function CredentialFormErrorState({ labels }: { readonly labels: CredentialFormL
   );
 }
 
-function ScopesField({
+function ScopesTagInput({
   labels,
-  scopes,
-  onAddScope,
-  onRemoveScope,
+  control,
   error,
 }: {
   readonly labels: SettingsMeetingIntegrationsLabels["credentialForm"];
-  readonly scopes: readonly string[];
-  readonly onAddScope: (scope: string) => void;
-  readonly onRemoveScope: (scope: string) => void;
+  readonly control: Control<CredentialFormValues>;
   readonly error?: string;
 }) {
-  const [inputValue, setInputValue] = useState("");
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      const trimmed = inputValue.trim();
-      if (trimmed && !scopes.includes(trimmed)) {
-        onAddScope(trimmed);
-      }
-      setInputValue("");
-    }
-  };
-
   return (
-    <Stack sx={{ gap: 1 }}>
-      <TextField
-        label={labels.scopes}
-        value={inputValue}
-        onChange={e => setInputValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={labels.scopesPlaceholder}
-        error={!!error}
-        helperText={error}
-        fullWidth
-        size="small"
+    <Box>
+      <Controller<CredentialFormValues, "scopes">
+        name="scopes"
+        control={control}
+        render={({ field }) => (
+          <TagInput
+            label={labels.scopes}
+            placeholder={labels.scopesPlaceholder}
+            initialTags={field.value ?? []}
+            onChange={field.onChange}
+          />
+        )}
       />
-      {scopes.length > 0 ? (
-        <Stack direction="row" sx={{ flexWrap: "wrap", gap: 0.5 }}>
-          {scopes.map(scope => (
-            <Chip
-              key={scope}
-              label={scope}
-              size="small"
-              onDelete={() => {
-                onRemoveScope(scope);
-              }}
-              deleteIcon={<CloseOutlined sx={{ width: 16, height: 16 }} aria-label={labels.removeScope} />}
-            />
-          ))}
-        </Stack>
+      {error ? (
+        <Typography variant="body2" sx={theme => ({ color: theme.palette.error.main })}>
+          {error}
+        </Typography>
       ) : null}
-    </Stack>
+    </Box>
   );
 }
 
@@ -216,10 +190,6 @@ function parseScopesFromEntries(
     : [];
 }
 
-function toggleSecretField(field: string, setFn: React.Dispatch<React.SetStateAction<Record<string, boolean>>>) {
-  setFn(prev => ({ ...prev, [field]: !prev[field] }));
-}
-
 function useCredentialFormMutations(
   providerSlugUpper: MeetingIntegrationProviderSlug,
   setValue: ReturnType<typeof useForm<CredentialFormValues>>["setValue"],
@@ -296,32 +266,6 @@ function filterProviderEntries(
   return filtered.filter(
     entry => entry.category === "meeting" && entry.key != null && isProviderKey(entry.key, providerSlugUpper)
   );
-}
-
-function useScopeHandlers(
-  scopes: readonly string[],
-  setValue: ReturnType<typeof useForm<CredentialFormValues>>["setValue"]
-) {
-  const onAddScope = useCallback(
-    (scope: string) => {
-      if (!scopes.includes(scope)) {
-        setValue("scopes", [...scopes, scope]);
-      }
-    },
-    [scopes, setValue]
-  );
-
-  const onRemoveScope = useCallback(
-    (scope: string) => {
-      setValue(
-        "scopes",
-        scopes.filter(s => s !== scope)
-      );
-    },
-    [scopes, setValue]
-  );
-
-  return { onAddScope, onRemoveScope };
 }
 
 function buildDefaultValues(
@@ -429,15 +373,11 @@ export function MeetingProviderCredentialForm({
     defaultValues,
   });
 
-  const scopes = useWatch({ control, name: "scopes" });
-
   useEffect(() => {
     if (!loading && providerEntries.length > 0) {
       reset(defaultValues);
     }
   }, [loading, providerEntries.length, defaultValues, reset]);
-
-  const { onAddScope, onRemoveScope } = useScopeHandlers(scopes, setValue);
 
   const { onSubmit, onRevert, isReverting } = useCredentialFormMutations(
     providerSlugUpper,
@@ -448,8 +388,11 @@ export function MeetingProviderCredentialForm({
   );
 
   const toggleSecret = useCallback((field: string) => {
-    toggleSecretField(field, setShowSecret);
+    setShowSecret(prev => ({ ...prev, [field]: !prev[field] }));
   }, []);
+
+  const { ref: clientSecretInputRef, ...clientSecretRegistration } = register("clientSecret");
+  const { ref: webhookSecretInputRef, ...webhookSecretRegistration } = register("webhookSecret");
 
   const earlyReturn = renderEarlyReturn(loading, error, providerEntries, hasExistingCredentials, labels);
   if (earlyReturn) {
@@ -476,39 +419,17 @@ export function MeetingProviderCredentialForm({
             autoComplete="off"
           />
 
-          <TextField
+          <SecretTextField
             label={labels.credentialForm.clientSecret}
-            {...register("clientSecret")}
+            {...clientSecretRegistration}
+            inputRef={clientSecretInputRef}
             error={!!errors.clientSecret}
             helperText={errors.clientSecret?.message}
-            fullWidth
-            size="small"
-            type={showSecret.clientSecret ? "text" : "password"}
-            autoComplete="off"
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      edge="end"
-                      aria-label={
-                        showSecret.clientSecret ? labels.credentialForm.hideValue : labels.credentialForm.showValue
-                      }
-                      onClick={() => {
-                        toggleSecret("clientSecret");
-                      }}
-                      disabled={isLoading}
-                    >
-                      {showSecret.clientSecret ? (
-                        <VisibilityOffOutlined fontSize="small" />
-                      ) : (
-                        <VisibilityOutlined fontSize="small" />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
+            revealed={showSecret.clientSecret ?? false}
+            onToggleReveal={() => toggleSecret("clientSecret")}
+            showValueLabel={labels.credentialForm.showValue}
+            hideValueLabel={labels.credentialForm.hideValue}
+            disabled={isLoading}
           />
 
           {providerSlugUpper === MeetingIntegrationProviderSlug.MicrosoftTeams ||
@@ -521,47 +442,19 @@ export function MeetingProviderCredentialForm({
             />
           ) : null}
 
-          <ScopesField
-            labels={labels.credentialForm}
-            scopes={scopes}
-            onAddScope={onAddScope}
-            onRemoveScope={onRemoveScope}
-            error={errors.scopes?.message}
-          />
+          <ScopesTagInput labels={labels.credentialForm} control={control} error={errors.scopes?.message} />
 
-          <TextField
+          <SecretTextField
             label={labels.credentialForm.webhookSecret}
-            {...register("webhookSecret")}
+            {...webhookSecretRegistration}
+            inputRef={webhookSecretInputRef}
             error={!!errors.webhookSecret}
             helperText={errors.webhookSecret?.message}
-            fullWidth
-            size="small"
-            type={showSecret.webhookSecret ? "text" : "password"}
-            autoComplete="off"
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      edge="end"
-                      aria-label={
-                        showSecret.webhookSecret ? labels.credentialForm.hideValue : labels.credentialForm.showValue
-                      }
-                      onClick={() => {
-                        toggleSecret("webhookSecret");
-                      }}
-                      disabled={isLoading}
-                    >
-                      {showSecret.webhookSecret ? (
-                        <VisibilityOffOutlined fontSize="small" />
-                      ) : (
-                        <VisibilityOutlined fontSize="small" />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
+            revealed={showSecret.webhookSecret ?? false}
+            onToggleReveal={() => toggleSecret("webhookSecret")}
+            showValueLabel={labels.credentialForm.showValue}
+            hideValueLabel={labels.credentialForm.hideValue}
+            disabled={isLoading}
           />
 
           {hasExistingCredentials ? (

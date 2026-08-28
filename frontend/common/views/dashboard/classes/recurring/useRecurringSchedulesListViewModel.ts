@@ -40,21 +40,24 @@ export function useRecurringSchedulesListViewModel(
   const applySearch = useRecurringSchedulesListStore(state => state.applySearch);
 
   const urlSearch = searchParams.get("search") ?? "";
-  const currentPage = initialized ? storedPage : initialPage;
+  // View-layer pages are 0-based (shared pagination contract); the `initialPage` prop and
+  // the `page` URL param stay 1-based, and the GraphQL query receives `page: currentPage + 1`.
+  const initialPageIndex = Math.max(0, initialPage - 1);
+  const currentPage = initialized ? storedPage : initialPageIndex;
   const searchValue = initialized ? storedSearch : urlSearch;
 
   // Seed the store from the URL/props on first mount so subsequent handlers operate on
   // store state and the current page/search survive viewport tier switches.
   useEffect(() => {
     if (!useRecurringSchedulesListStore.getState().initialized) {
-      initializeListState(urlSearch, initialPage);
+      initializeListState(urlSearch, initialPageIndex);
     }
-  }, [initializeListState, urlSearch, initialPage]);
+  }, [initializeListState, urlSearch, initialPageIndex]);
 
   const { data, loading, error, refetch } = useQuery(recurringSchedulesQueryDocument, {
     variables: {
       pagination: {
-        page: currentPage,
+        page: currentPage + 1,
         first: initialPageSize,
         after: null,
         before: null,
@@ -72,7 +75,7 @@ export function useRecurringSchedulesListViewModel(
     (page: number) => {
       setPage(page);
       const params = new URLSearchParams(searchParams.toString());
-      params.set("page", String(page));
+      params.set("page", String(page + 1));
       router.push(`?${params.toString()}`, { scroll: false });
     },
     [router, searchParams, setPage]

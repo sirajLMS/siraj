@@ -1,9 +1,10 @@
 "use client";
 
 import { AddOutlined, DeleteOutlined, TimerOutlined } from "@mui/icons-material";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { ScheduleLegend } from "@/frontend/common/views/dashboard/teachers/schedule/__shared__/teacherScheduleLegendShared";
 import {
   ScheduleLastUpdatedShared,
   TeacherWeeklyScheduleViewShared,
@@ -74,34 +75,6 @@ function DesktopWorkloadMetrics({ labels, schedule }: Readonly<{ labels: Schedul
   );
 }
 
-function LegendSwatch({ variant, labels }: Readonly<{ variant: "booked" | "available"; labels: ScheduleLabels }>) {
-  const text = variant === "booked" ? labels.grid.bookedClass : labels.grid.availableSlot;
-  return (
-    <Box sx={{ display: "flex", flexDirection: "row", gap: 1, alignItems: "center" }}>
-      <Box
-        sx={theme =>
-          variant === "booked"
-            ? {
-                width: 12,
-                height: 12,
-                backgroundColor: theme.palette.primary.main,
-                borderRadius: 0.5,
-              }
-            : {
-                width: 12,
-                height: 12,
-                border: `1px solid ${theme.palette.border.light}`,
-                borderRadius: 0.5,
-              }
-        }
-      />
-      <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {text}
-      </Typography>
-    </Box>
-  );
-}
-
 function DesktopLegendBar({ labels, schedule }: Readonly<{ labels: ScheduleLabels; schedule: Schedule }>) {
   return (
     <Box
@@ -114,10 +87,22 @@ function DesktopLegendBar({ labels, schedule }: Readonly<{ labels: ScheduleLabel
         mt: 2,
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "row", gap: 3, alignItems: "center" }}>
-        <LegendSwatch variant="booked" labels={labels} />
-        <LegendSwatch variant="available" labels={labels} />
-      </Box>
+      <ScheduleLegend
+        items={[
+          {
+            key: "booked",
+            label: labels.grid.bookedClass,
+            swatch: { kind: "filled", color: theme => theme.palette.primary.main },
+          },
+          {
+            key: "available",
+            label: labels.grid.availableSlot,
+            swatch: { kind: "outlined" },
+          },
+        ]}
+        labelVariant="labelUppercase"
+        spacing={3}
+      />
       <ScheduleLastUpdatedShared labels={labels} schedule={schedule} />
     </Box>
   );

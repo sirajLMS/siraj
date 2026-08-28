@@ -11,6 +11,7 @@ import {
   MobileCardList,
   MobileCardListItem,
   MobilePrimaryPageAction,
+  MobileSectionPanel,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 
@@ -104,17 +105,17 @@ export function SiteContentSettingsTabMobileView({
 }: Readonly<SiteContentSettingsViewModel>) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box sx={{ px: 2 }}>
-        <Typography sx={{ typography: "titleLg", mb: 1 }}>{labels.title}</Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, mb: 2 }}>
-          {labels.subtitle}
-        </Typography>
-        {canManage ? (
-          <MobilePrimaryPageAction onClick={onAdd} startIcon={<AddOutlined />} fullWidth>
-            {labels.addLabel}
-          </MobilePrimaryPageAction>
-        ) : null}
-      </Box>
+      <MobileSectionPanel
+        title={labels.title}
+        subTitle={labels.subtitle}
+        actions={
+          canManage ? (
+            <MobilePrimaryPageAction onClick={onAdd} startIcon={<AddOutlined />} fullWidth>
+              {labels.addLabel}
+            </MobilePrimaryPageAction>
+          ) : undefined
+        }
+      />
 
       <MobileCardList
         rows={rows}

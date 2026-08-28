@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherAssignedStudentsQuery_teacherAssignedStudents_rows } from "@/frontend/common/graphql/generated/gql/graphql";
 import { teacherAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -22,12 +23,21 @@ export interface TeacherStudentsViewModel {
   readonly loading: boolean;
   readonly error: unknown;
   readonly labels: TeacherStudentsLabels;
+  readonly paginationOptions: ListPaginationOptions;
+}
+
+export interface TeacherStudentsColumnLabels {
+  readonly name: string;
+  readonly status: string;
+  readonly quota: string;
+  readonly hours: string;
 }
 
 export interface TeacherStudentsLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly noStudents: string;
+  readonly columns: TeacherStudentsColumnLabels;
   readonly statusLabel: (status: string) => string;
   readonly quotaLabel: (remaining: number, total: number) => string;
   readonly hoursLabel: (hours: number) => string;
@@ -48,10 +58,12 @@ export function useTeacherStudentsViewModel(
     rows,
     loading,
     error,
+    paginationOptions: { mode: "client" },
     labels: {
       pageTitle: t.pageTitle,
       pageSubtitle: t.pageSubtitle,
       noStudents: t.noStudents,
+      columns: t.columns,
       statusLabel: t.statusLabel,
       quotaLabel: t.quotaLabel,
       hoursLabel: t.hoursLabel,

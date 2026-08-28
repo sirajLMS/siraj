@@ -4,7 +4,9 @@ import { LockOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, FormControlLabel, Stack, Switch, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
+import { mobileContentGutterBelowMdSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 import type { OptInTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
 
 interface OptInTabContentProps extends OptInTabSharedProps {
@@ -15,9 +17,9 @@ interface OptInTabContentProps extends OptInTabSharedProps {
   readonly historySection?: ReactNode;
   /**
    * Platform-specific admin consolidated view rendered below the history
-   * section (Task 13). Desktop wrappers pass an AppDataGrid with search;
-   * mobile wrappers pass a MobileCardList with search. The shared layer
-   * wraps this section in `RequirePermission` with `WhatsappConfigManage`.
+   * section. Desktop wrappers pass an AppDataGrid with search; mobile wrappers
+   * pass a MobileCardList with search. The shared layer wraps this section in
+   * `RequirePermission` with `WhatsappConfigManage`.
    */
   readonly adminSection?: ReactNode;
 }
@@ -26,15 +28,18 @@ interface OptInTabContentProps extends OptInTabSharedProps {
  * Shared inner content for OptInTab — used by both desktop and mobile wrappers.
  *
  * Renders:
- * 1. The opt-in toggle (Switch + consent copy) — existing behaviour preserved.
- * 2. The audit history section title/subtitle + platform-specific table/list
- *    passed via `historySection` prop (Task 12). The shared layer renders the
- *    section header; the platform wrapper renders the actual AppDataGrid
- *    (desktop) or MobileCardList (mobile).
+ * 1. The opt-in toggle — a `BaseCard` containing the Switch (existing behavior
+ *    preserved) and a `StatusBadge` reflecting the enabled/disabled state.
+ * 2. The audit history section: title/subtitle plus the platform-specific
+ *    table/list passed via the `historySection` prop.
  * 3. The admin consolidated opt-in view wrapped in `RequirePermission` with
- *    `AppPermission.WhatsappConfigManage` (Task 13). The shared layer renders
- *    the section header; the platform wrapper renders the actual admin table
- *    with search filter via `adminSection` prop.
+ *    `AppPermission.WhatsappConfigManage`. The shared layer renders the
+ *    section header; the platform wrapper renders the admin table with search
+ *    filter via the `adminSection` prop.
+ *
+ * Section headers and the toggle card apply the shared mobile content gutter
+ * below `md` so mobile wrappers stay edge-to-edge without their own page
+ * padding.
  */
 export function OptInTabContent({
   labels,
@@ -48,52 +53,45 @@ export function OptInTabContent({
 
   return (
     <Stack spacing={3}>
-      {/* ── Toggle section (existing) ── */}
+      {/* ── Toggle section ── */}
       <Stack spacing={2}>
-        <Box>
+        <Box sx={mobileContentGutterBelowMdSx}>
           <Typography variant="titleLg">{t.optInTitle}</Typography>
           <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 0.5 }}>
             {t.optInSubtitle}
           </Typography>
         </Box>
 
-        <Box
-          sx={{
-            p: 2,
-            borderRadius: 1,
-            border: theme => `1px solid ${theme.palette.outlineVariant}`,
-          }}
-        >
-          {optInLoading ? (
-            <Box component="output" sx={{ display: "flex", justifyContent: "center" }} aria-busy>
-              <CircularProgress size={24} />
+        <Box sx={mobileContentGutterBelowMdSx}>
+          <BaseCard>
+            {optInLoading ? (
+              <Box component="output" sx={{ display: "flex", justifyContent: "center" }} aria-busy>
+                <CircularProgress size={24} />
+              </Box>
+            ) : (
+              <FormControlLabel
+                control={<Switch checked={isOptedIn} onChange={e => onToggleOptIn(e.target.checked)} />}
+                label={t.optInToggle}
+                sx={{ gap: 1.5 }}
+              />
+            )}
+            <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 1, display: "block" }}>
+              {t.optInConsentBody}
+            </Typography>
+            <Box sx={{ mt: 1 }}>
+              <StatusBadge
+                category="syncStatus"
+                status={isOptedIn ? "success" : "cancelled"}
+                label={isOptedIn ? t.optInEnabled : t.optInDisabled}
+              />
             </Box>
-          ) : (
-            <FormControlLabel
-              control={<Switch checked={isOptedIn} onChange={e => onToggleOptIn(e.target.checked)} />}
-              label={t.optInToggle}
-              sx={{ gap: 1.5 }}
-            />
-          )}
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 1, display: "block" }}>
-            {t.optInConsentBody}
-          </Typography>
-          <Typography
-            variant="labelMd"
-            sx={{
-              mt: 1,
-              display: "block",
-              color: theme => (isOptedIn ? theme.palette.success.main : theme.palette.text.secondary),
-            }}
-          >
-            {isOptedIn ? t.optInEnabled : t.optInDisabled}
-          </Typography>
+          </BaseCard>
         </Box>
       </Stack>
 
-      {/* ── History section (Task 12) ── */}
+      {/* ── History section ── */}
       <Stack spacing={2}>
-        <Box>
+        <Box sx={mobileContentGutterBelowMdSx}>
           <Typography variant="titleLg">{t.optInHistoryTitle}</Typography>
           <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 0.5 }}>
             {t.optInHistorySubtitle}
@@ -103,7 +101,7 @@ export function OptInTabContent({
         {historySection}
       </Stack>
 
-      {/* ── Admin consolidated opt-in view (Task 13) ── */}
+      {/* ── Admin consolidated opt-in view ── */}
       <RequirePermission
         permissions={AppPermission.WhatsappConfigManage}
         fallback={
@@ -117,7 +115,7 @@ export function OptInTabContent({
         }
       >
         <Stack spacing={2}>
-          <Box>
+          <Box sx={mobileContentGutterBelowMdSx}>
             <Typography variant="titleLg">{t.optInAdminTitle}</Typography>
             <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 0.5 }}>
               {t.optInAdminSubtitle}

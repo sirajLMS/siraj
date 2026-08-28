@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { SettingsAuditDataGrid } from "@/frontend/common/views/dashboard/settings/components/audit/SettingsAuditDataGrid";
 import { SettingsAuditFilterBar } from "@/frontend/common/views/dashboard/settings/components/audit/SettingsAuditFilterBar";
 import {
@@ -8,10 +9,17 @@ import {
 } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsTabShared";
 import type { SettingsAuditViewModel } from "@/frontend/common/views/dashboard/settings/types/settingsAuditViewModel.types";
 
-export function SettingsAuditTabShared({
-  viewModel,
-  options,
-}: Readonly<{ readonly viewModel: SettingsAuditViewModel; readonly options: SettingsTabSharedOptions }>) {
+export interface SettingsAuditTabSharedProps {
+  readonly viewModel: SettingsAuditViewModel;
+  readonly options: SettingsTabSharedOptions;
+  /**
+   * Tier-supplied list body. When omitted, the shared desktop DataGrid is used;
+   * the mobile tier supplies a card-list body instead.
+   */
+  readonly listBody?: ReactNode;
+}
+
+export function SettingsAuditTabShared({ viewModel, options, listBody }: Readonly<SettingsAuditTabSharedProps>) {
   return (
     <SettingsTabShared
       options={options}
@@ -32,16 +40,18 @@ export function SettingsAuditTabShared({
         />
       }
       dataGrid={
-        <SettingsAuditDataGrid
-          rows={viewModel.rows}
-          columns={viewModel.columns}
-          page={viewModel.page}
-          pageSize={viewModel.pageSize}
-          totalCount={viewModel.totalCount}
-          loading={viewModel.loading}
-          emptyMessage={viewModel.labels.emptyMessage}
-          onPageChange={viewModel.onPageChange}
-        />
+        listBody ?? (
+          <SettingsAuditDataGrid
+            rows={viewModel.rows}
+            columns={viewModel.columns}
+            page={viewModel.page}
+            pageSize={viewModel.pageSize}
+            totalCount={viewModel.totalCount}
+            loading={viewModel.loading}
+            emptyMessage={viewModel.labels.emptyMessage}
+            onPageChange={viewModel.onPageChange}
+          />
+        )
       }
     />
   );

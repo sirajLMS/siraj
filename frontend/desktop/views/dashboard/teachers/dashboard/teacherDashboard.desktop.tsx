@@ -1,14 +1,11 @@
 "use client";
 
-import { Alert, Box } from "@mui/material";
+import { Box } from "@mui/material";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
-import {
-  teacherDashboardContentPaddingSx,
-  teacherDashboardPageContainerSx,
-} from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { teacherDashboardPageContainerSx } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
+import { DesktopFormErrorSnackbar, DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { ParentSupportFabDesktop as ParentSupportFab } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentSupportFab.desktop";
 import { ActivationPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/activationPolicyPanel.desktop";
@@ -16,6 +13,12 @@ import { ManualClassEntryStudentSelectDesktop } from "@/frontend/desktop/views/d
 import { MissedClassAlertBannerDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.desktop";
 import { StudentProgressFeedDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/studentProgressFeed.desktop";
 import { TeacherDailyScheduleSectionDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherDailyScheduleSection.desktop";
+
+/**
+ * Activation errors stay visible until the next activation attempt clears
+ * them upstream; the shared snackbar shell requires a close callback.
+ */
+const keepErrorVisible = (): void => {};
 
 export function TeacherDashboardDesktopView({
   userName,
@@ -54,12 +57,6 @@ export function TeacherDashboardDesktopView({
       {missedAlert && <MissedClassAlertBannerDesktop alert={missedAlert} labels={labels.alert} fixed />}
 
       <DesktopPageContainer sx={mergeSx(teacherDashboardPageContainerSx, missedAlert ? { pt: 10 } : undefined)}>
-        {activationError && (
-          <Alert severity="error" sx={teacherDashboardContentPaddingSx}>
-            {activationError}
-          </Alert>
-        )}
-
         <DesktopPageHeader title={labels.activeWelcome.title(userName)} subtitle={lastUpdated} />
 
         <Box sx={{ mb: 3 }}>
@@ -90,13 +87,11 @@ export function TeacherDashboardDesktopView({
           onPageChange={onPageChange}
         />
 
-        <Box sx={teacherDashboardContentPaddingSx}>
-          <StudentProgressFeedDesktop
-            items={progressFeed}
-            title={labels.progressFeed.title}
-            labels={labels.progressFeed}
-          />
-        </Box>
+        <StudentProgressFeedDesktop
+          items={progressFeed}
+          title={labels.progressFeed.title}
+          labels={labels.progressFeed}
+        />
 
         <ActivationPolicyPanelDesktop
           labels={labels.policy}
@@ -106,6 +101,12 @@ export function TeacherDashboardDesktopView({
         />
 
         <ParentSupportFab label={labels.support.liveSupport} onClick={onSupport} />
+
+        <DesktopFormErrorSnackbar
+          open={activationError !== null}
+          message={activationError ?? ""}
+          onClose={keepErrorVisible}
+        />
       </DesktopPageContainer>
 
       <ManualClassEntryDialog

@@ -1,9 +1,10 @@
 "use client";
 
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   getStatusLabel,
@@ -134,8 +135,16 @@ export function ConnectedAccountsTableDesktop({
       <Box sx={{ typography: "labelUppercase", color: theme => theme.palette.text.secondary, mb: 0.5 }}>
         {labels.connectedAccounts} — {providerName}
       </Box>
-      <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 1 }}>
-        <TextField size="small" value={search} onChange={e => setSearch(e.target.value)} sx={{ minWidth: 200 }} />
+      <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start", mb: 1 }}>
+        <Box sx={{ flexGrow: 1, maxWidth: 420, minWidth: 200 }}>
+          <SearchBarField
+            value={search}
+            placeholder={labels.searchPlaceholder}
+            searchingLabel={labels.searching}
+            isSearching={search.trim().length > 0}
+            onChange={setSearch}
+          />
+        </Box>
         <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} labels={labels} minWidth={140} />
       </Box>
       <Box sx={{ height: 300 }}>

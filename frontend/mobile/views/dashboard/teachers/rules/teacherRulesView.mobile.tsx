@@ -1,8 +1,7 @@
 "use client";
 
-import { Box, CircularProgress } from "@mui/material";
 import type { TeacherRulesViewModel } from "@/frontend/common/views/dashboard/teachers/rules/useTeacherRulesViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileLoadingState, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/activationPolicyPanel.mobile";
 
 /**
@@ -20,11 +19,7 @@ export function TeacherRulesMobileView({
   return (
     <MobilePageContainer>
       <MobilePageHeader title={shell.pageTitle} subtitle={shell.pageSubtitle} />
-      {handbookLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress size={24} />
-        </Box>
-      ) : null}
+      {handbookLoading ? <MobileLoadingState /> : null}
       <ActivationPolicyPanelMobile
         labels={policy}
         actionLabels={actions}

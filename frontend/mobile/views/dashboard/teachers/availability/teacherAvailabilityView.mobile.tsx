@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
@@ -12,6 +12,7 @@ import type {
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import {
   MobileExportButton,
+  MobileLoadingState,
   MobilePageContainer,
   MobilePageHeader,
   MobileSectionPanel,
@@ -82,11 +83,7 @@ export function TeacherAvailabilityMobileView({
         </MobileSectionPanel>
       </Box>
 
-      {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <CircularProgress />
-        </Box>
-      )}
+      {loading && <MobileLoadingState />}
 
       {!loading && (
         <WeeklyAvailabilityGridMobile availability={availability} labels={tableLabels} onBlockClick={onBlockClick} />

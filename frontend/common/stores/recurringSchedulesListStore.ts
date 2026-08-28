@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE = 0;
 
 interface RecurringSchedulesListState {
   /**
@@ -12,6 +12,7 @@ interface RecurringSchedulesListState {
    * and the state survives viewport tier switches.
    */
   readonly initialized: boolean;
+  /** 0-based page index, matching the shared list pagination contract (`PaginationControls`, DataGrid). */
   readonly currentPage: number;
   readonly searchValue: string;
   /** Seeds state from URL/defaults on first mount; a no-op once initialized. */

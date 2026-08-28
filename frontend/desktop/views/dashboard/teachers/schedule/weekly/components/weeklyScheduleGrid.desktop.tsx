@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { DeleteOutlined } from "@mui/icons-material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
@@ -132,19 +133,21 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
               />
             ) : null}
             {showDelete && hasScheduleDeleteClass ? (
-              <Box
-                component="span"
-                className="material-symbols-outlined"
-                sx={theme => ({
-                  fontSize: theme.typography.bodyLg.fontSize,
-                  cursor: "pointer",
-                  opacity: 0.7,
-                  "&:hover": { color: theme.palette.error.main, opacity: 1 },
-                })}
-                onClick={handleDeleteClick}
-              >
-                delete
-              </Box>
+              <Tooltip title={t.actions.deleteClass}>
+                <IconButton
+                  size="small"
+                  aria-label={t.actions.deleteClass}
+                  onClick={handleDeleteClick}
+                  sx={theme => ({
+                    p: 0.25,
+                    color: theme.palette.onPrimaryContainer,
+                    opacity: 0.7,
+                    "&:hover": { color: theme.palette.error.main, opacity: 1 },
+                  })}
+                >
+                  <DeleteOutlined fontSize="small" />
+                </IconButton>
+              </Tooltip>
             ) : null}
           </Box>
         ) : null}
