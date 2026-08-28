@@ -15,6 +15,10 @@
  * window. Under bun there's no DOM, so we shadow the "dompurify"
  * module in node_modules with a jsdom-bound version before importing
  * mermaid. On exit we restore the original package.
+ *
+ * (mermaid's stylis version is handled by a nested `"mermaid": { "stylis" }`
+ * override in package.json — the repo-wide stylis pin stays at 4.2.0 for
+ * Emotion, per docs/frontend/emotion-rtl-stylis.md.)
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -23,10 +27,18 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-const DOMPURIFY_DIR = "node_modules/dompurify";
-const DOMPURIFY_REAL = "node_modules/dompurify-real";
+interface ShimSpec {
+  dir: string;
+  real: string;
+  pkg: string;
+  index: string;
+}
 
-const SHIM_INDEX = `import { JSDOM } from "jsdom";
+const DOMPURIFY_SHIM: ShimSpec = {
+  dir: "node_modules/dompurify",
+  real: "node_modules/dompurify-real",
+  pkg: '{"name":"dompurify","version":"3.4.13","main":"index.js","type":"module"}\n',
+  index: `import { JSDOM } from "jsdom";
 import createDOMPurify from "../dompurify-real/dist/purify.es.mjs";
 
 const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>");
@@ -38,27 +50,39 @@ export const sanitize = DOMPurify.sanitize.bind(DOMPurify);
 export const removeAllHooks = DOMPurify.removeAllHooks.bind(DOMPurify);
 export const removeHook = DOMPurify.removeHook.bind(DOMPurify);
 export const setConfig = DOMPurify.setConfig.bind(DOMPurify);
-`;
+`,
+};
 
-const SHIM_PKG = '{"name":"dompurify","version":"3.4.13","main":"index.js","type":"module"}\n';
+const STYLIS_SHIM: ShimSpec = {
+  dir: "node_modules/stylis",
+  real: "node_modules/stylis-real",
+  pkg: '{"name":"stylis","version":"4.3.6","main":"index.js","type":"module"}\n',
+  index: 'export * from "stylis-for-mermaid";\n',
+};
 
-function installShim(): void {
-  if (fs.existsSync(DOMPURIFY_REAL)) return; // already shimmed
-  if (!fs.existsSync(DOMPURIFY_DIR)) {
-    throw new Error("dompurify not installed. Run: bun install");
+const SHIMS = [DOMPURIFY_SHIM, STYLIS_SHIM];
+
+function installShims(): void {
+  for (const shim of SHIMS) {
+    if (fs.existsSync(shim.real)) continue; // already shimmed
+    if (!fs.existsSync(shim.dir)) {
+      throw new Error(`${shim.dir} not installed. Run: bun install`);
+    }
+    fs.renameSync(shim.dir, shim.real);
+    fs.mkdirSync(shim.dir, { recursive: true });
+    fs.writeFileSync(path.join(shim.dir, "package.json"), shim.pkg);
+    fs.writeFileSync(path.join(shim.dir, "index.js"), shim.index);
   }
-  fs.renameSync(DOMPURIFY_DIR, DOMPURIFY_REAL);
-  fs.mkdirSync(DOMPURIFY_DIR, { recursive: true });
-  fs.writeFileSync(path.join(DOMPURIFY_DIR, "package.json"), SHIM_PKG);
-  fs.writeFileSync(path.join(DOMPURIFY_DIR, "index.js"), SHIM_INDEX);
 }
 
-function uninstallShim(): void {
-  if (!fs.existsSync(DOMPURIFY_REAL)) return; // nothing to restore
-  if (fs.existsSync(DOMPURIFY_DIR)) {
-    fs.rmSync(DOMPURIFY_DIR, { recursive: true, force: true });
+function uninstallShims(): void {
+  for (const shim of SHIMS) {
+    if (!fs.existsSync(shim.real)) continue; // nothing to restore
+    if (fs.existsSync(shim.dir)) {
+      fs.rmSync(shim.dir, { recursive: true, force: true });
+    }
+    fs.renameSync(shim.real, shim.dir);
   }
-  fs.renameSync(DOMPURIFY_REAL, DOMPURIFY_DIR);
 }
 
 interface MermaidModule {
@@ -108,7 +132,7 @@ async function validateFile(file: string, mermaid: MermaidModule): Promise<boole
 const defaultFiles = ["Diagram.md"];
 const files = process.argv.slice(2).length > 0 ? process.argv.slice(2) : defaultFiles;
 
-installShim();
+installShims();
 let hadError: boolean;
 try {
   const mermaid = (await import("mermaid")).default as MermaidModule;
@@ -123,7 +147,7 @@ try {
   );
   hadError = results.some(ok => !ok);
 } finally {
-  uninstallShim();
+  uninstallShims();
 }
 
 process.exit(hadError ? 1 : 0);

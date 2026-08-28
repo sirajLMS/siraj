@@ -131,6 +131,7 @@ page.locator(`button[aria-label="${escapeRegExp(common.notifications)}"]`)
 
 ## Component Test Conventions
 
+- **Organization**: test files live in one subdir per domain (`meeting-integrations/`, `whatsapp/`, `navigation/`, …) — direct children are shared infra only. See `test/ui/components/AGENTS.md`.
 - Preloads: `test/ui/test-env.ts`, `happydom-preload.ts`, `next-dynamic-mock.ts`, **`translation-preload.ts`**
 - Use `TestWrapper` for Apollo mocks — never hit a real server
 - See `frontend/common/components/ui/AGENTS.md` for component test structure

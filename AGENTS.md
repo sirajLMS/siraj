@@ -374,6 +374,8 @@ both `backend.instructions.md` and `tests.instructions.md`). Read ALL matching f
 | `backend/db/test/` | `backend/db/test/AGENTS.md`, `backend/AGENTS.md` |
 | `backend/types/` | `backend/types/AGENTS.md`, `backend/AGENTS.md` |
 | `scripts/run-test/` | `scripts/run-test/AGENTS.md` |
+| `test/ui/` | `test/ui/AGENTS.md` |
+| `test/ui/components/` | `test/ui/components/AGENTS.md`, `test/ui/AGENTS.md` |
 
 ### Fix-Or-Report Rule for Cross-File Violations
 
@@ -419,7 +421,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `backend/db/test/logic/` - Business logic integration tests
 - `frontend/common/graphql/test/` - GraphQL integration tests (dev server; use testClient, not raw fetch)
 - `test/ui/` - UI tests — see `test/ui/AGENTS.md`
-- `test/ui/components/` - Component tests (Happy DOM + mocked Apollo; no server)
+- `test/ui/components/` - Component tests per domain subdir (Happy DOM + mocked Apollo; no server) - see `test/ui/AGENTS.md` + `test/ui/components/AGENTS.md`
 - `test/ui/e2e/` - End-to-end tests (production server; requires `bun run build:test` first)
 
 ## Important References

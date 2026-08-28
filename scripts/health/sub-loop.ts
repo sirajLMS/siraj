@@ -116,6 +116,8 @@ function getAgentsMdFiles(filePath: string): string[] {
     ["backend/types/", "backend/types/AGENTS.md"],
     ["backend/", "backend/AGENTS.md"],
     ["scripts/run-test/", "scripts/run-test/AGENTS.md"],
+    ["test/ui/components/", "test/ui/components/AGENTS.md"],
+    ["test/ui/", "test/ui/AGENTS.md"],
   ];
 
   // Always include root AGENTS.md

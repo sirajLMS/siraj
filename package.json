@@ -266,6 +266,7 @@
     "husky": "^9.1.7",
     "jest": "^30.4.2",
     "jscpd": "^5.0.16",
+    "jsdom": "^30.0.1",
     "knip": "^6.32.3",
     "lint-staged": "^17.3.0",
     "mermaid": "^11.17.2",
@@ -298,7 +299,10 @@
   ],
   "overrides": {
     "eslint-import-resolver-typescript": "3.7.0",
-    "stylis": "4.2.0"
+    "stylis": "4.2.0",
+    "mermaid": {
+      "stylis": "^4.3.6"
+    }
   },
   "msw": {
     "workerDirectory": [
