@@ -1,6 +1,7 @@
 export interface TeacherFutureScheduleLabels {
   readonly pageTitle: string;
   readonly jumpToDate: string;
+  readonly today: string;
   readonly leaveQuota: string;
   readonly totalClasses: string;
   readonly futureClasses: string;

@@ -8,6 +8,8 @@ export const dashboardLmsLessonReportsEn: LessonReportLabels = {
   rejected: "Rejected",
   draft: "Draft",
   attendanceEvaluation: "Attendance Evaluation",
+  lessonDate: "Lesson Date",
+  status: "Status",
   present: "Present",
   absent: "Absent",
   late: "Late",

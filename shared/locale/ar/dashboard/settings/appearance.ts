@@ -35,6 +35,7 @@ export const dashboardSettingsAppearanceAr: SettingsAppearanceTabLabels = {
   toolbarLivePreviewHint: "تظهر التغييرات مباشرة أثناء التحرير",
   toolbarPublish: "نشر",
 
+  presetApplied: presetName => `تم تطبيق الإعداد المسبق ${presetName} — ادخل وضع التخصيص للضبط الدقيق`,
   saveDraftSuccess: "تم حفظ مسودة المظهر.",
   saveDraftError: "فشل حفظ مسودة المظهر.",
   publishSuccess: "تم نشر المظهر لجميع المستخدمين.",
