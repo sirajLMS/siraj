@@ -19,8 +19,6 @@ interface TeacherDataGridProps {
   readonly pageSize?: number;
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
-  readonly onNavigateToSchedule: (teacherId: string) => void;
-  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
 function isStringValue(value: unknown): value is string {

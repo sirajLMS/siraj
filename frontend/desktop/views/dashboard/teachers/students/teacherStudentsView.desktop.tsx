@@ -8,9 +8,13 @@ import {
   type TeacherStudentsViewSharedListProps,
 } from "@/frontend/common/views/dashboard/teachers/students/__shared__/teacherStudentsViewShared";
 import type { TeacherStudentsViewModel } from "@/frontend/common/views/dashboard/teachers/students/useTeacherStudentsViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopAppDataGrid,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 
 type StudentRow = TeacherStudentsViewModel["rows"][number];
@@ -77,15 +81,16 @@ function DesktopStudentsGrid({
   paginationOptions,
 }: Readonly<TeacherStudentsViewSharedListProps>) {
   return (
-    <DesktopAppDataGrid
-      rows={rows}
-      columns={buildStudentColumns(labels)}
-      getRowId={row => row.id ?? row.name ?? ""}
-      emptyMessage={emptyMessage}
-      ariaLabel={labels.pageTitle}
-      paginationOptions={paginationOptions}
-      sx={{ border: "none" }}
-    />
+    <DesktopSectionPanel contentPadding={false}>
+      <DesktopAppDataGrid
+        rows={rows}
+        columns={buildStudentColumns(labels)}
+        getRowId={row => row.id ?? row.name ?? ""}
+        emptyMessage={emptyMessage}
+        ariaLabel={labels.pageTitle}
+        paginationOptions={paginationOptions}
+      />
+    </DesktopSectionPanel>
   );
 }
 

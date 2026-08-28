@@ -21,9 +21,12 @@ await mockNextNavigation("/");
 // Child sections own their data concerns; this suite targets the page
 // header primitive, the date-summary chip, and MobileContentInset gutter
 // ownership around the alert wrappers.
-await mock.module("@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog", () => ({
-  ManualClassEntryDialog: () => <div data-testid="manual-class-entry-dialog" />,
-}));
+await mock.module(
+  "@/frontend/mobile/views/dashboard/teachers/dashboard/components/manualClassEntryDialog.mobile",
+  () => ({
+    ManualClassEntryDialogMobile: () => <div data-testid="manual-class-entry-dialog" />,
+  })
+);
 await mock.module("@/frontend/mobile/components/ui/filter", () => ({
   DateNavigatorMobile: () => <div data-testid="date-navigator" />,
 }));

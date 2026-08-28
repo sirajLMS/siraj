@@ -2,7 +2,7 @@
 
 import { Typography } from "@mui/material";
 import type { FC, ReactNode } from "react";
-import { LoadingState } from "@/frontend/common/components/ui";
+import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherStudentsViewModel } from "@/frontend/common/views/dashboard/teachers/students/useTeacherStudentsViewModel";
 
@@ -73,7 +73,7 @@ export function TeacherStudentsViewShared({
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       {loading ? <LoadingState /> : null}
-      {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.failedToLoad}</Typography> : null}
+      {error ? <ErrorState embedded message={labels.failedToLoad} /> : null}
       {!loading && !error ? (
         <ListWrapper
           rows={rows}

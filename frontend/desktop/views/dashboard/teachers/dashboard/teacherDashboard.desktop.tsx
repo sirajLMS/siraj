@@ -2,13 +2,13 @@
 
 import { Box } from "@mui/material";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
-import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import { teacherDashboardPageContainerSx } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 import { DesktopFormErrorSnackbar, DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { ParentSupportFabDesktop as ParentSupportFab } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentSupportFab.desktop";
 import { ActivationPolicyPanelDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/activationPolicyPanel.desktop";
+import { ManualClassEntryDialogDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/manualClassEntryDialog.desktop";
 import { ManualClassEntryStudentSelectDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.desktop";
 import { MissedClassAlertBannerDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.desktop";
 import { StudentProgressFeedDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/studentProgressFeed.desktop";
@@ -109,7 +109,7 @@ export function TeacherDashboardDesktopView({
         />
       </DesktopPageContainer>
 
-      <ManualClassEntryDialog
+      <ManualClassEntryDialogDesktop
         open={manualEntryOpen}
         onClose={onManualEntryClose}
         onSubmit={onManualEntrySubmit}

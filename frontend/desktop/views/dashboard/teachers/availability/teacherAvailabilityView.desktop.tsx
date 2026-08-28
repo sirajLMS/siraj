@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
 import { availabilitySearchResolverFactory } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
@@ -46,25 +45,23 @@ export function TeacherAvailabilityDesktopView({
         actions={<DesktopExportButton onClick={onExportPdf}>{labels.exportPdf}</DesktopExportButton>}
       />
 
-      <Box sx={{ mb: 4 }}>
-        <DesktopSectionPanel title={labels.searchTitle}>
-          <FormProvider {...methods}>
-            <AvailabilitySearchFormDesktop
-              onSearch={onSearch}
-              labels={{
-                searchTitle: labels.searchTitle,
-                from: labels.from,
-                to: labels.to,
-                gender: labels.gender,
-                any: labels.any,
-                male: labels.male,
-                female: labels.female,
-                submit: labels.submit,
-              }}
-            />
-          </FormProvider>
-        </DesktopSectionPanel>
-      </Box>
+      <DesktopSectionPanel title={labels.searchTitle}>
+        <FormProvider {...methods}>
+          <AvailabilitySearchFormDesktop
+            onSearch={onSearch}
+            labels={{
+              searchTitle: labels.searchTitle,
+              from: labels.from,
+              to: labels.to,
+              gender: labels.gender,
+              any: labels.any,
+              male: labels.male,
+              female: labels.female,
+              submit: labels.submit,
+            }}
+          />
+        </FormProvider>
+      </DesktopSectionPanel>
 
       {loading && <DesktopLoadingState />}
 

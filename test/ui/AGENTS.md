@@ -135,6 +135,28 @@ page.locator(`button[aria-label="${escapeRegExp(common.notifications)}"]`)
 - Use `TestWrapper` for Apollo mocks — never hit a real server
 - See `frontend/common/components/ui/AGENTS.md` for component test structure
 
+## Agent Browser Login (manual/E2E-style verification)
+
+AI layers redact real email addresses in prompts, so email+password login typed via browser automation fails schema validation. Use `scripts/browser-login.ts` instead — it reads credentials from `.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD` by default) and never surfaces them:
+
+```bash
+bun run scripts/browser-login.ts                       # login + write .browser-auth/ artifacts
+bun run scripts/browser-login.ts --inject              # + inject cookies into $AGENT_BROWSER_SESSION
+```
+
+- **agent-browser**: run with `--inject` (session from `AGENT_BROWSER_SESSION`), then navigate — pages are authenticated.
+- **Playwright MCP**: call `browser_run_code_unsafe` with `filename: ".browser-auth/inject-mcp.js"` (the file carries the cookies — the MCP sandbox has no fs/require, so values can't be read from disk mid-call).
+- **Playwright scripts**: `browser.newContext({ storageState: ".browser-auth/storageState.json" })`.
+
+Artifacts live in git-ignored `.browser-auth/` with mode 600.
+
+### Screenshot & Visual Inspection Context Isolation (CRITICAL)
+
+- **Do NOT call `ReadMediaFile` directly in the main test/orchestrator context** for browser screenshots.
+- In long multi-step browser verification runs, calling `ReadMediaFile` repeatedly accumulates multiple images into the conversation history, creating multi-megabyte payloads that cause upstream LLM timeouts and stream drops (`Stream ended before producing a non-ping SSE event`).
+- **Use DOM/Text verification first**: `agent-browser snapshot -i -c`, `agent-browser eval`, and console/network logs.
+- **Isolate Visual Checks**: If an image requires visual LLM inspection, spawn a dedicated short-lived subagent (`invoke_subagent` as `Visual Inspector`) that opens the single image with `ReadMediaFile` and returns a text-only summary. The main session receives only the text summary, keeping context clean and fast.
+
 ## Translation Rules (CRITICAL — No Hardcoded Strings)
 
 **NEVER hardcode user-facing text strings in test assertions.** All text that appears in the UI must be obtained via the translation system. This is a strict requirement — no exceptions.

@@ -118,7 +118,21 @@ playwright-cli tab-select 0
 playwright-cli state-save
 playwright-cli state-save auth.json
 playwright-cli state-load auth.json
+```
 
+**Siraj — authenticated sessions without typing credentials**: AI prompts redact real
+emails, so form-login fails server-side validation. Run `bun run scripts/browser-login.ts`
+first (reads `ADMIN_EMAIL`/`ADMIN_PASSWORD` from `.env`), then load the generated state:
+
+```bash
+# playwright-cli with an existing storage file:
+#   .browser-auth/storageState.json  (newContext({ storageState }) format)
+# Playwright MCP: call browser_run_code_unsafe with
+#   filename = <repo>/.browser-auth/inject-mcp.js
+# (the MCP run-code sandbox has no fs/require — the bridge file carries the cookies itself)
+```
+
+```bash
 # Cookies
 playwright-cli cookie-list
 playwright-cli cookie-list --domain=example.com

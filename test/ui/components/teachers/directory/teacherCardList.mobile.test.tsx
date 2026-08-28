@@ -96,8 +96,6 @@ function renderCardList(
       onSearchChange={options.onSearchChange ?? noop}
       paginationOptions={false}
       labels={labels}
-      onNavigateToSchedule={noop}
-      onNavigateToProfile={noop}
     />,
     { locale }
   );

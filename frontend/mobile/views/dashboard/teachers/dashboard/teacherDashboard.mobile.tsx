@@ -5,7 +5,6 @@ import { Alert, Chip } from "@mui/material";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
-import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import { teacherDashboardPageContainerSx } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 import {
@@ -21,6 +20,7 @@ import {
 } from "@/frontend/mobile/components/ui";
 import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter";
 import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/activationPolicyPanel.mobile";
+import { ManualClassEntryDialogMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/manualClassEntryDialog.mobile";
 import { ManualClassEntryStudentSelectMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.mobile";
 import { MissedClassAlertBannerMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.mobile";
 import { StudentProgressFeedMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/studentProgressFeed.mobile";
@@ -239,7 +239,7 @@ export function TeacherDashboardMobileView({
         </MobileContentStack>
       </MobilePageContainer>
 
-      <ManualClassEntryDialog
+      <ManualClassEntryDialogMobile
         open={manualEntryOpen}
         onClose={onManualEntryClose}
         onSubmit={onManualEntrySubmit}

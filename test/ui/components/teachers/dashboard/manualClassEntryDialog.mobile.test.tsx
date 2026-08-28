@@ -32,8 +32,8 @@ describe("ManualClassEntryDialogMobile", () => {
   test("renders the full-screen mobile shell with the same shared form fields", () => {
     const { baseElement } = renderMobileDialog();
 
+    // fullScreen keeps the maxWidth class on the paper; the edge-to-edge class is the tier signal.
     expect(baseElement.querySelector(".MuiDialog-paperFullScreen")).toBeInTheDocument();
-    expect(baseElement.querySelector(".MuiDialog-paperWidthSm")).not.toBeInTheDocument();
 
     expect(screen.getByRole("dialog", { name: manualEntryLabels.titleCreate })).toBeVisible();
     expect(screen.getByRole("group", { name: manualEntryLabels.scheduledDate })).toBeVisible();

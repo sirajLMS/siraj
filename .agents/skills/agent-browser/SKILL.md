@@ -84,6 +84,26 @@ Choose the right tool based on the core task:
   agent-browser screenshot --screenshot-dir scratch/screenshots
   ```
 
+### 5. Authenticated Pages (Siraj) — NEVER type credentials
+
+- **Gotcha**: The AI layer redacts real email addresses from prompts (they arrive as `[EMAIL_REDACTED]`-style tokens), so typing the super-admin credentials into the login form always fails the server's Email-scalar validation.
+- **Fix**: Use `scripts/browser-login.ts` — it reads `ADMIN_EMAIL`/`ADMIN_PASSWORD` from `.env` itself, performs the GraphQL login, and injects the session cookies directly into your browser session. Secrets never pass through the agent context.
+  ```bash
+  agent-browser session id --scope worktree --prefix verify      # create/save session name first
+  AGENT_BROWSER_SESSION=<session> bun run scripts/browser-login.ts --inject
+  agent-browser open http://localhost:3000/profile               # already authenticated
+  ```
+- Cookie/state artifacts live in git-ignored `.browser-auth/` (mode 600). Playwright paths use the same script — see `test/ui/AGENTS.md` ("Agent Browser Login").
+
+### 6. Screenshot & Visual Inspection Context Isolation (CRITICAL)
+
+- **Problem**: Calling `ReadMediaFile` directly in the main agent context attaches the binary image to the permanent conversation history. Across multi-page verification loops, multiple screenshots accumulate into megabytes of vision context, causing upstream LLM stream dropouts (`Stream ended before producing a non-ping SSE event`).
+- **Rule**:
+  1. **Text & DOM First**: Verify pages primarily using `agent-browser snapshot -i -c`, `agent-browser eval`, or console error logs.
+  2. **Subagent-Only `ReadMediaFile`**: Whenever a screenshot MUST be visually inspected with `ReadMediaFile`, **ALWAYS run it inside a dedicated, isolated subagent** (e.g. `invoke_subagent` with role `Visual Inspector`).
+  3. **Text-Only Return**: The subagent reads the single image file, performs the visual check, and responds ONLY with a concise text description back to the orchestrator.
+  4. **Context Cleanliness**: The main agent and peer subagents receive pure text; no image tokens enter the main conversation stream.
+
 ## Observability Dashboard
 
 The dashboard runs independently of browser sessions on port 4848 and can also be opened through a proxied or forwarded URL such as `https://dashboard.agent-browser.localhost`. Agents should stay on the dashboard origin: session tabs, status, and stream traffic are proxied internally, so session ports do not need to be exposed.

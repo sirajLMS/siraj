@@ -14,7 +14,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui/button";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
@@ -121,11 +120,15 @@ function ActionButtons({
   saved,
   onCancel,
   labels,
+  CancelAction,
+  SubmitAction,
 }: Readonly<{
   loading: boolean;
   saved: boolean;
   onCancel: () => void;
   labels: ManagementLabels["actions"];
+  CancelAction: ManagementControlsCardSlotProps["CancelAction"];
+  SubmitAction: ManagementControlsCardSlotProps["SubmitAction"];
 }>) {
   const getSubmitContent = (): React.ReactElement => {
     if (loading) return <CircularProgress size={18} color="inherit" />;
@@ -153,10 +156,10 @@ function ActionButtons({
       </Stack>
 
       <Stack direction="row" spacing={1.5} sx={{ width: "100%" }}>
-        <FilterButton onClick={onCancel} fullWidth sx={{ flex: 1 }}>
+        <CancelAction onClick={onCancel} fullWidth sx={{ flex: 1 }}>
           {labels.cancel}
-        </FilterButton>
-        <PrimaryPageAction
+        </CancelAction>
+        <SubmitAction
           type="submit"
           disabled={loading || saved}
           startIcon={saved ? <CheckCircleOutlined /> : undefined}
@@ -164,7 +167,7 @@ function ActionButtons({
           sx={{ flex: 1 }}
         >
           {getSubmitContent()}
-        </PrimaryPageAction>
+        </SubmitAction>
       </Stack>
     </Box>
   );
@@ -184,7 +187,7 @@ export function ManagementControlsCardShared({ props, slots }: Readonly<Manageme
     labels,
     statusLabelId,
   } = props;
-  const { CardContainer, StatusBadge, TeacherAutocomplete } = slots;
+  const { CardContainer, StatusBadge, TeacherAutocomplete, CancelAction, SubmitAction } = slots;
 
   return (
     <CardContainer sx={{ p: 3, boxShadow: theme => theme.palette.shadow.card }}>
@@ -212,7 +215,14 @@ export function ManagementControlsCardShared({ props, slots }: Readonly<Manageme
           statusLabelId={statusLabelId}
           StatusBadge={StatusBadge}
         />
-        <ActionButtons loading={isSubmitting} saved={saved} onCancel={onCancel} labels={labels.actions} />
+        <ActionButtons
+          loading={isSubmitting}
+          saved={saved}
+          onCancel={onCancel}
+          labels={labels.actions}
+          CancelAction={CancelAction}
+          SubmitAction={SubmitAction}
+        />
       </Stack>
     </CardContainer>
   );

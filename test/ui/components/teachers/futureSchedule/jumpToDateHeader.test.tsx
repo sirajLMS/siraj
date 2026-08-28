@@ -15,6 +15,8 @@ import { Translation } from "@/shared/locale/namespaces/translation";
 expect.extend(matchers);
 
 import { formatScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
+import { JumpToDateHeaderDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.desktop";
+import { JumpToDateHeaderMobile } from "@/frontend/mobile/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.mobile";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const locale: AppLocale = "ar";
@@ -106,4 +108,35 @@ describe("JumpToDateHeaderShared metrics", () => {
     expect(section.getByText(labels.totalClassesDesc(7))).toBeVisible();
     expect(section.getByText(`7 ${labels.totalClasses}`)).toBeVisible();
   });
+});
+
+describe("JumpToDateHeader tier metric grids", () => {
+  const TIER_CASES = [
+    { name: "desktop", Wrapper: JumpToDateHeaderDesktop, viewport: "desktop", expectDesktopGrid: true },
+    { name: "mobile", Wrapper: JumpToDateHeaderMobile, viewport: "mobile", expectDesktopGrid: false },
+  ] as const;
+
+  for (const { name, Wrapper, viewport, expectDesktopGrid } of TIER_CASES) {
+    test(`${name} wrapper renders the header metrics through the tier metric grid`, async () => {
+      const { container } = renderWithWrapper(
+        <Wrapper
+          leaveQuotaUsed={3}
+          leaveQuotaTotal={10}
+          totalClasses={7}
+          selectedDate={SELECTED_DATE}
+          onDateChange={() => {}}
+          labels={labels}
+        />,
+        { locale, viewport }
+      );
+      const section = within(container);
+
+      expect(await section.findByText(labels.leaveQuotaDesc(10))).toBeInTheDocument();
+      // Metric icons render inside the tier grid cards; the scaffold fallback has none.
+      expect(container.querySelector("[data-testid='EventBusyOutlinedIcon']")).not.toBeNull();
+      expect(container.querySelector("[data-testid='ClassOutlinedIcon']")).not.toBeNull();
+      // Only the desktop tier grid lays cards out via the MUI Grid container.
+      expect(container.querySelector(".MuiGrid-container") !== null).toBe(expectDesktopGrid);
+    });
+  }
 });

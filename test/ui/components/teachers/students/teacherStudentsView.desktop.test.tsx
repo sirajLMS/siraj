@@ -125,6 +125,22 @@ describe("TeacherStudentsDesktopView", () => {
     expect(view.queryByText(labels.columns.name)).not.toBeInTheDocument();
   });
 
+  test("renders the grid inside the section panel shell", () => {
+    const { container } = renderDesktopView();
+
+    const panel = container.querySelector(".MuiPaper-root");
+    expect(panel).not.toBeNull();
+    expect(panel?.querySelector(".MuiDataGrid-root")).not.toBeNull();
+  });
+
+  test("renders failures through the error state instead of the grid", () => {
+    const view = renderDesktopView({ error: new Error("boom") });
+
+    const alert = view.getByRole("alert");
+    expect(alert.textContent).toContain(labels.failedToLoad);
+    expect(view.queryByText(labels.columns.name)).not.toBeInTheDocument();
+  });
+
   test("paginates rows client-side through the shared pager", () => {
     const view = renderDesktopView({
       rows: [

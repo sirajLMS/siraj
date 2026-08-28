@@ -20,9 +20,12 @@ await mockNextNavigation("/");
 
 // Child sections own their data concerns; this suite targets the desktop
 // error presentation primitive and the page header, not child content.
-await mock.module("@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog", () => ({
-  ManualClassEntryDialog: () => <div data-testid="manual-class-entry-dialog" />,
-}));
+await mock.module(
+  "@/frontend/desktop/views/dashboard/teachers/dashboard/components/manualClassEntryDialog.desktop",
+  () => ({
+    ManualClassEntryDialogDesktop: () => <div data-testid="manual-class-entry-dialog" />,
+  })
+);
 await mock.module("@/frontend/desktop/views/dashboard/parent/dashboard/components/parentSupportFab.desktop", () => ({
   ParentSupportFabDesktop: () => <div data-testid="parent-support-fab" />,
 }));

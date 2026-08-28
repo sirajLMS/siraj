@@ -54,6 +54,12 @@ bun run test:ui:e2e            # End-to-end tests (dev/production server — tes
 bun run test:ui                # All UI tests (components + e2e + static)
 bun run test:ui:kill           # Kill test servers on port 3099 only (never dev:3000 or start:4000)
 
+# Authenticate an agent-driven browser (agent-browser / Playwright) with .env credentials.
+# REQUIRED for super-admin flows — the AI layer redacts emails in prompts, so typing
+# credentials into the login form always fails Email-scalar validation.
+bun run scripts/browser-login.ts            # writes .browser-auth/ artifacts (cookies, storageState, MCP bridge)
+bun run scripts/browser-login.ts --inject   # + inject cookies into $AGENT_BROWSER_SESSION
+
 # Run database tests with log capture (AI agents MUST use this instead of raw `bun test`)
 bun run test/scripts/run-test.ts <test-path>        # Run with log capture
 bun run test/scripts/run-test.ts --last <path>      # View last result (AI-optimized)
@@ -100,6 +106,11 @@ Server Component → Cached Wrapper → Service → Repository → Database
 
 ### Next.js 16 Breaking Changes
 This is NOT standard Next.js. APIs and conventions differ from training data. **Always read `node_modules/next/dist/docs/` before writing Next.js code.**
+
+### Browser Automation Login (agent-browser / Playwright)
+- Never type real email credentials into the login form — the AI prompt layer redacts them (they arrive as `[EMAIL_REDACTED]` placeholders the server Email scalar rejects).
+- Use `bun run scripts/browser-login.ts` (reads `.env` `ADMIN_EMAIL`/`ADMIN_PASSWORD`); with `--inject` it applies cookies to the active agent-browser session. Playwright MCP: `browser_run_code_unsafe` with `filename: ".browser-auth/inject-mcp.js"`. Playwright scripts: `newContext({ storageState: ".browser-auth/storageState.json" })`.
+- Full flow details: `test/ui/AGENTS.md` → "Agent Browser Login".
 
 ### Logging
 - **NEVER use `console.*` directly** - ESLint will error

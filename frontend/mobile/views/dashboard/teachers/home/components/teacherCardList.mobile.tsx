@@ -23,8 +23,6 @@ interface TeacherCardListProps {
   readonly onSearchChange: (query: string) => void;
   readonly paginationOptions: ListPaginationOptions;
   readonly labels: TeachersDirectoryLabels;
-  readonly onNavigateToSchedule: (teacherId: string) => void;
-  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
 function TeacherCard({ row, t }: { readonly row: TeacherDirectoryRow; readonly t: TeachersDirectoryLabels }) {

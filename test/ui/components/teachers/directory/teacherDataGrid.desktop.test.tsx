@@ -87,8 +87,6 @@ function renderGrid(options: { readonly rows?: readonly TeacherDirectoryRow[] } 
       pageSize={10}
       totalCount={options.rows?.length ?? 1}
       onPageChange={noop}
-      onNavigateToSchedule={noop}
-      onNavigateToProfile={noop}
     />,
     { locale }
   );

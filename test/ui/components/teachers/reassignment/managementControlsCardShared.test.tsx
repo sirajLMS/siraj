@@ -4,12 +4,13 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ManagementControlsCardShared } from "@/frontend/common/views/dashboard/teachers/reassignment/components/managementControlsCardShared";
 import type { ManagementControlsCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import type {
   ManagementControlsCardSlotProps,
+  SharedActionButtonProps,
   SharedCardContainerProps,
   SharedStatusBadgeProps,
   SharedTeacherAutocompleteProps,
@@ -47,10 +48,28 @@ function MockTeacherAutocomplete({ label }: Readonly<SharedTeacherAutocompletePr
   return <Typography>{label}</Typography>;
 }
 
+function MockCancelAction({ children, ...rest }: Readonly<SharedActionButtonProps>) {
+  return (
+    <Button variant="outlined" {...rest}>
+      {children}
+    </Button>
+  );
+}
+
+function MockSubmitAction({ children, ...rest }: Readonly<SharedActionButtonProps>) {
+  return (
+    <Button variant="contained" {...rest}>
+      {children}
+    </Button>
+  );
+}
+
 const slots: ManagementControlsCardSlotProps = {
   CardContainer: MockCardContainer,
   StatusBadge: MockStatusBadge,
   TeacherAutocomplete: MockTeacherAutocomplete,
+  CancelAction: MockCancelAction,
+  SubmitAction: MockSubmitAction,
 };
 
 function renderShared(overrides?: Readonly<Partial<ManagementControlsCardProps>>) {

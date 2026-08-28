@@ -89,6 +89,14 @@ describe("TeacherStudentsMobileView", () => {
     expect(view.queryByText("Ahmed Hassan")).not.toBeInTheDocument();
   });
 
+  test("renders failures through the error state instead of the list", () => {
+    const view = renderMobileView({ error: new Error("boom") });
+
+    const alert = view.getByRole("alert");
+    expect(alert.textContent).toContain(labels.failedToLoad);
+    expect(view.queryByText("Ahmed Hassan")).not.toBeInTheDocument();
+  });
+
   test("paginates cards client-side through the shared pager", () => {
     const view = renderMobileView({
       rows: [
