@@ -58,8 +58,11 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
     sessionActionProps,
     feedbackState,
     deleteDialogOpen,
+    onOpenDeleteDialog,
     onCloseDeleteDialog,
     onConfirmDelete,
+    onGenerateLog,
+    overrideRateDialog,
     t,
     headerLabels,
     formattedScheduledDate,
@@ -77,10 +80,11 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
           onDismissWarning={onDismissWarning}
           onForceActivate={handlers.handleForceActivate}
           onStop={handlers.handleStop}
-          onGenerateLog={() => {}}
+          onGenerateLog={onGenerateLog}
           onReschedule={handlers.handleReschedule}
-          onDelete={() => {}}
+          onDelete={onOpenDeleteDialog}
           handlers={handlers}
+          overrideRateDialog={overrideRateDialog}
           livePerformanceMetricGrid={LivePerformanceMetricGrid}
           formattedScheduledDate={formattedScheduledDate}
           formattedStartTime={formattedStartTime}
@@ -96,7 +100,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
           isWarningDismissed={isWarningDismissed}
           onDismissWarning={onDismissWarning}
           onStop={handlers.handleStop}
-          onDelete={() => {}}
+          onDelete={onOpenDeleteDialog}
           formattedScheduledDate={formattedScheduledDate}
           formattedStartTime={formattedStartTime}
           formattedEndTime={formattedEndTime}
@@ -114,7 +118,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
           onActivate={handlers.handleActivate}
           onStop={handlers.handleStop}
           onInfoEdit={handlers.handleInfoEdit}
-          onDelete={() => {}}
+          onDelete={onOpenDeleteDialog}
           performanceMetricGrid={TeacherPerformanceMetricGrid}
           formattedScheduledDate={formattedScheduledDate}
           formattedStartTime={formattedStartTime}

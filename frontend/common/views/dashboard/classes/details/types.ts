@@ -12,7 +12,10 @@ export interface EntityLinkTargets {
 
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import type { ClassInstance } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
+import type {
+  ClassInstance,
+  OverrideRateDialogState,
+} from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { ClassDetailsLabels, SessionLabels } from "@/shared/locale";
 
@@ -100,6 +103,7 @@ export interface AdminViewProps extends CommonViewProps {
   readonly onGenerateLog: () => void;
   readonly onReschedule: () => void;
   readonly handlers: ClassActionHandlers;
+  readonly overrideRateDialog: OverrideRateDialogState;
 }
 
 export interface TeacherViewProps extends CommonViewProps {
@@ -147,17 +151,14 @@ export interface ClassDetailsContentProps {
   readonly sessionActionProps: TierSessionActionProps;
   readonly feedbackState: ActionFeedbackState | null;
   readonly deleteDialogOpen: boolean;
+  readonly onOpenDeleteDialog: () => void;
   readonly onCloseDeleteDialog: () => void;
   readonly onConfirmDelete: () => Promise<void>;
+  readonly onGenerateLog: () => void;
+  readonly overrideRateDialog: OverrideRateDialogState;
   readonly t: ClassDetailsLabels;
   readonly headerLabels: ClassDetailsHeaderLabels;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;
-}
-
-// NEW FOR PLAN v5: lifted from classDetailsContainer.{mobile,desktop}.tsx inline declaration
-// specs.md §4.1 Class-B unified shape.
-export interface InvalidIdStateProps {
-  readonly t: ClassDetailsLabels;
 }

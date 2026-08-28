@@ -1,11 +1,8 @@
 "use client";
 
-import {
-  MobileProfileLayout,
-  MobileProfileSection,
-} from "@/frontend/common/views/dashboard/profile/__shared__/profileLayoutShared";
 import { TeacherOwnProfileShared } from "@/frontend/common/views/dashboard/teachers/own-profile/__shared__/teacherOwnProfileShared";
 import type { TeacherOwnProfileViewModel } from "@/frontend/common/views/dashboard/teachers/own-profile/useTeacherOwnProfileViewModel";
+import { MobileContentStack, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 
 export function TeacherOwnProfileMobileView({ ...vm }: Readonly<TeacherOwnProfileViewModel>) {
@@ -15,8 +12,8 @@ export function TeacherOwnProfileMobileView({ ...vm }: Readonly<TeacherOwnProfil
       options={{
         PageContainer: MobilePageContainer,
         PageHeader: MobilePageHeader,
-        ProfileLayout: MobileProfileLayout,
-        ProfileSection: MobileProfileSection,
+        ProfileLayout: MobileContentStack,
+        ProfileSection: MobileSectionPanel,
       }}
     />
   );

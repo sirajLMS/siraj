@@ -4,6 +4,7 @@ import { MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { type Control, Controller, type UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import { CurrencyCode, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
@@ -16,7 +17,6 @@ import {
   toDisplayValue,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import { Link } from "@/shared/i18n";
 
 type BillingSectionProps =
@@ -132,9 +132,9 @@ function BillingViewSection({
   return (
     <SectionPanel title={t.sections.billing}>
       <Stack spacing={2}>
-        <InfoField label={t.fields.invoiceType} value={toDisplayValue(adminData.invoiceType, tc.notSet)} />
-        <InfoField label={t.fields.feeAmount} value={feeLabel} />
-        <InfoField
+        <LabeledField label={t.fields.invoiceType} value={toDisplayValue(adminData.invoiceType, tc.notSet)} />
+        <LabeledField label={t.fields.feeAmount} value={feeLabel} />
+        <LabeledField
           label={t.fields.currency}
           value={<CurrencyDisplay code={adminData.currency} fallback={tc.notSet} />}
         />

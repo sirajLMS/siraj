@@ -5,14 +5,13 @@ import { IconButton, Stack, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { Translation, useAppTranslation } from "@/shared/locale";
-
-type InfoFieldComponent = React.FC<{ readonly label: string; readonly value: React.ReactNode }>;
 
 interface AdminStatusSectionProps {
   readonly labels: {
@@ -28,11 +27,10 @@ interface AdminStatusSectionProps {
     readonly email: string | null;
     readonly accountStatus: AccountStatus | null;
   };
-  readonly InfoField: InfoFieldComponent;
   readonly extraViewFields?: React.ReactNode;
 }
 
-export function AdminStatusSection({ labels, adminData, InfoField, extraViewFields }: AdminStatusSectionProps) {
+export function AdminStatusSection({ labels, adminData, extraViewFields }: AdminStatusSectionProps) {
   const tBase = useAppTranslation(Translation.Profile.Base);
   const { canAdminResetPassword } = useProfileFieldAccess({ scope: undefined });
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
@@ -61,7 +59,7 @@ export function AdminStatusSection({ labels, adminData, InfoField, extraViewFiel
         <Stack spacing={2}>
           {extraViewFields}
           <Stack spacing={0.5}>
-            <InfoField
+            <LabeledField
               label={labels.accountStatusLabel}
               value={
                 <Stack spacing={0.5} direction="row" sx={{ alignItems: "center" }}>

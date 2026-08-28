@@ -4,6 +4,7 @@ import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
+import { AdminNoteEditDialog } from "@/frontend/common/views/dashboard/classes/audit/components";
 import type { ClassAuditViewModel } from "@/frontend/common/views/dashboard/classes/audit/useClassAuditViewModel";
 
 const lazyViews = createLazyView<ClassAuditViewProps>(
@@ -52,5 +53,18 @@ export function ClassAuditView(props: Readonly<ClassAuditViewModel>) {
     isResending: props.isResending,
   };
 
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewProps} />;
+  return (
+    <>
+      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewProps} />
+      <AdminNoteEditDialog
+        open={props.adminNoteDialog.open}
+        content={props.adminNoteDialog.content}
+        isSaving={props.adminNoteDialog.isSaving}
+        labels={props.labels.adminNoteDialog}
+        onContentChange={props.adminNoteDialog.onContentChange}
+        onClose={props.adminNoteDialog.onClose}
+        onSave={props.adminNoteDialog.onSave}
+      />
+    </>
+  );
 }

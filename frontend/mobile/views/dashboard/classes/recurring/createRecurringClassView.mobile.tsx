@@ -31,7 +31,10 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
     setValue,
     control,
     errors,
+    subjects,
+    subjectsLoading,
     meetingConfig,
+    meetingConfigValidation,
     onMeetingConfigChange,
   } = viewModel;
 
@@ -67,7 +70,10 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
           goToClassLabel={notifications.goToClassLabel}
           onGoToCreatedClass={onGoToCreatedClass}
           formLabels={form}
+          subjects={subjects}
+          subjectsLoading={subjectsLoading}
           meetingConfig={meetingConfig}
+          meetingConfigValidation={meetingConfigValidation}
           onMeetingConfigChangeAction={onMeetingConfigChange}
           onSubmit={data => onSubmit(data, meetingConfig)}
         />

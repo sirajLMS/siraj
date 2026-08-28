@@ -17,6 +17,7 @@ import {
 import { type ReactNode, useMemo, useState } from "react";
 import { logger } from "@/frontend/common/utils/logger";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
+import type { ClassSubjectOption } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { ManualClassEntryStudentFieldContext } from "@/frontend/common/views/dashboard/teachers/dashboard/components/manualClassEntryStudentFieldContext";
 import type { TeacherDashboardLabels } from "@/shared/locale";
 
@@ -35,6 +36,8 @@ interface ManualClassEntryDialogProps {
   }) => Promise<void>;
   readonly defaultActive?: boolean;
   readonly studentSelect: ReactNode;
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
   readonly labels: ManualClassEntryLabels;
 }
 
@@ -44,6 +47,8 @@ export function ManualClassEntryDialog({
   onSubmit,
   defaultActive = false,
   studentSelect,
+  subjects,
+  subjectsLoading,
   labels,
 }: Readonly<ManualClassEntryDialogProps>) {
   return (
@@ -54,6 +59,8 @@ export function ManualClassEntryDialog({
         onSubmit={onSubmit}
         defaultActive={defaultActive}
         studentSelect={studentSelect}
+        subjects={subjects}
+        subjectsLoading={subjectsLoading}
         labels={labels}
       />
     </Dialog>
@@ -72,6 +79,8 @@ interface ManualClassEntryFormProps {
   }) => Promise<void>;
   readonly defaultActive: boolean;
   readonly studentSelect: ReactNode;
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
   readonly labels: ManualClassEntryLabels;
 }
 
@@ -100,6 +109,8 @@ function ManualClassEntryForm({
   onSubmit,
   defaultActive,
   studentSelect,
+  subjects,
+  subjectsLoading,
   labels,
 }: Readonly<ManualClassEntryFormProps>) {
   const [studentId, setStudentId] = useState("");
@@ -168,6 +179,8 @@ function ManualClassEntryForm({
             studentSelect={studentSelect}
             subjectId={subjectId}
             setSubjectId={setSubjectId}
+            subjects={subjects}
+            subjectsLoading={subjectsLoading}
             date={date}
             setDate={setDate}
             startTime={startTime}
@@ -198,6 +211,8 @@ interface ManualClassEntryFormFieldsProps {
   readonly studentSelect: ReactNode;
   readonly subjectId: string;
   readonly setSubjectId: (value: string) => void;
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
   readonly date: string;
   readonly setDate: (value: string) => void;
   readonly startTime: string;
@@ -215,6 +230,8 @@ function ManualClassEntryFormFields({
   studentSelect,
   subjectId,
   setSubjectId,
+  subjects,
+  subjectsLoading,
   date,
   setDate,
   startTime,
@@ -237,6 +254,8 @@ function ManualClassEntryFormFields({
         onChange={setSubjectId}
         label={labels.subjectLabel}
         placeholder={labels.subjectPlaceholder}
+        subjects={subjects}
+        loading={subjectsLoading}
         disabled={submitting}
       />
 

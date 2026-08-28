@@ -6,10 +6,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import PauseIcon from "@mui/icons-material/Pause";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
-import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { styled, type Theme } from "@mui/material/styles";
 import type { ReactElement } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { ExportButton, FilterButton } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { edgeToEdgeCardShellSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
@@ -34,20 +35,6 @@ interface AdminActionsBarProps {
 
 const StyledActionsDivider = styled(Box)(() => ({}));
 
-const StyledForceActivateButton = styled(IconButton)(({ theme }) => ({
-  borderRadius: 1.5,
-  transition: theme.transitions.create("all", { duration: 150, easing: "ease" }),
-}));
-
-const StyledStopPauseButton = styled(IconButton)(() => ({
-  borderRadius: 1.5,
-}));
-
-const StyledDeleteIconButton = styled(IconButton)(({ theme }) => ({
-  borderRadius: 1.5,
-  transition: theme.transitions.create("all", { duration: 150, easing: "ease" }),
-}));
-
 const StyledAdminActionsBar = styled(Box)(({ theme }) => ({
   paddingInline: theme.spacing(2),
   paddingBlock: theme.spacing(1.5),
@@ -62,31 +49,54 @@ const StyledAdminActionsBar = styled(Box)(({ theme }) => ({
   },
 }));
 
-const textActionButtonSx = (theme: Theme) => ({
-  px: { xs: 1.25, sm: 2 },
-  height: 40,
-  minWidth: 40,
-  backgroundColor: theme.palette.primaryContainer,
-  color: theme.palette.onPrimaryContainer,
-  border: "none",
-  borderRadius: 1.5,
-  cursor: "pointer",
-  typography: "labelUppercase" as const,
-  display: "flex",
-  alignItems: "center",
-  gap: 1,
-  transition: theme.transitions.create("background", { duration: 150, easing: "ease" }),
-  "&:hover": { backgroundColor: theme.palette.primaryContainer, filter: "brightness(0.9)" },
-});
+interface StatusTintTokens {
+  readonly container: (theme: Theme) => string;
+  readonly onContainer: (theme: Theme) => string;
+  readonly strong: (theme: Theme) => string;
+}
 
-function ActionIconButtonWithTooltip({
+/** Tonal icon-action styling driven by the shared `palette.status` token family. */
+function tintedIconActionSx(tint: StatusTintTokens) {
+  return (theme: Theme) => ({
+    borderRadius: 1.5,
+    backgroundColor: tint.container(theme),
+    color: tint.onContainer(theme),
+    transition: theme.transitions.create("background", { duration: 150, easing: "ease" }),
+    "&:hover": { backgroundColor: tint.strong(theme), filter: "brightness(1.1)" },
+    "&:active": { transform: "scale(0.95)" },
+    "&.Mui-disabled": {
+      opacity: 0.45,
+      backgroundColor: tint.container(theme),
+      color: tint.onContainer(theme),
+    },
+  });
+}
+
+const FORCE_ACTIVATE_TINT: StatusTintTokens = {
+  container: theme => theme.palette.status.activeContainer,
+  onContainer: theme => theme.palette.status.onActiveContainer,
+  strong: theme => theme.palette.status.active,
+};
+
+const STOP_PAUSE_TINT: StatusTintTokens = {
+  container: theme => theme.palette.status.cancelledContainer,
+  onContainer: theme => theme.palette.status.onCancelledContainer,
+  strong: theme => theme.palette.status.cancelled,
+};
+
+const DELETE_TINT: StatusTintTokens = {
+  container: theme => theme.palette.status.blockedContainer,
+  onContainer: theme => theme.palette.status.onBlockedContainer,
+  strong: theme => theme.palette.status.blocked,
+};
+
+function SessionIconAction({
   ariaLabel,
   enabledTitle,
   disabledTitle,
   disabled,
   onClick,
   icon,
-  ButtonComponent,
   sx,
 }: {
   readonly ariaLabel: string;
@@ -95,17 +105,16 @@ function ActionIconButtonWithTooltip({
   readonly disabled: boolean;
   readonly onClick: () => void;
   readonly icon: ReactElement;
-  readonly ButtonComponent: typeof StyledForceActivateButton;
-  readonly sx: Parameters<typeof StyledForceActivateButton>[0]["sx"];
+  readonly sx: ReturnType<typeof tintedIconActionSx>;
 }) {
   const tooltipTitle = disabled && disabledTitle ? disabledTitle : enabledTitle;
 
   return (
     <Tooltip title={tooltipTitle}>
       <Box data-testid={`tooltip-target-${ariaLabel}`} sx={{ display: "inline-flex" }}>
-        <ButtonComponent aria-label={ariaLabel} disabled={disabled} onClick={onClick} sx={sx}>
+        <IconButton aria-label={ariaLabel} disabled={disabled} onClick={onClick} sx={sx}>
           {icon}
-        </ButtonComponent>
+        </IconButton>
       </Box>
     </Tooltip>
   );
@@ -132,55 +141,23 @@ function SessionControlButtons({
 
   return (
     <Stack direction="row" sx={{ gap: 1, flex: "0 0 auto" }}>
-      <ActionIconButtonWithTooltip
+      <SessionIconAction
         ariaLabel="force-activate"
         enabledTitle={labels.forceActivate}
         disabledTitle={forceActivateDisabledTooltip}
         disabled={!canForceActivate}
         onClick={onForceActivate}
         icon={<PowerSettingsNewIcon />}
-        ButtonComponent={StyledForceActivateButton}
-        sx={theme => ({
-          backgroundColor: theme.palette.status.activeContainer,
-          color: theme.palette.status.onActiveContainer,
-          "&:hover": {
-            backgroundColor: theme.palette.status.active,
-            filter: "brightness(1.1)",
-          },
-          "&:active": {
-            transform: "scale(0.95)",
-          },
-          "&.Mui-disabled": {
-            opacity: 0.45,
-            color: theme.palette.status.onActiveContainer,
-            backgroundColor: theme.palette.status.activeContainer,
-          },
-        })}
+        sx={tintedIconActionSx(FORCE_ACTIVATE_TINT)}
       />
-      <ActionIconButtonWithTooltip
+      <SessionIconAction
         ariaLabel="stop-pause"
         enabledTitle={labels.stopPause}
         disabledTitle={stopDisabledTooltip}
         disabled={!canStop}
         onClick={onStop}
         icon={<PauseIcon />}
-        ButtonComponent={StyledStopPauseButton}
-        sx={theme => ({
-          backgroundColor: theme.palette.status.cancelledContainer,
-          color: theme.palette.status.onCancelledContainer,
-          "&:hover": {
-            backgroundColor: theme.palette.status.cancelled,
-            filter: "brightness(1.1)",
-          },
-          "&:active": {
-            transform: "scale(0.95)",
-          },
-          "&.Mui-disabled": {
-            opacity: 0.45,
-            color: theme.palette.status.onCancelledContainer,
-            backgroundColor: theme.palette.status.cancelledContainer,
-          },
-        })}
+        sx={tintedIconActionSx(STOP_PAUSE_TINT)}
       />
     </Stack>
   );
@@ -208,54 +185,44 @@ function SecondaryAdminActions({
     <>
       <RequirePermission permissions={[AppPermission.SessionReschedule]}>
         <Tooltip title={labels.reschedule}>
-          <Button
+          <FilterButton
             aria-label={labels.reschedule}
             onClick={onReschedule}
-            sx={theme => ({ ...textActionButtonSx(theme), textTransform: "none" })}
+            startIcon={<CalendarMonthOutlinedIcon sx={{ fontSize: 16 }} />}
+            sx={{ textTransform: "none" }}
           >
-            <CalendarMonthOutlinedIcon sx={{ fontSize: 16 }} />
             <Box sx={{ display: { xs: "none", sm: "inline" } }}>{labels.reschedule}</Box>
-          </Button>
+          </FilterButton>
         </Tooltip>
       </RequirePermission>
       <Tooltip title={labels.generateLog}>
-        <Button
+        <ExportButton
           aria-label={labels.generateLog}
           onClick={onGenerateLog}
-          sx={theme => ({ ...textActionButtonSx(theme), textTransform: "none" })}
+          startIcon={<ArticleIcon sx={{ fontSize: 16 }} />}
+          sx={{ textTransform: "none" }}
         >
-          <ArticleIcon sx={{ fontSize: 16 }} />
           <Box sx={{ display: { xs: "none", sm: "inline" } }}>{labels.generateLog}</Box>
-        </Button>
+        </ExportButton>
       </Tooltip>
       <Tooltip title={labels.overrideRateButton}>
-        <Button
+        <FilterButton
           aria-label={labels.overrideRateButton}
           onClick={onOverrideRate}
-          sx={theme => ({ ...textActionButtonSx(theme), textTransform: "none" })}
+          startIcon={<EditIcon sx={{ fontSize: 16 }} />}
+          sx={{ textTransform: "none" }}
         >
-          <EditIcon sx={{ fontSize: 16 }} />
           <Box sx={{ display: { xs: "none", sm: "inline" } }}>{labels.overrideRateButton}</Box>
-        </Button>
+        </FilterButton>
       </Tooltip>
-      <StyledDeleteIconButton
+      <IconButton
         aria-label={labels.deleteInstance}
         title={labels.deleteInstance}
         onClick={onDelete}
-        sx={theme => ({
-          backgroundColor: theme.palette.status.blockedContainer,
-          color: theme.palette.status.onBlockedContainer,
-          "&:hover": {
-            backgroundColor: theme.palette.status.blocked,
-            filter: "brightness(1.1)",
-          },
-          "&:active": {
-            transform: "scale(0.95)",
-          },
-        })}
+        sx={tintedIconActionSx(DELETE_TINT)}
       >
         <DeleteIcon />
-      </StyledDeleteIconButton>
+      </IconButton>
     </>
   );
 }

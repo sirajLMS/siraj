@@ -8,8 +8,9 @@ import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { Box, Button, Card, CardContent, Collapse, Icon, Stack, Typography } from "@mui/material";
+import { Box, Button, Collapse, Icon, Stack, Typography } from "@mui/material";
 import { useId, useState } from "react";
+import { BaseCard } from "@/frontend/common/components/ui";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 export type AutoGenerationSupportCalloutProps = {
@@ -206,15 +207,13 @@ export function AutoGenerationSupportCallout({
   const handleToggle = () => setExpanded(prev => !prev);
 
   return (
-    <Card variant="outlined" sx={theme => ({ bgcolor: theme.palette.info.main })}>
-      <CardContent sx={{ p: 2.5 }}>
-        <Stack spacing={1.5}>
-          <CollapsedSummary labels={labels} expanded={expanded} onToggle={handleToggle} contentId={contentId} />
-          <Collapse in={expanded} id={contentId}>
-            <ExpandedGuide labels={labels} onCreateConfig={onCreateConfig} createConfigHref={createConfigHref} />
-          </Collapse>
-        </Stack>
-      </CardContent>
-    </Card>
+    <BaseCard sx={theme => ({ bgcolor: theme.palette.info.main })}>
+      <Stack spacing={1.5}>
+        <CollapsedSummary labels={labels} expanded={expanded} onToggle={handleToggle} contentId={contentId} />
+        <Collapse in={expanded} id={contentId}>
+          <ExpandedGuide labels={labels} onCreateConfig={onCreateConfig} createConfigHref={createConfigHref} />
+        </Collapse>
+      </Stack>
+    </BaseCard>
   );
 }

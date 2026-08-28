@@ -95,7 +95,10 @@ export function RecurringClassFormShared({
   onGoToCreatedClass,
   formLabels,
   onSubmit,
+  subjects,
+  subjectsLoading,
   meetingConfig,
+  meetingConfigValidation,
   onMeetingConfigChangeAction,
   options,
 }: BaseRecurringClassFormProps & {
@@ -122,7 +125,10 @@ export function RecurringClassFormShared({
           control={control}
           isSubmitting={isSubmitting}
           labels={formLabels}
+          subjects={subjects}
+          subjectsLoading={subjectsLoading}
           meetingConfig={meetingConfig}
+          meetingConfigValidation={meetingConfigValidation}
           onMeetingConfigChangeAction={onMeetingConfigChangeAction}
         />
 

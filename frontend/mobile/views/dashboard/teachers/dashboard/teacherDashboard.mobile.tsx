@@ -213,6 +213,8 @@ export function TeacherDashboardMobileView({
   manualEntryOpen,
   manualEntryDefaultActive,
   teacherId,
+  subjects,
+  subjectsLoading,
   onManualEntryClose,
   onManualEntrySubmit,
 }: Readonly<TeacherDashboardViewModel>) {
@@ -273,6 +275,8 @@ export function TeacherDashboardMobileView({
         onClose={onManualEntryClose}
         onSubmit={onManualEntrySubmit}
         defaultActive={manualEntryDefaultActive}
+        subjects={subjects}
+        subjectsLoading={subjectsLoading}
         labels={labels.manualClassEntry}
         studentSelect={
           <ManualClassEntryStudentSelectMobile

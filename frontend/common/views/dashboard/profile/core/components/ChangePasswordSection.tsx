@@ -1,10 +1,10 @@
 "use client";
 
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import LockOutlined from "@mui/icons-material/LockOutlined";
-import { Alert, Box, Button, IconButton, InputAdornment, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
+import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { useChangePasswordSectionViewModel } from "@/frontend/common/views/dashboard/profile/core/useChangePasswordSectionViewModel";
 
 export function ChangePasswordSection() {
@@ -34,15 +34,8 @@ export function ChangePasswordSection() {
   const passwordsDoNotMatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
 
   return (
-    <Paper sx={{ p: 3, borderRadius: 2 }}>
+    <SectionPanel title={tProfile.title}>
       <Stack spacing={2} component="form" onSubmit={handleSubmit}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <LockOutlined color="primary" />
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            {tProfile.title}
-          </Typography>
-        </Stack>
-
         {errorMsg ? <Alert severity="error">{errorMsg}</Alert> : null}
         {successMsg ? <Alert severity="success">{successMsg}</Alert> : null}
 
@@ -141,15 +134,14 @@ export function ChangePasswordSection() {
         />
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 1 }}>
-          <Button
+          <PrimaryPageAction
             type="submit"
-            variant="contained"
             disabled={loading || !currentPassword || !newPassword || !confirmPassword || passwordsDoNotMatch}
           >
             {tProfile.submit}
-          </Button>
+          </PrimaryPageAction>
         </Box>
       </Stack>
-    </Paper>
+    </SectionPanel>
   );
 }

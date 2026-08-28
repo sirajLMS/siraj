@@ -1,39 +1,39 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
-import { classSubjectsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
+import type { ClassSubjectOption } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
 export interface SubjectSelectProps {
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly label: string;
   readonly placeholder: string;
+  /** Presentational options projected from the classSubjects query by the owner ViewModel. */
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly loading?: boolean;
   readonly error?: string;
   readonly disabled?: boolean;
   readonly name?: string;
 }
 
 /**
- * Standalone subject selector (value/onChange) loading active subjects via
- * the classSubjects GraphQL query.
+ * Presentational subject selector. Data fetching lives in the owner ViewModel
+ * (`useClassSubjects`); this component only renders the supplied options.
  */
 export function SubjectSelect({
   value,
   onChange,
   label,
   placeholder,
+  subjects,
+  loading,
   error,
   disabled,
   name = "subjectId",
 }: Readonly<SubjectSelectProps>) {
   const labelId = `${name}-label`;
-  const { data, loading } = useQuery(classSubjectsQueryDocument, {
-    variables: { categoryId: null },
-  });
-  const subjects = (data?.classSubjects ?? []).filter(subject => subject?.isActive !== false && subject?.id);
 
   return (
     <FormControl fullWidth required error={!!error} disabled={disabled ?? loading} sx={outlinedInputSx}>
@@ -53,8 +53,8 @@ export function SubjectSelect({
           {placeholder}
         </MenuItem>
         {subjects.map(subject => (
-          <MenuItem key={subject?.id ?? ""} value={subject?.id ?? ""}>
-            {subject?.name ?? subject?.id}
+          <MenuItem key={subject.id} value={subject.id}>
+            {subject.name}
           </MenuItem>
         ))}
       </Select>
@@ -68,18 +68,23 @@ interface SubjectSelectFieldProps<T extends FieldValues> {
   readonly control: Control<T>;
   readonly label: string;
   readonly placeholder: string;
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly loading?: boolean;
   readonly error?: string;
   readonly disabled?: boolean;
 }
 
 /**
- * Required subject selector bound to react-hook-form.
+ * Required subject selector bound to react-hook-form. Options are owned by
+ * the ViewModel and flow down as props.
  */
 export function SubjectSelectField<T extends FieldValues>({
   name,
   control,
   label,
   placeholder,
+  subjects,
+  loading,
   error,
   disabled,
 }: Readonly<SubjectSelectFieldProps<T>>) {
@@ -94,6 +99,8 @@ export function SubjectSelectField<T extends FieldValues>({
           onChange={field.onChange}
           label={label}
           placeholder={placeholder}
+          subjects={subjects}
+          loading={loading}
           error={error}
           disabled={disabled}
         />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import type { ClassInstanceQuery } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { ClassInstanceQuery, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { formatScheduleTimeOnly } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -49,6 +49,57 @@ const noopSessionActionProps = {
 type Translations = ClassDetailsLabels;
 type Handlers = ReturnType<typeof useClassActionHandlers>;
 type FeedbackState = { readonly message: string; readonly severity: "success" | "error" } | null;
+
+/**
+ * Store-backed state + handlers for the admin override-rate dialog. The dialog
+ * lives in `classDetailsStore` so it survives viewport tier switches; handlers
+ * are bound to the container's action handlers by the ViewModel.
+ */
+export interface OverrideRateDialogState {
+  readonly open: boolean;
+  readonly amount: string;
+  readonly currency: CurrencyCode | null;
+  readonly onOpen: () => void;
+  readonly onClose: () => void;
+  readonly onAmountChange: (value: string) => void;
+  readonly onCurrencyChange: (value: CurrencyCode | null) => void;
+  readonly onSubmit: (clearOverride: boolean) => Promise<void>;
+}
+
+type OverrideRateDialogStoreSlice = {
+  readonly open: boolean;
+  readonly amount: string;
+  readonly currency: CurrencyCode | null;
+  readonly setAmount: (value: string) => void;
+  readonly setCurrency: (value: CurrencyCode | null) => void;
+  readonly setOpen: (value: boolean) => void;
+  readonly openDialog: (amount: string, currency: CurrencyCode | null) => void;
+};
+
+export function buildOverrideRateDialog(
+  store: OverrideRateDialogStoreSlice,
+  handlers: Handlers,
+  seedAmount: string,
+  seedCurrency: CurrencyCode | null
+): OverrideRateDialogState {
+  return {
+    open: store.open,
+    amount: store.amount,
+    currency: store.currency,
+    onOpen: () => store.openDialog(seedAmount, seedCurrency),
+    onClose: () => store.setOpen(false),
+    onAmountChange: store.setAmount,
+    onCurrencyChange: store.setCurrency,
+    onSubmit: async (clearOverride: boolean) => {
+      // An empty amount (or an explicit clear action) removes the override entirely.
+      const normalizedAmount = store.amount.trim();
+      const rateAmount = clearOverride || normalizedAmount.length === 0 ? null : normalizedAmount;
+      const rateCurrency = rateAmount ? store.currency : null;
+      await handlers.handleOverrideRate(rateAmount, rateCurrency);
+      store.setOpen(false);
+    },
+  };
+}
 
 function buildClassDetailsHeaderLabels(
   t: ClassDetailsLabels,
@@ -98,6 +149,8 @@ type CommonViewModelFields = {
   readonly feedbackState: FeedbackState;
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
+  readonly onGenerateLog: () => void;
+  readonly overrideRateDialog: OverrideRateDialogState;
   readonly t: Translations;
   readonly headerLabels: ClassDetailsHeaderLabels;
   readonly formattedScheduledDate: string;
@@ -114,6 +167,8 @@ type EarlyReturnSharedFields = {
   readonly feedbackState: FeedbackState;
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
+  readonly onGenerateLog: () => void;
+  readonly overrideRateDialog: OverrideRateDialogState;
   readonly t: Translations;
   readonly headerLabels: ClassDetailsHeaderLabels;
   readonly canViewSessionDetails: boolean;
@@ -134,6 +189,8 @@ function buildEarlyReturnViewModel(status: EarlyReturnStatus, shared: EarlyRetur
     feedbackState: shared.feedbackState,
     deleteDialogOpen: shared.deleteDialogOpen,
     setDeleteDialogOpen: shared.setDeleteDialogOpen,
+    onGenerateLog: shared.onGenerateLog,
+    overrideRateDialog: shared.overrideRateDialog,
     t: shared.t,
     headerLabels: shared.headerLabels,
     formattedScheduledDate: "",
@@ -180,6 +237,8 @@ type ReadyInputs = {
   readonly feedbackState: FeedbackState;
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
+  readonly onGenerateLog: () => void;
+  readonly overrideRateDialog: OverrideRateDialogState;
   readonly t: Translations;
   readonly headerLabels: ClassDetailsHeaderLabels;
   readonly formattedScheduledDate: string;
@@ -202,6 +261,8 @@ function buildReadyViewModel(inputs: ReadyInputs): ClassDetailsViewModel {
     feedbackState: inputs.feedbackState,
     deleteDialogOpen: inputs.deleteDialogOpen,
     setDeleteDialogOpen: inputs.setDeleteDialogOpen,
+    onGenerateLog: inputs.onGenerateLog,
+    overrideRateDialog: inputs.overrideRateDialog,
     t: inputs.t,
     headerLabels: inputs.headerLabels,
     formattedScheduledDate: inputs.formattedScheduledDate,
@@ -224,6 +285,8 @@ export interface ClassDetailsViewModel {
   readonly feedbackState: { readonly message: string; readonly severity: "success" | "error" } | null;
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
+  readonly onGenerateLog: () => void;
+  readonly overrideRateDialog: OverrideRateDialogState;
   readonly t: ClassDetailsLabels;
   readonly headerLabels: ClassDetailsHeaderLabels;
   readonly formattedScheduledDate: string;
@@ -247,6 +310,13 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
     setShouldLoadEvents,
     deleteDialogOpen,
     setDeleteDialogOpen,
+    overrideDialogOpen,
+    setOverrideDialogOpen,
+    overrideRateAmount,
+    setOverrideRateAmount,
+    overrideRateCurrency,
+    setOverrideRateCurrency,
+    openOverrideDialog,
   } = useClassDetailsContainerState();
 
   const { data, loading, error } = useClassDetailsData(id);
@@ -260,6 +330,25 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
   const handlers = useClassActionHandlers(id, mutations, router, setFeedbackState, t);
   const { canOverride, isParentView, isStudentView, canViewSessionDetails } = useClassDetailsPermissions(hasPermission);
 
+  // Triggers the lazy class-status-events query inside useEventLogDownload; when
+  // the events resolve, the hook serializes them into a JSON file download.
+  const onGenerateLog = () => setShouldLoadEvents(true);
+
+  const overrideRateDialog = buildOverrideRateDialog(
+    {
+      open: overrideDialogOpen,
+      amount: overrideRateAmount,
+      currency: overrideRateCurrency,
+      setAmount: setOverrideRateAmount,
+      setCurrency: setOverrideRateCurrency,
+      setOpen: setOverrideDialogOpen,
+      openDialog: openOverrideDialog,
+    },
+    handlers,
+    data?.classInstance?.rateAmount ?? "",
+    data?.classInstance?.rateCurrency ?? null
+  );
+
   const earlyReturnShared = {
     isWarningDismissed,
     setIsWarningDismissed,
@@ -267,6 +356,8 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
     feedbackState,
     deleteDialogOpen,
     setDeleteDialogOpen,
+    onGenerateLog,
+    overrideRateDialog,
     t,
     headerLabels,
     canViewSessionDetails,
@@ -303,6 +394,8 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
     feedbackState,
     deleteDialogOpen,
     setDeleteDialogOpen,
+    onGenerateLog,
+    overrideRateDialog,
     t,
     headerLabels,
     formattedScheduledDate,

@@ -33,8 +33,11 @@ export function ClassDetailsContainerBody({ viewModel, slots }: Readonly<ClassDe
         sessionActionProps={viewModel.sessionActionProps}
         feedbackState={viewModel.feedbackState}
         deleteDialogOpen={viewModel.deleteDialogOpen}
+        onOpenDeleteDialog={() => viewModel.setDeleteDialogOpen(true)}
         onCloseDeleteDialog={() => viewModel.setDeleteDialogOpen(false)}
         onConfirmDelete={viewModel.handlers.handleDeleteConfirm}
+        onGenerateLog={viewModel.onGenerateLog}
+        overrideRateDialog={viewModel.overrideRateDialog}
         t={viewModel.t}
         headerLabels={viewModel.headerLabels}
         formattedScheduledDate={viewModel.formattedScheduledDate}
