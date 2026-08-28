@@ -49,6 +49,7 @@ export namespace PaymentsLedgerService {
         paymentAmount: payments.amount,
         paymentCurrency: payments.currency,
         paymentMethodType: payments.paymentMethodType,
+        paymentGateway: payments.paymentGateway,
         paymentCreatedAt: payments.createdAt,
         paymentCreditHours: payments.creditHours,
         invoiceStudentId: invoices.studentId,
@@ -83,7 +84,8 @@ export namespace PaymentsLedgerService {
         amount: r.paymentAmount,
         currency: r.paymentCurrency,
         packageName: r.packageDisplayName ?? r.invoiceType ?? null,
-        paymentGateway: r.paymentMethodType,
+        paymentGateway: r.paymentGateway,
+        paymentMethodType: r.paymentMethodType,
         paymentDate: r.paymentCreatedAt.toISOString(),
       };
     });

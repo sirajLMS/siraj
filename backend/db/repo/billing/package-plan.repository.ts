@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { queryDb, queryWithPagination } from "@/backend/db";
 import { packagePlans } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
@@ -80,7 +80,7 @@ export namespace PackagePlanRepository {
     const baseQuery = q
       .select()
       .from(packagePlans)
-      .orderBy(desc(packagePlans.createdAt), asc(packagePlans.sortOrder))
+      .orderBy(asc(packagePlans.sortOrder), asc(packagePlans.displayName))
       .$dynamic();
     return queryWithPagination(baseQuery, paginationArgs);
   };

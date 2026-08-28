@@ -20,6 +20,7 @@ export const PaymentLedgerEntryPothosObject = PaymentLedgerEntryRef.implement({
     currency: t.exposeString("currency"),
     packageName: t.exposeString("packageName", { nullable: true }),
     paymentGateway: t.exposeString("paymentGateway"),
+    paymentMethodType: t.exposeString("paymentMethodType", { nullable: true }),
     paymentDate: t.expose("paymentDate", { type: "DateTime" }),
   }),
 });

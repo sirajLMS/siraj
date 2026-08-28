@@ -3443,6 +3443,7 @@ type PaymentLedgerEntry {
   packageName: String
   paymentDate: DateTime
   paymentGateway: String
+  paymentMethodType: String
   studentId: ID
   studentName: String
 }

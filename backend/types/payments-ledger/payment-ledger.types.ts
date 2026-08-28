@@ -10,6 +10,8 @@ export interface PaymentLedgerEntry {
   readonly currency: string;
   readonly packageName: string | null;
   readonly paymentGateway: string;
+  /** How the money moved (cash, online account, …) — presentation method, distinct from gateway. */
+  readonly paymentMethodType: string | null;
   readonly paymentDate: string;
 }
 
