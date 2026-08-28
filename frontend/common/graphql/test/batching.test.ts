@@ -20,8 +20,9 @@ import {
  *    array of individual operation responses.
  * 2. Persisted queries (APQ) work correctly with batched requests.
  * 3. Unauthenticated batched requests return errors.
- * 4. The client-side Apollo provider uses `BatchHttpLink` (verified by
- *    inspecting the source file).
+ * 4. The client-side Apollo provider batches only in non-production — the
+ *    production server rejects batched array bodies (verified by inspecting the
+ *    provider source).
  */
 
 // ── Type guards (replace unsafe type assertions) ────────────────────────
@@ -222,18 +223,23 @@ describe("Client-side BatchHttpLink configuration", () => {
     expect(typeof mod.BatchHttpLink).toBe("function");
   });
 
-  test("AppApolloProvider uses BatchHttpLink (not HttpLink) with PersistedQueryLink before it", async () => {
+  test("AppApolloProvider gates BatchHttpLink off in production (plain HttpLink) with PersistedQueryLink before it", async () => {
     const source = await readFile("frontend/common/providers/apollo/AppApolloProvider.tsx", "utf8");
 
-    expect(source).toContain("BatchHttpLink");
+    // The production server rejects batched array bodies, so the provider must
+    // gate BatchHttpLink behind a non-production check and fall back to a plain
+    // HttpLink in production.
+    expect(source).toContain("new BatchHttpLink");
+    expect(source).toContain("new HttpLink");
     expect(source).not.toMatch(/import\s+\{[^}]*HttpLink[^}]*\}\s+from\s+"@apollo\/client"/);
+    expect(source).toContain('process.env.NODE_ENV === "production"');
     expect(source).toContain("PersistedQueryLink");
 
     const pqIdx = source.indexOf("PersistedQueryLink");
-    const batchIdx = source.indexOf("new BatchHttpLink");
+    const linkIdx = source.indexOf("process.env.NODE_ENV");
     expect(pqIdx).toBeGreaterThan(-1);
-    expect(batchIdx).toBeGreaterThan(-1);
-    expect(pqIdx).toBeLessThan(batchIdx);
+    expect(linkIdx).toBeGreaterThan(-1);
+    expect(pqIdx).toBeLessThan(linkIdx);
   });
 
   test("ApolloServer constructor gates allowBatchedHttpRequests on !isProduction (H3 security fix)", async () => {

@@ -11,10 +11,7 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { AccountingPaymentHistoryKind, AppPermission, CreditReason } from "@/backend/enum";
 import { ConflictError, logger, NotFoundError, ValidationError } from "@/backend/lib";
 import { AccountingNotificationService } from "@/backend/services/billing/accounting-notification.service";
-import {
-  DEFAULT_LOW_HOURS_THRESHOLD,
-  resolveLowHoursThreshold,
-} from "@/backend/services/billing/accounting-settings.utils";
+import { resolveLowHoursThreshold } from "@/backend/services/billing/accounting-settings.utils";
 import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type {
@@ -411,7 +408,7 @@ export namespace AccountingPaymentService {
     ]);
     return {
       ...balance,
-      lowHoursThreshold: threshold.value ?? DEFAULT_LOW_HOURS_THRESHOLD,
+      lowHoursThreshold: threshold.value,
       lastPaymentCurrency,
     };
   }

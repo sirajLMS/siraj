@@ -2,6 +2,7 @@
 
 import { ApolloClient, ApolloLink } from "@apollo/client";
 import { BatchHttpLink } from "@apollo/client/link/batch-http";
+import { HttpLink } from "@apollo/client/link/http";
 import { PersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { ApolloProvider } from "@apollo/client/react";
 import type React from "react";
@@ -56,12 +57,18 @@ const apolloClient = new ApolloClient({
     ),
     createAuthLink(() => apolloLinkState.authToken),
     new PersistedQueryLink({ sha256 }),
-    // BatchHttpLink groups multiple concurrent operations into a single HTTP
-    // POST (JSON array body). The server must opt in via
-    // `allowBatchedHttpRequests: true` on the ApolloServer constructor.
-    // APQ link must chain BEFORE BatchHttpLink so persisted-query hashes are
-    // resolved before the batch is assembled.
-    new BatchHttpLink({ uri: "/api/graphql", credentials: "include" }),
+    // The HTTP terminating link is production-gated to match the server: the
+    // GraphQL route disables array batching in production
+    // (`allowBatchedHttpRequests: !isProduction` in app/api/graphql/route.ts),
+    // so a production client sending a JSON array body is rejected with HTTP
+    // 400 "Operation batching disabled". Plain HttpLink sends one operation per
+    // POST object body, which is the only shape the production server accepts.
+    // Dev/test keep BatchHttpLink (single POST per navigation burst). The APQ
+    // link must chain before the terminating link so persisted-query hashes are
+    // resolved before the request is assembled.
+    ...(process.env.NODE_ENV === "production"
+      ? [new HttpLink({ uri: "/api/graphql", credentials: "include" })]
+      : [new BatchHttpLink({ uri: "/api/graphql", credentials: "include" })]),
   ]),
   cache: createApolloCache(),
   defaultOptions: {

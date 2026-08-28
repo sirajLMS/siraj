@@ -90,8 +90,13 @@ export interface AccountingPaymentBalanceReturnType {
   studentId: string;
   creditHoursTotal: string;
   creditHoursRemaining: string;
-  /** Configured low-hours warning threshold (system setting with fallback). */
-  lowHoursThreshold: number;
+  /**
+   * Configured low-hours warning threshold (system setting row → built-in
+   * fallback). Null when the persisted value cannot be parsed as a number —
+   * surfaces hide the low-balance warning rather than comparing against a
+   * misleading value.
+   */
+  lowHoursThreshold: number | null;
   /** Currency of the student's most recent payment (null when none recorded). */
   lastPaymentCurrency: string | null;
 }

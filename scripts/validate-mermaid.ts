@@ -53,14 +53,7 @@ export const setConfig = DOMPurify.setConfig.bind(DOMPurify);
 `,
 };
 
-const STYLIS_SHIM: ShimSpec = {
-  dir: "node_modules/stylis",
-  real: "node_modules/stylis-real",
-  pkg: '{"name":"stylis","version":"4.3.6","main":"index.js","type":"module"}\n',
-  index: 'export * from "stylis-for-mermaid";\n',
-};
-
-const SHIMS = [DOMPURIFY_SHIM, STYLIS_SHIM];
+const SHIMS = [DOMPURIFY_SHIM];
 
 function installShims(): void {
   for (const shim of SHIMS) {

@@ -371,6 +371,7 @@ await mock.module("@/backend/lib", () => ({
       super(message);
     }
   },
+  ForbiddenError: class ForbiddenError extends Error {},
 }));
 
 // --- Locale mock (the service imports `@/shared/locale` for type-only) ---
