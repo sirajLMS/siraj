@@ -26,9 +26,9 @@ import { myPaymentsLedgerQueryDocument } from "@/frontend/common/graphql/sharedD
 import { studentCreditHourBalanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
-function formatGatewayLabel(gateway: string): string {
-  if (!gateway) return "—";
-  return gateway
+function formatMethodLabel(method: string | null): string {
+  if (!method) return "—";
+  return method
     .toLowerCase()
     .split("_")
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -45,7 +45,10 @@ interface PaymentRow {
   amount: string;
   currency: string;
   packageName: string | null;
+  /** True processing gateway (card/none/…) — kept for reference. */
   paymentGateway: string;
+  /** How the money moved (Cash / Online Account / …) — what parents recognize. */
+  paymentMethodType: string | null;
   paymentDate: string;
 }
 
@@ -61,7 +64,7 @@ function PaymentTable({ rows }: Readonly<{ rows: readonly PaymentRow[] }>) {
             <HeaderCell label="Credits" align="center" />
             <HeaderCell label="Amount" align="right" />
             <HeaderCell label="Package" />
-            <HeaderCell label="Gateway" />
+            <HeaderCell label="Method" />
             <HeaderCell label="Date" />
           </TableRow>
         </TableHead>
@@ -120,7 +123,7 @@ function PaymentRowCells({ row, zebra }: Readonly<{ row: PaymentRow; zebra: bool
             size="small"
             color="success"
             variant="outlined"
-            label={`+${row.creditsPurchased}`}
+            label={row.creditsPurchased ? `+${row.creditsPurchased}` : "—"}
             sx={{ borderRadius: 2, fontWeight: 600 }}
           />
         )}
@@ -139,7 +142,7 @@ function PaymentRowCells({ row, zebra }: Readonly<{ row: PaymentRow; zebra: bool
       <TableCell sx={{ py: 1.5 }}>
         <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
           <CreditCardOutlined sx={theme => ({ fontSize: 16, color: theme.palette.text.secondary })} />
-          <Typography variant="caption">{formatGatewayLabel(row.paymentGateway)}</Typography>
+          <Typography variant="caption">{formatMethodLabel(row.paymentMethodType)}</Typography>
         </Stack>
       </TableCell>
       <TableCell sx={{ py: 1.5 }}>
@@ -271,6 +274,7 @@ export function PaymentsLedgerContainer() {
       currency: p.currency ?? "",
       packageName: p.packageName ?? null,
       paymentGateway: p.paymentGateway ?? "",
+      paymentMethodType: p.paymentMethodType ?? null,
       paymentDate: p.paymentDate ?? "",
     })) ?? [];
 

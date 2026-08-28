@@ -17,6 +17,7 @@ export const myPaymentsLedgerQueryDocument: TypedDocumentNode<MyPaymentsLedgerQu
       currency
       packageName
       paymentGateway
+      paymentMethodType
       paymentDate
     }
   }

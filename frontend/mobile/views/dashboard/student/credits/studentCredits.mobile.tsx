@@ -28,7 +28,9 @@ interface MobileTransactionItemProps {
 
 function MobileTransactionItem({ row, locale, reasonLabel }: MobileTransactionItemProps): ReactNode {
   const positive = row.changeAmount >= 0;
-  const sign = positive ? "+" : "";
+  const sign = positive ? "+" : "-";
+  // Hours-based rows show "±15.00 h"; legacy class-credit rows keep integers.
+  const amountLabel = row.isHours ? `${Math.abs(row.changeAmount).toFixed(2)} h` : `${Math.abs(row.changeAmount)}`;
 
   return (
     <MobileCardListItem variant="edge-to-edge">
@@ -49,7 +51,7 @@ function MobileTransactionItem({ row, locale, reasonLabel }: MobileTransactionIt
           })}
         >
           {sign}
-          {row.changeAmount}
+          {amountLabel}
         </Typography>
       </Stack>
       {row.notes ? (
@@ -82,19 +84,19 @@ export function StudentCreditsMobileView({
       {
         key: "hoursRemaining",
         label: labels.hoursRemaining,
-        count: balance.classesRemaining,
+        count: `${balance.hoursRemaining.toFixed(2)} h`,
         icon: PaymentsOutlined,
         labelKey: "hoursRemaining",
       },
       {
         key: "hoursTotal",
         label: labels.hoursTotal,
-        count: balance.classesTotal,
+        count: `${balance.hoursTotal.toFixed(2)} h`,
         icon: SchoolOutlined,
         labelKey: "hoursTotal",
       },
     ],
-    [balance.classesRemaining, balance.classesTotal, labels.hoursRemaining, labels.hoursTotal]
+    [balance.hoursRemaining, balance.hoursTotal, labels.hoursRemaining, labels.hoursTotal]
   );
 
   return (

@@ -50,15 +50,15 @@ export function StudentCreditsDesktopView({
             [
               {
                 key: "hours-remaining",
-                count: balance.classesRemaining,
+                count: `${balance.hoursRemaining.toFixed(2)} h`,
                 labelKey: "hours-remaining",
                 label: labels.hoursRemaining,
                 icon: PaymentsOutlined,
-                subLabel: `${balance.classesTotal} ${labels.hoursTotal.toLowerCase()}`,
+                subLabel: `${balance.hoursTotal.toFixed(2)} ${labels.hoursTotal.toLowerCase()}`,
               },
               {
                 key: "hours-total",
-                count: balance.classesTotal,
+                count: `${balance.hoursTotal.toFixed(2)} h`,
                 labelKey: "hours-total",
                 label: labels.hoursTotal,
                 icon: SchoolOutlined,

@@ -271,12 +271,14 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
       {
         field: "actions",
         headerName: t.columns.actions,
-        width: 80,
+        width: 120,
         sortable: false,
         renderCell: params => (
+          // VIEW-safe: this opens the (role-scoped) detail page — it must NOT
+          // read as a manage ("Edit") action for VIEW-only roles like staff.
           <Tooltip title={t.paymentDetails}>
             <Link href={`/accounting/payments/${params.row.id}`} style={{ textDecoration: "none" }}>
-              <Chip size="small" label={t.detail.editAction} clickable />
+              <Chip size="small" label={t.paymentDetails} clickable />
             </Link>
           </Tooltip>
         ),

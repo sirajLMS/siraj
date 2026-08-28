@@ -3,10 +3,9 @@
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  studentCreditBalanceQueryDocument,
-  studentCreditTransactionsQueryDocument,
-} from "@/frontend/common/graphql/sharedDocuments/billing/credit-lms.documents";
+// Hours-domain balance (creditHoursRemaining/Total) — NOT the legacy class-unit balance.
+import { studentCreditHourBalanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting/accounting.documents";
+import { studentCreditTransactionsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/credit-lms.documents";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import type {
   StudentCreditBalanceInfo,
@@ -60,9 +59,15 @@ type TransactionItem = NonNullable<
 >;
 
 function mapTransaction(raw: TransactionItem): StudentCreditTransactionRow {
+  // Hour-based transactions carry changeAmountHours ("15.00") with a null
+  // changeAmount; legacy class-credit purchases carry the inverse shape.
+  // Prefer hours so hour grants never collapse to a displayed 0.
+  const hours = raw.changeAmountHours;
+  const changeAmount = hours != null ? Number(hours) : (raw.changeAmount ?? 0);
   return {
     id: raw.id ?? "",
-    changeAmount: raw.changeAmount ?? 0,
+    changeAmount: Number.isFinite(changeAmount) ? changeAmount : 0,
+    isHours: hours != null,
     reason: raw.reason ?? null,
     notes: raw.notes ?? null,
     createdAt: raw.createdAt ?? null,
@@ -107,7 +112,7 @@ function useStudentCreditQueries(): UseCreditQueriesState {
   });
   const studentId = profileData?.studentProfile?.id ?? null;
 
-  const { data: balanceData, loading: balanceLoading } = useQuery(studentCreditBalanceQueryDocument, {
+  const { data: balanceData, loading: balanceLoading } = useQuery(studentCreditHourBalanceQueryDocument, {
     variables: { studentId: studentId ?? "" },
     skip: !studentId,
     fetchPolicy: "cache-and-network",
@@ -131,10 +136,12 @@ function useStudentCreditQueries(): UseCreditQueriesState {
     fetchPolicy: "cache-and-network",
   });
 
+  // Hours domain: this page is the student's credit-HOURS ledger — the legacy
+  // studentCreditBalance (class units) must not feed the hour KPI cards.
   const balance = useMemo<StudentCreditBalanceInfo>(
     () => ({
-      classesRemaining: balanceData?.studentCreditBalance?.classesRemaining ?? 0,
-      classesTotal: balanceData?.studentCreditBalance?.classesTotal ?? 0,
+      hoursRemaining: Number(balanceData?.studentCreditHourBalance?.creditHoursRemaining ?? 0),
+      hoursTotal: Number(balanceData?.studentCreditHourBalance?.creditHoursTotal ?? 0),
     }),
     [balanceData]
   );
