@@ -62,6 +62,7 @@ export interface ClassAuditLabels {
     readonly lastUpdated: (time: string) => string;
     readonly update: string;
     readonly edit: string;
+    readonly content: string;
   };
   readonly meetingIdLabel: string;
   readonly online: string;

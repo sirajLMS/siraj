@@ -21,7 +21,10 @@ import { cleanup, fireEvent, screen } from "@testing-library/react";
 expect.extend(matchers);
 
 import { ClassAuditView } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditView";
-import type { ClassAuditViewModel } from "@/frontend/common/views/dashboard/classes/audit/useClassAuditViewModel";
+import type {
+  ClassAuditReadyViewModel,
+  ClassAuditViewModel,
+} from "@/frontend/common/views/dashboard/classes/audit/useClassAuditViewModel";
 import {
   buildClassAuditViewLabels,
   CLASS_AUDIT_CLASS_NAME,
@@ -30,11 +33,21 @@ import {
 } from "@/test/ui/components/fixtures/classAuditFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
-function buildViewModel(overrides: Partial<ClassAuditViewModel>): ClassAuditViewModel {
+function buildShellViewModel(status: "loading" | "invalidId" | "error"): ClassAuditViewModel {
   return {
-    status: "loading",
+    status,
     audit: null,
     labels: {},
+    isResending: false,
+    onRetry: noopHandler,
+  };
+}
+
+function buildReadyViewModel(overrides: Partial<ClassAuditReadyViewModel> = {}): ClassAuditViewModel {
+  return {
+    status: "ready",
+    audit: classAuditFixture,
+    labels: buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel),
     onGenerateReport: noopHandler,
     onEditClass: noopHandler,
     onExportStudents: noopHandler,
@@ -44,6 +57,14 @@ function buildViewModel(overrides: Partial<ClassAuditViewModel>): ClassAuditView
     onEditAdminNote: noopHandler,
     isResending: false,
     onRetry: noopHandler,
+    adminNoteDialog: {
+      open: false,
+      content: "",
+      isSaving: false,
+      onContentChange: noopHandler,
+      onClose: noopHandler,
+      onSave: noopHandler,
+    },
     ...overrides,
   };
 }
@@ -54,7 +75,7 @@ afterEach(() => {
 
 describe("ClassAuditView shell states", () => {
   test("renders a loading indicator while the audit query is in flight", () => {
-    const { container } = renderWithWrapper(<ClassAuditView {...buildViewModel({ status: "loading" })} />, {
+    const { container } = renderWithWrapper(<ClassAuditView {...buildShellViewModel("loading")} />, {
       locale,
       viewport: "mobile",
     });
@@ -66,7 +87,8 @@ describe("ClassAuditView shell states", () => {
 
   test("renders an error alert with a retry action that re-triggers the query", () => {
     const onRetry = mock(() => {});
-    renderWithWrapper(<ClassAuditView {...buildViewModel({ status: "error", onRetry })} />, {
+    const viewModel = buildShellViewModel("error");
+    renderWithWrapper(<ClassAuditView {...viewModel} onRetry={onRetry} />, {
       locale,
       viewport: "mobile",
     });
@@ -80,7 +102,7 @@ describe("ClassAuditView shell states", () => {
   });
 
   test("renders an error alert without a retry action for an invalid class id", () => {
-    renderWithWrapper(<ClassAuditView {...buildViewModel({ status: "invalidId" })} />, {
+    renderWithWrapper(<ClassAuditView {...buildShellViewModel("invalidId")} />, {
       locale,
       viewport: "mobile",
     });
@@ -91,13 +113,7 @@ describe("ClassAuditView shell states", () => {
   });
 
   test("renders the lazy tier view once the audit payload is ready", async () => {
-    const viewModel = buildViewModel({
-      status: "ready",
-      audit: classAuditFixture,
-      labels: buildClassAuditViewLabels(auditT, classAuditFixture),
-    });
-
-    renderWithWrapper(<ClassAuditView {...viewModel} />, { locale, viewport: "mobile" });
+    renderWithWrapper(<ClassAuditView {...buildReadyViewModel()} />, { locale, viewport: "mobile" });
 
     const titleMatches = await screen.findAllByText(CLASS_AUDIT_CLASS_NAME);
     expect(titleMatches.length).toBeGreaterThan(0);

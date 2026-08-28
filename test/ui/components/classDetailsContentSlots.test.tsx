@@ -6,7 +6,6 @@ expect.extend(matchers);
 
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { ClassDetailsContentShared } from "@/frontend/common/views/dashboard/classes/details/components/classDetailsContentShared";
-import type { ClassInstance } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
 import type {
   ClassDetailsContentProps,
   ClassDetailsMetricGridSlotProps,
@@ -14,6 +13,10 @@ import type {
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
+import {
+  buildClassDetailsContentProps,
+  ClassDetailsHeaderStub,
+} from "@/test/ui/components/fixtures/classDetailsFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -23,108 +26,6 @@ afterEach(() => {
 const locale: AppLocale = "ar";
 const t = readTranslation(Translation.Dashboard.ClassDetails, locale);
 const session = readTranslation(Translation.Session, locale);
-
-const noop = () => {};
-const noopAsync = () => Promise.resolve();
-
-function makeInstance(): ClassInstance {
-  return {
-    id: "ci-1",
-    courseName: "Math",
-    classType: null,
-    instanceId: "inst-1",
-    scheduledDate: "2026-08-20",
-    startTime: "10:00",
-    endTime: "11:00",
-    durationMinutes: 60,
-    status: null,
-    remarks: null,
-    hasTimezoneMismatch: false,
-    studentTimezone: null,
-    teacherTimezone: null,
-    recurringScheduleId: null,
-    payrollCredited: false,
-    isRescheduled: false,
-    isFrozen: false,
-    executionState: null,
-    outcome: null,
-    avatarUrl: null,
-    subjectId: "sub-1",
-    subjectName: "Mathematics",
-    subjectAvatarUrl: null,
-    rateAmount: null,
-    rateCurrency: null,
-    isRateOverridden: false,
-    rateSource: null,
-    effectiveMeeting: null,
-    student: { id: "student-1", name: "Student One", grade: null, level: null, avatarUrl: null },
-    teacher: { id: "teacher-1", name: "Teacher One", title: null, avatarUrl: null },
-    performance: {
-      id: "perf-1",
-      engagementScore: 92,
-      assessmentProgress: 60,
-      assessmentTotal: 5,
-      focusLevel: "High",
-      sessionHealth: "Stable",
-      heatmapData: null,
-      latencyMs: null,
-      authorizationLabel: null,
-      attendanceRate: 85,
-      avgGrade: "A",
-      lastClassDaysAgo: 3,
-    },
-  };
-}
-
-function makeProps(overrides: Partial<ClassDetailsContentProps>): ClassDetailsContentProps {
-  return {
-    instance: makeInstance(),
-    canOverride: false,
-    isParentView: false,
-    isStudentView: false,
-    canViewSessionDetails: false,
-    isWarningDismissed: true,
-    onDismissWarning: noop,
-    handlers: {
-      handleForceActivate: noopAsync,
-      handleStop: noopAsync,
-      handleActivate: noopAsync,
-      handleDeleteConfirm: noopAsync,
-      handleReschedule: noop,
-      handleInfoEdit: noop,
-      handleOverrideRate: noopAsync,
-    },
-    sessionActionProps: {
-      onStart: noopAsync,
-      onAbsent: noopAsync,
-      onLeave: noopAsync,
-      onReset: noopAsync,
-      isStarting: false,
-      isMarkingAbsent: false,
-      isProcessingLeave: false,
-      isResetting: false,
-      error: null,
-    },
-    feedbackState: null,
-    deleteDialogOpen: false,
-    onCloseDeleteDialog: noop,
-    onConfirmDelete: noopAsync,
-    t,
-    headerLabels: {
-      pageSubtitleAdmin: t.pageSubtitleAdmin,
-      pageSubtitleTeacher: t.pageSubtitleTeacher,
-      pageSubtitleStudent: t.pageSubtitleStudent,
-      classTypes: session.classTypes,
-      breadcrumbs: { dashboard: t.breadcrumbs.dashboard, classes: t.breadcrumbs.classes },
-    },
-    formattedScheduledDate: "2026-08-20",
-    formattedStartTime: "10:00",
-    formattedEndTime: "11:00",
-    ...overrides,
-  };
-}
-
-const HeaderStub = () => <div data-testid="header-stub" />;
 
 function makeSpyGrid(captured: MetricItem[][], testId: string) {
   return function SpyMetricGrid({ metrics }: ClassDetailsMetricGridSlotProps) {
@@ -138,9 +39,9 @@ function renderContent(overrides: Partial<ClassDetailsContentProps>) {
   const liveCaptured: MetricItem[][] = [];
   const result = renderWithWrapper(
     <ClassDetailsContentShared
-      props={makeProps(overrides)}
+      props={buildClassDetailsContentProps(t, session, overrides)}
       slots={{
-        Header: HeaderStub,
+        Header: ClassDetailsHeaderStub,
         TeacherPerformanceMetricGrid: makeSpyGrid(teacherCaptured, "teacher-metric-grid"),
         LivePerformanceMetricGrid: makeSpyGrid(liveCaptured, "live-metric-grid"),
       }}

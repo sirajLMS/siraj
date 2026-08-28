@@ -91,7 +91,11 @@ export const classAuditFixture = {
  * Maps the raw audit locale labels onto the flat view-level label shape,
  * mirroring the ViewModel mapping so tests exercise the same strings.
  */
-export function buildClassAuditViewLabels(t: ClassAuditLocaleLabels, audit: GroupClassAudit): ClassAuditLabels {
+export function buildClassAuditViewLabels(
+  t: ClassAuditLocaleLabels,
+  audit: GroupClassAudit,
+  commonCancel: string
+): ClassAuditLabels {
   const registeredStudentCount = audit.registeredStudentCount ?? 0;
   return {
     breadcrumbs: {
@@ -147,6 +151,12 @@ export function buildClassAuditViewLabels(t: ClassAuditLocaleLabels, audit: Grou
       lastUpdated: t.adminNote.lastUpdated(audit.adminNote?.lastUpdated ?? ""),
       update: t.adminNote.update,
       edit: t.adminNote.edit,
+    },
+    adminNoteDialog: {
+      title: t.adminNote.title,
+      content: t.adminNote.content,
+      cancel: commonCancel,
+      save: t.adminNote.update,
     },
   };
 }

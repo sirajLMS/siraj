@@ -16,18 +16,14 @@ handful of Zustand/Apollo/patterns issues.
 
 ## Findings
 
-### WARNING (theme — string palette access, 9)
+### WARNING (theme — string palette access, 5)
 - [ ] [WARNING] theme: frontend/common/views/dashboard/students/profile/StudentCreditHoursTab.tsx:218 — string palette "success.main"/"error.main" → theme callback
-- [ ] [WARNING] theme: frontend/desktop/views/dashboard/accounting/PackagePlansListView.desktop.tsx:61 — "text.secondary" → theme callback
-- [ ] [WARNING] theme: frontend/desktop/views/dashboard/accounting/PackagePlansListView.desktop.tsx:94 — "text.secondary" → theme callback
 - [ ] [WARNING] theme: frontend/desktop/views/dashboard/accounting/PaymentsListView.desktop.tsx:102 — "text.secondary" → theme callback
 - [ ] [WARNING] theme: frontend/desktop/views/dashboard/accounting/PaymentsListView.desktop.tsx:128 — "text.secondary" → theme callback
 - [ ] [WARNING] theme: frontend/desktop/views/dashboard/accounting/PaymentsListView.desktop.tsx:144 — "text.secondary" → theme callback
-- [ ] [WARNING] theme: frontend/mobile/views/dashboard/accounting/PackagePlansListView.mobile.tsx:26 — "error.main" → theme callback
-- [ ] [WARNING] theme: frontend/mobile/views/dashboard/accounting/PackagePlansListView.mobile.tsx:74 — "text.secondary" → theme callback
 - [ ] [WARNING] theme: frontend/mobile/views/dashboard/accounting/PaymentsListView.mobile.tsx:89 — "error.main" → theme callback
 
-### WARNING (theme — hardcoded fontSize, 34)
+### WARNING (theme — hardcoded fontSize, 36)
 - [ ] [WARNING] theme: frontend/common/components/ui/input/tagInput/TagInputShared.tsx:73,80 — fontSize 16/14 → theme variant
 - [ ] [WARNING] theme: frontend/common/components/onboarding/sections/OnboardingPaymentMethodSection.tsx:161 — fontSize 12 → theme variant
 - [ ] [WARNING] theme: frontend/common/views/dashboard/classes/details/admin/ClassInfoCard.tsx:51 — fontSize 12 → theme variant
@@ -39,6 +35,8 @@ handful of Zustand/Apollo/patterns issues.
 - [ ] [WARNING] theme: frontend/common/views/dashboard/teachers/futureSchedule/components/futureClassCardShared.tsx:51,142,161,183 — fontSize 10/11 → theme variant
 - [ ] [WARNING] theme: frontend/common/views/dashboard/teachers/futureSchedule/components/jumpToDateHeaderShared.tsx:102,127 — fontSize 10 → theme variant
 - [ ] [WARNING] theme: frontend/common/views/dashboard/teachers/futureSchedule/components/miniCalendarShared.tsx:67 — fontSize 9 → theme variant
+- [ ] [WARNING] theme: frontend/desktop/views/dashboard/accounting/PackagePlansListView.desktop.tsx:66 — fontSize 11 → theme variant (caption/body2)
+- [ ] [WARNING] theme: frontend/desktop/views/dashboard/accounting/PackagePlansListView.desktop.tsx:98 — fontSize 12 → theme variant (caption)
 - [ ] [WARNING] theme: (remaining fontSize findings — see /tmp/theme-findings.txt)
 
 ### WARNING (MUI — component="form" direct props, ~41)
@@ -74,8 +72,8 @@ handful of Zustand/Apollo/patterns issues.
 ## Scoping Decisions
 
 ### IN-SCOPE (fix this round)
-- Theme string palette access (9) — mechanical, low-risk
-- Theme hardcoded fontSize (34) — mechanical, map to theme variants
+- Theme string palette access (5) — mechanical, low-risk
+- Theme hardcoded fontSize (36) — mechanical, map to theme variants
 - Apollo `as TypedDocumentNode` casts (2) — mechanical
 - Apollo missing barrel export (1) — mechanical
 - Zustand type mapping (3) — mechanical, use codegen types
@@ -111,7 +109,7 @@ None beyond the findings above.
 
 ## Fix Status
 
-- Total findings: ~121
-- Fixed: 0 / ~121
-- Remaining: ~121
+- Total findings: ~117
+- Fixed: 0 / ~117
+- Remaining: ~117
 - Deferred: ~71 (MUI 41 + i18n 19 + patterns 9 + apollo inline 2)

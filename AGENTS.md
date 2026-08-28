@@ -78,7 +78,7 @@ The codebase follows strict layer separation. Each layer has its own `AGENTS.md`
 | App Router | `app/` | `app/AGENTS.md` |
 | Shared | `shared/` | `shared/AGENTS.md` |
 | Frontend Views | `frontend/views/` | `frontend/views/AGENTS.md` |
-| Frontend Stores | `frontend/stores/` | `frontend/stores/AGENTS.md` |
+| Frontend Stores | `frontend/common/stores/` | `frontend/common/stores/AGENTS.md` |
 | Frontend GraphQL | `frontend/common/graphql/` | `frontend/common/graphql/AGENTS.md` |
 | Backend Services | `backend/services/` | `backend/services/AGENTS.md` |
 | Backend GraphQL/Pothos | `backend/graphql/` | `backend/graphql/AGENTS.md` |
@@ -353,7 +353,7 @@ both `backend.instructions.md` and `tests.instructions.md`). Read ALL matching f
 | `app/` | `app/AGENTS.md` |
 | `shared/` | `shared/AGENTS.md` |
 | `frontend/views/` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
-| `frontend/stores/` | `frontend/stores/AGENTS.md`, `frontend/AGENTS.md` |
+| `frontend/common/stores/` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` |
 | `frontend/common/graphql/sharedDocuments/` | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` |
 | `frontend/common/graphql/` | `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` |
 | `backend/services/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` |
@@ -390,7 +390,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 
 ### Frontend
 - `frontend/views/dashboard/` - Domain-organized page components
-- `frontend/stores/` - Zustand stores (mock stores for Storybook)
+- `frontend/common/stores/` - Zustand stores (mock stores for Storybook)
 - `frontend/components/ui/` - Shared UI components (AppDataGrid, MetricCard, PageContainer, etc.)
 - `frontend/common/graphql/sharedDocuments/` - GraphQL documents by domain
 - `frontend/common/graphql/generated/` - Auto-generated types (do not edit)

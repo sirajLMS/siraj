@@ -6,6 +6,7 @@ import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation"
 
 const locale: AppLocale = "ar";
 const auditT = readTranslation(Translation.Dashboard.ClassAudit, locale);
+const commonLabels = readTranslation(Translation.Common, locale);
 
 await mockNextNavigation("/dashboard");
 
@@ -32,7 +33,7 @@ import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 function buildProps(overrides: Partial<ClassAuditViewProps> = {}): ClassAuditViewProps {
   return {
     audit: classAuditFixture,
-    labels: buildClassAuditViewLabels(auditT, classAuditFixture),
+    labels: buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel),
     onGenerateReport: noopHandler,
     onEditClass: noopHandler,
     onExportStudents: noopHandler,

@@ -20,6 +20,7 @@ expect.extend(matchers);
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/profile/profile.documents";
 import { useSupervisorProfileViewModel } from "@/frontend/common/views/dashboard/supervisor/profile/useSupervisorProfileViewModel";
 import { SupervisorProfileDesktopView } from "@/frontend/desktop/views/dashboard/supervisor/profile/supervisorProfile.desktop";
+import { SupervisorProfileMobileView } from "@/frontend/mobile/views/dashboard/supervisor/profile/supervisorProfile.mobile";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
@@ -31,12 +32,17 @@ const labels = readTranslation(Translation.Dashboard.SupervisorPortalProfile, lo
 const targetUserId = "supervisor-user-1";
 
 /**
- * Production-shaped desktop container for tests.
+ * Production-shaped container for tests.
  * Bypasses ResponsiveViewSwitch / next/dynamic (not preloaded for this view).
  */
 function SupervisorProfileContainerImpl({ userId }: Readonly<{ userId: string }>) {
   const viewModel = useSupervisorProfileViewModel({ targetUserId: userId });
   return <SupervisorProfileDesktopView {...viewModel} />;
+}
+
+function SupervisorProfileMobileContainerImpl({ userId }: Readonly<{ userId: string }>) {
+  const viewModel = useSupervisorProfileViewModel({ targetUserId: userId });
+  return <SupervisorProfileMobileView {...viewModel} />;
 }
 
 const profileMockData = {
@@ -46,7 +52,7 @@ const profileMockData = {
     audience: "STAFF",
     scope: "OWN",
     name: "Sara Supervisor",
-    email: "sara@example.com",
+    email: "[EMAIL_REDACTED]",
     avatarUrl: null,
     teacherId: null,
     parentId: null,
@@ -63,7 +69,7 @@ const profileMockData = {
       id: "staff-1",
       staffProfileId: "staff-1",
       name: "Sara Supervisor",
-      email: "sara@example.com",
+      email: "[EMAIL_REDACTED]",
       avatarUrl: null,
       phone: "+201111111111",
       status: "ACTIVE",
@@ -122,8 +128,29 @@ describe("SupervisorProfileContainer", () => {
     expect(statusLabels.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("ACTIVE")).toBeInTheDocument();
     expect(screen.getByText(labels.fields.email)).toBeInTheDocument();
-    expect(screen.getByText("sara@example.com")).toBeInTheDocument();
+    expect(screen.getByText("[EMAIL_REDACTED]")).toBeInTheDocument();
     expect(screen.getByText(labels.fields.roleName)).toBeInTheDocument();
+    expect(screen.getByText("Supervisor")).toBeInTheDocument();
+  });
+
+  test("mobile view renders the same account/contact/role sections after profileLayoutShared removal", async () => {
+    renderWithWrapper(<SupervisorProfileMobileContainerImpl userId={targetUserId} />, {
+      locale,
+      themeMode: "dark",
+      mocks: createMocks(),
+      viewport: "mobile",
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Sara Supervisor")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(labels.pageTitle)).toBeInTheDocument();
+    expect(screen.getByText(labels.sections.account)).toBeInTheDocument();
+    expect(screen.getByText(labels.sections.contact)).toBeInTheDocument();
+    expect(screen.getByText(labels.sections.role)).toBeInTheDocument();
+    expect(screen.getByText(labels.fields.fullName)).toBeInTheDocument();
+    expect(screen.getByText("[EMAIL_REDACTED]")).toBeInTheDocument();
     expect(screen.getByText("Supervisor")).toBeInTheDocument();
   });
 });

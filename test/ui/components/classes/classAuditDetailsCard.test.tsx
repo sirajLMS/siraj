@@ -5,6 +5,7 @@ import { Translation } from "@/shared/locale/namespaces/translation";
 
 const locale: AppLocale = "ar";
 const auditT = readTranslation(Translation.Dashboard.ClassAudit, locale);
+const commonLabels = readTranslation(Translation.Common, locale);
 
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";
@@ -21,7 +22,7 @@ import {
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 function renderDetailsCard() {
-  const labels = buildDetailsLabels(buildClassAuditViewLabels(auditT, classAuditFixture));
+  const labels = buildDetailsLabels(buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel));
   return renderWithWrapper(<ClassAuditDetailsCard audit={classAuditFixture} labels={labels} />, { locale });
 }
 

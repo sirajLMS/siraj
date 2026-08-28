@@ -121,4 +121,49 @@ describe("AdminActionsBar", () => {
 
     expect(handlers.onForceActivate).toHaveBeenCalledTimes(1);
   });
+
+  test("clicking stop calls handler when RUNNING", async () => {
+    const handlers = setupAdminActionsBar("RUNNING");
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /stop-pause/i }));
+
+    expect(handlers.onStop).toHaveBeenCalledTimes(1);
+  });
+
+  test("clicking delete calls handler", async () => {
+    const handlers = setupAdminActionsBar("NOT_ACTIVATED");
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: labels.deleteInstance }));
+
+    expect(handlers.onDelete).toHaveBeenCalledTimes(1);
+  });
+
+  test("clicking reschedule calls handler when permitted", async () => {
+    const handlers = setupAdminActionsBar("NOT_ACTIVATED", [AppPermission.SessionReschedule]);
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: labels.reschedule }));
+
+    expect(handlers.onReschedule).toHaveBeenCalledTimes(1);
+  });
+
+  test("clicking generate log calls handler", async () => {
+    const handlers = setupAdminActionsBar("RUNNING");
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: labels.generateLog }));
+
+    expect(handlers.onGenerateLog).toHaveBeenCalledTimes(1);
+  });
+
+  test("clicking override rate calls handler", async () => {
+    const handlers = setupAdminActionsBar("RUNNING");
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: labels.overrideRateButton }));
+
+    expect(handlers.onOverrideRate).toHaveBeenCalledTimes(1);
+  });
 });

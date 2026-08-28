@@ -22,10 +22,8 @@ import {
   packagePlanQueryDocument,
   packagePlansQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/accounting";
+import { usePackagePlanFormViewModel } from "@/frontend/common/views/dashboard/accounting/usePackagePlanFormViewModel";
 import { PackagePlanFormMobile } from "@/frontend/mobile/views/dashboard/accounting/PackagePlanFormView.mobile";
-import {
-  usePackagePlanFormViewModel,
-} from "@/frontend/common/views/dashboard/accounting/usePackagePlanFormViewModel";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { DashboardAccountingPackagePlans } from "@/shared/locale/namespaces";

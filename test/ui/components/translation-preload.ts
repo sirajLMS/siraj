@@ -53,6 +53,8 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   Translation.Dashboard.StudentHistory,
   Translation.Dashboard.TeacherDashboard,
   Translation.Dashboard.TeacherProfile,
+  Translation.Dashboard.TeacherOwnProfile,
+  Translation.Dashboard.Billing,
   Translation.Profile.Base,
   Translation.Profile.Notifications,
   Translation.Ui.MeetingConfig,

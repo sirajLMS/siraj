@@ -64,6 +64,7 @@ export const dashboardClassAuditEn: ClassAuditLabels = {
     lastUpdated: time => `Last updated: ${time}`,
     update: "Update",
     edit: "Edit",
+    content: "Note content",
   },
   meetingIdLabel: "Meeting ID:",
   online: "Online",

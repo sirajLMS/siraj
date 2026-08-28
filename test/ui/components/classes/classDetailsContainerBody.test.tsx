@@ -52,6 +52,17 @@ function buildViewModel(status: "invalidId" | "error"): ClassDetailsViewModel {
     feedbackState: null,
     deleteDialogOpen: false,
     setDeleteDialogOpen: () => {},
+    onGenerateLog: () => {},
+    overrideRateDialog: {
+      open: false,
+      amount: "",
+      currency: null,
+      onOpen: () => {},
+      onClose: () => {},
+      onAmountChange: () => {},
+      onCurrencyChange: () => {},
+      onSubmit: async () => {},
+    },
     t: classDetails,
     headerLabels: {
       pageSubtitleAdmin: classDetails.pageSubtitleAdmin,
