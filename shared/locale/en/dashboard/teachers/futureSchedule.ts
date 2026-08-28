@@ -3,6 +3,7 @@ import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboar
 export const dashboardTeacherFutureScheduleEn: TeacherFutureScheduleLabels = {
   pageTitle: "Future Schedule",
   jumpToDate: "Jump to Date",
+  today: "Today",
   leaveQuota: "Leave Quota",
   totalClasses: "Total Classes",
   futureClasses: "Future Classes",

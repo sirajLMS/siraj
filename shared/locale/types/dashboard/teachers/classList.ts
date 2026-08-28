@@ -2,6 +2,12 @@ export interface TeacherClassListLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly noClasses: string;
+  readonly columns: {
+    readonly student: string;
+    readonly schedule: string;
+    readonly status: string;
+    readonly actions: string;
+  };
   readonly viewDetails: string;
   readonly viewClassAudit: string;
   readonly joinVideo: string;

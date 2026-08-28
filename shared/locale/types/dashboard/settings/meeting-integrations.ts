@@ -80,6 +80,8 @@ export interface SettingsMeetingIntegrationsLabels {
   readonly rawPayload: string;
   readonly connectedAccounts: string;
   readonly noConnectedAccounts: string;
+  readonly searchPlaceholder: string;
+  readonly searching: string;
   readonly columns: {
     readonly name: string;
     readonly email: string;
@@ -87,6 +89,9 @@ export interface SettingsMeetingIntegrationsLabels {
     readonly expiresAt: string;
     readonly status: string;
     readonly actions: string;
+  };
+  readonly filters: {
+    readonly statusAll: string;
   };
   readonly status: {
     readonly connected: string;

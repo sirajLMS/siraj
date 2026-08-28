@@ -1,16 +1,9 @@
 "use client";
 
 import { CalendarTodayOutlined, LogoutOutlined, PlayArrowOutlined } from "@mui/icons-material";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  Tooltip,
-} from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import type { TeacherActiveSessionControlsProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
 export interface TeacherActiveSessionControlsSharedOptions {
@@ -19,8 +12,24 @@ export interface TeacherActiveSessionControlsSharedOptions {
 }
 
 export interface TeacherActiveSessionControlsSharedProps extends TeacherActiveSessionControlsProps {
+  readonly markAbsentLoading?: boolean;
   readonly options: TeacherActiveSessionControlsSharedOptions;
 }
+
+const noopDialogClose = () => {};
+
+/**
+ * Warning-toned confirm for mark-absent: absence records a completed session
+ * with an absence outcome rather than deleting an entity, so the shared
+ * destructive dialog keeps its chrome but the confirm action uses the
+ * warning palette instead of the default error palette.
+ */
+const markAbsentConfirmSx: SxProps<Theme> = theme => ({
+  py: 1.5,
+  backgroundColor: theme.palette.warning.main,
+  color: theme.palette.onWarning,
+  "&:hover": { backgroundColor: theme.palette.warning.dark },
+});
 
 export function TeacherActiveSessionControlsShared({
   labels,
@@ -40,6 +49,7 @@ export function TeacherActiveSessionControlsShared({
   absentDialogOpen,
   onAbsentDialogOpen,
   onAbsentDialogClose,
+  markAbsentLoading = false,
   options,
 }: Readonly<TeacherActiveSessionControlsSharedProps>) {
   const { buttonSize, iconFontSize } = options;
@@ -118,18 +128,17 @@ export function TeacherActiveSessionControlsShared({
       ) : null}
 
       {showMarkAbsent && (hasSessionUpdateStatusAbsent ?? true) ? (
-        <Dialog open={absentDialogOpen ?? false} onClose={onAbsentDialogClose}>
-          <DialogTitle>{labels.markAbsentDialogTitle}</DialogTitle>
-          <DialogContent>
-            <DialogContentText>{labels.markAbsentConfirmation}</DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={onAbsentDialogClose}>{labels.cancel}</Button>
-            <Button onClick={handleAbsentConfirm} variant="contained" color="warning">
-              {labels.markAbsentConfirm}
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <BaseDeleteDialog
+          open={absentDialogOpen ?? false}
+          onClose={onAbsentDialogClose ?? noopDialogClose}
+          onConfirm={handleAbsentConfirm}
+          isLoading={markAbsentLoading}
+          title={labels.markAbsentDialogTitle}
+          body={labels.markAbsentConfirmation}
+          cancelLabel={labels.cancel}
+          confirmLabel={labels.markAbsentConfirm}
+          confirmSx={markAbsentConfirmSx}
+        />
       ) : null}
     </>
   );

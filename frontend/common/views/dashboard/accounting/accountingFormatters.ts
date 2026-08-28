@@ -49,11 +49,24 @@ export function dateCell(value: unknown): string | null {
   return null;
 }
 
-export function formatAccountingDate(value: string | null | undefined): string {
+/**
+ * Maps the app locale to an Intl tag for accounting dates. Bare "ar" keeps the
+ * Gregorian calendar (matching the dates printed on invoice PDFs) while
+ * rendering Arabic month names; other locales fall back to "en".
+ */
+export function resolveAccountingDateLocale(locale: string): string {
+  return locale.startsWith("ar") ? "ar" : "en";
+}
+
+export function formatAccountingDate(value: string | null | undefined, locale: string): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  return date.toLocaleDateString(resolveAccountingDateLocale(locale), {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 /** Chip color tone for the paid/unpaid status. */

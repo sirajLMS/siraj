@@ -1,10 +1,10 @@
 "use client";
 
 import { AccountCircleOutlined, EventNoteOutlined, HistoryOutlined, UpdateOutlined } from "@mui/icons-material";
-import { alpha, Box, Chip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { BaseCard } from "@/frontend/common/components/ui";
+import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
 import type { GroupClassAuditQuery_groupClassAudit as GroupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql";
 
 interface ClassAuditDetailsCardProps {
@@ -50,13 +50,6 @@ const StyledHeaderEventIcon = styled(EventNoteOutlined)(({ theme }) => ({
 
 const StyledHeaderTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.onPrimary,
-}));
-
-const StyledStatusChip = styled(Chip)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.primary.main,
-  typography: "labelUppercase",
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
 }));
 
 const StyledEmphasizedFieldValue = styled(Typography)(({ theme }) => ({
@@ -148,7 +141,7 @@ function ClassAuditHeader({ auditName, statusLabel }: Readonly<{ auditName: stri
         <StyledHeaderEventIcon />
         <StyledHeaderTitle variant="titleLg">{auditName}</StyledHeaderTitle>
       </Box>
-      <StyledStatusChip label={statusLabel} size="small" />
+      <StatusBadge category="trackingStatus" status="rescheduled" label={statusLabel} />
     </StyledHeaderBar>
   );
 }

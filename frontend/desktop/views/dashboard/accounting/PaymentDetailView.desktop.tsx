@@ -4,11 +4,14 @@ import { EditOutlined, LockOpenOutlined, LockOutlined } from "@mui/icons-materia
 import { Alert, Box, Chip, CircularProgress, Divider, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import {
   formatAccountingDate,
   formatAccountingMoney,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { PaymentDocumentPreview } from "@/frontend/common/views/dashboard/accounting/components/PaymentDocumentPreview";
+import { PaymentHistoryTimeline } from "@/frontend/common/views/dashboard/accounting/components/PaymentHistoryTimeline";
 import type { PaymentDetailViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentDetailViewModel";
 import {
   DesktopPrimaryPageAction,
@@ -16,8 +19,7 @@ import {
 } from "@/frontend/desktop/components/ui/button";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-import { PaymentDocumentPreview } from "@/frontend/desktop/views/dashboard/accounting/components/PaymentDocumentPreview";
-import { PaymentHistoryTimeline } from "@/frontend/desktop/views/dashboard/accounting/components/PaymentHistoryTimeline";
+import { useAppLocale } from "@/shared/locale/localeContext";
 
 function DetailField({ label, value }: Readonly<{ label: string; value: ReactNode }>) {
   return (
@@ -25,15 +27,35 @@ function DetailField({ label, value }: Readonly<{ label: string; value: ReactNod
       <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 0.5 })}>
         {label}
       </Typography>
-      <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
+      <Typography variant="bodyMd" component="div" sx={{ fontWeight: 500 }}>
         {value}
       </Typography>
     </Box>
   );
 }
 
+function DetailHeaderActions(props: Readonly<{ vm: PaymentDetailViewModel }>) {
+  const { t, payment, toggling, onTogglePaid } = props.vm;
+  if (!payment) return null;
+  return (
+    <Stack direction="row" spacing={1.5}>
+      <DesktopSecondaryAction
+        startIcon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
+        onClick={() => void onTogglePaid()}
+        disabled={toggling}
+      >
+        {payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
+      </DesktopSecondaryAction>
+      <Link href={`/accounting/payments/${payment.id}/edit`} style={{ textDecoration: "none" }}>
+        <DesktopPrimaryPageAction startIcon={<EditOutlined />}>{t.detail.editAction}</DesktopPrimaryPageAction>
+      </Link>
+    </Stack>
+  );
+}
+
 export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
-  const { t, payment, loading, notFound, toggling, toggleError, onTogglePaid, onDismissToggleError } = props;
+  const { t, payment, loading, notFound, toggleError, onDismissToggleError, canManagePayments } = props;
+  const locale = useAppLocale();
 
   if (loading) {
     return (
@@ -57,25 +79,12 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
-        title={`${t.paymentDetails} · ${String(payment.invoiceId ?? payment.id)}`}
+        title={`${t.paymentDetails} · ${String(payment.invoiceId ?? payment.id).slice(0, 8)}`}
         breadcrumbs={[
           { label: t.pageTitle, href: "/accounting/payments" },
-          { label: String(payment.invoiceId ?? payment.id), current: true },
+          { label: String(payment.invoiceId ?? payment.id).slice(0, 8), current: true },
         ]}
-        actions={
-          <Stack direction="row" spacing={1.5}>
-            <DesktopSecondaryAction
-              startIcon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
-              onClick={() => void onTogglePaid()}
-              disabled={toggling}
-            >
-              {payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
-            </DesktopSecondaryAction>
-            <Link href={`/accounting/payments/${payment.id}/edit`} style={{ textDecoration: "none" }}>
-              <DesktopPrimaryPageAction startIcon={<EditOutlined />}>{t.detail.editAction}</DesktopPrimaryPageAction>
-            </Link>
-          </Stack>
-        }
+        actions={canManagePayments ? <DetailHeaderActions vm={props} /> : null}
       />
 
       {toggleError ? (
@@ -116,14 +125,17 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
 
             <Stack direction="row" spacing={3} sx={{ flexWrap: "wrap", rowGap: 2 }}>
               <DetailField label={t.detail.invoiceId} value={payment.invoiceId ?? "—"} />
-              <DetailField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate)} />
+              <DetailField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate, locale)} />
               <DetailField
                 label={t.columns.studentName}
                 value={
                   payment.studentId ? (
-                    <MuiLink component={Link} href={`/students/${payment.studentId}/profile`} underline="hover">
-                      {payment.studentName ?? payment.studentId}
-                    </MuiLink>
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                      <BaseAvatar label={payment.studentName ?? undefined} size={28} />
+                      <MuiLink component={Link} href={`/students/${payment.studentId}/profile`} underline="hover">
+                        {payment.studentName ?? payment.studentId}
+                      </MuiLink>
+                    </Stack>
                   ) : (
                     "—"
                   )
@@ -161,10 +173,11 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
               events={payment.history ?? []}
               labels={t.historyKinds}
               emptyLabel={t.detail.historyEmpty}
+              locale={locale}
             />
             <Stack spacing={2}>
-              <DetailField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt)} />
-              <DetailField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt)} />
+              <DetailField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt, locale)} />
+              <DetailField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt, locale)} />
             </Stack>
           </Stack>
         </DesktopSectionPanel>
@@ -175,6 +188,11 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
           title={t.detail.documentPreview}
           emptyLabel={t.detail.documentEmpty}
           downloadLabel={t.detail.downloadPdf}
+          zoomInLabel={t.detail.zoomIn}
+          zoomOutLabel={t.detail.zoomOut}
+          rotateLabel={t.detail.rotate}
+          expandLabel={t.detail.expand}
+          closeLabel={t.detail.close}
           src={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
           downloadHref={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
         />

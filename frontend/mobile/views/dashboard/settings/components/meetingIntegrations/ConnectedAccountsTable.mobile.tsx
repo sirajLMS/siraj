@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, Button, OutlinedInput, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   formatConnectedAccountDate,
@@ -13,7 +14,12 @@ import type {
   ConnectedAccountsTableProps,
   MeetingIntegrationConnectedAccount,
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
-import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobileContentInset,
+  MobileStatusBadge,
+} from "@/frontend/mobile/components/ui";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
 const OAUTH_STATUS_TO_SYNC: Record<MeetingIntegrationConnectedAccountStatus, string> = {
@@ -112,25 +118,20 @@ export function ConnectedAccountsTableMobile({
         {labels.connectedAccounts} — {providerName}
       </Typography>
 
-      <Stack direction="row" spacing={1} sx={{ px: 2, mb: 1 }}>
-        <OutlinedInput
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          sx={{
-            flex: 1,
-            minWidth: 0,
-            border: theme => `1px solid ${theme.palette.outlineVariant}`,
-            borderRadius: 1,
-            py: 0.75,
-            px: 1.5,
-            typography: "bodyMd",
-            backgroundColor: theme => theme.palette.background.paper,
-            color: theme => theme.palette.text.primary,
-            outline: "none",
-          }}
-        />
-        <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} labels={labels} minWidth={120} />
-      </Stack>
+      <MobileContentInset sx={{ mb: 1 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "flex-start" }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <SearchBarField
+              value={search}
+              placeholder={labels.searchPlaceholder}
+              searchingLabel={labels.searching}
+              isSearching={search.trim().length > 0}
+              onChange={setSearch}
+            />
+          </Box>
+          <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} labels={labels} minWidth={120} />
+        </Stack>
+      </MobileContentInset>
 
       <MobileCardList
         rows={filteredRows}

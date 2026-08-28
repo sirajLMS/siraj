@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useCallback } from "react";
 import {
   AppPermission,
   type TeacherDirectoryQuery_teacherDirectory_metrics as TeacherDirectoryMetrics,
@@ -10,8 +9,6 @@ import {
 import { teacherDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useTeacherDirectoryStore } from "@/frontend/common/stores/teacherDirectoryStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
-import { useRouter } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
@@ -26,15 +23,6 @@ export interface TeachersViewModel {
   readonly pageSize: number;
   readonly totalCount: number;
   readonly onPageChange: (page: number) => void;
-  // NEW FOR PLAN v5: per-row navigation callbacks lifted out of the tier
-  // TeacherCardList / TeacherDataGrid files (specs §6.2 + §3 N8 — `useRouter`
-  // belongs in the ViewModel, not in the tier views).
-  readonly onNavigateToSchedule: (teacherId: string) => void;
-  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
-  // NEW FOR PLAN v5: `canCreateTeacher` gate-prop lifted out of the tier
-  // teachersView.{mobile,desktop}.tsx files (specs §6.1 + §3 N3 —
-  // `RequirePermission` belongs in the Container; the tier views gate on
-  // this boolean instead).
   readonly canCreateTeacher: boolean;
 }
 
@@ -44,7 +32,6 @@ export function useTeachersViewModel(_props: Readonly<UseTeachersViewModelProps>
   const labels = useAppTranslation(Translation.Dashboard.TeachersDirectory);
   const { searchQuery, setSearchQuery, page, pageSize, setPage } = useTeacherDirectoryStore();
   const { hasPermission } = useUserStore();
-  const router = useRouter();
 
   const { data } = useQuery(teacherDirectoryQueryDocument, {
     variables: {
@@ -64,25 +51,6 @@ export function useTeachersViewModel(_props: Readonly<UseTeachersViewModelProps>
 
   const directory = data?.teacherDirectory;
 
-  // NEW FOR PLAN v5: navigation handlers owned by the ViewModel — the tier
-  // views now call these callbacks instead of `router.push(...)` directly.
-  const onNavigateToSchedule = useCallback(
-    (teacherId: string) => {
-      router.push(`/teachers/${teacherId}/schedule/weekly`);
-    },
-    [router]
-  );
-
-  const onNavigateToProfile = useCallback(
-    (teacher: TeacherDirectoryRow) => {
-      const href = profileHrefForTeacher({ userId: teacher.userId, teacherId: teacher.id });
-      if (href) {
-        router.push(href);
-      }
-    },
-    [router]
-  );
-
   const canCreateTeacher = hasPermission(AppPermission.TeachersCreate);
 
   return {
@@ -96,8 +64,6 @@ export function useTeachersViewModel(_props: Readonly<UseTeachersViewModelProps>
     pageSize,
     totalCount: directory?.pageInfo?.total ?? 0,
     onPageChange: setPage,
-    onNavigateToSchedule,
-    onNavigateToProfile,
     canCreateTeacher,
   };
 }

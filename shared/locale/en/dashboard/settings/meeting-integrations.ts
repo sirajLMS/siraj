@@ -82,6 +82,8 @@ export const dashboardSettingsMeetingIntegrationsEn: SettingsMeetingIntegrations
   rawPayload: "Raw upstream payload",
   connectedAccounts: "Connected Teacher Accounts",
   noConnectedAccounts: "No connected teacher accounts for this provider.",
+  searchPlaceholder: "Search by name or email…",
+  searching: "Searching…",
   columns: {
     name: "Name",
     email: "Email",
@@ -89,6 +91,9 @@ export const dashboardSettingsMeetingIntegrationsEn: SettingsMeetingIntegrations
     expiresAt: "Expires",
     status: "Status",
     actions: "Actions",
+  },
+  filters: {
+    statusAll: "All statuses",
   },
   status: {
     connected: "Connected",

@@ -22,8 +22,10 @@ import {
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {
   dateCell,
@@ -39,12 +41,92 @@ import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/butto
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import {
+  ParentAutocompleteDesktop,
+  StudentAutocompleteDesktop,
+} from "@/frontend/desktop/components/ui/input/userSelect";
+import { useAppLocale } from "@/shared/locale/localeContext";
+
+/** One-line truncating text block that never overflows its grid cell. */
+function CellLine(props: Readonly<{ children: React.ReactNode; secondary?: boolean; mono?: boolean }>) {
+  const { children, secondary, mono } = props;
+  return (
+    <Box
+      component="div"
+      sx={theme => ({
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        lineHeight: 1.4,
+        color: secondary ? theme.palette.onSurfaceVariant : undefined,
+        fontSize: secondary ? 12 : 13,
+        fontFamily: mono ? "monospace" : undefined,
+      })}
+    >
+      {children}
+    </Box>
+  );
+}
 
 function FiltersBar(props: Readonly<PaymentsListViewModel>) {
-  const { t, fromDate, toDate, unpaidOnly, setFromDate, setToDate, setUnpaidOnly, resetFilters, hasActiveFilters } =
-    props;
+  const {
+    t,
+    rows,
+    fromDate,
+    toDate,
+    unpaidOnly,
+    studentId,
+    parentId,
+    setFromDate,
+    setToDate,
+    setUnpaidOnly,
+    setStudentId,
+    setParentId,
+    resetFilters,
+    hasActiveFilters,
+  } = props;
+
+  const [studentOption, setStudentOption] = useState<PersonOption | null>(null);
+  const [parentOption, setParentOption] = useState<PersonOption | null>(null);
+
+  // The store persists only ids; derive the displayed facades from the active
+  // ids so an externally cleared filter (e.g. resetFilters) can never show a
+  // stale name. Rows provide the student label fallback after a reload.
+  const studentValue = useMemo<PersonOption | null>(() => {
+    if (studentId === null || studentId === "") return null;
+    if (studentOption?.id === studentId) return studentOption;
+    const match = rows.find(row => row.studentId === studentId);
+    return match ? { id: studentId, name: match.studentName ?? "" } : null;
+  }, [rows, studentId, studentOption]);
+
+  const parentValue = parentId !== null && parentOption?.id === parentId ? parentOption : null;
+
+  const handleStudentChange = (next: PersonOption | null) => {
+    setStudentOption(next);
+    setStudentId(next?.id ?? null);
+  };
+
+  const handleParentChange = (next: PersonOption | null) => {
+    setParentOption(next);
+    setParentId(next?.id ?? null);
+  };
+
   return (
     <Stack direction="row" spacing={2} sx={{ flex: 1, flexWrap: "wrap", alignItems: "center" }}>
+      <StudentAutocompleteDesktop
+        size="small"
+        label={t.filters.student}
+        value={studentValue}
+        onChange={handleStudentChange}
+        sx={{ width: 220, flexShrink: 0 }}
+      />
+      <ParentAutocompleteDesktop
+        size="small"
+        label={t.filters.parent}
+        value={parentValue}
+        onChange={handleParentChange}
+        sx={{ width: 220, flexShrink: 0 }}
+      />
       <TextField
         size="small"
         type="date"
@@ -87,7 +169,8 @@ function FiltersBar(props: Readonly<PaymentsListViewModel>) {
 }
 
 export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
-  const { t, rows, loading, error, metrics } = props;
+  const { t, rows, loading, error, metrics, metricsBasis, canManagePayments } = props;
+  const locale = useAppLocale();
   const router = useRouter();
 
   const columns = useMemo<GridColDef[]>(() => {
@@ -96,16 +179,15 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         field: "studentName",
         headerName: t.columns.studentName,
         flex: 1.2,
-        minWidth: 165,
+        minWidth: 190,
         renderCell: params => (
-          <Box>
-            <Box component="div">{params.row.studentName ?? "—"}</Box>
-            {params.row.parentName ? (
-              <Box component="div" sx={theme => ({ color: theme.palette.text.secondary, fontSize: 11 })}>
-                {params.row.parentName}
-              </Box>
-            ) : null}
-          </Box>
+          <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", minWidth: 0, width: "100%" }}>
+            <BaseAvatar label={params.row.studentName ?? undefined} size={30} />
+            <Box sx={{ minWidth: 0 }}>
+              <CellLine>{params.row.studentName ?? "—"}</CellLine>
+              {params.row.parentName ? <CellLine secondary>{params.row.parentName}</CellLine> : null}
+            </Box>
+          </Stack>
         ),
       },
       {
@@ -127,7 +209,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
             <Box component="span" sx={{ fontWeight: 600 }}>
               {formatAccountingMoney(params.row.amount)}
             </Box>
-            <Box component="span" sx={theme => ({ color: theme.palette.text.secondary, fontSize: 12 })}>
+            <Box component="span" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontSize: 12 })}>
               {params.row.currency ?? ""}
             </Box>
           </Stack>
@@ -140,15 +222,12 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         minWidth: 150,
         renderCell: params =>
           params.row.packageName ? (
-            <Box>
-              <Box component="div">{params.row.packageName}</Box>
+            <Box sx={{ minWidth: 0, width: "100%" }}>
+              <CellLine>{params.row.packageName}</CellLine>
               {params.row.packageCodename ? (
-                <Box
-                  component="div"
-                  sx={theme => ({ color: theme.palette.text.secondary, fontSize: 11, fontFamily: "monospace" })}
-                >
+                <CellLine secondary mono>
                   {params.row.packageCodename}
-                </Box>
+                </CellLine>
               ) : null}
             </Box>
           ) : (
@@ -168,13 +247,13 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         field: "paymentDate",
         headerName: t.columns.paymentDate,
         width: 120,
-        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value)),
+        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value), locale),
       },
       {
         field: "createdAt",
         headerName: t.columns.createdAt,
         width: 120,
-        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value)),
+        valueFormatter: (value: unknown) => formatAccountingDate(dateCell(value), locale),
       },
       {
         field: "isPaidStatusOn",
@@ -192,19 +271,21 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
       {
         field: "actions",
         headerName: t.columns.actions,
-        width: 80,
+        width: 120,
         sortable: false,
         renderCell: params => (
+          // VIEW-safe: this opens the (role-scoped) detail page — it must NOT
+          // read as a manage ("Edit") action for VIEW-only roles like staff.
           <Tooltip title={t.paymentDetails}>
             <Link href={`/accounting/payments/${params.row.id}`} style={{ textDecoration: "none" }}>
-              <Chip size="small" label={t.detail.editAction} clickable />
+              <Chip size="small" label={t.paymentDetails} clickable />
             </Link>
           </Tooltip>
         ),
       },
     ];
     return cols;
-  }, [t]);
+  }, [t, locale]);
 
   const metricItems = useMemo<MetricItem[]>(
     () => [
@@ -214,6 +295,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         label: t.pageTitle,
         labelKey: "dashboard.accounting.payments.pageTitle",
         icon: PaymentsOutlined,
+        subLabel: metricsBasis ?? undefined,
       },
       {
         key: "payments-paid",
@@ -239,7 +321,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         variant: "highlight",
       },
     ],
-    [t, metrics]
+    [t, metrics, metricsBasis]
   );
 
   return (
@@ -248,9 +330,11 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
         actions={
-          <Link href="/accounting/payments/new" style={{ textDecoration: "none" }}>
-            <DesktopPrimaryPageAction>{t.addPayment}</DesktopPrimaryPageAction>
-          </Link>
+          canManagePayments ? (
+            <Link href="/accounting/payments/new" style={{ textDecoration: "none" }}>
+              <DesktopPrimaryPageAction>{t.addPayment}</DesktopPrimaryPageAction>
+            </Link>
+          ) : null
         }
       />
 
@@ -272,6 +356,7 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
               emptyMessage={t.empty}
               autoHeight
               disableColumnMenu
+              rowHeight={64}
               paginationOptions={{ mode: "client" }}
               onRowClick={params => router.push(`/accounting/payments/${String(params.row.id)}`)}
             />

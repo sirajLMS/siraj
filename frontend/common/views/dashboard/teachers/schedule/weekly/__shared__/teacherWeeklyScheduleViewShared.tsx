@@ -1,15 +1,8 @@
 "use client";
 
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Typography,
-} from "@mui/material";
+import { Typography } from "@mui/material";
 import type { FC, ReactNode } from "react";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 
@@ -52,25 +45,25 @@ export function ClearScheduleDialogShared({
   open,
   onCancel,
   onConfirm,
+  isLoading = false,
 }: Readonly<{
   labels: ScheduleLabels;
   open: boolean;
   onCancel: () => void;
   onConfirm: () => void;
+  isLoading?: boolean;
 }>) {
   return (
-    <Dialog open={open} onClose={onCancel}>
-      <DialogTitle>{labels.dialogs.clearScheduleTitle}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{labels.dialogs.clearScheduleMessage}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onCancel}>{labels.dialogs.cancel}</Button>
-        <Button onClick={onConfirm} color="error" variant="contained">
-          {labels.actions.clearSchedule}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      onClose={onCancel}
+      onConfirm={onConfirm}
+      isLoading={isLoading}
+      title={labels.dialogs.clearScheduleTitle}
+      body={labels.dialogs.clearScheduleMessage}
+      cancelLabel={labels.dialogs.cancel}
+      confirmLabel={labels.actions.clearSchedule}
+    />
   );
 }
 

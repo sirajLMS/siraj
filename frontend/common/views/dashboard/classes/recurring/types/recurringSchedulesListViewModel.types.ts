@@ -29,8 +29,10 @@ export interface RecurringSchedulesListViewModel {
   readonly error: string | null;
   readonly rows: readonly RecurringScheduleListItem[];
   readonly totalCount: number;
+  /** 0-based page index — pass straight to `buildServerPaginationOptions`. */
   readonly currentPage: number;
   readonly pageSize: number;
+  /** Receives the 0-based page index from the list pagination controls. */
   readonly onPageChange: (page: number) => void;
   readonly onSearchChange: (search: string) => void;
   readonly searchValue: string;
@@ -38,6 +40,7 @@ export interface RecurringSchedulesListViewModel {
 }
 
 export interface UseRecurringSchedulesListViewModelProps {
+  /** 1-based first page, as it appears in the `page` URL param. */
   readonly initialPage?: number;
   readonly initialPageSize?: number;
   readonly onRetry?: () => void;

@@ -82,6 +82,8 @@ export const dashboardSettingsMeetingIntegrationsAr: SettingsMeetingIntegrations
   rawPayload: "الحزمة الخام من المزود",
   connectedAccounts: "حسابات المعلمين المتصلين",
   noConnectedAccounts: "لا توجد حسابات معلمين متصلين لهذا المزود.",
+  searchPlaceholder: "ابحث بالاسم أو البريد الإلكتروني…",
+  searching: "جارٍ البحث…",
   columns: {
     name: "الاسم",
     email: "البريد الإلكتروني",
@@ -89,6 +91,9 @@ export const dashboardSettingsMeetingIntegrationsAr: SettingsMeetingIntegrations
     expiresAt: "تاريخ الانتهاء",
     status: "الحالة",
     actions: "إجراءات",
+  },
+  filters: {
+    statusAll: "كل الحالات",
   },
   status: {
     connected: "متصل",

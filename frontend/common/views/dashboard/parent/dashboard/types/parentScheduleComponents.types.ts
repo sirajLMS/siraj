@@ -39,9 +39,8 @@ export interface BaseAssociatedStudentsListProps {
 }
 
 // VARIANT JUSTIFICATION: extra field loading — the desktop data-grid renders a
-// MUI X loading overlay; the mobile card list relies on a sibling
-// StudentsLoadingState that the section wrapper renders around the list, so the
-// card list itself never needs to know about loading.
+// MUI X loading overlay from this flag; the mobile card list variant accepts
+// loading separately and forwards it to MobileCardList's built-in loading state.
 export interface AssociatedStudentsDataGridDesktopProps extends BaseAssociatedStudentsListProps {
   readonly loading?: boolean;
   readonly emptyMessage: string;

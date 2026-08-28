@@ -32,7 +32,7 @@ function SkeletonCard({ config }: Readonly<{ readonly config: SkeletonCardConfig
 
 export function ProfileSkeletonShared({ options }: Readonly<{ readonly options: ProfileSkeletonSharedOptions }>) {
   return (
-    <Box sx={{ width: "100%", p: 2 }}>
+    <Box sx={{ width: "100%" }}>
       <Stack
         direction={options.stackDirection}
         spacing={options.stackSpacing}

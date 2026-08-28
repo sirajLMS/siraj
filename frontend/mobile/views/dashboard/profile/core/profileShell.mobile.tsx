@@ -45,7 +45,6 @@ export function ProfileShellMobileView({ labels, ...shellProps }: Readonly<Profi
           flexDirection: "column",
           gap: theme.layout.sectionGap,
           width: "100%",
-          px: { xs: 2 },
         })}
       >
         <ProfileShellShared shellProps={shellProps} labels={labels} options={{ renderHeader: renderMobileHeader }} />

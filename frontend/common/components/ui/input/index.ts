@@ -11,6 +11,7 @@ export * from "./paymentMethodSelect";
 export * from "./paymentMethodTypeFields";
 export * from "./phoneInput";
 export * from "./quotaSelect";
+export * from "./secretTextField";
 export * from "./tagInput";
 export * from "./timezoneSelect";
 export * from "./userPaymentMethodSelect";

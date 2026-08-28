@@ -1,6 +1,6 @@
 "use client";
 
-import { AddOutlined } from "@mui/icons-material";
+import { AddOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,7 @@ import { MobileFab, MobilePageContainer, MobilePageHeader } from "@/frontend/mob
 const SKELETON_KEYS = ["skeleton-0", "skeleton-1", "skeleton-2"] as const;
 
 export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel>) {
-  const { t, rows, loading, error } = props;
+  const { t, rows, loading, error, canManagePackages } = props;
   const router = useRouter();
 
   return (
@@ -35,7 +35,12 @@ export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel
               </Box>
             ))
           : rows.map(row => (
-              <Link key={row.id} href={`/accounting/packages/${row.id}/edit`} style={{ textDecoration: "none" }}>
+              <Box
+                key={row.id}
+                {...(canManagePackages
+                  ? { component: Link, href: `/accounting/packages/${row.id}/edit`, style: { textDecoration: "none" } }
+                  : {})}
+              >
                 <Box
                   sx={theme => ({
                     mx: 2,
@@ -51,12 +56,21 @@ export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel
                     <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
                       {row.displayName}
                     </Typography>
-                    <Chip
-                      size="small"
-                      color={planActiveTone(Boolean(row.active))}
-                      variant={row.active ? "filled" : "outlined"}
-                      label={row.active ? t.columns.active : t.archived}
-                    />
+                    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+                      <Chip
+                        size="small"
+                        color={planActiveTone(Boolean(row.active))}
+                        variant={row.active ? "filled" : "outlined"}
+                        label={row.active ? t.columns.active : t.archived}
+                      />
+                      {canManagePackages ? (
+                        <EditOutlined
+                          fontSize="small"
+                          sx={theme => ({ color: theme.palette.onSurfaceVariant })}
+                          aria-hidden
+                        />
+                      ) : null}
+                    </Stack>
                   </Stack>
                   <Stack
                     direction="row"
@@ -82,7 +96,7 @@ export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel
                     </Typography>
                   </Stack>
                 </Box>
-              </Link>
+              </Box>
             ))}
 
         {!loading && rows.length === 0 && !error ? (
@@ -92,7 +106,13 @@ export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel
         ) : null}
       </Stack>
 
-      <MobileFab icon={<AddOutlined />} label={t.createPlan} onClick={() => router.push("/accounting/packages/new")} />
+      {canManagePackages ? (
+        <MobileFab
+          icon={<AddOutlined />}
+          label={t.createPlan}
+          onClick={() => router.push("/accounting/packages/new")}
+        />
+      ) : null}
     </MobilePageContainer>
   );
 }

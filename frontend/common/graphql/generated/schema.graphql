@@ -37,6 +37,16 @@ type AccountingPaymentBalance {
   creditHoursRemaining: String
   creditHoursTotal: String
   id: String
+
+  """
+  Currency of the student's most recent payment (null when none recorded)
+  """
+  lastPaymentCurrency: String
+
+  """
+  Configured remaining-hours threshold below which the low-balance warning applies
+  """
+  lowHoursThreshold: Float
   studentId: String
 }
 
@@ -3426,12 +3436,14 @@ A single payment ledger entry for a parent/student, derived from payments + invo
 """
 type PaymentLedgerEntry {
   amount: String
+  creditHours: Float
   creditsPurchased: Int
   currency: String
   id: ID
   packageName: String
   paymentDate: DateTime
   paymentGateway: String
+  paymentMethodType: String
   studentId: ID
   studentName: String
 }

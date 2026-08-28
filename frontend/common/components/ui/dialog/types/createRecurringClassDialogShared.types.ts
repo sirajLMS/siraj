@@ -6,7 +6,11 @@ import type {
   OnDemandNoCreditsOutcome,
   SchedulingMode,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import type {
+  ClassSubjectOption,
+  DayScheduleConfig,
+  RecurringMeetingConfigValidation,
+} from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassDialogFormState } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type {
@@ -120,6 +124,11 @@ export interface CreateRecurringClassDialogSharedProps {
   readonly mutationLoading: boolean;
   readonly meetingConfigWarning: boolean;
   readonly completedClassInstanceId: string | null;
+  /** Subject picker options — fetched once by the owner ViewModel hook (`useClassSubjects`). */
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
+  /** Meeting-config validation slice owned by the ViewModel (`useRecurringMeetingConfigValidation`). */
+  readonly meetingConfigValidation: RecurringMeetingConfigValidation;
   readonly closeDialog: () => void;
   readonly handleSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => Promise<void>;
   readonly hasSessionCreateClass: boolean;

@@ -6,12 +6,14 @@ import type * as React from "react";
 
 export interface LabeledFieldProps {
   readonly label: string;
-  readonly value: string;
+  readonly value: React.ReactNode;
 }
 
 /**
  * Standard label + value field used across detail panels and profile sections.
- * Label in `labelMd` / `onSurfaceVariant`; value in `bodyMd` / `onSurface` 500.
+ * Label in `labelMd` / `onSurfaceVariant`. String values render in `bodyMd` /
+ * `onSurface` 500; non-string values (badges, icon actions, display primitives)
+ * render as-is beneath the label.
  */
 export function LabeledField({ label, value }: Readonly<LabeledFieldProps>): React.ReactNode {
   return (
@@ -19,9 +21,13 @@ export function LabeledField({ label, value }: Readonly<LabeledFieldProps>): Rea
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
         {label}
       </Typography>
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface, fontWeight: 500 })}>
-        {value}
-      </Typography>
+      {typeof value === "string" ? (
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface, fontWeight: 500 })}>
+          {value}
+        </Typography>
+      ) : (
+        value
+      )}
     </Stack>
   );
 }

@@ -6,8 +6,8 @@ import EditNoteIcon from "@mui/icons-material/EditNote";
 import HelpOutlinedIcon from "@mui/icons-material/HelpOutlined";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
-import { alpha, Box, Button, Grid, Stack, Typography } from "@mui/material";
-import { styled, type Theme } from "@mui/material/styles";
+import { Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { BaseCard } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -126,44 +126,22 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
             const buttonElement = (
               <Button
                 id={`action-btn-${config.key}`}
+                variant="outlined"
                 onClick={handlers[config.key]}
-                sx={theme => {
-                  const status = theme.palette.status;
-                  const mainColor = status[statusKey];
-                  const borderColor = status[`${statusKey}Container`];
-                  const backgroundColor = status.onActiveContainer; // Fallback to a valid key
-
-                  return {
-                    width: "100%",
-                    aspectRatio: "1",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 1.5,
-                    backgroundColor: backgroundColor,
-                    border: `1px solid ${borderColor}`,
-                    borderRadius: 2,
-                    cursor: "pointer",
-                    color: mainColor,
-                    boxShadow: theme.palette.shadow.button,
-                    transition: theme.transitions.create("all", { duration: 150, easing: "ease" }),
-                    "&:hover": {
-                      backgroundColor: alpha(mainColor, 0.08),
-                      boxShadow: theme.palette.shadow.buttonHover,
-                      "& .action-icon": { transform: "scale(1.1)" },
-                    },
-                    "&:active": { transform: "scale(0.95)" },
-                  };
-                }}
+                sx={theme => ({
+                  width: "100%",
+                  aspectRatio: "1",
+                  flexDirection: "column",
+                  gap: 1,
+                  borderColor: theme.palette.status[`${statusKey}Container`],
+                  color: theme.palette.status[statusKey],
+                  "&:hover": {
+                    backgroundColor: theme.palette.action.hover,
+                    borderColor: theme.palette.status[statusKey],
+                  },
+                })}
               >
-                <Icon
-                  className="action-icon"
-                  sx={(theme: Theme) => ({
-                    fontSize: 36,
-                    transition: theme.transitions.create("transform", { duration: 150, easing: "ease" }),
-                  })}
-                />
+                <Icon sx={{ fontSize: 36 }} />
                 <Typography variant="labelUppercase" sx={{ color: "inherit" }}>
                   {actionLabels[config.key]}
                 </Typography>

@@ -21,7 +21,7 @@ interface ProfileLoadingSkeletonProps {
 
 export function ProfileLoadingSkeleton({ config }: Readonly<ProfileLoadingSkeletonProps>) {
   return (
-    <Box sx={{ p: 2, width: "100%" }}>
+    <Box sx={{ width: "100%" }}>
       <Stack spacing={config.spacing ?? 2}>
         <Box
           sx={{

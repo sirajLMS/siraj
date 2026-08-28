@@ -437,3 +437,46 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 - Quality gate: tsgo ✓, biome ✓, lint ✓, db tests (825) ✓, services tests (221) ✓
 - Seed data exists for quotas (PACKAGE, PERIODIC)
 - Race condition test deferred (requires concurrent runner infrastructure)
+
+---
+
+## Test Coverage Backfill: Cross-Actor Journeys & 4-Tier Enforcement
+
+> Closes the gap between this plan and the enforced test kinds added later to the spec process
+> (.agents/skills/spec-implementation/SKILL.md → "Plan Intake" items 5-7 + "Test-Layer Coverage
+> Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
+> additive and execute before this plan is treated as test-complete.
+
+- [ ] TB.1 Journey: on-demand generator (system cron) creates PENDING_CREDIT instance → student/parent notified → parent/admin credit purchase flips instance to AVAILABLE → session-start deduction reduces balance (on-demand credit lifecycle)
+  - Create `test/workflows/quota/ondemand-credit-lifecycle.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
+  - Assert: shared-state transitions (PENDING_CREDIT → AVAILABLE FIFO flip via `QuotaService.refreshStudentOndemandInstances`), cross-actor visibility (student/parent see own pending classes; teacher sees own students only; other students must not), `students.classesRemaining`/`classesTotal` side effects, `dispatchWithPreferences` called for `ON_DEMAND_INSTANCE_PENDING_CREDIT`/reminders targeting exactly student + parent userIds, denial path when an actor without permission attempts to trigger state change
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/quota/ondemand-credit-lifecycle.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: cross-cutting (Scheduling Modes → On-Demand; Credit Interaction; Notifications — specs.md)_
+- [ ] TB.2 Journey: admin creates quota + links recurring schedule in QUOTA mode (earmark) → RESERVE up front → instance redemption → cancellation RELEASEs unused earmark (admin action → student/parent balance & ledger visibility)
+  - Create `test/workflows/quota/quota-earmark-recurring-redemption.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
+  - Assert: ledger state transitions (GRANT → RESERVE → REDEEM → RELEASE) as single source of truth, cached `quotas.remaining`/`reservedClasses` stay in sync, cross-actor visibility (student/parent/teacher/supervisor see quota tab per audience rules; unrelated student must not see quota), `QUOTA_LOW_BALANCE` notification targets student + parent when threshold crossed, `QUOTAS_MANAGE` denial for STAFF/TEACHER actors attempting quota mutation
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/quota/quota-earmark-recurring-redemption.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: cross-cutting (Scheduling Modes → Quota; Mode Switch Behavior; Permissions — specs.md)_
+- [ ] TB.3 Journey: quota expiry sweeper (system cron) expires quota + writes periodic rollover GRANT/EXPIRE → student/parent notified, balances shift (system actor → user-visible state)
+  - Create `test/workflows/quota/quota-expiry-rollover.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
+  - Assert: EXPIRE ledger rows reduce remaining to zero, periodic rollover grants per `rolloverPolicy`, `QUOTA_EXPIRED`/`QUOTA_EXPIRING_SOON` dispatch targets student + parent only, expired quota is invisible as open quota (`studentOpenQuotas`) and cannot be redeemed, admin insights reflect expiry, sweeper idempotency per (quotaId, period) on re-run
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/quota/quota-expiry-rollover.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: cross-cutting (Scheduling Modes → On-Demand; Notifications; Design Goal "append-only ledger" — specs.md)_
+- [ ] TB.4 Journey: admin mode-switches recurring schedule → un-taken instances archived with refunds/releases → student balance/quota restored; generator slot conflict → CONFLICT_HELD + admin notification + teacher digest (admin + system actors → student/teacher visibility)
+  - Create `test/workflows/quota/mode-switch-refund-conflict-hold.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
+  - Assert: mode-switch archives future instances, `CreditService.refundOnCancel` + `QuotaService.releaseForRecurringSchedule` run exactly once (no double deduction/refund), conflict-held instance surfaces to teacher quota tab and admin notification, `ON_DEMAND_TEACHER_DAILY_DIGEST` dispatched to teacher userId only, cancellation by unauthorized actor denied via real permission groups
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/quota/mode-switch-refund-conflict-hold.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: cross-cutting (Mode Switch Behavior; Design Goal "eliminate double-deduction"; Notifications — specs.md)_
+- [ ] TB.5 4-Tier verification for quota + on-demand backend layer
+  - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/services/billing/quota.service.ts`, `backend/services/billing/quota-notification.service.ts`, `backend/services/scheduling/availability.service.ts`, `backend/db/repo/billing/quota.repository.ts`, `backend/db/repo/billing/quota-ledger.repository.ts`, `backend/services/schedule/recurring-class.service.ts` (quota/on-demand branches), `backend/services/session/class-session.service.ts` (session-start deduction), `backend/services/billing/credit.service.ts` (`refreshStudentOndemandInstances` hook), plus cron entry points `scripts/quota-expiry-sweeper.ts`, `scripts/ondemand-instance-generator.ts`, `scripts/ondemand-no-credits-resolver.ts`, `scripts/ondemand-teacher-digest-cron.ts`
+  - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels
+  - Verify with `bun run test/scripts/run-test.ts <each test file>`
+  - _Requirements: cross-cutting_
+- [ ] TB.6 Penetration verification
+  - BOLA/IDOR across the roles in this plan (student vs other student's quota/quotaLedger/studentQuotas/availableClassSlots; teacher vs unassigned students; parent vs non-child students); permission denial (`QUOTAS_MANAGE`) on `createQuota`/`updateQuota`/`deleteQuota` mutations for STAFF/PARENT/TEACHER actors; wildcard/LIKE and filter injection on `quotas(filter, pagination)` and `quotaLedger` queries; optimistic-lock/version replay on `updateQuota`
+  - Via `.agents/skills/pentester/SKILL.md`
+  - _Requirements: cross-cutting_

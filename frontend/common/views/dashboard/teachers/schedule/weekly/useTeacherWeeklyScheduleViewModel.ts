@@ -23,7 +23,15 @@ import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRec
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import { logger } from "@/frontend/common/utils/logger";
-import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import type {
+  DayScheduleConfig,
+  RecurringMeetingConfigValidation,
+} from "@/frontend/common/views/dashboard/classes/recurring/types";
+import {
+  type ClassSubjectsResult,
+  useClassSubjects,
+} from "@/frontend/common/views/dashboard/classes/recurring/useClassSubjects";
+import { useRecurringMeetingConfigValidation } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringMeetingConfigValidation";
 import { postCreateRecurringMeetingConfig } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import {
   type CreateRecurringClassDialogFormState,
@@ -404,6 +412,8 @@ function buildCreateRecurringClassDialog(args: {
   readonly tMeeting: MeetingConfigManagerLabels;
   readonly tRecurringSchedule: MeetingConfigRecurringScheduleLabels;
   readonly onGoToCreatedClass: () => void;
+  readonly classSubjects: ClassSubjectsResult;
+  readonly meetingConfigValidation: RecurringMeetingConfigValidation;
 }): CreateRecurringClassDialogViewModel {
   const {
     formState,
@@ -421,6 +431,8 @@ function buildCreateRecurringClassDialog(args: {
     tMeeting,
     tRecurringSchedule,
     onGoToCreatedClass,
+    classSubjects,
+    meetingConfigValidation,
   } = args;
   return {
     formState,
@@ -440,6 +452,9 @@ function buildCreateRecurringClassDialog(args: {
     meetingLabels: tMeeting,
     recurringScheduleLabels: tRecurringSchedule,
     onGoToCreatedClass,
+    subjects: classSubjects.subjects,
+    subjectsLoading: classSubjects.loading,
+    meetingConfigValidation,
   };
 }
 
@@ -503,6 +518,12 @@ export function useTeacherWeeklyScheduleViewModel(
   // now called by the ViewModel instead of by the tier views (specs §6.2 + N7
   // + N6 — the ViewModel owns form state + side-effect resets).
   const formState = useDialogFormState(isDialogOpen, resetDays);
+  // Meeting-config validation state (`urlError` / `fieldsError`) lives here so
+  // the section component stays presentational (specs N7 — ViewModel owns state).
+  const meetingConfigValidation = useRecurringMeetingConfigValidation(formState.meetingConfig);
+  // Subject picker options fetched once here; the dialog's SubjectSelect is
+  // presentational and receives them as props.
+  const classSubjects = useClassSubjects();
   // NEW FOR PLAN v5: `useValidation` (which calls `useNotifications`) is now
   // called by the ViewModel (specs N17 — `useNotifications` only in VM).
   const validateBeforeSubmit = useValidation(formState, days, notifications, dialogLabels, tClassScope, tMeeting);
@@ -577,6 +598,8 @@ export function useTeacherWeeklyScheduleViewModel(
     tMeeting,
     tRecurringSchedule,
     onGoToCreatedClass,
+    classSubjects,
+    meetingConfigValidation,
   });
 
   const baseFields: BaseViewModelFields = {

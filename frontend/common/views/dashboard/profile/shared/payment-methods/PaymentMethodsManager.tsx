@@ -3,9 +3,12 @@
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Button, Stack } from "@mui/material";
+import type { ComponentType } from "react";
 import { ErrorState, PrimaryPageAction } from "@/frontend/common/components/ui";
-import { PaymentMethodList } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodList";
-import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
+import type {
+  PaymentMethodListProps,
+  PaymentMethodRow,
+} from "@/frontend/common/components/ui/display/paymentMethod/types";
 import {
   type PaymentDirection,
   PaymentMethodType,
@@ -42,10 +45,17 @@ function resolveTypeLabel(messageKey: string, typeLabels: PaymentMethodTypeLabel
 
 export type PaymentMethodsSlot = "payin" | "payout";
 
+/**
+ * Tier-selected list renderer injected by the desktop/mobile tab wrappers so the
+ * shared manager never picks a viewport-specific presentation on its own.
+ */
+export type PaymentMethodsListView = ComponentType<PaymentMethodListProps>;
+
 export type PaymentMethodsManagerProps = {
   readonly targetUserId: string;
   readonly slot: PaymentMethodsSlot;
   readonly canManage: boolean;
+  readonly ListView: PaymentMethodsListView;
 };
 
 type VerifyButtonProps = {
@@ -140,7 +150,7 @@ function renderAddButton(t: PaymentMethodManagerLabels, onClick: () => void) {
   );
 }
 
-export function PaymentMethodsManager({ targetUserId, slot, canManage }: PaymentMethodsManagerProps) {
+export function PaymentMethodsManager({ targetUserId, slot, canManage, ListView }: PaymentMethodsManagerProps) {
   const state = usePaymentMethodsManagerViewModel({ targetUserId, slot, canManage });
   const { t, methods, error, refetchData, busy } = state;
 
@@ -157,12 +167,12 @@ export function PaymentMethodsManager({ targetUserId, slot, canManage }: Payment
           })
         : null}
 
-      <PaymentMethodList
+      <ListView
         methods={methods}
         loading={busy}
         title={t.listTitle}
         emptyMessage={t.empty}
-        onEditAction={state.handleEdit}
+        onEditAction={canManage ? state.handleEdit : undefined}
         onDeleteAction={canManage ? id => state.setDeleteId(id) : undefined}
         onSetDefaultAction={canManage ? state.setDefault : undefined}
       />

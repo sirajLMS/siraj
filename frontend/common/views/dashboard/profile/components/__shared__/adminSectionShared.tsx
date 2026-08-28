@@ -5,6 +5,7 @@ import { IconButton, MenuItem, Stack, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import {
   AdminResetPasswordSection,
   type AdminResetPasswordSectionRef,
@@ -18,8 +19,6 @@ type StatusBadgeCategory = "studentAccount" | "staffAccount";
 
 type StatusColor = "activated" | "deactivated" | "suspended" | "on_leave" | "on_trial";
 
-type InfoFieldComponent = React.FC<{ readonly label: string; readonly value: React.ReactNode }>;
-
 interface StatusOption {
   readonly value: string;
   readonly label: string;
@@ -31,7 +30,6 @@ interface AdminSectionSharedProps {
   readonly accountStatusLabel: string;
   readonly resetPasswordSuccess: string;
   readonly resetPasswordError: string;
-  readonly InfoField: InfoFieldComponent;
   readonly statusBadgeCategory: StatusBadgeCategory;
   readonly statusColor: StatusColor;
   readonly statusLabel: string;
@@ -125,7 +123,7 @@ export function AdminSectionShared(props: Readonly<AdminSectionSharedProps>) {
         <Stack spacing={2}>
           {props.extraViewFields}
           <Stack spacing={0.5}>
-            <props.InfoField
+            <LabeledField
               label={props.accountStatusLabel}
               value={
                 <Stack spacing={0.5} direction="row" sx={{ alignItems: "center" }}>

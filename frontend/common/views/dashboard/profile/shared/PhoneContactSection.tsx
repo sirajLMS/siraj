@@ -2,7 +2,7 @@ import { Stack } from "@mui/material";
 import type { Control, FieldPath, FieldValues } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 
 type PhoneContactSectionProps<T extends FieldValues> =
   | {
@@ -27,7 +27,7 @@ export function PhoneContactSection<T extends FieldValues>(props: PhoneContactSe
         {props.mode === "edit" ? (
           <PhoneFormField name={props.name} control={props.control} label={props.phoneLabel} />
         ) : (
-          <InfoField
+          <LabeledField
             label={props.phoneLabel}
             value={<PhoneDisplay phone={props.phoneValue} fallback={props.notSetLabel} />}
           />

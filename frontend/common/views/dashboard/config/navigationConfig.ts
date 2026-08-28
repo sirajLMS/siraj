@@ -313,6 +313,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     audience: "teacher",
   },
   {
+    key: "teacher-lesson-reports",
+    labelKey: "lessonReports",
+    iconKey: "rateReview",
+    href: "/teachers/lesson-reports",
+    section: "main",
+    permission: PAGE_PERMISSIONS.teacherDashboard,
+    audience: "teacher",
+  },
+  {
     key: "teacher-rules",
     labelKey: "teacherRules",
     iconKey: "description",

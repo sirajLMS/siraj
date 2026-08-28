@@ -2,7 +2,9 @@ import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/
 
 export const dashboardAccountingPaymentsEn: PaymentsLabels = {
   pageTitle: "Payments",
+  metricsBasis: max => `Most recent ${max} payments`,
   pageSubtitle: "Track credit-hour package payments and their paid status.",
+  formSubtitle: "Record a new payment transaction for a student.",
   addPayment: "Add Payment",
   editPayment: "Edit Payment",
   paymentDetails: "Payment Details",
@@ -87,6 +89,11 @@ export const dashboardAccountingPaymentsEn: PaymentsLabels = {
     documentPreview: "Document Preview",
     documentEmpty: "No receipt document attached to this payment.",
     downloadPdf: "Download PDF",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    rotate: "Rotate document",
+    expand: "Expand document",
+    close: "Close document preview",
     historyTitle: "History",
     historyEmpty: "No timeline events yet.",
     hoursCredited: "Hours Credited",

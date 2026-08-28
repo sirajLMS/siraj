@@ -35,6 +35,7 @@ export const dashboardSettingsAppearanceEn: SettingsAppearanceTabLabels = {
   toolbarLivePreviewHint: "Changes preview live as you edit",
   toolbarPublish: "Publish",
 
+  presetApplied: presetName => `${presetName} preset applied — enter customize mode to refine`,
   saveDraftSuccess: "Appearance draft saved.",
   saveDraftError: "Failed to save appearance draft.",
   publishSuccess: "Appearance published to all users.",

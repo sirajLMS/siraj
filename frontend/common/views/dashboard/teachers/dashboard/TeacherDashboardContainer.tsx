@@ -5,6 +5,7 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { useClassSubjects } from "@/frontend/common/views/dashboard/classes/recurring/useClassSubjects";
 import { TeacherDashboardDataIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherDashboardDataIsland";
 import { TeacherDashboardSnackbarIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherDashboardSnackbarIsland";
 import { TeacherHandbookIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherHandbookIsland";
@@ -35,6 +36,7 @@ export function TeacherDashboardContainer() {
   const router = useRouter();
   const permissions = useUserStore(state => state.permissions);
   const userName = useUserStore(state => state.name);
+  const { subjects, loading: subjectsLoading } = useClassSubjects();
 
   const hasSessionUpdateStatusStart = permissions.includes(AppPermission.SessionUpdateStatusStart);
   const hasSessionUpdateStatusAbsent = permissions.includes(AppPermission.SessionUpdateStatusAbsent);
@@ -99,6 +101,8 @@ export function TeacherDashboardContainer() {
     manualEntryOpen,
     manualEntryDefaultActive,
     teacherId: data.teacherId,
+    subjects,
+    subjectsLoading,
     onManualEntryClose: handlers.onManualEntryClose ?? noop,
     onManualEntrySubmit: handlers.onManualEntrySubmit ?? noopManualEntrySubmit,
     onActivate: handlers.onActivate,

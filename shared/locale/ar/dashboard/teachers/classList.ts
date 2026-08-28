@@ -4,6 +4,12 @@ export const dashboardTeacherClassListAr: TeacherClassListLabels = {
   pageTitle: "قائمة الحصص",
   pageSubtitle: "عرض وإدارة حصصك المجدولة",
   noClasses: "لم يتم العثور على حصص.",
+  columns: {
+    student: "الطالب",
+    schedule: "الموعد",
+    status: "الحالة",
+    actions: "الإجراءات",
+  },
   viewDetails: "عرض التفاصيل",
   viewClassAudit: "عرض تدقيق الحصة",
   joinVideo: "انضمام للفيديو",

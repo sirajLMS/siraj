@@ -131,4 +131,7 @@ shared/locale/**/*.js
 /worklog.md
 dev.log
 
+# Browser login cookies created by scripts/browser-login.ts (contain session tokens)
+.browser-auth/
+
 __pycache__

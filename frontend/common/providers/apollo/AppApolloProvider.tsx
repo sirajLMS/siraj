@@ -2,7 +2,6 @@
 
 import { ApolloClient, ApolloLink } from "@apollo/client";
 import { BatchHttpLink } from "@apollo/client/link/batch-http";
-import { HttpLink } from "@apollo/client/link/http";
 import { PersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { ApolloProvider } from "@apollo/client/react";
 import type React from "react";
@@ -57,18 +56,18 @@ const apolloClient = new ApolloClient({
     ),
     createAuthLink(() => apolloLinkState.authToken),
     new PersistedQueryLink({ sha256 }),
-    // The HTTP terminating link is production-gated to match the server: the
-    // GraphQL route disables array batching in production
-    // (`allowBatchedHttpRequests: !isProduction` in app/api/graphql/route.ts),
-    // so a production client sending a JSON array body is rejected with HTTP
-    // 400 "Operation batching disabled". Plain HttpLink sends one operation per
-    // POST object body, which is the only shape the production server accepts.
-    // Dev/test keep BatchHttpLink (single POST per navigation burst). The APQ
-    // link must chain before the terminating link so persisted-query hashes are
-    // resolved before the request is assembled.
-    ...(process.env.NODE_ENV === "production"
-      ? [new HttpLink({ uri: "/api/graphql", credentials: "include" })]
-      : [new BatchHttpLink({ uri: "/api/graphql", credentials: "include" })]),
+    // BatchHttpLink groups concurrent operations into a single POST (JSON
+    // array body) — one serverless invocation per navigation burst instead
+    // of one per query. Batching is enabled server-side in ALL environments,
+    // including production: app/api/graphql/route.ts caps batches at
+    // MAX_BATCHED_OPERATIONS and charges one rate-limit unit per operation,
+    // so both sides' behavior is identical in every environment. Do NOT gate
+    // this link on NODE_ENV — the client and server batching contract must
+    // never diverge (a one-sided gate once caused every production GraphQL
+    // call to fail with HTTP 400 "Operation batching disabled").
+    // PersistedQueryLink must chain BEFORE BatchHttpLink so APQ hashes are
+    // resolved before the batch is assembled.
+    new BatchHttpLink({ uri: "/api/graphql", credentials: "include" }),
   ]),
   cache: createApolloCache(),
   defaultOptions: {

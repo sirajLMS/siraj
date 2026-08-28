@@ -4,6 +4,12 @@ export const dashboardTeacherClassListEn: TeacherClassListLabels = {
   pageTitle: "Class List",
   pageSubtitle: "View and manage your scheduled classes",
   noClasses: "No classes found.",
+  columns: {
+    student: "Student",
+    schedule: "Schedule",
+    status: "Status",
+    actions: "Actions",
+  },
   viewDetails: "View Details",
   viewClassAudit: "View Class Audit",
   joinVideo: "Join Video",

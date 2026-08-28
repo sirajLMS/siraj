@@ -30,8 +30,6 @@ export interface TeachersMobileViewProps {
   readonly onPageChange: (page: number) => void;
   readonly totalTeachers: number;
   readonly canCreateTeacher: boolean;
-  readonly onNavigateToSchedule: (teacherId: string) => void;
-  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
 /**
@@ -52,8 +50,6 @@ export function TeachersMobileView({
   totalCount,
   onPageChange,
   canCreateTeacher,
-  onNavigateToSchedule,
-  onNavigateToProfile,
 }: Readonly<TeachersMobileViewProps>) {
   const t = labels;
 
@@ -93,8 +89,6 @@ export function TeachersMobileView({
             totalCount,
             onPageChange,
           })}
-          onNavigateToSchedule={onNavigateToSchedule}
-          onNavigateToProfile={onNavigateToProfile}
         />
       </MobileContentStack>
     </MobilePageContainer>

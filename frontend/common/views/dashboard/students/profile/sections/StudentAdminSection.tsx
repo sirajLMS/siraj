@@ -4,7 +4,6 @@ import {
   AdminSectionShared,
   EditResetPasswordSlot,
 } from "@/frontend/common/views/dashboard/profile/components/__shared__/adminSectionShared";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/components/__shared__/infoFieldShared";
 import type { AdminResetPasswordSectionRef } from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
 import {
   getStudentStatusColor,
@@ -57,7 +56,6 @@ export function StudentAdminSection(props: StudentAdminSectionProps) {
       accountStatusLabel={t.accountStatus}
       resetPasswordSuccess={tBase.adminResetPassword.success}
       resetPasswordError={tBase.adminResetPassword.error}
-      InfoField={InfoField}
       statusBadgeCategory="studentAccount"
       statusColor={getStudentStatusColor(studentData.status)}
       statusLabel={getStudentStatusLabel(studentData.status, tStatus)}

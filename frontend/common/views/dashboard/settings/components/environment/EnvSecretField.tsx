@@ -1,7 +1,7 @@
 "use client";
 
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { IconButton, InputAdornment, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
+import { SecretTextField } from "@/frontend/common/components/ui/input";
 import { useEnvironmentConfigSettingsStore } from "@/frontend/common/stores/environmentConfigSettingsStore";
 
 type EnvSecretFieldProps = {
@@ -16,8 +16,6 @@ type EnvSecretFieldProps = {
   readonly showValueLabel: string;
   readonly hideValueLabel: string;
 };
-
-const HIDDEN_SECRET_PLACEHOLDER = "••••••••";
 
 export function EnvSecretField({
   configKey,
@@ -52,68 +50,21 @@ export function EnvSecretField({
     );
   }
 
-  if (readOnly) {
-    const displayValue = revealed ? ((value || placeholder) ?? HIDDEN_SECRET_PLACEHOLDER) : HIDDEN_SECRET_PLACEHOLDER;
-
-    return (
-      <TextField
-        label={label}
-        value={displayValue}
-        disabled={disabled}
-        fullWidth
-        size="small"
-        slotProps={{
-          input: {
-            readOnly: true,
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  edge="end"
-                  aria-label={revealed ? hideValueLabel : showValueLabel}
-                  onClick={() => {
-                    toggleSecretRevealed(configKey);
-                  }}
-                  disabled={disabled}
-                >
-                  {revealed ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
-    );
-  }
-
   return (
-    <TextField
+    <SecretTextField
       label={label}
       value={value}
       onChange={event => onChange?.(event.target.value)}
       disabled={disabled}
+      readOnly={readOnly}
       placeholder={placeholder}
-      fullWidth
-      size="small"
-      type={revealed ? "text" : "password"}
       autoComplete="off"
-      slotProps={{
-        input: {
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                edge="end"
-                aria-label={revealed ? hideValueLabel : showValueLabel}
-                onClick={() => {
-                  toggleSecretRevealed(configKey);
-                }}
-                disabled={disabled}
-              >
-                {revealed ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-              </IconButton>
-            </InputAdornment>
-          ),
-        },
+      revealed={revealed ?? false}
+      onToggleReveal={() => {
+        toggleSecretRevealed(configKey);
       }}
+      showValueLabel={showValueLabel}
+      hideValueLabel={hideValueLabel}
     />
   );
 }

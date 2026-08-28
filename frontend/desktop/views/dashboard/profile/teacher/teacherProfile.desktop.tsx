@@ -2,11 +2,17 @@
 
 import { Box, Grid, Stack } from "@mui/material";
 import type { ReactNode } from "react";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {
   TeacherProfileShared,
   type TeacherProfileSharedSections,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/__shared__/teacherProfileShared";
 import type { TeacherProfileViewModel } from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileViewModel";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
+
+function renderStats(metrics: readonly MetricItem[]): ReactNode {
+  return <DesktopMetricCardGrid metrics={metrics} />;
+}
 
 function renderDesktopView(sections: TeacherProfileSharedSections): ReactNode {
   return (
@@ -27,7 +33,7 @@ function renderDesktopView(sections: TeacherProfileSharedSections): ReactNode {
 export function TeacherProfileDesktopView(props: Readonly<TeacherProfileViewModel>) {
   return (
     <Box data-testid="teacher-profile-view">
-      <TeacherProfileShared vm={props} options={{ renderView: renderDesktopView }} />
+      <TeacherProfileShared vm={props} options={{ renderView: renderDesktopView, renderStats }} />
     </Box>
   );
 }

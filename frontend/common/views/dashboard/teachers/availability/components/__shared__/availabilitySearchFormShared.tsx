@@ -1,13 +1,14 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box, FormControl, FormHelperText } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { PickerValue } from "@mui/x-date-pickers/internals";
 import type { ComponentType } from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { outlinedInputSx, timeInputOutlinedSx } from "@/frontend/common/components/ui/form/field";
-import { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
+import { PrimaryPageAction } from "@/frontend/common/components/ui/button";
+import { timeInputOutlinedSx } from "@/frontend/common/components/ui/form/field";
+import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector";
 import type {
   AvailabilitySearchFormData,
   AvailabilitySearchFormProps,
@@ -30,10 +31,7 @@ export interface AvailabilitySearchFormSharedOptions {
   }>;
   readonly timePickerSize: "small" | "medium";
   readonly formLayoutSx: SxProps<Theme>;
-  readonly formControlSize: "small" | "medium" | undefined;
-  readonly genderLabelIdSuffix: string;
   readonly buttonHeight: number;
-  readonly buttonBorderRadius: number;
   readonly buttonFullWidth: boolean;
 }
 
@@ -70,14 +68,40 @@ function TimeField({
   );
 }
 
+function GenderField({ labels }: Readonly<Pick<AvailabilitySearchFormProps, "labels">>) {
+  const { control } = useFormContext<AvailabilitySearchFormData>();
+  return (
+    <Controller
+      name="gender"
+      control={control}
+      render={({ field, fieldState }) => (
+        <FormControl fullWidth error={fieldState.error !== undefined}>
+          <GenderSelector
+            gender={field.value}
+            setGenderAction={field.onChange}
+            error={fieldState.error !== undefined}
+            fullWidth
+            allowEmpty
+            labels={{
+              title: labels.gender,
+              any: labels.any,
+              male: labels.male,
+              female: labels.female,
+            }}
+          />
+          {fieldState.error ? <FormHelperText>{fieldState.error.message}</FormHelperText> : null}
+        </FormControl>
+      )}
+    />
+  );
+}
+
 export function AvailabilitySearchFormShared({ onSearch, labels, options }: AvailabilitySearchFormSharedProps) {
-  const { control, handleSubmit } = useFormContext<AvailabilitySearchFormData>();
+  const { handleSubmit } = useFormContext<AvailabilitySearchFormData>();
 
   const onSubmit = (data: AvailabilitySearchFormData) => {
     onSearch?.(data);
   };
-
-  const genderLabelId = `availability-gender-label-${options.genderLabelIdSuffix}`;
 
   return (
     <Box
@@ -90,42 +114,16 @@ export function AvailabilitySearchFormShared({ onSearch, labels, options }: Avai
       <TimeField label={labels.from} name="fromTime" options={options} />
       <TimeField label={labels.to} name="toTime" options={options} />
 
-      <FormControl fullWidth size={options.formControlSize} sx={outlinedInputSx}>
-        <InputLabel id={genderLabelId} shrink>
-          {labels.gender}
-        </InputLabel>
-        <Controller
-          name="gender"
-          control={control}
-          render={({ field }) => (
-            <Select {...field} labelId={genderLabelId} label={labels.gender}>
-              <MenuItem value="">{labels.any}</MenuItem>
-              <MenuItem value={Gender.Male}>{labels.male}</MenuItem>
-              <MenuItem value={Gender.Female}>{labels.female}</MenuItem>
-            </Select>
-          )}
-        />
-      </FormControl>
+      <GenderField labels={labels} />
 
-      <Button
+      <PrimaryPageAction
         type="submit"
-        variant="contained"
         fullWidth={options.buttonFullWidth}
         startIcon={<SearchOutlined />}
-        sx={theme => ({
-          height: options.buttonHeight,
-          borderRadius: options.buttonBorderRadius,
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          boxShadow: theme.palette.shadow.button,
-          "&:hover": {
-            backgroundColor: theme.palette.primary.dark,
-            boxShadow: theme.palette.shadow.buttonHover,
-          },
-        })}
+        sx={{ height: options.buttonHeight }}
       >
         {labels.submit}
-      </Button>
+      </PrimaryPageAction>
     </Box>
   );
 }

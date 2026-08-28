@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { ParentRepository } from "@/backend/db/repo/parents";
-import { creditTransactions, invoices, payments, students } from "@/backend/db/schema";
+import { creditTransactions, invoices, packagePlans, payments, students } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
 import { UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
@@ -49,15 +49,20 @@ export namespace PaymentsLedgerService {
         paymentAmount: payments.amount,
         paymentCurrency: payments.currency,
         paymentMethodType: payments.paymentMethodType,
+        paymentGateway: payments.paymentGateway,
         paymentCreatedAt: payments.createdAt,
+        paymentCreditHours: payments.creditHours,
         invoiceStudentId: invoices.studentId,
         invoiceType: invoices.invoiceType,
         studentName: students.name,
         creditsPurchased: creditTransactions.changeAmount,
+        hoursGranted: creditTransactions.changeAmountHours,
+        packageDisplayName: packagePlans.displayName,
       })
       .from(payments)
       .innerJoin(invoices, eq(payments.invoiceId, invoices.id))
       .leftJoin(students, eq(invoices.studentId, students.id))
+      .leftJoin(packagePlans, eq(payments.packagePlanId, packagePlans.id))
       .leftJoin(
         creditTransactions,
         and(eq(creditTransactions.sourcePaymentId, payments.id), eq(creditTransactions.reason, "PURCHASE"))
@@ -65,17 +70,25 @@ export namespace PaymentsLedgerService {
       .where(inArray(invoices.studentId, studentIds))
       .orderBy(desc(payments.createdAt));
 
-    const entries: PaymentLedgerEntry[] = rows.map(r => ({
-      id: r.paymentId,
-      studentId: r.invoiceStudentId ?? null,
-      studentName: r.studentName ?? null,
-      creditsPurchased: r.creditsPurchased ?? 0,
-      amount: r.paymentAmount,
-      currency: r.paymentCurrency,
-      packageName: r.invoiceType ?? null,
-      paymentGateway: r.paymentMethodType,
-      paymentDate: r.paymentCreatedAt.toISOString(),
-    }));
+    const entries: PaymentLedgerEntry[] = rows.map(r => {
+      // Hour packages grant hours (ledger grant preferred, payment snapshot as
+      // fallback); class-credit purchases carry creditsPurchased instead.
+      const hoursRaw = r.hoursGranted ?? r.paymentCreditHours;
+      const creditHours = hoursRaw == null ? null : Number(hoursRaw);
+      return {
+        id: r.paymentId,
+        studentId: r.invoiceStudentId ?? null,
+        studentName: r.studentName ?? null,
+        creditsPurchased: r.creditsPurchased ?? 0,
+        creditHours: creditHours != null && Number.isFinite(creditHours) && creditHours !== 0 ? creditHours : null,
+        amount: r.paymentAmount,
+        currency: r.paymentCurrency,
+        packageName: r.packageDisplayName ?? r.invoiceType ?? null,
+        paymentGateway: r.paymentGateway,
+        paymentMethodType: r.paymentMethodType,
+        paymentDate: r.paymentCreatedAt.toISOString(),
+      };
+    });
 
     logger.info("Payments ledger fetched", { callerUserId, entryCount: entries.length });
 

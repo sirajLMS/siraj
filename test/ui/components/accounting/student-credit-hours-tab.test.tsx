@@ -39,6 +39,7 @@ afterEach(() => {
 function createMocks(args: {
   creditHoursTotal: string;
   creditHoursRemaining: string;
+  lowHoursThreshold?: number;
   transactions?: Array<Record<string, unknown>>;
 }): MockLink.MockedResponse[] {
   return [
@@ -50,6 +51,7 @@ function createMocks(args: {
             studentId: "s-1",
             creditHoursTotal: args.creditHoursTotal,
             creditHoursRemaining: args.creditHoursRemaining,
+            lowHoursThreshold: args.lowHoursThreshold ?? null,
           },
         },
       },
@@ -128,16 +130,16 @@ describe("student profile — credit hours tab (component)", () => {
     expect(purchaseCell).toBeVisible();
   });
 
-  test("surfaces the low-balance warning when remaining falls to the threshold ratio", async () => {
+  test("surfaces the low-balance warning when remaining falls below the low-hours threshold", async () => {
     renderWithWrapper(<StudentCreditHoursTab studentId="s-1" />, {
       locale,
       permissions: [AppPermission.StudentsList],
-      mocks: createMocks({ creditHoursTotal: "20.00", creditHoursRemaining: "4.00" }),
+      mocks: createMocks({ creditHoursTotal: "20.00", creditHoursRemaining: "4.00", lowHoursThreshold: 5 }),
     });
 
-    // 4/20 = 0.2 ≤ 0.25 → alert visible with remaining + threshold hours.
-    await act(async () => {});
-    const alertText = labels.lowBalanceAlert("4.00", (20 * 0.25).toFixed(2));
+    // Threshold comes from the accounting_low_hours_threshold setting on the
+    // balance payload; 4.00 remaining < 5.00 threshold → alert visible.
+    const alertText = labels.lowBalanceAlert("4.00", "5.00");
     expect(await screen.findByText(alertText)).toBeVisible();
   });
 });

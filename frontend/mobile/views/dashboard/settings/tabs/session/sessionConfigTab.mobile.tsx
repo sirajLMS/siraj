@@ -8,7 +8,7 @@ import type {
   SessionConfigRow,
   SessionConfigTabViewModel,
 } from "@/frontend/common/views/dashboard/settings/types/sessionConfig.types";
-import { MobileCardList, MobileCardListItem, MobileFab, MobileSectionTitleRow } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobileFab, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 
 interface SessionConfigCardProps {
   readonly row: SessionConfigRow;
@@ -21,7 +21,7 @@ interface SessionConfigCardProps {
 function SessionConfigCard({ row, labels, canManage, onEdit, onDelete }: SessionConfigCardProps) {
   return (
     <MobileCardListItem variant="edge-to-edge">
-      <Box sx={{ p: 2, width: "100%" }}>
+      <Box sx={{ width: "100%" }}>
         <Stack spacing={1.5}>
           <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
             <Typography sx={{ typography: "titleLg" }}>{row.roleName}</Typography>
@@ -74,11 +74,7 @@ export function SessionConfigTabMobileView({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <MobileSectionTitleRow title={labels.title} />
-
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, px: 2 }}>
-        {labels.subtitle}
-      </Typography>
+      <MobileSectionPanel title={labels.title} subTitle={labels.subtitle} />
 
       <MobileCardList
         rows={rows}

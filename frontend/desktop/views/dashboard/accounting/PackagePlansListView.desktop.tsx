@@ -27,7 +27,7 @@ import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewModel>) {
-  const { t, rows, loading, error, activeCount, archivedCount } = props;
+  const { t, rows, loading, error, activeCount, archivedCount, canManagePackages } = props;
 
   const priceLeader = useMemo(() => {
     const active = rows.filter(row => row.active);
@@ -56,7 +56,7 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
         flex: 1.2,
         minWidth: 180,
         renderCell: params => (
-          <Box>
+          <Box sx={{ lineHeight: 1.35, py: 0.5 }}>
             <Box component="div">{params.row.displayName}</Box>
             {params.row.description ? (
               <Box
@@ -125,26 +125,30 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
         width: 110,
         type: "number",
       },
-      {
-        field: "actions",
-        headerName: t.columns.actions,
-        width: 100,
-        sortable: false,
-        renderCell: params => (
-          <Stack direction="row" spacing={0.5}>
-            <Tooltip title={t.editTitle}>
-              <Link href={`/accounting/packages/${params.row.id}/edit`} style={{ textDecoration: "none" }}>
-                <IconButton size="small" aria-label={t.editTitle}>
-                  <EditOutlined fontSize="small" />
-                </IconButton>
-              </Link>
-            </Tooltip>
-          </Stack>
-        ),
-      },
+      ...(canManagePackages
+        ? ([
+            {
+              field: "actions",
+              headerName: t.columns.actions,
+              width: 100,
+              sortable: false,
+              renderCell: params => (
+                <Stack direction="row" spacing={0.5}>
+                  <Tooltip title={t.editTitle}>
+                    <Link href={`/accounting/packages/${params.row.id}/edit`} style={{ textDecoration: "none" }}>
+                      <IconButton size="small" aria-label={t.editTitle}>
+                        <EditOutlined fontSize="small" />
+                      </IconButton>
+                    </Link>
+                  </Tooltip>
+                </Stack>
+              ),
+            },
+          ] as GridColDef[])
+        : []),
     ];
     return cols;
-  }, [t]);
+  }, [t, canManagePackages]);
 
   const metricItems = useMemo<MetricItem[]>(
     () => [
@@ -187,9 +191,11 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
         actions={
-          <Link href="/accounting/packages/new" style={{ textDecoration: "none" }}>
-            <DesktopPrimaryPageAction startIcon={<StarOutlined />}>{t.createPlan}</DesktopPrimaryPageAction>
-          </Link>
+          canManagePackages ? (
+            <Link href="/accounting/packages/new" style={{ textDecoration: "none" }}>
+              <DesktopPrimaryPageAction startIcon={<StarOutlined />}>{t.createPlan}</DesktopPrimaryPageAction>
+            </Link>
+          ) : null
         }
       />
 
@@ -197,13 +203,24 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
 
       <DesktopSectionPanel contentPadding={false} title={t.pageTitle} sx={{ mt: 3 }}>
         <DesktopListStateGate error={error} loading={loading} hasRows={rows.length > 0} errorMessage={t.loadError}>
-          <Box sx={{ width: "100%", height: 540, p: 2 }}>
+          <Box
+            sx={{
+              width: "100%",
+              height: 540,
+              p: 2,
+              "& .archived-plan-row": {
+                opacity: 0.62,
+                filter: "grayscale(0.45)",
+              },
+            }}
+          >
             <AppDataGrid
               rows={rows}
               columns={columns}
               loading={loading}
               ariaLabel={t.pageTitle}
               emptyMessage={t.empty}
+              getRowClassName={params => (params.row.active ? "" : "archived-plan-row")}
               autoHeight
               disableColumnMenu
               paginationOptions={{ mode: "client" }}

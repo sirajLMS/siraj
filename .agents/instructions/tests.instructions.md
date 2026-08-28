@@ -164,6 +164,7 @@ See `test/ui/AGENTS.md` for full rules. Summary:
 - **Rebuild after server changes** — Re-run `build:test` after auth, middleware, API routes, or other server/runtime changes.
 - **Component tests** (`test/ui/components/`) — Happy DOM + mocked Apollo; no server, no `build:test` required.
 - **GraphQL vs UI** — `test:graphql` still uses the dev server (test-helper mutations). Only `test/ui/` defaults to production.
+- **Agent browser verification (agent-browser / Playwright MCP)** — never type credentials into the login form: the AI layer redacts emails and the server's Email scalar rejects the placeholder values. Use `bun run scripts/browser-login.ts --inject` (agent-browser) or the generated `.browser-auth/inject-mcp.js` / `storageState.json` (Playwright) — see `test/ui/AGENTS.md` → "Agent Browser Login".
 
 ```bash
 bun run build:test           # once before E2E (or after server code changes)

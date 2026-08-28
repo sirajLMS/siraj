@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { Dialog, type Theme, useMediaQuery } from "@mui/material";
+import { Dialog } from "@mui/material";
 import { useId, useState } from "react";
 import type {
   UserMeetingConfigFieldsFragment,
@@ -116,6 +116,8 @@ export type MeetingConfigFormDialogProps = {
   readonly existingCount: number;
   readonly labels: MeetingConfigManagerLabels;
   readonly enhancementLabels?: MeetingConfigFormContentEnhancementLabels;
+  /** Full-screen dialog chrome; `true` from the mobile tier caller, `false` on desktop. */
+  readonly fullScreen?: boolean;
   readonly onClose: () => void;
   readonly onSaved: () => void;
 };
@@ -127,6 +129,7 @@ export function MeetingConfigFormDialog({
   existingCount,
   labels,
   enhancementLabels,
+  fullScreen = false,
   onClose,
   onSaved,
 }: Readonly<MeetingConfigFormDialogProps>) {
@@ -138,7 +141,6 @@ export function MeetingConfigFormDialog({
   });
   const { isEdit, label, isDefault, details, provider, providerChanged, validateUrl, setSaveError, t } = state;
   const formId = useId();
-  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"), { noSsr: true });
 
   const schema = createMeetingConfigFormSchema(labels);
 
@@ -236,7 +238,7 @@ export function MeetingConfigFormDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" fullScreen={isMobile}>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" fullScreen={fullScreen}>
       <MeetingConfigFormDialogContent
         formId={formId}
         state={state}

@@ -7,7 +7,7 @@ import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { invoices } from "@/backend/db/schema";
 import { AppPermission, InvoicePaymentSubmissionStatus } from "@/backend/enum";
-import { logger, NotFoundError } from "@/backend/lib";
+import { ForbiddenError, logger, NotFoundError } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   assertInvoiceBelongsToParentUser,
@@ -624,15 +624,16 @@ export namespace BillingManagementService {
       throw new NotFoundError("INVOICE", tErrors.billing.invoiceNotFound(invoiceId));
     }
 
+    const actorPermissions = context?.permissions ?? [];
     const hasBillingAccess =
-      context?.isSuperAdmin ??
-      context?.permissions?.includes(AppPermission.INVOICES_LIST) ??
-      context?.permissions?.includes(AppPermission.BILLING_VIEW_UNPAID_INVOICES);
+      context?.isSuperAdmin === true ||
+      actorPermissions.includes(AppPermission.INVOICES_LIST) ||
+      actorPermissions.includes(AppPermission.BILLING_VIEW_UNPAID_INVOICES);
 
     if (!hasBillingAccess) {
       const parent = await ParentRepository.findByUserId(actorUserId);
       if (parent?.id !== invoice.parentId) {
-        throw new Error(tErrors.insufficientPermissions);
+        throw new ForbiddenError(tErrors.insufficientPermissions);
       }
     }
 

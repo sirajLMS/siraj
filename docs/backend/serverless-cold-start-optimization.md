@@ -359,6 +359,15 @@ private hasPriorityLog = false;
 
 ## 9. HTTP Batching (Phase E2)
 
+### Production Posture (ACCEPTED SECURITY DECISION)
+
+Batching is enabled in **all environments, including production**. A prior security review had disabled it in production (`allowBatchedHttpRequests: !isProduction`) out of amplification concerns; that restriction has been deliberately replaced by two compensating controls in `app/api/graphql/route.ts`:
+
+1. **Hard batch cap** — `MAX_BATCHED_OPERATIONS` (10): any array body beyond the cap is rejected with HTTP 400 before Apollo executes anything.
+2. **Per-operation rate-limit accounting** — a batch of N operations consumes N units of the same per-IP rate budget (one atomic window increment per operation), so batched and unbatched traffic share an identical effective rate.
+
+Per-operation authorization is unaffected (each operation runs its own context, authScopes, and depth limit), and APQ is fully compatible with batching. Future security reviews MUST verify these two controls before flagging batching — the decision is recorded here and in the `allowBatchedHttpRequests` comment block in `app/api/graphql/route.ts`. Never gate batching per-environment on either side: a one-sided gate broke every production GraphQL call with HTTP 400 `Operation batching disabled`.
+
 ### Problem
 
 Each GraphQL operation was sent as an individual `POST /api/graphql` request. A permissions page load could trigger 8 individual requests = 8 Vercel function invocations.

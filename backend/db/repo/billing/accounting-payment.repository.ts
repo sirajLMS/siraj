@@ -169,6 +169,23 @@ export namespace AccountingPaymentRepository {
       .where(inArray(payments.id, [...ids]));
   };
 
+  /**
+   * Currency of the student's most recent payment (null when none recorded).
+   * Newest payment date first; creation time breaks same-day ties so the
+   * currency-mismatch hint resolves deterministically.
+   */
+  export const findLastPaymentCurrency = async (studentId: string, tx?: DBTransaction): Promise<string | null> => {
+    const q = queryDb(tx);
+    const [row] = await q
+      .select({ currency: payments.currency })
+      .from(payments)
+      .innerJoin(invoices, eq(payments.invoiceId, invoices.id))
+      .where(eq(invoices.studentId, studentId))
+      .orderBy(desc(payments.paymentDate), desc(payments.createdAt))
+      .limit(1);
+    return row?.currency ?? null;
+  };
+
   export const update = async (
     tx: DBTransaction,
     id: string,

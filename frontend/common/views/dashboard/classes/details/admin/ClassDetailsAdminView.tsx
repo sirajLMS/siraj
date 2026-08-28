@@ -16,31 +16,30 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  MenuItem,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
-import { ClassExecutionState, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
-import { logger } from "@/frontend/common/utils/logger";
+import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
+import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
+import { ClassExecutionState } from "@/frontend/common/graphql/generated/gql/graphql";
+import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { ActivityHeatmap } from "@/frontend/common/views/dashboard/classes/details/admin/ActivityHeatmap";
 import { AdminActionsBar } from "@/frontend/common/views/dashboard/classes/details/admin/AdminActionsBar";
 import { ClassInfoCard } from "@/frontend/common/views/dashboard/classes/details/admin/ClassInfoCard";
 import { LivePerformanceGrid } from "@/frontend/common/views/dashboard/classes/details/admin/LivePerformanceGrid";
 import { MetadataCard } from "@/frontend/common/views/dashboard/classes/details/admin/MetadataCard";
+import type { OverrideRateDialogState } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
-import type { AdminViewProps } from "@/frontend/common/views/dashboard/classes/details/types";
+import type {
+  AdminViewProps,
+  ClassDetailsMetricGridSlot,
+} from "@/frontend/common/views/dashboard/classes/details/types";
 import type { AdminViewLabels } from "@/shared/locale";
-
-const CURRENCY_CODE_VALUES = new Set<string>(Object.values(CurrencyCode).map((v): string => v));
-
-function isCurrencyCode(value: string): value is CurrencyCode {
-  return CURRENCY_CODE_VALUES.has(value);
-}
 
 interface ClassDetailsAdminViewProps extends AdminViewProps {
   readonly labels: AdminViewLabels;
+  readonly livePerformanceMetricGrid: ClassDetailsMetricGridSlot;
 }
 
 // HeatmapData is typed as JSON[] on the GraphQL side; ActivityHeatmap expects number[].
@@ -154,10 +153,11 @@ interface ClassDetailsPerformanceGridProps {
   readonly metrics: readonly LivePerformanceMetricRow[];
   readonly hasData: boolean;
   readonly labels: AdminViewLabels;
+  readonly metricGrid: ClassDetailsMetricGridSlot;
 }
 
 function ClassDetailsPerformanceGrid(props: Readonly<ClassDetailsPerformanceGridProps>) {
-  const { heatmapData, metrics, hasData, labels } = props;
+  const { heatmapData, metrics, hasData, labels, metricGrid } = props;
 
   return (
     <Grid container spacing={{ xs: 2, lg: 3 }}>
@@ -165,38 +165,25 @@ function ClassDetailsPerformanceGrid(props: Readonly<ClassDetailsPerformanceGrid
         <ActivityHeatmap data={heatmapData} labels={labels.heatmap} />
       </Grid>
       <Grid size={{ xs: 12, lg: 5 }}>
-        <LivePerformanceGrid metrics={metrics} hasData={hasData} labels={labels.performance} />
+        <LivePerformanceGrid metrics={metrics} hasData={hasData} labels={labels.performance} MetricGrid={metricGrid} />
       </Grid>
     </Grid>
   );
 }
 
 interface OverrideRateDialogProps {
-  readonly open: boolean;
-  readonly onClose: () => void;
+  readonly dialog: OverrideRateDialogState;
   readonly labels: AdminViewLabels;
-  readonly overrideRateAmount: string;
-  readonly onOverrideRateAmountChange: (value: string) => void;
-  readonly overrideRateCurrency: CurrencyCode | null;
-  readonly onOverrideRateCurrencyChange: (value: CurrencyCode | null) => void;
-  readonly onSubmitOverride: (clearOverride: boolean) => void | Promise<void>;
 }
 
+// Dialog chrome uses the shared DialogPresets.info form-dialog shell; the currency
+// field is the shared CurrencySelect (flag emoji + localized names) instead of raw
+// enum MenuItems. All state lives in the store-backed OverrideRateDialogState.
 function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
-  const {
-    open,
-    onClose,
-    labels,
-    overrideRateAmount,
-    onOverrideRateAmountChange,
-    overrideRateCurrency,
-    onOverrideRateCurrencyChange,
-    onSubmitOverride,
-  } = props;
-  const currencyOptions = Object.values(CurrencyCode);
+  const { dialog, labels } = props;
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog {...DialogPresets.info} open={dialog.open} onClose={dialog.onClose}>
       <DialogTitle>{labels.rate.overrideRateDialogTitle}</DialogTitle>
       <DialogContent sx={{ display: "grid", gap: 2, pt: 1 }}>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -204,36 +191,24 @@ function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
         </Typography>
         <TextField
           label={labels.rate.hourlyRateLabel}
-          value={overrideRateAmount}
-          onChange={event => onOverrideRateAmountChange(event.target.value)}
+          value={dialog.amount}
+          onChange={event => dialog.onAmountChange(event.target.value)}
           type="text"
           fullWidth
         />
-        <TextField
-          select
+        <CurrencySelect
+          currency={dialog.currency ? (getCurrencyByCode(dialog.currency) ?? null) : null}
+          setCurrencyAction={selected => dialog.onCurrencyChange(selected.code)}
+          onClearAction={() => dialog.onCurrencyChange(null)}
           label={labels.rate.currencyLabel}
-          value={overrideRateCurrency ?? ""}
-          onChange={event => {
-            const raw = event.target.value;
-            onOverrideRateCurrencyChange(raw && isCurrencyCode(raw) ? raw : null);
-          }}
           fullWidth
-        >
-          <MenuItem value="">{labels.rate.currencyLabel}</MenuItem>
-          {currencyOptions.map(currency => (
-            <MenuItem key={currency} value={currency}>
-              {currency}
-            </MenuItem>
-          ))}
-        </TextField>
+        />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{labels.rate.cancelButton}</Button>
+        <Button onClick={dialog.onClose}>{labels.rate.cancelButton}</Button>
         <Button
           onClick={() => {
-            void Promise.resolve(onSubmitOverride(true)).catch((err: Error) =>
-              logger.error("Failed to clear override rate", err)
-            );
+            void dialog.onSubmit(true);
           }}
         >
           {labels.rate.clearOverrideButton}
@@ -241,9 +216,7 @@ function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
         <Button
           variant="contained"
           onClick={() => {
-            void Promise.resolve(onSubmitOverride(false)).catch((err: Error) =>
-              logger.error("Failed to save override rate", err)
-            );
+            void dialog.onSubmit(false);
           }}
         >
           {labels.rate.saveButton}
@@ -253,46 +226,11 @@ function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
   );
 }
 
-function useOverrideRateDialog(instance: AdminViewProps["instance"], handlers: AdminViewProps["handlers"]) {
-  const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
-  const [overrideRateAmount, setOverrideRateAmount] = useState(instance.rateAmount ?? "");
-  const [overrideRateCurrency, setOverrideRateCurrency] = useState<CurrencyCode | null>(instance.rateCurrency ?? null);
-
-  const handleOpenOverrideDialog = () => {
-    setOverrideRateAmount(instance.rateAmount ?? "");
-    setOverrideRateCurrency(instance.rateCurrency ?? null);
-    setIsOverrideDialogOpen(true);
-  };
-
-  const handleCloseOverrideDialog = () => {
-    setIsOverrideDialogOpen(false);
-  };
-
-  const handleSubmitOverride = async (clearOverride: boolean) => {
-    const normalizedAmount = overrideRateAmount.trim();
-    const rateAmount = clearOverride || normalizedAmount.length === 0 ? null : normalizedAmount;
-    const rateCurrency = rateAmount ? overrideRateCurrency : null;
-    await handlers.handleOverrideRate(rateAmount, rateCurrency);
-    setIsOverrideDialogOpen(false);
-  };
-
-  return {
-    isOverrideDialogOpen,
-    overrideRateAmount,
-    setOverrideRateAmount,
-    overrideRateCurrency,
-    setOverrideRateCurrency,
-    handleOpenOverrideDialog,
-    handleCloseOverrideDialog,
-    handleSubmitOverride,
-  };
-}
-
 export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps>) {
   const {
     instance,
     labels,
-    handlers,
+    overrideRateDialog,
     isWarningDismissed,
     onDismissWarning,
     onForceActivate,
@@ -301,9 +239,8 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
     onReschedule,
     onDelete,
     formattedScheduledDate,
+    livePerformanceMetricGrid,
   } = props;
-
-  const overrideRateDialog = useOverrideRateDialog(instance, handlers);
 
   const executionState = instance.executionState ?? "";
   const performance = instance.performance;
@@ -328,7 +265,7 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
         onGenerateLog={onGenerateLog}
         onReschedule={onReschedule}
         onDelete={onDelete}
-        onOverrideRate={overrideRateDialog.handleOpenOverrideDialog}
+        onOverrideRate={overrideRateDialog.onOpen}
         labels={labels.adminActions}
       />
 
@@ -340,18 +277,15 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
         labels={labels}
       />
 
-      <ClassDetailsPerformanceGrid heatmapData={heatmapData} metrics={metrics} hasData={hasData} labels={labels} />
-
-      <OverrideRateDialog
-        open={overrideRateDialog.isOverrideDialogOpen}
-        onClose={overrideRateDialog.handleCloseOverrideDialog}
+      <ClassDetailsPerformanceGrid
+        heatmapData={heatmapData}
+        metrics={metrics}
+        hasData={hasData}
         labels={labels}
-        overrideRateAmount={overrideRateDialog.overrideRateAmount}
-        onOverrideRateAmountChange={overrideRateDialog.setOverrideRateAmount}
-        overrideRateCurrency={overrideRateDialog.overrideRateCurrency}
-        onOverrideRateCurrencyChange={overrideRateDialog.setOverrideRateCurrency}
-        onSubmitOverride={overrideRateDialog.handleSubmitOverride}
+        metricGrid={livePerformanceMetricGrid}
       />
+
+      <OverrideRateDialog dialog={overrideRateDialog} labels={labels} />
     </Stack>
   );
 }

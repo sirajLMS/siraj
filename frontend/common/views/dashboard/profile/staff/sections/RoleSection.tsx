@@ -2,7 +2,7 @@
 
 import { Stack } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import {
   type StaffProfileData,
   type StaffRoleSectionLabels,
@@ -21,7 +21,7 @@ export function RoleSection({
   return (
     <SectionPanel title={t.sections.role}>
       <Stack spacing={1.5}>
-        <InfoField
+        <LabeledField
           label={t.fields.roleName}
           value={toDisplayValue(staffData.roleName ?? staffData.roleSlug, tc.notSet)}
         />

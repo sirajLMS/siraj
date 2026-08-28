@@ -1,8 +1,8 @@
 "use client";
 
-import { Alert, Box, Snackbar, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
+import { AppSnackbar } from "@/frontend/common/components/ui/state";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
@@ -33,11 +33,10 @@ export function NotificationPreferencesTabShared({
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <NotificationPreferencesTabHeader labels={labels} />
       {options.renderBody(variantProps)}
-      <NotificationPreferencesTabSnackbar
-        open={snackbarOpen}
-        message={snackbarMessage}
-        severity={snackbarSeverity}
+      <AppSnackbar
+        state={{ open: snackbarOpen, message: snackbarMessage, severity: snackbarSeverity }}
         onClose={onSnackbarClose}
+        autoHideDuration={4000}
       />
     </Box>
   );
@@ -51,25 +50,5 @@ function NotificationPreferencesTabHeader({ labels }: Readonly<{ readonly labels
         {labels.description}
       </Typography>
     </Box>
-  );
-}
-
-function NotificationPreferencesTabSnackbar(props: {
-  readonly open: boolean;
-  readonly message: string;
-  readonly severity: SnackbarSeverity;
-  readonly onClose: () => void;
-}) {
-  return (
-    <Snackbar
-      open={props.open}
-      autoHideDuration={4000}
-      onClose={props.onClose}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-    >
-      <Alert severity={props.severity} onClose={props.onClose} sx={{ width: "100%" }}>
-        {props.message}
-      </Alert>
-    </Snackbar>
   );
 }

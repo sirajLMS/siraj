@@ -23,6 +23,13 @@ export interface AdminNoteLabels {
   readonly edit: string;
 }
 
+export interface AdminNoteDialogLabels {
+  readonly title: string;
+  readonly content: string;
+  readonly cancel: string;
+  readonly save: string;
+}
+
 export interface RegisteredStudentsLabels {
   readonly title: string;
   readonly exportList: string;
@@ -63,6 +70,7 @@ export interface ClassAuditLabels {
   readonly meetingInfo: MeetingInfoLabels;
   readonly communicationLog: CommunicationLogLabels;
   readonly adminNote: AdminNoteLabels;
+  readonly adminNoteDialog: AdminNoteDialogLabels;
 }
 
 export interface ClassAuditViewProps {

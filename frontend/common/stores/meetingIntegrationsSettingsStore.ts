@@ -1,7 +1,11 @@
 "use client";
 
 import { create } from "zustand";
-import { AppPermission, MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  AppPermission,
+  type MeetingIntegrationConnectedAccountStatus,
+  MeetingIntegrationProviderSlug,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   CredentialFormMode,
   TestConnectionResult,
@@ -82,6 +86,20 @@ interface MeetingIntegrationsSettingsUiState {
   readonly setCredentialFormProvider: (provider: MeetingIntegrationProviderSummary | null) => void;
   readonly setCredentialFormMode: (mode: CredentialFormMode) => void;
   readonly setCanViewProfile: (value: boolean) => void;
+
+  /**
+   * Connected-accounts table filter state, keyed by provider so each accordion
+   * section keeps its own search/status filter across viewport-tier switches.
+   */
+  readonly connectedAccountsSearchByProvider: Readonly<Partial<Record<MeetingIntegrationProviderSlug, string>>>;
+  readonly connectedAccountsStatusFilterByProvider: Readonly<
+    Partial<Record<MeetingIntegrationProviderSlug, MeetingIntegrationConnectedAccountStatus | "all">>
+  >;
+  readonly setConnectedAccountsSearch: (slug: MeetingIntegrationProviderSlug, search: string) => void;
+  readonly setConnectedAccountsStatusFilter: (
+    slug: MeetingIntegrationProviderSlug,
+    status: MeetingIntegrationConnectedAccountStatus | "all"
+  ) => void;
 }
 
 const initialState = {
@@ -106,6 +124,11 @@ const initialState = {
   credentialFormProvider: null as MeetingIntegrationProviderSummary | null,
   credentialFormMode: "create" as CredentialFormMode,
   canViewProfile: false as boolean,
+
+  connectedAccountsSearchByProvider: {} as Partial<Record<MeetingIntegrationProviderSlug, string>>,
+  connectedAccountsStatusFilterByProvider: {} as Partial<
+    Record<MeetingIntegrationProviderSlug, MeetingIntegrationConnectedAccountStatus | "all">
+  >,
 };
 
 export const useMeetingIntegrationsSettingsStore = create<MeetingIntegrationsSettingsUiState>(set => ({
@@ -139,4 +162,13 @@ export const useMeetingIntegrationsSettingsStore = create<MeetingIntegrationsSet
   setCredentialFormProvider: provider => set({ credentialFormProvider: provider }),
   setCredentialFormMode: mode => set({ credentialFormMode: mode }),
   setCanViewProfile: value => set({ canViewProfile: value }),
+
+  setConnectedAccountsSearch: (slug, search) =>
+    set(state => ({
+      connectedAccountsSearchByProvider: { ...state.connectedAccountsSearchByProvider, [slug]: search },
+    })),
+  setConnectedAccountsStatusFilter: (slug, status) =>
+    set(state => ({
+      connectedAccountsStatusFilterByProvider: { ...state.connectedAccountsStatusFilterByProvider, [slug]: status },
+    })),
 }));

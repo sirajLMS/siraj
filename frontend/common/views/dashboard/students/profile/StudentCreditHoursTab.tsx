@@ -26,13 +26,13 @@ import { AppPermission, type StudentCreditTransactionsQuery } from "@/frontend/c
 import { studentCreditHourBalanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting";
 import { studentCreditTransactionsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { formatAccountingDate } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import { useAppTranslation } from "@/shared/locale/client";
+import { useAppLocale } from "@/shared/locale/localeContext";
 import { DashboardAccountingStudentCreditHours } from "@/shared/locale/namespaces";
 import type { StudentCreditHoursLabels } from "@/shared/locale/types/dashboard/accounting/student-credit-hours";
 
 const RECENT_TRANSACTIONS = 10;
-/** Remaining-hours ratio at/below which the low-balance alert surfaces. */
-const LOW_BALANCE_RATIO = 0.25;
 
 type CreditHoursAudience = "admin" | "teacher" | "parent" | null;
 
@@ -74,6 +74,7 @@ function audienceHint(labels: StudentCreditHoursLabels, audience: CreditHoursAud
 
 export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: string }>) {
   const t = useAppTranslation(DashboardAccountingStudentCreditHours);
+  const locale = useAppLocale();
   const permissions = useUserStore(s => s.permissions);
   const actorIsSuperAdmin = useUserStore(s => s.actorIsSuperAdmin);
 
@@ -114,6 +115,7 @@ export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: strin
   const remaining = Number(balance?.creditHoursRemaining ?? 0);
   const consumed = Math.max(0, total - remaining);
   const remainingRatio = total > 0 ? remaining / total : 0;
+  const lowHoursThreshold = balance?.lowHoursThreshold ?? 0;
 
   const transactions = useMemo(() => txData?.studentCreditTransactions ?? [], [txData]);
 
@@ -130,7 +132,7 @@ export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: strin
   }
 
   const hint = audienceHint(t, audience);
-  const isLowBalance = total > 0 && remainingRatio <= LOW_BALANCE_RATIO;
+  const isLowBalance = remaining < lowHoursThreshold;
 
   return (
     <Stack spacing={3}>
@@ -142,7 +144,7 @@ export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: strin
 
       {isLowBalance ? (
         <Alert severity="warning" icon={<AccessTimeFilledOutlined fontSize="inherit" />}>
-          {t.lowBalanceAlert(remaining.toFixed(2), (total * LOW_BALANCE_RATIO).toFixed(2))}
+          {t.lowBalanceAlert(remaining.toFixed(2), lowHoursThreshold.toFixed(2))}
         </Alert>
       ) : null}
 
@@ -166,14 +168,9 @@ export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: strin
           value={t.hoursUnit(remaining.toFixed(2))}
           highlight
           progress={total > 0 ? remainingRatio : 0}
+          lowBalance={isLowBalance}
         />
       </Stack>
-
-      {total > 0 && remainingRatio > LOW_BALANCE_RATIO ? (
-        <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t.nextClassConsumes("1.00")}
-        </Typography>
-      ) : null}
 
       {/* Recent hour-based transactions */}
       <Box>
@@ -181,7 +178,13 @@ export function StudentCreditHoursTab({ studentId }: Readonly<{ studentId: strin
           {t.recentPurchasesTitle}
         </Typography>
 
-        <RecentHourTransactions t={t} rows={transactions} loading={txLoading} hasError={Boolean(txError)} />
+        <RecentHourTransactions
+          t={t}
+          rows={transactions}
+          loading={txLoading}
+          hasError={Boolean(txError)}
+          locale={locale}
+        />
       </Box>
     </Stack>
   );
@@ -192,11 +195,13 @@ function RecentHourTransactions({
   rows,
   loading,
   hasError,
+  locale,
 }: Readonly<{
   t: StudentCreditHoursLabels;
   rows: HourTransaction[];
   loading: boolean;
   hasError: boolean;
+  locale: string;
 }>) {
   if (hasError) {
     return <Alert severity="error">{t.loadError}</Alert>;
@@ -235,15 +240,7 @@ function RecentHourTransactions({
             const isPositive = hours != null && hours > 0;
             return (
               <TableRow key={tx.id} hover>
-                <TableCell>
-                  {tx.createdAt
-                    ? new Date(tx.createdAt).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })
-                    : "—"}
-                </TableCell>
+                <TableCell>{formatAccountingDate(tx.createdAt, locale)}</TableCell>
                 <TableCell align="right">
                   <Typography
                     variant="labelSm"
@@ -309,12 +306,14 @@ function BalanceCard({
   value,
   highlight,
   progress,
+  lowBalance,
 }: Readonly<{
   icon: ReactNode;
   label: string;
   value: string;
   highlight: boolean;
   progress?: number;
+  lowBalance?: boolean;
 }>) {
   return (
     <Box
@@ -356,7 +355,7 @@ function BalanceCard({
           variant="determinate"
           value={Math.round(progress * 100)}
           sx={{ mt: 1.5, height: 6, borderRadius: 3 }}
-          color={progress <= LOW_BALANCE_RATIO ? "warning" : "primary"}
+          color={lowBalance ? "warning" : "primary"}
         />
       ) : null}
     </Box>

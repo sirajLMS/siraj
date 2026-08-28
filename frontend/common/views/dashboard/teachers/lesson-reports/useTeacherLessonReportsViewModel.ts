@@ -1,14 +1,17 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { LessonReportStatus, type PendingLessonReportsQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
+import {
+  type TeacherLessonReportStatusFilter,
+  useTeacherLessonReportsStore,
+} from "@/frontend/common/stores/teacherLessonReportsStore";
 import type { TeacherLessonReportsLabelsBySection } from "@/frontend/common/views/dashboard/teachers/lesson-reports/types/teacherLessonReports.types";
 import { type LessonReportLabels, Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
-type LessonReportStatusValue = `${LessonReportStatus}`;
-export type StatusFilterValue = "ALL" | LessonReportStatusValue;
+export type StatusFilterValue = TeacherLessonReportStatusFilter;
 
 export interface TeacherLessonReportRow {
   readonly id: string | null;
@@ -66,7 +69,8 @@ export function useTeacherLessonReportsViewModel({
 }: Readonly<UseTeacherLessonReportsViewModelProps>): TeacherLessonReportsViewModel {
   const t = useAppTranslation(Translation.Dashboard.LmsLessonReports);
   const locale = useAppLocale();
-  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>("ALL");
+  const statusFilter = useTeacherLessonReportsStore(s => s.statusFilter);
+  const setStatusFilter = useTeacherLessonReportsStore(s => s.setStatusFilter);
 
   const { data, loading, error } = useQuery(pendingLessonReportsQueryDocument, {
     variables: { teacherId, studentId: null, paginationArgs: null },
@@ -105,6 +109,14 @@ export function useTeacherLessonReportsViewModel({
       },
       filters: {
         filterAll: t.filterAll,
+        status: t.status,
+      },
+      columns: {
+        lessonDate: t.lessonDate,
+        status: t.status,
+        durationMinutes: t.durationMinutes,
+        completionPercentage: t.completionPercentage,
+        teacherNotes: t.teacherNotes,
       },
       cards: t,
     },
