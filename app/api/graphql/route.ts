@@ -32,6 +32,15 @@ const envConfig = getEnvironmentConfig();
 const isProduction = envConfig.nodeEnv === "production";
 const MAX_GRAPHQL_DEPTH = 7;
 
+/**
+ * Maximum GraphQL operations allowed inside a single batched HTTP request
+ * (JSON array body). Hard reject happens in `withRateLimit` BEFORE Apollo sees
+ * the payload. The cap bounds request amplification to 10x and matches the
+ * client default (`BatchHttpLink` `batchMax`), so legitimate traffic never
+ * trips it.
+ */
+const MAX_BATCHED_OPERATIONS = 10;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -85,10 +94,27 @@ function createApolloServer(schema: typeof graphQLSchema) {
     // Enable HTTP batching — Apollo Server 4 disables this by default.
     // With BatchHttpLink on the client, multiple operations are POSTed as a
     // single JSON array body, reducing Vercel function invocations (8→1 POSTs).
-    // CRITICAL (security review H3): disable array-batching in production so a
-    // single HTTP POST cannot amplify into hundreds of resolver executions while
-    // counting as one rate-limit unit. Dev/test still allows batching for tooling.
-    allowBatchedHttpRequests: !isProduction,
+    //
+    // SECURITY DECISION — batching is enabled in ALL environments, including
+    // production. A previous security review disabled it in production out of
+    // concern that one POST could amplify into many resolver executions while
+    // counting as a single rate-limit unit. That vulnerability is closed
+    // compensating-control style in `withRateLimit` below:
+    //   1. Hard cap: batches above MAX_BATCHED_OPERATIONS are rejected (400)
+    //      before Apollo executes anything.
+    //   2. Per-operation accounting: a batch of N operations consumes N units
+    //      of the same per-IP rate budget — batched and unbatched traffic have
+    //      an identical effective rate.
+    // Additional layers are unaffected by batching: every operation still runs
+    // its own auth context, authScopes, depth limit (MAX_GRAPHQL_DEPTH), and
+    // persisted-query validation.
+    //
+    // Do NOT disable batching in production again: the client always sends
+    // batches, so disabling it turns every GraphQL call into HTTP 400
+    // "Operation batching disabled" (this outage already happened once). A
+    // future review should verify the two controls above are intact rather
+    // than re-flag batching itself.
+    allowBatchedHttpRequests: true,
     formatError: (formattedError, error) => {
       const code =
         findCode(error) ??
@@ -169,6 +195,31 @@ async function flushPendingCookies(response: Response): Promise<Response> {
 }
 
 /**
+ * Charge one rate-limit unit per GraphQL operation so a batched request
+ * consumes the same budget as the equivalent number of individual requests.
+ * Each unit is a single atomic window increment; the increments are fired
+ * concurrently, and the aggregate verdict uses the strictest result across
+ * the batch (any exhausted unit fails the whole batch with 429, the most
+ * conservative reset time drives Retry-After, and the lowest remaining count
+ * is reported). A unit is consumed even when the batch is ultimately
+ * rejected — identical to how a failed single request is already charged.
+ */
+async function chargeOperationRateLimitUnits(
+  identifier: string,
+  operationCount: number
+): Promise<{ success: boolean; limit: number; remaining: number; reset: number }> {
+  const results = await Promise.all(
+    Array.from({ length: operationCount }, () => checkRateLimit(identifier, graphqlRateLimiter))
+  );
+  return results.reduce((strictest, current) => ({
+    success: strictest.success && current.success,
+    limit: current.limit,
+    remaining: Math.min(strictest.remaining, current.remaining),
+    reset: Math.max(strictest.reset, current.reset),
+  }));
+}
+
+/**
  * Rate limiting middleware wrapper
  * Checks rate limit before processing the request
  */
@@ -178,23 +229,25 @@ async function withRateLimit(
 ): Promise<Response> {
   const identifier = getClientIdentifier(request);
 
-  // Security review H3: reject oversized batched GraphQL arrays before Apollo
-  // sees them. A single POST carrying > 10 operations is almost always abuse
-  // (request amplification). We parse a cloned body so the downstream handler
-  // can still read the original request body. Malformed bodies fall through to
-  // Apollo's normal handling.
+  // Batched GraphQL requests (JSON array body) carry multiple operations in
+  // one POST. Batch size is validated here and the operation count drives
+  // per-operation rate-limit accounting below — see the security decision
+  // block on `allowBatchedHttpRequests` in `createApolloServer`.
+  let operationCount = 1;
   if (request.method === "POST") {
     try {
-      const cloned = request.clone();
-      const body: unknown = await cloned.json();
-      if (Array.isArray(body) && body.length > 10) {
-        const locale = await getLocale();
-        const tErrors = getServerTranslations(locale).errorsTranslations;
-        logger.warn(`GraphQL batched request rejected: ${body.length} operations from ${identifier}`);
-        return NextResponse.json(
-          { errors: [{ message: tErrors.invalidRequestFormat, extensions: { code: "BAD_REQUEST" } }] },
-          { status: 400 }
-        );
+      const body: unknown = await request.clone().json();
+      if (Array.isArray(body) && body.length > 0) {
+        operationCount = body.length;
+        if (operationCount > MAX_BATCHED_OPERATIONS) {
+          const locale = await getLocale();
+          const tErrors = getServerTranslations(locale).errorsTranslations;
+          logger.warn(`GraphQL batched request rejected: ${operationCount} operations from ${identifier}`);
+          return NextResponse.json(
+            { errors: [{ message: tErrors.invalidRequestFormat, extensions: { code: "BAD_REQUEST" } }] },
+            { status: 400 }
+          );
+        }
       }
     } catch {
       // malformed body — let Apollo handle it
@@ -202,7 +255,7 @@ async function withRateLimit(
   }
 
   // Check rate limit
-  const { success, limit, remaining, reset } = await checkRateLimit(identifier, graphqlRateLimiter);
+  const { success, limit, remaining, reset } = await chargeOperationRateLimitUnits(identifier, operationCount);
 
   if (!success) {
     logger.warn(`Rate limit exceeded for ${identifier}`);
