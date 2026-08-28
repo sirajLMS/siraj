@@ -81,7 +81,7 @@ describe("CopyMeetingUrlButton", () => {
 
   test("disabled button does not attempt copy", () => {
     renderButton({ disabled: true });
-    expect(screen.getByLabelText(copyLabel)).toBeDisabled();
+    expect(screen.getByRole("button", { name: copyLabel })).toBeDisabled();
   });
 
   test("has aria-pressed false initially", () => {
