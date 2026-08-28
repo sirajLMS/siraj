@@ -1,0 +1,248 @@
+import { afterEach, describe, expect, mock, test } from "bun:test";
+import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
+
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Dashboard.CoreSearchSchedule, locale);
+
+await mockNextNavigation("/search-schedule");
+
+await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+  useLanguageSwitch: () => ({ currentLocale: locale, switchLanguage: () => {}, isPending: false }),
+}));
+
+import type { MockLink } from "@apollo/client/testing";
+import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup, screen, waitFor } from "@testing-library/react";
+import { addDays, format } from "date-fns";
+
+expect.extend(matchers);
+
+import {
+  searchTeacherAvailabilityQueryDocument,
+  teachersQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
+import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
+import { SearchScheduleContainer } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleContainer";
+import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const fromDate = format(new Date(), "yyyy-MM-dd");
+const toDate = format(addDays(new Date(), 7), "yyyy-MM-dd");
+
+const defaultInput = {
+  fromTime: "08:00",
+  toTime: "17:00",
+  fromDate,
+  toDate,
+  gender: null,
+  minAvailableDays: null,
+  minTotalGaps: null,
+  teacherNameSearch: null,
+  daysOfWeek: null,
+  sortBy: AvailabilitySearchSortBy.MostAvailableDays,
+  paginationArgs: {
+    first: 10,
+    page: 1,
+    skip: null,
+    after: null,
+    before: null,
+    last: null,
+    maxCount: null,
+  },
+};
+
+afterEach(() => {
+  cleanup();
+  useUserStore.setState({ permissions: [] }, false);
+  useSearchScheduleStore.setState({
+    draft: useSearchScheduleStore.getState().draft,
+    activeInput: null,
+    hasSearched: false,
+    page: 0,
+    selectedTeacher: null,
+  });
+});
+
+const mockSearchResult = {
+  searchTeacherAvailability: {
+    id: `availability-search-${fromDate}-${toDate}-08:00-17:00`,
+    totalGaps: 3,
+    totalCount: 1,
+    pageInfo: {
+      count: 1,
+      currentPage: 1,
+      hasMorePages: false,
+      lastPage: 1,
+      perPage: 10,
+      total: 1,
+    },
+    teachers: [
+      {
+        id: "teacher-1",
+        name: "Ahmed Hassan",
+        gender: "MALE",
+        timezone: IanaTimezone.Africa_Cairo,
+        availableDaysCount: 2,
+        gaps: [
+          {
+            id: "gap-1",
+            teacherId: "teacher-1",
+            teacherName: "Ahmed Hassan",
+            teacherGender: "MALE",
+            dayOfWeek: "MONDAY",
+            calendarDate: fromDate,
+            gapStartTime: "09:00",
+            gapEndTime: "11:00",
+            timezone: IanaTimezone.Africa_Cairo,
+          },
+        ],
+      },
+    ],
+  },
+};
+
+const mockEmptyResult = {
+  searchTeacherAvailability: {
+    id: `availability-search-${fromDate}-${toDate}-08:00-17:00`,
+    totalGaps: 0,
+    totalCount: 0,
+    pageInfo: {
+      count: 0,
+      currentPage: 1,
+      hasMorePages: false,
+      lastPage: 1,
+      perPage: 10,
+      total: 0,
+    },
+    teachers: [],
+  },
+};
+
+function createTeachersMock(): MockLink.MockedResponse {
+  return {
+    request: {
+      query: teachersQueryDocument,
+      variables: { search: "", limit: 20 },
+    },
+    result: { data: { teachers: [] } },
+    maxUsageCount: Number.POSITIVE_INFINITY,
+  };
+}
+
+function createSearchMock(
+  data = mockSearchResult,
+  variables?: { input: typeof defaultInput }
+): MockLink.MockedResponse[] {
+  return [
+    createTeachersMock(),
+    {
+      request: {
+        query: searchTeacherAvailabilityQueryDocument,
+        variables: variables ?? { input: defaultInput },
+      },
+      result: { data },
+      maxUsageCount: Number.POSITIVE_INFINITY,
+    },
+  ];
+}
+
+describe("SearchScheduleContainer", () => {
+  test("renders page title and search form when permission granted", async () => {
+    renderWithWrapper(<SearchScheduleContainer />, {
+      locale,
+      permissions: [AppPermission.ScheduleSearchAvailability],
+      mocks: createSearchMock(),
+    });
+
+    expect(await screen.findByText(labels.pageTitle)).toBeVisible();
+    expect(screen.getByRole("button", { name: new RegExp(labels.searchBtn, "i") })).toBeVisible();
+  });
+
+  test("shows skeleton while initial query is loading", async () => {
+    renderWithWrapper(<SearchScheduleContainer />, {
+      locale,
+      permissions: [AppPermission.ScheduleSearchAvailability],
+      mocks: createSearchMock(),
+    });
+
+    await waitFor(() => {
+      expect(document.querySelectorAll(".MuiSkeleton-root").length).toBeGreaterThan(0);
+    });
+  });
+
+  test("shows results after initial load with matching data", async () => {
+    renderWithWrapper(<SearchScheduleContainer />, {
+      locale,
+      permissions: [AppPermission.ScheduleSearchAvailability],
+      mocks: createSearchMock(),
+    });
+
+    const teacherName = await screen.findByText("Ahmed Hassan");
+    expect(teacherName).toBeVisible();
+
+    const gapTime = await screen.findByText("09:00 - 11:00");
+    expect(gapTime).toBeVisible();
+  });
+
+  test("shows no results message when query returns empty", async () => {
+    renderWithWrapper(<SearchScheduleContainer />, {
+      locale,
+      permissions: [AppPermission.ScheduleSearchAvailability],
+      mocks: createSearchMock(mockEmptyResult),
+    });
+
+    const noResults = await screen.findByText(labels.noResults);
+    expect(noResults).toBeVisible();
+  });
+
+  test("shows error message when query fails", async () => {
+    const mocks: MockLink.MockedResponse[] = [
+      createTeachersMock(),
+      {
+        request: {
+          query: searchTeacherAvailabilityQueryDocument,
+          variables: { input: defaultInput },
+        },
+        error: new Error("Server error"),
+        maxUsageCount: Number.POSITIVE_INFINITY,
+      },
+    ];
+
+    renderWithWrapper(<SearchScheduleContainer />, {
+      locale,
+      permissions: [AppPermission.ScheduleSearchAvailability],
+      mocks,
+    });
+
+    const errorMsg = await screen.findByText(labels.errorLoading);
+    expect(errorMsg).toBeVisible();
+  });
+
+  test("form renders filter inputs", () => {
+    renderWithWrapper(<SearchScheduleContainer />, {
+      locale,
+      permissions: [AppPermission.ScheduleSearchAvailability],
+      mocks: createSearchMock(),
+    });
+
+    expect(screen.getByLabelText(labels.dateRange)).toBeVisible();
+    expect(screen.getByLabelText(labels.timeRange)).toBeVisible();
+    expect(screen.getByLabelText(labels.teacherName)).toBeVisible();
+    expect(screen.getByRole("button", { name: new RegExp(labels.searchBtn, "i") })).toBeVisible();
+  });
+
+  test("form renders filter drawer button", () => {
+    renderWithWrapper(<SearchScheduleContainer />, {
+      locale,
+      permissions: [AppPermission.ScheduleSearchAvailability],
+      mocks: createSearchMock(),
+    });
+
+    expect(screen.getByLabelText(labels.filters)).toBeVisible();
+  });
+});

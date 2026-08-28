@@ -12,10 +12,12 @@ export const myPaymentsLedgerQueryDocument: TypedDocumentNode<MyPaymentsLedgerQu
       studentId
       studentName
       creditsPurchased
+      creditHours
       amount
       currency
       packageName
       paymentGateway
+      paymentMethodType
       paymentDate
     }
   }

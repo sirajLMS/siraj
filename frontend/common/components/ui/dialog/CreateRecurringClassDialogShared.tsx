@@ -33,7 +33,12 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
-import { CLASS_TYPE_OPTIONS, type DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import {
+  CLASS_TYPE_OPTIONS,
+  type ClassSubjectOption,
+  type DayScheduleConfig,
+  type RecurringMeetingConfigValidation,
+} from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
   buildClassTypeLabels,
   buildDayLabels,
@@ -418,6 +423,8 @@ function StudentSubjectFields({
   mutationLoading,
   t,
   StudentSelect,
+  subjects,
+  subjectsLoading,
 }: {
   readonly teacherId: string;
   readonly state: CreateRecurringClassDialogFormState;
@@ -425,6 +432,8 @@ function StudentSubjectFields({
   readonly mutationLoading: boolean;
   readonly t: TeacherCreateRecurringClassLabels;
   readonly StudentSelect: React.ComponentType<Readonly<CreateRecurringClassStudentSelectSlotProps>>;
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
 }) {
   return (
     <>
@@ -441,10 +450,39 @@ function StudentSubjectFields({
         onChange={state.setSubjectId}
         label={t.fields.subject}
         placeholder={t.fields.subjectPlaceholder}
+        subjects={subjects}
+        loading={subjectsLoading}
         disabled={mutationLoading}
       />
     </>
   );
+}
+
+interface DialogFormContentProps {
+  readonly teacherId: string;
+  readonly state: CreateRecurringClassDialogFormState;
+  readonly days: readonly DayScheduleConfig[];
+  readonly toggleDay: (day: DayOfWeek) => void;
+  readonly toggleTimeOverride: (day: DayOfWeek) => void;
+  readonly setTimeOverride: (day: DayOfWeek, time: string) => void;
+  readonly isDialogOpen: boolean;
+  readonly mutationLoading: boolean;
+  readonly meetingConfigWarning: boolean;
+  readonly completedClassInstanceId: string | null;
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
+  readonly meetingConfigValidation: RecurringMeetingConfigValidation;
+  readonly t: TeacherCreateRecurringClassLabels;
+  readonly tMeeting: MeetingConfigManagerLabels;
+  readonly tRecurringSchedule: MeetingConfigRecurringScheduleLabels;
+  readonly onGoToCreatedClass: () => void;
+  readonly StudentSelect: React.ComponentType<Readonly<CreateRecurringClassStudentSelectSlotProps>>;
+  readonly TimezoneSelect: CreateRecurringClassTimezoneSelectSlot;
+  readonly QuotaAutocomplete: QuotaAutocompleteSlot;
+  readonly layout: CreateRecurringClassDialogLayoutProps;
+  readonly onClassTypeChange: (value: string) => void;
+  readonly onSchedulingModeChange: (value: string) => void;
+  readonly onOndemandNoCreditsOutcomeChange: (value: string) => void;
 }
 
 function DialogFormContent({
@@ -458,6 +496,9 @@ function DialogFormContent({
   mutationLoading,
   meetingConfigWarning,
   completedClassInstanceId,
+  subjects,
+  subjectsLoading,
+  meetingConfigValidation,
   t,
   tMeeting,
   tRecurringSchedule,
@@ -469,29 +510,7 @@ function DialogFormContent({
   onClassTypeChange,
   onSchedulingModeChange,
   onOndemandNoCreditsOutcomeChange,
-}: {
-  readonly teacherId: string;
-  readonly state: CreateRecurringClassDialogFormState;
-  readonly days: readonly DayScheduleConfig[];
-  readonly toggleDay: (day: DayOfWeek) => void;
-  readonly toggleTimeOverride: (day: DayOfWeek) => void;
-  readonly setTimeOverride: (day: DayOfWeek, time: string) => void;
-  readonly isDialogOpen: boolean;
-  readonly mutationLoading: boolean;
-  readonly meetingConfigWarning: boolean;
-  readonly completedClassInstanceId: string | null;
-  readonly t: TeacherCreateRecurringClassLabels;
-  readonly tMeeting: MeetingConfigManagerLabels;
-  readonly tRecurringSchedule: MeetingConfigRecurringScheduleLabels;
-  readonly onGoToCreatedClass: () => void;
-  readonly StudentSelect: React.ComponentType<Readonly<CreateRecurringClassStudentSelectSlotProps>>;
-  readonly TimezoneSelect: CreateRecurringClassTimezoneSelectSlot;
-  readonly QuotaAutocomplete: QuotaAutocompleteSlot;
-  readonly layout: CreateRecurringClassDialogLayoutProps;
-  readonly onClassTypeChange: (value: string) => void;
-  readonly onSchedulingModeChange: (value: string) => void;
-  readonly onOndemandNoCreditsOutcomeChange: (value: string) => void;
-}) {
+}: DialogFormContentProps) {
   return (
     <DialogContent>
       <Stack sx={{ gap: 3 }}>
@@ -511,6 +530,8 @@ function DialogFormContent({
           mutationLoading={mutationLoading}
           t={t}
           StudentSelect={StudentSelect}
+          subjects={subjects}
+          subjectsLoading={subjectsLoading}
         />
         <DurationTimeFields
           duration={state.duration}
@@ -553,6 +574,7 @@ function DialogFormContent({
           teacherId={teacherId}
           value={state.meetingConfig}
           onChangeAction={state.setMeetingConfig}
+          validation={meetingConfigValidation}
           disabled={mutationLoading}
         />
       </Stack>
@@ -596,6 +618,9 @@ export function CreateRecurringClassDialogShared({
   mutationLoading,
   meetingConfigWarning,
   completedClassInstanceId,
+  subjects,
+  subjectsLoading,
+  meetingConfigValidation,
   closeDialog,
   handleSubmit,
   hasSessionCreateClass,
@@ -638,6 +663,9 @@ export function CreateRecurringClassDialogShared({
           mutationLoading={mutationLoading}
           meetingConfigWarning={meetingConfigWarning}
           completedClassInstanceId={completedClassInstanceId}
+          subjects={subjects}
+          subjectsLoading={subjectsLoading}
+          meetingConfigValidation={meetingConfigValidation}
           t={t}
           tMeeting={tMeeting}
           tRecurringSchedule={tRecurringSchedule}

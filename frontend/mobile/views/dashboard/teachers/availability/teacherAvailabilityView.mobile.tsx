@@ -1,6 +1,5 @@
 "use client";
 
-import { Box, CircularProgress } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
@@ -12,6 +11,7 @@ import type {
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import {
   MobileExportButton,
+  MobileLoadingState,
   MobilePageContainer,
   MobilePageHeader,
   MobileSectionPanel,
@@ -62,31 +62,25 @@ export function TeacherAvailabilityMobileView({
         actions={<MobileExportButton onClick={onExportPdf}>{labels.exportPdf}</MobileExportButton>}
       />
 
-      <Box sx={{ mb: 2 }}>
-        <MobileSectionPanel title={labels.searchTitle} edgeToEdge>
-          <FormProvider {...methods}>
-            <AvailabilitySearchFormMobile
-              onSearch={onSearch}
-              labels={{
-                searchTitle: labels.searchTitle,
-                from: labels.from,
-                to: labels.to,
-                gender: labels.gender,
-                any: labels.any,
-                male: labels.male,
-                female: labels.female,
-                submit: labels.submit,
-              }}
-            />
-          </FormProvider>
-        </MobileSectionPanel>
-      </Box>
+      <MobileSectionPanel title={labels.searchTitle} edgeToEdge>
+        <FormProvider {...methods}>
+          <AvailabilitySearchFormMobile
+            onSearch={onSearch}
+            labels={{
+              searchTitle: labels.searchTitle,
+              from: labels.from,
+              to: labels.to,
+              gender: labels.gender,
+              any: labels.any,
+              male: labels.male,
+              female: labels.female,
+              submit: labels.submit,
+            }}
+          />
+        </FormProvider>
+      </MobileSectionPanel>
 
-      {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <CircularProgress />
-        </Box>
-      )}
+      {loading && <MobileLoadingState />}
 
       {!loading && (
         <WeeklyAvailabilityGridMobile availability={availability} labels={tableLabels} onBlockClick={onBlockClick} />

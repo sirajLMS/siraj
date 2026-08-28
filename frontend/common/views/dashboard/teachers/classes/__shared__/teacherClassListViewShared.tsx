@@ -1,10 +1,11 @@
 "use client";
 
-import { Box, Link, Stack, Typography } from "@mui/material";
-import type { ComponentType, ReactNode } from "react";
-import { LoadingState } from "@/frontend/common/components/ui";
+import { Box, Link, Typography } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
+import type { ComponentType } from "react";
 import { PrimaryPageAction } from "@/frontend/common/components/ui/button";
 import type { MeetingJoinActionProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import {
   formatClassSchedule,
@@ -12,9 +13,20 @@ import {
   type TeacherClassListViewModel,
 } from "@/frontend/common/views/dashboard/teachers/classes/useTeacherClassListViewModel";
 
-type TeacherClassRow = TeacherClassListViewModel["rows"][number];
+/**
+ * Shared columns/card contract for the teacher class list.
+ *
+ * The desktop tier builds `GridColDef`s via `buildTeacherClassListColumns`
+ * (`teacherClassListColumns.tsx`) and renders `DesktopAppDataGrid`; the mobile
+ * tier renders {@link TeacherClassListCardContent} inside `MobileCardListItem`.
+ * Both tiers inject their own action components (meeting join + class audit)
+ * through {@link TeacherClassListActionSlots} so the contract stays tier-agnostic.
+ */
 
-interface ClassSessionActionLabels {
+export type TeacherClassRow = TeacherClassListViewModel["rows"][number];
+export type TeacherClassListLabels = TeacherClassListViewModel["labels"];
+
+export interface TeacherClassSessionActionLabels {
   readonly joinSession: string;
   readonly leaveClass: string;
   readonly leaveDisabledReason: string;
@@ -22,142 +34,128 @@ interface ClassSessionActionLabels {
   readonly contactAdmin: string;
 }
 
-interface ClassSessionActionButtonSlotProps {
+export interface ClassSessionActionButtonSlotProps {
   readonly action: "view_class_audit";
   readonly classId: string;
-  readonly labels: ClassSessionActionLabels;
+  readonly labels: TeacherClassSessionActionLabels;
   readonly onLeave: (id: string) => void;
   readonly onViewClassAudit: (id: string) => void;
   readonly fullWidth?: boolean;
 }
 
-export interface TeacherClassListViewSharedSlots {
-  readonly PageContainer: ComponentType<{ readonly children: ReactNode }>;
-  readonly PageHeader: ComponentType<{ readonly title: string; readonly subtitle?: string }>;
-  readonly RowWrapper: ComponentType<{ readonly children: ReactNode }>;
-  readonly ListContainer: ComponentType<{
-    readonly children: ReactNode;
-  }>;
+export interface TeacherClassListActionSlots {
   readonly MeetingJoinAction: ComponentType<Readonly<MeetingJoinActionProps>>;
   readonly ClassSessionActionButton: ComponentType<Readonly<ClassSessionActionButtonSlotProps>>;
 }
 
-export interface TeacherClassListViewSharedOptions {
-  readonly actionButtonMarginTop: number;
+export interface TeacherClassListCellProps {
+  readonly row: TeacherClassRow;
+  readonly labels: TeacherClassListLabels;
+  readonly locale: string;
+  readonly onViewClassAudit: (id: string) => void;
+  readonly slots: TeacherClassListActionSlots;
 }
 
-export type TeacherClassListViewSharedProps = Readonly<TeacherClassListViewModel> & {
-  readonly slots: TeacherClassListViewSharedSlots;
-  readonly options: TeacherClassListViewSharedOptions;
-};
+export function TeacherClassName({ name }: Readonly<{ name: string | null }>) {
+  return <Typography sx={{ typography: "titleLg", fontWeight: 600 }}>{name}</Typography>;
+}
 
-function ClassRow({
+export function TeacherClassSchedule({ row, locale }: Readonly<Pick<TeacherClassListCellProps, "row" | "locale">>) {
+  return (
+    <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+      {formatClassSchedule(row.scheduledStartAt, row.scheduledEndAt, locale)}
+    </Typography>
+  );
+}
+
+export function TeacherClassStatusSummary({
+  row,
+  labels,
+}: Readonly<Pick<TeacherClassListCellProps, "row" | "labels">>) {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+      {row.durationMinutes ? (
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
+          {labels.durationMinutes(row.durationMinutes)}
+        </Typography>
+      ) : null}
+      <ScheduleInstanceStatusBadge
+        executionState={row.executionState}
+        outcome={row.outcome}
+        scheduledStartAt={row.scheduledStartAt}
+        scheduledEndAt={row.scheduledEndAt}
+        durationMinutes={row.durationMinutes}
+        statusLabels={labels.statusLabels}
+        size="small"
+      />
+    </Box>
+  );
+}
+
+/** Join action for joinable rows, audit action otherwise, plus the details link. */
+export function TeacherClassRowActions({
+  row,
+  labels,
+  onViewClassAudit,
+  slots,
+}: Readonly<Omit<TeacherClassListCellProps, "locale">>) {
+  const classId = row.id ?? "";
+  return (
+    <>
+      {isRowJoinable(row) ? (
+        <slots.MeetingJoinAction
+          variant="icon"
+          joinUrl={row.meetingJoinUrl}
+          meeting={row.effectiveMeeting}
+          emptyRole="teacher"
+          label={labels.joinVideo}
+          setupHref="/profile?tab=meeting"
+        />
+      ) : (
+        <slots.ClassSessionActionButton
+          action="view_class_audit"
+          classId={classId}
+          labels={{
+            joinSession: "",
+            leaveClass: "",
+            leaveDisabledReason: "",
+            viewClassAudit: labels.viewClassAudit,
+            contactAdmin: "",
+          }}
+          onLeave={() => {}}
+          onViewClassAudit={onViewClassAudit}
+        />
+      )}
+      <Link href={`/classes/${classId}`} style={{ textDecoration: "none" }}>
+        <PrimaryPageAction size="small">{labels.viewDetails}</PrimaryPageAction>
+      </Link>
+    </>
+  );
+}
+
+/** Inner content of one mobile card (rendered inside `MobileCardListItem`). */
+export function TeacherClassListCardContent({
   row,
   labels,
   locale,
-  handleViewClassAudit,
+  onViewClassAudit,
   slots,
-  options,
-}: Readonly<{
-  row: TeacherClassRow;
-  labels: TeacherClassListViewModel["labels"];
-  locale: string;
-  handleViewClassAudit: (id: string) => void;
-  slots: TeacherClassListViewSharedSlots;
-  options: TeacherClassListViewSharedOptions;
-}>) {
-  const classId = row.id ?? "";
+}: Readonly<TeacherClassListCellProps>) {
   return (
-    <slots.RowWrapper>
-      <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography sx={{ typography: "titleLg", fontWeight: 600 }}>{row.studentName}</Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {formatClassSchedule(row.scheduledStartAt, row.scheduledEndAt, locale)}
-        </Typography>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", mt: 0.5 }}>
-          {row.durationMinutes ? (
-            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-              {labels.durationMinutes(row.durationMinutes)}
-            </Typography>
-          ) : null}
-          <ScheduleInstanceStatusBadge
-            executionState={row.executionState}
-            outcome={row.outcome}
-            scheduledStartAt={row.scheduledStartAt}
-            scheduledEndAt={row.scheduledEndAt}
-            durationMinutes={row.durationMinutes}
-            statusLabels={labels.statusLabels}
-            size="small"
-          />
-        </Stack>
+    <Box sx={{ minWidth: 0 }}>
+      <TeacherClassName name={row.studentName} />
+      <TeacherClassSchedule row={row} locale={locale} />
+      <Box sx={{ mt: 0.5 }}>
+        <TeacherClassStatusSummary row={row} labels={labels} />
       </Box>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: options.actionButtonMarginTop, flexWrap: "wrap" }}>
-        {isRowJoinable(row) ? (
-          <slots.MeetingJoinAction
-            variant="icon"
-            joinUrl={row.meetingJoinUrl}
-            meeting={row.effectiveMeeting}
-            emptyRole="teacher"
-            label={labels.joinVideo}
-            setupHref="/profile?tab=meeting"
-          />
-        ) : (
-          <slots.ClassSessionActionButton
-            action="view_class_audit"
-            classId={classId}
-            labels={{
-              joinSession: "",
-              leaveClass: "",
-              leaveDisabledReason: "",
-              viewClassAudit: labels.viewClassAudit,
-              contactAdmin: "",
-            }}
-            onLeave={() => {}}
-            onViewClassAudit={handleViewClassAudit}
-          />
-        )}
-        <Link href={`/classes/${classId}`} style={{ textDecoration: "none" }}>
-          <PrimaryPageAction size="small">{labels.viewDetails}</PrimaryPageAction>
-        </Link>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1.5, flexWrap: "wrap" }}>
+        <TeacherClassRowActions row={row} labels={labels} onViewClassAudit={onViewClassAudit} slots={slots} />
       </Box>
-    </slots.RowWrapper>
+    </Box>
   );
 }
 
-export function TeacherClassListViewShared({
-  rows,
-  loading,
-  error,
-  labels,
-  locale,
-  handleViewClassAudit,
-  slots,
-  options,
-}: TeacherClassListViewSharedProps) {
-  return (
-    <slots.PageContainer>
-      <slots.PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
-      {loading ? <LoadingState /> : null}
-      {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.failedToLoad}</Typography> : null}
-      {!loading && !error ? (
-        <slots.ListContainer>
-          {rows.length === 0 ? (
-            <Typography sx={{ color: theme => theme.palette.text.secondary }}>{labels.noClasses}</Typography>
-          ) : (
-            rows.map(row => (
-              <ClassRow
-                key={row.id ?? row.studentName ?? ""}
-                row={row}
-                labels={labels}
-                locale={locale}
-                handleViewClassAudit={handleViewClassAudit}
-                slots={slots}
-                options={options}
-              />
-            ))
-          )}
-        </slots.ListContainer>
-      ) : null}
-    </slots.PageContainer>
-  );
+/** Shared load-failure line rendered instead of the list on either tier. */
+export function TeacherClassListErrorNotice({ message, sx }: Readonly<{ message: string; sx?: SxProps<Theme> }>) {
+  return <Typography sx={mergeSx({ color: theme => theme.palette.error.main }, sx)}>{message}</Typography>;
 }

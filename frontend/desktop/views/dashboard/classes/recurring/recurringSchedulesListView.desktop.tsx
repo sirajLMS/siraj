@@ -1,12 +1,12 @@
 "use client";
 
-import { Box, TextField, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { AppDataGrid } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { RecurringViewShellShared } from "@/frontend/common/views/dashboard/classes/recurring/__shared__/recurringViewShellShared";
 import type { RecurringSchedulesListViewModel } from "@/frontend/common/views/dashboard/classes/recurring/types/recurringSchedulesListViewModel.types";
-import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 
 export function RecurringSchedulesListDesktopView({
   labelsBySection,
@@ -36,49 +36,40 @@ export function RecurringSchedulesListDesktopView({
       retryLabel={shell.retryLabel}
       desktopBreadcrumbs={shell.breadcrumbs}
     >
-      <Box sx={{ mb: 2 }}>
-        <TextField
-          size="small"
-          placeholder={filters.searchPlaceholder}
-          value={searchValue}
-          onChange={e => onSearchChange(e.target.value)}
-          sx={{ minWidth: 300 }}
-        />
+      <Box sx={{ mb: 2, maxWidth: 420 }}>
+        <SearchBarField value={searchValue} placeholder={filters.searchPlaceholder} onChange={onSearchChange} />
       </Box>
-      {rows.length === 0 ? (
-        <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{shell.emptyMessage}</Typography>
-      ) : (
-        <DesktopSectionPanel contentPadding={false}>
-          <AppDataGrid
-            rows={rows}
-            columns={[
-              { field: "studentName", headerName: columns.student, flex: 1 },
-              { field: "teacherName", headerName: columns.teacher, flex: 1 },
-              { field: "defaultStartTime", headerName: columns.schedule, flex: 1 },
-              {
-                field: "durationMinutes",
-                headerName: columns.duration,
-                flex: 1,
-                valueGetter: (_value, row) => columns.durationMinutesShort(row.durationMinutes ?? 0),
-              },
-              {
-                field: "hourlyRate",
-                headerName: columns.rate,
-                flex: 1,
-                valueGetter: (_value, row) => row.hourlyRate ?? "-",
-              },
-            ]}
-            getRowId={row => row.id ?? ""}
-            onRowClick={row => router.push(`/recurring-schedules/${row.id}`)}
-            paginationOptions={buildServerPaginationOptions({
-              page: currentPage,
-              pageSize,
-              totalCount,
-              onPageChange,
-            })}
-          />
-        </DesktopSectionPanel>
-      )}
+      <DesktopSectionPanel contentPadding={false}>
+        <DesktopAppDataGrid
+          rows={rows}
+          columns={[
+            { field: "studentName", headerName: columns.student, flex: 1 },
+            { field: "teacherName", headerName: columns.teacher, flex: 1 },
+            { field: "defaultStartTime", headerName: columns.schedule, flex: 1 },
+            {
+              field: "durationMinutes",
+              headerName: columns.duration,
+              flex: 1,
+              valueGetter: (_value, row) => columns.durationMinutesShort(row.durationMinutes ?? 0),
+            },
+            {
+              field: "hourlyRate",
+              headerName: columns.rate,
+              flex: 1,
+              valueGetter: (_value, row) => row.hourlyRate ?? "-",
+            },
+          ]}
+          getRowId={row => row.id ?? ""}
+          onRowClick={row => router.push(`/recurring-schedules/${row.id}`)}
+          emptyMessage={shell.emptyMessage}
+          paginationOptions={buildServerPaginationOptions({
+            page: currentPage,
+            pageSize,
+            totalCount,
+            onPageChange,
+          })}
+        />
+      </DesktopSectionPanel>
     </RecurringViewShellShared>
   );
 }

@@ -1,35 +1,57 @@
 "use client";
 
-import { TeacherLessonReportsViewShared } from "@/frontend/common/views/dashboard/teachers/lesson-reports/__shared__/teacherLessonReportsViewShared";
+import {
+  TeacherLessonReportCardContent,
+  type TeacherLessonReportsSectionPanelSlotProps,
+  TeacherLessonReportsViewShared,
+} from "@/frontend/common/views/dashboard/teachers/lesson-reports/__shared__/teacherLessonReportsViewShared";
 import type { TeacherLessonReportsViewModel } from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
 import {
+  MobileCardList,
   MobileCardListItem,
-  MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
+  MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 
-function MobileCardWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <MobileCardListItem variant="edge-to-edge">{children}</MobileCardListItem>;
-}
-
-function MobileContentWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <MobileContentStack gap={2}>{children}</MobileContentStack>;
+function MobileReportsSectionPanel({ actions, children }: Readonly<TeacherLessonReportsSectionPanelSlotProps>) {
+  return (
+    <MobileSectionPanel contentInset={false} actions={actions}>
+      {children}
+    </MobileSectionPanel>
+  );
 }
 
 export function TeacherLessonReportsMobileView(props: Readonly<TeacherLessonReportsViewModel>) {
+  const { rows, loading, labelsBySection, locale, resolveStatusLabel } = props;
+  const { shell, cards } = labelsBySection;
+
   return (
     <TeacherLessonReportsViewShared
       {...props}
       slots={{
         PageContainer: MobilePageContainer,
         PageHeader: MobilePageHeader,
-        ContentWrapper: MobileContentWrapper,
-        CardWrapper: MobileCardWrapper,
+        SectionPanel: MobileReportsSectionPanel,
       }}
-      options={{
-        cardMarginTop: 1,
-      }}
-    />
+    >
+      <MobileCardList
+        rows={rows}
+        loading={loading}
+        getKey={row => row.id ?? row.classInstanceId ?? ""}
+        emptyMessage={shell.emptyMessage}
+        paginationOptions={{ mode: "client" }}
+        renderItem={row => (
+          <MobileCardListItem variant="edge-to-edge">
+            <TeacherLessonReportCardContent
+              row={row}
+              labels={cards}
+              locale={locale}
+              resolveStatusLabel={resolveStatusLabel}
+            />
+          </MobileCardListItem>
+        )}
+      />
+    </TeacherLessonReportsViewShared>
   );
 }

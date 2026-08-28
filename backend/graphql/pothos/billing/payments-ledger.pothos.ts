@@ -15,10 +15,12 @@ export const PaymentLedgerEntryPothosObject = PaymentLedgerEntryRef.implement({
     studentId: t.exposeID("studentId", { nullable: true }),
     studentName: t.exposeString("studentName", { nullable: true }),
     creditsPurchased: t.exposeInt("creditsPurchased"),
+    creditHours: t.exposeFloat("creditHours", { nullable: true }),
     amount: t.exposeString("amount"),
     currency: t.exposeString("currency"),
     packageName: t.exposeString("packageName", { nullable: true }),
     paymentGateway: t.exposeString("paymentGateway"),
+    paymentMethodType: t.exposeString("paymentMethodType", { nullable: true }),
     paymentDate: t.expose("paymentDate", { type: "DateTime" }),
   }),
 });

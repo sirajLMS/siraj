@@ -1,62 +1,31 @@
 "use client";
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
-import { Alert, Box, Stack, Typography } from "@mui/material";
+import { Alert, Chip } from "@mui/material";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
-import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
-import { ManualClassEntryDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/ManualClassEntryDialog";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
-import {
-  teacherDashboardContentPaddingSx,
-  teacherDashboardPageContainerSx,
-} from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
+import { buildHeaderActions } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildHeaderActions";
+import { teacherDashboardPageContainerSx } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/teacherDashboardMobileLayout";
 import {
   MobileCardList,
+  MobileContentInset,
   MobileContentStack,
   MobileMetricCardGrid,
   MobilePageContainer,
+  MobilePageHeader,
   MobilePrimaryPageAction,
   MobileSectionPanel,
+  MobileSectionTitleRow,
 } from "@/frontend/mobile/components/ui";
 import { DateNavigatorMobile } from "@/frontend/mobile/components/ui/filter";
 import { ActivationPolicyPanelMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/activationPolicyPanel.mobile";
+import { ManualClassEntryDialogMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/manualClassEntryDialog.mobile";
 import { ManualClassEntryStudentSelectMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/manualClassEntryStudentSelect.mobile";
 import { MissedClassAlertBannerMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/missedClassAlertBanner.mobile";
 import { StudentProgressFeedMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/studentProgressFeed.mobile";
 import { TeacherScheduleCardMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleCard.mobile";
-
-interface MobileWelcomeHeaderProps {
-  readonly userName: string;
-  readonly welcomeMobileSummary: string;
-  readonly welcomeTitle: (name: string) => string;
-  readonly lastUpdated: string;
-}
-
-function MobileWelcomeHeader({ userName, welcomeMobileSummary, welcomeTitle, lastUpdated }: MobileWelcomeHeaderProps) {
-  return (
-    <Stack sx={mergeSx(teacherDashboardContentPaddingSx, { gap: 1 })}>
-      <Typography sx={theme => ({ typography: "headlineMd", color: theme.palette.primary.main })}>
-        {welcomeTitle(userName)}
-      </Typography>
-      <Typography sx={theme => ({ typography: "bodyLg", color: theme.palette.text.secondary })}>
-        {lastUpdated}
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          color: theme => theme.palette.text.secondary,
-        }}
-      >
-        <CalendarMonthOutlined sx={{ fontSize: 18 }} />
-        <Typography sx={{ typography: "bodyMd" }}>{welcomeMobileSummary}</Typography>
-      </Box>
-    </Stack>
-  );
-}
 
 interface MobileScheduleSectionProps {
   readonly scheduleRows: readonly TeacherScheduleRow[];
@@ -113,7 +82,7 @@ function MobileScheduleSection({
 
   return (
     <>
-      <Box sx={teacherDashboardContentPaddingSx}>
+      <MobileContentInset>
         <DateNavigatorMobile
           dateValue={dateValue}
           todayLabel={labels.dateFilter.today}
@@ -122,7 +91,7 @@ function MobileScheduleSection({
           dateLabel={labels.dateFilter.dateLabel}
           onDateChange={onDateChange}
         />
-      </Box>
+      </MobileContentInset>
 
       <MobileSectionPanel
         title={labels.schedule.titleToday}
@@ -164,15 +133,15 @@ interface MobileFooterProps {
 function MobileFooter({ progressFeed, labels, onDownloadHandbook, onContactCoordinator }: MobileFooterProps) {
   return (
     <>
-      <Box sx={teacherDashboardContentPaddingSx}>
+      <MobileContentInset>
         <StudentProgressFeedMobile
           items={progressFeed}
           title={labels.progressFeed.title}
           labels={labels.progressFeed}
         />
-      </Box>
+      </MobileContentInset>
 
-      <Box sx={teacherDashboardContentPaddingSx}>
+      <MobileContentInset>
         <ActivationPolicyPanelMobile
           labels={labels.policy}
           compact
@@ -180,7 +149,7 @@ function MobileFooter({ progressFeed, labels, onDownloadHandbook, onContactCoord
           onContactCoordinator={onContactCoordinator}
           actionLabels={labels.actions}
         />
-      </Box>
+      </MobileContentInset>
     </>
   );
 }
@@ -213,30 +182,52 @@ export function TeacherDashboardMobileView({
   manualEntryOpen,
   manualEntryDefaultActive,
   teacherId,
+  subjects,
+  subjectsLoading,
   onManualEntryClose,
   onManualEntrySubmit,
+  canManualEntry,
+  canPrintSchedule,
+  onPrintSchedule,
+  onManualEntry,
+  onNewSession,
 }: Readonly<TeacherDashboardViewModel>) {
+  const headerActions = buildHeaderActions({
+    labels,
+    canManualEntry,
+    canPrintSchedule,
+    canActivate,
+    onPrintSchedule,
+    onManualEntry,
+    onNewSession,
+  });
+
   return (
     <>
       {missedAlert && (
-        <Box sx={teacherDashboardContentPaddingSx}>
+        <MobileContentInset>
           <MissedClassAlertBannerMobile alert={missedAlert} labels={labels.alert} />
-        </Box>
+        </MobileContentInset>
       )}
 
       <MobilePageContainer sx={teacherDashboardPageContainerSx}>
         {activationError && (
-          <Alert severity="error" sx={teacherDashboardContentPaddingSx}>
-            {activationError}
-          </Alert>
+          <MobileContentInset>
+            <Alert severity="error">{activationError}</Alert>
+          </MobileContentInset>
         )}
 
         <MobileContentStack>
-          <MobileWelcomeHeader
-            userName={userName}
-            welcomeMobileSummary={welcomeMobileSummary}
-            welcomeTitle={labels.activeWelcome.title}
-            lastUpdated={lastUpdated}
+          <MobilePageHeader
+            title={labels.activeWelcome.title(userName)}
+            subtitle={lastUpdated}
+            actions={headerActions}
+          />
+
+          <MobileSectionTitleRow
+            title={
+              <Chip icon={<CalendarMonthOutlined />} label={welcomeMobileSummary} variant="outlined" size="small" />
+            }
           />
 
           <MobileMetricCardGrid metrics={metricItems} />
@@ -268,11 +259,13 @@ export function TeacherDashboardMobileView({
         </MobileContentStack>
       </MobilePageContainer>
 
-      <ManualClassEntryDialog
+      <ManualClassEntryDialogMobile
         open={manualEntryOpen}
         onClose={onManualEntryClose}
         onSubmit={onManualEntrySubmit}
         defaultActive={manualEntryDefaultActive}
+        subjects={subjects}
+        subjectsLoading={subjectsLoading}
         labels={labels.manualClassEntry}
         studentSelect={
           <ManualClassEntryStudentSelectMobile

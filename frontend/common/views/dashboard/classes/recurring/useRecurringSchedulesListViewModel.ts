@@ -2,9 +2,10 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { recurringSchedulesQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { useRecurringSchedulesListStore } from "@/frontend/common/stores/recurringSchedulesListStore";
 import type {
   RecurringSchedulesListLabelsBySection,
   RecurringSchedulesListViewModel,
@@ -31,13 +32,32 @@ export function useRecurringSchedulesListViewModel(
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [searchValue, setSearchValue] = useState(searchParams.get("search") ?? "");
+  const initialized = useRecurringSchedulesListStore(state => state.initialized);
+  const storedPage = useRecurringSchedulesListStore(state => state.currentPage);
+  const storedSearch = useRecurringSchedulesListStore(state => state.searchValue);
+  const initializeListState = useRecurringSchedulesListStore(state => state.initialize);
+  const setPage = useRecurringSchedulesListStore(state => state.setPage);
+  const applySearch = useRecurringSchedulesListStore(state => state.applySearch);
+
+  const urlSearch = searchParams.get("search") ?? "";
+  // View-layer pages are 0-based (shared pagination contract); the `initialPage` prop and
+  // the `page` URL param stay 1-based, and the GraphQL query receives `page: currentPage + 1`.
+  const initialPageIndex = Math.max(0, initialPage - 1);
+  const currentPage = initialized ? storedPage : initialPageIndex;
+  const searchValue = initialized ? storedSearch : urlSearch;
+
+  // Seed the store from the URL/props on first mount so subsequent handlers operate on
+  // store state and the current page/search survive viewport tier switches.
+  useEffect(() => {
+    if (!useRecurringSchedulesListStore.getState().initialized) {
+      initializeListState(urlSearch, initialPageIndex);
+    }
+  }, [initializeListState, urlSearch, initialPageIndex]);
 
   const { data, loading, error, refetch } = useQuery(recurringSchedulesQueryDocument, {
     variables: {
       pagination: {
-        page: currentPage,
+        page: currentPage + 1,
         first: initialPageSize,
         after: null,
         before: null,
@@ -53,18 +73,17 @@ export function useRecurringSchedulesListViewModel(
 
   const handlePageChange = useCallback(
     (page: number) => {
-      setCurrentPage(page);
+      setPage(page);
       const params = new URLSearchParams(searchParams.toString());
-      params.set("page", String(page));
+      params.set("page", String(page + 1));
       router.push(`?${params.toString()}`, { scroll: false });
     },
-    [router, searchParams]
+    [router, searchParams, setPage]
   );
 
   const handleSearchChange = useCallback(
     (search: string) => {
-      setSearchValue(search);
-      setCurrentPage(1);
+      applySearch(search);
       const params = new URLSearchParams(searchParams.toString());
       if (search) {
         params.set("search", search);
@@ -74,7 +93,7 @@ export function useRecurringSchedulesListViewModel(
       params.set("page", "1");
       router.push(`?${params.toString()}`, { scroll: false });
     },
-    [router, searchParams]
+    [router, searchParams, applySearch]
   );
 
   const handleRetry = useCallback(() => {

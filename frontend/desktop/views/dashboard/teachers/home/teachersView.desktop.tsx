@@ -23,8 +23,6 @@ export interface TeachersDesktopViewProps {
   readonly totalCount: number;
   readonly onPageChange: (page: number) => void;
   readonly canCreateTeacher: boolean;
-  readonly onNavigateToSchedule: (teacherId: string) => void;
-  readonly onNavigateToProfile: (teacher: TeacherDirectoryRow) => void;
 }
 
 /**
@@ -44,8 +42,6 @@ export function TeachersDesktopView({
   totalCount,
   onPageChange,
   canCreateTeacher,
-  onNavigateToSchedule,
-  onNavigateToProfile,
 }: Readonly<TeachersDesktopViewProps>) {
   const t = labels;
 
@@ -82,8 +78,6 @@ export function TeachersDesktopView({
           pageSize={pageSize}
           totalCount={totalCount}
           onPageChange={onPageChange}
-          onNavigateToSchedule={onNavigateToSchedule}
-          onNavigateToProfile={onNavigateToProfile}
         />
       </DesktopSectionPanel>
     </DesktopPageContainer>

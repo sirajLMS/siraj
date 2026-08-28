@@ -7,6 +7,7 @@ import type {
   JumpToDateHeaderProps,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
+import { ScheduleLegend } from "@/frontend/common/views/dashboard/teachers/schedule/__shared__/teacherScheduleLegendShared";
 
 export interface FutureScheduleViewSharedSlots {
   readonly PageContainer: ComponentType<{ readonly children: ReactNode }>;
@@ -92,34 +93,21 @@ export function FutureScheduleViewShared({
               <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
                 {labels.futureClasses}
               </Typography>
-              <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box
-                    sx={theme => ({
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      backgroundColor: theme.palette.status.active,
-                    })}
-                  />
-                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {labels.available}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box
-                    sx={theme => ({
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      backgroundColor: theme.palette.status.blocked,
-                    })}
-                  />
-                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {legendSecondColorLabel}
-                  </Typography>
-                </Box>
-              </Stack>
+              <ScheduleLegend
+                items={[
+                  {
+                    key: "available",
+                    label: labels.available,
+                    swatch: { kind: "dot", color: theme => theme.palette.status.active },
+                  },
+                  {
+                    key: "second",
+                    label: legendSecondColorLabel,
+                    swatch: { kind: "dot", color: theme => theme.palette.status.blocked },
+                  },
+                ]}
+                spacing={2}
+              />
             </Box>
 
             <slots.ClassListWrapper>

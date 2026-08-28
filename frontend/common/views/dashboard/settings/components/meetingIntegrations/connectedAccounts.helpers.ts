@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import {
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+import { useMeetingIntegrationsSettingsStore } from "@/frontend/common/stores/meetingIntegrationsSettingsStore";
 import type {
   ConnectedAccountsTableProps,
   MeetingIntegrationConnectedAccount,
@@ -101,8 +102,31 @@ export function useConnectedAccountsFilter(
   providerSlug: MeetingIntegrationProviderSlug,
   labels: SettingsMeetingIntegrationsLabels
 ) {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<MeetingIntegrationConnectedAccountStatus | "all">("all");
+  // Filter state lives in the settings store (keyed per provider) so it
+  // survives the component unmount/remount caused by viewport tier switches.
+  const search = useMeetingIntegrationsSettingsStore(
+    state => state.connectedAccountsSearchByProvider[providerSlug] ?? ""
+  );
+  const statusFilter = useMeetingIntegrationsSettingsStore(
+    state => state.connectedAccountsStatusFilterByProvider[providerSlug] ?? "all"
+  );
+  const setConnectedAccountsSearch = useMeetingIntegrationsSettingsStore(state => state.setConnectedAccountsSearch);
+  const setConnectedAccountsStatusFilter = useMeetingIntegrationsSettingsStore(
+    state => state.setConnectedAccountsStatusFilter
+  );
+
+  const setSearch = useCallback(
+    (value: string) => {
+      setConnectedAccountsSearch(providerSlug, value);
+    },
+    [providerSlug, setConnectedAccountsSearch]
+  );
+  const setStatusFilter = useCallback(
+    (value: MeetingIntegrationConnectedAccountStatus | "all") => {
+      setConnectedAccountsStatusFilter(providerSlug, value);
+    },
+    [providerSlug, setConnectedAccountsStatusFilter]
+  );
 
   const providerName = useMemo(() => getProviderLabel(providerSlug, labels), [providerSlug, labels]);
 

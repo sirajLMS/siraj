@@ -5,6 +5,7 @@ import { IconButton, MenuItem, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import { AccountStatus, type CurrencyCode, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   ParentAdminData,
@@ -13,7 +14,6 @@ import type {
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { ProfileScope } from "@/shared/constants/profile.enum";
@@ -107,7 +107,7 @@ export function AccountSection(props: AccountSectionProps) {
   const accountStatus = accountStatusRaw ?? null;
   const accountStatusContent =
     canView("parent_account") && accountStatus ? (
-      <InfoField
+      <LabeledField
         label={t.fields.accountStatus}
         value={
           <StatusBadge
@@ -151,7 +151,7 @@ export function AccountSection(props: AccountSectionProps) {
           <Stack spacing={1}>
             {accountStatusContent}
             {canResetPassword && targetUserId && (
-              <InfoField
+              <LabeledField
                 label={tBase.adminResetPassword.title}
                 value={
                   <IconButton

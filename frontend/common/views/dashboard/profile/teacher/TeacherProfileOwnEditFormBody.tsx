@@ -3,6 +3,7 @@
 import { Box, Stack, TextField } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
+import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
 import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import type { ProfilePersonalFieldLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
@@ -54,18 +55,7 @@ export function TeacherProfileOwnEditFormBody({
           onUploadAvatar={onUploadAvatar}
         />
       ) : null}
-      <Box
-        sx={{
-          display: "grid",
-          gap: 3,
-          minWidth: 0,
-          width: "100%",
-          gridTemplateColumns: {
-            xs: "minmax(0, 1fr)",
-            lg: "repeat(2, minmax(0, 1fr))",
-          },
-        }}
-      >
+      <Box sx={PROFILE_SECTION_GRID_SX}>
         {canEdit("core_identity") ? (
           <AccountSection
             labels={sectionLabels}

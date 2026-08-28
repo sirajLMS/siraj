@@ -16,12 +16,16 @@ import { PerformanceOverviewCard } from "@/frontend/common/views/dashboard/class
 import { RemarksCard } from "@/frontend/common/views/dashboard/classes/details/teacher/RemarksCard";
 import { StudentProfileCard } from "@/frontend/common/views/dashboard/classes/details/teacher/StudentProfileCard";
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
-import type { TeacherViewProps } from "@/frontend/common/views/dashboard/classes/details/types";
+import type {
+  ClassDetailsMetricGridSlot,
+  TeacherViewProps,
+} from "@/frontend/common/views/dashboard/classes/details/types";
 import type { TeacherViewLabels } from "@/frontend/common/views/dashboard/classes/details/useClassDetailsLabels";
 import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/types/dashboard";
 
 interface ClassDetailsTeacherViewProps extends TeacherViewProps {
   readonly labels: TeacherViewLabels;
+  readonly performanceMetricGrid: ClassDetailsMetricGridSlot;
 }
 
 const NULL_STUDENT: ClassInstanceQuery_classInstance_student = {
@@ -36,6 +40,7 @@ export function ClassDetailsTeacherView(props: Readonly<ClassDetailsTeacherViewP
   const {
     instance,
     labels,
+    performanceMetricGrid,
     viewMode,
     isWarningDismissed,
     onDismissWarning,
@@ -99,6 +104,7 @@ export function ClassDetailsTeacherView(props: Readonly<ClassDetailsTeacherViewP
             lastClassDaysAgo={performance?.lastClassDaysAgo ?? 0}
             hasData={performanceHasData}
             labels={labels.performance}
+            MetricGrid={performanceMetricGrid}
           />
         </Grid>
         {isTeacherView ? (

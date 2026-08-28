@@ -1,50 +1,69 @@
 "use client";
 
-import { Box, Stack } from "@mui/material";
-import { TeacherClassListViewShared } from "@/frontend/common/views/dashboard/teachers/classes/__shared__/teacherClassListViewShared";
+import { useMemo } from "react";
+import { buildTeacherClassListColumns } from "@/frontend/common/views/dashboard/teachers/classes/__shared__/teacherClassListColumns";
+import {
+  type TeacherClassListActionSlots,
+  TeacherClassListErrorNotice,
+  type TeacherClassRow,
+} from "@/frontend/common/views/dashboard/teachers/classes/__shared__/teacherClassListViewShared";
 import type { TeacherClassListViewModel } from "@/frontend/common/views/dashboard/teachers/classes/useTeacherClassListViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import {
+  DesktopAppDataGrid,
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopSectionPanel,
+} from "@/frontend/desktop/components/ui";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { ClassSessionActionButtonDesktop } from "@/frontend/desktop/views/dashboard/schedule/alerts/components/classSessionActionButton.desktop";
 
-function DesktopRowWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        borderRadius: 1,
-        border: `1px solid ${theme.palette.border.light}`,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: 2,
-        flexWrap: "wrap",
-      })}
-    >
-      {children}
-    </Box>
+const DESKTOP_SLOTS: TeacherClassListActionSlots = {
+  MeetingJoinAction: DesktopMeetingJoinAction,
+  ClassSessionActionButton: ClassSessionActionButtonDesktop,
+};
+
+/**
+ * Desktop tier of the teacher class list: a `DesktopAppDataGrid` (columns from the
+ * shared contract) inside a `DesktopSectionPanel` with grid-flush content.
+ */
+export function TeacherClassListDesktopView({
+  rows,
+  loading,
+  error,
+  labels,
+  locale,
+  handleViewClassAudit,
+}: Readonly<TeacherClassListViewModel>) {
+  const columns = useMemo(
+    () =>
+      buildTeacherClassListColumns({
+        labels,
+        locale,
+        onViewClassAudit: handleViewClassAudit,
+        slots: DESKTOP_SLOTS,
+      }),
+    [labels, locale, handleViewClassAudit]
   );
-}
 
-function DesktopListContainer({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <Stack spacing={1}>{children}</Stack>;
-}
-
-export function TeacherClassListDesktopView(props: Readonly<TeacherClassListViewModel>) {
   return (
-    <TeacherClassListViewShared
-      {...props}
-      slots={{
-        PageContainer: DesktopPageContainer,
-        PageHeader: DesktopPageHeader,
-        RowWrapper: DesktopRowWrapper,
-        ListContainer: DesktopListContainer,
-        MeetingJoinAction: DesktopMeetingJoinAction,
-        ClassSessionActionButton: ClassSessionActionButtonDesktop,
-      }}
-      options={{
-        actionButtonMarginTop: 0,
-      }}
-    />
+    <DesktopPageContainer>
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
+      {error ? (
+        <TeacherClassListErrorNotice message={labels.failedToLoad} />
+      ) : (
+        <DesktopSectionPanel contentPadding={false}>
+          <DesktopAppDataGrid<TeacherClassRow>
+            rows={rows}
+            columns={columns}
+            getRowId={row => row.id ?? ""}
+            loading={loading}
+            autoHeight
+            ariaLabel={labels.pageTitle}
+            emptyMessage={labels.noClasses}
+            paginationOptions={{ mode: "client" }}
+          />
+        </DesktopSectionPanel>
+      )}
+    </DesktopPageContainer>
   );
 }

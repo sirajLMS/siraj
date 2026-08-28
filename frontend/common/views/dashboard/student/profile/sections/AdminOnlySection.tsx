@@ -1,7 +1,5 @@
 "use client";
 
-import { Stack, Typography } from "@mui/material";
-import type * as React from "react";
 import { AdminSectionShared } from "@/frontend/common/views/dashboard/profile/components/__shared__/adminSectionShared";
 import {
   getStudentStatusColor,
@@ -28,15 +26,6 @@ type AdminOnlySectionProps = {
     }
 );
 
-function InfoField({ label, value }: { readonly label: string; readonly value: React.ReactNode }) {
-  return (
-    <Stack spacing={0.5}>
-      <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>{label}</Typography>
-      {value}
-    </Stack>
-  );
-}
-
 export function AdminOnlySection(props: AdminOnlySectionProps) {
   const t = useAppTranslation(Translation.Dashboard.StudentPortalProfile);
   const tStatus = useAppTranslation(Translation.Dashboard.StudentStatus);
@@ -53,7 +42,6 @@ export function AdminOnlySection(props: AdminOnlySectionProps) {
       accountStatusLabel={t.accountStatus}
       resetPasswordSuccess={tBase.adminResetPassword.success}
       resetPasswordError={tBase.adminResetPassword.error}
-      InfoField={InfoField}
       statusBadgeCategory="studentAccount"
       statusColor={getStudentStatusColor(profile.status)}
       statusLabel={getStudentStatusLabel(profile.status, tStatus)}

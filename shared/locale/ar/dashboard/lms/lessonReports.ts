@@ -8,6 +8,8 @@ export const dashboardLmsLessonReportsAr: LessonReportLabels = {
   rejected: "مرفوض",
   draft: "مسودة",
   attendanceEvaluation: "تقييم الحضور",
+  lessonDate: "تاريخ الدرس",
+  status: "الحالة",
   present: "حاضر",
   absent: "غائب",
   late: "متأخر",

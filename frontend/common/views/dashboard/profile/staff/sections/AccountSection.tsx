@@ -1,13 +1,15 @@
 "use client";
 
-import { MenuItem, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { KeyOutlined } from "@mui/icons-material";
+import { IconButton, MenuItem, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import { AccountStatus, type CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/components/__shared__/infoFieldShared";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
+import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type {
   StaffProfileData,
@@ -15,6 +17,7 @@ import type {
 } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffAdminEditFormData } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
 import type { ProfileScope } from "@/shared/constants/profile.enum";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type AccountSectionProps =
   | {
@@ -36,31 +39,17 @@ type AccountSectionProps =
       readonly control: Control<StaffAdminEditFormData>;
     };
 
-function StaffRoleStatusView({
-  status,
-  statusLabel,
-  statusFieldLabel,
-}: {
-  readonly status: string;
-  readonly statusLabel: string;
-  readonly statusFieldLabel: string;
-}) {
-  return (
-    <Stack spacing={0.25}>
-      <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
-        {statusFieldLabel}
-      </Typography>
-      <StatusBadge category="staffAccount" status={status} label={statusLabel} size="small" />
-    </Stack>
-  );
-}
-
 export function AccountSection(props: AccountSectionProps) {
   const t = props.labels.staff;
   const { baseLabels } = props.labels;
+  const tBase = useAppTranslation(Translation.Profile.Base);
   const { canView, canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope: props.scope });
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
+  const { resetPassword, loading: resetLoading } = useAdminResetPassword(
+    tBase.adminResetPassword.success,
+    tBase.adminResetPassword.error
+  );
 
   if (props.mode === "edit") {
     return (
@@ -93,17 +82,48 @@ export function AccountSection(props: AccountSectionProps) {
     props.staffData.status === AccountStatus.Activated ? t.fields.statusActive : t.fields.statusInactive;
   const roleStatusContent =
     props.isAdminScope && canView("staff_role") ? (
-      <StaffRoleStatusView
-        status={(props.staffData.status ?? AccountStatus.Activated).toLowerCase()}
-        statusLabel={statusLabel}
-        statusFieldLabel={t.fields.status}
+      <LabeledField
+        label={t.fields.status}
+        value={
+          <StatusBadge
+            category="staffAccount"
+            status={(props.staffData.status ?? AccountStatus.Activated).toLowerCase()}
+            label={statusLabel}
+            size="small"
+          />
+        }
       />
     ) : null;
 
   const canResetPassword = canAdminResetPassword();
   const targetUserId = props.targetUserId;
+  const hasValidTarget = targetUserId.length > 0;
   const staffName = props.staffData.name ?? "";
   const staffEmail = props.staffData.email ?? "";
+
+  const handleResetConfirm = async (password: string, sendNotificationEmail: boolean) => {
+    if (!hasValidTarget) return;
+    const success = await resetPassword(targetUserId, password, sendNotificationEmail);
+    if (success) {
+      setResetPasswordOpen(false);
+    }
+  };
+
+  const resetPasswordField =
+    canResetPassword && hasValidTarget ? (
+      <LabeledField
+        label={tBase.adminResetPassword.title}
+        value={
+          <IconButton
+            aria-label={tBase.adminResetPassword.title}
+            onClick={() => setResetPasswordOpen(true)}
+            sx={theme => ({ color: theme.palette.primary.main })}
+          >
+            <KeyOutlined />
+          </IconButton>
+        }
+      />
+    ) : null;
 
   return (
     <Stack>
@@ -122,40 +142,22 @@ export function AccountSection(props: AccountSectionProps) {
         additionalViewContent={
           <Stack spacing={1}>
             {roleStatusContent}
-            {canResetPassword && targetUserId && (
-              <Tooltip title={baseLabels.actions.manageLifecycle}>
-                <InfoField
-                  label={baseLabels.actions.manageLifecycle}
-                  value={
-                    <ResetPasswordDialog
-                      open={resetPasswordOpen}
-                      onClose={() => setResetPasswordOpen(false)}
-                      userName={staffName}
-                      userEmail={staffEmail}
-                      isLoading={false}
-                      sendEmail={sendEmail}
-                      setSendEmail={setSendEmail}
-                      onConfirm={() => setResetPasswordOpen(false)}
-                    />
-                  }
-                />
-              </Tooltip>
-            )}
+            {resetPasswordField}
           </Stack>
         }
       />
-      {canResetPassword && targetUserId && (
+      {canResetPassword && hasValidTarget ? (
         <ResetPasswordDialog
           open={resetPasswordOpen}
           onClose={() => setResetPasswordOpen(false)}
           userName={staffName}
           userEmail={staffEmail}
-          isLoading={false}
+          isLoading={resetLoading}
           sendEmail={sendEmail}
           setSendEmail={setSendEmail}
-          onConfirm={() => setResetPasswordOpen(false)}
+          onConfirm={handleResetConfirm}
         />
-      )}
+      ) : null}
     </Stack>
   );
 }

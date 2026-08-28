@@ -183,6 +183,8 @@ interface AppearancePreviewState {
   readonly hydrated: boolean;
   /** Whether the draft has unsaved changes (cleared by `markSaved` / `loadFromServer`). */
   readonly dirty: boolean;
+  /** Whether the reset-to-defaults confirmation dialog is open. */
+  readonly resetDialogOpen: boolean;
   /** Undo stack (most-recent-last). Bounded by `MAX_HISTORY`. */
   readonly past: ReadonlyArray<AppearanceDraftInput>;
   /** Redo stack (most-recent-first). Cleared on any new edit. */
@@ -211,6 +213,10 @@ interface AppearancePreviewState {
   readonly undo: () => void;
   /** Pop the redo stack onto the draft; pushes the current draft to undo. */
   readonly redo: () => void;
+  /** Open the reset-to-defaults confirmation dialog. */
+  readonly openResetDialog: () => void;
+  /** Close the reset-to-defaults confirmation dialog without resetting. */
+  readonly closeResetDialog: () => void;
   /** Whether `undo()` would do anything. */
   readonly canUndo: () => boolean;
   /** Whether `redo()` would do anything. */
@@ -226,6 +232,7 @@ const initialState = {
   presetId: "default" as AppearancePresetId,
   hydrated: false,
   dirty: false,
+  resetDialogOpen: false,
   past: [] as ReadonlyArray<AppearanceDraftInput>,
   future: [] as ReadonlyArray<AppearanceDraftInput>,
 };
@@ -305,6 +312,8 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
       };
     }),
   markSaved: () => set({ dirty: false }),
+  openResetDialog: () => set({ resetDialogOpen: true }),
+  closeResetDialog: () => set({ resetDialogOpen: false }),
   undo: () =>
     set(state => {
       if (state.past.length === 0) return state;

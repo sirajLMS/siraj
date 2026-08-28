@@ -14,10 +14,14 @@ import {
   type RecurringClassFormData,
 } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import {
+  type ClassSubjectOption,
   type CreatedRecurringClassResult,
   DEFAULT_DAY_SCHEDULE,
+  type RecurringMeetingConfigValidation,
 } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassLabelsBySection } from "@/frontend/common/views/dashboard/classes/recurring/types/createRecurringClassViewModel.types";
+import { useClassSubjects } from "@/frontend/common/views/dashboard/classes/recurring/useClassSubjects";
+import { useRecurringMeetingConfigValidation } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringMeetingConfigValidation";
 import { buildRecurringClassFormLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
 import { mapFormDataToInput } from "@/frontend/common/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
 import {
@@ -55,7 +59,10 @@ export interface CreateRecurringClassViewModel {
   readonly onDismissSuccess: () => void;
   readonly onDismissError: () => void;
   readonly meetingConfig: RecurringMeetingConfigFormState;
+  readonly meetingConfigValidation: RecurringMeetingConfigValidation;
   readonly onMeetingConfigChange: (next: RecurringMeetingConfigFormState) => void;
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
   readonly register: RecurringClassFormInstance["register"];
   readonly handleSubmit: RecurringClassFormInstance["handleSubmit"];
   readonly watch: RecurringClassFormInstance["watch"];
@@ -216,6 +223,8 @@ export function useCreateRecurringClassViewModel(
   const [meetingConfig, setMeetingConfig] = useState<RecurringMeetingConfigFormState>(
     emptyRecurringMeetingConfigState()
   );
+  const { subjects, loading: subjectsLoading } = useClassSubjects();
+  const meetingConfigValidation = useRecurringMeetingConfigValidation(meetingConfig);
 
   const isSubmitting = useCreateRecurringClassStore(state => state.isSubmitting);
   const showSuccess = useCreateRecurringClassStore(state => state.showSuccess);
@@ -345,7 +354,10 @@ export function useCreateRecurringClassViewModel(
     onDismissSuccess: resetSuccess,
     onDismissError: clearError,
     meetingConfig,
+    meetingConfigValidation,
     onMeetingConfigChange: handleMeetingConfigChange,
+    subjects,
+    subjectsLoading,
     register,
     handleSubmit,
     watch,

@@ -10,7 +10,6 @@ import type {
   ParentSectionLabelsBundle,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { AdminStatusSection } from "@/frontend/common/views/dashboard/profile/shared/AdminStatusSection";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 
 type AdminOnlySectionProps = {
@@ -58,7 +57,6 @@ export function AdminOnlySection(props: AdminOnlySectionProps) {
         baseLabels: props.labels.baseLabels,
       }}
       adminData={props.adminData}
-      InfoField={InfoField}
     />
   );
 }

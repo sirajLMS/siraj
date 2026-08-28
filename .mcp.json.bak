@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "storybook": {
+      "url": "http://localhost:6006/mcp",
+      "type": "http"
+    },
+    "sonarqube": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--add-host=host.docker.internal:host-gateway",
+        "-e",
+        "SONARQUBE_TOKEN",
+        "-e",
+        "SONARQUBE_URL",
+        "sonarsource/sonarqube-mcp"
+      ],
+      "env": {
+        "SONARQUBE_URL": "http://host.docker.internal:9000",
+        "SONARQUBE_TOKEN": "squ_0793464c9307891b0142956e08c457581548836a"
+      }
+    }
+  }
+}

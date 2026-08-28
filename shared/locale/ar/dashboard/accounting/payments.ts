@@ -2,7 +2,9 @@ import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/
 
 export const dashboardAccountingPaymentsAr: PaymentsLabels = {
   pageTitle: "المدفوعات",
+  metricsBasis: max => `أحدث ${max} دفعة`,
   pageSubtitle: "تتبع مدفوعات باقات الساعات المعتمدة وحالة السداد.",
+  formSubtitle: "تسجيل عملية دفعة جديدة لطالب.",
   addPayment: "إضافة دفعة",
   editPayment: "تعديل الدفعة",
   paymentDetails: "تفاصيل الدفعة",
@@ -87,6 +89,11 @@ export const dashboardAccountingPaymentsAr: PaymentsLabels = {
     documentPreview: "معاينة المستند",
     documentEmpty: "لا يوجد مستند إيصال مرفق بهذه الدفعة.",
     downloadPdf: "تنزيل PDF",
+    zoomIn: "تكبير",
+    zoomOut: "تصغير",
+    rotate: "تدوير المستند",
+    expand: "توسيع المستند",
+    close: "إغلاق معاينة المستند",
     historyTitle: "السجل",
     historyEmpty: "لا توجد أحداث بعد.",
     hoursCredited: "الساعات المُضافة",

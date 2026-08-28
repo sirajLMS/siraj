@@ -1,52 +1,24 @@
 "use client";
 
 import { SaveOutlined, SyncOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  FormControl,
-  FormControlLabel,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Switch,
-  TextField,
-} from "@mui/material";
+import { Box, Button, CircularProgress, FormControlLabel, Stack, Switch, TextField } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
+import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
-import { CurrencyCode, PaymentGateway } from "@/frontend/common/graphql/generated/gql/graphql";
+import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { PackagePlanSelectShared } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanSelectShared";
+import {
+  CurrencyMismatchAlert,
+  GatewaySelectField,
+  PaymentNoteField,
+} from "@/frontend/common/views/dashboard/accounting/components/PaymentFormFields";
 import type { UsePaymentFormViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentFormViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobileAppDatePicker } from "@/frontend/mobile/components/ui/form/date";
 import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
-
-const GATEWAY_OPTIONS: readonly PaymentGateway[] = [
-  PaymentGateway.None,
-  PaymentGateway.Paypal,
-  PaymentGateway.WesternUnion,
-  PaymentGateway.Bank,
-  PaymentGateway.Other,
-];
-
-const CURRENCY_OPTIONS: readonly CurrencyCode[] = [
-  CurrencyCode.Egp,
-  CurrencyCode.Usd,
-  CurrencyCode.Sar,
-  CurrencyCode.Aed,
-];
-
-const CURRENCY_LABELS: Record<string, string> = {
-  Egp: "EGP",
-  Usd: "USD",
-  Sar: "SAR",
-  Aed: "AED",
-};
 
 export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
   const {
@@ -62,11 +34,32 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
     loadingExisting,
     showSuccess,
     existing,
+    lastPaymentCurrency,
+    currencyMismatch,
     onSubmit,
     onEditSubmit,
     onDismissSuccess,
   } = props;
   const router = useRouter();
+
+  const gatewayFieldArgs = { label: t.form.paymentGateway, localizedGateways: t.gateways };
+
+  const submitButtons = (
+    <>
+      <Button
+        type="submit"
+        variant="contained"
+        size="large"
+        disabled={isSubmitting}
+        startIcon={isSubmitting ? <SyncOutlined /> : <SaveOutlined />}
+      >
+        {isSubmitting ? t.form.saving : t.form.submit}
+      </Button>
+      <Button variant="text" onClick={() => router.push("/accounting/payments")} disabled={isSubmitting}>
+        {t.form.cancel}
+      </Button>
+    </>
+  );
 
   // Keep the resolved student option (id + display name) in local state so the
   // autocomplete shows the human-readable name instead of the raw id after
@@ -87,7 +80,7 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={title} subtitle={t.pageSubtitle} />
+      <MobilePageHeader title={title} subtitle={t.formSubtitle} />
 
       {isEditing ? (
         <Box component="form" onSubmit={handleEditSubmit(onEditSubmit)} noValidate>
@@ -117,55 +110,28 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
             />
 
             <Controller
-              name="paymentGateway"
-              control={editControl}
-              render={({ field }) => (
-                <FormControl size="small">
-                  <InputLabel>{t.form.paymentGateway}</InputLabel>
-                  <Select<PaymentGateway>
-                    value={field.value}
-                    label={t.form.paymentGateway}
-                    onChange={e => field.onChange(e.target.value)}
-                  >
-                    {GATEWAY_OPTIONS.map(gw => (
-                      <MenuItem key={gw} value={gw}>
-                        {t.gateways[gw]}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-
-            <Controller
               name="paymentNote"
               control={editControl}
               render={({ field }) => (
-                <TextField
-                  value={field.value ?? ""}
+                <PaymentNoteField
+                  value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
-                  size="small"
-                  multiline
-                  minRows={3}
                   label={t.form.note}
                   placeholder={t.form.notePlaceholder}
                 />
               )}
             />
 
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={isSubmitting}
-              startIcon={isSubmitting ? <SyncOutlined /> : <SaveOutlined />}
-            >
-              {isSubmitting ? t.form.saving : t.form.submit}
-            </Button>
-            <Button variant="text" onClick={() => router.push("/accounting/payments")} disabled={isSubmitting}>
-              {t.form.cancel}
-            </Button>
+            <Controller
+              name="paymentGateway"
+              control={editControl}
+              render={({ field }) => (
+                <GatewaySelectField value={field.value} onChange={field.onChange} {...gatewayFieldArgs} />
+              )}
+            />
+
+            {submitButtons}
           </Stack>
         </Box>
       ) : (
@@ -246,43 +212,38 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
                 name="currency"
                 control={control}
                 render={({ field }) => (
-                  <FormControl size="small" sx={{ flex: 1 }}>
-                    <InputLabel>{t.form.currency}</InputLabel>
-                    <Select<CurrencyCode>
-                      value={field.value}
+                  <Box sx={{ flex: 1 }}>
+                    <CurrencySelect
+                      currency={getCurrencyByCode(field.value) ?? null}
+                      setCurrencyAction={selected => field.onChange(selected.code)}
+                      onBlurAction={field.onBlur}
                       label={t.form.currency}
-                      onChange={e => field.onChange(e.target.value)}
-                    >
-                      {CURRENCY_OPTIONS.map(code => (
-                        <MenuItem key={code} value={code}>
-                          {CURRENCY_LABELS[code] ?? code}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                      error={Boolean(errors.currency)}
+                      helperText={errors.currency?.message}
+                      fullWidth
+                    />
+                  </Box>
                 )}
               />
               <Controller
                 name="paymentGateway"
                 control={control}
                 render={({ field }) => (
-                  <FormControl size="small" sx={{ flex: 1.4 }}>
-                    <InputLabel>{t.form.paymentGateway}</InputLabel>
-                    <Select<PaymentGateway>
-                      value={field.value}
-                      label={t.form.paymentGateway}
-                      onChange={e => field.onChange(e.target.value)}
-                    >
-                      {GATEWAY_OPTIONS.map(gw => (
-                        <MenuItem key={gw} value={gw}>
-                          {t.gateways[gw]}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <GatewaySelectField
+                    value={field.value}
+                    onChange={field.onChange}
+                    {...gatewayFieldArgs}
+                    sx={{ flex: 1.4 }}
+                  />
                 )}
               />
             </Stack>
+
+            <CurrencyMismatchAlert
+              active={currencyMismatch}
+              lastPaymentCurrency={lastPaymentCurrency}
+              message={t.currencyWarning}
+            />
 
             <Controller
               name="paymentDate"
@@ -312,31 +273,17 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
               name="paymentNote"
               control={control}
               render={({ field }) => (
-                <TextField
-                  value={field.value ?? ""}
+                <PaymentNoteField
+                  value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
-                  size="small"
-                  multiline
-                  minRows={3}
                   label={t.form.note}
                   placeholder={t.form.notePlaceholder}
                 />
               )}
             />
 
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={isSubmitting}
-              startIcon={isSubmitting ? <SyncOutlined /> : <SaveOutlined />}
-            >
-              {isSubmitting ? t.form.saving : t.form.submit}
-            </Button>
-            <Button variant="text" onClick={() => router.push("/accounting/payments")} disabled={isSubmitting}>
-              {t.form.cancel}
-            </Button>
+            {submitButtons}
           </Stack>
         </Box>
       )}

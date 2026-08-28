@@ -16,6 +16,7 @@ await mockNextNavigation("/accounting/packages", {
   includeReplaceAndPrefetch: false,
 });
 
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { packagePlansQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting";
 import { PackagePlansContainer } from "@/frontend/common/views/dashboard/accounting/PackagePlansContainer";
 import type { AppLocale } from "@/shared/locale/AppLocale";
@@ -98,7 +99,8 @@ describe("package plans catalog (component)", () => {
   test("shows the translated empty state before any plan exists", async () => {
     renderWithWrapper(<PackagePlansContainer />, {
       locale,
-      permissions: [],
+      // The create CTA is permission-gated (ACCOUNTING_PAYMENTS_MANAGE).
+      permissions: [AppPermission.AccountingPaymentsManage],
       mocks: [
         {
           request: {

@@ -1,9 +1,8 @@
 "use client";
 
-import { Stack } from "@mui/material";
 import { PaymentMethodsManager } from "@/frontend/common/views/dashboard/profile/shared/payment-methods";
 import type { PaymentMethodsTabVariantProps } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader, MobilePaymentMethodList } from "@/frontend/mobile/components/ui";
 
 export type PaymentMethodsTabMobileViewProps = PaymentMethodsTabVariantProps;
 
@@ -15,10 +14,13 @@ export function PaymentMethodsTabMobileView({
 }: Readonly<PaymentMethodsTabMobileViewProps>) {
   return (
     <MobilePageContainer>
-      <Stack spacing={3}>
-        <MobilePageHeader title={title} />
-        <PaymentMethodsManager targetUserId={targetUserId} slot={slot} canManage={canManage} />
-      </Stack>
+      <MobilePageHeader title={title} />
+      <PaymentMethodsManager
+        targetUserId={targetUserId}
+        slot={slot}
+        canManage={canManage}
+        ListView={MobilePaymentMethodList}
+      />
     </MobilePageContainer>
   );
 }

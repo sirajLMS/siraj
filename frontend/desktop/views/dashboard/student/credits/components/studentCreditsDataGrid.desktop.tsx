@@ -68,7 +68,11 @@ export function StudentCreditsDataGrid({
         headerAlign: "right",
         renderCell: ({ row }) => {
           const positive = row.changeAmount >= 0;
-          const sign = positive ? "+" : "";
+          const sign = positive ? "+" : "-";
+          // Hours-based rows show "±15.00 h"; legacy class-credit rows keep integers.
+          const amountLabel = row.isHours
+            ? `${Math.abs(row.changeAmount).toFixed(2)} h`
+            : `${Math.abs(row.changeAmount)}`;
           return (
             <Typography
               variant="bodyMd"
@@ -78,7 +82,7 @@ export function StudentCreditsDataGrid({
               })}
             >
               {sign}
-              {row.changeAmount}
+              {amountLabel}
             </Typography>
           );
         },

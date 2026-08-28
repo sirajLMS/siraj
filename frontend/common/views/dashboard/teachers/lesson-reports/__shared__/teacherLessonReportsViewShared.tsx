@@ -2,44 +2,66 @@
 
 import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
-import { LoadingState, StatusBadge } from "@/frontend/common/components/ui";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { LessonReportCardProps } from "@/frontend/common/views/dashboard/teachers/lesson-reports/types";
 import type { TeacherLessonReportsViewModel } from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
+import { formatLessonReportDate } from "@/frontend/common/views/dashboard/teachers/lesson-reports/utils";
 
-type LessonReportRow = TeacherLessonReportsViewModel["rows"][number];
-type CardLabels = TeacherLessonReportsViewModel["labelsBySection"]["cards"];
-type Locale = TeacherLessonReportsViewModel["locale"];
-type ResolveStatusLabel = TeacherLessonReportsViewModel["resolveStatusLabel"];
+type FilterLabels = TeacherLessonReportsViewModel["labelsBySection"]["filters"];
+
+export interface TeacherLessonReportsSectionPanelSlotProps {
+  readonly actions: ReactNode;
+  readonly children: ReactNode;
+}
 
 export interface TeacherLessonReportsViewSharedSlots {
   readonly PageContainer: ComponentType<{ readonly children: ReactNode }>;
   readonly PageHeader: ComponentType<{ readonly title: string }>;
-  readonly ContentWrapper: ComponentType<{ readonly children: ReactNode }>;
-  readonly CardWrapper: ComponentType<{ readonly children: ReactNode }>;
-}
-
-export interface TeacherLessonReportsViewSharedOptions {
-  readonly cardMarginTop: number;
+  readonly SectionPanel: ComponentType<TeacherLessonReportsSectionPanelSlotProps>;
 }
 
 export type TeacherLessonReportsViewSharedProps = Readonly<TeacherLessonReportsViewModel> & {
   readonly slots: TeacherLessonReportsViewSharedSlots;
-  readonly options: TeacherLessonReportsViewSharedOptions;
+  readonly children: ReactNode;
 };
 
-function LessonReportCardContent({
+function LessonReportStatusFilter({
+  statusFilter,
+  statusOptions,
+  filterLabels,
+  onStatusFilterChange,
+}: Readonly<{
+  statusFilter: TeacherLessonReportsViewModel["statusFilter"];
+  statusOptions: TeacherLessonReportsViewModel["statusOptions"];
+  filterLabels: FilterLabels;
+  onStatusFilterChange: TeacherLessonReportsViewModel["onStatusFilterChange"];
+}>) {
+  return (
+    <FormControl size="small">
+      <InputLabel id="lesson-report-status-filter-label">{filterLabels.status}</InputLabel>
+      <Select
+        labelId="lesson-report-status-filter-label"
+        value={statusFilter}
+        label={filterLabels.status}
+        onChange={e => onStatusFilterChange(e.target.value)}
+      >
+        {statusOptions.map(option => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+}
+
+export function TeacherLessonReportCardContent({
   row,
   labels,
   locale,
   resolveStatusLabel,
-  cardMarginTop,
-}: Readonly<{
-  row: LessonReportRow;
-  labels: CardLabels;
-  locale: Locale;
-  resolveStatusLabel: ResolveStatusLabel;
-  cardMarginTop: number;
-}>) {
+}: Readonly<LessonReportCardProps>) {
   return (
     <>
       <Box
@@ -52,19 +74,13 @@ function LessonReportCardContent({
         }}
       >
         <Typography sx={{ typography: "titleLg", fontWeight: 600 }}>
-          {row.lessonDate
-            ? new Date(row.lessonDate).toLocaleDateString(locale, {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-              })
-            : labels.submittedAt}
+          {formatLessonReportDate(row.lessonDate, locale) ?? labels.submittedAt}
         </Typography>
         {row.status ? (
           <StatusBadge category="classInstance" status={row.status} label={resolveStatusLabel(row.status)} />
         ) : null}
       </Box>
-      <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1, mt: cardMarginTop }}>
+      <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1, mt: 1 }}>
         {row.durationMinutes != null ? (
           <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
             {labels.durationMinutes}: {row.durationMinutes}
@@ -82,12 +98,12 @@ function LessonReportCardContent({
         ) : null}
       </Stack>
       {row.teacherNotes ? (
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, mt: cardMarginTop }}>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, mt: 1 }}>
           {labels.teacherNotes}: {row.teacherNotes}
         </Typography>
       ) : null}
       {row.status === LessonReportStatus.Rejected && row.rejectionReason ? (
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main, mt: cardMarginTop }}>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main, mt: 1 }}>
           {labels.rejectionReason}: {row.rejectionReason}
         </Typography>
       ) : null}
@@ -95,93 +111,31 @@ function LessonReportCardContent({
   );
 }
 
-function LessonReportCard({
-  row,
-  labels,
-  locale,
-  resolveStatusLabel,
-  slots,
-  options,
-}: Readonly<{
-  row: LessonReportRow;
-  labels: CardLabels;
-  locale: Locale;
-  resolveStatusLabel: ResolveStatusLabel;
-  slots: TeacherLessonReportsViewSharedSlots;
-  options: TeacherLessonReportsViewSharedOptions;
-}>) {
-  return (
-    <slots.CardWrapper>
-      <LessonReportCardContent
-        row={row}
-        labels={labels}
-        locale={locale}
-        resolveStatusLabel={resolveStatusLabel}
-        cardMarginTop={options.cardMarginTop}
-      />
-    </slots.CardWrapper>
-  );
-}
-
 export function TeacherLessonReportsViewShared({
-  rows,
-  loading,
-  error,
   statusFilter,
   statusOptions,
   labelsBySection,
-  locale,
   onStatusFilterChange,
-  resolveStatusLabel,
   slots,
-  options,
+  children,
 }: TeacherLessonReportsViewSharedProps) {
-  const { shell, filters, cards: labels } = labelsBySection;
+  const { shell, filters } = labelsBySection;
 
   return (
     <slots.PageContainer>
       <slots.PageHeader title={shell.title} />
-      <slots.ContentWrapper>
-        <FormControl size="small" sx={{ minWidth: 220, maxWidth: { sm: 280 } }}>
-          <InputLabel id="lesson-report-status-filter-label">{filters.filterAll}</InputLabel>
-          <Select
-            labelId="lesson-report-status-filter-label"
-            value={statusFilter}
-            label={filters.filterAll}
-            onChange={e => onStatusFilterChange(e.target.value)}
-          >
-            {statusOptions.map(option => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {loading ? <LoadingState /> : null}
-
-        {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{shell.emptyMessage}</Typography> : null}
-
-        {!loading && !error && rows.length === 0 ? (
-          <Typography sx={{ color: theme => theme.palette.text.secondary }}>{shell.emptyMessage}</Typography>
-        ) : null}
-
-        {!loading && !error && rows.length > 0 ? (
-          <Stack spacing={1}>
-            {rows.map((row, index) => (
-              <LessonReportCard
-                key={row.id ?? row.classInstanceId ?? `row-${index}`}
-                row={row}
-                labels={labels}
-                locale={locale}
-                resolveStatusLabel={resolveStatusLabel}
-                slots={slots}
-                options={options}
-              />
-            ))}
-          </Stack>
-        ) : null}
-      </slots.ContentWrapper>
+      <slots.SectionPanel
+        actions={
+          <LessonReportStatusFilter
+            statusFilter={statusFilter}
+            statusOptions={statusOptions}
+            filterLabels={filters}
+            onStatusFilterChange={onStatusFilterChange}
+          />
+        }
+      >
+        {children}
+      </slots.SectionPanel>
     </slots.PageContainer>
   );
 }

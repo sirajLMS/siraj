@@ -387,3 +387,40 @@ bun run scripts/health/sub-loop.ts <file-path> --lifecycle duplicates
 - [ ] 🔗 Plan 5 (`carryover-balance-module`) — `carryover_balances.id` queryable for the "From Carryover" drill-down; `CarryoverDetailDrawer` component importable.
 - [ ] 🔗 Plan 6 (`expense-ledger`) — `expenses.expense_date` + `expenses.deleted_at` indexed; `ExpenseTypeChip` + `ExpenseSourceChip` + `ExpenseDetailDrawer` components importable.
 - [ ] Existing FX module — `FxService.getLatestRate(from, to)` callable.
+
+---
+
+## Test Coverage Backfill: Cross-Actor Journeys & 4-Tier Enforcement
+
+> Closes the gap between this plan and the enforced test kinds added later to the spec process
+> (.agents/skills/spec-implementation/SKILL.md → "Plan Intake" items 5-7 + "Test-Layer Coverage
+> Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
+> additive and execute before this plan is treated as test-complete.
+
+- [ ] TB.1 Journey: student/parent cash-in payment recorded → executive sees it in Income Payments + Profits summary (cash-in visibility)
+  - Create `test/workflows/accounting/profit-loss-cash-in-visibility.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` — student, parent, package, `payments` row via the real billing/payment service — + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")` and assert none are dispatched — this plan explicitly defers notifications)
+  - Assert: shared-state transitions (a payment recorded by the billing actor appears in `ProfitLossService.getReport`'s `incomePaymentsPage` and `profitsSummary.incomePayments` for that month and no other month), cross-actor visibility (executive with `ACCOUNTING_PROFITS_VIEW` sees it; payment actor's own view unchanged), side effects (Total Income Payments + Net Profit aggregates move correctly), denial paths (same query as a user without the permission is rejected before any data is read)
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/accounting/profit-loss-cash-in-visibility.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: US-5 (AC-5.1–AC-5.3), US-6 (AC-6.1), US-8 (AC-8.1, AC-8.2)_
+- [ ] TB.2 Journey: teacher session completed + payroll/deduction calculated → executive sees earned revenue in Payments tab (earned-revenue visibility)
+  - Create `test/workflows/accounting/profit-loss-earned-revenue.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` — teacher, student, class instance driven to `executionState = COMPLETED` + an allowed `calculationStatus` via the real payroll-calculation path 🔗 Plan 3, plus a manual subtract credit via Plan 2's credit-adjustment path — + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy `dispatchWithPreferences` and assert none dispatched from the read path)
+  - Assert: shared-state transitions (completed+calculated session surfaces in `paymentsPage` with the subtract credit summed into Total Payments; `NOT_CALCULATED` sessions do NOT surface), cross-actor visibility (executive sees it; teacher/student roles cannot call `profitLossReport`), side effects (Total Payments and Net Profit move correctly), denial paths for unauthorized actors
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/accounting/profit-loss-earned-revenue.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: US-3 (AC-3.1–AC-3.3), US-6 (AC-6.1), US-8 (AC-8.1, AC-8.2)_
+- [ ] TB.3 Journey: manager records expense / carryover settlement auto-generates Salaries expense → executive sees it in Expenses tab and Net Profit drops (expense visibility)
+  - Create `test/workflows/accounting/profit-loss-expense-visibility.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` — one manual expense via the real expense service 🔗 Plan 6, one carryover-sourced `Salaries` expense via the real carryover settlement path 🔗 Plan 5 — + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy `dispatchWithPreferences` and assert none dispatched from the read path)
+  - Assert: shared-state transitions (both expense kinds appear in `expensesPage` for `expenseDate` month; the carryover one carries its source linkage; soft-deleted expenses disappear), cross-actor visibility (executive sees them; the manager without `ACCOUNTING_PROFITS_VIEW` does not gain report access), side effects (Total Expenses + Net Profit recompute correctly), denial paths for unauthorized actors
+  - Verify: `bun run test/scripts/run-test.ts test/workflows/accounting/profit-loss-expense-visibility.test.ts` green, then `bun run test:workflows`
+  - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
+  - _Requirements: US-4 (AC-4.1–AC-4.5), US-6 (AC-6.1–AC-6.3), US-8 (AC-8.1, AC-8.2), NFR-9_
+- [ ] TB.4 4-Tier verification for P&L service, repository extensions, GraphQL query, and CSV export routes
+  - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/services/accounting/profit-loss.service.ts`, `backend/services/accounting/profit-loss-helpers.ts`, `backend/db/repo/scheduling/class-instances.ts` (`findProfitLossPayments`), `backend/db/repo/expenses/expense.repository.ts` (`findProfitLossExpenses`), `backend/db/repo/billing/payments.repository.ts` (`findProfitLossIncome`), `backend/db/repo/billing/credit-transactions.repository.ts` (`findSubtractCreditsByInstanceIds`), `backend/graphql/query/accounting/profit-loss.query.ts`, `app/api/profit-loss/{payments,expenses,income,summary}/export/route.ts`
+  - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels (FX service)
+  - Verify with `bun run test/scripts/run-test.ts <each test file>`
+  - _Requirements: US-2 (AC-2.3, AC-2.4), US-3, US-4, US-5, US-6, US-7 (AC-7.1–AC-7.6), US-8, NFR-9, NFR-12, E2, E13, E14, E17, E19 — cross-cutting across the read model_
+- [ ] TB.5 Penetration verification (plan adds a new GraphQL query + 4 new CSV export endpoints)
+  - BOLA/IDOR across the roles in this plan (`profitLossReport` + CSV exports must not leak financial rows to teacher/student/parent/manager roles lacking `ACCOUNTING_PROFITS_VIEW`); permission denial on every export route (403 without the permission); wildcard/regex injection on the `month` argument (`YYYY-MM` validation must reject patterns like `%`, `.*`, `2024-1`, `2024-13`); CSV formula-injection check on exported cells
+  - Via `.agents/skills/pentester/SKILL.md`
+  - _Requirements: US-8 (AC-8.1–AC-8.4), NFR-5, AC-2.x (E11), E13_

@@ -1,44 +1,55 @@
 "use client";
 
-import { Box, Stack } from "@mui/material";
-import { TeacherLessonReportsViewShared } from "@/frontend/common/views/dashboard/teachers/lesson-reports/__shared__/teacherLessonReportsViewShared";
-import type { TeacherLessonReportsViewModel } from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
+import type { GridColDef } from "@mui/x-data-grid";
+import { useMemo } from "react";
+import {
+  type TeacherLessonReportsSectionPanelSlotProps,
+  TeacherLessonReportsViewShared,
+} from "@/frontend/common/views/dashboard/teachers/lesson-reports/__shared__/teacherLessonReportsViewShared";
+import type {
+  TeacherLessonReportRow,
+  TeacherLessonReportsViewModel,
+} from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
+import { buildTeacherLessonReportColumns } from "@/frontend/common/views/dashboard/teachers/lesson-reports/utils";
+import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
-function DesktopCardWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
+function DesktopReportsSectionPanel({ actions, children }: Readonly<TeacherLessonReportsSectionPanelSlotProps>) {
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        borderRadius: 1,
-        border: `1px solid ${theme.palette.border.light}`,
-        display: "flex",
-        flexDirection: "column",
-        gap: 1,
-      })}
-    >
+    <DesktopSectionPanel contentPadding={false} actions={actions}>
       {children}
-    </Box>
+    </DesktopSectionPanel>
   );
 }
 
-function DesktopContentWrapper({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <Stack spacing={2}>{children}</Stack>;
-}
-
 export function TeacherLessonReportsDesktopView(props: Readonly<TeacherLessonReportsViewModel>) {
+  const { rows, loading, labelsBySection, locale, resolveStatusLabel } = props;
+  const { shell, columns: columnLabels } = labelsBySection;
+
+  const columns = useMemo<GridColDef<TeacherLessonReportRow>[]>(
+    () => buildTeacherLessonReportColumns({ labels: columnLabels, locale, resolveStatusLabel }),
+    [columnLabels, locale, resolveStatusLabel]
+  );
+
   return (
     <TeacherLessonReportsViewShared
       {...props}
       slots={{
         PageContainer: DesktopPageContainer,
         PageHeader: DesktopPageHeader,
-        ContentWrapper: DesktopContentWrapper,
-        CardWrapper: DesktopCardWrapper,
+        SectionPanel: DesktopReportsSectionPanel,
       }}
-      options={{
-        cardMarginTop: 0,
-      }}
-    />
+    >
+      <DesktopAppDataGrid<TeacherLessonReportRow>
+        rows={rows}
+        columns={columns}
+        getRowId={row => row.id ?? row.classInstanceId ?? ""}
+        emptyMessage={shell.emptyMessage}
+        loading={loading}
+        autoHeight
+        rowHeight={56}
+        paginationOptions={{ mode: "client" }}
+      />
+    </TeacherLessonReportsViewShared>
   );
 }

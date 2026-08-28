@@ -1,8 +1,8 @@
 "use client";
 
-import { Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import type { FC, ReactNode } from "react";
-import { LoadingState } from "@/frontend/common/components/ui";
+import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherStudentsViewModel } from "@/frontend/common/views/dashboard/teachers/students/useTeacherStudentsViewModel";
 
@@ -20,8 +20,8 @@ export interface TeacherStudentsViewSharedListProps {
 export interface TeacherStudentsViewSharedSlots {
   readonly PageContainer: FC<Readonly<{ children: ReactNode }>>;
   readonly PageHeader: FC<Readonly<{ title: string; subtitle: string }>>;
-  readonly RowWrapper: FC<Readonly<{ children: ReactNode }>>;
-  readonly ListWrapper?: FC<Readonly<TeacherStudentsViewSharedListProps>>;
+  readonly RowWrapper?: FC<Readonly<{ children: ReactNode }>>;
+  readonly ListWrapper: FC<Readonly<TeacherStudentsViewSharedListProps>>;
 }
 
 function StudentRowContent({ row, labels }: Readonly<{ row: StudentRow; labels: StudentLabels }>) {
@@ -48,7 +48,7 @@ export function StudentRowCardShared({
 }: Readonly<{
   row: StudentRow;
   labels: StudentLabels;
-  RowWrapper: TeacherStudentsViewSharedSlots["RowWrapper"];
+  RowWrapper: FC<Readonly<{ children: ReactNode }>>;
 }>) {
   return (
     <RowWrapper>
@@ -62,45 +62,27 @@ export function TeacherStudentsViewShared({
   loading,
   error,
   labels,
+  paginationOptions,
   slots,
 }: Readonly<TeacherStudentsViewModel> & {
   readonly slots: TeacherStudentsViewSharedSlots;
 }) {
-  const { PageContainer, PageHeader, RowWrapper, ListWrapper } = slots;
-
-  const renderBody = () => {
-    if (rows.length === 0) {
-      return <Typography sx={{ color: theme => theme.palette.text.secondary }}>{labels.noStudents}</Typography>;
-    }
-
-    if (ListWrapper) {
-      return (
-        <ListWrapper
-          rows={rows}
-          labels={labels}
-          emptyMessage={labels.noStudents}
-          getKey={row => row.id ?? row.name ?? ""}
-          paginationOptions={{ mode: "client" }}
-        />
-      );
-    }
-
-    return (
-      <Stack spacing={1}>
-        {rows.map((row: StudentRow) => {
-          const key = row.id ?? row.name ?? "";
-          return <StudentRowCardShared key={key} row={row} labels={labels} RowWrapper={RowWrapper} />;
-        })}
-      </Stack>
-    );
-  };
+  const { PageContainer, PageHeader, ListWrapper } = slots;
 
   return (
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
       {loading ? <LoadingState /> : null}
-      {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.failedToLoad}</Typography> : null}
-      {!loading && !error ? renderBody() : null}
+      {error ? <ErrorState embedded message={labels.failedToLoad} /> : null}
+      {!loading && !error ? (
+        <ListWrapper
+          rows={rows}
+          labels={labels}
+          emptyMessage={labels.noStudents}
+          getKey={row => row.id ?? row.name ?? ""}
+          paginationOptions={paginationOptions}
+        />
+      ) : null}
     </PageContainer>
   );
 }

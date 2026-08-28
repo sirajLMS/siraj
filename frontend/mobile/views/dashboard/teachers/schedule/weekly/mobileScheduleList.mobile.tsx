@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Button, Typography } from "@mui/material";
+import { DeleteOutlined } from "@mui/icons-material";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   isTerminalClassInstance,
@@ -45,6 +46,7 @@ interface SlotItemActionsProps {
   readonly showDelete: boolean;
   readonly hasScheduleDeleteClass: boolean;
   readonly classItem: ScheduledClass;
+  readonly labels: TeacherWeeklyScheduleLabels;
   readonly meetingJoinLabels: MeetingConfigJoinLabels;
   readonly onDeleteClick: (event: React.MouseEvent) => void;
 }
@@ -54,6 +56,7 @@ function SlotItemActions({
   showDelete,
   hasScheduleDeleteClass,
   classItem,
+  labels,
   meetingJoinLabels,
   onDeleteClick,
 }: Readonly<SlotItemActionsProps>) {
@@ -74,19 +77,20 @@ function SlotItemActions({
         />
       ) : null}
       {showDelete && hasScheduleDeleteClass ? (
-        <Box
-          component="span"
-          className="material-symbols-outlined"
-          sx={theme => ({
-            fontSize: 20,
-            cursor: "pointer",
-            opacity: 0.7,
-            "&:hover": { color: theme.palette.error.main, opacity: 1 },
-          })}
-          onClick={onDeleteClick}
-        >
-          delete
-        </Box>
+        <Tooltip title={labels.actions.deleteClass}>
+          <IconButton
+            size="small"
+            aria-label={labels.actions.deleteClass}
+            onClick={onDeleteClick}
+            sx={theme => ({
+              color: theme.palette.onPrimaryContainer,
+              opacity: 0.7,
+              "&:hover": { color: theme.palette.error.main, opacity: 1 },
+            })}
+          >
+            <DeleteOutlined fontSize="small" />
+          </IconButton>
+        </Tooltip>
       ) : null}
     </Box>
   );
@@ -209,6 +213,7 @@ function MobileSlotItem({
           showDelete={showDelete}
           hasScheduleDeleteClass={hasScheduleDeleteClass}
           classItem={classItem}
+          labels={labels}
           meetingJoinLabels={meetingJoinLabels}
           onDeleteClick={handleDeleteClick}
         />

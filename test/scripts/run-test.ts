@@ -8,6 +8,20 @@ const PROJECT_ROOT = process.cwd();
 const LOGS_DIR = join(PROJECT_ROOT, "logs");
 const FEEDBACK_DIR = join(PROJECT_ROOT, "test", "scripts", "feedback");
 
+// Component tests under test/ui/components need the browser DOM and translation
+// preloads that package.json wires into `test:ui:components`; without them the
+// experienced failure mode is `screen` reporting "no global document".
+const UI_COMPONENT_TEST_PRELOADS = [
+  "--preload",
+  "./test/ui/test-env.ts",
+  "--preload",
+  "./test/ui/components/happydom-preload.ts",
+  "--preload",
+  "./test/ui/components/translation-preload.ts",
+  "--preload",
+  "./test/ui/components/next-dynamic-mock.ts",
+];
+
 function logInfo(message: string): void {
   process.stderr.write(`[run-test] ${message}\n`);
 }
@@ -151,7 +165,9 @@ async function runTest(testPath: string): Promise<number> {
 
   logInfo(`Running: bun test ${testPath}`);
 
-  const proc = Bun.spawn([BUN_BIN, "--env-file=.env.test", "test", testPath, "--timeout=60000"], {
+  const preloadArgs = testPath.includes("test/ui/components") ? UI_COMPONENT_TEST_PRELOADS : [];
+
+  const proc = Bun.spawn([BUN_BIN, "--env-file=.env.test", "test", testPath, "--timeout=60000", ...preloadArgs], {
     stdout: "pipe",
     stderr: "pipe",
     env: { ...process.env, DATABASE_URL: undefined, FORCE_COLOR: "0", NODE_ENV: "test", SIRAJ_TEST_RUNNER_OK: "1" },

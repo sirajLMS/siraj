@@ -64,6 +64,7 @@ export const dashboardClassAuditAr: ClassAuditLabels = {
     lastUpdated: time => `آخر تحديث: ${time}`,
     update: "تحديث",
     edit: "تعديل",
+    content: "محتوى الملاحظة",
   },
   meetingIdLabel: "معرف الاجتماع:",
   online: "عبر الإنترنت",

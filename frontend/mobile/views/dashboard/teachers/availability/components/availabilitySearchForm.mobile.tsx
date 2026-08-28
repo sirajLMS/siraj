@@ -18,10 +18,7 @@ export function AvailabilitySearchFormMobile(props: Readonly<AvailabilitySearchF
           gap: 2,
           p: 2,
         },
-        formControlSize: "small",
-        genderLabelIdSuffix: "mobile",
         buttonHeight: 48,
-        buttonBorderRadius: 2,
         buttonFullWidth: true,
       }}
     />

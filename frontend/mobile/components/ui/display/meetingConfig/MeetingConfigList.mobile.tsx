@@ -25,7 +25,7 @@ const MOBILE_OPTIONS = {
   chipGap: 0.75,
   actionGap: 0.25,
   statusTypographyVariant: "bodyMd",
-  wrapUrlInTooltip: false,
+  wrapUrlInTooltip: true,
   innerColumnFlex: true,
 } as const satisfies MeetingConfigListSharedOptions;
 

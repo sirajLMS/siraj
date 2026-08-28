@@ -4,7 +4,11 @@ import type {
   DayOfWeek,
   TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_classes,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import type {
+  ClassSubjectOption,
+  DayScheduleConfig,
+  RecurringMeetingConfigValidation,
+} from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassDialogFormState } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type {
   MeetingConfigManagerLabels,
@@ -101,6 +105,13 @@ export interface CreateRecurringClassDialogViewModel {
   readonly handleSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => Promise<void>;
   // PERMISSION GATE (owned by the VM via `useUserStore` — specs N3)
   readonly hasSessionCreateClass: boolean;
+  // SUBJECT OPTIONS (fetched once by the VM via `useClassSubjects` — the
+  // SubjectSelect in the dialog is presentational and receives these as props)
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
+  // MEETING CONFIG VALIDATION (owned by the VM via
+  // `useRecurringMeetingConfigValidation` — the section is presentational)
+  readonly meetingConfigValidation: RecurringMeetingConfigValidation;
   // LABELS — already fetched via `useAppTranslation` ONCE inside the VM
   // (specs §6.3 — labels travel with the ViewModel, not fetched in tier)
   readonly labels: TeacherCreateRecurringClassLabels;

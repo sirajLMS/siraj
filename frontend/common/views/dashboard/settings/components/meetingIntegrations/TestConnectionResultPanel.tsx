@@ -1,15 +1,15 @@
 "use client";
 
-import { ContentCopyOutlined, OpenInNewOutlined } from "@mui/icons-material";
-import { Alert, Box, Chip, CircularProgress, Link, Stack, Typography } from "@mui/material";
+import { OpenInNewOutlined } from "@mui/icons-material";
+import { Alert, Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type * as React from "react";
+import { CopyMeetingUrlButton } from "@/frontend/common/components/ui";
 import { FilterButton } from "@/frontend/common/components/ui/button";
 import {
   MeetingConnectionTestMode,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import { useCopyFeedback } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/useCopyFeedback";
 import type { TestConnectionState } from "@/frontend/common/views/dashboard/settings/types/meeting-ui.types";
 import type { TestMeetingConnectionResult } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
@@ -60,26 +60,17 @@ function TestButtonRow({ labels, testing, providerSlug, onRunTest }: TestButtonR
 }
 
 type TestJoinUrlRowProps = {
-  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly joinUrlLabel: string;
   readonly url: string;
-  readonly copied: boolean;
-  readonly onCopy: (url: string) => Promise<void>;
 };
 
-function TestJoinUrlRow({ labels, url, copied, onCopy }: TestJoinUrlRowProps) {
+function TestJoinUrlRow({ joinUrlLabel, url }: TestJoinUrlRowProps) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}>
       <Typography sx={{ typography: "bodyMd" }}>
-        {labels.joinUrl}: {url}
+        {joinUrlLabel}: {url}
       </Typography>
-      <Chip
-        size="small"
-        icon={<ContentCopyOutlined sx={{ fontSize: 14 }} />}
-        label={copied ? labels.testPanel.copied : labels.testPanel.copyUrl}
-        variant="outlined"
-        clickable
-        onClick={() => onCopy(url)}
-      />
+      <CopyMeetingUrlButton meetingUrl={url} variant="icon" size="small" />
     </Box>
   );
 }
@@ -164,16 +155,12 @@ function ConnectionSummaryMetrics({ labels, result, authStatusLabel }: Connectio
 }
 
 function SuccessContent({ labels, result, marketplaceUrl }: SuccessContentProps) {
-  const [copied, handleCopyUrl] = useCopyFeedback();
-
   return (
     <Alert severity="success" icon={false}>
       <Stack sx={{ gap: 0.5 }}>
         <Typography sx={{ fontWeight: 600 }}>{labels.testPanel.successMessage}</Typography>
         <ConnectionSummaryMetrics labels={labels} result={result} authStatusLabel={labels.testPanel.authSuccess} />
-        {result.testJoinUrl && (
-          <TestJoinUrlRow labels={labels} url={result.testJoinUrl} copied={copied} onCopy={handleCopyUrl} />
-        )}
+        {result.testJoinUrl && <TestJoinUrlRow joinUrlLabel={labels.joinUrl} url={result.testJoinUrl} />}
         {result.deleted !== null && (
           <Typography sx={{ typography: "bodyMd" }}>
             {labels.deleted}: {result.deleted ? labels.testSuccess : labels.notDeleted}

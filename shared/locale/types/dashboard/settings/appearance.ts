@@ -55,6 +55,8 @@ export interface SettingsAppearanceTabLabels {
   readonly toolbarPublish: string;
 
   // ─── Toast / status messages ───────────────────────────────────────
+  /** Success toast after applying a quick preset to the in-memory draft. */
+  readonly presetApplied: (presetName: string) => string;
   readonly saveDraftSuccess: string;
   readonly saveDraftError: string;
   readonly publishSuccess: string;

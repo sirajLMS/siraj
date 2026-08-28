@@ -1,9 +1,10 @@
 "use client";
 
 import { DownloadOutlined } from "@mui/icons-material";
-import { Box, OutlinedInput, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useCallback } from "react";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import {
   formatDateInput,
   parseDateInput,
@@ -16,7 +17,7 @@ import type {
   WhatsappOptInAuditEntry,
   WhatsappOptInUserState,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
-import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileContentInset, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileExportButton } from "@/frontend/mobile/components/ui/button";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container";
@@ -25,27 +26,20 @@ import { MobileEmptyState } from "@/frontend/mobile/components/ui/state";
 
 /**
  * Mobile wrapper for OptInTab. Renders the shared toggle section plus a
- * mobile-only history section with inline date filter, MobileCardList, and
- * CSV export (Task 12), and an admin consolidated opt-in view with search
- * and MobileCardList (Task 13).
+ * mobile-only opt-in history section (inline date filter, MobileCardList,
+ * CSV export) and an admin consolidated opt-in view with search.
  *
- * Task 12 — non-admin opt-in history table.
- * NOTE: Backend `whatsappOptInAuditQuery` resolver does not exist yet (Task 3).
- *       Until it ships, `auditEntries` is placeholder/mock data.
- *
- * Task 13 — admin consolidated opt-in view.
- * NOTE: Backend resolver for all-users opt-in query does not exist yet.
- *       Until it ships, `adminUsers` is placeholder/mock data.
+ * NOTE: The backend `whatsappOptInAuditQuery` resolver and the all-users
+ *       opt-in query do not exist yet. Until they ship, `auditEntries` and
+ *       `adminUsers` are placeholder/mock data.
  */
 export function OptInTabMobile(props: Readonly<OptInTabSharedProps>) {
   return (
-    <Box sx={{ p: 2 }}>
-      <OptInTabContent
-        {...props}
-        historySection={<MobileHistorySection {...props} />}
-        adminSection={<MobileAdminSection {...props} />}
-      />
-    </Box>
+    <OptInTabContent
+      {...props}
+      historySection={<MobileHistorySection {...props} />}
+      adminSection={<MobileAdminSection {...props} />}
+    />
   );
 }
 
@@ -98,32 +92,36 @@ function MobileHistorySection({
   return (
     <Stack spacing={2}>
       {/* Inline date filter */}
-      <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
-        <MobileAppDatePicker
-          label={t.optInHistoryFilterFrom}
-          value={parseDateInput(dateRange.from)}
-          onChange={(date: Date | null) => onDateRangeChange({ ...dateRange, from: formatDateInput(date) })}
-          sx={{ flex: 1 }}
-        />
-        <MobileAppDatePicker
-          label={t.optInHistoryFilterTo}
-          value={parseDateInput(dateRange.to)}
-          onChange={(date: Date | null) => onDateRangeChange({ ...dateRange, to: formatDateInput(date) })}
-          sx={{ flex: 1 }}
-        />
-      </Stack>
+      <MobileContentInset>
+        <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
+          <MobileAppDatePicker
+            label={t.optInHistoryFilterFrom}
+            value={parseDateInput(dateRange.from)}
+            onChange={(date: Date | null) => onDateRangeChange({ ...dateRange, from: formatDateInput(date) })}
+            sx={{ flex: 1 }}
+          />
+          <MobileAppDatePicker
+            label={t.optInHistoryFilterTo}
+            value={parseDateInput(dateRange.to)}
+            onChange={(date: Date | null) => onDateRangeChange({ ...dateRange, to: formatDateInput(date) })}
+            sx={{ flex: 1 }}
+          />
+        </Stack>
+      </MobileContentInset>
 
       {/* Export button */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-        <MobileExportButton
-          startIcon={<DownloadOutlined />}
-          onClick={handleExport}
-          disabled={filteredEntries.length === 0}
-          aria-label={t.optInHistoryExport}
-        >
-          {t.optInHistoryExport}
-        </MobileExportButton>
-      </Box>
+      <MobileContentInset>
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <MobileExportButton
+            startIcon={<DownloadOutlined />}
+            onClick={handleExport}
+            disabled={filteredEntries.length === 0}
+            aria-label={t.optInHistoryExport}
+          >
+            {t.optInHistoryExport}
+          </MobileExportButton>
+        </Box>
+      </MobileContentInset>
 
       {/* History list */}
       {filteredEntries.length === 0 ? (
@@ -177,23 +175,9 @@ function MobileAdminSection({ labels, adminUsers }: Readonly<OptInTabSharedProps
   return (
     <Stack spacing={2}>
       {/* Search input */}
-      <OutlinedInput
-        type="search"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        placeholder={t.optInAdminSearchPlaceholder}
-        autoComplete="off"
-        sx={{
-          width: "100%",
-          boxSizing: "border-box",
-          padding: "8px 12px",
-          borderRadius: 1,
-          border: theme => `1px solid ${theme.palette.divider}`,
-          outline: "none",
-          fontSize: theme => theme.typography.bodyMd.fontSize,
-          fontFamily: "inherit",
-        }}
-      />
+      <MobileContentInset>
+        <SearchBarField value={search} onChange={setSearch} placeholder={t.optInAdminSearchPlaceholder} />
+      </MobileContentInset>
 
       {/* User list */}
       {filteredUsers.length === 0 ? (

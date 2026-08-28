@@ -1,93 +1,48 @@
 "use client";
 
 import { AssignmentTurnedInOutlined, EventRepeatOutlined, PowerSettingsNewOutlined } from "@mui/icons-material";
-import { Box, Button, type SxProps, styled, type Theme, Tooltip, Typography } from "@mui/material";
+import { Box, type ButtonProps, type SxProps, type Theme, Tooltip, Typography } from "@mui/material";
+import type { ComponentType, ReactElement, ReactNode } from "react";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import {
   computeSessionStatus,
   SessionStatus,
   type StatusActionProps,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 
-const StyledActionButton = styled(Button, {
-  shouldForwardProp: prop => prop !== "minWidthLg",
-})<{ minWidthLg?: number | string }>(({ theme, minWidthLg }) => ({
-  fontFamily: '"Inter", sans-serif',
-  fontSize: theme.typography.labelUppercase.fontSize,
-  fontWeight: 700,
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-  paddingTop: theme.spacing(0.75),
-  paddingBottom: theme.spacing(0.75),
-  borderRadius: theme.spacing(1.5),
-  boxShadow: "none",
-  "&:hover": {
-    boxShadow: "none",
-  },
-  "& .MuiButton-startIcon": {
-    marginLeft: "-4px",
-    marginRight: "-4px",
-    [theme.breakpoints.down("lg")]: {
-      marginLeft: 0,
-      marginRight: 0,
-    },
-  },
-  minWidth: "unset",
-  paddingLeft: theme.spacing(2),
-  paddingRight: theme.spacing(2),
-  [theme.breakpoints.down("lg")]: {
-    minWidth: minWidthLg ?? "auto",
-    paddingLeft: theme.spacing(1),
-    paddingRight: theme.spacing(1),
-  },
-}));
-
-const StyledTooltip = styled(Tooltip)({
-  arrow: true,
-  placement: "top",
-});
-
-interface ActionButtonWrapperProps {
+interface StatusActionButtonProps {
   readonly id: string;
   readonly label: string;
-  readonly icon: React.ReactNode;
-  readonly tooltipTitle: React.ReactNode;
-  readonly variant?: "contained" | "outlined";
+  readonly icon: ReactElement;
+  readonly tooltipTitle: ReactNode;
+  readonly ActionButton: ComponentType<ButtonProps>;
   readonly sx?: SxProps<Theme>;
-  readonly minWidthLg?: number | string;
   readonly disabled?: boolean;
   readonly onClick: () => void;
 }
 
-const ActionButtonWrapper = ({
+function StatusActionButton({
   id,
   label,
   icon,
   tooltipTitle,
-  variant = "contained",
+  ActionButton,
   sx,
-  minWidthLg,
   disabled,
   onClick,
-}: ActionButtonWrapperProps) => (
-  <StyledTooltip title={tooltipTitle}>
-    <StyledActionButton
-      id={id}
-      variant={variant}
-      size="small"
-      minWidthLg={minWidthLg}
-      disabled={disabled}
-      onClick={onClick}
-      sx={sx}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        {icon}
-        <Typography variant="labelUppercase" sx={{ display: { xs: "none", md: "none", lg: "inline" } }}>
-          {label}
-        </Typography>
+}: Readonly<StatusActionButtonProps>) {
+  return (
+    <Tooltip title={tooltipTitle}>
+      <Box component="span" sx={{ display: "inline-flex" }}>
+        <ActionButton id={id} size="small" disabled={disabled} onClick={onClick} startIcon={icon} sx={sx}>
+          <Box component="span" sx={{ display: { xs: "none", lg: "inline" } }}>
+            {label}
+          </Box>
+        </ActionButton>
       </Box>
-    </StyledActionButton>
-  </StyledTooltip>
-);
+    </Tooltip>
+  );
+}
 
 export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }: StatusActionProps) {
   const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
@@ -99,7 +54,7 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
 
   if (sessionStatus === SessionStatus.SUSPENDED_PENDING) {
     return (
-      <ActionButtonWrapper
+      <StatusActionButton
         id={`activate-session-${rowId}`}
         label={labels.activate}
         icon={<PowerSettingsNewOutlined />}
@@ -107,7 +62,6 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
           <Box>
             <Typography
               sx={theme => ({
-                fontFamily: '"Inter", sans-serif',
                 typography: "labelUppercase",
                 fontWeight: 700,
                 mb: 0.5,
@@ -119,11 +73,10 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
             <Typography sx={{ typography: "labelUppercase" }}>{labels.holdDescription}</Typography>
           </Box>
         }
-        variant="outlined"
+        ActionButton={FilterButton}
         sx={theme => ({
           color: theme.palette.text.secondary,
           borderColor: theme.palette.border.light,
-          letterSpacing: "0.06em",
         })}
         disabled
         onClick={() => {
@@ -135,11 +88,12 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
 
   if (sessionStatus === SessionStatus.ON_LEAVE) {
     return (
-      <ActionButtonWrapper
+      <StatusActionButton
         id={`reschedule-session-${rowId}`}
         label={labels.reschedule}
         icon={<EventRepeatOutlined />}
         tooltipTitle={labels.reschedule}
+        ActionButton={PrimaryPageAction}
         sx={theme => ({
           backgroundColor: theme.palette.secondaryContainer,
           color: theme.palette.onSecondaryContainer,
@@ -156,11 +110,12 @@ export function StatusAction({ row, labels, onActivate, onReschedule, onVerify }
   }
 
   return (
-    <ActionButtonWrapper
+    <StatusActionButton
       id={`verify-session-${rowId}`}
       label={labels.verifyDocuments}
       icon={<AssignmentTurnedInOutlined />}
       tooltipTitle={labels.verifyDocuments}
+      ActionButton={PrimaryPageAction}
       sx={theme => ({
         backgroundColor: theme.palette.status.pendingContainer,
         color: theme.palette.status.onPendingContainer,

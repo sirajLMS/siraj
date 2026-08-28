@@ -316,7 +316,10 @@ export function RecurringClassFormFieldsShared({
   control,
   isSubmitting,
   labels,
+  subjects,
+  subjectsLoading,
   meetingConfig,
+  meetingConfigValidation,
   onMeetingConfigChangeAction,
   options,
 }: RecurringClassFormFieldsProps & {
@@ -348,6 +351,8 @@ export function RecurringClassFormFieldsShared({
         control={control}
         label={labels.subject}
         placeholder={labels.subjectPlaceholder}
+        subjects={subjects}
+        loading={subjectsLoading}
         error={errors.subjectId?.message}
         disabled={isSubmitting}
       />
@@ -357,6 +362,7 @@ export function RecurringClassFormFieldsShared({
           teacherId={teacherId}
           value={meetingConfig}
           onChangeAction={onMeetingConfigChangeAction}
+          validation={meetingConfigValidation}
           disabled={isSubmitting}
         />
       ) : null}

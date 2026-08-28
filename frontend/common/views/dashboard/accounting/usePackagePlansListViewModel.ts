@@ -2,7 +2,9 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { packagePlansQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingPackagePlans } from "@/shared/locale/namespaces";
 import type { PackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans";
@@ -19,6 +21,8 @@ export interface PackagePlansListViewModel {
   readonly error: boolean;
   readonly activeCount: number;
   readonly archivedCount: number;
+  /** True when the caller holds ACCOUNTING_PAYMENTS_MANAGE (create/edit/archive). */
+  readonly canManagePackages: boolean;
 }
 
 export function usePackagePlansListViewModel(): PackagePlansListViewModel {
@@ -41,11 +45,15 @@ export function usePackagePlansListViewModel(): PackagePlansListViewModel {
     return { activeCount, archivedCount: rows.length - activeCount };
   }, [rows]);
 
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canManagePackages = hasPermission(AppPermission.AccountingPaymentsManage);
+
   return {
     t,
     rows,
     loading,
     error: Boolean(error),
     ...counts,
+    canManagePackages,
   };
 }

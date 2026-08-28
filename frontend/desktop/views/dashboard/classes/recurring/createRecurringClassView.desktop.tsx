@@ -27,7 +27,10 @@ export function CreateRecurringClassViewDesktop(viewModel: Readonly<CreateRecurr
     setValue,
     control,
     errors,
+    subjects,
+    subjectsLoading,
     meetingConfig,
+    meetingConfigValidation,
     onMeetingConfigChange,
   } = viewModel;
 
@@ -73,7 +76,10 @@ export function CreateRecurringClassViewDesktop(viewModel: Readonly<CreateRecurr
             goToClassLabel={notifications.goToClassLabel}
             onGoToCreatedClass={onGoToCreatedClass}
             formLabels={form}
+            subjects={subjects}
+            subjectsLoading={subjectsLoading}
             meetingConfig={meetingConfig}
+            meetingConfigValidation={meetingConfigValidation}
             onMeetingConfigChangeAction={onMeetingConfigChange}
             onSubmit={data => onSubmit(data, meetingConfig)}
           />

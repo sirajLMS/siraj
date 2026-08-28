@@ -9,6 +9,7 @@ import { ClassDetailsStudentView } from "@/frontend/common/views/dashboard/class
 import { ClassDetailsTeacherView } from "@/frontend/common/views/dashboard/classes/details/teacher/ClassDetailsTeacherView";
 import type {
   AdminViewProps,
+  ClassDetailsMetricGridSlot,
   StudentViewProps,
   TeacherViewProps,
 } from "@/frontend/common/views/dashboard/classes/details/types";
@@ -18,13 +19,21 @@ import {
   useTeacherViewLabels,
 } from "@/frontend/common/views/dashboard/classes/details/useClassDetailsLabels";
 
-const AdminView = (props: AdminViewProps) => {
+interface AdminViewWrapperProps extends AdminViewProps {
+  readonly livePerformanceMetricGrid: ClassDetailsMetricGridSlot;
+}
+
+const AdminView = (props: AdminViewWrapperProps) => {
   const labels = useAdminViewLabels(props.instance.studentTimezone ?? "");
   const instance = useLocalizedClassInstance(props.instance);
   return <ClassDetailsAdminView {...props} instance={instance} labels={labels} />;
 };
 
-const TeacherView = (props: TeacherViewProps) => {
+interface TeacherViewWrapperProps extends TeacherViewProps {
+  readonly performanceMetricGrid: ClassDetailsMetricGridSlot;
+}
+
+const TeacherView = (props: TeacherViewWrapperProps) => {
   const labels = useTeacherViewLabels(props.instance.studentTimezone ?? "");
   const instance = useLocalizedClassInstance(props.instance);
   return <ClassDetailsTeacherView {...props} instance={instance} labels={labels} />;
@@ -49,15 +58,18 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
     sessionActionProps,
     feedbackState,
     deleteDialogOpen,
+    onOpenDeleteDialog,
     onCloseDeleteDialog,
     onConfirmDelete,
+    onGenerateLog,
+    overrideRateDialog,
     t,
     headerLabels,
     formattedScheduledDate,
     formattedStartTime,
     formattedEndTime,
   } = props;
-  const { Header } = slots;
+  const { Header, TeacherPerformanceMetricGrid, LivePerformanceMetricGrid } = slots;
 
   const viewContent = (() => {
     if (canOverride) {
@@ -68,10 +80,12 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
           onDismissWarning={onDismissWarning}
           onForceActivate={handlers.handleForceActivate}
           onStop={handlers.handleStop}
-          onGenerateLog={() => {}}
+          onGenerateLog={onGenerateLog}
           onReschedule={handlers.handleReschedule}
-          onDelete={() => {}}
+          onDelete={onOpenDeleteDialog}
           handlers={handlers}
+          overrideRateDialog={overrideRateDialog}
+          livePerformanceMetricGrid={LivePerformanceMetricGrid}
           formattedScheduledDate={formattedScheduledDate}
           formattedStartTime={formattedStartTime}
           formattedEndTime={formattedEndTime}
@@ -86,7 +100,7 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
           isWarningDismissed={isWarningDismissed}
           onDismissWarning={onDismissWarning}
           onStop={handlers.handleStop}
-          onDelete={() => {}}
+          onDelete={onOpenDeleteDialog}
           formattedScheduledDate={formattedScheduledDate}
           formattedStartTime={formattedStartTime}
           formattedEndTime={formattedEndTime}
@@ -104,7 +118,8 @@ export function ClassDetailsContentShared({ props, slots }: Readonly<ClassDetail
           onActivate={handlers.handleActivate}
           onStop={handlers.handleStop}
           onInfoEdit={handlers.handleInfoEdit}
-          onDelete={() => {}}
+          onDelete={onOpenDeleteDialog}
+          performanceMetricGrid={TeacherPerformanceMetricGrid}
           formattedScheduledDate={formattedScheduledDate}
           formattedStartTime={formattedStartTime}
           formattedEndTime={formattedEndTime}

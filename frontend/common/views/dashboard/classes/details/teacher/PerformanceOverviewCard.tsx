@@ -1,55 +1,20 @@
 "use client";
 
-import { Box, Grid, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui";
+import {
+  buildPerformanceOverviewMetrics,
+  type PerformanceOverviewLabels,
+} from "@/frontend/common/views/dashboard/classes/details/teacher/performanceOverviewMetrics";
+import type { ClassDetailsMetricGridSlot } from "@/frontend/common/views/dashboard/classes/details/types";
 
 interface PerformanceOverviewCardProps {
   readonly attendanceRate: number;
   readonly avgGrade: string;
   readonly lastClassDaysAgo: number;
   readonly hasData: boolean;
-  readonly labels: {
-    readonly previousPerformanceOverview: string;
-    readonly attendanceRate: string;
-    readonly avgGrade: string;
-    readonly lastClass: string;
-    readonly days: string;
-    readonly noData: string;
-  };
-}
-
-interface StatBoxProps {
-  readonly label: string;
-  readonly value: string;
-}
-
-// Rounded default-background container for a single performance stat
-const StyledStatBox = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  backgroundColor: theme.palette.background.default,
-  borderRadius: theme.shape.borderRadius,
-  textAlign: "center",
-}));
-
-const StyledStatLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onSurfaceVariant,
-  display: "block",
-}));
-
-const StyledStatValue = styled(Typography)(({ theme }) => ({
-  color: theme.palette.primary.main,
-}));
-
-function StatBox({ label, value }: StatBoxProps) {
-  return (
-    <StyledStatBox>
-      <StyledStatLabel variant="caption" sx={{ mb: 0.5 }}>
-        {label}
-      </StyledStatLabel>
-      <StyledStatValue variant="headlineMd">{value}</StyledStatValue>
-    </StyledStatBox>
-  );
+  readonly labels: PerformanceOverviewLabels;
+  readonly MetricGrid: ClassDetailsMetricGridSlot;
 }
 
 export function PerformanceOverviewCard({
@@ -58,24 +23,17 @@ export function PerformanceOverviewCard({
   lastClassDaysAgo,
   hasData,
   labels,
+  MetricGrid,
 }: PerformanceOverviewCardProps) {
+  const metricItems = buildPerformanceOverviewMetrics({ attendanceRate, avgGrade, lastClassDaysAgo, labels });
+
   return (
     <BaseCard edgeToEdge>
       <Typography variant="titleLg" sx={theme => ({ mb: 2.5, color: theme.palette.text.primary })}>
         {labels.previousPerformanceOverview}
       </Typography>
       {hasData ? (
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 4 }}>
-            <StatBox label={labels.attendanceRate} value={`${attendanceRate}%`} />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
-            <StatBox label={labels.avgGrade} value={avgGrade} />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
-            <StatBox label={labels.lastClass} value={`${lastClassDaysAgo} ${labels.days}`} />
-          </Grid>
-        </Grid>
+        <MetricGrid metrics={metricItems} />
       ) : (
         <Typography variant="body2" sx={{ textAlign: "center", py: 2 }}>
           {labels.noData}

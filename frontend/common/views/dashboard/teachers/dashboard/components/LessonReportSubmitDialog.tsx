@@ -20,6 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo, useState } from "react";
+import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
 import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql";
 import { logger } from "@/frontend/common/utils/logger";
 import { lessonReportFormSchema } from "@/frontend/common/views/dashboard/teachers/dashboard/schemas/lessonReportFormSchema";
@@ -45,7 +46,13 @@ interface LessonReportSubmitDialogProps {
   readonly defaultDurationMinutes?: number;
   readonly labels: LessonReportFormLabels;
   readonly onSubmit: (input: LessonReportFormSubmitInput) => Promise<void>;
+  /** Renders the dialog edge-to-edge; the mobile tier wrapper sets this. */
+  readonly fullScreen?: boolean;
 }
+
+export type { LessonReportSubmitDialogProps };
+
+const LESSON_REPORT_DIALOG_TITLE_ID = "lesson-report-submit-dialog-title";
 
 function buildInitialForm(defaultDurationMinutes?: number) {
   return {
@@ -63,6 +70,7 @@ export function LessonReportSubmitDialog({
   defaultDurationMinutes,
   labels,
   onSubmit,
+  fullScreen = false,
 }: Readonly<LessonReportSubmitDialogProps>) {
   const [form, setForm] = useState(() => buildInitialForm(defaultDurationMinutes));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -115,9 +123,17 @@ export function LessonReportSubmitDialog({
   };
 
   return (
-    <Dialog open={open} onClose={submitting ? undefined : onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      {...DialogPresets.info}
+      fullScreen={fullScreen}
+      open={open}
+      onClose={submitting ? undefined : onClose}
+      aria-labelledby={LESSON_REPORT_DIALOG_TITLE_ID}
+    >
       <form onSubmit={handleFormSubmit}>
-        <DialogTitle sx={{ typography: "titleLg" }}>{labels.dialogTitle}</DialogTitle>
+        <DialogTitle id={LESSON_REPORT_DIALOG_TITLE_ID} sx={{ typography: "titleLg" }}>
+          {labels.dialogTitle}
+        </DialogTitle>
         <DialogContent dividers>
           <Stack spacing={3} sx={{ mt: 1 }}>
             {error && <Alert severity="error">{error}</Alert>}

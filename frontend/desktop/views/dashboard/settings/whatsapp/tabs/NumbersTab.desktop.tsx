@@ -4,7 +4,6 @@ import { CloudSyncOutlined, DeleteOutlined, EditOutlined, MoreVertOutlined } fro
 import {
   Box,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -17,7 +16,6 @@ import {
   Stack,
   TextField,
   Typography,
-  useMediaQuery,
 } from "@mui/material";
 import { useCallback, useState } from "react";
 import {
@@ -28,11 +26,8 @@ import {
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/__shared__";
 import { NumbersSnackbar } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/components/NumbersSnackbar";
 import { NumberCard } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCard";
-import {
-  ROW_DELETE_DURATION,
-  ROW_ENTER_DURATION,
-  syncPulseSx,
-} from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/whatsappAnimations";
+import { NumberCardField } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCardContent";
+import { syncPulseSx } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/whatsappAnimations";
 import type { NumbersTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
 import type {
   WhatsappAccountRow,
@@ -114,14 +109,14 @@ function CredentialEditDialog({
   );
 }
 
-function ExtraChipsRow({
+function AccountIdFields({
   labels,
   account,
 }: Readonly<{ readonly labels: WhatsappLabels; readonly account: WhatsappAccountRow }>) {
   return (
     <>
-      <Chip size="small" label={`${labels.wabaId}: ${account.wabaId}`} />
-      <Chip size="small" label={`${labels.phoneNumberId}: ${account.phoneNumberId}`} />
+      <NumberCardField label={labels.wabaId} value={account.wabaId ?? "—"} />
+      <NumberCardField label={labels.phoneNumberId} value={account.phoneNumberId ?? "—"} />
     </>
   );
 }
@@ -141,10 +136,6 @@ function AccountsListSection({
   readonly onMenuOpen: (event: React.MouseEvent<HTMLElement>, account: WhatsappAccountRow) => void;
   readonly onOpenDeleteConfirmDialog: (accountId: string, displayName: string) => void;
 }>) {
-  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
-  const enterTimeout = reducedMotion ? 0 : ROW_ENTER_DURATION;
-  const deleteTimeout = reducedMotion ? 0 : ROW_DELETE_DURATION;
-
   if (accounts.length === 0) {
     return (
       <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, py: 4, textAlign: "center" }}>
@@ -163,15 +154,12 @@ function AccountsListSection({
           <NumbersListItemTransition
             key={account.id ?? account.phoneNumberId ?? index}
             visible={!isDeleting}
-            enterTimeout={enterTimeout}
-            deleteTimeout={deleteTimeout}
             ariaBusy={isDeleting}
           >
             {isDeleting ? <LinearProgress sx={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 1 }} /> : null}
             <NumberCard
               account={account}
               labels={labels}
-              chipGap={1}
               action={
                 <Box>
                   <IconButton
@@ -200,7 +188,7 @@ function AccountsListSection({
                   ) : null}
                 </Box>
               }
-              extraChips={<ExtraChipsRow labels={labels} account={account} />}
+              extraMetadata={<AccountIdFields labels={labels} account={account} />}
             />
           </NumbersListItemTransition>
         );

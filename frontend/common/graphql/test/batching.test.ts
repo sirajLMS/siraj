@@ -20,9 +20,11 @@ import {
  *    array of individual operation responses.
  * 2. Persisted queries (APQ) work correctly with batched requests.
  * 3. Unauthenticated batched requests return errors.
- * 4. The client-side Apollo provider batches only in non-production — the
- *    production server rejects batched array bodies (verified by inspecting the
- *    provider source).
+ * 4. The client-side Apollo provider batches in all environments — the
+ *    production contract between client and server (verified by inspecting
+ *    the provider and route sources).
+ * 5. A batched request consumes one rate-limit unit per operation, so
+ *    batching cannot amplify around the per-IP rate budget.
  */
 
 // ── Type guards (replace unsafe type assertions) ────────────────────────
@@ -207,6 +209,24 @@ describe("GraphQL HTTP Batching Integration Tests", () => {
     }
   });
 
+  test("batched request consumes one rate-limit unit per operation", async () => {
+    const operation = { query: "{ __typename }" };
+
+    const baseline = await sendBatchedRequest([operation]);
+    const remainingBefore = Number(baseline.headers.get("x-ratelimit-remaining"));
+    expect(Number.isNaN(remainingBefore)).toBe(false);
+
+    const batch = Array.from({ length: 4 }, () => operation);
+    const response = await sendBatchedRequest(batch);
+    expect(response.status).toBe(200);
+    const remainingAfter = Number(response.headers.get("x-ratelimit-remaining"));
+    expect(Number.isNaN(remainingAfter)).toBe(false);
+
+    // The 4-operation batch must charge exactly 4 units on top of the
+    // baseline probe itself — same budget as 4 individual requests.
+    expect(remainingBefore - remainingAfter).toBe(batch.length);
+  });
+
   test("clearing cookies after batch test does not pollute subsequent tests", () => {
     clearCookies();
     expect(getTestCookie("session_id")).toBeUndefined();
@@ -223,28 +243,37 @@ describe("Client-side BatchHttpLink configuration", () => {
     expect(typeof mod.BatchHttpLink).toBe("function");
   });
 
-  test("AppApolloProvider gates BatchHttpLink off in production (plain HttpLink) with PersistedQueryLink before it", async () => {
+  test("AppApolloProvider uses BatchHttpLink in all environments (no NODE_ENV gate) with PersistedQueryLink before it", async () => {
     const source = await readFile("frontend/common/providers/apollo/AppApolloProvider.tsx", "utf8");
 
-    // The production server rejects batched array bodies, so the provider must
-    // gate BatchHttpLink behind a non-production check and fall back to a plain
-    // HttpLink in production.
+    // The server accepts batching in every environment now — the terminating
+    // link must not carry a production/dev split, or the two sides drift
+    // again and production requests start failing with HTTP 400.
     expect(source).toContain("new BatchHttpLink");
-    expect(source).toContain("new HttpLink");
+    expect(source).not.toContain('process.env.NODE_ENV === "production"');
     expect(source).not.toMatch(/import\s+\{[^}]*HttpLink[^}]*\}\s+from\s+"@apollo\/client"/);
-    expect(source).toContain('process.env.NODE_ENV === "production"');
     expect(source).toContain("PersistedQueryLink");
 
     const pqIdx = source.indexOf("PersistedQueryLink");
-    const linkIdx = source.indexOf("process.env.NODE_ENV");
+    const batchIdx = source.indexOf("new BatchHttpLink");
     expect(pqIdx).toBeGreaterThan(-1);
-    expect(linkIdx).toBeGreaterThan(-1);
-    expect(pqIdx).toBeLessThan(linkIdx);
+    expect(batchIdx).toBeGreaterThan(-1);
+    expect(pqIdx).toBeLessThan(batchIdx);
   });
 
-  test("ApolloServer constructor gates allowBatchedHttpRequests on !isProduction (H3 security fix)", async () => {
+  test("ApolloServer enables batching everywhere with per-operation rate-limit accounting and a hard batch cap", async () => {
     const source = await readFile("app/api/graphql/route.ts", "utf8");
-    // H3 fix: array-batching is disabled in production to prevent request amplification.
-    expect(source).toContain("allowBatchedHttpRequests: !isProduction");
+
+    // Batching is on in every environment — never re-enable a production
+    // gate (allowBatchedHttpRequests: !isProduction once turned every
+    // production call into HTTP 400).
+    expect(source).toContain("allowBatchedHttpRequests: true");
+    expect(source).not.toContain("allowBatchedHttpRequests: !isProduction");
+
+    // The two compensating controls that make production batching safe:
+    // a hard cap on operations per POST, and one rate-limit unit consumed
+    // per operation.
+    expect(source).toContain("MAX_BATCHED_OPERATIONS");
+    expect(source).toContain("chargeOperationRateLimitUnits");
   });
 });

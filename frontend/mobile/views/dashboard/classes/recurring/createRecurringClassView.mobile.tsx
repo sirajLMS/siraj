@@ -1,106 +1,17 @@
 "use client";
 
-import { CheckCircleOutlined, CloseOutlined, ErrorOutlined } from "@mui/icons-material";
-import { Box, IconButton, Snackbar, Typography } from "@mui/material";
+import { CloseOutlined } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form";
 import type { CreateRecurringClassViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useCreateRecurringClassViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileFormErrorSnackbar, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { RecurringClassFormMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/recurringClassForm.mobile";
-
-const StyledSuccessSnackbarContent = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1.5),
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.sidebarContainer,
-  color: theme.palette.onSidebarContainer,
-  boxShadow: theme.palette.shadow.card,
-  paddingInline: theme.spacing(3),
-  paddingBlock: theme.spacing(1.5),
-}));
-
-const StyledSuccessCheckIcon = styled(CheckCircleOutlined)(({ theme }) => ({
-  backgroundColor: theme.palette.primaryContainer,
-  color: theme.palette.onPrimaryContainer,
-  borderRadius: "50%",
-  padding: theme.spacing(0.5),
-}));
 
 const StyledHeaderCloseButton = styled(IconButton)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
 }));
-
-const StyledErrorSnackbarContent = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1.5),
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: theme.palette.errorContainer,
-  color: theme.palette.onErrorContainer,
-  boxShadow: theme.palette.shadow.card,
-  paddingInline: theme.spacing(3),
-  paddingBlock: theme.spacing(1.5),
-}));
-
-const StyledErrorIcon = styled(ErrorOutlined)(({ theme }) => ({
-  backgroundColor: theme.palette.errorContainer,
-  color: theme.palette.onErrorContainer,
-  borderRadius: "50%",
-  padding: theme.spacing(0.5),
-}));
-
-function SuccessSnackbar({
-  open,
-  onClose,
-  labels,
-}: {
-  readonly open: boolean;
-  readonly onClose: () => void;
-  readonly labels: string;
-}) {
-  return (
-    <Snackbar
-      open={open}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      sx={{ bottom: { xs: 96, sm: 96 } }}
-      onClose={onClose}
-    >
-      <StyledSuccessSnackbarContent>
-        <StyledSuccessCheckIcon />
-        <Typography variant="labelUppercase" sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-          {labels}
-        </Typography>
-      </StyledSuccessSnackbarContent>
-    </Snackbar>
-  );
-}
-
-function ErrorSnackbar({
-  open,
-  onClose,
-  message,
-}: {
-  readonly open: boolean;
-  readonly onClose: () => void;
-  readonly message: string;
-}) {
-  return (
-    <Snackbar
-      open={open}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      sx={{ bottom: { xs: 96, sm: 96 } }}
-      onClose={onClose}
-    >
-      <StyledErrorSnackbarContent>
-        <StyledErrorIcon />
-        <Typography variant="labelUppercase" sx={{ fontWeight: 700, whiteSpace: "nowrap" }}>
-          {message}
-        </Typography>
-      </StyledErrorSnackbarContent>
-    </Snackbar>
-  );
-}
 
 export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurringClassViewModel>) {
   const {
@@ -120,7 +31,10 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
     setValue,
     control,
     errors,
+    subjects,
+    subjectsLoading,
     meetingConfig,
+    meetingConfigValidation,
     onMeetingConfigChange,
   } = viewModel;
 
@@ -156,14 +70,17 @@ export function CreateRecurringClassViewMobile(viewModel: Readonly<CreateRecurri
           goToClassLabel={notifications.goToClassLabel}
           onGoToCreatedClass={onGoToCreatedClass}
           formLabels={form}
+          subjects={subjects}
+          subjectsLoading={subjectsLoading}
           meetingConfig={meetingConfig}
+          meetingConfigValidation={meetingConfigValidation}
           onMeetingConfigChangeAction={onMeetingConfigChange}
           onSubmit={data => onSubmit(data, meetingConfig)}
         />
       </MobileSectionPanel>
 
-      <SuccessSnackbar open={showSuccess} onClose={onDismissSuccess} labels={shell.addedSuccessfully} />
-      <ErrorSnackbar open={!!errorMessage} onClose={onDismissError} message={errorMessage ?? ""} />
+      <FormSuccessSnackbar open={showSuccess} message={shell.addedSuccessfully} onClose={onDismissSuccess} />
+      <MobileFormErrorSnackbar open={!!errorMessage} message={errorMessage ?? ""} onClose={onDismissError} />
     </MobilePageContainer>
   );
 }

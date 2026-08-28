@@ -11,6 +11,7 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { AccountingPaymentHistoryKind, AppPermission, CreditReason } from "@/backend/enum";
 import { ConflictError, logger, NotFoundError, ValidationError } from "@/backend/lib";
 import { AccountingNotificationService } from "@/backend/services/billing/accounting-notification.service";
+import { resolveLowHoursThreshold } from "@/backend/services/billing/accounting-settings.utils";
 import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type {
@@ -400,7 +401,16 @@ export namespace AccountingPaymentService {
     tErrors: ErrorsLabels
   ): Promise<AccountingPaymentBalanceReturnType> {
     await assertAssociatedOrManage(actorUserId, studentId, tErrors, AppPermission.ACCOUNTING_PAYMENTS_VIEW);
-    return await StudentRepository.getCreditHourBalance(studentId);
+    const [balance, threshold, lastPaymentCurrency] = await Promise.all([
+      StudentRepository.getCreditHourBalance(studentId),
+      resolveLowHoursThreshold(),
+      AccountingPaymentRepository.findLastPaymentCurrency(studentId),
+    ]);
+    return {
+      ...balance,
+      lowHoursThreshold: threshold.value,
+      lastPaymentCurrency,
+    };
   }
 
   /**

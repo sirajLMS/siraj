@@ -6,6 +6,8 @@ export interface LessonReportLabels {
   readonly rejected: string;
   readonly draft: string;
   readonly attendanceEvaluation: string;
+  readonly lessonDate: string;
+  readonly status: string;
   readonly present: string;
   readonly absent: string;
   readonly late: string;

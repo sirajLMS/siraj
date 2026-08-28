@@ -4,7 +4,6 @@
 import { CheckCircleOutlined, InfoOutlined } from "@mui/icons-material";
 import {
   Box,
-  Button,
   CircularProgress,
   FormControl,
   FormHelperText,
@@ -121,23 +120,20 @@ function ActionButtons({
   saved,
   onCancel,
   labels,
+  CancelAction,
+  SubmitAction,
 }: Readonly<{
   loading: boolean;
   saved: boolean;
   onCancel: () => void;
   labels: ManagementLabels["actions"];
+  CancelAction: ManagementControlsCardSlotProps["CancelAction"];
+  SubmitAction: ManagementControlsCardSlotProps["SubmitAction"];
 }>) {
-  const getButtonContent = (): React.ReactNode => {
+  const getSubmitContent = (): React.ReactElement => {
     if (loading) return <CircularProgress size={18} color="inherit" />;
-    if (saved) {
-      return (
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "center" }}>
-          <CheckCircleOutlined sx={{ fontSize: 16 }} />
-          <Typography variant="labelSm">{labels.saved}</Typography>
-        </Stack>
-      );
-    }
-    return <Typography variant="labelSm">{labels.submit}</Typography>;
+    if (saved) return <>{labels.saved}</>;
+    return <>{labels.submit}</>;
   };
 
   return (
@@ -160,48 +156,18 @@ function ActionButtons({
       </Stack>
 
       <Stack direction="row" spacing={1.5} sx={{ width: "100%" }}>
-        <Button
-          variant="outlined"
-          onClick={onCancel}
-          fullWidth
-          sx={theme => ({
-            flex: 1,
-            minWidth: 100,
-            py: 1,
-            fontWeight: 700,
-            color: theme.palette.onSurfaceVariant,
-            borderColor: theme.palette.border.main,
-            "&:hover": {
-              borderColor: theme.palette.border.main,
-              backgroundColor: theme.palette.surfaceContainerLow,
-            },
-          })}
-        >
+        <CancelAction onClick={onCancel} fullWidth sx={{ flex: 1 }}>
           {labels.cancel}
-        </Button>
-        <Button
+        </CancelAction>
+        <SubmitAction
           type="submit"
-          variant="contained"
           disabled={loading || saved}
+          startIcon={saved ? <CheckCircleOutlined /> : undefined}
           fullWidth
-          sx={theme => ({
-            flex: 1,
-            minWidth: 140,
-            py: 1,
-            fontWeight: 700,
-            backgroundColor: saved ? theme.palette.success.main : theme.palette.primary.main,
-            color: saved ? theme.palette.onSuccess : theme.palette.onPrimary,
-            "&:hover": {
-              backgroundColor: saved ? theme.palette.success.dark : theme.palette.primary.dark,
-            },
-            "&.Mui-disabled": {
-              backgroundColor: theme.palette.surfaceContainerHighest,
-              color: theme.palette.onSurfaceVariant,
-            },
-          })}
+          sx={{ flex: 1 }}
         >
-          {getButtonContent()}
-        </Button>
+          {getSubmitContent()}
+        </SubmitAction>
       </Stack>
     </Box>
   );
@@ -221,7 +187,7 @@ export function ManagementControlsCardShared({ props, slots }: Readonly<Manageme
     labels,
     statusLabelId,
   } = props;
-  const { CardContainer, StatusBadge, TeacherAutocomplete } = slots;
+  const { CardContainer, StatusBadge, TeacherAutocomplete, CancelAction, SubmitAction } = slots;
 
   return (
     <CardContainer sx={{ p: 3, boxShadow: theme => theme.palette.shadow.card }}>
@@ -249,7 +215,14 @@ export function ManagementControlsCardShared({ props, slots }: Readonly<Manageme
           statusLabelId={statusLabelId}
           StatusBadge={StatusBadge}
         />
-        <ActionButtons loading={isSubmitting} saved={saved} onCancel={onCancel} labels={labels.actions} />
+        <ActionButtons
+          loading={isSubmitting}
+          saved={saved}
+          onCancel={onCancel}
+          labels={labels.actions}
+          CancelAction={CancelAction}
+          SubmitAction={SubmitAction}
+        />
       </Stack>
     </CardContainer>
   );

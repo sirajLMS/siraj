@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Alert, FormControlLabel, Radio, RadioGroup, Stack, TextField, Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { MeetingConfigSelect } from "@/frontend/common/components/ui/input/meetingConfigSelect/MeetingConfigSelect";
 import type { MeetingConfigSelectOption } from "@/frontend/common/components/ui/input/meetingConfigSelect/types";
@@ -10,19 +10,16 @@ import { MeetingConfigTypeFields } from "@/frontend/common/components/ui/input/m
 import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+import type { RecurringMeetingConfigValidation } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import {
-  getRecurringMeetingConfigErrorKey,
-  resolveRecurringMeetingConfigErrorMessage,
-} from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
-import { isUrlAllowedByProvider } from "@/shared/lib/meeting-config";
 import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 export type RecurringMeetingConfigSectionProps = {
   readonly teacherId: string;
   readonly value: RecurringMeetingConfigFormState;
   readonly onChangeAction: (next: RecurringMeetingConfigFormState) => void;
+  readonly validation: RecurringMeetingConfigValidation;
   readonly disabled?: boolean;
 };
 
@@ -139,13 +136,12 @@ export function RecurringMeetingConfigSection({
   teacherId,
   value,
   onChangeAction,
+  validation,
   disabled,
 }: RecurringMeetingConfigSectionProps) {
   const t = useAppTranslation(Translation.Ui.MeetingConfig).classScope;
   const tManager = useAppTranslation(Translation.Ui.MeetingConfig).manager;
   const locale = useAppLocale();
-  const [urlError, setUrlError] = useState<string | null>(null);
-  const [fieldsError, setFieldsError] = useState<string | null>(null);
   const { data, loading } = useQuery(userMeetingConfigsQueryDocument, {
     variables: { userId: teacherId },
     skip: !teacherId,
@@ -164,50 +160,6 @@ export function RecurringMeetingConfigSection({
     return resolveLocalizedString(providerInstructions, locale);
   }, [locale, providerInstructions]);
 
-  const validateNewModeFields = (): boolean => {
-    const errorKey = getRecurringMeetingConfigErrorKey(value);
-    const message = resolveRecurringMeetingConfigErrorMessage(errorKey, {
-      recurringFieldsRequired: t.recurringFieldsRequired,
-      urlNotAllowed: tManager.urlNotAllowed,
-    });
-
-    if (errorKey === "urlNotAllowed") {
-      setUrlError(message);
-      setFieldsError(null);
-      return false;
-    }
-
-    if (errorKey === "incomplete") {
-      setFieldsError(message);
-      setUrlError(null);
-      return false;
-    }
-
-    setUrlError(null);
-    setFieldsError(null);
-    return true;
-  };
-
-  const validateUrl = (): boolean => {
-    if (!value.newProvider || !value.newMeetingUrl.trim()) {
-      return validateNewModeFields();
-    }
-
-    const allowlist = value.newProvider.urlAllowlist ?? [];
-    if (allowlist.length === 0) {
-      setUrlError(null);
-      return true;
-    }
-
-    if (isUrlAllowedByProvider(value.newMeetingUrl.trim(), allowlist)) {
-      setUrlError(null);
-      return true;
-    }
-
-    setUrlError(tManager.urlNotAllowed);
-    return false;
-  };
-
   return (
     <Stack spacing={2}>
       <Typography sx={{ typography: "titleLg" }}>{t.recurringSectionTitle}</Typography>
@@ -218,8 +170,7 @@ export function RecurringMeetingConfigSection({
       <RadioGroup
         value={mode}
         onChange={(_event, next) => {
-          setUrlError(null);
-          setFieldsError(null);
+          validation.resetErrors();
           if (next === "default") {
             onChangeAction({ ...value, useTeacherDefault: true, selectedConfig: null });
             return;
@@ -261,11 +212,11 @@ export function RecurringMeetingConfigSection({
           value={value}
           onChangeAction={onChangeAction}
           disabled={disabled}
-          urlError={urlError}
-          fieldsError={fieldsError}
-          onUrlErrorChange={setUrlError}
-          onFieldsErrorChange={setFieldsError}
-          onValidateUrl={validateUrl}
+          urlError={validation.urlError}
+          fieldsError={validation.fieldsError}
+          onUrlErrorChange={validation.onUrlErrorChange}
+          onFieldsErrorChange={validation.onFieldsErrorChange}
+          onValidateUrl={validation.onValidateUrl}
           instructions={instructions}
           selectLabel={t.selectLabel}
           recurringFieldsRequiredLabel={t.recurringFieldsRequired}

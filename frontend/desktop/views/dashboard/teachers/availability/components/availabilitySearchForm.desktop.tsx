@@ -19,10 +19,7 @@ export function AvailabilitySearchFormDesktop(props: Readonly<AvailabilitySearch
           alignItems: "end",
           p: 3,
         },
-        formControlSize: undefined,
-        genderLabelIdSuffix: "desktop",
         buttonHeight: 56,
-        buttonBorderRadius: 3,
         buttonFullWidth: false,
       }}
     />

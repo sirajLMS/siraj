@@ -67,6 +67,26 @@ export interface DaysScheduleSectionProps {
   readonly labels: DaysScheduleLabels;
 }
 
+/** Option projected from the `classSubjects` query for subject pickers. */
+export interface ClassSubjectOption {
+  readonly id: string;
+  readonly name: string;
+}
+
+/**
+ * Validation slice for the recurring meeting-config section. Owned by the
+ * ViewModel so the section component stays presentational — it renders the
+ * surfaced errors and delegates blur/submit validation to these handlers.
+ */
+export interface RecurringMeetingConfigValidation {
+  readonly urlError: string | null;
+  readonly fieldsError: string | null;
+  readonly onUrlErrorChange: (error: string | null) => void;
+  readonly onFieldsErrorChange: (error: string | null) => void;
+  readonly resetErrors: () => void;
+  readonly onValidateUrl: () => boolean;
+}
+
 export interface RecurringClassFormFieldsProps {
   readonly register: UseFormRegister<RecurringClassFormData>;
   readonly errors: FieldErrors<RecurringClassFormData>;
@@ -75,7 +95,10 @@ export interface RecurringClassFormFieldsProps {
   readonly control: Control<RecurringClassFormData>;
   readonly isSubmitting: boolean;
   readonly labels: RecurringClassFormLabels;
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
   readonly meetingConfig: RecurringMeetingConfigFormState;
+  readonly meetingConfigValidation: RecurringMeetingConfigValidation;
   readonly onMeetingConfigChangeAction: (next: RecurringMeetingConfigFormState) => void;
 }
 
@@ -89,7 +112,10 @@ export interface BaseRecurringClassFormProps {
   readonly control: Control<RecurringClassFormData>;
   readonly handleSubmit: import("react-hook-form").UseFormHandleSubmit<RecurringClassFormData>;
   readonly onSubmit: (data: RecurringClassFormData) => void;
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
   readonly meetingConfig: RecurringMeetingConfigFormState;
+  readonly meetingConfigValidation: RecurringMeetingConfigValidation;
   readonly onMeetingConfigChangeAction: (next: RecurringMeetingConfigFormState) => void;
   readonly meetingConfigWarning?: boolean;
   readonly meetingConfigWarningMessage?: string;

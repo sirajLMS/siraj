@@ -1,14 +1,14 @@
 "use client";
 
-import { LockOutlined, TagOutlined } from "@mui/icons-material";
-import { Box, Chip, Stack, Typography } from "@mui/material";
+import { TagOutlined } from "@mui/icons-material";
+import { Box, Stack, Typography } from "@mui/material";
 import { SystemSettingMetadataRow } from "@/frontend/common/views/dashboard/settings/tabs/general/components/SystemSettingMetadataRow";
 import { SystemSettingValueField } from "@/frontend/common/views/dashboard/settings/tabs/general/components/SystemSettingValueField";
 import type {
   GeneralSettingsViewModel,
   SystemSettingRow,
 } from "@/frontend/common/views/dashboard/settings/types/generalSettings.types";
-import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 
 function GeneralSettingCard({
   row,
@@ -38,9 +38,13 @@ function GeneralSettingCard({
           </Typography>
         </Box>
 
-        <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
-          <Chip size="small" variant="outlined" label={dataTypeLabel} icon={<TagOutlined />} />
-          <Chip size="small" variant="outlined" label={labels.categories[row.category]} icon={<LockOutlined />} />
+        <Stack direction="row" sx={{ flexWrap: "wrap", gap: 2 }}>
+          <Typography sx={{ typography: "labelSm", color: theme => theme.palette.text.secondary }}>
+            {labels.dataTypeColumn}: {dataTypeLabel}
+          </Typography>
+          <Typography sx={{ typography: "labelSm", color: theme => theme.palette.text.secondary }}>
+            {labels.categoryColumn}: {labels.categories[row.category]}
+          </Typography>
         </Stack>
 
         <Box>
@@ -72,12 +76,7 @@ export function GeneralSettingsTabMobileView({
 }: Readonly<GeneralSettingsViewModel>) {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box sx={{ px: 2 }}>
-        <Typography sx={{ typography: "titleLg", mb: 1 }}>{labels.title}</Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-          {labels.subtitle}
-        </Typography>
-      </Box>
+      <MobileSectionPanel title={labels.title} subTitle={labels.subtitle} />
 
       <MobileCardList
         rows={rows}

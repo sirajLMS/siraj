@@ -1,2 +1,3 @@
-// NEW FOR PLAN v5: Barrel for audit-area shared styled factories.
+// Barrel for audit-area shared components (edit dialog, styled factories).
+export * from "./AdminNoteEditDialog";
 export * from "./communicationLogCard.styled";

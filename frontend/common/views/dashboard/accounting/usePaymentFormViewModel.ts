@@ -26,6 +26,7 @@ import {
   accountingPaymentQueryDocument,
   packagePlanQueryDocument,
   recordAccountingPaymentMutationDocument,
+  studentCreditHourBalanceQueryDocument,
   updateAccountingPaymentMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/accounting";
 import { logger } from "@/frontend/common/utils/logger";
@@ -52,7 +53,7 @@ const CREATE_DEFAULT_VALUES: PaymentFormInput = {
   currency: CurrencyCode.Egp,
   paymentGateway: PaymentGateway.None,
   paymentDate: new Date().toISOString().slice(0, 10),
-  isPaidStatusOn: true,
+  isPaidStatusOn: false,
   paymentNote: null,
 };
 
@@ -76,6 +77,10 @@ export interface UsePaymentFormViewModel {
   readonly showSuccess: boolean;
   readonly submitError: string | null;
   readonly existing: AccountingPaymentQuery["accountingPayment"] | undefined;
+  /** Currency of the selected student's most recent payment (null when unknown). */
+  readonly lastPaymentCurrency: CurrencyCode | null;
+  /** True when the chosen currency differs from the student's last payment currency. */
+  readonly currencyMismatch: boolean;
   readonly onSubmit: (data: PaymentFormData) => Promise<void>;
   readonly onEditSubmit: (data: PaymentEditFormData) => Promise<void>;
   readonly onDismissSuccess: () => void;
@@ -130,6 +135,21 @@ export function usePaymentFormViewModel({
   // so skip that single check (the value is only used as a query variable).
   // eslint-disable-next-line react-hooks/incompatible-library
   const selectedPlanId = createForm.watch("packagePlanId");
+
+  const watchedStudentId = createForm.watch("studentId");
+  const watchedCurrency = createForm.watch("currency");
+
+  const { data: balanceData } = useQuery(studentCreditHourBalanceQueryDocument, {
+    variables: { studentId: watchedStudentId ?? "" },
+    skip: isEditing || !watchedStudentId,
+  });
+
+  const lastPaymentCurrency = useMemo<CurrencyCode | null>(() => {
+    const raw = balanceData?.studentCreditHourBalance?.lastPaymentCurrency ?? null;
+    return raw !== null && asCurrencyCode(raw) !== undefined ? (asCurrencyCode(raw) ?? null) : null;
+  }, [balanceData]);
+
+  const currencyMismatch = !isEditing && lastPaymentCurrency !== null && watchedCurrency !== lastPaymentCurrency;
 
   const { data: planData } = useQuery(packagePlanQueryDocument, {
     variables: { id: selectedPlanId ?? "" },
@@ -241,6 +261,8 @@ export function usePaymentFormViewModel({
     showSuccess,
     submitError,
     existing,
+    lastPaymentCurrency,
+    currencyMismatch,
     onSubmit,
     onEditSubmit,
     onDismissSuccess,

@@ -81,6 +81,13 @@ export const AccountingPaymentBalancePothosObject = AccountingPaymentBalanceRef.
     studentId: t.exposeString("studentId"),
     creditHoursTotal: t.exposeString("creditHoursTotal"),
     creditHoursRemaining: t.exposeString("creditHoursRemaining"),
+    lowHoursThreshold: t.exposeFloat("lowHoursThreshold", {
+      description: "Configured remaining-hours threshold below which the low-balance warning applies",
+    }),
+    lastPaymentCurrency: t.exposeString("lastPaymentCurrency", {
+      nullable: true,
+      description: "Currency of the student's most recent payment (null when none recorded)",
+    }),
   }),
 });
 

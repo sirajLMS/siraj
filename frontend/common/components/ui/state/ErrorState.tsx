@@ -24,6 +24,7 @@ export function ErrorState({
 }: ErrorStateProps) {
   const tDefault = useAppTranslation(Translation.Common);
   const displayMessage = message ?? tDefault.loadFailed ?? "";
+  const displayRetryLabel = retryLabel ?? tDefault.retry;
 
   const alert = (
     <Alert
@@ -31,7 +32,7 @@ export function ErrorState({
       action={
         onRetry ? (
           <Button color="inherit" size="small" onClick={onRetry}>
-            {retryLabel}
+            {displayRetryLabel}
           </Button>
         ) : undefined
       }

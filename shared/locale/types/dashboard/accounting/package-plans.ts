@@ -33,6 +33,7 @@ export interface PackagePlansLabels {
     readonly activeHelp: string;
     readonly sortOrder: string;
     readonly validityMonths: string;
+    readonly validityUnlimited: string;
     readonly submit: string;
     readonly cancel: string;
     readonly saving: string;

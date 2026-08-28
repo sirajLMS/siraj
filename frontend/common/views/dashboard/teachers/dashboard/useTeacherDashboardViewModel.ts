@@ -7,6 +7,7 @@ import type {
   TeacherScheduleRow,
 } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import type { ClassSubjectOption } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
 import type {
   TeacherDashboardLastUpdatedLabels,
@@ -55,6 +56,9 @@ export interface TeacherDashboardViewModel {
   readonly manualEntryOpen: boolean;
   readonly manualEntryDefaultActive: boolean;
   readonly teacherId: string;
+  /** Subject options for the manual-entry dialog picker (fetched by the container via `useClassSubjects`). */
+  readonly subjects: readonly ClassSubjectOption[];
+  readonly subjectsLoading: boolean;
   readonly onManualEntryClose: () => void;
   readonly onManualEntrySubmit: (data: {
     readonly studentId: string;

@@ -3,6 +3,7 @@
 import { InputAdornment, Stack, TextField } from "@mui/material";
 import { type Control, type FieldPath, type FieldValues, type UseFormRegister, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { getCurrencySymbol } from "@/frontend/common/lib/currency";
@@ -10,7 +11,6 @@ import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { ProfileLabels, ProfileStaffLabels, ProfileTeacherLabels } from "@/shared/locale/types/profile";
@@ -131,7 +131,7 @@ export function CompensationViewSection({
     <SectionPanel title={t.sections.compensation}>
       {subjectUserId ? <DisplayCurrencyHint mode="subject" subjectUserId={subjectUserId} /> : null}
       <Stack spacing={2}>
-        <InfoField label={t.fields.hourlyRate} value={salaryLabel} />
+        <LabeledField label={t.fields.hourlyRate} value={salaryLabel} />
       </Stack>
     </SectionPanel>
   );

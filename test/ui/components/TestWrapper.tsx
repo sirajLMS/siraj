@@ -115,6 +115,12 @@ interface RenderOptions {
 export function renderWithWrapper(ui: ReactElement, options: RenderOptions = {}): RenderResult {
   const { locale = "ar", themeMode = "dark", permissions = [], mocks = [], viewport } = options;
 
+  // Seed permissions synchronously BEFORE render: children that subscribe to a stable
+  // selector (e.g. the `hasPermission` function reference) never re-render after the
+  // wrapper's useEffect seeds the store post-mount, so effect-only seeding leaves them
+  // stuck with the pre-seed state. Seeding here makes the first render authoritative.
+  useUserStore.setState({ permissions });
+
   return render(ui, {
     wrapper: ({ children }) => (
       <TestWrapper locale={locale} themeMode={themeMode} permissions={permissions} mocks={mocks} viewport={viewport}>

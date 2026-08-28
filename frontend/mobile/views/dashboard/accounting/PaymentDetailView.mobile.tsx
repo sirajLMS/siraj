@@ -1,16 +1,20 @@
 "use client";
 
 import { EditOutlined, LockOpenOutlined, LockOutlined } from "@mui/icons-material";
-import { Alert, Box, Chip, CircularProgress, Divider, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, CircularProgress, Divider, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import {
   formatAccountingDate,
   formatAccountingMoney,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { PaymentDocumentPreview } from "@/frontend/common/views/dashboard/accounting/components/PaymentDocumentPreview";
+import { PaymentHistoryTimeline } from "@/frontend/common/views/dashboard/accounting/components/PaymentHistoryTimeline";
 import type { PaymentDetailViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentDetailViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader, MobileSectionPanel } from "@/frontend/mobile/components/ui";
+import { useAppLocale } from "@/shared/locale/localeContext";
 
 type DetailLabels = PaymentDetailViewModel["t"];
 type DetailPayment = NonNullable<PaymentDetailViewModel["payment"]>;
@@ -21,7 +25,7 @@ function MobileField({ label, value }: Readonly<{ label: string; value: ReactNod
       <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
         {label}
       </Typography>
-      <Typography variant="bodyMd" sx={{ fontWeight: 500, textAlign: "end" }}>
+      <Typography variant="bodyMd" component="div" sx={{ fontWeight: 500, textAlign: "end" }}>
         {value}
       </Typography>
     </Stack>
@@ -89,18 +93,22 @@ function PaymentDetailFields({
   t: DetailLabels;
   payment: DetailPayment;
 }>) {
+  const locale = useAppLocale();
   return (
     <MobileCardShell>
       <Stack spacing={1.5}>
         <MobileField label={t.detail.invoiceId} value={payment.invoiceId ?? "—"} />
-        <MobileField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate)} />
+        <MobileField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate, locale)} />
         <MobileField
           label={t.columns.studentName}
           value={
             payment.studentId ? (
-              <Link href={`/students/${payment.studentId}/profile`} style={{ textDecoration: "none" }}>
-                {payment.studentName ?? payment.studentId}
-              </Link>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "flex-end" }}>
+                <BaseAvatar label={payment.studentName ?? undefined} size={24} />
+                <Link href={`/students/${payment.studentId}/profile`} style={{ textDecoration: "none" }}>
+                  {payment.studentName ?? payment.studentId}
+                </Link>
+              </Stack>
             ) : (
               "—"
             )
@@ -132,6 +140,35 @@ function PaymentDetailFields({
   );
 }
 
+function PaymentDetailActions(props: Readonly<{ vm: PaymentDetailViewModel }>) {
+  const { t, payment, toggling, onTogglePaid } = props.vm;
+  if (!payment) return null;
+  return (
+    <Stack direction="row" spacing={1.5}>
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
+        onClick={() => void onTogglePaid()}
+        disabled={toggling}
+        sx={{ flex: 1 }}
+      >
+        {payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
+      </Button>
+      <Button
+        variant="outlined"
+        size="small"
+        component={Link}
+        href={`/accounting/payments/${payment.id}/edit`}
+        startIcon={<EditOutlined />}
+        sx={{ flex: 1 }}
+      >
+        {t.detail.editAction}
+      </Button>
+    </Stack>
+  );
+}
+
 function PaymentAuditFields({
   t,
   payment,
@@ -139,18 +176,18 @@ function PaymentAuditFields({
   t: DetailLabels;
   payment: DetailPayment;
 }>) {
+  const locale = useAppLocale();
   return (
-    <MobileCardShell>
-      <Stack spacing={1.5}>
-        <MobileField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt)} />
-        <MobileField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt)} />
-      </Stack>
-    </MobileCardShell>
+    <Stack spacing={1.5}>
+      <MobileField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt, locale)} />
+      <MobileField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt, locale)} />
+    </Stack>
   );
 }
 
 export function PaymentDetailMobile(props: Readonly<PaymentDetailViewModel>) {
-  const { t, payment, loading, notFound, toggling, toggleError, onTogglePaid, onDismissToggleError } = props;
+  const { t, payment, loading, notFound, toggleError, onDismissToggleError, canManagePayments } = props;
+  const locale = useAppLocale();
 
   return (
     <MobilePageContainer>
@@ -177,20 +214,32 @@ export function PaymentDetailMobile(props: Readonly<PaymentDetailViewModel>) {
 
             <PaymentDetailFields t={t} payment={payment} />
 
-            <PaymentAuditFields t={t} payment={payment} />
+            <MobileSectionPanel title={t.detail.historyTitle}>
+              <Stack spacing={2}>
+                <PaymentHistoryTimeline
+                  events={payment.history ?? []}
+                  labels={t.historyKinds}
+                  emptyLabel={t.detail.historyEmpty}
+                  locale={locale}
+                />
+                <PaymentAuditFields t={t} payment={payment} />
+              </Stack>
+            </MobileSectionPanel>
 
-            <Stack direction="row" spacing={1.5}>
-              <Chip
-                icon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
-                label={payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
-                onClick={() => void onTogglePaid()}
-                disabled={toggling}
-                sx={{ flex: 1, py: 2 }}
-              />
-              <Link href={`/accounting/payments/${payment.id}/edit`} style={{ textDecoration: "none", flex: 1 }}>
-                <Chip icon={<EditOutlined />} label={t.detail.editAction} sx={{ width: "100%", py: 2 }} />
-              </Link>
-            </Stack>
+            <PaymentDocumentPreview
+              title={t.detail.documentPreview}
+              emptyLabel={t.detail.documentEmpty}
+              downloadLabel={t.detail.downloadPdf}
+              zoomInLabel={t.detail.zoomIn}
+              zoomOutLabel={t.detail.zoomOut}
+              rotateLabel={t.detail.rotate}
+              expandLabel={t.detail.expand}
+              closeLabel={t.detail.close}
+              src={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
+              downloadHref={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
+            />
+
+            {canManagePayments ? <PaymentDetailActions vm={props} /> : null}
           </>
         ) : null}
       </Stack>

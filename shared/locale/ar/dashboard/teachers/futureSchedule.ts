@@ -3,6 +3,7 @@ import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboar
 export const dashboardTeacherFutureScheduleAr: TeacherFutureScheduleLabels = {
   pageTitle: "جدول المعلم القادم",
   jumpToDate: "الانتقال إلى تاريخ",
+  today: "اليوم",
   leaveQuota: "حصة الإجازة",
   totalClasses: "إجمالي الحصص",
   futureClasses: "الحصص القادمة",
