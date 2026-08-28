@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
@@ -25,6 +25,21 @@ const labels: SettingsMeetingIntegrationsLabels = readTranslation(
   Translation.Dashboard.SettingsMeetingIntegrations,
   locale
 );
+const copyLabels = readTranslation(Translation.Ui.MeetingConfig, locale).enhancements;
+
+const successResult: TestMeetingConnectionResult = {
+  ok: true,
+  latencyMs: 150,
+  mode: MeetingConnectionTestMode.ValidateConfig,
+  testJoinUrl: "https://meet.example.com/test",
+  deleted: false,
+  upstreamResponseSummary: "200 OK",
+  errorCode: null,
+  errorMessage: null,
+  rawUpstreamPayload: null,
+  requiredScopes: null,
+  grantedScopes: null,
+};
 
 function renderPanel(props: {
   result?: TestMeetingConnectionResult | null;
@@ -61,28 +76,54 @@ describe("TestConnectionResultPanel", () => {
   });
 
   test("renders success state with result details", () => {
-    renderPanel({
-      result: {
-        ok: true,
-        latencyMs: 150,
-        mode: MeetingConnectionTestMode.ValidateConfig,
-        testJoinUrl: "https://meet.example.com/test",
-        deleted: false,
-        upstreamResponseSummary: "200 OK",
-        errorCode: null,
-        errorMessage: null,
-        rawUpstreamPayload: null,
-        requiredScopes: null,
-        grantedScopes: null,
-      },
-      testing: false,
-    });
+    renderPanel({ result: successResult, testing: false });
     expect(screen.getByText(labels.testPanel.successMessage)).toBeInTheDocument();
     expect(screen.getByText(/150ms/)).toBeInTheDocument();
     expect(screen.getByText(/200 OK/)).toBeInTheDocument();
     // authSuccess is rendered as "{authStatus}: {authSuccess}" in a combined paragraph
     const authParagraph = screen.getByText(new RegExp(labels.testPanel.authSuccess));
     expect(authParagraph).toBeInTheDocument();
+  });
+
+  test("renders copy-url primitive for the test join URL", () => {
+    renderPanel({ result: successResult, testing: false });
+    const copyButton = screen.getByRole("button", { name: copyLabels.copyMeetingUrl });
+    expect(copyButton).toHaveAttribute("aria-pressed", "false");
+  });
+
+  test("shows copied feedback after a successful clipboard write", async () => {
+    renderPanel({ result: successResult, testing: false });
+    const copyButton = screen.getByRole("button", { name: copyLabels.copyMeetingUrl });
+    fireEvent.click(copyButton);
+
+    await waitFor(() => {
+      expect(copyButton).toHaveAttribute("aria-pressed", "true");
+    });
+  });
+
+  test("shows error feedback in tooltip when the clipboard write fails", async () => {
+    const originalClipboard = navigator.clipboard;
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText: () => Promise.reject(new Error("denied")) },
+      writable: true,
+      configurable: true,
+    });
+
+    renderPanel({ result: successResult, testing: false });
+    const copyButton = screen.getByRole("button", { name: copyLabels.copyMeetingUrl });
+    fireEvent.click(copyButton);
+    fireEvent.mouseOver(copyButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(copyLabels.urlCopyFailed)).toBeInTheDocument();
+    });
+    expect(copyButton).toHaveAttribute("aria-pressed", "false");
+
+    Object.defineProperty(navigator, "clipboard", {
+      value: originalClipboard,
+      writable: true,
+      configurable: true,
+    });
   });
 
   test("renders failure state with retry button", () => {

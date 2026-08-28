@@ -54,6 +54,24 @@ function renderOptInTabContent(overrides: Record<string, unknown> = {}) {
   return { onToggleOptIn };
 }
 
+function renderOptInTabMobile(overrides: Record<string, unknown> = {}) {
+  renderWithWrapper(
+    <OptInTabMobile
+      labels={settingsLabels}
+      isOptedIn={false}
+      optInLoading={false}
+      onToggleOptIn={mock(noopPromise)}
+      auditEntries={[]}
+      dateRange={{ from: null, to: null }}
+      onDateRangeChange={mock(() => {})}
+      onExportCsv={mock(() => {})}
+      adminUsers={[]}
+      {...overrides}
+    />,
+    { locale, permissions: [AppPermission.WhatsappConfigManage] }
+  );
+}
+
 describe("OptInTabContent — toggle (non-admin)", () => {
   beforeEach(() => {
     cleanup();
@@ -91,6 +109,20 @@ describe("OptInTabContent — toggle (non-admin)", () => {
     expect(screen.getByRole("progressbar")).toBeTruthy();
     // Switch should NOT be present
     expect(screen.queryByRole("switch")).toBeNull();
+  });
+
+  test("toggle row renders inside a BaseCard shell", () => {
+    renderOptInTabContent();
+    const switchEl = screen.getByRole("switch");
+    expect(switchEl.closest(".MuiCard-root")).not.toBeNull();
+  });
+
+  test("opt-in status renders inside a StatusBadge container", () => {
+    renderOptInTabContent({ isOptedIn: true });
+    const badgeLabel = screen.getByText(labels.optInEnabled);
+    // StatusBadge wraps its label in an inline-flex span badge container —
+    // the legacy color-coded block Typography rendered directly inside the card.
+    expect(badgeLabel.parentElement?.tagName).toBe("SPAN");
   });
 });
 
@@ -209,5 +241,29 @@ describe("OptInTabMobile — integration with shared content", () => {
     expect(dateEl).toBeTruthy();
     // The "changed by" label should be present
     expect(screen.getByText(new RegExp(auditEntry.changedBy))).toBeTruthy();
+  });
+
+  test("admin search renders via SearchBarField and filters users on change", async () => {
+    renderOptInTabMobile({
+      adminUsers: [makeAdminUser("u-1", "Alice", true), makeAdminUser("u-2", "Bob", false)],
+    });
+
+    // SearchBarField renders a textbox with the translated placeholder.
+    const searchInput = await screen.findByPlaceholderText(labels.optInAdminSearchPlaceholder);
+    expect(searchInput).toBeTruthy();
+
+    // Initial state: both users visible.
+    await screen.findByText("Alice");
+    expect(screen.getByText("Bob")).toBeTruthy();
+
+    // Typing into the search field fires the change handler and filters rows.
+    await act(async () => {
+      fireEvent.change(searchInput, { target: { value: "Alice" } });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Alice")).toBeTruthy();
+      expect(screen.queryByText("Bob")).toBeNull();
+    });
   });
 });

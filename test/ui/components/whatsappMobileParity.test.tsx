@@ -29,6 +29,7 @@ import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const locale: AppLocale = "ar";
 const labels = readTranslation(Translation.Whatsapp, locale);
+const adminLabels = readTranslation(Translation.Dashboard.Admin, locale);
 
 const settingsLabels: WhatsappSettingsLabels = {
   page: labels,
@@ -153,6 +154,61 @@ describe("Mobile parity — NumbersTab CRUD", () => {
   });
 });
 
+describe("Mobile numbers list — MobileCardList client pagination", () => {
+  beforeEach(() => {
+    cleanup();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  function renderPaginatedNumbers(count: number) {
+    const accounts = Array.from({ length: count }, (_, i) =>
+      makeAccountRow(`acc-${i + 1}`, `+1555000${String(i).padStart(2, "0")}`, `Number ${i + 1}`)
+    );
+    renderWithWrapper(<NumbersTabMobile {...mobileNumbersProps} accounts={accounts} dialogState={{ type: null }} />, {
+      locale,
+      permissions: [AppPermission.WhatsappConfigManage],
+    });
+  }
+
+  test("renders the first page of 10 accounts with the list-owned pager", async () => {
+    renderPaginatedNumbers(12);
+
+    // First page shows accounts 1–10 only (client pagination, pageSize 10)
+    expect(await screen.findByText("Number 1")).toBeTruthy();
+    expect(screen.getByText("Number 10")).toBeTruthy();
+    expect(screen.queryByText("Number 11")).toBeNull();
+
+    // The list primitive owns the pager — range label is rendered once
+    expect(screen.getByText(adminLabels.paginationRange(1, 10, 12))).toBeTruthy();
+    expect(screen.getByLabelText(adminLabels.nextPage)).toBeTruthy();
+
+    // Metadata renders as labelled Typography pairs, not ad-hoc chips
+    expect(screen.getAllByText(labels.qualityRating)).toHaveLength(10);
+    expect(screen.getAllByText(labels.messagingTier)).toHaveLength(10);
+  });
+
+  test("navigating to the next page renders the remaining accounts", async () => {
+    renderPaginatedNumbers(12);
+
+    const nextButton = screen.getByLabelText(adminLabels.nextPage).querySelector("button");
+    expect(nextButton).not.toBeNull();
+    if (nextButton) {
+      await act(async () => {
+        fireEvent.click(nextButton);
+      });
+    }
+
+    await waitFor(() => {
+      expect(screen.getByText("Number 11")).toBeTruthy();
+      expect(screen.getByText("Number 12")).toBeTruthy();
+      expect(screen.queryByText("Number 1")).toBeNull();
+    });
+  });
+});
+
 describe("Mobile parity — TemplatesTab expandable cards", () => {
   beforeEach(() => {
     cleanup();
@@ -205,6 +261,54 @@ describe("Mobile parity — TemplatesTab expandable cards", () => {
     // After expansion, detail fields should be visible
     await waitFor(() => {
       expect(screen.getAllByText(labels.templateCategory).length).toBeGreaterThan(0);
+    });
+  });
+
+  test("mobile template card shows labeled pairs and localized status badge", async () => {
+    const t1 = makeTemplateRow("tpl-1", "Welcome Message");
+    renderWithWrapper(
+      <TemplatesTabMobile
+        labels={settingsLabels}
+        templates={[t1]}
+        loading={false}
+        syncing={false}
+        onSyncFromMeta={mock(noopPromise)}
+        isConfigured
+        queryError={false}
+        onRetry={mock(() => {})}
+      />,
+      { locale, permissions: [AppPermission.WhatsappTemplatesManage] }
+    );
+    // Labeled Typography pairs replace the old raw Chips
+    expect(await screen.findByText(labels.templateLanguage)).toBeTruthy();
+    expect(screen.getByText(t1.language ?? "")).toBeTruthy();
+    // Status badge shows the localized status label
+    expect(screen.getByText(labels.templateStatusApproved)).toBeTruthy();
+  });
+
+  test("mobile template cards render through the shared scaffold details", async () => {
+    const t1 = makeTemplateRow("tpl-1", "Welcome Message");
+    renderWithWrapper(
+      <TemplatesTabMobile
+        labels={settingsLabels}
+        templates={[t1]}
+        loading={false}
+        syncing={false}
+        onSyncFromMeta={mock(noopPromise)}
+        isConfigured
+        queryError={false}
+        onRetry={mock(() => {})}
+      />,
+      { locale, permissions: [AppPermission.WhatsappTemplatesManage] }
+    );
+    const expandArea = screen.getByLabelText(`Welcome Message — ${labels.templateBody}`);
+    await act(async () => {
+      fireEvent.click(expandArea);
+    });
+    // Expanded detail stack shows localized status and last-synced fields
+    await waitFor(() => {
+      expect(screen.getByText(labels.templateStatus)).toBeTruthy();
+      expect(screen.getByText(labels.templateLastUpdated)).toBeTruthy();
     });
   });
 

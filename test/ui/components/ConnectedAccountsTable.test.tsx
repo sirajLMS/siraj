@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
@@ -8,6 +8,7 @@ import {
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+import { useMeetingIntegrationsSettingsStore } from "@/frontend/common/stores/meetingIntegrationsSettingsStore";
 import type {
   ConnectedAccountsTableProps,
   MeetingIntegrationConnectedAccount,
@@ -21,6 +22,7 @@ import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();
+  useMeetingIntegrationsSettingsStore.getState().reset();
 });
 
 const locale: AppLocale = "ar";
@@ -60,10 +62,6 @@ function renderTable(props: Partial<ConnectedAccountsTableProps> = {}) {
 }
 
 describe("ConnectedAccountsTableDesktop", () => {
-  beforeEach(() => {
-    // Reset any pending timers
-  });
-
   test("renders connected accounts title with provider name", async () => {
     renderTable();
     await waitFor(() => {
@@ -142,5 +140,79 @@ describe("ConnectedAccountsTableDesktop", () => {
       expect(screen.getByText("أحمد")).toBeInTheDocument();
       expect(screen.getByText("سارة")).toBeInTheDocument();
     });
+  });
+
+  test("search input change filters rows via handler", async () => {
+    const accounts = [
+      makeAccount({ id: "1", name: "[A]", email: "[EMAIL_REDACTED]" }),
+      makeAccount({ id: "2", name: "[B]", email: "[EMAIL_REDACTED]" }),
+    ];
+    renderTable({ accounts });
+    const input = await screen.findByPlaceholderText(labels.searchPlaceholder);
+    fireEvent.change(input, { target: { value: "[B]" } });
+    await waitFor(() => {
+      expect(screen.queryByText("[A]")).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("[B]")).toBeInTheDocument();
+  });
+
+  test("shows searching helper text while a search term is entered", async () => {
+    renderTable();
+    const input = await screen.findByPlaceholderText(labels.searchPlaceholder);
+    fireEvent.change(input, { target: { value: "Term" } });
+    await waitFor(() => {
+      expect(screen.getByText(labels.searching)).toBeInTheDocument();
+    });
+  });
+
+  test("search survives unmount and remount of the table", async () => {
+    const accounts = [
+      makeAccount({ id: "1", name: "[A]", email: "[EMAIL_REDACTED]" }),
+      makeAccount({ id: "2", name: "[B]", email: "[EMAIL_REDACTED]" }),
+    ];
+    const firstRender = renderTable({ accounts });
+    const input = await screen.findByPlaceholderText(labels.searchPlaceholder);
+    fireEvent.change(input, { target: { value: "[B]" } });
+    await waitFor(() => {
+      expect(screen.queryByText("[A]")).not.toBeInTheDocument();
+    });
+    firstRender.unmount();
+
+    renderTable({ accounts });
+    const remountedInput = await screen.findByPlaceholderText(labels.searchPlaceholder);
+    expect(remountedInput).toHaveValue("[B]");
+    await waitFor(() => {
+      expect(screen.queryByText("[A]")).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("[B]")).toBeInTheDocument();
+  });
+
+  test("status filter survives unmount and remount of the table", async () => {
+    const accounts = [
+      makeAccount({ id: "1", name: "[A]", status: MeetingIntegrationConnectedAccountStatus.Connected }),
+      makeAccount({ id: "2", name: "[B]", status: MeetingIntegrationConnectedAccountStatus.Revoked }),
+    ];
+    const firstRender = renderTable({ accounts });
+    await waitFor(() => {
+      expect(screen.getByText("[A]")).toBeInTheDocument();
+    });
+    act(() => {
+      useMeetingIntegrationsSettingsStore
+        .getState()
+        .setConnectedAccountsStatusFilter(
+          MeetingIntegrationProviderSlug.Zoom,
+          MeetingIntegrationConnectedAccountStatus.Revoked
+        );
+    });
+    await waitFor(() => {
+      expect(screen.queryByText("[A]")).not.toBeInTheDocument();
+    });
+    firstRender.unmount();
+
+    renderTable({ accounts });
+    await waitFor(() => {
+      expect(screen.getByText("[B]")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("[A]")).not.toBeInTheDocument();
   });
 });

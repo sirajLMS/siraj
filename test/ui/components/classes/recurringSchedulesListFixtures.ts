@@ -59,7 +59,7 @@ export function buildRecurringSchedulesViewModel(
     error: null,
     rows: [],
     totalCount: 0,
-    currentPage: 1,
+    currentPage: 0,
     pageSize: 20,
     onPageChange: mock(() => {}),
     onSearchChange: mock(() => {}),

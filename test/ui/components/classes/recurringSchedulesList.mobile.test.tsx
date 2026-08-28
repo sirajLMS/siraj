@@ -54,7 +54,7 @@ describe("RecurringSchedulesListMobileView", () => {
     const { container } = renderMobileView({
       rows: [makeRecurringScheduleRow()],
       totalCount: 80,
-      currentPage: 1,
+      currentPage: 0,
       pageSize: 20,
       onPageChange,
     });
@@ -69,7 +69,7 @@ describe("RecurringSchedulesListMobileView", () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(onPageChange).toHaveBeenCalledWith(2);
+      expect(onPageChange).toHaveBeenCalledWith(1);
     });
   });
 });

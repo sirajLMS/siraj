@@ -70,12 +70,16 @@ describe("TemplatesTabContent", () => {
     expect(screen.getByText("Order Confirmation")).toBeTruthy();
   });
 
-  test("shows template language chip and status badge", () => {
+  test("shows language/category labeled values and localized status badge", () => {
     const t1 = makeTemplateRow("tpl-1", "Welcome Message");
     renderTemplatesTab({ templates: [t1] });
-    expect(screen.getByText(`${labels.templateLanguage}: ${t1.language}`)).toBeTruthy();
-    // Template name should be visible in collapsed state
-    expect(screen.getByText("Welcome Message")).toBeTruthy();
+    // Labeled Typography pairs replace the old raw Chips
+    expect(screen.getByText(labels.templateLanguage)).toBeTruthy();
+    expect(screen.getByText(t1.language ?? "")).toBeTruthy();
+    expect(screen.getByText(labels.templateCategory)).toBeTruthy();
+    expect(screen.getByText(t1.category ?? "")).toBeTruthy();
+    // Status badge shows the localized status label
+    expect(screen.getByText(labels.templateStatusApproved)).toBeTruthy();
   });
 
   test("shows empty state with sync CTA when no templates", () => {

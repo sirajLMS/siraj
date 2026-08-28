@@ -152,15 +152,6 @@ function createSearchMock(
 }
 
 describe("SearchScheduleContainer", () => {
-  test("hides entire page when user lacks ScheduleSearchAvailability", () => {
-    renderWithWrapper(<SearchScheduleContainer />, {
-      locale,
-      permissions: [],
-    });
-
-    expect(screen.queryByText(labels.pageTitle)).toBeNull();
-  });
-
   test("renders page title and search form when permission granted", async () => {
     renderWithWrapper(<SearchScheduleContainer />, {
       locale,

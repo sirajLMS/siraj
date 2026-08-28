@@ -38,7 +38,11 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   Translation.Dashboard.OAuthFlow,
   Translation.Dashboard.BillingQuota,
   Translation.Dashboard.Settings,
+  Translation.Dashboard.SettingsGeneral,
   Translation.Dashboard.SettingsMeetingIntegrations,
+  Translation.Dashboard.SettingsSession,
+  Translation.Dashboard.SettingsSiteContent,
+  Translation.Dashboard.SettingsTimezones,
   Translation.Dashboard.StudentPortalCredits,
   Translation.Dashboard.StudentPortalDashboard,
   Translation.Dashboard.StudentPortalHistory,
@@ -52,6 +56,7 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   Translation.Dashboard.CoreSearchSchedule,
   Translation.Dashboard.StudentHistory,
   Translation.Dashboard.TeacherDashboard,
+  Translation.Dashboard.TeacherFutureSchedule,
   Translation.Dashboard.TeacherProfile,
   Translation.Dashboard.TeacherOwnProfile,
   Translation.Dashboard.Billing,
@@ -72,6 +77,7 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   Translation.Profile.Staff,
   Translation.Profile.Teacher,
   Translation.Ui.UserSelect,
+  Translation.Ui.TagInput,
 ];
 
 const pendingPromises: Promise<unknown>[] = [];

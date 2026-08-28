@@ -25,7 +25,7 @@ await mock.module("next/navigation", () => ({
 }));
 
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
@@ -189,6 +189,40 @@ describe("MeetingProviderCredentialForm", () => {
     await waitFor(() => {
       expect(screen.getByText("meeting:write")).toBeInTheDocument();
       expect(screen.getByText("meeting:read")).toBeInTheDocument();
+    });
+  });
+
+  test("adds a scope via Enter and removes it via chip delete", async () => {
+    renderForm();
+
+    await waitFor(() => {
+      expect(screen.getByText("meeting:write")).toBeInTheDocument();
+    });
+
+    const scopesLabel = screen.getByText(labels.credentialForm.scopes);
+    const scopesInput = scopesLabel.parentElement?.querySelector("input");
+    expect(scopesInput).not.toBeNull();
+    if (!scopesInput) {
+      return;
+    }
+
+    fireEvent.change(scopesInput, { target: { value: "meeting:update" } });
+    fireEvent.keyDown(scopesInput, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(screen.getByText("meeting:update")).toBeInTheDocument();
+    });
+
+    const chip = screen.getByText("meeting:update").closest(".MuiChip-root");
+    const deleteIcon = chip?.querySelector(".MuiChip-deleteIcon");
+    expect(deleteIcon).not.toBeNull();
+    if (!deleteIcon) {
+      return;
+    }
+    fireEvent.click(deleteIcon);
+
+    await waitFor(() => {
+      expect(screen.queryByText("meeting:update")).not.toBeInTheDocument();
     });
   });
 

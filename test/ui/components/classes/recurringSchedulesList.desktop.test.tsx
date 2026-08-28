@@ -47,7 +47,7 @@ describe("RecurringSchedulesListDesktopView", () => {
     const { container } = renderDesktopView({
       rows: [makeRecurringScheduleRow()],
       totalCount: 80,
-      currentPage: 1,
+      currentPage: 0,
       pageSize: 20,
       onPageChange,
     });
@@ -67,7 +67,7 @@ describe("RecurringSchedulesListDesktopView", () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(onPageChange).toHaveBeenCalledWith(2);
+      expect(onPageChange).toHaveBeenCalledWith(1);
     });
   });
 

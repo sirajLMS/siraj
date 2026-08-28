@@ -18,7 +18,7 @@ import { useRecurringSchedulesListViewModel } from "@/frontend/common/views/dash
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const PAGE_SIZE = 20;
-const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE = 0;
 
 interface CapturedState {
   readonly page: number;
@@ -154,7 +154,7 @@ describe("useRecurringSchedulesListStore", () => {
 describe("useRecurringSchedulesListViewModel", () => {
   test("seeds the search from the URL on first mount (deep link)", async () => {
     sharedSearchParams.set("search", "physics");
-    const mocks = [buildListMock(DEFAULT_PAGE, "physics", 42)];
+    const mocks = [buildListMock(1, "physics", 42)];
 
     renderWithWrapper(<ViewModelConsumer />, { locale, mocks });
 
@@ -166,11 +166,7 @@ describe("useRecurringSchedulesListViewModel", () => {
   });
 
   test("keeps search and page in the store across unmount/remount (tier switch)", async () => {
-    const mocks = [
-      buildListMock(DEFAULT_PAGE, null, 10),
-      buildListMock(DEFAULT_PAGE, "math", 7),
-      buildListMock(3, "math", 99),
-    ];
+    const mocks = [buildListMock(1, null, 10), buildListMock(1, "math", 7), buildListMock(3, "math", 99)];
 
     const firstRender = renderWithWrapper(<ViewModelConsumer />, { locale, mocks });
 
@@ -188,11 +184,11 @@ describe("useRecurringSchedulesListViewModel", () => {
     expect(mockPush).toHaveBeenCalledWith("?search=math&page=1", { scroll: false });
 
     act(() => {
-      requireLatestViewModel().onPageChange(3);
+      requireLatestViewModel().onPageChange(2);
     });
 
     await waitFor(() => {
-      expect(readCapturedState()).toEqual({ page: 3, search: "math", total: 99 });
+      expect(readCapturedState()).toEqual({ page: 2, search: "math", total: 99 });
     });
     expect(mockPush).toHaveBeenLastCalledWith("?page=3", { scroll: false });
 
@@ -203,10 +199,10 @@ describe("useRecurringSchedulesListViewModel", () => {
 
     renderWithWrapper(<ViewModelConsumer />, { locale, mocks });
 
-    expect(readCapturedState()).toEqual({ page: 3, search: "math", total: 0 });
+    expect(readCapturedState()).toEqual({ page: 2, search: "math", total: 0 });
 
     await waitFor(() => {
-      expect(readCapturedState()).toEqual({ page: 3, search: "math", total: 99 });
+      expect(readCapturedState()).toEqual({ page: 2, search: "math", total: 99 });
     });
   });
 });

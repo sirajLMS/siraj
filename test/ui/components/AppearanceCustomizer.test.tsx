@@ -133,7 +133,7 @@ describe("AppearanceSettingsTab (Tier 1)", () => {
     expect(screen.queryByText("Enter Customize Mode")).toBeNull();
   });
 
-  test("renders hero title, subtitle, status chips, and Enter Customize Mode CTA with permission", () => {
+  test("renders hero title, subtitle, status chips, and Enter Customize Mode CTA with permission", async () => {
     render(<AppearanceSettingsTab />, {
       wrapper: ({ children }) => (
         <TestWrapper locale="en" themeMode="light" permissions={[AppPermission.SettingsAppearanceManage]}>
@@ -142,7 +142,9 @@ describe("AppearanceSettingsTab (Tier 1)", () => {
       ),
     });
 
-    expect(screen.getByText("Site Appearance")).toBeInTheDocument();
+    // The tab now lazy-loads its tier view via `createLazyView`, so the body
+    // renders asynchronously — await it before asserting.
+    expect(await screen.findByText("Site Appearance")).toBeInTheDocument();
     expect(screen.getByText(/Customize your site's branding, colors, and visual identity/)).toBeInTheDocument();
     expect(screen.getByText("Published")).toBeInTheDocument();
     expect(screen.getByText("Draft has changes")).toBeInTheDocument();
