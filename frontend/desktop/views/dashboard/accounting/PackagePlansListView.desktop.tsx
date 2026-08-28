@@ -27,7 +27,7 @@ import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewModel>) {
-  const { t, rows, loading, error, activeCount, archivedCount } = props;
+  const { t, rows, loading, error, activeCount, archivedCount, canManagePackages } = props;
 
   const priceLeader = useMemo(() => {
     const active = rows.filter(row => row.active);
@@ -125,26 +125,30 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
         width: 110,
         type: "number",
       },
-      {
-        field: "actions",
-        headerName: t.columns.actions,
-        width: 100,
-        sortable: false,
-        renderCell: params => (
-          <Stack direction="row" spacing={0.5}>
-            <Tooltip title={t.editTitle}>
-              <Link href={`/accounting/packages/${params.row.id}/edit`} style={{ textDecoration: "none" }}>
-                <IconButton size="small" aria-label={t.editTitle}>
-                  <EditOutlined fontSize="small" />
-                </IconButton>
-              </Link>
-            </Tooltip>
-          </Stack>
-        ),
-      },
+      ...(canManagePackages
+        ? ([
+            {
+              field: "actions",
+              headerName: t.columns.actions,
+              width: 100,
+              sortable: false,
+              renderCell: params => (
+                <Stack direction="row" spacing={0.5}>
+                  <Tooltip title={t.editTitle}>
+                    <Link href={`/accounting/packages/${params.row.id}/edit`} style={{ textDecoration: "none" }}>
+                      <IconButton size="small" aria-label={t.editTitle}>
+                        <EditOutlined fontSize="small" />
+                      </IconButton>
+                    </Link>
+                  </Tooltip>
+                </Stack>
+              ),
+            },
+          ] as GridColDef[])
+        : []),
     ];
     return cols;
-  }, [t]);
+  }, [t, canManagePackages]);
 
   const metricItems = useMemo<MetricItem[]>(
     () => [
@@ -187,9 +191,11 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
         actions={
-          <Link href="/accounting/packages/new" style={{ textDecoration: "none" }}>
-            <DesktopPrimaryPageAction startIcon={<StarOutlined />}>{t.createPlan}</DesktopPrimaryPageAction>
-          </Link>
+          canManagePackages ? (
+            <Link href="/accounting/packages/new" style={{ textDecoration: "none" }}>
+              <DesktopPrimaryPageAction startIcon={<StarOutlined />}>{t.createPlan}</DesktopPrimaryPageAction>
+            </Link>
+          ) : null
         }
       />
 

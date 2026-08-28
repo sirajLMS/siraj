@@ -3436,6 +3436,7 @@ A single payment ledger entry for a parent/student, derived from payments + invo
 """
 type PaymentLedgerEntry {
   amount: String
+  creditHours: Float
   creditsPurchased: Int
   currency: String
   id: ID

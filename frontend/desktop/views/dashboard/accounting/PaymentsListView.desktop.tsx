@@ -169,7 +169,7 @@ function FiltersBar(props: Readonly<PaymentsListViewModel>) {
 }
 
 export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
-  const { t, rows, loading, error, metrics, metricsBasis } = props;
+  const { t, rows, loading, error, metrics, metricsBasis, canManagePayments } = props;
   const locale = useAppLocale();
   const router = useRouter();
 
@@ -328,9 +328,11 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         title={t.pageTitle}
         subtitle={t.pageSubtitle}
         actions={
-          <Link href="/accounting/payments/new" style={{ textDecoration: "none" }}>
-            <DesktopPrimaryPageAction>{t.addPayment}</DesktopPrimaryPageAction>
-          </Link>
+          canManagePayments ? (
+            <Link href="/accounting/payments/new" style={{ textDecoration: "none" }}>
+              <DesktopPrimaryPageAction>{t.addPayment}</DesktopPrimaryPageAction>
+            </Link>
+          ) : null
         }
       />
 

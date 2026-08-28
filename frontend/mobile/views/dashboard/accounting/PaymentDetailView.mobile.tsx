@@ -1,6 +1,6 @@
 "use client";
 
-import { DownloadOutlined, EditOutlined, LockOpenOutlined, LockOutlined } from "@mui/icons-material";
+import { EditOutlined, LockOpenOutlined, LockOutlined } from "@mui/icons-material";
 import { Alert, Box, Button, Chip, CircularProgress, Divider, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -10,9 +10,10 @@ import {
   formatAccountingMoney,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { PaymentDocumentPreview } from "@/frontend/common/views/dashboard/accounting/components/PaymentDocumentPreview";
 import { PaymentHistoryTimeline } from "@/frontend/common/views/dashboard/accounting/components/PaymentHistoryTimeline";
 import type { PaymentDetailViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentDetailViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 import { useAppLocale } from "@/shared/locale/localeContext";
 
 type DetailLabels = PaymentDetailViewModel["t"];
@@ -139,6 +140,35 @@ function PaymentDetailFields({
   );
 }
 
+function PaymentDetailActions(props: Readonly<{ vm: PaymentDetailViewModel }>) {
+  const { t, payment, toggling, onTogglePaid } = props.vm;
+  if (!payment) return null;
+  return (
+    <Stack direction="row" spacing={1.5}>
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
+        onClick={() => void onTogglePaid()}
+        disabled={toggling}
+        sx={{ flex: 1 }}
+      >
+        {payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
+      </Button>
+      <Button
+        variant="outlined"
+        size="small"
+        component={Link}
+        href={`/accounting/payments/${payment.id}/edit`}
+        startIcon={<EditOutlined />}
+        sx={{ flex: 1 }}
+      >
+        {t.detail.editAction}
+      </Button>
+    </Stack>
+  );
+}
+
 function PaymentAuditFields({
   t,
   payment,
@@ -148,17 +178,23 @@ function PaymentAuditFields({
 }>) {
   const locale = useAppLocale();
   return (
-    <MobileCardShell>
-      <Stack spacing={1.5}>
-        <MobileField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt, locale)} />
-        <MobileField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt, locale)} />
-      </Stack>
-    </MobileCardShell>
+    <Stack spacing={1.5}>
+      <MobileField label={t.columns.createdAt} value={formatAccountingDate(payment.createdAt, locale)} />
+      <MobileField label={t.auditUpdatedAt} value={formatAccountingDate(payment.updatedAt, locale)} />
+    </Stack>
   );
 }
 
 export function PaymentDetailMobile(props: Readonly<PaymentDetailViewModel>) {
-  const { t, payment, loading, notFound, toggling, toggleError, onTogglePaid, onDismissToggleError } = props;
+  const {
+    t,
+    payment,
+    loading,
+    notFound,
+    toggleError,
+    onDismissToggleError,
+    canManagePayments,
+  } = props;
   const locale = useAppLocale();
 
   return (
@@ -186,53 +222,32 @@ export function PaymentDetailMobile(props: Readonly<PaymentDetailViewModel>) {
 
             <PaymentDetailFields t={t} payment={payment} />
 
-            <MobileCardShell>
-              <PaymentHistoryTimeline
-                events={payment.history ?? []}
-                labels={t.historyKinds}
-                emptyLabel={t.detail.historyEmpty}
-                locale={locale}
-              />
-            </MobileCardShell>
+            <MobileSectionPanel title={t.detail.historyTitle}>
+              <Stack spacing={2}>
+                <PaymentHistoryTimeline
+                  events={payment.history ?? []}
+                  labels={t.historyKinds}
+                  emptyLabel={t.detail.historyEmpty}
+                  locale={locale}
+                />
+                <PaymentAuditFields t={t} payment={payment} />
+              </Stack>
+            </MobileSectionPanel>
 
-            <PaymentAuditFields t={t} payment={payment} />
+            <PaymentDocumentPreview
+              title={t.detail.documentPreview}
+              emptyLabel={t.detail.documentEmpty}
+              downloadLabel={t.detail.downloadPdf}
+              zoomInLabel={t.detail.zoomIn}
+              zoomOutLabel={t.detail.zoomOut}
+              rotateLabel={t.detail.rotate}
+              expandLabel={t.detail.expand}
+              closeLabel={t.detail.close}
+              src={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
+              downloadHref={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
+            />
 
-            <Stack direction="row" spacing={1.5}>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
-                onClick={() => void onTogglePaid()}
-                disabled={toggling}
-                sx={{ flex: 1 }}
-              >
-                {payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                component={Link}
-                href={`/accounting/payments/${payment.id}/edit`}
-                startIcon={<EditOutlined />}
-                sx={{ flex: 1 }}
-              >
-                {t.detail.editAction}
-              </Button>
-            </Stack>
-
-            {payment.invoiceId ? (
-              <Button
-                variant="contained"
-                component="a"
-                href={`/api/invoices/${payment.invoiceId}/download`}
-                target="_blank"
-                rel="noopener"
-                startIcon={<DownloadOutlined />}
-                fullWidth
-              >
-                {t.detail.downloadPdf}
-              </Button>
-            ) : null}
+            {canManagePayments ? <PaymentDetailActions vm={props} /> : null}
           </>
         ) : null}
       </Stack>

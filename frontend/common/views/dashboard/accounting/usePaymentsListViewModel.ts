@@ -2,9 +2,10 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import type { AccountingPaymentFilterInput } from "@/frontend/common/graphql/generated/gql/graphql";
+import { type AccountingPaymentFilterInput, AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { accountingPaymentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting";
 import { useAccountingPaymentsStore } from "@/frontend/common/stores/accountingPaymentsStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingPayments } from "@/shared/locale/namespaces";
 import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments";
@@ -52,11 +53,15 @@ export interface PaymentsListViewModel extends PaymentsFilterSlice {
   readonly metrics: PaymentsListMetrics;
   readonly metricsBasis: string | null;
   readonly hasActiveFilters: boolean;
+  /** True when the caller holds ACCOUNTING_PAYMENTS_MANAGE (create/edit/toggle). */
+  readonly canManagePayments: boolean;
 }
 
 export function usePaymentsListViewModel(): PaymentsListViewModel {
   const t = useAppTranslation(DashboardAccountingPayments);
   const filterSlice = useAccountingPaymentsFilterSlice();
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canManagePayments = hasPermission(AppPermission.AccountingPaymentsManage);
   const {
     studentId,
     parentId,
@@ -118,6 +123,7 @@ export function usePaymentsListViewModel(): PaymentsListViewModel {
     setUnpaidOnly,
     resetFilters,
     hasActiveFilters,
+    canManagePayments,
   };
 }
 

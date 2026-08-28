@@ -4,6 +4,8 @@ export interface PaymentLedgerEntry {
   readonly studentId: string | null;
   readonly studentName: string | null;
   readonly creditsPurchased: number;
+  /** Credit hours granted by this payment (hour-package purchases); null when none. */
+  readonly creditHours: number | null;
   readonly amount: string;
   readonly currency: string;
   readonly packageName: string | null;

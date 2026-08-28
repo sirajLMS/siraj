@@ -39,6 +39,7 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
     setParentId,
     resetFilters,
     hasActiveFilters,
+    canManagePayments,
   } = props;
   const router = useRouter();
 
@@ -206,7 +207,13 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
         ) : null}
       </Stack>
 
-      <MobileFab icon={<AddOutlined />} label={t.addPayment} onClick={() => router.push("/accounting/payments/new")} />
+      {canManagePayments ? (
+        <MobileFab
+          icon={<AddOutlined />}
+          label={t.addPayment}
+          onClick={() => router.push("/accounting/payments/new")}
+        />
+      ) : null}
     </MobilePageContainer>
   );
 }

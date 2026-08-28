@@ -73,6 +73,8 @@ const DEFAULT_PAGE_SIZE = 10;
 
 export interface StudentCreditsViewModel {
   readonly balance: StudentCreditBalanceInfo;
+  /** The logged-in student own student id (null until the profile query resolves). */
+  readonly studentId: string | null;
   readonly transactions: readonly StudentCreditTransactionRow[];
   readonly totalCount: number;
   readonly reasonFilter: CreditReasonFilter;
@@ -253,13 +255,14 @@ export function useStudentCreditsViewModel(): StudentCreditsViewModel {
   const router = useRouter();
   const labels = useStudentCreditsLabels(t);
 
-  const { balance, allTransactions, loading } = useStudentCreditQueries();
+  const { studentId, balance, allTransactions, loading } = useStudentCreditQueries();
   const { reasonFilter, page, pageSize, setReasonFilter, setPage, setPageSize } = useStudentCreditsPagination();
   const { transactions, totalCount } = useDerivedTransactions(allTransactions, reasonFilter, page, pageSize);
   const { reasonOptions, reasonLabel } = useReasonOptions(labels);
 
   return {
     balance,
+    studentId,
     transactions,
     totalCount,
     reasonFilter,

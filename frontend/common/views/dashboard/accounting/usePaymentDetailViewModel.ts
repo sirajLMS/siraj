@@ -2,11 +2,12 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useState } from "react";
-import type { AccountingPaymentQuery } from "@/frontend/common/graphql/generated/gql/graphql";
+import { type AccountingPaymentQuery, AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   accountingPaymentQueryDocument,
   toggleAccountingPaymentPaidStatusMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/accounting";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingPayments } from "@/shared/locale/namespaces";
@@ -23,10 +24,14 @@ export interface PaymentDetailViewModel {
   readonly toggleError: string | null;
   readonly onTogglePaid: () => Promise<void>;
   readonly onDismissToggleError: () => void;
+  /** True when the caller holds ACCOUNTING_PAYMENTS_MANAGE (toggle/edit actions). */
+  readonly canManagePayments: boolean;
 }
 
 export function usePaymentDetailViewModel(paymentId: string): PaymentDetailViewModel {
   const t = useAppTranslation(DashboardAccountingPayments);
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canManagePayments = hasPermission(AppPermission.AccountingPaymentsManage);
 
   const { data, loading } = useQuery(accountingPaymentQueryDocument, {
     variables: { id: paymentId },
@@ -78,5 +83,6 @@ export function usePaymentDetailViewModel(paymentId: string): PaymentDetailViewM
     toggleError,
     onTogglePaid,
     onDismissToggleError,
+    canManagePayments,
   };
 }

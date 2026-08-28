@@ -10,6 +10,7 @@ import {
   formatAccountingMoney,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { PaymentDocumentPreview } from "@/frontend/common/views/dashboard/accounting/components/PaymentDocumentPreview";
 import { PaymentHistoryTimeline } from "@/frontend/common/views/dashboard/accounting/components/PaymentHistoryTimeline";
 import type { PaymentDetailViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentDetailViewModel";
 import {
@@ -18,7 +19,6 @@ import {
 } from "@/frontend/desktop/components/ui/button";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-import { PaymentDocumentPreview } from "@/frontend/desktop/views/dashboard/accounting/components/PaymentDocumentPreview";
 import { useAppLocale } from "@/shared/locale/localeContext";
 
 function DetailField({ label, value }: Readonly<{ label: string; value: ReactNode }>) {
@@ -34,8 +34,27 @@ function DetailField({ label, value }: Readonly<{ label: string; value: ReactNod
   );
 }
 
+function DetailHeaderActions(props: Readonly<{ vm: PaymentDetailViewModel }>) {
+  const { t, payment, toggling, onTogglePaid } = props.vm;
+  if (!payment) return null;
+  return (
+    <Stack direction="row" spacing={1.5}>
+      <DesktopSecondaryAction
+        startIcon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
+        onClick={() => void onTogglePaid()}
+        disabled={toggling}
+      >
+        {payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
+      </DesktopSecondaryAction>
+      <Link href={`/accounting/payments/${payment.id}/edit`} style={{ textDecoration: "none" }}>
+        <DesktopPrimaryPageAction startIcon={<EditOutlined />}>{t.detail.editAction}</DesktopPrimaryPageAction>
+      </Link>
+    </Stack>
+  );
+}
+
 export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
-  const { t, payment, loading, notFound, toggling, toggleError, onTogglePaid, onDismissToggleError } = props;
+  const { t, payment, loading, notFound, toggleError, onDismissToggleError, canManagePayments } = props;
   const locale = useAppLocale();
 
   if (loading) {
@@ -65,20 +84,7 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
           { label: t.pageTitle, href: "/accounting/payments" },
           { label: String(payment.invoiceId ?? payment.id).slice(0, 8), current: true },
         ]}
-        actions={
-          <Stack direction="row" spacing={1.5}>
-            <DesktopSecondaryAction
-              startIcon={payment.isPaidStatusOn ? <LockOpenOutlined /> : <LockOutlined />}
-              onClick={() => void onTogglePaid()}
-              disabled={toggling}
-            >
-              {payment.isPaidStatusOn ? t.detail.markUnpaid : t.detail.markPaid}
-            </DesktopSecondaryAction>
-            <Link href={`/accounting/payments/${payment.id}/edit`} style={{ textDecoration: "none" }}>
-              <DesktopPrimaryPageAction startIcon={<EditOutlined />}>{t.detail.editAction}</DesktopPrimaryPageAction>
-            </Link>
-          </Stack>
-        }
+        actions={canManagePayments ? <DetailHeaderActions vm={props} /> : null}
       />
 
       {toggleError ? (
