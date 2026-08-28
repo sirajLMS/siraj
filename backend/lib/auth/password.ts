@@ -4,12 +4,24 @@ import { getServerTranslations } from "@/shared/locale";
 const SALT_ROUNDS = 12;
 
 /**
+ * Maximum password length allowed to prevent CPU-exhaustion DoS attacks
+ * during bcrypt hashing operations.
+ */
+export const PASSWORD_MAX_LENGTH = 128;
+
+/**
  * Validate password strength/complexity.
- * Enforces: minimum 12 characters AND at least 2 of {lowercase, uppercase,
- * digit, symbol}. Throws localized Error messages for each failed rule.
+ * Enforces: minimum 12 characters, maximum 128 characters, AND at least 2 of
+ * {lowercase, uppercase, digit, symbol}. Throws localized Error messages for each failed rule.
  */
 export async function validatePasswordStrength(password: string, locale?: string): Promise<void> {
   const { auth } = getServerTranslations(locale ?? "en").errorsTranslations;
+
+  // Security guard (DoS prevention): reject excessively long password strings
+  // before passing them to CPU-intensive bcrypt hashing algorithms.
+  if (password.length > PASSWORD_MAX_LENGTH) {
+    throw new Error(`Password exceeds maximum allowed length of ${PASSWORD_MAX_LENGTH} characters.`);
+  }
 
   if (password.length < 12) {
     throw new Error(auth.passwordMinLength);
