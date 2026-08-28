@@ -95,11 +95,10 @@ playwright-cli mousewheel 0 100
 ### Save as
 
 ```bash
-playwright-cli screenshot
-playwright-cli screenshot e5
-playwright-cli screenshot --filename=page.png
-playwright-cli screenshot --hires
-playwright-cli pdf --filename=page.pdf
+playwright-cli screenshot --filename=scratch/screenshots/page.png
+playwright-cli screenshot e5 --filename=scratch/screenshots/element.png
+playwright-cli screenshot --filename=scratch/screenshots/hires.png --hires
+playwright-cli pdf --filename=scratch/screenshots/page.pdf
 ```
 
 ### Tabs
