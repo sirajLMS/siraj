@@ -105,16 +105,10 @@ const getReportMock = mock(
 // from this barrel), then substitute only the payroll service.
 const realServices = await import("@/backend/services");
 
-void mock.module(
-  "@/backend/services",
-  () =>
-    new Proxy(realServices, {
-      get: (target, property, receiver) =>
-        property === "PayrollCalculationService"
-          ? { getReport: getReportMock }
-          : Reflect.get(target, property, receiver),
-    })
-);
+void mock.module("@/backend/services", () => ({
+  ...realServices,
+  PayrollCalculationService: { getReport: getReportMock },
+}));
 
 // The builder eagerly side-imports the full schema tree for its dev-mode HMR
 // edge; neutralize it so the schema under test contains only the payroll types.
@@ -126,8 +120,19 @@ void mock.module("@/backend/graphql/gqlSchema.definitions", () => ({}));
 const { gqlSchemaBuilder } = await import("@/backend/graphql/gqlSchemaBuilder");
 void mock.module("@/backend/graphql/gqlSchemaBuilder", () => ({ gqlSchemaBuilder }));
 
-gqlSchemaBuilder.addScalarType("DateTime", DateTimeResolver, {});
-gqlSchemaBuilder.addScalarType("JSON", JSONScalar);
+// Register the scalars the payroll types reference. Guarded by a global flag
+// so both payroll test files can share the builder when bun runs them in a
+// single process (module caches persist across test files).
+const PAYROLL_TEST_SCALARS = Symbol.for("siraj.payrollTest.scalarsRegistered");
+const globalForPayrollTest = globalThis as typeof globalThis & {
+  [PAYROLL_TEST_SCALARS]?: boolean;
+};
+
+if (!globalForPayrollTest[PAYROLL_TEST_SCALARS]) {
+  gqlSchemaBuilder.addScalarType("DateTime", DateTimeResolver, {});
+  gqlSchemaBuilder.addScalarType("JSON", JSONScalar);
+  globalForPayrollTest[PAYROLL_TEST_SCALARS] = true;
+}
 
 await import("@/backend/graphql/query/teachers/payroll.query");
 
@@ -262,7 +267,7 @@ describe("payrollReport query", () => {
   test("returns the page shape with rows, totalCount, and aggregates", async () => {
     const result = await executePayrollReport({}, makeCtx());
 
-    expect(result.errors?.[0]?.message).toBe("DEBUG");
+    expect(result.errors ?? []).toHaveLength(0);
     const page = extractPage(result);
     expect(page).not.toBeNull();
     expect(page?.totalCount).toBe(2);
@@ -271,7 +276,8 @@ describe("payrollReport query", () => {
     const row = page?.rows[0];
     expect(row?.instanceId).toBe(INSTANCE_ID);
     expect(row?.id).toBe(INSTANCE_ID);
-    expect(row?.scheduledStartAt).toBe("2026-08-20T10:00:00.000Z");
+    // The DateTime scalar serializes the row timestamp; compare the instant.
+    expect(row && new Date(row.scheduledStartAt).toISOString()).toBe("2026-08-20T10:00:00.000Z");
     expect(row?.teacherPaidAmount).toBe("116.00");
     expect(row?.teacherPaidCurrency).toBe(CurrencyCode.SAR);
     expect(row?.calculationStatus).toBe(CalculationStatus.CALCULATED);
@@ -341,8 +347,16 @@ describe("payrollReport query", () => {
     expect(getReportCalls).toHaveLength(0);
   });
 
-  test("rejects unauthenticated callers with a UNAUTHENTICATED GraphQL error", async () => {
+  test("rejects logged-out callers with a FORBIDDEN GraphQL error", async () => {
     const result = await executePayrollReport({}, makeCtx({ user: undefined, permissions: [], role: UserRole.GUEST }));
+
+    expectErrorEnvelope(result, "FORBIDDEN", tErrorsEn.insufficientPermissions);
+    expect(extractPage(result)).toBeNull();
+    expect(getReportCalls).toHaveLength(0);
+  });
+
+  test("the resolver itself rejects a permissioned context without a user id", async () => {
+    const result = await executePayrollReport({}, makeCtx({ user: undefined, role: UserRole.GUEST }));
 
     expectErrorEnvelope(result, "UNAUTHENTICATED", tErrorsEn.unauthorized);
     expect(extractPage(result)).toBeNull();

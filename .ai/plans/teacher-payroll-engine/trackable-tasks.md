@@ -197,7 +197,7 @@
 - ✏️ `backend/graphql/mutation/teachers/index.ts` — re-export.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/mutation/teachers/payroll.mutation.ts --lifecycle codescene`
 
-### 2.5 Query + mutation tests
+### 2.5 Query + mutation tests ✅ DONE
 - 🧪 `backend/graphql/query/teachers/payroll.query.test.ts` — returns page shape; respects `limit`/`offset`; permission denied → GraphQL error.
 - 🧪 `backend/graphql/mutation/teachers/payroll.mutation.test.ts` — mutation returns result shape; permission denied → GraphQL error; mutation-argument coverage (per `docs/testing/mutation-argument-coverage.md`).
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/query/teachers/payroll.query.test.ts --lifecycle codescene`
@@ -210,7 +210,7 @@
 - 🧪 `app/api/payroll/export/route.test.ts` — happy path returns CSV; permission denied returns 403; truncation header set when `totalCount > 10_000`.
 - 🔁 `bun run scripts/health/sub-loop.ts "app/api/payroll/export/route.ts" --lifecycle codescene`
 
-### 2.7 Phase-2 acceptance
+### 2.7 Phase-2 acceptance ✅ DONE
 - ✅ GraphQL schema builds (`bun run graphql:build`).
 - ✅ Codegen (`bun run graphql:codegen`) produces typed `PayrollReportQuery` + `ApplyPayrollOverrideMutation` hooks.
 
@@ -273,7 +273,7 @@
 
 ## Phase 4 — Payroll Reports page
 
-### 4.1 Apollo documents
+### 4.1 Apollo documents ✅ DONE
 - 🆕 `frontend/common/graphql/sharedDocuments/teachers/payroll.documents.ts` — `payrollReportQueryDocument` + `applyPayrollOverrideMutationDocument` (both `TypedDocumentNode<Operations.X, Types.Y>`, camelCase + `Document` suffix per `sharedDocuments/AGENTS.md`; include `id`-equivalent fields `instanceId` + `auditEventId` so Apollo cache can auto-update).
 - ✏️ `frontend/common/graphql/sharedDocuments/teachers/index.ts` — add `export * from "./payroll.documents";`.
 - 🔁 After Phase 2 lands: `bun run generate:gqlSchema && bun codegen` so `Operations.PayrollReportQuery`, `Operations.ApplyPayrollOverrideMutation`, + their `Types.Args` exist.

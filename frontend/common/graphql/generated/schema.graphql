@@ -777,6 +777,8 @@ enum ClassExecutionState {
 
 type ClassInstanceDetail {
   avatarUrl: String
+  calculatedDuration: Int
+  calculationStatus: CalculationStatus
   classType: ClassType
   courseName: String
   durationMinutes: Int
@@ -787,11 +789,14 @@ type ClassInstanceDetail {
   id: String
   instanceId: String
   isFrozen: Boolean
+  isPartialPercentage: Int
   isRateOverridden: Boolean
   isRescheduled: Boolean
   meetingJoinUrl: String @deprecated(reason: "Use effectiveMeeting.joinUrl")
   outcome: ClassOutcome
+  payrollCalculatedAt: DateTime
   payrollCredited: Boolean
+  payrollNote: String
   performance: ClassInstancePerformance
   rateAmount: String
   rateCurrency: CurrencyCode
@@ -807,6 +812,8 @@ type ClassInstanceDetail {
   subjectId: String
   subjectName: String
   teacher: ClassInstanceTeacherInfo
+  teacherPaidAmount: String
+  teacherPaidCurrency: CurrencyCode
   teacherTimezone: IanaTimezone
 }
 
@@ -2660,6 +2667,11 @@ type Mutation {
   adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult
   adminRevokeMeetingProviderToken(input: AdminRevokeTokenInput!): AdminRevokeTokenResult
 
+  """
+  Apply an operator override (Refund / Calculated / Not Calculated / Partially) to a class instance's payroll calculation. The acting operator is resolved from the authenticated context and is never accepted as input.
+  """
+  applyPayrollOverride(input: PayrollOverrideInput!): PayrollOverrideResult
+
   """Approve a pending lesson report (supervisor/manager action)"""
   approveLessonReport(reportId: ID!): LessonReport
   approvePaymentProof(expectedVersion: Int, invoiceId: String!): MarkInvoicePaidResult
@@ -3584,6 +3596,92 @@ enum PaymentMethodType {
   PROOF_UPLOAD
 }
 
+"""
+Client-supplied fields for overriding a class instance's payroll calculation. The acting operator is resolved from the request context and is never accepted as input.
+"""
+input PayrollOverrideInput {
+  clientRequestId: String
+  force: Boolean
+  instanceId: ID!
+  note: String
+  partialPercentage: Int
+  targetStatus: CalculationStatus!
+}
+
+"""
+Payroll snapshot of a class instance after an operator override, with the audit event id of the emitted override record
+"""
+type PayrollOverrideResult {
+  auditEventId: ID
+  calculatedDuration: Int
+  calculationStatus: CalculationStatus
+  id: ID
+  instanceId: ID
+  isPartialPercentage: Int
+  payrollNote: String
+  teacherPaidAmount: String
+  teacherPaidCurrency: CurrencyCode
+}
+
+"""
+Totals over the full filtered payroll set (not just the returned page): paid amount, dominant currency, and row counts per calculation status
+"""
+type PayrollReportAggregates {
+  id: ID
+  rowCountByStatus: JSON
+  totalPaidAmount: String
+  totalPaidCurrency: CurrencyCode
+}
+
+"""
+AND-combined filters narrowing the payroll report to a teacher, student, date range, statuses, or free-text search
+"""
+input PayrollReportFilter {
+  calculationStatuses: [CalculationStatus!]
+  dateFrom: String
+  dateTo: String
+  search: String
+  studentId: ID
+  teacherId: ID
+}
+
+"""
+One page of the payroll report plus aggregates over the full filtered set
+"""
+type PayrollReportPage {
+  aggregates: PayrollReportAggregates
+  id: ID
+  rows: [PayrollReportRow!]
+  totalCount: Int
+}
+
+"""
+One class instance flattened with teacher, student, and subject names for the payroll report
+"""
+type PayrollReportRow {
+  actualEndAt: DateTime
+  actualStartAt: DateTime
+  calculatedDuration: Int
+  calculationStatus: CalculationStatus
+  id: ID
+  instanceId: ID
+  isPartialPercentage: Int
+  isStudentAbsence: Boolean
+  isTeacherAbsence: Boolean
+  payrollNote: String
+  scheduledDurationMinutes: Int
+  scheduledEndAt: DateTime
+  scheduledStartAt: DateTime
+  studentId: ID
+  studentName: String
+  subjectId: ID
+  subjectName: String
+  teacherId: ID
+  teacherName: String
+  teacherPaidAmount: String
+  teacherPaidCurrency: CurrencyCode
+}
+
 """Paginated pending lesson reports awaiting review, with total count"""
 type PendingLessonReportsPayload {
   rows: [LessonReport!]
@@ -3803,6 +3901,17 @@ type Query {
 
   """Lightweight parent list for autocomplete (id, name, avatarUrl)."""
   parentsDirectory(limit: Int, search: String): [ParentDirectoryAutocompleteRow!]!
+
+  """
+  Paginated payroll report across class instances. Aggregates cover the full filtered set (capped at 10,000 rows), not just the returned page.
+  """
+  payrollReport(
+    filter: PayrollReportFilter
+
+    """Max rows per page (max 200)"""
+    limit: Int = 50
+    offset: Int = 0
+  ): PayrollReportPage
 
   """
   Get pending lesson reports awaiting review with optional teacher/student filters and pagination
