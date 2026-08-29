@@ -164,3 +164,65 @@ export function sanitizeRichText(html: string): string {
   }
   return output;
 }
+/** Marker appended when plain text is truncated at its maximum length. */
+const PLAIN_TEXT_ELLIPSIS = "…";
+
+/** A stray `<` that survives tag stripping is escaped to this inert entity. */
+const ESCAPED_LT = "&lt;";
+
+const STRAY_LT_PATTERN = /</g;
+
+/**
+ * Truncates to `maxLength` UTF-16 units (the trailing ellipsis included)
+ * without splitting a surrogate pair at the cut, so the result stays valid
+ * UTF-16 and fits fixed-width storage.
+ */
+function truncateWithEllipsis(text: string, maxLength: number): string {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  let cut = Math.max(maxLength - 1, 0);
+  const lastUnit = text.charCodeAt(cut - 1);
+  if (lastUnit >= 0xd800 && lastUnit <= 0xdbff) {
+    cut -= 1;
+  }
+  return text.slice(0, cut) + PLAIN_TEXT_ELLIPSIS;
+}
+
+/**
+ * Sanitizes free-form plain text (e.g. an operator note on a payroll
+ * calculation) before it is persisted to a column that is rendered as text
+ * and must never be interpreted as markup.
+ *
+ * Guarantees for the returned string:
+ *  - Every HTML tag is removed: dangerous container elements (`script`,
+ *    `style`, `iframe`, `object`, `embed`, `svg`, `math`) together with their
+ *    contents, and every remaining tag with all of its attributes — there is
+ *    no allowlist, so no element, event handler, or URL can survive.
+ *  - Any `<` that is not part of a tag is escaped to `&lt;`, so markup
+ *    concatenated after the stored value cannot complete an unterminated tag.
+ *  - Character entities (`&lt;`, `&#x61;`, …) pass through as inert text:
+ *    entity references never re-tokenize as markup at render time.
+ *  - The result is at most `maxLength` characters long, the trailing ellipsis
+ *    included, and never splits a surrogate pair at the truncation boundary.
+ *
+ * Pure, synchronous, never throws, and idempotent:
+ * `sanitizePlainText(sanitizePlainText(x)) === sanitizePlainText(x)`.
+ *
+ * @example
+ * sanitizePlainText("<script>alert(1)</script>Refund") // → "Refund"
+ * sanitizePlainText("Paid <b>in full</b>")             // → "Paid in full"
+ * sanitizePlainText("a < b")                           // → "a &lt; b"
+ */
+export function sanitizePlainText(text: string, maxLength = 2000): string {
+  if (text.length === 0) {
+    return "";
+  }
+  let clean = text;
+  for (const tagName of DANGEROUS_CONTAINER_TAGS) {
+    clean = stripContainerBlocks(clean, tagName);
+  }
+  clean = clean.replace(HTML_TAG_PATTERN, "");
+  clean = clean.replace(STRAY_LT_PATTERN, ESCAPED_LT);
+  return truncateWithEllipsis(clean, maxLength);
+}

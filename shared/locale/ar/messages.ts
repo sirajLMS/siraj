@@ -13,6 +13,7 @@ import { dashboardBillingExchangeRatesAr } from "@/shared/locale/ar/dashboard/bi
 import { dashboardBillingAr } from "@/shared/locale/ar/dashboard/billing/main.ts";
 import { dashboardBillingManualAr } from "@/shared/locale/ar/dashboard/billing/manual.ts";
 import { dashboardBillingPaymentAr } from "@/shared/locale/ar/dashboard/billing/payment.ts";
+import { dashboardBillingPayrollAr } from "@/shared/locale/ar/dashboard/billing/payroll.ts";
 import { quotaAr } from "@/shared/locale/ar/dashboard/billing/quota.ts";
 import { dashboardBillingSupportedCurrenciesAr } from "@/shared/locale/ar/dashboard/billing/supportedCurrencies.ts";
 
@@ -164,6 +165,7 @@ export const arMessages: Translations = {
     billingQuota: quotaAr,
     billingPayment: dashboardBillingPaymentAr,
     billingCreditAdjustment: dashboardBillingCreditAdjustmentAr,
+    billingPayroll: dashboardBillingPayrollAr,
     accountingPayments: dashboardAccountingPaymentsAr,
     accountingPackages: dashboardAccountingPackagePlansAr,
     accountingStudentCreditHours: dashboardAccountingStudentCreditHoursAr,

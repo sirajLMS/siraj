@@ -233,6 +233,7 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
       AppPermission.QuotasView,
       AppPermission.QuotasManage,
       AppPermission.AccountingCreditsManage,
+      AppPermission.AccountingPayrollView,
     ],
     separator: true,
   },
@@ -593,6 +594,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/accounting/credits",
     section: "main",
     permission: PAGE_PERMISSIONS.accountingCreditsManage,
+    groupId: "grp_finance",
+  },
+  {
+    key: "accounting-payroll",
+    labelKey: "accountingPayroll",
+    iconKey: "payments",
+    href: "/accounting/payroll",
+    section: "main",
+    permission: PAGE_PERMISSIONS.accountingPayrollView,
     groupId: "grp_finance",
   },
 

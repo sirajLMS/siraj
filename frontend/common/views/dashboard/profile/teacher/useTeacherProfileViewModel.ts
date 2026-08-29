@@ -33,10 +33,6 @@ function buildEditSource(scope: ProfileScope, profile: ProfileData | null | unde
   return scope === ProfileScope.OWN ? profile.teacherOwnProfile : profile.teacherAdminProfile;
 }
 
-const onTabChange = (_tab: string) => {
-  // Tab routing is owned by the profile shell / URL.
-};
-
 export type TeacherOwnSubmitData = {
   name: string;
   email: string;
@@ -85,7 +81,6 @@ export interface TeacherProfileViewModel {
   readonly error: Error | undefined;
   readonly refetch: () => void;
   readonly activeTab: string;
-  readonly onTabChange: (tab: string) => void;
 }
 
 export interface UseTeacherProfileViewModelProps {
@@ -220,6 +215,5 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
     error,
     refetch,
     activeTab,
-    onTabChange,
   };
 }

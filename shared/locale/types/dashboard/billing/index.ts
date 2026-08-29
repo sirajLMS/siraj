@@ -5,5 +5,6 @@ export * from "./main";
 export * from "./manual";
 export * from "./payment";
 export * from "./paymentsLedger";
+export * from "./payroll";
 export * from "./quota";
 export * from "./supportedCurrencies";

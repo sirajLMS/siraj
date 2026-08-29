@@ -118,5 +118,6 @@
   "accountingPackages": "الباقات",
   "accountingPaymentsNew": "إضافة دفعة",
   "accountingPackagesNew": "إنشاء باقة",
-  "accountingCredits": "الرصيد"
+  "accountingCredits": "الرصيد",
+  "accountingPayroll": "الرواتب"
 }

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { sanitizeRichText } from "@/backend/lib/sanitize/richTextSanitizer";
+import { sanitizePlainText, sanitizeRichText } from "@/backend/lib/sanitize/richTextSanitizer";
 
 /**
  * Removes every canonical tag the sanitizer is allowed to emit; the
@@ -233,5 +233,152 @@ describe("sanitizeRichText — Tier 4: security battery", () => {
   test("benign editor output survives byte-identical", () => {
     const benign = "<p>Discount for <b>Ramadan</b> camp:</p><ul><li>2 <i>free</i> hours</li></ul>";
     expect(sanitizeRichText(benign)).toBe(benign);
+  });
+});
+/**
+ * Plain-text invariant: no raw `<` may survive (tags are stripped and stray
+ * angle brackets are escaped), and re-sanitizing is a fixed point.
+ */
+function expectPlainTextInert(output: string): void {
+  expect(output.includes("<")).toBe(false);
+  expect(sanitizePlainText(output)).toBe(output);
+}
+
+describe("sanitizePlainText — Tier 1: branches", () => {
+  test("returns empty string for empty input", () => {
+    expect(sanitizePlainText("")).toBe("");
+  });
+
+  test("passes plain text through unchanged", () => {
+    expect(sanitizePlainText("Override: refund the session")).toBe("Override: refund the session");
+  });
+
+  test("strips script tags together with their contents", () => {
+    expect(sanitizePlainText("<script>alert(1)</script>Refund approved")).toBe("Refund approved");
+  });
+
+  test("strips every tag — no formatting allowlist survives", () => {
+    expect(sanitizePlainText("Paid <b>in full</b> on <i>Monday</i>")).toBe("Paid in full on Monday");
+  });
+
+  test("truncates over-long input to the default 2000 characters with an ellipsis", () => {
+    const input = "x".repeat(2500);
+    const output = sanitizePlainText(input);
+    expect(output).toHaveLength(2000);
+    expect(output).toBe("x".repeat(1999) + "…");
+  });
+
+  test("strips markup first and truncates the stripped result", () => {
+    const output = sanitizePlainText("<p>paid</p>".repeat(600));
+    expect(output).toHaveLength(2000);
+    expect(output.startsWith("paid")).toBe(true);
+    expect(output.endsWith("…")).toBe(true);
+  });
+});
+
+describe("sanitizePlainText — Tier 2: boundaries", () => {
+  test("exactly maxLength characters pass through unchanged", () => {
+    const input = "y".repeat(2000);
+    expect(sanitizePlainText(input)).toBe(input);
+  });
+
+  test("maxLength + 1 truncates to maxLength including the ellipsis", () => {
+    const output = sanitizePlainText("y".repeat(2001));
+    expect(output).toHaveLength(2000);
+    expect(output).toBe("y".repeat(1999) + "…");
+  });
+
+  test("a custom maxLength is honored", () => {
+    expect(sanitizePlainText("abcdefghij", 5)).toBe("abcd…");
+  });
+
+  test("truncation never splits a surrogate pair", () => {
+    const output = sanitizePlainText("😀".repeat(1001));
+    expect(output).toHaveLength(1999);
+    expect(output.endsWith("😀…")).toBe(true);
+  });
+
+  test("unicode and RTL content survive untouched", () => {
+    const input = "خصم جزئي — ٣٠٪ من الحصة";
+    expect(sanitizePlainText(input)).toBe(input);
+  });
+});
+
+describe("sanitizePlainText — Tier 3: malformed and adversarial markup", () => {
+  test("nested tags collapse to the inner text", () => {
+    expect(sanitizePlainText("<div><p><span>deep</span></p></div>")).toBe("deep");
+  });
+
+  test("an unterminated tag is escaped so it cannot be completed later", () => {
+    expect(sanitizePlainText("<img src=x onerror=alert(1)")).toBe("&lt;img src=x onerror=alert(1)");
+  });
+
+  test("input consisting only of tags yields an empty string", () => {
+    expect(sanitizePlainText("<p><b><i>")).toBe("");
+    expect(sanitizePlainText("<script></script>")).toBe("");
+  });
+
+  test("comments and processing instructions are removed", () => {
+    expect(sanitizePlainText("a<!-- hidden -->b<?xml version='1.0'?>c")).toBe("abc");
+  });
+
+  test("already-escaped entities stay as inert text", () => {
+    const input = "&lt;script&gt;alert(1)&lt;/script&gt;";
+    expect(sanitizePlainText(input)).toBe(input);
+  });
+
+  test("sanitizing twice is a fixed point", () => {
+    const dirty = '<p onclick="x()">a</p><script>evil()</script><img src=y onerror=z()><b ok';
+    const once = sanitizePlainText(dirty);
+    expect(sanitizePlainText(once)).toBe(once);
+  });
+
+  test("truncation that lands inside an escaped entity stays inert and stable", () => {
+    const input = "a&lt;".repeat(800);
+    const output = sanitizePlainText(input);
+    expect(output).toHaveLength(2000);
+    expectPlainTextInert(output);
+  });
+});
+
+describe("sanitizePlainText — Tier 4: security battery", () => {
+  const NEUTRALIZED_CASES: ReadonlyArray<readonly [string, string]> = [
+    ["plain script element", "<script>alert(1)</script>"],
+    ["uppercase script element", "<SCRIPT>alert(1)</SCRIPT>"],
+    ["script with src attribute", '<script src="https://evil.example/x.js"></script>'],
+    ["img onerror handler", "<img src=x onerror=alert(1)>"],
+    ["img onerror self-closing", "<img src=x onerror=alert(1)/>"],
+    ["javascript: href", '<a href="javascript:alert(1)">click</a>'],
+    ["data: URL href", '<a href="data:text/html,<script>alert(1)</script>">x</a>'],
+    ["entity-obfuscated javascript: href", '<a href="j&#x61;vascript:alert(1)">x</a>'],
+    ["svg onload attribute", "<svg onload=alert(1)>"],
+    ["svg wrapping script", "<svg><script>alert(1)</script></svg>"],
+    ["iframe with javascript: src", "<iframe src=javascript:alert(1)></iframe>"],
+    ["event handler on a formatting tag", '<b onmouseover="alert(1)">bold</b>'],
+    ["body event handler", "<body onpageshow=alert(1)>x</body>"],
+    ["details ontoggle handler", "<details open ontoggle=alert(1)>x</details>"],
+  ];
+
+  for (const [name, payload] of NEUTRALIZED_CASES) {
+    test(`neutralizes ${name}`, () => {
+      const output = sanitizePlainText(payload);
+      expect(output.includes("<")).toBe(false);
+      expect(output).not.toMatch(/on\w+\s*=/i);
+      expect(output.toLowerCase()).not.toContain("javascript:");
+      expect(output.toLowerCase()).not.toContain("data:text/html");
+      expectPlainTextInert(output);
+    });
+  }
+
+  test("bare entity-encoded payloads remain inert literal text", () => {
+    const input = "j&#x61;vascript:alert(1) &lt;script&gt;";
+    const output = sanitizePlainText(input);
+    expect(output).toBe(input);
+    expect(output.includes("<")).toBe(false);
+  });
+
+  test("a long repeated XSS payload is fully stripped before truncation", () => {
+    const output = sanitizePlainText("<img src=x onerror=alert(1)>".repeat(300));
+    expect(output).toBe("");
   });
 });

@@ -101,6 +101,14 @@ const teacherDue = {
   insertFailed: "فشل إدراج صف مستحقات المعلم.",
 } as const;
 
+const payroll = {
+  notTerminal: "لا يمكن احتساب الراتب إلا للجلسات في حالة نهائية.",
+  alreadyPaid: "تم صرف الراتب؛ لا يمكن التجاوز.",
+  awaitingSettlement: "الراتب قيد التسوية ولا يمكن تجاوزه دون تفعيل التجاوز الإجباري.",
+  invalidTargetStatus: "حالة التجاوز المستهدفة غير صالحة.",
+  partialRequiresPercentage: "يتطلب التجاوز الجزئي تحديد نسبة بين 0 و100.",
+} as const;
+
 const classSubject = {
   createFailed: "فشل إنشاء مادة الفصل.",
 } as const;
@@ -398,6 +406,7 @@ export const errorsAr: ErrorsLabels = {
   classInstance,
   teacher,
   teacherDue,
+  payroll,
   student,
   category,
   user,

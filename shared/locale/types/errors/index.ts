@@ -357,6 +357,17 @@ export interface TeacherDueErrors {
 }
 
 /**
+ * PayrollErrors — teacher payroll calculation and override errors.
+ */
+export interface PayrollErrors {
+  readonly notTerminal: string;
+  readonly alreadyPaid: string;
+  readonly awaitingSettlement: string;
+  readonly invalidTargetStatus: string;
+  readonly partialRequiresPercentage: string;
+}
+
+/**
  * StudentErrors — student specific errors.
  */
 export interface StudentErrors {
@@ -525,6 +536,7 @@ export interface ErrorsLabels
   readonly meetingProvider: MeetingProviderErrors;
   readonly teacher: TeacherErrors;
   readonly teacherDue: TeacherDueErrors;
+  readonly payroll: PayrollErrors;
   readonly student: StudentErrors;
   readonly category: CategoryErrors;
   readonly user: UserErrors;

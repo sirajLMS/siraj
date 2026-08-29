@@ -3,9 +3,9 @@ import { DocsContainer, type DocsContainerProps } from "@storybook/addon-docs/bl
 import type { Decorator, Preview } from "@storybook/react";
 import { setupWorker } from "msw/browser";
 import { mswLoader } from "msw-storybook-addon/csf3";
-import { type PropsWithChildren, useState } from "react";
+import { type PropsWithChildren, useEffect, useState } from "react";
 import { GLOBALS_UPDATED } from "storybook/internal/core-events";
-import { useChannel } from "storybook/preview-api";
+import { addons } from "storybook/preview-api";
 import { themes } from "storybook/theming";
 import { mswHandlers } from "./msw-handlers";
 import { StoryWrapper } from "./StoryWrapper";
@@ -33,13 +33,17 @@ function getInitialDocsMode(): DocsThemeMode {
  */
 function ThemedDocsContainer({ children, context }: PropsWithChildren<DocsContainerProps>) {
   const [mode, setMode] = useState<DocsThemeMode>(getInitialDocsMode);
-  useChannel({
-    [GLOBALS_UPDATED]: ({ globals }: { globals: Record<string, unknown> }) => {
+  useEffect(() => {
+    // `useChannel` only works inside story render contexts; docs containers subscribe directly.
+    const onGlobalsUpdated = ({ globals }: { globals: Record<string, unknown> }) => {
       if (globals.theme === "light" || globals.theme === "dark") {
         setMode(globals.theme);
       }
-    },
-  });
+    };
+    const channel = addons.getChannel();
+    channel.on(GLOBALS_UPDATED, onGlobalsUpdated);
+    return () => channel.off(GLOBALS_UPDATED, onGlobalsUpdated);
+  }, []);
   return (
     <DocsContainer context={context} theme={mode === "dark" ? themes.dark : themes.light}>
       {children}

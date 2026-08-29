@@ -22,10 +22,9 @@ import {
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {
   dateCell,
@@ -35,6 +34,7 @@ import {
   paymentStatusTone,
   textCell,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { usePaymentsPersonFilterSelection } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentsPersonFiltersShared";
 import { DesktopListStateGate } from "@/frontend/common/views/dashboard/accounting/components/DesktopListStateGate";
 import type { PaymentsListViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentsListViewModel";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
@@ -69,47 +69,11 @@ function CellLine(props: Readonly<{ children: React.ReactNode; secondary?: boole
 }
 
 function FiltersBar(props: Readonly<PaymentsListViewModel>) {
-  const {
-    t,
-    rows,
-    fromDate,
-    toDate,
-    unpaidOnly,
-    studentId,
-    parentId,
-    setFromDate,
-    setToDate,
-    setUnpaidOnly,
-    setStudentId,
-    setParentId,
-    resetFilters,
-    hasActiveFilters,
-  } = props;
+  const { t, fromDate, toDate, unpaidOnly, setFromDate, setToDate, setUnpaidOnly, resetFilters, hasActiveFilters } =
+    props;
 
-  const [studentOption, setStudentOption] = useState<PersonOption | null>(null);
-  const [parentOption, setParentOption] = useState<PersonOption | null>(null);
-
-  // The store persists only ids; derive the displayed facades from the active
-  // ids so an externally cleared filter (e.g. resetFilters) can never show a
-  // stale name. Rows provide the student label fallback after a reload.
-  const studentValue = useMemo<PersonOption | null>(() => {
-    if (studentId === null || studentId === "") return null;
-    if (studentOption?.id === studentId) return studentOption;
-    const match = rows.find(row => row.studentId === studentId);
-    return match ? { id: studentId, name: match.studentName ?? "" } : null;
-  }, [rows, studentId, studentOption]);
-
-  const parentValue = parentId !== null && parentOption?.id === parentId ? parentOption : null;
-
-  const handleStudentChange = (next: PersonOption | null) => {
-    setStudentOption(next);
-    setStudentId(next?.id ?? null);
-  };
-
-  const handleParentChange = (next: PersonOption | null) => {
-    setParentOption(next);
-    setParentId(next?.id ?? null);
-  };
+  const { studentValue, parentValue, handleStudentChange, handleParentChange } =
+    usePaymentsPersonFilterSelection(props);
 
   return (
     <Stack direction="row" spacing={2} sx={{ flex: 1, flexWrap: "wrap", alignItems: "center" }}>

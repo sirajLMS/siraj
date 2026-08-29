@@ -15,6 +15,7 @@ import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billin
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main.ts";
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual.ts";
 import type { PaymentComponentLabels } from "@/shared/locale/types/dashboard/billing/payment.ts";
+import type { PayrollLabels } from "@/shared/locale/types/dashboard/billing/payroll.ts";
 import type { QuotaLabels as BillingQuotaLabels } from "@/shared/locale/types/dashboard/billing/quota.ts";
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies.ts";
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/audit.ts";
@@ -140,6 +141,7 @@ export interface DashboardTranslations {
   billingQuota: BillingQuotaLabels;
   billingPayment: PaymentComponentLabels;
   billingCreditAdjustment: CreditAdjustmentLabels;
+  billingPayroll: PayrollLabels;
   accountingPayments: AccountingPaymentsLabels;
   accountingPackages: AccountingPackagePlansLabels;
   accountingStudentCreditHours: AccountingStudentCreditHoursLabels;

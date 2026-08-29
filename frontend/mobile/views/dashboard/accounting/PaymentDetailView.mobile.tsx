@@ -10,7 +10,7 @@ import {
   formatAccountingMoney,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
-import { PaymentDocumentPreview } from "@/frontend/common/views/dashboard/accounting/components/PaymentDocumentPreview";
+import { PaymentDocumentPreviewShared } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentDocumentPreviewShared";
 import { PaymentHistoryTimeline } from "@/frontend/common/views/dashboard/accounting/components/PaymentHistoryTimeline";
 import type { PaymentDetailViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentDetailViewModel";
 import { MobilePageContainer, MobilePageHeader, MobileSectionPanel } from "@/frontend/mobile/components/ui";
@@ -226,18 +226,7 @@ export function PaymentDetailMobile(props: Readonly<PaymentDetailViewModel>) {
               </Stack>
             </MobileSectionPanel>
 
-            <PaymentDocumentPreview
-              title={t.detail.documentPreview}
-              emptyLabel={t.detail.documentEmpty}
-              downloadLabel={t.detail.downloadPdf}
-              zoomInLabel={t.detail.zoomIn}
-              zoomOutLabel={t.detail.zoomOut}
-              rotateLabel={t.detail.rotate}
-              expandLabel={t.detail.expand}
-              closeLabel={t.detail.close}
-              src={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
-              downloadHref={payment.invoiceId ? `/api/invoices/${payment.invoiceId}/download` : null}
-            />
+            <PaymentDocumentPreviewShared labels={t.detail} invoiceId={payment.invoiceId} />
 
             {canManagePayments ? <PaymentDetailActions vm={props} /> : null}
           </>

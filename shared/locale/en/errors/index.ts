@@ -79,6 +79,14 @@ const teacherDue = {
   insertFailed: "Failed to insert teacher due row.",
 } as const;
 
+const payroll = {
+  notTerminal: "Payroll can only be calculated for sessions in a terminal state.",
+  alreadyPaid: "Payroll has already been disbursed; override blocked.",
+  awaitingSettlement: "Payroll is awaiting settlement and cannot be overridden without force.",
+  invalidTargetStatus: "Invalid payroll override target status.",
+  partialRequiresPercentage: "Partially requires a percentage between 0 and 100.",
+} as const;
+
 const classSubject = {
   createFailed: "Failed to create class subject.",
 } as const;
@@ -399,6 +407,7 @@ export const errorsEn: ErrorsLabels = {
   classInstance,
   teacher,
   teacherDue,
+  payroll,
   student,
   category,
   user,

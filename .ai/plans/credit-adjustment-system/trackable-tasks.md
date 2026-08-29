@@ -205,7 +205,7 @@
 - 🔁 `bun run locale:snapshots` (or project equivalent) — generate `public/static/locale-snapshots/{en,ar}/dashboard.billing.creditAdjustment.json`.
 - ✅ Verify snapshots committed.
 
-### 3.5 Route shells
+### 3.5 Route shells ✅ DONE
 - 🆕 `app/(dashboard)/accounting/credits/page.tsx` — server component that renders `<StudentCreditsList />`.
 - 🆕 `app/(dashboard)/accounting/credits/adjust/page.tsx` — server component that reads `searchParams.studentId` and renders `<CreditAdjustForm studentId={...} />`.
 - 🔁 `bun run scripts/health/sub-loop.ts "app/(dashboard)/accounting/credits/page.tsx" --lifecycle codescene`
@@ -220,7 +220,7 @@
 
 ## Phase 4 — Student Credits list page
 
-### 4.1 Apollo documents
+### 4.1 Apollo documents ✅ DONE
 - 🆕 `frontend/common/graphql/sharedDocuments/billing/credit-adjustment.documents.ts` — `recordCreditAdjustmentMutationDocument` (TypedDocumentNode, camelCase + `Document` suffix per `sharedDocuments/AGENTS.md`); include `id` field on the selection set so Apollo cache can auto-update.
 - ✏️ `frontend/common/graphql/sharedDocuments/billing/index.ts` — add `export * from "./credit-adjustment.documents";`.
 - ✅ Reuse the existing `studentDirectoryQueryDocument` from `students/student-directory.documents.ts` for the Student Credits list (already returns `classesRemaining` + `classesTotal`); extend its `StudentDirectoryRow` fragment if a `lastTransactionAt` column is needed (do NOT fork a separate query).

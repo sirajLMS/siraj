@@ -15,9 +15,9 @@ import type {
   ClassAuditLabels,
   ClassAuditViewProps,
 } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
+import { buildClassAuditLabels } from "@/frontend/common/views/dashboard/classes/audit/utils/classAuditLabels.utils";
 import { useRouter } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
-import type { CommonLabels } from "@/shared/locale/types/common";
 import type { ClassAuditLabels as ClassAuditLocaleLabels } from "@/shared/locale/types/dashboard/classes/audit";
 
 type ClassAuditT = ClassAuditLocaleLabels;
@@ -85,7 +85,7 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
   return {
     status: "ready",
     audit,
-    labels: buildClassAuditLabels(t, common, audit),
+    labels: buildClassAuditLabels(t, common.cancel, audit),
     ...handlers,
     isResending,
     onRetry: refetch,
@@ -206,80 +206,6 @@ function useClassAuditHandlers({ id, audit, router, resendNotifications, t, admi
     onResendNotifications,
     onUpdateAdminNote: adminNote.openDialog,
     onEditAdminNote: adminNote.openDialog,
-  };
-}
-
-function buildClassAuditLabels(t: ClassAuditT, common: CommonLabels, audit: Audit): ClassAuditLabels {
-  const registeredStudentCount = audit.registeredStudentCount ?? 0;
-  return {
-    breadcrumbs: {
-      dashboard: t.breadcrumbs.dashboard,
-      schedules: t.breadcrumbs.schedules,
-      current: t.breadcrumbs.current,
-    },
-    pageTitle: t.pageTitle,
-    mobileTitle: t.mobileTitle,
-    generateReport: t.actions.generateReport,
-    editClass: t.actions.editClass,
-    courseCode: t.fields.courseCode,
-    teacher: t.fields.teacher,
-    originalDate: t.fields.originalDate,
-    rescheduledDate: t.fields.rescheduledDate,
-    timeSlot: t.fields.timeSlot,
-    venue: t.fields.venue,
-    auditTrailTitle: t.auditTrail.title,
-    statusRescheduled: t.status.regularRescheduled,
-    classDetails: t.fields.classDetails,
-    registeredStudents: buildRegisteredStudentsLabels(t, registeredStudentCount),
-    meetingInfo: buildMeetingInfoLabels(t),
-    communicationLog: {
-      title: t.communication.title,
-      resendNotifications: t.communication.resendNotifications,
-    },
-    adminNote: {
-      title: t.adminNote.title,
-      titleMobile: t.adminNote.titleMobile,
-      lastUpdated: t.adminNote.lastUpdated(audit.adminNote?.lastUpdated ?? ""),
-      update: t.adminNote.update,
-      edit: t.adminNote.edit,
-    },
-    adminNoteDialog: {
-      title: t.adminNote.title,
-      content: t.adminNote.content,
-      cancel: common.cancel,
-      save: t.adminNote.update,
-    },
-  };
-}
-
-function buildRegisteredStudentsLabels(t: ClassAuditT, registeredStudentCount: number) {
-  return {
-    title: t.students.title(registeredStudentCount),
-    exportList: t.students.exportList,
-    studentName: t.students.studentName,
-    idNumber: t.students.idNumber,
-    attendanceStatus: t.students.attendanceStatus,
-    actions: t.students.actions,
-    student: t.students.student,
-    status: t.students.status,
-    viewAll: t.students.viewAll(registeredStudentCount),
-    pending: t.students.pending,
-    present: t.students.present,
-    absent: t.students.absent,
-    noEntries: t.students.noEntries,
-    viewStudentAriaLabel: t.students.viewStudentAriaLabel,
-  };
-}
-
-function buildMeetingInfoLabels(t: ClassAuditT) {
-  return {
-    title: t.meeting.title,
-    joinMeeting: t.meeting.joinMeeting,
-    capacityBadge: t.venue.capacityBadge(0),
-    capacity: t.venue.capacity(0),
-    meetingIdLabel: t.meetingIdLabel,
-    online: t.online,
-    meetingIdNA: t.meetingIdNA,
   };
 }
 

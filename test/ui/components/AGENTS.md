@@ -45,7 +45,7 @@ Test files are organized **one subdirectory per domain**, mirroring the componen
 | Dir | Covers |
 |-----|--------|
 | `accounting/` | Payments, package plans, credit hours |
-| `admin/` | Admin home dashboard (schedule overview, metric filters) |
+| `admin/` | Admin home dashboard (schedule overview, metric filters), admin billing views (`billing/`) |
 | `auth/` | `RequirePermission` and auth components |
 | `billing/` | Billing navbar/section components |
 | `classes/` | Class details, recurring schedules, audit, status tracking |

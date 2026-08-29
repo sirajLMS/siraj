@@ -439,6 +439,55 @@ export namespace CreditService {
     return mapToReturnType(row);
   }
 
+  /**
+   * Seed-only bootstrap: idempotent HOUR purchase with a caller-supplied
+   * deterministic idempotency key (e.g. `seed-hour-credit-purchase:0:10`).
+   * Mirrors `recordPurchaseIfMissing` for the hour ledger — the idempotency
+   * check runs INSIDE the transaction (no TOCTOU) and repeats return the
+   * first persisted row instead of double-crediting. The core write
+   * (hour ledger row + hour facet bump) is delegated to `recordHourPurchase`.
+   */
+  export async function recordHourPurchaseIfMissing(
+    actorUserId: string,
+    input: { studentId: string; hours: number; notes?: string | null },
+    idempotencyKey: string,
+    tErrors: ErrorsLabels
+  ): Promise<CreditTransactionReturnType | null> {
+    try {
+      const created = await db.transaction(async tx => {
+        await assertStudentExists(input.studentId, tErrors);
+
+        return recordHourPurchase(
+          {
+            studentId: input.studentId,
+            hours: input.hours,
+            creditedByUserId: actorUserId,
+            notes: input.notes ?? null,
+          },
+          idempotencyKey,
+          tx,
+          tErrors
+        );
+      });
+
+      logger.info("Hour credit purchase seeded", {
+        actorUserId,
+        studentId: input.studentId,
+        hours: input.hours,
+        idempotencyKey,
+      });
+
+      return created;
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        const resolved = await CreditRepository.findByIdempotencyKeys([idempotencyKey]);
+        const row = resolved[0];
+        return row ? mapToReturnType(row) : null;
+      }
+      throw error;
+    }
+  }
+
   /** Consumes HOURS for an hour-billed class instance (Plan 6 wiring point). */
   export async function deductHoursForBooking(
     studentId: string,

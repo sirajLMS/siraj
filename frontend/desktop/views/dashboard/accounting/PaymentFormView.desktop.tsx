@@ -1,15 +1,18 @@
 "use client";
 
 import { SaveOutlined, SyncOutlined } from "@mui/icons-material";
-import { Box, CircularProgress, FormControlLabel, FormHelperText, Stack, Switch, TextField } from "@mui/material";
+import { Box, CircularProgress, FormHelperText, Stack, TextField } from "@mui/material";
 import Link from "next/link";
-import { useState } from "react";
 import { Controller } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import {
+  PaymentDecimalControllerField,
+  PaymentPaidStatusControllerField,
+  PaymentStudentControllerField,
+} from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentFormFieldsShared";
 import { PackagePlanSelectShared } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanSelectShared";
 import {
   CurrencyMismatchAlert,
@@ -62,7 +65,6 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
     control,
     editControl,
     errors,
-    editErrors,
     handleSubmit,
     handleEditSubmit,
     isSubmitting,
@@ -78,11 +80,6 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
     onDismissSuccess,
     onDismissError,
   } = props;
-
-  // Keep the resolved student option (id + display name) in local state so the
-  // autocomplete shows the human-readable name instead of the raw id after
-  // re-renders triggered by other form fields (e.g. package auto-fill).
-  const [selectedStudent, setSelectedStudent] = useState<PersonOption | null>(null);
 
   if (isEditing && loadingExisting) {
     return (
@@ -135,21 +132,13 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                   />
                 </Stack>
 
-                <Controller
-                  name="creditHours"
+                <PaymentDecimalControllerField
                   control={editControl}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      size="small"
-                      type="number"
-                      label={t.form.credit}
-                      error={Boolean(editErrors.creditHours)}
-                      helperText={editErrors.creditHours?.message}
-                      slotProps={{ htmlInput: { step: 0.5, min: 0.5, inputMode: "decimal" } }}
-                      sx={{ maxWidth: 220 }}
-                    />
-                  )}
+                  name="creditHours"
+                  label={t.form.credit}
+                  inputStep={0.5}
+                  inputMin={0.5}
+                  sx={{ maxWidth: 220 }}
                 />
 
                 <Controller
@@ -199,23 +188,11 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
         >
           <Stack spacing={3}>
             <DesktopSectionPanel title={t.form.student}>
-              <Controller
-                name="studentId"
+              <PaymentStudentControllerField
                 control={control}
-                render={({ field }) => (
-                  <StudentAutocompleteDesktop
-                    value={selectedStudent}
-                    onChange={option => {
-                      setSelectedStudent(option ?? null);
-                      field.onChange(option?.id ?? "");
-                    }}
-                    label={t.form.student}
-                    placeholder={t.form.studentPlaceholder}
-                    error={Boolean(errors.studentId)}
-                    helperText={errors.studentId?.message}
-                    fullWidth
-                  />
-                )}
+                label={t.form.student}
+                placeholder={t.form.studentPlaceholder}
+                StudentAutocomplete={StudentAutocompleteDesktop}
               />
             </DesktopSectionPanel>
 
@@ -239,37 +216,21 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                 {errors.packagePlanId ? <FormHelperText error>{errors.packagePlanId.message}</FormHelperText> : null}
 
                 <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2 }}>
-                  <Controller
+                  <PaymentDecimalControllerField
+                    control={control}
                     name="creditHours"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        size="small"
-                        type="number"
-                        label={t.form.credit}
-                        error={Boolean(errors.creditHours)}
-                        helperText={errors.creditHours?.message}
-                        slotProps={{ htmlInput: { step: 0.5, min: 0.5, inputMode: "decimal" } }}
-                        sx={{ flex: 1, minWidth: 150 }}
-                      />
-                    )}
+                    label={t.form.credit}
+                    inputStep={0.5}
+                    inputMin={0.5}
+                    sx={{ flex: 1, minWidth: 150 }}
                   />
-                  <Controller
-                    name="amount"
+                  <PaymentDecimalControllerField
                     control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        size="small"
-                        type="number"
-                        label={t.form.paid}
-                        error={Boolean(errors.amount)}
-                        helperText={errors.amount?.message}
-                        slotProps={{ htmlInput: { step: 0.01, min: 0, inputMode: "decimal" } }}
-                        sx={{ flex: 1, minWidth: 150 }}
-                      />
-                    )}
+                    name="amount"
+                    label={t.form.paid}
+                    inputStep={0.01}
+                    inputMin={0}
+                    sx={{ flex: 1, minWidth: 150 }}
                   />
                   <Controller
                     name="currency"
@@ -327,15 +288,10 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                     )}
                   />
 
-                  <Controller
-                    name="isPaidStatusOn"
+                  <PaymentPaidStatusControllerField
                     control={control}
-                    render={({ field }) => (
-                      <FormControlLabel
-                        control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} />}
-                        label={field.value ? t.form.paidToggleOn : t.form.paidToggleOff}
-                      />
-                    )}
+                    onLabel={t.form.paidToggleOn}
+                    offLabel={t.form.paidToggleOff}
                   />
                 </Stack>
 

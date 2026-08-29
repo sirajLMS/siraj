@@ -1,7 +1,7 @@
 "use client";
 
-import { styled } from "@mui/material/styles";
 import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
+import { ClassAuditHeaderShared } from "@/frontend/common/views/dashboard/classes/audit/components/__shared__/classAuditHeaderShared";
 import {
   ClassAuditViewGridShared,
   type ClassAuditViewGridSlotConfig,
@@ -17,14 +17,6 @@ import {
 import { AdminNoteCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/adminNoteCard.mobile";
 import { CommunicationLogCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/communicationLogCard.mobile";
 import { OnlineMeetingCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/onlineMeetingCard.mobile";
-
-const StyledGenerateReportButton = styled(MobileFilterButton)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  "&:hover": {
-    backgroundColor: theme.palette.action.selected,
-    borderColor: theme.palette.primary.dark,
-  },
-}));
 
 export function ClassAuditViewMobile({
   audit,
@@ -48,23 +40,16 @@ export function ClassAuditViewMobile({
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader
+      <ClassAuditHeaderShared
         title={audit.className ?? ""}
-        breadcrumbs={[
-          { label: labels.breadcrumbs.dashboard, href: "/dashboard" },
-          { label: labels.breadcrumbs.schedules, href: "/schedule-search" },
-          { label: labels.breadcrumbs.current, current: true },
-        ]}
-        actions={
-          <>
-            <StyledGenerateReportButton id="audit-generate-report-btn" onClick={onGenerateReport}>
-              {labels.generateReport}
-            </StyledGenerateReportButton>
-            <MobilePrimaryPageAction id="audit-edit-class-btn" onClick={onEditClass}>
-              {labels.editClass}
-            </MobilePrimaryPageAction>
-          </>
-        }
+        labels={labels}
+        onGenerateReport={onGenerateReport}
+        onEditClass={onEditClass}
+        slots={{
+          PageHeader: MobilePageHeader,
+          FilterButton: MobileFilterButton,
+          PrimaryAction: MobilePrimaryPageAction,
+        }}
       />
       <MobileContentInset sx={{ mb: 2 }}>
         <MobileStatusBadge category="trackingStatus" status="rescheduled" label={labels.statusRescheduled} />

@@ -3,8 +3,12 @@
 import LinkOffOutlinedIcon from "@mui/icons-material/LinkOffOutlined";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
-import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
+import { Alert, AlertTitle, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { OAuthConnectionStatusBadge } from "@/frontend/common/components/ui/display/meetingConfig/OAuthConnectionStatusBadge";
+import {
+  DEFAULT_MEETING_CONFIG_ACTION_SLOTS,
+  type MeetingConfigActionSlots,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/meetingConfigActionSlots";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 export type ConnectionState = "disconnected" | "connecting" | "connected" | "expiring" | "expired";
@@ -33,6 +37,7 @@ export interface ConnectProviderAccountProps {
   readonly onReconnect: (providerSlug: string) => void;
   readonly onDisconnect: (providerSlug: string) => void;
   readonly loading?: boolean;
+  readonly actionSlots?: MeetingConfigActionSlots;
 }
 
 // ---------------------------------------------------------------------------
@@ -67,11 +72,13 @@ function DisconnectedState({
   labels,
   loading,
   onConnect,
+  PrimaryAction,
 }: {
   readonly providerName: string;
   readonly labels: ConnectProviderAccountLabels;
   readonly loading: boolean;
   readonly onConnect: () => void;
+  readonly PrimaryAction: MeetingConfigActionSlots["primary"];
 }) {
   return (
     <Box sx={{ position: "relative" }}>
@@ -79,21 +86,14 @@ function DisconnectedState({
         <Typography sx={{ typography: "bodyMd" }}>{providerName}</Typography>
         <OAuthConnectionStatusBadge status="disconnected" />
       </Stack>
-      <Button
-        variant="contained"
-        color="primary"
+      <PrimaryAction
         disabled={loading}
         startIcon={loading ? undefined : <LinkOutlinedIcon />}
         onClick={onConnect}
         aria-label={`${labels.connectButton} ${providerName}`}
-        sx={theme => ({
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          minHeight: 48,
-        })}
       >
         {labels.connectButton}
-      </Button>
+      </PrimaryAction>
     </Box>
   );
 }
@@ -128,12 +128,14 @@ function ConnectedState({
   connectedEmail,
   loading,
   onDisconnect,
+  OutlinedAction,
 }: {
   readonly labels: ConnectProviderAccountLabels;
   readonly providerName: string;
   readonly connectedEmail: string | undefined;
   readonly loading: boolean;
   readonly onDisconnect: () => void;
+  readonly OutlinedAction: MeetingConfigActionSlots["outlined"];
 }) {
   return (
     <Stack sx={{ gap: 1.5 }}>
@@ -146,8 +148,7 @@ function ConnectedState({
           </Typography>
         ) : null}
       </Stack>
-      <Button
-        variant="outlined"
+      <OutlinedAction
         color="error"
         disabled={loading}
         startIcon={<LinkOffOutlinedIcon />}
@@ -156,11 +157,10 @@ function ConnectedState({
         sx={theme => ({
           color: theme.palette.error.main,
           borderColor: theme.palette.error.main,
-          minHeight: 48,
         })}
       >
         {labels.disconnectButton}
-      </Button>
+      </OutlinedAction>
     </Stack>
   );
 }
@@ -178,6 +178,7 @@ function ReconnectAlertState({
   status,
   severity,
   paletteColor,
+  OutlinedAction,
 }: {
   readonly labels: ConnectProviderAccountLabels;
   readonly providerName: string;
@@ -187,6 +188,7 @@ function ReconnectAlertState({
   readonly status: "expiring" | "expired";
   readonly severity: "warning" | "error";
   readonly paletteColor: "warning" | "error";
+  readonly OutlinedAction: MeetingConfigActionSlots["outlined"];
 }) {
   return (
     <Stack sx={{ gap: 1.5 }}>
@@ -209,8 +211,7 @@ function ReconnectAlertState({
       >
         <AlertTitle>{labels.reconnectCallout}</AlertTitle>
         <Box sx={{ position: "relative" }}>
-          <Button
-            variant="outlined"
+          <OutlinedAction
             color={paletteColor}
             disabled={loading}
             startIcon={loading ? undefined : <RefreshOutlinedIcon />}
@@ -219,11 +220,10 @@ function ReconnectAlertState({
             sx={theme => ({
               color: theme.palette[paletteColor].main,
               borderColor: theme.palette[paletteColor].main,
-              minHeight: 48,
             })}
           >
             {labels.reconnectButton}
-          </Button>
+          </OutlinedAction>
           {loading ? <OAuthLoadingOverlay labels={labels} /> : null}
         </Box>
       </Alert>
@@ -245,7 +245,9 @@ export function ConnectProviderAccount({
   onReconnect,
   onDisconnect,
   loading = false,
+  actionSlots,
 }: ConnectProviderAccountProps) {
+  const { primary: PrimaryAction, outlined: OutlinedAction } = actionSlots ?? DEFAULT_MEETING_CONFIG_ACTION_SLOTS;
   const handleConnect = () => onConnect(providerSlug);
   const handleReconnect = () => onReconnect(providerSlug);
   const handleDisconnect = () => onDisconnect(providerSlug);
@@ -261,6 +263,7 @@ export function ConnectProviderAccount({
           connectedEmail={connectedEmail}
           loading={loading}
           onDisconnect={handleDisconnect}
+          OutlinedAction={OutlinedAction}
         />
       );
     case "expiring":
@@ -274,6 +277,7 @@ export function ConnectProviderAccount({
           status="expiring"
           severity="warning"
           paletteColor="warning"
+          OutlinedAction={OutlinedAction}
         />
       );
     case "expired":
@@ -287,11 +291,18 @@ export function ConnectProviderAccount({
           status="expired"
           severity="error"
           paletteColor="error"
+          OutlinedAction={OutlinedAction}
         />
       );
     default:
       return (
-        <DisconnectedState providerName={providerName} labels={labels} loading={loading} onConnect={handleConnect} />
+        <DisconnectedState
+          providerName={providerName}
+          labels={labels}
+          loading={loading}
+          onConnect={handleConnect}
+          PrimaryAction={PrimaryAction}
+        />
       );
   }
 }

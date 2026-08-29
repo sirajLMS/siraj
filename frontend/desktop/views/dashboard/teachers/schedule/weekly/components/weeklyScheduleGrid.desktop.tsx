@@ -4,11 +4,9 @@ import { DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import {
-  isTerminalClassInstance,
-  resolveWeeklyScheduleSlotStatus,
+  useWeeklyScheduleSlotItem,
   WEEKLY_SCHEDULE_DAYS,
   WEEKLY_SCHEDULE_TIMES,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
@@ -18,7 +16,6 @@ import type {
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { DesktopPersonProfileLink } from "@/frontend/desktop/components/ui/display";
 import { Link } from "@/shared/i18n";
-import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
 
@@ -41,34 +38,19 @@ interface SlotItemProps {
 }
 
 function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meetingJoinLabels }: Readonly<SlotItemProps>) {
-  const deleteConfirmClassInstanceId = useWeeklyScheduleStore(state => state.deleteConfirmClassInstanceId);
-  const openDeleteConfirm = useWeeklyScheduleStore(state => state.openDeleteConfirm);
-  const closeDeleteConfirm = useWeeklyScheduleStore(state => state.closeDeleteConfirm);
-  const confirmDeleteClassInstance = useWeeklyScheduleStore(state => state.confirmDeleteClassInstance);
   const t = labels;
-  const classInstanceId = classItem.id ?? "";
-  const open = deleteConfirmClassInstanceId !== null && deleteConfirmClassInstanceId === classInstanceId;
-  const subjectLabel = classItem.subjectName?.trim() ?? t.grid.unknownSubject;
-  const statusLabel = resolveWeeklyScheduleSlotStatus(classItem, t.grid.status);
-
-  const handleConfirm = () => {
-    const confirmedId = confirmDeleteClassInstance();
-    if (confirmedId !== null) {
-      onRemove(confirmedId);
-    }
-  };
-
-  const handleDeleteClick = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    openDeleteConfirm(classInstanceId);
-  };
-
-  const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
-    isFrozen: classItem.isFrozen ?? false,
-  });
-  const isTerminal = isTerminalClassInstance(classItem.executionState, classItem.outcome);
-  const showDelete = !classItem.isFrozen && !isTerminal;
+  const {
+    classInstanceId,
+    deleteDialogOpen,
+    subjectLabel,
+    statusLabel,
+    canJoin,
+    isTerminal,
+    showDelete,
+    closeDeleteConfirm,
+    handleDeleteDialogConfirm,
+    handleDeleteClick,
+  } = useWeeklyScheduleSlotItem(classItem, labels, onRemove);
 
   return (
     <>
@@ -160,9 +142,9 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
       </Box>
 
       <BaseDeleteDialog
-        open={open}
+        open={deleteDialogOpen}
         onClose={closeDeleteConfirm}
-        onConfirm={handleConfirm}
+        onConfirm={handleDeleteDialogConfirm}
         isLoading={false}
         title={t.dialogs.deleteClassTitle}
         body={t.dialogs.deleteClassMessage}

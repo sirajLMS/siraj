@@ -129,4 +129,5 @@ export interface DashboardNavigationLabels {
   readonly accountingPaymentsNew: string;
   readonly accountingPackagesNew: string;
   readonly accountingCredits: string;
+  readonly accountingPayroll: string;
 }

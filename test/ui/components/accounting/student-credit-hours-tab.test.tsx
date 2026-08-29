@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { act, cleanup, screen } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
@@ -119,25 +119,24 @@ describe("student profile — credit hours tab (desktop view)", () => {
       }),
     });
 
-    // Metric grid shows the translated labels with hour-formatted values.
-    expect(await screen.findByText(labels.totalLabel)).toBeVisible();
-    // Two mocked queries settle independently — pump an act() turn so the
-    // transactions observable commit lands before synchronous assertions.
-    await act(async () => {});
-    expect(screen.getByText(labels.consumedLabel)).toBeVisible();
-    expect(screen.getByText(labels.hoursUnit("6.00"))).toBeVisible(); // consumed = total − remaining
-    expect(screen.getByText(labels.balanceCardTitle)).toBeVisible();
-    expect(screen.getByText(labels.hoursUnit("20.00"))).toBeVisible();
-    expect(screen.getByText(labels.hoursUnit("14.00"))).toBeVisible(); // remaining card
+    // Query inside waitFor: the grid/metric trees re-mount as the two mocked
+    // queries settle asynchronously, so single-shot matchers can race a remount.
+    await waitFor(() => {
+      expect(screen.getByText(labels.totalLabel)).toBeVisible();
+      expect(screen.getByText(labels.consumedLabel)).toBeVisible();
+      expect(screen.getByText(labels.hoursUnit("6.00"))).toBeVisible(); // consumed = total − remaining
+      expect(screen.getByText(labels.balanceCardTitle)).toBeVisible();
+      expect(screen.getByText(labels.hoursUnit("20.00"))).toBeVisible();
+      expect(screen.getByText(labels.hoursUnit("14.00"))).toBeVisible(); // remaining card
 
-    // Audience hint comes from the ViewModel permission resolution (admin here).
-    expect(screen.getByText(labels.perAudience.supervisorHint)).toBeVisible();
+      // Audience hint comes from the ViewModel permission resolution (admin here).
+      expect(screen.getByText(labels.perAudience.supervisorHint)).toBeVisible();
 
-    // Transactions grid renders the positive purchase row with its reason badge.
-    expect(screen.getAllByText(labels.recentPurchasesTitle).length).toBeGreaterThan(0);
-    const purchaseCell = await screen.findByText("+10.00 h");
-    expect(purchaseCell).toBeVisible();
-    expect(screen.getByText(labels.reasons.PURCHASE)).toBeVisible();
+      // Transactions grid renders the positive purchase row with its reason badge.
+      expect(screen.getAllByText(labels.recentPurchasesTitle).length).toBeGreaterThan(0);
+      expect(screen.getByText("+10.00 h")).toBeVisible();
+      expect(screen.getByText(labels.reasons.PURCHASE)).toBeVisible();
+    });
   });
 
   test("surfaces the low-balance warning when remaining falls below the low-hours threshold", async () => {
@@ -151,7 +150,7 @@ describe("student profile — credit hours tab (desktop view)", () => {
     // Threshold comes from the accounting_low_hours_threshold setting on the
     // balance payload; 4.00 remaining < 5.00 threshold → alert visible.
     const alertText = labels.lowBalanceAlert("4.00", "5.00");
-    expect(await screen.findByText(alertText)).toBeVisible();
+    await waitFor(() => expect(screen.getByText(alertText)).toBeVisible());
   });
 
   test("renders the translated empty state when there are no transactions", async () => {
@@ -162,7 +161,9 @@ describe("student profile — credit hours tab (desktop view)", () => {
       mocks: createMocks({ creditHoursTotal: "20.00", creditHoursRemaining: "14.00" }),
     });
 
-    expect(await screen.findByText(labels.recentPurchasesEmpty)).toBeVisible();
-    expect(screen.getByText(labels.perAudience.parentHint)).toBeVisible();
+    await waitFor(() => {
+      expect(screen.getByText(labels.recentPurchasesEmpty)).toBeVisible();
+      expect(screen.getByText(labels.perAudience.parentHint)).toBeVisible();
+    });
   });
 });

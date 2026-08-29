@@ -81,28 +81,28 @@
 > `applyOverride` + `getReport` with full idempotency, validation, and
 > audit logging.
 
-### 1.1 Types
+### 1.1 Types ✅ DONE
 - 🆕 `backend/types/teachers/payroll.types.ts` — add `PayrollCalculationInput`, `PayrollCalculationResult`, `PayrollOverrideInput`, `PayrollOverrideResult`, `PayrollReportFilters`, `PayrollReportRow`, `PayrollReportPage`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/types/teachers/payroll.types.ts --lifecycle codescene`
 
-### 1.2 Repository extension
+### 1.2 Repository extension ✅ DONE
 - ✏️ `backend/db/repo/scheduling/class-instances.ts` — add `getById(id, tx, opts)` with `forUpdate` option, `updatePayrollCalculation(tx, id, patch)`, and `findPayrollReportRows(filters, pagination)` (single joined query).
 - ✏️ `backend/db/repo/scheduling/class-status-events.repository.ts` — add `findRecentByInstanceAndHash(instanceId, hash, windowSeconds, tx)` to the existing `ClassStatusEventsRepository` namespace (plural — see existing namespace in `backend/db/repo/scheduling/class-status-events.repository.ts`). The lookup queries `toState->>'idempotencyKey' = $1` and `created_at >= now() - interval '$2 seconds'`. **Do NOT add a `metadata` jsonb column** — the existing `class_status_events` schema has no such column; store the idempotency key inside the existing `toState` jsonb instead. Use the existing `createMany(inputs, tx)` method (not a hypothetical `create` method) for inserts.
 - 🧪 `backend/db/test/repo/scheduling/payroll-report.repository.test.ts` — filter by teacher/student/date/status; pagination; SQL-computed `isStudentAbsence`/`isTeacherAbsence` booleans.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/scheduling/class-instances.ts --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/scheduling/class-status-events.repository.ts --lifecycle codescene`
 
-### 1.3 Idempotency helper
+### 1.3 Idempotency helper ✅ DONE
 - 🆕 `backend/services/teachers/payroll-override.idempotency.ts` — `deriveOverrideIdempotencyKey(input)` = sha256 of (instanceId, targetStatus, partialPercentage, note, force).
 - 🧪 `backend/services/teachers/payroll-override.idempotency.test.ts` — same input → same key; percentage change → different key.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/payroll-override.idempotency.ts --lifecycle codescene`
 
-### 1.4 Grace-settings resolver
+### 1.4 Grace-settings resolver ✅ DONE
 - 🆕 `backend/services/teachers/payroll-grace-settings.ts` — `resolveGraceSettings()` reading from `SystemSettingsRepository`; falls back to defaults (3/6/30) and logs a warning on misconfiguration.
 - 🧪 `backend/services/teachers/payroll-grace-settings.test.ts` — happy path, missing settings → defaults, negative setting → defaults + warning, threshold < 1 → defaults + warning.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/payroll-grace-settings.ts --lifecycle codescene`
 
-### 1.5 Plain-text sanitizer for `payrollNote`
+### 1.5 Plain-text sanitizer for `payrollNote` ✅ DONE
 - ✏️ `backend/lib/sanitize/richTextSanitizer.ts` (extend if exists; else 🆕) — add `sanitizePlainText(text, maxLength)` that strips HTML tags + truncates.
 - 🧪 `backend/lib/sanitize/richTextSanitizer.test.ts` — strips `<script>` tags; truncates to 2000 chars with ellipsis.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/lib/sanitize/richTextSanitizer.ts --lifecycle codescene`
@@ -220,7 +220,7 @@
 
 > Goal: routes exist, nav item renders, permission gating works. No reports page yet.
 
-### 3.1 Page-permission entries
+### 3.1 Page-permission entries ✅ DONE
 - ✏️ `frontend/common/types/page-permissions.types.ts` — add `accountingPayrollView` + `accountingPayrollManage` as **arrays** cast to `PagePermissions` (per existing convention):
   ```ts
   accountingPayrollView: [AppPermission.ACCOUNTING_PAYROLL_VIEW] as PagePermissions,
@@ -228,7 +228,7 @@
   ```
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/types/page-permissions.types.ts --lifecycle codescene`
 
-### 3.2 Sidebar nav item + nav label additions
+### 3.2 Sidebar nav item + nav label additions ✅ DONE
 - ✏️ `frontend/common/views/dashboard/config/navigationConfig.ts` — add `accounting-payroll` item to `SIDEBAR_NAV_ITEMS` under `grp_finance`; add `AppPermission.ACCOUNTING_PAYROLL_VIEW` to `grp_finance` group `permission` array.
 - ✏️ `frontend/common/views/dashboard/config/navIconKeys.ts` — verify `payments` is already in `NavIconKey` union (it is — no change needed).
 - ✏️ `shared/locale/types/dashboard/core/nav.ts` — add `readonly accountingPayroll: string;` to `DashboardNavigationLabels` (label lives in the existing `dashboard.core.nav` namespace, NOT in the new `dashboard.billing.payroll` namespace).
@@ -237,7 +237,7 @@
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/config/navigationConfig.ts --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/core/nav.ts --lifecycle codescene`
 
-### 3.3 i18n namespace (four-artifact compile-time i18n)
+### 3.3 i18n namespace (four-artifact compile-time i18n) ✅ DONE
 - 🆕 `shared/locale/types/dashboard/billing/payroll.ts` — define `PayrollLabels` interface per implementation.md §7.1 (use TypeScript function-typed fields where interpolation is needed — not ICU strings).
 - ✏️ `shared/locale/types/dashboard/billing/index.ts` — add `export * from "./payroll";`.
 - ✏️ `shared/locale/types/message.ts` — register `dashboard.billing.payroll` in `MessageSchema`.
@@ -250,13 +250,13 @@
 - 🔁 `bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/billing/payroll.ts --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/billing/payroll.ts --lifecycle codescene`
 
-### 3.4 Errors namespace extension (separate locale)
+### 3.4 Errors namespace extension (separate locale) ✅ DONE
 - ✏️ `shared/locale/types/errors/index.ts` — add new `PayrollErrors` interface with `notTerminal`, `alreadyPaid`, `awaitingSettlement`, `invalidTargetStatus`, `partialRequiresPercentage` (and add `readonly payroll: PayrollErrors;` to `ErrorsLabels`).
 - ✏️ `shared/locale/en/errors/index.ts` — EN strings for `payroll.*`.
 - ✏️ `shared/locale/ar/errors/index.ts` — AR strings for `payroll.*`.
 - 🔁 `bun run scripts/health/sub-loop.ts shared/locale/types/errors/index.ts --lifecycle codescene`
 
-### 3.5 Locale snapshot
+### 3.5 Locale snapshot ✅ DONE
 - 🔁 `bun run locale:snapshots` (or project equivalent) — generate `public/static/locale-snapshots/{en,ar}/dashboard.billing.payroll.json`.
 - ✅ Verify snapshots committed.
 

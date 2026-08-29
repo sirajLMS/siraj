@@ -4,6 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { ErrorState, LoadingState, StatusBadge } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/billing-alerts.documents";
 import { buildFxDisplayMessages, type FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
@@ -12,6 +13,7 @@ import {
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { NotificationDrawerEmptyState } from "@/frontend/common/views/dashboard/components/navbar/notifications/emptyState";
 import { useRouter } from "@/shared/i18n/navigation";
 import { type ErrorsLabels, type ProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
 
@@ -27,36 +29,6 @@ function buildUnpaidInvoicesFxMessages(
     {
       convertedTotalApprox: tProfile.convertedTotalApprox,
     }
-  );
-}
-
-function LoadingState({ message }: { readonly message: string }) {
-  return (
-    <Box sx={{ px: 2, py: 1.5 }}>
-      <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {message}
-      </Typography>
-    </Box>
-  );
-}
-
-function ErrorState({ message }: { readonly message: string }) {
-  return (
-    <Box sx={{ px: 2, py: 1.5 }}>
-      <Typography variant="body2" sx={theme => ({ color: theme.palette.error.main })}>
-        {message}
-      </Typography>
-    </Box>
-  );
-}
-
-function EmptyState({ message }: { readonly message: string }) {
-  return (
-    <Box sx={{ px: 2, py: 1.5, textAlign: "center" }}>
-      <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {message}
-      </Typography>
-    </Box>
   );
 }
 
@@ -77,19 +49,7 @@ function SectionHeader({
       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
         {title}
       </Typography>
-      <Typography
-        variant="caption"
-        sx={theme => ({
-          backgroundColor: theme.palette.error.main,
-          color: theme.palette.onError,
-          px: 0.75,
-          py: 0.25,
-          borderRadius: 1,
-          fontWeight: 600,
-        })}
-      >
-        {count}
-      </Typography>
+      <StatusBadge category="invoice" status="OVERDUE" label={String(count)} size="small" />
       <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, ml: "auto" })}>
         {totalLabel}: {totalLabelValue}
       </Typography>
@@ -180,17 +140,25 @@ export function UnpaidInvoicesSection() {
   const { data, loading, error } = useQuery(unpaidInvoicesAlertQueryDocument);
 
   if (loading) {
-    return <LoadingState message={t.loadingBilling} />;
+    return (
+      <Box sx={{ px: 2, py: 1.5 }}>
+        <LoadingState embedded size={20} message={t.loadingBilling} />
+      </Box>
+    );
   }
 
   if (error) {
-    return <ErrorState message={t.errorLoading} />;
+    return (
+      <Box sx={{ px: 2, py: 1.5 }}>
+        <ErrorState embedded message={t.errorLoading} />
+      </Box>
+    );
   }
 
   const summary = data?.unpaidInvoicesAlert;
 
   if (!summary || summary.totalOverdueInvoices === 0) {
-    return <EmptyState message={t.noUnpaidInvoices} />;
+    return <NotificationDrawerEmptyState emptyMessage={t.noUnpaidInvoices} />;
   }
 
   const fxMessages = buildUnpaidInvoicesFxMessages(tProfile, tErrors);

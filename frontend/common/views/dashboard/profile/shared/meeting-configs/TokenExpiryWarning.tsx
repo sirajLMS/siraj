@@ -3,7 +3,11 @@
 import ErrorOutlinedIcon from "@mui/icons-material/ErrorOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
-import { Box, Button, CircularProgress, Stack, Typography, useMediaQuery } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography, useMediaQuery } from "@mui/material";
+import {
+  DEFAULT_MEETING_CONFIG_ACTION_SLOTS,
+  type MeetingConfigActionSlots,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/meetingConfigActionSlots";
 import type { MeetingConfigEnhancementLabels } from "@/shared/locale/types/ui";
 
 export type TokenExpiryLevel = "safe" | "warning" | "critical" | "expired";
@@ -14,6 +18,7 @@ export interface TokenExpiryWarningProps {
   readonly expiresAt: Date | null;
   readonly onReconnect: () => void;
   readonly reconnecting?: boolean;
+  readonly actionSlots?: MeetingConfigActionSlots;
 }
 
 const SAFE_THRESHOLD_MS = 14 * 24 * 60 * 60 * 1000;
@@ -76,6 +81,7 @@ export function TokenExpiryWarning({
   expiresAt,
   onReconnect,
   reconnecting = false,
+  actionSlots,
 }: Readonly<TokenExpiryWarningProps>) {
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
   const level = deriveLevel(expiresAt);
@@ -84,6 +90,7 @@ export function TokenExpiryWarning({
   const visual = buildLevelVisual(level);
   const countdownText = expiresAt ? formatCountdown(expiresAt, level, labels) : labels.expired;
   const showPulse = level === "critical" && !reducedMotion;
+  const OutlinedAction = (actionSlots ?? DEFAULT_MEETING_CONFIG_ACTION_SLOTS).outlined;
 
   return (
     <Box
@@ -117,19 +124,17 @@ export function TokenExpiryWarning({
           {providerName} &middot; {countdownText}
         </Typography>
       </Stack>
-      <Button
-        variant="outlined"
+      <OutlinedAction
         disabled={reconnecting}
         startIcon={reconnecting ? <CircularProgress size={16} /> : <RefreshOutlinedIcon />}
         onClick={onReconnect}
-        sx={theme => ({
-          color: levelBorderColor(theme, level),
-          borderColor: levelBorderColor(theme, level),
-          minHeight: 48,
-        })}
+        sx={theme => {
+          const borderColor = levelBorderColor(theme, level);
+          return { color: borderColor, borderColor };
+        }}
       >
         {labels.reconnect}
-      </Button>
+      </OutlinedAction>
     </Box>
   );
 }

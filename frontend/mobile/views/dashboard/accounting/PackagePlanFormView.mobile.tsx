@@ -1,45 +1,29 @@
 "use client";
 
-import { ArchiveOutlined, SaveOutlined, SyncOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Switch,
-  TextField,
-} from "@mui/material";
+import { SaveOutlined, SyncOutlined } from "@mui/icons-material";
+import { Box, Button, CircularProgress, Stack } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { Controller } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  PackagePlanArchiveDialogShared,
+  PackagePlanArchiveTriggerButton,
+} from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanArchiveDialogShared";
+import {
+  PackagePlanActiveField,
+  PackagePlanCodenameField,
+  PackagePlanCreditHoursField,
+  PackagePlanCurrencyField,
+  PackagePlanDescriptionField,
+  PackagePlanDisplayNameField,
+  PackagePlanPriceAmountField,
+  PackagePlanSortOrderField,
+  PackagePlanValidityMonthsField,
+} from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanFormFieldsShared";
+import { MOBILE_PACKAGE_PLAN_FORM_STYLES } from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanFormFieldsShared.options";
 import type { UsePackagePlanFormViewModel } from "@/frontend/common/views/dashboard/accounting/usePackagePlanFormViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 
-const CURRENCY_OPTIONS: readonly CurrencyCode[] = [
-  CurrencyCode.Egp,
-  CurrencyCode.Usd,
-  CurrencyCode.Sar,
-  CurrencyCode.Aed,
-];
-
-const CURRENCY_LABELS: Record<string, string> = {
-  Egp: "EGP",
-  Usd: "USD",
-  Sar: "SAR",
-  Aed: "AED",
-};
+const styles = MOBILE_PACKAGE_PLAN_FORM_STYLES;
 
 export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewModel>) {
   const {
@@ -79,178 +63,29 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
 
       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
         <Stack spacing={2.5} sx={{ px: 2, pb: 6 }}>
-          <Controller
-            name="codename"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                size="small"
-                label={t.form.codename}
-                placeholder={t.form.codenamePlaceholder}
-                helperText={errors.codename?.message ?? t.form.codenameHelp}
-                error={Boolean(errors.codename)}
-                disabled={isEditing}
-              />
-            )}
-          />
+          <PackagePlanCodenameField control={control} errors={errors} labels={t.form} isEditing={isEditing} />
 
-          <Controller
-            name="displayName"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                size="small"
-                label={t.form.displayName}
-                error={Boolean(errors.displayName)}
-                helperText={errors.displayName?.message}
-              />
-            )}
-          />
+          <PackagePlanDisplayNameField control={control} errors={errors} labels={t.form} />
 
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                size="small"
-                multiline
-                minRows={2}
-                label={t.form.description}
-              />
-            )}
-          />
+          <PackagePlanDescriptionField control={control} labels={t.form} />
 
           <Stack direction="row" spacing={1.5}>
-            <Controller
-              name="creditHours"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  size="small"
-                  type="number"
-                  label={t.form.creditHours}
-                  error={Boolean(errors.creditHours)}
-                  helperText={errors.creditHours?.message}
-                  slotProps={{ htmlInput: { step: 0.5, min: 0.5, inputMode: "decimal" } }}
-                  sx={{ flex: 1 }}
-                />
-              )}
-            />
-            <Controller
-              name="priceAmount"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  size="small"
-                  type="number"
-                  label={t.form.priceAmount}
-                  error={Boolean(errors.priceAmount)}
-                  helperText={errors.priceAmount?.message}
-                  slotProps={{ htmlInput: { step: 0.01, min: 0, inputMode: "decimal" } }}
-                  sx={{ flex: 1 }}
-                />
-              )}
-            />
+            <PackagePlanCreditHoursField control={control} errors={errors} labels={t.form} sx={styles.numericField} />
+            <PackagePlanPriceAmountField control={control} errors={errors} labels={t.form} sx={styles.numericField} />
           </Stack>
 
           <Stack direction="row" spacing={1.5}>
-            <Controller
-              name="currency"
+            <PackagePlanCurrencyField control={control} labels={t.form} sx={styles.currencyField} />
+            <PackagePlanSortOrderField control={control} errors={errors} labels={t.form} sx={styles.sortOrderField} />
+            <PackagePlanValidityMonthsField
               control={control}
-              render={({ field }) => (
-                <FormControl size="small" sx={{ flex: 1 }}>
-                  <InputLabel>{t.form.currency}</InputLabel>
-                  <Select<CurrencyCode>
-                    value={field.value}
-                    label={t.form.currency}
-                    onChange={e => field.onChange(e.target.value)}
-                  >
-                    {CURRENCY_OPTIONS.map(code => (
-                      <MenuItem key={code} value={code}>
-                        {CURRENCY_LABELS[code] ?? code}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="sortOrder"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  size="small"
-                  type="number"
-                  label={t.form.sortOrder}
-                  error={Boolean(errors.sortOrder)}
-                  helperText={errors.sortOrder?.message}
-                  slotProps={{ htmlInput: { step: 1, min: 0 } }}
-                  sx={{ flex: 1 }}
-                />
-              )}
-            />
-            <Controller
-              name="validityMonths"
-              control={control}
-              render={({ field }) => (
-                <Stack spacing={1} sx={{ flex: 1 }}>
-                  <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
-                    {[1, 3, 6, 12].map(months => (
-                      <Chip
-                        key={months}
-                        size="small"
-                        clickable
-                        label={String(months)}
-                        aria-pressed={field.value === months}
-                        color={field.value === months ? "primary" : "default"}
-                        variant={field.value === months ? "filled" : "outlined"}
-                        onClick={() => field.onChange(months)}
-                      />
-                    ))}
-                    <Chip
-                      size="small"
-                      clickable
-                      label={t.form.validityUnlimited}
-                      aria-pressed={field.value == null}
-                      color={field.value == null ? "primary" : "default"}
-                      variant={field.value == null ? "filled" : "outlined"}
-                      onClick={() => field.onChange(null)}
-                    />
-                  </Stack>
-                  <TextField
-                    value={field.value ?? ""}
-                    onChange={e => field.onChange(e.target.value === "" ? null : e.target.value)}
-                    size="small"
-                    type="number"
-                    label={t.form.validityMonths}
-                    error={Boolean(errors.validityMonths)}
-                    helperText={errors.validityMonths?.message}
-                    slotProps={{ htmlInput: { step: 1, min: 1, max: 120 } }}
-                    sx={{ width: "100%" }}
-                  />
-                </Stack>
-              )}
+              errors={errors}
+              labels={t.form}
+              sx={styles.validityStack}
             />
           </Stack>
 
-          <Controller
-            name="active"
-            control={control}
-            render={({ field }) => (
-              <FormControlLabel
-                control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} />}
-                label={t.form.active}
-              />
-            )}
-          />
+          <PackagePlanActiveField control={control} labels={t.form} />
 
           <Button
             type="submit"
@@ -263,15 +98,12 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
           </Button>
 
           {isEditing ? (
-            <Button
-              color="error"
-              variant="outlined"
-              startIcon={<ArchiveOutlined />}
-              onClick={() => setArchiveDialogOpen(true)}
-              disabled={archiving || !(existing?.active ?? true)}
-            >
-              {t.archiveConfirm}
-            </Button>
+            <PackagePlanArchiveTriggerButton
+              archiving={archiving}
+              planActive={existing?.active ?? true}
+              onOpen={() => setArchiveDialogOpen(true)}
+              label={t.archiveConfirm}
+            />
           ) : null}
 
           <Button variant="text" onClick={() => router.push("/accounting/packages")} disabled={isSubmitting}>
@@ -280,20 +112,18 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
         </Stack>
       </Box>
 
-      <Dialog open={archiveDialogOpen} onClose={() => setArchiveDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>{t.archiveTitle}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{existing ? t.archiveBody(existing.displayName ?? "") : ""}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setArchiveDialogOpen(false)} disabled={archiving}>
-            {t.form.cancel}
-          </Button>
-          <Button color="error" variant="contained" onClick={() => void onArchive()} disabled={archiving}>
-            {t.archiveConfirm}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <PackagePlanArchiveDialogShared
+        open={archiveDialogOpen}
+        onClose={() => setArchiveDialogOpen(false)}
+        onConfirm={() => void onArchive()}
+        archiving={archiving}
+        labels={{
+          title: t.archiveTitle,
+          body: existing ? t.archiveBody(existing.displayName ?? "") : "",
+          cancel: t.form.cancel,
+          confirm: t.archiveConfirm,
+        }}
+      />
 
       <FormSuccessSnackbar open={showSuccess} message={t.saveSuccess} onClose={onDismissSuccess} />
     </MobilePageContainer>

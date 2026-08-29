@@ -1,22 +1,24 @@
 "use client";
 
 import { AddOutlined, ClearOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, FormControlLabel, Skeleton, Stack, Switch, TextField, Typography } from "@mui/material";
+import { Box, Button, Chip, FormControlLabel, Stack, Switch, TextField, Typography } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import {
   formatAccountingDate,
   formatAccountingMoney,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import {
+  MobileListCardSkeletons,
+  MobileListEmptyNotice,
+  MobileListErrorNotice,
+} from "@/frontend/common/views/dashboard/accounting/components/__shared__/mobileListStateShared";
+import { usePaymentsPersonFilterSelection } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentsPersonFiltersShared";
 import type { PaymentsListViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentsListViewModel";
 import { MobileFab, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { ParentAutocompleteMobile, StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { useAppLocale } from "@/shared/locale/localeContext";
-
-const SKELETON_KEYS = ["skeleton-0", "skeleton-1", "skeleton-2"] as const;
 
 export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
   const locale = useAppLocale();
@@ -30,43 +32,17 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
     fromDate,
     toDate,
     unpaidOnly,
-    studentId,
-    parentId,
     setFromDate,
     setToDate,
     setUnpaidOnly,
-    setStudentId,
-    setParentId,
     resetFilters,
     hasActiveFilters,
     canManagePayments,
   } = props;
   const router = useRouter();
 
-  const [studentOption, setStudentOption] = useState<PersonOption | null>(null);
-  const [parentOption, setParentOption] = useState<PersonOption | null>(null);
-
-  // The store persists only ids; derive the displayed facades from the active
-  // ids so an externally cleared filter (e.g. resetFilters) can never show a
-  // stale name. Rows provide the student label fallback after a reload.
-  const studentValue = useMemo<PersonOption | null>(() => {
-    if (studentId === null || studentId === "") return null;
-    if (studentOption?.id === studentId) return studentOption;
-    const match = rows.find(row => row.studentId === studentId);
-    return match ? { id: studentId, name: match.studentName ?? "" } : null;
-  }, [rows, studentId, studentOption]);
-
-  const parentValue = parentId !== null && parentOption?.id === parentId ? parentOption : null;
-
-  const handleStudentChange = (next: PersonOption | null) => {
-    setStudentOption(next);
-    setStudentId(next?.id ?? null);
-  };
-
-  const handleParentChange = (next: PersonOption | null) => {
-    setParentOption(next);
-    setParentId(next?.id ?? null);
-  };
+  const { studentValue, parentValue, handleStudentChange, handleParentChange } =
+    usePaymentsPersonFilterSelection(props);
 
   return (
     <MobilePageContainer>
@@ -139,72 +115,62 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
         </Stack>
 
         {/* Cards */}
-        {error && rows.length === 0 ? (
-          <Typography variant="bodyMd" sx={theme => ({ px: 2, color: theme.palette.error.main })}>
-            {t.loadError}
-          </Typography>
-        ) : null}
+        <MobileListErrorNotice visible={error && rows.length === 0} message={t.loadError} />
 
-        {loading && rows.length === 0
-          ? SKELETON_KEYS.map(key => (
-              <Box key={key} sx={{ px: 2 }}>
-                <Skeleton variant="rounded" height={96} />
-              </Box>
-            ))
-          : rows.map(row => (
-              <Link key={row.id} href={`/accounting/payments/${row.id}`} style={{ textDecoration: "none" }}>
-                <Box
-                  sx={theme => ({
-                    mx: 2,
-                    p: 2,
-                    borderRadius: 3,
-                    bgcolor: theme.palette.surfaceContainerLow,
-                    border: 1,
-                    borderColor: theme.palette.outlineVariant,
-                  })}
+        {loading && rows.length === 0 ? (
+          <MobileListCardSkeletons height={96} />
+        ) : (
+          rows.map(row => (
+            <Link key={row.id} href={`/accounting/payments/${row.id}`} style={{ textDecoration: "none" }}>
+              <Box
+                sx={theme => ({
+                  mx: 2,
+                  p: 2,
+                  borderRadius: 3,
+                  bgcolor: theme.palette.surfaceContainerLow,
+                  border: 1,
+                  borderColor: theme.palette.outlineVariant,
+                })}
+              >
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between" }}>
+                  <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+                    {row.studentName ?? "—"}
+                  </Typography>
+                  <Chip
+                    size="small"
+                    color={paymentStatusTone(Boolean(row.isPaidStatusOn))}
+                    variant={row.isPaidStatusOn ? "outlined" : "filled"}
+                    label={row.isPaidStatusOn ? t.status.paid : t.status.unpaid}
+                  />
+                </Stack>
+                <Stack
+                  direction="row"
+                  spacing={1.5}
+                  sx={{ mt: 1, alignItems: "baseline", justifyContent: "space-between" }}
                 >
-                  <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between" }}>
-                    <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                      {row.studentName ?? "—"}
-                    </Typography>
-                    <Chip
-                      size="small"
-                      color={paymentStatusTone(Boolean(row.isPaidStatusOn))}
-                      variant={row.isPaidStatusOn ? "outlined" : "filled"}
-                      label={row.isPaidStatusOn ? t.status.paid : t.status.unpaid}
-                    />
-                  </Stack>
-                  <Stack
-                    direction="row"
-                    spacing={1.5}
-                    sx={{ mt: 1, alignItems: "baseline", justifyContent: "space-between" }}
-                  >
-                    <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
-                      {`${formatAccountingMoney(row.amount)} ${row.currency ?? ""}`}
-                    </Typography>
-                    {row.creditHours ? (
-                      <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                        {`${Number(row.creditHours).toFixed(2)} h`}
-                      </Typography>
-                    ) : null}
-                  </Stack>
-                  <Stack direction="row" spacing={1.5} sx={{ mt: 1, justifyContent: "space-between" }}>
+                  <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
+                    {`${formatAccountingMoney(row.amount)} ${row.currency ?? ""}`}
+                  </Typography>
+                  {row.creditHours ? (
                     <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                      {row.packageName ?? "—"}
+                      {`${Number(row.creditHours).toFixed(2)} h`}
                     </Typography>
-                    <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                      {formatAccountingDate(row.paymentDate, locale)}
-                    </Typography>
-                  </Stack>
-                </Box>
-              </Link>
-            ))}
+                  ) : null}
+                </Stack>
+                <Stack direction="row" spacing={1.5} sx={{ mt: 1, justifyContent: "space-between" }}>
+                  <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+                    {row.packageName ?? "—"}
+                  </Typography>
+                  <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+                    {formatAccountingDate(row.paymentDate, locale)}
+                  </Typography>
+                </Stack>
+              </Box>
+            </Link>
+          ))
+        )}
 
-        {!loading && rows.length === 0 && !error ? (
-          <Typography variant="bodyMd" sx={{ px: 2, textAlign: "center", py: 4 }}>
-            {t.empty}
-          </Typography>
-        ) : null}
+        <MobileListEmptyNotice visible={!loading && rows.length === 0 && !error} message={t.empty} />
       </Stack>
 
       {canManagePayments ? (
