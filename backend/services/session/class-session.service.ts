@@ -27,6 +27,7 @@ import {
   validateStateTransition,
 } from "@/backend/services/scheduling/state-change-validation.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
+import { PayrollCalculationService } from "@/backend/services/teacher/payroll-calculation.service";
 import type {
   ClassInstanceDetailReturnType,
   ClassInstanceInsertType,
@@ -35,8 +36,22 @@ import type {
   ClassStatusEventSelectType,
   DBTransaction,
 } from "@/backend/types";
+import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
+import { parseClassExecutionState } from "@/shared/lib/enum";
 import { type ErrorsLabels, getServerTranslations, type SessionLabels } from "@/shared/locale";
+
+/**
+ * Terminal on-demand execution states. A transition into one of these closes
+ * the session without a live meeting; the payroll calculation for such rows
+ * carries the on-demand flag so absence semantics resolve correctly.
+ */
+const ON_DEMAND_TERMINAL_EXECUTION_STATES = new Set<string>([
+  ClassExecutionState.ON_DEMAND_PENDING_CREDITS,
+  ClassExecutionState.ON_DEMAND_CONFLICT_HELD,
+  ClassExecutionState.ON_DEMAND_NO_CREDITS_CANCELLED,
+  ClassExecutionState.ON_DEMAND_NO_CREDITS_ABSENT,
+]);
 
 /**
  * ClassSessionService
@@ -350,19 +365,26 @@ export namespace ClassSessionService {
    * provides idempotency: concurrent runs cannot double-process because
    * only rows still in PENDING_CREDIT are affected.
    *
-   * Does NOT dispatch notifications — callers handle that.
+   * When the target execution state is a terminal on-demand state, the
+   * payroll calculation runs for every flipped instance inside the same
+   * transaction. Does NOT dispatch notifications — callers handle that.
    *
+   * @param options.actorUserId  Authenticated user to attribute the payroll
+   *                             calculation to. System flows without a user
+   *                             session omit it and the calculation is
+   *                             deferred to an operator reconciliation.
    * @returns Count of rows actually updated.
    */
   export async function markNoCreditsBatch(
     tx: DBTransaction,
     instanceIds: string[],
     newStatus: OnDemandStatus,
-    executionState: string
+    executionState: string,
+    options?: { actorUserId?: string | null }
   ): Promise<number> {
     if (instanceIds.length === 0) return 0;
     const now = new Date();
-    return SchedulingRepository.updateOndemandStatusBatch(
+    const updatedCount = await SchedulingRepository.updateOndemandStatusBatch(
       instanceIds,
       {
         executionState,
@@ -371,6 +393,81 @@ export namespace ClassSessionService {
       },
       OnDemandStatus.PENDING_CREDIT,
       tx
+    );
+    if (updatedCount > 0 && ON_DEMAND_TERMINAL_EXECUTION_STATES.has(executionState)) {
+      await triggerPayrollForOndemandResolution(tx, instanceIds, executionState, options?.actorUserId ?? null);
+    }
+    return updatedCount;
+  }
+
+  /**
+   * Runs the automatic payroll calculation for an instance that just reached
+   * a terminal execution state, inside the same transaction as the state
+   * change so the payroll snapshot and the transition commit or roll back
+   * together. Callers invoke it only after a terminal transition; the
+   * calculator itself additionally rejects rows whose execution state is not
+   * terminal.
+   *
+   * The calculation is best-effort by design: when the calculator rejects
+   * (a permission guard, a settled row, a non-terminal re-read) the error is
+   * logged and swallowed so the session state change itself is never rolled
+   * back — the snapshot stays NOT_CALCULATED and an operator reconciles it
+   * later.
+   */
+  async function triggerTerminalPayrollCalculation(
+    instance: ClassInstanceSelectType,
+    actorUserId: string,
+    tErrors: ErrorsLabels,
+    tx: DBTransaction
+  ): Promise<void> {
+    try {
+      await PayrollCalculationService.calculateForInstance(
+        {
+          instanceId: instance.id,
+          actorUserId,
+          isOnDemand: ON_DEMAND_TERMINAL_EXECUTION_STATES.has(parseClassExecutionState(instance.executionState)),
+        },
+        tErrors,
+        tx
+      );
+    } catch (error) {
+      logger.error("Automatic payroll calculation failed; session state change preserved", {
+        classInstanceId: instance.id,
+        actorUserId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Runs the payroll calculation for every instance the no-credits batch
+   * update actually moved into the given terminal on-demand state. Rows a
+   * concurrent transaction already claimed (still in their previous state)
+   * are skipped so an unresolved pending-credit session is never calculated
+   * early. System flows without an authenticated actor defer the calculation
+   * to an operator reconciliation — there is no user to attribute the payroll
+   * write to.
+   */
+  async function triggerPayrollForOndemandResolution(
+    tx: DBTransaction,
+    instanceIds: readonly string[],
+    executionState: string,
+    actorUserId: string | null
+  ): Promise<void> {
+    if (!actorUserId) {
+      logger.warn("On-demand terminal resolution without an actor; payroll calculation deferred", {
+        executionState,
+        instanceIds,
+      });
+      return;
+    }
+    const tErrors = getServerTranslations("en").errorsTranslations;
+    await Promise.all(
+      instanceIds.map(async instanceId => {
+        const instance = await SchedulingRepository.getById(instanceId, tx);
+        if (instance?.executionState !== executionState) return;
+        await triggerTerminalPayrollCalculation(instance, actorUserId, tErrors, tx);
+      })
     );
   }
 
@@ -421,9 +518,15 @@ export namespace ClassSessionService {
 
   export async function stop(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
-    const result = await SchedulingRepository.stopClassInstance(classInstanceId, userId, undefined, tErrors, {
-      onAuth: checkStateChangeAuth,
-      onValidate: validateStateTransition,
+    const result = await db.transaction(async tx => {
+      const updated = await SchedulingRepository.stopClassInstance(classInstanceId, userId, tx, tErrors, {
+        onAuth: checkStateChangeAuth,
+        onValidate: validateStateTransition,
+      });
+      if (updated) {
+        await triggerTerminalPayrollCalculation(updated, userId, tErrors, tx);
+      }
+      return updated;
     });
     await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_COMPLETED);
     return result;
@@ -511,9 +614,15 @@ export namespace ClassSessionService {
       AppPermission.SESSION_UPDATE_STATUS_ABSENT,
       async instance => {
         await SystemRulesService.assertAbsentWaitingPeriod(instance);
-        return SchedulingRepository.markClassAbsent(classInstanceId, userId, undefined, tErrors, {
-          onAuth: checkStateChangeAuth,
-          onValidate: validateStateTransition,
+        return db.transaction(async tx => {
+          const updated = await SchedulingRepository.markClassAbsent(classInstanceId, userId, tx, tErrors, {
+            onAuth: checkStateChangeAuth,
+            onValidate: validateStateTransition,
+          });
+          if (updated) {
+            await triggerTerminalPayrollCalculation(updated, userId, tErrors, tx);
+          }
+          return updated;
         });
       },
       tErrors,
@@ -547,6 +656,10 @@ export namespace ClassSessionService {
         if (!quotaReleased) {
           await refundCreditIfDeducted(instance, userId, tErrors, tx);
         }
+      }
+      const completedOriginal = await SchedulingRepository.getById(processed.originalId, tx);
+      if (completedOriginal) {
+        await triggerTerminalPayrollCalculation(completedOriginal, userId, tErrors, tx);
       }
       return processed;
     });

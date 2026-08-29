@@ -107,19 +107,19 @@
 - 🧪 `backend/lib/sanitize/richTextSanitizer.test.ts` — strips `<script>` tags; truncates to 2000 chars with ellipsis.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/lib/sanitize/richTextSanitizer.ts --lifecycle codescene`
 
-### 1.6 `calculateForInstance` — grace-period + outcome-rule branches
+### 1.6 `calculateForInstance` — grace-period + outcome-rule branches ✅ DONE
 - 🆕 `backend/services/teachers/payroll-calculation.service.ts` — implement `calculateForInstance(input, tErrors)` with the four branches: student-absent, teacher-absent, on-time (within grace), late-pro-rated. Reads grace via `resolveGraceSettings`, rate via the existing PURE function `resolveClassRate({...})` from `@/backend/services/pricing/rate-resolver.service.ts` (NOT `RateResolverService.resolveForInstance` — that method does not exist; fetch `recurringSchedule`, `subject`, and `teacher` rows first, then call `resolveClassRate`).
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/payroll-calculation.service.ts --lifecycle codescene`
 
-### 1.7 `applyOverride` — four-mode matrix
+### 1.7 `applyOverride` — four-mode matrix ✅ DONE
 - ✏️ `backend/services/teachers/payroll-calculation.service.ts` — add `applyOverride(input, tErrors)` with the four modes (Refund / Calculated / Not Calculated / Partially) + `computeOverridePatch` helper + state guards (`PAYROLL_ALREADY_PAID`, `PAYROLL_AWAITING_SETTLEMENT`) + idempotency lookup.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/payroll-calculation.service.ts --lifecycle codescene`
 
-### 1.8 `getReport` — read model + aggregates
+### 1.8 `getReport` — read model + aggregates ✅ DONE
 - ✏️ `backend/services/teachers/payroll-calculation.service.ts` — add `getReport(actorUserId, filters, pagination, tErrors)` returning `PayrollReportPage` with aggregate totals + `rowCountByStatus`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/payroll-calculation.service.ts --lifecycle codescene`
 
-### 1.9 Service tests — calculation
+### 1.9 Service tests — calculation ✅ DONE
 - 🧪 `backend/services/teachers/payroll-calculation.service.test.ts` — full coverage matrix:
   - Auto-trigger on `COMPLETED` → `CALCULATED` + amount set.
   - Auto-trigger on `ON_DEMAND_NO_CREDITS_ABSENT` → teacher-absent path.
@@ -136,7 +136,7 @@
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/payroll-calculation.service.test.ts --lifecycle codescene`
 - 🔁 `bun test backend/services/teachers/payroll-calculation.service.test.ts`
 
-### 1.10 Service tests — override
+### 1.10 Service tests — override ✅ DONE
 - 🧪 `backend/services/teachers/payroll-override.service.test.ts` — coverage matrix:
   - Refund happy path → amount zeroed, status `REFUND`, event emitted.
   - Calculated happy path → re-run + status flip.
@@ -153,22 +153,22 @@
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/payroll-override.service.test.ts --lifecycle codescene`
 - 🔁 `bun test backend/services/teachers/payroll-override.service.test.ts`
 
-### 1.11 Wire auto-trigger into `SchedulingService`
+### 1.11 Wire auto-trigger into `SchedulingService` ✅ DONE
 - ✏️ `backend/services/scheduling/scheduling.service.ts` (or whichever service owns the state-machine) — after a successful transition to `COMPLETED` or any `ON_DEMAND_*` terminal state, invoke `PayrollCalculationService.calculateForInstance` inside the same tx (AC-2.1).
 - 🧪 `backend/services/scheduling/scheduling-payroll-trigger.test.ts` — verify the calculator runs on transition; verify it does NOT run on non-terminal transitions.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/scheduling/scheduling.service.ts --lifecycle codescene`
 
-### 1.12 Wire `WAITING_PAID` flip into `TeacherDueService`
+### 1.12 Wire `WAITING_PAID` flip into `TeacherDueService` ✅ DONE
 - ✏️ `backend/services/teachers/teacher-due.service.ts` (existing) — in the existing `createDueEntry(...)` method (NOT `accrueForApprovedReport` — that method does not exist), read `class_instances.calculationStatus` first; if `CALCULATED`/`PARTIALLY`/`REFUND`, use `teacherPaidAmount`/`teacherPaidCurrency` as the authoritative due amount; otherwise fall back to legacy rate-resolver path with a warning log. Flip `calculationStatus = WAITING_PAID` in the same tx (AC-9.4).
 - 🧪 `backend/services/teachers/teacher-due-payroll-integration.test.ts` — happy path consumes `teacherPaidAmount`; legacy fallback when `NOT_CALCULATED`; `WAITING_PAID` flip is atomic.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/teacher-due.service.ts --lifecycle codescene`
 
-### 1.13 Wire `PAID` flip into `markAsPaid` (called by `markTeacherDuesPaid` mutation)
+### 1.13 Wire `PAID` flip into `markAsPaid` (called by `markTeacherDuesPaid` mutation) ✅ DONE
 - ✏️ `backend/services/teachers/teacher-due.service.ts` — in `markAsPaid(actorUserId, dueIds, teacherPaymentId, locale)` (the existing method called by the existing `markTeacherDuesPaid` GraphQL mutation), after marking dues `PAID`, flip the linked `class_instances.calculationStatus = PAID` in the same tx (AC-9.5). Emit `PAYROLL_STATUS_TRANSITION` event.
 - 🧪 extend `backend/services/teachers/teacher-due.service.test.ts` (existing) — verify the status flip + event emission.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/teacher-due.service.ts --lifecycle codescene`
 
-### 1.14 Phase-1 acceptance
+### 1.14 Phase-1 acceptance ✅ DONE
 - ✅ All service tests green.
 - ✅ Existing `teacher-due.service.test.ts` + `scheduling.repository.test.ts` still green (no regression).
 - ✅ `sub-loop` exit 0 on every touched file.

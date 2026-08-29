@@ -132,6 +132,14 @@ await mock.module("@/backend/db/repo/scheduling/class-status-events.repository",
   ClassStatusEventsRepository: { create: mock(() => Promise.resolve({})) },
 }));
 
+// The state machine imports the payroll calculator; this suite exercises
+// quota-refund behavior on cancellation, which never reaches it, so the
+// calculator stays a mocked leaf (mocking it also keeps its heavier module
+// graph out of this unit test).
+await mock.module("@/backend/services/teacher/payroll-calculation.service", () => ({
+  PayrollCalculationService: { calculateForInstance: mock(() => Promise.resolve({})) },
+}));
+
 await mock.module("@/backend/graphql/utils/class-session.utils", () => ({
   buildClassInstanceDetail: mock(() => ({})),
 }));
