@@ -53,6 +53,7 @@ Test files are organized **one subdirectory per domain**, mirroring the componen
 | `dashboard/` | Dashboard container and bridge |
 | `meeting-integrations/` | Meeting integrations (settings tab + profile meeting-configs + `ui/display/meetingConfig`) |
 | `navigation/` | Sidebar nav configs, breadcrumbs, tab nav |
+| `parents/` | Admin parents directory (data grid + student directory grid pagination) |
 | `profile/` | Profile views across roles (core, teacher, parent, staff, student, supervisor) |
 | `quota/` | Quota views and containers |
 | `schedule/` | Search-schedule |

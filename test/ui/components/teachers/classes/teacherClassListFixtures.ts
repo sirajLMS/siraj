@@ -45,6 +45,7 @@ export const teacherClassListLabels: TeacherClassListViewModel["labels"] = {
 export function makeTeacherClassRow(overrides: Partial<TeacherClassRow> = {}): TeacherClassRow {
   return {
     id: "class-1",
+    studentId: "student-1",
     studentName: "Ahmed Fixture",
     scheduledStartAt: "2026-06-01T15:00:00.000Z",
     scheduledEndAt: "2026-06-01T16:00:00.000Z",

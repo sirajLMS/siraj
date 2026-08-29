@@ -10,9 +10,10 @@ import {
 await mockNextNavigation("/teachers", { locale: weeklyScheduleLocale });
 
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, fireEvent, render, waitFor, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
+import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { ScheduledClass } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import MobileScheduleList from "@/frontend/mobile/views/dashboard/teachers/schedule/weekly/mobileScheduleList.mobile";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
@@ -21,6 +22,7 @@ expect.extend(matchers);
 
 afterEach(() => {
   cleanup();
+  useWeeklyScheduleStore.setState({ deleteConfirmClassInstanceId: null, selectedDay: "monday" });
 });
 
 function findDeleteButton(container: HTMLElement): HTMLButtonElement {
@@ -121,5 +123,60 @@ describe("MobileScheduleList delete affordance", () => {
   test("permission gating removes the delete affordance entirely", () => {
     const { container } = renderList({ hasScheduleDeleteClass: false });
     expect(container.querySelector(`button[aria-label="${weeklyScheduleLabels.actions.deleteClass}"]`)).toBeNull();
+  });
+});
+
+describe("MobileScheduleList store-driven delete dialog", () => {
+  test("a dialog opened via the store before render is shown for the matching slot item", async () => {
+    useWeeklyScheduleStore.getState().openDeleteConfirm("class-delete-1");
+
+    renderList();
+
+    const dialog = await within(document.body).findByRole("dialog");
+    expect(dialog).toHaveTextContent(weeklyScheduleLabels.dialogs.deleteClassTitle);
+    expect(dialog).toHaveTextContent(weeklyScheduleLabels.dialogs.deleteClassMessage);
+  });
+
+  test("confirming the dialog clears the store dialog id", async () => {
+    const onRemoveClass = mock((_: string) => {});
+    const { container } = renderList({ onRemoveClass });
+
+    fireEvent.click(findDeleteButton(container));
+    const dialog = await within(document.body).findByRole("dialog");
+    expect(useWeeklyScheduleStore.getState().deleteConfirmClassInstanceId).toBe("class-delete-1");
+
+    fireEvent.click(within(dialog).getByRole("button", { name: weeklyScheduleLabels.dialogs.confirmYes }));
+
+    await waitFor(() => {
+      expect(onRemoveClass).toHaveBeenCalledWith("class-delete-1");
+    });
+    expect(useWeeklyScheduleStore.getState().deleteConfirmClassInstanceId).toBeNull();
+  });
+});
+
+describe("MobileScheduleList day selector (store-backed)", () => {
+  test("defaults to monday and switches the filtered day via the store", () => {
+    const mondayClass = makeDeletableScheduledClass({
+      id: "class-mon",
+      day: "monday",
+      subjectName: "Fixture Monday Subject",
+    });
+    const tuesdayClass = makeDeletableScheduledClass({
+      id: "class-tue",
+      day: "tuesday",
+      subjectName: "Fixture Tuesday Subject",
+    });
+
+    renderList({ classes: [mondayClass, tuesdayClass] });
+
+    expect(useWeeklyScheduleStore.getState().selectedDay).toBe("monday");
+    expect(screen.getByText("Fixture Monday Subject")).toBeInTheDocument();
+    expect(screen.queryByText("Fixture Tuesday Subject")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: weeklyScheduleLabels.days.tue }));
+
+    expect(useWeeklyScheduleStore.getState().selectedDay).toBe("tuesday");
+    expect(screen.queryByText("Fixture Monday Subject")).toBeNull();
+    expect(screen.getByText("Fixture Tuesday Subject")).toBeInTheDocument();
   });
 });

@@ -60,6 +60,12 @@ await mock.module(
   })
 );
 
+// Layout suite targets PageContainer structure only — replace the metric grid
+// with an inert stub so parent-child DOM assertions stay exact.
+await mock.module("@/frontend/desktop/components/ui/card/MetricCardGrid", () => ({
+  DesktopMetricCardGrid: () => <div data-testid="metric-card-grid" />,
+}));
+
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, within } from "@testing-library/react";
 
@@ -168,5 +174,18 @@ describe("TeacherDashboardDesktopView header", () => {
     expect(title.className).toContain("MuiTypography-headlineLg");
 
     expect(page.getByText(LAST_UPDATED)).toBeVisible();
+  });
+});
+
+describe("TeacherDashboardDesktopView layout", () => {
+  test("metric grid is a direct child of the page container (no ad-hoc gap wrapper)", () => {
+    const { container } = renderView();
+
+    const pageRoot = container.firstElementChild;
+    const metricGrid = container.querySelector("[data-testid='metric-card-grid']");
+    expect(pageRoot).not.toBeNull();
+    expect(metricGrid).not.toBeNull();
+    expect(metricGrid?.parentElement).not.toBeNull();
+    expect(metricGrid?.parentElement).toBe(pageRoot);
   });
 });

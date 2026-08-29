@@ -1,4 +1,8 @@
+import type { ComponentType } from "react";
+import { useForm } from "react-hook-form";
 import { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql";
+import { availabilitySearchResolverFactory } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
+import type { AvailabilitySearchFormData } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import { type AppLocale, locales } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
@@ -27,10 +31,12 @@ await Promise.all(pendingNamespaces);
 
 export const AVAILABILITY_TEST_TEACHER = "Test Teacher";
 
+export type TeacherAvailabilityViewFixture = Omit<TeacherAvailabilityViewModel, "formMethods">;
+
 export function buildTeacherAvailabilityViewModel(
   locale: AppLocale,
-  overrides: Partial<TeacherAvailabilityViewModel> = {}
-): TeacherAvailabilityViewModel {
+  overrides: Partial<TeacherAvailabilityViewFixture> = {}
+): TeacherAvailabilityViewFixture {
   const t = readTranslation(Translation.Dashboard.TeacherAvailability, locale);
   const { table, ...shell } = t;
   return {
@@ -44,4 +50,29 @@ export function buildTeacherAvailabilityViewModel(
     defaultFilters: { fromTime: null, toTime: null, gender: null },
     ...overrides,
   };
+}
+
+interface TeacherAvailabilityViewHarnessProps {
+  readonly locale: AppLocale;
+  readonly overrides?: Partial<TeacherAvailabilityViewFixture>;
+  readonly ViewPanel: ComponentType<TeacherAvailabilityViewModel>;
+}
+
+/**
+ * Provides the RHF form instance that the ViewModel hands to tier views, so
+ * tier views render from a fully mocked view-model object in isolation.
+ */
+export function TeacherAvailabilityViewHarness({
+  locale,
+  overrides,
+  ViewPanel,
+}: Readonly<TeacherAvailabilityViewHarnessProps>) {
+  const viewModel = buildTeacherAvailabilityViewModel(locale, overrides);
+  const formMethods = useForm<AvailabilitySearchFormData>({
+    defaultValues: viewModel.defaultFilters,
+    resolver: availabilitySearchResolverFactory({
+      invalidGender: viewModel.labelsBySection.shell.validation.invalidGender,
+    }),
+  });
+  return <ViewPanel {...viewModel} formMethods={formMethods} />;
 }

@@ -75,7 +75,28 @@ async function assertProfileSections() {
   expect(screen.getByText(labels.pageTitle)).toBeInTheDocument();
   expect(screen.getByText(labels.sections.contact)).toBeInTheDocument();
   expect(screen.getByText(labels.sections.salary)).toBeInTheDocument();
+  expect(screen.getByText(labels.fields.fullName)).toBeInTheDocument();
+  expect(screen.getByText(labels.fields.email)).toBeInTheDocument();
   expect(screen.getByText("mariam@example.com")).toBeInTheDocument();
+}
+
+/**
+ * A section panel renders its title in a dedicated title bar only when the
+ * scaffold passes the section `title` prop — otherwise the Panel holds the
+ * body alone as its single child element.
+ */
+function expectSectionPanelTitleBar(title: string) {
+  const panels = Array.from(document.querySelectorAll(".MuiPaper-root"));
+  const panel = panels.find(
+    element =>
+      element.childElementCount >= 2 && (element.firstElementChild?.textContent?.includes(title) ?? false)
+  );
+  expect(panel).toBeDefined();
+}
+
+function assertSectionPanelTitleBars() {
+  expectSectionPanelTitleBar(labels.sections.contact);
+  expectSectionPanelTitleBar(labels.sections.salary);
 }
 
 describe("TeacherOwnProfileView (post profileLayoutShared migration)", () => {
@@ -87,6 +108,7 @@ describe("TeacherOwnProfileView (post profileLayoutShared migration)", () => {
       viewport: "desktop",
     });
     await assertProfileSections();
+    assertSectionPanelTitleBars();
   });
 
   test("mobile view renders profile sections inside section panels", async () => {
@@ -97,5 +119,24 @@ describe("TeacherOwnProfileView (post profileLayoutShared migration)", () => {
       viewport: "mobile",
     });
     await assertProfileSections();
+    assertSectionPanelTitleBars();
+  });
+
+  test("load failure renders the shared ErrorState alert, not a bare error text", async () => {
+    renderWithWrapper(<TeacherOwnProfileDesktopContainer />, {
+      locale,
+      themeMode: "dark",
+      mocks: [
+        {
+          request: { query: teacherOwnProfileQueryDocument },
+          error: new Error("network failure"),
+          maxUsageCount: Number.POSITIVE_INFINITY,
+        },
+      ],
+      viewport: "desktop",
+    });
+
+    const alertMessage = await screen.findByText(labels.errors.failedToLoad);
+    expect(alertMessage.closest(".MuiAlert-root")).not.toBeNull();
   });
 });
