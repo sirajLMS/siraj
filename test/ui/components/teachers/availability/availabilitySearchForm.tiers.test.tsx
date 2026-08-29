@@ -5,12 +5,12 @@ await mockNextNavigation();
 
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 
-mock.module("@/frontend/desktop/components/ui/form/time", () => ({
+void mock.module("@/frontend/desktop/components/ui/form/time", () => ({
   DesktopAppTimePicker: () => <span data-testid="desktop-time-picker" />,
   DesktopAppTimeRangePicker: () => null,
 }));
 
-mock.module("@/frontend/desktop/components/ui/input/genderSelector", () => ({
+void mock.module("@/frontend/desktop/components/ui/input/genderSelector", () => ({
   GenderSelectorDesktop: ({ setGenderAction }: { readonly setGenderAction: (gender: Gender | null) => void }) => (
     <button type="button" data-testid="gender-desktop" onClick={() => setGenderAction(Gender.Male)}>
       gender-desktop-marker
@@ -18,12 +18,12 @@ mock.module("@/frontend/desktop/components/ui/input/genderSelector", () => ({
   ),
 }));
 
-mock.module("@/frontend/mobile/components/ui/form/time", () => ({
+void mock.module("@/frontend/mobile/components/ui/form/time", () => ({
   MobileAppTimePicker: () => <span data-testid="mobile-time-picker" />,
   MobileAppTimeRangePicker: () => null,
 }));
 
-mock.module("@/frontend/mobile/components/ui/input/genderSelector", () => ({
+void mock.module("@/frontend/mobile/components/ui/input/genderSelector", () => ({
   GenderSelectorMobile: () => <span data-testid="gender-mobile" />,
 }));
 
@@ -100,14 +100,24 @@ afterAll(() => {
   mock.restore();
 });
 
+const DESKTOP_MARKERS = ["desktop-time-picker", "gender-desktop"] as const;
+const MOBILE_MARKERS = ["mobile-time-picker", "gender-mobile"] as const;
+
+function assertTierMarkers(present: readonly string[], absent: readonly string[]) {
+  for (const marker of present) {
+    expect(screen.getAllByTestId(marker).length).toBeGreaterThan(0);
+  }
+  for (const marker of absent) {
+    expect(screen.queryByTestId(marker)).not.toBeInTheDocument();
+  }
+}
+
 describe("AvailabilitySearchForm tier wiring", () => {
   test("desktop form renders the desktop time picker and gender selector variants", () => {
     renderWithWrapper(<TierHarness FormComponent={AvailabilitySearchFormDesktop} onSearch={() => {}} />, { locale });
 
     expect(screen.getAllByTestId("desktop-time-picker")).toHaveLength(2);
-    expect(screen.getByTestId("gender-desktop")).toBeInTheDocument();
-    expect(screen.queryByTestId("mobile-time-picker")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("gender-mobile")).not.toBeInTheDocument();
+    assertTierMarkers(DESKTOP_MARKERS, MOBILE_MARKERS);
   });
 
   test("mobile form renders the mobile time picker and gender selector variants", () => {
@@ -117,9 +127,7 @@ describe("AvailabilitySearchForm tier wiring", () => {
     });
 
     expect(screen.getAllByTestId("mobile-time-picker")).toHaveLength(2);
-    expect(screen.getByTestId("gender-mobile")).toBeInTheDocument();
-    expect(screen.queryByTestId("desktop-time-picker")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("gender-desktop")).not.toBeInTheDocument();
+    assertTierMarkers(MOBILE_MARKERS, DESKTOP_MARKERS);
   });
 
   test("submitting the desktop form forwards the tier selector value to onSearch", async () => {

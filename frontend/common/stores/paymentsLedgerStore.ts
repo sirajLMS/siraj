@@ -10,9 +10,7 @@ import type { StudentCreditHourBalanceQuery_studentCreditHourBalance } from "@/f
  * fetches cheap.
  */
 export interface PaymentsLedgerState {
-  readonly balancesByStudentId: Readonly<
-    Record<string, StudentCreditHourBalanceQuery_studentCreditHourBalance>
-  >;
+  readonly balancesByStudentId: Readonly<Record<string, StudentCreditHourBalanceQuery_studentCreditHourBalance>>;
   /** Joined student-id key of the last completed balance fan-out. */
   readonly balancesFetchedKey: string;
   readonly applyBalances: (

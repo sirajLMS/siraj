@@ -282,5 +282,6 @@ export function buildBillingLabels(t: BillingLabels): BillingLabels {
     tabsPageSubtitle: t.tabsPageSubtitle,
     tabNavAriaLabel: t.tabNavAriaLabel,
     billingTabs: t.billingTabs,
+    paymentsLedger: t.paymentsLedger,
   };
 }

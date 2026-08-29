@@ -72,7 +72,9 @@ function TimeField({
 function GenderField({
   labels,
   GenderSelectorComponent,
-}: Readonly<Pick<AvailabilitySearchFormProps, "labels"> & { GenderSelectorComponent: ComponentType<GenderSelectorProps> }>) {
+}: Readonly<
+  Pick<AvailabilitySearchFormProps, "labels"> & { GenderSelectorComponent: ComponentType<GenderSelectorProps> }
+>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();
   return (
     <Controller

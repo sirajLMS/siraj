@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import type { TimezoneSelectProps } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
@@ -7,19 +8,39 @@ const dialogLocale: AppLocale = "en";
 
 await mockNextNavigation("/teachers", { locale: dialogLocale });
 
+const TEACHER_ID = "teacher-1";
+const INITIAL_TIMEZONE = IanaTimezone.Africa_Cairo;
+const TARGET_TIMEZONE = IanaTimezone.Europe_London;
+
 // Record every render of the desktop-tier timezone primitive so tests can assert
 // the dialog wires the `TimezoneSelect` slot to `TimezoneSelectDesktop` (not the
-// viewport-agnostic common `TimezoneSelect`). The real component still renders
-// underneath so DOM behavior stays faithful.
+// viewport-agnostic common `TimezoneSelect`). The stub also exposes change/clear
+// triggers so tests can drive `onChangeAction` without opening the real
+// autocomplete popup. (The real component must not be re-imported from inside
+// this module-mock factory: awaiting it here deadlocks `bun test`.)
 const renderedTimezoneSelectProps: TimezoneSelectProps[] = [];
 
-await mock.module("@/frontend/desktop/components/ui/input/timezoneSelect", async () => {
-  const actual = await import("@/frontend/desktop/components/ui/input/timezoneSelect/timezoneSelect.desktop");
-  const RecordingTimezoneSelectDesktop = (props: Readonly<TimezoneSelectProps>) => {
+await mock.module("@/frontend/desktop/components/ui/input/timezoneSelect", () => {
+  const StubTimezoneSelectDesktop = (props: Readonly<TimezoneSelectProps>) => {
     renderedTimezoneSelectProps.push(props);
-    return <actual.TimezoneSelectDesktop {...props} />;
+    return (
+      <div data-testid="timezone-select-desktop-stub">
+        <output data-testid="timezone-select-value">{props.value ?? ""}</output>
+        <span data-testid="timezone-select-label">{props.label ?? ""}</span>
+        <button
+          type="button"
+          data-testid="timezone-select-change"
+          onClick={() => props.onChangeAction(TARGET_TIMEZONE)}
+        >
+          stub-change
+        </button>
+        <button type="button" data-testid="timezone-select-clear" onClick={() => props.onChangeAction(null)}>
+          stub-clear
+        </button>
+      </div>
+    );
   };
-  return { TimezoneSelectDesktop: RecordingTimezoneSelectDesktop };
+  return { TimezoneSelectDesktop: StubTimezoneSelectDesktop };
 });
 
 import type { MockLink } from "@apollo/client/testing";
@@ -29,13 +50,11 @@ import type { Dispatch, SetStateAction } from "react";
 import { USER_SELECT_LIMIT } from "@/frontend/common/components/ui/input/userSelect/userSelect.constants";
 import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { studentsQueryDocument, userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { getTimezoneOptions } from "@/frontend/common/lib/timezone";
 import type { RecurringMeetingConfigValidation } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { emptyRecurringMeetingConfigState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import type { CreateRecurringClassDialogFormState } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type { CreateRecurringClassDialogViewModel } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { CreateRecurringClassDialogDesktop } from "@/frontend/desktop/views/dashboard/teachers/schedule/weekly/components/createRecurringClassDialog.desktop";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
@@ -45,10 +64,6 @@ expect.extend(matchers);
 const dialogLabels = readTranslation(Translation.Dashboard.TeacherCreateRecurringClass, dialogLocale);
 const meetingLabels = readTranslation(Translation.Ui.MeetingConfig, dialogLocale).manager;
 const recurringScheduleLabels = readTranslation(Translation.Ui.MeetingConfigRecurringSchedule, dialogLocale);
-
-const TEACHER_ID = "teacher-1";
-const INITIAL_TIMEZONE = IanaTimezone.Africa_Cairo;
-const TARGET_TIMEZONE = IanaTimezone.Europe_London;
 
 const meetingConfigValidation: RecurringMeetingConfigValidation = {
   urlError: null,
@@ -61,10 +76,6 @@ const meetingConfigValidation: RecurringMeetingConfigValidation = {
 
 function noopSetter<T>(): Dispatch<SetStateAction<T>> {
   return () => {};
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function makeFormState(
@@ -163,8 +174,9 @@ describe("CreateRecurringClassDialogDesktop timezone slot", () => {
   test("renders the timezone field through TimezoneSelectDesktop with the translated label and current IANA value", () => {
     renderDesktopDialog();
 
-    const timezoneInput = screen.getByRole("combobox", { name: dialogLabels.fields.timezone });
-    expect(timezoneInput).toBeVisible();
+    expect(screen.getByTestId("timezone-select-desktop-stub")).toBeVisible();
+    expect(screen.getByTestId("timezone-select-value").textContent).toBe(INITIAL_TIMEZONE);
+    expect(screen.getByTestId("timezone-select-label").textContent).toBe(dialogLabels.fields.timezone);
 
     const slotProps = renderedTimezoneSelectProps.at(-1);
     expect(slotProps).toBeDefined();
@@ -172,30 +184,19 @@ describe("CreateRecurringClassDialogDesktop timezone slot", () => {
     expect(slotProps?.value).toBe(INITIAL_TIMEZONE);
     expect(slotProps?.fullWidth).toBe(true);
     expect(slotProps?.disabled).toBe(false);
-
-    const expectedOption = getTimezoneOptions(dialogLocale).find(option => option.id === INITIAL_TIMEZONE);
-    expect(timezoneInput).toHaveValue(expectedOption?.label ?? "");
   });
 
-  test("propagates the chosen IANA timezone to the form state through the desktop slot", async () => {
+  test("propagates the chosen IANA timezone to the form state and ignores null clears", async () => {
     const setTimezone = mock<Dispatch<SetStateAction<IanaTimezone>>>(() => {});
     renderDesktopDialog(setTimezone);
 
-    const timezoneInput = screen.getByRole("combobox", { name: dialogLabels.fields.timezone });
-    fireEvent.keyDown(timezoneInput, { key: "ArrowDown" });
-
-    const targetOption = getTimezoneOptions(dialogLocale).find(option => option.id === TARGET_TIMEZONE);
-    if (!targetOption) {
-      throw new Error("target timezone option missing from timezone catalog");
-    }
-    const optionName = new RegExp(
-      `^${escapeRegExp(targetOption.pathLabel)}\\s*\\(${escapeRegExp(targetOption.offsetLabel)}\\)$`
-    );
-    const option = await screen.findByRole("option", { name: optionName });
-    fireEvent.click(option);
+    fireEvent.click(screen.getByTestId("timezone-select-change"));
 
     await waitFor(() => {
       expect(setTimezone).toHaveBeenCalledWith(TARGET_TIMEZONE);
     });
+
+    fireEvent.click(screen.getByTestId("timezone-select-clear"));
+    expect(setTimezone).toHaveBeenCalledTimes(1);
   });
 });

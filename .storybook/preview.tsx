@@ -1,12 +1,51 @@
 // cspell:ignore circlehollow
+import { DocsContainer, type DocsContainerProps } from "@storybook/addon-docs/blocks";
 import type { Decorator, Preview } from "@storybook/react";
 import { setupWorker } from "msw/browser";
 import { mswLoader } from "msw-storybook-addon/csf3";
+import { type PropsWithChildren, useState } from "react";
+import { GLOBALS_UPDATED } from "storybook/internal/core-events";
+import { useChannel } from "storybook/preview-api";
+import { themes } from "storybook/theming";
 import { mswHandlers } from "./msw-handlers";
 import { StoryWrapper } from "./StoryWrapper";
 
 // Import global styles
 import "@/app/index.css";
+
+type DocsThemeMode = "light" | "dark";
+
+function getInitialDocsMode(): DocsThemeMode {
+  // The story `theme` global travels in the preview iframe URL query string.
+  const frameGlobals = new URLSearchParams(window.location.search).get("globals");
+  const themeEntry = frameGlobals?.split(";").find(entry => entry.startsWith("theme:"));
+  const frameTheme = themeEntry?.split(":")[1];
+  if (frameTheme === "light" || frameTheme === "dark") {
+    return frameTheme;
+  }
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+/**
+ * Docs pages render independently from the manager theme (and default to light), which
+ * left the docs surface white inside a dark Storybook UI. Theming the docs container
+ * from the story `theme` global keeps docs in sync with the canvas and its toolbar toggle.
+ */
+function ThemedDocsContainer({ children, context }: PropsWithChildren<DocsContainerProps>) {
+  const [mode, setMode] = useState<DocsThemeMode>(getInitialDocsMode);
+  useChannel({
+    [GLOBALS_UPDATED]: ({ globals }: { globals: Record<string, unknown> }) => {
+      if (globals.theme === "light" || globals.theme === "dark") {
+        setMode(globals.theme);
+      }
+    },
+  });
+  return (
+    <DocsContainer context={context} theme={mode === "dark" ? themes.dark : themes.light}>
+      {children}
+    </DocsContainer>
+  );
+}
 
 const withAllProviders: Decorator = (Story, context) => <StoryWrapper Story={Story} context={context} />;
 
@@ -61,6 +100,8 @@ const preview: Preview = {
   ],
   parameters: {
     msw: { handlers: mswHandlers },
+
+    docs: { container: ThemedDocsContainer },
 
     nextjs: {
       appDirectory: true,

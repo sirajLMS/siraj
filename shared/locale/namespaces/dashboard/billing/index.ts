@@ -1,3 +1,4 @@
+export * from "./creditAdjustment.namespace";
 export * from "./currencyHedges.namespace";
 export * from "./exchangeRates.namespace";
 export * from "./main.namespace";

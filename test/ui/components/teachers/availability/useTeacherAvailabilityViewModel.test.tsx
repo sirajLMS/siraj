@@ -8,6 +8,7 @@ import { act, cleanup } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import { useEffect } from "react";
 import { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
 import type { AvailabilitySearchFormData } from "@/frontend/common/views/dashboard/teachers/availability/types";
@@ -39,7 +40,10 @@ const locale: AppLocale = "en";
 let capturedViewModel: TeacherAvailabilityViewModel | null = null;
 
 function ViewModelProbe(props: UseTeacherAvailabilityViewModelProps) {
-  capturedViewModel = useTeacherAvailabilityViewModel(props);
+  const viewModel = useTeacherAvailabilityViewModel(props);
+  useEffect(() => {
+    capturedViewModel = viewModel;
+  }, [viewModel]);
   return null;
 }
 

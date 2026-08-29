@@ -230,9 +230,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
 
   if (error) {
     logger.error("Error loading teacher availability:", { error });
-    return (
-      <ErrorState message={commonLabels.loadFailed} onRetry={handleRetry} />
-    );
+    return <ErrorState message={commonLabels.loadFailed} onRetry={handleRetry} />;
   }
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;

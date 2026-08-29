@@ -7,6 +7,7 @@ import { dashboardAccountingStudentCreditHoursEn } from "@/shared/locale/en/dash
 import { dashboardAdminEn } from "@/shared/locale/en/dashboard/admin";
 import { dashboardDstMigrationEn } from "@/shared/locale/en/dashboard/admin/dstMigration.ts";
 import { dashboardAdminViewEn } from "@/shared/locale/en/dashboard/admin/view.ts";
+import { dashboardBillingCreditAdjustmentEn } from "@/shared/locale/en/dashboard/billing/creditAdjustment.ts";
 import { dashboardBillingCurrencyHedgesEn } from "@/shared/locale/en/dashboard/billing/currencyHedges.ts";
 import { dashboardBillingExchangeRatesEn } from "@/shared/locale/en/dashboard/billing/exchangeRates.ts";
 import { dashboardBillingEn } from "@/shared/locale/en/dashboard/billing/main.ts";
@@ -162,6 +163,7 @@ export const enMessages: Translations = {
     billingManual: dashboardBillingManualEn,
     billingQuota: quotaEn,
     billingPayment: dashboardBillingPaymentEn,
+    billingCreditAdjustment: dashboardBillingCreditAdjustmentEn,
     accountingPayments: dashboardAccountingPaymentsEn,
     accountingPackages: dashboardAccountingPackagePlansEn,
     accountingStudentCreditHours: dashboardAccountingStudentCreditHoursEn,

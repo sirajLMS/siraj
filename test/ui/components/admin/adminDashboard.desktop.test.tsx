@@ -65,10 +65,9 @@ describe("AdminDashboardDesktopView", () => {
   });
 
   test("header search renders through SearchBarField with the translated placeholder", () => {
-    renderWithWrapper(
-      <AdminDashboardDesktopView {...buildAdminDashboardViewModel({ canDashboardSearch: true })} />,
-      { locale: adminHomeLocale }
-    );
+    renderWithWrapper(<AdminDashboardDesktopView {...buildAdminDashboardViewModel({ canDashboardSearch: true })} />, {
+      locale: adminHomeLocale,
+    });
 
     expect(screen.getByPlaceholderText(adminHomeLabels.searchPlaceholder)).toBeVisible();
   });

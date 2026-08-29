@@ -18,7 +18,13 @@ import type {
   PaymentsLedgerRow,
 } from "@/frontend/common/views/dashboard/billing/types/paymentsLedger.types";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type AppLocale, type PaymentsLedgerLabels, Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
+import {
+  type AppLocale,
+  type PaymentsLedgerLabels,
+  Translation,
+  useAppLocale,
+  useAppTranslation,
+} from "@/shared/locale";
 
 type LedgerEntry = MyPaymentsLedgerQuery_myPaymentsLedger;
 type BalanceEntry = StudentCreditHourBalanceQuery_studentCreditHourBalance;

@@ -232,6 +232,7 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
       AppPermission.TeacherDuesView,
       AppPermission.QuotasView,
       AppPermission.QuotasManage,
+      AppPermission.AccountingCreditsManage,
     ],
     separator: true,
   },
@@ -583,6 +584,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/payment-catalogs",
     section: "main",
     permission: PAGE_PERMISSIONS.paymentCatalogsParent,
+    groupId: "grp_finance",
+  },
+  {
+    key: "accounting-credits",
+    labelKey: "accountingCredits",
+    iconKey: "accountBalanceWallet",
+    href: "/accounting/credits",
+    section: "main",
+    permission: PAGE_PERMISSIONS.accountingCreditsManage,
     groupId: "grp_finance",
   },
 

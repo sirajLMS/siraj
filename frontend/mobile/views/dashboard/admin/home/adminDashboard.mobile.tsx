@@ -4,9 +4,9 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { MobileMetricCardGrid, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
+import { createScheduleOverviewMobileCardRenderer } from "@/frontend/mobile/views/dashboard/admin/home/__shared__/scheduleOverviewCardRenderer";
 import { ScheduleOverviewMobileCardList } from "@/frontend/mobile/views/dashboard/admin/home/__shared__/scheduleOverviewMobileCardList";
 import {
-  createScheduleOverviewMobileCardRenderer,
   ScheduleOverviewMobileSection,
   ScheduleOverviewMobileToolbar,
 } from "@/frontend/mobile/views/dashboard/admin/home/__shared__/scheduleOverviewSectionShared";

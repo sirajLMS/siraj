@@ -6,14 +6,7 @@ import type { ReactNode } from "react";
 import { FilterChip } from "@/frontend/common/components/ui";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
-import { scheduleOverviewCardShellSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
-import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
-import type {
-  ScheduleOverviewDataHeaders,
-  ScheduleOverviewDataStatusLabels,
-} from "@/frontend/common/views/dashboard/types/dashboard";
-import { MobileCardListItem, MobileContentInset, MobileSectionPanel } from "@/frontend/mobile/components/ui";
-import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
+import { MobileContentInset, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 
 /** Labels the schedule overview toolbar needs, tier-neutral between admin pages. */
 export interface ScheduleOverviewMobileToolbarLabels {
@@ -120,32 +113,5 @@ export function ScheduleOverviewMobileSection({
       ) : null}
       {list}
     </MobileSectionPanel>
-  );
-}
-
-/** Label bundle the schedule overview card renderer needs. */
-export interface ScheduleOverviewMobileCardLabels {
-  readonly columns: ScheduleOverviewDataHeaders;
-  readonly status: ScheduleOverviewDataStatusLabels;
-  readonly detailsLabel: string;
-}
-
-/** Builds the card-list `renderItem` that wraps each row in the shared card shell. */
-export function createScheduleOverviewMobileCardRenderer(
-  labels: ScheduleOverviewMobileCardLabels,
-  showTimezones: boolean,
-  locale: string
-): (row: DailyScheduleRow) => ReactNode {
-  return (row: DailyScheduleRow): ReactNode => (
-    <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
-      <ScheduleOverviewMobileCard
-        row={row}
-        headers={labels.columns}
-        statusLabels={labels.status}
-        detailsLabel={labels.detailsLabel}
-        showTimezones={showTimezones}
-        locale={locale}
-      />
-    </MobileCardListItem>
   );
 }

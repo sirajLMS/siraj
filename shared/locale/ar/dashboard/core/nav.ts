@@ -119,4 +119,5 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   accountingPackages: "الباقات",
   accountingPaymentsNew: "إضافة دفعة",
   accountingPackagesNew: "إنشاء باقة",
+  accountingCredits: "الرصيد",
 };

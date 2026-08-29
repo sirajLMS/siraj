@@ -55,6 +55,8 @@ const labels: ParentsDataGridLabels = {
   status: "Custom status",
   accountStatus: "Custom account",
   unpaidInvoices: "Custom unpaid",
+  unpaidCount: (count: number) => `Custom unpaid count ${count}`,
+  invoicesCleared: "Custom invoices cleared",
   options: "Custom options",
   noEntries: "Custom empty message",
   statusLabels: {

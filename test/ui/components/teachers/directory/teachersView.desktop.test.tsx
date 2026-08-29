@@ -68,8 +68,9 @@ describe("TeachersDesktopView layout", () => {
   test("metrics row is a direct child of the page container (no ad-hoc gap wrapper)", () => {
     const { container } = renderView();
 
-    const pageRoot = container.firstElementChild;
-    const metricsRow = container.querySelector("[data-testid='teacher-metrics-row']");
+    // The first <div> in document order is the DesktopPageContainer root.
+    const pageRoot = container.querySelector<HTMLElement>("div");
+    const metricsRow = container.querySelector<HTMLElement>("[data-testid='teacher-metrics-row']");
     expect(pageRoot).not.toBeNull();
     expect(metricsRow).not.toBeNull();
     expect(metricsRow?.parentElement).not.toBeNull();

@@ -1,3 +1,4 @@
+export * from "./creditAdjustment";
 export * from "./currencyHedges";
 export * from "./exchangeRates";
 export * from "./main";

@@ -1,9 +1,9 @@
 import { mock } from "bun:test";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
+import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { createDailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/scheduleFixture";
-import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
 import type { AppLocale } from "@/shared/locale/AppLocale";

@@ -181,8 +181,9 @@ describe("TeacherDashboardDesktopView layout", () => {
   test("metric grid is a direct child of the page container (no ad-hoc gap wrapper)", () => {
     const { container } = renderView();
 
-    const pageRoot = container.firstElementChild;
-    const metricGrid = container.querySelector("[data-testid='metric-card-grid']");
+    // The first <div> in document order is the DesktopPageContainer root.
+    const pageRoot = container.querySelector<HTMLElement>("div");
+    const metricGrid = container.querySelector<HTMLElement>("[data-testid='metric-card-grid']");
     expect(pageRoot).not.toBeNull();
     expect(metricGrid).not.toBeNull();
     expect(metricGrid?.parentElement).not.toBeNull();

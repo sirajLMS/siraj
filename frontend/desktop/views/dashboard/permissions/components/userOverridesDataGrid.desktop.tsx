@@ -89,7 +89,7 @@ export function UserOverridesDataGridDesktop({
       },
       {
         field: "status",
-        headerName: "Status",
+        headerName: t.columnStatus,
         width: 130,
         sortable: false,
         renderCell: params => {

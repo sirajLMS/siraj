@@ -30,7 +30,10 @@ export interface TeacherAvailabilityViewModel {
   readonly onBlockClick?: (entry: AvailabilityEntry) => void;
 }
 
-export type UseTeacherAvailabilityViewModelProps = Omit<TeacherAvailabilityViewModel, "labelsBySection" | "formMethods">;
+export type UseTeacherAvailabilityViewModelProps = Omit<
+  TeacherAvailabilityViewModel,
+  "labelsBySection" | "formMethods"
+>;
 
 export interface TeacherAvailabilityCoordinatorLabels {
   readonly shell: TeacherAvailabilityShellLabels;
@@ -53,8 +56,7 @@ export function useTeacherAvailabilityViewModel(
   const t = useAppTranslation(Translation.Dashboard.TeacherAvailability);
 
   const storeFilters = useTeacherAvailabilityStore(state => state.filters);
-  const storeHasDraft =
-    storeFilters.fromTime !== null || storeFilters.toTime !== null || storeFilters.gender !== null;
+  const storeHasDraft = storeFilters.fromTime !== null || storeFilters.toTime !== null || storeFilters.gender !== null;
 
   const formMethods = useForm<AvailabilitySearchFormData>({
     resolver: availabilitySearchResolverFactory({ invalidGender: t.validation.invalidGender }),

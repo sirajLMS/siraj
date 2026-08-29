@@ -4,49 +4,24 @@ import { screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import type {
-  AssociatedStudentRow,
-  AssociatedStudentsSectionLabels,
-} from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import type { AssociatedStudentRow } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { AssociatedStudentsSectionMobileView } from "@/frontend/mobile/views/dashboard/profile/parent/sections/associatedStudentsSection.mobile";
-import type { AppLocale } from "@/shared/locale/AppLocale";
-import { readTranslation } from "@/shared/locale/client/translation-cache-store";
-import { Translation } from "@/shared/locale/namespaces/translation";
+import {
+  associatedStudentsLabels,
+  associatedStudentsLocale,
+  makeAssociatedStudentRow,
+} from "@/test/ui/components/profile/associatedStudentsFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
-
-const locale: AppLocale = "ar";
-
-const labels: AssociatedStudentsSectionLabels = {
-  parent: readTranslation(Translation.Profile.Parent, locale),
-  base: readTranslation(Translation.Profile.Base, locale),
-};
-
-function makeRow(overrides: Partial<AssociatedStudentRow> = {}): AssociatedStudentRow {
-  return {
-    id: "student-1",
-    name: "Fatima Ahmad",
-    studentAvatarUrl: null,
-    status: "REGULAR",
-    primaryTeacherId: "teacher-1",
-    teacherUserId: "teacher-user-1",
-    teacherName: "Layla Hassan",
-    teacherAvatarUrl: null,
-    hoursPerWeek: "3",
-    classesRemaining: 4,
-    classesTotal: 10,
-    ...overrides,
-  };
-}
 
 function renderSection(props: Readonly<{ loading: boolean; rows: AssociatedStudentRow[] }>) {
   return renderWithWrapper(
     <AssociatedStudentsSectionMobileView
-      labels={labels}
+      labels={associatedStudentsLabels}
       rows={props.rows}
       loading={props.loading}
-      emptyMessage={labels.parent.students.empty}
+      emptyMessage={associatedStudentsLabels.parent.students.empty}
     />,
-    { locale }
+    { locale: associatedStudentsLocale }
   );
 }
 
@@ -62,9 +37,9 @@ describe("AssociatedStudentsSection mobile view", () => {
   });
 
   test("renders the title and edge-to-edge rows without an extra content-gutter wrapper", async () => {
-    const { container } = renderSection({ loading: false, rows: [makeRow()] });
+    const { container } = renderSection({ loading: false, rows: [makeAssociatedStudentRow()] });
 
-    expect(screen.getByText(labels.parent.sections.students)).toBeInTheDocument();
+    expect(screen.getByText(associatedStudentsLabels.parent.sections.students)).toBeInTheDocument();
     const studentName = await screen.findByText("Fatima Ahmad");
     expect(studentName).toBeInTheDocument();
     expect(container.querySelector(".MuiDataGrid-overlay")).toBeNull();
@@ -78,9 +53,9 @@ describe("AssociatedStudentsSection mobile view", () => {
     expect(listRoot?.parentElement?.className).toContain("MuiPaper-root");
   });
 
-  test("shows the list empty state when there are no students", async () => {
+  test("shows the forwarded emptyMessage as the list empty state when there are no students", async () => {
     renderSection({ loading: false, rows: [] });
 
-    expect(await screen.findByText(labels.parent.students.mobileListLabel)).toBeInTheDocument();
+    expect(await screen.findByText(associatedStudentsLabels.parent.students.empty)).toBeInTheDocument();
   });
 });

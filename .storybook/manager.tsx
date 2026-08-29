@@ -1,0 +1,77 @@
+import { MoonIcon, SunIcon } from "@storybook/icons";
+import { memo, useCallback, useEffect, useState } from "react";
+import { ToggleButton } from "storybook/internal/components";
+import { addons, types } from "storybook/manager-api";
+import { themes } from "storybook/theming";
+
+type UiThemeMode = "light" | "dark";
+
+export const UI_THEME_STORAGE_KEY = "sb-ui-theme";
+export const UI_THEME_TOOL_ID = "ui-theme-toggle";
+
+function getStoredMode(): UiThemeMode | null {
+  const stored = window.localStorage.getItem(UI_THEME_STORAGE_KEY);
+  return stored === "light" || stored === "dark" ? stored : null;
+}
+
+function getOsMode(): UiThemeMode {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+export function applyUiTheme(mode: UiThemeMode): void {
+  addons.setConfig({ theme: mode === "dark" ? themes.dark : themes.light });
+}
+
+// No forced dark mode: use the stored choice, otherwise follow the OS preference.
+applyUiTheme(getStoredMode() ?? getOsMode());
+
+const UiThemeToggle = memo(function UiThemeToggle() {
+  const [mode, setMode] = useState<UiThemeMode>(getStoredMode() ?? getOsMode());
+
+  // Keep following OS changes live until the user picks a mode manually.
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onOsChange = (event: MediaQueryListEvent) => {
+      if (getStoredMode()) {
+        return;
+      }
+      setMode(event.matches ? "dark" : "light");
+    };
+    media.addEventListener("change", onOsChange);
+    return () => media.removeEventListener("change", onOsChange);
+  }, []);
+
+  useEffect(() => {
+    applyUiTheme(mode);
+  }, [mode]);
+
+  const toggle = useCallback(() => {
+    setMode(prev => {
+      const next: UiThemeMode = prev === "dark" ? "light" : "dark";
+      window.localStorage.setItem(UI_THEME_STORAGE_KEY, next);
+      return next;
+    });
+  }, []);
+
+  return (
+    <ToggleButton
+      ariaLabel="Toggle light and dark UI theme"
+      onClick={toggle}
+      padding="small"
+      pressed={false}
+      title="Toggle UI theme"
+      tooltip={`UI theme: ${mode} — click to switch`}
+      variant="ghost"
+    >
+      {mode === "dark" ? <MoonIcon /> : <SunIcon />}
+    </ToggleButton>
+  );
+});
+
+addons.register(UI_THEME_TOOL_ID, () => {
+  addons.add(UI_THEME_TOOL_ID, {
+    type: types.TOOL,
+    title: "Toggle UI theme",
+    render: () => <UiThemeToggle />,
+  });
+});

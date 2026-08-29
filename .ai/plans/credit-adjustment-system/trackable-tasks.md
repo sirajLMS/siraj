@@ -171,7 +171,7 @@
 
 > Goal: routes exist, nav item renders, permission gating works. No form yet.
 
-### 3.1 Page-permission entries
+### 3.1 Page-permission entries ✅ DONE
 - ✏️ `frontend/common/types/page-permissions.types.ts` — add `accountingCreditsManage` + `accountingCreditsAdjust` as **arrays** cast to `PagePermissions` (per existing convention):
   ```ts
   accountingCreditsManage: [AppPermission.ACCOUNTING_CREDITS_MANAGE] as PagePermissions,
@@ -179,7 +179,7 @@
   ```
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/types/page-permissions.types.ts --lifecycle codescene`
 
-### 3.2 Sidebar nav item + nav label additions
+### 3.2 Sidebar nav item + nav label additions ✅ DONE
 - ✏️ `frontend/common/views/dashboard/config/navigationConfig.ts` — add `accounting-credits` item to `SIDEBAR_NAV_ITEMS` under `grp_finance`; add `AppPermission.ACCOUNTING_CREDITS_MANAGE` to `grp_finance` group `permission` array.
 - ✏️ `frontend/common/views/dashboard/config/navIconKeys.ts` — verify `accountBalanceWallet` is already in `NavIconKey` union (it is — no change needed).
 - ✏️ `shared/locale/types/dashboard/core/nav.ts` — add `readonly accountingCredits: string;` to `DashboardNavigationLabels` (label lives in the existing `dashboard.core.nav` namespace, NOT in the new `dashboard.billing.creditAdjustment` namespace).
@@ -188,7 +188,7 @@
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/config/navigationConfig.ts --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/core/nav.ts --lifecycle codescene`
 
-### 3.3 i18n namespace (four-artifact compile-time i18n)
+### 3.3 i18n namespace (four-artifact compile-time i18n) ✅ DONE
 - 🆕 `shared/locale/types/dashboard/billing/creditAdjustment.ts` — define `CreditAdjustmentLabels` interface per implementation.md §7.1 (use TypeScript function-typed fields for `success.added(hours)`, `success.subtracted(hours)`, `success.carryover(hours, teacher)` — not ICU strings).
 - ✏️ `shared/locale/types/dashboard/billing/index.ts` — add `export * from "./creditAdjustment";`.
 - ✏️ `shared/locale/types/message.ts` — register `dashboard.billing.creditAdjustment` in `MessageSchema`.
@@ -201,7 +201,7 @@
 - 🔁 `bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/billing/creditAdjustment.ts --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/billing/creditAdjustment.ts --lifecycle codescene`
 
-### 3.4 Locale snapshot
+### 3.4 Locale snapshot ✅ DONE
 - 🔁 `bun run locale:snapshots` (or project equivalent) — generate `public/static/locale-snapshots/{en,ar}/dashboard.billing.creditAdjustment.json`.
 - ✅ Verify snapshots committed.
 

@@ -2,8 +2,11 @@
 
 import { DialogActions } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import {
+  SharedDialogCancelButton,
+  SharedDialogSaveButton,
+} from "@/frontend/common/views/dashboard/permissions/components/__shared__/sharedDialogButtons";
 import type { OverridesDialogFooterProps } from "@/frontend/common/views/dashboard/permissions/types";
-import { SharedDialogCancelButton, SharedDialogSaveButton } from "./sharedDialogButtons";
 
 const StyledFooterContainer = styled(DialogActions)(({ theme }) => ({
   borderTop: `1px solid ${theme.palette.divider}`,

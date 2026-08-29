@@ -1,6 +1,6 @@
+import { afterEach, describe, expect, mock, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { afterEach, describe, expect, mock, test } from "bun:test";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 await mockNextNavigation("/dashboard", { locale: "ar" });
@@ -68,9 +68,7 @@ describe("admin home mobile tier hygiene", () => {
 describe("ScheduleOverviewMobileView", () => {
   test("renders the page header title and the card list empty state", () => {
     renderWithWrapper(
-      <ScheduleOverviewMobileView
-        {...buildScheduleOverviewViewModel({ rows: [], totalCount: 0, pageCount: 0 })}
-      />,
+      <ScheduleOverviewMobileView {...buildScheduleOverviewViewModel({ rows: [], totalCount: 0, pageCount: 0 })} />,
       { locale: adminHomeLocale }
     );
 

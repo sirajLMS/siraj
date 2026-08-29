@@ -9,6 +9,7 @@ import type { StudentCreditHoursLabels as AccountingStudentCreditHoursLabels } f
 import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration.ts";
 import type { AdminViewLabels } from "@/shared/locale/types/dashboard/admin/view.ts";
+import type { CreditAdjustmentLabels } from "@/shared/locale/types/dashboard/billing/creditAdjustment.ts";
 import type { CurrencyHedgesLabels } from "@/shared/locale/types/dashboard/billing/currencyHedges.ts";
 import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates.ts";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main.ts";
@@ -138,6 +139,7 @@ export interface DashboardTranslations {
   billingManual: BillingManualLabels;
   billingQuota: BillingQuotaLabels;
   billingPayment: PaymentComponentLabels;
+  billingCreditAdjustment: CreditAdjustmentLabels;
   accountingPayments: AccountingPaymentsLabels;
   accountingPackages: AccountingPackagePlansLabels;
   accountingStudentCreditHours: AccountingStudentCreditHoursLabels;

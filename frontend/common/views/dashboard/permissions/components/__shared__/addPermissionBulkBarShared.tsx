@@ -2,8 +2,8 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { SharedDialogAssignButton } from "@/frontend/common/views/dashboard/permissions/components/__shared__/sharedDialogButtons";
 import type { AddPermissionBulkBarSharedProps } from "@/frontend/common/views/dashboard/permissions/types/addPermissionBulkBarShared.types";
-import { SharedDialogAssignButton } from "./sharedDialogButtons";
 
 const StyledBulkBarContainer = styled(Box, {
   shouldForwardProp: prop => prop !== "tierVariant",
