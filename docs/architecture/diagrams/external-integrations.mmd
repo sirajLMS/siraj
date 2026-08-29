@@ -1,0 +1,32 @@
+%% Siraj — external integrations behind adapter/factory patterns
+flowchart TB
+    subgraph Meetings["Meeting providers — IMeetingChannel + MeetingChannelFactory"]
+        Zoom["Zoom<br/>S2S OAuth + per-user OAuth"]
+        GMeet["Google Meet<br/>service account + domain-wide delegation"]
+        Teams["Microsoft Teams<br/>Entra client credentials"]
+    end
+
+    subgraph Comms["Communication channels — factories per channel"]
+        Email["Email — Resend"]
+        Sms["SMS — Twilio"]
+        Push["Push — Firebase FCM"]
+        Wa["WhatsApp — Meta Cloud API<br/>template-only sends, opt-in, webhook"]
+    end
+
+    subgraph FxProv["FX rate providers — FxRateProviderFactory"]
+        Fixer["Fixer (APILayer)"]
+        Oxr["OpenExchangeRates"]
+    end
+
+    subgraph CronQ["Cron queue backends — CronQueueAdapter"]
+        PgBoss["pg-boss (default)"]
+        CustomSql["custom SQL (SKIP LOCKED)"]
+        BullPg["BullMQ-PG"]
+        BullRedis["BullMQ-Redis"]
+    end
+
+    Booking["Class booking /<br/>meeting config services"] --> Meetings
+    Notify["Notification dispatch<br/>49 event types, per-user preferences"] --> Comms
+    WaHook["POST /api/webhooks/whatsapp"] --> Wa
+    FxJob["/api/fx/refresh cron + manual refresh"] --> FxProv
+    Ticker["/api/cron/ticker (every minute)"] --> CronQ

@@ -1,0 +1,32 @@
+%% Siraj — high-level system overview
+flowchart TB
+    subgraph Client["Frontend — React 19, MUI v9, Zustand"]
+        RSC["Server Components<br/>(direct service calls)"]
+        CC["Client Components<br/>(Apollo hooks + ViewModels)"]
+    end
+
+    subgraph Next["Next.js 16 App Router — Bun runtime"]
+        Pages["app/(dashboard) — ~114 pages<br/>guarded by withPageAuth"]
+        GQL["POST /api/graphql<br/>Apollo Server + Pothos"]
+        API["app/api/* — webhooks, OAuth callbacks,<br/>cron, storage, health, locale"]
+    end
+
+    subgraph Backend["Backend"]
+        Pothos["Pothos schema — 159 queries / 193 mutations<br/>ScopeAuth permission enforcement"]
+        Services["backend/services — 38 domains"]
+        Repos["backend/db/repo — repositories (Drizzle)"]
+    end
+
+    DB[("PostgreSQL / SQLite<br/>97 tables, RLS, triggers")]
+    Redis[("Redis — sessions, rate limits, caches")]
+    Ext["External providers:<br/>Zoom / Google Meet / MS Teams<br/>Resend, Twilio, FCM, WhatsApp Cloud API<br/>Fixer / OpenExchangeRates"]
+
+    RSC --> Services
+    CC --> GQL
+    Pages --> RSC
+    Pages --> CC
+    GQL --> Pothos --> Services
+    API --> Services
+    Services --> Repos --> DB
+    Services --> Redis
+    Services --> Ext
