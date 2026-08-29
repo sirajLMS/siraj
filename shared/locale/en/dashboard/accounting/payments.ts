@@ -78,6 +78,7 @@ export const dashboardAccountingPaymentsEn: PaymentsLabels = {
   togglePaidSuccessOff: "Payment marked as unpaid.",
   deleteTitle: "Delete Payment",
   detail: {
+    title: "Payment",
     invoiceStatus: "Invoice Status",
     invoiceId: "Invoice ID",
     parent: "Parent",

@@ -360,6 +360,13 @@
     "amountMustBeNonNegative": "Amount must be non-negative.",
     "insertFailed": "Failed to insert teacher due row."
   },
+  "payroll": {
+    "notTerminal": "Payroll can only be calculated for sessions in a terminal state.",
+    "alreadyPaid": "Payroll has already been disbursed; override blocked.",
+    "awaitingSettlement": "Payroll is awaiting settlement and cannot be overridden without force.",
+    "invalidTargetStatus": "Invalid payroll override target status.",
+    "partialRequiresPercentage": "Partially requires a percentage between 0 and 100."
+  },
   "student": {
     "studentNotFound": {
       "__fn": "(id) => `Student not found: ${id}`"

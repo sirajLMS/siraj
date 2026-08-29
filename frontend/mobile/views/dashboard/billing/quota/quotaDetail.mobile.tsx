@@ -134,7 +134,7 @@ export function QuotaDetailMobile(props: Readonly<QuotaDetailViewModel>) {
             ]}
           />
 
-          <MobileContentStack>
+          <MobileContentStack gap={3} paddingBottom={4}>
             <MobileSectionPanel title={t.quotaDetails} contentInset={false}>
               <QuotaDetailSummaryMobile quota={quota} t={t} />
             </MobileSectionPanel>
@@ -175,7 +175,6 @@ export function QuotaDetailMobile(props: Readonly<QuotaDetailViewModel>) {
           body={t.deleteConfirm.body(quota.name ?? "")}
           cancelLabel={t.deleteConfirm.cancel}
           confirmLabel={t.deleteConfirm.confirm}
-          fullScreen
         />
 
         <FormErrorSnackbar open={deleteErrorOpen} message={t.errors.deleteFailed} onClose={onDeleteErrorClose} />

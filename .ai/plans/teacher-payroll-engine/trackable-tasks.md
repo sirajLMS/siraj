@@ -177,22 +177,22 @@
 
 ## Phase 2 — GraphQL layer
 
-### 2.1 Pothos types
+### 2.1 Pothos types ✅ DONE
 - 🆕 `backend/graphql/pothos/teachers/payroll.pothos.ts` — `CalculationStatusPothosEnum`, `PayrollReportFilterPothosInput`, `PayrollReportRowPothosObject`, `PayrollReportPagePothosObject`, `PayrollOverrideInputPothos`, `PayrollOverrideResultPothosObject`.
 - ✏️ `backend/graphql/pothos/teachers/index.ts` — re-export.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/pothos/teachers/payroll.pothos.ts --lifecycle codescene`
 
-### 2.2 Extend existing `ClassInstanceDetailPothosObject`
+### 2.2 Extend existing `ClassInstanceDetailPothosObject` ✅ DONE
 - ✏️ `backend/graphql/pothos/classes/class-session.pothos.ts` — expose `calculatedDuration`, `teacherPaidAmount`, `teacherPaidCurrency`, `calculationStatus`, `isPartialPercentage`, `payrollNote`, `payrollCalculatedAt` on the existing object.
 - ✏️ `backend/types/classes/class-instance.types.ts` (or wherever the ReturnType lives) — add the new fields to `ClassInstanceDetailReturnType`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/pothos/classes/class-session.pothos.ts --lifecycle codescene`
 
-### 2.3 Query
+### 2.3 Query ✅ DONE
 - 🆕 `backend/graphql/query/teachers/payroll.query.ts` — `payrollReport(filter, limit, offset)` field.
 - ✏️ `backend/graphql/query/teachers/index.ts` — re-export.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/query/teachers/payroll.query.ts --lifecycle codescene`
 
-### 2.4 Mutation
+### 2.4 Mutation ✅ DONE
 - 🆕 `backend/graphql/mutation/teachers/payroll.mutation.ts` — `applyPayrollOverride(input)` field.
 - ✏️ `backend/graphql/mutation/teachers/index.ts` — re-export.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/mutation/teachers/payroll.mutation.ts --lifecycle codescene`
@@ -205,7 +205,7 @@
 - 🔁 `bun test backend/graphql/query/teachers/payroll.query.test.ts`
 - 🔁 `bun test backend/graphql/mutation/teachers/payroll.mutation.test.ts`
 
-### 2.6 CSV export route
+### 2.6 CSV export route ✅ DONE
 - 🆕 `app/api/payroll/export/route.ts` — Next.js Route Handler; calls `requireAuth` + `requirePermission(ACCOUNTING_PAYROLL_VIEW)`; calls `PayrollCalculationService.getReport` with `limit: 10_000`; serializes CSV; sets `Content-Type` + `Content-Disposition` + `X-Export-Truncated` headers.
 - 🧪 `app/api/payroll/export/route.test.ts` — happy path returns CSV; permission denied returns 403; truncation header set when `totalCount > 10_000`.
 - 🔁 `bun run scripts/health/sub-loop.ts "app/api/payroll/export/route.ts" --lifecycle codescene`

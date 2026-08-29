@@ -1,4 +1,5 @@
 export * from "./manager-onboarding.pothos";
+export * from "./payroll.pothos";
 export * from "./staff-directory.pothos";
 export * from "./staff-profile.pothos";
 export * from "./teacher.pothos";

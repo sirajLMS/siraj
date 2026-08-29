@@ -41,7 +41,7 @@ export function PaymentsLedgerMobileView({
           rows={rows}
           loading={loading}
           getKey={row => row.id}
-          emptyMessage={`${labels.emptyTitle} ${labels.emptySubtitle}`}
+          emptyMessage={`${labels.emptyTitle}. ${labels.emptySubtitle}`}
           layout="edge-to-edge"
           paginationOptions={paginationOptions}
           renderItem={row => (

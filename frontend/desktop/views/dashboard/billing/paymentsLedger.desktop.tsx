@@ -123,7 +123,7 @@ export function PaymentsLedgerDesktopView({
           columns={columns}
           loading={loading}
           getRowId={row => row.id}
-          emptyMessage={`${labels.emptyTitle} ${labels.emptySubtitle}`}
+          emptyMessage={`${labels.emptyTitle}. ${labels.emptySubtitle}`}
           ariaLabel={labels.historySectionTitle}
           paginationOptions={paginationOptions}
         />

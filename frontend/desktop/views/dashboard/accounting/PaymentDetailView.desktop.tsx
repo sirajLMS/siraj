@@ -94,7 +94,7 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
       ) : null}
 
       <Stack direction="row" spacing={3} sx={{ alignItems: "flex-start", flexWrap: { xs: "wrap", lg: "nowrap" } }}>
-        <DesktopSectionPanel title={t.pageTitle} sx={{ flex: 2, minWidth: 320 }}>
+        <DesktopSectionPanel title={t.detail.title} sx={{ flex: 2, minWidth: 320 }}>
           <Stack spacing={3}>
             <Stack
               direction="row"

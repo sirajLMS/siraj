@@ -2,6 +2,7 @@ export interface CreditAdjustmentLabels {
   readonly title: string;
   readonly adjustCredits: string;
   readonly adjustmentType: {
+    readonly title: string;
     readonly add: string;
     readonly subtract: string;
     readonly subtractWithCarryover: string;
@@ -19,6 +20,7 @@ export interface CreditAdjustmentLabels {
     readonly fromAfterTo: string;
     readonly paymentTooFar: string;
     readonly insufficientClasses: string;
+    readonly hoursPositive: string;
   };
   readonly success: {
     readonly added: (hours: number) => string;

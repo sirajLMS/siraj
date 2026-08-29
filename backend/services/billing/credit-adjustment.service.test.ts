@@ -213,6 +213,12 @@ await mock.module("@/backend/services/billing/carryover-handoff", () => ({
   maybeInsertCarryoverBalanceEntry: carryoverHandoffMock,
 }));
 
+// Post-commit audit writes are best-effort side effects; keep them isolated
+// from the suite (no repo/DB interaction under test).
+await mock.module("@/backend/services/system/audit.service", () => ({
+  AuditService: { createManyAuditLogs: async () => [] },
+}));
+
 // ---------------------------------------------------------------------------
 // Errors stub (only the fields the service actually reads).
 // ---------------------------------------------------------------------------

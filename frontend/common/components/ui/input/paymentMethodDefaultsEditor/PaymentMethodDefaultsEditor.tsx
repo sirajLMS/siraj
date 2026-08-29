@@ -12,7 +12,7 @@ import {
 } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/PaymentMethodDefaultsEditorShared";
 import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
 
-export type { PaymentMethodDefaultsEditorProps } from "./types";
+export type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
 
 const commonSlots: PaymentMethodDefaultsEditorSlots = {
   StatusBadge,

@@ -204,6 +204,68 @@ describe("CreditService hour methods (caller-owned tx)", () => {
   });
 });
 
+/**
+ * Committed (non-rolled-back) fixture cast shared by the describes below.
+ * `recordHourPurchaseIfMissing` / `getStudentHourBalance` run bare reads on the
+ * global pool (student existence, actor permission context), so their fixtures
+ * must be committed rows — hard-deleted in `afterAll`.
+ */
+interface CommittedFixtureIds {
+  adminUserId: string;
+  parentUserId: string;
+  parentRowId: string;
+  studentLoginId: string;
+  studentRowId: string;
+  unrelatedUserId: string;
+}
+
+async function createCommittedFixtures(): Promise<CommittedFixtureIds> {
+  const ids: CommittedFixtureIds = {
+    adminUserId: "",
+    parentUserId: "",
+    parentRowId: "",
+    studentLoginId: "",
+    studentRowId: "",
+    unrelatedUserId: "",
+  };
+  await db.transaction(async tx => {
+    const admin = await createTestUser(tx, { isSuperAdmin: true });
+    const parentUser = await createTestUser(tx);
+    const studentLogin = await createTestUser(tx);
+    const parentRow = await createTestParent(tx, parentUser.id);
+    const studentRow = await createTestStudent(tx, parentRow.id, { userId: studentLogin.id });
+    const unrelated = await createTestUser(tx);
+
+    ids.adminUserId = admin.id;
+    ids.parentUserId = parentUser.id;
+    ids.parentRowId = parentRow.id;
+    ids.studentLoginId = studentLogin.id;
+    ids.studentRowId = studentRow.id;
+    ids.unrelatedUserId = unrelated.id;
+  });
+  return ids;
+}
+
+async function deleteCommittedFixtures(ids: CommittedFixtureIds): Promise<void> {
+  if (!ids.studentRowId) return;
+  await db.transaction(async tx => {
+    await tx.delete(creditTransactions).where(eq(creditTransactions.studentId, ids.studentRowId));
+    await tx.delete(students).where(eq(students.id, ids.studentRowId));
+    await tx.delete(parents).where(eq(parents.id, ids.parentRowId));
+    await tx
+      .delete(users)
+      .where(inArray(users.id, [ids.adminUserId, ids.parentUserId, ids.studentLoginId, ids.unrelatedUserId]));
+  });
+}
+
+async function readHourFacets(studentId: string): Promise<{ total: number; remaining: number }> {
+  const rows = await db.select().from(students).where(eq(students.id, studentId));
+  return {
+    total: Number(rows[0]?.creditHoursTotal ?? "0"),
+    remaining: Number(rows[0]?.creditHoursRemaining ?? "0"),
+  };
+}
+
 describe("CreditService.getStudentHourBalance (committed fixtures)", () => {
   let adminUserId = "";
   let parentUserId = "";
@@ -213,29 +275,23 @@ describe("CreditService.getStudentHourBalance (committed fixtures)", () => {
   let unrelatedUserId = "";
 
   beforeAll(async () => {
-    await db.transaction(async tx => {
-      const admin = await createTestUser(tx, { isSuperAdmin: true });
-      const parentUser = await createTestUser(tx);
-      const studentLogin = await createTestUser(tx);
-      const parentRow = await createTestParent(tx, parentUser.id);
-      const studentRow = await createTestStudent(tx, parentRow.id, { userId: studentLogin.id });
-      const unrelated = await createTestUser(tx);
-
-      adminUserId = admin.id;
-      parentUserId = parentUser.id;
-      parentRowId = parentRow.id;
-      studentLoginId = studentLogin.id;
-      studentRowId = studentRow.id;
-      unrelatedUserId = unrelated.id;
-    });
+    const ids = await createCommittedFixtures();
+    adminUserId = ids.adminUserId;
+    parentUserId = ids.parentUserId;
+    parentRowId = ids.parentRowId;
+    studentLoginId = ids.studentLoginId;
+    studentRowId = ids.studentRowId;
+    unrelatedUserId = ids.unrelatedUserId;
   });
 
   afterAll(async () => {
-    if (!studentRowId) return;
-    await db.transaction(async tx => {
-      await tx.delete(students).where(eq(students.id, studentRowId));
-      await tx.delete(parents).where(eq(parents.id, parentRowId));
-      await tx.delete(users).where(inArray(users.id, [adminUserId, parentUserId, studentLoginId, unrelatedUserId]));
+    await deleteCommittedFixtures({
+      adminUserId,
+      parentUserId,
+      parentRowId,
+      studentLoginId,
+      studentRowId,
+      unrelatedUserId,
     });
   });
 
@@ -256,5 +312,46 @@ describe("CreditService.getStudentHourBalance (committed fixtures)", () => {
 
     const notFound = await catchError(() => CreditService.getStudentHourBalance(adminUserId, randomUUID(), tErrors));
     expect(notFound.message).toContain("not found");
+  });
+});
+
+describe("CreditService.recordHourPurchaseIfMissing (committed fixtures)", () => {
+  let ids: CommittedFixtureIds;
+
+  beforeAll(async () => {
+    ids = await createCommittedFixtures();
+  });
+
+  afterAll(async () => {
+    await deleteCommittedFixtures(ids);
+  });
+
+  test("writes the hour ledger row, bumps the hour facets once, and replays return the same row", async () => {
+    const key = `svc-hour-purchase-if-missing-${randomUUID()}`;
+    const input = { studentId: ids.studentRowId, hours: 10, notes: "hour purchase if-missing test" };
+
+    const first = await CreditService.recordHourPurchaseIfMissing(ids.adminUserId, input, key, tErrors);
+    expect(first).not.toBeNull();
+    expect(Number(first?.changeAmountHours ?? "0")).toBe(10);
+
+    const replay = await CreditService.recordHourPurchaseIfMissing(ids.adminUserId, input, key, tErrors);
+    expect(replay?.id).toBe(first?.id);
+
+    const rows = await db.select().from(creditTransactions).where(eq(creditTransactions.studentId, ids.studentRowId));
+    expect(rows).toHaveLength(1);
+
+    expect(await readHourFacets(ids.studentRowId)).toEqual({ total: 10, remaining: 10 });
+  });
+
+  test("rejects an unknown student without touching the ledger", async () => {
+    const error = await catchError(() =>
+      CreditService.recordHourPurchaseIfMissing(
+        ids.adminUserId,
+        { studentId: randomUUID(), hours: 5 },
+        `svc-hour-purchase-missing-student-${randomUUID()}`,
+        tErrors
+      )
+    );
+    expect(error.message).toContain("not found");
   });
 });

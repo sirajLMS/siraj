@@ -120,6 +120,7 @@ import { uiMeetingConfigRecurringScheduleEn } from "@/shared/locale/en/ui/meetin
 import { uiMeetingConfigSummaryEn } from "@/shared/locale/en/ui/meetingConfig/summary.ts";
 import { uiPaymentMethodEn } from "@/shared/locale/en/ui/paymentMethod";
 import { uiPhoneInputEn } from "@/shared/locale/en/ui/phone-input.ts";
+import { uiRichTextEn } from "@/shared/locale/en/ui/rich-text.ts";
 import { uiTagInputEn } from "@/shared/locale/en/ui/tag-input.ts";
 import { uiTimezoneSelectEn } from "@/shared/locale/en/ui/timezone-select.ts";
 import { uiUserSelectEn } from "@/shared/locale/en/ui/user-select.ts";
@@ -151,6 +152,7 @@ export const enMessages: Translations = {
     meetingConfigRecurringSchedule: uiMeetingConfigRecurringScheduleEn,
     paymentMethod: uiPaymentMethodEn,
     phoneInput: uiPhoneInputEn,
+    richText: uiRichTextEn,
     tagInput: uiTagInputEn,
     timezoneSelect: uiTimezoneSelectEn,
     userSelect: uiUserSelectEn,

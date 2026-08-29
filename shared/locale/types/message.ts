@@ -124,6 +124,7 @@ import type {
   MeetingConfigSummaryLabels,
   PaymentMethodLabels,
   PhoneInputLabels,
+  RichTextLabels,
   TagInputLabels,
   TimezoneSelectLabels,
   UserSelectLabels,
@@ -245,6 +246,7 @@ export interface UiTranslations {
   meetingConfigRecurringSchedule: MeetingConfigRecurringScheduleLabels;
   paymentMethod: PaymentMethodLabels;
   phoneInput: PhoneInputLabels;
+  richText: RichTextLabels;
   tagInput: TagInputLabels;
   timezoneSelect: TimezoneSelectLabels;
   userSelect: UserSelectLabels;

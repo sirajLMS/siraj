@@ -4,6 +4,7 @@ export const dashboardBillingCreditAdjustmentAr: CreditAdjustmentLabels = {
   title: "رصيد الطلاب",
   adjustCredits: "تعديل الرصيد",
   adjustmentType: {
+    title: "نوع التعديل",
     add: "إضافة",
     subtract: "خصم",
     subtractWithCarryover: "خصم مع الترحيل",
@@ -21,6 +22,7 @@ export const dashboardBillingCreditAdjustmentAr: CreditAdjustmentLabels = {
     fromAfterTo: "لا يمكن أن يكون تاريخ البداية بعد تاريخ النهاية",
     paymentTooFar: "لا يمكن أن يتجاوز تاريخ الدفع يوماً واحداً",
     insufficientClasses: "لا يوجد رصيد كافٍ للطالب",
+    hoursPositive: "يجب أن تكون الساعات رقماً صحيحاً موجباً",
   },
   success: {
     added: hours => `تمت إضافة ${hours} ساعة معتمدة`,

@@ -4,6 +4,7 @@ export const dashboardBillingCreditAdjustmentEn: CreditAdjustmentLabels = {
   title: "Student Credits",
   adjustCredits: "Adjust Credits",
   adjustmentType: {
+    title: "Adjustment Type",
     add: "Add",
     subtract: "Subtract",
     subtractWithCarryover: "Subtract With Carryover",
@@ -21,6 +22,7 @@ export const dashboardBillingCreditAdjustmentEn: CreditAdjustmentLabels = {
     fromAfterTo: "From Date cannot be after To Date",
     paymentTooFar: "Payment Date cannot be more than 1 day ahead",
     insufficientClasses: "Student has insufficient credit hours",
+    hoursPositive: "Hours must be a positive whole number",
   },
   success: {
     added: hours => `Added ${hours} credit hours`,

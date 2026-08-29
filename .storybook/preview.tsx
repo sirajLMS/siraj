@@ -15,15 +15,26 @@ import "@/app/index.css";
 
 type DocsThemeMode = "light" | "dark";
 
-function getInitialDocsMode(): DocsThemeMode {
-  // The story `theme` global travels in the preview iframe URL query string.
-  const frameGlobals = new URLSearchParams(window.location.search).get("globals");
-  const themeEntry = frameGlobals?.split(";").find(entry => entry.startsWith("theme:"));
-  const frameTheme = themeEntry?.split(":")[1];
-  if (frameTheme === "light" || frameTheme === "dark") {
-    return frameTheme;
+function readThemeGlobal(globals: unknown): DocsThemeMode | null {
+  if (typeof globals !== "object" || globals === null || !("theme" in globals)) {
+    return null;
   }
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const theme: unknown = globals.theme;
+  return theme === "light" || theme === "dark" ? theme : null;
+}
+
+function getInitialDocsMode(): DocsThemeMode {
+  // Globals do not travel in the iframe URL; the preview channel keeps the last
+  // GLOBALS_UPDATED payload (emitted while preparing a story/docs render), which carries them.
+  const lastGlobalsArgs: unknown = addons.getChannel().last(GLOBALS_UPDATED);
+  const payload =
+    Array.isArray(lastGlobalsArgs) &&
+    typeof lastGlobalsArgs[0] === "object" &&
+    lastGlobalsArgs[0] !== null &&
+    "globals" in lastGlobalsArgs[0]
+      ? lastGlobalsArgs[0].globals
+      : undefined;
+  return readThemeGlobal(payload) ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 }
 
 /**

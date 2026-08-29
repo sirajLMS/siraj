@@ -78,6 +78,7 @@ export const dashboardAccountingPaymentsAr: PaymentsLabels = {
   togglePaidSuccessOff: "تم تعليم الدفعة كغير مدفوعة.",
   deleteTitle: "حذف الدفعة",
   detail: {
+    title: "الدفعة",
     invoiceStatus: "حالة الفاتورة",
     invoiceId: "معرّف الفاتورة",
     parent: "ولي الأمر",

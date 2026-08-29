@@ -68,6 +68,7 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   Translation.Ui.MeetingConfig,
   Translation.Ui.MeetingConfigRecurringSchedule,
   Translation.Ui.PaymentMethod,
+  Translation.Ui.RichText,
   Translation.Dashboard.CoreNotifications,
   Translation.Dashboard.CoreNav,
   Translation.Dashboard.CoreStatusTracking,

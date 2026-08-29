@@ -10,7 +10,9 @@ import { maybeInsertCarryoverBalanceEntry } from "@/backend/services/billing/car
 import { deriveAdjustmentIdempotencyKey } from "@/backend/services/billing/credit-adjustment.idempotency";
 import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
 import { QuotaService } from "@/backend/services/billing/quota.service";
+import { AuditService } from "@/backend/services/system/audit.service";
 import type {
+  CreateAuditLogInput,
   CreditAdjustmentInput,
   CreditAdjustmentReturnType,
   CreditBalanceReturnType,
@@ -234,14 +236,19 @@ async function executeAdjustmentTransaction(params: AdjustmentTxParams): Promise
 }
 
 /** Runs an adjustment and resolves same-key concurrent inserts to the winning row. */
-async function runAdjustment(
-  params: AdjustmentTxParams,
-  logMessage: string,
-  logContext: Record<string, unknown>
-): Promise<CreditAdjustmentReturnType> {
+async function runAdjustment(params: AdjustmentTxParams, logMessage: string): Promise<CreditAdjustmentReturnType> {
   try {
+    // Success is reported only once the transaction commits — a rolled-back
+    // adjustment produces neither a success log nor an audit entry.
     const created = await executeAdjustmentTransaction(params);
-    logger.info(logMessage, logContext);
+    logger.info(logMessage, {
+      actorUserId: params.actorUserId,
+      studentId: params.input.studentId,
+      adjustmentType: params.input.adjustmentType,
+      changeAmount: params.signedHours,
+      carryoverTeacherId: params.carryover?.teacherId,
+    });
+    await emitAdjustmentAudit(params, created);
     return created;
   } catch (error) {
     if (isUniqueViolation(error)) {
@@ -249,6 +256,39 @@ async function runAdjustment(
       if (resolved) return resolved;
     }
     throw error;
+  }
+}
+
+/**
+ * Best-effort audit emit for a committed adjustment — never throws: a failed
+ * audit write must not fail an adjustment whose ledger row already committed.
+ */
+async function emitAdjustmentAudit(params: AdjustmentTxParams, created: CreditAdjustmentReturnType): Promise<void> {
+  const { input } = params;
+  const audit: CreateAuditLogInput = {
+    actorUserId: params.actorUserId,
+    actorType: "USER",
+    entityType: "STUDENT",
+    entityId: input.studentId,
+    action: "UPDATE",
+    description: `Credit adjustment ${input.adjustmentType}`,
+    newState: {
+      creditTransactionId: created.id,
+      adjustmentType: input.adjustmentType,
+      changeAmount: params.signedHours,
+      carryoverTeacherId: params.carryover?.teacherId ?? null,
+    },
+  };
+
+  try {
+    await AuditService.createManyAuditLogs([audit]);
+  } catch (error) {
+    logger.error(
+      `credit-service: audit write failed for adjustmentType=${input.adjustmentType} studentId=${input.studentId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      { actorUserId: params.actorUserId, studentId: input.studentId, adjustmentType: input.adjustmentType, error }
+    );
   }
 }
 
@@ -266,8 +306,7 @@ async function addCredit(
       signedHours: input.hours,
       reason: CreditReason.CREDIT_ADJUSTMENT_ADD,
     },
-    "Credit adjustment Add recorded",
-    { actorUserId, studentId: input.studentId, hours: input.hours }
+    "Credit adjustment Add recorded"
   );
 }
 
@@ -285,8 +324,7 @@ async function subtractCredit(
       signedHours: -input.hours,
       reason: CreditReason.CREDIT_ADJUSTMENT_SUBTRACT,
     },
-    "Credit adjustment Subtract recorded",
-    { actorUserId, studentId: input.studentId, hours: input.hours }
+    "Credit adjustment Subtract recorded"
   );
 }
 
@@ -306,8 +344,7 @@ async function subtractWithCarryover(
       reason: CreditReason.CREDIT_ADJUSTMENT_CARRYOVER,
       carryover,
     },
-    "Credit adjustment Subtract-With-Carryover recorded",
-    { actorUserId, studentId: input.studentId, hours: input.hours, carryoverTeacherId: carryover.teacherId }
+    "Credit adjustment Subtract-With-Carryover recorded"
   );
 }
 

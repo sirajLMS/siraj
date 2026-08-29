@@ -227,11 +227,11 @@
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/billing/credit-adjustment.documents.ts --lifecycle codescene`
 - 🔁 After Phase 2 lands: `bun run generate:gqlSchema && bun codegen` so `Operations.RecordCreditAdjustmentMutation` + `Types.MutationRecordCreditAdjustmentArgs` exist.
 
-### 4.2 List component
+### 4.2 List component ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/credits/StudentCreditsList.tsx` — MUI DataGrid, search, "Adjust Credits" row action.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/credits/StudentCreditsList.tsx --lifecycle codescene`
 
-### 4.3 List tests
+### 4.3 List tests ✅ DONE
 - 🧪 `frontend/common/views/dashboard/accounting/credits/StudentCreditsList.test.tsx` — renders rows, empty state, "Adjust" navigates with `?studentId=`.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/credits/StudentCreditsList.test.tsx --lifecycle codescene`
 - 🔁 `bun test frontend/common/views/dashboard/accounting/credits/StudentCreditsList.test.tsx`
@@ -240,31 +240,31 @@
 
 ## Phase 5 — Adjustment form (the heart of the feature)
 
-### 5.1 Zustand store slice
+### 5.1 Zustand store slice ✅ DONE
 - 🆕 `frontend/common/stores/creditAdjustFormStore.ts` — `studentId`, `adjustmentType`, `hours`, `notes`, `carryoverTeacherId`, `fromDate`, `toDate`, `paymentDate`, `clientRequestId`; `reset()`; `clearCarryover()`.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/stores/creditAdjustFormStore.ts --lifecycle codescene`
 
-### 5.2 Rich-text editor
+### 5.2 Rich-text editor ✅ DONE
 - 🆕 `frontend/common/components/ui/input/richText/RichTextEditor.tsx` — TipTap-based; outputs HTML. (Path follows the existing `input/<widget>/` convention used by `input/tagInput/`, `input/currencySelect/`, etc.)
 - ✏️ `frontend/common/components/ui/input/index.ts` — barrel-export `RichTextEditor`.
 - 🧪 `frontend/common/components/ui/input/richText/RichTextEditor.test.tsx` — emits HTML, empty when cleared, toolbar buttons toggle marks.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/components/ui/input/richText/RichTextEditor.tsx --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/components/ui/input/richText/RichTextEditor.test.tsx --lifecycle codescene`
 
-### 5.3 Teacher autocomplete (reuse existing)
+### 5.3 Teacher autocomplete (reuse existing) ✅ DONE
 - ✅ Reuse the existing `TeacherAutocomplete` at `frontend/common/components/ui/input/userSelect/TeacherAutocomplete.tsx` — do NOT create a new component. Import it directly: `import { TeacherAutocomplete } from "@/frontend/common/components/ui/input/userSelect/TeacherAutocomplete";`.
 - ✏️ (Optional) If extra props are needed (e.g. `required`, custom `label`), extend `TeacherAutocompleteProps` in `frontend/common/components/ui/input/userSelect/types.ts`.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/components/ui/input/userSelect/TeacherAutocomplete.tsx --lifecycle codescene`
 
-### 5.4 Carryover banner
+### 5.4 Carryover banner ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/credits/CarryoverBanner.tsx` — green `Alert` + TeacherAutocomplete + 3 DatePickers with `minDate`/`maxDate` constraints.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/credits/CarryoverBanner.tsx --lifecycle codescene`
 
-### 5.5 Adjustment type RadioGroup
+### 5.5 Adjustment type RadioGroup ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/credits/AdjustmentTypeRadioGroup.tsx` — 3 options with colored accents; on change → `clearCarryover()` if switching away from "Subtract With Carryover".
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/credits/AdjustmentTypeRadioGroup.tsx --lifecycle codescene`
 
-### 5.6 Form component
+### 5.6 Form component ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/credits/CreditAdjustForm.tsx` — composes Student picker (reuse existing `StudentAutocomplete`), RadioGroup, Hours, `RichTextEditor`, conditional `<CarryoverBanner />`, Submit/Cancel.
   - Uses `useMutation(recordCreditAdjustmentMutationDocument)` (Apollo hook imported from `@apollo/client/react`).
   - `clientRequestId` generated once per mount (UUIDv4).
@@ -272,7 +272,7 @@
   - On `INSUFFICIENT_CLASSES`: inline error on Hours.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/credits/CreditAdjustForm.tsx --lifecycle codescene`
 
-### 5.7 Form tests
+### 5.7 Form tests ✅ DONE
 - 🧪 `frontend/common/views/dashboard/accounting/credits/CreditAdjustForm.test.tsx`:
   - RadioGroup switches → carryover banner shows/hides.
   - Switching back to "Add" clears carryover fields (edge case E3).
@@ -321,11 +321,11 @@
 - 🧪 `CreditAdjustForm.test.tsx` — add axe-core assertions (existing project pattern).
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/credits/CreditAdjustForm.tsx --lifecycle codescene`
 
-### 7.3 Observability
+### 7.3 Observability ✅ DONE
 - ✏️ `backend/services/billing/credit.service.ts` — structured `logger.info` on every successful adjustment with `actorUserId`, `studentId`, `adjustmentType`, `changeAmount`, `carryoverTeacherId?`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/billing/credit.service.ts --lifecycle codescene`
 
-### 7.4 Audit-log integration
+### 7.4 Audit-log integration ✅ DONE
 - ✏️ (if the project has an audit-log service) emit an `audit.log` event for every adjustment — reuse existing `AuditService.log` pattern.
 - 🔁 `bun run scripts/health/sub-loop.ts <audit-call-site> --lifecycle codescene`
 

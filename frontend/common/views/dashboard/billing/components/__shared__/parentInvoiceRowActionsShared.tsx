@@ -1,9 +1,9 @@
 "use client";
 
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box } from "@mui/material";
 import type { ComponentType } from "react";
-import { FilterButton } from "@/frontend/common/components/ui";
+import { FilterButton, TooltipIconButton } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   ParentInvoiceRowActionLabels,
@@ -33,24 +33,6 @@ export interface ParentInvoiceRowActionsConfig {
   readonly unpaidPrimaryFullWidth: boolean;
 }
 
-function InvoiceRowIconAction({
-  label,
-  onClick,
-  icon,
-}: {
-  readonly label: string;
-  readonly onClick: () => void;
-  readonly icon: React.ReactNode;
-}): React.ReactNode {
-  return (
-    <Tooltip title={label}>
-      <IconButton size="small" aria-label={label} onClick={onClick}>
-        {icon}
-      </IconButton>
-    </Tooltip>
-  );
-}
-
 function PaidRowActionsShared({
   labels,
   onOpenDetails,
@@ -64,12 +46,12 @@ function PaidRowActionsShared({
 }): React.ReactNode {
   return (
     <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
-      <InvoiceRowIconAction
+      <TooltipIconButton
         label={labels.viewDetails}
         onClick={onOpenDetails}
         icon={<VisibilityOutlined fontSize="small" />}
       />
-      <InvoiceRowIconAction
+      <TooltipIconButton
         label={labels.downloadPdf}
         onClick={() => onDownloadPdf(invoiceId)}
         icon={<DownloadOutlined fontSize="small" />}

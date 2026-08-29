@@ -120,6 +120,7 @@ import { uiMeetingConfigRecurringScheduleAr } from "@/shared/locale/ar/ui/meetin
 import { uiMeetingConfigSummaryAr } from "@/shared/locale/ar/ui/meetingConfig/summary.ts";
 import { uiPaymentMethodAr } from "@/shared/locale/ar/ui/paymentMethod";
 import { uiPhoneInputAr } from "@/shared/locale/ar/ui/phone-input.ts";
+import { uiRichTextAr } from "@/shared/locale/ar/ui/rich-text.ts";
 import { uiTagInputAr } from "@/shared/locale/ar/ui/tag-input.ts";
 import { uiTimezoneSelectAr } from "@/shared/locale/ar/ui/timezone-select.ts";
 import { uiUserSelectAr } from "@/shared/locale/ar/ui/user-select.ts";
@@ -151,6 +152,7 @@ export const arMessages: Translations = {
     meetingConfigRecurringSchedule: uiMeetingConfigRecurringScheduleAr,
     paymentMethod: uiPaymentMethodAr,
     phoneInput: uiPhoneInputAr,
+    richText: uiRichTextAr,
     tagInput: uiTagInputAr,
     timezoneSelect: uiTimezoneSelectAr,
     userSelect: uiUserSelectAr,

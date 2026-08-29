@@ -6,12 +6,12 @@ import { useQuotaViewModel } from "@/frontend/common/views/dashboard/billing/quo
 
 const lazyViews = createLazyView<ReturnType<typeof useQuotaViewModel>>(
   () =>
-    import("@/frontend/desktop/views/dashboard/billing/quota/quotaList.desktop").then(m => ({
-      default: m.QuotaListDesktop,
-    })),
-  () =>
     import("@/frontend/mobile/views/dashboard/billing/quota/quotaList.mobile").then(m => ({
       default: m.QuotaListMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/billing/quota/quotaList.desktop").then(m => ({
+      default: m.QuotaListDesktop,
     }))
 );
 

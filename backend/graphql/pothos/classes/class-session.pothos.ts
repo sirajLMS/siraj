@@ -1,6 +1,7 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import {
+  CalculationStatusPothosEnum,
   ClassExecutionStatePothosObject,
   ClassOutcomePothosObject,
   ClassTypePothosObject,
@@ -117,6 +118,14 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
     isRateOverridden: t.exposeBoolean("isRateOverridden"),
     rateSource: t.expose("rateSource", { type: RateSourcePothosEnum, nullable: true }),
+    // Payroll calculation snapshot (written when a session reaches a terminal state).
+    calculatedDuration: t.exposeInt("calculatedDuration", { nullable: true }),
+    teacherPaidAmount: t.exposeString("teacherPaidAmount", { nullable: true }),
+    teacherPaidCurrency: t.expose("teacherPaidCurrency", { type: CurrencyCodePothosObject, nullable: true }),
+    calculationStatus: t.expose("calculationStatus", { type: CalculationStatusPothosEnum }),
+    isPartialPercentage: t.exposeInt("isPartialPercentage", { nullable: true }),
+    payrollNote: t.exposeString("payrollNote", { nullable: true }),
+    payrollCalculatedAt: t.expose("payrollCalculatedAt", { type: "DateTime", nullable: true }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     subjectId: t.exposeString("subjectId"),
     subjectName: t.exposeString("subjectName"),
