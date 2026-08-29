@@ -85,8 +85,11 @@ export enum AppLanguage {
 }
 
 export enum AppPermission {
+  AccountingCreditsManage = 'ACCOUNTING_CREDITS_MANAGE',
   AccountingPaymentsManage = 'ACCOUNTING_PAYMENTS_MANAGE',
   AccountingPaymentsView = 'ACCOUNTING_PAYMENTS_VIEW',
+  AccountingPayrollManage = 'ACCOUNTING_PAYROLL_MANAGE',
+  AccountingPayrollView = 'ACCOUNTING_PAYROLL_VIEW',
   AppraisalFeedback = 'APPRAISAL_FEEDBACK',
   AppraisalSubmit = 'APPRAISAL_SUBMIT',
   AppraisalView = 'APPRAISAL_VIEW',
@@ -863,6 +866,9 @@ export type CreateTeacherNoteInput = {
 
 export enum CreditReason {
   Adjustment = 'ADJUSTMENT',
+  CreditAdjustmentAdd = 'CREDIT_ADJUSTMENT_ADD',
+  CreditAdjustmentCarryover = 'CREDIT_ADJUSTMENT_CARRYOVER',
+  CreditAdjustmentSubtract = 'CREDIT_ADJUSTMENT_SUBTRACT',
   Deduction = 'DEDUCTION',
   Purchase = 'PURCHASE',
   Refund = 'REFUND'
@@ -1814,6 +1820,7 @@ export enum SystemSettingCategory {
   Fx = 'Fx',
   General = 'General',
   Meeting = 'Meeting',
+  Payroll = 'Payroll',
   Push = 'Push',
   Redis = 'Redis',
   Scheduling = 'Scheduling',

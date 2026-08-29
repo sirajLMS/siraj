@@ -9,6 +9,7 @@ import {
   AvailabilityStatus,
   BilledUnit,
   BookingStatus,
+  CalculationStatus,
   CountryCode,
   CreditAdjustmentType,
   CreditReason,
@@ -244,6 +245,10 @@ export const AttendanceEvaluationPothosEnum = gqlSchemaBuilder.enumType(Attendan
 
 export const TeacherDueStatusPothosEnum = gqlSchemaBuilder.enumType(TeacherDueStatus, {
   name: "TeacherDueStatus",
+});
+
+export const CalculationStatusPothosEnum = gqlSchemaBuilder.enumType(CalculationStatus, {
+  name: "CalculationStatus",
 });
 
 export const RateSourcePothosEnum = gqlSchemaBuilder.enumType(RateSource, {

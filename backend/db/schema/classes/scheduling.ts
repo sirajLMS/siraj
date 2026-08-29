@@ -19,6 +19,7 @@ import { quotas } from "@/backend/db/schema/billing/quotas";
 import { classSubjects } from "@/backend/db/schema/classes/class-subject";
 import {
   billedUnitEnum,
+  calculationStatusEnum,
   classExecutionStateEnum,
   classOutcomeEnum,
   classTypeEnum,
@@ -40,7 +41,7 @@ import { timezones } from "@/backend/db/schema/shared/timezones";
 import { students } from "@/backend/db/schema/students/students";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
-import type { RateSource } from "@/backend/enum";
+import { CalculationStatus, type RateSource } from "@/backend/enum";
 import type { MeetingConfigSnapshot } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
@@ -140,6 +141,8 @@ export const recurringScheduleDays = createTable(
  * - CHECK Constraint `class_instances_reschedule_not_self_chk`: Enforces `original_class_id IS NULL OR original_class_id != id` (cannot reschedule to self).
  * - CHECK Constraint `class_instances_rescheduled_no_quota_chk`: Enforces `is_rescheduled = false OR quota_deducted = false`.
  * - CHECK Constraint `class_instances_rescheduled_no_complete_chk`: Enforces `is_rescheduled = false OR (execution_state != 'COMPLETED' OR outcome != 'TAKEN')`.
+ * - CHECK Constraint `class_instances_partial_percentage_chk`: Enforces `is_partial_percentage` (0–100) is present only when `calculation_status = 'PARTIALLY'`.
+ * - CHECK Constraint `class_instances_calculated_status_amount_chk`: Enforces `calculation_status = 'REFUND'` zeroes `teacher_paid_amount` and `CALCULATED` requires a `calculated_duration`.
  *
  * NOTE: High-level business rules (Quota deduction, Overlap prevention, Teacher assignment integrity, Rescheduling logic)
  * are now enforced in the application layer via `SchedulingRepository` to reduce database trigger depth and deadlock risk (Issue #10).
@@ -213,6 +216,22 @@ export const classInstances = createTable(
     // RECURRING | OVERRIDE). Set when the snapshot is captured at booking time
     // and again at approval. See `rate-resolver.service.ts`.
     rateSource: rateSourceEnum("rate_source").$type<RateSource>(),
+    // Payroll calculation snapshot — written when teacher pay for a completed
+    // session is calculated (single override or batch run) and retained for audit.
+    calculatedDuration: integerColumn("calculated_duration"), // Payable minutes after grace-period rules; NULL until first calculation
+    // Exact decimal amount kept as TEXT for dialect portability — parsed at the service layer.
+    teacherPaidAmount: textColumn("teacher_paid_amount"),
+    teacherPaidCurrency: currencyCodeEnum("teacher_paid_currency").$type<CurrencyCode>(),
+    calculationStatus: calculationStatusEnum("calculation_status")
+      .notNull()
+      .default(CalculationStatus.NOT_CALCULATED)
+      .$type<CalculationStatus>(),
+    isPartialPercentage: integerColumn("is_partial_percentage"), // 0–100 share of the full rate; NULL unless calculationStatus = PARTIALLY
+    payrollNote: varcharColumn("payroll_note", { length: 2000 }),
+    payrollCalculatedAt: timestampColumn("payroll_calculated_at"),
+    payrollCalculatedBy: uuidDefaultColumn("payroll_calculated_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
     remarks: textColumn("remarks"),
     adminNotes: textColumn("admin_notes"),
     idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
@@ -249,6 +268,14 @@ export const classInstances = createTable(
     index("class_instances_payroll_credited_idx").on(table.payrollCredited),
     index("class_instances_is_rate_overridden_idx").on(table.isRateOverridden),
     index("class_instances_rate_source_idx").on(table.rateSource),
+    index("class_instances_calculation_status_idx").on(table.calculationStatus),
+    index("class_instances_teacher_paid_amount_idx").on(table.teacherPaidAmount),
+    index("class_instances_payroll_calculated_at_idx").on(table.payrollCalculatedAt),
+    index("class_instances_teacher_status_scheduled_idx").on(
+      table.teacherId,
+      table.calculationStatus,
+      table.scheduledStartAt
+    ),
     index("class_instances_deleted_at_idx").on(table.deletedAt),
     index("class_instances_teacher_state_start_idx").on(table.teacherId, table.executionState, table.scheduledStartAt),
     index("class_instances_student_state_start_idx").on(table.studentId, table.executionState, table.scheduledStartAt),
@@ -300,6 +327,30 @@ export const classInstances = createTable(
       "class_instances_rescheduled_no_complete_chk",
       sql`${table.isRescheduled} = false OR (${table.executionState} != 'COMPLETED' OR ${table.outcome} != 'TAKEN')`,
       sql`${table.isRescheduled} = false OR (${table.executionState} != 'COMPLETED' OR ${table.outcome} != 'TAKEN')`
+    ),
+    checkConstraint(
+      "class_instances_partial_percentage_chk",
+      sql`
+        (${table.calculationStatus} != 'PARTIALLY' OR ${table.isPartialPercentage} IS NOT NULL) AND
+        (${table.calculationStatus} = 'PARTIALLY' OR ${table.isPartialPercentage} IS NULL) AND
+        (${table.isPartialPercentage} IS NULL OR (${table.isPartialPercentage} >= 0 AND ${table.isPartialPercentage} <= 100))
+      `,
+      sql`
+        (${table.calculationStatus} != 'PARTIALLY' OR ${table.isPartialPercentage} IS NOT NULL) AND
+        (${table.calculationStatus} = 'PARTIALLY' OR ${table.isPartialPercentage} IS NULL) AND
+        (${table.isPartialPercentage} IS NULL OR (${table.isPartialPercentage} >= 0 AND ${table.isPartialPercentage} <= 100))
+      `
+    ),
+    checkConstraint(
+      "class_instances_calculated_status_amount_chk",
+      sql`
+        (${table.calculationStatus} != 'REFUND' OR ${table.teacherPaidAmount} = '0') AND
+        (${table.calculationStatus} != 'CALCULATED' OR ${table.calculatedDuration} IS NOT NULL)
+      `,
+      sql`
+        (${table.calculationStatus} != 'REFUND' OR ${table.teacherPaidAmount} = '0') AND
+        (${table.calculationStatus} != 'CALCULATED' OR ${table.calculatedDuration} IS NOT NULL)
+      `
     ),
   ]
 );

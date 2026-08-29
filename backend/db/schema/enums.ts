@@ -5,6 +5,7 @@ import {
   AttendanceEvaluation,
   AvailabilityStatus,
   BilledUnit,
+  CalculationStatus,
   ComplaintCategory,
   ComplaintStatus,
   CountryCode,
@@ -165,3 +166,5 @@ export const cronQueueBackendEnum = createPgEnumFromEnum("cron_queue_backend", C
 export const paymentGatewayEnum = createPgEnumFromEnum("payment_gateway", PaymentGateway);
 
 export const billedUnitEnum = createPgEnumFromEnum("billed_unit", BilledUnit);
+
+export const calculationStatusEnum = createPgEnumFromEnum("calculation_status", CalculationStatus);

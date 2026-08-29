@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { AppPermission, isAppPermission, parseAppPermission } from "@/backend/enum/permissions/permission.enum";
 
 const accountingCreditsManageKey = "accounting.credits_manage";
+const accountingPayrollViewKey = "accounting.payroll_view";
+const accountingPayrollManageKey = "accounting.payroll_manage";
 
 describe("AppPermission accounting credits manage", () => {
   test("defines ACCOUNTING_CREDITS_MANAGE with the accounting.credits_manage key", () => {
@@ -18,9 +20,29 @@ describe("AppPermission accounting credits manage", () => {
   });
 });
 
+describe("AppPermission accounting payroll", () => {
+  test("defines ACCOUNTING_PAYROLL_VIEW and ACCOUNTING_PAYROLL_MANAGE with their keys", () => {
+    const viewValue: string = AppPermission.ACCOUNTING_PAYROLL_VIEW;
+    const manageValue: string = AppPermission.ACCOUNTING_PAYROLL_MANAGE;
+    expect(viewValue).toBe(accountingPayrollViewKey);
+    expect(manageValue).toBe(accountingPayrollManageKey);
+  });
+
+  test("isAppPermission accepts the accounting payroll keys", () => {
+    expect(isAppPermission(accountingPayrollViewKey)).toBe(true);
+    expect(isAppPermission(accountingPayrollManageKey)).toBe(true);
+  });
+
+  test("parseAppPermission resolves the accounting payroll keys to the enum values", () => {
+    expect(parseAppPermission(accountingPayrollViewKey)).toBe(AppPermission.ACCOUNTING_PAYROLL_VIEW);
+    expect(parseAppPermission(accountingPayrollManageKey)).toBe(AppPermission.ACCOUNTING_PAYROLL_MANAGE);
+  });
+});
+
 describe("AppPermission rejection paths", () => {
   test("isAppPermission rejects unknown permission keys", () => {
     expect(isAppPermission("accounting.credits_manage_typo")).toBe(false);
+    expect(isAppPermission("accounting.payroll_view_typo")).toBe(false);
     expect(isAppPermission("unknown.permission")).toBe(false);
     expect(isAppPermission("")).toBe(false);
   });

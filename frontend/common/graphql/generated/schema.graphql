@@ -189,8 +189,11 @@ enum AppLanguage {
 }
 
 enum AppPermission {
+  ACCOUNTING_CREDITS_MANAGE
   ACCOUNTING_PAYMENTS_MANAGE
   ACCOUNTING_PAYMENTS_VIEW
+  ACCOUNTING_PAYROLL_MANAGE
+  ACCOUNTING_PAYROLL_VIEW
   APPRAISAL_FEEDBACK
   APPRAISAL_SUBMIT
   APPRAISAL_VIEW
@@ -708,6 +711,15 @@ type BulkOperationResult {
   success: Boolean
   successCount: Int
   successfulItems: [StorageObject!]
+}
+
+enum CalculationStatus {
+  CALCULATED
+  NOT_CALCULATED
+  PAID
+  PARTIALLY
+  REFUND
+  WAITING_PAID
 }
 
 type ChangeParentLifecycleResult {
@@ -1355,6 +1367,12 @@ input CreateTeacherNoteInput {
   title: String!
 }
 
+enum CreditAdjustmentType {
+  ADD
+  SUBTRACT
+  SUBTRACT_WITH_CARRYOVER
+}
+
 """
 Credit balance summary for a student (total classes purchased and remaining)
 """
@@ -1383,6 +1401,9 @@ type CreditPurchaseResult {
 
 enum CreditReason {
   ADJUSTMENT
+  CREDIT_ADJUSTMENT_ADD
+  CREDIT_ADJUSTMENT_CARRYOVER
+  CREDIT_ADJUSTMENT_SUBTRACT
   DEDUCTION
   PURCHASE
   REFUND
@@ -5072,6 +5093,7 @@ enum SystemSettingCategory {
   Fx
   General
   Meeting
+  Payroll
   Push
   Redis
   Scheduling

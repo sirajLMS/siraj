@@ -28,7 +28,7 @@
 > Goal: additive data-model changes that unblock every later phase. Zero
 > behavior change for existing flows.
 
-### 0.1 Add `CalculationStatus` enum
+### 0.1 Add `CalculationStatus` enum ✅ DONE
 - 🆕 `backend/enum/teachers/payroll-calculation.enum.ts` — define `CalculationStatus` enum (`NOT_CALCULATED | CALCULATED | PARTIALLY | REFUND | WAITING_PAID | PAID` — values follow SCREAMING_SNAKE_CASE convention used by every other PG enum).
 - ✏️ `backend/enum/teachers/index.ts` — re-export via `export * from "./payroll-calculation.enum";`.
 - 🆕 `shared/constants/teachers/payroll-calculation.enum.ts` — mirror enum for client/server.
@@ -37,37 +37,37 @@
 - 🔁 `bun run scripts/health/sub-loop.ts backend/enum/teachers/payroll-calculation.enum.ts --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts shared/constants/teachers/payroll-calculation.enum.ts --lifecycle codescene`
 
-### 0.2 Add `ACCOUNTING_PAYROLL_VIEW` + `ACCOUNTING_PAYROLL_MANAGE` permissions
+### 0.2 Add `ACCOUNTING_PAYROLL_VIEW` + `ACCOUNTING_PAYROLL_MANAGE` permissions ✅ DONE
 - ✏️ `backend/enum/permissions/permission.enum.ts` — add both new values.
 - ✏️ `backend/db/seeds/auth/seed-user-permission-overrides.ts` (or wherever permission-groups are seeded) — grant both to the "Accounting" / "Finance Manager" default group.
 - 🧪 `backend/enum/permissions/permission.enum.test.ts` — assert both new values parse via `isAppPermission`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts --lifecycle codescene`
 
-### 0.3 Register `SystemSettingCategory.Payroll` (if absent)
+### 0.3 Register `SystemSettingCategory.Payroll` (if absent) ✅ DONE
 - ✏️ `shared/constants/settings/system-settings.enum.ts` — add `Payroll = "payroll"` to `SystemSettingCategory` enum (additive, lowercase string value — matches the existing `Security = "security"`, `System = "system"`, `Scheduling = "scheduling"`, `Billing = "billing"` pattern).
 - ✅ Verify `backend/db/schema/enums.ts` — `systemSettingCategoryEnum = createPgEnumFromEnum("system_setting_category", SystemSettingCategory)` picks up the new value automatically (no `enums.ts` change required).
 - 🔁 `bun run scripts/health/sub-loop.ts shared/constants/settings/system-settings.enum.ts --lifecycle codescene`
 
-### 0.4 Extend `class_instances` schema with payroll columns
+### 0.4 Extend `class_instances` schema with payroll columns ✅ DONE
 - ✏️ `backend/db/schema/classes/scheduling.ts` — add `calculatedDuration`, `teacherPaidAmount`, `teacherPaidCurrency`, `calculationStatus`, `isPartialPercentage`, `payrollNote`, `payrollCalculatedAt`, `payrollCalculatedBy` + 3 new indexes + 2 CHECK constraints (partial-percentage consistency, refund-zeroes-amount, calculated-requires-duration).
 - ✏️ `backend/db/schema/enums.ts` — register `calculationStatusEnum = createPgEnumFromEnum("calculation_status", CalculationStatus)`.
 - ✏️ `backend/db/drizzleRelations.ts` — add `classInstances.payrollCalculatedByUser` relation to `users`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/db/schema/classes/scheduling.ts --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts backend/db/schema/enums.ts --lifecycle codescene`
 
-### 0.5 Seed `system_settings` rows for grace thresholds
+### 0.5 Seed `system_settings` rows for grace thresholds ✅ DONE
 - ✏️ `backend/db/seeds/shared/system-settings.ts` — add three rows: `payroll.grace_short_minutes` (=3), `payroll.grace_long_minutes` (=6), `payroll.grace_threshold_minutes` (=30).
 - 🧪 `backend/db/test/repo/shared/system-settings.repository.test.ts` — assert the three keys exist after seed and parse as integers.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/db/seeds/shared/system-settings.ts --lifecycle codescene`
 
-### 0.6 Generate + apply migration
+### 0.6 Generate + apply migration ✅ DONE
 - 🔁 `bun run db:generate` — produce additive migration (new columns nullable/defaulted, new enum type, new system_settings rows).
 - ✏️ migration file — split into three: (a) `CREATE TYPE calculation_status` (transactional), (b) `ALTER TABLE class_instances ADD COLUMN ...` (transactional), (c) `INSERT INTO system_settings ... ON CONFLICT DO NOTHING` (idempotent).
 - 🔁 `bun run db:migrate` against local dev DB.
 - 🧪 `backend/db/test/migrations/payroll-columns.test.ts` — assert migration is idempotent and additive; existing `class_instances_state_machine_chk` constraint still passes.
 - 🔁 `bun run scripts/health/sub-loop.ts <migration-file> --lifecycle codescene`
 
-### 0.7 Phase-0 regression smoke
+### 0.7 Phase-0 regression smoke ✅ DONE
 - 🔁 `bun test backend/db/test/repo/scheduling/scheduling.repository.test.ts`
 - 🔁 `bun test backend/db/test/logic/scheduling/class_instances_security.test.ts`
 - 🔁 `bun test backend/db/test/logic/scheduling/class_rescheduling.test.ts`

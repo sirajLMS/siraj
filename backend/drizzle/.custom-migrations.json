@@ -1,5 +1,5 @@
 {
-  "manifestHash": "07f783104dc8df039b09c44406b898341cb862b4bfa5b4565de0605e4d489d68",
+  "manifestHash": "e6bc6627dc7c8bf950009916a2c211960a78735d5b1bf6355c4a8f7a56042d12",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -40,6 +40,14 @@
     {
       "file": "35-accounting-credits-permission.sql",
       "sha256": "6cb8aacc60a1b20d2ec0969b4e0c2c2d58a4dea804ff4d39628735b2b8413e00"
+    },
+    {
+      "file": "36-accounting-payroll-permissions.sql",
+      "sha256": "1d2ed658a09746c2fb1432b1f8df0077309c412234d0aa6334cc0d3f270e1071"
+    },
+    {
+      "file": "37-payroll-grace-settings.sql",
+      "sha256": "315e8d169c89e2a6d4f7d5020519064b23d41584d8c3078cfb890c0106875a8e"
     },
     {
       "file": "4-class_categories_and_subjects.sql",
@@ -300,6 +308,8 @@
     "20260826162257_custom_self_service_reschedule_permissions",
     "20260827015543_custom_33-accounting-permissions-and-enums",
     "20260827015544_custom_34-credit-hours-system-settings-seed",
-    "20260828212837_custom_35-accounting-credits-permission"
+    "20260828212837_custom_35-accounting-credits-permission",
+    "20260829023113_custom_36-accounting-payroll-permissions",
+    "20260829031931_custom_37-payroll-grace-settings"
   ]
 }
