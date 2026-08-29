@@ -1,11 +1,24 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Box, FormControl, InputLabel, MenuItem, Select, type SelectChangeEvent, Typography } from "@mui/material";
+import {
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  type SelectChangeEvent,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
-import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
+import { FilterButton, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import { DialogPresets } from "@/frontend/common/components/ui/dialog";
 import { AppPermission, FxProvider, FxProviderConfigSource } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   fxProviderConfigQueryDocument,
@@ -121,22 +134,20 @@ export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = 
         </Box>
       </SectionPanel>
 
-      <BaseDeleteDialog
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        onConfirm={() => void handleConfirm()}
-        isLoading={saving}
-        title={labels.confirmTitle}
-        body={labels.confirmBody}
-        cancelLabel={labels.cancel}
-        confirmLabel={labels.save}
-        confirmSx={theme => ({
-          py: 1.5,
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          "&:hover": { backgroundColor: theme.palette.primary.dark },
-        })}
-      />
+      <Dialog {...DialogPresets.confirm} open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>{labels.confirmTitle}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{labels.confirmBody}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <FilterButton disabled={saving} onClick={() => setConfirmOpen(false)}>
+            {labels.cancel}
+          </FilterButton>
+          <PrimaryPageAction loading={saving} onClick={() => void handleConfirm()}>
+            {labels.save}
+          </PrimaryPageAction>
+        </DialogActions>
+      </Dialog>
     </RequirePermission>
   );
 }

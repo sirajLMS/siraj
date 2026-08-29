@@ -2,7 +2,9 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
+import { useMemo } from "react";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
+import { buildMeetingProviderColumns } from "@/frontend/common/views/dashboard/admin/meeting-providers/meetingProvidersColumns";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
   DesktopAppDataGrid,
@@ -30,15 +32,18 @@ export function MeetingProvidersDesktopView({
   t,
   locale,
   rows,
-  columns,
   loading,
   deleteProvider,
   deleting,
   notifications,
   onCreateOpen,
+  onEditRow,
+  onDeleteRow,
   onDeleteClose,
   onDeleteConfirm,
 }: Readonly<MeetingProvidersViewProps>) {
+  const columns = useMemo(() => buildMeetingProviderColumns(t, onEditRow, onDeleteRow), [t, onEditRow, onDeleteRow]);
+
   return (
     <DesktopPageContainer>
       <DesktopPageHeader

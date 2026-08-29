@@ -5,10 +5,8 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { PermissionFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { CurrentPermissionsEmptyState } from "@/frontend/common/views/dashboard/permissions/components/__shared__/currentPermissionsTabShared";
-import {
-  StyledPermissionKeyChipShared,
-  StyledRevokeButtonShared,
-} from "@/frontend/common/views/dashboard/permissions/components/__shared__/currentPermissionsTabShared.styles";
+import { StyledRevokeButtonShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/currentPermissionsTabShared.styles";
+import { PermissionKeyChipShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionKeyChipShared";
 import type { CurrentPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 
@@ -30,7 +28,7 @@ export function CurrentPermissionsTabDesktop({
         headerName: t.columnKey,
         flex: 1,
         minWidth: 200,
-        renderCell: params => <StyledPermissionKeyChipShared>{String(params.value)}</StyledPermissionKeyChipShared>,
+        renderCell: params => <PermissionKeyChipShared label={String(params.value)} />,
       },
       {
         field: "category",

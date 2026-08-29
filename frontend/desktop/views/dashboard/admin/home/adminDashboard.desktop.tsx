@@ -1,23 +1,17 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { Box, Chip, InputAdornment, TextField } from "@mui/material";
-import { PaginationControls } from "@/frontend/common/components/ui";
+import { Box } from "@mui/material";
+import { FilterChip } from "@/frontend/common/components/ui";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
-import { ScheduleOverviewEmptyState } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
-import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
-import {
-  scheduleOverviewFilterBarSx,
-  scheduleOverviewListCanvasSx,
-} from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
+import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
+import { scheduleOverviewFilterBarSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
 import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { desktopSectionContentInsetSx } from "@/frontend/desktop/components/ui/container/desktopSectionContentInsetSx";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
-import { ScheduleOverviewDesktopCard } from "@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.desktop";
-import { useAppLocale } from "@/shared/locale";
 
 type AdminDashboardHeaderActionsProps = Pick<
   AdminDashboardViewModel,
@@ -39,23 +33,11 @@ function AdminDashboardHeaderActions({
     <>
       <DesktopMetricCardGrid metrics={metrics} onMetricClick={onMetricClick} selectedKey={selectedMetricKey} />
       {canDashboardSearch ? (
-        <TextField
-          placeholder={searchPlaceholder}
+        <SearchBarField
           value={searchValue}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            onSearchChange(event.target.value);
-          }}
-          size="small"
+          placeholder={searchPlaceholder}
+          onChange={onSearchChange}
           sx={{ maxWidth: 280 }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchOutlined fontSize="small" />
-                </InputAdornment>
-              ),
-            },
-          }}
         />
       ) : null}
     </>
@@ -98,8 +80,6 @@ type AdminDashboardScheduleOverviewProps = Pick<
 > & {
   readonly labelsBySection: AdminDashboardLabelsBySection;
   readonly showTimezones: boolean;
-  readonly locale: ReturnType<typeof useAppLocale>;
-  readonly pageCount: number;
 };
 
 function AdminDashboardScheduleOverview({
@@ -107,54 +87,27 @@ function AdminDashboardScheduleOverview({
   labelsBySection,
   loading,
   showTimezones,
-  locale,
   page,
   totalCount,
   pageSize,
-  pageCount,
   onPageChange,
 }: Readonly<AdminDashboardScheduleOverviewProps>) {
-  const { shell, columns, status, actions } = {
-    shell: labelsBySection.shell,
-    columns: labelsBySection.columns,
-    status: labelsBySection.status,
-    actions: { detailsLabel: labelsBySection.shell.details },
-  };
+  const { shell, columns, status } = labelsBySection;
 
   return (
-    <Box sx={scheduleOverviewListCanvasSx}>
-      <ScheduleOverviewListShell
-        rows={rows}
-        getKey={row => row.id ?? ""}
-        loading={loading}
-        emptyMessage={shell.noClasses}
-        renderItem={row => (
-          <ScheduleOverviewDesktopCard
-            row={row}
-            headers={columns}
-            statusLabels={status}
-            detailsLabel={actions.detailsLabel}
-            showTimezones={showTimezones}
-            locale={locale}
-          />
-        )}
-        renderEmptyState={() => (
-          <Box sx={{ py: 2 }}>
-            <ScheduleOverviewEmptyState message={shell.noClasses} />
-          </Box>
-        )}
-      />
-
-      {totalCount != null ? (
-        <PaginationControls
-          page={page}
-          pageCount={pageCount}
-          rowCount={totalCount}
-          pageSize={pageSize}
-          onPageChange={onPageChange}
-        />
-      ) : null}
-    </Box>
+    <ScheduleOverviewDataGrid
+      rows={rows}
+      page={page}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      onPageChange={onPageChange}
+      headers={columns}
+      statusLabels={status}
+      detailsLabel={shell.details}
+      emptyMessage={shell.noClasses}
+      loading={loading}
+      showTimezones={showTimezones}
+    />
   );
 }
 
@@ -177,14 +130,12 @@ export function AdminDashboardDesktopView({
   onDateChange,
   onTeacherChange,
   pageSize,
-  pageCount,
   canDashboardSearch,
   canScheduleFilterAdvanced,
   canScheduleViewTimezones,
 }: Readonly<AdminDashboardViewModel>) {
-  const locale = useAppLocale();
-  const showTimezones = canScheduleViewTimezones;
   const { shell, filters } = labelsBySection;
+  const onClearMetricFilter = selectedMetricKey ? () => onMetricClick(selectedMetricKey) : undefined;
 
   return (
     <DesktopPageContainer>
@@ -217,7 +168,6 @@ export function AdminDashboardDesktopView({
             sx={theme => ({
               ...scheduleOverviewFilterBarSx(theme),
               ...desktopSectionContentInsetSx,
-              py: 2.5,
               width: "100%",
             })}
           >
@@ -232,7 +182,7 @@ export function AdminDashboardDesktopView({
         ) : null}
         {selectedMetricLabel ? (
           <Box sx={{ ...desktopSectionContentInsetSx, py: 0, mb: 1 }}>
-            <Chip size="small" variant="outlined" label={selectedMetricLabel} />
+            <FilterChip label={selectedMetricLabel} onClear={onClearMetricFilter} />
           </Box>
         ) : null}
 
@@ -240,12 +190,10 @@ export function AdminDashboardDesktopView({
           rows={rows}
           labelsBySection={labelsBySection}
           loading={loading}
-          showTimezones={showTimezones}
-          locale={locale}
+          showTimezones={canScheduleViewTimezones}
           page={page}
           totalCount={totalCount}
           pageSize={pageSize}
-          pageCount={pageCount}
           onPageChange={onPageChange}
         />
       </DesktopSectionPanel>

@@ -5,7 +5,7 @@ import { Box, Button, Fade, type Theme, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useMemo } from "react";
-import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { QuotaDetailLoadingSkeleton } from "@/frontend/common/views/dashboard/billing/quota/components/__shared__/QuotaDetailLoadingSkeleton";
 import type { QuotaLedgerItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
@@ -14,6 +14,7 @@ import { formatQuotaDate } from "@/frontend/common/views/dashboard/billing/quota
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
+import { DesktopBaseDeleteDialog } from "@/frontend/desktop/components/ui/dialog";
 import { QuotaDetailSummaryDesktop } from "@/frontend/desktop/views/dashboard/billing/quota/components/QuotaDetailSummaryDesktop";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
@@ -142,18 +143,17 @@ export function QuotaDetailDesktop(props: Readonly<QuotaDetailViewModel>) {
                 loading={loadingLedger}
                 ariaLabel={t.ledger.title}
                 emptyMessage={t.ledger.title}
-                paginationOptions={{
-                  mode: "server",
-                  page: ledgerPage + 1,
+                paginationOptions={buildServerPaginationOptions({
+                  page: ledgerPage,
                   pageSize: ledgerPageSize,
                   totalCount: ledgerTotalCount,
-                  onPageChange: (newPage: number) => setLedgerPage(newPage - 1),
-                }}
+                  onPageChange: (newPage: number) => setLedgerPage(newPage),
+                })}
               />
             </Box>
           </DesktopSectionPanel>
 
-          <BaseDeleteDialog
+          <DesktopBaseDeleteDialog
             open={deleteDialogOpen}
             onClose={onDeleteDialogClose}
             onConfirm={onDeleteConfirm}

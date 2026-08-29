@@ -1,9 +1,10 @@
 "use client";
 
-import { AddOutlined, DeleteOutlined, EditOutlined, VideocamOutlined } from "@mui/icons-material";
-import { Alert, Avatar, Box, Chip, IconButton, Stack } from "@mui/material";
+import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
+import { Alert, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
+import { MeetingProviderLogo } from "@/frontend/common/components/ui/display/meetingConfig/MeetingProviderLogo";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
@@ -46,18 +47,7 @@ function MobileProviderRow({ row, labels, onEdit, onDelete }: MobileProviderRowP
           {/* Header Row */}
           <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
             <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0, flex: 1 }}>
-              {row.logoUrl ? (
-                <Avatar
-                  src={row.logoUrl}
-                  alt={row.slug ?? undefined}
-                  variant="rounded"
-                  sx={{ width: 40, height: 40, "& img": { objectFit: "contain" } }}
-                />
-              ) : (
-                <Avatar variant="rounded" sx={{ width: 40, height: 40 }}>
-                  <VideocamOutlined fontSize="small" />
-                </Avatar>
-              )}
+              <MeetingProviderLogo providerSlug={null} providerName={row.slug} logoUrl={row.logoUrl} size="large" />
               <Box sx={{ minWidth: 0, flex: 1 }}>
                 <Box sx={{ typography: "titleLg", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   <LocalizedStringDisplay value={row.name} />

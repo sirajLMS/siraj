@@ -55,10 +55,10 @@ function renderCard(
   overrides: Partial<FutureClass> = {},
   onRequestLeave?: () => void
 ) {
-  return renderWithWrapper(
-    <Card item={makeItem(overrides)} labels={labels} onRequestLeave={onRequestLeave} />,
-    { locale, viewport }
-  );
+  return renderWithWrapper(<Card item={makeItem(overrides)} labels={labels} onRequestLeave={onRequestLeave} />, {
+    locale,
+    viewport,
+  });
 }
 
 afterEach(() => {

@@ -1,7 +1,7 @@
 "use client";
 
-import { CalendarTodayOutlined, MoreVertOutlined, VideoChatOutlined } from "@mui/icons-material";
-import { Box, Button, Tooltip, Typography } from "@mui/material";
+import { CalendarTodayOutlined, MoreVertOutlined } from "@mui/icons-material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
@@ -14,6 +14,7 @@ import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileActionIconLink } from "@/frontend/mobile/components/ui/button";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { MobileCardList, MobileContentInset } from "@/frontend/mobile/components/ui/container";
+import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";
 
@@ -61,17 +62,11 @@ function TeacherCard({ row, t }: { readonly row: TeacherDirectoryRow; readonly t
           gap: theme.spacing(2),
         })}
       >
-        <Button
-          startIcon={<VideoChatOutlined />}
+        <MobileMeetingJoinAction
+          variant="icon"
+          label={t.actions.joinRoom}
           disabled={row.status === AccountStatus.Deactivated}
-          sx={theme => ({
-            color: theme.palette.primary.main,
-            fontWeight: 700,
-            typography: "buttonText",
-          })}
-        >
-          {t.actions.joinRoom}
-        </Button>
+        />
         <Box sx={{ display: "flex", gap: 1, alignItems: "center", marginInlineStart: "auto" }}>
           {row.userId ? (
             <ViewAsUserButton variant="link" targetUserId={row.userId} targetUserName={row.name ?? row.email ?? ""} />

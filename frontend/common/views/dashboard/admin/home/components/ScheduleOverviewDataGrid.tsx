@@ -23,6 +23,11 @@ interface ScheduleOverviewDataGridProps {
   readonly detailsLabel: string;
   readonly emptyMessage: string;
   readonly loading?: boolean;
+  /**
+   * When supplied by the view (from the ViewModel's permission flags), wins
+   * over the internal store derivation so callers control timezone columns.
+   */
+  readonly showTimezones?: boolean;
 }
 
 export function ScheduleOverviewDataGrid({
@@ -36,9 +41,10 @@ export function ScheduleOverviewDataGrid({
   detailsLabel,
   emptyMessage,
   loading = false,
+  showTimezones: showTimezonesProp,
 }: ScheduleOverviewDataGridProps) {
   const { hasPermission } = useUserStore();
-  const showTimezones = hasPermission(AppPermission.ScheduleViewTimezones);
+  const showTimezones = showTimezonesProp ?? hasPermission(AppPermission.ScheduleViewTimezones);
 
   const columns = useScheduleColumns({ headers, statusLabels, detailsLabel, showTimezones });
 

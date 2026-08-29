@@ -25,9 +25,3 @@ export const scheduleOverviewPaginationSurfaceSx: ThemeStyleFn = theme => ({
   borderTop: `1px solid ${theme.palette.outlineVariant}`,
   backgroundColor: theme.palette.surfaceContainerLow,
 });
-
-/** Mobile section chrome (title + filters). */
-export const scheduleOverviewMobileChromeSx: ThemeStyleFn = theme => ({
-  backgroundColor: theme.palette.surfaceContainerLow,
-  borderBottom: `1px solid ${theme.palette.outlineVariant}`,
-});

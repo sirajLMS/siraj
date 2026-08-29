@@ -1,12 +1,14 @@
 "use client";
 
-import { AddOutlined, FilterListOutlined, PersonAddAltOutlined, SearchOutlined } from "@mui/icons-material";
-import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
+import { AddOutlined, FilterListOutlined } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { StudentsViewModel } from "@/frontend/common/views/dashboard/admin/parents/students/useStudentsViewModel";
 import {
   MobileCardList,
+  MobileContentInset,
   MobileContentStack,
   MobileFab,
   MobileMetricCardGrid,
@@ -29,8 +31,6 @@ export function StudentsMobileView({
   onFilterClick,
   onViewProfile,
   onPageChange,
-  // NEW FOR PLAN v5: lifted permission boolean consumed by the tier view
-  // instead of a `RequirePermission` wrapper.
   canStudentsCreate,
 }: Readonly<StudentsViewModel>) {
   const { shell, filters, actions, cards } = labelsBySection;
@@ -46,30 +46,8 @@ export function StudentsMobileView({
       <MobileContentStack gap={3} paddingBottom={10}>
         <MobileMetricCardGrid metrics={metrics} />
 
-        <Box sx={{ display: "flex", gap: 1, mb: 1, px: 2 }}>
-          <TextField
-            fullWidth
-            size="small"
-            value={searchQuery}
-            onChange={e => {
-              onSearchChange(e.target.value);
-            }}
-            placeholder={filters.searchPlaceholder}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlined sx={theme => ({ fontSize: 20, color: theme.palette.text.secondary })} />
-                  </InputAdornment>
-                ),
-                sx: theme => ({
-                  borderRadius: 3,
-                  backgroundColor: theme.palette.background.paper,
-                  py: 0.5,
-                }),
-              },
-            }}
-          />
+        <MobileContentInset sx={{ display: "flex", gap: 1, mb: 1 }}>
+          <SearchBarField value={searchQuery} placeholder={filters.searchPlaceholder} onChange={onSearchChange} />
           <IconButton
             id="students-filter-mobile-btn"
             aria-label={filters.filters}
@@ -84,23 +62,7 @@ export function StudentsMobileView({
           >
             <FilterListOutlined />
           </IconButton>
-          {canStudentsCreate ? (
-            <IconButton
-              id="students-add-mobile-btn"
-              aria-label={actions.addStudent}
-              onClick={onAddStudent}
-              sx={theme => ({
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.onPrimary,
-                borderRadius: 3,
-                px: 2,
-                "&:hover": { backgroundColor: theme.palette.primary.dark },
-              })}
-            >
-              <PersonAddAltOutlined />
-            </IconButton>
-          ) : null}
-        </Box>
+        </MobileContentInset>
 
         <MobileCardList<(typeof rows)[number]>
           rows={rows}

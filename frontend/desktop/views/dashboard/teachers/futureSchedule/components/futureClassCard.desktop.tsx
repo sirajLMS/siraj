@@ -1,6 +1,7 @@
 "use client";
 
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui/button";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { FutureClassCardShared } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/futureClassCardShared";
@@ -25,6 +26,8 @@ const DESKTOP_SLOTS: FutureClassCardSlots = {
   ClassProfileLink: props => <DesktopClassProfileLink {...props} typographyVariant="titleLg" fontWeight={700} />,
   StatusBadge,
   MeetingJoinAction,
+  LeaveRequestButton: FilterButton,
+  ViewMaterialsButton: PrimaryPageAction,
 };
 
 export function FutureClassCardDesktop(props: Readonly<FutureClassCardProps>) {

@@ -2,13 +2,13 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import Link from "next/link";
-import { StatusBadge } from "@/frontend/common/components/ui/badge";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import {
   formatQuotaDate,
   formatQuotaKind,
   formatQuotaStatus,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaFormatters";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
 export interface QuotaListItemMobileProps {
@@ -28,7 +28,7 @@ export function QuotaListItemMobile({ quota, t }: Readonly<QuotaListItemMobilePr
             <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
               {quota.name ?? ""}
             </Typography>
-            <StatusBadge
+            <MobileStatusBadge
               category="quotaStatus"
               status={quota.status ?? ""}
               label={statusLabel}
@@ -38,7 +38,7 @@ export function QuotaListItemMobile({ quota, t }: Readonly<QuotaListItemMobilePr
           </Stack>
 
           <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <StatusBadge
+            <MobileStatusBadge
               category="quotaStatus"
               status={quota.kind ?? ""}
               label={kindLabel}

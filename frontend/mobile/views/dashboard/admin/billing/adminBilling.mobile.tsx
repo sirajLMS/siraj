@@ -1,7 +1,7 @@
 "use client";
 
 import { AccountBalanceWalletOutlined, AddOutlined, TimelineOutlined } from "@mui/icons-material";
-import { Box, Button, Chip } from "@mui/material";
+import { Button } from "@mui/material";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { StudentCreditFooterShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/studentCreditFooterShared";
@@ -10,12 +10,14 @@ import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/uti
 import {
   MobileCardList,
   MobileCardListItem,
+  MobileContentInset,
   MobileContentStack,
   MobileEmptyState,
   MobileFab,
   MobilePageContainer,
   MobilePageHeader,
   MobileSectionPanel,
+  MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 import { AdminInvoiceMobileCard } from "@/frontend/mobile/views/dashboard/admin/billing/components/adminInvoiceCard.mobile";
 import { BillingMetricsRowMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMetricsRow.mobile";
@@ -25,7 +27,7 @@ import { Link } from "@/shared/i18n";
 
 function ExchangeRatesLink({ labels }: { readonly labels: AdminBillingViewModel["labels"] }) {
   return (
-    <Box sx={{ mb: 2, px: { xs: 2, md: 0 }, display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+    <MobileContentInset sx={{ mb: 2, display: "flex", gap: 1.5, flexWrap: "wrap" }}>
       <Link href="/billing/exchange-rates" style={{ textDecoration: "none" }}>
         <Button variant="outlined" size="small" startIcon={<TimelineOutlined />}>
           {labels.exchangeRatesLink}
@@ -36,7 +38,7 @@ function ExchangeRatesLink({ labels }: { readonly labels: AdminBillingViewModel[
           {labels.quotasLink}
         </Button>
       </Link>
-    </Box>
+    </MobileContentInset>
   );
 }
 
@@ -156,7 +158,7 @@ function StudentCreditSection({
       contentInset={false}
       actions={
         creditFilter === "negative_balance" ? (
-          <Chip label={labels.creditTable.negativeBalance} size="small" color="error" />
+          <MobileStatusBadge category="invoice" status="OVERDUE" label={labels.creditTable.negativeBalance} />
         ) : undefined
       }
     >

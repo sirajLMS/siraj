@@ -1,24 +1,23 @@
 "use client";
 
-import { DeleteOutlined, EditOutlined, SearchOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { DeleteOutlined, EditOutlined, VisibilityOutlined } from "@mui/icons-material";
 import {
   Box,
   Fade,
   FormControl,
   IconButton,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   type SelectChangeEvent,
   Stack,
-  TextField,
   Tooltip,
 } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useMemo } from "react";
-import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
@@ -28,6 +27,7 @@ import { buildQuotaColumns } from "@/frontend/common/views/dashboard/billing/quo
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid";
 import { QuotaListDesktopActions } from "@/frontend/desktop/views/dashboard/billing/quota/components/QuotaListDesktopActions";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
@@ -52,22 +52,7 @@ function FilterControls({
 }: Readonly<FilterControlsProps>) {
   return (
     <Stack direction="row" spacing={2} sx={{ flex: 1, flexWrap: "wrap" }}>
-      <TextField
-        size="small"
-        placeholder={t.listTitle}
-        value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-        }}
-        sx={{ maxWidth: 300 }}
-      />
+      <SearchBarField value={searchQuery} placeholder={t.listTitle} onChange={setSearchQuery} sx={{ maxWidth: 300 }} />
 
       <FormControl size="small" sx={{ minWidth: 140 }}>
         <InputLabel>{t.fields.status}</InputLabel>
@@ -130,20 +115,19 @@ function QuotaDesktopGrid({
 }: Readonly<QuotaDesktopGridProps>) {
   return (
     <Box sx={{ width: "100%", height: 600 }}>
-      <AppDataGrid<QuotaItem>
+      <DesktopAppDataGrid<QuotaItem>
         rows={quotas}
         columns={columns}
         loading={loading}
         ariaLabel={t.listTitle}
         emptyMessage={t.noQuotas}
-        paginationOptions={{
-          mode: "server",
-          page: page + 1,
+        paginationOptions={buildServerPaginationOptions({
+          page,
           pageSize,
           totalCount,
-          onPageChange: (newPage: number) => setPage(newPage - 1),
+          onPageChange: (newPage: number) => setPage(newPage),
           onPageSizeChange: (newPageSize: number) => setPageSize(newPageSize),
-        }}
+        })}
       />
     </Box>
   );

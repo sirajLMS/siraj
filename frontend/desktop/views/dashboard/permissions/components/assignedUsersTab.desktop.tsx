@@ -1,11 +1,12 @@
 "use client";
 
-import { PersonAddOutlined, PersonRemoveOutlined, SearchOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
+import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
+import { Box, Button, Checkbox, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { PermissionGroupDetailFieldsFragment_assignedUsers } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import {
@@ -20,7 +21,7 @@ import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/pe
 import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
 import { assignedUsersTabLabels } from "@/frontend/common/views/dashboard/permissions/utils";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
-import { Link } from "@/shared/i18n";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 
 const StyledDesktopToolbar = styled(StyledUserToolbar)({
   flexDirection: "row",
@@ -37,15 +38,6 @@ const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
   "&:hover": {
     backgroundColor: theme.palette.primary.dark,
   },
-}));
-
-const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
-  width: 32,
-  height: 32,
-  backgroundColor: theme.palette.primaryContainer,
-  color: theme.palette.onPrimaryContainer,
-  typography: "bodyMd",
-  fontWeight: 600,
 }));
 
 function AssignedUsersDesktopToolbar({
@@ -66,22 +58,9 @@ function AssignedUsersDesktopToolbar({
 }>) {
   return (
     <StyledDesktopToolbar>
-      <TextField
-        size="small"
-        placeholder={searchPlaceholder}
-        value={searchQuery}
-        onChange={e => onSearchChange(e.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-        }}
-        sx={{ width: 360 }}
-      />
+      <Box sx={{ width: 360 }}>
+        <SearchBarField value={searchQuery} placeholder={searchPlaceholder} onChange={onSearchChange} />
+      </Box>
       <StyledAssignUsersButton
         variant="contained"
         startIcon={<PersonAddOutlined />}
@@ -92,14 +71,6 @@ function AssignedUsersDesktopToolbar({
     </StyledDesktopToolbar>
   );
 }
-
-const userInitials = (name?: string | null): string =>
-  (name ?? "")
-    .split(" ")
-    .map((w: string) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 
 function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlotProps>) {
   const { group, filteredAssignedUsers, selectedAssignedUserIds, onRevokeUser, onUserToggle, loading } = props;
@@ -115,7 +86,14 @@ function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlot
         renderCell: (params: { row: PermissionGroupDetailFieldsFragment_assignedUsers }) => {
           const id = params.row.id ?? "";
           const checked = selectedAssignedUserIds.includes(id);
-          return <input type="checkbox" checked={checked} onChange={e => onUserToggle(id, e.target.checked)} />;
+          return (
+            <Checkbox
+              checked={checked}
+              onChange={e => onUserToggle(id, e.target.checked)}
+              aria-label={params.row.name ?? params.row.email ?? ""}
+              size="small"
+            />
+          );
         },
       },
       {
@@ -125,26 +103,16 @@ function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlot
         minWidth: 200,
         renderCell: (params: { row: PermissionGroupDetailFieldsFragment_assignedUsers }) => {
           const user = params.row;
-          const profileHref = user.id ? profileHrefForUser(user.id) : undefined;
           return (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 1 }}>
-              <StyledUserAvatar>{userInitials(user.name)}</StyledUserAvatar>
-              <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                {profileHref ? (
-                  <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
-                    <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                      {user.name}
-                    </Typography>
-                  </Link>
-                ) : (
-                  <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                    {user.name}
-                  </Typography>
-                )}
-                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                  {user.email}
-                </Typography>
-              </Box>
+            <Box sx={{ display: "flex", alignItems: "center", py: 1, height: "100%" }}>
+              <DesktopPersonProfileLinkCell
+                href={user.id ? profileHrefForUser(user.id) : undefined}
+                name={user.name ?? ""}
+                avatarSize={32}
+                label={user.email ?? undefined}
+                typographyVariant="bodyMd"
+                fontWeight={600}
+              />
             </Box>
           );
         },

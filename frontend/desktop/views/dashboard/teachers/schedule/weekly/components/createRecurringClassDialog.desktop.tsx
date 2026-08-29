@@ -8,12 +8,12 @@ import type {
   CreateRecurringClassTimezoneSelectSlotProps,
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
 import { QuotaAutocomplete } from "@/frontend/common/components/ui/input/quotaSelect";
-import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { useCreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/useCreateRecurringClassDialogProps";
 import type {
   CreateRecurringClassDialogProps,
   CreateRecurringClassDialogViewModel,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
+import { TimezoneSelectDesktop } from "@/frontend/desktop/components/ui/input/timezoneSelect";
 import { StudentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 
 function DesktopDialogShell({ open, onClose, title, children }: Readonly<CreateRecurringClassDialogShellSlotProps>) {
@@ -55,7 +55,7 @@ function DesktopTimezoneSelect({
   disabled,
 }: Readonly<CreateRecurringClassTimezoneSelectSlotProps>) {
   return (
-    <TimezoneSelect
+    <TimezoneSelectDesktop
       value={value}
       onChangeAction={onChangeAction}
       label={label}

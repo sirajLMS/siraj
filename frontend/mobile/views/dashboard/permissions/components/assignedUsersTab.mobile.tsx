@@ -1,9 +1,10 @@
 "use client";
 
 import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, OutlinedInput, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import {
   AssignedUsersBulkActionBar,
@@ -16,8 +17,7 @@ import {
 import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTab.types";
 import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
 import { assignedUsersTabLabels } from "@/frontend/common/views/dashboard/permissions/utils";
-import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
-import { Link } from "@/shared/i18n";
+import { MobileCardList, MobileCardListItem, MobilePersonProfileLink } from "@/frontend/mobile/components/ui";
 
 const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -29,15 +29,6 @@ const StyledAssignUsersButton = styled(Button)(({ theme }) => ({
   "&:hover": {
     backgroundColor: theme.palette.primary.dark,
   },
-}));
-
-const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
-  width: 40,
-  height: 40,
-  backgroundColor: theme.palette.primaryContainer,
-  color: theme.palette.onPrimaryContainer,
-  typography: "bodyMd",
-  fontWeight: 600,
 }));
 
 function AssignedUsersToolbar({
@@ -59,23 +50,7 @@ function AssignedUsersToolbar({
 }>) {
   return (
     <StyledUserToolbar>
-      <OutlinedInput
-        type="text"
-        value={searchQuery}
-        onChange={e => onSearchChange(e.target.value)}
-        placeholder={searchPlaceholder}
-        autoComplete="off"
-        sx={theme => ({
-          width: "100%",
-          padding: `${theme.spacing(1)} ${theme.spacing(3.5)} ${theme.spacing(1)} ${theme.spacing(3.5)}`,
-          border: `1px solid ${theme.palette.outlineVariant}`,
-          borderRadius: theme.shape.borderRadius,
-          backgroundColor: theme.palette.surfaceContainer,
-          color: theme.palette.onSurface,
-          outline: "none",
-          typography: "bodyMd",
-        })}
-      />
+      <SearchBarField value={searchQuery} placeholder={searchPlaceholder} onChange={onSearchChange} />
       <StyledAssignUsersButton
         variant="contained"
         startIcon={<PersonAddOutlined />}
@@ -110,12 +85,6 @@ function AssignedUserCard({
   onRevokeUser: (userId: string) => void;
 }>) {
   const id = user.id ?? "";
-  const initials = user.name
-    ?.split(" ")
-    .map((w: string) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
   const assignedOn = groupCreatedAt ? new Date(groupCreatedAt).toLocaleDateString() : new Date().toLocaleDateString();
 
   return (
@@ -127,36 +96,20 @@ function AssignedUserCard({
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <StyledUserAvatar>{initials}</StyledUserAvatar>
-          <Box sx={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
-            {profileHref ? (
-              <Link href={profileHref} style={{ textDecoration: "none", color: "inherit" }}>
-                <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                  {user.name}
-                </Typography>
-              </Link>
-            ) : (
-              <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                {user.name}
-              </Typography>
-            )}
-            <Typography
-              variant="labelMd"
-              sx={theme => ({
-                color: theme.palette.text.secondary,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              })}
-            >
-              {user.email}
-            </Typography>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <MobilePersonProfileLink
+              href={profileHref}
+              name={user.name ?? ""}
+              avatarSize={40}
+              label={user.email ?? undefined}
+              typographyVariant="bodyMd"
+              fontWeight={600}
+            />
           </Box>
-          <input
-            type="checkbox"
+          <Checkbox
             checked={checked}
             onChange={e => onUserToggle(id, e.target.checked)}
-            style={{ width: 20, height: 20 }}
+            aria-label={user.name ?? user.email ?? ""}
           />
         </Box>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>

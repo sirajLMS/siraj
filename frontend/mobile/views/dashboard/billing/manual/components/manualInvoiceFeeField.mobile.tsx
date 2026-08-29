@@ -1,15 +1,11 @@
 "use client";
 
-import { InputAdornment, TextField, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { TextField } from "@mui/material";
 import { Controller } from "react-hook-form";
+import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import type { ManualInvoiceFeeFieldMobileProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceFeeField.types";
-
-const StyledCurrencyLabel = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.primary.main,
-}));
 
 export function ManualInvoiceFeeFieldMobile({
   control,
@@ -17,7 +13,7 @@ export function ManualInvoiceFeeFieldMobile({
   labels,
   draftCurrency,
 }: Readonly<ManualInvoiceFeeFieldMobileProps>) {
-  const currencySymbol = getCurrencySymbol(draftCurrency ?? "SAR");
+  const currencySymbol = getCurrencySymbol(draftCurrency ?? CurrencyCode.Usd);
 
   return (
     <Controller
@@ -39,11 +35,7 @@ export function ManualInvoiceFeeFieldMobile({
           })}
           slotProps={{
             input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <StyledCurrencyLabel>{currencySymbol}</StyledCurrencyLabel>
-                </InputAdornment>
-              ),
+              startAdornment: <CurrencySymbolAdornment symbol={currencySymbol} />,
               inputProps: { step: "0.01", min: "0" },
             },
             htmlInput: { autoComplete: "off" },

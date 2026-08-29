@@ -1,7 +1,8 @@
 "use client";
 
+import { Fragment } from "react";
 import {
-  ClassListWrapperPassthrough,
+  type FutureClassListWrapperProps,
   FutureScheduleViewShared,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/__shared__/futureScheduleViewShared";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
@@ -12,6 +13,18 @@ import { JumpToDateHeaderDesktop } from "@/frontend/desktop/views/dashboard/teac
 import { MiniCalendarDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/miniCalendar.desktop";
 import { SupportContactDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/supportContact.desktop";
 
+// Desktop intentionally keeps the plain card stack — no list primitive or
+// pager — so the wrapper just materializes each row through renderItem.
+function FutureClassListDesktop({ rows, getKey, renderItem }: FutureClassListWrapperProps) {
+  return (
+    <>
+      {rows.map(item => (
+        <Fragment key={getKey(item)}>{renderItem(item)}</Fragment>
+      ))}
+    </>
+  );
+}
+
 export function FutureScheduleViewDesktop(props: Readonly<FutureScheduleViewModel>) {
   return (
     <FutureScheduleViewShared
@@ -21,7 +34,7 @@ export function FutureScheduleViewDesktop(props: Readonly<FutureScheduleViewMode
         PageHeader: DesktopPageHeader,
         JumpToDateHeader: JumpToDateHeaderDesktop,
         FutureClassCard: FutureClassCardDesktop,
-        ClassListWrapper: ClassListWrapperPassthrough,
+        ClassListWrapper: FutureClassListDesktop,
         MiniCalendar: MiniCalendarDesktop,
         ImportantNotes: ImportantNotesDesktop,
         SupportContact: SupportContactDesktop,

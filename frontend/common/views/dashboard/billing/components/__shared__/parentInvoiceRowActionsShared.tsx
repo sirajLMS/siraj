@@ -1,8 +1,9 @@
 "use client";
 
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { Box, Button, IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Tooltip } from "@mui/material";
 import type { ComponentType } from "react";
+import { FilterButton } from "@/frontend/common/components/ui";
 import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   ParentInvoiceRowActionLabels,
@@ -32,6 +33,24 @@ export interface ParentInvoiceRowActionsConfig {
   readonly unpaidPrimaryFullWidth: boolean;
 }
 
+function InvoiceRowIconAction({
+  label,
+  onClick,
+  icon,
+}: {
+  readonly label: string;
+  readonly onClick: () => void;
+  readonly icon: React.ReactNode;
+}): React.ReactNode {
+  return (
+    <Tooltip title={label}>
+      <IconButton size="small" aria-label={label} onClick={onClick}>
+        {icon}
+      </IconButton>
+    </Tooltip>
+  );
+}
+
 function PaidRowActionsShared({
   labels,
   onOpenDetails,
@@ -45,16 +64,16 @@ function PaidRowActionsShared({
 }): React.ReactNode {
   return (
     <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
-      <Tooltip title={labels.viewDetails}>
-        <IconButton size="small" aria-label={labels.viewDetails} onClick={onOpenDetails}>
-          <VisibilityOutlined fontSize="small" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title={labels.downloadPdf}>
-        <IconButton size="small" aria-label={labels.downloadPdf} onClick={() => onDownloadPdf(invoiceId)}>
-          <DownloadOutlined fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <InvoiceRowIconAction
+        label={labels.viewDetails}
+        onClick={onOpenDetails}
+        icon={<VisibilityOutlined fontSize="small" />}
+      />
+      <InvoiceRowIconAction
+        label={labels.downloadPdf}
+        onClick={() => onDownloadPdf(invoiceId)}
+        icon={<DownloadOutlined fontSize="small" />}
+      />
     </Box>
   );
 }
@@ -135,14 +154,9 @@ export function ParentInvoiceRowActionsShared(
       }}
     >
       {showViewFeedback ? (
-        <Button
-          size={unpaidViewFeedbackSize}
-          variant="outlined"
-          fullWidth={unpaidViewFeedbackFullWidth}
-          onClick={openDetails}
-        >
+        <FilterButton size={unpaidViewFeedbackSize} fullWidth={unpaidViewFeedbackFullWidth} onClick={openDetails}>
           {labels.viewFeedback}
-        </Button>
+        </FilterButton>
       ) : null}
       {showPayNow ? (
         <PrimaryAction size={unpaidPrimarySize} fullWidth={unpaidPrimaryFullWidth} onClick={() => onPayNow(target)}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type {
   PermissionGroupDetailFieldsFragment,
   UsersQuery_users,
@@ -10,14 +10,11 @@ import {
   EditOverridesButton,
   OverridesCellBox,
   StatisticBox,
-  StyledUserAvatar,
   UserGroupsChips,
 } from "@/frontend/common/views/dashboard/permissions/components/__shared__/userOverridesDataGridShared";
-import { getAvatarInitials } from "@/frontend/common/views/dashboard/permissions/components/__shared__/userOverridesDataGridShared.helpers";
 import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { getUserGroupsForUser } from "@/frontend/common/views/dashboard/permissions/utils";
-import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
-import { Link } from "@/shared/i18n";
+import { MobileCardList, MobileCardListItem, MobilePersonProfileLink } from "@/frontend/mobile/components/ui";
 
 interface UserOverridesCardProps {
   readonly labels: UserOverridesDataGridProps["labels"];
@@ -34,41 +31,24 @@ function UserOverridesCardMobile({ labels, user, groups, onManageOverrides }: Re
   return (
     <MobileCardListItem variant="edge-to-edge">
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <StyledUserAvatar>{getAvatarInitials(user)}</StyledUserAvatar>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            {userId && (
-              <Link href={profileHrefForUser(userId)} style={{ textDecoration: "none", color: "inherit" }}>
-                <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-                  {user.name}
-                </Typography>
-              </Link>
-            )}
-            <Typography
-              variant="labelMd"
-              sx={theme => ({
-                color: theme.palette.text.secondary,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              })}
-            >
-              {user.email}
-            </Typography>
-          </Box>
-        </Box>
+        <MobilePersonProfileLink
+          href={user.id ? profileHrefForUser(user.id) : undefined}
+          name={user.name ?? ""}
+          avatarUrl={user.avatarUrl}
+          label={user.email ?? undefined}
+        />
 
         <UserGroupsChips userGroups={userGroups} />
 
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <StatisticBox label={t.explicitGrant}>
-            <OverridesCellBox userId={userId} userGroups={userGroups} type="grants" />
+            <OverridesCellBox userId={userId} userGroups={userGroups} type="grants" labels={t} />
           </StatisticBox>
           <StatisticBox label={t.explicitDeny}>
-            <OverridesCellBox userId={userId} userGroups={userGroups} type="revokes" />
+            <OverridesCellBox userId={userId} userGroups={userGroups} type="revokes" labels={t} />
           </StatisticBox>
           <StatisticBox label={t.columnStatus}>
-            <OverridesCellBox userId={userId} userGroups={userGroups} type="status" />
+            <OverridesCellBox userId={userId} userGroups={userGroups} type="status" labels={t} />
           </StatisticBox>
         </Box>
 

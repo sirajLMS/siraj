@@ -27,6 +27,7 @@ import {
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
+import { DialogPresets } from "@/frontend/common/components/ui/dialog";
 import type { AppearanceDraftInput, AppearanceSettingsQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   appearanceSettingsQueryDocument,
@@ -442,7 +443,7 @@ export function CustomizeToolbar() {
         onConfirm={handleResetConfirm}
       />
 
-      <Dialog open={conflictOpen} onClose={handleConflictCancel}>
+      <Dialog {...DialogPresets.confirm} open={conflictOpen} onClose={handleConflictCancel}>
         <DialogTitle>{t.conflictTitle}</DialogTitle>
         <DialogContent>{t.conflictBody}</DialogContent>
         <DialogActions>

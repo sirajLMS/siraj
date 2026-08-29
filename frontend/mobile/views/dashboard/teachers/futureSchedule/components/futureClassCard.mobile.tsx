@@ -7,6 +7,7 @@ import type {
   FutureClassCardStyleProps,
 } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types/futureClassCardShared.types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge/MobileStatusBadge";
+import { MobileFilterButton, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card/MobileCardListItem";
 import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLink.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingJoinAction.mobile";
@@ -25,6 +26,8 @@ const MOBILE_SLOTS: FutureClassCardSlots = {
   ClassProfileLink: props => <MobileClassProfileLink {...props} typographyVariant="titleLg" fontWeight={700} />,
   StatusBadge: MobileStatusBadge,
   MeetingJoinAction: MobileMeetingJoinAction,
+  LeaveRequestButton: MobileFilterButton,
+  ViewMaterialsButton: MobilePrimaryPageAction,
 };
 
 export function FutureClassCardMobile(props: Readonly<FutureClassCardProps>) {

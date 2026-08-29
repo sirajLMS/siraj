@@ -6,6 +6,7 @@ import type { TeacherOnboardingViewModel } from "@/frontend/common/views/dashboa
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
+import { CountrySelectMobile } from "@/frontend/mobile/components/ui/input/countrySelect";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function TeacherOnboardingMobileView({ ...vm }: Readonly<TeacherOnboardingViewModel>) {
@@ -19,6 +20,7 @@ export function TeacherOnboardingMobileView({ ...vm }: Readonly<TeacherOnboardin
         SectionPanel: MobileSectionPanel,
         PrimaryPageAction: MobilePrimaryPageAction,
         FormSuccessSnackbar: FormSuccessSnackbar,
+        CountrySelectComponent: CountrySelectMobile,
         userEntityLabels,
         formActionsFlexWrap: "wrap",
       }}

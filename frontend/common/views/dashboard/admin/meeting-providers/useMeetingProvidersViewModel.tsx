@@ -1,14 +1,9 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { DeleteOutlined, EditOutlined, VideocamOutlined } from "@mui/icons-material";
-import { Avatar, Box, Chip, IconButton, Stack, Typography } from "@mui/material";
-import type { GridColDef } from "@mui/x-data-grid";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui";
-import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display/localizedStringDisplay/LocalizedStringDisplay";
 import { AppPermission, type MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deleteMeetingProviderMutationDocument,
@@ -22,115 +17,6 @@ import type {
   MeetingProvidersViewProps,
 } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
-
-function buildMeetingProviderColumns(
-  labels: MeetingProvidersViewLabels,
-  onEdit: (row: MeetingProviderFieldsFragment) => void,
-  onDelete: (row: MeetingProviderFieldsFragment) => void
-): GridColDef<MeetingProviderFieldsFragment>[] {
-  return [
-    {
-      field: "logoUrl",
-      headerName: labels.logo ?? "Logo",
-      width: 72,
-      sortable: false,
-      filterable: false,
-      renderCell: ({ row }) => (
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-          {row.logoUrl ? (
-            <Avatar
-              src={row.logoUrl}
-              alt={row.slug ?? undefined}
-              variant="rounded"
-              sx={{ width: 36, height: 36, "& img": { objectFit: "contain" } }}
-            />
-          ) : (
-            <Avatar variant="rounded" sx={{ width: 36, height: 36 }}>
-              <VideocamOutlined fontSize="small" />
-            </Avatar>
-          )}
-        </Box>
-      ),
-    },
-    {
-      field: "name",
-      headerName: labels.name,
-      flex: 1.2,
-      minWidth: 150,
-      renderCell: ({ row }) => <LocalizedStringDisplay value={row.name} />,
-    },
-    {
-      field: "description",
-      headerName: labels.description ?? "Description",
-      flex: 1.5,
-      minWidth: 180,
-      renderCell: ({ row }) => (row.description ? <LocalizedStringDisplay value={row.description} /> : "—"),
-    },
-    {
-      field: "instructions",
-      headerName: labels.instructions ?? "Instructions",
-      flex: 1.5,
-      minWidth: 180,
-      renderCell: ({ row }) => (row.instructions ? <LocalizedStringDisplay value={row.instructions} /> : "—"),
-    },
-    {
-      field: "urlAllowlist",
-      headerName: labels.urlAllowlist ?? "Allowed Hosts",
-      flex: 1.5,
-      minWidth: 180,
-      renderCell: ({ row }) => (
-        <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5, py: 1 }}>
-          {(row.urlAllowlist ?? []).map(host => (
-            <Chip key={host} size="small" variant="outlined" label={host} />
-          ))}
-        </Stack>
-      ),
-    },
-    {
-      field: "urlExample",
-      headerName: labels.urlExample ?? "Example URL",
-      flex: 1.2,
-      minWidth: 160,
-      renderCell: ({ row }) =>
-        row.urlExample ? (
-          <Typography variant="body2" sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-            {row.urlExample}
-          </Typography>
-        ) : (
-          "—"
-        ),
-    },
-    {
-      field: "isActive",
-      headerName: labels.active,
-      width: 100,
-      renderCell: ({ value }) => (
-        <StatusBadge
-          category="syncStatus"
-          status={value ? "success" : "pending"}
-          label={value ? labels.active : labels.inactive}
-        />
-      ),
-    },
-    {
-      field: "actions",
-      headerName: labels.actions,
-      width: 100,
-      sortable: false,
-      filterable: false,
-      renderCell: ({ row }) => (
-        <Stack direction="row" spacing={0.5}>
-          <IconButton size="small" aria-label={labels.edit} onClick={() => onEdit(row)}>
-            <EditOutlined fontSize="small" />
-          </IconButton>
-          <IconButton size="small" aria-label={labels.delete} onClick={() => onDelete(row)}>
-            <DeleteOutlined fontSize="small" />
-          </IconButton>
-        </Stack>
-      ),
-    },
-  ];
-}
 
 function useNotificationState(): MeetingProvidersNotificationState {
   const [errorOpen, setErrorOpen] = useState(false);
@@ -230,11 +116,6 @@ export function useMeetingProvidersViewModel(
     [router]
   );
 
-  const columns = useMemo(
-    () => buildMeetingProviderColumns(columnLabels, handleEditRow, setDeleteProvider),
-    [columnLabels, handleEditRow]
-  );
-
   const handleCreateOpen = useCallback(() => {
     router.push("/meeting-providers/create");
   }, [router]);
@@ -257,7 +138,6 @@ export function useMeetingProvidersViewModel(
     t: columnLabels,
     locale,
     rows,
-    columns,
     loading,
     createOpen: false,
     editProvider: null,

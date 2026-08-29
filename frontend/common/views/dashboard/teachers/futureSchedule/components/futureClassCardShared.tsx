@@ -1,7 +1,7 @@
 "use client";
 
 import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
-import { alpha, Box, Button, Stack, type Theme, Tooltip, Typography } from "@mui/material";
+import { alpha, Box, Stack, type Theme, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import type { TeacherFutureScheduleQuery_teacherFutureSchedule_classes as FutureClass } from "@/frontend/common/graphql/generated/gql/graphql";
 import { classHref } from "@/frontend/common/utils/profileHref";
@@ -118,10 +118,16 @@ interface ActionButtonsProps {
   readonly item: FutureClass;
   readonly onRequestLeave?: () => void;
   readonly labels: TeacherFutureScheduleLabels;
+  readonly slots: FutureClassCardSlots;
   readonly style: FutureClassCardStyleProps;
 }
 
-function ActionButtons({ item, onRequestLeave, labels, style }: Readonly<ActionButtonsProps>) {
+function ActionButtons({ item, onRequestLeave, labels, slots, style }: Readonly<ActionButtonsProps>) {
+  const { LeaveRequestButton, ViewMaterialsButton } = slots;
+  const quotaDisabled = item.leaveRequestDisabled === true && item.leaveRequestDisabledReason === "quota";
+  const leaveLabel = quotaDisabled ? labels.quotaReached : labels.requestLeave;
+  const leaveIcon = quotaDisabled ? <BlockOutlined /> : <EventBusyOutlined />;
+
   return (
     <Stack
       direction="row"
@@ -131,65 +137,19 @@ function ActionButtons({ item, onRequestLeave, labels, style }: Readonly<ActionB
         alignSelf: style.actionButtonsAlignSelf,
       }}
     >
-      {item.leaveRequestDisabled ? (
-        <Button
-          variant="outlined"
-          disabled
-          startIcon={item.leaveRequestDisabledReason === "quota" ? <BlockOutlined /> : <EventBusyOutlined />}
-          sx={theme => ({
-            borderRadius: 2,
-            fontSize: theme.typography.labelUppercase.fontSize,
-            fontWeight: 700,
-            letterSpacing: "0.05em",
-            backgroundColor: theme.palette.surfaceContainerLow,
-            color: theme.palette.onSurface,
-            borderColor: theme.palette.outlineVariant,
-            opacity: 0.38,
-            flex: style.actionButtonFlex,
-          })}
-        >
-          {item.leaveRequestDisabledReason === "quota" ? labels.quotaReached : labels.requestLeave}
-        </Button>
-      ) : (
-        <Button
-          variant="outlined"
-          startIcon={<EventBusyOutlined />}
-          onClick={onRequestLeave}
-          sx={theme => ({
-            borderRadius: 2,
-            fontSize: theme.typography.labelUppercase.fontSize,
-            fontWeight: 700,
-            letterSpacing: "0.05em",
-            color: theme.palette.primary.main,
-            borderColor: theme.palette.primary.main,
-            flex: style.actionButtonFlex,
-            "&:hover": {
-              backgroundColor: theme.palette.primary.main,
-              color: theme.palette.onPrimary,
-            },
-          })}
-        >
-          {labels.requestLeave}
-        </Button>
-      )}
+      <LeaveRequestButton
+        startIcon={leaveIcon}
+        disabled={item.leaveRequestDisabled === true}
+        onClick={onRequestLeave}
+        sx={{ flex: style.actionButtonFlex }}
+      >
+        {leaveLabel}
+      </LeaveRequestButton>
       <Tooltip title={labels.notifications.noSubjectAssigned}>
         <span>
-          <Button
-            variant="contained"
-            disabled
-            sx={theme => ({
-              borderRadius: 2,
-              fontSize: theme.typography.labelUppercase.fontSize,
-              fontWeight: 700,
-              letterSpacing: "0.05em",
-              backgroundColor: theme.palette.primary.main,
-              color: theme.palette.onPrimary,
-              px: style.materialsButtonPx,
-              flex: style.actionButtonFlex,
-            })}
-          >
+          <ViewMaterialsButton disabled sx={{ px: style.materialsButtonPx, flex: style.actionButtonFlex }}>
             {labels.viewMaterials}
-          </Button>
+          </ViewMaterialsButton>
         </span>
       </Tooltip>
     </Stack>
@@ -223,7 +183,7 @@ export function FutureClassCardShared({
         <DateSquare date={item.scheduledDate ?? ""} isRescheduled={isRescheduled} />
         <ClassInfo item={item} labels={labels} slots={slots} style={style} />
       </Stack>
-      <ActionButtons item={item} onRequestLeave={onRequestLeave} labels={labels} style={style} />
+      <ActionButtons item={item} onRequestLeave={onRequestLeave} labels={labels} slots={slots} style={style} />
     </Stack>
   );
 

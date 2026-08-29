@@ -16,7 +16,10 @@ export type StatusBadgeCategory =
   | "syncStatus"
   | "quotaStatus"
   | "cronRunStatus"
-  | "cronScheduleStatus";
+  | "cronScheduleStatus"
+  | "overrideStatus"
+  | "groupType"
+  | "creditTransaction";
 
 export type StatusPaletteKey = "active" | "pending" | "blocked" | "confirmed" | "completed" | "cancelled";
 

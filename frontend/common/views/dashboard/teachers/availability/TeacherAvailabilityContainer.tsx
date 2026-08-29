@@ -1,12 +1,12 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Box, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { addDays, format } from "date-fns";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import { ErrorState } from "@/frontend/common/components/ui/state";
 import {
   AvailabilitySearchSortBy,
   type DayOfWeek,
@@ -14,6 +14,7 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   AvailabilityEntry,
@@ -152,13 +153,10 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
   const notifications = useNotifications();
   useDocumentTitle(null, Translation.Dashboard.TeacherAvailability, "pageTitle");
 
-  const [searchInput, setSearchInput] = useState<AvailabilitySearchFormData>({
-    fromTime: null,
-    toTime: null,
-    gender: null,
-  });
-
-  const [hasSearched, setHasSearched] = useState(false);
+  const searchInput = useTeacherAvailabilityStore(state => state.filters);
+  const hasSearched = useTeacherAvailabilityStore(state => state.hasSearched);
+  const setSearchFilters = useTeacherAvailabilityStore(state => state.setSearchFilters);
+  const setHasSearched = useTeacherAvailabilityStore(state => state.setHasSearched);
 
   const graphqlInput = hasSearched
     ? buildGraphQLInput(searchInput)
@@ -188,7 +186,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
 
   const handleSearch = useCallback(
     (formData: AvailabilitySearchFormData) => {
-      setSearchInput(formData);
+      setSearchFilters(formData);
       if (!formData.fromTime || !formData.toTime) {
         notifications.show(availabilityLabels.errors.missingTimeRange, { severity: "warning", autoHideDuration: 4000 });
         return;
@@ -197,7 +195,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
       const input = buildGraphQLInput(formData);
       void refetch({ input });
     },
-    [refetch, notifications, availabilityLabels]
+    [refetch, notifications, availabilityLabels, setSearchFilters, setHasSearched]
   );
 
   const handleBlockClick = useCallback(
@@ -214,6 +212,10 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
     notifications.show(availabilityLabels.exportPdfComingSoon, { severity: "info", autoHideDuration: 4000 });
   }, [notifications, availabilityLabels]);
 
+  const handleRetry = useCallback(() => {
+    void refetch();
+  }, [refetch]);
+
   const props: UseTeacherAvailabilityViewModelProps = {
     availability,
     insights,
@@ -229,9 +231,7 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
   if (error) {
     logger.error("Error loading teacher availability:", { error });
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-        <Typography sx={theme => ({ color: theme.palette.error.main })}>{commonLabels.loadFailed}</Typography>
-      </Box>
+      <ErrorState message={commonLabels.loadFailed} onRetry={handleRetry} />
     );
   }
 

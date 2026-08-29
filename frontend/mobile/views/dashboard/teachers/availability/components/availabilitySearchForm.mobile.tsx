@@ -4,6 +4,7 @@
 import { AvailabilitySearchFormShared } from "@/frontend/common/views/dashboard/teachers/availability/components/__shared__/availabilitySearchFormShared";
 import type { AvailabilitySearchFormProps } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import { MobileAppTimePicker } from "@/frontend/mobile/components/ui/form/time";
+import { GenderSelectorMobile } from "@/frontend/mobile/components/ui/input/genderSelector";
 
 export function AvailabilitySearchFormMobile(props: Readonly<AvailabilitySearchFormProps>) {
   return (
@@ -11,6 +12,7 @@ export function AvailabilitySearchFormMobile(props: Readonly<AvailabilitySearchF
       {...props}
       options={{
         TimePickerComponent: MobileAppTimePicker,
+        GenderSelectorComponent: GenderSelectorMobile,
         timePickerSize: "small",
         formLayoutSx: {
           display: "flex",

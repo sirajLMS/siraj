@@ -1,10 +1,13 @@
 "use client";
 
-import { Avatar, Box, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { type SxProps, styled, type Theme } from "@mui/material/styles";
 import type { ComponentType } from "react";
+import { UserAvatar } from "@/frontend/common/components/ui/avatar";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { PermissionGroupChipShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionGroupChipShared";
 import type { OverridesUserSidebarProps } from "@/frontend/common/views/dashboard/permissions/types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 export interface OverridesUserSidebarSharedOptions {
   readonly sidebarContainerSx: SxProps<Theme>;
@@ -24,15 +27,6 @@ const StyledUserInfoBox = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
 }));
 
-const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
-  width: 80,
-  height: 80,
-  backgroundColor: theme.palette.primaryContainer,
-  color: theme.palette.onPrimaryContainer,
-  typography: "headlineLg",
-  fontWeight: 600,
-}));
-
 const StyledGroupsSection = styled(Box)({
   width: "100%",
   textAlign: "left",
@@ -46,45 +40,21 @@ const StyledGroupsSectionLabel = styled(Typography)(({ theme }) => ({
   letterSpacing: "0.05em",
 }));
 
-const StyledGroupChip = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1.5),
-  padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
-  borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
-  backgroundColor: theme.palette.secondaryContainer,
-  color: theme.palette.onSecondaryContainer,
-}));
-
-const StyledGroupName = styled(Typography)({
-  fontWeight: 500,
-});
-
 export function OverridesUserSidebarShared({
   labels,
   user,
   userGroups,
   options,
-  slots,
 }: Readonly<OverridesUserSidebarProps> & {
   readonly options: OverridesUserSidebarSharedOptions;
   readonly slots: OverridesUserSidebarSharedSlots;
 }) {
   const t = labels;
-  const { LocalizedStringDisplay } = slots;
 
   return (
     <Box sx={options.sidebarContainerSx}>
       <StyledUserInfoBox>
-        <StyledUserAvatar src={user.avatarUrl ?? undefined} alt={user.name ?? ""}>
-          {user.name
-            ?.split(" ")
-            .map(w => w[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase()}
-        </StyledUserAvatar>
+        <UserAvatar src={user.avatarUrl ?? undefined} label={user.name ?? ""} size={80} />
         <Box>
           <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
             {user.name}
@@ -104,11 +74,18 @@ export function OverridesUserSidebarShared({
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             {userGroups.map(g => (
-              <StyledGroupChip key={g.id ?? g.slug}>
-                <StyledGroupName variant="bodyMd">
-                  <LocalizedStringDisplay value={g.name ?? {}} typographyVariant="bodyMd" />
-                </StyledGroupName>
-              </StyledGroupChip>
+              <PermissionGroupChipShared
+                key={g.id ?? g.slug}
+                label={resolveLocalizedString(g.name)}
+                sx={theme => ({
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  px: 2,
+                  py: 1,
+                  borderRadius: Number(theme.shape.borderRadius) * 1.5,
+                })}
+              />
             ))}
           </Box>
         )}

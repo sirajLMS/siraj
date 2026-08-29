@@ -1,14 +1,14 @@
 "use client";
 
-import { DownloadOutlined, FilterListOutlined } from "@mui/icons-material";
-import { Box, Collapse, Fade, IconButton, Skeleton } from "@mui/material";
-import { type ReactElement, useState } from "react";
+import { DownloadOutlined } from "@mui/icons-material";
+import { Box, Fade, Skeleton } from "@mui/material";
+import type { ReactElement } from "react";
 import type { QuotaInsightsViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel";
 import {
   buildQuotaInsightsMetrics,
   quotaInsightsBreadcrumbs,
 } from "@/frontend/common/views/dashboard/billing/quota/utils";
-import { MobileExportButton, MobileFilterButton } from "@/frontend/mobile/components/ui/button";
+import { MobileExportButton } from "@/frontend/mobile/components/ui/button";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card/MobileMetricCardGrid";
 import { MobileContentStack } from "@/frontend/mobile/components/ui/container/MobileContentStack";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container/MobileSectionPanel";
@@ -50,7 +50,6 @@ function renderMobileChartContent(
 
 export function QuotaInsightsMobileView(vm: Readonly<QuotaInsightsViewModel>): ReactElement {
   const { labels, loading, error, metrics, chartData, exportCsv } = vm;
-  const [filtersOpen, setFiltersOpen] = useState(false);
 
   if (error) {
     return <MobileErrorState message={labels.errors.loadFailed} />;
@@ -83,28 +82,6 @@ export function QuotaInsightsMobileView(vm: Readonly<QuotaInsightsViewModel>): R
 
           <Box aria-busy={loading}>
             <MobileMetricCardGrid metrics={buildQuotaInsightsMetrics(vm)} />
-
-            {/* Collapsible Filters */}
-            <MobileSectionPanel
-              title={labels.insightsDateRangeLabel}
-              actions={
-                <IconButton
-                  size="small"
-                  aria-label={labels.insightsDateRangeLabel}
-                  onClick={() => setFiltersOpen(v => !v)}
-                >
-                  <FilterListOutlined />
-                </IconButton>
-              }
-            >
-              <Collapse in={filtersOpen}>
-                <MobileContentStack gap={1.5}>
-                  <MobileFilterButton>{labels.insightsKindLabel}</MobileFilterButton>
-                  <MobileFilterButton>{labels.insightsStatusLabel}</MobileFilterButton>
-                  <MobileFilterButton>{labels.insightsStudentLabel}</MobileFilterButton>
-                </MobileContentStack>
-              </Collapse>
-            </MobileSectionPanel>
           </Box>
 
           {/* Charts */}

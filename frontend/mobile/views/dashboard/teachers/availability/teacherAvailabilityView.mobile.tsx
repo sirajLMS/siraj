@@ -1,13 +1,6 @@
 "use client";
 
-import { FormProvider, useForm } from "react-hook-form";
-import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
-import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
-import { availabilitySearchResolverFactory } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
-import type {
-  AvailabilitySearchFormData,
-  TeacherAvailabilityInsights,
-} from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { FormProvider } from "react-hook-form";
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import {
   MobileExportButton,
@@ -19,36 +12,16 @@ import {
 import { AvailabilitySearchFormMobile } from "@/frontend/mobile/views/dashboard/teachers/availability/components/availabilitySearchForm.mobile";
 import { WeeklyAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard/teachers/availability/components/weeklyAvailabilityGrid.mobile";
 
-interface TeacherAvailabilityMobileViewProps extends Omit<TeacherAvailabilityViewModel, "insights"> {
-  readonly insights?: TeacherAvailabilityInsights;
-}
-
-function resolveDefaultFilters(
-  propFilters: AvailabilitySearchFormData,
-  storeFilters: { readonly fromTime: Date | null; readonly toTime: Date | null; readonly gender: Gender | null }
-): AvailabilitySearchFormData {
-  const storeHasDraft = storeFilters.fromTime !== null || storeFilters.toTime !== null || storeFilters.gender !== null;
-  return storeHasDraft ? storeFilters : propFilters;
-}
-
 export function TeacherAvailabilityMobileView({
   labelsBySection,
   availability,
-  defaultFilters,
+  formMethods,
   loading,
   onExportPdf,
   onSearch,
   onBlockClick,
-}: Readonly<TeacherAvailabilityMobileViewProps>) {
+}: Readonly<TeacherAvailabilityViewModel>) {
   const { shell: labels, table: tableLabels } = labelsBySection;
-  const storeFilters = useTeacherAvailabilityStore(
-    (state: { readonly filters: AvailabilitySearchFormData }) => state.filters
-  );
-
-  const methods = useForm<AvailabilitySearchFormData>({
-    resolver: availabilitySearchResolverFactory({ invalidGender: labels.validation.invalidGender }),
-    defaultValues: resolveDefaultFilters(defaultFilters, storeFilters),
-  });
 
   return (
     <MobilePageContainer>
@@ -63,7 +36,7 @@ export function TeacherAvailabilityMobileView({
       />
 
       <MobileSectionPanel title={labels.searchTitle} edgeToEdge>
-        <FormProvider {...methods}>
+        <FormProvider {...formMethods}>
           <AvailabilitySearchFormMobile
             onSearch={onSearch}
             labels={{

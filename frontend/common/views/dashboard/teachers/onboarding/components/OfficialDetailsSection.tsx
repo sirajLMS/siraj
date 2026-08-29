@@ -1,8 +1,10 @@
 "use client";
 
 import { Grid } from "@mui/material";
+import type { ComponentType } from "react";
 import { type Control, Controller, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
+import type { CountrySelectProps } from "@/frontend/common/components/ui/input/countrySelect/types";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
@@ -15,9 +17,16 @@ interface OfficialDetailsSectionProps {
       readonly country: string;
     };
   };
+  /** Tier-specific country picker; falls back to the viewport-agnostic variant. */
+  readonly CountrySelectComponent?: ComponentType<CountrySelectProps>;
 }
 
-export function OfficialDetailsSection({ control, errors, labels }: Readonly<OfficialDetailsSectionProps>) {
+export function OfficialDetailsSection({
+  control,
+  errors,
+  labels,
+  CountrySelectComponent = CountrySelect,
+}: Readonly<OfficialDetailsSectionProps>) {
   return (
     <Grid container spacing={3} sx={{ p: 3 }}>
       <Grid size={{ xs: 12, md: 6 }}>
@@ -28,7 +37,7 @@ export function OfficialDetailsSection({ control, errors, labels }: Readonly<Off
             const selectedCountry = field.value ? getCountryByCode(field.value) : undefined;
 
             return (
-              <CountrySelect
+              <CountrySelectComponent
                 country={selectedCountry}
                 setCountryAction={country => field.onChange(country?.code ?? "")}
                 label={`${labels.fields.country} *`}

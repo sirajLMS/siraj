@@ -142,8 +142,8 @@ export function PermissionGroupsDataGridDesktop({
         width: 130,
         renderCell: params => (
           <DesktopStatusBadge
-            category="session"
-            status={params.value ? "active" : "pending"}
+            category="groupType"
+            status={params.value ? "system" : "custom"}
             label={params.value ? t.systemBadge : t.customBadge}
           />
         ),

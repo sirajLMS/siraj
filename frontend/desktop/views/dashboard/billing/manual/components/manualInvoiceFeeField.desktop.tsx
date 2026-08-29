@@ -1,22 +1,21 @@
 "use client";
 
-import { PaymentsOutlined } from "@mui/icons-material";
-import { InputAdornment, TextField } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { TextField } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
+import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
+import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import type { BaseManualInvoiceFeeFieldProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceFeeField.types";
-
-const StyledPaymentsIcon = styled(PaymentsOutlined)(({ theme }) => ({
-  color: theme.palette.primary.main,
-}));
 
 export function ManualInvoiceFeeFieldDesktop({
   control,
   errors,
   labels,
+  draftCurrency,
 }: Readonly<BaseManualInvoiceFeeFieldProps & { draftCurrency?: CurrencyCode }>) {
+  const currencySymbol = getCurrencySymbol(draftCurrency ?? CurrencyCode.Usd);
+
   return (
     <Controller
       name="feeAmount"
@@ -34,11 +33,7 @@ export function ManualInvoiceFeeFieldDesktop({
           sx={outlinedInputSx}
           slotProps={{
             input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <StyledPaymentsIcon />
-                </InputAdornment>
-              ),
+              startAdornment: <CurrencySymbolAdornment symbol={currencySymbol} />,
               inputProps: { step: "0.01", min: "0" },
             },
             htmlInput: { autoComplete: "off" },

@@ -7,11 +7,6 @@ import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { studentHref } from "@/frontend/common/utils/profileHref";
-import {
-  buildDirectoryEmailColumn,
-  buildDirectoryIndexColumn,
-  buildDirectoryNameColumn,
-} from "@/frontend/common/views/dashboard/admin/parents/__shared__/directoryDataGridShared";
 import { ClassesLeftProgress } from "@/frontend/common/views/dashboard/admin/parents/students/components/ClassesLeftProgress";
 import type {
   StudentDirectoryDataGridLabels,
@@ -19,6 +14,11 @@ import type {
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import {
+  buildDirectoryEmailColumn,
+  buildDirectoryIndexColumn,
+  buildDirectoryNameColumn,
+} from "@/frontend/desktop/views/dashboard/admin/parents/home/components/directoryDataGridShared";
 
 interface StudentDirectoryDataGridProps {
   readonly rows: readonly StudentDirectoryRowExtended[];

@@ -70,7 +70,7 @@ export function UserOverridesDataGridDesktop({
           const userId = params.row.id;
           if (!userId) return null;
           const userGroups = getUserGroupsForUser(userId, groups);
-          return <OverridesCellBox userId={userId} userGroups={userGroups} type="grants" />;
+          return <OverridesCellBox userId={userId} userGroups={userGroups} type="grants" labels={t} />;
         },
       },
       {
@@ -84,7 +84,7 @@ export function UserOverridesDataGridDesktop({
           const userId = params.row.id;
           if (!userId) return null;
           const userGroups = getUserGroupsForUser(userId, groups);
-          return <OverridesCellBox userId={userId} userGroups={userGroups} type="revokes" />;
+          return <OverridesCellBox userId={userId} userGroups={userGroups} type="revokes" labels={t} />;
         },
       },
       {
@@ -96,7 +96,7 @@ export function UserOverridesDataGridDesktop({
           const userId = params.row.id;
           if (!userId) return null;
           const userGroups = getUserGroupsForUser(userId, groups);
-          return <OverridesCellBox userId={userId} userGroups={userGroups} type="status" />;
+          return <OverridesCellBox userId={userId} userGroups={userGroups} type="status" labels={t} />;
         },
       },
       {

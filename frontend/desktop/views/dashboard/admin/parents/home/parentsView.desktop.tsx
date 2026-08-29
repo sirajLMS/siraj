@@ -1,8 +1,9 @@
 "use client";
 
-import { FilterListOutlined, SearchOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, TextField } from "@mui/material";
-import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
+import { FilterListOutlined } from "@mui/icons-material";
+import { Box } from "@mui/material";
+import { useState } from "react";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { BaseParentsViewProps } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
 import {
@@ -13,6 +14,7 @@ import {
   DesktopPrimaryPageAction,
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
+import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { ParentsDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/parents/home/components/parentsDataGrid.desktop";
 
 // VARIANT JUSTIFICATION: extra field loading — desktop tier renders a grid-level loading overlay via
@@ -28,29 +30,18 @@ function ParentSearchField({
   readonly placeholder: string;
   readonly onSearch: (query: string) => void;
 }) {
+  // Local input state keeps the shared search field controlled; the canonical
+  // query lives in the parents store via `onSearch`.
+  const [query, setQuery] = useState("");
   return (
-    <TextField
-      size="small"
+    <SearchBarField
+      value={query}
       placeholder={placeholder}
-      onChange={e => {
-        onSearch(e.target.value);
+      onChange={value => {
+        setQuery(value);
+        onSearch(value);
       }}
-      sx={{
-        width: 300,
-        "& .MuiOutlinedInput-root": {
-          borderRadius: theme => theme.shape.borderRadius,
-          backgroundColor: theme => theme.palette.background.paper,
-        },
-      }}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchOutlined fontSize="small" />
-            </InputAdornment>
-          ),
-        },
-      }}
+      sx={{ width: 300 }}
     />
   );
 }
@@ -93,7 +84,9 @@ export function ParentsViewDesktop({
         }
       />
 
-      <ParentsMetricGrid metrics={metrics} />
+      <Box sx={{ mb: 4 }}>
+        <DesktopMetricCardGrid metrics={metrics} />
+      </Box>
 
       <DesktopSectionPanel
         contentPadding={false}

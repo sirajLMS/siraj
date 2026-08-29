@@ -48,12 +48,3 @@ export const StyledAssignFirstButtonShared = styled(Button)(({ theme }) => ({
     backgroundColor: theme.palette.primary.dark,
   },
 }));
-
-export const StyledPermissionKeyChipShared = styled(Box)(({ theme }) => ({
-  typography: "labelMd",
-  backgroundColor: theme.palette.surfaceVariant,
-  color: theme.palette.onSurfaceVariant,
-  padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
-  borderRadius: theme.shape.borderRadius,
-  display: "inline-block",
-}));

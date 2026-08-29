@@ -4,11 +4,11 @@ import { DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   isTerminalClassInstance,
   resolveWeeklyScheduleSlotStatus,
-  useDeleteConfirmDialog,
   WEEKLY_SCHEDULE_DAYS,
   WEEKLY_SCHEDULE_TIMES,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
@@ -41,21 +41,27 @@ interface SlotItemProps {
 }
 
 function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meetingJoinLabels }: Readonly<SlotItemProps>) {
-  const { open, openDialog, closeDialog } = useDeleteConfirmDialog();
+  const deleteConfirmClassInstanceId = useWeeklyScheduleStore(state => state.deleteConfirmClassInstanceId);
+  const openDeleteConfirm = useWeeklyScheduleStore(state => state.openDeleteConfirm);
+  const closeDeleteConfirm = useWeeklyScheduleStore(state => state.closeDeleteConfirm);
+  const confirmDeleteClassInstance = useWeeklyScheduleStore(state => state.confirmDeleteClassInstance);
   const t = labels;
   const classInstanceId = classItem.id ?? "";
+  const open = deleteConfirmClassInstanceId !== null && deleteConfirmClassInstanceId === classInstanceId;
   const subjectLabel = classItem.subjectName?.trim() ?? t.grid.unknownSubject;
   const statusLabel = resolveWeeklyScheduleSlotStatus(classItem, t.grid.status);
 
   const handleConfirm = () => {
-    closeDialog();
-    onRemove(classInstanceId);
+    const confirmedId = confirmDeleteClassInstance();
+    if (confirmedId !== null) {
+      onRemove(confirmedId);
+    }
   };
 
   const handleDeleteClick = (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
-    openDialog();
+    openDeleteConfirm(classInstanceId);
   };
 
   const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
@@ -155,7 +161,7 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
 
       <BaseDeleteDialog
         open={open}
-        onClose={closeDialog}
+        onClose={closeDeleteConfirm}
         onConfirm={handleConfirm}
         isLoading={false}
         title={t.dialogs.deleteClassTitle}

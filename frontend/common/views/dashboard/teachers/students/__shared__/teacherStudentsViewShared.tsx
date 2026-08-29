@@ -4,6 +4,7 @@ import { Typography } from "@mui/material";
 import type { FC, ReactNode } from "react";
 import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import type { TeacherStudentsViewModel } from "@/frontend/common/views/dashboard/teachers/students/useTeacherStudentsViewModel";
 
 type StudentRow = TeacherStudentsViewModel["rows"][number];
@@ -24,13 +25,47 @@ export interface TeacherStudentsViewSharedSlots {
   readonly ListWrapper: FC<Readonly<TeacherStudentsViewSharedListProps>>;
 }
 
-function StudentRowContent({ row, labels }: Readonly<{ row: StudentRow; labels: StudentLabels }>) {
+/**
+ * Props the shared student row hands to the tier-provided profile-link slot.
+ * Mirrors the `href` + `name` + `fallbackInitial` surface of the tier
+ * `PersonProfileLink` primitives without depending on a tier component.
+ */
+export interface StudentRowProfileLinkSlotProps {
+  readonly href?: string;
+  readonly name: string;
+  readonly fallbackInitial?: string;
+}
+
+/**
+ * Props the shared student row hands to the tier-provided status-badge slot.
+ * The category is fixed to `studentAccount` because every row is a student
+ * account; only the raw status and the localized label vary per row.
+ */
+export interface StudentRowStatusBadgeSlotProps {
+  readonly category: "studentAccount";
+  readonly status: string;
+  readonly label: string;
+}
+
+export interface StudentRowContentSlots {
+  readonly PersonProfileLink: FC<Readonly<StudentRowProfileLinkSlotProps>>;
+  readonly StatusBadge: FC<Readonly<StudentRowStatusBadgeSlotProps>>;
+}
+
+function StudentRowContent({
+  row,
+  labels,
+  PersonProfileLink,
+  StatusBadge,
+}: Readonly<{ row: StudentRow; labels: StudentLabels } & StudentRowContentSlots>) {
   return (
     <>
-      <Typography sx={{ typography: "titleLg", fontWeight: 600 }}>{row.name}</Typography>
-      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-        {labels.statusLabel(row.status ?? "")}
-      </Typography>
+      <PersonProfileLink href={row.id ? studentHref(row.id) : undefined} name={row.name ?? ""} fallbackInitial="S" />
+      <StatusBadge
+        category="studentAccount"
+        status={(row.status ?? "").toLowerCase()}
+        label={labels.statusLabel(row.status ?? "")}
+      />
       <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
         {labels.quotaLabel(row.classesRemaining ?? 0, row.classesTotal ?? 0)}
       </Typography>
@@ -45,14 +80,18 @@ export function StudentRowCardShared({
   row,
   labels,
   RowWrapper,
-}: Readonly<{
-  row: StudentRow;
-  labels: StudentLabels;
-  RowWrapper: FC<Readonly<{ children: ReactNode }>>;
-}>) {
+  PersonProfileLink,
+  StatusBadge,
+}: Readonly<
+  {
+    row: StudentRow;
+    labels: StudentLabels;
+    RowWrapper: FC<Readonly<{ children: ReactNode }>>;
+  } & StudentRowContentSlots
+>) {
   return (
     <RowWrapper>
-      <StudentRowContent row={row} labels={labels} />
+      <StudentRowContent row={row} labels={labels} PersonProfileLink={PersonProfileLink} StatusBadge={StatusBadge} />
     </RowWrapper>
   );
 }

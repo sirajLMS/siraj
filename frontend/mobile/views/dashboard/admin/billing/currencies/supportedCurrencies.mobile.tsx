@@ -2,9 +2,9 @@
 
 import { AddOutlined, EditOutlined, ToggleOffOutlined } from "@mui/icons-material";
 import { Alert, Box, IconButton, Stack } from "@mui/material";
-import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
+import { CurrencyDisplayPart } from "@/frontend/common/components/ui/display/currencyDisplay";
+import { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
-import { BillingMobileListShellShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/billingMobileListShellShared";
 import {
   SupportedCurrencyActivateDialog,
   type SupportedCurrencyActivateDialogProps,
@@ -14,8 +14,20 @@ import type {
   SupportedCurrenciesViewModel,
   SupportedCurrencyRow,
 } from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel";
-import { MobileCardListItem, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardListItem,
+  MobileCountryDisplay,
+  MobileCurrencyDisplay,
+  MobilePrimaryPageAction,
+} from "@/frontend/mobile/components/ui";
+import { BillingMobileListShellShared } from "@/frontend/mobile/views/dashboard/admin/billing/__shared__";
 import { useAppLocale } from "@/shared/locale";
+
+const VALID_COUNTRY_CODES = new Set(Object.values(CountryCode) as readonly string[]);
+
+function isSupportedCountryCode(value: string): value is CountryCode {
+  return VALID_COUNTRY_CODES.has(value);
+}
 
 function SupportedCurrencyCard({
   row,
@@ -45,9 +57,7 @@ function SupportedCurrencyCard({
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box component="span" sx={{ fontSize: 24 }} aria-hidden>
-            {row.flagEmoji}
-          </Box>
+          <MobileCurrencyDisplay code={row.code} parts={[CurrencyDisplayPart.Flag]} sx={{ fontSize: 24 }} />
           <Box>
             <Box sx={{ fontWeight: 700 }}>{row.code}</Box>
             <Box sx={theme => ({ color: theme.palette.text.secondary })}>{row.symbol}</Box>
@@ -55,10 +65,12 @@ function SupportedCurrencyCard({
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Box sx={{ textAlign: "right" }}>
-            <Box>{getCurrencyDisplayName(row.code, locale)}</Box>
-            <Box sx={theme => ({ color: theme.palette.text.secondary })}>
-              {getCountryDisplayName(row.countryCode, locale)}
-            </Box>
+            <MobileCurrencyDisplay code={row.code} parts={[CurrencyDisplayPart.Label]} />
+            <MobileCountryDisplay
+              code={isSupportedCountryCode(row.countryCode) ? row.countryCode : null}
+              fallback={getCountryDisplayName(row.countryCode, locale)}
+              showEmoji={false}
+            />
           </Box>
           {canManage ? (
             <Stack direction="row" spacing={0.5}>

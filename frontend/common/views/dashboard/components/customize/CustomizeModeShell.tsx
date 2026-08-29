@@ -8,29 +8,33 @@ import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePr
 import { CustomizeOverlay } from "@/frontend/common/views/dashboard/components/customize/CustomizeOverlay";
 
 const CUSTOMIZE_TOOLBAR_HEIGHT = "48px";
-/** Matches `CustomizeSidebar`'s `width: 300` (`frontend/common/views/dashboard/components/customize/CustomizeSidebar.tsx`). */
-const CUSTOMIZE_SIDEBAR_WIDTH = 300;
 
 /**
  * Customization layout — sits structurally ABOVE the dashboard layout.
  *
  * When `?customize=1` is active the dashboard is rendered as the shell's
- * content, so the customize chrome (toolbar + sidebar) wraps it instead of
- * being injected into the dashboard's own flex boxes:
+ * content, so the customize chrome wraps it instead of being injected
+ * into the dashboard's own flex boxes. The toolbar renders on both
+ * tiers; the customize sidebar is desktop-only and is mounted by the
+ * desktop dashboard layout itself (tier rule: common code cannot import
+ * desktop-tier components):
  *
  * ```
  * ┌─ Toolbar (fixed, 48px, full width) ──────────────────┐
  * ├──────────────┬───────────────────────────────────────┤
  * │  Customize   │  Dashboard layout (navbar, sidebar,   │
  * │  Sidebar     │  content — completely untouched)      │
+ * │  (desktop)   │                                       │
  * └──────────────┴───────────────────────────────────────┘
  * ```
  *
  * The offsets the dashboard needs are owned here:
  *  - `--dashboard-shell-height` bounds the dashboard root to the space below
  *    the toolbar (dashboard layouts use `height: var(--dashboard-shell-height, 100vh)`).
- *  - `.MuiAppBar-root` is pushed below the toolbar and inset beside the
- *    sidebar so the navbar never spans the full viewport width on desktop.
+ *  - `.MuiAppBar-root` is pushed below the toolbar on both tiers. The
+ *    desktop layout additionally insets the navbar beside its customize
+ *    sidebar — that side offset is a desktop-tier concern and lives in
+ *    the desktop layout.
  *
  * ## Live preview (BUG-C fix)
  *
@@ -86,24 +90,17 @@ export function CustomizeModeShell({ children }: Readonly<{ children: ReactNode 
       <Box aria-hidden sx={{ height: CUSTOMIZE_TOOLBAR_HEIGHT, flexShrink: 0 }} />
       <CustomizeOverlay.Toolbar />
       <Box sx={{ display: "flex", alignItems: "stretch", flex: 1, minHeight: 0 }}>
-        {/* The customize sidebar is `position: fixed; top: 0` (see
-            CustomizeSidebar.tsx) — pull it below the toolbar so its top
-            controls aren't hidden behind it. */}
-        <Box sx={{ "& [data-appearance-customize='sidebar']": { top: CUSTOMIZE_TOOLBAR_HEIGHT } }}>
-          <CustomizeOverlay.Sidebar />
-        </Box>
         <Box
           sx={{
             flex: 1,
             minWidth: 0,
             // Bound the dashboard root to the area below the toolbar.
             ["--dashboard-shell-height" as string]: `calc(100dvh - ${CUSTOMIZE_TOOLBAR_HEIGHT})`,
-            // Push the fixed navbar below the toolbar; on desktop also inset
-            // it beside the customize sidebar (the sidebar hides below md).
+            // Push the fixed navbar below the toolbar (both tiers). The
+            // desktop layout also insets the navbar beside its customize
+            // sidebar — see `dashboardLayout.desktop.tsx`.
             "& .MuiAppBar-root": {
               top: CUSTOMIZE_TOOLBAR_HEIGHT,
-              insetInlineStart: { xs: 0, md: `${CUSTOMIZE_SIDEBAR_WIDTH}px` },
-              width: { xs: "100%", md: `calc(100% - ${CUSTOMIZE_SIDEBAR_WIDTH}px)` },
             },
           }}
         >

@@ -1,9 +1,8 @@
 "use client";
 
-import { Search } from "@mui/icons-material";
-import { Box, Input, InputAdornment, MenuItem, Select } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { standardInputSx } from "@/frontend/common/components/ui/form/field";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { PermissionFilterBarProps } from "@/frontend/common/views/dashboard/permissions/types";
 
 export interface PermissionFilterBarSharedOptions {
@@ -28,34 +27,19 @@ export function PermissionFilterBarShared({
   return (
     <Box sx={options.filterContainerSx}>
       <Box sx={options.inputGroupSx}>
-        <Input
-          value={searchTerm}
-          onChange={e => onSearchChange(e.target.value)}
-          placeholder={t.searchPermissionsPlaceholder}
-          sx={standardInputSx}
-          startAdornment={
-            <InputAdornment position="start">
-              <Search sx={theme => ({ color: theme.palette.text.secondary })} />
-            </InputAdornment>
-          }
-          disabled={isLoading}
-        />
+        <SearchBarField value={searchTerm} placeholder={t.searchPermissionsPlaceholder} onChange={onSearchChange} />
 
-        <Select
-          value={selectedCategory}
-          onChange={e => onCategoryChange(e.target.value)}
-          displayEmpty
-          variant="standard"
-          sx={standardInputSx}
-          disabled={isLoading}
-        >
-          <MenuItem value="ALL">{t.allCategoriesOption}</MenuItem>
-          {categories.map(cat => (
-            <MenuItem key={cat} value={cat}>
-              {cat}
-            </MenuItem>
-          ))}
-        </Select>
+        <FormControl disabled={isLoading}>
+          <InputLabel>{t.columnCategory}</InputLabel>
+          <Select value={selectedCategory} onChange={e => onCategoryChange(e.target.value)} label={t.columnCategory}>
+            <MenuItem value="ALL">{t.allCategoriesOption}</MenuItem>
+            {categories.map(cat => (
+              <MenuItem key={cat} value={cat}>
+                {cat}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
 
       <Box sx={options.selectedCountBadgeSx}>{t.itemsSelectedLabel(selectedCount)}</Box>

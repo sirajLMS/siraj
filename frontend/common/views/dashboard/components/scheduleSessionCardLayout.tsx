@@ -1,23 +1,20 @@
 "use client";
 
+import type { Theme } from "@mui/material";
+import { PersonProfileLink } from "@/frontend/common/components/ui";
 import {
+  getPersonAccentColor,
   StyledScheduleSessionMetaLabel,
   StyledScheduleSessionMetaPanel,
   StyledScheduleSessionMetaTile,
   StyledScheduleSessionMetaValue,
-  StyledScheduleSessionPersonAvatar,
   StyledScheduleSessionPersonCell,
-  StyledScheduleSessionPersonContentRow,
-  StyledScheduleSessionPersonLabel,
-  StyledScheduleSessionPersonName,
-  StyledScheduleSessionPersonText,
 } from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout.styles";
 import type {
   ScheduleSessionCardPersonCellProps,
   ScheduleSessionMetaStatItem,
+  ScheduleSessionPersonAccentTone,
 } from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout.types";
-import { getNameInitials } from "@/frontend/common/views/dashboard/utils/nameInitials";
-import { Link } from "@/shared/i18n";
 
 export type {
   ScheduleSessionCardPersonCellProps,
@@ -57,6 +54,22 @@ export function ScheduleSessionCardMetaBar({ items }: { readonly items: readonly
   );
 }
 
+/**
+ * Keeps the teacher/student accent on the linked name while reusing the shared
+ * profile-link primitive: the tone color always wins over the primitive's
+ * default link coloring, matching how the bespoke cell colored the name.
+ */
+function personCellSx(tone: ScheduleSessionPersonAccentTone) {
+  return (theme: Theme) => ({
+    "& .MuiStack-root > .MuiTypography-root:last-child": {
+      color: getPersonAccentColor(tone, theme),
+    },
+    "& a:hover .MuiStack-root > .MuiTypography-root:last-child": {
+      textDecoration: "underline",
+    },
+  });
+}
+
 export function ScheduleSessionCardPersonCell({
   name,
   label,
@@ -65,33 +78,8 @@ export function ScheduleSessionCardPersonCell({
   avatarUrl,
 }: ScheduleSessionCardPersonCellProps) {
   return (
-    <StyledScheduleSessionPersonCell>
-      <StyledScheduleSessionPersonLabel variant="labelMd" title={label}>
-        {label}
-      </StyledScheduleSessionPersonLabel>
-      <StyledScheduleSessionPersonContentRow>
-        <StyledScheduleSessionPersonAvatar src={avatarUrl ?? undefined} alt={name} aria-hidden={!avatarUrl}>
-          {getNameInitials(name)}
-        </StyledScheduleSessionPersonAvatar>
-        <StyledScheduleSessionPersonText>
-          <StyledScheduleSessionPersonName
-            variant="bodyMd"
-            title={name}
-            tone={tone}
-            {...(href ? { component: Link, href } : {})}
-            sx={
-              href
-                ? {
-                    textDecoration: "none",
-                    "&:hover": { textDecoration: "underline" },
-                  }
-                : undefined
-            }
-          >
-            {name}
-          </StyledScheduleSessionPersonName>
-        </StyledScheduleSessionPersonText>
-      </StyledScheduleSessionPersonContentRow>
+    <StyledScheduleSessionPersonCell sx={personCellSx(tone)}>
+      <PersonProfileLink href={href} name={name} label={label} avatarUrl={avatarUrl} avatarSize={32} />
     </StyledScheduleSessionPersonCell>
   );
 }

@@ -13,17 +13,17 @@ import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
-import {
-  buildDirectoryEmailColumn,
-  buildDirectoryIndexColumn,
-  buildDirectoryNameColumn,
-} from "@/frontend/common/views/dashboard/admin/parents/__shared__/directoryDataGridShared";
 import type {
   ParentDirectoryRow,
   ParentsDataGridLabels,
 } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
+import {
+  buildDirectoryEmailColumn,
+  buildDirectoryIndexColumn,
+  buildDirectoryNameColumn,
+} from "@/frontend/desktop/views/dashboard/admin/parents/home/components/directoryDataGridShared";
 import { Link } from "@/shared/i18n";
 
 export type { ParentsDataGridLabels };

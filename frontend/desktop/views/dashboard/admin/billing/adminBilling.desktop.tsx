@@ -1,26 +1,26 @@
 "use client";
 
 import { AccountBalanceWalletOutlined, AddOutlined, TimelineOutlined } from "@mui/icons-material";
-import { Box, Button, Chip } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Button } from "@mui/material";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { StudentCreditFooterShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/studentCreditFooterShared";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
-import { BillingSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingSearchBar";
 import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import {
   getAdminInvoiceGridLabels,
   getStudentCreditGridLabels,
 } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
-import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import {
+  DesktopPageContainer,
+  DesktopPageHeader,
+  DesktopPrimaryPageAction,
+  DesktopSectionPanel,
+  DesktopStatusBadge,
+} from "@/frontend/desktop/components/ui";
 import { AdminInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/admin/billing/components/adminInvoicesDataGrid.desktop";
 import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
 import { StudentCreditDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/studentCreditDataGrid.desktop";
 import { Link } from "@/shared/i18n";
-
-const StyledAttentionChip = styled(Chip)(({ theme }) => ({
-  backgroundColor: theme.palette.error.main,
-  color: theme.palette.onError,
-}));
 
 function AdminBillingHeaderActions({
   labels,
@@ -88,9 +88,9 @@ function StudentCreditSection({
       title={labels.sections.studentCreditStatus}
       actions={
         isNegativeFilter ? (
-          <Chip label={labels.creditTable.negativeBalance} size="small" color="error" />
+          <DesktopStatusBadge category="invoice" status="OVERDUE" label={labels.creditTable.negativeBalance} />
         ) : (
-          <StyledAttentionChip label={labels.requiresAttention} size="small" />
+          <DesktopStatusBadge category="invoice" status="OVERDUE" label={labels.requiresAttention} />
         )
       }
       subTitle={isNegativeFilter ? labels.creditTable.showingNegativeBalanceOnly : undefined}
@@ -149,17 +149,21 @@ export function AdminBillingDesktopView({
   const adminMetrics = buildAdminMetrics(summary, labels);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {canViewExchangeRates || canCreate ? (
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, flexWrap: "wrap" }}>
-          <AdminBillingHeaderActions
-            labels={labels}
-            canViewExchangeRates={canViewExchangeRates}
-            canCreate={canCreate}
-            onManualInvoice={onManualInvoice}
-          />
-        </Box>
-      ) : null}
+    <DesktopPageContainer>
+      <DesktopPageHeader
+        title={labels.adminPageTitle}
+        subtitle={labels.adminPageSubtitle}
+        actions={
+          canViewExchangeRates || canCreate ? (
+            <AdminBillingHeaderActions
+              labels={labels}
+              canViewExchangeRates={canViewExchangeRates}
+              canCreate={canCreate}
+              onManualInvoice={onManualInvoice}
+            />
+          ) : null
+        }
+      />
 
       <BillingMetricsRowDesktop metrics={adminMetrics} loading={summaryLoading} />
 
@@ -167,12 +171,13 @@ export function AdminBillingDesktopView({
         contentPadding={false}
         title={labels.sections.recentInvoices}
         actions={
-          <BillingSearchBar
+          <SearchBarField
             value={searchQuery}
             placeholder={labels.search.invoicesPlaceholder}
             searchingLabel={labels.search.searching}
             isSearching={isSearchPending}
             onChange={onSearchChange}
+            sx={{ maxWidth: 300 }}
           />
         }
       >
@@ -207,6 +212,6 @@ export function AdminBillingDesktopView({
           sendingReminderId={sendingReminderId}
         />
       )}
-    </Box>
+    </DesktopPageContainer>
   );
 }

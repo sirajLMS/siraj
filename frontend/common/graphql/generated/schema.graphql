@@ -1367,6 +1367,43 @@ input CreateTeacherNoteInput {
   title: String!
 }
 
+"""
+Input for recording a manual credit adjustment. Carryover fields are required only when adjustmentType is SUBTRACT_WITH_CARRYOVER.
+"""
+input CreditAdjustmentInput {
+  adjustmentType: CreditAdjustmentType!
+  carryoverFromDate: String
+  carryoverPaymentDate: String
+  carryoverTeacherId: ID
+  carryoverToDate: String
+  hours: Int!
+  notes: String
+  studentId: ID!
+}
+
+"""
+A recorded credit adjustment ledger row, carrying the adjustment type and carryover metadata
+"""
+type CreditAdjustmentResult {
+  adjustmentType: CreditAdjustmentType
+  carryoverFromDate: String
+  carryoverPaymentDate: String
+  carryoverTeacherId: String
+  carryoverToDate: String
+  changeAmount: Int
+  changeAmountHours: String
+  classInstanceId: String
+  createdAt: DateTime
+  creditedByUserId: String
+  id: String
+  idempotencyKey: String
+  notes: String
+  reason: CreditReason
+  sourcePaymentId: String
+  studentId: String
+  updatedAt: DateTime
+}
+
 enum CreditAdjustmentType {
   ADD
   SUBTRACT
@@ -1385,6 +1422,11 @@ type CreditBalance {
 
 """Result of recording a credit purchase for a student"""
 type CreditPurchaseResult {
+  adjustmentType: CreditAdjustmentType
+  carryoverFromDate: String
+  carryoverPaymentDate: String
+  carryoverTeacherId: String
+  carryoverToDate: String
   changeAmount: Int
   changeAmountHours: String
   classInstanceId: String
@@ -1413,6 +1455,11 @@ enum CreditReason {
 A credit ledger transaction for a student (purchase, deduction, refund, or adjustment)
 """
 type CreditTransaction {
+  adjustmentType: CreditAdjustmentType
+  carryoverFromDate: String
+  carryoverPaymentDate: String
+  carryoverTeacherId: String
+  carryoverToDate: String
   changeAmount: Int
   changeAmountHours: String
   classInstanceId: String
@@ -2801,6 +2848,11 @@ type Mutation {
 
   """Record an accounting payment that credits hours to a student"""
   recordAccountingPayment(input: AccountingPaymentInput!): AccountingPayment
+
+  """
+  Record a manual credit adjustment (Add / Subtract / Subtract With Carryover) for a student
+  """
+  recordCreditAdjustment(input: CreditAdjustmentInput!): CreditAdjustmentResult
 
   """Record a credit purchase for a student (adds classes to their balance)"""
   recordCreditPurchase(hours: Int!, notes: String, studentId: ID!): CreditPurchaseResult
@@ -5128,6 +5180,7 @@ type TeacherAssignedClass {
   outcome: ClassOutcome
   scheduledEndAt: String
   scheduledStartAt: String
+  studentId: String
   studentName: String
 }
 

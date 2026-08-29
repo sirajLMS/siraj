@@ -1,8 +1,13 @@
 "use client";
 
 import { Box } from "@mui/material";
+import { useCustomizeMode } from "@/frontend/common/hooks/useCustomizeMode";
 import type { DashboardLayoutProps } from "@/frontend/common/views/dashboard/components/dashboardLayoutTypes";
 import { NavbarStaticShell } from "@/frontend/common/views/dashboard/components/navbar/NavbarStaticShell";
+import {
+  CUSTOMIZE_SIDEBAR_WIDTH,
+  CustomizeSidebarDesktop,
+} from "@/frontend/desktop/views/dashboard/components/customize";
 import { DashboardLayoutIsland } from "@/frontend/desktop/views/dashboard/components/dashboardLayoutIsland.desktop";
 import { TopNavbarDesktop } from "@/frontend/desktop/views/dashboard/components/topNavbar.desktop";
 
@@ -23,11 +28,12 @@ export function DashboardLayoutDesktop({
   initialSidebarOpen,
   hideSidebarNavigation = false,
 }: Readonly<DashboardLayoutProps>) {
+  const customizeMode = useCustomizeMode();
+
   return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
         // `CustomizeModeShell` (the customization layout above this one)
         // bounds the shell height via `--dashboard-shell-height`; the 100vh
         // fallback keeps the dashboard full-height outside customize mode.
@@ -37,36 +43,56 @@ export function DashboardLayoutDesktop({
         boxSizing: "border-box",
       }}
     >
-      <NavbarStaticShell appTitle={appTitle} roleLabel={roleLabel} logoAriaLabel={logoAriaLabel}>
-        <TopNavbarDesktop
-          userName={userName}
-          userEmail={userEmail}
-          userRole={userRole}
-          avatarUrl={avatarUrl}
-          notificationCount={notificationCount}
-        />
-      </NavbarStaticShell>
-
+      {customizeMode ? <CustomizeSidebarDesktop /> : null}
       <Box
-        sx={theme => ({
+        sx={{
           display: "flex",
+          flexDirection: "column",
           flex: 1,
+          minWidth: 0,
           minHeight: 0,
-          pt: theme.layout.navbarHeight,
-          boxSizing: "border-box",
-        })}
+          // While customize mode is on, the fixed navbar must sit beside the
+          // in-flow customize sidebar instead of spanning the full viewport
+          // width. `CustomizeModeShell` owns the shared vertical offset (top).
+          ...(customizeMode && {
+            "& .MuiAppBar-root": {
+              insetInlineStart: CUSTOMIZE_SIDEBAR_WIDTH,
+              width: `calc(100% - ${CUSTOMIZE_SIDEBAR_WIDTH}px)`,
+            },
+          }),
+        }}
       >
-        <DashboardLayoutIsland
-          sidebarGroups={sidebarGroups}
-          sidebarItems={sidebarItems}
-          sidebarWidth={sidebarWidth}
-          initialSidebarOpen={initialSidebarOpen}
-          userName={userName}
-          avatarUrl={avatarUrl}
-          hideSidebarNavigation={hideSidebarNavigation}
+        <NavbarStaticShell appTitle={appTitle} roleLabel={roleLabel} logoAriaLabel={logoAriaLabel}>
+          <TopNavbarDesktop
+            userName={userName}
+            userEmail={userEmail}
+            userRole={userRole}
+            avatarUrl={avatarUrl}
+            notificationCount={notificationCount}
+          />
+        </NavbarStaticShell>
+
+        <Box
+          sx={theme => ({
+            display: "flex",
+            flex: 1,
+            minHeight: 0,
+            pt: theme.layout.navbarHeight,
+            boxSizing: "border-box",
+          })}
         >
-          {children}
-        </DashboardLayoutIsland>
+          <DashboardLayoutIsland
+            sidebarGroups={sidebarGroups}
+            sidebarItems={sidebarItems}
+            sidebarWidth={sidebarWidth}
+            initialSidebarOpen={initialSidebarOpen}
+            userName={userName}
+            avatarUrl={avatarUrl}
+            hideSidebarNavigation={hideSidebarNavigation}
+          >
+            {children}
+          </DashboardLayoutIsland>
+        </Box>
       </Box>
     </Box>
   );

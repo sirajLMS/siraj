@@ -3,12 +3,11 @@
 import { RemoveCircleOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { CurrentPermissionsEmptyState } from "@/frontend/common/views/dashboard/permissions/components/__shared__/currentPermissionsTabShared";
-import {
-  StyledPermissionKeyChipShared,
-  StyledRevokeButtonShared,
-} from "@/frontend/common/views/dashboard/permissions/components/__shared__/currentPermissionsTabShared.styles";
+import { StyledRevokeButtonShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/currentPermissionsTabShared.styles";
+import { PermissionKeyChipShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionKeyChipShared";
 import type { CurrentPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
+import { MobileEmptyState } from "@/frontend/mobile/components/ui/state";
 
 export function CurrentPermissionsTabMobile({
   labels,
@@ -25,13 +24,7 @@ export function CurrentPermissionsTabMobile({
   }
 
   if (groupPermissions.length === 0 && !loading) {
-    return (
-      <Box sx={{ p: 4, textAlign: "center" }}>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.noPermissionsFound}
-        </Typography>
-      </Box>
-    );
+    return <MobileEmptyState title={t.noPermissionsFound} />;
   }
 
   return (
@@ -45,7 +38,7 @@ export function CurrentPermissionsTabMobile({
         <MobileCardListItem variant="edge-to-edge">
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
-              <StyledPermissionKeyChipShared>{permission.key}</StyledPermissionKeyChipShared>
+              <PermissionKeyChipShared label={permission.key ?? ""} />
               {permission.category ? (
                 <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
                   {permission.category}

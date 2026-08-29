@@ -3,13 +3,13 @@
 import { DeleteOutlined } from "@mui/icons-material";
 import { Fade, Skeleton, Stack, type Theme, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import type { QuotaLedgerItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaDetailViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaDetailViewModel";
 import { formatQuotaDate } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaFormatters";
 import {
+  MobileBaseDeleteDialog,
   MobileCardList,
   MobileCardListItem,
   MobileContentStack,
@@ -166,7 +166,7 @@ export function QuotaDetailMobile(props: Readonly<QuotaDetailViewModel>) {
           disabled={deleting}
         />
 
-        <BaseDeleteDialog
+        <MobileBaseDeleteDialog
           open={deleteDialogOpen}
           onClose={onDeleteDialogClose}
           onConfirm={onDeleteConfirm}

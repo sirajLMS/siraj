@@ -112,7 +112,7 @@ existing split between `backend/graphql/**/test` mocked suites and
 | `backend/graphql/mutation/billing/credit-adjustment.mutation.ts` | ✅ all stages |
 | `backend/graphql/mutation/billing/index.ts` | ✅ all stages |
 | `backend/graphql/pothos/billing/index.ts` | ✅ all stages |
-| `backend/graphql/mutation/billing/credit-adjustment.mutation.test.ts` | tsgo ✅ (project-wide, zero errors in this file), oxlint ✅ (fixed `no-unsafe-type-assertion` on `GraphQLError` casts → `instanceof` narrowing), biome:check ✅ (formatter applied), lint:type-aware ✅ exit 0, codescene ✅ "perfect health". The full sub-loop run for this file was starved by other agents' concurrent lock queue for 40+ minutes twice, so stages were verified individually; final combined sub-loop re-run was launched. |
+| `backend/graphql/mutation/billing/credit-adjustment.mutation.test.ts` | ✅ all six stages (`All checks ... passed`). Two fixes en route: oxlint `no-unsafe-type-assertion` (`error as GraphQLError` → `instanceof` narrowing) and sonarjs `no-undefined-argument` (`mockCtx(undefined)` → `mockCtx()`). |
 
 Project-wide `bun tsgo` after Phase 2: errors exist **only** in other agents'
 in-flight work (`frontend/**/exchange-rates/**`, `test/ui/components/**`,
