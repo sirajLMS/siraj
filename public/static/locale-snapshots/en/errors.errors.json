@@ -313,6 +313,15 @@
     "resetFailed": "Failed to reset appearance draft.",
     "unauthorized": "You are not authorized to manage site appearance."
   },
+  "serviceOutage": {
+    "title": "We're having trouble reaching our servers",
+    "description": "The service is temporarily unavailable. This usually resolves within a few moments — we'll retry automatically, or you can try again now.",
+    "autoRetryHint": "Checking the connection automatically…",
+    "genericTitle": "Something went wrong",
+    "genericDescription": "An unexpected error occurred while loading this page. Please try again.",
+    "retry": "Try again",
+    "retrying": "Retrying…"
+  },
   "classSubject": {
     "createFailed": "Failed to create class subject."
   },

@@ -256,7 +256,8 @@
       "app": "App",
       "meeting": "Meeting",
       "billing": "Billing",
-      "general": "General"
+      "general": "General",
+      "payroll": "Payroll"
     },
     "dataTypeLabels": {
       "string": "String",

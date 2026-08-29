@@ -397,36 +397,36 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 > Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
 > additive and execute before this plan is treated as test-complete.
 
-- [ ] TB.1 Journey: admin records hour-package payment → student + parent see bumped hour balance and receive payment-recorded notification
+- [x] TB.1 Journey: admin records hour-package payment → student + parent see bumped hour balance and receive payment-recorded notification
   - Create `test/workflows/accounting/record-payment-balance-visibility.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (invoice + payment + credit_transactions hour row + `students.creditHoursRemaining/creditHoursTotal` bump in one tx), cross-actor visibility (student sees own balance + hour ledger, linked parent sees it, unrelated student/parent do NOT; admin/staff with `ACCOUNTING_PAYMENTS_VIEW` see the row), side effects (`ACCOUNTING_PAYMENT_RECORDED` dispatched to student + linked parent), denial paths (`getStudentBalance` by an unassociated caller without `ACCOUNTING_PAYMENTS_VIEW` → denied)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-2.1, US-5.1_
-- [ ] TB.2 Journey: admin toggles Paid status → invoice status cascades; view-only staff observe but cannot mutate
+- [x] TB.2 Journey: admin toggles Paid status → invoice status cascades; view-only staff observe but cannot mutate
   - Create `test/workflows/accounting/toggle-paid-invoice-cascade.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`)
   - Assert: shared-state transitions (toggle ON → invoice `PAID` + `paidDate`; OFF → `UNPAID` only when no paid sibling per `findPaidSiblingsByInvoice`; respects `accounting_paid_toggle_auto_flips_invoice=false`), cross-actor visibility (staff_default with VIEW-only sees the flipped status on list/detail), side effects (optimistic-lock `expectedInvoiceVersion` mismatch rejected), denial paths (staff_default without `ACCOUNTING_PAYMENTS_MANAGE` attempting `toggleAccountingPaymentPaidStatus` → denied at resolver AND service)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-2.2_
-- [ ] TB.3 Journey: admin edits payment creditHours → ADJUSTMENT ledger row + student balance observed by student/parent
+- [x] TB.3 Journey: admin edits payment creditHours → ADJUSTMENT ledger row + student balance observed by student/parent
   - Create `test/workflows/accounting/edit-payment-hours-adjustment.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`)
   - Assert: shared-state transitions (creditHours increase → ADJUSTMENT row with positive `changeAmountHours` + balance bump; decrease within balance → negative ADJUSTMENT), cross-actor visibility (student/parent see updated balance + ledger entry; unrelated actors do not), side effects (note/gateway-only edit inserts NO ledger row), denial paths (decrease past balance → `ConflictError(tErrors.credit.insufficientHours)`; edit attempt by actor without `ACCOUNTING_PAYMENTS_MANAGE` → denied)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-3.2_
-- [ ] TB.4 Journey: hour deduction pushes balance below threshold → low-hours notification reaches student + parent + admin
+- [x] TB.4 Journey: hour deduction pushes balance below threshold → low-hours notification reaches student + parent + admin
   - Create `test/workflows/accounting/low-hours-notification.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (`deductHoursForBooking` consumes hours and inserts the hour ledger row via service-level call, since v1 has no booking-side producer), cross-actor visibility (student + linked parent + admin each receive `ACCOUNTING_LOW_HOURS` when balance < `accounting_low_hours_threshold`; no notification when above threshold), denial paths (deduction beyond balance → `ConflictError(tErrors.credit.insufficientHours)` and NO notification)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-4.1 (v1 CreditService primitives), Phase 12 notifications_
-- [ ] TB.5 4-Tier verification for accounting repositories, services, and GraphQL layer
+- [x] TB.5 4-Tier verification for accounting repositories, services, and GraphQL layer
   - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/db/repo/billing/package-plan.repository.ts`, `backend/db/repo/billing/accounting-payment.repository.ts`, `backend/db/repo/billing/credit.repository.ts` (hour methods), `backend/db/repo/students/student.repository.ts` (`addCreditHours`/`deductCreditHours`/`getCreditHourBalance`), `backend/services/billing/package-plan.service.ts`, `backend/services/billing/credit.service.ts` (`recordHourPurchase`/`deductHoursForBooking`/`refundHoursOnCancel`/`getStudentHourBalance`), `backend/services/billing/accounting-payment.service.ts`, `backend/services/notification/accounting-notification.builders.ts`, `backend/graphql/query/billing/accounting.query.ts`, `backend/graphql/mutation/billing/accounting.mutation.ts` (existing Phase 10 tests cover behavior but were not authored against the 4-Tier framework — audit Tier 1 branch coverage and Tier 4 abuse/IDOR/permission cases explicitly)
   - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels
   - Verify with `bun run test/scripts/run-test.ts <each test file>`
   - _Requirements: cross-cutting (US-1.1 through US-5.1)_
-- [ ] TB.6 Penetration verification (this plan adds new GraphQL queries + 6 mutations — NOT skippable)
+- [x] TB.6 Penetration verification (this plan adds new GraphQL queries + 6 mutations — NOT skippable)
   - BOLA/IDOR across the roles in this plan (student/parent accessing another family's balance or payments via `accountingPayments`/`accountingPayment`/`studentCreditHourBalance`); permission denial on admin mutations (`createPackagePlan`, `updatePackagePlan`, `archivePackagePlan`, `recordAccountingPayment`, `updateAccountingPayment`, `toggleAccountingPaymentPaidStatus`) when called by VIEW-only or unprivileged actors; wildcard/injection input on the `AccountingPaymentFilterInput` search/filter fields (studentId/parentId/date range)
   - Via `.agents/skills/pentester/SKILL.md`
   - _Requirements: US-2.1, US-2.2, US-3.1, US-3.2, US-5.1_

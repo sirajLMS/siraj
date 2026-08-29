@@ -41,6 +41,8 @@ export interface PermissionsLabels {
   readonly deleteConfirmBody: (name: string) => string;
   readonly createGroupTitle: string;
   readonly editGroupTitle: string;
+  readonly backToAllGroups: string;
+  readonly editGroupDetails: string;
   readonly groupNameLabel: string;
   readonly descriptionLabel: string;
   readonly groupNamePlaceholder: string;
@@ -69,6 +71,8 @@ export interface PermissionsLabels {
   readonly labelExplicitDeny: string;
   readonly labelInherited: string;
   readonly columnStatus: string;
+  readonly conflict: string;
+  readonly healthy: string;
   readonly currentGroups: string;
   readonly noAssignedGroups: string;
   readonly filterPermissions: string;

@@ -436,5 +436,33 @@
     "currencies": "العملات المدعومة",
     "hedges": "تحوطات العملات",
     "manual": "فاتورة يدوية"
+  },
+  "paymentsLedger": {
+    "pageTitle": "سجل المدفوعات",
+    "pageSubtitle": "سجل مدفوعاتك والساعات الشرائية التي اقتنيتها",
+    "historySectionTitle": "سجل الدفعات",
+    "emptyTitle": "لا توجد مدفوعات بعد",
+    "emptySubtitle": "سيظهر سجل دفعاتك هنا بمجرد إتمام عملية شراء.",
+    "loadError": "تعذّر تحميل المدفوعات.",
+    "balanceSubLabel": "رصيد الساعات الشرائية",
+    "lowBalanceHint": "الرصيد منخفض — فكّر في شحن إضافي",
+    "topUpAction": "شحن الرصيد",
+    "hoursRemainingValue": {
+      "__fn": "(hours) => `${hours.toFixed(2)} \\u0633`"
+    },
+    "hoursAddedChip": {
+      "__fn": "(hours) => `+${hours.toFixed(2)} \\u0633`"
+    },
+    "creditsAddedChip": {
+      "__fn": "(credits) => `+${credits}`"
+    },
+    "columns": {
+      "student": "الطالب",
+      "credits": "الرصيد",
+      "amount": "المبلغ",
+      "packageName": "الباقة",
+      "method": "طريقة الدفع",
+      "date": "التاريخ"
+    }
   }
 }

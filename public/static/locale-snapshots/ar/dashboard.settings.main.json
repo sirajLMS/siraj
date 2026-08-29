@@ -256,7 +256,8 @@
       "app": "التطبيق",
       "meeting": "الاجتماعات",
       "billing": "الفوترة",
-      "general": "عام"
+      "general": "عام",
+      "payroll": "الرواتب"
     },
     "dataTypeLabels": {
       "string": "نص",

@@ -97,23 +97,23 @@
 - 🧪 `backend/lib/sanitize/richTextSanitizer.test.ts` — strips `<script>`, `onerror=`, `javascript:`; preserves `<b><i><ul><li>`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/lib/sanitize/richTextSanitizer.ts --lifecycle codescene`
 
-### 1.5 `addCredit`
+### 1.5 `addCredit` ✅ DONE
 - ✏️ `backend/services/billing/credit.service.ts` — add `addCredit` (private), wire into `recordAdjustment` switch.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/billing/credit.service.ts --lifecycle codescene`
 
-### 1.6 `subtractCredit`
+### 1.6 `subtractCredit` ✅ DONE
 - ✏️ `backend/services/billing/credit.service.ts` — add `subtractCredit` (private) with `INSUFFICIENT_CLASSES` guard inside tx.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/billing/credit.service.ts --lifecycle codescene`
 
-### 1.7 `subtractWithCarryover`
+### 1.7 `subtractWithCarryover` ✅ DONE
 - ✏️ `backend/services/billing/credit.service.ts` — add `subtractWithCarryover` (private) + `assertTeacherExists` helper + `maybeInsertCarryoverBalanceEntry` 🔗 (Plan 5 handoff stub: no-op if Plan 5 table absent).
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/billing/credit.service.ts --lifecycle codescene`
 
-### 1.8 `recordAdjustment` dispatcher
+### 1.8 `recordAdjustment` dispatcher ✅ DONE
 - ✏️ `backend/services/billing/credit.service.ts` — export `recordAdjustment(actorUserId, input, tErrors)` that runs `requirePermission(ACCOUNTING_CREDITS_MANAGE)` + `validateAdjustmentInput` + switch.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/billing/credit.service.ts --lifecycle codescene`
 
-### 1.9 Service tests
+### 1.9 Service tests ✅ DONE
 - 🧪 `backend/services/billing/credit-adjustment.service.test.ts` — full coverage matrix:
   - Add happy path (balance +1).
   - Subtract happy path (balance -1).
@@ -130,7 +130,8 @@
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/billing/credit-adjustment.service.test.ts --lifecycle codescene`
 - 🔁 `bun test backend/services/billing/credit-adjustment.service.test.ts`
 
-### 1.10 Phase-1 acceptance
+### 1.10 Phase-1 acceptance ✅ DONE
+> Verified by orchestrator 2026-08-29: service 30/30, repo regression 28/28, workflow 3/3, `bun tsgo` 0 errors.
 - ✅ All service tests green.
 - ✅ Existing `credit.service.test.ts` still green (no regression).
 - ✅ `sub-loop` exit 0 on every touched file.
@@ -139,20 +140,20 @@
 
 ## Phase 2 — GraphQL layer
 
-### 2.1 Pothos types
+### 2.1 Pothos types ✅ DONE
 - 🆕 `backend/graphql/pothos/billing/credit-adjustment.pothos.ts` — `CreditAdjustmentTypePothosEnum`, `CreditAdjustmentInputPothos`, `CreditAdjustmentResultPothosObject`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/pothos/billing/credit-adjustment.pothos.ts --lifecycle codescene`
 
-### 2.2 Extend existing transaction object
+### 2.2 Extend existing transaction object ✅ DONE
 - ✏️ `backend/graphql/pothos/billing/credit.pothos.ts` — expose `adjustmentType`, `carryoverTeacherId`, `carryoverFromDate`, `carryoverToDate`, `carryoverPaymentDate` on the existing `CreditTransactionPothosObject`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/pothos/billing/credit.pothos.ts --lifecycle codescene`
 
-### 2.3 Mutation
+### 2.3 Mutation ✅ DONE
 - 🆕 `backend/graphql/mutation/billing/credit-adjustment.mutation.ts` — `recordCreditAdjustment(input)` field.
 - ✏️ `backend/graphql/mutation/billing/index.ts` — re-export.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/mutation/billing/credit-adjustment.mutation.ts --lifecycle codescene`
 
-### 2.4 Mutation tests
+### 2.4 Mutation tests ✅ DONE
 - 🧪 `backend/graphql/mutation/billing/credit-adjustment.mutation.test.ts` —
   - Returns result shape.
   - Permission denied → GraphQL error.
@@ -160,7 +161,7 @@
 - 🔁 `bun run scripts/health/sub-loop.ts backend/graphql/mutation/billing/credit-adjustment.mutation.test.ts --lifecycle codescene`
 - 🔁 `bun test backend/graphql/mutation/billing/credit-adjustment.mutation.test.ts`
 
-### 2.5 Phase-2 acceptance
+### 2.5 Phase-2 acceptance ✅ DONE
 - ✅ GraphQL schema builds (`bun run graphql:build`).
 - ✅ Codegen (`bun run graphql:codegen`) produces typed `RecordCreditAdjustmentMutation` hooks.
 
@@ -293,7 +294,7 @@
 
 ## Phase 6 — Plan 5 carryover handoff + integration
 
-### 6.1 Carryover stub contract
+### 6.1 Carryover stub contract ✅ DONE
 - 🆕 `backend/services/billing/carryover-handoff.ts` — `maybeInsertCarryoverBalanceEntry(tx, payload)`:
   - If `teacher_carryover_balances` table exists → insert row.
   - Else → no-op (Plan 2 self-contained).

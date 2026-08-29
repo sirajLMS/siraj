@@ -4,6 +4,10 @@ export const dashboardTeacherOwnProfileAr: TeacherOwnProfileLabels = {
   pageTitle: "تفاصيل الراتب",
   pageSubtitle: "اعرض ملفك الرسمي وتفاصيل التعويض.",
   notSet: "غير محدد",
+  fields: {
+    fullName: "الاسم الكامل",
+    email: "البريد الإلكتروني",
+  },
   sections: {
     contact: "معلومات الاتصال",
     salary: "تفاصيل الراتب",
