@@ -173,10 +173,57 @@ describe("deriveOverrideIdempotencyKey — edge inputs", () => {
     expect(embedded).not.toBe(genuine);
   });
 
-  test("client-generated request ids and actor ids do not affect the key", () => {
-    const first = { ...baseInput(), clientRequestId: "override-dialog-click-1", actorUserId: "actor-a" };
-    const second = { ...baseInput(), clientRequestId: "override-dialog-click-2", actorUserId: "actor-b" };
+  test("actor ids do not affect the key", () => {
+    const first = { ...baseInput(), actorUserId: "actor-a" };
+    const second = { ...baseInput(), actorUserId: "actor-b" };
     expect(deriveOverrideIdempotencyKey(first)).toBe(deriveOverrideIdempotencyKey(second));
+  });
+});
+
+describe("deriveOverrideIdempotencyKey — client request id scheme", () => {
+  test("keys the hash on the token alone: same token equals, different token differs", () => {
+    const first = deriveOverrideIdempotencyKey({ ...baseInput(), clientRequestId: "override-dialog-click-1" });
+    const retry = deriveOverrideIdempotencyKey({
+      ...baseInput(),
+      targetStatus: CalculationStatus.REFUND,
+      note: "edited on retry",
+      force: true,
+      clientRequestId: "override-dialog-click-1",
+    });
+    const other = deriveOverrideIdempotencyKey({ ...baseInput(), clientRequestId: "override-dialog-click-2" });
+
+    expect(retry).toBe(first);
+    expect(other).not.toBe(first);
+  });
+
+  test("null, undefined, and blank tokens fall back to the content-derived key", () => {
+    const contentKey = deriveOverrideIdempotencyKey(baseInput());
+    expect(deriveOverrideIdempotencyKey({ ...baseInput(), clientRequestId: null })).toBe(contentKey);
+    expect(deriveOverrideIdempotencyKey({ ...baseInput(), clientRequestId: undefined })).toBe(contentKey);
+    expect(deriveOverrideIdempotencyKey({ ...baseInput(), clientRequestId: "   " })).toBe(contentKey);
+  });
+
+  test("a token can never impersonate a content-derived key", () => {
+    // Craft the token to spell out the content segments of the baseline key;
+    // the distinct scheme prefix keeps the two hashes apart regardless.
+    const baseline = baseInput();
+    const impersonatingToken = [
+      baseline.targetStatus,
+      String(baseline.partialPercentage ?? ""),
+      baseline.note ?? "",
+      String(baseline.force ?? false),
+    ].join(":");
+
+    expect(deriveOverrideIdempotencyKey({ ...baseline, clientRequestId: impersonatingToken })).not.toBe(
+      deriveOverrideIdempotencyKey(baseline)
+    );
+  });
+
+  test("tokens are scoped per instance", () => {
+    const token = "override-dialog-click-1";
+    expect(deriveOverrideIdempotencyKey({ ...baseInput(), clientRequestId: token })).not.toBe(
+      deriveOverrideIdempotencyKey({ ...baseInput(), instanceId: INSTANCE_B, clientRequestId: token })
+    );
   });
 });
 

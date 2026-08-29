@@ -9,7 +9,7 @@ Siraj is a Next.js 16 (App Router) full-stack application using:
 - **Frontend**: React 19, MUI v9, Apollo Client v4, Zustand
 - **Backend**: Pothos GraphQL, Drizzle ORM, PostgreSQL
 - **Testing**: Bun test runner, Vitest for Storybook, Playwright for E2E
-- **i18n**: **Custom compile-time TypeScript system** in `shared/locale/` (replaces legacy `next-intl`; see `shared/AGENTS.md` for rules). Next.js native `[locale]` routing preserved.
+- **i18n**: **Custom compile-time TypeScript system** in `shared/locale/` (replaces legacy `next-intl`; see `shared/AGENTS.md` for rules). Locale is cookie/header-driven (`NEXT_LOCALE`) — URLs are NOT locale-prefixed (no `[locale]` segment under `app/`).
 
 ## Essential Commands
 

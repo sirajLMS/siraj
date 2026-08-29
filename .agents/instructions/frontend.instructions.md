@@ -45,7 +45,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Server Components (`app/`): no hooks (`useState`, `useEffect`), no browser APIs, no repos/DB
 - Server Components call services directly - NOT GraphQL. Use cached wrappers for deduplication
 - Layouts cannot pass props to page children - pages only receive `params` and `searchParams`
-- `await params` for locale: `const { locale } = await params;`
+- Locale is NOT part of URL params (no `[locale]` segment) — read it via `getLocale()` from `@/shared/locale/server-cookies`
 - `React.cache()` pattern for layout-page data sharing - memoizes per request, executes only once:
   ```ts
   import { cache } from "react";
@@ -57,14 +57,14 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Place cached wrappers in `backend/lib/auth/` or similar shared location
 - `getServerUserContext()` auth guard in layouts:
   ```ts
-  import { redirect } from "next/navigation";
   import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+  import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
   const { userId, context } = await getServerUserContext();
-  if (!userId || !context) redirect(`/${locale}/login`);
+  if (!userId || !context) await redirectToLogin();
   ```
 - Server translations: `getTranslations(locale)` from `@/shared/locale/server` (synchronous, single string arg, returns property-chain — NOT awaited)
 - Client translations: `useAppTranslation("<namespace>")` from `@/shared/locale/client`
-- Locale in redirects: `redirect(`/${locale}/login`)` - never `redirect("/login")`
+- Redirects use plain paths (`redirect("/login")`) — there is NO `[locale]` URL segment, so never prefix paths with the locale
 
 ### New Page Workflow
 

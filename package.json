@@ -252,6 +252,7 @@
     "@vitest/browser-playwright": "^4.1.11",
     "@vitest/coverage-v8": "^4.1.11",
     "autoprefixer": "^10.5.4",
+    "axe-core": "^4.12.1",
     "babel-plugin-react-compiler": "1.0.0",
     "cldr-core": "^48.2.0",
     "cldr-dates-full": "^48.2.0",

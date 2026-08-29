@@ -112,8 +112,8 @@ const userProfile = await getCurrentUser(userId);
 
 ## Locale Handling
 
-- Locale is available via `params` (as a Promise in Next.js 15+): `const { locale } = await params;`
-- Use locale for redirects: `redirect(`/${locale}/login`)`.
+- Locale is NOT part of the URL — there is no `[locale]` segment anywhere under `app/`. Read it with `getLocale()` from `@/shared/locale/server-cookies` (async; cookie/header based via `proxy.ts`).
+- Redirects use plain paths: `redirect("/login")` or `await redirectToLogin()` from `@/frontend/common/lib/redirectToLogin`. Never prefix paths with the locale.
 
 ## Linting Rules
 

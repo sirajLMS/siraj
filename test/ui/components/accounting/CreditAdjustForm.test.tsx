@@ -24,6 +24,7 @@ await mock.module("@toolpad/core/useNotifications", () => ({
 }));
 
 import type { MockLink } from "@apollo/client/testing";
+import { run as runAxe } from "axe-core";
 import { GraphQLError } from "graphql";
 import {
   CreditAdjustmentType as CreditAdjustmentGqlType,
@@ -228,6 +229,13 @@ const carryoverInput: CreditAdjustmentInput = {
   carryoverPaymentDate: "2026-08-20",
 };
 
+// Happy DOM cannot compute visual styles, so the color-contrast rule stays
+// incomplete there; it is excluded and contrast is covered by the theme tokens.
+async function expectNoAxeViolations(container: HTMLElement): Promise<void> {
+  const results = await runAxe(container, { rules: { "color-contrast": { enabled: false } } });
+  expect(results.violations).toEqual([]);
+}
+
 describe("credit adjust form (component)", () => {
   test("shows the carryover banner only while the carryover radio is selected", async () => {
     renderWithWrapper(<CreditAdjustForm studentId={null} />, { locale, mocks: [studentDirectoryMock, teachersMock] });
@@ -416,5 +424,27 @@ describe("credit adjust form (component)", () => {
     // only echoes typed search text when a value is set programmatically).
     expect(await screen.findByText(STUDENT_NAME)).toBeVisible();
     expect(screen.getByText("14 / 20")).toBeVisible();
+  });
+
+  test("passes axe accessibility checks in the default Add state", async () => {
+    const { container } = renderWithWrapper(<CreditAdjustForm studentId={null} />, {
+      locale,
+      mocks: [studentDirectoryMock, teachersMock],
+    });
+
+    expect(await screen.findByRole("radiogroup")).toBeInTheDocument();
+    await expectNoAxeViolations(container);
+  });
+
+  test("passes axe accessibility checks with the carryover section expanded", async () => {
+    const { container } = renderWithWrapper(<CreditAdjustForm studentId={null} />, {
+      locale,
+      mocks: [studentDirectoryMock, teachersMock],
+    });
+
+    fireEvent.click(screen.getByRole("radio", { name: credits.adjustmentType.subtractWithCarryover }));
+    expect(await screen.findByText(credits.carryover.bannerTitle)).toBeVisible();
+
+    await expectNoAxeViolations(container);
   });
 });

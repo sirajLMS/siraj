@@ -294,7 +294,11 @@ async function markInstanceWaitingPaid(
  * appends one transition event per instance inside the settlement
  * transaction. Instances outside the settlement lifecycle — legacy rows that
  * never entered `WAITING_PAID`, or rows already settled — keep their state,
- * so re-running the payment mutation emits no second event.
+ * so re-running the payment mutation emits no second event. The batch read
+ * is unlocked, so the flip is status-preconditioned: an instance whose
+ * status was changed by a concurrent writer between the read and the flip
+ * keeps that writer's committed state (skipped, logged, no event) instead
+ * of being stomped to `PAID`.
  */
 async function markLinkedInstancesPaid(
   tx: DBTransaction,
@@ -314,12 +318,22 @@ async function markLinkedInstancesPaid(
   const eventRows = await awaiting.reduce(
     async (previous, instance) => {
       const events = await previous;
-      const updated = await SchedulingRepository.updatePayrollCalculation(tx, instance.id, {
-        calculationStatus: CalculationStatus.PAID,
-      });
+      const updated = await SchedulingRepository.updatePayrollCalculation(
+        tx,
+        instance.id,
+        { calculationStatus: CalculationStatus.PAID },
+        { expectedStatus: CalculationStatus.WAITING_PAID }
+      );
       if (!updated) {
-        const t = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(t.internalServerError);
+        // Expected race outcome, not a failure: a concurrent writer (a forced
+        // override or a duplicate settlement) transitioned this instance
+        // after the unlocked batch read. Its committed state stands — no
+        // stomp and no duplicate transition event.
+        logger.info("Skipped the payroll settlement flip: the instance status changed after the batch read", {
+          classInstanceId: instance.id,
+          teacherPaymentId,
+        });
+        return events;
       }
       return [
         ...events,
@@ -333,6 +347,8 @@ async function markLinkedInstancesPaid(
     },
     Promise.resolve([] as ClassStatusEventSeedInsertInput[])
   );
+
+  if (eventRows.length === 0) return;
 
   const inserted = await ClassStatusEventsRepository.createMany(eventRows, tx);
   if (inserted.length !== eventRows.length) {

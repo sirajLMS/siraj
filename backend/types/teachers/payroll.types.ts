@@ -5,7 +5,13 @@ import type { CurrencyCode } from "@/shared/constants/currency.enum";
 export interface PayrollCalculationInput {
   instanceId: string;
   actorUserId: string;
-  /** When true, an ON_DEMAND_* terminal state triggered the calculation. */
+  /**
+   * Provenance marker: an ON_DEMAND_* terminal state triggered this
+   * calculation. Carries no branch weight — the payable-duration rules key
+   * on the row outcome plus attendance telemetry, so an absent session pays
+   * zero without join telemetry and pays the full window with it, whether
+   * the terminal state was on-demand or not.
+   */
   isOnDemand?: boolean;
   /** When true, recalculation is allowed even if the current status is PARTIALLY, REFUND, or WAITING_PAID. */
   forceRecalc?: boolean;
@@ -41,7 +47,14 @@ export interface PayrollOverrideInput {
   note?: string | null;
   /** Bypasses the WAITING_PAID guard. Requires the ACCOUNTING_PAYROLL_MANAGE permission. */
   force?: boolean;
-  /** Absorbs double-clicks: the same value within 30 seconds is treated as idempotent. */
+  /**
+   * Client idempotency token. When provided (non-blank), the idempotency
+   * key becomes instanceId + clientRequestId: every re-submission with the
+   * same token inside the window collapses onto the first-applied result
+   * even if other fields were edited in between, while a different token
+   * starts a fresh override. Absent or blank falls back to the
+   * content-derived key.
+   */
   clientRequestId?: string | null;
 }
 

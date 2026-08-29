@@ -684,9 +684,37 @@ describe("PayrollCalculationService.applyOverride", () => {
       expect(insertedEvents).toHaveLength(1);
     });
 
-    test("collapses a re-submission that only differs by client request id", async () => {
+    test("applies a new override when only the client request id differs", async () => {
+      // A provided client request id IS the idempotency token: a different
+      // token means a different request, so the second override applies.
       const first = await applyOverrideInput();
       const second = await applyOverrideInput({ clientRequestId: "client-request-2" });
+
+      expect(second.auditEventId).not.toBe(first.auditEventId);
+      expect(payrollPatches).toHaveLength(2);
+      expect(insertedEvents).toHaveLength(2);
+    });
+
+    test("returns the first-applied result for the same client request id even when the content differs", async () => {
+      // A double-clicked submission keeps its token across retries: the
+      // first-applied result wins for the whole idempotency window.
+      const first = await applyOverrideInput();
+      const second = await applyOverrideInput({
+        targetStatus: CalculationStatus.PARTIALLY,
+        partialPercentage: 25,
+        note: "changed my mind midway",
+      });
+
+      expect(second.auditEventId).toBe(first.auditEventId);
+      expect(second.calculationStatus).toBe(first.calculationStatus);
+      expect(second.teacherPaidAmount).toBe(first.teacherPaidAmount);
+      expect(payrollPatches).toHaveLength(1);
+      expect(insertedEvents).toHaveLength(1);
+    });
+
+    test("collapses an identical re-submission without a client request id onto the content key", async () => {
+      const first = await applyOverrideInput({ clientRequestId: null });
+      const second = await applyOverrideInput({ clientRequestId: null });
 
       expect(second.auditEventId).toBe(first.auditEventId);
       expect(payrollPatches).toHaveLength(1);
@@ -696,7 +724,7 @@ describe("PayrollCalculationService.applyOverride", () => {
     test("applies a new override when the note differs", async () => {
       await applyOverrideInput();
 
-      const second = await applyOverrideInput({ note: "different justification" });
+      const second = await applyOverrideInput({ note: "different justification", clientRequestId: "client-request-2" });
 
       expect(second.payrollNote).toBe("different justification");
       expect(second.auditEventId).not.toBe("payroll-event-1");
@@ -705,10 +733,9 @@ describe("PayrollCalculationService.applyOverride", () => {
     });
 
     test("collapses two concurrent identical submissions onto one event", async () => {
-      const [first, second] = await Promise.all([
-        applyOverrideInput(),
-        applyOverrideInput({ clientRequestId: "client-request-2" }),
-      ]);
+      // Same client request id on both legs: a rapid double-click carries
+      // the same token, so the concurrent retry collapses onto the first.
+      const [first, second] = await Promise.all([applyOverrideInput(), applyOverrideInput()]);
 
       expect(second.auditEventId).toBe(first.auditEventId);
       expect(payrollPatches).toHaveLength(1);

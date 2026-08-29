@@ -312,11 +312,11 @@
 
 ## Phase 7 — i18n polish, accessibility, observability
 
-### 7.1 Full key coverage
+### 7.1 Full key coverage ✅ DONE
 - ✏️ `shared/locale/namespaces/dashboard/accounting/credits.namespace.ts` — confirm every user-visible string has EN + AR.
 - 🔁 `bun run locale:validate` (or project equivalent) — fail if any key missing in either locale.
 
-### 7.2 Accessibility pass
+### 7.2 Accessibility pass ✅ DONE
 - ✏️ `CreditAdjustForm.tsx` — aria-labels on RadioGroup, autocomplete, date pickers, rich-text editor; focus trap; keyboard nav.
 - 🧪 `CreditAdjustForm.test.tsx` — add axe-core assertions (existing project pattern).
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/credits/CreditAdjustForm.tsx --lifecycle codescene`
@@ -342,7 +342,7 @@
   - Subtract 1 with carryover → verify balance -1 and carryover row visible in transaction history.
 - 🔁 `bun run scripts/health/sub-loop.ts e2e/accounting/credit-adjustment.spec.ts --lifecycle codescene`
 
-### 8.2 Regression suite
+### 8.2 Regression suite ✅ DONE
 - 🔁 `bun test backend/db/test/repo/billing/credit.repository.test.ts`
 - 🔁 `bun test backend/db/test/logic/lms/credit-workflow.test.ts`
 - 🔁 `bun test backend/services/billing/credit.service.test.ts`
@@ -397,24 +397,24 @@ bun run scripts/health/sub-loop.ts <file-path> --lifecycle duplicates
 > Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
 > additive and execute before this plan is treated as test-complete.
 
-- [ ] TB.1 Journey: accounting operator submits Add/Subtract adjustment → student/parent observes updated balance and ledger row (Adjust → Observe)
+- [x] TB.1 Journey: accounting operator submits Add/Subtract adjustment → student/parent observes updated balance and ledger row (Adjust → Observe)
   - Create `test/workflows/billing/credit-adjustment-student-visibility.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (`students.classesRemaining` / `classesTotal` move in lockstep with the `credit_transactions` row), cross-actor visibility (student/parent sees the adjustment row via `getStudentTransactions` and the `/students/credits` balance; other students and their parents must NOT see it), side effects (ledger row + balance change + quota-instance refresh), denial paths (actor without `ACCOUNTING_CREDITS_MANAGE` is rejected via real permission rows; no ledger write occurs; idempotent re-submit returns the first row without a second balance change)
   - Verify: `bun run test/scripts/run-test.ts test/workflows/billing/credit-adjustment-student-visibility.test.ts` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-2 (AC-2.1–AC-2.6), US-3 (AC-3.1–AC-3.6), US-6 (AC-6.1–AC-6.3), US-7 (AC-7.1–AC-7.3); edge cases E1, E9, E11, E18_
-- [ ] TB.2 Journey: accounting operator Subtract With Carryover → teacher gains payout obligation while student loses hours
+- [x] TB.2 Journey: accounting operator Subtract With Carryover → teacher gains payout obligation while student loses hours
   - Create `test/workflows/billing/credit-adjustment-carryover.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: single-transaction consistency (ledger row + balance decrement + carryover columns/commit via `maybeInsertCarryoverBalanceEntry` — all-or-nothing), cross-actor visibility (teacher's pending carryover obligation reflects the deducted hours and date range; carryover row renders teacher name/dates in the student's transaction history per AC-7.2; unrelated teachers must NOT gain an obligation), side effects (audit event emitted with actor/student/teacher/hours), denial paths (operator lacking `ACCOUNTING_CREDITS_MANAGE`; nonexistent or soft-deleted teacher → `NOT_FOUND`; insufficient classes → `INSUFFICIENT_CLASSES` with zero writes; duplicate submit → single carryover entry)
   - Verify: `bun run test/scripts/run-test.ts test/workflows/billing/credit-adjustment-carryover.test.ts` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-4 (AC-4.1–AC-4.10), US-6 (AC-6.1–AC-6.3), US-7 (AC-7.2), NFR-3, NFR-8; edge cases E4–E8, E14, E15_
-- [ ] TB.3 4-Tier verification for credit-adjustment service/repository/sanitizer/mutation files
+- [x] TB.3 4-Tier verification for credit-adjustment service/repository/sanitizer/mutation files
   - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/services/billing/credit.service.ts`, `backend/services/billing/credit-adjustment.idempotency.ts`, `backend/services/billing/carryover-handoff.ts`, `backend/db/repo/billing/credit.repository.ts`, `backend/lib/sanitize/richTextSanitizer.ts`, `backend/graphql/mutation/billing/credit-adjustment.mutation.ts`
   - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels
   - Verify with `bun run test/scripts/run-test.ts <each test file>`
   - _Requirements: cross-cutting (US-2, US-3, US-4, US-5, US-6; NFR-3, NFR-4, NFR-8)_
-- [ ] TB.4 Penetration verification
+- [x] TB.4 Penetration verification
   - BOLA/IDOR across the roles in this plan: `recordCreditAdjustment` with a `studentId`/`carryoverTeacherId` outside the actor's scope or soft-deleted; permission denial on the mutation for teacher/student/parent actors; XSS via stored rich-text `notes` (payload surviving sanitization rendered in transaction history); wildcard/LIKE injection on the Student Credits list search
   - Via `.agents/skills/pentester/SKILL.md`
   - _Requirements: US-5 (AC-5.2, AC-5.4), US-6 (AC-6.1–AC-6.3), NFR-4; edge cases E12, E18_

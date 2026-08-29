@@ -137,6 +137,22 @@ export namespace StudentRepository {
     return row ?? null;
   };
 
+  /**
+   * Like `findById`, but treats students whose linked user account was
+   * soft-deleted as missing — used by write flows that must not act on
+   * removed accounts.
+   */
+  export const findActiveById = async (id: string, tx?: DBTransaction): Promise<Types.StudentSelectType | null> => {
+    const q = queryDb(tx);
+    const [row] = await q
+      .select({ student: students })
+      .from(students)
+      .innerJoin(users, eq(students.userId, users.id))
+      .where(and(eq(students.id, id), isNull(users.deletedAt)))
+      .limit(1);
+    return row?.student ?? null;
+  };
+
   export const getStudentIdByUserId = async (userId: string, tx?: DBTransaction): Promise<string | null> => {
     const q = queryDb(tx);
     const [row] = await q.select({ id: students.id }).from(students).where(eq(students.userId, userId)).limit(1);

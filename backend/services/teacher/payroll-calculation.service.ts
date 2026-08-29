@@ -153,15 +153,15 @@ function floorMinutesBetween(start: Date, end: Date): number {
  *
  * 1. Student absence — teacher joined, student did not: the full scheduled
  *    window is payable.
- * 2. Teacher absence — teacher never joined and the student was not marked
- *    absent: zero pay (still a successful calculation).
+ * 2. Teacher absence — no attendance telemetry ever arrived
+ *    (`actualStartAt` is null), whatever the outcome says: zero pay (still a
+ *    successful calculation). An absent outcome without a join timestamp
+ *    means the teacher never taught, so the student-absence rule does not
+ *    rescue the row.
  * 3. On-time — entry within the grace window (short grace for sessions at or
  *    below the threshold duration, long grace above it): full scheduled pay.
  * 4. Pro-rated — entry beyond grace: payable time runs from the actual join
  *    time to the scheduled end; overtime is never credited.
- *
- * Sessions the student missed where the teacher also never joined fall
- * through to the on-time branch and keep their full scheduled pay.
  */
 function classifyPayrollBranch(instance: ClassInstanceSelectType, grace: PayrollGraceSettings): PayrollBranchOutcome {
   const scheduledDurationMinutes = floorMinutesBetween(instance.scheduledStartAt, instance.scheduledEndAt);
@@ -177,7 +177,12 @@ function classifyPayrollBranch(instance: ClassInstanceSelectType, grace: Payroll
     };
   }
 
-  if (instance.actualStartAt == null && outcome !== ClassOutcome.ABSENT) {
+  // Order matters: any row that reaches here with no join telemetry pays
+  // zero as a teacher absence — including rows whose outcome says ABSENT,
+  // because a student absence the teacher also missed was never taught.
+  // (Rows where the teacher DID join an absent-marked session already
+  // returned as student absence above.)
+  if (instance.actualStartAt == null) {
     return {
       calculatedDuration: 0,
       isStudentAbsence: false,
@@ -187,7 +192,8 @@ function classifyPayrollBranch(instance: ClassInstanceSelectType, grace: Payroll
     };
   }
 
-  const effectiveStart = instance.actualStartAt ?? instance.scheduledStartAt;
+  // The teacher-absence early return guarantees a join timestamp here.
+  const effectiveStart = instance.actualStartAt;
   const latenessMinutes = floorMinutesBetween(instance.scheduledStartAt, effectiveStart);
   const graceThresholdMinutes =
     scheduledDurationMinutes <= grace.thresholdMinutes ? grace.shortMinutes : grace.longMinutes;
@@ -592,22 +598,36 @@ function pickDominantCurrency(rows: readonly PayrollReportRow[]): CurrencyCode {
 // ---------------------------------------------------------------------------
 
 /**
- * Loads the instance for a payroll write. An unlocked read supplies the
- * teacher-scoped advisory lock key; the row is then re-read with FOR UPDATE
- * so every status decision and the snapshot write happen under the row lock.
- * The advisory lock serializes concurrent calculators and overrides for one
- * teacher (batch runs included); the row lock serializes them per instance.
+ * Loads the instance for a payroll write, row-locked with FOR UPDATE so every
+ * status decision and the snapshot write happen under the lock.
+ *
+ * Lock-ordering rule: a standalone payroll run takes the teacher-scoped
+ * advisory lock FIRST and only then the row lock, serializing concurrent
+ * calculators and overrides for one teacher (batch runs included). A run
+ * embedded in a caller-provided transaction (the scheduling state machine)
+ * must SKIP the advisory lock: that caller already holds the instance row
+ * lock from its transition update, and waiting on the advisory while holding
+ * the row would invert the standalone order — a transaction holding a row
+ * lock blocking on the advisory while a standalone run holds the advisory
+ * and blocks on the same row is the classic two-lock deadlock. The embedded
+ * path never waits on the advisory, so it always makes progress and releases
+ * the row, keeping both paths acyclic; per-instance serialization is
+ * preserved by the row lock either way.
  */
 async function lockInstanceForPayroll(
   tx: DBTransaction,
   instanceId: string,
-  tErrors: ErrorsLabels
+  tErrors: ErrorsLabels,
+  options: { advisoryLock: boolean }
 ): Promise<ClassInstanceSelectType> {
-  const snapshot = await SchedulingRepository.getById(instanceId, tx);
-  if (!snapshot) {
-    throw new NotFoundError("CLASS_INSTANCE", tErrors.scheduling.classInstanceNotFound({ id: instanceId }));
+  if (options.advisoryLock) {
+    // Unlocked pre-read: only supplies the teacher id for the lock key.
+    const snapshot = await SchedulingRepository.getById(instanceId, tx);
+    if (!snapshot) {
+      throw new NotFoundError("CLASS_INSTANCE", tErrors.scheduling.classInstanceNotFound({ id: instanceId }));
+    }
+    await acquireAdvisoryLock(tx, `payroll_teacher_${snapshot.teacherId}`);
   }
-  await acquireAdvisoryLock(tx, `payroll_teacher_${snapshot.teacherId}`);
   const locked = await SchedulingRepository.getById(instanceId, tx, { forUpdate: true });
   if (!locked) {
     throw new NotFoundError("CLASS_INSTANCE", tErrors.scheduling.classInstanceNotFound({ id: instanceId }));
@@ -618,9 +638,10 @@ async function lockInstanceForPayroll(
 async function calculateWithinTransaction(
   tx: DBTransaction,
   input: PayrollCalculationInput,
-  tErrors: ErrorsLabels
+  tErrors: ErrorsLabels,
+  lockOptions: { advisoryLock: boolean }
 ): Promise<PayrollCalculationResult> {
-  const instance = await lockInstanceForPayroll(tx, input.instanceId, tErrors);
+  const instance = await lockInstanceForPayroll(tx, input.instanceId, tErrors, lockOptions);
   const previousStatus = instance.calculationStatus;
 
   // Settled money is immutable — payment history must never be recalculated away.
@@ -704,7 +725,7 @@ async function applyOverrideWithinTransaction(
   idempotencyKey: string,
   tErrors: ErrorsLabels
 ): Promise<PayrollOverrideResult> {
-  const instance = await lockInstanceForPayroll(tx, input.instanceId, tErrors);
+  const instance = await lockInstanceForPayroll(tx, input.instanceId, tErrors, { advisoryLock: true });
   const previousStatus = instance.calculationStatus;
 
   if (previousStatus === CalculationStatus.PAID) {
@@ -775,7 +796,9 @@ export namespace PayrollCalculationService {
    * the idempotency window return the first result without duplicate writes.
    *
    * Pass the caller's transaction to embed the calculation in a wider write
-   * (the scheduling state machine does this on terminal transitions).
+   * (the scheduling state machine does this on terminal transitions). The
+   * embedded run relies on the caller row lock and skips the teacher
+   * advisory lock (see lockInstanceForPayroll for the lock-ordering rule).
    */
   export async function calculateForInstance(
     input: PayrollCalculationInput,
@@ -783,7 +806,11 @@ export namespace PayrollCalculationService {
     tx?: DBTransaction
   ): Promise<PayrollCalculationResult> {
     await requirePermission(input.actorUserId, AppPermission.ACCOUNTING_PAYROLL_MANAGE, tErrors);
-    const calculate = (executor: DBTransaction) => calculateWithinTransaction(executor, input, tErrors);
+    // A caller-provided tx means the caller already holds the instance row
+    // lock; taking the advisory there would invert the standalone
+    // advisory-then-row order, so only standalone runs lock both.
+    const calculate = (executor: DBTransaction) =>
+      calculateWithinTransaction(executor, input, tErrors, { advisoryLock: tx == null });
     return tx ? calculate(tx) : db.transaction(calculate);
   }
 

@@ -162,7 +162,9 @@ export function RichTextEditor({
 }: RichTextEditorProps): React.ReactNode {
   const t = useAppTranslation(Translation.Ui.RichText);
   const generatedId = useId();
-  const labelId = `${id ?? generatedId}-label`;
+  const baseId = id ?? generatedId;
+  const labelId = `${baseId}-label`;
+  const helperTextId = `${baseId}-helper`;
   // Last HTML delivered to the consumer; guards the external-value sync so a
   // prop echo of our own onChange never re-enters setContent (no update loop).
   const lastEmittedRef = useRef(value);
@@ -203,6 +205,20 @@ export function RichTextEditor({
     editor?.setEditable(!disabled);
   }, [editor, disabled]);
 
+  // Error/required state and the helper text are purely visual in MUI; mirror
+  // them onto the editable element so assistive tech sees the same status.
+  useEffect(() => {
+    if (!editor) return;
+    const editableElement = editor.view.dom;
+    editableElement.setAttribute("aria-required", String(required));
+    editableElement.setAttribute("aria-invalid", String(error));
+    if (helperText) {
+      editableElement.setAttribute("aria-describedby", helperTextId);
+    } else {
+      editableElement.removeAttribute("aria-describedby");
+    }
+  }, [editor, required, error, helperText, helperTextId]);
+
   useEffect(() => {
     if (!editor || value === lastEmittedRef.current) {
       return;
@@ -228,7 +244,7 @@ export function RichTextEditor({
         </Box>
         <EditorContent editor={editor} />
       </Box>
-      {helperText ? <FormHelperText>{helperText}</FormHelperText> : null}
+      {helperText ? <FormHelperText id={helperTextId}>{helperText}</FormHelperText> : null}
     </FormControl>
   );
 }

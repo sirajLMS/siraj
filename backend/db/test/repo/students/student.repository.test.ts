@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { StudentRepository } from "@/backend/db/repo/students";
-import { students } from "@/backend/db/schema";
-import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
+import { students, users } from "@/backend/db/schema";
+import { createTestUser, setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { StudentStatus } from "@/backend/enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -241,6 +241,35 @@ describe("StudentRepository — credit-hours parallel balance methods", () => {
       expect(typeof missing.studentId).toBe("string");
       expect(missing.creditHoursTotal).toBe("0");
       expect(missing.creditHoursRemaining).toBe("0");
+    });
+  });
+
+  describe("findActiveById", () => {
+    test("returns the student while the linked user is active", async () => {
+      await runInRollback(async tx => {
+        const { student } = await makeStudent(tx, "ActiveLookup");
+
+        const found = await StudentRepository.findActiveById(student.id, tx);
+        expect(found?.id).toBe(student.id);
+      });
+    });
+
+    test("returns null after the linked user is soft-deleted", async () => {
+      await runInRollback(async tx => {
+        const studentUser = await createTestUser(tx, { name: "SoftGone StudentUser" });
+        const { student } = await makeStudent(tx, "SoftGone", { userId: studentUser.id });
+
+        await tx.update(users).set({ deletedAt: new Date() }).where(eq(users.id, studentUser.id));
+
+        expect(await StudentRepository.findById(student.id, tx)).not.toBeNull();
+        expect(await StudentRepository.findActiveById(student.id, tx)).toBeNull();
+      });
+    });
+
+    test("returns null for an unknown id", async () => {
+      await runInRollback(async tx => {
+        expect(await StudentRepository.findActiveById(randomUUID(), tx)).toBeNull();
+      });
     });
   });
 });

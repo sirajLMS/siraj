@@ -1,6 +1,7 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
 import { createHash } from "node:crypto";
 import { CalculationStatus, RateSource, SchedulingMode, TeacherDueStatus } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
 import type { ClassInstanceSelectType, ClassStatusEventSeedInsertInput, TeacherDueSelectType } from "@/backend/types";
 import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -108,7 +109,7 @@ function expectedSettlementKey(instanceId: string, teacherPaymentId: string): st
 let settledDues: TeacherDueSelectType[] = [];
 let linkedInstances: ClassInstanceSelectType[] = [];
 let dueUpdates: { dueIds: string[]; teacherPaymentId: string; tx: unknown }[] = [];
-let payrollUpdates: { tx: unknown; id: string; patch: Record<string, unknown> }[] = [];
+let payrollUpdates: { tx: unknown; id: string; patch: Record<string, unknown>; options: unknown }[] = [];
 let eventInserts: { rows: ClassStatusEventSeedInsertInput[]; tx: unknown }[] = [];
 let cacheInvalidations: string[] = [];
 let selectCalls = 0;
@@ -134,8 +135,13 @@ const dueMarkAsPaidMock = mock(
 );
 
 const updatePayrollCalculationMock = mock(
-  async (tx: unknown, id: string, patch: Record<string, unknown>): Promise<ClassInstanceSelectType | null> => {
-    payrollUpdates.push({ tx, id, patch });
+  async (
+    tx: unknown,
+    id: string,
+    patch: Record<string, unknown>,
+    options?: unknown
+  ): Promise<ClassInstanceSelectType | null> => {
+    payrollUpdates.push({ tx, id, patch, options });
     return linkedInstances.find(instance => instance.id === id) ?? null;
   }
 );
@@ -240,10 +246,12 @@ beforeEach(() => {
   createManyEventsMock.mockClear();
   hasPermissionMock.mockClear();
   hasPermissionMock.mockImplementation(async () => true);
-  updatePayrollCalculationMock.mockImplementation(async (tx: unknown, id: string, patch: Record<string, unknown>) => {
-    payrollUpdates.push({ tx, id, patch });
-    return linkedInstances.find(instance => instance.id === id) ?? null;
-  });
+  updatePayrollCalculationMock.mockImplementation(
+    async (tx: unknown, id: string, patch: Record<string, unknown>, options?: unknown) => {
+      payrollUpdates.push({ tx, id, patch, options });
+      return linkedInstances.find(instance => instance.id === id) ?? null;
+    }
+  );
   createManyEventsMock.mockImplementation(async (rows: ClassStatusEventSeedInsertInput[], tx?: unknown) => {
     eventInserts.push({ rows: [...rows], tx });
     return rows.map((row, index) => ({ ...row, id: `event-${eventInserts.length}-${index}` }));
@@ -268,6 +276,7 @@ describe("TeacherDueService.markAsPaid — Tier 1: settlement branches", () => {
     expect(payrollUpdates[0]?.tx).toBe(fakeTx);
     expect(payrollUpdates[0]?.id).toBe(INSTANCE_ID);
     expect(payrollUpdates[0]?.patch).toEqual({ calculationStatus: CalculationStatus.PAID });
+    expect(payrollUpdates[0]?.options).toEqual({ expectedStatus: CalculationStatus.WAITING_PAID });
 
     expect(eventInserts).toHaveLength(1);
     expect(eventInserts[0]?.tx).toBe(fakeTx);
@@ -384,13 +393,44 @@ describe("TeacherDueService.markAsPaid — Tier 3: repeat settlements", () => {
     expect(eventInserts[0]?.rows).toHaveLength(1);
   });
 
-  test("surfaces an invariant failure when the flip write misses", async () => {
+  test("skips cleanly when a forced override raced the settlement (precondition matched no row)", async () => {
     stageAwaitingSettlement();
+    // The unlocked batch read saw WAITING_PAID; a concurrent forced override
+    // then committed REFUND. The preconditioned flip matches no row, so the
+    // settlement completes without stomping the refund and without emitting
+    // a transition event for the instance.
     updatePayrollCalculationMock.mockImplementationOnce(async () => null);
+    const infoSpy = spyOn(logger, "info");
 
-    const error = await settleAndCaptureError();
-    expect(error.message).toContain("internal server error");
+    await TeacherDueService.markAsPaid(ACTOR_ID, [DUE_ID], PAYMENT_ID);
+
     expect(eventInserts).toHaveLength(0);
+    expect(cacheInvalidations).toEqual([TEACHER_ID]);
+    expect(infoSpy).toHaveBeenCalledTimes(1);
+    expect(infoSpy.mock.calls[0]?.[0]).toBe(
+      "Skipped the payroll settlement flip: the instance status changed after the batch read"
+    );
+
+    infoSpy.mockRestore();
+  });
+
+  test("returns no settled dues on a double submit, so no second event can be emitted", async () => {
+    settledDues = [buildDueRow()];
+    linkedInstances = [buildClassInstance()];
+
+    await TeacherDueService.markAsPaid(ACTOR_ID, [DUE_ID], PAYMENT_ID);
+
+    // After the first settlement the due row is no longer PENDING, so the
+    // repo returns no rows for the re-submitted ids and the instance pass
+    // never runs — the first payment keeps its exclusive link.
+    settledDues = [];
+    await TeacherDueService.markAsPaid(ACTOR_ID, [DUE_ID], PAYMENT_ID);
+
+    expect(dueUpdates).toHaveLength(2);
+    expect(dueUpdates[1]?.dueIds).toEqual([DUE_ID]);
+    expect(payrollUpdates).toHaveLength(1);
+    expect(eventInserts).toHaveLength(1);
+    expect(cacheInvalidations).toEqual([TEACHER_ID]);
   });
 
   test("surfaces an invariant failure when the event insert misses", async () => {

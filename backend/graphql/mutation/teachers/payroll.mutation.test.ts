@@ -298,6 +298,19 @@ describe("applyPayrollOverride mutation", () => {
     expect(applyOverrideCalls).toHaveLength(0);
   });
 
+  test("rejects impersonating actors with a FORBIDDEN GraphQL error and never invokes the service", async () => {
+    const result = await executeApplyOverride(
+      { input: buildInput() },
+      makeCtx({ isImpersonating: true, realUserId: "99999999-9999-9999-9999-999999999999" })
+    );
+
+    // Money mutations are blocked while impersonating: the override (and its
+    // audit event attribution) must land under the operator's own session.
+    expectErrorEnvelope(result, "FORBIDDEN", tErrorsEn.insufficientPermissions);
+    expect(extractOverride(result)).toBeNull();
+    expect(applyOverrideCalls).toHaveLength(0);
+  });
+
   for (const testCase of overrideInputCases) {
     test(`forwards the input unchanged to the service: ${testCase.label}`, async () => {
       const result = await executeApplyOverride({ input: testCase.input }, makeCtx());

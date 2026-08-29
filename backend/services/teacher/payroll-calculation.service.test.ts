@@ -8,6 +8,7 @@ import type {
   ClassInstanceSelectType,
   ClassStatusEventSeedInsertInput,
   ClassStatusEventSelectType,
+  DBTransaction,
   PayrollCalculationInput,
   PayrollCalculationResult,
 } from "@/backend/types";
@@ -129,6 +130,20 @@ function readIdempotencyKey(toState: unknown): string | null {
     return typeof value === "string" ? value : null;
   }
   return null;
+}
+
+function isDbTransaction(value: unknown): value is DBTransaction {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * Wraps a fake caller transaction as the opaque executor the calculator
+ * forwards to every repository mock (same type-guard pattern as the billing
+ * carryover-handoff tests).
+ */
+function asCallerTx(value: object): DBTransaction {
+  if (isDbTransaction(value)) return value;
+  throw new Error("fake caller tx must be an object");
 }
 
 const getByIdMock = mock(async (id: string, tx?: unknown, opts?: { forUpdate?: boolean }) => {
@@ -512,6 +527,47 @@ describe("PayrollCalculationService.calculateForInstance", () => {
       expectSnapshotPatch({ status: CalculationStatus.CALCULATED, duration: 0, amount: "0.00" });
     });
 
+    test("pays zero for an on-demand absent session with no attendance telemetry", async () => {
+      // The absent outcome without a join timestamp must not flip the row
+      // onto the student-absence branch: nobody taught, so nobody is paid.
+      instanceRow = buildInstanceRow({
+        executionState: ClassExecutionState.ON_DEMAND_NO_CREDITS_ABSENT,
+        ondemandStatus: OnDemandStatus.NO_CREDITS_ABSENT,
+        outcome: ClassOutcome.ABSENT,
+        actualStartAt: null,
+        actualEndAt: null,
+      });
+
+      const result = await calculate({ isOnDemand: true });
+
+      expect(result.calculationStatus).toBe(CalculationStatus.CALCULATED);
+      expect(result.calculatedDuration).toBe(0);
+      expect(result.teacherPaidAmount).toBe("0.00");
+      expect(result.isStudentAbsence).toBe(false);
+      expect(result.isTeacherAbsence).toBe(true);
+      expectSnapshotPatch({ status: CalculationStatus.CALCULATED, duration: 0, amount: "0.00" });
+    });
+
+    test("pays a joined teacher the full window for an on-demand absent session", async () => {
+      // The teacher actually joined the on-demand session, so the
+      // student-absence rule pays the full scheduled window.
+      instanceRow = buildInstanceRow({
+        executionState: ClassExecutionState.ON_DEMAND_NO_CREDITS_ABSENT,
+        ondemandStatus: OnDemandStatus.NO_CREDITS_ABSENT,
+        outcome: ClassOutcome.ABSENT,
+        actualStartAt: minutesAfter(SCHEDULED_START, 2),
+        actualEndAt: minutesAfter(SCHEDULED_START, 62),
+      });
+
+      const result = await calculate({ isOnDemand: true });
+
+      expect(result.calculationStatus).toBe(CalculationStatus.CALCULATED);
+      expect(result.calculatedDuration).toBe(60);
+      expect(result.teacherPaidAmount).toBe("120.00");
+      expect(result.isStudentAbsence).toBe(true);
+      expect(result.isTeacherAbsence).toBe(false);
+    });
+
     test("rejects a session that has not reached a terminal execution state", async () => {
       instanceRow = buildInstanceRow({ executionState: ClassExecutionState.RUNNING });
 
@@ -666,17 +722,18 @@ describe("PayrollCalculationService.calculateForInstance", () => {
       expectSnapshotPatch({ status: CalculationStatus.CALCULATED, duration: 0, amount: "0.00" });
     });
 
-    test("still pays the full window when both student and teacher missed the session", async () => {
-      // The student was marked absent, so the teacher-absence rule does not
-      // apply: the session keeps its full scheduled pay.
+    test("pays zero when both student and teacher missed the session", async () => {
+      // An absent outcome with no join telemetry means the session was never
+      // taught: the teacher-absence rule applies, not the student-absence one.
       const result = await expectPayableAmount({
         row: { outcome: ClassOutcome.ABSENT, actualStartAt: null, actualEndAt: null },
-        expectedDuration: 60,
-        expectedAmount: "120.00",
+        expectedDuration: 0,
+        expectedAmount: "0.00",
       });
-      expect(result.isWithinGrace).toBe(true);
+      expect(result.calculationStatus).toBe(CalculationStatus.CALCULATED);
+      expect(result.isWithinGrace).toBe(false);
       expect(result.isStudentAbsence).toBe(false);
-      expect(result.isTeacherAbsence).toBe(false);
+      expect(result.isTeacherAbsence).toBe(true);
     });
 
     test("pays a joined teacher in full when the student took a leave", async () => {
@@ -686,6 +743,20 @@ describe("PayrollCalculationService.calculateForInstance", () => {
         expectedAmount: "120.00",
       });
       expect(result.isWithinGrace).toBe(true);
+    });
+
+    test("pays zero for a student leave the teacher never joined", async () => {
+      // The mirror of the absent-outcome case: without join telemetry the
+      // session was never taught, so a student leave does not rescue the
+      // row either — the outcome never outvotes the missing attendance.
+      const result = await expectPayableAmount({
+        row: { outcome: ClassOutcome.LEAVE, actualStartAt: null, actualEndAt: null },
+        expectedDuration: 0,
+        expectedAmount: "0.00",
+      });
+      expect(result.calculationStatus).toBe(CalculationStatus.CALCULATED);
+      expect(result.isStudentAbsence).toBe(false);
+      expect(result.isTeacherAbsence).toBe(true);
     });
   });
 
@@ -880,6 +951,45 @@ describe("PayrollCalculationService.calculateForInstance", () => {
       expect(second).toEqual(first);
       expect(payrollPatches).toHaveLength(1);
       expect(insertedEvents).toHaveLength(1);
+    });
+  });
+
+  describe("transaction embedding", () => {
+    test("skips the advisory lock when embedded in the caller transaction", async () => {
+      // The caller (the scheduling state machine) already holds the instance
+      // row lock from its transition update. The embedded run must not wait
+      // on the advisory lock: a standalone payroll run holding the advisory
+      // and waiting for the same row would deadlock against it.
+      const callerTx = asCallerTx({ executor: "scheduling-state-machine-transaction" });
+      const { PayrollCalculationService } = await importService();
+
+      const result = await PayrollCalculationService.calculateForInstance(
+        { instanceId: INSTANCE_ID, actorUserId: ACTOR_ID },
+        tErrors,
+        callerTx
+      );
+
+      expect(result.calculationStatus).toBe(CalculationStatus.CALCULATED);
+      expect(result.teacherPaidAmount).toBe("120.00");
+      expect(acquiredLockKeys).toHaveLength(0);
+      expect(dbTransactionMock).not.toHaveBeenCalled();
+      // One FOR UPDATE read straight through the caller executor: no
+      // unlocked pre-read, because the advisory lock key is never needed.
+      expect(instanceReads).toHaveLength(1);
+      expect(instanceReads[0]?.forUpdate).toBe(true);
+      expect(instanceReads[0]?.tx).toBe(callerTx);
+      expect(payrollPatches[0]?.tx).toBe(callerTx);
+      expectSnapshotPatch({ status: CalculationStatus.CALCULATED, duration: 60, amount: "120.00" });
+    });
+
+    test("still takes the advisory lock before the row lock on a standalone run", async () => {
+      await calculate();
+
+      expect(acquiredLockKeys).toHaveLength(1);
+      expect(acquiredLockKeys[0]?.lockKey).toBe(`payroll_teacher_${TEACHER_ID}`);
+      expect(instanceReads).toHaveLength(2);
+      expect(instanceReads[0]?.forUpdate).toBe(false);
+      expect(instanceReads[1]?.forUpdate).toBe(true);
     });
   });
 

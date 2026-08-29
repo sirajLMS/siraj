@@ -154,6 +154,14 @@ describe("deriveAdjustmentIdempotencyKey — edge inputs", () => {
     expect(padded).not.toBe(unpadded);
   });
 
+  test("key material is hashed verbatim — whitespace and casing variants produce distinct keys", () => {
+    const letterBearingId = "550e8400-e29b-41d4-a716-446655440000";
+    const lower = deriveAdjustmentIdempotencyKey({ ...baseInput(), carryoverTeacherId: letterBearingId });
+    const upper = deriveAdjustmentIdempotencyKey({ ...baseInput(), carryoverTeacherId: letterBearingId.toUpperCase() });
+    const padded = deriveAdjustmentIdempotencyKey({ ...baseInput(), carryoverTeacherId: ` ${letterBearingId} ` });
+    expect(new Set([lower, upper, padded]).size).toBe(3);
+  });
+
   test("the free-text reason is excluded from the key", () => {
     const input = baseInput();
     const arabicReasonInput = { ...input, notes: "سبب التعديل: تصحيح رصيد" };

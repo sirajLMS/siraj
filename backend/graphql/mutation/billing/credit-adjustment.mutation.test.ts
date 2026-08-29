@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { GraphQLError } from "graphql";
 import { CreditAdjustmentType, CreditReason, UserRole } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
-import { ForbiddenError } from "@/backend/lib/errors";
+import { ForbiddenError, ValidationError } from "@/backend/lib/errors";
 import type { CreditAdjustmentInput, CreditAdjustmentReturnType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -225,6 +225,17 @@ describe("recordCreditAdjustment mutation", () => {
       throw new Error("expected the resolver to propagate the service ForbiddenError");
     }
     expect(error.extensions.code).toBe("FORBIDDEN");
+  });
+
+  test("propagates a ValidationError from the service with its VALIDATION extension code", async () => {
+    serviceError = new ValidationError("invalid credit adjustment input");
+
+    const error = await expectResolverError(buildCarryoverInput(), mockCtx(ACTOR_ID));
+
+    if (!(error instanceof ValidationError)) {
+      throw new Error("expected the resolver to propagate the service ValidationError");
+    }
+    expect(error.extensions.code).toBe("VALIDATION");
   });
 
   test("rejects unauthenticated callers with a UNAUTHENTICATED GraphQL error", async () => {

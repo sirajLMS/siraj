@@ -189,6 +189,13 @@ export namespace TeacherDueRepository {
     };
   }
 
+  /**
+   * Marks a batch of dues as paid through one teacher payment. Only `PENDING`
+   * dues transition: an already-settled due keeps its original payment link,
+   * so re-submitting settled ids (a double submit) neither re-links them to
+   * the newer payment nor returns them — the rows this call actually settled
+   * are the ones returned.
+   */
   export async function markAsPaid(
     dueIds: string[],
     teacherPaymentId: string,
@@ -203,9 +210,9 @@ export namespace TeacherDueRepository {
         teacherPaymentId,
         updatedAt: new Date(),
       })
-      .where(inArray(teacherDues.id, dueIds))
+      .where(and(inArray(teacherDues.id, dueIds), eq(teacherDues.status, TeacherDueStatus.PENDING)))
       .returning();
-    logger.info("Marked teacher dues as paid", { count: dueIds.length, teacherPaymentId });
+    logger.info("Marked teacher dues as paid", { count: updated.length, teacherPaymentId });
     return updated;
   }
 

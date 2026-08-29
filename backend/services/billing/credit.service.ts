@@ -59,6 +59,18 @@ async function assertStudentExists(studentId: string, tErrors: ErrorsLabels): Pr
   }
 }
 
+/**
+ * Adjustments must not target students whose account was removed — a
+ * soft-deleted student user is treated as not found, with zero writes.
+ * Runs inside the adjustment transaction (after the advisory lock).
+ */
+async function assertActiveStudentExists(studentId: string, tErrors: ErrorsLabels, tx: DBTransaction): Promise<void> {
+  const existing = await StudentRepository.findActiveById(studentId, tx);
+  if (!existing) {
+    throw new NotFoundError("STUDENT", tErrors.studentNotFound(studentId));
+  }
+}
+
 /** Type guard: narrows a `string` to `CreditReason` enum. */
 function isCreditReason(value: string): value is CreditReason {
   return (Object.values(CreditReason) as readonly string[]).includes(value);
@@ -124,7 +136,7 @@ function sanitizeAdjustmentNotes(notes: string | null | undefined): string | nul
 }
 
 async function assertTeacherExists(teacherId: string, tErrors: ErrorsLabels, tx: DBTransaction): Promise<void> {
-  const existing = await TeacherRepository.findById(teacherId, tx);
+  const existing = await TeacherRepository.findActiveById(teacherId, tx);
   if (!existing) {
     throw new NotFoundError("TEACHER", tErrors.teacher.teacherNotFound(teacherId));
   }
@@ -185,7 +197,7 @@ async function executeAdjustmentTransaction(params: AdjustmentTxParams): Promise
 
   return db.transaction(async tx => {
     await acquireAdvisoryLock(tx, `student_${input.studentId}`);
-    await assertStudentExists(input.studentId, tErrors);
+    await assertActiveStudentExists(input.studentId, tErrors, tx);
     if (params.carryover) {
       await assertTeacherExists(params.carryover.teacherId, tErrors, tx);
     }

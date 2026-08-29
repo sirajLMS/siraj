@@ -253,6 +253,35 @@ describe("Payroll report repository", () => {
       });
     });
 
+    test("flags a session both the student and teacher missed as teacher-absent", async () => {
+      await runInRollback(async tx => {
+        // An absent outcome with no join telemetry is a teacher absence,
+        // mirroring the calculator branch: the session was never taught.
+        const { student, teacher } = await setupTestEntities(tx, "PayBoth", { skipInstance: true });
+        const subject = await createReportSubject(tx);
+        const bothMissed = await createCompletedInstance(tx, student.id, teacher.id, subject.id, atTime(DAY_ONE, 9), {
+          outcome: ClassOutcome.ABSENT,
+          actualStartAt: null,
+          actualEndAt: null,
+          calculationStatus: CalculationStatus.CALCULATED,
+          calculatedDuration: 0,
+          teacherPaidAmount: "0",
+          teacherPaidCurrency: CurrencyCode.USD,
+        });
+
+        const { rows } = await SchedulingRepository.findPayrollReportRows(
+          { teacherId: teacher.id },
+          { limit: 10, offset: 0 },
+          tx
+        );
+
+        const row = rows.find(r => r.instanceId === bothMissed.id);
+        if (!row) throw new Error("both-missed row missing from report");
+        expect(row.isStudentAbsence).toBe(false);
+        expect(row.isTeacherAbsence).toBe(true);
+      });
+    });
+
     test("filters by teacher id and excludes soft-deleted instances", async () => {
       await runInRollback(async tx => {
         const scenario = await setupReportScenario(tx);
@@ -445,6 +474,15 @@ describe("Payroll report repository", () => {
         expect(row.calculationStatus).toBe(CalculationStatus.NOT_CALCULATED);
       });
     });
+
+    test("rejects a forUpdate read without a transaction", () => {
+      // Fail fast over a silent no-op: outside a transaction the FOR UPDATE
+      // lock evaporates the moment the statement finishes. The guard throws
+      // before any statement executes, so no rollback wrapper is needed.
+      return expect(SchedulingRepository.getById(randomUUID(), undefined, { forUpdate: true })).rejects.toThrow(
+        /forUpdate requires a transaction/
+      );
+    });
   });
 
   describe("updatePayrollCalculation", () => {
@@ -501,6 +539,51 @@ describe("Payroll report repository", () => {
           calculationStatus: CalculationStatus.CALCULATED,
         });
         expect(updated).toBeNull();
+      });
+    });
+
+    test("flips the row when the expected status still matches", async () => {
+      await runInRollback(async tx => {
+        const scenario = await setupReportScenario(tx);
+        await SchedulingRepository.updatePayrollCalculation(tx, scenario.refunded.id, {
+          calculationStatus: CalculationStatus.WAITING_PAID,
+        });
+
+        const updated = await SchedulingRepository.updatePayrollCalculation(
+          tx,
+          scenario.refunded.id,
+          { calculationStatus: CalculationStatus.PAID },
+          { expectedStatus: CalculationStatus.WAITING_PAID }
+        );
+
+        if (!updated) throw new Error("the preconditioned update should return the updated row");
+        expect(updated.calculationStatus).toBe(CalculationStatus.PAID);
+        expect(updated.teacherPaidAmount).toBe("0");
+
+        const reread = await SchedulingRepository.getById(scenario.refunded.id, tx);
+        expect(reread?.calculationStatus).toBe(CalculationStatus.PAID);
+      });
+    });
+
+    test("returns null and leaves the row untouched when the status no longer matches", async () => {
+      await runInRollback(async tx => {
+        const scenario = await setupReportScenario(tx);
+
+        // A forced override committed REFUND after a settlement transaction
+        // read the row as WAITING_PAID: the preconditioned PAID flip matches
+        // zero rows and the refund must stand.
+        const updated = await SchedulingRepository.updatePayrollCalculation(
+          tx,
+          scenario.refunded.id,
+          { calculationStatus: CalculationStatus.PAID },
+          { expectedStatus: CalculationStatus.WAITING_PAID }
+        );
+
+        expect(updated).toBeNull();
+        const reread = await SchedulingRepository.getById(scenario.refunded.id, tx);
+        expect(reread?.calculationStatus).toBe(CalculationStatus.REFUND);
+        expect(reread?.teacherPaidAmount).toBe("0");
+        expect(reread?.payrollNote).toBe("parent refund");
       });
     });
   });

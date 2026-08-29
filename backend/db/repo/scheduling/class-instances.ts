@@ -16,7 +16,7 @@ import {
 import { updateInstanceState } from "@/backend/db/repo/scheduling/state-changes";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
-import { OnDemandStatus } from "@/backend/enum";
+import { type CalculationStatus, OnDemandStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type * as Types from "@/backend/types";
@@ -501,10 +501,10 @@ export type PayrollCalculationPatch = Partial<
 /** Read options for single-instance lookups. */
 export interface GetClassInstanceOptions {
   /**
-   * Locks the row with `SELECT ... FOR UPDATE`. Only meaningful when `tx` is
-   * passed — the lock is held until that transaction commits or rolls back,
-   * so a payroll write in the same transaction cannot race with a concurrent
-   * calculator or override.
+   * Locks the row with `SELECT ... FOR UPDATE`. Requires `tx` (the call
+   * throws otherwise): the lock is held until that transaction commits or
+   * rolls back, so a payroll write in the same transaction cannot race with
+   * a concurrent calculator or override.
    */
   forUpdate?: boolean;
 }
@@ -519,27 +519,56 @@ export async function getById(
   tx?: DBTransaction,
   opts?: GetClassInstanceOptions
 ): Promise<Types.ClassInstanceSelectType | null> {
+  // Fail fast over a silent no-op: without a transaction the FOR UPDATE lock
+  // is released the moment the statement finishes, so the caller would think
+  // the row is locked while nothing is.
+  if (opts?.forUpdate && tx == null) {
+    throw new Error(
+      "getById with forUpdate requires a transaction: the row lock only exists inside the caller transaction"
+    );
+  }
   const q = queryDb(tx);
   const base = q.select().from(classInstances).where(eq(classInstances.id, id));
   const [row] = await (opts?.forUpdate ? withForUpdate(base) : base).limit(1);
   return row ?? null;
 }
 
+/** Optional guards for payroll snapshot updates. */
+export interface UpdatePayrollCalculationOptions {
+  /**
+   * Only fire the update while the row still carries this calculation
+   * status. A caller that read the row without holding its lock uses the
+   * precondition so a concurrent writer's committed transition (for
+   * example a forced override) is never stomped: the update then matches
+   * zero rows and this helper returns `null`, telling the caller to skip
+   * the follow-up write instead of overwriting the newer state.
+   */
+  expectedStatus?: CalculationStatus;
+}
+
 /**
  * Applies a partial payroll-snapshot update to one class instance and returns
- * the updated row (`null` when the instance does not exist). Callers lock the
- * row first with `getById(id, tx, { forUpdate: true })` so the snapshot write
- * and its audit event commit atomically inside the caller's transaction.
+ * the updated row. `null` means the update matched no row: either the
+ * instance does not exist, or — when `expectedStatus` is supplied — the
+ * row's calculation status no longer matches, i.e. a concurrent writer
+ * already transitioned it. Callers that locked the row first with
+ * `getById(id, tx, { forUpdate: true })` may omit the precondition; callers
+ * reading without the lock should always pass one.
  */
 export async function updatePayrollCalculation(
   tx: DBTransaction,
   id: string,
-  patch: PayrollCalculationPatch
+  patch: PayrollCalculationPatch,
+  options?: UpdatePayrollCalculationOptions
 ): Promise<Types.ClassInstanceSelectType | null> {
+  const conditions: SQL[] = [eq(classInstances.id, id)];
+  if (options?.expectedStatus != null) {
+    conditions.push(eq(classInstances.calculationStatus, options.expectedStatus));
+  }
   const [updated] = await tx
     .update(classInstances)
     .set({ ...patch, updatedAt: new Date() })
-    .where(eq(classInstances.id, id))
+    .where(and(...conditions))
     .returning();
   return updated ?? null;
 }
@@ -593,7 +622,9 @@ function buildPayrollReportConditions(filters: Types.PayrollReportFilters): (SQL
  * `class_instances` + `teachers` → `users` (teacher name) + `students`
  * (student name) + `class_subjects` (subject name). The absence-rule
  * booleans (`isStudentAbsence`, `isTeacherAbsence`) mirror the calculator's
- * branch conditions and are computed in the SELECT clause.
+ * branch conditions and are computed in the SELECT clause: student absence
+ * requires an absent outcome WITH join telemetry; a row with no join
+ * telemetry is a teacher absence whatever the outcome says.
  */
 function payrollReportBaseQuery(q: QueryDbHandle | DBTransaction) {
   return q
@@ -619,10 +650,7 @@ function payrollReportBaseQuery(q: QueryDbHandle | DBTransaction) {
         sql<boolean>`(${classInstances.outcome} = ${ClassOutcome.ABSENT} AND ${classInstances.actualStartAt} IS NOT NULL)`.mapWith(
           Boolean
         ),
-      isTeacherAbsence:
-        sql<boolean>`(${classInstances.actualStartAt} IS NULL AND ${classInstances.outcome} <> ${ClassOutcome.ABSENT})`.mapWith(
-          Boolean
-        ),
+      isTeacherAbsence: sql<boolean>`(${classInstances.actualStartAt} IS NULL)`.mapWith(Boolean),
     })
     .from(classInstances)
     .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))

@@ -4,6 +4,7 @@ import { DomainError, ForbiddenError, NotFoundError, ValidationError } from "@/b
 import type { CarryoverHandoffPayload } from "@/backend/services/billing/carryover-handoff";
 import { deriveAdjustmentIdempotencyKey } from "@/backend/services/billing/credit-adjustment.idempotency";
 import type {
+  CreateAuditLogInput,
   CreditAdjustmentInput,
   CreditAdjustmentInsertInput,
   CreditBalanceReturnType,
@@ -149,7 +150,7 @@ await mock.module("@/backend/db/repo/billing", () => ({
   },
 }));
 
-const studentFindByIdMock = mock(async () => ({ id: STUDENT_ID }));
+const studentFindByIdMock = mock(async (): Promise<{ id: string } | null> => ({ id: STUDENT_ID }));
 
 const addClassesMock = mock(async (studentId: string, _tErrors: unknown, hours: number) => {
   addClassesCalls.push({ studentId, hours });
@@ -162,6 +163,7 @@ const deductClassesMock = mock(async (studentId: string, _tErrors: unknown, hour
 await mock.module("@/backend/db/repo/students", () => ({
   StudentRepository: {
     findById: studentFindByIdMock,
+    findActiveById: studentFindByIdMock,
     addClasses: addClassesMock,
     deductClasses: deductClassesMock,
   },
@@ -172,6 +174,7 @@ const teacherFindByIdMock = mock(async (): Promise<{ id: string } | null> => ({ 
 await mock.module("@/backend/db/repo/teachers", () => ({
   TeacherRepository: {
     findById: teacherFindByIdMock,
+    findActiveById: teacherFindByIdMock,
   },
 }));
 
@@ -213,10 +216,19 @@ await mock.module("@/backend/services/billing/carryover-handoff", () => ({
   maybeInsertCarryoverBalanceEntry: carryoverHandoffMock,
 }));
 
-// Post-commit audit writes are best-effort side effects; keep them isolated
-// from the suite (no repo/DB interaction under test).
+// Post-commit audit writes are best-effort side effects; capture them so tests
+// can assert the emitted shape and prove a failed audit never fails the adjustment.
+const auditLogEntries: CreateAuditLogInput[] = [];
+let auditFailure: Error | null = null;
+
 await mock.module("@/backend/services/system/audit.service", () => ({
-  AuditService: { createManyAuditLogs: async () => [] },
+  AuditService: {
+    createManyAuditLogs: async (entries: CreateAuditLogInput[]) => {
+      auditLogEntries.push(...entries);
+      if (auditFailure) throw auditFailure;
+      return entries;
+    },
+  },
 }));
 
 // ---------------------------------------------------------------------------
@@ -282,6 +294,7 @@ function expectZeroWrites(): void {
   expect(deductClassesMock).not.toHaveBeenCalled();
   expect(carryoverHandoffMock).not.toHaveBeenCalled();
   expect(refreshQuotaMock).not.toHaveBeenCalled();
+  expect(auditLogEntries).toHaveLength(0);
 }
 
 function resetMocks(): void {
@@ -293,6 +306,8 @@ function resetMocks(): void {
   carryoverHandoffCalls.length = 0;
   refreshQuotaCalls.length = 0;
   acquiredLockKeys.length = 0;
+  auditLogEntries.length = 0;
+  auditFailure = null;
 
   createAdjustmentMock.mockReset();
   createAdjustmentMock.mockImplementation(async (tx, input) => Promise.resolve(defaultInsert(tx, input)));
@@ -436,6 +451,16 @@ describe("CreditService.recordAdjustment", () => {
       expectZeroWrites();
     });
 
+    test("returns STUDENT_NOT_FOUND when the adjustment target student does not exist", async () => {
+      studentFindByIdMock.mockResolvedValue(null);
+
+      const error = await expectRecordError(buildAddInput(), "STUDENT_NOT_FOUND");
+      expect(error).toBeInstanceOf(NotFoundError);
+      expect(error.message).toContain("not found");
+      expectZeroWrites();
+      expect(idempotencyLookups).toHaveLength(0);
+    });
+
     test("rejects a carryover whose fromDate is after its toDate", async () => {
       const error = await expectRecordError(
         buildCarryoverInput({ carryoverFromDate: "2026-08-20", carryoverToDate: "2026-08-10" }),
@@ -519,6 +544,87 @@ describe("CreditService.recordAdjustment", () => {
       expect(adjustmentInserts).toHaveLength(1);
       expect(addClassesMock).toHaveBeenCalledTimes(1);
     });
+
+    test("rethrows a unique violation when no winning row exists to recover", async () => {
+      createAdjustmentMock.mockRejectedValueOnce(new UniqueViolationError("duplicate key value"));
+
+      let caught: unknown = null;
+      try {
+        await recordAdjustment(buildAddInput());
+      } catch (error) {
+        caught = error;
+      }
+
+      expect(caught).toBeInstanceOf(UniqueViolationError);
+      const recoveryLookups = idempotencyLookups.filter(l => !l.insideTransaction);
+      expect(recoveryLookups).toHaveLength(1);
+    });
+
+    test("propagates non-unique transaction errors without attempting recovery", async () => {
+      createAdjustmentMock.mockRejectedValueOnce(new Error("connection reset by peer"));
+
+      let caught: unknown = null;
+      try {
+        await recordAdjustment(buildAddInput());
+      } catch (error) {
+        caught = error;
+      }
+
+      expect(caught).toBeInstanceOf(Error);
+      if (!(caught instanceof Error)) throw new Error("expected an Error from the transaction");
+      expect(caught.message).toBe("connection reset by peer");
+      const recoveryLookups = idempotencyLookups.filter(l => !l.insideTransaction);
+      expect(recoveryLookups).toHaveLength(0);
+    });
+
+    test("maps an unrecognized persisted reason to the ADJUSTMENT fallback on idempotent return", async () => {
+      const input = buildAddInput();
+      await recordAdjustment(input);
+      const firstRow = createdRows[0];
+      if (!firstRow) throw new Error("expected the first insert to produce a ledger row");
+
+      const legacyRow = { ...firstRow };
+      Object.assign(legacyRow, { reason: "LEGACY_UNKNOWN_REASON" });
+      findByIdempotencyKeysMock.mockResolvedValue([legacyRow]);
+
+      const result = await recordAdjustment(input);
+
+      expect(result.id).toBe(firstRow.id);
+      expect(result.reason).toBe(CreditReason.ADJUSTMENT);
+      expect(createAdjustmentMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("observability", () => {
+    test("emits one audit entry after commit with the adjustment summary", async () => {
+      const result = await recordAdjustment(buildAddInput());
+
+      expect(auditLogEntries).toHaveLength(1);
+      const entry = auditLogEntries[0];
+      expect(entry?.actorUserId).toBe(ACTOR_ID);
+      expect(entry?.actorType).toBe("USER");
+      expect(entry?.entityType).toBe("STUDENT");
+      expect(entry?.entityId).toBe(STUDENT_ID);
+      expect(entry?.action).toBe("UPDATE");
+      expect(entry?.description).toBe(`Credit adjustment ${CreditAdjustmentType.ADD}`);
+      expect(entry?.newState).toEqual({
+        creditTransactionId: result.id,
+        adjustmentType: CreditAdjustmentType.ADD,
+        changeAmount: 3,
+        carryoverTeacherId: null,
+      });
+    });
+
+    test("still returns the committed adjustment when the audit write fails", async () => {
+      auditFailure = new Error("audit store unavailable");
+
+      const result = await recordAdjustment(buildAddInput());
+
+      expect(result.id).toBe(LEDGER_ROW_ID);
+      expect(result.changeAmount).toBe(3);
+      expect(auditLogEntries).toHaveLength(1);
+      expect(addClassesCalls).toEqual([{ studentId: STUDENT_ID, hours: 3 }]);
+    });
   });
 
   describe("input validation", () => {
@@ -528,6 +634,9 @@ describe("CreditService.recordAdjustment", () => {
       ["non-finite hours", buildAddInput({ hours: Number.NaN })],
       ["sub-unit hours", buildAddInput({ hours: 0.5 })],
       ["a missing carryover teacher", buildCarryoverInput({ carryoverTeacherId: null })],
+      ["a whitespace-only carryover teacher", buildCarryoverInput({ carryoverTeacherId: "   " })],
+      ["a missing carryover from-date", buildCarryoverInput({ carryoverFromDate: null })],
+      ["a missing carryover to-date", buildCarryoverInput({ carryoverToDate: null })],
       ["a missing carryover payment date", buildCarryoverInput({ carryoverPaymentDate: null })],
     ];
 

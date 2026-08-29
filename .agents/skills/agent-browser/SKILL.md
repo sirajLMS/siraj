@@ -95,6 +95,15 @@ Choose the right tool based on the core task:
   ```
 - Cookie/state artifacts live in git-ignored `.browser-auth/` (mode 600). Playwright paths use the same script — see `test/ui/AGENTS.md` ("Agent Browser Login").
 
+### 5a. URLs are NOT locale-prefixed (Siraj)
+
+- **Gotcha**: Siraj has NO `app/[locale]/` segment — i18n is cookie/header-driven (`NEXT_LOCALE`), so every route is unprefixed (`/quotas`, `/billing`, `/dashboard`). Navigating to `/en/...` or `/ar/...` hits the `app/(dashboard)/[...slug]` catch-all and renders "Page not found" for EVERY page — including otherwise-valid routes.
+- **Rule**: Always use unprefixed URLs (`http://localhost:3000/quotas`, never `http://localhost:3000/en/quotas`). If a full page says "Page not found" while the sidebar shell looks normal, check the URL for a locale prefix first.
+- To inspect a page in a specific locale, set the `NEXT_LOCALE` cookie (or switch via the header language menu) instead of changing the path:
+  ```bash
+  agent-browser cookies set NEXT_LOCALE ar --domain localhost   # then reload the SAME unprefixed URL
+  ```
+
 ### 6. Screenshot & Visual Inspection Context Isolation (CRITICAL)
 
 - **Problem**: Calling `ReadMediaFile` directly in the main agent context attaches the binary image to the permanent conversation history. Across multi-page verification loops, multiple screenshots accumulate into megabytes of vision context, causing upstream LLM stream dropouts (`Stream ended before producing a non-ping SSE event`).

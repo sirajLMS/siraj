@@ -150,6 +150,7 @@ export function StudentCreditsList() {
                   </InputAdornment>
                 ),
               },
+              htmlInput: { "aria-label": directory.searchPlaceholder, autoComplete: "off" },
             }}
             sx={{ minWidth: { xs: "100%", sm: 260 } }}
           />
