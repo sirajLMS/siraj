@@ -12,7 +12,16 @@ gqlSchemaBuilder.mutationField("applyPayrollOverride", t =>
     type: PayrollOverrideResultPothosObject,
     description:
       "Apply an operator override (Refund / Calculated / Not Calculated / Partially) to a class instance's payroll calculation. The acting operator is resolved from the authenticated context and is never accepted as input.",
-    authScopes: { permission: AppPermission.ACCOUNTING_PAYROLL_MANAGE, notImpersonating: true },
+    authScopes: {
+      // Both scopes are required: the manage permission AND an operator-owned
+      // session. The `$all` wrapper is load-bearing — an ungrouped scope map is
+      // satisfiable by any single entry, which would let either scope alone
+      // authorize the override.
+      $all: {
+        permission: AppPermission.ACCOUNTING_PAYROLL_MANAGE,
+        notImpersonating: true,
+      },
+    },
     args: {
       input: t.arg({ type: PayrollOverrideInputPothos, required: true }),
     },

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 
 import { OnDemandStatus } from "@/backend/enum";
+import { DatabaseUnavailableError, DomainError, ForbiddenError } from "@/backend/lib/errors";
 import type { PayrollCalculationInput } from "@/backend/types";
 import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
 
@@ -8,7 +9,9 @@ import { ClassExecutionState } from "@/shared/constants/class-instance-detail.en
  * Verifies the class-session state machine invokes the payroll calculator
  * when an instance reaches a terminal execution state (COMPLETED or a
  * terminal on-demand state), inside the same transaction as the transition —
- * and never for non-terminal transitions.
+ * and never for non-terminal transitions. Also pins the log classification
+ * of calculator rejections: routine policy rejections warn, genuine failures
+ * error, and database-level failures carry the transaction-abort warning.
  */
 
 const loggerWarn = mock((_msg: string, _ctx?: unknown) => {});
@@ -428,8 +431,8 @@ describe("ClassSessionService automatic payroll trigger", () => {
     expect(loggerWarn).not.toHaveBeenCalled();
   });
 
-  it("preserves the state change when the calculator throws", async () => {
-    calculateForInstance.mockImplementationOnce(() => Promise.reject(new Error("insufficient permissions")));
+  it("preserves the state change and logs an error when the calculator throws unexpectedly", async () => {
+    calculateForInstance.mockImplementationOnce(() => Promise.reject(new Error("calculation crashed")));
 
     const result = await ClassSessionService.stop("user-1", "inst-1", tErrors);
 
@@ -437,5 +440,85 @@ describe("ClassSessionService automatic payroll trigger", () => {
     expect(result?.executionState).toBe(ClassExecutionState.COMPLETED);
     expect(loggerError).toHaveBeenCalledTimes(1);
     expect(loggerError.mock.calls[0][0]).toBe("Automatic payroll calculation failed; session state change preserved");
+    expect(loggerWarn).not.toHaveBeenCalled();
+  });
+
+  // Calculator rejection log classification: routine policy rejections are
+  // deferrals and warn, genuine failures error, and database-level failures
+  // warn about the aborted shared transaction.
+  it("logs routine permission rejections as warnings so error alerts stay actionable", async () => {
+    // Teachers and parents close their own sessions without the payroll
+    // manage permission; the calculator's permission gate rejecting them is
+    // the expected deferral path, not a failure.
+    calculateForInstance.mockImplementationOnce(() => Promise.reject(new ForbiddenError("insufficient permissions")));
+
+    const result = await ClassSessionService.stop("user-1", "inst-1", tErrors);
+
+    expect(result?.id).toBe("inst-1");
+    expect(result?.executionState).toBe(ClassExecutionState.COMPLETED);
+    expect(loggerWarn).toHaveBeenCalledTimes(1);
+    expect(loggerWarn.mock.calls[0][0]).toBe("Automatic payroll calculation deferred; session state change preserved");
+    expect(loggerWarn.mock.calls[0][1]).toMatchObject({ reason: "FORBIDDEN" });
+    expect(loggerError).not.toHaveBeenCalled();
+  });
+
+  it("logs the settled-pay and terminal-state guard rejections as warnings too", async () => {
+    calculateForInstance.mockImplementationOnce(() =>
+      Promise.reject(new DomainError("PAYROLL_ALREADY_PAID", "payroll already settled"))
+    );
+    await ClassSessionService.stop("user-1", "inst-1", tErrors);
+
+    calculateForInstance.mockImplementationOnce(() =>
+      Promise.reject(new DomainError("PAYROLL_NOT_TERMINAL", "session is not terminal"))
+    );
+    await ClassSessionService.stop("user-1", "inst-1", tErrors);
+
+    expect(loggerWarn).toHaveBeenCalledTimes(2);
+    expect(loggerWarn.mock.calls[0][1]).toMatchObject({ reason: "PAYROLL_ALREADY_PAID" });
+    expect(loggerWarn.mock.calls[1][1]).toMatchObject({ reason: "PAYROLL_NOT_TERMINAL" });
+    expect(loggerError).not.toHaveBeenCalled();
+  });
+
+  it("keeps genuine calculator failures at error level", async () => {
+    calculateForInstance.mockImplementationOnce(() =>
+      Promise.reject(new DomainError("PAYROLL_UPDATE_FAILED", "internal server error"))
+    );
+
+    const result = await ClassSessionService.stop("user-1", "inst-1", tErrors);
+
+    expect(result?.id).toBe("inst-1");
+    expect(loggerError).toHaveBeenCalledTimes(1);
+    expect(loggerError.mock.calls[0][0]).toBe("Automatic payroll calculation failed; session state change preserved");
+    expect(loggerWarn).not.toHaveBeenCalled();
+  });
+
+  it("flags database-level calculator failures that may abort the transition transaction", async () => {
+    const driverError = Object.assign(new Error("current transaction is aborted"), { code: "25P02" });
+    calculateForInstance.mockImplementationOnce(() =>
+      Promise.reject(new Error("Failed query: update class_instances", { cause: driverError }))
+    );
+
+    const result = await ClassSessionService.stop("user-1", "inst-1", tErrors);
+
+    expect(result?.id).toBe("inst-1");
+    expect(loggerError).toHaveBeenCalledTimes(1);
+    expect(loggerError.mock.calls[0][0]).toBe(
+      "Automatic payroll calculation failed at the database level; the transition transaction may be aborted"
+    );
+    expect(loggerError.mock.calls[0][1]).toMatchObject({ sqlState: "25P02" });
+    expect(loggerWarn).not.toHaveBeenCalled();
+  });
+
+  it("flags connection-level calculator failures with the transaction-abort warning", async () => {
+    calculateForInstance.mockImplementationOnce(() => Promise.reject(new DatabaseUnavailableError()));
+
+    const result = await ClassSessionService.stop("user-1", "inst-1", tErrors);
+
+    expect(result?.id).toBe("inst-1");
+    expect(loggerError).toHaveBeenCalledTimes(1);
+    expect(loggerError.mock.calls[0][0]).toBe(
+      "Automatic payroll calculation failed at the database level; the transition transaction may be aborted"
+    );
+    expect(loggerWarn).not.toHaveBeenCalled();
   });
 });

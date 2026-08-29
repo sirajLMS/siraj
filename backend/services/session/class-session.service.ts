@@ -11,7 +11,13 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, NotificationEventType, OnDemandStatus } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
-import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
+import {
+  DatabaseUnavailableError,
+  DomainError,
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -52,6 +58,16 @@ const ON_DEMAND_TERMINAL_EXECUTION_STATES = new Set<string>([
   ClassExecutionState.ON_DEMAND_NO_CREDITS_CANCELLED,
   ClassExecutionState.ON_DEMAND_NO_CREDITS_ABSENT,
 ]);
+
+/**
+ * Calculator rejections the auto-trigger treats as routine deferrals rather
+ * than failures: the actor lacks the payroll manage permission (teachers and
+ * parents close their own sessions without it), the row's pay is already
+ * settled, or the calculator's terminal-state guard tripped on a re-read.
+ * The snapshot stays uncalculated for operator reconciliation in all three
+ * cases, so these log as warnings and stay out of error alerts.
+ */
+const ROUTINE_CALCULATOR_REJECTIONS = new Set<string>(["FORBIDDEN", "PAYROLL_NOT_TERMINAL", "PAYROLL_ALREADY_PAID"]);
 
 /**
  * ClassSessionService
@@ -401,6 +417,32 @@ export namespace ClassSessionService {
   }
 
   /**
+   * SQLSTATE codes are five characters starting with a digit ("25P02",
+   * "23505"); the letter-only domain error codes can never match.
+   */
+  const SQLSTATE_PATTERN = /^\d[0-9A-Z]{4}$/;
+
+  /** Cause-chain depth cap for the SQLSTATE search, mirroring the transient-error classifier. */
+  const MAX_CAUSE_DEPTH = 5;
+
+  /**
+   * Finds the SQLSTATE of a database driver failure anywhere in an error
+   * cause chain. Query wrappers nest the driver error in `cause` — the same
+   * chain shape the transient-error classifier walks — and the depth cap
+   * keeps pathological chains bounded.
+   */
+  function findDatabaseSqlState(error: unknown, depth = 0): string | null {
+    if (depth > MAX_CAUSE_DEPTH || typeof error !== "object" || error === null) return null;
+    const code = (error as { code?: unknown }).code;
+    if (typeof code === "string" && SQLSTATE_PATTERN.test(code)) return code;
+    const cause = (error as { cause?: unknown }).cause;
+    if (cause !== undefined && cause !== error) {
+      return findDatabaseSqlState(cause, depth + 1);
+    }
+    return null;
+  }
+
+  /**
    * Runs the automatic payroll calculation for an instance that just reached
    * a terminal execution state, inside the same transaction as the state
    * change so the payroll snapshot and the transition commit or roll back
@@ -408,11 +450,17 @@ export namespace ClassSessionService {
    * calculator itself additionally rejects rows whose execution state is not
    * terminal.
    *
-   * The calculation is best-effort by design: when the calculator rejects
-   * (a permission guard, a settled row, a non-terminal re-read) the error is
-   * logged and swallowed so the session state change itself is never rolled
-   * back — the snapshot stays NOT_CALCULATED and an operator reconciles it
-   * later.
+   * The calculation is best-effort by design. Policy rejections — a
+   * permission guard, a settled row, a non-terminal re-read — are routine
+   * deferrals: the snapshot stays NOT_CALCULATED and an operator reconciles
+   * it later, so they log as warnings instead of errors. Every other
+   * rejection is logged as an error but still swallowed: an
+   * application-level throw leaves the caller's transaction usable, so the
+   * session state change itself is never rolled back. A failure at the
+   * database driver level is the one exception — it aborts the shared
+   * transaction on the server, and the whole transition rolls back at commit
+   * — so it is logged with an explicit transaction-abort warning rather than
+   * a preservation claim.
    */
   async function triggerTerminalPayrollCalculation(
     instance: ClassInstanceSelectType,
@@ -431,6 +479,34 @@ export namespace ClassSessionService {
         tx
       );
     } catch (error) {
+      if (error instanceof DomainError && ROUTINE_CALCULATOR_REJECTIONS.has(error.code)) {
+        // A policy rejection is a routine deferral, not a failure: the
+        // snapshot stays for operator reconciliation.
+        logger.warn("Automatic payroll calculation deferred; session state change preserved", {
+          classInstanceId: instance.id,
+          actorUserId,
+          reason: error.code,
+          error: error.message,
+        });
+        return;
+      }
+      // A driver-level failure aborts the shared transaction on the server;
+      // swallowing the rejection here cannot heal that, so the transition
+      // and the payroll write roll back together at commit. Say so instead
+      // of claiming the state change is preserved.
+      const sqlState = findDatabaseSqlState(error);
+      if (sqlState !== null || error instanceof DatabaseUnavailableError) {
+        logger.error(
+          "Automatic payroll calculation failed at the database level; the transition transaction may be aborted",
+          {
+            classInstanceId: instance.id,
+            actorUserId,
+            sqlState,
+            error: error instanceof Error ? error.message : String(error),
+          }
+        );
+        return;
+      }
       logger.error("Automatic payroll calculation failed; session state change preserved", {
         classInstanceId: instance.id,
         actorUserId,
