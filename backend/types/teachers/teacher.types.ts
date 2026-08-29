@@ -194,6 +194,7 @@ export type TeacherOwnProfileUpdateInput = {
 
 export type TeacherAssignedClassReturnType = {
   id: string;
+  studentId: string;
   studentName: string;
   scheduledStartAt: string;
   scheduledEndAt: string;

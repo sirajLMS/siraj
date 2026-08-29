@@ -509,3 +509,135 @@ describe("CreditRepository — tx propagation", () => {
     });
   });
 });
+
+describe("CreditRepository hour ledger — Tier 1 branch + Tier 2 boundary coverage", () => {
+  test("getHourBalance returns zero-string facets for a student without a row match", async () => {
+    await runInRollback(async tx => {
+      const balance = await CreditRepository.getHourBalance(tx, randomUUID());
+      expect(balance).toEqual({ creditHoursTotal: "0", creditHoursRemaining: "0" });
+    });
+  });
+
+  test("balance getters reject a missing studentId when tx is not a string", async () => {
+    await runInRollback(async tx => {
+      const error = await expectSavepointError(() => CreditRepository.getHourBalance(), tx);
+      expect(error.message).toContain("studentId is required");
+    });
+  });
+
+  test("listBySourcePaymentId returns the originating ledger rows ordered by createdAt", async () => {
+    await runInRollback(async tx => {
+      const { parent, student, user } = await setupStudent(tx);
+      const paymentId = await createTestPayment(tx, parent.id, student.id);
+
+      const first = await CreditRepository.createHourPurchase(tx, {
+        studentId: student.id,
+        hours: 5,
+        creditedByUserId: user.id,
+        sourcePaymentId: paymentId,
+        idempotencyKey: `lsrc-a-${randomUUID()}`,
+      });
+      await new Promise(resolve => setTimeout(resolve, 10));
+      const second = await CreditRepository.createHourAdjustment(tx, {
+        studentId: student.id,
+        delta: -2,
+        sourcePaymentId: paymentId,
+        creditedByUserId: user.id,
+        idempotencyKey: `lsrc-b-${randomUUID()}`,
+      });
+      // A row for a DIFFERENT payment must not leak into this listing.
+      const otherPaymentId = await createTestPayment(tx, parent.id, student.id);
+      await CreditRepository.createHourPurchase(tx, {
+        studentId: student.id,
+        hours: 1,
+        creditedByUserId: user.id,
+        sourcePaymentId: otherPaymentId,
+        idempotencyKey: `lsrc-c-${randomUUID()}`,
+      });
+
+      const rows = await CreditRepository.listBySourcePaymentId(paymentId, tx);
+      expect(rows.map(r => r.id)).toEqual([first.id, second.id]);
+
+      expect(await CreditRepository.listBySourcePaymentId(randomUUID(), tx)).toEqual([]);
+    });
+  });
+
+  test("createHourAdjustment persists signed deltas and nulls the class-amount column", async () => {
+    await runInRollback(async tx => {
+      const { student, user } = await setupStudent(tx);
+
+      const positive = await CreditRepository.createHourAdjustment(tx, {
+        studentId: student.id,
+        delta: 3.5,
+        creditedByUserId: user.id,
+        idempotencyKey: `adj-pos-${randomUUID()}`,
+      });
+      expect(Number(positive.changeAmountHours ?? "0")).toBe(3.5);
+      expect(positive.changeAmount).toBeNull();
+      expect(positive.reason).toBe(CreditReason.ADJUSTMENT);
+      expect(positive.sourcePaymentId).toBeNull();
+
+      const negative = await CreditRepository.createHourAdjustment(tx, {
+        studentId: student.id,
+        delta: -2,
+        creditedByUserId: user.id,
+        idempotencyKey: `adj-neg-${randomUUID()}`,
+      });
+      expect(Number(negative.changeAmountHours ?? "0")).toBe(-2);
+    });
+  });
+
+  test("deductHoursForBooking rejects negative and non-finite hour inputs", async () => {
+    await runInRollback(async tx => {
+      const entities = await setupTestEntities(tx, "NegHours");
+      const instance = requireInstance(entities.instance);
+      const adminUser = await createTestUser(tx, { name: "Credit Admin" });
+
+      const negativeError = await expectSavepointError(
+        () =>
+          CreditRepository.deductHoursForBooking(tx, {
+            studentId: entities.student.id,
+            classInstanceId: instance.id,
+            hours: -2,
+            creditedByUserId: adminUser.id,
+            idempotencyKey: `neg-hours-${randomUUID()}`,
+          }),
+        tx
+      );
+      expect(negativeError.message).toContain("positive, non-zero hours");
+
+      const nanError = await expectSavepointError(
+        () =>
+          CreditRepository.deductHoursForBooking(tx, {
+            studentId: entities.student.id,
+            classInstanceId: instance.id,
+            hours: Number.NaN,
+            creditedByUserId: adminUser.id,
+            idempotencyKey: `nan-hours-${randomUUID()}`,
+          }),
+        tx
+      );
+      expect(nanError.message).toContain("positive, non-zero hours");
+    });
+  });
+
+  test("refundHoursOnCancel stores the absolute value even for a negative hours input", async () => {
+    await runInRollback(async tx => {
+      const entities = await setupTestEntities(tx, "AbsRefund");
+      const instance = requireInstance(entities.instance);
+      const adminUser = await createTestUser(tx, { name: "Credit Admin" });
+
+      const row = await CreditRepository.refundHoursOnCancel(tx, {
+        studentId: entities.student.id,
+        classInstanceId: instance.id,
+        hours: -1.5,
+        creditedByUserId: adminUser.id,
+        idempotencyKey: `abs-refund-${randomUUID()}`,
+      });
+
+      expect(Number(row.changeAmountHours ?? "0")).toBe(1.5);
+      expect(row.changeAmount).toBeNull();
+      expect(row.reason).toBe(CreditReason.REFUND);
+    });
+  });
+});

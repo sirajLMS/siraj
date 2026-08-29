@@ -56,6 +56,15 @@ function deriveInvoiceIdempotencyKey(input: AccountingPaymentSubmitInput): strin
 }
 
 export namespace AccountingPaymentService {
+  /**
+   * Server-side enforcement of the bounds declared on the GraphQL input via
+   * `@constraint` metadata (max: 99,999,999 / 100,000). The constraint
+   * directive is registered as SDL metadata only (`extendSchema`, no runtime
+   * transformer), so the service MUST enforce the contract itself.
+   */
+  const MAX_PAYMENT_AMOUNT = 99_999_999;
+  const MAX_PAYMENT_CREDIT_HOURS = 100_000;
+
   /** Re-validates the plan row inside the tx (EC-2 archival race window). */
   async function revalidatePackageInsideTx(
     planId: string | null | undefined,
@@ -77,8 +86,9 @@ export namespace AccountingPaymentService {
   ): Promise<AccountingPaymentReturnType> {
     await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
 
-    if (!Number.isFinite(input.amount) || input.amount <= 0) throw new ValidationError(tErrors.package.invalidInput);
-    if (!Number.isFinite(input.creditHours) || input.creditHours <= 0)
+    if (!Number.isFinite(input.amount) || input.amount <= 0 || input.amount > MAX_PAYMENT_AMOUNT)
+      throw new ValidationError(tErrors.package.invalidInput);
+    if (!Number.isFinite(input.creditHours) || input.creditHours <= 0 || input.creditHours > MAX_PAYMENT_CREDIT_HOURS)
       throw new ValidationError(tErrors.package.invalidInput);
 
     // Strict existence check (pre-tx fast-fail; EC-8 cascades protect invariants).

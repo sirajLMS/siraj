@@ -187,6 +187,7 @@ export const getTeacherAssignedClasses = async (
   const rows = await q
     .select({
       id: classInstances.id,
+      studentId: students.id,
       studentName: students.name,
       scheduledStartAt: classInstances.scheduledStartAt,
       scheduledEndAt: classInstances.scheduledEndAt,

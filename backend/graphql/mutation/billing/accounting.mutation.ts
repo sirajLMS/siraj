@@ -11,7 +11,7 @@ import {
   PackagePlanUpdateInputType,
 } from "@/backend/graphql/pothos/billing/accounting.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { AccountingPaymentService, PackagePlanService, PermissionsService } from "@/backend/services";
+import { AccountingPaymentService, PackagePlanService, requirePermission } from "@/backend/services";
 import type {
   AccountingPaymentSubmitInput,
   AccountingPaymentTogglePaidInput,
@@ -153,14 +153,8 @@ gqlSchemaBuilder.mutationField("createPackagePlan", t =>
     args: { input: t.arg({ type: PackagePlanInput, required: true }) },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(
-        actorUserId,
-        AppPermission.ACCOUNTING_PAYMENTS_MANAGE
-      );
-      if (!hasPermission) {
-        throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
-      }
       const tErrors = ctx.t().errorsTranslations;
+      await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
       try {
         return await PackagePlanService.create(actorUserId, normalizePackagePlanSubmit(args.input), tErrors);
       } catch (error) {
@@ -178,14 +172,8 @@ gqlSchemaBuilder.mutationField("updatePackagePlan", t =>
     args: { input: t.arg({ type: PackagePlanUpdateInputType, required: true }) },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(
-        actorUserId,
-        AppPermission.ACCOUNTING_PAYMENTS_MANAGE
-      );
-      if (!hasPermission) {
-        throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
-      }
       const tErrors = ctx.t().errorsTranslations;
+      await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
       try {
         return await PackagePlanService.update(actorUserId, normalizePackagePlanUpdate(args.input), tErrors);
       } catch (error) {
@@ -203,14 +191,8 @@ gqlSchemaBuilder.mutationField("archivePackagePlan", t =>
     args: { id: t.arg.id({ required: true }) },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(
-        actorUserId,
-        AppPermission.ACCOUNTING_PAYMENTS_MANAGE
-      );
-      if (!hasPermission) {
-        throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
-      }
       const tErrors = ctx.t().errorsTranslations;
+      await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
       try {
         await PackagePlanService.archive(actorUserId, args.id, tErrors);
         const plan = await PackagePlanService.getById(args.id);
@@ -231,14 +213,8 @@ gqlSchemaBuilder.mutationField("recordAccountingPayment", t =>
     args: { input: t.arg({ type: AccountingPaymentInput, required: true }) },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(
-        actorUserId,
-        AppPermission.ACCOUNTING_PAYMENTS_MANAGE
-      );
-      if (!hasPermission) {
-        throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
-      }
       const tErrors = ctx.t().errorsTranslations;
+      await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
       try {
         return await AccountingPaymentService.recordPayment(
           actorUserId,
@@ -260,14 +236,8 @@ gqlSchemaBuilder.mutationField("updateAccountingPayment", t =>
     args: { input: t.arg({ type: AccountingPaymentUpdateInputObject, required: true }) },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(
-        actorUserId,
-        AppPermission.ACCOUNTING_PAYMENTS_MANAGE
-      );
-      if (!hasPermission) {
-        throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
-      }
       const tErrors = ctx.t().errorsTranslations;
+      await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
       try {
         return await AccountingPaymentService.update(
           actorUserId,
@@ -289,14 +259,8 @@ gqlSchemaBuilder.mutationField("toggleAccountingPaymentPaidStatus", t =>
     args: { input: t.arg({ type: AccountingPaymentTogglePaidInputObject, required: true }) },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const hasPermission = await PermissionsService.hasPermission(
-        actorUserId,
-        AppPermission.ACCOUNTING_PAYMENTS_MANAGE
-      );
-      if (!hasPermission) {
-        throw new Error(ctx.t().errorsTranslations.insufficientPermissions);
-      }
       const tErrors = ctx.t().errorsTranslations;
+      await requirePermission(actorUserId, AppPermission.ACCOUNTING_PAYMENTS_MANAGE, tErrors);
       try {
         return await AccountingPaymentService.togglePaidStatus(actorUserId, normalizeTogglePaid(args.input), tErrors);
       } catch (error) {

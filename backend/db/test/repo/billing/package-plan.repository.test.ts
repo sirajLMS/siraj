@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PackagePlanRepository } from "@/backend/db/repo/billing";
 import { expectSavepointError, runInRollback } from "@/backend/db/test/test-utils";
+import { PaginationArgs } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
@@ -150,5 +151,82 @@ describe("PackagePlanRepository", () => {
       currency: "USD",
     });
     expect(different).not.toBe(first);
+  });
+
+  test("findById returns null for an unknown id", async () => {
+    await runInRollback(async tx => {
+      expect(await PackagePlanRepository.findById(randomUUID(), tx)).toBeNull();
+    });
+  });
+
+  test("findByCodename returns null for an unknown codename and treats wildcards literally", async () => {
+    await runInRollback(async tx => {
+      await createPlan(tx, "pkgrepo_literal");
+      // Tier 4: wildcard/injection-shaped inputs must not widen the lookup.
+      expect(await PackagePlanRepository.findByCodename("%", tx)).toBeNull();
+      expect(await PackagePlanRepository.findByCodename("'; DROP TABLE package_plans; --", tx)).toBeNull();
+      expect(await PackagePlanRepository.findByCodename(`no_such_${randomUUID()}`, tx)).toBeNull();
+    });
+  });
+
+  test("create persists the explicit optional fields (description/validityMonths/metadata/inactive)", async () => {
+    await runInRollback(async tx => {
+      const created = await PackagePlanRepository.create(tx, {
+        ...planInput(`pkgrepo_full_${randomUUID().slice(0, 8)}`),
+        description: "Full-field plan",
+        validityMonths: 6,
+        metadata: { tier: "gold" },
+        active: false,
+      });
+
+      expect(created.description).toBe("Full-field plan");
+      expect(created.validityMonths).toBe(6);
+      expect(created.metadata).toEqual({ tier: "gold" });
+      expect(created.active).toBe(false);
+    });
+  });
+
+  test("listActive excludes inactive plans that were never archived", async () => {
+    await runInRollback(async tx => {
+      const active = await createPlan(tx, "pkgrepo_acton");
+      const inactive = await PackagePlanRepository.create(tx, {
+        ...planInput(`pkgrepo_actoff_${randomUUID().slice(0, 8)}`),
+        active: false,
+      });
+
+      const list = await PackagePlanRepository.listActive(tx);
+      const ids = list.map(row => row.id);
+
+      expect(ids).toContain(active.id);
+      expect(ids).not.toContain(inactive.id);
+    });
+  });
+
+  test("listAllPaginated returns created plans with and without pagination args", async () => {
+    await runInRollback(async tx => {
+      const plan = await createPlan(tx, "pkgrepo_paged");
+
+      const unpaged = await PackagePlanRepository.listAllPaginated(null, tx);
+      expect(unpaged.map(row => row.id)).toContain(plan.id);
+
+      // Tiny first-page window covers the pagination branch; sortOrder/displayName
+      // ordering keeps the applied slice deterministic for our row.
+      const paged = await PackagePlanRepository.listAllPaginated(new PaginationArgs({ first: 5, page: 1 }), tx);
+      expect(paged.length).toBeGreaterThan(0);
+      expect(paged.length).toBeLessThanOrEqual(5);
+    });
+  });
+
+  test("update returns null for an unknown id", async () => {
+    await runInRollback(async tx => {
+      const missing = await PackagePlanRepository.update(tx, randomUUID(), { displayName: "Ghost" });
+      expect(missing).toBeNull();
+    });
+  });
+
+  test("archive returns null for an unknown id", async () => {
+    await runInRollback(async tx => {
+      expect(await PackagePlanRepository.archive(tx, randomUUID())).toBeNull();
+    });
   });
 });
