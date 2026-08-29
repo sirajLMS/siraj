@@ -490,6 +490,22 @@ export interface AppearanceErrors {
 }
 
 /**
+ * ServiceOutageErrors — full-screen error page copy for the root error
+ * boundary (`app/error.tsx`). The database-unavailable variant is selected by
+ * the `DATABASE_UNAVAILABLE` error digest; everything else uses the generic
+ * copy. Neither variant ever exposes underlying error details.
+ */
+export interface ServiceOutageErrors {
+  readonly title: string;
+  readonly description: string;
+  readonly autoRetryHint: string;
+  readonly genericTitle: string;
+  readonly genericDescription: string;
+  readonly retry: string;
+  readonly retrying: string;
+}
+
+/**
  * ErrorsLabels — the top-level errors namespace.
  * Only the subset needed by the login GraphQL mutation is defined here.
  * Grow this interface as more errors are migrated.
@@ -531,6 +547,7 @@ export interface ErrorsLabels
   readonly leaveQuota: LeaveQuotaErrors;
   readonly classInstance: ClassInstanceErrors;
   readonly appearance: AppearanceErrors;
+  readonly serviceOutage: ServiceOutageErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;

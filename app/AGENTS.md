@@ -7,6 +7,10 @@
 - Server Components must **not** call repositories or the database directly — always go through the service layer.
 - Server Components must **not** use React hooks (`useState`, `useEffect`, etc.) or browser APIs.
 
+## Error Boundaries
+
+- Database outages surface through `DatabaseUnavailableError` + a digest sentinel recognized by the root error boundary. See `docs/backend/db-availability-fail-fast.md`.
+
 ## Authentication Guards
 
 - Use `getServerUserContext()` from `@/backend/lib/auth/server-auth` to verify authentication in layout files.

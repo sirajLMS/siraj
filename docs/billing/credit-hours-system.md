@@ -70,3 +70,13 @@ bun --no-env-file run scripts/dbActions/index.ts --env-file=.env.test push --for
 ## Relationship to the Quota System
 
 See `docs/billing/quota-system.md`. The two ledgers co-exist per student: class-based quotas (FIFO, rollover) and hour-based packages (duration-driven deduction at booking). `class_instances.billed_unit` is the v1 discriminator scaffold for routing a booking to the correct ledger — hour writers arrive with Plan 6 (`student.billingMode`).
+
+## Deferred Items
+
+The authoritative list lives in [`.ai/plans/student-credit-hours-system/deferred-items.md`](../../.ai/plans/student-credit-hours-system/deferred-items.md). Headlines:
+
+1. **D-1** — `student.billingMode` discriminator wiring `deductHoursForBooking` into production (v1 hour service methods are intentional dormant code — do NOT remove as unused).
+2. **D-2** — Package plan → quota bridge (post-commit hook placeholder).
+3. **D-3** — True refund-of-payment flow (v1 allows update-with-decrease only, under the balance floor).
+4. **D-4** — Multi-currency hour ledger (v1 single numeric balance; UI soft-warning shipped).
+5. **D-5** — Gateway webhook auto-recording (enum values exist, no integration yet).

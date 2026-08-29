@@ -1,5 +1,5 @@
 {
-  "manifestHash": "5ababe5c4373de32b4b3d79fabd00d2a6563b8404fc4d9437141bed0f19b6368",
+  "manifestHash": "07f783104dc8df039b09c44406b898341cb862b4bfa5b4565de0605e4d489d68",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -36,6 +36,10 @@
     {
       "file": "34-credit-hours-system-settings-seed.sql",
       "sha256": "3d2836e49dfb736c0ba2f4be9e0b786e49765453b241173514570fd2700a1c57"
+    },
+    {
+      "file": "35-accounting-credits-permission.sql",
+      "sha256": "6cb8aacc60a1b20d2ec0969b4e0c2c2d58a4dea804ff4d39628735b2b8413e00"
     },
     {
       "file": "4-class_categories_and_subjects.sql",
@@ -295,6 +299,7 @@
     "20260825020602_custom_self_service_reschedule_permissions",
     "20260826162257_custom_self_service_reschedule_permissions",
     "20260827015543_custom_33-accounting-permissions-and-enums",
-    "20260827015544_custom_34-credit-hours-system-settings-seed"
+    "20260827015544_custom_34-credit-hours-system-settings-seed",
+    "20260828212837_custom_35-accounting-credits-permission"
   ]
 }

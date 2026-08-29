@@ -235,6 +235,10 @@ export const relations = defineRelations(schema, r => ({
       from: r.creditTransactions.sourcePaymentId,
       to: r.payments.id,
     }),
+    carryoverTeacher: r.one.teachers({
+      from: r.creditTransactions.carryoverTeacherId,
+      to: r.teachers.id,
+    }),
   },
   quotas: {
     student: r.one.students({

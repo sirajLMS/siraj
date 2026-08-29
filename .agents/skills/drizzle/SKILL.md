@@ -46,6 +46,13 @@ When reading or editing any `backend/db/repo/**/*.repository.ts` file, follow th
 
 Full reference: `docs/drizzle/prepared-statements.md`
 
+## Dialect-Aware Constraints & Soft-Delete Indexes
+
+- **CHECK constraints** MUST use `checkConstraint(name, pgSql, sqliteSql)` from `backend/db/schema/__shared__/dialectAwareBuilder.ts` — raw `check()` from `drizzle-orm` is PG-only and silently no-ops on SQLite.
+- **Soft-deleted tables**: enforce uniqueness with a partial unique index `WHERE deleted_at IS NULL` so archiving frees the value.
+
+Full reference: `docs/drizzle/dialect-aware-constraints.md`.
+
 ## Surface selection
 
 drizzle-kit exposes the same migration verbs (`generate`, `push`, `pull`, `up`, `check`, `export`) over three surfaces — CLI, SDK, and an MCP server — that all return the identical JSON envelope and consume the same `hints` array. The procedural skills (`drizzle-hints`, `drizzle-responses-and-errors`) apply unchanged regardless of surface; only the invocation differs. Pick the surface per verb:

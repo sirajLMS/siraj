@@ -575,6 +575,21 @@ AGENTS.md and instructions files MUST NOT contain:
 - Command references (those live in root AGENTS.md "Essential Commands" only)
 - Generic workflow documentation (e.g., quality-gate lifecycle, SonarQube issue management)
 
+### The Feature-Name Litmus Test (MANDATORY before writing any rule)
+
+Before adding ANY bullet to an AGENTS.md, instructions, or skill file, apply this test:
+
+> **If a developer who never works on this feature would find the bullet meaningless, it does NOT belong in the rule file — it belongs in the canonical `docs/<domain>/<topic>.md` only.**
+
+Concrete violations to never repeat:
+- **Route lists & navigation placement** for the feature (e.g. "`/accounting/payments`, sidebar group `grp_accounting`") — feature UX notes, belong in the doc.
+- **Feature permission strings** (e.g. `ACCOUNTING_PAYMENTS_VIEW`) — feature access matrix, belongs in the doc.
+- **Feature file inventories** (e.g. "object types in `accounting.pothos.ts`, 5 queries + 6 mutations in `accounting.documents.ts`") — the doc owns file maps, not rule files.
+- **Feature type/entity names in rule bullets** (e.g. `CreditHourTransactionSubmitInput`, `PackagePlanRepository`) — generalize the rule ("versioned updates MUST self-increment the `version` column") or drop it; the doc names the reference implementation.
+- **Feature i18n namespace lists** — doc-only content.
+
+Rule files get ONLY the generic invariant extracted from the feature's experience, plus at most a one-line pointer to the canonical doc. The doc — never the rule file — names the feature's routes, permissions, files, and entities.
+
 When propagating learnings from a plan:
 - Plan details and task outcomes → `.ai/plans/<feature-name>/outcome/`
 - Full patterns, code examples, domain architecture, and implementation details → `docs/<domain>/<topic>.md`

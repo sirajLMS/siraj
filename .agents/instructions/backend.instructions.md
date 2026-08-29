@@ -121,6 +121,8 @@ applyTo: "backend/**/*.ts"
 - **Permission Context Propagation**: Services that check permissions MUST accept `UserPermissionContext` from GraphQL context instead of re-querying via `PermissionsService.hasPermission(userId, ...)`. The `UserPermissionContext` type in `@/backend/types/permissions/permission.types.ts` has `permissions`, `permissionGroups`, `isSuperAdmin`, `role`. See `docs/backend/serverless-cold-start-optimization.md`.
 - **Batch Service Methods**: Services called from GraphQL resolvers MUST expose batch versions (e.g., `resolveTeacherIdsForUsers(userIds: string[])`) returning `Map<string, T | null>`. Delegate to batch repository methods. See `docs/graphql/dataloader-batching.md`.
 
+- **Single-Orchestrator Writes**: When one action writes multiple related rows (invoice + payment + ledger + balance), one service method owns the whole transaction (advisory locks, idempotency keys, post-commit notifications) — never split the write across services. See `docs/billing/credit-hours-system.md` for a reference implementation.
+
 ### Seeds (CRITICAL)
 
 - Every table has its own `seedOrGet` function in dedicated file (e.g., `seed-classes.ts`, `seed-class-instances.ts`)

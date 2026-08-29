@@ -74,9 +74,9 @@ When asked to "create a prototype for a plan" (e.g. `.ai/plans/<feature>/specs.m
 6. **After each generation, immediately capture** the new screen's `name`/`id`/title from the response (grep the temp output file if needed — see Ground Rules). Do **not** rely on `list_screens` for fresh screens.
 7. **Save artifacts locally** under `<plan-dir>/prototype/`:
    - `mkdir -p <plan-dir>/prototype`
-   - Per screen: `curl -sL -o <kebab-case-name>.html "<htmlCode.downloadUrl>"` and `curl -sL -o <kebab-case-name>.png "<screenshot.downloadUrl>=s0"` (note the `=s0`).
+   - Per screen: `curl -sL -o <kebab-case-name>.png "<screenshot.downloadUrl>=s0"` (note the `=s0`). **Do NOT download `.html` files unless the user explicitly asks for them.**
    - Re-fetch URLs with `get_screen` for any screen not in a fresh `list_screens` result.
-   - Verify: `file *.html *.png` → HTML/PNG, sizes >1KB, PNG dimensions match the render (2560×2048 desktop).
+   - Verify: `file *.png` → PNG, sizes >1KB, PNG dimensions match the render (2560×2048 desktop). Also validate any `.html` files if they were explicitly requested.
 8. **Report**: list saved files + the Stitch project resource name so the user can iterate via `edit_screens` / `generate_variants`.
 
 ---
@@ -106,7 +106,7 @@ When asked to "create a prototype for a plan" (e.g. `.ai/plans/<feature>/specs.m
 
 ### 4. Asset Download & Code Integration
 - Retrieve full metadata with `get_screen`:
-  - Fetch HTML code from `htmlCode.downloadUrl` (requires `curl -L` to follow redirects).
+  - Fetch HTML code from `htmlCode.downloadUrl` (requires `curl -L` to follow redirects) **only when the user explicitly asks for HTML/code output** — otherwise download PNGs only.
   - Fetch the **full-resolution** screenshot by appending `=s0` to `screenshot.downloadUrl`. The bare URL returns a small, blurry thumbnail (~30–80KB); `=s0` returns the original render (~110–430KB, e.g. 2560×2048 desktop). Prefer `=s0` over `=w{width}`.
 - **`download_assets` is unreliable**: it can report success yet write no files at all. Always verify afterwards (`ls` the outputDir + confirm file count). If empty, fall back to downloading each screen's `htmlCode.downloadUrl` and `screenshot.downloadUrl` directly with `curl -sL`, saving with meaningful names.
 - After any download, **validate files**: `file *.html *.png` must show HTML/PNG (not JSON) and sizes must be >1KB. A "successful" download of ~100–500 bytes is usually a JSON error payload, not an asset. `file` also reports PNG dimensions — 512×410 means you accidentally saved a thumbnail even when the byte size looked plausible; desktop originals are 2560×2048 and ~110–430KB.
@@ -150,7 +150,8 @@ Responses are huge (40–410KB) and the saved `/tmp/…-copilot-tool-output-*.tx
 - **ALWAYS** use numeric/alphanumeric IDs (without `projects/` or `screens/` prefix) for `generate_screen_from_text`, `edit_screens`, `get_screen`, `generate_variants`, and `apply_design_system`.
 - **ALWAYS** pass only `id` and `sourceScreen` in `selectedScreenInstances` for `apply_design_system` (omit coordinates and dimensions).
 - **ALWAYS** record screen IDs and title→ID mapping from generation responses; never rely solely on `list_screens` for recently generated screens.
-- **ALWAYS** verify downloaded files exist, have non-trivial size, and are valid HTML/PNG before declaring success.
+- **ALWAYS** download PNGs by default; download `.html` files ONLY when the user explicitly requests HTML/code output.
+- **ALWAYS** verify downloaded files exist, have non-trivial size, and are valid PNG (and HTML if requested) before declaring success.
 - **ALWAYS** save artifacts with meaningful, kebab-case names derived from the screen title (e.g. `add-payment-form.html`), not raw IDs.
 - **NEVER** spam `generate_screen_from_text` on timeout; wait and verify with `get_screen`.
 - **NEVER** delete projects without explicit confirmation from the user.

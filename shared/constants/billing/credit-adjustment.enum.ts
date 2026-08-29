@@ -1,0 +1,5 @@
+export enum CreditAdjustmentType {
+  ADD = "ADD",
+  SUBTRACT = "SUBTRACT",
+  SUBTRACT_WITH_CARRYOVER = "SUBTRACT_WITH_CARRYOVER",
+}

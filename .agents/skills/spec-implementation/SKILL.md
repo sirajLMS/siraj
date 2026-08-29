@@ -547,6 +547,7 @@ After all implementation tasks and post-implementation review are complete, exec
    - **DO NOT add to AGENTS.md / instructions**: Plan-specific constraints, feature business logic, temporary migration steps, entity-specific database schemas/columns, or one-off feature instructions.
    - **DO add to AGENTS.md / instructions**: Permanent, codebase-wide architectural rules, library/tooling breaking pitfalls (Next.js 16, React 19, MUI v9, Drizzle, Apollo, Bun), concurrency/deadlock rules, or cross-cutting safety invariants that every future developer/agent must follow.
    - **DO add to `docs/<domain>/<topic>.md`**: Deep domain architecture guides, pattern catalogs, and feature references.
+   - **Feature-Name Litmus Test (MANDATORY)**: before writing ANY bullet to an AGENTS.md / instructions / skill file, ask: *"Would this bullet be meaningful to a developer who never works on this feature?"* If not, it belongs in the canonical doc only. Never put feature route lists, sidebar placements, feature permission strings, feature file inventories, feature i18n namespaces, or feature type/entity names in rule files — generalize the invariant (e.g. "versioned updates MUST self-increment the `version` column", NOT "`PackagePlanRepository` snapshots purchased values") and let the doc own the feature specifics.
 4. **Identify knowledge propagation targets** using the domain-to-artifacts mapping (below)
 5. **Propagate learnings** to permanent project knowledge:
 

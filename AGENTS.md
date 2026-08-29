@@ -472,6 +472,8 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/workflows/plan-doc-reconciliation.md` - Plan-vs-canonical-doc reconciliation workflow (docs-only plan pattern, anchor-on-text, outcome-pointer rule, known-open-issues propagation, phantom-spec-code handling, markdown link-integrity loop)
 - `docs/backend/serverless-cold-start-optimization.md` - Serverless cold-start optimization patterns (permission context, env-config pre-warm, singleton persistence, HTTP batching, client log batching)
 - `docs/backend/login-cold-start-resilience.md` - Login cold-start resilience patterns (fail-open rate limiter, retryTransient on DB reads, frontend retry on SERVICE_UNAVAILABLE, env-config transient short TTL)
+- `docs/backend/db-availability-fail-fast.md` - DB-outage handling (pool/fetch timeouts, `DatabaseUnavailableError` + digest sentinel, root error pages, `/api/health/db` probe, auto-retry UX)
+- `docs/drizzle/dialect-aware-constraints.md` - Dialect-aware CHECK constraints (PG/SQLite) and soft-delete partial unique indexes
 - `docs/graphql/domain-error-extensions-code.md` - DomainError → GraphQLError extensions.code propagation pattern
 - `docs/observability/new-relic-integration.md` - New Relic APM integration (Hybrid Agent, GraphQL resolver tracing, zero dev/test overhead)
 

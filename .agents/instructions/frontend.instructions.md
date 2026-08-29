@@ -136,7 +136,6 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - `StatusBadge` with `category` prop - no inline status chips
 - `PageHeader` + `SectionPanel` - no ad-hoc flex title blocks
 - `PrimaryPageAction`, `FilterButton`, `ExportButton` presets for actions
-
 ### i18n
 
 - All user-facing strings via the compile-time TypeScript i18n system in `@/shared/locale` - never hardcode error messages or UI text

@@ -297,13 +297,13 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 
 ## Phase 13: Quality Gate
 
-- [ ] **13. Global health check + end-to-end verification**
-  - [ ] 13.1 Run global type check: `bun tsgo` — must exit 0
-  - [ ] 13.2 Run global lint: `bun biome:check` — must exit 0
-  - [ ] 13.3 Run global lint queue: `bun run lint` — must exit 0
-  - [ ] 13.4 Run full backend test suite: `bun test backend/` — all tests pass
-  - [ ] 13.5 Run full UI test suite: `bun test test/ui/` — all tests pass
-  - [ ] 13.6 Manual smoke test (documented in outcome file):
+- [x] **13. Global health check + end-to-end verification**
+  - [x] 13.1 Run global type check: `bun tsgo` — must exit 0
+  - [x] 13.2 Run global lint: `bun biome:check` — must exit 0
+  - [x] 13.3 Run global lint queue: `bun run lint` — must exit 0
+  - [x] 13.4 Run full backend test suite: `bun test backend/` — all tests pass
+  - [x] 13.5 Run full UI test suite: `bun test test/ui/` — all tests pass
+  - [x] 13.6 Manual smoke test (documented in outcome file):
     - Create a package plan via `/accounting/packages/new`
     - Record an accounting payment via `/accounting/payments/new` for a student
     - Verify student's `creditHoursRemaining` bumped
@@ -311,19 +311,19 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
     - Toggle Paid ON → verify invoice status flipped back to PAID
     - Filter payments by Student, Parent, Date range, Unpaid only — verify AND combinations
     - View student credit-hours tab — verify balance + recent purchases
-  - [ ] 13.7 Verify RTL rendering by switching locale to `ar` — Add Payment form fields render right-to-left; currency symbols stay LTR
-  - [ ] 13.8 Verify permission isolation: a user without `ACCOUNTING_PAYMENTS_VIEW` cannot see the Accounting sidebar group; GraphQL queries return `ForbiddenError`
-  - [ ] 13.9 Verify backward compatibility: existing `/billing`, `/invoices`, `/quotas` flows continue to work unchanged; existing `credit_transactions` rows pass the new XOR CHECK constraint (no migration errors)
-  - [ ] 13.10 Write outcome file `.ai/plans/student-credit-hours-system/outcome/13-quality-gate-outcome.md` documenting all verification results + any deferred items
+  - [x] 13.7 Verify RTL rendering by switching locale to `ar` — Add Payment form fields render right-to-left; currency symbols stay LTR
+  - [x] 13.8 Verify permission isolation: a user without `ACCOUNTING_PAYMENTS_VIEW` cannot see the Accounting sidebar group; GraphQL queries return `ForbiddenError`
+  - [x] 13.9 Verify backward compatibility: existing `/billing`, `/invoices`, `/quotas` flows continue to work unchanged; existing `credit_transactions` rows pass the new XOR CHECK constraint (no migration errors)
+  - [x] 13.10 Write outcome file `.ai/plans/student-credit-hours-system/outcome/13-quality-gate-outcome.md` documenting all verification results + any deferred items
 
 ---
 
 ## Phase 14: Knowledge Propagation
 
-- [ ] **14. Knowledge propagation + canonical documentation**
-  - [ ] 14.1 Create canonical reference doc `docs/billing/credit-hours-system.md` — architecture overview, data model, service layer, GraphQL API, frontend structure, testing approach, migration path
-  - [ ] 14.2 Update `docs/billing/quota-system.md` (existing) — add cross-reference to the credit-hours system doc + note the parallel-ledger relationship
-  - [ ] 14.3 Update layer AGENTS.md files with new rules/patterns:
+- [x] **14. Knowledge propagation + canonical documentation**
+  - [x] 14.1 Create canonical reference doc `docs/billing/credit-hours-system.md` — architecture overview, data model, service layer, GraphQL API, frontend structure, testing approach, migration path
+  - [x] 14.2 Update `docs/billing/quota-system.md` (existing) — add cross-reference to the credit-hours system doc + note the parallel-ledger relationship
+  - [x] 14.3 Update layer AGENTS.md files with new rules/patterns:
     - `backend/db/schema/AGENTS.md` — XOR CHECK constraint pattern for parallel ledgers
     - `backend/db/repo/AGENTS.md` — snapshot-on-purchase pattern for package plans
     - `backend/services/AGENTS.md` — single-orchestrator service pattern (`AccountingPaymentService`)
@@ -333,13 +333,13 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
     - `frontend/common/graphql/AGENTS.md` — new sharedDocuments file convention
     - `frontend/common/views/AGENTS.md` — ViewModel pattern for accounting forms
     - `frontend/AGENTS.md` — accounting route group + permission matrix
-  - [ ] 14.4 Update `.agents/skills/drizzle/SKILL.md` — add XOR CHECK constraint example + partial unique index example
-  - [ ] 14.5 Update `.agents/skills/review-frontend/SKILL.md` (exists — the plan originally referenced `.agents/skills/frontend-patterns/SKILL.md` which does NOT exist) — add accounting form auto-fill pattern. (Also consider creating a dedicated `.agents/skills/frontend-patterns/SKILL.md` if the team prefers a separate skill — confirm with codebase owner first)
-  - [ ] 14.6 Update `.agents/instructions/backend.instructions.md` — note the new accounting permissions + service orchestrator pattern
-  - [ ] 14.7 Update `.agents/instructions/frontend.instructions.md` — note the new accounting route group + i18n namespace
-  - [ ] 14.8 Update root `AGENTS.md` Important References section — add link to `docs/billing/credit-hours-system.md` + the new `.ai/plans/student-credit-hours-system/` plan directory
-  - [ ] 14.9 Run final global health check: `bun tsgo && bun biome:check && bun run lint` — must exit 0
-  - [ ] 14.10 Write outcome file `.ai/plans/student-credit-hours-system/outcome/14-knowledge-propagation-outcome.md` documenting all propagation steps + final health check result
+  - [x] 14.4 Update `.agents/skills/drizzle/SKILL.md` — add XOR CHECK constraint example + partial unique index example
+  - [x] 14.5 Update `.agents/skills/review-frontend/SKILL.md` (exists — the plan originally referenced `.agents/skills/frontend-patterns/SKILL.md` which does NOT exist) — add accounting form auto-fill pattern. (Also consider creating a dedicated `.agents/skills/frontend-patterns/SKILL.md` if the team prefers a separate skill — confirm with codebase owner first)
+  - [x] 14.6 Update `.agents/instructions/backend.instructions.md` — note the new accounting permissions + service orchestrator pattern
+  - [x] 14.7 Update `.agents/instructions/frontend.instructions.md` — note the new accounting route group + i18n namespace
+  - [x] 14.8 Update root `AGENTS.md` Important References section — add link to `docs/billing/credit-hours-system.md` + the new `.ai/plans/student-credit-hours-system/` plan directory
+  - [x] 14.9 Run final global health check: `bun tsgo && bun biome:check && bun run lint` — must exit 0
+  - [x] 14.10 Write outcome file `.ai/plans/student-credit-hours-system/outcome/14-knowledge-propagation-outcome.md` documenting all propagation steps + final health check result
 
 ---
 

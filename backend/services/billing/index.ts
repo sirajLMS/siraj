@@ -2,6 +2,8 @@ export * from "./accounting-payment.service";
 export * from "./billing-alerts.service";
 export * from "./billing-history.service";
 export * from "./billing-management.service";
+export * from "./carryover-handoff";
+export * from "./credit-adjustment.idempotency";
 export * from "./credit.service";
 export * from "./currency.service";
 export * from "./fx-display.service";

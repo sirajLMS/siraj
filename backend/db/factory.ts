@@ -15,9 +15,48 @@ import { createSqliteDb } from "@/backend/db/drivers/sqlite/sqlite.driver";
 import { relations } from "@/backend/db/drizzleRelations";
 import { getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
+import { toDatabaseUnavailableError } from "@/backend/lib/retry";
 import { isVercelRuntime } from "@/backend/lib/runtime";
 
 export type DatabaseProvider = "postgres" | "neon" | "sqlite";
+
+/**
+ * Fail-fast bounds so a database outage surfaces as an error within seconds
+ * instead of hanging the request until the OS kills the socket (ECONNRESET).
+ * `connectionTimeoutMillis` covers acquiring a connection (the dominant
+ * outage mode); `query_timeout` bounds a hung in-flight query while staying
+ * generous enough for legitimately slow report queries.
+ */
+const DB_CONNECT_TIMEOUT_MS = 5_000;
+const DB_QUERY_TIMEOUT_MS = 30_000;
+
+type ResilientPool = PgPool | Pool;
+
+/**
+ * Translates transient connection failures from pool-level queries into
+ * `DatabaseUnavailableError` so every caller (RSC pages, GraphQL resolvers)
+ * sees one distinguishable error type. Non-transient rejections (constraint
+ * violations, SQL errors) pass through unchanged. Transaction paths
+ * (`pool.connect`) are bounded by `connectionTimeoutMillis` instead — wrapping
+ * their overloaded callback signatures would be unsound. No implicit retry
+ * here — retry policy stays at idempotent call sites (`retryTransient`).
+ */
+function applyFailFastResilience<TPool extends ResilientPool>(pool: TPool): TPool {
+  const originalQuery = pool.query.bind(pool);
+  const resilientQuery = (...args: unknown[]) => {
+    // Callback-style invocations (legacy node-pg API) pass through untouched;
+    // Drizzle always uses the promise form.
+    if (typeof args.at(-1) === "function") {
+      return Reflect.apply(originalQuery, pool, args);
+    }
+    return Promise.resolve(Reflect.apply(originalQuery, pool, args)).catch((error: unknown) => {
+      throw toDatabaseUnavailableError(error) ?? error;
+    });
+  };
+  pool.query = resilientQuery as TPool["query"];
+
+  return pool;
+}
 
 function attachVercelPoolLifecycle(pool: PgPool): void {
   if (!isVercelRuntime()) return;
@@ -37,21 +76,30 @@ function createPgPool(): PgPool {
     connectionString: getEnvironmentConfig().databaseUrl,
     max: poolMax(),
     idleTimeoutMillis: poolIdleTimeoutMillis(),
+    connectionTimeoutMillis: DB_CONNECT_TIMEOUT_MS,
+    query_timeout: DB_QUERY_TIMEOUT_MS,
   });
 
   attachVercelPoolLifecycle(pool);
 
-  return pool;
+  return applyFailFastResilience(pool);
 }
 
-const createNeonDb = () => {
-  logger.info("Initializing Neon serverless Pool connection");
+function createNeonPool(): Pool {
   configureNeonWebSocket();
   const pool = new Pool({
     connectionString: getEnvironmentConfig().databaseUrl,
     max: poolMax(),
     idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: DB_CONNECT_TIMEOUT_MS,
+    query_timeout: DB_QUERY_TIMEOUT_MS,
   });
+  return applyFailFastResilience(pool);
+}
+
+const createNeonDb = () => {
+  logger.info("Initializing Neon serverless Pool connection");
+  const pool = createNeonPool();
   const db = drizzleNeon({ client: pool, relations });
   return db;
 };
@@ -125,10 +173,5 @@ export function createPool(): PgPool | Pool | null {
     return createPgPool();
   }
 
-  configureNeonWebSocket();
-  return new Pool({
-    connectionString: getEnvironmentConfig().databaseUrl,
-    max: poolMax(),
-    idleTimeoutMillis: 30_000,
-  });
+  return createNeonPool();
 }

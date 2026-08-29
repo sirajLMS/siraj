@@ -28,14 +28,14 @@
 > Goal: additive data-model changes that unblock every later phase. Zero
 > behavior change for existing flows.
 
-### 0.1 Add `CreditAdjustmentType` enum
+### 0.1 Add `CreditAdjustmentType` enum ✅ DONE
 - 🆕 `backend/enum/billing/credit-adjustment.enum.ts` — define `CreditAdjustmentType` enum (`ADD | SUBTRACT | SUBTRACT_WITH_CARRYOVER` — values follow SCREAMING_SNAKE_CASE convention used by every other PG enum).
 - ✏️ `backend/enum/billing/index.ts` — re-export via `export * from "./credit-adjustment.enum";`.
 - 🆕 `shared/constants/billing/credit-adjustment.enum.ts` — mirror enum for client/server.
 - ✏️ `shared/constants/billing/index.ts` — re-export (create if missing).
 - 🔁 `bun run scripts/health/sub-loop.ts backend/enum/billing/credit-adjustment.enum.ts --lifecycle codescene`
 
-### 0.2 Extend `CreditReason` enum
+### 0.2 Extend `CreditReason` enum ✅ DONE
 - ✏️ `backend/enum/billing/credit.enum.ts` — add `CREDIT_ADJUSTMENT_ADD`, `CREDIT_ADJUSTMENT_SUBTRACT`, `CREDIT_ADJUSTMENT_CARRYOVER`.
 - ✏️ `shared/constants/billing/credit.enum.ts` — mirror (extend existing).
 - ✏️ `shared/constants/credit.enum.ts` — mirror (extend existing — both shared mirrors must stay in sync).
@@ -45,27 +45,27 @@
 - 🔁 `bun run scripts/health/sub-loop.ts shared/constants/billing/credit.enum.ts --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts shared/constants/credit.enum.ts --lifecycle codescene`
 
-### 0.3 Add `ACCOUNTING_CREDITS_MANAGE` permission
+### 0.3 Add `ACCOUNTING_CREDITS_MANAGE` permission ✅ DONE
 - ✏️ `backend/enum/permissions/permission.enum.ts` — add `ACCOUNTING_CREDITS_MANAGE = "accounting.credits_manage"`.
 - ✏️ `backend/db/seeds/permissions/` (or wherever permission-groups are seeded) — grant to "Accounting" / "Finance Manager" default group.
 - 🧪 `backend/enum/permissions/permission.enum.test.ts` — assert new value parses via `isAppPermission`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts --lifecycle codescene`
 
-### 0.4 Extend `credit_transactions` schema
+### 0.4 Extend `credit_transactions` schema ✅ DONE
 - ✏️ `backend/db/schema/billing/credit-transactions.ts` — add `adjustmentType`, `carryoverTeacherId`, `carryoverFromDate`, `carryoverToDate`, `carryoverPaymentDate` + 2 new indexes.
 - ✏️ `backend/db/schema/enums.ts` — register `creditAdjustmentTypeEnum = createPgEnumFromEnum("credit_adjustment_type", CreditAdjustmentType)`.
 - ✏️ `backend/db/drizzleRelations.ts` — add `creditTransactions.carryoverTeacher` relation to `teachers`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/db/schema/billing/credit-transactions.ts --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts backend/db/schema/enums.ts --lifecycle codescene`
 
-### 0.5 Generate + apply migration
+### 0.5 Generate + apply migration ✅ DONE
 - 🔁 `bun run db:generate` — produce additive migration (new columns nullable/defaulted, new enum values).
 - ✏️ migration file — split into two: (a) enum-value adds (`--single-transaction=false`), (b) column adds (transactional).
 - 🔁 `bun run db:migrate` against local dev DB.
 - 🧪 `backend/db/test/migrations/credit-adjustment-columns.test.ts` — assert migration is idempotent and additive.
 - 🔁 `bun run scripts/health/sub-loop.ts <migration-file> --lifecycle codescene`
 
-### 0.6 Phase-0 regression smoke
+### 0.6 Phase-0 regression smoke ✅ DONE
 - 🔁 `bun test backend/db/test/repo/billing/credit.repository.test.ts`
 - 🔁 `bun test backend/db/test/logic/lms/credit-workflow.test.ts`
 - ✅ Confirm existing `recordPurchase` / `deductForBooking` / `refundOnCancel` flows still pass.
@@ -78,21 +78,21 @@
 > `subtractCredit`, `subtractWithCarryover` with full idempotency,
 > validation, and audit logging.
 
-### 1.1 Types
+### 1.1 Types ✅ DONE
 - ✏️ `backend/types/billing/credit.types.ts` — add `CreditAdjustmentInput`, `CreditAdjustmentReturnType`, `CreditAdjustmentInsertInput`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/types/billing/credit.types.ts --lifecycle codescene`
 
-### 1.2 Repository extension
+### 1.2 Repository extension ✅ DONE
 - ✏️ `backend/db/repo/billing/credit.repository.ts` — add `createAdjustment(tx, input)` + expose carryover columns in `mapToReturnType`.
 - 🧪 `backend/db/test/repo/billing/credit-adjustment.repository.test.ts` — insert + read-back of all carryover columns.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/billing/credit.repository.ts --lifecycle codescene`
 
-### 1.3 Idempotency helper
+### 1.3 Idempotency helper ✅ DONE
 - ✏️ `backend/services/billing/credit-adjustment.idempotency.ts` 🆕 — `deriveAdjustmentIdempotencyKey(input)`.
 - 🧪 `backend/services/billing/credit-adjustment.idempotency.test.ts` — same input → same key; teacher/date changes → different key.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/billing/credit-adjustment.idempotency.ts --lifecycle codescene`
 
-### 1.4 HTML sanitizer for Reason
+### 1.4 HTML sanitizer for Reason ✅ DONE
 - ✏️ `backend/lib/sanitize/richTextSanitizer.ts` 🆕 — `sanitizeRichText(html: string): string` (DOMPurify + jsdom on server).
 - 🧪 `backend/lib/sanitize/richTextSanitizer.test.ts` — strips `<script>`, `onerror=`, `javascript:`; preserves `<b><i><ul><li>`.
 - 🔁 `bun run scripts/health/sub-loop.ts backend/lib/sanitize/richTextSanitizer.ts --lifecycle codescene`

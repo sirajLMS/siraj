@@ -99,6 +99,9 @@
     "toolbarRedo": "Redo",
     "toolbarLivePreviewHint": "Changes preview live as you edit",
     "toolbarPublish": "Publish",
+    "presetApplied": {
+      "__fn": "(presetName) => `${presetName} preset applied \\u2014 enter customize mode to refine`"
+    },
     "saveDraftSuccess": "Appearance draft saved.",
     "saveDraftError": "Failed to save appearance draft.",
     "publishSuccess": "Appearance published to all users.",
@@ -344,6 +347,8 @@
     "rawPayload": "Raw upstream payload",
     "connectedAccounts": "Connected Teacher Accounts",
     "noConnectedAccounts": "No connected teacher accounts for this provider.",
+    "searchPlaceholder": "Search by name or email…",
+    "searching": "Searching…",
     "columns": {
       "name": "Name",
       "email": "Email",
@@ -351,6 +356,9 @@
       "expiresAt": "Expires",
       "status": "Status",
       "actions": "Actions"
+    },
+    "filters": {
+      "statusAll": "All statuses"
     },
     "status": {
       "connected": "Connected",

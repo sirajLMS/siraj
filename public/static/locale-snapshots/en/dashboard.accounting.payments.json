@@ -1,6 +1,10 @@
 {
   "pageTitle": "Payments",
+  "metricsBasis": {
+    "__fn": "(max) => `Most recent ${max} payments`"
+  },
   "pageSubtitle": "Track credit-hour package payments and their paid status.",
+  "formSubtitle": "Record a new payment transaction for a student.",
   "addPayment": "Add Payment",
   "editPayment": "Edit Payment",
   "paymentDetails": "Payment Details",
@@ -75,6 +79,24 @@
     "editAction": "Edit",
     "togglePaidAction": "Toggle Paid",
     "markPaid": "Mark as Paid",
-    "markUnpaid": "Mark as Unpaid"
+    "markUnpaid": "Mark as Unpaid",
+    "transactionRef": "Transfer Ref",
+    "documentPreview": "Document Preview",
+    "documentEmpty": "No receipt document attached to this payment.",
+    "downloadPdf": "Download PDF",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "rotate": "Rotate document",
+    "expand": "Expand document",
+    "close": "Close document preview",
+    "historyTitle": "History",
+    "historyEmpty": "No timeline events yet.",
+    "hoursCredited": "Hours Credited"
+  },
+  "historyKinds": {
+    "PAYMENT_RECORDED": "Payment recorded",
+    "HOURS_CREDITED": "Hours credited to student balance",
+    "HOURS_ADJUSTED": "Hours adjusted",
+    "MARKED_PAID": "Payment marked as Paid"
   }
 }

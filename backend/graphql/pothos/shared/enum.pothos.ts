@@ -10,6 +10,7 @@ import {
   BilledUnit,
   BookingStatus,
   CountryCode,
+  CreditAdjustmentType,
   CreditReason,
   CronConcurrencyPolicy,
   CronJobKind,
@@ -227,6 +228,10 @@ export const UserRolePothosEnum = gqlSchemaBuilder.enumType(UserRole, {
 
 export const CreditReasonPothosEnum = gqlSchemaBuilder.enumType(CreditReason, {
   name: "CreditReason",
+});
+
+export const CreditAdjustmentTypePothosEnum = gqlSchemaBuilder.enumType(CreditAdjustmentType, {
+  name: "CreditAdjustmentType",
 });
 
 export const LessonReportStatusPothosEnum = gqlSchemaBuilder.enumType(LessonReportStatus, {

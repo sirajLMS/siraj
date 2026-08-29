@@ -14,9 +14,11 @@ import {
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { payments } from "@/backend/db/schema/billing/billing";
 import { classInstances } from "@/backend/db/schema/classes/scheduling";
-import { creditReasonEnum } from "@/backend/db/schema/enums";
+import { creditAdjustmentTypeEnum, creditReasonEnum } from "@/backend/db/schema/enums";
 import { students } from "@/backend/db/schema/students/students";
+import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
+import { CreditAdjustmentType } from "@/backend/enum";
 
 export const creditTransactions = createTable(
   "credit_transactions",
@@ -46,6 +48,21 @@ export const creditTransactions = createTable(
     idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),
     updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
+    // Credit-adjustment bookkeeping: the adjustment kind plus the carryover
+    // metadata consumed by the carryover settlement flow. Defaults keep
+    // existing purchase/deduction/refund rows unchanged.
+    adjustmentType: creditAdjustmentTypeEnum("adjustment_type")
+      .notNull()
+      .default(CreditAdjustmentType.ADD)
+      .$type<CreditAdjustmentType>(),
+    carryoverTeacherId: uuidDefaultColumn("carryover_teacher_id").references(() => teachers.id, {
+      onDelete: "set null",
+    }),
+    // PG-only: `date` column has no dialect-aware helper — degraded to TEXT
+    // (ISO date strings, YYYY-MM-DD), same as teachers.date_of_birth.
+    carryoverFromDate: textColumn("carryover_from_date"),
+    carryoverToDate: textColumn("carryover_to_date"),
+    carryoverPaymentDate: textColumn("carryover_payment_date"),
   },
   table => [
     uniqueIndex("credit_transactions_idempotency_key_unique_idx").on(table.idempotencyKey),
@@ -56,6 +73,8 @@ export const creditTransactions = createTable(
     index("credit_transactions_source_payment_id_idx").on(table.sourcePaymentId),
     index("credit_transactions_credited_by_user_id_idx").on(table.creditedByUserId),
     index("credit_transactions_student_change_hours_idx").on(table.studentId, table.changeAmountHours),
+    index("credit_transactions_adjustment_type_idx").on(table.adjustmentType),
+    index("credit_transactions_carryover_teacher_id_idx").on(table.carryoverTeacherId),
     checkConstraint(
       "credit_transactions_change_amount_xor_chk",
       sql`((${table.changeAmount} IS NOT NULL AND ${table.changeAmountHours} IS NULL) OR (${table.changeAmount} IS NULL AND ${table.changeAmountHours} IS NOT NULL))`,

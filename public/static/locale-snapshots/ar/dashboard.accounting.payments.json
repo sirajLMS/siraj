@@ -1,6 +1,10 @@
 {
   "pageTitle": "المدفوعات",
+  "metricsBasis": {
+    "__fn": "(max) => `\\u0623\\u062D\\u062F\\u062B ${max} \\u062F\\u0641\\u0639\\u0629`"
+  },
   "pageSubtitle": "تتبع مدفوعات باقات الساعات المعتمدة وحالة السداد.",
+  "formSubtitle": "تسجيل عملية دفعة جديدة لطالب.",
   "addPayment": "إضافة دفعة",
   "editPayment": "تعديل الدفعة",
   "paymentDetails": "تفاصيل الدفعة",
@@ -75,6 +79,24 @@
     "editAction": "تعديل",
     "togglePaidAction": "تبديل حالة السداد",
     "markPaid": "تعليم كمدفوعة",
-    "markUnpaid": "تعليم كغير مدفوعة"
+    "markUnpaid": "تعليم كغير مدفوعة",
+    "transactionRef": "رقم المرجع",
+    "documentPreview": "معاينة المستند",
+    "documentEmpty": "لا يوجد مستند إيصال مرفق بهذه الدفعة.",
+    "downloadPdf": "تنزيل PDF",
+    "zoomIn": "تكبير",
+    "zoomOut": "تصغير",
+    "rotate": "تدوير المستند",
+    "expand": "توسيع المستند",
+    "close": "إغلاق معاينة المستند",
+    "historyTitle": "السجل",
+    "historyEmpty": "لا توجد أحداث بعد.",
+    "hoursCredited": "الساعات المُضافة"
+  },
+  "historyKinds": {
+    "PAYMENT_RECORDED": "تم تسجيل الدفعة",
+    "HOURS_CREDITED": "تمت إضافة ساعات لرصيد الطالب",
+    "HOURS_ADJUSTED": "تم تعديل الساعات",
+    "MARKED_PAID": "تم تعليم الدفعة كمدفوعة"
   }
 }
