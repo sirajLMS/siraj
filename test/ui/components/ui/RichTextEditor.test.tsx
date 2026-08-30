@@ -52,15 +52,41 @@ describe("RichTextEditor", () => {
     renderWithWrapper(<Harness initialValue="" />, { locale });
     await editorReady();
 
-    expect(screen.getByText(LABEL)).toBeInTheDocument();
+    expect(screen.getByText(LABEL, { selector: "label" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: labels.bold })).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByRole("button", { name: labels.italic })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: labels.underline })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: labels.bulletList })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: labels.orderedList })).toBeInTheDocument();
 
-    const label = screen.getByText(LABEL);
+    const label = screen.getByText(LABEL, { selector: "label" });
     expect(screen.getByRole("textbox")).toHaveAttribute("aria-labelledby", label.id);
+  });
+
+  test("keeps the toolbar and the content inside one outlined surface with a legend-reserved notch", async () => {
+    const capture: Capture = { latest: "", callCount: 0 };
+    const Harness = makeHarness(capture);
+    const { container } = renderWithWrapper(<Harness initialValue="" />, { locale });
+    await editorReady();
+
+    const toolbar = screen.getByRole("toolbar");
+    const surface = toolbar.parentElement;
+    expect(surface).toContainElement(screen.getByRole("textbox"));
+
+    const outline = container.querySelector("fieldset");
+    expect(outline?.parentElement).toBe(surface);
+    expect(outline?.querySelector("legend")).toHaveTextContent(LABEL);
+  });
+
+  test("reserves the required asterisk in the notch and mirrors it on the required label", async () => {
+    const { container } = renderWithWrapper(<RichTextEditor value="" onChange={() => {}} label={LABEL} required />, {
+      locale,
+    });
+    await editorReady();
+
+    expect(container.querySelector("legend")).toHaveTextContent(`${LABEL} *`);
+    expect(screen.getByText(LABEL, { selector: "label" })).toHaveTextContent(`${LABEL} *`);
+    expect(screen.getByRole("textbox")).toHaveAttribute("aria-required", "true");
   });
 
   test("emits HTML when the user types", async () => {

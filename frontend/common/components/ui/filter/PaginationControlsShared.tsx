@@ -144,10 +144,14 @@ export function PaginationControlsScaffold({
       </Typography>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Tooltip title={t.previousPage}>
+        {/* The span keeps hover working while a nav button is disabled; the
+            accessible name rides on the button itself and the tooltip only
+            describes it, so the roleless wrapper never carries naming ARIA. */}
+        <Tooltip title={t.previousPage} describeChild>
           <span>
             <IconButton
               size="small"
+              aria-label={t.previousPage}
               disabled={page <= 0 || safePageCount === 0}
               onClick={() => onPageChange(page - 1)}
               sx={navButtonSx}
@@ -178,10 +182,11 @@ export function PaginationControlsScaffold({
           sx={{ width: inputWidth, "& .MuiInputBase-input": { textAlign: "center", paddingBlock: 1 } }}
         />
 
-        <Tooltip title={t.nextPage}>
+        <Tooltip title={t.nextPage} describeChild>
           <span>
             <IconButton
               size="small"
+              aria-label={t.nextPage}
               disabled={safePageCount === 0 || page >= safePageCount - 1}
               onClick={() => onPageChange(page + 1)}
               sx={navButtonSx}

@@ -7,6 +7,7 @@ import type {
   ClassInstanceSelectType,
   ClassStatusEventSeedInsertInput,
   ClassStatusEventSelectType,
+  CreateAuditLogInput,
   PayrollOverrideInput,
   PayrollOverrideResult,
 } from "@/backend/types";
@@ -204,6 +205,13 @@ const requirePermissionMock = mock(async (_actorUserId: string, _permission: App
   }
 });
 
+const auditLogInputs: CreateAuditLogInput[] = [];
+
+const createManyAuditLogsMock = mock(async (inputs: readonly CreateAuditLogInput[]) => {
+  auditLogInputs.push(...inputs);
+  return [];
+});
+
 /**
  * Transaction executor stand-in. Calls are chained so a second override for
  * the same rows observes the first one's committed event — the in-process
@@ -252,6 +260,12 @@ await mock.module("@/backend/db/drizzleDb", () => ({
 
 await mock.module("@/backend/services/billing/permission-utils", () => ({
   requirePermission: requirePermissionMock,
+}));
+
+await mock.module("@/backend/services/system/audit.service", () => ({
+  AuditService: {
+    createManyAuditLogs: createManyAuditLogsMock,
+  },
 }));
 
 await mock.module("@/backend/services/pricing/rate-resolver.service", () => ({
@@ -380,6 +394,7 @@ async function expectPartialOverride(percentage: number, expectedAmount: string)
 }
 
 const loggerInfoSpy = spyOn(logger, "info").mockImplementation(() => {});
+const loggerErrorSpy = spyOn(logger, "error").mockImplementation(() => {});
 
 function resetMocks(): void {
   payrollPatches.length = 0;
@@ -388,6 +403,7 @@ function resetMocks(): void {
   idempotencyLookups.length = 0;
   acquiredLockKeys.length = 0;
   instanceReads.length = 0;
+  auditLogInputs.length = 0;
 
   eventCounter = 0;
   instanceRow = buildInstanceRow();
@@ -408,7 +424,9 @@ function resetMocks(): void {
   resolveClassRateMock.mockClear();
   requirePermissionMock.mockClear();
   dbTransactionMock.mockClear();
+  createManyAuditLogsMock.mockClear();
   loggerInfoSpy.mockClear();
+  loggerErrorSpy.mockClear();
 }
 
 // ---------------------------------------------------------------------------
@@ -464,6 +482,18 @@ describe("PayrollCalculationService.applyOverride", () => {
       expect(instanceReads[1]?.forUpdate).toBe(true);
       expect(payrollPatches[0]?.tx).toBe(TX_SENTINEL);
       expect(idempotencyLookups[0]?.windowSeconds).toBe(30);
+
+      // Structured override log: the five auditability fields.
+      expect(loggerInfoSpy).toHaveBeenCalledWith(
+        "Payroll override applied",
+        expect.objectContaining({
+          actorUserId: ACTOR_ID,
+          instanceId: INSTANCE_ID,
+          previousStatus: CalculationStatus.CALCULATED,
+          newStatus: CalculationStatus.REFUND,
+          amount: "0",
+        })
+      );
     });
 
     test("re-runs the calculator and flips the row to CALCULATED", async () => {
@@ -813,6 +843,51 @@ describe("PayrollCalculationService.applyOverride", () => {
       expect(error).toBeInstanceOf(NotFoundError);
       expect(error.message).toContain("not found");
       expectNoWrites();
+      expect(auditLogInputs).toHaveLength(0);
+    });
+  });
+
+  describe("audit-log integration", () => {
+    test("mirrors a fresh override into the admin audit log", async () => {
+      const result = await applyOverrideInput();
+
+      expect(result.calculationStatus).toBe(CalculationStatus.REFUND);
+      expect(auditLogInputs).toHaveLength(1);
+      const audit = auditLogInputs[0];
+      expect(audit?.actorUserId).toBe(ACTOR_ID);
+      expect(audit?.actorType).toBe("USER");
+      expect(audit?.entityType).toBe("CLASS_INSTANCE");
+      expect(audit?.entityId).toBe(INSTANCE_ID);
+      expect(audit?.action).toBe("UPDATE");
+      expect(audit?.description).toBe(`Payroll override to ${CalculationStatus.REFUND}`);
+      expect(audit?.previousState).toEqual({ calculationStatus: CalculationStatus.CALCULATED });
+      expect(audit?.newState).toEqual({
+        calculationStatus: CalculationStatus.REFUND,
+        teacherPaidAmount: "0",
+        partialPercentage: null,
+        payrollEventId: "payroll-event-1",
+      });
+    });
+
+    test("does not audit-log an idempotent replay", async () => {
+      await applyOverrideInput();
+      await applyOverrideInput();
+
+      expect(payrollPatches).toHaveLength(1);
+      expect(auditLogInputs).toHaveLength(1);
+    });
+
+    test("keeps the committed override when the audit write fails", async () => {
+      createManyAuditLogsMock.mockImplementationOnce(async () => {
+        throw new Error("audit sink unavailable");
+      });
+
+      const result = await applyOverrideInput();
+
+      expect(result.calculationStatus).toBe(CalculationStatus.REFUND);
+      expect(result.teacherPaidAmount).toBe("0");
+      expect(soleEvent().eventType).toBe("PAYROLL_OVERRIDE");
+      expect(loggerErrorSpy).toHaveBeenCalled();
     });
   });
 });

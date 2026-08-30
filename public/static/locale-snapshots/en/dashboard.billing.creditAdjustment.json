@@ -20,6 +20,9 @@
   "hours": {
     "label": "Hours"
   },
+  "form": {
+    "balance": "Balance"
+  },
   "resultsCappedHint": {
     "__fn": "(limit) => `Showing the first ${limit} students. Refine your search to narrow the list.`"
   },

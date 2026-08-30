@@ -13,11 +13,13 @@ import { AppPermission, CalculationStatus } from "@/backend/enum";
 import { DomainError, logger, NotFoundError, sanitizePlainText, ValidationError } from "@/backend/lib";
 import { requirePermission } from "@/backend/services/billing/permission-utils";
 import { resolveClassRate } from "@/backend/services/pricing/rate-resolver.service";
+import { AuditService } from "@/backend/services/system/audit.service";
 import { type PayrollGraceSettings, resolveGraceSettings } from "@/backend/services/teacher/payroll-grace-settings";
 import { deriveOverrideIdempotencyKey } from "@/backend/services/teacher/payroll-override.idempotency";
 import type {
   ClassInstanceSelectType,
   ClassStatusEventSeedInsertInput,
+  CreateAuditLogInput,
   DBTransaction,
   PayrollCalculationInput,
   PayrollCalculationResult,
@@ -423,6 +425,65 @@ function mapToOverrideResult(instance: ClassInstanceSelectType, auditEventId: st
 }
 
 // ---------------------------------------------------------------------------
+// Override audit-log emit
+// ---------------------------------------------------------------------------
+
+/** What the post-commit audit-log emit needs to know about one applied override. */
+interface AppliedOverrideAuditContext {
+  previousStatus: CalculationStatus;
+  newStatus: CalculationStatus;
+  amount: string | null;
+  partialPercentage: number | null;
+  payrollEventId: string;
+}
+
+/**
+ * One override transaction: the client payload plus the audit context the
+ * post-commit emit needs. An idempotent replay writes nothing, so its audit
+ * context is null.
+ */
+interface OverrideTransactionOutcome {
+  result: PayrollOverrideResult;
+  auditContext: AppliedOverrideAuditContext | null;
+}
+
+/**
+ * Best-effort audit-log emit for a committed override — never throws: a failed
+ * audit write must not fail an override whose payroll snapshot and
+ * PAYROLL_OVERRIDE event already committed. The class_status_events row stays
+ * the authoritative payroll trail; this entry mirrors it into the admin audit
+ * log so payroll changes surface alongside every other audited entity.
+ */
+async function emitOverrideAuditLog(input: PayrollOverrideInput, context: AppliedOverrideAuditContext): Promise<void> {
+  const audit: CreateAuditLogInput = {
+    actorUserId: input.actorUserId,
+    actorType: "USER",
+    entityType: "CLASS_INSTANCE",
+    entityId: input.instanceId,
+    action: "UPDATE",
+    description: `Payroll override to ${context.newStatus}`,
+    previousState: { calculationStatus: context.previousStatus },
+    newState: {
+      calculationStatus: context.newStatus,
+      teacherPaidAmount: context.amount,
+      partialPercentage: context.partialPercentage,
+      payrollEventId: context.payrollEventId,
+    },
+  };
+
+  try {
+    await AuditService.createManyAuditLogs([audit]);
+  } catch (error) {
+    logger.error(
+      `payroll-service: audit log failed for override on instance ${input.instanceId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      { actorUserId: input.actorUserId, instanceId: input.instanceId, error }
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Override validation
 // ---------------------------------------------------------------------------
 
@@ -712,6 +773,7 @@ async function calculateWithinTransaction(
       instanceId: input.instanceId,
       previousStatus,
       newStatus: patch.calculationStatus,
+      amount: patch.teacherPaidAmount,
       payrollNote: patch.payrollNote,
     });
   }
@@ -724,7 +786,7 @@ async function applyOverrideWithinTransaction(
   input: PayrollOverrideInput,
   idempotencyKey: string,
   tErrors: ErrorsLabels
-): Promise<PayrollOverrideResult> {
+): Promise<OverrideTransactionOutcome> {
   const instance = await lockInstanceForPayroll(tx, input.instanceId, tErrors, { advisoryLock: true });
   const previousStatus = instance.calculationStatus;
 
@@ -742,7 +804,7 @@ async function applyOverrideWithinTransaction(
     tx
   );
   if (existingEvent) {
-    return mapToOverrideResult(instance, existingEvent.id);
+    return { result: mapToOverrideResult(instance, existingEvent.id), auditContext: null };
   }
 
   const sanitizedNote = input.note ? sanitizePlainText(input.note) : null;
@@ -775,7 +837,16 @@ async function applyOverrideWithinTransaction(
     amount: patch.teacherPaidAmount,
   });
 
-  return mapToOverrideResult(updated, auditEventId);
+  return {
+    result: mapToOverrideResult(updated, auditEventId),
+    auditContext: {
+      previousStatus,
+      newStatus: patch.calculationStatus,
+      amount: patch.teacherPaidAmount ?? null,
+      partialPercentage: patch.isPartialPercentage ?? null,
+      payrollEventId: auditEventId,
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -819,7 +890,9 @@ export namespace PayrollCalculationService {
    * Calculated / Not Calculated / Partially) and appends a PAYROLL_OVERRIDE
    * audit event. PAID rows reject; WAITING_PAID rows reject unless `force` is
    * set. The identical override re-submitted within the idempotency window
-   * returns the first-applied result without a duplicate event.
+   * returns the first-applied result without a duplicate event. After the
+   * transaction commits, a fresh override is mirrored into the admin audit
+   * log (best-effort — see emitOverrideAuditLog).
    */
   export async function applyOverride(
     input: PayrollOverrideInput,
@@ -828,7 +901,13 @@ export namespace PayrollCalculationService {
     await requirePermission(input.actorUserId, AppPermission.ACCOUNTING_PAYROLL_MANAGE, tErrors);
     validateOverrideInput(input, tErrors);
     const idempotencyKey = deriveOverrideIdempotencyKey(input);
-    return db.transaction(tx => applyOverrideWithinTransaction(tx, input, idempotencyKey, tErrors));
+    const { result, auditContext } = await db.transaction(tx =>
+      applyOverrideWithinTransaction(tx, input, idempotencyKey, tErrors)
+    );
+    if (auditContext) {
+      await emitOverrideAuditLog(input, auditContext);
+    }
+    return result;
   }
 
   /**

@@ -507,6 +507,18 @@ describe("PayrollCalculationService.calculateForInstance", () => {
       expect(idempotencyLookups[0]?.windowSeconds).toBe(IDEMPOTENCY_WINDOW_SECONDS);
       expect(requirePermissionMock).toHaveBeenCalledWith(ACTOR_ID, AppPermission.ACCOUNTING_PAYROLL_MANAGE, tErrors);
       expect(recurringFindByIdMock).not.toHaveBeenCalled();
+
+      // Structured calculation log: the five auditability fields.
+      expect(loggerInfoSpy).toHaveBeenCalledWith(
+        "Payroll calculation snapshot written",
+        expect.objectContaining({
+          actorUserId: ACTOR_ID,
+          instanceId: INSTANCE_ID,
+          previousStatus: CalculationStatus.NOT_CALCULATED,
+          newStatus: CalculationStatus.CALCULATED,
+          amount: "120.00",
+        })
+      );
     });
 
     test("pays zero for an on-demand no-credits-absent session the teacher never joined", async () => {
@@ -883,7 +895,16 @@ describe("PayrollCalculationService.calculateForInstance", () => {
           note: RATE_FAILURE_NOTE,
         });
         expectTransitionEvent(CalculationStatus.NOT_CALCULATED, null);
-        expect(loggerWarnSpy).toHaveBeenCalled();
+        expect(loggerWarnSpy).toHaveBeenCalledWith(
+          "Payroll calculation degraded to NOT_CALCULATED",
+          expect.objectContaining({
+            actorUserId: ACTOR_ID,
+            instanceId: INSTANCE_ID,
+            previousStatus: CalculationStatus.NOT_CALCULATED,
+            newStatus: CalculationStatus.NOT_CALCULATED,
+            amount: null,
+          })
+        );
       });
     }
 

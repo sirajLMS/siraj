@@ -364,7 +364,15 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
 
   return (
     <SectionPanel title={t.adjustCredits}>
-      <Box sx={{ px: { xs: 2, md: 3 }, py: 3 }}>
+      <Box
+        sx={{
+          px: { xs: 2, md: 3 },
+          pt: 3,
+          // Extra bottom room on phones so the form clears the fixed bottom
+          // navigation instead of clipping its last fields behind it.
+          pb: { xs: 6, md: 3 },
+        }}
+      >
         <Stack sx={{ gap: 3 }}>
           <StudentAutocomplete
             value={displayedStudent}
@@ -376,18 +384,67 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
             fullWidth
           />
           {preselectedSummary !== null ? (
-            <Stack direction="row" sx={{ alignItems: "center", gap: 1.5, mt: -1.5 }}>
+            // The picker input cannot echo a programmatic value, so the
+            // resolved student is surfaced as a card: visually primary, while
+            // the search field above stays available to change the student.
+            <Box
+              sx={theme => ({
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                px: 2,
+                py: 1.5,
+                mt: -1.5,
+                borderWidth: "1px",
+                borderStyle: "solid",
+                borderColor: theme.palette.outlineVariant,
+                borderRadius: 2,
+                backgroundColor: theme.palette.surface,
+              })}
+            >
               <BaseAvatar
                 label={preselectedSummary.name ?? ""}
                 src={preselectedSummary.avatarUrl ?? undefined}
-                size={28}
+                size={40}
               />
-              <Typography sx={{ fontWeight: 600, fontSize: 14 }}>{preselectedSummary.name}</Typography>
-              <Chip
-                size="small"
-                label={`${preselectedSummary.classesRemaining ?? "—"} / ${preselectedSummary.classesTotal ?? "—"}`}
-              />
-            </Stack>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: 14,
+                    // Long names must yield before the balance caption, not
+                    // collide with it: the nowrap ellipsis trades full text
+                    // for a guaranteed gap at narrow widths.
+                    minWidth: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {preselectedSummary.name}
+                </Typography>
+                {preselectedSummary.teacherName ? (
+                  <Typography sx={theme => ({ fontSize: 12, color: theme.palette.text.secondary })}>
+                    {preselectedSummary.teacherName}
+                  </Typography>
+                ) : null}
+              </Box>
+              <Stack direction="row" sx={{ alignItems: "center", gap: 1, flexShrink: 0 }}>
+                <Typography
+                  sx={theme => ({
+                    typography: "labelUppercase",
+                    fontSize: 10,
+                    color: theme.palette.text.secondary,
+                  })}
+                >
+                  {t.form.balance}
+                </Typography>
+                <Chip
+                  size="small"
+                  label={`${preselectedSummary.classesRemaining ?? "—"} / ${preselectedSummary.classesTotal ?? "—"}`}
+                />
+              </Stack>
+            </Box>
           ) : null}
           <AdjustmentTypeRadioGroup sectionTitle={t.adjustmentType.title} />
           {isCarryover ? <CarryoverBanner errors={carryoverErrors} /> : null}
@@ -400,21 +457,43 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
             helperText={fieldErrors.hours}
             disabled={submitting}
             required
-            fullWidth
             aria-invalid={fieldErrors.hours !== undefined}
+            // Numeric input needs no full-width stretch; keep it compact with
+            // the same outlined floating-label convention as the other fields.
+            sx={{ width: "100%", maxWidth: 240 }}
             slotProps={{ htmlInput: { min: 1, step: 1 } }}
           />
-          <RichTextEditor
-            value={notes}
-            onChange={handleNotesChange}
-            label={t.reason.label}
-            error={fieldErrors.notes !== undefined}
-            helperText={fieldErrors.notes}
-            disabled={submitting}
-            required
-          />
+          <Box
+            sx={theme => ({
+              // The shared editor fixes a taller body than this short-form
+              // reason warrants (~3 rows here); a wrapper-level override keeps
+              // the shared component untouched.
+              "& .ProseMirror.ProseMirror": { minHeight: theme.spacing(9) },
+            })}
+          >
+            <RichTextEditor
+              value={notes}
+              onChange={handleNotesChange}
+              label={t.reason.label}
+              error={fieldErrors.notes !== undefined}
+              helperText={fieldErrors.notes}
+              disabled={submitting}
+              required
+            />
+          </Box>
           <Stack direction="row" sx={{ justifyContent: "flex-end", gap: 2 }}>
-            <FilterButton onClick={handleCancel} disabled={submitting}>
+            <FilterButton
+              onClick={handleCancel}
+              disabled={submitting}
+              sx={theme => ({
+                borderColor: theme.palette.outline,
+                color: theme.palette.text.secondary,
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                  borderColor: theme.palette.outline,
+                },
+              })}
+            >
               {common.cancel}
             </FilterButton>
             <PrimaryPageAction onClick={() => void handleSubmit()} loading={submitting}>

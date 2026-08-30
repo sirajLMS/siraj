@@ -346,16 +346,16 @@
 
 ## Phase 6 — Backfill script + audit observability
 
-### 6.1 Backfill script (out-of-band)
+### 6.1 Backfill script (out-of-band) ✅ DONE
 - 🆕 `scripts/payroll-backfill.ts` — `bun run` script that iterates over `class_instances WHERE execution_state IN (...) AND calculation_status = 'Not Calculated'` and calls `PayrollCalculationService.calculateForInstance({ forceRecalc: true, ... })`. Supports `--dryRun` flag that prints the proposed patches without writing.
 - 🧪 `scripts/payroll-backfill.test.ts` — idempotency (running twice produces zero new updates the second time); `--dryRun` produces no writes.
 - 🔁 `bun run scripts/health/sub-loop.ts scripts/payroll-backfill.ts --lifecycle codescene`
 
-### 6.2 Structured logging
+### 6.2 Structured logging ✅ DONE
 - ✏️ `backend/services/teachers/payroll-calculation.service.ts` — confirm structured `logger.info` on every successful calculation + override with `actorUserId`, `instanceId`, `previousStatus`, `newStatus`, `amount` (NFR-11).
 - 🔁 `bun run scripts/health/sub-loop.ts backend/services/teachers/payroll-calculation.service.ts --lifecycle codescene`
 
-### 6.3 Audit-log integration
+### 6.3 Audit-log integration ✅ DONE
 - ✏️ `backend/services/teachers/payroll-calculation.service.ts` — emit an `audit.log` event for every override (reuse existing `AuditService.log` pattern, if present in the project).
 - 🔁 `bun run scripts/health/sub-loop.ts <audit-call-site> --lifecycle codescene`
 

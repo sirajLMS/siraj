@@ -251,6 +251,33 @@ describe("PayrollReportsContainer (component)", () => {
     expect(await screen.findByText(payrollLabels.empty)).toBeInTheDocument();
   });
 
+  test("labels every filter control with its localized accessible name", async () => {
+    renderContainer({ mocks: [reportMock([PAYROLL_ROW], null)] });
+
+    expect(await screen.findByText(PAYROLL_ROW.teacherName ?? "")).toBeInTheDocument();
+    // Each filter input exposes its localized label to assistive tech: the
+    // free-text search via aria-label, the person autocompletes and the status
+    // multi-select through their form labels, the date bounds through their
+    // from/to labels.
+    expect(screen.getByLabelText(payrollLabels.filters.search)).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: payrollLabels.filters.teacher })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: payrollLabels.filters.student })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: payrollLabels.filters.status })).toBeInTheDocument();
+    // The collapsed date-range trigger carries the range label; opening it
+    // surfaces the from/to bounds, each with its own label.
+    fireEvent.click(screen.getByRole("textbox", { name: payrollLabels.filters.dateRange }));
+    await waitFor(() => {
+      expect(screen.getByLabelText(payrollLabels.filters.dateFrom)).toBeInTheDocument();
+      expect(screen.getByLabelText(payrollLabels.filters.dateTo)).toBeInTheDocument();
+    });
+
+    // Activating a filter surfaces the clear affordance, also named.
+    fireEvent.change(screen.getByLabelText(payrollLabels.filters.search), { target: { value: "Karim" } });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: payrollLabels.filters.clear })).toBeInTheDocument();
+    });
+  });
+
   test("downloads the filtered CSV from the URL the view model builds", async () => {
     let queryRequests = 0;
     const countRequest = () => {

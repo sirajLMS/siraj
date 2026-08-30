@@ -11,7 +11,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import type { SxProps, Theme } from "@mui/material/styles";
+import { alpha, type SxProps, type Theme } from "@mui/material/styles";
 import { type ChangeEvent, type ReactNode, useId } from "react";
 import { useCreditAdjustFormStore } from "@/frontend/common/stores/creditAdjustFormStore";
 import { CreditAdjustmentType } from "@/shared/constants/billing";
@@ -34,27 +34,23 @@ const OPTION_CONFIG: readonly AdjustmentTypeOptionConfig[] = [
   { value: CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER, icon: <SwapHorizOutlined />, accent: "warning" },
 ];
 
-/** Resolved Material 3 tone triple for a semantic family. */
+/** Resolved family tones for a semantic accent (theme palette main + M3 onContainer text). */
 interface AccentTones {
   readonly main: string;
-  readonly container: string;
   readonly onContainer: string;
 }
 
 const ACCENT_TONES: Record<AdjustmentAccent, (theme: Theme) => AccentTones> = {
   success: theme => ({
     main: theme.palette.success.main,
-    container: theme.palette.successContainer,
     onContainer: theme.palette.onSuccessContainer,
   }),
   error: theme => ({
     main: theme.palette.error.main,
-    container: theme.palette.errorContainer,
     onContainer: theme.palette.onErrorContainer,
   }),
   warning: theme => ({
     main: theme.palette.warning.main,
-    container: theme.palette.warningContainer,
     onContainer: theme.palette.onWarningContainer,
   }),
 };
@@ -74,20 +70,54 @@ function buildCardSx(theme: Theme, tones: AccentTones, selected: boolean): SxPro
     m: 0,
     flex: 1,
     minWidth: 0,
-    alignItems: "flex-start",
+    // Mobile rows are horizontal and compact; from `sm` up the icon stacks
+    // above the label and the cards sit side by side. The stretch alignment
+    // lets the label slot span the full card height so the icon+label group
+    // can center vertically when a wrapped sibling makes the row taller.
+    alignItems: { xs: "center", sm: "stretch" },
     gap: 1,
     px: 2,
-    py: 2,
+    py: { xs: 1.5, sm: 2 },
     cursor: "pointer",
     borderWidth: "1px",
     borderStyle: "solid",
     borderRadius: 2,
-    borderColor: selected ? tones.main : theme.palette.outlineVariant,
-    backgroundColor: selected ? tones.container : theme.palette.surface,
+    // One selection language for every option: a subtle translucent family
+    // tint + single accent border (the container tokens read as saturated
+    // fills in dark mode). Unselected cards stay flat on `surface` with the
+    // full-strength divider border so they read as tappable boxes.
+    borderColor: selected ? tones.main : theme.palette.divider,
+    backgroundColor: selected ? alpha(tones.main, 0.1) : theme.palette.surface,
     "&:hover": { borderColor: tones.main },
-    "&:focus-within": { borderColor: tones.main, outline: "2px solid", outlineColor: tones.main, outlineOffset: "1px" },
+    // Ring only for keyboard focus (`.Mui-focusVisible`); a mouse click
+    // focuses the hidden radio too, and a focus-within rule would leave a
+    // second border ring on the last-clicked card indefinitely.
+    "&:has(.Mui-focusVisible)": {
+      outline: "2px solid",
+      outlineColor: tones.main,
+      outlineOffset: "1px",
+    },
     // The label slot stretches so the card content fills the clickable area.
     "& .MuiFormControlLabel-label": { flex: 1 },
+  };
+}
+
+/** Circular icon badge, identical geometry for every option in every state. */
+function buildIconBadgeSx(tones: AccentTones): SxProps<Theme> {
+  return {
+    display: "grid",
+    placeItems: "center",
+    width: 40,
+    height: 40,
+    borderRadius: "50%",
+    flexShrink: 0,
+    // Translucent family tint stays distinct from the card surface in both
+    // selected and unselected states (a container-toned badge would blend
+    // into the card when dark-mode container tokens read as strong fills).
+    backgroundColor: alpha(tones.main, 0.16),
+    // The icon keeps the family accent at full opacity in both selected and
+    // unselected cards — color is role decoration here, never a state hint.
+    color: tones.main,
   };
 }
 
@@ -113,8 +143,20 @@ function AdjustmentTypeOptionCard({ config, label, selected }: AdjustmentTypeOpt
       value={config.value}
       control={<Radio sx={hiddenRadioSx} />}
       label={
-        <Stack sx={{ gap: 0.5 }}>
-          <Stack aria-hidden sx={{ color: tones.main }}>
+        <Stack
+          sx={{
+            // Compact row on phones (badge left, label right); from `sm` the
+            // desktop layout keeps the badge stacked above the label. The
+            // group centers vertically so a wrapped sibling label doesn't
+            // leave dead space at the bottom of the card.
+            flexDirection: { xs: "row", sm: "column" },
+            alignItems: { xs: "center", sm: "flex-start" },
+            justifyContent: { sm: "center" },
+            height: { sm: "100%" },
+            gap: { xs: 1.5, sm: 1 },
+          }}
+        >
+          <Stack aria-hidden sx={buildIconBadgeSx(tones)}>
             {config.icon}
           </Stack>
           <Typography
@@ -146,6 +188,16 @@ export interface AdjustmentTypeRadioGroupProps {
  * stale carryover selections must not leak into a plain Add or Subtract. The
  * store keeps the two actions separate on purpose; this control owns the pairing.
  */
+/**
+ * Neutral eyebrow color for the section heading. The per-preset
+ * `onSurfaceVariant` and `text.secondary` tokens are tinted toward the preset
+ * accent family (ocean renders them cyan), so the MUI `grey` ramp — the only
+ * palette family presets never override — supplies the desaturated tone.
+ */
+function neutralSectionLabelColor(theme: Theme): string {
+  return theme.palette.mode === "dark" ? theme.palette.grey[400] : theme.palette.grey[700];
+}
+
 export function AdjustmentTypeRadioGroup({ sectionTitle }: AdjustmentTypeRadioGroupProps) {
   const labels = useAppTranslation(DashboardBillingCreditAdjustment);
   const labelId = useId();
@@ -172,7 +224,14 @@ export function AdjustmentTypeRadioGroup({ sectionTitle }: AdjustmentTypeRadioGr
     <FormControl sx={{ width: "100%" }}>
       <FormLabel
         id={labelId}
-        sx={theme => ({ ...theme.typography.labelUppercase, color: theme.palette.onSurfaceVariant, mb: 1 })}
+        sx={theme => ({
+          ...theme.typography.labelUppercase,
+          color: neutralSectionLabelColor(theme),
+          mb: 1,
+          // MUI tints the group label with the primary color while the control
+          // is focused; section headings stay neutral in every state.
+          "&.Mui-focused": { color: neutralSectionLabelColor(theme) },
+        })}
       >
         {sectionTitle}
       </FormLabel>

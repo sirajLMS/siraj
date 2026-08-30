@@ -26,6 +26,8 @@ export interface RichTextEditorProps {
   readonly required?: boolean;
   /** Base id used to derive the label/editor aria association. */
   readonly id?: string;
+  /** Minimum visible text rows in the content area; defaults to 3. */
+  readonly minRows?: number;
 }
 
 interface ToolbarAction {
@@ -87,18 +89,22 @@ function buildToolbarActions(t: RichTextLabels): readonly ToolbarAction[] {
   ];
 }
 
-function buildEditorSurfaceSx(error: boolean, disabled: boolean): SxProps<Theme> {
+function buildEditorSurfaceSx(error: boolean, disabled: boolean, minRows: number): SxProps<Theme> {
   return (theme: Theme) => ({
-    border: `1px solid ${error ? theme.palette.error.main : theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
+    position: "relative",
+    // Numeric sx borderRadius is multiplied by theme.shape.borderRadius, so 1
+    // resolves to the same radius MUI OutlinedInput uses in styleOverrides.
+    borderRadius: 1,
     backgroundColor: disabled ? theme.palette.action.disabledBackground : "transparent",
     cursor: disabled ? "default" : "text",
-    "&:focus-within": {
+    "&:focus-within fieldset": {
       borderColor: error ? theme.palette.error.main : theme.palette.primary.main,
     },
     "& .ProseMirror": {
       outline: "none",
-      minHeight: theme.spacing(12),
+      // bodyMd rows are 20px (14px × 1.43); the 2×1.5 vertical padding adds 3
+      // spacing units, so the default shows ~3 text rows and grows past them.
+      minHeight: theme.spacing(minRows * 2.5 + 3),
       padding: theme.spacing(1.5, 2),
       whiteSpace: "pre-wrap",
       ...theme.typography.bodyMd,
@@ -109,12 +115,64 @@ function buildEditorSurfaceSx(error: boolean, disabled: boolean): SxProps<Theme>
   });
 }
 
+/**
+ * Border overlay that encloses the toolbar and the content as a single
+ * control (notched-outline technique): the fieldset draws the one rounded
+ * border, and its hidden legend reserves the gap the shrunken floating label
+ * occupies, so nothing is painted over the border to fake a notch.
+ */
+function buildOutlineSx(error: boolean): SxProps<Theme> {
+  return (theme: Theme) => ({
+    textAlign: "start",
+    position: "absolute",
+    inset: "-5px 0 0 0",
+    margin: 0,
+    padding: "0 8px",
+    pointerEvents: "none",
+    borderRadius: "inherit",
+    borderStyle: "solid",
+    borderWidth: "1px",
+    borderColor: error ? theme.palette.error.main : theme.palette.divider,
+    overflow: "hidden",
+    minWidth: "0%",
+    // The legend's 0.75em must resolve against the same base size the scaled
+    // floating label uses so the reserved notch matches the label width.
+    ...theme.typography.body1,
+  });
+}
+
+const outlineLegendSx: SxProps<Theme> = {
+  float: "unset",
+  width: "auto",
+  overflow: "hidden",
+  display: "block",
+  padding: 0,
+  height: 11,
+  fontSize: "0.75em",
+  visibility: "hidden",
+  maxWidth: "100%",
+  whiteSpace: "nowrap",
+  "& > span": {
+    paddingInline: "5px",
+    display: "inline-block",
+    opacity: 0,
+    visibility: "visible",
+  },
+};
+
 const toolbarRowSx: SxProps<Theme> = (theme: Theme) => ({
   display: "flex",
   flexWrap: "wrap",
   gap: 0.5,
-  padding: theme.spacing(0.5, 1),
-  borderBottom: `1px solid ${theme.palette.divider}`,
+  // 1.25 here + the 0.75 button padding aligns the first icon with the 2
+  // spacing units of content padding below.
+  padding: theme.spacing(0.5, 1.25),
+  borderBlockEnd: `1px solid ${theme.palette.divider}`,
+  // Round the band's top corners to the container radius so its background
+  // stays inside the notched-outline arc instead of squaring against it.
+  borderStartStartRadius: `${theme.shape.borderRadius}px`,
+  borderStartEndRadius: `${theme.shape.borderRadius}px`,
+  backgroundColor: theme.palette.surfaceContainerLow,
 });
 
 function ToolbarButton({
@@ -136,7 +194,13 @@ function ToolbarButton({
       onMouseDown={event => event.preventDefault()}
       onClick={() => action.run(editor)}
       sx={(theme: Theme) => ({
+        // 6px of padding around the 20px icon gives a 32px touch target.
+        padding: theme.spacing(0.75),
         color: active ? theme.palette.primary.main : theme.palette.text.secondary,
+        backgroundColor: active ? theme.palette.action.selected : "transparent",
+        "&:hover": {
+          backgroundColor: active ? theme.palette.action.selected : theme.palette.action.hover,
+        },
       })}
     >
       {action.icon}
@@ -159,6 +223,7 @@ export function RichTextEditor({
   disabled = false,
   required = false,
   id,
+  minRows = 3,
 }: RichTextEditorProps): React.ReactNode {
   const t = useAppTranslation(Translation.Ui.RichText);
   const generatedId = useId();
@@ -241,7 +306,14 @@ export function RichTextEditor({
           {label}
         </InputLabel>
       ) : null}
-      <Box sx={buildEditorSurfaceSx(error, disabled)}>
+      <Box sx={buildEditorSurfaceSx(error, disabled, minRows)}>
+        <Box component="fieldset" aria-hidden sx={buildOutlineSx(error)}>
+          {label ? (
+            <Box component="legend" sx={outlineLegendSx}>
+              <span>{required ? `${label}\u2009*` : label}</span>
+            </Box>
+          ) : null}
+        </Box>
         <Box sx={toolbarRowSx} role="toolbar" aria-label={t.editorLabel}>
           {editor
             ? buildToolbarActions(t).map(action => (

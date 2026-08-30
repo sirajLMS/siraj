@@ -18,6 +18,7 @@ export const dashboardBillingCreditAdjustmentAr: CreditAdjustmentLabels = {
   },
   reason: { label: "السبب" },
   hours: { label: "الساعات" },
+  form: { balance: "الرصيد" },
   resultsCappedHint: limit => `يتم عرض أول ${limit} طالباً. حدد البحث بشكل أدق لتضييق القائمة.`,
   validation: {
     fromAfterTo: "لا يمكن أن يكون تاريخ البداية بعد تاريخ النهاية",

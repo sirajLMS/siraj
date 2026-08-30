@@ -487,6 +487,7 @@ describe("credit adjust form (component)", () => {
     // The summary row carries the resolved name + balance (the picker itself
     // only echoes typed search text when a value is set programmatically).
     expect(await screen.findByText(STUDENT_NAME)).toBeVisible();
+    expect(screen.getByText(credits.form.balance)).toBeVisible();
     expect(screen.getByText("14 / 20")).toBeVisible();
   });
 

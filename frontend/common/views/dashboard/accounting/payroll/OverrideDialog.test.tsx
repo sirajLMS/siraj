@@ -37,6 +37,7 @@ const { applyPayrollOverrideMutationDocument, payrollReportQueryDocument } = awa
 );
 const { useApolloClient } = await import("@apollo/client/react");
 const { useEffect } = await import("react");
+const { useTheme } = await import("@mui/material/styles");
 const { run: runAxe } = await import("axe-core");
 const { readTranslation } = await import("@/shared/locale/client/translation-cache-store");
 const { DashboardBillingPayroll } = await import("@/shared/locale/namespaces");
@@ -45,6 +46,7 @@ const { renderWithWrapper } = await import("@/test/ui/components/TestWrapper");
 const { OverrideDialog } = await import("@/frontend/common/views/dashboard/accounting/payroll/OverrideDialog");
 
 const locale: AppLocale = "en";
+const rtlLocale: AppLocale = "ar";
 
 /** Resolves a lazy namespace warm-up: readTranslation throws its pending
  * promise on a cache miss, which must be awaited before the read resolves. */
@@ -57,13 +59,18 @@ async function warmNamespace(warm: () => void): Promise<void> {
 }
 
 // Warm the lazy-loaded namespaces so component renders resolve translations
-// synchronously instead of suspending on an unresolved promise.
+// synchronously instead of suspending on an unresolved promise. Both locales
+// are warmed: the right-to-left suite renders the same dialog in Arabic.
 await Promise.all([
   warmNamespace(() => readTranslation(DashboardBillingPayroll, locale)),
   warmNamespace(() => readTranslation(Translation.Common, locale)),
+  warmNamespace(() => readTranslation(DashboardBillingPayroll, rtlLocale)),
+  warmNamespace(() => readTranslation(Translation.Common, rtlLocale)),
 ]);
 const payrollLabels = readTranslation(DashboardBillingPayroll, locale);
 const commonLabels = readTranslation(Translation.Common, locale);
+const payrollLabelsAr = readTranslation(DashboardBillingPayroll, rtlLocale);
+const commonLabelsAr = readTranslation(Translation.Common, rtlLocale);
 
 // The dialog mints one idempotency token per open session; pinning the token
 // keeps the mutation variables deterministic so the Apollo mocks match exactly.
@@ -200,9 +207,16 @@ function ApolloClientCapture() {
   return null;
 }
 
+/** Exposes the active MUI theme direction so right-to-left renders can assert it. */
+function ThemeDirectionProbe() {
+  const theme = useTheme();
+  return <span data-testid="theme-direction">{theme.direction}</span>;
+}
+
 interface DialogRenderOptions {
   readonly mocks?: MockLink.MockedResponse[];
   readonly row?: PayrollReportRow;
+  readonly locale?: AppLocale;
 }
 
 function renderDialog(options: DialogRenderOptions = {}) {
@@ -211,7 +225,7 @@ function renderDialog(options: DialogRenderOptions = {}) {
       <ApolloClientCapture />
       <OverrideDialog open row={options.row ?? PAYROLL_ROW} onClose={onClose} />
     </>,
-    { locale, mocks: options.mocks ?? [] }
+    { locale: options.locale ?? locale, mocks: options.mocks ?? [] }
   );
 }
 
@@ -523,6 +537,62 @@ describe("OverrideDialog (component)", () => {
 
     selectTarget(payrollLabels.override.target.Partially);
     expect(await screen.findByRole("spinbutton")).toBeInTheDocument();
+    await expectNoAxeViolations(container);
+  });
+
+  test("moves focus into the dialog on open and names the target radiogroup", async () => {
+    renderDialog();
+
+    const dialog = await screen.findByRole("dialog");
+    // The dialog modal traps focus: the initial focus lands inside the
+    // surface, so keyboard users never start behind the overlay.
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    expect(screen.getByRole("radiogroup", { name: payrollLabels.column.status })).toBeInTheDocument();
+  });
+
+  test("renders right-to-left with Arabic labels across the override surface", async () => {
+    renderDialog({ locale: rtlLocale });
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(payrollLabelsAr.override.title)).toBeInTheDocument();
+    for (const label of [
+      payrollLabelsAr.override.target.Refund,
+      payrollLabelsAr.override.target.Calculated,
+      payrollLabelsAr.override.target.NotCalculated,
+      payrollLabelsAr.override.target.Partially,
+    ]) {
+      expect(screen.getByRole("radio", { name: label })).toBeInTheDocument();
+    }
+    expect(screen.getByRole("button", { name: commonLabelsAr.cancel })).toBeInTheDocument();
+
+    // The conditional percentage field surfaces with its Arabic label.
+    fireEvent.click(screen.getByRole("radio", { name: payrollLabelsAr.override.target.Partially }));
+    expect(await screen.findByRole("spinbutton", { name: payrollLabelsAr.override.percentage })).toBeInTheDocument();
+
+    // Escape still requests the close under the right-to-left direction.
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test("applies the right-to-left theme direction for the Arabic locale", async () => {
+    renderWithWrapper(
+      <>
+        <ThemeDirectionProbe />
+        <OverrideDialog open row={PAYROLL_ROW} onClose={onClose} />
+      </>,
+      { locale: rtlLocale, mocks: [] }
+    );
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByTestId("theme-direction")).toHaveTextContent("rtl");
+  });
+
+  test("passes axe accessibility checks under the Arabic right-to-left locale", async () => {
+    const { container } = renderDialog({ locale: rtlLocale });
+
+    await screen.findByRole("radiogroup");
     await expectNoAxeViolations(container);
   });
 });
