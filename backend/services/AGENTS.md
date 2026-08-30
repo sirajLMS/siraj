@@ -108,3 +108,8 @@ Completed extractions:
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
 
+
+## Transactions & Concurrency (CRITICAL)
+
+- When a service method accepts a caller transaction (`tx`), it MUST skip acquiring its own advisory locks (`advisoryLock: tx == null` pattern) — a callee acquiring locks inside a caller that already holds locks deadlocks (ABBA). See `docs/services/teacher-payroll.md`.
+- Idempotency keys derived from user free text MUST hash the RAW input while persisting the SANITIZED value (rules: `docs/IDEMPOTENCY.md`).

@@ -384,7 +384,12 @@ export namespace ClassSessionService {
   ): Promise<ClassStatusEventReturnType[]> {
     const instance = await getOrThrow(classInstanceId, tErrors);
     await assertClassInstanceDetailViewAuth(userId, instance, tErrors);
-    return SchedulingRepository.getClassStatusEvents(classInstanceId);
+    const events = await SchedulingRepository.getClassStatusEvents(classInstanceId);
+    // PAYROLL_* audit payloads carry amounts in their fromState/toState JSON, so
+    // they are payroll-view data: filtered for actors without
+    // ACCOUNTING_PAYROLL_VIEW, mirroring the getClassInstanceDetail strip.
+    const canSeePayroll = await PermissionsService.hasPermission(userId, AppPermission.ACCOUNTING_PAYROLL_VIEW);
+    return canSeePayroll ? events : events.filter(event => !event.eventType.startsWith("PAYROLL_"));
   }
 
   async function handleOndemandSessionStartCreditDeduction(

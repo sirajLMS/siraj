@@ -11,6 +11,9 @@ import type {
   DBTransaction,
   PayrollCalculationInput,
   PayrollCalculationResult,
+  PayrollReportFilters,
+  PayrollReportPage,
+  PayrollReportRow,
 } from "@/backend/types";
 import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -113,6 +116,7 @@ const eventStore: ClassStatusEventSelectType[] = [];
 const idempotencyLookups: { instanceId: string; hash: string; windowSeconds: number; tx: unknown }[] = [];
 const acquiredLockKeys: { tx: unknown; lockKey: string }[] = [];
 const instanceReads: { id: string; tx: unknown; forUpdate: boolean }[] = [];
+const reportReads: { filters: PayrollReportFilters; limit: number; offset: number }[] = [];
 
 let eventCounter = 0;
 let instanceRow: ClassInstanceSelectType | null = buildInstanceRow();
@@ -123,6 +127,8 @@ let subjectRow: { id: string } | null = { id: SUBJECT_ID };
 let subjectLookupFails = false;
 let permissionError: Error | null = null;
 let transactionChain: Promise<unknown> = Promise.resolve();
+let reportRows: PayrollReportRow[] = [];
+let reportTotalCount = 0;
 
 function readIdempotencyKey(toState: unknown): string | null {
   if (toState != null && typeof toState === "object" && "idempotencyKey" in toState) {
@@ -161,6 +167,16 @@ const updatePayrollCalculationMock = mock(async (tx: unknown, id: string, patch:
   payrollPatches.push({ tx, id, patch });
   return updated;
 });
+
+const findPayrollReportRowsMock = mock(
+  async (filters: PayrollReportFilters, pagination: { limit: number; offset: number }) => {
+    reportReads.push({ filters, limit: pagination.limit, offset: pagination.offset });
+    return {
+      rows: reportRows.slice(pagination.offset, pagination.offset + pagination.limit),
+      totalCount: reportTotalCount,
+    };
+  }
+);
 
 const findRecentByInstanceAndHashMock = mock(
   async (instanceId: string, hash: string, windowSeconds: number, tx?: unknown) => {
@@ -236,6 +252,7 @@ await mock.module("@/backend/db/repo/scheduling", () => ({
   SchedulingRepository: {
     getById: getByIdMock,
     updatePayrollCalculation: updatePayrollCalculationMock,
+    findPayrollReportRows: findPayrollReportRowsMock,
   },
   RecurringScheduleRepository: {
     findById: recurringFindByIdMock,
@@ -444,6 +461,7 @@ function resetMocks(): void {
   idempotencyLookups.length = 0;
   acquiredLockKeys.length = 0;
   instanceReads.length = 0;
+  reportReads.length = 0;
 
   eventCounter = 0;
   instanceRow = buildInstanceRow();
@@ -454,9 +472,12 @@ function resetMocks(): void {
   subjectLookupFails = false;
   permissionError = null;
   transactionChain = Promise.resolve();
+  reportRows = [];
+  reportTotalCount = 0;
 
   getByIdMock.mockClear();
   updatePayrollCalculationMock.mockClear();
+  findPayrollReportRowsMock.mockClear();
   findRecentByInstanceAndHashMock.mockClear();
   createManyEventsMock.mockClear();
   recurringFindByIdMock.mockClear();
@@ -474,6 +495,40 @@ function resetMocks(): void {
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
+
+function buildReportRow(overrides: Partial<PayrollReportRow> = {}): PayrollReportRow {
+  return {
+    instanceId: INSTANCE_ID,
+    scheduledStartAt: "2026-08-20T10:00:00.000Z",
+    scheduledEndAt: "2026-08-20T11:00:00.000Z",
+    scheduledDurationMinutes: 60,
+    actualStartAt: "2026-08-20T10:00:00.000Z",
+    actualEndAt: "2026-08-20T11:00:00.000Z",
+    calculatedDuration: 60,
+    teacherPaidAmount: "120.00",
+    teacherPaidCurrency: CurrencyCode.SAR,
+    calculationStatus: CalculationStatus.CALCULATED,
+    isPartialPercentage: null,
+    payrollNote: null,
+    teacherId: TEACHER_ID,
+    teacherName: "Payroll Report Teacher",
+    studentId: STUDENT_ID,
+    studentName: "Payroll Report Student",
+    subjectId: SUBJECT_ID,
+    subjectName: "Payroll Report Subject",
+    isStudentAbsence: false,
+    isTeacherAbsence: false,
+    ...overrides,
+  };
+}
+
+async function readReport(
+  pagination: { limit: number; offset: number },
+  filters: PayrollReportFilters = {}
+): Promise<PayrollReportPage> {
+  const { PayrollCalculationService } = await importService();
+  return PayrollCalculationService.getReport(ACTOR_ID, filters, pagination, tErrors);
+}
 
 describe("PayrollCalculationService.calculateForInstance", () => {
   beforeEach(() => {
@@ -1027,5 +1082,186 @@ describe("PayrollCalculationService.calculateForInstance", () => {
       expect(insertedEvents).toHaveLength(0);
       expect(requirePermissionMock).toHaveBeenCalledWith(ACTOR_ID, AppPermission.ACCOUNTING_PAYROLL_MANAGE, tErrors);
     });
+  });
+});
+
+describe("PayrollCalculationService.getReport", () => {
+  beforeEach(() => {
+    resetMocks();
+  });
+
+  test("computes exact aggregates from the page itself when the filtered set fits on it", async () => {
+    reportRows = [
+      buildReportRow(),
+      buildReportRow({ teacherPaidAmount: "60.50", calculationStatus: CalculationStatus.PARTIALLY }),
+      buildReportRow({ teacherPaidAmount: "0", calculationStatus: CalculationStatus.REFUND }),
+    ];
+    reportTotalCount = 3;
+
+    const page = await readReport({ limit: 50, offset: 0 });
+
+    expect(reportReads).toHaveLength(1);
+    expect(reportReads[0]?.limit).toBe(50);
+    expect(reportReads[0]?.offset).toBe(0);
+    expect(page.rows).toHaveLength(3);
+    expect(page.totalCount).toBe(3);
+    expect(page.aggregates.totalPaidAmount).toBe("180.50");
+    expect(page.aggregates.totalPaidCurrency).toBe(CurrencyCode.SAR);
+    expect(page.aggregates.rowCountByStatus).toEqual({
+      [CalculationStatus.NOT_CALCULATED]: 0,
+      [CalculationStatus.CALCULATED]: 1,
+      [CalculationStatus.PARTIALLY]: 1,
+      [CalculationStatus.REFUND]: 1,
+      [CalculationStatus.WAITING_PAID]: 0,
+      [CalculationStatus.PAID]: 0,
+    });
+  });
+
+  test("re-scans the filtered set at the export ceiling when the page is a slice", async () => {
+    reportRows = [
+      buildReportRow({ teacherPaidAmount: "10.00" }),
+      buildReportRow({ teacherPaidAmount: "20.00" }),
+      buildReportRow({ teacherPaidAmount: "30.00" }),
+      buildReportRow({ teacherPaidAmount: "40.00" }),
+      buildReportRow({ teacherPaidAmount: "50.00" }),
+    ];
+    reportTotalCount = 5;
+
+    const page = await readReport({ limit: 2, offset: 0 });
+
+    expect(reportReads).toHaveLength(2);
+    expect(reportReads[1]?.limit).toBe(10_000);
+    expect(reportReads[1]?.offset).toBe(0);
+    expect(page.rows).toHaveLength(2);
+    expect(page.totalCount).toBe(5);
+    expect(page.aggregates.totalPaidAmount).toBe("150.00");
+  });
+
+  test("re-scans even a small filtered set when the page starts beyond the first row", async () => {
+    reportRows = [
+      buildReportRow({ teacherPaidAmount: "5.00" }),
+      buildReportRow({ teacherPaidAmount: "6.00" }),
+      buildReportRow({ teacherPaidAmount: "7.00" }),
+    ];
+    reportTotalCount = 3;
+
+    const page = await readReport({ limit: 50, offset: 2 });
+
+    expect(reportReads).toHaveLength(2);
+    expect(page.rows).toHaveLength(1);
+    expect(page.aggregates.totalPaidAmount).toBe("18.00");
+  });
+
+  test("treats a set exactly the page size as fitting, and one row more forces the capped re-scan", async () => {
+    const fitRows = [
+      buildReportRow({ teacherPaidAmount: "1.00" }),
+      buildReportRow({ teacherPaidAmount: "2.00" }),
+      buildReportRow({ teacherPaidAmount: "3.00" }),
+    ];
+    const scenarios: { rows: PayrollReportRow[]; totalCount: number; expectedReads: number }[] = [
+      { rows: fitRows, totalCount: 3, expectedReads: 1 },
+      { rows: [...fitRows, buildReportRow({ teacherPaidAmount: "4.00" })], totalCount: 4, expectedReads: 2 },
+    ];
+
+    await scenarios.reduce(async (previous, scenario) => {
+      await previous;
+      resetMocks();
+      reportRows = [...scenario.rows];
+      reportTotalCount = scenario.totalCount;
+      const page = await readReport({ limit: 3, offset: 0 });
+      expect(reportReads).toHaveLength(scenario.expectedReads);
+      expect(page.rows).toHaveLength(Math.min(scenario.totalCount, 3));
+    }, Promise.resolve());
+  });
+
+  test("skips null and malformed amounts while summing the filtered set", async () => {
+    reportRows = [
+      buildReportRow({ teacherPaidAmount: null, calculationStatus: CalculationStatus.NOT_CALCULATED }),
+      buildReportRow({ teacherPaidAmount: "30.00" }),
+      buildReportRow({ teacherPaidAmount: "not-a-decimal" }),
+    ];
+    reportTotalCount = 3;
+
+    const page = await readReport({ limit: 50, offset: 0 });
+
+    expect(page.aggregates.totalPaidAmount).toBe("30.00");
+    expect(page.aggregates.rowCountByStatus[CalculationStatus.CALCULATED]).toBe(2);
+    expect(page.aggregates.rowCountByStatus[CalculationStatus.NOT_CALCULATED]).toBe(1);
+  });
+
+  test("picks the most frequent currency, keeps the earliest on ties, and defaults when none is set", async () => {
+    const scenarios: { currencies: Array<CurrencyCode | null>; expected: CurrencyCode }[] = [
+      { currencies: [CurrencyCode.USD, CurrencyCode.USD, CurrencyCode.SAR], expected: CurrencyCode.USD },
+      { currencies: [CurrencyCode.SAR, CurrencyCode.USD], expected: CurrencyCode.SAR },
+      { currencies: [null, null], expected: CurrencyCode.SAR },
+    ];
+
+    await scenarios.reduce(async (previous, scenario) => {
+      await previous;
+      resetMocks();
+      reportRows = scenario.currencies.map(currency => buildReportRow({ teacherPaidCurrency: currency }));
+      reportTotalCount = reportRows.length;
+      const page = await readReport({ limit: 50, offset: 0 });
+      expect(page.aggregates.totalPaidCurrency).toBe(scenario.expected);
+    }, Promise.resolve());
+  });
+
+  test("zero-fills every status key and the money sum for an empty filtered set", async () => {
+    reportRows = [];
+    reportTotalCount = 0;
+
+    const page = await readReport({ limit: 50, offset: 0 });
+
+    expect(reportReads).toHaveLength(1);
+    expect(page.rows).toHaveLength(0);
+    expect(page.totalCount).toBe(0);
+    expect(page.aggregates.totalPaidAmount).toBe("0.00");
+    expect(page.aggregates.totalPaidCurrency).toBe(CurrencyCode.SAR);
+    expect(page.aggregates.rowCountByStatus).toEqual({
+      [CalculationStatus.NOT_CALCULATED]: 0,
+      [CalculationStatus.CALCULATED]: 0,
+      [CalculationStatus.PARTIALLY]: 0,
+      [CalculationStatus.REFUND]: 0,
+      [CalculationStatus.WAITING_PAID]: 0,
+      [CalculationStatus.PAID]: 0,
+    });
+  });
+
+  test("forwards the caller filters and pagination to the report repository", async () => {
+    const filters: PayrollReportFilters = {
+      teacherId: TEACHER_ID,
+      calculationStatuses: [CalculationStatus.CALCULATED],
+      search: "Payroll Report",
+    };
+
+    const page = await readReport({ limit: 25, offset: 50 }, filters);
+
+    // The paged read carries the caller pagination; a page starting past the
+    // first row also triggers the capped aggregate re-scan with the filters.
+    expect(reportReads).toHaveLength(2);
+    expect(reportReads[0]?.filters).toEqual(filters);
+    expect(reportReads[0]?.limit).toBe(25);
+    expect(reportReads[0]?.offset).toBe(50);
+    expect(reportReads[1]?.filters).toEqual(filters);
+    expect(page.rows).toHaveLength(0);
+  });
+
+  test("rejects an actor without the payroll view permission before reading anything", async () => {
+    permissionError = new ForbiddenError(tErrors.insufficientPermissions);
+
+    let caught: unknown = null;
+    try {
+      await readReport({ limit: 50, offset: 0 });
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(ForbiddenError);
+    if (caught instanceof ForbiddenError) {
+      expect(caught.code).toBe("FORBIDDEN");
+      expect(caught.message).toBe("insufficient permissions");
+    }
+    expect(reportReads).toHaveLength(0);
+    expect(requirePermissionMock).toHaveBeenCalledWith(ACTOR_ID, AppPermission.ACCOUNTING_PAYROLL_VIEW, tErrors);
   });
 });

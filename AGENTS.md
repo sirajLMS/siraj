@@ -434,6 +434,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `frontend/THEME_PALETTE.md` - Color tokens and access patterns
 - `docs/frontend/emotion-rtl-stylis.md` - Emotion RTL cache rules (never pass stylis `prefixer`; `::placeholder` crash)
 - `docs/IDEMPOTENCY.md` - Idempotency patterns
+- `docs/services/teacher-payroll.md` - Teacher payroll engine: money math, override idempotency, permission-filtered surfaces, migration/backfill rehearsal evidence
 - `docs/drizzle/prepared-statements.md` - Drizzle Prepared Statements 2.0 pattern reference
 - `docs/drizzle/neon-http-client.md` - Neon HTTP Client & Provider-Agnostic Stateless Queries reference
 - `docs/graphql/dataloader-batching.md` - Pothos DataLoader batching pattern reference

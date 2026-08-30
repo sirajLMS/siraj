@@ -42,3 +42,22 @@ Idempotency is enforced at the database level for the following entities:
 1. **Use UUID v4:** Always generate a fresh UUID v4 for each _new_ operation.
 2. **Persistent Retries:** If a request fails due to a network error, retry with the **SAME** idempotency key.
 3. **Storage:** Store the idempotency key locally on the device until the request succeeds, to ensure it can be reused across app restarts if a retry is needed.
+
+## Content-Derived vs Client-Token Keys; Raw-Input Hashing (global invariants)
+
+1. **Hash the RAW user input, persist the SANITIZED value.** When an idempotency
+   key is derived from user-supplied free text (notes, descriptions), compute the
+   hash over the raw input exactly as received, while storing only the sanitized
+   form. Hashing the sanitized text breaks duplicate suppression whenever
+   sanitization alters the payload (entity escaping, truncation), letting the
+   same logical retry land twice.
+2. **Content-derived keys and client-token keys must live under distinct scheme
+   prefixes** (e.g. `"feature-op:"` vs `"feature-op-token:"`). When a caller
+   supplies a request token, key on `(entityId, token)`; when absent/blank, fall
+   back to the deterministic content key — never mix the two namespaces or a
+   token can collide with a content digest.
+3. **Deduplicate at write time, not only at key time.** If the sink is an
+   append-only event table, carry the key on the row (`toState.idempotencyKey`)
+   and collapse duplicates with a bounded window read (e.g. 30s) before insert —
+   content-hash equality alone does not protect against concurrent in-flight
+   duplicates.

@@ -269,6 +269,20 @@ describe("Automatic payroll calculation journey (teacher telemetry → operator 
       expect(eventTypes.filter(type => type === PAYROLL_OVERRIDE_EVENT)).toHaveLength(0);
       expect(eventTypes.filter(type => type === PAYROLL_STATUS_TRANSITION_EVENT)).toHaveLength(1);
     }
+
+    // The same audit-events surface is payroll-blind for the session teacher
+    // and student: PAYROLL_* payloads carry amounts in fromState/toState and
+    // are reserved for ACCOUNTING_PAYROLL_VIEW holders.
+    const viewerEventTypes = await Promise.all(
+      [cast.teacherUser.id, cast.student.userId].map(viewerUserId =>
+        ClassSessionService.getClassStatusEvents(viewerUserId, cast.onTimeInstance.id, tErrors).then(events =>
+          events.map(event => event.eventType)
+        )
+      )
+    );
+    for (const eventTypes of viewerEventTypes) {
+      expect(eventTypes.filter(type => type.startsWith("PAYROLL_"))).toHaveLength(0);
+    }
   });
 
   test("step 8 — denial paths: teacher, student and parent cannot read the payroll report", async () => {

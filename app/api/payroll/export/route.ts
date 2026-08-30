@@ -9,8 +9,8 @@ import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 const EXPORT_ROW_LIMIT = 10_000;
 /** Free-text search bound, shared with the payroll report GraphQL filter input. */
 const SEARCH_MAX_LENGTH = 200;
-/** Spreadsheet formula starters — cells beginning with one of these are neutralized (OWASP CSV-injection guidance). */
-const CSV_FORMULA_PREFIXES: readonly string[] = ["=", "+", "-", "@"];
+/** Spreadsheet formula starters — cells beginning with one of these are neutralized (OWASP CSV-injection guidance: =, +, -, @, tab, CR). */
+const CSV_FORMULA_PREFIXES: readonly string[] = ["=", "+", "-", "@", "\t", "\r"];
 const CSV_LINE_SEPARATOR = "\r\n";
 
 interface CsvColumn {
@@ -122,7 +122,7 @@ function isSearchWithinLimit(value: string): boolean {
   return value.length <= SEARCH_MAX_LENGTH;
 }
 
-/** RFC 4180 escaping plus formula neutralization: cells starting with `=`, `+`, `-` or `@` get a `'` prefix. */
+/** RFC 4180 escaping plus formula neutralization: cells starting with `=`, `+`, `-`, `@`, a tab or a CR get a `'` prefix. */
 function toCsvCell(value: string): string {
   const startsFormula = value.length > 0 && CSV_FORMULA_PREFIXES.some(prefix => value.startsWith(prefix));
   const hardened = startsFormula ? `'${value}` : value;

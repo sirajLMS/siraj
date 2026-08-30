@@ -264,7 +264,7 @@
 - 🆕 `app/(dashboard)/accounting/payroll/page.tsx` — server component that renders `<PayrollReportsContainer />`.
 - 🔁 `bun run scripts/health/sub-loop.ts "app/(dashboard)/accounting/payroll/page.tsx" --lifecycle codescene`
 
-### 3.7 Phase-3 acceptance
+### 3.7 Phase-3 acceptance ✅ DONE
 - ✅ `/accounting/payroll` renders (with permission) / 403 (without).
 - ✅ Sidebar "Payroll" item visible only with `ACCOUNTING_PAYROLL_VIEW` or `ACCOUNTING_PAYROLL_MANAGE`.
 - ✅ AR/EN snapshots exist.
@@ -405,11 +405,11 @@
 - 🔁 `bun test backend/graphql/query/teachers/payroll.query.test.ts`
 - 🔁 `bun test backend/graphql/mutation/teachers/payroll.mutation.test.ts`
 
-### 8.3 Full quality gate
+### 8.3 Full quality gate ✅ DONE
 - 🔁 Run project-wide `lint`, `typecheck`, `test`, `build`.
 - 🔁 `bun run scripts/health/sub-loop.ts <each-new-file> --lifecycle codescene` for every file created/edited in Phases 0–7.
 
-### 8.4 Migration rehearsal on staging
+### 8.4 Migration rehearsal on staging ✅ DONE
 - 🔁 Apply migration to a staging snapshot of prod data.
 - ✅ Confirm row count of `class_instances` unchanged, new columns nullable/defaulted, no locks held > 100 ms.
 - 🔁 Run `bun run scripts/payroll-backfill.ts --dryRun` against staging; review proposed patch counts with accounting.
@@ -419,14 +419,14 @@
 
 ## Definition of Done
 
-- [ ] All Phase 0–8 tasks complete.
-- [ ] Every touched file passes `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0).
-- [ ] `specs.md` acceptance criteria AC-1.1 … AC-9.5 each have a passing test.
-- [ ] Edge cases E1–E20 each covered by a test or explicit "won't happen" note.
-- [ ] Migration is additive, zero-downtime, idempotent.
-- [ ] EN + AR locale snapshots committed.
-- [ ] Existing scheduling / state-machine / teacher-dues / teacher-payments flows regression-green.
-- [ ] 🔗 Plan 4 (`session-event-audit`) can read the new payroll fields via the existing `ClassInstanceDetailPothosObject` extension.
+- [x] All Phase 0–8 tasks complete.
+- [x] Every touched file passes `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0). — 8.3 sweep: 63/63 payroll files green
+- [x] `specs.md` acceptance criteria AC-1.1 … AC-9.5 each have a passing test. — phase outcomes + TB.4 8×4 matrix; review R1 items 5/6/12 PASS
+- [x] Edge cases E1–E20 each covered by a test or explicit "won't happen" note. — 1.9-1.10 matrices + TB.4 verification
+- [x] Migration is additive, zero-downtime, idempotent. — 8.4 rehearsal: row count unchanged, 21ms ACCESS EXCLUSIVE window (AC <100ms), journal no-op re-run
+- [x] EN + AR locale snapshots committed. — dashboard.billing.payroll.json EN (2,250B) + AR (2,806B)
+- [x] Existing scheduling / state-machine / teacher-dues / teacher-payments flows regression-green. — 8.2 nine suites + 8.3 gate (workflows 74/0, services green); 7 non-payroll sibling failures baseline-filtered with ownership evidence (8.3 outcome)
+- [x] 🔗 Plan 4 (`session-event-audit`) can read the new payroll fields via the existing `ClassInstanceDetailPothosObject` extension. — D15 SDL evidence + detail-surface exposure (payroll fields stripped per-viewer, D22)
 
 ---
 
@@ -450,13 +450,13 @@ bun run scripts/health/sub-loop.ts <file-path> --lifecycle duplicates
 
 ## Cross-plan handoff checklist (for Plan 4 owner)
 
-- [ ] `class_instances` extended with the 8 new payroll columns.
-- [ ] `CalculationStatus` enum registered in GraphQL via `CalculationStatusPothosEnum`.
-- [ ] `ClassInstanceDetailPothosObject` exposes `calculationStatus`, `teacherPaidAmount`, `teacherPaidCurrency`, `calculatedDuration`, `isPartialPercentage`, `payrollNote`, `payrollCalculatedAt`.
-- [ ] `payrollReport` query live with `PayrollReportFilter` input.
-- [ ] `applyPayrollOverride` mutation live.
-- [ ] `/api/payroll/export` route returns CSV.
-- [ ] EN + AR locale snapshots for `dashboard.accounting.payroll`.
+- [x] `class_instances` extended with the 8 new payroll columns.
+- [x] `CalculationStatus` enum registered in GraphQL via `CalculationStatusPothosEnum`.
+- [x] `ClassInstanceDetailPothosObject` exposes `calculationStatus`, `teacherPaidAmount`, `teacherPaidCurrency`, `calculatedDuration`, `isPartialPercentage`, `payrollNote`, `payrollCalculatedAt`.
+- [x] `payrollReport` query live with `PayrollReportFilter` input.
+- [x] `applyPayrollOverride` mutation live.
+- [x] `/api/payroll/export` route returns CSV.
+- [x] EN + AR locale snapshots for `dashboard.accounting.payroll`. — shipped as the `dashboard.billing.payroll` namespace per the locale tree layout (3.3-3.5 outcome)
 
 ---
 
@@ -479,18 +479,18 @@ bun run scripts/health/sub-loop.ts <file-path> --lifecycle duplicates
   - Verify: `bun run test/scripts/run-test.ts test/workflows/payroll/override-to-settlement-lifecycle.test.ts` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-6, US-9, AC-6.1–AC-6.10, AC-9.4, AC-9.5_
-- [ ] TB.3 Journey: unauthorized actors (teacher / parent / student / non-accounting staff) attempt payroll query, override mutation, and CSV export → all denied without touching state
+- [x] TB.3 Journey: unauthorized actors (teacher / parent / student / non-accounting staff) attempt payroll query, override mutation, and CSV export → all denied without touching state
   - Create `test/workflows/payroll/payroll-permission-denials.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (none — rows unchanged under denial), cross-actor visibility (`payrollReport` query, `applyPayrollOverride` mutation, and `/api/payroll/export` each reject with `INSUFFICIENT_PERMISSIONS` for actors lacking `ACCOUNTING_PAYROLL_VIEW`/`ACCOUNTING_PAYROLL_MANAGE`; `VIEW`-only actor cannot override), side effects (no `class_status_events` / `audit_logs` rows from denied calls), denial paths for unauthorized actors
   - Verify: `bun run test/scripts/run-test.ts test/workflows/payroll/payroll-permission-denials.test.ts` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-7, AC-7.1–AC-7.5, E19_
-- [ ] TB.4 4-Tier verification for payroll service + repository files
+- [x] TB.4 4-Tier verification for payroll service + repository files
   - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/services/teachers/payroll-calculation.service.ts`, `backend/services/teachers/payroll-grace-settings.ts`, `backend/services/teachers/payroll-override.idempotency.ts`, `backend/services/teachers/teacher-due.service.ts` (payroll-amount consumption + status flips), `backend/services/scheduling/scheduling.service.ts` (auto-trigger wiring), `backend/db/repo/scheduling/class-instances.ts` (`getById` forUpdate / `updatePayrollCalculation` / `findPayrollReportRows`), `backend/db/repo/scheduling/class-status-events.repository.ts` (`findRecentByInstanceAndHash`), `backend/lib/sanitize/richTextSanitizer.ts` (`sanitizePlainText`)
   - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels
   - Verify with `bun run test/scripts/run-test.ts <each test file>`
   - _Requirements: cross-cutting (US-2–US-7, AC-6.7–AC-6.8, E15–E16)_
-- [ ] TB.5 Penetration verification (skip only if plan has no new endpoints/mutations)
+- [x] TB.5 Penetration verification (skip only if plan has no new endpoints/mutations)
   - BOLA/IDOR across the roles in this plan (teacher / accounting operator / admin against other teachers' payroll rows via `payrollReport` filters and `applyPayrollOverride` on arbitrary `instanceId`s); permission denial on `applyPayrollOverride` and `payrollReport`; wildcard injection on the report search/text filters and CSV export query string; `payrollNote` XSS/sanitizer bypass attempts against `sanitizePlainText`; `force` flag escalation without `ACCOUNTING_PAYROLL_MANAGE`
   - Via `.agents/skills/pentester/SKILL.md`
   - _Requirements: US-7, AC-7.1–AC-7.5, E15, E16_

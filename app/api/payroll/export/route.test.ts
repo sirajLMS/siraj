@@ -365,5 +365,27 @@ describe("GET /api/payroll/export", () => {
       );
       expect(body).not.toContain(",=SUM(A1:A9)");
     });
+
+    test("neutralizes tab- and CR-led formula cells (OWASP 0x09/0x0D prefixes)", async () => {
+      getReportMock.mockResolvedValueOnce(
+        buildReportPage([
+          buildReportRow({
+            studentName: '\t=HYPERLINK("http://evil.example","click")',
+            subjectName: "\r=1+1",
+          }),
+        ])
+      );
+
+      const response = await callExport();
+
+      expect(response.status).toBe(200);
+      const body = await response.text();
+      const expectedTabCell = '"\'\t=HYPERLINK(""http://evil.example"",""click"")"';
+      const expectedCrCell = '"\'\r=1+1"';
+      expect(body).toContain(expectedTabCell);
+      expect(body).toContain(expectedCrCell);
+      expect(body).not.toMatch(/(^|,)\t=/);
+      expect(body).not.toMatch(/(^|,)\r=/);
+    });
   });
 });

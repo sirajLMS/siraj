@@ -118,3 +118,69 @@ sequenceDiagram
   operator->>payroll: applyOverride Partially without force
   payroll-->>operator: DomainError PAYROLL_AWAITING_SETTLEMENT awaitingSettlement
 ```
+
+## payroll-permission-denials.test.ts
+
+Every payroll surface — the report query service, the CSV export permission gate, and the override mutation — rejects actors without the matching payroll permission before any row is read or written. The journey lands one calculated baseline row, then the teacher, parent, student, and a non-payroll staff actor probe all three surfaces, and a view-only auditor proves view access covers reads and the export gate but never the override mutation; instance rows, event history, the audit trail, and the notification fan-out stay untouched.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant teacher as "teacher - teacher_default"
+  participant operator as "accounting operator - academy_admin"
+  participant parent as "parent - permissionless"
+  participant student as "student - student_default"
+  participant staff as "staff - staff_default, no payroll grants"
+  participant viewer as "read-only auditor - view-only group"
+  participant session as "ClassSessionService"
+  participant payroll as "PayrollCalculationService"
+  participant gate as "requirePermission ACCOUNTING_PAYROLL_VIEW"
+  participant db as "Postgres"
+  participant notify as "notification dispatch spy"
+
+  teacher->>session: activate plus updateStatusStart onTimeInstance
+  operator->>session: stop onTimeInstance
+  session->>payroll: calculateForInstance in the same transaction
+  payroll->>db: CALCULATED snapshot 120.00 SAR plus one status-transition event
+  session-)notify: CLASS_COMPLETED fan-out intercepted then cleared
+  note over db: baseline snapshot of all cast instance rows and event counts
+
+  par report query denials
+    teacher->>payroll: getReport filtered by teacher
+    payroll-->>teacher: ForbiddenError insufficientPermissions
+    parent->>payroll: getReport
+    payroll-->>parent: ForbiddenError insufficientPermissions
+    student->>payroll: getReport
+    payroll-->>student: ForbiddenError insufficientPermissions
+    staff->>payroll: getReport
+    payroll-->>staff: ForbiddenError insufficientPermissions
+  and CSV export gate denials
+    teacher->>gate: export permission check
+    gate-->>teacher: ForbiddenError insufficientPermissions
+    parent->>gate: export permission check
+    gate-->>parent: ForbiddenError insufficientPermissions
+    student->>gate: export permission check
+    gate-->>student: ForbiddenError insufficientPermissions
+    staff->>gate: export permission check
+    gate-->>staff: ForbiddenError insufficientPermissions
+  and override mutation denials
+    teacher->>payroll: applyOverride Partially 50
+    payroll-->>teacher: ForbiddenError insufficientPermissions
+    parent->>payroll: applyOverride Partially 50
+    payroll-->>parent: ForbiddenError insufficientPermissions
+    student->>payroll: applyOverride Partially 50
+    payroll-->>student: ForbiddenError insufficientPermissions
+    staff->>payroll: applyOverride Partially 50
+    payroll-->>staff: ForbiddenError insufficientPermissions
+    viewer->>payroll: applyOverride Partially 50
+    payroll-->>viewer: ForbiddenError insufficientPermissions — view cannot override
+  end
+
+  viewer->>payroll: getReport filtered by teacher
+  payroll-->>viewer: CALCULATED row 120.00 SAR
+  viewer->>gate: export permission check
+  gate-->>viewer: view permission passes
+
+  note over db: instance rows, class_status_events, and audit_logs identical to the baseline — denied calls wrote nothing
+  notify-->>notify: zero dispatches from denied calls
+```
