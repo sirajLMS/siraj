@@ -21,6 +21,7 @@ import { ensureEnvironmentValidated } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { buildCallbackRedirectUri, MeetingOAuthService, verifyAndConsumeOAuthState } from "@/backend/services";
 import type { OAuthCallbackConfig } from "@/backend/types";
+import { isRelativeSafePath } from "@/frontend/common/lib/safeRedirect";
 
 import { getServerTranslations } from "@/shared/locale";
 
@@ -85,7 +86,7 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
   const redirectUri = buildCallbackRedirectUri(providerSlug);
 
   // Defense-in-depth: validate returnPath to prevent open redirect
-  if (!returnPath.startsWith("/") || returnPath.startsWith("//")) {
+  if (!isRelativeSafePath(returnPath) || returnPath.includes("://")) {
     logger.warn(`${logTag}: invalid return path detected`, { returnPath });
     return NextResponse.json({ error: tErrors.meetingProvider.invalidReturnPath }, { status: 400 });
   }

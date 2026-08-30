@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getEnv, getEnvironmentConfig } from "@/backend/lib/env";
+import { isRelativeSafePath } from "@/frontend/common/lib/safeRedirect";
 import { getServerTranslations } from "@/shared/locale";
 import { locales } from "@/shared/locale/AppLocale";
 
@@ -30,7 +31,7 @@ function applyLocaleCookie(response: NextResponse, locale: string): void {
 
 /** Only allow same-origin relative paths (block open redirects). */
 function safeRedirectPath(raw: string | null, fallback = "/"): string {
-  if (!raw?.startsWith("/") || raw.startsWith("//") || raw.includes("://")) {
+  if (!raw || !isRelativeSafePath(raw) || raw.includes("://")) {
     return fallback;
   }
   return raw;
