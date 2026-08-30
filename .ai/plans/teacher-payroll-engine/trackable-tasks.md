@@ -363,18 +363,18 @@
 
 ## Phase 7 — i18n polish, accessibility, observability
 
-### 7.1 Full key coverage
+### 7.1 Full key coverage ✅ DONE
 - ✏️ `shared/locale/namespaces/dashboard/accounting/payroll.namespace.ts` — confirm every user-visible string has EN + AR (per implementation.md §7.1 table).
 - 🔁 `bun run locale:validate` (or project equivalent) — fail if any key missing in either locale.
 
-### 7.2 Accessibility pass
+### 7.2 Accessibility pass ✅ DONE
 - ✏️ `PayrollReportsDataGrid.tsx` — aria-labels on filter inputs, sortable columns announced, status chip has `aria-label` with full status text.
 - ✏️ `OverrideDialog.tsx` — aria-labels on RadioGroup, percentage input, note field; focus trap; keyboard nav; Escape closes.
 - 🧪 `OverrideDialog.test.tsx` + `PayrollReportsDataGrid.test.tsx` — add axe-core assertions (existing project pattern).
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/OverrideDialog.tsx --lifecycle codescene`
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/PayrollReportsDataGrid.tsx --lifecycle codescene`
 
-### 7.3 RTL pass
+### 7.3 RTL pass ✅ DONE
 - ✏️ Confirm AR locale renders RTL; status chips + percentage input align right; filter bar mirrors LTR layout.
 - 🧪 `OverrideDialog.test.tsx` — RTL snapshot matches expected.
 

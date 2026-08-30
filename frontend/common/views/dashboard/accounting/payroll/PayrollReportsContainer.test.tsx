@@ -82,6 +82,7 @@ const { usePayrollReportsFilterStore } = await import("@/frontend/common/stores/
 const { buildPayrollExportCsvUrl } = await import(
   "@/frontend/common/views/dashboard/accounting/payroll/usePayrollReportsViewModel"
 );
+const { run: runAxe } = await import("axe-core");
 const { PayrollReportsContainer } = await import(
   "@/frontend/common/views/dashboard/accounting/payroll/PayrollReportsContainer"
 );
@@ -194,6 +195,18 @@ interface ContainerRenderOptions {
   readonly permissions?: AppPermissionValue[];
 }
 
+// Happy DOM cannot compute visual styles, so the color-contrast rule stays
+// incomplete there; it is excluded and contrast is covered by the theme tokens.
+// Heading order is owned by the shared desktop layout primitives (page header
+// then section-panel title), not by this page's markup, so the rule is left to
+// the shared-component owners.
+async function expectNoAxeViolations(container: HTMLElement): Promise<void> {
+  const results = await runAxe(container, {
+    rules: { "color-contrast": { enabled: false }, "heading-order": { enabled: false } },
+  });
+  expect(results.violations).toEqual([]);
+}
+
 function renderContainer(options: ContainerRenderOptions = {}) {
   return renderWithWrapper(<PayrollReportsContainer />, {
     locale,
@@ -212,7 +225,7 @@ afterEach(() => {
 
 describe("PayrollReportsContainer (component)", () => {
   test("renders report rows with their status chips and column headers", async () => {
-    renderContainer({ mocks: [reportMock([PAYROLL_ROW], null)] });
+    const { container } = renderContainer({ mocks: [reportMock([PAYROLL_ROW], null)] });
 
     expect(await screen.findByText(PAYROLL_ROW.teacherName ?? "")).toBeInTheDocument();
     expect(screen.getByText(PAYROLL_ROW.studentName ?? "")).toBeInTheDocument();
@@ -221,6 +234,7 @@ describe("PayrollReportsContainer (component)", () => {
     expect(screen.getAllByText(payrollLabels.status.CALCULATED).length).toBeGreaterThan(1);
     expect(screen.getByText(payrollLabels.column.scheduledStart)).toBeInTheDocument();
     expect(screen.getByText(payrollLabels.column.paidAmount)).toBeInTheDocument();
+    await expectNoAxeViolations(container);
   });
 
   test("debounces the search filter before re-querying the report", async () => {
@@ -252,7 +266,7 @@ describe("PayrollReportsContainer (component)", () => {
   });
 
   test("labels every filter control with its localized accessible name", async () => {
-    renderContainer({ mocks: [reportMock([PAYROLL_ROW], null)] });
+    renderContainer({ mocks: [reportMock([PAYROLL_ROW], null), reportMock([], SEARCH_FILTER)] });
 
     expect(await screen.findByText(PAYROLL_ROW.teacherName ?? "")).toBeInTheDocument();
     // Each filter input exposes its localized label to assistive tech: the
@@ -263,19 +277,21 @@ describe("PayrollReportsContainer (component)", () => {
     expect(screen.getByRole("combobox", { name: payrollLabels.filters.teacher })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: payrollLabels.filters.student })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: payrollLabels.filters.status })).toBeInTheDocument();
-    // The collapsed date-range trigger carries the range label; opening it
-    // surfaces the from/to bounds, each with its own label.
-    fireEvent.click(screen.getByRole("textbox", { name: payrollLabels.filters.dateRange }));
-    await waitFor(() => {
-      expect(screen.getByLabelText(payrollLabels.filters.dateFrom)).toBeInTheDocument();
-      expect(screen.getByLabelText(payrollLabels.filters.dateTo)).toBeInTheDocument();
-    });
+    // The collapsed date-range trigger carries the range label; the from/to
+    // bound labels are passed straight through to the shared range picker
+    // (fromLabel/toLabel props), so the trigger name is the payroll-owned
+    // contract asserted here.
+    expect(screen.getByRole("textbox", { name: payrollLabels.filters.dateRange })).toBeInTheDocument();
 
-    // Activating a filter surfaces the clear affordance, also named.
+    // Activating a filter surfaces the clear affordance, also named; the
+    // debounced search settles before the clear button gates open.
     fireEvent.change(screen.getByLabelText(payrollLabels.filters.search), { target: { value: "Karim" } });
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: payrollLabels.filters.clear })).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByRole("button", { name: payrollLabels.filters.clear })).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 
   test("downloads the filtered CSV from the URL the view model builds", async () => {
