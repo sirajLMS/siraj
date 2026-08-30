@@ -8,6 +8,8 @@ export interface PaymentsLabels {
   readonly metricsBasis: (max: number) => string;
   readonly pageSubtitle: string;
   readonly formSubtitle: string;
+  /** Subtitle for the Edit Payment flow (payment hours/gateway/note update). */
+  readonly editFormSubtitle: string;
   readonly addPayment: string;
   readonly editPayment: string;
   readonly paymentDetails: string;

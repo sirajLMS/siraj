@@ -1,25 +1,25 @@
 import type { TeacherAvailabilityLabels } from "@/shared/locale/types/dashboard/teachers";
 
 export const dashboardTeacherAvailabilityAr: TeacherAvailabilityLabels = {
-  pageTitle: "أداة توفر المعلمين",
-  pageSubtitle: "عرض والبحث عن الفترات الزمنية المتاحة عبر كادر هيئة التدريس.",
-  exportPdf: "تصدير PDF",
-  exportPdfComingSoon: "تصدير PDF قريبًا",
-  teacherSlotSelected: (name, id) => `تم تحديد فترة ${name} (المعلم ${id})`,
-  searchTitle: "البحث في جداول المعلمين",
+  pageTitle: "توفر المعلمين",
+  pageSubtitle: "عرض توفر المعلمين وإدارته",
+  exportPdf: "تصدير إلى PDF",
+  exportPdfComingSoon: "قريبًا",
+  teacherSlotSelected: (name, id) => `تم تحديد فترة المعلم ${name} (${id})`,
+  searchTitle: "البحث عن التوفر",
   from: "من",
   to: "إلى",
   gender: "الجنس",
   any: "الكل",
   male: "ذكر",
   female: "أنثى",
-  submit: "إرسال",
+  submit: "بحث",
   breadcrumbs: {
     teachers: "المعلمون",
     availability: "التوفر",
   },
   errors: {
-    missingTimeRange: "يرجى تحديد وقت البداية والنهاية.",
+    missingTimeRange: "يرجى تحديد الفترة الزمنية.",
   },
   validation: {
     invalidGender: "قيمة الجنس غير صالحة",
@@ -44,23 +44,20 @@ export const dashboardTeacherAvailabilityAr: TeacherAvailabilityLabels = {
   },
   insights: {
     peakLoad: "ذروة التحميل",
-    peakLoadDesc: "أعلى نسبة إشغال للمعلمين يومي الاثنين والأربعاء.",
+    peakLoadDesc: "أكثر الأوقات ازدحامًا لدى المعلمين",
     availableStaff: "الموظفون المتاحون",
-    availableStaffDesc: "القدرة الحالية لتخصيص الدورات الفورية.",
+    availableStaffDesc: "المعلمون المتاحون خلال الساعات المحددة",
     teachersCount: count => `${count} معلم`,
     localTimezones: "المناطق الزمنية المحلية",
-    localTimezonesDesc: "تغطي هيئة التدريس العالمية 5 مناطق زمنية متميزة.",
+    localTimezonesDesc: "المناطق الزمنية المحلية للمعلمين",
   },
   mobile: {
-    pageTitle: "أداة التوفر",
-    pageSubtitle: "ابحث عن الفترات الشاغرة عبر هيئة التدريس.",
+    pageTitle: "التوفر",
+    pageSubtitle: "ابحث عن توفر المعلمين واطّلع عليه",
   },
   status: {
     live: "مباشر",
-    lastUpdate: minutes => {
-      if (minutes === 1) return `منذ ${minutes} دقيقة`;
-      return `منذ ${minutes} دقائق`;
-    },
+    lastUpdate: minutes => (minutes === 1 ? `آخر تحديث منذ ${minutes} دقيقة` : `آخر تحديث منذ ${minutes} دقائق`),
   },
   availabilityGridTitle: "الفترات المتاحة",
 };

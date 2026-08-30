@@ -92,7 +92,7 @@ describe("PaymentsLedgerDesktopView", () => {
     renderWithWrapper(<PaymentsLedgerDesktopView {...buildViewModel({ rows: [] })} />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
-      expect(screen.getByText(`${labels.emptyTitle} ${labels.emptySubtitle}`)).toBeInTheDocument();
+      expect(screen.getByText(`${labels.emptyTitle}. ${labels.emptySubtitle}`)).toBeInTheDocument();
     });
   });
 

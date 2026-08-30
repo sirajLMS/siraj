@@ -14,7 +14,7 @@ export const dashboardParentProfileAr: ParentProfileLabels = {
     deactivated: "غير مفعّل",
   },
   actions: {
-    editPicture: "تعديل الصورة",
+    editPicture: "تغيير الصورة الشخصية",
     editProfile: "تعديل الملف الشخصي",
     uploadDocs: "رفع الوثائق",
     addNewStudent: "إضافة طالب جديد",

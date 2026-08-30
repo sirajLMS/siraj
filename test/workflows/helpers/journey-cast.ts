@@ -3,6 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import {
   classCategories,
   classInstances,
+  classStatusEvents,
   classSubjects,
   creditTransactions,
   lessonReports,
@@ -181,6 +182,9 @@ export async function cleanupLessonReportCast(cast: LessonReportCast): Promise<v
   ];
 
   await db.transaction(async tx => {
+    // Session lifecycle + payroll transition events reference the instances
+    // with a RESTRICT foreign key, so they must go before the instance rows.
+    await tx.delete(classStatusEvents).where(inArray(classStatusEvents.classInstanceId, instanceIds));
     await tx.delete(lessonReports).where(inArray(lessonReports.classInstanceId, instanceIds));
     await tx.delete(teacherDues).where(inArray(teacherDues.classInstanceId, instanceIds));
     await tx.delete(creditTransactions).where(eq(creditTransactions.studentId, cast.student.id));

@@ -28,6 +28,7 @@ export function creditTransactionFields(t: PothosObjectFieldBuilder) {
     sourcePaymentId: t.exposeString("sourcePaymentId", { nullable: true }),
     classInstanceId: t.exposeString("classInstanceId", { nullable: true }),
     notes: t.exposeString("notes", { nullable: true }),
+    internalNotes: t.exposeString("internalNotes", { nullable: true }),
     creditedByUserId: t.exposeString("creditedByUserId"),
     idempotencyKey: t.exposeString("idempotencyKey"),
     createdAt: t.expose("createdAt", { type: "DateTime" }),

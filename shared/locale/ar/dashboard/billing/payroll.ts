@@ -14,8 +14,8 @@ export const dashboardBillingPayrollAr: PayrollLabels = {
     all: "جميع الحالات",
   },
   column: {
-    scheduledStart: "بداية الجلسة",
-    scheduledDuration: "مدة الجلسة (دقيقة)",
+    scheduledStart: "البدء المجدول",
+    scheduledDuration: "المدة المجدولة (دقيقة)",
     actualDuration: "المدة الفعلية (دقيقة)",
     calculatedDuration: "مدة الاحتساب (دقيقة)",
     paidAmount: "المبلغ المستحق",

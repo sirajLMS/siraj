@@ -5,6 +5,7 @@ export const dashboardAccountingPaymentsEn: PaymentsLabels = {
   metricsBasis: max => `Most recent ${max} payments`,
   pageSubtitle: "Track credit-hour package payments and their paid status.",
   formSubtitle: "Record a new payment transaction for a student.",
+  editFormSubtitle: "Update this payment's details, hours, or note.",
   addPayment: "Add Payment",
   editPayment: "Edit Payment",
   paymentDetails: "Payment Details",

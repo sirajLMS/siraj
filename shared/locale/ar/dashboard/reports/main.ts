@@ -22,10 +22,10 @@ export const dashboardReportsAr: ReportsLabels = {
   },
   table: {
     name: "الاسم (معلم/طالب)",
-    taken: "حضر",
+    taken: "حاضر",
     absent: "غائب",
     leave: "إجازة",
-    pending: "معلق",
+    pending: "قيد الانتظار",
     hours: "الساعات",
     paid: "مدفوع",
     paidDisplay: "مدفوع (معروض)",
@@ -53,7 +53,7 @@ export const dashboardReportsAr: ReportsLabels = {
   },
   noEntries: "لا توجد بيانات تقرير لهذا النطاق",
   reportMultiCurrencyNote:
-    "يُعرض التوزيع المالي بالمبالغ الأصلية بالعملات الأصلية. استخدم فلتر التقرير لتضييق النطاق حسب المعلم لإجماليات حسب العملة.",
+    "يعرض التوزيع المالي المبالغ بعملاتها الأصلية. استخدم فلتر التقرير للتضييق حسب المعلم للحصول على إجماليات لكل عملة.",
   validation: {
     invalidDateRange: "نطاق التاريخ غير صالح",
   },

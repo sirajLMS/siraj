@@ -573,6 +573,8 @@ export interface ErrorsLabels
   readonly notFound: string;
   readonly unknownName: string;
   readonly invalidInput: string;
+  /** Generic over-long free-text rejection (max-length guardrails). */
+  readonly tooLong: string;
   readonly invalidNationalId: string;
 
   // ─── General user creation errors ──────────────────────────────────

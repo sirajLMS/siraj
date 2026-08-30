@@ -4,7 +4,8 @@ export const dashboardAccountingPaymentsAr: PaymentsLabels = {
   pageTitle: "المدفوعات",
   metricsBasis: max => `أحدث ${max} دفعة`,
   pageSubtitle: "تتبع مدفوعات باقات الساعات المعتمدة وحالة السداد.",
-  formSubtitle: "تسجيل عملية دفعة جديدة لطالب.",
+  formSubtitle: "تسجيل عملية دفع جديدة لطالب.",
+  editFormSubtitle: "حدّث تفاصيل هذه الدفعة أو ساعاتها أو ملاحظتها.",
   addPayment: "إضافة دفعة",
   editPayment: "تعديل الدفعة",
   paymentDetails: "تفاصيل الدفعة",
@@ -23,7 +24,7 @@ export const dashboardAccountingPaymentsAr: PaymentsLabels = {
   },
 
   filters: {
-    title: "التصفية",
+    title: "الفلاتر",
     student: "الطالب",
     parent: "ولي الأمر",
     fromDate: "من تاريخ",
@@ -69,7 +70,7 @@ export const dashboardAccountingPaymentsAr: PaymentsLabels = {
 
   currencyWarning: currency =>
     `تنبيه: هذه الدفعة بعملة ${currency} وهي تختلف عن عملة آخر دفعة للطالب. الساعات من العملات المختلفة تشترك في رصيد واحد.`,
-  empty: "لا توجد مدفوعات مطابقة للتصفية الحالية.",
+  empty: "لا توجد مدفوعات مطابقة للفلاتر الحالية.",
   loadError: "فشل تحميل المدفوعات. حاول مرة أخرى.",
   auditUpdatedAt: "آخر تحديث",
   saveSuccess: "تم حفظ الدفعة بنجاح.",

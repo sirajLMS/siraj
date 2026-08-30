@@ -1,7 +1,7 @@
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers";
 
 export const dashboardTeacherWeeklyScheduleAr: TeacherWeeklyScheduleLabels = {
-  pageTitle: name => `جدول ${name}`,
+  pageTitle: name => `الجدول الأسبوعي - ${name}`,
   breadcrumbs: {
     teachers: "المعلمون",
     schedule: "الجدول",
@@ -19,10 +19,10 @@ export const dashboardTeacherWeeklyScheduleAr: TeacherWeeklyScheduleLabels = {
   grid: {
     teacherTime: "وقت المعلم",
     available: "متاح",
-    lunchBreak: "استراحة غداء",
-    bookedClass: "حصة محجوزة",
+    lunchBreak: "غداء",
+    bookedClass: "محجوزة",
     availableSlot: "فترة متاحة",
-    lastUpdated: time => `آخر تحديث: ${time}`,
+    lastUpdated: date => `آخر تحديث: ${date}`,
     unknownSubject: "حصة",
     minutesShort: minutes => `${minutes} د`,
     status: {
@@ -52,12 +52,12 @@ export const dashboardTeacherWeeklyScheduleAr: TeacherWeeklyScheduleLabels = {
     sun: "أحد",
   },
   dialogs: {
-    deleteConfirm: "هل أنت متأكد أنك تريد إزالة هذا الحجز؟",
-    deleteConfirmClass: "هل أنت متأكد أنك تريد إزالة هذه الحصة من جدولك؟",
+    deleteConfirm: "هل أنت متأكد أنك تريد حذف هذه الفترة؟",
+    deleteConfirmClass: "هل أنت متأكد أنك تريد حذف هذه الحصة؟",
     deleteClassTitle: "تأكيد الحذف",
-    deleteClassMessage: "هل أنت متأكد أنك تريد حذف هذه الحصة؟",
+    deleteClassMessage: "لا يمكن التراجع عن هذا الإجراء.",
     clearScheduleTitle: "مسح الجدول الأسبوعي",
-    clearScheduleMessage: "هل أنت متأكد أنك تريد حذف الجدول؟",
+    clearScheduleMessage: "هل أنت متأكد أنك تريد مسح الجدول بالكامل؟",
     confirmYes: "نعم",
     cancel: "إلغاء",
   },

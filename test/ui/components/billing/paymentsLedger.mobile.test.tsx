@@ -72,7 +72,7 @@ describe("PaymentsLedgerMobileView", () => {
     renderWithWrapper(<PaymentsLedgerMobileView {...buildViewModel({ rows: [] })} />, { locale, viewport: "mobile" });
 
     await waitFor(() => {
-      expect(screen.getByText(`${labels.emptyTitle} ${labels.emptySubtitle}`)).toBeInTheDocument();
+      expect(screen.getByText(`${labels.emptyTitle}. ${labels.emptySubtitle}`)).toBeInTheDocument();
     });
   });
 

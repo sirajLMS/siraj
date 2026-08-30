@@ -1,15 +1,15 @@
 import type { CreateRecurringClassLabels } from "@/shared/locale/types/dashboard/classes/createRecurringClass";
 
 export const dashboardCreateRecurringClassAr: CreateRecurringClassLabels = {
-  pageTitle: "إضافة فصل متكرر",
-  title: "إضافة فصل متكرر",
-  subtitle: "ضبط جدول للجلسات الأسبوعية التلقائية",
+  pageTitle: "إضافة حصة متكررة",
+  title: "إضافة حصة متكررة",
+  subtitle: "ضبط جدول الحصص الأسبوعية التلقائية",
   breadcrumbs: {
     dashboard: "لوحة التحكم",
-    classes: "الفصول",
+    classes: "الحصص",
   },
   add: "إضافة",
-  addClass: "إضافة فصل",
+  addClass: "إضافة حصة",
   addedSuccessfully: "تمت الإضافة بنجاح",
   close: "إغلاق",
   students: "الطالب",
@@ -25,13 +25,13 @@ export const dashboardCreateRecurringClassAr: CreateRecurringClassLabels = {
   hours: "ساعات",
   minutes: "دقائق",
   daysSelection: "اختيار الأيام والتوقيت",
-  classSchedule: "جدول الفصل",
+  classSchedule: "جدول الحصة",
   timeOverride: "تجاوز التوقيت",
   weekendOff: "عطلة نهاية الأسبوع",
   timezone: "المنطقة الزمنية",
   timezonePlaceholder: "اختر المنطقة الزمنية",
-  classType: "نوع الفصل",
-  classTypePlaceholder: "اختر نوع الفصل",
+  classType: "نوع الحصة",
+  classTypePlaceholder: "اختر نوع الحصة",
   hourlyRateLabel: "السعر بالساعة",
   currencyLabel: "العملة",
   days: {
@@ -53,6 +53,6 @@ export const dashboardCreateRecurringClassAr: CreateRecurringClassLabels = {
     durationHoursMax: "لا يمكن أن تتجاوز الساعات 12",
     durationMinutesMax: "لا يمكن أن تتجاوز الدقائق 59",
     timezoneRequired: "المنطقة الزمنية مطلوبة",
-    creationFailed: "فشل إنشاء الفصل المتكرر. يرجى المحاولة مرة أخرى.",
+    creationFailed: "فشل إنشاء الحصة المتكررة. يرجى المحاولة مرة أخرى.",
   },
 };

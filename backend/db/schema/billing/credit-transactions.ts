@@ -63,6 +63,9 @@ export const creditTransactions = createTable(
     carryoverFromDate: textColumn("carryover_from_date"),
     carryoverToDate: textColumn("carryover_to_date"),
     carryoverPaymentDate: textColumn("carryover_payment_date"),
+    // Operator-internal plain-text note (accounting-only): stored verbatim —
+    // not rich-text sanitized and never rendered on student/parent surfaces.
+    internalNotes: textColumn("internal_notes"),
   },
   table => [
     uniqueIndex("credit_transactions_idempotency_key_unique_idx").on(table.idempotencyKey),

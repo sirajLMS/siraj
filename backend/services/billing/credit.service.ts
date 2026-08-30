@@ -116,6 +116,9 @@ function validateAdjustmentInput(input: CreditAdjustmentInput, tErrors: ErrorsLa
   if (!Number.isInteger(input.hours) || input.hours < 1 || input.hours > 100_000) {
     throw new ValidationError(tErrors.credit.invalidInput);
   }
+  if ((input.internalNotes?.trim().length ?? 0) > INTERNAL_NOTES_MAX_LENGTH) {
+    throw new ValidationError(tErrors.tooLong);
+  }
   if (input.adjustmentType !== CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER) return;
 
   const carryover = requireCarryoverBlock(input, tErrors);
@@ -134,6 +137,19 @@ function sanitizeAdjustmentNotes(notes: string | null | undefined): string | nul
   if (!notes?.trim()) return null;
   const sanitized = sanitizeRichText(notes);
   return sanitized.length === 0 ? null : sanitized;
+}
+
+/** Sanity cap for the operator-internal plain-text note (accounting-only). */
+const INTERNAL_NOTES_MAX_LENGTH = 2000;
+
+/**
+ * Normalizes the internal note: trimmed, blank values persist as NULL.
+ * Unlike `notes`, the content is stored verbatim — it is plain text visible
+ * only in accounting contexts, never rendered as rich text.
+ */
+function normalizeInternalNotes(internalNotes: string | null | undefined): string | null {
+  const trimmed = internalNotes?.trim();
+  return trimmed ? trimmed : null;
 }
 
 async function assertTeacherExists(teacherId: string, tErrors: ErrorsLabels, tx: DBTransaction): Promise<void> {
@@ -226,6 +242,7 @@ async function executeAdjustmentTransaction(params: AdjustmentTxParams): Promise
       reason: params.reason,
       adjustmentType: input.adjustmentType,
       notes: sanitizeAdjustmentNotes(input.notes),
+      internalNotes: normalizeInternalNotes(input.internalNotes),
       creditedByUserId: params.actorUserId,
       carryoverTeacherId: params.carryover?.teacherId,
       carryoverFromDate: params.carryover?.fromDate,

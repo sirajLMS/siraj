@@ -444,6 +444,7 @@ export const errorsAr: ErrorsLabels = {
   notFound: "المورد المطلوب غير موجود.",
   unknownName: "غير معروف",
   invalidInput: "إدخال غير صالح.",
+  tooLong: "الإدخال يتجاوز الحد الأقصى المسموح به للطول.",
   invalidNationalId: "الرقم القومي غير صالح للجنسية المحددة.",
 
   // ─── General user creation errors ──────────────────────────────────

@@ -355,6 +355,7 @@ export namespace CreditRepository {
         sourcePaymentId: null,
         classInstanceId: null,
         notes: input.notes ?? null,
+        internalNotes: input.internalNotes ?? null,
         creditedByUserId: input.creditedByUserId,
         idempotencyKey: input.idempotencyKey,
       })

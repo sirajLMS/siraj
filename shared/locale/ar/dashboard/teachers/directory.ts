@@ -2,7 +2,7 @@ import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/te
 
 export const dashboardTeachersDirectoryAr: TeachersDirectoryLabels = {
   pageTitle: "دليل المعلمين",
-  pageSubtitle: "إدارة شاملة لجميع الكوادر التعليمية النشطة وغير النشطة.",
+  pageSubtitle: "إدارة وعرض جميع المعلمين",
   metrics: {
     activated: "نشط",
     deactivated: "غير نشط",
@@ -10,7 +10,7 @@ export const dashboardTeachersDirectoryAr: TeachersDirectoryLabels = {
   actions: {
     updateSchedules: "تحديث الجداول",
     addTeacher: "إضافة معلم",
-    joinRoom: "انضمام للغرفة",
+    joinRoom: "الانضمام إلى الغرفة",
     viewSchedule: "عرض الجدول",
     options: "خيارات",
   },

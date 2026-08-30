@@ -51,8 +51,8 @@ export const dashboardClassAuditAr: ClassAuditLabels = {
     capacityBadge: count => `سعة ${count} طالب`,
   },
   meeting: {
-    title: "الاجتماع عبر الإنترنت",
-    joinMeeting: "انضم إلى الاجتماع",
+    title: "اجتماع عبر الإنترنت",
+    joinMeeting: "الانضمام إلى الاجتماع",
   },
   communication: {
     title: "سجل التواصل",

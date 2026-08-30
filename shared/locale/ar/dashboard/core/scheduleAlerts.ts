@@ -1,7 +1,7 @@
 import type { ScheduleAlertsLabels } from "@/shared/locale/types/dashboard/core";
 
 export const dashboardCoreScheduleAlertsAr: ScheduleAlertsLabels = {
-  pageTitle: "التنبيهات والحصص",
+  pageTitle: "تنبيهات الجدول",
   pageSubtitle: "مراقبة تنبيهات الجدول والحصص اليومية.",
   alerts: {
     leaveQuotaExceeded: "لقد وصلت إلى الحد الأقصى لترك الحصص.",
@@ -35,7 +35,7 @@ export const dashboardCoreScheduleAlertsAr: ScheduleAlertsLabels = {
     export: "تصدير",
     joinSession: "الانضمام للحصة",
     leaveClass: "ترك الحصة",
-    leaveDisabledReason: "تم الوصول إلى حصة الإجازة.",
+    leaveDisabledReason: "تم بلوغ الحد الأقصى لترك الحصص.",
     viewClassAudit: "عرض تدقيق الحصة",
     contactAdmin: "تواصل مع المشرف (تجميد)",
   },

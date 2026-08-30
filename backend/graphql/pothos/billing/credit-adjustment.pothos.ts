@@ -13,6 +13,7 @@ export const CreditAdjustmentInputPothosRef = gqlSchemaBuilder
       adjustmentType: t.field({ type: CreditAdjustmentTypePothosEnum, required: true }),
       hours: t.int({ required: true, directives: { constraint: { min: 1, max: 100000 } } }),
       notes: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
+      internalNotes: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
       carryoverTeacherId: t.id({ required: false }),
       carryoverFromDate: t.string({ required: false }),
       carryoverToDate: t.string({ required: false }),

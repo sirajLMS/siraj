@@ -10,8 +10,8 @@ export const dashboardLmsTeacherDuesAr: TeacherDueLabels = {
   accruedHours: "الساعات المتراكمة",
   monthlyReport: "التقرير الشهري",
   teacherName: "اسم المعلم",
-  lessonsTaught: "الدروس المُدرَّسة",
+  lessonsTaught: "الحصص المُعطاة",
   approvedCount: "عدد التقارير المعتمدة",
-  cancelledCount: "عدد الدروس الملغاة",
+  cancelledCount: "عدد الحصص الملغاة",
   markAsPaid: "تحديد كمدفوع",
 };

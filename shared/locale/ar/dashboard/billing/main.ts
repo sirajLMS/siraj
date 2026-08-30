@@ -116,8 +116,8 @@ export const dashboardBillingAr: BillingLabels = {
     body: invoiceId => `سيؤدي هذا إلى إزالة الفاتورة ${invoiceId} نهائياً. لا يمكن التراجع عن هذا الإجراء.`,
     confirm: "حذف الفاتورة",
   },
-  noUnpaidInvoices: "لا توجد فواتير غير مدفوعة للدفع",
-  hasPaymentProofHint: "إثبات دفع مرفق",
+  noUnpaidInvoices: "لا توجد فواتير غير مدفوعة متاحة للدفع",
+  hasPaymentProofHint: "إثبات الدفع مرفق",
   submitProofDialog: {
     titleSubmit: "إرسال إثبات الدفع",
     titleMarkPaid: "تحديد الفاتورة كمدفوعة",
@@ -175,12 +175,12 @@ export const dashboardBillingAr: BillingLabels = {
     adminBody: "أسعار الصرف قديمة. قد لا تظهر التحويلات في العملة المعروضة حتى يتم التحديث.",
     userBody: "أسعار الصرف قديمة. قد لا تظهر التحويلات في عملتك المعروضة حتى يتم التحديث.",
     adminCta: "إدارة الأسعار",
-    userCta: "تحديث الملف",
+    userCta: "تحديث الملف الشخصي",
   },
   displayCurrencyHint: {
     title: "لم يتم تعيين عملة العرض",
     body: "عيّن عملة عرض في ملفك الشخصي لرؤية المبالغ المحوّلة في الفواتير والتقارير.",
-    cta: "تعديل الملف",
+    cta: "تعديل الملف الشخصي",
     dismiss: "إغلاق",
     subject: {
       title: "لم يتم تعيين عملة عرض لهذا المستخدم",
@@ -199,7 +199,7 @@ export const dashboardBillingAr: BillingLabels = {
   currencyHedges,
   supportedCurrencies,
   tabsPageTitle: "الفوترة",
-  tabsPageSubtitle: "تتبع الفواتير، التعرض للعملات، أسعار الصرف، وإنشاء الفواتير اليدوية.",
+  tabsPageSubtitle: "تتبع الفواتير والتعرض بالعملات وأسعار الصرف، وإنشاء فواتير يدوية.",
   tabNavAriaLabel: "أقسام الفوترة",
   billingTabs: {
     overview: "نظرة عامة",

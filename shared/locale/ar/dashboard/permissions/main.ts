@@ -41,7 +41,7 @@ export const dashboardPermissionsAr: PermissionsLabels = {
   saveOverrides: "حفظ التخصيصات",
   deleteConfirmTitle: "حذف مجموعة الصلاحيات",
   deleteConfirmBody: name =>
-    `هل أنت متأكد من حذف مجموعة الصلاحيات "${name}"؟ لا يمكن التراجع عن هذا الإجراء وسيخسر جميع المستخدمين المعينين هذه الصلاحيات.`,
+    `هل أنت متأكد من حذف مجموعة الصلاحيات "${name}"؟ لا يمكن التراجع عن هذا الإجراء، وسيفقد جميع المستخدمين المعيّنين صلاحيات هذه المجموعة.`,
   createGroupTitle: "إنشاء مجموعة صلاحيات",
   editGroupTitle: "تعديل مجموعة الصلاحيات",
   backToAllGroups: "العودة إلى كل المجموعات",

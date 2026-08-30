@@ -1,7 +1,7 @@
 import type { TeacherCreateRecurringClassLabels } from "@/shared/locale/types/dashboard/teachers";
 
 export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClassLabels = {
-  dialogTitle: "إضافة حصة",
+  dialogTitle: "إنشاء حصة متكررة",
   fields: {
     student: "الطالب",
     studentPlaceholder: "ابحث واختر طالباً...",
@@ -11,15 +11,15 @@ export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClass
     subjectPlaceholder: "اختر مادة",
     time: "الوقت",
     duration: "المدة",
-    durationMinutes: minutes => `${minutes} دقائق`,
-    days: "الأيام المتكررة",
+    durationMinutes: minutes => `${minutes} دقيقة`,
+    days: "الأيام",
     timezone: "المنطقة الزمنية",
     classType: "نوع الحصة",
   },
   classTypes: {
-    REGULAR: "عادي",
-    TRIAL: "تجريبي",
-    ADVANCE: "متقدم",
+    REGULAR: "عادية",
+    TRIAL: "تجريبية",
+    ADVANCE: "متقدمة",
   },
   days: {
     monday: "الاثنين",
@@ -33,7 +33,7 @@ export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClass
   timeOverride: {
     addOverride: "إضافة وقت مخصص",
     removeOverride: "إزالة التخصيص",
-    label: _day => `وقت مخصص`,
+    label: day => `الوقت المخصص ليوم ${day}`,
   },
   scheduling: {
     mode: "وضع الجدولة",
@@ -59,19 +59,19 @@ export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClass
     },
   },
   actions: {
-    create: "إنشاء الحصة",
+    create: "إنشاء",
     cancel: "إلغاء",
-    submitting: "جارٍ الإرسال...",
+    submitting: "جارٍ الإنشاء...",
   },
   success: {
-    title: "تم إنشاء الحصة",
+    title: "تم الإنشاء بنجاح",
     description: count => `تم إنشاء ${count} حصة بنجاح للجدول المتكرر.`,
   },
   errors: {
-    noDaysSelected: "يرجى اختيار يوم واحد على الأقل للجدول المتكرر.",
-    noStudentSelected: "يرجى اختيار طالب.",
-    noSubjectSelected: "يرجى اختيار مادة.",
+    noDaysSelected: "يجب اختيار يوم واحد على الأقل.",
+    noStudentSelected: "يجب اختيار طالب.",
+    noSubjectSelected: "يجب اختيار مادة.",
     creationFailed: "فشل إنشاء الحصة المتكررة. يرجى المحاولة مرة أخرى.",
-    durationMustBePositive: "يجب أن تكون المدة أكبر من 0",
+    durationMustBePositive: "يجب أن تكون المدة أكبر من 0.",
   },
 };

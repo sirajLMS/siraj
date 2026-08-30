@@ -46,6 +46,7 @@ function buildLedgerRow(overrides: Partial<CreditTransactionSelectType> = {}): C
     carryoverFromDate: null,
     carryoverToDate: null,
     carryoverPaymentDate: null,
+    internalNotes: null,
     ...overrides,
   };
 }
@@ -113,6 +114,7 @@ function defaultInsert(_tx: unknown, input: CreditAdjustmentInsertInput): Credit
     reason: input.reason,
     adjustmentType: input.adjustmentType,
     notes: input.notes ?? null,
+    internalNotes: input.internalNotes ?? null,
     creditedByUserId: input.creditedByUserId,
     idempotencyKey: input.idempotencyKey,
     carryoverTeacherId: input.carryoverTeacherId ?? null,
@@ -245,6 +247,7 @@ function assertIsErrorsLabels(value: unknown): asserts value is ErrorsLabels {
 function buildErrorsStub(): ErrorsLabels {
   const stub = {
     insufficientPermissions: "insufficient permissions",
+    tooLong: "input exceeds the maximum allowed length",
     credit: {
       invalidInput: "invalid credit adjustment input",
       insufficientBalance: ({ studentId, remaining }: { studentId: string; remaining: number }) =>

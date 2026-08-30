@@ -448,6 +448,7 @@ export const errorsEn: ErrorsLabels = {
   notFound: "The requested resource was not found.",
   unknownName: "Unknown",
   invalidInput: "Invalid input.",
+  tooLong: "Input exceeds the maximum allowed length.",
   invalidNationalId: "The national ID is invalid for the selected nationality.",
 
   // ─── General user creation errors ──────────────────────────────────

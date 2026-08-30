@@ -44,6 +44,8 @@ export interface CreditAdjustmentInput {
   hours: number;
   /** Operator-supplied rich-text reason; sanitized by the service before persistence. */
   notes?: string | null;
+  /** Plain-text operator note, accounting-only: stored verbatim (not rich-text sanitized), never rendered on student/parent surfaces. */
+  internalNotes?: string | null;
   /** Carryover metadata — required when adjustmentType is SUBTRACT_WITH_CARRYOVER. */
   carryoverTeacherId?: string | null;
   /** ISO date strings (YYYY-MM-DD) — carryover columns are TEXT in the schema. */
@@ -59,6 +61,8 @@ export interface CreditAdjustmentReturnType extends CreditTransactionReturnType 
   carryoverFromDate: string | null;
   carryoverToDate: string | null;
   carryoverPaymentDate: string | null;
+  /** Plain-text operator note, accounting-only (see CreditAdjustmentInput.internalNotes). */
+  internalNotes: string | null;
 }
 
 /** Repository insert payload for a single adjustment ledger row. */
@@ -70,6 +74,8 @@ export interface CreditAdjustmentInsertInput {
   adjustmentType: CreditAdjustmentType;
   /** Sanitized rich-text reason for the adjustment. */
   notes?: string | null;
+  /** Plain-text operator note, accounting-only; stored verbatim. */
+  internalNotes?: string | null;
   creditedByUserId: string;
   carryoverTeacherId?: string | null;
   carryoverFromDate?: string | null;

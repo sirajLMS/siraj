@@ -31,7 +31,7 @@ export const dashboardSubjectsAr: SubjectsLabels = {
   createCategory: "إنشاء فئة",
   editCategory: "تعديل الفئة",
   deleteCategory: "حذف الفئة",
-  deleteCategoryConfirm: name => `هل أنت متأكد من حذف الفئة "${name}"؟ سيتم إلغاء تعيين جميع المواد في هذه الفئة.`,
+  deleteCategoryConfirm: name => `هل أنت متأكد من حذف الفئة "${name}"؟ سيتم إلغاء تصنيف جميع المواد في هذه الفئة.`,
   cancel: "إلغاء",
   saveChanges: "حفظ التغييرات",
   saving: "جاري الحفظ...",

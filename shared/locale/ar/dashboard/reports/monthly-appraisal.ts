@@ -40,7 +40,7 @@ export const monthlyAppraisalAr: MonthlyAppraisalLabels = {
     emptyState: "لا توجد تقييمات بعد",
     emptyStateDescription: "لم يقدّم معلّمك تقييماً لهذا الشهر.",
     month: "الشهر",
-    teacher: "المعلّم",
+    teacher: "المعلم",
     addFeedback: "إضافة ملاحظة",
     feedbackModal: {
       title: "إضافة ملاحظة",
@@ -55,7 +55,7 @@ export const monthlyAppraisalAr: MonthlyAppraisalLabels = {
       behavior: "السلوك",
       attendance: "الحضور",
       punctuality: "الالتزام بالمواعيد",
-      overall: "العام",
+      overall: "التقييم العام",
     },
     learningTargets: "أهداف التعلّم",
     feedbackThread: "الملاحظات",
@@ -66,7 +66,7 @@ export const monthlyAppraisalAr: MonthlyAppraisalLabels = {
     loadFailed: "فشل تحميل التقييمات.",
     submitFailed: "فشل حفظ التقييم.",
     feedbackFailed: "فشل إضافة الملاحظة.",
-    gradeOutOfRange: "يجب أن تكون التقديرات بين 1 و 5.",
-    monthRequired: "يرجى اختيار شهر.",
+    gradeOutOfRange: "يجب أن تكون التقديرات بين 1 و5.",
+    monthRequired: "يرجى اختيار الشهر.",
   },
 };

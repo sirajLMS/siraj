@@ -69,8 +69,8 @@ export { adminActions, classInfo, metadata, rate };
 
 export const dashboardAdminViewAr: AdminViewLabels = {
   admin: {
-    pageTitle: "لوحة تحكم المسؤول",
-    roleLabel: "دور المسؤول",
+    pageTitle: "لوحة تحكم مدير النظام",
+    roleLabel: "دور مدير النظام",
   },
   timezone: {
     title: "تم اكتشاف تعارض في المنطقة الزمنية",
@@ -90,7 +90,7 @@ export const dashboardAdminViewAr: AdminViewLabels = {
     noData: "لا تتوفر بيانات أداء لهذه الجلسة.",
   },
   heatmap: {
-    activityHeatmap: "خريطة النشاط الحراري",
+    activityHeatmap: "خريطة النشاط الحرارية",
     studentInput: "مدخلات الطالب",
     teacherResponse: "استجابة المعلم",
     noData: "لا تتوفر بيانات نشاط لهذه الجلسة.",

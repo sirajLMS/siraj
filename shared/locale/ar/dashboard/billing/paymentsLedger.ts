@@ -2,7 +2,7 @@ import type { PaymentsLedgerLabels } from "@/shared/locale/types/dashboard/billi
 
 export const dashboardBillingPaymentsLedgerAr: PaymentsLedgerLabels = {
   pageTitle: "سجل المدفوعات",
-  pageSubtitle: "سجل مدفوعاتك والساعات الشرائية التي اقتنيتها",
+  pageSubtitle: "سجل مدفوعاتك والساعات الشرائية التي اشتريتها",
   historySectionTitle: "سجل الدفعات",
   emptyTitle: "لا توجد مدفوعات بعد",
   emptySubtitle: "سيظهر سجل دفعاتك هنا بمجرد إتمام عملية شراء.",

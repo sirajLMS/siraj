@@ -112,7 +112,7 @@ describe("usePaymentsLedgerViewModel", () => {
     const [first, second] = captured.vm?.rows ?? [];
     expect(first.creditsLabel).toBe(labels.hoursAddedChip(2.5));
     expect(second.creditsLabel).toBe(labels.creditsAddedChip(5));
-    expect(first.amountLabel).toBe("150 SAR");
+    expect(first.amountLabel).toBe("150.00 SAR");
     expect(first.methodLabel).toBe("Online Account");
     expect(second.methodLabel).toBe("—");
   });

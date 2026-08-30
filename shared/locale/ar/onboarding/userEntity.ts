@@ -25,7 +25,7 @@ export const onboardingUserEntityAr: UserEntityOnboardingLabels = {
     timezoneRequired: "المنطقة الزمنية مطلوبة",
     currencyRequired: "العملة مطلوبة",
     nameMinLength: "يجب أن يكون الاسم 3 أحرف على الأقل",
-    passwordMinLength: "يجب أن تكون كلمة المرور ١٢ حرفاً على الأقل.",
+    passwordMinLength: "يجب أن تكون كلمة المرور 12 حرفاً على الأقل.",
     passwordWeakComplexity: "يجب أن تحتوي كلمة المرور على فئتين على الأقل من: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
     passwordStrength: "قوة كلمة المرور",
     strengthWeak: "ضعيفة",

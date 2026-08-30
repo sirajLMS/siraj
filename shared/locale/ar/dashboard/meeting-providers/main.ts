@@ -7,7 +7,7 @@ export const dashboardMeetingProvidersAr: MeetingProvidersLabels = {
   createTitle: "إضافة منصة اجتماعات",
   editTitle: "تعديل بيانات المنصة",
   deleteTitle: "حذف منصة الاجتماعات",
-  deleteConfirm: "هل أنت تأكيد حذف المنصة التالية؟",
+  deleteConfirm: "هل أنت متأكد من حذف المنصة التالية؟",
   active: "مُفعّل",
   inactive: "معطّل",
   cancel: "إلغاء",

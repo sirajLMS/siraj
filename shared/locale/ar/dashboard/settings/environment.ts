@@ -19,12 +19,12 @@ export const dashboardSettingsEnvironmentAr: SettingsEnvironmentLabels = {
     unset: "غير مضبوط",
   },
   badges: {
-    dbOverride: "تجاوز DB",
+    dbOverride: "تجاوز قاعدة البيانات",
     envOnly: "بيئة فقط",
   },
   actions: {
     save: "حفظ التجاوز",
-    revert: "الرجوع للبيئة",
+    revert: "الرجوع إلى البيئة",
     showValue: "إظهار القيمة",
     hideValue: "إخفاء القيمة",
   },

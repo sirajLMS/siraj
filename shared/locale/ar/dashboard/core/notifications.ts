@@ -2,7 +2,7 @@ import type { DashboardCoreNotificationsLabels } from "@/shared/locale/types/das
 
 export const dashboardCoreNotificationsAr: DashboardCoreNotificationsLabels = {
   title: "الإشعارات",
-  noAlerts: "لا توجد تنبيهات في هذا الوقت.",
+  noAlerts: "لا توجد تنبيهات في الوقت الحالي.",
   errorLoading: "فشل في تحميل الإشعارات.",
   unpaidInvoicesTitle: "الفواتير غير المدفوعة",
   totalOverdueLabel: "إجمالي المتأخر",
