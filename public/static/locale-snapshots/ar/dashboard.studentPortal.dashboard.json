@@ -1,7 +1,7 @@
 {
-  "pageTitle": "لوحتي",
+  "pageTitle": "لوحة التحكم",
   "welcomeMessage": {
-    "__fn": "(name) => `\\u0623\\u0647\\u0644\\u064B\\u0627\\u060C ${name}`"
+    "__fn": "(name) => `\\u0645\\u0631\\u062D\\u0628\\u064B\\u0627\\u060C ${name}`"
   },
   "nextClass": "الحصة القادمة",
   "joinNow": "انضم",

@@ -3,7 +3,7 @@ import type { ErrorsLabels } from "@/shared/locale/types/errors";
 const student = {
   studentNotFound: (id: string) => `الطالب غير موجود: ${id}`,
   studentCreateFailed: "فشل إنشاء الطالب.",
-  studentUpdateFailed: (id: string) => `فشل تحديث الطالب (المعرف: ${id}).`,
+  studentUpdateFailed: (id: string) => `فشل تحديث الطالب (المعرّف: ${id}).`,
   studentVersionMismatch: ({
     id,
     expectedVersion,
@@ -126,25 +126,24 @@ export const errorsAr: ErrorsLabels = {
   auth: {
     // ─── No-param strings ────────────────────────────────────────────
     invalidRoleTab: "علامة التبويب المحددة للدور غير صالحة.",
-    passwordMinLength: "يجب أن تكون كلمة المرور ١٢ حرفاً على الأقل.",
-    passwordWeakComplexity:
-      "كلمة المرور يجب أن تحتوي على الأقل على فئتين من الأحرف: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
+    passwordMinLength: "يجب أن تكون كلمة المرور 12 حرفاً على الأقل.",
+    passwordWeakComplexity: "يجب أن تحتوي كلمة المرور على فئتين على الأقل من: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
     passwordRequiresUppercase: "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل.",
     passwordRequiresLowercase: "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل.",
     passwordRequiresDigit: "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.",
     passwordRequiresSpecialChar: "يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل (!@#$%^&*()_+-=[]{}|;:',.<>?/).",
-    tooManyLoginAttempts: "عدد محاولات تسجيل الدخول كثيرة جداً. يرجى المحاولة لاحقاً.",
+    tooManyLoginAttempts: "عدد محاولات تسجيل الدخول كثير جداً. يرجى المحاولة لاحقاً.",
     serviceUnavailable: "خدمة المصادقة غير متاحة مؤقتاً",
-    invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صالحة",
+    invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
     currentPasswordInvalid: "كلمة المرور الحالية غير صحيحة.",
     passwordsDoNotMatch: "كلمة المرور الجديدة وتأكيد كلمة المرور غير متطابقين.",
     accountDeactivated: "تم إلغاء تفعيل هذا الحساب. يرجى التواصل مع الدعم.",
-    accountLocked: "عدد محاولات تسجيل الدخول كثيرة جداً. تم قفل حسابك مؤقتاً.",
+    accountLocked: "عدد محاولات تسجيل الدخول كثير جداً. تم قفل حسابك مؤقتاً.",
     demoLoginNotEnabled: "تسجيل الدخول التجريبي غير مفعل",
     demoLoginFailed: "فشل تسجيل الدخول التجريبي",
     impersonationNotAllowed: "غير مسموح لك بانتحال هوية المستخدمين",
     cannotImpersonateSelf: "لا يمكنك انتحال هويتك",
-    cannotImpersonateSuperAdmin: "لا يمكنك انتحال هوية مسؤول نظام آخر",
+    cannotImpersonateSuperAdmin: "لا يمكنك انتحال هوية مدير نظام آخر",
     impersonationTargetNotFound: "المستخدم المراد انتحال هويته غير موجود",
     impersonationTargetInactive: "المستخدم المراد انتحال هويته غير نشط أو محذوف",
     impersonationSessionInvalid: "جلستك غير صالحة لانتحال الهوية",
@@ -169,9 +168,9 @@ export const errorsAr: ErrorsLabels = {
     userNotFound: (id: string) => `المستخدم غير موجود: ${id}`,
     permissionGroupNotFound: (id: string) => `مجموعة الأذونات غير موجودة: ${id}`,
     permissionGroupNameRequired: "اسم المجموعة مطلوب.",
-    permissionGroupNameTooLong: "اسم المجموعة طويل جداً (255 حرف كحد أقصى).",
+    permissionGroupNameTooLong: "اسم المجموعة طويل جداً (255 حرفاً كحد أقصى).",
     permissionGroupInvalidName: "اسم المجموعة غير صالح.",
-    cannotModifySuperAdmin: "لا يمكن تعديل المستخدم المسؤول الأعلى.",
+    cannotModifySuperAdmin: "لا يمكن تعديل مستخدم مدير النظام.",
     cannotModifySelf: "لا يمكن تعديل صلاحياتك الخاصة.",
     cannotModifySystemPermissionGroup: "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام",
     cannotDeleteSystemPermissionGroup: "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام",
@@ -184,7 +183,7 @@ export const errorsAr: ErrorsLabels = {
       `الفاتورة ${id} بالفعل في حالة ${status.toLowerCase()}.`,
     paymentProofRequired: "إثبات الدفع مطلوب.",
     cannotDeletePaidInvoice: (id: string) => `لا يمكن حذف الفاتورة ${id} لأنها مدفوعة.`,
-    invalidParentId: "معرف ولي الأمر غير صالح.",
+    invalidParentId: "معرّف ولي الأمر غير صالح.",
     invalidInvoiceAmount: "مبلغ الفاتورة غير صالح.",
     parentNotFound: "ولي الأمر غير موجود.",
     invoiceVersionMismatch: ({
@@ -203,8 +202,8 @@ export const errorsAr: ErrorsLabels = {
     quotaRefreshConcurrentWrite: "فشل تحديث الحصة بسبب تعديل متزامن",
     quotaResetConcurrentModification: "فشل إعادة تعيين فترة الحصة بسبب تعديل متزامن",
     paymentMethodCreateFailed: "فشل إنشاء طريقة دفع المستخدم.",
-    paymentMethodNotFound: (id: string) => `طريقة الدفع غير موجودة (المعرف: ${id}).`,
-    currencyHedgeCreateFailed: "فشل إنشاء تغطية العملة.",
+    paymentMethodNotFound: (id: string) => `طريقة الدفع غير موجودة (المعرّف: ${id}).`,
+    currencyHedgeCreateFailed: "فشل إنشاء تحوّط العملة.",
     fxRefreshRateLimitExceeded: "تم تجاوز حد تحديث أسعار صرف العملات. يرجى المحاولة مرة أخرى لاحقاً.",
   },
   credit: {
@@ -232,8 +231,8 @@ export const errorsAr: ErrorsLabels = {
       `${tableName} غير موجود: ${entityId}`,
     invalidFileType:
       "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و GIF و WebP و BMP و DOC و DOCX و XLS و XLSX و PPT و PPTX.",
-    invalidFileId: "معرف الملف غير صالح.",
-    invoicePaymentProofPending: "لدى هذه الفاتورة إثبات دفع قيد المراجعة بالفعل.",
+    invalidFileId: "معرّف الملف غير صالح.",
+    invoicePaymentProofPending: "يوجد إثبات دفع قيد المراجعة بالفعل لهذه الفاتورة.",
     fileUsageRegistered: "تم تسجيل استخدام الملف بنجاح",
     fileUsageRegisterFailed: (error: string) => `فشل تسجيل استخدام الملف: ${error}`,
     fileUsageRegisterFailedGeneric: "فشل تسجيل استخدام الملف.",
@@ -265,13 +264,13 @@ export const errorsAr: ErrorsLabels = {
     failedToCreateFileRecord: "فشل في إنشاء سجل الملف",
     invalidOrExpiredToken: "رمز غير صالح أو منتهي الصلاحية أو مستخدم بالفعل",
     invalidFilePath: "مسار الملف غير صالح",
-    requestBodyRequired: "مطلوب نص الطلب",
+    requestBodyRequired: "نص الطلب مطلوب",
     failedToWriteFile: "فشل في كتابة الملف",
     filePathRequired: "مسار الملف مطلوب",
     fileNotFound: "الملف غير موجود",
     authenticationRequired: "المصادقة مطلوبة",
     missingPathname: "مسار الملف مفقود في طلب الرفع",
-    missingUploadSessionId: "معرف جلسة الرفع مفقود",
+    missingUploadSessionId: "معرّف جلسة الرفع مفقود",
     invalidFileSize: "حجم الملف غير صالح في طلب الرفع",
     missingContentType: "نوع المحتوى مفقود في طلب الرفع",
     invalidUploadSession: "جلسة الرفع غير صالحة",
@@ -303,7 +302,7 @@ export const errorsAr: ErrorsLabels = {
     itemNotFoundInBucket: "العنصر غير موجود في المخزن",
     directoryDoesNotExist: "الدليل غير موجود",
     unknownError: "خطأ غير معروف",
-    failedToRetrieveMovedItemInfo: "فشل في استرداد معلومات العنصر المنقول",
+    failedToRetrieveMovedItemInfo: "فشل استرداد معلومات العنصر المنقول",
   },
   meetingProvider: {
     meetingProviderInactive: "موفر الاجتماعات غير نشط.",
@@ -311,11 +310,11 @@ export const errorsAr: ErrorsLabels = {
     meetingConfigCreateFailed: "فشل إنشاء تكوين الاجتماع.",
     meetingConfigUpdateFailed: "فشل تحديث تكوين الاجتماع.",
     meetingProviderNotFound: (id: string) => `موفر الاجتماعات غير موجود: ${id}`,
-    meetingProviderCreateFailed: "فشل إنشاء موفر الاجتماعات.",
-    meetingProviderUpdateFailed: "فشل تحديث موفر الاجتماعات.",
-    meetingProviderInUse: "موفر الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
-    invalidReturnPath: "مسار الإرجاع غير صالح. يجب أن يكون مسار الإرجاع ارتباطاً نسبياً.",
-    missingSubject: "مطلوب موضوع الانتحال لتفويض النطاق الكامل",
+    meetingProviderCreateFailed: "فشل إنشاء مزوّد الاجتماعات.",
+    meetingProviderUpdateFailed: "فشل تحديث مزوّد الاجتماعات.",
+    meetingProviderInUse: "مزوّد الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
+    invalidReturnPath: "مسار الإرجاع غير صالح. يجب أن يكون مسار الإرجاع رابطاً نسبياً.",
+    missingSubject: "موضوع الانتحال مطلوب لتفويض النطاق الكامل.",
     dwdNotEnabled: "تفويض النطاق الكامل غير مفعّل لحساب الخدمة هذا. اتصل بمسؤول Google Workspace لديك.",
     slugIsRequired: "المعرّف الفريد (slug) مطلوب",
     urlAllowlistIsRequired: "قائمة عناوين URL المسموح بها مطلوبة",
@@ -330,7 +329,7 @@ export const errorsAr: ErrorsLabels = {
     channelUnsupportedProviderKind: "هذا المزوّد لا يدعم إنشاء روابط الاجتماعات تلقائياً.",
     channelInsufficientScopes: "صلاحيات غير كافية لمزوّد الاجتماعات.",
     channelInvalidServiceAccountJson: "تكوين حساب الخدمة غير صالح.",
-    channelMissingImpersonationSubject: "موضوع التمثيل (impersonation) لمزوّد الاجتماعات غير مُعدّ.",
+    channelMissingImpersonationSubject: "موضوع الانتحال لمزوّد الاجتماعات غير مُعدّ.",
     channelNoOrgCredentialsNoUserToken: "لا توجد بيانات اعتماد لمزوّد الاجتماعات.",
     channelNoAppAccessPolicy: "لا توجد سياسة وصول للتطبيق لمزوّد الاجتماعات.",
     channelProviderErrorOccurred: "حدث خطأ في مزوّد الاجتماعات.",
@@ -340,7 +339,7 @@ export const errorsAr: ErrorsLabels = {
     invalidTimezone: "المنطقة الزمنية غير صالحة.",
     createFailed: "فشل إنشاء ملف ولي الأمر.",
     suggestionSubmitFailed: "فشل إرسال الاقتراح.",
-    upsertFailed: "فشل عملية إدراج/تحديث ولي الأمر.",
+    upsertFailed: "فشل حفظ بيانات ولي الأمر.",
   },
   staff: {
     alreadyExists: "ملف الموظف لهذا المستخدم موجود بالفعل.",
@@ -377,14 +376,14 @@ export const errorsAr: ErrorsLabels = {
     notFound: "مورد المادة غير موجود.",
   },
   meetingConfig: {
-    requiresInstanceOrSchedule: "يتطلب تكوين اجتماع الفصل معرف مثيل الفصل أو معرف الجدولة المتكررة.",
+    requiresInstanceOrSchedule: "يتطلب تكوين اجتماع الحصة معرّف مثيل الحصة أو معرّف الجدولة المتكررة.",
   },
   meeting: {
     providerTokenUpdateFailed: "فشل تحديث رمز موفر الاجتماعات.",
     providerTokenInsertFailed: "فشل إدراج رمز موفر الاجتماعات.",
   },
   session: {
-    userIdRequired: "معرف المستخدم (userId) مطلوب.",
+    userIdRequired: "معرّف المستخدم (userId) مطلوب.",
   },
   appearance: {
     saveDraftFailed: "فشل حفظ مسودة المظهر.",
@@ -420,14 +419,14 @@ export const errorsAr: ErrorsLabels = {
   quota: {
     insufficientRemaining: (requested: number, available: number) => `المتبقي ${available} حصة فقط — طُلب ${requested}`,
     exceedsCreditBalance: (requested: number, available: number) =>
-      `رصيد غير كافٍ. المتاح: ${available}، المطلوب: ${requested}`,
+      `الرصيد غير كافٍ. المتاح: ${available}، المطلوب: ${requested}`,
     periodicRefreshFailed: (quotaName: string, reason: string) => `فشل تحديث الحصة الدورية ${quotaName}: ${reason}`,
     invalidPeriod: (quotaName: string) => `الحصة ${quotaName} منتهية الصلاحية أو فترتها غير صالحة`,
     alreadyExpired: (quotaName: string) => `الحصة ${quotaName} منتهية الصلاحية بالفعل`,
     earmarkExceedsRemaining: (requested: number, available: number) =>
       `حجز ${requested} يتجاوز الحصة المتبقية (${available})`,
     slotConflict: (startTime: string, endTime: string) => `الفترة الزمنية ${startTime}–${endTime} تتعارض مع حجز قائم`,
-    onDemandNoCredits: (studentName: string) => `لا توجد أرصدة كافية للحجز الفوري لـ ${studentName}`,
+    onDemandNoCredits: (studentName: string) => `لا يوجد رصيد كافٍ للحجز الفوري لـ ${studentName}`,
     cannotRefreshNonPeriodic: "لا يمكن تحديث حصة غير دورية",
     noValidPeriodDays: "الحصة لا تحتوي على أيام صالحة للفترة المحددة",
   },
@@ -457,11 +456,11 @@ export const errorsAr: ErrorsLabels = {
 
   // ─── FX Display Currency messages (used by buildFxDisplayMessages) ────
   displayCurrencyNotSet: (values: { lockedAmount: string; lockedCurrency: string }) =>
-    `عرض العملة غير محدد. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
+    `عملة العرض غير محددة. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
   displayCurrencyStale: (values: { lockedAmount: string; lockedCurrency: string }) =>
-    `عرض العملة قديم. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
+    `عملة العرض غير محدثة. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
   displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) =>
-    `عملات عرض مختلطة. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
+    `تم اكتشاف عملات عرض مختلطة. المبلغ المقفل: ${values.lockedAmount} ${values.lockedCurrency}`,
 
   // ─── Flattened error properties for backward compatibility ───────────
   // Spread the nested sub-objects to provide flat top-level keys
@@ -473,31 +472,31 @@ export const errorsAr: ErrorsLabels = {
   ...scheduling,
   ...permissionGroup,
   ...teacher,
-  meetingProviderNotFound: (id: string) => `موفر الاجتماعات غير موجود: ${id}`,
-  meetingProviderCreateFailed: "فشل إنشاء موفر الاجتماعات.",
-  meetingProviderUpdateFailed: "فشل تحديث موفر الاجتماعات.",
-  meetingProviderInUse: "موفر الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
-  meetingProviderInactive: "موفر الاجتماعات غير نشط.",
+  meetingProviderNotFound: (id: string) => `مزود الاجتماعات غير موجود: ${id}`,
+  meetingProviderCreateFailed: "فشل إنشاء مزود الاجتماعات.",
+  meetingProviderUpdateFailed: "فشل تحديث مزود الاجتماعات.",
+  meetingProviderInUse: "مزود الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
+  meetingProviderInactive: "مزود الاجتماعات غير نشط.",
   meetingConfigNotFound: (id: string) => `تكوين الاجتماع غير موجود: ${id}`,
   meetingConfigCreateFailed: "فشل إنشاء تكوين الاجتماع.",
   meetingConfigUpdateFailed: "فشل تحديث تكوين الاجتماع.",
   parentAlreadyDeactivated: "حساب ولي الأمر معطل بالفعل.",
   parentAlreadyActivated: "حساب ولي الأمر مفعّل بالفعل.",
   exchangeRateStale: ({ fromCurrency, toCurrency }: { fromCurrency: string; toCurrency: string }) =>
-    `سعر الصرف لـ ${fromCurrency} إلى ${toCurrency} قديم (أقدم من 24 ساعة)`,
+    `سعر الصرف من ${fromCurrency} إلى ${toCurrency} قديم (أقدم من 24 ساعة)`,
   quotaExpired: "انتهت صلاحية الحصة.",
   quotaNotFound: "الحصة غير موجودة.",
   invalidQuotaState: "حالة الحصة غير صالحة.",
   outsideAvailability: "الحجز خارج نوافذ توفر المعلم.",
-  teacherUnavailabilityConflict: "الحجز محظور بسبب نمط عدم التفرغ المتكرر.",
-  teacherOnVacation: "الحجز محظور بسبب إجازة معتمدة.",
+  teacherUnavailabilityConflict: "الحجز محظور بسبب نمط عدم التوفر المتكرر.",
+  teacherOnVacation: "الحجز محظور بسبب فترة إجازة معتمدة.",
   resourceNotFound: "مورد التعلم غير موجود.",
   currencyInUse:
     "لا يمكن إلغاء تفعيل هذه العملة لأنها مستخدمة حالياً في الفواتير أو المدفوعات أو أسعار الصرف أو ملفات المستخدمين.",
 
   // ─── Cron errors ──────────────────────────────────────────────────
   invalidRunStatus: (status: string, runId: string) =>
-    `لا يمكن إعادة محاولة تشغيل بحالة ${status} (معرف التشغيل: ${runId}).`,
+    `لا يمكن إعادة محاولة تشغيل بحالة ${status} (معرّف التشغيل: ${runId}).`,
 
   // ─── Communication / suggestion / complaint errors ─────────────────────
   complaintNotFound: "الشكوى غير موجودة.",
@@ -517,12 +516,12 @@ export const errorsAr: ErrorsLabels = {
   // ─── WhatsApp account management errors ─────────────────────────────────
   whatsappAccountNotFound: (id: string) => `حساب واتساب غير موجود: ${id}`,
   whatsappAccessTokenNotConfigured: "رمز الوصول لواتساب غير مُهيأ.",
-  whatsappWabaIdNotConfigured: "معرف حساب واتساب التجاري غير مُهيأ.",
+  whatsappWabaIdNotConfigured: "معرّف حساب واتساب التجاري غير مُهيأ.",
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "البريد الإلكتروني",
   smsChannelLabel: "رسائل SMS",
-  pushChannelLabel: "إشعارات الدفع",
+  pushChannelLabel: "إشعارات فورية",
   whatsappChannelLabel: "واتساب",
   onAppChannelLabel: "داخل التطبيق",
   deliveryFailed: (channelLabel: string) => `فشل تسليم ${channelLabel}. يرجى المحاولة مرة أخرى لاحقاً.`,
@@ -533,32 +532,32 @@ export const errorsAr: ErrorsLabels = {
   studentNameFallback: "طالب",
 
   // ─── Data-integrity guards (developer-facing) ────────────────────
-  invalidIdentifierKind: (value: string) => `صفحة حساب غير صالحة: identifierKind غير مدعوم '${value}'`,
-  invalidSupportedDirections: (value: string) => `صفحة حساب غير صالحة: supportedDirections غير مدعوم '${value}'`,
+  invalidIdentifierKind: (value: string) => `صف حساب غير صالح: identifierKind غير مدعوم '${value}'`,
+  invalidSupportedDirections: (value: string) => `صف حساب غير صالح: supportedDirections غير مدعوم '${value}'`,
 
   // ─── Permission override validation errors ──────────────────────
   invalidOverrideState: "قيمة حالة تجاوز الصلاحية غير صالحة.",
 
   // ─── Storage bulk operation errors ──────────────────────────────
   bulkOperationLimitExceeded: (operation: string, limit: number) =>
-    `عملية ${operation} المجموعة محدودة بـ ${limit} عنصر كحد أقصى`,
+    `عملية ${operation} الجماعية محدودة بحد أقصى ${limit} عنصرًا`,
 
   // ─── API route errors ─────────────────────────────────────────────
   forbidden: "محظور",
-  noPdfAvailable: "لا تتوفر ملف PDF لهذه الفاتورة",
+  noPdfAvailable: "لا يتوفر ملف PDF لهذه الفاتورة",
   invoiceNotFoundShort: "الفاتورة غير موجودة",
   invalidLocale: "اللغة غير صالحة",
   invalidOrigin: "المصدر غير صالح",
-  failedToSetLocale: "فشل في تعيين اللغة",
+  failedToSetLocale: "فشل تعيين اللغة",
   fxRefreshFailed: "فشل تحديث أسعار الصرف",
-  deletedExpiredSignedUrls: (count: number) => `تم حذف ${count} رابط موقع منتهي الصلاحية`,
+  deletedExpiredSignedUrls: (count: number) => `تم حذف ${count} رابطًا موقّعًا منتهي الصلاحية`,
   invalidRequestFormat: "تنسيق الطلب غير صالح. المتوقع { logs: LogEntry[] }",
   missingRequiredFields: "حقول مطلوبة مفقودة في إدخال السجل",
-  invalidSessionId: "معرف الجلسة غير صالح في إدخال السجل",
-  failedToWriteLogs: "فشل في كتابة السجلات",
-  missingCodeOrState: "معامل الكود أو الحالة مفقود",
+  invalidSessionId: "معرّف الجلسة غير صالح في إدخال السجل",
+  failedToWriteLogs: "فشلت كتابة السجلات",
+  missingCodeOrState: "معامل code أو state مفقود",
   invalidOrExpiredOAuthState: "حالة OAuth غير صالحة أو منتهية الصلاحية",
   providerMismatch: "عدم تطابق المزوّد في حالة OAuth",
-  failedToCompleteOAuthTokenExchange: "فشل في إتمام تبادل رمز OAuth",
+  failedToCompleteOAuthTokenExchange: "فشل إتمام تبادل رمز OAuth",
   invalidEventType: "نوع الحدث غير صالح",
 };

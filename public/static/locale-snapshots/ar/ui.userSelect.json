@@ -1,9 +1,9 @@
 {
-  "teacherLabel": "المعلم",
-  "studentLabel": "الطالب",
+  "teacherLabel": "معلم",
+  "studentLabel": "طالب",
   "parentLabel": "ولي الأمر",
   "userLabel": "المستخدم",
-  "staffLabel": "الموظف",
+  "staffLabel": "موظف",
   "searchPlaceholder": "ابحث…",
   "noResults": "لا توجد نتائج",
   "required": "هذا الحقل مطلوب"

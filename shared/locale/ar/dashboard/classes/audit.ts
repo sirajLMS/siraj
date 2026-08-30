@@ -1,7 +1,7 @@
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes";
 
 export const dashboardClassAuditAr: ClassAuditLabels = {
-  invalidClassId: "معرف الحصة غير صالح",
+  invalidClassId: "معرّف الحصة غير صالح",
   pageTitle: "عرض تفاصيل الحصة",
   mobileTitle: "سجل تدقيق الحصة",
   breadcrumbs: {
@@ -66,7 +66,7 @@ export const dashboardClassAuditAr: ClassAuditLabels = {
     edit: "تعديل",
     content: "محتوى الملاحظة",
   },
-  meetingIdLabel: "معرف الاجتماع:",
+  meetingIdLabel: "معرّف الاجتماع:",
   online: "عبر الإنترنت",
   meetingIdNA: "غير متوفر",
 };

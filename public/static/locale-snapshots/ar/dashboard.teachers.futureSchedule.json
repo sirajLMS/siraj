@@ -2,33 +2,33 @@
   "pageTitle": "جدول المعلم القادم",
   "jumpToDate": "الانتقال إلى تاريخ",
   "today": "اليوم",
-  "leaveQuota": "حصة الإجازة",
+  "leaveQuota": "حصة الإجازات",
   "totalClasses": "إجمالي الحصص",
   "futureClasses": "الحصص القادمة",
-  "regular": "عادي",
-  "reScheduled": "مُعاد جدولته",
+  "regular": "عادية",
+  "reScheduled": "مُعاد جدولتها",
   "requestLeave": "طلب إجازة",
   "viewMaterials": "عرض المواد",
-  "quotaReached": "تم الوصول للحد الأقصى",
+  "quotaReached": "لقد استنفدت حصة الإجازات المتاحة لك.",
   "remaining": {
-    "__fn": "(count, total) => `${count} / ${total} \\u0645\\u062A\\u0628\\u0642\\u064A`"
+    "__fn": "(count, total) => `\\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062A\\u0628\\u0642\\u064A\\u0629: ${count} \\u0645\\u0646 ${total}`"
   },
   "importantNotes": "ملاحظات هامة",
-  "supportContact": "جهة اتصال الدعم",
-  "contactAdmin": "الآتصال بالمسؤول",
+  "supportContact": "التواصل مع الدعم",
+  "contactAdmin": "تواصل مع مدير النظام للحصول على المساعدة.",
   "monthDisplay": {
     "__fn": "(month, year) => `${month} ${year}`"
   },
   "leaveQuotaDesc": {
-    "__fn": "() => \"\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0625\\u062C\\u0627\\u0632\\u0629\""
+    "__fn": "(count) => `\\u064A\\u0645\\u0643\\u0646\\u0643 \\u0637\\u0644\\u0628 \\u0625\\u062C\\u0627\\u0632\\u0629 \\u0644\\u0640 ${count} \\u062D\\u0635\\u0635.`"
   },
   "totalClassesDesc": {
-    "__fn": "() => \"\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A \\u0627\\u0644\\u062D\\u0635\\u0635\""
+    "__fn": "(count) => `\\u0644\\u062F\\u064A\\u0643 ${count} \\u062D\\u0635\\u0635 \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629.`"
   },
   "available": "متاح",
-  "loading": "جاري تحميل الجدول المستقبلي...",
-  "defaultLeaveReason": "المعلم طلب إجازة من الجدول المستقبلي",
-  "supportRequestReason": "طلب المعلم الدعم من صفحة الجدول المستقبلي",
+  "loading": "جارٍ تحميل الجدول...",
+  "defaultLeaveReason": "غير محدد",
+  "supportRequestReason": "غير محدد",
   "students": "الطلاب",
   "studentCount": {
     "__fn": "(count) => count === 1 ? `${count} \\u0637\\u0627\\u0644\\u0628` : `${count} \\u0637\\u0644\\u0627\\u0628`"
@@ -54,15 +54,15 @@
     "openCalendar": "فتح التقويم"
   },
   "errors": {
-    "quotaExceeded": "لقد وصلت إلى الحد الأقصى لطلبات الإجازة لهذا الشهر.",
+    "quotaExceeded": "لا يمكن طلب الإجازة: تم تجاوز الحد المسموح.",
     "leaveRequestFailed": "فشل طلب الإجازة. يرجى المحاولة مرة أخرى.",
-    "failedToLoad": "فشل تحميل الجدول المستقبلي.",
+    "failedToLoad": "فشل تحميل الجدول.",
     "supportRequestFailed": "فشل إرسال طلب الدعم. يرجى المحاولة مرة أخرى."
   },
   "notifications": {
     "noSubjectAssigned": "لم يتم تعيين مادة لهذه الحصة.",
     "supportRequestSent": "تم إرسال طلب الدعم بنجاح.",
-    "leaveRequested": "تم طلب الإجازة بنجاح."
+    "leaveRequested": "تم تقديم طلب الإجازة بنجاح."
   },
   "actions": {
     "joinVideo": "الانضمام للفيديو"

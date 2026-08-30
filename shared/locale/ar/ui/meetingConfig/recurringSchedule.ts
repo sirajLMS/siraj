@@ -6,7 +6,7 @@ export const uiMeetingConfigRecurringScheduleAr = {
   breadcrumbDashboard: "لوحة التحكم",
   breadcrumbClasses: "الحصص",
   goToClass: "الانتقال إلى الحصة",
-  rateSectionTitle: "سعر الفصل المتكرر",
+  rateSectionTitle: "سعر الحصة المتكررة",
   hourlyRateLabel: "السعر بالساعة",
   currencyLabel: "العملة",
   rateSaveLabel: "حفظ السعر",

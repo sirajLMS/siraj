@@ -7,6 +7,6 @@ export const smsAr: SmsLabels = {
   },
   suggestionAcknowledged: {
     acknowledged: ({ parentName, suggestionTitle }) =>
-      `عزيزي ${parentName}، تم استلام اقتراحك "${suggestionTitle}" وتأكيده. شكراً لك!`,
+      `عزيزي ${parentName}، تم استلام اقتراحك "${suggestionTitle}". شكراً لك!`,
   },
 };

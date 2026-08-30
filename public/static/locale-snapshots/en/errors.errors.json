@@ -499,6 +499,7 @@
   "notFound": "The requested resource was not found.",
   "unknownName": "Unknown",
   "invalidInput": "Invalid input.",
+  "tooLong": "Input exceeds the maximum allowed length.",
   "invalidNationalId": "The national ID is invalid for the selected nationality.",
   "specializedGroupNotAllowed": "Cannot assign a specialized group (student, teacher, or parent) to a general user. Use the dedicated onboarding flow for that user type instead.",
   "rejectedReportsRequireReason": "REJECTED reports must include a rejection reason.",

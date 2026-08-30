@@ -51,6 +51,6 @@ export const dashboardTeacherReassignmentAr: TeacherReassignmentLabels = {
     statusChangeSuccess: "تم تحديث الحالة بنجاح.",
   },
   errors: {
-    invalidId: "معرف الطالب غير صالح.",
+    invalidId: "معرّف الطالب غير صالح.",
   },
 };

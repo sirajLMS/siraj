@@ -29,7 +29,7 @@ export const dashboardPermissionsAr: PermissionsLabels = {
   systemBadge: "نظام",
   customBadge: "مخصص",
   columnName: "الاسم",
-  columnSlug: "المعرف الفريد",
+  columnSlug: "المعرّف الفريد",
   columnType: "النوع",
   columnPermissionsCount: "الصلاحيات",
   columnActions: "الإجراءات",

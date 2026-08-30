@@ -34,7 +34,7 @@ export const dashboardParentProfileAr: ParentProfileLabels = {
     avatarUploadSuccess: "تم رفع الصورة الشخصية بنجاح.",
   },
   errors: {
-    invalidId: "معرف ولي الأمر غير صالح.",
+    invalidId: "معرّف ولي الأمر غير صالح.",
     notFound: "ولي الأمر غير موجود.",
     invalidData: "بيانات ولي الأمر غير صالحة.",
   },

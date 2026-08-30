@@ -5,7 +5,10 @@
     "title": "Adjustment Type",
     "add": "Add",
     "subtract": "Subtract",
-    "subtractWithCarryover": "Subtract With Carryover"
+    "subtractWithCarryover": "Subtract With Carryover",
+    "addDescription": "Grant bonus hours",
+    "subtractDescription": "Deduct unearned hours",
+    "subtractWithCarryoverDescription": "Deduct hours and owe payout to a teacher"
   },
   "carryover": {
     "bannerTitle": "Carryover — allocate to teacher",
@@ -21,7 +24,25 @@
     "label": "Hours"
   },
   "form": {
-    "balance": "Balance"
+    "balance": "Balance",
+    "internalNotes": "Internal Notes",
+    "internalNotesHint": "Visible to staff only — never shown to students or parents."
+  },
+  "preview": {
+    "balance": {
+      "__fn": "(from, to) => `Classes remaining: ${from} \\u2192 ${to}`"
+    }
+  },
+  "summary": {
+    "add": {
+      "__fn": "(hours, student) => hours === 1 ? `Add 1 hour to ${student}` : `Add ${hours} hours to ${student}`"
+    },
+    "subtract": {
+      "__fn": "(hours, student) => hours === 1 ? `Subtract 1 hour from ${student}` : `Subtract ${hours} hours from ${student}`"
+    },
+    "carryover": {
+      "__fn": "(hours, teacher, paymentDate) => hours === 1 ? `Subtract 1 hour; 1 payout hour to ${teacher} by ${paymentDate}` : `Subtract ${hours} hours; ${hours} payout hours to ${teacher} by ${paymentDate}`"
+    }
   },
   "resultsCappedHint": {
     "__fn": "(limit) => `Showing the first ${limit} students. Refine your search to narrow the list.`"

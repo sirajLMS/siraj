@@ -1,5 +1,5 @@
 export const uiPaymentMethodIdentifierAr = {
-  email: "بريد إلكتروني",
-  handle: "معرّف",
-  emailOrHandle: "بريد أو معرّف",
+  email: "البريد الإلكتروني",
+  handle: "المعرّف",
+  emailOrHandle: "البريد الإلكتروني أو المعرّف",
 };

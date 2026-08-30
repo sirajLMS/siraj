@@ -10,11 +10,11 @@
     "audit": "التدقيق",
     "siteContent": "محتوى الموقع",
     "timezones": "المناطق الزمنية",
-    "meetingIntegrations": "تكامل الاجتماعات",
+    "meetingIntegrations": "تكاملات الاجتماعات",
     "appearance": "المظهر"
   },
   "audit": {
-    "emptyMessage": "لا توجد سجلات تدقيق تطابق عوامل التصفية الحالية.",
+    "emptyMessage": "لا توجد سجلات تدقيق تطابق الفلاتر الحالية.",
     "filters": {
       "entityType": "نوع الكيان",
       "action": "الإجراء",
@@ -84,7 +84,7 @@
     "currentBrandColors": "ألوان العلامة التجارية الحالية",
     "currentBrandColorsHint": "لقطة من لوحة ألوان المسودة الخاصة بك. ادخل وضع التخصيص لضبط الألوان الفردية.",
     "quickPresets": "الإعدادات المسبقة السريعة",
-    "quickPresetsHint": "انقر على إعداد مسبق لمعاينته فوراً. افتح وضع التخصيص للضبط الدقيق.",
+    "quickPresetsHint": "انقر على إعداد مسبق لمعاينته فورًا. افتح وضع التخصيص للضبط الدقيق.",
     "primaryColor": "أساسي",
     "secondaryColor": "ثانوي",
     "lightMode": "الوضع الفاتح",
@@ -113,12 +113,12 @@
     "resetConfirmCancel": "إلغاء",
     "resetConfirmConfirm": "إعادة التعيين",
     "conflictTitle": "تم تعديل المظهر بواسطة مسؤول آخر",
-    "conflictBody": "تم تغيير إعدادات المظهر بواسطة مسؤول آخر منذ آخر تحميل لك. أعد التحميل لتجاهل تغييراتك واستخدام أحدث إصدار، أو الكتابة فوقها لفرض تغييراتك.",
+    "conflictBody": "غيّر مسؤول آخر إعدادات المظهر منذ آخر مرة حمّلتها فيها. أعد التحميل لتجاهل تغييراتك واستخدام أحدث إصدار، أو استخدم الكتابة فوق لفرض تغييراتك.",
     "conflictReload": "إعادة التحميل",
     "conflictOverwrite": "الكتابة فوق",
     "conflictCancel": "إلغاء",
     "errorBoundaryTitle": "خطأ في المخصّص",
-    "errorBoundaryBody": "واجه مخصّص مظهر الموقع خطأ غير متوقع. أعد التعيين واخرج للاستعادة.",
+    "errorBoundaryBody": "واجه مخصّص مظهر الموقع خطأ غير متوقع. أعد تعيين المسودة واخرج للاستعادة.",
     "errorBoundaryReset": "إعادة التعيين والخروج",
     "noPermission": "ليس لديك صلاحية لإدارة مظهر الموقع.",
     "customize": {
@@ -168,12 +168,12 @@
       "unset": "غير مضبوط"
     },
     "badges": {
-      "dbOverride": "تجاوز DB",
+      "dbOverride": "تجاوز قاعدة البيانات",
       "envOnly": "بيئة فقط"
     },
     "actions": {
       "save": "حفظ التجاوز",
-      "revert": "الرجوع للبيئة",
+      "revert": "الرجوع إلى البيئة",
       "showValue": "إظهار القيمة",
       "hideValue": "إخفاء القيمة"
     },
@@ -226,7 +226,7 @@
     "keyRequired": "المفتاح مطلوب",
     "valueRequired": "القيمة مطلوبة",
     "valueInteger": "يجب أن تكون القيمة عدداً صحيحاً غير سالب",
-    "valueBoolean": "يجب أن تكون القيمة منطقية (صحيح أو خاطئ)",
+    "valueBoolean": "يجب أن تكون القيمة منطقية (صحيح أو خطأ)",
     "valueJson": "يجب أن تكون القيمة بصيغة JSON صحيحة",
     "saveLabel": "حفظ",
     "cancelLabel": "إلغاء",
@@ -271,14 +271,14 @@
     "loading": "جارٍ تحميل تكاملات الاجتماعات…",
     "loadError": "تعذّر تحميل تكاملات الاجتماعات.",
     "providersConfigured": "المزودون المُعدّون",
-    "credentialsHealthy": "بيانات المؤسسة صحية",
+    "credentialsHealthy": "بيانات اعتماد المؤسسة صحيحة",
     "teachersConnected": "المعلمون المتصلون",
-    "reauthNeeded": "يحتاج إعادة مصادقة",
+    "reauthNeeded": "يلزم إعادة المصادقة",
     "lastTested": "آخر اختبار",
     "neverTested": "لم يُختبر",
     "totalProviders": "إجمالي المزودين",
     "connectedProviders": "المزودون المتصلون",
-    "providersWithIssues": "مزودون بهم مشاكل",
+    "providersWithIssues": "مزودون لديهم مشاكل",
     "disconnectedProviders": "مزودون غير متصلين",
     "connectProvider": "ربط المزود",
     "connecting": "جارٍ الربط…",
@@ -286,7 +286,7 @@
     "connectProviderError": "تعذّر ربط المزود.",
     "viewProfileMeetingConfigs": "عرض إعدادات الاجتماع",
     "viewProfileMeetingConfigsAriaLabel": "الانتقال إلى إعدادات اجتماعات المعلم",
-    "adminProviderSettings": "إعدادات مزود المشرف",
+    "adminProviderSettings": "إعدادات المزود الإدارية",
     "clientIdRequired": "معرّف العميل مطلوب",
     "clientSecretRequired": "سر العميل مطلوب",
     "scopesRequired": "النطاقات مطلوبة",
@@ -332,7 +332,7 @@
       "scopesPlaceholder": "أدخل النطاق واضغط Enter"
     },
     "testConnection": "اختبار الاتصال",
-    "validateConfig": "التحقق من الإعداد",
+    "validateConfig": "التحقق من الإعدادات",
     "generateAndDelete": "إنشاء وحذف",
     "runTest": "تشغيل",
     "testing": "جارٍ الاختبار…",
@@ -345,9 +345,9 @@
     "latency": "زمن الاستجابة",
     "errorCode": "رمز الخطأ",
     "errorMessage": "رسالة الخطأ",
-    "rawPayload": "الحزمة الخام من المزود",
-    "connectedAccounts": "حسابات المعلمين المتصلين",
-    "noConnectedAccounts": "لا توجد حسابات معلمين متصلين لهذا المزود.",
+    "rawPayload": "البيانات الخام من المزود",
+    "connectedAccounts": "حسابات المعلمين المتصلة",
+    "noConnectedAccounts": "لا توجد حسابات معلمين متصلة لهذا المزود.",
     "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني…",
     "searching": "جارٍ البحث…",
     "columns": {
@@ -356,7 +356,7 @@
       "connectedAt": "تاريخ الاتصال",
       "expiresAt": "تاريخ الانتهاء",
       "status": "الحالة",
-      "actions": "إجراءات"
+      "actions": "الإجراءات"
     },
     "filters": {
       "statusAll": "كل الحالات"
@@ -364,8 +364,8 @@
     "status": {
       "connected": "متصل",
       "expiringSoon": "ينتهي قريباً",
-      "reauthNeeded": "يحتاج إعادة مصادقة",
-      "revoked": "ملغي"
+      "reauthNeeded": "يحتاج إلى إعادة المصادقة",
+      "revoked": "مُلغى"
     },
     "actions": {
       "viewMetadata": "عرض البيانات الوصفية",
@@ -396,7 +396,7 @@
       "copyUrl": "نسخ الرابط",
       "copied": "تم النسخ!",
       "marketplaceHint": "تكوين في سوق المزود",
-      "endpointReached": "نقطة النهاية المتاحة",
+      "endpointReached": "تم الوصول إلى نقطة النهاية",
       "authStatus": "المصادقة",
       "authSuccess": "تمت المصادقة",
       "authFailure": "غير مصدّق",
@@ -483,7 +483,7 @@
     "publishSuccess": "تم نشر المحتوى.",
     "unpublishSuccess": "تم إلغاء نشر المحتوى.",
     "publishError": "فشل تحديث حالة النشر.",
-    "deleteConfirmTitle": "حذف المحتوى",
+    "deleteConfirmTitle": "حذف محتوى الموقع",
     "deleteConfirmBody": {
       "__fn": "(title) => `\\u0647\\u0644 \\u0623\\u0646\\u062A \\u0645\\u062A\\u0623\\u0643\\u062F \\u0645\\u0646 \\u062D\\u0630\\u0641 \"${title}\"\\u061F \\u0644\\u0627 \\u064A\\u0645\\u0643\\u0646 \\u0627\\u0644\\u062A\\u0631\\u0627\\u062C\\u0639 \\u0639\\u0646 \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0625\\u062C\\u0631\\u0627\\u0621.`"
     },

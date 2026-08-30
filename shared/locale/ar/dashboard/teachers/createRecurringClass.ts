@@ -19,7 +19,7 @@ export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClass
   classTypes: {
     REGULAR: "عادية",
     TRIAL: "تجريبية",
-    ADVANCE: "متقدمة",
+    ADVANCE: "مسبقة",
   },
   days: {
     monday: "الاثنين",
@@ -37,7 +37,7 @@ export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClass
   },
   scheduling: {
     mode: "وضع الجدولة",
-    quotaId: "معرف الحصة",
+    quotaId: "معرّف الحصة",
     quotaSelect: "اختر الحصة",
     quotaPlaceholder: "اختر حصة متاحة...",
     noOpenQuotas: "لا توجد حصص متاحة — أنشئ حصة أولاً",

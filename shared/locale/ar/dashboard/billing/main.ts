@@ -19,7 +19,7 @@ export const dashboardBillingAr: BillingLabels = {
   viewAllNegativeBalance: "عرض جميع الطلاب برصيد سالب",
   requiresAttention: "يتطلب اهتماماً",
   showingResults: (shown: number, total: number) => `عرض ${shown} من ${total} نتائج`,
-  invalidUserId: "معرف المستخدم غير صالح",
+  invalidUserId: "معرّف المستخدم غير صالح",
   billingProfileTitle: "الملف المالي للمستخدم",
   profileForUser: "تفاصيل الملف المالي",
   reminderSent: "تم إرسال تذكير الدفع",
@@ -167,7 +167,7 @@ export const dashboardBillingAr: BillingLabels = {
     paymentPendingReview: "مدفوعاتك قيد المراجعة. لا توجد فواتير غير مدفوعة تحتاج إلى إجراء الآن.",
   },
   errors: {
-    invalidId: "معرف ولي الأمر غير صالح في عرض الفواتير.",
+    invalidId: "معرّف ولي الأمر غير صالح في عرض الفواتير.",
     retry: "إعادة المحاولة",
   },
   exchangeRates,

@@ -74,7 +74,7 @@ export const dashboardSettingsAr: SettingsLabels = {
       action: "الإجراء",
       description: "الوصف",
       actor: "الفاعل",
-      entityId: "معرف الكيان",
+      entityId: "معرّف الكيان",
     },
     entityTypes: auditEntityTypes,
     actions: auditActions,

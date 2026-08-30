@@ -57,7 +57,7 @@ export const dashboardStudentQuotaAr: StudentQuotaLabels = {
     classesLeftMin: "يجب أن تكون الحصص المتبقية 0 على الأقل",
   },
   errors: {
-    invalidId: "معرف الطالب غير صالح",
+    invalidId: "معرّف الطالب غير صالح",
   },
   audience: {
     studentTitle: "حصصي",

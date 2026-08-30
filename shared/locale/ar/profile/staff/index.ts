@@ -11,7 +11,7 @@ export const profileStaffAr: ProfileStaffLabels = {
     account: "معلومات الحساب",
     contact: "معلومات الاتصال",
     role: "معلومات الدور",
-    compensation: "التعويض",
+    compensation: "التعويضات",
     permissions: "الصلاحيات الفعّالة",
   },
   fields: {

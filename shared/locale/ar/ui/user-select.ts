@@ -1,11 +1,11 @@
 import type { UserSelectLabels } from "@/shared/locale/types/ui";
 
 export const uiUserSelectAr: UserSelectLabels = {
-  teacherLabel: "المعلم",
-  studentLabel: "الطالب",
+  teacherLabel: "معلم",
+  studentLabel: "طالب",
   parentLabel: "ولي الأمر",
   userLabel: "المستخدم",
-  staffLabel: "الموظف",
+  staffLabel: "موظف",
   searchPlaceholder: "ابحث…",
   noResults: "لا توجد نتائج",
   required: "هذا الحقل مطلوب",

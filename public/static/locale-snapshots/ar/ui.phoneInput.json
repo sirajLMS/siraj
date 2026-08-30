@@ -4,6 +4,6 @@
   "invalidPrefix": "رمز الاتصال غير صالح",
   "invalidPhone": "رقم الهاتف غير صالح",
   "required": "رقم الهاتف مطلوب",
-  "countryCallingCode": "رمز الدولة",
+  "countryCallingCode": "رمز الاتصال الدولي",
   "phoneNumber": "رقم الهاتف"
 }

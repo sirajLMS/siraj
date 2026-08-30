@@ -17,7 +17,7 @@
   "rejectionReason": "سبب الرفض",
   "reviewedBy": "راجعه",
   "submittedAt": "أُرسل في",
-  "reviewedAt": "رُوجع في",
+  "reviewedAt": "تمت مراجعته في",
   "approve": "موافقة",
   "reject": "رفض",
   "submit": "إرسال",
@@ -32,7 +32,7 @@
   "dialogTitle": "إرسال تقرير الدرس",
   "cancel": "إلغاء",
   "submitting": "جارٍ الإرسال...",
-  "submitFailed": "تعذر إرسال تقرير الدرس. حاول مرة أخرى.",
+  "submitFailed": "تعذر إرسال تقرير الدرس. يرجى المحاولة مرة أخرى.",
   "attendanceRequired": "يرجى اختيار تقييم الحضور.",
   "durationMin": "يجب ألا تقل المدة عن دقيقة واحدة.",
   "durationMax": "لا يمكن أن تتجاوز المدة 600 دقيقة.",
@@ -40,5 +40,5 @@
   "completionMax": "لا يمكن أن تتجاوز نسبة الإنجاز 100.",
   "filterAll": "الكل",
   "noReports": "لا توجد تقارير دروس.",
-  "historyTitle": "تقاريري"
+  "historyTitle": "تقارير دروسي"
 }

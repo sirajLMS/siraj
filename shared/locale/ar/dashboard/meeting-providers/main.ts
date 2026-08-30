@@ -53,7 +53,7 @@ export const dashboardMeetingProvidersAr: MeetingProvidersLabels = {
     isActive: "تفعيل المنصة",
     supportsUsername: "دعم اسم المستخدم",
     supportsPassword: "دعم كلمة المرور",
-    supportsTenantId: "دعم معرف المؤسسة (Tenant ID)",
+    supportsTenantId: "دعم معرّف المؤسسة (Tenant ID)",
     providerKind: "نوع المنصة",
     providerKindManual: "يدوي (يُدخل المستخدم الرابط)",
     providerKindZoom: "Zoom (توليد تلقائي)",

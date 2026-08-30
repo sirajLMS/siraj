@@ -3,14 +3,14 @@
   "loading": "جارٍ تحميل تكاملات الاجتماعات…",
   "loadError": "تعذّر تحميل تكاملات الاجتماعات.",
   "providersConfigured": "المزودون المُعدّون",
-  "credentialsHealthy": "بيانات المؤسسة صحية",
+  "credentialsHealthy": "بيانات اعتماد المؤسسة صحيحة",
   "teachersConnected": "المعلمون المتصلون",
-  "reauthNeeded": "يحتاج إعادة مصادقة",
+  "reauthNeeded": "يلزم إعادة المصادقة",
   "lastTested": "آخر اختبار",
   "neverTested": "لم يُختبر",
   "totalProviders": "إجمالي المزودين",
   "connectedProviders": "المزودون المتصلون",
-  "providersWithIssues": "مزودون بهم مشاكل",
+  "providersWithIssues": "مزودون لديهم مشاكل",
   "disconnectedProviders": "مزودون غير متصلين",
   "connectProvider": "ربط المزود",
   "connecting": "جارٍ الربط…",
@@ -18,7 +18,7 @@
   "connectProviderError": "تعذّر ربط المزود.",
   "viewProfileMeetingConfigs": "عرض إعدادات الاجتماع",
   "viewProfileMeetingConfigsAriaLabel": "الانتقال إلى إعدادات اجتماعات المعلم",
-  "adminProviderSettings": "إعدادات مزود المشرف",
+  "adminProviderSettings": "إعدادات المزود الإدارية",
   "clientIdRequired": "معرّف العميل مطلوب",
   "clientSecretRequired": "سر العميل مطلوب",
   "scopesRequired": "النطاقات مطلوبة",
@@ -64,7 +64,7 @@
     "scopesPlaceholder": "أدخل النطاق واضغط Enter"
   },
   "testConnection": "اختبار الاتصال",
-  "validateConfig": "التحقق من الإعداد",
+  "validateConfig": "التحقق من الإعدادات",
   "generateAndDelete": "إنشاء وحذف",
   "runTest": "تشغيل",
   "testing": "جارٍ الاختبار…",
@@ -77,9 +77,9 @@
   "latency": "زمن الاستجابة",
   "errorCode": "رمز الخطأ",
   "errorMessage": "رسالة الخطأ",
-  "rawPayload": "الحزمة الخام من المزود",
-  "connectedAccounts": "حسابات المعلمين المتصلين",
-  "noConnectedAccounts": "لا توجد حسابات معلمين متصلين لهذا المزود.",
+  "rawPayload": "البيانات الخام من المزود",
+  "connectedAccounts": "حسابات المعلمين المتصلة",
+  "noConnectedAccounts": "لا توجد حسابات معلمين متصلة لهذا المزود.",
   "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني…",
   "searching": "جارٍ البحث…",
   "columns": {
@@ -88,7 +88,7 @@
     "connectedAt": "تاريخ الاتصال",
     "expiresAt": "تاريخ الانتهاء",
     "status": "الحالة",
-    "actions": "إجراءات"
+    "actions": "الإجراءات"
   },
   "filters": {
     "statusAll": "كل الحالات"
@@ -96,8 +96,8 @@
   "status": {
     "connected": "متصل",
     "expiringSoon": "ينتهي قريباً",
-    "reauthNeeded": "يحتاج إعادة مصادقة",
-    "revoked": "ملغي"
+    "reauthNeeded": "يحتاج إلى إعادة المصادقة",
+    "revoked": "مُلغى"
   },
   "actions": {
     "viewMetadata": "عرض البيانات الوصفية",
@@ -128,7 +128,7 @@
     "copyUrl": "نسخ الرابط",
     "copied": "تم النسخ!",
     "marketplaceHint": "تكوين في سوق المزود",
-    "endpointReached": "نقطة النهاية المتاحة",
+    "endpointReached": "تم الوصول إلى نقطة النهاية",
     "authStatus": "المصادقة",
     "authSuccess": "تمت المصادقة",
     "authFailure": "غير مصدّق",
