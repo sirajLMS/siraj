@@ -101,15 +101,20 @@ export function filterStudentProfileByFieldGroups<T extends Record<string, unkno
 /**
  * Assertion-free dictionary lookup so arbitrary client strings can never be
  * smuggled past the field-group gates (oxlint no-unsafe-type-assertion).
+ * Uses O(1) direct property access instead of O(N) Object.entries array iteration.
  */
 function lookupProfileGroup(key: string): ProfileFieldGroupDefinition | undefined {
-  const found = Object.entries(PROFILE_FIELD_GROUP_BY_KEY).find(([entryKey]) => entryKey === key);
-  return found?.[1];
+  if (Object.hasOwn(PROFILE_FIELD_GROUP_BY_KEY, key)) {
+    return PROFILE_FIELD_GROUP_BY_KEY[key as keyof typeof PROFILE_FIELD_GROUP_BY_KEY];
+  }
+  return undefined;
 }
 
 function lookupStudentGroup(key: string): StudentFieldGroupDefinition | undefined {
-  const found = Object.entries(STUDENT_FIELD_GROUP_BY_KEY).find(([entryKey]) => entryKey === key);
-  return found?.[1];
+  if (Object.hasOwn(STUDENT_FIELD_GROUP_BY_KEY, key)) {
+    return STUDENT_FIELD_GROUP_BY_KEY[key as keyof typeof STUDENT_FIELD_GROUP_BY_KEY];
+  }
+  return undefined;
 }
 
 export function canViewProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {
