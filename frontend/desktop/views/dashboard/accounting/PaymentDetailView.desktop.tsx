@@ -8,6 +8,7 @@ import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import {
   formatAccountingDate,
   formatAccountingMoney,
+  paymentGatewayLabel,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import { PaymentDocumentPreviewShared } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentDocumentPreviewShared";
@@ -93,78 +94,87 @@ export function PaymentDetailDesktop(props: Readonly<PaymentDetailViewModel>) {
         </Alert>
       ) : null}
 
-      <Stack direction="row" spacing={3} sx={{ alignItems: "flex-start", flexWrap: { xs: "wrap", lg: "nowrap" } }}>
-        <DesktopSectionPanel title={t.detail.title} sx={{ flex: 2, minWidth: 320 }}>
-          <Stack spacing={3}>
-            <Stack
-              direction="row"
-              spacing={2}
-              sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}
-            >
-              <Box>
-                <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                  {t.columns.paid}
-                </Typography>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {formatAccountingMoney(payment.amount)}
-                  </Typography>
-                  <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {payment.currency}
-                  </Typography>
-                </Stack>
-              </Box>
-              <Chip
-                label={payment.isPaidStatusOn ? t.status.paid : t.status.unpaid}
-                color={paymentStatusTone(Boolean(payment.isPaidStatusOn))}
-                variant={payment.isPaidStatusOn ? "outlined" : "filled"}
-              />
+      <Stack direction="row" spacing={3} sx={{ alignItems: "stretch", flexWrap: { xs: "wrap", lg: "nowrap" } }}>
+        <DesktopSectionPanel
+          title={t.detail.title}
+          sx={{
+            flex: 2,
+            minWidth: 320,
+            display: "flex",
+            flexDirection: "column",
+            "& > :last-of-type": { flex: 1, display: "flex", flexDirection: "column" },
+          }}
+        >
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <Stack spacing={3}>
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}
+              >
+                <Box>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
+                    <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                      {formatAccountingMoney(payment.amount)}
+                    </Typography>
+                    <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+                      {payment.currency}
+                    </Typography>
+                  </Stack>
+                </Box>
+                <Chip
+                  label={payment.isPaidStatusOn ? t.status.paid : t.status.unpaid}
+                  color={paymentStatusTone(Boolean(payment.isPaidStatusOn))}
+                  variant={payment.isPaidStatusOn ? "outlined" : "filled"}
+                />
+              </Stack>
+
+              <Divider />
+
+              <Stack direction="row" spacing={3} sx={{ flexWrap: "wrap", rowGap: 2 }}>
+                <DetailField label={t.detail.invoiceId} value={payment.invoiceId ?? "—"} />
+                <DetailField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate, locale)} />
+                <DetailField
+                  label={t.columns.studentName}
+                  value={
+                    payment.studentId ? (
+                      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                        <BaseAvatar label={payment.studentName ?? undefined} size={28} />
+                        <MuiLink component={Link} href={`/students/${payment.studentId}/profile`} underline="hover">
+                          {payment.studentName ?? payment.studentId}
+                        </MuiLink>
+                      </Stack>
+                    ) : (
+                      "—"
+                    )
+                  }
+                />
+                <DetailField label={t.detail.parent} value={payment.parentName ?? "—"} />
+                <DetailField
+                  label={t.columns.package}
+                  value={payment.packageName ? `${payment.packageName} (${payment.packageCodename ?? ""})` : "—"}
+                />
+                <DetailField
+                  label={t.columns.credit}
+                  value={payment.creditHours ? `${Number(payment.creditHours).toFixed(2)} h` : "—"}
+                />
+                <DetailField
+                  label={t.columns.paymentGateway}
+                  value={paymentGatewayLabel(payment.paymentGateway, t.gateways)}
+                />
+                <DetailField label={t.detail.transactionRef} value={payment.transactionId ?? "—"} />
+                <DetailField label={t.detail.invoiceStatus} value={payment.invoiceStatus} />
+              </Stack>
             </Stack>
 
-            <Divider />
-
-            <Stack direction="row" spacing={3} sx={{ flexWrap: "wrap", rowGap: 2 }}>
-              <DetailField label={t.detail.invoiceId} value={payment.invoiceId ?? "—"} />
-              <DetailField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate, locale)} />
-              <DetailField
-                label={t.columns.studentName}
-                value={
-                  payment.studentId ? (
-                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                      <BaseAvatar label={payment.studentName ?? undefined} size={28} />
-                      <MuiLink component={Link} href={`/students/${payment.studentId}/profile`} underline="hover">
-                        {payment.studentName ?? payment.studentId}
-                      </MuiLink>
-                    </Stack>
-                  ) : (
-                    "—"
-                  )
-                }
-              />
-              <DetailField label={t.detail.parent} value={payment.parentName ?? "—"} />
-              <DetailField
-                label={t.columns.package}
-                value={payment.packageName ? `${payment.packageName} (${payment.packageCodename ?? ""})` : "—"}
-              />
-              <DetailField
-                label={t.columns.credit}
-                value={payment.creditHours ? `${Number(payment.creditHours).toFixed(2)} h` : "—"}
-              />
-              <DetailField
-                label={t.columns.paymentGateway}
-                value={payment.paymentGateway ? t.gateways[payment.paymentGateway] : "—"}
-              />
-              <DetailField label={t.detail.transactionRef} value={payment.transactionId ?? "—"} />
-              <DetailField label={t.detail.invoiceStatus} value={payment.invoiceStatus} />
-            </Stack>
-
+            {/* Pin the note to the card floor so the stretch layout leaves no dead gap above it. */}
             {payment.paymentNote ? (
-              <>
-                <Divider />
+              <Box sx={{ mt: "auto", pt: 3 }}>
+                <Divider sx={{ mb: 3 }} />
                 <DetailField label={t.form.note} value={payment.paymentNote} />
-              </>
+              </Box>
             ) : null}
-          </Stack>
+          </Box>
         </DesktopSectionPanel>
 
         <DesktopSectionPanel title={t.detail.historyTitle} sx={{ flex: 1, minWidth: 260 }}>

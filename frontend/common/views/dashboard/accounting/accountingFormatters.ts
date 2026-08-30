@@ -1,4 +1,6 @@
 import type { InputBaseComponentProps } from "@mui/material";
+import { PaymentGateway } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments";
 
 /**
  * Shared formatting helpers for the accounting views (payments + packages).
@@ -82,4 +84,17 @@ export function planActiveTone(active: boolean): "success" | "default" {
 /** Numeric input that strips "+eE" chars — keeps numeric fields clean. */
 export function positiveNumberInputProps(): Pick<InputBaseComponentProps, "inputMode"> {
   return { inputMode: "decimal" };
+}
+
+/**
+ * Payment-gateway label for detail surfaces: payments recorded without a
+ * gateway (null or the NONE member) render the shared muted dash, matching the
+ * other empty-value fallbacks instead of spelling out "None".
+ */
+export function paymentGatewayLabel(
+  gateway: PaymentGateway | null | undefined,
+  gateways: PaymentsLabels["gateways"]
+): string {
+  if (!gateway || gateway === PaymentGateway.None) return "—";
+  return gateways[gateway];
 }

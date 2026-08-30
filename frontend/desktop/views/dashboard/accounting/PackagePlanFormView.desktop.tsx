@@ -88,24 +88,31 @@ export function PackagePlanFormDesktop(props: Readonly<UsePackagePlanFormViewMod
         }
       />
 
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ maxWidth: 720 }}>
+      <Box
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        sx={{ maxWidth: 1140, width: "100%", mx: "auto" }}
+      >
         <Stack spacing={3}>
           <DesktopSectionPanel title={t.form.displayName}>
             <Stack spacing={3}>
-              <PackagePlanCodenameField
-                control={control}
-                errors={errors}
-                labels={t.form}
-                isEditing={isEditing}
-                sx={styles.codenameField}
-                inputSx={styles.codenameInput}
-              />
-              <PackagePlanDisplayNameField
-                control={control}
-                errors={errors}
-                labels={t.form}
-                sx={styles.displayNameField}
-              />
+              <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2 }}>
+                <PackagePlanCodenameField
+                  control={control}
+                  errors={errors}
+                  labels={t.form}
+                  isEditing={isEditing}
+                  sx={styles.codenameField}
+                  inputSx={styles.codenameInput}
+                />
+                <PackagePlanDisplayNameField
+                  control={control}
+                  errors={errors}
+                  labels={t.form}
+                  sx={styles.displayNameField}
+                />
+              </Stack>
               <PackagePlanDescriptionField control={control} labels={t.form} sx={styles.descriptionField} />
             </Stack>
           </DesktopSectionPanel>
@@ -141,7 +148,9 @@ export function PackagePlanFormDesktop(props: Readonly<UsePackagePlanFormViewMod
                   labels={t.form}
                   sx={styles.validityStack}
                 />
-                <PackagePlanActiveField control={control} labels={t.form} />
+                <Box sx={{ display: "flex", alignItems: "center", alignSelf: "stretch" }}>
+                  <PackagePlanActiveField control={control} labels={t.form} />
+                </Box>
               </Stack>
               {errors.active ? <FormHelperText error>{errors.active.message}</FormHelperText> : null}
             </Stack>
@@ -149,7 +158,7 @@ export function PackagePlanFormDesktop(props: Readonly<UsePackagePlanFormViewMod
 
           <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
             <Link href="/accounting/packages" style={{ textDecoration: "none" }}>
-              <DesktopPrimaryPageAction variant="outlined" disabled={isSubmitting}>
+              <DesktopPrimaryPageAction variant="text" color="inherit" disabled={isSubmitting}>
                 {t.form.cancel}
               </DesktopPrimaryPageAction>
             </Link>

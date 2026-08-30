@@ -77,13 +77,9 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
           <Stack direction="row" spacing={1.5}>
             <PackagePlanCurrencyField control={control} labels={t.form} sx={styles.currencyField} />
             <PackagePlanSortOrderField control={control} errors={errors} labels={t.form} sx={styles.sortOrderField} />
-            <PackagePlanValidityMonthsField
-              control={control}
-              errors={errors}
-              labels={t.form}
-              sx={styles.validityStack}
-            />
           </Stack>
+
+          <PackagePlanValidityMonthsField control={control} errors={errors} labels={t.form} sx={styles.validityStack} />
 
           <PackagePlanActiveField control={control} labels={t.form} />
 

@@ -13,6 +13,7 @@ import {
   PaymentPaidStatusControllerField,
   PaymentStudentControllerField,
 } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentFormFieldsShared";
+import { paymentReadOnlyFieldSx } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentFormFieldsShared.styles";
 import { PackagePlanSelectShared } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanSelectShared";
 import {
   CurrencyMismatchAlert,
@@ -44,7 +45,7 @@ function FormActions({ isSubmitting, submitLabel, savingLabel, cancelLabel }: Re
   return (
     <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
       <Link href="/accounting/payments" style={{ textDecoration: "none" }}>
-        <DesktopPrimaryPageAction variant="outlined" disabled={isSubmitting}>
+        <DesktopPrimaryPageAction variant="text" color="inherit" disabled={isSubmitting}>
           {cancelLabel}
         </DesktopPrimaryPageAction>
       </Link>
@@ -102,7 +103,11 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title={title} subtitle={t.formSubtitle} breadcrumbs={breadcrumbs} />
+      <DesktopPageHeader
+        title={title}
+        subtitle={isEditing ? t.editFormSubtitle : t.formSubtitle}
+        breadcrumbs={breadcrumbs}
+      />
 
       {isEditing ? (
         /* ── EDIT: only hours / gateway / note stay mutable (invoice snapshot locked) ── */
@@ -110,7 +115,7 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
           component="form"
           onSubmit={handleEditSubmit(onEditSubmit)}
           noValidate
-          sx={{ maxWidth: 860, width: "100%", mx: "auto" }}
+          sx={{ maxWidth: 1100, width: "100%", mx: "auto" }}
         >
           <Stack spacing={3}>
             <DesktopSectionPanel title={t.paymentDetails}>
@@ -121,25 +126,39 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                     label={t.form.student}
                     value={existing?.studentName ?? "—"}
                     disabled
-                    sx={{ flex: 1, minWidth: 220 }}
+                    sx={theme => ({ ...paymentReadOnlyFieldSx(theme), flex: 1, minWidth: 220 })}
                   />
                   <TextField
                     size="small"
                     label={`${t.columns.paid} / ${t.form.currency}`}
                     value={existing ? `${formatAccountingMoney(existing.amount)} ${existing.currency ?? ""}` : "—"}
                     disabled
-                    sx={{ flex: 1, minWidth: 170 }}
+                    sx={theme => ({ ...paymentReadOnlyFieldSx(theme), flex: 1, minWidth: 170 })}
                   />
                 </Stack>
 
-                <PaymentDecimalControllerField
-                  control={editControl}
-                  name="creditHours"
-                  label={t.form.credit}
-                  inputStep={0.5}
-                  inputMin={0.5}
-                  sx={{ maxWidth: 220 }}
-                />
+                <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2 }}>
+                  <PaymentDecimalControllerField
+                    control={editControl}
+                    name="creditHours"
+                    label={t.form.credit}
+                    inputStep={0.5}
+                    inputMin={0.5}
+                    sx={{ flex: 1, minWidth: 220 }}
+                  />
+                  <Controller
+                    name="paymentGateway"
+                    control={editControl}
+                    render={({ field }) => (
+                      <GatewaySelectField
+                        value={field.value}
+                        onChange={field.onChange}
+                        {...gatewayFieldArgs}
+                        sx={{ flex: 1, minWidth: 240 }}
+                      />
+                    )}
+                  />
+                </Stack>
 
                 <Controller
                   name="paymentNote"
@@ -151,19 +170,6 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                       onBlur={field.onBlur}
                       label={t.form.note}
                       placeholder={t.form.notePlaceholder}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="paymentGateway"
-                  control={editControl}
-                  render={({ field }) => (
-                    <GatewaySelectField
-                      value={field.value}
-                      onChange={field.onChange}
-                      {...gatewayFieldArgs}
-                      sx={{ minWidth: 240 }}
                     />
                   )}
                 />
@@ -184,59 +190,62 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
           component="form"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          sx={{ maxWidth: 860, width: "100%", mx: "auto" }}
+          sx={{ maxWidth: 1100, width: "100%", mx: "auto" }}
         >
           <Stack spacing={3}>
-            <DesktopSectionPanel title={t.form.student}>
-              <PaymentStudentControllerField
-                control={control}
-                label={t.form.student}
-                placeholder={t.form.studentPlaceholder}
-                StudentAutocomplete={StudentAutocompleteDesktop}
-              />
-            </DesktopSectionPanel>
-
-            <DesktopSectionPanel title={t.form.packagePlan}>
-              <Stack spacing={3}>
-                <Controller
-                  name="packagePlanId"
+            <Stack direction="row" spacing={3} sx={{ alignItems: "flex-start" }}>
+              <DesktopSectionPanel title={t.form.student} sx={{ flex: 1, minWidth: 0 }}>
+                <PaymentStudentControllerField
                   control={control}
-                  render={({ field }) => (
-                    <PackagePlanSelectShared
-                      value={field.value}
-                      onChange={field.onChange}
-                      label={t.form.packagePlan}
-                      placeholder={t.form.packagePlanPlaceholder}
-                      adhocLabel={t.form.packagePlanAdhoc}
-                      size="small"
-                      minWidth={340}
-                    />
-                  )}
+                  label={t.form.student}
+                  placeholder={t.form.studentPlaceholder}
+                  StudentAutocomplete={StudentAutocompleteDesktop}
                 />
-                {errors.packagePlanId ? <FormHelperText error>{errors.packagePlanId.message}</FormHelperText> : null}
+              </DesktopSectionPanel>
 
-                <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2 }}>
-                  <PaymentDecimalControllerField
+              <DesktopSectionPanel title={t.form.packagePlan} sx={{ flex: 1, minWidth: 0 }}>
+                <Stack spacing={3}>
+                  <Controller
+                    name="packagePlanId"
                     control={control}
-                    name="creditHours"
-                    label={t.form.credit}
-                    inputStep={0.5}
-                    inputMin={0.5}
-                    sx={{ flex: 1, minWidth: 150 }}
+                    render={({ field }) => (
+                      <PackagePlanSelectShared
+                        value={field.value}
+                        onChange={field.onChange}
+                        label={t.form.packagePlan}
+                        placeholder={t.form.packagePlanPlaceholder}
+                        adhocLabel={t.form.packagePlanAdhoc}
+                        size="small"
+                        minWidth={340}
+                      />
+                    )}
                   />
-                  <PaymentDecimalControllerField
-                    control={control}
-                    name="amount"
-                    label={t.form.paid}
-                    inputStep={0.01}
-                    inputMin={0}
-                    sx={{ flex: 1, minWidth: 150 }}
-                  />
+                  {errors.packagePlanId ? <FormHelperText error>{errors.packagePlanId.message}</FormHelperText> : null}
+
+                  <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2 }}>
+                    <PaymentDecimalControllerField
+                      control={control}
+                      name="creditHours"
+                      label={t.form.credit}
+                      inputStep={0.5}
+                      inputMin={0.5}
+                      sx={{ flex: 1, minWidth: 150 }}
+                    />
+                    <PaymentDecimalControllerField
+                      control={control}
+                      name="amount"
+                      label={t.form.paid}
+                      inputStep={0.01}
+                      inputMin={0}
+                      sx={{ flex: 1, minWidth: 150 }}
+                    />
+                  </Stack>
+
                   <Controller
                     name="currency"
                     control={control}
                     render={({ field }) => (
-                      <Box sx={{ minWidth: 190 }}>
+                      <Box sx={{ width: "100%" }}>
                         <CurrencySelect
                           currency={getCurrencyByCode(field.value) ?? null}
                           setCurrencyAction={selected => field.onChange(selected.code)}
@@ -249,15 +258,15 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                       </Box>
                     )}
                   />
-                </Stack>
 
-                <CurrencyMismatchAlert
-                  active={currencyMismatch}
-                  lastPaymentCurrency={lastPaymentCurrency}
-                  message={t.currencyWarning}
-                />
-              </Stack>
-            </DesktopSectionPanel>
+                  <CurrencyMismatchAlert
+                    active={currencyMismatch}
+                    lastPaymentCurrency={lastPaymentCurrency}
+                    message={t.currencyWarning}
+                  />
+                </Stack>
+              </DesktopSectionPanel>
+            </Stack>
 
             <DesktopSectionPanel title={t.paymentDetails}>
               <Stack spacing={3}>

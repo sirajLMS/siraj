@@ -388,6 +388,23 @@ const getMuiDataGrid = (): Components<Omit<Theme, "components">>["MuiDataGrid"] 
             ? alpha(theme.palette.primary.main, 0.04)
             : alpha(theme.palette.primary.main, 0.06),
       },
+      // Column separators double as resize hit-targets; keep them invisible so
+      // headers stay clean, and reveal the affordance only on header
+      // hover/focus (pointer devices) or during an active resize drag.
+      "& .MuiDataGrid-columnSeparator": {
+        color: "transparent",
+      },
+      "& .MuiDataGrid-columnSeparator--resizing": {
+        color: theme.palette.primary.main,
+      },
+      "& .MuiDataGrid-columnHeader:focus-within .MuiDataGrid-columnSeparator--resizable": {
+        color: theme.palette.divider,
+      },
+      "@media (hover: hover)": {
+        "& .MuiDataGrid-columnHeader:hover .MuiDataGrid-columnSeparator--resizable": {
+          color: theme.palette.divider,
+        },
+      },
       "& .MuiDataGrid-footerContainer": {
         borderTop: `1px solid`,
         borderColor: theme.palette.border.light,

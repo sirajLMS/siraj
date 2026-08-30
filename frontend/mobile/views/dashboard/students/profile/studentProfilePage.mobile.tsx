@@ -1,6 +1,6 @@
 "use client";
 
-import { Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
@@ -65,7 +65,12 @@ export function StudentProfilePageMobileView({
         subtitle={header.subtitle}
         actions={
           statusBadge ? (
-            <StatusBadge category={statusBadge.category} status={statusBadge.status} label={statusBadge.label} />
+            // MobilePageHeader stretches direct action children to width: 100%;
+            // display:contents keeps the wrapper boxless so the chip stays at
+            // its natural width.
+            <Box sx={{ display: "contents" }}>
+              <StatusBadge category={statusBadge.category} status={statusBadge.status} label={statusBadge.label} />
+            </Box>
           ) : undefined
         }
         edgeToEdge={false}

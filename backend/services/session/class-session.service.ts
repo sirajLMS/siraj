@@ -335,6 +335,34 @@ export namespace ClassSessionService {
     return handleUpdate(action(instance), tErrors);
   }
 
+  /** Payroll snapshot columns carried on the class-instance detail surface. */
+  const PAYROLL_SNAPSHOT_DETAIL_FIELDS = [
+    "calculationStatus",
+    "teacherPaidAmount",
+    "teacherPaidCurrency",
+    "calculatedDuration",
+    "isPartialPercentage",
+    "payrollNote",
+    "payrollCalculatedAt",
+    "payrollCalculatedBy",
+  ] as const;
+
+  /**
+   * Removes the payroll snapshot columns from a class-instance detail. Payroll
+   * compensation data is restricted to accounting payroll viewers: teachers and
+   * students legitimately reach this shared session surface, so their response
+   * must not carry pay amounts or calculation state. Booking-rate data and the
+   * payrollCredited scheduling flag stay visible — they are not payroll data.
+   */
+  function withoutPayrollSnapshot(detail: ClassInstanceDetailReturnType): ClassInstanceDetailReturnType {
+    const stripped = { ...detail };
+    const strippable: Partial<ClassInstanceDetailReturnType> = stripped;
+    for (const field of PAYROLL_SNAPSHOT_DETAIL_FIELDS) {
+      delete strippable[field];
+    }
+    return stripped;
+  }
+
   export async function getClassInstanceDetail(
     userId: string,
     classInstanceId: string,
@@ -344,7 +372,9 @@ export namespace ClassSessionService {
     const instance = await getOrThrow(classInstanceId, tErrors);
     await assertClassInstanceDetailViewAuth(userId, instance, tErrors);
     const perf = await ClassPerformanceService.getPerformanceForClass(classInstanceId);
-    return buildClassInstanceDetail(instance, perf, tSession, tErrors);
+    const detail = await buildClassInstanceDetail(instance, perf, tSession, tErrors);
+    const canSeePayroll = await PermissionsService.hasPermission(userId, AppPermission.ACCOUNTING_PAYROLL_VIEW);
+    return canSeePayroll ? detail : withoutPayrollSnapshot(detail);
   }
 
   export async function getClassStatusEvents(

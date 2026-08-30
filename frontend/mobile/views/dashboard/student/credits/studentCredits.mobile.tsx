@@ -29,17 +29,15 @@ interface MobileTransactionItemProps {
 function MobileTransactionItem({ row, locale, reasonLabel }: MobileTransactionItemProps): ReactNode {
   const positive = row.changeAmount >= 0;
   const sign = positive ? "+" : "-";
-  // Hours-based rows show "±15.00 h"; legacy class-credit rows keep integers.
-  const amountLabel = row.isHours ? `${Math.abs(row.changeAmount).toFixed(2)} h` : `${Math.abs(row.changeAmount)}`;
 
   return (
     <MobileCardListItem variant="edge-to-edge">
       <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
         <Box sx={{ minWidth: 0 }}>
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+          <Typography variant="bodyMd" sx={theme => ({ fontWeight: 600, color: theme.palette.onSurface })}>
             {reasonLabel(row.reason)}
           </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ fontWeight: 700, color: theme.palette.onSurface })}>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
             {row.createdAt ? formatDate(row.createdAt, locale) : "—"}
           </Typography>
         </Box>
@@ -47,11 +45,22 @@ function MobileTransactionItem({ row, locale, reasonLabel }: MobileTransactionIt
           variant="bodyMd"
           sx={theme => ({
             fontWeight: 700,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
             color: positive ? theme.palette.success.main : theme.palette.error.main,
           })}
         >
           {sign}
-          {amountLabel}
+          {row.isHours ? (
+            <>
+              {Math.abs(row.changeAmount).toFixed(2)}
+              <Box component="span" sx={theme => ({ fontSize: "0.75em", color: theme.palette.onSurfaceVariant })}>
+                {" h"}
+              </Box>
+            </>
+          ) : (
+            Math.abs(row.changeAmount)
+          )}
         </Typography>
       </Stack>
       {row.notes ? (

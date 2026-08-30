@@ -34,6 +34,7 @@ export function PaymentsLedgerMobileView({
           metrics={metrics}
           loading={balancesLoading && metrics.length === 0}
           onMetricClick={onMetricClick}
+          stretchCells
         />
       ) : null}
       <MobileSectionPanel title={labels.historySectionTitle} contentInset={false}>
@@ -50,13 +51,9 @@ export function PaymentsLedgerMobileView({
                 <Typography variant="titleLg" sx={{ fontWeight: 700, minWidth: 0 }}>
                   {row.studentName ?? MISSING_VALUE}
                 </Typography>
-                <Chip
-                  size="small"
-                  variant="outlined"
-                  color={row.creditHours != null ? "primary" : "success"}
-                  label={row.creditsLabel}
-                  sx={{ fontWeight: 600 }}
-                />
+                {row.creditHours != null || row.creditsPurchased > 0 ? (
+                  <Chip size="small" variant="outlined" color="primary" label={row.creditsLabel} />
+                ) : null}
               </Box>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1, mt: 1 }}>
                 <Typography variant="bodyMd" sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>

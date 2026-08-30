@@ -20,13 +20,13 @@ function buildTransactionColumns(
     {
       field: "dateLabel",
       headerName: labels.columns.date,
-      flex: 1,
-      minWidth: 140,
+      flex: 0.7,
+      minWidth: 120,
     },
     {
       field: "changeLabel",
       headerName: labels.columns.change,
-      flex: 0.7,
+      flex: 0.6,
       minWidth: 110,
       align: "right",
       headerAlign: "right",
@@ -35,6 +35,7 @@ function buildTransactionColumns(
           variant="labelSm"
           sx={theme => ({
             fontWeight: 600,
+            whiteSpace: "nowrap",
             color: params.row.isPositive ? theme.palette.success.main : theme.palette.error.main,
           })}
         >
@@ -45,7 +46,7 @@ function buildTransactionColumns(
     {
       field: "reasonStatus",
       headerName: labels.columns.reason,
-      flex: 0.9,
+      flex: 0.8,
       minWidth: 140,
       sortable: false,
       renderCell: params => (

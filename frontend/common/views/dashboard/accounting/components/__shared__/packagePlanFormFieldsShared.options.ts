@@ -30,19 +30,19 @@ export interface PackagePlanFormFieldStyles {
 }
 
 export const DESKTOP_PACKAGE_PLAN_FORM_STYLES: PackagePlanFormFieldStyles = {
-  codenameField: { maxWidth: 340 },
+  codenameField: { flex: 1, minWidth: 300 },
   codenameInput: { fontFamily: "monospace" },
-  displayNameField: { maxWidth: 480 },
-  descriptionField: { maxWidth: 640 },
+  displayNameField: { flex: 1, minWidth: 300 },
+  descriptionField: { width: "100%" },
   numericField: { flex: 1, minWidth: 150 },
-  currencyField: { minWidth: 130 },
-  sortOrderField: { width: 150 },
-  validityStack: { width: 220 },
+  currencyField: { flex: 1, minWidth: 160 },
+  sortOrderField: { width: 200 },
+  validityStack: { flex: 1, minWidth: 280 },
 };
 
 export const MOBILE_PACKAGE_PLAN_FORM_STYLES: PackagePlanFormFieldStyles = {
   numericField: { flex: 1 },
   currencyField: { flex: 1 },
   sortOrderField: { flex: 1 },
-  validityStack: { flex: 1 },
+  validityStack: { width: "100%" },
 };

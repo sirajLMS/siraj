@@ -382,7 +382,7 @@
 
 ## Phase 8 — End-to-end & regression
 
-### 8.1 E2E test
+### 8.1 E2E test ✅ DONE
 - 🧪 `e2e/accounting/payroll.spec.ts` (Playwright, if project uses it):
   - Log in as accounting operator.
   - Open `/accounting/payroll`, filter by teacher.
@@ -394,7 +394,7 @@
   - Click "Export CSV"; verify the downloaded file has the expected rows.
 - 🔁 `bun run scripts/health/sub-loop.ts e2e/accounting/payroll.spec.ts --lifecycle codescene`
 
-### 8.2 Regression suite
+### 8.2 Regression suite ✅ DONE
 - 🔁 `bun test backend/db/test/repo/scheduling/scheduling.repository.test.ts`
 - 🔁 `bun test backend/db/test/logic/scheduling/class_instances_security.test.ts`
 - 🔁 `bun test backend/db/test/logic/scheduling/class_rescheduling.test.ts`
@@ -467,13 +467,13 @@ bun run scripts/health/sub-loop.ts <file-path> --lifecycle duplicates
 > Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
 > additive and execute before this plan is treated as test-complete.
 
-- [ ] TB.1 Journey: session reaches terminal state (teacher attendance telemetry) → auto-calculation runs → accounting operator sees the calculated row (+ teacher absence / student absence money outcome) 
+- [x] TB.1 Journey: session reaches terminal state (teacher attendance telemetry) → auto-calculation runs → accounting operator sees the calculated row (+ teacher absence / student absence money outcome) 
   - Create `test/workflows/payroll/auto-calculation-to-payroll-visibility.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (terminal `executionState` → `calculationStatus = CALCULATED` with `teacherPaidAmount`/`teacherPaidCurrency` persisted in the same tx), cross-actor visibility (accounting operator with `ACCOUNTING_PAYROLL_VIEW` reads the row via `payrollReport`; the teacher and student-facing surfaces must not expose the payroll amounts), side effects (grace/on-time/student-absent/teacher-absent amount outcomes; `PAYROLL_STATUS_TRANSITION`/override event history remains empty on auto-calc), denial paths for unauthorized actors
   - Verify: `bun run test/scripts/run-test.ts test/workflows/payroll/auto-calculation-to-payroll-visibility.test.ts` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-2, US-3, US-4, US-5, AC-2.1–AC-2.6, AC-9.1_
-- [ ] TB.2 Journey: accounting operator applies override → lesson-report approval accrues `teacher_dues` from `teacherPaidAmount` (status flips to `WAITING_PAID`) → operator marks dues paid (status flips to `PAID`, further overrides rejected)
+- [x] TB.2 Journey: accounting operator applies override → lesson-report approval accrues `teacher_dues` from `teacherPaidAmount` (status flips to `WAITING_PAID`) → operator marks dues paid (status flips to `PAID`, further overrides rejected)
   - Create `test/workflows/payroll/override-to-settlement-lifecycle.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (`CALCULATED` → overridden state → `WAITING_PAID` → `PAID` across `class_instances` + `teacher_dues` in the same transactions), cross-actor visibility (audit drawer surfaces `PAYROLL_OVERRIDE` + `PAYROLL_STATUS_TRANSITION` events with the operator's `actorUserId`; the teacher sees only their settled dues, never the override internals), side effects (`teacher_dues` amount equals `teacherPaidAmount`; `class_status_events` rows appended; duplicate override submission within the idempotency window produces no second event), denial paths for unauthorized actors (override on `PAID` rejected with `PAYROLL_ALREADY_PAID`; `WAITING_PAID` requires `force`)
   - Verify: `bun run test/scripts/run-test.ts test/workflows/payroll/override-to-settlement-lifecycle.test.ts` green, then `bun run test:workflows`

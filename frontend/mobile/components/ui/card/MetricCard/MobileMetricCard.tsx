@@ -1,7 +1,7 @@
 "use client";
 
 import type { SvgIconComponent } from "@mui/icons-material";
-import type { SxProps } from "@mui/material";
+import { Box, type SxProps } from "@mui/material";
 import {
   MetricCardIconWrap,
   MetricCardMotionWrapper,
@@ -16,6 +16,21 @@ import {
   StyledCompactMiddleRow,
   StyledValueContainer,
 } from "@/frontend/mobile/components/ui/card/MetricCard/styled";
+
+/**
+ * Splits a formatted value ("12.50 h", "98 %") into its numeric main token and
+ * a trailing unit suffix so the card can render the unit smaller and keep the
+ * whole value on one line next to the trailing icon. Values without a
+ * non-numeric trailing token ("1,284", "10:30") return `unit: null`.
+ */
+function splitMetricValue(value: number | string): { readonly main: string; readonly unit: string | null } {
+  const text = formatValue(value);
+  const trailingToken = /\s+(\S+)$/.exec(text);
+  if (!trailingToken || /\d/.test(trailingToken[1])) {
+    return { main: text, unit: null };
+  }
+  return { main: text.slice(0, trailingToken.index), unit: trailingToken[1] };
+}
 
 export interface MobileMetricCardProps {
   readonly icon: SvgIconComponent;
@@ -51,9 +66,18 @@ export function MobileMetricCard({
     </StyledLabel>
   );
 
+  const { main: valueMain, unit: valueUnit } = splitMetricValue(value);
+
+  // nowrap: value+unit stay on one line beside the trailing icon.
   const valueTypography = (
-    <StyledValue variant="headlineMd" metricVariant={variant}>
-      {formatValue(value)}
+    <StyledValue variant="headlineMd" metricVariant={variant} sx={{ whiteSpace: "nowrap" }}>
+      {valueMain}
+      {valueUnit ? (
+        <Box component="span" sx={{ fontSize: "0.6em", fontWeight: 600 }}>
+          {" "}
+          {valueUnit}
+        </Box>
+      ) : null}
     </StyledValue>
   );
 

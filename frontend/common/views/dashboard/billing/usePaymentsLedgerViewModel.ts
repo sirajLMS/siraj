@@ -69,6 +69,17 @@ function formatLedgerDate(isoDate: string, locale: AppLocale): string {
   return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }).format(date);
 }
 
+/** Money amounts are decimal strings from the API; always render two fraction digits. */
+function formatLedgerAmount(amount: string | null, currency: string | null, locale: AppLocale): string {
+  const rawAmount = amount?.trim() ?? "";
+  const numeric = rawAmount === "" ? Number.NaN : Number(rawAmount);
+  const formatted = Number.isFinite(numeric)
+    ? new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric)
+    : MISSING_VALUE;
+  const currencyCode = currency?.trim() ?? "";
+  return currencyCode ? `${formatted} ${currencyCode}` : formatted;
+}
+
 function mapLedgerEntry(entry: LedgerEntry, labels: PaymentsLedgerLabels, locale: AppLocale): PaymentsLedgerRow {
   const hours = entry.creditHours;
   const creditsPurchased = entry.creditsPurchased ?? 0;
@@ -85,7 +96,7 @@ function mapLedgerEntry(entry: LedgerEntry, labels: PaymentsLedgerLabels, locale
     creditHours: hours,
     creditsPurchased,
     creditsLabel,
-    amountLabel: `${entry.amount ?? "0"} ${entry.currency ?? ""}`.trim(),
+    amountLabel: formatLedgerAmount(entry.amount ?? null, entry.currency ?? null, locale),
     packageName: entry.packageName ?? null,
     methodLabel: formatMethodLabel(entry.paymentMethodType ?? null),
     dateLabel: formatLedgerDate(entry.paymentDate ?? "", locale),

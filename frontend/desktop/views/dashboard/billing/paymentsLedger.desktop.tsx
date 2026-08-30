@@ -37,23 +37,22 @@ function buildPaymentColumns(labels: PaymentsLedgerLabels["columns"]): GridColDe
       minWidth: 110,
       align: "center",
       headerAlign: "center",
-      renderCell: ({ row }) => (
-        <Chip
-          size="small"
-          variant="outlined"
-          color={row.creditHours != null ? "primary" : "success"}
-          label={row.creditsLabel}
-          sx={{ borderRadius: 2, fontWeight: 600 }}
-        />
-      ),
+      renderCell: ({ row }) =>
+        row.creditHours != null || row.creditsPurchased > 0 ? (
+          <Chip size="small" variant="outlined" color="primary" label={row.creditsLabel} sx={{ borderRadius: 2 }} />
+        ) : (
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {MISSING_VALUE}
+          </Typography>
+        ),
     },
     {
       field: "amount",
       headerName: labels.amount,
       flex: 0.9,
       minWidth: 120,
-      align: "right",
-      headerAlign: "right",
+      align: "left",
+      headerAlign: "left",
       renderCell: ({ row }) => (
         <Typography
           variant="labelMd"
@@ -68,9 +67,14 @@ function buildPaymentColumns(labels: PaymentsLedgerLabels["columns"]): GridColDe
       headerName: labels.packageName,
       flex: 0.9,
       minWidth: 130,
-      renderCell: ({ row }) => (
-        <Chip size="small" variant="outlined" label={row.packageName ?? MISSING_VALUE} sx={{ borderRadius: 2 }} />
-      ),
+      renderCell: ({ row }) =>
+        row.packageName ? (
+          <Chip size="small" variant="outlined" label={row.packageName} sx={{ borderRadius: 2 }} />
+        ) : (
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {MISSING_VALUE}
+          </Typography>
+        ),
     },
     {
       field: "method",
@@ -126,6 +130,7 @@ export function PaymentsLedgerDesktopView({
           emptyMessage={`${labels.emptyTitle}. ${labels.emptySubtitle}`}
           ariaLabel={labels.historySectionTitle}
           paginationOptions={paginationOptions}
+          slotProps={{ pagination: { hideRangeLabel: true } }}
         />
       </DesktopSectionPanel>
     </DesktopPageContainer>

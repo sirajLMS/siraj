@@ -122,7 +122,7 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     calculatedDuration: t.exposeInt("calculatedDuration", { nullable: true }),
     teacherPaidAmount: t.exposeString("teacherPaidAmount", { nullable: true }),
     teacherPaidCurrency: t.expose("teacherPaidCurrency", { type: CurrencyCodePothosObject, nullable: true }),
-    calculationStatus: t.expose("calculationStatus", { type: CalculationStatusPothosEnum }),
+    calculationStatus: t.expose("calculationStatus", { type: CalculationStatusPothosEnum, nullable: true }),
     isPartialPercentage: t.exposeInt("isPartialPercentage", { nullable: true }),
     payrollNote: t.exposeString("payrollNote", { nullable: true }),
     payrollCalculatedAt: t.expose("payrollCalculatedAt", { type: "DateTime", nullable: true }),

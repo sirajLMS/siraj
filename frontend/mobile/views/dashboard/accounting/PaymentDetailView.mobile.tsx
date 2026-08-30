@@ -1,13 +1,14 @@
 "use client";
 
 import { EditOutlined, LockOpenOutlined, LockOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, Chip, CircularProgress, Divider, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, CircularProgress, Divider, Stack, Tooltip, Typography } from "@mui/material";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import {
   formatAccountingDate,
   formatAccountingMoney,
+  paymentGatewayLabel,
   paymentStatusTone,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import { PaymentDocumentPreviewShared } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentDocumentPreviewShared";
@@ -32,6 +33,24 @@ function MobileField({ label, value }: Readonly<{ label: string; value: ReactNod
   );
 }
 
+/** Truncated invoice identifier (first 8 chars) with the full value on hover/title. */
+function TruncatedInvoiceId({ value }: Readonly<{ value: string }>) {
+  const truncated = value.length > 8 ? `${value.slice(0, 8)}…` : value;
+  return (
+    <Tooltip title={value}>
+      <Typography
+        component="span"
+        sx={theme => ({
+          fontFamily: "var(--font-jetbrains-mono), monospace",
+          fontSize: theme.typography.labelMd.fontSize,
+        })}
+      >
+        {truncated}
+      </Typography>
+    </Tooltip>
+  );
+}
+
 function PaymentStatusCard({
   t,
   payment,
@@ -50,10 +69,7 @@ function PaymentStatusCard({
       })}
     >
       <Stack spacing={1}>
-        <Stack direction="row" spacing={1.5} sx={{ justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-            {t.columns.paid}
-          </Typography>
+        <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
           <Chip
             size="small"
             color={paymentStatusTone(Boolean(payment.isPaidStatusOn))}
@@ -97,7 +113,10 @@ function PaymentDetailFields({
   return (
     <MobileCardShell>
       <Stack spacing={1.5}>
-        <MobileField label={t.detail.invoiceId} value={payment.invoiceId ?? "—"} />
+        <MobileField
+          label={t.detail.invoiceId}
+          value={payment.invoiceId ? <TruncatedInvoiceId value={payment.invoiceId} /> : "—"}
+        />
         <MobileField label={t.columns.paymentDate} value={formatAccountingDate(payment.paymentDate, locale)} />
         <MobileField
           label={t.columns.studentName}
@@ -120,20 +139,14 @@ function PaymentDetailFields({
           label={t.columns.credit}
           value={payment.creditHours ? `${Number(payment.creditHours).toFixed(2)} h` : "—"}
         />
-        <MobileField
-          label={t.columns.paymentGateway}
-          value={payment.paymentGateway ? t.gateways[payment.paymentGateway] : "—"}
-        />
+        <MobileField label={t.columns.paymentGateway} value={paymentGatewayLabel(payment.paymentGateway, t.gateways)} />
         <MobileField label={t.detail.invoiceStatus} value={payment.invoiceStatus} />
       </Stack>
 
       {payment.paymentNote ? (
         <>
           <Divider sx={{ my: 2 }} />
-          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant, mb: 0.5 })}>
-            {t.form.note}
-          </Typography>
-          <Typography variant="bodyMd">{payment.paymentNote}</Typography>
+          <MobileField label={t.form.note} value={payment.paymentNote} />
         </>
       ) : null}
     </MobileCardShell>

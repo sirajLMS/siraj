@@ -32,6 +32,8 @@ function MobileCreditTransactionItem({ row }: Readonly<{ row: StudentCreditHours
           variant="bodyMd"
           sx={theme => ({
             fontWeight: 700,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
             color: row.isPositive ? theme.palette.success.main : theme.palette.error.main,
           })}
         >

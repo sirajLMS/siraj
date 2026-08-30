@@ -48,7 +48,8 @@ export function PaymentsListMobile(props: Readonly<PaymentsListViewModel>) {
     <MobilePageContainer>
       <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
-      <Stack spacing={2} sx={{ pb: 10 }}>
+      {/* pb 11 (88px): FAB height (56) + breathing room — the shell only reserves the bottom-nav height, so the last card can still scroll fully above the fixed MobileFab. */}
+      <Stack spacing={2} sx={{ pb: 11 }}>
         {/* Inline metric strip */}
         <Stack direction="row" spacing={1} sx={{ px: 2 }}>
           <Chip size="small" label={`${t.columns.status}: ${metrics.total}`} />

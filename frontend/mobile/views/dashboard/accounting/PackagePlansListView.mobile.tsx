@@ -24,7 +24,8 @@ export function PackagePlansListMobile(props: Readonly<PackagePlansListViewModel
     <MobilePageContainer>
       <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
-      <Stack spacing={2} sx={{ pb: 10 }}>
+      {/* pb 11 (88px): FAB height (56) + breathing room — the shell only reserves the bottom-nav height, so the last card can still scroll fully above the fixed MobileFab. */}
+      <Stack spacing={2} sx={{ pb: 11 }}>
         <MobileListErrorNotice visible={error && rows.length === 0} message={t.loadError} />
 
         {loading && rows.length === 0 ? (

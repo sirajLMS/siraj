@@ -97,26 +97,28 @@ function DocumentIframe(
   );
 }
 
-/** Dashed placeholder shown when the payment has no receipt document. */
+/** Compact single-row placeholder shown when the payment has no receipt document. */
 function PreviewEmptyState({ emptyLabel }: Readonly<{ emptyLabel: string }>) {
   return (
-    <Box
+    <Stack
+      direction="row"
+      spacing={1.5}
       sx={theme => ({
         mx: 2,
         mb: 2,
-        py: 8,
-        display: "flex",
+        minHeight: 56,
+        px: 2,
         alignItems: "center",
-        justifyContent: "center",
-        border: 2,
+        border: 1,
         borderStyle: "dashed",
         borderColor: theme.palette.divider,
         borderRadius: 2,
         color: theme.palette.onSurfaceVariant,
       })}
     >
+      <InsertDriveFileOutlined fontSize="small" />
       <Typography variant="bodyMd">{emptyLabel}</Typography>
-    </Box>
+    </Stack>
   );
 }
 
@@ -205,10 +207,12 @@ export function PaymentDocumentPreview({
   const [zoom, setZoom] = useState(100);
   const [rotation, setRotation] = useState(0);
   const [expanded, setExpanded] = useState(false);
-  const hasDocument = src !== null;
   const [checkedSrc, setCheckedSrc] = useState<string | null>(null);
   const [documentStatus, setDocumentStatus] = useState<DocumentAvailability>("checking");
   const documentAvailability = resolveDocumentAvailability(src, checkedSrc, documentStatus);
+  // Toolbar actions stay disabled until the document probe confirms a renderable
+  // receipt, so the empty placeholder never shows active zoom/rotate/expand controls.
+  const hasDocument = documentAvailability === "available";
 
   useEffect(() => {
     if (!src) return undefined;
@@ -270,19 +274,29 @@ export function PaymentDocumentPreview({
           </Typography>
         </Stack>
         <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-          {controls}
-          <Tooltip title={expandLabel}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label={expandLabel}
-                disabled={!hasDocument}
-                onClick={() => setExpanded(true)}
-              >
-                <OpenInFullOutlined fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
+          <Stack
+            direction="row"
+            spacing={0.5}
+            sx={toolbarTheme => ({
+              alignItems: "center",
+              opacity: hasDocument ? 1 : toolbarTheme.palette.action.disabledOpacity,
+              pointerEvents: hasDocument ? "auto" : "none",
+            })}
+          >
+            {controls}
+            <Tooltip title={expandLabel}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label={expandLabel}
+                  disabled={!hasDocument}
+                  onClick={() => setExpanded(true)}
+                >
+                  <OpenInFullOutlined fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Stack>
           {downloadHref ? (
             <Tooltip title={downloadLabel}>
               <span>

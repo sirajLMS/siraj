@@ -222,7 +222,21 @@ export function PackagePlanValidityMonthsField({
       control={control}
       render={({ field }) => (
         <Stack spacing={1} sx={sx}>
-          <Stack direction="row" spacing={0.75} sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
+          <TextField
+            value={field.value ?? ""}
+            onChange={e => field.onChange(e.target.value === "" ? null : e.target.value)}
+            size="small"
+            type="number"
+            label={labels.validityMonths}
+            error={Boolean(errors.validityMonths)}
+            helperText={errors.validityMonths?.message}
+            slotProps={{
+              htmlInput: { step: 1, min: 1, max: 120 },
+              inputLabel: { shrink: true },
+            }}
+            sx={{ width: "100%" }}
+          />
+          <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
             {PACKAGE_PLAN_VALIDITY_CHOICES.map(months => (
               <Chip
                 key={months}
@@ -245,17 +259,6 @@ export function PackagePlanValidityMonthsField({
               onClick={() => field.onChange(null)}
             />
           </Stack>
-          <TextField
-            value={field.value ?? ""}
-            onChange={e => field.onChange(e.target.value === "" ? null : e.target.value)}
-            size="small"
-            type="number"
-            label={labels.validityMonths}
-            error={Boolean(errors.validityMonths)}
-            helperText={errors.validityMonths?.message}
-            slotProps={{ htmlInput: { step: 1, min: 1, max: 120 } }}
-            sx={{ width: "100%" }}
-          />
         </Stack>
       )}
     />
@@ -271,6 +274,7 @@ export function PackagePlanActiveField({ control, labels }: Readonly<PackagePlan
         <FormControlLabel
           control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} />}
           label={labels.active}
+          sx={{ m: 0, gap: 1 }}
         />
       )}
     />

@@ -12,7 +12,7 @@ export interface PaymentsLedgerRow {
   readonly creditsPurchased: number;
   /** Chip text resolved in the ViewModel (hours padded, or class-credit count). */
   readonly creditsLabel: string;
-  /** `${amount} ${currency}` with the numeric part locale-normalized. */
+  /** `${amount} ${currency}` — numeric part locale-formatted, always two fraction digits. */
   readonly amountLabel: string;
   readonly packageName: string | null;
   /** Title-cased payment-method type (e.g. "Online Account"). */
