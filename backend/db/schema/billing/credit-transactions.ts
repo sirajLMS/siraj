@@ -29,7 +29,7 @@ export const creditTransactions = createTable(
       .references(() => students.id, { onDelete: "cascade" }),
     // Relaxed from NOT NULL to nullable for the hour-based parallel ledger:
     // a row carries EITHER classes (changeAmount) OR hours (changeAmountHours),
-    // never both — enforced by the XOR CHECK constraint below (Task 1.2 / EC-9).
+    // never both — enforced by the XOR CHECK constraint below.
     changeAmount: integerColumn("change_amount"),
     // Hours ledger amount (numeric(12,2) on PG; TEXT on SQLite).
     // NULL for legacy class-count rows; non-null for hour-based rows.

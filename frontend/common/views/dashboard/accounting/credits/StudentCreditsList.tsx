@@ -20,7 +20,7 @@ type StudentCreditsRow = StudentsDirectoryQuery["studentsDirectory"][number];
 type CreditChipColor = "success" | "warning" | "error" | "default";
 
 /** Server-side search cap; the fetched page is paginated client-side by the grid. */
-const DIRECTORY_FETCH_LIMIT = 500;
+export const DIRECTORY_FETCH_LIMIT = 500;
 const SEARCH_DEBOUNCE_MS = 300;
 /** Balances at or below this threshold render the balance chip as a warning. */
 const LOW_BALANCE_THRESHOLD = 3;
@@ -96,6 +96,11 @@ export function StudentCreditsList() {
 
   const rows = useMemo<StudentCreditsRow[]>(() => data?.studentsDirectory ?? [], [data]);
 
+  // A result set equal to the fetch cap almost certainly means the directory
+  // search was truncated server-side; the operator must refine the search to
+  // reach the omitted rows.
+  const hitsFetchCap = error === undefined && rows.length === DIRECTORY_FETCH_LIMIT;
+
   const columns = useMemo<GridColDef<StudentCreditsRow>[]>(
     () => [
       {
@@ -166,6 +171,11 @@ export function StudentCreditsList() {
         <Alert severity="error" sx={{ mb: 2 }}>
           {directory.errors.loadFailed}
         </Alert>
+      ) : null}
+      {hitsFetchCap ? (
+        <Typography sx={{ mb: 1.5, fontSize: 12, color: theme => theme.palette.onSurfaceVariant }}>
+          {credits.resultsCappedHint(DIRECTORY_FETCH_LIMIT)}
+        </Typography>
       ) : null}
       <Box sx={{ width: "100%", height: DESKTOP_GRID_HEIGHT }}>
         <AppDataGrid<StudentCreditsRow>

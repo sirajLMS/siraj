@@ -9,6 +9,7 @@ import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
 import { TeacherAutocomplete } from "@/frontend/common/components/ui/input/userSelect/TeacherAutocomplete";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { useCreditAdjustFormStore } from "@/frontend/common/stores/creditAdjustFormStore";
+import { PAYMENT_DATE_MAX_FUTURE_DAYS } from "@/frontend/common/views/dashboard/accounting/credits/creditAdjust.constants";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingCreditAdjustment } from "@/shared/locale/namespaces";
 
@@ -58,7 +59,7 @@ export function CarryoverBanner({ errors }: Readonly<CarryoverBannerProps>) {
 
   const fromDateValue = parseDateInput(fromDate);
   const toDateValue = parseDateInput(toDate);
-  const maxPaymentDate = addDays(new Date(), 1);
+  const maxPaymentDate = addDays(new Date(), PAYMENT_DATE_MAX_FUTURE_DAYS);
 
   const handleTeacherChange = (next: PersonOption | null) => {
     setTeacher(next);

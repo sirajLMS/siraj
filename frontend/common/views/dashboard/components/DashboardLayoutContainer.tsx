@@ -3,8 +3,10 @@ import { isUsersDirectoryEnabled } from "@/backend/lib/features/is-users-directo
 import type { MeQuery_me as User } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AppClientProviders as DashboardClientProviders } from "@/frontend/common/providers/AppClientProviders";
 import { DashboardClientBridge } from "@/frontend/common/views/dashboard/components/DashboardClientBridge";
+import { UserRole } from "@/shared/constants/auth.enum";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
+import type { AdminDashboardLabels } from "@/shared/locale/types";
 
 interface DashboardLayoutContainerProps {
   readonly children: ReactNode;
@@ -12,6 +14,24 @@ interface DashboardLayoutContainerProps {
   readonly isSuperAdmin: boolean;
   readonly initialSidebarOpen?: boolean;
   readonly hideSidebarNavigation?: boolean;
+}
+
+/**
+ * Administrative shells keep the explicit "Admin Dashboard" brand label; every
+ * other portal (student, parent, teacher, supervisor) falls back to the
+ * generic dashboard title so non-admin users never see admin branding.
+ */
+const ADMINISTRATIVE_ROLES: ReadonlySet<string> = new Set<string>([
+  UserRole.SUPER_ADMIN,
+  UserRole.ACADEMY_ADMIN,
+  UserRole.STAFF,
+]);
+
+function resolveNavbarRoleLabel(
+  role: User["role"],
+  labels: Pick<AdminDashboardLabels, "roleLabel" | "pageTitle">
+): string {
+  return role !== null && ADMINISTRATIVE_ROLES.has(role) ? labels.roleLabel : labels.pageTitle;
 }
 
 export async function DashboardLayoutContainer({
@@ -32,7 +52,7 @@ export async function DashboardLayoutContainer({
       <DashboardClientBridge
         userProfile={userProfile}
         isSuperAdmin={isSuperAdmin}
-        roleLabel={adminT.roleLabel}
+        roleLabel={resolveNavbarRoleLabel(userProfile.role, adminT)}
         appTitle={coreLayoutT.appTitle}
         logoAriaLabel={coreLayoutT.appTitle}
         initialSidebarOpen={initialSidebarOpen}

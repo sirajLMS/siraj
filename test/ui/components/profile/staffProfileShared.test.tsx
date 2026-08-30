@@ -43,7 +43,6 @@ function buildProps(overrides: Partial<StaffProfileSharedViewProps>): StaffProfi
     error: undefined,
     refetch: () => {},
     activeTab: "profile",
-    onTabChange: () => {},
     permissionGroups: [],
     permissionOverrides: [],
     canView: () => true,

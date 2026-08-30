@@ -97,11 +97,12 @@ interface CarryoverBlock {
 /** Narrows the optional carryover fields, failing validation when any is missing. */
 function requireCarryoverBlock(input: CreditAdjustmentInput, tErrors: ErrorsLabels): CarryoverBlock {
   const { carryoverTeacherId, carryoverFromDate, carryoverToDate, carryoverPaymentDate } = input;
-  if (!carryoverTeacherId?.trim() || !carryoverFromDate || !carryoverToDate || !carryoverPaymentDate) {
+  const teacherId = carryoverTeacherId?.trim();
+  if (!teacherId || !carryoverFromDate || !carryoverToDate || !carryoverPaymentDate) {
     throw new ValidationError(tErrors.credit.invalidInput);
   }
   return {
-    teacherId: carryoverTeacherId,
+    teacherId,
     fromDate: carryoverFromDate,
     toDate: carryoverToDate,
     paymentDate: carryoverPaymentDate,
@@ -112,7 +113,7 @@ function validateAdjustmentInput(input: CreditAdjustmentInput, tErrors: ErrorsLa
   if (!input.studentId?.trim()) {
     throw new ValidationError(tErrors.credit.invalidInput);
   }
-  if (!Number.isFinite(input.hours) || input.hours < 1) {
+  if (!Number.isInteger(input.hours) || input.hours < 1 || input.hours > 100_000) {
     throw new ValidationError(tErrors.credit.invalidInput);
   }
   if (input.adjustmentType !== CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER) return;
@@ -185,18 +186,32 @@ interface AdjustmentTxParams {
   carryover?: CarryoverBlock;
 }
 
+/** Outcome of an adjustment transaction: the committed/returned row and whether it was newly persisted. */
+interface AdjustmentTxResult {
+  row: CreditAdjustmentReturnType;
+  /** False when the idempotency pre-check replayed an earlier persisted row. */
+  createdNewRow: boolean;
+}
+
 /**
  * Executes one adjustment atomically: a per-student advisory lock serializes
- * concurrent adjustments, the balance guard runs under that lock (no
- * read-modify-write race), and the idempotency check inside the transaction
- * returns the first persisted row on a double-submit. Subtractions carry a
- * carryover block that is mirrored to the payouts table when it exists.
+ * concurrent adjustments, then the idempotency pre-check runs FIRST — ahead
+ * of every existence/balance guard — so a replayed submission returns the
+ * originally persisted row even when the state that guarded the first write
+ * has since changed. The balance guard runs under the lock (no
+ * read-modify-write race). Subtractions may carry a carryover block that is
+ * mirrored to the payouts table when it exists.
  */
-async function executeAdjustmentTransaction(params: AdjustmentTxParams): Promise<CreditAdjustmentReturnType> {
+async function executeAdjustmentTransaction(params: AdjustmentTxParams): Promise<AdjustmentTxResult> {
   const { input, tErrors } = params;
 
   return db.transaction(async tx => {
     await acquireAdvisoryLock(tx, `student_${input.studentId}`);
+
+    const existing = await CreditRepository.findByIdempotencyKeys([params.idempotencyKey], tx);
+    const existingRow = existing[0];
+    if (existingRow) return { row: mapToAdjustmentReturnType(existingRow), createdNewRow: false };
+
     await assertActiveStudentExists(input.studentId, tErrors, tx);
     if (params.carryover) {
       await assertTeacherExists(params.carryover.teacherId, tErrors, tx);
@@ -204,10 +219,6 @@ async function executeAdjustmentTransaction(params: AdjustmentTxParams): Promise
     if (params.signedHours < 0) {
       await assertSufficientClasses(tx, input.studentId, input.hours, tErrors);
     }
-
-    const existing = await CreditRepository.findByIdempotencyKeys([params.idempotencyKey], tx);
-    const existingRow = existing[0];
-    if (existingRow) return mapToAdjustmentReturnType(existingRow);
 
     const ledgerRow = await CreditRepository.createAdjustment(tx, {
       studentId: input.studentId,
@@ -243,25 +254,33 @@ async function executeAdjustmentTransaction(params: AdjustmentTxParams): Promise
       });
     }
 
-    return mapToAdjustmentReturnType(ledgerRow);
+    return { row: mapToAdjustmentReturnType(ledgerRow), createdNewRow: true };
   });
 }
 
-/** Runs an adjustment and resolves same-key concurrent inserts to the winning row. */
+/**
+ * Runs an adjustment and resolves same-key concurrent inserts to the winning
+ * row. The success log and audit entry are emitted only when the transaction
+ * actually persisted a new ledger row — replayed submissions (in-tx or
+ * recovered from a unique violation) return the first row without producing
+ * duplicate observability records.
+ */
 async function runAdjustment(params: AdjustmentTxParams, logMessage: string): Promise<CreditAdjustmentReturnType> {
   try {
     // Success is reported only once the transaction commits — a rolled-back
     // adjustment produces neither a success log nor an audit entry.
-    const created = await executeAdjustmentTransaction(params);
-    logger.info(logMessage, {
-      actorUserId: params.actorUserId,
-      studentId: params.input.studentId,
-      adjustmentType: params.input.adjustmentType,
-      changeAmount: params.signedHours,
-      carryoverTeacherId: params.carryover?.teacherId,
-    });
-    await emitAdjustmentAudit(params, created);
-    return created;
+    const { row, createdNewRow } = await executeAdjustmentTransaction(params);
+    if (createdNewRow) {
+      logger.info(logMessage, {
+        actorUserId: params.actorUserId,
+        studentId: params.input.studentId,
+        adjustmentType: params.input.adjustmentType,
+        changeAmount: params.signedHours,
+        carryoverTeacherId: params.carryover?.teacherId,
+      });
+      await emitAdjustmentAudit(params, row);
+    }
+    return row;
   } catch (error) {
     if (isUniqueViolation(error)) {
       const resolved = await resolveDuplicateAdjustment(params.idempotencyKey);
@@ -314,7 +333,7 @@ async function addCredit(
       actorUserId,
       input,
       tErrors,
-      idempotencyKey: deriveAdjustmentIdempotencyKey(input),
+      idempotencyKey: deriveAdjustmentIdempotencyKey(actorUserId, input),
       signedHours: input.hours,
       reason: CreditReason.CREDIT_ADJUSTMENT_ADD,
     },
@@ -332,7 +351,7 @@ async function subtractCredit(
       actorUserId,
       input,
       tErrors,
-      idempotencyKey: deriveAdjustmentIdempotencyKey(input),
+      idempotencyKey: deriveAdjustmentIdempotencyKey(actorUserId, input),
       signedHours: -input.hours,
       reason: CreditReason.CREDIT_ADJUSTMENT_SUBTRACT,
     },
@@ -351,7 +370,7 @@ async function subtractWithCarryover(
       actorUserId,
       input,
       tErrors,
-      idempotencyKey: deriveAdjustmentIdempotencyKey(input),
+      idempotencyKey: deriveAdjustmentIdempotencyKey(actorUserId, input),
       signedHours: -input.hours,
       reason: CreditReason.CREDIT_ADJUSTMENT_CARRYOVER,
       carryover,

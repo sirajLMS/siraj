@@ -18,6 +18,7 @@ export const dashboardBillingCreditAdjustmentEn: CreditAdjustmentLabels = {
   },
   reason: { label: "Reason" },
   hours: { label: "Hours" },
+  resultsCappedHint: limit => `Showing the first ${limit} students. Refine your search to narrow the list.`,
   validation: {
     fromAfterTo: "From Date cannot be after To Date",
     paymentTooFar: "Payment Date cannot be more than 1 day ahead",

@@ -42,7 +42,7 @@ export interface CreditAdjustmentInput {
   adjustmentType: CreditAdjustmentType;
   /** Positive class-credit amount; the sign is derived from adjustmentType. */
   hours: number;
-  /** Sanitized rich-text reason for the adjustment. */
+  /** Operator-supplied rich-text reason; sanitized by the service before persistence. */
   notes?: string | null;
   /** Carryover metadata — required when adjustmentType is SUBTRACT_WITH_CARRYOVER. */
   carryoverTeacherId?: string | null;

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { cleanup, waitFor } from "@testing-library/react";
-
 import type { MockLink } from "@apollo/client/testing";
+import { cleanup, waitFor } from "@testing-library/react";
+import { useEffect } from "react";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { studentCreditHourBalanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/accounting";
 import { studentCreditTransactionsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
@@ -21,7 +21,10 @@ const labels = readTranslation(DashboardAccountingStudentCreditHours, locale);
 let captured: StudentCreditHoursViewModel | null = null;
 
 function ViewModelCapture({ studentId }: Readonly<{ studentId: string }>) {
-  captured = useStudentCreditHoursViewModel({ studentId });
+  const vm = useStudentCreditHoursViewModel({ studentId });
+  useEffect(() => {
+    captured = vm;
+  }, [vm]);
   return null;
 }
 
@@ -128,7 +131,10 @@ describe("useStudentCreditHoursViewModel", () => {
   });
 
   test("flags low balance when remaining hours drop below the low-hours threshold", async () => {
-    await renderAndSettle([], createMocks({ creditHoursTotal: "20.00", creditHoursRemaining: "4.00", lowHoursThreshold: 5 }));
+    await renderAndSettle(
+      [],
+      createMocks({ creditHoursTotal: "20.00", creditHoursRemaining: "4.00", lowHoursThreshold: 5 })
+    );
 
     expect(captured?.lowBalanceMessage).toBe(labels.lowBalanceAlert("4.00", "5.00"));
     // Remaining below the threshold → the remaining metric renders in the error tone.
@@ -136,10 +142,16 @@ describe("useStudentCreditHoursViewModel", () => {
   });
 
   test("resolves the audience hint from permissions in priority order", async () => {
-    await renderAndSettle([AppPermission.TeacherViewStudents], createMocks({ creditHoursTotal: "1.00", creditHoursRemaining: "1.00" }));
+    await renderAndSettle(
+      [AppPermission.TeacherViewStudents],
+      createMocks({ creditHoursTotal: "1.00", creditHoursRemaining: "1.00" })
+    );
     expect(captured?.hint).toBe(labels.perAudience.teacherHint);
 
-    await renderAndSettle([AppPermission.ParentViewStudents], createMocks({ creditHoursTotal: "1.00", creditHoursRemaining: "1.00" }));
+    await renderAndSettle(
+      [AppPermission.ParentViewStudents],
+      createMocks({ creditHoursTotal: "1.00", creditHoursRemaining: "1.00" })
+    );
     expect(captured?.hint).toBe(labels.perAudience.parentHint);
 
     await renderAndSettle([], createMocks({ creditHoursTotal: "1.00", creditHoursRemaining: "1.00" }));

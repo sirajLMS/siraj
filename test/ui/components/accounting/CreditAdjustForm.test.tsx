@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, describe, expect, mock, spyOn, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 
@@ -23,9 +23,12 @@ await mock.module("@toolpad/core/useNotifications", () => ({
   useNotifications: () => ({ show: showNotification }),
 }));
 
+import type { ApolloClient } from "@apollo/client";
+import { useApolloClient } from "@apollo/client/react";
 import type { MockLink } from "@apollo/client/testing";
 import { run as runAxe } from "axe-core";
 import { GraphQLError } from "graphql";
+import { useEffect } from "react";
 import {
   CreditAdjustmentType as CreditAdjustmentGqlType,
   type CreditAdjustmentInput,
@@ -73,6 +76,7 @@ afterEach(() => {
   mockPush.mockClear();
   showNotification.mockClear();
   mutationCalls = 0;
+  capturedClient = null;
   useCreditAdjustFormStore.getState().reset();
   useUserAutocompleteStore.setState({ byAudience: { teacher: {}, student: {}, parent: {}, user: {}, staff: {} } });
 });
@@ -195,6 +199,17 @@ function insufficientClassesMock(input: CreditAdjustmentInput): MockLink.MockedR
     },
     maxUsageCount: Number.POSITIVE_INFINITY,
   };
+}
+
+let capturedClient: ApolloClient | null = null;
+
+/** Captures the wrapper's Apollo client so tests can inspect cache behavior directly. */
+function ClientProbe(): null {
+  const client = useApolloClient();
+  useEffect(() => {
+    capturedClient = client;
+  }, [client]);
+  return null;
 }
 
 /** Seeds the store with a fully valid Add draft (notes seeded; editor behavior is covered elsewhere). */
@@ -411,6 +426,55 @@ describe("credit adjust form (component)", () => {
     expect(await screen.findByText(credits.validation.insufficientClasses)).toBeVisible();
     expect(mockPush).not.toHaveBeenCalled();
     expect(showNotification).not.toHaveBeenCalled();
+  });
+
+  test("a whitespace-only rich-text reason is rejected before submitting", async () => {
+    renderWithWrapper(<CreditAdjustForm studentId={null} />, {
+      locale,
+      mocks: [studentDirectoryMock],
+    });
+
+    // TipTap stores a lone space as markup; the required check must strip it.
+    await act(async () => {
+      useCreditAdjustFormStore.setState({
+        studentId: STUDENT_ID,
+        adjustmentType: CreditAdjustmentType.ADD,
+        hours: 3,
+        notes: "<p>&nbsp;</p>",
+      });
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: credits.adjustCredits }));
+
+    expect(await screen.findByText(userSelect.required)).toBeVisible();
+    expect(mutationCalls).toBe(0);
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(showNotification).not.toHaveBeenCalled();
+  });
+
+  test("a successful submit evicts the cached directory and student records", async () => {
+    renderWithWrapper(
+      <>
+        <CreditAdjustForm studentId={null} />
+        <ClientProbe />
+      </>,
+      { locale, mocks: [studentDirectoryMock, successfulAdjustmentMock(addInput)] }
+    );
+
+    const client = capturedClient;
+    if (client === null) throw new Error("Apollo client probe was not mounted");
+    const evictSpy = spyOn(client.cache, "evict");
+
+    await act(async () => {
+      seedAddDraft();
+    });
+    fireEvent.click(screen.getByRole("button", { name: credits.adjustCredits }));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/accounting/credits");
+    });
+    expect(evictSpy).toHaveBeenCalledWith({ fieldName: "studentsDirectory" });
+    expect(evictSpy).toHaveBeenCalledWith({ fieldName: "studentById" });
   });
 
   test("a deep-linked student is seeded into the store and shown in the picker (AC-1.5)", async () => {

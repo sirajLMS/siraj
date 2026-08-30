@@ -89,7 +89,7 @@ describe("Credit adjustment journey — operator Add/Subtract and family visibil
     expect(recorded.changeAmountHours).toBeNull();
     expect(recorded.creditedByUserId).toBe(cast.adminUser.id);
     expect(recorded.notes).toBe(`${PREFIX} add`);
-    expect(recorded.idempotencyKey).toBe(deriveAdjustmentIdempotencyKey(input));
+    expect(recorded.idempotencyKey).toBe(deriveAdjustmentIdempotencyKey(cast.adminUser.id, input));
     expect(recorded.carryoverTeacherId).toBeNull();
 
     const ledger = await ledgerRows();
@@ -230,10 +230,10 @@ describe("Credit adjustment journey — operator Add/Subtract and family visibil
     expect(balanceRow?.classesRemaining).toBe(ADD_HOURS - SUBTRACT_HOURS);
   });
 
-  test("step 7 — every committed adjustment emits an UPDATE audit entry; nothing notifies a user", async () => {
-    // Add, Subtract, and the collapsed re-submit (a successful adjustment
-    // record) each emit exactly one audit entry.
-    expect(auditSpy).toHaveBeenCalledTimes(3);
+  test("step 7 — each newly persisted adjustment emits an UPDATE audit entry; nothing notifies a user", async () => {
+    // Add and Subtract each emit exactly one audit entry; the collapsed
+    // re-submit reuses the first row and therefore audits nothing.
+    expect(auditSpy).toHaveBeenCalledTimes(2);
 
     const addAudit = auditSpy.mock.calls[0]?.[0]?.[0];
     expect(addAudit?.actorUserId).toBe(cast.adminUser.id);

@@ -136,58 +136,51 @@ function recordVars(
 /** A mutator probe: executes one admin mutation as a caller and asserts denial. */
 type MutationDenialProbe = (token: string, expectedCode: string) => Promise<unknown>;
 
-/** All 6 admin mutations with fully-populated variables, as per-probe closures. */
-function adminMutationProbes(state: SecurityTestState): MutationDenialProbe[] {
+const PACKAGE_PLAN_DENIAL_INPUT = {
+  codename: "sec-abuse",
+  displayName: "Security Abuse Probe",
+  description: null,
+  creditHours: 10,
+  priceAmount: 100,
+  currency: CurrencyCode.Usd,
+  validityMonths: null,
+  active: null,
+  sortOrder: null,
+};
+
+const PACKAGE_PLAN_UPDATE_DENIAL_INPUT = {
+  id: NIL_UUID,
+  displayName: null,
+  description: null,
+  creditHours: null,
+  priceAmount: null,
+  currency: null,
+  validityMonths: null,
+  active: null,
+  sortOrder: null,
+  version: null,
+};
+
+function planMutationProbes(): MutationDenialProbe[] {
   return [
-    (token, expectedCode) =>
-      expectMutationError(
-        token,
-        createPackagePlanMutationDocument,
-        {
-          input: {
-            codename: "sec-abuse",
-            displayName: "Security Abuse Probe",
-            description: null,
-            creditHours: 10,
-            priceAmount: 100,
-            currency: CurrencyCode.Usd,
-            validityMonths: null,
-            active: null,
-            sortOrder: null,
-          },
-        },
-        expectedCode
-      ),
-    (token, expectedCode) =>
-      expectMutationError(
-        token,
-        updatePackagePlanMutationDocument,
-        {
-          input: {
-            id: NIL_UUID,
-            displayName: null,
-            description: null,
-            creditHours: null,
-            priceAmount: null,
-            currency: null,
-            validityMonths: null,
-            active: null,
-            sortOrder: null,
-            version: null,
-          },
-        },
-        expectedCode
-      ),
-    (token, expectedCode) =>
-      expectMutationError(token, archivePackagePlanMutationDocument, { id: NIL_UUID }, expectedCode),
-    (token, expectedCode) =>
+    (token, code) =>
+      expectMutationError(token, createPackagePlanMutationDocument, { input: PACKAGE_PLAN_DENIAL_INPUT }, code),
+    (token, code) =>
+      expectMutationError(token, updatePackagePlanMutationDocument, { input: PACKAGE_PLAN_UPDATE_DENIAL_INPUT }, code),
+    (token, code) => expectMutationError(token, archivePackagePlanMutationDocument, { id: NIL_UUID }, code),
+  ];
+}
+
+function paymentMutationProbes(state: SecurityTestState): MutationDenialProbe[] {
+  return [
+    (token, code) =>
       expectMutationError(
         token,
         recordAccountingPaymentMutationDocument,
         recordVars(state.studentId, { paymentNote: "denial-probe" }),
-        expectedCode
+        code
       ),
-    (token, expectedCode) =>
+    (token, code) =>
       expectMutationError(
         token,
         updateAccountingPaymentMutationDocument,
@@ -200,16 +193,21 @@ function adminMutationProbes(state: SecurityTestState): MutationDenialProbe[] {
             expectedInvoiceVersion: null,
           },
         },
-        expectedCode
+        code
       ),
-    (token, expectedCode) =>
+    (token, code) =>
       expectMutationError(
         token,
         toggleAccountingPaymentPaidStatusMutationDocument,
         { input: { id: state.paymentId, isPaidStatusOn: false, expectedInvoiceVersion: null } },
-        expectedCode
+        code
       ),
   ];
+}
+
+/** All 6 admin mutations with fully-populated variables, as per-probe closures. */
+function adminMutationProbes(state: SecurityTestState): MutationDenialProbe[] {
+  return [...planMutationProbes(), ...paymentMutationProbes(state)];
 }
 
 type DenialPrincipal = { name: string; token: (s: SecurityTestState) => string };
@@ -357,55 +355,37 @@ describe("GraphQL Security: accounting payments surface", () => {
 
   // ─── Positive controls (associated-passes paths) ────────────────────────────
 
-  test("victim student can read own balance, own payment, and own filtered list", async () => {
-    const balance = await authenticatedRequest(
-      state.victimStudentToken,
-      "query",
-      studentCreditHourBalanceQueryDocument,
-      { studentId: state.studentId }
-    );
+  async function assertCanReadVictimAccountingData(token: string) {
+    const balance = await authenticatedRequest(token, "query", studentCreditHourBalanceQueryDocument, {
+      studentId: state.studentId,
+    });
     expect(balance.studentCreditHourBalance?.studentId).toBe(state.studentId);
-    expect(Number(balance.studentCreditHourBalance?.creditHoursTotal)).toBe(GRANTED_HOURS);
 
-    const detail = await authenticatedRequest(state.victimStudentToken, "query", accountingPaymentQueryDocument, {
+    const detail = await authenticatedRequest(token, "query", accountingPaymentQueryDocument, {
       id: state.paymentId,
     });
     expect(detail.accountingPayment?.id).toBe(state.paymentId);
 
     const list = await authenticatedRequest(
-      state.victimStudentToken,
-      "query",
-      accountingPaymentsQueryDocument,
-      paymentsVars(fullFilter({ studentId: state.studentId }))
-    );
-    const rows = list.accountingPayments ?? [];
-    expect(rows.some(row => row?.id === state.paymentId)).toBe(true);
-    for (const row of rows) {
-      expect(row?.studentId).toBe(state.studentId);
-    }
-  });
-
-  test("linked parent can read the child's balance, payment, and filtered list", async () => {
-    const balance = await authenticatedRequest(
-      state.victimParentToken,
-      "query",
-      studentCreditHourBalanceQueryDocument,
-      { studentId: state.studentId }
-    );
-    expect(balance.studentCreditHourBalance?.studentId).toBe(state.studentId);
-
-    const detail = await authenticatedRequest(state.victimParentToken, "query", accountingPaymentQueryDocument, {
-      id: state.paymentId,
-    });
-    expect(detail.accountingPayment?.id).toBe(state.paymentId);
-
-    const list = await authenticatedRequest(
-      state.victimParentToken,
+      token,
       "query",
       accountingPaymentsQueryDocument,
       paymentsVars(fullFilter({ studentId: state.studentId }))
     );
     expect(list.accountingPayments?.some(row => row?.id === state.paymentId)).toBe(true);
+    return { balance, detail, list };
+  }
+
+  test("victim student can read own balance, own payment, and own filtered list", async () => {
+    const { balance, list } = await assertCanReadVictimAccountingData(state.victimStudentToken);
+    expect(Number(balance.studentCreditHourBalance?.creditHoursTotal)).toBe(GRANTED_HOURS);
+    for (const row of list.accountingPayments ?? []) {
+      expect(row?.studentId).toBe(state.studentId);
+    }
+  });
+
+  test("linked parent can read the child's balance, payment, and filtered list", async () => {
+    await assertCanReadVictimAccountingData(state.victimParentToken);
   });
 
   test("VIEW-only staff can read payments/balance (documented as allowed) but only that", async () => {
@@ -557,46 +537,34 @@ describe("GraphQL Security: accounting payments surface", () => {
 
   // ─── Injection / wildcard / malformed input abuse ───────────────────────────
 
-  test("SQL-injection and wildcard studentId filters are rejected without leaking rows", async () => {
-    const maliciousIds = ["' OR '1'='1' --", "%", "%%", "_", "../../../../etc/passwd"];
-    await Promise.all(
-      maliciousIds.map(async maliciousId => {
-        const result = await testClient.query({
-          query: accountingPaymentsQueryDocument,
-          variables: paymentsVars(fullFilter({ studentId: maliciousId })),
-          errorPolicy: "all",
-          context: { headers: { Authorization: `Bearer ${state.adminToken}` } },
-        });
-        expect(result.error).toBeDefined();
-        expect(result.data?.accountingPayments ?? null).toBeNull();
-      })
-    );
-  });
-
-  test("injected parentId filter is rejected without leaking rows", async () => {
+  async function assertPaymentsQueryRejected(variables: AccountingPaymentsQueryVariables) {
     const result = await testClient.query({
       query: accountingPaymentsQueryDocument,
-      variables: paymentsVars(fullFilter({ parentId: "' UNION SELECT id FROM users --" })),
+      variables,
       errorPolicy: "all",
       context: { headers: { Authorization: `Bearer ${state.adminToken}` } },
     });
     expect(result.error).toBeDefined();
     expect(result.data?.accountingPayments ?? null).toBeNull();
+  }
+
+  test("SQL-injection and wildcard studentId filters are rejected without leaking rows", async () => {
+    const maliciousIds = ["' OR '1'='1' --", "%", "%%", "_", "../../../../etc/passwd"];
+    await Promise.all(
+      maliciousIds.map(maliciousId => assertPaymentsQueryRejected(paymentsVars(fullFilter({ studentId: maliciousId }))))
+    );
+  });
+
+  test("injected parentId filter is rejected without leaking rows", async () => {
+    await assertPaymentsQueryRejected(paymentsVars(fullFilter({ parentId: "' UNION SELECT id FROM users --" })));
   });
 
   test("malformed date bounds are rejected without crashing the API", async () => {
     const malformedDates = ["not-a-date", "999-99-99", "'); DROP TABLE payments; --"];
     await Promise.all(
-      malformedDates.map(async fromDate => {
-        const result = await testClient.query({
-          query: accountingPaymentsQueryDocument,
-          variables: paymentsVars(fullFilter({ studentId: state.studentId, fromDate })),
-          errorPolicy: "all",
-          context: { headers: { Authorization: `Bearer ${state.adminToken}` } },
-        });
-        expect(result.error).toBeDefined();
-        expect(result.data?.accountingPayments ?? null).toBeNull();
-      })
+      malformedDates.map(fromDate =>
+        assertPaymentsQueryRejected(paymentsVars(fullFilter({ studentId: state.studentId, fromDate })))
+      )
     );
   });
 
@@ -653,6 +621,13 @@ describe("GraphQL Security: accounting payments surface", () => {
 
   // ─── Idempotency replay abuse ───────────────────────────────────────────────
 
+  async function fetchCurrentCreditBalance(): Promise<number> {
+    const res = await authenticatedRequest(state.adminToken, "query", studentCreditHourBalanceQueryDocument, {
+      studentId: state.studentId,
+    });
+    return Number(res.studentCreditHourBalance?.creditHoursTotal);
+  }
+
   test("identical replay returns the same payment and does not double-credit hours", async () => {
     const replay = await authenticatedRequest(
       state.adminToken,
@@ -662,11 +637,7 @@ describe("GraphQL Security: accounting payments surface", () => {
     );
     expect(replay.recordAccountingPayment?.id).toBe(state.paymentId);
     expect(replay.recordAccountingPayment?.invoiceId).not.toBeNull();
-
-    const balance = await authenticatedRequest(state.adminToken, "query", studentCreditHourBalanceQueryDocument, {
-      studentId: state.studentId,
-    });
-    expect(Number(balance.studentCreditHourBalance?.creditHoursTotal)).toBe(GRANTED_HOURS);
+    expect(await fetchCurrentCreditBalance()).toBe(GRANTED_HOURS);
   });
 
   test("altered payload derives a distinct key and records a separate payment", async () => {
@@ -678,10 +649,6 @@ describe("GraphQL Security: accounting payments surface", () => {
     );
     expect(altered.recordAccountingPayment?.id).not.toBe(state.paymentId);
     expect(altered.recordAccountingPayment?.id).not.toBeNull();
-
-    const balance = await authenticatedRequest(state.adminToken, "query", studentCreditHourBalanceQueryDocument, {
-      studentId: state.studentId,
-    });
-    expect(Number(balance.studentCreditHourBalance?.creditHoursTotal)).toBe(GRANTED_HOURS * 2);
+    expect(await fetchCurrentCreditBalance()).toBe(GRANTED_HOURS * 2);
   });
 });

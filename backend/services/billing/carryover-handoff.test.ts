@@ -126,6 +126,7 @@ describe("maybeInsertCarryoverBalanceEntry — insert branch", () => {
     expect(executed).toHaveLength(2);
     const rendered = renderProbe(executed[1] ?? executed[0]);
     expect(rendered.sql).toContain(`INSERT INTO "${CARRYOVER_TABLE}"`);
+    expect(rendered.sql).toContain("approved_by_user_id");
     expect(rendered.sql).toContain("'PENDING'");
     expect(rendered.sql).toContain("now()");
     expect(rendered.params).toEqual([
@@ -136,6 +137,7 @@ describe("maybeInsertCarryoverBalanceEntry — insert branch", () => {
       payload.toDate,
       payload.paymentDate,
       payload.hours,
+      payload.approvedByUserId,
     ]);
   });
 

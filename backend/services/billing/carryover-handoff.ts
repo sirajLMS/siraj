@@ -59,7 +59,7 @@ export async function maybeInsertCarryoverBalanceEntry(
 
   await tx.execute(sql`
     INSERT INTO ${sql.identifier(CARRYOVER_BALANCES_TABLE)}
-      (credit_transaction_id, teacher_id, student_id, from_date, to_date, payment_date, hours, status, created_at)
+      (credit_transaction_id, teacher_id, student_id, from_date, to_date, payment_date, hours, approved_by_user_id, status, created_at)
     VALUES (
       ${payload.creditTransactionId},
       ${payload.teacherId},
@@ -68,6 +68,7 @@ export async function maybeInsertCarryoverBalanceEntry(
       ${payload.toDate},
       ${payload.paymentDate},
       ${payload.hours},
+      ${payload.approvedByUserId},
       'PENDING',
       now()
     )

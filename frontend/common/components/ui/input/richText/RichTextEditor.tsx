@@ -168,6 +168,13 @@ export function RichTextEditor({
   // Last HTML delivered to the consumer; guards the external-value sync so a
   // prop echo of our own onChange never re-enters setContent (no update loop).
   const lastEmittedRef = useRef(value);
+  // The editor instance is created once, so its `onUpdate` closure would
+  // otherwise pin the first render's `onChange`. Mirror the prop into a ref
+  // and always call the latest handler.
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const editor = useEditor({
     // Server rendering must not touch the DOM; the instance mounts client-side.
@@ -197,7 +204,7 @@ export function RichTextEditor({
         return;
       }
       lastEmittedRef.current = html;
-      onChange(html);
+      onChangeRef.current(html);
     },
   });
 

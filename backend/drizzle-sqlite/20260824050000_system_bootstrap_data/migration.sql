@@ -1468,6 +1468,8 @@ INSERT OR IGNORE INTO group_permissions (group_id, permission_id) VALUES ('8a51f
 --> statement-breakpoint
 INSERT OR IGNORE INTO group_permissions (group_id, permission_id) VALUES ('8a51ffab-a417-4d86-9487-50bb5fe4624d', '11d7e564-3ab8-4980-b259-20e54ee971a2');
 --> statement-breakpoint
+INSERT OR IGNORE INTO group_permissions (group_id, permission_id) VALUES ('8a51ffab-a417-4d86-9487-50bb5fe4624d', '6874a759-c625-4e34-9b9d-d13abe26bef4');
+--> statement-breakpoint
 INSERT OR IGNORE INTO group_permissions (group_id, permission_id) VALUES ('dc3c6bb1-aa9d-4eb5-ba7d-746ad428ca96', '015c314c-ed51-4b58-a555-844993cad70a');
 --> statement-breakpoint
 INSERT OR IGNORE INTO group_permissions (group_id, permission_id) VALUES ('dc3c6bb1-aa9d-4eb5-ba7d-746ad428ca96', 'b20210a7-44c2-4773-97f1-bf7bfc25651c');

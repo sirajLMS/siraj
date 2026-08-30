@@ -202,6 +202,7 @@ The tasks phase serves to:
   - Provision the actor cast via a per-domain helper in `test/workflows/helpers/` (real permission-group membership)
   - Assert shared-state transitions, cross-actor visibility, side effects, and denial paths
   - Committed fixtures in `beforeAll` + tracked hard-delete in `afterAll` — never `runInRollback` around service calls
+  - Add/update the journey's Mermaid diagram in `test/workflows/<domain>/DIAGRAMS.md` (same change) and validate via `bun run validate:mermaid` (rule 11 in `test/workflows/AGENTS.md`)
   - Reference: `docs/testing/workflow-journey-tests.md` + `test/workflows/AGENTS.md`
   - _Requirements: [the journey's cross-actor EARS criteria]_
 ```

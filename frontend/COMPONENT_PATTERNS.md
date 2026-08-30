@@ -73,7 +73,7 @@ DashboardLayoutMobile (px: 0 — edge-to-edge)
 
 ### Navbar shells
 
-`NavbarChrome` and `NavbarStaticShell` (`frontend/common/views/dashboard/components/navbar/`) render the same pure-presentational brand block (logo + app title + role label). `NavbarStaticShell` renders the pre-hydration HTML (a server component with no hooks), so it must stay hook/theme-callback-free — it uses CSS variable tokens (`var(--mui-palette-...)`) instead of JS theme callbacks. **Never** introduce `useTheme` or theme callbacks into `NavbarStaticShell`.
+`NavbarChrome` and `NavbarStaticShell` (`frontend/common/views/dashboard/components/navbar/`) both delegate the brand block (logo + app title + role label) to the shared pure-presentational `NavbarBrandBlock.tsx` fragment. `NavbarStaticShell` renders the pre-hydration HTML (a server component with no hooks), so it must stay hook/theme-callback-free — it passes CSS-variable values (`var(--mui-palette-...)`) into the fragment instead of JS theme callbacks. **Never** introduce `useTheme` or theme callbacks into `NavbarStaticShell`.
 
 ---
 

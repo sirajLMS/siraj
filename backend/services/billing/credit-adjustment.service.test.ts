@@ -17,6 +17,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 // ---------------------------------------------------------------------------
 
 const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
+const SECOND_ACTOR_ID = "77777777-7777-4777-8777-777777777777";
 const STUDENT_ID = "44444444-4444-4444-4444-444444444444";
 const TEACHER_ID = "77777777-7777-7777-7777-777777777777";
 const LEDGER_ROW_ID = "88888888-8888-8888-8888-888888888888";
@@ -268,9 +269,9 @@ async function importService(): Promise<typeof import("@/backend/services/billin
   return import("@/backend/services/billing/credit.service");
 }
 
-async function recordAdjustment(input: CreditAdjustmentInput) {
+async function recordAdjustment(input: CreditAdjustmentInput, actorUserId: string = ACTOR_ID) {
   const { CreditService } = await importService();
-  return CreditService.recordAdjustment(ACTOR_ID, input, tErrorsStub);
+  return CreditService.recordAdjustment(actorUserId, input, tErrorsStub);
 }
 
 async function expectRecordError(input: CreditAdjustmentInput, code: string): Promise<DomainError> {
@@ -361,7 +362,7 @@ describe("CreditService.recordAdjustment", () => {
       expect(insert?.changeAmount).toBe(3);
       expect(insert?.adjustmentType).toBe(CreditAdjustmentType.ADD);
       expect(insert?.reason).toBe(CreditReason.CREDIT_ADJUSTMENT_ADD);
-      expect(insert?.idempotencyKey).toBe(deriveAdjustmentIdempotencyKey(input));
+      expect(insert?.idempotencyKey).toBe(deriveAdjustmentIdempotencyKey(ACTOR_ID, input));
 
       expect(refreshQuotaCalls).toEqual([STUDENT_ID]);
       expect(acquiredLockKeys).toEqual([`student_${STUDENT_ID}`]);
@@ -458,7 +459,8 @@ describe("CreditService.recordAdjustment", () => {
       expect(error).toBeInstanceOf(NotFoundError);
       expect(error.message).toContain("not found");
       expectZeroWrites();
-      expect(idempotencyLookups).toHaveLength(0);
+      // The in-transaction idempotency pre-check runs before the student guard.
+      expect(idempotencyLookups).toHaveLength(1);
     });
 
     test("rejects a carryover whose fromDate is after its toDate", async () => {
@@ -504,9 +506,53 @@ describe("CreditService.recordAdjustment", () => {
 
       expect(second.id).toBe(first.id);
       expect(second.notes).toBe("first submission");
-      expect(second.idempotencyKey).toBe(deriveAdjustmentIdempotencyKey(input));
+      expect(second.idempotencyKey).toBe(deriveAdjustmentIdempotencyKey(ACTOR_ID, input));
       expect(createAdjustmentMock).toHaveBeenCalledTimes(1);
       expect(addClassesMock).toHaveBeenCalledTimes(1);
+      // Only the original insert observability-records; the replay stays silent.
+      expect(auditLogEntries).toHaveLength(1);
+    });
+
+    test("a replay after the balance was drained returns the first row instead of failing the balance guard", async () => {
+      const input = buildSubtractInput();
+      getBalanceMock.mockResolvedValue({ studentId: STUDENT_ID, classesTotal: 4, classesRemaining: 4 });
+
+      const first = await recordAdjustment(input);
+      expect(deductClassesCalls).toHaveLength(1);
+
+      // The balance is now drained; a guard-first implementation would throw
+      // INSUFFICIENT_CLASSES here instead of returning the original row.
+      getBalanceMock.mockResolvedValue({ studentId: STUDENT_ID, classesTotal: 4, classesRemaining: 0 });
+      const firstRow = createdRows[0];
+      if (!firstRow) throw new Error("expected the first insert to produce a ledger row");
+      findByIdempotencyKeysMock.mockResolvedValue([firstRow]);
+
+      const second = await recordAdjustment(input);
+
+      expect(second.id).toBe(first.id);
+      expect(createAdjustmentMock).toHaveBeenCalledTimes(1);
+      expect(deductClassesCalls).toHaveLength(1);
+      expect(auditLogEntries).toHaveLength(1);
+    });
+
+    test("two operators submitting the same payload each persist their own ledger row", async () => {
+      const input = buildSubtractInput();
+      createAdjustmentMock.mockImplementation(async (tx, insertInput) => {
+        const row = defaultInsert(tx, insertInput);
+        return Promise.resolve({ ...row, id: `ledger-row-${adjustmentInserts.length}` });
+      });
+
+      const first = await recordAdjustment(input);
+      const second = await recordAdjustment(input, SECOND_ACTOR_ID);
+
+      expect(second.id).not.toBe(first.id);
+      expect(adjustmentInserts).toHaveLength(2);
+      expect(adjustmentInserts[0]?.idempotencyKey).toBe(deriveAdjustmentIdempotencyKey(ACTOR_ID, input));
+      expect(adjustmentInserts[1]?.idempotencyKey).toBe(deriveAdjustmentIdempotencyKey(SECOND_ACTOR_ID, input));
+      expect(adjustmentInserts[0]?.creditedByUserId).toBe(ACTOR_ID);
+      expect(adjustmentInserts[1]?.creditedByUserId).toBe(SECOND_ACTOR_ID);
+      expect(deductClassesCalls).toHaveLength(2);
+      expect(auditLogEntries).toHaveLength(2);
     });
 
     test("a unique-violation race resolves to the winner row", async () => {
@@ -543,6 +589,7 @@ describe("CreditService.recordAdjustment", () => {
       expect(createAdjustmentMock).toHaveBeenCalledTimes(2);
       expect(adjustmentInserts).toHaveLength(1);
       expect(addClassesMock).toHaveBeenCalledTimes(1);
+      expect(auditLogEntries).toHaveLength(1);
     });
 
     test("rethrows a unique violation when no winning row exists to recover", async () => {
@@ -633,6 +680,7 @@ describe("CreditService.recordAdjustment", () => {
       ["zero hours", buildAddInput({ hours: 0 })],
       ["non-finite hours", buildAddInput({ hours: Number.NaN })],
       ["sub-unit hours", buildAddInput({ hours: 0.5 })],
+      ["hours above the accepted bound", buildAddInput({ hours: 100_001 })],
       ["a missing carryover teacher", buildCarryoverInput({ carryoverTeacherId: null })],
       ["a whitespace-only carryover teacher", buildCarryoverInput({ carryoverTeacherId: "   " })],
       ["a missing carryover from-date", buildCarryoverInput({ carryoverFromDate: null })],

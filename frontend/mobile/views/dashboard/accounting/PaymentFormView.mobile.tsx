@@ -3,11 +3,11 @@
 import { SaveOutlined, SyncOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, FormControlLabel, Stack, Switch, TextField } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { Controller } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { PackagePlanSelectShared } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanSelectShared";
 import {
@@ -263,7 +263,12 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
               control={control}
               render={({ field }) => (
                 <FormControlLabel
-                  control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} />}
+                  control={
+                    <Switch
+                      checked={field.value}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => field.onChange(e.target.checked)}
+                    />
+                  }
                   label={field.value ? t.form.paidToggleOn : t.form.paidToggleOff}
                 />
               )}

@@ -6,7 +6,7 @@ import { cleanup, fireEvent, screen } from "@testing-library/react";
 expect.extend(matchers);
 
 import { AccountStatus, AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
-import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/staff/sections/AdminOnlySection";
+import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/staff/sections/StaffAdminOnlySection";
 import { toStaffSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";

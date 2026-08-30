@@ -84,7 +84,6 @@ function buildViewModel(overrides: Partial<TeacherProfileViewModel>): TeacherPro
     error: undefined,
     refetch: () => {},
     activeTab: "profile",
-    onTabChange: () => {},
     ...overrides,
   };
 }

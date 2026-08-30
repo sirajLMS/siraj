@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -156,6 +156,33 @@ describe("RichTextEditor", () => {
     view.rerender(<Controlled />);
     await waitFor(() => expect(screen.getByRole("textbox")).toHaveTextContent(/^$/));
     expect(capture.callCount).toBe(callsBeforeReset);
+  });
+
+  test("routes edits to the latest onChange handler after a rerender", async () => {
+    const firstHandler = mock((_html: string) => {});
+    const secondHandler = mock((_html: string) => {});
+
+    function Controlled({ handler }: { readonly handler: (html: string) => void }) {
+      const [value, setValue] = useState("");
+      return (
+        <RichTextEditor
+          value={value}
+          label={LABEL}
+          onChange={html => {
+            handler(html);
+            setValue(html);
+          }}
+        />
+      );
+    }
+
+    const view = renderWithWrapper(<Controlled handler={firstHandler} />, { locale });
+    await editorReady();
+    view.rerender(<Controlled handler={secondHandler} />);
+
+    await userEvent.setup().type(screen.getByRole("textbox"), "x");
+    await waitFor(() => expect(secondHandler).toHaveBeenCalled());
+    expect(firstHandler).not.toHaveBeenCalled();
   });
 
   test("renders a bare editor with a fallback accessible name when no label is given", async () => {

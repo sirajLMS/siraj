@@ -6,8 +6,12 @@ export const dashboardBillingPayrollEn: PayrollLabels = {
     teacher: "Teacher",
     student: "Student",
     dateRange: "Date range",
+    dateFrom: "From",
+    dateTo: "To",
     status: "Calculation status",
     search: "Search teacher / student",
+    clear: "Clear filters",
+    all: "All statuses",
   },
   column: {
     scheduledStart: "Scheduled start",
@@ -16,7 +20,10 @@ export const dashboardBillingPayrollEn: PayrollLabels = {
     calculatedDuration: "Calculated duration (min)",
     paidAmount: "Paid amount",
     status: "Status",
+    partialPercentage: "Partial %",
     note: "Note",
+    subject: "Subject",
+    actions: "Actions",
   },
   status: {
     NOT_CALCULATED: "Not Calculated",
@@ -38,6 +45,7 @@ export const dashboardBillingPayrollEn: PayrollLabels = {
     percentage: "Percentage (0–100)",
     note: "Note",
     force: "Force override even if Awaiting Paid",
+    action: "Override",
   },
   validation: {
     percentageRequired: "Percentage is required for Partially.",
@@ -49,9 +57,17 @@ export const dashboardBillingPayrollEn: PayrollLabels = {
   },
   success: { overridden: "Payroll calculation updated." },
   empty: "No payroll rows match the current filters.",
+  loadError: "Failed to load the payroll report.",
   exportTruncated: "Export truncated to 10 000 rows.",
+  exportCsv: "Export CSV",
+  exportFailed: "CSV export failed. Please try again.",
   aggregate: {
     totalPaid: "Total paid",
     rowCount: "Rows",
+  },
+  audit: {
+    title: "Payroll Calculation",
+    overrideHistory: "Override history",
+    noOverrideEvents: "No overrides recorded.",
   },
 };

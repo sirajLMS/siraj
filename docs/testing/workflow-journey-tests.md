@@ -48,6 +48,22 @@ Use a different layer when:
 - You only exercise repositories/constraints (repo or logic test with `runInRollback`).
 - You need resolver wiring, HTTP, or browser behavior (GraphQL / E2E).
 
+## Diagram documentation (mandatory)
+
+Every journey ships with a Mermaid diagram in its domain's diagram file
+(`test/workflows/<domain>/DIAGRAMS.md`): one section per journey test — heading named after the
+test file, a 1-2 sentence intro, and a single ```` ```mermaid ```` block (`sequenceDiagram` for
+actor flows, `stateDiagram-v2` for state machines, `flowchart` for decision logic). Actor and
+step names must match the real service calls. Create or update the diagram in the **same change**
+as the journey, and validate before finishing:
+
+```bash
+bun run validate:mermaid test/workflows/<domain>/DIAGRAMS.md   # every block must report OK
+```
+
+Existing examples: `test/workflows/accounting/DIAGRAMS.md`, `test/workflows/billing/DIAGRAMS.md`,
+`test/workflows/scheduling/DIAGRAMS.md`.
+
 ## Rule: NO `runInRollback` in journeys
 
 Services use the global `db` and spawn their **own top-level transactions**. Wrapping a journey in

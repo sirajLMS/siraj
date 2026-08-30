@@ -26,6 +26,7 @@ import {
   CarryoverBanner,
   type CarryoverBannerErrors,
 } from "@/frontend/common/views/dashboard/accounting/credits/CarryoverBanner";
+import { PAYMENT_DATE_MAX_FUTURE_DAYS } from "@/frontend/common/views/dashboard/accounting/credits/creditAdjust.constants";
 import { CreditAdjustmentType } from "@/shared/constants/billing";
 import { useRouter } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -71,8 +72,18 @@ const ADJUSTMENT_TYPE_TO_GQL: Record<CreditAdjustmentType, CreditAdjustmentGqlTy
 
 const INSUFFICIENT_CLASSES_CODE = "INSUFFICIENT_CLASSES";
 const CREDITS_LIST_HREF = "/accounting/credits";
-/** Client mirror of the server rule: payment date may be at most one day in the future. */
-const PAYMENT_DATE_MAX_FUTURE_DAYS = 1;
+
+const HTML_TAG_PATTERN = /<[^<>]*>/g;
+
+/**
+ * Rich-text emptiness probe for the required Reason field: a lone space in the
+ * editor reaches store state as `"<p> </p>"` / `"<p>&nbsp;</p>"`, so a plain
+ * `.trim()` always sees markup instead of the empty content. Strip tags and
+ * decoding the non-breaking-space entity restores the whitespace-only signal.
+ */
+function hasReasonText(html: string): boolean {
+  return html.replace(HTML_TAG_PATTERN, "").replaceAll("&nbsp;", " ").trim() !== "";
+}
 
 function omitFieldError(
   errors: CreditAdjustFieldErrors,
@@ -131,7 +142,7 @@ function validateCreditAdjustDraft(
   } = {};
   if (draft.studentId === null) errors.student = copy.required;
   if (draft.hours === null || !Number.isInteger(draft.hours) || draft.hours < 1) errors.hours = copy.hoursPositive;
-  if (draft.notes.trim() === "") errors.notes = copy.required;
+  if (!hasReasonText(draft.notes)) errors.notes = copy.required;
   if (draft.adjustmentType === CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER) {
     const carryover = validateCarryoverDraft(draft, copy);
     if (carryover) errors.carryover = carryover;
@@ -324,8 +335,11 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
 
   const applySubmitSuccess = (submittedDraft: CreditAdjustDraft) => {
     // The mutation result carries no recalculated balances — drop the cached
-    // students directory entries so the list refetches with fresh balances.
+    // students directory entries so the list refetches with fresh balances,
+    // and the deep-linked student record so a revisited preselection summary
+    // never shows the stale balance.
     client.cache.evict({ fieldName: "studentsDirectory" });
+    client.cache.evict({ fieldName: "studentById" });
     notifications.show(buildSuccessMessage(t, submittedDraft), { severity: "success" });
     reset();
     router.push(CREDITS_LIST_HREF);

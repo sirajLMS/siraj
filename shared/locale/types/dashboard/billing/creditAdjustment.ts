@@ -16,6 +16,8 @@ export interface CreditAdjustmentLabels {
   };
   readonly reason: { readonly label: string };
   readonly hours: { readonly label: string };
+  /** Hint shown when a server-capped directory search returns exactly the fetch limit. */
+  readonly resultsCappedHint: (limit: number) => string;
   readonly validation: {
     readonly fromAfterTo: string;
     readonly paymentTooFar: string;

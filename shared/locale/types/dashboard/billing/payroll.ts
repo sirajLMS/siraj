@@ -4,8 +4,12 @@ export interface PayrollLabels {
     readonly teacher: string;
     readonly student: string;
     readonly dateRange: string;
+    readonly dateFrom: string;
+    readonly dateTo: string;
     readonly status: string;
     readonly search: string;
+    readonly clear: string;
+    readonly all: string;
   };
   readonly column: {
     readonly scheduledStart: string;
@@ -14,7 +18,10 @@ export interface PayrollLabels {
     readonly calculatedDuration: string;
     readonly paidAmount: string;
     readonly status: string;
+    readonly partialPercentage: string;
     readonly note: string;
+    readonly subject: string;
+    readonly actions: string;
   };
   readonly status: {
     readonly NOT_CALCULATED: string;
@@ -36,6 +43,7 @@ export interface PayrollLabels {
     readonly percentage: string;
     readonly note: string;
     readonly force: string;
+    readonly action: string;
   };
   readonly validation: {
     readonly percentageRequired: string;
@@ -47,9 +55,17 @@ export interface PayrollLabels {
   };
   readonly success: { readonly overridden: string };
   readonly empty: string;
+  readonly loadError: string;
   readonly exportTruncated: string;
+  readonly exportCsv: string;
+  readonly exportFailed: string;
   readonly aggregate: {
     readonly totalPaid: string;
     readonly rowCount: string;
+  };
+  readonly audit: {
+    readonly title: string;
+    readonly overrideHistory: string;
+    readonly noOverrideEvents: string;
   };
 }

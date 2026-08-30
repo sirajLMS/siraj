@@ -52,7 +52,8 @@
     ".next-test-3027/dev/dev/types/**/*.ts",
     ".next-dev/dev/dev/types/**/*.ts",
     ".next-test-dev/types/**/*.ts",
-    ".next-test-dev/dev/types/**/*.ts"
+    ".next-test-dev/dev/types/**/*.ts",
+    ".next/dev/dev/types/**/*.ts"
   ],
   "exclude": [
     // Dot-directories (except `.storybook`, which is explicitly included above).

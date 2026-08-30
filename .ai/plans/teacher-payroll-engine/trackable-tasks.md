@@ -260,7 +260,7 @@
 - 🔁 `bun run locale:snapshots` (or project equivalent) — generate `public/static/locale-snapshots/{en,ar}/dashboard.billing.payroll.json`.
 - ✅ Verify snapshots committed.
 
-### 3.6 Route shell
+### 3.6 Route shell ✅ DONE
 - 🆕 `app/(dashboard)/accounting/payroll/page.tsx` — server component that renders `<PayrollReportsContainer />`.
 - 🔁 `bun run scripts/health/sub-loop.ts "app/(dashboard)/accounting/payroll/page.tsx" --lifecycle codescene`
 
@@ -279,32 +279,32 @@
 - 🔁 After Phase 2 lands: `bun run generate:gqlSchema && bun codegen` so `Operations.PayrollReportQuery`, `Operations.ApplyPayrollOverrideMutation`, + their `Types.Args` exist.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/teachers/payroll.documents.ts --lifecycle codescene`
 
-### 4.2 View-model hook
+### 4.2 View-model hook ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/payroll/usePayrollReportsViewModel.ts` — manages Apollo query state, filter state (Zustand slice), pagination, debounced search, "Export CSV" handler.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/usePayrollReportsViewModel.ts --lifecycle codescene`
 
-### 4.3 Zustand filter store
+### 4.3 Zustand filter store ✅ DONE
 - 🆕 `frontend/common/stores/payrollReportsFilterStore.ts` — `teacherId`, `studentId`, `dateFrom`, `dateTo`, `calculationStatuses`, `search`, `page`, `pageSize`; `reset()`, `clearFilters()`.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/stores/payrollReportsFilterStore.ts --lifecycle codescene`
 
-### 4.4 Filter bar component
+### 4.4 Filter bar component ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/payroll/PayrollReportsFilterBar.tsx` — teacher autocomplete, student autocomplete, date-range picker, status multi-select, search input (debounced 300 ms).
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/PayrollReportsFilterBar.tsx --lifecycle codescene`
 
-### 4.5 Status chip component
+### 4.5 Status chip component ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip.tsx` — MUI `Chip` with colored variant per `CalculationStatus` (red=Refund, blue=Calculated, grey=Not Calculated, amber=Partially, indigo=Waiting Paid, green=Paid).
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip.tsx --lifecycle codescene`
 
-### 4.6 DataGrid component
+### 4.6 DataGrid component ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/payroll/PayrollReportsDataGrid.tsx` — MUI `DataGrid` v9 with columns per §4.1; per-row "Override" action (gated on `ACCOUNTING_PAYROLL_MANAGE`); aggregate footer card; CSV export button.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/PayrollReportsDataGrid.tsx --lifecycle codescene`
 
-### 4.7 Container + view
+### 4.7 Container + view ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/payroll/PayrollReportsContainer.tsx` — composes filter bar + data grid + override dialog; uses `usePayrollReportsViewModel`.
 - 🆕 `frontend/desktop/views/dashboard/accounting/payroll/payroll.desktop.tsx` + `frontend/mobile/views/dashboard/accounting/payroll/payroll.mobile.tsx` — responsive view variants (per existing `ReportsContainer` pattern).
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/PayrollReportsContainer.tsx --lifecycle codescene`
 
-### 4.8 Page tests
+### 4.8 Page tests ✅ DONE
 - 🧪 `frontend/common/views/dashboard/accounting/payroll/PayrollReportsContainer.test.tsx` — renders rows; filters debounce; empty state; CSV button navigates to `/api/payroll/export?...`; "Override" action hidden without `_MANAGE`.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/PayrollReportsContainer.test.tsx --lifecycle codescene`
 - 🔁 `bun test frontend/common/views/dashboard/accounting/payroll/PayrollReportsContainer.test.tsx`
@@ -313,15 +313,15 @@
 
 ## Phase 5 — Override dialog
 
-### 5.1 Override dialog component
+### 5.1 Override dialog component ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/payroll/OverrideDialog.tsx` — RadioGroup (4 modes), conditional percentage field, note field, optional `force` checkbox, summary card of current values, Submit/Cancel.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/OverrideDialog.tsx --lifecycle codescene`
 
-### 5.2 Override form state
+### 5.2 Override form state ✅ DONE
 - 🆕 `frontend/common/views/dashboard/accounting/payroll/useOverrideDialogViewModel.ts` — local form state + `useMutation(applyPayrollOverrideMutationDocument)` (Apollo hook imported from `@apollo/client/react`) + cache evict + error mapping.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/useOverrideDialogViewModel.ts --lifecycle codescene`
 
-### 5.3 Override dialog tests
+### 5.3 Override dialog tests ✅ DONE
 - 🧪 `frontend/common/views/dashboard/accounting/payroll/OverrideDialog.test.tsx`:
   - RadioGroup toggles percentage field visibility.
   - Validation blocks invalid submits (Partially without pct; Refund/Partially without note).
@@ -332,12 +332,12 @@
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/accounting/payroll/OverrideDialog.test.tsx --lifecycle codescene`
 - 🔁 `bun test frontend/common/views/dashboard/accounting/payroll/OverrideDialog.test.tsx`
 
-### 5.4 Audit drawer extension
+### 5.4 Audit drawer extension ✅ DONE
 - ✏️ `frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard.tsx` — add a "Payroll Calculation" card: status chip, calculated duration, paid amount + currency, note, chronological list of `PAYROLL_OVERRIDE` events; "Override" button (gated on `ACCOUNTING_PAYROLL_MANAGE`).
 - 🧪 `frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard.test.tsx` — card renders when payroll fields are present; "Override" button opens the dialog.
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard.tsx --lifecycle codescene`
 
-### 5.5 Phase-5 acceptance
+### 5.5 Phase-5 acceptance ✅ DONE
 - ✅ Full Refund / Calculated / Not Calculated / Partially flows work end-to-end in dev.
 - ✅ Double-submit produces exactly one `class_status_events` row.
 - ✅ Audit drawer card renders and opens the override dialog.

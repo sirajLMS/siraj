@@ -380,7 +380,7 @@ Each builder/adapter/service task MUST include paired tests as subtasks using [.
 - Builder/adapter tasks — always
 - Service layer tasks — recommended
 - Repository layer tasks — recommended (100% coverage target, `runInRollback` + `tx` propagation)
-- Cross-actor journey tasks — always, and **test-first**: write `test/workflows/<domain>/<journey>.test.ts` before the service surface, then implement until the journey passes. Real services + real DB, committed fixtures + tracked `afterAll` cleanup, NO `runInRollback`, honest permission-group membership, notification dispatch spied. Run via `bun run test/scripts/run-test.ts <path>` then `bun run test:workflows`. See `docs/testing/workflow-journey-tests.md` and `test/workflows/AGENTS.md`.
+- Cross-actor journey tasks — always, and **test-first**: write `test/workflows/<domain>/<journey>.test.ts` before the service surface, then implement until the journey passes. Real services + real DB, committed fixtures + tracked `afterAll` cleanup, NO `runInRollback`, honest permission-group membership, notification dispatch spied. Run via `bun run test/scripts/run-test.ts <path>` then `bun run test:workflows`. Also create/update the journey's Mermaid diagram in `test/workflows/<domain>/DIAGRAMS.md` (same change) and validate via `bun run validate:mermaid`. See `docs/testing/workflow-journey-tests.md` and `test/workflows/AGENTS.md`.
 - Complex business logic tasks — recommended
 
 **When to defer tests:**

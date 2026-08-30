@@ -6,8 +6,12 @@ export const dashboardBillingPayrollAr: PayrollLabels = {
     teacher: "المعلم",
     student: "الطالب",
     dateRange: "النطاق الزمني",
+    dateFrom: "من",
+    dateTo: "إلى",
     status: "حالة الاحتساب",
     search: "ابحث عن معلم / طالب",
+    clear: "مسح عوامل التصفية",
+    all: "جميع الحالات",
   },
   column: {
     scheduledStart: "بداية الجلسة",
@@ -16,7 +20,10 @@ export const dashboardBillingPayrollAr: PayrollLabels = {
     calculatedDuration: "مدة الاحتساب (دقيقة)",
     paidAmount: "المبلغ المستحق",
     status: "الحالة",
+    partialPercentage: "نسبة الجزئي",
     note: "ملاحظة",
+    subject: "المادة",
+    actions: "إجراءات",
   },
   status: {
     NOT_CALCULATED: "غير محسوب",
@@ -38,6 +45,7 @@ export const dashboardBillingPayrollAr: PayrollLabels = {
     percentage: "النسبة (0–100)",
     note: "ملاحظة",
     force: "التجاوز رغم حالة (بانتظار الصرف)",
+    action: "تجاوز",
   },
   validation: {
     percentageRequired: "النسبة مطلوبة عند اختيار (جزئي).",
@@ -49,9 +57,17 @@ export const dashboardBillingPayrollAr: PayrollLabels = {
   },
   success: { overridden: "تم تحديث احتساب الراتب." },
   empty: "لا توجد صفوف رواتب تطابق عوامل التصفية الحالية.",
+  loadError: "تعذر تحميل تقرير الرواتب.",
   exportTruncated: "تم اقتطاع التصدير إلى 10 000 صف.",
+  exportCsv: "تصدير CSV",
+  exportFailed: "فشل تصدير CSV. حاول مرة أخرى.",
   aggregate: {
     totalPaid: "إجمالي المستحق",
     rowCount: "الصفوف",
+  },
+  audit: {
+    title: "احتساب الراتب",
+    overrideHistory: "سجل التجاوزات",
+    noOverrideEvents: "لا توجد تجاوزات مسجلة.",
   },
 };

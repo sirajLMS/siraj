@@ -1,5 +1,5 @@
 {
-  "manifestHash": "e6bc6627dc7c8bf950009916a2c211960a78735d5b1bf6355c4a8f7a56042d12",
+  "manifestHash": "6cb6d46c37b46bc47c28fa90b9217293e5b5f45bfe799a4ee4829fbad99582c7",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -48,6 +48,10 @@
     {
       "file": "37-payroll-grace-settings.sql",
       "sha256": "315e8d169c89e2a6d4f7d5020519064b23d41584d8c3078cfb890c0106875a8e"
+    },
+    {
+      "file": "38-parent-notification-view-alerts.sql",
+      "sha256": "3a1179b5def089c96110b008e9db0c9b471d018fa4bd4de9c3dc119eed38e0cb"
     },
     {
       "file": "4-class_categories_and_subjects.sql",
@@ -310,6 +314,7 @@
     "20260827015544_custom_34-credit-hours-system-settings-seed",
     "20260828212837_custom_35-accounting-credits-permission",
     "20260829023113_custom_36-accounting-payroll-permissions",
-    "20260829031931_custom_37-payroll-grace-settings"
+    "20260829031931_custom_37-payroll-grace-settings",
+    "20260829192949_custom_38-parent-notification-view-alerts"
   ]
 }

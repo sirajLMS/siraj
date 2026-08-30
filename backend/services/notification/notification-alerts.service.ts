@@ -26,6 +26,24 @@ const COMPLAINT_ALERT_BODY_LIMIT = 100;
 const ALERTS_PAGE_SIZE = 20;
 const ALERTS_FEED_ID_PREFIX = "notification-alerts-";
 
+/**
+ * Per-channel fan-out of one notification dispatch shares the same event,
+ * target entity, and creation timestamp within seconds; deliveries from the
+ * same dispatch are grouped when they fall into the same minute bucket.
+ */
+const DELIVERY_GROUP_WINDOW_MS = 60_000;
+
+/**
+ * Channels whose delivery row stores the recipient address in `body` instead
+ * of message copy (ResendEmailAdapter persists `payload.to`, TwilioSmsAdapter
+ * the phone number). These rows are delivery bookkeeping, never user-facing
+ * notification content.
+ */
+const ADDRESS_BODY_CHANNELS: ReadonlySet<string> = new Set<string>([
+  NotificationChannel.EMAIL,
+  NotificationChannel.SMS,
+]);
+
 const NOTIFICATION_ENTITY_KINDS: ReadonlySet<string> = new Set([
   "invoice",
   "class",
@@ -141,6 +159,41 @@ function toMarkableDeliveryRow(row: { id: string; status: string }): MarkableDel
   };
 }
 
+/**
+ * The drawer surface renders one entry per logical notification, while the
+ * `notification_deliveries` table stores one row per dispatched channel
+ * (e.g. ON_APP + EMAIL for the same dispatch). Deliveries belonging to the
+ * same dispatch share event type, target entity, and creation-minute bucket;
+ * within a group the ON_APP row wins because it is the only channel whose
+ * `title`/`body` carry the in-app message copy. Non-grouped rows pass through
+ * unchanged, so an unmatched row degrades to the previous per-delivery row
+ * instead of disappearing.
+ */
+export function groupRecentDeliveriesByNotification(rows: readonly RecentNotificationRow[]): RecentNotificationRow[] {
+  const byGroup = new Map<string, RecentNotificationRow>();
+  for (const row of rows) {
+    const metadata = isNotificationMetadata(row.metadata) ? row.metadata : null;
+    const bucket = Math.floor(row.createdAt.getTime() / DELIVERY_GROUP_WINDOW_MS);
+    const key = `${row.eventType}|${metadata?.entityKind ?? ""}|${metadata?.entityId ?? ""}|${bucket}`;
+    const existing = byGroup.get(key);
+    const preferRow =
+      !existing || (existing.channel !== NotificationChannel.ON_APP && row.channel === NotificationChannel.ON_APP);
+    if (preferRow) {
+      byGroup.set(key, row);
+    }
+  }
+  return [...byGroup.values()];
+}
+
+/**
+ * Suppresses the recipient-address placeholder stored as the delivery `body`
+ * for email/SMS rows so the drawer never renders a raw address as notification
+ * content. Real message bodies (ON_APP, push, WhatsApp) pass through.
+ */
+export function resolveNotificationAlertBody(channel: NotificationChannel, body: string | null): string | null {
+  return ADDRESS_BODY_CHANNELS.has(channel) ? null : body;
+}
+
 async function fetchMarkableDeliveryRows(userId: string): Promise<MarkableDeliveryRow[]> {
   const rows = await db
     .select({
@@ -185,7 +238,7 @@ function buildNotificationAlert(
     channel: notification.channel,
     metadata: isNotificationMetadata(notification.metadata) ? notification.metadata : null,
     title: notification.title ?? defaultTitle,
-    body: notification.body,
+    body: resolveNotificationAlertBody(notification.channel, notification.body),
     createdAt: notification.createdAt,
     severity: notification.status === NotificationDeliveryStatus.FAILED ? "error" : "info",
     readAt: notification.openedAt ?? null,
@@ -212,7 +265,7 @@ async function buildAlertsResult(
 ): Promise<NotificationAlertsPaginatedReturnType> {
   const unansweredComplaints = canListComplaints ? await fetchUnansweredComplaintRows() : [];
 
-  const recentNotifications = await fetchRecentNotificationRows(userId);
+  const recentNotifications = groupRecentDeliveriesByNotification(await fetchRecentNotificationRows(userId));
 
   const alerts: NotificationAlertReturnType[] = [];
   for (const complaint of unansweredComplaints) {

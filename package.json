@@ -80,7 +80,7 @@
     "ondemand:generate": "bun run scripts/ondemand-instance-generator.ts",
     "ondemand:resolve": "bun run scripts/ondemand-no-credits-resolver.ts",
     "ondemand:teacher-digest": "bun run scripts/ondemand-teacher-digest-cron.ts",
-    "validate:mermaid": "scripts/validate-mermaid.ts"
+    "validate:mermaid": "bun run scripts/validate-mermaid.ts"
   },
   "dependencies": {
     "@apollo/client": "^4.2.12",

@@ -308,8 +308,8 @@ describe("Credit adjustment journey — Subtract With Carryover handoff and visi
   });
 
   test("step 8 — committed carryovers audit the actor, student, teacher and hours; nothing notifies a user", async () => {
-    // Add seed + four carryovers + the collapsed resubmission.
-    expect(auditSpy).toHaveBeenCalledTimes(6);
+    // Add seed + four carryovers; the collapsed resubmission audits nothing.
+    expect(auditSpy).toHaveBeenCalledTimes(5);
 
     const carryoverAudit = auditSpy.mock.calls[1]?.[0]?.[0];
     expect(carryoverAudit?.actorUserId).toBe(cast.adminUser.id);

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import type { BrowserContext, Page } from "playwright";
+import type { BrowserContext, Locator, Page } from "playwright";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { getDefaultTranslations } from "@/shared/locale/server";
 import {
@@ -45,9 +45,9 @@ const PAYMENT_DATE_LABEL = new RegExp(escapeRegExp(credits.carryover.paymentDate
 
 /**
  * Test input data (operator-typed reason), not a rendered translation.
- * A per-run suffix keeps repeated runs from collapsing onto the same
- * server-derived idempotency key (same student + type + hours + notes would
- * otherwise replay the first submission without changing the balance).
+ * A per-run suffix keeps the ledger audit trail distinguishable between runs;
+ * server-side idempotency keys exclude notes, so rerun uniqueness comes from
+ * the per-run hour amounts chosen in the flow test below.
  */
 const E2E_REASON = `E2E credit adjustment reason ${Date.now().toString(36)}`;
 
@@ -184,10 +184,29 @@ async function dismissOpenNotifications(p: Page): Promise<void> {
   }
 }
 
-async function selectAdjustmentType(p: Page, cardName: RegExp): Promise<void> {
+async function isRadioChecked(p: Page, value: string): Promise<boolean> {
+  return p.locator(`input[type="radio"][value="${value}"]`).isChecked();
+}
+
+async function clickCardUntilChecked(card: Locator, isChecked: () => Promise<boolean>, attempt: number): Promise<void> {
+  if (attempt > 8) {
+    throw new Error("radio card click never registered (checked state did not flip)");
+  }
+  await card.click();
+  if (await isChecked()) return;
+  await clickCardUntilChecked(card, isChecked, attempt + 1);
+}
+
+async function selectAdjustmentType(
+  p: Page,
+  cardName: RegExp,
+  value: "ADD" | "SUBTRACT" | "SUBTRACT_WITH_CARRYOVER"
+): Promise<void> {
   const card = p.locator(".MuiFormControlLabel-root").filter({ hasText: cardName }).first();
   await card.waitFor({ state: "visible", timeout: devWaitTimeout });
-  await card.click();
+  // Hydration-safe: on a freshly loaded page a click can land before React
+  // attaches its handlers, so verify the store-driven checked state and retry.
+  await clickCardUntilChecked(card, () => isRadioChecked(p, value), 1);
 }
 
 async function fillHoursAndReason(p: Page, hours: number): Promise<void> {
@@ -207,15 +226,16 @@ async function submitAndReturnToList(p: Page, toastPattern: RegExp): Promise<voi
   await p.waitForURL(url => url.pathname === CREDITS_PATH, { timeout: devWaitTimeout });
 }
 
-/** Masked date inputs accept digit-by-digit entry (dd/MM/yyyy in the default ar locale). */
+/** Masked date inputs (MUI X contenteditable sections) accept digit-by-digit entry (dd/MM/yyyy in the default ar locale). */
 async function fillDateField(p: Page, label: RegExp, date: Date): Promise<void> {
-  const input = p.getByLabel(label).first();
-  await input.waitFor({ state: "visible", timeout: devWaitTimeout });
-  await input.click();
+  const field = p.getByLabel(label).first();
+  await field.waitFor({ state: "visible", timeout: devWaitTimeout });
+  await field.click();
   const digits = `${String(date.getDate()).padStart(2, "0")}${String(date.getMonth() + 1).padStart(2, "0")}${date.getFullYear()}`;
-  await input.pressSequentially(digits);
+  await field.pressSequentially(digits);
   await p.keyboard.press("Escape");
-  expect((await input.inputValue()).trim().length).toBeGreaterThan(0);
+  // Not a native input (contenteditable sections), so read the rendered value.
+  expect((await field.textContent()) ?? "").toContain(String(date.getFullYear()));
 }
 
 const pageConsoleErrors: string[] = [];
@@ -279,7 +299,7 @@ describe.serial("Accounting Credits E2E", () => {
     expect(await p.getByRole("link", { name: CREDITS_NAV_LINK }).count()).toBe(0);
   });
 
-  test("operator flow: add 2, subtract 1, subtract 1 with carryover (AC-2.x, AC-3.x, AC-4.x, AC-2.6)", async () => {
+  test("operator flow: add, subtract, subtract with carryover (AC-2.x, AC-3.x, AC-4.x, AC-2.6)", async () => {
     const p = await loginAtRoute(DEMO_USERS.academyAdmin.groupSlug, CREDITS_PATH);
     let step = "list-render";
     try {
@@ -288,34 +308,40 @@ describe.serial("Accounting Credits E2E", () => {
       const studentName = target.name;
       const balance = { ...target.balance };
 
-      // Add +2 hours — increments both remaining and total.
-      step = "add+2";
+      // Server-side idempotency keys are derived from (studentId, type, hours,
+      // carryover fields) — notes are deliberately excluded. Per-run-varying
+      // hours keep reruns from replaying an earlier run's ledger row, and
+      // ADD = SUBTRACT + CARRYOVER keeps the demo balance a net-zero no-op.
+      const addHours = 2 + (Math.floor(Date.now() / 60_000) % 30);
+      const subtractHours = Math.ceil(addHours / 2);
+      const carryoverHours = addHours - subtractHours;
+
+      // Add — increments both remaining and total.
+      step = "add";
       await openAdjustFormForStudent(p, studentName);
       const studentId = new URL(p.url()).searchParams.get("studentId") ?? "";
       expect(studentId.length).toBeGreaterThan(0);
-      await fillHoursAndReason(p, 2);
-      await submitAndReturnToList(p, exactText(credits.success.added(2)));
-      balance.remaining += 2;
-      balance.total += 2;
-      step = "add+2.verify-balance";
-      await searchForStudent(p, studentName);
+      await fillHoursAndReason(p, addHours);
+      await submitAndReturnToList(p, exactText(credits.success.added(addHours)));
+      balance.remaining += addHours;
+      balance.total += addHours;
+      step = "add.verify-balance";
       await verifyBalanceAfterSubmit(p, studentName, studentId, balance);
 
-      // Subtract 1 hour — decrements remaining only.
-      step = "subtract-1";
+      // Subtract — decrements remaining only.
+      step = "subtract";
       await gotoAdjustWithStudent(p, studentId);
-      await selectAdjustmentType(p, SUBTRACT_CARD);
-      await fillHoursAndReason(p, 1);
-      await submitAndReturnToList(p, exactText(credits.success.subtracted(1)));
-      balance.remaining -= 1;
-      step = "subtract-1.verify-balance";
-      await searchForStudent(p, studentName);
+      await selectAdjustmentType(p, SUBTRACT_CARD, "SUBTRACT");
+      await fillHoursAndReason(p, subtractHours);
+      await submitAndReturnToList(p, exactText(credits.success.subtracted(subtractHours)));
+      balance.remaining -= subtractHours;
+      step = "subtract.verify-balance";
       await verifyBalanceAfterSubmit(p, studentName, studentId, balance);
 
-      // Subtract 1 hour with carryover — decrements remaining; carryover section required.
-      step = "carryover-1";
+      // Subtract with carryover — decrements remaining; carryover section required.
+      step = "carryover";
       await gotoAdjustWithStudent(p, studentId);
-      await selectAdjustmentType(p, CARRYOVER_CARD);
+      await selectAdjustmentType(p, CARRYOVER_CARD, "SUBTRACT_WITH_CARRYOVER");
       await p.getByText(CARRYOVER_BANNER_TITLE).first().waitFor({ state: "visible", timeout: devWaitTimeout });
 
       const teacherInput = p.getByLabel(TEACHER_LABEL).first();
@@ -330,16 +356,15 @@ describe.serial("Accounting Credits E2E", () => {
       await fillDateField(p, TO_DATE_LABEL, today);
       await fillDateField(p, PAYMENT_DATE_LABEL, today);
 
-      await fillHoursAndReason(p, 1);
+      await fillHoursAndReason(p, carryoverHours);
       // Success toast names the teacher; fall back to the plain subtracted copy if the
       // client cannot resolve the teacher display name (degraded-by-design branch).
       const carryoverToast = new RegExp(
-        `${escapeRegExp(credits.success.carryover(1, ""))}|${exactText(credits.success.subtracted(1)).source}`
+        `${escapeRegExp(credits.success.carryover(carryoverHours, ""))}|${exactText(credits.success.subtracted(carryoverHours)).source}`
       );
       await submitAndReturnToList(p, carryoverToast);
-      balance.remaining -= 1;
-      step = "carryover-1.verify-balance";
-      await searchForStudent(p, studentName);
+      balance.remaining -= carryoverHours;
+      step = "carryover.verify-balance";
       await verifyBalanceAfterSubmit(p, studentName, studentId, balance);
     } catch (error) {
       await dumpFlowDiagnostics(p, step);

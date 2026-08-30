@@ -444,6 +444,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/services/general-user-creation.md` - General user creation pattern (createUserOfType null extension, specialized group filtering, cache eviction)
 - `docs/billing/quota-system.md` - Quota System: append-only ledger, FIFO selection, periodic rollover, on-demand scheduling integration
 - `docs/billing/credit-hours-system.md` - Credit-Hours accounting: hour-based parallel ledger, package plans, accounting payments, XOR CHECK, push+migrate dual provisioning (plan: `.ai/plans/student-credit-hours-system`)
+- `docs/billing/credit-adjustments.md` - Credit Adjustment System: manual Add/Subtract/Carryover operator adjustments, server-derived idempotency (lock-then-replay-check ordering), rich-text sanitizer, carryover payout handoff (plan: `.ai/plans/credit-adjustment-system`)
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines
 - `docs/services/cron-service.md` - Cron service pattern reference
 - `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern for common/desktop/mobile triplication

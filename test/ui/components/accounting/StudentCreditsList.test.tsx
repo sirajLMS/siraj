@@ -17,7 +17,10 @@ await mockNextNavigation("/accounting/credits", {
 });
 
 import { studentsDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-directory.documents";
-import { StudentCreditsList } from "@/frontend/common/views/dashboard/accounting/credits/StudentCreditsList";
+import {
+  DIRECTORY_FETCH_LIMIT,
+  StudentCreditsList,
+} from "@/frontend/common/views/dashboard/accounting/credits/StudentCreditsList";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { DashboardBillingCreditAdjustment, DashboardStudentDirectory } from "@/shared/locale/namespaces";
@@ -94,7 +97,25 @@ const studentRows = [
   },
 ];
 
-function directoryMocks(rows = studentRows) {
+/** Builds an exactly-at-cap result set so the truncation hint path can be exercised. */
+function cappedRows() {
+  return Array.from({ length: DIRECTORY_FETCH_LIMIT }, (_, index) => ({
+    __typename: "StudentDirectoryRow",
+    id: `s-${index}`,
+    name: `Student ${index}`,
+    email: null,
+    avatarUrl: null,
+    status: "REGULAR",
+    classesRemaining: 5,
+    classesTotal: 10,
+    hoursPerWeek: null,
+    teacherName: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  }));
+}
+
+function directoryMocks(rows: typeof studentRows | ReturnType<typeof cappedRows> = studentRows) {
   return [
     {
       request: { query: studentsDirectoryQueryDocument, variables: { search: null, limit: 500 } },
@@ -119,6 +140,13 @@ describe("student credits list (component)", () => {
     expect(screen.getByText(directory.table.actions)).toBeVisible();
     expect(screen.getByPlaceholderText(directory.searchPlaceholder)).toBeVisible();
     expect(screen.getAllByRole("button", { name: credits.adjustCredits }).length).toBeGreaterThan(0);
+    expect(screen.queryByText(credits.resultsCappedHint(DIRECTORY_FETCH_LIMIT))).not.toBeInTheDocument();
+  });
+
+  test("shows the refine-search hint when the directory result hits the fetch cap", async () => {
+    renderWithWrapper(<StudentCreditsList />, { locale, mocks: directoryMocks(cappedRows()) });
+
+    expect(await screen.findByText(credits.resultsCappedHint(DIRECTORY_FETCH_LIMIT))).toBeVisible();
   });
 
   test("shows the translated empty state when no students match", async () => {

@@ -276,7 +276,7 @@ Every implementation task (X.Y) in `trackable-tasks.md` must follow the 5-stage 
     • Tier 3: Monkey & chaos cases (randomized fuzz payloads, concurrency races via Promise.allSettled)
     • Tier 4: Security & abuse tests (payload injection, invalid roles, error handling)
     • Layer constraints: DB tests wrapped in `runInRollback` + `tx`; Service tests mock all external adapters
-    • Cross-actor journey tests (`test/workflows/`): real services + real DB, committed fixtures + tracked `afterAll` cleanup, NO `runInRollback`; permission checks resolve honestly; run via `bun run test:workflows` — see `docs/testing/workflow-journey-tests.md` and `test/workflows/AGENTS.md`
+    • Cross-actor journey tests (`test/workflows/`): real services + real DB, committed fixtures + tracked `afterAll` cleanup, NO `runInRollback`; permission checks resolve honestly; run via `bun run test:workflows`; each journey ships with a Mermaid diagram in `test/workflows/<domain>/DIAGRAMS.md` (create/update in the same change, validate via `bun run validate:mermaid`) — see `docs/testing/workflow-journey-tests.md` and `test/workflows/AGENTS.md`
   - [ ] X.Y.SEC **Security & Tenancy Audit** ([.agents/skills/idor-testing/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/idor-testing/SKILL.md) & [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md)):
     • BOLA / IDOR Defense: Assert caller ownership (`ctx.user.id`), verify tenant isolation
     • BOPLA Defense: Strict DTO mapping; ensure no `{ ...input }` spread into DB updates

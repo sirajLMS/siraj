@@ -4,6 +4,8 @@
  * Supports two input kinds:
  *   - `.mmd` files  → the whole file is treated as a single Mermaid definition
  *   - `.md` files   → every ```mermaid fenced block is validated in place
+ *                     (trailing whitespace / fence info-string attributes after
+ *                     `mermaid` are tolerated; closing fence must be at line start)
  *
  * Usage:
  *   bun run scripts/validate-mermaid.ts <file> [file2 ...]
@@ -82,7 +84,7 @@ interface MermaidModule {
   parse: (definition: string) => Promise<unknown>;
 }
 
-const blockRe = /```mermaid\n([\s\S]*?)```/g;
+const blockRe = /^```mermaid[^\n\r]*\r?\n([\s\S]*?)^```/gm;
 
 async function validateFile(file: string, mermaid: MermaidModule): Promise<boolean> {
   const content = fs.readFileSync(file, "utf8");
