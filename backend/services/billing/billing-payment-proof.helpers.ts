@@ -1,4 +1,5 @@
 import { BillingRepository, InvoicePaymentSubmissionRepository } from "@/backend/db/repo/billing";
+import { env } from "../system/environment-config.service";
 import { ParentRepository } from "@/backend/db/repo/parents";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { InvoicePaymentSubmissionStatus } from "@/backend/enum/billing/billing.enum";
@@ -10,6 +11,11 @@ import { INVOICE_FILE_USAGE } from "@/shared/constants/billing/invoice-file-usag
 import { isAllowedPaymentProofMimeType } from "@/shared/constants/billing/payment-proof";
 import type { ErrorsLabels } from "@/shared/locale";
 import { extToMime } from "@/shared/utils/storage.utils";
+
+export function getPaymentProofUrl(fileName: string | null): string | null {
+  if (!fileName) return null;
+  return `https://${env.STORAGE_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+}
 
 function inferMimeFromPath(path: string): string | null {
   const ext = path.split(".").pop()?.toLowerCase();
