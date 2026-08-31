@@ -1,7 +1,7 @@
 "use client";
 
 import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { IconButton, InputAdornment, TextField, type TextFieldProps } from "@mui/material";
+import { IconButton, InputAdornment, TextField, type TextFieldProps, Tooltip } from "@mui/material";
 import type React from "react";
 
 export const HIDDEN_SECRET_MASK = "••••••••";
@@ -26,16 +26,27 @@ function SecretRevealToggle({
     readonly disabled?: boolean;
   }
 >): React.ReactNode {
+  const label = revealed ? hideValueLabel : showValueLabel;
+  const buttonNode = (
+    <IconButton
+      edge="end"
+      aria-label={label}
+      onClick={onToggleReveal}
+      disabled={disabled}
+    >
+      {revealed ? <VisibilityOffOutlined fontSize="small" /> : <VisibilityOutlined fontSize="small" />}
+    </IconButton>
+  );
+
   return (
     <InputAdornment position="end">
-      <IconButton
-        edge="end"
-        aria-label={revealed ? hideValueLabel : showValueLabel}
-        onClick={onToggleReveal}
-        disabled={disabled}
-      >
-        {revealed ? <VisibilityOffOutlined fontSize="small" /> : <VisibilityOutlined fontSize="small" />}
-      </IconButton>
+      <Tooltip title={label}>
+        {disabled ? (
+          <span style={{ display: "inline-flex" }}>{buttonNode}</span>
+        ) : (
+          buttonNode
+        )}
+      </Tooltip>
     </InputAdornment>
   );
 }
