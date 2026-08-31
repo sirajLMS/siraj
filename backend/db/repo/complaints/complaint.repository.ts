@@ -126,6 +126,31 @@ export namespace ComplaintRepository {
     return created;
   };
 
+  export const insertManyComplaints = async (
+    inputs: ComplaintInsertInput[],
+    tx?: DBTransaction
+  ): Promise<ComplaintSelectType[]> => {
+    if (inputs.length === 0) {
+      return [];
+    }
+
+    const q = queryDb(tx);
+    const now = new Date();
+
+    const valuesToInsert = inputs.map(input => ({
+      parentId: input.parentId,
+      studentId: input.studentId ?? null,
+      category: input.category,
+      submitterEmail: input.submitterEmail,
+      body: input.body,
+      status: input.status,
+      createdAt: input.createdAt ?? now,
+      updatedAt: input.updatedAt ?? now,
+    }));
+
+    return q.insert(complaints).values(valuesToInsert).returning();
+  };
+
   export const submitComplaint = async (
     input: ComplaintSubmitInput,
     parentId: string,

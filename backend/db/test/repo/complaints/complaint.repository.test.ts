@@ -106,8 +106,10 @@ async function insertTimedComplaintPair(
   laterBody: string,
   earlierOffsetMs = 60000
 ) {
-  const now = new Date();
-  const earlier = new Date(now.getTime() - earlierOffsetMs);
+  const nowMs = Date.now();
+  const earlierMs = nowMs - Math.max(earlierOffsetMs, 1000);
+  const earlier = new Date(earlierMs);
+  const later = new Date(nowMs);
   await tx.insert(complaints).values({
     parentId,
     category: "OTHER",
@@ -123,10 +125,49 @@ async function insertTimedComplaintPair(
     submitterEmail: `later-${randomUUID()}@test.com`,
     body: laterBody,
     status: "UNANSWERED",
-    createdAt: now,
-    updatedAt: now,
+    createdAt: later,
+    updatedAt: later,
   });
 }
+
+describe("ComplaintRepository — insertManyComplaints", () => {
+  complaintTest("inserts multiple complaints in a single call", async tx => {
+    const { parent, student } = await setupParentWithStudent(tx, "BatchInsert");
+
+    const inputs = [
+      {
+        parentId: parent.id,
+        studentId: student.id,
+        category: ComplaintCategory.REGARDING_TEACHER,
+        submitterEmail: "parent1@test.com",
+        body: "First batch complaint",
+        status: ComplaintStatus.UNANSWERED,
+      },
+      {
+        parentId: parent.id,
+        studentId: null,
+        category: ComplaintCategory.REGARDING_SYSTEM,
+        submitterEmail: "parent2@test.com",
+        body: "Second batch complaint",
+        status: ComplaintStatus.ANSWERED,
+      },
+    ];
+
+    const results = await ComplaintRepository.insertManyComplaints(inputs, tx);
+
+    expect(results).toHaveLength(2);
+    expect(results[0].parentId).toBe(parent.id);
+    expect(results[0].body).toBe("First batch complaint");
+    expect(results[0].status).toBe(ComplaintStatus.UNANSWERED);
+    expect(results[1].body).toBe("Second batch complaint");
+    expect(results[1].status).toBe(ComplaintStatus.ANSWERED);
+  });
+
+  complaintTest("returns empty array when inputs array is empty", async tx => {
+    const results = await ComplaintRepository.insertManyComplaints([], tx);
+    expect(results).toEqual([]);
+  });
+});
 
 describe("ComplaintRepository — submitComplaint", () => {
   complaintTest("creates a complaint record with valid input", async tx => {

@@ -99,6 +99,7 @@ async function expectSubmitComplaintThrows(
 
 describe("ComplaintService", () => {
   let hasPermissionSpy: ReturnType<typeof spyOn>;
+  let insertManyComplaintsSpy: ReturnType<typeof spyOn>;
   let findByUserIdSpy: ReturnType<typeof spyOn>;
   let getIntValueSpy: ReturnType<typeof spyOn>;
   let submitComplaintSpy: ReturnType<typeof spyOn>;
@@ -121,6 +122,7 @@ describe("ComplaintService", () => {
     });
     getComplaintByIdSpy = spyOn(ComplaintRepository, "getComplaintById").mockResolvedValue(mockComplaintDetail);
     getComplaintFilesSpy = spyOn(ComplaintRepository, "getComplaintFiles").mockResolvedValue([]);
+    insertManyComplaintsSpy = spyOn(ComplaintRepository, "insertManyComplaints").mockResolvedValue([mockComplaint]);
   });
 
   afterEach(() => {
@@ -133,6 +135,27 @@ describe("ComplaintService", () => {
     getComplaintFilesSpy.mockRestore();
     getUserIdsWithPermissionSpy.mockRestore();
     dispatchWithPreferencesSpy.mockRestore();
+    insertManyComplaintsSpy.mockRestore();
+  });
+
+  describe("createManyComplaints", () => {
+    test("delegates batch creation to ComplaintRepository.insertManyComplaints", async () => {
+      const inputs = [
+        {
+          parentId: MOCK_PARENT_ID,
+          studentId: null,
+          category: ComplaintCategory.OTHER,
+          submitterEmail: "test@test.com",
+          body: "Batch body",
+          status: ComplaintStatus.UNANSWERED,
+        },
+      ];
+
+      const results = await ComplaintService.createManyComplaints(inputs);
+
+      expect(insertManyComplaintsSpy).toHaveBeenCalledWith(inputs);
+      expect(results).toHaveLength(1);
+    });
   });
 
   describe("submitComplaint — file validation", () => {
