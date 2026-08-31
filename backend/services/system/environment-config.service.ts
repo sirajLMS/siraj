@@ -75,6 +75,13 @@ import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants
 
 // ─── Shared constants & helpers ─────────────────────────────────────────────────
 
+/** Environment variables accessor object. */
+export const env = {
+  get STORAGE_BUCKET_NAME(): string {
+    return process.env.STORAGE_BUCKET_NAME ?? "";
+  },
+};
+
 /** Prefix applied to env var names when reading/writing DB overrides in `system_settings`. */
 const ENV_SETTING_KEY_PREFIX = "env::";
 
