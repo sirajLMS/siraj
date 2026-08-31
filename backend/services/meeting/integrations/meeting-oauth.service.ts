@@ -24,6 +24,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { AuditService } from "@/backend/services/system/audit.service";
+import { isRelativeSafePath } from "@/frontend/common/lib/safeRedirect";
 import type {
   ConnectMeetingProviderOAuthReturnType,
   ConnectMeetingProviderOAuthSubmitInput,
@@ -43,10 +44,10 @@ import type { ErrorsLabels } from "@/shared/locale";
 /**
  * Validates that `returnPath` is a safe relative path to prevent open
  * redirect attacks. A valid return path must start with `/` and must
- * NOT start with `//` (protocol-relative URLs like `//evil.com`).
+ * NOT start with `//` or `/\` (e.g. `//evil.com` or `/\evil.com`).
  */
 function validateReturnPath(returnPath: string, tErrors: ErrorsLabels): void {
-  if (!returnPath.startsWith("/") || returnPath.startsWith("//")) {
+  if (!isRelativeSafePath(returnPath)) {
     throw new GraphQLError(tErrors.meetingProvider.invalidReturnPath);
   }
 }
