@@ -302,6 +302,48 @@ describe("StaffProfileRepository — findByUserId", () => {
   });
 });
 
+describe("StaffProfileRepository — findByUserIds", () => {
+  staffTest("returns empty array when userIds array is empty", async tx => {
+    const result = await StaffProfileRepository.findByUserIds([], tx);
+    expect(result).toEqual([]);
+  });
+
+  staffTest("returns staff profiles for multiple valid user IDs in batch", async tx => {
+    const { user: u1, profile: p1 } = await createStaffUser(tx, "BatchFind1");
+    const { user: u2, profile: p2 } = await createStaffUser(tx, "BatchFind2");
+
+    const results = await StaffProfileRepository.findByUserIds([u1.id, u2.id], tx);
+    expect(results).toHaveLength(2);
+    expect(results.find(r => r.id === u1.id)?.staffProfileId).toBe(p1.id);
+    expect(results.find(r => r.id === u2.id)?.staffProfileId).toBe(p2.id);
+  });
+
+  staffTest("handles duplicate and non-existent user IDs gracefully", async tx => {
+    const { user, profile } = await createStaffUser(tx, "BatchFindDup");
+
+    const results = await StaffProfileRepository.findByUserIds(
+      [user.id, user.id, "00000000-0000-0000-0000-000000000000"],
+      tx
+    );
+    expect(results).toHaveLength(1);
+    expect(results[0]?.staffProfileId).toBe(profile.id);
+  });
+
+  staffTest("matches findByUserId behavior for user with multiple permission groups", async tx => {
+    const { user } = await createStaffUser(tx, "MultiGroupUser");
+    const group1 = await createTestPermissionGroup(tx, "Group A", `grp-a-${randomUUID()}`);
+    const group2 = await createTestPermissionGroup(tx, "Group B", `grp-b-${randomUUID()}`);
+    await assignUserToGroup(tx, user.id, group1.id);
+    await assignUserToGroup(tx, user.id, group2.id);
+
+    const singleResult = await StaffProfileRepository.findByUserId(user.id, tx);
+    const batchResults = await StaffProfileRepository.findByUserIds([user.id], tx);
+
+    expect(batchResults).toHaveLength(1);
+    expect(batchResults[0]).toEqual(singleResult);
+  });
+});
+
 describe("StaffProfileRepository — updateManagerProfile", () => {
   staffTest("updates phone", async tx => {
     const { profile } = await createStaffUser(tx, "UpdatePhone");

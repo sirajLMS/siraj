@@ -78,9 +78,8 @@ export namespace UserSeedService {
   }
 
   /** Read helper for seed scripts — lists staff profiles for avatar seeding. */
-  export async function findStaffProfilesByUserIds(userIds: readonly string[]) {
-    const profiles = await Promise.all(userIds.map(userId => StaffProfileRepository.findByUserId(userId)));
-    return profiles.filter((profile): profile is NonNullable<typeof profile> => profile != null);
+  export async function findStaffProfilesByUserIds(userIds: readonly string[], tx?: DBTransaction) {
+    return StaffProfileRepository.findByUserIds(userIds, tx);
   }
 
   /** Seed-only avatar URL update (demo user avatars in seed assets). */
