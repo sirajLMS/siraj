@@ -127,6 +127,28 @@ describe("ParentRepository — getParentProfile", () => {
   });
 });
 
+describe("ParentRepository — findManyByUserIds", () => {
+  it("returns empty array for empty userIds", async () => {
+    await withTestDb(async tx => {
+      const results = await ParentRepository.findManyByUserIds([], tx);
+      expect(results).toEqual([]);
+    });
+  });
+
+  it("returns matching parents for given userIds", async () => {
+    await withTestDb(async tx => {
+      const { user: user1, parent: parent1 } = await createTestParent(tx);
+      const { user: user2, parent: parent2 } = await createTestParent(tx);
+
+      const results = await ParentRepository.findManyByUserIds([user1.id, user2.id, randomUUID()], tx);
+      expect(results.length).toBe(2);
+      const ids = results.map(r => r.id);
+      expect(ids).toContain(parent1.id);
+      expect(ids).toContain(parent2.id);
+    });
+  });
+});
+
 describe("ParentRepository — getAssociatedStudents", () => {
   test("returns students array for a parent with students", async () => {
     await runInRollback(async tx => {

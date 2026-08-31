@@ -390,6 +390,12 @@ export namespace ParentRepository {
     return parent ?? null;
   };
 
+  export const findManyByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<ParentSelectType[]> => {
+    if (userIds.length === 0) return [];
+    const q = queryDb(tx);
+    return q.select().from(parents).where(inArray(parents.userId, userIds));
+  };
+
   export const findUserIdByParentId = async (parentId: string, tx?: DBTransaction): Promise<string | null> => {
     const q = queryDb(tx);
     const [parent] = await q.select({ userId: parents.userId }).from(parents).where(eq(parents.id, parentId)).limit(1);

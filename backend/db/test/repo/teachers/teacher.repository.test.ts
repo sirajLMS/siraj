@@ -261,6 +261,26 @@ describe("TeacherRepository", () => {
         expect(result?.id).toBe(teacher.id);
       });
     });
+
+    describe("findManyByUserIds", () => {
+      it("returns empty array for empty userIds", async () => {
+        const results = await TeacherRepository.findManyByUserIds([], tx);
+        expect(results).toEqual([]);
+      });
+
+      it("returns matching teachers for given userIds", async () => {
+        const user1 = await createTestUser(tx);
+        const user2 = await createTestUser(tx);
+        const teacher1 = await createTestTeacher(user1.id, tx);
+        const teacher2 = await createTestTeacher(user2.id, tx);
+
+        const results = await TeacherRepository.findManyByUserIds([user1.id, user2.id, randomUUID()], tx);
+        expect(results.length).toBe(2);
+        const ids = results.map(r => r.id);
+        expect(ids).toContain(teacher1.id);
+        expect(ids).toContain(teacher2.id);
+      });
+    });
   });
 
   describe("findById", () => {
