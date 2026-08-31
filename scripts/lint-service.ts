@@ -56,7 +56,7 @@
  *   2 = Invalid arguments or service fault
  */
 
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { parseArgs } from "node:util";
 import { withProcessLock } from "@/scripts/lib/process-lock";
 
@@ -209,49 +209,57 @@ class LintService {
   }
 
   /**
-   * Execute eslint via shell. Returns LintResult with eslint's exit code and combined output.
+   * Execute eslint safely via execFile. Returns LintResult with eslint's exit code and combined output.
    */
   private async runEslint(files: string[], options: LintOptions): Promise<LintResult> {
     const isFullRepo = files.length === 0;
     const timeout = isFullRepo ? DEFAULT_TIMEOUT_FULL_REPO_MS : DEFAULT_TIMEOUT_FILES_MS;
 
-    // Build file args: empty for full-repo (let eslint config drive scope), quoted paths otherwise
-    const fileArgs = isFullRepo ? "" : files.map(f => `"${f}"`).join(" ");
+    const eslintBinPath = ESLINT_BIN.startsWith("~") && process.env.HOME
+      ? ESLINT_BIN.replace(/^~/, process.env.HOME)
+      : ESLINT_BIN;
 
-    // Append --fix if requested
-    const fixFlag = options.fix ? "--fix" : "";
-    const maxWarningsFlag = options.maxWarnings !== undefined ? `--max-warnings ${options.maxWarnings}` : "";
-
-    // Construct the command
-    const envPrefix = options.typeAware ? 'ESLINT_TYPE_AWARE="true"' : "";
     const concurrencySetting = options.typeAware ? "1" : CONCURRENCY;
     const nodeOptions = `${ESLINT_PATCH} --max-old-space-size=8192`;
     // Type-aware mode toggles parserOptions/rules via ESLINT_TYPE_AWARE; sharing
     // `.eslintcache` with non-type-aware runs can resurface stale parse errors
     // (e.g. resolved merge conflicts). Use a dedicated cache file instead.
     const cacheLocation = options.typeAware ? ".eslintcache-type-aware" : ".eslintcache";
-    const cmd = [
-      envPrefix,
-      `NODE_OPTIONS="${nodeOptions}"`,
-      ESLINT_BIN,
-      "x eslint",
+
+    const args: string[] = [
+      "x",
+      "eslint",
       "--cache",
-      `--cache-location ${cacheLocation}`,
+      "--cache-location",
+      cacheLocation,
       `--concurrency=${concurrencySetting}`,
-      maxWarningsFlag,
-      fixFlag,
-      fileArgs,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim();
+    ];
+
+    if (options.maxWarnings !== undefined) {
+      args.push("--max-warnings", String(options.maxWarnings));
+    }
+    if (options.fix) {
+      args.push("--fix");
+    }
+    if (!isFullRepo) {
+      args.push(...files);
+    }
+
+    const env: Record<string, string> = {
+      ...(process.env as Record<string, string>),
+      NODE_OPTIONS: nodeOptions,
+    };
+    if (options.typeAware) {
+      env.ESLINT_TYPE_AWARE = "true";
+    }
 
     return new Promise<LintResult>(resolve => {
-      exec(
-        cmd,
+      execFile(
+        eslintBinPath,
+        args,
         {
           cwd: process.cwd(),
-          shell: "bash",
+          env,
           timeout,
           maxBuffer: 50 * 1024 * 1024, // 50MB
         },
