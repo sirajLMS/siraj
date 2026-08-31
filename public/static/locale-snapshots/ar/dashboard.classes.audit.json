@@ -1,5 +1,5 @@
 {
-  "invalidClassId": "معرف الحصة غير صالح",
+  "invalidClassId": "معرّف الحصة غير صالح",
   "pageTitle": "عرض تفاصيل الحصة",
   "mobileTitle": "سجل تدقيق الحصة",
   "breadcrumbs": {
@@ -76,7 +76,7 @@
     "edit": "تعديل",
     "content": "محتوى الملاحظة"
   },
-  "meetingIdLabel": "معرف الاجتماع:",
+  "meetingIdLabel": "معرّف الاجتماع:",
   "online": "عبر الإنترنت",
   "meetingIdNA": "غير متوفر"
 }

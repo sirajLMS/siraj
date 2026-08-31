@@ -11,7 +11,7 @@ description: >
 license: MIT
 metadata:
   author: siraj
-  version: "1.0.0"
+  version: "1.1.0"
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
 
@@ -54,9 +54,13 @@ measured evidence: [references/model-notes.md](references/model-notes.md).
       Sanity-check discovery first with `--list`.
 - [ ] **Run the script** (reports land in `scratch/locale-ar/<timestamp>/`,
       mirroring the ar tree; `_summary.json` has run totals).
+      **Recovery**: if the run is interrupted (session exit kills the process),
+      nothing is lost — re-run with
+      `bun run scripts/translate-locale-ar.ts --all --resume --out-dir scratch/locale-ar/<same-dir>`.
+      Files with an error-free report are skipped; only missing or
+      error-carrying files are re-run. Never restart a long run from scratch.
 - [ ] **Review the report per entry** (see "Review" below).
-- [ ] **Apply accepted changes** to the ar file with the `Edit` tool only
-      (see "Applying edits" below).
+- [ ] **Apply accepted changes** (see "Applying edits" and "Apply waves" below).
 - [ ] **Verify each edited file**:
       `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`.
 - [ ] **Report in chat**: files changed, accepted/rejected counts, notable
@@ -109,10 +113,33 @@ Reject or hand-fix when the proposal:
   matters to the UX.
 - Churns wording for no quality gain (synonym swaps of already-good strings).
 - Transliterates an English word that has an established Arabic UI term.
+- Retranslates brand names (e.g. `سراج` → `Siraj`) or converts Western digits
+  to Eastern Arabic numerals (١٢) — repo convention is Western digits.
+- Feminizes only part of a badge/select-group of peer labels (e.g. 3 of 5
+  status labels) — agree as a group or not at all.
 - For functions: touches anything except user-facing string literals
   (must not reorder branches or alter conditions).
 
-## Applying edits
+## Apply waves (bulk runs)
+
+For tree-wide passes (100+ files), apply with one subagent per file:
+
+- Dispatch subagents in waves; each subagent owns exactly ONE ar file, reads
+  the SKILL + report, applies accepted `changed` entries, and verifies with
+  sub-loop. Never give a subagent a second file "because it's small".
+- Idempotency: if the working tree changed concurrently (some report proposals
+  may already be applied), subagents treat an already-matching file as applied.
+- The sub-loop serialized process-lock queues heavily during waves — verify
+  with a generous Bash timeout (300s+) and retry once on lock timeout. Expect
+  it; it is normal.
+- Another process (formatter, other agents) may reformat a locale file
+  MID-wave. After each wave, re-check each edited file still parses and its
+  edits survived (grep the proposed values).
+- Keep waves merge-safe: applied edits are uncommitted — if the user commits a
+  batch mid-workflow, recompute "still pending" from reports vs. `git diff`
+  rather than from the task list.
+
+## Applying edits (per file)
 
 - Use `Edit` with `old_string` taken from the report entry's `currentSource`
   (it is the exact source slice of that entry) — or from your own `Read` of the
@@ -123,6 +150,10 @@ Reject or hand-fix when the proposal:
 - For `kind: "function"` entries, replace the whole arrow-function slice with
   the (validated) proposal, preserving the file's formatting conventions;
   function values may be multi-line.
+- Code references (identifier/member-expression values, e.g. shared strings
+  imported from another locale file) are excluded from reports by the parser
+  (kind `reference`) — if you somehow see one, never replace it with a literal;
+  fix the canonical source file instead (report it under Fix-Or-Report).
 - Do not add, remove, rename, or reorder keys. Do not touch imports, the type
   annotation, or the export name.
 - Leaf modules are plain string/function literals only — never introduce
@@ -134,13 +165,33 @@ Reject or hand-fix when the proposal:
 
 - ar leaf files under `shared/locale/ar/**` only (`messages.ts` and
   aggregators are auto-skipped by the parser).
-- Both entry kinds are in scope: plain strings and functions
-  (`(count: number) => string`, `(name) => `…${name}…` `, etc.).
+- Both translatable kinds are in scope: plain strings and functions
+  (`(count: number) => string`, `(name) => `…${name}…` `, etc.). Code
+  references (`reference` kind) are skipped entirely by the parser.
 
 ### Reports
 
+- Reports are per-file and PERSISTENT: finishing a file writes its report
+  immediately, so `--resume` after any interruption re-runs only missing or
+  error-carrying files (files whose report has only `invalid` entries count
+  as done — invalid is a review signal, not a failure).
 - Reports are disposable scratch artifacts: `scratch/locale-ar/<run>/`.
 - `raw/` holds raw model output when JSON parsing failed — debugging only.
+
+### Terminology canon (extend the script glossary when you promote one)
+
+The glossary in `scripts/translate-locale-ar.ts` is the source of truth. The
+canon established during the first full run:
+
+- Identifiers: always `معرّف` (shadda), never `معرف`; `الرقم القومي` for
+  National ID (never رقم الهوية الوطنية).
+- Money direction: payin = `التحصيل` (from parents), payout = `الصرف` (to
+  teachers) — never الدفع الوارد/الصارد.
+- Class types: feminine adjectives for classes (عادية / تجريبية / مسبقة),
+  masculine `تجريبي` for person-status badges.
+- Western digits (12) everywhere, never Eastern numerals (١٢).
+- Brands stay in English ("Siraj LMS", "WhatsApp"); `سراج` stays Arabic in
+  prose that already uses it.
 
 ## Security
 
@@ -161,12 +212,15 @@ Reject or hand-fix when the proposal:
 ## Reference files
 
 - [Model notes](references/model-notes.md) — riva vs kimi A/B results,
-  endpoint/gateway quirks (auth, `tool_choice`), benchmark figures.
+  endpoint/gateway quirks (auth, `tool_choice`), benchmark figures, and the
+  operational lessons from the first full-tree run (chunk sizing, retries,
+  resume semantics, wave-apply patterns).
 
 ## Ground rules
 
 - ALWAYS read `shared/AGENTS.md` + `shared/locale/AGENTS.md` before editing.
 - ALWAYS verify each edited file with sub-loop (`--lifecycle lint`).
+- ALWAYS resume with `--resume --out-dir <same-dir>` after an interrupted run.
 - NEVER hardcode the API key or commit it.
 - NEVER apply `invalid`/`error` report entries.
 - NEVER use `sed`, `awk`, or shell redirects to edit locale files.

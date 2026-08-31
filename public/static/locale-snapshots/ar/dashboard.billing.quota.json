@@ -20,7 +20,7 @@
     "periodType": "نوع الفترة",
     "priority": "الأولوية",
     "all": "الكل",
-    "studentIdPlaceholder": "معرف الطالب",
+    "studentIdPlaceholder": "معرّف الطالب",
     "periodDays": "أيام الفترة",
     "periodDaysHelperText": "عدد أيام الفترة المخصصة",
     "periodDaysRequired": "أيام الفترة مطلوبة عندما يكون نوع الفترة مخصص",

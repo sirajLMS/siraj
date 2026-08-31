@@ -29,7 +29,7 @@
   "showingResults": {
     "__fn": "(shown, total) => `\\u0639\\u0631\\u0636 ${shown} \\u0645\\u0646 ${total} \\u0646\\u062A\\u0627\\u0626\\u062C`"
   },
-  "invalidUserId": "معرف المستخدم غير صالح",
+  "invalidUserId": "معرّف المستخدم غير صالح",
   "billingProfileTitle": "الملف المالي للمستخدم",
   "profileForUser": "تفاصيل الملف المالي",
   "reminderSent": "تم إرسال تذكير الدفع",
@@ -244,7 +244,7 @@
     "paymentPendingReview": "مدفوعاتك قيد المراجعة. لا توجد فواتير غير مدفوعة تحتاج إلى إجراء الآن."
   },
   "errors": {
-    "invalidId": "معرف ولي الأمر غير صالح في عرض الفواتير.",
+    "invalidId": "معرّف ولي الأمر غير صالح في عرض الفواتير.",
     "retry": "إعادة المحاولة"
   },
   "exchangeRates": {

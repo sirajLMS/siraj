@@ -29,7 +29,7 @@
       "action": "الإجراء",
       "description": "الوصف",
       "actor": "الفاعل",
-      "entityId": "معرف الكيان"
+      "entityId": "معرّف الكيان"
     },
     "entityTypes": {
       "SYSTEM": "النظام",

@@ -19,3 +19,13 @@
 - **"Internal Notes" field**: no column exists in `credit_transactions` beyond `reason/notes` rich-text — adding a second free-text field = schema change. Do NOT implement without spec amendment.
 - **Live preview banner / rejected-balance preview**: implementable client-side (balance known from selected student + pending delta) — no backend change needed.
 - **Quick-filter chips** on the list: the `studentsDirectory` resolver search is the only filter domain — "Low Balance" would require a filter extension; "No Credits" too; needs scope decision.
+
+## Addendum — post-implementation of prototype deltas (user-approved scope)
+
+After implementing: type-card descriptions, live balance preview + balance context, pre-submit summary + full-width error band, `internalNotes` field (schema → migrations → service → Pothos → form), page subtitle, carryover helper caption:
+
+- `credit-adjust-form` (empty state): **TIE** — impl matches IA 1:1 + adds asterisks/staff-only helper; remaining prototype edges: Hours stepper, preview in filled state (exists in impl, unverifiable in empty story).
+- `credit-adjust-carryover` (filled): **TIE** — impl wins on control quality + breathing room (3-col dates, notched labels, staff-visibility helper); prototype's identity strip exists in impl via the selected-student card (verified in the preselected story/state).
+- `credit-adjust-error`: error surface = inline hours error + full-width band with code + message (implemented in x2).
+
+Not implemented by user decision: quick-filter chips + footer aggregates on the list, separate "Notes" beyond the now-added internalNotes. Regressions pinned green: form 17/17, service 48/48, mutation 6/6, E2E 4/4 (plus compile-race warmup fix in runner scaffold).

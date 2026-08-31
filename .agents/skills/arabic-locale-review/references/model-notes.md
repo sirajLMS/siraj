@@ -38,3 +38,35 @@ verbatim-identical to the hand-curated translations, the rest were correct
 improvements/equivalents, all glossary terms obeyed, feminine agreement on
 password-strength adjectives correct, and it returned complete, valid
 arrow-function sources for interpolation/pluralization entries.
+
+## Lessons from the first full-tree run (153 files, 3 waves, ~500 proposals)
+
+Throughput & reliability:
+
+- Chunking at 60 entries blew up: output is ~16k tokens at that size and the
+  gateway/NIM straggles far beyond the request timeout. CHUNK_SIZE = 30 entries
+  with a size-derived `max_tokens` cap (4k–12k) works well (~100s/file).
+- The gateway sometimes hangs cold (`504 DIRECT_RESPONSE_START_TIMEOUT`,
+  request timeouts). Retries (2 attempts, 2s/5s backoff, 429/5xx/network) are
+  mandatory; a file that still fails should simply be re-run — no need to
+  restart the batch.
+- Session exits kill the background process BUT reports are per-file and
+  written incrementally — nothing is lost. `--resume --out-dir <same-dir>`
+  re-runs only missing or error-carrying files. Verified end-to-end.
+
+Review/apply learnings (fed back into script + SKILL.md):
+
+- Parser gap: non-literal values (shorthand references, identifiers, member
+  expressions like `adminViewAr.adminActions`, imported blocks) were being
+  offered to the model as plain strings. The parser now classifies them as
+  `reference` and drops them from payloads and reports entirely (this also
+  correctly excludes index aggregators from the leaf set: 153→149).
+- Digit drift: the model occasionally produced Eastern Arabic numerals (١٢)
+  where repo convention is Western digits. A glossary/prompt rule fixes it;
+  subagent reviewers rejected the few that slipped through.
+- Idempotent apply: several proposals had already landed in the file by the
+  time a wave ran (concurrent workstreams); treat "already matches" as applied.
+- Gender-only flips that would split an otherwise-consistent badge group were
+  correctly rejected by reviewers; keep that rule explicit.
+- Sub-loop lock queueing during waves is expected — each subagent needs a
+  generous Bash timeout (300s+), and one retry typically clears a lock wait.

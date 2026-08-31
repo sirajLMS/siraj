@@ -14,6 +14,7 @@ A collection of Claude Code skills following the [agentskills.io](https://agents
 | [ai-prompting](./ai-prompting/) | Effective AI communication strategies | Beginner |
 | [quality-assurance](./quality-assurance/) | Testing and validation techniques | Intermediate |
 | [troubleshooting](./troubleshooting/) | Diagnosing and resolving common issues | Intermediate |
+| [visual-improvement-loop](./visual-improvement-loop/) | Score implemented UI pages to 10/10 vs prototype across desktop/tablet/mobile via Storybook captures, objective pre-check gate, isolated inspectors, fix waves; self-evolves via evolution log | Advanced |
 | [create-steering-documents](./create-steering-documents/) | Generate .kiro/steering/ project guidelines | Intermediate |
 
 ## Installation

@@ -29,7 +29,7 @@
   },
   "select": {
     "selectMethod": "اختر طريقة الدفع",
-    "searchByNameOrSlug": "ابحث بالاسم أو المعرف",
+    "searchByNameOrSlug": "ابحث بالاسم أو المعرّف",
     "required": "مطلوب"
   },
   "display": {
@@ -66,8 +66,8 @@
     "empty": "لا توجد طرق دفع بعد",
     "direction": "الاتجاه",
     "label": "التسمية",
-    "defaultPayin": "تعيين كطريقة افتراضية للدفع الوارد",
-    "defaultPayout": "تعيين كطريقة افتراضية للدفع الصادر",
+    "defaultPayin": "تعيين كطريقة افتراضية للتحصيل",
+    "defaultPayout": "تعيين كطريقة افتراضية للصرف",
     "cancel": "إلغاء",
     "save": "حفظ",
     "deleteTitle": "حذف طريقة الدفع",
