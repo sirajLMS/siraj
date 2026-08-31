@@ -25,11 +25,12 @@ import {
  */
 function splitMetricValue(value: number | string): { readonly main: string; readonly unit: string | null } {
   const text = formatValue(value);
-  const trailingToken = /\s+(\S+)$/.exec(text);
-  if (!trailingToken || /\d/.test(trailingToken[1])) {
+  const tokens = text.split(/\s+/);
+  const lastToken = tokens.at(-1);
+  if (tokens.length < 2 || !lastToken || /\d/.test(lastToken)) {
     return { main: text, unit: null };
   }
-  return { main: text.slice(0, trailingToken.index), unit: trailingToken[1] };
+  return { main: text.slice(0, text.length - lastToken.length).trimEnd(), unit: lastToken };
 }
 
 export interface MobileMetricCardProps {

@@ -2,6 +2,7 @@
 
 import { ArchiveOutlined } from "@mui/icons-material";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import type { UsePackagePlanFormViewModel } from "@/frontend/common/views/dashboard/accounting/usePackagePlanFormViewModel";
 
 export interface PackagePlanArchiveDialogLabels {
   readonly title: string;
@@ -68,5 +69,35 @@ export function PackagePlanArchiveTriggerButton({
     >
       {label}
     </Button>
+  );
+}
+
+export type PackagePlanArchiveSectionSharedProps = Pick<
+  UsePackagePlanFormViewModel,
+  "t" | "existing" | "archiveDialogOpen" | "setArchiveDialogOpen" | "onArchive" | "archiving"
+>;
+
+/** Archive confirmation dialog wired to the package-plan form view-model; shared across viewport tiers. */
+export function PackagePlanArchiveSectionShared({
+  t,
+  existing,
+  archiveDialogOpen,
+  setArchiveDialogOpen,
+  onArchive,
+  archiving,
+}: Readonly<PackagePlanArchiveSectionSharedProps>) {
+  return (
+    <PackagePlanArchiveDialogShared
+      open={archiveDialogOpen}
+      onClose={() => setArchiveDialogOpen(false)}
+      onConfirm={() => void onArchive()}
+      archiving={archiving}
+      labels={{
+        title: t.archiveTitle,
+        body: existing ? t.archiveBody(existing.displayName ?? "") : "",
+        cancel: t.form.cancel,
+        confirm: t.archiveConfirm,
+      }}
+    />
   );
 }

@@ -1,18 +1,5 @@
-import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import {
-  classCategories,
-  classInstances,
-  classStatusEvents,
-  classSubjects,
-  creditTransactions,
-  lessonReports,
-  parents,
-  students,
-  teacherDues,
-  teachers,
-  users,
-} from "@/backend/db/schema";
+import { classSubjects } from "@/backend/db/schema";
 import {
   createCompletedClassInstance,
   createTestParent,
@@ -29,11 +16,8 @@ import type {
   UserSelectType,
 } from "@/backend/types";
 import { SystemPermissionGroupSlug } from "@/shared/constants";
-import {
-  assignSystemGroup,
-  revokeSystemGroupAssignments,
-  type SystemGroupAssignment,
-} from "@/test/workflows/helpers/permissions";
+import { createCastSubjectPair, purgeCastFixture } from "@/test/workflows/helpers/cast-scaffold";
+import { assignSystemGroup, type SystemGroupAssignment } from "@/test/workflows/helpers/permissions";
 
 /**
  * The actor "cast" for the lesson-report lifecycle journey. Every committed
@@ -78,37 +62,8 @@ async function ensureCastSubject(tx: TestDb, prefix: string): Promise<CastSubjec
     return { subjectId: existing.id, createdCategoryId: null, createdSubjectId: null };
   }
 
-  const now = new Date();
-  const [category] = await tx
-    .insert(classCategories)
-    .values({
-      name: `${prefix} Category`,
-      slug: `${prefix}-category`,
-      isActive: true,
-      sortOrder: 0,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning({ id: classCategories.id });
-  if (!category) {
-    throw new Error("Workflow cast: failed to create class category");
-  }
-
-  const [subject] = await tx
-    .insert(classSubjects)
-    .values({
-      categoryId: category.id,
-      name: `${prefix} Subject`,
-      slug: `${prefix}-subject`,
-      isActive: true,
-      sortOrder: 0,
-    })
-    .returning({ id: classSubjects.id });
-  if (!subject) {
-    throw new Error("Workflow cast: failed to create class subject");
-  }
-
-  return { subjectId: subject.id, createdCategoryId: category.id, createdSubjectId: subject.id };
+  const pair = await createCastSubjectPair(tx, prefix);
+  return { subjectId: pair.subjectId, createdCategoryId: pair.categoryId, createdSubjectId: pair.subjectId };
 }
 
 /**
@@ -171,34 +126,22 @@ export async function provisionLessonReportCast(prefix: string): Promise<LessonR
  * only this run's membership rows are removed.
  */
 export async function cleanupLessonReportCast(cast: LessonReportCast): Promise<void> {
-  const instanceIds = [cast.firstClassInstance.id, cast.secondClassInstance.id];
-  const teacherIds = [cast.teacher.id, cast.secondTeacher.id];
-  const userIds = [
-    cast.teacherUser.id,
-    cast.secondTeacherUser.id,
-    cast.managerUser.id,
-    cast.parentUser.id,
-    cast.student.userId,
-  ];
-
   await db.transaction(async tx => {
-    // Session lifecycle + payroll transition events reference the instances
-    // with a RESTRICT foreign key, so they must go before the instance rows.
-    await tx.delete(classStatusEvents).where(inArray(classStatusEvents.classInstanceId, instanceIds));
-    await tx.delete(lessonReports).where(inArray(lessonReports.classInstanceId, instanceIds));
-    await tx.delete(teacherDues).where(inArray(teacherDues.classInstanceId, instanceIds));
-    await tx.delete(creditTransactions).where(eq(creditTransactions.studentId, cast.student.id));
-    await revokeSystemGroupAssignments(tx, cast.groupAssignments);
-    await tx.delete(classInstances).where(inArray(classInstances.id, instanceIds));
-    await tx.delete(students).where(eq(students.id, cast.student.id));
-    await tx.delete(parents).where(eq(parents.id, cast.parent.id));
-    await tx.delete(teachers).where(inArray(teachers.id, teacherIds));
-    await tx.delete(users).where(inArray(users.id, userIds));
-    if (cast.createdSubjectId) {
-      await tx.delete(classSubjects).where(eq(classSubjects.id, cast.createdSubjectId));
-    }
-    if (cast.createdCategoryId) {
-      await tx.delete(classCategories).where(eq(classCategories.id, cast.createdCategoryId));
-    }
+    await purgeCastFixture(tx, {
+      instanceIds: [cast.firstClassInstance.id, cast.secondClassInstance.id],
+      studentId: cast.student.id,
+      parentId: cast.parent.id,
+      teacherIds: [cast.teacher.id, cast.secondTeacher.id],
+      userIds: [
+        cast.teacherUser.id,
+        cast.secondTeacherUser.id,
+        cast.managerUser.id,
+        cast.parentUser.id,
+        cast.student.userId,
+      ],
+      groupAssignments: cast.groupAssignments,
+      createdSubjectId: cast.createdSubjectId,
+      createdCategoryId: cast.createdCategoryId,
+    });
   });
 }

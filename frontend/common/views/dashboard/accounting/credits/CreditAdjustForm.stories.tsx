@@ -91,6 +91,7 @@ const carryoverInput: CreditAdjustmentInput = {
   adjustmentType: CreditAdjustmentGqlType.SubtractWithCarryover,
   hours: 4,
   notes: "<p>Schedule conflict — carrying over to teacher payout</p>",
+  internalNotes: null,
   carryoverTeacherId: TEACHER_ID,
   carryoverFromDate: "2026-08-01",
   carryoverToDate: "2026-08-15",

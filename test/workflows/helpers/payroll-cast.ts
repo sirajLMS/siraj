@@ -1,25 +1,10 @@
-import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import {
-  classCategories,
-  classInstances,
-  classStatusEvents,
-  classSubjects,
-  creditTransactions,
-  lessonReports,
-  parents,
-  students,
-  teacherDues,
-  teachers,
-  users,
-} from "@/backend/db/schema";
 import {
   createMockClassInstance,
   createTestParent,
   createTestStudent,
   createTestTeacher,
   createTestUser,
-  type TestDb,
 } from "@/backend/db/test/entity-setup";
 import type {
   ClassInstanceSelectType,
@@ -31,11 +16,8 @@ import type {
 import { SystemPermissionGroupSlug } from "@/shared/constants";
 import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-import {
-  assignSystemGroup,
-  revokeSystemGroupAssignments,
-  type SystemGroupAssignment,
-} from "@/test/workflows/helpers/permissions";
+import { createCastSubjectPair, purgeCastFixture } from "@/test/workflows/helpers/cast-scaffold";
+import { assignSystemGroup, type SystemGroupAssignment } from "@/test/workflows/helpers/permissions";
 
 /** Hourly rate pinned on the cast teacher so every payroll amount is derivable: 60-minute sessions pay exactly 120.00 SAR. */
 const TEACHER_HOURLY_RATE = "120";
@@ -74,46 +56,6 @@ export interface PayrollJourneyCast {
 }
 
 /**
- * Creates a run-prefixed category + subject with no hourly rate, so the rate
- * cascade for cast instances deterministically falls through to the teacher
- * tier. Reusing an arbitrary existing subject would let its subject-level
- * rate silently change every expected amount.
- */
-async function createCastSubject(tx: TestDb, prefix: string): Promise<{ subjectId: string; categoryId: string }> {
-  const now = new Date();
-  const [category] = await tx
-    .insert(classCategories)
-    .values({
-      name: `${prefix} Category`,
-      slug: `${prefix}-category`,
-      isActive: true,
-      sortOrder: 0,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning({ id: classCategories.id });
-  if (!category) {
-    throw new Error("Payroll cast: failed to create class category");
-  }
-
-  const [subject] = await tx
-    .insert(classSubjects)
-    .values({
-      categoryId: category.id,
-      name: `${prefix} Subject`,
-      slug: `${prefix}-subject`,
-      isActive: true,
-      sortOrder: 0,
-    })
-    .returning({ id: classSubjects.id });
-  if (!subject) {
-    throw new Error("Payroll cast: failed to create class subject");
-  }
-
-  return { subjectId: subject.id, categoryId: category.id };
-}
-
-/**
  * Provisions the full payroll cast in a single COMMITTING transaction:
  * operator, teacher (hourly rate SAR 120), parent, student, and three
  * 60-minute class instances whose scheduling windows predetermine the payroll
@@ -126,7 +68,10 @@ async function createCastSubject(tx: TestDb, prefix: string): Promise<{ subjectI
 export async function provisionPayrollJourneyCast(prefix: string): Promise<PayrollJourneyCast> {
   return db.transaction(async tx => {
     const now = new Date();
-    const subject = await createCastSubject(tx, prefix);
+    // Fresh prefixed rows keep the rate cascade deterministic — an arbitrary
+    // existing subject could carry a subject-level rate that silently changes
+    // every expected amount.
+    const subject = await createCastSubjectPair(tx, prefix);
 
     const operatorUser = await createTestUser(tx, { name: `${prefix} Operator` });
     const teacherUser = await createTestUser(tx, { name: `${prefix} Teacher` });
@@ -198,21 +143,16 @@ export async function provisionPayrollJourneyCast(prefix: string): Promise<Payro
  * membership rows are revoked.
  */
 export async function cleanupPayrollJourneyCast(cast: PayrollJourneyCast): Promise<void> {
-  const instanceIds = [cast.onTimeInstance.id, cast.studentAbsentInstance.id, cast.unattendedInstance.id];
-  const userIds = [cast.operatorUser.id, cast.teacherUser.id, cast.parentUser.id, cast.student.userId];
-
   await db.transaction(async tx => {
-    await tx.delete(classStatusEvents).where(inArray(classStatusEvents.classInstanceId, instanceIds));
-    await tx.delete(lessonReports).where(inArray(lessonReports.classInstanceId, instanceIds));
-    await tx.delete(teacherDues).where(inArray(teacherDues.classInstanceId, instanceIds));
-    await tx.delete(creditTransactions).where(eq(creditTransactions.studentId, cast.student.id));
-    await revokeSystemGroupAssignments(tx, cast.groupAssignments);
-    await tx.delete(classInstances).where(inArray(classInstances.id, instanceIds));
-    await tx.delete(students).where(eq(students.id, cast.student.id));
-    await tx.delete(parents).where(eq(parents.id, cast.parent.id));
-    await tx.delete(teachers).where(eq(teachers.id, cast.teacher.id));
-    await tx.delete(users).where(inArray(users.id, userIds));
-    await tx.delete(classSubjects).where(eq(classSubjects.id, cast.createdSubjectId));
-    await tx.delete(classCategories).where(eq(classCategories.id, cast.createdCategoryId));
+    await purgeCastFixture(tx, {
+      instanceIds: [cast.onTimeInstance.id, cast.studentAbsentInstance.id, cast.unattendedInstance.id],
+      studentId: cast.student.id,
+      parentId: cast.parent.id,
+      teacherIds: [cast.teacher.id],
+      userIds: [cast.operatorUser.id, cast.teacherUser.id, cast.parentUser.id, cast.student.userId],
+      groupAssignments: cast.groupAssignments,
+      createdSubjectId: cast.createdSubjectId,
+      createdCategoryId: cast.createdCategoryId,
+    });
   });
 }

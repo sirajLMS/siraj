@@ -8,13 +8,39 @@ export const TEST_SERVER_PREFERRED_PORT = FIXED_TEST_PORT;
 export const TEST_SERVER_PORT = FIXED_TEST_PORT;
 export const PROTECTED_APP_PORTS = [3000, 4000] as const;
 
-function getChildPidsForPort(parentPid: number): number[] {
+function getChildPids(parentPid: number): number[] {
   try {
     const result = spawnSync(["pgrep", "-P", String(parentPid)], { stdout: "pipe", stderr: "ignore" });
     return result.stdout?.toString().trim().split("\n").filter(Boolean).map(Number) ?? [];
   } catch {
     return [];
   }
+}
+
+/** Terminate a process and all of its descendants. Returns the number of processes killed. */
+export function killProcessTree(rootPid: number): number {
+  const visited = new Set<number>();
+  const queue = [rootPid];
+  let killed = 0;
+
+  while (queue.length > 0) {
+    const pid = queue.shift();
+    if (pid === undefined || visited.has(pid)) continue;
+    visited.add(pid);
+
+    for (const childPid of getChildPids(pid)) {
+      queue.push(childPid);
+    }
+
+    try {
+      process.kill(pid, "SIGKILL");
+      killed++;
+    } catch {
+      // Process may already be dead
+    }
+  }
+
+  return killed;
 }
 
 /**
@@ -39,26 +65,7 @@ export function killListenersOnPort(port: number): number {
       continue;
     }
 
-    // Terminate process tree
-    const visited = new Set<number>();
-    const queue = [rootPid];
-
-    while (queue.length > 0) {
-      const pid = queue.shift();
-      if (pid === undefined || visited.has(pid)) continue;
-      visited.add(pid);
-
-      for (const childPid of getChildPidsForPort(pid)) {
-        queue.push(childPid);
-      }
-
-      try {
-        process.kill(pid, "SIGKILL");
-        killed++;
-      } catch {
-        // already gone
-      }
-    }
+    killed += killProcessTree(rootPid);
   }
 
   return killed;

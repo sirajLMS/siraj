@@ -5,7 +5,7 @@ import { Box, CircularProgress, FormHelperText, Stack } from "@mui/material";
 import Link from "next/link";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import {
-  PackagePlanArchiveDialogShared,
+  PackagePlanArchiveSectionShared,
   PackagePlanArchiveTriggerButton,
 } from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanArchiveDialogShared";
 import {
@@ -34,6 +34,85 @@ const spinIcon = (
   />
 );
 
+function PackagePlanFormLoadingState() {
+  return (
+    <DesktopPageContainer>
+      <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
+        <CircularProgress size={36} />
+      </Box>
+    </DesktopPageContainer>
+  );
+}
+
+type IdentitySectionProps = Pick<UsePackagePlanFormViewModel, "t" | "control" | "errors" | "isEditing">;
+
+function PackagePlanIdentitySection({ t, control, errors, isEditing }: Readonly<IdentitySectionProps>) {
+  return (
+    <DesktopSectionPanel title={t.form.displayName}>
+      <Stack spacing={3}>
+        <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2 }}>
+          <PackagePlanCodenameField
+            control={control}
+            errors={errors}
+            labels={t.form}
+            isEditing={isEditing}
+            sx={styles.codenameField}
+            inputSx={styles.codenameInput}
+          />
+          <PackagePlanDisplayNameField control={control} errors={errors} labels={t.form} sx={styles.displayNameField} />
+        </Stack>
+        <PackagePlanDescriptionField control={control} labels={t.form} sx={styles.descriptionField} />
+      </Stack>
+    </DesktopSectionPanel>
+  );
+}
+
+type PricingSectionProps = Pick<UsePackagePlanFormViewModel, "t" | "control" | "errors">;
+
+function PackagePlanPricingSection({ t, control, errors }: Readonly<PricingSectionProps>) {
+  return (
+    <DesktopSectionPanel title={t.columns.price}>
+      <Stack spacing={3}>
+        <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2 }}>
+          <PackagePlanCreditHoursField control={control} errors={errors} labels={t.form} sx={styles.numericField} />
+          <PackagePlanPriceAmountField control={control} errors={errors} labels={t.form} sx={styles.numericField} />
+          <PackagePlanCurrencyField control={control} labels={t.form} sx={styles.currencyField} />
+        </Stack>
+
+        <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2, alignItems: "center" }}>
+          <PackagePlanSortOrderField control={control} errors={errors} labels={t.form} sx={styles.sortOrderField} />
+          <PackagePlanValidityMonthsField control={control} errors={errors} labels={t.form} sx={styles.validityStack} />
+          <Box sx={{ display: "flex", alignItems: "center", alignSelf: "stretch" }}>
+            <PackagePlanActiveField control={control} labels={t.form} />
+          </Box>
+        </Stack>
+        {errors.active ? <FormHelperText error>{errors.active.message}</FormHelperText> : null}
+      </Stack>
+    </DesktopSectionPanel>
+  );
+}
+
+type FormActionsProps = Pick<UsePackagePlanFormViewModel, "t" | "isSubmitting">;
+
+function PackagePlanFormActions({ t, isSubmitting }: Readonly<FormActionsProps>) {
+  return (
+    <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
+      <Link href="/accounting/packages" style={{ textDecoration: "none" }}>
+        <DesktopPrimaryPageAction variant="text" color="inherit" disabled={isSubmitting}>
+          {t.form.cancel}
+        </DesktopPrimaryPageAction>
+      </Link>
+      <DesktopPrimaryPageAction
+        type="submit"
+        disabled={isSubmitting}
+        startIcon={isSubmitting ? spinIcon : <SaveOutlined />}
+      >
+        {isSubmitting ? t.form.saving : t.form.submit}
+      </DesktopPrimaryPageAction>
+    </Stack>
+  );
+}
+
 export function PackagePlanFormDesktop(props: Readonly<UsePackagePlanFormViewModel>) {
   const {
     t,
@@ -56,13 +135,7 @@ export function PackagePlanFormDesktop(props: Readonly<UsePackagePlanFormViewMod
   } = props;
 
   if (isEditing && loadingExisting) {
-    return (
-      <DesktopPageContainer>
-        <Box sx={{ display: "flex", justifyContent: "center", py: 10 }}>
-          <CircularProgress size={36} />
-        </Box>
-      </DesktopPageContainer>
-    );
+    return <PackagePlanFormLoadingState />;
   }
 
   const title = isEditing ? t.editTitle : t.createTitle;
@@ -95,95 +168,19 @@ export function PackagePlanFormDesktop(props: Readonly<UsePackagePlanFormViewMod
         sx={{ maxWidth: 1140, width: "100%", mx: "auto" }}
       >
         <Stack spacing={3}>
-          <DesktopSectionPanel title={t.form.displayName}>
-            <Stack spacing={3}>
-              <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2 }}>
-                <PackagePlanCodenameField
-                  control={control}
-                  errors={errors}
-                  labels={t.form}
-                  isEditing={isEditing}
-                  sx={styles.codenameField}
-                  inputSx={styles.codenameInput}
-                />
-                <PackagePlanDisplayNameField
-                  control={control}
-                  errors={errors}
-                  labels={t.form}
-                  sx={styles.displayNameField}
-                />
-              </Stack>
-              <PackagePlanDescriptionField control={control} labels={t.form} sx={styles.descriptionField} />
-            </Stack>
-          </DesktopSectionPanel>
-
-          <DesktopSectionPanel title={t.columns.price}>
-            <Stack spacing={3}>
-              <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2 }}>
-                <PackagePlanCreditHoursField
-                  control={control}
-                  errors={errors}
-                  labels={t.form}
-                  sx={styles.numericField}
-                />
-                <PackagePlanPriceAmountField
-                  control={control}
-                  errors={errors}
-                  labels={t.form}
-                  sx={styles.numericField}
-                />
-                <PackagePlanCurrencyField control={control} labels={t.form} sx={styles.currencyField} />
-              </Stack>
-
-              <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", rowGap: 2, alignItems: "center" }}>
-                <PackagePlanSortOrderField
-                  control={control}
-                  errors={errors}
-                  labels={t.form}
-                  sx={styles.sortOrderField}
-                />
-                <PackagePlanValidityMonthsField
-                  control={control}
-                  errors={errors}
-                  labels={t.form}
-                  sx={styles.validityStack}
-                />
-                <Box sx={{ display: "flex", alignItems: "center", alignSelf: "stretch" }}>
-                  <PackagePlanActiveField control={control} labels={t.form} />
-                </Box>
-              </Stack>
-              {errors.active ? <FormHelperText error>{errors.active.message}</FormHelperText> : null}
-            </Stack>
-          </DesktopSectionPanel>
-
-          <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
-            <Link href="/accounting/packages" style={{ textDecoration: "none" }}>
-              <DesktopPrimaryPageAction variant="text" color="inherit" disabled={isSubmitting}>
-                {t.form.cancel}
-              </DesktopPrimaryPageAction>
-            </Link>
-            <DesktopPrimaryPageAction
-              type="submit"
-              disabled={isSubmitting}
-              startIcon={isSubmitting ? spinIcon : <SaveOutlined />}
-            >
-              {isSubmitting ? t.form.saving : t.form.submit}
-            </DesktopPrimaryPageAction>
-          </Stack>
+          <PackagePlanIdentitySection t={t} control={control} errors={errors} isEditing={isEditing} />
+          <PackagePlanPricingSection t={t} control={control} errors={errors} />
+          <PackagePlanFormActions t={t} isSubmitting={isSubmitting} />
         </Stack>
       </Box>
 
-      <PackagePlanArchiveDialogShared
-        open={archiveDialogOpen}
-        onClose={() => setArchiveDialogOpen(false)}
-        onConfirm={() => void onArchive()}
+      <PackagePlanArchiveSectionShared
+        t={t}
+        existing={existing}
+        archiveDialogOpen={archiveDialogOpen}
+        setArchiveDialogOpen={setArchiveDialogOpen}
+        onArchive={onArchive}
         archiving={archiving}
-        labels={{
-          title: t.archiveTitle,
-          body: existing ? t.archiveBody(existing.displayName ?? "") : "",
-          cancel: t.form.cancel,
-          confirm: t.archiveConfirm,
-        }}
       />
 
       <FormSuccessSnackbar open={showSuccess} message={t.saveSuccess} onClose={onDismissSuccess} />

@@ -153,9 +153,7 @@ describe("PayrollReportsDataGrid (component)", () => {
     // The row chip renders the status label text; its root element must carry
     // the same text as the aria-label so screen readers announce the status
     // rather than an unnamed colored chip.
-    const rowChip = within(grid)
-      .getByText(payrollLabels.status.CALCULATED)
-      .closest("[aria-label]");
+    const rowChip = within(grid).getByText(payrollLabels.status.CALCULATED).closest("[aria-label]");
     expect(rowChip).not.toBeNull();
     expect(rowChip).toHaveAttribute("aria-label", payrollLabels.status.CALCULATED);
   });

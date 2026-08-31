@@ -3,7 +3,7 @@
 import { SaveOutlined, SyncOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, FormHelperText, Stack, TextField } from "@mui/material";
 import Link from "next/link";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
@@ -60,6 +60,37 @@ function FormActions({ isSubmitting, submitLabel, savingLabel, cancelLabel }: Re
   );
 }
 
+interface PaymentNoteControllerFieldProps<TValues extends FieldValues, TTransformed> {
+  readonly control: Control<TValues, undefined, TTransformed>;
+  readonly name: FieldPath<TValues>;
+  readonly label: string;
+  readonly placeholder: string;
+}
+
+/** Note textarea bound via react-hook-form Controller; shared by the create and edit payment forms. */
+function PaymentNoteControllerField<TValues extends FieldValues, TTransformed>({
+  control,
+  name,
+  label,
+  placeholder,
+}: Readonly<PaymentNoteControllerFieldProps<TValues, TTransformed>>) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <PaymentNoteField
+          value={field.value}
+          onChange={field.onChange}
+          onBlur={field.onBlur}
+          label={label}
+          placeholder={placeholder}
+        />
+      )}
+    />
+  );
+}
+
 export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
   const {
     t,
@@ -95,6 +126,15 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
   const title = isEditing ? t.editPayment : t.addPayment;
 
   const gatewayFieldArgs = { label: t.form.paymentGateway, localizedGateways: t.gateways };
+
+  const formActions = (
+    <FormActions
+      isSubmitting={isSubmitting}
+      submitLabel={t.form.submit}
+      savingLabel={t.form.saving}
+      cancelLabel={t.form.cancel}
+    />
+  );
 
   const breadcrumbs = [
     { label: t.pageTitle, href: "/accounting/payments" },
@@ -160,28 +200,16 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                   />
                 </Stack>
 
-                <Controller
-                  name="paymentNote"
+                <PaymentNoteControllerField
                   control={editControl}
-                  render={({ field }) => (
-                    <PaymentNoteField
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      label={t.form.note}
-                      placeholder={t.form.notePlaceholder}
-                    />
-                  )}
+                  name="paymentNote"
+                  label={t.form.note}
+                  placeholder={t.form.notePlaceholder}
                 />
               </Stack>
             </DesktopSectionPanel>
 
-            <FormActions
-              isSubmitting={isSubmitting}
-              submitLabel={t.form.submit}
-              savingLabel={t.form.saving}
-              cancelLabel={t.form.cancel}
-            />
+            {formActions}
           </Stack>
         </Box>
       ) : (
@@ -304,28 +332,16 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                   />
                 </Stack>
 
-                <Controller
-                  name="paymentNote"
+                <PaymentNoteControllerField
                   control={control}
-                  render={({ field }) => (
-                    <PaymentNoteField
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      label={t.form.note}
-                      placeholder={t.form.notePlaceholder}
-                    />
-                  )}
+                  name="paymentNote"
+                  label={t.form.note}
+                  placeholder={t.form.notePlaceholder}
                 />
               </Stack>
             </DesktopSectionPanel>
 
-            <FormActions
-              isSubmitting={isSubmitting}
-              submitLabel={t.form.submit}
-              savingLabel={t.form.saving}
-              cancelLabel={t.form.cancel}
-            />
+            {formActions}
           </Stack>
         </Box>
       )}

@@ -1,12 +1,13 @@
 "use client";
 
-import { DeleteOutlined } from "@mui/icons-material";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import {
-  useWeeklyScheduleSlotItem,
+  WeeklyScheduleSlotItemShared,
+  type WeeklyScheduleSlotItemSharedOptions,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/weeklyScheduleSlotItemShared";
+import {
   WEEKLY_SCHEDULE_DAYS,
   WEEKLY_SCHEDULE_TIMES,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
@@ -15,19 +16,11 @@ import type {
   WeeklyScheduleGridProps,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { DesktopPersonProfileLink } from "@/frontend/desktop/components/ui/display";
-import { Link } from "@/shared/i18n";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
 
 const TIME_COLUMN_WIDTH = 88;
 const GRID_COLUMNS = `${TIME_COLUMN_WIDTH}px repeat(7, minmax(0, 1fr))`;
-
-const linkTypographySx = {
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  display: "block",
-} as const;
 
 interface SlotItemProps {
   readonly classItem: ScheduledClass;
@@ -37,122 +30,24 @@ interface SlotItemProps {
   readonly meetingJoinLabels: MeetingConfigJoinLabels;
 }
 
-function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meetingJoinLabels }: Readonly<SlotItemProps>) {
-  const t = labels;
-  const {
-    classInstanceId,
-    deleteDialogOpen,
-    subjectLabel,
-    statusLabel,
-    canJoin,
-    isTerminal,
-    showDelete,
-    closeDeleteConfirm,
-    handleDeleteDialogConfirm,
-    handleDeleteClick,
-  } = useWeeklyScheduleSlotItem(classItem, labels, onRemove);
+const DESKTOP_SLOT_ITEM_OPTIONS: WeeklyScheduleSlotItemSharedOptions = {
+  cardBorderRadius: 1,
+  cardPaddingX: 1,
+  cardPaddingY: 0.75,
+  cardGap: 0.5,
+  subjectVariant: "labelMd",
+  actionsGap: 0.5,
+  actionsMinHeight: 20,
+  deleteButtonPadding: 0.25,
+  JoinAction: MeetingJoinAction,
+  DeleteDialog: BaseDeleteDialog,
+  renderStudentLink: (href, name) => (
+    <DesktopPersonProfileLink href={href} name={name} showAvatar={false} typographyVariant="caption" fontWeight={500} />
+  ),
+};
 
-  return (
-    <>
-      <Box
-        sx={theme => ({
-          flex: 1,
-          width: "100%",
-          minHeight: 0,
-          backgroundColor: isTerminal ? theme.palette.surfaceContainerHigh : theme.palette.primaryContainer,
-          color: isTerminal ? theme.palette.onSurface : theme.palette.onPrimaryContainer,
-          borderRadius: 1,
-          px: 1,
-          py: 0.75,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          gap: 0.5,
-          border: `1px solid ${isTerminal ? theme.palette.outlineVariant : theme.palette.primary.main}`,
-          borderInlineStart: `3px solid ${theme.palette.primary.main}`,
-          opacity: isTerminal ? 0.9 : 1,
-        })}
-      >
-        <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.25 }}>
-          {classInstanceId ? (
-            <Link href={classHref(classInstanceId)} style={{ textDecoration: "none", minWidth: 0 }}>
-              <Typography
-                variant="labelMd"
-                sx={theme => ({
-                  ...linkTypographySx,
-                  fontWeight: 700,
-                  color: theme.palette.primary.main,
-                  lineHeight: 1.25,
-                  "&:hover": { textDecoration: "underline" },
-                })}
-              >
-                {subjectLabel}
-              </Typography>
-            </Link>
-          ) : (
-            <Typography variant="labelMd" sx={{ ...linkTypographySx, fontWeight: 700, lineHeight: 1.25 }}>
-              {subjectLabel}
-            </Typography>
-          )}
-
-          <DesktopPersonProfileLink
-            href={classItem.studentId ? studentHref(classItem.studentId) : undefined}
-            name={classItem.studentName ?? "—"}
-            showAvatar={false}
-            typographyVariant="caption"
-            fontWeight={500}
-          />
-
-          <Typography variant="caption" sx={{ color: "inherit", opacity: 0.85, lineHeight: 1.2 }}>
-            {t.grid.minutesShort(classItem.duration ?? 0)} · {statusLabel}
-          </Typography>
-        </Box>
-
-        {canJoin || (showDelete && hasScheduleDeleteClass) ? (
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.5, minHeight: 20 }}>
-            {canJoin ? (
-              <MeetingJoinAction
-                variant="icon"
-                joinUrl={classItem.meetingJoinUrl}
-                meeting={classItem.effectiveMeeting}
-                emptyRole="teacher"
-                label={meetingJoinLabels.joinMeeting}
-                setupHref="/profile?tab=meeting"
-              />
-            ) : null}
-            {showDelete && hasScheduleDeleteClass ? (
-              <Tooltip title={t.actions.deleteClass}>
-                <IconButton
-                  size="small"
-                  aria-label={t.actions.deleteClass}
-                  onClick={handleDeleteClick}
-                  sx={theme => ({
-                    p: 0.25,
-                    color: theme.palette.onPrimaryContainer,
-                    opacity: 0.7,
-                    "&:hover": { color: theme.palette.error.main, opacity: 1 },
-                  })}
-                >
-                  <DeleteOutlined fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            ) : null}
-          </Box>
-        ) : null}
-      </Box>
-
-      <BaseDeleteDialog
-        open={deleteDialogOpen}
-        onClose={closeDeleteConfirm}
-        onConfirm={handleDeleteDialogConfirm}
-        isLoading={false}
-        title={t.dialogs.deleteClassTitle}
-        body={t.dialogs.deleteClassMessage}
-        cancelLabel={t.dialogs.cancel}
-        confirmLabel={t.dialogs.confirmYes}
-      />
-    </>
-  );
+function SlotItem(props: Readonly<SlotItemProps>) {
+  return <WeeklyScheduleSlotItemShared {...props} options={DESKTOP_SLOT_ITEM_OPTIONS} />;
 }
 
 function GridHeader({ labels }: Readonly<{ labels: TeacherWeeklyScheduleLabels }>) {

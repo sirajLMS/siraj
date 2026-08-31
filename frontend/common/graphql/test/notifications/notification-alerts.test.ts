@@ -58,7 +58,7 @@ describe("GraphQL notificationAlerts Integration Tests", () => {
     expect(result.data?.notificationAlerts).toBeFalsy();
   });
 
-  test("returns empty alert feed for parent role", async () => {
+  test("returns alert feed for parent role", async () => {
     const token = await loginDemoUser("parent_default");
 
     const data = await authenticatedRequest(token, "query", notificationAlertsQueryDocument);
@@ -66,8 +66,10 @@ describe("GraphQL notificationAlerts Integration Tests", () => {
 
     if (!alerts) throw new Error("Expected notificationAlerts to be defined");
     expect(alerts.id).toBeDefined();
-    // Parents may lack NOTIFICATION_VIEW_ALERTS — the service returns empty alerts
-    expect(alerts.alerts).toEqual([]);
-    expect(alerts.totalCount).toBe(0);
+    // parent_default holds notification.view_alerts (migration 20260829192949),
+    // so the feed is served; exact rows depend on demo data.
+    const rows = alerts.alerts ?? [];
+    expect(Array.isArray(rows)).toBe(true);
+    expect(alerts.totalCount).toBeGreaterThanOrEqual(rows.length);
   });
 });

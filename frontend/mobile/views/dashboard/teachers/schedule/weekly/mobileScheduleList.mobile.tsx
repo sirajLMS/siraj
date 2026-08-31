@@ -1,11 +1,12 @@
 "use client";
 
-import { DeleteOutlined } from "@mui/icons-material";
-import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
-import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import {
-  useWeeklyScheduleSlotItem,
+  WeeklyScheduleSlotItemShared,
+  type WeeklyScheduleSlotItemSharedOptions,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/weeklyScheduleSlotItemShared";
+import {
   WEEKLY_SCHEDULE_DAYS,
   WEEKLY_SCHEDULE_TIMES,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
@@ -17,16 +18,8 @@ import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/conta
 import { MobileBaseDeleteDialog } from "@/frontend/mobile/components/ui/dialog";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
-import { Link } from "@/shared/i18n";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
-
-const linkTypographySx = {
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  display: "block",
-} as const;
 
 interface MobileSlotItemProps {
   readonly classItem: ScheduledClass;
@@ -36,189 +29,23 @@ interface MobileSlotItemProps {
   readonly meetingJoinLabels: MeetingConfigJoinLabels;
 }
 
-// --- Sub-components for MobileSlotItem ---
+const MOBILE_SLOT_ITEM_OPTIONS: WeeklyScheduleSlotItemSharedOptions = {
+  cardBorderRadius: 1.5,
+  cardPaddingX: 1.5,
+  cardPaddingY: 1.25,
+  cardGap: 0.75,
+  subjectVariant: "bodyMd",
+  actionsGap: 0.75,
+  actionsMinHeight: 24,
+  JoinAction: MobileMeetingJoinAction,
+  DeleteDialog: MobileBaseDeleteDialog,
+  renderStudentLink: (href, name) => (
+    <MobilePersonProfileLink href={href} name={name} showAvatar={false} typographyVariant="bodyMd" fontWeight={500} />
+  ),
+};
 
-interface SlotItemActionsProps {
-  readonly canJoin: boolean;
-  readonly showDelete: boolean;
-  readonly hasScheduleDeleteClass: boolean;
-  readonly classItem: ScheduledClass;
-  readonly labels: TeacherWeeklyScheduleLabels;
-  readonly meetingJoinLabels: MeetingConfigJoinLabels;
-  readonly onDeleteClick: (event: React.MouseEvent) => void;
-}
-
-function SlotItemActions({
-  canJoin,
-  showDelete,
-  hasScheduleDeleteClass,
-  classItem,
-  labels,
-  meetingJoinLabels,
-  onDeleteClick,
-}: Readonly<SlotItemActionsProps>) {
-  if (!canJoin && !(showDelete && hasScheduleDeleteClass)) {
-    return null;
-  }
-
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.75, minHeight: 24 }}>
-      {canJoin ? (
-        <MobileMeetingJoinAction
-          variant="icon"
-          joinUrl={classItem.meetingJoinUrl}
-          meeting={classItem.effectiveMeeting}
-          emptyRole="teacher"
-          label={meetingJoinLabels.joinMeeting}
-          setupHref="/profile?tab=meeting"
-        />
-      ) : null}
-      {showDelete && hasScheduleDeleteClass ? (
-        <Tooltip title={labels.actions.deleteClass}>
-          <IconButton
-            size="small"
-            aria-label={labels.actions.deleteClass}
-            onClick={onDeleteClick}
-            sx={theme => ({
-              color: theme.palette.onPrimaryContainer,
-              opacity: 0.7,
-              "&:hover": { color: theme.palette.error.main, opacity: 1 },
-            })}
-          >
-            <DeleteOutlined fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      ) : null}
-    </Box>
-  );
-}
-
-interface SlotItemContentProps {
-  readonly classItem: ScheduledClass;
-  readonly classInstanceId: string;
-  readonly subjectLabel: string;
-  readonly statusLabel: string;
-  readonly labels: TeacherWeeklyScheduleLabels;
-}
-
-function SlotItemContent({
-  classItem,
-  classInstanceId,
-  subjectLabel,
-  statusLabel,
-  labels,
-}: Readonly<SlotItemContentProps>) {
-  return (
-    <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.25 }}>
-      {classInstanceId ? (
-        <Link href={classHref(classInstanceId)} style={{ textDecoration: "none", minWidth: 0 }}>
-          <Typography
-            variant="bodyMd"
-            sx={theme => ({
-              ...linkTypographySx,
-              fontWeight: 700,
-              color: theme.palette.primary.main,
-              lineHeight: 1.25,
-              "&:hover": { textDecoration: "underline" },
-            })}
-          >
-            {subjectLabel}
-          </Typography>
-        </Link>
-      ) : (
-        <Typography variant="bodyMd" sx={{ ...linkTypographySx, fontWeight: 700, lineHeight: 1.25 }}>
-          {subjectLabel}
-        </Typography>
-      )}
-
-      <MobilePersonProfileLink
-        href={classItem.studentId ? studentHref(classItem.studentId) : undefined}
-        name={classItem.studentName ?? "—"}
-        showAvatar={false}
-        typographyVariant="bodyMd"
-        fontWeight={500}
-      />
-
-      <Typography variant="caption" sx={{ color: "inherit", opacity: 0.85, lineHeight: 1.2 }}>
-        {labels.grid.minutesShort(classItem.duration ?? 0)} · {statusLabel}
-      </Typography>
-    </Box>
-  );
-}
-
-function MobileSlotItem({
-  classItem,
-  onRemove,
-  hasScheduleDeleteClass,
-  labels,
-  meetingJoinLabels,
-}: Readonly<MobileSlotItemProps>) {
-  const t = labels;
-  const {
-    classInstanceId,
-    deleteDialogOpen,
-    subjectLabel,
-    statusLabel,
-    canJoin,
-    isTerminal,
-    showDelete,
-    closeDeleteConfirm,
-    handleDeleteDialogConfirm,
-    handleDeleteClick,
-  } = useWeeklyScheduleSlotItem(classItem, labels, onRemove);
-
-  return (
-    <>
-      <Box
-        sx={theme => ({
-          flex: 1,
-          width: "100%",
-          minHeight: 0,
-          backgroundColor: isTerminal ? theme.palette.surfaceContainerHigh : theme.palette.primaryContainer,
-          color: isTerminal ? theme.palette.onSurface : theme.palette.onPrimaryContainer,
-          borderRadius: 1.5,
-          px: 1.5,
-          py: 1.25,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          gap: 0.75,
-          border: `1px solid ${isTerminal ? theme.palette.outlineVariant : theme.palette.primary.main}`,
-          borderInlineStart: `3px solid ${theme.palette.primary.main}`,
-          opacity: isTerminal ? 0.9 : 1,
-        })}
-      >
-        <SlotItemContent
-          classItem={classItem}
-          classInstanceId={classInstanceId}
-          subjectLabel={subjectLabel}
-          statusLabel={statusLabel}
-          labels={labels}
-        />
-
-        <SlotItemActions
-          canJoin={canJoin}
-          showDelete={showDelete}
-          hasScheduleDeleteClass={hasScheduleDeleteClass}
-          classItem={classItem}
-          labels={labels}
-          meetingJoinLabels={meetingJoinLabels}
-          onDeleteClick={handleDeleteClick}
-        />
-      </Box>
-
-      <MobileBaseDeleteDialog
-        open={deleteDialogOpen}
-        onClose={closeDeleteConfirm}
-        onConfirm={handleDeleteDialogConfirm}
-        isLoading={false}
-        title={t.dialogs.deleteClassTitle}
-        body={t.dialogs.deleteClassMessage}
-        cancelLabel={t.dialogs.cancel}
-        confirmLabel={t.dialogs.confirmYes}
-      />
-    </>
-  );
+function MobileSlotItem(props: Readonly<MobileSlotItemProps>) {
+  return <WeeklyScheduleSlotItemShared {...props} options={MOBILE_SLOT_ITEM_OPTIONS} />;
 }
 
 interface DaySelectorProps {

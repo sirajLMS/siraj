@@ -2,7 +2,6 @@ import { type ChildProcess, spawn } from "node:child_process";
 import { openSync } from "node:fs";
 import { access, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { spawnSync } from "bun";
 import { restoreCanonicalNextEnvDts } from "@/scripts/lib/restore-next-env-dts";
 import { getTestProductionEnv } from "@/scripts/lib/test-build-env";
 import { resolveAdminPassword } from "@/shared/demo-users";
@@ -18,6 +17,7 @@ import {
   getTestServerMode,
   isServerRunningOnPort,
   killListenersOnPort,
+  killProcessTree,
   releaseAllocatedTestPort,
   releaseTcpPortReservation,
   setTestPort,
@@ -53,36 +53,6 @@ function getDevTestServerEnv(distDir: string): NodeJS.ProcessEnv {
     ADMIN_PASSWORD: TEST_ADMIN_PASSWORD,
     ...(enforceRateLimit ? { TEST_ENFORCE_RATE_LIMIT: "true" } : { DISABLE_RATE_LIMITING: "true" }),
   });
-}
-
-function getChildPids(parentPid: number): number[] {
-  try {
-    const result = spawnSync(["pgrep", "-P", String(parentPid)], { stdout: "pipe", stderr: "ignore" });
-    return result.stdout?.toString().trim().split("\n").filter(Boolean).map(Number) ?? [];
-  } catch {
-    return [];
-  }
-}
-
-function killProcessTree(rootPid: number) {
-  const visited = new Set<number>();
-  const queue = [rootPid];
-
-  while (queue.length > 0) {
-    const pid = queue.shift();
-    if (pid === undefined || visited.has(pid)) continue;
-    visited.add(pid);
-
-    for (const childPid of getChildPids(pid)) {
-      queue.push(childPid);
-    }
-
-    try {
-      process.kill(pid, "SIGKILL");
-    } catch {
-      // Process may already be dead
-    }
-  }
 }
 
 async function warmUpRoute(route: string, base: string, fetchFn: typeof fetch, routeTimeoutMs: number): Promise<void> {

@@ -5,7 +5,7 @@ import { Box, Button, CircularProgress, Stack } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import {
-  PackagePlanArchiveDialogShared,
+  PackagePlanArchiveSectionShared,
   PackagePlanArchiveTriggerButton,
 } from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanArchiveDialogShared";
 import {
@@ -108,17 +108,13 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
         </Stack>
       </Box>
 
-      <PackagePlanArchiveDialogShared
-        open={archiveDialogOpen}
-        onClose={() => setArchiveDialogOpen(false)}
-        onConfirm={() => void onArchive()}
+      <PackagePlanArchiveSectionShared
+        t={t}
+        existing={existing}
+        archiveDialogOpen={archiveDialogOpen}
+        setArchiveDialogOpen={setArchiveDialogOpen}
+        onArchive={onArchive}
         archiving={archiving}
-        labels={{
-          title: t.archiveTitle,
-          body: existing ? t.archiveBody(existing.displayName ?? "") : "",
-          cancel: t.form.cancel,
-          confirm: t.archiveConfirm,
-        }}
       />
 
       <FormSuccessSnackbar open={showSuccess} message={t.saveSuccess} onClose={onDismissSuccess} />
