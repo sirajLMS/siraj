@@ -1,7 +1,7 @@
 import { NotificationEventCategory, NotificationEventType } from "@/backend/enum";
 import { fanOutToUsers } from "@/backend/services/notification/notification-payloads.builders";
 import type { CommunicationPayload } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type { NotificationsLabels } from "@/shared/locale/types/notifications";
 
 /**

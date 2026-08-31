@@ -31,7 +31,7 @@ import type {
   NotificationMetadata,
   WhatsappTemplateMetadata,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 import type {
   ClassLifecycleBodyParams,
   NotificationsLabels,
