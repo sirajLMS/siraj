@@ -2,7 +2,7 @@
 
 import { CombinedGraphQLErrors } from "@apollo/client";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
-import { Box, Chip, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Chip, Stack, TextField, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { addDays } from "date-fns";
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
@@ -16,6 +16,7 @@ import type { PersonOption } from "@/frontend/common/components/ui/input/userSel
 import {
   CreditAdjustmentType as CreditAdjustmentGqlType,
   type CreditAdjustmentInput,
+  type StudentByIdQuery_studentById,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { recordCreditAdjustmentMutationDocument } from "@/frontend/common/graphql/sharedDocuments/billing/credit-adjustment.documents";
 import { studentByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student.documents";
@@ -49,6 +50,7 @@ interface CreditAdjustDraft {
   readonly adjustmentType: CreditAdjustmentType;
   readonly hours: number | null;
   readonly notes: string;
+  readonly internalNotes: string;
   readonly carryoverTeacherId: string | null;
   readonly fromDate: string | null;
   readonly toDate: string | null;
@@ -72,6 +74,8 @@ const ADJUSTMENT_TYPE_TO_GQL: Record<CreditAdjustmentType, CreditAdjustmentGqlTy
 
 const INSUFFICIENT_CLASSES_CODE = "INSUFFICIENT_CLASSES";
 const CREDITS_LIST_HREF = "/accounting/credits";
+/** Mirrors the server-side internal-notes cap (`INTERNAL_NOTES_MAX_LENGTH`). */
+const INTERNAL_NOTES_MAX_LENGTH = 2000;
 
 const HTML_TAG_PATTERN = /<[^<>]*>/g;
 
@@ -152,16 +156,54 @@ function validateCreditAdjustDraft(
 
 function buildAdjustmentInput(draft: CreditAdjustDraft): CreditAdjustmentInput {
   const isCarryover = draft.adjustmentType === CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER;
+  const internalNotes = draft.internalNotes.trim();
   return {
     studentId: draft.studentId ?? "",
     adjustmentType: ADJUSTMENT_TYPE_TO_GQL[draft.adjustmentType],
     hours: draft.hours ?? 0,
     notes: draft.notes,
+    // Omitted (undefined) when blank so an untouched note never reaches the wire.
+    internalNotes: internalNotes === "" ? undefined : internalNotes,
     carryoverTeacherId: isCarryover ? draft.carryoverTeacherId : null,
     carryoverFromDate: isCarryover ? draft.fromDate : null,
     carryoverToDate: isCarryover ? draft.toDate : null,
     carryoverPaymentDate: isCarryover ? draft.paymentDate : null,
   };
+}
+
+/** Hours must be a positive whole number before any balance math is meaningful. */
+function isValidHours(hours: number | null): hours is number {
+  return hours !== null && Number.isInteger(hours) && hours >= 1;
+}
+
+/** Resulting `classesRemaining`: Add grows the balance; Subtract and Carryover deduct from it. */
+function remainingAfterAdjustment(
+  adjustmentType: CreditAdjustmentType,
+  classesRemaining: number,
+  hours: number
+): number {
+  return adjustmentType === CreditAdjustmentType.ADD ? classesRemaining + hours : classesRemaining - hours;
+}
+
+/** Previewable balance pair; null until the row loads and hours is valid. */
+interface BalancePreview {
+  readonly from: number;
+  readonly to: number;
+}
+
+/** Rows whose balance fields can drive the preview (the fetched student record). */
+interface BalancePreviewSource {
+  readonly classesRemaining: number | null;
+}
+
+function computeBalancePreview(
+  row: BalancePreviewSource | null,
+  adjustmentType: CreditAdjustmentType,
+  hours: number | null
+): BalancePreview | null {
+  const remaining = row?.classesRemaining;
+  if (remaining === null || remaining === undefined || !isValidHours(hours)) return null;
+  return { from: remaining, to: remainingAfterAdjustment(adjustmentType, remaining, hours) };
 }
 
 function getGraphQLErrorCode(error: unknown): string | undefined {
@@ -214,6 +256,104 @@ function buildSuccessMessage(labels: CreditAdjustmentLabelsForSuccess, draft: Cr
   return labels.success.subtracted(hours);
 }
 
+interface CreditAdjustmentLabelsForSummary {
+  readonly summary: {
+    readonly add: (hours: number, student: string) => string;
+    readonly subtract: (hours: number, student: string) => string;
+    readonly carryover: (hours: number, teacher: string, paymentDate: string) => string;
+  };
+}
+
+/**
+ * Human-readable recap of the pending operation for the pre-submit summary
+ * strip. Incomplete carryover metadata (teacher/date still being picked) falls
+ * back to the plain deduction wording; returns null while hours is not a
+ * valid positive integer.
+ */
+function buildSummaryText(
+  labels: CreditAdjustmentLabelsForSummary,
+  draft: CreditAdjustDraft,
+  studentName: string
+): string | null {
+  if (!isValidHours(draft.hours)) return null;
+  if (draft.adjustmentType === CreditAdjustmentType.ADD) return labels.summary.add(draft.hours, studentName);
+  if (draft.adjustmentType === CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER) {
+    const teacherName = resolveTeacherDisplayName(draft.carryoverTeacherId);
+    if (teacherName !== null && draft.paymentDate !== null) {
+      return labels.summary.carryover(draft.hours, teacherName, draft.paymentDate);
+    }
+  }
+  return labels.summary.subtract(draft.hours, studentName);
+}
+
+/** Authoritative server rejection shown in the full-width band above the actions. */
+interface SubmitError {
+  readonly code: string | undefined;
+  readonly message: string;
+}
+
+interface SelectedStudentCardProps {
+  readonly row: StudentByIdQuery_studentById;
+  /** Caption prefixing the `remaining / total` balance chip. */
+  readonly balanceLabel: string;
+}
+
+/**
+ * Read-only live-context card for the selected student. The picker input
+ * cannot echo a programmatic value, so the resolved record (name, teacher,
+ * current balance) is surfaced here while the search field above stays
+ * available to swap the student.
+ */
+function SelectedStudentCard({ row, balanceLabel }: SelectedStudentCardProps) {
+  return (
+    <Box
+      sx={theme => ({
+        display: "flex",
+        alignItems: "center",
+        gap: 1.5,
+        px: 2,
+        py: 1.5,
+        mt: -1.5,
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: theme.palette.outlineVariant,
+        borderRadius: 2,
+        backgroundColor: theme.palette.surface,
+      })}
+    >
+      <BaseAvatar label={row.name ?? ""} src={row.avatarUrl ?? undefined} size={40} />
+      <Box sx={{ minWidth: 0, flex: 1 }}>
+        <Typography
+          sx={{
+            fontWeight: 600,
+            fontSize: 14,
+            // Long names must yield before the balance caption, not collide
+            // with it: the nowrap ellipsis trades full text for a guaranteed
+            // gap at narrow widths.
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {row.name}
+        </Typography>
+        {row.teacherName ? (
+          <Typography sx={theme => ({ fontSize: 12, color: theme.palette.text.secondary })}>
+            {row.teacherName}
+          </Typography>
+        ) : null}
+      </Box>
+      <Stack direction="row" sx={{ alignItems: "center", gap: 1, flexShrink: 0 }}>
+        <Typography sx={theme => ({ typography: "labelUppercase", fontSize: 10, color: theme.palette.text.secondary })}>
+          {balanceLabel}
+        </Typography>
+        <Chip size="small" label={`${row.classesRemaining ?? "—"} / ${row.classesTotal ?? "—"}`} />
+      </Stack>
+    </Box>
+  );
+}
+
 export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<CreditAdjustFormProps>) {
   const t = useAppTranslation(DashboardBillingCreditAdjustment);
   const common = useAppTranslation(Translation.Common);
@@ -226,6 +366,7 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
   const storeStudentId = useCreditAdjustFormStore(state => state.studentId);
   const hours = useCreditAdjustFormStore(state => state.hours);
   const notes = useCreditAdjustFormStore(state => state.notes);
+  const internalNotes = useCreditAdjustFormStore(state => state.internalNotes);
   const carryoverTeacherId = useCreditAdjustFormStore(state => state.carryoverTeacherId);
   const fromDate = useCreditAdjustFormStore(state => state.fromDate);
   const toDate = useCreditAdjustFormStore(state => state.toDate);
@@ -234,12 +375,14 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
   const setStudentId = useCreditAdjustFormStore(state => state.setStudentId);
   const setHours = useCreditAdjustFormStore(state => state.setHours);
   const setNotes = useCreditAdjustFormStore(state => state.setNotes);
+  const setInternalNotes = useCreditAdjustFormStore(state => state.setInternalNotes);
   const regenerateClientRequestId = useCreditAdjustFormStore(state => state.regenerateClientRequestId);
   const reset = useCreditAdjustFormStore(state => state.reset);
 
   // The picker renders full person records while the store keeps only the id.
   const [student, setStudent] = useState<PersonOption | null>(null);
   const [fieldErrors, setFieldErrors] = useState<CreditAdjustFieldErrors>({});
+  const [submitError, setSubmitError] = useState<SubmitError | null>(null);
   // One submission per form session: the guard token is regenerated on mount
   // and on reset, so a re-mounted form can always submit again.
   const submittedTokenRef = useRef<string | null>(null);
@@ -250,13 +393,12 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
     errorPolicy: "none",
   });
 
-  // Resolve the display record for a deep-linked student so the picker shows
-  // a name instead of a bare id. A manual re-pick wins over a late response:
-  // the derived option is used only while the picked list value is absent and
-  // the store id still matches the fetched row.
-  const { data: preselectedData } = useQuery(studentByIdQueryDocument, {
-    variables: { studentId: preselectedStudentId ?? "" },
-    skip: preselectedStudentId === null,
+  // The selected student (deep-linked or freshly picked) is the live-context
+  // surface: fetch the full record whenever the store holds an id so the
+  // summary card and the balance preview always reflect real data.
+  const { data: selectedStudentData } = useQuery(studentByIdQueryDocument, {
+    variables: { studentId: storeStudentId ?? "" },
+    skip: storeStudentId === null,
   });
 
   // Every mount starts a fresh form session: new guard token, deep-linked
@@ -270,16 +412,19 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
     };
   }, [preselectedStudentId, regenerateClientRequestId, setStudentId, reset]);
 
-  const preselectedRow = preselectedData?.studentById;
+  const selectedRowRaw = selectedStudentData?.studentById;
+  // A stale response for a previously selected student must never leak into
+  // the display: only use the row while it still matches the store id.
+  const selectedRow = selectedRowRaw?.id === storeStudentId ? selectedRowRaw : null;
   const displayedStudent: PersonOption | null =
     student ??
-    (preselectedRow?.id && preselectedRow.name && preselectedRow.id === storeStudentId
-      ? { id: preselectedRow.id, name: preselectedRow.name, avatarUrl: preselectedRow.avatarUrl }
+    (selectedRow?.id && selectedRow.name
+      ? { id: selectedRow.id, name: selectedRow.name, avatarUrl: selectedRow.avatarUrl }
       : null);
-  // The picker edits free text while browsing, so a deep-linked student is
-  // also surfaced as a read-only summary with the current balance (mirrors the
-  // credits list presentation).
-  const preselectedSummary = preselectedRow?.id === storeStudentId && preselectedRow.name ? preselectedRow : null;
+  // The picker edits free text while browsing, so the selected student is also
+  // surfaced as a read-only summary with the live balance (mirrors the credits
+  // list presentation).
+  const studentSummary = selectedRow?.name ? selectedRow : null;
 
   // Carryover error highlights are re-derived from the live draft each render:
   // once a failed submit has flagged the section, fixing a field lifts its
@@ -289,6 +434,7 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
     adjustmentType,
     hours,
     notes,
+    internalNotes,
     carryoverTeacherId,
     fromDate,
     toDate,
@@ -303,6 +449,17 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
   const isCarryover = adjustmentType === CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER;
   const carryoverErrors =
     fieldErrors.carryover === undefined || !isCarryover ? undefined : validateCarryoverDraft(draft, validationCopy);
+
+  // Live preview of the resulting balance: shown only once the student's real
+  // balance has loaded and hours holds a positive whole number. A negative
+  // outcome is what the server would reject with INSUFFICIENT_CLASSES, so it
+  // is flagged with the error tone before the operator even submits.
+  const balancePreview = computeBalancePreview(studentSummary, adjustmentType, hours);
+
+  // The summary strip describes the exact pending write in words; it needs the
+  // student name, which only exists once a row/option resolves.
+  const studentName = studentSummary?.name ?? null;
+  const summaryText = studentName === null ? null : buildSummaryText(t, draft, studentName);
 
   const handleStudentChange = (next: PersonOption | null) => {
     setStudent(next);
@@ -321,16 +478,25 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
     setFieldErrors(previous => omitFieldError(previous, "notes"));
   };
 
+  const handleInternalNotesChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setInternalNotes(event.target.value);
+  };
+
   const handleCancel = () => {
     router.push(CREDITS_LIST_HREF);
   };
 
   const applySubmitError = (error: unknown) => {
+    // The full-width band is the authoritative error surface; the inline
+    // hours error additionally pinpoints the fixable field for balance
+    // rejections.
+    setSubmitError({
+      code: getGraphQLErrorCode(error),
+      message: getGraphQLErrorMessage(error) ?? common.operationFailed,
+    });
     if (getGraphQLErrorCode(error) === INSUFFICIENT_CLASSES_CODE) {
       setFieldErrors(previous => ({ ...previous, hours: t.validation.insufficientClasses }));
-      return;
     }
-    notifications.show(getGraphQLErrorMessage(error) ?? common.operationFailed, { severity: "error" });
   };
 
   const applySubmitSuccess = (submittedDraft: CreditAdjustDraft) => {
@@ -347,6 +513,9 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
 
   const handleSubmit = async () => {
     if (submittedTokenRef.current === clientRequestId) return;
+    // A new attempt supersedes the previous rejection: clear the band up
+    // front so a stale message never survives a successful retry.
+    setSubmitError(null);
     const validation = validateCreditAdjustDraft(draft, validationCopy);
     setFieldErrors(validation ?? {});
     if (validation) return;
@@ -363,7 +532,7 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
   };
 
   return (
-    <SectionPanel title={t.adjustCredits}>
+    <SectionPanel title={t.adjustCredits} subTitle={t.adjustCreditsSubtitle}>
       <Box
         sx={{
           px: { xs: 2, md: 3 },
@@ -383,68 +552,13 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
             required
             fullWidth
           />
-          {preselectedSummary !== null ? (
-            // The picker input cannot echo a programmatic value, so the
-            // resolved student is surfaced as a card: visually primary, while
-            // the search field above stays available to change the student.
-            <Box
-              sx={theme => ({
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                px: 2,
-                py: 1.5,
-                mt: -1.5,
-                borderWidth: "1px",
-                borderStyle: "solid",
-                borderColor: theme.palette.outlineVariant,
-                borderRadius: 2,
-                backgroundColor: theme.palette.surface,
-              })}
-            >
-              <BaseAvatar
-                label={preselectedSummary.name ?? ""}
-                src={preselectedSummary.avatarUrl ?? undefined}
-                size={40}
-              />
-              <Box sx={{ minWidth: 0, flex: 1 }}>
-                <Typography
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: 14,
-                    // Long names must yield before the balance caption, not
-                    // collide with it: the nowrap ellipsis trades full text
-                    // for a guaranteed gap at narrow widths.
-                    minWidth: 0,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {preselectedSummary.name}
-                </Typography>
-                {preselectedSummary.teacherName ? (
-                  <Typography sx={theme => ({ fontSize: 12, color: theme.palette.text.secondary })}>
-                    {preselectedSummary.teacherName}
-                  </Typography>
-                ) : null}
-              </Box>
-              <Stack direction="row" sx={{ alignItems: "center", gap: 1, flexShrink: 0 }}>
-                <Typography
-                  sx={theme => ({
-                    typography: "labelUppercase",
-                    fontSize: 10,
-                    color: theme.palette.text.secondary,
-                  })}
-                >
-                  {t.form.balance}
-                </Typography>
-                <Chip
-                  size="small"
-                  label={`${preselectedSummary.classesRemaining ?? "—"} / ${preselectedSummary.classesTotal ?? "—"}`}
-                />
-              </Stack>
-            </Box>
+          {studentSummary !== null ? <SelectedStudentCard row={studentSummary} balanceLabel={t.form.balance} /> : null}
+          {balancePreview !== null ? (
+            // A negative outcome is what the server would reject with
+            // INSUFFICIENT_CLASSES — flag it with the error tone up front.
+            <Alert severity={balancePreview.to < 0 ? "error" : "info"}>
+              {t.preview.balance(balancePreview.from, balancePreview.to)}
+            </Alert>
           ) : null}
           <AdjustmentTypeRadioGroup sectionTitle={t.adjustmentType.title} />
           {isCarryover ? <CarryoverBanner errors={carryoverErrors} /> : null}
@@ -481,6 +595,32 @@ export function CreditAdjustForm({ studentId: preselectedStudentId }: Readonly<C
               required
             />
           </Box>
+          <TextField
+            multiline
+            minRows={2}
+            label={t.form.internalNotes}
+            helperText={t.form.internalNotesHint}
+            value={internalNotes}
+            onChange={handleInternalNotesChange}
+            disabled={submitting}
+            fullWidth
+            slotProps={{ htmlInput: { maxLength: INTERNAL_NOTES_MAX_LENGTH } }}
+          />
+          {summaryText !== null ? (
+            // Pre-submit recap of the pending write, re-derived from the store
+            // on every render so it always matches the current draft.
+            <Alert severity="info">{summaryText}</Alert>
+          ) : null}
+          {submitError !== null ? (
+            // Authoritative rejection surface: the GraphQL error code next to
+            // the server's localized message.
+            <Alert severity="error">
+              <Stack direction="row" sx={{ alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                {submitError.code !== undefined ? <Chip size="small" label={submitError.code} /> : null}
+                <Typography sx={{ fontSize: 14 }}>{submitError.message}</Typography>
+              </Stack>
+            </Alert>
+          ) : null}
           <Stack direction="row" sx={{ justifyContent: "flex-end", gap: 2 }}>
             <FilterButton
               onClick={handleCancel}

@@ -34,6 +34,14 @@
  *   # List leaf files without calling the model
  *   bun run scripts/translate-locale-ar.ts --all --list
  *
+ *   # Resume an interrupted run (reports are per-file and persistent)
+ *   bun run scripts/translate-locale-ar.ts --all --resume --out-dir scratch/locale-ar/full-run
+ *
+ * Code-reference values (identifiers, member expressions, shorthand shared
+ * blocks — e.g. `adminActions: adminViewAr.adminActions`) are classified as
+ * `reference` and never sent to the model or reported; only string literals
+ * and arrow functions are translatable.
+ *
  * ## Report format (per locale file, mirrors the ar/ tree)
  *
  *   <out-dir>/auth/login.json            — entries with en/current/proposed + status
@@ -119,11 +127,19 @@ const GLOSSARY: ReadonlyArray<readonly [string, string]> = [
   ["Profile", "الملف الشخصي"],
   ["Status", "الحالة"],
   ["Filters", "الفلاتر"],
+  ["Identifier / ID", "معرّف (always with shadda, never معرف)"],
+  ["Payin / money collected from parents", "التحصيل"],
+  ["Payout / money sent to teachers", "الصرف"],
+  ["National ID", "الرقم القومي"],
+  ["Advance class type (booked in advance)", "حصة مسبقة / مسبقة"],
+  ["Trial class type", "حصة تجريبية / تجريبية (feminine for classes)"],
+  ["Regular class type", "حصة عادية / عادية (feminine for classes)"],
+  ["Person trial status badge", "تجريبي (masculine for people)"],
 ];
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export type EntryKind = "string" | "function";
+export type EntryKind = "string" | "function" | "reference";
 
 /** A single flattened locale entry extracted from a leaf module. */
 export interface LocaleEntry {
@@ -316,12 +332,20 @@ function normalizeKey(raw: string): string {
 }
 
 /** Classify a parsed value slice: a quoted/backtick literal is a string,
- *  anything containing a top-level `=>` is an interpolation/pluralization
- *  function. */
+ *  an arrow function is a translatable function, and anything else
+ *  (identifier, member expression, shorthand reference from an aggregator or
+ *  shared block) is a "reference" — never translated, never sent to the
+ *  model, and excluded from reports. */
 function classifyValue(value: string): EntryKind {
   const first = value[0] ?? "";
   if (first === '"' || first === "'" || first === "`") return "string";
-  return ARROW_REGEX.test(value.slice(0, 200)) ? "function" : "string";
+  if (ARROW_REGEX.test(value.slice(0, 200))) return "function";
+  return "reference";
+}
+
+/** Entries the model can translate (excludes code references). */
+function translatable(entries: LocaleEntry[]): LocaleEntry[] {
+  return entries.filter(e => e.kind !== "reference");
 }
 
 /** Skip whitespace, commas, and comments between object entries. */
@@ -689,6 +713,7 @@ function buildSystemPrompt(): string {
     `- Respect gender agreement with the Arabic head noun in context`,
     `  (e.g. password-strength adjectives agree with قوة: ضعيفة / مقبولة / قوية).`,
     `- Keep digits as digits; keep brand names (e.g. Siraj LMS) unchanged.`,
+    `- ALWAYS use Western digits (0-9), never Eastern Arabic numerals (٠١٢).`,
     `- Terminology glossary (use these EXACT renderings):`,
     glossary,
     `- Output ONLY the JSON object. No markdown fences, no commentary.`,
@@ -825,9 +850,12 @@ export async function translateFile(
   const rel = relative(resolve(AR_ROOT), absArPath);
   const enPath = join(enRoot, rel);
   const arSrc = readFileSync(absArPath, "utf-8");
-  const arEntries = parseLocaleFile(arSrc).filter(e => e.kind === "string" || e.kind === "function");
+  const arAll = parseLocaleFile(arSrc);
+  const arEntries = translatable(arAll);
+  const skippedRefs = arAll.length - arEntries.length;
+  if (skippedRefs > 0) logInfo(`  ${rel}: skipping ${skippedRefs} code-reference entries`);
   const enEntries = existsSync(enPath) ? parseLocaleFile(readFileSync(enPath, "utf-8")) : [];
-  const enMap = new Map(enEntries.map(e => [e.key, e]));
+  const enMap = new Map(translatable(enEntries).map(e => [e.key, e]));
 
   /** Process one chunk sequentially — model calls are deliberately serialized
    *  to avoid hammering the local gateway. */
@@ -890,6 +918,9 @@ function printHelp(): void {
     "Options:",
     "  --all                Process every leaf file under shared/locale/ar",
     "  --list               Only list matching files (no API calls)",
+    "  --resume             With --out-dir of a previous run: skip files that",
+    "                       already have an error-free report; re-run only the",
+    "                       missing/failed ones. Safe after interrupted runs.",
     "  --out-dir <dir>      Report directory (default scratch/locale-ar/<timestamp>)",
     "  --model <id>         Model id (default " + DEFAULT_MODEL + ")",
     "  --help, -h           Show this help",
@@ -918,11 +949,13 @@ interface RunCtx {
 
 /** Keep files that have at least one translatable entry (aggregator modules
  *  with only re-exports are reported and skipped). */
+/** Keep only leaf files that have at least one translatable entry (aggregator
+ *  modules contain only references and report zero). */
 function collectLeaves(files: string[]): string[] {
   const leaves: string[] = [];
   for (const f of files) {
     const entries = parseLocaleFile(readFileSync(f, "utf-8"));
-    if (entries.length === 0) {
+    if (translatable(entries).length === 0) {
       logWarning(`skip (no translatable entries): ${f}`);
     } else {
       leaves.push(f);
@@ -994,12 +1027,32 @@ function sumTotals(perFile: FileOutcome[]): Record<EntryStatus, number> {
   return totals;
 }
 
+/**
+ * Whether a leaf still needs processing under `--resume`: true when no report
+ * exists yet or the existing report carries any `error` entries (transient
+ * gateway failures). Reports with `invalid` entries count as DONE — those are
+ * review signals, not failures, and re-running would just churn cost.
+ */
+function needsRerun(reportPath: string): boolean {
+  if (!existsSync(reportPath)) return true;
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(reportPath, "utf-8"));
+    if (!isStringKeyedObject(parsed)) return true;
+    const stats: unknown = parsed.stats;
+    if (!isStringKeyedObject(stats)) return true;
+    return typeof stats.error !== "number" || stats.error > 0;
+  } catch {
+    return true;
+  }
+}
+
 async function main(): Promise<number> {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: {
       all: { type: "boolean", default: false },
       list: { type: "boolean", default: false },
+      resume: { type: "boolean", default: false },
       "out-dir": { type: "string" },
       model: { type: "string" },
       help: { type: "boolean", short: "h", default: false },
@@ -1026,7 +1079,17 @@ async function main(): Promise<number> {
   }
 
   const ctx = buildRunCtx(values.model, values["out-dir"], leaves.length);
-  const outcomes = await runAllFiles(leaves, ctx);
+  let toRun = leaves;
+  if (values.resume) {
+    toRun = leaves.filter(f => needsRerun(join(ctx.absOut, relative(resolve(AR_ROOT), f).replace(/\.ts$/, ".json"))));
+    logInfo(`resume: ${leaves.length - toRun.length} already done, ${toRun.length} to process`);
+    if (toRun.length === 0) {
+      logSuccess("Nothing to do — every leaf has a clean report.");
+      return 0;
+    }
+  }
+  ctx.total = toRun.length;
+  const outcomes = await runAllFiles(toRun, ctx);
   const perFile = outcomes.filter(r => r !== null);
   const totals = sumTotals(perFile);
 

@@ -1,6 +1,8 @@
 export interface CreditAdjustmentLabels {
   readonly title: string;
   readonly adjustCredits: string;
+  /** One-line explainer under the adjust-form page title. */
+  readonly adjustCreditsSubtitle: string;
   readonly adjustmentType: {
     readonly title: string;
     readonly add: string;
@@ -12,6 +14,8 @@ export interface CreditAdjustmentLabels {
   };
   readonly carryover: {
     readonly bannerTitle: string;
+    /** Explainer caption under the banner title clarifying what a carryover does. */
+    readonly bannerCaption: string;
     readonly teacher: string;
     readonly fromDate: string;
     readonly toDate: string;

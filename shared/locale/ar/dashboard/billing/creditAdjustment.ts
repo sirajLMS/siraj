@@ -3,6 +3,7 @@ import type { CreditAdjustmentLabels } from "@/shared/locale/types/dashboard/bil
 export const dashboardBillingCreditAdjustmentAr: CreditAdjustmentLabels = {
   title: "رصيد الطلاب",
   adjustCredits: "تعديل الرصيد",
+  adjustCreditsSubtitle: "تعديل أرصدة الطلاب وإدارة التزامات الترحيل.",
   adjustmentType: {
     title: "نوع التعديل",
     add: "إضافة",
@@ -14,6 +15,7 @@ export const dashboardBillingCreditAdjustmentAr: CreditAdjustmentLabels = {
   },
   carryover: {
     bannerTitle: "الترحيل — تخصيص للمعلم",
+    bannerCaption: "الساعات المخصومة تتوقف عن الاحتساب لهذا الطالب؛ ويُستحق للمعلم قيمتها مع دفعة بحلول تاريخ الدفع.",
     teacher: "المعلم",
     fromDate: "من تاريخ",
     toDate: "إلى تاريخ",

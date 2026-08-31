@@ -123,6 +123,7 @@ function buildAdjustmentResult(overrides: Partial<CreditAdjustmentReturnType> = 
     carryoverFromDate: "2026-08-01",
     carryoverToDate: "2026-08-14",
     carryoverPaymentDate: "2026-08-15",
+    internalNotes: "quarterly audit note",
     ...overrides,
   };
 }
@@ -133,6 +134,7 @@ function buildCarryoverInput(): CreditAdjustmentInput {
     adjustmentType: CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER,
     hours: 2,
     notes: "carryover settlement",
+    internalNotes: "handover to accounting team",
     carryoverTeacherId: TEACHER_ID,
     carryoverFromDate: "2026-08-01",
     carryoverToDate: "2026-08-14",
@@ -146,6 +148,7 @@ function buildNullableOptionalInput(): CreditAdjustmentInput {
     adjustmentType: CreditAdjustmentType.ADD,
     hours: 3,
     notes: null,
+    internalNotes: null,
     carryoverTeacherId: null,
     carryoverFromDate: null,
     carryoverToDate: null,
@@ -200,6 +203,7 @@ describe("recordCreditAdjustment mutation", () => {
     expect(data.carryoverFromDate).toBe("2026-08-01");
     expect(data.carryoverToDate).toBe("2026-08-14");
     expect(data.carryoverPaymentDate).toBe("2026-08-15");
+    expect(data.internalNotes).toBe("quarterly audit note");
 
     expect(recordAdjustmentCalls).toHaveLength(1);
     const call = recordAdjustmentCalls[0];

@@ -3,6 +3,7 @@ import type { CreditAdjustmentLabels } from "@/shared/locale/types/dashboard/bil
 export const dashboardBillingCreditAdjustmentEn: CreditAdjustmentLabels = {
   title: "Student Credits",
   adjustCredits: "Adjust Credits",
+  adjustCreditsSubtitle: "Modify student balances and manage carryover obligations.",
   adjustmentType: {
     title: "Adjustment Type",
     add: "Add",
@@ -14,6 +15,8 @@ export const dashboardBillingCreditAdjustmentEn: CreditAdjustmentLabels = {
   },
   carryover: {
     bannerTitle: "Carryover — allocate to teacher",
+    bannerCaption:
+      "Deducted hours stop counting for this student; the teacher is owed their value and a payout by the payment date.",
     teacher: "Teacher",
     fromDate: "From Date",
     toDate: "To Date",

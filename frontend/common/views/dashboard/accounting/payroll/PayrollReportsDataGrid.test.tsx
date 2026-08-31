@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import type { PayrollReportRow } from "@/frontend/common/views/dashboard/accounting/payroll/usePayrollReportsViewModel";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 
 // This suite lives next to the component it covers, so the happydom preloads
@@ -52,7 +53,7 @@ await warmNamespace(() => readTranslation(DashboardBillingPayroll, locale));
 const payrollLabels = readTranslation(DashboardBillingPayroll, locale);
 
 /** Bridges the locale status labels (literal keys) onto the generated enum keys the status chip consumes. */
-const statusLabels: Record<CalculationStatus, string> = {
+const statusLabels: Record<(typeof CalculationStatus)[keyof typeof CalculationStatus], string> = {
   [CalculationStatus.NotCalculated]: payrollLabels.status.NOT_CALCULATED,
   [CalculationStatus.Calculated]: payrollLabels.status.CALCULATED,
   [CalculationStatus.Partially]: payrollLabels.status.PARTIALLY,
@@ -104,7 +105,7 @@ const onPageChange = mock((_page: number) => {});
 const onPageSizeChange = mock((_pageSize: number) => {});
 
 interface GridRenderOptions {
-  readonly rows?: readonly unknown[];
+  readonly rows?: readonly PayrollReportRow[];
   readonly canManagePayroll?: boolean;
 }
 

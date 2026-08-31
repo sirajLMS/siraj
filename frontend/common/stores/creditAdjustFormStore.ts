@@ -16,6 +16,8 @@ interface CreditAdjustFormFields {
   readonly adjustmentType: CreditAdjustmentType;
   readonly hours: number | null;
   readonly notes: string;
+  /** Plain-text operator note; staff-only, stored verbatim (never rich text). */
+  readonly internalNotes: string;
   readonly carryoverTeacherId: string | null;
   readonly fromDate: string | null;
   readonly toDate: string | null;
@@ -34,6 +36,7 @@ export interface CreditAdjustFormState extends CreditAdjustFormFields {
   readonly setAdjustmentType: (adjustmentType: CreditAdjustmentType) => void;
   readonly setHours: (hours: number | null) => void;
   readonly setNotes: (notes: string) => void;
+  readonly setInternalNotes: (internalNotes: string) => void;
   readonly setCarryoverTeacherId: (carryoverTeacherId: string | null) => void;
   readonly setFromDate: (fromDate: string | null) => void;
   readonly setToDate: (toDate: string | null) => void;
@@ -52,6 +55,7 @@ function buildInitialFields(): CreditAdjustFormFields {
     adjustmentType: CreditAdjustmentType.ADD,
     hours: null,
     notes: "",
+    internalNotes: "",
     carryoverTeacherId: null,
     fromDate: null,
     toDate: null,
@@ -74,6 +78,7 @@ export const useCreditAdjustFormStore = create<CreditAdjustFormState>(set => ({
   setAdjustmentType: adjustmentType => set({ adjustmentType }),
   setHours: hours => set({ hours }),
   setNotes: notes => set({ notes }),
+  setInternalNotes: internalNotes => set({ internalNotes }),
   setCarryoverTeacherId: carryoverTeacherId => set({ carryoverTeacherId }),
   setFromDate: fromDate => set({ fromDate }),
   setToDate: toDate => set({ toDate }),

@@ -153,6 +153,7 @@ function preselectedStudentMock(studentId: string): MockLink.MockedResponse {
         },
       },
     },
+    maxUsageCount: Number.POSITIVE_INFINITY,
   };
 }
 
@@ -170,9 +171,24 @@ function adjustmentResult(input: CreditAdjustmentInput) {
     carryoverToDate: input.carryoverToDate ?? null,
     carryoverPaymentDate: input.carryoverPaymentDate ?? null,
     notes: input.notes ?? "",
+    internalNotes: input.internalNotes ?? null,
     creditedByUserId: "admin-1",
     createdAt: "2026-08-29T00:00:00.000Z",
     updatedAt: "2026-08-29T00:00:00.000Z",
+  };
+}
+
+function domainErrorMock(input: CreditAdjustmentInput, code: string, message: string): MockLink.MockedResponse {
+  return {
+    request: { query: recordCreditAdjustmentMutationDocument, variables: { input } },
+    result: () => {
+      mutationCalls += 1;
+      return {
+        data: { recordCreditAdjustment: null },
+        errors: [new GraphQLError(message, { extensions: { code } })],
+      };
+    },
+    maxUsageCount: Number.POSITIVE_INFINITY,
   };
 }
 
@@ -227,6 +243,8 @@ const addInput: CreditAdjustmentInput = {
   adjustmentType: CreditAdjustmentGqlType.Add,
   hours: 3,
   notes: NOTES_HTML,
+  // The form omits (undefined) an untouched internal note — keep parity here.
+  internalNotes: undefined,
   carryoverTeacherId: null,
   carryoverFromDate: null,
   carryoverToDate: null,
@@ -238,11 +256,21 @@ const carryoverInput: CreditAdjustmentInput = {
   adjustmentType: CreditAdjustmentGqlType.SubtractWithCarryover,
   hours: 4,
   notes: NOTES_HTML,
+  internalNotes: undefined,
   carryoverTeacherId: TEACHER_ID,
   carryoverFromDate: "2026-08-01",
   carryoverToDate: "2026-08-15",
   carryoverPaymentDate: "2026-08-20",
 };
+
+// Radio card labels include the type description in the accessible name
+// ("Add Grant bonus hours"), and a bare `^Subtract` would also match the
+// carryover card — anchor on the full "label description" pair instead.
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+function radioNamePattern(label: string, description: string): RegExp {
+  return new RegExp(`^${escapeRegExp(label)} ${escapeRegExp(description)}`);
+}
 
 // Happy DOM cannot compute visual styles, so the color-contrast rule stays
 // incomplete there; it is excluded and contrast is covered by the theme tokens.
@@ -257,10 +285,21 @@ describe("credit adjust form (component)", () => {
 
     expect(screen.queryByText(credits.carryover.bannerTitle)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("radio", { name: credits.adjustmentType.subtractWithCarryover }));
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(
+          credits.adjustmentType.subtractWithCarryover,
+          credits.adjustmentType.subtractWithCarryoverDescription
+        ),
+      })
+    );
     expect(await screen.findByText(credits.carryover.bannerTitle)).toBeVisible();
 
-    fireEvent.click(screen.getByRole("radio", { name: credits.adjustmentType.subtract }));
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(credits.adjustmentType.subtract, credits.adjustmentType.subtractDescription),
+      })
+    );
     await waitFor(() => {
       expect(screen.queryByText(credits.carryover.bannerTitle)).not.toBeInTheDocument();
     });
@@ -269,7 +308,14 @@ describe("credit adjust form (component)", () => {
   test("switching back to Add clears the carryover fields from the store (E3)", async () => {
     renderWithWrapper(<CreditAdjustForm studentId={null} />, { locale, mocks: [studentDirectoryMock, teachersMock] });
 
-    fireEvent.click(screen.getByRole("radio", { name: credits.adjustmentType.subtractWithCarryover }));
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(
+          credits.adjustmentType.subtractWithCarryover,
+          credits.adjustmentType.subtractWithCarryoverDescription
+        ),
+      })
+    );
     expect(await screen.findByText(credits.carryover.bannerTitle)).toBeVisible();
 
     await act(async () => {
@@ -281,7 +327,11 @@ describe("credit adjust form (component)", () => {
       });
     });
 
-    fireEvent.click(screen.getByRole("radio", { name: credits.adjustmentType.add }));
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(credits.adjustmentType.add, credits.adjustmentType.addDescription),
+      })
+    );
 
     const state = useCreditAdjustFormStore.getState();
     expect(state.adjustmentType).toBe(CreditAdjustmentType.ADD);
@@ -297,7 +347,12 @@ describe("credit adjust form (component)", () => {
   test("submitting an Add sends positive hours without carryover fields and navigates back", async () => {
     renderWithWrapper(<CreditAdjustForm studentId={null} />, {
       locale,
-      mocks: [studentDirectoryMock, studentSelectionEchoMock, successfulAdjustmentMock(addInput)],
+      mocks: [
+        studentDirectoryMock,
+        studentSelectionEchoMock,
+        preselectedStudentMock(STUDENT_ID),
+        successfulAdjustmentMock(addInput),
+      ],
     });
 
     // Pick the student through the real autocomplete; hours via the number field;
@@ -324,7 +379,13 @@ describe("credit adjust form (component)", () => {
   test("submitting a carryover sends all carryover fields and names the teacher in the toast", async () => {
     renderWithWrapper(<CreditAdjustForm studentId={null} />, {
       locale,
-      mocks: [studentDirectoryMock, teachersMock, teacherSelectionEchoMock, successfulAdjustmentMock(carryoverInput)],
+      mocks: [
+        studentDirectoryMock,
+        teachersMock,
+        teacherSelectionEchoMock,
+        preselectedStudentMock(STUDENT_ID),
+        successfulAdjustmentMock(carryoverInput),
+      ],
     });
 
     await act(async () => {
@@ -338,7 +399,14 @@ describe("credit adjust form (component)", () => {
       });
     });
 
-    fireEvent.click(screen.getByRole("radio", { name: credits.adjustmentType.subtractWithCarryover }));
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(
+          credits.adjustmentType.subtractWithCarryover,
+          credits.adjustmentType.subtractWithCarryoverDescription
+        ),
+      })
+    );
     expect(await screen.findByText(credits.carryover.bannerTitle)).toBeVisible();
 
     // The teacher is picked through the real autocomplete so the result cache
@@ -362,10 +430,17 @@ describe("credit adjust form (component)", () => {
   test("fromDate after toDate blocks submission with the inline range error (AC-4.3)", async () => {
     renderWithWrapper(<CreditAdjustForm studentId={null} />, {
       locale,
-      mocks: [studentDirectoryMock, teachersMock],
+      mocks: [studentDirectoryMock, teachersMock, preselectedStudentMock(STUDENT_ID)],
     });
 
-    fireEvent.click(screen.getByRole("radio", { name: credits.adjustmentType.subtractWithCarryover }));
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(
+          credits.adjustmentType.subtractWithCarryover,
+          credits.adjustmentType.subtractWithCarryoverDescription
+        ),
+      })
+    );
     expect(await screen.findByText(credits.carryover.bannerTitle)).toBeVisible();
 
     await act(async () => {
@@ -391,7 +466,7 @@ describe("credit adjust form (component)", () => {
   test("a double click submits exactly one mutation", async () => {
     renderWithWrapper(<CreditAdjustForm studentId={null} />, {
       locale,
-      mocks: [studentDirectoryMock, successfulAdjustmentMock(addInput)],
+      mocks: [studentDirectoryMock, preselectedStudentMock(STUDENT_ID), successfulAdjustmentMock(addInput)],
     });
 
     await act(async () => {
@@ -411,7 +486,7 @@ describe("credit adjust form (component)", () => {
   test("INSUFFICIENT_CLASSES surfaces as an inline hours error without navigating", async () => {
     renderWithWrapper(<CreditAdjustForm studentId={null} />, {
       locale,
-      mocks: [studentDirectoryMock, insufficientClassesMock(addInput)],
+      mocks: [studentDirectoryMock, preselectedStudentMock(STUDENT_ID), insufficientClassesMock(addInput)],
     });
 
     await act(async () => {
@@ -431,7 +506,7 @@ describe("credit adjust form (component)", () => {
   test("a whitespace-only rich-text reason is rejected before submitting", async () => {
     renderWithWrapper(<CreditAdjustForm studentId={null} />, {
       locale,
-      mocks: [studentDirectoryMock],
+      mocks: [studentDirectoryMock, preselectedStudentMock(STUDENT_ID)],
     });
 
     // TipTap stores a lone space as markup; the required check must strip it.
@@ -458,7 +533,7 @@ describe("credit adjust form (component)", () => {
         <CreditAdjustForm studentId={null} />
         <ClientProbe />
       </>,
-      { locale, mocks: [studentDirectoryMock, successfulAdjustmentMock(addInput)] }
+      { locale, mocks: [studentDirectoryMock, preselectedStudentMock(STUDENT_ID), successfulAdjustmentMock(addInput)] }
     );
 
     const client = capturedClient;
@@ -507,9 +582,148 @@ describe("credit adjust form (component)", () => {
       mocks: [studentDirectoryMock, teachersMock],
     });
 
-    fireEvent.click(screen.getByRole("radio", { name: credits.adjustmentType.subtractWithCarryover }));
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(
+          credits.adjustmentType.subtractWithCarryover,
+          credits.adjustmentType.subtractWithCarryoverDescription
+        ),
+      })
+    );
     expect(await screen.findByText(credits.carryover.bannerTitle)).toBeVisible();
 
     await expectNoAxeViolations(container);
+  });
+
+  test("renders a one-line description under each adjustment type card", async () => {
+    renderWithWrapper(<CreditAdjustForm studentId={null} />, {
+      locale,
+      mocks: [studentDirectoryMock],
+    });
+
+    expect(await screen.findByText(credits.adjustmentType.addDescription)).toBeVisible();
+    expect(screen.getByText(credits.adjustmentType.subtractDescription)).toBeVisible();
+    expect(screen.getByText(credits.adjustmentType.subtractWithCarryoverDescription)).toBeVisible();
+  });
+
+  test("the live balance preview renders only after valid hours and tracks type + hours", async () => {
+    renderWithWrapper(<CreditAdjustForm studentId={STUDENT_ID} />, {
+      locale,
+      mocks: [studentDirectoryMock, preselectedStudentMock(STUDENT_ID)],
+    });
+
+    expect(await screen.findByText(STUDENT_NAME)).toBeVisible();
+    // Zero-state: no preview banner until hours holds a positive whole number.
+    expect(screen.queryByText(credits.preview.balance(14, 16))).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("spinbutton", { name: credits.hours.label }), { target: { value: "2" } });
+    expect(await screen.findByText(credits.preview.balance(14, 16))).toBeVisible();
+
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(credits.adjustmentType.subtract, credits.adjustmentType.subtractDescription),
+      })
+    );
+    expect(await screen.findByText(credits.preview.balance(14, 12))).toBeVisible();
+
+    // Emptying the field collapses the banner again (no stale zero-state).
+    fireEvent.change(screen.getByRole("spinbutton", { name: credits.hours.label }), { target: { value: "" } });
+    await waitFor(() => {
+      expect(screen.queryByText(credits.preview.balance(14, 12))).not.toBeInTheDocument();
+    });
+  });
+
+  test("the summary strip mirrors the current store state for every type", async () => {
+    renderWithWrapper(<CreditAdjustForm studentId={STUDENT_ID} />, {
+      locale,
+      mocks: [studentDirectoryMock, teachersMock, preselectedStudentMock(STUDENT_ID)],
+    });
+
+    expect(await screen.findByText(STUDENT_NAME)).toBeVisible();
+    await act(async () => {
+      useCreditAdjustFormStore.setState({ hours: 2 });
+    });
+    expect(await screen.findByText(credits.summary.add(2, STUDENT_NAME))).toBeVisible();
+
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(credits.adjustmentType.subtract, credits.adjustmentType.subtractDescription),
+      })
+    );
+    expect(await screen.findByText(credits.summary.subtract(2, STUDENT_NAME))).toBeVisible();
+
+    fireEvent.click(
+      screen.getByRole("radio", {
+        name: radioNamePattern(
+          credits.adjustmentType.subtractWithCarryover,
+          credits.adjustmentType.subtractWithCarryoverDescription
+        ),
+      })
+    );
+    // The carryover wording needs the teacher name from the picker cache plus
+    // a payment date; before both resolve it falls back to the subtraction.
+    expect(await screen.findByText(credits.carryover.bannerTitle)).toBeVisible();
+    act(() => {
+      useUserAutocompleteStore
+        .getState()
+        .setResults("teacher", "seeded", [{ id: TEACHER_ID, name: TEACHER_NAME, avatarUrl: null }]);
+    });
+    await act(async () => {
+      useCreditAdjustFormStore.setState({ carryoverTeacherId: TEACHER_ID, paymentDate: "2026-08-20" });
+    });
+    expect(await screen.findByText(credits.summary.carryover(2, TEACHER_NAME, "2026-08-20"))).toBeVisible();
+  });
+
+  test("internal notes travel with the mutation input when filled", async () => {
+    const input: CreditAdjustmentInput = { ...addInput, internalNotes: "Operator note" };
+    renderWithWrapper(<CreditAdjustForm studentId={null} />, {
+      locale,
+      mocks: [studentDirectoryMock, preselectedStudentMock(STUDENT_ID), successfulAdjustmentMock(input)],
+    });
+
+    await act(async () => {
+      useCreditAdjustFormStore.setState({
+        studentId: STUDENT_ID,
+        adjustmentType: CreditAdjustmentType.ADD,
+        hours: 3,
+        notes: NOTES_HTML,
+      });
+    });
+    // The plain multiline field is the single writer of the store field.
+    fireEvent.change(screen.getByRole("textbox", { name: credits.form.internalNotes }), {
+      target: { value: "Operator note" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: credits.adjustCredits }));
+
+    await waitFor(() => {
+      expect(mutationCalls).toBe(1);
+      expect(mockPush).toHaveBeenCalledWith("/accounting/credits");
+    });
+  });
+
+  test("a rejected mutation renders the error band with the code and message", async () => {
+    renderWithWrapper(<CreditAdjustForm studentId={null} />, {
+      locale,
+      mocks: [
+        studentDirectoryMock,
+        preselectedStudentMock(STUDENT_ID),
+        domainErrorMock(addInput, "VALIDATION", "Hours exceed the package cap"),
+      ],
+    });
+
+    await act(async () => {
+      seedAddDraft();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: credits.adjustCredits }));
+
+    await waitFor(() => {
+      expect(mutationCalls).toBe(1);
+    });
+    expect(await screen.findByText("VALIDATION")).toBeVisible();
+    expect(screen.getByText("Hours exceed the package cap")).toBeVisible();
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(showNotification).not.toHaveBeenCalled();
   });
 });

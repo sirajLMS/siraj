@@ -1384,6 +1384,7 @@ input CreditAdjustmentInput {
   carryoverTeacherId: ID
   carryoverToDate: String
   hours: Int!
+  internalNotes: String
   notes: String
   studentId: ID!
 }
@@ -1404,6 +1405,7 @@ type CreditAdjustmentResult {
   creditedByUserId: String
   id: String
   idempotencyKey: String
+  internalNotes: String
   notes: String
   reason: CreditReason
   sourcePaymentId: String
@@ -1441,6 +1443,7 @@ type CreditPurchaseResult {
   creditedByUserId: String
   id: String
   idempotencyKey: String
+  internalNotes: String
   notes: String
   reason: CreditReason
   sourcePaymentId: String
@@ -1474,6 +1477,7 @@ type CreditTransaction {
   creditedByUserId: String
   id: String
   idempotencyKey: String
+  internalNotes: String
   notes: String
   reason: CreditReason
   sourcePaymentId: String

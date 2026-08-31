@@ -117,6 +117,8 @@ const E2E_WARMUP_ROUTES = [
   "/lesson-reports",
   "/billing-profile",
   "/teachers/onboarding",
+  "/accounting/credits",
+  "/accounting/credits/adjust",
 ] as const;
 
 async function warmUpRouteBatches(

@@ -801,4 +801,66 @@ describe("CreditService.recordAdjustment", () => {
       });
     }
   });
+
+  describe("internalNotes", () => {
+    test("persists the trimmed internal note and returns it on the adjustment row", async () => {
+      const result = await recordAdjustment(buildAddInput({ internalNotes: "  quarterly correction (AUD-41)  " }));
+
+      expect(adjustmentInserts[0]?.internalNotes).toBe("quarterly correction (AUD-41)");
+      expect(result.internalNotes).toBe("quarterly correction (AUD-41)");
+    });
+
+    test("persists NULL when the internal note is omitted or whitespace-only", async () => {
+      const omitted = await recordAdjustment(buildAddInput());
+      await recordAdjustment(buildSubtractInput({ internalNotes: "   " }));
+
+      expect(adjustmentInserts[0]?.internalNotes).toBeNull();
+      expect(adjustmentInserts[1]?.internalNotes).toBeNull();
+      expect(omitted.internalNotes).toBeNull();
+    });
+
+    test("stores internal notes verbatim — no rich-text sanitization (accounting-only field)", async () => {
+      const verbatim = "<b>not rendered</b> — plain text note";
+
+      await recordAdjustment(buildAddInput({ internalNotes: verbatim }));
+
+      expect(adjustmentInserts[0]?.internalNotes).toBe(verbatim);
+    });
+
+    test("accepts an internal note at exactly the length cap", async () => {
+      await recordAdjustment(buildAddInput({ internalNotes: "x".repeat(2000) }));
+
+      expect(adjustmentInserts[0]?.internalNotes).toBe("x".repeat(2000));
+    });
+
+    test("rejects an internal note above the length cap and writes nothing", async () => {
+      const error = await expectRecordError(buildAddInput({ internalNotes: "x".repeat(2001) }), "VALIDATION");
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error.message).toContain("maximum allowed length");
+      expectZeroWrites();
+    });
+
+    test("does not participate in the idempotency key — a retried submission with a changed note replays the first row", async () => {
+      const input = buildAddInput({ internalNotes: "first internal note" });
+
+      const first = await recordAdjustment(input);
+      expect(createAdjustmentMock).toHaveBeenCalledTimes(1);
+
+      const firstRow = createdRows[0];
+      if (!firstRow) throw new Error("expected the first insert to produce a ledger row");
+      findByIdempotencyKeysMock.mockImplementation(async (keys: string[], tx?: unknown) => {
+        idempotencyLookups.push({ keys: [...keys], insideTransaction: tx !== undefined });
+        return [firstRow];
+      });
+
+      const second = await recordAdjustment({ ...input, internalNotes: "changed internal note" });
+
+      expect(second.id).toBe(first.id);
+      expect(second.internalNotes).toBe("first internal note");
+      expect(createAdjustmentMock).toHaveBeenCalledTimes(1);
+      // Both submissions derived the same key — the note is not key material.
+      expect(idempotencyLookups[1]?.keys[0]).toBe(idempotencyLookups[0]?.keys[0]);
+    });
+  });
 });

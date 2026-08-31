@@ -149,7 +149,8 @@ const INTERNAL_NOTES_MAX_LENGTH = 2000;
  */
 function normalizeInternalNotes(internalNotes: string | null | undefined): string | null {
   const trimmed = internalNotes?.trim();
-  return trimmed ? trimmed : null;
+  if (!trimmed) return null;
+  return trimmed;
 }
 
 async function assertTeacherExists(teacherId: string, tErrors: ErrorsLabels, tx: DBTransaction): Promise<void> {

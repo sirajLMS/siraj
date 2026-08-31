@@ -1,8 +1,9 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
 import type { BrowserContext, Locator, Page } from "playwright";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { getDefaultTranslations } from "@/shared/locale/server";
+import { getTestBaseUrl } from "@/test/helpers";
 import {
   closeE2eSession,
   DEMO_USERS,
@@ -90,6 +91,14 @@ interface StudentTarget {
  * Picks a directory row whose student name appears exactly once. Concurrent
  * test suites leak identically-named fixture students into the directory; an
  * ambiguous name makes row-scoped assertions attach to the wrong twin.
+ *
+ * Selection rotates across the unique candidates on purpose: the server-side
+ * idempotency key is (actor, studentId, type, hours, carryover teacher/dates)
+ * — see the flow test — and hours rotate only over 30 per-minute values.
+ * Always taking the FIRST unique row replays an earlier same-day run's key on
+ * rollover, returning the old ledger row with no balance change and hanging
+ * the post-submit balance verification. The minute-derived index spreads runs
+ * across candidates without needing randomness (sonarjs/pseudo-random).
  */
 async function pickUniqueStudent(p: Page): Promise<StudentTarget> {
   const rows = p.locator(".MuiDataGrid-row");
@@ -99,10 +108,9 @@ async function pickUniqueStudent(p: Page): Promise<StudentTarget> {
   );
   const seen = new Map<string, number>();
   for (const name of names) seen.set(name, (seen.get(name) ?? 0) + 1);
-  const uniqueName = names.find(name => name.length > 0 && seen.get(name) === 1);
-  // Degenerate environment: every visible name is duplicated — fall back to
-  // the first row rather than skipping the whole flow.
-  const studentName = uniqueName ?? names[0] ?? "";
+  const candidates = names.filter(name => name.length > 0 && seen.get(name) === 1);
+  const rotatingIndex = Math.floor(Date.now() / 60_000) % Math.max(candidates.length, 1);
+  const studentName = candidates.length > 0 ? (candidates[rotatingIndex] ?? "") : (names[0] ?? "");
   expect(studentName.length).toBeGreaterThan(0);
   const row = rows.filter({ hasText: studentName }).first();
   const balance = parseBalance(await row.locator(".MuiChip-label").first().textContent());
@@ -255,9 +263,21 @@ async function loginAtRoute(groupSlug: string, route: string): Promise<Page> {
 
 /** Best-effort context dump when the multi-step flow fails mid-way. */
 async function dumpFlowDiagnostics(p: Page, step: string): Promise<void> {
-  const chips = await p.locator(".MuiChip-label").allTextContents();
-  const snackbars = await p.locator(".MuiSnackbar-root, .MuiAlert-root, [role='alert']").allTextContents();
-  const body = await p.locator("body").innerText();
+  // Each read is individually guarded: this runs from catch blocks where the page
+  // is often mid-navigation (e.g. post-submit redirect), and an unguarded
+  // locator read would throw "Execution context was destroyed" and mask the
+  // original assertion failure.
+  const readTexts = (selector: string): Promise<string[]> =>
+    p
+      .locator(selector)
+      .allTextContents()
+      .catch(() => ["<unavailable: page navigating>"]);
+  const chips = await readTexts(".MuiChip-label");
+  const snackbars = await readTexts(".MuiSnackbar-root, .MuiAlert-root, [role='alert']");
+  const body = await p
+    .locator("body")
+    .innerText()
+    .catch(() => "<unavailable: page navigating>");
   await p.screenshot({ path: `scratch/screenshots/credit-adjustment-failure-${step}.png` }).catch(() => undefined);
   testLogger.error("credit-adjustment e2e flow failed", {
     step,
@@ -270,6 +290,30 @@ async function dumpFlowDiagnostics(p: Page, step: string): Promise<void> {
 }
 
 describe.serial("Accounting Credits E2E", () => {
+  beforeAll(async () => {
+    // Dev-mode first-visit Turbopack compile of the credits route tree can
+    // exceed the per-assertion `devWaitTimeout` — especially while a concurrent
+    // workstream edits the accounting sources (invalidating the compile cache)
+    // and the runner spawn skips E2E_WARMUP_ROUTES on file-scoped invocations.
+    // One readiness fetch per route pre-compiles both up front (unauthenticated
+    // requests redirect to /login but still compile the route tree). No fixed
+    // sleep: each fetch waits on a real HTTP response.
+    if (process.env.TEST_SERVER_MODE === "production") return;
+    await Promise.all(
+      [CREDITS_PATH, ADJUST_PATH].map(route =>
+        fetch(`${getTestBaseUrl()}${route}`, {
+          redirect: "follow",
+          signal: AbortSignal.timeout(240_000),
+        }).catch(error => {
+          testLogger.warn("credits route pre-warm failed (assertions still apply)", {
+            route,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        })
+      )
+    );
+  }, 500_000);
+
   test("snapshot files exist for both locales (EN + AR)", () => {
     // 3.6 acceptance: the compile-time snapshots the client loader fetches at runtime.
     expect(existsSync("public/static/locale-snapshots/en/dashboard.billing.creditAdjustment.json")).toBe(true);
@@ -278,16 +322,20 @@ describe.serial("Accounting Credits E2E", () => {
 
   test("operator with permission: list renders, rows actionable, sidebar item present (AC-1.1, AC-1.3, AC-1.6)", async () => {
     const p = await loginAtRoute(DEMO_USERS.academyAdmin.groupSlug, CREDITS_PATH);
+    try {
+      await p.getByText(CREDITS_TITLE).first().waitFor({ state: "visible", timeout: devWaitTimeout });
+      const headerAction = p.getByRole("link", { name: ADJUST_BUTTON }).first();
+      await headerAction.waitFor({ state: "attached", timeout: devWaitTimeout });
+      const firstRow = p.locator(".MuiDataGrid-row").first();
+      await firstRow.waitFor({ state: "visible", timeout: devWaitTimeout });
+      expect(await firstRow.getByRole("button", { name: ADJUST_BUTTON }).count()).toBeGreaterThan(0);
 
-    await p.getByText(CREDITS_TITLE).first().waitFor({ state: "visible", timeout: devWaitTimeout });
-    const headerAction = p.getByRole("link", { name: ADJUST_BUTTON }).first();
-    await headerAction.waitFor({ state: "attached", timeout: devWaitTimeout });
-    const firstRow = p.locator(".MuiDataGrid-row").first();
-    await firstRow.waitFor({ state: "visible", timeout: devWaitTimeout });
-    expect(await firstRow.getByRole("button", { name: ADJUST_BUTTON }).count()).toBeGreaterThan(0);
-
-    const creditsLink = p.getByRole("link", { name: CREDITS_NAV_LINK }).first();
-    await creditsLink.waitFor({ state: "visible", timeout: devWaitTimeout });
+      const creditsLink = p.getByRole("link", { name: CREDITS_NAV_LINK }).first();
+      await creditsLink.waitFor({ state: "visible", timeout: devWaitTimeout });
+    } catch (error) {
+      await dumpFlowDiagnostics(p, "list-render");
+      throw error;
+    }
   });
 
   test("user without permission: redirected away and sidebar item hidden (AC-1.2, AC-1.6)", async () => {

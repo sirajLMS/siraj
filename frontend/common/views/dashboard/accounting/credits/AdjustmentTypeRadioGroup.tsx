@@ -132,10 +132,11 @@ function parseAdjustmentType(value: string): CreditAdjustmentType | null {
 interface AdjustmentTypeOptionCardProps {
   readonly config: AdjustmentTypeOptionConfig;
   readonly label: string;
+  readonly description: string;
   readonly selected: boolean;
 }
 
-function AdjustmentTypeOptionCard({ config, label, selected }: AdjustmentTypeOptionCardProps) {
+function AdjustmentTypeOptionCard({ config, label, description, selected }: AdjustmentTypeOptionCardProps) {
   const theme = useTheme();
   const tones = ACCENT_TONES[config.accent](theme);
   return (
@@ -159,15 +160,32 @@ function AdjustmentTypeOptionCard({ config, label, selected }: AdjustmentTypeOpt
           <Stack aria-hidden sx={buildIconBadgeSx(tones)}>
             {config.icon}
           </Stack>
-          <Typography
-            sx={{
-              fontWeight: 600,
-              lineHeight: 1.3,
-              color: selected ? tones.onContainer : theme.palette.onSurface,
-            }}
-          >
-            {label}
-          </Typography>
+          <Stack sx={{ minWidth: 0, gap: 0.25 }}>
+            <Typography
+              sx={{
+                fontWeight: 600,
+                lineHeight: 1.3,
+                color: selected ? tones.onContainer : theme.palette.onSurface,
+              }}
+            >
+              {label}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: 12,
+                lineHeight: 1.4,
+                color: selected ? tones.onContainer : theme.palette.text.secondary,
+                // One short guidance line per type; clamp so a long
+                // translation can't unbalance the card row on narrow widths.
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 2,
+                overflow: "hidden",
+              }}
+            >
+              {description}
+            </Typography>
+          </Stack>
         </Stack>
       }
       sx={buildCardSx(theme, tones, selected)}
@@ -211,6 +229,12 @@ export function AdjustmentTypeRadioGroup({ sectionTitle }: AdjustmentTypeRadioGr
     [CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER]: labels.adjustmentType.subtractWithCarryover,
   };
 
+  const descriptionByType: Record<CreditAdjustmentType, string> = {
+    [CreditAdjustmentType.ADD]: labels.adjustmentType.addDescription,
+    [CreditAdjustmentType.SUBTRACT]: labels.adjustmentType.subtractDescription,
+    [CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER]: labels.adjustmentType.subtractWithCarryoverDescription,
+  };
+
   const handleChange = (_event: ChangeEvent<HTMLInputElement>, value: string) => {
     const next = parseAdjustmentType(value);
     if (next === null) return;
@@ -246,6 +270,7 @@ export function AdjustmentTypeRadioGroup({ sectionTitle }: AdjustmentTypeRadioGr
             key={option.value}
             config={option}
             label={labelByType[option.value]}
+            description={descriptionByType[option.value]}
             selected={option.value === adjustmentType}
           />
         ))}

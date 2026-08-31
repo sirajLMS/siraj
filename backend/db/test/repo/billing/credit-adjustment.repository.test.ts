@@ -54,6 +54,7 @@ function expectAdjustmentDefaults(row: CreditTransactionSelectType, input: Credi
   expect(row.idempotencyKey).toBe(input.idempotencyKey);
   expect(row.sourcePaymentId).toBeNull();
   expect(row.classInstanceId).toBeNull();
+  expect(row.internalNotes).toBe(input.internalNotes ?? null);
 }
 
 describe("CreditRepository.createAdjustment", () => {
@@ -130,6 +131,26 @@ describe("CreditRepository.createAdjustment", () => {
 
       expect(emptyNotes.notes).toBe("");
       expect(unicode.notes).toBe(unicodeNotes);
+    });
+  });
+
+  test("stores internal notes verbatim (unsanitized); omitted internal notes default to null", async () => {
+    await runInRollback(async tx => {
+      const fixture = await setupAdjustmentFixture(tx);
+      // Markup must pass through untouched: internalNotes is accounting-only
+      // plain text and does not flow through the rich-text sanitizer.
+      const markupNote = "<b>audit ref</b> AUD-41 — correction per teacher dispute";
+      const input = buildAdjustmentInput(fixture, { internalNotes: markupNote });
+
+      const row = await CreditRepository.createAdjustment(tx, input);
+      const persisted = await fetchPersistedRow(tx, row.id);
+
+      expectAdjustmentDefaults(persisted, input);
+      expect(persisted.internalNotes).toBe(markupNote);
+
+      const plainRow = await CreditRepository.createAdjustment(tx, buildAdjustmentInput(fixture));
+      const plainPersisted = await fetchPersistedRow(tx, plainRow.id);
+      expect(plainPersisted.internalNotes).toBeNull();
     });
   });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import SwapHorizOutlinedIcon from "@mui/icons-material/SwapHorizOutlined";
-import { Alert, AlertTitle, Box } from "@mui/material";
+import { Alert, AlertTitle, Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { addDays } from "date-fns";
 import { useState } from "react";
@@ -102,6 +102,16 @@ export function CarryoverBanner({ errors }: Readonly<CarryoverBannerProps>) {
       })}
     >
       <AlertTitle>{t.carryover.bannerTitle}</AlertTitle>
+      <Typography
+        variant="caption"
+        sx={theme => ({
+          // Keep the caption visually subordinate to the banner title while
+          // staying on the contrast-safe on-container tone.
+          color: alpha(theme.palette.onSuccessContainer, 0.85),
+        })}
+      >
+        {t.carryover.bannerCaption}
+      </Typography>
       <Box sx={FIELDS_GRID_SX}>
         <Box sx={TEACHER_FIELD_SX}>
           <TeacherAutocomplete

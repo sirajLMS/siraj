@@ -21,6 +21,7 @@ export const recordCreditAdjustmentMutationDocument: TypedDocumentNode<
       carryoverToDate
       carryoverPaymentDate
       notes
+      internalNotes
       creditedByUserId
       createdAt
       updatedAt
