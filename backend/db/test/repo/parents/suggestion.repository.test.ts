@@ -177,6 +177,40 @@ async function verifyRollback(
   }
 }
 
+describe("SuggestionRepository — insertManySuggestions", () => {
+  suggestionTest("inserts multiple suggestions in a batch", async tx => {
+    const { parent } = await setupParentForSuggestion(tx, "Batch15");
+
+    const inputs = [
+      {
+        parentId: parent.id,
+        submitterName: "Batch Parent 1",
+        body: "First batch suggestion",
+        status: SuggestionStatus.PENDING,
+      },
+      {
+        parentId: parent.id,
+        submitterName: "Batch Parent 2",
+        body: "Second batch suggestion",
+        status: SuggestionStatus.PENDING,
+      },
+    ];
+
+    const results = await SuggestionRepository.insertManySuggestions(inputs, tx);
+
+    expect(results).toHaveLength(2);
+    expect(results[0].parentId).toBe(parent.id);
+    expect(results[0].body).toBe("First batch suggestion");
+    expect(results[1].parentId).toBe(parent.id);
+    expect(results[1].body).toBe("Second batch suggestion");
+  });
+
+  suggestionTest("returns empty array when inputs array is empty", async tx => {
+    const results = await SuggestionRepository.insertManySuggestions([], tx);
+    expect(results).toEqual([]);
+  });
+});
+
 describe("SuggestionRepository — submitSuggestion", () => {
   suggestionTest("creates a suggestion record with valid input", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "Submit15");

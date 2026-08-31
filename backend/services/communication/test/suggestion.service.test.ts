@@ -160,6 +160,7 @@ describe("SuggestionService", () => {
   let softDeleteSuggestionSpy: ReturnType<typeof spyOn>;
   let submitSuggestionRepoSpy: ReturnType<typeof spyOn>;
   let findSafeByIdSpy: ReturnType<typeof spyOn>;
+  let insertManySuggestionsSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
     hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
@@ -190,6 +191,7 @@ describe("SuggestionService", () => {
     submitSuggestionRepoSpy = spyOn(SuggestionRepository, "submitSuggestion").mockResolvedValue(mockSuggestionSelect);
     // Default: submitter user has an email — recipient resolution stamps `to`.
     findSafeByIdSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser("submitter-uuid"));
+    insertManySuggestionsSpy = spyOn(SuggestionRepository, "insertManySuggestions").mockResolvedValue([mockSuggestionSelect]);
   });
 
   afterEach(() => {
@@ -205,6 +207,7 @@ describe("SuggestionService", () => {
     softDeleteSuggestionSpy.mockRestore();
     submitSuggestionRepoSpy.mockRestore();
     findSafeByIdSpy.mockRestore();
+    insertManySuggestionsSpy.mockRestore();
   });
 
   function mockSuggestionLookup(targetResult?: SuggestionRepository.SuggestionDetailRow | null) {
@@ -214,6 +217,25 @@ describe("SuggestionService", () => {
       return null;
     });
   }
+
+  describe("createManySuggestions", () => {
+    test("delegates batch insertion to SuggestionRepository.insertManySuggestions", async () => {
+      const inputs = [
+        {
+          parentId: MOCK_PARENT_ID,
+          submitterName: "Test Submitter",
+          body: "Suggestion 1",
+          status: SuggestionStatus.PENDING,
+        },
+      ];
+
+      const results = await SuggestionService.createManySuggestions(inputs);
+
+      expect(insertManySuggestionsSpy).toHaveBeenCalledWith(inputs);
+      expect(results).toHaveLength(1);
+      expect(results[0].id).toBe(MOCK_SUGGESTION_ID);
+    });
+  });
 
   describe("getParentSuggestions", () => {
     test("returns suggestions for authorized parent with support.view_history", async () => {

@@ -64,6 +64,27 @@ export namespace SuggestionRepository {
     return created;
   };
 
+  export const insertManySuggestions = async (inputs: SuggestionInsertInput[], tx?: DBTransaction) => {
+    if (inputs.length === 0) {
+      return [];
+    }
+    const q = queryDb(tx);
+    const now = new Date();
+    const values = inputs.map(input => ({
+      parentId: input.parentId,
+      submitterName: input.submitterName,
+      body: input.body,
+      status: input.status,
+      adminResponse: input.adminResponse ?? null,
+      reviewedByUserId: input.reviewedByUserId ?? null,
+      reviewedAt: input.reviewedAt ?? null,
+      createdAt: input.createdAt ?? now,
+    }));
+
+    const created = await q.insert(suggestions).values(values).returning();
+    return created;
+  };
+
   export const submitSuggestion = async (
     input: SuggestionSubmitInput & { parentId: string },
     tx?: DBTransaction,
