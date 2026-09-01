@@ -121,12 +121,22 @@ export namespace ParentRepository {
       .from(parents)
       .groupBy(parents.status);
 
-    return {
-      regular: metricsResult.find(m => m.status === "REGULAR")?.count ?? 0,
-      onLeave: metricsResult.find(m => m.status === "ON_LEAVE")?.count ?? 0,
-      suspended: metricsResult.find(m => m.status === "SUSPENDED")?.count ?? 0,
-      onTrial: metricsResult.find(m => m.status === "ON_TRIAL")?.count ?? 0,
+    // Performance optimization: Populate metrics object in a single O(n) loop without Map allocation or redundant Array.find scans.
+    const metrics: ParentDirectoryMetrics = {
+      regular: 0,
+      onLeave: 0,
+      suspended: 0,
+      onTrial: 0,
     };
+
+    for (const item of metricsResult) {
+      if (item.status === "REGULAR") metrics.regular = item.count;
+      else if (item.status === "ON_LEAVE") metrics.onLeave = item.count;
+      else if (item.status === "SUSPENDED") metrics.suspended = item.count;
+      else if (item.status === "ON_TRIAL") metrics.onTrial = item.count;
+    }
+
+    return metrics;
   }
 
   function buildDirectoryConditions(options: {
