@@ -15,11 +15,13 @@ import {
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
+import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { ClassSessionActionButtonMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/components/classSessionActionButton.mobile";
 
 const MOBILE_SLOTS: TeacherClassListActionSlots = {
   MeetingJoinAction: MobileMeetingJoinAction,
   ClassSessionActionButton: ClassSessionActionButtonMobile,
+  PersonProfileLink: MobilePersonProfileLink,
 };
 
 /**

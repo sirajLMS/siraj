@@ -1,7 +1,7 @@
 "use client";
 
 import { WarningAmberOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
@@ -9,11 +9,15 @@ import { studentHref } from "@/frontend/common/utils/profileHref";
 import type { StudentCreditRow } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import type { StudentCreditDataGridDesktopProps } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
 import { formatClassesLeft } from "@/frontend/common/views/dashboard/billing/utils/parentInvoiceFormatters";
-import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import {
+  DesktopAppDataGrid,
+  DesktopPersonProfileLinkCell,
+  DesktopPrimaryPageAction,
+} from "@/frontend/desktop/components/ui";
 
 const StyledWarningIcon = styled(WarningAmberOutlined)(({ theme }) => ({
   fontSize: 16,
-  color: theme.palette.error.main,
+  color: theme.palette.warning.main,
 }));
 
 export function StudentCreditDataGridDesktop({
@@ -65,11 +69,15 @@ export function StudentCreditDataGridDesktop({
           const isNegative = row.status === "negative_balance";
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, height: "100%" }}>
-              <DesktopStatusBadge
-                category="invoice"
-                status={isNegative ? "OVERDUE" : "PAID"}
-                label={formatClassesLeft(row)}
-              />
+              <Typography
+                variant="bodyMd"
+                sx={theme => ({
+                  fontWeight: isNegative ? 700 : 500,
+                  color: isNegative ? theme.palette.warning.main : theme.palette.text.primary,
+                })}
+              >
+                {formatClassesLeft(row)}
+              </Typography>
               {isNegative && <StyledWarningIcon />}
             </Box>
           );
@@ -106,8 +114,7 @@ export function StudentCreditDataGridDesktop({
           }
           const isSending = sendingReminderId === row.id;
           return (
-            <Button
-              variant="contained"
+            <DesktopPrimaryPageAction
               size="small"
               onClick={() => {
                 onSendReminder(row.id);
@@ -115,7 +122,7 @@ export function StudentCreditDataGridDesktop({
               disabled={isSending}
             >
               {isSending ? <CircularProgress size={18} color="inherit" /> : labels.sendReminder}
-            </Button>
+            </DesktopPrimaryPageAction>
           );
         },
       },

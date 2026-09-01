@@ -1,7 +1,6 @@
 "use client";
 
 import { AddCardOutlined } from "@mui/icons-material";
-import { Typography } from "@mui/material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { BillingSectionSharedProps } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import type { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
@@ -12,6 +11,7 @@ import {
   MobileFab,
   MobilePageContainer,
   MobilePageHeader,
+  MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { BillingMetricsRowMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMetricsRow.mobile";
 import { BillingMobileSearchBarMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMobileSearchBar.mobile";
@@ -70,37 +70,38 @@ export function BillingSectionMobile({
             isSearching={isSearchPending}
             onChange={onSearchChange}
           />
-          <Typography variant="titleLg">{labels.sections.invoiceHistory}</Typography>
-          {invoices.length === 0 && !listLoading ? (
-            <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.parentTable.emptySubtitle} />
-          ) : (
-            <ParentInvoicesCardListMobile
-              rows={invoices}
-              canView={canView}
-              canSubmitProof={canSubmitProof}
-              canManage={canManage}
-              billingActionsDisabled={billingActionsDisabled}
-              loading={listLoading}
-              onPayNow={onPayNow}
-              onMarkAsPaid={onMarkAsPaid}
-              onViewPaymentDetails={onViewPaymentDetails}
-              onDownloadPdf={onDownloadPdf}
-              labels={{
-                ...getParentInvoiceGridLabels(labels),
-                hasPaymentProofHint: labels.hasPaymentProofHint,
-              }}
-              paginationOptions={
-                totalCount !== undefined && onPageChange !== undefined
-                  ? buildServerPaginationOptions({
-                      page: page ?? 0,
-                      pageSize: pageSize ?? 10,
-                      totalCount,
-                      onPageChange,
-                    })
-                  : false
-              }
-            />
-          )}
+          <MobileSectionPanel title={labels.sections.invoiceHistory} contentInset={false}>
+            {invoices.length === 0 && !listLoading ? (
+              <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.parentTable.emptySubtitle} />
+            ) : (
+              <ParentInvoicesCardListMobile
+                rows={invoices}
+                canView={canView}
+                canSubmitProof={canSubmitProof}
+                canManage={canManage}
+                billingActionsDisabled={billingActionsDisabled}
+                loading={listLoading}
+                onPayNow={onPayNow}
+                onMarkAsPaid={onMarkAsPaid}
+                onViewPaymentDetails={onViewPaymentDetails}
+                onDownloadPdf={onDownloadPdf}
+                labels={{
+                  ...getParentInvoiceGridLabels(labels),
+                  hasPaymentProofHint: labels.hasPaymentProofHint,
+                }}
+                paginationOptions={
+                  totalCount !== undefined && onPageChange !== undefined
+                    ? buildServerPaginationOptions({
+                        page: page ?? 0,
+                        pageSize: pageSize ?? 10,
+                        totalCount,
+                        onPageChange,
+                      })
+                    : false
+                }
+              />
+            )}
+          </MobileSectionPanel>
         </MobileContentStack>
       </MobilePageContainer>
       {showQuickPayFab ? <MobileFab icon={<AddCardOutlined />} label={labels.quickPay} onClick={onQuickPay} /> : null}

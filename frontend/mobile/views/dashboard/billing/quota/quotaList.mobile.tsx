@@ -1,23 +1,21 @@
 "use client";
 
-import { AddOutlined, InsightsOutlined, SearchOutlined } from "@mui/icons-material";
+import { AddOutlined, InsightsOutlined } from "@mui/icons-material";
 import {
-  Button,
   Fade,
   FormControl,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   type SelectChangeEvent,
   Skeleton,
   Stack,
-  TextField,
 } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaListViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
@@ -28,6 +26,7 @@ import {
   MobileContentStack,
   MobileEmptyState,
   MobileFab,
+  MobileFilterButton,
   MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
@@ -71,22 +70,7 @@ function MobileFilterControls({
 }: Readonly<MobileFilterControlsProps>) {
   return (
     <Stack spacing={1.5}>
-      <TextField
-        size="small"
-        fullWidth
-        placeholder={t.listTitle}
-        value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+      <SearchBarField value={searchQuery} placeholder={t.listTitle} onChange={setSearchQuery} />
       <Stack direction="row" spacing={1}>
         <FormControl size="small" fullWidth>
           <InputLabel>{t.fields.status}</InputLabel>
@@ -170,9 +154,9 @@ export function QuotaListMobile(props: Readonly<QuotaListViewModel>) {
             breadcrumbs={[{ label: t.title, current: true }]}
             actions={
               <Link href="/quotas/insights" style={{ textDecoration: "none" }}>
-                <Button variant="outlined" size="small" startIcon={<InsightsOutlined />}>
+                <MobileFilterButton size="small" startIcon={<InsightsOutlined />}>
                   {t.insights}
-                </Button>
+                </MobileFilterButton>
               </Link>
             }
           />

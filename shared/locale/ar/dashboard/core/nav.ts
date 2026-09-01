@@ -5,7 +5,7 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   scheduleSearch: "بحث الجدول",
   scheduleTracking: "متابعة إعادة الجدولة",
   scheduleTrackingParent: "متابعة الجدول",
-  statusTracking: "حالة حصص الجلسات",
+  statusTracking: "حالة الحصة",
   scheduleAlerts: "التنبيهات والحصص",
   teachers: "المعلمون",
   parents: "أولياء الأمور",
@@ -119,4 +119,6 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   accountingPackages: "الباقات",
   accountingPaymentsNew: "إضافة دفعة",
   accountingPackagesNew: "إنشاء باقة",
+  accountingCredits: "الرصيد",
+  accountingPayroll: "الرواتب",
 };

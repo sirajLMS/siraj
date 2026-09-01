@@ -15,11 +15,13 @@ import {
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
+import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink";
 import { ClassSessionActionButtonDesktop } from "@/frontend/desktop/views/dashboard/schedule/alerts/components/classSessionActionButton.desktop";
 
 const DESKTOP_SLOTS: TeacherClassListActionSlots = {
   MeetingJoinAction: DesktopMeetingJoinAction,
   ClassSessionActionButton: ClassSessionActionButtonDesktop,
+  PersonProfileLink: DesktopPersonProfileLinkCell,
 };
 
 /**

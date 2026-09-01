@@ -1,8 +1,8 @@
 import type { TeacherProfileLabels } from "@/shared/locale/types/dashboard/teachers";
 
 export const dashboardTeacherProfileAr: TeacherProfileLabels = {
-  pageTitle: "تعديل الملف الشخصي للمعلم",
-  pageSubtitle: "إدارة البيانات المؤسسية والتفاصيل الإدارية لأعضاء هيئة التدريس.",
+  pageTitle: "الملف الشخصي للمعلم",
+  pageSubtitle: "عرض وتعديل بيانات المعلم",
   breadcrumbs: {
     teachers: "المعلمون",
     editProfile: "تعديل الملف الشخصي",
@@ -22,12 +22,12 @@ export const dashboardTeacherProfileAr: TeacherProfileLabels = {
     male: "ذكر",
     female: "أنثى",
     timezone: "المنطقة الزمنية",
-    address: "العنوان السكني",
+    address: "العنوان",
     baseSalary: "الراتب الأساسي",
     currency: "العملة",
     paymentMethod: "طريقة الدفع",
     accountStatus: "حالة الحساب",
-    accountStatusDesc: "منح حق الوصول إلى الأنظمة الداخلية",
+    accountStatusDesc: "حالة الحساب الحالية",
     active: "نشط",
     inactive: "غير نشط",
     displayCurrency: "عملة العرض",
@@ -38,17 +38,17 @@ export const dashboardTeacherProfileAr: TeacherProfileLabels = {
     saveProfile: "حفظ الملف الشخصي",
     discardChanges: "تجاهل التغييرات",
     lastModified: date => `آخر تعديل: ${date}`,
-    saveSuccess: "تم حفظ الملف الشخصي بنجاح",
+    saveSuccess: "تم حفظ الملف الشخصي بنجاح!",
     saveError: "فشل حفظ الملف الشخصي",
   },
   stats: {
-    totalClasses: "إجمالي الحصص المقدمة",
-    avgEngagement: "متوسط درجة التفاعل",
+    totalClasses: "إجمالي الحصص",
+    avgEngagement: "متوسط التفاعل",
   },
   validation: {
     nameRequired: "الاسم الكامل مطلوب",
     emailRequired: "البريد الإلكتروني مطلوب",
-    emailInvalid: "بريد إلكتروني غير صالح",
+    emailInvalid: "صيغة البريد الإلكتروني غير صالحة",
     timezoneRequired: "المنطقة الزمنية مطلوبة",
   },
 };

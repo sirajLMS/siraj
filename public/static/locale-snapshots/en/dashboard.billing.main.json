@@ -436,5 +436,33 @@
     "currencies": "Supported Currencies",
     "hedges": "Currency Hedges",
     "manual": "Manual Invoice"
+  },
+  "paymentsLedger": {
+    "pageTitle": "Payments Ledger",
+    "pageSubtitle": "Your payment history and purchased credit hours",
+    "historySectionTitle": "Payment History",
+    "emptyTitle": "No payments yet",
+    "emptySubtitle": "Your payment history will appear here once you make a purchase.",
+    "loadError": "Failed to load payments.",
+    "balanceSubLabel": "Credit-hours balance",
+    "lowBalanceHint": "Low balance — consider a top-up",
+    "topUpAction": "Top up",
+    "hoursRemainingValue": {
+      "__fn": "(hours) => `${hours.toFixed(2)} h`"
+    },
+    "hoursAddedChip": {
+      "__fn": "(hours) => `+${hours.toFixed(2)} h`"
+    },
+    "creditsAddedChip": {
+      "__fn": "(credits) => `+${credits}`"
+    },
+    "columns": {
+      "student": "Student",
+      "credits": "Credits",
+      "amount": "Amount",
+      "packageName": "Package",
+      "method": "Method",
+      "date": "Date"
+    }
   }
 }

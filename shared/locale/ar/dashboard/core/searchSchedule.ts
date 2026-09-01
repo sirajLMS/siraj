@@ -40,7 +40,7 @@ export const dashboardCoreSearchScheduleAr: SearchScheduleLabels = {
     mostGaps: "الأكثر فترات",
     nameAsc: "الاسم (أ-ي)",
     nameDesc: "الاسم (ي-أ)",
-    timezoneAsc: "المنطقة الزمنية",
+    timezoneAsc: "المنطقة الزمنية (أ-ي)",
   },
   day: {
     monday: "الاثنين",

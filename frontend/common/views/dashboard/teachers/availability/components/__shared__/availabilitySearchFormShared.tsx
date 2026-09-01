@@ -8,7 +8,7 @@ import type { ComponentType } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/common/components/ui/button";
 import { timeInputOutlinedSx } from "@/frontend/common/components/ui/form/field";
-import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector";
+import type { GenderSelectorProps } from "@/frontend/common/components/ui/input/genderSelector";
 import type {
   AvailabilitySearchFormData,
   AvailabilitySearchFormProps,
@@ -33,6 +33,7 @@ export interface AvailabilitySearchFormSharedOptions {
   readonly formLayoutSx: SxProps<Theme>;
   readonly buttonHeight: number;
   readonly buttonFullWidth: boolean;
+  readonly GenderSelectorComponent: ComponentType<GenderSelectorProps>;
 }
 
 export type AvailabilitySearchFormSharedProps = Readonly<AvailabilitySearchFormProps> & {
@@ -68,7 +69,12 @@ function TimeField({
   );
 }
 
-function GenderField({ labels }: Readonly<Pick<AvailabilitySearchFormProps, "labels">>) {
+function GenderField({
+  labels,
+  GenderSelectorComponent,
+}: Readonly<
+  Pick<AvailabilitySearchFormProps, "labels"> & { GenderSelectorComponent: ComponentType<GenderSelectorProps> }
+>) {
   const { control } = useFormContext<AvailabilitySearchFormData>();
   return (
     <Controller
@@ -76,7 +82,7 @@ function GenderField({ labels }: Readonly<Pick<AvailabilitySearchFormProps, "lab
       control={control}
       render={({ field, fieldState }) => (
         <FormControl fullWidth error={fieldState.error !== undefined}>
-          <GenderSelector
+          <GenderSelectorComponent
             gender={field.value}
             setGenderAction={field.onChange}
             error={fieldState.error !== undefined}
@@ -114,7 +120,7 @@ export function AvailabilitySearchFormShared({ onSearch, labels, options }: Avai
       <TimeField label={labels.from} name="fromTime" options={options} />
       <TimeField label={labels.to} name="toTime" options={options} />
 
-      <GenderField labels={labels} />
+      <GenderField labels={labels} GenderSelectorComponent={options.GenderSelectorComponent} />
 
       <PrimaryPageAction
         type="submit"

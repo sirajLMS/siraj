@@ -1,7 +1,7 @@
 import type { StudentDirectoryLabels } from "@/shared/locale/types/dashboard/students";
 
 export const dashboardStudentDirectoryAr: StudentDirectoryLabels = {
-  pageTitle: "دليل الطلاب الرئيسي",
+  pageTitle: "دليل الطلاب",
   pageSubtitle: "إدارة شاملة لبيانات الطلاب المسجلين والتاريخية.",
   mobileTitle: "دليل الطلاب",
   searchPlaceholder: "البحث عن الطلاب...",
@@ -44,12 +44,12 @@ export const dashboardStudentDirectoryAr: StudentDirectoryLabels = {
     enrollmentStatus: "الحالة",
   },
   actions: {
-    viewProfile: "عرض الملف",
+    viewProfile: "عرض الملف الشخصي",
     viewHistory: "عرض السجل",
   },
   noEntries: "لا يوجد طلاب",
   registrationComingSoon: "تسجيل الطالب قريباً.",
-  registrationComingSoonDescription: "تسجيل الطالب سيكون متاحاً قريباً.",
+  registrationComingSoonDescription: "سيكون تسجيل الطالب متاحاً قريباً.",
   registrationComingSoonNotice: "تسجيل الطالب قريباً. يرجى التحقق لاحقاً.",
   loadFailed: "فشل تحميل دليل الطلاب.",
   errors: {

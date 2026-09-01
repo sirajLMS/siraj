@@ -8,6 +8,7 @@ import {
   OnboardingPaymentMethodSection,
   UserEntityFieldsSection,
 } from "@/frontend/common/components/onboarding/sections";
+import type { CountrySelectProps } from "@/frontend/common/components/ui/input/countrySelect/types";
 import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql";
 import { MeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
@@ -45,6 +46,7 @@ export interface TeacherOnboardingSharedOptions {
   readonly PrimaryPageAction: ComponentType<PrimaryPageActionProps>;
   readonly FormSuccessSnackbar: ComponentType<SnackbarProps>;
   readonly FormErrorSnackbar?: ComponentType<SnackbarProps>;
+  readonly CountrySelectComponent?: ComponentType<CountrySelectProps>;
   readonly userEntityLabels: UserEntityOnboardingLabels;
   readonly formActionsFlexWrap?: "wrap" | "nowrap";
 }
@@ -59,6 +61,7 @@ function FormSections({
   userEntityLabels,
   onUploadAvatar,
   SectionPanel,
+  CountrySelectComponent,
 }: Readonly<{
   register: TeacherOnboardingViewModel["register"];
   control: TeacherOnboardingViewModel["control"];
@@ -67,6 +70,7 @@ function FormSections({
   userEntityLabels: UserEntityOnboardingLabels;
   onUploadAvatar: TeacherOnboardingViewModel["onUploadAvatar"];
   SectionPanel: ComponentType<SectionPanelProps>;
+  CountrySelectComponent?: ComponentType<CountrySelectProps>;
 }>) {
   return (
     <>
@@ -83,7 +87,13 @@ function FormSections({
         <TeacherExtensionSection register={register} control={control} errors={errors} labels={labels} />
       </SectionPanel>
       <SectionPanel title={labels.sections.officialDetails}>
-        <OfficialDetailsSection register={register} control={control} errors={errors} labels={labels} />
+        <OfficialDetailsSection
+          register={register}
+          control={control}
+          errors={errors}
+          labels={labels}
+          CountrySelectComponent={CountrySelectComponent}
+        />
       </SectionPanel>
       <SectionPanel title={labels.sections.salaryDetails}>
         <SalaryDetailsSection register={register} control={control} errors={errors} labels={labels} />
@@ -185,6 +195,7 @@ export function TeacherOnboardingShared({
     PrimaryPageAction,
     FormSuccessSnackbar,
     FormErrorSnackbar,
+    CountrySelectComponent,
     userEntityLabels,
     formActionsFlexWrap = "nowrap",
   } = options;
@@ -218,6 +229,7 @@ export function TeacherOnboardingShared({
             userEntityLabels={userEntityLabels}
             onUploadAvatar={onUploadAvatar}
             SectionPanel={SectionPanel}
+            CountrySelectComponent={CountrySelectComponent}
           />
           <FormActions
             isSubmitting={isSubmitting}

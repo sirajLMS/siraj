@@ -1,6 +1,6 @@
 "use client";
 
-import { Close } from "@mui/icons-material";
+import { CloseOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -214,7 +214,7 @@ export function PermissionGroupFormShared({
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="titleLg">{group ? t.editGroupTitle : t.createGroupTitle}</Typography>
           <IconButton onClick={onClose} disabled={isLoading} size="small" aria-label={t.cancel}>
-            <Close />
+            <CloseOutlined />
           </IconButton>
         </Box>
       </DialogTitle>

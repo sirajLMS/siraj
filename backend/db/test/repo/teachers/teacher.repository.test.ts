@@ -393,6 +393,34 @@ describe("TeacherRepository", () => {
     });
   });
 
+  describe("findActiveById", () => {
+    it("returns the teacher while the linked user is active", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTeacher(tx, { name: "ActiveLookup T" });
+
+        const found = await TeacherRepository.findActiveById(teacher.id, tx);
+        expect(found?.id).toBe(teacher.id);
+      });
+    });
+
+    it("returns null after the linked user is soft-deleted", async () => {
+      await runInRollback(async tx => {
+        const { teacher, user } = await setupTeacher(tx, { name: "SoftGone T" });
+
+        await tx.update(users).set({ deletedAt: new Date() }).where(eq(users.id, user.id));
+
+        expect(await TeacherRepository.findById(teacher.id, tx)).not.toBeNull();
+        expect(await TeacherRepository.findActiveById(teacher.id, tx)).toBeNull();
+      });
+    });
+
+    it("returns null for an unknown id", async () => {
+      await runInRollback(async tx => {
+        expect(await TeacherRepository.findActiveById(randomUUID(), tx)).toBeNull();
+      });
+    });
+  });
+
   describe("transaction rollback participation", () => {
     it("rolls back teacher creation on subsequent failure", async () => {
       let createdTeacherId: string | undefined;

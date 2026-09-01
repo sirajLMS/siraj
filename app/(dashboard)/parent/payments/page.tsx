@@ -4,7 +4,7 @@ import { AppPermission } from "@/backend/enum";
 import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { PaymentsLedgerContainer } from "@/frontend/desktop/views/dashboard/billing/paymentsLedger.desktop";
+import { PaymentsLedgerContainer } from "@/frontend/common/views/dashboard/billing/PaymentsLedgerContainer";
 import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata(): Promise<Metadata> {

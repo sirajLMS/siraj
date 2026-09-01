@@ -176,14 +176,11 @@ describe("QuotaInsightsContainer", () => {
     await assertInsightsRenders();
   });
 
-  test("renders filter buttons for date range, kind, status, student", async () => {
+  test("renders export CSV action", async () => {
     renderInsights();
 
     await waitFor(() => {
-      expect(screen.getByText(mockLabels.insightsDateRangeLabel)).toBeVisible();
+      expect(screen.getByText(mockLabels.actions.exportCsv)).toBeVisible();
     });
-    expect(screen.getByText(mockLabels.insightsKindLabel)).toBeVisible();
-    expect(screen.getByText(mockLabels.insightsStatusLabel)).toBeVisible();
-    expect(screen.getByText(mockLabels.insightsStudentLabel)).toBeVisible();
   });
 });

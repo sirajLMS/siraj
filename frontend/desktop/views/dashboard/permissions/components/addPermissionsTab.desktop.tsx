@@ -5,6 +5,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { PermissionFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
+import { PermissionKeyChipShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionKeyChipShared";
 import type { AddPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { AddPermissionBulkBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/addPermissionBulkBar.desktop";
@@ -19,17 +20,6 @@ const StyledTabContainer = styled(Box)({
 function isString(value: unknown): value is string {
   return typeof value === "string";
 }
-
-const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
-  fontFamily: "var(--font-jetbrains-mono), monospace",
-
-  typography: "labelMd",
-  backgroundColor: theme.palette.surfaceVariant,
-  color: theme.palette.onSurfaceVariant,
-  padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
-  borderRadius: theme.shape.borderRadius,
-  display: "inline-block",
-}));
 
 export function AddPermissionsTabDesktop({
   labels,
@@ -66,9 +56,7 @@ export function AddPermissionsTabDesktop({
         flex: 1,
         minWidth: 200,
         renderCell: params => (
-          <StyledPermissionKeyCell>
-            {isString(params.value) ? params.value : String(params.value ?? "")}
-          </StyledPermissionKeyCell>
+          <PermissionKeyChipShared label={isString(params.value) ? params.value : String(params.value ?? "")} />
         ),
       },
       {

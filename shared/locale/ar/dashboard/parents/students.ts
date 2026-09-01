@@ -2,7 +2,7 @@ import type { ParentStudentsLabels } from "@/shared/locale/types/dashboard/paren
 
 export const dashboardParentStudentsAr: ParentStudentsLabels = {
   pageTitle: "طلابك",
-  pageSubtitle: "الطلاب المرتبطون بحساب عائلتك.",
+  pageSubtitle: "عرض وإدارة الطلاب المرتبطين بحسابك",
   noStudents: "لا يوجد طلاب مرتبطون بحسابك بعد.",
   card: {
     classesLeft: "الحصص المتبقية",
@@ -16,6 +16,6 @@ export const dashboardParentStudentsAr: ParentStudentsLabels = {
     onTrial: "تجريبي",
   },
   errors: {
-    failedToLoad: "تعذر تحميل طلابك.",
+    failedToLoad: "تعذر تحميل الطلاب. يرجى المحاولة مرة أخرى لاحقًا.",
   },
 };

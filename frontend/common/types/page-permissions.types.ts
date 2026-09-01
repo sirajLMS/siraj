@@ -143,4 +143,9 @@ export const PAGE_PERMISSIONS = {
   // Accounting (credit-hours payments + package plans) — plan Phase 7.
   accountingPaymentsView: [AppPermission.AccountingPaymentsView] as PagePermissions,
   accountingPaymentsManage: [AppPermission.AccountingPaymentsManage] as PagePermissions,
+  accountingCreditsManage: [AppPermission.AccountingCreditsManage] as PagePermissions,
+  accountingCreditsAdjust: [AppPermission.AccountingCreditsManage] as PagePermissions,
+  // Accounting — teacher payroll.
+  accountingPayrollView: [AppPermission.AccountingPayrollView] as PagePermissions,
+  accountingPayrollManage: [AppPermission.AccountingPayrollManage] as PagePermissions,
 } as const;

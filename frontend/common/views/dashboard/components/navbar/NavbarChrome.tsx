@@ -1,9 +1,23 @@
 "use client";
 
-import { SchoolOutlined } from "@mui/icons-material";
-import { AppBar, alpha, Box, Toolbar, Typography } from "@mui/material";
+import { AppBar, alpha, Box, Toolbar, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
+import { NavbarBrandBlock } from "@/frontend/common/views/dashboard/components/navbar/NavbarBrandBlock";
 import { Translation, useAppTranslation } from "@/shared/locale";
+
+/**
+ * NavbarChrome — the interactive client shell of the dashboard navbar.
+ *
+ * It shares its brand-group markup with `NavbarStaticShell` via
+ * `NavbarBrandBlock`. Unlike the static shell, this component always runs
+ * under a client ThemeProvider, so it resolves the brand colors from the MUI
+ * theme palette and hands them to the fragment as computed CSS strings.
+ *
+ * The two shells intentionally stay separate: the static shell renders the
+ * pre-hydration LCP markup on the server and must stay hook-free and
+ * theme-callback-free, which this component (with `useAppTranslation` and
+ * `useTheme`) cannot guarantee.
+ */
 
 interface NavbarChromeProps {
   readonly roleLabel: string;
@@ -13,6 +27,7 @@ interface NavbarChromeProps {
 
 export function NavbarChrome({ roleLabel, rightSlot, leftSlot }: Readonly<NavbarChromeProps>) {
   const t = useAppTranslation(Translation.Dashboard.CoreLayout);
+  const muiTheme = useTheme();
 
   return (
     <AppBar
@@ -33,42 +48,14 @@ export function NavbarChrome({ roleLabel, rightSlot, leftSlot }: Readonly<Navbar
           px: { xs: 2, md: 4 },
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 2 } }}>
-          {leftSlot}
-          <Box
-            sx={theme => ({
-              width: 40,
-              height: 40,
-              backgroundColor: alpha(theme.palette.onHeaderContainer, 0.15),
-              borderRadius: 2,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            })}
-          >
-            <SchoolOutlined sx={{ fontSize: 24 }} />
-          </Box>
-          <Box sx={{ display: { xs: "none", md: "flex" }, flexDirection: "column" }}>
-            <Typography
-              variant="titleLg"
-              sx={{
-                color: theme => theme.palette.onHeaderContainer,
-                lineHeight: 1.2,
-              }}
-            >
-              {t.appTitle}
-            </Typography>
-            <Typography
-              variant="labelMd"
-              sx={{
-                color: theme => alpha(theme.palette.onHeaderContainer, 0.7),
-                lineHeight: 1.2,
-              }}
-            >
-              {roleLabel}
-            </Typography>
-          </Box>
-        </Box>
+        <NavbarBrandBlock
+          appTitle={t.appTitle}
+          roleLabel={roleLabel}
+          logoBackgroundColor={alpha(muiTheme.palette.onHeaderContainer, 0.15)}
+          brandNameColor={muiTheme.palette.onHeaderContainer}
+          roleColor={alpha(muiTheme.palette.onHeaderContainer, 0.7)}
+          leadingSlot={leftSlot}
+        />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 3 } }}>{rightSlot}</Box>
       </Toolbar>

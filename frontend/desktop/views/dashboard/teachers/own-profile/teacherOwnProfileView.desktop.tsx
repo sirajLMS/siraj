@@ -15,10 +15,10 @@ function DesktopProfileLayout({ children }: { readonly children: ReactNode }) {
   );
 }
 
-function DesktopProfileSection({ children }: { readonly children: ReactNode }) {
+function DesktopProfileSection({ title, children }: { readonly title: string; readonly children: ReactNode }) {
   return (
     <Grid size={{ xs: 12, md: 6 }}>
-      <DesktopSectionPanel>{children}</DesktopSectionPanel>
+      <DesktopSectionPanel title={title}>{children}</DesktopSectionPanel>
     </Grid>
   );
 }

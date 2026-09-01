@@ -1,12 +1,20 @@
 import { createHash } from "node:crypto";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo/billing";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { StudentRepository } from "@/backend/db/repo/students";
-import { AppPermission, CreditReason } from "@/backend/enum";
-import { ConflictError, logger, NotFoundError, ValidationError } from "@/backend/lib";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
+import { AppPermission, CreditAdjustmentType, CreditReason } from "@/backend/enum";
+import { ConflictError, DomainError, logger, NotFoundError, sanitizeRichText, ValidationError } from "@/backend/lib";
+import { maybeInsertCarryoverBalanceEntry } from "@/backend/services/billing/carryover-handoff";
+import { deriveAdjustmentIdempotencyKey } from "@/backend/services/billing/credit-adjustment.idempotency";
 import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
 import { QuotaService } from "@/backend/services/billing/quota.service";
+import { AuditService } from "@/backend/services/system/audit.service";
 import type {
+  CreateAuditLogInput,
+  CreditAdjustmentInput,
+  CreditAdjustmentReturnType,
   CreditBalanceReturnType,
   CreditHourBalanceReturnType,
   CreditTransactionReturnType,
@@ -51,6 +59,18 @@ async function assertStudentExists(studentId: string, tErrors: ErrorsLabels): Pr
   }
 }
 
+/**
+ * Adjustments must not target students whose account was removed — a
+ * soft-deleted student user is treated as not found, with zero writes.
+ * Runs inside the adjustment transaction (after the advisory lock).
+ */
+async function assertActiveStudentExists(studentId: string, tErrors: ErrorsLabels, tx: DBTransaction): Promise<void> {
+  const existing = await StudentRepository.findActiveById(studentId, tx);
+  if (!existing) {
+    throw new NotFoundError("STUDENT", tErrors.studentNotFound(studentId));
+  }
+}
+
 /** Type guard: narrows a `string` to `CreditReason` enum. */
 function isCreditReason(value: string): value is CreditReason {
   return (Object.values(CreditReason) as readonly string[]).includes(value);
@@ -59,6 +79,322 @@ function isCreditReason(value: string): value is CreditReason {
 function mapToReturnType(row: CreditTransactionSelectType): CreditTransactionReturnType {
   const reason = isCreditReason(row.reason) ? row.reason : CreditReason.ADJUSTMENT;
   return { ...row, reason };
+}
+
+/** Maps an adjustment ledger row to the operator-facing return shape. */
+function mapToAdjustmentReturnType(row: CreditTransactionSelectType): CreditAdjustmentReturnType {
+  return mapToReturnType(row);
+}
+
+/** Fully-present carryover block of an adjustment input. */
+interface CarryoverBlock {
+  teacherId: string;
+  fromDate: string;
+  toDate: string;
+  paymentDate: string;
+}
+
+/** Narrows the optional carryover fields, failing validation when any is missing. */
+function requireCarryoverBlock(input: CreditAdjustmentInput, tErrors: ErrorsLabels): CarryoverBlock {
+  const { carryoverTeacherId, carryoverFromDate, carryoverToDate, carryoverPaymentDate } = input;
+  const teacherId = carryoverTeacherId?.trim();
+  if (!teacherId || !carryoverFromDate || !carryoverToDate || !carryoverPaymentDate) {
+    throw new ValidationError(tErrors.credit.invalidInput);
+  }
+  return {
+    teacherId,
+    fromDate: carryoverFromDate,
+    toDate: carryoverToDate,
+    paymentDate: carryoverPaymentDate,
+  };
+}
+
+function validateAdjustmentInput(input: CreditAdjustmentInput, tErrors: ErrorsLabels): void {
+  if (!input.studentId?.trim()) {
+    throw new ValidationError(tErrors.credit.invalidInput);
+  }
+  if (!Number.isInteger(input.hours) || input.hours < 1 || input.hours > 100_000) {
+    throw new ValidationError(tErrors.credit.invalidInput);
+  }
+  if ((input.internalNotes?.trim().length ?? 0) > INTERNAL_NOTES_MAX_LENGTH) {
+    throw new ValidationError(tErrors.tooLong);
+  }
+  if (input.adjustmentType !== CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER) return;
+
+  const carryover = requireCarryoverBlock(input, tErrors);
+  if (new Date(carryover.fromDate) > new Date(carryover.toDate)) {
+    throw new ValidationError(tErrors.credit.invalidInput);
+  }
+  const maxPaymentDate = new Date();
+  maxPaymentDate.setDate(maxPaymentDate.getDate() + 1);
+  if (new Date(carryover.paymentDate) > maxPaymentDate) {
+    throw new ValidationError(tErrors.credit.invalidInput);
+  }
+}
+
+/** Sanitizes the rich-text reason before persistence; blank reasons persist as NULL. */
+function sanitizeAdjustmentNotes(notes: string | null | undefined): string | null {
+  if (!notes?.trim()) return null;
+  const sanitized = sanitizeRichText(notes);
+  return sanitized.length === 0 ? null : sanitized;
+}
+
+/** Sanity cap for the operator-internal plain-text note (accounting-only). */
+const INTERNAL_NOTES_MAX_LENGTH = 2000;
+
+/**
+ * Normalizes the internal note: trimmed, blank values persist as NULL.
+ * Unlike `notes`, the content is stored verbatim — it is plain text visible
+ * only in accounting contexts, never rendered as rich text.
+ */
+function normalizeInternalNotes(internalNotes: string | null | undefined): string | null {
+  const trimmed = internalNotes?.trim();
+  if (!trimmed) return null;
+  return trimmed;
+}
+
+async function assertTeacherExists(teacherId: string, tErrors: ErrorsLabels, tx: DBTransaction): Promise<void> {
+  const existing = await TeacherRepository.findActiveById(teacherId, tx);
+  if (!existing) {
+    throw new NotFoundError("TEACHER", tErrors.teacher.teacherNotFound(teacherId));
+  }
+}
+
+/**
+ * Fails the adjustment when the student's remaining class credits cannot cover
+ * the subtraction. Runs inside the adjustment transaction, after the per-student
+ * advisory lock, so concurrent subtractions cannot observe a stale balance.
+ */
+async function assertSufficientClasses(
+  tx: DBTransaction,
+  studentId: string,
+  hours: number,
+  tErrors: ErrorsLabels
+): Promise<void> {
+  const balance = await CreditRepository.getBalance(tx, studentId);
+  if (balance.classesRemaining < hours) {
+    throw new DomainError(
+      "INSUFFICIENT_CLASSES",
+      tErrors.credit.insufficientBalance({ studentId, remaining: balance.classesRemaining })
+    );
+  }
+}
+
+/**
+ * Resolves a concurrent-insert race on the idempotency key: the competing
+ * request won the insert, so its committed row is the canonical result.
+ */
+async function resolveDuplicateAdjustment(idempotencyKey: string): Promise<CreditAdjustmentReturnType | null> {
+  const resolved = await CreditRepository.findByIdempotencyKeys([idempotencyKey]);
+  const row = resolved[0];
+  return row ? mapToAdjustmentReturnType(row) : null;
+}
+
+/** Shared parameters of a single adjustment transaction. */
+interface AdjustmentTxParams {
+  actorUserId: string;
+  input: CreditAdjustmentInput;
+  tErrors: ErrorsLabels;
+  idempotencyKey: string;
+  /** Signed class-credit delta for the ledger row. */
+  signedHours: number;
+  reason: CreditReason;
+  /** Present only for subtract-with-carryover adjustments. */
+  carryover?: CarryoverBlock;
+}
+
+/** Outcome of an adjustment transaction: the committed/returned row and whether it was newly persisted. */
+interface AdjustmentTxResult {
+  row: CreditAdjustmentReturnType;
+  /** False when the idempotency pre-check replayed an earlier persisted row. */
+  createdNewRow: boolean;
+}
+
+/**
+ * Executes one adjustment atomically: a per-student advisory lock serializes
+ * concurrent adjustments, then the idempotency pre-check runs FIRST — ahead
+ * of every existence/balance guard — so a replayed submission returns the
+ * originally persisted row even when the state that guarded the first write
+ * has since changed. The balance guard runs under the lock (no
+ * read-modify-write race). Subtractions may carry a carryover block that is
+ * mirrored to the payouts table when it exists.
+ */
+async function executeAdjustmentTransaction(params: AdjustmentTxParams): Promise<AdjustmentTxResult> {
+  const { input, tErrors } = params;
+
+  return db.transaction(async tx => {
+    await acquireAdvisoryLock(tx, `student_${input.studentId}`);
+
+    const existing = await CreditRepository.findByIdempotencyKeys([params.idempotencyKey], tx);
+    const existingRow = existing[0];
+    if (existingRow) return { row: mapToAdjustmentReturnType(existingRow), createdNewRow: false };
+
+    await assertActiveStudentExists(input.studentId, tErrors, tx);
+    if (params.carryover) {
+      await assertTeacherExists(params.carryover.teacherId, tErrors, tx);
+    }
+    if (params.signedHours < 0) {
+      await assertSufficientClasses(tx, input.studentId, input.hours, tErrors);
+    }
+
+    const ledgerRow = await CreditRepository.createAdjustment(tx, {
+      studentId: input.studentId,
+      changeAmount: params.signedHours,
+      reason: params.reason,
+      adjustmentType: input.adjustmentType,
+      notes: sanitizeAdjustmentNotes(input.notes),
+      internalNotes: normalizeInternalNotes(input.internalNotes),
+      creditedByUserId: params.actorUserId,
+      carryoverTeacherId: params.carryover?.teacherId,
+      carryoverFromDate: params.carryover?.fromDate,
+      carryoverToDate: params.carryover?.toDate,
+      carryoverPaymentDate: params.carryover?.paymentDate,
+      idempotencyKey: params.idempotencyKey,
+    });
+
+    if (params.signedHours < 0) {
+      await StudentRepository.deductClasses(input.studentId, tErrors, input.hours, undefined, tx);
+    } else {
+      await StudentRepository.addClasses(input.studentId, tErrors, input.hours, undefined, tx);
+    }
+    await QuotaService.refreshStudentOndemandInstances(input.studentId, tx);
+
+    if (params.carryover) {
+      await maybeInsertCarryoverBalanceEntry(tx, {
+        creditTransactionId: ledgerRow.id,
+        teacherId: params.carryover.teacherId,
+        studentId: input.studentId,
+        fromDate: params.carryover.fromDate,
+        toDate: params.carryover.toDate,
+        paymentDate: params.carryover.paymentDate,
+        hours: input.hours,
+        approvedByUserId: params.actorUserId,
+      });
+    }
+
+    return { row: mapToAdjustmentReturnType(ledgerRow), createdNewRow: true };
+  });
+}
+
+/**
+ * Runs an adjustment and resolves same-key concurrent inserts to the winning
+ * row. The success log and audit entry are emitted only when the transaction
+ * actually persisted a new ledger row — replayed submissions (in-tx or
+ * recovered from a unique violation) return the first row without producing
+ * duplicate observability records.
+ */
+async function runAdjustment(params: AdjustmentTxParams, logMessage: string): Promise<CreditAdjustmentReturnType> {
+  try {
+    // Success is reported only once the transaction commits — a rolled-back
+    // adjustment produces neither a success log nor an audit entry.
+    const { row, createdNewRow } = await executeAdjustmentTransaction(params);
+    if (createdNewRow) {
+      logger.info(logMessage, {
+        actorUserId: params.actorUserId,
+        studentId: params.input.studentId,
+        adjustmentType: params.input.adjustmentType,
+        changeAmount: params.signedHours,
+        carryoverTeacherId: params.carryover?.teacherId,
+      });
+      await emitAdjustmentAudit(params, row);
+    }
+    return row;
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      const resolved = await resolveDuplicateAdjustment(params.idempotencyKey);
+      if (resolved) return resolved;
+    }
+    throw error;
+  }
+}
+
+/**
+ * Best-effort audit emit for a committed adjustment — never throws: a failed
+ * audit write must not fail an adjustment whose ledger row already committed.
+ */
+async function emitAdjustmentAudit(params: AdjustmentTxParams, created: CreditAdjustmentReturnType): Promise<void> {
+  const { input } = params;
+  const audit: CreateAuditLogInput = {
+    actorUserId: params.actorUserId,
+    actorType: "USER",
+    entityType: "STUDENT",
+    entityId: input.studentId,
+    action: "UPDATE",
+    description: `Credit adjustment ${input.adjustmentType}`,
+    newState: {
+      creditTransactionId: created.id,
+      adjustmentType: input.adjustmentType,
+      changeAmount: params.signedHours,
+      carryoverTeacherId: params.carryover?.teacherId ?? null,
+    },
+  };
+
+  try {
+    await AuditService.createManyAuditLogs([audit]);
+  } catch (error) {
+    logger.error(
+      `credit-service: audit write failed for adjustmentType=${input.adjustmentType} studentId=${input.studentId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      { actorUserId: params.actorUserId, studentId: input.studentId, adjustmentType: input.adjustmentType, error }
+    );
+  }
+}
+
+async function addCredit(
+  actorUserId: string,
+  input: CreditAdjustmentInput,
+  tErrors: ErrorsLabels
+): Promise<CreditAdjustmentReturnType> {
+  return runAdjustment(
+    {
+      actorUserId,
+      input,
+      tErrors,
+      idempotencyKey: deriveAdjustmentIdempotencyKey(actorUserId, input),
+      signedHours: input.hours,
+      reason: CreditReason.CREDIT_ADJUSTMENT_ADD,
+    },
+    "Credit adjustment Add recorded"
+  );
+}
+
+async function subtractCredit(
+  actorUserId: string,
+  input: CreditAdjustmentInput,
+  tErrors: ErrorsLabels
+): Promise<CreditAdjustmentReturnType> {
+  return runAdjustment(
+    {
+      actorUserId,
+      input,
+      tErrors,
+      idempotencyKey: deriveAdjustmentIdempotencyKey(actorUserId, input),
+      signedHours: -input.hours,
+      reason: CreditReason.CREDIT_ADJUSTMENT_SUBTRACT,
+    },
+    "Credit adjustment Subtract recorded"
+  );
+}
+
+async function subtractWithCarryover(
+  actorUserId: string,
+  input: CreditAdjustmentInput,
+  tErrors: ErrorsLabels
+): Promise<CreditAdjustmentReturnType> {
+  const carryover = requireCarryoverBlock(input, tErrors);
+  return runAdjustment(
+    {
+      actorUserId,
+      input,
+      tErrors,
+      idempotencyKey: deriveAdjustmentIdempotencyKey(actorUserId, input),
+      signedHours: -input.hours,
+      reason: CreditReason.CREDIT_ADJUSTMENT_CARRYOVER,
+      carryover,
+    },
+    "Credit adjustment Subtract-With-Carryover recorded"
+  );
 }
 
 /** Shared purchase logic: insert ledger row, adjust student classes, refresh quotas. */
@@ -187,6 +523,55 @@ export namespace CreditService {
     });
     await StudentRepository.addCreditHours(input.studentId, tErrors, input.hours, undefined, tx);
     return mapToReturnType(row);
+  }
+
+  /**
+   * Seed-only bootstrap: idempotent HOUR purchase with a caller-supplied
+   * deterministic idempotency key (e.g. `seed-hour-credit-purchase:0:10`).
+   * Mirrors `recordPurchaseIfMissing` for the hour ledger — the idempotency
+   * check runs INSIDE the transaction (no TOCTOU) and repeats return the
+   * first persisted row instead of double-crediting. The core write
+   * (hour ledger row + hour facet bump) is delegated to `recordHourPurchase`.
+   */
+  export async function recordHourPurchaseIfMissing(
+    actorUserId: string,
+    input: { studentId: string; hours: number; notes?: string | null },
+    idempotencyKey: string,
+    tErrors: ErrorsLabels
+  ): Promise<CreditTransactionReturnType | null> {
+    try {
+      const created = await db.transaction(async tx => {
+        await assertStudentExists(input.studentId, tErrors);
+
+        return recordHourPurchase(
+          {
+            studentId: input.studentId,
+            hours: input.hours,
+            creditedByUserId: actorUserId,
+            notes: input.notes ?? null,
+          },
+          idempotencyKey,
+          tx,
+          tErrors
+        );
+      });
+
+      logger.info("Hour credit purchase seeded", {
+        actorUserId,
+        studentId: input.studentId,
+        hours: input.hours,
+        idempotencyKey,
+      });
+
+      return created;
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        const resolved = await CreditRepository.findByIdempotencyKeys([idempotencyKey]);
+        const row = resolved[0];
+        return row ? mapToReturnType(row) : null;
+      }
+      throw error;
+    }
   }
 
   /** Consumes HOURS for an hour-billed class instance (Plan 6 wiring point). */
@@ -484,6 +869,33 @@ export namespace CreditService {
     });
 
     return toInsert.length;
+  }
+
+  /**
+   * Records a manual credit adjustment (Add / Subtract / Subtract With
+   * Carryover). Requires the ACCOUNTING_CREDITS_MANAGE permission; validates
+   * the operator-supplied input, then dispatches to the matching adjustment
+   * flow. Double-submits collapse onto the first persisted ledger row via the
+   * derived idempotency key.
+   */
+  export async function recordAdjustment(
+    actorUserId: string,
+    input: CreditAdjustmentInput,
+    tErrors: ErrorsLabels
+  ): Promise<CreditAdjustmentReturnType> {
+    await requirePermission(actorUserId, AppPermission.ACCOUNTING_CREDITS_MANAGE, tErrors);
+    validateAdjustmentInput(input, tErrors);
+
+    switch (input.adjustmentType) {
+      case CreditAdjustmentType.ADD:
+        return addCredit(actorUserId, input, tErrors);
+      case CreditAdjustmentType.SUBTRACT:
+        return subtractCredit(actorUserId, input, tErrors);
+      case CreditAdjustmentType.SUBTRACT_WITH_CARRYOVER:
+        return subtractWithCarryover(actorUserId, input, tErrors);
+      default:
+        throw new ValidationError(tErrors.credit.invalidInput);
+    }
   }
 }
 

@@ -2,7 +2,7 @@ import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/
 
 export const dashboardBillingSupportedCurrenciesAr: SupportedCurrenciesLabels = {
   pageTitle: "العملات المدعومة",
-  pageSubtitle: "قائمة العملات المتاحة في النظام للفوترة وأسعار الصرف",
+  pageSubtitle: "إدارة العملات المتاحة للاستخدام في الفوترة",
   code: "الرمز",
   symbol: "الرمز المختصر",
   name: "الاسم",
@@ -10,9 +10,8 @@ export const dashboardBillingSupportedCurrenciesAr: SupportedCurrenciesLabels = 
   flag: "العلم",
   active: "نشط",
   actions: "إجراءات",
-  empty: "لا تتوفر عملات في الكتالوج",
-  footerNote:
-    "لإضافة رموز ISO جديدة، حدّث تعداد العملات في الخادم وكتالوج العملات في الواجهة الأمامية، ثم أعد تشغيل البذور إذا لزم الأمر.",
+  empty: "لا تتوفر عملات مُهيأة",
+  footerNote: "العملات المتاحة للمحاسبة والفوترة والتقارير",
   activateLabel: "تفعيل عملة",
   editLabel: "تعديل",
   deactivateLabel: "إلغاء التفعيل",

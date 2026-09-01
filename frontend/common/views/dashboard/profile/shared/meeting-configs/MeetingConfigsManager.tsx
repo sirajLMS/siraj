@@ -2,7 +2,7 @@
 
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import { Box, Button, Stack } from "@mui/material";
+import { Box, Button, Stack, type Theme } from "@mui/material";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { ErrorState } from "@/frontend/common/components/ui";
@@ -22,6 +22,7 @@ import {
   MeetingConfigFormDialog,
   type MeetingConfigFormDialogProps,
 } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
+import type { MeetingConfigActionSlots } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/meetingConfigActionSlots";
 import { OAuthCallbackHandler } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/OAuthCallbackHandler";
 import { ReconnectAllAction } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ReconnectAllAction";
 import { ReauthNeededBanner } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/reauth-needed-banner";
@@ -35,6 +36,8 @@ export type MeetingConfigsManagerProps = {
   readonly canManage: boolean;
   /** Passed through to the form dialog; the mobile tier caller sets this to `true`. */
   readonly fullScreenFormDialog?: boolean;
+  /** Action presets; tier callers may inject their tier variants (defaults are the common presets). */
+  readonly actionSlots?: MeetingConfigActionSlots;
 };
 
 /**
@@ -305,7 +308,7 @@ export function MeetingConfigsManager({
             startIcon={<AddOutlinedIcon />}
             variant="contained"
             onClick={state.openCreateForm}
-            sx={theme => ({ minHeight: 48, [theme.breakpoints.down("sm")]: { width: "100%" } })}
+            sx={(theme: Theme) => ({ minHeight: 48, [theme.breakpoints.down("sm")]: { width: "100%" } })}
           >
             {t.add}
           </Button>
@@ -317,7 +320,7 @@ export function MeetingConfigsManager({
               variant="outlined"
               onClick={state.navigateToSettings}
               aria-label={state.labels.enhancements.navigateToAdminSettingsAriaLabel}
-              sx={theme => ({
+              sx={(theme: Theme) => ({
                 ...(canManage ? { ml: 1 } : {}),
                 minHeight: 48,
                 [theme.breakpoints.down("sm")]: { width: "100%" },

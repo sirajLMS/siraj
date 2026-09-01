@@ -33,9 +33,12 @@ async function createInvoice(
   return invoice;
 }
 
+const byId = (a: string, b: string) => a.localeCompare(b);
+
 type CreatePaymentArgs = {
   invoiceId: string;
   gateway?: PaymentGateway;
+  currency?: CurrencyCode;
   creditHours?: string | null;
   isPaidStatusOn?: boolean;
   paymentDate?: Date;
@@ -45,7 +48,7 @@ async function createPayment(tx: DBTransaction, args: CreatePaymentArgs) {
   return AccountingPaymentRepository.create(tx, {
     invoiceId: args.invoiceId,
     amount: "100.00",
-    currency: CurrencyCode.USD,
+    currency: args.currency ?? CurrencyCode.USD,
     paymentDate: args.paymentDate ?? new Date("2026-07-05T12:00:00.000Z"),
     packagePlanId: null,
     paymentGateway: args.gateway ?? PaymentGateway.BANK,
@@ -203,5 +206,112 @@ describe("AccountingPaymentRepository", () => {
       paymentGateway: "OTHER",
     });
     expect(otherGateway).not.toBe(withNull);
+  });
+
+  test("findById returns null for an unknown payment id", async () => {
+    await runInRollback(async tx => {
+      expect(await AccountingPaymentRepository.findById(randomUUID(), tx)).toBeNull();
+    });
+  });
+
+  test("listPaginated without filters returns rows; single-bound date filters apply", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+      if (!student.parentId) throw new Error("fixture student must be parent-linked");
+      const invoice = await createInvoice(tx, { parentId: student.parentId, studentId: student.id });
+      const payment = await createPayment(tx, {
+        invoiceId: invoice.id,
+        paymentDate: new Date("2026-07-15T10:00:00.000Z"),
+      });
+
+      // Empty filter exercises the no-conditions branch of buildFilterConditions.
+      const unfiltered = await AccountingPaymentRepository.listPaginated({}, null, tx);
+      expect(unfiltered.some(row => row.id === payment.id)).toBe(true);
+
+      // fromDate only (lower bound, no upper bound).
+      const fromOnly = await AccountingPaymentRepository.listPaginated(
+        { studentId: student.id, fromDate: "2026-07-16" },
+        null,
+        tx
+      );
+      expect(fromOnly).toHaveLength(0);
+
+      // toDate only (inclusive upper bound, no lower bound).
+      const toOnly = await AccountingPaymentRepository.listPaginated(
+        { studentId: student.id, toDate: "2026-07-15" },
+        null,
+        tx
+      );
+      expect(toOnly.map(row => row.id)).toEqual([payment.id]);
+    });
+  });
+
+  test("countForFilter counts filtered rows and returns 0 for no matches", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+      if (!student.parentId) throw new Error("fixture student must be parent-linked");
+      const invoice = await createInvoice(tx, { parentId: student.parentId, studentId: student.id });
+      await createPayment(tx, { invoiceId: invoice.id, isPaidStatusOn: true });
+      await createPayment(tx, { invoiceId: invoice.id, isPaidStatusOn: false });
+
+      expect(await AccountingPaymentRepository.countForFilter({ studentId: student.id }, tx)).toBe(2);
+      expect(await AccountingPaymentRepository.countForFilter({ studentId: student.id, unpaidOnly: true }, tx)).toBe(1);
+      expect(await AccountingPaymentRepository.countForFilter({ studentId: randomUUID() }, tx)).toBe(0);
+    });
+  });
+
+  test("findByIds returns the requested rows and treats an empty id list as a no-op", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+      if (!student.parentId) throw new Error("fixture student must be parent-linked");
+      const invoice = await createInvoice(tx, { parentId: student.parentId, studentId: student.id });
+      const first = await createPayment(tx, { invoiceId: invoice.id });
+      const second = await createPayment(tx, { invoiceId: invoice.id });
+
+      expect(await AccountingPaymentRepository.findByIds([], tx)).toEqual([]);
+
+      const found = await AccountingPaymentRepository.findByIds([first.id, second.id], tx);
+      expect(found.map(row => row.id).toSorted(byId)).toEqual([first.id, second.id].toSorted(byId));
+
+      expect(await AccountingPaymentRepository.findByIds([randomUUID()], tx)).toEqual([]);
+    });
+  });
+
+  test("update applies the patch and returns null for an unknown id", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+      if (!student.parentId) throw new Error("fixture student must be parent-linked");
+      const invoice = await createInvoice(tx, { parentId: student.parentId, studentId: student.id });
+      const created = await createPayment(tx, { invoiceId: invoice.id });
+
+      const updated = await AccountingPaymentRepository.update(tx, created.id, {
+        paymentGateway: PaymentGateway.OTHER,
+        paymentNote: "edited note",
+        creditHours: "12.50",
+        isPaidStatusOn: false,
+      });
+      expect(updated?.paymentGateway).toBe(PaymentGateway.OTHER);
+      expect(updated?.paymentNote).toBe("edited note");
+      expect(Number(updated?.creditHours ?? "0")).toBe(12.5);
+      expect(updated?.isPaidStatusOn).toBe(false);
+
+      expect(await AccountingPaymentRepository.update(tx, randomUUID(), { paymentNote: "ghost" })).toBeNull();
+    });
+  });
+
+  test("findLastPaymentCurrency breaks same-day ties by creation order (newest created wins)", async () => {
+    await runInRollback(async tx => {
+      const { student } = await setupStudent(tx);
+      if (!student.parentId) throw new Error("fixture student must be parent-linked");
+      const invoice = await createInvoice(tx, { parentId: student.parentId, studentId: student.id });
+
+      const sameDay = new Date("2026-07-05T12:00:00.000Z");
+      await createPayment(tx, { invoiceId: invoice.id, paymentDate: sameDay });
+      // Distinct createdAt so the same-date tiebreak is deterministic.
+      await new Promise(resolve => setTimeout(resolve, 10));
+      await createPayment(tx, { invoiceId: invoice.id, paymentDate: sameDay, currency: CurrencyCode.EUR });
+
+      expect(await AccountingPaymentRepository.findLastPaymentCurrency(student.id, tx)).toBe(CurrencyCode.EUR);
+    });
   });
 });

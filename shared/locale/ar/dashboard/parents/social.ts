@@ -1,7 +1,7 @@
 import type { ParentSocialLabels } from "@/shared/locale/types/dashboard/parents";
 
 export const dashboardParentSocialAr: ParentSocialLabels = {
-  pageTitle: "وسائل التواصل الاجتماعي",
+  pageTitle: "التواصل ووسائل التواصل الاجتماعي",
   pageSubtitle: "قنوات الاتصال ووسائل التواصل المسجلة لديك.",
   sections: {
     contact: "التواصل",
@@ -15,6 +15,6 @@ export const dashboardParentSocialAr: ParentSocialLabels = {
     twitter: "تويتر",
   },
   errors: {
-    failedToLoad: "تعذر تحميل ملف التواصل الاجتماعي.",
+    failedToLoad: "تعذر تحميل بيانات التواصل الاجتماعي.",
   },
 };

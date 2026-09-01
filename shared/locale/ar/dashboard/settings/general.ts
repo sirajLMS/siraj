@@ -28,7 +28,7 @@ export const dashboardSettingsGeneralAr: SettingsGeneralTabLabels = {
   keyRequired: "المفتاح مطلوب",
   valueRequired: "القيمة مطلوبة",
   valueInteger: "يجب أن تكون القيمة عدداً صحيحاً غير سالب",
-  valueBoolean: "يجب أن تكون القيمة منطقية (صحيح أو خاطئ)",
+  valueBoolean: "يجب أن تكون القيمة منطقية (صحيح أو خطأ)",
   valueJson: "يجب أن تكون القيمة بصيغة JSON صحيحة",
   saveLabel: "حفظ",
   cancelLabel: "إلغاء",
@@ -57,6 +57,7 @@ export const dashboardSettingsGeneralAr: SettingsGeneralTabLabels = {
     meeting: "الاجتماعات",
     billing: "الفوترة",
     general: "عام",
+    payroll: "الرواتب",
   },
   dataTypeLabels: {
     string: "نص",

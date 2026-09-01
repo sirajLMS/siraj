@@ -1,8 +1,13 @@
+import { format } from "date-fns";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 type DateInput = Date | string | number;
 
-export function parseDateInput(date: DateInput): Date | null {
+export function parseDateInput(date: DateInput | null | undefined): Date | null {
+  if (date == null) {
+    return null;
+  }
+
   if (date instanceof Date) {
     return Number.isNaN(date.getTime()) ? null : date;
   }
@@ -55,6 +60,17 @@ function createFormatFunction(
 ): (date: DateInput, locale: string, fallback?: string) => string {
   return (date: DateInput, locale: string, fallback = "—"): string =>
     formatWithFallback(date, locale, options, fallback);
+}
+
+const ISO_DATE_FORMAT = "yyyy-MM-dd";
+
+/**
+ * Formats a `Date` (or null) as an ISO calendar date (`YYYY-MM-DD`) for date
+ * input/picker state; returns an empty string when the value is invalid.
+ */
+export function formatDateInput(date: Date | null): string {
+  const parsed = parseDateInput(date);
+  return parsed ? format(parsed, ISO_DATE_FORMAT) : "";
 }
 
 /**

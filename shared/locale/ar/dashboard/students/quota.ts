@@ -1,7 +1,7 @@
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students";
 
 export const dashboardStudentQuotaAr: StudentQuotaLabels = {
-  pageTitle: "تعديل الملف الشخصي للطالب",
+  pageTitle: "حصة الطالب",
   common: {
     system: "النظام",
     notSet: "غير محدد",
@@ -16,7 +16,7 @@ export const dashboardStudentQuotaAr: StudentQuotaLabels = {
   },
   fields: {
     studentName: "اسم الطالب",
-    studentNamePlaceholder: "أدخل الاسم الكامل",
+    studentNamePlaceholder: "أدخل اسم الطالب",
     dateOfBirth: "تاريخ الميلاد",
     language: "اللغة",
     arabic: "العربية",
@@ -28,23 +28,22 @@ export const dashboardStudentQuotaAr: StudentQuotaLabels = {
     loadingTeachers: "جاري تحميل المعلمين...",
     totalClasses: "إجمالي الحصص",
     classesLeft: "الحصص المتبقية",
-    overrideActive: "يدوي",
-    overrideNotice: "تجاوز الحصة اليدوي نشط. ستتجاهل هذه القيمة الاستهلاك التلقائي لدورة الفوترة الحالية.",
+    overrideActive: "التجاوز نشط",
+    overrideNotice: "تم تعديل هذه الحصة آخر مرة من قِبل النظام. أي تغيير يدوي سيعطّل التحديثات التلقائية.",
   },
   actions: {
     save: "حفظ التغييرات",
     cancel: "إلغاء",
     saving: "جاري الحفظ...",
     saved: "تم الحفظ!",
-    saveSuccess: "تم تحديث الحصة بنجاح.",
+    saveSuccess: "تم تحديث حصة الطالب بنجاح.",
     lastEditedAt: time => `آخر تعديل: ${time}`,
   },
   info: {
     quotaTitle: "إدارة الحصص",
-    quotaDesc:
-      "سيؤدي تعديل 'الحصص المتبقية' إلى تجاوز التتبع التلقائي للحضور لدورة الفوترة هذه. استخدم هذا للجلسات التكميلية أو أرصدة التعويض.",
+    quotaDesc: "إدارة حصة الحصص الخاصة بالطالب. تتم مزامنة التعديلات مع فوترة النظام.",
     publicTitle: "الملف العام",
-    publicDesc: "ستكون التغييرات على الاسم واللغة مرئية للمعلمين وأولياء الأمور في لوحات التحكم الخاصة بهم على الفور.",
+    publicDesc: "التغييرات هنا تؤثر على الملفات الشخصية العامة.",
   },
   validation: {
     nameRequired: "اسم الطالب مطلوب",
@@ -53,12 +52,12 @@ export const dashboardStudentQuotaAr: StudentQuotaLabels = {
     genderRequired: "الجنس مطلوب",
     teacherRequired: "المعلم مطلوب",
     totalClassesRequired: "إجمالي الحصص مطلوب",
-    totalClassesMin: "يجب أن يكون إجمالي الحصص 0 على الأقل",
+    totalClassesMin: "يجب أن يكون إجمالي الحصص 1 على الأقل",
     classesLeftRequired: "الحصص المتبقية مطلوبة",
     classesLeftMin: "يجب أن تكون الحصص المتبقية 0 على الأقل",
   },
   errors: {
-    invalidId: "معرف الطالب غير صالح.",
+    invalidId: "معرّف الطالب غير صالح",
   },
   audience: {
     studentTitle: "حصصي",

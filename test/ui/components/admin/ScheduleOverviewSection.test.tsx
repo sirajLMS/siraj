@@ -35,33 +35,10 @@ await mock.module("@/frontend/common/components/auth/RequirePermission", () => (
   },
 }));
 
-// Mock the entire ScheduleOverviewView to render desktop directly.
-// NOTE: The common standalone `ScheduleOverviewView` switcher was removed by the
-// Plan v5 mobile/desktop refactor — the section is now composed inline by
-// `AdminDashboardView` (common switcher) which delegates to
-// `ScheduleOverviewDesktopView` / `ScheduleOverviewMobileView` tier views. The
-// mock-module target path below redirects to the canonical desktop tier module
-// (real file) so the import in this file resolves at type-check time; at runtime
-// the mock factory still substitutes our hand-rolled stub for assertion control.
-await mock.module("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop", () => ({
-  ScheduleOverviewDesktopView: (props: UseScheduleOverviewViewModelProps) => {
-    const hasSearchPermission = useUserStore.getState().hasPermission?.(AppPermission.DashboardSearch) ?? false;
-    const { shell, filters } = props.labelsBySection;
-    return (
-      <div data-testid="desktop-view">
-        <div data-testid="section-title">{shell.title}</div>
-        {hasSearchPermission && filters.searchPlaceholder && (
-          <input
-            placeholder={filters.searchPlaceholder}
-            value={props.searchValue}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => props.onSearchChange?.(event.target.value)}
-          />
-        )}
-        {props.rows.length === 0 && <div data-testid="empty-message">{shell.emptyMessage}</div>}
-      </div>
-    );
-  },
-}));
+// Renders the real ScheduleOverviewDesktopView — the section is composed inline
+// by `AdminDashboardView`, which delegates to `ScheduleOverviewDesktopView` /
+// `ScheduleOverviewMobileView` tier views, so this suite mounts the real tier view
+// and drives visibility through its props (e.g. `canDashboardSearch`).
 
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";
@@ -99,15 +76,12 @@ const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
   [ClassExecutionState.OnDemandPendingCredits]: labels.statusLabels.ON_DEMAND_PENDING_CREDITS,
 };
 
-const createMockProps = (overrides: Partial<UseScheduleOverviewViewModelProps> = {}): ScheduleOverviewViewModel => {
-  // Plan v5: the section's standalone `ScheduleOverviewView` switcher was removed
-  // by the mobile/desktop refactor; the section is now rendered inline by tier
-  // switchers (`ScheduleOverviewDesktopView` / `ScheduleOverviewMobileView`).
-  // Those tier views take the full `ScheduleOverviewViewModel` (incl. the fields
-  // the common `useScheduleOverviewViewModel` hook derives at runtime). The
-  // runtime mocks below override the entire module so only the prop fields the
-  // stub consumes matter, but we still surface a type-complete view model here
-  // so `React.createElement(ScheduleOverviewView, props)` passes type-check.
+const createMockProps = (overrides: Partial<ScheduleOverviewViewModel> = {}): ScheduleOverviewViewModel => {
+  // The section is rendered inline by tier switchers (`ScheduleOverviewDesktopView`
+  // / `ScheduleOverviewMobileView`), which take the full `ScheduleOverviewViewModel`
+  // (incl. the fields the common `useScheduleOverviewViewModel` hook derives at
+  // runtime). We surface a type-complete view model here so
+  // `React.createElement(ScheduleOverviewView, props)` passes type-check.
   const base: UseScheduleOverviewViewModelProps = {
     labelsBySection: {
       shell: {
@@ -208,7 +182,7 @@ const renderScheduleView = (
 
 describe("ScheduleOverviewSection", () => {
   test("search input visible with DashboardSearch permission", () => {
-    const props = createMockProps();
+    const props = createMockProps({ canDashboardSearch: true });
     renderScheduleView(props, { permissions: [AppPermission.DashboardSearch], viewport: "desktop" });
 
     const textboxes = screen.getAllByRole("textbox");
@@ -229,7 +203,13 @@ describe("ScheduleOverviewSection", () => {
     const props = createMockPropsWithFilters({
       searchPlaceholder: labels.searchPlaceholder,
     });
-    renderScheduleView(props, { permissions: [AppPermission.DashboardSearch], viewport: "desktop" });
+    renderScheduleView(
+      { ...props, canDashboardSearch: true },
+      {
+        permissions: [AppPermission.DashboardSearch],
+        viewport: "desktop",
+      }
+    );
 
     const textbox = screen.getAllByRole("textbox")[0];
     expect(textbox).toHaveAttribute("placeholder", labels.searchPlaceholder);

@@ -73,7 +73,8 @@
       "__fn": "(time) => `Last updated: ${time}`"
     },
     "update": "Update",
-    "edit": "Edit"
+    "edit": "Edit",
+    "content": "Note content"
   },
   "meetingIdLabel": "Meeting ID:",
   "online": "Online",

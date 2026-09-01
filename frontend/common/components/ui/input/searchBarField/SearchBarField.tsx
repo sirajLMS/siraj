@@ -2,6 +2,7 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { InputAdornment, TextField } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
 
 export interface SearchBarFieldProps {
   readonly value: string;
@@ -9,6 +10,7 @@ export interface SearchBarFieldProps {
   readonly searchingLabel?: string;
   readonly isSearching?: boolean;
   readonly onChange: (value: string) => void;
+  readonly sx?: SxProps<Theme>;
 }
 
 /**
@@ -22,6 +24,7 @@ export function SearchBarField({
   searchingLabel,
   isSearching = false,
   onChange,
+  sx,
 }: Readonly<SearchBarFieldProps>) {
   return (
     <TextField
@@ -33,6 +36,7 @@ export function SearchBarField({
       }}
       placeholder={placeholder}
       helperText={isSearching ? searchingLabel : undefined}
+      sx={sx}
       slotProps={{
         input: {
           startAdornment: (

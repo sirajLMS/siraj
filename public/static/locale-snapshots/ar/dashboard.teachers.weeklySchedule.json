@@ -1,6 +1,6 @@
 {
   "pageTitle": {
-    "__fn": "(name) => `\\u062C\\u062F\\u0648\\u0644 ${name}`"
+    "__fn": "(name) => `\\u0627\\u0644\\u062C\\u062F\\u0648\\u0644 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\\u064A - ${name}`"
   },
   "breadcrumbs": {
     "teachers": "المعلمون",
@@ -21,11 +21,11 @@
   "grid": {
     "teacherTime": "وقت المعلم",
     "available": "متاح",
-    "lunchBreak": "استراحة غداء",
-    "bookedClass": "حصة محجوزة",
+    "lunchBreak": "غداء",
+    "bookedClass": "محجوزة",
     "availableSlot": "فترة متاحة",
     "lastUpdated": {
-      "__fn": "(time) => `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B: ${time}`"
+      "__fn": "(date) => `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B: ${date}`"
     },
     "unknownSubject": "حصة",
     "minutesShort": {
@@ -58,12 +58,12 @@
     "sun": "أحد"
   },
   "dialogs": {
-    "deleteConfirm": "هل أنت متأكد أنك تريد إزالة هذا الحجز؟",
-    "deleteConfirmClass": "هل أنت متأكد أنك تريد إزالة هذه الحصة من جدولك؟",
+    "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذه الفترة؟",
+    "deleteConfirmClass": "هل أنت متأكد أنك تريد حذف هذه الحصة؟",
     "deleteClassTitle": "تأكيد الحذف",
-    "deleteClassMessage": "هل أنت متأكد أنك تريد حذف هذه الحصة؟",
+    "deleteClassMessage": "لا يمكن التراجع عن هذا الإجراء.",
     "clearScheduleTitle": "مسح الجدول الأسبوعي",
-    "clearScheduleMessage": "هل أنت متأكد أنك تريد حذف الجدول؟",
+    "clearScheduleMessage": "هل أنت متأكد أنك تريد مسح الجدول بالكامل؟",
     "confirmYes": "نعم",
     "cancel": "إلغاء"
   },

@@ -31,7 +31,7 @@
     "regenerating": "جارٍ إعادة التوليد..."
   },
   "join": {
-    "joinMeeting": "انضم للاجتماع",
+    "joinMeeting": "انضم إلى الاجتماع",
     "joinUnavailable": "رابط الاجتماع غير متوفر",
     "openInNewTab": "يفتح في علامة تبويب جديدة",
     "emptyTeacher": "أعدّ رابط الاجتماع من إعدادات الملف الشخصي لتفعيل الانضمام.",
@@ -102,20 +102,20 @@
     "recurringSectionTitle": "اجتماع الجدول المتكرر",
     "recurringSectionSubtitle": "تجاوز اختياري لجميع حصص هذا الجدول المتكرر.",
     "createNewConfig": "إنشاء إعداد اجتماع جديد",
-    "recurringFieldsRequired": "اختر مزوداً وأدخل رابط الاجتماع.",
+    "recurringFieldsRequired": "اختر مزودًا وأدخل رابط الاجتماع.",
     "seriesSectionTitle": "إعدادات اجتماع السلسلة",
     "seriesSectionSubtitle": "تنطبق على جميع الحصص المستقبلية من هذا الجدول المتكرر.",
     "manageSeriesLink": "إدارة إعدادات السلسلة الكاملة"
   },
   "providerSelect": {
-    "emptyCatalogTitle": "لا توجد مزودات اجتماعات",
-    "emptyCatalogBody": "يجب على المسؤول إضافة مزودات اجتماعات قبل إعداد الاجتماعات.",
-    "emptyCatalogAdminLink": "إدارة مزودات الاجتماعات",
-    "emptyCatalogContactAdmin": "تواصل مع المسؤول لإضافة مزودات اجتماعات."
+    "emptyCatalogTitle": "لا يوجد مزودو اجتماعات",
+    "emptyCatalogBody": "يجب على المسؤول إضافة مزودي اجتماعات قبل إعداد الاجتماعات.",
+    "emptyCatalogAdminLink": "إدارة مزودي الاجتماعات",
+    "emptyCatalogContactAdmin": "تواصل مع المسؤول لإضافة مزودي اجتماعات."
   },
   "summary": {
     "sectionTitle": "الاجتماع عبر الإنترنت",
-    "loading": "جارٍ تحميل إعدادات الاجتماع...",
+    "loading": "جارٍ تحميل إعدادات الاجتماع…",
     "empty": "لم يتم تكوين اجتماع افتراضي",
     "manageLink": "إدارة إعدادات الاجتماع"
   },
@@ -128,7 +128,7 @@
     "breadcrumbDashboard": "لوحة التحكم",
     "breadcrumbClasses": "الحصص",
     "goToClass": "الانتقال إلى الحصة",
-    "rateSectionTitle": "سعر الفصل المتكرر",
+    "rateSectionTitle": "سعر الحصة المتكررة",
     "hourlyRateLabel": "السعر بالساعة",
     "currencyLabel": "العملة",
     "rateSaveLabel": "حفظ السعر",
@@ -137,8 +137,8 @@
     "rateErrorMessage": "فشل تحديث السعر"
   },
   "reauthNeeded": {
-    "reauthNeededTitle": "أعد ربط حسابك",
-    "reauthNeededMessage": "رموز المزودين التالية على وشك الانتهاء أو انتهت. أعد الربط للاستمرار في توليد روابط الاجتماعات تلقائياً.",
+    "reauthNeededTitle": "أعد ربط حساباتك",
+    "reauthNeededMessage": "رموز المزوّدين التالية منتهية الصلاحية أو على وشك الانتهاء. أعد الربط للاستمرار في إنشاء روابط الاجتماعات تلقائياً.",
     "reconnectButton": "إعادة الربط",
     "reauthExpiringSoon": "على وشك الانتهاء",
     "reauthExpired": "منتهي",
@@ -156,8 +156,8 @@
     "meetingUrl": "رابط الاجتماع"
   },
   "enhancements": {
-    "oauthCallbackSuccess": "تم ربط المزود بنجاح. حسابك أصبح مرتبطاً الآن.",
-    "oauthCallbackError": "فشل رد نداء OAuth. يرجى محاولة إعادة ربط المزود.",
+    "oauthCallbackSuccess": "تم ربط المزود بنجاح. حسابك أصبح مرتبطًا الآن.",
+    "oauthCallbackError": "فشل استدعاء OAuth. يرجى محاولة إعادة ربط المزود.",
     "reconnectAll": "إعادة ربط الكل",
     "reconnecting": "جارٍ إعادة الربط…",
     "reconnectAllSuccess": "تمت إعادة ربط جميع المزودين بنجاح.",
@@ -174,14 +174,14 @@
     "reconnectFailedProviders": {
       "__fn": "(count) => {\n    if (count === 1)\n      return \"\\u0641\\u0634\\u0644 \\u0625\\u0639\\u0627\\u062F\\u0629 \\u0631\\u0628\\u0637 \\u0645\\u0632\\u0648\\u062F \\u0648\\u0627\\u062D\\u062F\";\n    if (count === 2)\n      return \"\\u0641\\u0634\\u0644 \\u0625\\u0639\\u0627\\u062F\\u0629 \\u0631\\u0628\\u0637 \\u0645\\u0632\\u0648\\u062F\\u064A\\u0646\";\n    return `\\u0641\\u0634\\u0644 \\u0625\\u0639\\u0627\\u062F\\u0629 \\u0631\\u0628\\u0637 ${count} \\u0645\\u0632\\u0648\\u062F\\u064A\\u0646`;\n  }"
     },
-    "reconnectAllAriaLabel": "إعادة ربط جميع المزودين المنتهية",
+    "reconnectAllAriaLabel": "إعادة ربط جميع المزودين المنتهية صلاحيتهم",
     "expiresInDays": {
       "__fn": "(days) => {\n    if (days === 1)\n      return \"\\u064A\\u0646\\u062A\\u0647\\u064A \\u062E\\u0644\\u0627\\u0644 \\u064A\\u0648\\u0645 \\u0648\\u0627\\u062D\\u062F\";\n    if (days === 2)\n      return \"\\u064A\\u0646\\u062A\\u0647\\u064A \\u062E\\u0644\\u0627\\u0644 \\u064A\\u0648\\u0645\\u064A\\u0646\";\n    return `\\u064A\\u0646\\u062A\\u0647\\u064A \\u062E\\u0644\\u0627\\u0644 ${days} \\u0623\\u064A\\u0627\\u0645`;\n  }"
     },
     "expiresInHours": {
       "__fn": "(hours) => {\n    if (hours === 1)\n      return \"\\u064A\\u0646\\u062A\\u0647\\u064A \\u062E\\u0644\\u0627\\u0644 \\u0633\\u0627\\u0639\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\";\n    if (hours === 2)\n      return \"\\u064A\\u0646\\u062A\\u0647\\u064A \\u062E\\u0644\\u0627\\u0644 \\u0633\\u0627\\u0639\\u062A\\u064A\\u0646\";\n    return `\\u064A\\u0646\\u062A\\u0647\\u064A \\u062E\\u0644\\u0627\\u0644 ${hours} \\u0633\\u0627\\u0639\\u0627\\u062A`;\n  }"
     },
-    "expired": "منتهي",
+    "expired": "منتهي الصلاحية",
     "reconnect": "إعادة الربط",
     "copyMeetingUrl": "نسخ رابط الاجتماع",
     "urlCopied": "تم نسخ رابط الاجتماع!",
@@ -190,17 +190,17 @@
     "generationSuccess": "تم توليد رابط الاجتماع بنجاح.",
     "generationFailed": "تعذّر توليد رابط الاجتماع.",
     "retryGeneration": "إعادة التوليد",
-    "generationPreviewCallout": "المعاينة ستولّد رابط اجتماع مؤقت دون حفظه.",
+    "generationPreviewCallout": "المعاينة ستولّد رابط اجتماع مؤقتًا دون حفظه.",
     "testConfig": "اختبار الإعداد",
     "previewUrlGenerated": "تم توليد رابط المعاينة. لن يتم حفظ هذا الرابط.",
     "connectFirstProvider": "اربط مزودك الأول",
-    "connectFirstProviderDescription": "اربط مزود اجتماعات لبدء التوليد التلقائي لروابط الاجتماعات لفصولك.",
+    "connectFirstProviderDescription": "اربط مزود اجتماعات لبدء التوليد التلقائي لروابط الاجتماعات لحصصك.",
     "disconnectWarningTitle": "فصل المزود؟",
     "disconnectWarningMessage": "أنت على وشك فصل مزود الاجتماعات هذا. قد تتوقف روابط الاجتماعات الحالية عن العمل.",
-    "disconnectWarningImpact": "ستحتاج الفصول القادمة إلى إدخال الرابط يدئياً حتى يتم إعادة ربط مزود.",
-    "disconnect": "فصل",
+    "disconnectWarningImpact": "ستحتاج الحصص القادمة إلى إدخال الرابط يدويًا حتى يتم إعادة ربط مزود.",
+    "disconnect": "قطع الاتصال",
     "cancel": "إلغاء",
-    "disconnectError": "تعذّر فصل المزود. يرجى المحاولة مرة أخرى.",
+    "disconnectError": "تعذّر قطع الاتصال بالمزود. يرجى المحاولة مرة أخرى.",
     "navigateToAdminSettings": "إعدادات المزود الإدارية",
     "navigateToAdminSettingsAriaLabel": "فتح إعدادات مزود الاجتماعات الإدارية"
   },

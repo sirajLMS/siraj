@@ -33,7 +33,7 @@ export const dashboardSupervisorPortalPendingReviewsAr: PendingReviewsLabels = {
   studentSearchPlaceholder: "ابحث عن طلاب…",
   statusLabels: {
     DRAFT: "مسودة",
-    PENDING_REVIEW: "معلق",
+    PENDING_REVIEW: "قيد المراجعة",
     APPROVED: "مقبول",
     REJECTED: "مرفوض",
   },

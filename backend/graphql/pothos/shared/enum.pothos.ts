@@ -9,7 +9,9 @@ import {
   AvailabilityStatus,
   BilledUnit,
   BookingStatus,
+  CalculationStatus,
   CountryCode,
+  CreditAdjustmentType,
   CreditReason,
   CronConcurrencyPolicy,
   CronJobKind,
@@ -229,6 +231,10 @@ export const CreditReasonPothosEnum = gqlSchemaBuilder.enumType(CreditReason, {
   name: "CreditReason",
 });
 
+export const CreditAdjustmentTypePothosEnum = gqlSchemaBuilder.enumType(CreditAdjustmentType, {
+  name: "CreditAdjustmentType",
+});
+
 export const LessonReportStatusPothosEnum = gqlSchemaBuilder.enumType(LessonReportStatus, {
   name: "LessonReportStatus",
 });
@@ -239,6 +245,10 @@ export const AttendanceEvaluationPothosEnum = gqlSchemaBuilder.enumType(Attendan
 
 export const TeacherDueStatusPothosEnum = gqlSchemaBuilder.enumType(TeacherDueStatus, {
   name: "TeacherDueStatus",
+});
+
+export const CalculationStatusPothosEnum = gqlSchemaBuilder.enumType(CalculationStatus, {
+  name: "CalculationStatus",
 });
 
 export const RateSourcePothosEnum = gqlSchemaBuilder.enumType(RateSource, {

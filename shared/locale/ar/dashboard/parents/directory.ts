@@ -2,7 +2,7 @@ import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/par
 
 export const dashboardParentsDirectoryAr: ParentsDirectoryLabels = {
   pageTitle: "دليل أولياء الأمور",
-  pageSubtitle: "إدارة ملفات أولياء الأمور، حالات الاشتراك، والسجلات المالية.",
+  pageSubtitle: "إدارة ملفات أولياء الأمور، وحالات الاشتراك، والسجلات المالية.",
   searchPlaceholder: "البحث عن أولياء الأمور...",
   records: "سجلات أولياء الأمور",
   metrics: {
@@ -25,7 +25,7 @@ export const dashboardParentsDirectoryAr: ParentsDirectoryLabels = {
   },
   card: {
     guardianOf: name => `ولي أمر ${name}`,
-    unpaidCount: count => `غير مدفوع: ${count}`,
+    unpaidCount: count => `غير مدفوعة: ${count}`,
     invoicesCleared: "تم تسوية الفواتير",
   },
   accountStatus: {

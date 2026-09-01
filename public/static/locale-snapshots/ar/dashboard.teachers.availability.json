@@ -1,25 +1,25 @@
 {
-  "pageTitle": "أداة توفر المعلمين",
-  "pageSubtitle": "عرض والبحث عن الفترات الزمنية المتاحة عبر كادر هيئة التدريس.",
-  "exportPdf": "تصدير PDF",
-  "exportPdfComingSoon": "تصدير PDF قريبًا",
+  "pageTitle": "توفر المعلمين",
+  "pageSubtitle": "عرض توفر المعلمين وإدارته",
+  "exportPdf": "تصدير إلى PDF",
+  "exportPdfComingSoon": "قريبًا",
   "teacherSlotSelected": {
-    "__fn": "(name, id) => `\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062F \\u0641\\u062A\\u0631\\u0629 ${name} (\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645 ${id})`"
+    "__fn": "(name, id) => `\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062F \\u0641\\u062A\\u0631\\u0629 \\u0627\\u0644\\u0645\\u0639\\u0644\\u0645 ${name} (${id})`"
   },
-  "searchTitle": "البحث في جداول المعلمين",
+  "searchTitle": "البحث عن التوفر",
   "from": "من",
   "to": "إلى",
   "gender": "الجنس",
   "any": "الكل",
   "male": "ذكر",
   "female": "أنثى",
-  "submit": "إرسال",
+  "submit": "بحث",
   "breadcrumbs": {
     "teachers": "المعلمون",
     "availability": "التوفر"
   },
   "errors": {
-    "missingTimeRange": "يرجى تحديد وقت البداية والنهاية."
+    "missingTimeRange": "يرجى تحديد الفترة الزمنية."
   },
   "validation": {
     "invalidGender": "قيمة الجنس غير صالحة"
@@ -46,23 +46,23 @@
   },
   "insights": {
     "peakLoad": "ذروة التحميل",
-    "peakLoadDesc": "أعلى نسبة إشغال للمعلمين يومي الاثنين والأربعاء.",
+    "peakLoadDesc": "أكثر الأوقات ازدحامًا لدى المعلمين",
     "availableStaff": "الموظفون المتاحون",
-    "availableStaffDesc": "القدرة الحالية لتخصيص الدورات الفورية.",
+    "availableStaffDesc": "المعلمون المتاحون خلال الساعات المحددة",
     "teachersCount": {
       "__fn": "(count) => `${count} \\u0645\\u0639\\u0644\\u0645`"
     },
     "localTimezones": "المناطق الزمنية المحلية",
-    "localTimezonesDesc": "تغطي هيئة التدريس العالمية 5 مناطق زمنية متميزة."
+    "localTimezonesDesc": "المناطق الزمنية المحلية للمعلمين"
   },
   "mobile": {
-    "pageTitle": "أداة التوفر",
-    "pageSubtitle": "ابحث عن الفترات الشاغرة عبر هيئة التدريس."
+    "pageTitle": "التوفر",
+    "pageSubtitle": "ابحث عن توفر المعلمين واطّلع عليه"
   },
   "status": {
     "live": "مباشر",
     "lastUpdate": {
-      "__fn": "(minutes) => {\n      if (minutes === 1)\n        return `\\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`;\n      return `\\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u0627\\u0626\\u0642`;\n    }"
+      "__fn": "(minutes) => minutes === 1 ? `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629` : `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u0627\\u0626\\u0642`"
     }
   },
   "availabilityGridTitle": "الفترات المتاحة"

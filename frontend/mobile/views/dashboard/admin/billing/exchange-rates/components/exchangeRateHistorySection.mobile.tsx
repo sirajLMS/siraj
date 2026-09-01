@@ -1,11 +1,14 @@
 "use client";
 
 import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
-import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/common/components/ui/display/currencyDisplay";
-import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import { formatExchangeRateTimestamp } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import type { ExchangeRateHistoryProps } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/types";
+import {
+  currencyCodeToOption,
+  currencyOptionToCode,
+} from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/utils";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
+import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect";
 
 export function ExchangeRateHistorySectionMobile({ labels, historyViewModel }: Readonly<ExchangeRateHistoryProps>) {
   const { fromCurrency, toCurrency, maxDays, rows, loading, fromOptions, toOptions, dayOptions } = historyViewModel;
@@ -22,47 +25,21 @@ export function ExchangeRateHistorySectionMobile({ labels, historyViewModel }: R
       </Box>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel id="fx-history-from-mobile">{labels.rateTable.fromCurrency}</InputLabel>
-          <Select
-            labelId="fx-history-from-mobile"
-            label={labels.rateTable.fromCurrency}
-            value={fromCurrency}
-            onChange={event => {
-              const parsed = parseCurrencyCode(event.target.value);
-              if (parsed) {
-                historyViewModel.onFromCurrencyChange(parsed);
-              }
-            }}
-          >
-            {fromOptions.map(currency => (
-              <MenuItem key={currency} value={currency}>
-                <CurrencyDisplay code={currency} parts={[CurrencyDisplayPart.Label, CurrencyDisplayPart.Code]} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <CurrencySelectMobile
+          label={labels.rateTable.fromCurrency}
+          currency={currencyCodeToOption(fromCurrency)}
+          setCurrencyAction={option => historyViewModel.onFromCurrencyChange(currencyOptionToCode(option))}
+          allowedCodes={fromOptions}
+          fullWidth
+        />
 
-        <FormControl size="small" sx={{ minWidth: 200 }}>
-          <InputLabel id="fx-history-to-mobile">{labels.rateTable.toCurrency}</InputLabel>
-          <Select
-            labelId="fx-history-to-mobile"
-            label={labels.rateTable.toCurrency}
-            value={toCurrency}
-            onChange={event => {
-              const parsed = parseCurrencyCode(event.target.value);
-              if (parsed) {
-                historyViewModel.onToCurrencyChange(parsed);
-              }
-            }}
-          >
-            {(toOptions.length > 0 ? toOptions : [toCurrency]).map(currency => (
-              <MenuItem key={currency} value={currency}>
-                <CurrencyDisplay code={currency} parts={[CurrencyDisplayPart.Label, CurrencyDisplayPart.Code]} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <CurrencySelectMobile
+          label={labels.rateTable.toCurrency}
+          currency={currencyCodeToOption(toCurrency)}
+          setCurrencyAction={option => historyViewModel.onToCurrencyChange(currencyOptionToCode(option))}
+          allowedCodes={toOptions}
+          fullWidth
+        />
 
         <FormControl size="small" sx={{ minWidth: 160 }}>
           <InputLabel id="fx-history-days-mobile">{labels.history.daysLabel}</InputLabel>

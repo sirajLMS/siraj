@@ -6,6 +6,7 @@ export * from "./MeetingConfigDeleteDialog";
 export * from "./MeetingConfigFormDialog";
 export * from "./MeetingConfigsBreadcrumb";
 export * from "./MeetingConfigsManager";
+export * from "./meetingConfigActionSlots";
 export * from "./OAuthCallbackHandler";
 export * from "./ReconnectAllAction";
 export * from "./reauth-needed-banner";

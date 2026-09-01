@@ -79,6 +79,14 @@ const teacherDue = {
   insertFailed: "Failed to insert teacher due row.",
 } as const;
 
+const payroll = {
+  notTerminal: "Payroll can only be calculated for sessions in a terminal state.",
+  alreadyPaid: "Payroll has already been disbursed; override blocked.",
+  awaitingSettlement: "Payroll is awaiting settlement and cannot be overridden without force.",
+  invalidTargetStatus: "Invalid payroll override target status.",
+  partialRequiresPercentage: "Partially requires a percentage between 0 and 100.",
+} as const;
+
 const classSubject = {
   createFailed: "Failed to create class subject.",
 } as const;
@@ -384,11 +392,22 @@ export const errorsEn: ErrorsLabels = {
     resetFailed: "Failed to reset appearance draft.",
     unauthorized: "You are not authorized to manage site appearance.",
   },
+  serviceOutage: {
+    title: "We're having trouble reaching our servers",
+    description:
+      "The service is temporarily unavailable. This usually resolves within a few moments — we'll retry automatically, or you can try again now.",
+    autoRetryHint: "Checking the connection automatically…",
+    genericTitle: "Something went wrong",
+    genericDescription: "An unexpected error occurred while loading this page. Please try again.",
+    retry: "Try again",
+    retrying: "Retrying…",
+  },
   classSubject,
   leaveQuota,
   classInstance,
   teacher,
   teacherDue,
+  payroll,
   student,
   category,
   user,
@@ -429,6 +448,7 @@ export const errorsEn: ErrorsLabels = {
   notFound: "The requested resource was not found.",
   unknownName: "Unknown",
   invalidInput: "Invalid input.",
+  tooLong: "Input exceeds the maximum allowed length.",
   invalidNationalId: "The national ID is invalid for the selected nationality.",
 
   // ─── General user creation errors ──────────────────────────────────

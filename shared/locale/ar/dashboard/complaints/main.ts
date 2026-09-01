@@ -9,16 +9,16 @@ export const dashboardComplaintsAr: ComplaintsLabels = {
     contactEmail: "البريد الإلكتروني للتواصل",
     contactEmailPlaceholder: "parent.contact@example.com",
     complaintDetails: "تفاصيل الشكوى",
-    complaintDetailsPlaceholder: "صف مخاوفك بالتفصيل...",
+    complaintDetailsPlaceholder: "اشرح مخاوفك بالتفصيل...",
     submit: "إرسال الشكوى",
     successMessage: "تم إرسال شكواك بنجاح.",
     policyTitle: "نظرة عامة على السياسة",
     policyBody:
-      "نهدف للرد على جميع شكاوى أولياء الأمور خلال 48 ساعة أكاديمية. يجب الإبلاغ عن الأمور العاجلة مباشرة إلى مكتب الإدارة.",
+      "نهدف إلى الرد على جميع شكاوى أولياء الأمور خلال 48 ساعة أكاديمية. يجب الإبلاغ عن الأمور العاجلة مباشرة إلى مكتب الإدارة.",
     recordTitle: "سجل الشكاوى",
     totalRecords: count => `${count} سجل إجمالي`,
     loadOlder: "تحميل السجلات الأقدم",
-    waitingMessage: "في انتظار مراجعة الإدارة وتقديم الرد...",
+    waitingMessage: "في انتظار مراجعة مدير النظام وتقديم الرد...",
     adminResponse: "رد الإدارة",
     regarding: "بخصوص",
     validation: {
@@ -29,8 +29,8 @@ export const dashboardComplaintsAr: ComplaintsLabels = {
       categoryRequired: "يرجى اختيار فئة الشكوى.",
     },
     statusLabels: {
-      pending: "معلقة",
-      resolved: "تم الحل",
+      pending: "قيد الانتظار",
+      resolved: "تمت المعالجة",
     },
     categoryLabels: {
       REGARDING_TEACHER: "بخصوص المعلم",
@@ -40,7 +40,7 @@ export const dashboardComplaintsAr: ComplaintsLabels = {
   },
   admin: {
     pageTitle: "قائمة معالجة الشكاوى",
-    pageSubtitle: "مراجعة والرد على شكاوى المؤسسة.",
+    pageSubtitle: "مراجعة شكاوى المؤسسة والرد عليها.",
     metrics: {
       unanswered: "غير مجاب",
       answered: "تم الرد",

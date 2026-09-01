@@ -1,8 +1,7 @@
 "use client";
 
-import { ArrowBackOutlined, HourglassTopOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
+import { ArrowBackOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack } from "@mui/material";
-import Link from "next/link";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
@@ -12,7 +11,6 @@ import { StudentCreditsDataGrid } from "@/frontend/desktop/views/dashboard/stude
 
 export function StudentCreditsDesktopView({
   balance,
-  studentId,
   transactions,
   totalCount,
   reasonFilter,
@@ -30,19 +28,7 @@ export function StudentCreditsDesktopView({
 }: Readonly<StudentCreditsViewModel>) {
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader
-        title={labels.pageTitle}
-        subtitle={labels.pageSubtitle}
-        actions={
-          studentId ? (
-            <Link href={`/students/${studentId}/profile?tab=credit-hours`} style={{ textDecoration: "none" }}>
-              <Button variant="outlined" startIcon={<HourglassTopOutlined />}>
-                {labels.hoursRemaining}
-              </Button>
-            </Link>
-          ) : null
-        }
-      />
+      <DesktopPageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
       <Box sx={{ mb: 3 }}>
         <DesktopMetricCardGrid
@@ -54,7 +40,6 @@ export function StudentCreditsDesktopView({
                 labelKey: "hours-remaining",
                 label: labels.hoursRemaining,
                 icon: PaymentsOutlined,
-                subLabel: `${balance.hoursTotal.toFixed(2)} ${labels.hoursTotal.toLowerCase()}`,
               },
               {
                 key: "hours-total",

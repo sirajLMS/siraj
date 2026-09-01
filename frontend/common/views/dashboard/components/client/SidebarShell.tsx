@@ -470,7 +470,7 @@ function SidebarAccountFooter({
         })}
       >
         <ListItemIcon sx={{ minWidth: isCollapsed ? "unset" : 40, color: "inherit" }}>
-          <UserAvatar src={avatarUrl} sx={{ width: 32, height: 32 }} />
+          <UserAvatar src={avatarUrl} label={userName} sx={{ width: 32, height: 32 }} />
         </ListItemIcon>
         {isExpanded && (
           <ListItemText

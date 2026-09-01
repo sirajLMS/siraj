@@ -3,12 +3,13 @@
 import { SaveOutlined, SyncOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, FormControlLabel, Stack, Switch, TextField } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { Controller } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
+import { paymentReadOnlyFieldSx } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentFormFieldsShared.styles";
 import { PackagePlanSelectShared } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanSelectShared";
 import {
   CurrencyMismatchAlert,
@@ -55,7 +56,12 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
       >
         {isSubmitting ? t.form.saving : t.form.submit}
       </Button>
-      <Button variant="text" onClick={() => router.push("/accounting/payments")} disabled={isSubmitting}>
+      <Button
+        variant="text"
+        color="inherit"
+        onClick={() => router.push("/accounting/payments")}
+        disabled={isSubmitting}
+      >
         {t.form.cancel}
       </Button>
     </>
@@ -80,17 +86,24 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={title} subtitle={t.formSubtitle} />
+      <MobilePageHeader title={title} subtitle={isEditing ? t.editFormSubtitle : t.formSubtitle} />
 
       {isEditing ? (
         <Box component="form" onSubmit={handleEditSubmit(onEditSubmit)} noValidate>
           <Stack spacing={2.5} sx={{ px: 2, pb: 6 }}>
-            <TextField size="small" label={t.form.student} value={existing?.studentName ?? "—"} disabled />
+            <TextField
+              size="small"
+              label={t.form.student}
+              value={existing?.studentName ?? "—"}
+              disabled
+              sx={paymentReadOnlyFieldSx}
+            />
             <TextField
               size="small"
               label={`${t.columns.paid} / ${t.form.currency}`}
               value={existing ? `${Number(existing.amount ?? 0).toFixed(2)} ${existing.currency ?? ""}` : "—"}
               disabled
+              sx={paymentReadOnlyFieldSx}
             />
 
             <Controller
@@ -207,37 +220,34 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
               />
             </Stack>
 
-            <Stack direction="row" spacing={1.5}>
-              <Controller
-                name="currency"
-                control={control}
-                render={({ field }) => (
-                  <Box sx={{ flex: 1 }}>
-                    <CurrencySelect
-                      currency={getCurrencyByCode(field.value) ?? null}
-                      setCurrencyAction={selected => field.onChange(selected.code)}
-                      onBlurAction={field.onBlur}
-                      label={t.form.currency}
-                      error={Boolean(errors.currency)}
-                      helperText={errors.currency?.message}
-                      fullWidth
-                    />
-                  </Box>
-                )}
-              />
-              <Controller
-                name="paymentGateway"
-                control={control}
-                render={({ field }) => (
-                  <GatewaySelectField
-                    value={field.value}
-                    onChange={field.onChange}
-                    {...gatewayFieldArgs}
-                    sx={{ flex: 1.4 }}
-                  />
-                )}
-              />
-            </Stack>
+            <Controller
+              name="currency"
+              control={control}
+              render={({ field }) => (
+                <CurrencySelect
+                  currency={getCurrencyByCode(field.value) ?? null}
+                  setCurrencyAction={selected => field.onChange(selected.code)}
+                  onBlurAction={field.onBlur}
+                  label={t.form.currency}
+                  error={Boolean(errors.currency)}
+                  helperText={errors.currency?.message}
+                  fullWidth
+                />
+              )}
+            />
+
+            <Controller
+              name="paymentGateway"
+              control={control}
+              render={({ field }) => (
+                <GatewaySelectField
+                  value={field.value}
+                  onChange={field.onChange}
+                  {...gatewayFieldArgs}
+                  sx={{ width: "100%" }}
+                />
+              )}
+            />
 
             <CurrencyMismatchAlert
               active={currencyMismatch}
@@ -263,8 +273,14 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
               control={control}
               render={({ field }) => (
                 <FormControlLabel
-                  control={<Switch checked={field.value} onChange={e => field.onChange(e.target.checked)} />}
+                  control={
+                    <Switch
+                      checked={field.value}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => field.onChange(e.target.checked)}
+                    />
+                  }
                   label={field.value ? t.form.paidToggleOn : t.form.paidToggleOff}
+                  sx={{ mx: 0, py: 0.5 }}
                 />
               )}
             />

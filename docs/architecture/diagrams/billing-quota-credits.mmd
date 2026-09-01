@@ -1,0 +1,30 @@
+%% Siraj — billing: dual ledgers (credit-hours + class quotas), FX, invoicing
+flowchart LR
+    subgraph Money["Money in"]
+        Pay["Accounting payment<br/>(idempotent, advisory lock)"]
+        Inv["Invoices<br/>+ coverage months + PDF download"]
+    end
+
+    subgraph Ledgers["Parallel append-only ledgers"]
+        PKG["package_plans<br/>(credit-hour packages)"]
+        CT["credit_transactions<br/>hour ledger — XOR amount/hours CHECK"]
+        QL["quota_ledger<br/>GRANT / RESERVE / REDEEM / RELEASE / EXPIRE / ADJUST"]
+        QT["quotas<br/>denormalized counters + optimistic version"]
+    end
+
+    subgraph Consumption["Consumption"]
+        FIFO["selectQuotaForBookingFIFO<br/>priority desc, validUntil asc"]
+        Redeem["Session start:<br/>redeem quota or deduct credit hours"]
+    end
+
+    subgraph Currency["Currency"]
+        FX["FX ingestion<br/>Fixer / OpenExchangeRates"]
+        Hedge["Currency hedges + display conversion"]
+    end
+
+    Pay --> PKG --> CT
+    Pay --> QL
+    QL --> QT --> FIFO --> Redeem
+    CT --> Redeem
+    FX --> Hedge --> Inv
+    Pay --> Inv

@@ -208,3 +208,11 @@ bun run test:ui:kill         # stop stale test servers (port 3066 only — never
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
 
+
+### Async Assertion Style (lint-enforced)
+
+- `await expect(...)` trips the `typescript(await-thenable)` lint because `expect()` is not Promise-typed. Assert resolution via `const result = await promise; expect(result)...` and rejection via `return expect(promise).rejects.toThrow(...)` (return, not await).
+
+### Audit-Log Cleanup in Journeys
+
+- Journeys whose actions mirror into `audit_logs` cannot hard-delete cast users afterward — the immutability trigger (`prevent_audit_log_mod_trigger`) blocks row updates/deletes and the actor FK is `ON DELETE SET NULL`. Cleanup must: disable the trigger, delete ONLY the run's audit rows (scoped to the cast actors), re-enable the trigger in `finally`.

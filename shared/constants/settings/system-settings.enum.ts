@@ -22,4 +22,5 @@ export enum SystemSettingCategory {
   Meeting = "meeting",
   Billing = "billing",
   General = "general",
+  Payroll = "payroll",
 }

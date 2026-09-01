@@ -1,5 +1,9 @@
 # Login Cold-Start Resilience
 
+> See also `docs/backend/db-availability-fail-fast.md` for the platform-wide
+> DB-outage handling (pool timeouts, `DatabaseUnavailableError`, root error
+> pages, `/api/health/db`) layered on top of the login-specific strategy below.
+
 ## Problem
 On Vercel serverless + Neon PostgreSQL, the login flow produces false errors ("invalid credentials", "too many attempts") during cold starts. When Neon's serverless HTTP endpoint and/or the connection pool are cold, the first login attempt after idle time fails because rate limiter operations, DB reads, and session creation throw transient connection errors.
 

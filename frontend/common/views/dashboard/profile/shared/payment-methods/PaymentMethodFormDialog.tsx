@@ -51,6 +51,8 @@ export type PaymentMethodFormDialogProps = {
   readonly allowedDirections: readonly PaymentDirection[];
   readonly editMethod: UserPaymentMethodFieldsFragment | null;
   readonly labels: PaymentMethodProfileLabels;
+  /** Full-screen dialog chrome; `true` from the mobile tier caller, `false` on desktop. */
+  readonly fullScreen?: boolean;
   readonly onClose: () => void;
   readonly onSaved: () => void;
 };

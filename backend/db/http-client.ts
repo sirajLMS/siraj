@@ -27,7 +27,7 @@
  * ```
  */
 
-import { type NeonQueryFunction, neon } from "@neondatabase/serverless";
+import { type NeonQueryFunction, neon, neonConfig } from "@neondatabase/serverless";
 import { drizzle as drizzleNeonHttp, type NeonHttpDatabase } from "drizzle-orm/neon-http";
 import { isNeonHttpEligible } from "@/backend/db/connection-strategy";
 import { relations } from "@/backend/db/drizzleRelations";
@@ -38,6 +38,23 @@ let httpClient: NeonQueryFunction<boolean, boolean> | null = null;
 
 /** Singleton instance for Drizzle ORM HTTP database interface. */
 let httpDbInstance: NeonHttpDatabase<typeof relations> | null = null;
+
+/**
+ * Bounds a single HTTP query so a stalled Neon endpoint fails fast instead of
+ * hanging the request until the platform or OS kills the fetch.
+ */
+const NEON_HTTP_TIMEOUT_MS = 8_000;
+
+/**
+ * Bounds every Neon HTTP query so a stalled endpoint fails fast instead of
+ * hanging the request until the platform or OS kills the fetch. Applied via
+ * the global Neon config once; a fresh `AbortSignal.timeout` is created per
+ * request (a single shared signal would abort all later queries after firing).
+ */
+function configureNeonHttpTimeout(): void {
+  neonConfig.fetchFunction = (input: string | URL | Request, init?: RequestInit) =>
+    fetch(input, { ...init, signal: AbortSignal.timeout(NEON_HTTP_TIMEOUT_MS) });
+}
 
 /**
  * Returns the module-level singleton instance of the raw `@neondatabase/serverless` HTTP query function.
@@ -54,6 +71,7 @@ export function getNeonHttpClient(): NeonQueryFunction<boolean, boolean> {
           'DB_CONNECTION_MODE != "pg", and DB_NEON_HTTP_ENABLED != "false".'
       );
     }
+    configureNeonHttpTimeout();
     httpClient = neon(getEnvironmentConfig().databaseUrl);
   }
   return httpClient;

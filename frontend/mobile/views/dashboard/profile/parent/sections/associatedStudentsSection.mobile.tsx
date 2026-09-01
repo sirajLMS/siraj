@@ -8,10 +8,11 @@ export function AssociatedStudentsSectionMobileView({
   labels,
   rows,
   loading,
+  emptyMessage,
 }: Readonly<AssociatedStudentsSectionVariantProps>) {
   return (
     <MobileSectionPanel title={labels.parent.sections.students} edgeToEdge contentInset={false}>
-      <AssociatedStudentsCardListMobile rows={rows} labels={labels} loading={loading} />
+      <AssociatedStudentsCardListMobile rows={rows} labels={labels} loading={loading} emptyMessage={emptyMessage} />
     </MobileSectionPanel>
   );
 }

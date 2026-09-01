@@ -1,0 +1,8 @@
+export const uiRichTextAr = {
+  bold: "غامق",
+  italic: "مائل",
+  underline: "تسطير",
+  bulletList: "قائمة نقطية",
+  orderedList: "قائمة مرقّمة",
+  editorLabel: "محرر نص منسّق",
+};

@@ -1,5 +1,8 @@
+import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useMemo, useState } from "react";
+import { USER_SELECT_LIMIT } from "@/frontend/common/components/ui/input/userSelect/userSelect.constants";
+import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import { isAdminMetricKey } from "@/frontend/common/views/dashboard/admin/__shared__/adminDashboardView";
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
@@ -155,12 +158,32 @@ export function MockAdminDashboardContainer() {
   );
 }
 
+// MockedProvider requires exact query+variables matches; TeacherAutocomplete fires an
+// initial `teachers` query with an empty search on mount.
+const apolloMocks = [
+  {
+    request: {
+      query: teachersQueryDocument,
+      variables: { search: "", limit: USER_SELECT_LIMIT },
+    },
+    result: { data: { teachers: [] } },
+  },
+];
+
 const meta: Meta<typeof MockAdminDashboardContainer> = {
   title: "Views/dashboard/dashboard/AdminDashboardContainer",
   component: MockAdminDashboardContainer,
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
+    // The story renders a mock container component, so the static source panel would dump
+    // the whole component body; keep the docs snippet at the usage level instead.
+    docs: {
+      source: {
+        code: "<MockAdminDashboardContainer />",
+        language: "tsx",
+      },
+    },
   },
   decorators: [
     Story => {
@@ -174,7 +197,11 @@ const meta: Meta<typeof MockAdminDashboardContainer> = {
         scheduleRows: MOCK_SCHEDULE,
         teachers: MOCK_TEACHERS,
       });
-      return <Story />;
+      return (
+        <MockedProvider mocks={apolloMocks}>
+          <Story />
+        </MockedProvider>
+      );
     },
   ],
 };

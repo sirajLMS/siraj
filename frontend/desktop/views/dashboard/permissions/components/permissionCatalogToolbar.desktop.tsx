@@ -1,7 +1,7 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { Box, FormControl, InputAdornment, MenuItem, Select, TextField } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { PermissionCatalogToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
 
 export function PermissionCatalogToolbarDesktop({
@@ -24,26 +24,13 @@ export function PermissionCatalogToolbarDesktop({
         gap: 2,
       }}
     >
-      <TextField
-        size="small"
-        value={searchQuery}
-        onChange={e => onSearchChange(e.target.value)}
-        placeholder={t.searchPlaceholder}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-          htmlInput: { autoComplete: "off" },
-        }}
-        sx={{ minWidth: 320 }}
-      />
+      <Box sx={{ minWidth: 320 }}>
+        <SearchBarField value={searchQuery} placeholder={t.searchPlaceholder} onChange={onSearchChange} />
+      </Box>
 
       <FormControl size="small" sx={{ minWidth: 200 }}>
-        <Select value={selectedCategory} onChange={e => onCategoryChange(e.target.value)} displayEmpty>
+        <InputLabel>{t.columnCategory}</InputLabel>
+        <Select value={selectedCategory} onChange={e => onCategoryChange(e.target.value)} label={t.columnCategory}>
           <MenuItem value="all">{t.allCategories}</MenuItem>
           {categories.map(cat => (
             <MenuItem key={cat} value={cat}>

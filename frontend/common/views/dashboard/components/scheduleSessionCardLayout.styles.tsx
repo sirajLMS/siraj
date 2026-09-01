@@ -1,10 +1,10 @@
 "use client";
 
-import { Avatar, Box, type Theme, Typography } from "@mui/material";
+import { Box, type Theme, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ScheduleSessionPersonAccentTone } from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout.types";
 
-function getPersonAccentColor(tone: ScheduleSessionPersonAccentTone, theme: Theme): string {
+export function getPersonAccentColor(tone: ScheduleSessionPersonAccentTone, theme: Theme): string {
   switch (tone) {
     case "teacher":
       return theme.palette.onSurfaceVariant;
@@ -165,45 +165,4 @@ export const StyledScheduleSessionPersonCell = styled(Box)(({ theme }) => ({
     paddingInlineEnd: theme.spacing(0.75),
     borderInlineEnd: `1px solid ${theme.palette.outlineVariant}`,
   },
-}));
-
-export const StyledScheduleSessionPersonContentRow = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  minWidth: 0,
-  width: "100%",
-}));
-
-export const StyledScheduleSessionPersonAvatar = styled(Avatar)(({ theme }) => ({
-  width: 32,
-  height: 32,
-  flexShrink: 0,
-  fontSize: theme.typography.labelSm.fontSize,
-  fontWeight: theme.typography.labelSm.fontWeight,
-  backgroundColor: theme.palette.surfaceContainerHighest,
-  color: theme.palette.onSurfaceVariant,
-}));
-
-export const StyledScheduleSessionPersonText = styled(Box)({
-  minWidth: 0,
-  flex: 1,
-  overflow: "hidden",
-});
-
-export const StyledScheduleSessionPersonLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onSurfaceVariant,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-}));
-
-export const StyledScheduleSessionPersonName = styled(Typography, {
-  shouldForwardProp: prop => prop !== "tone",
-})<{ tone: ScheduleSessionPersonAccentTone }>(({ theme, tone }) => ({
-  color: getPersonAccentColor(tone, theme),
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-  display: "block",
 }));

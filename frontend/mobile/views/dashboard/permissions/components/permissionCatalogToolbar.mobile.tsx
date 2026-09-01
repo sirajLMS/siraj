@@ -1,7 +1,7 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { Box, Button, InputAdornment, TextField } from "@mui/material";
+import { Box, Button } from "@mui/material";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { PermissionCatalogToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileContentInset, MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
 
@@ -59,23 +59,7 @@ export function PermissionCatalogToolbarMobile({
       }}
     >
       <MobileContentInset>
-        <TextField
-          size="small"
-          value={searchQuery}
-          onChange={e => onSearchChange(e.target.value)}
-          placeholder={t.searchPlaceholder}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchOutlined fontSize="small" />
-                </InputAdornment>
-              ),
-            },
-            htmlInput: { autoComplete: "off" },
-          }}
-          sx={{ minWidth: "100%" }}
-        />
+        <SearchBarField value={searchQuery} placeholder={t.searchPlaceholder} onChange={onSearchChange} />
       </MobileContentInset>
 
       <MobileHorizontalScrollRow sx={{ pb: 1 }}>

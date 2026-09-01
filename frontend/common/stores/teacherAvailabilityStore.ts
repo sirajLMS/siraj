@@ -11,7 +11,9 @@ export interface AvailabilitySearchFilters {
 
 interface TeacherAvailabilityState {
   readonly filters: AvailabilitySearchFilters;
+  readonly hasSearched: boolean;
   setSearchFilters: (filters: AvailabilitySearchFilters) => void;
+  setHasSearched: (hasSearched: boolean) => void;
   reset: () => void;
 }
 
@@ -23,6 +25,8 @@ const initialFilters: AvailabilitySearchFilters = {
 
 export const useTeacherAvailabilityStore = create<TeacherAvailabilityState>(set => ({
   filters: initialFilters,
+  hasSearched: false,
   setSearchFilters: filters => set({ filters }),
-  reset: () => set({ filters: initialFilters }),
+  setHasSearched: hasSearched => set({ hasSearched }),
+  reset: () => set({ filters: initialFilters, hasSearched: false }),
 }));

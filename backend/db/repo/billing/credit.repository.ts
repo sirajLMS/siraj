@@ -5,6 +5,7 @@ import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
 import { DomainError } from "@/backend/lib/errors";
 import {
+  type CreditAdjustmentInsertInput,
   type CreditTransactionInsertType,
   type CreditTransactionSelectType,
   type DBTransaction,
@@ -328,6 +329,39 @@ export namespace CreditRepository {
       creditedByUserId: rest.creditedByUserId,
       idempotencyKey: rest.idempotencyKey,
     });
+  };
+
+  /**
+   * Admin credit adjustment row (ADD / SUBTRACT / SUBTRACT_WITH_CARRYOVER).
+   * Unlike purchase/booking rows it also stamps the adjustment kind and, for
+   * carryover adjustments, the carryover metadata consumed by the settlement
+   * flow. Never linked to a payment or class instance.
+   */
+  export const createAdjustment = async (
+    tx: DBTransaction,
+    input: CreditAdjustmentInsertInput
+  ): Promise<CreditTransactionSelectType> => {
+    const [row] = await tx
+      .insert(creditTransactions)
+      .values({
+        studentId: input.studentId,
+        changeAmount: input.changeAmount,
+        reason: input.reason,
+        adjustmentType: input.adjustmentType,
+        carryoverTeacherId: input.carryoverTeacherId ?? null,
+        carryoverFromDate: input.carryoverFromDate ?? null,
+        carryoverToDate: input.carryoverToDate ?? null,
+        carryoverPaymentDate: input.carryoverPaymentDate ?? null,
+        sourcePaymentId: null,
+        classInstanceId: null,
+        notes: input.notes ?? null,
+        internalNotes: input.internalNotes ?? null,
+        creditedByUserId: input.creditedByUserId,
+        idempotencyKey: input.idempotencyKey,
+      })
+      .returning();
+    if (!row) throw new DomainError("INSERT_FAILED", "credit_transactions insert returned no row");
+    return row;
   };
 
   export const findByIdempotencyKeys = async (

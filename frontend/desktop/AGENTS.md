@@ -88,9 +88,7 @@ frontend/desktop/
         │   │       └── adminInvoiceCard.desktop.tsx
         │   ├── home/
         │   │   └── scheduleOverview/
-        │   │       ├── scheduleOverview.desktop.tsx
-        │   │       └── components/
-        │   │           └── scheduleOverviewCard.desktop.tsx
+        │   │       └── scheduleOverview.desktop.tsx
         │   └── parents/
         │       ├── home/
         │       │   └── parentsView.desktop.tsx

@@ -17,6 +17,7 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import type { ViewportTier } from "@/frontend/common/context/ViewportContext";
 import { teacherOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useTeacherOwnProfileViewModel } from "@/frontend/common/views/dashboard/teachers/own-profile/useTeacherOwnProfileViewModel";
 import { TeacherOwnProfileDesktopView } from "@/frontend/desktop/views/dashboard/teachers/own-profile/teacherOwnProfileView.desktop";
@@ -52,13 +53,11 @@ const profileMockData = {
   },
 };
 
-function createMocks(): MockLink.MockedResponse[] {
+function createMocks(outcome: Pick<MockLink.MockedResponse, "result" | "error">): MockLink.MockedResponse[] {
   return [
     {
-      request: {
-        query: teacherOwnProfileQueryDocument,
-      },
-      result: { data: profileMockData },
+      request: { query: teacherOwnProfileQueryDocument },
+      ...outcome,
       maxUsageCount: Number.POSITIVE_INFINITY,
     },
   ];
@@ -75,27 +74,51 @@ async function assertProfileSections() {
   expect(screen.getByText(labels.pageTitle)).toBeInTheDocument();
   expect(screen.getByText(labels.sections.contact)).toBeInTheDocument();
   expect(screen.getByText(labels.sections.salary)).toBeInTheDocument();
+  expect(screen.getByText(labels.fields.fullName)).toBeInTheDocument();
+  expect(screen.getByText(labels.fields.email)).toBeInTheDocument();
   expect(screen.getByText("mariam@example.com")).toBeInTheDocument();
+}
+
+/**
+ * A section panel renders its title in a dedicated title bar only when the
+ * scaffold passes the section `title` prop — otherwise the Panel holds the
+ * body alone as its single child element.
+ */
+function expectSectionPanelTitleBar(title: string) {
+  const panels = Array.from(document.querySelectorAll(".MuiPaper-root"));
+  const panel = panels.find(
+    element => element.childElementCount >= 2 && (element.firstElementChild?.textContent?.includes(title) ?? false)
+  );
+  expect(panel).toBeDefined();
+}
+
+function assertSectionPanelTitleBars() {
+  expectSectionPanelTitleBar(labels.sections.contact);
+  expectSectionPanelTitleBar(labels.sections.salary);
+}
+
+function renderTierView(viewport: ViewportTier, mocks: MockLink.MockedResponse[]) {
+  const element = viewport === "mobile" ? <TeacherOwnProfileMobileContainer /> : <TeacherOwnProfileDesktopContainer />;
+  return renderWithWrapper(element, { locale, themeMode: "dark", mocks, viewport });
 }
 
 describe("TeacherOwnProfileView (post profileLayoutShared migration)", () => {
   test("desktop view renders profile sections inside section panels", async () => {
-    renderWithWrapper(<TeacherOwnProfileDesktopContainer />, {
-      locale,
-      themeMode: "dark",
-      mocks: createMocks(),
-      viewport: "desktop",
-    });
+    renderTierView("desktop", createMocks({ result: { data: profileMockData } }));
     await assertProfileSections();
+    assertSectionPanelTitleBars();
   });
 
   test("mobile view renders profile sections inside section panels", async () => {
-    renderWithWrapper(<TeacherOwnProfileMobileContainer />, {
-      locale,
-      themeMode: "dark",
-      mocks: createMocks(),
-      viewport: "mobile",
-    });
+    renderTierView("mobile", createMocks({ result: { data: profileMockData } }));
     await assertProfileSections();
+    assertSectionPanelTitleBars();
+  });
+
+  test("load failure renders the shared ErrorState alert, not a bare error text", async () => {
+    renderTierView("desktop", createMocks({ error: new Error("network failure") }));
+
+    const alertMessage = await screen.findByText(labels.errors.failedToLoad);
+    expect(alertMessage.closest(".MuiAlert-root")).not.toBeNull();
   });
 });

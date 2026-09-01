@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
@@ -9,6 +9,13 @@ import { DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { DBTransaction, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+
+let tErrors: ErrorsLabels;
+
+beforeAll(() => {
+  tErrors = getServerTranslations("ar").errorsTranslations;
+});
 
 async function createTestUser(tx: DBTransaction, name: string, emailPrefix: string): Promise<UserSelectType> {
   const now = new Date();
@@ -218,7 +225,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
         teacherId: teacher.id,
         start: "2026-06-24T14:00:00Z",
         end: "2026-06-24T15:00:00Z",
-        expectedError: "خارج نوافذ توفر المعلم",
+        expectedError: tErrors.outsideAvailability,
       });
     }));
 
@@ -242,7 +249,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
         teacherId: teacher.id,
         start: "2026-06-26T12:30:00Z",
         end: "2026-06-26T13:30:00Z",
-        expectedError: "نمط عدم التفرغ المتكرر",
+        expectedError: tErrors.teacherUnavailabilityConflict,
       });
     }));
 
@@ -285,7 +292,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
         teacherId: teacher.id,
         start: "2026-07-06T10:00:00Z",
         end: "2026-07-06T11:00:00Z",
-        expectedError: "إجازة معتمدة",
+        expectedError: tErrors.teacherOnVacation,
       });
     }));
 

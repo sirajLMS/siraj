@@ -1,10 +1,13 @@
 "use client";
 
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { type PersonOption, resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect";
-import { SharedDialogCancelButton } from "@/frontend/common/views/dashboard/permissions/components/__shared__/sharedDialogButtons";
+import {
+  SharedDialogAssignButton,
+  SharedDialogCancelButton,
+} from "@/frontend/common/views/dashboard/permissions/components/__shared__/sharedDialogButtons";
 import type { AssignGroupDialogSharedProps } from "@/frontend/common/views/dashboard/permissions/types/assignGroupDialogShared.types";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
@@ -73,23 +76,7 @@ export function AssignGroupDialogShared({ labels, props, slots }: Readonly<Assig
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <SharedDialogCancelButton label={t.cancel} disabled={isLoading} onClick={onClose} />
-        <Button
-          type="submit"
-          form={formId}
-          disabled={isLoading}
-          variant="contained"
-          sx={theme => ({
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            fontWeight: 700,
-            borderRadius: 1.5,
-            "&:hover": {
-              backgroundColor: theme.palette.primary.dark,
-            },
-          })}
-        >
-          {t.assignButton}
-        </Button>
+        <SharedDialogAssignButton label={t.assignButton} disabled={isLoading} type="submit" form={formId} />
       </DialogActions>
     </Dialog>
   );

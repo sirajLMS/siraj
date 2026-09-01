@@ -103,6 +103,8 @@ function toGraphQLCategory(category: SystemSettingCategory): GraphQLSystemSettin
       return GraphQLSystemSettingCategory.Billing;
     case SystemSettingCategory.General:
       return GraphQLSystemSettingCategory.General;
+    case SystemSettingCategory.Payroll:
+      return GraphQLSystemSettingCategory.Payroll;
     default: {
       // Exhaustiveness check
       const exhaustiveCheck: never = category;

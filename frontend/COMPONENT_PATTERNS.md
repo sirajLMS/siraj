@@ -1,6 +1,6 @@
 # Dashboard UI Component Patterns
 
-**Last updated:** 2026-06-13  
+**Last updated:** 2026-08-29  
 **Status:** Phases 0–2 complete; card/header migration complete on implemented pages; typography standardized on class detail cards
 
 This document defines the shared UI layer for Siraj dashboard pages. All new dashboard views **must** follow these patterns.
@@ -70,6 +70,10 @@ DashboardLayoutMobile (px: 0 — edge-to-edge)
 - **Use for:** Table sections, list sections with filter/export buttons
 - **Children:** `AppDataGrid` (desktop) or card lists (mobile)
 - **Desktop grid sections:** Use `DesktopSectionPanel` with `contentPadding={false}` so the data grid is flush under the title bar. The header bar keeps its own padding; only the grid body is edge-to-edge. For mixed sections (filters + grid), apply `desktopSectionContentInsetSx` to non-grid prefix content.
+
+### Navbar shells
+
+`NavbarChrome` and `NavbarStaticShell` (`frontend/common/views/dashboard/components/navbar/`) both delegate the brand block (logo + app title + role label) to the shared pure-presentational `NavbarBrandBlock.tsx` fragment. `NavbarStaticShell` renders the pre-hydration HTML (a server component with no hooks), so it must stay hook/theme-callback-free — it passes CSS-variable values (`var(--mui-palette-...)`) into the fragment instead of JS theme callbacks. **Never** introduce `useTheme` or theme callbacks into `NavbarStaticShell`.
 
 ---
 
@@ -144,7 +148,7 @@ Dashboard home uses [`MetricCardGrid`](frontend/common/views/dashboard/reports/c
 
 ## Status badges
 
-Use shared [`StatusBadge`](frontend/common/components/ui/state/StatusBadge.tsx):
+Use shared [`StatusBadge`](frontend/common/components/ui/badge/StatusBadge.tsx):
 
 ```tsx
 <StatusBadge category="studentAccount" status={row.accountStatus} label={label} />
@@ -154,17 +158,42 @@ Use shared [`StatusBadge`](frontend/common/components/ui/state/StatusBadge.tsx):
 
 ### Categories
 
-| Category          | Use case                       | Palette mapping                                            |
-| ----------------- | ------------------------------ | ---------------------------------------------------------- |
-| `studentAccount`  | Student directory              | `palette.status.active / .pending / .blocked`              |
-| `classSession`    | Schedule alerts session status | active → active, upcoming → pending, missed → blocked      |
-| `classStatus`     | Dashboard schedule overview    | scheduled → confirmed, in_progress → active, etc.          |
-| `sessionTracking` | Status tracking rows           | regular, suspended_pending, on_leave, pending_verification |
-| `trackingStatus`  | Reschedule tracking            | rescheduled, pending_leave                                 |
-| `session`         | Direct `palette.status` key    | Pass status key directly                                   |
-| `enrollment`      | Enrollment labels              | `palette.status.active / .pending / .cancelled`            |
+| Category             | Use case                       | Palette mapping                                                                                          |
+| -------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `studentAccount`     | Student directory              | regular → active, deactivated → cancelled, suspended → blocked, on_leave → secondary, on_trial → pending |
+| `staffAccount`       | Staff directory                | activated → active, deactivated → cancelled                                                              |
+| `session`            | Direct `palette.status` key   | Pass status key directly (`active / pending / blocked / confirmed / completed / cancelled`)              |
+| `enrollment`         | Enrollment labels              | regular → active, prospect → pending, withdrawn → cancelled                                              |
+| `classSession`       | Schedule alerts session status | active → active, upcoming → pending, missed/hold → blocked, late → confirmed                             |
+| `classStatus`        | Dashboard schedule overview    | scheduled → confirmed, in_progress → active, completed → completed, cancelled → cancelled, absent → blocked |
+| `classInstance`      | Class instance status          | PENDING/NOT_ACTIVATED → pending, ACTIVATED/RUNNING → active, TAKEN/COMPLETED → completed, ABSENT → blocked, LEAVE → cancelled |
+| `sessionTracking`    | Status tracking rows           | regular/PRESENT → active, suspended_pending/ABSENT → blocked, pending_verification/PENDING/LATE → pending; on_leave → secondary |
+| `trackingStatus`     | Reschedule tracking            | rescheduled → active, pending_leave → pending                                                            |
+| `invoice`            | Billing invoices               | PAID → completed, PENDING/UNPAID → pending, OVERDUE → blocked, PAYMENT_PENDING → confirmed               |
+| `paymentMethod`      | Payment methods                | active → active, verified → confirmed, unverified → pending, inactive → cancelled                        |
+| `syncStatus`         | Provider sync runs             | success → completed, running/unknown → pending, partial → confirmed, failed → blocked                    |
+| `quotaStatus`        | Quota records                  | ACTIVE → active, EXPIRED → completed, ARCHIVED → blocked, PENDING → pending                              |
+| `cronRunStatus`      | Cron run history               | COMPLETED → completed, PENDING/RUNNING/RETRYING → pending, FAILED/TIMEOUT → blocked, CANCELLED → cancelled |
+| `cronScheduleStatus` | Cron schedules                 | ACTIVE → active, PAUSED → pending, DISABLED → cancelled                                                  |
 
 **Do not** use inline `Chip` with hardcoded colors for status display.
+
+---
+
+## Avatars / profile links
+
+### PersonProfileLink
+
+Use shared [`PersonProfileLink`](frontend/common/components/ui/display/personProfileLink/PersonProfileLink.tsx) for every linked person name + avatar cell. Props per [`profileLinkShared.types.ts`](frontend/common/components/ui/display/__shared__/profileLinkShared.types.ts): `href?`, `name`, `avatarUrl?`, `showAvatar?`, `avatarSize?`, `fallbackInitial?`, `label?`, `typographyVariant?`, `fontWeight?`, `emphasizeLink?`.
+
+- **Rule:** never hand-roll styled `Avatar` + manual `Link` person cells — `PersonProfileLink` is the canonical primitive.
+- **Rule:** bespoke person cells must migrate to these shared primitives (done for the dashboard schedule-session card).
+
+### UserAvatar
+
+Use shared [`UserAvatar`](frontend/common/components/ui/avatar/UserAvatar.tsx) for standalone user avatars. Fallback initials come from [`avatarInitials`](frontend/common/utils/avatar.ts) via the `BaseAvatar` scaffold.
+
+- **Rule:** use `avatarInitials`-based fallbacks — do not write bespoke initials helpers.
 
 ---
 
@@ -318,7 +347,8 @@ When building or refactoring a dashboard page:
 - [ ] Use `SectionPanel` for table/list sections
 - [ ] Desktop table → feature `*DataGrid` wrapping `AppDataGrid` / `DesktopAppDataGrid` with `paginationOptions`
 - [ ] Mobile list → `MobileCardList` + `MobileCardListItem` with `paginationOptions` — no sibling mobile pagers; server ViewModels use `buildServerPaginationOptions`
-- [ ] Status cells → shared `StatusBadge`
+- [ ] Status cells → shared [`StatusBadge`](frontend/common/components/ui/badge/StatusBadge.tsx) with the correct `category`
+- [ ] Person name/links → shared `PersonProfileLink`; standalone avatars → `UserAvatar` (never hand-rolled Avatar + Link or bespoke initials helpers)
 - [ ] Pass i18n `noEntries` / `noClasses` to DataGrid `emptyMessage`
 - [ ] Wire real pagination (no decorative prev/next buttons)
 - [ ] Person pickers → tier `userSelect` Autocomplete (`TeacherAutocompleteDesktop` / `StudentAutocompleteMobile` / …) — never inline MUI Autocomplete + directory `useQuery` in views

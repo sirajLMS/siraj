@@ -7,11 +7,13 @@ import { dashboardAccountingStudentCreditHoursAr } from "@/shared/locale/ar/dash
 import { dashboardAdminAr } from "@/shared/locale/ar/dashboard/admin";
 import { dashboardDstMigrationAr } from "@/shared/locale/ar/dashboard/admin/dstMigration.ts";
 import { dashboardAdminViewAr } from "@/shared/locale/ar/dashboard/admin/view.ts";
+import { dashboardBillingCreditAdjustmentAr } from "@/shared/locale/ar/dashboard/billing/creditAdjustment.ts";
 import { dashboardBillingCurrencyHedgesAr } from "@/shared/locale/ar/dashboard/billing/currencyHedges.ts";
 import { dashboardBillingExchangeRatesAr } from "@/shared/locale/ar/dashboard/billing/exchangeRates.ts";
 import { dashboardBillingAr } from "@/shared/locale/ar/dashboard/billing/main.ts";
 import { dashboardBillingManualAr } from "@/shared/locale/ar/dashboard/billing/manual.ts";
 import { dashboardBillingPaymentAr } from "@/shared/locale/ar/dashboard/billing/payment.ts";
+import { dashboardBillingPayrollAr } from "@/shared/locale/ar/dashboard/billing/payroll.ts";
 import { quotaAr } from "@/shared/locale/ar/dashboard/billing/quota.ts";
 import { dashboardBillingSupportedCurrenciesAr } from "@/shared/locale/ar/dashboard/billing/supportedCurrencies.ts";
 
@@ -118,6 +120,7 @@ import { uiMeetingConfigRecurringScheduleAr } from "@/shared/locale/ar/ui/meetin
 import { uiMeetingConfigSummaryAr } from "@/shared/locale/ar/ui/meetingConfig/summary.ts";
 import { uiPaymentMethodAr } from "@/shared/locale/ar/ui/paymentMethod";
 import { uiPhoneInputAr } from "@/shared/locale/ar/ui/phone-input.ts";
+import { uiRichTextAr } from "@/shared/locale/ar/ui/rich-text.ts";
 import { uiTagInputAr } from "@/shared/locale/ar/ui/tag-input.ts";
 import { uiTimezoneSelectAr } from "@/shared/locale/ar/ui/timezone-select.ts";
 import { uiUserSelectAr } from "@/shared/locale/ar/ui/user-select.ts";
@@ -149,6 +152,7 @@ export const arMessages: Translations = {
     meetingConfigRecurringSchedule: uiMeetingConfigRecurringScheduleAr,
     paymentMethod: uiPaymentMethodAr,
     phoneInput: uiPhoneInputAr,
+    richText: uiRichTextAr,
     tagInput: uiTagInputAr,
     timezoneSelect: uiTimezoneSelectAr,
     userSelect: uiUserSelectAr,
@@ -162,6 +166,8 @@ export const arMessages: Translations = {
     billingManual: dashboardBillingManualAr,
     billingQuota: quotaAr,
     billingPayment: dashboardBillingPaymentAr,
+    billingCreditAdjustment: dashboardBillingCreditAdjustmentAr,
+    billingPayroll: dashboardBillingPayrollAr,
     accountingPayments: dashboardAccountingPaymentsAr,
     accountingPackages: dashboardAccountingPackagePlansAr,
     accountingStudentCreditHours: dashboardAccountingStudentCreditHoursAr,

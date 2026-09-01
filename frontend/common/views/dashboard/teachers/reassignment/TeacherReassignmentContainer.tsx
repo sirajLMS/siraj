@@ -1,11 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { LoadingState } from "@/frontend/common/components/ui";
+import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { type StudentByIdQuery, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -63,10 +62,6 @@ function mapStudentData(studentData: StudentQueryData | undefined): Reassignment
     version: s.version ?? null,
     updatedAt: s.updatedAt ?? null,
   };
-}
-
-function ReassignmentErrorState({ message }: { readonly message: string }) {
-  return <Typography sx={{ color: theme => theme.palette.error.main }}>{message}</Typography>;
 }
 
 const lazyViews = createLazyView<TeacherReassignmentViewModel>(
@@ -183,7 +178,7 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
   const viewModel = useTeacherReassignmentViewModel(viewModelProps);
 
   if (!studentId) {
-    return <ReassignmentErrorState message={reassignmentLabels.errors.invalidId} />;
+    return <ErrorState message={reassignmentLabels.errors.invalidId} />;
   }
 
   if (studentLoading) {
@@ -192,11 +187,11 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
 
   if (studentError) {
     logger.error("Error loading teacher reassignment data:", { studentError });
-    return <ReassignmentErrorState message={commonLabels.loadFailed} />;
+    return <ErrorState message={commonLabels.loadFailed} />;
   }
 
   if (!student) {
-    return <ReassignmentErrorState message={reassignmentLabels.errors.invalidId} />;
+    return <ErrorState message={reassignmentLabels.errors.invalidId} />;
   }
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;

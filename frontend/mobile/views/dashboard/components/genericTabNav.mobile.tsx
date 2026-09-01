@@ -1,13 +1,12 @@
 "use client";
 
-import { Box, Button, Chip, Typography } from "@mui/material";
-import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { Box, Button, Typography, useTheme } from "@mui/material";
+import { type KeyboardEvent, useEffect, useRef } from "react";
 import {
   type GenericTabNavVariantProps,
   isDateTabNavProps,
 } from "@/frontend/common/views/dashboard/components/genericTabNav.types";
-import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
+import { MobileHorizontalScrollRow, MobileTabPill } from "@/frontend/mobile/components/ui";
 
 export type GenericTabNavMobileViewProps = GenericTabNavVariantProps<string>;
 
@@ -16,6 +15,28 @@ function DefaultTabNavMobile({
   tabs,
   ariaLabel,
 }: Readonly<Extract<GenericTabNavMobileViewProps, { variant?: "default" }>>) {
+  const { direction } = useTheme();
+  const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+
+  // The pill tablist is link-based (no MUI Tabs wrapper on mobile), so the row
+  // re-implements the usual tablist keyboard contract: roving tabindex with
+  // arrow/Home/End focus movement, RTL-aware arrow direction.
+  const targetIndexForKey = (key: string, index: number): number | null => {
+    const forwardKey = direction === "rtl" ? "ArrowLeft" : "ArrowRight";
+    if (key === "Home") return 0;
+    if (key === "End") return tabs.length - 1;
+    if (key === forwardKey) return (index + 1) % tabs.length;
+    if (key === "ArrowLeft" || key === "ArrowRight") return (index - 1 + tabs.length) % tabs.length;
+    return null;
+  };
+
+  const handleKeyDown = (index: number) => (event: KeyboardEvent<HTMLElement>) => {
+    const targetIndex = targetIndexForKey(event.key, index);
+    if (targetIndex === null) return;
+    event.preventDefault();
+    tabRefs.current[targetIndex]?.focus();
+  };
+
   return (
     <Box
       sx={theme => ({
@@ -27,40 +48,18 @@ function DefaultTabNavMobile({
       aria-label={ariaLabel}
     >
       <MobileHorizontalScrollRow>
-        {tabs.map(tab => {
-          const isActive = activeTab === tab.id;
-
-          return (
-            <Chip
-              key={tab.id}
-              component={Link}
-              href={tab.href}
-              scroll={false}
-              role="tab"
-              aria-selected={isActive}
-              aria-current={isActive ? "page" : undefined}
-              label={tab.label}
-              clickable
-              sx={theme => ({
-                flexShrink: 0,
-                textDecoration: "none",
-                ...(isActive
-                  ? {
-                      bgcolor: theme.palette.primary.main,
-                      color: theme.palette.onPrimary,
-                      borderColor: theme.palette.primary.dark,
-                    }
-                  : {
-                      bgcolor: "transparent",
-                      color: theme.palette.text.primary,
-                      borderColor: theme.palette.divider,
-                    }),
-                borderWidth: 1,
-                borderStyle: "solid",
-              })}
-            />
-          );
-        })}
+        {tabs.map((tab, index) => (
+          <MobileTabPill
+            key={tab.id}
+            label={tab.label}
+            href={tab.href}
+            isActive={activeTab === tab.id}
+            tabRef={element => {
+              tabRefs.current[index] = element;
+            }}
+            onKeyDown={handleKeyDown(index)}
+          />
+        ))}
       </MobileHorizontalScrollRow>
     </Box>
   );

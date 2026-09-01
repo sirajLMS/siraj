@@ -34,7 +34,7 @@ export const dashboardParentLifecycleAr: ParentLifecycleLabels = {
   },
   successMessage: "تم تحديث حالة دورة حياة ولي الأمر بنجاح.",
   errors: {
-    invalidId: "معرف ولي أمر غير صالح.",
+    invalidId: "معرّف ولي أمر غير صالح.",
   },
   status: {
     regular: "عادي",

@@ -9,7 +9,7 @@ Siraj is a Next.js 16 (App Router) full-stack application using:
 - **Frontend**: React 19, MUI v9, Apollo Client v4, Zustand
 - **Backend**: Pothos GraphQL, Drizzle ORM, PostgreSQL
 - **Testing**: Bun test runner, Vitest for Storybook, Playwright for E2E
-- **i18n**: **Custom compile-time TypeScript system** in `shared/locale/` (replaces legacy `next-intl`; see `shared/AGENTS.md` for rules). Next.js native `[locale]` routing preserved.
+- **i18n**: **Custom compile-time TypeScript system** in `shared/locale/` (replaces legacy `next-intl`; see `shared/AGENTS.md` for rules). Locale is cookie/header-driven (`NEXT_LOCALE`) — URLs are NOT locale-prefixed (no `[locale]` segment under `app/`).
 
 ## Essential Commands
 
@@ -434,6 +434,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `frontend/THEME_PALETTE.md` - Color tokens and access patterns
 - `docs/frontend/emotion-rtl-stylis.md` - Emotion RTL cache rules (never pass stylis `prefixer`; `::placeholder` crash)
 - `docs/IDEMPOTENCY.md` - Idempotency patterns
+- `docs/services/teacher-payroll.md` - Teacher payroll engine: money math, override idempotency, permission-filtered surfaces, migration/backfill rehearsal evidence
 - `docs/drizzle/prepared-statements.md` - Drizzle Prepared Statements 2.0 pattern reference
 - `docs/drizzle/neon-http-client.md` - Neon HTTP Client & Provider-Agnostic Stateless Queries reference
 - `docs/graphql/dataloader-batching.md` - Pothos DataLoader batching pattern reference
@@ -444,6 +445,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/services/general-user-creation.md` - General user creation pattern (createUserOfType null extension, specialized group filtering, cache eviction)
 - `docs/billing/quota-system.md` - Quota System: append-only ledger, FIFO selection, periodic rollover, on-demand scheduling integration
 - `docs/billing/credit-hours-system.md` - Credit-Hours accounting: hour-based parallel ledger, package plans, accounting payments, XOR CHECK, push+migrate dual provisioning (plan: `.ai/plans/student-credit-hours-system`)
+- `docs/billing/credit-adjustments.md` - Credit Adjustment System: manual Add/Subtract/Carryover operator adjustments, server-derived idempotency (lock-then-replay-check ordering), rich-text sanitizer, carryover payout handoff (plan: `.ai/plans/credit-adjustment-system`)
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines
 - `docs/services/cron-service.md` - Cron service pattern reference
 - `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern for common/desktop/mobile triplication
@@ -472,6 +474,8 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/workflows/plan-doc-reconciliation.md` - Plan-vs-canonical-doc reconciliation workflow (docs-only plan pattern, anchor-on-text, outcome-pointer rule, known-open-issues propagation, phantom-spec-code handling, markdown link-integrity loop)
 - `docs/backend/serverless-cold-start-optimization.md` - Serverless cold-start optimization patterns (permission context, env-config pre-warm, singleton persistence, HTTP batching, client log batching)
 - `docs/backend/login-cold-start-resilience.md` - Login cold-start resilience patterns (fail-open rate limiter, retryTransient on DB reads, frontend retry on SERVICE_UNAVAILABLE, env-config transient short TTL)
+- `docs/backend/db-availability-fail-fast.md` - DB-outage handling (pool/fetch timeouts, `DatabaseUnavailableError` + digest sentinel, root error pages, `/api/health/db` probe, auto-retry UX)
+- `docs/drizzle/dialect-aware-constraints.md` - Dialect-aware CHECK constraints (PG/SQLite) and soft-delete partial unique indexes
 - `docs/graphql/domain-error-extensions-code.md` - DomainError → GraphQLError extensions.code propagation pattern
 - `docs/observability/new-relic-integration.md` - New Relic APM integration (Hybrid Agent, GraphQL resolver tracing, zero dev/test overhead)
 

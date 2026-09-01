@@ -4,11 +4,11 @@ import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import {
   type TeacherClassListCellProps,
-  TeacherClassName,
   type TeacherClassRow,
   TeacherClassRowActions,
   TeacherClassSchedule,
   TeacherClassStatusSummary,
+  TeacherClassStudentLink,
 } from "@/frontend/common/views/dashboard/teachers/classes/__shared__/teacherClassListViewShared";
 
 /** DataGrid column contract for the desktop teacher class list. */
@@ -22,7 +22,7 @@ export function buildTeacherClassListColumns(
       headerName: labels.columns.student,
       flex: 1,
       minWidth: 160,
-      renderCell: ({ row }) => <TeacherClassName name={row.studentName} />,
+      renderCell: ({ row }) => <TeacherClassStudentLink row={row} slots={slots} />,
     },
     {
       field: "scheduledStartAt",

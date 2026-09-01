@@ -8,7 +8,6 @@ import type { AppearancePreset } from "@/frontend/common/providers/theme/presets
 import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 import { AppearanceErrorBoundary } from "@/frontend/common/views/dashboard/components/customize/AppearanceErrorBoundary";
 import { ColorField } from "@/frontend/common/views/dashboard/components/customize/ColorEditorSection";
-import { CustomizeSidebar } from "@/frontend/common/views/dashboard/components/customize/CustomizeSidebar";
 import { CustomizeToolbar } from "@/frontend/common/views/dashboard/components/customize/CustomizeToolbar";
 import {
   CustomizeOverlayContext,
@@ -51,16 +50,15 @@ export interface CustomizeOverlayProps {
 }
 
 /**
- * Site-appearance customizer overlay root (Task 9.9, AC-35).
+ * Site-appearance customizer overlay root.
  *
  * Compound composition: the overlay exposes static sub-components
- * (`Toolbar`, `Sidebar`, `PresetGrid`, `ColorField`) as thin wrappers
- * around the existing editor components so call sites compose like:
+ * (`Toolbar`, `PresetGrid`, `ColorField`) as thin wrappers around the
+ * existing editor components so call sites compose like:
  *
  * ```tsx
  * <CustomizeOverlay>
- *   {customizeMode ? <CustomizeOverlay.Toolbar /> : null}
- *   {customizeMode ? <CustomizeOverlay.Sidebar /> : null}
+ *   <CustomizeOverlay.Toolbar />
  * </CustomizeOverlay>
  * ```
  *
@@ -70,8 +68,9 @@ export interface CustomizeOverlayProps {
  *  1. **Focus trapping + restoration** — on enter, the
  *     previously-focused element is captured into `previousFocusRef`.
  *     While open, Tab / Shift+Tab cycles focus within the overlay
- *     surfaces (toolbar + sidebar). On `Escape`, focus is restored to
- *     the captured element and `?customize=1` is stripped from the URL.
+ *     surfaces (toolbar and, on desktop, the customize sidebar). On
+ *     `Escape`, focus is restored to the captured element and
+ *     `?customize=1` is stripped from the URL.
  *  2. **`aria-live="polite"` announcements** — a visually-hidden region
  *     mirrors short status messages ("Draft saved", "Published") for
  *     assistive tech. The toolbar writes via `useCustomizeOverlayAnnounce`.
@@ -81,10 +80,11 @@ export interface CustomizeOverlayProps {
  *     and closes the overlay. When customize mode is off, no boundary —
  *     the dashboard's own error boundary remains in effect.
  *
- * Mounting: the dashboard layouts (desktop + mobile) render
- * `<CustomizeOverlay>` once at the top of the dashboard tree, wrapping
- * the entire tree so the toolbar (fixed top) and sidebar (in-flow flex
- * item) both live inside the overlay's context.
+ * Mounting: `CustomizeModeShell` renders `<CustomizeOverlay>` once at the
+ * top of the dashboard tree, wrapping the entire tree so the toolbar
+ * (fixed top, both tiers) and the desktop customize sidebar (an in-flow
+ * flex item mounted by the desktop dashboard layout) both live inside
+ * the overlay's context.
  */
 export function CustomizeOverlay({ children }: Readonly<CustomizeOverlayProps>) {
   const customizeMode = useCustomizeMode();
@@ -252,19 +252,6 @@ CustomizeOverlay.Toolbar = function CustomizeOverlayToolbar() {
   return (
     <Box component="span" data-customize-overlay-surface="true" sx={{ display: "contents" }}>
       <CustomizeToolbar />
-    </Box>
-  );
-};
-
-/**
- * Thin wrapper around `CustomizeSidebar` — same focus-surface tagging
- * as `Toolbar`. The sidebar is an in-flow flex item on desktop; the
- * `display: contents` wrapper preserves that layout.
- */
-CustomizeOverlay.Sidebar = function CustomizeOverlaySidebar() {
-  return (
-    <Box component="span" data-customize-overlay-surface="true" sx={{ display: "contents" }}>
-      <CustomizeSidebar />
     </Box>
   );
 };

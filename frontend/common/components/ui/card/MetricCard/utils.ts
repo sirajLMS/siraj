@@ -16,7 +16,9 @@ export function valueColor({ variant, theme }: { variant: MetricCardVariant; the
     case "error":
       return theme.palette.error.main;
     case "highlight":
-      return theme.palette.primary.light;
+      // emphasis comes from the card chrome (glow border + filled icon); a
+      // lighter value color only reads as dimmer/disabled next to siblings
+      return theme.palette.primary.main;
     case "danger":
       return theme.palette.error.main;
     case "default":

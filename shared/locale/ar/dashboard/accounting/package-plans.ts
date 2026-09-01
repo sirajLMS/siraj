@@ -1,7 +1,7 @@
 import type { PackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans";
 
 export const dashboardAccountingPackagePlansAr: PackagePlansLabels = {
-  pageTitle: "الباقات",
+  pageTitle: "باقات الساعات",
   pageSubtitle: "باقات ساعات معتمدة محددة مسبقاً تملأ نموذج إضافة الدفعة تلقائياً.",
   createPlan: "إنشاء باقة",
   createTitle: "إنشاء باقة",
@@ -38,7 +38,8 @@ export const dashboardAccountingPackagePlansAr: PackagePlansLabels = {
   },
 
   archiveTitle: "أرشفة الباقة",
-  archiveBody: name => `أرشفة "${name}"؟ المدفوعات السابقة تحتفظ بلقختها، لكن الباقة تختفي من نماذج الدفع الجديدة.`,
+  archiveBody: name =>
+    `أرشفة "${name}"؟ تحتفظ المدفوعات السابقة بلقطة بياناتها المسجلة، لكن الباقة تختفي من نماذج الدفع الجديدة.`,
   archiveConfirm: "أرشفة",
   archived: "مؤرشفة",
   empty: "لا توجد باقات بعد. أنشئ أول باقة لتفعيل الدفع بالباقات.",

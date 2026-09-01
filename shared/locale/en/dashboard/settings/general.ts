@@ -57,6 +57,7 @@ export const dashboardSettingsGeneralEn: SettingsGeneralTabLabels = {
     meeting: "Meeting",
     billing: "Billing",
     general: "General",
+    payroll: "Payroll",
   },
   dataTypeLabels: {
     string: "String",

@@ -6,7 +6,7 @@ export const dashboardStaffDirectoryAr: StaffDirectoryLabels = {
   mobileTitle: "دليل الموظفين",
   metrics: {
     totalAdmin: "إجمالي المديرين",
-    systemStaff: "موظفي النظام",
+    systemStaff: "موظفو النظام",
     activeNow: "نشط الآن",
     alerts: "تنبيهات الصلاحيات",
   },
@@ -56,5 +56,5 @@ export const dashboardStaffDirectoryAr: StaffDirectoryLabels = {
     supervisor: "مشرف",
   },
   showingOf: (count, total) => `عرض ${count} من أصل ${total} نتيجة`,
-  noEntries: "لا يوجد مديرين",
+  noEntries: "لا يوجد مديرون",
 };

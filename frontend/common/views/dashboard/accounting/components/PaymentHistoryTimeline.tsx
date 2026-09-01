@@ -47,27 +47,17 @@ export function PaymentHistoryTimeline({ events, labels, emptyLabel, locale }: R
         const isLast = index === ordered.length - 1;
         const tone = kindDotTone[String(event.kind)] ?? "info";
         return (
-          <Stack
-            key={event.id ?? `history-${index}`}
-            direction="row"
-            spacing={2}
-            component="li"
-            sx={{ alignItems: "stretch" }}
-          >
-            <Stack sx={{ alignItems: "center", width: 20 }}>
+          <Stack key={event.id ?? `history-${index}`} component="li" spacing={0.5} sx={{ pb: isLast ? 0 : 3 }}>
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
               <Box
                 sx={theme => ({
                   width: 10,
                   height: 10,
                   borderRadius: "50%",
-                  mt: 1,
                   bgcolor: theme.palette[tone].main,
                   flexShrink: 0,
                 })}
               />
-              {isLast ? null : <Box sx={theme => ({ width: 2, flex: 1, bgcolor: theme.palette.outlineVariant })} />}
-            </Stack>
-            <Stack sx={{ pb: isLast ? 0 : 3, minWidth: 0 }}>
               <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
                 {labels[String(event.kind)] ?? String(event.kind)}
                 {event.hoursDelta != null ? (
@@ -79,6 +69,15 @@ export function PaymentHistoryTimeline({ events, labels, emptyLabel, locale }: R
                   </Box>
                 ) : null}
               </Typography>
+            </Stack>
+            <Box
+              sx={theme => ({
+                ml: "4px",
+                pl: 1.5,
+                borderLeft: isLast ? 0 : 2,
+                borderColor: theme.palette.outlineVariant,
+              })}
+            >
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 <HistoryOutlined sx={theme => ({ fontSize: 14, color: theme.palette.onSurfaceVariant })} />
                 <Typography variant="labelSm" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
@@ -93,7 +92,7 @@ export function PaymentHistoryTimeline({ events, labels, emptyLabel, locale }: R
                   {event.notes}
                 </Typography>
               ) : null}
-            </Stack>
+            </Box>
           </Stack>
         );
       })}

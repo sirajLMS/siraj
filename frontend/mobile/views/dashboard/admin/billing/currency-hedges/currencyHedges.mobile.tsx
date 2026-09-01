@@ -1,15 +1,16 @@
 "use client";
 
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, IconButton, Typography } from "@mui/material";
-import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
-import { BillingMobileListShellShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/billingMobileListShellShared";
+import { Box, IconButton } from "@mui/material";
+import { CurrencyDisplayPart } from "@/frontend/common/components/ui/display/currencyDisplay";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import type {
   CurrencyHedgesViewModel,
   HedgeRow,
 } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/useCurrencyHedgesViewModel";
 import { formatHedgeTimestamp } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/utils";
-import { MobileCardListItem, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
+import { MobileCardListItem, MobileCurrencyDisplay, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
+import { BillingMobileListShellShared } from "@/frontend/mobile/views/dashboard/admin/billing/__shared__";
 import { useAppLocale } from "@/shared/locale";
 
 export function CurrencyHedgesMobileView({
@@ -40,9 +41,12 @@ export function CurrencyHedgesMobileView({
         <MobileCardListItem variant="edge-to-edge">
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1 }}>
-              <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
-                {getCurrencyDisplayName(row.currency, locale)}
-              </Typography>
+              <MobileCurrencyDisplay
+                code={row.currency}
+                parts={[CurrencyDisplayPart.Label]}
+                typographyVariant="titleLg"
+                sx={{ fontWeight: 700 }}
+              />
               <Box sx={{ display: "flex", gap: 0.5 }}>
                 <IconButton size="small" aria-label={actions.editHedge} onClick={() => onEdit(row)}>
                   <EditOutlined fontSize="small" />
@@ -52,22 +56,10 @@ export function CurrencyHedgesMobileView({
                 </IconButton>
               </Box>
             </Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{columns.amount}</Typography>
-              <Typography>{row.amount}</Typography>
-            </Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{columns.hedgeType}</Typography>
-              <Typography>{row.hedgeType}</Typography>
-            </Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{columns.notes}</Typography>
-              <Typography>{row.notes ?? ""}</Typography>
-            </Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-              <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{columns.updatedAt}</Typography>
-              <Typography>{formatHedgeTimestamp(row.updatedAt, locale)}</Typography>
-            </Box>
+            <LabeledField label={columns.amount} value={row.amount} />
+            <LabeledField label={columns.hedgeType} value={row.hedgeType} />
+            <LabeledField label={columns.notes} value={row.notes ?? ""} />
+            <LabeledField label={columns.updatedAt} value={formatHedgeTimestamp(row.updatedAt, locale)} />
           </Box>
         </MobileCardListItem>
       )}

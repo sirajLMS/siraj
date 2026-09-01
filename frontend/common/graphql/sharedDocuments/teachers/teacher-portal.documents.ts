@@ -51,6 +51,7 @@ export const teacherAssignedClassesQueryDocument: TypedDocumentNode<TeacherAssig
       totalCount
       rows {
         id
+        studentId
         studentName
         scheduledStartAt
         scheduledEndAt

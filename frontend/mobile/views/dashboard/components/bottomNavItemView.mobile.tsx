@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
+import type { CSSProperties } from "react";
 import type { NavIconKey } from "@/frontend/common/views/dashboard/config/navIconKeys";
 import { NavIcon } from "@/frontend/common/views/dashboard/config/navIconRegistry";
 import { Link } from "@/shared/i18n";
@@ -25,16 +26,21 @@ export function BottomNavItemViewMobile({
   isActive,
   isScrollable,
 }: Readonly<BottomNavItemViewMobileProps>) {
+  // The Link anchor is the flex child of the nav strip, so the item sizing
+  // (equal-share vs fixed scroll width) must live on its inline style — flex
+  // rules on the inner Box would not participate in the strip layout.
+  const linkFlexStyle: CSSProperties = isScrollable
+    ? { flex: `0 0 ${BOTTOM_NAV_ITEM_MIN_WIDTH}px`, maxWidth: 104 }
+    : { flex: "1 1 0", minWidth: 0 };
   return (
-    <Link href={href} style={{ textDecoration: "none" }}>
+    <Link href={href} style={{ display: "flex", textDecoration: "none", ...linkFlexStyle }}>
       <Box
         key={itemKey}
         aria-label={label}
         aria-current={isActive ? "page" : undefined}
         sx={theme => ({
-          flex: isScrollable ? `0 0 ${BOTTOM_NAV_ITEM_MIN_WIDTH}px` : 1,
-          minWidth: isScrollable ? BOTTOM_NAV_ITEM_MIN_WIDTH : 0,
-          maxWidth: isScrollable ? 104 : "none",
+          width: "100%",
+          height: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",

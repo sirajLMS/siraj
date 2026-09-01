@@ -380,6 +380,15 @@ export interface PhoneInputLabels {
   readonly phoneNumber: string;
 }
 
+export interface RichTextLabels {
+  readonly bold: string;
+  readonly italic: string;
+  readonly underline: string;
+  readonly bulletList: string;
+  readonly orderedList: string;
+  readonly editorLabel: string;
+}
+
 export interface TagInputLabels {
   readonly label: string;
   readonly placeholder: string;
@@ -410,6 +419,7 @@ export interface UiLabels {
   readonly languageSelector: LanguageSelectorLabels;
   readonly localizedString: LocalizedStringLabels;
   readonly phoneInput: PhoneInputLabels;
+  readonly richText: RichTextLabels;
   readonly tagInput: TagInputLabels;
   readonly timezoneSelect: TimezoneSelectLabels;
   readonly meetingConfig: MeetingConfigLabels;

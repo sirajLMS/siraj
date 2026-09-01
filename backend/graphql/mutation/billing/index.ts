@@ -1,6 +1,7 @@
 import "./accounting.mutation";
 import "./payment-method.mutation";
 import "./credit.mutation";
+import "./credit-adjustment.mutation";
 import "./billing-payments.mutation";
 import "./quota.mutation";
 import "./billing-management.mutation";

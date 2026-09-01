@@ -1,7 +1,7 @@
 import type { SupervisorDashboardLabels } from "@/shared/locale/types/dashboard/supervisorPortal/supervisorDashboard";
 
 export const dashboardSupervisorPortalDashboardAr: SupervisorDashboardLabels = {
-  pageTitle: "لوحة المشرف",
+  pageTitle: "لوحة تحكم المشرف",
   welcomeMessage: name => `أهلًا، ${name}`,
   pendingReviewsHero: count => `لديك ${count} مراجعات معلقة بحاجة إلى اهتمامك`,
   pendingReviewsSubtitle: "راجع تقارير الحصص المقدّمة من المعلمين",

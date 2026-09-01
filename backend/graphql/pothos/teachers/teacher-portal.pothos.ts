@@ -79,6 +79,7 @@ export const TeacherAssignedClassRef =
 export const TeacherAssignedClassPothosObject = TeacherAssignedClassRef.implement({
   fields: t => ({
     id: t.exposeString("id"),
+    studentId: t.exposeString("studentId"),
     studentName: t.exposeString("studentName"),
     scheduledStartAt: t.exposeString("scheduledStartAt"),
     scheduledEndAt: t.exposeString("scheduledEndAt"),

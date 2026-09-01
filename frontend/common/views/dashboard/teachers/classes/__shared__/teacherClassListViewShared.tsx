@@ -5,6 +5,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type { ComponentType } from "react";
 import { PrimaryPageAction } from "@/frontend/common/components/ui/button";
 import type { MeetingJoinActionProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import {
@@ -43,9 +44,15 @@ export interface ClassSessionActionButtonSlotProps {
   readonly fullWidth?: boolean;
 }
 
+export interface TeacherClassPersonProfileLinkSlotProps {
+  readonly href: string | undefined;
+  readonly name: string;
+}
+
 export interface TeacherClassListActionSlots {
   readonly MeetingJoinAction: ComponentType<Readonly<MeetingJoinActionProps>>;
   readonly ClassSessionActionButton: ComponentType<Readonly<ClassSessionActionButtonSlotProps>>;
+  readonly PersonProfileLink: ComponentType<Readonly<TeacherClassPersonProfileLinkSlotProps>>;
 }
 
 export interface TeacherClassListCellProps {
@@ -56,8 +63,14 @@ export interface TeacherClassListCellProps {
   readonly slots: TeacherClassListActionSlots;
 }
 
-export function TeacherClassName({ name }: Readonly<{ name: string | null }>) {
-  return <Typography sx={{ typography: "titleLg", fontWeight: 600 }}>{name}</Typography>;
+/** Student name cell with avatar + profile link, rendered through the tier slot. */
+export function TeacherClassStudentLink({ row, slots }: Readonly<Pick<TeacherClassListCellProps, "row" | "slots">>) {
+  return (
+    <slots.PersonProfileLink
+      href={row.studentId ? studentHref(row.studentId) : undefined}
+      name={row.studentName ?? ""}
+    />
+  );
 }
 
 export function TeacherClassSchedule({ row, locale }: Readonly<Pick<TeacherClassListCellProps, "row" | "locale">>) {
@@ -143,7 +156,7 @@ export function TeacherClassListCardContent({
 }: Readonly<TeacherClassListCellProps>) {
   return (
     <Box sx={{ minWidth: 0 }}>
-      <TeacherClassName name={row.studentName} />
+      <TeacherClassStudentLink row={row} slots={slots} />
       <TeacherClassSchedule row={row} locale={locale} />
       <Box sx={{ mt: 0.5 }}>
         <TeacherClassStatusSummary row={row} labels={labels} />

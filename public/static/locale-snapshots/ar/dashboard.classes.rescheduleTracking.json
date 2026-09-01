@@ -12,7 +12,7 @@
     "approvedClasses": "الحصص المعتمدة",
     "leaveRequests": "طلبات الإجازة",
     "reScheduled": "مُعاد جدولتها",
-    "cancelled": "ملغى"
+    "cancelled": "ملغاة"
   },
   "table": {
     "teacherName": "اسم المعلم",
@@ -27,10 +27,10 @@
     "leaveRequest": "طلب إجازة"
   },
   "status": {
-    "rescheduled": "عادي (مُعاد جدولته)",
+    "rescheduled": "عادية (مُعاد جدولتها)",
     "pendingLeave": "إجازة معلقة",
-    "approved": "معتمد",
-    "cancelled": "ملغى"
+    "approved": "معتمدة",
+    "cancelled": "ملغاة"
   },
   "actions": {
     "viewDetails": "عرض التفاصيل",
@@ -39,7 +39,7 @@
     "rejectLeave": "رفض الإجازة"
   },
   "errors": {
-    "missingOriginalClassId": "لا يمكن تنفيذ الإجراء: معرف الحصة الأصلية مفقود",
+    "missingOriginalClassId": "لا يمكن تنفيذ الإجراء: معرّف الحصة الأصلية مفقود",
     "approveFailed": "فشل في قبول الإجازة"
   },
   "loadFailed": "فشل تحميل بيانات التتبع."

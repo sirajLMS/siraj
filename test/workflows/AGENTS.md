@@ -40,6 +40,14 @@ through the real service layer against the real test database. Canonical referen
     (`test/workflows/<domain>/<workflow>.test.ts`). Shared scaffolding lives in
     `test/workflows/helpers/` with a pure `export *` barrel (`./` paths only, one `/` max per
     export path).
+11. **Every journey has a Mermaid diagram.** Each `<workflow>.test.ts` has a matching section in
+    the domain's diagram file (`test/workflows/<domain>/DIAGRAMS.md`): heading named after the
+    test file, a 1-2 sentence intro, then a single ```mermaid block (`sequenceDiagram` for actor
+    flows, `stateDiagram-v2` for state machines, `flowchart` for decision logic). Actor and step
+    names must match the real service calls. Creating or updating a journey means creating or
+    updating its diagram in the same change — never let them drift. Validate before considering
+    the task done: `bun run validate:mermaid test/workflows/<domain>/DIAGRAMS.md` — every block
+    must report `OK`.
 
 ## Running
 

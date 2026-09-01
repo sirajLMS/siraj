@@ -357,6 +357,17 @@ export interface TeacherDueErrors {
 }
 
 /**
+ * PayrollErrors — teacher payroll calculation and override errors.
+ */
+export interface PayrollErrors {
+  readonly notTerminal: string;
+  readonly alreadyPaid: string;
+  readonly awaitingSettlement: string;
+  readonly invalidTargetStatus: string;
+  readonly partialRequiresPercentage: string;
+}
+
+/**
  * StudentErrors — student specific errors.
  */
 export interface StudentErrors {
@@ -490,6 +501,22 @@ export interface AppearanceErrors {
 }
 
 /**
+ * ServiceOutageErrors — full-screen error page copy for the root error
+ * boundary (`app/error.tsx`). The database-unavailable variant is selected by
+ * the `DATABASE_UNAVAILABLE` error digest; everything else uses the generic
+ * copy. Neither variant ever exposes underlying error details.
+ */
+export interface ServiceOutageErrors {
+  readonly title: string;
+  readonly description: string;
+  readonly autoRetryHint: string;
+  readonly genericTitle: string;
+  readonly genericDescription: string;
+  readonly retry: string;
+  readonly retrying: string;
+}
+
+/**
  * ErrorsLabels — the top-level errors namespace.
  * Only the subset needed by the login GraphQL mutation is defined here.
  * Grow this interface as more errors are migrated.
@@ -509,6 +536,7 @@ export interface ErrorsLabels
   readonly meetingProvider: MeetingProviderErrors;
   readonly teacher: TeacherErrors;
   readonly teacherDue: TeacherDueErrors;
+  readonly payroll: PayrollErrors;
   readonly student: StudentErrors;
   readonly category: CategoryErrors;
   readonly user: UserErrors;
@@ -531,6 +559,7 @@ export interface ErrorsLabels
   readonly leaveQuota: LeaveQuotaErrors;
   readonly classInstance: ClassInstanceErrors;
   readonly appearance: AppearanceErrors;
+  readonly serviceOutage: ServiceOutageErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;
@@ -544,6 +573,8 @@ export interface ErrorsLabels
   readonly notFound: string;
   readonly unknownName: string;
   readonly invalidInput: string;
+  /** Generic over-long free-text rejection (max-length guardrails). */
+  readonly tooLong: string;
   readonly invalidNationalId: string;
 
   // ─── General user creation errors ──────────────────────────────────

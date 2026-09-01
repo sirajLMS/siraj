@@ -3,7 +3,10 @@
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import { Alert, AlertTitle, Button, IconButton, Slide, Stack, useMediaQuery } from "@mui/material";
 import { useState } from "react";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import {
+  DEFAULT_MEETING_CONFIG_ACTION_SLOTS,
+  type MeetingConfigActionSlots,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/meetingConfigActionSlots";
 import {
   expiryLabel,
   type ReauthNeededBannerProps,
@@ -19,25 +22,30 @@ function hasExpired(provider: { readonly expiryState?: string }): boolean {
   return provider.expiryState === "expired";
 }
 
+type BannerActions = Pick<MeetingConfigActionSlots, "primary" | "outlined">;
+
 function ReconnectAllButton({
   onReconnectAll,
   label,
   severity,
+  actions,
 }: {
   readonly onReconnectAll: () => void;
   readonly label: string;
   readonly severity: "error" | "warning";
+  readonly actions: BannerActions;
 }) {
+  const PrimaryAction = actions.primary;
   return (
-    <PrimaryPageAction color={severity} onClick={onReconnectAll} sx={{ minHeight: 48 }}>
+    <PrimaryAction color={severity} onClick={onReconnectAll}>
       {label}
-    </PrimaryPageAction>
+    </PrimaryAction>
   );
 }
 
 function RemindLaterButton({ onDismiss, label }: { readonly onDismiss: () => void; readonly label: string }) {
   return (
-    <Button variant="text" onClick={onDismiss} sx={{ minHeight: 48 }}>
+    <Button variant="text" onClick={onDismiss}>
       {label}
     </Button>
   );
@@ -60,7 +68,10 @@ export function ReauthNeededBanner({
   onReconnect,
   onReconnectAll,
   onDismiss,
+  actionSlots,
 }: ReauthNeededBannerProps) {
+  const actions: BannerActions = actionSlots ?? DEFAULT_MEETING_CONFIG_ACTION_SLOTS;
+  const OutlinedAction = actions.outlined;
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
   const [visible, setVisible] = useState(true);
 
@@ -91,18 +102,25 @@ export function ReauthNeededBanner({
         {labels.reauthNeededMessage}
         <Stack sx={{ flexDirection: "row", flexWrap: "wrap", gap: 1, mt: 2, alignItems: "center" }}>
           {reauthProviders.map(provider => (
-            <Button
+            <OutlinedAction
               key={provider.slug}
-              variant="outlined"
               color={severity}
               onClick={() => onReconnect(provider.slug)}
-              sx={{ minHeight: 48 }}
+              sx={theme => ({
+                color: theme.palette[severity].main,
+                borderColor: theme.palette[severity].main,
+              })}
             >
               {`${labels.reconnectButton} · ${provider.name} (${expiryLabel(provider.expiryState, labels)})`}
-            </Button>
+            </OutlinedAction>
           ))}
           {showReconnectAll ? (
-            <ReconnectAllButton onReconnectAll={onReconnectAll} label={labels.reconnectAllButton} severity={severity} />
+            <ReconnectAllButton
+              onReconnectAll={onReconnectAll}
+              label={labels.reconnectAllButton}
+              severity={severity}
+              actions={actions}
+            />
           ) : null}
           {onDismiss ? <RemindLaterButton onDismiss={handleDismiss} label={labels.remindLater} /> : null}
         </Stack>

@@ -1,9 +1,9 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { InputAdornment, Stack, TextField } from "@mui/material";
+import { Stack } from "@mui/material";
+import { useState } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { ParentsMetricGrid } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsMetricGrid";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { BaseParentsViewProps } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
 import {
@@ -11,6 +11,7 @@ import {
   MobileContentStack,
   MobileExportButton,
   MobileFilterButton,
+  MobileMetricCardGrid,
   MobilePageContainer,
   MobilePageHeader,
   MobilePrimaryPageAction,
@@ -27,29 +28,16 @@ function ParentMobileSearchField({
   readonly placeholder: string;
   readonly onSearch: (query: string) => void;
 }) {
+  // Local input state keeps the shared search field controlled; the canonical
+  // query lives in the parents store via `onSearch`.
+  const [query, setQuery] = useState("");
   return (
-    <TextField
-      fullWidth
-      size="medium"
+    <SearchBarField
+      value={query}
       placeholder={placeholder}
-      onChange={e => {
-        onSearch(e.target.value);
-      }}
-      sx={{
-        mb: 3,
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 3,
-          backgroundColor: theme => theme.palette.background.paper,
-        },
-      }}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchOutlined />
-            </InputAdornment>
-          ),
-        },
+      onChange={value => {
+        setQuery(value);
+        onSearch(value);
       }}
     />
   );
@@ -94,9 +82,7 @@ export function ParentsViewMobile({
           <ParentMobileSearchField placeholder={filters.searchPlaceholder} onSearch={onSearch} />
         </MobileContentInset>
 
-        <MobileContentInset>
-          <ParentsMetricGrid metrics={metrics} />
-        </MobileContentInset>
+        <MobileMetricCardGrid metrics={metrics} />
 
         <MobileSectionPanel
           title={shell.records}

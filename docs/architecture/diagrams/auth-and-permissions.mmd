@@ -1,0 +1,17 @@
+%% Siraj — authentication, sessions, and the 3-tier permission model
+flowchart TB
+    Login["login mutation<br/>bcrypt password check + rate limit"] --> Sess["sessions table<br/>HMAC-hashed id + Redis cache"]
+    Sess --> JWT["JWT pair via jose (HS256)<br/>access token 15 min — refresh token 7 days"]
+    JWT --> Cookies["httpOnly cookies:<br/>session_id, access_token, refresh_token"]
+    Cookies --> Ctx["getServerUserContext<br/>/ GraphQL createContext"]
+    Ctx --> PCtx["PermissionsService<br/>groups + per-user overrides + isSuperAdmin flag"]
+    PCtx --> Role["Role derived from group slugs<br/>SUPER_ADMIN / ACADEMY_ADMIN / SUPERVISOR /<br/>STAFF / TEACHER / STUDENT / PARENT"]
+    Ctx --> Imp["Impersonation and<br/>permission-group simulation (super admin)"]
+
+    subgraph Enforcement["3-tier permission enforcement"]
+        T1["1. withPageAuth<br/>on every dashboard page"]
+        T2["2. Pothos ScopeAuth<br/>on resolvers — loggedIn / permission / superAdmin"]
+        T3["3. RequirePermission<br/>fine-grained UI gating only"]
+    end
+
+    Ctx --> Enforcement

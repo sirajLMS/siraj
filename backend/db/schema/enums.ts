@@ -5,9 +5,11 @@ import {
   AttendanceEvaluation,
   AvailabilityStatus,
   BilledUnit,
+  CalculationStatus,
   ComplaintCategory,
   ComplaintStatus,
   CountryCode,
+  CreditAdjustmentType,
   CreditReason,
   CronConcurrencyPolicy,
   CronJobKind,
@@ -145,6 +147,8 @@ export const attendanceEvaluationEnum = createPgEnumFromEnum("attendance_evaluat
 
 export const creditReasonEnum = createPgEnumFromEnum("credit_reason", CreditReason);
 
+export const creditAdjustmentTypeEnum = createPgEnumFromEnum("credit_adjustment_type", CreditAdjustmentType);
+
 export const rateSourceEnum = createPgEnumFromEnum("rate_source", RateSource);
 
 export const cronScheduleStatusEnum = createPgEnumFromEnum("cron_schedule_status", CronScheduleStatus);
@@ -162,3 +166,5 @@ export const cronQueueBackendEnum = createPgEnumFromEnum("cron_queue_backend", C
 export const paymentGatewayEnum = createPgEnumFromEnum("payment_gateway", PaymentGateway);
 
 export const billedUnitEnum = createPgEnumFromEnum("billed_unit", BilledUnit);
+
+export const calculationStatusEnum = createPgEnumFromEnum("calculation_status", CalculationStatus);

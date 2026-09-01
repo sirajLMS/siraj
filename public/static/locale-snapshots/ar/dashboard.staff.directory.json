@@ -4,7 +4,7 @@
   "mobileTitle": "دليل الموظفين",
   "metrics": {
     "totalAdmin": "إجمالي المديرين",
-    "systemStaff": "موظفي النظام",
+    "systemStaff": "موظفو النظام",
     "activeNow": "نشط الآن",
     "alerts": "تنبيهات الصلاحيات"
   },
@@ -60,5 +60,5 @@
   "showingOf": {
     "__fn": "(count, total) => `\\u0639\\u0631\\u0636 ${count} \\u0645\\u0646 \\u0623\\u0635\\u0644 ${total} \\u0646\\u062A\\u064A\\u062C\\u0629`"
   },
-  "noEntries": "لا يوجد مديرين"
+  "noEntries": "لا يوجد مديرون"
 }

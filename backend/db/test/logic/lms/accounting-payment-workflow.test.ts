@@ -14,7 +14,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "@/backend/db/test/entity-setup";
-import { PaymentGateway } from "@/backend/enum";
+import { AccountingPaymentHistoryKind, PaymentGateway } from "@/backend/enum";
 import { AccountingPaymentService } from "@/backend/services/billing/accounting-payment.service";
 import { PackagePlanService } from "@/backend/services/billing/package-plan.service";
 import type { AccountingPaymentSubmitInput } from "@/backend/types";
@@ -55,6 +55,8 @@ describe("Accounting payment workflow", () => {
   let studentRowId = "";
   let overflowStudentId = "";
   let overflowLoginId = "";
+  let orphanStudentId = "";
+  let orphanLoginId = "";
   let planId = "";
 
   /** Row ids produced by service calls during this suite (for afterAll wipe). */
@@ -80,6 +82,24 @@ describe("Accounting payment workflow", () => {
       const overflowStudent = await createTestStudent(t, parentRow.id, { userId: overflowLogin.id });
       overflowStudentId = overflowStudent.id;
       overflowLoginId = overflowLogin.id;
+
+      // Parent-less student: `invoices.parentId` is NOT NULL, so a payment for
+      // them must be rejected before any invoice can be created.
+      const orphanLogin = await createTestUser(t);
+      const [orphanStudent] = await t
+        .insert(students)
+        .values({
+          name: `${UNIQUE} Orphan Student`,
+          userId: orphanLogin.id,
+          parentId: null,
+          status: "REGULAR",
+          idempotencyKey: `orphan-${randomUUID()}`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+      orphanStudentId = orphanStudent.id;
+      orphanLoginId = orphanLogin.id;
 
       actorUserId = actor.id;
       unrelatedUserId = unrelated.id;
@@ -134,11 +154,20 @@ describe("Accounting payment workflow", () => {
       }
 
       await t.delete(packagePlans).where(inArray(packagePlans.id, createdPlanIds));
-      await t.delete(students).where(inArray(students.id, [studentRowId, overflowStudentId]));
+      await t.delete(students).where(inArray(students.id, [studentRowId, overflowStudentId, orphanStudentId]));
       await t.delete(parents).where(inArray(parents.id, [parentRowId]));
       await t
         .delete(users)
-        .where(inArray(users.id, [actorUserId, unrelatedUserId, parentUserId, studentLoginId, overflowLoginId]));
+        .where(
+          inArray(users.id, [
+            actorUserId,
+            unrelatedUserId,
+            parentUserId,
+            studentLoginId,
+            overflowLoginId,
+            orphanLoginId,
+          ])
+        );
     });
   });
 
@@ -390,5 +419,111 @@ describe("Accounting payment workflow", () => {
     const adminList = await AccountingPaymentService.listPaginated(actorUserId, {}, null, tErrors);
     expect(adminList.totalCount).toBeGreaterThan(0);
     expect(Array.isArray(adminList.rows)).toBe(true);
+  });
+
+  test("recordPayment rejects invalid amounts, invalid hours, unknown students and parent-less students", async () => {
+    const invalidNumerics = [
+      // Non-positive amount.
+      submitInput({ amount: 0 }),
+      submitInput({ amount: -1 }),
+      // Non-positive hours.
+      submitInput({ creditHours: 0 }),
+      submitInput({ creditHours: Number.NaN }),
+    ];
+    const numericErrors = await Promise.all(
+      invalidNumerics.map(input =>
+        catchError(() => AccountingPaymentService.recordPayment(actorUserId, input, tErrors))
+      )
+    );
+    for (const error of numericErrors) {
+      expect(error.message).toBe(tErrors.package.invalidInput);
+    }
+
+    const unknownId = randomUUID();
+    const unknown = await catchError(() =>
+      AccountingPaymentService.recordPayment(actorUserId, submitInput({ studentId: unknownId }), tErrors)
+    );
+    expect(unknown.message).toBe(tErrors.studentNotFound(unknownId));
+
+    const orphan = await catchError(() =>
+      AccountingPaymentService.recordPayment(actorUserId, submitInput({ studentId: orphanStudentId }), tErrors)
+    );
+    expect(orphan.message).toBe(tErrors.package.invalidInput);
+  });
+
+  test("an unpaid payment keeps its invoice UNPAID with no paidDate", async () => {
+    const recorded = await AccountingPaymentService.recordPayment(
+      actorUserId,
+      submitInput({
+        isPaidStatusOn: false,
+        amount: 180,
+        paymentGateway: PaymentGateway.OTHER,
+        paymentDate: new Date("2026-07-08T10:00:00.000Z"),
+      }),
+      tErrors
+    );
+    createdInvoiceIds.push(recorded.invoiceId);
+
+    expect(recorded.isPaidStatusOn).toBe(false);
+    expect(recorded.invoiceStatus).toBe("UNPAID");
+
+    const [invoice] = await db.select().from(invoices).where(eq(invoices.id, recorded.invoiceId)).limit(1);
+    expect(invoice?.status).toBe("UNPAID");
+    expect(invoice?.paidDate).toBeNull();
+  });
+
+  test("togglePaidStatus and update reject unknown payment ids with the localized not-found error", async () => {
+    const missingId = randomUUID();
+
+    const toggleError = await catchError(() =>
+      AccountingPaymentService.togglePaidStatus(actorUserId, { id: missingId, isPaidStatusOn: true }, tErrors)
+    );
+    expect(toggleError.message).toBe(tErrors.billing.invoiceNotFound(missingId));
+
+    const updateError = await catchError(() =>
+      AccountingPaymentService.update(actorUserId, { id: missingId, paymentNote: "ghost" }, tErrors)
+    );
+    expect(updateError.message).toBe(tErrors.billing.invoiceNotFound(missingId));
+  });
+
+  test("getHistory derives the recorded / marked-paid / credited / adjusted timeline and is IDOR-guarded", async () => {
+    const recorded = await AccountingPaymentService.recordPayment(
+      actorUserId,
+      submitInput({
+        amount: 90,
+        creditHours: 5,
+        paymentGateway: PaymentGateway.WESTERN_UNION,
+        paymentDate: new Date("2026-07-09T10:00:00.000Z"),
+        paymentNote: `${UNIQUE} history note`,
+      }),
+      tErrors
+    );
+    createdInvoiceIds.push(recorded.invoiceId);
+
+    // Signed ADJUSTMENT rows: +1 then -2 against the same payment.
+    await AccountingPaymentService.update(actorUserId, { id: recorded.id, creditHours: 6 }, tErrors);
+    await AccountingPaymentService.update(actorUserId, { id: recorded.id, creditHours: 4 }, tErrors);
+
+    const events = await AccountingPaymentService.getHistory(actorUserId, recorded.id, tErrors);
+
+    const kinds = events.map(event => event.kind);
+    expect(kinds).toContain(AccountingPaymentHistoryKind.PAYMENT_RECORDED);
+    expect(kinds).toContain(AccountingPaymentHistoryKind.MARKED_PAID);
+    expect(kinds).toContain(AccountingPaymentHistoryKind.HOURS_CREDITED);
+
+    const adjustments = events.filter(event => event.kind === AccountingPaymentHistoryKind.HOURS_ADJUSTED);
+    expect(adjustments).toHaveLength(2);
+    expect(adjustments.map(event => Number(event.hoursDelta ?? "0"))).toEqual([1, -2]);
+
+    const credited = events.find(event => event.kind === AccountingPaymentHistoryKind.HOURS_CREDITED);
+    expect(Number(credited?.hoursDelta ?? "0")).toBe(5);
+
+    // Ascending chronological order.
+    const stamps = events.map(event => event.occurredAt.getTime());
+    expect(stamps).toEqual(stamps.toSorted((a, b) => a - b));
+
+    // An unrelated caller cannot read another family's timeline.
+    const denied = await catchError(() => AccountingPaymentService.getHistory(unrelatedUserId, recorded.id, tErrors));
+    expect(denied.message).toBe(tErrors.insufficientPermissions);
   });
 });

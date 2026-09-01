@@ -2,6 +2,7 @@ import type { CurrencyHedgesLabels } from "@/shared/locale/types/dashboard/billi
 import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates";
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual";
 import type { PaymentComponentLabels } from "@/shared/locale/types/dashboard/billing/payment";
+import type { PaymentsLedgerLabels } from "@/shared/locale/types/dashboard/billing/paymentsLedger";
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies";
 import type { AdminInvoiceStatus, StudentCreditStatus } from "@/shared/types/billing-view";
 
@@ -201,4 +202,5 @@ export interface BillingLabels extends PaymentComponentLabels {
     readonly hedges: string;
     readonly manual: string;
   };
+  readonly paymentsLedger: PaymentsLedgerLabels;
 }

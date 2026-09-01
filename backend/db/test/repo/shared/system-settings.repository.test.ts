@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { systemSettings } from "@/backend/db/schema";
+import { SYSTEM_SETTINGS_DATA } from "@/backend/db/seeds/shared/system-settings";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { DBTransaction } from "@/backend/types";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
@@ -277,6 +278,27 @@ describe("SystemSettingsRepository", () => {
 
       const success = await SystemSettingsRepository.deleteSetting("some_key", fakeTx);
       expect(success).toBe(false);
+    });
+  });
+
+  it("seeds the payroll grace-period settings and parses them as integers", async () => {
+    await runInRollback(async tx => {
+      await Promise.all(SYSTEM_SETTINGS_DATA.map(setting => SystemSettingsRepository.upsertSetting(setting, tx)));
+
+      const graceSettings: ReadonlyArray<[key: string, expectedValue: number]> = [
+        ["payroll.grace_short_minutes", 3],
+        ["payroll.grace_long_minutes", 6],
+        ["payroll.grace_threshold_minutes", 30],
+      ];
+      await Promise.all(
+        graceSettings.map(async ([key, expectedValue]) => {
+          const setting = await SystemSettingsRepository.getByKey(key, tx);
+          expect(setting).not.toBeNull();
+          expect(setting?.category).toBe(SystemSettingCategory.Payroll);
+          expect(setting?.dataType).toBe(SystemSettingDataType.Integer);
+          expect(await SystemSettingsRepository.getIntValue(key, -1, tx)).toBe(expectedValue);
+        })
+      );
     });
   });
 });

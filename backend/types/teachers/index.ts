@@ -1,3 +1,4 @@
+export * from "./payroll.types";
 export * from "./teacher.types";
 export * from "./teacher-availability.types";
 export * from "./teacher-due.types";

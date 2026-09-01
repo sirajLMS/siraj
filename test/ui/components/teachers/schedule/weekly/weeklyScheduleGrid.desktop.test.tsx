@@ -13,6 +13,7 @@ import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, render, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
+import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { ScheduledClass } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import WeeklyScheduleGrid from "@/frontend/desktop/views/dashboard/teachers/schedule/weekly/components/weeklyScheduleGrid.desktop";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
@@ -21,6 +22,7 @@ expect.extend(matchers);
 
 afterEach(() => {
   cleanup();
+  useWeeklyScheduleStore.setState({ deleteConfirmClassInstanceId: null, selectedDay: "monday" });
 });
 
 function findDeleteButton(container: HTMLElement): HTMLButtonElement {

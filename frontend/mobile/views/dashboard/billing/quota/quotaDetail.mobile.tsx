@@ -3,13 +3,13 @@
 import { DeleteOutlined } from "@mui/icons-material";
 import { Fade, Skeleton, Stack, type Theme, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import type { QuotaLedgerItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaDetailViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaDetailViewModel";
 import { formatQuotaDate } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaFormatters";
 import {
+  MobileBaseDeleteDialog,
   MobileCardList,
   MobileCardListItem,
   MobileContentStack,
@@ -134,7 +134,7 @@ export function QuotaDetailMobile(props: Readonly<QuotaDetailViewModel>) {
             ]}
           />
 
-          <MobileContentStack>
+          <MobileContentStack gap={3} paddingBottom={4}>
             <MobileSectionPanel title={t.quotaDetails} contentInset={false}>
               <QuotaDetailSummaryMobile quota={quota} t={t} />
             </MobileSectionPanel>
@@ -166,7 +166,7 @@ export function QuotaDetailMobile(props: Readonly<QuotaDetailViewModel>) {
           disabled={deleting}
         />
 
-        <BaseDeleteDialog
+        <MobileBaseDeleteDialog
           open={deleteDialogOpen}
           onClose={onDeleteDialogClose}
           onConfirm={onDeleteConfirm}
@@ -175,7 +175,6 @@ export function QuotaDetailMobile(props: Readonly<QuotaDetailViewModel>) {
           body={t.deleteConfirm.body(quota.name ?? "")}
           cancelLabel={t.deleteConfirm.cancel}
           confirmLabel={t.deleteConfirm.confirm}
-          fullScreen
         />
 
         <FormErrorSnackbar open={deleteErrorOpen} message={t.errors.deleteFailed} onClose={onDeleteErrorClose} />

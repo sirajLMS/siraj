@@ -1,7 +1,7 @@
 "use client";
 
-import { Box, Button, Stack, Typography } from "@mui/material";
 import { useEffect } from "react";
+import { ErrorState } from "@/frontend/common/components/ui";
 import { logger } from "@/frontend/common/utils/logger";
 import { type NamespaceHandle, useAppTranslation } from "@/shared/locale";
 
@@ -30,27 +30,5 @@ export function DashboardErrorBoundary<TLabels extends DashboardErrorBoundaryLab
     logger.error(`${errorScope} error boundary:`, error);
   }, [error, errorScope]);
 
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        p: { xs: 2, sm: 3 },
-        width: "100%",
-      }}
-    >
-      <Stack sx={{ alignItems: "center", gap: 2, py: 4 }}>
-        <Typography variant="h6" sx={{ color: theme => theme.palette.error.main }}>
-          {t.errorGenericTitle}
-        </Typography>
-        <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {t.errorGeneric}
-        </Typography>
-        <Button variant="outlined" onClick={reset}>
-          {t.retry}
-        </Button>
-      </Stack>
-    </Box>
-  );
+  return <ErrorState message={t.errorGeneric} onRetry={reset} retryLabel={t.retry} />;
 }

@@ -13,6 +13,7 @@ import {
   type GroupClassAuditQuery_groupClassAudit as GroupClassAudit,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ClassAuditLabels } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
+import { buildClassAuditLabels } from "@/frontend/common/views/dashboard/classes/audit/utils/classAuditLabels.utils";
 import type { ClassAuditLabels as ClassAuditLocaleLabels } from "@/shared/locale/types/dashboard/classes/audit";
 
 export const CLASS_AUDIT_CLASS_NAME = "Quran Recitation - Advanced";
@@ -88,75 +89,14 @@ export const classAuditFixture = {
 } satisfies GroupClassAudit;
 
 /**
- * Maps the raw audit locale labels onto the flat view-level label shape,
- * mirroring the ViewModel mapping so tests exercise the same strings.
+ * Maps the raw audit locale labels onto the flat view-level label shape.
+ * Delegates to the same builder the ViewModel uses so tests exercise the
+ * exact mapping production renders.
  */
 export function buildClassAuditViewLabels(
   t: ClassAuditLocaleLabels,
   audit: GroupClassAudit,
   commonCancel: string
 ): ClassAuditLabels {
-  const registeredStudentCount = audit.registeredStudentCount ?? 0;
-  return {
-    breadcrumbs: {
-      dashboard: t.breadcrumbs.dashboard,
-      schedules: t.breadcrumbs.schedules,
-      current: t.breadcrumbs.current,
-    },
-    pageTitle: t.pageTitle,
-    mobileTitle: t.mobileTitle,
-    generateReport: t.actions.generateReport,
-    editClass: t.actions.editClass,
-    courseCode: t.fields.courseCode,
-    teacher: t.fields.teacher,
-    originalDate: t.fields.originalDate,
-    rescheduledDate: t.fields.rescheduledDate,
-    timeSlot: t.fields.timeSlot,
-    venue: t.fields.venue,
-    auditTrailTitle: t.auditTrail.title,
-    statusRescheduled: t.status.regularRescheduled,
-    classDetails: t.fields.classDetails,
-    registeredStudents: {
-      title: t.students.title(registeredStudentCount),
-      exportList: t.students.exportList,
-      studentName: t.students.studentName,
-      idNumber: t.students.idNumber,
-      attendanceStatus: t.students.attendanceStatus,
-      actions: t.students.actions,
-      student: t.students.student,
-      status: t.students.status,
-      viewAll: t.students.viewAll(registeredStudentCount),
-      pending: t.students.pending,
-      present: t.students.present,
-      absent: t.students.absent,
-      noEntries: t.students.noEntries,
-      viewStudentAriaLabel: t.students.viewStudentAriaLabel,
-    },
-    meetingInfo: {
-      title: t.meeting.title,
-      joinMeeting: t.meeting.joinMeeting,
-      capacityBadge: t.venue.capacityBadge(0),
-      capacity: t.venue.capacity(0),
-      meetingIdLabel: t.meetingIdLabel,
-      online: t.online,
-      meetingIdNA: t.meetingIdNA,
-    },
-    communicationLog: {
-      title: t.communication.title,
-      resendNotifications: t.communication.resendNotifications,
-    },
-    adminNote: {
-      title: t.adminNote.title,
-      titleMobile: t.adminNote.titleMobile,
-      lastUpdated: t.adminNote.lastUpdated(audit.adminNote?.lastUpdated ?? ""),
-      update: t.adminNote.update,
-      edit: t.adminNote.edit,
-    },
-    adminNoteDialog: {
-      title: t.adminNote.title,
-      content: t.adminNote.content,
-      cancel: commonCancel,
-      save: t.adminNote.update,
-    },
-  };
+  return buildClassAuditLabels(t, commonCancel, audit);
 }

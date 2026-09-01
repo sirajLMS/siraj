@@ -43,13 +43,13 @@ export const dashboardStaffOnboardingAr: StaffOnboardingLabels = {
     signup: "إنشاء موظف",
     processing: "جاري المعالجة...",
     cancel: "إلغاء",
-    successMessage: "تم تقديم طلب الحساب بنجاح. في انتظار التحقق من المسؤول الرئيسي.",
+    successMessage: "تم تقديم طلب الحساب بنجاح. في انتظار موافقة مدير النظام.",
     errorMessage: "فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.",
   },
   metrics: {
     activeStaff: "الموظفون النشطون",
     pendingApproval: "بانتظار الموافقة",
-    avgOnboarding: "متوسط الانضمام",
+    avgOnboarding: "متوسط مدة الانضمام",
   },
   validation: {
     fullNameRequired: "الاسم الكامل مطلوب",

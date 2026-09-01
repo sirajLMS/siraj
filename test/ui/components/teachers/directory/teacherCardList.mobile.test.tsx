@@ -63,6 +63,7 @@ try {
 await Promise.all(pendingTranslations);
 
 const labels = readTranslation(Translation.Dashboard.TeachersDirectory, locale);
+const meetingUrlLabels = readTranslation(Translation.Dashboard.MeetingUrlStatus, locale);
 const theme = createAppTheme("dark", "rtl", locale);
 
 function noop(): void {
@@ -140,14 +141,21 @@ describe("TeacherCardList (mobile)", () => {
     expectBadgeColors(labels.status.active, "activated", container);
   });
 
-  test("renders deactivated teachers with the deactivated staff palette and a disabled join action", () => {
+  test("renders deactivated teachers with the deactivated staff palette and the URL-status join badge", () => {
     const { container } = renderCardList({ rows: [makeRow({ status: AccountStatus.Deactivated })] });
 
     expectBadgeColors(labels.status.offline, "deactivated", container);
 
-    const joinButton = within(container).getByText(labels.actions.joinRoom).closest("button");
-    expect(joinButton).not.toBeNull();
-    expect(joinButton?.disabled).toBe(true);
+    // The join affordance is MobileMeetingJoinAction; without a resolvable meeting URL it
+    // surfaces the pending URL-status badge instead of an enabled join button.
+    expect(within(container).queryByRole("button", { name: labels.actions.joinRoom })).toBeNull();
+    expect(within(container).getByText(meetingUrlLabels.urlPending)).toBeInTheDocument();
+  });
+
+  test("renders the join affordance with URL-status handling for active teachers", () => {
+    const { container } = renderCardList();
+
+    expect(within(container).getByText(meetingUrlLabels.urlPending)).toBeInTheDocument();
   });
 
   test("renders schedule and options actions as shared action links", () => {
