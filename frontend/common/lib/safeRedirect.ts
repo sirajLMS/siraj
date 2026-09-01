@@ -4,9 +4,21 @@ const LOGIN_PATH = "/login";
 
 /**
  * Returns true when `url` is a same-origin relative path (single leading `/`).
+ * Rejects double-slashes (`//`), backslashes (`/\`), control characters,
+ * and leading whitespace/control chars that browsers normalize into host separators.
  */
 export function isRelativeSafePath(url: string): boolean {
-  return url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
+  if (typeof url !== "string" || !url.startsWith("/")) {
+    return false;
+  }
+  if (url.startsWith("//") || url.startsWith("/\\")) {
+    return false;
+  }
+  // Disallow ASCII control characters (0x00-0x1F, 0x7F) anywhere or whitespace/control chars following leading slash
+  if (/[\x00-\x1f\x7f]/.test(url) || /^[\/\\][\s\t\n\r]/.test(url)) {
+    return false;
+  }
+  return true;
 }
 
 /**
