@@ -321,10 +321,7 @@ describe("StaffProfileRepository — findByUserIds", () => {
   staffTest("handles duplicate and non-existent user IDs gracefully", async tx => {
     const { user, profile } = await createStaffUser(tx, "BatchFindDup");
 
-    const results = await StaffProfileRepository.findByUserIds(
-      [user.id, user.id, "[CARD_REDACTED]-[CARD_REDACTED]"],
-      tx
-    );
+    const results = await StaffProfileRepository.findByUserIds([user.id, user.id, randomUUID()], tx);
     expect(results).toHaveLength(1);
     expect(results[0]?.staffProfileId).toBe(profile.id);
   });

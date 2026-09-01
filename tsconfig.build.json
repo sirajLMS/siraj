@@ -1,0 +1,56 @@
+{
+  // Production build scope for `next build` (wired via typescript.tsconfigPath in
+  // next.config.ts). Restricts the build-time type-check program to the deployable
+  // graph — tests, stories, and scripts are intentionally absent (CI's `bun tsgo`
+  // still checks them through the full tsconfig.json).
+  "extends": "./tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    "environment.d.ts",
+    "instrumentation.ts",
+    "proxy.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "backend/**/*.ts",
+    "frontend/**/*.ts",
+    "frontend/**/*.tsx",
+    "shared/**/*.ts",
+    "shared/**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    // Dot-directories
+    "**/.ai/**",
+    "**/.agents/**",
+    "**/.codescene/**",
+    "**/.cursor/**",
+    "**/.git/**",
+    "**/.github/**",
+    "**/.husky/**",
+    "**/.kiro/**",
+    "**/.next/**",
+    "**/.next-*/**",
+    "**/.storybook/**",
+    "**/.vercel/**",
+    "**/.vscode/**",
+    // Build output / dependency dirs
+    "node_modules",
+    "dist",
+    "out",
+    "build",
+    "storybook-static",
+    // Tests & stories (covered by the full tsconfig.json in CI instead)
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    // Non-production scratch & generated subtrees
+    "scratch/**",
+    "draft",
+    "frontend/common/graphql/generated",
+    "**/unRefactored_tests"
+  ]
+}

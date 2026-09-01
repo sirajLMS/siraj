@@ -55,6 +55,11 @@ const nextConfig: NextConfig = {
   distDir: getEnv("NEXT_DIST_DIR", ".next"),
   reactStrictMode: true,
   generateBuildId: () => buildId,
+  typescript: {
+    // Build type-checks the deployable graph only — tests/stories/scripts live in the
+    // full tsconfig.json (CI `bun tsgo`), not in the production build program.
+    tsconfigPath: "tsconfig.build.json",
+  },
   env: {
     NEXT_PUBLIC_BUILD_ID: buildId,
     NEXT_PUBLIC_LOCALE_SNAPSHOT_BASE: "/static/locale-snapshots",
@@ -67,7 +72,10 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: { "/*": ["./node_modules/newrelic/**/*"] },
   turbopack: {},
   experimental: {
-    useTypeScriptCli: false,
+    // TS7 lands as a CLI-only compiler (no JS API) — let `next build` type-check
+    // by spawning the native `tsc` binary instead of the in-process compiler API.
+    // ESLint keeps its own TS6 wiring via scripts/ts6-eslint-patch.cjs.
+    useTypeScriptCli: true,
     optimizePackageImports: [
       "@mui/x-data-grid",
       "@mui/x-date-pickers",

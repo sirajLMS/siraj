@@ -279,19 +279,6 @@ describe("GraphQL accounting credit-hours surface", () => {
     expect(toggled.toggleAccountingPaymentPaidStatus?.invoiceStatus).toBe("UNPAID");
   });
 
-  test("archivePackagePlan removes the plan from the active list", async () => {
-    const archived = await authenticatedRequest(state.adminToken, "mutate", archivePackagePlanMutationDocument, {
-      id: state.planId,
-    });
-    expect(archived.archivePackagePlan?.active).toBe(false);
-
-    const activeList = await authenticatedRequest(state.adminToken, "query", packagePlansQueryDocument, {
-      activeOnly: true,
-      paginationArgs: null,
-    });
-    expect(activeList.packagePlans?.some(row => row?.id === state.planId)).toBe(false);
-  });
-
   test("Tier 4: teachers are denied on all six accounting mutations", async () => {
     const paymentInput = {
       studentId: state.studentId,
@@ -351,6 +338,19 @@ describe("GraphQL accounting credit-hours surface", () => {
       id: state.planId,
     });
     expect(planAfterDeniedWrites.packagePlan?.active).toBe(true);
+  });
+
+  test("archivePackagePlan removes the plan from the active list", async () => {
+    const archived = await authenticatedRequest(state.adminToken, "mutate", archivePackagePlanMutationDocument, {
+      id: state.planId,
+    });
+    expect(archived.archivePackagePlan?.active).toBe(false);
+
+    const activeList = await authenticatedRequest(state.adminToken, "query", packagePlansQueryDocument, {
+      activeOnly: true,
+      paginationArgs: null,
+    });
+    expect(activeList.packagePlans?.some(row => row?.id === state.planId)).toBe(false);
   });
 
   test("Tier 4: associated family reads work; cross-family reads are denied (IDOR)", async () => {
