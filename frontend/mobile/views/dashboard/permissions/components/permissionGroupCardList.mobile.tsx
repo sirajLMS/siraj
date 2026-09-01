@@ -71,7 +71,14 @@ function GroupCardMobile({
             </Typography>
           </Box>
           <Box>
-            <IconButton id={`group-card-actions-btn-${group.id}`} onClick={openMenu} size="small">
+            <IconButton
+              id={`group-card-actions-btn-${group.id}`}
+              onClick={openMenu}
+              size="small"
+              aria-label="Actions"
+              aria-haspopup="true"
+              aria-expanded={open}
+            >
               <MoreVertOutlined fontSize="small" />
             </IconButton>
             <Menu anchorEl={anchorEl} open={open} onClose={closeMenu}>

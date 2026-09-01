@@ -43,10 +43,11 @@ import type { ErrorsLabels } from "@/shared/locale";
 /**
  * Validates that `returnPath` is a safe relative path to prevent open
  * redirect attacks. A valid return path must start with `/` and must
- * NOT start with `//` (protocol-relative URLs like `//evil.com`).
+ * NOT start with `//` (protocol-relative URLs like `//evil.com`) or `/\`
+ * (backslash open-redirect bypass like `/\evil.com`).
  */
 function validateReturnPath(returnPath: string, tErrors: ErrorsLabels): void {
-  if (!returnPath.startsWith("/") || returnPath.startsWith("//")) {
+  if (!returnPath.startsWith("/") || returnPath.startsWith("//") || returnPath.startsWith("/\\")) {
     throw new GraphQLError(tErrors.meetingProvider.invalidReturnPath);
   }
 }

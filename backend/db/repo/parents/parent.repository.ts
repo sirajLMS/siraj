@@ -121,12 +121,21 @@ export namespace ParentRepository {
       .from(parents)
       .groupBy(parents.status);
 
-    return {
-      regular: metricsResult.find(m => m.status === "REGULAR")?.count ?? 0,
-      onLeave: metricsResult.find(m => m.status === "ON_LEAVE")?.count ?? 0,
-      suspended: metricsResult.find(m => m.status === "SUSPENDED")?.count ?? 0,
-      onTrial: metricsResult.find(m => m.status === "ON_TRIAL")?.count ?? 0,
+    const metrics: ParentDirectoryMetrics = {
+      regular: 0,
+      onLeave: 0,
+      suspended: 0,
+      onTrial: 0,
     };
+
+    for (const m of metricsResult) {
+      if (m.status === "REGULAR") metrics.regular = m.count;
+      else if (m.status === "ON_LEAVE") metrics.onLeave = m.count;
+      else if (m.status === "SUSPENDED") metrics.suspended = m.count;
+      else if (m.status === "ON_TRIAL") metrics.onTrial = m.count;
+    }
+
+    return metrics;
   }
 
   function buildDirectoryConditions(options: {
@@ -163,7 +172,13 @@ export namespace ParentRepository {
       .where(and(inArray(invoices.parentId, parentIds), eq(invoices.status, "UNPAID")))
       .groupBy(invoices.parentId);
 
-    return new Map(unpaidCounts.map(r => [r.parentId, r.cnt]));
+    const map = new Map<string, number>();
+    for (const r of unpaidCounts) {
+      if (r.parentId) {
+        map.set(r.parentId, r.cnt);
+      }
+    }
+    return map;
   }
 
   export const getParentDirectory = async (
@@ -388,6 +403,12 @@ export namespace ParentRepository {
     const q = queryDb(tx);
     const [parent] = await q.select().from(parents).where(eq(parents.userId, userId)).limit(1);
     return parent ?? null;
+  };
+
+  export const listByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<ParentSelectType[]> => {
+    if (userIds.length === 0) return [];
+    const q = queryDb(tx);
+    return q.select().from(parents).where(inArray(parents.userId, userIds));
   };
 
   export const findUserIdByParentId = async (parentId: string, tx?: DBTransaction): Promise<string | null> => {

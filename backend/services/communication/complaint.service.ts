@@ -369,7 +369,7 @@ export namespace ComplaintService {
   export async function createManyComplaints(
     inputs: Parameters<typeof ComplaintRepository.insertComplaint>[0][]
   ): Promise<ComplaintSelectType[]> {
-    return Promise.all(inputs.map(input => ComplaintRepository.insertComplaint(input)));
+    return ComplaintRepository.insertManyComplaints(inputs);
   }
 
   export async function ensureComplaintResponse(input: {

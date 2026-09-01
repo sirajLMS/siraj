@@ -4,9 +4,31 @@ const LOGIN_PATH = "/login";
 
 /**
  * Returns true when `url` is a same-origin relative path (single leading `/`).
+ * Rejects double-slashes (`//`), backslashes (`/\`), control characters, and
+ * leading whitespace/control chars that browsers normalize into host separators.
  */
 export function isRelativeSafePath(url: string): boolean {
-  return url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
+  if (!url.startsWith("/")) {
+    return false;
+  }
+  if (url.startsWith("//") || url.startsWith("/\\")) {
+    return false;
+  }
+  // Reject ASCII control characters (0x00-0x1F, 0x7F) anywhere — browsers
+  // strip them, so a value like "/\tevil.com" would otherwise survive the
+  // bare prefix check and resolve as a host change in `new URL()`.
+  for (let i = 0; i < url.length; i++) {
+    const code = url.charCodeAt(i);
+    if (code <= 0x1f || code === 0x7f) {
+      return false;
+    }
+  }
+  // Reject whitespace directly after the leading slash (browser URL
+  // normalization can collapse "/ evil.com" into a host change).
+  if (/\s/.test(url[1] ?? "")) {
+    return false;
+  }
+  return true;
 }
 
 /**

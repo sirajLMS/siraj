@@ -30,33 +30,19 @@
     "types": ["bun"]
   },
   "include": [
-    ".storybook/**/*.ts",
-    ".storybook/**/*.tsx",
     "next-env.d.ts",
-    "**/*.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next-dev/types/**/*.ts",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    ".next-test-3001/dev/types/**/*.ts",
-    ".next-test-3001/dev/dev/types/**/*.ts",
-    ".next-dev/dev/types/**/*.ts",
-    ".next-test-3112/dev/types/**/*.ts",
-    ".next-test-3112/dev/dev/types/**/*.ts",
-    ".next-test-3061/dev/types/**/*.ts",
-    ".next-test-3061/dev/dev/types/**/*.ts",
-    ".next-test-3128/dev/types/**/*.ts",
-    ".next-test-3128/dev/dev/types/**/*.ts",
-    ".next-test-3027/dev/types/**/*.ts",
-    ".next-test-3027/dev/dev/types/**/*.ts",
-    ".next-dev/dev/dev/types/**/*.ts",
-    ".next-test-dev/types/**/*.ts",
-    ".next-test-dev/dev/types/**/*.ts",
-    ".next/dev/dev/types/**/*.ts"
+    "environment.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "backend/**/*.ts",
+    "frontend/**/*.ts",
+    "frontend/**/*.tsx",
+    "shared/**/*.ts",
+    "shared/**/*.tsx",
+    "scripts/**/*.ts"
   ],
   "exclude": [
-    // Dot-directories (except `.storybook`, which is explicitly included above).
+    // Dot-directories
     "**/.ai/**",
     "**/.agents/**",
     "**/.codescene/**",
@@ -66,20 +52,29 @@
     "**/.husky/**",
     "**/.kiro/**",
     "**/.next/**",
-    "**/.next-dev/**",
-    "**/.next-test*/**",
+    "**/.next-*/**",
     "**/.playwright-mcp/**",
     "**/.scannerwork/**",
     "**/.stakpak/**",
+    "**/.storybook/**",
     "**/.vercel/**",
     "**/.vscode/**",
-    // Build output / dependency dirs that don't start with a dot.
+    // Build output / dependency dirs
     "node_modules",
     "dist",
     "out",
     "build",
     "storybook-static",
-    // Source subtrees deliberately excluded from type-checking.
+    // Tests, stories, mocks & non-production files
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    "test/**",
+    "scratch/**",
+    // Source subtrees deliberately excluded from type-checking
     "draft",
     "frontend/common/graphql/generated",
     "**/unRefactored_tests"

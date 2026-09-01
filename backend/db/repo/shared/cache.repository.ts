@@ -1,4 +1,4 @@
-import { and, eq, gte, lt, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { rateLimitCache, sessionCache } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
@@ -196,6 +196,53 @@ export namespace CacheDbRepository {
       return true;
     } catch (error) {
       logger.error(`Failed to delete cache entry for key ${key}:`, error);
+      return false;
+    }
+  };
+
+  /**
+   * Delete multiple cache entries in a single batched operation. Groups keys by
+   * their owning table (session vs rate-limit) and issues one DELETE per group
+   * instead of one DELETE per key.
+   */
+  export const delMany = async (keys: string[]): Promise<boolean> => {
+    if (keys.length === 0) {
+      return true;
+    }
+    try {
+      const sessionKeys: string[] = [];
+      const rateLimitKeys: string[] = [];
+
+      for (const key of keys) {
+        if (key.startsWith("ratelimit:") || key.startsWith("auth:")) {
+          rateLimitKeys.push(key);
+        } else {
+          sessionKeys.push(key);
+        }
+      }
+
+      const tasks: Promise<unknown>[] = [];
+
+      if (sessionKeys.length > 0) {
+        tasks.push(
+          sessionKeys.length === 1
+            ? db.delete(sessionCache).where(eq(sessionCache.key, sessionKeys[0]))
+            : db.delete(sessionCache).where(inArray(sessionCache.key, sessionKeys))
+        );
+      }
+
+      if (rateLimitKeys.length > 0) {
+        tasks.push(
+          rateLimitKeys.length === 1
+            ? db.delete(rateLimitCache).where(eq(rateLimitCache.key, rateLimitKeys[0]))
+            : db.delete(rateLimitCache).where(inArray(rateLimitCache.key, rateLimitKeys))
+        );
+      }
+
+      await Promise.all(tasks);
+      return true;
+    } catch (error) {
+      logger.error(`Failed to delete cache entries for keys: ${keys.join(", ")}`, error);
       return false;
     }
   };

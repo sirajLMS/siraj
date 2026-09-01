@@ -169,7 +169,7 @@ export class PostgresCacheAdapter extends CacheAdapterBase {
       // into a single SQL CTE for the rate-limit pattern. Current implementation issues 4 separate queries.
       case "del": {
         const keys = cmd.args.map(arg => String(arg));
-        await Promise.all(keys.map(key => CacheDbRepository.del(key)));
+        await CacheDbRepository.delMany(keys);
         return keys.length;
       }
 

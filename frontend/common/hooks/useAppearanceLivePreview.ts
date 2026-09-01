@@ -91,7 +91,14 @@ export function useAppearanceLivePreview(): void {
     if (logoUrl) {
       // Replace the default SchoolOutlined icon with an <img> of the logo.
       // Preserve the 24px size + centering that the original icon had.
-      brandLogoEl.innerHTML = `<img src="${logoUrl}" alt="Site logo" style="width: 24px; height: 24px; object-fit: contain; border-radius: 2px;" />`;
+      const img = document.createElement("img");
+      img.src = logoUrl;
+      img.alt = "Site logo";
+      img.style.width = "24px";
+      img.style.height = "24px";
+      img.style.objectFit = "contain";
+      img.style.borderRadius = "2px";
+      brandLogoEl.replaceChildren(img);
     } else if (originalsRef.current?.brandLogoHtml) {
       // Restore the original icon markup (SchoolOutlined SVG).
       brandLogoEl.innerHTML = originalsRef.current.brandLogoHtml;

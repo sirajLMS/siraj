@@ -76,6 +76,12 @@ export namespace TeacherRepository {
     return teacher ?? null;
   };
 
+  export const listByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<TeacherSelectType[]> => {
+    if (userIds.length === 0) return [];
+    const q = queryDb(tx);
+    return q.select().from(teachers).where(inArray(teachers.userId, userIds));
+  };
+
   export const findById = async (id: string, tx?: DBTransaction) => {
     const q = queryDb(tx);
     const [teacher] = await q.select().from(teachers).where(eq(teachers.id, id)).limit(1);

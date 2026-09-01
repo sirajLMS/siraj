@@ -230,23 +230,23 @@ export function CopyMeetingUrlButton({
     );
   }
 
-  return (
-    <Tooltip title={tooltipText}>
-      <IconButton
-        size={size}
-        disabled={disabled}
-        onClick={handleCopy}
-        aria-label={resolvedAriaLabel}
-        aria-pressed={isCopied}
-        sx={theme => ({
-          color: iconColor(theme),
-          "&:hover": {
-            backgroundColor: alpha(iconColor(theme), 0.08),
-          },
-        })}
-      >
-        {iconNode}
-      </IconButton>
-    </Tooltip>
+  const iconButton = (
+    <IconButton
+      size={size}
+      disabled={disabled}
+      onClick={handleCopy}
+      aria-label={resolvedAriaLabel}
+      aria-pressed={isCopied}
+      sx={theme => ({
+        color: iconColor(theme),
+        "&:hover": {
+          backgroundColor: alpha(iconColor(theme), 0.08),
+        },
+      })}
+    >
+      {iconNode}
+    </IconButton>
   );
+
+  return <Tooltip title={tooltipText}>{disabled ? <span>{iconButton}</span> : iconButton}</Tooltip>;
 }

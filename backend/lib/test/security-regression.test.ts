@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { validatePasswordStrength } from "@/backend/lib/auth/password";
+import { PASSWORD_MAX_LENGTH, validatePasswordStrength } from "@/backend/lib/auth/password";
 
 /**
  * Security regression suite — covers the fixes from the pentest-audit plan
@@ -64,6 +64,17 @@ describe("M5 — password policy", () => {
       threw = true;
     }
     expect(threw).toBe(false);
+  });
+
+  test("rejects passwords exceeding PASSWORD_MAX_LENGTH to prevent bcrypt DoS", async () => {
+    let threw = false;
+    try {
+      const overlongPassword = `A1${"a".repeat(PASSWORD_MAX_LENGTH)}`;
+      await validatePasswordStrength(overlongPassword);
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 });
 

@@ -418,6 +418,6 @@ export namespace SuggestionService {
   export async function createManySuggestions(
     inputs: Parameters<typeof SuggestionRepository.insertSuggestion>[0][]
   ): Promise<SuggestionSelectType[]> {
-    return Promise.all(inputs.map(input => SuggestionRepository.insertSuggestion(input)));
+    return SuggestionRepository.insertManySuggestions(inputs);
   }
 }

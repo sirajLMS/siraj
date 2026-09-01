@@ -1,4 +1,4 @@
-import { and, count, eq, or } from "drizzle-orm";
+import { and, count, eq, inArray, or } from "drizzle-orm";
 import { caseInsensitiveLike, db, queryDb } from "@/backend/db";
 import { UserRepository } from "@/backend/db/repo/users";
 import {
@@ -381,6 +381,38 @@ export namespace StaffProfileRepository {
   ): Promise<ManagerDirectoryRow | null> {
     const q = queryDb(tx) ?? db;
     return findManagerDirectoryRow(eq(users.id, userId), q, locale);
+  }
+
+  /**
+   * Batch variant of findByUserId — single query for N user IDs. Returns one
+   * row per user (highest-priority group mapping), preserving input order
+   * (unmatched IDs are simply absent — callers use a Map/lookup if needed).
+   */
+  export async function findByUserIds(
+    userIds: readonly string[],
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<ManagerDirectoryRow[]> {
+    if (userIds.length === 0) return [];
+
+    const q = queryDb(tx) ?? db;
+    const uniqueIds = [...new Set(userIds)];
+    const rows = await q
+      .select(MANAGER_DIRECTORY_SELECT)
+      .from(staffProfiles)
+      .innerJoin(users, eq(staffProfiles.userId, users.id))
+      .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
+      .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
+      .where(inArray(users.id, uniqueIds));
+
+    const profileMap = new Map<string, ManagerDirectoryRow>();
+    for (const row of rows) {
+      if (!profileMap.has(row.id)) {
+        profileMap.set(row.id, mapManagerDirectoryRow(row, locale));
+      }
+    }
+
+    return Array.from(profileMap.values());
   }
 
   export async function findByStaffProfileId(
