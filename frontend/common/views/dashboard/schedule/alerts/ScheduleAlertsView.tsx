@@ -23,4 +23,4 @@ export function ScheduleAlertsView(_props: Readonly<UseScheduleAlertsViewModelPr
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { ScheduleAlertsViewModel, UseScheduleAlertsViewModelProps };
+export type { UseScheduleAlertsViewModelProps };

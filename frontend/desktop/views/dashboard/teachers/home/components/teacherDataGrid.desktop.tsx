@@ -167,5 +167,3 @@ export function TeacherDataGrid({
     />
   );
 }
-
-export default TeacherDataGrid;

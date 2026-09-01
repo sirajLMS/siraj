@@ -11,7 +11,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
-export type CountryDisplaySlotProps = {
+type CountryDisplaySlotProps = {
   readonly LocaleEmoji: React.ComponentType<LocaleEmojiProps>;
   readonly spacing?: number;
   readonly flexWrap?: "wrap" | "nowrap" | "wrap-reverse";

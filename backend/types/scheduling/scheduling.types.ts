@@ -30,12 +30,12 @@ import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { DailyScheduleMetricsCounts } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 
 export type RecurringScheduleSelectType = typeof recurringSchedules.$inferSelect;
-export type RecurringScheduleInsertType = typeof recurringSchedules.$inferInsert;
+type RecurringScheduleInsertType = typeof recurringSchedules.$inferInsert;
 
 export type RecurringScheduleDaySelectType = typeof recurringScheduleDays.$inferSelect;
 export type RecurringScheduleDayInsertType = typeof recurringScheduleDays.$inferInsert;
 
-export type DailyScheduleTeacher = TeacherSelectType & { user: UserSelectType };
+type DailyScheduleTeacher = TeacherSelectType & { user: UserSelectType };
 
 export type DailyScheduleResult = Omit<
   ClassInstanceSelectType,
@@ -77,10 +77,9 @@ export type AdminDashboardScheduleResult = {
 };
 
 export type LeaveQuotaUsageSelectType = typeof leaveQuotaUsage.$inferSelect;
-export type LeaveQuotaUsageInsertType = typeof leaveQuotaUsage.$inferInsert;
 
 export type LeaveRequestSelectType = typeof leaveRequests.$inferSelect;
-export type LeaveRequestInsertType = typeof leaveRequests.$inferInsert;
+type LeaveRequestInsertType = typeof leaveRequests.$inferInsert;
 
 export type CreateLeaveRequestInput = Omit<LeaveRequestInsertType, "id">;
 
@@ -98,7 +97,6 @@ export type TimezoneUpsertInput = {
   baseOffsetMinutes: number;
   isDstSupported?: boolean;
 };
-export type TimezoneInsertType = typeof timezones.$inferInsert;
 
 export type SettingsTimezonesPaginatedResult = {
   readonly id: string;
@@ -182,20 +180,6 @@ export type CreateRecurringClassReturnType = {
   classInstanceCount: number;
   meetingUrl: string | null;
 };
-
-export type DailyScheduleMetricFilter =
-  | "total"
-  | "regular"
-  | "trial"
-  | "advance"
-  | "rescheduled"
-  | "suspended"
-  | "taken"
-  | "pending"
-  | "activated"
-  | "running"
-  | "absent"
-  | "leave";
 
 export type FutureClassRow = {
   id: string;

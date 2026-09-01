@@ -1,14 +1,11 @@
 import type { impersonationSessions } from "@/backend/db/schema/auth/impersonation";
 
-export type ImpersonationSessionSelectType = typeof impersonationSessions.$inferSelect;
-export type ImpersonationSessionInsertType = typeof impersonationSessions.$inferInsert;
+type ImpersonationSessionSelectType = typeof impersonationSessions.$inferSelect;
 
 export type ImpersonationSessionReturnType = Omit<ImpersonationSessionSelectType, never> & {
   actorUser?: { id: string };
   targetUser?: { id: string };
 };
-
-export type ImpersonationSessionSubmitInput = Omit<ImpersonationSessionInsertType, "id" | "startedAt" | "isActive">;
 
 export type StartImpersonationInput = {
   actorUserId: string;

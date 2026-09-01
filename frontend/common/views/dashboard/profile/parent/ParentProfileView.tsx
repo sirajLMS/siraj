@@ -43,5 +43,3 @@ export function ParentProfileView(props: Readonly<ParentProfileViewModel | UsePa
   }
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
-
-export default ParentProfileView;

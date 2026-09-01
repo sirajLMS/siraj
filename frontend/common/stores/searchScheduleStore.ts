@@ -416,12 +416,3 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
     }
   )
 );
-
-export function buildSearchScheduleInput(
-  draft: SearchScheduleDraftFilters,
-  page: number,
-  pageSize: number,
-  teacherNameSearch: string | null
-): AvailabilitySearchInput {
-  return draftToActiveInput(draft, page, pageSize, teacherNameSearch);
-}

@@ -1,7 +1,7 @@
 import { eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { queryDb } from "@/backend/db";
-import { invoices, packagePlans, parents, payments, students, users } from "@/backend/db/schema";
+import { invoices, parents, payments, students, users } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -65,15 +65,6 @@ export namespace AccountingPaymentSupport {
   ): Promise<Types.InvoiceSelectType | null> => {
     const q = queryDb(tx);
     const [row] = await q.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
-    return row ?? null;
-  };
-
-  export const findPackagePlanById = async (
-    planId: string,
-    tx?: DBTransaction
-  ): Promise<Types.PackagePlanSelectType | null> => {
-    const q = queryDb(tx);
-    const [row] = await q.select().from(packagePlans).where(eq(packagePlans.id, planId)).limit(1);
     return row ?? null;
   };
 

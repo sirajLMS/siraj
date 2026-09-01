@@ -5,7 +5,7 @@ import type { ComplaintStatus } from "@/frontend/common/graphql/generated/gql/gr
 
 const DEFAULT_PAGE_SIZE = 10;
 
-export type ComplaintTab = ComplaintStatus | "all";
+type ComplaintTab = ComplaintStatus | "all";
 
 interface AdminComplaintsState {
   readonly searchQuery: string;

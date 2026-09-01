@@ -1,6 +1,6 @@
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies";
 
-export type SupportedCurrenciesShellLabels = Pick<
+type SupportedCurrenciesShellLabels = Pick<
   SupportedCurrenciesLabels,
   "pageTitle" | "pageSubtitle" | "empty" | "footerNote"
 >;
@@ -15,7 +15,7 @@ export type SupportedCurrenciesActionLabels = Pick<
   "activateLabel" | "editLabel" | "deactivateLabel"
 >;
 
-export type SupportedCurrenciesDialogLabels = Pick<
+type SupportedCurrenciesDialogLabels = Pick<
   SupportedCurrenciesLabels,
   | "activateTitle"
   | "editTitle"
@@ -25,7 +25,7 @@ export type SupportedCurrenciesDialogLabels = Pick<
   | "deactivateConfirmConfirm"
 >;
 
-export type SupportedCurrenciesNotificationLabels = Pick<
+type SupportedCurrenciesNotificationLabels = Pick<
   SupportedCurrenciesLabels,
   "saveSuccess" | "saveError" | "deactivateSuccess" | "deactivateError" | "currencyInUse"
 >;

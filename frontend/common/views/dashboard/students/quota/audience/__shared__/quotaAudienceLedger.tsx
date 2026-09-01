@@ -9,7 +9,7 @@ import {
 import { getLedgerReasonLabel } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceStatus.utils";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
-export interface LedgerEntry {
+interface LedgerEntry {
   readonly id: string | null;
   readonly delta: number | null;
   readonly reason: string | null;

@@ -27,6 +27,3 @@ export function createMeetingConfigFormSchema(labels: MeetingConfigFormSchemaLab
     settings: z.record(z.string(), z.unknown()),
   });
 }
-
-export type MeetingConfigFormValues = z.infer<ReturnType<typeof createMeetingConfigFormSchema>>;
-export type MeetingConfigFormInput = z.input<ReturnType<typeof createMeetingConfigFormSchema>>;

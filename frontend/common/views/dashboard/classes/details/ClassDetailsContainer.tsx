@@ -7,8 +7,6 @@ import {
   useClassDetailsViewModel,
 } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
 
-export type { ClassDetailsViewModel };
-
 const lazyViews = createLazyView<{ readonly viewModel: ClassDetailsViewModel }>(
   () =>
     import("@/frontend/mobile/views/dashboard/classes/details/classDetailsContainer.mobile").then(m => ({

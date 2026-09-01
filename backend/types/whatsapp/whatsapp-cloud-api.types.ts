@@ -50,20 +50,6 @@ export interface GraphApiPaginatedResponse<T> {
 }
 
 /**
- * Meta error shape inside a non-2xx response body:
- * `{ error: { message, code, type, fbtrace_id, ... } }`.
- */
-export interface MetaErrorBody {
-  readonly error: {
-    readonly message: string;
-    readonly code: number;
-    readonly type?: string;
-    readonly fbtrace_id?: string;
-    readonly error_subcode?: number;
-  };
-}
-
-/**
  * Phone number detail response from GET /{phone_number_id}.
  * Fields follow Meta's v23.0 Graph API (R2/R3/R8).
  *

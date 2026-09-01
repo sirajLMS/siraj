@@ -20,7 +20,6 @@ export type ListPaginationOptions =
     };
 
 export type ServerListPaginationOptions = Extract<ListPaginationOptions, { mode: "server" }>;
-export type ClientListPaginationOptions = Extract<ListPaginationOptions, { mode: "client" }>;
 
 export function buildServerPaginationOptions(args: {
   readonly page: number;

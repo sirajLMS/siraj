@@ -7,7 +7,7 @@ import { NavIcon } from "@/frontend/common/views/dashboard/config/navIconRegistr
 import { Link } from "@/shared/i18n";
 
 export const BOTTOM_NAV_SCROLL_THRESHOLD = 5;
-export const BOTTOM_NAV_ITEM_MIN_WIDTH = 88;
+const BOTTOM_NAV_ITEM_MIN_WIDTH = 88;
 
 interface BottomNavItemViewMobileProps {
   readonly itemKey: string;

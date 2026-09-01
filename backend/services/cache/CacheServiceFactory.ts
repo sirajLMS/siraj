@@ -87,7 +87,7 @@ async function createCacheService(): Promise<ICacheService> {
 /**
  * Get cache service instance (singleton)
  */
-export const getCacheService = async (): Promise<ICacheService> => {
+const getCacheService = async (): Promise<ICacheService> => {
   const state = getCacheState();
 
   if (state.instance) {

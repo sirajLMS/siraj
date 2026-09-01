@@ -33,6 +33,3 @@ export const SETTINGS_AUDIT_ACTION_OPTIONS = [
   "DEACTIVATE",
   "RESTORE",
 ] as const;
-
-export type SettingsAuditEntityTypeOption = (typeof SETTINGS_AUDIT_ENTITY_TYPE_OPTIONS)[number];
-export type SettingsAuditActionOption = (typeof SETTINGS_AUDIT_ACTION_OPTIONS)[number];

@@ -1,6 +1,6 @@
 import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers/futureSchedule";
 
-export interface FutureScheduleSupportContactLabels {
+interface FutureScheduleSupportContactLabels {
   readonly supportContact: string;
   readonly contactAdmin: string;
 }

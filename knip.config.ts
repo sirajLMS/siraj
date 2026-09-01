@@ -14,7 +14,6 @@ const config: KnipConfig = {
     "app/**/route.ts",
     "app/**/loading.tsx",
     "app/**/error.tsx",
-    "app/**/template.tsx",
     "app/**/actions.ts",
     "scripts/**/*.ts",
 
@@ -36,8 +35,17 @@ const config: KnipConfig = {
     "test/ui/e2e-preload.ts",
     "test/ui/components/happydom-preload.ts",
     "test/ui/components/next-dynamic-mock.ts",
+    "test/ui/components/translation-preload.ts",
     "test/integration/preload/live-comm-preload.ts",
     "test/integration/preload/live-fx-preload.ts",
+
+    // Shell-invoked test runners — executed via `bun run test/scripts/…` from
+    // package.json scripts (test:graphql, build:test, test:ui:*, etc.), never imported
+    "test/scripts/**/*.ts",
+
+    // Storybook stories — mirrors .storybook/main.ts `stories` glob; components exercised
+    // only by stories stay counted (storybook runtime imports .storybook/preview.tsx itself)
+    "frontend/**/*.stories.@(ts|tsx)",
   ],
   project: [
     "app/**/*.{ts,tsx}",
@@ -48,42 +56,33 @@ const config: KnipConfig = {
     "test/**/*.{ts,tsx}",
   ],
   ignore: [
-    "**/.*/**",
-    "!.storybook/**",
-    "storage/**",
     "**/generated/**",
-    "**/*.d.ts",
 
     // Storybook story aggregation — re-exports *.stories.tsx, accessed only by
     // @storybook/react plugin globbing, never by app code
     "frontend/common/stories/**",
 
-    // Auto-generated exhaustive IANA timezone catalog — consumed via Object.values(),
-    // individual members are never referenced by name (441 enumMember false positives)
-    "shared/constants/iana-timezone.enum.ts",
-    // Hand-curated ISO-3166 country catalog — members represent valid input options
-    // for regional app, removing "unused" members risks dropping valid selections (246 false positives)
-    "backend/enum/shared/country.enum.ts",
-    // Hand-maintained RBAC permission enum — consumed dynamically via Object.values()
-    // and filterKnownAppPermissions() which explicitly handles legacy permission removal (81 false positives)
-    "backend/enum/permissions/permission.enum.ts",
-
-    // Barrel re-export false positives — consumers import from source files directly,
-    // so barrel re-exports appear unused to knip but the symbols themselves are live
-
-    // i18n compile-time namespace barrel — only DashboardBillingQuota is statically consumed;
-    // the other 105 handles are mirror entries of translation.ts (registers namespaces via side-effect)
-    "shared/locale/namespaces/index.ts",
-    // Meeting type barrel — re-exports ~30 types from 3 sub-type files; 28 flagged
-    // entries are unused re-export fanout, not dead code
-    "backend/types/meeting/index.ts",
-    // WhatsApp Cloud API barrel — author-documented public-API surface for Meta Cloud API v1;
-    // flagged members are awaiting integration-test consumers
-    "backend/services/communication/channels/whatsapp/cloud-api/index.ts",
+    // Enum layers are value catalogs, not regular modules: members back pgEnum columns, are
+    // registered into the Pothos schema via gqlSchemaBuilder.enumType(), and are referenced as
+    // string literals (e.g. `invoiceType: "CREDIT_HOURS_PACKAGE"`) — member-level dead-code
+    // analysis is unsound here and deleting "unused" members breaks the GraphQL/DB contract.
+    "backend/enum/**",
+    "shared/constants/**/*.enum.ts",
 
     // Curated catalog helper surfaces — partially-consumed public API surfaces that mirror
     // other catalog patterns (currency.ts); removing "unused" entries risks dropping valid options
     "frontend/common/lib/payment-method.ts",
+
+    // Namespace-member usage invisible to knip's member tracking:
+    // - recurring-schedule-detail/payment-catalog: consumed via `const { X } = await import(...)` dynamic imports
+    // - appearance-settings getResolvedAppearance: consumed by service tests via the services barrel
+    // - supported-*-repo `listAll`: consumed through the generic `CatalogRepo` type parameter of
+    //   buildCatalogMethods() (payment-catalog.service.ts), not by class-name member access
+    "backend/services/schedule/recurring-schedule-detail.service.ts",
+    "backend/services/payment-method/payment-catalog.service.ts",
+    "backend/services/appearance/appearance-settings.service.ts",
+    "backend/db/repo/billing/supported-payment-link.repository.ts",
+    "backend/db/repo/billing/supported-online-account.repository.ts",
   ],
 
   // External CLI tool spawned at runtime via child_process.spawn — not an npm binary
@@ -93,7 +92,23 @@ const config: KnipConfig = {
   // Tooling-only / lifecycle dependencies not statically imported from any source file.
   // These are spell-check dicts, sonar CLI, and duplicate scanner.
   // Conservative starter set — re-run knip after entry changes to verify remaining deps.
-  ignoreDependencies: ["lint-staged", "jscpd", "@sonar/scan", "@cspell/dict-ar", "@cspell/eslint-plugin"],
+  ignoreDependencies: [
+    "lint-staged",
+    "jscpd",
+    "@sonar/scan",
+    "@cspell/dict-ar",
+    "@cspell/eslint-plugin",
+    // TypeScript 6 patch: required via CommonJS require() in scripts/ts6-eslint-patch.cjs and
+    // package.json postinstall — .cjs files sit outside the knip project globs
+    "@typescript/typescript6",
+    // Provides the `tsgo` binary invoked by the `bun tsgo` package script
+    "@typescript/native-preview",
+    // CLDR data packs: read by file path from node_modules in scripts/generate-iana-timezone-enum.ts
+    // (fs.readFileSync, no import statements)
+    "cldr-core",
+    "cldr-dates-full",
+    "cldr-localenames-full",
+  ],
 };
 
 export default config;

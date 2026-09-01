@@ -3,8 +3,6 @@ import type {
   ManagerDirectoryQuery,
   ManagerDirectoryQueryVariables,
   OnboardingMetricsQuery,
-  StaffDirectoryQuery,
-  StaffDirectoryQueryVariables,
   TeacherDirectoryQuery,
   TeacherDirectoryQueryVariables,
   UpdateManagerProfileMutation,
@@ -109,24 +107,6 @@ export const onboardingMetricsQueryDocument: TypedDocumentNode<OnboardingMetrics
       activeStaff
       pendingApproval
       avgOnboardingDays
-    }
-  }
-`;
-
-export const staffDirectoryAutocompleteRowFragment = gql`
-  fragment StaffDirectoryAutocompleteRow on StaffDirectoryAutocompleteRow {
-    id
-    name
-    avatarUrl
-    email
-  }
-`;
-
-export const staffDirectoryQueryDocument: TypedDocumentNode<StaffDirectoryQuery, StaffDirectoryQueryVariables> = gql`
-  ${staffDirectoryAutocompleteRowFragment}
-  query staffDirectory($search: String, $limit: Int, $permissionGroupFilter: String) {
-    staffDirectory(search: $search, limit: $limit, permissionGroupFilter: $permissionGroupFilter) {
-      ...StaffDirectoryAutocompleteRow
     }
   }
 `;

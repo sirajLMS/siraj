@@ -83,7 +83,7 @@ const activeCustomizedCssVars = new Set<string>();
  * Guarded by `typeof document` so the store can be imported in SSR / tests
  * without touching the DOM.
  */
-export function writeActiveModeCssVars(
+function writeActiveModeCssVars(
   draft: AppearanceDraftInput,
   isDark: boolean,
   presetId?: AppearancePresetId | null
@@ -121,7 +121,7 @@ export function writeActiveModeCssVars(
  * tokens emitted by `server-theme-css.ts` (Task 8.1) once the admin leaves
  * the customizer.
  */
-export function clearActiveModeCssVars(): void {
+function clearActiveModeCssVars(): void {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   for (const varName of activeCustomizedCssVars) {

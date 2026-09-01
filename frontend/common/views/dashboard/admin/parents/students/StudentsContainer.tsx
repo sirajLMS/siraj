@@ -23,5 +23,3 @@ export function StudentsContainer() {
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { StudentsViewModel };

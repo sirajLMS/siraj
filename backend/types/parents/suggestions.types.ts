@@ -73,7 +73,7 @@ export type SuggestionSearchResultType = {
   parentName: string;
 };
 
-export type SuggestionContributor = {
+type SuggestionContributor = {
   readonly id: string;
   readonly name: string;
   readonly suggestionCount: number;

@@ -1,11 +1,3 @@
-export interface ZoomMeetingContext {
-  readonly accountId: string;
-  readonly clientId: string;
-  readonly clientSecret: string;
-  readonly accessToken: string;
-  readonly expiresAt: number;
-}
-
 export interface ZoomTokenResponse {
   readonly access_token: string;
   readonly token_type: string;

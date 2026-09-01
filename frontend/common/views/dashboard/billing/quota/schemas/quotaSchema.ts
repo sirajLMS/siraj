@@ -33,26 +33,5 @@ export const createQuotaSchema = (messages: QuotaLabels) => {
     });
 };
 
-export const createQuotaEditSchema = (messages: QuotaLabels) => {
-  return z
-    .object({
-      name: z.string().min(1, messages.fields.name),
-      validFrom: z.string().nullable().optional(),
-      validUntil: z.string().nullable().optional(),
-      priority: z.coerce.number().min(0),
-    })
-    .superRefine((data, ctx) => {
-      if (data.validFrom && data.validUntil && data.validFrom > data.validUntil) {
-        ctx.addIssue({
-          code: "custom",
-          message: messages.fields.validUntilAfterValidFrom,
-          path: ["validUntil"],
-        });
-      }
-    });
-};
-
 export type QuotaFormData = z.infer<ReturnType<typeof createQuotaSchema>>;
 export type QuotaFormInput = z.input<ReturnType<typeof createQuotaSchema>>;
-export type QuotaEditFormData = z.infer<ReturnType<typeof createQuotaEditSchema>>;
-export type QuotaEditFormInput = z.input<ReturnType<typeof createQuotaEditSchema>>;

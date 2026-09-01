@@ -8,7 +8,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export interface MeetingConfigSelectSharedSlots {
+interface MeetingConfigSelectSharedSlots {
   /** When true, the Autocomplete fills its container width (mobile full-width usage). */
   readonly fullWidth?: boolean;
   /** Extra sx override forwarded onto the Autocomplete (tier chrome adjustments). */

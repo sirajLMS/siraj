@@ -13,8 +13,8 @@ import type {
 } from "@/frontend/common/views/dashboard/classes/details/types";
 import type { ClassDetailsLabels, SessionLabels } from "@/shared/locale";
 
-export const noop = () => {};
-export const noopAsync = () => Promise.resolve();
+const noop = () => {};
+const noopAsync = () => Promise.resolve();
 
 export function makeClassDetailsInstance(): ClassInstance {
   return {

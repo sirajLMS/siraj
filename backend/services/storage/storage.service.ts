@@ -9,7 +9,6 @@ import type {
   DirectoryPermissionsUpdateInput,
   FileOperationResult,
   FileUsageCheckInput,
-  FileUsageInfo,
   FileUsageResult,
   SiteContentUpsertInput,
   StorageItemProtectionUpdateInput,
@@ -169,13 +168,6 @@ export namespace StorageService {
   }
 
   /**
-   * Get file usages (which entities reference this file).
-   */
-  export async function getFileUsages(filePath: string): Promise<FileUsageInfo[]> {
-    return await StorageDbRepository.getFileUsages(filePath);
-  }
-
-  /**
    * Check if a user has access to a file based on its usages.
    * Returns an error response if access is denied, or null if allowed.
    */
@@ -286,28 +278,10 @@ export namespace StorageService {
   }
 
   /**
-   * Clean up unused file records (files with no references).
-   */
-  export async function cleanupExpiredFiles(): Promise<void> {
-    await StorageDbRepository.cleanupExpiredFiles();
-  }
-
-  /**
    * Clean up expired signed URLs.
    */
   export async function cleanupExpiredSignedUrls(): Promise<number> {
     return await SignedUrlRepository.deleteExpired();
-  }
-
-  /**
-   * Get file metadata by path.
-   */
-  export async function getFileByPath(filePath: string): Promise<{
-    id: string;
-    path: string;
-    isProtected: boolean;
-  } | null> {
-    return await StorageDbRepository.fileByPath(filePath);
   }
 
   /**
@@ -484,14 +458,4 @@ export namespace StorageManageService {
   ): Promise<FileOperationResult> {
     return StorageService.setStorageItemProtection(input, locale);
   }
-
-  /** @deprecated Use StorageService.checkDirectoryUploadPermissions instead */
-  export async function checkUploadPermissions(directoryPath: string, locale?: string): Promise<string | null> {
-    return StorageService.checkDirectoryUploadPermissions(directoryPath, locale);
-  }
 }
-
-/** @deprecated Use StorageService directly */
-export const StorageUtils = {
-  validateUpload: StorageService.validateUpload,
-};

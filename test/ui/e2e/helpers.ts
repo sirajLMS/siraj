@@ -1,4 +1,3 @@
-import { expect } from "bun:test";
 import type { BrowserContext, Cookie, Page } from "playwright";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { academyAdmins, parents, staff, students, superAdmins, supervisors, teachers } from "@/shared/demo-users";
@@ -48,8 +47,6 @@ export const DEMO_USERS = {
     groupSlug: SystemPermissionGroupSlug.STUDENT_DEFAULT,
   },
 } as const;
-
-export type DemoUserSlug = keyof typeof DEMO_USERS;
 
 function parseSetCookieHeader(raw: string, baseUrl: string): Cookie | null {
   const [nameValue, ...attributes] = raw.split(";").map(part => part.trim());
@@ -376,18 +373,6 @@ export async function loginAsDemoUserAtRoute(
   await gotoWithRetry(page, `${getTestBaseUrl()}${path}`);
 }
 
-export async function loginAsDemoUserAt(
-  page: Page,
-  context: BrowserContext,
-  groupSlug: string,
-  path: string,
-  waitForReady: (page: Page) => Promise<void>
-): Promise<void> {
-  await authenticateDemoUser(context, groupSlug);
-  await gotoAppRoute(page, path);
-  await waitForReady(page);
-}
-
 export async function gotoAppRoute(page: Page, path: string): Promise<void> {
   await gotoWithRetry(page, path);
 }
@@ -413,27 +398,4 @@ export async function closeE2eSession(page?: Page, context?: BrowserContext): Pr
   } catch {
     // ignore context cleanup errors
   }
-}
-
-export async function assertElementVisible(page: Page, selector: string): Promise<void> {
-  const isVisible = await page.locator(selector).isVisible();
-  expect(isVisible).toBe(true);
-}
-
-export async function assertElementHidden(page: Page, selector: string): Promise<void> {
-  const isVisible = await page.locator(selector).isVisible();
-  expect(isVisible).toBe(false);
-}
-
-export async function createMobileContext(browser: {
-  newContext: (options?: unknown) => Promise<BrowserContext>;
-}): Promise<BrowserContext> {
-  return browser.newContext({
-    baseURL: getTestBaseUrl(),
-    viewport: { width: 390, height: 844 },
-    isMobile: true,
-    hasTouch: true,
-    userAgent:
-      "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1",
-  });
 }

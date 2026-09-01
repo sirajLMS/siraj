@@ -74,14 +74,14 @@ import { APPEARANCE_HEX_PATTERN } from "@/shared/schemas/appearance.zod";
  * input type also enforces this length, but a direct service caller
  * (e.g. an env-config override replay) might bypass GraphQL.
  */
-export const SITE_NAME_MAX_LENGTH = 80;
+const SITE_NAME_MAX_LENGTH = 80;
 
 /**
  * Max length for the `siteTitle` field after sanitization.
  *
  * `siteTitle` is the full HTML `<title>` text; the schema allows 120 chars.
  */
-export const SITE_TITLE_MAX_LENGTH = 120;
+const SITE_TITLE_MAX_LENGTH = 120;
 
 /**
  * Max length for the `siteDescription` field after sanitization.
@@ -89,7 +89,7 @@ export const SITE_TITLE_MAX_LENGTH = 120;
  * Empty is allowed (the SSR `generateMetadata` path treats an empty
  * description as "fall back to default").
  */
-export const SITE_DESCRIPTION_MAX_LENGTH = 300;
+const SITE_DESCRIPTION_MAX_LENGTH = 300;
 
 /**
  * Sentinel returned by {@link normalizeHexColor} when the input cannot be
@@ -103,7 +103,7 @@ export const SITE_DESCRIPTION_MAX_LENGTH = 300;
  * it should not be `null` (the schema requires a non-null hex string).
  */
 // theme-token-allow: hex-schema-input-validation only; never use in sx or styled()
-export const INVALID_HEX_FALLBACK = "#000000";
+const INVALID_HEX_FALLBACK = "#000000";
 
 /**
  * HTML tag stripper — used by {@link sanitizeSiteName} to coerce to plain
@@ -249,7 +249,7 @@ const METADATA_ALLOWED_TAGS = ["b", "i", "em", "strong", "a", "p", "br"] as cons
  * normalizeHexColor(123)            // → "#000000"
  * normalizeHexColor(null)           // → "#000000"
  */
-export function normalizeHexColor(input: unknown): string {
+function normalizeHexColor(input: unknown): string {
   if (typeof input !== "string") {
     return INVALID_HEX_FALLBACK;
   }
@@ -344,7 +344,7 @@ function transformHtmlTag(match: string): string {
  * sanitizeMetadataHtml(42)   // → ""
  * sanitizeMetadataHtml("")   // → ""
  */
-export function sanitizeMetadataHtml(html: unknown): string {
+function sanitizeMetadataHtml(html: unknown): string {
   if (typeof html !== "string" || html.length === 0) {
     return "";
   }
@@ -380,7 +380,7 @@ export function sanitizeMetadataHtml(html: unknown): string {
  * sanitizeSiteName("a".repeat(100), 5)         // → "aaaaa"
  * sanitizeSiteName(null)                       // → ""
  */
-export function sanitizeSiteName(name: unknown, maxLength: number = SITE_NAME_MAX_LENGTH): string {
+function sanitizeSiteName(name: unknown, maxLength: number = SITE_NAME_MAX_LENGTH): string {
   if (typeof name !== "string" || name.length === 0) {
     return "";
   }
@@ -401,7 +401,7 @@ export function sanitizeSiteName(name: unknown, maxLength: number = SITE_NAME_MA
  * sanitizeSiteTitle("Siraj — Quran Learning Platform")
  *   // → "Siraj — Quran Learning Platform"
  */
-export function sanitizeSiteTitle(title: unknown, maxLength: number = SITE_TITLE_MAX_LENGTH): string {
+function sanitizeSiteTitle(title: unknown, maxLength: number = SITE_TITLE_MAX_LENGTH): string {
   return sanitizeSiteName(title, maxLength);
 }
 
@@ -417,7 +417,7 @@ export function sanitizeSiteTitle(title: unknown, maxLength: number = SITE_TITLE
  * sanitizeSiteDescription('<script>alert(1)</script>Learn')
  *   // → "Learn"
  */
-export function sanitizeSiteDescription(description: unknown, maxLength: number = SITE_DESCRIPTION_MAX_LENGTH): string {
+function sanitizeSiteDescription(description: unknown, maxLength: number = SITE_DESCRIPTION_MAX_LENGTH): string {
   if (typeof description !== "string" || description.length === 0) {
     return "";
   }

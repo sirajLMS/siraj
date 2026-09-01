@@ -2,6 +2,10 @@
 
 import { Avatar } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import {
+  type BaseAvatarScaffoldOptions,
+  DEFAULT_DESKTOP_AVATAR_OPTIONS,
+} from "@/frontend/common/components/ui/avatar/avatarShared.options";
 import { getAvatarContent, ROUNDED_BORDER_RADIUS } from "@/frontend/common/components/ui/avatar/avatarSharedUtils";
 import type { BaseAvatarProps } from "@/frontend/common/components/ui/avatar/types/avatarShared.types";
 import { avatarInitials } from "@/frontend/common/utils/avatar";
@@ -11,16 +15,6 @@ function isSxProps(value: SxProps<Theme> | undefined | null | false): value is S
   return Boolean(value);
 }
 
-export interface BaseAvatarScaffoldOptions {
-  /** Default avatar pixel size when the `size` prop is not explicitly passed. */
-  readonly defaultSize?: number;
-  /** When true, circular avatars receive a 1px divider outline (mobile tier). */
-  readonly showCircularOutline?: boolean;
-}
-
-const DEFAULT_DESKTOP_OPTIONS: BaseAvatarScaffoldOptions = { defaultSize: 40, showCircularOutline: false };
-const DEFAULT_MOBILE_OPTIONS: BaseAvatarScaffoldOptions = { defaultSize: 36, showCircularOutline: true };
-
 export function BaseAvatarScaffold({
   src,
   label = "",
@@ -28,7 +22,7 @@ export function BaseAvatarScaffold({
   variant = "circular",
   sx,
   children,
-  options = DEFAULT_DESKTOP_OPTIONS,
+  options = DEFAULT_DESKTOP_AVATAR_OPTIONS,
 }: BaseAvatarProps & { readonly options?: BaseAvatarScaffoldOptions }) {
   const effectiveSize = size ?? options.defaultSize ?? 40;
   const initials = children ?? avatarInitials(label);
@@ -60,5 +54,3 @@ export function BaseAvatarScaffold({
     </Avatar>
   );
 }
-
-export { DEFAULT_DESKTOP_OPTIONS as DESKTOP_AVATAR_OPTIONS, DEFAULT_MOBILE_OPTIONS as MOBILE_AVATAR_OPTIONS };

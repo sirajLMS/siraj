@@ -73,7 +73,7 @@ export interface UseStudentQuotaViewModelProps {
   readonly studentId?: string;
 }
 
-export type StudentQuotaMethods = UseFormReturn<StudentQuotaFormInput, undefined, StudentQuotaFormData>;
+type StudentQuotaMethods = UseFormReturn<StudentQuotaFormInput, undefined, StudentQuotaFormData>;
 
 export interface StudentQuotaViewModel {
   readonly t: StudentQuotaLabels;

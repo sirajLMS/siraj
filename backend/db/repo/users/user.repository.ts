@@ -1,30 +1,13 @@
 import { and, asc, count, eq, inArray, or, type SQL } from "drizzle-orm";
 import { caseInsensitiveLike, db, queryDb } from "@/backend/db";
-import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
 import type { AccountStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
-import {
-  type DBTransaction,
-  type PaginatedUsersResponse,
-  PaginationArgsDefault,
-  type PaginationInput,
-  type UserCreateInput,
-  type UserInsertType,
-  type UserReturnType,
-  type UserSelectType,
-} from "@/backend/types";
+import type { DBTransaction, UserCreateInput, UserInsertType, UserReturnType, UserSelectType } from "@/backend/types";
 import { AuthUtils, escapeLikeWildcards } from "@/backend/utils";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
-import { parseAccountStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
-
-// ============================================================================
-// Prepared Statements (Drizzle Prepared Statements 2.0)
-// ============================================================================
-
-const usersTotalCountPrepared = db.select({ total: count() }).from(users).prepare("users_total_count");
 
 export namespace UserRepository {
   export const existsByEmail = async (email: string, tx?: DBTransaction): Promise<boolean> => {
@@ -161,30 +144,6 @@ export namespace UserRepository {
     return result[0] ?? null;
   };
 
-  export const usersTotalCount = async (): Promise<number> => {
-    const [result] = await usersTotalCountPrepared.execute();
-    return result.total;
-  };
-
-  /**
-   * @deprecated Use `findUsersPaginated` instead. This method lacks pagination and returns all rows.
-   */
-  export const findAll = async (): Promise<
-    Pick<UserReturnType, "id" | "name" | "email" | "status" | "createdAt">[]
-  > => {
-    const rows = await db
-      .select({
-        id: users.id,
-        name: users.name,
-        email: users.email,
-        status: users.status,
-        createdAt: users.createdAt,
-      })
-      .from(users)
-      .limit(500);
-    return rows.map(row => Object.assign(row, { status: parseAccountStatus(row.status) }));
-  };
-
   export const findUsers = async (opts: {
     limit: number;
     offset: number;
@@ -227,46 +186,6 @@ export namespace UserRepository {
     });
   };
 
-  export const findUsersPaginated = async (
-    paginationArgs?: PaginationInput | null
-  ): Promise<PaginatedUsersResponse> => {
-    const { first, skip, page, maxCount } = paginationArgs ?? {};
-
-    const total = await usersTotalCount();
-
-    const perPage = Math.min(first ?? PaginationArgsDefault.first, maxCount ?? PaginationArgsDefault.maxCount);
-    const currentPage = page ?? (skip ? Math.floor(skip / perPage) + 1 : 1);
-    const offset = (currentPage - 1) * perPage;
-
-    // Build the conditions (empty for now since we don't support search in paginated yet)
-    const whereClause = undefined;
-
-    const usersList = await db
-      .select()
-      .from(users)
-      .where(whereClause)
-      .orderBy(users.createdAt)
-      .limit(perPage)
-      .offset(offset);
-
-    const length = usersList.length;
-    const lastPage = Math.ceil(total / perPage);
-
-    return {
-      data: usersList.map(user => AuthUtils.toUserReturnType(user)),
-      pageInfo: {
-        count: length,
-        currentPage,
-        firstItem: length > 0 ? offset + 1 : null,
-        lastItem: length > 0 ? offset + length : null,
-        hasMorePages: currentPage < lastPage,
-        lastPage,
-        perPage,
-        total,
-      },
-    };
-  };
-
   export const create = async (
     input: UserCreateInput,
     locale?: string,
@@ -296,12 +215,7 @@ export namespace UserRepository {
     }
   };
 
-  export const deleteUserById = async (id: string, actorUserId?: string | null): Promise<UserReturnType> => {
-    const { entity } = await SoftDeleteRepository.softDeleteUser(id, actorUserId);
-    return AuthUtils.toUserReturnType(entity);
-  };
-
-  export type UserProfileUpdateInput = {
+  type UserProfileUpdateInput = {
     readonly name?: string;
     readonly email?: string;
     readonly avatarUrl?: string | null;
@@ -426,7 +340,7 @@ export namespace UserRepository {
     return updateUserColumn(userId, { status }, tx, locale);
   };
 
-  export type BootstrapUserUpsertInput = {
+  type BootstrapUserUpsertInput = {
     name: string;
     email: string;
     hashedPassword: string;

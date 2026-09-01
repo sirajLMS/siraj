@@ -35,17 +35,3 @@ export const edgeToEdgeCardPaddingSx: SxProps<Theme> = theme => ({
     paddingBlock: theme.spacing(3),
   },
 });
-
-/** Card flush shell with default inner padding on mobile/tablet. */
-export const edgeToEdgeCardSx: SxProps<Theme> = theme => ({
-  [mobileTabletMedia(theme)]: {
-    borderRadius: "0 !important",
-    borderInlineStart: "none",
-    borderInlineEnd: "none",
-    borderLeft: "none",
-    borderRight: "none",
-    boxShadow: "none",
-    paddingInline: `${theme.spacing(2)} !important`,
-    paddingBlock: theme.spacing(3),
-  },
-});

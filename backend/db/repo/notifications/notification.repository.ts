@@ -45,7 +45,7 @@ const toDeliveryStatus = (value: string): NotificationDeliveryStatus => {
 };
 
 export namespace NotificationRepository {
-  export type NotificationDeliveryInsertInput = CreateNotificationDeliveryInput & {
+  type NotificationDeliveryInsertInput = CreateNotificationDeliveryInput & {
     status: NotificationDeliveryStatus;
     sentAt?: Date | null;
     deliveredAt?: Date | null;
@@ -444,23 +444,9 @@ export namespace NotificationRepository {
     );
   };
 
-  export const getDeliveryByProviderMessageId = async (
-    providerMessageId: string,
-    tx?: DBTransaction
-  ): Promise<NotificationDeliverySelectType | null> => {
-    const q = queryDb(tx);
-    const results = await q
-      .select()
-      .from(notificationDeliveries)
-      .where(eq(notificationDeliveries.providerMessageId, providerMessageId))
-      .limit(1);
-
-    return results[0] ?? null;
-  };
-
   /**
-   * Batch version of `getDeliveryByProviderMessageId` — resolves N providerMessageIds
-   * in a single SELECT using `inArray`. Returns a Map keyed by providerMessageId.
+   * Resolves N providerMessageIds in a single SELECT using `inArray`.
+   * Returns a Map keyed by providerMessageId.
    * Missing deliveries are absent from the Map (caller falls back to CLASS_REMINDER).
    */
   export const getDeliveriesByProviderMessageIds = async (
@@ -490,7 +476,7 @@ export namespace NotificationRepository {
    * used for the INSERT path of the upsert. If any are missing, only UPDATE
    * is attempted and the method returns null when no row matches.
    */
-  export interface DeliveryWebhookInput {
+  interface DeliveryWebhookInput {
     providerMessageId: string;
     status: NotificationDeliveryStatus;
     webhookPayload?: Record<string, unknown> | null;
@@ -653,11 +639,6 @@ export namespace NotificationRepository {
     //
     // The caller's "no existing delivery" log is misleading in case 2
     // (the actual scenario is a rank-guard rejection on concurrent insert).
-    //
-    // If needed, the caller can disambiguate by calling
-    // `getDeliveryByProviderMessageId` to check whether the row exists.
-    // We do not perform that check here to avoid an extra query inside the
-    // transaction; the rank-guard skip is idempotent and harmless.
     return inserted;
   };
 

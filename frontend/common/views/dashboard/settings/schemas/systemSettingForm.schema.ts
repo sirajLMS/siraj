@@ -1,11 +1,8 @@
 import { z } from "zod";
-import { SystemSettingCategory, SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql";
+import { SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SettingsGeneralTabLabels } from "@/shared/locale/types/dashboard/settings/general";
 
-export { SystemSettingCategory, SystemSettingDataType };
-
-export const SYSTEM_SETTING_DATA_TYPES = Object.values(SystemSettingDataType) as readonly SystemSettingDataType[];
-export const SYSTEM_SETTING_CATEGORIES = Object.values(SystemSettingCategory) as readonly SystemSettingCategory[];
+export { SystemSettingDataType };
 
 export type SystemSettingValueLabels = Pick<
   SettingsGeneralTabLabels,

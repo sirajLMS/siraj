@@ -16,15 +16,8 @@ export * from "./leave-request.repository";
 export * from "./queries";
 export * from "./recurring-schedule.repository";
 export * from "./scheduling-queries.repository.findUpcoming";
-export type {
-  ClassInstanceAffectedUsers,
-  ClassInstanceWithAffectedUsers,
-} from "./scheduling-queries.repository.helpers";
-export {
-  classLifecycleAffectedUserIds,
-  getClassInstanceAffectedUsers,
-  getClassInstanceAffectedUsersForTeacher,
-} from "./scheduling-queries.repository.helpers";
+export type { ClassInstanceAffectedUsers } from "./scheduling-queries.repository.helpers";
+export { classLifecycleAffectedUserIds } from "./scheduling-queries.repository.helpers";
 export * from "./shared";
 
 export const SchedulingRepository = {

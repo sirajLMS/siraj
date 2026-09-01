@@ -74,7 +74,7 @@ const REGISTRY: Record<AppearancePresetId, PresetPalettes> = {
 };
 
 /** The default preset id used when `APP_THEME_PRESET` is unset or unknown. */
-export const DEFAULT_PRESET_ID: AppearancePresetId = "default";
+const DEFAULT_PRESET_ID: AppearancePresetId = "default";
 
 /**
  * Read the active preset id from the `APP_THEME_PRESET` environment variable.
@@ -84,7 +84,7 @@ export const DEFAULT_PRESET_ID: AppearancePresetId = "default";
  * falls back to `"default"` rather than throwing — the SSR fast path (decision
  * §15) must never block on theme resolution.
  */
-export function getActivePresetId(): AppearancePresetId {
+function getActivePresetId(): AppearancePresetId {
   const raw = process.env.APP_THEME_PRESET;
   if (!raw) return DEFAULT_PRESET_ID;
   return isAppearancePresetId(raw) ? raw : DEFAULT_PRESET_ID;

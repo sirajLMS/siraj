@@ -11,7 +11,7 @@ export interface SupportContactSharedProps extends Readonly<SupportContactProps>
   readonly options: SupportContactSharedOptions;
 }
 
-export interface SupportContactSharedOptions {
+interface SupportContactSharedOptions {
   readonly CardComponent: ComponentType<{ readonly sx?: SxProps<Theme>; readonly children: ReactNode }>;
   readonly AvatarComponent: ComponentType<{
     readonly src?: string | null;

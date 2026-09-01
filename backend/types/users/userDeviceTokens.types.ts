@@ -1,7 +1,7 @@
 import type { userDeviceTokens } from "@/backend/db/schema";
 
 export type UserDeviceTokenSelectType = typeof userDeviceTokens.$inferSelect;
-export type UserDeviceTokenInsertType = typeof userDeviceTokens.$inferInsert;
+type UserDeviceTokenInsertType = typeof userDeviceTokens.$inferInsert;
 
 // UserDeviceTokenReturnType removed — was unused. Re-create from UserDeviceTokenSelectType if needed (Omit "token").
 

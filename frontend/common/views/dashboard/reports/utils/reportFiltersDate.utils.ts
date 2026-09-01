@@ -5,7 +5,7 @@
 
 import { format, isValid, parse } from "date-fns";
 
-export const REPORT_DATE_FILTER_FORMAT = "yyyy-MM-dd";
+const REPORT_DATE_FILTER_FORMAT = "yyyy-MM-dd";
 
 export function parseReportFilterDate(date: string): Date | null {
   if (date.length === 0) {

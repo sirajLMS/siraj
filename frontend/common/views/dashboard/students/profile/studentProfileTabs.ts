@@ -1,6 +1,6 @@
 import type { StudentFieldGroupKey } from "@/shared/constants/profile-field-groups";
 
-export const STUDENT_PROFILE_TABS = ["profile", "status", "classes", "quota", "credit-hours", "history"] as const;
+const STUDENT_PROFILE_TABS = ["profile", "status", "classes", "quota", "credit-hours", "history"] as const;
 
 export type StudentProfileTab = (typeof STUDENT_PROFILE_TABS)[number];
 
@@ -52,20 +52,4 @@ export function getVisibleStudentProfileTabs(
   canView: (groupKey: StudentFieldGroupKey) => boolean
 ): StudentProfileTab[] {
   return STUDENT_PROFILE_TABS.filter(tab => canViewStudentProfileTab(tab, canView));
-}
-
-export function resolveStudentProfileTab(
-  tabParam: string | null,
-  canView: (groupKey: StudentFieldGroupKey) => boolean
-): StudentProfileTab | null {
-  const visibleTabs = getVisibleStudentProfileTabs(canView);
-  if (visibleTabs.length === 0) {
-    return null;
-  }
-
-  if (isStudentProfileTab(tabParam) && visibleTabs.includes(tabParam)) {
-    return tabParam;
-  }
-
-  return visibleTabs[0] ?? null;
 }

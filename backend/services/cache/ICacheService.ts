@@ -6,8 +6,3 @@ import type { ICacheServiceBase } from "@/backend/types";
  * Matches Redis operations used in rate limiting
  */
 export type ICacheService = ICacheServiceBase;
-
-/**
- * Cache Provider Types
- */
-export type CacheProvider = "redis" | "postgres";

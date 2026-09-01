@@ -15,7 +15,7 @@ function resolveMeetingUrlStatus(row: ParentScheduleRow): "failed" | "generated"
   return "pending";
 }
 
-export interface ScheduleCardJoinActionRenderProps {
+interface ScheduleCardJoinActionRenderProps {
   readonly row: ParentScheduleRow;
   readonly labels: ParentDashboardLabels;
   readonly canJoin: boolean;

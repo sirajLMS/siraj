@@ -6,22 +6,19 @@ import type {
 } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents";
 
-export type ParentsDirectoryShellLabels = Pick<
-  ParentsDirectoryLabels,
-  "pageTitle" | "pageSubtitle" | "records" | "noEntries"
->;
+type ParentsDirectoryShellLabels = Pick<ParentsDirectoryLabels, "pageTitle" | "pageSubtitle" | "records" | "noEntries">;
 
-export type ParentsDirectoryFilterLabels = Pick<ParentsDirectoryLabels, "searchPlaceholder"> & {
+type ParentsDirectoryFilterLabels = Pick<ParentsDirectoryLabels, "searchPlaceholder"> & {
   readonly filterLabel: string;
   readonly clearFilters: string;
   readonly statusLabels: Record<ParentLifecycleStatus, string>;
 };
 
-export type ParentsDirectoryColumnLabels = ParentsDataGridLabels;
+type ParentsDirectoryColumnLabels = ParentsDataGridLabels;
 
-export type ParentsDirectoryCardLabels = ParentCardListLabels;
+type ParentsDirectoryCardLabels = ParentCardListLabels;
 
-export type ParentsDirectoryActionLabels = Pick<
+type ParentsDirectoryActionLabels = Pick<
   ParentsDirectoryLabels["actions"],
   "addParent" | "export" | "manageLifecycle"
 > & {

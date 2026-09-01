@@ -30,7 +30,7 @@ export interface AdminNoteDialogLabels {
   readonly save: string;
 }
 
-export interface RegisteredStudentsLabels {
+interface RegisteredStudentsLabels {
   readonly title: string;
   readonly exportList: string;
   readonly studentName: string;

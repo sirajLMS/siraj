@@ -20,19 +20,6 @@ export namespace ClassCategoryService {
     return await ClassCategoryRepository.listCategories();
   }
 
-  export async function getCategoryById(
-    userId: string,
-    id: string,
-    tErrors: ErrorsLabels
-  ): Promise<ClassCategoryReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.SUBJECTS_LIST);
-    if (!hasPermission) {
-      throw new Error(tErrors.unauthorizedAction);
-    }
-
-    return await ClassCategoryRepository.getCategoryById(id, tErrors);
-  }
-
   export async function createCategory(
     userId: string,
     input: ClassCategorySubmitInput,

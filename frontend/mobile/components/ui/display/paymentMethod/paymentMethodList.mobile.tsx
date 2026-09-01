@@ -17,8 +17,6 @@ import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/di
 import { MobilePaymentMethodDisplay } from "@/frontend/mobile/components/ui/display/paymentMethod/paymentMethodDisplay.mobile";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type { PaymentMethodRow };
-
 export type MobilePaymentMethodListProps = {
   readonly methods: readonly PaymentMethodRow[];
   readonly loading?: boolean;
@@ -160,5 +158,3 @@ export function MobilePaymentMethodList({
     </Stack>
   );
 }
-
-export { MobilePaymentMethodDisplay };

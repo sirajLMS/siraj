@@ -2,7 +2,6 @@ import type { studentStatusHistory } from "@/backend/db/schema";
 import type { StudentStatus } from "@/backend/enum";
 
 export type StudentStatusHistorySelectType = typeof studentStatusHistory.$inferSelect;
-export type StudentStatusHistoryInsertType = typeof studentStatusHistory.$inferInsert;
 
 export type CreateInitialStatusHistoryInput = {
   studentId: string;

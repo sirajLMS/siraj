@@ -7,7 +7,7 @@ export type ScheduleLegendSwatchSpec =
   | { readonly kind: "filled"; readonly color: (theme: Theme) => string }
   | { readonly kind: "outlined" };
 
-export interface ScheduleLegendItem {
+interface ScheduleLegendItem {
   readonly key: string;
   readonly label: string;
   readonly swatch: ScheduleLegendSwatchSpec;

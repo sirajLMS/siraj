@@ -296,7 +296,4 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
   };
 }
 
-export {
-  isStudentProfileAudience,
-  PROFILE_AUDIENCE_STUDENT,
-} from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";
+export { PROFILE_AUDIENCE_STUDENT } from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";

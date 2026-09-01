@@ -3,13 +3,10 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { ReportsDataGridLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { ReportLedgerRow } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import type { ReportsDataGridProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { reportNameHrefForRow } from "@/frontend/common/views/dashboard/reports/utils/reportNameHrefForRow.utils";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui";
-
-export type ReportsDataGridDesktopLabels = ReportsDataGridLabels;
 
 function CountCell({ value, tone = "default" }: Readonly<{ value: number; tone?: "default" | "error" | "primary" }>) {
   return (

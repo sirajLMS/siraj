@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { classInstancePerformance } from "@/backend/db/schema";
 import type {
@@ -77,25 +77,6 @@ export namespace ClassPerformanceRepository {
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
-  }
-
-  export async function listByClassInstanceIds(
-    classInstanceIds: readonly string[],
-    tx?: DBTransaction
-  ): Promise<Map<string, ClassInstancePerformanceSelectType>> {
-    const map = new Map<string, ClassInstancePerformanceSelectType>();
-    if (classInstanceIds.length === 0) return map;
-
-    const q = queryDb(tx);
-    const rows = await q
-      .select()
-      .from(classInstancePerformance)
-      .where(inArray(classInstancePerformance.classInstanceId, [...classInstanceIds]));
-
-    for (const row of rows) {
-      map.set(row.classInstanceId, row);
-    }
-    return map;
   }
 
   export async function upsertMany(

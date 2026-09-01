@@ -51,14 +51,14 @@ export function tintedIconWrapSx(theme: Theme, isError: boolean) {
   };
 }
 
-export function interactiveIconHoverSx(theme: Theme, isError: boolean) {
+function interactiveIconHoverSx(theme: Theme, isError: boolean) {
   return {
     ...filledIconWrapSx(theme, isError),
     transform: "scale(1.1)",
   };
 }
 
-export function interactiveIconActiveSx(theme: Theme, isError: boolean) {
+function interactiveIconActiveSx(theme: Theme, isError: boolean) {
   return {
     ...filledIconWrapSx(theme, isError),
     transform: "scale(0.95)",

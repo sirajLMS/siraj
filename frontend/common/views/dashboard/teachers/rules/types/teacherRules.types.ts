@@ -1,13 +1,13 @@
 import type { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 
-export interface TeacherRulesShellLabels {
+interface TeacherRulesShellLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
 }
 
-export type TeacherRulesPolicyLabels = ReturnType<typeof buildTeacherDashboardLabels>["policy"];
+type TeacherRulesPolicyLabels = ReturnType<typeof buildTeacherDashboardLabels>["policy"];
 
-export type TeacherRulesActionLabels = ReturnType<typeof buildTeacherDashboardLabels>["actions"];
+type TeacherRulesActionLabels = ReturnType<typeof buildTeacherDashboardLabels>["actions"];
 
 export interface TeacherRulesLabelsBySection {
   readonly shell: TeacherRulesShellLabels;

@@ -1,19 +1,6 @@
 import { redirect as nextRedirect } from "next/navigation";
-import { type AppLocale, defaultLocale, locales } from "@/shared/locale/AppLocale";
 
-export { type AppLocale, defaultLocale, locales };
-
-export interface RoutingConfig {
-  locales: readonly AppLocale[];
-  defaultLocale: AppLocale;
-  localePrefix: "never";
-}
-
-export const routing: RoutingConfig = {
-  locales,
-  defaultLocale,
-  localePrefix: "never",
-};
+export { type AppLocale, locales } from "@/shared/locale/AppLocale";
 
 export interface RedirectOptions {
   href: string;

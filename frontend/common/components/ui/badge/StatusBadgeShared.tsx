@@ -8,13 +8,6 @@ import type {
   StatusBadgeSlotProps,
 } from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
 
-export type {
-  StatusBadgeCategory,
-  StatusBadgeSharedProps,
-  StatusBadgeSlotProps,
-  StatusPaletteKey,
-} from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
-
 export interface StatusBadgeScaffoldProps extends StatusBadgeSharedProps, StatusBadgeSlotProps {}
 
 /**

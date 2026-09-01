@@ -1,10 +1,6 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type {
-  CreateCurrencyHedgeMutation,
-  CreateCurrencyHedgeMutationVariables,
   CurrencyHedgesQuery,
-  DeleteCurrencyHedgeMutation,
-  DeleteCurrencyHedgeMutationVariables,
   ExchangeRateHistoryQuery,
   ExchangeRateHistoryQueryVariables,
   FxProviderConfigQuery,
@@ -14,8 +10,6 @@ import type {
   LatestFxSyncRunQuery,
   RefreshExchangeRatesMutation,
   RefreshExchangeRatesMutationVariables,
-  UpdateCurrencyHedgeMutation,
-  UpdateCurrencyHedgeMutationVariables,
   UpdateFxProviderMutation,
   UpdateFxProviderMutationVariables,
   UpsertManualExchangeRateMutation,
@@ -191,65 +185,5 @@ export const currencyHedgesQueryDocument: TypedDocumentNode<CurrencyHedgesQuery>
       createdAt
       updatedAt
     }
-  }
-`;
-
-export const createCurrencyHedgeMutationDocument: TypedDocumentNode<
-  CreateCurrencyHedgeMutation,
-  CreateCurrencyHedgeMutationVariables
-> = gql`
-  mutation CreateCurrencyHedge(
-    $currency: CurrencyCode!
-    $amount: String!
-    $hedgeType: String!
-    $notes: String
-  ) {
-    createCurrencyHedge(currency: $currency, amount: $amount, hedgeType: $hedgeType, notes: $notes) {
-      id
-      currency
-      amount
-      hedgeType
-      notes
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-export const updateCurrencyHedgeMutationDocument: TypedDocumentNode<
-  UpdateCurrencyHedgeMutation,
-  UpdateCurrencyHedgeMutationVariables
-> = gql`
-  mutation UpdateCurrencyHedge(
-    $id: String!
-    $currency: CurrencyCode
-    $amount: String
-    $hedgeType: String
-    $notes: String
-  ) {
-    updateCurrencyHedge(
-      id: $id
-      currency: $currency
-      amount: $amount
-      hedgeType: $hedgeType
-      notes: $notes
-    ) {
-      id
-      currency
-      amount
-      hedgeType
-      notes
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-export const deleteCurrencyHedgeMutationDocument: TypedDocumentNode<
-  DeleteCurrencyHedgeMutation,
-  DeleteCurrencyHedgeMutationVariables
-> = gql`
-  mutation DeleteCurrencyHedge($id: String!) {
-    deleteCurrencyHedge(id: $id)
   }
 `;

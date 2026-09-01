@@ -98,7 +98,7 @@ export namespace UserOnboardingService {
     readonly logTag: string;
   }
 
-  export interface CreateUserOfTypeResult<TExtension> {
+  interface CreateUserOfTypeResult<TExtension> {
     readonly user: UserReturnType;
     readonly extension: TExtension;
   }

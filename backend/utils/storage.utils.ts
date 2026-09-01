@@ -32,14 +32,14 @@ export namespace StorageUtils {
   // Allow common file name characters: letters, numbers, spaces, parentheses, brackets, underscores, hyphens, periods
   export const validateFileName = sharedValidateFileName;
 
-  export const validateFileSize = (size: number): string | null => {
+  const validateFileSize = (size: number): string | null => {
     if (size > STORAGE_CONFIG.MAX_FILE_SIZE) {
       return `File size exceeds maximum allowed size (${STORAGE_CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB)`;
     }
     return null;
   };
 
-  export interface UploadValidationOptions {
+  interface UploadValidationOptions {
     path: string;
     size: number;
     contentType: string;
@@ -122,20 +122,6 @@ export namespace StorageUtils {
       url,
       mediaLink,
       fileType,
-      isPublic,
-    };
-  };
-
-  export const blobToDirectoryInfo = (blob: Types.BlobMetadata): Types.BucketDirectory => {
-    const path = (blob.name ?? "").replace(/\/$/, "");
-    const createdAt = blob.timeCreated ? new Date(blob.timeCreated) : new Date();
-    const lastModified = blob.updated ? new Date(blob.updated) : new Date();
-    const isPublic = path.startsWith("public");
-
-    return {
-      path,
-      createdAt,
-      lastModified,
       isPublic,
     };
   };

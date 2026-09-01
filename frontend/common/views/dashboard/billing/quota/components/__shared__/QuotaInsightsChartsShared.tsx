@@ -27,7 +27,7 @@ import {
   makeGaugeShape,
 } from "@/frontend/common/views/dashboard/billing/quota/utils";
 
-export function ChartAxisGrid(): ReactElement {
+function ChartAxisGrid(): ReactElement {
   return (
     <>
       <CartesianGrid strokeDasharray="3 3" />
@@ -39,7 +39,7 @@ export function ChartAxisGrid(): ReactElement {
   );
 }
 
-export function PurchasesOverTimeAreas({
+function PurchasesOverTimeAreas({
   chartLabels,
   chartColors,
   showClassesArea,
@@ -76,7 +76,7 @@ export function PurchasesOverTimeAreas({
   );
 }
 
-export function ExpiredSlippageLines({
+function ExpiredSlippageLines({
   chartLabels,
   chartColors,
 }: {
@@ -107,7 +107,7 @@ export function ExpiredSlippageLines({
   );
 }
 
-export function PurchasesOverTimeChartContent({
+function PurchasesOverTimeChartContent({
   data,
   chartLabels,
   chartColors,
@@ -126,7 +126,7 @@ export function PurchasesOverTimeChartContent({
   );
 }
 
-export function ExpiredSlippageChartContent({
+function ExpiredSlippageChartContent({
   data,
   chartLabels,
   chartColors,

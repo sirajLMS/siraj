@@ -30,7 +30,7 @@ const TAB_VISIBILITY: Record<ProfileTabId, readonly TabVisibilityKey[]> = {
   permissions: ["STAFF-OTHER"],
 };
 
-export const profileTabs: readonly ProfileTabDefinition[] = [
+const profileTabs: readonly ProfileTabDefinition[] = [
   { id: "profile", i18nKey: "shell.tabs.profile" },
   { id: "paymentMethods", i18nKey: "shell.tabs.paymentMethods" },
   { id: "meeting", i18nKey: "shell.tabs.meeting" },

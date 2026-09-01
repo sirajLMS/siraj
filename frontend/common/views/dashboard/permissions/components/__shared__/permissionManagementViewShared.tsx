@@ -15,13 +15,13 @@ export interface PermissionManagementViewSharedOptions {
   readonly contentSx: { readonly mt: number; readonly gap: number };
 }
 
-export interface PageHeaderSlotProps {
+interface PageHeaderSlotProps {
   readonly title: string;
   readonly subtitle?: string;
   readonly actions?: ReactNode;
 }
 
-export interface PrimaryPageActionSlotProps {
+interface PrimaryPageActionSlotProps {
   readonly id?: string;
   readonly onClick?: () => void;
   readonly children?: ReactNode;

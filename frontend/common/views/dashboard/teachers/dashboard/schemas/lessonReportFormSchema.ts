@@ -19,5 +19,3 @@ export const lessonReportFormSchema = (labels: LessonReportFormLabels) =>
       .max(100, labels.completionMax),
     teacherNotes: z.string().optional().default(""),
   });
-
-export type LessonReportFormData = z.infer<ReturnType<typeof lessonReportFormSchema>>;

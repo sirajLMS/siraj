@@ -17,9 +17,9 @@ import type { CatalogImageUploadLabels } from "@/shared/locale/types/ui";
 
 export const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const DEFAULT_MAX_SIZE_MB = 2;
-export const BYTES_PER_MB = 1024 * 1024;
+const BYTES_PER_MB = 1024 * 1024;
 
-export type UploadState = "idle" | "uploading" | "ready" | "error";
+type UploadState = "idle" | "uploading" | "ready" | "error";
 
 export type ImageUploadHookParams = {
   readonly onImageUrlChangeAction?: (url: string | null) => void;

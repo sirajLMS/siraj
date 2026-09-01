@@ -6,11 +6,11 @@ import { getStorageService } from "@/backend/storage/storage.service";
 
 export type CatalogLogoCategory = "meeting" | "payment" | "subjects";
 
-export function getCatalogLogoAssetPath(category: CatalogLogoCategory, slug: string): string {
+function getCatalogLogoAssetPath(category: CatalogLogoCategory, slug: string): string {
   return `logos/${category}/${slug}.png`;
 }
 
-export function getCatalogLogoBucketPath(category: CatalogLogoCategory, slug: string): string {
+function getCatalogLogoBucketPath(category: CatalogLogoCategory, slug: string): string {
   return `public/logos/${category}/${slug}.png`;
 }
 

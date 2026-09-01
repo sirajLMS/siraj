@@ -7,7 +7,7 @@ import type {
   ScheduleTrackingTabLabelKey,
 } from "@/frontend/common/views/dashboard/schedule/tracking/tabs/types";
 
-export const SCHEDULE_TRACKING_TABS: readonly TabDefinition<ScheduleTrackingTabId, ScheduleTrackingTabLabelKey>[] = [
+const SCHEDULE_TRACKING_TABS: readonly TabDefinition<ScheduleTrackingTabId, ScheduleTrackingTabLabelKey>[] = [
   {
     id: "reschedule",
     labelKey: "reschedule",

@@ -20,7 +20,7 @@ import { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graph
 import type { ComplaintFormData } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
 import type { ComplaintsParentLabels } from "@/shared/locale";
 
-export interface ComplaintFormFieldsSlotProps {
+interface ComplaintFormFieldsSlotProps {
   /** Tier-specific student autocomplete component (desktop or mobile). */
   readonly StudentAutocomplete: React.ComponentType<{
     readonly value: PersonOption | null;
@@ -32,7 +32,7 @@ export interface ComplaintFormFieldsSlotProps {
   }>;
 }
 
-export interface ComplaintFormFieldsSharedOptions {
+interface ComplaintFormFieldsSharedOptions {
   /** Gap between form fields (spacing units). Desktop: 4, Mobile: 3. */
   readonly fieldGap: number;
   /** Extra bottom margin on the header box (spacing units). Desktop: 1, Mobile: 0. */

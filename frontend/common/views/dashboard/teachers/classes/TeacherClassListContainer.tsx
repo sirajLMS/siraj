@@ -8,7 +8,7 @@ import {
   useTeacherClassListViewModel,
 } from "@/frontend/common/views/dashboard/teachers/classes/useTeacherClassListViewModel";
 
-export type { TeacherClassListViewModel, UseTeacherClassListViewModelProps };
+export type { UseTeacherClassListViewModelProps };
 
 const lazyViews = createLazyView<TeacherClassListViewModel>(
   () =>

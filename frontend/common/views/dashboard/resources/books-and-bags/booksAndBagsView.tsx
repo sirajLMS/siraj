@@ -14,7 +14,6 @@ import {
 // wrapper that previously lived in the books-and-bags tier view files was
 // lifted here per specs.md §3 N3 + §6.1 — permission gating lives in the
 // common Container/Switcher. The tier files now render content unconditionally.
-export type { BooksAndBagsViewModel };
 
 const lazyViews = createLazyView<BooksAndBagsViewModel>(
   () =>

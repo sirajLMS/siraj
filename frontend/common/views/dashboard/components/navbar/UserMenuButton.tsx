@@ -19,13 +19,13 @@ import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import { useRouter } from "@/shared/i18n/navigation";
 import { type AuthImpersonationLabels, type CommonLabels, Translation, useAppTranslation } from "@/shared/locale";
 
-export interface UserInfoSlotProps {
+interface UserInfoSlotProps {
   readonly name: string;
   readonly mail: string;
   readonly secondaryLine?: string;
 }
 
-export interface LogoutButtonSlotProps {
+interface LogoutButtonSlotProps {
   readonly onClick: () => void;
 }
 

@@ -224,36 +224,12 @@ export namespace SoftDeleteRepository {
     return softDelete({ tableName: "complaints", entityId: complaintId, actorUserId }, tx);
   };
 
-  export const softDeleteLearningResource = async (
-    resourceId: string,
-    actorUserId?: string | null,
-    tx?: DBTransaction
-  ): Promise<Types.SoftDeleteResult<Types.SoftDeletableEntityMap["learning_resources"]>> => {
-    return softDelete({ tableName: "learning_resources", entityId: resourceId, actorUserId }, tx);
-  };
-
-  export const softDeleteInvoice = async (
-    invoiceId: string,
-    actorUserId?: string | null,
-    tx?: DBTransaction
-  ): Promise<Types.SoftDeleteResult<Types.SoftDeletableEntityMap["invoices"]>> => {
-    return softDelete({ tableName: "invoices", entityId: invoiceId, actorUserId }, tx);
-  };
-
   export const softDeleteSuggestion = async (
     suggestionId: string,
     actorUserId?: string | null,
     tx?: DBTransaction
   ): Promise<Types.SoftDeleteResult<Types.SoftDeletableEntityMap["suggestions"]>> => {
     return softDelete({ tableName: "suggestions", entityId: suggestionId, actorUserId }, tx);
-  };
-
-  export const softDeleteBook = async (
-    bookId: string,
-    actorUserId?: string | null,
-    tx?: DBTransaction
-  ): Promise<Types.SoftDeleteResult<Types.SoftDeletableEntityMap["books"]>> => {
-    return softDelete({ tableName: "books", entityId: bookId, actorUserId }, tx);
   };
 
   /**

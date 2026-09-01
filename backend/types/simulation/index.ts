@@ -3,11 +3,6 @@
  * impersonation.service.ts and permission-group-simulation.service.ts.
  */
 
-export type SimulationSessionOwnership = {
-  rawSessionId: string;
-  actorUserId: string;
-};
-
 export type SimulationAuditLogParams = {
   actorUserId: string;
   targetUserId: string;

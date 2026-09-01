@@ -17,7 +17,7 @@ export interface StudentOnboardingSharedOptions {
   readonly footerPadding: number;
 }
 
-export interface StudentParentAssignmentSlotProps {
+interface StudentParentAssignmentSlotProps {
   readonly control: StudentOnboardingViewModel["control"];
   readonly errors: StudentOnboardingViewModel["errors"];
   readonly parentLocked: boolean;
@@ -29,7 +29,7 @@ export interface StudentParentAssignmentSlotProps {
   };
 }
 
-export interface StudentTeacherAssignmentSlotProps {
+interface StudentTeacherAssignmentSlotProps {
   readonly control: StudentOnboardingViewModel["control"];
   readonly labels: {
     readonly sectionTitle: string;
@@ -38,7 +38,7 @@ export interface StudentTeacherAssignmentSlotProps {
   };
 }
 
-export interface StudentPrimaryActionSlotProps {
+interface StudentPrimaryActionSlotProps {
   readonly type?: "submit";
   readonly disabled?: boolean;
   readonly fullWidth?: boolean;

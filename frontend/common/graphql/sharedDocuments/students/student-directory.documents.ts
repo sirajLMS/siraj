@@ -6,7 +6,7 @@ import type {
   StudentsDirectoryQueryVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const studentDirectoryRowFragment = gql`
+const studentDirectoryRowFragment = gql`
   fragment StudentDirectoryRow on StudentDirectoryRow {
     id
     name

@@ -1,4 +1,4 @@
-export function resolveBillingDateLocale(locale: string): string {
+function resolveBillingDateLocale(locale: string): string {
   if (locale.startsWith("ar")) {
     return "ar-SA";
   }

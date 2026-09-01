@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 
-export type MonthlyReportType = "teacher" | "student";
+type MonthlyReportType = "teacher" | "student";
 
 interface SupervisorMonthlyReportsState {
   readonly reportType: MonthlyReportType;

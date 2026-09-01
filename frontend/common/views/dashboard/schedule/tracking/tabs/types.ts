@@ -4,7 +4,7 @@ export type ScheduleTrackingTabId = "reschedule" | "status" | "alerts";
 /** I18n label keys (map to `dashboard.scheduleTrackingParent.tabs.*`). */
 export type ScheduleTrackingTabLabelKey = "reschedule" | "status" | "alerts";
 
-export type ScheduleTrackingTabsLabels = Record<ScheduleTrackingTabLabelKey, string>;
+type ScheduleTrackingTabsLabels = Record<ScheduleTrackingTabLabelKey, string>;
 
 export interface ScheduleTrackingViewLabels {
   readonly title: string;

@@ -74,7 +74,7 @@ export const CronRunObject = gqlSchemaBuilder.objectRef<CronRunReturnType>("Cron
   }),
 });
 
-export const CronQueueStatsObject = gqlSchemaBuilder.objectRef<CronQueueStats>("CronQueueStats").implement({
+const CronQueueStatsObject = gqlSchemaBuilder.objectRef<CronQueueStats>("CronQueueStats").implement({
   fields: t => ({
     // CronQueueStats has no natural id — this synthetic field exists solely for Apollo cache normalization.
     id: t.string({ resolve: () => "cron-queue-stats" }),
@@ -89,7 +89,7 @@ export const CronQueueStatsObject = gqlSchemaBuilder.objectRef<CronQueueStats>("
   }),
 });
 
-export const CronPaginatedSchedulesObject = gqlSchemaBuilder
+const CronPaginatedSchedulesObject = gqlSchemaBuilder
   .objectRef<CronScheduleListResult>("CronPaginatedSchedules")
   .implement({
     fields: t => ({
@@ -98,7 +98,7 @@ export const CronPaginatedSchedulesObject = gqlSchemaBuilder
     }),
   });
 
-export const CronPaginatedRunsObject = gqlSchemaBuilder.objectRef<CronRunListResult>("CronPaginatedRuns").implement({
+const CronPaginatedRunsObject = gqlSchemaBuilder.objectRef<CronRunListResult>("CronPaginatedRuns").implement({
   fields: t => ({
     rows: t.expose("rows", { type: [CronRunObject] }),
     totalCount: t.exposeInt("totalCount"),
@@ -114,7 +114,7 @@ export const CronPaginatedRunsObject = gqlSchemaBuilder.objectRef<CronRunListRes
 // a TypeScript interface/type, so these definitions are intentionally maintained in
 // parallel. Keep them in sync with the canonical types when fields change.
 
-export const CronScheduleListInput = gqlSchemaBuilder.inputType("CronScheduleListInput", {
+const CronScheduleListInput = gqlSchemaBuilder.inputType("CronScheduleListInput", {
   fields: t => ({
     status: t.field({ type: CronScheduleStatusPothosEnum, required: false }),
     jobKind: t.field({ type: CronJobKindPothosEnum, required: false }),
@@ -124,7 +124,7 @@ export const CronScheduleListInput = gqlSchemaBuilder.inputType("CronScheduleLis
   }),
 });
 
-export const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
+const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
   fields: t => ({
     scheduleId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     status: t.field({ type: CronRunStatusPothosEnum, required: false }),
@@ -137,9 +137,7 @@ export const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput"
 });
 
 /** Fields shared by both submit and update input types — all optional. */
-export function commonScheduleOptionalFields(
-  t: Parameters<Parameters<typeof gqlSchemaBuilder.inputType>[1]["fields"]>[0]
-) {
+function commonScheduleOptionalFields(t: Parameters<Parameters<typeof gqlSchemaBuilder.inputType>[1]["fields"]>[0]) {
   return {
     description: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
     payload: t.field({ type: "JSON", required: false }),
@@ -151,7 +149,7 @@ export function commonScheduleOptionalFields(
   };
 }
 
-export const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmitInput", {
+const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmitInput", {
   fields: t => ({
     name: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
     cronExpression: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
@@ -160,7 +158,7 @@ export const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronSchedu
   }),
 });
 
-export const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronScheduleUpdateInput", {
+const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronScheduleUpdateInput", {
   fields: t => ({
     name: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     cronExpression: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
@@ -169,21 +167,21 @@ export const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronSchedu
   }),
 });
 
-export const CronScheduleDeleteInput = gqlSchemaBuilder.inputType("CronScheduleDeleteInput", {
+const CronScheduleDeleteInput = gqlSchemaBuilder.inputType("CronScheduleDeleteInput", {
   fields: t => ({
     id: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     hard: t.boolean({ required: false }),
   }),
 });
 
-export const CronRunTriggerInput = gqlSchemaBuilder.inputType("CronRunTriggerInput", {
+const CronRunTriggerInput = gqlSchemaBuilder.inputType("CronRunTriggerInput", {
   fields: t => ({
     id: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     payload: t.field({ type: "JSON", required: false }),
   }),
 });
 
-export const CronRunRetryInput = gqlSchemaBuilder.inputType("CronRunRetryInput", {
+const CronRunRetryInput = gqlSchemaBuilder.inputType("CronRunRetryInput", {
   fields: t => ({
     runId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     attempt: t.int({ required: false }),
@@ -192,7 +190,7 @@ export const CronRunRetryInput = gqlSchemaBuilder.inputType("CronRunRetryInput",
 
 // ─── Type Guards ──────────────────────────────────────────────────────────────
 
-export function isRecordOrNull(value: unknown): value is Record<string, unknown> | null {
+function isRecordOrNull(value: unknown): value is Record<string, unknown> | null {
   if (value === null) return true;
   return typeof value === "object" && !Array.isArray(value);
 }

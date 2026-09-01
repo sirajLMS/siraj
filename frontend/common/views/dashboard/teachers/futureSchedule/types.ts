@@ -56,19 +56,3 @@ export interface SupportContactProps {
   readonly supportContactLabel: string;
   readonly contactAdminLabel: string;
 }
-
-export interface FutureScheduleViewProps {
-  readonly classes: readonly TeacherFutureScheduleQuery_teacherFutureSchedule_classes[];
-  readonly leaveQuotaUsed: number;
-  readonly leaveQuotaTotal: number;
-  readonly totalClasses: number;
-  readonly onRequestLeave: (classInstanceId: string) => Promise<void>;
-  readonly selectedDate: string;
-  readonly onDateChange: (date: string) => void;
-  readonly notes: readonly ImportantNoteItem[];
-  readonly contact: SupportContactData | null;
-}
-
-export interface FutureScheduleContainerProps {
-  readonly teacherId: string;
-}

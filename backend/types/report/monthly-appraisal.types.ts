@@ -20,9 +20,7 @@ import type { appraisalFeedback, monthlyAppraisals } from "@/backend/db/schema";
  */
 
 export type MonthlyAppraisalSelectType = typeof monthlyAppraisals.$inferSelect;
-export type MonthlyAppraisalInsertType = typeof monthlyAppraisals.$inferInsert;
-export type AppraisalFeedbackSelectType = typeof appraisalFeedback.$inferSelect;
-export type AppraisalFeedbackInsertType = typeof appraisalFeedback.$inferInsert;
+type AppraisalFeedbackSelectType = typeof appraisalFeedback.$inferSelect;
 
 /**
  * Sparse-field rubric payload submitted by a teacher.

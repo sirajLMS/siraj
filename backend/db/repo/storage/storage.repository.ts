@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import {
   classInstanceFiles,
@@ -33,11 +33,6 @@ export namespace StorageDbRepository {
   export const fileByPath = async (path: string): Promise<StorageTypes.FileSelectType | null> => {
     const results = await db.select().from(storageFiles).where(eq(storageFiles.path, path)).limit(1);
     return results[0] ?? null;
-  };
-
-  export const filesByIds = async (ids: string[]): Promise<StorageTypes.FileSelectType[]> => {
-    if (ids.length === 0) return [];
-    return await db.select().from(storageFiles).where(inArray(storageFiles.id, ids));
   };
 
   export const filesByPaths = async (paths: string[]): Promise<StorageTypes.FileSelectType[]> => {
@@ -382,7 +377,7 @@ export namespace StorageDbRepository {
     }
   };
 
-  export interface JunctionInsertParams {
+  interface JunctionInsertParams {
     table: string;
     fileId: string;
     refId: string;
@@ -584,75 +579,6 @@ export namespace StorageDbRepository {
     }
   };
 
-  export const updateDirectoryPermissions = async (
-    input: StorageTypes.DirectoryPermissionsUpdateInput,
-    locale?: string
-  ): Promise<StorageTypes.FileOperationResult> => {
-    try {
-      const directory = await directoryByPath(input.path);
-      if (!directory) return { success: false, message: "Directory not found" };
-
-      const updated = await updateDirectory({
-        ...directory,
-        allowUploads: input.permissions.allowUploads,
-        allowDelete: input.permissions.allowDelete,
-        allowMove: input.permissions.allowMove,
-        allowCreateSubDirs: input.permissions.allowCreateSubDirs,
-        allowDeleteFiles: input.permissions.allowDeleteFiles,
-        allowMoveFiles: input.permissions.allowMoveFiles,
-      });
-
-      return {
-        success: !!updated,
-        message: updated ? "Directory permissions updated successfully" : "Failed to update directory permissions",
-      };
-    } catch (error) {
-      logger.error("Failed to update directory permissions", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
-      return {
-        success: false,
-        message: tErrors.permissionsUpdateFailedGeneric,
-      };
-    }
-  };
-
-  export const setProtection = async (
-    input: StorageTypes.StorageItemProtectionUpdateInput,
-    locale?: string
-  ): Promise<StorageTypes.FileOperationResult> => {
-    try {
-      const file = await fileByPath(input.path);
-      if (file) {
-        const updated = await updateFile({ ...file, isProtected: input.isProtected });
-        return {
-          success: !!updated,
-          message: updated ? "File protection updated successfully" : "Failed to update file protection",
-        };
-      }
-
-      const directory = await directoryByPath(input.path);
-      if (directory) {
-        const updated = await updateDirectory({
-          ...directory,
-          isProtected: input.isProtected,
-          protectChildren: input.protectChildren ?? false,
-        });
-        return {
-          success: !!updated,
-          message: updated ? "Directory protection updated successfully" : "Failed to update directory protection",
-        };
-      }
-
-      return { success: false, message: "File or directory not found" };
-    } catch (error) {
-      logger.error("Failed to set protection", { error: error instanceof Error ? error.message : String(error) });
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
-      return { success: false, message: tErrors.protectionUpdateFailedGeneric };
-    }
-  };
-
   export const getFilesForParent = async (
     parentId: string,
     tx?: DBTransaction
@@ -795,53 +721,5 @@ export namespace StorageDbRepository {
     }
 
     return null;
-  };
-
-  /**
-   * Clean up expired or unused file records.
-   * Removes files that have no usages and are older than a certain threshold.
-   */
-  export const cleanupExpiredFiles = async (): Promise<void> => {
-    // Delete files that have no references - no age filter since storageFiles has no createdAt field
-    // First, find file IDs that have no usages
-    const unusedFileIds = await db
-      .select({ id: storageFiles.id })
-      .from(storageFiles)
-      .leftJoin(invoiceFiles, eq(storageFiles.id, invoiceFiles.fileId))
-      .leftJoin(parentFiles, eq(storageFiles.id, parentFiles.fileId))
-      .leftJoin(userFiles, eq(storageFiles.id, userFiles.fileId))
-      .leftJoin(teacherFiles, eq(storageFiles.id, teacherFiles.fileId))
-      .leftJoin(studentFiles, eq(storageFiles.id, studentFiles.fileId))
-      .leftJoin(complaintFiles, eq(storageFiles.id, complaintFiles.fileId))
-      .leftJoin(learningResourceFiles, eq(storageFiles.id, learningResourceFiles.fileId))
-      .leftJoin(staffProfileFiles, eq(storageFiles.id, staffProfileFiles.fileId))
-      .leftJoin(recurringScheduleFiles, eq(storageFiles.id, recurringScheduleFiles.fileId))
-      .leftJoin(classInstanceFiles, eq(storageFiles.id, classInstanceFiles.fileId))
-      .where(
-        and(
-          isNull(invoiceFiles.id),
-          isNull(parentFiles.id),
-          isNull(userFiles.id),
-          isNull(teacherFiles.id),
-          isNull(studentFiles.id),
-          isNull(complaintFiles.id),
-          isNull(learningResourceFiles.id),
-          isNull(staffProfileFiles.id),
-          isNull(recurringScheduleFiles.id),
-          isNull(classInstanceFiles.id)
-        )
-      );
-
-    if (unusedFileIds.length === 0) {
-      logger.info("No unused files to clean up");
-      return;
-    }
-
-    const fileIds = unusedFileIds.map(f => f.id);
-
-    // Delete the files
-    await db.delete(storageFiles).where(inArray(storageFiles.id, fileIds));
-
-    logger.info(`Cleaned up ${fileIds.length} unused files`);
   };
 }

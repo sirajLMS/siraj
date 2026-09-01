@@ -6,7 +6,6 @@ import type {
   TeacherMonthlyReportQueryVariables,
   TeacherPendingDuesQuery,
   TeacherPendingDuesQueryVariables,
-  TeacherPendingDuesSummaryQuery,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const teacherPendingDuesQueryDocument: TypedDocumentNode<
@@ -35,17 +34,6 @@ export const teacherPendingDuesQueryDocument: TypedDocumentNode<
       createdAt
       updatedAt
       rateSource
-    }
-  }
-`;
-
-export const teacherPendingDuesSummaryQueryDocument: TypedDocumentNode<TeacherPendingDuesSummaryQuery> = gql`
-  query TeacherPendingDuesSummary {
-    teacherPendingDuesSummary {
-      id
-      totalCount
-      totalAmount
-      currency
     }
   }
 `;

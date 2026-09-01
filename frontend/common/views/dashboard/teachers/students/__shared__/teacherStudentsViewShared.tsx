@@ -30,7 +30,7 @@ export interface TeacherStudentsViewSharedSlots {
  * Mirrors the `href` + `name` + `fallbackInitial` surface of the tier
  * `PersonProfileLink` primitives without depending on a tier component.
  */
-export interface StudentRowProfileLinkSlotProps {
+interface StudentRowProfileLinkSlotProps {
   readonly href?: string;
   readonly name: string;
   readonly fallbackInitial?: string;
@@ -41,7 +41,7 @@ export interface StudentRowProfileLinkSlotProps {
  * The category is fixed to `studentAccount` because every row is a student
  * account; only the raw status and the localized label vary per row.
  */
-export interface StudentRowStatusBadgeSlotProps {
+interface StudentRowStatusBadgeSlotProps {
   readonly category: "studentAccount";
   readonly status: string;
   readonly label: string;

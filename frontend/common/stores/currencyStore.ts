@@ -44,9 +44,3 @@ export const useCurrencyStore = create<CurrencyCatalogState>(set => ({
   },
   resetToStatic: () => set({ options: Array.from(currencies), loaded: false }),
 }));
-
-export const mockCurrencyStore = {
-  preloadStatic: () => {
-    useCurrencyStore.getState().resetToStatic();
-  },
-};

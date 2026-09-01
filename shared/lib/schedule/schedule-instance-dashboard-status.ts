@@ -2,7 +2,7 @@ import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-inst
 
 export const DEFAULT_MISSED_GRACE_MINUTES = 15;
 
-export type DailyScheduleMetricFilterKey =
+type DailyScheduleMetricFilterKey =
   | "total"
   | "regular"
   | "trial"
@@ -152,7 +152,7 @@ export function resolveClassInstanceDashboardStatus(
   return isClassInstanceDashboardStatus(normalizedOutcome) ? normalizedOutcome : "PENDING";
 }
 
-export function resolveClassInstanceDashboardStatusFromRow(
+function resolveClassInstanceDashboardStatusFromRow(
   row: ClassInstanceDashboardStatusInput,
   options?: ClassInstanceStatusResolveOptions
 ): ClassInstanceDashboardStatus {

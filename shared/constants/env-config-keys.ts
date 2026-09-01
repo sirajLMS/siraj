@@ -20,9 +20,3 @@ export const HIDDEN_ENV_CONFIG_KEYS = [
   "WHATSAPP_TEST_TEMPLATE_NAME",
   "WHATSAPP_TEST_TO_PHONE",
 ] as const;
-
-export type HiddenEnvConfigKey = (typeof HIDDEN_ENV_CONFIG_KEYS)[number];
-
-export function isHiddenEnvConfigKey(key: string): key is HiddenEnvConfigKey {
-  return (HIDDEN_ENV_CONFIG_KEYS as readonly string[]).includes(key);
-}

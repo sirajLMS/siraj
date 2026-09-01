@@ -1,7 +1,5 @@
 import type { ParentInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 
-export type ParentInvoiceStatus = ParentInvoiceDisplayStatus;
-
 export interface ParentBillingSummary {
   readonly outstandingBalance: string;
   readonly outstandingBalanceSubLabel?: string;

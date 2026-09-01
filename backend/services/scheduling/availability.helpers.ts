@@ -2,52 +2,16 @@ import { type DayOfWeek, VacationRequestStatus } from "@/backend/enum";
 import { ValidationError } from "@/backend/lib/errors";
 import type { TeacherAvailabilityWindowSelectType, TeacherRecurringUnavailabilitySelectType } from "@/backend/types";
 import {
-  countAvailableDays,
-  createGap,
   dateToTimeString,
-  expandDateRange,
-  type FindGapsForCalendarDateOptions,
-  findGapsForCalendarDate,
-  generateGapsFromBlocked,
-  getBlockedRanges,
-  getBookingBlockedRangesForDate,
-  getDayOfWeekFromDateString,
   getUtcDateString,
   getUtcDayOfWeek,
-  getVacationBlockedRangesForDate,
-  groupByTeacherId,
   isWithinEffectiveRange,
-  JS_DAY_TO_ENUM,
-  type MinuteRange,
-  mergeBlockedRanges,
-  sortTeachers,
-  type TeacherShortInfo,
   timeToMinutes,
 } from "@/backend/utils/availability-utils";
 import { getServerTranslations } from "@/shared/locale";
 
-export type { FindGapsForCalendarDateOptions, MinuteRange, TeacherShortInfo };
 // Re-export shared utilities so existing consumers of this module are unaffected.
-export {
-  countAvailableDays,
-  createGap,
-  dateToTimeString,
-  expandDateRange,
-  findGapsForCalendarDate,
-  generateGapsFromBlocked,
-  getBlockedRanges,
-  getBookingBlockedRangesForDate,
-  getDayOfWeekFromDateString,
-  getUtcDateString,
-  getUtcDayOfWeek,
-  getVacationBlockedRangesForDate,
-  groupByTeacherId,
-  isWithinEffectiveRange,
-  JS_DAY_TO_ENUM,
-  mergeBlockedRanges,
-  sortTeachers,
-  timeToMinutes,
-};
+export { getUtcDateString, timeToMinutes };
 
 // ── Pure validation helpers (no DB, no error throws) ─────────────────────────
 
@@ -183,13 +147,6 @@ export function computeSlotBounds(slots: { startTime: Date; endTime: Date }[]): 
   const latestEnd = new Date(Math.max(...slots.map(s => s.endTime.getTime())));
   return { earliestStart, latestEnd };
 }
-
-// Re-export type for batch fetcher return shape
-export type BatchAvailabilityRows = [
-  { startAt: Date; endAt: Date }[],
-  TeacherRecurringUnavailabilitySelectType[],
-  TeacherAvailabilityWindowSelectType[],
-];
 
 // ── Vacation status validation ───────────────────────────────────────────────
 

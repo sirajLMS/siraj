@@ -3,7 +3,6 @@ import { caseInsensitiveLike, db, type QueryDbHandle, queryDb, withForUpdate } f
 import {
   type ClassInstanceUpsertManyOptions,
   runClassInstanceUpsertMany,
-  upsertProductionClassInstance,
   upsertSeedClassInstance,
 } from "@/backend/db/repo/scheduling/class-instance-upsert";
 import {
@@ -262,31 +261,6 @@ export const softDeleteClassInstance = async (id: string, actorUserId: string, t
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
 
-export async function listByIdempotencyKeys(
-  keys: readonly string[],
-  tx?: DBTransaction
-): Promise<Map<string, Types.ClassInstanceSelectType>> {
-  const map = new Map<string, Types.ClassInstanceSelectType>();
-  if (keys.length === 0) return map;
-
-  const q = queryDb(tx);
-  const rows = await q
-    .select()
-    .from(classInstances)
-    .where(inArray(classInstances.idempotencyKey, [...keys]));
-  for (const row of rows) {
-    map.set(row.idempotencyKey, row);
-  }
-  return map;
-}
-
-export async function upsertMany(
-  instances: Types.ClassInstanceInsertType[],
-  options?: ClassInstanceUpsertManyOptions
-): Promise<Types.ClassInstanceSelectType[]> {
-  return runClassInstanceUpsertMany(instances, upsertProductionClassInstance, options);
-}
-
 export async function upsertManyForSeed(
   instances: Types.ClassInstanceInsertType[],
   options?: ClassInstanceUpsertManyOptions
@@ -319,16 +293,6 @@ export async function getOndemandPendingInstances(
     .orderBy(classInstances.scheduledStartAt)
     .limit(limit);
 }
-
-/**
- * V3-021: Soft-delete multiple class instances in a single batch UPDATE.
- */
-export const softDeleteBatch = async (ids: string[], tx?: DBTransaction): Promise<void> => {
-  if (ids.length === 0) return;
-  const now = new Date();
-  const q = queryDb(tx);
-  await q.update(classInstances).set({ deletedAt: now, updatedAt: now }).where(inArray(classInstances.id, ids));
-};
 
 /**
  * Returns non-deleted upcoming class instances (`scheduledStartAt >= now`)

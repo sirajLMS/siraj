@@ -11,7 +11,7 @@ import { shiftMonth } from "@/frontend/common/views/dashboard/search-schedule/ut
 import { useAppLocale } from "@/shared/locale";
 import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 
-export interface TeacherAvailabilityMonthDrawerSlotProps {
+interface TeacherAvailabilityMonthDrawerSlotProps {
   /** Tier-specific calendar grid component (desktop or mobile). */
   readonly CalendarGridComponent: React.FC<{
     readonly labels: SearchScheduleLabels;

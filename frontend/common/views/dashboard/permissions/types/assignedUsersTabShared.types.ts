@@ -1,7 +1,7 @@
 import type React from "react";
 import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTab.types";
 
-export interface AssignedUsersToolbarSlotProps {
+interface AssignedUsersToolbarSlotProps {
   readonly searchQuery: string;
   readonly onSearchChange: (value: string) => void;
   readonly onAssignGroup: (id: string) => void;
@@ -11,14 +11,14 @@ export interface AssignedUsersToolbarSlotProps {
   readonly loading: boolean;
 }
 
-export interface AssignedUsersBulkActionBarSlotProps {
+interface AssignedUsersBulkActionBarSlotProps {
   readonly selectedCount: number;
   readonly onBulkRevokeUsers: () => void;
   readonly usersSelectedLabel: (count: number) => string;
   readonly removeSelectedLabel: string;
 }
 
-export interface AssignedUsersListSlotLabels {
+interface AssignedUsersListSlotLabels {
   readonly assignDate: string;
   readonly removeUser: string;
   readonly usersSelected: (count: number) => string;
@@ -37,7 +37,7 @@ export interface AssignedUsersListSlotProps {
   readonly labels: AssignedUsersListSlotLabels;
 }
 
-export interface AssignedUsersTabSlotProps {
+interface AssignedUsersTabSlotProps {
   readonly Toolbar: React.ComponentType<AssignedUsersToolbarSlotProps>;
   readonly BulkActionBar: React.ComponentType<AssignedUsersBulkActionBarSlotProps>;
   readonly UsersList: React.ComponentType<AssignedUsersListSlotProps>;

@@ -5,7 +5,6 @@ import { logger } from "@/backend/lib/logger";
 import { assertHasPermission } from "@/backend/services/shared";
 import type {
   BaseEntity,
-  ResolutionResult,
   ResolveEntityByIdArgs,
   ResolveNotFoundErrorKey,
   SoftDeleteEntityLogArgs,
@@ -105,17 +104,6 @@ export async function softDeleteEntityLog(args: SoftDeleteEntityLogArgs): Promis
     }
     throw error;
   }
-}
-
-// ─── Resolution response constructor ───────────────────────────────────────
-
-/**
- * Builds a `ResolutionResult` indicating whether an admin response was
- * recorded and what the resolution text was. Used by procedural endpoints
- * that record an admin's response to a complaint or suggestion.
- */
-export function buildResolutionResponse(resolved: boolean, resolution: string | null): ResolutionResult {
-  return { resolved, resolution };
 }
 
 // ─── Internal helpers status ──────────────────────────────────────────────

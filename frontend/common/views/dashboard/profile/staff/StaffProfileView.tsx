@@ -8,7 +8,7 @@ import {
   useStaffProfileViewModel,
 } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileViewModel";
 
-export type { StaffProfileViewModel, UseStaffProfileViewModelProps };
+export type { UseStaffProfileViewModelProps };
 
 const lazyViews = createLazyView<StaffProfileViewModel>(
   () =>

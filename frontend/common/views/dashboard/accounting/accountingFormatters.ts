@@ -1,4 +1,3 @@
-import type { InputBaseComponentProps } from "@mui/material";
 import { PaymentGateway } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments";
 
@@ -56,7 +55,7 @@ export function dateCell(value: unknown): string | null {
  * Gregorian calendar (matching the dates printed on invoice PDFs) while
  * rendering Arabic month names; other locales fall back to "en".
  */
-export function resolveAccountingDateLocale(locale: string): string {
+function resolveAccountingDateLocale(locale: string): string {
   return locale.startsWith("ar") ? "ar" : "en";
 }
 
@@ -79,11 +78,6 @@ export function paymentStatusTone(isPaid: boolean): "success" | "warning" {
 /** Chip color tone for package plan active/archived. */
 export function planActiveTone(active: boolean): "success" | "default" {
   return active ? "success" : "default";
-}
-
-/** Numeric input that strips "+eE" chars — keeps numeric fields clean. */
-export function positiveNumberInputProps(): Pick<InputBaseComponentProps, "inputMode"> {
-  return { inputMode: "decimal" };
 }
 
 /**

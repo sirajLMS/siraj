@@ -25,7 +25,7 @@ const STAFF_GROUP_SLUGS = new Set(["super_admin", "academy_admin", "staff_defaul
 
 export namespace UserSeedService {
   /** Idempotently upsert one demo user with permission group and optional staff profile. */
-  export async function upsertDemoUser(
+  async function upsertDemoUser(
     input: SeedDemoUserInput,
     groupMap: Map<string, string>,
     tx?: DBTransaction

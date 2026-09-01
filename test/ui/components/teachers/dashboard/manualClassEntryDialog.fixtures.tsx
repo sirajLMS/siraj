@@ -15,7 +15,7 @@ export const manualEntryLabels = teacherDashboardTranslations.manualClassEntry;
 export const MANUAL_ENTRY_STUDENT_ID = "student-1";
 export const MANUAL_ENTRY_SUBJECT = { id: "subject-1", name: "Chemistry" } as const;
 
-export const STUB_SELECT_STUDENT_LABEL = "Stub: select student";
+const STUB_SELECT_STUDENT_LABEL = "Stub: select student";
 
 /** Stands in for the tier-owned student selector and drives the field context. */
 function ManualEntryStudentStub() {

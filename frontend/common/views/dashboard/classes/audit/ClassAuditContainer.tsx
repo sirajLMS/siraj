@@ -8,8 +8,3 @@ export function ClassAuditContainer() {
 
   return <ClassAuditView {...viewModel} />;
 }
-
-export type {
-  ClassAuditViewModel,
-  UseClassAuditViewModelProps,
-} from "@/frontend/common/views/dashboard/classes/audit/useClassAuditViewModel";

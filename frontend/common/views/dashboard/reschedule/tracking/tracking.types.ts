@@ -33,7 +33,7 @@ export interface RawMetrics {
   readonly cancelled?: number | null;
 }
 
-export interface RescheduleTrackingCommonLabels extends TrackingStatusLabelMap {
+interface RescheduleTrackingCommonLabels extends TrackingStatusLabelMap {
   readonly newDate: string;
   readonly leaveRequest: string;
   readonly rescheduled: string;
@@ -68,7 +68,7 @@ export interface RescheduleTrackingDataGridProps {
   readonly loading?: boolean;
 }
 
-export type RescheduleTrackingCardListLabels = RescheduleTrackingCommonLabels;
+type RescheduleTrackingCardListLabels = RescheduleTrackingCommonLabels;
 
 export interface RescheduleTrackingCardListProps {
   readonly rows: readonly TrackingRow[];

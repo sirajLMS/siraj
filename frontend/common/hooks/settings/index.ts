@@ -1,5 +1,4 @@
 export * from "./useEnvConfigEntriesQuery";
-export * from "./useMeetingIntegrationConnectedAccountsQuery";
 export * from "./useMeetingIntegrationProvidersQuery";
 export * from "./useSessionConfigsQuery";
 export * from "./useSettingsAuditLogsQuery";

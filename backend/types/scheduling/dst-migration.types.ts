@@ -2,10 +2,7 @@ import type { dstMigrationEntries, dstMigrationRuns } from "@/backend/db/schema"
 import type { MigrationStatus } from "@/backend/enum";
 
 export type DstMigrationRunSelectType = typeof dstMigrationRuns.$inferSelect;
-export type DstMigrationRunInsertType = typeof dstMigrationRuns.$inferInsert;
-
 export type DstMigrationEntrySelectType = typeof dstMigrationEntries.$inferSelect;
-export type DstMigrationEntryInsertType = typeof dstMigrationEntries.$inferInsert;
 
 export type DstUpdatedSessionReturnType = {
   readonly id: string;

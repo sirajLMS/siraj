@@ -24,4 +24,4 @@ export function TeacherDashboardView(props: Readonly<UseTeacherDashboardViewMode
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { TeacherDashboardViewModel, UseTeacherDashboardViewModelProps };
+export type { UseTeacherDashboardViewModelProps };

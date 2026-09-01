@@ -42,7 +42,7 @@ export function validateDeletePermissions(options: DeletePermissionOptions, tFil
 /**
  * Common validation and entity loading for single file deletion
  */
-export async function prepareDeleteFile(
+async function prepareDeleteFile(
   filePath: string,
   locale?: string
 ): Promise<{
@@ -122,7 +122,7 @@ export async function executeDeleteFile(
 /**
  * Loads all necessary database entities for bulk delete operations
  */
-export async function loadDeleteEntities(paths: string[], force: boolean) {
+async function loadDeleteEntities(paths: string[], force: boolean) {
   const parentDirectories = [...new Set(paths.map(path => path.substring(0, path.lastIndexOf("/"))))];
 
   const [dbFiles, dbDirectories, dbParentDirs, usageChecks] = await Promise.all([

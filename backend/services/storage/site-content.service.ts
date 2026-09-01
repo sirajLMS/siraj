@@ -5,7 +5,7 @@
  * guarded with `SETTINGS_VIEW`) and the write path (`site_content` repository).
  *
  * Write path — `upsertSiteContent` / `updatePublishState` /
- * `deleteSiteContentById` / `deleteSiteContentBySlug`:
+ * `deleteSiteContentById`:
  *   Enforces `AppPermission.SETTINGS_SITE_CONTENT_MANAGE` and emits an audit
  *   log entry via `AuditService.createManyAuditLogs`. Audit is best-effort and
  *   wrapped in try/catch so a logging failure never rolls back the mutation.
@@ -96,23 +96,8 @@ export namespace SiteContentService {
     return SiteContentRepository.listAll(tx);
   }
 
-  export async function listPublishedSiteContent(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
-    return SiteContentRepository.listPublished(tx);
-  }
-
-  export async function listSiteContentByType(
-    contentType: string,
-    tx?: DBTransaction
-  ): Promise<SiteContentSelectType[]> {
-    return SiteContentRepository.listByContentType(contentType, tx);
-  }
-
   export async function getSiteContentById(id: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
     return SiteContentRepository.findById(id, tx);
-  }
-
-  export async function getSiteContentBySlug(slug: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
-    return SiteContentRepository.findBySlug(slug, tx);
   }
 
   export async function upsertSiteContent(
@@ -157,15 +142,6 @@ export namespace SiteContentService {
     tx?: DBTransaction
   ): Promise<void> {
     await deleteSiteContent(txn => SiteContentRepository.deleteById(id, txn), id, actorUserId, tErrors, tx);
-  }
-
-  export async function deleteSiteContentBySlug(
-    slug: string,
-    actorUserId: string,
-    tErrors: ErrorsLabels,
-    tx?: DBTransaction
-  ): Promise<void> {
-    await deleteSiteContent(txn => SiteContentRepository.deleteBySlug(slug, txn), slug, actorUserId, tErrors, tx);
   }
 
   /**

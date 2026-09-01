@@ -227,13 +227,6 @@ export namespace CronService {
     return CronRepository.listRuns(input);
   }
 
-  export async function getRunsBySchedule(
-    scheduleId: string,
-    input: CronRunListInput = {}
-  ): Promise<CronRunListResult> {
-    return CronRepository.listRunsBySchedule(scheduleId, input);
-  }
-
   // ── Dispatch ──
 
   export async function dispatchDueSchedules(params: {

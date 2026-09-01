@@ -15,7 +15,7 @@ import type {
   TimeFieldProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
 
-export interface AvailabilitySearchFormSharedOptions {
+interface AvailabilitySearchFormSharedOptions {
   readonly TimePickerComponent: ComponentType<{
     readonly value?: PickerValue;
     readonly onChange?: (value: PickerValue) => void;

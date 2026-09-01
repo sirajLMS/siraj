@@ -25,14 +25,6 @@ export type SupportedCurrencyRow = {
   readonly isActive: boolean;
 };
 
-export interface SupportedCurrencyUpsertFormInput {
-  readonly code: CurrencyCode;
-  readonly symbol: string;
-  readonly countryCode?: string | null;
-  readonly decimals?: number | null;
-  readonly sortOrder?: number | null;
-}
-
 export interface SupportedCurrenciesViewModel {
   readonly labelsBySection: SupportedCurrenciesLabelsBySection;
   readonly rows: readonly SupportedCurrencyRow[];
@@ -185,5 +177,3 @@ export function useSupportedCurrenciesViewModel(
     handleConfirmDeactivate,
   };
 }
-
-export { activateSupportedCurrencyMutationDocument };

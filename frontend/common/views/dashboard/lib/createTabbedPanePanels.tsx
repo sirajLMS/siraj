@@ -26,9 +26,9 @@ import { TabPanelFallback } from "@/frontend/common/views/dashboard/lib/TabPanel
  * hidden via `visibility:hidden + height:0 + position:absolute`.
  */
 
-export type PagePermission = (typeof PAGE_PERMISSIONS)[keyof typeof PAGE_PERMISSIONS];
+type PagePermission = (typeof PAGE_PERMISSIONS)[keyof typeof PAGE_PERMISSIONS];
 
-export interface TabbedPaneDefinition<TabId extends string> {
+interface TabbedPaneDefinition<TabId extends string> {
   readonly id: TabId;
   /** Already-lazy component (via `next/dynamic`). Rendered when this tab has been visited. */
   readonly Component: ComponentType;

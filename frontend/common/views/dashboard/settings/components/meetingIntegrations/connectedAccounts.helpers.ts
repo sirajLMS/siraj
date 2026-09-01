@@ -45,23 +45,6 @@ export function getStatusLabel(
   }
 }
 
-export function getStatusColor(
-  status: MeetingIntegrationConnectedAccountStatus
-): "success" | "warning" | "error" | "default" {
-  switch (status) {
-    case MeetingIntegrationConnectedAccountStatus.Connected:
-      return "success";
-    case MeetingIntegrationConnectedAccountStatus.ExpiringSoon:
-      return "warning";
-    case MeetingIntegrationConnectedAccountStatus.ReauthNeeded:
-      return "error";
-    case MeetingIntegrationConnectedAccountStatus.Revoked:
-      return "default";
-    default:
-      return "default";
-  }
-}
-
 export function formatConnectedAccountDate(date: Date | null | undefined): string {
   return date ? date.toLocaleDateString() : "—";
 }
@@ -78,7 +61,7 @@ export function isRevokeDisabled(
   return revokingFor?.userId === account.userId && revokingFor?.providerSlug === providerSlug;
 }
 
-export function filterConnectedAccounts(
+function filterConnectedAccounts(
   accounts: readonly MeetingIntegrationConnectedAccount[],
   search: string,
   statusFilter: MeetingIntegrationConnectedAccountStatus | "all"

@@ -1,14 +1,14 @@
 import type { RecurringClassFormLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
 import type { CreateRecurringClassLabels } from "@/shared/locale";
 
-export type CreateRecurringClassShellLabels = Pick<
+type CreateRecurringClassShellLabels = Pick<
   CreateRecurringClassLabels,
   "title" | "subtitle" | "breadcrumbs" | "close" | "addedSuccessfully"
 >;
 
-export type CreateRecurringClassFormSectionLabels = RecurringClassFormLabels;
+type CreateRecurringClassFormSectionLabels = RecurringClassFormLabels;
 
-export interface CreateRecurringClassNotificationLabels {
+interface CreateRecurringClassNotificationLabels {
   readonly meetingConfigWarningMessage: string;
   readonly goToClassLabel: string;
 }

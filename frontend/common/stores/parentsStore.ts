@@ -16,7 +16,7 @@ interface ParentsState {
   resetFilters: () => void;
 }
 
-export const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
 
 export const useParentsStore = create<ParentsState>(set => ({
   searchQuery: "",

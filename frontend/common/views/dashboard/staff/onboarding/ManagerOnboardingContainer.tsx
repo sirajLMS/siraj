@@ -25,4 +25,4 @@ export function ManagerOnboardingContainer(props: UseManagerOnboardingContainerV
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { ManagerOnboardingContainerViewModel, UseManagerOnboardingContainerViewModelProps };
+export type { UseManagerOnboardingContainerViewModelProps };

@@ -8,75 +8,67 @@ import {
 } from "@/backend/services/profile/profile-field-manifest";
 import type { ProfileFieldGroupDefinition } from "@/backend/types";
 
-describe("getProfileViewPermission", () => {
-  test("returns viewOwn permission when scope is OWN", () => {
-    const coreIdentity = PROFILE_FIELD_GROUP_BY_KEY.core_identity;
-    const permission = getProfileViewPermission(coreIdentity, ProfileScope.OWN);
-    expect(permission).toBe(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN);
-    expect(permission).toBe(coreIdentity.viewOwn);
+interface PermissionResolverCase {
+  readonly kind: "view" | "edit";
+  readonly resolver: typeof getProfileViewPermission;
+  readonly ownField: "viewOwn" | "editOwn";
+  readonly otherField: "viewOther" | "editOther";
+  readonly ownPermission: AppPermission;
+  readonly otherPermission: AppPermission;
+}
+
+const PERMISSION_RESOLVER_CASES: readonly PermissionResolverCase[] = [
+  {
+    resolver: getProfileViewPermission,
+    kind: "view",
+    ownField: "viewOwn",
+    otherField: "viewOther",
+    ownPermission: AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN,
+    otherPermission: AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER,
+  },
+  {
+    resolver: getProfileEditPermission,
+    kind: "edit",
+    ownField: "editOwn",
+    otherField: "editOther",
+    ownPermission: AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN,
+    otherPermission: AppPermission.PROFILE_CORE_IDENTITY_EDIT_OTHER,
+  },
+];
+
+for (const { kind, resolver, ownField, otherField, ownPermission, otherPermission } of PERMISSION_RESOLVER_CASES) {
+  describe(`profile permission resolver (${kind})`, () => {
+    test(`returns ${ownField} permission when scope is OWN`, () => {
+      const coreIdentity = PROFILE_FIELD_GROUP_BY_KEY.core_identity;
+      const permission = resolver(coreIdentity, ProfileScope.OWN);
+      expect(permission).toBe(ownPermission);
+      expect(permission).toBe(coreIdentity[ownField]);
+    });
+
+    test(`returns ${otherField} permission when scope is OTHER`, () => {
+      const coreIdentity = PROFILE_FIELD_GROUP_BY_KEY.core_identity;
+      const permission = resolver(coreIdentity, ProfileScope.OTHER);
+      expect(permission).toBe(otherPermission);
+      expect(permission).toBe(coreIdentity[otherField]);
+    });
+
+    test("resolves permissions for an arbitrary custom group definition", () => {
+      const customGroup: ProfileFieldGroupDefinition = {
+        groupKey: "core_identity",
+        paths: ["name"],
+        audiences: [ProfileAudience.TEACHER],
+        scopes: [ProfileScope.OWN, ProfileScope.OTHER],
+        viewOwn: AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN,
+        viewOther: AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER,
+        editOwn: AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN,
+        editOther: AppPermission.PROFILE_CORE_IDENTITY_EDIT_OTHER,
+      };
+
+      expect(resolver(customGroup, ProfileScope.OWN)).toBe(ownPermission);
+      expect(resolver(customGroup, ProfileScope.OTHER)).toBe(otherPermission);
+    });
   });
-
-  test("returns viewOther permission when scope is OTHER", () => {
-    const coreIdentity = PROFILE_FIELD_GROUP_BY_KEY.core_identity;
-    const permission = getProfileViewPermission(coreIdentity, ProfileScope.OTHER);
-    expect(permission).toBe(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER);
-    expect(permission).toBe(coreIdentity.viewOther);
-  });
-
-  test("correctly resolves permissions for arbitrary custom group definition", () => {
-    const mockGroup: ProfileFieldGroupDefinition = {
-      groupKey: "core_identity",
-      paths: ["name"],
-      audiences: [ProfileAudience.TEACHER],
-      scopes: [ProfileScope.OWN, ProfileScope.OTHER],
-      viewOwn: AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN,
-      viewOther: AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER,
-      editOwn: AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN,
-      editOther: AppPermission.PROFILE_CORE_IDENTITY_EDIT_OTHER,
-    };
-
-    expect(getProfileViewPermission(mockGroup, ProfileScope.OWN)).toBe(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN);
-    expect(getProfileViewPermission(mockGroup, ProfileScope.OTHER)).toBe(
-      AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER
-    );
-  });
-});
-
-describe("getProfileEditPermission", () => {
-  test("returns editOwn permission when scope is OWN", () => {
-    const coreIdentity = PROFILE_FIELD_GROUP_BY_KEY.core_identity;
-    const permission = getProfileEditPermission(coreIdentity, ProfileScope.OWN);
-    expect(permission).toBe(AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN);
-    expect(permission).toBe(coreIdentity.editOwn);
-  });
-
-  test("returns editOther permission when scope is OTHER", () => {
-    const coreIdentity = PROFILE_FIELD_GROUP_BY_KEY.core_identity;
-    const permission = getProfileEditPermission(coreIdentity, ProfileScope.OTHER);
-    expect(permission).toBe(AppPermission.PROFILE_CORE_IDENTITY_EDIT_OTHER);
-    expect(permission).toBe(coreIdentity.editOther);
-  });
-
-  test("correctly resolves permissions for arbitrary custom group definition", () => {
-    const mockGroup: ProfileFieldGroupDefinition = {
-      groupKey: "teacher_professional",
-      paths: ["teacherOwnProfile.qualifications"],
-      audiences: [ProfileAudience.TEACHER],
-      scopes: [ProfileScope.OWN, ProfileScope.OTHER],
-      viewOwn: AppPermission.PROFILE_TEACHER_PROFESSIONAL_VIEW_OWN,
-      viewOther: AppPermission.PROFILE_TEACHER_PROFESSIONAL_VIEW_OTHER,
-      editOwn: AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OWN,
-      editOther: AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER,
-    };
-
-    expect(getProfileEditPermission(mockGroup, ProfileScope.OWN)).toBe(
-      AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OWN
-    );
-    expect(getProfileEditPermission(mockGroup, ProfileScope.OTHER)).toBe(
-      AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER
-    );
-  });
-});
+}
 
 describe("PROFILE_FIELD_GROUPS integrity", () => {
   test("every profile field group maps correctly in PROFILE_FIELD_GROUP_BY_KEY", () => {

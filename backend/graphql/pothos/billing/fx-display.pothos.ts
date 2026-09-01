@@ -6,7 +6,7 @@ import type { DisplayAmountReturnType } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCode } from "@/shared/lib/enum";
 
-export const DisplayAmountRef = gqlSchemaBuilder.objectRef<DisplayAmountReturnType>("DisplayAmount");
+const DisplayAmountRef = gqlSchemaBuilder.objectRef<DisplayAmountReturnType>("DisplayAmount");
 
 export const DisplayAmountPothosObject = DisplayAmountRef.implement({
   fields: t => ({
@@ -17,7 +17,7 @@ export const DisplayAmountPothosObject = DisplayAmountRef.implement({
   }),
 });
 
-export function resolveEffectiveDisplayCurrency(ctx: BaseContext, subjectUserId?: string | null): CurrencyCode | null {
+function resolveEffectiveDisplayCurrency(ctx: BaseContext, subjectUserId?: string | null): CurrencyCode | null {
   if (ctx.billingFxDisplayCurrency !== undefined) {
     return ctx.billingFxDisplayCurrency;
   }
@@ -75,31 +75,6 @@ export async function populateBillingFxDisplayCurrencyByUserId(
   }
 
   ctx.billingFxDisplayCurrencyByUserId = map;
-}
-
-export function resolveDisplayAmountField<P extends { id: string; amount?: string | null; currency?: string | null }>(
-  parent: P,
-  ctx: BaseContext,
-  amountKey: keyof P & string = "amount",
-  currencyKey: keyof P & string = "currency",
-  subjectUserId?: string | null
-) {
-  const displayCurrency = resolveEffectiveDisplayCurrency(ctx, subjectUserId);
-  if (!displayCurrency) {
-    return null;
-  }
-
-  const amount = parent[amountKey];
-  const currency = parent[currencyKey];
-
-  return FxDisplayService.convertForDisplay(
-    typeof amount === "string" ? amount : null,
-    typeof currency === "string" ? parseCurrencyCode(currency) : null,
-    displayCurrency,
-    parent.id,
-    undefined,
-    ctx.locale
-  );
 }
 
 export async function resolveDisplayAmountFields(

@@ -5,7 +5,7 @@ import type {
   RecurringSchedulesListFilterLabels,
 } from "@/shared/locale/types/dashboard/classes/recurringSchedulesList";
 
-export interface RecurringSchedulesListShellLabels {
+interface RecurringSchedulesListShellLabels {
   readonly pageTitle: string;
   readonly subtitle: string;
   readonly breadcrumbs: readonly { readonly label: string; readonly href?: string }[];

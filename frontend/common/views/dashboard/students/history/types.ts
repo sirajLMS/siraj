@@ -1,6 +1,6 @@
 import type { Theme } from "@mui/material";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
-import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
+import type { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export function isJoinableClassSession(
@@ -29,11 +29,7 @@ export interface ClassSession {
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 }
 
-export type {
-  StudentHistoryMetrics,
-  StudentHistorySessionRow,
-} from "@/frontend/common/views/dashboard/students/history/types/studentHistoryTypes";
-export type { StudentHistoryViewProps } from "@/frontend/common/views/dashboard/students/history/types/studentHistoryViewProps";
+export type { StudentHistoryMetrics } from "@/frontend/common/views/dashboard/students/history/types/studentHistoryTypes";
 
 export interface CalendarGridProps {
   readonly currentMonth: Date;
@@ -63,12 +59,4 @@ export interface MobileMetricProps {
   readonly icon: React.ReactNode;
   readonly value: React.ReactNode;
   readonly bg: string | ((theme: Theme) => string);
-}
-
-export function mapStatusToAttendance(rawStatus: string): AttendanceStatus {
-  const lower = rawStatus.toLowerCase();
-  if (lower === "absent") return AttendanceStatus.ABSENT;
-  if (lower === "late") return AttendanceStatus.LATE;
-  if (lower === "taken" || lower === "completed" || lower === "present") return AttendanceStatus.PRESENT;
-  return AttendanceStatus.PRESENT;
 }

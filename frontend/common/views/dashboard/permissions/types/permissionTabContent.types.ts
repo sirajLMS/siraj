@@ -8,7 +8,7 @@ import type { PermissionCatalogFilterResult } from "@/frontend/common/views/dash
 import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permissions/components/useRowMenuAnchor";
 import type { PermissionsLabels } from "@/shared/locale";
 
-export type PermissionTabKey = "groups" | "catalog" | "overrides";
+type PermissionTabKey = "groups" | "catalog" | "overrides";
 
 export interface PermissionTabContentProps {
   readonly labels: PermissionsLabels;

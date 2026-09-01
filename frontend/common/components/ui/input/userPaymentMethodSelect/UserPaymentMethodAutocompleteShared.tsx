@@ -31,7 +31,7 @@ export type UserPaymentMethodAutocompleteProps = {
   readonly style?: React.CSSProperties;
 };
 
-export type UserPaymentMethodAutocompleteSlotProps = {
+type UserPaymentMethodAutocompleteSlotProps = {
   readonly optionSx?: SxProps<Theme>;
 };
 

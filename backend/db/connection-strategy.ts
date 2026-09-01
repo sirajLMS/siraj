@@ -2,7 +2,7 @@ import { getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import { isServerlessRuntime, isTestEnv, isVercelRuntime } from "@/backend/lib/runtime";
 
 export type DbConnectionStrategy = "pg-pooled" | "neon-serverless";
-export type DbConnectionMode = "auto" | "pg" | "neon";
+type DbConnectionMode = "auto" | "pg" | "neon";
 
 export type PoolMaxContext = {
   isTest: boolean;

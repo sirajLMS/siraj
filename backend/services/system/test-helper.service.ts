@@ -31,7 +31,7 @@ import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { INTERNAL_DEMO_USERS, resolveAdminPassword } from "@/shared/demo-users";
 import { getServerTranslations } from "@/shared/locale";
 
-export interface TestEntitiesResult {
+interface TestEntitiesResult {
   studentUserEmail: string;
   studentUserId: string;
   studentId: string;

@@ -23,7 +23,7 @@ function resolveJoinUrl(
   return fromEffective ?? fromLegacy ?? null;
 }
 
-export function mapUpcomingLesson(raw: UpcomingClassItem): UpcomingLessonRow {
+function mapUpcomingLesson(raw: UpcomingClassItem): UpcomingLessonRow {
   return {
     id: raw.id ?? "",
     instructor: raw.instructor ?? "",
@@ -49,7 +49,7 @@ type RecentReportItem = NonNullable<
   NonNullable<NonNullable<StudentRecentLessonReportsQuery["studentRecentLessonReports"]>["rows"]>[number]
 >;
 
-export function mapRecentLessonReport(raw: RecentReportItem): RecentLessonReportRow {
+function mapRecentLessonReport(raw: RecentReportItem): RecentLessonReportRow {
   return {
     id: raw.id ?? "",
     classInstanceId: raw.classInstanceId ?? null,

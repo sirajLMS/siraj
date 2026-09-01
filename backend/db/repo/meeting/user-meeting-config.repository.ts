@@ -60,7 +60,7 @@ export namespace UserMeetingConfigRepository {
     return row ?? null;
   }
 
-  export async function clearDefault(userId: string, tx: DBTransaction): Promise<void> {
+  async function clearDefault(userId: string, tx: DBTransaction): Promise<void> {
     await tx
       .update(userMeetingConfigs)
       .set({ isDefault: false, updatedAt: new Date() })
@@ -197,7 +197,7 @@ export namespace UserMeetingConfigRepository {
     await db.transaction(run);
   }
 
-  export async function findByUserProviderLabel(
+  async function findByUserProviderLabel(
     userId: string,
     providerId: string,
     label: string | null | undefined,

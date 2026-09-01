@@ -7,7 +7,7 @@ import {
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 const EFFECTIVE_MEETING_SOURCE_VALUES = new Set(Object.values(EffectiveMeetingSource) as string[]);
-export function isEffectiveMeetingSource(value: string | null | undefined): value is EffectiveMeetingSource {
+function isEffectiveMeetingSource(value: string | null | undefined): value is EffectiveMeetingSource {
   return value != null && EFFECTIVE_MEETING_SOURCE_VALUES.has(value);
 }
 

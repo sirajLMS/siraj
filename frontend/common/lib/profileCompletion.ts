@@ -1,10 +1,10 @@
 /** Paths reachable while a teacher must complete required profile fields. */
-export const TEACHER_PROFILE_COMPLETION_ALLOWED_PATHS = new Set(["/profile", "/profile/edit"]);
+const TEACHER_PROFILE_COMPLETION_ALLOWED_PATHS = new Set(["/profile", "/profile/edit"]);
 
 export const TEACHER_PROFILE_EDIT_PATH = "/profile/edit";
 
 export const FORCE_COMPLETE_SEARCH_PARAM = "forceComplete";
-export const FORCE_COMPLETE_SEARCH_VALUE = "1";
+const FORCE_COMPLETE_SEARCH_VALUE = "1";
 
 export const TEACHER_PROFILE_COMPLETION_EDIT_HREF = buildTeacherProfileEditHref(true);
 

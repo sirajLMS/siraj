@@ -12,8 +12,6 @@ import type {
 import { MobileCardListItem, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 
-export type { ParentCardListLabels };
-
 interface ParentCardProps {
   readonly row: ParentDirectoryRow;
   readonly labels: ParentCardListLabels;

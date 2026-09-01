@@ -9,7 +9,7 @@ import type {
 import type { MeetingProviderFormData } from "@/frontend/common/views/dashboard/admin/meeting-providers/schemas/meetingProviderFormSchema";
 import type { MeetingProvidersLabels } from "@/shared/locale/types/dashboard/meeting-providers/main";
 
-export type MeetingProviderFormMode = "create" | "edit";
+type MeetingProviderFormMode = "create" | "edit";
 
 export type UseMeetingProviderFormViewModelProps = {
   readonly mode: MeetingProviderFormMode;

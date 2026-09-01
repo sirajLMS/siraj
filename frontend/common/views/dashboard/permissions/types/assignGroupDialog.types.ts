@@ -5,7 +5,7 @@ import type { PermissionGroupDetailFieldsFragment } from "@/frontend/common/grap
 import type { AssignGroupFormData } from "@/frontend/common/views/dashboard/permissions/schemas/assignGroup.schema";
 import type { PermissionsLabels } from "@/shared/locale";
 
-export interface AssignGroupFormBindings {
+interface AssignGroupFormBindings {
   // NEW FOR PLAN v5: NS-2 lifted `useForm`/`zodResolver`/`useEffect` OUT of tier
   // into the common `useAssignGroupForm` hook; tier files receive form bindings
   // as plain props (specs §6.2).

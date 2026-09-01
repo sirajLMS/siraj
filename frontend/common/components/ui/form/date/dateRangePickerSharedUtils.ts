@@ -2,11 +2,11 @@ import { format, isValid, parse } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 
-export const DATE_STORAGE_FORMAT = "yyyy-MM-dd";
-export const DATE_DISPLAY_FORMAT = "MMM d, yyyy";
-export const DATE_DISPLAY_FORMAT_AR = "d MMM yyyy";
+const DATE_STORAGE_FORMAT = "yyyy-MM-dd";
+const DATE_DISPLAY_FORMAT = "MMM d, yyyy";
+const DATE_DISPLAY_FORMAT_AR = "d MMM yyyy";
 
-export function parseStorageDate(value: string): Date | null {
+function parseStorageDate(value: string): Date | null {
   if (value.length === 0) {
     return null;
   }
@@ -15,11 +15,11 @@ export function parseStorageDate(value: string): Date | null {
   return isValid(parsed) ? parsed : null;
 }
 
-export function formatStorageDate(value: Date | null): string {
+function formatStorageDate(value: Date | null): string {
   return value ? format(value, DATE_STORAGE_FORMAT) : "";
 }
 
-export function formatDisplayRange(fromDate: string, toDate: string, locale: string): string {
+function formatDisplayRange(fromDate: string, toDate: string, locale: string): string {
   const from = parseStorageDate(fromDate);
   const to = parseStorageDate(toDate);
 

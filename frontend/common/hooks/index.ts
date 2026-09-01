@@ -1,1 +1,0 @@
-export { useMutationWrapper } from "./useMutationWrapper";

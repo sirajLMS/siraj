@@ -370,7 +370,7 @@ function CardFooter({
   );
 }
 
-export function TeacherScheduleMobileCardItem({
+export function TeacherScheduleMobileCard({
   row,
   labels,
   canActivate,
@@ -442,10 +442,3 @@ export function TeacherScheduleMobileCardItem({
     </MobileCardListItem>
   );
 }
-
-/**
- * Re-exported under the historical `TeacherScheduleMobileCard` name so the
- * thin `teacherScheduleCard.mobile.tsx` wrapper keeps its current contract.
- * Mobile view is the only legitimate consumer of this implementation.
- */
-export const TeacherScheduleMobileCard = TeacherScheduleMobileCardItem;

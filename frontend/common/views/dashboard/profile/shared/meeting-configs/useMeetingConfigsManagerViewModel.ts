@@ -967,5 +967,3 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
     reconnectAllTargetSlugs,
   };
 }
-
-export type MeetingConfigsManagerViewModel = ReturnType<typeof useMeetingConfigsManagerViewModel>;

@@ -24,4 +24,4 @@ export function StudentStatusView(props: Readonly<UseStudentStatusViewModelProps
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { StudentStatusViewModel, UseStudentStatusViewModelProps };
+export type { UseStudentStatusViewModelProps };

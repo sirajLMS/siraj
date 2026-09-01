@@ -9,12 +9,3 @@ export type DaysScheduleLabels = Pick<
   RecurringClassFormLabels,
   "daysSelection" | "classSchedule" | "timeOverride" | "days"
 >;
-
-export function buildDaysScheduleLabels(labels: RecurringClassFormLabels): DaysScheduleLabels {
-  return {
-    daysSelection: labels.daysSelection,
-    classSchedule: labels.classSchedule,
-    timeOverride: labels.timeOverride,
-    days: labels.days,
-  };
-}

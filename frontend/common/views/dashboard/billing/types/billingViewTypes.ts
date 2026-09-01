@@ -53,7 +53,7 @@ export interface StudentCreditRow {
   readonly status: StudentCreditStatus;
 }
 
-export interface BillingCapabilityProps {
+interface BillingCapabilityProps {
   readonly canManage: boolean;
   readonly canSubmitProof: boolean;
   readonly canView: boolean;
@@ -62,36 +62,6 @@ export interface BillingCapabilityProps {
 }
 
 export type CreditFilter = "all" | "negative_balance";
-
-export interface AdminBillingViewProps extends BillingCapabilityProps {
-  readonly labels: BillingLabels;
-  readonly summary: AdminBillingSummary;
-  readonly summaryLoading?: boolean;
-  readonly invoices: readonly AdminInvoiceRow[];
-  readonly creditRows: readonly StudentCreditRow[];
-  readonly loading?: boolean;
-  readonly isSearchPending?: boolean;
-  readonly billingActionsDisabled?: boolean;
-  readonly creditFilter: CreditFilter;
-  readonly searchQuery: string;
-  readonly onSearchChange: (value: string) => void;
-  readonly onMarkAsPaid: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
-  readonly onSendReminder: (id: string) => void;
-  readonly onManualInvoice: () => void;
-  readonly onViewAllNegativeBalance: () => void;
-  readonly onClearCreditFilter: () => void;
-  readonly onDeleteInvoice?: (id: string) => void;
-  readonly canDelete?: boolean;
-  readonly deletingInvoice?: boolean;
-  readonly creditLoading?: boolean;
-  readonly creditError?: Error | null;
-  readonly sendingReminderId?: string | null;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
-}
 
 export interface ParentBillingViewProps extends BillingCapabilityProps {
   readonly labels: BillingLabels;

@@ -7,7 +7,7 @@ import type {
   SupportedCurrenciesQuery,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const SUPPORTED_CURRENCY_FIELDS = gql`
+const SUPPORTED_CURRENCY_FIELDS = gql`
   fragment SupportedCurrencyFields on SupportedCurrency {
     id
     code

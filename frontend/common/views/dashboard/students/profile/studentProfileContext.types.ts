@@ -2,10 +2,6 @@ import type { StudentProfileQuery } from "@/frontend/common/graphql/generated/gq
 
 export type StudentProfileQueryData = NonNullable<StudentProfileQuery["studentProfile"]>;
 
-export type StudentProfileClassHistorySession = NonNullable<
-  NonNullable<StudentProfileQueryData["classHistory"]>["sessions"]
->[number];
-
 export type StudentProfileContextValue = {
   readonly studentId: string;
   readonly profile: StudentProfileQueryData | null | undefined;

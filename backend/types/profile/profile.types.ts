@@ -20,11 +20,11 @@ import type {
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
-// Re-surface the profile enums from @/backend/enum so type-layer consumers
-// importing via `@/backend/types` can resolve them. TeacherOwnProfileUpdateInput
+// Re-surface the ProfileMode enum from @/backend/enum so type-layer consumers
+// importing via `@/backend/types` can resolve it. TeacherOwnProfileUpdateInput
 // is NOT re-exported here — it is owned by the teachers domain and reached via
 // `@/backend/types` through the teachers barrel.
-export type { ProfileAudience, ProfileMode, ProfileScope };
+export type { ProfileMode };
 
 export type ProfilePageContext = {
   readonly scope: ProfileScope;
@@ -39,7 +39,7 @@ export type ProfilePageContext = {
   readonly allowedPermissions: readonly AppPermission[];
 };
 
-export type ProfilePageRedirect = {
+type ProfilePageRedirect = {
   readonly redirect: string;
 };
 

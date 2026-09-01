@@ -3,13 +3,10 @@
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { StatGrid } from "@/frontend/common/views/dashboard/reports/components/__shared__/PerformanceLedgerCardShared";
-import type { PerformanceLedgerCardLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { PerformanceLedgerCardProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { getLedgerBadgeStatus } from "@/frontend/common/views/dashboard/reports/utils/performanceLedgerStatus.utils";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
-
-export type PerformanceLedgerCardMobileLabels = PerformanceLedgerCardLabels;
 
 export function PerformanceLedgerCardMobile({
   row,

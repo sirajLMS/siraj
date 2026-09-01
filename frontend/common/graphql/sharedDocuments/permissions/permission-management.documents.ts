@@ -10,10 +10,6 @@ import type {
   CreatePermissionGroupMutationVariables,
   DeletePermissionGroupMutation,
   DeletePermissionGroupMutationVariables,
-  EffectiveUserPermissionsQuery,
-  EffectiveUserPermissionsQueryVariables,
-  PermissionGroupQuery,
-  PermissionGroupQueryVariables,
   PermissionGroupsQuery,
   PermissionsQuery,
   RevokePermissionGroupFromUserMutation,
@@ -24,8 +20,6 @@ import type {
   UpdateUserOverridesMutationVariables,
   UserOverridesQuery,
   UserOverridesQueryVariables,
-  UserPermissionGroupsQuery,
-  UserPermissionGroupsQueryVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
 const PERMISSION_FIELDS = gql`
@@ -98,39 +92,12 @@ export const permissionGroupsQueryDocument: TypedDocumentNode<PermissionGroupsQu
   }
 `;
 
-export const permissionGroupQueryDocument: TypedDocumentNode<PermissionGroupQuery, PermissionGroupQueryVariables> = gql`
-  ${PERMISSION_GROUP_DETAIL_FIELDS}
-  query permissionGroup($id: String!) {
-    permissionGroup(id: $id) {
-      ...PermissionGroupDetailFields
-    }
-  }
-`;
-
-export const userPermissionGroupsQueryDocument: TypedDocumentNode<
-  UserPermissionGroupsQuery,
-  UserPermissionGroupsQueryVariables
-> = gql`
-  query userPermissionGroups($userId: String!) {
-    userPermissionGroups(userId: $userId)
-  }
-`;
-
 export const userOverridesQueryDocument: TypedDocumentNode<UserOverridesQuery, UserOverridesQueryVariables> = gql`
   ${USER_OVERRIDE_FIELDS}
   query userOverrides($userId: String!) {
     userOverrides(userId: $userId) {
       ...UserOverrideFields
     }
-  }
-`;
-
-export const effectiveUserPermissionsQueryDocument: TypedDocumentNode<
-  EffectiveUserPermissionsQuery,
-  EffectiveUserPermissionsQueryVariables
-> = gql`
-  query effectiveUserPermissions($userId: String!) {
-    effectiveUserPermissions(userId: $userId)
   }
 `;
 

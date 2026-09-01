@@ -4,10 +4,6 @@ import { isCallingCodeComplete, matchCallingCodeFromDigits } from "@/shared/lib/
 import { PhoneNumber } from "@/shared/lib/phone/phone-number";
 import type { ParsePhoneResult } from "@/shared/lib/phone/types";
 
-export function digitsOnly(value: string): string {
-  return value.replace(/\D/g, "");
-}
-
 export function buildE164FromParts(prefixDigits: string, nationalDigits: string): string | null {
   if (!prefixDigits || !nationalDigits) {
     return null;

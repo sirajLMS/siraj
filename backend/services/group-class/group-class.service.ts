@@ -213,13 +213,6 @@ export namespace GroupClassService {
     return GroupClassRepository.createMany(inputs, tx);
   }
 
-  export async function findEnrollmentKeys(
-    keys: readonly { groupClassId: string; studentId: string }[],
-    tx?: DBTransaction
-  ): Promise<Set<string>> {
-    return GroupClassRepository.findEnrollmentKeys(keys, tx);
-  }
-
   export async function createManyEnrollments(
     inputs: Omit<GroupClassEnrollmentInsertType, "id" | "createdAt" | "updatedAt">[],
     tx?: DBTransaction

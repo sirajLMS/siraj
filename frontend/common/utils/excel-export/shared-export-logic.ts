@@ -1,8 +1,8 @@
 import type { CellStyle, WorkSheet } from "xlsx-js-style";
 
-export const EXPORT_FONT = "Cairo";
+const EXPORT_FONT = "Cairo";
 
-export const titleStyle: CellStyle = {
+const titleStyle: CellStyle = {
   font: { name: EXPORT_FONT, bold: true, sz: 16, color: { rgb: "1A237E" } },
   alignment: { horizontal: "center", vertical: "center" },
   fill: { fgColor: { rgb: "E8EAF6" } },
@@ -11,7 +11,7 @@ export const titleStyle: CellStyle = {
   },
 };
 
-export const headerStyle: CellStyle = {
+const headerStyle: CellStyle = {
   font: { name: EXPORT_FONT, bold: true, sz: 11, color: { rgb: "FFFFFF" } },
   alignment: { horizontal: "center", vertical: "center", wrapText: true },
   fill: { fgColor: { rgb: "1A237E" } },
@@ -23,7 +23,7 @@ export const headerStyle: CellStyle = {
   },
 };
 
-export const bodyStyle: CellStyle = {
+const bodyStyle: CellStyle = {
   font: { name: EXPORT_FONT, sz: 10 },
   alignment: { horizontal: "center", vertical: "center" },
   border: {
@@ -34,39 +34,33 @@ export const bodyStyle: CellStyle = {
   },
 };
 
-export const bodyAltStyle: CellStyle = {
+const bodyAltStyle: CellStyle = {
   ...bodyStyle,
   fill: { fgColor: { rgb: "F5F5FA" } },
 };
 
-export const nameStyle: CellStyle = {
+const nameStyle: CellStyle = {
   ...bodyStyle,
   alignment: { horizontal: "left" },
   font: { name: EXPORT_FONT, sz: 10, bold: true },
 };
 
-export const nameAltStyle: CellStyle = {
+const nameAltStyle: CellStyle = {
   ...nameStyle,
   fill: { fgColor: { rgb: "F5F5FA" } },
 };
 
-export const statusStyle: CellStyle = {
+const statusStyle: CellStyle = {
   ...bodyStyle,
   font: { name: EXPORT_FONT, sz: 10, bold: true },
 };
 
-export const statusAltStyle: CellStyle = {
+const statusAltStyle: CellStyle = {
   ...statusStyle,
   fill: { fgColor: { rgb: "F5F5FA" } },
 };
 
 export type XLSXModule = typeof import("xlsx-js-style");
-
-export interface CellWriteOptions {
-  readonly v: string | number;
-  readonly t: "s" | "n";
-  readonly s: CellStyle;
-}
 
 export function writeMergedTitleCell(XLSX: XLSXModule, ws: WorkSheet, pageTitle: string, totalCols: number): void {
   ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } }];
@@ -90,7 +84,7 @@ export interface CellStyleSpec {
   readonly statusColumnIndex: number;
 }
 
-export function getCellStyle(col: number, isAlt: boolean, spec: CellStyleSpec): CellStyle {
+function getCellStyle(col: number, isAlt: boolean, spec: CellStyleSpec): CellStyle {
   if (col === spec.nameColumnIndex) return isAlt ? nameAltStyle : nameStyle;
   if (col === spec.statusColumnIndex) return isAlt ? statusAltStyle : statusStyle;
   return isAlt ? bodyAltStyle : bodyStyle;
@@ -110,7 +104,7 @@ export function writeDataRow(
   });
 }
 
-export function writeCell(
+function writeCell(
   XLSX: XLSXModule,
   ws: WorkSheet,
   row: number,
@@ -122,15 +116,7 @@ export function writeCell(
   ws[cell] = { v: value, t: typeof value === "number" ? "n" : "s", s: style };
 }
 
-export function appendMergedRow(ws: WorkSheet, row: number, totalCols: number): void {
-  ws["!merges"]?.push({ s: { r: row, c: 0 }, e: { r: row, c: totalCols - 1 } });
-}
-
 export function resolveStatusValue(status: string | null | undefined, statusLabels: Record<string, string>): string {
   if (status === null || status === undefined) return "";
   return statusLabels[status] ?? status;
-}
-
-export function formatDateForFilename(): string {
-  return new Date().toISOString().split("T")[0];
 }

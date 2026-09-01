@@ -31,7 +31,7 @@ export type WhatsappAccountReturnType = Omit<
   portfolioMessagingLimitTier: WhatsappLimitTier | null;
 };
 
-export type WhatsappAccountSubmitInput = Omit<
+type WhatsappAccountSubmitInput = Omit<
   WhatsappAccountInsertType,
   // auto-generated
   "id" | "createdAt" | "updatedAt" | "lastWebhookAt"

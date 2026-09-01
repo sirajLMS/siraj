@@ -1,7 +1,5 @@
 import type * as Types from "@/backend/types";
 
-type StorageProvider = "gcp";
-
 /**
  * Storage Service Interface
  * Handles cloud storage operations (GCP Cloud Storage) and integrates with database
@@ -26,12 +24,6 @@ export interface StorageService {
 }
 
 /**
- * Factory function to create StorageService instance
- * Matches the Kotlin storageService factory function
- */
-export declare function createStorageService(provider: StorageProvider): StorageService;
-
-/**
  * Configuration constants matching Kotlin companion object
  */
 export const STORAGE_CONFIG = {
@@ -41,20 +33,9 @@ export const STORAGE_CONFIG = {
 } as const;
 
 /**
- * Helper functions for file type detection and validation
- */
-export interface StorageUtils {
-  getFileTypeFromContentType(contentType?: string): string;
-  validatePath(path: string): string | null;
-  extractDirectoryPath(filePath: string): string;
-  extractFileName(filePath: string): string;
-  sanitizePath(path: string): string;
-}
-
-/**
  * Error classes for storage operations
  */
-export class StorageError extends Error {
+class StorageError extends Error {
   constructor(
     message: string,
     public readonly code?: string
@@ -68,19 +49,5 @@ export class StorageValidationError extends StorageError {
   constructor(message: string) {
     super(message, "VALIDATION_ERROR");
     this.name = "StorageValidationError";
-  }
-}
-
-export class StorageNotFoundError extends StorageError {
-  constructor(path: string) {
-    super(`File or directory not found: ${path}`, "NOT_FOUND");
-    this.name = "StorageNotFoundError";
-  }
-}
-
-export class StoragePermissionError extends StorageError {
-  constructor(message: string) {
-    super(message, "PERMISSION_DENIED");
-    this.name = "StoragePermissionError";
   }
 }

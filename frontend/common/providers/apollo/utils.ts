@@ -38,7 +38,7 @@ export const createAuthLink = (getToken: () => string | null) => {
   });
 };
 
-export const createSuccessHandler =
+const createSuccessHandler =
   (getConnected: () => boolean, setConnected: (v: boolean) => void, observer: ObserverLike<ApolloLink.Result>) =>
   (result: ApolloLink.Result) => {
     if (!getConnected()) {

@@ -12,7 +12,7 @@ import { logger } from "@/backend/lib/logger";
  *    (`file:...`, `libsql://...`, `http://...`, `https://...`).
  * 2. `DB_FILE_NAME` env var (convenience: a bare file path) → `file:` URL.
  */
-export function resolveSqliteUrl(): string {
+function resolveSqliteUrl(): string {
   const databaseUrl = process.env.DATABASE_URL;
   if (databaseUrl && /^(file:|libsql:|https?:|wss?:)/i.test(databaseUrl)) {
     return databaseUrl;
@@ -27,7 +27,7 @@ let cachedSqliteClient: Client | null = null;
  * Resets the cached SQLite client (useful in test teardown).
  * Closes the underlying libsql client so file handles are released.
  */
-export function resetSqliteClient(): void {
+function resetSqliteClient(): void {
   const client = cachedSqliteClient;
   cachedSqliteClient = null;
   if (client && !client.closed) {
@@ -44,7 +44,7 @@ export function resetSqliteClient(): void {
  * server workload: WAL mode, foreign_keys ON, busy_timeout 60s.
  * For remote (Turso / http) targets, pragmas are skipped.
  */
-export function createSqliteClient(): Client {
+function createSqliteClient(): Client {
   if (cachedSqliteClient) {
     return cachedSqliteClient;
   }

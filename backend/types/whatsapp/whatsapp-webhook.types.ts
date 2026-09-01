@@ -30,7 +30,7 @@ export interface WebhookChangeType {
  *
  * @see WebhookEntryType JSDoc for why the `Type` suffix is intentional.
  */
-export interface WebhookError {
+interface WebhookError {
   code: number;
   title?: string;
   message?: string;

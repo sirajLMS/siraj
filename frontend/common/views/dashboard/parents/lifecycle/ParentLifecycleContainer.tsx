@@ -8,7 +8,7 @@ import {
   useParentLifecycleViewModel,
 } from "@/frontend/common/views/dashboard/parents/lifecycle/useParentLifecycleViewModel";
 
-export type { ParentLifecycleViewModel, UseParentLifecycleViewModelProps };
+export type { UseParentLifecycleViewModelProps };
 
 const lazyViews = createLazyView<ParentLifecycleViewModel>(
   () =>

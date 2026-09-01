@@ -23,7 +23,7 @@ export function matchesSearchQuery(row: SettingsTimezoneRow, query: string): boo
   return row.ianaId.toLowerCase().includes(normalizedQuery) || row.name.toLowerCase().includes(normalizedQuery);
 }
 
-export function toSettingsTimezoneRow(
+function toSettingsTimezoneRow(
   timezone: SettingsTimezoneSource,
   labels: SettingsTimezonesLabels,
   index: number

@@ -16,7 +16,7 @@ function getBadgeStatusKey(status: StudentStatus): string {
   return STATUS_BADGE_MAP[status] ?? "regular";
 }
 
-export interface StatusBadgeSlotProps {
+interface StatusBadgeSlotProps {
   readonly category: "studentAccount";
   readonly status: string;
   readonly label: string;

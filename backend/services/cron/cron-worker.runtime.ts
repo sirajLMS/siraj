@@ -29,7 +29,7 @@ const HEARTBEAT_MIN_MS = 1_000;
 const MIN_TIMEOUT_SECONDS = 1;
 
 /** Error thrown when a job exceeds its `timeoutSeconds` deadline. */
-export class JobTimeoutError extends DomainError {
+class JobTimeoutError extends DomainError {
   constructor(message: string) {
     super("JOB_TIMEOUT", message);
     this.name = "JobTimeoutError";

@@ -1,18 +1,6 @@
 import type { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 
-export type {
-  ClassMetadata,
-  ComplaintMetadata,
-  InvoiceMetadata,
-  LessonReportMetadata,
-  NotificationEntityKind,
-  NotificationMetadata,
-  NotificationMetadataBase,
-  PaymentMethodMetadata,
-  ScheduleMetadata,
-  StudentMetadata,
-  SuggestionMetadata,
-} from "@/shared/types/notification-alerts.types";
+export type { NotificationEntityKind, NotificationMetadata } from "@/shared/types/notification-alerts.types";
 
 export type UnansweredComplaintRow = {
   id: string;

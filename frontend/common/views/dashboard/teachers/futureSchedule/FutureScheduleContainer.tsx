@@ -24,4 +24,4 @@ export function FutureScheduleContainer(props: Readonly<UseFutureScheduleViewMod
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { FutureScheduleViewModel, UseFutureScheduleViewModelProps };
+export type { UseFutureScheduleViewModelProps };

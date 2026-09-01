@@ -10,9 +10,6 @@ import type { CurrencyCode } from "@/shared/constants/currency.enum";
 /** Drizzle select type. numeric columns arrive as strings for precision. */
 export type PackagePlanSelectType = typeof packagePlans.$inferSelect;
 
-/** Drizzle insert type (creditHours/priceAmount as decimal strings). */
-export type PackagePlanInsertType = typeof packagePlans.$inferInsert;
-
 export interface PackagePlanSubmitInput {
   codename: string;
   displayName: string;

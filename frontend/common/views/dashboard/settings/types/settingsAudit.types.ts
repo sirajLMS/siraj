@@ -10,7 +10,7 @@ export type SettingsAuditRow = {
   readonly entityId: string;
 };
 
-export type SettingsAuditFilterLabels = {
+type SettingsAuditFilterLabels = {
   readonly entityType: string;
   readonly action: string;
   readonly dateRange: string;

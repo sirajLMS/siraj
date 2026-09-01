@@ -1,9 +1,7 @@
 import { cache } from "react";
 import { getCurrentUser } from "@/backend/lib";
-import { isRedirect, ProfileService } from "@/backend/services";
-import type { ProfileMode, ProfilePageContext, ProfilePageResolution, UserPermissionContext } from "@/backend/types";
-
-export { isRedirect };
+import { ProfileService } from "@/backend/services";
+import type { ProfileMode, ProfilePageResolution, UserPermissionContext } from "@/backend/types";
 
 export const resolveProfilePageContext = cache(
   async (
@@ -20,12 +18,3 @@ export const resolveProfilePageContext = cache(
     });
   }
 );
-
-export type ResolvedProfilePage = ProfilePageContext | { readonly redirect: string };
-
-export function toProfileRedirect(result: ProfilePageResolution): string | null {
-  if (isRedirect(result)) {
-    return result.redirect;
-  }
-  return null;
-}

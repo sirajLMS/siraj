@@ -24,7 +24,7 @@
  * duplicated here to avoid a circular dependency from the lib layer into the
  * service/types layer).
  */
-export type EnvConfigCategory =
+type EnvConfigCategory =
   | "email"
   | "sms"
   | "push"
@@ -47,7 +47,7 @@ export type EnvConfigCategory =
  * - `db_with_mask_only`: value stored verbatim in DB, but masked in the UI with an
  *   eye-toggle to reveal on demand (use for secrets — api keys, tokens, passwords).
  */
-export type EnvConfigDisplayStrategy = "plain" | "db_with_mask_only";
+type EnvConfigDisplayStrategy = "plain" | "db_with_mask_only";
 
 /**
  * Descriptor for one env-config key.

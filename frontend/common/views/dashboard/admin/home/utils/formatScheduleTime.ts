@@ -15,7 +15,7 @@ export interface ScheduleTimezoneOffsetDetail {
   readonly yourUtcOffset: string;
 }
 
-export function resolveScheduleInstant(value: string | null | undefined): Date {
+function resolveScheduleInstant(value: string | null | undefined): Date {
   const parsed = parseScheduleDate(value);
   return parsed ?? new Date();
 }

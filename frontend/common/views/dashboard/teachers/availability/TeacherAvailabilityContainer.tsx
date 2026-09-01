@@ -235,5 +235,3 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { TeacherAvailabilityViewModel, UseTeacherAvailabilityViewModelProps };

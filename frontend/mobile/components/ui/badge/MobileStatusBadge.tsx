@@ -8,7 +8,7 @@ import type {
   StatusBadgeSlotProps,
 } from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
 
-export type MobileStatusBadgeCategory = StatusBadgeCategory;
+type MobileStatusBadgeCategory = StatusBadgeCategory;
 
 export interface MobileStatusBadgeProps {
   readonly category: MobileStatusBadgeCategory;

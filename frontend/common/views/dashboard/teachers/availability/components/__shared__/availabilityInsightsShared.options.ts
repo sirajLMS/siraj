@@ -9,13 +9,6 @@ const desktopLayoutSx: SxProps<Theme> = {
   mt: 4,
 };
 
-const mobileLayoutSx: SxProps<Theme> = {
-  display: "flex",
-  flexDirection: "column",
-  gap: 2,
-  mt: 3,
-};
-
 export const DESKTOP_AVAILABILITY_INSIGHTS_STYLE_OPTIONS: AvailabilityInsightsSharedStyleOptions = {
   cardMinHeight: 160,
   insightTitleMarginBottom: 2,
@@ -27,18 +20,4 @@ export const DESKTOP_AVAILABILITY_INSIGHTS_STYLE_OPTIONS: AvailabilityInsightsSh
   iconOffset: 16,
   iconFontSize: 120,
   layoutSx: desktopLayoutSx,
-};
-
-export const MOBILE_AVAILABILITY_INSIGHTS_STYLE_OPTIONS: AvailabilityInsightsSharedStyleOptions = {
-  cardMinHeight: 130,
-  cardFlex: 1,
-  insightTitleMarginBottom: 1.5,
-  valueVariant: "titleLg",
-  descriptionVariant: "labelSm",
-  timezoneTitleMarginBottom: 0.5,
-  avatarGroupMarginTop: 1.5,
-  avatarSize: 28,
-  iconOffset: 12,
-  iconFontSize: 96,
-  layoutSx: mobileLayoutSx,
 };

@@ -11,7 +11,7 @@ import {
  * Reads the current request path (+ search) from proxy-injected headers.
  * Falls back to the default post-login path when headers are missing.
  */
-export async function getRequestReturnPath(): Promise<string> {
+async function getRequestReturnPath(): Promise<string> {
   const headersList = await headers();
   const pathname = headersList.get("x-pathname");
 

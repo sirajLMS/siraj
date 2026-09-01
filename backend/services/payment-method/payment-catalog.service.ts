@@ -178,18 +178,6 @@ export namespace PaymentCatalogService {
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
 
-  export async function listAllMobileWallets(tx?: DBTransaction) {
-    return SupportedMobileWalletRepository.listAll(tx);
-  }
-
-  export async function listAllPaymentLinks(tx?: DBTransaction) {
-    return SupportedPaymentLinkRepository.listAll(tx);
-  }
-
-  export async function listAllOnlineAccounts(tx?: DBTransaction) {
-    return SupportedOnlineAccountRepository.listAll(tx);
-  }
-
   async function upsertWithDuplicateFallback<T extends { slug: string }>(
     inputs: readonly T[],
     upsertMany: (items: readonly T[], tx?: DBTransaction) => Promise<T[]>,

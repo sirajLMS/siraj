@@ -22,4 +22,4 @@ export function ParentBillingView(props: Readonly<UseParentBillingViewModelProps
   const viewModel = useParentBillingViewModel(props);
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-export type { ParentBillingViewModel, UseParentBillingViewModelProps };
+export type { UseParentBillingViewModelProps };

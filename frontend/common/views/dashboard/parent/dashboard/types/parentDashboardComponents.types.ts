@@ -20,7 +20,7 @@ export interface ParentWelcomeHeroProps {
   readonly pendingMessagesCount: number;
 }
 
-export interface ParentDashboardMetricsRowLabels {
+interface ParentDashboardMetricsRowLabels {
   readonly totalStudents: string;
   readonly todaysClasses: string;
   readonly pendingInvoices: string;
@@ -37,7 +37,7 @@ export interface ParentClassStatusIndicatorProps {
   readonly label: string;
 }
 
-export interface AcademicProgressSummaryLabels {
+interface AcademicProgressSummaryLabels {
   readonly title: string;
   readonly subtitle: string;
   readonly completion: (percent: number) => string;
@@ -50,7 +50,7 @@ export interface AcademicProgressSummaryProps {
   readonly onDownloadReport: () => void;
 }
 
-export interface WorkshopPromoCardLabels {
+interface WorkshopPromoCardLabels {
   readonly badge: string;
   readonly learnMore: string;
 }

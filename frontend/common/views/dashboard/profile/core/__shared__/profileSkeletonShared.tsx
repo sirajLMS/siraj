@@ -3,7 +3,7 @@
 import { Box, Card, Skeleton, Stack } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 
-export interface SkeletonCardConfig {
+interface SkeletonCardConfig {
   readonly id: string;
   readonly skeletonHeight: number;
   readonly textWidths: readonly string[];

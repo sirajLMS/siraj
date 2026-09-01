@@ -9,10 +9,10 @@
 
 // ── Duration constants (ms) ──
 
-export const TAB_FADE_DURATION = 200;
+const TAB_FADE_DURATION = 200;
 export const ROW_ENTER_DURATION = 300;
 export const ROW_DELETE_DURATION = 300;
-export const SYNC_PULSE_DURATION = 1000;
+const SYNC_PULSE_DURATION = 1000;
 
 // ── Tab fade-in keyframe sx (opacity + translateY, ease-in-out) ──
 

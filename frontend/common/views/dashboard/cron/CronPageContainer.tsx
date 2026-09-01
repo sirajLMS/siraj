@@ -19,5 +19,3 @@ export function CronPageContainer() {
   const viewModel = useCronViewModel();
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { CronViewModel };

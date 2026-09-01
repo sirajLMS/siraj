@@ -9,30 +9,6 @@ export const StyledMonospaceLabel = styled(Typography)(({ theme }) => ({
   alignSelf: "center",
 }));
 
-export const StyledStudentNameText = styled(Typography)({
-  fontWeight: 500,
-  alignSelf: "center",
-});
-
-export const StyledTeacherNameText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  alignSelf: "center",
-}));
-
-export const StyledScheduleNameLink = styled(Link)(({ theme }) => ({
-  alignSelf: "center",
-  color: theme.palette.primary.main,
-  fontWeight: 500,
-  textDecoration: "none",
-  "&:hover": {
-    textDecoration: "underline",
-  },
-}));
-
-export const StyledScheduleTeacherLink = styled(StyledScheduleNameLink)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-}));
-
 export const StyledActionsCellBox = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",

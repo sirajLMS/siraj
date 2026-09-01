@@ -81,7 +81,7 @@ export function LifecycleParentSummaryCard({
   );
 }
 
-export function PolicyOverviewCard({ labels }: Readonly<{ labels: ParentLifecycleLabels }>) {
+function PolicyOverviewCard({ labels }: Readonly<{ labels: ParentLifecycleLabels }>) {
   return (
     <Box
       sx={theme => ({
@@ -117,10 +117,7 @@ export function PolicyOverviewCard({ labels }: Readonly<{ labels: ParentLifecycl
   );
 }
 
-export function LifecycleControls({
-  labels,
-  isUpdating,
-}: Readonly<{ labels: ParentLifecycleLabels; isUpdating: boolean }>) {
+function LifecycleControls({ labels, isUpdating }: Readonly<{ labels: ParentLifecycleLabels; isUpdating: boolean }>) {
   const { control, register } = useFormContext<LifecycleUpdateFormData>();
 
   return (

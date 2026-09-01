@@ -1,6 +1,6 @@
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const ALLOWED_STATUS_TRANSITIONS: Record<StudentStatus, readonly StudentStatus[]> = {
+const ALLOWED_STATUS_TRANSITIONS: Record<StudentStatus, readonly StudentStatus[]> = {
   [StudentStatus.OnTrial]: [StudentStatus.Regular, StudentStatus.Deactivated],
   [StudentStatus.Regular]: [StudentStatus.Suspended, StudentStatus.OnLeave, StudentStatus.Deactivated],
   [StudentStatus.Suspended]: [StudentStatus.Regular, StudentStatus.Deactivated],

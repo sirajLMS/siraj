@@ -199,24 +199,6 @@ export namespace GroupClassRepository {
     return runInTransaction(tx, async t => t.insert(groupClasses).values(inputs).returning());
   }
 
-  export async function findEnrollmentKeys(
-    keys: readonly { groupClassId: string; studentId: string }[],
-    tx?: DBTransaction
-  ): Promise<Set<string>> {
-    if (keys.length === 0) return new Set();
-    const groupClassIds = [...new Set(keys.map(k => k.groupClassId))];
-    const q = queryDb(tx);
-    const rows = await q
-      .select({
-        groupClassId: groupClassEnrollments.groupClassId,
-        studentId: groupClassEnrollments.studentId,
-      })
-      .from(groupClassEnrollments)
-      .where(inArray(groupClassEnrollments.groupClassId, groupClassIds));
-    const wanted = new Set(keys.map(k => k.groupClassId + ":" + k.studentId));
-    return new Set(rows.map(r => r.groupClassId + ":" + r.studentId).filter(key => wanted.has(key)));
-  }
-
   export async function findEnrollmentsByKeys(
     keys: readonly { groupClassId: string; studentId: string }[],
     tx?: DBTransaction

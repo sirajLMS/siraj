@@ -31,17 +31,6 @@ function hasClientWindow() {
   return getBrowserGlobalScope().window !== undefined;
 }
 
-export function getClientTheme(): PaletteMode {
-  if (!hasClientWindow()) {
-    return "dark";
-  }
-  const saved = globalThis.localStorage.getItem("theme");
-  if (saved === "light" || saved === "dark") {
-    return saved;
-  }
-  return "dark";
-}
-
 export function setThemePreference(mode: PaletteMode) {
   if (hasClientWindow()) {
     globalThis.localStorage.setItem("theme", mode);
@@ -57,10 +46,10 @@ export function setThemePreference(mode: PaletteMode) {
  *
  * SECURITY NOTE: This cookie cannot use httpOnly=true because it is set from
  * client-side JavaScript (both Cookie Store API and document.cookie fallback).
- * The httpOnly flag prevents JavaScript access, which would break the cookieStore
- * reads in getCookie(). For a more secure alternative, consider setting the theme
- * cookie server-side via Next.js middleware or a Server Action with httpOnly:true,
- * and reading it only from the request headers on subsequent page loads.
+ * The httpOnly flag prevents JavaScript access. For a more secure alternative,
+ * consider setting the theme cookie server-side via Next.js middleware or a
+ * Server Action with httpOnly:true, and reading it only from the request
+ * headers on subsequent page loads.
  */
 async function setCookie(name: string, value: string, days: number) {
   if (!hasClientWindow()) {
@@ -92,46 +81,4 @@ async function setCookie(name: string, value: string, days: number) {
   const expiresStr = `expires=${date.toUTCString()}`;
   // biome-ignore lint/suspicious/noDocumentCookie: Fallback for browsers without Cookie Store API
   globalThis.document.cookie = `${name}=${value};${expiresStr};path=/;SameSite=Lax;Secure`;
-}
-
-/**
- * Get a cookie value by name (client-side)
- */
-export async function getCookie(name: string): Promise<string | null> {
-  if (!hasClientWindow()) {
-    return null;
-  }
-
-  // Use Cookie Store API if available
-  const cookieStore = getBrowserGlobalScope().cookieStore;
-  if (cookieStore !== undefined) {
-    try {
-      const cookie = await cookieStore.get(name);
-      return cookie?.value ?? null;
-    } catch {
-      // Fall through to legacy method if Cookie Store API fails
-    }
-  }
-
-  // Fallback to traditional method for browsers without Cookie Store API
-  const nameEQ = `${name}=`;
-  const cookies = globalThis.document.cookie.split(";");
-  for (const cookie of cookies) {
-    const trimmedCookie = cookie.trimStart();
-    if (trimmedCookie.startsWith(nameEQ)) {
-      return trimmedCookie.substring(nameEQ.length);
-    }
-  }
-  return null;
-}
-
-/**
- * Get theme from cookie value (server-side compatible)
- */
-export function getThemeFromCookies(themeValue?: string): PaletteMode {
-  if (themeValue === "light" || themeValue === "dark") {
-    return themeValue;
-  }
-
-  return "dark";
 }

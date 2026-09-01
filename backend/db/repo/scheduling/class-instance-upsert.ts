@@ -176,31 +176,6 @@ export async function runClassInstanceUpsertMany(
   return options?.tx ? runner(options.tx) : db.transaction(runner);
 }
 
-/** Production upsert: may update execution state directly on idempotency-key conflict. */
-export async function upsertProductionClassInstance(
-  t: DBTransaction,
-  instance: ClassInstanceInsertType,
-  updatedAt: Date
-): Promise<ClassInstanceSelectType> {
-  const [inserted] = await t
-    .insert(classInstances)
-    .values(instance)
-    .onConflictDoUpdate({
-      target: classInstances.idempotencyKey,
-      set: {
-        scheduledStartAt: instance.scheduledStartAt,
-        scheduledEndAt: instance.scheduledEndAt,
-        executionState: instance.executionState,
-        outcome: instance.outcome,
-        actualStartAt: instance.actualStartAt,
-        actualEndAt: instance.actualEndAt,
-        updatedAt,
-      },
-    })
-    .returning();
-  return inserted;
-}
-
 /**
  * Seed upsert: promotes NOT_ACTIVATED/PENDING shells through valid transitions so
  * `fn_enforce_class_instance_transition` is not violated on re-seed.

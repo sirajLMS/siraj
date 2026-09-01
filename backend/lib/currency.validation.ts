@@ -11,7 +11,7 @@ import { CurrencyCode } from "@/shared/constants/currency.enum";
  * @param value The value to check
  * @returns true if the value is a valid CurrencyCode, false otherwise
  */
-export function isCurrencyCode(value: unknown): value is CurrencyCode {
+function isCurrencyCode(value: unknown): value is CurrencyCode {
   if (typeof value !== "string") return false;
   return (Object.values(CurrencyCode) as readonly string[]).includes(value);
 }

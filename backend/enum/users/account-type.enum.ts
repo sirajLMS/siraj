@@ -19,13 +19,3 @@ export enum ManagerAccountType {
   manager = "manager",
   supervisor = "supervisor",
 }
-
-/**
- * Constants derived from {@link ManagerAccountType} for ergonomic membership
- * checks without paying for enum reverse-lookups. Mirrors the literal-string
- * union the type system already enforces on `accountType` usages.
- */
-export const MANAGER_ACCOUNT_TYPES: readonly ManagerAccountType[] = [
-  ManagerAccountType.manager,
-  ManagerAccountType.supervisor,
-] as const;

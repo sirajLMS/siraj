@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { leaveRequests } from "@/backend/db/schema";
 import type { CreateLeaveRequestInput, DBTransaction, LeaveRequestSelectType } from "@/backend/types";
@@ -42,18 +42,5 @@ export namespace LeaveRequestRepository {
     };
     await processNext(0);
     return results;
-  }
-
-  export async function findByClassInstanceId(
-    classInstanceId: string,
-    tx?: DBTransaction
-  ): Promise<LeaveRequestSelectType | null> {
-    const executor = queryDb(tx);
-    const [row] = await executor
-      .select()
-      .from(leaveRequests)
-      .where(eq(leaveRequests.classInstanceId, classInstanceId))
-      .limit(1);
-    return row ?? null;
   }
 }

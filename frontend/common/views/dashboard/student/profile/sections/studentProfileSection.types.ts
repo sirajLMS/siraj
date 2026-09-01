@@ -4,7 +4,7 @@ import type { StudentPortalProfileLabels } from "@/shared/locale/types/dashboard
 
 export type StudentProfileSectionLabels = StudentPortalProfileLabels;
 
-export type StudentProfileDraftPatch = (patch: Partial<StudentPortalProfileEditDraft>) => void;
+type StudentProfileDraftPatch = (patch: Partial<StudentPortalProfileEditDraft>) => void;
 
 export type StudentProfileSectionBaseProps = {
   readonly profile: StudentProfileRow;

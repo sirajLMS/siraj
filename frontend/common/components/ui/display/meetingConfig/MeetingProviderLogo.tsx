@@ -7,7 +7,7 @@ import type * as React from "react";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type MeetingProviderLogoSize = "small" | "medium" | "large";
+type MeetingProviderLogoSize = "small" | "medium" | "large";
 
 export interface MeetingProviderLogoProps {
   readonly providerSlug: string | null | undefined;

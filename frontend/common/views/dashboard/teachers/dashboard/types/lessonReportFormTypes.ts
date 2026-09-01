@@ -1,18 +1,7 @@
-import type {
-  AttendanceEvaluation as GraphqlAttendanceEvaluation,
-  LessonReportStatus as GraphqlLessonReportStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql";
+import type { AttendanceEvaluation as GraphqlAttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
 
 export type AttendanceEvaluationValue = `${GraphqlAttendanceEvaluation}`;
-export type LessonReportStatusValue = `${GraphqlLessonReportStatus}`;
-
-export interface LessonReportFormState {
-  readonly attendanceEvaluation: AttendanceEvaluationValue;
-  readonly durationMinutes: number;
-  readonly completionPercentage: number;
-  readonly teacherNotes: string;
-}
 
 export interface LessonReportFormSubmitInput {
   readonly classInstanceId: string;

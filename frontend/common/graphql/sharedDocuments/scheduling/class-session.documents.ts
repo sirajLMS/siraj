@@ -12,8 +12,6 @@ import type {
   DeleteClassInstanceMutationVariables,
   OverrideClassInstanceRateMutation,
   OverrideClassInstanceRateMutationVariables,
-  RescheduleClassMutation,
-  RescheduleClassMutationVariables,
   ResetClassMutation,
   ResetClassMutationVariables,
   StopClassMutation,
@@ -203,22 +201,6 @@ export const stopClassMutationDocument: TypedDocumentNode<StopClassMutation, Sto
       status
       durationMinutes
       remarks
-    }
-  }
-`;
-
-export const rescheduleClassMutationDocument: TypedDocumentNode<
-  RescheduleClassMutation,
-  RescheduleClassMutationVariables
-> = gql`
-  mutation rescheduleClass($classInstanceId: ID!, $input: RescheduleClassInput!) {
-    rescheduleClass(classInstanceId: $classInstanceId, input: $input) {
-      id
-      status
-      scheduledDate
-      startTime
-      endTime
-      durationMinutes
     }
   }
 `;

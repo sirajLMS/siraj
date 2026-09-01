@@ -64,14 +64,3 @@ export function buildLoginHref(returnPath: string): string {
   }
   return `${LOGIN_PATH}?${LOGIN_REDIRECT_PARAM}=${encodeURIComponent(returnPath)}`;
 }
-
-/**
- * Client: build login href from the current window location (pathname + search).
- */
-export function buildLoginHrefFromWindow(): string {
-  if (typeof globalThis.window === "undefined") {
-    return LOGIN_PATH;
-  }
-  const { pathname, search } = globalThis.window.location;
-  return buildLoginHref(`${pathname}${search}`);
-}

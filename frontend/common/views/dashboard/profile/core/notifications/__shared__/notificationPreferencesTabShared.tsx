@@ -6,7 +6,7 @@ import { AppSnackbar } from "@/frontend/common/components/ui/state";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
-export interface NotificationPreferencesTabSharedOptions {
+interface NotificationPreferencesTabSharedOptions {
   readonly renderBody: (props: Readonly<NotificationPreferencesTabVariantProps>) => ReactNode;
 }
 

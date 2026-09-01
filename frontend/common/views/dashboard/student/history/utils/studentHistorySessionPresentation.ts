@@ -63,12 +63,3 @@ export function formatStudentHistoryDuration(
   }
   return labels.minutesShort(minutes);
 }
-
-export function formatStudentHistoryDurationStatus(
-  row: Pick<StudentHistorySessionRow, "duration" | "status" | "outcome">,
-  labels: Pick<StudentPortalHistoryLabels, "minutesShort" | "statusLabels">
-): string {
-  const duration = formatStudentHistoryDuration(row.duration, labels);
-  const status = resolveStudentHistoryStatusLabel(row, labels.statusLabels);
-  return `${duration} · ${status}`;
-}

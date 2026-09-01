@@ -11,7 +11,7 @@ import { Translation } from "@/shared/locale/namespaces/translation";
 export const recurringLocale: AppLocale = "ar";
 
 export const recurringLabels = readTranslation(Translation.Dashboard.RecurringSchedulesList, recurringLocale);
-export const commonLabels = readTranslation(Translation.Common, recurringLocale);
+const commonLabels = readTranslation(Translation.Common, recurringLocale);
 export const adminLabels = readTranslation(Translation.Dashboard.Admin, recurringLocale);
 
 export function makeRecurringScheduleRow(

@@ -23,13 +23,6 @@ export interface ReassignmentStudentData {
   readonly updatedAt: string | null;
 }
 
-export interface ReassignmentTeacherOption {
-  readonly id: string;
-  readonly name: string;
-  readonly avatarUrl: string;
-  readonly status: "active" | "offline";
-}
-
 export interface ReassignmentSubmitInput {
   readonly studentId: string;
   readonly newTeacherId: string;

@@ -22,5 +22,3 @@ export function StudentHistoryView() {
   const viewModel = useStudentHistoryViewModel({});
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { StudentHistoryViewModel };

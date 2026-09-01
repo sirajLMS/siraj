@@ -3,11 +3,8 @@
 // Previously each tier declared its own *MobileProps/*DesktopProps inline
 // duplicate — collapsed to a single shared type per specs.md §4.1 Class B.
 
-import type { ExchangeRateRow } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import type { UseExchangeRateHistoryViewModel } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/hooks";
 import type { ExchangeRatesLabels } from "@/shared/locale";
-
-export type ExchangeRateHistoryRow = ExchangeRateRow;
 
 // NEW FOR PLAN v5: the tier section receives its ViewModel from the parent as a prop
 // (specs §3 N26 + §6.1 — tier views get the view model passed down, never call the hook).

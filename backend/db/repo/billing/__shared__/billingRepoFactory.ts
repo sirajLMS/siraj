@@ -28,7 +28,7 @@ export interface BillingRow {
  * Typed Drizzle column references from the table definition.
  * Using `PgColumn` ensures compatibility with `eq()`, `orderBy()`, etc.
  */
-export interface BillingTableShape {
+interface BillingTableShape {
   /** The Drizzle table (used for select / insert / update / from). */
   readonly table: PgTable;
   /** The `id` column. */
@@ -263,14 +263,14 @@ export function makeBillingRepo<
  * Receives the input and `now` (shared timestamp) — returns the
  * entity-specific record to pass to `.values()`.
  */
-export type BuildUpsertInsert<TInsert> = (input: TInsert, now: Date) => Record<string, unknown>;
+type BuildUpsertInsert<TInsert> = (input: TInsert, now: Date) => Record<string, unknown>;
 
 /**
  * Builds the on-conflict update set for a single upsert row.
  * Receives the input and `now` — returns the entity-specific
  * partial record to pass to `.onConflictDoUpdate({ set })`.
  */
-export type BuildUpsertConflictSet<TInsert> = (input: TInsert, now: Date) => Record<string, unknown>;
+type BuildUpsertConflictSet<TInsert> = (input: TInsert, now: Date) => Record<string, unknown>;
 
 /**
  * Common upsert fields shared by all supported-* billing entities

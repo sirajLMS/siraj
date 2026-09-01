@@ -4,7 +4,7 @@ import { create } from "zustand";
 import type { CalculationStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
 /** Rows per server page on first load. */
-export const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_SIZE = 25;
 
 /** Page-size choices offered by the payroll report pager. */
 export const PAGE_SIZE_OPTIONS: readonly number[] = [25, 50, 100];

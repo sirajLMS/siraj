@@ -1,7 +1,6 @@
 import type { teacherImportantNotes } from "@/backend/db/schema";
 
 export type TeacherImportantNoteSelectType = typeof teacherImportantNotes.$inferSelect;
-export type TeacherImportantNoteInsertType = typeof teacherImportantNotes.$inferInsert;
 
 export type TeacherImportantNoteReturnType = Omit<
   TeacherImportantNoteSelectType,

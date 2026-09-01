@@ -23,4 +23,4 @@ export function PaymentsLedgerView(props: Readonly<UsePaymentsLedgerViewModelPro
   const viewModel = usePaymentsLedgerViewModel(props);
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-export type { PaymentsLedgerViewModel, UsePaymentsLedgerViewModelProps };
+export type { UsePaymentsLedgerViewModelProps };

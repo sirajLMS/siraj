@@ -65,7 +65,6 @@ export namespace SupportedPaymentLinkRepository {
   export const create = baseRepo.create;
   export const update = baseRepo.update;
   export const deactivate = baseRepo.deactivate;
-  export const listByIds = baseRepo.listByIds;
 
   export const upsertMany = makeBillingUpsertMany<
     SupportedPaymentLinkSelectType,

@@ -47,7 +47,7 @@ const ENV_SETTING_KEY_PREFIX = "env::";
  * the generic general-settings service. Env-config keys are owned by the
  * Settings → Environment Config tab and its dedicated service.
  */
-export class EnvConfigScopeError extends Error {
+class EnvConfigScopeError extends Error {
   readonly code = "EENV_SCOPE_REJECTED" as const;
 
   constructor(message: string) {
@@ -186,45 +186,6 @@ export namespace SystemSettingsService {
     return uploadHandbookWithConfig(userId, fileName, fileBuffer, tErrors, TEACHER_HANDBOOK_UPLOAD);
   }
 
-  /**
-   * Deletes the teacher handbook file from storage and removes its registry path from system settings.
-   *
-   * Checks if the user has delete permissions (RESOURCES_DELETE or TEACHERS_EDIT)
-   * if a `userId` is provided. If `userId` is `null`, it allows system-level bypass.
-   * It fetches the registered path, deletes the actual file from the storage provider, and
-   * deletes the setting record from the system settings repository.
-   *
-   * @param userId The user ID of the actor initiating the deletion, or `null` for system-level bypass.
-   * @param tErrors Translated error labels.
-   */
-  export async function deleteHandbook(userId: string | null, tErrors: ErrorsLabels): Promise<void> {
-    if (userId) {
-      const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.RESOURCES_DELETE);
-      const isAdmin = await PermissionsService.hasPermission(userId, AppPermission.TEACHERS_EDIT);
-      if (!isAuthorized && !isAdmin) {
-        throw new Error(tErrors.unauthorizedAction);
-      }
-    }
-
-    const setting = await SystemSettingsRepository.getByKey(HANDBOOK_SETTING_KEY);
-    if (!setting?.value) {
-      logger.warn("Teacher handbook setting does not exist; skipping deletion.");
-      return;
-    }
-
-    const path = setting.value;
-
-    logger.info(`Deleting teacher handbook from storage path: ${path}`);
-    const storageService = await getStorageService();
-    const deleteResult = await storageService.deleteFile(path);
-    if (!deleteResult.success) {
-      logger.error(`Failed to delete teacher handbook file from storage: ${deleteResult.message}`);
-    }
-
-    logger.info("Deleting teacher handbook from system settings repository...");
-    await SystemSettingsRepository.deleteSetting(HANDBOOK_SETTING_KEY);
-  }
-
   export type SystemSettingUpsertInput = {
     key: string;
     value: string;
@@ -249,7 +210,7 @@ export namespace SystemSettingsService {
    * Settings → General System Settings tab. `category` defaults to `"system"`
    * at the repository layer.
    */
-  export interface GenericSettingUpsertInput {
+  interface GenericSettingUpsertInput {
     /** System-setting key, e.g. `site_name`, `maintenance_mode`, `default_page_size`. */
     key: string;
     /** String value — DB stores all settings as strings; the UI casts for display. */
@@ -346,15 +307,6 @@ export namespace SystemSettingsService {
   export async function listAllSettings(tx?: DBTransaction): Promise<SystemSettingSelectType[]> {
     const queryDb = tx ?? db;
     return queryDb.select().from(systemSettings);
-  }
-
-  /**
-   * Returns the `value` string for the given key, or `undefined` when the row
-   * is missing. Never throws on a missing key. Read-only.
-   */
-  export async function getGenericSetting(key: string, tx?: DBTransaction): Promise<string | undefined> {
-    const setting = await getSettingByKey(key, tx);
-    return setting?.value ?? undefined;
   }
 
   /**

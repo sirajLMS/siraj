@@ -19,7 +19,7 @@ export type TimezoneSelectProps = {
 /** Component used to render the flag emoji in the input start adornment and option rows. */
 export type LocaleEmojiComponent = React.FC<{ readonly emoji: string }>;
 
-export interface TimezoneSelectSlotProps {
+interface TimezoneSelectSlotProps {
   /** Component used to render the flag emoji in the input and dropdown options */
   readonly LocaleEmojiComponent: LocaleEmojiComponent;
   /** sx applied to each option row <Box component="li"> (mobile uses larger touch targets) */

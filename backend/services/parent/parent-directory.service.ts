@@ -11,12 +11,6 @@ import type {
 import { parseAccountStatus, parseParentStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
-export type {
-  ParentDirectoryMetrics,
-  ParentDirectoryResult,
-  ParentDirectoryRow,
-} from "@/backend/types";
-
 const PARENTS_DIRECTORY_MAX_LIMIT = 100;
 
 export namespace ParentDirectoryService {

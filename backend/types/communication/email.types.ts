@@ -22,5 +22,3 @@ export interface IEmailChannel {
   validateConfig(): Promise<boolean>;
   disconnect(): Promise<void>;
 }
-
-export type EmailProvider = "resend";

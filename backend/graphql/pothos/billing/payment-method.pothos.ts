@@ -22,11 +22,11 @@ import type {
   UserPaymentMethodSubmitGqlInput,
 } from "@/backend/types";
 
-export function isRecordLike(value: unknown): value is Record<string, unknown> {
+function isRecordLike(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-export function detailField(key: string, details: PaymentMethodDetails): string | null {
+function detailField(key: string, details: PaymentMethodDetails): string | null {
   if (key in details && isRecordLike(details)) {
     const record: Record<string, unknown> = details;
     const value = record[key];
@@ -35,9 +35,9 @@ export function detailField(key: string, details: PaymentMethodDetails): string 
   return null;
 }
 
-export const PaymentMethodDetailsRef = gqlSchemaBuilder.objectRef<PaymentMethodDetails>("PaymentMethodDetails");
+const PaymentMethodDetailsRef = gqlSchemaBuilder.objectRef<PaymentMethodDetails>("PaymentMethodDetails");
 
-export const PaymentMethodDetailsPothosObject = PaymentMethodDetailsRef.implement({
+const PaymentMethodDetailsPothosObject = PaymentMethodDetailsRef.implement({
   fields: t => ({
     walletId: t.string({ nullable: true, resolve: d => detailField("walletId", d) }),
     phone: t.string({ nullable: true, resolve: d => detailField("phone", d) }),
@@ -73,10 +73,10 @@ export const PaymentMethodDetailsPothosObject = PaymentMethodDetailsRef.implemen
   }),
 });
 
-export const PaymentMethodCatalogSnapshotRef =
+const PaymentMethodCatalogSnapshotRef =
   gqlSchemaBuilder.objectRef<PaymentMethodCatalogSnapshot>("PaymentMethodCatalogSnapshot");
 
-export const PaymentMethodCatalogSnapshotPothosObject = PaymentMethodCatalogSnapshotRef.implement({
+const PaymentMethodCatalogSnapshotPothosObject = PaymentMethodCatalogSnapshotRef.implement({
   fields: t => ({
     id: t.string({ resolve: parent => parent.catalogId }),
     catalogId: t.exposeString("catalogId"),
@@ -85,7 +85,7 @@ export const PaymentMethodCatalogSnapshotPothosObject = PaymentMethodCatalogSnap
   }),
 });
 
-export const PaymentMethodTransactionSnapshotRef = gqlSchemaBuilder.objectRef<PaymentMethodTransactionSnapshot>(
+const PaymentMethodTransactionSnapshotRef = gqlSchemaBuilder.objectRef<PaymentMethodTransactionSnapshot>(
   "PaymentMethodTransactionSnapshot"
 );
 
@@ -101,7 +101,7 @@ export const PaymentMethodTransactionSnapshotPothosObject = PaymentMethodTransac
   }),
 });
 
-export const UserPaymentMethodRef = gqlSchemaBuilder.objectRef<UserPaymentMethodReturnType>("UserPaymentMethod");
+const UserPaymentMethodRef = gqlSchemaBuilder.objectRef<UserPaymentMethodReturnType>("UserPaymentMethod");
 
 export const UserPaymentMethodPothosObject = UserPaymentMethodRef.implement({
   fields: t => ({
@@ -119,7 +119,7 @@ export const UserPaymentMethodPothosObject = UserPaymentMethodRef.implement({
   }),
 });
 
-export const PaymentMethodDefaultsRef = gqlSchemaBuilder.objectRef<PaymentMethodDefaults>("PaymentMethodDefaults");
+const PaymentMethodDefaultsRef = gqlSchemaBuilder.objectRef<PaymentMethodDefaults>("PaymentMethodDefaults");
 
 export const PaymentMethodDefaultsPothosObject = PaymentMethodDefaultsRef.implement({
   fields: t => ({
@@ -128,7 +128,7 @@ export const PaymentMethodDefaultsPothosObject = PaymentMethodDefaultsRef.implem
   }),
 });
 
-export function supportedObjectCommonFields(t: PothosObjectFieldBuilder<SupportedCommonShape>) {
+function supportedObjectCommonFields(t: PothosObjectFieldBuilder<SupportedCommonShape>) {
   return {
     id: t.exposeString("id"),
     slug: t.exposeString("slug"),
@@ -143,8 +143,7 @@ export function supportedObjectCommonFields(t: PothosObjectFieldBuilder<Supporte
   };
 }
 
-export const SupportedMobileWalletRef =
-  gqlSchemaBuilder.objectRef<SupportedMobileWalletReturnType>("SupportedMobileWallet");
+const SupportedMobileWalletRef = gqlSchemaBuilder.objectRef<SupportedMobileWalletReturnType>("SupportedMobileWallet");
 
 export const SupportedMobileWalletPothosObject = SupportedMobileWalletRef.implement({
   fields: t => ({
@@ -155,8 +154,7 @@ export const SupportedMobileWalletPothosObject = SupportedMobileWalletRef.implem
   }),
 });
 
-export const SupportedPaymentLinkRef =
-  gqlSchemaBuilder.objectRef<SupportedPaymentLinkReturnType>("SupportedPaymentLink");
+const SupportedPaymentLinkRef = gqlSchemaBuilder.objectRef<SupportedPaymentLinkReturnType>("SupportedPaymentLink");
 
 export const SupportedPaymentLinkPothosObject = SupportedPaymentLinkRef.implement({
   fields: t => ({
@@ -166,7 +164,7 @@ export const SupportedPaymentLinkPothosObject = SupportedPaymentLinkRef.implemen
   }),
 });
 
-export const SupportedOnlineAccountRef =
+const SupportedOnlineAccountRef =
   gqlSchemaBuilder.objectRef<SupportedOnlineAccountReturnType>("SupportedOnlineAccount");
 
 export const SupportedOnlineAccountPothosObject = SupportedOnlineAccountRef.implement({
@@ -177,7 +175,7 @@ export const SupportedOnlineAccountPothosObject = SupportedOnlineAccountRef.impl
   }),
 });
 
-export const PaymentMethodDetailsInputPothos = gqlSchemaBuilder.inputType("PaymentMethodDetailsInput", {
+const PaymentMethodDetailsInputPothos = gqlSchemaBuilder.inputType("PaymentMethodDetailsInput", {
   fields: t => ({
     walletId: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
     phone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
@@ -227,7 +225,7 @@ export function normalizePaymentMethodDetailsInput(input: {
   };
 }
 
-export function userPaymentMethodCommonInputFields(t: PothosInputFieldBuilder) {
+function userPaymentMethodCommonInputFields(t: PothosInputFieldBuilder) {
   return {
     type: t.field({ type: PaymentMethodTypePothosEnum, required: true }),
     direction: t.field({ type: PaymentDirectionPothosEnum, required: true }),
@@ -263,7 +261,7 @@ export const UserPaymentMethodUpdateInputPothos = gqlSchemaBuilder
     }),
   });
 
-export function supportedInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
+function supportedInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
     description: t.field({ type: "LocalizedString", required }),
     instructions: t.field({ type: "LocalizedString", required }),
@@ -273,7 +271,7 @@ export function supportedInputCommonFields(t: PothosInputFieldBuilder, required:
   };
 }
 
-export function mobileWalletInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
+function mobileWalletInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
     slug: t.string({ required }),
     name: t.field({ type: "LocalizedString", required }),
@@ -284,7 +282,7 @@ export function mobileWalletInputCommonFields(t: PothosInputFieldBuilder, requir
   };
 }
 
-export function paymentLinkInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
+function paymentLinkInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
     slug: t.string({ required }),
     name: t.field({ type: "LocalizedString", required }),

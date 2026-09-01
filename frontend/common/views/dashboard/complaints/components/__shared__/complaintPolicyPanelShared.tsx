@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ComplaintsParentLabels } from "@/shared/locale";
 
-export interface ComplaintPolicyPanelSharedOptions {
+interface ComplaintPolicyPanelSharedOptions {
   readonly marginTop: number;
   readonly padding: number;
 }

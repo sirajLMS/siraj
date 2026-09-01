@@ -12,26 +12,12 @@ import { z } from "zod";
 
 import { entityFormBaseSchema } from "@/frontend/common/views/dashboard/subjects/home/schemas/subject.schema";
 
-/**
- * Category create/edit form schema (name, slug, description, isActive).
- * Identical to `editCategorySchema` below — kept as a separate named export
- * so callers can express the create-vs-edit intent at the import site.
- */
+/** Category create/edit form schema (name, slug, description, isActive). */
 export const categoryFormSchema = z.object(entityFormBaseSchema);
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
-/**
- * NEW FOR PLAN v5: edit-category schema lifted out of the inline
- * `const editCategorySchema = z.object(...)` declaration that previously
- * lived in `editCategoryDialog.{mobile,desktop}.tsx`. Structurally identical
- * to `categoryFormSchema` but exported here so the edit dialog imports a
- * distinct, named schema object (matches the §5 contract: zod schemas live
- * in `schemas/`, not in tier files).
- */
-export const editCategorySchema = z.object(entityFormBaseSchema);
-
-export type EditCategoryFormValues = z.infer<typeof editCategorySchema>;
+export type EditCategoryFormValues = z.infer<typeof categoryFormSchema>;
 
 export const emptyCategoryFormValues: CategoryFormValues = {
   name: "",

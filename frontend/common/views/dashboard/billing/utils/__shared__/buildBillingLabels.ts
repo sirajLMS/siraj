@@ -3,7 +3,7 @@
 import { buildManualInvoiceLabels } from "@/frontend/common/views/dashboard/billing/manual/utils/buildManualInvoiceLabels";
 import type { BillingLabels } from "@/shared/locale";
 
-export function buildPageLabels(t: BillingLabels) {
+function buildPageLabels(t: BillingLabels) {
   return {
     adminPageTitle: t.adminPageTitle,
     adminPageSubtitle: t.adminPageSubtitle,
@@ -23,7 +23,7 @@ export function buildPageLabels(t: BillingLabels) {
   };
 }
 
-export function buildMetricLabels(t: BillingLabels) {
+function buildMetricLabels(t: BillingLabels) {
   return {
     adminMetrics: {
       totalOutstanding: t.adminMetrics.totalOutstanding,
@@ -40,7 +40,7 @@ export function buildMetricLabels(t: BillingLabels) {
   };
 }
 
-export function buildSectionAndSearchLabels(t: BillingLabels) {
+function buildSectionAndSearchLabels(t: BillingLabels) {
   return {
     sections: {
       recentInvoices: t.sections.recentInvoices,
@@ -56,7 +56,7 @@ export function buildSectionAndSearchLabels(t: BillingLabels) {
   };
 }
 
-export function buildTableLabels(t: BillingLabels) {
+function buildTableLabels(t: BillingLabels) {
   return {
     adminTable: {
       invoiceId: t.adminTable.invoiceId,
@@ -107,7 +107,7 @@ export function buildTableLabels(t: BillingLabels) {
   };
 }
 
-export function buildStatusLabels(t: BillingLabels) {
+function buildStatusLabels(t: BillingLabels) {
   return {
     invoiceStatus: {
       OVERDUE: t.invoiceStatus.OVERDUE,
@@ -124,7 +124,7 @@ export function buildStatusLabels(t: BillingLabels) {
   };
 }
 
-export function buildPaymentLabels(t: BillingLabels) {
+function buildPaymentLabels(t: BillingLabels) {
   return {
     paymentMethodSelector: {
       label: t.paymentMethodSelector.label,
@@ -146,7 +146,7 @@ export function buildPaymentLabels(t: BillingLabels) {
   };
 }
 
-export function buildSubmitProofDialogLabels(t: BillingLabels) {
+function buildSubmitProofDialogLabels(t: BillingLabels) {
   return {
     submitProofDialog: {
       titleSubmit: t.submitProofDialog.titleSubmit,
@@ -171,7 +171,7 @@ export function buildSubmitProofDialogLabels(t: BillingLabels) {
   };
 }
 
-export function buildPaymentDetailsDialogLabels(t: BillingLabels) {
+function buildPaymentDetailsDialogLabels(t: BillingLabels) {
   return {
     paymentDetailsDialog: {
       title: t.paymentDetailsDialog.title,
@@ -200,7 +200,7 @@ export function buildPaymentDetailsDialogLabels(t: BillingLabels) {
   };
 }
 
-export function buildNotificationAndErrorLabels(t: BillingLabels) {
+function buildNotificationAndErrorLabels(t: BillingLabels) {
   return {
     notifications: {
       popupBlocked: t.notifications.popupBlocked,
@@ -213,7 +213,7 @@ export function buildNotificationAndErrorLabels(t: BillingLabels) {
   };
 }
 
-export function buildFxAndCurrencyLabels(t: BillingLabels) {
+function buildFxAndCurrencyLabels(t: BillingLabels) {
   return {
     exchangeRates: t.exchangeRates,
     fxStaleBanner: {
@@ -243,7 +243,7 @@ export function buildFxAndCurrencyLabels(t: BillingLabels) {
   };
 }
 
-export function buildSuccessLabels(t: BillingLabels) {
+function buildSuccessLabels(t: BillingLabels) {
   return {
     markAsPaidSuccess: t.markAsPaidSuccess,
     submitProofSuccess: t.submitProofSuccess,

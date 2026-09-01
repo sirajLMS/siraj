@@ -282,5 +282,3 @@ export function usePaymentMethodsManagerViewModel(props: Readonly<UsePaymentMeth
     busy,
   };
 }
-
-export type PaymentMethodsManagerViewModel = ReturnType<typeof usePaymentMethodsManagerViewModel>;

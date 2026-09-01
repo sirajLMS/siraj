@@ -11,7 +11,7 @@ import type {
   SearchScheduleSortMenuProps,
 } from "@/frontend/common/views/dashboard/search-schedule/types";
 
-export interface SearchScheduleFormSlotProps {
+interface SearchScheduleFormSlotProps {
   /** Tier-specific teacher autocomplete — desktop or mobile variant. */
   readonly TeacherAutocomplete: React.FC<{
     readonly value: SearchScheduleFormProps["selectedTeacher"];

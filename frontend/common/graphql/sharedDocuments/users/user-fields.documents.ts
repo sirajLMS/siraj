@@ -40,10 +40,3 @@ export const USER_FIELDS = gql`
     displayCurrency
   }
 `;
-
-// Alias for codegen-style consumers: re-exports the gql-built DocumentNode so
-// gql template interpolations in `auth.documents.ts` / `general-user-create.documents.ts`
-// receive a DocumentNode that retains its `loc` (the codegen-emitted
-// `UserFieldsFragmentDoc` from `generated/gql/graphql` is a JSON literal without
-// `loc`, which crashes `graphql-tag`'s template interpolation at module load).
-export const UserFieldsFragmentDoc = USER_FIELDS;

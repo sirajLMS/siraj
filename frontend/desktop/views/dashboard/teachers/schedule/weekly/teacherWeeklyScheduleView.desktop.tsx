@@ -128,5 +128,3 @@ const DESKTOP_SLOTS: TeacherWeeklyScheduleViewSharedSlots = {
 export function TeacherWeeklyScheduleViewDesktop(props: Readonly<TeacherWeeklyScheduleViewProps>) {
   return <TeacherWeeklyScheduleViewShared {...props} slots={DESKTOP_SLOTS} />;
 }
-
-export default TeacherWeeklyScheduleViewDesktop;

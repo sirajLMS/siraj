@@ -2,8 +2,6 @@ import { gql, type TypedDocumentNode } from "@apollo/client";
 import type {
   StudentClassHistoryQuery,
   StudentClassHistoryQueryVariables,
-  StudentClassSessionDetailQuery,
-  StudentClassSessionDetailQueryVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 
@@ -42,29 +40,6 @@ export const studentClassHistoryQueryDocument: TypedDocumentNode<
           ...EffectiveMeetingFields
         }
       }
-    }
-  }
-`;
-
-export const studentClassSessionDetailQueryDocument: TypedDocumentNode<
-  StudentClassSessionDetailQuery,
-  StudentClassSessionDetailQueryVariables
-> = gql`
-  ${EFFECTIVE_MEETING_FIELDS}
-  query studentClassSessionDetail($classInstanceId: ID!) {
-    studentClassSessionDetail(classInstanceId: $classInstanceId) {
-      id
-      durationMinutes
-      executionState
-      outcome
-      remarks
-      meetingJoinUrl
-      effectiveMeeting {
-        ...EffectiveMeetingFields
-      }
-      teacherName
-      scheduledStartAt
-      scheduledEndAt
     }
   }
 `;

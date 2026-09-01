@@ -36,7 +36,7 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 
 // ── Slot types ──────────────────────────────────────────────────────────────
 
-export interface MeetingJoinActionSlotProps {
+interface MeetingJoinActionSlotProps {
   /** Primary action component used for the "action" variant (tier-specific). */
   readonly ActionComponent: React.ComponentType<ButtonProps>;
 }

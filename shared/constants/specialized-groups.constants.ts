@@ -1,6 +1,6 @@
 import { SystemPermissionGroupSlug } from "@/shared/constants/permission-group.enum";
 
-export const SPECIALIZED_GROUP_SLUGS = [
+const SPECIALIZED_GROUP_SLUGS = [
   SystemPermissionGroupSlug.STUDENT_DEFAULT,
   SystemPermissionGroupSlug.TEACHER_DEFAULT,
   SystemPermissionGroupSlug.PARENT_DEFAULT,

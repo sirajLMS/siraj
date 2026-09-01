@@ -4,10 +4,6 @@ import type {
   ApproveLessonReportMutationVariables,
   LessonReportByIdQuery,
   LessonReportByIdQueryVariables,
-  LessonReportCountQuery,
-  LessonReportCountQueryVariables,
-  LessonReportQuery,
-  LessonReportQueryVariables,
   PendingLessonReportsQuery,
   PendingLessonReportsQueryVariables,
   RecentApprovedLessonReportsQuery,
@@ -16,45 +12,9 @@ import type {
   RejectLessonReportMutationVariables,
   StudentRecentLessonReportsQuery,
   StudentRecentLessonReportsQueryVariables,
-  SubmitLessonReportMutation,
-  SubmitLessonReportMutationVariables,
   SubmitStudentLessonReportReflectionMutation,
   SubmitStudentLessonReportReflectionMutationVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-
-export const lessonReportQueryDocument: TypedDocumentNode<LessonReportQuery, LessonReportQueryVariables> = gql`
-  query LessonReport($classInstanceId: ID!) {
-    lessonReport(classInstanceId: $classInstanceId) {
-      id
-      classInstanceId
-      studentId
-      teacherId
-      teacherName
-      studentName
-      subjectName
-      classAvatarUrl
-      teacherAvatarUrl
-      studentAvatarUrl
-      teacherUserId
-      studentUserId
-      lessonDate
-      durationMinutes
-      attendanceEvaluation
-      teacherNotes
-      studentNotes
-      completionPercentage
-      status
-      submittedByUserId
-      submittedAt
-      reviewedByUserId
-      reviewedAt
-      rejectionReason
-      idempotencyKey
-      createdAt
-      updatedAt
-    }
-  }
-`;
 
 export const lessonReportByIdQueryDocument: TypedDocumentNode<LessonReportByIdQuery, LessonReportByIdQueryVariables> =
   gql`
@@ -207,54 +167,6 @@ export const studentRecentLessonReportsQueryDocument: TypedDocumentNode<
         createdAt
         updatedAt
       }
-    }
-  }
-`;
-
-export const lessonReportCountQueryDocument: TypedDocumentNode<
-  LessonReportCountQuery,
-  LessonReportCountQueryVariables
-> = gql`
-  query LessonReportCount($teacherId: ID, $studentId: ID) {
-    lessonReportCount(teacherId: $teacherId, studentId: $studentId) {
-      pendingCount
-    }
-  }
-`;
-
-export const submitLessonReportMutationDocument: TypedDocumentNode<
-  SubmitLessonReportMutation,
-  SubmitLessonReportMutationVariables
-> = gql`
-  mutation SubmitLessonReport($classInstanceId: ID!, $input: LessonReportSubmitInput!) {
-    submitLessonReport(classInstanceId: $classInstanceId, input: $input) {
-      id
-      classInstanceId
-      studentId
-      teacherId
-      teacherName
-      studentName
-      subjectName
-      classAvatarUrl
-      teacherAvatarUrl
-      studentAvatarUrl
-      teacherUserId
-      studentUserId
-      lessonDate
-      durationMinutes
-      attendanceEvaluation
-      teacherNotes
-      studentNotes
-      completionPercentage
-      status
-      submittedByUserId
-      submittedAt
-      reviewedByUserId
-      reviewedAt
-      rejectionReason
-      idempotencyKey
-      createdAt
-      updatedAt
     }
   }
 `;

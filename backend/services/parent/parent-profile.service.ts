@@ -17,13 +17,6 @@ import type {
 import { parseStudentStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
-export type {
-  AssociatedStudentResult,
-  DeactivateParentResult,
-  ParentProfileResult,
-  ReactivateParentResult,
-} from "@/backend/types";
-
 type ParentProfileRepoResult = NonNullable<Awaited<ReturnType<typeof ParentRepository.getParentProfile>>>;
 
 async function toParentProfileResult(profile: ParentProfileRepoResult, locale?: string): Promise<ParentProfileResult> {

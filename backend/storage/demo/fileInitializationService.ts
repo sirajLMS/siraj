@@ -7,7 +7,7 @@ import { getStorageService } from "@/backend/storage/storage.service";
 import type { FileOperationResult, FileUploadResult, FolderCreateInput } from "@/backend/types";
 import { extToMime } from "@/shared/utils/storage.utils";
 
-export interface FileSeedInput {
+interface FileSeedInput {
   /**
    * The destination path in the storage bucket (e.g. "public/docs/handbook.pdf")
    */
@@ -39,7 +39,7 @@ export interface IFileSeedingService {
   seedFiles(inputs: FileSeedInput[]): Promise<FileUploadResult[]>;
 }
 
-export class FileSeedingService implements IFileSeedingService {
+class FileSeedingService implements IFileSeedingService {
   private readonly storageService: StorageService;
 
   constructor(storageService: StorageService) {

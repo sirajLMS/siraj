@@ -72,5 +72,3 @@ export function ParentSuggestionsContainer() {
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { ParentSuggestionsViewModel, UseParentSuggestionsViewModelProps };

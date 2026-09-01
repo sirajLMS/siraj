@@ -4,14 +4,14 @@ import { ArchiveOutlined } from "@mui/icons-material";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
 import type { UsePackagePlanFormViewModel } from "@/frontend/common/views/dashboard/accounting/usePackagePlanFormViewModel";
 
-export interface PackagePlanArchiveDialogLabels {
+interface PackagePlanArchiveDialogLabels {
   readonly title: string;
   readonly body: string;
   readonly cancel: string;
   readonly confirm: string;
 }
 
-export interface PackagePlanArchiveDialogSharedProps {
+interface PackagePlanArchiveDialogSharedProps {
   readonly open: boolean;
   readonly onClose: () => void;
   readonly onConfirm: () => void;
@@ -20,7 +20,7 @@ export interface PackagePlanArchiveDialogSharedProps {
 }
 
 /** Confirmation dialog for archiving a package plan; shared across viewport tiers. */
-export function PackagePlanArchiveDialogShared({
+function PackagePlanArchiveDialogShared({
   open,
   onClose,
   onConfirm,

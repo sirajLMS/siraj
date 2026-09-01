@@ -28,7 +28,7 @@ export interface StudentProfileSharedOptions {
   renderLoading: (message: string) => ReactNode;
 }
 
-export function StudentOwnProfileShared({
+function StudentOwnProfileShared({
   profile,
   labels,
   formattedDateOfBirth,

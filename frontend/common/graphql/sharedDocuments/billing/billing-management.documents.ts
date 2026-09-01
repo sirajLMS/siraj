@@ -6,8 +6,6 @@ import type {
   CreateManualInvoiceMutationVariables,
   DeleteInvoiceMutation,
   DeleteInvoiceMutationVariables,
-  InvoicePaymentSubmissionQuery,
-  InvoicePaymentSubmissionQueryVariables,
   MarkInvoicePaidMutation,
   MarkInvoicePaidMutationVariables,
   RejectPaymentProofMutation,
@@ -134,27 +132,6 @@ export const rejectPaymentProofMutationDocument: TypedDocumentNode<
       paidDate
       version
       notificationSummaryUpdated
-    }
-  }
-`;
-
-export const invoicePaymentSubmissionQueryDocument: TypedDocumentNode<
-  InvoicePaymentSubmissionQuery,
-  InvoicePaymentSubmissionQueryVariables
-> = gql`
-  query InvoicePaymentSubmission($invoiceId: String!) {
-    invoicePaymentSubmission(invoiceId: $invoiceId) {
-      id
-      invoiceId
-      fileId
-      filePath
-      mimeType
-      status
-      submittedByUserId
-      submittedAt
-      reviewedByUserId
-      reviewedAt
-      rejectionReason
     }
   }
 `;

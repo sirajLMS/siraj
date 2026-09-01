@@ -1,14 +1,5 @@
-import type { SvgIconComponent } from "@mui/icons-material";
 import type { SxProps } from "@mui/material";
 import type { ElementType } from "react";
-
-export interface MetricCardIconWrapProps {
-  readonly icon: SvgIconComponent;
-  readonly iconSize: number;
-  readonly iconFontSize: number;
-  readonly isError: boolean;
-  readonly isHighlight: boolean;
-}
 
 export interface MetricCardMotionWrapperProps {
   readonly isHighlight: boolean;

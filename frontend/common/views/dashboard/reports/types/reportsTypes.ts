@@ -5,11 +5,6 @@ export type ReportType = "by_teacher" | "by_student" | "by_date";
 
 export type LedgerStatus = "active" | "on_break";
 
-export interface ReportTeacherOption {
-  readonly id: string;
-  readonly name: string;
-}
-
 export interface ReportPaidAmount {
   readonly id: string;
   readonly amount: string;
@@ -50,11 +45,4 @@ export interface ReportsSummary {
   readonly engagementGrowth: number | null;
   readonly currencyDistribution: readonly CurrencyDistributionSlice[];
   readonly totalHours: string;
-}
-
-export interface ReportFilters {
-  readonly fromDate: string;
-  readonly toDate: string;
-  readonly teacherId: string;
-  readonly reportType: ReportType;
 }

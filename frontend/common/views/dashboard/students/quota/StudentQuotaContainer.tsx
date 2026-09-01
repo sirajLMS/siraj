@@ -49,4 +49,4 @@ export function StudentQuotaView(props: Readonly<UseStudentQuotaViewModelProps>)
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { StudentQuotaViewModel, UseStudentQuotaViewModelProps };
+export type { UseStudentQuotaViewModelProps };

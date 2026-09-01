@@ -23,7 +23,7 @@ export type StudentDirectoryRowExtended = Readonly<StudentDirectoryRowFragment> 
   readonly isDeactivated?: boolean;
 };
 
-/** Shared directory labels reused by both {@link StudentsViewLabels} and {@link StudentDirectoryDataGridLabels}. */
+/** Shared directory labels reused by {@link StudentDirectoryDataGridLabels}. */
 interface StudentDirectorySharedLabels {
   readonly index: string;
   readonly student: string;
@@ -39,19 +39,6 @@ interface StudentDirectorySharedLabels {
   readonly viewHistory: string;
   readonly noEntries: string;
   readonly statusLabels: Record<StudentAccountStatus, string>;
-}
-
-export interface StudentsViewLabels extends StudentDirectorySharedLabels {
-  readonly pageTitle: string;
-  readonly pageSubtitle: string;
-  readonly mobileTitle: string;
-  readonly searchPlaceholder: string;
-  readonly addStudent: string;
-  readonly filters: string;
-  readonly globalRecord: string;
-  readonly weeklyHours: string;
-  readonly enrollmentStatus: string;
-  readonly enrollmentLabels: Record<StudentEnrollmentStatus, string>;
 }
 
 export type StudentDirectoryDataGridLabels = StudentDirectorySharedLabels;

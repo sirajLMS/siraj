@@ -915,7 +915,7 @@ function hasItemPermission(item: NavItem, permissions: readonly AppPermission[])
  * by [`skipSuperAdminKeysForSupervisorItems`] below because the admin `home`
  * item already serves `/dashboard` for them (user decision: consolidate).
  */
-export function isSuperAdminNavUser(permissions: readonly AppPermission[]): boolean {
+function isSuperAdminNavUser(permissions: readonly AppPermission[]): boolean {
   return permissions.includes(AppPermission.PermissionGroupsManage);
 }
 
@@ -1096,7 +1096,7 @@ function isParentPortalUser(permissions: readonly AppPermission[]): boolean {
   );
 }
 
-export function applyParentNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
+function applyParentNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
   if (!isParentPortalUser(permissions)) {
     return [...items];
   }
@@ -1120,7 +1120,7 @@ function isTeacherPortalUser(permissions: readonly AppPermission[]): boolean {
   );
 }
 
-export function applyTeacherNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
+function applyTeacherNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
   if (!isTeacherPortalUser(permissions)) {
     return [...items];
   }
@@ -1141,7 +1141,7 @@ function isStudentPortalUser(permissions: readonly AppPermission[]): boolean {
   );
 }
 
-export function applyStudentNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
+function applyStudentNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
   if (!isStudentPortalUser(permissions)) {
     return [...items];
   }
@@ -1157,10 +1157,7 @@ function isSupervisorPortalUser(permissions: readonly AppPermission[]): boolean 
   );
 }
 
-export function applySupervisorNavOverrides(
-  items: readonly NavItem[],
-  permissions: readonly AppPermission[]
-): NavItem[] {
+function applySupervisorNavOverrides(items: readonly NavItem[], permissions: readonly AppPermission[]): NavItem[] {
   if (!isSupervisorPortalUser(permissions)) {
     return [...items];
   }

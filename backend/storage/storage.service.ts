@@ -87,30 +87,3 @@ export const getStorageService = async (): Promise<StorageService> => {
 
   return initializationPromise;
 };
-
-/**
- * Get storage service synchronously (throws if not initialized)
- * Use this only when you're certain the service has been initialized
- */
-export const getStorageServiceSync = (): StorageService => {
-  if (!instance) {
-    throw new Error("Storage service not initialized. Call getStorageService() first.");
-  }
-  return instance;
-};
-
-/**
- * Initialize storage service (optional, useful for app startup)
- * The service will be automatically initialized on first use if not called explicitly
- */
-export const initializeStorageService = async (): Promise<StorageService> => {
-  return await getStorageService();
-};
-
-/**
- * Reset the singleton instance (useful for testing)
- */
-export const resetStorageService = (): void => {
-  instance = null;
-  initializationPromise = null;
-};

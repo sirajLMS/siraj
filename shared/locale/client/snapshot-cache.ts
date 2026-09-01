@@ -40,7 +40,7 @@ function getDb(): Promise<IDBDatabase | null> {
   return dbPromise;
 }
 
-export function reviver(_key: string, val: unknown): unknown {
+function reviver(_key: string, val: unknown): unknown {
   // Security: forbid function resurrection from IndexedDB payloads.
   // A tampered IndexedDB (XSS, devtools, third-party script) could inject
   // arbitrary code via the __fn property. Functions must only ever live in
@@ -180,8 +180,4 @@ export async function wipeIfBuildIdChanged(buildId: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-export function getLocaleCacheStats(): { hits: number; misses: number; size: number } {
-  return { ...stats };
 }

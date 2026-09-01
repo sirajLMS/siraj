@@ -10,7 +10,7 @@ const CLASS_TYPE_MAPPING: Record<string, ClassType> = {
   ADVANCE: ClassType.Advance,
 };
 
-export function isValidSchedulingMode(v: string): v is SchedulingMode {
+function isValidSchedulingMode(v: string): v is SchedulingMode {
   return (
     v === SchedulingMode.NumberOfClasses.toString() ||
     v === SchedulingMode.OnDemand.toString() ||

@@ -4,8 +4,6 @@ import type { ReactNode } from "react";
 import { StatusBadgeShared } from "@/frontend/common/components/ui/badge/StatusBadgeShared";
 import type { StatusBadgeCategory } from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
 
-export type { StatusBadgeCategory };
-
 export interface DesktopStatusBadgeProps {
   readonly category: StatusBadgeCategory;
   readonly status: string;

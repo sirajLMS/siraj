@@ -156,27 +156,6 @@ export namespace TeacherNotesRepository {
     }
   }
 
-  export async function listAllNotes(
-    teacherId?: string,
-    tx?: DBTransaction
-  ): Promise<TeacherImportantNoteSelectType[]> {
-    try {
-      const client = queryDb(tx);
-      const conditions = [isNull(teacherImportantNotes.deletedAt)];
-      if (teacherId) {
-        conditions.push(eq(teacherImportantNotes.teacherId, teacherId));
-      }
-      return await client
-        .select()
-        .from(teacherImportantNotes)
-        .where(and(...conditions))
-        .orderBy(desc(teacherImportantNotes.priority));
-    } catch (error) {
-      logger.error("Error listing all teacher notes:", error);
-      throw error;
-    }
-  }
-
   export async function findByTitles(
     titles: readonly string[],
     tx?: DBTransaction

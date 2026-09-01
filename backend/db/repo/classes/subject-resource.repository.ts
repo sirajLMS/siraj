@@ -45,26 +45,6 @@ async function runInTx<T>(tx: DBTransaction | undefined, fn: (t: DBTransaction) 
 }
 
 export namespace SubjectResourceRepository {
-  export async function listResourcesForSubject(
-    subjectId: string,
-    tx?: DBTransaction
-  ): Promise<SubjectResourceReturnType[]> {
-    try {
-      const client = queryDb(tx);
-      const rows = await client
-        .select(resourceSelectColumns)
-        .from(subjectResources)
-        .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
-        .where(eq(subjectResources.subjectId, subjectId))
-        .orderBy(asc(subjectResources.sortOrder));
-
-      return rows.map(mapRowToReturnType);
-    } catch (error) {
-      logger.error(`Error listing resources for subject ${subjectId}:`, error);
-      throw error;
-    }
-  }
-
   export async function loadResourcesBySubjectIds(
     subjectIds: string[],
     tx?: DBTransaction
@@ -167,35 +147,6 @@ export namespace SubjectResourceRepository {
       });
     } catch (error) {
       logger.error(`Error detaching resource from subject ${subjectId}:`, error);
-      throw error;
-    }
-  }
-
-  export async function reorderResource(
-    id: string,
-    sortOrder: number,
-    locale?: string,
-    tx?: DBTransaction
-  ): Promise<{ id: string; sortOrder: number }> {
-    try {
-      return await runInTx(tx, async t => {
-        const [updated] = await t
-          .update(subjectResources)
-          .set({ sortOrder })
-          .where(eq(subjectResources.id, id))
-          .returning({ id: subjectResources.id, sortOrder: subjectResources.sortOrder });
-
-        if (!updated) {
-          const { subjectResource } = getServerTranslations(locale ?? "en").errorsTranslations;
-          throw new Error(subjectResource.notFound);
-        }
-
-        logger.info("Resource reordered", { subjectResourceId: id, sortOrder });
-
-        return updated;
-      });
-    } catch (error) {
-      logger.error(`Error reordering resource ${id}:`, error);
       throw error;
     }
   }

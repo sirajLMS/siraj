@@ -11,7 +11,7 @@ import type {
   TeacherAvailabilityGridProps,
 } from "@/frontend/common/views/dashboard/search-schedule/types";
 
-export interface TeacherAvailabilityGridSlotProps {
+interface TeacherAvailabilityGridSlotProps {
   /** Tier-specific DayPill component (desktop or mobile). */
   readonly DayPillComponent: React.FC<Readonly<TeacherAvailabilityDayPillProps>>;
   /** Extra Paper sx merged onto card shell (mobile uses edgeToEdgeCardShellSx). */

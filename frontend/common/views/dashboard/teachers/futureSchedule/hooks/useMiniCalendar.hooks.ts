@@ -6,8 +6,8 @@
 // declarations in tier), and §5 (custom hooks live in
 // `frontend/common/views/dashboard/<domain>/hooks/`).
 //
-// Both tier files now import `useViewingMonth`, `getCalendarGrid`, and the
-// `MINI_CALENDAR_WEEKDAYS` constant from here — no state, no `useX` decls,
+// Both tier files now import `useViewingMonth` and `getCalendarGrid`
+// from here — no state, no `useX` decls,
 // and no lowercase pure-data helpers remain in either tier file.
 
 import { useState } from "react";
@@ -81,16 +81,3 @@ export function getCalendarGrid(
 
   return dates;
 }
-
-// NEW FOR PLAN v5: MINI_CALENDAR_WEEKDAYS — the previously inline `DAYS`
-// constant (7-entry weekday header helper) lifted to a common constant file
-// per specs.md §3 N5 (Record/E,K label-maps live in common).
-export const MINI_CALENDAR_WEEKDAYS = [
-  { id: "sun", label: "S" },
-  { id: "mon", label: "M" },
-  { id: "tue", label: "T" },
-  { id: "wed", label: "W" },
-  { id: "thu", label: "T" },
-  { id: "fri", label: "F" },
-  { id: "sat", label: "S" },
-] as const;

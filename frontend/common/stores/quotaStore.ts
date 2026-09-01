@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { QuotaKind, type QuotaStatus, type QuotaSubmitInput } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export type QuotaFormState = Pick<
+type QuotaFormState = Pick<
   QuotaSubmitInput,
   "studentId" | "kind" | "name" | "totalClasses" | "validFrom" | "validUntil" | "periodType" | "periodDays" | "priority"
 >;

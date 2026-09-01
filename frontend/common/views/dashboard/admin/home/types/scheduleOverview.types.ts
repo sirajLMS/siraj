@@ -3,12 +3,12 @@ import type {
   ScheduleOverviewDataStatusLabels,
 } from "@/frontend/common/views/dashboard/types/dashboard";
 
-export interface ScheduleOverviewShellLabels {
+interface ScheduleOverviewShellLabels {
   readonly title: string;
   readonly emptyMessage: string;
 }
 
-export interface ScheduleOverviewFilterLabels {
+interface ScheduleOverviewFilterLabels {
   readonly searchPlaceholder: string;
   readonly dateLabel: string;
   readonly teacherPlaceholder: string;
@@ -17,7 +17,7 @@ export interface ScheduleOverviewFilterLabels {
   readonly nextDayLabel: string;
 }
 
-export interface ScheduleOverviewActionLabels {
+interface ScheduleOverviewActionLabels {
   readonly detailsLabel: string;
 }
 

@@ -1,7 +1,5 @@
 import type {
   WhatsappAccountFieldsFragment,
-  WhatsappLimitTier,
-  WhatsappQualityRating,
   WhatsappTemplateSnapshotFieldsFragment,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
@@ -49,55 +47,10 @@ export interface WhatsappOptInUserState {
 }
 
 /**
- * Form values for the WhatsApp account API settings form.
+ * Form values for the create-account form.
  *
- * This type intentionally diverges from the generated `WhatsappAccountCreateInput`/
- * `WhatsappAccountUpdateInput` types because:
- * - Form fields are non-null (required in the form), while GraphQL uses InputMaybe
- * - The form uses flat `string` for displayName, while GraphQL uses a localized shape
- *
- * When adding/removing fields from the GraphQL input types, update this type AND
- * the form rendering logic in the settings views.
- *
- * Fields that map directly to the `WhatsappAccountCreateInput` / `WhatsappAccountUpdateInput`
- * GraphQL inputs. These are the only values sent to the API on create/update.
- */
-export interface WhatsappAccountApiFormValues {
-  readonly wabaId: string;
-  readonly phoneNumberId: string;
-  readonly displayPhoneNumber: string;
-  readonly displayName: string;
-  readonly isActive: boolean;
-  readonly portfolioMessagingLimitTier: WhatsappLimitTier | null;
-  readonly qualityRating: WhatsappQualityRating | null;
-  readonly throughputLevel: string;
-}
-
-/**
- * Credential fields that are form-only — they are NOT part of the create/update
- * GraphQL inputs. Instead, `accessToken` and `twoStepPin` are sent via dedicated
- * `setWhatsappAccessToken` / `setWhatsappTwoStepPin` mutations.
- */
-export interface WhatsappAccountCredentialFormValues {
-  readonly accessToken: string;
-  readonly twoStepPin: string;
-}
-
-/**
- * Complete form values for creating / editing a WhatsApp account.
- *
- * Combines API-sent fields with form-only credential fields. Consumers that
- * build GraphQL mutation payloads should pick from `WhatsappAccountApiFormValues`
- * only; credential values go through dedicated mutations.
- */
-export type WhatsappAccountFormValues = WhatsappAccountApiFormValues & WhatsappAccountCredentialFormValues;
-
-/**
- * Form values for the create-account form (Task 2 — activated).
- *
- * Narrower than `WhatsappAccountApiFormValues` because the create form only
- * collects three fields. The remaining API fields are populated server-side
- * or via the Meta sync flow.
+ * The create form only collects three fields; the remaining account fields
+ * are populated server-side or via the Meta sync flow.
  */
 export interface AccountCreateFormValues {
   readonly displayName: string;
@@ -125,16 +78,8 @@ export interface AccountCredentialFormValues {
   readonly twoStepPin: string;
 }
 
-/** Snackbar feedback state. */
-export interface WhatsappSnackbarState {
-  readonly open: boolean;
-  readonly message: string;
-  readonly severity: "success" | "error";
-}
-
 /**
  * New snackbar pattern: `null` when closed, `{ message, severity }` when open.
- * Task 7 will wire `FormSuccessSnackbar`/`FormErrorSnackbar` to this shape.
  */
 export type WhatsappSnackbar = { readonly message: string; readonly severity: "success" | "error" } | null;
 

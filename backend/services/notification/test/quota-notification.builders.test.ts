@@ -84,86 +84,89 @@ describe("buildQuotaExpiredPayloads", () => {
 describe("Other quota & on-demand builders", () => {
   const USER_1 = "00000000-0000-0000-0000-000000000001";
 
-  test("buildQuotaExpiringSoonPayloads builds expected payloads", () => {
-    const result = buildQuotaExpiringSoonPayloads({
-      affectedUserIds: [USER_1],
-      quotaName: "Gold Quota",
-      validUntil: "2026-12-31",
-      remaining: 2,
-    });
+  test.each([
+    {
+      name: "buildQuotaExpiringSoonPayloads",
+      call: () =>
+        buildQuotaExpiringSoonPayloads({
+          affectedUserIds: [USER_1],
+          quotaName: "Gold Quota",
+          validUntil: "2026-12-31",
+          remaining: 2,
+        }),
+      eventType: NotificationEventType.QUOTA_EXPIRING_SOON,
+      bodyContains: "Gold Quota",
+      expectedMetadata: {
+        category: NotificationEventCategory.REMINDER,
+        quotaName: "Gold Quota",
+        validUntil: "2026-12-31",
+        remaining: 2,
+      },
+    },
+    {
+      name: "buildQuotaLowBalancePayloads",
+      call: () =>
+        buildQuotaLowBalancePayloads({
+          affectedUserIds: [USER_1],
+          studentName: "John Doe",
+          remaining: 1,
+          totalClasses: 10,
+        }),
+      eventType: NotificationEventType.QUOTA_LOW_BALANCE,
+      bodyContains: "John Doe",
+      expectedMetadata: {
+        category: NotificationEventCategory.REMINDER,
+        studentName: "John Doe",
+        remaining: 1,
+        totalClasses: 10,
+      },
+    },
+  ])("$name builds expected payloads", ({ call, eventType, bodyContains, expectedMetadata }) => {
+    const result = call();
 
     expect(result).toHaveLength(4);
-    expect(result[0].eventType).toBe(NotificationEventType.QUOTA_EXPIRING_SOON);
-    expect(result[0].body).toContain("Gold Quota");
-    expect(result[0].metadata).toMatchObject({
-      category: NotificationEventCategory.REMINDER,
-      quotaName: "Gold Quota",
-      validUntil: "2026-12-31",
-      remaining: 2,
-    });
+    expect(result[0].eventType).toBe(eventType);
+    expect(result[0].body).toContain(bodyContains);
+    expect(result[0].metadata).toMatchObject(expectedMetadata);
   });
 
-  test("buildQuotaLowBalancePayloads builds expected payloads", () => {
-    const result = buildQuotaLowBalancePayloads({
-      affectedUserIds: [USER_1],
-      studentName: "John Doe",
-      remaining: 1,
-      totalClasses: 10,
-    });
-
-    expect(result).toHaveLength(4);
-    expect(result[0].eventType).toBe(NotificationEventType.QUOTA_LOW_BALANCE);
-    expect(result[0].body).toContain("John Doe");
-    expect(result[0].metadata).toMatchObject({
-      category: NotificationEventCategory.REMINDER,
-      studentName: "John Doe",
-      remaining: 1,
-      totalClasses: 10,
-    });
-  });
-
-  test("buildOndemandInstancePendingCreditPayloads builds expected payloads", () => {
-    const result = buildOndemandInstancePendingCreditPayloads({
+  test.each([
+    {
+      name: "buildOndemandInstancePendingCreditPayloads",
+      build: buildOndemandInstancePendingCreditPayloads,
+      eventType: NotificationEventType.ON_DEMAND_INSTANCE_PENDING_CREDIT,
+      expectedMetadata: {
+        category: NotificationEventCategory.URGENT,
+        studentName: "Jane Doe",
+        scheduledStartAt: "2026-09-01T10:00:00Z",
+      },
+    },
+    {
+      name: "buildOndemandInstanceReminderT3Payloads",
+      build: buildOndemandInstanceReminderT3Payloads,
+      eventType: NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T3,
+      expectedMetadata: {
+        category: NotificationEventCategory.REMINDER,
+      },
+    },
+    {
+      name: "buildOndemandInstanceReminderT1Payloads",
+      build: buildOndemandInstanceReminderT1Payloads,
+      eventType: NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T1,
+      expectedMetadata: {
+        category: NotificationEventCategory.URGENT,
+      },
+    },
+  ])("$name builds expected payloads", ({ build, eventType, expectedMetadata }) => {
+    const result = build({
       affectedUserIds: [USER_1],
       studentName: "Jane Doe",
       scheduledStartAt: "2026-09-01T10:00:00Z",
     });
 
     expect(result).toHaveLength(4);
-    expect(result[0].eventType).toBe(NotificationEventType.ON_DEMAND_INSTANCE_PENDING_CREDIT);
-    expect(result[0].metadata).toMatchObject({
-      category: NotificationEventCategory.URGENT,
-      studentName: "Jane Doe",
-      scheduledStartAt: "2026-09-01T10:00:00Z",
-    });
-  });
-
-  test("buildOndemandInstanceReminderT3Payloads builds expected payloads", () => {
-    const result = buildOndemandInstanceReminderT3Payloads({
-      affectedUserIds: [USER_1],
-      studentName: "Jane Doe",
-      scheduledStartAt: "2026-09-01T10:00:00Z",
-    });
-
-    expect(result).toHaveLength(4);
-    expect(result[0].eventType).toBe(NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T3);
-    expect(result[0].metadata).toMatchObject({
-      category: NotificationEventCategory.REMINDER,
-    });
-  });
-
-  test("buildOndemandInstanceReminderT1Payloads builds expected payloads", () => {
-    const result = buildOndemandInstanceReminderT1Payloads({
-      affectedUserIds: [USER_1],
-      studentName: "Jane Doe",
-      scheduledStartAt: "2026-09-01T10:00:00Z",
-    });
-
-    expect(result).toHaveLength(4);
-    expect(result[0].eventType).toBe(NotificationEventType.ON_DEMAND_INSTANCE_REMINDER_T1);
-    expect(result[0].metadata).toMatchObject({
-      category: NotificationEventCategory.URGENT,
-    });
+    expect(result[0].eventType).toBe(eventType);
+    expect(result[0].metadata).toMatchObject(expectedMetadata);
   });
 
   test("buildOndemandTeacherDailyDigestPayloads builds expected payloads", () => {

@@ -310,28 +310,6 @@ export namespace QuotaService {
     };
   };
 
-  /**
-   * Recompute a single quota's live balance directly from the immutable
-   * `quota_ledger` rows (the single source of truth for quota mutations).
-   * Delegates to {@link QuotaLedgerRepository.computeBalance} so the service
-   * layer never reads ledger rows directly — keeping the ledger repo the
-   * sole reader of its own schema (mirrors the single-writer invariant).
-   *
-   * Permission check is intentionally shared with `getStudentQuotaBalance`
-   * via the caller; this low-level computation is invoked from internal flows
-   * (sweepers, reconcilers) that already hold an admin context, so it does not
-   * re-run `requirePermission`. Callers exposing this to end users must scope
-   * the result by `assertAssociatedOrManage` first.
-   *
-   * @returns The ledger-derived `{ remaining, reservedClasses }` for the quota.
-   */
-  export const computeBalance = async (
-    quotaId: string,
-    tx?: ReadExecutor
-  ): Promise<{ remaining: number; reservedClasses: number }> => {
-    return QuotaLedgerRepository.computeBalance(tx ?? db, quotaId);
-  };
-
   export const updateQuota = async (
     id: string,
     input: QuotaUpdateInput,
@@ -543,29 +521,6 @@ export namespace QuotaService {
     }
   };
 
-  export const releaseForInstances = async (
-    studentId: string,
-    classInstanceIds: string[],
-    quotaId: string,
-    recurringScheduleId: string,
-    actorUserId: string | null | undefined,
-    tx: DBTransaction
-  ): Promise<{ releasedCount: number; quota: QuotaReturnType | null }> => {
-    return runInTx(tx, async t => {
-      const result = await QuotaRepository.releaseForInstanceBatch(t, {
-        quotaId,
-        studentId,
-        recurringScheduleId,
-        instanceIds: classInstanceIds,
-        actorUserId,
-      });
-      return {
-        releasedCount: result.releasedCount,
-        quota: result.quota ? mapQuotaToReturnType(result.quota) : null,
-      };
-    });
-  };
-
   export const expireOverdueQuotas = async (tx?: DBTransaction): Promise<QuotaReturnType[]> => {
     return runInTx(tx, async t => (await QuotaRepository.expireOverdue(t)).map(mapQuotaToReturnType));
   };
@@ -642,23 +597,6 @@ export namespace QuotaService {
 
       logger.info({ studentId, flippedCount }, "Refreshed student on-demand instances");
       return flippedCount;
-    });
-  };
-
-  /**
-   * Seed-only bootstrap method: atomically checks if any quotas already exist
-   * and creates a demo quota if none are found, all within a single transaction.
-   * This eliminates the race condition in the seeder's check-then-create pattern.
-   * Permission checks are intentionally omitted — this runs in trusted seed context.
-   */
-  export const seedOrGetQuota = async (input: QuotaSubmitInput): Promise<QuotaReturnType[]> => {
-    return db.transaction(async t => {
-      const res = await QuotaRepository.listAllPaginated(t, null, null);
-      if (res.rows.length > 0) {
-        return res.rows.map(mapQuotaToReturnType);
-      }
-      const created = await QuotaRepository.create(t, { ...input });
-      return [mapQuotaToReturnType(created)];
     });
   };
 

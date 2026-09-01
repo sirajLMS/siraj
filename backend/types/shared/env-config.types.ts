@@ -30,7 +30,7 @@ export type EnvConfigCategory =
   | "general";
 
 /** How a resolved value should be presented in the UI. */
-export type EnvConfigDisplayStrategy = "plain" | "db_with_mask_only";
+type EnvConfigDisplayStrategy = "plain" | "db_with_mask_only";
 
 /**
  * A single env-config row as returned by the resolver and consumed by

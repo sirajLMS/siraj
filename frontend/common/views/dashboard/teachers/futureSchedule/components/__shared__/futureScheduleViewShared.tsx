@@ -22,7 +22,7 @@ export interface FutureClassListWrapperProps {
   readonly renderItem: (item: FutureClassItem) => ReactNode;
 }
 
-export interface FutureScheduleViewSharedSlots {
+interface FutureScheduleViewSharedSlots {
   readonly PageContainer: ComponentType<{ readonly children: ReactNode }>;
   readonly PageHeader: ComponentType<{ readonly title: string }>;
   readonly JumpToDateHeader: ComponentType<Readonly<JumpToDateHeaderProps>>;
@@ -46,7 +46,7 @@ export interface FutureScheduleViewSharedSlots {
   }>;
 }
 
-export interface FutureScheduleViewSharedOptions {
+interface FutureScheduleViewSharedOptions {
   readonly mainGridSize: Record<string, number>;
   readonly sidebarGridSize: Record<string, number>;
   readonly legendSecondColorLabel: "regular" | "reScheduled";

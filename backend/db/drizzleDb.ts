@@ -11,8 +11,6 @@ const DB_KEY = Symbol.for("siraj.db");
 const DB_POOL_KEY = Symbol.for("siraj.dbPool");
 const HTTP_DB_KEY = Symbol.for("siraj.httpDb");
 
-export const drizzleLogs: string[] = [];
-
 function initDatabase() {
   ensureEnvironmentValidated();
 

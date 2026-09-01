@@ -13,7 +13,7 @@ import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingPayments } from "@/shared/locale/namespaces";
 import type { PaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments";
 
-export type AccountingPaymentDetail = NonNullable<AccountingPaymentQuery["accountingPayment"]>;
+type AccountingPaymentDetail = NonNullable<AccountingPaymentQuery["accountingPayment"]>;
 
 export interface PaymentDetailViewModel {
   readonly t: PaymentsLabels;

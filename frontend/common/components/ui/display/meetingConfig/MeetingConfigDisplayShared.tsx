@@ -19,7 +19,7 @@ import type { LocalizedString } from "@/shared/types";
 
 // ── Slot types ──────────────────────────────────────────────────────────────
 
-export interface ProviderNameDisplayProps {
+interface ProviderNameDisplayProps {
   readonly value: LocalizedString | null | undefined;
   readonly typographyVariant?: UiTypographyVariant;
   readonly sx?: SxProps<Theme>;
@@ -46,7 +46,7 @@ export interface MeetingConfigDisplaySharedOptions {
   readonly providerTypographyVariant?: UiTypographyVariantLoose;
 }
 
-export interface MeetingConfigDisplaySharedSlots {
+interface MeetingConfigDisplaySharedSlots {
   /** Tier-specific provider-name display component (optional; falls back to inline Typography). */
   readonly ProviderNameDisplay?: React.ComponentType<ProviderNameDisplayProps>;
   /** Tier-specific provider-name display typography variant (default "bodyMd"; mobile uses "bodyMd"). */

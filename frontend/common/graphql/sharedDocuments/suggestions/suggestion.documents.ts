@@ -10,8 +10,6 @@ import type {
   MarkSuggestionReviewedMutationVariables,
   RespondToSuggestionMutation,
   RespondToSuggestionMutationVariables,
-  SearchSuggestionsQuery,
-  SearchSuggestionsQueryVariables,
   SubmitSuggestionMutation,
   SubmitSuggestionMutationVariables,
   SuggestionContributorStatsQuery,
@@ -49,24 +47,6 @@ export const adminSuggestionsQueryDocument: TypedDocumentNode<AdminSuggestionsQu
         avgResponseTime
         totalCount
       }
-    }
-  }
-`;
-
-// ─── Query: searchSuggestions ──────────────────────────────────────────────
-
-export const searchSuggestionsQueryDocument: TypedDocumentNode<
-  SearchSuggestionsQuery,
-  SearchSuggestionsQueryVariables
-> = gql`
-  query SearchSuggestions($query: String!, $excludeId: String!) {
-    searchSuggestions(query: $query, excludeId: $excludeId) {
-      id
-      submitterName
-      body
-      status
-      parentName
-      createdAt
     }
   }
 `;

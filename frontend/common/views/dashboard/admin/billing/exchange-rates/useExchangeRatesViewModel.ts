@@ -36,7 +36,7 @@ export type ExchangeRatesSyncRun = {
   readonly errorMessage?: string | null;
 };
 
-export type ExchangeRatesSnackbarState = {
+type ExchangeRatesSnackbarState = {
   readonly open: boolean;
   readonly message: string;
   readonly severity: "success" | "error";

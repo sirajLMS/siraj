@@ -228,21 +228,6 @@ export namespace PaymentMethodService {
     return buildMaskedPaymentMethods(rows, revealSensitive);
   }
 
-  export async function getUserPaymentMethodDefaults(
-    actorUserId: string,
-    userId: string,
-    _locale?: string
-  ): Promise<PaymentMethodDefaults> {
-    const revealSensitive = actorUserId === userId || (await hasAdminPaymentAccess(actorUserId));
-    const payinDefault = await UserPaymentMethodRepository.findDefaultForSlot(userId, "PAYIN");
-    const payoutDefault = await UserPaymentMethodRepository.findDefaultForSlot(userId, "PAYOUT");
-
-    return {
-      payinDefault: payinDefault ? buildMaskedPaymentMethod(payinDefault, revealSensitive) : null,
-      payoutDefault: payoutDefault ? buildMaskedPaymentMethod(payoutDefault, revealSensitive) : null,
-    };
-  }
-
   export async function getDefaultsForProfile(
     actorUserId: string,
     targetUserId: string,
@@ -548,13 +533,6 @@ export namespace PaymentMethodService {
     );
 
     return buildMaskedPaymentMethod(created, true);
-  }
-
-  export async function createInitialMethodForUser(
-    input: UserPaymentMethodSubmitInput,
-    tx: DBTransaction
-  ): Promise<UserPaymentMethodReturnType> {
-    return createUserPaymentMethodInternal(input, tx);
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────

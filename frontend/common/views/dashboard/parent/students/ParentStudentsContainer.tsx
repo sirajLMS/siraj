@@ -8,7 +8,7 @@ import {
   useParentStudentsViewModel,
 } from "@/frontend/common/views/dashboard/parent/students/useParentStudentsViewModel";
 
-export type { ParentStudentsViewModel, UseParentStudentsViewModelProps };
+export type { UseParentStudentsViewModelProps };
 
 const lazyViews = createLazyView<ParentStudentsViewModel>(
   () =>

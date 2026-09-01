@@ -11,7 +11,7 @@ import type { LocalizedString } from "@/shared/types";
 // Session snapshot (frozen on class_instances at booking)
 // ============================================================================
 
-export type MeetingProviderCatalogSnapshot = {
+type MeetingProviderCatalogSnapshot = {
   readonly catalogId: string;
   readonly catalogSlug: string;
   readonly catalogName: LocalizedString;

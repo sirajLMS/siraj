@@ -64,7 +64,7 @@ export namespace CreditRepository {
   };
 
   /** Single source of truth for both balance views (avoids query duplication). */
-  export const getStudentQuotaBalances = async (
+  const getStudentQuotaBalances = async (
     tx?: ReadExecutor,
     studentId?: string
   ): Promise<{

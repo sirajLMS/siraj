@@ -8,7 +8,6 @@ export * from "./communication";
 export * from "./complaints";
 export * from "./cron";
 export * from "./db.types";
-export * from "./fx";
 export * from "./meeting";
 export * from "./notifications";
 export * from "./parents";

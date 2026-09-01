@@ -1,7 +1,5 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type {
-  DeleteSystemSettingMutation,
-  DeleteSystemSettingMutationVariables,
   SystemSettingQuery,
   SystemSettingQueryVariables,
   SystemSettingsQuery,
@@ -49,14 +47,5 @@ export const upsertSystemSettingMutationDocument: TypedDocumentNode<
     upsertSystemSetting(input: $input) {
       ...SystemSettingFields
     }
-  }
-`;
-
-export const deleteSystemSettingMutationDocument: TypedDocumentNode<
-  DeleteSystemSettingMutation,
-  DeleteSystemSettingMutationVariables
-> = gql`
-  mutation deleteSystemSetting($key: String!) {
-    deleteSystemSetting(key: $key)
   }
 `;

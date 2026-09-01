@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 import { alpha, type SxProps, type Theme } from "@mui/material/styles";
 import type { SystemStyleObject } from "@mui/system";
 
-export type OverrideCountPillVariant = "grant" | "revoke";
+type OverrideCountPillVariant = "grant" | "revoke";
 
 export interface OverrideCountPillSharedProps {
   readonly count: number;

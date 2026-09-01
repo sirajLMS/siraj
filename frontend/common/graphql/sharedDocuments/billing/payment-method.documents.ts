@@ -1,11 +1,5 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type {
-  CreateSupportedMobileWalletMutation,
-  CreateSupportedMobileWalletMutationVariables,
-  CreateSupportedOnlineAccountMutation,
-  CreateSupportedOnlineAccountMutationVariables,
-  CreateSupportedPaymentLinkMutation,
-  CreateSupportedPaymentLinkMutationVariables,
   CreateUserPaymentMethodMutation,
   CreateUserPaymentMethodMutationVariables,
   DeactivateSupportedMobileWalletMutation,
@@ -24,12 +18,6 @@ import type {
   SupportedOnlineAccountsQueryVariables,
   SupportedPaymentLinksQuery,
   SupportedPaymentLinksQueryVariables,
-  UpdateSupportedMobileWalletMutation,
-  UpdateSupportedMobileWalletMutationVariables,
-  UpdateSupportedOnlineAccountMutation,
-  UpdateSupportedOnlineAccountMutationVariables,
-  UpdateSupportedPaymentLinkMutation,
-  UpdateSupportedPaymentLinkMutationVariables,
   UpdateUserPaymentMethodMutation,
   UpdateUserPaymentMethodMutationVariables,
   UserPaymentMethodQuery,
@@ -40,7 +28,7 @@ import type {
   VerifyBankTransferPaymentMethodMutationVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const PAYMENT_METHOD_DETAILS_FIELDS = gql`
+const PAYMENT_METHOD_DETAILS_FIELDS = gql`
   fragment PaymentMethodDetailsFields on PaymentMethodDetails {
     walletId
     phone
@@ -278,30 +266,6 @@ export const verifyBankTransferPaymentMethodMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const createSupportedMobileWalletMutationDocument: TypedDocumentNode<
-  CreateSupportedMobileWalletMutation,
-  CreateSupportedMobileWalletMutationVariables
-> = gql`
-  ${SUPPORTED_MOBILE_WALLET_FIELDS}
-  mutation createSupportedMobileWallet($input: SupportedMobileWalletCreateInput!) {
-    createSupportedMobileWallet(input: $input) {
-      ...SupportedMobileWalletFields
-    }
-  }
-`;
-
-export const updateSupportedMobileWalletMutationDocument: TypedDocumentNode<
-  UpdateSupportedMobileWalletMutation,
-  UpdateSupportedMobileWalletMutationVariables
-> = gql`
-  ${SUPPORTED_MOBILE_WALLET_FIELDS}
-  mutation updateSupportedMobileWallet($id: ID!, $input: SupportedMobileWalletUpdateInput!) {
-    updateSupportedMobileWallet(id: $id, input: $input) {
-      ...SupportedMobileWalletFields
-    }
-  }
-`;
-
 export const deactivateSupportedMobileWalletMutationDocument: TypedDocumentNode<
   DeactivateSupportedMobileWalletMutation,
   DeactivateSupportedMobileWalletMutationVariables
@@ -314,30 +278,6 @@ export const deactivateSupportedMobileWalletMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const createSupportedPaymentLinkMutationDocument: TypedDocumentNode<
-  CreateSupportedPaymentLinkMutation,
-  CreateSupportedPaymentLinkMutationVariables
-> = gql`
-  ${SUPPORTED_PAYMENT_LINK_FIELDS}
-  mutation createSupportedPaymentLink($input: SupportedPaymentLinkCreateInput!) {
-    createSupportedPaymentLink(input: $input) {
-      ...SupportedPaymentLinkFields
-    }
-  }
-`;
-
-export const updateSupportedPaymentLinkMutationDocument: TypedDocumentNode<
-  UpdateSupportedPaymentLinkMutation,
-  UpdateSupportedPaymentLinkMutationVariables
-> = gql`
-  ${SUPPORTED_PAYMENT_LINK_FIELDS}
-  mutation updateSupportedPaymentLink($id: ID!, $input: SupportedPaymentLinkUpdateInput!) {
-    updateSupportedPaymentLink(id: $id, input: $input) {
-      ...SupportedPaymentLinkFields
-    }
-  }
-`;
-
 export const deactivateSupportedPaymentLinkMutationDocument: TypedDocumentNode<
   DeactivateSupportedPaymentLinkMutation,
   DeactivateSupportedPaymentLinkMutationVariables
@@ -346,30 +286,6 @@ export const deactivateSupportedPaymentLinkMutationDocument: TypedDocumentNode<
   mutation deactivateSupportedPaymentLink($id: ID!) {
     deactivateSupportedPaymentLink(id: $id) {
       ...SupportedPaymentLinkFields
-    }
-  }
-`;
-
-export const createSupportedOnlineAccountMutationDocument: TypedDocumentNode<
-  CreateSupportedOnlineAccountMutation,
-  CreateSupportedOnlineAccountMutationVariables
-> = gql`
-  ${SUPPORTED_ONLINE_ACCOUNT_FIELDS}
-  mutation createSupportedOnlineAccount($input: SupportedOnlineAccountCreateInput!) {
-    createSupportedOnlineAccount(input: $input) {
-      ...SupportedOnlineAccountFields
-    }
-  }
-`;
-
-export const updateSupportedOnlineAccountMutationDocument: TypedDocumentNode<
-  UpdateSupportedOnlineAccountMutation,
-  UpdateSupportedOnlineAccountMutationVariables
-> = gql`
-  ${SUPPORTED_ONLINE_ACCOUNT_FIELDS}
-  mutation updateSupportedOnlineAccount($id: ID!, $input: SupportedOnlineAccountUpdateInput!) {
-    updateSupportedOnlineAccount(id: $id, input: $input) {
-      ...SupportedOnlineAccountFields
     }
   }
 `;

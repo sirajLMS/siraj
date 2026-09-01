@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import type { AdminComplaintRow } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 
@@ -29,8 +28,6 @@ export interface ComplaintQueueCardListRenderCardProps {
   readonly onAnswer: (options: { readonly sendEmail: boolean }) => void;
   readonly onDelete: () => void;
 }
-
-export type ComplaintQueueCardRenderer = (props: ComplaintQueueCardListRenderCardProps) => ReactNode;
 
 export function buildQueueCardProps(
   row: AdminComplaintRow,

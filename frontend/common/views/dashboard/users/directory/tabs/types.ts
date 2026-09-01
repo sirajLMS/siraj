@@ -1,6 +1,6 @@
 export type UsersDirectoryTabId = "teachers" | "parents" | "students" | "staff";
 export type UsersDirectoryTabLabelKey = "teachers" | "parents" | "students" | "staff";
-export type UsersDirectoryTabsLabels = Record<UsersDirectoryTabLabelKey, string>;
+type UsersDirectoryTabsLabels = Record<UsersDirectoryTabLabelKey, string>;
 export interface UsersDirectoryViewLabels {
   readonly title: string;
   readonly subtitle: string;

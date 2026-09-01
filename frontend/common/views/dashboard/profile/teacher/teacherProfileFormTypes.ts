@@ -93,18 +93,6 @@ export const teacherAdminEditSchemaFactory = (labels: Pick<TeacherProfileValidat
     timezone: timezoneField(labels.invalidTimezone),
   });
 
-/**
- * Backwards-compatible static schema (no translated messages). Used by callers
- * that don't yet inject labels. Prefer `teacherOwnEditSchemaFactory`.
- */
-export const teacherOwnEditSchema = z.object({
-  ...coreSchema.shape,
-  ...ownTeacherSchemaBase.shape,
-  nationalId: z.string().optional(),
-});
-
-export const teacherAdminEditSchema = z.object({ ...coreSchema.shape, ...adminTeacherSchemaBase.shape });
-
 export type TeacherOwnEditFormData = z.infer<ReturnType<typeof teacherOwnEditSchemaFactory>>;
 export type TeacherAdminEditFormData = z.infer<ReturnType<typeof teacherAdminEditSchemaFactory>>;
 

@@ -155,7 +155,7 @@ export type PaymentMethodDefaults = {
 // ---------------------------------------------------------------------------
 
 export type SupportedMobileWalletSelectType = typeof supportedMobileWallets.$inferSelect;
-export type SupportedMobileWalletInsertType = typeof supportedMobileWallets.$inferInsert;
+type SupportedMobileWalletInsertType = typeof supportedMobileWallets.$inferInsert;
 
 export type SupportedMobileWalletReturnType = Omit<SupportedMobileWalletSelectType, "supportedDirections"> & {
   supportedDirections: PaymentDirection;
@@ -175,7 +175,7 @@ export type UpdateSupportedMobileWalletInput = Partial<SupportedMobileWalletSubm
 // ---------------------------------------------------------------------------
 
 export type SupportedPaymentLinkSelectType = typeof supportedPaymentLinks.$inferSelect;
-export type SupportedPaymentLinkInsertType = typeof supportedPaymentLinks.$inferInsert;
+type SupportedPaymentLinkInsertType = typeof supportedPaymentLinks.$inferInsert;
 
 export type SupportedPaymentLinkReturnType = Omit<SupportedPaymentLinkSelectType, "supportedDirections"> & {
   supportedDirections: PaymentDirection;
@@ -195,7 +195,7 @@ export type UpdateSupportedPaymentLinkInput = Partial<SupportedPaymentLinkSubmit
 // ---------------------------------------------------------------------------
 
 export type SupportedOnlineAccountSelectType = typeof supportedOnlineAccounts.$inferSelect;
-export type SupportedOnlineAccountInsertType = typeof supportedOnlineAccounts.$inferInsert;
+type SupportedOnlineAccountInsertType = typeof supportedOnlineAccounts.$inferInsert;
 
 export type SupportedOnlineAccountReturnType = Omit<
   SupportedOnlineAccountSelectType,

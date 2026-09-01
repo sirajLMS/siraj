@@ -43,7 +43,7 @@ import { logger } from "@/frontend/common/utils/logger";
  * @returns A new draft with `logoUrl` resolved to a storage URL (or null on
  *          upload failure, or unchanged if already a storage URL/null).
  */
-export async function resolveDraftLogoForSave(
+async function resolveDraftLogoForSave(
   draft: AppearanceDraftInput,
   uploadLogo: (file: File) => Promise<{ url: string; path: string }>
 ): Promise<AppearanceDraftInput> {

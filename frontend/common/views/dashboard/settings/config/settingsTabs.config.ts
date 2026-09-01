@@ -12,7 +12,7 @@ import type { AppPermission } from "@/frontend/common/graphql/generated/gql/grap
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import type { SettingsTabDefinition } from "@/frontend/common/views/dashboard/settings/types/settings.types";
 
-export const SETTINGS_TABS: readonly SettingsTabDefinition[] = [
+const SETTINGS_TABS: readonly SettingsTabDefinition[] = [
   {
     id: "general",
     labelKey: "general",

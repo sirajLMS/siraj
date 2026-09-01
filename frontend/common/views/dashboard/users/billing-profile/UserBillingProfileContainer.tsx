@@ -24,4 +24,4 @@ export function UserBillingProfileContainer(props: Readonly<UseUserBillingProfil
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { UserBillingProfileViewModel, UseUserBillingProfileViewModelProps };
+export type { UseUserBillingProfileViewModelProps };

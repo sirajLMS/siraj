@@ -28,7 +28,7 @@ import type { MeetingProviderFormData } from "@/frontend/common/views/dashboard/
 
 /* ────────────────────────── Tier-specific slots ────────────────────────── */
 
-export interface MeetingProviderFormSharedSlots {
+interface MeetingProviderFormSharedSlots {
   /** Full page wrapper (DesktopPageContainer or MobilePageContainer). */
   readonly PageContainer: React.ComponentType<{ readonly children: ReactNode }>;
   /** Page header with optional back-button action slot. */
@@ -39,7 +39,7 @@ export interface MeetingProviderFormSharedSlots {
   }>;
 }
 
-export interface MeetingProviderFormSharedStyleProps {
+interface MeetingProviderFormSharedStyleProps {
   /** Section paper padding (3 desktop / 2 mobile). */
   readonly sectionPaperPadding: number;
   /** Typography variant for section titles (h6 desktop / subtitle1 mobile). */

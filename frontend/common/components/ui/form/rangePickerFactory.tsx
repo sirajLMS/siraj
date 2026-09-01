@@ -10,7 +10,7 @@ import type { RangePickerSlotProps } from "@/frontend/common/components/ui/form/
  * picker: `AppDatePicker`, `DesktopAppDatePicker`, `MobileAppDatePicker`,
  * `AppTimePicker`, `DesktopAppTimePicker`, `MobileAppTimePicker`.
  */
-export interface RangePickerSinglePickerProps {
+interface RangePickerSinglePickerProps {
   readonly label: string;
   readonly value: Date | null;
   readonly onChange: (date: Date | null) => void;
@@ -21,13 +21,13 @@ export interface RangePickerSinglePickerProps {
 /**
  * A concrete single-picker component compatible with the range picker factory.
  */
-export type RangePickerSinglePicker = React.ComponentType<RangePickerSinglePickerProps>;
+type RangePickerSinglePicker = React.ComponentType<RangePickerSinglePickerProps>;
 
 /**
  * A range-picker chrome component (e.g. `DateRangePickerChrome` or
  * `TimeRangePickerChrome`) that wraps `RangePickerChrome`.
  */
-export type RangePickerChromeComponent<P, S> = React.ComponentType<{
+type RangePickerChromeComponent<P, S> = React.ComponentType<{
   readonly props: Readonly<P>;
   readonly state: S;
   readonly slots: RangePickerSlotProps;

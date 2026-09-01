@@ -35,7 +35,7 @@ const SYNC_STATUS = "syncStatus" as const satisfies StatusBadgeCategory;
  * Record mapping each `WhatsappTemplateStatus` enum value to its `StatusBadge`
  * configuration. Keyed by the enum string value (e.g. `"APPROVED"`).
  */
-export const WHATSAPP_TEMPLATE_STATUS_BADGE: Readonly<Record<WhatsappTemplateStatus, WhatsappStatusBadgeConfig>> = {
+const WHATSAPP_TEMPLATE_STATUS_BADGE: Readonly<Record<WhatsappTemplateStatus, WhatsappStatusBadgeConfig>> = {
   [WhatsappTemplateStatus.APPROVED]: {
     category: SYNC_STATUS,
     status: "success",

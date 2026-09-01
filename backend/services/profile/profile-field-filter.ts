@@ -112,14 +112,6 @@ function lookupStudentGroup(key: string): StudentFieldGroupDefinition | undefine
   return found?.[1];
 }
 
-export function canViewProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {
-  const group = lookupProfileGroup(groupKey);
-  if (!group || !shouldApplyProfileGroup(group, ctx)) {
-    return false;
-  }
-  return hasProfileGroupViewPermission(ctx, group);
-}
-
 export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {
   const group = lookupProfileGroup(groupKey);
   if (!group || !shouldApplyProfileGroup(group, ctx)) {
@@ -142,14 +134,6 @@ export function canEditStudentFieldGroup(ctx: StudentFieldFilterContext, groupKe
     return false;
   }
   return hasStudentGroupEditPermission(ctx, group);
-}
-
-export function assertProfileEditFieldGroups(ctx: FieldFilterContext, submittedGroupKeys: readonly string[]): void {
-  for (const groupKey of submittedGroupKeys) {
-    if (!canEditProfileFieldGroup(ctx, groupKey)) {
-      throw new Error("insufficientPermissions");
-    }
-  }
 }
 
 const KEY_INCLUDES = (keys: readonly string[], key: string): boolean => keys.includes(key);

@@ -9,11 +9,9 @@ import type {
 } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 
-export type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
-
 import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 
-export type TeacherDashboardMode = "standard" | "active";
+type TeacherDashboardMode = "standard" | "active";
 export type SupportRequestType = "COORDINATOR" | "SUPPORT";
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -25,7 +23,7 @@ const DEFAULT_PAGE_SIZE = 10;
  * `JSON.stringify`-able state is safe because this store is in-memory only
  * (no `persist` middleware) — see frontend/common/stores/AGENTS.md.
  */
-export interface TeacherDashboardHandlers {
+interface TeacherDashboardHandlers {
   /**
    * Refetch the underlying dashboard query. Registered by the data island
    * (which owns `useQuery`) so mutation-bearing islands can request a refresh
@@ -61,7 +59,7 @@ export interface TeacherDashboardHandlers {
  * switcher can restore identical view content unmounted/mounted under the
  * mobile/desktop boundary.
  */
-export interface TeacherDashboardDataSlice {
+interface TeacherDashboardDataSlice {
   readonly loading: boolean;
   readonly metricItems: readonly MetricItem[];
   readonly scheduleRows: readonly TeacherScheduleRow[];

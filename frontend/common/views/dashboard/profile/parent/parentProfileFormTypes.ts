@@ -49,7 +49,6 @@ export const parentAdminEditSchemaFactory = (labels: ParentProfileValidationLabe
       .refine(value => !value || isValidIanaTimezoneId(value), { message: labels.invalidTimezone }),
   });
 
-export type ParentOwnEditFormData = z.infer<ReturnType<typeof parentOwnEditSchemaFactory>>;
 export type ParentAdminEditFormData = z.infer<ReturnType<typeof parentAdminEditSchemaFactory>>;
 
 export type ParentEditData = {

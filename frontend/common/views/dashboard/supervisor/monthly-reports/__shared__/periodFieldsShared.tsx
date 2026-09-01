@@ -4,7 +4,7 @@ import { Grid, type GridProps, MenuItem, TextField } from "@mui/material";
 import { YEARS } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/__shared__/monthlyReportsConstants";
 import type { SupervisorMonthlyReportsLabels } from "@/shared/locale";
 
-export type PeriodGridSize = NonNullable<GridProps["size"]>;
+type PeriodGridSize = NonNullable<GridProps["size"]>;
 
 export interface PeriodFieldsSharedProps {
   readonly year: number;

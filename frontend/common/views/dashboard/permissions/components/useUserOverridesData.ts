@@ -15,11 +15,6 @@ export interface UserOverrideInfo {
   readonly conflictDetails: string[];
 }
 
-export interface UserOverrideRowData {
-  readonly loading: boolean;
-  readonly info: UserOverrideInfo | null;
-}
-
 export interface UserOverridesDataResult {
   readonly loading: boolean;
   readonly error: Error | undefined;

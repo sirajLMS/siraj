@@ -8,8 +8,6 @@ import {
 } from "@/frontend/common/views/dashboard/students/onboarding/components/StudentExtensionFields";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
-export type { StudentExtensionFieldLabels };
-
 interface StudentExtensionSectionProps {
   readonly register: UseFormRegister<StudentOnboardingFormData>;
   readonly errors: FieldErrors<StudentOnboardingFormData>;

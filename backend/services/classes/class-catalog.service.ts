@@ -48,11 +48,4 @@ export namespace ClassCatalogService {
   ): Promise<SubjectResourceReturnType[]> {
     return SubjectResourceRepository.createMany(inputs, tx);
   }
-
-  export async function loadResourcesBySubjectIds(
-    subjectIds: readonly string[],
-    tx?: DBTransaction
-  ): Promise<Map<string, SubjectResourceReturnType[]>> {
-    return SubjectResourceRepository.loadResourcesBySubjectIds([...subjectIds], tx);
-  }
 }

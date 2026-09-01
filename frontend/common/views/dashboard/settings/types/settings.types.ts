@@ -11,7 +11,7 @@ export type SettingsTabId =
   | "meetingIntegrations"
   | "appearance";
 
-export type SettingsTabLabelKey = keyof SettingsLabels["tabs"];
+type SettingsTabLabelKey = keyof SettingsLabels["tabs"];
 
 export type SettingsTabDefinition = {
   readonly id: SettingsTabId;

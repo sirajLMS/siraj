@@ -2,27 +2,27 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type DashboardRole = "parent" | "teacher" | "student" | "supervisor" | "admin";
 
-export function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
+function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
   return (
     permissions.includes(AppPermission.ScheduleViewFamily) && !permissions.includes(AppPermission.DashboardViewMetrics)
   );
 }
 
-export function shouldShowTeacherDashboard(permissions: readonly AppPermission[]): boolean {
+function shouldShowTeacherDashboard(permissions: readonly AppPermission[]): boolean {
   return (
     permissions.includes(AppPermission.TeacherViewDashboard) &&
     !permissions.includes(AppPermission.DashboardViewMetrics)
   );
 }
 
-export function shouldShowStudentDashboard(permissions: readonly AppPermission[]): boolean {
+function shouldShowStudentDashboard(permissions: readonly AppPermission[]): boolean {
   return (
     permissions.includes(AppPermission.StudentViewOwnDashboard) &&
     !permissions.includes(AppPermission.DashboardViewMetrics)
   );
 }
 
-export function shouldShowSupervisorDashboard(permissions: readonly AppPermission[]): boolean {
+function shouldShowSupervisorDashboard(permissions: readonly AppPermission[]): boolean {
   return (
     permissions.includes(AppPermission.SupervisorViewDashboard) &&
     !permissions.includes(AppPermission.DashboardViewMetrics)

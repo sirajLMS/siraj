@@ -80,5 +80,3 @@ export function TeachersDesktopView({
     </DesktopPageContainer>
   );
 }
-
-export default TeachersDesktopView;

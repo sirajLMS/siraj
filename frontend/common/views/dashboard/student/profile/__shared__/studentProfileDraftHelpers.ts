@@ -1,44 +1,24 @@
-import { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
+import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 
-const VALID_CURRENCY_CODES = new Set(Object.values(CurrencyCode) as readonly string[]);
 const VALID_GENDERS = new Set(Object.values(Gender) as readonly string[]);
 const VALID_LANGUAGES = new Set(Object.values(AppLanguage) as readonly string[]);
 
-export function toDateInputValue(value: string | null | undefined): string {
+function toDateInputValue(value: string | null | undefined): string {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return date.toISOString().slice(0, 10);
 }
 
-export function isCurrencyCode(value: string): value is CurrencyCode {
-  return VALID_CURRENCY_CODES.has(value);
-}
-
-export function isGender(value: string | null | undefined): value is Gender {
+function isGender(value: string | null | undefined): value is Gender {
   return value !== null && value !== undefined && VALID_GENDERS.has(value);
 }
 
-export function isAppLanguage(value: string | null | undefined): value is AppLanguage {
+function isAppLanguage(value: string | null | undefined): value is AppLanguage {
   return value !== null && value !== undefined && VALID_LANGUAGES.has(value);
-}
-
-export function toCurrencyCode(value: string | null): CurrencyCode | "" {
-  if (value && isCurrencyCode(value)) return value;
-  return "";
-}
-
-export function toGender(value: string | null): Gender | "" {
-  if (value && isGender(value)) return value;
-  return "";
-}
-
-export function toAppLanguage(value: string | null): AppLanguage | "" {
-  if (value && isAppLanguage(value)) return value;
-  return "";
 }
 
 export function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDraft {

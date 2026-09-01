@@ -15,7 +15,7 @@ import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 // Slot Types
 // ---------------------------------------------------------------------------
 
-export type PopoverOrigin = MuiPopoverOrigin;
+type PopoverOrigin = MuiPopoverOrigin;
 
 export type LocaleAdornmentSwitchSlotProps = {
   readonly LocaleEmoji: React.ComponentType<LocaleEmojiComponentProps>;

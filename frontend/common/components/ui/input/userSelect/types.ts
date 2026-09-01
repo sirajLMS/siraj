@@ -44,7 +44,7 @@ export interface AudienceAutocompleteProps {
   readonly excludeIds?: readonly string[];
 }
 
-export interface AudienceFacadeProps {
+interface AudienceFacadeProps {
   readonly value: PersonOption | null;
   readonly onChange: (next: PersonOption | null) => void;
   readonly label?: string;
@@ -66,4 +66,3 @@ export type TeacherAutocompleteProps = Omit<AudienceFacadeProps, "scope">;
 export type StudentAutocompleteProps = AudienceFacadeProps;
 export type ParentAutocompleteProps = Omit<AudienceFacadeProps, "scope">;
 export type UserAutocompleteProps = Omit<AudienceFacadeProps, "scope">;
-export type StaffAutocompleteProps = AudienceFacadeProps;

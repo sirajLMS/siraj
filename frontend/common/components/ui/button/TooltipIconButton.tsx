@@ -10,7 +10,7 @@ export interface TooltipIconButtonProps {
   readonly disabled?: boolean;
   readonly disabledReason?: string;
   readonly size?: "small" | "medium" | "large";
-  readonly color?: IconButtonProps["color"];
+  readonly color?: NonNullable<IconButtonProps["color"]>;
   readonly sx?: SxProps<Theme>;
 }
 

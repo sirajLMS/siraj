@@ -8,7 +8,7 @@ export type PrepareUploadFn = (options: {
 /**
  * Compute the base64-encoded SHA-256 hash of a `File`.
  */
-export async function computeContentHash(file: File): Promise<string> {
+async function computeContentHash(file: File): Promise<string> {
   const buffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
   const hashArray = new Uint8Array(hashBuffer);
@@ -22,7 +22,7 @@ export async function computeContentHash(file: File): Promise<string> {
 /**
  * Stream the `File` body to the signed-URL PUT endpoint.
  */
-export async function uploadViaSignedUrl(
+async function uploadViaSignedUrl(
   uploadUrl: string,
   file: File,
   contentType: string,
@@ -52,7 +52,7 @@ export async function uploadViaSignedUrl(
 /**
  * Upload via Vercel Blob client-side upload (production serverless deploys).
  */
-export async function uploadViaVercelBlob(
+async function uploadViaVercelBlob(
   filePath: string,
   file: File,
   handleUploadUrl: string,

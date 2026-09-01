@@ -5,7 +5,6 @@ import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { LocalizedString } from "@/shared/types";
 
 export type UserPermissionOverrideSelectType = typeof userPermissionOverrides.$inferSelect;
-export type UserPermissionOverrideInsertType = typeof userPermissionOverrides.$inferInsert;
 
 export type UserOverrideReturnType = Omit<UserPermissionOverrideSelectType, "state"> & {
   state: OverrideState;

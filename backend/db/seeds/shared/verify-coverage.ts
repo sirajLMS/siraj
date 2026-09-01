@@ -4,13 +4,13 @@ import { ReferenceDataService } from "@/backend/services";
 
 type TableCategory = "seeded" | "migration" | "excluded";
 
-export interface TableCoverageEntry {
+interface TableCoverageEntry {
   table: string;
   category: TableCategory;
   seeder?: string;
 }
 
-export const TABLE_COVERAGE: readonly TableCoverageEntry[] = [
+const TABLE_COVERAGE: readonly TableCoverageEntry[] = [
   { table: "timezones", category: "seeded", seeder: "timezones.ts" },
   { table: "system_settings", category: "seeded", seeder: "system-settings.ts" },
   { table: "users", category: "seeded", seeder: "seed-users.ts" },
@@ -99,17 +99,6 @@ export const TABLE_COVERAGE: readonly TableCoverageEntry[] = [
 ] as const;
 
 const STANDARD_PROFILE_TABLES = TABLE_COVERAGE.filter(entry => entry.category === "seeded").map(entry => entry.table);
-
-export const ALL_SCHEMA_TABLES = TABLE_COVERAGE.map(entry => entry.table);
-
-export function getTableCoverageRegistry(): readonly TableCoverageEntry[] {
-  return TABLE_COVERAGE;
-}
-
-export function getUncoveredSchemaTables(knownTables: readonly string[]): string[] {
-  const registered = new Set(ALL_SCHEMA_TABLES);
-  return knownTables.filter(table => !registered.has(table));
-}
 
 export async function verifySeedCoverage(failedSteps: readonly string[] = []): Promise<void> {
   const config = loadSeedConfig();

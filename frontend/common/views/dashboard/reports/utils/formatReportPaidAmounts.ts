@@ -4,11 +4,7 @@ import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graph
 import { type FormatCurrencyMessages, formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import type { ReportPaidAmount } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 
-export function formatReportPaidAmount(
-  paid: ReportPaidAmount,
-  locale: string,
-  messages: FormatCurrencyMessages
-): string {
+function formatReportPaidAmount(paid: ReportPaidAmount, locale: string, messages: FormatCurrencyMessages): string {
   return formatCurrencyForDisplay(
     paid.amount,
     paid.currency,
@@ -102,54 +98,4 @@ export function aggregatePaidAmountTotals(
         }
       : null,
   }));
-}
-
-export function aggregateCurrencyTotals(
-  rows: readonly { readonly paidAmounts?: readonly ReportPaidAmount[] | null }[]
-): readonly { readonly currency: CurrencyCode; readonly amount: number; readonly percent: number }[] {
-  const currencyMap = new Map<CurrencyCode, number>();
-
-  for (const row of rows) {
-    for (const paid of row.paidAmounts ?? []) {
-      const numericAmount = Number.parseFloat(paid.amount);
-      if (!Number.isFinite(numericAmount)) {
-        continue;
-      }
-      currencyMap.set(paid.currency, (currencyMap.get(paid.currency) ?? 0) + numericAmount);
-    }
-  }
-
-  const totalPaid = [...currencyMap.values()].reduce((sum, value) => sum + value, 0);
-  return [...currencyMap.entries()].map(([currency, amount]) => ({
-    currency,
-    amount,
-    percent: totalPaid > 0 ? Math.round((amount / totalPaid) * 100) : 0,
-  }));
-}
-
-export function aggregateCurrencyTotalsWithDisplay(
-  rows: readonly { readonly paidAmounts?: readonly ReportPaidAmount[] | null }[]
-): readonly {
-  readonly currency: CurrencyCode;
-  readonly amount: number;
-  readonly percent: number;
-  readonly paidAmount: ReportPaidAmount;
-}[] {
-  const paidTotals = aggregatePaidAmountTotals(rows);
-  const totalLocked = paidTotals.reduce((sum, paid) => {
-    const numeric = Number.parseFloat(paid.amount);
-    return Number.isFinite(numeric) ? sum + numeric : sum;
-  }, 0);
-
-  return paidTotals.map(paid => {
-    const amount = Number.parseFloat(paid.amount);
-    const lockedAmount = Number.isFinite(amount) ? amount : 0;
-
-    return {
-      currency: paid.currency,
-      amount: lockedAmount,
-      percent: totalLocked > 0 ? Math.round((lockedAmount / totalLocked) * 100) : 0,
-      paidAmount: paid,
-    };
-  });
 }

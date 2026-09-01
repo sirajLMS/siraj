@@ -49,7 +49,7 @@ export type PaymentMethodsSlot = "payin" | "payout";
  * Tier-selected list renderer injected by the desktop/mobile tab wrappers so the
  * shared manager never picks a viewport-specific presentation on its own.
  */
-export type PaymentMethodsListView = ComponentType<PaymentMethodListProps>;
+type PaymentMethodsListView = ComponentType<PaymentMethodListProps>;
 
 export type PaymentMethodsManagerProps = {
   readonly targetUserId: string;

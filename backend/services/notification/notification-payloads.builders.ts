@@ -49,20 +49,7 @@ function isStudentTeacherReassignmentRecipient(value: unknown): value is Student
   return typeof value === "string" && VALID_REASSIGNMENT_RECIPIENTS.has(value);
 }
 
-/**
- * Maps `NotificationChannel` enum members to their lowercase string identifiers
- * used in channel comparison and routing. WhatsApp joins the existing four.
- * Exported for downstream consumers (dispatch helpers, tests).
- */
-export const CHANNEL_FROM_ENUM: Readonly<Record<NotificationChannel, string>> = Object.freeze({
-  [NotificationChannel.ON_APP]: "on_app",
-  [NotificationChannel.EMAIL]: "email",
-  [NotificationChannel.SMS]: "sms",
-  [NotificationChannel.PUSH]: "push",
-  [NotificationChannel.WHATSAPP]: "whatsapp",
-});
-
-export const ALL_CHANNELS: readonly NotificationChannel[] = [
+const ALL_CHANNELS: readonly NotificationChannel[] = [
   NotificationChannel.ON_APP,
   NotificationChannel.EMAIL,
   NotificationChannel.SMS,
@@ -149,7 +136,7 @@ function labelsFor(locale: string | undefined): NotificationsLabels {
  * the templated send. Events without a template mapping get no
  * `whatsappTemplate` — the dispatch layer skips the send in that case.
  */
-export function buildPerChannel(
+function buildPerChannel(
   userId: string,
   eventType: NotificationEventType,
   title: string,
@@ -361,26 +348,6 @@ function renderStudentLifecycle(
       return null;
   }
 }
-
-export {
-  buildAccountingLowHoursPayloads,
-  buildAccountingPaymentRecordedPayloads,
-} from "@/backend/services/notification/accounting-notification.builders";
-// ─── Quota & on-demand event builder registry ─────────────────────────
-//
-// The quota/on-demand notification builders live in `quota-notification.builders.ts`
-// to keep the pure three-arg thousand-line file from growing further. They are
-// re-exported here so every notification builder shares a single import surface
-// (`notification-payloads.builders`) — resolving task 11.4 "register new builders".
-export {
-  buildOndemandInstancePendingCreditPayloads,
-  buildOndemandInstanceReminderT1Payloads,
-  buildOndemandInstanceReminderT3Payloads,
-  buildOndemandTeacherDailyDigestPayloads,
-  buildQuotaExpiredPayloads,
-  buildQuotaExpiringSoonPayloads,
-  buildQuotaLowBalancePayloads,
-} from "@/backend/services/notification/quota-notification.builders";
 
 // ─── Invoice event builders ───────────────────────────────────────────
 

@@ -1,7 +1,5 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type {
-  RecordCreditPurchaseMutation,
-  RecordCreditPurchaseMutationVariables,
   StudentCreditBalanceQuery,
   StudentCreditBalanceQueryVariables,
   StudentCreditTransactionsQuery,
@@ -32,27 +30,6 @@ export const studentCreditTransactionsQueryDocument: TypedDocumentNode<
       studentId
       changeAmount
       changeAmountHours
-      reason
-      sourcePaymentId
-      classInstanceId
-      notes
-      creditedByUserId
-      idempotencyKey
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-export const recordCreditPurchaseMutationDocument: TypedDocumentNode<
-  RecordCreditPurchaseMutation,
-  RecordCreditPurchaseMutationVariables
-> = gql`
-  mutation RecordCreditPurchase($studentId: ID!, $hours: Int!, $notes: String) {
-    recordCreditPurchase(studentId: $studentId, hours: $hours, notes: $notes) {
-      id
-      studentId
-      changeAmount
       reason
       sourcePaymentId
       classInstanceId

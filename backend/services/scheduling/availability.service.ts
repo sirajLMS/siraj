@@ -61,15 +61,6 @@ export namespace AvailabilityService {
     return true;
   };
 
-  export const assertSlotAvailable = async (input: SlotAvailabilityInput): Promise<void> => {
-    const { studentId, teacherId, startAt, endAt, ignoreInstanceIds = [], locale = "en" } = input;
-    const available = await isSlotAvailable({ studentId, teacherId, startAt, endAt, ignoreInstanceIds, locale });
-    if (!available) {
-      const tErrors = getServerTranslations(locale).errorsTranslations;
-      throw new ValidationError(tErrors.invalidInput);
-    }
-  };
-
   export const assertSchedulePatternAvailable = async (input: AssertSchedulePatternAvailableInput): Promise<void> => {
     const { studentId, teacherId, days, startDate, endDate, options = {} } = input;
     const { ignoreInstanceIds = [], locale = "en", tx, durationMinutes = 60, timezone = "UTC" } = options;

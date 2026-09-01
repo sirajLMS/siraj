@@ -1,7 +1,5 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type {
-  AttachSubjectResourceMutation,
-  AttachSubjectResourceMutationVariables,
   ClassSubjectByIdQuery,
   ClassSubjectByIdQueryVariables,
   ClassSubjectsQuery,
@@ -10,8 +8,6 @@ import type {
   CreateClassSubjectMutationVariables,
   DeleteClassSubjectMutation,
   DeleteClassSubjectMutationVariables,
-  DetachSubjectResourceMutation,
-  DetachSubjectResourceMutationVariables,
   UpdateClassSubjectMutation,
   UpdateClassSubjectMutationVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -105,26 +101,5 @@ export const deleteClassSubjectMutationDocument: TypedDocumentNode<
 > = gql`
   mutation deleteClassSubject($id: ID!) {
     deleteClassSubject(id: $id)
-  }
-`;
-
-export const attachSubjectResourceMutationDocument: TypedDocumentNode<
-  AttachSubjectResourceMutation,
-  AttachSubjectResourceMutationVariables
-> = gql`
-  ${SUBJECT_RESOURCE_FIELDS}
-  mutation attachSubjectResource($input: AttachSubjectResourceInput!) {
-    attachSubjectResource(input: $input) {
-      ...SubjectResourceFields
-    }
-  }
-`;
-
-export const detachSubjectResourceMutationDocument: TypedDocumentNode<
-  DetachSubjectResourceMutation,
-  DetachSubjectResourceMutationVariables
-> = gql`
-  mutation detachSubjectResource($subjectId: ID!, $learningResourceId: ID!) {
-    detachSubjectResource(subjectId: $subjectId, learningResourceId: $learningResourceId)
   }
 `;

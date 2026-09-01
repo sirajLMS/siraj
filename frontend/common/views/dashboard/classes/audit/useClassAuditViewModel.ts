@@ -28,7 +28,7 @@ type MaybeAudit = Audit | null | undefined;
  * Admin-note edit dialog slice. Dialog state lives in `classAuditStore` so an
  * open dialog and its draft survive viewport tier switches.
  */
-export interface AdminNoteDialogState {
+interface AdminNoteDialogState {
   readonly open: boolean;
   readonly content: string;
   readonly isSaving: boolean;
@@ -38,7 +38,7 @@ export interface AdminNoteDialogState {
 }
 
 /** Shell states render loading/error chrome only — the tier views never receive stubbed handlers. */
-export interface ClassAuditShellViewModel {
+interface ClassAuditShellViewModel {
   readonly status: "loading" | "invalidId" | "error";
   readonly audit: null;
   readonly labels: Record<string, never>;
@@ -57,8 +57,6 @@ export interface ClassAuditReadyViewModel extends Omit<ClassAuditViewProps, "aud
 }
 
 export type ClassAuditViewModel = ClassAuditShellViewModel | ClassAuditReadyViewModel;
-
-export type UseClassAuditViewModelProps = Record<string, never>;
 
 export function useClassAuditViewModel(): ClassAuditViewModel {
   const t = useAppTranslation(Translation.Dashboard.ClassAudit);

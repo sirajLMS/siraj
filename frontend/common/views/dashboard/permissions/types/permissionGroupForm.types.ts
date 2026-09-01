@@ -47,5 +47,3 @@ export interface PermissionGroupFormContentProps {
   readonly handleSubmitForm: (e: React.SyntheticEvent<HTMLFormElement>) => void;
   readonly t: PermissionsLabels;
 }
-
-export type { ValidPermission };

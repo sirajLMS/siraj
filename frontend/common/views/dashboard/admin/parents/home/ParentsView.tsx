@@ -24,4 +24,4 @@ export function ParentsView(props: Readonly<UseParentsViewModelProps>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { ParentsViewModel, UseParentsViewModelProps };
+export type { UseParentsViewModelProps };

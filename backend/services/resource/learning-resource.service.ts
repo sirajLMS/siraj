@@ -80,20 +80,6 @@ export namespace LearningResourceService {
   }
 
   /**
-   * Checks whether an actor has permission to access a specific resource file.
-   * Implements the `system.restrict_resource_access` enforcement.
-   * Returns true only when the resource exists and the actor has `resources.list` permission.
-   */
-  export async function checkAccess(actorUserId: string, resourceId: string): Promise<boolean> {
-    const resource = await LearningResourceRepository.findById(resourceId);
-    if (!resource) {
-      return false;
-    }
-
-    return await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_LIST);
-  }
-
-  /**
    * Orchestrates the complete deletion lifecycle of a learning resource.
    *
    * @description

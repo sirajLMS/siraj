@@ -7,7 +7,7 @@ import type {
 } from "@/frontend/common/views/dashboard/admin/payment-catalogs/tabs/types";
 import { getVisibleTabs, type TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";
 
-export const PAYMENT_CATALOGS_TABS: readonly TabDefinition<PaymentCatalogsTabId, PaymentCatalogsTabLabelKey>[] = [
+const PAYMENT_CATALOGS_TABS: readonly TabDefinition<PaymentCatalogsTabId, PaymentCatalogsTabLabelKey>[] = [
   {
     id: "paymentCatalogs",
     labelKey: "paymentCatalogs",

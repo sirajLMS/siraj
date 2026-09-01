@@ -24,4 +24,4 @@ export function MeetingProvidersView(props: Readonly<UseMeetingProvidersViewMode
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { MeetingProvidersViewModel, UseMeetingProvidersViewModelProps };
+export type { UseMeetingProvidersViewModelProps };

@@ -14,21 +14,11 @@ import {
 import type { ValidPermission } from "@/frontend/common/views/dashboard/permissions/types/validPermission.types";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type { ValidPermission };
-
 type SelectablePermission = Permission & { id: string };
 
-export interface GroupedPermissions {
+interface GroupedPermissions {
   readonly categories: string[];
   readonly groupedPermissions: Record<string, ValidPermission[]>;
-}
-
-export interface PermissionGroupSelection {
-  readonly selectedPermissionIds: string[];
-  readonly handleTogglePermission: (permId: string, isSystem: boolean) => void;
-  readonly handleSelectAllCategory: (categoryPerms: readonly SelectablePermission[], checked: boolean) => void;
-  readonly isGroupSelected: (categoryPerms: readonly SelectablePermission[]) => boolean;
-  readonly isGroupIndeterminate: (categoryPerms: readonly SelectablePermission[]) => boolean;
 }
 
 export interface PermissionGroupFormState {

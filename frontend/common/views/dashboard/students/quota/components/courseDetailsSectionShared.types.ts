@@ -6,7 +6,7 @@ import type { ElementType, ReactNode } from "react";
  * Props for the end-adornment shown inside the "classes left" field when
  * an override is active. Each tier supplies its own icon and styling.
  */
-export interface ClassesLeftOverrideEndAdornmentProps {
+interface ClassesLeftOverrideEndAdornmentProps {
   readonly icon: ElementType;
   readonly iconFontSize: number;
   readonly boxSx: SxProps<Theme>;
@@ -17,7 +17,7 @@ export interface ClassesLeftOverrideEndAdornmentProps {
  * Props for the override notice typography shown below the "classes left"
  * field when editing is allowed.
  */
-export interface ClassesLeftOverrideNoticeProps {
+interface ClassesLeftOverrideNoticeProps {
   readonly icon: ElementType | undefined;
   readonly iconFontSize: number | undefined;
   readonly sx: SxProps<Theme>;
@@ -26,7 +26,7 @@ export interface ClassesLeftOverrideNoticeProps {
 /**
  * sx factory for the "classes left" TextField outlined-input root.
  */
-export type ClassesLeftInputSxFactory = (theme: Theme) => SystemStyleObject<Theme>;
+type ClassesLeftInputSxFactory = (theme: Theme) => SystemStyleObject<Theme>;
 
 /**
  * Slot props supplied by each tier wrapper to

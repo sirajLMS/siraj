@@ -5,7 +5,6 @@ import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/c
 import type { DaysScheduleLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildDaysScheduleLabels";
 import type { RecurringClassFormLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type DayScheduleConfig = BaseDayScheduleConfig<DayOfWeek>;
 
@@ -22,12 +21,6 @@ export const DEFAULT_DAY_SCHEDULE: readonly DayScheduleConfig[] = [
 export const CLASS_TYPE_OPTIONS = ["REGULAR", "TRIAL", "ADVANCE"] as const;
 export type ClassType = (typeof CLASS_TYPE_OPTIONS)[number];
 
-export const TIMEZONE_OPTIONS = [
-  { value: "Africa/Cairo", label: "Africa/Cairo (Cairo)" },
-  { value: IanaTimezone.Asia_Riyadh, label: "Asia/Riyadh (Riyadh)" },
-  { value: "UTC", label: "UTC" },
-] as const;
-
 export interface TimeInputProps {
   readonly label: string;
   readonly control: Control<RecurringClassFormData>;
@@ -35,7 +28,7 @@ export interface TimeInputProps {
   readonly error?: string;
 }
 
-export interface DurationInputLabels {
+interface DurationInputLabels {
   readonly duration: string;
   readonly durationHours: string;
   readonly durationMinutes: string;

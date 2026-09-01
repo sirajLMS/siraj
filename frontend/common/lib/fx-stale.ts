@@ -1,6 +1,6 @@
-export const FX_STALE_MS = 24 * 60 * 60 * 1000;
+const FX_STALE_MS = 24 * 60 * 60 * 1000;
 
-export function isFxStale(finishedAt: string | null | undefined): boolean {
+function isFxStale(finishedAt: string | null | undefined): boolean {
   if (!finishedAt) {
     return true;
   }

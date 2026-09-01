@@ -25,9 +25,9 @@ import {
  */
 
 export type TeacherClassRow = TeacherClassListViewModel["rows"][number];
-export type TeacherClassListLabels = TeacherClassListViewModel["labels"];
+type TeacherClassListLabels = TeacherClassListViewModel["labels"];
 
-export interface TeacherClassSessionActionLabels {
+interface TeacherClassSessionActionLabels {
   readonly joinSession: string;
   readonly leaveClass: string;
   readonly leaveDisabledReason: string;
@@ -35,7 +35,7 @@ export interface TeacherClassSessionActionLabels {
   readonly contactAdmin: string;
 }
 
-export interface ClassSessionActionButtonSlotProps {
+interface ClassSessionActionButtonSlotProps {
   readonly action: "view_class_audit";
   readonly classId: string;
   readonly labels: TeacherClassSessionActionLabels;
@@ -44,7 +44,7 @@ export interface ClassSessionActionButtonSlotProps {
   readonly fullWidth?: boolean;
 }
 
-export interface TeacherClassPersonProfileLinkSlotProps {
+interface TeacherClassPersonProfileLinkSlotProps {
   readonly href: string | undefined;
   readonly name: string;
 }

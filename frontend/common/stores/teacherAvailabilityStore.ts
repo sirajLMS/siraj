@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export interface AvailabilitySearchFilters {
+interface AvailabilitySearchFilters {
   readonly fromTime: Date | null;
   readonly toTime: Date | null;
   readonly gender: Gender | null;

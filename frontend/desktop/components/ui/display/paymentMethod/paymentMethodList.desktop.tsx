@@ -10,8 +10,6 @@ import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type { PaymentMethodRow };
-
 export type DesktopPaymentMethodListProps = {
   readonly methods: readonly PaymentMethodRow[];
   readonly loading?: boolean;

@@ -15,7 +15,7 @@ const STATUS_LABEL_KEYS: Record<LessonReportStatus, "pendingReview" | "approved"
   [LessonReportStatus.Draft]: "draft",
 };
 
-export const TEACHER_LESSON_REPORT_ROWS: readonly TeacherLessonReportRow[] = [
+const TEACHER_LESSON_REPORT_ROWS: readonly TeacherLessonReportRow[] = [
   {
     id: "report-1",
     classInstanceId: "class-1",

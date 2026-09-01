@@ -6,24 +6,6 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentMethodFormValues } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
-export function emptyPaymentMethodDetailsInput(): PaymentMethodDetailsInput {
-  return {
-    accountNumber: null,
-    bankName: null,
-    beneficiaryName: null,
-    iban: null,
-    identifier: null,
-    note: null,
-    onlineAccountId: null,
-    paymentLinkId: null,
-    phone: null,
-    routingNumber: null,
-    swiftBic: null,
-    url: null,
-    walletId: null,
-  };
-}
-
 export function formDetailsToInput(details: PaymentMethodFormValues["details"]): PaymentMethodDetailsInput {
   return {
     accountNumber: details.accountNumber?.trim() ?? null,

@@ -58,17 +58,6 @@ export interface PerformanceLedgerCardProps {
   readonly onClick?: (row: ReportLedgerRow) => void;
 }
 
-export interface PerformanceLedgerCardListProps {
-  readonly rows: readonly ReportLedgerRow[];
-  readonly labels: PerformanceLedgerCardLabels;
-  // NEW FOR PLAN v5: bound formatter + gate flag lifted from tier; list
-  // computes `paidLabel` per row and threads `showFinancials` down.
-  readonly showFinancials: boolean;
-  readonly formatPaidAmounts: (paidAmounts: readonly ReportPaidAmount[]) => string;
-  readonly loading?: boolean;
-  readonly onRowClick?: (row: ReportLedgerRow) => void;
-}
-
 export interface ReportsDataGridProps {
   readonly rows: readonly ReportLedgerRow[];
   readonly labels: ReportsDataGridLabels;

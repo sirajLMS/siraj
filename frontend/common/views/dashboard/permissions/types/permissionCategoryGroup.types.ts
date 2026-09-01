@@ -3,8 +3,6 @@ import type { PermissionsQuery_permissions } from "@/frontend/common/graphql/gen
 import type { ValidPermission } from "@/frontend/common/views/dashboard/permissions/types/validPermission.types";
 import type { PermissionsLabels } from "@/shared/locale";
 
-export type { ValidPermission };
-
 export interface PermissionCategoryGroupProps {
   readonly categoryName: string;
   readonly perms: ValidPermission[];

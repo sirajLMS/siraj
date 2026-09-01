@@ -2,7 +2,7 @@
 // (was duplicated in dayScheduleRow + timeInput mobile/desktop). date-fns imports banned in tier.
 import { format, isValid, parse } from "date-fns";
 
-export const RECURRING_TIME_FORMAT = "HH:mm";
+const RECURRING_TIME_FORMAT = "HH:mm";
 
 export function parseTimeValue(timeStr: string): Date | null {
   if (!timeStr) return null;

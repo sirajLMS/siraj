@@ -33,7 +33,7 @@ export const AVAILABILITY_TEST_TEACHER = "Test Teacher";
 
 export type TeacherAvailabilityViewFixture = Omit<TeacherAvailabilityViewModel, "formMethods">;
 
-export function buildTeacherAvailabilityViewModel(
+function buildTeacherAvailabilityViewModel(
   locale: AppLocale,
   overrides: Partial<TeacherAvailabilityViewFixture> = {}
 ): TeacherAvailabilityViewFixture {

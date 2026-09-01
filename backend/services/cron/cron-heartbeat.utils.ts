@@ -14,10 +14,10 @@
  */
 
 /** Divisor: heartbeat fires ~4× per timeout window. */
-export const HEARTBEAT_DIVISOR = 4;
+const HEARTBEAT_DIVISOR = 4;
 
 /** Cap: never heartbeat more frequently than once per 60 seconds. */
-export const HEARTBEAT_MAX_SECONDS = 60;
+const HEARTBEAT_MAX_SECONDS = 60;
 
 /**
  * Compute the heartbeat interval in **seconds** (used by pg-boss queue options).

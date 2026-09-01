@@ -10,7 +10,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export interface TeacherOwnProfileContact {
+interface TeacherOwnProfileContact {
   readonly name: string | null;
   readonly email: string | null;
   readonly phone: string | null;
@@ -78,5 +78,3 @@ export function useTeacherOwnProfileViewModel(
     salaryDisplay,
   };
 }
-
-export default useTeacherOwnProfileViewModel;

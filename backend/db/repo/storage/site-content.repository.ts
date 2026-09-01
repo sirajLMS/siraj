@@ -1,10 +1,10 @@
-import { and, desc, eq, type SQL } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { siteContent } from "@/backend/db/schema";
 import type { DBTransaction, SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types";
 
 export namespace SiteContentRepository {
-  export async function findBySlug(slug: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
+  async function findBySlug(slug: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
     const q = queryDb(tx);
     const [row] = await q.select().from(siteContent).where(eq(siteContent.slug, slug)).limit(1);
     return row ?? null;
@@ -67,30 +67,6 @@ export namespace SiteContentRepository {
     return rows;
   }
 
-  async function selectOrdered(
-    tx: DBTransaction | undefined,
-    where: SQL | undefined
-  ): Promise<SiteContentSelectType[]> {
-    const q = queryDb(tx);
-    const rows = await q.select().from(siteContent).where(where).orderBy(desc(siteContent.updatedAt));
-    return rows;
-  }
-
-  export async function listPublished(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
-    return selectOrdered(tx, eq(siteContent.isPublished, true));
-  }
-
-  export async function listByContentType(contentType: string, tx?: DBTransaction): Promise<SiteContentSelectType[]> {
-    return selectOrdered(tx, eq(siteContent.contentType, contentType));
-  }
-
-  export async function listPublishedByContentType(
-    contentType: string,
-    tx?: DBTransaction
-  ): Promise<SiteContentSelectType[]> {
-    return selectOrdered(tx, and(eq(siteContent.contentType, contentType), eq(siteContent.isPublished, true)));
-  }
-
   export async function updatePublishState(
     id: string,
     isPublished: boolean,
@@ -109,16 +85,6 @@ export namespace SiteContentRepository {
     const q = queryDb(tx);
     try {
       const deleted = await q.delete(siteContent).where(eq(siteContent.id, id)).returning();
-      return deleted.length > 0;
-    } catch {
-      return false;
-    }
-  }
-
-  export async function deleteBySlug(slug: string, tx?: DBTransaction): Promise<boolean> {
-    const q = queryDb(tx);
-    try {
-      const deleted = await q.delete(siteContent).where(eq(siteContent.slug, slug)).returning();
       return deleted.length > 0;
     } catch {
       return false;

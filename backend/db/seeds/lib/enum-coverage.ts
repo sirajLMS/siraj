@@ -3,7 +3,6 @@ import {
   DevicePlatform,
   InvoiceType,
   LeaveRequesterType,
-  LeaveRequestStatus,
   NotificationChannel,
   NotificationDeliveryStatus,
   NotificationEventType,
@@ -40,13 +39,6 @@ export const ALL_PARENT_STATUSES = [
 export const ALL_ACCOUNT_STATUSES = [AccountStatus.ACTIVATED, AccountStatus.DEACTIVATED] as const;
 
 export const ALL_CLASS_TYPES = [ClassType.REGULAR, ClassType.TRIAL, ClassType.ADVANCE] as const;
-
-export const ALL_LEAVE_REQUEST_STATUSES = [
-  LeaveRequestStatus.APPROVED,
-  LeaveRequestStatus.PENDING,
-  LeaveRequestStatus.RESCHEDULED,
-  LeaveRequestStatus.CANCELLED,
-] as const;
 
 export const ALL_LEAVE_REQUESTER_TYPES = [
   LeaveRequesterType.TEACHER,

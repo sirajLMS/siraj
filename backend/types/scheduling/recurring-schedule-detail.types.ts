@@ -47,14 +47,6 @@ export type RecurringSchedulesPaginatedResult = {
   readonly pageInfo: PageInfo | null;
 };
 
-export type UpdateRecurringClassRateInput = {
-  readonly recurringScheduleId: string;
-  /** New hourly rate. Send null to clear the recurring-class override (fall back to subject/teacher). */
-  readonly hourlyRate: string | null;
-  /** Currency for `hourlyRate`. Required when `hourlyRate` is non-null. */
-  readonly rateCurrency: CurrencyCode | null;
-};
-
 /**
  * Repository returns rows with studentName and teacherUserName attached via Object.assign
  * but typed as RecurringScheduleSelectType[]. This type represents the actual shape.

@@ -6,14 +6,14 @@ import type {
   UpdateMeetingProviderInput,
 } from "@/backend/types";
 
-export const meetingProviderFieldSchemaSchema = z.object({
+const meetingProviderFieldSchemaSchema = z.object({
   requiresMeetingUrl: z.boolean(),
   supportsUsername: z.boolean().optional(),
   supportsPassword: z.boolean().optional(),
   supportsTenantId: z.boolean().optional(),
 }) satisfies z.ZodType<MeetingProviderFieldSchema>;
 
-export const meetingProviderSubmitInputSchema = z.object({
+const meetingProviderSubmitInputSchema = z.object({
   slug: z
     .string()
     .min(1)
@@ -30,7 +30,7 @@ export const meetingProviderSubmitInputSchema = z.object({
   isActive: z.boolean().optional(),
 }) satisfies z.ZodType<MeetingProviderSubmitInput>;
 
-export const updateMeetingProviderInputSchema = z.object({
+const updateMeetingProviderInputSchema = z.object({
   slug: z
     .string()
     .min(1)

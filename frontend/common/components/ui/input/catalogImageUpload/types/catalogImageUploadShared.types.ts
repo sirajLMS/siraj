@@ -3,7 +3,7 @@
 
 import type * as React from "react";
 
-export type CatalogImageUploadPreviewShape = "square" | "circle";
+type CatalogImageUploadPreviewShape = "square" | "circle";
 
 export type CatalogImageUploadSharedProps = {
   readonly imageUrl?: string | null;

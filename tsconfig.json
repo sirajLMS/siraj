@@ -32,6 +32,14 @@
   "include": [
     "next-env.d.ts",
     "environment.d.ts",
+    "codegen.ts",
+    "drizzle.config.ts",
+    "drizzle.config.sqlite.ts",
+    "instrumentation.ts",
+    "knip.config.ts",
+    "next.config.ts",
+    "proxy.ts",
+    "vitest.config.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
     "backend/**/*.ts",
@@ -39,7 +47,11 @@
     "frontend/**/*.tsx",
     "shared/**/*.ts",
     "shared/**/*.tsx",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "test/**/*.ts",
+    "test/**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     // Dot-directories
@@ -65,16 +77,8 @@
     "out",
     "build",
     "storybook-static",
-    // Tests, stories, mocks & non-production files
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "**/*.stories.ts",
-    "**/*.stories.tsx",
-    "test/**",
+    // Non-production scratch & generated subtrees
     "scratch/**",
-    // Source subtrees deliberately excluded from type-checking
     "draft",
     "frontend/common/graphql/generated",
     "**/unRefactored_tests"

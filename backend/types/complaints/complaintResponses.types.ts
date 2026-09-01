@@ -1,7 +1,7 @@
 import type { complaintResponses } from "@/backend/db/schema";
 
-export type ComplaintResponseSelectType = typeof complaintResponses.$inferSelect;
-export type ComplaintResponseInsertType = typeof complaintResponses.$inferInsert;
+type ComplaintResponseSelectType = typeof complaintResponses.$inferSelect;
+type ComplaintResponseInsertType = typeof complaintResponses.$inferInsert;
 
 export type ComplaintResponseSubmitInput = Omit<
   ComplaintResponseInsertType,
@@ -9,7 +9,7 @@ export type ComplaintResponseSubmitInput = Omit<
   "id" | "createdAt" | "responderUserId" | "emailSent"
 >;
 
-export type ComplaintResponseInput = Omit<
+type ComplaintResponseInput = Omit<
   ComplaintResponseInsertType,
   "id" | "createdAt" | "updatedAt" | "deletedAt" | "responderUserId" | "emailSent"
 >;

@@ -40,18 +40,18 @@ function buildStudentStatusLabel(tStatus: StudentStatusLabels): Record<StudentSt
   };
 }
 
-export interface StudentProfileHeaderValues {
+interface StudentProfileHeaderValues {
   readonly title: string;
   readonly subtitle: string;
 }
 
-export interface StudentProfileStatusBadge {
+interface StudentProfileStatusBadge {
   readonly category: "studentAccount";
   readonly status: string;
   readonly label: string;
 }
 
-export type StudentProfileLoadingState = "loading" | "notFound" | "ready";
+type StudentProfileLoadingState = "loading" | "notFound" | "ready";
 
 export interface StudentProfilePageViewModel {
   readonly studentId: string;
@@ -290,5 +290,3 @@ export function useStudentProfilePageViewModel(
     onTabChange,
   };
 }
-
-export type { StudentProfileContextValue, StudentProfileQueryData };

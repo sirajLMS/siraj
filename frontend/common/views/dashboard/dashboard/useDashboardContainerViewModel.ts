@@ -6,8 +6,6 @@ import {
   resolveDashboardRole,
 } from "@/frontend/common/views/dashboard/dashboard/dashboardRoleHelpers";
 
-export type { DashboardRole };
-
 export interface DashboardContainerViewModel {
   readonly role: DashboardRole;
   readonly userName: string;

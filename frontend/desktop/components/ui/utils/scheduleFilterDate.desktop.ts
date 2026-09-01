@@ -1,6 +1,6 @@
 import { addDays, format, isValid, parse, subDays } from "date-fns";
 
-export const SCHEDULE_DATE_FILTER_FORMAT_DESKTOP = "yyyy-MM-dd";
+const SCHEDULE_DATE_FILTER_FORMAT_DESKTOP = "yyyy-MM-dd";
 
 export function parseScheduleFilterDateDesktop(date: string): Date | null {
   if (date.length === 0) {
@@ -11,7 +11,7 @@ export function parseScheduleFilterDateDesktop(date: string): Date | null {
   return isValid(parsedDate) ? parsedDate : null;
 }
 
-export function formatScheduleFilterDateDesktop(date: Date): string {
+function formatScheduleFilterDateDesktop(date: Date): string {
   return format(date, SCHEDULE_DATE_FILTER_FORMAT_DESKTOP);
 }
 

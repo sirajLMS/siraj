@@ -22,7 +22,7 @@ export type MeetingConfigFormEditInfo = {
   } | null;
 };
 
-export function emptyMeetingConfigDetails(): MeetingConfigDetailsForm {
+function emptyMeetingConfigDetails(): MeetingConfigDetailsForm {
   return {
     meetingUrl: "",
     username: "",
@@ -31,7 +31,7 @@ export function emptyMeetingConfigDetails(): MeetingConfigDetailsForm {
   };
 }
 
-export function meetingConfigDetailsFromConfig(config: MeetingConfigFormEditInfo): MeetingConfigDetailsForm {
+function meetingConfigDetailsFromConfig(config: MeetingConfigFormEditInfo): MeetingConfigDetailsForm {
   return {
     meetingUrl: config.details?.meetingUrl ?? "",
     username: config.details?.username ?? "",

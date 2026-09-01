@@ -8,13 +8,10 @@ import type { PageInfo, PaginationInput } from "@/backend/types";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type TeacherAvailabilityWindowSelectType = typeof teacherAvailabilityWindows.$inferSelect;
-export type TeacherAvailabilityWindowInsertType = typeof teacherAvailabilityWindows.$inferInsert;
 
 export type TeacherRecurringUnavailabilitySelectType = typeof teacherRecurringUnavailability.$inferSelect;
-export type TeacherRecurringUnavailabilityInsertType = typeof teacherRecurringUnavailability.$inferInsert;
 
 export type TeacherVacationRequestSelectType = typeof teacherVacationRequests.$inferSelect;
-export type TeacherVacationRequestInsertType = typeof teacherVacationRequests.$inferInsert;
 
 export type AvailabilityWindowInput = {
   dayOfWeek: DayOfWeek;

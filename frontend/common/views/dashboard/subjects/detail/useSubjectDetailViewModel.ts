@@ -13,7 +13,7 @@ import { Translation, useAppTranslation } from "@/shared/locale";
  * Mirrors the `SubjectsLabels["detail"]` shape pulled out of the i18n binding
  * so the View components receive a flat, tier-agnostic props bundle.
  */
-export interface SubjectDetailViewModelLabels {
+interface SubjectDetailViewModelLabels {
   readonly pageTitle: (name: string) => string;
   readonly notFound: string;
   readonly resourcesTitle: string;

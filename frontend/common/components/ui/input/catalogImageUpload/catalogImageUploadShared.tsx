@@ -22,7 +22,7 @@ const DEFAULT_PREVIEW_SIZE = 96;
 const DEFAULT_HELPER_TEXT_VARIANT = "bodyMd";
 const DEFAULT_BUTTON_LAYOUT: CatalogImageUploadButtonLayout = "vertical";
 
-export const PreviewBox: React.FC<PreviewBoxProps> = ({
+const PreviewBox: React.FC<PreviewBoxProps> = ({
   previewUrl,
   label,
   showError,
@@ -94,7 +94,7 @@ function getButtonSx(layout: CatalogImageUploadButtonLayout) {
   });
 }
 
-export const UploadButtons: React.FC<UploadButtonsProps> = ({
+const UploadButtons: React.FC<UploadButtonsProps> = ({
   onUploadClick,
   onRemoveClick,
   disabled,
@@ -134,7 +134,7 @@ export const UploadButtons: React.FC<UploadButtonsProps> = ({
   </Box>
 );
 
-export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorMessage }): React.ReactNode => (
+const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorMessage }): React.ReactNode => (
   <Typography
     variant="bodyMd"
     sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.error.main })}
@@ -144,7 +144,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errorMessage }): Rea
   </Typography>
 );
 
-export const UrlFallbackField: React.FC<UrlFallbackFieldProps> = ({
+const UrlFallbackField: React.FC<UrlFallbackFieldProps> = ({
   imageUrl,
   onUrlChange,
   disabled,

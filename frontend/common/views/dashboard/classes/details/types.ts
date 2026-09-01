@@ -1,13 +1,8 @@
-export type ClassDetailsViewMode = "teacher" | "parent";
+type ClassDetailsViewMode = "teacher" | "parent";
 
 export interface ActionFeedbackState {
   readonly message: string;
   readonly severity: "success" | "error";
-}
-
-export interface EntityLinkTargets {
-  readonly studentId: string;
-  readonly teacherId: string;
 }
 
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -56,18 +51,6 @@ export function formatClassDetailDate(value: string | null | undefined, locale: 
   });
 }
 
-export interface SessionActionProps {
-  readonly onStart: () => void;
-  readonly onAbsent: () => void;
-  readonly onLeave: (reason: string) => void;
-  readonly onReset: () => void;
-  readonly isStarting: boolean;
-  readonly isMarkingAbsent: boolean;
-  readonly isProcessingLeave: boolean;
-  readonly isResetting: boolean;
-  readonly error: string | null;
-}
-
 export interface ClassActionHandlers {
   readonly handleForceActivate: () => Promise<void>;
   readonly handleStop: () => Promise<void>;
@@ -78,7 +61,7 @@ export interface ClassActionHandlers {
   readonly handleOverrideRate: (rateAmount: string | null, rateCurrency: CurrencyCode | null) => Promise<void>;
 }
 
-export interface CommonViewProps {
+interface CommonViewProps {
   readonly instance: ClassInstance;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
@@ -116,7 +99,7 @@ export type StudentViewProps = CommonViewProps;
 
 // NEW FOR PLAN v5: lifted from classDetailsContent.{mobile,desktop}.tsx inline declaration
 // specs.md §4.1 Class-B unified shape (mobile/desktop content bodies were identical).
-export interface TierSessionActionProps {
+interface TierSessionActionProps {
   readonly onStart: () => Promise<void>;
   readonly onAbsent: () => Promise<void>;
   readonly onLeave: (reason: string) => Promise<void>;

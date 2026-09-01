@@ -71,7 +71,7 @@ export function getTimezonePathLabel(ianaTimezone: string, locale?: string): str
   return IANA_TIMEZONE_LABELS_MAP[normalizedTimezone]?.[localeKey] ?? normalizedTimezone;
 }
 
-export function getTimezoneTerritoryCode(ianaTimezone: string): string | null {
+function getTimezoneTerritoryCode(ianaTimezone: string): string | null {
   const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
   return resolveUiCountryCode(IANA_TIMEZONE_TERRITORY_CODES_MAP[normalizedTimezone] ?? null);
 }
@@ -114,7 +114,7 @@ export function getTimezoneOffsetLabel(ianaTimezone: string, _locale?: string, d
   return formatOffsetFromMinutes(getTimezoneOffsetMinutes(ianaTimezone, date));
 }
 
-export function getTimezoneOffsetMinutes(ianaTimezone: string, date = new Date()): number {
+function getTimezoneOffsetMinutes(ianaTimezone: string, date = new Date()): number {
   const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
   try {
     const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
@@ -129,10 +129,6 @@ export function getTimezoneSelectLabel(ianaTimezone: string, locale?: string, da
   const pathLabel = getTimezonePathLabel(ianaTimezone, locale);
   const offsetLabel = getTimezoneOffsetLabel(ianaTimezone, locale, date);
   return `${pathLabel} (${offsetLabel})`;
-}
-
-export function getTimezoneDisplayName(ianaTimezone: string, locale?: string): string {
-  return getTimezoneSelectLabel(ianaTimezone, locale);
 }
 
 export function getTimezoneOptions(locale?: string, date = new Date()): TimezoneOption[] {

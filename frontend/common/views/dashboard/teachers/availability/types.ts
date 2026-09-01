@@ -24,14 +24,6 @@ export interface TeacherAvailabilityInsights {
   readonly timezones: readonly string[];
 }
 
-export interface TeacherAvailabilityViewProps {
-  readonly availability: WeeklyAvailability;
-  readonly insights: TeacherAvailabilityInsights;
-  readonly defaultFilters: AvailabilitySearchFormData;
-  readonly loading?: boolean;
-  readonly onExportPdf?: () => void;
-}
-
 export interface WeeklyAvailabilityGridProps {
   readonly availability: WeeklyAvailability;
   readonly labels: WeeklyAvailabilityGridLabels;

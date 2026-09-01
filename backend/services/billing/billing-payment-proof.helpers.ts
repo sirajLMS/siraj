@@ -71,7 +71,7 @@ export function buildProofSnapshot(
   };
 }
 
-export function buildProofTransactionSnapshot(proof: PaymentProofSnapshot): PaymentProofTransactionSnapshot {
+function buildProofTransactionSnapshot(proof: PaymentProofSnapshot): PaymentProofTransactionSnapshot {
   return {
     type: PaymentMethodType.PROOF_UPLOAD,
     proof,

@@ -2,7 +2,7 @@ import type { SxProps, Theme } from "@mui/material";
 import type { ComponentType, ReactElement, ReactNode } from "react";
 import type { StudentProfileData } from "@/frontend/common/views/dashboard/students/quota/types";
 
-export interface QuotaFormActionComponentProps {
+interface QuotaFormActionComponentProps {
   readonly type: "submit" | "button";
   readonly variant?: "text" | "contained" | "outlined";
   readonly disabled?: boolean;
@@ -12,15 +12,15 @@ export interface QuotaFormActionComponentProps {
   readonly children: ReactNode;
 }
 
-export type QuotaFormActionComponent = ComponentType<Readonly<QuotaFormActionComponentProps>>;
+type QuotaFormActionComponent = ComponentType<Readonly<QuotaFormActionComponentProps>>;
 
-export interface QuotaFormSectionComponents {
+interface QuotaFormSectionComponents {
   readonly StudentInformationSection: () => ReactElement | null;
   readonly CourseDetailsSection: () => ReactElement | null;
   readonly ContextualHelperCards: () => ReactElement | null;
 }
 
-export interface QuotaFormHeaderRenderProps {
+interface QuotaFormHeaderRenderProps {
   readonly t: {
     readonly breadcrumbs: {
       readonly students: string;
@@ -30,15 +30,15 @@ export interface QuotaFormHeaderRenderProps {
   readonly studentData: StudentProfileData;
 }
 
-export type QuotaFormHeaderRenderer = (props: Readonly<QuotaFormHeaderRenderProps>) => ReactElement | null;
+type QuotaFormHeaderRenderer = (props: Readonly<QuotaFormHeaderRenderProps>) => ReactElement | null;
 
-export interface QuotaFormCardSx {
+interface QuotaFormCardSx {
   readonly useCardStyling: boolean;
   readonly formPadding: number;
   readonly formGap: number;
 }
 
-export interface QuotaFormActionsSx {
+interface QuotaFormActionsSx {
   readonly containerPaddingTop: number;
   readonly containerDirection: "row" | "column";
   readonly innerDirection: "row" | "column";
@@ -53,7 +53,7 @@ export interface QuotaFormActionsSx {
   readonly cancelButtonWidth: "auto" | "100%";
 }
 
-export type ContextualHelperCardsWrapper = (children: ReactElement) => ReactElement;
+type ContextualHelperCardsWrapper = (children: ReactElement) => ReactElement;
 
 export interface StudentQuotaTierConfig {
   readonly PrimaryAction: QuotaFormActionComponent;

@@ -43,21 +43,6 @@ export async function runInRollback(fn: (tx: DBTransaction) => Promise<void>): P
 }
 
 /**
- * Convenience wrapper for bun:test to automatically run a test case in a rolled-back transaction.
- * Drastically reduces boilerplate and CodeScene structural duplication scores.
- */
-export function testInRollback(name: string, fn: (tx: DBTransaction) => Promise<void>) {
-  // We dynamically import test from bun:test to avoid global pollution if not in test env
-  void import("bun:test").then(({ test }) => {
-    test(name, async () => {
-      expect(typeof fn).toBe("function");
-      await runInRollback(fn);
-    });
-    return undefined;
-  });
-}
-
-/**
  * Creates a test user in the database.
  * @param tx Database transaction
  * @param overrides Optional field overrides
@@ -287,42 +272,8 @@ function quoteIdent(ident: string): string {
   return `"${ident.replaceAll('"', '""')}"`;
 }
 
-const rlsClientCache = new Map<string, import("pg").Pool>();
-
-export async function queryAsRlsRole<T = unknown>(
-  roleName: string,
-  userId: string,
-  querySql: string,
-  params: unknown[] = []
-): Promise<T[]> {
-  if (isSqlite()) return [];
-  let pool = rlsClientCache.get(roleName);
-  if (!pool) {
-    const { Pool } = await import("pg");
-    const base = new URL(process.env.DATABASE_URL);
-    base.username = roleName;
-    base.password = "test_rls_pass";
-    pool = new Pool({ connectionString: base.toString(), max: 1 });
-    rlsClientCache.set(roleName, pool);
-  }
-
-  const client = await pool.connect();
-  try {
-    await client.query(`SELECT set_config('app.current_user_id', $1, false)`, [userId]);
-    // Ensure soft-delete bypass is not leaked across pooled connections.
-    await client.query(`SELECT set_config('app.soft_delete', '', false)`);
-    const result = await client.query(querySql, params);
-    // result.rows from pg is typed as any[], which is assignable to T[]
-    return result.rows;
-  } finally {
-    client.release();
-  }
-}
-
 export async function closeRlsClients(): Promise<void> {
-  if (isSqlite()) return;
-  await Promise.all(Array.from(rlsClientCache.values()).map(pool => pool.end()));
-  rlsClientCache.clear();
+  // No-op retained as a stable teardown hook — no per-role RLS pools are cached anymore.
 }
 
 interface TxSqlExecutor {

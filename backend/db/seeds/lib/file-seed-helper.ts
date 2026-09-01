@@ -53,7 +53,3 @@ export async function seedEntityFile(input: SeedEntityFileInput): Promise<{ url:
 
   return { url: fileInfo?.url ?? null, filePath: input.bucketPath };
 }
-
-export function getAvatarFileName(index: number, poolSize: number): string {
-  return `${String((index % poolSize) + 1).padStart(2, "0")}.png`;
-}

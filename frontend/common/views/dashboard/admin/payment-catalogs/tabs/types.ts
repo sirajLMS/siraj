@@ -1,6 +1,6 @@
 export type PaymentCatalogsTabId = "paymentCatalogs" | "meetingProviders";
 export type PaymentCatalogsTabLabelKey = "paymentCatalogs" | "meetingProviders";
-export type PaymentCatalogsTabsLabels = Record<PaymentCatalogsTabLabelKey, string>;
+type PaymentCatalogsTabsLabels = Record<PaymentCatalogsTabLabelKey, string>;
 export interface PaymentCatalogsViewLabels {
   readonly title: string;
   readonly subtitle: string;

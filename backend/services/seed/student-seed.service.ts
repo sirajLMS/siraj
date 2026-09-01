@@ -27,11 +27,6 @@ import type {
 } from "@/backend/types";
 
 export namespace StudentSeedService {
-  /** Read helper — find seed students by stable idempotency keys. */
-  export async function findByIdempotencyKeys(keys: string[], tx?: DBTransaction): Promise<StudentSelectType[]> {
-    return StudentRepository.findByIdempotencyKeys(keys, tx);
-  }
-
   /** Idempotently upsert one demo student row (seed / test-helper). */
   export async function seedStudentByKey(input: SeedStudentInput, tx?: DBTransaction): Promise<StudentSelectType> {
     assertSeedWriteAllowed("Student seed writes");
@@ -43,27 +38,6 @@ export namespace StudentSeedService {
       if (!existing) throw error;
       return existing;
     }
-  }
-
-  /** Idempotently upsert many demo students. */
-  export async function seedManyStudentsByKey(
-    inputs: readonly SeedStudentInput[],
-    tx?: DBTransaction
-  ): Promise<StudentSelectType[]> {
-    assertSeedWriteAllowed("Student seed writes");
-    return seedStudentsSequential(inputs, 0, [], tx);
-  }
-
-  /** Recursive sequential helper — preserves tx ordering for shared transactions. */
-  async function seedStudentsSequential(
-    inputs: readonly SeedStudentInput[],
-    index: number,
-    results: StudentSelectType[],
-    tx?: DBTransaction
-  ): Promise<StudentSelectType[]> {
-    if (index >= inputs.length) return results;
-    results.push(await seedStudentByKey(inputs[index], tx));
-    return seedStudentsSequential(inputs, index + 1, results, tx);
   }
 
   /** Seed-only primary teacher assignment for demo students. */

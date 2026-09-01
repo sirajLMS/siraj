@@ -3,7 +3,7 @@
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import type { PermissionsLabels } from "@/shared/locale";
 
-export type OverrideEffectiveState = "allowed" | "denied" | "not_set";
+type OverrideEffectiveState = "allowed" | "denied" | "not_set";
 
 export interface OverrideEffectiveDisplayProps {
   readonly labels: PermissionsLabels;

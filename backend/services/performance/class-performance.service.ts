@@ -10,19 +10,6 @@ export namespace ClassPerformanceService {
     return await ClassPerformanceRepository.getByClassInstanceId(classInstanceId);
   }
 
-  export async function logPerformance(
-    classInstanceId: string,
-    input: Omit<ClassInstancePerformanceInsertType, "classInstanceId" | "createdAt" | "updatedAt">
-  ) {
-    return await ClassPerformanceRepository.upsertForClassInstance(classInstanceId, input);
-  }
-  export async function listPerformanceByClassInstanceIds(
-    classInstanceIds: readonly string[],
-    tx?: DBTransaction
-  ): Promise<Map<string, ClassInstancePerformanceSelectType>> {
-    return ClassPerformanceRepository.listByClassInstanceIds(classInstanceIds, tx);
-  }
-
   export async function upsertManyPerformance(
     inputs: readonly ClassInstancePerformanceInsertType[],
     tx?: DBTransaction

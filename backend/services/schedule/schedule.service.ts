@@ -182,31 +182,6 @@ export namespace ScheduleService {
     }
   }
 
-  export async function getDailyMetrics(userId: string, targetDate: Date, tErrors: ErrorsLabels, teacherId?: string) {
-    try {
-      const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
-      if (!isAuthorized) {
-        logger.logDomainError("Unauthorized access to daily metrics", { userId });
-        throw new UnauthorizedError(tErrors.unauthorizedViewMetrics);
-      }
-
-      const viewerTimezone = await resolveViewerTimezone(userId);
-      const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacherId, undefined, viewerTimezone);
-
-      return {
-        id: `metrics-${targetDate.toISOString()}-${teacherId ?? "all"}`,
-        ...metrics,
-      };
-    } catch (error) {
-      if (error instanceof DomainError) {
-        logger.logDomainError("Daily metrics access issue", { userId, error: error.message });
-      } else {
-        logger.error("Error fetching daily metrics", { userId, error });
-      }
-      throw error;
-    }
-  }
-
   export async function getDailySchedule(
     userId: string,
     targetDate: Date,

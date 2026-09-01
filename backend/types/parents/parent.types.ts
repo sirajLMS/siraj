@@ -103,11 +103,6 @@ export type ParentDashboardScheduleRow = {
   classTimeFormatted: string;
 };
 
-export type ParentDashboardScheduleInput = {
-  date?: string | null;
-  search?: string | null;
-};
-
 export type ParentDashboardSchedulePaginatedResult = {
   id?: string;
   rows: ParentDashboardScheduleRow[];

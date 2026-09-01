@@ -1,6 +1,6 @@
-export type SystemSettingDataTypeKey = "string" | "integer" | "boolean" | "json";
+type SystemSettingDataTypeKey = "string" | "integer" | "boolean" | "json";
 
-export type SystemSettingCategoryKey =
+type SystemSettingCategoryKey =
   | "security"
   | "system"
   | "scheduling"

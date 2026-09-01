@@ -1,10 +1,10 @@
 import { z } from "zod";
 import type { SettingsSessionTabLabels } from "@/shared/locale/types/dashboard/settings/session";
 
-export const SESSION_TTL_SECONDS_MIN = 60;
-export const SESSION_TTL_SECONDS_MAX = 2_419_200;
-export const SESSION_CONCURRENT_MIN = 1;
-export const SESSION_CONCURRENT_MAX = 50;
+const SESSION_TTL_SECONDS_MIN = 60;
+const SESSION_TTL_SECONDS_MAX = 2_419_200;
+const SESSION_CONCURRENT_MIN = 1;
+const SESSION_CONCURRENT_MAX = 50;
 
 export function createSessionConfigFormSchema(
   labels: Pick<

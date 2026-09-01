@@ -5,7 +5,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { CategoryChip } from "@/frontend/common/views/dashboard/subjects/home/components/categoryChip";
 import type { CategoriesSectionProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 
-export interface CategoryChipListSlotProps {
+interface CategoryChipListSlotProps {
   /** Sx applied to each chip (mobile adds flexShrink: 0 for scroll). */
   readonly chipSx: SxProps<Theme> | undefined;
 }

@@ -91,7 +91,7 @@ function mapComplaintQueueRow(r: {
 }
 
 export namespace ComplaintRepository {
-  export type ComplaintInsertInput = ComplaintSubmitInput & {
+  type ComplaintInsertInput = ComplaintSubmitInput & {
     parentId: string;
     status: ComplaintStatus;
     createdAt?: Date;
@@ -331,7 +331,7 @@ export namespace ComplaintRepository {
    * Raw status counts for complaint metrics — the service layer
    * (`deriveComplaintMetrics`) computes the final `ComplaintMetrics`.
    */
-  export const getComplaintStatusCounts = async (
+  const getComplaintStatusCounts = async (
     whereClause?: SQL,
     txOrDb?: DBTransaction | typeof db
   ): Promise<{ status: string; count: number }[]> => {
@@ -356,7 +356,7 @@ export namespace ComplaintRepository {
    * Raw average resolution hours for ANSWERED complaints — the service layer
    * (`deriveComplaintMetrics`) uses this to compute formatted display strings.
    */
-  export const getComplaintAvgResolutionHours = async (txOrDb?: DBTransaction | typeof db): Promise<number> => {
+  const getComplaintAvgResolutionHours = async (txOrDb?: DBTransaction | typeof db): Promise<number> => {
     const q = queryDb(typeof txOrDb === "function" ? undefined : txOrDb);
 
     const epochExpr = isSqlite()

@@ -27,7 +27,7 @@ import type {
 
 export namespace TeacherAvailabilitySeedService {
   /** Idempotently upsert one availability window for a demo teacher. */
-  export async function seedAvailabilityWindow(
+  async function seedAvailabilityWindow(
     input: AvailabilityWindowUpsertInput,
     tx?: DBTransaction
   ): Promise<TeacherAvailabilityWindowSelectType> {

@@ -10,8 +10,6 @@ import type { FormActionsProps, StudentProfileData } from "@/frontend/common/vie
 import type { StudentQuotaViewModel } from "@/frontend/common/views/dashboard/students/quota/useStudentQuotaViewModel";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
-export type { StudentQuotaTierConfig };
-
 type QuotaViewModelPick = Pick<
   StudentQuotaViewModel,
   | "t"
@@ -29,7 +27,7 @@ type QuotaViewModelPick = Pick<
   | "canViewTeacher"
 >;
 
-export interface StudentQuotaContentSharedProps extends QuotaViewModelPick {
+interface StudentQuotaContentSharedProps extends QuotaViewModelPick {
   readonly studentData: StudentProfileData | null;
   readonly tier: StudentQuotaTierConfig;
 }

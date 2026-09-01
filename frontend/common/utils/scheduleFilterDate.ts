@@ -1,6 +1,6 @@
 import { addDays, format, isValid, parse, subDays } from "date-fns";
 
-export const SCHEDULE_DATE_FILTER_FORMAT = "yyyy-MM-dd";
+const SCHEDULE_DATE_FILTER_FORMAT = "yyyy-MM-dd";
 
 export function parseScheduleFilterDate(date: string): Date | null {
   if (date.length === 0) {

@@ -13,7 +13,7 @@ import type { ManualInvoiceParentFieldProps } from "@/frontend/common/views/dash
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import type { BillingManualLabels } from "@/shared/locale";
 
-export interface ManualInvoiceFormFieldsSharedConfig {
+interface ManualInvoiceFormFieldsSharedConfig {
   readonly StudentAutocomplete: ComponentType<{
     readonly value: PersonOption | null;
     readonly onChange: (option: PersonOption | null) => void;

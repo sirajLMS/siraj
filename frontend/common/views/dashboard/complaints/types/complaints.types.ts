@@ -1,7 +1,5 @@
 import { ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export type { ComplaintQueueFilter, ComplaintSubmitInput } from "@/frontend/common/graphql/generated/gql/graphql";
-
 export { ComplaintStatus };
 
 // UI/Mock-specific view types (used by mock store and views)
@@ -9,9 +7,9 @@ export type ComplaintTab = ComplaintStatus | "all";
 
 export type ComplaintPriority = "urgent" | "general";
 
-export type ParentComplaintRecordStatus = ComplaintStatus;
+type ParentComplaintRecordStatus = ComplaintStatus;
 
-export interface ParentComplaintRecordResponse {
+interface ParentComplaintRecordResponse {
   readonly text: string;
   readonly answeredAt: string;
 }

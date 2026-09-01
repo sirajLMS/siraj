@@ -2,7 +2,6 @@ import { AccountStatus, ParentStatus } from "@/frontend/common/graphql/generated
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { ParentsDirectoryLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/home/types/parentsDirectory.types";
 import type { ParentLifecycleStatus as BaseParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
-import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents";
 
 export type ParentLifecycleStatus = BaseParentLifecycleStatus;
 export type ParentAccountStatusKey = "activated" | "deactivated";
@@ -62,25 +61,6 @@ export interface ParentsDataGridLabels {
   readonly statusLabels: Record<ParentLifecycleStatus, string>;
   readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
   readonly manageLifecycle: string;
-}
-
-export interface ParentsViewLabels {
-  readonly pageTitle: string;
-  readonly pageSubtitle: string;
-  readonly searchPlaceholder: string;
-  readonly addParent: string;
-  readonly records: string;
-  readonly filterLabel: string;
-  readonly clearFilters: string;
-  // NEW FOR PLAN v5: noEntries + manageLifecycle lifted onto the parent view-labels contract
-  // so the desktop data-grid and mobile card-list call sites can compose ParentsDataGridLabels /
-  // ParentCardListLabels without touching the shared i18n schema (see CROSS-FILE DEPENDENCY in MA11 NS-1 report).
-  readonly noEntries: string;
-  readonly manageLifecycle: string;
-  readonly table: ParentsDirectoryLabels["table"];
-  readonly card: ParentsDirectoryLabels["card"];
-  readonly statusLabels: Record<ParentLifecycleStatus, string>;
-  readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
 }
 
 export interface ParentsViewModel extends BaseParentsViewProps {

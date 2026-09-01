@@ -83,7 +83,7 @@ function linearizeChannel(c: number): number {
  * relativeLuminance("#000000") // → 0
  * relativeLuminance("#1976d2") // → ~0.18 (MUI default primary)
  */
-export function relativeLuminance(hex: string): number {
+function relativeLuminance(hex: string): number {
   const { r, g, b } = parseHex(hex);
   return 0.2126 * linearizeChannel(r) + 0.7152 * linearizeChannel(g) + 0.0722 * linearizeChannel(b);
 }

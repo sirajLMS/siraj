@@ -13,7 +13,7 @@ import type { SubjectsLabels } from "@/shared/locale";
 type CategoryFormState = ReturnType<typeof useCategoryFormState>;
 type SubjectMutations = ReturnType<typeof useSubjectMutations>;
 
-export interface CategoryManagementStoreForDialogs {
+interface CategoryManagementStoreForDialogs {
   readonly createCategoryDialogOpen: boolean;
   readonly editCategoryDialogOpen: boolean;
   readonly isDeleteDialogOpen: boolean;

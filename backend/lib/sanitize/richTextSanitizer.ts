@@ -30,7 +30,7 @@
  * underline, bulleted/numbered lists, paragraphs) plus their common inline
  * aliases. No attributes are ever preserved.
  */
-export const RICH_TEXT_ALLOWED_TAGS = ["b", "br", "em", "i", "li", "ol", "p", "strong", "u", "ul"] as const;
+const RICH_TEXT_ALLOWED_TAGS = ["b", "br", "em", "i", "li", "ol", "p", "strong", "u", "ul"] as const;
 
 /**
  * Container elements removed with their full contents before the allowlist

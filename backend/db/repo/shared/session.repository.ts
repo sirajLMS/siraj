@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, lte } from "drizzle-orm";
+import { and, desc, eq, gt } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { acquireAdvisoryLock } from "@/backend/db/repo/shared/advisory-lock";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
@@ -174,7 +174,7 @@ export namespace SessionRepository {
     }
   };
 
-  export const findSessionsByUserId = async (userId: string): Promise<RedisSessionData[]> => {
+  const findSessionsByUserId = async (userId: string): Promise<RedisSessionData[]> => {
     try {
       if (!redisSessionsEnabled()) return [];
 
@@ -220,7 +220,7 @@ export namespace SessionRepository {
     };
   };
 
-  export interface SessionCreationOptions extends Omit<SessionInsertType, "lastActivity"> {
+  interface SessionCreationOptions extends Omit<SessionInsertType, "lastActivity"> {
     deviceType?: string;
     deviceName?: string;
     roleName?: string;
@@ -543,12 +543,6 @@ export namespace SessionRepository {
     }
   };
 
-  export const cleanupExpiredSessions = async (): Promise<number> => {
-    const result = await db.delete(sessionMetadata).where(lte(sessionMetadata.expiresAt, new Date())).returning();
-    logger.info(`Cleaned up ${result.length} expired session metadata records`);
-    return result.length;
-  };
-
   export const getUserSessionMetadata = async (
     userId: string,
     tx?: DBTransaction
@@ -575,7 +569,7 @@ export namespace SessionRepository {
   /**
    * Read full Redis session data (including impersonation state).
    */
-  export const getRedisSessionData = async (rawSessionId: string): Promise<RedisSessionData | null> => {
+  const getRedisSessionData = async (rawSessionId: string): Promise<RedisSessionData | null> => {
     if (!redisSessionsEnabled()) return null;
     const hashedId = hashSessionId(rawSessionId);
     const redisService = await getSessionRedisService();

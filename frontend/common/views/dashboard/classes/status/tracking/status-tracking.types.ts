@@ -150,7 +150,7 @@ export interface RawMetric {
   readonly subLabel?: string;
 }
 
-export interface StatusTrackingViewProps {
+interface StatusTrackingViewProps {
   readonly metrics: readonly RawMetric[];
   readonly rows: readonly StatusTrackingScheduleRow[];
   readonly totalSessions: number;

@@ -6,5 +6,3 @@ import { type AppLocale, locales } from "@/shared/locale";
  * component automatically.
  */
 export const ALLOWED_LOCALES: readonly AppLocale[] = locales;
-
-export type LocalizedStringRow = { readonly locale: AppLocale; readonly text: string };

@@ -44,7 +44,7 @@ const errorAccent = (theme: Theme) => theme.palette.error.main;
 const successAccent = (theme: Theme) => theme.palette.success.main;
 const primaryAccent = (theme: Theme) => theme.palette.primary.main;
 
-export const EVENT_VARIANT_CONFIG: Record<NotificationEventType, EventVariantConfig> = {
+const EVENT_VARIANT_CONFIG: Record<NotificationEventType, EventVariantConfig> = {
   [NotificationEventType.ClassScheduled]: {
     icon: <EventOutlined fontSize="small" />,
     iconColor: primaryAccent,
@@ -222,7 +222,7 @@ export const EVENT_VARIANT_CONFIG: Record<NotificationEventType, EventVariantCon
   },
 };
 
-export const COMPLAINT_BUCKET_VARIANT: EventVariantConfig = {
+const COMPLAINT_BUCKET_VARIANT: EventVariantConfig = {
   icon: <ReportProblemOutlined fontSize="small" />,
   iconColor: warningAccent,
   accentColor: warningAccent,

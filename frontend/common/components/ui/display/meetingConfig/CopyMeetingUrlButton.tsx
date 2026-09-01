@@ -7,7 +7,7 @@ import { type ReactElement, useCallback, useEffect, useRef, useState } from "rea
 import { logger } from "@/frontend/common/utils/logger";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type CopyMeetingUrlVariant = "icon" | "button" | "text";
+type CopyMeetingUrlVariant = "icon" | "button" | "text";
 
 export interface CopyMeetingUrlButtonProps {
   /** The meeting URL to copy to the clipboard. */

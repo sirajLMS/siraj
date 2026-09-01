@@ -25,10 +25,3 @@ export function getServerPaginationOptions(
   }
   return result;
 }
-
-export function isServerPagination(
-  totalCount: number | undefined,
-  onPageChange: ((page: number) => void) | undefined
-): boolean {
-  return totalCount !== undefined && onPageChange !== undefined;
-}

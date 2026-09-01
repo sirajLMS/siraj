@@ -13,7 +13,7 @@ import {
  * the pager. Callers compute `pageCount` locally (same as the legacy inline
  * block) — the shell is strictly presentational and never derives pagination.
  */
-export interface ScheduleOverviewListShellPagination {
+interface ScheduleOverviewListShellPagination {
   readonly page: number;
   readonly pageCount: number;
   readonly rowCount: number;

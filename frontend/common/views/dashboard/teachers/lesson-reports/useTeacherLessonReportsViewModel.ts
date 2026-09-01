@@ -11,7 +11,7 @@ import {
 import type { TeacherLessonReportsLabelsBySection } from "@/frontend/common/views/dashboard/teachers/lesson-reports/types/teacherLessonReports.types";
 import { type LessonReportLabels, Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
-export type StatusFilterValue = TeacherLessonReportStatusFilter;
+type StatusFilterValue = TeacherLessonReportStatusFilter;
 
 export interface TeacherLessonReportRow {
   readonly id: string | null;
@@ -25,7 +25,7 @@ export interface TeacherLessonReportRow {
   readonly rejectionReason: string | null;
 }
 
-export interface TeacherLessonReportStatusOption {
+interface TeacherLessonReportStatusOption {
   readonly value: StatusFilterValue;
   readonly label: string;
 }

@@ -28,8 +28,6 @@ export interface UserBillingProfileState {
   readonly closeSnackbar: () => void;
 }
 
-export { DEFAULT_PAGE_SIZE };
-
 export const useUserBillingProfileStore = create<UserBillingProfileState>(set => ({
   page: 0,
   pageSize: DEFAULT_PAGE_SIZE,

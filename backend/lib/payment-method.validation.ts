@@ -1,14 +1,12 @@
 import { z } from "zod";
-import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type {
   BankTransferDetails,
   CashDetails,
   MobileWalletDetails,
   OnlineAccountDetails,
   PaymentLinkDetails,
-  PaymentMethodCatalogSnapshot,
   PaymentMethodDetails,
-  PaymentMethodTransactionSnapshot,
   UserPaymentMethodSubmitInput,
 } from "@/backend/types";
 import { DEFAULT_CONTENT_LOCALE, isAppLocale, type LocalizedString } from "@/shared/types/localized-string";
@@ -16,9 +14,8 @@ import { DEFAULT_CONTENT_LOCALE, isAppLocale, type LocalizedString } from "@/sha
 // ============================================================================
 // Enum schemas (runtime mirrors of `@/backend/enum/billing/payment-method.enum`)
 // ============================================================================
-export const paymentMethodTypeEnumSchema = z.enum(PaymentMethodType);
-export const paymentDirectionEnumSchema = z.enum(PaymentDirection);
-export const identifierKindEnumSchema = z.enum(IdentifierKind);
+const paymentMethodTypeEnumSchema = z.enum(PaymentMethodType);
+const paymentDirectionEnumSchema = z.enum(PaymentDirection);
 
 // ============================================================================
 // LocalizedString schema
@@ -90,17 +87,17 @@ export const localizedStringRequiredSchema = (requiredLocales: readonly string[]
 // Per-type details schemas (spec § Validation rules, lines 227-234)
 // ============================================================================
 
-export const mobileWalletDetailsSchema = z.object({
+const mobileWalletDetailsSchema = z.object({
   walletId: z.guid(),
   phone: z.string().min(1), // E.164 validated at service layer against catalog phoneRegion
 }) satisfies z.ZodType<MobileWalletDetails>;
 
-export const paymentLinkDetailsSchema = z.object({
+const paymentLinkDetailsSchema = z.object({
   paymentLinkId: z.guid(),
   url: z.url(),
 }) satisfies z.ZodType<PaymentLinkDetails>;
 
-export const onlineAccountDetailsSchema = z.object({
+const onlineAccountDetailsSchema = z.object({
   onlineAccountId: z.guid(),
   identifier: z.string().min(1),
 }) satisfies z.ZodType<OnlineAccountDetails>;
@@ -126,7 +123,7 @@ export const bankTransferDetailsSchema = z
     }
   }) satisfies z.ZodType<BankTransferDetails>;
 
-export const cashDetailsSchema = z.object({
+const cashDetailsSchema = z.object({
   note: z.string().optional(),
 }) satisfies z.ZodType<CashDetails>;
 
@@ -157,46 +154,6 @@ export function parsePaymentMethodDetails(type: PaymentMethodType, details: unkn
     }
   }
 }
-
-// ============================================================================
-// Catalog snapshot schema (nested in the transaction snapshot)
-// ============================================================================
-
-export const paymentMethodCatalogSnapshotSchema = z.object({
-  catalogId: z.string(),
-  catalogSlug: z.string(),
-  catalogName: localizedStringRequiredSchema(),
-}) satisfies z.ZodType<PaymentMethodCatalogSnapshot>;
-
-// ============================================================================
-// PaymentMethodTransactionSnapshot — frozen on every pay-in/pay-out
-// ============================================================================
-
-export const paymentMethodTransactionSnapshotSchema = z
-  .object({
-    userPaymentMethodId: z.guid().nullable(),
-    type: paymentMethodTypeEnumSchema,
-    direction: paymentDirectionEnumSchema, // PAYIN or PAYOUT for a transaction
-    label: z.string().nullable(),
-    // `details` is validated via parsePaymentMethodDetails based on `type`
-    // before snapshot creation; here it is opaque to avoid re-running the
-    // discriminated parse on a frozen (and already-encrypted) payload.
-    details: z.unknown().pipe(z.custom<PaymentMethodDetails>()),
-    catalog: paymentMethodCatalogSnapshotSchema.nullable(),
-    snapshottedAt: z.iso.datetime({ message: "snapshottedAt must be an ISO timestamp" }),
-  })
-  .check(ctx => {
-    const data = ctx.value;
-    try {
-      parsePaymentMethodDetails(data.type, data.details);
-    } catch {
-      ctx.issues.push({
-        code: "custom",
-        message: "details do not match the declared type",
-        input: ctx.value,
-      });
-    }
-  }) satisfies z.ZodType<PaymentMethodTransactionSnapshot>;
 
 // ============================================================================
 // UserPaymentMethodSubmitInput — service boundary gate

@@ -33,13 +33,6 @@ export interface StudentStatusPageData {
   readonly upcomingClasses: readonly UpcomingClassDisplay[];
 }
 
-export interface StudentStatusViewProps {
-  readonly student: StudentStatusPageData;
-  readonly isUpdating: boolean;
-  readonly embedded?: boolean;
-  readonly onUpdateStatus: (status: StudentStatus, reason: string) => Promise<void>;
-}
-
 export interface StudentStatusHeaderProps {
   readonly student: StudentStatusPageData;
   readonly embedded?: boolean;
@@ -52,9 +45,4 @@ export interface UpcomingClassesTableProps {
 
 export interface AdminHoldControlsProps {
   readonly isUpdating: boolean;
-}
-
-export interface PolicyItemProps {
-  readonly title: string;
-  readonly description: string;
 }

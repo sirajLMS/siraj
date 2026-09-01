@@ -22,5 +22,3 @@ export interface IPushChannel {
   validateConfig(): Promise<boolean>;
   disconnect(): Promise<void>;
 }
-
-export type PushProvider = "fcm";

@@ -19,9 +19,3 @@ export const scheduleOverviewCardShellSx: ThemeStyleFn = theme => ({
   backgroundColor: theme.palette.surfaceContainer,
   borderBottom: `1px solid ${theme.palette.outlineVariant}`,
 });
-
-/** Pagination footer band. */
-export const scheduleOverviewPaginationSurfaceSx: ThemeStyleFn = theme => ({
-  borderTop: `1px solid ${theme.palette.outlineVariant}`,
-  backgroundColor: theme.palette.surfaceContainerLow,
-});

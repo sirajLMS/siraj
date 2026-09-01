@@ -1,4 +1,4 @@
-import type { LedgerStatus, ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
+import type { LedgerStatus } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 
 /**
  * Shared label contracts used by both mobile and desktop reports variants.
@@ -41,26 +41,3 @@ export interface PerformanceLedgerCardLabels {
   readonly pending: string;
   readonly hours: string;
 }
-
-export interface ReportsTotalsSectionLabels {
-  readonly totalsLabel: string;
-}
-
-export interface ReportFiltersCollapsibleLabels extends ReportFiltersFormLabels {
-  readonly title: string;
-}
-
-export interface EngagementRateCardLabels {
-  readonly rate: number;
-  readonly growth: number | null;
-  readonly title: string;
-  readonly subtitle: string;
-  readonly increaseLabel: string;
-}
-
-export interface FinancialDistributionCardLabels {
-  readonly title: string;
-  readonly subtitle: string;
-}
-
-export type ReportsReportType = ReportType;

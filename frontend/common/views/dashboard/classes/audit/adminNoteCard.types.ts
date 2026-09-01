@@ -2,7 +2,7 @@
 import type { GroupClassAuditQuery_groupClassAudit_adminNote as AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AdminNoteLabels } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 
-export interface BaseAdminNoteCardProps {
+interface BaseAdminNoteCardProps {
   readonly note: AdminNoteInfo | null | undefined;
   readonly labels: AdminNoteLabels;
   readonly onUpdate: () => void;

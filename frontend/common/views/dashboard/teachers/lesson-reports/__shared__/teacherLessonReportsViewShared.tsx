@@ -15,7 +15,7 @@ export interface TeacherLessonReportsSectionPanelSlotProps {
   readonly children: ReactNode;
 }
 
-export interface TeacherLessonReportsViewSharedSlots {
+interface TeacherLessonReportsViewSharedSlots {
   readonly PageContainer: ComponentType<{ readonly children: ReactNode }>;
   readonly PageHeader: ComponentType<{ readonly title: string }>;
   readonly SectionPanel: ComponentType<TeacherLessonReportsSectionPanelSlotProps>;

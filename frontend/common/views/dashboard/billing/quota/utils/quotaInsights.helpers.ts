@@ -28,7 +28,7 @@ export interface ExpiredSlippageData {
   readonly cumulativeRedeemed: number;
 }
 
-export function groupQuotasByMonth<T>(
+function groupQuotasByMonth<T>(
   quotas: QuotaItem[],
   getDate: (q: QuotaItem) => string | null,
   init: T,
@@ -163,10 +163,6 @@ function escapeCsvCell(cell: string): string {
     return `"${cell.replaceAll('"', '""')}"`;
   }
   return cell;
-}
-
-export interface CsvRow {
-  readonly [key: string]: string;
 }
 
 export function buildQuotaInsightsCsv(quotas: QuotaItem[], labels: QuotaLabels): string {

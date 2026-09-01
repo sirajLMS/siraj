@@ -33,7 +33,7 @@ import {
 } from "@/frontend/common/views/dashboard/reports/utils/formatReportPaidAmounts";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export interface ReportsViewLabels {
+interface ReportsViewLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly filtersTitle: string;

@@ -10,7 +10,7 @@ const EXPIRY_WARNING_THRESHOLD_DAYS = 7;
  * Returns the number of days from now until `validUntil`. Returns `null`
  * when `validUntil` is missing or cannot be parsed.
  */
-export function daysUntilExpiry(validUntil: string | null | undefined): number | null {
+function daysUntilExpiry(validUntil: string | null | undefined): number | null {
   if (validUntil == null || validUntil.length === 0) return null;
   const expiryDate = new Date(validUntil);
   if (Number.isNaN(expiryDate.getTime())) return null;

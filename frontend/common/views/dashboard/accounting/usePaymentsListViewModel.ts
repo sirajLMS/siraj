@@ -31,13 +31,13 @@ function hasAnyListFilter(v: {
 }
 
 /** One row of the accounting payments list (denormalized payment view). */
-export type AccountingPaymentRow = NonNullable<
+type AccountingPaymentRow = NonNullable<
   NonNullable<
     import("@/frontend/common/graphql/generated/gql/graphql").AccountingPaymentsQuery["accountingPayments"]
   >[number]
 >;
 
-export interface PaymentsListMetrics {
+interface PaymentsListMetrics {
   readonly total: number;
   readonly paid: number;
   readonly unpaid: number;

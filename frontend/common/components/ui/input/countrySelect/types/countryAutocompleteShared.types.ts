@@ -1,7 +1,6 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
 import type { CountryOptionRowProps } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.types";
-import type { CountryType } from "@/frontend/common/lib/locale";
 
 /** Emoji component injected into the autocomplete input adornment. */
 type LocaleEmojiSlot = React.ComponentType<{
@@ -20,7 +19,3 @@ export interface CountryAutocompleteSlots {
   /** sx prop applied to the option `<li>` wrapper Box. Mobile uses larger touch targets. */
   readonly optionBoxSx: SxProps<Theme>;
 }
-
-export type CountryAutocompleteSlotProps = Readonly<CountryAutocompleteSlots> & {
-  readonly country: CountryType | null | undefined;
-};

@@ -1,7 +1,6 @@
 import type {
   MeetingProviderFieldsFragment,
   MeetingProviderFieldsFragment_fieldSchema,
-  UserMeetingConfigFieldsFragment_details,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
 type MeetingProviderFieldVisibility = {
@@ -18,8 +17,4 @@ export function getVisibleMeetingConfigFields(provider: MeetingProviderFieldVisi
     showPassword: provider.fieldSchema?.supportsPassword === true,
     showTenantId: provider.fieldSchema?.supportsTenantId === true,
   };
-}
-
-export function getMeetingJoinUrlFromDetails(details: UserMeetingConfigFieldsFragment_details): string {
-  return details.meetingUrl ?? "";
 }

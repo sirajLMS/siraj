@@ -108,7 +108,7 @@ export interface SettingsAppearanceTabLabels {
  *   brandIdentity | colors | light | dark | logoUpload | defaultMode
  *   published | draft | exportJson
  */
-export interface AppearanceCustomizeLabels {
+interface AppearanceCustomizeLabels {
   // ─── Mode toggle ───────────────────────────────────────────────────
   /** CTA button label for entering customize mode ("Enter Customize Mode"). */
   readonly enterMode: string;

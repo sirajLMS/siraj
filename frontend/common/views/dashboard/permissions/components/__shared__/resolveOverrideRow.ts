@@ -6,7 +6,7 @@ import type { OverrideState } from "@/frontend/common/views/dashboard/permission
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { PermissionsLabels } from "@/shared/locale";
 
-export type EffectiveState = "allowed" | "denied" | "not_set";
+type EffectiveState = "allowed" | "denied" | "not_set";
 
 export interface OverrideRowData {
   readonly baselineGroups: readonly PermissionGroupsQuery_permissionGroups[];

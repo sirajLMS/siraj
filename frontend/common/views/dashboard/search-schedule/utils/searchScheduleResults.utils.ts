@@ -5,13 +5,13 @@ import type {
 } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
 import { buildDateColumns, groupGapsByDate } from "@/frontend/common/views/dashboard/search-schedule/utils";
 
-export interface SearchScheduleActiveTeacher {
+interface SearchScheduleActiveTeacher {
   readonly teacher: SearchScheduleResultItem;
   readonly dateColumns: string[];
   readonly gapsByDate: ReadonlyMap<string, readonly TeacherAvailabilityGapItem[]>;
 }
 
-export function getActiveTeachers(
+function getActiveTeachers(
   searchResult: SearchScheduleResultSummary | null | undefined
 ): readonly SearchScheduleResultItem[] {
   if (!searchResult) return [];
@@ -19,7 +19,7 @@ export function getActiveTeachers(
   return teachers.filter((teacher): teacher is SearchScheduleResultItem => teacher != null);
 }
 
-export function buildTeacherScheduleSlots(
+function buildTeacherScheduleSlots(
   searchResult: SearchScheduleResultSummary | null | undefined,
   fromDate: string,
   toDate: string
@@ -33,7 +33,7 @@ export function buildTeacherScheduleSlots(
   }));
 }
 
-export function getTotalGaps(searchResult: SearchScheduleResultSummary | null | undefined): number {
+function getTotalGaps(searchResult: SearchScheduleResultSummary | null | undefined): number {
   return searchResult?.totalGaps ?? 0;
 }
 

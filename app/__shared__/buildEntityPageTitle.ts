@@ -25,7 +25,7 @@ export async function buildTranslatedMetadata(selector: (t: Translations) => str
  * @param title — The translated title string.
  * @param id — The entity ID from route params.
  */
-export function buildIdSuffixedMetadata(title: string, id: string): Metadata {
+function buildIdSuffixedMetadata(title: string, id: string): Metadata {
   return { title: `${title} — ${id}` };
 }
 
@@ -56,7 +56,7 @@ export async function buildIdSuffixedTranslatedMetadata(
  * @param entityName — The fetched entity name (or null).
  * @param title — The translated title string used as fallback and suffix.
  */
-export function buildEntityNamePrefixedMetadata(entityName: string | null, title: string): Metadata {
+function buildEntityNamePrefixedMetadata(entityName: string | null, title: string): Metadata {
   if (entityName) {
     return { title: `${entityName} — ${title}` };
   }
@@ -87,7 +87,7 @@ export async function buildEntityNamePrefixedTranslatedMetadata(
  * @param entityName — The fetched entity name (or null).
  * @param fallbackTitle — The translated title used when entityName is null.
  */
-export function buildEntityNameOnlyMetadata(entityName: string | null, fallbackTitle: string): Metadata {
+function buildEntityNameOnlyMetadata(entityName: string | null, fallbackTitle: string): Metadata {
   if (entityName) {
     return { title: entityName };
   }
@@ -108,33 +108,6 @@ export async function buildEntityNameOnlyTranslatedMetadata(
   const [entityName, titleMetadata] = await Promise.all([fetchEntityName(), buildTranslatedMetadata(fallbackSelector)]);
   const title = titleMetadata.title;
   return buildEntityNameOnlyMetadata(entityName, typeof title === "string" ? title : "");
-}
-
-/**
- * Build a page title Metadata object using a formatting function that
- * receives the entity name (e.g. `t.pageTitle(name)` which interpolates).
- *
- * When the entity name is available, `formatTitle(entityName)` is used.
- * When the entity name is null/empty:
- * - If `fallbackTitle` is provided, it is used directly.
- * - Otherwise, `formatTitle("")` is used (to match the existing fallback
- *   behavior of calling the format function with an empty string).
- *
- * @param entityName — The fetched entity name (or null).
- * @param formatTitle — A function that accepts the entity name and returns
- *   the formatted title string.
- * @param fallbackTitle — Optional translated title used when entityName is
- *   null/empty (when different from `formatTitle("")`).
- */
-export function buildEntityNameFormattedMetadata(
-  entityName: string | null,
-  formatTitle: (name: string) => string,
-  fallbackTitle?: string
-): Metadata {
-  if (entityName) {
-    return { title: formatTitle(entityName) };
-  }
-  return { title: fallbackTitle ?? formatTitle("") };
 }
 
 /**

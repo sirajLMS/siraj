@@ -1,7 +1,7 @@
 import type { DataGridProps, GridOverlayProps, GridValidRowModel } from "@mui/x-data-grid";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 
-export type OmittedDataGridProps =
+type OmittedDataGridProps =
   | "paginationMode"
   | "paginationModel"
   | "onPaginationModelChange"

@@ -9,7 +9,7 @@ import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/co
 import { MobileContentInset, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 
 /** Labels the schedule overview toolbar needs, tier-neutral between admin pages. */
-export interface ScheduleOverviewMobileToolbarLabels {
+interface ScheduleOverviewMobileToolbarLabels {
   readonly dateLabel: string;
   readonly todayLabel: string;
   readonly previousDayLabel: string;

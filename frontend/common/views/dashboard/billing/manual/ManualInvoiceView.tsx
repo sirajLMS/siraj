@@ -22,4 +22,4 @@ export function ManualInvoiceView(props: Readonly<UseManualInvoiceViewModelProps
   const viewModel = useManualInvoiceViewModel(props);
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-export type { ManualInvoiceViewModel, UseManualInvoiceViewModelProps };
+export type { UseManualInvoiceViewModelProps };

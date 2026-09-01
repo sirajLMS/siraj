@@ -26,7 +26,7 @@ function buildSubmitterRole(
   return `${categoryLabel} • ${studentName}`;
 }
 
-export function mapAdminComplaintRow(row: ComplaintQueueRow, labels: ComplaintsAdminLabels): AdminComplaintRow {
+function mapAdminComplaintRow(row: ComplaintQueueRow, labels: ComplaintsAdminLabels): AdminComplaintRow {
   const responses = row.responses ?? [];
   const latestResponse = responses.at(-1);
 

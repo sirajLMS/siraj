@@ -1,7 +1,7 @@
 import { addMonths, formatDateKey, getDateWindow, startOfDay } from "@/backend/db/seeds/lib/date-window";
 import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
 import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
-import { InvoiceStatus, InvoiceType } from "@/backend/enum";
+import { InvoiceStatus } from "@/backend/enum";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export interface InvoiceMonthSpec {
@@ -40,7 +40,6 @@ export function buildInvoiceAmount(config: SeedConfig, parentIndex: number, mont
 }
 
 export const DEFAULT_INVOICE_CURRENCY = CurrencyCode.USD;
-export const DEFAULT_INVOICE_TYPE = InvoiceType.MONTHLY;
 
 export const EXCHANGE_PAIRS: ReadonlyArray<{
   from: CurrencyCode;

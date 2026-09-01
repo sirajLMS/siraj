@@ -129,11 +129,3 @@ export type AppearanceSettingsReturnType = Omit<AppearanceSettingsRow, never>;
  * session context, never accepted from client input (decision #20 — BOPLA).
  */
 export type AppearanceSettingsSubmitInput = AppearanceFields;
-
-/**
- * Draft input alias — semantically distinct from `SubmitInput` for
- * readability at call sites where the draft is being seeded from defaults
- * (e.g. `resetDraft` -> `DEFAULT_APPEARANCE_FIELDS`) rather than submitted
- * by a client. Structurally identical to {@link AppearanceFields}.
- */
-export type AppearanceDraftInput = AppearanceFields;

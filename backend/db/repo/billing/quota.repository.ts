@@ -40,7 +40,7 @@ const deriveIdempotencyKey = (prefix: string, ...parts: (string | undefined | nu
 };
 
 export namespace QuotaRepository {
-  export const deriveGrantIdempotencyKey = (quotaId: string): string => deriveIdempotencyKey("grant", quotaId);
+  const deriveGrantIdempotencyKey = (quotaId: string): string => deriveIdempotencyKey("grant", quotaId);
 
   export const deriveRedeemIdempotencyKey = (classInstanceId: string, quotaId: string): string =>
     deriveIdempotencyKey("redeem", classInstanceId, quotaId);
@@ -57,7 +57,7 @@ export namespace QuotaRepository {
     quotaId: string
   ): string => deriveIdempotencyKey("release", recurringScheduleId, classInstanceId, quotaId);
 
-  export const deriveExpireIdempotencyKey = (quotaId: string, periodStr: string): string =>
+  const deriveExpireIdempotencyKey = (quotaId: string, periodStr: string): string =>
     deriveIdempotencyKey("expire", quotaId, periodStr);
 
   /**
@@ -65,7 +65,7 @@ export namespace QuotaRepository {
    * Distinct from {@link deriveGrantIdempotencyKey} (the one-time creation grant)
    * so that rollover grants for different periods never collide.
    */
-  export const derivePeriodicGrantIdempotencyKey = (quotaId: string, periodStr: string): string =>
+  const derivePeriodicGrantIdempotencyKey = (quotaId: string, periodStr: string): string =>
     deriveIdempotencyKey("grant:periodic", quotaId, periodStr);
 
   /** Maximum number of overdue quotas to expire per cron tick (unbounded SELECT guard). */
@@ -840,81 +840,6 @@ export namespace QuotaRepository {
     }
 
     return { redeemedCount, quota: updated };
-  };
-
-  export const releaseForInstanceBatch = async (
-    tx: DBTransaction,
-    input: {
-      quotaId: string;
-      studentId: string;
-      recurringScheduleId?: string | null;
-      instanceIds: string[];
-      actorUserId?: string | null;
-    },
-    locale?: string
-  ): Promise<{ releasedCount: number; quota: QuotaSelectType | null }> => {
-    if (input.instanceIds.length === 0) {
-      return { releasedCount: 0, quota: null };
-    }
-
-    const now = new Date();
-
-    // Build one ledger row per instance using the same idempotency-key derivation as releaseForInstance
-    // AUDIT: ledger entries required for RELEASE batch tracking and balance reconstruction
-    const ledgerRows = input.instanceIds.map(instId => ({
-      quotaId: input.quotaId,
-      studentId: input.studentId,
-      recurringScheduleId: input.recurringScheduleId ?? null,
-      classInstanceId: instId,
-      delta: 1,
-      reason: QuotaLedgerReason.RELEASE,
-      reasonNote: `Released 1 class for instance ${instId}`,
-      actorUserId: input.actorUserId ?? null,
-      idempotencyKey: deriveReleasePoolIdempotencyKey(instId, input.quotaId),
-    }));
-
-    const inserted = await QuotaLedgerRepository.insertBatch(tx, ledgerRows);
-    const releasedCount = inserted.length;
-
-    // Credit ONLY by the actual number of newly inserted ledger rows, not the full count.
-    // This prevents over-crediting when some instances were already released (idempotency dedup).
-    if (releasedCount === 0) {
-      // Nothing newly inserted — all instances were already released; no credit needed
-      const [existing] = await tx
-        .select()
-        .from(quotas)
-        .where(and(eq(quotas.id, input.quotaId), eq(quotas.studentId, input.studentId), isNull(quotas.deletedAt)))
-        .limit(1);
-      return { releasedCount: 0, quota: existing ?? null };
-    }
-
-    const [updated] = await tx
-      .update(quotas)
-      .set({
-        remaining: sql<number>`${quotas.remaining} + ${releasedCount}`,
-        usedThisPeriod: sql<number>`CASE WHEN ${quotas.usedThisPeriod} > ${releasedCount} THEN ${quotas.usedThisPeriod} - ${releasedCount} ELSE 0 END`,
-        version: sql<number>`${quotas.version} + 1`,
-        updatedAt: now,
-      })
-      .where(
-        and(
-          eq(quotas.id, input.quotaId),
-          eq(quotas.studentId, input.studentId),
-          eq(quotas.status, QuotaStatus.ACTIVE),
-          isNull(quotas.deletedAt)
-        )
-      )
-      .returning();
-
-    if (!updated) {
-      // Concurrent transaction archived/deleted the quota between ledger insert and this UPDATE.
-      // Throwing forces tx rollback, discarding the already-inserted ledger rows and
-      // preventing ledger/aggregate drift.
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new ConflictError(tErrors.billing.quotaReleaseConcurrentModification);
-    }
-
-    return { releasedCount, quota: updated };
   };
 
   export const expireOverdue = async (tx: DBTransaction, asOfDate?: Date): Promise<QuotaSelectType[]> => {

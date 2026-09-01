@@ -103,7 +103,7 @@ export function parseCurrencyCode(value: string | null | undefined): CurrencyCod
 }
 
 /** ISO 4217 minor-unit decimals; default 2 when not listed. */
-export function getCurrencyDecimals(code: CurrencyCode | string): number {
+function getCurrencyDecimals(code: CurrencyCode | string): number {
   if (!isCurrencyCode(code)) {
     return 2;
   }

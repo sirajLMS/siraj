@@ -32,7 +32,7 @@ export interface TeacherProfileSharedSections {
   readonly stats: ReactNode;
 }
 
-export interface TeacherProfileSharedOptions {
+interface TeacherProfileSharedOptions {
   readonly renderView: (sections: TeacherProfileSharedSections) => ReactNode;
   /**
    * Tier slot that renders the teacher stats metric descriptors through the

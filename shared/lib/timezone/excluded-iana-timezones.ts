@@ -1,10 +1,10 @@
 /** IANA timezone IDs excluded from generated enums, pickers, and validation lists. */
-export const EXCLUDED_IANA_TIMEZONE_IDS = ["Asia/Jerusalem"] as const;
+const EXCLUDED_IANA_TIMEZONE_IDS = ["Asia/Jerusalem"] as const;
 
 export type ExcludedIanaTimezoneId = (typeof EXCLUDED_IANA_TIMEZONE_IDS)[number];
 
 /** Map excluded legacy/OS timezone IDs to their Palestine equivalent. */
-export const EXCLUDED_IANA_TIMEZONE_REPLACEMENTS: Readonly<Record<ExcludedIanaTimezoneId, string>> = {
+const EXCLUDED_IANA_TIMEZONE_REPLACEMENTS: Readonly<Record<ExcludedIanaTimezoneId, string>> = {
   "Asia/Jerusalem": "Asia/Hebron",
 };
 

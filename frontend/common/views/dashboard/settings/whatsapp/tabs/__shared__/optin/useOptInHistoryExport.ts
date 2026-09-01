@@ -6,13 +6,13 @@ import { toCsvValue } from "@/frontend/common/views/dashboard/settings/whatsapp/
 import type { WhatsappOptInAuditEntry } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 
 /** Date range filter shape used by the opt-in history table. */
-export interface OptInDateRange {
+interface OptInDateRange {
   readonly from: string | null;
   readonly to: string | null;
 }
 
 /** Labels required by the export hook (subset of `WhatsappLabels`). */
-export interface OptInHistoryExportLabels {
+interface OptInHistoryExportLabels {
   readonly optInHistoryDate: string;
   readonly optInHistoryAction: string;
   readonly optInHistoryChangedBy: string;

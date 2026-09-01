@@ -31,9 +31,8 @@ function cacheDeserialize(raw: string): unknown {
 function cacheSerialize(value: unknown): string {
   return JSON.stringify(value);
 }
-export const CACHE_TAG_INDEX_TTL = 86400; // 24 hours
-export const CACHE_KEY_PREFIX_ENTITY = "ec:";
-export const CACHE_KEY_PREFIX_TAG = "tag:";
+const CACHE_TAG_INDEX_TTL = 86400; // 24 hours
+const CACHE_KEY_PREFIX_TAG = "tag:";
 
 export interface CacheEntry<T> {
   version: number;
@@ -250,7 +249,7 @@ export async function invalidateTag(tag: string): Promise<void> {
   }
 }
 
-export async function invalidateTags(tags: string[]): Promise<void> {
+async function invalidateTags(tags: string[]): Promise<void> {
   await Promise.all(tags.map(invalidateTag));
 }
 

@@ -1,15 +1,8 @@
-import type {
-  ProfilePersonalFieldLabels,
-  ProfileSharedBaseLabels,
-} from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
+import type { ProfilePersonalFieldLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import {
   type TeacherProfileViewLabels,
   toTeacherBaseLabels,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-
-export function toProfileSharedBaseLabels(base: TeacherProfileViewLabels["base"]): ProfileSharedBaseLabels {
-  return toTeacherBaseLabels(base);
-}
 
 export function toTeacherSectionLabels(labels: TeacherProfileViewLabels) {
   return {

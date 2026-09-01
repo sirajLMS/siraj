@@ -1,6 +1,6 @@
 import type { AppPermission, ProfileAudience, ProfileScope } from "@/backend/enum";
 
-export type FieldGroupScope = ProfileScope;
+type FieldGroupScope = ProfileScope;
 
 export type ProfileFieldGroupKey =
   | "core_identity"

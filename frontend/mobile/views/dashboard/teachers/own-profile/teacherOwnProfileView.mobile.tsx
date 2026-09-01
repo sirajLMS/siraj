@@ -18,5 +18,3 @@ export function TeacherOwnProfileMobileView({ ...vm }: Readonly<TeacherOwnProfil
     />
   );
 }
-
-export default TeacherOwnProfileMobileView;

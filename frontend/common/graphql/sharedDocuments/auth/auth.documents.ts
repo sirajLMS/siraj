@@ -25,10 +25,10 @@ import type {
   UsersQuery,
   UsersQueryVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import { UserFieldsFragmentDoc } from "@/frontend/common/graphql/sharedDocuments/users/user-fields.documents";
+import { USER_FIELDS } from "@/frontend/common/graphql/sharedDocuments/users/user-fields.documents";
 
 export const meQueryDocument: TypedDocumentNode<MeQuery> = gql`
-  ${UserFieldsFragmentDoc}
+  ${USER_FIELDS}
   query me {
     me {
       ...UserFields
@@ -37,7 +37,7 @@ export const meQueryDocument: TypedDocumentNode<MeQuery> = gql`
 `;
 
 export const userQueryDocument: TypedDocumentNode<UserQuery, UserQueryVariables> = gql`
-  ${UserFieldsFragmentDoc}
+  ${USER_FIELDS}
   query user($id: String!) {
     user(id: $id) {
       ...UserFields
@@ -46,7 +46,7 @@ export const userQueryDocument: TypedDocumentNode<UserQuery, UserQueryVariables>
 `;
 
 export const usersQueryDocument: TypedDocumentNode<UsersQuery, UsersQueryVariables> = gql`
-  ${UserFieldsFragmentDoc}
+  ${USER_FIELDS}
   query users($search: String, $limit: Int, $offset: Int) {
     users(search: $search, limit: $limit, offset: $offset) {
       ...UserFields
@@ -55,7 +55,7 @@ export const usersQueryDocument: TypedDocumentNode<UsersQuery, UsersQueryVariabl
 `;
 
 export const loginMutationDocument: TypedDocumentNode<LoginMutation, LoginMutationVariables> = gql`
-  ${UserFieldsFragmentDoc}
+  ${USER_FIELDS}
   mutation login($input: LoginInput!) {
     login(input: $input) {
       token
@@ -67,7 +67,7 @@ export const loginMutationDocument: TypedDocumentNode<LoginMutation, LoginMutati
 `;
 
 export const demoLoginMutationDocument: TypedDocumentNode<DemoLoginMutation, DemoLoginMutationVariables> = gql`
-    ${UserFieldsFragmentDoc}
+    ${USER_FIELDS}
     mutation demoLogin($input: DemoLoginInput!) {
       demoLogin(input: $input) {
         token
@@ -85,7 +85,7 @@ export const logoutMutationDocument: TypedDocumentNode<LogoutMutation> = gql`
 `;
 
 export const refreshTokenMutationDocument: TypedDocumentNode<RefreshTokenMutation> = gql`
-  ${UserFieldsFragmentDoc}
+  ${USER_FIELDS}
   mutation refreshToken {
     refreshToken {
       token

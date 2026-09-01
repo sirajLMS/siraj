@@ -65,7 +65,7 @@ import { parseAppearanceEnvBranding, zAppearanceFields } from "@/shared/schemas/
  * `APP_THEME_PRESET`) is overridden via the Settings → Environment Config tab
  * (AC-30) — see {@link revalidateAppearanceCache}.
  */
-export const NAME_APPEARANCE = "appearance";
+const NAME_APPEARANCE = "appearance";
 
 /**
  * Invalidates the SSR appearance cache so the next read picks up new branding.
@@ -225,7 +225,7 @@ export const DEFAULT_APPEARANCE_FIELDS: AppearanceFields = {
 /**
  * Options for {@link AppearanceSettingsService.getAppearance}.
  */
-export interface GetAppearanceOptions {
+interface GetAppearanceOptions {
   /**
    * When `true`, the GraphQL resolver exposes the per-mode `colors` from
    * `draftFields` (admin draft view). When `false`, only published fields are

@@ -2,7 +2,7 @@
 
 import { Stack, Typography } from "@mui/material";
 
-export interface SettingsCardBodyField {
+interface SettingsCardBodyField {
   readonly label: string;
   readonly value: string;
 }

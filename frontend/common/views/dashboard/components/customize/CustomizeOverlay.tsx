@@ -4,7 +4,6 @@ import { Box } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCustomizeMode } from "@/frontend/common/hooks/useCustomizeMode";
-import type { AppearancePreset } from "@/frontend/common/providers/theme/presets";
 import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 import { AppearanceErrorBoundary } from "@/frontend/common/views/dashboard/components/customize/AppearanceErrorBoundary";
 import { ColorField } from "@/frontend/common/views/dashboard/components/customize/ColorEditorSection";
@@ -285,8 +284,3 @@ CustomizeOverlay.ColorField = function CustomizeOverlayColorField({
 }: Readonly<CustomizeOverlayColorFieldProps>) {
   return <ColorField label={label} hex={hex} onChange={onChange} />;
 };
-
-// Re-export `AppearancePreset` type so consumers of the compound API can
-// reference the preset shape without a separate import from the
-// providers package. (Type-only re-export — no runtime impact.)
-export type { AppearancePreset };

@@ -1,19 +1,6 @@
-import {
-  type SearchSuggestionsQuery_searchSuggestions,
-  SuggestionStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql";
-
-export type {
-  AdminSuggestionsQuery_adminSuggestions as AdminSuggestionResult,
-  AdminSuggestionsQuery_adminSuggestions_metrics as SuggestionMetrics,
-  AdminSuggestionsQuery_adminSuggestions_rows as Suggestion,
-  SubmitSuggestionInput,
-  SuggestionFilter,
-} from "@/frontend/common/graphql/generated/gql/graphql";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export { SuggestionStatus };
-
-export type SearchResult = SearchSuggestionsQuery_searchSuggestions;
 
 export interface AdminSuggestionsSummary {
   readonly pending: number;

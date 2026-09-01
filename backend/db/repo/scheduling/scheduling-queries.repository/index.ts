@@ -1,12 +1,3 @@
-export type {
-  DailyScheduleMetricFilter,
-  FutureClassRow,
-  StatusTrackingRow,
-  TeacherAssignedClassRow,
-  UpcomingClassRow,
-  WeeklyScheduleGridRow,
-  WeeklyWorkloadMetrics,
-} from "@/backend/types";
 export * from "./class-status-events.repository";
 export * from "./daily-schedule.repository";
 export * from "./expired-instances.repository";

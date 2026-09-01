@@ -345,6 +345,12 @@ describe("GraphQL accounting credit-hours surface", () => {
     await expectMutationError(state.teacherToken, toggleAccountingPaymentPaidStatusMutationDocument, {
       input: { id: state.paymentId, isPaidStatusOn: true, expectedInvoiceVersion: null },
     });
+
+    // Denied writes must be no-ops: the plan targeted by the denied archive stays active.
+    const planAfterDeniedWrites = await authenticatedRequest(state.adminToken, "query", packagePlanQueryDocument, {
+      id: state.planId,
+    });
+    expect(planAfterDeniedWrites.packagePlan?.active).toBe(true);
   });
 
   test("Tier 4: associated family reads work; cross-family reads are denied (IDOR)", async () => {

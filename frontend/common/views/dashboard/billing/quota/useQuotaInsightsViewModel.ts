@@ -19,16 +19,16 @@ import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingQuota } from "@/shared/locale/namespaces";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
-export type InsightsDateRange = "all" | "month" | "quarter" | "year";
+type InsightsDateRange = "all" | "month" | "quarter" | "year";
 
-export interface QuotaInsightsFilters {
+interface QuotaInsightsFilters {
   readonly dateRange: InsightsDateRange;
   readonly kind: QuotaKind | null;
   readonly status: QuotaStatus | null;
   readonly studentId: string | null;
 }
 
-export interface QuotaInsightsChartData {
+interface QuotaInsightsChartData {
   readonly purchasesOverTime: { readonly month: string; readonly purchases: number; readonly classes: number }[];
   readonly redemptionByType: { readonly name: string; readonly value: number; readonly pct: number }[];
   readonly deliveryRate: { readonly name: string; readonly count: number }[];
@@ -39,7 +39,7 @@ export interface QuotaInsightsChartData {
   }[];
 }
 
-export interface QuotaInsightsMetricsData {
+interface QuotaInsightsMetricsData {
   readonly activeQuotasCount: number;
   readonly totalClassesRemaining: number;
   readonly totalReserved: number;

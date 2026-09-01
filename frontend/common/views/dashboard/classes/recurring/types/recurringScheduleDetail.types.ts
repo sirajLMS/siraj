@@ -1,6 +1,6 @@
 import type { RecurringRateSectionLabels } from "@/frontend/common/views/dashboard/classes/recurring/RecurringRateSection";
 
-export interface RecurringScheduleDetailShellLabels {
+interface RecurringScheduleDetailShellLabels {
   readonly pageTitle: string;
   readonly subtitle: string;
   readonly breadcrumbs: readonly { readonly label: string; readonly href?: string }[];
@@ -9,7 +9,7 @@ export interface RecurringScheduleDetailShellLabels {
   readonly retryLabel: string;
 }
 
-export interface RecurringScheduleDetailFormLabels {
+interface RecurringScheduleDetailFormLabels {
   readonly rate: RecurringRateSectionLabels;
 }
 

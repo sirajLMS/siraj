@@ -3,7 +3,7 @@ import { GcpAdapter } from "@/backend/storage/disk/gcp/adapter";
 import { getGcpStorageClient } from "@/backend/storage/disk/gcp-auth";
 import type { StorageService } from "@/backend/storage/disk/storage.service.interface";
 
-export async function createGcpStorage(): Promise<Storage> {
+async function createGcpStorage(): Promise<Storage> {
   const storage = await getGcpStorageClient();
   return storage;
 }

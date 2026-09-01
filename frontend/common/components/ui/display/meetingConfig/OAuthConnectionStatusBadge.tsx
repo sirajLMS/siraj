@@ -6,7 +6,7 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
-export type OAuthBadgeStatus = "connected" | "expiring" | "expired" | "disconnected";
+type OAuthBadgeStatus = "connected" | "expiring" | "expired" | "disconnected";
 
 export interface OAuthConnectionStatusBadgeProps {
   readonly status: OAuthBadgeStatus;

@@ -3,16 +3,16 @@ import type { ManageOverridesState } from "@/frontend/common/views/dashboard/per
 import type { ManageOverridesDialogProps } from "@/frontend/common/views/dashboard/permissions/types/manageOverridesDialog.types";
 import type { PermissionsLabels } from "@/shared/locale";
 
-export interface ManageOverridesDialogVariant {
+interface ManageOverridesDialogVariant {
   readonly fullWidth?: boolean;
   readonly maxWidth?: "xs" | "sm" | "md" | "lg";
   readonly fullScreen?: boolean;
   readonly slotPropsPaperSx?: Record<string, unknown>;
 }
 
-export type ManageOverridesDialogVariantKind = "desktop" | "mobile";
+type ManageOverridesDialogVariantKind = "desktop" | "mobile";
 
-export interface ManageOverridesDialogSlotProps {
+interface ManageOverridesDialogSlotProps {
   readonly variant: ManageOverridesDialogVariantKind;
   readonly dialogVariant: ManageOverridesDialogVariant;
   readonly formIdSuffix: "desktop" | "mobile";

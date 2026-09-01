@@ -23,5 +23,3 @@ export function TeacherDuesContainer() {
 
   return <SnackbarContainer viewModel={viewModel} mobile={lazyViews.mobile} desktop={lazyViews.desktop} />;
 }
-
-export type { TeacherDuesViewModel };

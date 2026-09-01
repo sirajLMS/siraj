@@ -22,5 +22,3 @@ export function StudentCreditsContainer() {
   const viewModel = useStudentCreditsViewModel();
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { StudentCreditsViewModel };

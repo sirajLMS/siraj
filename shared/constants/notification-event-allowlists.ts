@@ -65,9 +65,9 @@ export const SUPERVISOR_NOTIFICATION_EVENTS: readonly NotificationEventTypeKey[]
   "COMPLAINT_RESPONSE",
 ];
 
-export const PARENT_NOTIFICATION_EVENTS: readonly NotificationEventTypeKey[] | "ALL" = "ALL";
-export const TEACHER_NOTIFICATION_EVENTS: readonly NotificationEventTypeKey[] | "ALL" = "ALL";
-export const STAFF_NOTIFICATION_EVENTS: readonly NotificationEventTypeKey[] | "ALL" = "ALL";
+const PARENT_NOTIFICATION_EVENTS: readonly NotificationEventTypeKey[] | "ALL" = "ALL";
+const TEACHER_NOTIFICATION_EVENTS: readonly NotificationEventTypeKey[] | "ALL" = "ALL";
+const STAFF_NOTIFICATION_EVENTS: readonly NotificationEventTypeKey[] | "ALL" = "ALL";
 
 const ROLE_ALLOWLIST_MAP: Readonly<Record<NotificationPreferenceRole, readonly NotificationEventTypeKey[] | "ALL">> = {
   student: STUDENT_NOTIFICATION_EVENTS,

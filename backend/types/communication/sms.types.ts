@@ -21,12 +21,3 @@ export interface ISmsChannel {
   validateConfig(): Promise<boolean>;
   disconnect(): Promise<void>;
 }
-
-export type SmsProvider = "twilio";
-
-/** Data shape for the urgent complaint response SMS template. */
-export interface UrgentComplaintResponseSmsData {
-  readonly parentName: string;
-  readonly complaintTitle: string;
-  readonly responseSummary: string;
-}

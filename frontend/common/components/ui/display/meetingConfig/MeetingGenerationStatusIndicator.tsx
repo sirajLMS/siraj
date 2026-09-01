@@ -28,7 +28,7 @@ import { useId, useState } from "react";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { MeetingGenerationLabels } from "@/shared/locale/types/dashboard/meeting-generation";
 
-export type GenerationIndicatorStatus = "pending" | "success" | "failed";
+type GenerationIndicatorStatus = "pending" | "success" | "failed";
 
 export interface MeetingGenerationStatusIndicatorProps {
   readonly status: GenerationIndicatorStatus | (string & {});

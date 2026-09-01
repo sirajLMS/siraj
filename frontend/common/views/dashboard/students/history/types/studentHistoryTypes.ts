@@ -1,4 +1,1 @@
-export type {
-  StudentHistoryMetrics,
-  StudentHistorySessionRow,
-} from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
+export type { StudentHistoryMetrics } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";

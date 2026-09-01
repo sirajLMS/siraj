@@ -20,9 +20,9 @@ import {
   useAppTranslation,
 } from "@/shared/locale";
 
-export type CreditReasonFilter = "ALL" | CreditReason;
+type CreditReasonFilter = "ALL" | CreditReason;
 
-export interface CreditReasonFilterOption {
+interface CreditReasonFilterOption {
   readonly value: CreditReasonFilter;
   readonly label: string;
 }
@@ -95,8 +95,6 @@ export interface StudentCreditsViewModel {
   readonly onBackToDashboard: () => void;
   readonly reasonLabel: (reason: CreditReason | null) => string;
 }
-
-export type UseStudentCreditsViewModelProps = Record<string, never>;
 
 interface UseCreditQueriesState {
   readonly studentId: string | null;

@@ -94,5 +94,3 @@ export function TeachersMobileView({
     </MobilePageContainer>
   );
 }
-
-export default TeachersMobileView;

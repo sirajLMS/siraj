@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/client/react";
 import { classInstanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 
-export function useClassDetailsQuery(id: string) {
+function useClassDetailsQuery(id: string) {
   const { data, loading, error } = useQuery(classInstanceQueryDocument, {
     variables: { id },
     skip: !id,

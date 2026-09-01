@@ -56,7 +56,7 @@ export const APPEARANCE_HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
  * Both fields are 6-digit hex strings. Reused for `colors.light` and
  * `colors.dark` (mirrors the `$defs.perModeColors` reuse in the JSON Schema).
  */
-export const zPerModeColors = z.object({
+const zPerModeColors = z.object({
   primaryMain: z.string().regex(APPEARANCE_HEX_PATTERN, "must be a 6-digit hex color (e.g. #2DD4BF)"),
   secondaryMain: z.string().regex(APPEARANCE_HEX_PATTERN, "must be a 6-digit hex color (e.g. #9333EA)"),
 });
@@ -128,7 +128,7 @@ export type AppearanceFieldsZod = z.infer<typeof zAppearanceFields>;
  * @example
  *   const safeInput = zAppearanceFieldsSafe(input, DEFAULT_APPEARANCE_FIELDS);
  */
-export function zAppearanceFieldsSafe(data: unknown, fallback: AppearanceFieldsZod): AppearanceFieldsZod {
+function zAppearanceFieldsSafe(data: unknown, fallback: AppearanceFieldsZod): AppearanceFieldsZod {
   const result = zAppearanceFields.safeParse(data);
   return result.success ? result.data : fallback;
 }

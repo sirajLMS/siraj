@@ -10,7 +10,7 @@ import type {
   UploadLearningResourceMutationVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const learningResourceRowFragment = gql`
+const learningResourceRowFragment = gql`
 fragment LearningResourceRow on LearningResourceRow {
   id
   displayName

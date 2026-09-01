@@ -7,7 +7,7 @@ import type {
 import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers/futureSchedule";
 
 /** Props shared across both tiers — identical for FutureClassCardDesktop and FutureClassCardMobile. */
-export interface FutureClassCardSharedProps {
+interface FutureClassCardSharedProps {
   readonly item: TeacherFutureScheduleQuery_teacherFutureSchedule_classes;
   readonly onRequestLeave?: () => void;
   readonly labels: TeacherFutureScheduleLabels;

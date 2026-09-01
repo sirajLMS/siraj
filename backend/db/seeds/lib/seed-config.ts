@@ -1,4 +1,4 @@
-export type SeedProfile = "minimal" | "standard";
+type SeedProfile = "minimal" | "standard";
 
 export interface SeedConfig {
   profile: SeedProfile;
@@ -79,14 +79,6 @@ export function loadSeedConfig(): SeedConfig {
     anchorDate: parseAnchorDate(),
     ...defaults,
   };
-}
-
-export function getTotalTeachers(config: SeedConfig): number {
-  return 1 + config.extraTeachers;
-}
-
-export function getTotalParents(config: SeedConfig): number {
-  return 1 + config.extraParents;
 }
 
 export function getTotalStudents(config: SeedConfig): number {

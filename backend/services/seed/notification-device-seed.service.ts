@@ -17,7 +17,7 @@ import type { DBTransaction, RegisterDeviceTokenInput, UserDeviceTokenSelectType
 
 export namespace NotificationDeviceSeedService {
   /** Idempotently register one demo device token for a user. */
-  export async function seedDeviceToken(
+  async function seedDeviceToken(
     userId: string,
     input: RegisterDeviceTokenInput,
     tx?: DBTransaction

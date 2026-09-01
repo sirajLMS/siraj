@@ -48,10 +48,6 @@ export namespace AuditService {
     }
   }
 
-  export async function upsertManyAuditLogs(inputs: readonly CreateAuditLogInput[], tx?: DBTransaction): Promise<void> {
-    return AuditRepository.upsertManyAuditLogs(inputs, tx);
-  }
-
   export async function createManyAdminAuditLogs(
     inputs: readonly CreateAdminAuditLogInput[],
     tx?: DBTransaction
@@ -67,12 +63,5 @@ export namespace AuditService {
       }
       throw error;
     }
-  }
-
-  export async function upsertManyAdminAuditLogs(
-    inputs: readonly CreateAdminAuditLogInput[],
-    tx?: DBTransaction
-  ): Promise<void> {
-    return AuditRepository.upsertManyAdminAuditLogs(inputs, tx);
   }
 }

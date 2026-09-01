@@ -4,7 +4,7 @@ export type BillingTabId = "overview" | "invoices" | "exchangeRates" | "currenci
 /** I18n label keys (map to `dashboard.billing.tabs.*` namespace). */
 export type BillingTabLabelKey = "overview" | "invoices" | "exchangeRates" | "currencies" | "hedges" | "manual";
 
-export type BillingTabsLabels = Record<BillingTabLabelKey, string>;
+type BillingTabsLabels = Record<BillingTabLabelKey, string>;
 
 /** Full labels object consumed by the billing tier shells (page title + subtitle + tabs). */
 export interface BillingViewLabels {
@@ -28,11 +28,3 @@ export const BILLING_TAB_IDS: readonly BillingTabId[] = [
   "hedges",
   "manual",
 ] as const;
-
-/** Type for tab definition used in config. */
-export interface BillingTabDefinition {
-  readonly id: BillingTabId;
-  readonly labelKey: BillingTabLabelKey;
-  readonly permissions: readonly string[];
-  readonly icon: React.ComponentType<{ fontSize?: "inherit" | "small" | "medium" | "large" }>;
-}

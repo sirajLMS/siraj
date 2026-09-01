@@ -3,7 +3,7 @@ export interface MonthOption {
   readonly label: string;
 }
 
-export function generateMonthOptions(monthFormat: "long" | "short" = "long"): readonly MonthOption[] {
+function generateMonthOptions(monthFormat: "long" | "short" = "long"): readonly MonthOption[] {
   const now = new Date();
   const opts: MonthOption[] = [];
   for (let i = -6; i <= 6; i += 1) {

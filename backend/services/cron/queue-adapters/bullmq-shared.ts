@@ -7,7 +7,7 @@ import type { CronQueueAdapter } from "@/backend/types";
  * Once exceeded, the oldest ~20% are evicted to amortize cost across insertions.
  * Shared by all queue adapters that maintain in-memory job-tracking maps.
  */
-export const MAP_MAX_SIZE = 10_000;
+const MAP_MAX_SIZE = 10_000;
 
 /**
  * Prune a pair of closure-scoped Maps when the primary map exceeds `MAP_MAX_SIZE`.
@@ -38,9 +38,9 @@ export function pruneMaps<KA extends string, VA>(
 }
 
 /** Shared BullMQ import helper — avoids duplicating dynamic-import logic across adapters. */
-export type BullMQModule = typeof import("bullmq");
+type BullMQModule = typeof import("bullmq");
 
-export async function tryImportBullMQ(): Promise<BullMQModule | null> {
+async function tryImportBullMQ(): Promise<BullMQModule | null> {
   try {
     // Use variable to avoid static module resolution for optional dependency
     const moduleName = "bullmq";

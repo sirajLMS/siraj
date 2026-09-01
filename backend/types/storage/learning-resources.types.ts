@@ -1,7 +1,6 @@
 import type { learningResources } from "@/backend/db/schema/communications/communications";
 
-export type LearningResourceSelectType = typeof learningResources.$inferSelect;
-export type LearningResourceInsertType = typeof learningResources.$inferInsert;
+type LearningResourceSelectType = typeof learningResources.$inferSelect;
 
 export type LearningResourceReturnType = Omit<LearningResourceSelectType, "deletedAt"> & {
   fileSize?: number | null;

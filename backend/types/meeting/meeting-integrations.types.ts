@@ -15,8 +15,6 @@ import type {
 import type { EnvironmentConfig } from "@/backend/lib/env";
 import type { MeetingProvider, MeetingProviderKind } from "@/backend/types";
 
-export type { MeetingConnectionTestMode, MeetingIntegrationConnectedAccountStatus };
-
 // ============================================================================
 // Provider summary
 // ============================================================================

@@ -7,8 +7,6 @@ import { PermissionCatalogSectionDesktop } from "@/frontend/desktop/views/dashbo
 import { PermissionGroupsDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionGroupsDataGrid.desktop";
 import { UserOverridesDataGridDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/userOverridesDataGrid.desktop";
 
-export type TabKey = "groups" | "catalog" | "overrides";
-
 export function PermissionTabContentDesktop({
   labels,
   activeTab,

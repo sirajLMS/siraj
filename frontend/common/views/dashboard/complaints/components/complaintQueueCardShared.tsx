@@ -20,7 +20,7 @@ type StatusBadgeComponentProps = {
 
 type ButtonComponentType = React.FC<Readonly<ButtonProps>>;
 
-export interface ComplaintQueueCardSlotProps {
+interface ComplaintQueueCardSlotProps {
   readonly Root: React.FC<{
     readonly children: ReactNode;
     readonly isUnanswered: boolean;

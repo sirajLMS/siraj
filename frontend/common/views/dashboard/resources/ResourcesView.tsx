@@ -23,4 +23,4 @@ export function ResourcesView(props: Readonly<UseResourcesViewModelProps>) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { ResourcesViewModel, UseResourcesViewModelProps };
+export type { UseResourcesViewModelProps };

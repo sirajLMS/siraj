@@ -110,12 +110,6 @@ export namespace SupportedCurrencyRepository {
     return results;
   }
 
-  export async function getByCode(code: CurrencyCode, tx?: DBTransaction): Promise<SupportedCurrencyReturnType | null> {
-    const client = queryDb(tx);
-    const [row] = await client.select().from(supportedCurrencies).where(eq(supportedCurrencies.code, code)).limit(1);
-    return row ? toReturnType(row) : null;
-  }
-
   /**
    * Soft-deactivate a supported currency by setting `isActive = false`.
    * Caller must guard with {@link isCurrencyInUse} before invoking.

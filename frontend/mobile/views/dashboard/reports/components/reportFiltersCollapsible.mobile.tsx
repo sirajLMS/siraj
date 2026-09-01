@@ -2,15 +2,8 @@
 
 import { ExpandMoreOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Button, Collapse, IconButton, Typography } from "@mui/material";
-import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
-import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import type { ReportFiltersCollapsibleProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
-import {
-  ReportFiltersFormMobile,
-  type ReportFiltersFormMobileLabels,
-} from "@/frontend/mobile/views/dashboard/reports/components/reportFiltersForm.mobile";
-
-export type ReportFiltersCollapsibleMobileLabels = ReportFiltersFormLabels;
+import { ReportFiltersFormMobile } from "@/frontend/mobile/views/dashboard/reports/components/reportFiltersForm.mobile";
 
 // VARIANT JUSTIFICATION: extra fields title, expanded, onToggleExpanded —
 // the desktop twin of this component is a permanently-expanded panel that
@@ -103,6 +96,3 @@ export function ReportFiltersCollapsibleMobile({
     </Box>
   );
 }
-
-export type _CollapsibleLabelsUnused = ReportFiltersFormMobileLabels;
-export type _CollapsibleReportTypeUnused = ReportType;

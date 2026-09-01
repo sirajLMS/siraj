@@ -58,7 +58,7 @@ export interface PayrollReportAggregates {
 }
 
 /** Result of a completed CSV export download; null means the export failed. */
-export interface PayrollCsvExportOutcome {
+interface PayrollCsvExportOutcome {
   /** True when the exported set exceeded the server-side 10 000-row export ceiling. */
   readonly truncated: boolean;
 }

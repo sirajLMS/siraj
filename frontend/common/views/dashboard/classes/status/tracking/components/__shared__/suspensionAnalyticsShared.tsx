@@ -9,8 +9,6 @@ import type {
   SuspensionAnalyticsProps,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/status-tracking.types";
 
-export type { SuspensionAnalyticsTierConfig };
-
 const BAR_HEIGHTS: ReadonlyArray<{ readonly pct: number; readonly isHighlighted: boolean }> = [
   { pct: 40, isHighlighted: false },
   { pct: 55, isHighlighted: false },

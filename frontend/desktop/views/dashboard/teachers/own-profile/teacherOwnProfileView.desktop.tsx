@@ -36,5 +36,3 @@ export function TeacherOwnProfileDesktopView({ ...vm }: Readonly<TeacherOwnProfi
     />
   );
 }
-
-export default TeacherOwnProfileDesktopView;

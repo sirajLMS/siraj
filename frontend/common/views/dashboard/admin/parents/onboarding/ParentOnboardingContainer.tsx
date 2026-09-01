@@ -25,4 +25,4 @@ export function ParentOnboardingContainer(_props: Readonly<UseParentOnboardingVi
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { ParentOnboardingViewModel, UseParentOnboardingViewModelProps };
+export type { UseParentOnboardingViewModelProps };

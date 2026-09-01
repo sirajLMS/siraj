@@ -1,6 +1,6 @@
 export type FeedbackManageTabId = "complaints" | "suggestions";
 export type FeedbackManageTabLabelKey = "complaints" | "suggestions";
-export type FeedbackManageTabsLabels = Record<FeedbackManageTabLabelKey, string>;
+type FeedbackManageTabsLabels = Record<FeedbackManageTabLabelKey, string>;
 export interface FeedbackManageViewLabels {
   readonly title: string;
   readonly subtitle: string;

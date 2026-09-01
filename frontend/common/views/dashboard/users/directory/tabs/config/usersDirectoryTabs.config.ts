@@ -7,7 +7,7 @@ import type {
   UsersDirectoryTabLabelKey,
 } from "@/frontend/common/views/dashboard/users/directory/tabs/types";
 
-export const USERS_DIRECTORY_TABS: readonly TabDefinition<UsersDirectoryTabId, UsersDirectoryTabLabelKey>[] = [
+const USERS_DIRECTORY_TABS: readonly TabDefinition<UsersDirectoryTabId, UsersDirectoryTabLabelKey>[] = [
   { id: "teachers", labelKey: "teachers", permissions: PAGE_PERMISSIONS.usersTeachers, icon: SchoolOutlined },
   { id: "parents", labelKey: "parents", permissions: PAGE_PERMISSIONS.usersParents, icon: Diversity1Outlined },
   { id: "students", labelKey: "students", permissions: PAGE_PERMISSIONS.usersStudents, icon: PersonOutlined },

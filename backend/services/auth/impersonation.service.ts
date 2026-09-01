@@ -16,7 +16,7 @@ import type * as Types from "@/backend/types";
 import type { SessionSelectType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
-export const IMPERSONATION_TTL_MS = 30 * 60 * 1000;
+const IMPERSONATION_TTL_MS = 30 * 60 * 1000;
 
 function omit<T extends Record<string, unknown>, K extends keyof T>(obj: T, key: K): Omit<T, K> {
   const result = { ...obj };
@@ -237,11 +237,7 @@ export namespace ImpersonationService {
     };
   }
 
-  export async function clearExpiredImpersonation(rawSessionId: string, actorUserId: string): Promise<void> {
-    await getActiveDbImpersonation(rawSessionId, actorUserId);
-  }
-
-  export type ResolvedAuthIdentity = {
+  type ResolvedAuthIdentity = {
     effectiveUserId: string;
     actorUserId?: string;
     isImpersonating: boolean;

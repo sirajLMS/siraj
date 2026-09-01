@@ -11,7 +11,7 @@ import {
 import type { DBTransaction } from "@/backend/types";
 
 export namespace DstMigrationRepository {
-  export type RecurringScheduleRow = {
+  type RecurringScheduleRow = {
     id: string;
     studentId: string;
     teacherId: string;

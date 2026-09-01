@@ -6,7 +6,7 @@ import type { BaseAvatarVariant } from "@/frontend/common/components/ui/avatar/B
  * Card container slot — accepts `sx` and `children`.
  * Used by `BaseCard` (desktop) and `MobileBaseCard` (mobile).
  */
-export interface SharedCardContainerProps {
+interface SharedCardContainerProps {
   readonly sx?: SxProps<Theme>;
   readonly onClick?: () => void;
   readonly children: ReactNode;
@@ -16,7 +16,7 @@ export interface SharedCardContainerProps {
  * User avatar slot — accepts `src`, `label`, `size`, `variant`, `sx`, `children`.
  * Used by `DesktopUserAvatar` and `MobileUserAvatar`.
  */
-export interface SharedUserAvatarProps {
+interface SharedUserAvatarProps {
   readonly src?: string | null;
   readonly label?: string;
   readonly size?: number;
@@ -29,7 +29,7 @@ export interface SharedUserAvatarProps {
  * Status badge slot — accepts `category`, `status`, `label`.
  * Used by `DesktopStatusBadge` and `MobileStatusBadge`.
  */
-export interface SharedStatusBadgeProps {
+interface SharedStatusBadgeProps {
   readonly category: "studentAccount";
   readonly status: string;
   readonly label: string;

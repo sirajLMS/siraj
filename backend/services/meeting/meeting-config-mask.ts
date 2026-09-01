@@ -6,7 +6,7 @@ import type {
 } from "@/backend/types";
 
 /** Sensitive keys within providerMetadata that must be masked for non-admin users. */
-export const SENSITIVE_METADATA_KEYS = new Set(["password", "token", "refreshToken", "accessToken"]);
+const SENSITIVE_METADATA_KEYS = new Set(["password", "token", "refreshToken", "accessToken"]);
 
 /**
  * Masks sensitive fields (password, token, refreshToken, accessToken)

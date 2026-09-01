@@ -5,7 +5,7 @@ import { UserSeedService } from "@/backend/services";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 
-export type SeedAvatarEntityLink = {
+type SeedAvatarEntityLink = {
   readonly id: string;
   readonly userId?: string;
 };
@@ -18,7 +18,7 @@ export type SeedAvatarPoolInput = {
   entities: readonly SeedAvatarEntityLink[];
 };
 
-export async function seedAvatarForEntity(input: {
+async function seedAvatarForEntity(input: {
   index: number;
   poolFiles: readonly string[];
   assetDir: string;

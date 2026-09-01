@@ -22,5 +22,3 @@ export function MonthlyReportsContainer() {
   const viewModel = useMonthlyReportsViewModel({});
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { MonthlyReportsViewModel };

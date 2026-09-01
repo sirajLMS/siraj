@@ -5,7 +5,7 @@ import { GenderSelectorShared } from "@/frontend/common/components/ui/input/gend
 import type { ButtonGroupSelectorOptions } from "@/frontend/common/components/ui/input/genderSelector/buttonGroupSelectorTypes";
 import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export type GenderSelectorLabels = {
+type GenderSelectorLabels = {
   readonly title?: string;
   readonly male?: string;
   readonly female?: string;

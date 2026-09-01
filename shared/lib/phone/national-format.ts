@@ -12,7 +12,7 @@ export function formatNationalDigits(nationalDigits: string, region: string): st
 }
 
 /** Map a display-string index to the corresponding digit index (digits-only positions). */
-export function mapDisplayIndexToDigitIndex(display: string, displayIndex: number): number {
+function mapDisplayIndexToDigitIndex(display: string, displayIndex: number): number {
   let digitIndex = 0;
   for (let index = 0; index < displayIndex && index < display.length; index += 1) {
     if (/\d/.test(display[index] ?? "")) {
@@ -23,7 +23,7 @@ export function mapDisplayIndexToDigitIndex(display: string, displayIndex: numbe
 }
 
 /** Map a digit index back to the display-string index (start of that digit). */
-export function mapDigitIndexToDisplayIndex(display: string, digitIndex: number): number {
+function mapDigitIndexToDisplayIndex(display: string, digitIndex: number): number {
   let seenDigits = 0;
   for (let index = 0; index < display.length; index += 1) {
     if (/\d/.test(display[index] ?? "")) {

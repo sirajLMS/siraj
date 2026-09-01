@@ -1,4 +1,4 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { userNotificationPreferences } from "@/backend/db/schema";
@@ -15,18 +15,6 @@ export namespace NotificationPreferencesRepository {
   ): Promise<UserNotificationPreferenceSelectType[]> {
     const q = queryDb(tx);
     return q.select().from(userNotificationPreferences).where(eq(userNotificationPreferences.userId, userId));
-  }
-
-  export async function getByUserIdAndChannel(
-    userId: string,
-    channel: string,
-    tx?: DBTransaction
-  ): Promise<UserNotificationPreferenceSelectType[]> {
-    const q = queryDb(tx);
-    return q
-      .select()
-      .from(userNotificationPreferences)
-      .where(and(eq(userNotificationPreferences.userId, userId), eq(userNotificationPreferences.channel, channel)));
   }
 
   /**

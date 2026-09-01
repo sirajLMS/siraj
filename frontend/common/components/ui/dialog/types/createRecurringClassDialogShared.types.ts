@@ -43,9 +43,7 @@ export interface CreateRecurringClassStudentSelectSlotProps {
   readonly label: string;
 }
 
-export type CreateRecurringClassStudentSelectSlot = React.ComponentType<
-  Readonly<CreateRecurringClassStudentSelectSlotProps>
->;
+type CreateRecurringClassStudentSelectSlot = React.ComponentType<Readonly<CreateRecurringClassStudentSelectSlotProps>>;
 
 /** Slot props for the timezone select field. */
 export interface CreateRecurringClassTimezoneSelectSlotProps {
@@ -99,12 +97,10 @@ export interface CreateRecurringClassDialogShellSlotProps {
   readonly children: ReactNode;
 }
 
-export type CreateRecurringClassDialogShellSlot = React.ComponentType<
-  Readonly<CreateRecurringClassDialogShellSlotProps>
->;
+type CreateRecurringClassDialogShellSlot = React.ComponentType<Readonly<CreateRecurringClassDialogShellSlotProps>>;
 
 /** All slot components + layout config the tier variants must inject. */
-export interface CreateRecurringClassDialogSlotProps {
+interface CreateRecurringClassDialogSlotProps {
   readonly DialogShell: CreateRecurringClassDialogShellSlot;
   readonly StudentSelect: CreateRecurringClassStudentSelectSlot;
   readonly TimezoneSelect: CreateRecurringClassTimezoneSelectSlot;

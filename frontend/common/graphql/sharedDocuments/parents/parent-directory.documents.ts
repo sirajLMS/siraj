@@ -6,7 +6,7 @@ import type {
   ParentsDirectoryQueryVariables,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const parentDirectoryAutocompleteRowFragment = gql`
+const parentDirectoryAutocompleteRowFragment = gql`
   fragment ParentDirectoryAutocompleteRow on ParentDirectoryAutocompleteRow {
     id
     name

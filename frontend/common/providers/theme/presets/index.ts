@@ -121,31 +121,9 @@ export const APPEARANCE_PRESETS: ReadonlyArray<AppearancePreset> = [
   },
 ];
 
-/**
- * Lookup helper — find a preset by id.
- *
- * Returns `undefined` if no preset matches (e.g. an env-var preset id
- * that was renamed in a release). Callers in the resolution tier
- * (decision §14) fall back to `APPEARANCE_PRESETS[0]` (`default`) when
- * this returns `undefined`.
- *
- * Linear scan (6 entries) — no need for a `Record` lookup table; the
- * catalog is small enough that the array iteration is faster than the
- * hash-lookup overhead for a single read.
- */
-export function findAppearancePreset(id: string): AppearancePreset | undefined {
-  return APPEARANCE_PRESETS.find(preset => preset.id === id);
-}
-
 // Re-export the palette factory functions so consumers can import everything
 // from the barrel (`@/frontend/common/providers/theme/presets`). The factory
 // module (`paletteFactory.ts`) imports `APPEARANCE_PRESETS` from this barrel —
 // the re-export is safe because `APPEARANCE_PRESETS` is defined above (before
 // this re-export line), so the factory sees a fully-evaluated catalog at runtime.
-export {
-  extractCssVarsFromPalette,
-  matchPresetByColors,
-  type PresetPalettes,
-  resolvePresetPalette,
-  resolvePresetPalettes,
-} from "./paletteFactory";
+export { extractCssVarsFromPalette, matchPresetByColors, resolvePresetPalette } from "./paletteFactory";

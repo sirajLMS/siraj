@@ -9,7 +9,7 @@ import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
-export const JS_DAY_TO_ENUM: Record<number, DayOfWeek> = {
+const JS_DAY_TO_ENUM: Record<number, DayOfWeek> = {
   0: DayOfWeek.SUNDAY,
   1: DayOfWeek.MONDAY,
   2: DayOfWeek.TUESDAY,
@@ -79,7 +79,7 @@ export function isWithinEffectiveRange(
 
 // ── Search / gap computation helpers ─────────────────────────────────────────
 
-export function getBlockedRanges(
+function getBlockedRanges(
   dayUnavail: TeacherRecurringUnavailabilitySelectType[],
   searchStart: number,
   searchEnd: number
@@ -98,7 +98,7 @@ export function getBlockedRanges(
   return blockedRanges;
 }
 
-export function mergeBlockedRanges(blockedRanges: { start: number; end: number }[]): { start: number; end: number }[] {
+function mergeBlockedRanges(blockedRanges: { start: number; end: number }[]): { start: number; end: number }[] {
   const sorted = [...blockedRanges].toSorted((a, b) => a.start - b.start);
   const mergedBlocked: { start: number; end: number }[] = [];
   for (const range of sorted) {
@@ -112,7 +112,7 @@ export function mergeBlockedRanges(blockedRanges: { start: number; end: number }
   return mergedBlocked;
 }
 
-export function createGap(
+function createGap(
   teacher: TeacherShortInfo,
   day: DayOfWeek,
   calendarDate: string,
@@ -137,7 +137,7 @@ export function createGap(
   };
 }
 
-export function generateGapsFromBlocked(
+function generateGapsFromBlocked(
   teacher: TeacherShortInfo,
   day: DayOfWeek,
   calendarDate: string,

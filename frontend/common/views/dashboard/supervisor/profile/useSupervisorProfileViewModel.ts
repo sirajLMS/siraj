@@ -6,7 +6,7 @@ import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDo
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { type SupervisorPortalProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
 
-export interface SupervisorProfileData {
+interface SupervisorProfileData {
   readonly userId: string;
   readonly name: string;
   readonly email: string | null;

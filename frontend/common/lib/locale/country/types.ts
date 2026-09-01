@@ -6,9 +6,3 @@ export interface CountryType {
   emoji: string;
   suggested?: boolean;
 }
-
-export interface CountryDetectionResult {
-  countryCode: string;
-  countryCodeLoading: boolean;
-  countryCodeError: string | null;
-}

@@ -3,7 +3,6 @@ import { FxProvider, FxProviderConfigSource } from "@/backend/enum/fx/fx-provide
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
-import type { FxProviderFetchResult } from "@/backend/types";
 
 const FX_PROVIDER_SETTING_KEY = "fx_provider";
 
@@ -114,20 +113,4 @@ export const resetFxRateProvider = (): void => {
   instance = null;
   initializationPromise = null;
   cachedProviderName = null;
-};
-
-/**
- * Facade object that delegates to the singleton. This is the public surface
- * most consumers should import — they never need to await `getFxRateProvider`
- * directly.
- */
-export const fxRateProvider = {
-  fetchLatestRates: async (locale?: string): Promise<FxProviderFetchResult> => {
-    const provider = await getFxRateProvider();
-    return provider.fetchLatestRates(locale);
-  },
-  validateConfig: async (): Promise<boolean> => {
-    const provider = await getFxRateProvider();
-    return provider.validateConfig();
-  },
 };

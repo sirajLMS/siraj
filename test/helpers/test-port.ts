@@ -4,7 +4,6 @@ import { spawnSync } from "bun";
 const FIXED_TEST_PORT = 3099;
 
 /** Ports used by GraphQL/UI test servers — never kill dev (3000) or prod start (4000). */
-export const TEST_SERVER_PREFERRED_PORT = FIXED_TEST_PORT;
 export const TEST_SERVER_PORT = FIXED_TEST_PORT;
 export const PROTECTED_APP_PORTS = [3000, 4000] as const;
 
@@ -151,7 +150,7 @@ export function getTestDistDir(): string {
   return ".next-test-dev";
 }
 
-export function getProductionBuildDistDir(): string {
+function getProductionBuildDistDir(): string {
   return process.env.TEST_SERVER_DIST_DIR ?? ".next-test-prod";
 }
 

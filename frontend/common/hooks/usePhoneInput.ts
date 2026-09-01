@@ -7,7 +7,6 @@ import {
   canAppendCallingCodeDigit,
   clampSelectionToDigits,
   formatNationalDigits,
-  getCallingCodeForRegion,
   getMaxCallingCodeLength,
   getNextFormatChar,
   isCallingCodeComplete,
@@ -17,7 +16,7 @@ import {
   splitPhoneValueToParts,
 } from "@/shared/lib/phone";
 
-export type PhoneInputSlot = "prefix" | "national";
+type PhoneInputSlot = "prefix" | "national";
 
 export type UsePhoneInputOptions = {
   readonly value: string | null;
@@ -570,13 +569,4 @@ export function usePhoneInput({
     closeCountryPicker,
     handleCountrySelect,
   };
-}
-
-export function getDefaultCountryForRegion(region: string): CountryType | undefined {
-  const callingCode = getCallingCodeForRegion(region);
-  const match = matchCallingCodeFromDigits(callingCode, region);
-  if (!match) {
-    return getCountryByCode(region);
-  }
-  return getCountryByCode(match.region);
 }

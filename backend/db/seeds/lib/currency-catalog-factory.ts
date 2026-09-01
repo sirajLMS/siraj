@@ -9,7 +9,7 @@ type CurrencyCatalogSeed = {
   readonly decimals?: number;
 };
 
-export const CURRENCY_CATALOG_SEEDS: readonly CurrencyCatalogSeed[] = [
+const CURRENCY_CATALOG_SEEDS: readonly CurrencyCatalogSeed[] = [
   { code: CurrencyCode.EGP, symbol: "E£", countryCode: CountryCode.EG },
   { code: CurrencyCode.SAR, symbol: "ر.س", countryCode: CountryCode.SA },
   { code: CurrencyCode.AED, symbol: "د.إ", countryCode: CountryCode.AE },

@@ -1,16 +1,14 @@
 import type {
   MeetingConnectionTestMode as GqlMeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountFieldsFragment,
-  MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderFieldsFragment,
   MeetingIntegrationProviderSlug,
   TestMeetingConnectionResultFieldsFragment,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
-export type { MeetingConnectionTestMode as GqlMeetingConnectionTestMode, MeetingIntegrationProviderSlug };
+export type { MeetingIntegrationProviderSlug };
 export type MeetingConnectionTestMode = GqlMeetingConnectionTestMode;
-export type MeetingIntegrationConnectedAccountStatusType = MeetingIntegrationConnectedAccountStatus;
 
 export type TestMeetingConnectionResult = {
   readonly ok: NonNullable<TestMeetingConnectionResultFieldsFragment["ok"]>;

@@ -7,11 +7,6 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import type { AttendanceReportFilters, AttendanceReportResult } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
-export type {
-  AttendanceReportFilters,
-  AttendanceReportRow,
-} from "@/backend/types";
-
 export namespace ReportService {
   export async function generateAttendanceReport(
     filters: AttendanceReportFilters,

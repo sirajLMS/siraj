@@ -21,8 +21,6 @@ import {
 } from "@/frontend/desktop/views/dashboard/admin/parents/home/components/directoryDataGridShared";
 import { Link } from "@/shared/i18n";
 
-export type { ParentsDataGridLabels };
-
 // VARIANT JUSTIFICATION: Class C card-list vs data-grid sibling per specs §4.3 — `ParentsDataGridDesktopProps` renders a desktop data grid (taking the type-specific `ParentsDataGridLabels`). The mobile twin is the `ParentCardListMobile` rendering single-row mobile cards with a different label contract. The shared row shape (`ParentDirectoryRow`) already lives once in `directory.ts`.
 //
 // NEW FOR PLAN v5: added the `canParentManageStatus` boolean (lifted from the

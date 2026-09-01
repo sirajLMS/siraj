@@ -26,7 +26,7 @@ export interface ScheduleContext {
   isDemoSchedule: boolean;
 }
 
-export interface ResolvedInstanceState {
+interface ResolvedInstanceState {
   executionState: ClassInstanceInsert["executionState"];
   outcome: ClassInstanceInsert["outcome"];
   actualStartAt: Date | null;
@@ -76,7 +76,7 @@ function resolveFutureState(): ResolvedInstanceState {
   };
 }
 
-export function resolveInstanceState(
+function resolveInstanceState(
   config: SeedConfig,
   scheduleIndex: number,
   date: Date,

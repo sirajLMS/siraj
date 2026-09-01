@@ -62,8 +62,6 @@ export interface TeacherOnboardingViewModel {
   readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 }
 
-export type UseTeacherOnboardingViewModelProps = Record<string, never>;
-
 interface OnboardingTranslations {
   readonly labels: TeacherOnboardingLabels;
   readonly tMeeting: MeetingConfigManagerLabels;

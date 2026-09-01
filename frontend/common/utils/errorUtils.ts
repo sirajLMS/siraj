@@ -21,33 +21,6 @@ export function getGraphQLErrorMessage(error: unknown, fallback: string): string
 }
 
 /**
- * Checks if an error is an abort error (e.g., from a cancelled request)
- *
- * This is useful for preventing error notifications when requests are
- * aborted due to navigation or component unmounting.
- *
- * @param error - The error to check
- * @returns True if the error is an abort error
- *
- * @example
- * ```ts
- * try {
- *   await someQuery();
- * } catch (error) {
- *   if (!isAbortError(error)) {
- *     notifications.show("An error occurred");
- *   }
- * }
- * ```
- */
-export function isAbortError(error: unknown): boolean {
-  return (
-    error instanceof Error &&
-    (error.message.includes("aborted") || error.message.includes("AbortError") || error.name === "AbortError")
-  );
-}
-
-/**
  * Checks if an error is a network error
  *
  * @param error - The error to check

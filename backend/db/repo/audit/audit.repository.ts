@@ -383,7 +383,7 @@ export namespace AuditRepository {
   /**
    * Student status change log input
    */
-  export interface StudentStatusChangeInput {
+  interface StudentStatusChangeInput {
     studentId: string;
     oldStatus: string;
     newStatus: string;
@@ -406,7 +406,7 @@ export namespace AuditRepository {
   /**
    * Invoice change log input
    */
-  export interface InvoiceChangeInput {
+  interface InvoiceChangeInput {
     invoiceId: string;
     action: Types.AuditAction;
     previousState: Record<string, unknown> | null;
@@ -434,7 +434,7 @@ export namespace AuditRepository {
   /**
    * Payment refund log input
    */
-  export interface PaymentRefundInput {
+  interface PaymentRefundInput {
     paymentId: string;
     refundAmount: number;
     currency: CurrencyCode;
@@ -460,7 +460,7 @@ export namespace AuditRepository {
   /**
    * Permission change log input
    */
-  export interface PermissionChangeInput {
+  interface PermissionChangeInput {
     userId: string;
     action: "GRANT" | "REVOKE";
     permissionOrGroupId: string;
@@ -488,7 +488,7 @@ export namespace AuditRepository {
   /**
    * Exchange rate update log input
    */
-  export interface ExchangeRateUpdateInput {
+  interface ExchangeRateUpdateInput {
     rateId: string;
     fromCurrency: CurrencyCode;
     toCurrency: CurrencyCode;
@@ -521,7 +521,7 @@ export namespace AuditRepository {
   /**
    * System setting change log input
    */
-  export interface SystemSettingChangeInput {
+  interface SystemSettingChangeInput {
     settingKey: string;
     oldValue: unknown;
     newValue: unknown;

@@ -12,15 +12,12 @@ import type {
   WhatsappAccountUpdateInput,
 } from "@/backend/types";
 
-// Re-export for backward-compatible imports
-export { buildReturnType, isValidLimitTier, isValidQualityRating } from "@/backend/lib";
-
 /**
  * Convert a SelectType row (with encrypted fields and raw enum strings)
  * to ReturnType (sanitized for GraphQL clients).
  * Used by service layer when it needs to return a full entity from a SelectType source.
  */
-export function toReturnType(row: WhatsappAccountSelectType): WhatsappAccountReturnType {
+function toReturnType(row: WhatsappAccountSelectType): WhatsappAccountReturnType {
   const {
     encryptedAccessToken: _at,
     encryptedTwoStepPin: _pin,
@@ -161,10 +158,6 @@ export namespace WhatsappAccountRepository {
       result.set(row.phoneNumberId, toReturnType(row));
     }
     return result;
-  }
-
-  export async function findByWabaId(wabaId: string, tx?: DBTransaction): Promise<WhatsappAccountReturnType[]> {
-    return findManyRows(eq(whatsappAccounts.wabaId, wabaId), tx);
   }
 
   export async function listActive(tx?: DBTransaction): Promise<WhatsappAccountReturnType[]> {

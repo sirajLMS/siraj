@@ -26,7 +26,7 @@ import type {
 } from "@/frontend/common/views/dashboard/accounting/schemas/packagePlanFormSchema";
 import type { PackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans";
 
-export type PackagePlanFormLabels = PackagePlansLabels["form"];
+type PackagePlanFormLabels = PackagePlansLabels["form"];
 
 interface PackagePlanFieldCoreProps {
   readonly control: Control<PackagePlanFormInput, undefined, PackagePlanFormData>;

@@ -25,4 +25,4 @@ export function TeacherRulesContainer(props: Readonly<UseTeacherRulesViewModelPr
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { TeacherRulesViewModel, UseTeacherRulesViewModelProps };
+export type { UseTeacherRulesViewModelProps };

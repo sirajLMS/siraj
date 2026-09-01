@@ -6,7 +6,7 @@ import type { ClassInstanceSelectType, DailyScheduleResult, DBTransaction } from
 import { escapeLikeWildcards } from "@/backend/utils";
 import { parseClassExecutionState, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 
-export function buildDailyScheduleDayConditions(
+function buildDailyScheduleDayConditions(
   date: Date,
   viewerTimezone: string,
   teacherId: string | undefined,
@@ -31,7 +31,7 @@ export function buildDailyScheduleDayConditions(
   );
 }
 
-export async function hydrateDailyScheduleRows(
+async function hydrateDailyScheduleRows(
   t: DBTransaction,
   instances: ClassInstanceSelectType[]
 ): Promise<DailyScheduleResult[]> {

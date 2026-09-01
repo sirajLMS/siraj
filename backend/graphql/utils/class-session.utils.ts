@@ -121,12 +121,3 @@ export async function buildClassInstanceDetail(
     performance: buildPerformanceBlock(perf),
   };
 }
-
-export async function resolveDetail(
-  userId: string,
-  classInstanceId: string,
-  tSession: SessionLabels,
-  tErrors: ErrorsLabels
-): Promise<ClassInstanceDetailReturnType> {
-  return ClassSessionService.getClassInstanceDetail(userId, classInstanceId, tSession, tErrors);
-}

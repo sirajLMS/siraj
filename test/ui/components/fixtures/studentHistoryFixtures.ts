@@ -79,7 +79,7 @@ export interface StudentClassHistoryFixture {
 // Shared session objects
 // ---------------------------------------------------------------------------
 
-export const QURAN_RECITATION_SESSION: StudentSessionFixture = {
+const QURAN_RECITATION_SESSION: StudentSessionFixture = {
   id: "session-1",
   title: "Quran Recitation",
   time: "2026-07-10T10:00:00.000Z",
@@ -97,7 +97,7 @@ export const QURAN_RECITATION_SESSION: StudentSessionFixture = {
   effectiveMeeting: null,
 };
 
-export const TAJWEED_SESSION: StudentSessionFixture = {
+const TAJWEED_SESSION: StudentSessionFixture = {
   id: "session-2",
   title: "Tajweed",
   time: "2026-07-12T11:00:00.000Z",

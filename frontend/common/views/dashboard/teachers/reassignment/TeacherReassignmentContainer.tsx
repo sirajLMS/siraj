@@ -196,5 +196,3 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { TeacherReassignmentViewModel, UseTeacherReassignmentViewModelProps };

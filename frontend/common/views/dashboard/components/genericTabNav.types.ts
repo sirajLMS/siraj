@@ -7,9 +7,7 @@ export interface DateTabNavItem<TabId extends string = string> {
   readonly hasSession: boolean;
 }
 
-export type GenericTabNavMode = "link" | "button";
-
-export type DefaultGenericTabNavVariantProps<TabId extends string> = TabNavVariantProps<TabId> & {
+type DefaultGenericTabNavVariantProps<TabId extends string> = TabNavVariantProps<TabId> & {
   readonly variant?: "default";
   readonly ariaLabel: string;
 };

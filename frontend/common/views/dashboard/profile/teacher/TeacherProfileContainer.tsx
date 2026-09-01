@@ -24,4 +24,4 @@ export function TeacherProfileContainer(props: Readonly<UseTeacherProfileViewMod
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { TeacherProfileViewModel, UseTeacherProfileViewModelProps };
+export type { UseTeacherProfileViewModelProps };

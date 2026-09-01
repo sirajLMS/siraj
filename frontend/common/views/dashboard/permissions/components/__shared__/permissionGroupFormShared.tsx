@@ -87,7 +87,7 @@ function PermissionGroupFormActionsShared({
   );
 }
 
-export function PermissionGroupFormContentShared({
+function PermissionGroupFormContentShared({
   control,
   isLoading,
   isSystem,

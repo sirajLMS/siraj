@@ -1,6 +1,6 @@
 import { Box, Card, Skeleton, Stack, type StackProps } from "@mui/material";
 
-export interface SkeletonCardConfig {
+interface SkeletonCardConfig {
   readonly textWidth: string;
   readonly rectHeight: number;
   readonly lines?: readonly { readonly width: string; readonly mt?: number }[];

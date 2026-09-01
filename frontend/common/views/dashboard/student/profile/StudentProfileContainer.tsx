@@ -8,7 +8,7 @@ import {
   useStudentProfileViewModel,
 } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
 
-export type { StudentProfileViewModel, UseStudentProfileViewModelProps };
+export type { UseStudentProfileViewModelProps };
 
 const lazyViews = createLazyView<StudentProfileViewModel>(
   () =>

@@ -3,9 +3,8 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission } from "@/backend/enum";
 import { ForbiddenError } from "@/backend/lib/errors";
-import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { cachedRead, invalidateTags } from "@/backend/services/cache";
+import { cachedRead } from "@/backend/services/cache";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**
@@ -131,27 +130,4 @@ export async function resolveAssociatedStudentIds(actorUserId: string): Promise<
     },
     [`user:${actorUserId}`]
   );
-}
-
-/**
- * H2 fix: invalidation hooks called when a teacher/parent is reassigned or
- * deactivated. Drops every cache entry tagged `user:${actorUserId}` (both the
- * per-student viewer cache and the student-IDs cache) so the next access
- * re-queries the DB instead of using stale association data. Tag-based
- * invalidation replaces the prior no-op `cacheService.del(prefix-key)`.
- */
-export async function invalidateTeacherViewerCache(actorUserId: string): Promise<void> {
-  try {
-    await invalidateTags([`user:${actorUserId}`]);
-  } catch (err) {
-    logger.warn("Failed to invalidate teacher cache", { actorUserId, err: String(err) });
-  }
-}
-
-export async function invalidateParentViewerCache(actorUserId: string): Promise<void> {
-  try {
-    await invalidateTags([`user:${actorUserId}`]);
-  } catch (err) {
-    logger.warn("Failed to invalidate parent cache", { actorUserId, err: String(err) });
-  }
 }

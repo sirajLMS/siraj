@@ -18,8 +18,8 @@ import type {
 // ============================================================================
 
 export const REQUEST_TIMEOUT_MS = 30_000;
-export const RETRY_JITTER_BASE_MS = 200;
-export const MAX_GENERATE_RETRIES = 2;
+const RETRY_JITTER_BASE_MS = 200;
+const MAX_GENERATE_RETRIES = 2;
 
 // ============================================================================
 // Shared types (internal to the base class — not exported for consumers)
@@ -35,7 +35,7 @@ export function withTimeout(ms: number): { signal: AbortSignal; cancel: () => vo
   return { signal: controller.signal, cancel: () => clearTimeout(timer) };
 }
 
-export function jitterDelay(baseMs: number): number {
+function jitterDelay(baseMs: number): number {
   return baseMs + (Date.now() % 100);
 }
 

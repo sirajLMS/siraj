@@ -33,7 +33,7 @@ export namespace AccountingNotificationService {
    * Fire-and-forget notice after a successful hour purchase. Delivered to the
    * student (plus the linked parent when one exists).
    */
-  export const sendPaymentRecorded = (input: {
+  const sendPaymentRecorded = (input: {
     affectedUserIds: readonly string[];
     packageName: string;
     creditHours: string;
@@ -72,7 +72,7 @@ export namespace AccountingNotificationService {
   }
 
   /** Fire-and-forget low-balance warning delivered to student + linked parent. */
-  export const sendLowHours = (input: {
+  const sendLowHours = (input: {
     affectedUserIds: readonly string[];
     remaining: string;
     threshold: string;

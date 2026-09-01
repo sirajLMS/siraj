@@ -101,11 +101,11 @@ export namespace ParentRepository {
     };
   }
 
-  export type ParentDirectoryMetrics = ParentDirectoryRawMetrics;
+  type ParentDirectoryMetrics = ParentDirectoryRawMetrics;
 
-  export type ParentDirectoryRow = ParentDirectoryRawRow;
+  type ParentDirectoryRow = ParentDirectoryRawRow;
 
-  export type ParentDirectoryResult = {
+  type ParentDirectoryResult = {
     metrics: ParentDirectoryMetrics;
     rows: ParentDirectoryRow[];
     totalCount: number;
@@ -299,7 +299,7 @@ export namespace ParentRepository {
     return result;
   };
 
-  export type ParentProfileResult = {
+  type ParentProfileResult = {
     id: string;
     userId: string;
     name: string;
@@ -433,7 +433,7 @@ export namespace ParentRepository {
     return map;
   };
 
-  export type DeactivatedParentResult = {
+  type DeactivatedParentResult = {
     id: string;
     userId: string;
     accountStatus: AccountStatus;
@@ -507,7 +507,7 @@ export namespace ParentRepository {
     return setParentAccountStatus(parentId, AccountStatus.ACTIVATED, false, tx, locale);
   };
 
-  export type ChangeParentLifecycleResult = {
+  type ChangeParentLifecycleResult = {
     id: string;
     lifecycleStatus: ParentStatus;
   };
@@ -542,7 +542,7 @@ export namespace ParentRepository {
     };
   };
 
-  export type AssociatedStudentRow = {
+  type AssociatedStudentRow = {
     id: string;
     name: string;
     studentAvatarUrl: string | null;
@@ -646,7 +646,7 @@ export namespace ParentRepository {
     return mapAssociatedStudentRow(results[0]);
   };
 
-  export type ParentDashboardScheduleResult = {
+  type ParentDashboardScheduleResult = {
     rows: ParentDashboardScheduleRow[];
     totalCount: number;
     pageInfo: import("@/backend/types").PageInfo | null;

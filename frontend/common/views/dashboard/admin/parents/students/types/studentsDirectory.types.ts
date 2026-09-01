@@ -4,21 +4,21 @@ import type {
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { StudentDirectoryLabels } from "@/shared/locale";
 
-export type StudentsDirectoryShellLabels = Pick<
+type StudentsDirectoryShellLabels = Pick<
   StudentDirectoryLabels,
   "pageTitle" | "pageSubtitle" | "mobileTitle" | "globalRecord" | "noEntries"
 >;
 
-export type StudentsDirectoryFilterLabels = Pick<StudentDirectoryLabels, "searchPlaceholder" | "filters">;
+type StudentsDirectoryFilterLabels = Pick<StudentDirectoryLabels, "searchPlaceholder" | "filters">;
 
-export type StudentsDirectoryActionLabels = Pick<StudentDirectoryLabels, "addStudent"> & {
+type StudentsDirectoryActionLabels = Pick<StudentDirectoryLabels, "addStudent"> & {
   readonly viewProfile: string;
   readonly viewHistory: string;
 };
 
-export type StudentsDirectoryColumnLabels = StudentDirectoryDataGridLabels;
+type StudentsDirectoryColumnLabels = StudentDirectoryDataGridLabels;
 
-export type StudentsDirectoryCardLabels = StudentDirectoryCardListLabels;
+type StudentsDirectoryCardLabels = StudentDirectoryCardListLabels;
 
 export interface StudentsLabelsBySection {
   readonly shell: StudentsDirectoryShellLabels;

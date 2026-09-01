@@ -1,12 +1,11 @@
 import type { users } from "@/backend/db/schema/users/users";
 import type { AccountStatus, UserRole } from "@/backend/enum";
-import type { PageInfo } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 // Alias AccountStatus as UserStatus for canonical pattern compliance
 // This aligns with the existing DB schema and UserStatus usage in the codebase
-export type UserStatus = AccountStatus;
+type UserStatus = AccountStatus;
 
 // Drizzle types
 // Canonical: {Entity}SelectType and {Entity}InsertType must be derived from Drizzle
@@ -44,20 +43,6 @@ export type UserReturnType = Omit<
   parentId?: string | null; // Resolved optional: parentId if applies
 };
 
-// Input types
-// Canonical: {Entity}SubmitInput for mutations/filters
-//--------------------------------------------------------------------------------
-export type UserSubmitInput = Omit<UserInsertType, "id" | "createdAt" | "updatedAt" | "deletedAt">;
-
-export type UserFilterInput = {
-  role?: UserRole | UserRole[];
-  status?: UserStatus | UserStatus[];
-  email?: string;
-};
-
-// Add canonical UserUpdateSubmitInput for consistency with patterns
-export type UserUpdateSubmitInput = Omit<UserSubmitInput, "email">;
-
 export type UserCreateInput = {
   name: string;
   email: { value: string };
@@ -91,11 +76,6 @@ export type UserCreateProfileFieldsInput = {
   readonly phone?: string | null;
   readonly timezone?: string | null;
   readonly displayCurrency?: string | null;
-};
-
-export type PaginatedUsersResponse = {
-  data: UserReturnType[];
-  pageInfo: PageInfo;
 };
 
 export interface GeneralUserCreateInput {

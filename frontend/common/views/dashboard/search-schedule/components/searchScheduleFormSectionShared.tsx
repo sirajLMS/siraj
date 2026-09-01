@@ -4,7 +4,7 @@ import { type SxProps, type Theme, Typography } from "@mui/material";
 import type { FC } from "react";
 import type { SearchScheduleFormProps } from "@/frontend/common/views/dashboard/search-schedule/types";
 
-export interface SearchScheduleFormSectionSlotProps {
+interface SearchScheduleFormSectionSlotProps {
   /** Tier-specific form component — desktop or mobile variant. */
   readonly FormComponent: FC<Readonly<SearchScheduleFormProps>>;
   /** Error Typography sx — desktop has no padding, mobile has px: 2. */

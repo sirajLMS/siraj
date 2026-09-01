@@ -5,12 +5,12 @@ import { logger } from "@/backend/lib/logger";
 
 const ASSETS_ROOT = path.join(import.meta.dir, "..", "assets");
 
-export type SeedAssetValidationResult = {
+type SeedAssetValidationResult = {
   missingRequired: string[];
   missingOptional: string[];
 };
 
-export function validateSeedAssets(): SeedAssetValidationResult {
+function validateSeedAssets(): SeedAssetValidationResult {
   const missingRequired: string[] = [];
   const missingOptional: string[] = [];
 

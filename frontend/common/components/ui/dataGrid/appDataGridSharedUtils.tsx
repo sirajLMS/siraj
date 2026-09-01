@@ -1,5 +1,3 @@
-import { useMemo } from "react";
-
 export const defaultGridSx = {
   border: "none",
   borderRadius: 0,
@@ -30,8 +28,4 @@ export function createNoRowsOverlay(Overlay: React.ComponentType<{ message: stri
   return function NoRowsOverlay() {
     return <Overlay message={message} />;
   };
-}
-
-export function useAppDataGridNoRowsOverlay(message: string, Overlay: React.ComponentType<{ message: string }>) {
-  return useMemo(() => createNoRowsOverlay(Overlay, message), [Overlay, message]);
 }

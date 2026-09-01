@@ -7,8 +7,3 @@ export type ClassInstancePerformanceReturnType = Omit<
   ClassInstancePerformanceSelectType,
   "deletedAt" | "createdAt" | "updatedAt"
 >;
-
-export type ClassInstancePerformanceSubmitInput = Omit<
-  ClassInstancePerformanceInsertType,
-  "id" | "createdAt" | "updatedAt" | "deletedAt"
->;

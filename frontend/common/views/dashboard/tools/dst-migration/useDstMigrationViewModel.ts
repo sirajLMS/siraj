@@ -39,8 +39,6 @@ export interface DstMigrationViewModel {
   readonly requiredPermission: AppPermission;
 }
 
-export type UseDstMigrationViewModelProps = Record<string, never>;
-
 export function useDstMigrationViewModel(): DstMigrationViewModel {
   const notifications = useNotifications();
   const labels = useAppTranslation(Translation.Dashboard.AdminDstMigration);

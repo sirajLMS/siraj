@@ -22,6 +22,5 @@ const factory = createChannelFactory<IPushChannel>({
   createAdapter: createFcmAdapter,
 });
 
-export const getPushChannel = factory.getChannel;
 export const resetPushChannel = factory.resetChannel;
 export const pushChannel = factory.channel;

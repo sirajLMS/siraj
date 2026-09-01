@@ -10,12 +10,6 @@ export type AutocompletePopperOptions = {
   readonly listAttached: boolean;
 };
 
-export type GetAutocompletePopperSlotProps<T> = (
-  options: AutocompletePopperOptions
-) => NonNullable<AutocompleteSlotProps<T>["popper"]>;
-
-export type GetAutocompletePaperSlotProps<T> = (listAttached: boolean) => AutocompleteSlotProps<T>["paper"];
-
 const sameWidthModifier: Modifier<"sameWidth", Record<string, unknown>> = {
   name: "sameWidth",
   enabled: true,

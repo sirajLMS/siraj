@@ -20,7 +20,7 @@ type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, Pa
  * their own type-specific fields (e.g. `timezone`, `days` for Detail,
  * `timezone`, `createdAt`/`updatedAt` for ListItem).
  */
-export function recurringScheduleSharedFields(t: PothosObjectFieldBuilder<RecurringScheduleSharedShape>) {
+function recurringScheduleSharedFields(t: PothosObjectFieldBuilder<RecurringScheduleSharedShape>) {
   return {
     id: t.exposeString("id"),
     studentId: t.exposeString("studentId"),

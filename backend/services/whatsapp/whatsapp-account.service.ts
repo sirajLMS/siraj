@@ -293,7 +293,7 @@ async function resolveGraphApiContext(tErrors: ErrorsLabels): Promise<{ ctx: Gra
 // and different error-handling needs (throw GraphApiError vs structured error
 // result), so they are not unified. If the signatures converge in the future,
 // route both through a single shared fetch wrapper.
-async function executeGraphApiFetch<T>(request: GraphApiRequestInit, schema: z.ZodSchema<T>): Promise<T> {
+async function executeGraphApiFetch<T>(request: GraphApiRequestInit, schema: z.ZodType<T>): Promise<T> {
   const response = await fetch(request.url, {
     ...request.init,
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),

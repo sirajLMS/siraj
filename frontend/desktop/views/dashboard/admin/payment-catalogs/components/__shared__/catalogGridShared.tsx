@@ -9,18 +9,6 @@ import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/compo
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display";
 import type { PaymentCatalogsLabels } from "@/shared/locale";
 
-/**
- * Minimal row shape required by the common catalog grid columns.
- * All three catalog fragment types satisfy this interface.
- */
-export interface CatalogCommonRow {
-  readonly id?: string | null;
-  readonly slug: string;
-  readonly name: unknown;
-  readonly supportedDirections: unknown;
-  readonly isActive: boolean;
-}
-
 export interface CatalogGridSharedProps<R extends PaymentCatalogRow> {
   readonly labels: PaymentCatalogsLabels;
   readonly rows: readonly R[];

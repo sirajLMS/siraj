@@ -24,4 +24,4 @@ export function RescheduleTrackingContainer(_props: Readonly<UseRescheduleTracki
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { RescheduleTrackingViewModel, UseRescheduleTrackingViewModelProps };
+export type { UseRescheduleTrackingViewModelProps };

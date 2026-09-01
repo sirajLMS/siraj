@@ -19,6 +19,3 @@ export const TAB_PERMISSIONS: Record<WhatsappConfigTab, readonly AppPermission[]
   templates: [AppPermission.WhatsappTemplatesManage],
   optin: [AppPermission.WhatsappView],
 };
-
-/** Tab URL string values — same as TAB_IDS, used for URL serialization. */
-export const TAB_URL_VALUES: readonly WhatsappConfigTab[] = TAB_IDS;

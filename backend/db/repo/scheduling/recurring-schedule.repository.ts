@@ -1,21 +1,14 @@
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { db, type QueryDbHandle, queryDb } from "@/backend/db";
 import { recurringScheduleDays, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import type {
   DBTransaction,
-  RecurringScheduleDayInsertType,
   RecurringScheduleDaySelectType,
   RecurringScheduleDayUpsertInput,
   RecurringScheduleSelectType,
   RecurringScheduleUpsertInput,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
-
-export type ScheduleDayKey = `${string}:${string}`;
-
-function toScheduleDayKey(recurringScheduleId: string, dayOfWeek: string): ScheduleDayKey {
-  return `${recurringScheduleId}:${dayOfWeek}`;
-}
 
 async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTransaction) => Promise<T>): Promise<T> {
   return tx ? fn(tx) : db.transaction(fn);
@@ -54,18 +47,6 @@ export namespace RecurringScheduleRepository {
       .select()
       .from(recurringScheduleDays)
       .where(eq(recurringScheduleDays.recurringScheduleId, recurringScheduleId));
-  }
-
-  export async function listByStudentIds(
-    studentIds: readonly string[],
-    tx?: DBTransaction
-  ): Promise<RecurringScheduleSelectType[]> {
-    if (studentIds.length === 0) return [];
-    const q = queryDb(tx);
-    return q
-      .select()
-      .from(recurringSchedules)
-      .where(inArray(recurringSchedules.studentId, [...studentIds]));
   }
 
   export async function upsertMany(
@@ -134,30 +115,6 @@ export namespace RecurringScheduleRepository {
     return updated ?? null;
   }
 
-  export async function findDaysByKeys(
-    keys: readonly { recurringScheduleId: string; dayOfWeek: RecurringScheduleDayInsertType["dayOfWeek"] }[],
-    tx?: DBTransaction
-  ): Promise<Map<ScheduleDayKey, RecurringScheduleDaySelectType>> {
-    const map = new Map<ScheduleDayKey, RecurringScheduleDaySelectType>();
-    if (keys.length === 0) return map;
-
-    const scheduleIds = [...new Set(keys.map(key => key.recurringScheduleId))];
-    const q = queryDb(tx);
-    const rows = await q
-      .select()
-      .from(recurringScheduleDays)
-      .where(inArray(recurringScheduleDays.recurringScheduleId, scheduleIds));
-
-    const keySet = new Set(keys.map(key => toScheduleDayKey(key.recurringScheduleId, key.dayOfWeek)));
-    for (const row of rows) {
-      const key = toScheduleDayKey(row.recurringScheduleId, row.dayOfWeek);
-      if (keySet.has(key)) {
-        map.set(key, row);
-      }
-    }
-    return map;
-  }
-
   export async function upsertManyDays(
     inputs: readonly RecurringScheduleDayUpsertInput[],
     tx?: DBTransaction
@@ -182,27 +139,6 @@ export namespace RecurringScheduleRepository {
         return acc;
       }, Promise.resolve<RecurringScheduleDaySelectType[]>([]));
     });
-  }
-
-  /**
-   * V3-021: Soft-delete a recurring schedule by setting `deletedAt` and `updatedAt`.
-   */
-  export async function softDelete(id: string, tx?: DBTransaction): Promise<void> {
-    const now = new Date();
-    const q = queryDb(tx);
-    await q.update(recurringSchedules).set({ deletedAt: now, updatedAt: now }).where(eq(recurringSchedules.id, id));
-  }
-
-  /**
-   * V3-021: Update the scheduling mode of a recurring schedule.
-   */
-  export async function updateSchedulingMode(id: string, mode: string, tx?: DBTransaction): Promise<void> {
-    const now = new Date();
-    const q = queryDb(tx);
-    await q
-      .update(recurringSchedules)
-      .set({ schedulingMode: mode, updatedAt: now })
-      .where(eq(recurringSchedules.id, id));
   }
 
   export async function findAll(

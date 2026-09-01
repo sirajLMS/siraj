@@ -10,13 +10,13 @@ export interface BillingMonthItemSlotProps {
   readonly label: string;
 }
 
-export type BillingMonthItemSlot = React.ComponentType<BillingMonthItemSlotProps>;
+type BillingMonthItemSlot = React.ComponentType<BillingMonthItemSlotProps>;
 
-export type BillingMonthSectionLabelKey = "billingMonths" | "billingMonthsMobile";
+type BillingMonthSectionLabelKey = "billingMonths" | "billingMonthsMobile";
 
-export type BillingMonthLabelFor = (monthId: string, labels: BillingManualLabels) => string;
+type BillingMonthLabelFor = (monthId: string, labels: BillingManualLabels) => string;
 
-export interface BillingMonthSelectorSlotProps {
+interface BillingMonthSelectorSlotProps {
   readonly MonthItem: BillingMonthItemSlot;
   readonly gridSx: SxProps<Theme>;
   readonly sectionLabelKey: BillingMonthSectionLabelKey;

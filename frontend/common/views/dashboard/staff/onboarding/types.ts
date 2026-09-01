@@ -19,9 +19,3 @@ export type ManagerOnboardingViewProps = {
   readonly metricsModel: OnboardingMetricsViewModel;
   readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 };
-
-// NEW FOR PLAN v5: lifted onboarding metrics overview props (was duplicated as `OnboardingMetricsOverviewMobileProps`/`DesktopProps` paired interfaces in tier — Class A PASS-THROUGH ALIAS removed per specs §4.1).
-export interface OnboardingMetricsOverviewProps {
-  readonly labels: StaffOnboardingLabels["metrics"];
-  readonly model: OnboardingMetricsViewModel;
-}

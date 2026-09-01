@@ -1,6 +1,6 @@
 import type { CurrencyHedgesLabels } from "@/shared/locale/types/dashboard/billing/currencyHedges";
 
-export type CurrencyHedgesShellLabels = Pick<CurrencyHedgesLabels, "pageTitle" | "pageSubtitle" | "empty">;
+type CurrencyHedgesShellLabels = Pick<CurrencyHedgesLabels, "pageTitle" | "pageSubtitle" | "empty">;
 
 export type CurrencyHedgesColumnLabels = CurrencyHedgesLabels["columns"];
 

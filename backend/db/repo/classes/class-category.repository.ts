@@ -97,30 +97,6 @@ export namespace ClassCategoryRepository {
     );
   }
 
-  export async function getCategoryById(
-    id: string,
-    tErrors: ErrorsLabels,
-    tx?: DBTransaction
-  ): Promise<ClassCategorySelectType> {
-    try {
-      const client = queryDb(tx);
-      const [result] = await client
-        .select()
-        .from(classCategories)
-        .where(and(eq(classCategories.id, id), isNull(classCategories.deletedAt)))
-        .limit(1);
-
-      if (!result) {
-        throw new Error(tErrors.categoryNotFound(id));
-      }
-
-      return result;
-    } catch (error) {
-      logger.error(`Error fetching class category by ID ${id}:`, error);
-      throw error;
-    }
-  }
-
   export async function createCategory(
     input: ClassCategorySubmitInput,
     tErrors: ErrorsLabels,

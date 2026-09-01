@@ -6,8 +6,6 @@ import { PermissionCatalogSectionMobile } from "@/frontend/mobile/views/dashboar
 import { PermissionGroupCardListMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionGroupCardList.mobile";
 import { UserOverridesDataGridMobile } from "@/frontend/mobile/views/dashboard/permissions/components/userOverridesDataGrid.mobile";
 
-export type TabKey = "groups" | "catalog" | "overrides";
-
 export function PermissionTabContentMobile({
   labels,
   activeTab,

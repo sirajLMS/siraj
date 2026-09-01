@@ -86,16 +86,6 @@ export namespace ClassSubjectService {
     return await ClassSubjectRepository.deleteSubject(id);
   }
 
-  export async function getSubjectResources(
-    userId: string,
-    subjectId: string,
-    tErrors: ErrorsLabels
-  ): Promise<SubjectResourceReturnType[]> {
-    await assertPermission(userId, AppPermission.SUBJECTS_VIEW_RESOURCES, tErrors);
-
-    return await SubjectResourceRepository.listResourcesForSubject(subjectId);
-  }
-
   export async function attachResource(
     userId: string,
     input: SubjectResourceAttachInput,

@@ -1,16 +1,16 @@
 import type { LessonReportLabels } from "@/shared/locale";
 
-export interface TeacherLessonReportsShellLabels {
+interface TeacherLessonReportsShellLabels {
   readonly title: string;
   readonly emptyMessage: string;
 }
 
-export interface TeacherLessonReportsFilterLabels {
+interface TeacherLessonReportsFilterLabels {
   readonly filterAll: string;
   readonly status: string;
 }
 
-export interface TeacherLessonReportsColumnLabels {
+interface TeacherLessonReportsColumnLabels {
   readonly lessonDate: string;
   readonly status: string;
   readonly durationMinutes: string;

@@ -26,7 +26,7 @@ export interface TeacherStudentsViewModel {
   readonly paginationOptions: ListPaginationOptions;
 }
 
-export interface TeacherStudentsColumnLabels {
+interface TeacherStudentsColumnLabels {
   readonly name: string;
   readonly status: string;
   readonly quota: string;

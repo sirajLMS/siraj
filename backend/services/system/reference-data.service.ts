@@ -73,10 +73,6 @@ function extractCount(result: unknown): number {
 }
 
 export namespace ReferenceDataService {
-  export async function listTimezones(): Promise<TimezoneSelectType[]> {
-    return TimezoneRepository.listAll();
-  }
-
   export async function listTimezonesPaginated(
     pagination: PaginationArgs | null
   ): Promise<SettingsTimezonesPaginatedResult> {
@@ -101,10 +97,6 @@ export namespace ReferenceDataService {
       totalCount,
       pageInfo: PaginationUtils.buildPageInfoFromArgs(pagination, rows.length, totalCount),
     };
-  }
-
-  export async function findTimezonesByIanaIds(ianaIds: string[]): Promise<TimezoneSelectType[]> {
-    return TimezoneRepository.findByIanaIds(ianaIds);
   }
 
   export async function upsertManyTimezones(inputs: TimezoneUpsertInput[]): Promise<TimezoneSelectType[]> {

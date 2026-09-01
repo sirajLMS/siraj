@@ -89,8 +89,8 @@ function createOverrideSchema(labels: PayrollLabels) {
     });
 }
 
-export type OverrideFormInput = z.input<ReturnType<typeof createOverrideSchema>>;
-export type OverrideFormData = z.output<ReturnType<typeof createOverrideSchema>>;
+type OverrideFormInput = z.input<ReturnType<typeof createOverrideSchema>>;
+type OverrideFormData = z.output<ReturnType<typeof createOverrideSchema>>;
 
 function buildDefaultValues(): OverrideFormInput {
   return {
@@ -102,7 +102,7 @@ function buildDefaultValues(): OverrideFormInput {
 }
 
 /** One selectable override target with its localized label (label text includes the helper copy). */
-export interface OverrideTargetOption {
+interface OverrideTargetOption {
   readonly value: OverrideTargetStatus;
   readonly label: string;
 }
@@ -129,7 +129,7 @@ function toStatusLabels(labels: PayrollLabels): Record<CalculationStatus, string
 }
 
 /** Read-only snapshot of the row's current calculation values shown in the summary card. */
-export interface OverrideSummaryValues {
+interface OverrideSummaryValues {
   readonly calculationStatus: CalculationStatus | null;
   readonly teacherPaidAmount: string | null;
   readonly teacherPaidCurrency: CurrencyCode | null;

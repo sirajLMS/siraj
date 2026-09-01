@@ -46,22 +46,6 @@ export namespace BookRepository {
     return rows.map(mapRow);
   }
 
-  export async function findById(bookId: string, tx?: DBTransaction): Promise<BookReturnType | null> {
-    const q = queryDb(tx);
-    const results = await q
-      .select({
-        id: books.id,
-        name: books.name,
-        availabilityStatus: books.availabilityStatus,
-        createdAt: books.createdAt,
-      })
-      .from(books)
-      .where(and(eq(books.id, bookId), isNull(books.deletedAt)))
-      .limit(1);
-
-    return results[0] ? mapRow(results[0]) : null;
-  }
-
   export async function deleteBook(id: string, actorUserId?: string | null, tx?: DBTransaction): Promise<boolean> {
     await SoftDeleteRepository.softDelete({ tableName: "books", entityId: id, actorUserId }, tx);
     return true;

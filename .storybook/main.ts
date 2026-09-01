@@ -21,13 +21,8 @@ const config: StorybookConfig = {
     return mergeConfig(cfg, {
       resolve: {
         alias: {
-          "react-leaflet/package.json": path.resolve("node_modules/react-leaflet/package.json"),
-          "@react-leaflet/core/package.json": path.resolve("node_modules/@react-leaflet/core/package.json"),
           "@": path.resolve(projectRoot, ".."),
         },
-      },
-      optimizeDeps: {
-        exclude: ["react-leaflet", "@react-leaflet/core"],
       },
     });
   },

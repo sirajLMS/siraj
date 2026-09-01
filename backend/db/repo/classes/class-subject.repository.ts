@@ -101,10 +101,6 @@ export namespace ClassSubjectRepository {
     return fetchSubjectByField("id", id, locale, tx);
   }
 
-  export function getSubjectBySlug(slug: string, locale?: string, tx?: DBTransaction): Promise<ClassSubjectSelectType> {
-    return fetchSubjectByField("slug", slug, locale, tx);
-  }
-
   export async function createSubject(
     input: ClassSubjectSubmitInput,
     locale?: string,

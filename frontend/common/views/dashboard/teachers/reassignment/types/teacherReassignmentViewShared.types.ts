@@ -6,9 +6,6 @@ import type {
   StudentContextCardProps,
 } from "@/frontend/common/views/dashboard/teachers/reassignment/types";
 import type { TeacherReassignmentViewModel } from "@/frontend/common/views/dashboard/teachers/reassignment/useTeacherReassignmentViewModel";
-import type { TeacherReassignmentLabels } from "@/shared/locale/types/dashboard/teachers/reassignment";
-
-type ShellLabels = Pick<TeacherReassignmentLabels, "pageTitle" | "pageSubtitle" | "warning" | "breadcrumbs">;
 
 export interface TeacherReassignmentViewSlotProps {
   readonly PageContainer: React.ComponentType<{ readonly children: ReactNode }>;
@@ -32,5 +29,3 @@ export interface TeacherReassignmentViewSharedProps {
   readonly viewModel: Readonly<TeacherReassignmentViewModel>;
   readonly slots: TeacherReassignmentViewSlotProps;
 }
-
-export type { ShellLabels };

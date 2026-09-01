@@ -1,8 +1,8 @@
 /** ISO 3166-1 alpha-2 codes excluded from all input UI country pickers and phone resolution. */
-export const EXCLUDED_UI_COUNTRY_CODES = new Set(["IL"]);
+const EXCLUDED_UI_COUNTRY_CODES = new Set(["IL"]);
 
 /** Map excluded codes to their UI replacement where applicable. */
-export const EXCLUDED_UI_COUNTRY_REPLACEMENTS: Readonly<Record<string, string>> = {
+const EXCLUDED_UI_COUNTRY_REPLACEMENTS: Readonly<Record<string, string>> = {
   IL: "PS",
 };
 

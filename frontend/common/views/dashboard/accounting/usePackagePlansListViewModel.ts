@@ -10,7 +10,7 @@ import { DashboardAccountingPackagePlans } from "@/shared/locale/namespaces";
 import type { PackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans";
 
 /** One row of the package plans catalog. */
-export type PackagePlanRow = NonNullable<
+type PackagePlanRow = NonNullable<
   NonNullable<import("@/frontend/common/graphql/generated/gql/graphql").PackagePlansQuery["packagePlans"]>[number]
 >;
 

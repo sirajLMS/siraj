@@ -2,7 +2,7 @@ import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/gen
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { createDailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/scheduleFixture";
 
-export interface MockScheduleSeed {
+interface MockScheduleSeed {
   readonly id: string;
   readonly yourTime: string;
   readonly teacherTime: string;
@@ -15,7 +15,7 @@ export interface MockScheduleSeed {
   readonly teacherName: string;
 }
 
-export const MOCK_SCHEDULE_SEED: readonly MockScheduleSeed[] = [
+const MOCK_SCHEDULE_SEED: readonly MockScheduleSeed[] = [
   {
     id: "9082",
     yourTime: "10:00 AM - 11:00 AM",

@@ -5,6 +5,5 @@ export * from "./staff-profile.documents";
 export * from "./teacher.documents";
 export * from "./teacher-dashboard.documents";
 export * from "./teacher-dues.documents";
-export * from "./teacher-notes.documents";
 export * from "./teacher-onboarding.documents";
 export * from "./teacher-portal.documents";

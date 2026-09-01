@@ -4,10 +4,7 @@ import { createLazyView } from "@/frontend/common/components/ui/container/create
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { GenericTabNavVariantProps } from "@/frontend/common/views/dashboard/components/genericTabNav.types";
 
-export type {
-  DateTabNavItem,
-  GenericTabNavVariantProps,
-} from "@/frontend/common/views/dashboard/components/genericTabNav.types";
+export type { GenericTabNavVariantProps } from "@/frontend/common/views/dashboard/components/genericTabNav.types";
 
 const lazyViews = createLazyView<GenericTabNavVariantProps<string>>(
   () =>

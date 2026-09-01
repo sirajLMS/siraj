@@ -32,13 +32,13 @@ export interface DatePickerSlotProps {
   readonly sx?: SxProps<Theme>;
 }
 
-export interface DatePickerSlot {
+interface DatePickerSlot {
   readonly component: ComponentType<DatePickerSlotProps>;
 }
 
 // --- Section wrapper slot (desktop wraps in a panel, mobile does not) ---
 
-export type SectionWrapper = ({ title, children }: Readonly<{ title: string; children: ReactElement }>) => ReactElement;
+type SectionWrapper = ({ title, children }: Readonly<{ title: string; children: ReactElement }>) => ReactElement;
 
 // --- Shared props ---
 

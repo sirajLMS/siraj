@@ -95,5 +95,3 @@ const MOBILE_SLOTS: TeacherWeeklyScheduleViewSharedSlots = {
 export function TeacherWeeklyScheduleViewMobile(props: Readonly<TeacherWeeklyScheduleViewProps>) {
   return <TeacherWeeklyScheduleViewShared {...props} slots={MOBILE_SLOTS} />;
 }
-
-export default TeacherWeeklyScheduleViewMobile;

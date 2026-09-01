@@ -25,4 +25,4 @@ export function ManagersContainer(props: UseManagersContainerViewModelProps) {
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { ManagersContainerViewModel, UseManagersContainerViewModelProps };
+export type { UseManagersContainerViewModelProps };

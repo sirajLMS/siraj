@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db, isSqlite, queryDb, queryWithPagination } from "@/backend/db";
@@ -209,38 +208,6 @@ export namespace StudentRepository {
     });
   };
 
-  export const createList = async (
-    input: Types.StudentCreateInput[],
-    tErrors: ErrorsLabels
-  ): Promise<Types.StudentSelectType[]> => {
-    if (input.length === 0) return [];
-    try {
-      const nameErrors = await Promise.all(input.map(item => StudentUtils.validateName(item.name)));
-      const nameErr = nameErrors.find(err => err !== null);
-      if (nameErr) throw new Error(nameErr);
-      const values: Types.StudentInsertType[] = input.map(item => ({
-        parentId: item.parentId,
-        userId: item.userId,
-        primaryTeacherId: item.primaryTeacherId ?? null,
-        name: item.name,
-        dateOfBirth: item.dateOfBirth,
-        gender: item.gender,
-        language: item.language,
-        status: item.status,
-        classesTotal: item.classesTotal ?? 0,
-        classesRemaining: item.classesRemaining ?? 0,
-        idempotencyKey: item.idempotencyKey ?? randomUUID(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }));
-      return await db.insert(students).values(values).returning();
-    } catch (error) {
-      throw new Error(tErrors.studentCreateFailed, {
-        cause: error,
-      });
-    }
-  };
-
   export const loadByIds = async (ids: string[], locale?: string): Promise<(Types.StudentReturnType | Error)[]> => {
     if (ids.length === 0) return [];
     const q = queryDb();
@@ -253,21 +220,6 @@ export namespace StudentRepository {
       if (!s) return new Error(studentNotFound(id));
       return StudentUtils.mapEntityToDto(s) ?? new Error(studentNotFound(id));
     });
-  };
-
-  export const existsById = async (id: string): Promise<boolean> => {
-    const q = queryDb();
-    return (await q.$count(students, eq(students.id, id))) > 0;
-  };
-
-  export const allExistsByIds = async (ids: string[]): Promise<boolean> => {
-    const q = queryDb();
-    return (await q.$count(students, inArray(students.id, ids))) === ids.length;
-  };
-
-  export const countAllStudents = async (): Promise<number> => {
-    const q = queryDb();
-    return await q.$count(students);
   };
 
   export const deleteById = async (id: string, tErrors: ErrorsLabels): Promise<Types.StudentSelectType> => {
@@ -755,7 +707,7 @@ export namespace StudentRepository {
     await executor.insert(teacherAssignments).values({ studentId, teacherId, assignedAt });
   };
 
-  export type StudentProfileRow = {
+  type StudentProfileRow = {
     readonly id: string;
     readonly userId: string;
     readonly name: string;

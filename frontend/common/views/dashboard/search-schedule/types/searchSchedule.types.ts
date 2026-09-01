@@ -47,12 +47,6 @@ export interface SearchScheduleSortMenuProps {
 }
 
 // Class-B unified: byte-identical mobile/desktop interfaces — per specs.md §4.1.
-export interface TeacherAvailabilityCalendarDay {
-  readonly day: number;
-  readonly gaps: readonly TeacherAvailabilityGapItem[];
-}
-
-// Class-B unified: byte-identical mobile/desktop interfaces — per specs.md §4.1.
 export interface TeacherAvailabilityCalendarGridProps {
   readonly labels: SearchScheduleLabels;
   readonly currentMonth: Date;

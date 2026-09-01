@@ -30,7 +30,7 @@ const commonSuggestionColumns = {
 };
 
 export namespace SuggestionRepository {
-  export type SuggestionInsertInput = {
+  type SuggestionInsertInput = {
     parentId: string;
     submitterName: string;
     body: string;
@@ -146,7 +146,7 @@ export namespace SuggestionRepository {
     return rows;
   };
 
-  export type AdminSuggestionQueueRow = {
+  type AdminSuggestionQueueRow = {
     id: string;
     parentId: string;
     parentUserId: string | null;
@@ -164,7 +164,7 @@ export namespace SuggestionRepository {
     createdAt: Date;
   };
 
-  export type AdminSuggestionQueueResult = {
+  type AdminSuggestionQueueResult = {
     rows: AdminSuggestionQueueRow[];
     totalCount: number;
   };
@@ -337,7 +337,7 @@ export namespace SuggestionRepository {
       locale
     );
 
-  export type SuggestionSearchResult = {
+  type SuggestionSearchResult = {
     id: string;
     body: string;
     submitterName: string;
@@ -375,7 +375,7 @@ export namespace SuggestionRepository {
     return rows;
   };
 
-  export type SuggestionMetrics = {
+  type SuggestionMetrics = {
     pending: number;
     reviewed: number;
     duplicate: number;
@@ -415,12 +415,6 @@ export namespace SuggestionRepository {
       duplicate,
       avgResponseHours: Math.round((avgResult?.avgHours ?? 0) * 100) / 100,
     };
-  };
-
-  export type ContributorRow = {
-    parentId: string;
-    name: string;
-    suggestionCount: number;
   };
 
   export const getContributorStats = async (days: number, tx?: DBTransaction): Promise<SuggestionContributorStats> => {

@@ -99,5 +99,3 @@ export function ReconnectAllAction({ providers, labels, onReconnectProvider, onC
     </Button>
   );
 }
-
-export default ReconnectAllAction;

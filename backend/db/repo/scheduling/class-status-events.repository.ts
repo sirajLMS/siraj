@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
-import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared";
+import { DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared";
 import { classStatusEvents } from "@/backend/db/schema";
 import type { ClassStatusEventSeedInsertInput, ClassStatusEventSelectType, DBTransaction } from "@/backend/types";
 
@@ -50,21 +50,6 @@ export namespace ClassStatusEventsRepository {
     return map;
   }
 
-  export async function listClassInstanceIdsWithEvents(
-    classInstanceIds: readonly string[],
-    tx?: DBTransaction
-  ): Promise<Set<string>> {
-    if (classInstanceIds.length === 0) return new Set();
-
-    const q = queryDb(tx);
-    const rows = await q
-      .selectDistinct({ classInstanceId: classStatusEvents.classInstanceId })
-      .from(classStatusEvents)
-      .where(inArray(classStatusEvents.classInstanceId, [...classInstanceIds]));
-
-    return new Set(rows.map(row => row.classInstanceId));
-  }
-
   /**
    * Finds the most recent status event for one class instance whose
    * `toState.idempotencyKey` matches `hash` and whose `createdAt` falls
@@ -107,13 +92,5 @@ export namespace ClassStatusEventsRepository {
       const chunkCount = Math.ceil(inputs.length / DEFAULT_BULK_CHUNK_SIZE);
       return insertChunks(t, inputs, chunkCount);
     });
-  }
-
-  export async function insertManyOnConflictDoNothing(
-    inputs: readonly ClassStatusEventSeedInsertInput[],
-    tx?: DBTransaction
-  ): Promise<void> {
-    if (inputs.length === 0) return;
-    await bulkInsertOnConflictDoNothing(classStatusEvents, [...inputs], { tx });
   }
 }

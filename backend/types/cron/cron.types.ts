@@ -59,17 +59,6 @@ export type CronRunReturnType = Omit<CronRunSelectType, "errorStack" | "jobKind"
   triggerSource: CronTriggerSource;
 };
 
-/** Canonical input type for creating a cron run. Kept for consistency with the
- *  per-entity input-type convention even though the dispatch path currently
- *  builds `CronRunInsertType` directly via the repository.
- *
- *  @internal — exported but not imported by any production code; kept for
- *  convention completeness and future use. */
-export type CronRunSubmitInput = Pick<
-  CronRunInsertType,
-  "scheduleId" | "jobKind" | "triggerSource" | "payload" | "attempt"
->;
-
 export type CronRunListInput = {
   scheduleId?: string;
   status?: CronRunStatus;
@@ -105,10 +94,6 @@ export type CronRunExtrasType = {
 
 export type CronHeartbeatSelectType = typeof cronHeartbeats.$inferSelect;
 export type CronHeartbeatInsertType = typeof cronHeartbeats.$inferInsert;
-
-/** @internal — exported but not imported by any production code; kept for
- *  convention completeness and future use. */
-export type CronHeartbeatReturnType = Omit<CronHeartbeatSelectType, "createdAt">;
 
 // ── Queue adapter types ──
 
@@ -182,7 +167,7 @@ export type CronJobResult = {
 
 // ── Handler execution context ──
 
-export type CronJobHandlerContext = {
+type CronJobHandlerContext = {
   /** AbortSignal that fires when the job's `timeoutSeconds` elapses. */
   signal: AbortSignal;
 };

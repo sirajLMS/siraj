@@ -10,7 +10,7 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 import type { MeetingUrlStatusLabels } from "@/shared/locale/types/dashboard/meeting-url-status";
 
 export type MeetingUrlStatus = "pending" | "generated" | "failed" | "expired";
-export type MeetingUrlStatusBadgeSize = "small" | "medium";
+type MeetingUrlStatusBadgeSize = "small" | "medium";
 
 export interface MeetingUrlStatusBadgeProps {
   readonly status: MeetingUrlStatus;

@@ -1,17 +1,8 @@
-import type {
-  AppPermission,
-  ClassExecutionState,
-  ClassInstanceQuery_classInstance,
-  ClassInstanceQuery_classInstance_student,
-  ClassInstanceQuery_classInstance_teacher,
-  ClassOutcome,
-} from "@/frontend/common/graphql/generated/gql/graphql";
-import type { TeacherFilterItem } from "@/frontend/common/types/shared.types";
-import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import type { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { NavIconKey } from "@/frontend/common/views/dashboard/config/navIconKeys";
 import type { DashboardNavigationLabels } from "@/shared/locale";
 
-export type NavAudience = "teacher" | "parent" | "student" | "supervisor";
+type NavAudience = "teacher" | "parent" | "student" | "supervisor";
 
 export interface NavItem {
   readonly key: string;
@@ -50,11 +41,6 @@ export interface NavGroup {
 
 export type ClassInstanceStatus = "active" | "scheduled" | "pending" | "completed" | "cancelled";
 
-// Re-export generated GraphQL types to replace local duplicates
-export type StudentInfo = ClassInstanceQuery_classInstance_student;
-export type TeacherInfo = ClassInstanceQuery_classInstance_teacher;
-export type ClassInstance = ClassInstanceQuery_classInstance;
-
 export interface PerformanceMetric {
   readonly key: string;
   readonly labelKey: string;
@@ -77,48 +63,3 @@ export type ScheduleOverviewDataHeaders = {
 };
 
 export type ScheduleOverviewDataStatusLabels = Record<ClassOutcome | ClassExecutionState, string>;
-
-export interface ScheduleOverviewData {
-  readonly searchPlaceholder: string;
-  readonly searchValue: string;
-  readonly dateLabel: string;
-  readonly dateValue: string;
-  readonly teacherPlaceholder: string;
-  readonly teacherValue: string;
-  readonly submitLabel: string;
-  readonly teachers: readonly TeacherFilterItem[];
-  readonly rows: readonly DailyScheduleRow[];
-  readonly headers: ScheduleOverviewDataHeaders;
-  readonly statusLabels: ScheduleOverviewDataStatusLabels;
-  readonly detailsLabel: string;
-  readonly emptyMessage: string;
-  readonly selectedMetricLabel?: string | null;
-  readonly todayLabel: string;
-  readonly previousDayLabel: string;
-  readonly nextDayLabel: string;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly totalCount?: number;
-  readonly onPageChange: (page: number) => void;
-  readonly onSearchChange: (value: string) => void;
-  readonly onDateChange: (date: string) => void;
-  readonly onTeacherChange: (teacher: string) => void;
-  readonly onSubmit: () => void;
-  readonly loading?: boolean;
-}
-
-export interface UserInfo {
-  readonly name: string;
-  readonly role: string;
-  readonly avatarUrl: string;
-  readonly permissions: readonly AppPermission[];
-  readonly notificationCount: number;
-}
-
-export type {
-  MissedClassAlert,
-  StudentProgressFeedItem,
-  TeacherDashboardMetrics,
-  TeacherScheduleRow,
-  TeacherSessionStatus,
-} from "@/frontend/common/types/shared.types";

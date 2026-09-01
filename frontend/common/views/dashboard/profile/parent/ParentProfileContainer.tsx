@@ -9,7 +9,7 @@ import {
 } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 
-export type { ParentProfileViewModel, UseParentProfileViewModelProps };
+export type { UseParentProfileViewModelProps };
 
 const lazyViews = createLazyView<ParentProfileViewModel>(
   () =>

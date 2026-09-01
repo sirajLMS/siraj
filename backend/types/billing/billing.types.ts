@@ -24,27 +24,6 @@ import type { CurrencyCode } from "@/shared/constants/currency.enum";
 export type InvoiceSelectType = typeof invoices.$inferSelect;
 export type InvoiceInsertType = typeof invoices.$inferInsert;
 
-export type InvoiceReturnType = Omit<
-  InvoiceSelectType,
-  "deletedAt" | "idempotencyKey" | "version" | "createdByUserId"
-> & {
-  status: InvoiceStatus;
-  invoiceType: InvoiceType;
-};
-
-export type InvoiceSubmitInput = Omit<
-  InvoiceInsertType,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "deletedAt"
-  | "idempotencyKey"
-  | "version"
-  | "createdByUserId"
-  | "status"
-  | "paidDate"
->;
-
 export type PaymentSelectType = typeof payments.$inferSelect;
 export type PaymentInsertType = typeof payments.$inferInsert;
 
@@ -61,18 +40,6 @@ export type PaymentReturnType = PaymentSelectType & {
   readonly precomputedPaymentMethodSnapshot?: unknown;
 };
 
-export type PaymentSubmitInput = Omit<
-  PaymentInsertType,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "deletedAt"
-  | "idempotencyKey"
-  | "refundedAmount"
-  | "paymentMethod"
-  | "paymentMethodSnapshot"
->;
-
 export type PaymentRecordInput = Omit<PaymentInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type CurrencyExchangeRateSelectType = typeof currencyExchangeRates.$inferSelect;
@@ -83,7 +50,6 @@ export type CurrencyExchangeRateSubmitInput = Omit<CurrencyExchangeRateInsertTyp
 export type CurrencyExchangeRateReturnType = Omit<CurrencyExchangeRateSelectType, "providerResponse">;
 
 export type FxSyncRunSelectType = typeof fxSyncRuns.$inferSelect;
-export type FxSyncRunInsertType = typeof fxSyncRuns.$inferInsert;
 
 export type FxSyncRunReturnType = Omit<FxSyncRunSelectType, "providerResponse"> & {
   provider: FxProvider;

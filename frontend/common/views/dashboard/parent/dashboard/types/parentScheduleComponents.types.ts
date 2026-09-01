@@ -11,7 +11,7 @@ import type {
   AssociatedStudentsSectionLabels,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 
-export interface BaseParentScheduleListProps {
+interface BaseParentScheduleListProps {
   readonly rows: readonly ParentScheduleRow[];
   readonly labels: ParentDashboardLabels;
   readonly pagination?: SchedulePagination;

@@ -16,12 +16,6 @@ export namespace CurrencyHedgeRepository {
     return client.select().from(currencyHedges).orderBy(desc(currencyHedges.updatedAt));
   }
 
-  export async function getById(id: string, tx?: DBTransaction): Promise<CurrencyHedgeSelectType | null> {
-    const client = queryDb(tx);
-    const [row] = await client.select().from(currencyHedges).where(eq(currencyHedges.id, id)).limit(1);
-    return row ?? null;
-  }
-
   export async function create(
     input: Omit<CurrencyHedgeInsertType, "id">,
     tx?: DBTransaction,

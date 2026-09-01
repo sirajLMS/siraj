@@ -6,11 +6,6 @@ export type CredentialFormLabels = Pick<
   "clientIdRequired" | "clientSecretRequired" | "scopesRequired"
 >;
 
-export type CredentialFormFieldLabels = Pick<
-  SettingsMeetingIntegrationsLabels["credentialForm"],
-  "clientId" | "clientSecret" | "tenantId" | "scopes" | "webhookSecret" | "accountId"
->;
-
 export function createCredentialFormSchema(labels: CredentialFormLabels) {
   return z.object({
     clientId: z.string().trim().min(1, labels.clientIdRequired),
@@ -23,4 +18,3 @@ export function createCredentialFormSchema(labels: CredentialFormLabels) {
 }
 
 export type CredentialFormValues = z.infer<ReturnType<typeof createCredentialFormSchema>>;
-export type CredentialFormInput = z.input<ReturnType<typeof createCredentialFormSchema>>;

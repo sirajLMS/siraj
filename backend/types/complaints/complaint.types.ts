@@ -3,7 +3,7 @@ import type { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import type { ComplaintResponseReturnType, PageInfo } from "@/backend/types";
 
 export type ComplaintSelectType = typeof complaints.$inferSelect;
-export type ComplaintInsertType = typeof complaints.$inferInsert;
+type ComplaintInsertType = typeof complaints.$inferInsert;
 
 export type ComplaintSubmitInput = Omit<
   ComplaintInsertType,

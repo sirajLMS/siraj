@@ -7,10 +7,6 @@ import {
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 
-export function hasTeacherProfessionalData(teacherData: TeacherViewData): boolean {
-  return hasTeacherCompensationData(teacherData) || hasTeacherStatsData(teacherData);
-}
-
 export function hasTeacherCompensationData(teacherData: TeacherViewData): boolean {
   return teacherData.hourlyRate != null ? teacherData.hourlyRate.trim() !== "" : teacherData.rateCurrency != null;
 }
@@ -33,8 +29,4 @@ export function hasTeacherPersonalData(teacherData: TeacherViewData): boolean {
 
 export function hasTeacherAdminOnlyData(adminData: TeacherAdminData): boolean {
   return [adminData.nationalId?.trim(), adminData.status].some(Boolean);
-}
-
-export function hasTeacherIdentityData(adminData: TeacherAdminData): boolean {
-  return hasTeacherPersonalData(adminData) || hasTeacherAdminOnlyData(adminData) || Boolean(adminData.timezone?.trim());
 }

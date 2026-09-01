@@ -5,7 +5,7 @@ import { Alert, Box, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
 import type { MissedClassAlertBannerProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
-export interface MissedClassAlertBannerSharedSlots {
+interface MissedClassAlertBannerSharedSlots {
   readonly DismissButton: ComponentType<{ readonly onDismiss: () => void; readonly ariaLabel: string }>;
 }
 
@@ -14,7 +14,7 @@ export interface MissedClassAlertBannerSharedProps extends MissedClassAlertBanne
   readonly slots: MissedClassAlertBannerSharedSlots;
 }
 
-export interface MissedClassAlertBannerContentProps {
+interface MissedClassAlertBannerContentProps {
   readonly title: string;
   readonly description: string;
   readonly fixed?: boolean;
@@ -22,11 +22,10 @@ export interface MissedClassAlertBannerContentProps {
 }
 
 /**
- * Pure presentational body of the missed-class alert banner.
- * Both the shared client component and the desktop server content component
- * delegate to this to avoid duplicating the Alert/Box/Typography structure.
+ * Pure presentational body of the missed-class alert banner, shared so the
+ * Alert/Box/Typography structure is defined once.
  */
-export function MissedClassAlertBannerContent({
+function MissedClassAlertBannerContent({
   title,
   description,
   fixed = false,

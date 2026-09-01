@@ -25,7 +25,7 @@ export const STUDENT_AVATAR_FILES = [
 
 export type AvatarPersona = "teachers" | "parents" | "students";
 
-export function getAvatarPoolFiles(persona: AvatarPersona): readonly string[] {
+function getAvatarPoolFiles(persona: AvatarPersona): readonly string[] {
   switch (persona) {
     case "teachers":
       return TEACHER_AVATAR_FILES;

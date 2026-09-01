@@ -4,8 +4,6 @@ import type {
   CreateQuotaMutationVariables,
   DeleteQuotaMutation,
   DeleteQuotaMutationVariables,
-  QuotaBalanceQuery,
-  QuotaBalanceQueryVariables,
   QuotaLedgerQuery,
   QuotaLedgerQueryVariables,
   QuotaQuery,
@@ -128,25 +126,6 @@ export const studentOpenQuotasQueryDocument: TypedDocumentNode<
   query StudentOpenQuotas($studentId: ID!) {
     studentOpenQuotas(studentId: $studentId) {
       ...QuotaFields
-    }
-  }
-`;
-
-export const quotaBalanceQueryDocument: TypedDocumentNode<QuotaBalanceQuery, QuotaBalanceQueryVariables> = gql`
-  query QuotaBalance($studentId: ID!) {
-    quotaBalance(studentId: $studentId) {
-      id
-      studentId
-      totalActiveClasses
-      totalRemaining
-      totalReserved
-      breakdownByExpiration {
-        id
-        quotaId
-        quotaName
-        remaining
-        validUntil
-      }
     }
   }
 `;

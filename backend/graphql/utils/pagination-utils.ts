@@ -6,13 +6,11 @@
  * and query files. All GraphQL resolvers should import from this module
  * instead of re-implementing pagination argument parsing locally.
  *
- * Delegates to the runtime `PaginationArgs` class (`@/backend/types`) and the
- * service-layer `PaginationUtils` (`@/backend/utils`) to preserve the single
- * source of truth for pagination math.
+ * Delegates to the runtime `PaginationArgs` class (`@/backend/types`) to
+ * preserve the single source of truth for pagination math.
  */
 
-import { type PageInfo, PaginationArgs, type PaginationInput } from "@/backend/types";
-import { PaginationUtils } from "@/backend/utils/pagination.utils";
+import { PaginationArgs, type PaginationInput } from "@/backend/types";
 
 /**
  * Parse a GraphQL pagination input into a runtime {@link PaginationArgs}.
@@ -26,16 +24,4 @@ import { PaginationUtils } from "@/backend/utils/pagination.utils";
  */
 export function parsePaginationArgs(input: PaginationInput | null | undefined): PaginationArgs | null {
   return PaginationArgs.fromArgs(input);
-}
-
-/**
- * Build the GraphQL {@link PageInfo} response from a result page.
- *
- * Thin wrapper over {@link PaginationUtils.buildPageInfoFromArgs} so GraphQL
- * resolvers have a single canonical import for both parsing and response
- * building. Keeps the service-layer helper as the source of truth for the
- * mathematical calculation.
- */
-export function buildPageInfo(args: PaginationArgs | null | undefined, count: number, total: number): PageInfo {
-  return PaginationUtils.buildPageInfoFromArgs(args, count, total);
 }

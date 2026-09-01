@@ -20,7 +20,7 @@ import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-st
 import type { ErrorsLabels } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types";
 
-export const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
+const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
 
 const NON_SIMULATABLE_GROUP_SLUGS = new Set<string>(["system_automated"]);
 
@@ -265,7 +265,7 @@ export namespace PermissionGroupSimulationService {
     };
   }
 
-  export type ResolvedGroupSimulation = {
+  type ResolvedGroupSimulation = {
     realUserId: string;
     isSimulatingGroup: boolean;
     simulatedGroupSlug?: string;

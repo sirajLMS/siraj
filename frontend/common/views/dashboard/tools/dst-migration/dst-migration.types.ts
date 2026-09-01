@@ -8,7 +8,7 @@ export interface UpdatedSession {
   readonly toTime: string;
 }
 
-export interface ConflictItem {
+interface ConflictItem {
   readonly id: string;
   readonly studentName: string;
   readonly message: string;

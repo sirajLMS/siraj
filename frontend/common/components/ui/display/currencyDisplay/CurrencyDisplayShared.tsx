@@ -18,7 +18,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
-export type LocaleEmojiComponentType = React.FC<{ readonly emoji: string }>;
+type LocaleEmojiComponentType = React.FC<{ readonly emoji: string }>;
 
 export interface CurrencyDisplaySharedProps extends Omit<CurrencyDisplayProps, "typographyVariant"> {
   /** Default typography variant when none is supplied. */

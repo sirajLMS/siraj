@@ -2,7 +2,7 @@ import type { staffProfiles } from "@/backend/db/schema";
 import type { AccountStatus, OverrideState } from "@/backend/enum";
 import type { PageInfo } from "@/backend/types";
 
-export type StaffProfileSelectType = typeof staffProfiles.$inferSelect;
+type StaffProfileSelectType = typeof staffProfiles.$inferSelect;
 export type StaffProfileInsertType = typeof staffProfiles.$inferInsert;
 
 export type StaffProfileCreateResult = Pick<StaffProfileSelectType, "id" | "userId" | "createdAt"> & {

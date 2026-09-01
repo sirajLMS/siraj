@@ -108,7 +108,7 @@ export const getMeetingChannel = async (slug: MeetingProvider): Promise<IMeeting
   return initPromise;
 };
 
-export const resetMeetingChannel = async (slug: MeetingProvider): Promise<void> => {
+const resetMeetingChannel = async (slug: MeetingProvider): Promise<void> => {
   const instance = instances.get(slug);
   if (instance) {
     await instance.disconnect();
@@ -118,11 +118,6 @@ export const resetMeetingChannel = async (slug: MeetingProvider): Promise<void> 
   for (const key of PROVIDER_ENV_KEYS[slug]) {
     invalidateEnvConfigCache(key);
   }
-};
-
-export const resetAllMeetingChannels = async (): Promise<void> => {
-  const slugs = [...instances.keys()];
-  await Promise.all(slugs.map(slug => resetMeetingChannel(slug)));
 };
 
 /**

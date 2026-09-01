@@ -11,7 +11,7 @@ import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 export type NotificationEventCategory = "info" | "reminder" | "urgent" | "digest";
 
 /** Maps every NotificationEventType → category so the prefs UI can group/toggle by category. */
-export const NOTIFICATION_EVENT_CATEGORY: Record<NotificationEventType, NotificationEventCategory> = {
+const NOTIFICATION_EVENT_CATEGORY: Record<NotificationEventType, NotificationEventCategory> = {
   [NotificationEventType.ClassReminder]: "reminder",
   [NotificationEventType.InvoiceGenerated]: "info",
   [NotificationEventType.ComplaintResponse]: "info",
@@ -190,14 +190,3 @@ export interface NotificationPreferencesTabVariantProps {
   /** Toggle all events in a category — called from category-level switch. */
   readonly onCategoryToggle?: (category: NotificationEventCategory, enabled: boolean) => void;
 }
-
-// Re-exported from notificationPreferenceUtils for backward compatibility.
-// The canonical implementations live in notificationPreferenceUtils.ts.
-export {
-  buildDefaultPreferences,
-  buildPreferenceMap,
-  buildPreferenceMatrixRows,
-  getNotificationEventTypesForRole,
-  preferenceKey,
-  resolveNotificationPreferenceRole,
-} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceUtils";

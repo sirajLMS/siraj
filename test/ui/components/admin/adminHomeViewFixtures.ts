@@ -13,11 +13,11 @@ import { Translation } from "@/shared/locale/namespaces/translation";
 export const adminHomeLocale: AppLocale = "ar";
 export const adminHomeLabels = readTranslation(Translation.Dashboard.Admin, adminHomeLocale);
 
-export function buildAdminHomeStatusLabels(): Record<ClassOutcome | ClassExecutionState, string> {
+function buildAdminHomeStatusLabels(): Record<ClassOutcome | ClassExecutionState, string> {
   return buildClassInstanceStatusLabels(adminHomeLabels.statusLabels);
 }
 
-export function buildAdminHomeLabelsBySection(): AdminDashboardLabelsBySection {
+function buildAdminHomeLabelsBySection(): AdminDashboardLabelsBySection {
   return {
     shell: {
       todayClasses: adminHomeLabels.todayClasses,
@@ -54,7 +54,7 @@ export function buildAdminHomeLabelsBySection(): AdminDashboardLabelsBySection {
   };
 }
 
-export function createAdminHomeScheduleRow(id: string): DailyScheduleRow {
+function createAdminHomeScheduleRow(id: string): DailyScheduleRow {
   return createDailyScheduleRow({
     id,
     yourTime: "10:00 AM",

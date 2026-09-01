@@ -16,5 +16,3 @@ export function useDownloadInvoicePdf({ showFeedback, popupBlockedLabel }: Downl
     [showFeedback, popupBlockedLabel]
   );
 }
-
-export type DownloadPdfHandler = ReturnType<typeof useDownloadInvoicePdf>;

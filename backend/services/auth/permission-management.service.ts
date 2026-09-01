@@ -9,7 +9,6 @@ import { invalidateRoleChange } from "@/backend/services/cache";
 import type {
   GroupWithPermissionIds,
   PermissionReturnType,
-  SystemPermissionUpsertInput,
   UserOverrideInput,
   UserPermissionOverrideSelectType,
 } from "@/backend/types";
@@ -117,23 +116,6 @@ export namespace PermissionManagementService {
     } catch (cacheErr) {
       logger.error("Failed to invalidate role change cache", { userIds: ids, context, error: cacheErr });
     }
-  }
-
-  /**
-   * Toggles the `trg_protect_system_permissions` trigger on the `permissions`
-   * table. The DO $$ block swallows concurrent / missing-table errors so the
-   * call is safe to run even when the trigger does not exist.
-   */
-  async function setSystemPermissionTrigger(enabled: boolean): Promise<void> {
-    const action = enabled ? "ENABLE" : "DISABLE";
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        ALTER TABLE permissions ${sql.raw(action)} TRIGGER trg_protect_system_permissions;
-      EXCEPTION WHEN OTHERS THEN
-        RAISE NOTICE 'Could not ${sql.raw(action.toLowerCase())} trigger: %', SQLERRM;
-      END $$;
-    `);
   }
 
   async function requireUserSetup(
@@ -487,138 +469,6 @@ export namespace PermissionManagementService {
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
 
-  async function disableSystemPermissionTrigger(): Promise<void> {
-    await setSystemPermissionTrigger(false);
-  }
-
-  async function enableSystemPermissionTrigger(): Promise<void> {
-    await setSystemPermissionTrigger(true);
-  }
-
-  /**
-   * Ensures app_permission enum values exist before inserting system permissions.
-   * Validates each key against the AppPermission enum before interpolating it
-   * into the DDL statement (stmt is built with sql.raw, so this guard is the
-   * only thing standing between a caller bug and unvalidated SQL).
-   */
-  export async function ensurePermissionEnumValues(keys: readonly AppPermission[]): Promise<void> {
-    const validatedKeys = keys.map(key => {
-      const parsed = parseAppPermission(key);
-      if (!parsed) {
-        throw new Error(`Invalid AppPermission key for enum DDL: ${key}`);
-      }
-      return parsed;
-    });
-    await Promise.all(
-      validatedKeys.map(key => db.execute(sql.raw(`ALTER TYPE app_permission ADD VALUE IF NOT EXISTS '${key}';`)))
-    );
-  }
-
-  /**
-   * Upserts immutable system permissions (disables protection trigger during write).
-   */
-  export async function upsertSystemPermissions(
-    inputs: readonly SystemPermissionUpsertInput[]
-  ): Promise<AppPermission[]> {
-    if (inputs.length === 0) return [];
-
-    const permissionKeys: AppPermission[] = [];
-    for (const spec of inputs) {
-      const parsed = parseAppPermission(spec.key);
-      if (!parsed) {
-        throw new Error(`Invalid AppPermission key: ${spec.key}`);
-      }
-      permissionKeys.push(parsed);
-    }
-
-    await ensurePermissionEnumValues(permissionKeys);
-    await disableSystemPermissionTrigger();
-
-    try {
-      await Promise.all(
-        inputs.map(spec =>
-          db.execute(sql`
-          INSERT INTO permissions (id, key, resource, action, description, category, is_system)
-          VALUES (
-            gen_random_uuid(),
-            ${spec.key}::app_permission,
-            ${spec.resource},
-            ${spec.action},
-            ${JSON.stringify(spec.description)}::jsonb,
-            ${JSON.stringify(spec.category)}::jsonb,
-            true
-          )
-          ON CONFLICT (key) DO UPDATE SET
-            resource = EXCLUDED.resource,
-            action = EXCLUDED.action,
-            description = EXCLUDED.description,
-            category = EXCLUDED.category,
-            is_system = EXCLUDED.is_system
-        `)
-        )
-      );
-      return permissionKeys;
-    } finally {
-      await enableSystemPermissionTrigger();
-    }
-  }
-
-  /**
-   * Assigns permissions to a group by slug (idempotent).
-   */
-  export async function ensureGroupPermissions(
-    groupSlug: string,
-    permissionKeys: readonly AppPermission[]
-  ): Promise<void> {
-    if (permissionKeys.length === 0) return;
-
-    await Promise.all(
-      permissionKeys.map(key =>
-        db.execute(sql`
-        INSERT INTO group_permissions (group_id, permission_id)
-        SELECT g.id, p.id
-        FROM permission_groups g, permissions p
-        WHERE g.slug = ${groupSlug}
-          AND p.key = ${key}::app_permission
-        ON CONFLICT DO NOTHING
-      `)
-      )
-    );
-  }
-
-  /**
-   * Assigns permissions to multiple groups by slug (idempotent).
-   */
-  export async function ensureGroupPermissionsForGroups(
-    groupSlugs: readonly string[],
-    permissionKeys: readonly AppPermission[]
-  ): Promise<void> {
-    await Promise.all(groupSlugs.map(groupSlug => ensureGroupPermissions(groupSlug, permissionKeys)));
-  }
-
-  /**
-   * Removes specific permissions from a group by slug (idempotent).
-   * Used by seeds when a previously granted key must be withdrawn.
-   */
-  export async function revokeGroupPermissions(
-    groupSlug: string,
-    permissionKeys: readonly AppPermission[]
-  ): Promise<void> {
-    if (permissionKeys.length === 0) return;
-
-    await Promise.all(
-      permissionKeys.map(key =>
-        db.execute(sql`
-        DELETE FROM group_permissions gp
-        USING permission_groups g, permissions p
-        WHERE gp.group_id = g.id
-          AND gp.permission_id = p.id
-          AND g.slug = ${groupSlug}
-          AND p.key = ${key}::app_permission
-      `)
-      )
-    );
-  }
   /**
    * Idempotent single user permission override (seed / bootstrap use).
    */
@@ -636,27 +486,6 @@ export namespace PermissionManagementService {
       permissionId,
       state: input.state,
       assignedByUserId: input.assignedByUserId,
-    });
-  }
-
-  /**
-   * Idempotent upsert of a fixed-slug system permission group. Used by seeders
-   * and bootstrap flows to guarantee the existence of system-ready groups whose
-   * slugs are referenced externally (e.g. by `SystemPermissionGroupSlug`) but
-   * which may predate the migrations inserting them. Safe to call repeatedly.
-   *
-   * NOTE: this bypasses `requireManageAccess` because it is part of the
-   * system bootstrap surface, not user-initiated CRUD.
-   */
-  export async function ensureSystemPermissionGroup(input: {
-    slug: string;
-    name: LocalizedString;
-    description?: LocalizedString | null;
-  }): Promise<{ id: string; slug: string; isSystem: boolean }> {
-    return PermissionManagementRepository.upsertSystemGroup({
-      slug: input.slug,
-      name: input.name,
-      description: input.description ?? null,
     });
   }
 }

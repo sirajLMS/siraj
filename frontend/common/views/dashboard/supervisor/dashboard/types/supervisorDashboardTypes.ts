@@ -1,13 +1,13 @@
 import type { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
-export interface PendingDuesSummary {
+interface PendingDuesSummary {
   readonly totalCount: number;
   readonly totalAmount: number;
   readonly currency: string;
 }
 
-export interface MonthlySnapshot {
+interface MonthlySnapshot {
   readonly year: number;
   readonly month: number;
   readonly label: string;

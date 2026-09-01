@@ -20,7 +20,7 @@
  */
 
 /** Storage key prefix for appearance logo uploads (public, CDN-cacheable). */
-export const APPEARANCE_LOGO_STORAGE_PREFIX = "public/appearance" as const;
+const APPEARANCE_LOGO_STORAGE_PREFIX = "public/appearance" as const;
 
 /**
  * MIME types accepted for appearance logo uploads.
@@ -28,14 +28,14 @@ export const APPEARANCE_LOGO_STORAGE_PREFIX = "public/appearance" as const;
  * Subset of `shared/utils/storage.utils.ts`'s `ALLOWED_MIME_TYPES`
  * (image kinds only). SVG is excluded — see file header.
  */
-export const APPEARANCE_LOGO_ALLOWED_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
+const APPEARANCE_LOGO_ALLOWED_MIME_TYPES = ["image/png", "image/jpeg", "image/webp"] as const;
 
 /**
  * Map an allowed logo MIME type to its canonical file extension.
  * Falls back to `png` for unknown image types (should not happen — the
  * allowlist is checked before this is called).
  */
-export const APPEARANCE_LOGO_MIME_TO_EXT: Readonly<Record<string, string>> = {
+const APPEARANCE_LOGO_MIME_TO_EXT: Readonly<Record<string, string>> = {
   "image/png": "png",
   "image/jpeg": "jpg",
   "image/webp": "webp",

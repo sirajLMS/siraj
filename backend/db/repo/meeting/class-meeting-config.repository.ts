@@ -19,7 +19,7 @@ import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 type ClassScope = { readonly classInstanceId: string };
 type RecurringScope = { readonly recurringScheduleId: string };
-export type ClassMeetingConfigScopeFilter = ClassScope | RecurringScope;
+type ClassMeetingConfigScopeFilter = ClassScope | RecurringScope;
 
 function scopeCondition(scope: ClassMeetingConfigScopeFilter) {
   return "classInstanceId" in scope
@@ -199,7 +199,7 @@ export namespace ClassMeetingConfigRepository {
     return db.transaction(run);
   }
 
-  export async function findByScopeProviderLabel(
+  async function findByScopeProviderLabel(
     scope: ClassMeetingConfigScopeFilter,
     providerId: string,
     label: string | null | undefined,

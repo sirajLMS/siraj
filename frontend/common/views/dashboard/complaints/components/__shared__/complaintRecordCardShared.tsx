@@ -19,7 +19,7 @@ type StatusBadgeComponentProps = {
 
 type StatusBadgeComponent = React.FC<Readonly<StatusBadgeComponentProps>>;
 
-export interface ComplaintRecordCardSharedOptions {
+interface ComplaintRecordCardSharedOptions {
   readonly contentPadding: number;
   readonly headerDirection: "row" | "column";
   readonly headerGap: number;

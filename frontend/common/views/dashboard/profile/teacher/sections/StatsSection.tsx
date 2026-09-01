@@ -8,7 +8,7 @@ import {
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 
-export const TEACHER_STATS_METRIC_KEYS = {
+const TEACHER_STATS_METRIC_KEYS = {
   totalClasses: "teacherTotalClasses",
   avgEngagement: "teacherAvgEngagement",
 } as const;

@@ -35,7 +35,7 @@ const APPEARANCE_EXPORT_FILENAME = "appearance-settings.json";
  * `$schema` is declared first so it appears at the top of the
  * pretty-printed JSON output (editor UX convention).
  */
-export interface AppearanceSettingsJson {
+interface AppearanceSettingsJson {
   /** JSON Schema URL for editor autocompletion / validation (Task 9.1). */
   readonly $schema: string;
   readonly colors: AppearanceDraftInput["colors"];
@@ -63,7 +63,7 @@ export interface AppearanceSettingsJson {
  * separately so unit tests can assert the serialized shape without
  * triggering a browser download.
  */
-export function buildAppearanceSettingsJson(draft: AppearanceDraftInput): string {
+function buildAppearanceSettingsJson(draft: AppearanceDraftInput): string {
   const document: AppearanceSettingsJson = {
     $schema: APPEARANCE_SCHEMA_URL,
     colors: draft.colors,

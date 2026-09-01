@@ -26,34 +26,3 @@ export async function getFolderFileCounts(
 
   return folderFileCountMap;
 }
-
-export async function getValidSourcePaths(
-  ctx: GcpContext,
-  sourcePaths: string[]
-): Promise<{
-  validSources: string[];
-  failureCount: number;
-  failures: Array<{ path: string; error: string }>;
-}> {
-  const existenceChecks = await Promise.all(
-    sourcePaths.map(async path => {
-      const [exists] = await ctx.bucket.file(path).exists();
-      return { path, exists };
-    })
-  );
-
-  const validSources: string[] = [];
-  const failures: Array<{ path: string; error: string }> = [];
-  let failureCount = 0;
-
-  for (const check of existenceChecks) {
-    if (check.exists) {
-      validSources.push(check.path);
-    } else {
-      failureCount++;
-      failures.push({ path: check.path, error: "Source path not found" });
-    }
-  }
-
-  return { validSources, failureCount, failures };
-}

@@ -6,7 +6,6 @@ export type {
   SearchSchedulePaginationFooterProps,
   SearchScheduleResultsSkeletonProps,
   SearchScheduleSortMenuProps,
-  TeacherAvailabilityCalendarDay,
   TeacherAvailabilityCalendarGridProps,
   TeacherAvailabilityDayPillProps,
   TeacherAvailabilityGapItem,

@@ -12,15 +12,12 @@ import type { PersonOption } from "@/frontend/common/components/ui/input/userSel
 import type {
   ClassExecutionState,
   ClassOutcome,
-  CountryCode,
   CurrencyCode,
   EffectiveMeetingFieldsFragment,
-  Gender,
   InvoiceType,
   ManagerOnboardingInput,
   MeetingProviderFieldsFragment,
   ParentOnboardingInput,
-  TeacherOnboardingInput,
   TeacherProgressFeedEventKind,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { OnboardingPaymentMethodFormValues } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
@@ -151,14 +148,6 @@ export interface TeacherScheduleRow {
   readonly isFrozen?: boolean | null;
 }
 
-export interface TeacherDashboardMetrics {
-  readonly totalClasses: number;
-  readonly missedSlots: number;
-  readonly completed: number;
-  readonly studentsToday: number;
-  readonly activeSessions?: number;
-}
-
 export interface StudentProgressFeedItem {
   readonly id: string;
   readonly studentId: string;
@@ -207,31 +196,6 @@ export type ParentOnboardingFormData = Omit<
   payinMethod?: OnboardingPaymentMethodFormValues | null;
   timezone: string;
   displayCurrency?: CurrencyCode | null;
-  meetingProvider?: MeetingProviderFieldsFragment | null;
-  meetingUrl?: string;
-  meetingLabel?: string;
-};
-
-export type TeacherOnboardingFormData = Omit<
-  CleanInput<TeacherOnboardingInput>,
-  | "timezoneId"
-  | "nationalId"
-  | "phone"
-  | "countryCode"
-  | "timezone"
-  | "hourlyRate"
-  | "rateCurrency"
-  | "initialPayoutMethod"
-  | "gender"
-> & {
-  nationalId?: string;
-  phone?: string;
-  countryCode: CountryCode;
-  timezone: string;
-  hourlyRate: string;
-  rateCurrency: CurrencyCode;
-  payoutMethod?: OnboardingPaymentMethodFormValues | null;
-  gender: Gender;
   meetingProvider?: MeetingProviderFieldsFragment | null;
   meetingUrl?: string;
   meetingLabel?: string;

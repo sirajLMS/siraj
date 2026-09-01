@@ -30,7 +30,7 @@ export interface TeacherClassListViewModel {
   readonly handleViewClassAudit: (id: string) => void;
 }
 
-export interface TeacherClassListLabels {
+interface TeacherClassListLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly noClasses: string;

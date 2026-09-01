@@ -17,7 +17,7 @@ import { SectionPanel } from "@/frontend/common/components/ui";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import { countPasswordClasses, PASSWORD_MIN_LENGTH } from "@/shared/utils/password-schema";
 
-export interface AdminResetPasswordData {
+interface AdminResetPasswordData {
   readonly newPassword: string;
   readonly sendNotificationEmail: boolean;
   readonly isValid: boolean;

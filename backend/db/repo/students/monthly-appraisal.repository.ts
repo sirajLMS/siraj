@@ -4,7 +4,6 @@ import { appraisalFeedback, monthlyAppraisals, users } from "@/backend/db/schema
 import type {
   AppraisalFeedbackInput,
   AppraisalFeedbackReturnType,
-  AppraisalFeedbackSelectType,
   DBTransaction,
   MonthlyAppraisalReturnType,
   MonthlyAppraisalSelectType,
@@ -255,9 +254,3 @@ export namespace MonthlyAppraisalRepository {
     };
   }
 }
-
-/**
- * Re-export the feedback select type for callers that need the raw row shape
- * (e.g., service-layer tests that assert against the inserted payload).
- */
-export type { AppraisalFeedbackSelectType };

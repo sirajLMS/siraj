@@ -2,40 +2,7 @@ import type { notificationDeliveries } from "@/backend/db/schema";
 import type { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import type { NotificationMetadata } from "@/backend/types";
 export type NotificationDeliverySelectType = typeof notificationDeliveries.$inferSelect;
-export type NotificationDeliveryInsertType = typeof notificationDeliveries.$inferInsert;
-
-export type NotificationDeliveryReturnType = Omit<
-  NotificationDeliverySelectType,
-  // audit fields
-  | "createdAt"
-  | "updatedAt"
-  // internal / sensitive fields
-  | "failureReason"
-  | "webhookPayload"
-  | "providerMessageId"
-> & {
-  // enums properly typed
-  channel: NotificationChannel;
-  eventType: NotificationEventType;
-  status: NotificationDeliveryStatus;
-};
-
-export type NotificationDeliverySubmitInput = Omit<
-  NotificationDeliveryInsertType,
-  // auto-generated
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  // status lifecycle fields set by server
-  | "status"
-  | "sentAt"
-  | "deliveredAt"
-  | "openedAt"
-  | "failedAt"
-  | "providerMessageId"
-  | "failureReason"
-  | "webhookPayload"
->;
+type NotificationDeliveryInsertType = typeof notificationDeliveries.$inferInsert;
 
 export type NotificationDeliveryStatusCount = {
   status: NotificationDeliveryStatus;

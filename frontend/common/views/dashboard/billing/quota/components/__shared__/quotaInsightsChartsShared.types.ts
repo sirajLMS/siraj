@@ -3,12 +3,6 @@ import type { ChartColors } from "@/frontend/common/views/dashboard/billing/quot
 
 export type ChartLabels = QuotaInsightsViewModel["labels"]["charts"];
 
-export interface ChartComponentProps<TData> {
-  readonly data: TData;
-  readonly chartLabels: ChartLabels;
-  readonly chartColors: ChartColors;
-}
-
 export interface GaugeComponentProps {
   readonly metrics: QuotaInsightsViewModel["metrics"];
   readonly chartLabels: ChartLabels;

@@ -5,19 +5,19 @@ import type { ReactNode } from "react";
 import type { AcademicProgressSummaryProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardComponents.types";
 import type { StudentProgressItem } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 
-export interface AcademicProgressRowOptions {
+interface AcademicProgressRowOptions {
   readonly wrapperSx: SxProps<Theme>;
   readonly nameContainerSx: SxProps<Theme>;
   readonly linearProgressHeight: number;
 }
 
-export interface AcademicProgressRowProps {
+interface AcademicProgressRowProps {
   readonly student: StudentProgressItem;
   readonly completionLabel: string;
   readonly options: AcademicProgressRowOptions;
 }
 
-export function AcademicProgressRowShared({ student, completionLabel, options }: Readonly<AcademicProgressRowProps>) {
+function AcademicProgressRowShared({ student, completionLabel, options }: Readonly<AcademicProgressRowProps>) {
   return (
     <Box sx={options.wrapperSx}>
       <Box sx={options.nameContainerSx}>

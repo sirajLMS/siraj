@@ -8,7 +8,7 @@ import {
   useSubjectDetailViewModel,
 } from "@/frontend/common/views/dashboard/subjects/detail/useSubjectDetailViewModel";
 
-export type { SubjectDetailViewModel, UseSubjectDetailViewModelProps };
+export type { UseSubjectDetailViewModelProps };
 
 const lazyViews = createLazyView<SubjectDetailViewModel>(
   () =>

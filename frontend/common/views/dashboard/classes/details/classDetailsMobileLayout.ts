@@ -5,7 +5,7 @@ import { mobileContentGutterBelowLgSx } from "@/frontend/common/utils/sx/mobileC
 const mobileTabletMedia = (theme: Theme) => theme.breakpoints.down(MOBILE_TABLET_MAX_BREAKPOINT);
 
 /** Consistent vertical rhythm between page sections on mobile/tablet. */
-export const CLASS_DETAILS_MOBILE_SECTION_GAP = 2;
+const CLASS_DETAILS_MOBILE_SECTION_GAP = 2;
 
 /** Horizontal inset for non-card content (headers, toolbars, section titles). */
 export const classDetailsContentPaddingSx: SxProps<Theme> = mobileContentGutterBelowLgSx;

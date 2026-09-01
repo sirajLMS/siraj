@@ -1,5 +1,4 @@
 import type { SvgIconComponent } from "@mui/icons-material";
-import type { ComponentType } from "react";
 import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PagePermissions } from "@/frontend/common/types/page-permissions.types";
 
@@ -26,20 +25,6 @@ export interface TabNavItem<TabId extends string> {
 export interface TabNavVariantProps<TabId extends string> {
   readonly activeTab: TabId;
   readonly tabs: readonly TabNavItem<TabId>[];
-}
-
-export interface TabbedPaneViewModel<TabId extends string, Labels> {
-  readonly labels: Labels;
-  readonly activeTab: TabId;
-  readonly tabNavItems: readonly TabNavItem<TabId>[];
-}
-
-/**
- * Type-safe `isTabId` predicate — caller passes the canonical id list and
- * gets back a narrow `(value: string): value is TabId` guard.
- */
-export function createIsTabId<TabId extends string>(tabIds: readonly TabId[]): (value: string) => value is TabId {
-  return (value: string): value is TabId => (tabIds as readonly string[]).includes(value);
 }
 
 /**
@@ -113,6 +98,3 @@ export function resolveActiveTabLabel<TabId extends string>(
 ): string | undefined {
   return tabNavItems.find(tab => tab.id === activeTab)?.label;
 }
-
-/** A no-op component exported so `lazy(() => import("."))` callers can resolve safely. */
-export const NoopComponent: ComponentType = () => null;

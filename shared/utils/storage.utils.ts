@@ -1,5 +1,5 @@
 // Whitelist of allowed MIME types for uploads
-export const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
+const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   "image/jpeg",
   "image/png",
   "image/gif",
@@ -49,50 +49,6 @@ export const extToMime: Record<string, string> = {
   ttf: "font/ttf",
   woff: "font/woff",
   woff2: "font/woff2",
-};
-
-// Map MIME types to file extensions
-export const mimeToExtensions: Record<string, string[]> = {
-  "image/jpeg": [".jpg", ".jpeg", ".jpe"],
-  "image/png": [".png"],
-  "image/gif": [".gif"],
-  "image/webp": [".webp"],
-  "application/pdf": [".pdf"],
-  "application/msword": [".doc"],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
-  "application/vnd.ms-excel": [".xls"],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-  "text/plain": [".txt", ".text"],
-  "application/zip": [".zip"],
-  "application/vnd.rar": [".rar"],
-  "video/mp4": [".mp4"],
-  "audio/mpeg": [".mp3"],
-  "audio/wav": [".wav"],
-  "font/otf": [".otf"],
-  "font/ttf": [".ttf"],
-  "font/woff": [".woff"],
-  "font/woff2": [".woff2"],
-};
-
-/**
- * Infer MIME type from a File object
- * Checks browser-detected MIME type first, falls back to extension
- */
-export const inferContentType = (file: File): string => {
-  // Try to use browser-detected MIME type if it's in our allowed list
-  if (file.type && isAllowedMimeType(file.type)) {
-    return file.type;
-  }
-
-  // Fallback: infer from extension
-  const ext = file.name.split(".").pop()?.toLowerCase();
-
-  if (ext && extToMime[ext]) {
-    return extToMime[ext];
-  }
-
-  // Default fallback
-  return "text/plain";
 };
 
 const FILE_NAME_PATTERN = /^[a-zA-Z0-9._\-\s()[\]]+$/;

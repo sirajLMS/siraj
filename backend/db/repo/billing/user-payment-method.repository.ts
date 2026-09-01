@@ -147,13 +147,6 @@ export namespace UserPaymentMethodRepository {
     );
   }
 
-  export async function listDefaultsByUserId(
-    userId: string,
-    tx?: DBTransaction
-  ): Promise<UserPaymentMethodReturnType[]> {
-    return selectByCondition(and(eq(userPaymentMethods.userId, userId), eq(userPaymentMethods.isDefault, true)), tx);
-  }
-
   export async function findDefaultForSlot(
     userId: string,
     slot: DefaultSlot,

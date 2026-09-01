@@ -1,16 +1,12 @@
 import type { auditLogs } from "@/backend/db/schema";
 
 export type AuditLogSelectType = typeof auditLogs.$inferSelect;
-export type AuditLogInsertType = typeof auditLogs.$inferInsert;
-
 export type AuditLogReturnType = Omit<AuditLogSelectType, "deletedAt">;
-
-export type AuditLogSubmitInput = Omit<AuditLogInsertType, "id" | "createdAt" | "actorUserId">;
 
 /**
  * Actor type for audit logs
  */
-export type ActorType = "USER" | "SYSTEM" | "API" | "CRON" | "TEACHER" | "PARENT";
+type ActorType = "USER" | "SYSTEM" | "API" | "CRON" | "TEACHER" | "PARENT";
 
 /**
  * Entity types that can be audited

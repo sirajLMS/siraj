@@ -1,24 +1,13 @@
-import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
-import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
 import type { ParentOnboardingViewModel } from "@/frontend/common/views/dashboard/admin/parents/onboarding/useParentOnboardingViewModel";
-
-export type ParentOnboardingViewProps = {
-  readonly register: UseFormRegister<ParentOnboardingFormData>;
-  readonly control: Control<ParentOnboardingFormData>;
-  readonly errors: FieldErrors<ParentOnboardingFormData>;
-  readonly handleSubmit: UseFormHandleSubmit<ParentOnboardingFormData>;
-  readonly isSubmitting: boolean;
-  readonly onSubmit: (data: ParentOnboardingFormData) => void | Promise<void>;
-};
 
 // Mobile tier presentation prop types (sub-components defined in
 // `frontend/mobile/views/dashboard/admin/parents/onboarding/parentOnboarding.mobile.tsx`).
-export type ParentOnboardingFieldAssistances = Pick<
+type ParentOnboardingFieldAssistances = Pick<
   ParentOnboardingViewModel,
   "register" | "control" | "errors" | "onUploadAvatar"
 >;
 
-export type MeetingConfigLabels = {
+type MeetingConfigLabels = {
   readonly sectionTitle: string;
   readonly optionalHint: string;
   readonly fields: {

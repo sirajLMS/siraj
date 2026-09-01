@@ -24,4 +24,4 @@ export function AdminBillingView(props: Readonly<UseAdminBillingViewModelProps>)
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { AdminBillingViewModel, UseAdminBillingViewModelProps };
+export type { UseAdminBillingViewModelProps };

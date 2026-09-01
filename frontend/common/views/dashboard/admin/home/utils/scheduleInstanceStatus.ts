@@ -18,7 +18,7 @@ function isScheduleInstanceDisplayStatus(value: string): value is ScheduleInstan
 
 type DateLike = Date | string | null;
 
-export interface ScheduleInstanceDisplayInput {
+interface ScheduleInstanceDisplayInput {
   readonly outcome: ClassOutcome | null | undefined;
   readonly executionState: ClassExecutionState | null | undefined;
   readonly actualStartAt?: DateLike;

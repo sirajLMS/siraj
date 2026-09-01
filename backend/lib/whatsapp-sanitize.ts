@@ -1,5 +1,5 @@
 /** Maximum length of a persisted failure reason (r10-011). */
-export const FAILURE_REASON_MAX_LENGTH = 256;
+const FAILURE_REASON_MAX_LENGTH = 256;
 
 /**
  * Sanitizes a failure reason before persisting to the database (r10-011).

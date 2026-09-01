@@ -15,11 +15,7 @@ import { PhoneFormField } from "@/frontend/common/components/ui/input/phoneInput
 import { TagInput } from "@/frontend/common/components/ui/input/tagInput/TagInput";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type {
-  PaymentMethodCatalogFormValue,
-  PaymentMethodDetailsFormValue,
-  PaymentMethodTypeFieldsProps,
-} from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
+export type { PaymentMethodTypeFieldsProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
 
 const getSharedSlots = <T extends FieldValues>(): PaymentMethodTypeFieldsSlots<T> => ({
   LocalizedStringFormField,

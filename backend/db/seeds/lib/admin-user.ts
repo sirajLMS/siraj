@@ -3,7 +3,7 @@ import type { UserSelectType } from "@/backend/types";
 import { students, supervisors } from "@/shared/demo-users";
 
 /** Email used to identify the system super admin (from ADMIN_EMAIL env var, fallback admin@siraj.local) */
-export const ADMIN_USER_EMAIL = getEnvironmentConfig().adminEmail || "admin@siraj.local";
+const ADMIN_USER_EMAIL = getEnvironmentConfig().adminEmail || "admin@siraj.local";
 
 /** Canonical demo supervisor login email from shared/demo-users.ts */
 export const SUPERVISOR_USER_EMAIL = supervisors[0]?.email ?? "supervisor@siraj.local";
@@ -35,7 +35,7 @@ export function findAdminUserOrFallback(usersList: UserSelectType[]): UserSelect
  * Find the demo supervisor user from the seeded users list.
  * Prefer for LMS review / complaint response attribution.
  */
-export function findSupervisorUser(usersList: UserSelectType[]): UserSelectType | undefined {
+function findSupervisorUser(usersList: UserSelectType[]): UserSelectType | undefined {
   return usersList.find(u => u.email === SUPERVISOR_USER_EMAIL);
 }
 

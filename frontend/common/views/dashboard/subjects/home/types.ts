@@ -5,7 +5,6 @@ import type {
   ClassCategoryUpdateInput,
   ClassSubjectCreateInput,
   ClassSubjectsQuery_classSubjects,
-  ClassSubjectsQuery_classSubjects_resources,
   ClassSubjectUpdateInput,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
@@ -18,8 +17,6 @@ import type { SubjectsLabels } from "@/shared/locale";
 export type CategoryItem = ClassCategoriesQuery_classCategories;
 
 export type SubjectItem = ClassSubjectsQuery_classSubjects;
-
-export type SubjectResourceItem = ClassSubjectsQuery_classSubjects_resources;
 
 // NEW FOR PLAN v5: subjects-related translation labels carried by the
 // ViewModel to the lifted dialogs so the tier files don't call useAppTranslation
@@ -75,7 +72,7 @@ export interface CategoryFormStateProps {
 // their `Controller`/`Control<EditCategoryFormValues>` calls type-correct
 // while still binding to the same shared form-state bundle (EditCategoryFormValues
 // is structurally identical to CategoryFormValues).
-export type EditCategoryFormStateProps = CategoryFormStateProps & {
+type EditCategoryFormStateProps = CategoryFormStateProps & {
   readonly control: Control<EditCategoryFormValues>;
   readonly errors: FieldErrors<EditCategoryFormValues>;
   readonly handleSubmit: UseFormHandleSubmit<EditCategoryFormValues>;
@@ -192,21 +189,4 @@ export interface DeleteCategoryDialogProps {
   readonly onConfirm: () => void;
   readonly categoryName: string;
   readonly isLoading: boolean;
-}
-
-export interface SubjectsContainerProps {
-  readonly subjectId?: string;
-}
-
-// NEW FOR PLAN v5: SubjectDialogsProps — §4.1 Class B unified lift of the byte-identical
-// SubjectDialogsMobileProps / SubjectDialogsDesktopProps pair. Used by both tier files via `import type`.
-export interface SubjectDialogsProps {
-  readonly categories: readonly CategoryItem[];
-  readonly selectedSubject: SubjectItem | null;
-  readonly selectedCategory: CategoryItem | null;
-  readonly pendingDeleteSubject: SubjectItem | null;
-  readonly pendingDeleteCategory: CategoryItem | null;
-  readonly refetchSubjects: () => Promise<unknown>;
-  readonly activeCategoryId: string | null;
-  readonly onCategoryReset: () => void;
 }

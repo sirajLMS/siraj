@@ -1,7 +1,7 @@
 import type { studentProgress } from "@/backend/db/schema";
 
 export type StudentProgressSelectType = typeof studentProgress.$inferSelect;
-export type StudentProgressInsertType = typeof studentProgress.$inferInsert;
+type StudentProgressInsertType = typeof studentProgress.$inferInsert;
 
 export type StudentProgressUpsertInput = Pick<
   StudentProgressInsertType,

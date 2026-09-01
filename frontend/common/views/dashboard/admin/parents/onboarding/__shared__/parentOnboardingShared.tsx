@@ -43,7 +43,7 @@ export interface ParentOnboardingSharedOptions {
   readonly renderFormSections: (sections: ReactNode, meetingConfigSection: ReactNode) => ReactNode;
 }
 
-export function MeetingConfigAlertShared({
+function MeetingConfigAlertShared({
   meetingConfigWarning,
   meetingSetupHref,
   failureMessage,
@@ -72,7 +72,7 @@ export function MeetingConfigAlertShared({
   );
 }
 
-export function StatusBadgeShared({
+function StatusBadgeShared({
   bannerText,
   options,
 }: {

@@ -10,13 +10,13 @@ import {
 } from "@/frontend/common/views/dashboard/classes/audit/components/__shared__/classAuditHeaderShared.helpers";
 
 /** Minimal heading contract both tier page headers satisfy. */
-export interface ClassAuditHeaderSlotProps {
+interface ClassAuditHeaderSlotProps {
   readonly title: string;
   readonly breadcrumbs: readonly ClassAuditHeaderBreadcrumb[];
   readonly actions: ReactNode;
 }
 
-export interface ClassAuditHeaderSlots {
+interface ClassAuditHeaderSlots {
   readonly PageHeader: ComponentType<ClassAuditHeaderSlotProps>;
   readonly FilterButton: ComponentType<ButtonProps>;
   readonly PrimaryAction: ComponentType<ButtonProps>;

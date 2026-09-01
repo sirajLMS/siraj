@@ -34,7 +34,7 @@ export type RevokeTarget = {
   readonly providerSlug: MeetingIntegrationProviderSlug;
 };
 
-export interface MeetingIntegrationsTabSlotProps {
+interface MeetingIntegrationsTabSlotProps {
   /** Layout for the AccordionSummary header — desktop uses inline row, mobile wraps to two rows. */
   readonly summaryContentSx: SxProps<Theme>;
   /** Inner wrapper layout within summary — desktop keeps chips inline, mobile wraps reauth chip below. */

@@ -3,15 +3,15 @@ import type { UserAutocompleteProps } from "@/frontend/common/components/ui/inpu
 import type { AssignGroupDialogProps } from "@/frontend/common/views/dashboard/permissions/types/assignGroupDialog.types";
 import type { PermissionsLabels } from "@/shared/locale";
 
-export type AssignGroupUserAutocompleteSlot = React.ComponentType<UserAutocompleteProps>;
+type AssignGroupUserAutocompleteSlot = React.ComponentType<UserAutocompleteProps>;
 
-export interface AssignGroupDialogVariant {
+interface AssignGroupDialogVariant {
   readonly fullWidth?: boolean;
   readonly maxWidth?: "xs" | "sm" | "md";
   readonly fullScreen?: boolean;
 }
 
-export interface AssignGroupDialogSlotProps {
+interface AssignGroupDialogSlotProps {
   readonly labels: PermissionsLabels;
   readonly UserAutocomplete: AssignGroupUserAutocompleteSlot;
   readonly dialogVariant: AssignGroupDialogVariant;

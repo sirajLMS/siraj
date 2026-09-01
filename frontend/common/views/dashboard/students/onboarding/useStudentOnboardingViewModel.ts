@@ -23,7 +23,7 @@ import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { StudentOnboardingLabels as StudentOnboardingLocaleLabels } from "@/shared/locale/types/dashboard/students/onboarding";
 
-export interface StudentOnboardingLabels {
+interface StudentOnboardingLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly statusBanner: string;

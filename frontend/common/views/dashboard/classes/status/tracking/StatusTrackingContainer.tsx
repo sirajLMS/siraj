@@ -25,4 +25,4 @@ export function StatusTrackingContainer(props: UseStatusTrackingViewModelProps) 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
-export type { StatusTrackingViewModel, UseStatusTrackingViewModelProps };
+export type { UseStatusTrackingViewModelProps };

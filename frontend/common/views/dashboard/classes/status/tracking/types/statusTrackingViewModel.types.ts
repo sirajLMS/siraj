@@ -5,7 +5,7 @@ import type {
   SuspensionAnalyticsLabels,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/status-tracking.types";
 
-export type StatusTrackingShellLabels = Pick<
+type StatusTrackingShellLabels = Pick<
   StatusTrackingLabels,
   | "pageTitle"
   | "pageSubtitle"
@@ -17,20 +17,20 @@ export type StatusTrackingShellLabels = Pick<
   | "todaysSchedule"
 >;
 
-export type StatusTrackingFilterLabels = Pick<StatusTrackingLabels, "dateFilter">;
+type StatusTrackingFilterLabels = Pick<StatusTrackingLabels, "dateFilter">;
 
-export type StatusTrackingColumnLabels = StatusTrackingDataGridLabels;
+type StatusTrackingColumnLabels = StatusTrackingDataGridLabels;
 
-export type StatusTrackingCardListSectionLabels = CardListLabels;
+type StatusTrackingCardListSectionLabels = CardListLabels;
 
-export type StatusTrackingAnalyticsSectionLabels = SuspensionAnalyticsLabels;
+type StatusTrackingAnalyticsSectionLabels = SuspensionAnalyticsLabels;
 
-export type StatusTrackingNotificationLabels = Pick<
+type StatusTrackingNotificationLabels = Pick<
   StatusTrackingLabels,
   "errorNoStudentId" | "errorAuditLogsComingSoon" | "errorFailedToLoad"
 >;
 
-export type StatusTrackingMetricSubLabels = Pick<
+type StatusTrackingMetricSubLabels = Pick<
   StatusTrackingLabels,
   "regularSubLabel" | "pendingSubLabel" | "suspendedSubLabel" | "onLeaveSubLabel"
 >;

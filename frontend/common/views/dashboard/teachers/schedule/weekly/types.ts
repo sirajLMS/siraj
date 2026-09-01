@@ -26,7 +26,7 @@ export type ScheduledClass = Omit<
   readonly outcome?: ClassOutcome | null;
 };
 
-export interface TeacherWeeklySchedule {
+interface TeacherWeeklySchedule {
   readonly teacherId: string;
   readonly teacherName: string;
   readonly weeklyHoursWorked: string;
@@ -68,10 +68,6 @@ export interface TeacherWeeklyScheduleViewProps {
   readonly hasScheduleDeleteClass: boolean;
   readonly labels: TeacherWeeklyScheduleLabels;
   readonly meetingJoinLabels: MeetingConfigJoinLabels;
-}
-
-export interface TeacherWeeklyScheduleContainerProps {
-  readonly teacherId: string;
 }
 
 // NEW FOR PLAN v5: CreateRecurringClassDialogViewModel — the ViewModel-owned

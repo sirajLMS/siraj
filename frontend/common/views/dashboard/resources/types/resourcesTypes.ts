@@ -1,12 +1,6 @@
 import type { ResourceFileType, ResourceFilterType, ResourceSortBy } from "@/frontend/common/types/shared.types";
 import type { ResourcesLabels } from "@/shared/locale";
 
-export type {
-  LearningResourceRowFragment as GqlLearningResourceRow,
-  ResourceUploadInput,
-} from "@/frontend/common/graphql/generated/gql/graphql";
-export type { ResourceFileType, ResourceFilterType, ResourceSortBy };
-
 /**
  * Upload form data shape — used by the upload dialog component.
  * This is the form-level type before it's converted to `ResourceUploadInput` for the mutation.

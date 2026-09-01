@@ -71,14 +71,6 @@ export type ReportTypeFilterProps = Readonly<{
   onReportTypeChange: MonthlyReportsViewModel["onReportTypeChange"];
 }>;
 
-export type DateRangeSelectorProps = Readonly<{
-  year: MonthlyReportsViewModel["year"];
-  month: MonthlyReportsViewModel["month"];
-  labels: Pick<MonthlyReportsViewModel["labels"], "selectYear" | "selectMonth" | "monthNames">;
-  onYearChange: MonthlyReportsViewModel["onYearChange"];
-  onMonthChange: MonthlyReportsViewModel["onMonthChange"];
-}>;
-
 export type TargetSelectSectionProps = Readonly<{
   reportType: MonthlyReportsViewModel["reportType"];
   selectedTeacher: MonthlyReportsViewModel["selectedTeacher"];

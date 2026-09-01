@@ -114,5 +114,3 @@ export function TeacherCardList({
     </Box>
   );
 }
-
-export default TeacherCardList;

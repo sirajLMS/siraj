@@ -6,7 +6,7 @@ import type {
 import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type { StudentCreditStatus } from "@/shared/types/billing-view";
 
-export interface ParentInvoicesActionLabels {
+interface ParentInvoicesActionLabels {
   readonly viewDetails: string;
   readonly viewSubmission: string;
   readonly viewFeedback: string;
@@ -68,13 +68,13 @@ export interface ParentInvoiceRowActionsProps {
   readonly onDownloadPdf: (id: string) => void;
 }
 
-export interface StudentCreditListLabels {
+interface StudentCreditListLabels {
   readonly classesLeft: string;
   readonly sendReminder: string;
   readonly creditStatusLabels: Record<StudentCreditStatus, string>;
 }
 
-export interface BaseStudentCreditListProps {
+interface BaseStudentCreditListProps {
   readonly rows: readonly StudentCreditRow[];
   readonly canManage: boolean;
   readonly billingActionsDisabled?: boolean;
@@ -87,7 +87,7 @@ export interface BaseStudentCreditListProps {
 // VARIANT JUSTIFICATION: extra field (none) — kept for symmetry so mobile/desktop tier signatures remain structurally paired with their label-set types
 export type StudentCreditCardListMobileProps = BaseStudentCreditListProps;
 
-export interface StudentCreditDataGridDesktopLabels {
+interface StudentCreditDataGridDesktopLabels {
   readonly student: string;
   readonly parentContact: string;
   readonly planType: string;

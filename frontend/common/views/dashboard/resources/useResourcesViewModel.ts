@@ -19,12 +19,6 @@ import type {
 } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
 import { type ResourcesLabels, Translation, useAppTranslation } from "@/shared/locale";
 
-export type {
-  LearningResourceRow,
-  ResourceUploadFormData,
-} from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
-export type { ResourceFilterType, ResourceSortBy };
-
 export interface ResourcesViewModel {
   readonly labels: ResourcesLabels;
   readonly resources: readonly LearningResourceRow[];

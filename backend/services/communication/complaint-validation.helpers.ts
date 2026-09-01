@@ -1,14 +1,11 @@
 import { ComplaintStatus } from "@/backend/enum";
-import { assertComplaintCategory, assertComplaintStatus, isComplaintCategory, isComplaintStatus } from "@/backend/lib";
 import type { ComplaintMetrics } from "@/backend/types";
-
-export { assertComplaintCategory, assertComplaintStatus, isComplaintCategory, isComplaintStatus };
 
 /**
  * Display formatting — converts hours to a human-readable duration string.
  * Moved from complaint.repository.ts to the service layer (business logic).
  */
-export function formatDuration(hours: number): string {
+function formatDuration(hours: number): string {
   if (hours < 1) {
     return `${Math.round(hours * 60)}m`;
   } else if (hours < 24) {

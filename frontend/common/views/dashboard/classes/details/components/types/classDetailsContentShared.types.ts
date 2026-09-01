@@ -4,7 +4,7 @@ import type {
   ClassDetailsMetricGridSlot,
 } from "@/frontend/common/views/dashboard/classes/details/types";
 
-export interface ClassDetailsContentSlotProps {
+interface ClassDetailsContentSlotProps {
   readonly Header: React.ComponentType<Readonly<ClassDetailsHeaderProps>>;
   /** Teacher/parent performance overview grid (injected by tier content). */
   readonly TeacherPerformanceMetricGrid: ClassDetailsMetricGridSlot;

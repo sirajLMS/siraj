@@ -974,32 +974,11 @@ export namespace ClassSessionService {
     );
     return resetInstance;
   }
-  export async function listClassInstancesByIdempotencyKeys(
-    keys: readonly string[],
-    tx?: DBTransaction
-  ): Promise<Map<string, ClassInstanceSelectType>> {
-    return SchedulingRepository.listByIdempotencyKeys(keys, tx);
-  }
-
-  export async function upsertManyClassInstances(
-    instances: ClassInstanceInsertType[],
-    options?: { chunkSize?: number; updatedAt?: Date; tx?: DBTransaction }
-  ): Promise<ClassInstanceSelectType[]> {
-    return SchedulingRepository.upsertMany(instances, options);
-  }
-
   export async function upsertManyClassInstancesForSeed(
     instances: ClassInstanceInsertType[],
     options?: { chunkSize?: number; updatedAt?: Date; tx?: DBTransaction }
   ): Promise<ClassInstanceSelectType[]> {
     return SchedulingRepository.upsertManyForSeed(instances, options);
-  }
-
-  export async function listClassInstanceIdsWithStatusEvents(
-    classInstanceIds: readonly string[],
-    tx?: DBTransaction
-  ): Promise<Set<string>> {
-    return ClassStatusEventsRepository.listClassInstanceIdsWithEvents(classInstanceIds, tx);
   }
 
   export async function createManyStatusEvents(

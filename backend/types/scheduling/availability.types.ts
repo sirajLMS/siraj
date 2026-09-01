@@ -9,7 +9,7 @@ export interface SlotAvailabilityInput {
   readonly locale?: string;
 }
 
-export interface AssertSchedulePatternAvailableOptions {
+interface AssertSchedulePatternAvailableOptions {
   readonly ignoreInstanceIds?: string[];
   readonly locale?: string;
   readonly tx?: DBTransaction;

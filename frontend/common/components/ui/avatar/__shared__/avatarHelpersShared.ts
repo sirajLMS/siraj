@@ -16,7 +16,7 @@ export type ClassAvatarProps = Omit<BaseAvatarProps, "variant"> & {
  * The fallback sx applied when an avatar has no image src.
  * Uses typography `labelMd` and bold font weight for the initials text.
  */
-export const FALLBACK_SX = {
+const FALLBACK_SX = {
   typography: "labelMd",
   fontWeight: 700,
 } as const;

@@ -15,7 +15,7 @@ import type { SubjectsLabels } from "@/shared/locale";
 type SubjectFormState = ReturnType<typeof useSubjectFormState>;
 type SubjectMutations = ReturnType<typeof useSubjectMutations>;
 
-export interface SubjectManagementStoreForDialogs {
+interface SubjectManagementStoreForDialogs {
   readonly createSubjectDialogOpen: boolean;
   readonly editSubjectDialogOpen: boolean;
   readonly isDeleteDialogOpen: boolean;

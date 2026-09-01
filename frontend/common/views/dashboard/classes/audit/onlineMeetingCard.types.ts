@@ -6,7 +6,7 @@ export interface OnlineMeetingCardProps extends BaseOnlineMeetingCardProps {
   readonly labels: MeetingInfoLabels;
 }
 
-export interface BaseOnlineMeetingCardProps {
+interface BaseOnlineMeetingCardProps {
   readonly meetingInfo: GroupClassAuditQuery_groupClassAudit_meetingInfo | null | undefined;
   readonly showJoin?: boolean;
 }

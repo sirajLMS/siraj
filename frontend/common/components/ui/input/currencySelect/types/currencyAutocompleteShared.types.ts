@@ -6,16 +6,16 @@ import type { CurrencyOption } from "@/frontend/common/lib/currency";
 
 type AutocompleteInternalSlotProps = NonNullable<AutocompleteProps<CurrencyOption, false, false, false>["slotProps"]>;
 
-export type CurrencyAutocompletePopperOptions = {
+type CurrencyAutocompletePopperOptions = {
   readonly matchAnchorWidth: boolean;
   readonly disablePortal: boolean;
   readonly listAttached: boolean;
 };
 
-export type GetPopperSlotProps = (
+type GetPopperSlotProps = (
   options: CurrencyAutocompletePopperOptions
 ) => NonNullable<AutocompleteInternalSlotProps["popper"]>;
-export type GetPaperSlotProps = (listAttached: boolean) => AutocompleteInternalSlotProps["paper"];
+type GetPaperSlotProps = (listAttached: boolean) => AutocompleteInternalSlotProps["paper"];
 
 export type LocaleEmojiComponent = React.FC<{ readonly emoji: string }>;
 
@@ -25,7 +25,7 @@ export type CurrencyOptionRowComponent = React.FC<{
   readonly showSymbol: boolean;
 }>;
 
-export interface CurrencyAutocompleteSlotProps {
+interface CurrencyAutocompleteSlotProps {
   /** Component used to render the flag emoji in the input start adornment */
   readonly LocaleEmojiComponent: LocaleEmojiComponent;
   /** Component used to render each currency option row in the dropdown */

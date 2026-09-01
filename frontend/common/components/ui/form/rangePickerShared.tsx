@@ -4,7 +4,7 @@ import type { SvgIconComponent } from "@mui/icons-material";
 import { Box, Drawer, InputAdornment, Popover, TextField } from "@mui/material";
 import { useId } from "react";
 
-export interface RangePickerSharedState {
+interface RangePickerSharedState {
   readonly selectedFrom: Date | null;
   readonly selectedTo: Date | null;
   readonly displayValue: string;
@@ -12,14 +12,14 @@ export interface RangePickerSharedState {
   readonly handleToChange: (date: Date | null) => void;
 }
 
-export interface RangePickerSharedProps {
+interface RangePickerSharedProps {
   readonly label: string;
   readonly fromLabel: string;
   readonly toLabel: string;
   readonly size?: "small" | "medium";
 }
 
-export interface RangePickerSlotRenderArgs {
+interface RangePickerSlotRenderArgs {
   readonly label: string;
   readonly value: Date | null;
   readonly onChange: (date: Date | null) => void;
@@ -27,7 +27,7 @@ export interface RangePickerSlotRenderArgs {
   readonly size: "small" | "medium";
 }
 
-export type RangePickerSlotRender = (args: Readonly<RangePickerSlotRenderArgs>) => React.ReactNode;
+type RangePickerSlotRender = (args: Readonly<RangePickerSlotRenderArgs>) => React.ReactNode;
 
 export interface RangePickerSlotProps {
   readonly renderFromPicker: RangePickerSlotRender;

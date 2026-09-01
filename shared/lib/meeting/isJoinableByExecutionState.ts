@@ -1,4 +1,4 @@
-export function isJoinableByExecutionState(executionState?: string | null, outcome?: string | null): boolean {
+function isJoinableByExecutionState(executionState?: string | null, outcome?: string | null): boolean {
   if (executionState) {
     const normalized = executionState.toUpperCase();
     if (normalized === "COMPLETED") {

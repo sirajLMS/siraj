@@ -114,5 +114,3 @@ export function createAppTheme(mode: PaletteMode, direction: "rtl" | "ltr" = "lt
 
   return responsiveFontSizes(themeWithLocale);
 }
-
-export const appTheme = createAppTheme("dark");

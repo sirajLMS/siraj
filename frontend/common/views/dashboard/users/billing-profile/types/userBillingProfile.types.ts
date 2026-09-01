@@ -9,10 +9,6 @@ import type {
 import type { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import type { BillingLabels } from "@/shared/locale";
 
-export interface UserBillingProfileContainerProps {
-  readonly userId: string;
-}
-
 export interface UserBillingProfileViewProps {
   readonly labels: BillingLabels;
   readonly summary: ParentBillingSummary;

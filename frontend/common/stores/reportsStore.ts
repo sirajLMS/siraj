@@ -7,7 +7,7 @@ import type { ReportType } from "@/frontend/common/views/dashboard/reports/types
 const DEFAULT_FROM_DATE = "2023-08-01";
 const DEFAULT_TO_DATE = "2023-08-31";
 
-export interface ReportsActiveFilters {
+interface ReportsActiveFilters {
   readonly fromDate: string;
   readonly toDate: string;
   readonly teacherId: string | null;

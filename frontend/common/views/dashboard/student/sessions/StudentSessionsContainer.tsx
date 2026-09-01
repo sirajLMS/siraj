@@ -22,5 +22,3 @@ export function StudentSessionsContainer() {
   const viewModel = useStudentSessionsViewModel({});
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { StudentSessionsViewModel };

@@ -31,7 +31,7 @@ import {
 // The dev test server is always spawned with TEST_SERVER=1 and the prod-mode
 // harness supplies its own ADMIN_PASSWORD via .env.test, so this value can
 // never reach a production deployment.
-export const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? resolveAdminPassword();
+const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? resolveAdminPassword();
 
 let serverProcess: ChildProcess | undefined;
 let serverRootPid: number | undefined;
@@ -312,7 +312,7 @@ async function ensureDemoUsersForTestsSafe(): Promise<void> {
   }
 }
 
-export function stopTestServer() {
+function stopTestServer() {
   if (reusesExistingDevServer) {
     testLogger.debug("Not stopping server — reusing existing dev server on port 3000.");
     reusesExistingDevServer = false;

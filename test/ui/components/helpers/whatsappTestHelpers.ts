@@ -8,37 +8,8 @@ import type {
   WhatsappAccountRow,
   WhatsappOptInAuditEntry,
   WhatsappOptInUserState,
-  WhatsappSettingsLabels,
   WhatsappTemplateRow,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
-import { readTranslation } from "@/shared/locale/client/translation-cache-store";
-import { Translation } from "@/shared/locale/namespaces/translation";
-import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
-
-/**
- * Full labels object for use in tests, sourced from the translation system.
- *
- * Tests should prefer calling `readTranslation(Translation.Whatsapp, locale)` directly
- * so the same `locale` flows into both assertions and `TestWrapper`. This export is
- * kept for legacy helpers that need the raw en labels object without a locale.
- */
-export const testLabels: WhatsappLabels = readTranslation(Translation.Whatsapp, "en");
-
-/** Grouped labels (page + notifications) used by NumbersTabSharedProps etc. */
-export const testSettingsLabels: WhatsappSettingsLabels = {
-  page: testLabels,
-  notifications: {
-    syncSuccess: testLabels.syncSuccess,
-    syncNoChange: testLabels.syncNoChange,
-    syncError: testLabels.syncError,
-    deleteSuccess: testLabels.deleteSuccess,
-    deleteError: testLabels.deleteError,
-    saveSuccess: testLabels.saveSuccess,
-    saveError: testLabels.saveError,
-    optInSuccess: "Opt-in updated successfully.",
-    optInError: testLabels.optInError,
-  },
-};
 
 /** Factory for a single mock account row matching `WhatsappAccountRow`. */
 export function makeAccountRow(

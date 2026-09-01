@@ -22,7 +22,3 @@ export interface SingleGroupViewProps {
   // needs to declare those callbacks separately.
   readonly singleGroupState: SingleGroupState;
 }
-
-// Re-export the underlying state input shape so callers wiring a custom flow
-// can compose the same hook with different callback bindings if needed.
-export type { Permission, SingleGroupState };

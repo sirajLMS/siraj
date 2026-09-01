@@ -6,7 +6,7 @@ import type { CurrencyCode } from "@/shared/constants/currency.enum";
  * Return type of {@link UserRepository.loadByIds} — a positionally-aligned
  * array of `UserReturnType | Error` (Error entries for IDs not found).
  */
-export type UserLoadByIdsResult = (UserReturnType | Error)[];
+type UserLoadByIdsResult = (UserReturnType | Error)[];
 
 /**
  * UserService — thin service wrapper for user lookups.

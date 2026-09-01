@@ -18,8 +18,6 @@ import { logger } from "@/backend/lib/logger";
 import { toDatabaseUnavailableError } from "@/backend/lib/retry";
 import { isVercelRuntime } from "@/backend/lib/runtime";
 
-export type DatabaseProvider = "postgres" | "neon" | "sqlite";
-
 /**
  * Fail-fast bounds so a database outage surfaces as an error within seconds
  * instead of hanging the request until the OS kills the socket (ECONNRESET).

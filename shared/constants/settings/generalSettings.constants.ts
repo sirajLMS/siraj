@@ -176,5 +176,3 @@ export const GENERAL_SETTINGS_DEFINITIONS: readonly GeneralSettingDefinition[] =
     defaultValue: '{"new_dashboard":false}',
   },
 ] as const;
-
-export type GeneralSettingCode = (typeof GENERAL_SETTINGS_DEFINITIONS)[number]["code"];

@@ -7,8 +7,6 @@ import type {
 } from "@/backend/types";
 import type { LocalizedString } from "@/shared/types";
 
-export type ClassMeetingConfigScope = "class_instance" | "recurring_schedule";
-
 export type ClassMeetingConfigSelectType = MeetingConfigBaseSelectType & {
   readonly classInstanceId: string | null;
   readonly recurringScheduleId: string | null;

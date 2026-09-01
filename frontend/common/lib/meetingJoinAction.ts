@@ -30,7 +30,7 @@ export function resolveEmptyMessage(t: MeetingConfigJoinLabels, emptyRole?: Meet
   return t.joinUnavailable;
 }
 
-export function resolveSourceLabel(
+function resolveSourceLabel(
   source: EffectiveMeetingSource | string | null | undefined,
   t: MeetingConfigDisplayLabels
 ): string {

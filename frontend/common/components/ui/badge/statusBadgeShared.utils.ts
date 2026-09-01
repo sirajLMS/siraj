@@ -24,7 +24,7 @@ function getStatusPaletteEntry(theme: Theme, key: string): string {
  *
  * Shared across all three tiers — extracted to eliminate the 199-line jscpd clone.
  */
-export const resolveStatusPaletteKey: ResolveStatusPaletteKeyFn = (
+const resolveStatusPaletteKey: ResolveStatusPaletteKeyFn = (
   category: StatusBadgeCategory,
   status: string
 ): StatusPaletteKey | null => {

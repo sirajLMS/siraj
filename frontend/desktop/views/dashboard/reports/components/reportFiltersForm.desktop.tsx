@@ -11,13 +11,10 @@ import {
   formatDateChange,
   useReportFilterFormState,
 } from "@/frontend/common/views/dashboard/reports/components/__shared__/reportFiltersFormShared.utils";
-import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { ReportFiltersFormProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
-
-export type ReportFiltersFormDesktopLabels = ReportFiltersFormLabels;
 
 export function ReportFiltersFormDesktop(props: Readonly<ReportFiltersFormProps>) {
   const { selectedFromDate, selectedToDate, teacherValue, setSelectedTeacher, handleReportTypeSelect } =

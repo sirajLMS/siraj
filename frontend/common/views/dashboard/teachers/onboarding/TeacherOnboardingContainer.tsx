@@ -22,5 +22,3 @@ export function TeacherOnboardingContainer() {
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export type { TeacherOnboardingViewModel };

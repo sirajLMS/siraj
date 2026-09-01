@@ -11,7 +11,7 @@ import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types
 import type { BillingTabId, BillingTabLabelKey } from "@/frontend/common/views/dashboard/billing/tabs/types";
 import { getVisibleTabs, type TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";
 
-export const BILLING_TABS: readonly TabDefinition<BillingTabId, BillingTabLabelKey>[] = [
+const BILLING_TABS: readonly TabDefinition<BillingTabId, BillingTabLabelKey>[] = [
   {
     id: "overview",
     labelKey: "overview",

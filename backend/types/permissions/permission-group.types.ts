@@ -2,8 +2,7 @@ import type { permissionGroups } from "@/backend/db/schema/permissions/permissio
 import type { LocalizedString } from "@/shared/types";
 
 // Canonical: PermissionGroup types (moved from auth.types.ts)
-export type PermissionGroupSelectType = typeof permissionGroups.$inferSelect;
-export type PermissionGroupInsertType = typeof permissionGroups.$inferInsert;
+type PermissionGroupSelectType = typeof permissionGroups.$inferSelect;
 
 /**
  * Resolved for API/UI: name/description stay as the raw JSONB `LocalizedString`
@@ -13,15 +12,4 @@ export type PermissionGroupInsertType = typeof permissionGroups.$inferInsert;
 export type PermissionGroupReturnType = Omit<PermissionGroupSelectType, "deletedAt" | "internalNotes"> & {
   name: LocalizedString;
   description: LocalizedString | null;
-};
-
-// Input types
-export type PermissionGroupSubmitInput = Omit<
-  PermissionGroupInsertType,
-  "id" | "createdAt" | "updatedAt" | "deletedAt"
->;
-
-export type PermissionGroupFilterInput = {
-  name?: string;
-  isActive?: boolean;
 };

@@ -9,7 +9,7 @@ import type { NotificationMetadata, WhatsappTemplateMetadata } from "@/backend/t
  * metadata flowing through the communication dispatch layer and the channel
  * adapter use a single, consistent shape.
  */
-export type WhatsappTemplateRef = WhatsappTemplateMetadata;
+type WhatsappTemplateRef = WhatsappTemplateMetadata;
 
 /**
  * Component payload for a template send. Each component targets a named placeholder
@@ -20,7 +20,7 @@ export interface WhatsappTemplateComponent {
   readonly parameters: readonly WhatsappComponentParameter[];
 }
 
-export interface WhatsappComponentParameter {
+interface WhatsappComponentParameter {
   readonly type: "text" | "currency" | "date_time";
   readonly text?: string;
   readonly currency?: {
