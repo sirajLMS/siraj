@@ -90,12 +90,15 @@ describe("AdminActionsBar", () => {
     expect(stopButton).not.toBeDisabled();
   });
 
-  test("renders delete button", () => {
+  test("renders delete button with tooltip", async () => {
     setupAdminActionsBar("NOT_ACTIVATED");
 
     const deleteButton = screen.getByRole("button", { name: labels.deleteInstance });
     expect(deleteButton).toBeVisible();
-    expect(deleteButton).toHaveAttribute("title", labels.deleteInstance);
+
+    const user = userEvent.setup();
+    await user.hover(deleteButton);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(labels.deleteInstance);
   });
 
   test("reschedule button visible with SessionReschedule permission", () => {

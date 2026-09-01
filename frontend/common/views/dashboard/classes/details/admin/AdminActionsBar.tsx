@@ -215,14 +215,15 @@ function SecondaryAdminActions({
           <Box sx={{ display: { xs: "none", sm: "inline" } }}>{labels.overrideRateButton}</Box>
         </FilterButton>
       </Tooltip>
-      <IconButton
-        aria-label={labels.deleteInstance}
-        title={labels.deleteInstance}
-        onClick={onDelete}
-        sx={tintedIconActionSx(DELETE_TINT)}
-      >
-        <DeleteIcon />
-      </IconButton>
+      <Tooltip title={labels.deleteInstance}>
+        <IconButton
+          aria-label={labels.deleteInstance}
+          onClick={onDelete}
+          sx={tintedIconActionSx(DELETE_TINT)}
+        >
+          <DeleteIcon />
+        </IconButton>
+      </Tooltip>
     </>
   );
 }
