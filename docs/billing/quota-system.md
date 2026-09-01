@@ -4,7 +4,7 @@ This document describes the complete Quota System — an append-only ledger-base
 
 ## Architecture Overview
 
-> **Parallel ledger note:** this system tracks class-based credits. The credit-hours accounting module (hour-based packages) runs alongside it — see `docs/billing/credit-hours-system.md` for the hour ledger, package plans, and the `changeAmount`/`changeAmountHours` XOR split.
+> **Parallel ledger note:** this system tracks class-based credits in quota periods (FIFO selection, periodic rollover). The credit-hours accounting module runs as a *parallel ledger* on the same `credit_transactions` table, measured in hours with no period/rollover semantics (pure purchase/deduct/adjust) — see `docs/billing/credit-hours-system.md` for the hour ledger, package plans, and the `changeAmount`/`changeAmountHours` XOR split.
 
 The Quota System replaces per-instance credit deductions with a centralized quota allocation that tracks student credits through an **append-only ledger**. Key design principles:
 

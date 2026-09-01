@@ -29,8 +29,11 @@ export interface ClassSession {
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
 }
 
-export type { StudentHistoryMetrics, StudentHistorySessionRow } from "./types/studentHistoryTypes";
-export type { StudentHistoryViewProps } from "./types/studentHistoryViewProps";
+export type {
+  StudentHistoryMetrics,
+  StudentHistorySessionRow,
+} from "@/frontend/common/views/dashboard/students/history/types/studentHistoryTypes";
+export type { StudentHistoryViewProps } from "@/frontend/common/views/dashboard/students/history/types/studentHistoryViewProps";
 
 export interface CalendarGridProps {
   readonly currentMonth: Date;

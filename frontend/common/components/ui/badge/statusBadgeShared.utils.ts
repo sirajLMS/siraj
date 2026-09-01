@@ -140,6 +140,29 @@ export const resolveStatusPaletteKey: ResolveStatusPaletteKeyFn = (
       };
       return map[status] ?? "pending";
     }
+    case "overrideStatus": {
+      const map: Record<string, "blocked" | "active"> = {
+        conflict: "blocked",
+        healthy: "active",
+      };
+      return map[status] ?? "pending";
+    }
+    case "groupType": {
+      const map: Record<string, "confirmed" | "pending"> = {
+        system: "confirmed",
+        custom: "pending",
+      };
+      return map[status] ?? "pending";
+    }
+    case "creditTransaction": {
+      const map: Record<string, "active" | "cancelled" | "confirmed" | "pending"> = {
+        PURCHASE: "active",
+        DEDUCTION: "cancelled",
+        REFUND: "confirmed",
+        ADJUSTMENT: "pending",
+      };
+      return map[status] ?? "pending";
+    }
     default:
       return null;
   }

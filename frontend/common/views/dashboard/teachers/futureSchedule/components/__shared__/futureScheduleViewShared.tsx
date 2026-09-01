@@ -9,12 +9,25 @@ import type {
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
 import { ScheduleLegend } from "@/frontend/common/views/dashboard/teachers/schedule/__shared__/teacherScheduleLegendShared";
 
+type FutureClassItem = FutureClassCardProps["item"];
+
+/**
+ * List-ownership contract for the future-class collection: the tier wrapper
+ * receives the rows plus stable key/render closures and decides how the list
+ * is materialized (mobile: paginated `MobileCardList`; desktop: plain stack).
+ */
+export interface FutureClassListWrapperProps {
+  readonly rows: readonly FutureClassItem[];
+  readonly getKey: (item: FutureClassItem) => string;
+  readonly renderItem: (item: FutureClassItem) => ReactNode;
+}
+
 export interface FutureScheduleViewSharedSlots {
   readonly PageContainer: ComponentType<{ readonly children: ReactNode }>;
   readonly PageHeader: ComponentType<{ readonly title: string }>;
   readonly JumpToDateHeader: ComponentType<Readonly<JumpToDateHeaderProps>>;
   readonly FutureClassCard: ComponentType<Readonly<FutureClassCardProps>>;
-  readonly ClassListWrapper: ComponentType<{ readonly children: ReactNode }>;
+  readonly ClassListWrapper: ComponentType<FutureClassListWrapperProps>;
   readonly MiniCalendar: ComponentType<{
     readonly selectedDate: FutureScheduleViewModel["selectedDate"];
     readonly onSelectDate: FutureScheduleViewModel["onDateChange"];
@@ -45,8 +58,8 @@ export type FutureScheduleViewSharedProps = Readonly<FutureScheduleViewModel> & 
   readonly options: FutureScheduleViewSharedOptions;
 };
 
-function ClassListWrapperPassthrough({ children }: Readonly<{ children: ReactNode }>) {
-  return <>{children}</>;
+function getFutureClassKey(item: FutureClassItem): string {
+  return item.id ?? "";
 }
 
 export function FutureScheduleViewShared({
@@ -110,18 +123,19 @@ export function FutureScheduleViewShared({
               />
             </Box>
 
-            <slots.ClassListWrapper>
-              {classes.map(item => (
+            <slots.ClassListWrapper
+              rows={classes}
+              getKey={getFutureClassKey}
+              renderItem={item => (
                 <slots.FutureClassCard
-                  key={item.id ?? ""}
                   item={item}
                   labels={labels}
                   onRequestLeave={() => {
                     if (item.id) void onRequestLeave(item.id);
                   }}
                 />
-              ))}
-            </slots.ClassListWrapper>
+              )}
+            />
           </Stack>
         </Grid>
 
@@ -146,5 +160,3 @@ export function FutureScheduleViewShared({
     </slots.PageContainer>
   );
 }
-
-export { ClassListWrapperPassthrough };

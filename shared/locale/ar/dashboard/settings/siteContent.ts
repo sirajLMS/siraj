@@ -34,7 +34,7 @@ export const dashboardSettingsSiteContentAr: SettingsSiteContentTabLabels = {
   publishSuccess: "تم نشر المحتوى.",
   unpublishSuccess: "تم إلغاء نشر المحتوى.",
   publishError: "فشل تحديث حالة النشر.",
-  deleteConfirmTitle: "حذف المحتوى",
+  deleteConfirmTitle: "حذف محتوى الموقع",
   deleteConfirmBody: title => `هل أنت متأكد من حذف "${title}"؟ لا يمكن التراجع عن هذا الإجراء.`,
   deleteConfirmCancel: "إلغاء",
   deleteConfirmConfirm: "حذف",

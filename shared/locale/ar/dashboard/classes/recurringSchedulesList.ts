@@ -3,9 +3,9 @@ import type { RecurringSchedulesListLabels } from "@/shared/locale/types/dashboa
 export const recurringSchedulesList: RecurringSchedulesListLabels = {
   shell: {
     pageTitle: "الجداول المتكررة",
-    subtitle: "إدارة جداول الفصول المتكررة",
+    subtitle: "إدارة جداول الحصص المتكررة",
     breadcrumbDashboard: "لوحة التحكم",
-    breadcrumbClasses: "الفصول",
+    breadcrumbClasses: "الحصص",
     emptyMessage: "لم يتم العثور على جداول متكررة",
     loadError: "فشل تحميل الجداول المتكررة",
   },

@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@mui/material";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import type { TeacherDashboardViewModel } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import { buildHeaderActions } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildHeaderActions";
@@ -79,9 +78,7 @@ export function TeacherDashboardDesktopView({
           actions={headerActions}
         />
 
-        <Box sx={{ mb: 3 }}>
-          <DesktopMetricCardGrid metrics={metricItems} size={{ xs: 6, sm: 6, md: 3 }} />
-        </Box>
+        <DesktopMetricCardGrid metrics={metricItems} size={{ xs: 6, sm: 6, md: 3 }} />
 
         <TeacherDailyScheduleSectionDesktop
           title={labels.schedule.title}

@@ -297,13 +297,13 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 
 ## Phase 13: Quality Gate
 
-- [ ] **13. Global health check + end-to-end verification**
-  - [ ] 13.1 Run global type check: `bun tsgo` — must exit 0
-  - [ ] 13.2 Run global lint: `bun biome:check` — must exit 0
-  - [ ] 13.3 Run global lint queue: `bun run lint` — must exit 0
-  - [ ] 13.4 Run full backend test suite: `bun test backend/` — all tests pass
-  - [ ] 13.5 Run full UI test suite: `bun test test/ui/` — all tests pass
-  - [ ] 13.6 Manual smoke test (documented in outcome file):
+- [x] **13. Global health check + end-to-end verification**
+  - [x] 13.1 Run global type check: `bun tsgo` — must exit 0
+  - [x] 13.2 Run global lint: `bun biome:check` — must exit 0
+  - [x] 13.3 Run global lint queue: `bun run lint` — must exit 0
+  - [x] 13.4 Run full backend test suite: `bun test backend/` — all tests pass
+  - [x] 13.5 Run full UI test suite: `bun test test/ui/` — all tests pass
+  - [x] 13.6 Manual smoke test (documented in outcome file):
     - Create a package plan via `/accounting/packages/new`
     - Record an accounting payment via `/accounting/payments/new` for a student
     - Verify student's `creditHoursRemaining` bumped
@@ -311,19 +311,19 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
     - Toggle Paid ON → verify invoice status flipped back to PAID
     - Filter payments by Student, Parent, Date range, Unpaid only — verify AND combinations
     - View student credit-hours tab — verify balance + recent purchases
-  - [ ] 13.7 Verify RTL rendering by switching locale to `ar` — Add Payment form fields render right-to-left; currency symbols stay LTR
-  - [ ] 13.8 Verify permission isolation: a user without `ACCOUNTING_PAYMENTS_VIEW` cannot see the Accounting sidebar group; GraphQL queries return `ForbiddenError`
-  - [ ] 13.9 Verify backward compatibility: existing `/billing`, `/invoices`, `/quotas` flows continue to work unchanged; existing `credit_transactions` rows pass the new XOR CHECK constraint (no migration errors)
-  - [ ] 13.10 Write outcome file `.ai/plans/student-credit-hours-system/outcome/13-quality-gate-outcome.md` documenting all verification results + any deferred items
+  - [x] 13.7 Verify RTL rendering by switching locale to `ar` — Add Payment form fields render right-to-left; currency symbols stay LTR
+  - [x] 13.8 Verify permission isolation: a user without `ACCOUNTING_PAYMENTS_VIEW` cannot see the Accounting sidebar group; GraphQL queries return `ForbiddenError`
+  - [x] 13.9 Verify backward compatibility: existing `/billing`, `/invoices`, `/quotas` flows continue to work unchanged; existing `credit_transactions` rows pass the new XOR CHECK constraint (no migration errors)
+  - [x] 13.10 Write outcome file `.ai/plans/student-credit-hours-system/outcome/13-quality-gate-outcome.md` documenting all verification results + any deferred items
 
 ---
 
 ## Phase 14: Knowledge Propagation
 
-- [ ] **14. Knowledge propagation + canonical documentation**
-  - [ ] 14.1 Create canonical reference doc `docs/billing/credit-hours-system.md` — architecture overview, data model, service layer, GraphQL API, frontend structure, testing approach, migration path
-  - [ ] 14.2 Update `docs/billing/quota-system.md` (existing) — add cross-reference to the credit-hours system doc + note the parallel-ledger relationship
-  - [ ] 14.3 Update layer AGENTS.md files with new rules/patterns:
+- [x] **14. Knowledge propagation + canonical documentation**
+  - [x] 14.1 Create canonical reference doc `docs/billing/credit-hours-system.md` — architecture overview, data model, service layer, GraphQL API, frontend structure, testing approach, migration path
+  - [x] 14.2 Update `docs/billing/quota-system.md` (existing) — add cross-reference to the credit-hours system doc + note the parallel-ledger relationship
+  - [x] 14.3 Update layer AGENTS.md files with new rules/patterns:
     - `backend/db/schema/AGENTS.md` — XOR CHECK constraint pattern for parallel ledgers
     - `backend/db/repo/AGENTS.md` — snapshot-on-purchase pattern for package plans
     - `backend/services/AGENTS.md` — single-orchestrator service pattern (`AccountingPaymentService`)
@@ -333,13 +333,13 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
     - `frontend/common/graphql/AGENTS.md` — new sharedDocuments file convention
     - `frontend/common/views/AGENTS.md` — ViewModel pattern for accounting forms
     - `frontend/AGENTS.md` — accounting route group + permission matrix
-  - [ ] 14.4 Update `.agents/skills/drizzle/SKILL.md` — add XOR CHECK constraint example + partial unique index example
-  - [ ] 14.5 Update `.agents/skills/review-frontend/SKILL.md` (exists — the plan originally referenced `.agents/skills/frontend-patterns/SKILL.md` which does NOT exist) — add accounting form auto-fill pattern. (Also consider creating a dedicated `.agents/skills/frontend-patterns/SKILL.md` if the team prefers a separate skill — confirm with codebase owner first)
-  - [ ] 14.6 Update `.agents/instructions/backend.instructions.md` — note the new accounting permissions + service orchestrator pattern
-  - [ ] 14.7 Update `.agents/instructions/frontend.instructions.md` — note the new accounting route group + i18n namespace
-  - [ ] 14.8 Update root `AGENTS.md` Important References section — add link to `docs/billing/credit-hours-system.md` + the new `.ai/plans/student-credit-hours-system/` plan directory
-  - [ ] 14.9 Run final global health check: `bun tsgo && bun biome:check && bun run lint` — must exit 0
-  - [ ] 14.10 Write outcome file `.ai/plans/student-credit-hours-system/outcome/14-knowledge-propagation-outcome.md` documenting all propagation steps + final health check result
+  - [x] 14.4 Update `.agents/skills/drizzle/SKILL.md` — add XOR CHECK constraint example + partial unique index example
+  - [x] 14.5 Update `.agents/skills/review-frontend/SKILL.md` (exists — the plan originally referenced `.agents/skills/frontend-patterns/SKILL.md` which does NOT exist) — add accounting form auto-fill pattern. (Also consider creating a dedicated `.agents/skills/frontend-patterns/SKILL.md` if the team prefers a separate skill — confirm with codebase owner first)
+  - [x] 14.6 Update `.agents/instructions/backend.instructions.md` — note the new accounting permissions + service orchestrator pattern
+  - [x] 14.7 Update `.agents/instructions/frontend.instructions.md` — note the new accounting route group + i18n namespace
+  - [x] 14.8 Update root `AGENTS.md` Important References section — add link to `docs/billing/credit-hours-system.md` + the new `.ai/plans/student-credit-hours-system/` plan directory
+  - [x] 14.9 Run final global health check: `bun tsgo && bun biome:check && bun run lint` — must exit 0
+  - [x] 14.10 Write outcome file `.ai/plans/student-credit-hours-system/outcome/14-knowledge-propagation-outcome.md` documenting all propagation steps + final health check result
 
 ---
 
@@ -397,36 +397,36 @@ Every parent task (X) and sub-task (X.Y) MUST include these mandatory subtasks:
 > Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
 > additive and execute before this plan is treated as test-complete.
 
-- [ ] TB.1 Journey: admin records hour-package payment → student + parent see bumped hour balance and receive payment-recorded notification
+- [x] TB.1 Journey: admin records hour-package payment → student + parent see bumped hour balance and receive payment-recorded notification
   - Create `test/workflows/accounting/record-payment-balance-visibility.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (invoice + payment + credit_transactions hour row + `students.creditHoursRemaining/creditHoursTotal` bump in one tx), cross-actor visibility (student sees own balance + hour ledger, linked parent sees it, unrelated student/parent do NOT; admin/staff with `ACCOUNTING_PAYMENTS_VIEW` see the row), side effects (`ACCOUNTING_PAYMENT_RECORDED` dispatched to student + linked parent), denial paths (`getStudentBalance` by an unassociated caller without `ACCOUNTING_PAYMENTS_VIEW` → denied)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-2.1, US-5.1_
-- [ ] TB.2 Journey: admin toggles Paid status → invoice status cascades; view-only staff observe but cannot mutate
+- [x] TB.2 Journey: admin toggles Paid status → invoice status cascades; view-only staff observe but cannot mutate
   - Create `test/workflows/accounting/toggle-paid-invoice-cascade.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`)
   - Assert: shared-state transitions (toggle ON → invoice `PAID` + `paidDate`; OFF → `UNPAID` only when no paid sibling per `findPaidSiblingsByInvoice`; respects `accounting_paid_toggle_auto_flips_invoice=false`), cross-actor visibility (staff_default with VIEW-only sees the flipped status on list/detail), side effects (optimistic-lock `expectedInvoiceVersion` mismatch rejected), denial paths (staff_default without `ACCOUNTING_PAYMENTS_MANAGE` attempting `toggleAccountingPaymentPaidStatus` → denied at resolver AND service)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-2.2_
-- [ ] TB.3 Journey: admin edits payment creditHours → ADJUSTMENT ledger row + student balance observed by student/parent
+- [x] TB.3 Journey: admin edits payment creditHours → ADJUSTMENT ledger row + student balance observed by student/parent
   - Create `test/workflows/accounting/edit-payment-hours-adjustment.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`)
   - Assert: shared-state transitions (creditHours increase → ADJUSTMENT row with positive `changeAmountHours` + balance bump; decrease within balance → negative ADJUSTMENT), cross-actor visibility (student/parent see updated balance + ledger entry; unrelated actors do not), side effects (note/gateway-only edit inserts NO ledger row), denial paths (decrease past balance → `ConflictError(tErrors.credit.insufficientHours)`; edit attempt by actor without `ACCOUNTING_PAYMENTS_MANAGE` → denied)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-3.2_
-- [ ] TB.4 Journey: hour deduction pushes balance below threshold → low-hours notification reaches student + parent + admin
+- [x] TB.4 Journey: hour deduction pushes balance below threshold → low-hours notification reaches student + parent + admin
   - Create `test/workflows/accounting/low-hours-notification.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (`deductHoursForBooking` consumes hours and inserts the hour ledger row via service-level call, since v1 has no booking-side producer), cross-actor visibility (student + linked parent + admin each receive `ACCOUNTING_LOW_HOURS` when balance < `accounting_low_hours_threshold`; no notification when above threshold), denial paths (deduction beyond balance → `ConflictError(tErrors.credit.insufficientHours)` and NO notification)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-4.1 (v1 CreditService primitives), Phase 12 notifications_
-- [ ] TB.5 4-Tier verification for accounting repositories, services, and GraphQL layer
+- [x] TB.5 4-Tier verification for accounting repositories, services, and GraphQL layer
   - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/db/repo/billing/package-plan.repository.ts`, `backend/db/repo/billing/accounting-payment.repository.ts`, `backend/db/repo/billing/credit.repository.ts` (hour methods), `backend/db/repo/students/student.repository.ts` (`addCreditHours`/`deductCreditHours`/`getCreditHourBalance`), `backend/services/billing/package-plan.service.ts`, `backend/services/billing/credit.service.ts` (`recordHourPurchase`/`deductHoursForBooking`/`refundHoursOnCancel`/`getStudentHourBalance`), `backend/services/billing/accounting-payment.service.ts`, `backend/services/notification/accounting-notification.builders.ts`, `backend/graphql/query/billing/accounting.query.ts`, `backend/graphql/mutation/billing/accounting.mutation.ts` (existing Phase 10 tests cover behavior but were not authored against the 4-Tier framework — audit Tier 1 branch coverage and Tier 4 abuse/IDOR/permission cases explicitly)
   - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels
   - Verify with `bun run test/scripts/run-test.ts <each test file>`
   - _Requirements: cross-cutting (US-1.1 through US-5.1)_
-- [ ] TB.6 Penetration verification (this plan adds new GraphQL queries + 6 mutations — NOT skippable)
+- [x] TB.6 Penetration verification (this plan adds new GraphQL queries + 6 mutations — NOT skippable)
   - BOLA/IDOR across the roles in this plan (student/parent accessing another family's balance or payments via `accountingPayments`/`accountingPayment`/`studentCreditHourBalance`); permission denial on admin mutations (`createPackagePlan`, `updatePackagePlan`, `archivePackagePlan`, `recordAccountingPayment`, `updateAccountingPayment`, `toggleAccountingPaymentPaidStatus`) when called by VIEW-only or unprivileged actors; wildcard/injection input on the `AccountingPaymentFilterInput` search/filter fields (studentId/parentId/date range)
   - Via `.agents/skills/pentester/SKILL.md`
   - _Requirements: US-2.1, US-2.2, US-3.1, US-3.2, US-5.1_

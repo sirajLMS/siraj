@@ -2,7 +2,7 @@ import type { SupervisorPortalProfileLabels } from "@/shared/locale/types/dashbo
 
 export const dashboardSupervisorPortalProfileAr: SupervisorPortalProfileLabels = {
   pageTitle: "الملف الشخصي",
-  pageSubtitle: "اعرض بيانات حسابك ومعلومات الاتصال.",
+  pageSubtitle: "عرض بيانات حسابك ومعلومات الاتصال.",
   notSet: "غير محدد",
   loadingMessage: "جارٍ التحميل...",
   sections: {

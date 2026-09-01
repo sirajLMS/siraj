@@ -1,7 +1,7 @@
 "use client";
 
-import { Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
-import { SectionPanel } from "@/frontend/common/components/ui";
+import { Link, Stack, Typography } from "@mui/material";
+import { LoadingState, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useMeetingSummarySectionViewModel } from "@/frontend/common/views/dashboard/profile/shared/useMeetingSummarySectionViewModel";
@@ -29,14 +29,7 @@ export function MeetingSummarySection({ userId, meetingTabHref }: MeetingSummary
 
   const renderConfigContent = () => {
     if (loading) {
-      return (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 0.5 }}>
-          <CircularProgress size={18} />
-          <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onSurfaceVariant })}>
-            {t.loading}
-          </Typography>
-        </Box>
-      );
+      return <LoadingState embedded size={18} message={t.loading} />;
     }
 
     if (defaultConfig) {

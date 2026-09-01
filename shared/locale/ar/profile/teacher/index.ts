@@ -48,8 +48,8 @@ export const profileTeacherAr: ProfileTeacherLabels = {
     deactivated: "غير مفعّل",
   },
   nationalIdCompletion: {
-    banner: "يجب إدخال الرقم القومي قبل التمكن من استخدام لوحة التحكم.",
-    action: "أدخل رقمك القومي في قسم الهوية بالأسفل واحفظ.",
+    banner: "يجب إدخال الرقم القومي قبل استخدام لوحة التحكم.",
+    action: "أدخل رقمك القومي في قسم الهوية أدناه واحفظ.",
   },
   validation: {
     nationalIdRequired: "الرقم القومي مطلوب.",
@@ -67,7 +67,7 @@ export const profileTeacherAr: ProfileTeacherLabels = {
     },
     loading: "جارٍ تحميل الملف الشخصي...",
     error: {
-      retry: "أعد المحاولة",
+      retry: "إعادة المحاولة",
     },
   },
   actions: {
@@ -80,7 +80,7 @@ export const profileTeacherAr: ProfileTeacherLabels = {
     manageLifecycle: "إدارة دورة حياة الحساب",
   },
   errors: {
-    failedToLoad: "Failed to load profile.",
-    notFound: "Profile not found.",
+    failedToLoad: "فشل تحميل الملف الشخصي.",
+    notFound: "الملف الشخصي غير موجود.",
   },
 };

@@ -2,20 +2,25 @@
 "use client";
 
 import { CheckCircleOutlined, WarningOutlined } from "@mui/icons-material";
-import { Box, CircularProgress, Tooltip, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { CircularProgress, Tooltip, Typography } from "@mui/material";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import type { PermissionGroupDetailFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
+import { OverrideCountPillShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/overrideCountPillShared";
 import {
   type UserOverrideInfo,
   useUserOverridesData,
 } from "@/frontend/common/views/dashboard/permissions/components/useUserOverridesData";
+import type { PermissionsLabels } from "@/shared/locale";
 
 export type OverridesCellType = "grants" | "revokes" | "status";
+
+export type OverridesCellLabels = Pick<PermissionsLabels, "explicitGrant" | "explicitDeny" | "conflict" | "healthy">;
 
 export interface OverridesCellProps {
   readonly userId: string;
   readonly userGroups: readonly PermissionGroupDetailFieldsFragment[];
   readonly type: OverridesCellType;
+  readonly labels: OverridesCellLabels;
 }
 
 /**
@@ -30,7 +35,7 @@ export interface OverridesCellProps {
  * This component is intentionally self-contained and is used by BOTH tiers
  * (mobile card body + desktop data-grid cell renderer).
  */
-export function OverridesCell({ userId, userGroups, type }: Readonly<OverridesCellProps>) {
+export function OverridesCell({ userId, userGroups, type, labels }: Readonly<OverridesCellProps>) {
   const { loading, info } = useUserOverridesData(userId, userGroups);
 
   if (loading) {
@@ -42,38 +47,19 @@ export function OverridesCell({ userId, userGroups, type }: Readonly<OverridesCe
   }
 
   if (type === "grants") {
-    return renderGrants(info);
+    return renderGrants(info, labels);
   }
 
   if (type === "revokes") {
-    return renderRevokes(info);
+    return renderRevokes(info, labels);
   }
 
-  return renderStatus(info);
+  return renderStatus(info, labels);
 }
 
-function renderGrants(info: UserOverrideInfo) {
+function renderGrants(info: UserOverrideInfo, labels: OverridesCellLabels) {
   if (info.grants > 0) {
-    return (
-      <Box
-        sx={theme => ({
-          fontSize: theme.typography.bodyMd.fontSize,
-          fontWeight: 700,
-          minWidth: 24,
-          height: 24,
-          borderRadius: 1,
-          px: 1,
-          backgroundColor: theme.palette.successContainer ?? alpha(theme.palette.success.main, 0.15),
-          color: theme.palette.success.main,
-          border: `1px solid ${theme.palette.success.light}`,
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-        })}
-      >
-        {info.grants}
-      </Box>
-    );
+    return <OverrideCountPillShared count={info.grants} variant="grant" label={labels.explicitGrant} />;
   }
   return (
     <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -82,28 +68,9 @@ function renderGrants(info: UserOverrideInfo) {
   );
 }
 
-function renderRevokes(info: UserOverrideInfo) {
+function renderRevokes(info: UserOverrideInfo, labels: OverridesCellLabels) {
   if (info.revokes > 0) {
-    return (
-      <Box
-        sx={theme => ({
-          fontSize: theme.typography.bodyMd.fontSize,
-          fontWeight: 700,
-          minWidth: 24,
-          height: 24,
-          borderRadius: 1,
-          px: 1,
-          backgroundColor: theme.palette.errorContainer ?? alpha(theme.palette.error.main, 0.15),
-          color: theme.palette.error.main,
-          border: `1px solid ${theme.palette.error.light}`,
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-        })}
-      >
-        {info.revokes}
-      </Box>
-    );
+    return <OverrideCountPillShared count={info.revokes} variant="revoke" label={labels.explicitDeny} />;
   }
   return (
     <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -112,35 +79,27 @@ function renderRevokes(info: UserOverrideInfo) {
   );
 }
 
-function renderStatus(info: UserOverrideInfo) {
+function renderStatus(info: UserOverrideInfo, labels: OverridesCellLabels) {
   if (info.status === "conflict") {
     const tooltipTitle = info.conflictDetails.join("\n");
     return (
       <Tooltip title={tooltipTitle} arrow placement="top">
-        <Box
-          sx={theme => ({
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            color: theme.palette.warning.main,
-            cursor: "help",
-          })}
-        >
-          <WarningOutlined fontSize="small" />
-          <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
-            Conflict
-          </Typography>
-        </Box>
+        <StatusBadge
+          category="overrideStatus"
+          status="conflict"
+          label={labels.conflict}
+          icon={<WarningOutlined fontSize="small" />}
+        />
       </Tooltip>
     );
   }
 
   return (
-    <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.success.main })}>
-      <CheckCircleOutlined fontSize="small" />
-      <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
-        Healthy
-      </Typography>
-    </Box>
+    <StatusBadge
+      category="overrideStatus"
+      status="healthy"
+      label={labels.healthy}
+      icon={<CheckCircleOutlined fontSize="small" />}
+    />
   );
 }

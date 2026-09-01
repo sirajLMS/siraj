@@ -110,4 +110,29 @@ describe("TeacherClassListDesktopView", () => {
     expect(screen.getByText(teacherClassListLabels.failedToLoad)).toBeInTheDocument();
     expect(container.querySelector(".MuiDataGrid-root")).toBeNull();
   });
+
+  test("renders the student cell as a profile link with avatar and student href", async () => {
+    renderDesktopView();
+
+    await waitFor(() => {
+      expect(screen.getByText("Ahmed Fixture")).toBeInTheDocument();
+    });
+
+    const profileLink = screen.getByText("Ahmed Fixture").closest("a");
+    if (!profileLink) {
+      throw new Error("student profile link not found in the grid cell");
+    }
+    expect(profileLink.getAttribute("href")).toContain("/students/student-1/profile");
+    expect(profileLink.querySelector(".MuiAvatar-root")).not.toBeNull();
+  });
+
+  test("renders the student name without a link when studentId is missing", async () => {
+    renderDesktopView({ rows: [makeTeacherClassRow({ studentId: null })] });
+
+    await waitFor(() => {
+      expect(screen.getByText("Ahmed Fixture")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Ahmed Fixture").closest("a")).toBeNull();
+  });
 });

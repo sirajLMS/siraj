@@ -40,9 +40,9 @@ const SAVE_DRAFT_SUCCESS = tr(T.appearance.saveDraftSuccess);
 const PUBLISH_SUCCESS = tr(T.appearance.publishSuccess);
 
 /**
- * Hardcoded English aria-label emitted by `CustomizeSidebar.tsx`. Not a
- * translation key today — recorded in the outcome file as a minor i18n
- * follow-up. Stable across locales for E2E purposes.
+ * Hardcoded English aria-label emitted by `customizeSidebar.desktop.tsx`.
+ * Not a translation key today — recorded in the outcome file as a minor
+ * i18n follow-up. Stable across locales for E2E purposes.
  */
 const SIDEBAR_ARIA = "Customize mode sidebar";
 

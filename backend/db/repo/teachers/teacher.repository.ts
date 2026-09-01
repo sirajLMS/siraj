@@ -82,6 +82,22 @@ export namespace TeacherRepository {
     return teacher ?? null;
   };
 
+  /**
+   * Like `findById`, but treats teachers whose linked user account was
+   * soft-deleted as missing — used by write flows that must not reference
+   * removed staff.
+   */
+  export const findActiveById = async (id: string, tx?: DBTransaction): Promise<TeacherSelectType | null> => {
+    const q = queryDb(tx);
+    const [row] = await q
+      .select({ teacher: teachers })
+      .from(teachers)
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(and(eq(teachers.id, id), isNull(users.deletedAt)))
+      .limit(1);
+    return row?.teacher ?? null;
+  };
+
   export const findByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<Map<string, string | null>> => {
     if (userIds.length === 0) return new Map();
 

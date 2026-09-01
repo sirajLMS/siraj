@@ -135,3 +135,4 @@ dev.log
 .browser-auth/
 
 __pycache__
+.tmp/

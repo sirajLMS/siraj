@@ -1,14 +1,38 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 await mockNextNavigation("/dashboard", { locale: "ar", routingIncludeReplaceAndPrefetch: false });
+
+await mock.module("next/link", () => ({
+  default: ({
+    children,
+    href,
+    prefetch: _prefetch,
+    replace: _replace,
+    scroll: _scroll,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    prefetch?: boolean;
+    replace?: boolean;
+    scroll?: boolean;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import { getStatusColors } from "@/frontend/common/components/ui/badge/statusBadgeShared.utils";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import { createAppTheme } from "@/frontend/common/providers/theme/theme";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherStudentsLabels,
   TeacherStudentsViewModel,
@@ -17,6 +41,7 @@ import { TeacherStudentsMobileView } from "@/frontend/mobile/views/dashboard/tea
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
+import { getEmotionStylesForElement } from "@/test/ui/components/helpers/emotionStyles";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -25,6 +50,7 @@ afterEach(() => {
 
 const locale: AppLocale = "ar";
 const adminLabels = readTranslation(Translation.Dashboard.Admin, locale);
+const theme = createAppTheme("dark", "rtl", locale);
 
 const labels: TeacherStudentsLabels = {
   pageTitle: "Custom students page",
@@ -75,6 +101,27 @@ describe("TeacherStudentsMobileView", () => {
     expect(view.getByText(labels.statusLabel(StudentStatus.Regular))).toBeInTheDocument();
     expect(view.getByText(labels.quotaLabel(4, 10))).toBeInTheDocument();
     expect(view.getByText(labels.hoursLabel(3))).toBeInTheDocument();
+  });
+
+  test("renders the student name as a profile link to the student profile", () => {
+    const view = renderMobileView();
+
+    const nameLinks = view.getAllByRole("link", { name: /Ahmed Hassan/ });
+    expect(nameLinks[0]).toHaveAttribute("href", studentHref("student-1"));
+  });
+
+  test("renders the status through a badge themed for the studentAccount category", () => {
+    const view = renderMobileView();
+
+    const labelElement = view.getByText(labels.statusLabel(StudentStatus.Regular));
+    const badge = labelElement.parentElement;
+    if (!badge) {
+      throw new Error("Status badge element not found");
+    }
+    const expected = getStatusColors(theme, "studentAccount", "regular");
+    const css = getEmotionStylesForElement(badge).replace(/\s+/g, "");
+    expect(css).toContain(`background-color:${expected.backgroundColor}`);
+    expect(css).toContain(`color:${expected.color}`);
   });
 
   test("shows the list empty state when there are no students", () => {

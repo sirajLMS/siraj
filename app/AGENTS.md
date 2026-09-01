@@ -7,6 +7,10 @@
 - Server Components must **not** call repositories or the database directly — always go through the service layer.
 - Server Components must **not** use React hooks (`useState`, `useEffect`, etc.) or browser APIs.
 
+## Error Boundaries
+
+- Database outages surface through `DatabaseUnavailableError` + a digest sentinel recognized by the root error boundary. See `docs/backend/db-availability-fail-fast.md`.
+
 ## Authentication Guards
 
 - Use `getServerUserContext()` from `@/backend/lib/auth/server-auth` to verify authentication in layout files.
@@ -108,8 +112,8 @@ const userProfile = await getCurrentUser(userId);
 
 ## Locale Handling
 
-- Locale is available via `params` (as a Promise in Next.js 15+): `const { locale } = await params;`
-- Use locale for redirects: `redirect(`/${locale}/login`)`.
+- Locale is NOT part of the URL — there is no `[locale]` segment anywhere under `app/`. Read it with `getLocale()` from `@/shared/locale/server-cookies` (async; cookie/header based via `proxy.ts`).
+- Redirects use plain paths: `redirect("/login")` or `await redirectToLogin()` from `@/frontend/common/lib/redirectToLogin`. Never prefix paths with the locale.
 
 ## Linting Rules
 

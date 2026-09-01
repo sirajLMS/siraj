@@ -1,10 +1,10 @@
 "use client";
 
 import { WarningAmberOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import type { StudentCreditCardListMobileProps } from "@/frontend/common/views/dashboard/billing/types/parentInvoiceList.types";
 import { formatClassesLeft } from "@/frontend/common/views/dashboard/billing/utils/parentInvoiceFormatters";
-import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 
 export function StudentCreditCardListMobile({
   rows,
@@ -47,13 +47,17 @@ export function StudentCreditCardListMobile({
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <MobileStatusBadge
-                  category="invoice"
-                  status={isNegative ? "OVERDUE" : "PAID"}
-                  label={formatClassesLeft(row)}
-                />
+                <Typography
+                  variant="bodyMd"
+                  sx={theme => ({
+                    fontWeight: isNegative ? 700 : 500,
+                    color: isNegative ? theme.palette.warning.main : theme.palette.text.primary,
+                  })}
+                >
+                  {formatClassesLeft(row)}
+                </Typography>
                 {isNegative ? (
-                  <WarningAmberOutlined sx={theme => ({ fontSize: 16, color: theme.palette.error.main })} />
+                  <WarningAmberOutlined sx={theme => ({ fontSize: 16, color: theme.palette.warning.main })} />
                 ) : null}
               </Box>
               <Typography
@@ -67,16 +71,14 @@ export function StudentCreditCardListMobile({
               </Typography>
             </Box>
             {isNegative && canManage && !billingActionsDisabled ? (
-              <Button
-                fullWidth
-                variant="contained"
+              <MobilePrimaryPageAction
                 onClick={() => {
                   onSendReminder(row.id);
                 }}
                 disabled={sendingReminderId === row.id}
               >
                 {sendingReminderId === row.id ? <CircularProgress size={18} color="inherit" /> : labels.sendReminder}
-              </Button>
+              </MobilePrimaryPageAction>
             ) : null}
           </MobileCardListItem>
         );

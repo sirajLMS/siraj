@@ -117,8 +117,8 @@ function GroupCardMobile({
           })}
         >
           <MobileStatusBadge
-            category="session"
-            status={group.isSystem ? "active" : "pending"}
+            category="groupType"
+            status={group.isSystem ? "system" : "custom"}
             label={group.isSystem ? t.systemBadge : t.customBadge}
           />
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>

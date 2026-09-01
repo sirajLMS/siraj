@@ -4,6 +4,10 @@ export const dashboardTeacherOwnProfileEn: TeacherOwnProfileLabels = {
   pageTitle: "My Profile",
   pageSubtitle: "Manage your information",
   notSet: "Not set",
+  fields: {
+    fullName: "Full name",
+    email: "Email",
+  },
   sections: {
     contact: "Contact Information",
     salary: "Salary Information",

@@ -17,7 +17,7 @@ export const dashboardSettingsAppearanceAr: SettingsAppearanceTabLabels = {
   currentBrandColors: "ألوان العلامة التجارية الحالية",
   currentBrandColorsHint: "لقطة من لوحة ألوان المسودة الخاصة بك. ادخل وضع التخصيص لضبط الألوان الفردية.",
   quickPresets: "الإعدادات المسبقة السريعة",
-  quickPresetsHint: "انقر على إعداد مسبق لمعاينته فوراً. افتح وضع التخصيص للضبط الدقيق.",
+  quickPresetsHint: "انقر على إعداد مسبق لمعاينته فورًا. افتح وضع التخصيص للضبط الدقيق.",
   primaryColor: "أساسي",
   secondaryColor: "ثانوي",
   lightMode: "الوضع الفاتح",
@@ -50,14 +50,13 @@ export const dashboardSettingsAppearanceAr: SettingsAppearanceTabLabels = {
 
   conflictTitle: "تم تعديل المظهر بواسطة مسؤول آخر",
   conflictBody:
-    "تم تغيير إعدادات المظهر بواسطة مسؤول آخر منذ آخر تحميل لك. " +
-    "أعد التحميل لتجاهل تغييراتك واستخدام أحدث إصدار، أو الكتابة فوقها لفرض تغييراتك.",
+    "غيّر مسؤول آخر إعدادات المظهر منذ آخر مرة حمّلتها فيها. أعد التحميل لتجاهل تغييراتك واستخدام أحدث إصدار، أو استخدم الكتابة فوق لفرض تغييراتك.",
   conflictReload: "إعادة التحميل",
   conflictOverwrite: "الكتابة فوق",
   conflictCancel: "إلغاء",
 
   errorBoundaryTitle: "خطأ في المخصّص",
-  errorBoundaryBody: "واجه مخصّص مظهر الموقع خطأ غير متوقع. أعد التعيين واخرج للاستعادة.",
+  errorBoundaryBody: "واجه مخصّص مظهر الموقع خطأ غير متوقع. أعد تعيين المسودة واخرج للاستعادة.",
   errorBoundaryReset: "إعادة التعيين والخروج",
 
   noPermission: "ليس لديك صلاحية لإدارة مظهر الموقع.",

@@ -1,0 +1,8 @@
+export const uiRichTextEn = {
+  bold: "Bold",
+  italic: "Italic",
+  underline: "Underline",
+  bulletList: "Bullet list",
+  orderedList: "Numbered list",
+  editorLabel: "Rich text editor",
+};

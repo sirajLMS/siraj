@@ -1,10 +1,11 @@
 "use client";
 
 import { ArrowBackOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, type ButtonProps, Typography } from "@mui/material";
 import { type SxProps, styled, type Theme } from "@mui/material/styles";
 import type { ComponentType } from "react";
 import type { StatusBadgeCategory } from "@/frontend/common/components/ui/badge";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui/button";
 import type { SingleGroupHeaderProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
@@ -20,6 +21,10 @@ export interface SingleGroupHeaderSharedSlots {
     readonly status: string;
     readonly label: string;
   }>;
+  /** Outlined action preset for the back-navigation buttons (FilterButton / tier variant). */
+  readonly backButton?: ComponentType<ButtonProps>;
+  /** Contained action preset for the edit button (PrimaryPageAction / tier variant). */
+  readonly editButton?: ComponentType<ButtonProps>;
 }
 
 const StyledBreadcrumbNav = styled(Box)({
@@ -27,16 +32,6 @@ const StyledBreadcrumbNav = styled(Box)({
   alignItems: "center",
   gap: 1,
 });
-
-const StyledBackButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  textTransform: "none",
-  fontSize: theme.typography.bodyMd.fontSize,
-  "&:hover": {
-    backgroundColor: "transparent",
-    color: theme.palette.primary.main,
-  },
-}));
 
 const StyledBreadcrumbSeparator = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.disabled,
@@ -66,25 +61,6 @@ const StyledHeaderDescription = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-const StyledBackToGroupsButton = styled(Button)(({ theme }) => ({
-  borderColor: theme.palette.divider,
-  color: theme.palette.text.primary,
-  textTransform: "none",
-  borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  fontWeight: 600,
-}));
-
-const StyledEditButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.onPrimary,
-  textTransform: "none",
-  borderRadius: Number(theme.shape.borderRadius) * 1.5,
-  fontWeight: 600,
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-  },
-}));
-
 export function SingleGroupHeaderShared({
   labels,
   group,
@@ -99,13 +75,15 @@ export function SingleGroupHeaderShared({
   const groupName = resolveLocalizedString(group.name);
   const groupDescription = resolveLocalizedString(group.description);
   const { StatusBadge } = slots;
+  const BackButton = slots.backButton ?? FilterButton;
+  const EditButton = slots.editButton ?? PrimaryPageAction;
 
   return (
     <>
       <StyledBreadcrumbNav>
-        <StyledBackButton onClick={onBack} size="small" variant="text" startIcon={<ArrowBackOutlined />}>
+        <BackButton onClick={onBack} size="small" startIcon={<ArrowBackOutlined />}>
           {t.groupsTab}
-        </StyledBackButton>
+        </BackButton>
         <StyledBreadcrumbSeparator variant="bodyMd">/</StyledBreadcrumbSeparator>
         <StyledBreadcrumbName variant="bodyMd">{groupName}</StyledBreadcrumbName>
       </StyledBreadcrumbNav>
@@ -128,8 +106,8 @@ export function SingleGroupHeaderShared({
           <StyledHeaderTitleRow>
             <StyledHeaderTitle variant="headlineMd">{groupName}</StyledHeaderTitle>
             <StatusBadge
-              category="session"
-              status={group.isSystem ? "active" : "pending"}
+              category="groupType"
+              status={group.isSystem ? "system" : "custom"}
               label={group.isSystem ? t.systemBadge : t.customBadge}
             />
           </StyledHeaderTitleRow>
@@ -147,17 +125,16 @@ export function SingleGroupHeaderShared({
             ...(Array.isArray(options.actionButtonsSx) ? options.actionButtonsSx : [options.actionButtonsSx]),
           ]}
         >
-          <StyledBackToGroupsButton variant="outlined" onClick={onBack} sx={options.actionButtonSx}>
-            Back to All Groups
-          </StyledBackToGroupsButton>
-          <StyledEditButton
-            variant="contained"
+          <BackButton onClick={onBack} sx={options.actionButtonSx}>
+            {t.backToAllGroups}
+          </BackButton>
+          <EditButton
             startIcon={<EditOutlined fontSize="small" />}
             onClick={() => group.id && onEditGroup(group.id)}
             sx={options.actionButtonSx}
           >
-            Edit Group Details
-          </StyledEditButton>
+            {t.editGroupDetails}
+          </EditButton>
         </Box>
       </Box>
     </>

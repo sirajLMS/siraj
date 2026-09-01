@@ -26,7 +26,7 @@ const createSetting = (
   category,
 });
 
-const SYSTEM_SETTINGS_DATA = [
+export const SYSTEM_SETTINGS_DATA = [
   createSetting(
     "auth_max_attempts",
     "5",
@@ -120,6 +120,24 @@ const SYSTEM_SETTINGS_DATA = [
     "Feature flags JSON",
     SystemSettingCategory.System,
     SystemSettingDataType.Json
+  ),
+  createSetting(
+    "payroll.grace_short_minutes",
+    "3",
+    "Grace period (minutes) for sessions at or below payroll.grace_threshold_minutes",
+    SystemSettingCategory.Payroll
+  ),
+  createSetting(
+    "payroll.grace_long_minutes",
+    "6",
+    "Grace period (minutes) for sessions above payroll.grace_threshold_minutes",
+    SystemSettingCategory.Payroll
+  ),
+  createSetting(
+    "payroll.grace_threshold_minutes",
+    "30",
+    "Scheduled-duration cutoff (minutes) that picks the short vs long grace period",
+    SystemSettingCategory.Payroll
   ),
 ] as const;
 

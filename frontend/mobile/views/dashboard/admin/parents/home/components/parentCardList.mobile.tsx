@@ -1,6 +1,6 @@
 "use client";
 
-import { PriorityHighOutlined as AlertIcon, SettingsOutlined as SettingsIcon } from "@mui/icons-material";
+import { SettingsOutlined as SettingsIcon } from "@mui/icons-material";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
@@ -79,21 +79,11 @@ function ParentCard({ row, labels, onOpenSettings }: Readonly<ParentCardProps>) 
               status={row.accountStatus}
               label={labels.accountStatusLabels[row.accountStatus]}
             />
-            {hasUnpaid ? (
-              <Box sx={theme => ({ display: "flex", alignItems: "center", gap: 0.5, color: theme.palette.error.main })}>
-                <AlertIcon sx={{ fontSize: 16 }} />
-                <Typography variant="labelMd" sx={{ fontWeight: 700 }}>
-                  {labels.unpaidCount(row.unpaidInvoices)}
-                </Typography>
-              </Box>
-            ) : (
-              <Typography
-                variant="labelMd"
-                sx={theme => ({ color: theme.palette.onSurfaceVariant, opacity: 0.6, fontStyle: "italic" })}
-              >
-                {labels.invoicesCleared}
-              </Typography>
-            )}
+            <MobileStatusBadge
+              category="invoice"
+              status={hasUnpaid ? "OVERDUE" : "PAID"}
+              label={hasUnpaid ? labels.unpaidCount(row.unpaidInvoices) : labels.invoicesCleared}
+            />
           </Box>
         </Box>
       </MobileCardListItem>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock } from "@mui/icons-material";
+import { LockOutlined } from "@mui/icons-material";
 import { Box, Checkbox, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { PermissionRowProps } from "@/frontend/common/views/dashboard/permissions/types";
@@ -81,7 +81,7 @@ export function PermissionRowShared({
           </StyledPermissionKeyText>
           {perm.isSystem && (
             <Tooltip title={t.corePermissionTooltip}>
-              <Lock fontSize="small" color="error" />
+              <LockOutlined fontSize="small" color="error" />
             </Tooltip>
           )}
         </StyledKeyRow>

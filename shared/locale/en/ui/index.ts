@@ -9,6 +9,7 @@ import { uiLocalizedStringEn as localizedString } from "./localized-string";
 import { uiMeetingConfigEn as meetingConfig } from "./meetingConfig";
 import { uiPaymentMethodEn as paymentMethod } from "./paymentMethod";
 import { uiPhoneInputEn as phoneInput } from "./phone-input";
+import { uiRichTextEn as richText } from "./rich-text";
 import { uiTagInputEn as tagInput } from "./tag-input";
 import { uiTimezoneSelectEn as timezoneSelect } from "./timezone-select";
 import { uiUserSelectEn as userSelect } from "./user-select";
@@ -22,6 +23,7 @@ export const uiEn: UiLabels = {
   languageSelector,
   localizedString,
   phoneInput,
+  richText,
   tagInput,
   timezoneSelect,
   meetingConfig,

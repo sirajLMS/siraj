@@ -59,6 +59,14 @@ Choose the right tool based on the core task:
 
 ## Critical Gotchas & Workarounds
 
+### 0. Full-Page Screenshots on Stateful SPA Pages
+- **Gotcha**: `agent-browser screenshot --full` can destabilize client state on authenticated SPA pages with scroll containers (observed: a Zustand-store-driven section mounted before the shot and unmounted after it).
+- **Rule**: When the page content depends on interaction-driven state (expanded sections, selected radios), verify DOM state BEFORE and AFTER the screenshot (`snapshot`/`eval`). Prefer a plain viewport screenshot + `eval "...scrollIntoView(...)"` positioning over `--full` for stateful sections.
+
+### 0b. Auth Expiry Silently Invalidates Captures
+- **Gotcha**: If the session/login expires mid-run, the app bounces to the login page and every subsequent screenshot is of the login screen.
+- **Rule**: Before accepting a batch of screenshots, run `agent-browser eval "document.title"` (or a DOM check) per page load; re-run `bun run scripts/browser-login.ts --inject` when bounced. If `--inject` errors on daemon startup, fall back to `agent-browser cookies set --curl .browser-auth/playwright.cookies.json --domain localhost`.
+
 ### 1. Element Ref Stability (`@eN`)
 - **Gotcha**: `@eN` references are ephemeral accessibility-tree nodes. They become stale whenever the DOM re-renders, Next.js hot-reloads, or the page navigates.
 - **Rule**: If an action fails with `"Ref not found"`, immediately call `agent-browser snapshot -i` again to refresh the ref table before retrying.
@@ -94,6 +102,15 @@ Choose the right tool based on the core task:
   agent-browser open http://localhost:3000/profile               # already authenticated
   ```
 - Cookie/state artifacts live in git-ignored `.browser-auth/` (mode 600). Playwright paths use the same script — see `test/ui/AGENTS.md` ("Agent Browser Login").
+
+### 5a. URLs are NOT locale-prefixed (Siraj)
+
+- **Gotcha**: Siraj has NO `app/[locale]/` segment — i18n is cookie/header-driven (`NEXT_LOCALE`), so every route is unprefixed (`/quotas`, `/billing`, `/dashboard`). Navigating to `/en/...` or `/ar/...` hits the `app/(dashboard)/[...slug]` catch-all and renders "Page not found" for EVERY page — including otherwise-valid routes.
+- **Rule**: Always use unprefixed URLs (`http://localhost:3000/quotas`, never `http://localhost:3000/en/quotas`). If a full page says "Page not found" while the sidebar shell looks normal, check the URL for a locale prefix first.
+- To inspect a page in a specific locale, set the `NEXT_LOCALE` cookie (or switch via the header language menu) instead of changing the path:
+  ```bash
+  agent-browser cookies set NEXT_LOCALE ar --domain localhost   # then reload the SAME unprefixed URL
+  ```
 
 ### 6. Screenshot & Visual Inspection Context Isolation (CRITICAL)
 

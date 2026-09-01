@@ -4,5 +4,5 @@ export const uiPaymentMethodTypeAr = {
   onlineAccount: "حساب إلكتروني",
   bankTransfer: "تحويل بنكي",
   cash: "نقدي",
-  proofUpload: "إثبات دفع",
+  proofUpload: "رفع إثبات الدفع",
 };

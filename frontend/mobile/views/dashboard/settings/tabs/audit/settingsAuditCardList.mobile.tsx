@@ -1,7 +1,7 @@
 "use client";
 
-import { Stack, Typography } from "@mui/material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui";
+import { SettingsCardBodyShared } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsCardBodyShared";
 import type {
   SettingsAuditColumnLabels,
   SettingsAuditRow,
@@ -19,35 +19,22 @@ export type SettingsAuditCardListMobileProps = {
   readonly onPageChange: (page: number) => void;
 };
 
-function SettingsAuditCardField({ label, value }: Readonly<{ readonly label: string; readonly value: string }>) {
-  return (
-    <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
-      {label}: {value}
-    </Typography>
-  );
-}
-
 function SettingsAuditCard({
   row,
   columnLabels,
 }: Readonly<{ readonly row: SettingsAuditRow; readonly columnLabels: SettingsAuditColumnLabels }>) {
   return (
     <MobileCardListItem variant="edge-to-edge">
-      <Stack spacing={0.5} sx={{ width: "100%" }}>
-        <Stack
-          direction="row"
-          sx={{ justifyContent: "space-between", alignItems: "baseline", gap: 1, flexWrap: "wrap" }}
-        >
-          <Typography sx={{ typography: "bodyMd", fontWeight: 700 }}>{row.entityType}</Typography>
-          <Typography sx={theme => ({ typography: "labelMd", color: theme.palette.text.secondary })}>
-            {row.createdAt}
-          </Typography>
-        </Stack>
-        <SettingsAuditCardField label={columnLabels.action} value={row.action} />
-        <SettingsAuditCardField label={columnLabels.description} value={row.description} />
-        <SettingsAuditCardField label={columnLabels.actor} value={row.actorUserId} />
-        <SettingsAuditCardField label={columnLabels.entityId} value={row.entityId} />
-      </Stack>
+      <SettingsCardBodyShared
+        title={row.entityType}
+        secondary={row.createdAt}
+        fields={[
+          { label: columnLabels.action, value: row.action },
+          { label: columnLabels.description, value: row.description },
+          { label: columnLabels.actor, value: row.actorUserId },
+          { label: columnLabels.entityId, value: row.entityId },
+        ]}
+      />
     </MobileCardListItem>
   );
 }

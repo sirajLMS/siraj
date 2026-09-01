@@ -1,0 +1,34 @@
+%% Siraj — database map: 97 tables across 17 domain bundles (Drizzle, dialect-aware PG/SQLite)
+flowchart TB
+    Users["users — 6 tables<br/>users, sessions, session config,<br/>password resets, rate limits"]
+    Auth["auth — 1<br/>impersonation sessions"]
+    Perms["permissions — 5<br/>groups, group-permissions,<br/>user groups, overrides"]
+    Teachers["teachers — 8<br/>profiles, availability, vacations,<br/>payments, dues"]
+    Students["students — 6<br/>status history, progress,<br/>teacher assignments, appraisals"]
+    Parents["parents — 1"]
+    Classes["classes — 16<br/>subjects, group classes, enrollments,<br/>recurring schedules, class instances,<br/>lesson reports, leave requests, DST runs"]
+    Billing["billing — 17<br/>invoices, payments, package plans,<br/>quotas + ledger, credit transactions,<br/>currencies, FX, payment methods"]
+    Comms["communications — 7<br/>notifications, devices, complaints,<br/>suggestions, learning resources"]
+    Meeting["meeting — 4<br/>providers, OAuth tokens,<br/>user/class meeting configs"]
+    Storage["storage — 14<br/>files, directories, signed URLs,<br/>10 polymorphic junction tables"]
+    Whatsapp["whatsapp — 1"]
+    CronT["cron — 3<br/>schedules, runs, heartbeats"]
+    SharedT["shared — 4<br/>system settings, timezones, caches"]
+    AuditT["audit — 2<br/>admin + entity audit logs"]
+    Books["books — 1"]
+    Appearance["appearance — 1"]
+
+    Teachers --> Users
+    Students --> Users
+    Students --> Parents
+    Parents --> Users
+    Perms --> Users
+    Auth --> Users
+    Classes --> Teachers
+    Classes --> Students
+    Billing --> Students
+    Meeting --> Users
+    Meeting --> Classes
+    Storage --> Users
+    Comms --> Users
+    AuditT --> Users

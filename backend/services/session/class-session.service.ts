@@ -11,7 +11,13 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, NotificationEventType, OnDemandStatus } from "@/backend/enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
-import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
+import {
+  DatabaseUnavailableError,
+  DomainError,
+  NotFoundError,
+  UnauthorizedError,
+  ValidationError,
+} from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -27,6 +33,7 @@ import {
   validateStateTransition,
 } from "@/backend/services/scheduling/state-change-validation.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
+import { PayrollCalculationService } from "@/backend/services/teacher/payroll-calculation.service";
 import type {
   ClassInstanceDetailReturnType,
   ClassInstanceInsertType,
@@ -35,8 +42,32 @@ import type {
   ClassStatusEventSelectType,
   DBTransaction,
 } from "@/backend/types";
+import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
+import { parseClassExecutionState } from "@/shared/lib/enum";
 import { type ErrorsLabels, getServerTranslations, type SessionLabels } from "@/shared/locale";
+
+/**
+ * Terminal on-demand execution states. A transition into one of these closes
+ * the session without a live meeting; the payroll calculation for such rows
+ * carries the on-demand flag so absence semantics resolve correctly.
+ */
+const ON_DEMAND_TERMINAL_EXECUTION_STATES = new Set<string>([
+  ClassExecutionState.ON_DEMAND_PENDING_CREDITS,
+  ClassExecutionState.ON_DEMAND_CONFLICT_HELD,
+  ClassExecutionState.ON_DEMAND_NO_CREDITS_CANCELLED,
+  ClassExecutionState.ON_DEMAND_NO_CREDITS_ABSENT,
+]);
+
+/**
+ * Calculator rejections the auto-trigger treats as routine deferrals rather
+ * than failures: the actor lacks the payroll manage permission (teachers and
+ * parents close their own sessions without it), the row's pay is already
+ * settled, or the calculator's terminal-state guard tripped on a re-read.
+ * The snapshot stays uncalculated for operator reconciliation in all three
+ * cases, so these log as warnings and stay out of error alerts.
+ */
+const ROUTINE_CALCULATOR_REJECTIONS = new Set<string>(["FORBIDDEN", "PAYROLL_NOT_TERMINAL", "PAYROLL_ALREADY_PAID"]);
 
 /**
  * ClassSessionService
@@ -304,6 +335,34 @@ export namespace ClassSessionService {
     return handleUpdate(action(instance), tErrors);
   }
 
+  /** Payroll snapshot columns carried on the class-instance detail surface. */
+  const PAYROLL_SNAPSHOT_DETAIL_FIELDS = [
+    "calculationStatus",
+    "teacherPaidAmount",
+    "teacherPaidCurrency",
+    "calculatedDuration",
+    "isPartialPercentage",
+    "payrollNote",
+    "payrollCalculatedAt",
+    "payrollCalculatedBy",
+  ] as const;
+
+  /**
+   * Removes the payroll snapshot columns from a class-instance detail. Payroll
+   * compensation data is restricted to accounting payroll viewers: teachers and
+   * students legitimately reach this shared session surface, so their response
+   * must not carry pay amounts or calculation state. Booking-rate data and the
+   * payrollCredited scheduling flag stay visible — they are not payroll data.
+   */
+  function withoutPayrollSnapshot(detail: ClassInstanceDetailReturnType): ClassInstanceDetailReturnType {
+    const stripped = { ...detail };
+    const strippable: Partial<ClassInstanceDetailReturnType> = stripped;
+    for (const field of PAYROLL_SNAPSHOT_DETAIL_FIELDS) {
+      delete strippable[field];
+    }
+    return stripped;
+  }
+
   export async function getClassInstanceDetail(
     userId: string,
     classInstanceId: string,
@@ -313,7 +372,9 @@ export namespace ClassSessionService {
     const instance = await getOrThrow(classInstanceId, tErrors);
     await assertClassInstanceDetailViewAuth(userId, instance, tErrors);
     const perf = await ClassPerformanceService.getPerformanceForClass(classInstanceId);
-    return buildClassInstanceDetail(instance, perf, tSession, tErrors);
+    const detail = await buildClassInstanceDetail(instance, perf, tSession, tErrors);
+    const canSeePayroll = await PermissionsService.hasPermission(userId, AppPermission.ACCOUNTING_PAYROLL_VIEW);
+    return canSeePayroll ? detail : withoutPayrollSnapshot(detail);
   }
 
   export async function getClassStatusEvents(
@@ -323,7 +384,12 @@ export namespace ClassSessionService {
   ): Promise<ClassStatusEventReturnType[]> {
     const instance = await getOrThrow(classInstanceId, tErrors);
     await assertClassInstanceDetailViewAuth(userId, instance, tErrors);
-    return SchedulingRepository.getClassStatusEvents(classInstanceId);
+    const events = await SchedulingRepository.getClassStatusEvents(classInstanceId);
+    // PAYROLL_* audit payloads carry amounts in their fromState/toState JSON, so
+    // they are payroll-view data: filtered for actors without
+    // ACCOUNTING_PAYROLL_VIEW, mirroring the getClassInstanceDetail strip.
+    const canSeePayroll = await PermissionsService.hasPermission(userId, AppPermission.ACCOUNTING_PAYROLL_VIEW);
+    return canSeePayroll ? events : events.filter(event => !event.eventType.startsWith("PAYROLL_"));
   }
 
   async function handleOndemandSessionStartCreditDeduction(
@@ -350,19 +416,26 @@ export namespace ClassSessionService {
    * provides idempotency: concurrent runs cannot double-process because
    * only rows still in PENDING_CREDIT are affected.
    *
-   * Does NOT dispatch notifications — callers handle that.
+   * When the target execution state is a terminal on-demand state, the
+   * payroll calculation runs for every flipped instance inside the same
+   * transaction. Does NOT dispatch notifications — callers handle that.
    *
+   * @param options.actorUserId  Authenticated user to attribute the payroll
+   *                             calculation to. System flows without a user
+   *                             session omit it and the calculation is
+   *                             deferred to an operator reconciliation.
    * @returns Count of rows actually updated.
    */
   export async function markNoCreditsBatch(
     tx: DBTransaction,
     instanceIds: string[],
     newStatus: OnDemandStatus,
-    executionState: string
+    executionState: string,
+    options?: { actorUserId?: string | null }
   ): Promise<number> {
     if (instanceIds.length === 0) return 0;
     const now = new Date();
-    return SchedulingRepository.updateOndemandStatusBatch(
+    const updatedCount = await SchedulingRepository.updateOndemandStatusBatch(
       instanceIds,
       {
         executionState,
@@ -371,6 +444,141 @@ export namespace ClassSessionService {
       },
       OnDemandStatus.PENDING_CREDIT,
       tx
+    );
+    if (updatedCount > 0 && ON_DEMAND_TERMINAL_EXECUTION_STATES.has(executionState)) {
+      await triggerPayrollForOndemandResolution(tx, instanceIds, executionState, options?.actorUserId ?? null);
+    }
+    return updatedCount;
+  }
+
+  /**
+   * SQLSTATE codes are five characters starting with a digit ("25P02",
+   * "23505"); the letter-only domain error codes can never match.
+   */
+  const SQLSTATE_PATTERN = /^\d[0-9A-Z]{4}$/;
+
+  /** Cause-chain depth cap for the SQLSTATE search, mirroring the transient-error classifier. */
+  const MAX_CAUSE_DEPTH = 5;
+
+  /**
+   * Finds the SQLSTATE of a database driver failure anywhere in an error
+   * cause chain. Query wrappers nest the driver error in `cause` — the same
+   * chain shape the transient-error classifier walks — and the depth cap
+   * keeps pathological chains bounded.
+   */
+  function findDatabaseSqlState(error: unknown, depth = 0): string | null {
+    if (depth > MAX_CAUSE_DEPTH || typeof error !== "object" || error === null) return null;
+    const code = (error as { code?: unknown }).code;
+    if (typeof code === "string" && SQLSTATE_PATTERN.test(code)) return code;
+    const cause = (error as { cause?: unknown }).cause;
+    if (cause !== undefined && cause !== error) {
+      return findDatabaseSqlState(cause, depth + 1);
+    }
+    return null;
+  }
+
+  /**
+   * Runs the automatic payroll calculation for an instance that just reached
+   * a terminal execution state, inside the same transaction as the state
+   * change so the payroll snapshot and the transition commit or roll back
+   * together. Callers invoke it only after a terminal transition; the
+   * calculator itself additionally rejects rows whose execution state is not
+   * terminal.
+   *
+   * The calculation is best-effort by design. Policy rejections — a
+   * permission guard, a settled row, a non-terminal re-read — are routine
+   * deferrals: the snapshot stays NOT_CALCULATED and an operator reconciles
+   * it later, so they log as warnings instead of errors. Every other
+   * rejection is logged as an error but still swallowed: an
+   * application-level throw leaves the caller's transaction usable, so the
+   * session state change itself is never rolled back. A failure at the
+   * database driver level is the one exception — it aborts the shared
+   * transaction on the server, and the whole transition rolls back at commit
+   * — so it is logged with an explicit transaction-abort warning rather than
+   * a preservation claim.
+   */
+  async function triggerTerminalPayrollCalculation(
+    instance: ClassInstanceSelectType,
+    actorUserId: string,
+    tErrors: ErrorsLabels,
+    tx: DBTransaction
+  ): Promise<void> {
+    try {
+      await PayrollCalculationService.calculateForInstance(
+        {
+          instanceId: instance.id,
+          actorUserId,
+          isOnDemand: ON_DEMAND_TERMINAL_EXECUTION_STATES.has(parseClassExecutionState(instance.executionState)),
+        },
+        tErrors,
+        tx
+      );
+    } catch (error) {
+      if (error instanceof DomainError && ROUTINE_CALCULATOR_REJECTIONS.has(error.code)) {
+        // A policy rejection is a routine deferral, not a failure: the
+        // snapshot stays for operator reconciliation.
+        logger.warn("Automatic payroll calculation deferred; session state change preserved", {
+          classInstanceId: instance.id,
+          actorUserId,
+          reason: error.code,
+          error: error.message,
+        });
+        return;
+      }
+      // A driver-level failure aborts the shared transaction on the server;
+      // swallowing the rejection here cannot heal that, so the transition
+      // and the payroll write roll back together at commit. Say so instead
+      // of claiming the state change is preserved.
+      const sqlState = findDatabaseSqlState(error);
+      if (sqlState !== null || error instanceof DatabaseUnavailableError) {
+        logger.error(
+          "Automatic payroll calculation failed at the database level; the transition transaction may be aborted",
+          {
+            classInstanceId: instance.id,
+            actorUserId,
+            sqlState,
+            error: error instanceof Error ? error.message : String(error),
+          }
+        );
+        return;
+      }
+      logger.error("Automatic payroll calculation failed; session state change preserved", {
+        classInstanceId: instance.id,
+        actorUserId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  /**
+   * Runs the payroll calculation for every instance the no-credits batch
+   * update actually moved into the given terminal on-demand state. Rows a
+   * concurrent transaction already claimed (still in their previous state)
+   * are skipped so an unresolved pending-credit session is never calculated
+   * early. System flows without an authenticated actor defer the calculation
+   * to an operator reconciliation — there is no user to attribute the payroll
+   * write to.
+   */
+  async function triggerPayrollForOndemandResolution(
+    tx: DBTransaction,
+    instanceIds: readonly string[],
+    executionState: string,
+    actorUserId: string | null
+  ): Promise<void> {
+    if (!actorUserId) {
+      logger.warn("On-demand terminal resolution without an actor; payroll calculation deferred", {
+        executionState,
+        instanceIds,
+      });
+      return;
+    }
+    const tErrors = getServerTranslations("en").errorsTranslations;
+    await Promise.all(
+      instanceIds.map(async instanceId => {
+        const instance = await SchedulingRepository.getById(instanceId, tx);
+        if (instance?.executionState !== executionState) return;
+        await triggerTerminalPayrollCalculation(instance, actorUserId, tErrors, tx);
+      })
     );
   }
 
@@ -421,9 +629,15 @@ export namespace ClassSessionService {
 
   export async function stop(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
-    const result = await SchedulingRepository.stopClassInstance(classInstanceId, userId, undefined, tErrors, {
-      onAuth: checkStateChangeAuth,
-      onValidate: validateStateTransition,
+    const result = await db.transaction(async tx => {
+      const updated = await SchedulingRepository.stopClassInstance(classInstanceId, userId, tx, tErrors, {
+        onAuth: checkStateChangeAuth,
+        onValidate: validateStateTransition,
+      });
+      if (updated) {
+        await triggerTerminalPayrollCalculation(updated, userId, tErrors, tx);
+      }
+      return updated;
     });
     await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_COMPLETED);
     return result;
@@ -511,9 +725,15 @@ export namespace ClassSessionService {
       AppPermission.SESSION_UPDATE_STATUS_ABSENT,
       async instance => {
         await SystemRulesService.assertAbsentWaitingPeriod(instance);
-        return SchedulingRepository.markClassAbsent(classInstanceId, userId, undefined, tErrors, {
-          onAuth: checkStateChangeAuth,
-          onValidate: validateStateTransition,
+        return db.transaction(async tx => {
+          const updated = await SchedulingRepository.markClassAbsent(classInstanceId, userId, tx, tErrors, {
+            onAuth: checkStateChangeAuth,
+            onValidate: validateStateTransition,
+          });
+          if (updated) {
+            await triggerTerminalPayrollCalculation(updated, userId, tErrors, tx);
+          }
+          return updated;
         });
       },
       tErrors,
@@ -547,6 +767,10 @@ export namespace ClassSessionService {
         if (!quotaReleased) {
           await refundCreditIfDeducted(instance, userId, tErrors, tx);
         }
+      }
+      const completedOriginal = await SchedulingRepository.getById(processed.originalId, tx);
+      if (completedOriginal) {
+        await triggerTerminalPayrollCalculation(completedOriginal, userId, tErrors, tx);
       }
       return processed;
     });

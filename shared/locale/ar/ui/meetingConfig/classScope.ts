@@ -11,7 +11,7 @@ export const uiMeetingConfigClassScopeAr = {
   recurringSectionTitle: "اجتماع الجدول المتكرر",
   recurringSectionSubtitle: "تجاوز اختياري لجميع حصص هذا الجدول المتكرر.",
   createNewConfig: "إنشاء إعداد اجتماع جديد",
-  recurringFieldsRequired: "اختر مزوداً وأدخل رابط الاجتماع.",
+  recurringFieldsRequired: "اختر مزودًا وأدخل رابط الاجتماع.",
   seriesSectionTitle: "إعدادات اجتماع السلسلة",
   seriesSectionSubtitle: "تنطبق على جميع الحصص المستقبلية من هذا الجدول المتكرر.",
   manageSeriesLink: "إدارة إعدادات السلسلة الكاملة",

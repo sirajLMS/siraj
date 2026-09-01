@@ -19,6 +19,14 @@ const StyledNav = styled("nav")(({ theme }) => ({
   },
 }));
 
+/**
+ * Width of the transparent-to-opaque fade at the inline-end edge in scrollable
+ * mode. Item basis (88px) does not divide the viewport evenly (e.g. 5 × 88 =
+ * 440 > 390 at xs), so the end item is always partially visible; the fade turns
+ * that hard clip into an intentional scroll peek affordance.
+ */
+const SCROLL_EDGE_FADE_PX = 24;
+
 interface BottomNavbarMobileProps {
   readonly items: readonly NavItem[];
   readonly activeKey: string | null;
@@ -42,9 +50,15 @@ export function BottomNavbarMobile({ items, activeKey }: Readonly<BottomNavbarMo
       elevation={3}
     >
       <StyledNav
-        sx={{
+        sx={theme => ({
           overflowX: isScrollable ? "auto" : "hidden",
-        }}
+          ...(isScrollable
+            ? {
+                maskImage: `linear-gradient(to ${theme.direction === "rtl" ? "right" : "left"}, black calc(100% - ${SCROLL_EDGE_FADE_PX}px), transparent)`,
+                WebkitMaskImage: `linear-gradient(to ${theme.direction === "rtl" ? "right" : "left"}, black calc(100% - ${SCROLL_EDGE_FADE_PX}px), transparent)`,
+              }
+            : null),
+        })}
       >
         {items.map(item => (
           <BottomNavItemViewMobile

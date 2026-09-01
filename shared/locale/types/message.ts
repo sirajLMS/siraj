@@ -9,11 +9,13 @@ import type { StudentCreditHoursLabels as AccountingStudentCreditHoursLabels } f
 import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
 import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration.ts";
 import type { AdminViewLabels } from "@/shared/locale/types/dashboard/admin/view.ts";
+import type { CreditAdjustmentLabels } from "@/shared/locale/types/dashboard/billing/creditAdjustment.ts";
 import type { CurrencyHedgesLabels } from "@/shared/locale/types/dashboard/billing/currencyHedges.ts";
 import type { ExchangeRatesLabels } from "@/shared/locale/types/dashboard/billing/exchangeRates.ts";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main.ts";
 import type { BillingManualLabels } from "@/shared/locale/types/dashboard/billing/manual.ts";
 import type { PaymentComponentLabels } from "@/shared/locale/types/dashboard/billing/payment.ts";
+import type { PayrollLabels } from "@/shared/locale/types/dashboard/billing/payroll.ts";
 import type { QuotaLabels as BillingQuotaLabels } from "@/shared/locale/types/dashboard/billing/quota.ts";
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types/dashboard/billing/supportedCurrencies.ts";
 import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes/audit.ts";
@@ -122,6 +124,7 @@ import type {
   MeetingConfigSummaryLabels,
   PaymentMethodLabels,
   PhoneInputLabels,
+  RichTextLabels,
   TagInputLabels,
   TimezoneSelectLabels,
   UserSelectLabels,
@@ -138,6 +141,8 @@ export interface DashboardTranslations {
   billingManual: BillingManualLabels;
   billingQuota: BillingQuotaLabels;
   billingPayment: PaymentComponentLabels;
+  billingCreditAdjustment: CreditAdjustmentLabels;
+  billingPayroll: PayrollLabels;
   accountingPayments: AccountingPaymentsLabels;
   accountingPackages: AccountingPackagePlansLabels;
   accountingStudentCreditHours: AccountingStudentCreditHoursLabels;
@@ -241,6 +246,7 @@ export interface UiTranslations {
   meetingConfigRecurringSchedule: MeetingConfigRecurringScheduleLabels;
   paymentMethod: PaymentMethodLabels;
   phoneInput: PhoneInputLabels;
+  richText: RichTextLabels;
   tagInput: TagInputLabels;
   timezoneSelect: TimezoneSelectLabels;
   userSelect: UserSelectLabels;

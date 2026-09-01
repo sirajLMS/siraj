@@ -1,7 +1,7 @@
 export const uiMeetingConfigReauthNeededAr = {
-  reauthNeededTitle: "أعد ربط حسابك",
+  reauthNeededTitle: "أعد ربط حساباتك",
   reauthNeededMessage:
-    "رموز المزودين التالية على وشك الانتهاء أو انتهت. أعد الربط للاستمرار في توليد روابط الاجتماعات تلقائياً.",
+    "رموز المزوّدين التالية منتهية الصلاحية أو على وشك الانتهاء. أعد الربط للاستمرار في إنشاء روابط الاجتماعات تلقائياً.",
   reconnectButton: "إعادة الربط",
   reauthExpiringSoon: "على وشك الانتهاء",
   reauthExpired: "منتهي",

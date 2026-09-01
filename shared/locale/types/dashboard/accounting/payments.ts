@@ -8,6 +8,8 @@ export interface PaymentsLabels {
   readonly metricsBasis: (max: number) => string;
   readonly pageSubtitle: string;
   readonly formSubtitle: string;
+  /** Subtitle for the Edit Payment flow (payment hours/gateway/note update). */
+  readonly editFormSubtitle: string;
   readonly addPayment: string;
   readonly editPayment: string;
   readonly paymentDetails: string;
@@ -81,6 +83,8 @@ export interface PaymentsLabels {
   readonly togglePaidSuccessOff: string;
   readonly deleteTitle: string;
   readonly detail: {
+    /** Singular panel title for the single-payment detail view ("Payment"), distinct from the plural list pageTitle. */
+    readonly title: string;
     readonly invoiceStatus: string;
     readonly invoiceId: string;
     readonly parent: string;

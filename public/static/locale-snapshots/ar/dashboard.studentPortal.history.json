@@ -42,7 +42,7 @@
     "__fn": "(minutes) => `${minutes} \\u062F`"
   },
   "viewClass": "عرض الحصة",
-  "joinSession": "انضم للحصة",
+  "joinSession": "انضم إلى الحصة",
   "sessionsList": "الحصص",
   "calendarWeekdays": {
     "sun": "أحد",

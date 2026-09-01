@@ -1,9 +1,13 @@
 import type { TeacherOwnProfileLabels } from "@/shared/locale/types/dashboard/teachers";
 
 export const dashboardTeacherOwnProfileAr: TeacherOwnProfileLabels = {
-  pageTitle: "تفاصيل الراتب",
-  pageSubtitle: "اعرض ملفك الرسمي وتفاصيل التعويض.",
+  pageTitle: "الملف الشخصي",
+  pageSubtitle: "إدارة معلوماتك",
   notSet: "غير محدد",
+  fields: {
+    fullName: "الاسم الكامل",
+    email: "البريد الإلكتروني",
+  },
   sections: {
     contact: "معلومات الاتصال",
     salary: "تفاصيل الراتب",
@@ -11,6 +15,6 @@ export const dashboardTeacherOwnProfileAr: TeacherOwnProfileLabels = {
   baseSalary: (amount, currency) => `الراتب الأساسي: ${amount} ${currency}`,
   paymentMethod: method => `طريقة الدفع: ${method}`,
   errors: {
-    failedToLoad: "فشل تحميل ملفك الشخصي.",
+    failedToLoad: "فشل تحميل الملف الشخصي.",
   },
 };

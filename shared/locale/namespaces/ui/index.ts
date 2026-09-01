@@ -8,6 +8,7 @@ export * from "./meetingConfig.namespace";
 export * from "./meetingConfigRecurringSchedule.namespace";
 export * from "./paymentMethod.namespace";
 export * from "./phoneInput.namespace";
+export * from "./richText.namespace";
 export * from "./tagInput.namespace";
 export * from "./timezoneSelect.namespace";
 export * from "./userSelect.namespace";

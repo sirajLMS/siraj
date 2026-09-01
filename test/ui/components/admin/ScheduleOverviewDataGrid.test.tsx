@@ -143,6 +143,24 @@ describe("ScheduleOverviewDataGrid", () => {
     expect(screen.queryByText(adminLabels.time)).toBeNull();
   });
 
+  test("showTimezones prop overrides the store-derived permission", () => {
+    renderWithWrapper(
+      <ScheduleOverviewDataGrid
+        rows={mockRows}
+        {...defaultPaginationProps}
+        headers={headers}
+        statusLabels={statusLabels}
+        detailsLabel={adminLabels.details}
+        emptyMessage={adminLabels.noClasses}
+        showTimezones
+      />,
+      { permissions: [], locale }
+    );
+
+    expect(screen.getByText(adminLabels.teacherTime)).toBeVisible();
+    expect(screen.getByText(adminLabels.studentTime)).toBeVisible();
+  });
+
   test("renders student and teacher names as profile links", () => {
     renderScheduleDataGrid([]);
 

@@ -88,4 +88,21 @@ describe("TeacherClassListMobileView", () => {
     expect(screen.queryByText(teacherClassListLabels.noClasses)).toBeNull();
     expect(container.querySelector(`[aria-label="${adminLabels.nextPage}"]`)).toBeNull();
   });
+
+  test("renders the student name as a profile link with avatar and student href", () => {
+    renderMobileView();
+
+    const profileLink = screen.getByText("Ahmed Fixture").closest("a");
+    if (!profileLink) {
+      throw new Error("student profile link not found in the card");
+    }
+    expect(profileLink.getAttribute("href")).toContain("/students/student-1/profile");
+    expect(profileLink.querySelector(".MuiAvatar-root")).not.toBeNull();
+  });
+
+  test("renders the student name without a link when studentId is missing", () => {
+    renderMobileView({ rows: [makeTeacherClassRow({ studentId: null })] });
+
+    expect(screen.getByText("Ahmed Fixture").closest("a")).toBeNull();
+  });
 });

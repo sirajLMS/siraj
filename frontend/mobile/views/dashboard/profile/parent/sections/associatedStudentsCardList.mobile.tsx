@@ -32,12 +32,14 @@ function studentStatusLabel(
 
 type AssociatedStudentsCardListMobileProps = BaseAssociatedStudentsListProps & {
   readonly loading?: boolean;
+  readonly emptyMessage: string;
 };
 
 export function AssociatedStudentsCardListMobile({
   rows,
   labels,
   loading,
+  emptyMessage,
 }: Readonly<AssociatedStudentsCardListMobileProps>) {
   const { parent: t, base: tProfile } = labels;
 
@@ -48,7 +50,7 @@ export function AssociatedStudentsCardListMobile({
       paginationOptions={false}
       layout="edge-to-edge"
       loading={loading}
-      emptyMessage={t.students.mobileListLabel}
+      emptyMessage={emptyMessage}
       renderItem={row => (
         <MobileCardListItem variant="edge-to-edge">
           <Stack spacing={1.5}>

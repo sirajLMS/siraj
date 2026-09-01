@@ -3,20 +3,20 @@ import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/stude
 export const dashboardStudentHistoryAr: StudentHistoryLabels = {
   breadcrumbs: {
     archive: "أرشيف الطلاب",
-    history: "تاريخ الحصص",
+    history: "سجل الطالب",
   },
   common: {
     student: "طالب",
   },
-  pageTitle: name => `تاريخ حصص ${name}`,
-  pageSubtitle: month => month,
+  pageTitle: name => `سجل ${name}`,
+  pageSubtitle: month => `حصص شهر ${month}`,
   exportPdf: "تصدير PDF",
   changeMonth: "تغيير الشهر",
   metrics: {
-    totalClasses: _count => `إجمالي الحصص`,
-    attendanceRate: _rate => `معدل الحضور`,
-    hoursStudied: _hours => `ساعات الدراسة`,
-    performance: _score => `الأداء`,
+    totalClasses: count => `إجمالي الحصص: ${count}`,
+    attendanceRate: rate => `معدل الحضور: ${rate}%`,
+    hoursStudied: hours => `ساعات الدراسة: ${hours}`,
+    performance: score => `الأداء: ${score}%`,
   },
   calendar: {
     weeklyAttendance: "الحضور الأسبوعي",
@@ -36,11 +36,11 @@ export const dashboardStudentHistoryAr: StudentHistoryLabels = {
     classDetails: date => `تفاصيل الحصة - ${date}`,
     instructor: name => `المعلم: ${name}`,
     timeSlot: "فترة الحصة",
-    roomNo: "رقم الغرفة",
-    contentNotes: "محتوى وملاحظات الحصة",
+    roomNo: "الغرفة",
+    contentNotes: "المحتوى والملاحظات",
     viewAssignments: "عرض الواجبات",
-    downloadLogs: "تنزيل السجلات",
-    joinSession: "الانضمام للحصة",
+    downloadLogs: "تنزيل سجلات الحصة",
+    joinSession: "الانضمام إلى الحصة",
     status: {
       present: "حاضر",
       absent: "غائب",

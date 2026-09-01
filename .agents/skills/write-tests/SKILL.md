@@ -21,6 +21,8 @@ Which layer are you testing?
  ├── Backend Services Layer (Business logic & API) → See Section 3
  ├── GraphQL Layer (Resolvers & Schema operations) → See Section 4
  └── Cross-Actor Journey Tests (`test/workflows/`) → See docs/testing/workflow-journey-tests.md
+     (each journey also owns a Mermaid diagram in `test/workflows/<domain>/DIAGRAMS.md` —
+     keep it in sync and validate with `bun run validate:mermaid test/workflows/<domain>/DIAGRAMS.md`; rule 11 in test/workflows/AGENTS.md)
 ```
 
 ---

@@ -14,4 +14,5 @@ export * from "./override-state.enum";
 export * from "./parent.enum";
 export * from "./permission-group.enum";
 export * from "./profile.enum";
+export * from "./service-availability.constants";
 export * from "./student-lifecycle.enum";

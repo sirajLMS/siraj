@@ -1,8 +1,8 @@
 import type { StatusTrackingLabels } from "@/shared/locale/types/dashboard/core";
 
 export const dashboardCoreStatusTrackingAr: StatusTrackingLabels = {
-  pageTitle: "حالة حصص الجلسات",
-  pageSubtitle: "راقب حصص الجلسات حسب حالة الطالب — عادي، معلّق، موقوف، وفي إجازة.",
+  pageTitle: "حالة الحصص",
+  pageSubtitle: "راقب الحصص حسب حالة الطالب — عادي، معلّق، موقوف، وفي إجازة.",
   filters: "الفلاتر",
   newReport: "حصة جديدة",
   todaysClassSchedule: "جدول حصص اليوم",
@@ -13,7 +13,7 @@ export const dashboardCoreStatusTrackingAr: StatusTrackingLabels = {
   seeAll: "عرض الكل",
   todaysSchedule: "جدول اليوم",
   administrativeHold: "تعليق إداري",
-  holdDescription: "تم تعليق الحساب بسبب رصيد مستحق أو مخالفة للسياسة. تواصل مع الفوترة.",
+  holdDescription: "تم تعليق الحساب بسبب رصيد مستحق أو مخالفة السياسة. تواصل مع قسم الفوترة.",
   dateFilter: {
     today: "اليوم",
     previousDay: "اليوم السابق",

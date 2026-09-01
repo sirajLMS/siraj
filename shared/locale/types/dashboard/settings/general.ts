@@ -16,7 +16,8 @@ export type SystemSettingCategoryKey =
   | "app"
   | "meeting"
   | "billing"
-  | "general";
+  | "general"
+  | "payroll";
 
 export interface SettingsGeneralTabLabels {
   readonly title: string;

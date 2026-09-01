@@ -55,6 +55,8 @@ export interface ParentsDataGridLabels {
   readonly status: string;
   readonly accountStatus: string;
   readonly unpaidInvoices: string;
+  readonly unpaidCount: (count: number) => string;
+  readonly invoicesCleared: string;
   readonly options: string;
   readonly noEntries: string;
   readonly statusLabels: Record<ParentLifecycleStatus, string>;

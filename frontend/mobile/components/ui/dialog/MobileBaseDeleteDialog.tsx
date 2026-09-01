@@ -9,6 +9,7 @@ export type { MobileBaseDeleteDialogProps };
 export function MobileBaseDeleteDialog(props: Readonly<MobileBaseDeleteDialogProps>) {
   return (
     <BaseDeleteDialogScaffold
+      fullScreen
       {...props}
       CancelActionButton={MobileFilterButton}
       ConfirmActionButton={MobilePrimaryPageAction}

@@ -140,7 +140,7 @@ export function MobilePageHeader({
             {title}
           </Typography>
           {subtitle ? (
-            <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.text.secondary, marginInlineStart: 2 })}>
+            <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.text.secondary })}>
               {subtitle}
             </Typography>
           ) : null}

@@ -1,14 +1,14 @@
 "use client";
 
-import { DownloadOutlined, FilterListOutlined } from "@mui/icons-material";
-import { Box, Fade, Skeleton, Stack } from "@mui/material";
+import { DownloadOutlined } from "@mui/icons-material";
+import { Box, Fade, Skeleton } from "@mui/material";
 import type { ReactElement } from "react";
 import type { QuotaInsightsViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel";
 import {
   buildQuotaInsightsMetrics,
   quotaInsightsBreadcrumbs,
 } from "@/frontend/common/views/dashboard/billing/quota/utils";
-import { DesktopExportButton, DesktopFilterButton } from "@/frontend/desktop/components/ui/button";
+import { DesktopExportButton } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid/DesktopMetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
@@ -76,16 +76,6 @@ export function QuotaInsightsDesktopView(vm: Readonly<QuotaInsightsViewModel>): 
           <Box aria-busy={loading}>
             {/* Metric Cards */}
             <DesktopMetricCardGrid metrics={buildQuotaInsightsMetrics(vm)} />
-
-            {/* Filter Bar */}
-            <Stack direction="row" spacing={2} sx={{ mt: 2, flexWrap: "wrap", gap: 1 }}>
-              <DesktopFilterButton startIcon={<FilterListOutlined />}>
-                {labels.insightsDateRangeLabel}
-              </DesktopFilterButton>
-              <DesktopFilterButton>{labels.insightsKindLabel}</DesktopFilterButton>
-              <DesktopFilterButton>{labels.insightsStatusLabel}</DesktopFilterButton>
-              <DesktopFilterButton>{labels.insightsStudentLabel}</DesktopFilterButton>
-            </Stack>
           </Box>
 
           {/* Charts */}

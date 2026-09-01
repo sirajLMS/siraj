@@ -119,4 +119,6 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   accountingPackages: "Packages",
   accountingPaymentsNew: "Add Payment",
   accountingPackagesNew: "Create Package Plan",
+  accountingCredits: "Credits",
+  accountingPayroll: "Payroll",
 };

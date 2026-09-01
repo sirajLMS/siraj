@@ -1,23 +1,31 @@
 "use client";
 
-import { SchoolOutlined } from "@mui/icons-material";
-import { AppBar, Box, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Toolbar } from "@mui/material";
 import type { ReactNode } from "react";
+import { NavbarBrandBlock } from "@/frontend/common/views/dashboard/components/navbar/NavbarBrandBlock";
 
 /**
  * NavbarStaticShell — SERVER COMPONENT rendering the dashboard navbar's
- * static chrome (AppBar + Toolbar + brand box: logo icon + app title +
+ * static chrome (AppBar + Toolbar + brand block: logo icon + app title +
  * role label Typography) into the initial HTML, before client hydration
  * completes.
  *
  * The app-title `<Typography>` here is the LCP candidate on chrome, so it
- * must render server-side (no `"use client"`, no React hooks, no browser
- * APIs, no `useAppTranslation`). All strings are passed in as props by the
+ * must render server-side (no hooks, no browser APIs, no
+ * `useAppTranslation`). All strings are passed in as props by the
  * server-side `DashboardLayoutContainer`.
  *
  * CSS variable tokens (`var(--mui-palette-headerContainer)`, etc.) are used
  * directly instead of JS theme callbacks so the server component renders
  * deterministic HTML without requiring client ThemeProvider context.
+ *
+ * The brand-group markup itself is shared with `NavbarChrome` through
+ * `NavbarBrandBlock`; this shell is the reason the fragment takes all colors
+ * as plain CSS strings (CSS variables / `color-mix()` here) instead of theme
+ * values. The two shells intentionally stay separate files: a unified
+ * component with a variant prop would have to import the interactive
+ * client-side chrome hooks (`useTheme`, `useAppTranslation`) into the
+ * pre-hydration render path, breaking the guarantees above.
  */
 
 interface NavbarStaticShellProps {
@@ -48,43 +56,14 @@ export function NavbarStaticShell({ appTitle, roleLabel, logoAriaLabel, children
           px: { xs: 2, md: 4 },
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 2 } }}>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              backgroundColor: "color-mix(in srgb, var(--mui-palette-onHeaderContainer) 15%, transparent)",
-              borderRadius: 2,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            data-appearance-target="brand-logo"
-          >
-            <SchoolOutlined sx={{ fontSize: 24 }} aria-label={logoAriaLabel} />
-          </Box>
-          <Box sx={{ display: { xs: "none", md: "flex" }, flexDirection: "column" }}>
-            <Typography
-              variant="titleLg"
-              sx={{
-                color: "var(--mui-palette-onHeaderContainer)",
-                lineHeight: 1.2,
-              }}
-              data-appearance-target="brand-name"
-            >
-              {appTitle}
-            </Typography>
-            <Typography
-              variant="labelMd"
-              sx={{
-                color: "color-mix(in srgb, var(--mui-palette-onHeaderContainer) 70%, transparent)",
-                lineHeight: 1.2,
-              }}
-            >
-              {roleLabel}
-            </Typography>
-          </Box>
-        </Box>
+        <NavbarBrandBlock
+          appTitle={appTitle}
+          roleLabel={roleLabel}
+          logoAriaLabel={logoAriaLabel}
+          logoBackgroundColor="color-mix(in srgb, var(--mui-palette-onHeaderContainer) 15%, transparent)"
+          brandNameColor="var(--mui-palette-onHeaderContainer)"
+          roleColor="color-mix(in srgb, var(--mui-palette-onHeaderContainer) 70%, transparent)"
+        />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 3 } }}>{children}</Box>
       </Toolbar>

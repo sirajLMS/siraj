@@ -23,8 +23,9 @@ const lazyViews = createLazyView<DashboardLayoutProps>(
 /**
  * Dashboard layout entrypoint. In customize mode (`?customize=1`) the whole
  * dashboard renders inside {@link CustomizeModeShell} — the customization
- * layout that owns the toolbar, sidebar, and all dashboard offsets — so the
- * desktop/mobile dashboard layouts stay completely customize-agnostic.
+ * layout that owns the toolbar and the shared dashboard offsets. The
+ * customize sidebar is desktop-only and is mounted by
+ * `DashboardLayoutDesktop` itself.
  */
 export function DashboardLayout(props: Readonly<DashboardLayoutProps>) {
   return (

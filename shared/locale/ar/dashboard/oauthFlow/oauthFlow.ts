@@ -8,7 +8,7 @@ export const dashboardOAuthFlowAr: OAuthFlowLabels = {
   tokenExpired: "انتهت صلاحية جلستك.",
   tokenExpiringSoon: "ستنتهي صلاحية جلستك قريباً.",
   reconnectNow: "إعادة الاتصال الآن",
-  remindMeLater: "ذكرني لاحقاً",
+  remindMeLater: "ذكّرني لاحقاً",
   statusConnected: "متصل",
   statusNotConnected: "غير متصل",
   statusExpiring: "قارب الانتهاء",

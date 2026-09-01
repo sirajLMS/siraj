@@ -7,7 +7,7 @@ import type {
   PaymentMethodSelectProps,
 } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 
-export type { PaymentMethodSelectProps } from "./types";
+export type { PaymentMethodSelectProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 
 /**
  * PaymentMethodSelect allows the operator to pick a catalog-backed payment

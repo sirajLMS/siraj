@@ -1,16 +1,18 @@
 // cspell:disable
 "use client";
 
-import { AppTimePicker } from "@/frontend/common/components/ui/form/time/AppTimePicker";
 import { AvailabilitySearchFormShared } from "@/frontend/common/views/dashboard/teachers/availability/components/__shared__/availabilitySearchFormShared";
 import type { AvailabilitySearchFormProps } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { DesktopAppTimePicker } from "@/frontend/desktop/components/ui/form/time";
+import { GenderSelectorDesktop } from "@/frontend/desktop/components/ui/input/genderSelector";
 
 export function AvailabilitySearchFormDesktop(props: Readonly<AvailabilitySearchFormProps>) {
   return (
     <AvailabilitySearchFormShared
       {...props}
       options={{
-        TimePickerComponent: AppTimePicker,
+        TimePickerComponent: DesktopAppTimePicker,
+        GenderSelectorComponent: GenderSelectorDesktop,
         timePickerSize: "medium",
         formLayoutSx: {
           display: "grid",

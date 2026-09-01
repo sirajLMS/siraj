@@ -54,6 +54,10 @@ Each sub-directory contains its own `index.ts` barrel that re-exports every `*.e
 4. If a new sub-directory was created, add `export * from "./<subdir>";` to the top-level `backend/enum/index.ts`.
 5. If the enum should be exposed via GraphQL, register it in `backend/graphql/pothos/shared/enum.pothos.ts` and run codegen.
 
+### Extending Existing Enums
+- Add values to an existing `pgEnum` via idempotent `ALTER TYPE … ADD VALUE` migration SQL plus the enum source file — never create a parallel new enum.
+- Cross-layer values (needed by frontend/shared) belong in `shared/constants/`, with `backend/enum/` re-exporting per the cross-layer migration rules.
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.

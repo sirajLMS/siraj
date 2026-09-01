@@ -1,35 +1,76 @@
 "use client";
 
-import { Box, type SxProps, type Theme } from "@mui/material";
+import { Box, Skeleton, type SxProps, type Theme } from "@mui/material";
 import { useMetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelSources";
 import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MetricCard/MobileMetricCard";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container/MobileHorizontalScrollRow";
 
+/** Fixed cell geometry shared by metric cards and their loading skeletons. */
+const METRIC_CELL_SX = { flex: "0 0 148px", minWidth: 148, scrollSnapAlign: "start" } as const satisfies SxProps<Theme>;
+
+/**
+ * Equal-grow cell geometry: cards expand to fill the row when there are few
+ * metrics instead of leaving dead space after the last card. Items still floor
+ * at 148px, so larger sets keep the peek-scroll behavior unchanged.
+ */
+const STRETCH_CELL_SX = {
+  flex: "1 0 148px",
+  minWidth: 148,
+  scrollSnapAlign: "start",
+} as const satisfies SxProps<Theme>;
+
+const DEFAULT_LOADING_COUNT = 3;
+const DEFAULT_LOADING_CARD_HEIGHT = 120;
+
 export interface MobileMetricCardGridProps {
   readonly metrics: readonly MetricItem[];
   readonly onMetricClick?: (key: string) => void;
   readonly selectedKey?: string;
+  /** Renders skeleton placeholders (sharing the card geometry) instead of metric cards. */
+  readonly loading?: boolean;
+  /** Number of skeleton cards rendered while `loading` is active. */
+  readonly loadingCount?: number;
+  /** Skeleton card height in px; match the card density of the surrounding layout. */
+  readonly loadingCardHeight?: number;
+  /** Stretch cards to fill the row when metrics are few (single-child rows go full width). */
+  readonly stretchCells?: boolean;
   readonly sx?: SxProps<Theme>;
 }
 
-export function MobileMetricCardGrid({ metrics, onMetricClick, selectedKey, sx }: MobileMetricCardGridProps) {
+export function MobileMetricCardGrid({
+  metrics,
+  onMetricClick,
+  selectedKey,
+  loading = false,
+  loadingCount = DEFAULT_LOADING_COUNT,
+  loadingCardHeight = DEFAULT_LOADING_CARD_HEIGHT,
+  stretchCells = false,
+  sx,
+}: MobileMetricCardGridProps) {
   const labelSources = useMetricLabelSources();
+  const cellSx = stretchCells ? STRETCH_CELL_SX : METRIC_CELL_SX;
+
+  if (loading) {
+    const skeletonKeys = Array.from({ length: loadingCount }, (_, index) => `metric-skeleton-${index}`);
+    return (
+      <MobileHorizontalScrollRow sx={sx}>
+        {skeletonKeys.map(skeletonKey => (
+          <Box key={skeletonKey} sx={cellSx}>
+            <Skeleton variant="rounded" height={loadingCardHeight} sx={{ borderRadius: 2 }} />
+          </Box>
+        ))}
+      </MobileHorizontalScrollRow>
+    );
+  }
 
   return (
     <MobileHorizontalScrollRow sx={sx}>
       {metrics.map((metric, index) => {
         const label = metric.label ?? resolveMetricLabel(metric.labelKey, labelSources);
         return (
-          <Box
-            key={metric.key}
-            sx={{
-              flex: "0 0 148px",
-              minWidth: 148,
-              scrollSnapAlign: "start",
-            }}
-          >
+          <Box key={metric.key} sx={cellSx}>
             <MobileMetricCard
               icon={metric.icon}
               label={label}

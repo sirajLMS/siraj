@@ -1,5 +1,5 @@
 {
-  "invalidClassId": "معرف الحصة غير صالح",
+  "invalidClassId": "معرّف الحصة غير صالح",
   "pageTitle": "عرض تفاصيل الحصة",
   "mobileTitle": "سجل تدقيق الحصة",
   "breadcrumbs": {
@@ -59,8 +59,8 @@
     }
   },
   "meeting": {
-    "title": "الاجتماع عبر الإنترنت",
-    "joinMeeting": "انضم إلى الاجتماع"
+    "title": "اجتماع عبر الإنترنت",
+    "joinMeeting": "الانضمام إلى الاجتماع"
   },
   "communication": {
     "title": "سجل التواصل",
@@ -73,9 +73,10 @@
       "__fn": "(time) => `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B: ${time}`"
     },
     "update": "تحديث",
-    "edit": "تعديل"
+    "edit": "تعديل",
+    "content": "محتوى الملاحظة"
   },
-  "meetingIdLabel": "معرف الاجتماع:",
+  "meetingIdLabel": "معرّف الاجتماع:",
   "online": "عبر الإنترنت",
   "meetingIdNA": "غير متوفر"
 }

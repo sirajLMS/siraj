@@ -1,5 +1,5 @@
 {
-  "manifestHash": "5ababe5c4373de32b4b3d79fabd00d2a6563b8404fc4d9437141bed0f19b6368",
+  "manifestHash": "6cb6d46c37b46bc47c28fa90b9217293e5b5f45bfe799a4ee4829fbad99582c7",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -36,6 +36,22 @@
     {
       "file": "34-credit-hours-system-settings-seed.sql",
       "sha256": "3d2836e49dfb736c0ba2f4be9e0b786e49765453b241173514570fd2700a1c57"
+    },
+    {
+      "file": "35-accounting-credits-permission.sql",
+      "sha256": "6cb8aacc60a1b20d2ec0969b4e0c2c2d58a4dea804ff4d39628735b2b8413e00"
+    },
+    {
+      "file": "36-accounting-payroll-permissions.sql",
+      "sha256": "1d2ed658a09746c2fb1432b1f8df0077309c412234d0aa6334cc0d3f270e1071"
+    },
+    {
+      "file": "37-payroll-grace-settings.sql",
+      "sha256": "315e8d169c89e2a6d4f7d5020519064b23d41584d8c3078cfb890c0106875a8e"
+    },
+    {
+      "file": "38-parent-notification-view-alerts.sql",
+      "sha256": "3a1179b5def089c96110b008e9db0c9b471d018fa4bd4de9c3dc119eed38e0cb"
     },
     {
       "file": "4-class_categories_and_subjects.sql",
@@ -295,6 +311,10 @@
     "20260825020602_custom_self_service_reschedule_permissions",
     "20260826162257_custom_self_service_reschedule_permissions",
     "20260827015543_custom_33-accounting-permissions-and-enums",
-    "20260827015544_custom_34-credit-hours-system-settings-seed"
+    "20260827015544_custom_34-credit-hours-system-settings-seed",
+    "20260828212837_custom_35-accounting-credits-permission",
+    "20260829023113_custom_36-accounting-payroll-permissions",
+    "20260829031931_custom_37-payroll-grace-settings",
+    "20260829192949_custom_38-parent-notification-view-alerts"
   ]
 }

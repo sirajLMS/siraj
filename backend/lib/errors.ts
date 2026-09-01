@@ -1,4 +1,5 @@
 import { GraphQLError } from "graphql";
+import { DATABASE_UNAVAILABLE_DIGEST } from "@/shared/constants";
 
 export class DomainError extends GraphQLError {
   constructor(
@@ -43,6 +44,27 @@ export class ValidationError extends DomainError {
 export class ConflictError extends DomainError {
   constructor(message: string, options?: ErrorOptions) {
     super("CONFLICT", message, options);
+  }
+}
+
+/**
+ * DatabaseUnavailableError — thrown when the database is unreachable and all
+ * bounded retries are exhausted (connection refused/reset/timeout, terminated
+ * connections, pool exhaustion).
+ *
+ * The `digest` sentinel survives Next.js production error serialization into
+ * client error boundaries (`app/error.tsx`), letting the UI render a
+ * translated "temporarily unavailable" page instead of a generic failure —
+ * without leaking any error details to the browser.
+ *
+ * In GraphQL resolvers it surfaces as `extensions.code === "DATABASE_UNAVAILABLE"`.
+ */
+export class DatabaseUnavailableError extends DomainError {
+  public readonly digest: string;
+
+  constructor(message = "Database temporarily unavailable", options?: ErrorOptions) {
+    super("DATABASE_UNAVAILABLE", message, options);
+    this.digest = DATABASE_UNAVAILABLE_DIGEST;
   }
 }
 

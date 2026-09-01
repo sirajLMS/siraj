@@ -145,6 +145,7 @@ import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing
 import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileDesktopView as UserBillingProfileView } from "@/frontend/desktop/views/dashboard/users/billing-profile/userBillingProfile.desktop";
 import type { AppLocale } from "@/shared/locale/AppLocale";
+import { dashboardBillingPaymentsLedgerEn } from "@/shared/locale/en/dashboard/billing/paymentsLedger";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -371,6 +372,7 @@ const mockLabels: BillingLabels = {
     hedges: "Currency Hedges",
     manual: "Manual Invoice",
   },
+  paymentsLedger: dashboardBillingPaymentsLedgerEn,
   notifications: {
     popupBlocked: "Popup blocked — allow popups to download PDF",
     paymentPendingReview: "Your payments are under review",

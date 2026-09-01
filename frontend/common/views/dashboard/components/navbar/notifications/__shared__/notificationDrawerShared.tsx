@@ -1,8 +1,9 @@
 "use client";
 
 import { CloseOutlined, DoneAllOutlined, SettingsOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Divider, Drawer, IconButton, List, Typography } from "@mui/material";
+import { Box, Button, Divider, Drawer, IconButton, List, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
+import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import { NotificationDrawerEmptyState } from "@/frontend/common/views/dashboard/components/navbar/notifications/emptyState";
 import { NotificationDrawerRow } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows";
 import type { NotificationDrawerProps } from "@/frontend/common/views/dashboard/components/navbar/notifications/types";
@@ -93,20 +94,9 @@ export function NotificationDrawerShared({
         />
 
         <Box sx={{ flex: 1, overflow: "auto" }}>
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-              <CircularProgress size={32} />
-            </Box>
-          ) : null}
+          {loading ? <LoadingState size={32} embedded /> : null}
 
-          {error ? (
-            <Typography
-              variant="body2"
-              sx={{ color: (theme: Theme) => theme.palette.error.main, textAlign: "center", py: 4, px: 2 }}
-            >
-              {errorLoadingMessage}
-            </Typography>
-          ) : null}
+          {error ? <ErrorState embedded message={errorLoadingMessage} /> : null}
 
           {!loading && !error && alerts.length === 0 ? (
             <NotificationDrawerEmptyState emptyMessage={labels.noNotifications} />

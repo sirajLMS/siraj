@@ -4,6 +4,7 @@ export * from "./billing-history.pothos";
 export * from "./billing-management.pothos";
 export * from "./billing-payments.pothos";
 export * from "./credit.pothos";
+export * from "./credit-adjustment.pothos";
 export * from "./currency.pothos";
 export * from "./currency-hedge.pothos";
 export * from "./fx-ingestion.pothos";

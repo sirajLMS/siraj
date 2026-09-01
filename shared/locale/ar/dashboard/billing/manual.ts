@@ -17,12 +17,12 @@ export const dashboardBillingManualAr: BillingManualLabels = {
   summarySubtitle: "سيتم حساب الضريبة تلقائياً بناءً على مبلغ الرسوم المحدد.",
   totalDraftValue: "إجمالي قيمة المسودة",
   submit: "إرسال",
-  submitAndSendEmail: "إرسال وإرسال بريد إلكتروني",
+  submitAndSendEmail: "الإرسال مع إرسال بريد إلكتروني",
   successMessage: "تم إرسال الفاتورة اليدوية بنجاح.",
   createSuccess: id => `تم إنشاء الفاتورة ${id} بنجاح`,
   manualInvoiceFxNote:
     "يُخزَّن مبلغ الفاتورة بالعملة المحددة. تظهر التحويلات في صفحات الفوترة بناءً على عملة عرض كل مستخدم.",
-  unknown: "غير معروف",
+  unknown: "طالب غير معروف",
   months: {
     jan: "يناير",
     feb: "فبراير",

@@ -9,7 +9,7 @@ import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboar
 
 export interface StudentExtensionFieldLabels {
   readonly dateOfBirth: string;
-  readonly dateOfBirthPlaceholder: string;
+  readonly dateOfBirthPlaceholder?: string;
   readonly gender: string;
   readonly male: string;
   readonly female: string;

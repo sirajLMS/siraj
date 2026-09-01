@@ -1,3 +1,4 @@
+import type { ButtonProps } from "@mui/material";
 import type { StatusBadgeCategory } from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
 import type {
   EffectiveMeetingFieldsFragment,
@@ -48,6 +49,10 @@ export interface FutureClassCardSlots {
     readonly label?: string;
     readonly setupHref?: string;
   }>;
+  /** Outlined action preset for the request-leave button (FilterButton / MobileFilterButton). */
+  readonly LeaveRequestButton: React.ComponentType<ButtonProps>;
+  /** Contained action preset for the view-materials button (PrimaryPageAction / MobilePrimaryPageAction). */
+  readonly ViewMaterialsButton: React.ComponentType<ButtonProps>;
 }
 
 /** Tier-specific styling values passed to the scaffold. */

@@ -599,6 +599,7 @@ Use this checklist when executing each task:
   - Spy on notification dispatch (`spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`) — NEVER hit real channels
   - Committed fixtures in `beforeAll` + tracked hard-delete in `afterAll` — NEVER wrap service calls in `runInRollback`
   - Run: `bun run test/scripts/run-test.ts test/workflows/<domain>/<workflow-name>.test.ts` until green, then `bun run test:workflows`
+  - Add/update the journey's Mermaid diagram in `test/workflows/<domain>/DIAGRAMS.md` (heading = test file name, 1-2 sentence intro, one ```mermaid block); validate: `bun run validate:mermaid test/workflows/<domain>/DIAGRAMS.md` — every block must report OK
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
   - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - Reference: `docs/testing/workflow-journey-tests.md` + `test/workflows/AGENTS.md`

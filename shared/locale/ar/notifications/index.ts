@@ -62,7 +62,7 @@ export const notificationsAr: NotificationsLabels = {
     body: ({ studentName, scheduledStartAt }) => `اكتملت الحصة المجدولة للطالب ${studentName} في ${scheduledStartAt}.`,
   },
   classMarkedAbsent: {
-    title: "تم تسجيل الغياب",
+    title: "تم تسجيل غياب الطالب",
     body: ({ studentName, scheduledStartAt }) => `تم تسجيل غياب ${studentName} عن الحصة في ${scheduledStartAt}.`,
   },
   classMarkedMissed: {
@@ -135,17 +135,17 @@ export const notificationsAr: NotificationsLabels = {
   },
   suggestionMarkedDuplicate: {
     title: "تم تعليم الاقتراح كمكرر",
-    body: ({ duplicateId }) => `تم تعليم اقتراحك كمكرر للاقتراح رقم #${duplicateId.slice(0, 8)}`,
+    body: ({ duplicateId }) => `تم تعليم اقتراحك كمكرر للاقتراح رقم ${duplicateId.slice(0, 8)}`,
   },
   accountingPaymentRecorded: {
     title: "تم تسجيل باقة ساعات تعليمية",
     body: ({ packageName, creditHours, amount, currency }) =>
-      `تم تسجيل الدفعة الخاصة باقة "${packageName}" (${creditHours} ساعات تعليمية، بمبلغ ${amount} ${currency}) وتم تحديث رصيد الساعات الخاص بك.`,
+      `تم تسجيل دفعة لباقة "${packageName}" (${creditHours} ساعات تعليمية، بمبلغ ${amount} ${currency})، وتم تحديث رصيد الساعات الخاص بك.`,
   },
   accountingLowHours: {
     title: "رصيد ساعات منخفض",
     body: ({ remaining, threshold }) =>
-      `انخفض رصيد الساعات المتبقية لديك إلى ${remaining} وهو أقل من الحد الأدنى (${threshold}). يُرجى شراء باقة جديدة لمواصلة حجز الفصول.`,
+      `انخفض رصيد الساعات المتبقية لديك إلى ${remaining}، وهو أقل من الحد الأدنى (${threshold}). يُرجى شراء باقة جديدة لمواصلة حجز الحصص.`,
   },
   quotaExpiringSoon: {
     title: "حصة تنتهي قريبًا",
@@ -164,7 +164,7 @@ export const notificationsAr: NotificationsLabels = {
   onDemandInstancePendingCredit: {
     title: "حصة بانتظار الرصيد",
     body: ({ studentName, scheduledStartAt }) =>
-      `الحصة الحسب الطلب للطالب ${studentName} في ${scheduledStartAt} تحتاج إلى رصيد إضافي.`,
+      `حصة حسب الطلب للطالب ${studentName} في ${scheduledStartAt} تحتاج إلى رصيد إضافي.`,
   },
   onDemandInstanceReminderT3: {
     title: "تذكير بحصة حسب الطلب قادمة",
@@ -172,14 +172,14 @@ export const notificationsAr: NotificationsLabels = {
       `حصة حسب الطلب للطالب ${studentName} مجدولة بعد 3 أيام في ${scheduledStartAt}.`,
   },
   onDemandInstanceReminderT1: {
-    title: "تذكير بحصة حسب الطلب غداً",
+    title: "تذكير بحصة حسب الطلب غدًا",
     body: ({ studentName, scheduledStartAt }) =>
-      `حصة حسب الطلب للطالب ${studentName} مجدولة غداً في ${scheduledStartAt}.`,
+      `حصة حسب الطلب للطالب ${studentName} مجدولة غدًا في ${scheduledStartAt}.`,
   },
   onDemandTeacherDailyDigest: {
     title: "ملخص الحصص حسب الطلب اليومي",
     body: ({ teacherName, pendingCount }) =>
-      `مرحباً ${teacherName}، لديك ${pendingCount} حصص حسب الطلب بانتظار تسوية الرصيد اليوم.`,
+      `مرحبًا ${teacherName}، لديك ${pendingCount} حصص حسب الطلب بانتظار تسوية الرصيد اليوم.`,
   },
   drawerTitle: "الإشعارات",
 

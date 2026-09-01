@@ -40,7 +40,7 @@ export const dashboardStudentPortalHistoryAr: StudentPortalHistoryLabels = {
   },
   minutesShort: minutes => `${minutes} د`,
   viewClass: "عرض الحصة",
-  joinSession: "انضم للحصة",
+  joinSession: "انضم إلى الحصة",
   sessionsList: "الحصص",
   calendarWeekdays: {
     sun: "أحد",

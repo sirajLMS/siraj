@@ -2,6 +2,7 @@ import { dashboardBillingCurrencyHedgesAr as currencyHedges } from "@/shared/loc
 import { dashboardBillingExchangeRatesAr as exchangeRates } from "@/shared/locale/ar/dashboard/billing/exchangeRates";
 import { dashboardBillingManualAr as manual } from "@/shared/locale/ar/dashboard/billing/manual";
 import { dashboardBillingPaymentAr as payment } from "@/shared/locale/ar/dashboard/billing/payment";
+import { dashboardBillingPaymentsLedgerAr as paymentsLedger } from "@/shared/locale/ar/dashboard/billing/paymentsLedger";
 import { dashboardBillingSupportedCurrenciesAr as supportedCurrencies } from "@/shared/locale/ar/dashboard/billing/supportedCurrencies";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 
@@ -18,7 +19,7 @@ export const dashboardBillingAr: BillingLabels = {
   viewAllNegativeBalance: "عرض جميع الطلاب برصيد سالب",
   requiresAttention: "يتطلب اهتماماً",
   showingResults: (shown: number, total: number) => `عرض ${shown} من ${total} نتائج`,
-  invalidUserId: "معرف المستخدم غير صالح",
+  invalidUserId: "معرّف المستخدم غير صالح",
   billingProfileTitle: "الملف المالي للمستخدم",
   profileForUser: "تفاصيل الملف المالي",
   reminderSent: "تم إرسال تذكير الدفع",
@@ -115,8 +116,8 @@ export const dashboardBillingAr: BillingLabels = {
     body: invoiceId => `سيؤدي هذا إلى إزالة الفاتورة ${invoiceId} نهائياً. لا يمكن التراجع عن هذا الإجراء.`,
     confirm: "حذف الفاتورة",
   },
-  noUnpaidInvoices: "لا توجد فواتير غير مدفوعة للدفع",
-  hasPaymentProofHint: "إثبات دفع مرفق",
+  noUnpaidInvoices: "لا توجد فواتير غير مدفوعة متاحة للدفع",
+  hasPaymentProofHint: "إثبات الدفع مرفق",
   submitProofDialog: {
     titleSubmit: "إرسال إثبات الدفع",
     titleMarkPaid: "تحديد الفاتورة كمدفوعة",
@@ -166,7 +167,7 @@ export const dashboardBillingAr: BillingLabels = {
     paymentPendingReview: "مدفوعاتك قيد المراجعة. لا توجد فواتير غير مدفوعة تحتاج إلى إجراء الآن.",
   },
   errors: {
-    invalidId: "معرف ولي الأمر غير صالح في عرض الفواتير.",
+    invalidId: "معرّف ولي الأمر غير صالح في عرض الفواتير.",
     retry: "إعادة المحاولة",
   },
   exchangeRates,
@@ -174,12 +175,12 @@ export const dashboardBillingAr: BillingLabels = {
     adminBody: "أسعار الصرف قديمة. قد لا تظهر التحويلات في العملة المعروضة حتى يتم التحديث.",
     userBody: "أسعار الصرف قديمة. قد لا تظهر التحويلات في عملتك المعروضة حتى يتم التحديث.",
     adminCta: "إدارة الأسعار",
-    userCta: "تحديث الملف",
+    userCta: "تحديث الملف الشخصي",
   },
   displayCurrencyHint: {
     title: "لم يتم تعيين عملة العرض",
     body: "عيّن عملة عرض في ملفك الشخصي لرؤية المبالغ المحوّلة في الفواتير والتقارير.",
-    cta: "تعديل الملف",
+    cta: "تعديل الملف الشخصي",
     dismiss: "إغلاق",
     subject: {
       title: "لم يتم تعيين عملة عرض لهذا المستخدم",
@@ -198,7 +199,7 @@ export const dashboardBillingAr: BillingLabels = {
   currencyHedges,
   supportedCurrencies,
   tabsPageTitle: "الفوترة",
-  tabsPageSubtitle: "تتبع الفواتير، التعرض للعملات، أسعار الصرف، وإنشاء الفواتير اليدوية.",
+  tabsPageSubtitle: "تتبع الفواتير والتعرض بالعملات وأسعار الصرف، وإنشاء فواتير يدوية.",
   tabNavAriaLabel: "أقسام الفوترة",
   billingTabs: {
     overview: "نظرة عامة",
@@ -208,4 +209,5 @@ export const dashboardBillingAr: BillingLabels = {
     hedges: "تحوطات العملات",
     manual: "فاتورة يدوية",
   },
+  paymentsLedger,
 };

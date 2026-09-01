@@ -1,8 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
+import { isSqlite } from "@/backend/db";
 import { StudentRepository } from "@/backend/db/repo/students";
+import { students } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { expectSavepointError, runInRollback } from "@/backend/db/test/test-utils";
 import { OrderSortDirection, StudentStatus } from "@/backend/enum";
 import { StudentsOrderByColumn } from "@/backend/enum/students";
 import {
@@ -19,13 +22,19 @@ function dirTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   });
 }
 
-function studentFilters(overrides: { nameEquals?: string | null; status?: StudentStatus | null }): StudentFilterArgs {
+function studentFilters(overrides: {
+  name?: string | null;
+  nameStartsWith?: string | null;
+  nameNotContains?: string | null;
+  nameEquals?: string | null;
+  status?: StudentStatus | null;
+}): StudentFilterArgs {
   return {
-    name: undefined,
-    nameNotContains: undefined,
+    name: overrides.name,
+    nameNotContains: overrides.nameNotContains,
     nameEquals: overrides.nameEquals,
     nameNotEquals: undefined,
-    nameStartsWith: undefined,
+    nameStartsWith: overrides.nameStartsWith,
     nameEndsWith: undefined,
     nameIsEmpty: undefined,
     nameIsNotEmpty: undefined,
@@ -213,5 +222,101 @@ describe("StudentRepository.getDirectoryRows", () => {
       expect(result.rows).toHaveLength(0);
       expect(result.totalCount).toBe(0);
     });
+  });
+
+  describe("Search input hardening", () => {
+    dirTest("treats LIKE wildcards literally in the nameStartsWith filter", async tx => {
+      const tag = randomUUID().slice(0, 8);
+      // `_` is a single-char LIKE wildcard; with escaping it must be literal,
+      // so the underscore student matches and the X student does not.
+      const underscored = `Dir${tag}_Score`;
+      const plain = `Dir${tag}XScore`;
+      await setupStudent(tx, { name: "Wild Par 1", email: `wild1-${randomUUID()}@t.com` }, {}, { name: underscored });
+      await setupStudent(tx, { name: "Wild Par 2", email: `wild2-${randomUUID()}@t.com` }, {}, { name: plain });
+
+      const result = await StudentRepository.getDirectoryRows(
+        null,
+        studentFilters({ nameStartsWith: `Dir${tag}_` }),
+        null,
+        tx
+      );
+
+      const matchedNames = result.rows.map(r => r.name);
+      expect(matchedNames).toContain(underscored);
+      expect(matchedNames).not.toContain(plain);
+    });
+
+    dirTest("treats a percent sign literally in the nameNotContains filter", async tx => {
+      const tag = randomUUID().slice(0, 8);
+      const percentName = `Pct${tag}%Name`;
+      const ordinaryName = `Pct${tag}Plain`;
+      await setupStudent(tx, { name: "Pct Par 1", email: `pct1-${randomUUID()}@t.com` }, {}, { name: percentName });
+      await setupStudent(tx, { name: "Pct Par 2", email: `pct2-${randomUUID()}@t.com` }, {}, { name: ordinaryName });
+
+      const result = await StudentRepository.getDirectoryRows(
+        null,
+        studentFilters({ nameNotContains: `Pct${tag}%` }),
+        null,
+        tx
+      );
+
+      const matchedNames = result.rows.map(r => r.name);
+      // Unescaped, `%` would match every name and hide both students.
+      expect(matchedNames).not.toContain(percentName);
+      expect(matchedNames).toContain(ordinaryName);
+    });
+
+    // The full-text `name` filter is PostgreSQL-only; the payload-char and
+    // injection probes below pin PG's parameterization and error behavior.
+    test.skipIf(isSqlite())("a wildcard-only full-text term does not broaden matches", async () => {
+      await runInRollback(async tx => {
+        const tag = randomUUID().slice(0, 8);
+        const fixture = `DirFts${tag}Target`;
+        await setupStudent(tx, { name: "Fts Par", email: `fts-${randomUUID()}@t.com` }, {}, { name: fixture });
+
+        const probeTerm = async (term: string) => {
+          const result = await StudentRepository.getDirectoryRows(null, studentFilters({ name: term }), null, tx);
+          expect(result.rows.some(r => r.name === fixture)).toBe(false);
+        };
+        await probeTerm("%");
+        await probeTerm("_");
+        await probeTerm("%%");
+        await probeTerm("__");
+        await probeTerm("\\");
+      });
+    });
+
+    test.skipIf(isSqlite())(
+      "an SQL-injection-shaped full-text term is bound as a parameter, not executed",
+      async () => {
+        await runInRollback(async tx => {
+          const tag = randomUUID().slice(0, 8);
+          const fixture = `DirInj${tag}Target`;
+          await setupStudent(tx, { name: "Inj Par", email: `inj-${randomUUID()}@t.com` }, {}, { name: fixture });
+
+          // PG's tsquery parser rejects the crafted token stream — the query
+          // fails inside a SAVEPOINT. What matters is that the payload reached
+          // the server as a bound parameter value, never as executable SQL.
+          const error = await expectSavepointError(
+            () =>
+              StudentRepository.getDirectoryRows(
+                null,
+                studentFilters({ name: `'; DROP TABLE students; --` }),
+                null,
+                tx
+              ),
+            tx
+          );
+          expect(error).toBeInstanceOf(Error);
+
+          // The table must still be intact and readable in the same transaction.
+          const [stillThere] = await tx
+            .select({ name: students.name })
+            .from(students)
+            .where(eq(students.name, fixture));
+          expect(stillThere?.name).toBe(fixture);
+        });
+      }
+    );
   });
 });

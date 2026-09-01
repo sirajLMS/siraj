@@ -1,10 +1,13 @@
 "use client";
 
-import { Box, Skeleton } from "@mui/material";
 import { useMemo } from "react";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { BillingMetricsRowProps } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
-import { MobileHorizontalScrollRow, MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
+import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
+
+const FALLBACK_LOADING_COUNT = 4;
+const COMPACT_CARD_HEIGHT = 88;
+const REGULAR_CARD_HEIGHT = 120;
 
 export function BillingMetricsRowMobile({
   metrics,
@@ -25,27 +28,15 @@ export function BillingMetricsRowMobile({
     [metrics]
   );
 
-  if (loading) {
-    const skeletonKeys =
-      metrics.length > 0 ? metrics.map(metric => metric.key) : ["outstanding", "paid", "next-due", "active-students"];
+  const loadingCount = metricItems.length > 0 ? metricItems.length : FALLBACK_LOADING_COUNT;
+  const loadingCardHeight = compact ? COMPACT_CARD_HEIGHT : REGULAR_CARD_HEIGHT;
 
-    return (
-      <MobileHorizontalScrollRow>
-        {skeletonKeys.map(key => (
-          <Box
-            key={`billing-metric-skeleton-${key}`}
-            sx={{
-              flex: "0 0 148px",
-              minWidth: 148,
-              scrollSnapAlign: "start",
-            }}
-          >
-            <Skeleton variant="rounded" height={compact ? 88 : 120} sx={{ borderRadius: 2 }} />
-          </Box>
-        ))}
-      </MobileHorizontalScrollRow>
-    );
-  }
-
-  return <MobileMetricCardGrid metrics={metricItems} />;
+  return (
+    <MobileMetricCardGrid
+      metrics={metricItems}
+      loading={loading}
+      loadingCount={loadingCount}
+      loadingCardHeight={loadingCardHeight}
+    />
+  );
 }

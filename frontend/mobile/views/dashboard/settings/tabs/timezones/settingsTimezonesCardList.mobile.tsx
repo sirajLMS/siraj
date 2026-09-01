@@ -1,7 +1,7 @@
 "use client";
 
-import { Stack, Typography } from "@mui/material";
 import { buildServerPaginationOptions, type ListPaginationOptions } from "@/frontend/common/components/ui";
+import { SettingsCardBodyShared } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsCardBodyShared";
 import type {
   SettingsTimezoneRow,
   SettingsTimezonesLabels,
@@ -26,23 +26,14 @@ function SettingsTimezonesCard({
 }: Readonly<{ readonly row: SettingsTimezoneRow; readonly columnLabels: SettingsTimezonesLabels["columns"] }>) {
   return (
     <MobileCardListItem variant="edge-to-edge">
-      <Stack spacing={0.5} sx={{ width: "100%" }}>
-        <Stack
-          direction="row"
-          sx={{ justifyContent: "space-between", alignItems: "baseline", gap: 1, flexWrap: "wrap" }}
-        >
-          <Typography sx={{ typography: "bodyMd", fontWeight: 700 }}>{row.name}</Typography>
-          <Typography sx={theme => ({ typography: "labelMd", color: theme.palette.text.secondary })}>
-            {row.offsetLabel}
-          </Typography>
-        </Stack>
-        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
-          {columnLabels.ianaId}: {row.ianaId}
-        </Typography>
-        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
-          {columnLabels.isDstSupported}: {row.isDstSupportedLabel}
-        </Typography>
-      </Stack>
+      <SettingsCardBodyShared
+        title={row.name}
+        secondary={row.offsetLabel}
+        fields={[
+          { label: columnLabels.ianaId, value: row.ianaId },
+          { label: columnLabels.isDstSupported, value: row.isDstSupportedLabel },
+        ]}
+      />
     </MobileCardListItem>
   );
 }

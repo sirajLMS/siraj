@@ -102,6 +102,11 @@ export enum AppPermission {
   // Accounting — credit-hours payments module
   ACCOUNTING_PAYMENTS_VIEW = "accounting.payments_view",
   ACCOUNTING_PAYMENTS_MANAGE = "accounting.payments_manage",
+  // Accounting — student credit-hour adjustments
+  ACCOUNTING_CREDITS_MANAGE = "accounting.credits_manage",
+  // Accounting — teacher payroll
+  ACCOUNTING_PAYROLL_VIEW = "accounting.payroll_view",
+  ACCOUNTING_PAYROLL_MANAGE = "accounting.payroll_manage",
   // Student Metadata & Lifecycle Management
   STUDENT_REASSIGN_TEACHER = "student.reassign_teacher",
   STUDENT_MANAGE_STATUS = "student.manage_status",

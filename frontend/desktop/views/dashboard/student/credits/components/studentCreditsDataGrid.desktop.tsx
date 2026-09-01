@@ -69,20 +69,28 @@ export function StudentCreditsDataGrid({
         renderCell: ({ row }) => {
           const positive = row.changeAmount >= 0;
           const sign = positive ? "+" : "-";
-          // Hours-based rows show "±15.00 h"; legacy class-credit rows keep integers.
-          const amountLabel = row.isHours
-            ? `${Math.abs(row.changeAmount).toFixed(2)} h`
-            : `${Math.abs(row.changeAmount)}`;
+          // Hours-based rows show "±15.00 h" with a de-emphasized unit;
+          // legacy class-credit rows keep plain integers (visually distinct).
           return (
             <Typography
               variant="bodyMd"
               sx={theme => ({
                 fontWeight: 700,
+                whiteSpace: "nowrap",
                 color: positive ? theme.palette.success.main : theme.palette.error.main,
               })}
             >
               {sign}
-              {amountLabel}
+              {row.isHours ? (
+                <>
+                  {Math.abs(row.changeAmount).toFixed(2)}
+                  <Box component="span" sx={theme => ({ fontSize: "0.75em", color: theme.palette.onSurfaceVariant })}>
+                    {" h"}
+                  </Box>
+                </>
+              ) : (
+                Math.abs(row.changeAmount)
+              )}
             </Typography>
           );
         },
@@ -93,7 +101,12 @@ export function StudentCreditsDataGrid({
         flex: 1.2,
         minWidth: 160,
         renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+          <Typography
+            variant="bodyMd"
+            noWrap
+            title={row.notes ?? ""}
+            sx={theme => ({ color: theme.palette.onSurfaceVariant })}
+          >
             {row.notes ?? "—"}
           </Typography>
         ),

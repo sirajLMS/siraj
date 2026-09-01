@@ -2,6 +2,9 @@
 "use client";
 
 import { useMemo } from "react";
+import { type UseFormReturn, useForm } from "react-hook-form";
+import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
+import { availabilitySearchResolverFactory } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type {
   AvailabilityEntry,
   AvailabilitySearchFormData,
@@ -20,13 +23,17 @@ export interface TeacherAvailabilityViewModel {
   readonly availability: WeeklyAvailability;
   readonly insights: TeacherAvailabilityInsights;
   readonly defaultFilters: AvailabilitySearchFormData;
+  readonly formMethods: UseFormReturn<AvailabilitySearchFormData>;
   readonly loading?: boolean;
   readonly onExportPdf?: () => void;
   readonly onSearch?: (formData: AvailabilitySearchFormData) => void;
   readonly onBlockClick?: (entry: AvailabilityEntry) => void;
 }
 
-export type UseTeacherAvailabilityViewModelProps = Omit<TeacherAvailabilityViewModel, "labelsBySection">;
+export type UseTeacherAvailabilityViewModelProps = Omit<
+  TeacherAvailabilityViewModel,
+  "labelsBySection" | "formMethods"
+>;
 
 export interface TeacherAvailabilityCoordinatorLabels {
   readonly shell: TeacherAvailabilityShellLabels;
@@ -47,6 +54,14 @@ export function useTeacherAvailabilityViewModel(
   const { availability, insights, defaultFilters, loading, onExportPdf, onSearch, onBlockClick } = props;
 
   const t = useAppTranslation(Translation.Dashboard.TeacherAvailability);
+
+  const storeFilters = useTeacherAvailabilityStore(state => state.filters);
+  const storeHasDraft = storeFilters.fromTime !== null || storeFilters.toTime !== null || storeFilters.gender !== null;
+
+  const formMethods = useForm<AvailabilitySearchFormData>({
+    resolver: availabilitySearchResolverFactory({ invalidGender: t.validation.invalidGender }),
+    defaultValues: storeHasDraft ? storeFilters : defaultFilters,
+  });
 
   const tableLabels = useMemo<WeeklyAvailabilityGridLabels>(
     () => ({
@@ -80,6 +95,7 @@ export function useTeacherAvailabilityViewModel(
     availability,
     insights,
     defaultFilters,
+    formMethods,
     loading,
     onExportPdf,
     onSearch,

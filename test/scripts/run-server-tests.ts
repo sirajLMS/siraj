@@ -190,6 +190,7 @@ function spawnTestServer(port: number, logStream: NodeJS.WritableStream): ChildP
     cwd: process.cwd(),
     env: serverEnv,
     stdio: ["ignore", "pipe", "pipe"],
+    detached: true,
   });
 
   proc.stdout?.pipe(logStream, { end: false });
@@ -621,15 +622,22 @@ async function main(): Promise<void> {
     } catch {
       // ignore
     }
-    try {
-      serverProc.kill("SIGKILL");
-    } catch {
-      // ignore
+    if (serverProc.pid) {
+      try {
+        process.kill(-serverProc.pid, "SIGKILL");
+      } catch {
+        try {
+          serverProc.kill("SIGKILL");
+        } catch {
+          // ignore
+        }
+      }
     }
     logStream.end();
     killListenersOnPort(port);
   };
 
+  process.on("exit", cleanup);
   process.on("SIGINT", () => {
     cleanup();
     process.exit(1);

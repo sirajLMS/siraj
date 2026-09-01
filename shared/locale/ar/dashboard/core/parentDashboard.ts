@@ -28,12 +28,12 @@ export const dashboardCoreParentDashboardAr: ParentDashboardLabels = {
     duration: minutes => `المدة: ${minutes} دقيقة`,
     teacherLabel: name => `المعلم: ${name}`,
     joinVideo: "الانضمام للجلسة المرئية",
-    frozen: "مجمّد",
+    frozen: "مجمّدة",
     contactAdmin: "تواصل مع المشرف (تجميد)",
     noEntries: "لا توجد حصص مجدولة لليوم",
   },
   bookingStatus: {
-    confirmed: "مؤكد",
+    confirmed: "مؤكدة",
     rescheduled: "معاد جدولته",
   },
   liveClassStatus: {

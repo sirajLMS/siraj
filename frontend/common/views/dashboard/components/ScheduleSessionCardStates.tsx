@@ -60,6 +60,13 @@ interface ScheduleSessionEmptyStateProps {
   readonly iconColorKey?: "primary" | "primaryContainer";
 }
 
+/**
+ * ntentionally NOT migrated to
+ * `MobileEmptyState` — this empty state doubles as a stable-height card placeholder
+ * (`minHeight: 220`) with a colored icon circle, and `MobileEmptyState` has no built-in
+ * icon circle or `iconColorKey` equivalent, so adoption would force callers to rebuild
+ * the circle inline or drop both behaviors.
+ */
 export function ScheduleSessionEmptyState({
   message,
   icon: Icon,

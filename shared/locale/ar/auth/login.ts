@@ -10,7 +10,7 @@ export const authLoginAr: AuthLoginLabels = {
   forgotPassword: "نسيت كلمة المرور؟",
   signIn: "تسجيل الدخول",
   noAccount: "ليس لديك حساب؟",
-  register: "سجل مدرستك",
+  register: "سجّل مدرستك",
   emailRequired: "البريد الإلكتروني مطلوب",
   emailInvalid: "يرجى إدخال بريد إلكتروني صالح",
   passwordRequired: "كلمة المرور مطلوبة",
@@ -37,9 +37,9 @@ export const authLoginAr: AuthLoginLabels = {
   strengthWeak: "ضعيفة",
   strengthFair: "مقبولة",
   strengthStrong: "قوية",
-  capsLockOn: "مفتاح الأحرف الكبيرة مفعل",
+  capsLockOn: "مفتاح الأحرف الكبيرة مفعّل",
   forgotPasswordComingSoonTitle: "إعادة تعيين كلمة المرور — قريباً",
   forgotPasswordComingSoonBody:
-    "خدمة إعادة تعيين كلمة المرور الذاتية غير متاحة بعد. يرجى الاتصال بمسؤول النظام لإعادة تعيين كلمة المرور الخاصة بك.",
+    "خدمة إعادة تعيين كلمة المرور الذاتية غير متاحة بعد. يرجى التواصل مع مدير النظام لإعادة تعيين كلمة المرور الخاصة بك.",
   close: "إغلاق",
 };

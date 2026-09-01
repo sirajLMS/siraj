@@ -2,6 +2,7 @@ import { dashboardBillingCurrencyHedgesEn as currencyHedges } from "@/shared/loc
 import { dashboardBillingExchangeRatesEn as exchangeRates } from "@/shared/locale/en/dashboard/billing/exchangeRates";
 import { dashboardBillingManualEn as manual } from "@/shared/locale/en/dashboard/billing/manual";
 import { dashboardBillingPaymentEn as payment } from "@/shared/locale/en/dashboard/billing/payment";
+import { dashboardBillingPaymentsLedgerEn as paymentsLedger } from "@/shared/locale/en/dashboard/billing/paymentsLedger";
 import { dashboardBillingSupportedCurrenciesEn as supportedCurrencies } from "@/shared/locale/en/dashboard/billing/supportedCurrencies";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 
@@ -208,4 +209,5 @@ export const dashboardBillingEn: BillingLabels = {
     hedges: "Currency Hedges",
     manual: "Manual Invoice",
   },
+  paymentsLedger,
 };

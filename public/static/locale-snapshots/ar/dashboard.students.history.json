@@ -1,31 +1,31 @@
 {
   "breadcrumbs": {
     "archive": "أرشيف الطلاب",
-    "history": "تاريخ الحصص"
+    "history": "سجل الطالب"
   },
   "common": {
     "student": "طالب"
   },
   "pageTitle": {
-    "__fn": "(name) => `\\u062A\\u0627\\u0631\\u064A\\u062E \\u062D\\u0635\\u0635 ${name}`"
+    "__fn": "(name) => `\\u0633\\u062C\\u0644 ${name}`"
   },
   "pageSubtitle": {
-    "__fn": "(month) => month"
+    "__fn": "(month) => `\\u062D\\u0635\\u0635 \\u0634\\u0647\\u0631 ${month}`"
   },
   "exportPdf": "تصدير PDF",
   "changeMonth": "تغيير الشهر",
   "metrics": {
     "totalClasses": {
-      "__fn": "(_count) => \"\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A \\u0627\\u0644\\u062D\\u0635\\u0635\""
+      "__fn": "(count) => `\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A \\u0627\\u0644\\u062D\\u0635\\u0635: ${count}`"
     },
     "attendanceRate": {
-      "__fn": "(_rate) => \"\\u0645\\u0639\\u062F\\u0644 \\u0627\\u0644\\u062D\\u0636\\u0648\\u0631\""
+      "__fn": "(rate) => `\\u0645\\u0639\\u062F\\u0644 \\u0627\\u0644\\u062D\\u0636\\u0648\\u0631: ${rate}%`"
     },
     "hoursStudied": {
-      "__fn": "(_hours) => \"\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u062F\\u0631\\u0627\\u0633\\u0629\""
+      "__fn": "(hours) => `\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u062F\\u0631\\u0627\\u0633\\u0629: ${hours}`"
     },
     "performance": {
-      "__fn": "(_score) => \"\\u0627\\u0644\\u0623\\u062F\\u0627\\u0621\""
+      "__fn": "(score) => `\\u0627\\u0644\\u0623\\u062F\\u0627\\u0621: ${score}%`"
     }
   },
   "calendar": {
@@ -52,11 +52,11 @@
       "__fn": "(name) => `\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645: ${name}`"
     },
     "timeSlot": "فترة الحصة",
-    "roomNo": "رقم الغرفة",
-    "contentNotes": "محتوى وملاحظات الحصة",
+    "roomNo": "الغرفة",
+    "contentNotes": "المحتوى والملاحظات",
     "viewAssignments": "عرض الواجبات",
-    "downloadLogs": "تنزيل السجلات",
-    "joinSession": "الانضمام للحصة",
+    "downloadLogs": "تنزيل سجلات الحصة",
+    "joinSession": "الانضمام إلى الحصة",
     "status": {
       "present": "حاضر",
       "absent": "غائب",

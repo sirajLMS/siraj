@@ -34,7 +34,7 @@ export function DesktopPaginationControls(props: Readonly<DesktopPaginationContr
   return <PaginationControlsScaffold {...props} {...DESKTOP_SLOT_PROPS} />;
 }
 
-export function DesktopGridPagination() {
+export function DesktopGridPagination({ hideRangeLabel = false }: Readonly<{ readonly hideRangeLabel?: boolean }>) {
   const apiRef = useGridApiContext();
   const page = useGridSelector(apiRef, gridPageSelector);
   const pageCount = useGridSelector(apiRef, gridPageCountSelector);
@@ -44,6 +44,7 @@ export function DesktopGridPagination() {
   return (
     <DesktopPaginationControls
       embedded
+      showRangeLabel={!hideRangeLabel}
       page={page}
       pageCount={pageCount}
       rowCount={rowCount}

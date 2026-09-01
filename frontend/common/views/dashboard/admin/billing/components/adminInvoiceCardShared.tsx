@@ -8,6 +8,7 @@ import type {
   AdminInvoiceCardProps,
   AdminInvoiceCardSlotProps,
 } from "@/frontend/common/views/dashboard/admin/billing/components/types/adminInvoiceCard.types";
+import { formatInvoiceDisplayId } from "@/frontend/common/views/dashboard/billing/utils/formatInvoiceDisplayId";
 import {
   isDeletableInvoiceStatus,
   isPayableUnpaidStatus,
@@ -46,7 +47,7 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
     actionsEnabled && shouldShowViewRejection(row.status, row.hasRejectedSubmission) && onViewPaymentDetails;
   const showDelete = canDelete && !billingActionsDisabled && onDeleteInvoice && isDeletableInvoiceStatus(row.status);
   const actionLabel = row.status === "OVERDUE" ? labels.adminTable.markAsPaid : labels.adminTable.quickPay;
-  const invoiceNumber = row.id.replace("inv-", "INV-").toUpperCase();
+  const invoiceNumber = formatInvoiceDisplayId(row.id);
 
   const fullActionButtonSx = { mt: 1.5, textTransform: "uppercase", fontWeight: 700 } as const;
 

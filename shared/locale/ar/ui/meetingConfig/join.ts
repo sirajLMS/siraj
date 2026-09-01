@@ -1,5 +1,5 @@
 export const uiMeetingConfigJoinAr = {
-  joinMeeting: "انضم للاجتماع",
+  joinMeeting: "انضم إلى الاجتماع",
   joinUnavailable: "رابط الاجتماع غير متوفر",
   openInNewTab: "يفتح في علامة تبويب جديدة",
   emptyTeacher: "أعدّ رابط الاجتماع من إعدادات الملف الشخصي لتفعيل الانضمام.",

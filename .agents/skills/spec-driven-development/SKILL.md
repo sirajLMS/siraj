@@ -276,7 +276,7 @@ Every implementation task (X.Y) in `trackable-tasks.md` must follow the 5-stage 
     • Tier 3: Monkey & chaos cases (randomized fuzz payloads, concurrency races via Promise.allSettled)
     • Tier 4: Security & abuse tests (payload injection, invalid roles, error handling)
     • Layer constraints: DB tests wrapped in `runInRollback` + `tx`; Service tests mock all external adapters
-    • Cross-actor journey tests (`test/workflows/`): real services + real DB, committed fixtures + tracked `afterAll` cleanup, NO `runInRollback`; permission checks resolve honestly; run via `bun run test:workflows` — see `docs/testing/workflow-journey-tests.md` and `test/workflows/AGENTS.md`
+    • Cross-actor journey tests (`test/workflows/`): real services + real DB, committed fixtures + tracked `afterAll` cleanup, NO `runInRollback`; permission checks resolve honestly; run via `bun run test:workflows`; each journey ships with a Mermaid diagram in `test/workflows/<domain>/DIAGRAMS.md` (create/update in the same change, validate via `bun run validate:mermaid`) — see `docs/testing/workflow-journey-tests.md` and `test/workflows/AGENTS.md`
   - [ ] X.Y.SEC **Security & Tenancy Audit** ([.agents/skills/idor-testing/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/idor-testing/SKILL.md) & [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md)):
     • BOLA / IDOR Defense: Assert caller ownership (`ctx.user.id`), verify tenant isolation
     • BOPLA Defense: Strict DTO mapping; ensure no `{ ...input }` spread into DB updates
@@ -574,6 +574,21 @@ AGENTS.md and instructions files MUST NOT contain:
 - Duplicated content from other AGENTS.md files or instructions files
 - Command references (those live in root AGENTS.md "Essential Commands" only)
 - Generic workflow documentation (e.g., quality-gate lifecycle, SonarQube issue management)
+
+### The Feature-Name Litmus Test (MANDATORY before writing any rule)
+
+Before adding ANY bullet to an AGENTS.md, instructions, or skill file, apply this test:
+
+> **If a developer who never works on this feature would find the bullet meaningless, it does NOT belong in the rule file — it belongs in the canonical `docs/<domain>/<topic>.md` only.**
+
+Concrete violations to never repeat:
+- **Route lists & navigation placement** for the feature (e.g. "`/accounting/payments`, sidebar group `grp_accounting`") — feature UX notes, belong in the doc.
+- **Feature permission strings** (e.g. `ACCOUNTING_PAYMENTS_VIEW`) — feature access matrix, belongs in the doc.
+- **Feature file inventories** (e.g. "object types in `accounting.pothos.ts`, 5 queries + 6 mutations in `accounting.documents.ts`") — the doc owns file maps, not rule files.
+- **Feature type/entity names in rule bullets** (e.g. `CreditHourTransactionSubmitInput`, `PackagePlanRepository`) — generalize the rule ("versioned updates MUST self-increment the `version` column") or drop it; the doc names the reference implementation.
+- **Feature i18n namespace lists** — doc-only content.
+
+Rule files get ONLY the generic invariant extracted from the feature's experience, plus at most a one-line pointer to the canonical doc. The doc — never the rule file — names the feature's routes, permissions, files, and entities.
 
 When propagating learnings from a plan:
 - Plan details and task outcomes → `.ai/plans/<feature-name>/outcome/`

@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  CheckCircleOutlined as CheckIcon,
-  ErrorOutlined as ErrorIcon,
-  TuneOutlined as LifecycleIcon,
-  SettingsOutlined as SettingsIcon,
-} from "@mui/icons-material";
+import { TuneOutlined as LifecycleIcon, SettingsOutlined as SettingsIcon } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
@@ -13,17 +8,17 @@ import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
-import {
-  buildDirectoryEmailColumn,
-  buildDirectoryIndexColumn,
-  buildDirectoryNameColumn,
-} from "@/frontend/common/views/dashboard/admin/parents/__shared__/directoryDataGridShared";
 import type {
   ParentDirectoryRow,
   ParentsDataGridLabels,
 } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
+import {
+  buildDirectoryEmailColumn,
+  buildDirectoryIndexColumn,
+  buildDirectoryNameColumn,
+} from "@/frontend/desktop/views/dashboard/admin/parents/home/components/directoryDataGridShared";
 import { Link } from "@/shared/i18n";
 
 export type { ParentsDataGridLabels };
@@ -109,23 +104,11 @@ export function ParentsDataGridDesktop({
         renderCell: ({ row }) => {
           const hasUnpaid = row.unpaidInvoices > 0;
           return (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%" }}>
-              {hasUnpaid ? (
-                <>
-                  <ErrorIcon sx={theme => ({ color: theme.palette.error.main, fontSize: 18 })} />
-                  <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main, fontWeight: 700 })}>
-                    Yes ({row.unpaidInvoices})
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <CheckIcon sx={theme => ({ color: theme.palette.success.main, fontSize: 18 })} />
-                  <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.success.main })}>
-                    No
-                  </Typography>
-                </>
-              )}
-            </Box>
+            <DesktopStatusBadge
+              category="invoice"
+              status={hasUnpaid ? "OVERDUE" : "PAID"}
+              label={hasUnpaid ? labels.unpaidCount(row.unpaidInvoices) : labels.invoicesCleared}
+            />
           );
         },
       },

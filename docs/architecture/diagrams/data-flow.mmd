@@ -1,0 +1,19 @@
+%% Siraj — the two data paths (server-side vs client-side)
+flowchart LR
+    subgraph ServerPath["Server-side path — initial page data"]
+        P["page.tsx<br/>Server Component"] --> W["withPageAuth<br/>permission guard"]
+        W --> S1["Service"]
+        S1 --> RP1["Repository"]
+        RP1 --> D1[("PostgreSQL")]
+    end
+
+    subgraph ClientPath["Client-side path — interactive data"]
+        V["ViewModel hook<br/>(Zustand store + handlers)"] --> A["Apollo useQuery<br/>(TypedDocumentNode)"]
+        A --> G["POST /api/graphql"]
+        G --> PO["Pothos resolver<br/>ScopeAuth: loggedIn / permission / superAdmin"]
+        PO --> S2["Service"]
+        S2 --> RP2["Repository"]
+        RP2 --> D2[("PostgreSQL")]
+    end
+
+    D1 -.same database.- D2

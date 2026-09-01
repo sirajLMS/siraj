@@ -1,8 +1,8 @@
 import type { StudentPortalDashboardLabels } from "@/shared/locale/types/dashboard/studentPortal/studentDashboard";
 
 export const dashboardStudentPortalDashboardAr: StudentPortalDashboardLabels = {
-  pageTitle: "لوحتي",
-  welcomeMessage: name => `أهلًا، ${name}`,
+  pageTitle: "لوحة التحكم",
+  welcomeMessage: name => `مرحبًا، ${name}`,
   nextClass: "الحصة القادمة",
   joinNow: "انضم",
   noUpcomingClasses: "لا توجد حصص قادمة مجدولة",

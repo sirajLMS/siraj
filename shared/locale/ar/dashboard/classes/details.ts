@@ -42,7 +42,7 @@ export const dashboardClassDetailsAr: ClassDetailsLabels = {
     noData: "لا تتوفر بيانات أداء لهذه الجلسة.",
   },
   heatmap: {
-    activityHeatmap: "خريطة النشاط الحراري",
+    activityHeatmap: "خريطة النشاط الحرارية",
     studentInput: "مدخلات الطالب",
     teacherResponse: "استجابة المعلم",
     noData: "لا تتوفر بيانات نشاط لهذه الجلسة.",
@@ -89,7 +89,7 @@ export const dashboardClassDetailsAr: ClassDetailsLabels = {
     cancel: "إلغاء",
     resetDialogTitle: "إعادة تعيين الجلسة؟",
     resetConfirm: "إعادة تعيين",
-    joinZoom: "انضم إلى اجتماع زووم",
+    joinZoom: "الانضمام إلى اجتماع Zoom",
   },
   deleteConfirm: {
     title: "حذف الحصة",
@@ -128,7 +128,7 @@ export const dashboardClassDetailsAr: ClassDetailsLabels = {
   editInfo: "تعديل المعلومات",
   generateLog: "إنشاء سجل",
   reschedule: "تعديل موعد الحصة",
-  invalidClassId: "معرف الحصة غير صالح",
+  invalidClassId: "معرّف الحصة غير صالح",
 };
 
 export { dashboardClassDetailsAr as details };

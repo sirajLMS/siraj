@@ -116,6 +116,7 @@ import { UiMeetingConfig } from "@/shared/locale/namespaces/ui/meetingConfig.nam
 import { UiMeetingConfigRecurringSchedule } from "@/shared/locale/namespaces/ui/meetingConfigRecurringSchedule.namespace";
 import { UiPaymentMethod } from "@/shared/locale/namespaces/ui/paymentMethod.namespace";
 import { UiPhoneInput } from "@/shared/locale/namespaces/ui/phoneInput.namespace";
+import { UiRichText } from "@/shared/locale/namespaces/ui/richText.namespace";
 import { UiTagInput } from "@/shared/locale/namespaces/ui/tagInput.namespace";
 import { UiTimezoneSelect } from "@/shared/locale/namespaces/ui/timezoneSelect.namespace";
 import { UiUserSelect } from "@/shared/locale/namespaces/ui/userSelect.namespace";
@@ -246,6 +247,7 @@ export const Translation = {
     LanguageSelector: UiLanguageSelector,
     LocalizedString: UiLocalizedString,
     PhoneInput: UiPhoneInput,
+    RichText: UiRichText,
     TagInput: UiTagInput,
     TimezoneSelect: UiTimezoneSelect,
     MeetingConfig: UiMeetingConfig,

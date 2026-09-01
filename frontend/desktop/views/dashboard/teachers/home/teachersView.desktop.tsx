@@ -1,7 +1,6 @@
 "use client";
 
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
-import { Box } from "@mui/material";
 import type {
   TeacherDirectoryQuery_teacherDirectory_metrics as TeacherDirectoryMetrics,
   TeacherDirectoryQuery_teacherDirectory_rows as TeacherDirectoryRow,
@@ -66,9 +65,7 @@ export function TeachersDesktopView({
         }
       />
 
-      <Box sx={{ mb: 4 }}>
-        <TeacherMetricsRow metrics={metrics} labels={labels.metrics} />
-      </Box>
+      <TeacherMetricsRow metrics={metrics} labels={labels.metrics} />
 
       <DesktopSectionPanel contentPadding={false} title={t.table.showingOf(rows.length, totalTeachers)}>
         <TeacherDataGrid

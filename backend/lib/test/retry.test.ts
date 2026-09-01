@@ -1,9 +1,26 @@
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { DatabaseUnavailableError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { isTransientError, retryTransient } from "@/backend/lib/retry";
 import { makeTransientError } from "@/backend/lib/test/helpers";
 
 describe("isTransientError", () => {
+  it("treats DatabaseUnavailableError as transient so retryTransient keeps retrying", () => {
+    expect(isTransientError(new DatabaseUnavailableError())).toBe(true);
+  });
+
+  it("classifies driver-wrapper errors by their nested transient cause", () => {
+    const wrapped = new Error("Failed query: select 1", { cause: makeTransientError("ECONNREFUSED") });
+    expect(isTransientError(wrapped)).toBe(true);
+  });
+
+  it("returns false for wrapper errors with a non-transient cause", () => {
+    const wrapped = new Error("Failed query: insert ...", {
+      cause: new Error("duplicate key value violates unique constraint"),
+    });
+    expect(isTransientError(wrapped)).toBe(false);
+  });
+
   it("returns true for ECONNRESET", () => {
     expect(isTransientError(makeTransientError("ECONNRESET"))).toBe(true);
   });

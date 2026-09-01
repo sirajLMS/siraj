@@ -244,6 +244,60 @@ describe("TeacherDueRepository.markAsPaid", () => {
       expect(pendingAfter).toHaveLength(pendingBefore.length);
     });
   });
+
+  test("keeps settled dues linked to their original payment on a double submit", async () => {
+    await runInRollback(async tx => {
+      const { user: approver } = await setupStudent(tx, {}, {}, {});
+      const { teacher } = await setupTeacher(tx);
+      const entities = await setupTestEntities(tx, "TDDoublePay");
+      const inst = requireInstance(entities.instance);
+
+      const due = await createTestTeacherDue(tx, teacher.id, inst.id, entities.student.id, approver.id);
+      const firstPaymentId = await insertTeacherPayment(tx, teacher.id, "25.00");
+      const secondPaymentId = await insertTeacherPayment(tx, teacher.id, "25.00");
+
+      const first = await TeacherDueRepository.markAsPaid([due.id], firstPaymentId, tx);
+      expect(first).toHaveLength(1);
+
+      const second = await TeacherDueRepository.markAsPaid([due.id], secondPaymentId, tx);
+
+      // The settled due is no longer PENDING: the re-submit settles nothing
+      // and the first payment keeps its exclusive link.
+      expect(second).toHaveLength(0);
+      const [reread] = await tx.select().from(teacherDues).where(eq(teacherDues.id, due.id));
+      expect(reread?.status).toBe(TeacherDueStatus.PAID);
+      expect(reread?.teacherPaymentId).toBe(firstPaymentId);
+    });
+  });
+
+  test("settles only the pending dues of a mixed batch", async () => {
+    await runInRollback(async tx => {
+      const { user: approver } = await setupStudent(tx, {}, {}, {});
+      const { teacher } = await setupTeacher(tx);
+      const entitiesA = await setupTestEntities(tx, "TDMixedA");
+      const instA = requireInstance(entitiesA.instance);
+      const entitiesB = await setupTestEntities(tx, "TDMixedB");
+      const instB = requireInstance(entitiesB.instance);
+
+      const settledPaymentId = await insertTeacherPayment(tx, teacher.id, "10.00");
+      const settledDue = await createTestTeacherDue(tx, teacher.id, instA.id, entitiesA.student.id, approver.id, {
+        status: TeacherDueStatus.PAID,
+        teacherPaymentId: settledPaymentId,
+      });
+      const pendingDue = await createTestTeacherDue(tx, teacher.id, instB.id, entitiesB.student.id, approver.id);
+
+      const paymentId = await insertTeacherPayment(tx, teacher.id, "25.00");
+      const updated = await TeacherDueRepository.markAsPaid([settledDue.id, pendingDue.id], paymentId, tx);
+
+      expect(updated).toHaveLength(1);
+      expect(updated[0]?.id).toBe(pendingDue.id);
+      expect(updated[0]?.teacherPaymentId).toBe(paymentId);
+
+      const [rereadSettled] = await tx.select().from(teacherDues).where(eq(teacherDues.id, settledDue.id));
+      expect(rereadSettled?.status).toBe(TeacherDueStatus.PAID);
+      expect(rereadSettled?.teacherPaymentId).toBe(settledPaymentId);
+    });
+  });
 });
 
 describe("TeacherDueRepository.getPendingDues", () => {

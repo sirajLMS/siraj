@@ -211,12 +211,16 @@ async function chargeOperationRateLimitUnits(
   const results = await Promise.all(
     Array.from({ length: operationCount }, () => checkRateLimit(identifier, graphqlRateLimiter))
   );
-  return results.reduce((strictest, current) => ({
-    success: strictest.success && current.success,
-    limit: current.limit,
-    remaining: Math.min(strictest.remaining, current.remaining),
-    reset: Math.max(strictest.reset, current.reset),
-  }));
+  const initial = results[0] ?? { success: true, limit: 0, remaining: 0, reset: 0 };
+  return results.reduce(
+    (strictest, current) => ({
+      success: strictest.success && current.success,
+      limit: current.limit,
+      remaining: Math.min(strictest.remaining, current.remaining),
+      reset: Math.max(strictest.reset, current.reset),
+    }),
+    initial
+  );
 }
 
 /**

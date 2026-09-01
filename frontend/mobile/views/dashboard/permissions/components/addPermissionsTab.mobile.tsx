@@ -3,6 +3,7 @@
 import { Box, Checkbox, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { PermissionFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
+import { PermissionKeyChipShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionKeyChipShared";
 import type { AddPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
@@ -34,21 +35,7 @@ function AddPermissionCardMobile({ permission, checked, onToggle }: Readonly<Per
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
         <Checkbox size="small" checked={checked} onChange={e => onToggle(id, e.target.checked)} sx={{ pt: 0.5 }} />
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1, minWidth: 0 }}>
-          <Box
-            sx={theme => ({
-              fontFamily: "var(--font-jetbrains-mono), monospace",
-              typography: "labelMd",
-              backgroundColor: theme.palette.surfaceVariant,
-              color: theme.palette.onSurfaceVariant,
-              px: 1,
-              py: 0.5,
-              borderRadius: 1,
-              display: "inline-block",
-              alignSelf: "flex-start",
-            })}
-          >
-            {permission.key}
-          </Box>
+          <PermissionKeyChipShared label={permission.key ?? ""} sx={{ alignSelf: "flex-start" }} />
           {permission.category && (
             <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {permission.category}

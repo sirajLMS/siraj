@@ -1,8 +1,8 @@
 import type { TeacherStudentsLabels } from "@/shared/locale/types/dashboard/teachers";
 
 export const dashboardTeacherStudentsAr: TeacherStudentsLabels = {
-  pageTitle: "طلابك",
-  pageSubtitle: "الطلاب المعينون حالياً لجدولك التدريسي.",
+  pageTitle: "طلابي",
+  pageSubtitle: "عرض وإدارة طلابك",
   noStudents: "لا يوجد طلاب معينون لك بعد.",
   columns: {
     name: "الطالب",
@@ -14,6 +14,6 @@ export const dashboardTeacherStudentsAr: TeacherStudentsLabels = {
   quotaLabel: (remaining, total) => `الحصص المتبقية: ${remaining} / ${total}`,
   hoursLabel: hours => `ساعات أسبوعياً: ${hours}`,
   errors: {
-    failedToLoad: "فشل تحميل طلابك.",
+    failedToLoad: "فشل تحميل بيانات الطلاب.",
   },
 };

@@ -278,6 +278,7 @@ export type UpcomingClassRow = {
 
 export type TeacherAssignedClassRow = {
   id: string;
+  studentId: string;
   studentName: string;
   scheduledStartAt: Date;
   scheduledEndAt: Date;

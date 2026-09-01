@@ -1,5 +1,5 @@
 {
-  "dialogTitle": "إضافة حصة",
+  "dialogTitle": "إنشاء حصة متكررة",
   "fields": {
     "student": "الطالب",
     "studentPlaceholder": "ابحث واختر طالباً...",
@@ -10,16 +10,16 @@
     "time": "الوقت",
     "duration": "المدة",
     "durationMinutes": {
-      "__fn": "(minutes) => `${minutes} \\u062F\\u0642\\u0627\\u0626\\u0642`"
+      "__fn": "(minutes) => `${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
     },
-    "days": "الأيام المتكررة",
+    "days": "الأيام",
     "timezone": "المنطقة الزمنية",
     "classType": "نوع الحصة"
   },
   "classTypes": {
-    "REGULAR": "عادي",
-    "TRIAL": "تجريبي",
-    "ADVANCE": "متقدم"
+    "REGULAR": "عادية",
+    "TRIAL": "تجريبية",
+    "ADVANCE": "مسبقة"
   },
   "days": {
     "monday": "الاثنين",
@@ -34,12 +34,12 @@
     "addOverride": "إضافة وقت مخصص",
     "removeOverride": "إزالة التخصيص",
     "label": {
-      "__fn": "(_day) => \"\\u0648\\u0642\\u062A \\u0645\\u062E\\u0635\\u0635\""
+      "__fn": "(day) => `\\u0627\\u0644\\u0648\\u0642\\u062A \\u0627\\u0644\\u0645\\u062E\\u0635\\u0635 \\u0644\\u064A\\u0648\\u0645 ${day}`"
     }
   },
   "scheduling": {
     "mode": "وضع الجدولة",
-    "quotaId": "معرف الحصة",
+    "quotaId": "معرّف الحصة",
     "quotaSelect": "اختر الحصة",
     "quotaPlaceholder": "اختر حصة متاحة...",
     "noOpenQuotas": "لا توجد حصص متاحة — أنشئ حصة أولاً",
@@ -63,21 +63,21 @@
     }
   },
   "actions": {
-    "create": "إنشاء الحصة",
+    "create": "إنشاء",
     "cancel": "إلغاء",
-    "submitting": "جارٍ الإرسال..."
+    "submitting": "جارٍ الإنشاء..."
   },
   "success": {
-    "title": "تم إنشاء الحصة",
+    "title": "تم الإنشاء بنجاح",
     "description": {
       "__fn": "(count) => `\\u062A\\u0645 \\u0625\\u0646\\u0634\\u0627\\u0621 ${count} \\u062D\\u0635\\u0629 \\u0628\\u0646\\u062C\\u0627\\u062D \\u0644\\u0644\\u062C\\u062F\\u0648\\u0644 \\u0627\\u0644\\u0645\\u062A\\u0643\\u0631\\u0631.`"
     }
   },
   "errors": {
-    "noDaysSelected": "يرجى اختيار يوم واحد على الأقل للجدول المتكرر.",
-    "noStudentSelected": "يرجى اختيار طالب.",
-    "noSubjectSelected": "يرجى اختيار مادة.",
+    "noDaysSelected": "يجب اختيار يوم واحد على الأقل.",
+    "noStudentSelected": "يجب اختيار طالب.",
+    "noSubjectSelected": "يجب اختيار مادة.",
     "creationFailed": "فشل إنشاء الحصة المتكررة. يرجى المحاولة مرة أخرى.",
-    "durationMustBePositive": "يجب أن تكون المدة أكبر من 0"
+    "durationMustBePositive": "يجب أن تكون المدة أكبر من 0."
   }
 }

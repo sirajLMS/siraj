@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useMemo } from "react";
 import {
   ProfileAudience as GqlProfileAudience,
   ProfileScope as GqlProfileScope,
@@ -11,10 +11,12 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
+import { useProfileShellTabStore } from "@/frontend/common/stores/profileShellTabStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { useRefetchOnWindowFocus } from "@/frontend/common/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import { isStudentProfileAudience } from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";
+import { getVisibleProfileTabs, resolveProfileTab } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
 import type {
   ProfilePageClientLabels,
   ProfilePageClientProps,
@@ -195,6 +197,26 @@ function computeShowParentAccountActions(audience: ProfileAudience, scope: Profi
   return audience === ProfileAudience.PARENT && scope === ProfileScope.OTHER && mode === ProfileMode.VIEW;
 }
 
+function useProfileActiveTab(audience: ProfileAudience, scope: ProfileScope) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const storedTab = useProfileShellTabStore(state => state.activeTabByRoute[pathname]);
+  const setStoredTab = useProfileShellTabStore(state => state.setActiveTab);
+
+  const visibleTabs = getVisibleProfileTabs({ audience, scope, hasPermission });
+  const storedVisibleTab = storedTab && visibleTabs.some(tab => tab.id === storedTab) ? storedTab : undefined;
+  const currentTab = storedVisibleTab ?? resolveProfileTab(searchParams.get("tab"), visibleTabs) ?? "profile";
+  const setCurrentTab = useCallback(
+    (tab: string) => {
+      setStoredTab(pathname, tab);
+    },
+    [pathname, setStoredTab]
+  );
+
+  return { currentTab, setCurrentTab };
+}
+
 export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientProps>): ProfilePageClientViewModel {
   const { scope, mode, audience, targetUserId } = props;
   const isStudentAudience = isStudentProfileAudience(audience);
@@ -207,7 +229,7 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
 
   const searchParams = useSearchParams();
   const forceComplete = searchParams.get("forceComplete") === "1";
-  const [currentTab, setCurrentTab] = useState(() => searchParams.get("tab") ?? "profile");
+  const { currentTab, setCurrentTab } = useProfileActiveTab(audience, scope);
 
   const {
     data: unifiedProfileData,

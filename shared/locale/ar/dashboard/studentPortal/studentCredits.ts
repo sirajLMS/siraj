@@ -9,7 +9,7 @@ export const dashboardStudentPortalCreditsAr: StudentPortalCreditsLabels = {
   transactionHistory: "سجل المعاملات",
   dateColumn: "التاريخ",
   typeColumn: "النوع",
-  amountColumn: "الكمية",
+  amountColumn: "المبلغ",
   notesColumn: "ملاحظات",
   purchase: "شراء",
   deduction: "خصم",

@@ -1,6 +1,7 @@
 export * from "./classProfileLink";
 export * from "./countryDisplay";
 export * from "./currencyDisplay";
+export * from "./labeledField";
 export * from "./language";
 export * from "./localeEmoji";
 export * from "./localizedStringDisplay";

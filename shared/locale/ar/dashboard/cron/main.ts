@@ -3,7 +3,7 @@ import type { CronLabels } from "@/shared/locale/types/dashboard/cron";
 
 export const dashboardCronAr: CronLabels = {
   pageTitle: "إدارة المهام المجدولة",
-  pageSubtitle: "إدارة مهام كرون المجدولة ومراقبة تنفيذها.",
+  pageSubtitle: "إدارة المهام المجدولة (كرون) ومراقبة تنفيذها.",
   // Table headers
   colName: "الاسم",
   colExpression: "تعبير كرون",
@@ -12,7 +12,7 @@ export const dashboardCronAr: CronLabels = {
   colNextRun: "التشغيل التالي",
   colLastRun: "آخر تشغيل",
   colConcurrencyPolicy: "التزامن",
-  colActions: "إجراءات",
+  colActions: "الإجراءات",
   colTriggerSource: "مصدر التشغيل",
   colAttempt: "المحاولة",
   colDuration: "المدة",
@@ -86,7 +86,7 @@ export const dashboardCronAr: CronLabels = {
   queueBackendStub: "وهمي (تطوير)",
   bullmqRedis: "BullMQ (Redis)",
   // Additional run status
-  statusSkipped: "متخطى",
+  statusSkipped: "تم تخطيه",
   // Empty state
   emptyMessage: 'لا توجد جدولات كرون. انقر على "إنشاء جدولة" لإضافة واحدة.',
   // Manual trigger confirm dialog
@@ -113,17 +113,18 @@ export const dashboardCronAr: CronLabels = {
     scheduleNotActive: "الجدولة غير نشطة — قد تكون متوقفة مؤقتاً أو معطلة بالفعل",
     scheduleNotPaused: "الجدولة غير متوقفة مؤقتاً — لا يمكن استئناف جدولة غير متوقفة حالياً",
     concurrencyConflict: "هناك تشغيل قيد التنفيذ لهذه الجدولة بالفعل",
-    queueBackendNotAvailable: "خلفية قائمة الانتظار المكونة غير متاحة",
-    permissionDenied: "ليس لديك صلاحية لإدارة جدولة كرون",
+    queueBackendNotAvailable: "الواجهة الخلفية لقائمة الانتظار المكوَّنة غير متاحة",
+    permissionDenied: "ليس لديك صلاحية إدارة جدولات كرون",
     invalidTimezone: tz => `منطقة زمنية غير صالحة: ${tz}`,
     runNotFound: id => `التشغيل غير موجود: ${id}`,
     manualTriggerConflict: "هناك تشغيل قيد التنفيذ لهذه الجدولة بالفعل",
     dispatchSendFailed: id => `فشل إرسال تشغيل للجدولة "${id}" — تعذر الوصول إلى محول قائمة الانتظار`,
-    enqueueRetryFailed: id => `فشل إعادة محاولة التشغيل "${id}" — تعذر الوصول إلى محول قائمة الانتظار`,
+    enqueueRetryFailed: id =>
+      `فشلت إضافة إعادة محاولة التشغيل "${id}" إلى قائمة الانتظار — تعذر الوصول إلى محول قائمة الانتظار`,
     queueBackendUnknown: backend => `خلفية قائمة انتظار غير معروفة: ${backend}`,
     genericError: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
     // API route-level errors
-    missingScheduleId: "معامل scheduleId مفقود",
+    missingScheduleId: "معامل scheduleId مفقود في الاستعلام",
     invalidScheduleIdFormat: "صيغة scheduleId غير صالحة",
     tickerFailed: "فشل المؤقت",
     classRemindersFailed: "فشل تذكيرات الحصص",

@@ -14,3 +14,15 @@ export default meta;
 type Story = StoryObj<typeof LoadingState>;
 
 export const Default: Story = {};
+
+export const WithMessage: Story = {
+  args: { message: "Loading sessions..." },
+};
+
+export const Compact: Story = {
+  args: { size: 24, minHeight: 120 },
+};
+
+export const Embedded: Story = {
+  args: { embedded: true, size: 20, message: "Loading…" },
+};

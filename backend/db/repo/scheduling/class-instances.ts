@@ -1,5 +1,5 @@
-import { and, eq, gte, inArray, isNull, notInArray, sql } from "drizzle-orm";
-import { db, queryDb } from "@/backend/db";
+import { and, desc, eq, gte, inArray, isNull, lte, notInArray, or, type SQL, sql } from "drizzle-orm";
+import { caseInsensitiveLike, db, type QueryDbHandle, queryDb, withForUpdate } from "@/backend/db";
 import {
   type ClassInstanceUpsertManyOptions,
   runClassInstanceUpsertMany,
@@ -16,10 +16,12 @@ import {
 import { updateInstanceState } from "@/backend/db/repo/scheduling/state-changes";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
-import { OnDemandStatus } from "@/backend/enum";
+import { type CalculationStatus, OnDemandStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type * as Types from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
+import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 /**
@@ -472,4 +474,244 @@ async function tUpdateOndemandStatusBatch(
     )
     .returning({ id: classInstances.id });
   return updated.length;
+}
+// ---------------------------------------------------------------------------
+// Payroll calculation reads & writes
+// ---------------------------------------------------------------------------
+
+/**
+ * Payroll snapshot columns that may be written by a calculation or an
+ * operator override. Deliberately narrow: payroll writes can never touch
+ * scheduling, state-machine, or rate-snapshot columns through this method.
+ */
+export type PayrollCalculationPatch = Partial<
+  Pick<
+    Types.ClassInstanceSelectType,
+    | "calculationStatus"
+    | "calculatedDuration"
+    | "teacherPaidAmount"
+    | "teacherPaidCurrency"
+    | "isPartialPercentage"
+    | "payrollNote"
+    | "payrollCalculatedAt"
+    | "payrollCalculatedBy"
+  >
+>;
+
+/** Read options for single-instance lookups. */
+export interface GetClassInstanceOptions {
+  /**
+   * Locks the row with `SELECT ... FOR UPDATE`. Requires `tx` (the call
+   * throws otherwise): the lock is held until that transaction commits or
+   * rolls back, so a payroll write in the same transaction cannot race with
+   * a concurrent calculator or override.
+   */
+  forUpdate?: boolean;
+}
+
+/**
+ * Fetches a single class instance row by ID without hydration joins.
+ * Unlike `getClassInstanceById` this returns the bare row, which keeps the
+ * read cheap enough to sit on the payroll write path.
+ */
+export async function getById(
+  id: string,
+  tx?: DBTransaction,
+  opts?: GetClassInstanceOptions
+): Promise<Types.ClassInstanceSelectType | null> {
+  // Fail fast over a silent no-op: without a transaction the FOR UPDATE lock
+  // is released the moment the statement finishes, so the caller would think
+  // the row is locked while nothing is.
+  if (opts?.forUpdate && tx == null) {
+    throw new Error(
+      "getById with forUpdate requires a transaction: the row lock only exists inside the caller transaction"
+    );
+  }
+  const q = queryDb(tx);
+  const base = q.select().from(classInstances).where(eq(classInstances.id, id));
+  const [row] = await (opts?.forUpdate ? withForUpdate(base) : base).limit(1);
+  return row ?? null;
+}
+
+/** Optional guards for payroll snapshot updates. */
+export interface UpdatePayrollCalculationOptions {
+  /**
+   * Only fire the update while the row still carries this calculation
+   * status. A caller that read the row without holding its lock uses the
+   * precondition so a concurrent writer's committed transition (for
+   * example a forced override) is never stomped: the update then matches
+   * zero rows and this helper returns `null`, telling the caller to skip
+   * the follow-up write instead of overwriting the newer state.
+   */
+  expectedStatus?: CalculationStatus;
+}
+
+/**
+ * Applies a partial payroll-snapshot update to one class instance and returns
+ * the updated row. `null` means the update matched no row: either the
+ * instance does not exist, or — when `expectedStatus` is supplied — the
+ * row's calculation status no longer matches, i.e. a concurrent writer
+ * already transitioned it. Callers that locked the row first with
+ * `getById(id, tx, { forUpdate: true })` may omit the precondition; callers
+ * reading without the lock should always pass one.
+ */
+export async function updatePayrollCalculation(
+  tx: DBTransaction,
+  id: string,
+  patch: PayrollCalculationPatch,
+  options?: UpdatePayrollCalculationOptions
+): Promise<Types.ClassInstanceSelectType | null> {
+  const conditions: SQL[] = [eq(classInstances.id, id)];
+  if (options?.expectedStatus != null) {
+    conditions.push(eq(classInstances.calculationStatus, options.expectedStatus));
+  }
+  const [updated] = await tx
+    .update(classInstances)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(and(...conditions))
+    .returning();
+  return updated ?? null;
+}
+
+/** Start-of-day bound for an inclusive `YYYY-MM-DD` date filter. */
+function startOfUtcDay(isoDate: string): Date {
+  return new Date(`${isoDate}T00:00:00.000Z`);
+}
+
+/** End-of-day bound for an inclusive `YYYY-MM-DD` date filter. */
+function endOfUtcDay(isoDate: string): Date {
+  return new Date(`${isoDate}T23:59:59.999Z`);
+}
+
+/**
+ * Shared WHERE conditions for the payroll report. Timestamp bounds are bound
+ * as JS Dates so the same SQL runs on PostgreSQL (timestamptz) and SQLite
+ * (epoch-millis) without dialect-specific casts. Teacher names live on
+ * `users` (via `teachers.userId`); student names live on `students.name`.
+ */
+function buildPayrollReportConditions(filters: Types.PayrollReportFilters): (SQL | undefined)[] {
+  const conditions: (SQL | undefined)[] = [isNull(classInstances.deletedAt)];
+
+  if (filters.teacherId != null) {
+    conditions.push(eq(classInstances.teacherId, filters.teacherId));
+  }
+  if (filters.studentId != null) {
+    conditions.push(eq(classInstances.studentId, filters.studentId));
+  }
+  if (filters.dateFrom != null) {
+    conditions.push(gte(classInstances.scheduledStartAt, startOfUtcDay(filters.dateFrom)));
+  }
+  if (filters.dateTo != null) {
+    conditions.push(lte(classInstances.scheduledStartAt, endOfUtcDay(filters.dateTo)));
+  }
+  if (filters.calculationStatuses != null && filters.calculationStatuses.length > 0) {
+    conditions.push(inArray(classInstances.calculationStatus, [...filters.calculationStatuses]));
+  }
+  const search = filters.search?.trim();
+  if (search) {
+    const searchPattern = `%${escapeLikeWildcards(search)}%`;
+    conditions.push(
+      or(caseInsensitiveLike(students.name, searchPattern), caseInsensitiveLike(users.name, searchPattern))
+    );
+  }
+  return conditions;
+}
+
+/**
+ * Base builder for the payroll report read: a single joined query over
+ * `class_instances` + `teachers` → `users` (teacher name) + `students`
+ * (student name) + `class_subjects` (subject name). The absence-rule
+ * booleans (`isStudentAbsence`, `isTeacherAbsence`) mirror the calculator's
+ * branch conditions and are computed in the SELECT clause: student absence
+ * requires an absent outcome WITH join telemetry; a row with no join
+ * telemetry is a teacher absence whatever the outcome says.
+ */
+function payrollReportBaseQuery(q: QueryDbHandle | DBTransaction) {
+  return q
+    .select({
+      instanceId: classInstances.id,
+      scheduledStartAt: classInstances.scheduledStartAt,
+      scheduledEndAt: classInstances.scheduledEndAt,
+      actualStartAt: classInstances.actualStartAt,
+      actualEndAt: classInstances.actualEndAt,
+      calculatedDuration: classInstances.calculatedDuration,
+      teacherPaidAmount: classInstances.teacherPaidAmount,
+      teacherPaidCurrency: classInstances.teacherPaidCurrency,
+      calculationStatus: classInstances.calculationStatus,
+      isPartialPercentage: classInstances.isPartialPercentage,
+      payrollNote: classInstances.payrollNote,
+      teacherId: classInstances.teacherId,
+      teacherName: users.name,
+      studentId: classInstances.studentId,
+      studentName: students.name,
+      subjectId: classInstances.subjectId,
+      subjectName: classSubjects.name,
+      isStudentAbsence:
+        sql<boolean>`(${classInstances.outcome} = ${ClassOutcome.ABSENT} AND ${classInstances.actualStartAt} IS NOT NULL)`.mapWith(
+          Boolean
+        ),
+      isTeacherAbsence: sql<boolean>`(${classInstances.actualStartAt} IS NULL)`.mapWith(Boolean),
+    })
+    .from(classInstances)
+    .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))
+    .innerJoin(users, eq(teachers.userId, users.id))
+    .innerJoin(students, eq(classInstances.studentId, students.id))
+    .innerJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id));
+}
+
+/**
+ * Reads one page of the payroll report. `totalCount` is counted by a
+ * parallel query that shares the same joins and filters but no
+ * LIMIT/OFFSET, so it always reflects the full filtered set independently
+ * of the requested page.
+ */
+export async function findPayrollReportRows(
+  filters: Types.PayrollReportFilters,
+  pagination: { limit: number; offset: number },
+  tx?: DBTransaction
+): Promise<{ rows: Types.PayrollReportRow[]; totalCount: number }> {
+  const q = queryDb(tx);
+  const conditions = buildPayrollReportConditions(filters);
+
+  const [rows, [{ count: totalCount }]] = await Promise.all([
+    payrollReportBaseQuery(q)
+      .where(and(...conditions))
+      .orderBy(desc(classInstances.scheduledStartAt), classInstances.id)
+      .limit(pagination.limit)
+      .offset(pagination.offset),
+    q
+      .select({ count: sql<number>`count(*)`.mapWith(Number) })
+      .from(classInstances)
+      .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .innerJoin(students, eq(classInstances.studentId, students.id))
+      .innerJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+      .where(and(...conditions)),
+  ]);
+
+  return {
+    rows: rows.map(row => ({
+      instanceId: row.instanceId,
+      scheduledStartAt: row.scheduledStartAt.toISOString(),
+      scheduledEndAt: row.scheduledEndAt.toISOString(),
+      scheduledDurationMinutes: Math.round((row.scheduledEndAt.getTime() - row.scheduledStartAt.getTime()) / 60_000),
+      actualStartAt: row.actualStartAt?.toISOString() ?? null,
+      actualEndAt: row.actualEndAt?.toISOString() ?? null,
+      calculatedDuration: row.calculatedDuration,
+      teacherPaidAmount: row.teacherPaidAmount,
+      teacherPaidCurrency: row.teacherPaidCurrency,
+      calculationStatus: row.calculationStatus,
+      isPartialPercentage: row.isPartialPercentage,
+      payrollNote: row.payrollNote,
+      teacherId: row.teacherId,
+      teacherName: row.teacherName,
+      studentId: row.studentId,
+      studentName: row.studentName,
+      subjectId: row.subjectId,
+      subjectName: row.subjectName,
+      isStudentAbsence: row.isStudentAbsence,
+      isTeacherAbsence: row.isTeacherAbsence,
+    })),
+    totalCount,
+  };
 }

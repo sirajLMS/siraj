@@ -133,6 +133,8 @@ function buildLabelsBySection(t: ParentsDirectoryLabels): ParentsDirectoryLabels
       status: t.table.status,
       accountStatus: t.table.accountStatus,
       unpaidInvoices: t.table.unpaidInvoices,
+      unpaidCount: t.card.unpaidCount,
+      invoicesCleared: t.card.invoicesCleared,
       options: t.table.options,
       noEntries: t.noEntries,
       statusLabels,

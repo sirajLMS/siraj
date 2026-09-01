@@ -10,8 +10,8 @@ import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/prof
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileEditForm";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
-import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/staff/sections/AdminOnlySection";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
+import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/staff/sections/StaffAdminOnlySection";
 import {
   type StaffProfileViewLabels,
   toStaffSharedBaseLabels,

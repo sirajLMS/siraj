@@ -1,9 +1,6 @@
 "use client";
 
-import { FormProvider, useForm } from "react-hook-form";
-import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
-import { availabilitySearchResolverFactory } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
-import type { AvailabilitySearchFormData } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import { FormProvider } from "react-hook-form";
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import { DesktopExportButton, DesktopLoadingState, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
@@ -15,23 +12,13 @@ export function TeacherAvailabilityDesktopView({
   labelsBySection,
   availability,
   insights,
-  defaultFilters,
+  formMethods,
   loading,
   onExportPdf,
   onSearch,
   onBlockClick,
 }: Readonly<TeacherAvailabilityViewModel>) {
   const { shell: labels, table: tableLabels } = labelsBySection;
-  const storeFilters = useTeacherAvailabilityStore(
-    (state: { readonly filters: AvailabilitySearchFormData }) => state.filters
-  );
-
-  const storeHasDraft = storeFilters.fromTime !== null || storeFilters.toTime !== null || storeFilters.gender !== null;
-
-  const methods = useForm<AvailabilitySearchFormData>({
-    resolver: availabilitySearchResolverFactory({ invalidGender: labels.validation.invalidGender }),
-    defaultValues: storeHasDraft ? storeFilters : defaultFilters,
-  });
 
   return (
     <DesktopPageContainer>
@@ -46,7 +33,7 @@ export function TeacherAvailabilityDesktopView({
       />
 
       <DesktopSectionPanel title={labels.searchTitle}>
-        <FormProvider {...methods}>
+        <FormProvider {...formMethods}>
           <AvailabilitySearchFormDesktop
             onSearch={onSearch}
             labels={{

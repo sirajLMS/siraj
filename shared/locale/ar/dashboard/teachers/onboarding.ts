@@ -63,7 +63,7 @@ export const dashboardTeacherOnboardingAr: TeacherOnboardingLabels = {
     passwordWeakComplexity: "يجب أن تحتوي كلمة المرور على فئتين على الأقل من: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
     nationalIdRequired: "الرقم القومي مطلوب",
     phoneRequired: "الهاتف مطلوب",
-    phoneMaxLength: "يجب ألا يزيد رقم الهاتف عن 50 حرف",
+    phoneMaxLength: "يجب ألا يزيد رقم الهاتف عن 50 حرفًا",
     genderRequired: "الجنس مطلوب",
     countryRequired: "البلد مطلوب",
     timezoneRequired: "المنطقة الزمنية مطلوبة",

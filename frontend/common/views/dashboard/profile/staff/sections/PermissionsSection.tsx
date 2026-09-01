@@ -105,7 +105,7 @@ export function PermissionsSection(props: Readonly<PermissionsSectionProps>) {
         {hasGroups ? (
           <Box>
             <Typography sx={{ typography: "labelMd", mb: 1.5 }}>{tp.inheritedGroups}</Typography>
-            <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: 1, overflowX: "auto", paddingBottom: 1 }}>
               {groups.map(group => (
                 <Chip
                   key={group.id}
@@ -113,9 +113,10 @@ export function PermissionsSection(props: Readonly<PermissionsSectionProps>) {
                   label={group.name}
                   variant="outlined"
                   size="small"
+                  sx={{ flexShrink: 0 }}
                 />
               ))}
-            </Stack>
+            </Box>
           </Box>
         ) : null}
 

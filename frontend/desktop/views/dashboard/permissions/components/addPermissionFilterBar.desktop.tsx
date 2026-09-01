@@ -1,7 +1,7 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { InputAdornment, MenuItem, Select, TextField } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { AddPermissionFilterBarShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/addPermissionFilterBarShared";
 import type { AddPermissionFilterBarProps } from "@/frontend/common/views/dashboard/permissions/types";
 
@@ -11,22 +11,9 @@ function DesktopSearchSlot({
   t,
 }: Readonly<Pick<AddPermissionFilterBarProps, "searchQuery" | "onSearchChange" | "t">>) {
   return (
-    <TextField
-      size="small"
-      placeholder={t.searchPermissionsPlaceholder}
-      value={searchQuery}
-      onChange={e => onSearchChange(e.target.value)}
-      sx={{ width: 360 }}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchOutlined fontSize="small" />
-            </InputAdornment>
-          ),
-        },
-      }}
-    />
+    <Box sx={{ width: 360 }}>
+      <SearchBarField value={searchQuery} placeholder={t.searchPermissionsPlaceholder} onChange={onSearchChange} />
+    </Box>
   );
 }
 
@@ -37,19 +24,21 @@ function DesktopCategorySlot({
   t,
 }: Readonly<Pick<AddPermissionFilterBarProps, "selectedCategory" | "onCategoryChange" | "addCategories" | "t">>) {
   return (
-    <Select<string>
-      size="small"
-      value={selectedCategory}
-      onChange={e => onCategoryChange(e.target.value)}
-      sx={{ width: 200 }}
-    >
-      <MenuItem value="all">{t.allCategoriesOption}</MenuItem>
-      {addCategories.map(cat => (
-        <MenuItem key={cat} value={cat}>
-          {cat}
-        </MenuItem>
-      ))}
-    </Select>
+    <FormControl size="small" sx={{ width: 200 }}>
+      <InputLabel>{t.columnCategory}</InputLabel>
+      <Select<string>
+        value={selectedCategory}
+        onChange={e => onCategoryChange(e.target.value)}
+        label={t.columnCategory}
+      >
+        <MenuItem value="all">{t.allCategoriesOption}</MenuItem>
+        {addCategories.map(cat => (
+          <MenuItem key={cat} value={cat}>
+            {cat}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
   );
 }
 

@@ -9,6 +9,7 @@ import {
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { CountrySelectDesktop } from "@/frontend/desktop/components/ui/input/countrySelect";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function TeacherOnboardingDesktopView({ ...vm }: Readonly<TeacherOnboardingViewModel>) {
@@ -23,6 +24,7 @@ export function TeacherOnboardingDesktopView({ ...vm }: Readonly<TeacherOnboardi
         PrimaryPageAction: DesktopPrimaryPageAction,
         FormSuccessSnackbar: FormSuccessSnackbar,
         FormErrorSnackbar: DesktopFormErrorSnackbar,
+        CountrySelectComponent: CountrySelectDesktop,
         userEntityLabels,
         formActionsFlexWrap: "nowrap",
       }}

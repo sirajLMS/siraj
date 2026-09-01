@@ -98,6 +98,7 @@ export namespace TeacherPortalService {
         const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors);
         return {
           id: row.id,
+          studentId: row.studentId,
           studentName: row.studentName,
           scheduledStartAt: row.scheduledStartAt.toISOString(),
           scheduledEndAt: row.scheduledEndAt.toISOString(),

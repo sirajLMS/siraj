@@ -1,9 +1,12 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { PermissionGroupChipShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionGroupChipShared";
+import { PermissionKeyChipShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionKeyChipShared";
 import type { BasePermissionCatalogListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
-import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 export function PermissionCatalogCardListMobile({
   labels,
@@ -11,6 +14,7 @@ export function PermissionCatalogCardListMobile({
   groups,
 }: Readonly<BasePermissionCatalogListProps>) {
   const t = labels;
+  const locale = useAppLocale();
 
   return (
     <MobileCardList
@@ -28,21 +32,7 @@ export function PermissionCatalogCardListMobile({
           <MobileCardListItem variant="edge-to-edge">
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
-                <Box
-                  sx={theme => ({
-                    fontFamily: "var(--font-jetbrains-mono), monospace",
-                    typography: "bodyMd",
-                    fontWeight: 500,
-                    backgroundColor: theme.palette.primaryContainer,
-                    color: theme.palette.onPrimaryContainer,
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: 1,
-                    display: "inline-block",
-                  })}
-                >
-                  {permission.key}
-                </Box>
+                <PermissionKeyChipShared label={permission.key ?? ""} />
                 {permission.category && (
                   <Typography
                     variant="labelMd"
@@ -88,23 +78,9 @@ export function PermissionCatalogCardListMobile({
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                     {usedGroups.map(g => {
                       if (!g.id || !g.name) return null;
-                      return (
-                        <MobileLocalizedStringDisplay
-                          key={g.id}
-                          value={g.name}
-                          typographyVariant="labelMd"
-                          sx={theme => ({
-                            fontWeight: 500,
-                            backgroundColor: theme.palette.secondaryContainer,
-                            color: theme.palette.onSecondaryContainer,
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: 1,
-                            border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
-                            display: "inline-block",
-                          })}
-                        />
-                      );
+                      const label = resolveLocalizedString(g.name, locale);
+                      if (!label) return null;
+                      return <PermissionGroupChipShared key={g.id} label={label} />;
                     })}
                   </Box>
                 </Box>

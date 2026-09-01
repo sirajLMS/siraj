@@ -43,10 +43,6 @@ function buildEditSource(_scope: ProfileScope, profile: ProfileData | null | und
   return profile?.staffProfile ?? null;
 }
 
-function onTabChange(_tab: string): void {
-  // Tab routing is owned by the profile shell / URL.
-}
-
 export interface StaffProfileViewModel {
   readonly labels: StaffProfileViewLabels;
   readonly staffData: StaffProfileData;
@@ -66,7 +62,6 @@ export interface StaffProfileViewModel {
   readonly error: Error | undefined;
   readonly refetch: () => void;
   readonly activeTab: string;
-  readonly onTabChange: (tab: string) => void;
   readonly permissionGroups: ProfileData["staffPermissionGroups"];
   readonly permissionOverrides: ProfileData["staffPermissionOverrides"];
   readonly canView: (field: string) => boolean;
@@ -185,7 +180,6 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
     error,
     refetch,
     activeTab,
-    onTabChange,
     permissionGroups: profile?.staffPermissionGroups ?? [],
     permissionOverrides: profile?.staffPermissionOverrides ?? [],
     canView,

@@ -11,8 +11,8 @@ export const dashboardStudentProfileAr: StudentProfileLabels = {
   tabs: {
     profile: "الملف الشخصي",
     status: "الحالة",
-    classes: "الحصص القادمة",
-    quota: "الحصص",
+    classes: "الحصص",
+    quota: "الحصص المخصصة",
     creditHours: "الساعات الائتمانية",
     history: "السجل",
   },

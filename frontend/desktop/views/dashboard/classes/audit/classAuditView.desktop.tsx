@@ -1,7 +1,7 @@
 "use client";
 
-import { styled } from "@mui/material/styles";
 import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
+import { ClassAuditHeaderShared } from "@/frontend/common/views/dashboard/classes/audit/components/__shared__/classAuditHeaderShared";
 import {
   ClassAuditViewGridShared,
   type ClassAuditViewGridSlotConfig,
@@ -11,14 +11,6 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 import { AdminNoteCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/adminNoteCard.desktop";
 import { CommunicationLogCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/communicationLogCard.desktop";
 import { OnlineMeetingCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/onlineMeetingCard.desktop";
-
-const StyledGenerateReportButton = styled(DesktopFilterButton)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  "&:hover": {
-    backgroundColor: theme.palette.action.selected,
-    borderColor: theme.palette.primary.dark,
-  },
-}));
 
 export function ClassAuditViewDesktop({
   audit,
@@ -42,23 +34,16 @@ export function ClassAuditViewDesktop({
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader
+      <ClassAuditHeaderShared
         title={labels.pageTitle}
-        breadcrumbs={[
-          { label: labels.breadcrumbs.dashboard, href: "/dashboard" },
-          { label: labels.breadcrumbs.schedules, href: "/schedule-search" },
-          { label: labels.breadcrumbs.current, current: true },
-        ]}
-        actions={
-          <>
-            <StyledGenerateReportButton id="audit-generate-report-btn" onClick={onGenerateReport}>
-              {labels.generateReport}
-            </StyledGenerateReportButton>
-            <DesktopPrimaryPageAction id="audit-edit-class-btn" onClick={onEditClass}>
-              {labels.editClass}
-            </DesktopPrimaryPageAction>
-          </>
-        }
+        labels={labels}
+        onGenerateReport={onGenerateReport}
+        onEditClass={onEditClass}
+        slots={{
+          PageHeader: DesktopPageHeader,
+          FilterButton: DesktopFilterButton,
+          PrimaryAction: DesktopPrimaryPageAction,
+        }}
       />
 
       <ClassAuditViewGridShared

@@ -30,7 +30,7 @@ export const dashboardAccountingStudentCreditHoursAr: StudentCreditHoursLabels =
     studentHint: "تُستهلك الساعات لكل حصة حسب مدتها.",
     parentHint: "يمكنك شحن ساعات ابنك بشراء باقة من الأكاديمية.",
     teacherHint: "أرصدة ساعات الطلاب المسندين إليك. الحصة القادمة ستستهلك الساعات الموضحة.",
-    supervisorHint: "رصيد الساعات المعتمدة للطالب وأحدث نشاطه الساعي.",
+    supervisorHint: "رصيد الساعات المعتمدة للطالب وأحدث نشاط على ساعاته.",
   },
 
   nextClassConsumes: hours => `الحصة القادمة تستهلك ~${hours} ساعة`,

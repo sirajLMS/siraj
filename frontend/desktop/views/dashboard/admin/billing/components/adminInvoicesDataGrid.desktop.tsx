@@ -12,6 +12,7 @@ import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
 } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
+import { formatInvoiceDisplayId } from "@/frontend/common/views/dashboard/billing/utils/formatInvoiceDisplayId";
 import {
   isDeletableInvoiceStatus,
   isPayableUnpaidStatus,
@@ -165,7 +166,7 @@ function RenderInvoiceAction(
           amount: row.amount,
           studentName: row.studentName,
           dueDate: row.dueDate,
-          invoiceNumber: row.id.replace("inv-", "INV-").toUpperCase(),
+          invoiceNumber: formatInvoiceDisplayId(row.id),
         });
       }}
       sx={{ fontWeight: 700, textTransform: "uppercase" }}
@@ -234,8 +235,8 @@ export function AdminInvoicesDataGridDesktop({
         flex: 0.8,
         minWidth: 120,
         renderCell: ({ row }) => (
-          <StyledInvoiceIdTypography variant="bodyMd">
-            {row.id.replace("inv-", "INV-").toUpperCase()}
+          <StyledInvoiceIdTypography variant="bodyMd" title={row.id}>
+            {formatInvoiceDisplayId(row.id)}
           </StyledInvoiceIdTypography>
         ),
       },

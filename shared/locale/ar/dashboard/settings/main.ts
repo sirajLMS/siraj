@@ -55,11 +55,11 @@ export const dashboardSettingsAr: SettingsLabels = {
     audit: "التدقيق",
     siteContent: "محتوى الموقع",
     timezones: "المناطق الزمنية",
-    meetingIntegrations: "تكامل الاجتماعات",
+    meetingIntegrations: "تكاملات الاجتماعات",
     appearance: "المظهر",
   },
   audit: {
-    emptyMessage: "لا توجد سجلات تدقيق تطابق عوامل التصفية الحالية.",
+    emptyMessage: "لا توجد سجلات تدقيق تطابق الفلاتر الحالية.",
     filters: {
       entityType: "نوع الكيان",
       action: "الإجراء",
@@ -74,7 +74,7 @@ export const dashboardSettingsAr: SettingsLabels = {
       action: "الإجراء",
       description: "الوصف",
       actor: "الفاعل",
-      entityId: "معرف الكيان",
+      entityId: "معرّف الكيان",
     },
     entityTypes: auditEntityTypes,
     actions: auditActions,

@@ -1,24 +1,16 @@
 "use client";
 
 import { EditOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, Button, Typography } from "@mui/material";
 import type { PermissionGroupDetailFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
+import { PermissionGroupChipShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionGroupChipShared";
 import {
   OverridesCell,
+  type OverridesCellLabels,
   type OverridesCellType,
 } from "@/frontend/common/views/dashboard/permissions/components/OverridesCell";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { PermissionsLabels } from "@/shared/locale";
-
-const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
-  width: 40,
-  height: 40,
-  backgroundColor: theme.palette.primaryContainer,
-  color: theme.palette.onPrimaryContainer,
-  typography: "bodyMd",
-  fontWeight: 600,
-}));
 
 export function UserGroupsChips({
   userGroups,
@@ -36,23 +28,7 @@ export function UserGroupsChips({
       {userGroups.map(group => {
         const name = resolveLocalizedString(group.name);
         if (!name) return null;
-        return (
-          <Box
-            key={group.id ?? group.slug}
-            sx={theme => ({
-              typography: "labelMd",
-              fontWeight: 500,
-              px: 1,
-              py: 0.25,
-              borderRadius: 1,
-              backgroundColor: theme.palette.secondaryContainer,
-              color: theme.palette.onSecondaryContainer,
-              border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
-            })}
-          >
-            {name}
-          </Box>
-        );
+        return <PermissionGroupChipShared key={group.id ?? group.slug} label={name} />;
       })}
     </Box>
   );
@@ -76,12 +52,14 @@ export function OverridesCellBox({
   userId,
   userGroups,
   type,
+  labels,
 }: Readonly<{
   readonly userId: string;
   readonly userGroups: readonly PermissionGroupDetailFieldsFragment[];
   readonly type: OverridesCellType;
+  readonly labels: OverridesCellLabels;
 }>) {
-  return <OverridesCell userId={userId} userGroups={userGroups} type={type} />;
+  return <OverridesCell userId={userId} userGroups={userGroups} type={type} labels={labels} />;
 }
 
 export function EditOverridesButton({
@@ -120,5 +98,3 @@ export function EditOverridesButton({
     </Button>
   );
 }
-
-export { StyledUserAvatar };

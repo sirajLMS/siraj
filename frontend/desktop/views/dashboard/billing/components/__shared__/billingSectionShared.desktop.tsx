@@ -1,11 +1,13 @@
 "use client";
 
 import { AddCardOutlined } from "@mui/icons-material";
-import { Box, Button, TextField } from "@mui/material";
+import { Box } from "@mui/material";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { BillingSectionSharedProps } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
 import { ParentInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoicesDataGrid.desktop";
 
@@ -52,24 +54,17 @@ export function BillingSectionDesktop({
         actions={
           <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
             {canSubmitProof && !billingActionsDisabled ? (
-              <Button
-                variant="contained"
-                startIcon={<AddCardOutlined />}
-                onClick={onQuickPay}
-                sx={{ textTransform: "uppercase", fontWeight: 700 }}
-              >
+              <DesktopPrimaryPageAction startIcon={<AddCardOutlined />} onClick={onQuickPay}>
                 {labels.quickPay}
-              </Button>
+              </DesktopPrimaryPageAction>
             ) : null}
-            <TextField
-              size="small"
+            <SearchBarField
               value={searchQuery}
-              onChange={event => {
-                onSearchChange(event.target.value);
-              }}
               placeholder={labels.search.parentPlaceholder}
-              helperText={isSearchPending ? labels.search.searching : undefined}
-              slotProps={{ htmlInput: { autoComplete: "off" } }}
+              searchingLabel={labels.search.searching}
+              isSearching={isSearchPending}
+              onChange={onSearchChange}
+              sx={{ maxWidth: 300 }}
             />
           </Box>
         }

@@ -1,4 +1,4 @@
-import { inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared";
 import { classStatusEvents } from "@/backend/db/schema";
@@ -24,6 +24,9 @@ async function insertChunks(
   }
   return processChunk(0, []);
 }
+
+/** JSON field inside `class_status_events.toState` that carries the override idempotency key. */
+const IDEMPOTENCY_KEY_FIELD = "idempotencyKey";
 
 export namespace ClassStatusEventsRepository {
   export async function findFirstByClassInstanceIds(
@@ -60,6 +63,38 @@ export namespace ClassStatusEventsRepository {
       .where(inArray(classStatusEvents.classInstanceId, [...classInstanceIds]));
 
     return new Set(rows.map(row => row.classInstanceId));
+  }
+
+  /**
+   * Finds the most recent status event for one class instance whose
+   * `toState.idempotencyKey` matches `hash` and whose `createdAt` falls
+   * within the last `windowSeconds`. Duplicate override submissions that
+   * rebuild the same key collapse onto the original event inside this
+   * window. The timestamp bound is computed in JS and bound as a Date so the
+   * query runs unchanged on PostgreSQL and SQLite (no interval arithmetic).
+   * The `->>` JSON-text extraction works on both dialects.
+   */
+  export async function findRecentByInstanceAndHash(
+    instanceId: string,
+    hash: string,
+    windowSeconds: number,
+    tx?: DBTransaction
+  ): Promise<ClassStatusEventSelectType | null> {
+    const q = queryDb(tx);
+    const windowStart = new Date(Date.now() - windowSeconds * 1000);
+    const [row] = await q
+      .select()
+      .from(classStatusEvents)
+      .where(
+        and(
+          eq(classStatusEvents.classInstanceId, instanceId),
+          sql`${classStatusEvents.toState}->>${IDEMPOTENCY_KEY_FIELD} = ${hash}`,
+          gte(classStatusEvents.createdAt, windowStart)
+        )
+      )
+      .orderBy(desc(classStatusEvents.createdAt))
+      .limit(1);
+    return row ?? null;
   }
 
   export async function createMany(
