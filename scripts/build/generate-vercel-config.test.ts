@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const SCRIPT_PATH = join(process.cwd(), "scripts/build/generate-vercel-config.ts");
@@ -22,21 +22,41 @@ function runScript(env: Record<string, string | undefined> = {}): {
   };
 }
 
-function readConfig(): { fluid: boolean; crons: Array<{ path: string; schedule: string }> } | null {
+function readConfig(): {
+  bunVersion?: string;
+  fluid: boolean;
+  crons: Array<{ path: string; schedule: string }>;
+} | null {
   if (!existsSync(OUTPUT_PATH)) return null;
   const content = readFileSync(OUTPUT_PATH, "utf-8");
   return JSON.parse(content);
 }
 
+const COMMITTED_CONFIG = {
+  $schema: "https://openapi.vercel.sh/vercel.json",
+  bunVersion: "1.4.x",
+  fluid: true,
+  crons: [
+    { path: "/api/fx/refresh", schedule: "0 6 * * *" },
+    { path: "/api/cron/class-reminders", schedule: "0 6 * * *" },
+  ],
+};
+
 function cleanup(): void {
-  if (existsSync(OUTPUT_PATH)) {
-    rmSync(OUTPUT_PATH, { force: true });
-  }
+  writeFileSync(OUTPUT_PATH, `${JSON.stringify(COMMITTED_CONFIG, null, 2)}\n`);
+}
+
+function writeSeedConfig(): void {
+  writeFileSync(
+    OUTPUT_PATH,
+    `${JSON.stringify({ bunVersion: "1.4.x", fluid: true, crons: [] }, null, 2)}\n`
+  );
 }
 
 describe("generate-vercel-config", () => {
   beforeEach(() => {
     cleanup();
+    writeSeedConfig();
   });
 
   afterEach(() => {
@@ -50,6 +70,7 @@ describe("generate-vercel-config", () => {
     const config = readConfig();
     expect(config).not.toBeNull();
     if (!config) return;
+    expect(config.bunVersion).toBe("1.4.x");
     expect(config.fluid).toBe(true);
     expect(config.crons).toHaveLength(2);
     expect(config.crons.map(c => c.path).toSorted((a, b) => a.localeCompare(b))).toEqual([

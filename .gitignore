@@ -37,8 +37,8 @@ yarn-error.log*
 
 # vercel
 .vercel
-# Generated at build time by scripts/build/generate-vercel-config.ts
-/vercel.json
+# vercel.json is committed (bunVersion must exist before `bun install`).
+# prebuild refreshes cron entries via scripts/build/generate-vercel-config.ts.
 
 # typescript
 *.tsbuildinfo

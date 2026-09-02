@@ -29,11 +29,14 @@
     "**/.github/**",
     "**/.husky/**",
     "**/.kiro/**",
-    "**/.next/**",
-    "**/.next-*/**",
     "**/.storybook/**",
     "**/.vercel/**",
     "**/.vscode/**",
+    // Keep `.next/types` included for route types; exclude other build output only.
+    "**/.next/cache/**",
+    "**/.next/server/**",
+    "**/.next/static/**",
+    "**/.next-*/**",
     // Build output / dependency dirs
     "node_modules",
     "dist",
@@ -41,6 +44,7 @@
     "build",
     "storybook-static",
     // Tests & stories (covered by the full tsconfig.json in CI instead)
+    "backend/db/test/**",
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",

@@ -2,6 +2,7 @@
   "name": "siraj",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "bun@1.4.0",
   "scripts": {
     "dev": "NEXT_DIST_DIR=.next-dev next dev --turbopack -p 3000 -H 0.0.0.0",
     "debug": "NEXT_DIST_DIR=.next-dev next dev --turbopack -p 3000 -H 0.0.0.0",

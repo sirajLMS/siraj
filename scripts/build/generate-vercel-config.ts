@@ -1,12 +1,13 @@
 #!/usr/bin/env bun
 /**
- * Generate root vercel.json for Vercel Cron Jobs.
- * Runs at build time via prebuild — vercel.json is gitignored.
- * Defaults to Hobby-safe schedules (vercel-daily); Pro ticker only when CRON_EXECUTION_MODE=vercel.
- * Validates cron expressions with cron-parser, fails fast on invalid.
+ * Refresh root vercel.json cron entries at build time (prebuild).
+ * Platform keys (bunVersion, fluid, $schema) live in the committed vercel.json so Vercel
+ * reads bunVersion before `bun install`. Defaults to Hobby-safe schedules (vercel-daily);
+ * Pro ticker only when CRON_EXECUTION_MODE=vercel. Validates cron expressions with
+ * cron-parser, fails fast on invalid.
  */
 
-import { writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CronExpressionParser } from "cron-parser";
 import type { CronDefinition, CronExecutionMode } from "@/backend/types";
@@ -17,9 +18,14 @@ interface VercelCron {
 }
 
 interface VercelJson {
+  $schema?: string;
+  bunVersion?: string;
   fluid: boolean;
   crons: VercelCron[];
 }
+
+const DEFAULT_BUN_VERSION = "1.4.x";
+const DEFAULT_SCHEMA = "https://openapi.vercel.sh/vercel.json";
 
 const CRON_DEFINITIONS: CronDefinition[] = [
   {
@@ -81,13 +87,26 @@ function validateCronExpression(expression: string, name: string): void {
 }
 
 function getSchedule(envKey: string, defaultValue: string, name: string): string {
-  const value = process.env[envKey]?.trim() ?? defaultValue;
+  const trimmed = process.env[envKey]?.trim();
+  const value = trimmed && trimmed.length > 0 ? trimmed : defaultValue;
   validateCronExpression(value, name);
   return value;
 }
 
 function shouldIncludeTicker(mode: CronExecutionMode): boolean {
   return mode === "vercel";
+}
+
+function readExistingConfig(outputPath: string): Partial<VercelJson> {
+  if (!existsSync(outputPath)) {
+    return {};
+  }
+  try {
+    return JSON.parse(readFileSync(outputPath, "utf-8")) as Partial<VercelJson>;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to parse existing ${outputPath}: ${message}`, { cause: error });
+  }
 }
 
 function main(): void {
@@ -104,12 +123,16 @@ function main(): void {
     }
   }
 
+  const outputPath = join(process.cwd(), "vercel.json");
+  const existing = readExistingConfig(outputPath);
+
   const config: VercelJson = {
-    fluid: true,
+    $schema: existing.$schema ?? DEFAULT_SCHEMA,
+    bunVersion: existing.bunVersion ?? DEFAULT_BUN_VERSION,
+    fluid: existing.fluid ?? true,
     crons,
   };
 
-  const outputPath = join(process.cwd(), "vercel.json");
   writeFileSync(outputPath, `${JSON.stringify(config, null, 2)}\n`);
   process.stderr.write(`[generate-vercel-config] Mode: ${mode}\n`);
   process.stderr.write(`[generate-vercel-config] Generated ${outputPath}\n`);
