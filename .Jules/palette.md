@@ -1,0 +1,3 @@
+## 2026-09-02 - Tooltips on Disabled MUI IconButtons
+**Learning:** MUI `IconButton` elements with `disabled={true}` suppress pointer events, preventing `Tooltip` hover/focus events from firing. To preserve accessible descriptions and tooltips when icon buttons are disabled (e.g., in rich text toolbars or form inputs), wrap disabled `IconButton`s in a non-disabled inline element such as `<Box component="span" sx={{ display: "inline-flex" }}>`.
+**Action:** When adding `Tooltip` to any `IconButton` or interactive element that can be `disabled`, ensure a `span` wrapper is conditionally rendered around disabled targets.
