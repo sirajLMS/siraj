@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { type Control, type FieldErrors, type UseFormHandleSubmit, useForm } from "react-hook-form";
+import { type Control, type FieldErrors, type UseFormHandleSubmit, useForm, useWatch } from "react-hook-form";
 import {
   type AccountingPaymentQuery,
   CurrencyCode,
@@ -130,14 +130,9 @@ export function usePaymentFormViewModel({
 
   // Package auto-fill: when a plan is selected on the CREATE path, snapshot
   // its hours/price/currency onto the form. Fields stay editable afterwards.
-  // react-hook-form watch() returns fresh functions each render, which React
-  // Compiler cannot memoize — expected for form bindings and render-safe here,
-  // so skip that single check (the value is only used as a query variable).
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const selectedPlanId = createForm.watch("packagePlanId");
-
-  const watchedStudentId = createForm.watch("studentId");
-  const watchedCurrency = createForm.watch("currency");
+  const selectedPlanId = useWatch({ control: createForm.control, name: "packagePlanId" });
+  const watchedStudentId = useWatch({ control: createForm.control, name: "studentId" });
+  const watchedCurrency = useWatch({ control: createForm.control, name: "currency" });
 
   const { data: balanceData } = useQuery(studentCreditHourBalanceQueryDocument, {
     variables: { studentId: watchedStudentId ?? "" },
