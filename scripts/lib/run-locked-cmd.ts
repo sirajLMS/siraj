@@ -47,36 +47,40 @@ if (process.env.VERCEL || process.env.NOW_BUILDER) {
   process.exit(result.status ?? 1);
 }
 
-const exitCode = await withProcessLock(lockName, async () => {
-  try {
-    const result = spawnSync(cmd, cmdArgs, {
-      stdio: "inherit",
-      shell: false,
-      env: mergedEnv,
-      timeout: timeoutMs,
-    });
+async function run(): Promise<void> {
+  const exitCode = await withProcessLock(lockName, async () => {
+    try {
+      const result = spawnSync(cmd, cmdArgs, {
+        stdio: "inherit",
+        shell: false,
+        env: mergedEnv,
+        timeout: timeoutMs,
+      });
 
-    if (result.error && getErrorCode(result.error) === "ETIMEDOUT") {
-      console.error(
-        `\n\x1b[31m❌ [run-locked-cmd] COMMAND TIMEOUT EXCEEDED (5 minutes / 300,000ms)\x1b[0m\n` +
-          `Command "${cmd} ${cmdArgs.join(" ")}" took longer than 5 minutes (300000ms) to complete.\n` +
-          `This usually indicates an un-excluded build/dist directory, an infinite loop, or resource contention.\n` +
-          `Fix the underlying issue before running again.\n`
-      );
-      return 1;
-    }
+      if (result.error && getErrorCode(result.error) === "ETIMEDOUT") {
+        console.error(
+          `\n\x1b[31m❌ [run-locked-cmd] COMMAND TIMEOUT EXCEEDED (5 minutes / 300,000ms)\x1b[0m\n` +
+            `Command "${cmd} ${cmdArgs.join(" ")}" took longer than 5 minutes (300000ms) to complete.\n` +
+            `This usually indicates an un-excluded build/dist directory, an infinite loop, or resource contention.\n` +
+            `Fix the underlying issue before running again.\n`
+        );
+        return 1;
+      }
 
-    return result.status ?? 1;
-  } finally {
-    if (lockName.startsWith("test")) {
-      try {
-        const { killListenersOnPort, TEST_SERVER_PORT } = await import("@/test/helpers");
-        killListenersOnPort(TEST_SERVER_PORT);
-      } catch {
-        // ignore
+      return result.status ?? 1;
+    } finally {
+      if (lockName.startsWith("test")) {
+        try {
+          const { killListenersOnPort, TEST_SERVER_PORT } = await import("@/test/helpers");
+          killListenersOnPort(TEST_SERVER_PORT);
+        } catch {
+          // ignore
+        }
       }
     }
-  }
-});
+  });
 
-process.exit(exitCode);
+  process.exit(exitCode);
+}
+
+void run();
