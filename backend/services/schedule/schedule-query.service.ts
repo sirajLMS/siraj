@@ -57,14 +57,19 @@ export namespace ScheduleQueryService {
       viewerTimezone,
     });
 
-    return Promise.all(
-      rows.map(async row => {
-        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors);
-        return Object.assign(row, {
-          meetingJoinUrl: effectiveMeeting.joinUrl,
-          effectiveMeeting,
-        });
-      })
-    );
+    if (rows.length === 0) {
+      return [];
+    }
+
+    const instanceIds = rows.map(r => r.id);
+    const meetingMap = await EffectiveMeetingService.resolveForClassInstances(instanceIds, tErrors);
+
+    return rows.map(row => {
+      const effectiveMeeting = meetingMap.get(row.id);
+      return Object.assign(row, {
+        meetingJoinUrl: effectiveMeeting?.joinUrl ?? null,
+        effectiveMeeting,
+      });
+    });
   }
 }

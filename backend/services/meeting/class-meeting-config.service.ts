@@ -1,9 +1,10 @@
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
-import { classInstances, teachers } from "@/backend/db/schema";
+import { classInstances, classMeetingConfigs, meetingProviders, teachers, userMeetingConfigs } from "@/backend/db/schema";
 import { AppPermission, EffectiveMeetingSource } from "@/backend/enum";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -15,6 +16,7 @@ import {
   buildMaskedClassMeetingConfig,
   buildMaskedClassMeetingConfigs,
 } from "@/backend/services/meeting/class-meeting-config-mask";
+import { buildMeetingProviderCatalogSnapshot } from "@/backend/services/meeting/meeting-config-mask";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import type {
   ClassMeetingConfigReturnType,
@@ -291,46 +293,217 @@ export namespace EffectiveMeetingService {
     return fromTeacherDefault(teacherDefault, tErrors, tx);
   }
 
+  export async function resolveForClassInstances(
+    classInstanceIds: readonly string[],
+    _tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<Map<string, EffectiveMeetingReturnType>> {
+    const resultMap = new Map<string, EffectiveMeetingReturnType>();
+    if (classInstanceIds.length === 0) {
+      return resultMap;
+    }
+
+    const client = queryDb(tx);
+    const uniqueInstanceIds = [...new Set(classInstanceIds)];
+
+    // 1. Batch fetch default class meeting configs for all instance IDs
+    const classDefaults = await client
+      .select()
+      .from(classMeetingConfigs)
+      .where(
+        and(
+          inArray(classMeetingConfigs.classInstanceId, uniqueInstanceIds),
+          eq(classMeetingConfigs.isDefault, true)
+        )
+      );
+
+    const classDefaultsMap = new Map<string, typeof classDefaults[0]>();
+    const providerIds = new Set<string>();
+
+    for (const config of classDefaults) {
+      if (config.classInstanceId) {
+        classDefaultsMap.set(config.classInstanceId, config);
+        providerIds.add(config.providerId);
+      }
+    }
+
+    // Identify which class instances need fallback resolution
+    const unresolvedInstanceIds = uniqueInstanceIds.filter(id => !classDefaultsMap.has(id));
+
+    const recurringDefaultsMap = new Map<string, typeof classDefaults[0]>();
+    const teacherDefaultsMap = new Map<string, Awaited<ReturnType<typeof UserMeetingConfigRepository.getDefaultForUser>>>();
+    const instanceToRecurringId = new Map<string, string>();
+    const instanceToTeacherUserId = new Map<string, string>();
+
+    if (unresolvedInstanceIds.length > 0) {
+      // 2. Fetch classInstances info for unresolved instances
+      const instanceRows = await client
+        .select({
+          id: classInstances.id,
+          recurringScheduleId: classInstances.recurringScheduleId,
+          teacherId: classInstances.teacherId,
+        })
+        .from(classInstances)
+        .where(inArray(classInstances.id, unresolvedInstanceIds));
+
+      const recurringScheduleIds = new Set<string>();
+      const teacherIds = new Set<string>();
+      const instanceTeacherMap = new Map<string, string>();
+
+      for (const row of instanceRows) {
+        if (row.recurringScheduleId) {
+          recurringScheduleIds.add(row.recurringScheduleId);
+          instanceToRecurringId.set(row.id, row.recurringScheduleId);
+        }
+        if (row.teacherId) {
+          teacherIds.add(row.teacherId);
+          instanceTeacherMap.set(row.id, row.teacherId);
+        }
+      }
+
+      // 3. Batch fetch default configs for recurring schedules
+      if (recurringScheduleIds.size > 0) {
+        const recurringDefaults = await client
+          .select()
+          .from(classMeetingConfigs)
+          .where(
+            and(
+              inArray(classMeetingConfigs.recurringScheduleId, [...recurringScheduleIds]),
+              eq(classMeetingConfigs.isDefault, true)
+            )
+          );
+
+        for (const config of recurringDefaults) {
+          if (config.recurringScheduleId) {
+            recurringDefaultsMap.set(config.recurringScheduleId, config);
+            providerIds.add(config.providerId);
+          }
+        }
+      }
+
+      // Identify instances still unresolved (no recurring schedule default)
+      const stillUnresolvedInstanceIds = unresolvedInstanceIds.filter(id => {
+        const recId = instanceToRecurringId.get(id);
+        return !recId || !recurringDefaultsMap.has(recId);
+      });
+
+      // 4. Batch fetch teacher userIds and default user meeting configs
+      if (stillUnresolvedInstanceIds.length > 0 && teacherIds.size > 0) {
+        const teacherRows = await client
+          .select({
+            id: teachers.id,
+            userId: teachers.userId,
+          })
+          .from(teachers)
+          .where(inArray(teachers.id, [...teacherIds]));
+
+        const teacherToUserMap = new Map<string, string>();
+        const userIds = new Set<string>();
+        for (const t of teacherRows) {
+          teacherToUserMap.set(t.id, t.userId);
+          userIds.add(t.userId);
+        }
+
+        for (const instId of stillUnresolvedInstanceIds) {
+          const tId = instanceTeacherMap.get(instId);
+          if (tId) {
+            const uId = teacherToUserMap.get(tId);
+            if (uId) {
+              instanceToTeacherUserId.set(instId, uId);
+            }
+          }
+        }
+
+        if (userIds.size > 0) {
+          const userDefaults = await client
+            .select()
+            .from(userMeetingConfigs)
+            .where(
+              and(
+                inArray(userMeetingConfigs.userId, [...userIds]),
+                eq(userMeetingConfigs.isDefault, true)
+              )
+            );
+
+          for (const config of userDefaults) {
+            teacherDefaultsMap.set(config.userId, config);
+            providerIds.add(config.providerId);
+          }
+        }
+      }
+    }
+
+    // 5. Batch fetch all required providers
+    const providerMap = new Map<string, Awaited<ReturnType<typeof MeetingProviderRepository.getById>>>();
+    if (providerIds.size > 0) {
+      const providers = await client
+        .select()
+        .from(meetingProviders)
+        .where(inArray(meetingProviders.id, [...providerIds]));
+
+      for (const p of providers) {
+        providerMap.set(p.id, p);
+      }
+    }
+
+    const buildEffective = (
+      config: { id: string; providerId: string; label: string | null; details: MeetingConfigDetails },
+      source: EffectiveMeetingSource
+    ): EffectiveMeetingReturnType => {
+      const provider = providerMap.get(config.providerId);
+      if (!provider) {
+        return empty;
+      }
+      const details = parseMeetingConfigDetails(provider, config.details);
+      const snapshot = {
+        userMeetingConfigId: config.id,
+        providerId: config.providerId,
+        label: config.label,
+        details,
+        provider: buildMeetingProviderCatalogSnapshot(provider),
+        snapshottedAt: new Date().toISOString(),
+      };
+      return buildEffectiveFromSnapshot(snapshot, source, config.id, config.providerId);
+    };
+
+    for (const id of uniqueInstanceIds) {
+      const classConfig = classDefaultsMap.get(id);
+      if (classConfig) {
+        resultMap.set(id, buildEffective(classConfig, EffectiveMeetingSource.CLASS));
+        continue;
+      }
+
+      const recId = instanceToRecurringId.get(id);
+      if (recId) {
+        const recConfig = recurringDefaultsMap.get(recId);
+        if (recConfig) {
+          resultMap.set(id, buildEffective(recConfig, EffectiveMeetingSource.RECURRING));
+          continue;
+        }
+      }
+
+      const teacherUserId = instanceToTeacherUserId.get(id);
+      if (teacherUserId) {
+        const teacherConfig = teacherDefaultsMap.get(teacherUserId);
+        if (teacherConfig) {
+          resultMap.set(id, buildEffective(teacherConfig, EffectiveMeetingSource.TEACHER));
+          continue;
+        }
+      }
+
+      resultMap.set(id, empty);
+    }
+
+    return resultMap;
+  }
+
   export async function resolveForClassInstance(
     classInstanceId: string,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<EffectiveMeetingReturnType> {
-    const client = tx ?? db;
-    const classDefault = await ClassMeetingConfigRepository.getDefaultForClassInstance(classInstanceId, tx);
-    if (classDefault) {
-      return fromClassConfig(classDefault, EffectiveMeetingSource.CLASS, tErrors, tx);
-    }
-
-    const [instance] = await client
-      .select({
-        recurringScheduleId: classInstances.recurringScheduleId,
-        teacherId: classInstances.teacherId,
-      })
-      .from(classInstances)
-      .where(eq(classInstances.id, classInstanceId))
-      .limit(1);
-
-    if (!instance) {
-      return empty;
-    }
-
-    if (instance.recurringScheduleId) {
-      const recurringDefault = await ClassMeetingConfigRepository.getDefaultForRecurringSchedule(
-        instance.recurringScheduleId,
-        tx
-      );
-      if (recurringDefault) {
-        return fromClassConfig(recurringDefault, EffectiveMeetingSource.RECURRING, tErrors, tx);
-      }
-    }
-
-    const userId = await getTeacherUserId(instance.teacherId, tx);
-    if (userId) {
-      return resolveTeacherDefault(userId, tErrors, tx);
-    }
-
-    return empty;
+    const resultMap = await resolveForClassInstances([classInstanceId], tErrors, tx);
+    return resultMap.get(classInstanceId) ?? empty;
   }
 
   export async function resolveForRecurringSchedule(
