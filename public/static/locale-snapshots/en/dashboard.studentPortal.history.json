@@ -27,7 +27,7 @@
   "backToDashboard": "Back to Dashboard",
   "weeklyAttendance": "Weekly Attendance",
   "week": {
-    "__fn": "(number) => `Week ${number}`"
+    "__fn": "number=>`Week ${number}`"
   },
   "statusLabels": {
     "ended": "Ended",
@@ -39,7 +39,7 @@
     "cancelled": "Cancelled"
   },
   "minutesShort": {
-    "__fn": "(minutes) => `${minutes}m`"
+    "__fn": "minutes=>`${minutes}m`"
   },
   "viewClass": "View class",
   "joinSession": "Join session",
@@ -54,6 +54,6 @@
     "sat": "Sat"
   },
   "scheduleFor": {
-    "__fn": "(weekday, month, day) => `Schedule for ${weekday}, ${month} ${day}`"
+    "__fn": "(weekday,month,day)=>`Schedule for ${weekday}, ${month} ${day}`"
   }
 }

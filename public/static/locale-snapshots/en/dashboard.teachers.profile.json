@@ -36,7 +36,7 @@
     "saveProfile": "Save Profile",
     "discardChanges": "Discard Changes",
     "lastModified": {
-      "__fn": "(date) => `Last modified ${date}`"
+      "__fn": "date=>`Last modified ${date}`"
     },
     "saveSuccess": "Profile saved successfully!",
     "saveError": "Failed to save profile."

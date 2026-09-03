@@ -5,12 +5,12 @@
   "consumedLabel": "Consumed",
   "totalLabel": "Total Purchased",
   "hoursUnit": {
-    "__fn": "(hours) => `${hours} hrs`"
+    "__fn": "hours=>`${hours} hrs`"
   },
   "recentPurchasesTitle": "Recent Hour Activity",
   "recentPurchasesEmpty": "No credit-hour activity yet.",
   "lowBalanceAlert": {
-    "__fn": "(remaining, threshold) => `Low balance: ${remaining} hrs remaining (threshold ${threshold} hrs). Consider purchasing a package.`"
+    "__fn": "(remaining,threshold)=>`Low balance: ${remaining} hrs remaining (threshold ${threshold} hrs). Consider purchasing a package.`"
   },
   "columns": {
     "date": "Date",
@@ -31,7 +31,7 @@
     "supervisorHint": "This student's credit-hour balance and recent hour activity."
   },
   "nextClassConsumes": {
-    "__fn": "(hours) => `Next class consumes ~${hours} hrs`"
+    "__fn": "hours=>`Next class consumes ~${hours} hrs`"
   },
   "loadError": "Failed to load the credit-hours summary. Please try again."
 }

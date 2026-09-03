@@ -1,7 +1,7 @@
 {
   "pageTitle": "My Dashboard",
   "welcomeMessage": {
-    "__fn": "(name) => `Welcome, ${name}`"
+    "__fn": "name=>`Welcome, ${name}`"
   },
   "nextClass": "Next Class",
   "joinNow": "Join",
@@ -27,12 +27,12 @@
   "columnStatus": "Status",
   "columnActions": "Actions",
   "minutesShort": {
-    "__fn": "(minutes) => `${minutes}m`"
+    "__fn": "minutes=>`${minutes}m`"
   },
   "hoursShort": {
-    "__fn": "(hours) => `${hours}h`"
+    "__fn": "hours=>`${hours}h`"
   },
   "durationMinutesShort": {
-    "__fn": "(minutes) => `${minutes} min`"
+    "__fn": "minutes=>`${minutes} min`"
   }
 }

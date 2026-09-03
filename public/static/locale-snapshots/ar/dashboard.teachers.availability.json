@@ -4,7 +4,7 @@
   "exportPdf": "تصدير إلى PDF",
   "exportPdfComingSoon": "قريبًا",
   "teacherSlotSelected": {
-    "__fn": "(name, id) => `\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062F \\u0641\\u062A\\u0631\\u0629 \\u0627\\u0644\\u0645\\u0639\\u0644\\u0645 ${name} (${id})`"
+    "__fn": "(name,id)=>`\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062F \\u0641\\u062A\\u0631\\u0629 \\u0627\\u0644\\u0645\\u0639\\u0644\\u0645 ${name} (${id})`"
   },
   "searchTitle": "البحث عن التوفر",
   "from": "من",
@@ -41,7 +41,7 @@
     "sat": "س",
     "sun": "أ",
     "availableSlot": {
-      "__fn": "(teacherName, time) => `${teacherName} \\u0645\\u062A\\u0627\\u062D \\u0641\\u064A ${time}`"
+      "__fn": "(teacherName,time)=>`${teacherName} \\u0645\\u062A\\u0627\\u062D \\u0641\\u064A ${time}`"
     }
   },
   "insights": {
@@ -50,7 +50,7 @@
     "availableStaff": "الموظفون المتاحون",
     "availableStaffDesc": "المعلمون المتاحون خلال الساعات المحددة",
     "teachersCount": {
-      "__fn": "(count) => `${count} \\u0645\\u0639\\u0644\\u0645`"
+      "__fn": "count=>`${count} \\u0645\\u0639\\u0644\\u0645`"
     },
     "localTimezones": "المناطق الزمنية المحلية",
     "localTimezonesDesc": "المناطق الزمنية المحلية للمعلمين"
@@ -62,7 +62,7 @@
   "status": {
     "live": "مباشر",
     "lastUpdate": {
-      "__fn": "(minutes) => minutes === 1 ? `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629` : `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u0627\\u0626\\u0642`"
+      "__fn": "minutes=>minutes===1?`\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`:`\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0645\\u0646\\u0630 ${minutes} \\u062F\\u0642\\u0627\\u0626\\u0642`"
     }
   },
   "availabilityGridTitle": "الفترات المتاحة"

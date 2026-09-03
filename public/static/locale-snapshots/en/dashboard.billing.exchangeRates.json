@@ -37,7 +37,7 @@
     "pairLabel": "Currency Pair",
     "empty": "No historical data",
     "maxDays": {
-      "__fn": "(days) => `Last ${days} days`"
+      "__fn": "days=>`Last ${days} days`"
     },
     "daysLabel": "Number of days"
   },
@@ -51,7 +51,7 @@
     "saveSuccess": "Provider settings saved",
     "saveFailed": "Failed to save provider settings",
     "lastChangedBy": {
-      "__fn": "(name, date) => `Last changed by ${name} on ${date}`"
+      "__fn": "(name,date)=>`Last changed by ${name} on ${date}`"
     },
     "cancel": "Cancel",
     "save": "Save"

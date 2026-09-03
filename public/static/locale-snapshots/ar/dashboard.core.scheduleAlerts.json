@@ -44,7 +44,7 @@
     "hold": "مُجمّد"
   },
   "showingOf": {
-    "__fn": "(shown, total) => `\\u0639\\u0631\\u0636 ${shown} \\u0645\\u0646 ${total} \\u062D\\u0635\\u0629`"
+    "__fn": "(shown,total)=>`\\u0639\\u0631\\u0636 ${shown} \\u0645\\u0646 ${total} \\u062D\\u0635\\u0629`"
   },
   "noEntries": "لا توجد حصص",
   "endOfSchedule": "نهاية جدول اليوم الرئيسي",

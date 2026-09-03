@@ -12,7 +12,7 @@
   "viewClassAudit": "View Class Audit",
   "joinVideo": "Join Video",
   "durationMinutes": {
-    "__fn": "(minutes) => `${minutes} min`"
+    "__fn": "minutes=>`${minutes} min`"
   },
   "errors": {
     "failedToLoad": "Failed to load classes."

@@ -6,7 +6,7 @@
     "invalidTimezone": "Invalid timezone"
   },
   "convertedAmount": {
-    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
+    "__fn": "(lockedAmount,lockedCurrency,convertedApprox,displayCurrency)=>`${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
   },
   "sections": {
     "account": "Account",

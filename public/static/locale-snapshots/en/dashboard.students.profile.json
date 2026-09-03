@@ -2,7 +2,7 @@
   "title": "Student Profile",
   "subtitle": "View and manage student information",
   "restrictedIdentity": {
-    "__fn": "(id) => `Student ${id}`"
+    "__fn": "id=>`Student ${id}`"
   },
   "restrictedIdentityGeneric": "Student profile",
   "loading": "Loading student profile...",

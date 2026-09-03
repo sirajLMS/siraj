@@ -12,7 +12,7 @@
   "viewClassAudit": "عرض تدقيق الحصة",
   "joinVideo": "انضمام للفيديو",
   "durationMinutes": {
-    "__fn": "(minutes) => `${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
+    "__fn": "minutes=>`${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
   },
   "errors": {
     "failedToLoad": "فشل تحميل الحصص."

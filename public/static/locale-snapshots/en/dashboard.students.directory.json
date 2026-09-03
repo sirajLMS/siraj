@@ -9,7 +9,7 @@
   "previous": "Previous",
   "next": "Next",
   "showingOf": {
-    "__fn": "(shown, total) => `Showing ${shown} of ${total} students`"
+    "__fn": "(shown,total)=>`Showing ${shown} of ${total} students`"
   },
   "metrics": {
     "deactivated": "Deactivated",

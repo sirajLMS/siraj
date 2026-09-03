@@ -1,7 +1,7 @@
 {
   "pageTitle": "Payments",
   "metricsBasis": {
-    "__fn": "(max) => `Most recent ${max} payments`"
+    "__fn": "max=>`Most recent ${max} payments`"
   },
   "pageSubtitle": "Track credit-hour package payments and their paid status.",
   "formSubtitle": "Record a new payment transaction for a student.",
@@ -63,7 +63,7 @@
     "unpaid": "Unpaid"
   },
   "currencyWarning": {
-    "__fn": "(currency) => `Note: this payment is in ${currency}, which differs from the student's most recent payment currency. Hours from mixed currencies share one balance.`"
+    "__fn": "currency=>`Note: this payment is in ${currency}, which differs from the student's most recent payment currency. Hours from mixed currencies share one balance.`"
   },
   "empty": "No payments match the current filters.",
   "loadError": "Failed to load payments. Please try again.",

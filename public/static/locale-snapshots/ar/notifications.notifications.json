@@ -2,32 +2,32 @@
   "invoiceGenerated": {
     "title": "فاتورة جديدة",
     "body": {
-      "__fn": "({ invoiceId, amount, currency }) => `\\u062A\\u0645 \\u0625\\u0635\\u062F\\u0627\\u0631 \\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId} \\u0628\\u0645\\u0628\\u0644\\u063A ${amount} ${currency}.`"
+      "__fn": "({invoiceId,amount,currency})=>`\\u062A\\u0645 \\u0625\\u0635\\u062F\\u0627\\u0631 \\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId} \\u0628\\u0645\\u0628\\u0644\\u063A ${amount} ${currency}.`"
     }
   },
   "invoiceStatusChanged": {
     "proofSubmitted": {
       "title": "تم تقديم إثبات الدفع",
       "body": {
-        "__fn": "({ invoiceId }) => `\\u062A\\u0645 \\u062A\\u0642\\u062F\\u064A\\u0645 \\u0625\\u062B\\u0628\\u0627\\u062A \\u0627\\u0644\\u062F\\u0641\\u0639 \\u0644\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId} \\u0648\\u0647\\u0648 \\u0642\\u064A\\u062F \\u0627\\u0644\\u0645\\u0631\\u0627\\u062C\\u0639\\u0629.`"
+        "__fn": "({invoiceId})=>`\\u062A\\u0645 \\u062A\\u0642\\u062F\\u064A\\u0645 \\u0625\\u062B\\u0628\\u0627\\u062A \\u0627\\u0644\\u062F\\u0641\\u0639 \\u0644\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId} \\u0648\\u0647\\u0648 \\u0642\\u064A\\u062F \\u0627\\u0644\\u0645\\u0631\\u0627\\u062C\\u0639\\u0629.`"
       }
     },
     "proofApproved": {
       "title": "تمت الموافقة على إثبات الدفع",
       "body": {
-        "__fn": "({ invoiceId }) => `\\u062A\\u0645\\u062A \\u0627\\u0644\\u0645\\u0648\\u0627\\u0641\\u0642\\u0629 \\u0639\\u0644\\u0649 \\u0625\\u062B\\u0628\\u0627\\u062A \\u0627\\u0644\\u062F\\u0641\\u0639 \\u0644\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId}.`"
+        "__fn": "({invoiceId})=>`\\u062A\\u0645\\u062A \\u0627\\u0644\\u0645\\u0648\\u0627\\u0641\\u0642\\u0629 \\u0639\\u0644\\u0649 \\u0625\\u062B\\u0628\\u0627\\u062A \\u0627\\u0644\\u062F\\u0641\\u0639 \\u0644\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId}.`"
       }
     },
     "proofRejected": {
       "title": "تم رفض إثبات الدفع",
       "body": {
-        "__fn": "({ invoiceId }) => `\\u062A\\u0645 \\u0631\\u0641\\u0636 \\u0625\\u062B\\u0628\\u0627\\u062A \\u0627\\u0644\\u062F\\u0641\\u0639 \\u0644\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId}. \\u064A\\u0631\\u062C\\u0649 \\u0625\\u0639\\u0627\\u062F\\u0629 \\u062A\\u0642\\u062F\\u064A\\u0645\\u0647.`"
+        "__fn": "({invoiceId})=>`\\u062A\\u0645 \\u0631\\u0641\\u0636 \\u0625\\u062B\\u0628\\u0627\\u062A \\u0627\\u0644\\u062F\\u0641\\u0639 \\u0644\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId}. \\u064A\\u0631\\u062C\\u0649 \\u0625\\u0639\\u0627\\u062F\\u0629 \\u062A\\u0642\\u062F\\u064A\\u0645\\u0647.`"
       }
     },
     "markedPaid": {
       "title": "تم دفع الفاتورة",
       "body": {
-        "__fn": "({ invoiceId }) => `\\u062A\\u0645 \\u062A\\u0639\\u0644\\u064A\\u0645 \\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId} \\u0643\\u0645\\u062F\\u0641\\u0648\\u0639\\u0629.`"
+        "__fn": "({invoiceId})=>`\\u062A\\u0645 \\u062A\\u0639\\u0644\\u064A\\u0645 \\u0627\\u0644\\u0641\\u0627\\u062A\\u0648\\u0631\\u0629 ${invoiceId} \\u0643\\u0645\\u062F\\u0641\\u0648\\u0639\\u0629.`"
       }
     }
   },
@@ -35,142 +35,142 @@
     "created": {
       "title": "تمت إضافة طريقة دفع",
       "body": {
-        "__fn": "({ identifier }) => `\\u062A\\u0645\\u062A \\u0625\\u0636\\u0627\\u0641\\u0629 \\u0637\\u0631\\u064A\\u0642\\u0629 \\u062F\\u0641\\u0639 \\u062C\\u062F\\u064A\\u062F\\u0629 (${identifier}) \\u0625\\u0644\\u0649 \\u062D\\u0633\\u0627\\u0628\\u0643.`"
+        "__fn": "({identifier})=>`\\u062A\\u0645\\u062A \\u0625\\u0636\\u0627\\u0641\\u0629 \\u0637\\u0631\\u064A\\u0642\\u0629 \\u062F\\u0641\\u0639 \\u062C\\u062F\\u064A\\u062F\\u0629 (${identifier}) \\u0625\\u0644\\u0649 \\u062D\\u0633\\u0627\\u0628\\u0643.`"
       }
     },
     "updated": {
       "title": "تم تحديث طريقة الدفع",
       "body": {
-        "__fn": "({ identifier }) => `\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 (${identifier}).`"
+        "__fn": "({identifier})=>`\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 (${identifier}).`"
       }
     },
     "deleted": {
       "title": "تم حذف طريقة الدفع",
       "body": {
-        "__fn": "({ identifier }) => `\\u062A\\u0645 \\u062D\\u0630\\u0641 \\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 (${identifier}).`"
+        "__fn": "({identifier})=>`\\u062A\\u0645 \\u062D\\u0630\\u0641 \\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 (${identifier}).`"
       }
     },
     "setDefault": {
       "title": "تم تغيير طريقة الدفع الافتراضية",
       "body": {
-        "__fn": "({ identifier }) => `\\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 \\u0627\\u0644\\u0627\\u0641\\u062A\\u0631\\u0627\\u0636\\u064A\\u0629 \\u0627\\u0644\\u0622\\u0646 \\u0647\\u064A ${identifier}.`"
+        "__fn": "({identifier})=>`\\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 \\u0627\\u0644\\u0627\\u0641\\u062A\\u0631\\u0627\\u0636\\u064A\\u0629 \\u0627\\u0644\\u0622\\u0646 \\u0647\\u064A ${identifier}.`"
       }
     },
     "verified": {
       "title": "تم التحقق من طريقة الدفع",
       "body": {
-        "__fn": "({ identifier }) => `\\u062A\\u0645 \\u0627\\u0644\\u062A\\u062D\\u0642\\u0642 \\u0645\\u0646 \\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 (${identifier}).`"
+        "__fn": "({identifier})=>`\\u062A\\u0645 \\u0627\\u0644\\u062A\\u062D\\u0642\\u0642 \\u0645\\u0646 \\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 (${identifier}).`"
       }
     }
   },
   "classScheduled": {
     "title": "تم جدولة حصة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062A\\u0645 \\u062C\\u062F\\u0648\\u0644\\u0629 \\u062D\\u0635\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062A\\u0645 \\u062C\\u062F\\u0648\\u0644\\u0629 \\u062D\\u0635\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "classActivated": {
     "title": "تم تفعيل الحصة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062A\\u0645 \\u062A\\u0641\\u0639\\u064A\\u0644 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062A\\u0645 \\u062A\\u0641\\u0639\\u064A\\u0644 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "classStarted": {
     "title": "بدأت الحصة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u0628\\u062F\\u0623\\u062A \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u0628\\u062F\\u0623\\u062A \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "classCompleted": {
     "title": "اكتملت الحصة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u0627\\u0643\\u062A\\u0645\\u0644\\u062A \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u0627\\u0643\\u062A\\u0645\\u0644\\u062A \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "classMarkedAbsent": {
     "title": "تم تسجيل غياب الطالب",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062A\\u0645 \\u062A\\u0633\\u062C\\u064A\\u0644 \\u063A\\u064A\\u0627\\u0628 ${studentName} \\u0639\\u0646 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062A\\u0645 \\u062A\\u0633\\u062C\\u064A\\u0644 \\u063A\\u064A\\u0627\\u0628 ${studentName} \\u0639\\u0646 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "classMarkedMissed": {
     "title": "تم تفويت الحصة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062A\\u0645 \\u062A\\u0641\\u0648\\u064A\\u062A \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062A\\u0645 \\u062A\\u0641\\u0648\\u064A\\u062A \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "classLeaveRequested": {
     "title": "تم طلب إجازة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062A\\u0645 \\u062A\\u0642\\u062F\\u064A\\u0645 \\u0637\\u0644\\u0628 \\u0625\\u062C\\u0627\\u0632\\u0629 \\u0644\\u062D\\u0635\\u0629 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062A\\u0645 \\u062A\\u0642\\u062F\\u064A\\u0645 \\u0637\\u0644\\u0628 \\u0625\\u062C\\u0627\\u0632\\u0629 \\u0644\\u062D\\u0635\\u0629 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "classRescheduled": {
     "title": "تمت إعادة جدولة الحصة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt, newStartAt }) => `\\u062A\\u0645\\u062A \\u0625\\u0639\\u0627\\u062F\\u0629 \\u062C\\u062F\\u0648\\u0644\\u0629 \\u062D\\u0635\\u0629 ${studentName} \\u0645\\u0646 ${scheduledStartAt} \\u0625\\u0644\\u0649 ${newStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt,newStartAt})=>`\\u062A\\u0645\\u062A \\u0625\\u0639\\u0627\\u062F\\u0629 \\u062C\\u062F\\u0648\\u0644\\u0629 \\u062D\\u0635\\u0629 ${studentName} \\u0645\\u0646 ${scheduledStartAt} \\u0625\\u0644\\u0649 ${newStartAt}.`"
     }
   },
   "classCancelled": {
     "title": "تم إلغاء الحصة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062A\\u0645 \\u0625\\u0644\\u063A\\u0627\\u0621 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062A\\u0645 \\u0625\\u0644\\u063A\\u0627\\u0621 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "classReset": {
     "title": "تمت إعادة ضبط الحصة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062A\\u0645\\u062A \\u0625\\u0639\\u0627\\u062F\\u0629 \\u0636\\u0628\\u0637 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062A\\u0645\\u062A \\u0625\\u0639\\u0627\\u062F\\u0629 \\u0636\\u0628\\u0637 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "studentTeacherReassigned": {
     "parent": {
       "title": "تم إعادة تعيين المعلم",
       "body": {
-        "__fn": "({ studentName, newTeacherName }) => `\\u062A\\u0645 \\u0625\\u0639\\u0627\\u062F\\u0629 \\u062A\\u0639\\u064A\\u064A\\u0646 \\u0645\\u0639\\u0644\\u0645 ${studentName} \\u0625\\u0644\\u0649 ${newTeacherName}.`"
+        "__fn": "({studentName,newTeacherName})=>`\\u062A\\u0645 \\u0625\\u0639\\u0627\\u062F\\u0629 \\u062A\\u0639\\u064A\\u064A\\u0646 \\u0645\\u0639\\u0644\\u0645 ${studentName} \\u0625\\u0644\\u0649 ${newTeacherName}.`"
       }
     },
     "oldTeacher": {
       "title": "تم نقل الطالب",
       "body": {
-        "__fn": "({ studentName, newTeacherName }) => `\\u062A\\u0645 \\u0646\\u0642\\u0644 \\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0625\\u0644\\u0649 \\u0645\\u0639\\u0644\\u0645 \\u062C\\u062F\\u064A\\u062F (${newTeacherName}).`"
+        "__fn": "({studentName,newTeacherName})=>`\\u062A\\u0645 \\u0646\\u0642\\u0644 \\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0625\\u0644\\u0649 \\u0645\\u0639\\u0644\\u0645 \\u062C\\u062F\\u064A\\u062F (${newTeacherName}).`"
       }
     },
     "newTeacher": {
       "title": "تم تعيين طالب لك",
       "body": {
-        "__fn": "({ studentName, oldTeacherName }) => `\\u062A\\u0645 \\u062A\\u0639\\u064A\\u064A\\u0646 \\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0644\\u0643 \\u0645\\u0646 ${oldTeacherName}.`"
+        "__fn": "({studentName,oldTeacherName})=>`\\u062A\\u0645 \\u062A\\u0639\\u064A\\u064A\\u0646 \\u0627\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0644\\u0643 \\u0645\\u0646 ${oldTeacherName}.`"
       }
     }
   },
   "studentStatusChanged": {
     "title": "تم تغيير حالة الطالب",
     "body": {
-      "__fn": "({ studentName, oldStatus, newStatus }) => `\\u062A\\u0645 \\u062A\\u063A\\u064A\\u064A\\u0631 \\u062D\\u0627\\u0644\\u0629 ${studentName} \\u0645\\u0646 ${oldStatus} \\u0625\\u0644\\u0649 ${newStatus}.`"
+      "__fn": "({studentName,oldStatus,newStatus})=>`\\u062A\\u0645 \\u062A\\u063A\\u064A\\u064A\\u0631 \\u062D\\u0627\\u0644\\u0629 ${studentName} \\u0645\\u0646 ${oldStatus} \\u0625\\u0644\\u0649 ${newStatus}.`"
     }
   },
   "studentQuotaOverridden": {
     "title": "تم تحديث حصة الطالب",
     "body": {
-      "__fn": "({ studentName, newClassesRemaining }) => `\\u0627\\u0644\\u0639\\u062F\\u062F \\u0627\\u0644\\u0645\\u062A\\u0628\\u0642\\u064A \\u0645\\u0646 \\u062D\\u0635\\u0635 ${studentName} \\u0647\\u0648 \\u0627\\u0644\\u0622\\u0646 ${newClassesRemaining}.`"
+      "__fn": "({studentName,newClassesRemaining})=>`\\u0627\\u0644\\u0639\\u062F\\u062F \\u0627\\u0644\\u0645\\u062A\\u0628\\u0642\\u064A \\u0645\\u0646 \\u062D\\u0635\\u0635 ${studentName} \\u0647\\u0648 \\u0627\\u0644\\u0622\\u0646 ${newClassesRemaining}.`"
     }
   },
   "lessonReportSubmitted": {
     "title": "تم تقديم تقرير حصة",
     "body": {
-      "__fn": "({ reportId, teacherName }) => `\\u0642\\u062F\\u0651\\u0645 ${teacherName} \\u062A\\u0642\\u0631\\u064A\\u0631 \\u0627\\u0644\\u062D\\u0635\\u0629 ${reportId} \\u0644\\u0645\\u0631\\u0627\\u062C\\u0639\\u062A\\u0643.`"
+      "__fn": "({reportId,teacherName})=>`\\u0642\\u062F\\u0651\\u0645 ${teacherName} \\u062A\\u0642\\u0631\\u064A\\u0631 \\u0627\\u0644\\u062D\\u0635\\u0629 ${reportId} \\u0644\\u0645\\u0631\\u0627\\u062C\\u0639\\u062A\\u0643.`"
     }
   },
   "lessonReportReviewed": {
     "title": "تمت مراجعة تقرير الحصة",
     "body": {
-      "__fn": "({ reportId, teacherName, decision }) => `\\u062A\\u0645 ${decision} \\u062A\\u0642\\u0631\\u064A\\u0631 \\u062D\\u0635\\u062A\\u0643 ${reportId} \\u0645\\u0646 ${teacherName}.`"
+      "__fn": "({reportId,teacherName,decision})=>`\\u062A\\u0645 ${decision} \\u062A\\u0642\\u0631\\u064A\\u0631 \\u062D\\u0635\\u062A\\u0643 ${reportId} \\u0645\\u0646 ${teacherName}.`"
     }
   },
   "newComplaint": {
     "title": "شكوى جديدة",
     "body": {
-      "__fn": "({ complaintId, category }) => `\\u062A\\u0645 \\u062A\\u0642\\u062F\\u064A\\u0645 \\u0634\\u0643\\u0648\\u0649 \\u062C\\u062F\\u064A\\u062F\\u0629 \\u0645\\u0646 \\u0646\\u0648\\u0639 ${category} (${complaintId}).`"
+      "__fn": "({complaintId,category})=>`\\u062A\\u0645 \\u062A\\u0642\\u062F\\u064A\\u0645 \\u0634\\u0643\\u0648\\u0649 \\u062C\\u062F\\u064A\\u062F\\u0629 \\u0645\\u0646 \\u0646\\u0648\\u0639 ${category} (${complaintId}).`"
     }
   },
   "complaintResponse": {
@@ -185,61 +185,61 @@
   "suggestionMarkedDuplicate": {
     "title": "تم تعليم الاقتراح كمكرر",
     "body": {
-      "__fn": "({ duplicateId }) => `\\u062A\\u0645 \\u062A\\u0639\\u0644\\u064A\\u0645 \\u0627\\u0642\\u062A\\u0631\\u0627\\u062D\\u0643 \\u0643\\u0645\\u0643\\u0631\\u0631 \\u0644\\u0644\\u0627\\u0642\\u062A\\u0631\\u0627\\u062D \\u0631\\u0642\\u0645 ${duplicateId.slice(0, 8)}`"
+      "__fn": "({duplicateId})=>`\\u062A\\u0645 \\u062A\\u0639\\u0644\\u064A\\u0645 \\u0627\\u0642\\u062A\\u0631\\u0627\\u062D\\u0643 \\u0643\\u0645\\u0643\\u0631\\u0631 \\u0644\\u0644\\u0627\\u0642\\u062A\\u0631\\u0627\\u062D \\u0631\\u0642\\u0645 ${duplicateId.slice(0,8)}`"
     }
   },
   "accountingPaymentRecorded": {
     "title": "تم تسجيل باقة ساعات تعليمية",
     "body": {
-      "__fn": "({ packageName, creditHours, amount, currency }) => `\\u062A\\u0645 \\u062A\\u0633\\u062C\\u064A\\u0644 \\u062F\\u0641\\u0639\\u0629 \\u0644\\u0628\\u0627\\u0642\\u0629 \"${packageName}\" (${creditHours} \\u0633\\u0627\\u0639\\u0627\\u062A \\u062A\\u0639\\u0644\\u064A\\u0645\\u064A\\u0629\\u060C \\u0628\\u0645\\u0628\\u0644\\u063A ${amount} ${currency})\\u060C \\u0648\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u062E\\u0627\\u0635 \\u0628\\u0643.`"
+      "__fn": "({packageName,creditHours,amount,currency})=>`\\u062A\\u0645 \\u062A\\u0633\\u062C\\u064A\\u0644 \\u062F\\u0641\\u0639\\u0629 \\u0644\\u0628\\u0627\\u0642\\u0629 \"${packageName}\" (${creditHours} \\u0633\\u0627\\u0639\\u0627\\u062A \\u062A\\u0639\\u0644\\u064A\\u0645\\u064A\\u0629\\u060C \\u0628\\u0645\\u0628\\u0644\\u063A ${amount} ${currency})\\u060C \\u0648\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u062E\\u0627\\u0635 \\u0628\\u0643.`"
     }
   },
   "accountingLowHours": {
     "title": "رصيد ساعات منخفض",
     "body": {
-      "__fn": "({ remaining, threshold }) => `\\u0627\\u0646\\u062E\\u0641\\u0636 \\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u0645\\u062A\\u0628\\u0642\\u064A\\u0629 \\u0644\\u062F\\u064A\\u0643 \\u0625\\u0644\\u0649 ${remaining}\\u060C \\u0648\\u0647\\u0648 \\u0623\\u0642\\u0644 \\u0645\\u0646 \\u0627\\u0644\\u062D\\u062F \\u0627\\u0644\\u0623\\u062F\\u0646\\u0649 (${threshold}). \\u064A\\u064F\\u0631\\u062C\\u0649 \\u0634\\u0631\\u0627\\u0621 \\u0628\\u0627\\u0642\\u0629 \\u062C\\u062F\\u064A\\u062F\\u0629 \\u0644\\u0645\\u0648\\u0627\\u0635\\u0644\\u0629 \\u062D\\u062C\\u0632 \\u0627\\u0644\\u062D\\u0635\\u0635.`"
+      "__fn": "({remaining,threshold})=>`\\u0627\\u0646\\u062E\\u0641\\u0636 \\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u0645\\u062A\\u0628\\u0642\\u064A\\u0629 \\u0644\\u062F\\u064A\\u0643 \\u0625\\u0644\\u0649 ${remaining}\\u060C \\u0648\\u0647\\u0648 \\u0623\\u0642\\u0644 \\u0645\\u0646 \\u0627\\u0644\\u062D\\u062F \\u0627\\u0644\\u0623\\u062F\\u0646\\u0649 (${threshold}). \\u064A\\u064F\\u0631\\u062C\\u0649 \\u0634\\u0631\\u0627\\u0621 \\u0628\\u0627\\u0642\\u0629 \\u062C\\u062F\\u064A\\u062F\\u0629 \\u0644\\u0645\\u0648\\u0627\\u0635\\u0644\\u0629 \\u062D\\u062C\\u0632 \\u0627\\u0644\\u062D\\u0635\\u0635.`"
     }
   },
   "quotaExpiringSoon": {
     "title": "حصة تنتهي قريبًا",
     "body": {
-      "__fn": "({ quotaName, validUntil, remaining }) => `\\u062A\\u0646\\u062A\\u0647\\u064A \\u0627\\u0644\\u062D\\u0635\\u0629 \"${quotaName}\" \\u0641\\u064A ${validUntil}. \\u0644\\u062F\\u064A\\u0643 ${remaining} \\u062D\\u0635\\u0635 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629.`"
+      "__fn": "({quotaName,validUntil,remaining})=>`\\u062A\\u0646\\u062A\\u0647\\u064A \\u0627\\u0644\\u062D\\u0635\\u0629 \"${quotaName}\" \\u0641\\u064A ${validUntil}. \\u0644\\u062F\\u064A\\u0643 ${remaining} \\u062D\\u0635\\u0635 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629.`"
     }
   },
   "quotaExpired": {
     "title": "انتهت صلاحية الحصة",
     "body": {
-      "__fn": "({ quotaName }) => `\\u0627\\u0646\\u062A\\u0647\\u062A \\u0635\\u0644\\u0627\\u062D\\u064A\\u0629 \\u0627\\u0644\\u062D\\u0635\\u0629 \"${quotaName}\".`"
+      "__fn": "({quotaName})=>`\\u0627\\u0646\\u062A\\u0647\\u062A \\u0635\\u0644\\u0627\\u062D\\u064A\\u0629 \\u0627\\u0644\\u062D\\u0635\\u0629 \"${quotaName}\".`"
     }
   },
   "quotaLowBalance": {
     "title": "رصيد حصة منخفض",
     "body": {
-      "__fn": "({ studentName, remaining, totalClasses }) => `\\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0645\\u0646\\u062E\\u0641\\u0636 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName}: \\u0645\\u062A\\u0628\\u0642\\u064A ${remaining} \\u0645\\u0646 \\u0623\\u0635\\u0644 ${totalClasses} \\u062D\\u0635\\u0635.`"
+      "__fn": "({studentName,remaining,totalClasses})=>`\\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0645\\u0646\\u062E\\u0641\\u0636 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName}: \\u0645\\u062A\\u0628\\u0642\\u064A ${remaining} \\u0645\\u0646 \\u0623\\u0635\\u0644 ${totalClasses} \\u062D\\u0635\\u0635.`"
     }
   },
   "onDemandInstancePendingCredit": {
     "title": "حصة بانتظار الرصيد",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062D\\u0635\\u0629 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt} \\u062A\\u062D\\u062A\\u0627\\u062C \\u0625\\u0644\\u0649 \\u0631\\u0635\\u064A\\u062F \\u0625\\u0636\\u0627\\u0641\\u064A.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062D\\u0635\\u0629 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0641\\u064A ${scheduledStartAt} \\u062A\\u062D\\u062A\\u0627\\u062C \\u0625\\u0644\\u0649 \\u0631\\u0635\\u064A\\u062F \\u0625\\u0636\\u0627\\u0641\\u064A.`"
     }
   },
   "onDemandInstanceReminderT3": {
     "title": "تذكير بحصة حسب الطلب قادمة",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062D\\u0635\\u0629 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0628\\u0639\\u062F 3 \\u0623\\u064A\\u0627\\u0645 \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062D\\u0635\\u0629 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u0628\\u0639\\u062F 3 \\u0623\\u064A\\u0627\\u0645 \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "onDemandInstanceReminderT1": {
     "title": "تذكير بحصة حسب الطلب غدًا",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `\\u062D\\u0635\\u0629 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u063A\\u062F\\u064B\\u0627 \\u0641\\u064A ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`\\u062D\\u0635\\u0629 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0644\\u0644\\u0637\\u0627\\u0644\\u0628 ${studentName} \\u0645\\u062C\\u062F\\u0648\\u0644\\u0629 \\u063A\\u062F\\u064B\\u0627 \\u0641\\u064A ${scheduledStartAt}.`"
     }
   },
   "onDemandTeacherDailyDigest": {
     "title": "ملخص الحصص حسب الطلب اليومي",
     "body": {
-      "__fn": "({ teacherName, pendingCount }) => `\\u0645\\u0631\\u062D\\u0628\\u064B\\u0627 ${teacherName}\\u060C \\u0644\\u062F\\u064A\\u0643 ${pendingCount} \\u062D\\u0635\\u0635 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0628\\u0627\\u0646\\u062A\\u0638\\u0627\\u0631 \\u062A\\u0633\\u0648\\u064A\\u0629 \\u0627\\u0644\\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u064A\\u0648\\u0645.`"
+      "__fn": "({teacherName,pendingCount})=>`\\u0645\\u0631\\u062D\\u0628\\u064B\\u0627 ${teacherName}\\u060C \\u0644\\u062F\\u064A\\u0643 ${pendingCount} \\u062D\\u0635\\u0635 \\u062D\\u0633\\u0628 \\u0627\\u0644\\u0637\\u0644\\u0628 \\u0628\\u0627\\u0646\\u062A\\u0638\\u0627\\u0631 \\u062A\\u0633\\u0648\\u064A\\u0629 \\u0627\\u0644\\u0631\\u0635\\u064A\\u062F \\u0627\\u0644\\u064A\\u0648\\u0645.`"
     }
   },
   "drawerTitle": "الإشعارات",
@@ -252,10 +252,10 @@
   "rejectInvoice": "رفض الفاتورة",
   "noNotifications": "لا توجد إشعارات",
   "unreadCount": {
-    "__fn": "(count) => {\n    if (count === 0)\n      return \"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u062A \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\\u0629\";\n    if (count === 1)\n      return \"\\u0625\\u0634\\u0639\\u0627\\u0631 \\u0648\\u0627\\u062D\\u062F \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\";\n    if (count === 2)\n      return \"\\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u0646 \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\\u0627\\u0646\";\n    if (count >= 3 && count <= 10)\n      return `${count} \\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u062A \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\\u0629`;\n    return `${count} \\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u064B \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\\u0627\\u064B`;\n  }"
+    "__fn": "count=>{if(count===0)return\"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u062A \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\\u0629\";if(count===1)return\"\\u0625\\u0634\\u0639\\u0627\\u0631 \\u0648\\u0627\\u062D\\u062F \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\";if(count===2)return\"\\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u0646 \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\\u0627\\u0646\";if(count>=3&&count<=10)return`${count} \\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u062A \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\\u0629`;return`${count} \\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u064B \\u063A\\u064A\\u0631 \\u0645\\u0642\\u0631\\u0648\\u0621\\u0627\\u064B`}"
   },
   "whatsappDeliveryFailed": "فشل تسليم رسالة واتساب",
   "whatsappDeliveryFailedWithReason": {
-    "__fn": "(reason) => `\\u0641\\u0634\\u0644 \\u062A\\u0633\\u0644\\u064A\\u0645 \\u0631\\u0633\\u0627\\u0644\\u0629 \\u0648\\u0627\\u062A\\u0633\\u0627\\u0628: ${reason}`"
+    "__fn": "reason=>`\\u0641\\u0634\\u0644 \\u062A\\u0633\\u0644\\u064A\\u0645 \\u0631\\u0633\\u0627\\u0644\\u0629 \\u0648\\u0627\\u062A\\u0633\\u0627\\u0628: ${reason}`"
   }
 }

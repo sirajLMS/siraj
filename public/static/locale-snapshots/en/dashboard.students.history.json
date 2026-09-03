@@ -7,31 +7,31 @@
     "student": "Student"
   },
   "pageTitle": {
-    "__fn": "(name) => `${name}'s History`"
+    "__fn": "name=>`${name}'s History`"
   },
   "pageSubtitle": {
-    "__fn": "(month) => `Classes for ${month}`"
+    "__fn": "month=>`Classes for ${month}`"
   },
   "exportPdf": "Export as PDF",
   "changeMonth": "Change Month",
   "metrics": {
     "totalClasses": {
-      "__fn": "(count) => `Total Classes: ${count}`"
+      "__fn": "count=>`Total Classes: ${count}`"
     },
     "attendanceRate": {
-      "__fn": "(rate) => `Attendance Rate: ${rate}%`"
+      "__fn": "rate=>`Attendance Rate: ${rate}%`"
     },
     "hoursStudied": {
-      "__fn": "(hours) => `Hours Studied: ${hours}`"
+      "__fn": "hours=>`Hours Studied: ${hours}`"
     },
     "performance": {
-      "__fn": "(score) => `Performance: ${score}%`"
+      "__fn": "score=>`Performance: ${score}%`"
     }
   },
   "calendar": {
     "weeklyAttendance": "Weekly Attendance",
     "week": {
-      "__fn": "(number) => `Week ${number}`"
+      "__fn": "number=>`Week ${number}`"
     },
     "days": {
       "sun": "Sun",
@@ -46,10 +46,10 @@
   "classDetails": {
     "title": "Class Details",
     "classDetails": {
-      "__fn": "(date) => `Details for ${date}`"
+      "__fn": "date=>`Details for ${date}`"
     },
     "instructor": {
-      "__fn": "(name) => `Instructor: ${name}`"
+      "__fn": "name=>`Instructor: ${name}`"
     },
     "timeSlot": "Time Slot",
     "roomNo": "Room",
@@ -72,23 +72,23 @@
     },
     "noSessions": "No class sessions found for this date.",
     "dayOfMonth": {
-      "__fn": "(day, month) => `Day ${day} of ${month}`"
+      "__fn": "(day,month)=>`Day ${day} of ${month}`"
     }
   },
   "performanceStreak": {
     "title": "Performance Streak",
     "description": {
-      "__fn": "(count) => `Student's performance trend over the last ${count} classes.`"
+      "__fn": "count=>`Student's performance trend over the last ${count} classes.`"
     }
   },
   "hoursShort": {
-    "__fn": "(hours) => `${hours}h`"
+    "__fn": "hours=>`${hours}h`"
   },
   "minutesShort": {
-    "__fn": "(minutes) => `${minutes}m`"
+    "__fn": "minutes=>`${minutes}m`"
   },
   "percentValue": {
-    "__fn": "(value) => `${value}%`"
+    "__fn": "value=>`${value}%`"
   },
   "errors": {
     "loadFailed": "Failed to load student history."

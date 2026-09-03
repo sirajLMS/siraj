@@ -31,10 +31,10 @@
     "totals": "الإجمالي:"
   },
   "convertedAmount": {
-    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
+    "__fn": "(lockedAmount,lockedCurrency,convertedApprox,displayCurrency)=>`${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
   },
   "convertedTotalApprox": {
-    "__fn": "(convertedApprox, displayCurrency) => `\\u2248 ${convertedApprox} ${displayCurrency}`"
+    "__fn": "(convertedApprox,displayCurrency)=>`\\u2248 ${convertedApprox} ${displayCurrency}`"
   },
   "summary": {
     "engagementRate": "معدل المشاركة",
@@ -46,7 +46,7 @@
   "ledger": {
     "title": "سجل الأداء",
     "studentLabel": {
-      "__fn": "(name) => `\\u0627\\u0644\\u0637\\u0627\\u0644\\u0628: ${name}`"
+      "__fn": "name=>`\\u0627\\u0644\\u0637\\u0627\\u0644\\u0628: ${name}`"
     },
     "paid": "مدفوع"
   },

@@ -7,13 +7,13 @@
   "switchLocale": "تبديل اللغة",
   "atLeastOneTranslationRequired": "أدخل ترجمة واحدة على الأقل",
   "localeRequired": {
-    "__fn": "(localeName) => `${localeName} \\u0645\\u0637\\u0644\\u0648\\u0628 \\u0644\\u0647\\u0630\\u0627 \\u0627\\u0644\\u062D\\u0642\\u0644`"
+    "__fn": "localeName=>`${localeName} \\u0645\\u0637\\u0644\\u0648\\u0628 \\u0644\\u0647\\u0630\\u0627 \\u0627\\u0644\\u062D\\u0642\\u0644`"
   },
   "localesRequired": {
-    "__fn": "(localeNames) => `${localeNames} \\u0645\\u0637\\u0644\\u0648\\u0628\\u0629 \\u0644\\u0647\\u0630\\u0627 \\u0627\\u0644\\u062D\\u0642\\u0644`"
+    "__fn": "localeNames=>`${localeNames} \\u0645\\u0637\\u0644\\u0648\\u0628\\u0629 \\u0644\\u0647\\u0630\\u0627 \\u0627\\u0644\\u062D\\u0642\\u0644`"
   },
   "localeRequiredEntry": {
-    "__fn": "(localeName) => `${localeName} \\u0645\\u0637\\u0644\\u0648\\u0628`"
+    "__fn": "localeName=>`${localeName} \\u0645\\u0637\\u0644\\u0648\\u0628`"
   },
   "locale": {
     "ar": "العربية",

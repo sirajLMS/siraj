@@ -56,7 +56,7 @@
   "adminResetPassword": {
     "title": "Reset Password",
     "description": {
-      "__fn": "(userName, userEmail) => `Set a new password for ${userName} (${userEmail})`"
+      "__fn": "(userName,userEmail)=>`Set a new password for ${userName} (${userEmail})`"
     },
     "newPassword": "New Password",
     "confirmPassword": "Confirm New Password",
@@ -83,10 +83,10 @@
     "cannotResetOwnPasswordViaAdmin": "You cannot reset your own password via admin action. Use the change password feature instead."
   },
   "convertedAmount": {
-    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
+    "__fn": "(lockedAmount,lockedCurrency,convertedApprox,displayCurrency)=>`${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
   },
   "convertedTotalApprox": {
-    "__fn": "(convertedApprox, displayCurrency) => `\\u2248 ${convertedApprox} ${displayCurrency}`"
+    "__fn": "(convertedApprox,displayCurrency)=>`\\u2248 ${convertedApprox} ${displayCurrency}`"
   },
   "fieldAccess": {
     "restrictedTitle": "Restricted",
@@ -128,7 +128,7 @@
     "allClasses": "All Classes",
     "mobileListLabel": "Assigned Students List",
     "pagination": {
-      "__fn": "(start, end, total) => `Showing ${start} \\u2013 ${end} of ${total} records`"
+      "__fn": "(start,end,total)=>`Showing ${start} \\u2013 ${end} of ${total} records`"
     },
     "noRows": "No students assigned",
     "columns": {

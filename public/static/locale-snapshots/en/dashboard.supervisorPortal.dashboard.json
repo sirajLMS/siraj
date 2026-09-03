@@ -1,10 +1,10 @@
 {
   "pageTitle": "Supervisor Dashboard",
   "welcomeMessage": {
-    "__fn": "(name) => `Welcome, ${name}`"
+    "__fn": "name=>`Welcome, ${name}`"
   },
   "pendingReviewsHero": {
-    "__fn": "(count) => `${count} pending reviews need your attention`"
+    "__fn": "count=>`${count} pending reviews need your attention`"
   },
   "pendingReviewsSubtitle": "Review lesson reports submitted by teachers",
   "goToReviews": "Go to Reviews",

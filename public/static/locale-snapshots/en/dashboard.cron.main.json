@@ -28,7 +28,7 @@
   "dialogCreateTitle": "Create Cron Schedule",
   "dialogEditTitle": "Edit Cron Schedule",
   "dialogRunsTitle": {
-    "__fn": "(name) => `Runs for ${name}`"
+    "__fn": "name=>`Runs for ${name}`"
   },
   "fieldName": "Name",
   "fieldDescription": "Description",
@@ -51,7 +51,7 @@
   "queueStatsFailed": "Failed",
   "runsTitle": "Run History",
   "runsCount": {
-    "__fn": "(count) => {\n    if (count === 0)\n      return \"No runs\";\n    if (count === 1)\n      return \"1 run\";\n    return `${count} runs`;\n  }"
+    "__fn": "count=>{if(count===0){return\"No runs\"}if(count===1){return\"1 run\"}return`${count} runs`}"
   },
   "statusPending": "Pending",
   "statusRunning": "Running",
@@ -74,7 +74,7 @@
   "emptyMessage": "No cron schedules found. Click \"Create Schedule\" to add one.",
   "manualTriggerConfirmTitle": "Trigger Schedule",
   "manualTriggerConfirmMessage": {
-    "__fn": "(name) => `Are you sure you want to manually trigger \"${name}\"?`"
+    "__fn": "name=>`Are you sure you want to manually trigger \"${name}\"?`"
   },
   "manualTriggerConfirmButton": "Trigger Now",
   "manualTriggerCancel": "Cancel",
@@ -88,13 +88,13 @@
   "triggerSkipped": "Trigger skipped — schedule already running",
   "errors": {
     "invalidCronExpression": {
-      "__fn": "(expr) => `Invalid cron expression: ${expr}`"
+      "__fn": "expr=>`Invalid cron expression: ${expr}`"
     },
     "scheduleNameTaken": {
-      "__fn": "(name) => `A schedule with name \"${name}\" already exists`"
+      "__fn": "name=>`A schedule with name \"${name}\" already exists`"
     },
     "scheduleNotFound": {
-      "__fn": "(id) => `Schedule not found: ${id}`"
+      "__fn": "id=>`Schedule not found: ${id}`"
     },
     "scheduleInactive": "Schedule is not active",
     "scheduleNotActive": "Schedule is not active — it may have already been paused or disabled",
@@ -103,20 +103,20 @@
     "queueBackendNotAvailable": "The configured queue backend is not available",
     "permissionDenied": "You do not have permission to manage cron schedules",
     "invalidTimezone": {
-      "__fn": "(tz) => `Invalid timezone: ${tz}`"
+      "__fn": "tz=>`Invalid timezone: ${tz}`"
     },
     "runNotFound": {
-      "__fn": "(id) => `Run not found: ${id}`"
+      "__fn": "id=>`Run not found: ${id}`"
     },
     "manualTriggerConflict": "A run is already in progress for this schedule",
     "dispatchSendFailed": {
-      "__fn": "(id) => `Failed to dispatch run for schedule \"${id}\" \\u2014 the queue adapter could not be reached`"
+      "__fn": "id=>`Failed to dispatch run for schedule \"${id}\" \\u2014 the queue adapter could not be reached`"
     },
     "enqueueRetryFailed": {
-      "__fn": "(id) => `Failed to enqueue retry for run \"${id}\" \\u2014 the queue adapter could not be reached`"
+      "__fn": "id=>`Failed to enqueue retry for run \"${id}\" \\u2014 the queue adapter could not be reached`"
     },
     "queueBackendUnknown": {
-      "__fn": "(backend) => `Unknown queue backend: ${backend}`"
+      "__fn": "backend=>`Unknown queue backend: ${backend}`"
     },
     "genericError": "An unexpected error occurred. Please try again.",
     "missingScheduleId": "Missing scheduleId query parameter",

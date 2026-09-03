@@ -21,7 +21,7 @@
     "schedule": "Schedule",
     "options": "Options",
     "showingOf": {
-      "__fn": "(count, total) => `Showing ${count} of ${total} teachers`"
+      "__fn": "(count,total)=>`Showing ${count} of ${total} teachers`"
     },
     "linkPending": "Link Pending"
   },

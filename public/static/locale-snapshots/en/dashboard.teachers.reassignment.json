@@ -8,7 +8,7 @@
   },
   "studentContext": {
     "grade": {
-      "__fn": "(grade) => `Grade: ${grade}`"
+      "__fn": "grade=>`Grade: ${grade}`"
     },
     "enrollment": "Enrollment Date",
     "active": "Active"
@@ -27,7 +27,7 @@
     "teacherAvailabilityNotice": "Teachers with availability in the student’s timezone",
     "statusUpdate": "Update Status",
     "currentStatus": {
-      "__fn": "(status) => `Current: ${status}`"
+      "__fn": "status=>`Current: ${status}`"
     },
     "statusOptions": {
       "REGULAR": "Regular / Active",
@@ -40,11 +40,11 @@
   "historyAndContact": {
     "changeHistory": "Change History",
     "lastUpdated": {
-      "__fn": "(date) => `Last updated: ${date}`"
+      "__fn": "date=>`Last updated: ${date}`"
     },
     "parentContact": "Parent Contact",
     "pendingNotifications": {
-      "__fn": "(count) => `Pending Notifications: ${count}`"
+      "__fn": "count=>`Pending Notifications: ${count}`"
     }
   },
   "actions": {

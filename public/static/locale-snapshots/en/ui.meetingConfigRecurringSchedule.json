@@ -1,7 +1,7 @@
 {
   "pageTitle": "Recurring Series Meeting",
   "scheduleSummary": {
-    "__fn": "(student, teacher, duration, timezone) => `${student} with ${teacher} \\xB7 ${duration} min \\xB7 ${timezone}`"
+    "__fn": "(student,teacher,duration,timezone)=>`${student} with ${teacher} \\xB7 ${duration} min \\xB7 ${timezone}`"
   },
   "invalidId": "Invalid schedule ID",
   "breadcrumbDashboard": "Dashboard",

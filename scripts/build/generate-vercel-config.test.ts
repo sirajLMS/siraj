@@ -23,7 +23,6 @@ function runScript(env: Record<string, string | undefined> = {}): {
 }
 
 function readConfig(): {
-  bunVersion?: string;
   fluid: boolean;
   crons: Array<{ path: string; schedule: string }>;
 } | null {
@@ -34,7 +33,6 @@ function readConfig(): {
 
 const COMMITTED_CONFIG = {
   $schema: "https://openapi.vercel.sh/vercel.json",
-  bunVersion: "1.4.x",
   fluid: true,
   crons: [
     { path: "/api/fx/refresh", schedule: "0 6 * * *" },
@@ -49,7 +47,7 @@ function cleanup(): void {
 function writeSeedConfig(): void {
   writeFileSync(
     OUTPUT_PATH,
-    `${JSON.stringify({ bunVersion: "1.4.x", fluid: true, crons: [] }, null, 2)}\n`
+    `${JSON.stringify({ fluid: true, crons: [] }, null, 2)}\n`
   );
 }
 
@@ -70,7 +68,6 @@ describe("generate-vercel-config", () => {
     const config = readConfig();
     expect(config).not.toBeNull();
     if (!config) return;
-    expect(config.bunVersion).toBe("1.4.x");
     expect(config.fluid).toBe(true);
     expect(config.crons).toHaveLength(2);
     expect(config.crons.map(c => c.path).toSorted((a, b) => a.localeCompare(b))).toEqual([

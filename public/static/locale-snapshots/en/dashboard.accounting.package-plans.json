@@ -34,7 +34,7 @@
   },
   "archiveTitle": "Archive Package Plan",
   "archiveBody": {
-    "__fn": "(name) => `Archive \"${name}\"? Past payments keep their recorded snapshot, but the plan disappears from new payment forms.`"
+    "__fn": "name=>`Archive \"${name}\"? Past payments keep their recorded snapshot, but the plan disappears from new payment forms.`"
   },
   "archiveConfirm": "Archive",
   "archived": "Archived",
@@ -44,6 +44,6 @@
   "saveError": "Failed to save the package plan. Please review and try again.",
   "archiveSuccess": "Package plan archived.",
   "hoursUnit": {
-    "__fn": "(hours) => `${hours} hrs`"
+    "__fn": "hours=>`${hours} hrs`"
   }
 }

@@ -28,7 +28,7 @@
   "saveError": "Failed to save session configuration.",
   "deleteConfirmTitle": "Delete Session Configuration",
   "deleteConfirmBody": {
-    "__fn": "(roleName) => `Are you sure you want to delete the session configuration for \"${roleName}\"? This action cannot be undone.`"
+    "__fn": "roleName=>`Are you sure you want to delete the session configuration for \"${roleName}\"? This action cannot be undone.`"
   },
   "deleteConfirmCancel": "Cancel",
   "deleteConfirmConfirm": "Delete",

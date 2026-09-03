@@ -72,13 +72,13 @@
     "save": "Save",
     "deleteTitle": "Delete payment method",
     "deleteBody": {
-      "__fn": "(name) => `Delete ${name}? This cannot be undone.`"
+      "__fn": "name=>`Delete ${name}? This cannot be undone.`"
     },
     "deleteConfirm": "Delete",
     "loadError": "Failed to load payment methods",
     "retry": "Retry",
     "verify": {
-      "__fn": "(label) => `Verify ${label}`"
+      "__fn": "label=>`Verify ${label}`"
     }
   },
   "defaultsEditor": {

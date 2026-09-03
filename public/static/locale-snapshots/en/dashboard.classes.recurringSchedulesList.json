@@ -13,7 +13,7 @@
     "schedule": "Schedule",
     "duration": "Duration",
     "durationMinutesShort": {
-      "__fn": "(minutes) => `${minutes} min`"
+      "__fn": "minutes=>`${minutes} min`"
     },
     "rate": "Rate",
     "actions": "Actions"

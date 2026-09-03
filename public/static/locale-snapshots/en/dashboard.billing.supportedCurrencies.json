@@ -17,7 +17,7 @@
   "editTitle": "Edit Supported Currency",
   "deactivateConfirmTitle": "Deactivate Currency",
   "deactivateConfirmBody": {
-    "__fn": "(code) => `Deactivate ${code}? It will no longer be available for new billing entries. Existing references are preserved.`"
+    "__fn": "code=>`Deactivate ${code}? It will no longer be available for new billing entries. Existing references are preserved.`"
   },
   "deactivateConfirmCancel": "Cancel",
   "deactivateConfirmConfirm": "Deactivate",

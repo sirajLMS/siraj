@@ -2,32 +2,32 @@
   "invoiceGenerated": {
     "title": "New Invoice",
     "body": {
-      "__fn": "({ invoiceId, amount, currency }) => `Invoice ${invoiceId} for ${amount} ${currency} has been generated.`"
+      "__fn": "({invoiceId,amount,currency})=>`Invoice ${invoiceId} for ${amount} ${currency} has been generated.`"
     }
   },
   "invoiceStatusChanged": {
     "proofSubmitted": {
       "title": "Payment Proof Submitted",
       "body": {
-        "__fn": "({ invoiceId }) => `Payment proof for invoice ${invoiceId} has been submitted and is pending review.`"
+        "__fn": "({invoiceId})=>`Payment proof for invoice ${invoiceId} has been submitted and is pending review.`"
       }
     },
     "proofApproved": {
       "title": "Payment Proof Approved",
       "body": {
-        "__fn": "({ invoiceId }) => `Payment proof for invoice ${invoiceId} has been approved.`"
+        "__fn": "({invoiceId})=>`Payment proof for invoice ${invoiceId} has been approved.`"
       }
     },
     "proofRejected": {
       "title": "Payment Proof Rejected",
       "body": {
-        "__fn": "({ invoiceId }) => `Payment proof for invoice ${invoiceId} has been rejected. Please resubmit.`"
+        "__fn": "({invoiceId})=>`Payment proof for invoice ${invoiceId} has been rejected. Please resubmit.`"
       }
     },
     "markedPaid": {
       "title": "Invoice Paid",
       "body": {
-        "__fn": "({ invoiceId }) => `Invoice ${invoiceId} has been marked as paid.`"
+        "__fn": "({invoiceId})=>`Invoice ${invoiceId} has been marked as paid.`"
       }
     }
   },
@@ -35,142 +35,142 @@
     "created": {
       "title": "Payment Method Added",
       "body": {
-        "__fn": "({ identifier }) => `A new payment method (${identifier}) has been added to your account.`"
+        "__fn": "({identifier})=>`A new payment method (${identifier}) has been added to your account.`"
       }
     },
     "updated": {
       "title": "Payment Method Updated",
       "body": {
-        "__fn": "({ identifier }) => `Your payment method (${identifier}) has been updated.`"
+        "__fn": "({identifier})=>`Your payment method (${identifier}) has been updated.`"
       }
     },
     "deleted": {
       "title": "Payment Method Removed",
       "body": {
-        "__fn": "({ identifier }) => `Your payment method (${identifier}) has been removed.`"
+        "__fn": "({identifier})=>`Your payment method (${identifier}) has been removed.`"
       }
     },
     "setDefault": {
       "title": "Default Payment Method Changed",
       "body": {
-        "__fn": "({ identifier }) => `Your default payment method is now ${identifier}.`"
+        "__fn": "({identifier})=>`Your default payment method is now ${identifier}.`"
       }
     },
     "verified": {
       "title": "Payment Method Verified",
       "body": {
-        "__fn": "({ identifier }) => `Your payment method (${identifier}) has been verified.`"
+        "__fn": "({identifier})=>`Your payment method (${identifier}) has been verified.`"
       }
     }
   },
   "classScheduled": {
     "title": "Class Scheduled",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `A class for ${studentName} has been scheduled for ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`A class for ${studentName} has been scheduled for ${scheduledStartAt}.`"
     }
   },
   "classActivated": {
     "title": "Class Activated",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `The class for ${studentName} at ${scheduledStartAt} has been activated.`"
+      "__fn": "({studentName,scheduledStartAt})=>`The class for ${studentName} at ${scheduledStartAt} has been activated.`"
     }
   },
   "classStarted": {
     "title": "Class Started",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `The class for ${studentName} scheduled at ${scheduledStartAt} has started.`"
+      "__fn": "({studentName,scheduledStartAt})=>`The class for ${studentName} scheduled at ${scheduledStartAt} has started.`"
     }
   },
   "classCompleted": {
     "title": "Class Completed",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `The class for ${studentName} scheduled at ${scheduledStartAt} has been completed.`"
+      "__fn": "({studentName,scheduledStartAt})=>`The class for ${studentName} scheduled at ${scheduledStartAt} has been completed.`"
     }
   },
   "classMarkedAbsent": {
     "title": "Student Marked Absent",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `${studentName} has been marked absent for the class at ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`${studentName} has been marked absent for the class at ${scheduledStartAt}.`"
     }
   },
   "classMarkedMissed": {
     "title": "Class Missed",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `The class for ${studentName} scheduled at ${scheduledStartAt} was missed.`"
+      "__fn": "({studentName,scheduledStartAt})=>`The class for ${studentName} scheduled at ${scheduledStartAt} was missed.`"
     }
   },
   "classLeaveRequested": {
     "title": "Leave Requested",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `A leave request has been submitted for the ${studentName} class at ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`A leave request has been submitted for the ${studentName} class at ${scheduledStartAt}.`"
     }
   },
   "classRescheduled": {
     "title": "Class Rescheduled",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt, newStartAt }) => `The class for ${studentName} originally scheduled at ${scheduledStartAt} has been rescheduled to ${newStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt,newStartAt})=>`The class for ${studentName} originally scheduled at ${scheduledStartAt} has been rescheduled to ${newStartAt}.`"
     }
   },
   "classCancelled": {
     "title": "Class Cancelled",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `The class for ${studentName} scheduled at ${scheduledStartAt} has been cancelled.`"
+      "__fn": "({studentName,scheduledStartAt})=>`The class for ${studentName} scheduled at ${scheduledStartAt} has been cancelled.`"
     }
   },
   "classReset": {
     "title": "Class Reset",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `The class for ${studentName} scheduled at ${scheduledStartAt} has been reset.`"
+      "__fn": "({studentName,scheduledStartAt})=>`The class for ${studentName} scheduled at ${scheduledStartAt} has been reset.`"
     }
   },
   "studentTeacherReassigned": {
     "parent": {
       "title": "Teacher Reassigned",
       "body": {
-        "__fn": "({ studentName, newTeacherName }) => `The teacher for ${studentName} has been reassigned to ${newTeacherName}.`"
+        "__fn": "({studentName,newTeacherName})=>`The teacher for ${studentName} has been reassigned to ${newTeacherName}.`"
       }
     },
     "oldTeacher": {
       "title": "Student Reassigned Away",
       "body": {
-        "__fn": "({ studentName, newTeacherName }) => `${studentName} has been reassigned to a new teacher (${newTeacherName}).`"
+        "__fn": "({studentName,newTeacherName})=>`${studentName} has been reassigned to a new teacher (${newTeacherName}).`"
       }
     },
     "newTeacher": {
       "title": "Student Reassigned To You",
       "body": {
-        "__fn": "({ studentName, oldTeacherName }) => `${studentName} has been reassigned to you from ${oldTeacherName}.`"
+        "__fn": "({studentName,oldTeacherName})=>`${studentName} has been reassigned to you from ${oldTeacherName}.`"
       }
     }
   },
   "studentStatusChanged": {
     "title": "Student Status Changed",
     "body": {
-      "__fn": "({ studentName, oldStatus, newStatus }) => `${studentName}'s status has changed from ${oldStatus} to ${newStatus}.`"
+      "__fn": "({studentName,oldStatus,newStatus})=>`${studentName}'s status has changed from ${oldStatus} to ${newStatus}.`"
     }
   },
   "studentQuotaOverridden": {
     "title": "Class Quota Updated",
     "body": {
-      "__fn": "({ studentName, newClassesRemaining }) => `${studentName}'s remaining class quota is now ${newClassesRemaining}.`"
+      "__fn": "({studentName,newClassesRemaining})=>`${studentName}'s remaining class quota is now ${newClassesRemaining}.`"
     }
   },
   "lessonReportSubmitted": {
     "title": "Lesson Report Submitted",
     "body": {
-      "__fn": "({ reportId, teacherName }) => `${teacherName} submitted lesson report ${reportId} for your review.`"
+      "__fn": "({reportId,teacherName})=>`${teacherName} submitted lesson report ${reportId} for your review.`"
     }
   },
   "lessonReportReviewed": {
     "title": "Lesson Report Reviewed",
     "body": {
-      "__fn": "({ reportId, teacherName, decision }) => `Your lesson report ${reportId} from ${teacherName} has been ${decision}.`"
+      "__fn": "({reportId,teacherName,decision})=>`Your lesson report ${reportId} from ${teacherName} has been ${decision}.`"
     }
   },
   "newComplaint": {
     "title": "New Complaint",
     "body": {
-      "__fn": "({ complaintId, category }) => `A new ${category} complaint (${complaintId}) has been submitted.`"
+      "__fn": "({complaintId,category})=>`A new ${category} complaint (${complaintId}) has been submitted.`"
     }
   },
   "complaintResponse": {
@@ -185,61 +185,61 @@
   "suggestionMarkedDuplicate": {
     "title": "Suggestion Marked as Duplicate",
     "body": {
-      "__fn": "({ duplicateId }) => `Your suggestion has been marked as a duplicate of suggestion #${duplicateId.slice(0, 8)}`"
+      "__fn": "({duplicateId})=>`Your suggestion has been marked as a duplicate of suggestion #${duplicateId.slice(0,8)}`"
     }
   },
   "accountingPaymentRecorded": {
     "title": "Credit Hours Package Recorded",
     "body": {
-      "__fn": "({ packageName, creditHours, amount, currency }) => `A payment for the \"${packageName}\" package (${creditHours} credit hours, ${amount} ${currency}) has been recorded. Your credit-hour balance has been updated.`"
+      "__fn": "({packageName,creditHours,amount,currency})=>`A payment for the \"${packageName}\" package (${creditHours} credit hours, ${amount} ${currency}) has been recorded. Your credit-hour balance has been updated.`"
     }
   },
   "accountingLowHours": {
     "title": "Low Credit-Hour Balance",
     "body": {
-      "__fn": "({ remaining, threshold }) => `Your remaining credit hours are down to ${remaining}, below the low-balance threshold of ${threshold}. Please purchase a new package to keep booking classes.`"
+      "__fn": "({remaining,threshold})=>`Your remaining credit hours are down to ${remaining}, below the low-balance threshold of ${threshold}. Please purchase a new package to keep booking classes.`"
     }
   },
   "quotaExpiringSoon": {
     "title": "Quota Expiring Soon",
     "body": {
-      "__fn": "({ quotaName, validUntil, remaining }) => `Quota \"${quotaName}\" expires on ${validUntil}. You have ${remaining} classes remaining.`"
+      "__fn": "({quotaName,validUntil,remaining})=>`Quota \"${quotaName}\" expires on ${validUntil}. You have ${remaining} classes remaining.`"
     }
   },
   "quotaExpired": {
     "title": "Quota Expired",
     "body": {
-      "__fn": "({ quotaName }) => `Quota \"${quotaName}\" has expired.`"
+      "__fn": "({quotaName})=>`Quota \"${quotaName}\" has expired.`"
     }
   },
   "quotaLowBalance": {
     "title": "Quota Low Balance",
     "body": {
-      "__fn": "({ studentName, remaining, totalClasses }) => `Low quota balance for ${studentName}: ${remaining} of ${totalClasses} classes remaining.`"
+      "__fn": "({studentName,remaining,totalClasses})=>`Low quota balance for ${studentName}: ${remaining} of ${totalClasses} classes remaining.`"
     }
   },
   "onDemandInstancePendingCredit": {
     "title": "Class Pending Credit",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `On-demand class for ${studentName} on ${scheduledStartAt} needs additional credits.`"
+      "__fn": "({studentName,scheduledStartAt})=>`On-demand class for ${studentName} on ${scheduledStartAt} needs additional credits.`"
     }
   },
   "onDemandInstanceReminderT3": {
     "title": "Upcoming On-Demand Class",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `On-demand class for ${studentName} is scheduled in 3 days on ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`On-demand class for ${studentName} is scheduled in 3 days on ${scheduledStartAt}.`"
     }
   },
   "onDemandInstanceReminderT1": {
     "title": "Upcoming On-Demand Class Tomorrow",
     "body": {
-      "__fn": "({ studentName, scheduledStartAt }) => `On-demand class for ${studentName} is scheduled tomorrow on ${scheduledStartAt}.`"
+      "__fn": "({studentName,scheduledStartAt})=>`On-demand class for ${studentName} is scheduled tomorrow on ${scheduledStartAt}.`"
     }
   },
   "onDemandTeacherDailyDigest": {
     "title": "Daily On-Demand Classes Digest",
     "body": {
-      "__fn": "({ teacherName, pendingCount }) => `Hello ${teacherName}, you have ${pendingCount} on-demand classes pending credit resolution today.`"
+      "__fn": "({teacherName,pendingCount})=>`Hello ${teacherName}, you have ${pendingCount} on-demand classes pending credit resolution today.`"
     }
   },
   "drawerTitle": "Notifications",
@@ -252,10 +252,10 @@
   "rejectInvoice": "Reject invoice",
   "noNotifications": "No notifications",
   "unreadCount": {
-    "__fn": "(count) => {\n    if (count === 0)\n      return \"No unread notifications\";\n    if (count === 1)\n      return \"1 unread notification\";\n    return `${count} unread notifications`;\n  }"
+    "__fn": "count=>{if(count===0)return\"No unread notifications\";if(count===1)return\"1 unread notification\";return`${count} unread notifications`}"
   },
   "whatsappDeliveryFailed": "WhatsApp message delivery failed",
   "whatsappDeliveryFailedWithReason": {
-    "__fn": "(reason) => `WhatsApp message delivery failed: ${reason}`"
+    "__fn": "reason=>`WhatsApp message delivery failed: ${reason}`"
   }
 }

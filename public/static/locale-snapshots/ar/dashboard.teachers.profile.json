@@ -36,7 +36,7 @@
     "saveProfile": "حفظ الملف الشخصي",
     "discardChanges": "تجاهل التغييرات",
     "lastModified": {
-      "__fn": "(date) => `\\u0622\\u062E\\u0631 \\u062A\\u0639\\u062F\\u064A\\u0644: ${date}`"
+      "__fn": "date=>`\\u0622\\u062E\\u0631 \\u062A\\u0639\\u062F\\u064A\\u0644: ${date}`"
     },
     "saveSuccess": "تم حفظ الملف الشخصي بنجاح!",
     "saveError": "فشل حفظ الملف الشخصي"

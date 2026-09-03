@@ -30,12 +30,12 @@
     "from": "من",
     "to": "إلى",
     "sessionsCount": {
-      "__fn": "(count) => count === 1 ? \"\\u062D\\u0635\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\" : `${count} \\u062D\\u0635\\u0635`"
+      "__fn": "count=>count===1?\"\\u062D\\u0635\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\":`${count} \\u062D\\u0635\\u0635`"
     }
   },
   "conflicts": {
     "teacherLabel": {
-      "__fn": "(name) => `\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645: ${name}`"
+      "__fn": "name=>`\\u0627\\u0644\\u0645\\u0639\\u0644\\u0645: ${name}`"
     }
   },
   "checkedEmpty": {

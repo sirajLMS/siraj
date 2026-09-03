@@ -9,9 +9,9 @@
   "generationShowDetails": "Show details",
   "generationHideDetails": "Hide details",
   "generationSuccessRate": {
-    "__fn": "(rate) => `Success rate: ${rate}`"
+    "__fn": "rate=>`Success rate: ${rate}`"
   },
   "generationAvgTime": {
-    "__fn": "(time) => `Average generation time: ${time}`"
+    "__fn": "time=>`Average generation time: ${time}`"
   }
 }

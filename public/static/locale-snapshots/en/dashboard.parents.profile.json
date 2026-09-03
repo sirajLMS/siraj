@@ -28,7 +28,7 @@
     "upload": "Upload",
     "avatarFileTypeError": "Only JPG, PNG, or WebP files are allowed",
     "avatarFileSizeError": {
-      "__fn": "(maxMb) => `File size must be less than ${maxMb}MB`"
+      "__fn": "maxMb=>`File size must be less than ${maxMb}MB`"
     },
     "avatarUploadSuccess": "Profile picture updated successfully"
   },

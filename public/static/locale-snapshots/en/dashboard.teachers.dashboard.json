@@ -5,7 +5,7 @@
   "todayChip": "Today",
   "updatedJustNow": "Updated just now",
   "updatedMinutesAgo": {
-    "__fn": "(minutes) => minutes === 1 ? `Updated ${minutes} minute ago` : `Updated ${minutes} minutes ago`"
+    "__fn": "minutes=>minutes===1?`Updated ${minutes} minute ago`:`Updated ${minutes} minutes ago`"
   },
   "metrics": {
     "totalClasses": "Total Classes",
@@ -21,14 +21,14 @@
   },
   "activeWelcome": {
     "title": {
-      "__fn": "(name) => `Welcome back, ${name}`"
+      "__fn": "name=>`Welcome back, ${name}`"
     },
     "subtitle": {
-      "__fn": "(date, count) => `Today is ${date}. You have ${count} scheduled classes.`"
+      "__fn": "(date,count)=>`Today is ${date}. You have ${count} scheduled classes.`"
     },
     "overviewLabel": "Dashboard Overview",
     "mobileSummary": {
-      "__fn": "(date, count) => `${date} \\u2022 ${count} active classes`"
+      "__fn": "(date,count)=>`${date} \\u2022 ${count} active classes`"
     }
   },
   "schedule": {
@@ -42,7 +42,7 @@
     "contact": "Contact",
     "actions": "Actions",
     "showing": {
-      "__fn": "(shown, total) => `Showing ${shown} of ${total} scheduled classes for today.`"
+      "__fn": "(shown,total)=>`Showing ${shown} of ${total} scheduled classes for today.`"
     },
     "noEntries": "No classes scheduled for today",
     "sessionEnded": "Session ended",
@@ -50,7 +50,7 @@
     "contactAdmin": "Contact admin (hold)",
     "duration": "Duration",
     "durationValue": {
-      "__fn": "(minutes) => `${minutes} min`"
+      "__fn": "minutes=>`${minutes} min`"
     },
     "current": "Current",
     "viewAll": "View All",
@@ -110,7 +110,7 @@
   "alert": {
     "title": "Missed Class Time",
     "description": {
-      "__fn": "(time) => `A class was scheduled for ${time}. Please contact admin to reschedule.`"
+      "__fn": "time=>`A class was scheduled for ${time}. Please contact admin to reschedule.`"
     }
   },
   "policy": {
@@ -159,7 +159,7 @@
     "teacherIdNotFound": "Teacher ID not found."
   },
   "supportRequestSubmitted": {
-    "__fn": "(type) => `Support request submitted to ${type}.`"
+    "__fn": "type=>`Support request submitted to ${type}.`"
   },
   "rules": {
     "pageTitle": "Classroom Rules",

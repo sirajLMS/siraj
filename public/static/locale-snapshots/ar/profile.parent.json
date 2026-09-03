@@ -6,7 +6,7 @@
     "invalidTimezone": "المنطقة الزمنية غير صالحة"
   },
   "convertedAmount": {
-    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
+    "__fn": "(lockedAmount,lockedCurrency,convertedApprox,displayCurrency)=>`${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
   },
   "sections": {
     "account": "الحساب",

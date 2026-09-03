@@ -47,17 +47,17 @@
     "yourOffset": "Your offset"
   },
   "paginationRange": {
-    "__fn": "(from, to, total) => `${from}\\u2013${to} of ${total}`"
+    "__fn": "(from,to,total)=>`${from}\\u2013${to} of ${total}`"
   },
   "pageOf": {
-    "__fn": "(current, total) => `Page ${current} of ${total}`"
+    "__fn": "(current,total)=>`Page ${current} of ${total}`"
   },
   "noData": "No data",
   "showingOf": {
-    "__fn": "(shown, total) => `Showing ${shown} of ${total} classes`"
+    "__fn": "(shown,total)=>`Showing ${shown} of ${total} classes`"
   },
   "updatedMinutesAgo": {
-    "__fn": "(minutes) => minutes === 1 ? \"Updated 1 minute ago\" : `Updated ${minutes} minutes ago`"
+    "__fn": "minutes=>minutes===1?\"Updated 1 minute ago\":`Updated ${minutes} minutes ago`"
   },
   "metrics": {
     "total": "Total",

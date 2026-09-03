@@ -34,7 +34,7 @@
   "saveError": "Failed to save setting.",
   "deleteConfirmTitle": "Delete Setting",
   "deleteConfirmBody": {
-    "__fn": "(key) => `Are you sure you want to delete \"${key}\"? This action cannot be undone.`"
+    "__fn": "key=>`Are you sure you want to delete \"${key}\"? This action cannot be undone.`"
   },
   "deleteConfirmCancel": "Cancel",
   "deleteConfirmConfirm": "Delete",

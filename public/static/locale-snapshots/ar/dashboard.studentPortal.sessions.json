@@ -24,7 +24,7 @@
     "cancelled": "ملغاة"
   },
   "minutesShort": {
-    "__fn": "(minutes) => `${minutes} \\u062F`"
+    "__fn": "minutes=>`${minutes} \\u062F`"
   },
   "viewClass": "عرض الحصة",
   "joinSession": "انضم للحصة"

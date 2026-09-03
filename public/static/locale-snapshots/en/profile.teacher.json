@@ -13,13 +13,13 @@
     "adminOnly": "Administrative Details"
   },
   "baseSalary": {
-    "__fn": "(amount, currency) => `${amount} ${currency}`"
+    "__fn": "(amount,currency)=>`${amount} ${currency}`"
   },
   "paymentMethod": {
-    "__fn": "(method) => method"
+    "__fn": "method=>method"
   },
   "convertedAmount": {
-    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
+    "__fn": "(lockedAmount,lockedCurrency,convertedApprox,displayCurrency)=>`${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
   },
   "stats": {
     "totalClasses": "Total Classes",

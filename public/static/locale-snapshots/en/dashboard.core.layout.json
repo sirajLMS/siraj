@@ -19,6 +19,6 @@
   "pageNotFoundBackToDashboard": "Back to dashboard",
   "customizeButton": "Customize",
   "welcomeUser": {
-    "__fn": "(name) => `Welcome ${name}`"
+    "__fn": "name=>`Welcome ${name}`"
   }
 }

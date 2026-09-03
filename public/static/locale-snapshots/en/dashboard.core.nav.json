@@ -112,7 +112,7 @@
     }
   },
   "toggleGroupAriaLabel": {
-    "__fn": "(label) => `Toggle ${label} group`"
+    "__fn": "label=>`Toggle ${label} group`"
   },
   "accountingPayments": "Payments",
   "accountingPackages": "Packages",

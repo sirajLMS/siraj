@@ -84,7 +84,7 @@
   "isInactive": "Inactive",
   "deliveryFailed": "WhatsApp message delivery failed",
   "deliveryFailedWithReason": {
-    "__fn": "(reason) => `WhatsApp message delivery failed: ${reason}`"
+    "__fn": "reason=>`WhatsApp message delivery failed: ${reason}`"
   },
   "createAccountTitle": "Add WhatsApp Number",
   "editNameTitle": "Edit Display Name",
@@ -104,7 +104,7 @@
   "validationPinFormat": "PIN must be exactly 6 digits.",
   "deleteConfirmTitle": "Delete WhatsApp Number",
   "deleteConfirmMessage": {
-    "__fn": "(displayName) => `Are you sure you want to delete \"${displayName}\"? This action cannot be undone.`"
+    "__fn": "displayName=>`Are you sure you want to delete \"${displayName}\"? This action cannot be undone.`"
   },
   "loadingTitle": "Loading…",
   "retry": "Retry",

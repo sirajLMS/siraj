@@ -56,7 +56,7 @@
   "adminResetPassword": {
     "title": "إعادة تعيين كلمة المرور",
     "description": {
-      "__fn": "(userName, userEmail) => `\\u062A\\u0639\\u064A\\u064A\\u0646 \\u0643\\u0644\\u0645\\u0629 \\u0645\\u0631\\u0648\\u0631 \\u062C\\u062F\\u064A\\u062F\\u0629 \\u0644\\u0640 ${userName} (${userEmail})`"
+      "__fn": "(userName,userEmail)=>`\\u062A\\u0639\\u064A\\u064A\\u0646 \\u0643\\u0644\\u0645\\u0629 \\u0645\\u0631\\u0648\\u0631 \\u062C\\u062F\\u064A\\u062F\\u0629 \\u0644\\u0640 ${userName} (${userEmail})`"
     },
     "newPassword": "كلمة المرور الجديدة",
     "confirmPassword": "تأكيد كلمة المرور الجديدة",
@@ -83,10 +83,10 @@
     "cannotResetOwnPasswordViaAdmin": "لا يمكنك إعادة تعيين كلمة مرورك الخاصة عبر إجراء المسؤول. استخدم ميزة تغيير كلمة المرور بدلاً من ذلك."
   },
   "convertedAmount": {
-    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
+    "__fn": "(lockedAmount,lockedCurrency,convertedApprox,displayCurrency)=>`${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
   },
   "convertedTotalApprox": {
-    "__fn": "(convertedApprox, displayCurrency) => `\\u2248 ${convertedApprox} ${displayCurrency}`"
+    "__fn": "(convertedApprox,displayCurrency)=>`\\u2248 ${convertedApprox} ${displayCurrency}`"
   },
   "fieldAccess": {
     "restrictedTitle": "محتوى مقيّد",
@@ -128,7 +128,7 @@
     "allClasses": "جميع الصفوف",
     "mobileListLabel": "قائمة الطلاب المعينين",
     "pagination": {
-      "__fn": "(start, end, total) => `\\u0639\\u0631\\u0636 ${start} \\u0625\\u0644\\u0649 ${end} \\u0645\\u0646 \\u0623\\u0635\\u0644 ${total} \\u0633\\u062C\\u0644`"
+      "__fn": "(start,end,total)=>`\\u0639\\u0631\\u0636 ${start} \\u0625\\u0644\\u0649 ${end} \\u0645\\u0646 \\u0623\\u0635\\u0644 ${total} \\u0633\\u062C\\u0644`"
     },
     "noRows": "لا يوجد طلاب معينون",
     "columns": {

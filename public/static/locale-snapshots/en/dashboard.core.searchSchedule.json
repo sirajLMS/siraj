@@ -25,15 +25,15 @@
   "searchBtn": "Search",
   "noResults": "No available time slots found for the given criteria.",
   "resultsCount": {
-    "__fn": "(count, gaps) => `${count} teachers with ${gaps} available slots`"
+    "__fn": "(count,gaps)=>`${count} teachers with ${gaps} available slots`"
   },
   "availableDaysCount": {
-    "__fn": "(count) => `${count} days`"
+    "__fn": "count=>`${count} days`"
   },
   "errorLoading": "Failed to load availability data.",
   "viewMonthSchedule": "View month schedule",
   "monthScheduleTitle": {
-    "__fn": "(name) => `${name} \\u2014 Monthly Availability`"
+    "__fn": "name=>`${name} \\u2014 Monthly Availability`"
   },
   "monthScheduleError": "Failed to load monthly availability.",
   "closeMonthSchedule": "Close month schedule",

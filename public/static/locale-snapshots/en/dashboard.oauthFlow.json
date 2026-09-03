@@ -1,9 +1,9 @@
 {
   "connectingTo": {
-    "__fn": "(provider) => `Connecting to ${provider}\\u2026`"
+    "__fn": "provider=>`Connecting to ${provider}\\u2026`"
   },
   "redirectingToProvider": {
-    "__fn": "(provider) => `Redirecting to ${provider}\\u2026`"
+    "__fn": "provider=>`Redirecting to ${provider}\\u2026`"
   },
   "connectionSuccessful": "Connection successful!",
   "connectionFailed": "Connection failed. Please try again.",
@@ -16,7 +16,7 @@
   "statusExpiring": "Expiring",
   "statusExpired": "Expired",
   "expiresInDays": {
-    "__fn": "(days) => `Expires in ${days} day${days === 1 ? \"\" : \"s\"}`"
+    "__fn": "days=>`Expires in ${days} day${days===1?\"\":\"s\"}`"
   },
   "statusAriaLabel": "OAuth connection status"
 }

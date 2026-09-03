@@ -11,10 +11,10 @@
     "salary": "Salary Information"
   },
   "baseSalary": {
-    "__fn": "(amount, currency) => `Base Salary: ${amount} ${currency}`"
+    "__fn": "(amount,currency)=>`Base Salary: ${amount} ${currency}`"
   },
   "paymentMethod": {
-    "__fn": "(method) => `Payment Method: ${method}`"
+    "__fn": "method=>`Payment Method: ${method}`"
   },
   "errors": {
     "failedToLoad": "Failed to load profile."

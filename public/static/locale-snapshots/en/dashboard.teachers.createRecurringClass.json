@@ -10,7 +10,7 @@
     "time": "Time",
     "duration": "Duration",
     "durationMinutes": {
-      "__fn": "(minutes) => `${minutes} minutes`"
+      "__fn": "minutes=>`${minutes} minutes`"
     },
     "days": "Days",
     "timezone": "Timezone",
@@ -34,7 +34,7 @@
     "addOverride": "Add Time Override",
     "removeOverride": "Remove Override",
     "label": {
-      "__fn": "(day) => `Custom Time for ${day}`"
+      "__fn": "day=>`Custom Time for ${day}`"
     }
   },
   "scheduling": {
@@ -45,7 +45,7 @@
     "noOpenQuotas": "No open quotas — create a quota first",
     "noOpenQuotasCta": "Create Quota",
     "quotaOptionLabel": {
-      "__fn": "(name, remaining, validUntil) => `${name} \\u2014 ${remaining} remaining \\u2014 valid until ${validUntil}`"
+      "__fn": "(name,remaining,validUntil)=>`${name} \\u2014 ${remaining} remaining \\u2014 valid until ${validUntil}`"
     },
     "earmarkedClasses": "Earmarked Classes",
     "generationHorizon": "Generation Horizon (weeks)",
@@ -70,7 +70,7 @@
   "success": {
     "title": "Success",
     "description": {
-      "__fn": "(count) => `Recurring classes created successfully (${count}).`"
+      "__fn": "count=>`Recurring classes created successfully (${count}).`"
     }
   },
   "errors": {

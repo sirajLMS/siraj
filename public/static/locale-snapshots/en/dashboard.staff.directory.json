@@ -42,10 +42,10 @@
     "processing": "Processing...",
     "save": "Save",
     "deactivateConfirmation": {
-      "__fn": "(name) => `Are you sure you want to deactivate ${name}?`"
+      "__fn": "name=>`Are you sure you want to deactivate ${name}?`"
     },
     "activateConfirmation": {
-      "__fn": "(name) => `Are you sure you want to activate ${name}?`"
+      "__fn": "name=>`Are you sure you want to activate ${name}?`"
     }
   },
   "status": {
@@ -58,7 +58,7 @@
     "supervisor": "Supervisor"
   },
   "showingOf": {
-    "__fn": "(count, total) => `Showing ${count} of ${total} results`"
+    "__fn": "(count,total)=>`Showing ${count} of ${total} results`"
   },
   "noEntries": "No managers"
 }

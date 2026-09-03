@@ -39,7 +39,7 @@
   "saveOverrides": "Save Overrides",
   "deleteConfirmTitle": "Delete Permission Group",
   "deleteConfirmBody": {
-    "__fn": "(name) => `Are you sure you want to delete permission group \"${name}\"? This action cannot be undone and all assigned users will lose this group's permissions.`"
+    "__fn": "name=>`Are you sure you want to delete permission group \"${name}\"? This action cannot be undone and all assigned users will lose this group's permissions.`"
   },
   "createGroupTitle": "Create Permission Group",
   "editGroupTitle": "Edit Permission Group",
@@ -56,7 +56,7 @@
   "selectUserPlaceholder": "Search or select a user...",
   "assignButton": "Assign",
   "itemsSelectedLabel": {
-    "__fn": "(count) => `${count} items selected`"
+    "__fn": "count=>`${count} items selected`"
   },
   "assignPermissionsButton": "Assign Permissions",
   "revoke": "Revoke",
@@ -68,7 +68,7 @@
   "columnGroupBaseline": "Group Baseline",
   "columnOverrideControl": "Override Control",
   "allowedViaGroups": {
-    "__fn": "(groups) => `Allowed via ${groups}`"
+    "__fn": "groups=>`Allowed via ${groups}`"
   },
   "notSet": "Not Set",
   "statusAllowed": "Allowed",
@@ -85,7 +85,7 @@
   "searchAssignedUsers": "Search assigned users by name or email...",
   "assignUsers": "Assign Users",
   "usersSelected": {
-    "__fn": "(count) => `${count} users selected`"
+    "__fn": "count=>`${count} users selected`"
   },
   "removeSelected": "Remove Selected",
   "assignedGroupMembers": "Assigned Group Members",

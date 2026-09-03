@@ -34,7 +34,7 @@
   "publishError": "Failed to update publish state.",
   "deleteConfirmTitle": "Delete Site Content",
   "deleteConfirmBody": {
-    "__fn": "(title) => `Are you sure you want to delete \"${title}\"? This action cannot be undone.`"
+    "__fn": "title=>`Are you sure you want to delete \"${title}\"? This action cannot be undone.`"
   },
   "deleteConfirmCancel": "Cancel",
   "deleteConfirmConfirm": "Delete",

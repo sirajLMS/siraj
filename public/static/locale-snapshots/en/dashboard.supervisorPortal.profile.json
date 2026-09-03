@@ -22,7 +22,7 @@
   "adminResetPassword": {
     "title": "Reset Password",
     "description": {
-      "__fn": "(userName, userEmail) => `Reset password for ${userName} (${userEmail})`"
+      "__fn": "(userName,userEmail)=>`Reset password for ${userName} (${userEmail})`"
     },
     "newPassword": "New Password",
     "confirmPassword": "Confirm Password",

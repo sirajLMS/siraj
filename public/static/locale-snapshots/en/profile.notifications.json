@@ -66,7 +66,7 @@
     "connectButton": "Connect",
     "connectingLabel": "Connecting...",
     "connectedAs": {
-      "__fn": "(email) => `Connected as ${email}`"
+      "__fn": "email=>`Connected as ${email}`"
     },
     "disconnectButton": "Disconnect",
     "disconnectConfirmTitle": "Disconnect meeting provider",

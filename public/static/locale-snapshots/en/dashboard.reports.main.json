@@ -31,10 +31,10 @@
     "totals": "Total:"
   },
   "convertedAmount": {
-    "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
+    "__fn": "(lockedAmount,lockedCurrency,convertedApprox,displayCurrency)=>`${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`"
   },
   "convertedTotalApprox": {
-    "__fn": "(convertedApprox, displayCurrency) => `\\u2248 ${convertedApprox} ${displayCurrency}`"
+    "__fn": "(convertedApprox,displayCurrency)=>`\\u2248 ${convertedApprox} ${displayCurrency}`"
   },
   "summary": {
     "engagementRate": "Engagement rate",
@@ -46,7 +46,7 @@
   "ledger": {
     "title": "Performance ledger",
     "studentLabel": {
-      "__fn": "(name) => `Student: ${name}`"
+      "__fn": "name=>`Student: ${name}`"
     },
     "paid": "Paid"
   },

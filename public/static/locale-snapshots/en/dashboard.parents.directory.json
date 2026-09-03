@@ -20,15 +20,15 @@
     "unpaidInvoices": "Unpaid Invoices",
     "options": "Options",
     "guardianOf": {
-      "__fn": "(name) => `Guardian of ${name}`"
+      "__fn": "name=>`Guardian of ${name}`"
     }
   },
   "card": {
     "guardianOf": {
-      "__fn": "(name) => `Guardian of ${name}`"
+      "__fn": "name=>`Guardian of ${name}`"
     },
     "unpaidCount": {
-      "__fn": "(count) => `Unpaid: ${count}`"
+      "__fn": "count=>`Unpaid: ${count}`"
     },
     "invoicesCleared": "Invoices Cleared"
   },

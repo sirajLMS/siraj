@@ -12,29 +12,29 @@
   "available": "Available",
   "quotaReached": "You have reached your leave quota.",
   "remaining": {
-    "__fn": "(count, total) => `Remaining quota: ${count} of ${total}`"
+    "__fn": "(count,total)=>`Remaining quota: ${count} of ${total}`"
   },
   "importantNotes": "Important Notes",
   "supportContact": "Contact Support",
   "contactAdmin": "Contact an administrator for assistance.",
   "monthDisplay": {
-    "__fn": "(month, year) => `${month} ${year}`"
+    "__fn": "(month,year)=>`${month} ${year}`"
   },
   "leaveQuotaDesc": {
-    "__fn": "(count) => `You can request leave for ${count} classes.`"
+    "__fn": "count=>`You can request leave for ${count} classes.`"
   },
   "totalClassesDesc": {
-    "__fn": "(count) => `You have ${count} classes scheduled.`"
+    "__fn": "count=>`You have ${count} classes scheduled.`"
   },
   "loading": "Loading schedule...",
   "defaultLeaveReason": "Not specified",
   "supportRequestReason": "Not specified",
   "students": "Students",
   "studentCount": {
-    "__fn": "(count) => count === 1 ? `${count} student` : `${count} students`"
+    "__fn": "count=>count===1?`${count} student`:`${count} students`"
   },
   "timeRange": {
-    "__fn": "(startTime, endTime) => `${startTime} - ${endTime}`"
+    "__fn": "(startTime,endTime)=>`${startTime} - ${endTime}`"
   },
   "weekdays": {
     "sun": "S",

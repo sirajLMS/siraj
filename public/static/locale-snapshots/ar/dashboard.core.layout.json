@@ -19,6 +19,6 @@
   "pageNotFoundBackToDashboard": "العودة إلى لوحة التحكم",
   "customizeButton": "تخصيص",
   "welcomeUser": {
-    "__fn": "(name) => `\\u0645\\u0631\\u062D\\u0628\\u064B\\u0627 ${name}`"
+    "__fn": "name=>`\\u0645\\u0631\\u062D\\u0628\\u064B\\u0627 ${name}`"
   }
 }

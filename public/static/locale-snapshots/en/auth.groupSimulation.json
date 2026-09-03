@@ -2,6 +2,6 @@
   "switchRoleTo": "Switch role to…",
   "returnToNormalRole": "Return to my normal role",
   "bannerSimulatingAs": {
-    "__fn": "(name) => `You are previewing the site as ${name} role.`"
+    "__fn": "name=>`You are previewing the site as ${name} role.`"
   }
 }

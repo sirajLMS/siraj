@@ -39,7 +39,7 @@
     "emptyClass": "Set up a meeting for the class to provide a join link.",
     "setupLink": "Set up meeting",
     "providerTooltip": {
-      "__fn": "(provider, source) => `${provider} \\xB7 ${source}`"
+      "__fn": "(provider,source)=>`${provider} \\xB7 ${source}`"
     }
   },
   "manager": {
@@ -54,7 +54,7 @@
     "save": "Save",
     "deleteTitle": "Delete Meeting Config",
     "deleteBody": {
-      "__fn": "(name) => `Delete ${name}? This cannot be undone.`"
+      "__fn": "name=>`Delete ${name}? This cannot be undone.`"
     },
     "deleteConfirm": "Delete",
     "loadError": "Failed to load meeting configs",
@@ -97,7 +97,7 @@
     "inheritedFromTeacher": "Uses teacher default",
     "overrideActive": "Class override active",
     "effectiveSourceBanner": {
-      "__fn": "(source) => `Effective meeting source: ${source}`"
+      "__fn": "source=>`Effective meeting source: ${source}`"
     },
     "recurringSectionTitle": "Recurring Schedule Meeting",
     "recurringSectionSubtitle": "Optional override for all classes in this recurring schedule.",
@@ -122,7 +122,7 @@
   "recurringSchedule": {
     "pageTitle": "Recurring Series Meeting",
     "scheduleSummary": {
-      "__fn": "(student, teacher, duration, timezone) => `${student} with ${teacher} \\xB7 ${duration} min \\xB7 ${timezone}`"
+      "__fn": "(student,teacher,duration,timezone)=>`${student} with ${teacher} \\xB7 ${duration} min \\xB7 ${timezone}`"
     },
     "invalidId": "Invalid schedule ID",
     "breadcrumbDashboard": "Dashboard",
@@ -163,23 +163,23 @@
     "reconnectAllSuccess": "All providers reconnected successfully.",
     "reconnectAllError": "Failed to reconnect some providers. Please try again.",
     "reconnectAllWithCount": {
-      "__fn": "(count) => `Reconnect All (${count})`"
+      "__fn": "count=>`Reconnect All (${count})`"
     },
     "reconnectingProgress": {
-      "__fn": "(current, total) => `Reconnecting ${current} of ${total}\\u2026`"
+      "__fn": "(current,total)=>`Reconnecting ${current} of ${total}\\u2026`"
     },
     "reconnectedProviders": {
-      "__fn": "(count) => `Reconnected ${count} provider${count === 1 ? \"\" : \"s\"}`"
+      "__fn": "count=>`Reconnected ${count} provider${count===1?\"\":\"s\"}`"
     },
     "reconnectFailedProviders": {
-      "__fn": "(count) => `${count} failed to reconnect`"
+      "__fn": "count=>`${count} failed to reconnect`"
     },
     "reconnectAllAriaLabel": "Reconnect all expiring providers",
     "expiresInDays": {
-      "__fn": "(days) => `Expires in ${days} day${days === 1 ? \"\" : \"s\"}`"
+      "__fn": "days=>`Expires in ${days} day${days===1?\"\":\"s\"}`"
     },
     "expiresInHours": {
-      "__fn": "(hours) => `Expires in ${hours} hour${hours === 1 ? \"\" : \"s\"}`"
+      "__fn": "hours=>`Expires in ${hours} hour${hours===1?\"\":\"s\"}`"
     },
     "expired": "Expired",
     "reconnect": "Reconnect",
@@ -205,7 +205,7 @@
     "navigateToAdminSettingsAriaLabel": "Open admin meeting provider settings"
   },
   "providerLogoAlt": {
-    "__fn": "(providerName) => `${providerName} logo`"
+    "__fn": "providerName=>`${providerName} logo`"
   },
   "providerLogoFallbackAlt": "Meeting provider logo"
 }

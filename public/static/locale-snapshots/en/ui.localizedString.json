@@ -7,13 +7,13 @@
   "switchLocale": "Switch locale",
   "atLeastOneTranslationRequired": "Enter at least one translation",
   "localeRequired": {
-    "__fn": "(localeName) => `${localeName} is required for this field`"
+    "__fn": "localeName=>`${localeName} is required for this field`"
   },
   "localesRequired": {
-    "__fn": "(localeNames) => `${localeNames} are required for this field`"
+    "__fn": "localeNames=>`${localeNames} are required for this field`"
   },
   "localeRequiredEntry": {
-    "__fn": "(localeName) => `${localeName} is required`"
+    "__fn": "localeName=>`${localeName} is required`"
   },
   "locale": {
     "ar": "Arabic",

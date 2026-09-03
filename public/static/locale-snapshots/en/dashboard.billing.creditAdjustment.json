@@ -32,22 +32,22 @@
   },
   "preview": {
     "balance": {
-      "__fn": "(from, to) => `Classes remaining: ${from} \\u2192 ${to}`"
+      "__fn": "(from,to)=>`Classes remaining: ${from} \\u2192 ${to}`"
     }
   },
   "summary": {
     "add": {
-      "__fn": "(hours, student) => hours === 1 ? `Add 1 hour to ${student}` : `Add ${hours} hours to ${student}`"
+      "__fn": "(hours,student)=>hours===1?`Add 1 hour to ${student}`:`Add ${hours} hours to ${student}`"
     },
     "subtract": {
-      "__fn": "(hours, student) => hours === 1 ? `Subtract 1 hour from ${student}` : `Subtract ${hours} hours from ${student}`"
+      "__fn": "(hours,student)=>hours===1?`Subtract 1 hour from ${student}`:`Subtract ${hours} hours from ${student}`"
     },
     "carryover": {
-      "__fn": "(hours, teacher, paymentDate) => hours === 1 ? `Subtract 1 hour; 1 payout hour to ${teacher} by ${paymentDate}` : `Subtract ${hours} hours; ${hours} payout hours to ${teacher} by ${paymentDate}`"
+      "__fn": "(hours,teacher,paymentDate)=>hours===1?`Subtract 1 hour; 1 payout hour to ${teacher} by ${paymentDate}`:`Subtract ${hours} hours; ${hours} payout hours to ${teacher} by ${paymentDate}`"
     }
   },
   "resultsCappedHint": {
-    "__fn": "(limit) => `Showing the first ${limit} students. Refine your search to narrow the list.`"
+    "__fn": "limit=>`Showing the first ${limit} students. Refine your search to narrow the list.`"
   },
   "validation": {
     "fromAfterTo": "From Date cannot be after To Date",
@@ -57,13 +57,13 @@
   },
   "success": {
     "added": {
-      "__fn": "(hours) => `Added ${hours} credit hours`"
+      "__fn": "hours=>`Added ${hours} credit hours`"
     },
     "subtracted": {
-      "__fn": "(hours) => `Subtracted ${hours} credit hours`"
+      "__fn": "hours=>`Subtracted ${hours} credit hours`"
     },
     "carryover": {
-      "__fn": "(hours, teacher) => `Subtracted ${hours} hours and allocated carryover to ${teacher}`"
+      "__fn": "(hours,teacher)=>`Subtracted ${hours} hours and allocated carryover to ${teacher}`"
     }
   }
 }

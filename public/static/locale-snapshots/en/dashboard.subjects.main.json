@@ -10,7 +10,7 @@
   "loading": "Loading subjects...",
   "inactive": "Inactive",
   "resourceCount": {
-    "__fn": "(count) => `${count} resource`"
+    "__fn": "count=>`${count} resource`"
   },
   "nameLabel": "Name",
   "nameRequired": "Name is required",
@@ -28,13 +28,13 @@
   "editSubject": "Edit Subject",
   "deleteSubject": "Delete Subject",
   "deleteSubjectConfirm": {
-    "__fn": "(name) => `Are you sure you want to delete the subject \"${name}\"? This action cannot be undone.`"
+    "__fn": "name=>`Are you sure you want to delete the subject \"${name}\"? This action cannot be undone.`"
   },
   "createCategory": "Create Category",
   "editCategory": "Edit Category",
   "deleteCategory": "Delete Category",
   "deleteCategoryConfirm": {
-    "__fn": "(name) => `Are you sure you want to delete the category \"${name}\"? All subjects in this category will be uncategorized.`"
+    "__fn": "name=>`Are you sure you want to delete the category \"${name}\"? All subjects in this category will be uncategorized.`"
   },
   "cancel": "Cancel",
   "saveChanges": "Save Changes",
@@ -47,11 +47,11 @@
   "categoryDeleted": "Category deleted successfully",
   "detail": {
     "pageTitle": {
-      "__fn": "(name) => name"
+      "__fn": "name=>name"
     },
     "resourcesTitle": "Resources",
     "resourcesSubtitle": {
-      "__fn": "(count) => `${count} attached resource`"
+      "__fn": "count=>`${count} attached resource`"
     },
     "noResources": "No resources attached to this subject.",
     "notFound": "Subject not found.",

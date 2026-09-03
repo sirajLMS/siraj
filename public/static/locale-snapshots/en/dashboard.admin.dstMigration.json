@@ -30,12 +30,12 @@
     "from": "From",
     "to": "To",
     "sessionsCount": {
-      "__fn": "(count) => count === 1 ? \"1 session\" : `${count} sessions`"
+      "__fn": "count=>count===1?\"1 session\":`${count} sessions`"
     }
   },
   "conflicts": {
     "teacherLabel": {
-      "__fn": "(name) => `Teacher: ${name}`"
+      "__fn": "name=>`Teacher: ${name}`"
     }
   },
   "checkedEmpty": {

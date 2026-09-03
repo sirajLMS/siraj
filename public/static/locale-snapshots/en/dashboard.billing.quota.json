@@ -59,7 +59,7 @@
   "deleteConfirm": {
     "title": "Delete Quota",
     "body": {
-      "__fn": "(studentName) => `Are you sure you want to delete the quota for ${studentName}?`"
+      "__fn": "studentName=>`Are you sure you want to delete the quota for ${studentName}?`"
     },
     "cancel": "Cancel",
     "confirm": "Delete"
@@ -79,19 +79,19 @@
   },
   "insightsTitle": "Quota System Overview",
   "activeQuotasCount": {
-    "__fn": "(count) => count === 1 ? \"1 Active Quota\" : `${count} Active Quotas`"
+    "__fn": "count=>count===1?\"1 Active Quota\":`${count} Active Quotas`"
   },
   "totalClassesRemaining": {
-    "__fn": "(count) => count === 1 ? \"1 Class Remaining\" : `${count} Classes Remaining`"
+    "__fn": "count=>count===1?\"1 Class Remaining\":`${count} Classes Remaining`"
   },
   "expiringThisWeekCount": {
-    "__fn": "(count) => count === 1 ? \"1 Expiring This Week\" : `${count} Expiring This Week`"
+    "__fn": "count=>count===1?\"1 Expiring This Week\":`${count} Expiring This Week`"
   },
   "quotaCount": {
-    "__fn": "(count) => count === 1 ? \"1 quota\" : `${count} quotas`"
+    "__fn": "count=>count===1?\"1 quota\":`${count} quotas`"
   },
   "ledgerCount": {
-    "__fn": "(count) => count === 1 ? \"1 ledger entry\" : `${count} ledger entries`"
+    "__fn": "count=>count===1?\"1 ledger entry\":`${count} ledger entries`"
   },
   "deleteSuccess": "Quota deleted successfully",
   "notFoundTitle": "Quota Not Found",

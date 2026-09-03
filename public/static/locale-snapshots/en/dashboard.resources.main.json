@@ -35,7 +35,7 @@
   "deleteDialog": {
     "title": "Delete Resource?",
     "body": {
-      "__fn": "(title) => `This action cannot be undone. Are you sure you want to permanently delete ${title}?`"
+      "__fn": "title=>`This action cannot be undone. Are you sure you want to permanently delete ${title}?`"
     },
     "confirm": "Yes",
     "cancel": "No"
@@ -46,7 +46,7 @@
   },
   "notification": {
     "fileTypeNotAllowed": {
-      "__fn": "(type) => `${type} is not an allowed file type`"
+      "__fn": "type=>`${type} is not an allowed file type`"
     },
     "uploadPrepareFailed": "Failed to prepare upload",
     "uploadFailed": "File upload failed. Please try again.",

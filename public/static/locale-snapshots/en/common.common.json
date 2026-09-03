@@ -2,7 +2,7 @@
   "title": "Siraj",
   "description": "Welcome to Siraj. This app is successfully initialized with Next.js and Material-UI, fully customized with your brand aesthetics.",
   "documentTitleTemplate": {
-    "__fn": "(title) => `${title} | Siraj`"
+    "__fn": "title=>`${title} | Siraj`"
   },
   "welcome": "Welcome!",
   "subtitle": "Siraj Design System",
@@ -42,6 +42,6 @@
   "ariaProfileSections": "Profile sections",
   "noEntriesFound": "No entries found",
   "footerCopyright": {
-    "__fn": "(brand, year) => `\\xA9 ${year} ${brand} \\xB7 All rights reserved`"
+    "__fn": "(brand,year)=>`\\xA9 ${year} ${brand} \\xB7 All rights reserved`"
   }
 }

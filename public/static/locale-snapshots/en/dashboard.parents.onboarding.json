@@ -76,16 +76,16 @@
   "networkOverview": {
     "title": "Join Our Network",
     "totalParents": {
-      "__fn": "(count) => `Total parents in network: ${count}`"
+      "__fn": "count=>`Total parents in network: ${count}`"
     },
     "pendingForms": {
-      "__fn": "(count) => `Pending onboarding forms: ${count}`"
+      "__fn": "count=>`Pending onboarding forms: ${count}`"
     },
     "unpaidInvoices": {
-      "__fn": "(count) => `Unpaid invoices: ${count}`"
+      "__fn": "count=>`Unpaid invoices: ${count}`"
     },
     "trend": {
-      "__fn": "(percentage) => `${percentage}% increase this month`"
+      "__fn": "percentage=>`${percentage}% increase this month`"
     }
   },
   "validation": {

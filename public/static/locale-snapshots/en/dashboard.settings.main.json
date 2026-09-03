@@ -73,10 +73,10 @@
     "draftBadge": "Draft has changes",
     "noPublishedVersion": "No published version yet",
     "lastPublishedBy": {
-      "__fn": "(actor, when) => `Last published ${when} by ${actor}`"
+      "__fn": "(actor,when)=>`Last published ${when} by ${actor}`"
     },
     "draftUpdated": {
-      "__fn": "(when) => `Draft updated ${when}`"
+      "__fn": "when=>`Draft updated ${when}`"
     },
     "draftUpdatedJustNow": "Draft updated just now",
     "enterCustomizeMode": "Enter Customize Mode",
@@ -100,7 +100,7 @@
     "toolbarLivePreviewHint": "Changes preview live as you edit",
     "toolbarPublish": "Publish",
     "presetApplied": {
-      "__fn": "(presetName) => `${presetName} preset applied \\u2014 enter customize mode to refine`"
+      "__fn": "presetName=>`${presetName} preset applied \\u2014 enter customize mode to refine`"
     },
     "saveDraftSuccess": "Appearance draft saved.",
     "saveDraftError": "Failed to save appearance draft.",
@@ -234,7 +234,7 @@
     "saveError": "Failed to save setting.",
     "deleteConfirmTitle": "Delete Setting",
     "deleteConfirmBody": {
-      "__fn": "(key) => `Are you sure you want to delete \"${key}\"? This action cannot be undone.`"
+      "__fn": "key=>`Are you sure you want to delete \"${key}\"? This action cannot be undone.`"
     },
     "deleteConfirmCancel": "Cancel",
     "deleteConfirmConfirm": "Delete",
@@ -442,7 +442,7 @@
     "saveError": "Failed to save session configuration.",
     "deleteConfirmTitle": "Delete Session Configuration",
     "deleteConfirmBody": {
-      "__fn": "(roleName) => `Are you sure you want to delete the session configuration for \"${roleName}\"? This action cannot be undone.`"
+      "__fn": "roleName=>`Are you sure you want to delete the session configuration for \"${roleName}\"? This action cannot be undone.`"
     },
     "deleteConfirmCancel": "Cancel",
     "deleteConfirmConfirm": "Delete",
@@ -485,7 +485,7 @@
     "publishError": "Failed to update publish state.",
     "deleteConfirmTitle": "Delete Site Content",
     "deleteConfirmBody": {
-      "__fn": "(title) => `Are you sure you want to delete \"${title}\"? This action cannot be undone.`"
+      "__fn": "title=>`Are you sure you want to delete \"${title}\"? This action cannot be undone.`"
     },
     "deleteConfirmCancel": "Cancel",
     "deleteConfirmConfirm": "Delete",

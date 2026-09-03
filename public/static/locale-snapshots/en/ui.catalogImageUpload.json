@@ -5,12 +5,12 @@
   "optional": "Optional",
   "logoUrlLabel": "Logo URL",
   "helperText": {
-    "__fn": "(maxMb) => `PNG, JPG, or WebP \\xB7 Max ${maxMb} MB`"
+    "__fn": "maxMb=>`PNG, JPG, or WebP \\xB7 Max ${maxMb} MB`"
   },
   "previewAlt": "Logo preview",
   "invalidType": "Unsupported file type. Only PNG, JPG, or WebP are allowed.",
   "fileTooLarge": {
-    "__fn": "(maxMb) => `File exceeds ${maxMb} MB.`"
+    "__fn": "maxMb=>`File exceeds ${maxMb} MB.`"
   },
   "uploadFailed": "Image upload failed. Please try again."
 }

@@ -36,7 +36,7 @@
     "saved": "Saved!",
     "saveSuccess": "Student quota updated successfully.",
     "lastEditedAt": {
-      "__fn": "(time) => `Last edited ${time}`"
+      "__fn": "time=>`Last edited ${time}`"
     }
   },
   "info": {
@@ -81,10 +81,10 @@
     "eligibleForNextClass": "Eligible for next class",
     "notEligibleForNextClass": "Not eligible for next class",
     "expiryWarning": {
-      "__fn": "(days) => {\n      if (days === 0)\n        return \"This quota expires today\";\n      if (days === 1)\n        return \"This quota expires in 1 day\";\n      return `This quota expires in ${days} days`;\n    }"
+      "__fn": "days=>{if(days===0)return\"This quota expires today\";if(days===1)return\"This quota expires in 1 day\";return`This quota expires in ${days} days`}"
     },
     "remainingOfTotal": {
-      "__fn": "(remaining, total) => `${remaining} / ${total}`"
+      "__fn": "(remaining,total)=>`${remaining} / ${total}`"
     },
     "validPeriod": "Valid Period",
     "recentLedgerEntries": "Recent Ledger Entries",
@@ -124,6 +124,6 @@
     }
   },
   "quotaCount": {
-    "__fn": "(count) => count === 1 ? \"1 quota\" : `${count} quotas`"
+    "__fn": "count=>count===1?\"1 quota\":`${count} quotas`"
   }
 }

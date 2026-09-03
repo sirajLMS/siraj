@@ -35,19 +35,19 @@
     "impersonationNotAllowedWhileImpersonating": "You cannot impersonate while already impersonating another user.",
     "cannotResetOwnPasswordViaAdmin": "You cannot reset your own password via the admin path.",
     "demoGroupNotFound": {
-      "__fn": "(groupSlug) => `Demo group not found: ${groupSlug}`"
+      "__fn": "groupSlug=>`Demo group not found: ${groupSlug}`"
     },
     "demoGroupNoUser": {
-      "__fn": "(groupSlug) => `No user found for demo group: ${groupSlug}`"
+      "__fn": "groupSlug=>`No user found for demo group: ${groupSlug}`"
     }
   },
   "permissionManagement": {
     "unauthorized": "You do not have sufficient permissions to perform this action.",
     "userNotFound": {
-      "__fn": "(id) => `User not found: ${id}`"
+      "__fn": "id=>`User not found: ${id}`"
     },
     "permissionGroupNotFound": {
-      "__fn": "(id) => `Permission group not found: ${id}`"
+      "__fn": "id=>`Permission group not found: ${id}`"
     },
     "permissionGroupNameRequired": "Permission group name is required.",
     "permissionGroupNameTooLong": "Permission group name is too long (max 255 characters).",
@@ -59,29 +59,29 @@
   },
   "billing": {
     "invoiceNotFound": {
-      "__fn": "(id) => `Invoice not found: ${id}`"
+      "__fn": "id=>`Invoice not found: ${id}`"
     },
     "invoiceNotPendingReview": {
-      "__fn": "(id) => `Invoice is not pending review: ${id}`"
+      "__fn": "id=>`Invoice is not pending review: ${id}`"
     },
     "invoicePaymentProofNotFound": {
-      "__fn": "(id) => `Payment proof not found for invoice: ${id}`"
+      "__fn": "id=>`Payment proof not found for invoice: ${id}`"
     },
     "invoiceAlreadyPaid": {
-      "__fn": "({ id, status }) => `Invoice ${id} is already ${status.toLowerCase()}.`"
+      "__fn": "({id,status})=>`Invoice ${id} is already ${status.toLowerCase()}.`"
     },
     "paymentProofRequired": "Payment proof is required.",
     "cannotDeletePaidInvoice": {
-      "__fn": "(id) => `Cannot delete invoice ${id} because it has been paid.`"
+      "__fn": "id=>`Cannot delete invoice ${id} because it has been paid.`"
     },
     "invalidParentId": "Invalid parent ID.",
     "invalidInvoiceAmount": "Invalid invoice amount.",
     "parentNotFound": "Parent not found.",
     "invoiceVersionMismatch": {
-      "__fn": "({\n      id,\n      expectedVersion,\n      gotVersion\n    }) => `Invoice ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
+      "__fn": "({id,expectedVersion,gotVersion})=>`Invoice ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
     },
     "exchangeRateStale": {
-      "__fn": "({ fromCurrency, toCurrency }) => `Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`"
+      "__fn": "({fromCurrency,toCurrency})=>`Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`"
     },
     "quotaReleaseReservationFailed": "Failed to release quota reservation: insufficient reserved classes",
     "quotaReleaseConcurrentModification": "Quota release failed: quota no longer active after concurrent modification",
@@ -89,7 +89,7 @@
     "quotaResetConcurrentModification": "Failed to reset quota period due to concurrent modification",
     "paymentMethodCreateFailed": "Failed to create user payment method.",
     "paymentMethodNotFound": {
-      "__fn": "(id) => `Payment method not found (ID: ${id}).`"
+      "__fn": "id=>`Payment method not found (ID: ${id}).`"
     },
     "currencyHedgeCreateFailed": "Failed to create currency hedge.",
     "fxRefreshRateLimitExceeded": "FX rate refresh rate limit exceeded. Please try again later."
@@ -97,32 +97,32 @@
   "credit": {
     "duplicatePurchase": "This credit purchase has already been processed.",
     "insufficientBalance": {
-      "__fn": "({ studentId, remaining }) => `Insufficient balance for student ${studentId}. Remaining: ${remaining}`"
+      "__fn": "({studentId,remaining})=>`Insufficient balance for student ${studentId}. Remaining: ${remaining}`"
     },
     "invalidInput": "Invalid input.",
     "insufficientHours": {
-      "__fn": "({\n      studentId,\n      remaining,\n      required\n    }) => `Insufficient credit hours for student ${studentId}. Remaining: ${remaining}, required: ${required}`"
+      "__fn": "({studentId,remaining,required})=>`Insufficient credit hours for student ${studentId}. Remaining: ${remaining}, required: ${required}`"
     }
   },
   "package": {
     "codenameAlreadyExists": {
-      "__fn": "(codename) => `A package plan with codename \"${codename}\" already exists.`"
+      "__fn": "codename=>`A package plan with codename \"${codename}\" already exists.`"
     },
     "invalidInput": "Invalid package plan input.",
     "planArchived": {
-      "__fn": "(id) => `Package plan ${id} is archived.`"
+      "__fn": "id=>`Package plan ${id} is archived.`"
     }
   },
   "file": {
     "recordNotFound": {
-      "__fn": "({ tableName, entityId }) => `${tableName} not found: ${entityId}`"
+      "__fn": "({tableName,entityId})=>`${tableName} not found: ${entityId}`"
     },
     "invalidFileType": "Invalid file type. Only PDF, JPG, PNG, GIF, WebP, BMP, DOC, DOCX, XLS, XLSX, PPT, and PPTX files are allowed.",
     "invalidFileId": "Invalid file ID.",
     "invoicePaymentProofPending": "A payment proof is already pending review for this invoice.",
     "fileUsageRegistered": "File usage registered successfully",
     "fileUsageRegisterFailed": {
-      "__fn": "(error) => `Failed to register file usage: ${error}`"
+      "__fn": "error=>`Failed to register file usage: ${error}`"
     },
     "fileUsageRegisterFailedGeneric": "Failed to register file usage.",
     "fileCurrentlyInUse": "File is currently being used",
@@ -131,7 +131,7 @@
     "directoryPermissionsUpdated": "Directory permissions updated successfully",
     "directoryPermissionsUpdateFailed": "Failed to update directory permissions",
     "permissionsUpdateFailed": {
-      "__fn": "(error) => `Failed to update permissions: ${error}`"
+      "__fn": "error=>`Failed to update permissions: ${error}`"
     },
     "permissionsUpdateFailedGeneric": "Failed to update permissions.",
     "fileProtectionUpdated": "File protection updated successfully",
@@ -140,7 +140,7 @@
     "directoryProtectionUpdateFailed": "Failed to update directory protection",
     "fileOrDirectoryNotFound": "File or directory not found",
     "protectionUpdateFailed": {
-      "__fn": "(error) => `Failed to set protection: ${error}`"
+      "__fn": "error=>`Failed to set protection: ${error}`"
     },
     "protectionUpdateFailedGeneric": "Failed to set protection.",
     "sha256HashMismatch": "SHA-256 hash mismatch",
@@ -148,15 +148,15 @@
     "forbidden": "Forbidden",
     "uploadsNotAllowedInDirectory": "Uploads not allowed in this directory",
     "fileSizeExceedsMaximum": {
-      "__fn": "(maxSizeMb) => `File size exceeds maximum allowed (${maxSizeMb}MB)`"
+      "__fn": "maxSizeMb=>`File size exceeds maximum allowed (${maxSizeMb}MB)`"
     },
     "contentTypeRequired": "Content type is required",
     "contentTypeMismatch": {
-      "__fn": "(expected) => `Content-Type mismatch. Expected: ${expected}`"
+      "__fn": "expected=>`Content-Type mismatch. Expected: ${expected}`"
     },
     "contentLengthRequired": "Content-Length header is required",
     "contentLengthExceedsSize": {
-      "__fn": "(size) => `Content-Length exceeds declared size of ${size} bytes`"
+      "__fn": "size=>`Content-Length exceeds declared size of ${size} bytes`"
     },
     "contentMd5Required": "Content-MD5 header is required",
     "contentMd5Mismatch": "Content-MD5 mismatch",
@@ -178,42 +178,42 @@
     "filePathMismatch": "File path mismatch",
     "fileDeletedSuccessfully": "File deleted successfully",
     "failedToDeleteFile": {
-      "__fn": "(error) => `Failed to delete file: ${error}`"
+      "__fn": "error=>`Failed to delete file: ${error}`"
     },
     "itemProtectedFromDeletion": "Item is protected from deletion",
     "fileProtectedFromDeletion": "File is protected from deletion",
     "deletionNotAllowedInParentDirectory": "Deletion not allowed in parent directory",
     "deletionNotAllowedInParentDirectoryWithPath": {
-      "__fn": "(path) => `Deletion not allowed in parent directory: ${path}`"
+      "__fn": "path=>`Deletion not allowed in parent directory: ${path}`"
     },
     "fileDeletionNotAllowedInDirectory": "File deletion not allowed in this directory",
     "sourcePathNotFound": "Source path not found",
     "uploadsNotAllowedToDestination": "Uploads not allowed to destination directory",
     "allItemsProcessedSuccessfully": {
-      "__fn": "(operationName) => `All items ${operationName} successfully`"
+      "__fn": "operationName=>`All items ${operationName} successfully`"
     },
     "itemsProcessedWithFailures": {
-      "__fn": "(successCount, failureCount, operationName) => `${successCount} items ${operationName}, ${failureCount} failed`"
+      "__fn": "(successCount,failureCount,operationName)=>`${successCount} items ${operationName}, ${failureCount} failed`"
     },
     "creatingSubdirectoriesNotAllowed": "Creating subdirectories not allowed in parent directory",
     "folderCreatedSuccessfully": "Folder created successfully",
     "failedToCreateFolder": {
-      "__fn": "(error) => `Failed to create folder: ${error}`"
+      "__fn": "error=>`Failed to create folder: ${error}`"
     },
     "fileUploadedSuccessfully": "File uploaded successfully",
     "failedToUploadFile": {
-      "__fn": "(error) => `Failed to upload file: ${error}`"
+      "__fn": "error=>`Failed to upload file: ${error}`"
     },
     "moveNotAllowedFromDirectory": {
-      "__fn": "(sourceDir) => `Move not allowed from directory: ${sourceDir}`"
+      "__fn": "sourceDir=>`Move not allowed from directory: ${sourceDir}`"
     },
     "fileRenamedSuccessfully": "File renamed successfully",
     "failedToRenameFile": {
-      "__fn": "(error) => `Failed to rename file: ${error}`"
+      "__fn": "error=>`Failed to rename file: ${error}`"
     },
     "fileIsInUse": "File is in use",
     "itemNotFound": {
-      "__fn": "(path) => `Item not found: ${path}`"
+      "__fn": "path=>`Item not found: ${path}`"
     },
     "itemNotFoundInBucket": "Item not found in bucket",
     "directoryDoesNotExist": "Directory does not exist",
@@ -223,12 +223,12 @@
   "meetingProvider": {
     "meetingProviderInactive": "Meeting provider is inactive.",
     "meetingConfigNotFound": {
-      "__fn": "(id) => `Meeting config not found: ${id}`"
+      "__fn": "id=>`Meeting config not found: ${id}`"
     },
     "meetingConfigCreateFailed": "Failed to create meeting config.",
     "meetingConfigUpdateFailed": "Failed to update meeting config.",
     "meetingProviderNotFound": {
-      "__fn": "(id) => `Meeting provider not found: ${id}`"
+      "__fn": "id=>`Meeting provider not found: ${id}`"
     },
     "meetingProviderCreateFailed": "Failed to create meeting provider.",
     "meetingProviderUpdateFailed": "Failed to update meeting provider.",
@@ -281,7 +281,7 @@
   },
   "notification": {
     "deliveryNotFound": {
-      "__fn": "(id) => `Notification delivery not found: ${id}`"
+      "__fn": "id=>`Notification delivery not found: ${id}`"
     }
   },
   "fx": {
@@ -335,15 +335,15 @@
   "teacher": {
     "alreadyExists": "Teacher profile for this user already exists.",
     "teacherNotFound": {
-      "__fn": "(id) => `Teacher not found: ${id}`"
+      "__fn": "id=>`Teacher not found: ${id}`"
     },
     "staffProfileNotFound": "Staff profile not found.",
     "quotaMustBeNonNegative": "Quota must be a non-negative number.",
     "quotaExceedsTotal": {
-      "__fn": "({ requested, total }) => `Quota (${requested}) exceeds total (${total}).`"
+      "__fn": "({requested,total})=>`Quota (${requested}) exceeds total (${total}).`"
     },
     "vacationRequestNotFound": {
-      "__fn": "(id) => `Vacation request not found: ${id}`"
+      "__fn": "id=>`Vacation request not found: ${id}`"
     },
     "createFailed": "Failed to create teacher profile.",
     "upsertFailed": "Teacher upsert failed.",
@@ -369,20 +369,20 @@
   },
   "student": {
     "studentNotFound": {
-      "__fn": "(id) => `Student not found: ${id}`"
+      "__fn": "id=>`Student not found: ${id}`"
     },
     "studentCreateFailed": "Failed to create student.",
     "studentUpdateFailed": {
-      "__fn": "(id) => `Failed to update student (id: ${id}).`"
+      "__fn": "id=>`Failed to update student (id: ${id}).`"
     },
     "studentVersionMismatch": {
-      "__fn": "({\n    id,\n    expectedVersion,\n    gotVersion\n  }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
+      "__fn": "({id,expectedVersion,gotVersion})=>`Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
     },
     "insufficientClasses": {
-      "__fn": "({ id, remaining, required }) => `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`"
+      "__fn": "({id,remaining,required})=>`Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`"
     },
     "invalidStatusTransition": {
-      "__fn": "({ currentStatus, newStatus }) => `Invalid status transition: ${currentStatus} -> ${newStatus}.`"
+      "__fn": "({currentStatus,newStatus})=>`Invalid status transition: ${currentStatus} -> ${newStatus}.`"
     },
     "studentEmailRequired": "Student email is required.",
     "studentPasswordRequired": "Student password is required.",
@@ -390,20 +390,20 @@
   },
   "category": {
     "categoryNotFound": {
-      "__fn": "(id) => `Category not found: ${id}`"
+      "__fn": "id=>`Category not found: ${id}`"
     },
     "categoryCreateFailed": "Failed to create class category.",
     "categoryHasSubjects": "Cannot delete category because it has associated subjects."
   },
   "user": {
     "userNotFound": {
-      "__fn": "(id) => `User not found: ${id}`"
+      "__fn": "id=>`User not found: ${id}`"
     },
     "userEmailExists": "User with this email already exists.",
     "cannotModifyBankingFields": "Cannot modify banking fields.",
     "parentNotFound": "Parent not found.",
     "userCreateFailed": {
-      "__fn": "(email) => `Failed to create user with email: ${email}`"
+      "__fn": "email=>`Failed to create user with email: ${email}`"
     }
   },
   "scheduling": {
@@ -412,15 +412,15 @@
     "cannotRescheduleAlreadyRescheduled": "Cannot reschedule a session that has already been rescheduled.",
     "outOfQuota": "Out of quota.",
     "leaveQuotaExceeded": {
-      "__fn": "({ maxLeaves }) => `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`"
+      "__fn": "({maxLeaves})=>`Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`"
     },
     "classInstanceNotFound": {
-      "__fn": "({ id }) => `Class instance not found: ${id}`"
+      "__fn": "({id})=>`Class instance not found: ${id}`"
     },
     "originalClassNotFound": "Original class not found.",
     "invalidTransition": "Invalid transition.",
     "teacherNotAssigned": {
-      "__fn": "({\n    teacherId,\n    studentId,\n    startTime\n  }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`"
+      "__fn": "({teacherId,studentId,startTime})=>`Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`"
     },
     "teacherBooked": "Teacher is already booked at this time.",
     "studentBooked": "Student is already booked at this time.",
@@ -428,27 +428,27 @@
     "sessionNotActivated": "Session is not activated.",
     "missedClassTime": "You have missed the class time.",
     "absentTooEarly": {
-      "__fn": "({ waitingMinutes }) => `Cannot mark absent yet. Please wait ${waitingMinutes} minutes after scheduled start time.`"
+      "__fn": "({waitingMinutes})=>`Cannot mark absent yet. Please wait ${waitingMinutes} minutes after scheduled start time.`"
     },
     "vacationStartBeforeEnd": "Vacation start date must be before end date",
     "startTimeBeforeEndTime": "Start time must be before end time",
     "dateRangeExceedsMax": {
-      "__fn": "(maxDays) => `Date range cannot exceed ${maxDays} days`"
+      "__fn": "maxDays=>`Date range cannot exceed ${maxDays} days`"
     },
     "vacationRequestNotPending": {
-      "__fn": "(id) => `Vacation request ${id} is not in pending status`"
+      "__fn": "id=>`Vacation request ${id} is not in pending status`"
     },
     "vacationRequestAlreadyCancelled": {
-      "__fn": "(id) => `Vacation request ${id} is already cancelled`"
+      "__fn": "id=>`Vacation request ${id} is already cancelled`"
     },
     "recurringClassDaysRequired": {
-      "__fn": "() => \"At least one day is required.\""
+      "__fn": "()=>\"At least one day is required.\""
     },
     "invalidDuration": {
-      "__fn": "() => \"Duration must be greater than zero.\""
+      "__fn": "()=>\"Duration must be greater than zero.\""
     },
     "subjectRequired": {
-      "__fn": "() => \"Subject is required.\""
+      "__fn": "()=>\"Subject is required.\""
     }
   },
   "permissionGroup": {
@@ -461,28 +461,28 @@
   },
   "quota": {
     "insufficientRemaining": {
-      "__fn": "(requested, available) => `Only ${available} quota remaining \\u2014 requested ${requested}`"
+      "__fn": "(requested,available)=>`Only ${available} quota remaining \\u2014 requested ${requested}`"
     },
     "exceedsCreditBalance": {
-      "__fn": "(requested, available) => `Insufficient credit balance. Available: ${available}, needed: ${requested}`"
+      "__fn": "(requested,available)=>`Insufficient credit balance. Available: ${available}, needed: ${requested}`"
     },
     "periodicRefreshFailed": {
-      "__fn": "(quotaName, reason) => `Failed to refresh periodic quota ${quotaName}: ${reason}`"
+      "__fn": "(quotaName,reason)=>`Failed to refresh periodic quota ${quotaName}: ${reason}`"
     },
     "invalidPeriod": {
-      "__fn": "(quotaName) => `Quota ${quotaName} has expired or its period is invalid`"
+      "__fn": "quotaName=>`Quota ${quotaName} has expired or its period is invalid`"
     },
     "alreadyExpired": {
-      "__fn": "(quotaName) => `Quota ${quotaName} has already expired`"
+      "__fn": "quotaName=>`Quota ${quotaName} has already expired`"
     },
     "earmarkExceedsRemaining": {
-      "__fn": "(requested, available) => `Earmark of ${requested} exceeds remaining quota (${available})`"
+      "__fn": "(requested,available)=>`Earmark of ${requested} exceeds remaining quota (${available})`"
     },
     "slotConflict": {
-      "__fn": "(startTime, endTime) => `Time slot ${startTime}\\u2013${endTime} conflicts with existing booking`"
+      "__fn": "(startTime,endTime)=>`Time slot ${startTime}\\u2013${endTime} conflicts with existing booking`"
     },
     "onDemandNoCredits": {
-      "__fn": "(studentName) => `Not enough credits for on-demand booking for ${studentName}`"
+      "__fn": "studentName=>`Not enough credits for on-demand booking for ${studentName}`"
     },
     "cannotRefreshNonPeriodic": "Cannot refresh non-periodic quota",
     "noValidPeriodDays": "Quota has no valid period days configured"
@@ -505,61 +505,61 @@
   "rejectedReportsRequireReason": "REJECTED reports must include a rejection reason.",
   "approvedReportsNoRejectionReason": "APPROVED reports must not include a rejection reason.",
   "displayCurrencyNotSet": {
-    "__fn": "(values) => `Display currency not set. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
+    "__fn": "values=>`Display currency not set. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
   },
   "displayCurrencyStale": {
-    "__fn": "(values) => `Display currency is stale. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
+    "__fn": "values=>`Display currency is stale. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
   },
   "displayCurrencyMixed": {
-    "__fn": "(values) => `Mixed display currencies detected. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
+    "__fn": "values=>`Mixed display currencies detected. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
   },
   "studentNotFound": {
-    "__fn": "(id) => `Student not found: ${id}`"
+    "__fn": "id=>`Student not found: ${id}`"
   },
   "studentCreateFailed": "Failed to create student.",
   "studentUpdateFailed": {
-    "__fn": "(id) => `Failed to update student (id: ${id}).`"
+    "__fn": "id=>`Failed to update student (id: ${id}).`"
   },
   "studentVersionMismatch": {
-    "__fn": "({\n    id,\n    expectedVersion,\n    gotVersion\n  }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
+    "__fn": "({id,expectedVersion,gotVersion})=>`Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
   },
   "insufficientClasses": {
-    "__fn": "({ id, remaining, required }) => `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`"
+    "__fn": "({id,remaining,required})=>`Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`"
   },
   "invalidStatusTransition": {
-    "__fn": "({ currentStatus, newStatus }) => `Invalid status transition: ${currentStatus} -> ${newStatus}.`"
+    "__fn": "({currentStatus,newStatus})=>`Invalid status transition: ${currentStatus} -> ${newStatus}.`"
   },
   "studentEmailRequired": "Student email is required.",
   "studentPasswordRequired": "Student password is required.",
   "upsertFailed": "Teacher upsert failed.",
   "categoryNotFound": {
-    "__fn": "(id) => `Category not found: ${id}`"
+    "__fn": "id=>`Category not found: ${id}`"
   },
   "categoryCreateFailed": "Failed to create class category.",
   "categoryHasSubjects": "Cannot delete category because it has associated subjects.",
   "userNotFound": {
-    "__fn": "(id) => `User not found: ${id}`"
+    "__fn": "id=>`User not found: ${id}`"
   },
   "userEmailExists": "User with this email already exists.",
   "cannotModifyBankingFields": "Cannot modify banking fields.",
   "parentNotFound": "Parent not found.",
   "userCreateFailed": {
-    "__fn": "(email) => `Failed to create user with email: ${email}`"
+    "__fn": "email=>`Failed to create user with email: ${email}`"
   },
   "cannotRescheduleToSelf": "Cannot reschedule to self.",
   "cannotRescheduleCompleted": "Cannot reschedule a completed session.",
   "cannotRescheduleAlreadyRescheduled": "Cannot reschedule a session that has already been rescheduled.",
   "outOfQuota": "Out of quota.",
   "leaveQuotaExceeded": {
-    "__fn": "({ maxLeaves }) => `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`"
+    "__fn": "({maxLeaves})=>`Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`"
   },
   "classInstanceNotFound": {
-    "__fn": "({ id }) => `Class instance not found: ${id}`"
+    "__fn": "({id})=>`Class instance not found: ${id}`"
   },
   "originalClassNotFound": "Original class not found.",
   "invalidTransition": "Invalid transition.",
   "teacherNotAssigned": {
-    "__fn": "({\n    teacherId,\n    studentId,\n    startTime\n  }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`"
+    "__fn": "({teacherId,studentId,startTime})=>`Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`"
   },
   "teacherBooked": "Teacher is already booked at this time.",
   "studentBooked": "Student is already booked at this time.",
@@ -567,40 +567,40 @@
   "sessionNotActivated": "Session is not activated.",
   "missedClassTime": "You have missed the class time.",
   "absentTooEarly": {
-    "__fn": "({ waitingMinutes }) => `Cannot mark absent yet. Please wait ${waitingMinutes} minutes after scheduled start time.`"
+    "__fn": "({waitingMinutes})=>`Cannot mark absent yet. Please wait ${waitingMinutes} minutes after scheduled start time.`"
   },
   "vacationStartBeforeEnd": "Vacation start date must be before end date",
   "startTimeBeforeEndTime": "Start time must be before end time",
   "dateRangeExceedsMax": {
-    "__fn": "(maxDays) => `Date range cannot exceed ${maxDays} days`"
+    "__fn": "maxDays=>`Date range cannot exceed ${maxDays} days`"
   },
   "vacationRequestNotPending": {
-    "__fn": "(id) => `Vacation request ${id} is not in pending status`"
+    "__fn": "id=>`Vacation request ${id} is not in pending status`"
   },
   "vacationRequestAlreadyCancelled": {
-    "__fn": "(id) => `Vacation request ${id} is already cancelled`"
+    "__fn": "id=>`Vacation request ${id} is already cancelled`"
   },
   "recurringClassDaysRequired": {
-    "__fn": "() => \"At least one day is required.\""
+    "__fn": "()=>\"At least one day is required.\""
   },
   "invalidDuration": {
-    "__fn": "() => \"Duration must be greater than zero.\""
+    "__fn": "()=>\"Duration must be greater than zero.\""
   },
   "subjectRequired": {
-    "__fn": "() => \"Subject is required.\""
+    "__fn": "()=>\"Subject is required.\""
   },
   "permissionGroupNotFound": "Permission group not found.",
   "alreadyExists": "Teacher profile for this user already exists.",
   "teacherNotFound": {
-    "__fn": "(id) => `Teacher not found: ${id}`"
+    "__fn": "id=>`Teacher not found: ${id}`"
   },
   "staffProfileNotFound": "Staff profile not found.",
   "quotaMustBeNonNegative": "Quota must be a non-negative number.",
   "quotaExceedsTotal": {
-    "__fn": "({ requested, total }) => `Quota (${requested}) exceeds total (${total}).`"
+    "__fn": "({requested,total})=>`Quota (${requested}) exceeds total (${total}).`"
   },
   "vacationRequestNotFound": {
-    "__fn": "(id) => `Vacation request not found: ${id}`"
+    "__fn": "id=>`Vacation request not found: ${id}`"
   },
   "createFailed": "Failed to create teacher profile.",
   "noteCreateFailed": "Failed to create teacher note.",
@@ -611,21 +611,21 @@
   "recurringUnavailabilityInsertFailed": "Failed to insert recurring unavailability.",
   "vacationInsertFailed": "Failed to insert vacation request.",
   "meetingProviderNotFound": {
-    "__fn": "(id) => `Meeting provider not found: ${id}`"
+    "__fn": "id=>`Meeting provider not found: ${id}`"
   },
   "meetingProviderCreateFailed": "Failed to create meeting provider.",
   "meetingProviderUpdateFailed": "Failed to update meeting provider.",
   "meetingProviderInUse": "Meeting provider is in use and cannot be deleted.",
   "meetingProviderInactive": "Meeting provider is inactive.",
   "meetingConfigNotFound": {
-    "__fn": "(id) => `Meeting config not found: ${id}`"
+    "__fn": "id=>`Meeting config not found: ${id}`"
   },
   "meetingConfigCreateFailed": "Failed to create meeting config.",
   "meetingConfigUpdateFailed": "Failed to update meeting config.",
   "parentAlreadyDeactivated": "Parent account is already deactivated.",
   "parentAlreadyActivated": "Parent account is already activated.",
   "exchangeRateStale": {
-    "__fn": "({ fromCurrency, toCurrency }) => `Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`"
+    "__fn": "({fromCurrency,toCurrency})=>`Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`"
   },
   "quotaExpired": "Quota has expired.",
   "quotaNotFound": "Quota not found.",
@@ -636,27 +636,27 @@
   "resourceNotFound": "Learning resource not found.",
   "currencyInUse": "This currency cannot be deactivated because it is currently in use by invoices, payments, exchange rates, or user profiles.",
   "invalidRunStatus": {
-    "__fn": "(status, runId) => `Cannot retry a run with status ${status} (runId: ${runId}).`"
+    "__fn": "(status,runId)=>`Cannot retry a run with status ${status} (runId: ${runId}).`"
   },
   "complaintNotFound": "Complaint not found.",
   "suggestionNotFound": "Suggestion not found.",
   "complaintTooManyFiles": {
-    "__fn": "(maxFiles) => `You can upload a maximum of ${maxFiles} files per complaint.`"
+    "__fn": "maxFiles=>`You can upload a maximum of ${maxFiles} files per complaint.`"
   },
   "complaintFileTooLarge": {
-    "__fn": "(maxSizeMb) => `File size must not exceed ${maxSizeMb} MB.`"
+    "__fn": "maxSizeMb=>`File size must not exceed ${maxSizeMb} MB.`"
   },
   "suggestionCannotMarkSelfAsDuplicate": "A suggestion cannot be marked as a duplicate of itself.",
   "suggestionCircularDuplicate": "Cannot create a circular duplicate chain.",
   "suggestionTargetIsAlreadyDuplicate": "The target suggestion is already marked as a duplicate of another suggestion.",
   "unknownCommunicationChannel": {
-    "__fn": "(channel) => `Unknown communication channel: ${channel}`"
+    "__fn": "channel=>`Unknown communication channel: ${channel}`"
   },
   "unknownError": "An unknown error occurred.",
   "unknownDispatchError": "An unknown dispatch error occurred.",
   "whatsappTemplateMissing": "WhatsApp template configuration is missing for this notification.",
   "whatsappAccountNotFound": {
-    "__fn": "(id) => `WhatsApp account not found: ${id}`"
+    "__fn": "id=>`WhatsApp account not found: ${id}`"
   },
   "whatsappAccessTokenNotConfigured": "WhatsApp access token is not configured.",
   "whatsappWabaIdNotConfigured": "WhatsApp Business Account ID is not configured.",
@@ -666,18 +666,18 @@
   "whatsappChannelLabel": "WhatsApp",
   "onAppChannelLabel": "In-app",
   "deliveryFailed": {
-    "__fn": "(channelLabel) => `${channelLabel} delivery failed. Please try again later.`"
+    "__fn": "channelLabel=>`${channelLabel} delivery failed. Please try again later.`"
   },
   "studentNameFallback": "Student",
   "invalidIdentifierKind": {
-    "__fn": "(value) => `Invalid account row: unsupported identifierKind '${value}'`"
+    "__fn": "value=>`Invalid account row: unsupported identifierKind '${value}'`"
   },
   "invalidSupportedDirections": {
-    "__fn": "(value) => `Invalid account row: unsupported supportedDirections '${value}'`"
+    "__fn": "value=>`Invalid account row: unsupported supportedDirections '${value}'`"
   },
   "invalidOverrideState": "Invalid permission override state value.",
   "bulkOperationLimitExceeded": {
-    "__fn": "(operation, limit) => `Bulk ${operation} operation limited to ${limit} items maximum`"
+    "__fn": "(operation,limit)=>`Bulk ${operation} operation limited to ${limit} items maximum`"
   },
   "forbidden": "Forbidden",
   "noPdfAvailable": "No PDF available for this invoice",
@@ -687,7 +687,7 @@
   "failedToSetLocale": "Failed to set locale",
   "fxRefreshFailed": "FX refresh failed",
   "deletedExpiredSignedUrls": {
-    "__fn": "(count) => `Deleted ${count} expired signed URLs`"
+    "__fn": "count=>`Deleted ${count} expired signed URLs`"
   },
   "invalidRequestFormat": "Invalid request format. Expected { logs: LogEntry[] }",
   "missingRequiredFields": "Missing required fields in log entry",

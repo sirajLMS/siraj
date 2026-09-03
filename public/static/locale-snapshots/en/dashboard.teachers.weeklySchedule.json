@@ -1,6 +1,6 @@
 {
   "pageTitle": {
-    "__fn": "(name) => `Weekly Schedule - ${name}`"
+    "__fn": "name=>`Weekly Schedule - ${name}`"
   },
   "breadcrumbs": {
     "teachers": "Teachers",
@@ -9,7 +9,7 @@
   "metrics": {
     "weeklyHoursWorkedTitle": "Weekly Hours Worked",
     "weeklyHoursWorked": {
-      "__fn": "(hours) => `Weekly Hours Worked: ${hours}`"
+      "__fn": "hours=>`Weekly Hours Worked: ${hours}`"
     }
   },
   "actions": {
@@ -25,11 +25,11 @@
     "bookedClass": "Booked",
     "availableSlot": "Available Slot",
     "lastUpdated": {
-      "__fn": "(date) => `Last Updated: ${date}`"
+      "__fn": "date=>`Last Updated: ${date}`"
     },
     "unknownSubject": "Class",
     "minutesShort": {
-      "__fn": "(minutes) => `${minutes}m`"
+      "__fn": "minutes=>`${minutes}m`"
     },
     "status": {
       "ended": "Ended",

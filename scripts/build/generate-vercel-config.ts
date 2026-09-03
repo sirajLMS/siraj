@@ -19,12 +19,10 @@ interface VercelCron {
 
 interface VercelJson {
   $schema?: string;
-  bunVersion?: string;
   fluid: boolean;
   crons: VercelCron[];
 }
 
-const DEFAULT_BUN_VERSION = "1.4.x";
 const DEFAULT_SCHEMA = "https://openapi.vercel.sh/vercel.json";
 
 const CRON_DEFINITIONS: CronDefinition[] = [
@@ -128,7 +126,6 @@ function main(): void {
 
   const config: VercelJson = {
     $schema: existing.$schema ?? DEFAULT_SCHEMA,
-    bunVersion: existing.bunVersion ?? DEFAULT_BUN_VERSION,
     fluid: existing.fluid ?? true,
     crons,
   };

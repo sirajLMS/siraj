@@ -5,12 +5,12 @@
   "newReport": "New Class",
   "todaysClassSchedule": "Today's Class Schedule",
   "totalSessions": {
-    "__fn": "(total) => `Total: ${total} classes`"
+    "__fn": "total=>`Total: ${total} classes`"
   },
   "previous": "Previous",
   "next": "Next",
   "showingOf": {
-    "__fn": "(shown, total) => `Showing ${shown} of ${total} classes`"
+    "__fn": "(shown,total)=>`Showing ${shown} of ${total} classes`"
   },
   "seeAll": "See All",
   "todaysSchedule": "Today's Schedule",
@@ -63,7 +63,7 @@
     "note": "Note: Spike in suspensions on Thursday due to end-of-month payment processing audit.",
     "urgentTask": "Urgent administrative task",
     "accountsLocked": {
-      "__fn": "(count) => `${count} accounts locked`"
+      "__fn": "count=>`${count} accounts locked`"
     },
     "auditDescription": "Review suspension logs to identify if any administrative holds can be released manually.",
     "openAuditLogs": "Open audit logs"

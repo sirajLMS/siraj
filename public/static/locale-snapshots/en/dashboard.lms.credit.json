@@ -10,9 +10,9 @@
   "hoursTotal": "Total Hours",
   "recordPurchase": "Record Purchase",
   "purchaseSuccess": {
-    "__fn": "(hours) => `Purchase recorded successfully: ${hours} hours`"
+    "__fn": "hours=>`Purchase recorded successfully: ${hours} hours`"
   },
   "insufficientCredits": {
-    "__fn": "(remaining) => `Insufficient credits. Remaining: ${remaining} hours`"
+    "__fn": "remaining=>`Insufficient credits. Remaining: ${remaining} hours`"
   }
 }

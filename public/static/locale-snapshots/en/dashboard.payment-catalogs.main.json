@@ -6,7 +6,7 @@
   "editTitle": "Edit Catalog Entry",
   "deleteTitle": "Deactivate Catalog Entry",
   "deleteBody": {
-    "__fn": "(name) => `Deactivate \"${name}\"? It will no longer be available for new payment methods.`"
+    "__fn": "name=>`Deactivate \"${name}\"? It will no longer be available for new payment methods.`"
   },
   "deleteConfirm": "Deactivate",
   "active": "Active",

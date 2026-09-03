@@ -1,12 +1,12 @@
 {
   "complaintResponse": {
     "urgentResponse": {
-      "__fn": "({ parentName, complaintTitle, responseSummary }) => `\\u0639\\u0632\\u064A\\u0632\\u064A ${parentName}\\u060C \\u0628\\u062E\\u0635\\u0648\\u0635 \"${complaintTitle}\": ${responseSummary}. - \\u0641\\u0631\\u064A\\u0642 \\u0627\\u0644\\u062F\\u0639\\u0645`"
+      "__fn": "({parentName,complaintTitle,responseSummary})=>`\\u0639\\u0632\\u064A\\u0632\\u064A ${parentName}\\u060C \\u0628\\u062E\\u0635\\u0648\\u0635 \"${complaintTitle}\": ${responseSummary}. - \\u0641\\u0631\\u064A\\u0642 \\u0627\\u0644\\u062F\\u0639\\u0645`"
     }
   },
   "suggestionAcknowledged": {
     "acknowledged": {
-      "__fn": "({ parentName, suggestionTitle }) => `\\u0639\\u0632\\u064A\\u0632\\u064A ${parentName}\\u060C \\u062A\\u0645 \\u0627\\u0633\\u062A\\u0644\\u0627\\u0645 \\u0627\\u0642\\u062A\\u0631\\u0627\\u062D\\u0643 \"${suggestionTitle}\". \\u0634\\u0643\\u0631\\u0627\\u064B \\u0644\\u0643!`"
+      "__fn": "({parentName,suggestionTitle})=>`\\u0639\\u0632\\u064A\\u0632\\u064A ${parentName}\\u060C \\u062A\\u0645 \\u0627\\u0633\\u062A\\u0644\\u0627\\u0645 \\u0627\\u0642\\u062A\\u0631\\u0627\\u062D\\u0643 \"${suggestionTitle}\". \\u0634\\u0643\\u0631\\u0627\\u064B \\u0644\\u0643!`"
     }
   }
 }

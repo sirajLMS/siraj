@@ -8,7 +8,7 @@
   },
   "studentContext": {
     "grade": {
-      "__fn": "(grade) => `\\u0627\\u0644\\u0635\\u0641: ${grade}`"
+      "__fn": "grade=>`\\u0627\\u0644\\u0635\\u0641: ${grade}`"
     },
     "enrollment": "تاريخ التسجيل",
     "active": "نشط"
@@ -27,7 +27,7 @@
     "teacherAvailabilityNotice": "المعلمون المتاحون في المنطقة الزمنية للطالب",
     "statusUpdate": "تحديث الحالة",
     "currentStatus": {
-      "__fn": "(status) => `\\u0627\\u0644\\u062D\\u0627\\u0644\\u0629 \\u0627\\u0644\\u062D\\u0627\\u0644\\u064A\\u0629: ${status}`"
+      "__fn": "status=>`\\u0627\\u0644\\u062D\\u0627\\u0644\\u0629 \\u0627\\u0644\\u062D\\u0627\\u0644\\u064A\\u0629: ${status}`"
     },
     "statusOptions": {
       "REGULAR": "منتظم / نشط",
@@ -40,11 +40,11 @@
   "historyAndContact": {
     "changeHistory": "سجل التغييرات",
     "lastUpdated": {
-      "__fn": "(date) => `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B: ${date}`"
+      "__fn": "date=>`\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B: ${date}`"
     },
     "parentContact": "التواصل مع ولي الأمر",
     "pendingNotifications": {
-      "__fn": "(count) => `\\u0627\\u0644\\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u062A \\u0627\\u0644\\u0645\\u0639\\u0644\\u0642\\u0629: ${count}`"
+      "__fn": "count=>`\\u0627\\u0644\\u0625\\u0634\\u0639\\u0627\\u0631\\u0627\\u062A \\u0627\\u0644\\u0645\\u0639\\u0644\\u0642\\u0629: ${count}`"
     }
   },
   "actions": {

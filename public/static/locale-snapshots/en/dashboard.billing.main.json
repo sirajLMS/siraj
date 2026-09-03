@@ -27,7 +27,7 @@
   "viewAllNegativeBalance": "View All Students with Negative Balance",
   "requiresAttention": "Requires Attention",
   "showingResults": {
-    "__fn": "(shown, total) => `Showing ${shown} of ${total} results`"
+    "__fn": "(shown,total)=>`Showing ${shown} of ${total} results`"
   },
   "invalidUserId": "Invalid user ID",
   "billingProfileTitle": "User Billing Profile",
@@ -36,7 +36,7 @@
     "totalOutstanding": "Total Outstanding",
     "pendingInvoices": "Pending Invoices",
     "negativeBalance": {
-      "__fn": "(count) => `Negative Balance (${count})`"
+      "__fn": "count=>`Negative Balance (${count})`"
     },
     "mtdRevenue": "MTD Revenue"
   },
@@ -135,7 +135,7 @@
     "submitAndSendEmail": "Submit & Send Email",
     "successMessage": "Manual invoice submitted successfully.",
     "createSuccess": {
-      "__fn": "(id) => `Invoice ${id} created successfully`"
+      "__fn": "id=>`Invoice ${id} created successfully`"
     },
     "manualInvoiceFxNote": "Invoice amount is stored in the selected currency. Conversions appear on billing pages based on each user's display currency.",
     "unknown": "Unknown Student",
@@ -185,7 +185,7 @@
   "deleteInvoiceDialog": {
     "title": "Delete Invoice",
     "body": {
-      "__fn": "(invoiceId) => `This will permanently remove invoice ${invoiceId}. This action cannot be undone.`"
+      "__fn": "invoiceId=>`This will permanently remove invoice ${invoiceId}. This action cannot be undone.`"
     },
     "confirm": "Delete Invoice"
   },
@@ -203,7 +203,7 @@
     "fileHint": "Upload a PDF, JPEG, PNG, or WebP file as payment proof.",
     "invalidFileType": "Invalid file type. Use PDF, JPEG, PNG, or WebP.",
     "fileTooLarge": {
-      "__fn": "(maxMb) => `File is too large. Maximum size is ${maxMb} MB.`"
+      "__fn": "maxMb=>`File is too large. Maximum size is ${maxMb} MB.`"
     },
     "cancel": "Cancel",
     "errorGeneric": "Failed to submit payment proof. Please try again.",
@@ -286,7 +286,7 @@
       "pairLabel": "Currency Pair",
       "empty": "No historical data",
       "maxDays": {
-        "__fn": "(days) => `Last ${days} days`"
+        "__fn": "days=>`Last ${days} days`"
       },
       "daysLabel": "Number of days"
     },
@@ -300,7 +300,7 @@
       "saveSuccess": "Provider settings saved",
       "saveFailed": "Failed to save provider settings",
       "lastChangedBy": {
-        "__fn": "(name, date) => `Last changed by ${name} on ${date}`"
+        "__fn": "(name,date)=>`Last changed by ${name} on ${date}`"
       },
       "cancel": "Cancel",
       "save": "Save"
@@ -340,20 +340,20 @@
     }
   },
   "fxConversionNote": {
-    "__fn": "(code) => `Converted totals use your display currency (${code})`"
+    "__fn": "code=>`Converted totals use your display currency (${code})`"
   },
   "fxConversionNoteSubject": {
-    "__fn": "(code) => `Converted amounts use this user's display currency (${code})`"
+    "__fn": "code=>`Converted amounts use this user's display currency (${code})`"
   },
   "adminBillingFxNote": "Metrics use your display currency; each invoice uses its parent's currency",
   "displayCurrencyMixed": {
-    "__fn": "(values) => `Multiple display currencies detected; showing locked amounts only: ${values.lockedAmount} ${values.lockedCurrency}`"
+    "__fn": "values=>`Multiple display currencies detected; showing locked amounts only: ${values.lockedAmount} ${values.lockedCurrency}`"
   },
   "displayCurrencyNotSet": {
-    "__fn": "(values) => `${values.lockedAmount} ${values.lockedCurrency} (display currency not set)`"
+    "__fn": "values=>`${values.lockedAmount} ${values.lockedCurrency} (display currency not set)`"
   },
   "displayCurrencyStale": {
-    "__fn": "(values) => `${values.lockedAmount} ${values.lockedCurrency} (rates may be stale)`"
+    "__fn": "values=>`${values.lockedAmount} ${values.lockedCurrency} (rates may be stale)`"
   },
   "currencyHedges": {
     "pageTitle": "Currency Hedges",
@@ -407,7 +407,7 @@
     "editTitle": "Edit Supported Currency",
     "deactivateConfirmTitle": "Deactivate Currency",
     "deactivateConfirmBody": {
-      "__fn": "(code) => `Deactivate ${code}? It will no longer be available for new billing entries. Existing references are preserved.`"
+      "__fn": "code=>`Deactivate ${code}? It will no longer be available for new billing entries. Existing references are preserved.`"
     },
     "deactivateConfirmCancel": "Cancel",
     "deactivateConfirmConfirm": "Deactivate",
@@ -448,13 +448,13 @@
     "lowBalanceHint": "Low balance — consider a top-up",
     "topUpAction": "Top up",
     "hoursRemainingValue": {
-      "__fn": "(hours) => `${hours.toFixed(2)} h`"
+      "__fn": "hours=>`${hours.toFixed(2)} h`"
     },
     "hoursAddedChip": {
-      "__fn": "(hours) => `+${hours.toFixed(2)} h`"
+      "__fn": "hours=>`+${hours.toFixed(2)} h`"
     },
     "creditsAddedChip": {
-      "__fn": "(credits) => `+${credits}`"
+      "__fn": "credits=>`+${credits}`"
     },
     "columns": {
       "student": "Student",

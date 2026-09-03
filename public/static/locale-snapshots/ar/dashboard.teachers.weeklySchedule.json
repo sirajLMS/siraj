@@ -1,6 +1,6 @@
 {
   "pageTitle": {
-    "__fn": "(name) => `\\u0627\\u0644\\u062C\\u062F\\u0648\\u0644 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\\u064A - ${name}`"
+    "__fn": "name=>`\\u0627\\u0644\\u062C\\u062F\\u0648\\u0644 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\\u064A - ${name}`"
   },
   "breadcrumbs": {
     "teachers": "المعلمون",
@@ -9,7 +9,7 @@
   "metrics": {
     "weeklyHoursWorkedTitle": "ساعات العمل الأسبوعية",
     "weeklyHoursWorked": {
-      "__fn": "(hours) => `\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u0639\\u0645\\u0644 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\\u064A\\u0629: ${hours}`"
+      "__fn": "hours=>`\\u0633\\u0627\\u0639\\u0627\\u062A \\u0627\\u0644\\u0639\\u0645\\u0644 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\\u064A\\u0629: ${hours}`"
     }
   },
   "actions": {
@@ -25,11 +25,11 @@
     "bookedClass": "محجوزة",
     "availableSlot": "فترة متاحة",
     "lastUpdated": {
-      "__fn": "(date) => `\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B: ${date}`"
+      "__fn": "date=>`\\u0622\\u062E\\u0631 \\u062A\\u062D\\u062F\\u064A\\u062B: ${date}`"
     },
     "unknownSubject": "حصة",
     "minutesShort": {
-      "__fn": "(minutes) => `${minutes} \\u062F`"
+      "__fn": "minutes=>`${minutes} \\u062F`"
     },
     "status": {
       "ended": "انتهت",

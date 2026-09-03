@@ -44,7 +44,7 @@
     "hold": "On Hold"
   },
   "showingOf": {
-    "__fn": "(shown, total) => `Showing ${shown} of ${total} classes`"
+    "__fn": "(shown,total)=>`Showing ${shown} of ${total} classes`"
   },
   "noEntries": "No classes found",
   "endOfSchedule": "End of main schedule",

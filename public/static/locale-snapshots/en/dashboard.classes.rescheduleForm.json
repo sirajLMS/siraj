@@ -12,7 +12,7 @@
   },
   "warning": {
     "message": {
-      "__fn": "(teacherTimezone) => `Warning: Class time is calculated based on teacher's timezone (${teacherTimezone}). Please verify local timezone conversions.`"
+      "__fn": "teacherTimezone=>`Warning: Class time is calculated based on teacher's timezone (${teacherTimezone}). Please verify local timezone conversions.`"
     }
   },
   "quickAdjust": {

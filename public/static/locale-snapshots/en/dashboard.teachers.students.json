@@ -9,13 +9,13 @@
     "hours": "Weekly hours"
   },
   "statusLabel": {
-    "__fn": "(status) => `Status: ${status}`"
+    "__fn": "status=>`Status: ${status}`"
   },
   "quotaLabel": {
-    "__fn": "(remaining, total) => `Remaining quota: ${remaining} / ${total}`"
+    "__fn": "(remaining,total)=>`Remaining quota: ${remaining} / ${total}`"
   },
   "hoursLabel": {
-    "__fn": "(hours) => `${hours} hours weekly`"
+    "__fn": "hours=>`${hours} hours weekly`"
   },
   "errors": {
     "failedToLoad": "Failed to load students."

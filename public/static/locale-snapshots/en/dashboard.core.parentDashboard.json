@@ -1,11 +1,11 @@
 {
   "pageTitle": "Dashboard",
   "welcome": {
-    "__fn": "(name) => `Welcome, ${name}`"
+    "__fn": "name=>`Welcome, ${name}`"
   },
   "welcomeBack": "Welcome back,",
   "pendingMessages": {
-    "__fn": "(count) => `${count} pending messages from teachers`"
+    "__fn": "count=>`${count} pending messages from teachers`"
   },
   "metrics": {
     "totalStudents": "Total Students",
@@ -28,10 +28,10 @@
     "contact": "Contact",
     "classStatus": "Class Status",
     "duration": {
-      "__fn": "(minutes) => `Duration: ${minutes} min`"
+      "__fn": "minutes=>`Duration: ${minutes} min`"
     },
     "teacherLabel": {
-      "__fn": "(name) => `Teacher: ${name}`"
+      "__fn": "name=>`Teacher: ${name}`"
     },
     "joinVideo": "Join Video Session",
     "frozen": "Frozen",
@@ -51,7 +51,7 @@
     "title": "Academic Progress Summary",
     "subtitle": "Weekly view for both students",
     "completion": {
-      "__fn": "(percent) => `${percent}% completion`"
+      "__fn": "percent=>`${percent}% completion`"
     },
     "downloadReport": "Download Full Report"
   },

@@ -4,7 +4,7 @@
   "exportPdf": "Export to PDF",
   "exportPdfComingSoon": "Coming soon",
   "teacherSlotSelected": {
-    "__fn": "(name, id) => `Teacher ${id} (${name}) slot selected`"
+    "__fn": "(name,id)=>`Teacher ${id} (${name}) slot selected`"
   },
   "searchTitle": "Search Availability",
   "from": "From",
@@ -41,7 +41,7 @@
     "sat": "Sat",
     "sun": "Sun",
     "availableSlot": {
-      "__fn": "(teacherName, time) => `${teacherName} available at ${time}`"
+      "__fn": "(teacherName,time)=>`${teacherName} available at ${time}`"
     }
   },
   "insights": {
@@ -50,7 +50,7 @@
     "availableStaff": "Available Staff",
     "availableStaffDesc": "Available teachers during selected hours",
     "teachersCount": {
-      "__fn": "(count) => `${count} Teachers`"
+      "__fn": "count=>`${count} Teachers`"
     },
     "localTimezones": "Local Timezones",
     "localTimezonesDesc": "Teachers' local timezones"
@@ -62,7 +62,7 @@
   "status": {
     "live": "Live",
     "lastUpdate": {
-      "__fn": "(minutes) => minutes === 1 ? `Last updated ${minutes} minute ago` : `Last updated ${minutes} minutes ago`"
+      "__fn": "minutes=>minutes===1?`Last updated ${minutes} minute ago`:`Last updated ${minutes} minutes ago`"
     }
   },
   "availabilityGridTitle": "Available Slots"

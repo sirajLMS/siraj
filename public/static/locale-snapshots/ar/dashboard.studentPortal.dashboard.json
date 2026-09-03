@@ -1,7 +1,7 @@
 {
   "pageTitle": "لوحة التحكم",
   "welcomeMessage": {
-    "__fn": "(name) => `\\u0645\\u0631\\u062D\\u0628\\u064B\\u0627\\u060C ${name}`"
+    "__fn": "name=>`\\u0645\\u0631\\u062D\\u0628\\u064B\\u0627\\u060C ${name}`"
   },
   "nextClass": "الحصة القادمة",
   "joinNow": "انضم",
@@ -27,12 +27,12 @@
   "columnStatus": "الحالة",
   "columnActions": "الإجراءات",
   "minutesShort": {
-    "__fn": "(minutes) => `${minutes} \\u062F`"
+    "__fn": "minutes=>`${minutes} \\u062F`"
   },
   "hoursShort": {
-    "__fn": "(hours) => `${hours} \\u0633`"
+    "__fn": "hours=>`${hours} \\u0633`"
   },
   "durationMinutesShort": {
-    "__fn": "(minutes) => `${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
+    "__fn": "minutes=>`${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
   }
 }
