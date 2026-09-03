@@ -45,10 +45,7 @@ function cleanup(): void {
 }
 
 function writeSeedConfig(): void {
-  writeFileSync(
-    OUTPUT_PATH,
-    `${JSON.stringify({ fluid: true, crons: [] }, null, 2)}\n`
-  );
+  writeFileSync(OUTPUT_PATH, `${JSON.stringify({ fluid: true, crons: [] }, null, 2)}\n`);
 }
 
 describe("generate-vercel-config", () => {

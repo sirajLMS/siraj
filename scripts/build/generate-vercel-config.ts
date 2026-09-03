@@ -95,12 +95,20 @@ function shouldIncludeTicker(mode: CronExecutionMode): boolean {
   return mode === "vercel";
 }
 
+function isPartialVercelJson(value: unknown): value is Partial<VercelJson> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function readExistingConfig(outputPath: string): Partial<VercelJson> {
   if (!existsSync(outputPath)) {
     return {};
   }
   try {
-    return JSON.parse(readFileSync(outputPath, "utf-8")) as Partial<VercelJson>;
+    const parsed: unknown = JSON.parse(readFileSync(outputPath, "utf-8"));
+    if (isPartialVercelJson(parsed)) {
+      return parsed;
+    }
+    return {};
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to parse existing ${outputPath}: ${message}`, { cause: error });
