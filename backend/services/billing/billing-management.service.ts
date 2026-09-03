@@ -230,7 +230,21 @@ async function dispatchUnpaidInvoicesForStudent(studentId: string, locale?: stri
     .from(invoices)
     .where(and(eq(invoices.parentId, parentId), eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)));
 
-  await Promise.all(unpaidInvoices.map(invoice => dispatchInvoiceGenerated(parentUserId, invoice, locale)));
+  if (unpaidInvoices.length === 0) return;
+
+  const allPayloads: Types.CommunicationPayload[] = [];
+  for (const invoice of unpaidInvoices) {
+    allPayloads.push(...buildInvoiceGeneratedPayloads(parentUserId, invoice, locale));
+  }
+
+  await dispatchWithPreferences(allPayloads, [parentUserId], locale).catch(err => {
+    logger.error("Payment reminder notification dispatch failed", {
+      studentId,
+      parentUserId,
+      invoiceCount: unpaidInvoices.length,
+      err,
+    });
+  });
 }
 
 /**

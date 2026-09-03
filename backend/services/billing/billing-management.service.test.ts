@@ -587,13 +587,12 @@ describe("BillingManagementService notification dispatch", () => {
       // 2 invoices (returned by unpaidInvoicesSelectMock) → builder called twice.
       expect(buildInvoiceGeneratedPayloadsMock).toHaveBeenCalledTimes(2);
 
-      // dispatchWithPreferences called once per unpaid invoice (parent fanout).
-      expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(2);
-      for (const call of dispatchCalls) {
-        expect(call.affectedUserIds).toEqual([PARENT_USER_ID]);
-        const dispatched = call.payloads;
-        expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_GENERATED)).toBe(true);
-      }
+      // dispatchWithPreferences called once for all unpaid invoices (batch parent fanout).
+      expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
+      expect(dispatchCalls[0]?.affectedUserIds).toEqual([PARENT_USER_ID]);
+      const dispatched = dispatchCalls[0]?.payloads ?? [];
+      expect(dispatched).toHaveLength(8);
+      expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_GENERATED)).toBe(true);
     });
   });
 
