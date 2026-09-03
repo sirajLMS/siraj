@@ -152,7 +152,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             dangerouslySetInnerHTML={{
               __html:
                 "if('serviceWorker' in navigator && window.isSecureContext){navigator.serviceWorker.register('/sw.js?build=" +
-                process.env.NEXT_PUBLIC_BUILD_ID +
+                encodeURIComponent(process.env.NEXT_PUBLIC_BUILD_ID ?? "").replace(/'/g, "%27") +
                 "').catch(function(){});}",
             }}
           />
