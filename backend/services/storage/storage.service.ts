@@ -5,6 +5,7 @@ import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { StorageUtils } from "@/backend/utils/storage.utils";
 import type {
   DirectoryPermissionsUpdateInput,
   FileOperationResult,
@@ -265,16 +266,11 @@ export namespace StorageService {
   }
 
   /**
-   * Validate a file path for traversal attempts.
+   * Validate a file path for traversal attempts and invalid characters.
    * Returns true if the path is safe, false otherwise.
    */
   export function validatePath(filePath: string): boolean {
-    return !(
-      filePath.includes("..") ||
-      filePath.includes("\\") ||
-      filePath.startsWith("/") ||
-      filePath.startsWith("~")
-    );
+    return StorageUtils.validatePath(filePath) === null;
   }
 
   /**
