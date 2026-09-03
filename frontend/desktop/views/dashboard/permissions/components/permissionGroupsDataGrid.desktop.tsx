@@ -53,7 +53,14 @@ function RowActionsDesktop({
 
   return (
     <>
-      <IconButton id={`group-actions-btn-${group.id}`} onClick={openMenu} size="small">
+      <IconButton
+        id={`group-actions-btn-${group.id}`}
+        onClick={openMenu}
+        size="small"
+        aria-label={t.columnActions}
+        aria-haspopup="true"
+        aria-expanded={open}
+      >
         <MoreVertOutlined fontSize="small" />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={closeMenu}>
