@@ -216,4 +216,14 @@ describe("RichTextEditor", () => {
     await editorReady();
     expect(screen.getByRole("textbox")).toHaveAccessibleName(labels.editorLabel);
   });
+
+  test("wraps toolbar buttons in tooltips displaying action labels", async () => {
+    renderWithWrapper(<RichTextEditor value="" onChange={() => {}} disabled />, { locale });
+    await editorReady();
+
+    const boldButton = screen.getByRole("button", { name: labels.bold });
+    expect(boldButton).toBeDisabled();
+    // Disabled IconButtons suppress pointer events, so a span wrapper keeps the tooltip interactive.
+    expect(boldButton.parentElement?.tagName.toLowerCase()).toBe("span");
+  });
 });

@@ -15,6 +15,7 @@ import type {
   StorageUploadValidationParams,
   ValidReferenceTable,
 } from "@/backend/types";
+import { StorageUtils } from "@/backend/utils/storage.utils";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 const VALID_REFERENCE_TABLES: readonly ValidReferenceTable[] = [
@@ -265,16 +266,11 @@ export namespace StorageService {
   }
 
   /**
-   * Validate a file path for traversal attempts.
+   * Validate a file path for traversal attempts and invalid characters.
    * Returns true if the path is safe, false otherwise.
    */
   export function validatePath(filePath: string): boolean {
-    return !(
-      filePath.includes("..") ||
-      filePath.includes("\\") ||
-      filePath.startsWith("/") ||
-      filePath.startsWith("~")
-    );
+    return StorageUtils.validatePath(filePath) === null;
   }
 
   /**

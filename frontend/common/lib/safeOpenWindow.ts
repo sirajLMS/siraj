@@ -11,6 +11,9 @@
  * handler that needs to open a URL) avoid `globalThis.open(...)` call sites
  * that would trip §3 N19 grep checks when re-exported through tier files.
  */
+import { isRelativeSafePath } from "@/frontend/common/lib/safeRedirect";
+import { isSafeUrl } from "@/shared/lib/safe-url";
+
 export function safeOpenWindow(url: string | null | undefined): void {
   const trimmed = typeof url === "string" ? url.trim() : "";
   if (!trimmed) {
@@ -19,5 +22,12 @@ export function safeOpenWindow(url: string | null | undefined): void {
   if (typeof globalThis.window === "undefined") {
     return;
   }
+
+  // Only allow http(s) URLs or known-safe same-origin relative paths — blocks
+  // javascript:/data:/vbscript: and protocol-relative (`//evil.com`) targets.
+  if (!isSafeUrl(trimmed) && !isRelativeSafePath(trimmed)) {
+    return;
+  }
+
   globalThis.window?.open(trimmed, "_blank", "noopener,noreferrer");
 }

@@ -103,13 +103,13 @@ export function filterStudentProfileByFieldGroups<T extends Record<string, unkno
  * smuggled past the field-group gates (oxlint no-unsafe-type-assertion).
  */
 function lookupProfileGroup(key: string): ProfileFieldGroupDefinition | undefined {
-  const found = Object.entries(PROFILE_FIELD_GROUP_BY_KEY).find(([entryKey]) => entryKey === key);
-  return found?.[1];
+  const groups: Readonly<Record<string, ProfileFieldGroupDefinition>> = PROFILE_FIELD_GROUP_BY_KEY;
+  return Object.hasOwn(groups, key) ? groups[key] : undefined;
 }
 
 function lookupStudentGroup(key: string): StudentFieldGroupDefinition | undefined {
-  const found = Object.entries(STUDENT_FIELD_GROUP_BY_KEY).find(([entryKey]) => entryKey === key);
-  return found?.[1];
+  const groups: Readonly<Record<string, StudentFieldGroupDefinition>> = STUDENT_FIELD_GROUP_BY_KEY;
+  return Object.hasOwn(groups, key) ? groups[key] : undefined;
 }
 
 export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {

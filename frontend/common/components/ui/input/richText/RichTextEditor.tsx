@@ -5,7 +5,7 @@ import FormatItalicIcon from "@mui/icons-material/FormatItalic";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import FormatUnderlinedIcon from "@mui/icons-material/FormatUnderlined";
-import { Box, FormControl, FormHelperText, IconButton, InputLabel } from "@mui/material";
+import { Box, FormControl, FormHelperText, IconButton, InputLabel, Tooltip } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
@@ -185,7 +185,7 @@ function ToolbarButton({
   readonly disabled: boolean;
 }): React.ReactNode {
   const active = action.isActive(editor);
-  return (
+  const button = (
     <IconButton
       size="small"
       aria-label={action.label}
@@ -205,6 +205,18 @@ function ToolbarButton({
     >
       {action.icon}
     </IconButton>
+  );
+
+  return (
+    <Tooltip title={action.label}>
+      {disabled ? (
+        <Box component="span" sx={{ display: "inline-flex" }}>
+          {button}
+        </Box>
+      ) : (
+        button
+      )}
+    </Tooltip>
   );
 }
 
