@@ -373,4 +373,53 @@ describe("NotificationRepository — handleDeliveryWebhook rank guard", () => {
   notificationTest("r10-059: DELIVERED→OPENED transition succeeds (rank 3 > 2)", async tx => {
     await assertSingleTransition(tx, "RgDo", NotificationDeliveryStatus.DELIVERED, NotificationDeliveryStatus.OPENED);
   });
+
+  notificationTest("findByProviderMessageId resolves row when present and returns null when absent", async tx => {
+    const user = await makeUser(tx, "FindPmi");
+    const pmi = `findpmi-${randomUUID()}`;
+
+    const missing = await NotificationRepository.findByProviderMessageId(pmi, tx);
+    expect(missing).toBeNull();
+
+    const created = await insertDeliveryWithStatus(tx, user.id, pmi, NotificationDeliveryStatus.SENT);
+    const found = await NotificationRepository.findByProviderMessageId(pmi, tx);
+
+    expect(found).not.toBeNull();
+    expect(found?.id).toBe(created.id);
+    expect(found?.providerMessageId).toBe(pmi);
+  });
+
+  notificationTest("createDelivery race guard: returns existing webhook row if providerMessageId already exists", async tx => {
+    const user = await makeUser(tx, "CreateRaceGuard");
+    const pmi = `raceguard-${randomUUID()}`;
+
+    // Webhook created row first with status DELIVERED
+    const webhookRow = await NotificationRepository.handleDeliveryWebhook(
+      {
+        providerMessageId: pmi,
+        status: NotificationDeliveryStatus.DELIVERED,
+        userId: user.id,
+        channel: BASE_INPUT.channel,
+        eventType: BASE_INPUT.eventType,
+      },
+      tx
+    );
+    expect(webhookRow).not.toBeNull();
+    expect(webhookRow?.status).toBe(NotificationDeliveryStatus.DELIVERED);
+
+    // Call createDelivery with the same providerMessageId (race condition)
+    const result = await NotificationRepository.createDelivery(
+      {
+        userId: user.id,
+        channel: BASE_INPUT.channel,
+        eventType: BASE_INPUT.eventType,
+        providerMessageId: pmi,
+      },
+      tx
+    );
+
+    // Should return existing webhook row rather than overwriting with PENDING
+    expect(result.id).toBe(webhookRow!.id);
+    expect(result.status).toBe(NotificationDeliveryStatus.DELIVERED);
+  });
 });

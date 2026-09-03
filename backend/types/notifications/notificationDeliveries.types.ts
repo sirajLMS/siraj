@@ -24,6 +24,7 @@ export type CreateNotificationDeliveryInput = Pick<
   title?: string | null;
   body?: string | null;
   metadata?: NotificationMetadata | null;
+  providerMessageId?: string | null;
 };
 
 export type UpdateDeliveryStatusInput = {
