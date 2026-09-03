@@ -285,8 +285,11 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
     // customizer starts in the same mode the user is viewing (dark or light),
     // not always the default isDark. This ensures color edits apply to the
     // mode the user actually sees.
-    const currentScheme = typeof document !== "undefined" ? document.documentElement.dataset.muiColorScheme : undefined;
-    const isDark = currentScheme !== "light";
+    const currentScheme =
+      typeof document !== "undefined"
+        ? document.documentElement.dataset.muiColorScheme || document.documentElement.dataset.theme
+        : undefined;
+    const isDark = currentScheme ? currentScheme === "dark" : get().isDark;
     const presetId = get().presetId ?? matchPresetByColors(get().draft.colors);
     set({ isCustomizeMode: true, isDark, presetId });
     writeActiveModeCssVars(get().draft, isDark, presetId);
