@@ -10,7 +10,7 @@
     "dev:inspect": "NEXT_DIST_DIR=.next-dev NODE_OPTIONS='--inspect' next dev --turbopack -p 3000 -H 0.0.0.0",
     "prebuild": "tsx scripts/locale-snapshots.ts && tsx scripts/build/generate-vercel-config.ts",
     "locale:snapshots": "tsx scripts/locale-snapshots.ts",
-    "build": "next build",
+    "build": "tsx scripts/lib/run-locked-cmd.ts build NODE_ENV=production next build",
     "start": "next start -p 4000 -H 0.0.0.0",
     "format": "bunx @biomejs/biome format --write .",
     "biome:check": "bun run scripts/lib/run-locked-cmd.ts biome:check bunx @biomejs/biome check --write --unsafe .",
