@@ -56,8 +56,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   generateBuildId: () => buildId,
   typescript: {
-    // Build type-checks the deployable graph only — tests/stories/scripts live in the
-    // full tsconfig.json (CI `bun tsgo`), not in the production build program.
+    // Disable type-checking during `next build` (type-checking is handled in CI via `bun tsgo`)
+    ignoreBuildErrors: true,
     tsconfigPath: "tsconfig.build.json",
   },
   env: {
