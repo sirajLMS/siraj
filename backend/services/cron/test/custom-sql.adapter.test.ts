@@ -97,11 +97,13 @@ describe("custom-sql.adapter", () => {
 
   // ── init / start ──
 
-  test("init creates the cron_queue table on first call", async () => {
+  test("init creates the cron_queue table and index on first call", async () => {
     await setupAdapter();
 
     const firstCall = queryMock.mock.calls[0];
+    const secondCall = queryMock.mock.calls[1];
     expect(firstCall?.[0]).toContain("CREATE TABLE IF NOT EXISTS cron_queue");
+    expect(secondCall?.[0]).toContain("CREATE INDEX IF NOT EXISTS cron_queue_status_available_idx");
   });
 
   test("init is lazy — subsequent calls do not re-run CREATE TABLE", async () => {

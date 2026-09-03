@@ -44,6 +44,9 @@ const CREATE_TABLE_SQL = `
     error_message TEXT,
     error_stack TEXT
   );
+`;
+
+const CREATE_INDEX_SQL = `
   CREATE INDEX IF NOT EXISTS cron_queue_status_available_idx
     ON cron_queue (status, available_at)
     WHERE status = 'pending';
@@ -103,6 +106,7 @@ async function ensureInit(state: CustomSqlState): Promise<QueryablePool> {
   };
   state.pool = pool;
   await pool.query(CREATE_TABLE_SQL);
+  await pool.query(CREATE_INDEX_SQL);
   logger.info("cron.customSql.initialized", {});
   return pool;
 }
