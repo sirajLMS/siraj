@@ -31,8 +31,8 @@ import {
   formatAccountingDate,
   formatAccountingMoney,
   numericCell,
+  paymentGatewayLabel,
   paymentStatusTone,
-  textCell,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import { usePaymentsPersonFilterSelection } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentsPersonFiltersShared";
 import { DesktopListStateGate } from "@/frontend/common/views/dashboard/accounting/components/DesktopListStateGate";
@@ -202,10 +202,8 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         field: "paymentGateway",
         headerName: t.columns.paymentGateway,
         width: 150,
-        valueGetter: (value: unknown) => {
-          const localized = Object.entries(t.gateways).find(([gatewayKey]) => gatewayKey === value);
-          return localized?.[1] ?? textCell(value);
-        },
+        valueGetter: (value: unknown) =>
+          paymentGatewayLabel(typeof value === "string" ? value : null, t.gateways),
       },
       {
         field: "paymentDate",

@@ -1,0 +1,3 @@
+## 2026-09-04 - O(1) Property Lookups vs. Object.entries().find() in Hot Paths
+**Learning:** In hot execution paths such as notification metadata type guards and DataGrid column value getters, using `Object.entries(obj).find(([k]) => k === target)` allocates entry arrays and entry tuple pairs while executing linear array scans on every execution/render. Replacing this with O(1) property lookups (or `Reflect.get(obj, key)`) eliminates heap allocations and provides O(1) constant-time indexing.
+**Action:** Always prefer direct property lookups, `in` operator checks, or `Reflect.get()` over `Object.entries().find()` when extracting specific properties from unknown objects in type guards or render loops.

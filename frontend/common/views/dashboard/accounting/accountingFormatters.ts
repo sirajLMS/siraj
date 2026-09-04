@@ -81,14 +81,15 @@ export function planActiveTone(active: boolean): "success" | "default" {
 }
 
 /**
- * Payment-gateway label for detail surfaces: payments recorded without a
- * gateway (null or the NONE member) render the shared muted dash, matching the
- * other empty-value fallbacks instead of spelling out "None".
+ * Payment-gateway label for detail and list surfaces: payments recorded without a
+ * gateway (null, undefined, or the NONE member) render the shared muted dash, matching the
+ * other empty-value fallbacks instead of spelling out "None". Performs O(1) hash table lookup.
  */
 export function paymentGatewayLabel(
-  gateway: PaymentGateway | null | undefined,
+  gateway: PaymentGateway | string | null | undefined,
   gateways: PaymentsLabels["gateways"]
 ): string {
-  if (!gateway || gateway === PaymentGateway.None) return "—";
-  return gateways[gateway];
+  if (!gateway || gateway === (PaymentGateway.None as string)) return "—";
+  const label = (gateways as Record<string, string>)[gateway];
+  return label ?? textCell(gateway);
 }
