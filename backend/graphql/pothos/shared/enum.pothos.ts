@@ -54,6 +54,8 @@ import {
   RateSource,
   RescheduleDateLabel,
   SchedulingMode,
+  SessionAuditReportSortFieldEnum,
+  SessionAuditStatusEnum,
   StudentStatus,
   TeacherDueStatus,
   TeacherProgressFeedEventKind,
@@ -342,6 +344,14 @@ export const QuotaLedgerReasonPothosEnum = gqlSchemaBuilder.enumType(QuotaLedger
 
 export const SchedulingModePothosEnum = gqlSchemaBuilder.enumType(SchedulingMode, {
   name: "SchedulingMode",
+});
+
+export const SessionAuditStatusPothosEnum = gqlSchemaBuilder.enumType(SessionAuditStatusEnum, {
+  name: "SessionAuditStatus",
+});
+
+export const SessionAuditReportSortFieldPothosEnum = gqlSchemaBuilder.enumType(SessionAuditReportSortFieldEnum, {
+  name: "SessionAuditReportSortField",
 });
 
 export const OnDemandNoCreditsOutcomePothosEnum = gqlSchemaBuilder.enumType(OnDemandNoCreditsOutcome, {

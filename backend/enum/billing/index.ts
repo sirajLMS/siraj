@@ -4,3 +4,4 @@ export * from "./credit-adjustment.enum";
 export * from "./package-plan.enum";
 export * from "./payment-method.enum";
 export * from "./quota.enum";
+export * from "./session-audit.enum";

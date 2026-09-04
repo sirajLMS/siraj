@@ -71,4 +71,47 @@ describe("EffectiveMeetingService", () => {
     expect(resolved.source).toBe(EffectiveMeetingSource.NONE);
     expect(resolved.joinUrl).toBeNull();
   });
+
+  resolutionTest("resolveForClassInstances resolves mixed sources in batch", async (tx, tErrors) => {
+    const { student } = await setupStudent(tx);
+    const { teacher, user: teacherUser } = await setupTeacher(tx);
+    const provider = await createTestMeetingProvider(tx);
+
+    // Teacher default config
+    await createTestMeetingConfig(tx, teacherUser.id, provider.id, {
+      isDefault: true,
+      details: { meetingUrl: "https://zoom.us/j/teacher-default" },
+    });
+
+    // Instance 1: Class-level default
+    const inst1 = await createMockClassInstance(tx, student.id, teacher.id);
+    await createTestClassMeetingConfig(tx, { classInstanceId: inst1.id }, provider.id, {
+      isDefault: true,
+      details: { meetingUrl: "https://zoom.us/j/class-1" },
+    });
+
+    // Instance 2: Fallback to teacher default
+    const inst2 = await createMockClassInstance(tx, student.id, teacher.id);
+
+    // Instance 3: No teacher config and no class config -> NONE
+    const { teacher: teacherNoConfig } = await setupTeacher(tx);
+    const inst3 = await createMockClassInstance(tx, student.id, teacherNoConfig.id);
+
+    // Empty list check
+    const emptyMap = await EffectiveMeetingService.resolveForClassInstances([], tErrors, tx);
+    expect(emptyMap.size).toBe(0);
+
+    // Batch resolve inst1, inst2, inst3
+    const map = await EffectiveMeetingService.resolveForClassInstances([inst1.id, inst2.id, inst3.id], tErrors, tx);
+
+    expect(map.size).toBe(3);
+    expect(map.get(inst1.id)?.source).toBe(EffectiveMeetingSource.CLASS);
+    expect(map.get(inst1.id)?.joinUrl).toBe("https://zoom.us/j/class-1");
+
+    expect(map.get(inst2.id)?.source).toBe(EffectiveMeetingSource.TEACHER);
+    expect(map.get(inst2.id)?.joinUrl).toBe("https://zoom.us/j/teacher-default");
+
+    expect(map.get(inst3.id)?.source).toBe(EffectiveMeetingSource.NONE);
+    expect(map.get(inst3.id)?.joinUrl).toBeNull();
+  });
 });

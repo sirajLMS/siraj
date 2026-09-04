@@ -203,8 +203,8 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         headerName: t.columns.paymentGateway,
         width: 150,
         valueGetter: (value: unknown) => {
-          const localized = Object.entries(t.gateways).find(([gatewayKey]) => gatewayKey === value);
-          return localized?.[1] ?? textCell(value);
+          const labels: Record<string, string | undefined> = t.gateways;
+          return typeof value === "string" ? (labels[value] ?? textCell(value)) : textCell(value);
         },
       },
       {

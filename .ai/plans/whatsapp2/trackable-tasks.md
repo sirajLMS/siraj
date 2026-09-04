@@ -87,7 +87,7 @@
 
 - [ ] **4. Factory + adapter multi-numberization**
   - [ ] 4.1 Edit `WhatsappChannelFactory.ts` — per-account instance map, `getWhatsappChannel(accountId)`, `getChannelForPurpose(purpose)` (resolution helper), reset per-account; keep legacy default path for `syncFromMeta` admin flow until Task 4.4.
-  - [ ] 4.2 Edit `MetaCloudApiAdapter.ts` — constructor takes accountId; `resolveCredentials` per account; remove first-active fallback for sends; pair rate-limit key `whatsapp:pair:<sender>:<recipient>`; remove hardcoded `v20.0` → env-config default `v23.0` (register key `WHATSAPP_GRAPH_API_VERSION` in `backend/lib/env-config-keys.ts` under the `whatsapp` category, DB-overridable via `env::` settings; NOT in the `shared/constants/env-config-keys.ts` hidden list — it is not a secret).
+  - [ ] 4.2 Edit `MetaCloudApiAdapter.ts` — constructor takes accountId; `resolveCredentials` per account; remove first-active fallback for sends; pair rate-limit key `whatsapp:pair:<sender>:<recipient>`; remove hardcoded `v20.0` → env-config default `v25.0` (current docs example version) (register key `WHATSAPP_GRAPH_API_VERSION` in `backend/lib/env-config-keys.ts` under the `whatsapp` category, DB-overridable via `env::` settings; NOT in the `shared/constants/env-config-keys.ts` hidden list — it is not a secret).
   - [ ] 4.3 Offboarded accounts: adapter eviction + `whatsapp.accountOffboarded` error before Graph call.
   - [ ] 4.4 Migrate `syncFromMeta` to per-account credentials (remove env-global token path for DB-managed accounts); keep env path only for bootstrapping first account, documented.
   - [ ] 4.5 Aggregate `isWhatsappConfigured`/`validateConfig`; add per-account health resolver hook.
@@ -117,9 +117,9 @@
 - [ ] **7. Route + event queue + handler**
   - [ ] 7.1 Edit `app/api/webhooks/whatsapp/route.ts` — remove `stripInboundMessages` call + strip fn + 24h identical-body rejection; insert per-change event rows pre-200; 5-minute payloadHash replay window (accept-but-skip); keep HMAC/1MB/per-IP.
   - [ ] 7.2 Edit `whatsapp-webhook.handler.ts` — `processPendingWebhookEvents(claim)` + field dispatch: `history` (phases/chunk_order/progress, threads→messages upsert, media_placeholder), `smb_app_state_sync` (contacts LWW add/remove), `smb_message_echoes` (echo/revoke/edit), `messages` inbound branch; statuses preserve existing `handleDeliveryWebhook` path; remove analytics CLASS_REMINDER fallback for pure inbound.
-  - [ ] 7.3 Media follow-up correlation: `mediaPlaceholder` flip + asset id persistence (≤14d semantics documented).
+  - [ ] 7.3 Media follow-up correlation: `mediaPlaceholder` flip + asset id persistence (7-day fetch window after the media webhook; 14 days is only the history follow-up eligibility cutoff — see implementation D8).
   - [ ] 7.4 Sweeper cron registration (stale-PENDING reclaim with retry/backoff; poison park) in existing cron service.
-  - [ ] 7.5 `account_update` lifecycle handling (offboard/reconnect/partner-uninstall/disable; capability update) per implementation Component 6.
+  - [ ] 7.5 `account_update` lifecycle handling (offboard/reconnect/partner-uninstall/disable; `PARTNER_REMOVED` with `disconnection_info.reason`; capability update) per implementation Component 6 — the `business_capability_update` parser MUST accept `max_daily_conversations_per_business` as both `TIER_*` strings and integer-style values, MUST also parse the legacy `max_daily_conversation_per_phone` (the only field Meta sends on webhooks <v24.0), and MUST tolerate absent `max_phone_numbers_per_business`/`max_phone_numbers_per_waba` (conditional inclusion — absence ≠ no cap).
   - [ ] 7.QL / 7.TE — handler tests: burst chunk ingest (batched), identical-body retry accepted + deduped, short-window replay skip, revoke-before-original, media placeholder→media arrival, 2593109 decline mapping, offboard eviction. Extend `backend/services/whatsapp/test/whatsapp-webhook.handler.test.ts`; mirror route changes in `app/api/webhooks/whatsapp/route.test.ts`. 7.SEC (HMAC fail → 401 + no insert; sanitize logging). 7.SR. 7.IV.
   - Outcome: `outcome/7-webhook-outcome.md` · _Requirements: REQ-6, REQ-7_
 

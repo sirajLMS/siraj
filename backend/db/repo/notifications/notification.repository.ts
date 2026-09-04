@@ -68,6 +68,7 @@ export namespace NotificationRepository {
       title?: string | null;
       body?: string | null;
       metadata?: NotificationMetadata | null;
+      providerMessageId?: string | null;
     },
     status: NotificationDeliveryStatus,
     extras: {
@@ -89,6 +90,7 @@ export namespace NotificationRepository {
       title: input.title ?? null,
       body: input.body ?? null,
       metadata: input.metadata ?? null,
+      providerMessageId: input.providerMessageId ?? null,
       sentAt: extras.sentAt ?? null,
       deliveredAt: extras.deliveredAt ?? null,
       failedAt: extras.failedAt ?? null,
@@ -250,6 +252,20 @@ export namespace NotificationRepository {
       .where(and(eq(userDeviceTokens.userId, userId), eq(userDeviceTokens.isActive, true)));
   };
 
+  export const findByProviderMessageId = async (
+    providerMessageId: string,
+    tx?: DBTransaction
+  ): Promise<NotificationDeliverySelectType | null> => {
+    const q = queryDb(tx);
+    const [result] = await q
+      .select()
+      .from(notificationDeliveries)
+      .where(eq(notificationDeliveries.providerMessageId, providerMessageId))
+      .limit(1);
+
+    return result ?? null;
+  };
+
   export const createDelivery = async (
     input: CreateNotificationDeliveryInput,
     tx?: DBTransaction
@@ -257,22 +273,50 @@ export namespace NotificationRepository {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
-      const [created] = await t
-        .insert(notificationDeliveries)
-        .values({
-          userId: input.userId,
-          deviceTokenId: input.deviceTokenId ?? null,
-          channel: input.channel,
-          eventType: input.eventType,
-          status: NotificationDeliveryStatus.PENDING,
-          title: input.title ?? null,
-          body: input.body ?? null,
-          metadata: input.metadata ?? null,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
+      if (input.providerMessageId) {
+        // Race-condition guard: if the webhook handler already created a row
+        // for this provider message ID before we reached this INSERT, return
+        // it so we never overwrite a newer status (e.g. DELIVERED) with PENDING.
+        const existing = await NotificationRepository.findByProviderMessageId(input.providerMessageId, t);
+        if (existing) {
+          return existing;
+        }
+      }
 
+      const values = {
+        userId: input.userId,
+        deviceTokenId: input.deviceTokenId ?? null,
+        channel: input.channel,
+        eventType: input.eventType,
+        status: NotificationDeliveryStatus.PENDING,
+        title: input.title ?? null,
+        body: input.body ?? null,
+        metadata: input.metadata ?? null,
+        providerMessageId: input.providerMessageId ?? null,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      if (input.providerMessageId) {
+        const [created] = await t
+          .insert(notificationDeliveries)
+          .values(values)
+          .onConflictDoNothing({
+            target: notificationDeliveries.providerMessageId,
+          })
+          .returning();
+
+        if (created) {
+          return created;
+        }
+
+        const existing = await NotificationRepository.findByProviderMessageId(input.providerMessageId, t);
+        if (existing) {
+          return existing;
+        }
+      }
+
+      const [created] = await t.insert(notificationDeliveries).values(values).returning();
       return created;
     };
 

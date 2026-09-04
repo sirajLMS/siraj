@@ -233,5 +233,41 @@ describe("WhatsApp Channel Factory", () => {
       expect(result.sendAttempted).toBe(false);
       expect(fetchSpy).not.toHaveBeenCalled();
     });
+
+    test("retries once with fresh credentials on 401 response and succeeds", async () => {
+      fetchSpy = spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ error: { message: "Invalid OAuth access token" } }), { status: 401 })
+        )
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ messages: [{ id: "wamid.retry.001" }], messaging_product: "whatsapp" }), {
+            status: 200,
+          })
+        );
+
+      const result = await whatsappChannel.send(sendParams());
+
+      expect(result.success).toBe(true);
+      expect(result.providerMessageId).toBe("wamid.retry.001");
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ status: NotificationDeliveryStatus.SENT })
+      );
+    });
+
+    test("does not retry a second time if retry call also returns 401", async () => {
+      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify({ error: { message: "Invalid OAuth access token" } }), { status: 401 })
+      );
+
+      const result = await whatsappChannel.send(sendParams());
+
+      expect(result.success).toBe(false);
+      expect(result.sendAttempted).toBe(true);
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(updateDeliveryStatusSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ status: NotificationDeliveryStatus.FAILED })
+      );
+    });
   });
 });

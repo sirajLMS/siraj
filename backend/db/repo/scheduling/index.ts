@@ -18,6 +18,7 @@ export * from "./recurring-schedule.repository";
 export * from "./scheduling-queries.repository.findUpcoming";
 export type { ClassInstanceAffectedUsers } from "./scheduling-queries.repository.helpers";
 export { classLifecycleAffectedUserIds } from "./scheduling-queries.repository.helpers";
+export * from "./session-audit.repository";
 export * from "./shared";
 
 export const SchedulingRepository = {

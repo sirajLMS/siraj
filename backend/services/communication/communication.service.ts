@@ -31,9 +31,8 @@ const NOTIFICATION_ENTITY_KINDS: readonly NotificationEntityKind[] = [
 /** Type guard: narrows an untyped `metadata` blob to a valid `NotificationMetadata`. */
 function isNotificationMetadata(metadata: unknown): metadata is NotificationMetadata {
   if (metadata === null || typeof metadata !== "object") return false;
-  const entries = Object.entries(metadata);
-  const entityKind = entries.find(([k]) => k === "entityKind")?.[1];
-  const entityId = entries.find(([k]) => k === "entityId")?.[1];
+  const entityKind = Reflect.get(metadata, "entityKind");
+  const entityId = Reflect.get(metadata, "entityId");
   if (typeof entityKind !== "string" || typeof entityId !== "string") {
     return false;
   }
@@ -47,7 +46,7 @@ function asNotificationMetadata(metadata: Record<string, unknown> | undefined): 
 /** Type guard: narrows an untyped value to `Record<string, string>` (for push `data`). */
 function isStringRecord(value: unknown): value is Record<string, string> {
   if (value === null || typeof value !== "object") return false;
-  return Object.entries(value).every(([, v]) => typeof v === "string");
+  return Object.values(value).every(v => typeof v === "string");
 }
 
 /**
@@ -56,14 +55,13 @@ function isStringRecord(value: unknown): value is Record<string, string> {
  */
 function isWhatsappTemplateMetadata(value: unknown): value is WhatsappTemplateMetadata {
   if (value === null || typeof value !== "object") return false;
-  const entries = Object.entries(value);
-  const name = entries.find(([k]) => k === "name")?.[1];
+  const name = Reflect.get(value, "name");
   if (typeof name !== "string") return false;
-  const languageCode = entries.find(([k]) => k === "languageCode")?.[1];
+  const languageCode = Reflect.get(value, "languageCode");
   if (languageCode != null && typeof languageCode !== "string") {
     return false;
   }
-  const paramsOrder = entries.find(([k]) => k === "paramsOrder")?.[1];
+  const paramsOrder = Reflect.get(value, "paramsOrder");
   if (paramsOrder !== undefined) {
     if (!Array.isArray(paramsOrder)) return false;
     if (!paramsOrder.every(p => typeof p === "string")) return false;

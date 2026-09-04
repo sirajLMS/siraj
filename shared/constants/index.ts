@@ -5,6 +5,7 @@ export * from "./billing/credit.enum";
 export * from "./billing.enum";
 export * from "./brand-tokens";
 export * from "./class-instance-detail.enum";
+export * from "./classes";
 export * from "./currency.enum";
 export * from "./day-of-week.enum";
 export * from "./gender.enum";

@@ -1,5 +1,5 @@
 {
-  "manifestHash": "6cb6d46c37b46bc47c28fa90b9217293e5b5f45bfe799a4ee4829fbad99582c7",
+  "manifestHash": "f74301ccda86b4a4970f28691aaaeadd525d6cea728d11fd31fefea03ca7fec7",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -52,6 +52,10 @@
     {
       "file": "38-parent-notification-view-alerts.sql",
       "sha256": "3a1179b5def089c96110b008e9db0c9b471d018fa4bd4de9c3dc119eed38e0cb"
+    },
+    {
+      "file": "39-accounting-reports-permissions.sql",
+      "sha256": "9f035e3ca44319ab2a98d90183ff81bcdb06985cc6a84ac92d889bb42d9ce962"
     },
     {
       "file": "4-class_categories_and_subjects.sql",
@@ -315,6 +319,7 @@
     "20260828212837_custom_35-accounting-credits-permission",
     "20260829023113_custom_36-accounting-payroll-permissions",
     "20260829031931_custom_37-payroll-grace-settings",
-    "20260829192949_custom_38-parent-notification-view-alerts"
+    "20260829192949_custom_38-parent-notification-view-alerts",
+    "20260904064952_custom_39-accounting-reports-permissions"
   ]
 }

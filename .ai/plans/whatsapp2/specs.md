@@ -108,7 +108,7 @@ Segregates risky marketing traffic (ads replies) from trust traffic (exam/attend
 1. WHEN `WhatsappChannelFactory` is asked for a channel THEN it SHALL return a per-account adapter instance (cache keyed by `accountId`), replacing the module-level singleton; parameterless construction SHALL be removed.
 2. WHEN `MetaCloudApiAdapter.resolveCredentials` runs THEN it SHALL resolve via `whatsappAccountRepository.findById(accountId)` (never `findFirstActiveForCredentials`), with a per-account 5s credentials cache.
 3. WHEN credentials change or a token rotates THEN `resetWhatsappChannel(accountId)` SHALL invalidate exactly that account's cache entry; env-key invalidation SHALL remain for the env-global path (admin `syncFromMeta` legacy) until Req 6 migrates it.
-4. WHEN the Graph API version is needed THEN it SHALL come from a single env-config key (`WHATSAPP_GRAPH_API_VERSION`, registered under the `whatsapp` category in `backend/lib/env-config-keys.ts`, DB-overridable via `env::` settings, default `v23.0` matching helpers) — the hardcoded `v20.0` at `MetaCloudApiAdapter.ts:494` SHALL be removed; per-number API versions are not a Meta concept.
+4. WHEN the Graph API version is needed THEN it SHALL come from a single env-config key (`WHATSAPP_GRAPH_API_VERSION`, registered under the `whatsapp` category in `backend/lib/env-config-keys.ts`, DB-overridable via `env::` settings, default `v25.0` — the current docs example version; `v23.0` remains valid) — the hardcoded `v20.0` at `MetaCloudApiAdapter.ts:494` SHALL be removed; per-number API versions are not a Meta concept.
 5. WHEN `isWhatsappConfigured`/`validateConfig` evaluates THEN it SHALL reflect "at least one active account has valid credentials" (aggregate) while a new `whatsappAccountHealth` view exposes per-account validity.
 6. IF a coexistence account is offboarded (`ACCOUNT_OFFBOARDED`) THEN its adapter SHALL be evicted and subsequent sends to it SHALL fail fast with `whatsapp.accountOffboarded` (not retried against Graph).
 
@@ -120,7 +120,7 @@ Segregates risky marketing traffic (ads replies) from trust traffic (exam/attend
 
 #### Acceptance Criteria
 
-1. WHEN the admin starts onboarding THEN the settings UI SHALL load the Facebook JS SDK with `FB.login({ config_id, response_type: 'code', extras: { featureType: 'whatsapp_business_app_onboarding', version: 'v4' } })` and a session-logging `window` message listener filtered to `event.origin` ending `facebook.com` and `data.type === 'WA_EMBEDDED_SIGNUP'`.
+1. WHEN the admin starts onboarding THEN the settings UI SHALL load the Facebook JS SDK with `FB.login({ config_id, response_type: 'code', extras: { setup: {}, featureType: 'whatsapp_business_app_onboarding' } })` — no `version` key: the v4 extras object is purposely empty apart from `setup`/`featureType`, v4 is activated by the v4 Facebook Login for Business Configuration (`config_id`), and `extras.version` accepts only `v4-public-preview, v3-public-preview, v2-public-preview, v3, v2` — and a session-logging `window` message listener filtered to `event.origin` ending `facebook.com` and `data.type === 'WA_EMBEDDED_SIGNUP'`.
 2. WHEN the session-logging event arrives THEN the system SHALL handle `FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING` (payload may contain ONLY `waba_id`), `FINISH`, `CANCEL` (with `current_step`), and `ERROR` distinctly; closing the popup on the final screen counts as success.
 3. WHEN the auth `code` is returned THEN the server SHALL exchange it for a business-integration system-user token (`GET /oauth/access_token?client_id…code=…`), store it `encryptedText` on the account, and SKIP phone-number registration (coexistence numbers are already registered).
 4. WHEN onboarding succeeds THEN the server SHALL `POST /<WABA_ID>/subscribed_apps` and confirm coexistence via `GET /<PHONE_NUMBER_ID>?fields=is_on_biz_app,platform_type` requiring `is_on_biz_app: true` AND `platform_type: "CLOUD_API"` before marking the account `onboardingMode: COEXISTENCE`.
@@ -155,7 +155,7 @@ Segregates risky marketing traffic (ads replies) from trust traffic (exam/attend
 2. WHEN `after()`-deferred processing runs THEN a worker SHALL claim PENDING events and process them; a periodic sweeper (cron) SHALL re-claim events stuck `PENDING` beyond a TTL — this is the mitigation for `after()`'s non-guaranteed execution on serverless.
 3. WHEN Meta retries an identical body THEN the dedupe key SHALL be the payload hash used ONLY as a short-window replay guard (`webhook:replay:<sha256>`, TTL minutes, not 24h) layered with DB idempotency; identical-body retries SHALL be accepted (200) and deduped at the entity level, never 4xx-rejected — the v1 24h reject-all-identical-bodies behavior is REMOVED for coexistence fields because Meta legitimately redelivers identical history chunks.
 4. WHEN `history` webhooks arrive THEN messages SHALL be upserted keyed by `wamid` into `whatsapp_messages` (dedupe), conversations keyed by (account, wa_id/BSUID) into `whatsapp_conversations`, and contacts into `whatsapp_contacts`; chunks SHALL be deduped by `(accountId, phase, chunk_order)`.
-5. WHEN a message carries `media_placeholder` THEN it SHALL be stored as `mediaPlaceholder: true` without content; the follow-up media webhook SHALL be matched by `wamid` and the row updated; media asset IDs SHALL be treated as fetchable for at most 14 days (Meta retention) and expired-media rendering SHALL degrade gracefully.
+5. WHEN a message carries `media_placeholder` THEN it SHALL be stored as `mediaPlaceholder: true` without content; the follow-up media webhook SHALL be matched by `wamid` and the row updated; webhook-delivered media asset IDs SHALL be fetched/stored within **7 days** of webhook receipt (Meta expires webhook media IDs after 7 days; the 14-day figure is only the history follow-up eligibility window — media messages sent ≤14 days before onboarding get a follow-up, older media stays `media_placeholder` forever) and expired-media rendering SHALL degrade gracefully.
 6. WHEN `smb_app_state_sync` arrives THEN contacts SHALL be upserted keyed by (account, phone/user_id) honoring `action: add | remove` and `metadata.timestamp` last-write-wins.
 7. WHEN `smb_message_echoes` arrives THEN echoes SHALL be upserted as outbound messages with `direction: 'echo'`; `type: 'revoke'` SHALL soft-mark the original message `revokedAt`; `type: 'edit'` SHALL store latest content + `editedAt` keyed by `original_message_id`.
 8. WHEN inbound `messages` webhooks arrive (user→business, `value.messages[]`) THEN they SHALL be persisted with `direction: 'inbound'` AND the existing status-pipeline (`handleMessagesStatus`) SHALL remain for delivery statuses; the user-resolution fallback to `CLASS_REMINDER` analytics pollution SHALL be removed for pure inbound events that have no delivery row.
@@ -173,7 +173,8 @@ Segregates risky marketing traffic (ads replies) from trust traffic (exam/attend
 2. WHEN `account_update` carries `ACCOUNT_RECONNECTED` THEN the account SHALL return to active with adapter re-instantiation; no sync SHALL be re-requested (one-shot rule — eligibility survives only if reonboarding was automatic).
 3. WHEN `PARTNER_APP_UNINSTALLED` arrives THEN the account SHALL be deactivated and a warning SHALL surface in the Numbers tab.
 4. WHEN `DISABLED_UPDATE` (`ban_info.waba_ban_state`) arrives THEN a severity-normal alert SHALL be logged and surfaced.
-5. WHEN `business_capability_update` reports `max_phone_numbers_per_business` THEN the number cap SHALL be stored/surfaced for admin awareness (informational only).
+5. WHEN `business_capability_update` reports `max_phone_numbers_per_business` THEN the number cap SHALL be stored/surfaced for admin awareness (informational only). The parser SHALL accept `max_daily_conversations_per_business` as both `TIER_*` strings (`TIER_250/TIER_2K/TIER_10K/TIER_100K/TIER_UNLIMITED`, per the webhook reference) and integer-style values (per messaging-limits docs); on webhooks <v24.0 Meta sends only the deprecated `max_daily_conversation_per_phone`, which SHALL also be parsed. `max_phone_numbers_per_business` (present only while the portfolio is at the initial 250 limit) and `max_phone_numbers_per_waba` (present only when ≠250) are CONDITIONALLY included — absence SHALL NOT be interpreted as "no cap".
+6. WHEN `account_update` carries `PARTNER_REMOVED` THEN the payload's `disconnection_info.reason` (`ACCOUNT_DISCONNECTED`, `BUSINESS_DOWNGRADE`, `CHANGE_NUMBER`, `COMPANION_INACTIVITY` ~30d inactive, `PRIMARY_INACTIVITY` ~14d inactive, `USER_RE_REGISTERED`) SHALL be recorded, the account SHALL be marked inactive, and an audit log + admin warning SHALL surface in the Numbers tab.
 
 ### Requirement 8: Inbox Tab (Read-Only Conversations)
 
@@ -184,7 +185,7 @@ Segregates risky marketing traffic (ads replies) from trust traffic (exam/attend
 1. WHEN a user with `WHATSAPP_INBOX_VIEW` opens Settings ▸ WhatsApp THEN a 4th tab `?tab=inbox` SHALL appear (URL-synced, TAB_IDS/TAB_LABELS/TAB_PERMISSIONS extended); users without it SHALL not see the tab (`RequirePermission`).
 2. WHEN the inbox loads THEN it SHALL list conversations for a selected account (or "all numbers" with account column) via `AppDataGrid` (desktop) / `MobileCardList` (mobile) with pagination per `frontend/COMPONENT_PATTERNS.md`.
 3. WHEN a conversation is opened THEN the full message thread SHALL render chronologically with inbound/echo/api direction bubbles, `status`, `mediaPlaceholder` fallback, revoked/edited indicators.
-4. WHEN media expired (>14 days) THEN the UI SHALL show an availability notice rather than broken images.
+4. WHEN media has expired (>7 days since the media follow-up webhook was received — Meta expires webhook media IDs after 7 days) THEN the UI SHALL show an availability notice rather than broken images.
 5. WHEN a new inbound/echo arrives WHILE the inbox is open THEN polling or refetch-on-focus SHALL surface it (no WebSocket requirement in v1).
 6. IF an unauthorized user hits the inbox query/mutation THEN GraphQL SHALL reject via `PermissionsService.hasPermission(WHATSAPP_INBOX_VIEW)` at resolver + `requirePermission` at service (defense in depth); `WHATSAPP_INBOX_MANAGE` SHALL gate any destructive action (e.g. clear conversation) added later.
 
@@ -289,8 +290,8 @@ No new sidebar entries: the existing `whatsapp-settings` item under `grp_integra
 | EC-5 | Meta retries identical webhook body (history chunk redelivery) | Short replay window (minutes) rejects exact duplicates; entity-level wamid upserts make any accepted duplicate a no-op; NEVER 4xx-rejected |
 | EC-6 | `after()` handler killed mid-processing (serverless) | Raw event row was persisted pre-200; sweeper cron re-claims PENDING events past TTL and processes them |
 | EC-7 | History burst (thousands of messages in one webhook) | Batched inserts; per-field processing is async; 200 returned immediately |
-| EC-8 | Media ≤14 days: placeholder now, media webhook never arrives | `mediaPlaceholder` row renders as "media unavailable"; no crash |
-| EC-9 | Media >14 days referenced later | Fetch attempt returns Meta expiry error → UI shows expiry notice |
+| EC-8 | History media ≤14 days old at onboarding: placeholder arrives, media follow-up webhook never arrives | `mediaPlaceholder` row renders as "media unavailable"; no crash |
+| EC-9 | Media fetched >7 days after the media webhook was received (Meta webhook media-ID expiry) | Fetch attempt returns Meta expiry error → UI shows expiry notice; media older than 14 days at onboarding stays `media_placeholder` forever (no follow-up is ever sent) |
 | EC-10 | Two admins assign conflicting purpose to the same account concurrently | Optimistic update; last write wins with audit; both clients refetch |
 | EC-11 | Number added beyond portfolio cap (2 initially) | Meta rejects at WABA level; UI surfaces Meta error; `business_capability_update` later raises cap to 20 |
 | EC-12 | `to` field absent on history message (usernames rollout) | Conversation keyed by `wa_id`, fallback `user_id` (BSUID), fallback `username`; thread SHALL still render |
@@ -304,7 +305,7 @@ No new sidebar entries: the existing `whatsapp-settings` item under `grp_integra
 
 ### Performance
 
-- WHEN a history chunk with thousands of messages arrives THEN ingest SHALL ack within the webhook timeout target (<1s) after a single lightweight insert, processing asynchronously.
+- WHEN a history chunk with thousands of messages arrives THEN ingest SHALL ack within our design target (<1s) after a single lightweight insert, processing asynchronously. Note: Meta documents NO numeric response-timeout for messaging webhooks (the only ~20s figure appears in the calling FAQ); Meta retries failed deliveries immediately, then with decreasing frequency for up to 7 days — the <1s target is our design choice, not a Meta-imposed limit.
 - WHEN the inbox lists conversations THEN pagination SHALL keep p95 < 300ms on 100k messages via `(accountId, lastMessageAt)` index and `(conversationId, timestamp)` index.
 - WHEN per-pair rate limiter checks THEN Redis lookup SHALL be O(1) and SHALL NOT introduce cross-number contention.
 
@@ -330,7 +331,7 @@ No new sidebar entries: the existing `whatsapp-settings` item under `grp_integra
 ### Technical Constraints
 
 - Embedded Signup v4 minimum: `featureType 'whatsapp_business_app_onboarding'`; v2 EOL 2026-10-15.
-- SMB sync: `smb_app_state_sync` + `history` each exactly once; only within 24h of onboarding; results via webhooks only; groups excluded; history covers 180 days max; media IDs ≤14 days.
+- SMB sync: `smb_app_state_sync` + `history` each exactly once; only within 24h of onboarding; results via webhooks only; groups excluded; history covers 180 days max; webhook media asset IDs must be fetched within 7 days of receipt, and history media follow-ups arrive only for media messages sent ≤14 days before onboarding.
 - Meta limits: 2 → 20 numbers per portfolio (cap raised by verification or 2,000-limit achievement); templates WABA-scoped; per-number throughput default 80 msg/s (**coexistence numbers are fixed at 20 mps** — verified in `throughput.md`); pair limit 1 msg/6s per (number,user); registration ≤10/72h (`133016`).
 - Business app ≥ 2.24.17; partner must be Solution Partner/Tech Provider; session logging mandatory; `app_only_install` incompatible with coexistence.
 - `request_id` is the ONLY sync correlation handle (not echoed in webhooks) → store it, don't rely on it for idempotency.
@@ -344,6 +345,7 @@ No new sidebar entries: the existing `whatsapp-settings` item under `grp_integra
 
 - App Dashboard webhook field subscriptions (`messages`, `history`, `smb_app_state_sync`, `smb_message_echoes`, `account_update`) are configured manually; code validates at runtime and surfaces gaps.
 - One tenant → one WABA in v2.
+- The route's 1MB webhook body cap is an **explicitly-flagged assumption**: docs confirm chunks may contain thousands of messages and give no byte-size limit. Mitigation: verify against a real history sync during onboarding rehearsal and raise the cap if a real chunk approaches it.
 
 ## Success Criteria
 

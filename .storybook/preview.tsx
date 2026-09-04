@@ -1,6 +1,6 @@
 // cspell:ignore circlehollow
 import { DocsContainer, type DocsContainerProps } from "@storybook/addon-docs/blocks";
-import type { Decorator, Preview } from "@storybook/react";
+import type { Decorator, Preview } from "@storybook/nextjs-vite";
 import { setupWorker } from "msw/browser";
 import { mswLoader } from "msw-storybook-addon/csf3";
 import { type PropsWithChildren, useEffect, useState } from "react";

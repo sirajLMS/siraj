@@ -194,6 +194,8 @@ enum AppPermission {
   ACCOUNTING_PAYMENTS_VIEW
   ACCOUNTING_PAYROLL_MANAGE
   ACCOUNTING_PAYROLL_VIEW
+  ACCOUNTING_REPORTS_MANAGE
+  ACCOUNTING_REPORTS_VIEW
   APPRAISAL_FEEDBACK
   APPRAISAL_SUBMIT
   APPRAISAL_VIEW
@@ -3974,6 +3976,18 @@ type Query {
   searchSuggestions(excludeId: String!, query: String!): [SuggestionSearchResult!]
   searchTeacherAvailability(input: AvailabilitySearchInput!): AvailabilitySearchResult
 
+  """
+  Paginated session audit report across class instances. Aggregates cover the returned page.
+  """
+  sessionAuditReport(
+    filter: SessionAuditReportFilter
+
+    """Max rows per page (max 200)"""
+    limit: Int = 50
+    offset: Int = 0
+    sort: SessionAuditReportSort
+  ): SessionAuditReportPage
+
   """Fetches the session configuration for a single role."""
   sessionConfig(roleName: String!): SessionConfig
 
@@ -4430,6 +4444,95 @@ enum SchedulingMode {
 type SendPaymentReminderResult {
   id: String
   success: Boolean
+}
+
+"""
+Aggregates over the rows of the returned page: status tallies cover every audit status, the paid split derives from the calculation status, and the paid amount is a precision-safe decimal string
+"""
+type SessionAuditReportAggregates {
+  id: ID
+  rowCountByPaid: JSON
+  rowCountByStatus: JSON
+  totalPaidAmount: String
+  totalPaidCurrency: CurrencyCode
+}
+
+"""
+AND-combined filters narrowing the session audit report to a teacher, student, scheduled-date range, audit statuses, or free-text search
+"""
+input SessionAuditReportFilter {
+  currentStatuses: [SessionAuditStatus!]
+  dateFrom: String
+  dateTo: String
+  includeDeleted: Boolean
+  search: String
+  studentId: ID
+  teacherId: ID
+}
+
+"""
+One page of the session audit report plus aggregates over the returned rows
+"""
+type SessionAuditReportPage {
+  aggregates: SessionAuditReportAggregates
+  id: ID
+  rows: [SessionAuditReportRow!]
+  totalCount: Int
+}
+
+"""
+One class instance flattened with its derived audit status, payroll snapshot columns, and denormalized teacher, student, and subject names
+"""
+type SessionAuditReportRow {
+  actualEndAt: DateTime
+  actualStartAt: DateTime
+  bookingTimezone: String
+  calculatedDuration: Int
+  calculationStatus: CalculationStatus
+  currentStatus: SessionAuditStatus
+  durationMinutes: Int
+  id: ID
+  instanceId: ID
+  isPartialPercentage: Int
+  payrollCalculatedAt: DateTime
+  payrollNote: String
+  scheduledEndAt: DateTime
+  scheduledStartAt: DateTime
+  studentId: ID
+  studentName: String
+  subjectId: ID
+  subjectName: String
+  teacherDuePaymentDate: DateTime
+  teacherId: ID
+  teacherName: String
+  teacherPaidAmount: String
+  teacherPaidCurrency: CurrencyCode
+}
+
+"""Sort applied to the session audit report before pagination"""
+input SessionAuditReportSort {
+  direction: OrderSortDirection!
+  field: SessionAuditReportSortField!
+}
+
+enum SessionAuditReportSortField {
+  actualEndAt
+  actualStartAt
+  calculatedDuration
+  calculationStatus
+  durationMinutes
+  scheduledEndAt
+  scheduledStartAt
+  studentName
+  teacherName
+  teacherPaidAmount
+}
+
+enum SessionAuditStatus {
+  Absent
+  absent_student
+  end
+  open
 }
 
 """

@@ -13,6 +13,7 @@ import {
   students,
   teacherAssignments,
   teacherDues,
+  teacherPayments,
   teachers,
   userMeetingConfigs,
   users,
@@ -24,6 +25,8 @@ import {
   AttendanceEvaluation,
   CreditReason,
   LessonReportStatus,
+  PaymentDirection,
+  PaymentMethodType,
   TeacherDueStatus,
 } from "@/backend/enum";
 import type {
@@ -36,6 +39,7 @@ import type {
   ParentSelectType,
   StudentSelectType,
   TeacherDueSelectType,
+  TeacherPaymentSelectType,
   TeacherSelectType,
   UserMeetingConfigSelectType,
   UserSelectType,
@@ -530,6 +534,51 @@ export async function createTestTeacherDue(
 
   if (!row) {
     throw new Error("Failed to create test teacher due");
+  }
+
+  return row;
+}
+
+/**
+ * Creates a teacher_payments disbursement row for testing.
+ * @param tx Database transaction
+ * @param teacherId Teacher who received the payment
+ * @param overrides Optional field overrides (defaults: CASH payout snapshot, amount="100.00",
+ *  currency=SAR, paymentDate=now, isTestPayment=true)
+ */
+export async function createTestTeacherPayment(
+  tx: TestDb,
+  teacherId: string,
+  overrides: Partial<typeof teacherPayments.$inferInsert> = {}
+): Promise<TeacherPaymentSelectType> {
+  const now = new Date();
+  const [row] = await tx
+    .insert(teacherPayments)
+    .values({
+      teacherId,
+      userPaymentMethodId: null,
+      paymentMethodType: PaymentMethodType.CASH,
+      paymentMethodSnapshot: {
+        userPaymentMethodId: null,
+        type: PaymentMethodType.CASH,
+        direction: PaymentDirection.PAYOUT,
+        label: "Cash payout",
+        details: { note: "Test payout" },
+        catalog: null,
+        snapshottedAt: now.toISOString(),
+      },
+      amount: "100.00",
+      currency: CurrencyCode.SAR,
+      paymentDate: now,
+      isTestPayment: true,
+      createdAt: now,
+      updatedAt: now,
+      ...overrides,
+    })
+    .returning();
+
+  if (!row) {
+    throw new Error("Failed to create test teacher payment");
   }
 
   return row;

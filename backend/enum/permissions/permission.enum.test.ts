@@ -4,6 +4,8 @@ import { AppPermission, isAppPermission, parseAppPermission } from "@/backend/en
 const accountingCreditsManageKey = "accounting.credits_manage";
 const accountingPayrollViewKey = "accounting.payroll_view";
 const accountingPayrollManageKey = "accounting.payroll_manage";
+const accountingReportsViewKey = "accounting.reports_view";
+const accountingReportsManageKey = "accounting.reports_manage";
 
 describe("AppPermission accounting credits manage", () => {
   test("defines ACCOUNTING_CREDITS_MANAGE with the accounting.credits_manage key", () => {
@@ -39,10 +41,30 @@ describe("AppPermission accounting payroll", () => {
   });
 });
 
+describe("AppPermission accounting reports", () => {
+  test("defines ACCOUNTING_REPORTS_VIEW and ACCOUNTING_REPORTS_MANAGE with their keys", () => {
+    const viewValue: string = AppPermission.ACCOUNTING_REPORTS_VIEW;
+    const manageValue: string = AppPermission.ACCOUNTING_REPORTS_MANAGE;
+    expect(viewValue).toBe(accountingReportsViewKey);
+    expect(manageValue).toBe(accountingReportsManageKey);
+  });
+
+  test("isAppPermission accepts the accounting reports keys", () => {
+    expect(isAppPermission(accountingReportsViewKey)).toBe(true);
+    expect(isAppPermission(accountingReportsManageKey)).toBe(true);
+  });
+
+  test("parseAppPermission resolves the accounting reports keys to the enum values", () => {
+    expect(parseAppPermission(accountingReportsViewKey)).toBe(AppPermission.ACCOUNTING_REPORTS_VIEW);
+    expect(parseAppPermission(accountingReportsManageKey)).toBe(AppPermission.ACCOUNTING_REPORTS_MANAGE);
+  });
+});
+
 describe("AppPermission rejection paths", () => {
   test("isAppPermission rejects unknown permission keys", () => {
     expect(isAppPermission("accounting.credits_manage_typo")).toBe(false);
     expect(isAppPermission("accounting.payroll_view_typo")).toBe(false);
+    expect(isAppPermission("accounting.reports_view_typo")).toBe(false);
     expect(isAppPermission("unknown.permission")).toBe(false);
     expect(isAppPermission("")).toBe(false);
   });

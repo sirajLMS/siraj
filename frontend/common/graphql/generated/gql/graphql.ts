@@ -90,6 +90,8 @@ export enum AppPermission {
   AccountingPaymentsView = 'ACCOUNTING_PAYMENTS_VIEW',
   AccountingPayrollManage = 'ACCOUNTING_PAYROLL_MANAGE',
   AccountingPayrollView = 'ACCOUNTING_PAYROLL_VIEW',
+  AccountingReportsManage = 'ACCOUNTING_REPORTS_MANAGE',
+  AccountingReportsView = 'ACCOUNTING_REPORTS_VIEW',
   AppraisalFeedback = 'APPRAISAL_FEEDBACK',
   AppraisalSubmit = 'APPRAISAL_SUBMIT',
   AppraisalView = 'APPRAISAL_VIEW',

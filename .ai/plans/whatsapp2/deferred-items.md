@@ -22,6 +22,7 @@ Pre-existing gaps and stakeholder-excluded scope that this plan will NOT fix. It
 | D8 | Polling vs realtime inbox updates (WebSocket/subscriptions) | implementation D-note | future plan | 📋 Backlog | v1 uses refetch-on-focus + interval polling |
 | D9 | Per-process concurrency guard is process-local (MAX_CONCURRENT_CALLS not cluster-wide) | implementation Component 1 | future plan | 📋 Backlog | Meta per-number throughput is authoritative; documented limitation |
 | D10 | Stale table in `docs/services/whatsapp-cloud-api.md` (r3 2-HIGH note already fixed in code) | inventory-frontend §7 | Task 15.2 | 🔄 In Progress | Doc-only reconciliation, part of knowledge propagation |
+| D11 | Account-model evolution Phase 3 (H1 2028): Meta endpoints will require WAAC IDs (not phone-number IDs) in URL paths | docs-research-multi-number / `account-model-evolution.md` | future plan | 📋 Backlog | Phase 1 GA H2 2026 (`messaging_account_id` optional); Phase 2 (H1 2027) requires it in multi-Messaging-Account scenarios; `paid_messaging_account_id` alias must be migrated by 2026-12-31 |
 
 ## Enforcement
 

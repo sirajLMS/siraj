@@ -4,6 +4,7 @@
 // `import * as Pothos from "@/backend/graphql/pothos"` (from query/mutation)
 // continue to resolve every Pothos object.
 
+export * from "./accounting";
 export * from "./auth";
 export * from "./billing";
 export * from "./books";

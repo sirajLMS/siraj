@@ -27,7 +27,7 @@ v1's WhatsApp stack has three multi-number-breaking chokepoints (singleton facto
 3. Webhook ingest = insert → ack → async process; sweeper cron as durability backstop.
 4. Replay distinction: short-window exact-body hash rejection + entity-level idempotent upserts.
 5. `onboardingMode` column (not a separate account type) flags coexistence.
-6. API version: single env-config default `v23.0` (kills the v20.0 hardcode); no per-number API versions.
+6. API version: single env-config default `v25.0` (kills the v20.0 hardcode; v23.0 remains valid); no per-number API versions.
 7. Webhook field subscriptions remain App-Dashboard-managed; code only validates + surfaces.
 
 ### UX/Navigation Specification (REQUIRED)
@@ -156,7 +156,7 @@ graph LR
 - `getWhatsappChannel(accountId)` — lazily instantiate & cache `MetaCloudApiAdapter` per accountId; still expose a default-channel helper for legacy call sites that resolves via purpose `GENERAL` → first active (kept for the `syncFromMeta` transitional path).
 - `resetWhatsappChannel(accountId?)` — drop one or all cache entries.
 - Adapter: `resolveCredentials(accountId)` → repo lookup → decrypt `encryptedText` token; per-account 5s cache. Remove `findFirstActiveForCredentials` fallback.
-- `resolveGraphApiVersion()` → env-config key `WHATSAPP_GRAPH_API_VERSION` (category `whatsapp` in `backend/lib/env-config-keys.ts`) defaulting `v23.0`; deletes the hardcoded `v20.0` (`MetaCloudApiAdapter.ts:494`).
+- `resolveGraphApiVersion()` → env-config key `WHATSAPP_GRAPH_API_VERSION` (category `whatsapp` in `backend/lib/env-config-keys.ts`) defaulting `v25.0`; deletes the hardcoded `v20.0` (`MetaCloudApiAdapter.ts:494`).
 - Pair rate-limit key: `whatsapp:pair:<senderE164>:<recipientE164>`; 1 msg/6s, backoff 4^X on `131056`.
 
 **Interfaces**
@@ -166,7 +166,7 @@ graph LR
 
 **Implementation Notes**
 - Offboarded account → evicted from cache; sends throw `whatsapp.accountOffboarded` BEFORE Graph call.
-- Keep `MAX_CONCURRENT_CALLS=10` fetch budget per account instance (per-number throughput 80 msg/s stays a Meta concern; our concurrency guard is process-local — document as v2 limitation, deferred).
+- Keep `MAX_CONCURRENT_CALLS=10` fetch budget per account instance (per-number throughput stays a Meta concern — 80 msg/s default, but **coexistence numbers are fixed at 20 msg/s** per `throughput.md`; our concurrency guard is process-local — document as v2 limitation, deferred).
 
 
 ### Component 2: Purpose Routing
@@ -193,7 +193,7 @@ graph LR
 **Files**: `frontend/.../settings/whatsapp/` onboarding dialog (new), new API route or GraphQL mutation `completeWhatsappEmbeddedSignup` under `backend/graphql/mutation/whatsapp/whatsapp-account.mutation.ts`, new request builders under `cloud-api/requests/`.
 
 **Flow**
-1. Numbers tab button "Connect Business App (Coexistence)" loads FB SDK; `FB.login` with `config_id`, `response_type: 'code'`, `extras: { setup: {}, featureType: 'whatsapp_business_app_onboarding', version: 'v4' }`.
+1. Numbers tab button "Connect Business App (Coexistence)" loads FB SDK; `FB.login` with `config_id`, `response_type: 'code'`, `extras: { setup: {}, featureType: 'whatsapp_business_app_onboarding' }` (no `version` key — v4 is activated by the v4 Login-for-Business configuration; `extras.version` accepts only `v4-public-preview, v3-public-preview, v2-public-preview, v3, v2`).
 2. `window` message listener captures `WA_EMBEDDED_SIGNUP` events; server receives `code` + asset IDs via mutation.
 3. Server exchanges code → business-integration token; `POST /<WABA_ID>/subscribed_apps`; confirms `is_on_biz_app && platform_type === 'CLOUD_API'`; writes account row (`onboardingMode: COEXISTENCE`, `encryptedText` token, sync `NOT_STARTED`); immediately enqueues sync (Component 4).
 4. UI surfaces `CANCEL` (with `current_step`) and ERROR states; success closes with account row visible.
@@ -252,7 +252,7 @@ graph LR
 **Implementation Notes**
 - `after()` remains for inline processing attempt; sweeper cron covers `after()` failures — this is the durable mitigation (v1 accepted the `after()` risk for statuses only; conversation data tolerance is zero).
 - Burst safety: per-change batch insert 500 rows; loop in chunks inside the claim transaction.
-- The 1MB cap is kept: Meta chunks history server-side; no documented chunk exceeds it. (Outcome research found no documented max; recorded as an assumption.)
+- The 1MB cap is kept: Meta chunks history server-side; no documented chunk exceeds it. **Assumption (explicitly flagged):** docs confirm a single webhook may carry thousands of messages but publish NO byte-size limit anywhere — mitigation: verify against a real history sync during onboarding rehearsal and raise the cap if a real chunk approaches it.
 
 
 ### Component 6: Account Lifecycle (account_update)
@@ -262,8 +262,9 @@ graph LR
 - `ACCOUNT_OFFBOARDED` → set `status: OFFBOARDED`, evict adapter, leave sync FAILED unless already COMPLETE.
 - `ACCOUNT_RECONNECTED` → `status: ACTIVE`, re-instantiate adapter; NO sync re-request.
 - `PARTNER_APP_UNINSTALLED` → deactivate, surface warning.
+- `PARTNER_REMOVED` (coexistence disconnect; app unshared rather than uninstalled) → record `disconnection_info.reason` (`ACCOUNT_DISCONNECTED`, `BUSINESS_DOWNGRADE`, `CHANGE_NUMBER`, `COMPANION_INACTIVITY` ~30d, `PRIMARY_INACTIVITY` ~14d, `USER_RE_REGISTERED`), mark account inactive + audit log, surface warning on Numbers tab.
 - `DISABLED_UPDATE` (`ban_info.waba_ban_state`) → alert log + surface on Numbers tab.
-- `business_capability_update.max_phone_numbers_per_business` → store on WABA-level settings record for admin visibility.
+- `business_capability_update` → tolerant parsing: (a) `max_daily_conversations_per_business` arrives only on webhooks **v24.0+** and may be a `TIER_*` string (`TIER_250/TIER_2K/TIER_10K/TIER_100K/TIER_UNLIMITED`, webhook reference) or integer-style (messaging-limits docs) — accept BOTH, and on older webhook versions parse the deprecated `max_daily_conversation_per_phone`; (b) `max_phone_numbers_per_business` is included ONLY while the portfolio is at the initial 250 limit and `max_phone_numbers_per_waba` only when ≠250 — absence is NOT "no cap"; store present values on the WABA-level settings record for admin visibility.
 - Companion-device re-link is manual client action; surfaced as a post-reconnect hint string.
 
 ### Component 7: Inbox UI Tab
@@ -273,7 +274,7 @@ graph LR
 **Responsibilities**
 - Account selector (multi-number) defaulting to "all".
 - Conversation list: AppDataGrid (desktop) / MobileCardList (mobile); columns: contact (name or wa_id/username fallback), last message preview, last message at, accountPurpose badge, unread indicator.
-- Thread view: chronological bubbles (inbound left, echo/api-outbound right), status chip per message, media placeholder fallback, revoked/edited markers, expiry notice for media >14d (Meta retention).
+- Thread view: chronological bubbles (inbound left, echo/api-outbound right), status chip per message, media placeholder fallback, revoked/edited markers, expiry notice once media passes the 7-day webhook-ID fetch window.
 - Poll via refetch-on-focus + interval (no WS in v1); no composer.
 
 **Interfaces**
@@ -481,18 +482,19 @@ Executing agents read all `.ai/plans/whatsapp2/outcome/*` before starting, write
 - **Rationale**: distinguishes "burst replay attack/rapid retry" (short window dedupe) from legitimate redelivery (entity dedupe on wamid/(phase, chunkOrder)).
 
 ### D6 — API version strategy
-- **Decision**: single env-config key `WHATSAPP_GRAPH_API_VERSION` defaulting `v23.0`, removing the hardcoded `v20.0`; no per-number versioning.
-- **Context**: Meta exposes no per-number API version; helpers defaulted to v23.0 while the adapter pinned v20.0. Re-verification (2026-09-14): current docs examples use v25.0 and `business_capability_update` semantics assume webhooks v24.0+ — implementation SHOULD target v25.0 after auditing `meta-cloud-api.helpers.ts` parse logic; keep the key env-configurable either way.
-- **Rationale**: one version keeps request/response parsing uniform; env-config allows staged rollout.
+- **Decision**: single env-config key `WHATSAPP_GRAPH_API_VERSION` defaulting **`v25.0`** (the docs' current example version), removing the hardcoded `v20.0`; no per-number versioning. The key is DB-overridable via `env::` settings.
+- **Context**: Meta exposes no per-number API version; helpers defaulted to v23.0 while the adapter pinned v20.0. Docs-verification (2026-09-04): v23.0 is valid but current docs examples use v25.0, and `business_capability_update`'s new `max_daily_conversations_per_business` field only arrives on webhooks v24.0+ (handlers parse both old and new fields — see Component 6).
+- **Rationale**: one version keeps request/response parsing uniform; env-config allows staged rollout or rollback if helpers misbehave on v25.0.
 
 ### D7 — Webhook field subscription management
 - **Decision**: field selection stays App Dashboard config (verified via startup/introspection); WABA attachment via `POST /<WABA_ID>/subscribed_apps` in onboarding code; missing subscription surfaces a settings warning.
 - **Rationale**: Meta provides no per-field subscription API; dashboard state is authoritative.
 
-### D8 — History media ≤ 14 days
-- **Decision**: store `mediaPlaceholder: true` rows; on follow-up media webhook, fetch-and-store binary (≤14d window) or keep Meta asset id; UI renders expiry notice after 14d.
-- **Options**: (a) ignore media; (b) store binary immediately; (c) store id + lazy fetch.
-- **Rationale**: binary copy is storage-heavy and Meta only guarantees the id ≤14d; lazy fetch mirrors Meta's SLA.
+### D8 — History media handling (7-day fetch window)
+- **Decision**: store `mediaPlaceholder: true` rows; on follow-up media webhook, fetch-and-store the binary (or persist the Meta asset id) **within 7 days of webhook receipt**; UI renders an expiry notice after 7d.
+- **Context**: webhook-delivered media asset IDs expire after **7 days** (`business-phone-numbers_media.md`: "Media IDs in webhooks expire after 7 days"); the 14-day figure is only the history follow-up eligibility cutoff — follow-up media webhooks are sent only for media messages sent ≤14 days before onboarding, and older media stays `media_placeholder` forever. Media **URLs** expire after 5 minutes — always re-query the ID for a fresh URL.
+- **Options**: (a) ignore media; (b) store binary immediately within the 7-day window; (c) store id + lazy fetch within 7 days.
+- **Rationale**: binary copy is storage-heavy; fetching promptly inside the documented 7-day window mirrors Meta's actual expiry instead of a nonexistent 14-day SLA.
 
 ### D9 — Sync destination of `request_id`
 - **Decision**: persisted on `whatsapp_sync_requests.requestId`; NOT used as a webhook-correlation key (Meta doesn't echo it).
@@ -511,7 +513,7 @@ Executing agents read all `.ai/plans/whatsapp2/outcome/*` before starting, write
 
 | Category | Behavior |
 |---|---|
-| Meta Graph error | `GraphApiError` + `extractMetaErrorCode`; `131056` → backoff retry; `131057` during throughput upgrade → defer; `2593109` → sync FAILED(historyDeclined) |
+| Meta Graph error | `GraphApiError` + `extractMetaErrorCode`; `131056` → backoff retry; `131057` during throughput upgrade → defer; `130429` → send above the current per-number throughput ceiling → throttle/defer (coexistence numbers are fixed at 20 msg/s, not the 80 msg/s default); `2593109` → sync FAILED(historyDeclined) |
 | Domain errors | `whatsapp.noSenderForPurpose`, `whatsapp.accountOffboarded`, `whatsapp.coexistenceTakenByOtherPartner`, `whatsapp.syncDeadlineExpired` — all i18n from `whatsapp`/`whatsappInbox` error groups |
 | Webhook processing failures | attempts++, requeue with backoff; permanent failures parked with alert (no silent drop) |
 | Validation | purpose required on coexistence onboarding; ES code rejection mapped to `whatsapp.embeddedSignupFailed` |
@@ -520,7 +522,7 @@ Logging: `logger.info` per send (accountId, purpose), `logger.warn` for fallback
 
 ## Performance Considerations
 
-- Webhook ack < 200ms (single insert).
+- Webhook ack < 200ms (single insert). Note: no documented Meta numeric response-timeout exists for messaging webhooks (the only ~20s figure is in the calling FAQ); <200ms/<1s are our design targets — Meta retries failed deliveries immediately, then with decreasing frequency for up to 7 days.
 - Sweeper batch: 500 events; ingest worker chunked inserts 500 rows.
 - Inbox list indexes as modeled; thread queries paginated 50/page.
 

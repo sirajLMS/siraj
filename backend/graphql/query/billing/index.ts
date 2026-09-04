@@ -10,3 +10,4 @@ import "./currency-hedge.query";
 import "./currency.query";
 import "./fx-ingestion.query";
 import "./payments-ledger.query";
+import "./session-audit.query";

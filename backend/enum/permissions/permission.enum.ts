@@ -107,6 +107,9 @@ export enum AppPermission {
   // Accounting — teacher payroll
   ACCOUNTING_PAYROLL_VIEW = "accounting.payroll_view",
   ACCOUNTING_PAYROLL_MANAGE = "accounting.payroll_manage",
+  // Accounting — session-event audit reports
+  ACCOUNTING_REPORTS_VIEW = "accounting.reports_view",
+  ACCOUNTING_REPORTS_MANAGE = "accounting.reports_manage",
   // Student Metadata & Lifecycle Management
   STUDENT_REASSIGN_TEACHER = "student.reassign_teacher",
   STUDENT_MANAGE_STATUS = "student.manage_status",
