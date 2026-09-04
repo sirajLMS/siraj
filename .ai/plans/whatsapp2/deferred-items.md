@@ -1,0 +1,28 @@
+# Deferred Items Ledger — whatsapp2
+
+**Feature:** whatsapp2 (Multi-Number + Coexistence)
+**Plan:** `.ai/plans/whatsapp2/`
+**Created:** 2026-09-04
+
+## Purpose
+
+Pre-existing gaps and stakeholder-excluded scope that this plan will NOT fix. Items use 📋 when intentionally out of scope for this plan (not blocking); ❌/⚠️ are reserved for in-plan deferrals (none at authoring time).
+
+## Ledger Table
+
+| ID | Deferred Item | Source | Target | Status | Notes |
+|---|---|---|---|---|---|
+| D1 | `whatsappTemplates` query resolver (templates tab reads sync-mutation transient snapshot only) | inventory-frontend §7 | future plan | 📋 Pre-existing | v1 gap; not caused or worsened by whatsapp2 |
+| D2 | Opt-in audit/history resolvers (hardcoded placeholder arrays in `WhatsappTabPanels.tsx:163-172`) | inventory-frontend §3/§7 | future plan | 📋 Pre-existing | independent of inbox work |
+| D3 | Groups API support | stakeholder non-goal | none (Meta-blocked for coexistence numbers) | 📋 Backlog | Meta: "Groups are not available for WhatsApp Business app phone numbers" |
+| D4 | Marketing Messages API | stakeholder non-goal | future plan | 📋 Backlog | |
+| D5 | Calling / SIP | stakeholder non-goal | none | 📋 Backlog | |
+| D6 | Free-text (non-template) outbound v2 / BL4 | stakeholder non-goal | future plan | 📋 Backlog | 24h CSW rules documented in docs-research-coexistence §6 for later |
+| D7 | Inbox reply composer (`WHATSAPP_INBOX_MANAGE` reserved) | stakeholder "eventually" | future plan | 📋 Backlog | Inbox ships read-only; CSW tracking hook (`messages` inbound timestamps) already persisted to enable it later |
+| D8 | Polling vs realtime inbox updates (WebSocket/subscriptions) | implementation D-note | future plan | 📋 Backlog | v1 uses refetch-on-focus + interval polling |
+| D9 | Per-process concurrency guard is process-local (MAX_CONCURRENT_CALLS not cluster-wide) | implementation Component 1 | future plan | 📋 Backlog | Meta per-number throughput is authoritative; documented limitation |
+| D10 | Stale table in `docs/services/whatsapp-cloud-api.md` (r3 2-HIGH note already fixed in code) | inventory-frontend §7 | Task 15.2 | 🔄 In Progress | Doc-only reconciliation, part of knowledge propagation |
+
+## Enforcement
+
+Final gate (Task 14.1) re-counts ❌/⚠️ (must be 0). 📋 items are deliberately out of scope and remain.
