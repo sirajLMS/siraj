@@ -1,7 +1,9 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
+import { permissionGroups } from "@/backend/db/schema";
 import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -45,11 +47,13 @@ function setupServiceSpies(opts: MockOptions = {}): { mockRestore: () => void }[
   const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(opts.hasPermission ?? true);
   const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(opts.existsByEmail ?? false);
   const findGroupBySlugSpy = spyOn(PermissionManagementRepository, "findGroupBySlug").mockResolvedValue(
-    opts.findGroupBySlug ?? {
-      id: "group-1",
-      slug: SystemPermissionGroupSlug.STAFF_DEFAULT,
-      isSystem: true,
-    }
+    opts.findGroupBySlug !== undefined
+      ? opts.findGroupBySlug
+      : {
+          id: "group-1",
+          slug: SystemPermissionGroupSlug.STAFF_DEFAULT,
+          isSystem: true,
+        }
   );
   return [hasPermissionSpy, existsByEmailSpy, findGroupBySlugSpy];
 }
@@ -90,8 +94,27 @@ function testRejection(
 describe("GeneralUserOnboardingService.createGeneralUser", () => {
   test("creates a general user with a valid non-specialized group", async () => {
     await runInRollback(async txContext => {
+      let [group] = await txContext
+        .select()
+        .from(permissionGroups)
+        .where(eq(permissionGroups.slug, SystemPermissionGroupSlug.STAFF_DEFAULT))
+        .limit(1);
+
+      if (!group) {
+        [group] = await txContext
+          .insert(permissionGroups)
+          .values({
+            slug: SystemPermissionGroupSlug.STAFF_DEFAULT,
+            name: "Staff Default",
+            isSystem: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .returning();
+      }
+
       const actor = await createTestUserWithDefaults(txContext);
-      const spies = setupServiceSpies({ existsByEmail: false });
+      const spies = setupServiceSpies({ existsByEmail: false, findGroupBySlug: group });
 
       const result = await GeneralUserOnboardingService.createGeneralUser(actor.id, buildValidInput(), "en", txContext);
 

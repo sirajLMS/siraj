@@ -2,6 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
+import { permissionGroups } from "@/backend/db/schema";
 import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -65,6 +66,23 @@ async function testCreateManagerInRollback(
   extraAssertions?: (result: ManagerOnboardingResult) => void
 ) {
   await runInRollback(async txContext => {
+    await txContext.insert(permissionGroups).values([
+      {
+        slug: SystemPermissionGroupSlug.ACADEMY_ADMIN,
+        name: "Academy Admin",
+        isSystem: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        slug: SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
+        name: "Supervisor Default",
+        isSystem: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]).onConflictDoNothing();
+
     const actor = await createTestUserWithDefaults(txContext);
     const { hasPermissionSpy, getUserContextSpy } = mockSuperAdmin();
     const existsByEmailSpy = mockExistsByEmail(false);
@@ -218,9 +236,9 @@ describe("ManagerOnboardingService.createManager", () => {
     const existsByEmailSpy = mockExistsByEmail(false);
 
     const createdEmail = "rollback-manager@test.com";
-    const listAllGroupsSpy = spyOn(PermissionManagementRepository, "listAllGroups").mockRejectedValue(
-      new Error("Database failure")
-    );
+    const listAllGroupsSpy = spyOn(PermissionManagementRepository, "listAllGroups").mockImplementation(async () => {
+      throw new Error("Database failure");
+    });
 
     await expectRejection(() =>
       ManagerOnboardingService.createManager(DEFAULT_ACTOR_ID, {

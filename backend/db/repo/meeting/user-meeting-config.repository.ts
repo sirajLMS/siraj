@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import {
   buildMeetingConfigInsertValues,
@@ -58,6 +58,18 @@ export namespace UserMeetingConfigRepository {
       .where(and(eq(userMeetingConfigs.userId, userId), eq(userMeetingConfigs.isDefault, true)))
       .limit(1);
     return row ?? null;
+  }
+
+  export async function getDefaultsForUsers(
+    userIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<UserMeetingConfigSelectType[]> {
+    if (userIds.length === 0) return [];
+    const client = queryDb(tx);
+    return client
+      .select()
+      .from(userMeetingConfigs)
+      .where(and(inArray(userMeetingConfigs.userId, [...userIds]), eq(userMeetingConfigs.isDefault, true)));
   }
 
   async function clearDefault(userId: string, tx: DBTransaction): Promise<void> {

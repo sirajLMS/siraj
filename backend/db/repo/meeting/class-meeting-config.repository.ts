@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import {
   buildMeetingConfigInsertValues,
@@ -84,6 +84,40 @@ export namespace ClassMeetingConfigRepository {
     tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType | null> {
     return getDefaultForScope({ recurringScheduleId }, tx);
+  }
+
+  export async function getDefaultsForClassInstances(
+    classInstanceIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<ClassMeetingConfigSelectType[]> {
+    if (classInstanceIds.length === 0) return [];
+    const client = queryDb(tx);
+    return client
+      .select()
+      .from(classMeetingConfigs)
+      .where(
+        and(
+          inArray(classMeetingConfigs.classInstanceId, [...classInstanceIds]),
+          eq(classMeetingConfigs.isDefault, true)
+        )
+      );
+  }
+
+  export async function getDefaultsForRecurringSchedules(
+    recurringScheduleIds: readonly string[],
+    tx?: DBTransaction
+  ): Promise<ClassMeetingConfigSelectType[]> {
+    if (recurringScheduleIds.length === 0) return [];
+    const client = queryDb(tx);
+    return client
+      .select()
+      .from(classMeetingConfigs)
+      .where(
+        and(
+          inArray(classMeetingConfigs.recurringScheduleId, [...recurringScheduleIds]),
+          eq(classMeetingConfigs.isDefault, true)
+        )
+      );
   }
 
   async function clearDefault(scope: ClassMeetingConfigScopeFilter, tx: DBTransaction): Promise<void> {

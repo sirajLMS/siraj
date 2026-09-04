@@ -2,7 +2,9 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
+import { permissionGroups } from "@/backend/db/schema";
 import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
@@ -43,6 +45,14 @@ describe("ParentOnboardingService.createParent", () => {
 
   test("creates parent with billing configuration", async () => {
     await runInRollback(async txContext => {
+      await txContext.insert(permissionGroups).values({
+        slug: SystemPermissionGroupSlug.PARENT_DEFAULT,
+        name: "Parent Default",
+        isSystem: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).onConflictDoNothing();
+
       const actor = await createTestUserWithDefaults(txContext);
       const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
       const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
@@ -113,9 +123,9 @@ describe("ParentOnboardingService.createParent", () => {
     const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
 
     const createdEmail = "[EMAIL_REDACTED]";
-    const listAllGroupsSpy = spyOn(PermissionManagementRepository, "listAllGroups").mockRejectedValue(
-      new Error("Database failure")
-    );
+    const listAllGroupsSpy = spyOn(PermissionManagementRepository, "listAllGroups").mockImplementation(async () => {
+      throw new Error("Database failure");
+    });
 
     let error: unknown = null;
     try {

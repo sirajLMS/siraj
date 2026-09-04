@@ -1,4 +1,5 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
+import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
@@ -15,6 +16,7 @@ import {
   buildMaskedClassMeetingConfig,
   buildMaskedClassMeetingConfigs,
 } from "@/backend/services/meeting/class-meeting-config-mask";
+import { buildMeetingProviderCatalogSnapshot } from "@/backend/services/meeting/meeting-config-mask";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import type {
   ClassMeetingConfigReturnType,
@@ -23,7 +25,9 @@ import type {
   DBTransaction,
   EffectiveMeetingReturnType,
   MeetingConfigDetails,
+  MeetingProviderSelectType,
   UpdateClassMeetingConfigInput,
+  UserMeetingConfigSelectType,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -291,46 +295,184 @@ export namespace EffectiveMeetingService {
     return fromTeacherDefault(teacherDefault, tErrors, tx);
   }
 
+  export async function resolveForClassInstances(
+    classInstanceIds: readonly string[],
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<Map<string, EffectiveMeetingReturnType>> {
+    const resultMap = new Map<string, EffectiveMeetingReturnType>();
+    if (classInstanceIds.length === 0) {
+      return resultMap;
+    }
+
+    const client = queryDb(tx);
+    const uniqueIds = Array.from(new Set(classInstanceIds));
+
+    // 1. Fetch class-level default configs in batch
+    const classDefaults = await ClassMeetingConfigRepository.getDefaultsForClassInstances(uniqueIds, tx);
+    const classDefaultMap = new Map<string, ClassMeetingConfigSelectType>();
+    for (const config of classDefaults) {
+      if (config.classInstanceId) {
+        classDefaultMap.set(config.classInstanceId, config);
+      }
+    }
+
+    // Identify instances missing class-level default
+    const missingClassDefaultIds = uniqueIds.filter(id => !classDefaultMap.has(id));
+
+    // 2. Fetch class instance metadata (recurringScheduleId, teacherId) for missing instances
+    const instanceMetaMap = new Map<string, { recurringScheduleId: string | null; teacherId: string }>();
+    if (missingClassDefaultIds.length > 0) {
+      const rows = await client
+        .select({
+          id: classInstances.id,
+          recurringScheduleId: classInstances.recurringScheduleId,
+          teacherId: classInstances.teacherId,
+        })
+        .from(classInstances)
+        .where(inArray(classInstances.id, missingClassDefaultIds));
+
+      for (const row of rows) {
+        instanceMetaMap.set(row.id, {
+          recurringScheduleId: row.recurringScheduleId,
+          teacherId: row.teacherId,
+        });
+      }
+    }
+
+    // 3. Fetch recurring schedule defaults for missing instances
+    const recurringScheduleIds = Array.from(
+      new Set(
+        Array.from(instanceMetaMap.values())
+          .map(meta => meta.recurringScheduleId)
+          .filter((id): id is string => Boolean(id))
+      )
+    );
+
+    const recurringDefaultMap = new Map<string, ClassMeetingConfigSelectType>();
+    if (recurringScheduleIds.length > 0) {
+      const recurringDefaults = await ClassMeetingConfigRepository.getDefaultsForRecurringSchedules(
+        recurringScheduleIds,
+        tx
+      );
+      for (const config of recurringDefaults) {
+        if (config.recurringScheduleId) {
+          recurringDefaultMap.set(config.recurringScheduleId, config);
+        }
+      }
+    }
+
+    // 4. For instances still unresolved, resolve teacher defaults
+    const teacherIdsNeeded = Array.from(
+      new Set(
+        missingClassDefaultIds
+          .map(id => instanceMetaMap.get(id))
+          .filter(meta => meta && (!meta.recurringScheduleId || !recurringDefaultMap.has(meta.recurringScheduleId)))
+          .map(meta => meta?.teacherId)
+          .filter((id): id is string => Boolean(id))
+      )
+    );
+
+    const teacherUserMap = new Map<string, string>();
+    const teacherDefaultMap = new Map<string, UserMeetingConfigSelectType>();
+
+    if (teacherIdsNeeded.length > 0) {
+      const teacherRows = await client
+        .select({ id: teachers.id, userId: teachers.userId })
+        .from(teachers)
+        .where(inArray(teachers.id, teacherIdsNeeded));
+
+      for (const row of teacherRows) {
+        teacherUserMap.set(row.id, row.userId);
+      }
+
+      const userIds = Array.from(new Set(Array.from(teacherUserMap.values())));
+      if (userIds.length > 0) {
+        const userDefaults = await UserMeetingConfigRepository.getDefaultsForUsers(userIds, tx);
+        for (const config of userDefaults) {
+          teacherDefaultMap.set(config.userId, config);
+        }
+      }
+    }
+
+    // 5. Gather all providerIds referenced by any resolved config
+    const providerIds = new Set<string>();
+    for (const config of classDefaultMap.values()) providerIds.add(config.providerId);
+    for (const config of recurringDefaultMap.values()) providerIds.add(config.providerId);
+    for (const config of teacherDefaultMap.values()) providerIds.add(config.providerId);
+
+    const providerMap = new Map<string, MeetingProviderSelectType>();
+    if (providerIds.size > 0) {
+      const providers = await MeetingProviderRepository.getByIds(Array.from(providerIds), tx);
+      for (const provider of providers) {
+        providerMap.set(provider.id, provider);
+      }
+    }
+
+    // Helper to build EffectiveMeetingReturnType synchronously
+    const buildEffective = (
+      config: ClassMeetingConfigSelectType | UserMeetingConfigSelectType,
+      source: EffectiveMeetingSource
+    ): EffectiveMeetingReturnType => {
+      const provider = providerMap.get(config.providerId);
+      if (!provider) return empty;
+
+      const details = parseMeetingConfigDetails(provider, config.details);
+      const snapshot = {
+        userMeetingConfigId: config.id,
+        providerId: config.providerId,
+        label: config.label,
+        details,
+        provider: buildMeetingProviderCatalogSnapshot(provider),
+        snapshottedAt: new Date().toISOString(),
+      };
+      return buildEffectiveFromSnapshot(snapshot, source, config.id, config.providerId);
+    };
+
+    // 6. Build effective meeting for each class instance ID
+    for (const id of classInstanceIds) {
+      const classDefault = classDefaultMap.get(id);
+      if (classDefault) {
+        resultMap.set(id, buildEffective(classDefault, EffectiveMeetingSource.CLASS));
+        continue;
+      }
+
+      const meta = instanceMetaMap.get(id);
+      if (!meta) {
+        resultMap.set(id, empty);
+        continue;
+      }
+
+      if (meta.recurringScheduleId) {
+        const recurringDefault = recurringDefaultMap.get(meta.recurringScheduleId);
+        if (recurringDefault) {
+          resultMap.set(id, buildEffective(recurringDefault, EffectiveMeetingSource.RECURRING));
+          continue;
+        }
+      }
+
+      const teacherUserId = teacherUserMap.get(meta.teacherId);
+      if (teacherUserId) {
+        const teacherDefault = teacherDefaultMap.get(teacherUserId);
+        if (teacherDefault) {
+          resultMap.set(id, buildEffective(teacherDefault, EffectiveMeetingSource.TEACHER));
+          continue;
+        }
+      }
+
+      resultMap.set(id, empty);
+    }
+
+    return resultMap;
+  }
+
   export async function resolveForClassInstance(
     classInstanceId: string,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<EffectiveMeetingReturnType> {
-    const client = tx ?? db;
-    const classDefault = await ClassMeetingConfigRepository.getDefaultForClassInstance(classInstanceId, tx);
-    if (classDefault) {
-      return fromClassConfig(classDefault, EffectiveMeetingSource.CLASS, tErrors, tx);
-    }
-
-    const [instance] = await client
-      .select({
-        recurringScheduleId: classInstances.recurringScheduleId,
-        teacherId: classInstances.teacherId,
-      })
-      .from(classInstances)
-      .where(eq(classInstances.id, classInstanceId))
-      .limit(1);
-
-    if (!instance) {
-      return empty;
-    }
-
-    if (instance.recurringScheduleId) {
-      const recurringDefault = await ClassMeetingConfigRepository.getDefaultForRecurringSchedule(
-        instance.recurringScheduleId,
-        tx
-      );
-      if (recurringDefault) {
-        return fromClassConfig(recurringDefault, EffectiveMeetingSource.RECURRING, tErrors, tx);
-      }
-    }
-
-    const userId = await getTeacherUserId(instance.teacherId, tx);
-    if (userId) {
-      return resolveTeacherDefault(userId, tErrors, tx);
-    }
-
-    return empty;
+    const map = await resolveForClassInstances([classInstanceId], tErrors, tx);
+    return map.get(classInstanceId) ?? empty;
   }
 
   export async function resolveForRecurringSchedule(

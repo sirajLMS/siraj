@@ -120,7 +120,9 @@ function setupSuccessMocks(opts: { emailDispatchFails?: boolean } = {}) {
 
   let emailSpy: ReturnType<typeof spyOn>;
   if (opts.emailDispatchFails) {
-    emailSpy = spyOn(CommunicationService, "dispatch").mockRejectedValue(new Error("Email service down"));
+    emailSpy = spyOn(CommunicationService, "dispatch").mockImplementation(async () => {
+      throw new Error("Email service down");
+    });
   } else {
     emailSpy = spyOn(CommunicationService, "dispatch").mockResolvedValue({
       success: true,

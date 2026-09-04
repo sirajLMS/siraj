@@ -2,8 +2,9 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
+import { permissionGroups } from "@/backend/db/schema";
 import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
-import { Gender } from "@/backend/enum";
+import { Gender, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
@@ -46,6 +47,14 @@ describe("TeacherOnboardingService.createTeacher", () => {
 
   test("creates teacher with full onboarding data", async () => {
     await runInRollback(async txContext => {
+      await txContext.insert(permissionGroups).values({
+        slug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
+        name: "Teacher Default",
+        isSystem: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).onConflictDoNothing();
+
       const actor = await createTestUserWithDefaults(txContext);
       const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
       const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
@@ -124,9 +133,9 @@ describe("TeacherOnboardingService.createTeacher", () => {
     const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
 
     const createdEmail = "rollback-teacher@test.com";
-    const listAllGroupsSpy = spyOn(PermissionManagementRepository, "listAllGroups").mockRejectedValue(
-      new Error("Database failure")
-    );
+    const listAllGroupsSpy = spyOn(PermissionManagementRepository, "listAllGroups").mockImplementation(async () => {
+      throw new Error("Database failure");
+    });
 
     let error: unknown = null;
     try {

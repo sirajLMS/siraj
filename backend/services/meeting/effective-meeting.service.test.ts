@@ -71,4 +71,51 @@ describe("EffectiveMeetingService", () => {
     expect(resolved.source).toBe(EffectiveMeetingSource.NONE);
     expect(resolved.joinUrl).toBeNull();
   });
+
+  resolutionTest("resolveForClassInstances batch resolves multiple instances correctly", async (tx, tErrors) => {
+    const { student } = await setupStudent(tx);
+    const { teacher, user: teacherUser } = await setupTeacher(tx);
+    const provider = await createTestMeetingProvider(tx);
+
+    // Set teacher default meeting
+    await createTestMeetingConfig(tx, teacherUser.id, provider.id, {
+      isDefault: true,
+      details: { meetingUrl: "https://zoom.us/j/teacher-default" },
+    });
+
+    // Create 3 instances: instance 1 with class default override, instance 2 relying on teacher default, instance 3 relying on teacher default
+    const inst1 = await createMockClassInstance(tx, student.id, teacher.id);
+    const inst2 = await createMockClassInstance(tx, student.id, teacher.id);
+    const inst3 = await createMockClassInstance(tx, student.id, teacher.id);
+
+    await createTestClassMeetingConfig(tx, { classInstanceId: inst1.id }, provider.id, {
+      isDefault: true,
+      details: { meetingUrl: "https://zoom.us/j/class-override-1" },
+    });
+
+    const resultMap = await EffectiveMeetingService.resolveForClassInstances(
+      [inst1.id, inst2.id, inst3.id],
+      tErrors,
+      tx
+    );
+
+    expect(resultMap.size).toBe(3);
+
+    const res1 = resultMap.get(inst1.id)!;
+    expect(res1.source).toBe(EffectiveMeetingSource.CLASS);
+    expect(res1.joinUrl).toBe("https://zoom.us/j/class-override-1");
+
+    const res2 = resultMap.get(inst2.id)!;
+    expect(res2.source).toBe(EffectiveMeetingSource.TEACHER);
+    expect(res2.joinUrl).toBe("https://zoom.us/j/teacher-default");
+
+    const res3 = resultMap.get(inst3.id)!;
+    expect(res3.source).toBe(EffectiveMeetingSource.TEACHER);
+    expect(res3.joinUrl).toBe("https://zoom.us/j/teacher-default");
+  });
+
+  resolutionTest("resolveForClassInstances handles empty array", async (tx, tErrors) => {
+    const resultMap = await EffectiveMeetingService.resolveForClassInstances([], tErrors, tx);
+    expect(resultMap.size).toBe(0);
+  });
 });

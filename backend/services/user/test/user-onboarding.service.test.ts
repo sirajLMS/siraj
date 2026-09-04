@@ -2,6 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
+import { permissionGroups } from "@/backend/db/schema";
 import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -140,6 +141,23 @@ describe("UserOnboardingService.createUserOfType", () => {
 
   test("supports dynamic groupSlug based on the extension", async () => {
     await runInRollback(async txContext => {
+      await txContext.insert(permissionGroups).values([
+        {
+          slug: SystemPermissionGroupSlug.ACADEMY_ADMIN,
+          name: "Academy Admin",
+          isSystem: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          slug: SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
+          name: "Supervisor Default",
+          isSystem: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]).onConflictDoNothing();
+
       const actor = await createTestUserWithDefaults(txContext);
       const { hasPermissionSpy, existsByEmailSpy } = mockCreateUserSpies();
 
@@ -172,6 +190,14 @@ describe("UserOnboardingService.createUserOfType", () => {
 
   test("writes optional profile fields (timezone + phone) to the users row", async () => {
     await runInRollback(async txContext => {
+      await txContext.insert(permissionGroups).values({
+        slug: SystemPermissionGroupSlug.PARENT_DEFAULT,
+        name: "Parent Default",
+        isSystem: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }).onConflictDoNothing();
+
       const actor = await createTestUserWithDefaults(txContext);
       const { hasPermissionSpy, existsByEmailSpy } = mockCreateUserSpies();
 

@@ -87,26 +87,28 @@ export namespace StudentHistoryService {
     studentId: string,
     year: number,
     month: number,
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    tx?: import("@/backend/types").DBTransaction
   ) {
     await assertCanViewStudentHistory(userId, studentId, tErrors);
 
-    const metrics = await StudentHistoryRepository.getMonthlyMetrics(studentId, year, month);
-    const rawSessions = await StudentHistoryRepository.getMonthlyCalendar(studentId, year, month);
+    const metrics = await StudentHistoryRepository.getMonthlyMetrics(studentId, year, month, tx);
+    const rawSessions = await StudentHistoryRepository.getMonthlyCalendar(studentId, year, month, undefined, tx);
 
-    const sessions = await Promise.all(
-      rawSessions.map(async session => {
-        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id, tErrors);
-        return Object.assign(session, {
-          status: toClassExecutionState(session.status),
-          outcome: toClassOutcome(session.outcome ?? null),
-          meetingJoinUrl: effectiveMeeting.joinUrl,
-          effectiveMeeting,
-        });
-      })
-    );
+    const sessionIds = rawSessions.map(session => session.id);
+    const effectiveMeetingMap = await EffectiveMeetingService.resolveForClassInstances(sessionIds, tErrors, tx);
 
-    const student = await StudentRepository.findById(studentId);
+    const sessions = rawSessions.map(session => {
+      const effectiveMeeting = effectiveMeetingMap.get(session.id) ?? EffectiveMeetingService.empty;
+      return Object.assign(session, {
+        status: toClassExecutionState(session.status),
+        outcome: toClassOutcome(session.outcome ?? null),
+        meetingJoinUrl: effectiveMeeting.joinUrl,
+        effectiveMeeting,
+      });
+    });
+
+    const student = await StudentRepository.findById(studentId, tx);
     if (!student) {
       throw new Error(tErrors.notFound);
     }
