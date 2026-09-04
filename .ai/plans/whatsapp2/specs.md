@@ -65,8 +65,8 @@ Segregates risky marketing traffic (ads replies) from trust traffic (exam/attend
 #### Acceptance Criteria
 
 1. WHEN client components render user-facing text THEN they SHALL use `useAppTranslation(Translation.<ns>)` with property access (`t.key`), never `t('key')`, never hardcoded strings, never `next-intl`.
-2. WHEN server components translate THEN they SHALL use `getTranslations(locale)` (single arg) with property access; resolvers use `ctx.t("namespace")`.
-3. WHEN a new locale namespace is introduced (`whatsappInbox`) THEN it SHALL be registered in BOTH surfaces per `shared/locale/AGENTS.md`: leaf modules under `shared/locale/{en,ar}/...` wired into `en/messages.ts` + `ar/messages.ts`, AND a `shared/locale/namespaces/whatsapp/*.namespace.ts` loader — with `@/shared/locale/...` aliases only.
+2. WHEN server components translate THEN they SHALL use `getTranslations(locale)` (single arg) with property access (e.g. `getTranslations(locale).commonTranslations...`); resolvers SHALL use the zero-arg context translator `ctx.t()` with property access (e.g. `ctx.t().errorsTranslations...`) — never a namespace argument.
+3. WHEN a new locale namespace is introduced (`whatsappInbox`) THEN it SHALL be registered in BOTH surfaces per `shared/locale/AGENTS.md`: type schema in `shared/locale/types/whatsappInbox/index.ts`, leaf modules under `shared/locale/{en,ar}/whatsappInbox/` wired into `en/messages.ts` + `ar/messages.ts`, a `shared/locale/namespaces/whatsappInbox/whatsappInbox.namespace.ts` loader via `defineNamespace`, schema registration in `shared/locale/types/message.ts`, and a handle entry in the `Translation` registry (`shared/locale/namespaces/translation.ts`) — with `@/shared/locale/...` aliases only.
 4. WHEN enums are used at runtime THEN they SHALL be imported as values (`import { WhatsappAccountPurpose }`), never `import type`.
 5. WHEN a new Drizzle pgEnum is added THEN it SHALL be registered via `createPgEnumFromEnum` in `backend/db/schema/enums.ts` (never raw `pgEnum`) and in `backend/graphql/pothos/shared/enum.pothos.ts` via `gqlSchemaBuilder.enumType`.
 
@@ -76,7 +76,7 @@ Segregates risky marketing traffic (ads replies) from trust traffic (exam/attend
 
 #### Acceptance Criteria
 
-1. WHEN an account row exists THEN the `whatsapp_accounts` table SHALL carry `purpose` (enum, default `GENERAL`), `onboardingMode` (`CLOUD_API` default | `COEXISTENCE`), and sync-state columns (`syncStatus`, `syncPhase`, `syncProgress`, `syncRequestId`, `syncRequestedAt`, `syncDeadlineAt`, `syncFailureReason`).
+1. WHEN an account row exists THEN the `whatsapp_accounts` table SHALL carry `purpose` (enum, default `GENERAL`), `onboardingMode` (`CLOUD_API` default | `COEXISTENCE`), sync-state columns (`syncStatus`, `syncPhase`, `syncProgress`, `syncDeadlineAt`, `syncFailureReason`), and `offboardedAt`; per-type Meta `request_id` values SHALL live on `whatsapp_sync_requests` (see Req 5), not on the account row.
 2. WHEN the admin edits an account (create/edit dialogs) THEN the system SHALL expose purpose selection and REJECT a purpose assignment on an account that is not active with `whatsapp.purposeRequiresActive`.
 3. WHEN more than the portfolio cap of numbers is added THEN Meta's cap behavior applies (cap 2→20 via `business_capability_update`); the system SHALL surface the webhook-reported cap but SHALL NOT implement its own hard cap.
 4. WHEN listing accounts THEN the Numbers tab SHALL show purpose chip, onboarding-mode badge (COEXISTENCE warning Alert already exists via `throughputLevel`), and sync progress for coexistence accounts.
@@ -108,7 +108,7 @@ Segregates risky marketing traffic (ads replies) from trust traffic (exam/attend
 1. WHEN `WhatsappChannelFactory` is asked for a channel THEN it SHALL return a per-account adapter instance (cache keyed by `accountId`), replacing the module-level singleton; parameterless construction SHALL be removed.
 2. WHEN `MetaCloudApiAdapter.resolveCredentials` runs THEN it SHALL resolve via `whatsappAccountRepository.findById(accountId)` (never `findFirstActiveForCredentials`), with a per-account 5s credentials cache.
 3. WHEN credentials change or a token rotates THEN `resetWhatsappChannel(accountId)` SHALL invalidate exactly that account's cache entry; env-key invalidation SHALL remain for the env-global path (admin `syncFromMeta` legacy) until Req 6 migrates it.
-4. WHEN the Graph API version is needed THEN it SHALL come from a single env-config/default resolution (`whatsapp-graph.version`, default `v23.0` matching helpers) — the hardcoded `v20.0` at `MetaCloudApiAdapter.ts:494` SHALL be removed; per-number API versions are not a Meta concept.
+4. WHEN the Graph API version is needed THEN it SHALL come from a single env-config key (`WHATSAPP_GRAPH_API_VERSION`, registered under the `whatsapp` category in `backend/lib/env-config-keys.ts`, DB-overridable via `env::` settings, default `v23.0` matching helpers) — the hardcoded `v20.0` at `MetaCloudApiAdapter.ts:494` SHALL be removed; per-number API versions are not a Meta concept.
 5. WHEN `isWhatsappConfigured`/`validateConfig` evaluates THEN it SHALL reflect "at least one active account has valid credentials" (aggregate) while a new `whatsappAccountHealth` view exposes per-account validity.
 6. IF a coexistence account is offboarded (`ACCOUNT_OFFBOARDED`) THEN its adapter SHALL be evicted and subsequent sends to it SHALL fail fast with `whatsapp.accountOffboarded` (not retried against Graph).
 
@@ -202,7 +202,7 @@ Groups API; Marketing Messages API; calling; message editing via API; inbox repl
 |---|---|---|---|
 | `numbers` (existing) | Account CRUD + purpose + coexistence status | `WHATSAPP_CONFIG_MANAGE` | super_admin, academy_admin |
 | `templates` (existing) | Template snapshot | `WHATSAPP_TEMPLATES_MANAGE` | super_admin, academy_admin |
-| `optin` (existing) | User opt-in prefs | `WHATSAPP_VIEW` | super_admin, academy_admin, staff |
+| `optin` (existing) | User opt-in prefs | `WHATSAPP_VIEW` | super_admin, academy_admin, staff_default |
 | `inbox` (NEW) | Conversations + threads | `WHATSAPP_INBOX_VIEW` | super_admin, academy_admin, staff_default |
 
 ### Sidebar
@@ -331,7 +331,7 @@ No new sidebar entries: the existing `whatsapp-settings` item under `grp_integra
 
 - Embedded Signup v4 minimum: `featureType 'whatsapp_business_app_onboarding'`; v2 EOL 2026-10-15.
 - SMB sync: `smb_app_state_sync` + `history` each exactly once; only within 24h of onboarding; results via webhooks only; groups excluded; history covers 180 days max; media IDs ≤14 days.
-- Meta limits: 2 → 20 numbers per portfolio (cap raised by verification or 2,000-limit achievement); templates WABA-scoped; per-number throughput default 80 msg/s; pair limit 1 msg/6s per (number,user); registration ≤10/72h (`133016`).
+- Meta limits: 2 → 20 numbers per portfolio (cap raised by verification or 2,000-limit achievement); templates WABA-scoped; per-number throughput default 80 msg/s (**coexistence numbers are fixed at 20 mps** — verified in `throughput.md`); pair limit 1 msg/6s per (number,user); registration ≤10/72h (`133016`).
 - Business app ≥ 2.24.17; partner must be Solution Partner/Tech Provider; session logging mandatory; `app_only_install` incompatible with coexistence.
 - `request_id` is the ONLY sync correlation handle (not echoed in webhooks) → store it, don't rely on it for idempotency.
 

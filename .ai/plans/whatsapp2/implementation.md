@@ -86,12 +86,12 @@ v1's WhatsApp stack has three multi-number-breaking chokepoints (singleton facto
 
 New namespace **`whatsappInbox`** (the existing `whatsapp` namespace stays for settings). New keys also added under `whatsapp` for purpose/sync labels.
 
-- Types: `shared/locale/types/whatsappInbox/index.ts` (`WhatsappInboxLabels`).
+- Types: `shared/locale/types/whatsappInbox/index.ts` (`WhatsappInboxLabels`); registered on the `Translations` schema in `shared/locale/types/message.ts` as `whatsappInboxTranslations`.
 - Leaves: `shared/locale/en/whatsappInbox/index.ts`, `shared/locale/ar/whatsappInbox/index.ts`.
-- **Dual-surface wiring (mandatory, `shared/locale/AGENTS.md`)**: wire both leaf modules into `en/messages.ts` + `ar/messages.ts` AND add `shared/locale/namespaces/whatsappInbox/whatsappInbox.namespace.ts` via `defineNamespace`.
-- `Translation` enum gains `WhatsappInbox = "whatsappInbox"`.
-- Server components: `getTranslations(locale)` single-arg; resolvers `ctx.t("whatsappInbox")`; services `getServerTranslations(locale, "whatsappInbox")`.
-- Errors added to `shared/locale/types/errors` under the existing whatsapp error group: `noSenderForPurpose`, `purposeRequiresActive`, `accountOffboarded`, `coexistenceTakenByOtherPartner`, `syncDeadlineExpired`, `historyDeclined`, `webhookProcessingFailed`.
+- **Dual-surface wiring (mandatory, `shared/locale/AGENTS.md`)**: wire both leaf modules into `en/messages.ts` + `ar/messages.ts` AND add `shared/locale/namespaces/whatsappInbox/whatsappInbox.namespace.ts` via `defineNamespace` (stable string id).
+- The `Translation` registry object in `shared/locale/namespaces/translation.ts` gains a `WhatsappInbox` handle entry pointing at the namespace (it is a const registry of `defineNamespace` handles, not an enum).
+- Server components: `getTranslations(locale)` single-arg, then property access (`.whatsappInboxTranslations`); resolvers: zero-arg `ctx.t().whatsappInboxTranslations` / `ctx.t().errorsTranslations`; services/scripts: `getServerTranslations(locale).whatsappInboxTranslations` (locale-only signature).
+- Errors added to `shared/locale/types/errors` under the existing whatsapp error group: `noSenderForPurpose`, `purposeRequiresActive`, `accountOffboarded`, `coexistenceTakenByOtherPartner`, `embeddedSignupFailed`, `syncDeadlineExpired`, `historyDeclined`, `webhookProcessingFailed`.
 - Enum import discipline: `WhatsappAccountPurpose`, `WhatsappOnboardingMode`, `WhatsappSyncStatus`, `WhatsappMessageDirection` imported as values.
 
 ## Architecture
@@ -156,7 +156,7 @@ graph LR
 - `getWhatsappChannel(accountId)` — lazily instantiate & cache `MetaCloudApiAdapter` per accountId; still expose a default-channel helper for legacy call sites that resolves via purpose `GENERAL` → first active (kept for the `syncFromMeta` transitional path).
 - `resetWhatsappChannel(accountId?)` — drop one or all cache entries.
 - Adapter: `resolveCredentials(accountId)` → repo lookup → decrypt `encryptedText` token; per-account 5s cache. Remove `findFirstActiveForCredentials` fallback.
-- `resolveGraphApiVersion()` → env-config `whatsapp-graph.version` defaulting `v23.0`; deletes the hardcoded `v20.0` (`MetaCloudApiAdapter.ts:494`).
+- `resolveGraphApiVersion()` → env-config key `WHATSAPP_GRAPH_API_VERSION` (category `whatsapp` in `backend/lib/env-config-keys.ts`) defaulting `v23.0`; deletes the hardcoded `v20.0` (`MetaCloudApiAdapter.ts:494`).
 - Pair rate-limit key: `whatsapp:pair:<senderE164>:<recipientE164>`; 1 msg/6s, backoff 4^X on `131056`.
 
 **Interfaces**
@@ -299,7 +299,7 @@ graph LR
 | `status` | reuse existing activity semantics; add `offboardedAt` timestamptz nullable | |
 | `maxPhoneNumbersPerWaba` (via new WABA-level settings row, not this table) | int nullable | from `business_capability_update` |
 
-New enums: `WhatsappAccountPurpose { GENERAL, ADVERTISING, STUDENTS }`, `WhatsappOnboardingMode { CLOUD_API, COEXISTENCE }`, `WhatsappSyncStatus { NOT_STARTED, REQUESTED, SYNCING, COMPLETE, FAILED }`, `WhatsappMessageDirection { INBOUND, ECHO, API_OUTBOUND }`, registered in `backend/enum/whatsapp/`, `backend/db/schema/enums.ts` (`createPgEnumFromEnum`), and `enum.pothos.ts`.
+New enums: `WhatsappAccountPurpose { GENERAL, ADVERTISING, STUDENTS }`, `WhatsappOnboardingMode { CLOUD_API, COEXISTENCE }`, `WhatsappSyncStatus { NOT_STARTED, REQUESTED, SYNCING, COMPLETE, FAILED }`, `WhatsappMessageDirection { INBOUND, ECHO, API_OUTBOUND }`, `WhatsappSyncRequestStatus { PENDING, REQUESTED, STREAMING, COMPLETE, FAILED }`, `WhatsappWebhookEventStatus { PENDING, PROCESSED, FAILED }`, `WhatsappSyncType { SMB_APP_STATE_SYNC, HISTORY }` — defined as `<entity>.enum.ts` files under the existing `backend/enum/whatsapp/` subdir, re-exported from its `index.ts` barrel, registered in `backend/db/schema/enums.ts` (`createPgEnumFromEnum`), and in `enum.pothos.ts`.
 
 ### New: `whatsapp_conversations`
 
@@ -357,7 +357,7 @@ Unique partial indexes `(accountId, phoneNumber)` / `(accountId, userId)`.
 | field | varchar | webhook field name |
 | payload | jsonb | raw `change` |
 | payloadHash | varchar(64) | sha256 of canonical body |
-| status | enum `PENDING/PROCESSED/FAILED` | |
+| status | `WhatsappWebhookEventStatus` enum | PENDING default |
 | attempts | int DEFAULT 0 | |
 | receivedAt / processedAt | timestamptz | |
 
@@ -371,7 +371,7 @@ Indexes: `(status, receivedAt)`; payloadHash plus short Redis window as the repl
 | accountId | uuid FK | |
 | syncType | enum `SMB_APP_STATE_SYNC`/`HISTORY` | |
 | requestId | varchar nullable | Meta-issued; support handle |
-| status | enum `PENDING/REQUESTED/STREAMING/COMPLETE/FAILED` | |
+| status | `WhatsappSyncRequestStatus` enum | |
 | requestedAt / completedAt | timestamptz | |
 | Unique `(accountId, syncType)` | enforces one-shot | |
 
@@ -481,8 +481,8 @@ Executing agents read all `.ai/plans/whatsapp2/outcome/*` before starting, write
 - **Rationale**: distinguishes "burst replay attack/rapid retry" (short window dedupe) from legitimate redelivery (entity dedupe on wamid/(phase, chunkOrder)).
 
 ### D6 — API version strategy
-- **Decision**: single env-config `whatsapp-graph.version` defaulting `v23.0`, removing the hardcoded `v20.0`; no per-number versioning.
-- **Context**: Meta exposes no per-number API version; helpers defaulted to v23.0 while the adapter pinned v20.0.
+- **Decision**: single env-config key `WHATSAPP_GRAPH_API_VERSION` defaulting `v23.0`, removing the hardcoded `v20.0`; no per-number versioning.
+- **Context**: Meta exposes no per-number API version; helpers defaulted to v23.0 while the adapter pinned v20.0. Re-verification (2026-09-14): current docs examples use v25.0 and `business_capability_update` semantics assume webhooks v24.0+ — implementation SHOULD target v25.0 after auditing `meta-cloud-api.helpers.ts` parse logic; keep the key env-configurable either way.
 - **Rationale**: one version keeps request/response parsing uniform; env-config allows staged rollout.
 
 ### D7 — Webhook field subscription management
@@ -529,7 +529,7 @@ Logging: `logger.info` per send (accountId, purpose), `logger.warn` for fallback
 - **Repo tests** (`runInRollback`, `tx` propagation): conversation/message/contact/event upserts, idempotency, unique constraints; run via `bun run test/scripts/run-test.ts`.
 - **Service tests** (external mocked): sync orchestrator (one-shot, deadline, decline), factory reset, routing fallback; sweep reprocessing.
 - **Webhook handler tests**: burst chunk ingest, identical retry acceptance, revoke/edit, media placeholder + follow-up, deadline sweep.
-- **Journey test**: `test/workflows/whatsapp/coexistence-journey.test.ts` — admin configures purposes, onboard stub via service-level fake ES, sync chunks ingested, staff reads inbox; permission denials (unauthorized actor). Real services + DB, committed fixtures, spied notifications, NO `runInRollback`.
+- **Journey test**: `test/workflows/whatsapp/coexistence-routing.test.ts` — admin configures purposes, onboard stub via service-level fake ES, sync chunks ingested, staff reads inbox; permission denials (unauthorized actor). Real services + DB, committed fixtures, spied notifications, NO `runInRollback`.
 - **UI component tests**: tab gating, list render, thread render, status badges.
 
 ## Deployment and Operations

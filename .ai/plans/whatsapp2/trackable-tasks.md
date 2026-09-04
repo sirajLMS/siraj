@@ -43,12 +43,12 @@
 ## Phase 1: Schema, Enums, Permissions
 
 - [ ] **1. Extend whatsapp schema + new tables + permissions**
-  - [ ] 1.1 Edit `backend/db/schema/whatsapp/whatsapp-accounts.ts` — add `purpose`, `onboardingMode`, `syncStatus`, `syncPhase`, `syncProgress`, `syncRequestId`, `syncRequestedAt`, `syncDeadlineAt`, `syncFailureReason`, `offboardedAt`; defaults preserve v1 (`GENERAL`/`CLOUD_API`/`NOT_STARTED`).
+  - [ ] 1.1 Edit `backend/db/schema/whatsapp/whatsapp-accounts.ts` — add `purpose`, `onboardingMode`, `syncStatus`, `syncPhase`, `syncProgress`, `syncDeadlineAt`, `syncFailureReason`, `offboardedAt`; defaults preserve v1 (`GENERAL`/`CLOUD_API`/`NOT_STARTED`). Meta `request_id` values live on `whatsapp_sync_requests` (per sync type), NOT on the account row.
   - [ ] 1.2 Create `backend/db/schema/whatsapp/whatsapp-conversations.ts`, `whatsapp-messages.ts`, `whatsapp-contacts.ts`, `whatsapp-webhook-events.ts`, `whatsapp-sync-requests.ts` — per implementation.md; `wamid` unique; `(accountId, syncType)` unique; partial uniques for waId/userId keys; dialect-aware `checkConstraint` only.
   - [ ] 1.3 Edit `backend/db/schema/whatsapp/index.ts` barrel + confirm top-level `backend/db/schema/index.ts` re-export.
-  - [ ] 1.4 Create `backend/enum/whatsapp/` enums: `WhatsappAccountPurpose`, `WhatsappOnboardingMode`, `WhatsappSyncStatus`, `WhatsappMessageDirection`, `WhatsappWebhookEventStatus`, `WhatsappSyncType` + barrel; register in `backend/db/schema/enums.ts` via `createPgEnumFromEnum`.
-  - [ ] 1.5 Edit `backend/graphql/pothos/shared/enum.pothos.ts` — register the six enums.
-  - [ ] 1.6 Edit `backend/enum/permissions/permission.enum.ts` (existing entries at lines 276–278) — add `WHATSAPP_INBOX_VIEW` + `WHATSAPP_INBOX_MANAGE`; create two-phase SQL migrations in `backend/db/migration/`: (a) `ALTER TYPE app_permission ADD VALUE ...` (phase 1), (b) INSERT permission rows + grant to `super_admin`, `academy_admin`, `staff_default`/`supervisor_default` for VIEW only (phase 2, separate migration — AppPermission enum gotcha).
+  - [ ] 1.4 Add new `<entity>.enum.ts` files under the existing `backend/enum/whatsapp/` subdir (its `index.ts` barrel already exists and keeps the deprecated shared-constants re-export untouched): `WhatsappAccountPurpose`, `WhatsappOnboardingMode`, `WhatsappSyncStatus`, `WhatsappMessageDirection`, `WhatsappWebhookEventStatus`, `WhatsappSyncRequestStatus` (`PENDING/REQUESTED/STREAMING/COMPLETE/FAILED`), `WhatsappSyncType`; register all seven in `backend/db/schema/enums.ts` via `createPgEnumFromEnum`.
+  - [ ] 1.5 Edit `backend/graphql/pothos/shared/enum.pothos.ts` — register the seven enums.
+  - [ ] 1.6 Edit `backend/enum/permissions/permission.enum.ts` (existing entries at lines 276–278) — add `WHATSAPP_INBOX_VIEW = "whatsapp.inbox_view"` + `WHATSAPP_INBOX_MANAGE = "whatsapp.inbox_manage"` (string style matches existing `whatsapp.view`/`whatsapp.config_manage`); create two-phase SQL migrations in `backend/db/migration/`: (a) `ALTER TYPE app_permission ADD VALUE ...` (phase 1), (b) INSERT permission rows + grant to `super_admin`, `academy_admin`, `staff_default`/`supervisor_default` for VIEW only (phase 2, separate migration — AppPermission enum gotcha).
   - [ ] 1.7 Run `bun run db push` + `bun run db migrate`; verify columns/enums exist.
   - [ ] 1.QL — sub-loop on each schema/enum file (codescene).
   - [ ] 1.TE — schema smoke via repo boot test (migration applies, enums round-trip).
@@ -80,14 +80,14 @@
   - [ ] 3.6 Edit `whatsapp-account.repository.ts` — add `findActiveByPurpose(purpose)`, `findActiveGeneral()`, remove reliance on `findFirstActiveForCredentials` for sends (keep for legacy fallback until Task 4), sync-status mutators.
   - [ ] 3.7 Update `backend/db/repo/whatsapp/index.ts` barrel.
   - [ ] 3.8 Repo-layer mandates (`backend/db/repo/AGENTS.md`): all non-transactional reads use `queryDb(tx)` (Neon HTTP rule); NEVER `inArray(col, sql.placeholder(...))` with prepared statements (PG protocol limitation); expose DataLoader batch lookup methods where GraphQL field resolvers need them; repositories contain data access only (no permission/business logic).
-  - [ ] 3.QL / 3.TE — repo tests (runInRollback; duplicate wamid no-op; chunk dedupe; LWW timestamps; SKIP LOCKED claiming) / 3.SEC / 3.SR / 3.IV — `backend/db/repo/AGENTS.md`.
+  - [ ] 3.QL / 3.TE — repo tests live in `backend/db/test/repo/whatsapp/` (runInRollback + full `tx` propagation, 100% line/branch coverage per `backend/db/test/AGENTS.md`, `bun run test/scripts/run-test.ts`; duplicate wamid no-op; chunk dedupe; LWW timestamps; SKIP LOCKED claiming) / 3.SEC / 3.SR / 3.IV — `backend/db/repo/AGENTS.md`.
   - Outcome: `outcome/3-repos-outcome.md` · _Requirements: REQ-2, REQ-5, REQ-6_
 
 ## Phase 4: Per-Account Adapter & Factory
 
 - [ ] **4. Factory + adapter multi-numberization**
   - [ ] 4.1 Edit `WhatsappChannelFactory.ts` — per-account instance map, `getWhatsappChannel(accountId)`, `getChannelForPurpose(purpose)` (resolution helper), reset per-account; keep legacy default path for `syncFromMeta` admin flow until Task 4.4.
-  - [ ] 4.2 Edit `MetaCloudApiAdapter.ts` — constructor takes accountId; `resolveCredentials` per account; remove first-active fallback for sends; pair rate-limit key `whatsapp:pair:<sender>:<recipient>`; remove hardcoded `v20.0` → env-config default `v23.0` (register key in `backend/lib/env-config-keys.ts` + `shared/constants/env-config-keys.ts` hidden list).
+  - [ ] 4.2 Edit `MetaCloudApiAdapter.ts` — constructor takes accountId; `resolveCredentials` per account; remove first-active fallback for sends; pair rate-limit key `whatsapp:pair:<sender>:<recipient>`; remove hardcoded `v20.0` → env-config default `v23.0` (register key `WHATSAPP_GRAPH_API_VERSION` in `backend/lib/env-config-keys.ts` under the `whatsapp` category, DB-overridable via `env::` settings; NOT in the `shared/constants/env-config-keys.ts` hidden list — it is not a secret).
   - [ ] 4.3 Offboarded accounts: adapter eviction + `whatsapp.accountOffboarded` error before Graph call.
   - [ ] 4.4 Migrate `syncFromMeta` to per-account credentials (remove env-global token path for DB-managed accounts); keep env path only for bootstrapping first account, documented.
   - [ ] 4.5 Aggregate `isWhatsappConfigured`/`validateConfig`; add per-account health resolver hook.
@@ -145,8 +145,8 @@
 ## Phase 10: i18n
 
 - [ ] **10. `whatsappInbox` namespace + whatsapp additions (EN + AR)**
-  - [ ] 10.1 Create `shared/locale/types/whatsappInbox/index.ts` + leaves en/ar; wire both surfaces (`messages.ts` + `namespaces/whatsappInbox/whatsappInbox.namespace.ts`); add `Translation.WhatsappInbox`.
-  - [ ] 10.2 Extend `shared/locale/types/whatsapp/index.ts` (+ en/ar leaves): purpose labels, sync statuses, onboarding strings, new errors (`noSenderForPurpose`, `accountOffboarded`, `coexistenceTakenByOtherPartner`, `syncDeadlineExpired`, `historyDeclined`).
+  - [ ] 10.1 Create `shared/locale/types/whatsappInbox/index.ts` + leaves en/ar; wire both surfaces (`en/messages.ts` + `ar/messages.ts` + `namespaces/whatsappInbox/whatsappInbox.namespace.ts` via `defineNamespace` with a stable string id); register `whatsappInboxTranslations` in `shared/locale/types/message.ts`; add a `WhatsappInbox` handle entry to the `Translation` registry in `shared/locale/namespaces/translation.ts`.
+  - [ ] 10.2 Extend `shared/locale/types/whatsapp/index.ts` (+ en/ar leaves): purpose labels, sync statuses, onboarding strings, new errors (`noSenderForPurpose`, `purposeRequiresActive`, `accountOffboarded`, `coexistenceTakenByOtherPartner`, `embeddedSignupFailed`, `syncDeadlineExpired`, `historyDeclined`, `webhookProcessingFailed`).
   - [ ] 10.3 `bun run locale:snapshots`; verify both locales.
   - [ ] 10.QL / 10.TE (snapshot + key parity) / 10.SEC / 10.SR / 10.IV — `shared/AGENTS.md`, `shared/locale/AGENTS.md`.
   - Outcome: `outcome/10-i18n-outcome.md` · _Requirements: REQ-0.5, REQ-8_
@@ -165,7 +165,7 @@
 
 - [ ] **12. Inbox tab end-to-end**
   - [ ] 12.1 `whatsappConfig.constants.ts` (`TAB_IDS`/`TAB_LABELS`/`TAB_PERMISSIONS` inbox entry), `WhatsappConfigView.tsx` union, `whatsappTabUrl.ts`.
-  - [ ] 12.2 `useWhatsappInboxViewModel.ts` (queries, account filter, pagination, refetch-on-focus polling).
+  - [ ] 12.2 Create `frontend/common/graphql/sharedDocuments/whatsapp/whatsapp-inbox.documents.ts` (`whatsappConversationsQueryDocument`, `whatsappConversationMessagesQueryDocument` — `id` on every object type per sharedDocuments rules) + `useWhatsappInboxViewModel.ts` (queries, account filter, pagination, refetch-on-focus polling).
   - [ ] 12.3 `tabs/shared/InboxTabContent.tsx` + `tabs/shared/ConversationThread.tsx` (AppDataGrid/MobileCardList, thread bubbles, media placeholder/expiry rendering, revoke/edit markers).
   - [ ] 12.4 Desktop + mobile lazy tab files; `WhatsappTabPanels.tsx` wiring with `RequirePermission`.
   - [ ] 12.QL / 12.TE — component tests: gating (no-permission hides tab), list/thread render, empty state, RTL. 12.SEC. 12.SR. 12.IV — `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend.instructions.md`, `mobile-desktop.instructions.md`.
