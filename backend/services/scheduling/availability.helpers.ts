@@ -2,7 +2,7 @@ import { type DayOfWeek, VacationRequestStatus } from "@/backend/enum";
 import { ValidationError } from "@/backend/lib/errors";
 import type { TeacherAvailabilityWindowSelectType, TeacherRecurringUnavailabilitySelectType } from "@/backend/types";
 import {
-  dateToTimeString,
+  dateToMinutes,
   getUtcDateString,
   getUtcDayOfWeek,
   isWithinEffectiveRange,
@@ -11,7 +11,7 @@ import {
 import { getServerTranslations } from "@/shared/locale";
 
 // Re-export shared utilities so existing consumers of this module are unaffected.
-export { getUtcDateString, timeToMinutes };
+export { dateToMinutes, getUtcDateString, timeToMinutes };
 
 // ── Pure validation helpers (no DB, no error throws) ─────────────────────────
 
@@ -116,8 +116,8 @@ export function validateSlotInMemory(
 ): void {
   const bookingDate = getUtcDateString(slot.startTime);
   const bookingDay = getUtcDayOfWeek(slot.startTime);
-  const bookingStartMinutes = timeToMinutes(dateToTimeString(slot.startTime));
-  const bookingEndMinutes = timeToMinutes(dateToTimeString(slot.endTime));
+  const bookingStartMinutes = dateToMinutes(slot.startTime);
+  const bookingEndMinutes = dateToMinutes(slot.endTime);
 
   if (checkVacationOverlap(slot.startTime, slot.endTime, vacationsRows)) {
     const { teacherOnVacation } = getServerTranslations(locale ?? "en").errorsTranslations;
