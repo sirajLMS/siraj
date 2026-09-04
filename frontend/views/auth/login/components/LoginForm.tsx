@@ -15,6 +15,7 @@ import {
   InputAdornment,
   Link,
   TextField,
+  Tooltip,
   useTheme,
 } from "@mui/material";
 import { alpha, styled, type Theme } from "@mui/material/styles";
@@ -192,16 +193,20 @@ const FormFields = ({
                   ),
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => {
-                          setShowPassword(!showPassword);
-                        }}
-                        edge="end"
-                        disabled={isSubmitting}
-                        aria-label={showPassword ? labels.hidePassword : labels.showPassword}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
+                      <Tooltip title={showPassword ? labels.hidePassword : labels.showPassword}>
+                        <span>
+                          <IconButton
+                            onClick={() => {
+                              setShowPassword(!showPassword);
+                            }}
+                            edge="end"
+                            disabled={isSubmitting}
+                            aria-label={showPassword ? labels.hidePassword : labels.showPassword}
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </span>
+                      </Tooltip>
                     </InputAdornment>
                   ),
                 },
