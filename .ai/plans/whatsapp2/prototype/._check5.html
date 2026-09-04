@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LMS Dashboard - Inbox</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-on-surface": "#eff1f5",
+            "on-tertiary-container": "#ffd274",
+            "on-primary-container": "#c0dbff",
+            "surface-container-highest": "#e0e2e7",
+            "on-surface-variant": "#414750",
+            "secondary": "#1b6d24",
+            "inverse-surface": "#2d3134",
+            "on-primary": "#ffffff",
+            "surface-variant": "#e0e2e7",
+            "on-tertiary-fixed-variant": "#5c4300",
+            "tertiary-fixed-dim": "#f8bd2a",
+            "tertiary": "#5b4300",
+            "secondary-fixed": "#a3f69c",
+            "on-background": "#191c1f",
+            "tertiary-fixed": "#ffdfa0",
+            "primary": "#00497d",
+            "surface-container-low": "#f2f3f8",
+            "primary-fixed-dim": "#9fcaff",
+            "on-surface": "#191c1f",
+            "surface-container-high": "#e6e8ed",
+            "outline-variant": "#c1c7d2",
+            "on-primary-fixed-variant": "#00497d",
+            "secondary-fixed-dim": "#88d982",
+            "surface": "#f8f9fe",
+            "on-secondary-fixed-variant": "#005312",
+            "outline": "#717782",
+            "tertiary-container": "#795900",
+            "primary-container": "#0061a4",
+            "error-container": "#ffdad6",
+            "on-tertiary-fixed": "#261a00",
+            "on-tertiary": "#ffffff",
+            "on-secondary-container": "#217128",
+            "on-secondary-fixed": "#002204",
+            "primary-fixed": "#d1e4ff",
+            "on-error": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "secondary-container": "#a0f399",
+            "on-secondary": "#ffffff",
+            "surface-tint": "#0061a4",
+            "error": "#ba1a1a",
+            "surface-dim": "#d8dadf",
+            "surface-container": "#eceef2",
+            "on-error-container": "#93000a",
+            "background": "#f8f9fe",
+            "inverse-primary": "#9fcaff",
+            "on-primary-fixed": "#001d36",
+            "surface-bright": "#f8f9fe"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "container-padding": "24px",
+            "stack-lg": "32px",
+            "gutter": "16px",
+            "stack-sm": "8px",
+            "stack-md": "16px",
+            "sidebar-width": "280px"
+          },
+          "fontFamily": {
+            "title-lg": ["Inter"],
+            "headline-md-mobile": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-lg": ["Inter"],
+            "display-lg": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "title-md": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-sm": ["Inter"]
+          },
+          "fontSize": {
+            "title-lg": ["22px", {"lineHeight": "28px", "fontWeight": "500"}],
+            "headline-md-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.25px", "fontWeight": "400"}],
+            "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.5px", "fontWeight": "400"}],
+            "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+            "display-lg": ["57px", {"lineHeight": "64px", "letterSpacing": "-0.25px", "fontWeight": "400"}],
+            "label-lg": ["12px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "700"}],
+            "headline-md": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+            "title-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0.15px", "fontWeight": "600"}],
+            "label-md": ["11px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}],
+            "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "500"}]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md h-screen overflow-hidden flex">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface dark:bg-on-surface-variant border-r border-outline-variant dark:border-outline flex flex-col h-full p-stack-md z-20">
+<div class="mb-stack-lg flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-lg">A</div>
+<div>
+<div class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary-fixed">LMS Admin</div>
+<div class="text-sm text-on-surface-variant">Enterprise Portal</div>
+</div>
+</div>
+<button class="mb-stack-lg bg-primary text-on-primary py-2 px-4 rounded-full font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-primary-container transition-colors duration-200">
+<span class="material-symbols-outlined text-[18px]">add</span>
+      New Campaign
+    </button>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-full text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md font-semibold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-body-md text-body-md font-semibold">Academic</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-md text-body-md font-semibold">Accounting</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">extension</span>
+<span class="font-body-md text-body-md font-semibold">Integrations</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-full text-on-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md font-semibold">Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col ml-[280px] h-full">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-on-surface-variant border-b border-outline-variant flex items-center justify-between w-full pr-gutter h-16 z-10 px-6">
+<div class="flex items-center gap-6">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">LMS Dashboard</h1>
+<div class="relative hidden lg:block w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 rounded-full border border-outline-variant bg-surface-container-lowest focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm transition-all duration-200" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-all duration-200" href="#">Numbers</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-all duration-200" href="#">Templates</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary transition-all duration-200" href="#">Opt-in</a>
+<a class="font-title-md text-title-md text-primary border-b-2 border-primary pb-1 transition-all duration-200" href="#">Inbox</a>
+</nav>
+<div class="h-6 w-px bg-outline-variant mx-2 hidden md:block"></div>
+<button class="text-on-surface-variant hover:text-primary p-2 rounded-full hover:bg-surface-container-high transition-colors duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary p-2 rounded-full hover:bg-surface-container-high transition-colors duration-200">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="flex gap-2">
+<button class="px-4 py-2 text-sm font-semibold text-primary border border-primary rounded-full hover:bg-primary-container hover:text-on-primary-container transition-colors duration-200">Export</button>
+<button class="px-4 py-2 text-sm font-semibold bg-primary text-on-primary rounded-full hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors duration-200">Add New</button>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant ml-2">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a corporate administrator in a modern, brightly lit office environment. The lighting is soft and neutral, reflecting a crisp, clean light-mode UI aesthetic. The subject is wearing business casual attire, conveying authority and approachability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf24Ml2EQx8m-VkYvIGD79jMbW6iB_u2C4tFZEodO9eFLRkqmDpSwvAr70fbdHaTQxCzZuOvyXpYPZnQDI-9AJHYVTZQooj3FKXj4v2AVZhJB7RLLtfqtmtpGkBZcWZCv6WRuj3jqlGBrwWne8yh0cWoSKsVehlMBnymcl3XbE_eGeJ89bg4_oRUSTlJ32240TTHzM_rXVc1pOQmMiiBuUbU0AM2n0c_aooTkpyBTzWr8lAiwUh67qqyQzyyFWmTt8wyYW9mmGnCA"/>
+</div>
+</div>
+</header>
+<!-- Split View Workspace -->
+<main class="flex-1 flex overflow-hidden bg-surface-container-lowest">
+<!-- Left Panel (40%) -->
+<section class="w-[40%] border-r border-outline-variant flex flex-col bg-surface-container-lowest">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h2 class="font-title-md text-title-md text-on-surface">Conversations</h2>
+<button class="p-1 rounded text-on-surface-variant hover:bg-surface-variant">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+</div>
+<div class="overflow-y-auto flex-1 p-2 space-y-1">
+<!-- Active Item -->
+<div class="flex items-start gap-3 p-3 rounded-lg bg-primary-fixed-dim/20 border border-primary/20 cursor-pointer">
+<div class="relative">
+<div class="w-12 h-12 rounded-full bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A close-up portrait of a student, Mona Adel, in a bright, modern educational setting. The image is well-lit with natural light, reflecting a clean, optimistic, light-mode corporate aesthetic. Soft focus background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3dcvrdsUfw4HsU4lXSSYzqYlsicEwUWE1j0EM1Q4s6rV2juESU5zRwVIPzJALKn5aQ7L9He2bU8Wx7c3CBif5fHDGuVnqxMF-zJdTDcpFpMOSA3Qzj_z1Ry4t0FZehMVSUdWaPaH1L9bZkl28AgrJaqYo1oKvW51kg1khE-yvdjKqFH0LsJxJazFXWE9DnU3iFy6inRmnV0S-meKYa2bsHqkykx1zMHuh6uxFxdo4CF1n-i4kPR_Ypz4g6NZbXUVcphmBYCp4K3A"/>
+</div>
+<div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-secondary-fixed-dim rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-title-md text-title-md text-on-surface truncate">Mona Adel</h3>
+<span class="text-xs text-on-surface-variant whitespace-nowrap">6:45 PM</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">أهلاً بحضرتك، أيوه الدرس مؤكد...</p>
+<div class="flex gap-1 mt-1.5">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">STUDENT</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-surface-variant text-on-surface-variant">WHATSAPP</span>
+</div>
+</div>
+</div>
+<!-- Inactive Items -->
+<div class="flex items-start gap-3 p-3 rounded-lg hover:bg-surface-container-low cursor-pointer transition-colors border border-transparent">
+<div class="relative">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant font-bold">YA</div>
+<div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-tertiary-fixed-dim rounded-full border-2 border-surface-container-lowest"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-title-md text-title-md text-on-surface truncate">Youssef Ahmed</h3>
+<span class="text-xs text-on-surface-variant whitespace-nowrap">Yesterday</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">شكراً جداً لحضرتك.</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg hover:bg-surface-container-low cursor-pointer transition-colors border border-transparent">
+<div class="relative">
+<div class="w-12 h-12 rounded-full bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A portrait of a male professional in a modern office environment, softly lit to match a clean light-mode UI style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmmVBVZtO-sWg9tjqrpqAFClU_semORKzV1TtHVUZwnio11YzE7FIKqjZ4yAJkykH0xIbuz8r_WF6UI0nmquOoSRAWdZY3bcOE7c5cSn9_mGTXuOZ05OJUXyQ_s5DbZfAzJsDOa-glsinBgB8cU1yv4smFfpC3W_XqSZ8r3AWYoj5-MKak49BhLSvd0oyiwyukQzmZ9gR4oGy1eKN8fTfGTkEpYytc_LXuUhnprhttpJ42uzOVQA829F0eXrIDIZ8ct1NlnDGdFm4"/>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-title-md text-title-md text-on-surface truncate">Ahmed Tarek</h3>
+<span class="text-xs text-on-surface-variant whitespace-nowrap">Mon</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">Is the assignment graded yet?</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Panel (60%) -->
+<section class="w-[60%] flex flex-col bg-[#e5e5e5] relative">
+<!-- Thread Header -->
+<header class="bg-surface-container-lowest border-b border-outline-variant p-4 flex items-center justify-between shadow-sm z-10">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A close-up portrait of a student, Mona Adel, in a bright, modern educational setting. The image is well-lit with natural light, reflecting a clean, optimistic, light-mode corporate aesthetic. Soft focus background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQrCqQyZLvDsuqnb9AK4GKJ2dRBqgeE7AYTB4c7ZP4R3RvPSEiuhW7gWg_7JFCi_w88aH8tf9GM4A-fjoZfWI_wCrukxXsVcpgS2wQDEkyxOW9VQooKZ51F1BfTAH6XM9jLt8_Ro_7x34hHW_o1w4grLC3KZE-fEDBaYrTw6t-MmVGkvQq6tt8ooRGivWRCmlIsozy7WNhvCcXEjJL4Tzqj_RIUoUP8rySS318YP42NRJLlB5DhQkFchgz7HZEejYBGaPiM9YZ8ek"/>
+</div>
+<div>
+<h2 class="font-title-md text-title-md text-on-surface flex items-center gap-2">
+                Mona Adel
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-surface-variant text-on-surface-variant border border-outline-variant">
+                  Siraj Admissions · COEXISTENCE
+                </span>
+</h2>
+<p class="text-sm text-on-surface-variant">+20 111 222 3333</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Chat Area -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col relative" style="background-image: url('data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%23d5d7dc\' fill-opacity=\'0.4\' fill-rule=\'evenodd\'/%3E%3C/svg%3E');">
+<!-- Date Divider -->
+<div class="flex justify-center my-2">
+<span class="bg-surface-container-lowest text-on-surface-variant text-xs font-semibold px-3 py-1 rounded-md shadow-sm border border-outline-variant/30">
+              Today
+            </span>
+</div>
+<!-- Inbound Message -->
+<div class="flex flex-col items-start w-full max-w-[85%] self-start">
+<div class="bg-surface-container-lowest text-on-surface rounded-lg rounded-tl-sm px-4 py-2 shadow-sm border border-outline-variant/50">
+<p class="font-body-md text-body-md text-right" dir="rtl">مساء الخير، هل درس الرياضيات ليوسف اتأكد ليوم الخميس؟</p>
+<div class="text-[10px] text-on-surface-variant text-right mt-1">6:42 PM</div>
+</div>
+</div>
+<!-- Outbound Message (Phone) -->
+<div class="flex flex-col items-end w-full max-w-[85%] self-end">
+<div class="flex items-center gap-1 mb-1 justify-end opacity-70">
+<span class="material-symbols-outlined text-[12px] text-on-surface-variant">smartphone</span>
+<span class="text-[10px] text-on-surface-variant font-medium">Sent from Business App</span>
+</div>
+<div class="bg-[#dcf8c6] text-on-background rounded-lg rounded-tr-sm px-4 py-2 shadow-sm border border-[#c4e3b1]">
+<p class="font-body-md text-body-md text-right" dir="rtl">أهلاً بحضرتك، أيوه الدرس مؤكد الخميس ٦ مساءً</p>
+<div class="flex items-center justify-end gap-1 mt-1">
+<span class="text-[10px] text-on-surface-variant opacity-80">6:45 PM</span>
+<span class="material-symbols-outlined text-[14px] text-primary">done_all</span>
+</div>
+</div>
+</div>
+<!-- Outbound Message (Platform) -->
+<div class="flex flex-col items-end w-full max-w-[85%] self-end mt-4">
+<div class="flex items-center gap-1 mb-1 justify-end opacity-70">
+<span class="material-symbols-outlined text-[12px] text-on-surface-variant">cloud</span>
+<span class="text-[10px] text-on-surface-variant font-medium">Sent via Cloud API</span>
+</div>
+<div class="bg-[#dcf8c6] text-on-background rounded-lg rounded-tr-sm px-4 py-3 shadow-sm border border-[#c4e3b1] w-full max-w-sm">
+<div class="border-l-4 border-primary pl-2 mb-2 bg-primary/5 p-2 rounded">
+<p class="font-body-md text-body-md font-semibold text-primary">Your class reminder: Mathematics — Thursday 6:00 PM</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-surface-container-lowest text-on-surface-variant border border-outline-variant">DELIVERED</span>
+<div class="flex items-center gap-1">
+<span class="text-[10px] text-on-surface-variant opacity-80">6:46 PM</span>
+<span class="material-symbols-outlined text-[14px] text-primary">done_all</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Edited Message -->
+<div class="flex flex-col items-end w-full max-w-[85%] self-end">
+<div class="bg-[#dcf8c6] text-on-background rounded-lg rounded-tr-sm px-4 py-2 shadow-sm border border-[#c4e3b1]">
+<p class="font-body-md text-body-md">Please bring the updated workbook.</p>
+<div class="flex items-center justify-end gap-1 mt-1">
+<span class="text-[10px] text-on-surface-variant italic opacity-80">Edited</span>
+<span class="text-[10px] text-on-surface-variant opacity-80">6:50 PM</span>
+<span class="material-symbols-outlined text-[14px] text-outline">done</span>
+</div>
+</div>
+</div>
+<!-- Revoked Message -->
+<div class="flex flex-col items-end w-full max-w-[85%] self-end">
+<div class="bg-surface-container-lowest text-on-surface-variant rounded-lg rounded-tr-sm px-4 py-2 shadow-sm border border-outline-variant/50 opacity-60 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">block</span>
+<p class="font-body-md text-body-md italic text-sm">This message was revoked</p>
+</div>
+</div>
+<!-- Expired Media -->
+<div class="flex flex-col items-start w-full max-w-[85%] self-start mt-4">
+<div class="bg-surface-container-lowest text-on-surface rounded-lg rounded-tl-sm p-1 shadow-sm border border-outline-variant/50 w-64">
+<div class="bg-surface-variant h-32 rounded-md flex flex-col items-center justify-center text-on-surface-variant p-4 text-center">
+<span class="material-symbols-outlined text-3xl mb-2 opacity-50">image_not_supported</span>
+<p class="text-xs">Media no longer available (expired after 14 days)</p>
+</div>
+<div class="text-[10px] text-on-surface-variant text-right mt-1 px-2 pb-1">2 weeks ago</div>
+</div>
+</div>
+</div>
+<!-- Composer Bar (Disabled) -->
+<div class="bg-surface-container-lowest border-t border-outline-variant p-4 z-10">
+<div class="bg-surface-container-low rounded-full px-4 py-3 flex items-center gap-3 border border-outline-variant/50 opacity-70 cursor-not-allowed">
+<span class="material-symbols-outlined text-outline">lock</span>
+<p class="text-sm text-on-surface-variant flex-1 select-none">Reply from the WhatsApp Business app (read-only inbox)</p>
+<span class="material-symbols-outlined text-outline">send</span>
+</div>
+</div>
+<!-- Footer Metadata -->
+<div class="bg-surface-container-lowest border-t border-outline-variant/50 px-4 py-1.5 text-center z-10">
+<p class="text-[10px] text-on-surface-variant flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[12px]">sync</span>
+            Synced 2 min ago · History sync complete
+          </p>
+</div>
+</section>
+</main>
+</div>
+</body></html>
