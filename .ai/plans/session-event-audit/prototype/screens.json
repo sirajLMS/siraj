@@ -1,0 +1,72 @@
+[
+  {
+    "screenId": "a0c19991113845b5b123fcb6ee99b864",
+    "title": "Full Reports \u2014 Session Event Audit",
+    "file": "session-audit-reports-default-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "default"
+  },
+  {
+    "screenId": "68123c230ab546488c2af5d17396897f",
+    "title": "Full Reports \u2014 Filtered",
+    "file": "session-audit-reports-filtered-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "filtered"
+  },
+  {
+    "screenId": "245b873d39384c90875aadb506127c89",
+    "title": "Full Reports \u2014 Empty State",
+    "file": "session-audit-reports-empty-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "empty"
+  },
+  {
+    "screenId": "4a4f54fb923847f2b1820e09414679ae",
+    "title": "Full Reports \u2014 403",
+    "file": "session-audit-reports-403-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "permission-denied"
+  },
+  {
+    "screenId": "7706dcbc582e48249e8124ef65264542",
+    "title": "Export Truncated",
+    "file": "session-audit-reports-export-truncated-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "export-truncated"
+  },
+  {
+    "screenId": "4e1665c1a71043a3ac4fbaf703e6d1e2",
+    "title": "Class Audit + Override dialog",
+    "file": "class-audit-payroll-override-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "audit-drilldown"
+  },
+  {
+    "screenId": "3f92e097d50947f8b8a3a587af6dea02",
+    "title": "Full Reports \u2014 Mobile",
+    "file": "session-audit-reports-default-mobile.png",
+    "deviceType": "MOBILE",
+    "state": "default"
+  },
+  {
+    "screenId": "13a2222b894a4d7ab2e1f0af3cad2184",
+    "title": "Mobile Filter Sheet",
+    "file": "session-audit-reports-filtered-mobile.png",
+    "deviceType": "MOBILE",
+    "state": "filters-open"
+  },
+  {
+    "screenId": "fec9f88d7f314a5d828279bf762d9706",
+    "title": "Mobile Empty State",
+    "file": "session-audit-reports-empty-mobile.png",
+    "deviceType": "MOBILE",
+    "state": "empty"
+  },
+  {
+    "screenId": "b514ff0ab11b4f349c3a0dd9807f144d",
+    "title": "Class Audit \u2014 Mobile",
+    "file": "class-audit-payroll-mobile.png",
+    "deviceType": "MOBILE",
+    "state": "audit-drilldown"
+  }
+]

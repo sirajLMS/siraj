@@ -27,7 +27,7 @@
 - **X.Y.QL — Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file until exit 0.
 - **X.Y.TE — Test Engineering** (4-tier): T1 100% branch coverage of new logic; T2 boundary (empty/unicode/timestamps/limits); T3 chaos (`Promise.allSettled` concurrent upserts, out-of-order webhook frames); T4 abuse (IDOR, permission denial, wildcard injection). Layer rules: repo tests in `runInRollback` with full `tx` propagation; service tests mock Meta fetch/Redis; GraphQL tests via `testClient`; journeys in `test/workflows/` with committed fixtures, no `runInRollback`.
 - **X.Y.SEC — Security & Tenancy Audit**: identity from ctx/session only; receiver↔account binding checks; permission gates at resolver+service; HMAC/replay semantics intact; webhook payload sanitized.
-- **X.Y.SR — Semantic Review**: no client-supplied ID without ownership check; no unvalidated `...input` spread; no read-then-write without lock; no unbounded module state; env-config keys registered + `resetWhatsappChannel` invalidates all; enums value-imported; replay/idempotency gaps logged into `deferred-items.md`.
+- **X.Y.SR — Semantic Review**: no client-supplied ID without ownership check; no unvalidated `...input` spread; no read-then-write without lock; no unbounded module state; env-config keys registered + `environment.d.ts` / `.env.example` updated for every new key + `resetWhatsappChannel` invalidates all; enums value-imported; replay/idempotency gaps logged into `deferred-items.md`.
 - **X.Y.IV — Instruction Verification**: read files printed by sub-loop (AGENTS.md + `.agents/instructions/*.md` for each touched file) and validate compliance.
 
 **Sequence per subtask**: QL → TE → SEC → SR → IV → mark `[x]`.
@@ -88,6 +88,8 @@
 - [ ] **4. Factory + adapter multi-numberization**
   - [ ] 4.1 Edit `WhatsappChannelFactory.ts` — per-account instance map, `getWhatsappChannel(accountId)`, `getChannelForPurpose(purpose)` (resolution helper), reset per-account; keep legacy default path for `syncFromMeta` admin flow until Task 4.4.
   - [ ] 4.2 Edit `MetaCloudApiAdapter.ts` — constructor takes accountId; `resolveCredentials` per account; remove first-active fallback for sends; pair rate-limit key `whatsapp:pair:<sender>:<recipient>`; remove hardcoded `v20.0` → env-config default `v25.0` (current docs example version) (register key `WHATSAPP_GRAPH_API_VERSION` in `backend/lib/env-config-keys.ts` under the `whatsapp` category, DB-overridable via `env::` settings; NOT in the `shared/constants/env-config-keys.ts` hidden list — it is not a secret).
+  - [ ] 4.2a Register key `WHATSAPP_ES_CONFIG_ID` in `backend/lib/env-config-keys.ts` under the `whatsapp` category (the v4 Facebook Login for Business configuration ID — NOT a secret, DB-overridable; resolves server-side and is passed to the ES dialog client component via props from the settings server page, never hardcoded client-side).
+  - [ ] 4.2b Update `.env.example` and `environment.d.ts` for BOTH new keys — mandatory whenever entries are added to `ENV_CONFIG_KEYS` (v1 env-typing gotcha); keep declarations grouped with the existing WHATSAPP_* block.
   - [ ] 4.3 Offboarded accounts: adapter eviction + `whatsapp.accountOffboarded` error before Graph call.
   - [ ] 4.4 Migrate `syncFromMeta` to per-account credentials (remove env-global token path for DB-managed accounts); keep env path only for bootstrapping first account, documented.
   - [ ] 4.5 Aggregate `isWhatsappConfigured`/`validateConfig`; add per-account health resolver hook.
@@ -129,7 +131,7 @@
   - [ ] 8.1 Server: token exchange helper + `GET /<WABA_ID>?fields=phone_numbers` resolution (reuse `list-phone-numbers.request.ts`); `subscribed_apps` request builder; coexistence confirm (`is_on_biz_app && platform_type`) in `whatsapp-account.service.ts` (`completeEmbeddedSignup`).
   - [ ] 8.2 GraphQL mutation `completeWhatsappEmbeddedSignup` (+ account creation with onboardingMode + immediate sync enqueue).
   - [ ] 8.3 Frontend: ES dialog component (FB SDK loader, session-logging listener, CANCEL/ERROR surfaces) on Numbers tab (`frontend/common/views/dashboard/settings/whatsapp/` + desktop/mobile variants).
-  - [ ] 8.QL / 8.TE — mocked FB SDK session events; token exchange mocked; decline path; only-waba_id payload. 8.SEC (code single-use; config_id from env, never client input). 8.SR. 8.IV.
+  - [ ] 8.QL / 8.TE — mocked FB SDK session events; token exchange mocked; decline path; only-waba_id payload. 8.SEC (code single-use; `config_id` from `WHATSAPP_ES_CONFIG_ID` env-config, never client input). 8.SR. 8.IV.
   - Outcome: `outcome/8-signup-outcome.md` · _Requirements: REQ-4_
 
 ## Phase 9: GraphQL Inbox Surface

@@ -1,0 +1,82 @@
+[
+  {
+    "screenId": "2599499f2f8f4b00942b6a97b9229d33",
+    "title": "Carryover Balances Dashboard",
+    "file": "carryover-list-default-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "default",
+    "view": "carryover-list"
+  },
+  {
+    "screenId": "13b402646a81428987dc6dcf5ad5ae5c",
+    "title": "Carryover Balances Dashboard",
+    "file": "carryover-list-default-desktop-alt.png",
+    "deviceType": "DESKTOP",
+    "state": "default-light-refined",
+    "view": "carryover-list"
+  },
+  {
+    "screenId": "d4097ecc386044deb8fe8d3d4ff60fea",
+    "title": "Carryover Balances Dashboard",
+    "file": "carryover-list-default-desktop-dark.png",
+    "deviceType": "DESKTOP",
+    "state": "default-dark",
+    "view": "carryover-list"
+  },
+  {
+    "screenId": "0be20a55d41c4fa7b88c48679ba4e3bb",
+    "title": "Carryover Balances \u2014 Empty State",
+    "file": "carryover-list-empty-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "empty",
+    "view": "carryover-list"
+  },
+  {
+    "screenId": "5b730132be8b49ae8e4cdd75f1a5f687",
+    "title": "Carryover Balances \u2014 Mobile Dashboard",
+    "file": "carryover-list-default-mobile.png",
+    "deviceType": "MOBILE",
+    "state": "default",
+    "view": "carryover-list"
+  },
+  {
+    "screenId": "d5f217b9d7694db5bd6101a7276ade8a",
+    "title": "Add Carryover Balance Modal",
+    "file": "carryover-form-add-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "modal-open-validation",
+    "view": "carryover-form"
+  },
+  {
+    "screenId": "bbd7631e138e46afb63d3f9edbf734ee",
+    "title": "Convert to Expenses Modal \u2014 Bulk Action",
+    "file": "carryover-bulk-to-expense-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "modal-open",
+    "view": "bulk-to-expense"
+  },
+  {
+    "screenId": "e54009bb6bdf4b3d90773c5c2a018ec2",
+    "title": "Carryover Balance Detail \u2014 Layla Hassan",
+    "file": "carryover-detail-drawer-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "drawer-open",
+    "view": "carryover-detail"
+  },
+  {
+    "screenId": "e79ae90942444ffba428cef476256abf",
+    "title": "Session Event Audit \u2014 Create Carryover Confirmation",
+    "file": "audit-grid-bulk-carryover-confirm-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "modal-open",
+    "view": "audit-grid-bulk-carryover"
+  },
+  {
+    "screenId": "b08964142c0b466da0ba8878718e9c36",
+    "title": "Unpay Carryover Confirmation \u2014 Layla Hassan",
+    "file": "carryover-unpay-confirm-desktop.png",
+    "deviceType": "DESKTOP",
+    "state": "dialog-open",
+    "view": "unpay-confirm"
+  }
+]

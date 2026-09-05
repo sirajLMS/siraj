@@ -1,7 +1,9 @@
 # TB.3 — Session Audit Access-Isolation Journey — Outcome
 
 - **Date**: 2026-09-05
-- **Status**: ✅ Complete
+- **Status**: ✅ Complete — test content green (7/7, twice, pre-drift; quality
+  loop exit 0) — ⚠️ final re-verification blocked by another agent's
+  unresolved schema drift on the shared test DB (see "Full-suite blockage").
 
 ## Files changed
 
@@ -96,16 +98,60 @@ notification boundary (the service is read-only — nothing can dispatch).
   `expect(x instanceof Y).toBe(true)` → `expect(x).toBeInstanceOf(Y)` with a
   narrowing `if` kept for the `code` assertions.
 - 🔁 DIAGRAMS.md: `bun run validate:mermaid test/workflows/accounting/DIAGRAMS.md`
-  → all 5 blocks **OK**. The sub-loop's oxlint stage is not applicable to the
-  markdown file (no TS to lint; mermaid validation is the applicable gate).
-- 🧪 `bun run test:workflows` full suite — see final line of this outcome.
+  → all blocks **OK** (6 after the sibling TB.1 section landed alongside; the
+  append was conflict-free). The sub-loop's oxlint stage is not applicable to
+  the markdown file (no TS to lint; mermaid validation is the applicable gate).
+- 🧪 `bun run test:workflows` full suite — **environmentally blocked during this
+  window, see the dedicated section below**. The file itself was verified green
+  against every subset of the suite (accounting dir alone; file+billing;
+  file+payroll; file+payroll+billing+scheduling = 8 files; and
+  full-minus-any-one-domain up to 12 files / 87 tests).
 - Test DB prerequisite verified by probing the test environment
   (`--env-file=.env.test`): the `accounting.reports_view` permission catalog
   row exists and is granted to `super_admin` + `academy_admin` (migration 39
-  applied), so the academcy-admin honest-membership path from outcome 0.1 is
+  applied), so the academy-admin honest-membership path from outcome 0.1 is
   live. (The dev DB at `DATABASE_URL` does NOT yet have the enum value —
   migration 39 needs `bun db migrate` there; noted for the orchestrator, not
   touched from this slice.)
+
+## Full-suite blockage (external — not caused by this slice)
+
+Two independent environmental disturbances from other concurrent in-flight
+work were observed and root-caused during verification:
+
+1. **Permission-catalog churn window**: during two full-suite runs, every
+   operator call failed `FORBIDDEN` — debug instrumentation showed
+   `PermissionsService.getUserContext(operator)` returning 149 permissions
+   (missing exactly `accounting.reports_view` + `accounting.reports_manage`)
+   while subset runs minutes later resolved 151 including both. The
+   permission rows and `academy_admin` grants were confirmed present in the
+   test DB (direct SQL probe) once the churn window closed, and the suite
+   subsets then ran green. Attributed to concurrent migration/seed activity
+   from shared-tree agents (several in-flight plans touch permissions and
+   `backend/db/pglite-pool`).
+2. **Carryover schema drift**: a concurrent `carryover-balance-module` agent's
+   uncommitted edit adds `carryoverBalanceId` (`carryover_balance_id`) to the
+   Drizzle `class_instances` table (`backend/db/schema/classes/scheduling.ts`)
+   with no migration applied to the test DB, so EVERY `class_instances`
+   insert fails with `column "carryover_balance_id" ... does not exist`,
+   breaking the entire workflows suite (31 failing tests across unrelated
+   files, including mine). Per the slice rules I did not touch that agent's
+   files.
+
+CROSS-FILE DEPENDENCY:
+  Target file: test/workflows/accounting/session-audit-access-isolation.test.ts
+  Blocked by: backend/db/schema/classes/scheduling.ts (+ migration for `carryover_balance_id`, carryover-balance-module plan)
+  Rule violated: none in my slice — the workflow suite cannot execute while schema ≠ test DB
+  Required fix: the carryover-balance-module owner must apply their migration to the test DB (`bun db migrate` under the test env), or revert the schema edit until the migration is ready.
+
+Once the test DB regains the column, `bun run test/scripts/run-test.ts
+test/workflows/accounting/session-audit-access-isolation.test.ts` is expected
+to return to green with no changes (it was green standalone + in all
+subsets before the drift landed). A 15-attempt poll (~23 min, 90 s apart)
+re-running the test observed red throughout (same `carryover_balance_id`
+error, confirmed unchanged via `--last`), plus one final attempt after the
+poll — the drift outlasted the whole verification window (~25 min).
+
 
 ## Semantic review
 
