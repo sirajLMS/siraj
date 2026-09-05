@@ -448,6 +448,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/billing/credit-adjustments.md` - Credit Adjustment System: manual Add/Subtract/Carryover operator adjustments, server-derived idempotency (lock-then-replay-check ordering), rich-text sanitizer, carryover payout handoff (plan: `.ai/plans/credit-adjustment-system`)
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines
 - `docs/services/cron-service.md` - Cron service pattern reference
+- `docs/services/session-audit-reports.md` - Session audit reports canonical reference (status mapper/predicate/CSV/permission model, URL-param + openOverride deep-link contracts, aggregates design)
 - `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern for common/desktop/mobile triplication
 - `docs/frontend/duplication-elimination-patterns.md` - Duplication elimination patterns A-G (scaffold extraction, shared utility, dead code deletion, store consolidation, scaffold extension, shared view scaffold, locale type consolidation) — Phase 6 eliminated 96% of duplications (475→18 pairs) with zero jscpd:ignore
 - `docs/frontend/meeting-integrations-ui.md` - Meeting Integrations UI canonical reference (MetricCardGrid, AppDataGrid, OAuth callback, reconnect-all, status badges, clipboard, i18n namespaces, mobile-desktop responsive, Zod schema factory, animations, permission-gated cross-links, lint workarounds, accessibility)

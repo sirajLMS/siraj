@@ -34,53 +34,53 @@
 
 ## Phase 0: Baseline
 
-- [ ] **0. Pre-implementation baseline + ledger init**
-  - [ ] 0.1 Record baselines: `bun tsgo 2>&1 | grep -c "error TS"`; `bun biome:check` warn count; `bun run scripts/lint-service.ts --json --id baseline` → saved under `.ai/plans/whatsapp2/outcome/0-baseline-outcome.md`.
-  - [ ] 0.2 Confirm `deferred-items.md` (authored with the plan) lists the pre-existing v1 gaps with `📋` statuses (plan will NOT fix): templates query/opt-in audit resolvers, apiVersion inconsistency NOTE (this plan DOES fix it — defer only if descoped), Groups API, Marketing Messages API, free-text send BL4, inbox composer.
-  - [ ] 0.3 Re-read all four `outcome/*.md` research files; confirm no Meta fact needed that is missing — if missing, query docs MCP (`search_docs`, library `whatsapp`) and APPEND to the relevant outcome doc.
+- [x] **0. Pre-implementation baseline + ledger init**
+  - [x] 0.1 Record baselines: `bun tsgo 2>&1 | grep -c "error TS"`; `bun biome:check` warn count; `bun run scripts/lint-service.ts --json --id baseline` → saved under `.ai/plans/whatsapp2/outcome/0-baseline-outcome.md`.
+  - [x] 0.2 Confirm `deferred-items.md` (authored with the plan) lists the pre-existing v1 gaps with `📋` statuses (plan will NOT fix): templates query/opt-in audit resolvers, apiVersion inconsistency NOTE (this plan DOES fix it — defer only if descoped), Groups API, Marketing Messages API, free-text send BL4, inbox composer.
+  - [x] 0.3 Re-read all four `outcome/*.md` research files; confirm no Meta fact needed that is missing — if missing, query docs MCP (`search_docs`, library `whatsapp`) and APPEND to the relevant outcome doc.
   - _Requirements: REQ-0_
 
 ## Phase 1: Schema, Enums, Permissions
 
-- [ ] **1. Extend whatsapp schema + new tables + permissions**
-  - [ ] 1.1 Edit `backend/db/schema/whatsapp/whatsapp-accounts.ts` — add `purpose`, `onboardingMode`, `syncStatus`, `syncPhase`, `syncProgress`, `syncDeadlineAt`, `syncFailureReason`, `offboardedAt`; defaults preserve v1 (`GENERAL`/`CLOUD_API`/`NOT_STARTED`). Meta `request_id` values live on `whatsapp_sync_requests` (per sync type), NOT on the account row.
-  - [ ] 1.2 Create `backend/db/schema/whatsapp/whatsapp-conversations.ts`, `whatsapp-messages.ts`, `whatsapp-contacts.ts`, `whatsapp-webhook-events.ts`, `whatsapp-sync-requests.ts` — per implementation.md; `wamid` unique; `(accountId, syncType)` unique; partial uniques for waId/userId keys; dialect-aware `checkConstraint` only.
-  - [ ] 1.3 Edit `backend/db/schema/whatsapp/index.ts` barrel + confirm top-level `backend/db/schema/index.ts` re-export.
-  - [ ] 1.4 Add new `<entity>.enum.ts` files under the existing `backend/enum/whatsapp/` subdir (its `index.ts` barrel already exists and keeps the deprecated shared-constants re-export untouched): `WhatsappAccountPurpose`, `WhatsappOnboardingMode`, `WhatsappSyncStatus`, `WhatsappMessageDirection`, `WhatsappWebhookEventStatus`, `WhatsappSyncRequestStatus` (`PENDING/REQUESTED/STREAMING/COMPLETE/FAILED`), `WhatsappSyncType`; register all seven in `backend/db/schema/enums.ts` via `createPgEnumFromEnum`.
-  - [ ] 1.5 Edit `backend/graphql/pothos/shared/enum.pothos.ts` — register the seven enums.
-  - [ ] 1.6 Edit `backend/enum/permissions/permission.enum.ts` (existing entries at lines 276–278) — add `WHATSAPP_INBOX_VIEW = "whatsapp.inbox_view"` + `WHATSAPP_INBOX_MANAGE = "whatsapp.inbox_manage"` (string style matches existing `whatsapp.view`/`whatsapp.config_manage`); create two-phase SQL migrations in `backend/db/migration/`: (a) `ALTER TYPE app_permission ADD VALUE ...` (phase 1), (b) INSERT permission rows + grant to `super_admin`, `academy_admin`, `staff_default`/`supervisor_default` for VIEW only (phase 2, separate migration — AppPermission enum gotcha).
-  - [ ] 1.7 Run `bun run db push` + `bun run db migrate`; verify columns/enums exist.
-  - [ ] 1.QL — sub-loop on each schema/enum file (codescene).
-  - [ ] 1.TE — schema smoke via repo boot test (migration applies, enums round-trip).
-  - [ ] 1.SEC — confirm no `encryptedText` misuse; unique indexes correct.
-  - [ ] 1.SR — semantic list (see header).
-  - [ ] 1.IV — `backend/db/schema/AGENTS.md`, `backend/AGENTS.md`, `backend.instructions.md`.
+- [x] **1. Extend whatsapp schema + new tables + permissions**
+  - [x] 1.1 Edit `backend/db/schema/whatsapp/whatsapp-accounts.ts` — add `purpose`, `onboardingMode`, `syncStatus`, `syncPhase`, `syncProgress`, `syncDeadlineAt`, `syncFailureReason`, `offboardedAt`; defaults preserve v1 (`GENERAL`/`CLOUD_API`/`NOT_STARTED`). Meta `request_id` values live on `whatsapp_sync_requests` (per sync type), NOT on the account row.
+  - [x] 1.2 Create `backend/db/schema/whatsapp/whatsapp-conversations.ts`, `whatsapp-messages.ts`, `whatsapp-contacts.ts`, `whatsapp-webhook-events.ts`, `whatsapp-sync-requests.ts` — per implementation.md; `wamid` unique; `(accountId, syncType)` unique; partial uniques for waId/userId keys; dialect-aware `checkConstraint` only.
+  - [x] 1.3 Edit `backend/db/schema/whatsapp/index.ts` barrel + confirm top-level `backend/db/schema/index.ts` re-export.
+  - [x] 1.4 Add new `<entity>.enum.ts` files under the existing `backend/enum/whatsapp/` subdir (its `index.ts` barrel already exists and keeps the deprecated shared-constants re-export untouched): `WhatsappAccountPurpose`, `WhatsappOnboardingMode`, `WhatsappSyncStatus`, `WhatsappMessageDirection`, `WhatsappWebhookEventStatus`, `WhatsappSyncRequestStatus` (`PENDING/REQUESTED/STREAMING/COMPLETE/FAILED`), `WhatsappSyncType`; register all seven in `backend/db/schema/enums.ts` via `createPgEnumFromEnum`.
+  - [x] 1.5 Edit `backend/graphql/pothos/shared/enum.pothos.ts` — register the seven enums.
+  - [x] 1.6 Edit `backend/enum/permissions/permission.enum.ts` (existing entries at lines 276–278) — add `WHATSAPP_INBOX_VIEW = "whatsapp.inbox_view"` + `WHATSAPP_INBOX_MANAGE = "whatsapp.inbox_manage"` (string style matches existing `whatsapp.view`/`whatsapp.config_manage`); create two-phase SQL migrations in `backend/db/migration/`: (a) `ALTER TYPE app_permission ADD VALUE ...` (phase 1), (b) INSERT permission rows + grant to `super_admin`, `academy_admin`, `staff_default`/`supervisor_default` for VIEW only (phase 2, separate migration — AppPermission enum gotcha).
+  - [x] 1.7 Run `bun run db push` + `bun run db migrate`; verify columns/enums exist.
+  - [x] 1.QL — sub-loop on each schema/enum file (codescene).
+  - [x] 1.TE — schema smoke via repo boot test (migration applies, enums round-trip).
+  - [x] 1.SEC — confirm no `encryptedText` misuse; unique indexes correct.
+  - [x] 1.SR — semantic list (see header).
+  - [x] 1.IV — `backend/db/schema/AGENTS.md`, `backend/AGENTS.md`, `backend.instructions.md`.
   - Outcome: `outcome/1-schema-outcome.md` · _Requirements: REQ-1, REQ-6_
 
 ## Phase 2: Backend Types
 
-- [ ] **2. Types in `backend/types/whatsapp/`**
-  - [ ] 2.1 Create `whatsapp-inbox.types.ts` — Conversation/Message/Contact Select/Insert/Return types + pagination inputs.
-  - [ ] 2.2 Create `whatsapp-sync.types.ts` + `whatsapp-webhook-event.types.ts`.
-  - [ ] 2.3 Edit `whatsapp-account.types.ts` — purpose/onboarding/sync fields in Select/Insert/Submit.
-  - [ ] 2.4 Edit `whatsapp-channel.types.ts` — `WhatsappPayload.senderAccountId` + `purpose`.
-  - [ ] 2.5 Extend `whatsapp-webhook.types.ts` — typed unions for `history`, `smb_app_state_sync`, `smb_message_echoes`, `account_update` payloads (mirror shapes in `docs-research-coexistence.md`).
-  - [ ] 2.6 Edit `backend/types/whatsapp/index.ts` barrel.
-  - [ ] 2.QL / 2.TE (type-only: tsgo + compile check) / 2.SEC / 2.SR / 2.IV — `backend/types/AGENTS.md`.
+- [x] **2. Types in `backend/types/whatsapp/`**
+  - [x] 2.1 Create `whatsapp-inbox.types.ts` — Conversation/Message/Contact Select/Insert/Return types + pagination inputs.
+  - [x] 2.2 Create `whatsapp-sync.types.ts` + `whatsapp-webhook-event.types.ts`.
+  - [x] 2.3 Edit `whatsapp-account.types.ts` — purpose/onboarding/sync fields in Select/Insert/Submit.
+  - [x] 2.4 Edit `whatsapp-channel.types.ts` — `WhatsappPayload.senderAccountId` + `purpose`.
+  - [x] 2.5 Extend `whatsapp-webhook.types.ts` — typed unions for `history`, `smb_app_state_sync`, `smb_message_echoes`, `account_update` payloads (mirror shapes in `docs-research-coexistence.md`).
+  - [x] 2.6 Edit `backend/types/whatsapp/index.ts` barrel.
+  - [x] 2.QL / 2.TE (type-only: tsgo + compile check) / 2.SEC / 2.SR / 2.IV — `backend/types/AGENTS.md`.
   - Outcome: `outcome/2-types-outcome.md` · _Requirements: REQ-1, REQ-2, REQ-6, REQ-8_
 
 ## Phase 3: Repositories
 
-- [ ] **3. WhatsApp repos (`backend/db/repo/whatsapp/`)**
-  - [ ] 3.1 Create `whatsapp-conversation.repository.ts` — upsert by account+waId/userId; update `lastMessageAt`/`lastMessagePreview` atomically; paginated list per account.
-  - [ ] 3.2 Create `whatsapp-message.repository.ts` — upsert by `wamid`; `markRevoked`, `applyEdit`, `attachMedia`; paginated thread query.
-  - [ ] 3.3 Create `whatsapp-contact.repository.ts` — upsert with LWW on `lastActionAt`; remove handling.
-  - [ ] 3.4 Create `whatsapp-webhook-event.repository.ts` — insert, claimBatch (`SELECT FOR UPDATE SKIP LOCKED`), markProcessed/Failed, stale requeue.
-  - [ ] 3.5 Create `whatsapp-sync-request.repository.ts` — insert unique (accountId, syncType), recordRequestId, status transitions.
-  - [ ] 3.6 Edit `whatsapp-account.repository.ts` — add `findActiveByPurpose(purpose)`, `findActiveGeneral()`, remove reliance on `findFirstActiveForCredentials` for sends (keep for legacy fallback until Task 4), sync-status mutators.
-  - [ ] 3.7 Update `backend/db/repo/whatsapp/index.ts` barrel.
-  - [ ] 3.8 Repo-layer mandates (`backend/db/repo/AGENTS.md`): all non-transactional reads use `queryDb(tx)` (Neon HTTP rule); NEVER `inArray(col, sql.placeholder(...))` with prepared statements (PG protocol limitation); expose DataLoader batch lookup methods where GraphQL field resolvers need them; repositories contain data access only (no permission/business logic).
-  - [ ] 3.QL / 3.TE — repo tests live in `backend/db/test/repo/whatsapp/` (runInRollback + full `tx` propagation, 100% line/branch coverage per `backend/db/test/AGENTS.md`, `bun run test/scripts/run-test.ts`; duplicate wamid no-op; chunk dedupe; LWW timestamps; SKIP LOCKED claiming) / 3.SEC / 3.SR / 3.IV — `backend/db/repo/AGENTS.md`.
+- [x] **3. WhatsApp repos (`backend/db/repo/whatsapp/`)**
+  - [x] 3.1 Create `whatsapp-conversation.repository.ts` — upsert by account+waId/userId; update `lastMessageAt`/`lastMessagePreview` atomically; paginated list per account.
+  - [x] 3.2 Create `whatsapp-message.repository.ts` — upsert by `wamid`; `markRevoked`, `applyEdit`, `attachMedia`; paginated thread query.
+  - [x] 3.3 Create `whatsapp-contact.repository.ts` — upsert with LWW on `lastActionAt`; remove handling.
+  - [x] 3.4 Create `whatsapp-webhook-event.repository.ts` — insert, claimBatch (`SELECT FOR UPDATE SKIP LOCKED`), markProcessed/Failed, stale requeue.
+  - [x] 3.5 Create `whatsapp-sync-request.repository.ts` — insert unique (accountId, syncType), recordRequestId, status transitions.
+  - [x] 3.6 Edit `whatsapp-account.repository.ts` — add `findActiveByPurpose(purpose)`, `findActiveGeneral()`, remove reliance on `findFirstActiveForCredentials` for sends (keep for legacy fallback until Task 4), sync-status mutators.
+  - [x] 3.7 Update `backend/db/repo/whatsapp/index.ts` barrel.
+  - [x] 3.8 Repo-layer mandates (`backend/db/repo/AGENTS.md`): all non-transactional reads use `queryDb(tx)` (Neon HTTP rule); NEVER `inArray(col, sql.placeholder(...))` with prepared statements (PG protocol limitation); expose DataLoader batch lookup methods where GraphQL field resolvers need them; repositories contain data access only (no permission/business logic).
+  - [x] 3.QL / 3.TE — repo tests live in `backend/db/test/repo/whatsapp/` (runInRollback + full `tx` propagation, 100% line/branch coverage per `backend/db/test/AGENTS.md`, `bun run test/scripts/run-test.ts`; duplicate wamid no-op; chunk dedupe; LWW timestamps; SKIP LOCKED claiming) / 3.SEC / 3.SR / 3.IV — `backend/db/repo/AGENTS.md`.
   - Outcome: `outcome/3-repos-outcome.md` · _Requirements: REQ-2, REQ-5, REQ-6_
 
 ## Phase 4: Per-Account Adapter & Factory

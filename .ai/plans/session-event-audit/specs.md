@@ -430,7 +430,7 @@ session events.
 | E17| Operator has `ACCOUNTING_REPORTS_VIEW` but not `_MANAGE`.                                 | Grid renders read-only; "Open audit page" row action hidden; the row-click still navigates to the audit page (which itself gates the Override button).          |
 | E18| Session is soft-deleted between filter open and CSV export.                              | Server excludes soft-deleted rows from the export; the row count in the CSV may differ from the displayed grid by the count of newly-deleted rows.            |
 | E19| Operator's locale timezone differs from the student's booking timezone.                  | `openSessionTime` / `endSessionTime` render in the operator's locale timezone (per AC-3.1); the tooltip shows the raw UTC + student's booking timezone (AC-3.7). |
-| E20| `execution_state = ON_DEMAND_NO_CREDITS_ABSENT` (student never confirmed an on-demand class). | `currentStatus = "Absent"` if `actual_start_at IS NULL`, else `"absent_student"`; payroll column reflects Plan 3's on-demand-aware calculation.                |
+| E20| `execution_state = ON_DEMAND_NO_CREDITS_ABSENT` (student never confirmed an on-demand class). | **Resolved conflict with AC-2.7 (implementation review):** AC-2.7 states every `ON_DEMAND_*` state maps to `"open"`, and that rule is the implemented behavior (mapper + predicate + tests). This row's earlier Absent mapping is superseded by AC-2.7; the payroll columns still reflect Plan 3's on-demand-aware calculation. |
 
 ---
 

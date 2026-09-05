@@ -78,6 +78,8 @@ declare global {
       WHATSAPP_PHONE_NUMBER_ID?: string;
       WHATSAPP_WABA_ID?: string;
       WHATSAPP_API_VERSION?: string;
+      WHATSAPP_GRAPH_API_VERSION?: string;
+      WHATSAPP_ES_CONFIG_ID?: string;
       WHATSAPP_TEST_TO_PHONE?: string;
       WHATSAPP_TEST_TEMPLATE_NAME?: string;
       WHATSAPP_TEST_TEMPLATE_LANGUAGE?: string;

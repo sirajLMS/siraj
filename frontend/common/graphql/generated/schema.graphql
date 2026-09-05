@@ -189,6 +189,8 @@ enum AppLanguage {
 }
 
 enum AppPermission {
+  ACCOUNTING_CARRYOVER_MANAGE
+  ACCOUNTING_CARRYOVER_VIEW
   ACCOUNTING_CREDITS_MANAGE
   ACCOUNTING_PAYMENTS_MANAGE
   ACCOUNTING_PAYMENTS_VIEW
@@ -450,6 +452,8 @@ enum AppPermission {
   USER_EDIT_PROFILE
   USER_VIEW_PROFILE
   WHATSAPP_CONFIG_MANAGE
+  WHATSAPP_INBOX_MANAGE
+  WHATSAPP_INBOX_VIEW
   WHATSAPP_TEMPLATES_MANAGE
   WHATSAPP_VIEW
 }
@@ -701,6 +705,48 @@ enum BookingStatus {
   RESCHEDULED
 }
 
+"""
+Outcome of grouping one teacher's audited class instances into a single carryover balance
+"""
+type BulkCreateCarryoverGroupResult {
+  carryoverId: ID
+  currency: CurrencyCode
+  id: ID
+  instanceIds: [ID!]
+  payable: String
+  studentsCount: Int
+  teacherId: ID
+  totalDuration: String
+}
+
+"""
+Bulk carryover creation over audited class instances. The acting operator is resolved from the request context and is never accepted as input.
+"""
+input BulkCreateCarryoverInput {
+  clientRequestId: String
+  instanceIds: [ID!]!
+  note: String
+}
+
+"""
+Outcome of a bulk carryover creation across all affected teacher groups
+"""
+type BulkCreateCarryoverResult {
+  auditLogIds: [ID!]
+  groups: [BulkCreateCarryoverGroupResult!]
+  id: ID
+  totalInstanceIds: [ID!]
+}
+
+"""
+Outcome of a batch carryover deletion, listing the removed carryover ids
+"""
+type BulkDeleteCarryoverResult {
+  auditLogIds: [ID!]
+  deletedIds: [ID!]
+  id: ID
+}
+
 type BulkOperationFailure {
   error: String
   path: String
@@ -715,6 +761,35 @@ type BulkOperationResult {
   successfulItems: [StorageObject!]
 }
 
+"""
+Bulk conversion of unpaid carryover balances into expense records. The acting operator is resolved from the request context and is never accepted as input.
+"""
+input BulkToExpenseInput {
+  carryoverIds: [ID!]!
+  clientRequestId: String
+  expenseDate: String
+  note: String
+  paymentDate: String!
+}
+
+"""Outcome of converting one carryover balance into its expense record"""
+type BulkToExpenseItemResult {
+  amount: String
+  carryoverId: ID
+  currency: CurrencyCode
+  expenseId: ID
+  id: ID
+}
+
+"""
+Outcome of a bulk carryover-to-expense conversion across all affected carryovers
+"""
+type BulkToExpenseResult {
+  auditLogIds: [ID!]
+  id: ID
+  items: [BulkToExpenseItemResult!]
+}
+
 enum CalculationStatus {
   CALCULATED
   NOT_CALCULATED
@@ -722,6 +797,70 @@ enum CalculationStatus {
   PARTIALLY
   REFUND
   WAITING_PAID
+}
+
+"""
+Totals over the full filtered carryover set (not just the returned page): payable, paid, dominant currency, and row counts per paid status
+"""
+type CarryoverAggregates {
+  dominantCurrency: CurrencyCode
+  id: ID
+  rowCountByPaid: JSON
+  totalPaid: String
+  totalPayable: String
+}
+
+"""
+One carryover balance row: audited class instances aggregated for a teacher into a single payable record, with the resolved teacher display fields
+"""
+type CarryoverBalance {
+  createdAt: DateTime
+  expenseId: ID
+  fromDate: String
+  id: ID
+  isDisabledTeacher: Boolean
+  isPaid: Boolean
+  note: String
+  paid: String
+  paidAt: DateTime
+  payable: String
+  paymentDate: String
+  studentsCount: Int
+  studentsText: String
+  teacherAvatarUrl: String
+  teacherCurrency: CurrencyCode
+  teacherId: ID
+  teacherName: String
+  toDate: String
+  totalDuration: String
+}
+
+"""Outcome of deleting a single carryover balance"""
+type CarryoverDeleteResult {
+  deleted: Boolean
+  id: ID
+}
+
+"""
+AND-combined filters narrowing the carryover list to a teacher, paid status, date range, or free-text search over the teacher name and students text
+"""
+input CarryoverFilter {
+  dateFrom: String
+  dateTo: String
+  includeDisabledTeachers: Boolean
+  paidStatus: String
+  search: String
+  teacherId: ID
+}
+
+"""
+One page of the carryover balance list plus aggregates over the full filtered set
+"""
+type CarryoverPage {
+  aggregates: CarryoverAggregates
+  id: ID
+  rows: [CarryoverBalance!]
+  totalCount: Int
 }
 
 type ChangeParentLifecycleResult {
@@ -1320,6 +1459,21 @@ enum CountryCode {
   ZA
   ZM
   ZW
+}
+
+"""
+Manual creation of a single carryover balance. The acting operator is resolved from the request context and is never accepted as input.
+"""
+input CreateCarryoverInput {
+  clientRequestId: String
+  fromDate: String
+  note: String
+  payable: String!
+  studentsCount: Int
+  studentsText: String
+  teacherCurrency: CurrencyCode!
+  teacherId: ID!
+  toDate: String
 }
 
 input CreateManualClassEntryInput {
@@ -2687,6 +2841,21 @@ type Mutation {
   assignPermissionGroupToUser(input: AssignPermissionGroupToUserInput!): Boolean
   attachSubjectResource(input: AttachSubjectResourceInput!): SubjectResource
   bulkAssignUsersToGroup(groupId: String!, userIds: [String!]!): Boolean
+
+  """
+  Convert a selection of unpaid carryover balances into expense records, mark them paid, and settle the linked sessions. The acting operator is resolved from the authenticated context and is never accepted as input.
+  """
+  bulkCarryoverToExpense(input: BulkToExpenseInput!): BulkToExpenseResult
+
+  """
+  Aggregate a selection of audited class instances into one carryover balance per teacher, link the sessions, and move them to awaiting settlement. The acting operator is resolved from the authenticated context and is never accepted as input.
+  """
+  bulkCreateCarryoverBalances(input: BulkCreateCarryoverInput!): BulkCreateCarryoverResult
+
+  """
+  Delete a batch of unpaid carryover balances in one transaction, unlinking their sessions back to their pre-carryover statuses.
+  """
+  bulkDeleteCarryoverBalances(ids: [ID!]!): BulkDeleteCarryoverResult
   bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
   changeParentLifecycleStatus(newStatus: ParentStatus!, parentId: String!): ChangeParentLifecycleResult
   changePassword(input: ChangePasswordInput!): Boolean
@@ -2698,6 +2867,11 @@ type Mutation {
   clearWeeklySchedule(teacherId: ID!): Boolean
   connectMeetingProviderOAuth(input: ConnectMeetingProviderOAuthInput!): ConnectMeetingProviderOAuthResult
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
+
+  """
+  Manually create a single carryover balance for a teacher. The acting operator is resolved from the authenticated context and is never accepted as input.
+  """
+  createCarryoverBalance(input: CreateCarryoverInput!): CarryoverBalance
   createClassCategory(input: ClassCategoryCreateInput!): ClassCategory
   createClassMeetingConfig(input: ClassMeetingConfigCreateInput!): ClassMeetingConfig
   createClassSubject(input: ClassSubjectCreateInput!): ClassSubject
@@ -2779,6 +2953,11 @@ type Mutation {
     """The UUID of the book to delete"""
     id: ID!
   ): Boolean
+
+  """
+  Delete a single unpaid carryover balance; every linked session returns to its pre-carryover status. Paid carryovers cannot be deleted.
+  """
+  deleteCarryoverBalance(id: ID!): CarryoverDeleteResult
   deleteClassCategory(id: ID!): Boolean
   deleteClassInstance(classInstanceId: ID!): DeleteClassInstanceResult
   deleteClassMeetingConfig(id: ID!): Boolean
@@ -2965,8 +3144,18 @@ type Mutation {
   """Toggle the Paid status on an accounting payment (cascades to invoice)"""
   toggleAccountingPaymentPaidStatus(input: AccountingPaymentTogglePaidInput!): AccountingPayment
 
+  """
+  Revert a paid carryover balance: soft-delete the expense record, mark the carryover unpaid, and return the linked sessions to awaiting settlement.
+  """
+  unpayCarryoverBalance(id: ID!, note: String): CarryoverBalance
+
   """Edit an accounting payment (gateway/note-only or creditHours delta)"""
   updateAccountingPayment(input: AccountingPaymentEditInput!): AccountingPayment
+
+  """
+  Apply a field-level patch to a carryover balance; only the provided fields change. The acting operator is resolved from the authenticated context and is never accepted as input.
+  """
+  updateCarryoverBalance(input: UpdateCarryoverInput!): CarryoverBalance
   updateClassAdminNote(classInstanceId: String!, content: String!): GroupClassAudit
   updateClassCategory(id: ID!, input: ClassCategoryUpdateInput!): ClassCategory
   updateClassMeetingConfig(id: ID!, input: ClassMeetingConfigUpdateInput!): ClassMeetingConfig
@@ -3775,6 +3964,20 @@ type Query {
 
   """Lists all books and bags available to the academy."""
   booksAndBags: [Book!]
+
+  """Single carryover balance by id, for the drill-down view."""
+  carryoverBalance(id: ID!): CarryoverBalance
+
+  """
+  Paginated carryover balance list; aggregates cover the full filtered set, not just the returned page.
+  """
+  carryoverBalances(
+    filter: CarryoverFilter
+
+    """Max rows per page (max 200)"""
+    limit: Int = 50
+    offset: Int = 0
+  ): CarryoverPage
   classCategories: [ClassCategory!]
   classInstance(id: ID!): ClassInstanceDetail
   classMeetingConfigs(classInstanceId: ID!): [ClassMeetingConfig!]
@@ -5863,6 +6066,20 @@ type UnpaidInvoicesSummary {
   totalOverdueInvoices: Int
 }
 
+"""
+Field-level patch for a carryover balance; only the provided fields change. The acting operator is resolved from the request context and is never accepted as input.
+"""
+input UpdateCarryoverInput {
+  fromDate: String
+  id: ID!
+  note: String
+  payable: String
+  studentsCount: Int
+  studentsText: String
+  teacherCurrency: CurrencyCode
+  toDate: String
+}
+
 input UpdateManagerProfileInput {
   email: String
   hourlyRate: String
@@ -6114,6 +6331,12 @@ input WhatsappAccountCreateInput {
   wabaId: String!
 }
 
+enum WhatsappAccountPurpose {
+  ADVERTISING
+  GENERAL
+  STUDENTS
+}
+
 input WhatsappAccountUpdateInput {
   displayName: LocalizedString
 
@@ -6136,6 +6359,17 @@ enum WhatsappLimitTier {
   UNTIERED
 }
 
+enum WhatsappMessageDirection {
+  API_OUTBOUND
+  ECHO
+  INBOUND
+}
+
+enum WhatsappOnboardingMode {
+  CLOUD_API
+  COEXISTENCE
+}
+
 enum WhatsappQualityRating {
   GREEN
   RED
@@ -6147,6 +6381,27 @@ type WhatsappSyncFromMetaResult {
   accounts: [WhatsappAccount!]
   id: String
   templates: [WhatsappTemplateSnapshot!]
+}
+
+enum WhatsappSyncRequestStatus {
+  COMPLETE
+  FAILED
+  PENDING
+  REQUESTED
+  STREAMING
+}
+
+enum WhatsappSyncStatus {
+  COMPLETE
+  FAILED
+  NOT_STARTED
+  REQUESTED
+  SYNCING
+}
+
+enum WhatsappSyncType {
+  HISTORY
+  SMB_APP_STATE_SYNC
 }
 
 enum WhatsappTemplateCategory {
@@ -6171,6 +6426,12 @@ enum WhatsappTemplateStatus {
   PENDING
   PENDING_DELETION
   REJECTED
+}
+
+enum WhatsappWebhookEventStatus {
+  FAILED
+  PENDING
+  PROCESSED
 }
 
 type WorkshopPromo {

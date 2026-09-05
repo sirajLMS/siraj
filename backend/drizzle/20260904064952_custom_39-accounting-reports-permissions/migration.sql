@@ -1,29 +1,24 @@
--- Source: 39-accounting-reports-permissions.sql
--- Accounting Reports permissions (session-event audit read model).
--- Adds the `accounting.reports_view` + `accounting.reports_manage`
--- AppPermission values and grants them to super_admin + academy_admin —
--- mirroring the `accounting.payroll_view` / `accounting.payroll_manage`
--- grants. The view permission stays separate from manage so read-only
--- auditors can be granted view-only access. Note: in the session-audit
--- report surface, `reports_manage` only gates the "open audit page"
--- deep-link shortcut; the payroll override mutation itself stays gated by
--- `accounting.payroll_manage`.
--- Idempotent: safe to re-run.
-
-ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'accounting.reports_view';
---> statement-breakpoint
-ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'accounting.reports_manage';
---> statement-breakpoint
-
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'accounting.reports_view'
+    ) THEN
+        ALTER TYPE app_permission ADD VALUE 'accounting.reports_view';
+    END IF;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'accounting.reports_manage'
+    ) THEN
+        ALTER TYPE app_permission ADD VALUE 'accounting.reports_manage';
+    END IF;
+END $$;--> statement-breakpoint
 -- Temporarily disable the system permission trigger to allow INSERT with is_system = true
 DO $$
 BEGIN
   ALTER TABLE permissions DISABLE TRIGGER trg_protect_system_permissions;
 EXCEPTION WHEN OTHERS THEN
   RAISE NOTICE 'Could not disable trigger: %', SQLERRM;
-END $$;
---> statement-breakpoint
-
+END $$;--> statement-breakpoint
 INSERT INTO permissions (id, key, resource, action, description, category, is_system)
 VALUES
   (
@@ -49,32 +44,25 @@ ON CONFLICT (key) DO UPDATE SET
   action = EXCLUDED.action,
   description = EXCLUDED.description,
   category = EXCLUDED.category,
-  is_system = EXCLUDED.is_system;
---> statement-breakpoint
-
+  is_system = EXCLUDED.is_system;--> statement-breakpoint
 DO $$
 BEGIN
   ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
 EXCEPTION WHEN OTHERS THEN
   RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
-END $$;
---> statement-breakpoint
-
+END $$;--> statement-breakpoint
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
 WHERE
   g.slug IN ('super_admin', 'academy_admin')
   AND p.key = 'accounting.reports_view'
-ON CONFLICT DO NOTHING;
---> statement-breakpoint
-
+ON CONFLICT DO NOTHING;--> statement-breakpoint
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
 WHERE
   g.slug IN ('super_admin', 'academy_admin')
   AND p.key = 'accounting.reports_manage'
-ON CONFLICT DO NOTHING;
---> statement-breakpoint
+ON CONFLICT DO NOTHING;--> statement-breakpoint
 

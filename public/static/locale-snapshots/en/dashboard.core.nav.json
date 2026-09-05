@@ -119,5 +119,6 @@
   "accountingPaymentsNew": "Add Payment",
   "accountingPackagesNew": "Create Package Plan",
   "accountingCredits": "Credits",
-  "accountingPayroll": "Payroll"
+  "accountingPayroll": "Payroll",
+  "accountingReports": "Full Reports"
 }

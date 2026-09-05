@@ -1,0 +1,113 @@
+{
+  "title": "Carryover Balances",
+  "empty": "No carryover records match the current filters.",
+  "loadError": "Failed to load carryover balances. Please try again.",
+  "column": {
+    "teacher": "Teacher",
+    "studentsCount": "Students",
+    "studentsText": "Students list",
+    "totalDuration": "Duration (h)",
+    "payable": "Payable",
+    "paid": "Paid",
+    "fromDate": "From",
+    "toDate": "To",
+    "paymentDate": "Payment date"
+  },
+  "chip": {
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "disabledTeacher": "Disabled"
+  },
+  "action": {
+    "addNew": "Add New",
+    "edit": "Edit",
+    "delete": "Delete",
+    "bulkToExpense": "Bulk To Expense",
+    "bulkDelete": "Bulk Delete",
+    "unpay": "Unpay",
+    "viewSessions": "View Sessions",
+    "exportCsv": "Export CSV"
+  },
+  "filters": {
+    "teacher": "Teacher",
+    "teacherPlaceholder": "Select a teacher",
+    "paidStatus": "Paid status",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "both": "Both",
+    "fromDate": "From",
+    "toDate": "To",
+    "includeDisabledTeachers": "Include disabled teachers",
+    "searchPlaceholder": "Search notes or students",
+    "clear": "Clear"
+  },
+  "modal": {
+    "bulkToExpense": {
+      "title": "Convert to expenses",
+      "paymentDate": "Payment date",
+      "expenseDate": "Expense month",
+      "note": "Note (optional)",
+      "summary": {
+        "__fn": "(count,amount,currency)=>count===1?`1 carryover totaling ${amount} ${currency}`:`${count} carryovers totaling ${amount} ${currency}`"
+      },
+      "submit": "Convert",
+      "cancel": "Cancel"
+    },
+    "form": {
+      "titleAdd": "Add Carryover Balance",
+      "titleEdit": "Edit Carryover Balance",
+      "teacher": "Teacher",
+      "teacherPlaceholder": "Select a teacher",
+      "teacherLockedHint": "The teacher cannot be changed; delete and recreate the record instead.",
+      "fromDate": "From",
+      "toDate": "To",
+      "payable": "Payable",
+      "currency": "Currency",
+      "studentsCount": "Students",
+      "studentsText": "Students list",
+      "note": "Note",
+      "notePlaceholder": "Optional note (max 2,000 characters)",
+      "submit": "Save",
+      "cancel": "Cancel"
+    }
+  },
+  "validation": {
+    "teacherRequired": "Select a teacher.",
+    "dateRangeInvalid": "The from date must be on or before the to date.",
+    "payableNegative": "Payable must be 0 or greater.",
+    "currencyRequired": "Currency is required.",
+    "noteTooLong": "Note must be 2,000 characters or fewer."
+  },
+  "error": {
+    "sessionNotAudited": "One or more sessions are not audited.",
+    "sessionAlreadyLinked": "One or more sessions are already linked.",
+    "alreadyPaid": "One or more carryovers are already paid.",
+    "cannotDeletePaid": "Cannot delete a paid carryover. Unpay first.",
+    "fxRateMissing": "Exchange rate missing for cross-currency aggregation."
+  },
+  "success": {
+    "created": "Carryover balance created.",
+    "updated": "Carryover balance updated.",
+    "deleted": "Carryover balance deleted.",
+    "bulkCreated": {
+      "__fn": "count=>{if(count===0)return\"No carryover balances created.\";if(count===1)return\"1 carryover balance created.\";return`${count} carryover balances created.`}"
+    },
+    "bulkDeleted": {
+      "__fn": "count=>{if(count===0)return\"No carryover balances deleted.\";if(count===1)return\"1 carryover balance deleted.\";return`${count} carryover balances deleted.`}"
+    },
+    "bulkedToExpense": {
+      "__fn": "count=>{if(count===0)return\"No expenses created.\";if(count===1)return\"1 expense created.\";return`${count} expenses created.`}"
+    },
+    "unpaid": "Carryover unpaid; sessions reverted."
+  },
+  "aggregate": {
+    "totalPayable": "Total payable",
+    "totalPaid": "Total paid",
+    "paidCount": {
+      "__fn": "count=>{if(count===0)return\"No paid carryovers\";if(count===1)return\"1 paid carryover\";return`${count} paid carryovers`}"
+    },
+    "unpaidCount": {
+      "__fn": "count=>{if(count===0)return\"No unpaid carryovers\";if(count===1)return\"1 unpaid carryover\";return`${count} unpaid carryovers`}"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "manifestHash": "f74301ccda86b4a4970f28691aaaeadd525d6cea728d11fd31fefea03ca7fec7",
+  "manifestHash": "fc5960ff0e6ec25e3cfd30da513e97a21b8270c83960bb889bfbdd5424cae4c3",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -64,6 +64,18 @@
     {
       "file": "4-fx_exchange_rate_permissions.sql",
       "sha256": "e2a13ea9d13bb946af8e8cc4d70daf3de42d558e6130f204bc28c8e2b95c4bc3"
+    },
+    {
+      "file": "40-accounting-carryover-permissions.sql",
+      "sha256": "59edf886b7cd45f067d8c94be95982a7245c021ec760c82eba2b970969972635"
+    },
+    {
+      "file": "41a-whatsapp-inbox-permissions-enum.sql",
+      "sha256": "a84b1cdba72eca5929287dd763d96e7e93687b21fcd7202f9f4385909a092bc5"
+    },
+    {
+      "file": "41b-whatsapp-inbox-permissions-data.sql",
+      "sha256": "f680d20224a5c4e678bbffd4beb28ecc49c78d8573ded20809d47356d408242e"
     },
     {
       "file": "4a-class_categories_and_subjects_seed.sql",
@@ -320,6 +332,9 @@
     "20260829023113_custom_36-accounting-payroll-permissions",
     "20260829031931_custom_37-payroll-grace-settings",
     "20260829192949_custom_38-parent-notification-view-alerts",
-    "20260904064952_custom_39-accounting-reports-permissions"
+    "20260904064952_custom_39-accounting-reports-permissions",
+    "20260904223645_custom_40-accounting-carryover-permissions",
+    "20260905024045_custom_41a-whatsapp-inbox-permissions-enum",
+    "20260905024046_custom_41b-whatsapp-inbox-permissions-data"
   ]
 }

@@ -367,6 +367,23 @@
     "invalidTargetStatus": "Invalid payroll override target status.",
     "partialRequiresPercentage": "Partially requires a percentage between 0 and 100."
   },
+  "carryover": {
+    "notFound": {
+      "__fn": "id=>`Carryover balance not found: ${id}`"
+    },
+    "noInstances": "Select at least one session for carryover.",
+    "sessionNotAudited": "One or more sessions are not audited.",
+    "sessionAlreadyLinked": "One or more sessions are already linked to a carryover balance.",
+    "fxRateMissing": "Exchange rate missing for cross-currency aggregation.",
+    "paymentDateRequired": "Payment date is required.",
+    "expenseDateInvalid": "Expense date must be in YYYY-MM format.",
+    "noCarryovers": "Select at least one carryover balance.",
+    "alreadyPaid": "One or more carryovers are already paid.",
+    "notPaid": "Carryover is not paid.",
+    "paidCannotDelete": "Cannot delete a paid carryover. Unpay it first.",
+    "teacherImmutable": "The carryover's teacher cannot be changed; delete and recreate the record instead.",
+    "toExpenseFailed": "Failed to convert carryover to expense."
+  },
   "student": {
     "studentNotFound": {
       "__fn": "id=>`Student not found: ${id}`"
