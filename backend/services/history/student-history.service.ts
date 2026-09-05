@@ -2,7 +2,7 @@ import { ParentRepository } from "@/backend/db/repo/parents";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { StudentHistoryRepository } from "@/backend/db/repo/students/student-history.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, EffectiveMeetingSource } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { assertHasPermission } from "@/backend/services/shared";
@@ -94,17 +94,28 @@ export namespace StudentHistoryService {
     const metrics = await StudentHistoryRepository.getMonthlyMetrics(studentId, year, month);
     const rawSessions = await StudentHistoryRepository.getMonthlyCalendar(studentId, year, month);
 
-    const sessions = await Promise.all(
-      rawSessions.map(async session => {
-        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id, tErrors);
-        return Object.assign(session, {
-          status: toClassExecutionState(session.status),
-          outcome: toClassOutcome(session.outcome ?? null),
-          meetingJoinUrl: effectiveMeeting.joinUrl,
-          effectiveMeeting,
-        });
-      })
-    );
+    const sessionIds = rawSessions.map(s => s.id);
+    const meetingMap = await EffectiveMeetingService.resolveForClassInstances(sessionIds, tErrors);
+
+    const sessions = rawSessions.map(session => {
+      const effectiveMeeting = meetingMap.get(session.id) ?? {
+        joinUrl: null,
+        providerSlug: null,
+        providerName: null,
+        logoUrl: null,
+        meetingId: null,
+        source: EffectiveMeetingSource.NONE,
+        configId: null,
+        providerId: null,
+        supportsAutoGeneration: false,
+      };
+      return Object.assign(session, {
+        status: toClassExecutionState(session.status),
+        outcome: toClassOutcome(session.outcome ?? null),
+        meetingJoinUrl: effectiveMeeting.joinUrl,
+        effectiveMeeting,
+      });
+    });
 
     const student = await StudentRepository.findById(studentId);
     if (!student) {
