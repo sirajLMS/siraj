@@ -13,6 +13,8 @@ export function SubmissionSuccessBanner({ message, onDismiss }: Readonly<Submiss
   const t = useAppTranslation(Translation.Common);
   return (
     <Box
+      role="status"
+      aria-live="polite"
       sx={theme => ({
         display: "flex",
         alignItems: "center",
@@ -31,7 +33,19 @@ export function SubmissionSuccessBanner({ message, onDismiss }: Readonly<Submiss
         <CheckCircleOutlined />
         <Typography variant="titleLg">{message}</Typography>
       </Box>
-      <IconButton aria-label={t.ariaDismiss} onClick={onDismiss} sx={{ color: "inherit", opacity: 0.7 }}>
+      <IconButton
+        aria-label={t.ariaDismiss}
+        onClick={onDismiss}
+        sx={theme => ({
+          color: "inherit",
+          opacity: 0.7,
+          "&:hover": { opacity: 1 },
+          "&:focus-visible": {
+            outline: `2px solid ${theme.palette.primary.main}`,
+            outlineOffset: 2,
+          },
+        })}
+      >
         <CloseOutlined />
       </IconButton>
     </Box>
