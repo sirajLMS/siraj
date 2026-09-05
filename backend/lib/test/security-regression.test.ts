@@ -173,3 +173,11 @@ describe("M3 — extended RLS migration file", () => {
     expect(src).toContain("FORCE ROW LEVEL SECURITY");
   });
 });
+
+describe("Logout IP sanitization", () => {
+  test("app/logout/route.ts uses getClientIdentifier and sanitizeIpAddress for IP extraction", async () => {
+    const src = await readSrc("app/logout/route.ts");
+    expect(src).toContain("getClientIdentifier");
+    expect(src).toContain("sanitizeIpAddress");
+  });
+});

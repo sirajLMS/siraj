@@ -1,7 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { extractTokenFromHeader } from "@/backend/lib/auth/jwt";
+import { sanitizeIpAddress } from "@/backend/lib/ip-utils";
 import { logger } from "@/backend/lib/logger";
+import { getClientIdentifier } from "@/backend/lib/ratelimit";
 import { SessionService } from "@/backend/services";
 
 const LOGIN_PATH = "/login";
@@ -15,10 +17,13 @@ function resolveRequestOrigin(request: NextRequest): string {
   return host ? `${proto}://${host}` : request.nextUrl.origin;
 }
 
+/**
+ * Security: resolve client IP using platform-trusted header checks and
+ * sanitize the result. Prevents IP header spoofing/injection in session logout audit logs.
+ */
 function getIpAddress(request: NextRequest): string {
-  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const realIp = request.headers.get("x-real-ip");
-  return realIp ?? forwardedFor ?? "127.0.0.1";
+  const clientIdentifier = getClientIdentifier(request);
+  return sanitizeIpAddress(clientIdentifier) ?? "127.0.0.1";
 }
 
 function getLocale(request: NextRequest): string {
