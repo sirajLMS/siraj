@@ -57,6 +57,11 @@ export function dateToTimeString(date: Date): string {
   return `${hours}:${minutes}:${seconds}`;
 }
 
+/** Minutes since UTC midnight — direct from the Date without a string round-trip. */
+export function dateToMinutes(date: Date): number {
+  return date.getUTCHours() * 60 + date.getUTCMinutes();
+}
+
 export function getUtcDayOfWeek(date: Date): DayOfWeek {
   return JS_DAY_TO_ENUM[date.getUTCDay()];
 }

@@ -94,17 +94,18 @@ export namespace StudentHistoryService {
     const metrics = await StudentHistoryRepository.getMonthlyMetrics(studentId, year, month);
     const rawSessions = await StudentHistoryRepository.getMonthlyCalendar(studentId, year, month);
 
-    const sessions = await Promise.all(
-      rawSessions.map(async session => {
-        const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(session.id, tErrors);
-        return Object.assign(session, {
-          status: toClassExecutionState(session.status),
-          outcome: toClassOutcome(session.outcome ?? null),
-          meetingJoinUrl: effectiveMeeting.joinUrl,
-          effectiveMeeting,
-        });
-      })
-    );
+    const sessionIds = rawSessions.map(session => session.id);
+    const meetingMap = await EffectiveMeetingService.resolveForClassInstances(sessionIds, tErrors);
+
+    const sessions = rawSessions.map(session => {
+      const effectiveMeeting = meetingMap.get(session.id);
+      return Object.assign(session, {
+        status: toClassExecutionState(session.status),
+        outcome: toClassOutcome(session.outcome ?? null),
+        meetingJoinUrl: effectiveMeeting?.joinUrl ?? null,
+        effectiveMeeting,
+      });
+    });
 
     const student = await StudentRepository.findById(studentId);
     if (!student) {

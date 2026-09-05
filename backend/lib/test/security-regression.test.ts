@@ -192,3 +192,23 @@ describe("M11 — storage file responses are sandboxed", () => {
     expect(src).toContain('"X-Content-Type-Options": "nosniff"');
   });
 });
+
+describe("H5 — host-header injection defense on redirect routes", () => {
+  test("set-locale and logout routes never redirect to a client-supplied unknown host", async () => {
+    const setLocaleSrc = await readSrc("app/api/set-locale/route.ts");
+    const logoutSrc = await readSrc("app/logout/route.ts");
+
+    // Both must gate candidate host headers against nextUrl host / allowlist.
+    expect(setLocaleSrc).toContain("resolveTrustedOrigin");
+    expect(setLocaleSrc).toContain("ALLOWED_ORIGINS.has");
+    expect(logoutSrc).toContain("ALLOWED_ORIGINS.has");
+    // Raw host header must not be interpolated into the redirect without a trust check.
+    expect(logoutSrc).not.toContain("return host ? `${proto}://${host}`");
+  });
+
+  test("logout route sanitizes client IP via the shared ratelimit identifier chain", async () => {
+    const src = await readSrc("app/logout/route.ts");
+    expect(src).toContain("getClientIdentifier");
+    expect(src).toContain("sanitizeIpAddress");
+  });
+});

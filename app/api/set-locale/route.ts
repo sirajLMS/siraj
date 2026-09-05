@@ -59,6 +59,29 @@ function resolveLocaleFromRequest(request: NextRequest): string {
   return request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
 }
 
+/**
+ * Resolve redirect origin, preferring Host / X-Forwarded-* only when the host
+ * is trusted (matches the request URL's own host or an ALLOWED_ORIGINS entry)
+ * so a hostile client cannot inject an arbitrary host into the redirect target.
+ */
+export function resolveTrustedOrigin(request: NextRequest): string {
+  const candidateHost = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  if (candidateHost) {
+    const candidateHostName = candidateHost.split(":")[0];
+    const isTrusted =
+      candidateHost === request.nextUrl.host ||
+      candidateHostName === request.nextUrl.hostname ||
+      ALLOWED_ORIGINS.has(candidateHost) ||
+      ALLOWED_ORIGINS.has(`http://${candidateHost}`) ||
+      ALLOWED_ORIGINS.has(`https://${candidateHost}`);
+    if (isTrusted) {
+      const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "");
+      return `${proto}://${candidateHost}`;
+    }
+  }
+  return request.nextUrl.origin;
+}
+
 export async function GET(request: NextRequest) {
   const locale = resolveLocaleFromRequest(request);
   const tErrors = getServerTranslations(locale).errorsTranslations;
@@ -69,12 +92,7 @@ export async function GET(request: NextRequest) {
   }
 
   const redirectPath = safeRedirectPath(request.nextUrl.searchParams.get("redirect"));
-  // Prefer Host / X-Forwarded-* so we don't redirect to 0.0.0.0 when the
-  // server listens on all interfaces but the user browsed via localhost.
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  const protoHeader = request.headers.get("x-forwarded-proto");
-  const proto = protoHeader ?? request.nextUrl.protocol.replace(":", "");
-  const origin = host ? `${proto}://${host}` : request.nextUrl.origin;
+  const origin = resolveTrustedOrigin(request);
   const response = NextResponse.redirect(new URL(redirectPath, origin));
   applyLocaleCookie(response, localeParam);
   return response;

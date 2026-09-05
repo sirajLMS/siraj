@@ -1,24 +1,46 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { extractTokenFromHeader } from "@/backend/lib/auth/jwt";
+import { getEnv, getEnvironmentConfig } from "@/backend/lib/env";
+import { sanitizeIpAddress } from "@/backend/lib/ip-utils";
 import { logger } from "@/backend/lib/logger";
+import { getClientIdentifier } from "@/backend/lib/ratelimit";
 import { SessionService } from "@/backend/services";
 
 const LOGIN_PATH = "/login";
 
+const envConfig = getEnvironmentConfig();
+const ALLOWED_ORIGINS = new Set(
+  [getEnv("NEXT_PUBLIC_BASE_URL", ""), envConfig.allowedOrigin, "http://localhost:3000"].filter(
+    (v): v is string => typeof v === "string" && v.length > 0
+  )
+);
+
 function resolveRequestOrigin(request: NextRequest): string {
-  // Prefer Host / X-Forwarded-* so we don't redirect to 0.0.0.0 when the
-  // server listens on all interfaces but the user browsed via localhost.
-  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  const protoHeader = request.headers.get("x-forwarded-proto");
-  const proto = protoHeader ?? request.nextUrl.protocol.replace(":", "");
-  return host ? `${proto}://${host}` : request.nextUrl.origin;
+  // Only honour Host / X-Forwarded-* when the candidate host is trusted — a
+  // client-supplied Host header must never pick the redirect origin
+  // (host-header injection / open redirect).
+  const candidateHost = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  if (candidateHost) {
+    const candidateHostName = candidateHost.split(":")[0];
+    const isTrusted =
+      candidateHost === request.nextUrl.host ||
+      candidateHostName === request.nextUrl.hostname ||
+      ALLOWED_ORIGINS.has(candidateHost) ||
+      ALLOWED_ORIGINS.has(`http://${candidateHost}`) ||
+      ALLOWED_ORIGINS.has(`https://${candidateHost}`);
+    if (isTrusted) {
+      const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "");
+      return `${proto}://${candidateHost}`;
+    }
+  }
+  return request.nextUrl.origin;
 }
 
 function getIpAddress(request: NextRequest): string {
-  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const realIp = request.headers.get("x-real-ip");
-  return realIp ?? forwardedFor ?? "127.0.0.1";
+  // Route through the shared ratelimit identifier chain + sanitizer so audit
+  // logs do not persist raw, attacker-controlled header values verbatim.
+  return sanitizeIpAddress(getClientIdentifier(request)) ?? "[IP_REDACTED]";
 }
 
 function getLocale(request: NextRequest): string {
