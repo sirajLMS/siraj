@@ -85,44 +85,44 @@
 
 ## Phase 4: Per-Account Adapter & Factory
 
-- [ ] **4. Factory + adapter multi-numberization**
-  - [ ] 4.1 Edit `WhatsappChannelFactory.ts` — per-account instance map, `getWhatsappChannel(accountId)`, `getChannelForPurpose(purpose)` (resolution helper), reset per-account; keep legacy default path for `syncFromMeta` admin flow until Task 4.4.
-  - [ ] 4.2 Edit `MetaCloudApiAdapter.ts` — constructor takes accountId; `resolveCredentials` per account; remove first-active fallback for sends; pair rate-limit key `whatsapp:pair:<sender>:<recipient>`; remove hardcoded `v20.0` → env-config default `v25.0` (current docs example version) (register key `WHATSAPP_GRAPH_API_VERSION` in `backend/lib/env-config-keys.ts` under the `whatsapp` category, DB-overridable via `env::` settings; NOT in the `shared/constants/env-config-keys.ts` hidden list — it is not a secret).
-  - [ ] 4.2a Register key `WHATSAPP_ES_CONFIG_ID` in `backend/lib/env-config-keys.ts` under the `whatsapp` category (the v4 Facebook Login for Business configuration ID — NOT a secret, DB-overridable; resolves server-side and is passed to the ES dialog client component via props from the settings server page, never hardcoded client-side).
-  - [ ] 4.2b Update `.env.example` and `environment.d.ts` for BOTH new keys — mandatory whenever entries are added to `ENV_CONFIG_KEYS` (v1 env-typing gotcha); keep declarations grouped with the existing WHATSAPP_* block.
-  - [ ] 4.3 Offboarded accounts: adapter eviction + `whatsapp.accountOffboarded` error before Graph call.
-  - [ ] 4.4 Migrate `syncFromMeta` to per-account credentials (remove env-global token path for DB-managed accounts); keep env path only for bootstrapping first account, documented.
-  - [ ] 4.5 Aggregate `isWhatsappConfigured`/`validateConfig`; add per-account health resolver hook.
-  - [ ] 4.QL / 4.TE — service tests: mocked fetch, per-account cache isolation, rate-limit keying, offboard fail-fast, version resolution / 4.SEC / 4.SR (reset invalidates ALL keys incl. new version key) / 4.IV.
+- [x] **4. Factory + adapter multi-numberization**
+  - [x] 4.1 Edit `WhatsappChannelFactory.ts` — per-account instance map, `getWhatsappChannel(accountId)`, `getChannelForPurpose(purpose)` (resolution helper), reset per-account; keep legacy default path for `syncFromMeta` admin flow until Task 4.4.
+  - [x] 4.2 Edit `MetaCloudApiAdapter.ts` — constructor takes accountId; `resolveCredentials` per account; remove first-active fallback for sends; pair rate-limit key `whatsapp:pair:<sender>:<recipient>`; remove hardcoded `v20.0` → env-config default `v25.0` (current docs example version) (register key `WHATSAPP_GRAPH_API_VERSION` in `backend/lib/env-config-keys.ts` under the `whatsapp` category, DB-overridable via `env::` settings; NOT in the `shared/constants/env-config-keys.ts` hidden list — it is not a secret).
+  - [x] 4.2a Register key `WHATSAPP_ES_CONFIG_ID` in `backend/lib/env-config-keys.ts` under the `whatsapp` category (the v4 Facebook Login for Business configuration ID — NOT a secret, DB-overridable; resolves server-side and is passed to the ES dialog client component via props from the settings server page, never hardcoded client-side).
+  - [x] 4.2b Update `.env.example` and `environment.d.ts` for BOTH new keys — mandatory whenever entries are added to `ENV_CONFIG_KEYS` (v1 env-typing gotcha); keep declarations grouped with the existing WHATSAPP_* block.
+  - [x] 4.3 Offboarded accounts: adapter eviction + `whatsapp.accountOffboarded` error before Graph call.
+  - [x] 4.4 Migrate `syncFromMeta` to per-account credentials (remove env-global token path for DB-managed accounts); keep env path only for bootstrapping first account, documented.
+  - [x] 4.5 Aggregate `isWhatsappConfigured`/`validateConfig`; add per-account health resolver hook.
+  - [x] 4.QL / 4.TE — service tests: mocked fetch, per-account cache isolation, rate-limit keying, offboard fail-fast, version resolution / 4.SEC / 4.SR (reset invalidates ALL keys incl. new version key) / 4.IV.
   - Outcome: `outcome/4-adapter-outcome.md` · _Requirements: REQ-3_
 
 ## Phase 5: Purpose Routing
 
-- [ ] **5. NOTIFICATION_TEMPLATE_MAP → dispatch routing**
-  - [ ] 5.1 Edit `notification-payloads.builders.ts` — add `purpose` per event in `NOTIFICATION_TEMPLATE_MAP` (5 v1 events → `STUDENTS`).
-  - [ ] 5.2 Edit `notification-dispatch.helpers.ts` — carry purpose through `metadata.whatsappTemplate`.
-  - [ ] 5.3 Edit `communication.service.ts` `dispatchWhatsapp` — resolve account by purpose with GENERAL fallback + `logger.warn`; attach `senderAccountId` on payload + delivery row attribution; error `whatsapp.noSenderForPurpose` when none.
-  - [ ] 5.QL / 5.TE — service tests: each event routes to correct account; deactivated purpose fallback; no-purpose default; 5.SEC; 5.SR; 5.IV.
+- [x] **5. NOTIFICATION_TEMPLATE_MAP → dispatch routing**
+  - [x] 5.1 Edit `notification-payloads.builders.ts` — add `purpose` per event in `NOTIFICATION_TEMPLATE_MAP` (5 v1 events → `STUDENTS`).
+  - [x] 5.2 Edit `notification-dispatch.helpers.ts` — carry purpose through `metadata.whatsappTemplate`.
+  - [x] 5.3 Edit `communication.service.ts` `dispatchWhatsapp` — resolve account by purpose with GENERAL fallback + `logger.warn`; attach `senderAccountId` on payload + delivery row attribution; error `whatsapp.noSenderForPurpose` when none.
+  - [x] 5.QL / 5.TE — service tests: each event routes to correct account; deactivated purpose fallback; no-purpose default; 5.SEC; 5.SR; 5.IV.
   - Outcome: `outcome/5-routing-outcome.md` · _Requirements: REQ-2_
 
 ## Phase 6: Coexistence Sync Orchestrator
 
-- [ ] **6. `whatsapp-coexistence-sync.service.ts` + request builder**
-  - [ ] 6.1 Create `cloud-api/requests/request-smb-app-data.request.ts` (build/parse `POST /<PHONE_NUMBER_ID>/smb_app_data`; sync types from docs-research-coexistence §2).
-  - [ ] 6.2 Create `backend/services/whatsapp/whatsapp-coexistence-sync.service.ts` — `enqueuePostOnboardingSync` (tx: insert 2 sync_requests rows, POST each, store requestId, set account sync REQUESTED + deadlineAt), retry-safe (requestId-guard), decline/deadline transitions, `getSyncStatus`.
-  - [ ] 6.3 Deadline sweeper hook (registration in cron service; flips expired PENDING to FAILED).
-  - [ ] 6.QL / 6.TE — service tests: one-shot enforced (unique violation on second POST attempt w/ existing requestId), deadline sweep, decline transition, progress updates. 6.SEC. 6.SR. 6.IV.
+- [x] **6. `whatsapp-coexistence-sync.service.ts` + request builder**
+  - [x] 6.1 Create `cloud-api/requests/request-smb-app-data.request.ts` (build/parse `POST /<PHONE_NUMBER_ID>/smb_app_data`; sync types from docs-research-coexistence §2).
+  - [x] 6.2 Create `backend/services/whatsapp/whatsapp-coexistence-sync.service.ts` — `enqueuePostOnboardingSync` (tx: insert 2 sync_requests rows, POST each, store requestId, set account sync REQUESTED + deadlineAt), retry-safe (requestId-guard), decline/deadline transitions, `getSyncStatus`.
+  - [x] 6.3 Deadline sweeper hook (registration in cron service; flips expired PENDING to FAILED).
+  - [x] 6.QL / 6.TE — service tests: one-shot enforced (unique violation on second POST attempt w/ existing requestId), deadline sweep, decline transition, progress updates. 6.SEC. 6.SR. 6.IV.
   - Outcome: `outcome/6-sync-outcome.md` · _Requirements: REQ-5_
 
 ## Phase 7: Durable Webhook Ingest
 
-- [ ] **7. Route + event queue + handler**
-  - [ ] 7.1 Edit `app/api/webhooks/whatsapp/route.ts` — remove `stripInboundMessages` call + strip fn + 24h identical-body rejection; insert per-change event rows pre-200; 5-minute payloadHash replay window (accept-but-skip); keep HMAC/1MB/per-IP.
-  - [ ] 7.2 Edit `whatsapp-webhook.handler.ts` — `processPendingWebhookEvents(claim)` + field dispatch: `history` (phases/chunk_order/progress, threads→messages upsert, media_placeholder), `smb_app_state_sync` (contacts LWW add/remove), `smb_message_echoes` (echo/revoke/edit), `messages` inbound branch; statuses preserve existing `handleDeliveryWebhook` path; remove analytics CLASS_REMINDER fallback for pure inbound.
-  - [ ] 7.3 Media follow-up correlation: `mediaPlaceholder` flip + asset id persistence (7-day fetch window after the media webhook; 14 days is only the history follow-up eligibility cutoff — see implementation D8).
-  - [ ] 7.4 Sweeper cron registration (stale-PENDING reclaim with retry/backoff; poison park) in existing cron service.
-  - [ ] 7.5 `account_update` lifecycle handling (offboard/reconnect/partner-uninstall/disable; `PARTNER_REMOVED` with `disconnection_info.reason`; capability update) per implementation Component 6 — the `business_capability_update` parser MUST accept `max_daily_conversations_per_business` as both `TIER_*` strings and integer-style values, MUST also parse the legacy `max_daily_conversation_per_phone` (the only field Meta sends on webhooks <v24.0), and MUST tolerate absent `max_phone_numbers_per_business`/`max_phone_numbers_per_waba` (conditional inclusion — absence ≠ no cap).
-  - [ ] 7.QL / 7.TE — handler tests: burst chunk ingest (batched), identical-body retry accepted + deduped, short-window replay skip, revoke-before-original, media placeholder→media arrival, 2593109 decline mapping, offboard eviction. Extend `backend/services/whatsapp/test/whatsapp-webhook.handler.test.ts`; mirror route changes in `app/api/webhooks/whatsapp/route.test.ts`. 7.SEC (HMAC fail → 401 + no insert; sanitize logging). 7.SR. 7.IV.
+- [x] **7. Route + event queue + handler**
+  - [x] 7.1 Edit `app/api/webhooks/whatsapp/route.ts` — remove `stripInboundMessages` call + strip fn + 24h identical-body rejection; insert per-change event rows pre-200; 5-minute payloadHash replay window (accept-but-skip); keep HMAC/1MB/per-IP.
+  - [x] 7.2 Edit `whatsapp-webhook.handler.ts` — `processPendingWebhookEvents(claim)` + field dispatch: `history` (phases/chunk_order/progress, threads→messages upsert, media_placeholder), `smb_app_state_sync` (contacts LWW add/remove), `smb_message_echoes` (echo/revoke/edit), `messages` inbound branch; statuses preserve existing `handleDeliveryWebhook` path; remove analytics CLASS_REMINDER fallback for pure inbound.
+  - [x] 7.3 Media follow-up correlation: `mediaPlaceholder` flip + asset id persistence (7-day fetch window after the media webhook; 14 days is only the history follow-up eligibility cutoff — see implementation D8).
+  - [x] 7.4 Sweeper cron registration (stale-PENDING reclaim with retry/backoff; poison park) in existing cron service.
+  - [x] 7.5 `account_update` lifecycle handling (offboard/reconnect/partner-uninstall/disable; `PARTNER_REMOVED` with `disconnection_info.reason`; capability update) per implementation Component 6 — the `business_capability_update` parser MUST accept `max_daily_conversations_per_business` as both `TIER_*` strings and integer-style values, MUST also parse the legacy `max_daily_conversation_per_phone` (the only field Meta sends on webhooks <v24.0), and MUST tolerate absent `max_phone_numbers_per_business`/`max_phone_numbers_per_waba` (conditional inclusion — absence ≠ no cap).
+  - [x] 7.QL / 7.TE — handler tests: burst chunk ingest (batched), identical-body retry accepted + deduped, short-window replay skip, revoke-before-original, media placeholder→media arrival, 2593109 decline mapping, offboard eviction. Extend `backend/services/whatsapp/test/whatsapp-webhook.handler.test.ts`; mirror route changes in `app/api/webhooks/whatsapp/route.test.ts`. 7.SEC (HMAC fail → 401 + no insert; sanitize logging). 7.SR. 7.IV.
   - Outcome: `outcome/7-webhook-outcome.md` · _Requirements: REQ-6, REQ-7_
 
 ## Phase 8: Embedded Signup Onboarding

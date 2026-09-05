@@ -56,6 +56,7 @@
   },
   "emptyState": {
     "title": "No session events match the current filters.",
+    "titleNoFilters": "No session events yet.",
     "cta": "Clear filters"
   }
 }

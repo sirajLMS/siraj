@@ -2,6 +2,8 @@
   "title": "Carryover Balances",
   "empty": "No carryover records match the current filters.",
   "loadError": "Failed to load carryover balances. Please try again.",
+  "exportTruncated": "Export truncated to 10 000 rows.",
+  "exportFailed": "CSV export failed. Please try again.",
   "column": {
     "teacher": "Teacher",
     "studentsCount": "Students",
@@ -35,6 +37,7 @@
     "paid": "Paid",
     "unpaid": "Unpaid",
     "both": "Both",
+    "dateRange": "Date range",
     "fromDate": "From",
     "toDate": "To",
     "includeDisabledTeachers": "Include disabled teachers",
@@ -69,14 +72,46 @@
       "notePlaceholder": "Optional note (max 2,000 characters)",
       "submit": "Save",
       "cancel": "Cancel"
+    },
+    "delete": {
+      "title": "Delete this carryover balance?",
+      "linkedSessionsWarning": {
+        "__fn": "count=>{if(count===1){return\"This carryover has 1 linked session. Deleting it unlinks the session and restores its previous audit status.\"}return`This carryover has ${count} linked sessions. Deleting it unlinks them and restores their previous audit status.`}"
+      },
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "unpay": {
+      "title": "Unpay this carryover balance?",
+      "warning": "The linked expense will be soft-deleted and the linked sessions will revert to WAITING_PAID (awaiting payment).",
+      "note": "Reason (optional)",
+      "notePlaceholder": "Explain why this carryover is being unpaid (max 2,000 characters)",
+      "confirm": "Unpay carryover",
+      "cancel": "Cancel"
     }
+  },
+  "drawer": {
+    "title": {
+      "__fn": "teacherName=>`Carryover Balance \\u2014 ${teacherName}`"
+    },
+    "sessionsHeading": {
+      "__fn": "count=>{if(count===0)return\"No linked sessions\";if(count===1)return\"1 linked session\";return`${count} linked sessions`}"
+    },
+    "noSessions": "No sessions are linked to this carryover balance.",
+    "sessionDate": "Date",
+    "student": "Student",
+    "subject": "Subject",
+    "duration": "Duration (h)",
+    "amount": "Amount",
+    "status": "Status"
   },
   "validation": {
     "teacherRequired": "Select a teacher.",
     "dateRangeInvalid": "The from date must be on or before the to date.",
     "payableNegative": "Payable must be 0 or greater.",
     "currencyRequired": "Currency is required.",
-    "noteTooLong": "Note must be 2,000 characters or fewer."
+    "noteTooLong": "Note must be 2,000 characters or fewer.",
+    "studentsCountInvalid": "Students must be a non-negative whole number."
   },
   "error": {
     "sessionNotAudited": "One or more sessions are not audited.",

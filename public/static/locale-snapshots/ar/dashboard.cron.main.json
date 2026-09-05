@@ -123,6 +123,8 @@
     "invalidScheduleIdFormat": "صيغة scheduleId غير صالحة",
     "tickerFailed": "فشل المؤقت",
     "classRemindersFailed": "فشل تذكيرات الحصص",
+    "whatsappSyncSweepFailed": "فشل مسح مزامنة واتساب",
+    "whatsappWebhookSweepFailed": "فشل مسح أحداث ويب هوك واتساب",
     "userContextRequired": "يلزم وجود سياق مستخدم مصادق عليه لتنفيذ هذا الإجراء",
     "unauthorized": "غير مصرح",
     "methodNotAllowed": "الطريقة غير مسموحة",

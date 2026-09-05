@@ -136,3 +136,6 @@ dev.log
 
 __pycache__
 .tmp/
+
+
+vercel.json

@@ -672,6 +672,7 @@
   "unknownError": "An unknown error occurred.",
   "unknownDispatchError": "An unknown dispatch error occurred.",
   "whatsappTemplateMissing": "WhatsApp template configuration is missing for this notification.",
+  "whatsappNoSenderForPurpose": "No active WhatsApp sender account is available for this notification.",
   "whatsappAccountNotFound": {
     "__fn": "id=>`WhatsApp account not found: ${id}`"
   },

@@ -22,6 +22,8 @@ declare global {
       CRON_EXECUTION_MODE?: "vercel" | "vercel-daily" | "external" | "standalone";
       CRON_FX_REFRESH_SCHEDULE?: string;
       CRON_CLASS_REMINDERS_SCHEDULE?: string;
+      CRON_WHATSAPP_SYNC_SWEEP_SCHEDULE?: string;
+      CRON_WHATSAPP_WEBHOOK_SWEEP_SCHEDULE?: string;
       CRON_TICKER_SCHEDULE?: string;
       CRON_EXTERNAL_ENABLED?: string;
       CRON_EXTERNAL_ENDPOINT?: string;

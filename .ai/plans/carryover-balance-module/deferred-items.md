@@ -16,9 +16,10 @@ This ledger tracks all work deferred from one task to another to ensure no defer
 
 | ID | Deferred Item | Source Task | Target Task | Status | Verified By | Notes |
 |---|---|---|---|---|---|---|
-| D1 | Example: `createManyDeliveries` bulk write | 6 | 13 | ✅ Done | R5 outcome | Implemented in Task 13.2 |
-| D2 | Example: Env-config key registration | 5 | 7 | ❌ Blocked | — | Never registered; breaks cache invalidation |
-| D3 | Example: `resetWhatsappChannel` cache completeness | 3 | 7 | ⚠️ Partial | R7 | Missing 3 keys until R7 fix |
+| D1 | Phase 6 Plan 4 audit-grid integration (6.1 bulk-carryover button, 6.2 "Linked" chip) | 6.1/6.2 | External: Plan 4 owner | ❌ Blocked | — | `frontend/common/views/dashboard/accounting/reports/SessionAuditDataGrid.tsx` does not exist yet — sibling session-event-audit plan is in-flight in the shared tree; carryover side is blocked until that component lands |
+| D2 | Task 8.4 staging migration rehearsal | 8.4 | External: staging env | ❌ Blocked | — | Requires staging DB + deployment access not available to this implementation run |
+| D3 | UI/E2E test first-execution (4.8/5.4 component tests + 8.1 E2E spec) | 4.8/5.4/8.1 | Post-merge enablement run | 🔄 In Progress | — | User directive: UI/E2E tests are written but must not be executed in this run; first run + fixes deferred |
+| D4 | Plan 6 `ExpenseService.createInternal`/`softDelete` real integration | 1.8/1.9 | External: Plan 6 (expense-ledger) | ❌ Blocked | — | Plan 6 has not landed; carryover uses the documented module-private expense adapter stub (outcome 1.7-1.11) — swap when Plan 6 ships |
 
 ---
 
