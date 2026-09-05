@@ -272,7 +272,10 @@ describe("OverrideDialog (component)", () => {
     expect(screen.getByText(payrollLabels.status.CALCULATED)).toBeInTheDocument();
     expect(screen.getByText("250.00 EGP")).toBeInTheDocument();
     expect(screen.getByText("60")).toBeInTheDocument();
-    expect(screen.getByText(PAYROLL_ROW.payrollNote ?? "")).toBeInTheDocument();
+    // Free-text notes are bidi-isolated so Latin punctuation keeps its order
+    // when the dialog renders under an RTL locale.
+    const summaryNote = screen.getByText(PAYROLL_ROW.payrollNote ?? "");
+    expect(summaryNote).toHaveAttribute("dir", "auto");
     expect(screen.getByRole("button", { name: commonLabels.cancel })).toBeInTheDocument();
     for (const label of [
       payrollLabels.override.target.Refund,

@@ -121,4 +121,6 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   accountingPackagesNew: "Create Package Plan",
   accountingCredits: "Credits",
   accountingPayroll: "Payroll",
+  accountingCarryover: "Carryover Balances",
+  accountingReports: "Full Reports",
 };

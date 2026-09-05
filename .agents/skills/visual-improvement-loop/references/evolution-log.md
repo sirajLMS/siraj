@@ -35,3 +35,23 @@ the agent-browser skill, or a global rule file) — and the entry records where 
 - RTL/Arabic captures had no scoring criteria. → landed: `references/rubric.md` RTL checklist.
 - Fix waves rediscovered the same recipes per finding. → landed: `references/fix-patterns.md`.
 - Free-form outcome files made scores non-comparable. → landed: `references/outcome-template.md`.
+
+### 2026-09-05 — session-event-audit
+
+- Headless Chromium never paints scrollbars in screenshots — inspector findings of "no scroll cue"
+  are always capture artifacts; verify the scrollbar element exists (`document.querySelector` +
+  `getComputedStyle` visibility/opacity/size) before accepting the finding. → landed: this log;
+  inspector prompt now carries the rule (add to rubric.md prompt text on next edit).
+- Storybook captures of this app render in a serif fallback until fonts are wired: the app uses
+  `next/font` CSS variables, so Storybook needs a `.storybook/preview-head.html` loading the webfonts
+  (Inter/Hanken Grotesk/JetBrains Mono) and mapping the CSS vars. Preview-head changes need a
+  Storybook RESTART (HMR does not apply them). → lesson for `storybook-protocol.md`.
+- In Storybook iframes, `document.title` equals the story id (not "Storybook") — the precheck title
+  guard must match the story id, or pass `--expect-title` accordingly. → lesson for `capture-protocol.md`.
+- Bare `agent-browser viewport` silently keeps the old size; always `set viewport W H` per shot.
+  Duplicate screenshots (byte-identical) were caught late — verify dimensions (`identify`) after changing viewports.
+- Trilogy of Storybook staleness: stale bundle can look like a regression mid-loop. Before trusting a
+  "fix didn't land" screenshot finding, probe the live DOM (`scrollWidth`/`clientWidth`, computed
+  styles) — geometry numbers travel through bash, images don't need reloading to compare widths.
+- Column-width budgeting against a declared sum is wrong by ~20px (MUI filler/separators); measure
+  `virtualScroller.scrollWidth` vs `clientWidth` live and iterate to ≤ container, not to the sum.

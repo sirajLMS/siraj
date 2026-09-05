@@ -5,7 +5,7 @@ import type { SessionAuditReportRow } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 const EXPECTED_HEADER =
-  "instanceId,scheduledStartAt,scheduledEndAt,durationMinutes,actualStartAt,actualEndAt,bookingTimezone,currentStatus,calculatedDuration,teacherPaidAmount,teacherPaidCurrency,calculationStatus,isPartialPercentage,payrollNote,payrollCalculatedAt,teacherId,teacherName,studentId,studentName,subjectId,subjectName,teacherDuePaymentDate";
+  "scheduledStartAt,teacherName,currentStatus,studentName,subjectName,actualStartAt,actualEndAt,durationMinutes,calculatedDuration,teacherPaidAmount,calculationStatus,isPartialPercentage,payrollNote,teacherDuePaymentDate,scheduledEndAt,subjectId,bookingTimezone,teacherPaidCurrency,payrollCalculatedAt,teacherId,studentId,instanceId";
 
 function buildRow(overrides: Partial<SessionAuditReportRow> = {}): SessionAuditReportRow {
   return {
@@ -47,11 +47,11 @@ describe("serializeSessionAuditCsv", () => {
     expect(csv.endsWith("\r\n")).toBe(true);
     expect(lines).toHaveLength(5); // trailing terminator produces one trailing empty segment
     expect(lines[0]).toBe(EXPECTED_HEADER);
-    expect(lines[1]).toContain("a,");
-    expect(lines[2]).toContain("b,");
-    expect(lines[3]).toContain("c,");
+    expect(lines[1]).toContain(",a");
+    expect(lines[2]).toContain(",b");
+    expect(lines[3]).toContain(",c");
     expect(lines[1]).toBe(
-      "a,2026-08-01T10:00:00.000Z,2026-08-01T11:00:00.000Z,60,2026-08-01T10:02:00.000Z,2026-08-01T10:58:00.000Z,Africa/Cairo,end,56,45.00,EGP,PAID,,Calculated on time,2026-08-02T09:00:00.000Z,teacher-1,Mona Adel,student-1,Omar Ali,subject-1,Mathematics,2026-08-03"
+      "2026-08-01T10:00:00.000Z,Mona Adel,end,Omar Ali,Mathematics,2026-08-01T10:02:00.000Z,2026-08-01T10:58:00.000Z,60,56,45.00,PAID,,Calculated on time,2026-08-03,2026-08-01T11:00:00.000Z,subject-1,Africa/Cairo,EGP,2026-08-02T09:00:00.000Z,teacher-1,student-1,a"
     );
   });
 
@@ -93,7 +93,7 @@ describe("serializeSessionAuditCsv", () => {
     const lines = csv.split("\r\n");
 
     expect(lines[1]).toBe(
-      "instance-1,2026-08-01T10:00:00.000Z,2026-08-01T11:00:00.000Z,60,2026-08-01T10:02:00.000Z,2026-08-01T10:58:00.000Z,Africa/Cairo,end,,,,,,,,teacher-1,Mona Adel,student-1,Omar Ali,subject-1,Mathematics,"
+      "2026-08-01T10:00:00.000Z,Mona Adel,end,Omar Ali,Mathematics,2026-08-01T10:02:00.000Z,2026-08-01T10:58:00.000Z,60,,,,,,,2026-08-01T11:00:00.000Z,subject-1,Africa/Cairo,,,teacher-1,student-1,instance-1"
     );
   });
 
@@ -103,10 +103,34 @@ describe("serializeSessionAuditCsv", () => {
     ["formula minus", "-10-5", "'-10-5"],
     ["formula at sign", "@SUM(A1)", "'@SUM(A1)"],
     ["leading tab", "\t=CMD()", "'\t=CMD()"],
+    ["leading carriage return", "\r=1+1", `"'\r=1+1"`],
   ])("neutralizes spreadsheet formula injection (%s)", (_label, raw, expected) => {
     const csv = serializeSessionAuditCsv([buildRow({ payrollNote: raw })]);
     const lines = csv.split("\r\n");
 
-    expect(lines[1].split(",")[13]).toBe(expected);
+    expect(lines[1].split(",")[12]).toBe(expected);
+  });
+
+  test("preserves unicode text verbatim and quotes cells that contain a comma", () => {
+    const csv = serializeSessionAuditCsv([
+      buildRow({
+        teacherName: "أحمد علي",
+        studentName: "خديجة, سمير",
+        payrollNote: "ملاحظة — حساب المعلم، بتجاهل الفاصلة العربية",
+      }),
+    ]);
+
+    expect(csv).toContain("أحمد علي");
+    expect(csv).toContain('"خديجة, سمير"');
+    expect(csv).toContain("ملاحظة — حساب المعلم، بتجاهل الفاصلة العربية");
+  });
+
+  test("serializes an overlong payroll note verbatim inside a single quoted cell", () => {
+    const longNote = `${"note ".repeat(400)},still-going`;
+    const csv = serializeSessionAuditCsv([buildRow({ payrollNote: longNote })]);
+    const lines = csv.split("\r\n");
+
+    expect(lines).toHaveLength(3);
+    expect(lines[1]).toContain(`"${longNote}"`);
   });
 });

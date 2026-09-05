@@ -67,4 +67,19 @@ describe("expandStatusesToSql", () => {
   test("unrecognized statuses collapse into a single open predicate when combined", () => {
     expect(render(expandStatusesToSql(["RESCHEDULED", "RESCHEDULED"]))).toEqual(render(expandStatusesToSql(["open"])));
   });
+
+  test("mixing known and unknown statuses keeps the known predicate next to the open fallback", () => {
+    expect(render(expandStatusesToSql(["end", "RETIRED-LEGACY"]))).toEqual(
+      render(expandStatusesToSql(["end", "open"]))
+    );
+  });
+
+  test("injection-shaped status strings fall back to the open predicate without leaking into the SQL", () => {
+    const hostile = ["open' OR 1=1 --", "end; DROP TABLE class_instances;", "Absent'/*"];
+    const rendered = render(expandStatusesToSql(hostile));
+
+    expect(rendered).toEqual(render(expandStatusesToSql(["open"])));
+    expect(rendered.sql).not.toContain("DROP");
+    expect(rendered.params).toEqual(["COMPLETED", "TAKEN", "ABSENT", "LEAVE"]);
+  });
 });

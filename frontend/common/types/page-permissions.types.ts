@@ -148,4 +148,10 @@ export const PAGE_PERMISSIONS = {
   // Accounting — teacher payroll.
   accountingPayrollView: [AppPermission.AccountingPayrollView] as PagePermissions,
   accountingPayrollManage: [AppPermission.AccountingPayrollManage] as PagePermissions,
+  // Accounting — session-event audit reports.
+  accountingReportsView: [AppPermission.AccountingReportsView] as PagePermissions,
+  accountingReportsManage: [AppPermission.AccountingReportsManage] as PagePermissions,
+  // Accounting — carryover balance settlements.
+  accountingCarryoverView: [AppPermission.AccountingCarryoverView] as PagePermissions,
+  accountingCarryoverManage: [AppPermission.AccountingCarryoverManage] as PagePermissions,
 } as const;

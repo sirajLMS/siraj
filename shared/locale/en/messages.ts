@@ -1,6 +1,7 @@
 /** Canonical static leaf assembler for server getTranslations (Phase 4). Same leaf modules as defineNamespace loaders. */
 import { authEn } from "@/shared/locale/en/auth";
 import { commonEn } from "@/shared/locale/en/common";
+import { dashboardAccountingCarryoverEn } from "@/shared/locale/en/dashboard/accounting/carryover.ts";
 import { dashboardAccountingPackagePlansEn } from "@/shared/locale/en/dashboard/accounting/package-plans.ts";
 import { dashboardAccountingPaymentsEn } from "@/shared/locale/en/dashboard/accounting/payments.ts";
 import { dashboardAccountingStudentCreditHoursEn } from "@/shared/locale/en/dashboard/accounting/student-credit-hours.ts";
@@ -54,6 +55,7 @@ import { dashboardPaymentCatalogsParentEn } from "@/shared/locale/en/dashboard/p
 import { dashboardPermissionsEn } from "@/shared/locale/en/dashboard/permissions/main.ts";
 import { dashboardReportsEn } from "@/shared/locale/en/dashboard/reports/main.ts";
 import { monthlyAppraisalEn } from "@/shared/locale/en/dashboard/reports/monthly-appraisal";
+import { dashboardReportsSessionAuditEn } from "@/shared/locale/en/dashboard/reports/sessionAudit";
 import { dashboardBooksAndBagsEn } from "@/shared/locale/en/dashboard/resources/booksAndBags.ts";
 import { dashboardResourcesEn } from "@/shared/locale/en/dashboard/resources/main.ts";
 import { dashboardScheduleTrackingParentEn } from "@/shared/locale/en/dashboard/schedule-tracking/main.ts";
@@ -170,6 +172,7 @@ export const enMessages: Translations = {
     billingPayroll: dashboardBillingPayrollEn,
     accountingPayments: dashboardAccountingPaymentsEn,
     accountingPackages: dashboardAccountingPackagePlansEn,
+    accountingCarryover: dashboardAccountingCarryoverEn,
     accountingStudentCreditHours: dashboardAccountingStudentCreditHoursEn,
 
     billingExchangeRates: dashboardBillingExchangeRatesEn,
@@ -218,6 +221,7 @@ export const enMessages: Translations = {
     selfServiceReschedule: selfServiceRescheduleEn,
     monthlyAppraisal: monthlyAppraisalEn,
     reports: dashboardReportsEn,
+    sessionAudit: dashboardReportsSessionAuditEn,
     resources: dashboardResourcesEn,
     booksAndBags: dashboardBooksAndBagsEn,
     studentPortalDashboard: dashboardStudentPortalDashboardEn,

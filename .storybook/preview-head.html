@@ -1,0 +1,22 @@
+<!--
+  Font loading for Storybook. The app self-hosts its typefaces via next/font in
+  app/layout.tsx, which defines the --font-inter / --font-hanken-grotesk /
+  --font-jetbrains-mono CSS variables the MUI theme consumes. The Next.js font
+  pipeline never runs inside Storybook, so the variables were undefined here and
+  every capture fell back to the browser serif. Load the same families from the
+  Google Fonts CDN and bind them to the same variables so stories render in the
+  product typeface.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@100..900&family=Inter:opsz,wght@14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --font-inter: "Inter", sans-serif;
+    --font-hanken-grotesk: "Hanken Grotesk", sans-serif;
+    --font-jetbrains-mono: "JetBrains Mono", monospace;
+  }
+</style>

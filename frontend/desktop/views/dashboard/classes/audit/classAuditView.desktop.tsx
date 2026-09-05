@@ -23,6 +23,9 @@ export function ClassAuditViewDesktop({
   onUpdateAdminNote,
   onEditAdminNote,
   isResending,
+  payroll,
+  statusEvents,
+  onOverride,
 }: Readonly<ClassAuditViewProps>) {
   const gridSlots: ClassAuditViewGridSlotConfig = {
     OnlineMeetingCard: OnlineMeetingCardDesktop,
@@ -55,6 +58,9 @@ export function ClassAuditViewDesktop({
         onViewStudent={onViewStudent}
         onUpdateAdminNote={onUpdateAdminNote}
         onEditAdminNote={onEditAdminNote}
+        payroll={payroll}
+        statusEvents={statusEvents}
+        onOverride={onOverride}
         slots={gridSlots}
       />
     </DesktopPageContainer>

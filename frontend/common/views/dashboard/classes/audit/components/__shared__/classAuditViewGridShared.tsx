@@ -34,6 +34,9 @@ export function ClassAuditViewGridShared({
   onViewStudent,
   onUpdateAdminNote,
   onEditAdminNote,
+  payroll,
+  statusEvents,
+  onOverride,
   slots,
 }: Readonly<
   Pick<
@@ -46,6 +49,9 @@ export function ClassAuditViewGridShared({
     | "onViewStudent"
     | "onUpdateAdminNote"
     | "onEditAdminNote"
+    | "payroll"
+    | "statusEvents"
+    | "onOverride"
   > & { readonly slots: ClassAuditViewGridSlotConfig }
 >) {
   const detailsLabels = buildDetailsLabels(labels);
@@ -54,7 +60,13 @@ export function ClassAuditViewGridShared({
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, lg: 8 }} sx={{ order: { xs: 1, lg: 1 } }}>
-        <ClassAuditDetailsCard audit={audit} labels={detailsLabels} />
+        <ClassAuditDetailsCard
+          audit={audit}
+          labels={detailsLabels}
+          payroll={payroll}
+          statusEvents={statusEvents}
+          onOverride={onOverride}
+        />
       </Grid>
 
       <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 2, lg: 2 } }}>

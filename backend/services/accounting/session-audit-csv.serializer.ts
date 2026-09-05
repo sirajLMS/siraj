@@ -9,30 +9,37 @@ interface CsvColumn {
   readonly pick: (row: SessionAuditReportRow) => string;
 }
 
-/** One CSV column per session audit report row field, in the row-contract declaration order. */
+/**
+ * One CSV column per session audit report row field. Grid-visible columns
+ * follow the grid's visual order (scheduled start, teacher, student, subject,
+ * open time, end time, duration, status, calculated duration, paid amount,
+ * calculation status, partial %, note, payment date), with non-rendered
+ * siblings kept adjacent to the column they qualify; the join-back id columns
+ * (`teacherId`, `studentId`, `instanceId`) come last.
+ */
 const CSV_COLUMNS: readonly CsvColumn[] = [
-  { header: "instanceId", pick: row => row.instanceId },
   { header: "scheduledStartAt", pick: row => row.scheduledStartAt },
-  { header: "scheduledEndAt", pick: row => row.scheduledEndAt },
-  { header: "durationMinutes", pick: row => String(row.durationMinutes) },
+  { header: "teacherName", pick: row => row.teacherName },
+  { header: "currentStatus", pick: row => row.currentStatus },
+  { header: "studentName", pick: row => row.studentName },
+  { header: "subjectName", pick: row => row.subjectName },
   { header: "actualStartAt", pick: row => row.actualStartAt ?? "" },
   { header: "actualEndAt", pick: row => row.actualEndAt ?? "" },
-  { header: "bookingTimezone", pick: row => row.bookingTimezone ?? "" },
-  { header: "currentStatus", pick: row => row.currentStatus },
+  { header: "durationMinutes", pick: row => String(row.durationMinutes) },
   { header: "calculatedDuration", pick: row => String(row.calculatedDuration ?? "") },
   { header: "teacherPaidAmount", pick: row => row.teacherPaidAmount ?? "" },
-  { header: "teacherPaidCurrency", pick: row => row.teacherPaidCurrency ?? "" },
   { header: "calculationStatus", pick: row => row.calculationStatus ?? "" },
   { header: "isPartialPercentage", pick: row => String(row.isPartialPercentage ?? "") },
   { header: "payrollNote", pick: row => row.payrollNote ?? "" },
+  { header: "teacherDuePaymentDate", pick: row => row.teacherDuePaymentDate ?? "" },
+  { header: "scheduledEndAt", pick: row => row.scheduledEndAt },
+  { header: "subjectId", pick: row => row.subjectId },
+  { header: "bookingTimezone", pick: row => row.bookingTimezone ?? "" },
+  { header: "teacherPaidCurrency", pick: row => row.teacherPaidCurrency ?? "" },
   { header: "payrollCalculatedAt", pick: row => row.payrollCalculatedAt ?? "" },
   { header: "teacherId", pick: row => row.teacherId },
-  { header: "teacherName", pick: row => row.teacherName },
   { header: "studentId", pick: row => row.studentId },
-  { header: "studentName", pick: row => row.studentName },
-  { header: "subjectId", pick: row => row.subjectId },
-  { header: "subjectName", pick: row => row.subjectName },
-  { header: "teacherDuePaymentDate", pick: row => row.teacherDuePaymentDate ?? "" },
+  { header: "instanceId", pick: row => row.instanceId },
 ];
 
 /** RFC 4180 escaping plus formula neutralization: cells starting with `=`, `+`, `-`, `@`, a tab or a CR get a `'` prefix. */

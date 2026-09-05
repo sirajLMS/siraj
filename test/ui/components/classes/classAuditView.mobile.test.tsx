@@ -42,6 +42,9 @@ function buildProps(overrides: Partial<ClassAuditViewProps> = {}): ClassAuditVie
     onUpdateAdminNote: noopHandler,
     onEditAdminNote: noopHandler,
     isResending: false,
+    payroll: null,
+    statusEvents: null,
+    onOverride: noopHandler,
     ...overrides,
   };
 }

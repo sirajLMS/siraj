@@ -85,6 +85,13 @@ describe("GraphQL Class Instance Detail Query", () => {
     expect(instance).toHaveProperty("subjectAvatarUrl");
     expect(instance?.student?.id).toBe(studentId);
     expect(instance?.teacher?.id).toBe(teacherId);
+    expect(instance).toHaveProperty("calculationStatus");
+    expect(instance).toHaveProperty("teacherPaidAmount");
+    expect(instance).toHaveProperty("teacherPaidCurrency");
+    expect(instance).toHaveProperty("calculatedDuration");
+    expect(instance).toHaveProperty("isPartialPercentage");
+    expect(instance).toHaveProperty("payrollNote");
+    expect(instance).toHaveProperty("payrollCalculatedAt");
   });
 
   test("teacher can read assigned class instance detail", async () => {

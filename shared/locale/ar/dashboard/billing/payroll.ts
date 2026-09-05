@@ -44,6 +44,7 @@ export const dashboardBillingPayrollAr: PayrollLabels = {
     },
     percentage: "النسبة (0–100)",
     note: "ملاحظة",
+    noteHint: "مطلوبة عند التجاوز إلى (استرداد) أو (جزئي).",
     force: "التجاوز رغم حالة (بانتظار الصرف)",
     action: "تجاوز",
   },

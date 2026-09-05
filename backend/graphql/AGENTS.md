@@ -124,6 +124,8 @@ The `createGeneralUser` mutation creates a user without a specialized profile ex
 
 Use `authScopes: { permission: AppPermission.X }` (not `authScopes: { superAdmin: true }`) for mutations accessible by non-superadmin users with the correct permission. The `superAdmin: true` authScope blocks ALL non-superadmin users — only use it for truly superadmin-only operations (e.g., impersonation, permission group simulation, system config).
 
+- **Privileged filter flags are enforced at EVERY entry point**: when a service accepts a privileged flag (e.g. `includeDeleted`) unconditionally, both the GraphQL resolver AND any API route exposing it must re-gate it on the manage permission (e.g. `ctx.isSuperAdmin || ctx.permissions.includes(...)`) — gating only one entry point is a privilege-escalation hole. See `docs/services/session-audit-reports.md`.
+
 See `docs/auth/supervisor-permissions.md` for the supervisor permission model and the list of mutations that were fixed from `superAdmin: true` to permission-based authScopes.
 
 ## Serverless Cold-Start Optimization

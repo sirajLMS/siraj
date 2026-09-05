@@ -3,6 +3,7 @@
 import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import { OverrideDialog } from "@/frontend/common/views/dashboard/accounting/payroll/OverrideDialog";
 import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 import { AdminNoteEditDialog } from "@/frontend/common/views/dashboard/classes/audit/components";
 import type { ClassAuditViewModel } from "@/frontend/common/views/dashboard/classes/audit/useClassAuditViewModel";
@@ -51,6 +52,9 @@ export function ClassAuditView(props: Readonly<ClassAuditViewModel>) {
     onUpdateAdminNote: props.onUpdateAdminNote,
     onEditAdminNote: props.onEditAdminNote,
     isResending: props.isResending,
+    payroll: props.payroll,
+    statusEvents: props.statusEvents,
+    onOverride: props.onOverride,
   };
 
   return (
@@ -64,6 +68,12 @@ export function ClassAuditView(props: Readonly<ClassAuditViewModel>) {
         onContentChange={props.adminNoteDialog.onContentChange}
         onClose={props.adminNoteDialog.onClose}
         onSave={props.adminNoteDialog.onSave}
+      />
+      <OverrideDialog
+        open={props.payrollOverrideDialog.open}
+        row={props.payrollOverrideDialog.row}
+        onClose={props.payrollOverrideDialog.onClose}
+        onApplied={props.payrollOverrideDialog.onApplied}
       />
     </>
   );

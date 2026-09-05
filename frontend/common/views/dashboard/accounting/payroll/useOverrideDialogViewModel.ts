@@ -138,13 +138,33 @@ interface OverrideSummaryValues {
   readonly payrollNote: string | null;
 }
 
+/**
+ * Payroll snapshot the dialog consumes: the override target id plus the current
+ * calculation values shown in the summary card. The payroll report's full row
+ * satisfies this narrower shape, so report pages pass rows unchanged while
+ * other surfaces (for example a per-instance detail view) can supply an
+ * instance-scoped snapshot with only these members.
+ */
+export type OverrideDialogRow = Pick<
+  PayrollReportRow,
+  | "instanceId"
+  | "calculationStatus"
+  | "teacherPaidAmount"
+  | "teacherPaidCurrency"
+  | "calculatedDuration"
+  | "isPartialPercentage"
+  | "payrollNote"
+>;
+
 export interface UseOverrideDialogViewModelProps {
   /** Whether the dialog is visible; every open starts a fresh form session. */
   readonly open: boolean;
-  /** Report row the override targets; null leaves the summary blank and disables submission. */
-  readonly row: PayrollReportRow | null;
+  /** Payroll snapshot the override targets; null leaves the summary blank and disables submission. */
+  readonly row: OverrideDialogRow | null;
   /** Close request raised by Cancel, Escape, backdrop click, or a successful override. */
   readonly onClose: () => void;
+  /** Runs after a successful override so the host page can refresh its queries. */
+  readonly onApplied?: () => void;
 }
 
 export interface OverrideDialogViewModel {
@@ -213,6 +233,7 @@ export function useOverrideDialogViewModel({
   open,
   row,
   onClose,
+  onApplied,
 }: Readonly<UseOverrideDialogViewModelProps>): OverrideDialogViewModel {
   const labels = useAppTranslation(DashboardBillingPayroll);
   const commonLabels = useAppTranslation(Translation.Common);
@@ -281,8 +302,9 @@ export function useOverrideDialogViewModel({
     client.cache.evict({ fieldName: "payrollReport" });
     client.cache.gc();
     notifications.show(labels.success.overridden, { severity: "success" });
+    onApplied?.();
     onClose();
-  }, [client, labels, notifications, onClose]);
+  }, [client, labels, notifications, onApplied, onClose]);
 
   const handleFormSubmit = useCallback(
     async (data: OverrideFormData): Promise<void> => {

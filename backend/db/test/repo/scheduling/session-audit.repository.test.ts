@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { SessionAuditRepository } from "@/backend/db/repo/scheduling";
-import { type classInstances, classSubjects } from "@/backend/db/schema";
+import { type classInstances, classSubjects, users } from "@/backend/db/schema";
 import {
   createMockClassInstance,
   createTestTeacherDue,
@@ -318,6 +318,52 @@ describe("SessionAuditRepository.findReportRows", () => {
     });
   });
 
+  test("matches % and _ search tokens as literals instead of LIKE wildcards", async () => {
+    await runInRollback(async tx => {
+      const percentPair = await setupPair(tx, "LikePctProbe");
+      const percentDecoy = await setupPair(tx, "LikePctDecoy");
+      const underscorePair = await setupPair(tx, "LikeUndProbe");
+      const underscoreDecoy = await setupPair(tx, "LikeUndDecoy");
+      await tx
+        .update(users)
+        .set({ name: "PctProbe 100%Wildcard TeacherUser" })
+        .where(eq(users.id, percentPair.teacherUserId));
+      await tx
+        .update(users)
+        .set({ name: "PctDecoy 1000XWildcard TeacherUser" })
+        .where(eq(users.id, percentDecoy.teacherUserId));
+      await tx
+        .update(users)
+        .set({ name: "UndProbe 200_Marker TeacherUser" })
+        .where(eq(users.id, underscorePair.teacherUserId));
+      await tx
+        .update(users)
+        .set({ name: "UndDecoy 2000Marker TeacherUser" })
+        .where(eq(users.id, underscoreDecoy.teacherUserId));
+
+      const percentInstance = await addInstance(tx, percentPair, atTime(DAY_ONE, 9));
+      await addInstance(tx, percentDecoy, atTime(DAY_ONE, 9));
+      const underscoreInstance = await addInstance(tx, underscorePair, atTime(DAY_ONE, 11));
+      await addInstance(tx, underscoreDecoy, atTime(DAY_ONE, 11));
+
+      const byPercent = await SessionAuditRepository.findReportRows(
+        { search: "100%Wildcard" },
+        DEFAULT_SORT,
+        DEFAULT_PAGE,
+        tx
+      );
+      expect(byPercent.rows.map(row => row.instanceId)).toEqual([percentInstance.id]);
+
+      const byUnderscore = await SessionAuditRepository.findReportRows(
+        { search: "200_Marker" },
+        DEFAULT_SORT,
+        DEFAULT_PAGE,
+        tx
+      );
+      expect(byUnderscore.rows.map(row => row.instanceId)).toEqual([underscoreInstance.id]);
+    });
+  });
+
   test("orders by every sortable field in both directions", async () => {
     await runInRollback(async tx => {
       const pair = await setupPair(tx, "SortVals");
@@ -486,6 +532,46 @@ describe("SessionAuditRepository.findReportRows", () => {
 
       const noDue = rows.find(row => row.instanceId === paidWithoutDue.id);
       expect(noDue?.teacherDuePaymentDate).toBeNull();
+    });
+  });
+
+  test("returns an empty page with the full count when the offset runs past the result set", async () => {
+    await runInRollback(async tx => {
+      const pair = await setupPair(tx, "OffPastEnd");
+      await Promise.all(Array.from({ length: 4 }, (_, index) => addInstance(tx, pair, atTime(DAY_ONE, 8 + index))));
+
+      const page = await queryReport(tx, pair, {}, DEFAULT_SORT, { limit: 10, offset: 999 });
+
+      expect(page.rows).toHaveLength(0);
+      expect(page.totalCount).toBe(4);
+    });
+  });
+
+  test("ignores blank and whitespace-only search terms instead of filtering everything out", async () => {
+    await runInRollback(async tx => {
+      const pair = await setupPair(tx, "BlankSrch");
+      await addInstance(tx, pair, atTime(DAY_ONE, 9));
+
+      const whitespace = await queryReport(tx, pair, { search: "   " });
+      expect(whitespace.totalCount).toBe(1);
+
+      const blank = await queryReport(tx, pair, { search: "" });
+      expect(blank.totalCount).toBe(1);
+    });
+  });
+
+  test("includes session starts at the exact inclusive day bounds", async () => {
+    await runInRollback(async tx => {
+      const pair = await setupPair(tx, "DayBounds");
+      const atStart = await addInstance(tx, pair, new Date(`${DAY_TWO}T00:00:00.000Z`));
+      const atEnd = await addInstance(tx, pair, new Date(`${DAY_TWO}T23:59:59.999Z`));
+      await addInstance(tx, pair, new Date(`${DAY_ONE}T23:59:59.999Z`));
+      await addInstance(tx, pair, new Date(`${DAY_THREE}T00:00:00.000Z`));
+
+      const page = await queryReport(tx, pair, { dateFrom: DAY_TWO, dateTo: DAY_TWO });
+
+      expect(page.rows.map(row => row.instanceId)).toEqual([atStart.id, atEnd.id]);
+      expect(page.totalCount).toBe(2);
     });
   });
 

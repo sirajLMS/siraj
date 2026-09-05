@@ -1,6 +1,7 @@
 /** Canonical static leaf assembler for server getTranslations (Phase 4). Same leaf modules as defineNamespace loaders. */
 import { authAr } from "@/shared/locale/ar/auth";
 import { commonAr } from "@/shared/locale/ar/common";
+import { dashboardAccountingCarryoverAr } from "@/shared/locale/ar/dashboard/accounting/carryover.ts";
 import { dashboardAccountingPackagePlansAr } from "@/shared/locale/ar/dashboard/accounting/package-plans.ts";
 import { dashboardAccountingPaymentsAr } from "@/shared/locale/ar/dashboard/accounting/payments.ts";
 import { dashboardAccountingStudentCreditHoursAr } from "@/shared/locale/ar/dashboard/accounting/student-credit-hours.ts";
@@ -54,6 +55,7 @@ import { dashboardPaymentCatalogsParentAr } from "@/shared/locale/ar/dashboard/p
 import { dashboardPermissionsAr } from "@/shared/locale/ar/dashboard/permissions/main.ts";
 import { dashboardReportsAr } from "@/shared/locale/ar/dashboard/reports/main.ts";
 import { monthlyAppraisalAr } from "@/shared/locale/ar/dashboard/reports/monthly-appraisal";
+import { dashboardReportsSessionAuditAr } from "@/shared/locale/ar/dashboard/reports/sessionAudit";
 import { dashboardBooksAndBagsAr } from "@/shared/locale/ar/dashboard/resources/booksAndBags.ts";
 import { dashboardResourcesAr } from "@/shared/locale/ar/dashboard/resources/main.ts";
 import { dashboardScheduleTrackingParentAr } from "@/shared/locale/ar/dashboard/schedule-tracking/main.ts";
@@ -170,6 +172,7 @@ export const arMessages: Translations = {
     billingPayroll: dashboardBillingPayrollAr,
     accountingPayments: dashboardAccountingPaymentsAr,
     accountingPackages: dashboardAccountingPackagePlansAr,
+    accountingCarryover: dashboardAccountingCarryoverAr,
     accountingStudentCreditHours: dashboardAccountingStudentCreditHoursAr,
 
     billingExchangeRates: dashboardBillingExchangeRatesAr,
@@ -218,6 +221,7 @@ export const arMessages: Translations = {
     selfServiceReschedule: selfServiceRescheduleAr,
     monthlyAppraisal: monthlyAppraisalAr,
     reports: dashboardReportsAr,
+    sessionAudit: dashboardReportsSessionAuditAr,
     resources: dashboardResourcesAr,
     booksAndBags: dashboardBooksAndBagsAr,
     studentPortalDashboard: dashboardStudentPortalDashboardAr,

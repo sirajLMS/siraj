@@ -1,4 +1,8 @@
-import type { GroupClassAuditQuery_groupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql";
+import type {
+  ClassStatusEventsQuery_classStatusEvents,
+  GroupClassAuditQuery_groupClassAudit,
+} from "@/frontend/common/graphql/generated/gql/graphql";
+import type { ClassAuditPayrollSnapshot } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
 
 export interface MeetingInfoLabels {
   readonly title: string;
@@ -84,6 +88,16 @@ export interface ClassAuditViewProps {
   readonly onUpdateAdminNote: () => void;
   readonly onEditAdminNote: () => void;
   readonly isResending: boolean;
+  /**
+   * Payroll snapshot for the instance; null while the instance query is
+   * loading or when the actor lacks payroll-visibility rights, in which case
+   * the payroll card is omitted entirely.
+   */
+  readonly payroll: ClassAuditPayrollSnapshot | null;
+  /** Status events feeding the payroll override history; payroll events are filtered server-side for unauthorized actors. */
+  readonly statusEvents: readonly ClassStatusEventsQuery_classStatusEvents[] | null;
+  /** Requests the payroll override dialog; the card only offers the action to payroll managers. */
+  readonly onOverride: () => void;
 }
 
 export interface ClassAuditDetailsLabels {

@@ -2,6 +2,7 @@
 
 import type { AuthLabels } from "@/shared/locale/types/auth";
 import type { CommonLabels } from "@/shared/locale/types/common";
+import type { CarryoverLabels as AccountingCarryoverLabels } from "@/shared/locale/types/dashboard/accounting/carryover.ts";
 import type { PackagePlansLabels as AccountingPackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans.ts";
 import type { PaymentsLabels as AccountingPaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments.ts";
 import type { StudentCreditHoursLabels as AccountingStudentCreditHoursLabels } from "@/shared/locale/types/dashboard/accounting/student-credit-hours.ts";
@@ -55,6 +56,7 @@ import type { PaymentCatalogsParentLabels } from "@/shared/locale/types/dashboar
 import type { PermissionsLabels } from "@/shared/locale/types/dashboard/permissions/main.ts";
 import type { ReportsLabels } from "@/shared/locale/types/dashboard/reports/main.ts";
 import type { MonthlyAppraisalLabels } from "@/shared/locale/types/dashboard/reports/monthly-appraisal";
+import type { SessionAuditLabels } from "@/shared/locale/types/dashboard/reports/sessionAudit";
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
 import type { ScheduleTrackingParentLabels } from "@/shared/locale/types/dashboard/schedule-tracking/main.ts";
 import type { SelfServiceRescheduleLabels } from "@/shared/locale/types/dashboard/scheduling/self-service-reschedule";
@@ -145,6 +147,7 @@ export interface DashboardTranslations {
   billingPayroll: PayrollLabels;
   accountingPayments: AccountingPaymentsLabels;
   accountingPackages: AccountingPackagePlansLabels;
+  accountingCarryover: AccountingCarryoverLabels;
   accountingStudentCreditHours: AccountingStudentCreditHoursLabels;
 
   billingExchangeRates: ExchangeRatesLabels;
@@ -193,6 +196,7 @@ export interface DashboardTranslations {
   selfServiceReschedule: SelfServiceRescheduleLabels;
   monthlyAppraisal: MonthlyAppraisalLabels;
   reports: ReportsLabels;
+  sessionAudit: SessionAuditLabels;
   resources: ResourcesLabels;
   booksAndBags: BooksAndBagsLabels;
   studentPortalDashboard: StudentPortalDashboardLabels;

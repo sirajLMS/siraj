@@ -38,3 +38,18 @@ The orchestrator NEVER calls ReadMediaFile on screenshots in its own loop. Image
 - `agent-browser snapshot -i -c` — interactive a11y tree: proves headings, fields, per-row actions, checkmarks.
 - `agent-browser console --level error` — error log check before each capture round.
 - `agent-browser network requests --filter "<pattern>"` — GraphQL traffic proof when mutation flows matter.
+
+## Learned gotchas (session-event-audit run, 2026-09-05)
+
+- Headless Chromium never paints scrollbars in screenshots. A "no scroll cue" inspector finding is a
+  capture artifact until disproven — verify DOM-side: `document.querySelector(".MuiDataGrid-scrollbar--horizontal")`
+  plus `getComputedStyle` (visibility/opacity/dimensions). Don't burn a fix wave on it.
+- This app's fonts don't load in the Storybook iframe by default: the app uses `next/font` CSS
+  variables, so Storybook needs `.storybook/preview-head.html` loading the webfonts and binding the
+  CSS variables. Serif-looking captures = missing preview-head fonts, not a product defect. Preview
+  head changes require a Storybook RESTART (HMR does not apply them).
+- In Storybook iframes `document.title` is the story id, not "Storybook". Match the precheck title
+  guard against the story id.
+- `agent-browser set viewport W H` must precede EVERY navigation when alternating sizes; omitting it
+  silently reuses the old viewport. Verify shot dimensions (`identify file.png`) — byte-identical
+  screenshots after a viewport change means the old viewport was kept.

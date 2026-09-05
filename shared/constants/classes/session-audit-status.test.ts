@@ -118,6 +118,22 @@ describe("mapToSessionAuditStatus", () => {
       expect(mapToSessionAuditStatus(null, undefined, undefined)).toBe("open");
     });
   });
+
+  describe("exhaustive sweep", () => {
+    test("every state × outcome × actual-start combination maps to a registered predicate key", () => {
+      const registeredKeys = Object.keys(STATUS_TO_PREDICATE_KEY);
+      let combinations = 0;
+      for (const state of Object.values(ClassExecutionState)) {
+        for (const outcome of Object.values(ClassOutcome)) {
+          for (const actualStartAt of [null, joined]) {
+            combinations += 1;
+            expect(registeredKeys).toContain(mapToSessionAuditStatus(state, outcome, actualStartAt));
+          }
+        }
+      }
+      expect(combinations).toBeGreaterThan(0);
+    });
+  });
 });
 
 describe("STATUS_TO_PREDICATE_KEY", () => {

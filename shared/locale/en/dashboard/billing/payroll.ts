@@ -44,6 +44,7 @@ export const dashboardBillingPayrollEn: PayrollLabels = {
     },
     percentage: "Percentage (0–100)",
     note: "Note",
+    noteHint: "Required when overriding to Refund or Partially.",
     force: "Force override even if Awaiting Paid",
     action: "Override",
   },

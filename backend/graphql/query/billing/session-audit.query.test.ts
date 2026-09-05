@@ -356,7 +356,9 @@ describe("sessionAuditReport query", () => {
           includeDeleted: true,
         },
       },
-      makeCtx()
+      makeCtx({
+        permissions: [AppPermission.ACCOUNTING_REPORTS_VIEW, AppPermission.ACCOUNTING_REPORTS_MANAGE],
+      })
     );
 
     expect(result.errors ?? []).toHaveLength(0);
@@ -387,6 +389,38 @@ describe("sessionAuditReport query", () => {
       includeDeleted: undefined,
     });
     expect(getReportCalls[1]?.filters).toEqual(getReportCalls[0]?.filters);
+  });
+
+  test("clears includeDeleted for callers without the reports manage permission", async () => {
+    const result = await executeSessionAuditReport({ filter: { includeDeleted: true } }, makeCtx());
+
+    expect(result.errors ?? []).toHaveLength(0);
+    expect(getReportCalls).toHaveLength(1);
+    expect(getReportCalls[0]?.filters.includeDeleted).toBe(false);
+  });
+
+  test("keeps includeDeleted for callers holding the reports manage permission", async () => {
+    const result = await executeSessionAuditReport(
+      { filter: { includeDeleted: true } },
+      makeCtx({
+        permissions: [AppPermission.ACCOUNTING_REPORTS_VIEW, AppPermission.ACCOUNTING_REPORTS_MANAGE],
+      })
+    );
+
+    expect(result.errors ?? []).toHaveLength(0);
+    expect(getReportCalls).toHaveLength(1);
+    expect(getReportCalls[0]?.filters.includeDeleted).toBe(true);
+  });
+
+  test("keeps includeDeleted for super admins without the explicit manage permission", async () => {
+    const result = await executeSessionAuditReport(
+      { filter: { includeDeleted: true } },
+      makeCtx({ permissions: [], isSuperAdmin: true, role: UserRole.SUPER_ADMIN })
+    );
+
+    expect(result.errors ?? []).toHaveLength(0);
+    expect(getReportCalls).toHaveLength(1);
+    expect(getReportCalls[0]?.filters.includeDeleted).toBe(true);
   });
 
   test("passes null payroll fields through untouched", async () => {

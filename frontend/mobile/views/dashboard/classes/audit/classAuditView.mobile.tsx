@@ -29,6 +29,9 @@ export function ClassAuditViewMobile({
   onUpdateAdminNote,
   onEditAdminNote,
   isResending,
+  payroll,
+  statusEvents,
+  onOverride,
 }: Readonly<ClassAuditViewProps>) {
   const gridSlots: ClassAuditViewGridSlotConfig = {
     OnlineMeetingCard: OnlineMeetingCardMobile,
@@ -64,6 +67,9 @@ export function ClassAuditViewMobile({
         onViewStudent={onViewStudent}
         onUpdateAdminNote={onUpdateAdminNote}
         onEditAdminNote={onEditAdminNote}
+        payroll={payroll}
+        statusEvents={statusEvents}
+        onOverride={onOverride}
         slots={gridSlots}
       />
     </MobilePageContainer>

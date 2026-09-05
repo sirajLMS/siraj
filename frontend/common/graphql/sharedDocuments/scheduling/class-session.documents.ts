@@ -48,6 +48,13 @@ export const classInstanceQueryDocument: TypedDocumentNode<ClassInstanceQuery, C
         ...EffectiveMeetingFields
       }
       payrollCredited
+      calculationStatus
+      teacherPaidAmount
+      teacherPaidCurrency
+      calculatedDuration
+      isPartialPercentage
+      payrollNote
+      payrollCalculatedAt
       isRescheduled
       isFrozen
       executionState

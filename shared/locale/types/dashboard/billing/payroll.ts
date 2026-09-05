@@ -42,6 +42,7 @@ export interface PayrollLabels {
     };
     readonly percentage: string;
     readonly note: string;
+    readonly noteHint: string;
     readonly force: string;
     readonly action: string;
   };

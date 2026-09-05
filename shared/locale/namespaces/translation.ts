@@ -49,6 +49,7 @@ import { DashboardPaymentCatalogsParent } from "@/shared/locale/namespaces/dashb
 import { DashboardPermissions } from "@/shared/locale/namespaces/dashboard/permissions/main.namespace";
 import { DashboardReports } from "@/shared/locale/namespaces/dashboard/reports/main.namespace";
 import { DashboardMonthlyAppraisal } from "@/shared/locale/namespaces/dashboard/reports/monthly-appraisal.namespace";
+import { DashboardReportsSessionAudit } from "@/shared/locale/namespaces/dashboard/reports/sessionAudit.namespace";
 import { DashboardBooksAndBags } from "@/shared/locale/namespaces/dashboard/resources/booksAndBags.namespace";
 import { DashboardResources } from "@/shared/locale/namespaces/dashboard/resources/main.namespace";
 import { DashboardScheduleTrackingParent } from "@/shared/locale/namespaces/dashboard/schedule-tracking/main.namespace";
@@ -192,6 +193,7 @@ export const Translation = {
     PaymentCatalogsParent: DashboardPaymentCatalogsParent,
     Permissions: DashboardPermissions,
     Reports: DashboardReports,
+    SessionAudit: DashboardReportsSessionAudit,
     SelfServiceReschedule: DashboardSchedulingSelfServiceReschedule,
     MonthlyAppraisal: DashboardMonthlyAppraisal,
     RescheduleForm: DashboardRescheduleForm,

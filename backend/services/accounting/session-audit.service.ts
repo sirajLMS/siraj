@@ -15,6 +15,14 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 const DEFAULT_REPORT_SORT: SessionAuditReportSort = { field: "scheduledStartAt", direction: "desc" };
 
+/**
+ * Date window applied when the caller supplies neither bound: the 30 calendar
+ * days ending on the current UTC date (UTC matches the day boundaries the
+ * repository filters on). A bound the caller did provide is never overridden.
+ */
+const DEFAULT_DATE_RANGE_DAYS = 30;
+const MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
+
 /** Fallback currency for the page total when no row carries a paid currency. */
 const DEFAULT_TOTAL_CURRENCY = CurrencyCode.SAR;
 
@@ -89,10 +97,41 @@ function buildPageAggregates(rows: readonly SessionAuditReportRow[]): SessionAud
   };
 }
 
+/** Strict `YYYY-MM-DD` check that also rejects impossible calendar days (JS `Date` rolls them over). */
+function isCalendarDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (match === null) {
+    return false;
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const constructed = new Date(Date.UTC(year, month - 1, day));
+  return (
+    constructed.getUTCFullYear() === year && constructed.getUTCMonth() === month - 1 && constructed.getUTCDate() === day
+  );
+}
+
+/** Formats a UTC instant as its `YYYY-MM-DD` calendar date. */
+function toUtcCalendarDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+/** Fills both date bounds with the default window when the caller left them unset. */
+function withDefaultDateRange(filters: SessionAuditReportFilters): SessionAuditReportFilters {
+  if (filters.dateFrom != null || filters.dateTo != null) return filters;
+  const dateTo = toUtcCalendarDate(new Date());
+  const dateFrom = toUtcCalendarDate(new Date(Date.now() - DEFAULT_DATE_RANGE_DAYS * MILLIS_PER_DAY));
+  return { ...filters, dateFrom, dateTo };
+}
+
 function assertValidDateRange(filters: SessionAuditReportFilters, tErrors: ErrorsLabels): void {
   const { dateFrom, dateTo } = filters;
+  if ((dateFrom != null && !isCalendarDate(dateFrom)) || (dateTo != null && !isCalendarDate(dateTo))) {
+    throw new ValidationError("INVALID_DATE_RANGE", tErrors.invalidInput);
+  }
   if (dateFrom == null || dateTo == null) return;
-  // Both bounds are ISO dates; ISO calendar dates compare correctly as strings.
+  // Both bounds are calendar dates; ISO dates compare correctly as strings.
   if (dateFrom > dateTo) {
     throw new ValidationError("INVALID_DATE_RANGE", tErrors.invalidInput);
   }
@@ -101,10 +140,12 @@ function assertValidDateRange(filters: SessionAuditReportFilters, tErrors: Error
 export namespace SessionAuditService {
   /**
    * Reads one page of the session audit report: permission-gated,
-   * date-range-validated, sorted (scheduled start, newest first, when the
-   * caller supplies no sort), and clamped to the last page when the requested
-   * offset runs past the result set. Aggregates describe the returned page;
-   * `totalCount` carries the size of the full filtered result.
+   * date-validated (each bound must be a real calendar date, in ascending
+   * order), sorted (scheduled start, newest first, when the caller supplies no
+   * sort), and clamped to the last page when the requested offset runs past
+   * the result set. With no date bounds at all, the report falls back to the
+   * default 30-day window. Aggregates describe the returned page; `totalCount`
+   * carries the size of the full filtered result.
    */
   export async function getReport(
     actorUserId: string,
@@ -115,14 +156,15 @@ export namespace SessionAuditService {
   ): Promise<SessionAuditReportPage> {
     await requirePermission(actorUserId, AppPermission.ACCOUNTING_REPORTS_VIEW, tErrors);
     assertValidDateRange(filters, tErrors);
+    const resolvedFilters = withDefaultDateRange(filters);
 
     const resolvedSort = sort ?? DEFAULT_REPORT_SORT;
-    let page = await SessionAuditRepository.findReportRows(filters, resolvedSort, pagination);
+    let page = await SessionAuditRepository.findReportRows(resolvedFilters, resolvedSort, pagination);
 
     if (page.totalCount > 0 && pagination.offset >= page.totalCount) {
       const normalizedLimit = Math.max(1, Math.floor(pagination.limit));
       const lastPageOffset = Math.floor((page.totalCount - 1) / normalizedLimit) * normalizedLimit;
-      page = await SessionAuditRepository.findReportRows(filters, resolvedSort, {
+      page = await SessionAuditRepository.findReportRows(resolvedFilters, resolvedSort, {
         limit: pagination.limit,
         offset: lastPageOffset,
       });
@@ -130,7 +172,7 @@ export namespace SessionAuditService {
 
     logger.info("Session audit report query", {
       actorUserId,
-      filters,
+      filters: resolvedFilters,
       limit: pagination.limit,
       offset: pagination.offset,
       rowCount: page.rows.length,

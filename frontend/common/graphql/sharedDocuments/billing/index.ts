@@ -7,4 +7,5 @@ export * from "./fx-ingestion.documents";
 export * from "./payment-method.documents";
 export * from "./payments-ledger.documents";
 export * from "./quota.documents";
+export * from "./session-audit.documents";
 export * from "./user-billing-profile.documents";

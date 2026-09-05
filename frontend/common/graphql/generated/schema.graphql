@@ -820,6 +820,9 @@ type CarryoverBalance {
   id: ID
   isDisabledTeacher: Boolean
   isPaid: Boolean
+
+  """Number of class instances aggregated into this carryover balance"""
+  linkedSessionCount: Int
   note: String
   paid: String
   paidAt: DateTime
@@ -851,6 +854,22 @@ input CarryoverFilter {
   paidStatus: String
   search: String
   teacherId: ID
+}
+
+"""
+One class instance aggregated into a carryover balance, with the student and subject display fields, the link-time amount/status snapshot, and the session's current calculation status
+"""
+type CarryoverLinkedSession {
+  currentStatus: CalculationStatus
+  durationMinutes: Int
+  id: ID
+  originalAmount: String
+  originalCurrency: CurrencyCode
+  originalStatus: String
+  scheduledStartAt: DateTime
+  studentId: ID
+  studentName: String
+  subjectName: String
 }
 
 """
@@ -2865,6 +2884,11 @@ type Mutation {
   cleanupTestManager(userId: String!): Boolean
   cleanupTestSuperAdmin(userId: String!): Boolean
   clearWeeklySchedule(teacherId: ID!): Boolean
+
+  """
+  Complete WhatsApp Embedded Signup (coexistence) onboarding for a Business-app number.
+  """
+  completeWhatsappEmbeddedSignup(input: WhatsappEmbeddedSignupInput!): WhatsappAccount
   connectMeetingProviderOAuth(input: ConnectMeetingProviderOAuthInput!): ConnectMeetingProviderOAuthResult
   copyStorageItems(input: StorageItemsCopyInput!): BulkOperationResult
 
@@ -3967,6 +3991,11 @@ type Query {
 
   """Single carryover balance by id, for the drill-down view."""
   carryoverBalance(id: ID!): CarryoverBalance
+
+  """
+  Sessions aggregated into one carryover balance, for the detail drawer's linked sessions list.
+  """
+  carryoverBalanceLinkedSessions(carryoverId: ID!): [CarryoverLinkedSession!]
 
   """
   Paginated carryover balance list; aggregates cover the full filtered set, not just the returned page.
@@ -6346,6 +6375,20 @@ input WhatsappAccountUpdateInput {
   portfolioMessagingLimitTier: WhatsappLimitTier
   qualityRating: WhatsappQualityRating
   throughputLevel: String
+}
+
+input WhatsappEmbeddedSignupInput {
+  """Meta Business ID from the session event (max 64 chars)"""
+  businessId: String
+
+  """Single-use ES authorization code (max 2048 chars)"""
+  code: String!
+
+  """Phone number ID when the session event carried it (max 64 chars)"""
+  phoneNumberId: String
+
+  """WhatsApp Business Account ID from the session event (max 64 chars)"""
+  wabaId: String!
 }
 
 enum WhatsappLimitTier {

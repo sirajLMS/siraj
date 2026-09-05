@@ -287,7 +287,9 @@ function ClassAuditFields({ audit, labels }: ClassAuditDetailsCardProps) {
         <StyledEmphasizedFieldValue variant="bodyLg">{audit.rescheduledDate ?? ""}</StyledEmphasizedFieldValue>
       </DetailField>
       <DetailField label={labels.timeSlot}>
-        <StyledFieldValueText variant="bodyLg">{audit.timeSlot ?? ""}</StyledFieldValueText>
+        <StyledFieldValueText variant="bodyLg" dir="ltr" sx={{ unicodeBidi: "isolate" }}>
+          {audit.timeSlot ?? ""}
+        </StyledFieldValueText>
       </DetailField>
       <DetailField label={labels.venue}>
         <StyledFieldValueText variant="bodyLg">{audit.venue ?? ""}</StyledFieldValueText>

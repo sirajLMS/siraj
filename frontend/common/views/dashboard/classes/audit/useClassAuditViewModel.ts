@@ -4,13 +4,22 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import {
+  AppPermission,
+  type ClassInstanceQuery_classInstance,
+  type ClassStatusEventsQuery_classStatusEvents,
+} from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  classInstanceQueryDocument,
+  classStatusEventsQueryDocument,
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
   updateClassAdminNoteMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useClassAuditStore } from "@/frontend/common/stores/classAuditStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
+import type { OverrideDialogRow } from "@/frontend/common/views/dashboard/accounting/payroll/useOverrideDialogViewModel";
 import type {
   ClassAuditLabels,
   ClassAuditViewProps,
@@ -37,6 +46,14 @@ interface AdminNoteDialogState {
   readonly onSave: () => void;
 }
 
+/** Payroll override dialog slice. Open state lives in `classAuditStore` so the deep link and the card share one dialog across tiers. */
+interface PayrollOverrideDialogState {
+  readonly open: boolean;
+  readonly row: OverrideDialogRow | null;
+  readonly onClose: () => void;
+  readonly onApplied: () => void;
+}
+
 /** Shell states render loading/error chrome only — the tier views never receive stubbed handlers. */
 interface ClassAuditShellViewModel {
   readonly status: "loading" | "invalidId" | "error";
@@ -54,6 +71,7 @@ export interface ClassAuditReadyViewModel extends Omit<ClassAuditViewProps, "aud
   /** Re-runs the audit query; used by the switcher to recover from a failed fetch. */
   readonly onRetry: () => void;
   readonly adminNoteDialog: AdminNoteDialogState;
+  readonly payrollOverrideDialog: PayrollOverrideDialogState;
 }
 
 export type ClassAuditViewModel = ClassAuditShellViewModel | ClassAuditReadyViewModel;
@@ -66,6 +84,7 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
   const id = typeof params?.id === "string" ? params.id : "";
 
   const { audit, loading, error, refetch, resendNotifications, isResending } = useClassAuditData(id);
+  const payroll = useClassAuditPayroll(id, refetch);
   const adminNote = useClassAuditAdminNoteDialog(id, audit?.adminNote?.content ?? "", refetch);
   const handlers = useClassAuditHandlers({ id, audit, router, resendNotifications, t, adminNote });
 
@@ -87,6 +106,9 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
     ...handlers,
     isResending,
     onRetry: refetch,
+    payroll: payroll.snapshot,
+    statusEvents: payroll.statusEvents,
+    onOverride: payroll.openDialog,
     adminNoteDialog: {
       open: adminNote.open,
       content: adminNote.content,
@@ -95,6 +117,7 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
       onClose: adminNote.onClose,
       onSave: adminNote.onSave,
     },
+    payrollOverrideDialog: payroll.dialog,
   };
 }
 
@@ -111,6 +134,62 @@ function useClassAuditData(id: string) {
     refetch,
     resendNotifications,
     isResending,
+  };
+}
+
+interface ClassAuditPayrollSection {
+  readonly snapshot: ClassInstanceQuery_classInstance | null;
+  readonly statusEvents: readonly ClassStatusEventsQuery_classStatusEvents[] | null;
+  readonly openDialog: () => void;
+  readonly dialog: PayrollOverrideDialogState;
+}
+
+/**
+ * Per-instance payroll snapshot for the audit page. The server strips the
+ * payroll fields for actors without payroll visibility (they resolve to
+ * null), and the queries are skipped client-side in the same case so the
+ * payroll card simply never mounts. The instance record doubles as the
+ * override dialog's row: both consumers read the same generated fields.
+ */
+function useClassAuditPayroll(id: string, refetchAudit: () => void): ClassAuditPayrollSection {
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canViewPayroll = hasPermission(AppPermission.AccountingPayrollView);
+  const canManagePayroll = hasPermission(AppPermission.AccountingPayrollManage);
+  // The override dialog renders payroll data, so both gates must hold: view
+  // for the data, manage for the action. A manage-only actor never opens it.
+  const canOpenOverride = canViewPayroll && canManagePayroll;
+
+  const { data: instanceData, refetch: refetchInstance } = useQuery(classInstanceQueryDocument, {
+    variables: { id },
+    skip: !id || !canViewPayroll,
+  });
+  const { data: eventsData, refetch: refetchEvents } = useQuery(classStatusEventsQueryDocument, {
+    variables: { classInstanceId: id },
+    skip: !id || !canViewPayroll,
+  });
+
+  const open = useClassAuditStore(state => state.overrideDialogOpen);
+  const setOpen = useClassAuditStore(state => state.setOverrideDialogOpen);
+
+  const openDialog = useCallback(() => {
+    if (!canOpenOverride) return;
+    setOpen(true);
+  }, [canOpenOverride, setOpen]);
+  const closeDialog = useCallback(() => setOpen(false), [setOpen]);
+  const onApplied = useCallback(() => {
+    refetchAudit();
+    void refetchInstance();
+    void refetchEvents();
+  }, [refetchAudit, refetchInstance, refetchEvents]);
+
+  const snapshot = canViewPayroll ? (instanceData?.classInstance ?? null) : null;
+  const statusEvents = canViewPayroll ? (eventsData?.classStatusEvents ?? null) : null;
+
+  return {
+    snapshot,
+    statusEvents,
+    openDialog,
+    dialog: { open: open && canOpenOverride, row: snapshot, onClose: closeDialog, onApplied },
   };
 }
 

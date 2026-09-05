@@ -124,6 +124,13 @@ function buildErrorsStub(): ErrorsLabels {
 
 const tErrors = buildErrorsStub();
 
+/** Mirrors the service's default window: today (UTC) back 30 days. */
+function expectedDefaultDateRange(): { dateFrom: string; dateTo: string } {
+  const dateTo = new Date().toISOString().slice(0, 10);
+  const dateFrom = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return { dateFrom, dateTo };
+}
+
 // ---------------------------------------------------------------------------
 // SUT import (deferred so mocks are registered first) + shared helpers.
 // ---------------------------------------------------------------------------
@@ -199,16 +206,19 @@ describe("SessionAuditService.getReport", () => {
 
       expect(requirePermissionMock).toHaveBeenCalledWith(ACTOR_ID, AppPermission.ACCOUNTING_REPORTS_VIEW, tErrors);
       expect(reportReads).toHaveLength(1);
-      expect(reportReads[0]?.filters).toEqual(filters);
+      expect(reportReads[0]?.filters).toEqual({ ...filters, ...expectedDefaultDateRange() });
       expect(reportReads[0]?.sort).toEqual(CUSTOM_SORT);
       expect(reportReads[0]?.limit).toBe(25);
       expect(reportReads[0]?.offset).toBe(0);
       expect(page.rows).toEqual(rows);
       expect(page.totalCount).toBe(2);
-      expect(loggerInfoSpy).toHaveBeenCalledWith(
-        "Session audit report query",
-        expect.objectContaining({ actorUserId: ACTOR_ID, filters, limit: 25, offset: 0, rowCount: 2 })
-      );
+      expect(loggerInfoSpy).toHaveBeenCalledWith("Session audit report query", {
+        actorUserId: ACTOR_ID,
+        filters: { ...filters, ...expectedDefaultDateRange() },
+        limit: 25,
+        offset: 0,
+        rowCount: 2,
+      });
     });
 
     test("computes page aggregates over all status and paid dimensions", async () => {
@@ -296,6 +306,20 @@ describe("SessionAuditService.getReport", () => {
       expect(requirePermissionMock).toHaveBeenCalledWith(ACTOR_ID, AppPermission.ACCOUNTING_REPORTS_VIEW, tErrors);
     });
 
+    test.each([
+      ["non-date garbage", { dateFrom: "not-a-date", dateTo: "2026-09-01" }],
+      ["an impossible calendar day", { dateFrom: "2026-02-30", dateTo: "2026-09-01" }],
+      ["an impossible month", { dateFrom: "2026-13-01", dateTo: "2026-12-01" }],
+      ["an invalid upper bound only", { dateFrom: "2026-09-01", dateTo: "01.09.2026" }],
+    ])("rejects %s before any repository read", async (_label, filters) => {
+      const error = await expectServiceError(() => readReport({ filters }));
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(error).toHaveProperty("extensions", { code: "INVALID_DATE_RANGE" });
+      expect(error.message).toContain("invalid input");
+      expect(reportReads).toHaveLength(0);
+    });
+
     test("accepts equal and ascending date bounds", async () => {
       await readReport({ filters: { dateFrom: "2026-09-01", dateTo: "2026-09-01" } });
       await readReport({ filters: { dateFrom: "2026-08-01", dateTo: "2026-09-01" } });
@@ -303,6 +327,23 @@ describe("SessionAuditService.getReport", () => {
       await readReport({ filters: { dateFrom: "2026-09-01" } });
 
       expect(reportReads).toHaveLength(4);
+    });
+  });
+
+  describe("default date range", () => {
+    test("applies the 30-day window ending today (UTC) when the caller supplies no date bounds", async () => {
+      await readReport({ filters: {} });
+
+      expect(reportReads).toHaveLength(1);
+      expect(reportReads[0]?.filters).toEqual(expectedDefaultDateRange());
+    });
+
+    test("does not override a caller-provided bound and leaves the other open", async () => {
+      await readReport({ filters: { dateFrom: "2026-09-01" } });
+      await readReport({ filters: { dateTo: "2026-09-30" } });
+
+      expect(reportReads[0]?.filters).toEqual({ dateFrom: "2026-09-01" });
+      expect(reportReads[1]?.filters).toEqual({ dateTo: "2026-09-30" });
     });
   });
 
@@ -339,6 +380,88 @@ describe("SessionAuditService.getReport", () => {
 
       expect(reportReads).toHaveLength(1);
       expect(page.totalCount).toBe(0);
+    });
+
+    test("clamps when the offset equals the result-set size exactly", async () => {
+      queuedPages = [
+        { rows: [], totalCount: 100 },
+        { rows: [buildRow({ instanceId: "boundary-row" })], totalCount: 100 },
+      ];
+
+      const page = await readReport({ pagination: { limit: 10, offset: 100 } });
+
+      expect(reportReads).toHaveLength(2);
+      expect(reportReads[1]?.offset).toBe(90);
+      expect(page.rows[0]?.instanceId).toBe("boundary-row");
+    });
+  });
+
+  describe("aggregate money math", () => {
+    test("excludes malformed paid amounts from the page total instead of counting them as zero", async () => {
+      queuedPages = [
+        {
+          rows: [
+            buildRow({ instanceId: "ok", teacherPaidAmount: "10.00" }),
+            buildRow({ instanceId: "malformed", teacherPaidAmount: "not-a-number" }),
+            buildRow({ instanceId: "blank", teacherPaidAmount: " " }),
+          ],
+          totalCount: 3,
+        },
+      ];
+
+      const page = await readReport();
+
+      expect(page.aggregates.totalPaidAmount).toBe("10.00");
+    });
+
+    test("rounds amounts with extra fraction digits half-up without float drift", async () => {
+      queuedPages = [
+        {
+          rows: [
+            buildRow({ instanceId: "round-up", teacherPaidAmount: "1.255" }),
+            buildRow({ instanceId: "round-down", teacherPaidAmount: "2.254" }),
+            buildRow({ instanceId: "whole", teacherPaidAmount: "7" }),
+          ],
+          totalCount: 3,
+        },
+      ];
+
+      const page = await readReport();
+
+      // 1.255 → 1.26 (half-up), 2.254 → 2.25, 7 → 7.00; exact ints: 126 + 225 + 700 = 1051.
+      expect(page.aggregates.totalPaidAmount).toBe("10.51");
+    });
+
+    test("formats a negative page total when refund rows outweigh paid rows", async () => {
+      queuedPages = [
+        {
+          rows: [
+            buildRow({ instanceId: "refund", teacherPaidAmount: "-20.00" }),
+            buildRow({ instanceId: "paid", teacherPaidAmount: "5.00" }),
+          ],
+          totalCount: 2,
+        },
+      ];
+
+      const page = await readReport();
+
+      expect(page.aggregates.totalPaidAmount).toBe("-15.00");
+    });
+
+    test("keeps the earliest-seen currency when currency tallies tie", async () => {
+      queuedPages = [
+        {
+          rows: [
+            buildRow({ instanceId: "sar", teacherPaidAmount: "1.00", teacherPaidCurrency: CurrencyCode.SAR }),
+            buildRow({ instanceId: "egp", teacherPaidAmount: "2.00", teacherPaidCurrency: CurrencyCode.EGP }),
+          ],
+          totalCount: 2,
+        },
+      ];
+
+      const page = await readReport();
+
+      expect(page.aggregates.totalPaidCurrency).toBe(CurrencyCode.SAR);
     });
   });
 

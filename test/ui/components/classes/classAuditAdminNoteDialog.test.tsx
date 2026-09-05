@@ -80,6 +80,15 @@ function buildReadyViewModel(overrides: Partial<ClassAuditReadyViewModel> = {}):
       onClose: noopHandler,
       onSave: noopHandler,
     },
+    payroll: null,
+    statusEvents: null,
+    onOverride: noopHandler,
+    payrollOverrideDialog: {
+      open: false,
+      row: null,
+      onClose: noopHandler,
+      onApplied: noopHandler,
+    },
     ...overrides,
   };
 }

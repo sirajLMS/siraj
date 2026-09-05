@@ -26,3 +26,9 @@ Story ids are kebab-slugs like `views-dashboard-accounting-credits-creditadjustf
 ## Keep stories and implementation in sync
 
 When a fix wave changes component structure/props, the same fixer must update the stories — stories get stale fast and stale stories corrupt the next loop's conclusions.
+
+## Fonts (hard-won)
+
+`next/font` CSS variables are NOT defined in the Storybook iframe. If captures render in a serif
+fallback, add a `.storybook/preview-head.html` that loads the app webfonts and binds the CSS vars,
+then RESTART Storybook (HMR ignores preview-head changes).

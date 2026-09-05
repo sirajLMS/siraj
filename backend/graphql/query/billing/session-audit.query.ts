@@ -27,6 +27,11 @@ const STATUS_FROM_POTHOS_ENUM: Record<SessionAuditStatusEnum, SessionAuditStatus
   [SessionAuditStatusEnum.absent_student]: "absent_student",
 };
 
+const SORT_DIRECTION_FROM_POTHOS_ENUM: Record<OrderSortDirection, SessionAuditReportSort["direction"]> = {
+  [OrderSortDirection.ASC]: "asc",
+  [OrderSortDirection.DESC]: "desc",
+};
+
 const SORT_FIELD_FROM_POTHOS_ENUM: Record<SessionAuditReportSortFieldEnum, SessionAuditReportSort["field"]> = {
   [SessionAuditReportSortFieldEnum.scheduledStartAt]: "scheduledStartAt",
   [SessionAuditReportSortFieldEnum.scheduledEndAt]: "scheduledEndAt",
@@ -59,6 +64,14 @@ gqlSchemaBuilder.queryField("sessionAuditReport", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
+      // includeDeleted holds for manage-capable callers only; a view-only
+      // caller requesting it gets the flag silently removed, mirroring the
+      // CSV export route — soft-deleted rows must not surface through the
+      // query for callers the route would strip them from.
+      const requestedIncludeDeleted = args.filter?.includeDeleted === true;
+      const includeDeleted = requestedIncludeDeleted
+        ? ctx.isSuperAdmin || ctx.permissions.includes(AppPermission.ACCOUNTING_REPORTS_MANAGE)
+        : args.filter?.includeDeleted;
       const filters: SessionAuditReportFilters = {
         teacherId: args.filter?.teacherId,
         studentId: args.filter?.studentId,
@@ -66,12 +79,12 @@ gqlSchemaBuilder.queryField("sessionAuditReport", t =>
         dateTo: args.filter?.dateTo,
         currentStatuses: args.filter?.currentStatuses?.map(status => STATUS_FROM_POTHOS_ENUM[status]),
         search: args.filter?.search,
-        includeDeleted: args.filter?.includeDeleted,
+        includeDeleted,
       };
       const sort: SessionAuditReportSort | null = args.sort
         ? {
             field: SORT_FIELD_FROM_POTHOS_ENUM[args.sort.field],
-            direction: args.sort.direction === OrderSortDirection.ASC ? "asc" : "desc",
+            direction: SORT_DIRECTION_FROM_POTHOS_ENUM[args.sort.direction],
           }
         : null;
       return SessionAuditService.getReport(

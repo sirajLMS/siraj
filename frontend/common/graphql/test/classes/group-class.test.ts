@@ -109,6 +109,19 @@ describe("GraphQL: Group Class integration tests", () => {
     expect(typeof audit.adminNote?.lastUpdated).toBe("string");
   });
 
+  test("groupClassAudit: non-super-admin with the session view permission passes the scope gate", async () => {
+    if (!adminToken || !classInstanceId) throw new Error("Missing test context");
+
+    const result = await testClient.query({
+      query: groupClassAuditQueryDocument,
+      variables: { classInstanceId },
+      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.data?.groupClassAudit).toBeDefined();
+  });
+
   test("groupClassAudit: non-existent classInstanceId returns GraphQL error", async () => {
     if (!superAdminToken) throw new Error("Missing test context");
 

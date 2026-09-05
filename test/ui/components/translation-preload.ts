@@ -17,6 +17,7 @@ import {
   DashboardAccountingPayments,
   DashboardAccountingStudentCreditHours,
 } from "@/shared/locale/namespaces/dashboard/accounting";
+import { DashboardBillingPayroll } from "@/shared/locale/namespaces/dashboard/billing";
 import type { NamespaceHandle } from "@/shared/locale/namespaces/define-namespace";
 import { Translation } from "@/shared/locale/namespaces/translation";
 
@@ -24,6 +25,7 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   DashboardAccountingPackagePlans,
   DashboardAccountingPayments,
   DashboardAccountingStudentCreditHours,
+  DashboardBillingPayroll,
   Translation.Common,
   Translation.Whatsapp,
   Translation.Dashboard.Cron,
@@ -55,6 +57,7 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   Translation.Dashboard.Admin,
   Translation.Dashboard.AdminView,
   Translation.Dashboard.RecurringSchedulesList,
+  Translation.Dashboard.SessionAudit,
   Translation.Dashboard.CoreSearchSchedule,
   Translation.Dashboard.StudentHistory,
   Translation.Dashboard.TeacherDashboard,

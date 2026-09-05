@@ -26,9 +26,9 @@ import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graph
 import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
 import {
   NOTE_MAX_LENGTH,
+  type OverrideDialogRow,
   useOverrideDialogViewModel,
 } from "@/frontend/common/views/dashboard/accounting/payroll/useOverrideDialogViewModel";
-import type { PayrollReportRow } from "@/frontend/common/views/dashboard/accounting/payroll/usePayrollReportsViewModel";
 
 /** HTML id of the dialog form so the submit button in DialogActions can target it. */
 const FORM_ID = "payroll-override-form";
@@ -42,10 +42,12 @@ const SUMMARY_GRID_SX = {
 export interface OverrideDialogProps {
   /** Whether the dialog is visible; every open starts a fresh form session. */
   readonly open: boolean;
-  /** Report row the override targets; null leaves the summary blank and disables submission. */
-  readonly row: PayrollReportRow | null;
+  /** Payroll snapshot the override targets; null leaves the summary blank and disables submission. */
+  readonly row: OverrideDialogRow | null;
   /** Close request raised by Cancel, Escape, backdrop click, or a successful override. */
   readonly onClose: () => void;
+  /** Runs after a successful override so the host page can refresh its queries. */
+  readonly onApplied?: () => void;
 }
 
 interface SummaryItemProps {
@@ -59,9 +61,8 @@ function SummaryItem({ label, value }: Readonly<SummaryItemProps>) {
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
         {label}
       </Typography>
-      <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
-        {value}
-      </Typography>
+      {/* The value can be a status chip (block-level), so the wrapper stays a div. */}
+      <Box sx={theme => ({ ...theme.typography.bodyMd, fontWeight: 600 })}>{value}</Box>
     </Stack>
   );
 }
@@ -71,8 +72,8 @@ function formatPaidAmount(amount: string | null, currency: CurrencyCode | null):
   return currency === null ? amount : `${amount} ${currency}`;
 }
 
-export function OverrideDialog({ open, row, onClose }: Readonly<OverrideDialogProps>) {
-  const viewModel = useOverrideDialogViewModel({ open, row, onClose });
+export function OverrideDialog({ open, row, onClose, onApplied }: Readonly<OverrideDialogProps>) {
+  const viewModel = useOverrideDialogViewModel({ open, row, onClose, onApplied });
   const { form, labels, commonLabels } = viewModel;
   const targetGroupLabelId = useId();
   const forceAlertId = useId();
@@ -124,7 +125,18 @@ export function OverrideDialog({ open, row, onClose }: Readonly<OverrideDialogPr
                 label={labels.column.partialPercentage}
                 value={viewModel.summary.isPartialPercentage ?? "—"}
               />
-              <SummaryItem label={labels.column.note} value={viewModel.summary.payrollNote ?? "—"} />
+              <SummaryItem
+                label={labels.column.note}
+                // Staff-entered notes are free text: a Latin note inside an RTL locale
+                // lets the bidi algorithm relocate trailing punctuation (the period
+                // detaches from "…teacher."). The isolate span anchors the note in
+                // its own direction regardless of the surrounding locale.
+                value={
+                  <Box component="span" dir="auto" sx={{ unicodeBidi: "isolate" }}>
+                    {viewModel.summary.payrollNote ?? "—"}
+                  </Box>
+                }
+              />
             </Box>
           </Box>
 
@@ -187,7 +199,7 @@ export function OverrideDialog({ open, row, onClose }: Readonly<OverrideDialogPr
                 fullWidth
                 disabled={viewModel.submitting}
                 error={fieldState.error !== undefined}
-                helperText={fieldState.error?.message}
+                helperText={fieldState.error?.message ?? labels.override.noteHint}
                 aria-invalid={fieldState.error !== undefined}
                 slotProps={{ htmlInput: { maxLength: NOTE_MAX_LENGTH } }}
               />
