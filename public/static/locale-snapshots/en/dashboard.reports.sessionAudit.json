@@ -54,6 +54,23 @@
   "error": {
     "dateRangeInvalid": "From date cannot be after To date."
   },
+  "carryover": {
+    "bulkAction": "Carryover Balance",
+    "linkedColumn": "Carryover",
+    "linkedChip": "Linked",
+    "dialog": {
+      "title": "Create carryover balances",
+      "intro": "The selected sessions are grouped per teacher and converted into carryover balances. Every session must be audited and not already linked.",
+      "teacherLine": {
+        "__fn": "(teacherName,count)=>{if(count===1)return`${teacherName} \\u2014 1 session`;return`${teacherName} \\u2014 ${count} sessions`}"
+      },
+      "totalSessions": {
+        "__fn": "count=>{if(count===1)return\"1 session selected\";return`${count} sessions selected`}"
+      },
+      "confirm": "Create carryovers",
+      "cancel": "Cancel"
+    }
+  },
   "emptyState": {
     "title": "No session events match the current filters.",
     "titleNoFilters": "No session events yet.",

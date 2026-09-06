@@ -100,6 +100,8 @@ export interface SessionAuditFilterSlice {
   /** 0-based server page index. */
   readonly page: number;
   readonly pageSize: number;
+  /** Ids of the rows currently checked for the carryover bulk action. */
+  readonly selectedIds: readonly string[];
   readonly setTeacherId: (teacherId: string | null) => void;
   readonly setStudentId: (studentId: string | null) => void;
   readonly setDateFrom: (dateFrom: string | null) => void;
@@ -109,6 +111,8 @@ export interface SessionAuditFilterSlice {
   readonly setSort: (sortField: SessionAuditReportSortField, sortDirection: OrderSortDirection) => void;
   readonly setPage: (page: number) => void;
   readonly setPageSize: (pageSize: number) => void;
+  readonly toggleSelected: (id: string) => void;
+  readonly clearSelection: () => void;
   readonly clearFilters: () => void;
 }
 
@@ -128,6 +132,8 @@ export interface SessionAuditReportsViewModel extends SessionAuditFilterSlice {
   readonly hasActiveFilters: boolean;
   /** True when the caller holds ACCOUNTING_REPORTS_MANAGE (per-row override access). */
   readonly canManageReports: boolean;
+  /** True when the caller holds ACCOUNTING_CARRYOVER_MANAGE (bulk carryover toolbar + selection). */
+  readonly canManageCarryover: boolean;
   readonly handleExportCsv: () => Promise<SessionAuditCsvExportOutcome | null>;
 }
 
@@ -151,6 +157,9 @@ function useSessionAuditFilterSlice(): SessionAuditFilterSlice {
   const setSort = useSessionAuditFilterStore(s => s.setSort);
   const setPage = useSessionAuditFilterStore(s => s.setPage);
   const setPageSize = useSessionAuditFilterStore(s => s.setPageSize);
+  const selectedIds = useSessionAuditFilterStore(s => s.selectedIds);
+  const toggleSelected = useSessionAuditFilterStore(s => s.toggleSelected);
+  const clearSelection = useSessionAuditFilterStore(s => s.clearSelection);
   const clearFilters = useSessionAuditFilterStore(s => s.clearFilters);
   return {
     teacherId,
@@ -172,6 +181,9 @@ function useSessionAuditFilterSlice(): SessionAuditFilterSlice {
     setSort,
     setPage,
     setPageSize,
+    selectedIds,
+    toggleSelected,
+    clearSelection,
     clearFilters,
   };
 }
@@ -276,11 +288,14 @@ function useSessionAuditReportPage(
     () => ({ filter, sort, limit: pageSize, offset: page * pageSize }),
     [filter, sort, page, pageSize]
   );
-  const { data, loading, error, refetch } = useQuery(sessionAuditReportQueryDocument, {
+  const { data, previousData, loading, error, refetch } = useQuery(sessionAuditReportQueryDocument, {
     variables,
     fetchPolicy: "cache-and-network",
   });
-  const report = data?.sessionAuditReport ?? null;
+  // While a page/sort change is in flight the fresh result is briefly absent;
+  // falling back to the previous report keeps `rowCount` stable so the grid
+  // does not clamp the requested page back to 0 mid-fetch.
+  const report = data?.sessionAuditReport ?? previousData?.sessionAuditReport ?? null;
   const rows = useMemo<readonly SessionAuditReportRow[]>(() => report?.rows ?? [], [report]);
   const totalCount = report?.totalCount ?? 0;
   const aggregates = useMemo<SessionAuditReportAggregates>(
@@ -337,6 +352,7 @@ export function useSessionAuditReportsViewModel(): SessionAuditReportsViewModel 
 
   const hasPermission = useUserStore(s => s.hasPermission);
   const canManageReports = hasPermission(AppPermission.AccountingReportsManage);
+  const canManageCarryover = hasPermission(AppPermission.AccountingCarryoverManage);
 
   const debouncedSearch = useDebouncedSearch(search);
 
@@ -396,6 +412,7 @@ export function useSessionAuditReportsViewModel(): SessionAuditReportsViewModel 
     refetch: handleRefetch,
     hasActiveFilters,
     canManageReports,
+    canManageCarryover,
     handleExportCsv,
   };
 }

@@ -11,10 +11,11 @@ import {
   UndoOutlined,
 } from "@mui/icons-material";
 import { Box, Button, IconButton, Menu, MenuItem, Stack, Tooltip, Typography } from "@mui/material";
-import type { GridColDef, GridRowId, GridRowSelectionModel } from "@mui/x-data-grid";
-import { useCallback, useMemo, useState } from "react";
+import type { GridColDef } from "@mui/x-data-grid";
+import { useMemo, useState } from "react";
 import { ExportButton, SectionPanel } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
+import { usePageLocalRowSelection } from "@/frontend/common/components/ui/dataGrid/usePageLocalRowSelection";
 import { PersonProfileLinkCell } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLinkCell";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ErrorState } from "@/frontend/common/components/ui/state";
@@ -531,67 +532,6 @@ function useCarryoverColumns(args: CarryoverColumnArgs): GridColDef<CarryoverRow
   );
 }
 
-interface CarryoverRowSelectionArgs {
-  readonly selectedIds: readonly string[];
-  readonly toggleSelected: (id: string) => void;
-  readonly clearSelection: () => void;
-  readonly onPageChange: (page: number) => void;
-  readonly onPageSizeChange: (pageSize: number) => void;
-}
-
-interface CarryoverRowSelection {
-  readonly rowSelectionModel: GridRowSelectionModel;
-  readonly onSelectionChange: (model: GridRowSelectionModel) => void;
-  readonly onPageChange: (page: number) => void;
-  readonly onPageSizeChange: (pageSize: number) => void;
-}
-
-/** Store-backed checkbox model plus page-turn handlers; changing pages clears the page-local selection. */
-function useCarryoverRowSelection(args: CarryoverRowSelectionArgs): CarryoverRowSelection {
-  const { selectedIds, toggleSelected, clearSelection, onPageChange, onPageSizeChange } = args;
-  const rowSelectionModel = useMemo<GridRowSelectionModel>(
-    () => ({ type: "include", ids: new Set<GridRowId>(selectedIds) }),
-    [selectedIds]
-  );
-
-  /** Checkbox diffs map onto the store's toggle: each added/removed id flips once. */
-  const onSelectionChange = useCallback(
-    (model: GridRowSelectionModel) => {
-      const nextIds = new Set(Array.from(model.ids, String));
-      for (const id of selectedIds) {
-        if (!nextIds.has(id)) toggleSelected(id);
-      }
-      for (const id of nextIds) {
-        if (!selectedIds.includes(id)) toggleSelected(id);
-      }
-    },
-    [selectedIds, toggleSelected]
-  );
-
-  /** Bulk selection is scoped to the visible page, so a page turn drops it. */
-  const handlePageChange = useCallback(
-    (nextPage: number) => {
-      if (selectedIds.length > 0) clearSelection();
-      onPageChange(nextPage);
-    },
-    [clearSelection, onPageChange, selectedIds.length]
-  );
-  const handlePageSizeChange = useCallback(
-    (nextPageSize: number) => {
-      if (selectedIds.length > 0) clearSelection();
-      onPageSizeChange(nextPageSize);
-    },
-    [clearSelection, onPageSizeChange, selectedIds.length]
-  );
-
-  return {
-    rowSelectionModel,
-    onSelectionChange,
-    onPageChange: handlePageChange,
-    onPageSizeChange: handlePageSizeChange,
-  };
-}
-
 /**
  * Carryover balance list grid: teacher/students/duration/money columns, paid and
  * disabled-teacher chips, per-row action menu (View Sessions for viewers, the
@@ -640,7 +580,7 @@ export function CarryoverDataGrid({
     onOpenUnpay,
     onOpenDrawer,
   });
-  const selection = useCarryoverRowSelection({
+  const selection = usePageLocalRowSelection({
     selectedIds,
     toggleSelected,
     clearSelection,

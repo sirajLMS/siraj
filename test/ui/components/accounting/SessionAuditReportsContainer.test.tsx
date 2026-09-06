@@ -131,6 +131,7 @@ function makeRow(overrides: Partial<SessionAuditReportRow> = {}): SessionAuditRe
     calculationStatus: CalculationStatus.Paid,
     isPartialPercentage: null,
     payrollNote: null,
+    carryoverBalanceId: null,
     teacherId: "teacher-1",
     teacherName: ROW_A_TEACHER,
     studentId: "student-1",

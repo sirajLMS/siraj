@@ -35,6 +35,7 @@ describe("session-audit.types", () => {
       isPartialPercentage: null,
       payrollNote: null,
       payrollCalculatedAt: "2026-09-01T12:00:00.000Z",
+      carryoverBalanceId: null,
       teacherId: "teacher-1",
       teacherName: "Ustadh Ahmed",
       studentId: "student-1",

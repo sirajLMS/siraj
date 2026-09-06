@@ -95,6 +95,7 @@ const ROW_FIELD_DEFAULTS = {
   calculationStatus: null,
   isPartialPercentage: null,
   payrollNote: null,
+  carryoverBalanceId: null,
   teacherId: null,
   teacherName: null,
   studentId: null,

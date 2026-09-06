@@ -54,6 +54,23 @@
   "error": {
     "dateRangeInvalid": "لا يمكن أن يكون تاريخ البداية بعد تاريخ النهاية."
   },
+  "carryover": {
+    "bulkAction": "رصيد الترحيل",
+    "linkedColumn": "الترحيل",
+    "linkedChip": "مرتبطة",
+    "dialog": {
+      "title": "إنشاء أرصدة ترحيل",
+      "intro": "سيتم تجميع الجلسات المحددة حسب المعلم وتحويلها إلى أرصدة ترحيل. يجب أن تكون كل جلسة مكتملة المراجعة وغير مرتبطة مسبقاً.",
+      "teacherLine": {
+        "__fn": "(teacherName,count)=>{if(count===1)return`${teacherName} \\u2014 \\u062C\\u0644\\u0633\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629`;if(count===2)return`${teacherName} \\u2014 \\u062C\\u0644\\u0633\\u062A\\u0627\\u0646`;if(count>=3&&count<=10)return`${teacherName} \\u2014 ${count} \\u062C\\u0644\\u0633\\u0627\\u062A`;return`${teacherName} \\u2014 ${count} \\u062C\\u0644\\u0633\\u0629`}"
+      },
+      "totalSessions": {
+        "__fn": "count=>{if(count===1)return\"\\u062C\\u0644\\u0633\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629 \\u0645\\u062D\\u062F\\u062F\\u0629\";if(count===2)return\"\\u062C\\u0644\\u0633\\u062A\\u0627\\u0646 \\u0645\\u062D\\u062F\\u062F\\u062A\\u0627\\u0646\";if(count>=3&&count<=10)return`${count} \\u062C\\u0644\\u0633\\u0627\\u062A \\u0645\\u062D\\u062F\\u062F\\u0629`;return`${count} \\u062C\\u0644\\u0633\\u0629 \\u0645\\u062D\\u062F\\u062F\\u0629`}"
+      },
+      "confirm": "إنشاء الترحيل",
+      "cancel": "إلغاء"
+    }
+  },
   "emptyState": {
     "title": "لا توجد جلسات تطابق الفلاتر الحالية.",
     "titleNoFilters": "لا توجد جلسات بعد.",

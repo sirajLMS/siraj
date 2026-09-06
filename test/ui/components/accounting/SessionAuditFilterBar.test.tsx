@@ -73,6 +73,7 @@ function makeRow(overrides: Partial<SessionAuditReportRow> = {}): SessionAuditRe
     calculationStatus: null,
     isPartialPercentage: null,
     payrollNote: null,
+    carryoverBalanceId: null,
     teacherId: "teacher-1",
     teacherName: "Row Teacher",
     studentId: "student-1",

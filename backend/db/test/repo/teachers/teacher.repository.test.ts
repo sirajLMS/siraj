@@ -360,6 +360,9 @@ describe("TeacherRepository", () => {
       const search = await TeacherRepository.searchTeachers("NonExistentName", 10);
       expect(search).toHaveLength(0);
 
+      const disabled = await TeacherRepository.isDisabled(fakeId);
+      expect(disabled).toBe(false);
+
       const directory = await TeacherRepository.getTeacherDirectory(new PaginationArgs({ first: 1, page: 1 }));
       expect(directory.rows.length).toBeGreaterThanOrEqual(0);
 
@@ -417,6 +420,28 @@ describe("TeacherRepository", () => {
     it("returns null for an unknown id", async () => {
       await runInRollback(async tx => {
         expect(await TeacherRepository.findActiveById(randomUUID(), tx)).toBeNull();
+      });
+    });
+  });
+
+  describe("isDisabled", () => {
+    it("returns true when the linked user account is deactivated", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTeacher(tx, { name: "Deactivated T" }, { status: AccountStatus.DEACTIVATED });
+        expect(await TeacherRepository.isDisabled(teacher.id, tx)).toBe(true);
+      });
+    });
+
+    it("returns false when the linked user account is activated", async () => {
+      await runInRollback(async tx => {
+        const { teacher } = await setupTeacher(tx, { name: "Activated T" });
+        expect(await TeacherRepository.isDisabled(teacher.id, tx)).toBe(false);
+      });
+    });
+
+    it("returns false for an unknown teacher id", async () => {
+      await runInRollback(async tx => {
+        expect(await TeacherRepository.isDisabled(randomUUID(), tx)).toBe(false);
       });
     });
   });

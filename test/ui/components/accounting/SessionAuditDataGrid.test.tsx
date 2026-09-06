@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, mock, test } from "bun:test";
+import { afterAll, afterEach, beforeAll, describe, expect, mock, test } from "bun:test";
+import type { MockLink } from "@apollo/client/testing";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 const locale = "en";
@@ -6,9 +7,18 @@ const locale = "en";
 const routerPush = mock((_href: string) => undefined);
 await mockNextNavigation("/accounting/reports", { locale, mockPush: routerPush });
 
+// The toast host needs a Toolpad provider chain the test wrapper does not set
+// up; the grid's carryover dialog only calls `show`, so a minimal hook mock is
+// enough.
+const showNotification = mock((_message: string, _options?: unknown) => {});
+await mock.module("@toolpad/core/useNotifications", () => ({
+  useNotifications: () => ({ show: showNotification }),
+}));
+
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { run as runAxe } from "axe-core";
+import { GraphQLError } from "graphql";
 
 expect.extend(matchers);
 
@@ -19,6 +29,7 @@ import {
   SessionAuditReportSortField,
   SessionAuditStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+import { bulkCreateCarryoverBalancesMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { formatPaidAmount } from "@/frontend/common/views/dashboard/billing/accounting/reports/formatters/sessionAuditCellFormatters";
 import {
   SessionAuditDataGrid,
@@ -26,10 +37,12 @@ import {
 } from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditDataGrid";
 import type { SessionAuditReportRow } from "@/frontend/common/views/dashboard/billing/accounting/reports/useSessionAuditReportsViewModel";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { DashboardAccountingCarryover } from "@/shared/locale/namespaces";
 import { Translation } from "@/shared/locale/namespaces/translation";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 const labels = readTranslation(Translation.Dashboard.SessionAudit, locale);
+const carryoverLabels = readTranslation(DashboardAccountingCarryover, locale);
 const adminLabels = readTranslation(Translation.Dashboard.Admin, locale);
 
 const DEFAULT_AGGREGATES: SessionAuditDataGridProps["aggregates"] = {
@@ -61,6 +74,7 @@ function makeRow(overrides: Partial<SessionAuditReportRow> = {}): SessionAuditRe
     calculationStatus: CalculationStatus.Paid,
     isPartialPercentage: null,
     payrollNote: "Approved after review.",
+    carryoverBalanceId: null,
     teacherId: "teacher-1",
     teacherName: "Ahmed Hassan",
     studentId: "student-1",
@@ -86,10 +100,14 @@ type GridOverrides = Partial<
     | "refetch"
     | "hasActiveFilters"
     | "clearFilters"
+    | "selectedIds"
+    | "toggleSelected"
+    | "clearSelection"
+    | "canManageCarryover"
   >
 >;
 
-function renderGrid(overrides: GridOverrides = {}) {
+function renderGrid(overrides: GridOverrides = {}, mocks: readonly MockLink.MockedResponse[] = []) {
   return render(
     <SessionAuditDataGrid
       labels={labels}
@@ -109,15 +127,97 @@ function renderGrid(overrides: GridOverrides = {}) {
       canManageReports={overrides.canManageReports ?? false}
       hasActiveFilters={overrides.hasActiveFilters ?? false}
       clearFilters={overrides.clearFilters ?? (() => undefined)}
+      selectedIds={overrides.selectedIds ?? []}
+      toggleSelected={overrides.toggleSelected ?? (() => undefined)}
+      clearSelection={overrides.clearSelection ?? (() => undefined)}
+      canManageCarryover={overrides.canManageCarryover ?? false}
     />,
-    { wrapper: ({ children }: { children: React.ReactNode }) => <TestWrapper locale={locale}>{children}</TestWrapper> }
+    {
+      wrapper: ({ children }: { children: React.ReactNode }) => (
+        <TestWrapper locale={locale} mocks={mocks}>
+          {children}
+        </TestWrapper>
+      ),
+    }
   );
 }
 
 afterEach(() => {
   cleanup();
   routerPush.mockClear();
+  showNotification.mockClear();
+  bulkCreateMutationCalls = 0;
 });
+
+// The dialog mints one idempotency token per open; pinning the token keeps the
+// mutation variables deterministic so the Apollo mocks match exactly.
+const FIXED_BULK_CREATE_REQUEST_ID: `${string}-${string}-${string}-${string}-${string}` =
+  "session-audit-bulk-create-fixed-request-id";
+const originalBulkCreateRandomUUID: typeof crypto.randomUUID = crypto.randomUUID;
+let bulkCreateMutationCalls = 0;
+
+beforeAll(() => {
+  crypto.randomUUID = () => FIXED_BULK_CREATE_REQUEST_ID;
+});
+
+afterAll(() => {
+  crypto.randomUUID = originalBulkCreateRandomUUID;
+});
+
+/** Counts actual mutation invocations (`result` runs once per network call). */
+function successfulBulkCreateMock(groupCount: number): MockLink.MockedResponse {
+  return {
+    request: {
+      query: bulkCreateCarryoverBalancesMutationDocument,
+      variables: {
+        input: { instanceIds: ["instance-1"], note: null, clientRequestId: FIXED_BULK_CREATE_REQUEST_ID },
+      },
+    },
+    result: () => {
+      bulkCreateMutationCalls += 1;
+      const groups = Array.from({ length: groupCount }, (_unused, index) => ({
+        id: `carryover-${index + 1}`,
+        carryoverId: `carryover-${index + 1}`,
+        instanceIds: ["instance-1"],
+        teacherId: "teacher-1",
+        payable: "45.00",
+        currency: "USD",
+        totalDuration: "0.88",
+        studentsCount: 1,
+      }));
+      return {
+        data: {
+          bulkCreateCarryoverBalances: {
+            id: "bulk-create-1",
+            totalInstanceIds: ["instance-1"],
+            auditLogIds: ["audit-1"],
+            groups,
+          },
+        },
+      };
+    },
+    maxUsageCount: Number.POSITIVE_INFINITY,
+  };
+}
+
+function rejectedBulkCreateMock(code: string, message: string): MockLink.MockedResponse {
+  return {
+    request: {
+      query: bulkCreateCarryoverBalancesMutationDocument,
+      variables: {
+        input: { instanceIds: ["instance-1"], note: null, clientRequestId: FIXED_BULK_CREATE_REQUEST_ID },
+      },
+    },
+    result: () => {
+      bulkCreateMutationCalls += 1;
+      return {
+        data: { bulkCreateCarryoverBalances: null },
+        errors: [new GraphQLError(message, { extensions: { code } })],
+      };
+    },
+    maxUsageCount: Number.POSITIVE_INFINITY,
+  };
+}
 
 describe("SessionAuditDataGrid — rendering", () => {
   test("renders the report columns with localized headers", () => {
@@ -216,11 +316,11 @@ describe("SessionAuditDataGrid — sorting", () => {
     expect(setSort).toHaveBeenCalledWith(SessionAuditReportSortField.TeacherName, OrderSortDirection.Asc);
   });
 
-  test("restores the default sort when the active sort is cleared (third click)", () => {
+  test("toggles to ascending when the actively descending sorted column is clicked", () => {
     const setSort = mock((_field: SessionAuditReportSortField, _direction: OrderSortDirection) => undefined);
     renderGrid({ setSort });
     fireEvent.click(screen.getByRole("columnheader", { name: labels.column.scheduledStart }));
-    expect(setSort).toHaveBeenCalledWith(SessionAuditReportSortField.ScheduledStartAt, OrderSortDirection.Desc);
+    expect(setSort).toHaveBeenCalledWith(SessionAuditReportSortField.ScheduledStartAt, OrderSortDirection.Asc);
   });
 
   test("ignores header clicks on non-sortable columns", () => {
@@ -301,5 +401,100 @@ describe("SessionAuditDataGrid — loading and error states", () => {
     renderGrid({ error: new Error("query failed"), refetch });
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+  });
+});
+
+describe("SessionAuditDataGrid — carryover linked chip", () => {
+  test("renders the Linked chip when the session is rolled into a carryover and navigates to its detail", () => {
+    renderGrid({ rows: [makeRow({ carryoverBalanceId: "carryover-42" })] });
+    const chip = screen.getByRole("button", { name: labels.carryover.linkedChip });
+    fireEvent.click(chip);
+    expect(routerPush).toHaveBeenCalledWith("/accounting/carryover/carryover-42");
+    // The chip owns its click: row navigation to the audit page must not fire.
+    expect(routerPush).not.toHaveBeenCalledWith("/classes/instance-1/audit");
+  });
+
+  test("renders the muted placeholder when the session is not linked", () => {
+    renderGrid();
+    expect(screen.queryByRole("button", { name: labels.carryover.linkedChip })).not.toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: labels.carryover.linkedColumn })).toBeInTheDocument();
+  });
+});
+
+describe("SessionAuditDataGrid — carryover bulk action", () => {
+  test("shows the Carryover Balance action only with the manage permission", () => {
+    const { unmount } = renderGrid({ canManageCarryover: true });
+    expect(screen.getByRole("button", { name: labels.carryover.bulkAction })).toBeInTheDocument();
+    unmount();
+    renderGrid({ canManageCarryover: false });
+    expect(screen.queryByRole("button", { name: labels.carryover.bulkAction })).not.toBeInTheDocument();
+  });
+
+  test("keeps the action disabled without a selection and opens the grouped summary with one", () => {
+    const rows = [
+      makeRow({ id: "instance-1", instanceId: "instance-1" }),
+      makeRow({ id: "instance-2", instanceId: "instance-2" }),
+      makeRow({
+        id: "instance-3",
+        instanceId: "instance-3",
+        teacherId: "teacher-2",
+        teacherName: "Mona Adel",
+      }),
+    ];
+    renderGrid({
+      canManageCarryover: true,
+      rows,
+      totalCount: rows.length,
+      selectedIds: ["instance-1", "instance-2", "instance-3"],
+    });
+    const action = screen.getByRole("button", { name: labels.carryover.bulkAction });
+    expect(action).toBeEnabled();
+    fireEvent.click(action);
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText(labels.carryover.dialog.totalSessions(3))).toBeInTheDocument();
+    expect(within(dialog).getByText(labels.carryover.dialog.teacherLine("Ahmed Hassan", 2))).toBeInTheDocument();
+    expect(within(dialog).getByText(labels.carryover.dialog.teacherLine("Mona Adel", 1))).toBeInTheDocument();
+  });
+
+  test("keeps the action disabled while nothing is selected", () => {
+    renderGrid({ canManageCarryover: true, selectedIds: [] });
+    expect(screen.getByRole("button", { name: labels.carryover.bulkAction })).toBeDisabled();
+  });
+
+  test("creates the carryovers with one mutation per confirm and reports evict + toast + selection clear", async () => {
+    const clearSelection = mock(() => undefined);
+    renderGrid(
+      {
+        canManageCarryover: true,
+        selectedIds: ["instance-1"],
+        clearSelection,
+      },
+      [successfulBulkCreateMock(1)]
+    );
+    fireEvent.click(screen.getByRole("button", { name: labels.carryover.bulkAction }));
+    const dialog = screen.getByRole("dialog");
+    const confirm = within(dialog).getByRole("button", { name: labels.carryover.dialog.confirm });
+    fireEvent.click(confirm);
+    fireEvent.click(confirm);
+    await waitFor(() => {
+      expect(bulkCreateMutationCalls).toBe(1);
+    });
+    await waitFor(() => {
+      expect(showNotification).toHaveBeenCalledWith(carryoverLabels.success.bulkCreated(1), { severity: "success" });
+      expect(clearSelection).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test("surfaces a selection-fatal domain rejection as a banner without closing the dialog", async () => {
+    renderGrid({ canManageCarryover: true, selectedIds: ["instance-1"] }, [
+      rejectedBulkCreateMock("CARRYOVER_SESSION_ALREADY_LINKED", "Sessions are already linked to a carryover."),
+    ]);
+    fireEvent.click(screen.getByRole("button", { name: labels.carryover.bulkAction }));
+    const dialog = await screen.findByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: labels.carryover.dialog.confirm }));
+    const banner = await within(dialog).findByText("Sessions are already linked to a carryover.");
+    expect(banner).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: labels.carryover.dialog.confirm })).toBeDisabled();
+    expect(showNotification).not.toHaveBeenCalledWith(carryoverLabels.success.bulkCreated(1), expect.anything());
   });
 });

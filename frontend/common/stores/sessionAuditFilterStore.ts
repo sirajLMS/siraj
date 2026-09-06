@@ -49,6 +49,8 @@ export interface SessionAuditFilterState {
   page: number;
   /** Rows per server page. */
   pageSize: number;
+  /** Ids of the rows currently checked for the carryover bulk action (page-local). */
+  selectedIds: readonly string[];
 }
 
 /** Subset of the filter state recovered from a query string; absent keys keep their defaults. */
@@ -70,6 +72,10 @@ interface SessionAuditFilterStore extends SessionAuditFilterState {
   setPageSize: (pageSize: number) => void;
   /** Clears every report filter and returns to the first page, keeping sort and page size. */
   clearFilters: () => void;
+  /** Adds the id when unchecked and removes it when checked. */
+  toggleSelected: (id: string) => void;
+  /** Empties the bulk-selection set. */
+  clearSelection: () => void;
   /** Restores the pristine store, including default sort and page size. */
   reset: () => void;
   /**
@@ -103,6 +109,7 @@ function defaultState(): SessionAuditFilterState {
     ...defaultSort(),
     page: 0,
     pageSize: SESSION_AUDIT_DEFAULT_PAGE_SIZE,
+    selectedIds: [],
   };
 }
 
@@ -247,7 +254,14 @@ export const useSessionAuditFilterStore = create<SessionAuditFilterStore>(set =>
   setSort: (sortField, sortDirection) => set({ sortField, sortDirection, page: 0 }),
   setPage: page => set({ page: toNonNegativePage(page) }),
   setPageSize: pageSize => set({ pageSize: toPositivePageSize(pageSize), page: 0 }),
-  clearFilters: () => set({ ...DEFAULT_FILTERS, page: 0 }),
+  toggleSelected: id =>
+    set(state => ({
+      selectedIds: state.selectedIds.includes(id)
+        ? state.selectedIds.filter(selectedId => selectedId !== id)
+        : [...state.selectedIds, id],
+    })),
+  clearSelection: () => set({ selectedIds: [] }),
+  clearFilters: () => set({ ...DEFAULT_FILTERS, page: 0, selectedIds: [] }),
   reset: () => set(defaultState()),
   hydrateFromUrl: search => set({ ...defaultState(), ...parseSessionAuditUrlParams(search ?? currentWindowSearch()) }),
 }));

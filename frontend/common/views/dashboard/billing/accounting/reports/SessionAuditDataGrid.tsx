@@ -1,13 +1,14 @@
 "use client";
 
-import { CheckCircleOutlined, OpenInNewOutlined } from "@mui/icons-material";
-import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
+import { AccountBalanceWalletOutlined, CheckCircleOutlined, OpenInNewOutlined } from "@mui/icons-material";
+import { Box, Button, Chip, IconButton, Stack, Tooltip } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { GridCellParams, GridColDef, GridSortModel, MuiEvent } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { formatDateTime, parseDateInput } from "@/frontend/common/components/intl/dateFormat";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
+import { usePageLocalRowSelection } from "@/frontend/common/components/ui/dataGrid/usePageLocalRowSelection";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ErrorState } from "@/frontend/common/components/ui/state";
 import {
@@ -17,6 +18,7 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
+import { CarryoverBulkCreateDialog } from "@/frontend/common/views/dashboard/billing/accounting/reports/CarryoverBulkCreateDialog";
 import {
   formatDurationMinutes,
   formatPaidAmount,
@@ -122,10 +124,10 @@ const ELLIPSIZED_CELL_SX = {
 
 /**
  * Cells whose own interactive content must not trigger row navigation:
- * the note popover button and the row-action button own their clicks and
- * keystrokes.
+ * the note popover button, the row-action button, the carryover link chip, and
+ * the checkbox-selection column own their clicks and keystrokes.
  */
-const NON_NAVIGATING_FIELDS: ReadonlySet<string> = new Set(["payrollNote", "actions"]);
+const NON_NAVIGATING_FIELDS: ReadonlySet<string> = new Set(["payrollNote", "actions", "carryoverLink", "__check__"]);
 
 /** Grid column field → server sort field, for the columns the API can sort. */
 const GRID_FIELD_TO_SORT_FIELD: Record<string, SessionAuditReportSortField> = {
@@ -146,12 +148,26 @@ const SORT_DIRECTION_TO_GRID_SORT: Record<OrderSortDirection, "asc" | "desc"> = 
   [OrderSortDirection.Desc]: "desc",
 };
 
+/**
+ * The grid's default cycle includes a third "unsorted" state, but every report
+ * query always carries a server sort — the cleared model falls back to the
+ * default sort instead, so a "no sort" step on the default column would read
+ * as a dead click. Restricting the cycle to asc/desc keeps every header click
+ * a visible direction flip.
+ */
+const SESSION_AUDIT_SORTING_ORDER: readonly ("asc" | "desc")[] = ["asc", "desc"];
+
 function auditHref(instanceId: string): string {
   return `/classes/${instanceId}/audit`;
 }
 
 function auditOverrideHref(instanceId: string): string {
   return `/classes/${instanceId}/audit?openOverride=1`;
+}
+
+/** Drill-down deep link to the carryover detail drawer for a linked session. */
+function carryoverHref(carryoverBalanceId: string): string {
+  return `/accounting/carryover/${carryoverBalanceId}`;
 }
 
 interface SessionTimeCellProps {
@@ -335,6 +351,40 @@ function PersonNameCell({ value }: Readonly<PersonNameCellProps>) {
   );
 }
 
+interface CarryoverLinkCellProps {
+  readonly carryoverBalanceId: string | null;
+  readonly chipLabel: string;
+  /** Muted placeholder rendered while the session is not linked to any carryover. */
+  readonly emptyText: string;
+  readonly onOpen: (carryoverBalanceId: string) => void;
+}
+
+/**
+ * Carryover-link column cell: a clickable chip on rows already rolled into a
+ * carryover balance (navigates to the carryover detail route), or the muted
+ * placeholder while the session is still unlinked.
+ */
+function CarryoverLinkCell({ carryoverBalanceId, chipLabel, emptyText, onOpen }: Readonly<CarryoverLinkCellProps>) {
+  if (carryoverBalanceId === null || carryoverBalanceId === "") {
+    return (
+      <Box component="span" sx={theme => ({ color: theme.palette.text.secondary })}>
+        {emptyText}
+      </Box>
+    );
+  }
+  return (
+    <Chip
+      size="small"
+      clickable
+      color="success"
+      variant="outlined"
+      label={chipLabel}
+      aria-label={chipLabel}
+      onClick={() => onOpen(carryoverBalanceId)}
+    />
+  );
+}
+
 interface SessionAuditColumnArgs {
   readonly labels: SessionAuditLabels;
   readonly payrollLabels: PayrollLabels;
@@ -342,6 +392,7 @@ interface SessionAuditColumnArgs {
   readonly locale: string;
   readonly canManageReports: boolean;
   readonly onOpenAuditOverride: (row: SessionAuditReportRow) => void;
+  readonly onOpenCarryover: (carryoverBalanceId: string) => void;
 }
 
 function buildTimeCellColumn(
@@ -374,6 +425,7 @@ function buildSessionAuditColumns({
   locale,
   canManageReports,
   onOpenAuditOverride,
+  onOpenCarryover,
 }: SessionAuditColumnArgs): GridColDef<SessionAuditReportRow>[] {
   const columns: GridColDef<SessionAuditReportRow>[] = [
     {
@@ -479,6 +531,22 @@ function buildSessionAuditColumns({
       valueFormatter: value => formatPartialPercentage(typeof value === "number" ? value : null, locale, labels.cell),
     },
     {
+      field: "carryoverLink",
+      headerName: labels.carryover.linkedColumn,
+      width: 96,
+      align: "center",
+      headerAlign: "center",
+      sortable: false,
+      renderCell: ({ row }) => (
+        <CarryoverLinkCell
+          carryoverBalanceId={row.carryoverBalanceId}
+          chipLabel={labels.carryover.linkedChip}
+          emptyText={labels.cell.notCalculated}
+          onOpen={onOpenCarryover}
+        />
+      ),
+    },
+    {
       field: "payrollNote",
       headerName: labels.column.note,
       flex: 1,
@@ -535,12 +603,18 @@ export type SessionAuditDataGridProps = Pick<
   | "canManageReports"
   | "hasActiveFilters"
   | "clearFilters"
+  | "selectedIds"
+  | "toggleSelected"
+  | "clearSelection"
+  | "canManageCarryover"
 >;
 
 /**
  * Main session-audit grid: server-side sorting and pagination over the report
  * rows, drill-down navigation per row, permission-gated override deep link,
- * and the aggregate footer card. Interactive cells (note popover, actions) own
+ * the carryover bulk-action toolbar with checkbox selection for carryover
+ * managers, the linked-carryover chip column, and the aggregate footer card.
+ * Interactive cells (note popover, actions, carryover chip, checkboxes) own
  * their clicks so they never trigger row navigation.
  */
 export function SessionAuditDataGrid({
@@ -561,11 +635,16 @@ export function SessionAuditDataGrid({
   canManageReports,
   hasActiveFilters,
   clearFilters,
+  selectedIds,
+  toggleSelected,
+  clearSelection,
+  canManageCarryover,
 }: Readonly<SessionAuditDataGridProps>) {
   const locale = useAppLocale();
   const payrollLabels = useAppTranslation(DashboardBillingPayroll);
   const calculationStatusLabels: Record<CalculationStatus, string> = payrollLabels.status;
   const router = useRouter();
+  const [carryoverDialogOpen, setCarryoverDialogOpen] = useState(false);
 
   const navigateToAudit = useCallback(
     (instanceId: string | null) => {
@@ -583,6 +662,13 @@ export function SessionAuditDataGrid({
     [router]
   );
 
+  const openCarryover = useCallback(
+    (carryoverBalanceId: string) => {
+      router.push(carryoverHref(carryoverBalanceId));
+    },
+    [router]
+  );
+
   const columns = useMemo<GridColDef<SessionAuditReportRow>[]>(
     () =>
       buildSessionAuditColumns({
@@ -592,9 +678,24 @@ export function SessionAuditDataGrid({
         locale,
         canManageReports,
         onOpenAuditOverride: openAuditOverride,
+        onOpenCarryover: openCarryover,
       }),
-    [labels, payrollLabels, calculationStatusLabels, locale, canManageReports, openAuditOverride]
+    [labels, payrollLabels, calculationStatusLabels, locale, canManageReports, openAuditOverride, openCarryover]
   );
+
+  const selection = usePageLocalRowSelection({
+    selectedIds,
+    toggleSelected,
+    clearSelection,
+    onPageChange: setPage,
+    onPageSizeChange: setPageSize,
+  });
+
+  /** Selection rows resolved against the visible page; the bulk action always acts on these rows. */
+  const selectedRows = useMemo(() => {
+    const idSet = new Set(selectedIds);
+    return rows.filter(row => idSet.has(row.instanceId ?? row.id ?? ""));
+  }, [rows, selectedIds]);
 
   const sortModel = useMemo<GridSortModel>(
     () => [{ field: sortField, sort: SORT_DIRECTION_TO_GRID_SORT[sortDirection] }],
@@ -637,6 +738,20 @@ export function SessionAuditDataGrid({
 
   return (
     <Stack sx={{ gap: 1.5, width: "100%" }}>
+      {canManageCarryover ? (
+        <Stack direction="row" sx={{ gap: 1, justifyContent: "flex-end" }}>
+          <Button
+            id="session-audit-bulk-carryover"
+            size="small"
+            variant="outlined"
+            startIcon={<AccountBalanceWalletOutlined />}
+            disabled={selectedRows.length === 0}
+            onClick={() => setCarryoverDialogOpen(true)}
+          >
+            {labels.carryover.bulkAction}
+          </Button>
+        </Stack>
+      ) : null}
       {error !== null ? (
         <ErrorState onRetry={refetch} />
       ) : (
@@ -649,17 +764,22 @@ export function SessionAuditDataGrid({
           ariaLabel={labels.title}
           disableColumnMenu
           sortingMode="server"
+          sortingOrder={SESSION_AUDIT_SORTING_ORDER}
           sx={[HEADER_WRAP_SX, SCROLLBAR_CUE_SX]}
           sortModel={sortModel}
           onSortModelChange={handleSortModelChange}
           onCellClick={handleCellClick}
           onCellKeyDown={handleCellKeyDown}
+          disableRowSelectionOnClick
+          checkboxSelection={canManageCarryover}
+          rowSelectionModel={selection.rowSelectionModel}
+          onRowSelectionModelChange={selection.onSelectionChange}
           paginationOptions={buildServerPaginationOptions({
             page,
             pageSize,
             totalCount,
-            onPageChange: setPage,
-            onPageSizeChange: setPageSize,
+            onPageChange: canManageCarryover ? selection.onPageChange : setPage,
+            onPageSizeChange: canManageCarryover ? selection.onPageSizeChange : setPageSize,
             pageSizeOptions: SESSION_AUDIT_PAGE_SIZE_OPTIONS,
           })}
         />
@@ -678,6 +798,13 @@ export function SessionAuditDataGrid({
         rowCountByPaid={aggregates.rowCountByPaid}
         labels={labels.aggregate}
         statusLabels={labels.status}
+      />
+      <CarryoverBulkCreateDialog
+        open={carryoverDialogOpen}
+        rows={selectedRows}
+        labels={labels.carryover}
+        onClose={() => setCarryoverDialogOpen(false)}
+        onDone={clearSelection}
       />
     </Stack>
   );

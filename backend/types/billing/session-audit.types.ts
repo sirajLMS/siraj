@@ -70,6 +70,8 @@ export interface SessionAuditReportRow {
   isPartialPercentage: number | null;
   payrollNote: string | null;
   payrollCalculatedAt: string | null;
+  /** Carryover balance this session has been rolled into; null while unlinked. */
+  carryoverBalanceId: string | null;
   teacherId: string;
   teacherName: string;
   studentId: string;

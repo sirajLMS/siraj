@@ -48,10 +48,40 @@ export interface SessionAuditLabels {
     readonly bookingTimezone: (value: string) => string;
   };
   readonly error: { readonly dateRangeInvalid: string };
+  readonly carryover: {
+    /** Toolbar bulk action that opens the carryover creation dialog for the selected sessions. */
+    readonly bulkAction: string;
+    /** Header of the narrow column that flags rows already rolled into a carryover. */
+    readonly linkedColumn: string;
+    /** Chip on a row linked to a carryover balance; navigating to the carryover detail. */
+    readonly linkedChip: string;
+    readonly dialog: {
+      readonly title: string;
+      readonly intro: string;
+      /** One line per affected teacher: name plus their selected session count (CLDR plural). */
+      readonly teacherLine: (teacherName: string, count: number) => string;
+      /** Summary footer over the whole selection (CLDR plural on the session count). */
+      readonly totalSessions: (count: number) => string;
+      readonly confirm: string;
+      readonly cancel: string;
+    };
+  };
   readonly emptyState: {
     readonly title: string;
     /** Neutral copy shown when the report is empty with no filters active. */
     readonly titleNoFilters: string;
     readonly cta: string;
+  };
+  readonly accessDenied: {
+    /** Heading of the in-page 403 card rendered when the viewer lacks the report permission. */
+    readonly title: string;
+    /** Text rendered before the highlighted permission identifier. */
+    readonly descriptionPrefix: string;
+    /** Text rendered after the highlighted permission identifier. */
+    readonly descriptionSuffix: string;
+    /** Status chip carrying the HTTP code and permission-error key. */
+    readonly statusChip: string;
+    readonly backToDashboard: string;
+    readonly contactSupport: string;
   };
 }

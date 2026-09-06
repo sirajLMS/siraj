@@ -50,9 +50,41 @@ export const dashboardReportsSessionAuditAr: SessionAuditLabels = {
     bookingTimezone: value => `توقيت الحجز: ${value}`,
   },
   error: { dateRangeInvalid: "لا يمكن أن يكون تاريخ البداية بعد تاريخ النهاية." },
+  carryover: {
+    bulkAction: "رصيد الترحيل",
+    linkedColumn: "الترحيل",
+    linkedChip: "مرتبطة",
+    dialog: {
+      title: "إنشاء أرصدة ترحيل",
+      intro:
+        "سيتم تجميع الجلسات المحددة حسب المعلم وتحويلها إلى أرصدة ترحيل. يجب أن تكون كل جلسة مكتملة المراجعة وغير مرتبطة مسبقاً.",
+      teacherLine: (teacherName, count) => {
+        if (count === 1) return `${teacherName} — جلسة واحدة`;
+        if (count === 2) return `${teacherName} — جلستان`;
+        if (count >= 3 && count <= 10) return `${teacherName} — ${count} جلسات`;
+        return `${teacherName} — ${count} جلسة`;
+      },
+      totalSessions: count => {
+        if (count === 1) return "جلسة واحدة محددة";
+        if (count === 2) return "جلستان محددتان";
+        if (count >= 3 && count <= 10) return `${count} جلسات محددة`;
+        return `${count} جلسة محددة`;
+      },
+      confirm: "إنشاء الترحيل",
+      cancel: "إلغاء",
+    },
+  },
   emptyState: {
     title: "لا توجد جلسات تطابق الفلاتر الحالية.",
     titleNoFilters: "لا توجد جلسات بعد.",
     cta: "مسح الفلاتر",
+  },
+  accessDenied: {
+    title: "ليس لديك صلاحية لعرض هذا التقرير",
+    descriptionPrefix: "اطلب من المسؤول منحك صلاحية",
+    descriptionSuffix: "للوصول إلى مراجعة أحداث الجلسات.",
+    statusChip: "403 · INSUFFICIENT_PERMISSIONS",
+    backToDashboard: "العودة إلى لوحة التحكم",
+    contactSupport: "تواصل مع الدعم",
   },
 };

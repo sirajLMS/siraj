@@ -50,9 +50,37 @@ export const dashboardReportsSessionAuditEn: SessionAuditLabels = {
     bookingTimezone: value => `Booking timezone: ${value}`,
   },
   error: { dateRangeInvalid: "From date cannot be after To date." },
+  carryover: {
+    bulkAction: "Carryover Balance",
+    linkedColumn: "Carryover",
+    linkedChip: "Linked",
+    dialog: {
+      title: "Create carryover balances",
+      intro:
+        "The selected sessions are grouped per teacher and converted into carryover balances. Every session must be audited and not already linked.",
+      teacherLine: (teacherName, count) => {
+        if (count === 1) return `${teacherName} — 1 session`;
+        return `${teacherName} — ${count} sessions`;
+      },
+      totalSessions: count => {
+        if (count === 1) return "1 session selected";
+        return `${count} sessions selected`;
+      },
+      confirm: "Create carryovers",
+      cancel: "Cancel",
+    },
+  },
   emptyState: {
     title: "No session events match the current filters.",
     titleNoFilters: "No session events yet.",
     cta: "Clear filters",
+  },
+  accessDenied: {
+    title: "You don't have permission to view this report",
+    descriptionPrefix: "Ask an administrator to grant you the",
+    descriptionSuffix: "permission to access session event audits.",
+    statusChip: "403 · INSUFFICIENT_PERMISSIONS",
+    backToDashboard: "Back to Dashboard",
+    contactSupport: "Contact support",
   },
 };

@@ -24,6 +24,7 @@ function buildRow(overrides: Partial<SessionAuditReportRow> = {}): SessionAuditR
     isPartialPercentage: null,
     payrollNote: "Calculated on time",
     payrollCalculatedAt: "2026-08-02T09:00:00.000Z",
+    carryoverBalanceId: null,
     teacherId: "teacher-1",
     teacherName: "Mona Adel",
     studentId: "student-1",

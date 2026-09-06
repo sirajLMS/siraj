@@ -4739,6 +4739,7 @@ type SessionAuditReportRow {
   bookingTimezone: String
   calculatedDuration: Int
   calculationStatus: CalculationStatus
+  carryoverBalanceId: ID
   currentStatus: SessionAuditStatus
   durationMinutes: Int
   id: ID

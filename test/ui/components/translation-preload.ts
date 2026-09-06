@@ -13,6 +13,7 @@
 import { locales } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import {
+  DashboardAccountingCarryover,
   DashboardAccountingPackagePlans,
   DashboardAccountingPayments,
   DashboardAccountingStudentCreditHours,
@@ -22,6 +23,7 @@ import type { NamespaceHandle } from "@/shared/locale/namespaces/define-namespac
 import { Translation } from "@/shared/locale/namespaces/translation";
 
 const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
+  DashboardAccountingCarryover,
   DashboardAccountingPackagePlans,
   DashboardAccountingPayments,
   DashboardAccountingStudentCreditHours,

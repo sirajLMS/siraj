@@ -79,6 +79,7 @@ export const SessionAuditReportRowPothosObject = SessionAuditReportRowRef.implem
     isPartialPercentage: t.exposeInt("isPartialPercentage", { nullable: true }),
     payrollNote: t.exposeString("payrollNote", { nullable: true }),
     payrollCalculatedAt: t.expose("payrollCalculatedAt", { type: "DateTime", nullable: true }),
+    carryoverBalanceId: t.exposeID("carryoverBalanceId", { nullable: true }),
     teacherId: t.exposeID("teacherId"),
     teacherName: t.exposeString("teacherName"),
     studentId: t.exposeID("studentId"),

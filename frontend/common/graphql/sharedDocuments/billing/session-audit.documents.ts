@@ -32,6 +32,7 @@ export const sessionAuditReportQueryDocument: TypedDocumentNode<
         calculationStatus
         isPartialPercentage
         payrollNote
+        carryoverBalanceId
         teacherId
         teacherName
         studentId
