@@ -26,10 +26,19 @@ const EMPTY_SNACKBAR: TeacherDuesSnackbarState = {
   severity: "success",
 };
 
-function groupDueIdsByPaymentId(dueIds: readonly string[], rows: readonly TeacherDueRow[]): Map<string, string[]> {
+export function groupDueIdsByPaymentId(dueIds: readonly string[], rows: readonly TeacherDueRow[]): Map<string, string[]> {
+  // Optimization: Pre-index rows by ID to avoid O(M * N) nested array scanning.
+  // Reduces lookup complexity from O(M * N) to O(N + M) where N = rows.length, M = dueIds.length.
+  const rowById = new Map<string, TeacherDueRow>();
+  for (const row of rows) {
+    if (row.id) {
+      rowById.set(row.id, row);
+    }
+  }
+
   const byPayment = new Map<string, string[]>();
   for (const dueId of dueIds) {
-    const row = rows.find(r => r.id === dueId);
+    const row = rowById.get(dueId);
     const paymentId = row?.teacherPaymentId?.trim() ?? "";
     if (!paymentId) continue;
     const existing = byPayment.get(paymentId) ?? [];
