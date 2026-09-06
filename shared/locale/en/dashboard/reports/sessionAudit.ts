@@ -71,8 +71,9 @@ export const dashboardReportsSessionAuditEn: SessionAuditLabels = {
     },
   },
   emptyState: {
-    title: "No session events match the current filters.",
+    title: "No sessions match your filters",
     titleNoFilters: "No session events yet.",
+    subtitle: "Try widening the date range or clearing the Status filter.",
     cta: "Clear filters",
   },
   accessDenied: {

@@ -91,6 +91,7 @@ export function ClassAuditViewGridShared({
         adminNoteLabels={labels.adminNote}
         onUpdateAdminNote={onUpdateAdminNote}
         onEditAdminNote={onEditAdminNote}
+        isOneOnOne={audit.isOneOnOne ?? false}
         slots={gridSlots}
       />
     </Grid>

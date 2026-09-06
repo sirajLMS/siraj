@@ -35,6 +35,7 @@ export const classAuditFixture = {
   isFrozen: false,
   auditRemark: "Class rescheduled due to teacher availability",
   auditLoggedAt: "2026-06-20T08:00:00Z",
+  isOneOnOne: false,
   registeredStudentCount: 3,
   totalStudentCount: 3,
   students: [

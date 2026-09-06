@@ -31,6 +31,7 @@ function buildAuditResult(): GroupClassAuditReturnType {
     isFrozen: false,
     auditRemark: null,
     auditLoggedAt: "2026-08-30T11:05:00.000Z",
+    isOneOnOne: false,
     registeredStudentCount: 1,
     totalStudentCount: 1,
     students: [
@@ -139,6 +140,7 @@ const GROUP_CLASS_AUDIT_QUERY = `
       timeSlot
       registeredStudentCount
       totalStudentCount
+      isOneOnOne
       status
       outcome
       isFrozen
@@ -173,6 +175,7 @@ interface GroupClassAuditData {
   className: string;
   registeredStudentCount: number;
   totalStudentCount: number;
+  isOneOnOne: boolean;
   status: string;
   outcome: string;
   students: Array<{ id: string; name: string; attendanceStatus: string }>;
@@ -212,6 +215,7 @@ describe("groupClassAudit query", () => {
     expect(audit?.registeredStudentCount).toBe(1);
     expect(audit?.status).toBe(ClassExecutionState.COMPLETED);
     expect(audit?.outcome).toBe(ClassOutcome.TAKEN);
+    expect(audit?.isOneOnOne).toBe(false);
     expect(audit?.students).toHaveLength(1);
     // Pothos enum member names surface uppercased on the wire.
     expect(audit?.students[0]?.attendanceStatus).toBe("PRESENT");

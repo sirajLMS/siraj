@@ -1,7 +1,7 @@
 import { GroupClassRepository } from "@/backend/db/repo/classes/group-class.repository";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { AppPermission, GroupClassAttendanceStatus, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { assertHasPermission } from "@/backend/services/shared";
@@ -45,18 +45,26 @@ export namespace GroupClassService {
     return classInstance;
   }
 
+  function buildStudentInitials(name: string): string {
+    return name
+      .split(" ")
+      .map(n => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  function formatTimeSlot(start: Date, end: Date): string {
+    return `${toClockText(start)} - ${toClockText(end)}`;
+  }
+
   async function fetchStudents(groupClassId: string): Promise<GroupClassStudentReturnType[]> {
     const enrollmentRows = await GroupClassRepository.getEnrollmentsWithStudentDetails(groupClassId);
     return enrollmentRows.map(e => ({
       id: e.studentId,
       name: e.studentName,
       studentId: e.studentIdNumber ?? e.studentId,
-      initials: e.studentName
-        .split(" ")
-        .map(n => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2),
+      initials: buildStudentInitials(e.studentName),
       attendanceStatus: parseGroupClassAttendanceStatus(e.attendanceStatus),
       avatarUrl: e.studentAvatarUrl,
     }));
@@ -100,7 +108,10 @@ export namespace GroupClassService {
   ): Promise<GroupClassAuditReturnType> {
     await assertPermission(userId, AppPermission.SESSION_VIEW_DETAILS, tErrors);
 
-    const groupClass = await getGroupClassOrThrow(classInstanceId, tErrors);
+    const groupClass = await GroupClassRepository.getByClassInstanceId(classInstanceId);
+    if (!groupClass) {
+      return getOneOnOneClassAudit(classInstanceId, tErrors);
+    }
     const classInstance = await getClassInstanceOrThrow(classInstanceId, tErrors);
 
     const [students, communicationLogs, meetingInfo] = await Promise.all([
@@ -134,6 +145,60 @@ export namespace GroupClassService {
       meetingInfo,
       communications: communicationLogs,
       adminNote,
+      isOneOnOne: false,
+    };
+  }
+
+  /**
+   * 1-on-1 sessions have no `group_classes` row, so the audit payload is built
+   * directly from the class instance: the single enrolled student comes from
+   * the instance's student join, and group-only surfaces (communications) stay
+   * empty. The `isOneOnOne` flag lets the UI hide group-only affordances.
+   */
+  async function getOneOnOneClassAudit(
+    classInstanceId: string,
+    tErrors: ErrorsLabels
+  ): Promise<GroupClassAuditReturnType> {
+    const classInstance = await getClassInstanceOrThrow(classInstanceId, tErrors);
+    const student = classInstance.student;
+    const students: GroupClassStudentReturnType[] = [];
+    if (student) {
+      students.push({
+        id: student.id,
+        name: student.name,
+        studentId: student.id,
+        initials: buildStudentInitials(student.name),
+        attendanceStatus: GroupClassAttendanceStatus.PENDING,
+        avatarUrl: student.avatarUrl,
+      });
+    }
+
+    const meetingInfo = await buildMeetingInfo(classInstanceId, tErrors);
+
+    return {
+      id: classInstance.id,
+      className: classInstance.subject?.name ?? classInstance.classType,
+      courseCode: classInstance.classType,
+      teacherName: classInstance.teacher?.user.name ?? "",
+      originalDate: classInstance.scheduledStartAt.toISOString(),
+      rescheduledDate: null,
+      timeSlot: formatTimeSlot(classInstance.scheduledStartAt, classInstance.scheduledEndAt),
+      venue: "Online",
+      status: resolveGroupClassStatus(classInstance.executionState),
+      outcome: parseClassOutcome(classInstance.outcome) ?? ClassOutcome.PENDING,
+      isFrozen: classInstance.isFrozen,
+      auditRemark: null,
+      auditLoggedAt: classInstance.updatedAt.toISOString(),
+      registeredStudentCount: students.length,
+      totalStudentCount: students.length,
+      students,
+      meetingInfo,
+      communications: [],
+      adminNote: {
+        content: classInstance.adminNotes ?? "",
+        lastUpdated: classInstance.updatedAt.toISOString(),
+      },
+      isOneOnOne: true,
     };
   }
 
@@ -248,4 +313,8 @@ function resolveGroupClassStatus(executionState: string | null | undefined): Cla
   if (state === ClassExecutionState.ACTIVATED) return ClassExecutionState.ACTIVATED;
   if (state === ClassExecutionState.RUNNING) return ClassExecutionState.RUNNING;
   return ClassExecutionState.NOT_ACTIVATED;
+}
+
+function toClockText(value: Date): string {
+  return value.toISOString().slice(11, 16);
 }

@@ -75,8 +75,9 @@ export const dashboardReportsSessionAuditAr: SessionAuditLabels = {
     },
   },
   emptyState: {
-    title: "لا توجد جلسات تطابق الفلاتر الحالية.",
-    titleNoFilters: "لا توجد جلسات بعد.",
+    title: "لا توجد جلسات تطابق فلاترك",
+    titleNoFilters: "لا توجد أحداث جلسات بعد.",
+    subtitle: "جرّب توسيع النطاق الزمني أو مسح فلتر الحالة.",
     cta: "مسح الفلاتر",
   },
   accessDenied: {

@@ -40,6 +40,12 @@ export type GroupClassAuditReturnType = {
   meetingInfo: GroupClassOnlineMeetingInfoReturnType;
   communications: GroupClassCommunicationLogEntryReturnType[];
   adminNote: GroupClassAdminNoteReturnType;
+  /**
+   * True when the audit payload was derived from a standalone 1-on-1 class
+   * instance (no `group_classes` row); group-only affordances such as the
+   * notification resend and the enrolled-students export do not apply.
+   */
+  isOneOnOne: boolean;
 };
 
 export type GroupClassStudentReturnType = {

@@ -98,5 +98,6 @@ export const GroupClassAuditPothosObject = GroupClassAuditRef.implement({
       type: AdminNoteRef,
       resolve: parent => parent.adminNote,
     }),
+    isOneOnOne: t.exposeBoolean("isOneOnOne"),
   }),
 });

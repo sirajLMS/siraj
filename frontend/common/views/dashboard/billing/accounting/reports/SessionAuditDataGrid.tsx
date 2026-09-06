@@ -26,6 +26,7 @@ import {
 } from "@/frontend/common/views/dashboard/billing/accounting/reports/formatters/sessionAuditCellFormatters";
 import { PayrollNotePopover } from "@/frontend/common/views/dashboard/billing/accounting/reports/PayrollNotePopover";
 import { SessionAuditAggregateCard } from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditAggregateCard";
+import { SessionAuditEmptyState } from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditEmptyState";
 import { SessionAuditStatusChip } from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditStatusChip";
 import type {
   SessionAuditReportRow,
@@ -120,6 +121,16 @@ const ELLIPSIZED_CELL_SX = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
+} as const;
+
+/**
+ * Zero-row geometry: the collapsed grid body would otherwise be shorter than
+ * the empty-state panel, so the panel would overflow under the footer. A
+ * min-height reserved while there are no rows gives the panel its room; once
+ * rows exist, the grid stretches past it on its own.
+ */
+const EMPTY_REPORT_MIN_HEIGHT_SX = {
+  minHeight: 400,
 } as const;
 
 /**
@@ -583,6 +594,19 @@ function buildSessionAuditColumns({
   return columns;
 }
 
+/** Builds the zero-row slot component with the empty-state copy and handlers bound. */
+function createSessionAuditNoRowsOverlay(
+  labels: SessionAuditLabels["emptyState"],
+  hasActiveFilters: boolean,
+  onClearFilters: () => void
+): React.ComponentType {
+  return function SessionAuditNoRowsOverlay() {
+    return (
+      <SessionAuditEmptyState labels={labels} hasActiveFilters={hasActiveFilters} onClearFilters={onClearFilters} />
+    );
+  };
+}
+
 /** View-model slice the session audit grid renders from. */
 export type SessionAuditDataGridProps = Pick<
   SessionAuditReportsViewModel,
@@ -734,7 +758,15 @@ export function SessionAuditDataGrid({
     [navigateToAudit]
   );
 
-  const showClearFiltersAction = hasActiveFilters && !isLoading && error === null && rows.length === 0;
+  // The no-rows slot replaces the grid body for the zero-row state so the
+  // column headers and the pager stay mounted around the empty-state panel.
+  // Mirroring the dataGrid layer's createNoRowsOverlay, the slot component is
+  // built by a module-scope factory: oxlint forbids defining components
+  // inline inside a render function.
+  const noRowsOverlay = useMemo(
+    () => createSessionAuditNoRowsOverlay(labels.emptyState, hasActiveFilters, clearFilters),
+    [labels, hasActiveFilters, clearFilters]
+  );
 
   return (
     <Stack sx={{ gap: 1.5, width: "100%" }}>
@@ -760,12 +792,16 @@ export function SessionAuditDataGrid({
           columns={columns}
           loading={isLoading}
           getRowId={row => row.instanceId ?? row.id ?? ""}
-          emptyMessage={labels.emptyState.title}
           ariaLabel={labels.title}
+          slots={{ noRowsOverlay }}
           disableColumnMenu
           sortingMode="server"
           sortingOrder={SESSION_AUDIT_SORTING_ORDER}
-          sx={[HEADER_WRAP_SX, SCROLLBAR_CUE_SX]}
+          sx={
+            rows.length === 0
+              ? [HEADER_WRAP_SX, SCROLLBAR_CUE_SX, EMPTY_REPORT_MIN_HEIGHT_SX]
+              : [HEADER_WRAP_SX, SCROLLBAR_CUE_SX]
+          }
           sortModel={sortModel}
           onSortModelChange={handleSortModelChange}
           onCellClick={handleCellClick}
@@ -784,13 +820,6 @@ export function SessionAuditDataGrid({
           })}
         />
       )}
-      {showClearFiltersAction ? (
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <Button size="small" variant="outlined" onClick={clearFilters}>
-            {labels.emptyState.cta}
-          </Button>
-        </Box>
-      ) : null}
       <SessionAuditAggregateCard
         totalPaidAmount={aggregates.totalPaidAmount}
         totalPaidCurrency={aggregates.totalPaidCurrency}

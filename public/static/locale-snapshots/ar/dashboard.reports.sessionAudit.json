@@ -72,8 +72,17 @@
     }
   },
   "emptyState": {
-    "title": "لا توجد جلسات تطابق الفلاتر الحالية.",
-    "titleNoFilters": "لا توجد جلسات بعد.",
+    "title": "لا توجد جلسات تطابق فلاترك",
+    "titleNoFilters": "لا توجد أحداث جلسات بعد.",
+    "subtitle": "جرّب توسيع النطاق الزمني أو مسح فلتر الحالة.",
     "cta": "مسح الفلاتر"
+  },
+  "accessDenied": {
+    "title": "ليس لديك صلاحية لعرض هذا التقرير",
+    "descriptionPrefix": "اطلب من المسؤول منحك صلاحية",
+    "descriptionSuffix": "للوصول إلى مراجعة أحداث الجلسات.",
+    "statusChip": "403 · INSUFFICIENT_PERMISSIONS",
+    "backToDashboard": "العودة إلى لوحة التحكم",
+    "contactSupport": "تواصل مع الدعم"
   }
 }

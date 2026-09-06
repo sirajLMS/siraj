@@ -76,6 +76,7 @@ const AUDIT: Audit = {
   isFrozen: false,
   auditRemark: "Rescheduled at parent request",
   auditLoggedAt: "2026-08-21 09:12",
+  isOneOnOne: false,
   registeredStudentCount: 3,
   totalStudentCount: 4,
   students: null,

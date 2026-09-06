@@ -70,6 +70,8 @@ export interface SessionAuditLabels {
     readonly title: string;
     /** Neutral copy shown when the report is empty with no filters active. */
     readonly titleNoFilters: string;
+    /** Guidance line under the heading while filters are active: widen the window or drop a filter. */
+    readonly subtitle: string;
     readonly cta: string;
   };
   readonly accessDenied: {

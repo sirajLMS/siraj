@@ -175,6 +175,32 @@ defaults first** so stale filters never leak across navigations.
    `onApplied` refetches the instance, status-events, and audit queries after a
    successful override; the mutation re-checks the permission server-side.
 
+## Audit Page Drill-Down (group + 1-on-1)
+
+`/classes/<instanceId>/audit` serves BOTH class shapes. The report grid only
+lists 1-on-1 instances (the report query inner-joins `students` per instance),
+so the row action links land on 1-on-1 ids; seeded/seeded group classes reach
+the same route from the class-tracking UI.
+
+- `GroupClassService.getGroupClassAudit` branches on
+  `GroupClassRepository.getByClassInstanceId(classInstanceId)`: when no
+  `group_classes` row exists it builds the audit payload from the class
+  instance itself instead of throwing `notFound` — the single student comes
+  from the instance's `student` join, `className` from the instance's subject
+  name (falling back to `classType`), `communications` is empty, and
+  `timeSlot` is derived from the scheduled window. The payload carries
+  `isOneOnOne: true` (`false` on the group path).
+- The frontend `groupClassAudit` / `updateClassAdminNote` documents select
+  `isOneOnOne`; `ClassAuditGrid` uses it to hide group-only affordances for
+  1-on-1 audits — the communication-log card (which carries the group-only
+  Resend Notifications action) and the registered-students section (with its
+  Export action). The details card, online-meeting card, admin-note dialog,
+  payroll card, and the payroll Override flow render for both shapes.
+- `updateAdminNote` writes `class_instances.admin_notes` (instance-derived),
+  so the admin-note affordance works on both paths. `resendClassNotifications`
+  remains group-only (it throws `notFound` for 1-on-1 ids), which is why the
+  UI never offers the action there.
+
 ## Known Design Decisions (ratified)
 
 - **Dominant-currency aggregate**: `totalPaidAmount` sums non-null

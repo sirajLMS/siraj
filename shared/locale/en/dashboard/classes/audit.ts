@@ -2,7 +2,7 @@ import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes";
 
 export const dashboardClassAuditEn: ClassAuditLabels = {
   invalidClassId: "Invalid class ID",
-  pageTitle: "Class Details View",
+  pageTitle: "Class Audit",
   mobileTitle: "Class Audit Log",
   breadcrumbs: {
     dashboard: "Dashboard",

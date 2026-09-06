@@ -2,7 +2,7 @@ import type { ClassAuditLabels } from "@/shared/locale/types/dashboard/classes";
 
 export const dashboardClassAuditAr: ClassAuditLabels = {
   invalidClassId: "معرّف الحصة غير صالح",
-  pageTitle: "عرض تفاصيل الحصة",
+  pageTitle: "سجل تدقيق الحصة",
   mobileTitle: "سجل تدقيق الحصة",
   breadcrumbs: {
     dashboard: "لوحة التحكم",

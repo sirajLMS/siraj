@@ -24,6 +24,7 @@ export const groupClassAuditQueryDocument: TypedDocumentNode<GroupClassAuditQuer
       isFrozen
       auditRemark
       auditLoggedAt
+      isOneOnOne
       registeredStudentCount
       totalStudentCount
       students {
@@ -78,6 +79,7 @@ export const updateClassAdminNoteMutationDocument: TypedDocumentNode<
       isFrozen
       auditRemark
       auditLoggedAt
+      isOneOnOne
       registeredStudentCount
       totalStudentCount
       students {

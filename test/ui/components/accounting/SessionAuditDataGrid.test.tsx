@@ -260,15 +260,18 @@ describe("SessionAuditDataGrid — rendering", () => {
     expect(screen.getAllByLabelText(labels.status.end).length).toBeGreaterThanOrEqual(1);
   });
 
-  test("renders the empty state message when the report has no rows and is not loading", () => {
+  test("renders the empty-state heading without guidance or the clear action when no filters are active", () => {
     renderGrid({ rows: [], totalCount: 0 });
     expect(screen.getByText(labels.emptyState.title)).toBeInTheDocument();
+    expect(screen.queryByText(labels.emptyState.subtitle)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: labels.emptyState.cta })).not.toBeInTheDocument();
   });
 
-  test("offers a clear-filters action in the empty state while filters are active", () => {
+  test("renders the empty-state panel with guidance and a clear-filters action while filters are active", () => {
     const clearFilters = mock(() => undefined);
     renderGrid({ rows: [], totalCount: 0, hasActiveFilters: true, clearFilters });
+    expect(screen.getByText(labels.emptyState.title)).toBeInTheDocument();
+    expect(screen.getByText(labels.emptyState.subtitle)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: labels.emptyState.cta }));
     expect(clearFilters).toHaveBeenCalled();
   });

@@ -53,6 +53,13 @@ export interface ClassAuditGridProps {
   /** Required — desktop slot ignores this; mobile slot renders an Edit button. */
   readonly onEditAdminNote: () => void;
 
+  /**
+   * True for 1-on-1 class instance audits: the communication log (with its
+   * resend-notifications action, group-only) and the registered-students
+   * grid (with its export action) do not apply and are not rendered.
+   */
+  readonly isOneOnOne: boolean;
+
   readonly slots: ClassAuditGridSlotProps;
 }
 
@@ -82,32 +89,37 @@ export function ClassAuditGrid({
   adminNoteLabels,
   onUpdateAdminNote,
   onEditAdminNote,
+  isOneOnOne,
   slots,
 }: Readonly<ClassAuditGridProps>) {
   const { CommunicationLogCard, AdminNoteCard } = slots;
 
   return (
     <>
-      <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 3, lg: 4 } }}>
-        <Box sx={{ mt: { lg: 0 } }}>
-          <CommunicationLogCard
-            entries={communications}
-            labels={communicationLogLabels}
-            onResend={onResendNotifications}
-            isResending={isResending}
-          />
-        </Box>
-      </Grid>
+      {!isOneOnOne ? (
+        <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 3, lg: 4 } }}>
+          <Box sx={{ mt: { lg: 0 } }}>
+            <CommunicationLogCard
+              entries={communications}
+              labels={communicationLogLabels}
+              onResend={onResendNotifications}
+              isResending={isResending}
+            />
+          </Box>
+        </Grid>
+      ) : null}
 
-      <Grid size={{ xs: 12, lg: 8 }} sx={{ order: { xs: 4, lg: 3 } }}>
-        <RegisteredStudentsSection
-          students={students}
-          registeredCount={registeredStudentCount}
-          labels={registeredStudentsLabels}
-          onExport={onExportStudents}
-          onViewStudent={onViewStudent}
-        />
-      </Grid>
+      {!isOneOnOne ? (
+        <Grid size={{ xs: 12, lg: 8 }} sx={{ order: { xs: 4, lg: 3 } }}>
+          <RegisteredStudentsSection
+            students={students}
+            registeredCount={registeredStudentCount}
+            labels={registeredStudentsLabels}
+            onExport={onExportStudents}
+            onViewStudent={onViewStudent}
+          />
+        </Grid>
+      ) : null}
 
       <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 5, lg: 5 } }}>
         <AdminNoteCard

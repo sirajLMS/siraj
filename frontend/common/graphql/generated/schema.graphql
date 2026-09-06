@@ -192,6 +192,8 @@ enum AppPermission {
   ACCOUNTING_CARRYOVER_MANAGE
   ACCOUNTING_CARRYOVER_VIEW
   ACCOUNTING_CREDITS_MANAGE
+  ACCOUNTING_EXPENSES_MANAGE
+  ACCOUNTING_EXPENSES_VIEW
   ACCOUNTING_PAYMENTS_MANAGE
   ACCOUNTING_PAYMENTS_VIEW
   ACCOUNTING_PAYROLL_MANAGE
@@ -2352,6 +2354,7 @@ type GroupClassAudit {
   courseCode: String
   id: String
   isFrozen: Boolean
+  isOneOnOne: Boolean
   meetingInfo: OnlineMeetingInfo
   originalDate: String
   outcome: ClassOutcome
@@ -6359,6 +6362,8 @@ type WhatsappAccount {
   portfolioMessagingLimitTier: WhatsappLimitTier
   purpose: WhatsappAccountPurpose
   qualityRating: WhatsappQualityRating
+  syncDeadlineAt: DateTime
+  syncFailureReason: String
   syncPhase: Int
   syncProgress: Int
   syncStatus: WhatsappSyncStatus
