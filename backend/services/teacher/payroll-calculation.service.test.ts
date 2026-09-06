@@ -90,6 +90,7 @@ function buildInstanceRow(overrides: Partial<ClassInstanceSelectType> = {}): Cla
     payrollNote: null,
     payrollCalculatedAt: null,
     payrollCalculatedBy: null,
+    carryoverBalanceId: null,
     remarks: null,
     adminNotes: null,
     idempotencyKey: "booking-idempotency-key",

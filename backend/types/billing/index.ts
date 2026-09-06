@@ -1,5 +1,6 @@
 export * from "./accounting-payment.types";
 export * from "./billing.types";
+export * from "./carryover-balance.types";
 export * from "./credit.types";
 export * from "./currency.types";
 export * from "./package-plan.types";

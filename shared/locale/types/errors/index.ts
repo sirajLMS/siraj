@@ -368,6 +368,28 @@ export interface PayrollErrors {
 }
 
 /**
+ * CarryoverErrors — carryover balance settlement errors: bulk aggregation of
+ * audited sessions, conversion of unpaid carryovers into expenses, and the
+ * correction (unpay) flow.
+ */
+export interface CarryoverErrors {
+  readonly notFound: (id: string) => string;
+  readonly noInstances: string;
+  readonly sessionNotAudited: string;
+  readonly sessionAlreadyLinked: string;
+  readonly fxRateMissing: string;
+  readonly paymentDateRequired: string;
+  readonly expenseDateInvalid: string;
+  readonly noCarryovers: string;
+  readonly alreadyPaid: string;
+  readonly notPaid: string;
+  readonly paidCannotDelete: string;
+  readonly paidCannotEdit: string;
+  readonly teacherImmutable: string;
+  readonly toExpenseFailed: string;
+}
+
+/**
  * StudentErrors — student specific errors.
  */
 export interface StudentErrors {
@@ -537,6 +559,7 @@ export interface ErrorsLabels
   readonly teacher: TeacherErrors;
   readonly teacherDue: TeacherDueErrors;
   readonly payroll: PayrollErrors;
+  readonly carryover: CarryoverErrors;
   readonly student: StudentErrors;
   readonly category: CategoryErrors;
   readonly user: UserErrors;
@@ -638,11 +661,19 @@ export interface ErrorsLabels
   readonly unknownError: string;
   readonly unknownDispatchError: string;
   readonly whatsappTemplateMissing: string;
+  readonly whatsappNoSenderForPurpose: string;
 
   // ─── WhatsApp account management errors ─────────────────────────────────
   readonly whatsappAccountNotFound: (id: string) => string;
   readonly whatsappAccessTokenNotConfigured: string;
   readonly whatsappWabaIdNotConfigured: string;
+  readonly whatsappEmbeddedSignupFailed: string;
+  readonly whatsappPurposeRequiresActive: string;
+  readonly whatsappAccountOffboarded: string;
+  readonly whatsappCoexistenceTakenByOtherPartner: string;
+  readonly whatsappSyncDeadlineExpired: string;
+  readonly whatsappHistoryDeclined: string;
+  readonly whatsappWebhookProcessingFailed: string;
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   readonly emailChannelLabel: string;

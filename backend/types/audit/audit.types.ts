@@ -35,7 +35,8 @@ export type AuditEntityType =
   | "SUGGESTION"
   | "BOOK"
   | "MEETING_PROVIDER_TOKEN"
-  | "WHATSAPP_ACCOUNT";
+  | "WHATSAPP_ACCOUNT"
+  | "CARRYOVER_BALANCE";
 
 /**
  * Action types for audit logs
@@ -57,7 +58,11 @@ export type AuditAction =
   | "DEACTIVATE"
   | "RESTORE"
   | "TEACHER_SUPPORT_REQUEST"
-  | "WHATSAPP_OPT_IN";
+  | "WHATSAPP_OPT_IN"
+  | "CARRYOVER_CREATE"
+  | "CARRYOVER_TO_EXPENSE"
+  | "CARRYOVER_UNPAID"
+  | "CARRYOVER_DELETE";
 
 /**
  * Input for creating an audit log entry
@@ -140,6 +145,7 @@ export const AUDIT_ENTITY_TYPE_VALUES = [
   "BOOK",
   "MEETING_PROVIDER_TOKEN",
   "WHATSAPP_ACCOUNT",
+  "CARRYOVER_BALANCE",
 ] as const satisfies readonly AuditEntityType[];
 
 export const AUDIT_ACTION_VALUES = [
@@ -160,4 +166,8 @@ export const AUDIT_ACTION_VALUES = [
   "RESTORE",
   "TEACHER_SUPPORT_REQUEST",
   "WHATSAPP_OPT_IN",
+  "CARRYOVER_CREATE",
+  "CARRYOVER_TO_EXPENSE",
+  "CARRYOVER_UNPAID",
+  "CARRYOVER_DELETE",
 ] as const satisfies readonly AuditAction[];

@@ -1,3 +1,4 @@
+export * from "./carryover-balance.repository";
 export * from "./staff-profile.repository";
 export * from "./teacher.repository";
 export * from "./teacher-availability.repository";

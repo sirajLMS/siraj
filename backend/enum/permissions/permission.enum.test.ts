@@ -6,6 +6,8 @@ const accountingPayrollViewKey = "accounting.payroll_view";
 const accountingPayrollManageKey = "accounting.payroll_manage";
 const accountingReportsViewKey = "accounting.reports_view";
 const accountingReportsManageKey = "accounting.reports_manage";
+const accountingCarryoverViewKey = "accounting.carryover_view";
+const accountingCarryoverManageKey = "accounting.carryover_manage";
 
 describe("AppPermission accounting credits manage", () => {
   test("defines ACCOUNTING_CREDITS_MANAGE with the accounting.credits_manage key", () => {
@@ -60,11 +62,31 @@ describe("AppPermission accounting reports", () => {
   });
 });
 
+describe("AppPermission accounting carryover", () => {
+  test("defines ACCOUNTING_CARRYOVER_VIEW and ACCOUNTING_CARRYOVER_MANAGE with their keys", () => {
+    const viewValue: string = AppPermission.ACCOUNTING_CARRYOVER_VIEW;
+    const manageValue: string = AppPermission.ACCOUNTING_CARRYOVER_MANAGE;
+    expect(viewValue).toBe(accountingCarryoverViewKey);
+    expect(manageValue).toBe(accountingCarryoverManageKey);
+  });
+
+  test("isAppPermission accepts the accounting carryover keys", () => {
+    expect(isAppPermission(accountingCarryoverViewKey)).toBe(true);
+    expect(isAppPermission(accountingCarryoverManageKey)).toBe(true);
+  });
+
+  test("parseAppPermission resolves the accounting carryover keys to the enum values", () => {
+    expect(parseAppPermission(accountingCarryoverViewKey)).toBe(AppPermission.ACCOUNTING_CARRYOVER_VIEW);
+    expect(parseAppPermission(accountingCarryoverManageKey)).toBe(AppPermission.ACCOUNTING_CARRYOVER_MANAGE);
+  });
+});
+
 describe("AppPermission rejection paths", () => {
   test("isAppPermission rejects unknown permission keys", () => {
     expect(isAppPermission("accounting.credits_manage_typo")).toBe(false);
     expect(isAppPermission("accounting.payroll_view_typo")).toBe(false);
     expect(isAppPermission("accounting.reports_view_typo")).toBe(false);
+    expect(isAppPermission("accounting.carryover_view_typo")).toBe(false);
     expect(isAppPermission("unknown.permission")).toBe(false);
     expect(isAppPermission("")).toBe(false);
   });

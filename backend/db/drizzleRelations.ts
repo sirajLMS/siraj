@@ -385,6 +385,10 @@ export const relations = defineRelations(schema, r => ({
       from: r.classInstances.payrollCalculatedBy,
       to: r.users.id,
     }),
+    carryoverBalance: r.one.carryoverBalances({
+      from: r.classInstances.carryoverBalanceId,
+      to: r.carryoverBalances.id,
+    }),
   },
   lessonReports: {
     classInstance: r.one.classInstances({
@@ -622,6 +626,38 @@ export const relations = defineRelations(schema, r => ({
     processedBy: r.one.users({
       from: r.teacherVacationRequests.processedByUserId,
       to: r.users.id,
+    }),
+  },
+  carryoverBalances: {
+    teacher: r.one.teachers({
+      from: r.carryoverBalances.teacherId,
+      to: r.teachers.id,
+    }),
+    createdByUser: r.one.users({
+      from: r.carryoverBalances.createdByUserId,
+      to: r.users.id,
+    }),
+    paidByUser: r.one.users({
+      from: r.carryoverBalances.paidByUserId,
+      to: r.users.id,
+    }),
+    items: r.many.carryoverBalanceItems({
+      from: r.carryoverBalances.id,
+      to: r.carryoverBalanceItems.carryoverId,
+    }),
+    classInstances: r.many.classInstances({
+      from: r.carryoverBalances.id,
+      to: r.classInstances.carryoverBalanceId,
+    }),
+  },
+  carryoverBalanceItems: {
+    carryover: r.one.carryoverBalances({
+      from: r.carryoverBalanceItems.carryoverId,
+      to: r.carryoverBalances.id,
+    }),
+    classInstance: r.one.classInstances({
+      from: r.carryoverBalanceItems.classInstanceId,
+      to: r.classInstances.id,
     }),
   },
   adminAuditLogs: {

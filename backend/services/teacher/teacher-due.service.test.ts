@@ -66,6 +66,7 @@ const BASE_INSTANCE = {
   payrollNote: null,
   payrollCalculatedAt: new Date(0),
   payrollCalculatedBy: null,
+  carryoverBalanceId: null,
   remarks: null,
   adminNotes: null,
   idempotencyKey: "settlement-fixture-key",

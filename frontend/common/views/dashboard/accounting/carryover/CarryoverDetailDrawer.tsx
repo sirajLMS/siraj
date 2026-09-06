@@ -1,0 +1,485 @@
+"use client";
+
+import { useQuery } from "@apollo/client/react";
+import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import { Alert, Avatar, Box, CircularProgress, Drawer, IconButton, Stack, Typography, useTheme } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
+import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import type {
+  CalculationStatus,
+  CarryoverBalanceLinkedSessionsQuery_carryoverBalanceLinkedSessions,
+  CarryoverBalanceQuery_carryoverBalance,
+  CurrencyCode,
+} from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  carryoverBalanceLinkedSessionsQueryDocument,
+  carryoverBalanceQueryDocument,
+} from "@/frontend/common/graphql/sharedDocuments";
+import { formatLockedAmount } from "@/frontend/common/lib/currency";
+import { DisabledTeacherChip } from "@/frontend/common/views/dashboard/accounting/carryover/DisabledTeacherChip";
+import { PaidStatusChip } from "@/frontend/common/views/dashboard/accounting/carryover/PaidStatusChip";
+import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+import { useAppLocale } from "@/shared/locale";
+import { useAppTranslation } from "@/shared/locale/client";
+import { DashboardAccountingCarryover, DashboardBillingPayroll, Translation } from "@/shared/locale/namespaces";
+import type { CommonLabels } from "@/shared/locale/types/common";
+import type { CarryoverLabels } from "@/shared/locale/types/dashboard/accounting/carryover";
+
+type CarryoverDetail = CarryoverBalanceQuery_carryoverBalance;
+
+const PAPER_SX = { width: { xs: "100%", sm: 460 }, maxWidth: "100%" } as const;
+
+const SUMMARY_GRID_SX = {
+  display: "grid",
+  gap: 2.5,
+  gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+} as const;
+
+const FULL_WIDTH_SX = { gridColumn: "1 / -1" } as const;
+
+const fieldLabelSx = (theme: Theme) => ({ color: theme.palette.onSurfaceVariant });
+
+const HEADER_SX = (theme: Theme) => ({
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: 1,
+  px: 2.5,
+  py: 2,
+  borderBottom: `1px solid ${theme.palette.divider}`,
+});
+
+const MINUTES_PER_HOUR = 60;
+
+const SESSIONS_TABLE_SX = (theme: Theme) => ({
+  width: "100%",
+  borderCollapse: "collapse",
+  "& th": {
+    pb: 1,
+    pe: 1.5,
+    textAlign: "start",
+    borderBottom: `1px solid ${theme.palette.divider}`,
+  },
+  "& td": {
+    py: 1,
+    pe: 1.5,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+  },
+  "& th:last-child, & td:last-child": { pe: 0 },
+  "& tr:last-child td": { borderBottom: "none" },
+});
+
+/** Session duration cell: minutes converted to locale-formatted hours, mirroring the billable-hours convention of the summary duration field. */
+function formatSessionHours(minutes: number | null, locale: string, notSet: string): string {
+  if (minutes === null || !Number.isFinite(minutes)) {
+    return notSet;
+  }
+  return new Intl.NumberFormat(getLatnLocaleTag(locale), { maximumFractionDigits: 2 }).format(
+    minutes / MINUTES_PER_HOUR
+  );
+}
+
+/** Link-time snapshot amount paired with its snapshot currency; the pair is null-safe together. */
+function formatSessionAmount(
+  amount: string | null,
+  currency: CurrencyCode | null,
+  locale: string,
+  notSet: string
+): string {
+  if (amount === null || currency === null) {
+    return notSet;
+  }
+  return formatLockedAmount(amount, currency, locale);
+}
+
+export interface CarryoverDetailDrawerProps {
+  /** Carryover balance id to drill into; the detail query only runs while open. */
+  readonly carryoverId: string;
+  /** Whether the drawer is visible. */
+  readonly open: boolean;
+  /** Close request raised by the close button, Escape, or backdrop click. */
+  readonly onClose: () => void;
+}
+
+interface DetailFieldProps {
+  readonly label: string;
+  readonly fullWidth?: boolean;
+  readonly children: React.ReactNode;
+}
+
+/** One labeled field cell in the summary grid: uppercase caption above its value. */
+function DetailField({ label, fullWidth, children }: Readonly<DetailFieldProps>) {
+  return (
+    <Box sx={fullWidth ? FULL_WIDTH_SX : undefined}>
+      <Typography variant="labelUppercase" sx={fieldLabelSx}>
+        {label}
+      </Typography>
+      <Box sx={{ typography: "bodyMd", mt: 0.5 }}>{children}</Box>
+    </Box>
+  );
+}
+
+function DrawerHeader({
+  balance,
+  title,
+  closeLabel,
+  onClose,
+}: {
+  readonly balance: CarryoverDetail | null;
+  readonly title: string;
+  readonly closeLabel: string;
+  readonly onClose: () => void;
+}) {
+  return (
+    <Box sx={HEADER_SX}>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
+          {title}
+        </Typography>
+        {balance ? (
+          <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
+            <PaidStatusChip paid={balance.isPaid ?? false} />
+            {balance.isDisabledTeacher ? <DisabledTeacherChip /> : null}
+          </Stack>
+        ) : null}
+      </Box>
+      <IconButton aria-label={closeLabel} onClick={onClose} size="small">
+        <CloseOutlinedIcon fontSize="small" />
+      </IconButton>
+    </Box>
+  );
+}
+
+function TeacherCell({ balance }: { readonly balance: CarryoverDetail }) {
+  return (
+    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+      <Avatar
+        src={balance.teacherAvatarUrl ?? undefined}
+        alt={balance.teacherName ?? ""}
+        sx={{ width: 32, height: 32 }}
+      />
+      {balance.teacherName}
+    </Stack>
+  );
+}
+
+function PayableValue({ balance, notSet }: { readonly balance: CarryoverDetail; readonly notSet: string }) {
+  const locale = useAppLocale();
+  if (balance.payable === null || balance.teacherCurrency === null) {
+    return <>{notSet}</>;
+  }
+  return (
+    <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+      {formatLockedAmount(balance.payable, balance.teacherCurrency, locale)}
+    </Typography>
+  );
+}
+
+function BalanceSummary({
+  balance,
+  labels,
+  commonLabels,
+}: {
+  readonly balance: CarryoverDetail;
+  readonly labels: CarryoverLabels;
+  readonly commonLabels: CommonLabels;
+}) {
+  const notSet = commonLabels.notSet;
+  return (
+    <Box sx={SUMMARY_GRID_SX}>
+      <DetailField label={labels.column.teacher}>
+        <TeacherCell balance={balance} />
+      </DetailField>
+      <DetailField label={labels.modal.form.currency}>{balance.teacherCurrency ?? notSet}</DetailField>
+      <DetailField label={labels.column.studentsCount}>{balance.studentsCount ?? notSet}</DetailField>
+      <DetailField label={labels.column.totalDuration}>{balance.totalDuration ?? notSet}</DetailField>
+      <DetailField label={labels.column.fromDate}>{balance.fromDate ?? notSet}</DetailField>
+      <DetailField label={labels.column.toDate}>{balance.toDate ?? notSet}</DetailField>
+      <DetailField label={labels.column.paid}>
+        <PaidStatusChip paid={balance.isPaid ?? false} />
+      </DetailField>
+      <DetailField label={labels.column.paymentDate}>{balance.paymentDate ?? notSet}</DetailField>
+      <DetailField label={labels.column.payable}>
+        <PayableValue balance={balance} notSet={notSet} />
+      </DetailField>
+      <DetailField label={labels.column.studentsText}>{balance.studentsText ?? notSet}</DetailField>
+      <DetailField label={labels.modal.form.note} fullWidth>
+        {balance.note ?? notSet}
+      </DetailField>
+    </Box>
+  );
+}
+
+type LinkedSession = CarryoverBalanceLinkedSessionsQuery_carryoverBalanceLinkedSessions;
+
+function LinkedSessionRow({
+  session,
+  locale,
+  notSet,
+  statusLabels,
+}: {
+  readonly session: LinkedSession;
+  readonly locale: string;
+  readonly notSet: string;
+  readonly statusLabels: Record<CalculationStatus, string>;
+}) {
+  return (
+    <Box component="tr">
+      <Box component="td">
+        <Typography variant="bodyMd">
+          {session.scheduledStartAt === null ? notSet : formatDate(session.scheduledStartAt, locale, notSet)}
+        </Typography>
+      </Box>
+      <Box component="td">
+        <Typography variant="bodyMd">{session.studentName ?? notSet}</Typography>
+      </Box>
+      <Box component="td">
+        <Typography variant="bodyMd">{session.subjectName ?? notSet}</Typography>
+      </Box>
+      <Box component="td">
+        <Typography variant="bodyMd">{formatSessionHours(session.durationMinutes, locale, notSet)}</Typography>
+      </Box>
+      <Box component="td">
+        <Typography variant="bodyMd">
+          {formatSessionAmount(session.originalAmount, session.originalCurrency, locale, notSet)}
+        </Typography>
+      </Box>
+      <Box component="td">
+        {session.currentStatus === null ? (
+          <Typography variant="bodyMd">{notSet}</Typography>
+        ) : (
+          <CalculationStatusChip status={session.currentStatus} labels={statusLabels} />
+        )}
+      </Box>
+    </Box>
+  );
+}
+
+function LinkedSessionsTable({
+  sessions,
+  locale,
+  notSet,
+  labels,
+  statusLabels,
+}: {
+  readonly sessions: readonly LinkedSession[];
+  readonly locale: string;
+  readonly notSet: string;
+  readonly labels: CarryoverLabels;
+  readonly statusLabels: Record<CalculationStatus, string>;
+}) {
+  const headers = [
+    labels.drawer.sessionDate,
+    labels.drawer.student,
+    labels.drawer.subject,
+    labels.drawer.duration,
+    labels.drawer.amount,
+    labels.drawer.status,
+  ];
+  return (
+    <Box sx={{ overflowX: "auto" }}>
+      <Box component="table" sx={SESSIONS_TABLE_SX}>
+        <Box component="thead">
+          <Box component="tr">
+            {headers.map(header => (
+              <Box component="th" scope="col" key={header}>
+                <Typography variant="labelUppercase" sx={fieldLabelSx}>
+                  {header}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+        <Box component="tbody">
+          {sessions.map((session, index) => (
+            <LinkedSessionRow
+              key={session.id ?? index}
+              session={session}
+              locale={locale}
+              notSet={notSet}
+              statusLabels={statusLabels}
+            />
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+function LinkedSessionsBody({
+  sessions,
+  loading,
+  hasError,
+  locale,
+  labels,
+  commonLabels,
+  statusLabels,
+}: {
+  readonly sessions: readonly LinkedSession[] | null;
+  readonly loading: boolean;
+  readonly hasError: boolean;
+  readonly locale: string;
+  readonly labels: CarryoverLabels;
+  readonly commonLabels: CommonLabels;
+  readonly statusLabels: Record<CalculationStatus, string>;
+}) {
+  if (loading && sessions === null) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }} aria-label={commonLabels.loading}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
+  if (hasError) {
+    return <Alert severity="error">{labels.loadError}</Alert>;
+  }
+  if (sessions === null || sessions.length === 0) {
+    return (
+      <Typography variant="bodyMd" sx={fieldLabelSx}>
+        {labels.drawer.noSessions}
+      </Typography>
+    );
+  }
+  return (
+    <LinkedSessionsTable
+      sessions={sessions}
+      locale={locale}
+      notSet={commonLabels.notSet}
+      labels={labels}
+      statusLabels={statusLabels}
+    />
+  );
+}
+
+/**
+ * Linked-session list for the balance: an independent fetch gated by the
+ * drawer's open state, with loading / error / empty / populated states. The
+ * heading count prefers the fetched rows and falls back to the balance
+ * record's snapshot count while rows load.
+ */
+function LinkedSessionsSection({
+  carryoverId,
+  open,
+  linkedSessionCount,
+  labels,
+  commonLabels,
+  statusLabels,
+}: {
+  readonly carryoverId: string;
+  readonly open: boolean;
+  /** Snapshot count from the balance record; keeps the heading stable while rows load. */
+  readonly linkedSessionCount: number | null;
+  readonly labels: CarryoverLabels;
+  readonly commonLabels: CommonLabels;
+  readonly statusLabels: Record<CalculationStatus, string>;
+}) {
+  const locale = useAppLocale();
+  const { data, loading, error } = useQuery(carryoverBalanceLinkedSessionsQueryDocument, {
+    variables: { carryoverId },
+    skip: !open,
+  });
+  const sessions = data?.carryoverBalanceLinkedSessions ?? null;
+  const heading = labels.drawer.sessionsHeading(sessions?.length ?? linkedSessionCount ?? 0);
+  return (
+    <Box sx={{ mt: 4 }} aria-label={heading}>
+      <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
+        {heading}
+      </Typography>
+      <Box sx={{ mt: 1.5 }}>
+        <LinkedSessionsBody
+          sessions={sessions}
+          loading={loading}
+          hasError={Boolean(error)}
+          locale={locale}
+          labels={labels}
+          commonLabels={commonLabels}
+          statusLabels={statusLabels}
+        />
+      </Box>
+    </Box>
+  );
+}
+
+function DrawerBody({
+  balance,
+  loading,
+  hasError,
+  labels,
+  commonLabels,
+}: {
+  readonly balance: CarryoverDetail | null;
+  readonly loading: boolean;
+  readonly hasError: boolean;
+  readonly labels: CarryoverLabels;
+  readonly commonLabels: CommonLabels;
+}) {
+  if (loading && !balance) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }} aria-label={commonLabels.loading}>
+        <CircularProgress size={32} />
+      </Box>
+    );
+  }
+  if (hasError) {
+    return <Alert severity="error">{labels.loadError}</Alert>;
+  }
+  if (!balance) {
+    return null;
+  }
+  return <BalanceSummary balance={balance} labels={labels} commonLabels={commonLabels} />;
+}
+
+/**
+ * Right-side drill-down for a single carryover balance: the full record fields,
+ * its paid/disabled chips, and the linked sessions table with per-session
+ * snapshot amounts and current calculation statuses, all fetched on open.
+ */
+export function CarryoverDetailDrawer({ carryoverId, open, onClose }: Readonly<CarryoverDetailDrawerProps>) {
+  const theme = useTheme();
+  const labels = useAppTranslation(DashboardAccountingCarryover);
+  const payrollLabels = useAppTranslation(DashboardBillingPayroll);
+  const commonLabels = useAppTranslation(Translation.Common);
+  const statusLabels: Record<CalculationStatus, string> = payrollLabels.status;
+  const { data, loading, error } = useQuery(carryoverBalanceQueryDocument, {
+    variables: { id: carryoverId },
+    fetchPolicy: "cache-and-network",
+    skip: !open,
+  });
+  const balance = data?.carryoverBalance ?? null;
+  // Until the detail resolves there is no name to interpolate, so fall back to
+  // the generic page title instead of the template's trailing empty slot.
+  const teacherName = balance?.teacherName ?? "";
+  const title = teacherName === "" ? labels.title : labels.drawer.title(teacherName);
+
+  return (
+    <Drawer
+      anchor={theme.direction === "rtl" ? "left" : "right"}
+      open={open}
+      onClose={onClose}
+      aria-label={title}
+      slotProps={{ paper: { sx: PAPER_SX } }}
+    >
+      <DrawerHeader balance={balance} title={title} closeLabel={commonLabels.ariaClose} onClose={onClose} />
+      <Box sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 3 }}>
+        <DrawerBody
+          balance={balance}
+          loading={loading}
+          hasError={Boolean(error)}
+          labels={labels}
+          commonLabels={commonLabels}
+        />
+        {balance !== null ? (
+          <LinkedSessionsSection
+            carryoverId={carryoverId}
+            open={open}
+            linkedSessionCount={balance.linkedSessionCount}
+            labels={labels}
+            commonLabels={commonLabels}
+            statusLabels={statusLabels}
+          />
+        ) : null}
+      </Box>
+    </Drawer>
+  );
+}

@@ -30,7 +30,8 @@ frontend/common/graphql/sharedDocuments/
 ├── suggestions/          suggestion
 ├── supervisor/           supervisor-dashboard
 └── teachers/             teacher, teacher-dashboard, teacher-notes, teacher-onboarding,
-                          teacher-portal, staff-profile, staff-directory, manager-onboarding
+                          teacher-portal, staff-profile, staff-directory, manager-onboarding,
+                          carryover
 ```
 
 ### Barrel pattern

@@ -317,6 +317,35 @@ try { new URL(data.meetingUrl); } catch { /* handle */ }
 // RIGHT — use the IIFE boolean pattern (see sonarjs/void-use above)
 ```
 
+### no-array-sort + sonarjs/no-alphabetical-sort
+
+Mutating `Array.prototype.sort()` is flagged twice: oxlint `no-array-sort` (mutation) and sonarjs `no-alphabetical-sort` (demands a real comparator). Both are satisfied by the non-mutating `toSorted` with an explicit comparator.
+
+```ts
+// WRONG — triggers BOTH rules
+const sorted = [...ids].sort();
+ids.sort();
+
+// RIGHT — non-mutating, explicit comparator (works on readonly string[] too)
+const sorted = ids.toSorted((a, b) => a.localeCompare(b));
+```
+
+### sonarjs/no-nested-conditional
+
+Nested ternaries are flagged. Common in locale plural/interpolation functions — convert to `if`/`return` early-exit branches (see the CLDR pluralization examples in `shared/locale/ar/`).
+
+```ts
+// WRONG — nested ternary
+plural: (count) => count === 0 ? "none" : count === 1 ? "one" : `${count} items`,
+
+// RIGHT — if/return branches
+plural: (count) => {
+  if (count === 0) return "none";
+  if (count === 1) return "one";
+  return `${count} items`;
+},
+```
+
 ## Config Overrides (legitimate — NOT `oxlint-disable`)
 
 The `oxlint.config.mts` has `overrides` for:

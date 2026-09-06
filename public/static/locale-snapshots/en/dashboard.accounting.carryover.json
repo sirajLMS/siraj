@@ -110,15 +110,10 @@
     "dateRangeInvalid": "The from date must be on or before the to date.",
     "payableNegative": "Payable must be 0 or greater.",
     "currencyRequired": "Currency is required.",
-    "noteTooLong": "Note must be 2,000 characters or fewer.",
-    "studentsCountInvalid": "Students must be a non-negative whole number."
+    "noteTooLong": "Note must be 2,000 characters or fewer."
   },
   "error": {
-    "sessionNotAudited": "One or more sessions are not audited.",
-    "sessionAlreadyLinked": "One or more sessions are already linked.",
-    "alreadyPaid": "One or more carryovers are already paid.",
-    "cannotDeletePaid": "Cannot delete a paid carryover. Unpay first.",
-    "fxRateMissing": "Exchange rate missing for cross-currency aggregation."
+    "alreadyPaid": "One or more carryovers are already paid."
   },
   "success": {
     "created": "Carryover balance created.",

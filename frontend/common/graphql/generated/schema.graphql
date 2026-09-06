@@ -3223,6 +3223,11 @@ type Mutation {
   """
   updateWhatsappAccount(id: String!, input: WhatsappAccountUpdateInput!): WhatsappAccount
 
+  """
+  Assign or change the routing purpose of a WhatsApp account (active accounts only).
+  """
+  updateWhatsappAccountPurpose(accountId: String!, purpose: WhatsappAccountPurpose!): WhatsappAccount
+
   """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
   upsertEnvConfigEntry(input: EnvConfigUpsertInput!): EnvConfigUpsertResult
@@ -4358,6 +4363,19 @@ type Query {
 
   """List all active WhatsApp business accounts."""
   whatsappAccounts: [WhatsappAccount!]
+
+  """Paginated message thread for one inbox conversation."""
+  whatsappConversationMessages(conversationId: String!, pagination: PaginationArgs): WhatsappConversationMessagesResult
+
+  """
+  Paginated WhatsApp inbox conversation list. Spans all accounts when `accountId` is omitted.
+  """
+  whatsappConversations(accountId: String, pagination: PaginationArgs): WhatsappConversationsResult
+
+  """
+  Per-account coexistence sync overview (status, progress, per-type request rows).
+  """
+  whatsappSyncStatus(accountId: String!): WhatsappAccountSyncOverview
 }
 
 """A class quota allocation for a student"""
@@ -6335,9 +6353,14 @@ type WhatsappAccount {
   isActive: Boolean
   lastWebhookAt: DateTime
   maxPhoneNumbersPerBusiness: String
+  onboardingMode: WhatsappOnboardingMode
   phoneNumberId: String
   portfolioMessagingLimitTier: WhatsappLimitTier
+  purpose: WhatsappAccountPurpose
   qualityRating: WhatsappQualityRating
+  syncPhase: Int
+  syncProgress: Int
+  syncStatus: WhatsappSyncStatus
   throughputLevel: String
   updatedAt: DateTime
   wabaId: String
@@ -6353,6 +6376,11 @@ input WhatsappAccountCreateInput {
   """Phone number ID (max 64 chars)"""
   phoneNumberId: String!
   portfolioMessagingLimitTier: WhatsappLimitTier
+
+  """
+  Initial routing purpose (defaults to GENERAL). Reassignment on existing accounts goes through updateWhatsappAccountPurpose.
+  """
+  purpose: WhatsappAccountPurpose
   qualityRating: WhatsappQualityRating
   throughputLevel: String
 
@@ -6366,6 +6394,17 @@ enum WhatsappAccountPurpose {
   STUDENTS
 }
 
+type WhatsappAccountSyncOverview {
+  accountId: String
+  id: String
+  requests: [WhatsappSyncRequest!]
+  syncDeadlineAt: DateTime
+  syncFailureReason: String
+  syncPhase: Int
+  syncProgress: Int
+  syncStatus: WhatsappSyncStatus
+}
+
 input WhatsappAccountUpdateInput {
   displayName: LocalizedString
 
@@ -6375,6 +6414,46 @@ input WhatsappAccountUpdateInput {
   portfolioMessagingLimitTier: WhatsappLimitTier
   qualityRating: WhatsappQualityRating
   throughputLevel: String
+}
+
+type WhatsappContact {
+  accountId: String
+  createdAt: DateTime
+  firstName: String
+  fullName: String
+  id: String
+  phoneNumber: String
+  updatedAt: DateTime
+  userId: String
+  username: String
+}
+
+type WhatsappConversation {
+  accountId: String
+  accountPurpose: WhatsappAccountPurpose
+  createdAt: DateTime
+  displayName: String
+  id: String
+  lastMessageAt: DateTime
+  lastMessagePreview: String
+  updatedAt: DateTime
+  userId: String
+  username: String
+  waId: String
+}
+
+type WhatsappConversationMessagesResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [WhatsappMessage!]
+  totalCount: Int
+}
+
+type WhatsappConversationsResult {
+  id: String
+  pageInfo: PageInfo
+  rows: [WhatsappConversation!]
+  totalCount: Int
 }
 
 input WhatsappEmbeddedSignupInput {
@@ -6402,6 +6481,27 @@ enum WhatsappLimitTier {
   UNTIERED
 }
 
+type WhatsappMessage {
+  accountId: String
+  chunkOrder: Int
+  content: JSON
+  conversationId: String
+  createdAt: DateTime
+  direction: WhatsappMessageDirection
+  editedAt: DateTime
+  id: String
+  mediaId: String
+  mediaMime: String
+  mediaPlaceholder: Boolean
+  mediaSha256: String
+  phase: Int
+  revokedAt: DateTime
+  sentAt: DateTime
+  status: String
+  type: String
+  wamid: String
+}
+
 enum WhatsappMessageDirection {
   API_OUTBOUND
   ECHO
@@ -6424,6 +6524,18 @@ type WhatsappSyncFromMetaResult {
   accounts: [WhatsappAccount!]
   id: String
   templates: [WhatsappTemplateSnapshot!]
+}
+
+type WhatsappSyncRequest {
+  accountId: String
+  completedAt: DateTime
+  createdAt: DateTime
+  id: String
+  requestId: String
+  requestedAt: DateTime
+  status: WhatsappSyncRequestStatus
+  syncType: WhatsappSyncType
+  updatedAt: DateTime
 }
 
 enum WhatsappSyncRequestStatus {
@@ -6475,6 +6587,7 @@ enum WhatsappWebhookEventStatus {
   FAILED
   PENDING
   PROCESSED
+  PROCESSING
 }
 
 type WorkshopPromo {

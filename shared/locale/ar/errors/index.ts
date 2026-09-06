@@ -109,6 +109,23 @@ const payroll = {
   partialRequiresPercentage: "يتطلب التجاوز الجزئي تحديد نسبة بين 0 و100.",
 } as const;
 
+const carryover = {
+  notFound: (id: string) => `رصيد الترحيل غير موجود: ${id}`,
+  noInstances: "حدد جلسة واحدة على الأقل للترحيل.",
+  sessionNotAudited: "واحدة أو أكثر من الجلسات غير مدققة.",
+  sessionAlreadyLinked: "واحدة أو أكثر من الجلسات مرتبطة بالفعل برصيد ترحيل.",
+  fxRateMissing: "سعر الصرف مفقود للتجميع متعدد العملات.",
+  paymentDateRequired: "تاريخ الدفع مطلوب.",
+  expenseDateInvalid: "يجب أن يكون تاريخ المصروف بصيغة YYYY-MM.",
+  noCarryovers: "حدد رصيد ترحيل واحدًا على الأقل.",
+  alreadyPaid: "واحد أو أكثر من أرصدة الترحيل مدفوعة بالفعل.",
+  notPaid: "رصيد الترحيل غير مدفوع.",
+  paidCannotDelete: "لا يمكن حذف رصيد ترحيل مدفوع. ألغِ الدفع أولاً.",
+  paidCannotEdit: "لا يمكن تعديل رصيد ترحيل مدفوع. ألغِ الدفع أولاً.",
+  teacherImmutable: "لا يمكن تغيير معلم رصيد الترحيل؛ احذف السجل وأعد إنشاءه بدلاً من ذلك.",
+  toExpenseFailed: "فشل تحويل رصيد الترحيل إلى مصروف.",
+} as const;
+
 const classSubject = {
   createFailed: "فشل إنشاء مادة الفصل.",
 } as const;
@@ -406,6 +423,7 @@ export const errorsAr: ErrorsLabels = {
   teacher,
   teacherDue,
   payroll,
+  carryover,
   student,
   category,
   user,
@@ -512,11 +530,21 @@ export const errorsAr: ErrorsLabels = {
   unknownError: "حدث خطأ غير معروف.",
   unknownDispatchError: "حدث خطأ غير معروف أثناء الإرسال.",
   whatsappTemplateMissing: "تكوين قالب واتساب مفقود لهذا الإشعار.",
+  whatsappNoSenderForPurpose: "لا يوجد حساب مرسِل واتساب نشط متاح لهذا الإشعار.",
 
   // ─── WhatsApp account management errors ─────────────────────────────────
   whatsappAccountNotFound: (id: string) => `حساب واتساب غير موجود: ${id}`,
   whatsappAccessTokenNotConfigured: "رمز الوصول لواتساب غير مُهيأ.",
   whatsappWabaIdNotConfigured: "معرّف حساب واتساب التجاري غير مُهيأ.",
+  whatsappEmbeddedSignupFailed: "فشل الاتصال بتطبيق واتساب للأعمال. يُرجى المحاولة مرة أخرى.",
+  whatsappPurposeRequiresActive: "لا يمكن تعيين الغرض إلا لأرقام واتساب النشطة. فعّل الرقم أولًا.",
+  whatsappAccountOffboarded: "تم فصل رقم واتساب هذا بواسطة Meta ولم يعد بإمكانه إرسال الرسائل.",
+  whatsappCoexistenceTakenByOtherPartner: "يُدار التواجد المشترك لهذا الرقم بواسطة مزود برمجيات آخر. افصله هناك أولًا.",
+  whatsappSyncDeadlineExpired:
+    "لم يُكمل تطبيق واتساب للأعمال المزامنة خلال ٢٤ ساعة. أعد تشغيل عملية الربط للمحاولة مرة أخرى.",
+  whatsappHistoryDeclined:
+    "تم رفض مشاركة سجل المحادثات على الجهاز المقترن. تمت مزامنة جهات الاتصال فقط؛ السجل غير متاح.",
+  whatsappWebhookProcessingFailed: "تعذّرت معالجة أحد أحداث webhook من واتساب وتم إيقافه للمراجعة.",
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "البريد الإلكتروني",

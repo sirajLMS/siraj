@@ -445,36 +445,36 @@ bun run scripts/health/sub-loop.ts <file-path> --lifecycle duplicates
 > Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
 > additive and execute before this plan is treated as test-complete.
 
-- [ ] TB.1 Journey: accounting operator bulk-creates carryover from audited sessions → sessions transition to `WAITING_PAID` and become visible/"Linked" to other operators on the Plan 4 audit grid (bulk-create settlement journey)
+- [x] TB.1 Journey: accounting operator bulk-creates carryover from audited sessions → sessions transition to `WAITING_PAID` and become visible/"Linked" to other operators on the Plan 4 audit grid (bulk-create settlement journey)
   - Create `test/workflows/accounting/carryover-bulk-create.journey.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (sessions move to `WAITING_PAID`, `carryover_balance_id` set); cross-actor visibility (second operator with `ACCOUNTING_CARRYOVER_VIEW` sees the new rows and linked sessions; unauthorised role sees nothing); side effects (one `CARRYOVER_CREATE` audit_logs row per carryover; `PAYROLL_STATUS_TRANSITION` events); denial paths (operator without `ACCOUNTING_CARRYOVER_MANAGE` rejected; second operator selecting the same already-linked sessions gets `CARRYOVER_SESSION_ALREADY_LINKED`)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-2 / AC-2.1–AC-2.10, E2, E15_
-- [ ] TB.2 Journey: accounting operator runs Bulk To Expense on unpaid carryovers → expenses created, carryovers marked paid, sessions transition to `PAID` and the expense becomes visible to the expense-ledger audience (to-expense settlement journey)
+- [x] TB.2 Journey: accounting operator runs Bulk To Expense on unpaid carryovers → expenses created, carryovers marked paid, sessions transition to `PAID` and the expense becomes visible to the expense-ledger audience (to-expense settlement journey)
   - Create `test/workflows/accounting/carryover-to-expense.journey.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (`isPaid = true`, sessions `PAID`, expense row with `sourceEntity = carryover_balances`); cross-actor visibility (VIEW-only operator reads paid rows + drill-down sessions; Plan 6 expense readers see the new Salaries expense); side effects (`CARRYOVER_TO_EXPENSE` audit rows; ledger doubled on idempotent re-submit is a no-op); denial paths (`CARRYOVER_ALREADY_PAID` for a concurrent second operator; missing `_MANAGE` rejected)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-3 / AC-3.1–AC-3.8, E5, E6, E7, E15_
-- [ ] TB.3 Journey: accounting operator unpays a paid carryover → linked expense soft-deleted, carryover reverted, sessions back to `WAITING_PAID` for the audit-grid audience (unpay correction journey)
+- [x] TB.3 Journey: accounting operator unpays a paid carryover → linked expense soft-deleted, carryover reverted, sessions back to `WAITING_PAID` for the audit-grid audience (unpay correction journey)
   - Create `test/workflows/accounting/carryover-unpay.journey.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (carryover `isPaid = false` with cleared payment fields; sessions `PAID → WAITING_PAID`; expense soft-deleted); cross-actor visibility (expense disappears from the ledger audience; audit-grid viewers see sessions linked again); side effects (`CARRYOVER_UNPAID` audit row preserved; idempotent when expense already soft-deleted per E17); denial paths (unpay on an already-unpaid carryover rejected; `_MANAGE` enforced)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-7 / AC-7.1–AC-7.4, E17_
-- [ ] TB.4 Journey: accounting operator deletes a carryover → linked sessions unlinked and reverted to their prior status on the Plan 4 audit grid while the audit trail survives (delete correction journey)
+- [x] TB.4 Journey: accounting operator deletes a carryover → linked sessions unlinked and reverted to their prior status on the Plan 4 audit grid while the audit trail survives (delete correction journey)
   - Create `test/workflows/accounting/carryover-delete.journey.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (`carryover_balance_id = NULL`, session `calculationStatus` reverted from `carryover_balance_items.originalStatus`); cross-actor visibility (sessions selectable again by another operator on the audit grid; deleted carryover gone from the list); side effects (`CARRYOVER_DELETE` audit rows preserved per AC-8.4; bulk delete atomic — one paid row rolls back the whole batch); denial paths (`CARRYOVER_PAID_CANNOT_DELETE`; `_MANAGE` enforced)
   - Verify: `bun run test/scripts/run-test.ts <path>` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-4 / AC-4.5–AC-4.10, US-8 / AC-8.3–AC-8.4, E8, E9_
-- [ ] TB.5 4-Tier verification for carryover service/repository files
+- [x] TB.5 4-Tier verification for carryover service/repository files
   - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and green for: `backend/services/teachers/carryover-balance.service.ts`, `backend/services/teachers/carryover-idempotency.ts`, `backend/services/teachers/carryover-aggregate.ts`, `backend/db/repo/teachers/carryover-balance.repository.ts`, `backend/db/repo/scheduling/class-instances.ts` (new `carryover_balance_id` methods), `backend/db/repo/teachers/teacher.repository.ts` (`isDisabled`), `backend/graphql/query/teachers/carryover.query.ts`, `backend/graphql/mutation/teachers/carryover.mutation.ts`, `app/api/carryover/export/route.ts`
   - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels
   - Verify with `bun run test/scripts/run-test.ts <each test file>`
   - _Requirements: cross-cutting_
-- [ ] TB.6 Penetration verification (skip only if plan has no new endpoints/mutations)
+- [x] TB.6 Penetration verification (skip only if plan has no new endpoints/mutations)
   - BOLA/IDOR across the roles in this plan (operator acting on another operator's carryovers; teacher-scoped ids in `bulkCreateCarryoverBalances` / `carryoverBalance(id)`); permission denial on all 7 mutations + CSV export route; wildcard/`ILIKE` injection on the teacher-name/`studentsText` search filter (AC-5.5)
   - Via `.agents/skills/pentester/SKILL.md`
   - _Requirements: US-6 / AC-6.1–AC-6.5, NFR-5_

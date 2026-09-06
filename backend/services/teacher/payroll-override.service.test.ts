@@ -83,6 +83,7 @@ function buildInstanceRow(overrides: Partial<ClassInstanceSelectType> = {}): Cla
     payrollNote: null,
     payrollCalculatedAt: new Date("2026-08-20T11:05:00.000Z"),
     payrollCalculatedBy: ACTOR_ID,
+    carryoverBalanceId: null,
     remarks: null,
     adminNotes: null,
     idempotencyKey: "booking-idempotency-key",

@@ -39,6 +39,7 @@ import { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers"
 import { userMeetingConfigs } from "@/backend/db/schema/meeting/user-meeting-configs";
 import { timezones } from "@/backend/db/schema/shared/timezones";
 import { students } from "@/backend/db/schema/students/students";
+import { carryoverBalances } from "@/backend/db/schema/teachers/carryover-balances";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
 import { CalculationStatus, type RateSource } from "@/backend/enum";
@@ -232,6 +233,10 @@ export const classInstances = createTable(
     payrollCalculatedBy: uuidDefaultColumn("payroll_calculated_by").references(() => users.id, {
       onDelete: "set null",
     }),
+    // Link to the carryover balance that aggregated this session for teacher payout.
+    carryoverBalanceId: uuidDefaultColumn("carryover_balance_id").references(() => carryoverBalances.id, {
+      onDelete: "set null",
+    }),
     remarks: textColumn("remarks"),
     adminNotes: textColumn("admin_notes"),
     idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
@@ -254,6 +259,7 @@ export const classInstances = createTable(
     index("class_instances_frozen_idx").on(table.isFrozen).where(sql`${table.isFrozen} = true`),
     index("class_instances_rescheduled_idx").on(table.isRescheduled).where(sql`${table.isRescheduled} = true`),
     index("class_instances_recurring_schedule_id_idx").on(table.recurringScheduleId),
+    index("class_instances_carryover_balance_id_idx").on(table.carryoverBalanceId),
     index("class_instances_user_meeting_config_id_idx").on(table.userMeetingConfigId),
     index("class_instances_meeting_provider_id_idx").on(table.meetingProviderId),
     index("class_instances_activated_by_user_id_idx").on(table.activatedByUserId),

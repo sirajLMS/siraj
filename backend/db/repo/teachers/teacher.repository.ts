@@ -104,6 +104,22 @@ export namespace TeacherRepository {
     return row?.teacher ?? null;
   };
 
+  /**
+   * Snapshot of whether the teacher's linked user account is deactivated —
+   * used when recording pay-side state that must capture account status at
+   * write time. Returns `false` when the teacher does not exist.
+   */
+  export const isDisabled = async (teacherId: string, tx?: DBTransaction): Promise<boolean> => {
+    const q = queryDb(tx);
+    const [row] = await q
+      .select({ status: users.status })
+      .from(teachers)
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .where(eq(teachers.id, teacherId))
+      .limit(1);
+    return parseAccountStatus(row?.status) === AccountStatus.DEACTIVATED;
+  };
+
   export const findByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<Map<string, string | null>> => {
     if (userIds.length === 0) return new Map();
 

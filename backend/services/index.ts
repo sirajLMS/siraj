@@ -34,6 +34,7 @@ export * from "./subject";
 export * from "./supervisor";
 export * from "./system";
 export * from "./teacher";
+export * from "./teachers";
 export * from "./user";
 export * from "./users";
 export * from "./whatsapp";

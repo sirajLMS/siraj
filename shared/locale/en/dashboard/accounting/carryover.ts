@@ -1,0 +1,170 @@
+import type { CarryoverLabels } from "@/shared/locale/types/dashboard/accounting/carryover";
+
+export const dashboardAccountingCarryoverEn: CarryoverLabels = {
+  title: "Carryover Balances",
+  empty: "No carryover records match the current filters.",
+  loadError: "Failed to load carryover balances. Please try again.",
+  exportTruncated: "Export truncated to 10 000 rows.",
+  exportFailed: "CSV export failed. Please try again.",
+
+  column: {
+    teacher: "Teacher",
+    studentsCount: "Students",
+    studentsText: "Students list",
+    totalDuration: "Duration (h)",
+    payable: "Payable",
+    paid: "Paid",
+    fromDate: "From",
+    toDate: "To",
+    paymentDate: "Payment date",
+  },
+
+  chip: {
+    paid: "Paid",
+    unpaid: "Unpaid",
+    disabledTeacher: "Disabled",
+  },
+
+  action: {
+    addNew: "Add New",
+    edit: "Edit",
+    delete: "Delete",
+    bulkToExpense: "Bulk To Expense",
+    bulkDelete: "Bulk Delete",
+    unpay: "Unpay",
+    viewSessions: "View Sessions",
+    exportCsv: "Export CSV",
+  },
+
+  filters: {
+    teacher: "Teacher",
+    teacherPlaceholder: "Select a teacher",
+    paidStatus: "Paid status",
+    paid: "Paid",
+    unpaid: "Unpaid",
+    both: "Both",
+    dateRange: "Date range",
+    fromDate: "From",
+    toDate: "To",
+    includeDisabledTeachers: "Include disabled teachers",
+    searchPlaceholder: "Search notes or students",
+    clear: "Clear",
+  },
+
+  modal: {
+    bulkToExpense: {
+      title: "Convert to expenses",
+      paymentDate: "Payment date",
+      expenseDate: "Expense month",
+      note: "Note (optional)",
+      summary: (count, amount, currency) =>
+        count === 1
+          ? `1 carryover totaling ${amount} ${currency}`
+          : `${count} carryovers totaling ${amount} ${currency}`,
+      submit: "Convert",
+      cancel: "Cancel",
+    },
+    form: {
+      titleAdd: "Add Carryover Balance",
+      titleEdit: "Edit Carryover Balance",
+      teacher: "Teacher",
+      teacherPlaceholder: "Select a teacher",
+      teacherLockedHint: "The teacher cannot be changed; delete and recreate the record instead.",
+      fromDate: "From",
+      toDate: "To",
+      payable: "Payable",
+      currency: "Currency",
+      studentsCount: "Students",
+      studentsText: "Students list",
+      note: "Note",
+      notePlaceholder: "Optional note (max 2,000 characters)",
+      submit: "Save",
+      cancel: "Cancel",
+    },
+    delete: {
+      title: "Delete this carryover balance?",
+      linkedSessionsWarning: count => {
+        if (count === 1) {
+          return "This carryover has 1 linked session. Deleting it unlinks the session and restores its previous audit status.";
+        }
+        return `This carryover has ${count} linked sessions. Deleting it unlinks them and restores their previous audit status.`;
+      },
+      confirm: "Delete",
+      cancel: "Cancel",
+    },
+    unpay: {
+      title: "Unpay this carryover balance?",
+      warning:
+        "The linked expense will be soft-deleted and the linked sessions will revert to WAITING_PAID (awaiting payment).",
+      note: "Reason (optional)",
+      notePlaceholder: "Explain why this carryover is being unpaid (max 2,000 characters)",
+      confirm: "Unpay carryover",
+      cancel: "Cancel",
+    },
+  },
+
+  drawer: {
+    title: teacherName => `Carryover Balance — ${teacherName}`,
+    sessionsHeading: count => {
+      if (count === 0) return "No linked sessions";
+      if (count === 1) return "1 linked session";
+      return `${count} linked sessions`;
+    },
+    noSessions: "No sessions are linked to this carryover balance.",
+    sessionDate: "Date",
+    student: "Student",
+    subject: "Subject",
+    duration: "Duration (h)",
+    amount: "Amount",
+    status: "Status",
+  },
+
+  validation: {
+    teacherRequired: "Select a teacher.",
+    dateRangeInvalid: "The from date must be on or before the to date.",
+    payableNegative: "Payable must be 0 or greater.",
+    currencyRequired: "Currency is required.",
+    noteTooLong: "Note must be 2,000 characters or fewer.",
+  },
+
+  error: {
+    alreadyPaid: "One or more carryovers are already paid.",
+  },
+
+  success: {
+    created: "Carryover balance created.",
+    updated: "Carryover balance updated.",
+    deleted: "Carryover balance deleted.",
+    bulkCreated: count => {
+      if (count === 0) return "No carryover balances created.";
+      if (count === 1) return "1 carryover balance created.";
+      return `${count} carryover balances created.`;
+    },
+    bulkDeleted: count => {
+      if (count === 0) return "No carryover balances deleted.";
+      if (count === 1) return "1 carryover balance deleted.";
+      return `${count} carryover balances deleted.`;
+    },
+    bulkedToExpense: count => {
+      if (count === 0) return "No expenses created.";
+      if (count === 1) return "1 expense created.";
+      return `${count} expenses created.`;
+    },
+    unpaid: "Carryover unpaid; sessions reverted.",
+  },
+
+  aggregate: {
+    totalPayable: "Total payable",
+    totalPaid: "Total paid",
+    paidCount: count => {
+      if (count === 0) return "No paid carryovers";
+      if (count === 1) return "1 paid carryover";
+      return `${count} paid carryovers`;
+    },
+    unpaidCount: count => {
+      if (count === 0) return "No unpaid carryovers";
+      if (count === 1) return "1 unpaid carryover";
+      return `${count} unpaid carryovers`;
+    },
+  },
+};

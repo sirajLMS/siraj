@@ -66,6 +66,7 @@ const BASE_INSTANCE = {
   payrollNote: null,
   payrollCalculatedAt: null,
   payrollCalculatedBy: null,
+  carryoverBalanceId: null,
   remarks: null,
   adminNotes: null,
   idempotencyKey: "due-accrual-fixture-key",

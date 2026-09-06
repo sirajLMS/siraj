@@ -87,6 +87,23 @@ const payroll = {
   partialRequiresPercentage: "Partially requires a percentage between 0 and 100.",
 } as const;
 
+const carryover = {
+  notFound: (id: string) => `Carryover balance not found: ${id}`,
+  noInstances: "Select at least one session for carryover.",
+  sessionNotAudited: "One or more sessions are not audited.",
+  sessionAlreadyLinked: "One or more sessions are already linked to a carryover balance.",
+  fxRateMissing: "Exchange rate missing for cross-currency aggregation.",
+  paymentDateRequired: "Payment date is required.",
+  expenseDateInvalid: "Expense date must be in YYYY-MM format.",
+  noCarryovers: "Select at least one carryover balance.",
+  alreadyPaid: "One or more carryovers are already paid.",
+  notPaid: "Carryover is not paid.",
+  paidCannotDelete: "Cannot delete a paid carryover. Unpay it first.",
+  paidCannotEdit: "Cannot edit a paid carryover. Unpay it first.",
+  teacherImmutable: "The carryover's teacher cannot be changed; delete and recreate the record instead.",
+  toExpenseFailed: "Failed to convert carryover to expense.",
+} as const;
+
 const classSubject = {
   createFailed: "Failed to create class subject.",
 } as const;
@@ -408,6 +425,7 @@ export const errorsEn: ErrorsLabels = {
   teacher,
   teacherDue,
   payroll,
+  carryover,
   student,
   category,
   user,
@@ -515,11 +533,22 @@ export const errorsEn: ErrorsLabels = {
   unknownError: "An unknown error occurred.",
   unknownDispatchError: "An unknown dispatch error occurred.",
   whatsappTemplateMissing: "WhatsApp template configuration is missing for this notification.",
+  whatsappNoSenderForPurpose: "No active WhatsApp sender account is available for this notification.",
 
   // ─── WhatsApp account management errors ─────────────────────────────────
   whatsappAccountNotFound: (id: string) => `WhatsApp account not found: ${id}`,
   whatsappAccessTokenNotConfigured: "WhatsApp access token is not configured.",
   whatsappWabaIdNotConfigured: "WhatsApp Business Account ID is not configured.",
+  whatsappEmbeddedSignupFailed: "WhatsApp Business app connection failed. Please try again.",
+  whatsappPurposeRequiresActive: "Only active WhatsApp numbers can be assigned a purpose. Activate the number first.",
+  whatsappAccountOffboarded: "This WhatsApp number was disconnected by Meta and can no longer send messages.",
+  whatsappCoexistenceTakenByOtherPartner:
+    "Coexistence for this number is managed by another software partner. Disconnect it there first.",
+  whatsappSyncDeadlineExpired:
+    "The WhatsApp Business app did not finish the sync within 24 hours. Re-run onboarding to retry.",
+  whatsappHistoryDeclined:
+    "Chat history sharing was declined on the paired device. Contacts are synced; message history is unavailable.",
+  whatsappWebhookProcessingFailed: "A WhatsApp webhook event could not be processed and was parked for review.",
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "Email",

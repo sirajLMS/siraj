@@ -537,6 +537,91 @@ export async function updatePayrollCalculation(
   return updated ?? null;
 }
 
+// ---------------------------------------------------------------------------
+// Carryover linking
+// ---------------------------------------------------------------------------
+
+/**
+ * Locks and fetches multiple class instance rows in a single
+ * `SELECT ... FOR UPDATE`. The rows stay locked until the caller's
+ * transaction commits or rolls back, which is what lets carryover
+ * aggregation validate-and-link atomically without a concurrent writer
+ * re-linking or re-calculating a session mid-transaction. Rows are read in
+ * ascending id order (ids are sorted before the IN clause and the statement
+ * orders by id) so concurrent callers lock overlapping id sets in the same
+ * order, and soft-deleted rows are excluded like every other read path in
+ * this repository — a deleted session can never be aggregated into a
+ * carryover. Missing ids surface via the caller's count check.
+ *
+ * `tx` is required — the lock only exists inside an open transaction, so a
+ * bare read would feign mutual exclusion it never had. Ids without a
+ * matching row are silently absent from the result; callers compare counts
+ * to detect missing instances.
+ */
+export async function getByIdsForUpdate(
+  ids: readonly string[],
+  tx: DBTransaction
+): Promise<Types.ClassInstanceSelectType[]> {
+  if (ids.length === 0) return [];
+  const sortedIds = [...ids].toSorted((a, b) => a.localeCompare(b));
+  const base = tx
+    .select()
+    .from(classInstances)
+    .where(and(inArray(classInstances.id, sortedIds), isNull(classInstances.deletedAt)))
+    .orderBy(classInstances.id);
+  return withForUpdate(base);
+}
+
+/**
+ * Returns every class instance currently linked to the given carryover
+ * balance. Used by payout and unpay flows that must transition all linked
+ * sessions together.
+ */
+export async function findByCarryoverId(
+  carryoverId: string,
+  tx?: DBTransaction
+): Promise<Types.ClassInstanceSelectType[]> {
+  const q = queryDb(tx);
+  return q.select().from(classInstances).where(eq(classInstances.carryoverBalanceId, carryoverId));
+}
+
+/**
+ * Points a batch of class instances at a carryover balance and returns the
+ * updated rows. Data access only: validating that the sessions are audited
+ * and not already linked belongs to the calling service, together with the
+ * `getByIdsForUpdate` row locks that make the validation meaningful.
+ */
+export async function linkToCarryover(
+  instanceIds: readonly string[],
+  carryoverId: string,
+  tx: DBTransaction
+): Promise<Types.ClassInstanceSelectType[]> {
+  if (instanceIds.length === 0) return [];
+  return tx
+    .update(classInstances)
+    .set({ carryoverBalanceId: carryoverId, updatedAt: new Date() })
+    .where(inArray(classInstances.id, [...instanceIds]))
+    .returning();
+}
+
+/**
+ * Detaches a batch of class instances from their carryover balance by
+ * nulling the link column and returns the updated rows. Restoring each
+ * session's prior calculation status is orchestrated by the calling
+ * service from the carryover's item snapshots.
+ */
+export async function unlinkFromCarryover(
+  instanceIds: readonly string[],
+  tx: DBTransaction
+): Promise<Types.ClassInstanceSelectType[]> {
+  if (instanceIds.length === 0) return [];
+  return tx
+    .update(classInstances)
+    .set({ carryoverBalanceId: null, updatedAt: new Date() })
+    .where(inArray(classInstances.id, [...instanceIds]))
+    .returning();
+}
+
 /** Start-of-day bound for an inclusive `YYYY-MM-DD` date filter. */
 function startOfUtcDay(isoDate: string): Date {
   return new Date(`${isoDate}T00:00:00.000Z`);

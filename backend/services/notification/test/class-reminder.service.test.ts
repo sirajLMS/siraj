@@ -81,6 +81,7 @@ const mockInstance1: ClassInstanceSelectType = {
   payrollNote: null,
   payrollCalculatedAt: null,
   payrollCalculatedBy: null,
+  carryoverBalanceId: null,
   remarks: null,
   adminNotes: null,
   idempotencyKey: "mock-ci",

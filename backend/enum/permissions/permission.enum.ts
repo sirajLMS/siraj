@@ -110,6 +110,9 @@ export enum AppPermission {
   // Accounting — session-event audit reports
   ACCOUNTING_REPORTS_VIEW = "accounting.reports_view",
   ACCOUNTING_REPORTS_MANAGE = "accounting.reports_manage",
+  // Accounting — carryover balance settlements
+  ACCOUNTING_CARRYOVER_VIEW = "accounting.carryover_view",
+  ACCOUNTING_CARRYOVER_MANAGE = "accounting.carryover_manage",
   // Student Metadata & Lifecycle Management
   STUDENT_REASSIGN_TEACHER = "student.reassign_teacher",
   STUDENT_MANAGE_STATUS = "student.manage_status",
@@ -276,6 +279,9 @@ export enum AppPermission {
   WHATSAPP_VIEW = "whatsapp.view",
   WHATSAPP_CONFIG_MANAGE = "whatsapp.config_manage",
   WHATSAPP_TEMPLATES_MANAGE = "whatsapp.templates_manage",
+  // WhatsApp inbox (coexistence conversations; INBOX_MANAGE reserved for the reply composer)
+  WHATSAPP_INBOX_VIEW = "whatsapp.inbox_view",
+  WHATSAPP_INBOX_MANAGE = "whatsapp.inbox_manage",
   // Quota Management
   QUOTAS_VIEW = "quotas.view",
   QUOTAS_MANAGE = "quotas.manage",
