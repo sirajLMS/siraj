@@ -1,7 +1,9 @@
+import type { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   WhatsappAccountRow,
   WhatsappCreateInput,
   WhatsappDialogState,
+  WhatsappEmbeddedSignupPayload,
   WhatsappOptInAuditEntry,
   WhatsappOptInUserState,
   WhatsappSettingsLabels,
@@ -44,17 +46,29 @@ export interface NumbersTabSharedProps {
   readonly onCreate: (input: WhatsappCreateInput) => Promise<void>;
   /** Edit an account's display name. */
   readonly onEditName: (accountId: string, displayName: string) => Promise<void>;
+  /** Assign a routing purpose (gated mutation — rejects inactive accounts server-side). */
+  readonly onUpdatePurpose: (accountId: string, purpose: WhatsappAccountPurpose) => Promise<void>;
   /** Open the create dialog. */
   readonly onOpenCreateDialog: () => void;
-  /** Open the edit-name dialog for a specific account. */
-  readonly onOpenEditNameDialog: (accountId: string, displayName: string) => void;
+  /** Open the edit-name dialog for a specific account, pre-selecting its current purpose. */
+  readonly onOpenEditNameDialog: (accountId: string, displayName: string, purpose: WhatsappAccountPurpose) => void;
   /** Close any open dialog. */
   readonly onCloseDialog: () => void;
   // ── Validation functions (Task 8) ──
   readonly validateDisplayName: (value: string) => string | null;
   readonly validatePhoneNumberId: (value: string) => string | null;
   readonly validateWabaId: (value: string) => string | null;
-  // ── Credential validation (Task 14) ──
+  readonly validatePurpose: (value: string) => string | null;
+  // ── Embedded signup (coexistence onboarding) ──
+  /** Server-resolved ES `config_id` (null disables the connect flow). */
+  readonly esConfigId?: string | null;
+  /** Server-resolved Meta App ID for the FB SDK init. */
+  readonly esAppId?: string | null;
+  /** Open the embedded signup dialog. */
+  readonly onOpenEmbeddedSignup?: () => void;
+  /** Submit the captured ES session payload (mutation + refetch). */
+  readonly onEmbeddedSignupComplete?: (payload: WhatsappEmbeddedSignupPayload) => Promise<void>;
+  // ── Credential validation ──
   readonly validateAccessToken: (value: string) => string | null;
   readonly validateTwoStepPin: (value: string) => string | null;
 }

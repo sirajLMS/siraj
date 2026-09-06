@@ -29,22 +29,19 @@ type WebhookChangeValue = {
   [key: string]: unknown;
 };
 
-type WebhookChange = {
-  field?: string;
-  value?: WebhookChangeValue;
-};
-
-type WebhookEntry = {
-  id?: string;
-  changes?: WebhookChange[];
-};
-
-type WebhookPayload = {
-  object?: string;
-  entry?: WebhookEntry[];
-};
-
-const processEventMock = mock(async (_payload?: WebhookPayload): Promise<void> => {});
+const processPendingEventsMock = mock(
+  async (_limit?: number): Promise<{ claimed: number; processed: number; failed: number }> => ({
+    claimed: 0,
+    processed: 0,
+    failed: 0,
+  })
+);
+const persistWebhookChangesMock = mock(
+  async (_body: unknown, _hash: string): Promise<{ inserted: number; skippedReplay: boolean }> => ({
+    inserted: 1,
+    skippedReplay: false,
+  })
+);
 
 const loggerWarnMock = mock((_msg: string, _meta?: Record<string, unknown>) => {});
 const loggerErrorMock = mock((_msg: string, _meta?: Record<string, unknown>) => {});
@@ -91,6 +88,10 @@ await mock.module("@/backend/services/system", () => ({
         return undefined;
     }
   },
+  invalidateEnvConfigCache: () => {},
+  resolveEnvConfigMany: async () => ({}),
+  setEnvConfig: async () => {},
+  clearEnvConfigCache: () => {},
 }));
 
 await mock.module("@/backend/lib/ratelimit", () => ({
@@ -106,8 +107,22 @@ await mock.module("@/backend/lib/ratelimit", () => ({
 
 await mock.module("@/backend/services/whatsapp/whatsapp-webhook.handler", () => ({
   WhatsappWebhookHandler: {
-    processEvent: processEventMock,
+    processPendingWebhookEvents: processPendingEventsMock,
   },
+}));
+
+await mock.module("@/backend/services/whatsapp/whatsapp-webhook-ingest.helpers", () => ({
+  persistWebhookChanges: persistWebhookChangesMock,
+  isRecord: (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value),
+  isValidWamid: (vamid: unknown): boolean =>
+    typeof vamid === "string" && vamid.length >= 8 && vamid.length <= 128 && /^(?=.*[a-zA-Z0-9])[\w.-]+$/.test(vamid),
+  toSafeString: (value: unknown): string | undefined =>
+    typeof value === "string" && value.length > 0 ? value : undefined,
+  resolveAccountByPhoneNumberId: async () => null,
+  resolveLifecycleAccount: async () => null,
+  collectEventRows: () => [],
+  WEBHOOK_REPLAY_WINDOW_MS: 5 * 60 * 1000,
 }));
 
 await mock.module("@/backend/lib/logger", () => ({
@@ -133,6 +148,11 @@ await mock.module("@/backend/lib/logger", () => ({
 
 function computeHmac(body: string, secret: string = TEST_APP_SECRET): string {
   return "sha256=" + crypto.createHmac("sha256", secret).update(body).digest("hex");
+}
+
+/** Narrow an unknown mock argument to a record for assertions. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function buildWebhookBody(messagesIncluded = false): string {
@@ -222,7 +242,9 @@ async function assertPostRejected(
   const res = await POST(req);
   expect(res.status).toBe(expectedStatus);
   expect(afterCallback).toBeNull();
-  expect(processEventMock).toHaveBeenCalledTimes(0);
+  // No durable event rows may be written for a rejected request (S2 cover).
+  expect(processPendingEventsMock).toHaveBeenCalledTimes(0);
+  expect(persistWebhookChangesMock).toHaveBeenCalledTimes(0);
   return res;
 }
 
@@ -246,7 +268,10 @@ async function importRoute() {
 // ---------------------------------------------------------------------------
 
 beforeEach(() => {
-  processEventMock.mockClear();
+  processPendingEventsMock.mockClear();
+  processPendingEventsMock.mockResolvedValue({ claimed: 0, processed: 0, failed: 0 });
+  persistWebhookChangesMock.mockClear();
+  persistWebhookChangesMock.mockResolvedValue({ inserted: 1, skippedReplay: false });
   loggerWarnMock.mockClear();
   loggerErrorMock.mockClear();
   loggerInfoMock.mockClear();
@@ -278,11 +303,17 @@ describe("POST /api/webhooks/whatsapp", () => {
 
     expect(res.status).toBe(200);
 
-    // The deferred handler should have been registered via after().
+    // Durable rows were persisted BEFORE the 200 (persist-first).
+    expect(persistWebhookChangesMock).toHaveBeenCalledTimes(1);
+    const call = persistWebhookChangesMock.mock.calls[0];
+    expect(call).toBeDefined();
+    expect(isRecord(call?.[0])).toBe(true);
+    expect(call?.[1]).toHaveLength(64);
+
+    // The deferred durable worker was registered via after().
     expect(afterCallback).not.toBeNull();
-    // Execute the deferred callback and verify processEvent was called.
     await afterCallback?.();
-    expect(processEventMock).toHaveBeenCalledTimes(1);
+    expect(processPendingEventsMock).toHaveBeenCalledTimes(1);
   });
 
   test("HMAC negative: invalid signature returns 401 and logs safe metadata only (S2)", async () => {
@@ -320,9 +351,10 @@ describe("POST /api/webhooks/whatsapp", () => {
     expect(loggedMeta).toHaveProperty("userAgent");
     expect(loggedMeta).toHaveProperty("contentLength");
 
-    // The handler must NOT have been called on HMAC failure.
+    // The handler must NOT have been called on HMAC failure, and no event rows.
     expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    expect(processPendingEventsMock).toHaveBeenCalledTimes(0);
+    expect(persistWebhookChangesMock).toHaveBeenCalledTimes(0);
   });
 
   test("Body-size cap: Content-Length > 1MB returns 413", async () => {
@@ -344,10 +376,56 @@ describe("POST /api/webhooks/whatsapp", () => {
 
     // Handler must not be called.
     expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    expect(processPendingEventsMock).toHaveBeenCalledTimes(0);
+    expect(persistWebhookChangesMock).toHaveBeenCalledTimes(0);
   });
 
-  test("Route-level S3 strip: messages[] stripped from change entries before deferral", async () => {
+  test("Identical-body retry inside the replay window is acked but persists no rows", async () => {
+    const { POST } = await importRoute();
+    persistWebhookChangesMock.mockResolvedValueOnce({ inserted: 0, skippedReplay: true });
+    const rawBody = buildWebhookBody(true);
+    const signature = computeHmac(rawBody);
+
+    const res = await POST(
+      makePostRequest(rawBody, {
+        "content-type": "application/json",
+        "x-hub-signature-256": signature,
+        "content-length": String(Buffer.byteLength(rawBody)),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    expect(persistWebhookChangesMock).toHaveBeenCalledTimes(1);
+    await afterCallback?.();
+    expect(processPendingEventsMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("Inbound messages[] are NOT stripped — the full change is persisted durably", async () => {
+    const { POST } = await importRoute();
+    const rawBody = buildWebhookBody(true); // body includes value.messages[]
+    const signature = computeHmac(rawBody);
+
+    const res = await POST(
+      makePostRequest(rawBody, {
+        "content-type": "application/json",
+        "x-hub-signature-256": signature,
+        "content-length": String(Buffer.byteLength(rawBody)),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    // The exact parsed body reaches the durable store — messages survive.
+    const persistedBody = persistWebhookChangesMock.mock.calls[0]?.[0];
+    expect(isRecord(persistedBody)).toBe(true);
+    const entry = isRecord(persistedBody) && Array.isArray(persistedBody.entry) ? persistedBody.entry[0] : null;
+    const changes = isRecord(entry) && Array.isArray(entry.changes) ? entry.changes : [];
+    const changeValue = isRecord(changes[0]) && isRecord(changes[0].value) ? changes[0].value : {};
+    expect(changeValue.messages).toEqual([expect.objectContaining({ id: "wamid.inbound1" })]);
+    await afterCallback?.();
+    expect(processPendingEventsMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("End-to-end: valid HMAC → durable persist BEFORE 200 → deferred worker runs", async () => {
     const { POST } = await importRoute();
     const rawBody = buildWebhookBody(true); // body includes value.messages[]
     const signature = computeHmac(rawBody);
@@ -359,70 +437,29 @@ describe("POST /api/webhooks/whatsapp", () => {
     });
 
     const res = await POST(req);
-
     expect(res.status).toBe(200);
-
-    // Execute the deferred handler.
     expect(afterCallback).not.toBeNull();
+
     await afterCallback?.();
 
-    // processEvent should have been called once with the stripped payload.
-    expect(processEventMock).toHaveBeenCalledTimes(1);
-
-    const passedPayload = processEventMock.mock.calls[0][0];
-
-    expect(passedPayload).toBeDefined();
-    expect(passedPayload?.entry).toBeDefined();
-    expect(Array.isArray(passedPayload?.entry)).toBe(true);
-
-    // Every change entry's value MUST NOT have a messages[] array — it should be stripped (S3).
-    for (const entry of passedPayload?.entry ?? []) {
-      for (const change of entry.changes ?? []) {
-        if (change.value) {
-          expect(change.value.messages).toBeUndefined();
-          // Other fields like statuses should be preserved.
-          expect(change.value.statuses).toBeDefined();
-        }
-      }
-    }
+    // Worker claimed the queue once; the full parsed body was persisted first.
+    expect(processPendingEventsMock).toHaveBeenCalledTimes(1);
+    expect(persistWebhookChangesMock).toHaveBeenCalledTimes(1);
+    const persistedBody = persistWebhookChangesMock.mock.calls[0]?.[0];
+    expect(isRecord(persistedBody) && persistedBody.object).toBe("whatsapp_business_account");
   });
 
-  // r10-056: End-to-end HMAC + S3 strip + deferred after() callback + handler invocation
-  test("End-to-end: valid HMAC → S3 strip → deferred after() → handler called with stripped payload", async () => {
+  test("Durable persist failure returns 503 (Meta retries) — no after() kick", async () => {
     const { POST } = await importRoute();
-    const rawBody = buildWebhookBody(true); // body includes value.messages[]
-    const signature = computeHmac(rawBody);
+    persistWebhookChangesMock.mockRejectedValueOnce(new Error("db down"));
+    const rawBody = buildWebhookBody(false);
 
-    const req = makePostRequest(rawBody, {
-      "content-type": "application/json",
-      "x-hub-signature-256": signature,
-      "content-length": String(Buffer.byteLength(rawBody)),
-    });
-
-    // Step 1: POST returns 200 immediately (deferred handler registered)
+    const req = makeSignedPostRequest(rawBody);
     const res = await POST(req);
-    expect(res.status).toBe(200);
 
-    // Step 2: after() callback was registered (deferred processing)
-    expect(afterCallback).not.toBeNull();
-
-    // Step 3: Execute deferred callback → handler invoked with stripped payload
-    await afterCallback?.();
-
-    // Step 4: processEvent was called exactly once
-    expect(processEventMock).toHaveBeenCalledTimes(1);
-
-    // Step 5: The passed payload has messages[] stripped (S3)
-    const passedPayload = processEventMock.mock.calls[0][0];
-    expect(passedPayload?.object).toBe("whatsapp_business_account");
-    for (const entry of passedPayload?.entry ?? []) {
-      for (const change of entry.changes ?? []) {
-        if (change.value) {
-          expect(change.value.messages).toBeUndefined();
-          expect(change.value.statuses).toBeDefined();
-        }
-      }
-    }
+    expect(res.status).toBe(503);
+    expect(afterCallback).toBeNull();
+    expect(loggerErrorMock).toHaveBeenCalled();
   });
 
   // r10-021: POST error-path edge cases
@@ -492,7 +529,8 @@ describe("POST /api/webhooks/whatsapp", () => {
     // Post-read Buffer.byteLength check catches the oversized body
     expect(res.status).toBe(413);
     expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    expect(processPendingEventsMock).toHaveBeenCalledTimes(0);
+    expect(persistWebhookChangesMock).toHaveBeenCalledTimes(0);
   });
 
   test("Body at exactly 1MB boundary is accepted (not 413)", async () => {

@@ -127,80 +127,80 @@
 
 ## Phase 8: Embedded Signup Onboarding
 
-- [ ] **8. ES v4 client + server complete**
-  - [ ] 8.1 Server: token exchange helper + `GET /<WABA_ID>?fields=phone_numbers` resolution (reuse `list-phone-numbers.request.ts`); `subscribed_apps` request builder; coexistence confirm (`is_on_biz_app && platform_type`) in `whatsapp-account.service.ts` (`completeEmbeddedSignup`).
-  - [ ] 8.2 GraphQL mutation `completeWhatsappEmbeddedSignup` (+ account creation with onboardingMode + immediate sync enqueue).
-  - [ ] 8.3 Frontend: ES dialog component (FB SDK loader, session-logging listener, CANCEL/ERROR surfaces) on Numbers tab (`frontend/common/views/dashboard/settings/whatsapp/` + desktop/mobile variants).
-  - [ ] 8.QL / 8.TE — mocked FB SDK session events; token exchange mocked; decline path; only-waba_id payload. 8.SEC (code single-use; `config_id` from `WHATSAPP_ES_CONFIG_ID` env-config, never client input). 8.SR. 8.IV.
+- [x] **8. ES v4 client + server complete**
+  - [x] 8.1 Server: token exchange helper + `GET /<WABA_ID>?fields=phone_numbers` resolution (reuse `list-phone-numbers.request.ts`); `subscribed_apps` request builder; coexistence confirm (`is_on_biz_app && platform_type`) in `whatsapp-account.service.ts` (`completeEmbeddedSignup`).
+  - [x] 8.2 GraphQL mutation `completeWhatsappEmbeddedSignup` (+ account creation with onboardingMode + immediate sync enqueue).
+  - [x] 8.3 Frontend: ES dialog component (FB SDK loader, session-logging listener, CANCEL/ERROR surfaces) on Numbers tab (`frontend/common/views/dashboard/settings/whatsapp/` + desktop/mobile variants).
+  - [x] 8.QL / 8.TE — mocked FB SDK session events; token exchange mocked; decline path; only-waba_id payload. 8.SEC (code single-use; `config_id` from `WHATSAPP_ES_CONFIG_ID` env-config, never client input). 8.SR. 8.IV.
   - Outcome: `outcome/8-signup-outcome.md` · _Requirements: REQ-4_
 
 ## Phase 9: GraphQL Inbox Surface
 
-- [ ] **9. Inbox queries + purpose mutation + codegen**
-  - [ ] 9.1 `backend/graphql/pothos/whatsapp/whatsapp-inbox.pothos.ts` — object types only.
-  - [ ] 9.2 `backend/graphql/query/whatsapp/whatsapp-inbox.query.ts` — `whatsappConversations`, `whatsappConversationMessages`, `whatsappSyncStatus`. Permission checks MUST pass `UserPermissionContext` from `ctx` (`{ permissions, permissionGroups, isSuperAdmin, role }`) into the service's `hasPermission(...)` — never re-query via `PermissionsService.getUserContext(userId)` (cold-start rule). Resolver errors MUST be DomainError subclasses (`ForbiddenError` etc.). Pothos enum types reference the real `backend/enum/whatsapp/` enums (no literal arrays).
-  - [ ] 9.3 Edit `whatsapp-account.mutation.ts` — `updateWhatsappAccountPurpose` (WHATSAPP_CONFIG_MANAGE) + register `completeWhatsappEmbeddedSignup` (from Task 8).
-  - [ ] 9.4 Barrels (`query/whatsapp/index.ts`, pothos index) + `bun run generate:gqlSchema && bun run codegen`.
-  - [ ] 9.QL / 9.TE — GraphQL integration tests via testClient (permission denial, pagination). 9.SEC (IDOR: conversationId belongs to tenant account). 9.SR. 9.IV.
+- [x] **9. Inbox queries + purpose mutation + codegen**
+  - [x] 9.1 `backend/graphql/pothos/whatsapp/whatsapp-inbox.pothos.ts` — object types only.
+  - [x] 9.2 `backend/graphql/query/whatsapp/whatsapp-inbox.query.ts` — `whatsappConversations`, `whatsappConversationMessages`, `whatsappSyncStatus`. Permission checks MUST pass `UserPermissionContext` from `ctx` (`{ permissions, permissionGroups, isSuperAdmin, role }`) into the service's `hasPermission(...)` — never re-query via `PermissionsService.getUserContext(userId)` (cold-start rule). Resolver errors MUST be DomainError subclasses (`ForbiddenError` etc.). Pothos enum types reference the real `backend/enum/whatsapp/` enums (no literal arrays).
+  - [x] 9.3 Edit `whatsapp-account.mutation.ts` — `updateWhatsappAccountPurpose` (WHATSAPP_CONFIG_MANAGE) + register `completeWhatsappEmbeddedSignup` (from Task 8).
+  - [x] 9.4 Barrels (`query/whatsapp/index.ts`, pothos index) + `bun run generate:gqlSchema && bun run codegen`.
+  - [x] 9.QL / 9.TE — GraphQL integration tests via testClient (permission denial, pagination). 9.SEC (IDOR: conversationId belongs to tenant account). 9.SR. 9.IV.
   - Outcome: `outcome/9-graphql-outcome.md` · _Requirements: REQ-8_
 
 ## Phase 10: i18n
 
-- [ ] **10. `whatsappInbox` namespace + whatsapp additions (EN + AR)**
-  - [ ] 10.1 Create `shared/locale/types/whatsappInbox/index.ts` + leaves en/ar; wire both surfaces (`en/messages.ts` + `ar/messages.ts` + `namespaces/whatsappInbox/whatsappInbox.namespace.ts` via `defineNamespace` with a stable string id); register `whatsappInboxTranslations` in `shared/locale/types/message.ts`; add a `WhatsappInbox` handle entry to the `Translation` registry in `shared/locale/namespaces/translation.ts`.
-  - [ ] 10.2 Extend `shared/locale/types/whatsapp/index.ts` (+ en/ar leaves): purpose labels, sync statuses, onboarding strings, new errors (`noSenderForPurpose`, `purposeRequiresActive`, `accountOffboarded`, `coexistenceTakenByOtherPartner`, `embeddedSignupFailed`, `syncDeadlineExpired`, `historyDeclined`, `webhookProcessingFailed`).
-  - [ ] 10.3 `bun run locale:snapshots`; verify both locales.
-  - [ ] 10.QL / 10.TE (snapshot + key parity) / 10.SEC / 10.SR / 10.IV — `shared/AGENTS.md`, `shared/locale/AGENTS.md`.
+- [x] **10. `whatsappInbox` namespace + whatsapp additions (EN + AR)**
+  - [x] 10.1 Create `shared/locale/types/whatsappInbox/index.ts` + leaves en/ar; wire both surfaces (`en/messages.ts` + `ar/messages.ts` + `namespaces/whatsappInbox/whatsappInbox.namespace.ts` via `defineNamespace` with a stable string id); register `whatsappInboxTranslations` in `shared/locale/types/message.ts`; add a `WhatsappInbox` handle entry to the `Translation` registry in `shared/locale/namespaces/translation.ts`.
+  - [x] 10.2 Extend `shared/locale/types/whatsapp/index.ts` (+ en/ar leaves): purpose labels, sync statuses, onboarding strings, new errors (`noSenderForPurpose`, `purposeRequiresActive`, `accountOffboarded`, `coexistenceTakenByOtherPartner`, `embeddedSignupFailed`, `syncDeadlineExpired`, `historyDeclined`, `webhookProcessingFailed`).
+  - [x] 10.3 `bun run locale:snapshots`; verify both locales.
+  - [x] 10.QL / 10.TE (snapshot + key parity) / 10.SEC / 10.SR / 10.IV — `shared/AGENTS.md`, `shared/locale/AGENTS.md`.
   - Outcome: `outcome/10-i18n-outcome.md` · _Requirements: REQ-0.5, REQ-8_
 
 ## Phase 11: Frontend — Numbers Tab Extensions
 
-- [ ] **11. Purpose + coexistence surfaces**
-  - [ ] 11.1 Extend `WhatsappAccountFields` fragment + `whatsapp.documents.ts` (purpose, onboardingMode, sync status fields).
-  - [ ] 11.2 Create/edit dialogs: purpose select (`createAccountDialog/`, `editNameDialog/`), `whatsappFormValidation.ts` purpose validator.
-  - [ ] 11.3 `NumberCard` — purpose chip + coexistence sync status (`whatsappStatusBadge` category extension) + sync % + `coexistenceRestrictionsHint` tooltip.
-  - [ ] 11.4 `whatsappTabSharedProps.ts` prop-contract update across tabs/__shared__ scaffolds + desktop/mobile tab files.
-  - [ ] 11.QL / 11.TE — component tests for card + dialogs. 11.SEC. 11.SR. 11.IV.
+- [x] **11. Purpose + coexistence surfaces**
+  - [x] 11.1 Extend `WhatsappAccountFields` fragment + `whatsapp.documents.ts` (purpose, onboardingMode, sync status fields).
+  - [x] 11.2 Create/edit dialogs: purpose select (`createAccountDialog/`, `editNameDialog/`), `whatsappFormValidation.ts` purpose validator.
+  - [x] 11.3 `NumberCard` — purpose chip + coexistence sync status (`whatsappStatusBadge` category extension) + sync % + `coexistenceRestrictionsHint` tooltip.
+  - [x] 11.4 `whatsappTabSharedProps.ts` prop-contract update across tabs/__shared__ scaffolds + desktop/mobile tab files.
+  - [x] 11.QL / 11.TE — component tests for card + dialogs. 11.SEC. 11.SR. 11.IV.
   - Outcome: `outcome/11-numbers-ui-outcome.md` · _Requirements: REQ-1_
 
 ## Phase 12: Frontend — Inbox Tab
 
-- [ ] **12. Inbox tab end-to-end**
-  - [ ] 12.1 `whatsappConfig.constants.ts` (`TAB_IDS`/`TAB_LABELS`/`TAB_PERMISSIONS` inbox entry), `WhatsappConfigView.tsx` union, `whatsappTabUrl.ts`.
-  - [ ] 12.2 Create `frontend/common/graphql/sharedDocuments/whatsapp/whatsapp-inbox.documents.ts` (`whatsappConversationsQueryDocument`, `whatsappConversationMessagesQueryDocument` — `id` on every object type per sharedDocuments rules) + `useWhatsappInboxViewModel.ts` (queries, account filter, pagination, refetch-on-focus polling).
-  - [ ] 12.3 `tabs/shared/InboxTabContent.tsx` + `tabs/shared/ConversationThread.tsx` (AppDataGrid/MobileCardList, thread bubbles, media placeholder/expiry rendering, revoke/edit markers).
-  - [ ] 12.4 Desktop + mobile lazy tab files; `WhatsappTabPanels.tsx` wiring with `RequirePermission`.
-  - [ ] 12.QL / 12.TE — component tests: gating (no-permission hides tab), list/thread render, empty state, RTL. 12.SEC. 12.SR. 12.IV — `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend.instructions.md`, `mobile-desktop.instructions.md`.
+- [x] **12. Inbox tab end-to-end**
+  - [x] 12.1 `whatsappConfig.constants.ts` (`TAB_IDS`/`TAB_LABELS`/`TAB_PERMISSIONS` inbox entry), `WhatsappConfigView.tsx` union, `whatsappTabUrl.ts`.
+  - [x] 12.2 Create `frontend/common/graphql/sharedDocuments/whatsapp/whatsapp-inbox.documents.ts` (`whatsappConversationsQueryDocument`, `whatsappConversationMessagesQueryDocument` — `id` on every object type per sharedDocuments rules) + `useWhatsappInboxViewModel.ts` (queries, account filter, pagination, refetch-on-focus polling).
+  - [x] 12.3 `tabs/shared/InboxTabContent.tsx` + `tabs/shared/ConversationThread.tsx` (AppDataGrid/MobileCardList, thread bubbles, media placeholder/expiry rendering, revoke/edit markers).
+  - [x] 12.4 Desktop + mobile lazy tab files; `WhatsappTabPanels.tsx` wiring with `RequirePermission`.
+  - [x] 12.QL / 12.TE — component tests: gating (no-permission hides tab), list/thread render, empty state, RTL. 12.SEC. 12.SR. 12.IV — `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, `frontend.instructions.md`, `mobile-desktop.instructions.md`.
   - Outcome: `outcome/12-inbox-ui-outcome.md` · _Requirements: REQ-8_
 
 ## Phase 13: Journey Test
 
-- [ ] **13. `test/workflows/whatsapp/coexistence-routing.test.ts`** (test-first)
-  - [ ] 13.1 Cast helper additions in `test/workflows/helpers/` (whatsapp admin/staff actors via `assignSystemGroup`).
-  - [ ] 13.2 Journey: purpose config → template dispatch lands on correct account; offboard → fail-fast; reconnect → active; onboarding sync enqueue → history/echo chunks ingested → staff reads inbox; unauthorized user denied; notification dispatch spied via `dispatchWithPreferences`.
-  - [ ] 13.3 `test/workflows/whatsapp/DIAGRAMS.md` mermaid + `bun run validate:mermaid`.
-  - [ ] 13.QL / 13.TE / 13.SEC / 13.SR / 13.IV — `test/workflows/AGENTS.md` committed fixtures (no runInRollback).
+- [x] **13. `test/workflows/whatsapp/coexistence-routing.test.ts`** (test-first)
+  - [x] 13.1 Cast helper additions in `test/workflows/helpers/` (whatsapp admin/staff actors via `assignSystemGroup`).
+  - [x] 13.2 Journey: purpose config → template dispatch lands on correct account; offboard → fail-fast; reconnect → active; onboarding sync enqueue → history/echo chunks ingested → staff reads inbox; unauthorized user denied; notification dispatch spied via `dispatchWithPreferences`.
+  - [x] 13.3 `test/workflows/whatsapp/DIAGRAMS.md` mermaid + `bun run validate:mermaid`.
+  - [x] 13.QL / 13.TE / 13.SEC / 13.SR / 13.IV — `test/workflows/AGENTS.md` committed fixtures (no runInRollback).
   - Outcome: `outcome/13-journey-outcome.md` · _Requirements: J1, J2, J3, cross-actor EARS_
 
 ## Phase 14: Final Quality Gate
 
-- [ ] **14. Global health + deferred enforcement + v1 regression**
-  - [ ] 14.1 `grep -c "❌\|⚠️" .ai/plans/whatsapp2/deferred-items.md` → 0 unresolved-blocking (📋 Future entries are accepted).
-  - [ ] 14.2 `bun tsgo && bun biome:check && bun run lint` vs baseline (record deltas).
-  - [ ] 14.3 Run suites: `bun run test/scripts/run-test.ts` for each new/edited repo+service+handler test file; `bun run test:workflows`; `bun run test:ui:components` (inbox/numbers tests).
-  - [ ] 14.4 v1 regression smoke: single-account tenant sends template end-to-end (adapter path unchanged externally); existing `whatsapp-webhook.handler.test.ts` status-delivery assertions green without `stripInboundMessages`.
-  - [ ] 14.5 Update `trackable-tasks.md` all `[x]`.
+- [x] **14. Global health + deferred enforcement + v1 regression**
+  - [x] 14.1 `grep -c "❌\|⚠️" .ai/plans/whatsapp2/deferred-items.md` → 0 unresolved-blocking (📋 Future entries are accepted).
+  - [x] 14.2 `bun tsgo && bun biome:check && bun run lint` vs baseline (record deltas).
+  - [x] 14.3 Run suites: `bun run test/scripts/run-test.ts` for each new/edited repo+service+handler test file; `bun run test:workflows`; ~~`bun run test:ui:components`~~ (UI suites skipped by user order — implemented, not executed).
+  - [x] 14.4 v1 regression smoke: single-account tenant sends template end-to-end (adapter path unchanged externally); existing `whatsapp-webhook.handler.test.ts` status-delivery assertions green without `stripInboundMessages`.
+  - [x] 14.5 Update `trackable-tasks.md` all `[x]`.
   - Outcome: `outcome/14-quality-outcome.md` · _Requirements: REQ-0_
 
 ## Phase 15: Knowledge Propagation
 
-- [ ] **15. Canonical docs + AGENTS/skill updates**
-  - [ ] 15.1 Create `docs/services/whatsapp-coexistence-multi.md` — multi-number routing, coexistence onboarding/sync lifecycle, durable ingest + replay/idempotency policy, per-pair limits, error codes, ops checklist (Dashboard field subscriptions).
-  - [ ] 15.2 Update `docs/services/whatsapp-cloud-api.md` — mark r3 "2 HIGH fixed" notes correct per inventory; add v2 cross-link.
-  - [ ] 15.3 Update `docs/frontend/whatsapp-ui-patterns.md` — inbox tab + purpose surfaces.
-  - [ ] 15.4 Update AGENTS.md: `backend/services/AGENTS.md` (per-account channel pattern + durable ingest rule), root `AGENTS.md` Important References (new docs link), `shared/locale/AGENTS.md` only if new convention emerged.
-  - [ ] 15.5 Update `.agents/skills/` (e.g. write-tests journey notes) if new patterns emerged.
-  - [ ] 15.6 Final sub-loop on edited docs-adjacent files (docs are markdown — lint only).
+- [x] **15. Canonical docs + AGENTS/skill updates**
+  - [x] 15.1 Create `docs/services/whatsapp-coexistence-multi.md` — multi-number routing, coexistence onboarding/sync lifecycle, durable ingest + replay/idempotency policy, per-pair limits, error codes, ops checklist (Dashboard field subscriptions).
+  - [x] 15.2 Update `docs/services/whatsapp-cloud-api.md` — mark r3 "2 HIGH fixed" notes correct per inventory; add v2 cross-link.
+  - [x] 15.3 Update `docs/frontend/whatsapp-ui-patterns.md` — inbox tab + purpose surfaces.
+  - [x] 15.4 Update AGENTS.md: `backend/services/AGENTS.md` (per-account channel pattern + durable ingest rule), root `AGENTS.md` Important References (new docs link), `shared/locale/AGENTS.md` only if new convention emerged.
+  - [x] 15.5 Update `.agents/skills/` (e.g. write-tests journey notes) if new patterns emerged.
+  - [x] 15.6 Final sub-loop on edited docs-adjacent files (docs are markdown — lint only).
   - Outcome: `outcome/15-knowledge-outcome.md` · _Requirements: Knowledge propagation protocol_
 
 ## Dependencies

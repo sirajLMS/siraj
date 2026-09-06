@@ -128,6 +128,8 @@ export const dashboardCronAr: CronLabels = {
     invalidScheduleIdFormat: "صيغة scheduleId غير صالحة",
     tickerFailed: "فشل المؤقت",
     classRemindersFailed: "فشل تذكيرات الحصص",
+    whatsappSyncSweepFailed: "فشل مسح مزامنة واتساب",
+    whatsappWebhookSweepFailed: "فشل مسح أحداث ويب هوك واتساب",
     userContextRequired: "يلزم وجود سياق مستخدم مصادق عليه لتنفيذ هذا الإجراء",
     // Cron auth errors (machine-to-machine API responses)
     unauthorized: "غير مصرح",

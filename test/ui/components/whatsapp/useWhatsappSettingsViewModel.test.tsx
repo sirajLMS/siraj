@@ -3,6 +3,7 @@ import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { type RefObject, useEffect } from "react";
+import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
@@ -161,6 +162,7 @@ function createAccountMock(account: ReturnType<typeof makeAccountRow>): MockLink
           displayName: { en: `Account ${account.id}` },
           phoneNumberId: account.phoneNumberId,
           wabaId: account.wabaId,
+          purpose: WhatsappAccountPurpose.General,
           displayPhoneNumber: null,
           isActive: null,
           portfolioMessagingLimitTier: null,
@@ -402,6 +404,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
         displayName: "Account acc-new",
         phoneNumberId: "phone-1",
         wabaId: "waba-1",
+        purpose: WhatsappAccountPurpose.General,
       });
     });
 
@@ -426,6 +429,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
         displayName: "",
         phoneNumberId: "phone-1",
         wabaId: "waba-1",
+        purpose: WhatsappAccountPurpose.General,
       });
     });
 

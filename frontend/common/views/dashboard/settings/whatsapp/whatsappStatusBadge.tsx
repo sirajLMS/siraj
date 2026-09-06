@@ -6,8 +6,8 @@ import { WhatsappTemplateStatus } from "@/shared/constants/whatsapp-templates.en
  *
  * Maps each `WhatsappTemplateStatus` value to a `StatusBadgeCategory` + semantic
  * status key that `StatusBadge` / `resolveStatusPaletteKey` understands. The
- * `label` field is intentionally the raw enum value — Task 11 (Phase 3) will
- * replace it with an i18n key lookup via `getTemplateStatusLabelKey`.
+ * `label` field carries the raw enum value; presentation layers are expected
+ * to override it with the localized template-status label.
  *
  * Uses the `syncStatus` category because it supports the full range of semantic
  * states (success/running/partial/failed/unknown) that map cleanly to template
@@ -23,8 +23,8 @@ export interface WhatsappStatusBadgeConfig {
   readonly category: StatusBadgeCategory;
   readonly status: string;
   /**
-   * Display label. Currently the raw enum value — Task 11 will replace this
-   * with the localized string from `getTemplateStatusLabelKey(status)`.
+   * Display label. Carries the raw enum/status value; callers that have the
+   * whatsapp locale labels should pass a localized label instead.
    */
   readonly label: string;
 }
@@ -96,14 +96,93 @@ export function getWhatsappTemplateStatusBadgeConfig(status: string | null): Wha
  * - Active   → success (green)
  * - Inactive → failed  (red/grey)
  *
- * The `label` is currently the raw boolean-derived string ("true"/"false").
- * Task 11 will replace this with localized `t.isActive` / `t.isInactive`.
+ * `label` falls back to a display-safe placeholder; callers overlay the
+ * localized active/inactive label from the whatsapp namespace.
  */
 export function getWhatsappAccountStatusBadgeConfig(isActive: boolean | null): WhatsappStatusBadgeConfig {
   const active = isActive ?? false;
   return {
     category: SYNC_STATUS,
     status: active ? "success" : "failed",
-    label: String(active),
+    label: "—",
+  };
+}
+
+/**
+ * Coexistence sync lifecycle (`WhatsappSyncStatus`) → badge config:
+ * - NOT_STARTED → unknown (grey)
+ * - REQUESTED / SYNCING → running (amber)
+ * - COMPLETE → success (green)
+ * - FAILED → failed (red)
+ */
+const WHATSAPP_SYNC_STATUS_BADGE: Readonly<Record<string, string>> = {
+  NOT_STARTED: "unknown",
+  REQUESTED: "running",
+  SYNCING: "running",
+  COMPLETE: "success",
+  FAILED: "failed",
+};
+
+/**
+ * Badge config for an account's coexistence sync status. The `label` is the
+ * raw status value — callers overlay the localized label via the sync-status
+ * label-key helpers.
+ */
+export function getWhatsappSyncStatusBadgeConfig(syncStatus: string | null): WhatsappStatusBadgeConfig {
+  return {
+    category: SYNC_STATUS,
+    status: (syncStatus ? WHATSAPP_SYNC_STATUS_BADGE[syncStatus] : undefined) ?? "unknown",
+    label: syncStatus ?? "—",
+  };
+}
+
+/** MUI `Alert` severities supported by the coexistence sync-state panels. */
+export type WhatsappSyncAlertSeverity = "info" | "success" | "error";
+
+/**
+ * Coexistence sync lifecycle → alert severity for the sync-state detail
+ * panels, kept in step with the badge mapping above:
+ * - REQUESTED / SYNCING → info (in-flight)
+ * - COMPLETE → success
+ * - FAILED → error
+ */
+const WHATSAPP_SYNC_STATUS_ALERT_SEVERITY: Readonly<Record<string, WhatsappSyncAlertSeverity>> = {
+  REQUESTED: "info",
+  SYNCING: "info",
+  COMPLETE: "success",
+  FAILED: "error",
+};
+
+/**
+ * Alert severity for a sync-state detail panel, or `null` when the status
+ * has no panel (NOT_STARTED or unknown) — the badge row alone covers those.
+ */
+export function getWhatsappSyncStatusAlertSeverity(syncStatus: string | null): WhatsappSyncAlertSeverity | null {
+  return (syncStatus ? WHATSAPP_SYNC_STATUS_ALERT_SEVERITY[syncStatus] : undefined) ?? null;
+}
+
+/**
+ * Routing purpose → badge config. Purpose is an attribute (not a lifecycle),
+ * so it maps onto the neutral-to-affirmative span of the sync category:
+ * - GENERAL → unknown (neutral grey)
+ * - STUDENTS → partial (teal)
+ * - ADVERTISING → success (green)
+ */
+const WHATSAPP_PURPOSE_BADGE: Readonly<Record<string, string>> = {
+  GENERAL: "unknown",
+  STUDENTS: "partial",
+  ADVERTISING: "success",
+};
+
+/**
+ * Badge config for an account's routing purpose. The `label` is the raw
+ * purpose value — callers overlay the localized label via the purpose
+ * label-key helpers.
+ */
+export function getWhatsappPurposeBadgeConfig(purpose: string | null): WhatsappStatusBadgeConfig {
+  return {
+    category: SYNC_STATUS,
+    status: (purpose ? WHATSAPP_PURPOSE_BADGE[purpose] : undefined) ?? "unknown",
+    label: purpose ?? "—",
   };
 }

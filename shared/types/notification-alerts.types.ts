@@ -19,6 +19,8 @@ export type NotificationEntityKind =
 interface NotificationMetadataBase {
   readonly entityKind: NotificationEntityKind;
   readonly entityId: string;
+  /** Sender attribution for channel sends (e.g. the WhatsApp account id that dispatched the delivery row). */
+  readonly senderAccountId?: string | null;
 }
 
 interface InvoiceMetadata extends NotificationMetadataBase {

@@ -1,32 +1,52 @@
+import { sql } from "drizzle-orm";
 import {
   booleanColumn,
+  checkConstraint,
   createTable,
   encryptedText,
   index,
+  integerColumn,
   jsonbColumn,
   timestampColumn,
   uuidColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
+import {
+  whatsappAccountPurposeEnum,
+  whatsappOnboardingModeEnum,
+  whatsappSyncStatusEnum,
+} from "@/backend/db/schema/enums";
+import { WhatsappAccountPurpose, WhatsappOnboardingMode, WhatsappSyncStatus } from "@/backend/enum/whatsapp";
 import type { LocalizedString } from "@/shared/types/localized-string";
 
 /**
  * WhatsApp Business Accounts table.
  * Stores per-account credentials and Meta-synced metadata for the Cloud API channel.
  *
- * Hybrid credential storage (REQ-3):
+ * Hybrid credential storage:
  * - `encryptedAccessToken` and `encryptedTwoStepPin` use the `encryptedText` custom
  *   Drizzle type — encryption/decryption happens transparently at the driver boundary
  *   via `field-encryption.ts`. The repository/service layer never handles raw ciphertext.
  * - Global webhook secrets (app secret, verify token) live in env-config, not here.
  *
- * Meta tier fields (Q5):
+ * Meta tier fields:
  * - `portfolioMessagingLimitTier` stores Meta's enum string verbatim
  *   (UNTIERED / TIER_50 / TIER_250 / TIER_1K / TIER_10K / TIER_100K / TIER_UNLIMITED / TIER_NOT_SET)
  *   with no transformation — needed for exact tier-budget accounting.
  * - `throughputLevel` stores STANDARD / COEXISTENCE / HIGH.
  *
- * B4: `updatedAt` uses `.$onUpdate(() => new Date())` so the repository need not
+ * Multi-number routing + one-shot coexistence sync:
+ * - `purpose` selects which account a notification dispatch targets (GENERAL is
+ *   the fallback purpose; v1 rows default to it).
+ * - `onboardingMode` flags Cloud-API-only numbers vs Business-app coexistence
+ *   numbers (v1 rows default to CLOUD_API).
+ * - `syncStatus`/`syncPhase`/`syncProgress`/`syncDeadlineAt`/`syncFailureReason`
+ *   track the one-shot `smb_app_data` sync (must be requested within 24h of
+ *   onboarding); Meta `request_id` values live per sync type on
+ *   `whatsapp_sync_requests`, not here.
+ * - `offboardedAt` records when Meta offboarded the number (account_update).
+ *
+ * `updatedAt` uses `.$onUpdate(() => new Date())` so the repository need not
  * set it manually on every update.
  */
 export const whatsappAccounts = createTable(
@@ -41,6 +61,14 @@ export const whatsappAccounts = createTable(
     portfolioMessagingLimitTier: varcharColumn("portfolio_messaging_limit_tier", { length: 32 }),
     throughputLevel: varcharColumn("throughput_level", { length: 16 }),
     maxPhoneNumbersPerBusiness: varcharColumn("max_phone_numbers_per_business", { length: 50 }),
+    purpose: whatsappAccountPurposeEnum("purpose").notNull().default(WhatsappAccountPurpose.GENERAL),
+    onboardingMode: whatsappOnboardingModeEnum("onboarding_mode").notNull().default(WhatsappOnboardingMode.CLOUD_API),
+    syncStatus: whatsappSyncStatusEnum("sync_status").notNull().default(WhatsappSyncStatus.NOT_STARTED),
+    syncPhase: integerColumn("sync_phase"),
+    syncProgress: integerColumn("sync_progress").notNull().default(0),
+    syncDeadlineAt: timestampColumn("sync_deadline_at"),
+    syncFailureReason: varcharColumn("sync_failure_reason", { length: 64 }),
+    offboardedAt: timestampColumn("offboarded_at"),
     encryptedAccessToken: encryptedText("encrypted_access_token").notNull(),
     encryptedTwoStepPin: encryptedText("encrypted_two_step_pin").notNull(),
     isActive: booleanColumn("is_active").notNull().default(true),
@@ -55,5 +83,10 @@ export const whatsappAccounts = createTable(
     index("whatsapp_accounts_waba_id_idx").on(table.wabaId),
     index("whatsapp_accounts_is_active_idx").on(table.isActive),
     index("whatsapp_accounts_active_created_at_idx").on(table.isActive, table.createdAt),
+    checkConstraint(
+      "whatsapp_accounts_sync_progress_range_chk",
+      sql`${table.syncProgress} BETWEEN 0 AND 100`,
+      sql`${table.syncProgress} BETWEEN 0 AND 100`
+    ),
   ]
 );

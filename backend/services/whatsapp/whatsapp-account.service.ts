@@ -4,12 +4,18 @@ import { NotificationPreferencesRepository } from "@/backend/db/repo/notificatio
 import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { AppPermission, NotificationChannel, NotificationEventType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { WhatsappTemplateCategory, WhatsappTemplateStatus } from "@/backend/enum/whatsapp/whatsapp.enum";
+import { type WhatsappAccountPurpose, WhatsappOnboardingMode } from "@/backend/enum/whatsapp/whatsapp-account.enum";
 import {
   buildReturnType,
+  ConflictError,
   coerceLimitTier,
   coerceQualityRating,
+  ForbiddenError,
   isValidLimitTier,
   isValidQualityRating,
+  NotFoundError,
+  WhatsappEmbeddedSignupError,
+  WhatsappPurposeRequiresActiveError,
 } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import {
@@ -17,32 +23,48 @@ import {
   MAX_CONCURRENT_CALLS,
   readErrorBody,
   resolveGraphApiContextFromEnv,
+  resolveGraphApiVersion,
 } from "@/backend/lib/whatsapp-constants";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { GraphApiError } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
+import {
+  buildExchangeEmbeddedSignupCodeRequest,
+  buildGetPhoneNumberPlatformRequest,
+  buildSubscribeAppToWabaRequest,
+  parseExchangeEmbeddedSignupCodeResponse,
+  parseGetPhoneNumberPlatformResponse,
+  parseSubscribeAppToWabaResponse,
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests";
 import { buildGetPhoneNumberRequest } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
 import { collectAllTemplates } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-message-templates.request";
 import { collectAllPhoneNumbers } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-phone-numbers.request";
 import { resetWhatsappChannel } from "@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory";
 import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
 import { NOTIFICATION_TEMPLATE_MAP } from "@/backend/services/notification/notification-payloads.builders";
+import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import { resolveEnvConfig } from "@/backend/services/system";
 import { AuditService } from "@/backend/services/system/audit.service";
+import { WhatsappCoexistenceSyncService } from "@/backend/services/whatsapp/whatsapp-coexistence-sync.service";
 // r10-043/r10-044/r10-045: Canonical types imported from the types layer,
 // not from service-layer barrels or request builders.
 import type {
   AuditAction,
   CreateAuditLogInput,
   DBTransaction,
+  ExchangeEmbeddedSignupCodeResponseBody,
+  GetPhoneNumberPlatformResponseBody,
   GetPhoneNumberResult,
   GraphApiRequestContext,
   GraphApiRequestInit,
   ListMessageTemplatesResponseBody,
   ListPhoneNumbersResponseBody,
   NotificationPreferenceUpdateInput,
+  SubscribedAppsResponseBody,
+  UserPermissionContext,
   WhatsappAccountCreateSubmitInput,
   WhatsappAccountReturnType,
   WhatsappAccountUpdateInput,
+  WhatsappEmbeddedSignupSubmitInput,
   WhatsappMessageTemplate,
   WhatsappPhoneNumber,
   WhatsappSyncFromMetaReturnType,
@@ -116,6 +138,32 @@ export const messageTemplateListSchema = z.object({
   data: z.array(messageTemplateSchema),
   paging: graphApiPagingSchema,
 });
+
+/** Runtime shape of the embedded-signup code-exchange response. */
+const embeddedSignupTokenResponseSchema = z.object({
+  access_token: z.string().optional(),
+  token_type: z.string().optional(),
+});
+
+/** Runtime shape of the coexistence platform-confirmation read. */
+const phoneNumberPlatformResponseSchema = z.object({
+  id: z.string().optional(),
+  display_phone_number: z.string().optional(),
+  is_on_biz_app: z.boolean().optional(),
+  platform_type: z.string().optional(),
+});
+
+/** Runtime shape of the `subscribed_apps` response. */
+const subscribedAppsResponseSchema = z.object({
+  success: z.boolean().optional(),
+});
+
+/** Meta numeric IDs (wabaId / phoneNumberId) are digit strings, ≤64 chars. */
+const META_NUMERIC_ID_REGEX = /^\d{1,64}$/;
+
+function isValidMetaNumericId(value: string): boolean {
+  return META_NUMERIC_ID_REGEX.test(value);
+}
 
 export const sendTemplateMessageResponseSchema = z.object({
   messaging_product: z.string(),
@@ -278,13 +326,34 @@ async function auditChange(
   }
 }
 
+/**
+ * Resolves the Graph API context for `syncFromMeta`.
+ *
+ * Credentials come from the active GENERAL-purpose account row (DB-managed,
+ * per-account) — this is the normal path once any WhatsApp account exists.
+ * The env-global `WHATSAPP_ACCESS_TOKEN` path survives ONLY as the bootstrap
+ * path for provisioning the very first account: before the first account row
+ * exists there is no DB-managed token to read. As soon as an active account
+ * exists, the env token is ignored for account sync.
+ */
 async function resolveGraphApiContext(tErrors: ErrorsLabels): Promise<{ ctx: GraphApiRequestContext; wabaId: string }> {
   const wabaId = await resolveEnvConfig("WHATSAPP_WABA_ID");
   if (!wabaId) {
     throw new Error(tErrors.whatsappWabaIdNotConfigured);
   }
-  const { accessToken, apiVersion } = await resolveGraphApiContextFromEnv(tErrors);
-  return { ctx: { accessToken, apiVersion }, wabaId };
+  const apiVersion = await resolveGraphApiVersion();
+
+  const account = await WhatsappAccountRepository.findActiveGeneral();
+  // `encryptedText.fromDriver` decrypts at the driver boundary — the column
+  // value read here is already the plaintext token.
+  if (account?.encryptedAccessToken) {
+    return { ctx: { accessToken: account.encryptedAccessToken, apiVersion }, wabaId };
+  }
+
+  // Bootstrap path — no usable DB-managed account yet, fall back to the
+  // env-global access token (provisioning the first account).
+  const envContext = await resolveGraphApiContextFromEnv(tErrors);
+  return { ctx: { accessToken: envContext.accessToken, apiVersion }, wabaId };
 }
 
 // NOTE (Fix 3, LOW): The fetch plumbing here (fetch + AbortSignal.timeout +
@@ -312,6 +381,117 @@ function isValidTemplateStatus(value: string): value is WhatsappTemplateStatus {
 
 function isValidTemplateCategory(value: string): value is WhatsappTemplateCategory {
   return (Object.values(WhatsappTemplateCategory) as string[]).includes(value);
+}
+
+// ─── Embedded Signup (coexistence onboarding) helpers ───────────────────────
+// Server side of the ES v4 flow: the browser captures a single-use
+// authorization `code` + WABA/phone asset IDs; the steps below exchange the
+// code, resolve the phone number, confirm coexistence eligibility, attach the
+// app to the WABA, then create the account row with `onboardingMode:
+// COEXISTENCE`. Every Meta failure surfaces to the client as
+// `WhatsappEmbeddedSignupError` (`whatsapp.embeddedSignupFailed`) — internal
+// detail is logged, never echoed.
+
+/** Wraps any unknown ES-step failure in the localized domain error. */
+function wrapEmbeddedSignupError(error: unknown, fallbackMessage: string, step: string): WhatsappEmbeddedSignupError {
+  logger.error(
+    `whatsapp-account-service: embedded signup ${step} failed: ${error instanceof Error ? error.message : String(error)}`,
+    { step, error }
+  );
+  return new WhatsappEmbeddedSignupError(fallbackMessage, {
+    cause: error instanceof Error ? error : undefined,
+  });
+}
+
+/** Exchanges the single-use ES authorization code for a business-integration token. */
+async function exchangeEmbeddedSignupCode(
+  code: string,
+  appId: string,
+  appSecret: string,
+  apiVersion: string,
+  failureMessage: string
+): Promise<string> {
+  try {
+    const request = buildExchangeEmbeddedSignupCodeRequest(apiVersion, { appId, appSecret, code });
+    const body = await executeGraphApiFetch<ExchangeEmbeddedSignupCodeResponseBody>(
+      request,
+      embeddedSignupTokenResponseSchema
+    );
+    return parseExchangeEmbeddedSignupCodeResponse(body).accessToken;
+  } catch (error) {
+    throw wrapEmbeddedSignupError(error, failureMessage, "codeExchange");
+  }
+}
+
+/**
+ * Resolves the phone number for the onboarding WABA. When the client session
+ * supplied a `phoneNumberId` it wins; otherwise the WABA's phone list is read
+ * (must contain exactly one number to be unambiguous).
+ */
+async function resolveEmbeddedSignupPhoneNumber(
+  ctx: GraphApiRequestContext,
+  wabaId: string,
+  phoneNumberId: string | undefined,
+  failureMessage: string
+): Promise<{ phoneNumberId: string; displayPhoneNumber: string | null }> {
+  if (phoneNumberId) {
+    return { phoneNumberId, displayPhoneNumber: null };
+  }
+  try {
+    const phones = await collectAllPhoneNumbers(ctx, { wabaId }, request =>
+      executeGraphApiFetch<ListPhoneNumbersResponseBody>(request, phoneNumberListSchema)
+    );
+    if (phones.length !== 1) {
+      throw new WhatsappEmbeddedSignupError(failureMessage);
+    }
+    return { phoneNumberId: phones[0].id, displayPhoneNumber: phones[0].display_phone_number ?? null };
+  } catch (error) {
+    throw wrapEmbeddedSignupError(error, failureMessage, "phoneResolution");
+  }
+}
+
+/**
+ * Confirms the coexistence preconditions on the resolved number: the business
+ * app must still be installed (`is_on_biz_app`) and the number must be
+ * Cloud-API reachable (`platform_type === "CLOUD_API"`).
+ */
+async function confirmEmbeddedSignupCoexistence(
+  ctx: GraphApiRequestContext,
+  phoneNumberId: string,
+  failureMessage: string
+): Promise<string | null> {
+  try {
+    const request = buildGetPhoneNumberPlatformRequest(ctx, { phoneNumberId });
+    const body = await executeGraphApiFetch<GetPhoneNumberPlatformResponseBody>(
+      request,
+      phoneNumberPlatformResponseSchema
+    );
+    const platform = parseGetPhoneNumberPlatformResponse(body);
+    if (!platform.isOnBizApp || platform.platformType !== "CLOUD_API") {
+      throw new WhatsappEmbeddedSignupError(failureMessage);
+    }
+    return platform.displayPhoneNumber;
+  } catch (error) {
+    throw wrapEmbeddedSignupError(error, failureMessage, "coexistenceConfirm");
+  }
+}
+
+/**
+ * Attaches the app to the WABA. A failure here is not onboarding-blocking —
+ * the account exists; the missing subscription surfaces as a settings
+ * warning instead.
+ */
+async function subscribeAppToWaba(ctx: GraphApiRequestContext, wabaId: string): Promise<void> {
+  try {
+    const request = buildSubscribeAppToWabaRequest(ctx, { wabaId });
+    const body = await executeGraphApiFetch<SubscribedAppsResponseBody>(request, subscribedAppsResponseSchema);
+    parseSubscribeAppToWabaResponse(body);
+  } catch (error) {
+    logger.warn(
+      `whatsapp-account-service: subscribed_apps call failed for waba ${wabaId.slice(-4)}: ${error instanceof Error ? error.message : String(error)}`,
+      { error }
+    );
+  }
 }
 
 export namespace WhatsappAccountService {
@@ -428,8 +608,59 @@ export namespace WhatsappAccountService {
           },
           t
         );
-        await resetWhatsappChannel();
+        await resetWhatsappChannel(id);
       }
+      return updated;
+    };
+
+    return tx ? await runner(tx) : await db.transaction(runner);
+  }
+
+  /**
+   * Assign or change the routing purpose of an account
+   * (`WHATSAPP_CONFIG_MANAGE`; permission context passed in from the caller so
+   * no extra user-context DB query happens). Purpose assignment on an inactive
+   * account is rejected — routing only considers active rows, so assigning a
+   * purpose to an inactive account would silently misroute sends.
+   */
+  export async function updateAccountPurpose(
+    actorUserId: string,
+    context: UserPermissionContext,
+    tErrors: ErrorsLabels,
+    id: string,
+    purpose: WhatsappAccountPurpose,
+    tx?: DBTransaction
+  ): Promise<WhatsappAccountReturnType> {
+    const ok = await PermissionsService.hasPermission(context, AppPermission.WHATSAPP_CONFIG_MANAGE);
+    if (!ok) {
+      throw new ForbiddenError(tErrors.insufficientPermissions);
+    }
+    assertValidId(id, tErrors);
+
+    const runner = async (t: DBTransaction): Promise<WhatsappAccountReturnType> => {
+      const previous = await WhatsappAccountRepository.findById(id, t);
+      if (!previous) {
+        throw new NotFoundError("WHATSAPP_ACCOUNT", tErrors.whatsappAccountNotFound(id));
+      }
+      if (!previous.isActive) {
+        throw new WhatsappPurposeRequiresActiveError(tErrors.whatsappPurposeRequiresActive);
+      }
+      const updated = await WhatsappAccountRepository.update(id, { purpose }, t);
+      if (!updated) {
+        throw new NotFoundError("WHATSAPP_ACCOUNT", tErrors.whatsappAccountNotFound(id));
+      }
+      await auditChange(
+        actorUserId,
+        "UPDATE",
+        id,
+        {
+          description: `Updated WhatsApp account ${id} purpose to ${purpose}`,
+          previousState: { purpose: previous.purpose },
+          newState: { purpose },
+        },
+        t
+      );
+      await resetWhatsappChannel(id);
       return updated;
     };
 
@@ -459,7 +690,7 @@ export namespace WhatsappAccountService {
           },
           t
         );
-        await resetWhatsappChannel();
+        await resetWhatsappChannel(id);
       }
       return deactivated;
     };
@@ -506,7 +737,7 @@ export namespace WhatsappAccountService {
         },
         tx
       );
-      await resetWhatsappChannel();
+      await resetWhatsappChannel(id);
     }
     return updated;
   }
@@ -542,7 +773,7 @@ export namespace WhatsappAccountService {
         },
         tx
       );
-      await resetWhatsappChannel();
+      await resetWhatsappChannel(id);
     }
     return updated;
   }
@@ -824,9 +1055,160 @@ export namespace WhatsappAccountService {
 
   // REQ-10/BL1: Per-user opt-in helpers
 
+  /**
+   * Completes Embedded Signup (coexistence) onboarding end-to-end:
+   * exchange the single-use code → resolve the phone number → confirm the
+   * number still runs the Business app and is Cloud-API reachable → attach
+   * the app to the WABA → create the account row (`onboardingMode:
+   * COEXISTENCE`, business-integration token stored) → enqueue the one-shot
+   * contacts/history sync. The account persists even when the sync enqueue
+   * fails — onboarding is complete once Meta accepts the credentials.
+   *
+   * The authorization code is single-use: a replayed or expired code fails
+   * the Meta exchange call and surfaces as `whatsapp.embeddedSignupFailed`.
+   */
+  export async function completeEmbeddedSignup(
+    actorUserId: string,
+    tErrors: ErrorsLabels,
+    input: WhatsappEmbeddedSignupSubmitInput,
+    tx?: DBTransaction
+  ): Promise<WhatsappAccountReturnType> {
+    await assertCanManage(actorUserId, tErrors);
+
+    const code = input.code.trim();
+    const wabaId = input.wabaId.trim();
+    const phoneNumberId = input.phoneNumberId?.trim() ?? undefined;
+    if (code.length === 0 || code.length > 2048 || !isValidMetaNumericId(wabaId)) {
+      throw new WhatsappAccountValidationError("INVALID_INPUT", tErrors.invalidInput);
+    }
+    if (phoneNumberId !== undefined && !isValidMetaNumericId(phoneNumberId)) {
+      throw new WhatsappAccountValidationError("INVALID_INPUT", tErrors.invalidInput);
+    }
+
+    const appId = await resolveEnvConfig("WHATSAPP_APP_ID");
+    const appSecret = await resolveEnvConfig("WHATSAPP_APP_SECRET");
+    if (!appId || !appSecret) {
+      logger.error("whatsapp-account-service: embedded signup aborted — app credentials not configured");
+      throw new WhatsappEmbeddedSignupError(tErrors.whatsappEmbeddedSignupFailed);
+    }
+    const apiVersion = await resolveGraphApiVersion();
+
+    const accessToken = await exchangeEmbeddedSignupCode(
+      code,
+      appId,
+      appSecret,
+      apiVersion,
+      tErrors.whatsappEmbeddedSignupFailed
+    );
+    const ctx: GraphApiRequestContext = { accessToken, apiVersion };
+
+    const resolved = await resolveEmbeddedSignupPhoneNumber(
+      ctx,
+      wabaId,
+      phoneNumberId,
+      tErrors.whatsappEmbeddedSignupFailed
+    );
+    const confirmedDisplayNumber = await confirmEmbeddedSignupCoexistence(
+      ctx,
+      resolved.phoneNumberId,
+      tErrors.whatsappEmbeddedSignupFailed
+    );
+    const displayPhoneNumber = confirmedDisplayNumber ?? resolved.displayPhoneNumber;
+
+    const existing = await WhatsappAccountRepository.findByPhoneNumberId(resolved.phoneNumberId, tx);
+    if (existing) {
+      throw wrapEmbeddedSignupError(
+        new ConflictError(`WhatsApp account already exists for phoneNumberId ***${resolved.phoneNumberId.slice(-4)}`),
+        tErrors.whatsappEmbeddedSignupFailed,
+        "duplicateCheck"
+      );
+    }
+
+    await subscribeAppToWaba(ctx, wabaId);
+
+    // A concurrent signup that passed the duplicate pre-check above loses at
+    // the unique `phone_number_id` index (SQLSTATE 23505); surface the same
+    // localized onboarding failure instead of leaking the raw driver error.
+    let account: WhatsappAccountReturnType;
+    try {
+      account = await WhatsappAccountRepository.create(
+        {
+          wabaId,
+          phoneNumberId: resolved.phoneNumberId,
+          displayPhoneNumber,
+          onboardingMode: WhatsappOnboardingMode.COEXISTENCE,
+          // Plaintext token — the `encryptedText` column encrypts at the driver
+          // boundary (same contract as setAccessToken).
+          encryptedAccessToken: accessToken,
+          encryptedTwoStepPin: SYNC_STATUS_PENDING,
+          isActive: true,
+        },
+        tx
+      );
+    } catch (error) {
+      if (isDuplicateError(error)) {
+        throw wrapEmbeddedSignupError(error, tErrors.whatsappEmbeddedSignupFailed, "accountCreate");
+      }
+      throw error;
+    }
+
+    await auditChange(
+      actorUserId,
+      "CREATE",
+      account.id,
+      {
+        description: `Completed WhatsApp embedded signup (coexistence) for ${maskPhoneNumber(displayPhoneNumber)}`,
+        newState: { wabaId, phoneNumberId: resolved.phoneNumberId, onboardingMode: WhatsappOnboardingMode.COEXISTENCE },
+      },
+      tx
+    );
+    await resetWhatsappChannel(account.id);
+
+    try {
+      // No caller tx: the sync POSTs to Meta must never sit inside a caller
+      // transaction (see the sync service's contract JSDoc).
+      await WhatsappCoexistenceSyncService.enqueuePostOnboardingSync(account.id, tErrors);
+    } catch (error) {
+      logger.error(
+        `whatsapp-account-service: post-onboarding sync enqueue failed for account ${account.id}: ${error instanceof Error ? error.message : String(error)}`,
+        { accountId: account.id, error }
+      );
+    }
+
+    return account;
+  }
+
+  // REQ-10/BL1: Per-user opt-in helpers
+
+  /**
+   * Per-account health hook: validates that the channel for a single account
+   * can resolve credentials. Never throws — missing, inactive, or offboarded
+   * accounts report `false` so callers can render health surfaces.
+   */
+  export async function validateAccountConfig(accountId: string): Promise<boolean> {
+    const { validateWhatsappChannelConfig } = await import("@/backend/services/communication/channels/whatsapp");
+    try {
+      return await validateWhatsappChannelConfig(accountId);
+    } catch (error) {
+      logger.warn("whatsapp-account-service: validateAccountConfig failed", {
+        accountId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Aggregate configuration check across accounts: WhatsApp is considered
+   * configured when at least one active account resolves healthy credentials.
+   */
   export async function isConfigured(): Promise<boolean> {
-    const { whatsappChannel } = await import("@/backend/services/communication/channels/whatsapp");
-    return whatsappChannel.validateConfig();
+    const accounts = await WhatsappAccountRepository.listActive();
+    if (accounts.length === 0) {
+      return false;
+    }
+    const results = await Promise.all(accounts.map(account => validateAccountConfig(account.id)));
+    return results.some(Boolean);
   }
 
   export async function isUserWhatsappOptIn(userId: string, tx?: DBTransaction): Promise<boolean> {
@@ -880,15 +1262,18 @@ export namespace WhatsappAccountService {
       .trim()
       .slice(0, 200);
 
-    // Only write opt-in/out prefs for event types where WhatsApp is a
-    // dispatchable channel per the EVENT_CHANNEL_ALLOWLIST AND has an
-    // actual template mapping in NOTIFICATION_TEMPLATE_MAP. Non-allowlisted
-    // events default to all channels but most have no WhatsApp template, so
-    // writing prefs for them would spam the preferences table with rows for
-    // events that will never dispatch WhatsApp.
+    // Only write opt-in/out prefs for event types that can dispatch over
+    // WhatsApp: dispatch treats an EVENT_CHANNEL_ALLOWLIST entry that omits
+    // WHATSAPP as "WhatsApp excluded", while an ABSENT entry means the event
+    // dispatches over all channels (whatsapp included). The
+    // NOTIFICATION_TEMPLATE_MAP check additionally skips events with no
+    // WhatsApp template, so the preferences table is not spammed with rows
+    // for events that will never dispatch WhatsApp.
     const whatsappEventTypes = (Object.values(NotificationEventType) as NotificationEventType[]).filter(eventType => {
       const allowed = EVENT_CHANNEL_ALLOWLIST[eventType];
-      return allowed?.includes(NotificationChannel.WHATSAPP) && NOTIFICATION_TEMPLATE_MAP[eventType] != null;
+      return (
+        (!allowed || allowed.includes(NotificationChannel.WHATSAPP)) && NOTIFICATION_TEMPLATE_MAP[eventType] != null
+      );
     });
     const inputs: NotificationPreferenceUpdateInput[] = whatsappEventTypes.map(eventType => ({
       channel: NotificationChannel.WHATSAPP,

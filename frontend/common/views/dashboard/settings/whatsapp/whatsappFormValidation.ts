@@ -29,6 +29,9 @@ const TWO_STEP_PIN_PATTERN = /^\d{6}$/;
 /** Pattern for numeric-only strings. */
 const NUMERIC_PATTERN = /^\d+$/;
 
+/** Accepted routing purposes (mirrors the `WhatsappAccountPurpose` GraphQL enum values). */
+const VALID_PURPOSES: ReadonlySet<string> = new Set(["GENERAL", "ADVERTISING", "STUDENTS"]);
+
 /**
  * Validates the display name field of the create-account form.
  *
@@ -106,11 +109,30 @@ export function validateTwoStepPin(value: string): string | null {
   return null;
 }
 
+/**
+ * Validates the routing purpose field of the create/edit dialogs.
+ *
+ * The purpose is a select from the `WhatsappAccountPurpose` enum, so this
+ * guards against an empty value or a non-member value (e.g. a tampered select).
+ *
+ * @returns `null` if valid, or a validation key string if invalid.
+ */
+export function validatePurpose(value: string): string | null {
+  if (value.trim().length === 0) {
+    return "validationPurposeRequired";
+  }
+  if (!VALID_PURPOSES.has(value)) {
+    return "validationPurposeInvalid";
+  }
+  return null;
+}
+
 /** Validation result for the create-account form. */
 export interface AccountCreateFormValidationResult {
   readonly displayName: string | null;
   readonly phoneNumberId: string | null;
   readonly wabaId: string | null;
+  readonly purpose: string | null;
 }
 
 /**
@@ -123,6 +145,7 @@ export function validateAccountCreateForm(values: AccountCreateFormValues): Acco
     displayName: validateDisplayName(values.displayName),
     phoneNumberId: validatePhoneNumberId(values.phoneNumberId),
     wabaId: validateWabaId(values.wabaId),
+    purpose: validatePurpose(values.purpose),
   };
 }
 

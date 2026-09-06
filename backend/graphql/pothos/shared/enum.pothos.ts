@@ -60,10 +60,17 @@ import {
   TeacherDueStatus,
   TeacherProgressFeedEventKind,
   UserRole,
+  WhatsappAccountPurpose,
   WhatsappLimitTier,
+  WhatsappMessageDirection,
+  WhatsappOnboardingMode,
   WhatsappQualityRating,
+  WhatsappSyncRequestStatus,
+  WhatsappSyncStatus,
+  WhatsappSyncType,
   WhatsappTemplateCategory,
   WhatsappTemplateStatus,
+  WhatsappWebhookEventStatus,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -324,6 +331,34 @@ export const WhatsappTemplateStatusPothosEnum = gqlSchemaBuilder.enumType(Whatsa
 
 export const WhatsappTemplateCategoryPothosEnum = gqlSchemaBuilder.enumType(WhatsappTemplateCategory, {
   name: "WhatsappTemplateCategory",
+});
+
+export const WhatsappAccountPurposePothosEnum = gqlSchemaBuilder.enumType(WhatsappAccountPurpose, {
+  name: "WhatsappAccountPurpose",
+});
+
+export const WhatsappOnboardingModePothosEnum = gqlSchemaBuilder.enumType(WhatsappOnboardingMode, {
+  name: "WhatsappOnboardingMode",
+});
+
+export const WhatsappSyncStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappSyncStatus, {
+  name: "WhatsappSyncStatus",
+});
+
+export const WhatsappMessageDirectionPothosEnum = gqlSchemaBuilder.enumType(WhatsappMessageDirection, {
+  name: "WhatsappMessageDirection",
+});
+
+export const WhatsappWebhookEventStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappWebhookEventStatus, {
+  name: "WhatsappWebhookEventStatus",
+});
+
+export const WhatsappSyncRequestStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappSyncRequestStatus, {
+  name: "WhatsappSyncRequestStatus",
+});
+
+export const WhatsappSyncTypePothosEnum = gqlSchemaBuilder.enumType(WhatsappSyncType, {
+  name: "WhatsappSyncType",
 });
 
 export const QuotaKindPothosEnum = gqlSchemaBuilder.enumType(QuotaKind, {

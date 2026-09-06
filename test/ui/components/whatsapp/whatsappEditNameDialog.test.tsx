@@ -4,8 +4,12 @@ import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react
 
 expect.extend(matchers);
 
+import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import { EditNameDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/editNameDialog/EditNameDialog";
-import { validateDisplayName } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
+import {
+  validateDisplayName,
+  validatePurpose,
+} from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
@@ -25,12 +29,14 @@ function renderDialog(overrides: Record<string, unknown> = {}) {
       open
       accountId="acc-1"
       initialDisplayName="Old Name"
+      initialPurpose={WhatsappAccountPurpose.General}
       labels={labels}
       loading={false}
       mutationError={null}
       onClose={onClose}
       onSubmit={onSubmit}
       validateDisplayName={validateDisplayName}
+      validatePurpose={validatePurpose}
       {...overrides}
     />,
     { locale }
@@ -82,7 +88,14 @@ describe("EditNameDialog", () => {
       expect(onSubmit).toHaveBeenCalledTimes(1);
       expect(firstCallArgStringAt(onSubmit, 0)).toBe("acc-1");
       expect(firstCallArgStringAt(onSubmit, 1)).toBe("New Name");
+      expect(firstCallArgStringAt(onSubmit, 2)).toBe("GENERAL");
     });
+  });
+
+  test("renders the purpose select pre-filled with the current purpose", () => {
+    renderDialog({ initialPurpose: WhatsappAccountPurpose.Students });
+    expect(screen.getByLabelText(labels.purposeLabel)).toBeTruthy();
+    expect(screen.getByText(labels.purposeStudents)).toBeTruthy();
   });
 
   test("Cancel button calls onClose", async () => {

@@ -1,14 +1,23 @@
+import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
+import { NotificationChannel } from "@/backend/enum";
+import { WhatsappAccountPurpose } from "@/backend/enum/whatsapp/whatsapp-account.enum";
 import { logger } from "@/backend/lib/logger";
+import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system";
-import type { IWhatsappChannel, WhatsappProvider } from "@/backend/types";
+import type { IWhatsappChannel, WhatsappPayload, WhatsappProvider, WhatsappSendResult } from "@/backend/types";
 
-let instance: IWhatsappChannel | null = null;
-let initializationPromise: Promise<IWhatsappChannel> | null = null;
+/**
+ * Per-account adapter instances. Each `whatsapp_accounts` row gets its own
+ * `MetaCloudApiAdapter` so credentials, pair-rate-limit state, and the
+ * concurrency budget stay isolated between numbers.
+ */
+const instances = new Map<string, IWhatsappChannel>();
+const initializationPromises = new Map<string, Promise<IWhatsappChannel>>();
 
 /**
  * Tracks in-flight init/send/validate/disconnect operations so that
- * `resetWhatsappChannel` can await them before discarding the instance,
- * preventing the r11-r10 singleton init race where a concurrent reset
+ * `resetWhatsappChannel` can await them before discarding instances,
+ * preventing the singleton-reset race where a concurrent reset
  * discards a disconnected instance while a send is still in progress.
  */
 const inFlightOperations = new Set<Promise<unknown>>();
@@ -17,7 +26,7 @@ let resetWaiter: Promise<void> | null = null;
 
 /**
  * Resolves the active WhatsApp provider via the DB-first / env-fallback resolver.
- * v1 only supports `"cloud_api"` (forward-compat slot for future BSP adapters).
+ * Only `"cloud_api"` is supported (forward-compat slot for future BSP adapters).
  */
 async function getWhatsappProvider(): Promise<WhatsappProvider> {
   const raw = (await resolveEnvConfig("WHATSAPP_PROVIDER")) ?? "cloud_api";
@@ -29,61 +38,117 @@ async function getWhatsappProvider(): Promise<WhatsappProvider> {
 }
 
 /**
- * Constructs the MetaCloudApiAdapter, resolving global WhatsApp config via
- * the DB-first / env-fallback resolver before dynamic-importing the adapter.
+ * Constructs the MetaCloudApiAdapter for one WhatsApp account, resolving
+ * global provider config via the DB-first / env-fallback resolver before
+ * dynamic-importing the adapter.
  *
  * Per-account credentials (accessToken, phoneNumberId) are NOT resolved here —
- * the adapter decrypts the active account token per send call (S4) so token
- * rotation takes effect without holding plaintext on the singleton.
+ * the adapter resolves the bound account's token on demand so token rotation
+ * takes effect without holding plaintext on a long-lived instance.
  */
-async function createCloudApiAdapter(): Promise<IWhatsappChannel> {
-  logger.info("Initializing WhatsApp channel with Meta Cloud API provider");
+async function createCloudApiAdapter(accountId: string): Promise<IWhatsappChannel> {
+  logger.info("Initializing WhatsApp channel with Meta Cloud API provider", { accountId });
   const { MetaCloudApiAdapter } = await import(
     "@/backend/services/communication/channels/whatsapp/cloud-api/MetaCloudApiAdapter"
   );
 
-  return new MetaCloudApiAdapter();
+  return new MetaCloudApiAdapter(accountId);
 }
 
-async function createWhatsappChannel(): Promise<IWhatsappChannel> {
+async function createWhatsappChannel(accountId: string): Promise<IWhatsappChannel> {
   const provider = await getWhatsappProvider();
 
-  logger.info(`Initializing WhatsApp channel with provider: ${provider}`);
+  logger.info(`Initializing WhatsApp channel with provider: ${provider}`, { accountId });
 
-  return await createCloudApiAdapter();
+  return await createCloudApiAdapter(accountId);
 }
 
-export const getWhatsappChannel = async (): Promise<IWhatsappChannel> => {
+/**
+ * Lazily instantiates and caches the channel adapter for one WhatsApp
+ * account. Callers with no explicit account (legacy dispatch) should go
+ * through {@link resolveDefaultAccountId} / the `whatsappChannel` proxy.
+ */
+export const getWhatsappChannel = async (accountId: string): Promise<IWhatsappChannel> => {
+  if (!accountId.trim()) {
+    // Internal wiring error — not user-facing, no i18n needed
+    throw new Error("getWhatsappChannel: accountId is required");
+  }
+
   // If a reset is in progress, wait for it to complete before (re)initializing
   if (resetInProgress && resetWaiter) {
     await resetWaiter;
   }
 
-  if (instance) {
-    return instance;
+  const existing = instances.get(accountId);
+  if (existing) {
+    return existing;
   }
 
-  initializationPromise ??= (async () => {
-    try {
-      const service = await createWhatsappChannel();
-      instance = service;
-      return instance;
-    } catch (error) {
-      initializationPromise = null;
-      logger.error("Failed to initialize WhatsApp channel", error);
-      throw error;
-    }
-  })();
+  let initPromise = initializationPromises.get(accountId);
+  if (!initPromise) {
+    initPromise = (async () => {
+      try {
+        const channel = await createWhatsappChannel(accountId);
+        instances.set(accountId, channel);
+        return channel;
+      } catch (error) {
+        initializationPromises.delete(accountId);
+        logger.error("Failed to initialize WhatsApp channel", { accountId, error });
+        throw error;
+      }
+    })();
+    initializationPromises.set(accountId, initPromise);
+  }
 
-  void trackInFlight(initializationPromise);
-  return initializationPromise;
+  void trackInFlight(initPromise);
+  return initPromise;
 };
 
 /**
- * Registers a promise in the in-flight set so that `resetWhatsappChannel`
- * can await it before discarding the singleton. The promise is removed
- * from the set once it settles (success or failure).
+ * Resolves the sending channel for a routing purpose: the active account
+ * carrying `purpose`, falling back to the active GENERAL account when the
+ * purpose has no dedicated number. Returns `null` when no account qualifies —
+ * callers translate that into the `whatsapp.noSenderForPurpose` domain error.
  */
+export const getChannelForPurpose = async (
+  purpose: WhatsappAccountPurpose
+): Promise<{ accountId: string; channel: IWhatsappChannel } | null> => {
+  const purposeAccount = await WhatsappAccountRepository.findActiveByPurpose(purpose);
+  const account =
+    purposeAccount ??
+    (purpose === WhatsappAccountPurpose.GENERAL ? null : await WhatsappAccountRepository.findActiveGeneral());
+  if (!account) {
+    return null;
+  }
+  if (!purposeAccount) {
+    logger.warn("getChannelForPurpose: no active account for purpose — routing via GENERAL fallback", {
+      purpose,
+      accountId: account.id,
+    });
+  }
+  return { accountId: account.id, channel: await getWhatsappChannel(account.id) };
+};
+
+/**
+ * Legacy default-account resolution for call sites that predate purpose
+ * routing. GENERAL only — deliberately no "first active account of any
+ * purpose" fallback so sends never borrow an unrelated number's credentials.
+ */
+async function resolveDefaultAccountId(): Promise<string | null> {
+  const account = await WhatsappAccountRepository.findActiveGeneral();
+  return account?.id ?? null;
+}
+
+/**
+ * Per-account health hook: validates that the channel for `accountId` can
+ * resolve credentials. Used by aggregate configuration checks and the
+ * per-account health surface.
+ */
+export const validateWhatsappChannelConfig = async (accountId: string): Promise<boolean> => {
+  const channel = await getWhatsappChannel(accountId);
+  return channel.validateConfig();
+};
+
 function trackInFlight<T>(promise: Promise<T>): Promise<T> {
   inFlightOperations.add(promise);
   return promise.finally(() => {
@@ -101,17 +166,46 @@ async function waitForInFlight(): Promise<void> {
 }
 
 /**
- * S4: Drops the singleton instance and initialization promise so that
- * token rotation (setAccessToken / setTwoStepPin) takes effect without
- * a process restart. Also invalidates the env-config cache for WhatsApp
- * keys so the resolver does not serve stale values on the next init.
+ * Every env-config key any branch of the WhatsApp channel layer resolves:
+ * provider, webhook base URL / HMAC globals, per-sync globals, and the
+ * Graph API version / Embedded Signup configuration keys. Every reset path
+ * must drop the cache for the whole set so stored settings edits take effect
+ * on the next resolution regardless of which account was reset.
+ */
+const WHATSAPP_ENV_CONFIG_KEYS = [
+  "WHATSAPP_PROVIDER",
+  "WHATSAPP_APP_SECRET",
+  "WHATSAPP_VERIFY_TOKEN",
+  "WHATSAPP_WEBHOOK_BASE_URL",
+  "WHATSAPP_WABA_ID",
+  "WHATSAPP_ACCESS_TOKEN",
+  "WHATSAPP_PHONE_NUMBER_ID",
+  "WHATSAPP_API_VERSION",
+  "WHATSAPP_GRAPH_API_VERSION",
+  "WHATSAPP_ES_CONFIG_ID",
+] as const;
+
+function invalidateWhatsappEnvConfigCache(): void {
+  for (const key of WHATSAPP_ENV_CONFIG_KEYS) {
+    invalidateEnvConfigCache(key);
+  }
+}
+
+/**
+ * Drops cached adapter instances so token rotation, deactivation, or
+ * offboarding take effect without a process restart.
+ *
+ * - `resetWhatsappChannel()` drops every account's instance.
+ * - `resetWhatsappChannel(accountId)` evicts only that account's adapter —
+ *   the offboarding path's eviction hook. Evicted adapters get a fresh
+ *   credential lookup on the next send, and offboarded accounts then fail
+ *   fast in `resolveCredentials` before any Graph API call.
  *
  * Race-safety: sets a reset flag and awaits any in-flight init/send/validate
- * operations before disconnecting and discarding the instance, preventing
- * the r11-r10 race where a concurrent reset discards a disconnected instance
- * while a send is still using it.
+ * operations before discarding instances, preventing a reset from discarding
+ * a disconnected instance while a send is still using it.
  */
-export const resetWhatsappChannel = async (): Promise<void> => {
+export const resetWhatsappChannel = async (accountId?: string): Promise<void> => {
   // Guard against concurrent reset calls — coalesce them onto a single waiter
   if (resetInProgress && resetWaiter) {
     return resetWaiter;
@@ -123,18 +217,20 @@ export const resetWhatsappChannel = async (): Promise<void> => {
       // Wait for any pending init or send operations to complete
       await waitForInFlight();
 
-      if (instance) {
-        await instance.disconnect();
-        instance = null;
+      if (accountId) {
+        const instance = instances.get(accountId);
+        if (instance) {
+          await instance.disconnect();
+          instances.delete(accountId);
+        }
+        initializationPromises.delete(accountId);
+      } else {
+        await Promise.all(Array.from(instances.values(), instance => instance.disconnect()));
+        instances.clear();
+        initializationPromises.clear();
       }
-      initializationPromise = null;
-      invalidateEnvConfigCache("WHATSAPP_PROVIDER");
-      invalidateEnvConfigCache("WHATSAPP_APP_SECRET");
-      invalidateEnvConfigCache("WHATSAPP_VERIFY_TOKEN");
-      invalidateEnvConfigCache("WHATSAPP_WABA_ID");
-      invalidateEnvConfigCache("WHATSAPP_ACCESS_TOKEN");
-      invalidateEnvConfigCache("WHATSAPP_PHONE_NUMBER_ID");
-      invalidateEnvConfigCache("WHATSAPP_API_VERSION");
+
+      invalidateWhatsappEnvConfigCache();
     } finally {
       resetInProgress = false;
       resetWaiter = null;
@@ -144,25 +240,46 @@ export const resetWhatsappChannel = async (): Promise<void> => {
   return resetWaiter;
 };
 
+/**
+ * Legacy account-agnostic proxy kept for dispatch call sites that predate
+ * per-account routing. Sends honor `payload.senderAccountId` when the
+ * dispatch layer already resolved the account; otherwise they fall back to
+ * the default GENERAL-purpose account.
+ */
 export const whatsappChannel = {
-  send: async (payload: Parameters<IWhatsappChannel["send"]>[0], locale?: string) => {
-    const op = (async () => {
-      const service = await getWhatsappChannel();
-      return service.send(payload, locale);
+  send: async (payload: WhatsappPayload, locale?: string): Promise<WhatsappSendResult> => {
+    const op = (async (): Promise<WhatsappSendResult> => {
+      const accountId = payload.senderAccountId ?? (await resolveDefaultAccountId());
+      if (!accountId) {
+        logger.warn("whatsappChannel proxy: no GENERAL WhatsApp account configured — send aborted", {
+          eventType: payload.eventType,
+          userId: payload.userId,
+        });
+        return {
+          success: false,
+          sendAttempted: false,
+          error: deliveryFailedMessage(NotificationChannel.WHATSAPP, locale ?? "en"),
+        };
+      }
+      const channel = await getWhatsappChannel(accountId);
+      return channel.send(payload, locale);
     })();
     return trackInFlight(op);
   },
   validateConfig: async () => {
     const op = (async () => {
-      const service = await getWhatsappChannel();
-      return service.validateConfig();
+      const accountId = await resolveDefaultAccountId();
+      if (!accountId) {
+        return false;
+      }
+      const channel = await getWhatsappChannel(accountId);
+      return channel.validateConfig();
     })();
     return trackInFlight(op);
   },
   disconnect: async () => {
     const op = (async () => {
-      const service = await getWhatsappChannel();
-      return service.disconnect();
+      await resetWhatsappChannel();
     })();
     return trackInFlight(op);
   },

@@ -5,11 +5,12 @@ import { BaseCard } from "@/frontend/common/components/ui";
 import {
   NumberCardContent,
   type NumberCardLabels,
+  type NumberCardSyncProps,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCardContent";
 import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 
 /** Props for the shared NumberCard component. */
-export interface NumberCardProps {
+export interface NumberCardProps extends NumberCardSyncProps {
   readonly account: WhatsappAccountRow;
   readonly labels: NumberCardLabels;
   /** Card header action area (platform-specific — icon buttons on desktop). */
@@ -23,10 +24,26 @@ export interface NumberCardProps {
  * `BaseCard` shell. Mobile hosts the same content inside `MobileCardListItem`,
  * so each tier owns its own card container.
  */
-export function NumberCard({ account, labels, action, extraMetadata }: Readonly<NumberCardProps>) {
+export function NumberCard({
+  account,
+  labels,
+  action,
+  extraMetadata,
+  syncFailureReason,
+  syncDeadlineAt,
+  onRetrySetup,
+}: Readonly<NumberCardProps>) {
   return (
     <BaseCard>
-      <NumberCardContent account={account} labels={labels} action={action} extraMetadata={extraMetadata} />
+      <NumberCardContent
+        account={account}
+        labels={labels}
+        action={action}
+        extraMetadata={extraMetadata}
+        syncFailureReason={syncFailureReason}
+        syncDeadlineAt={syncDeadlineAt}
+        onRetrySetup={onRetrySetup}
+      />
     </BaseCard>
   );
 }

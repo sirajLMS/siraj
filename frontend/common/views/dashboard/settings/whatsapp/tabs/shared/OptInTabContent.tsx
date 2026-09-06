@@ -1,7 +1,7 @@
 "use client";
 
 import { LockOutlined } from "@mui/icons-material";
-import { Box, CircularProgress, FormControlLabel, Stack, Switch, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, FormControlLabel, Stack, Switch, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
@@ -60,6 +60,10 @@ export function OptInTabContent({
           <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 0.5 }}>
             {t.optInSubtitle}
           </Typography>
+        </Box>
+
+        <Box sx={mobileContentGutterBelowMdSx}>
+          <Alert severity="info">{t.optInDefaultOffBanner}</Alert>
         </Box>
 
         <Box sx={mobileContentGutterBelowMdSx}>

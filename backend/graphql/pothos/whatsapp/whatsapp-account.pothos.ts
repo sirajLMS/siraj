@@ -1,7 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
+  WhatsappAccountPurposePothosEnum,
   WhatsappLimitTierPothosEnum,
+  WhatsappOnboardingModePothosEnum,
   WhatsappQualityRatingPothosEnum,
+  WhatsappSyncStatusPothosEnum,
   WhatsappTemplateCategoryPothosEnum,
   WhatsappTemplateStatusPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
@@ -31,6 +34,13 @@ export const WhatsappAccountPothosObject = WhatsappAccountRef.implement({
     throughputLevel: t.exposeString("throughputLevel", { nullable: true }),
     maxPhoneNumbersPerBusiness: t.exposeString("maxPhoneNumbersPerBusiness", { nullable: true }),
     isActive: t.exposeBoolean("isActive"),
+    purpose: t.expose("purpose", { type: WhatsappAccountPurposePothosEnum }),
+    onboardingMode: t.expose("onboardingMode", { type: WhatsappOnboardingModePothosEnum }),
+    syncStatus: t.expose("syncStatus", { type: WhatsappSyncStatusPothosEnum }),
+    syncPhase: t.exposeInt("syncPhase", { nullable: true }),
+    syncProgress: t.exposeInt("syncProgress"),
+    syncDeadlineAt: t.expose("syncDeadlineAt", { type: "DateTime", nullable: true }),
+    syncFailureReason: t.exposeString("syncFailureReason", { nullable: true }),
     lastWebhookAt: t.expose("lastWebhookAt", { type: "DateTime", nullable: true }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
@@ -54,12 +64,50 @@ export const WhatsappAccountCreateInputPothosObject = gqlSchemaBuilder.inputType
       description: "Phone number ID (max 64 chars)",
       directives: { constraint: { maxLength: 64 } },
     }),
+    purpose: t.field({
+      type: WhatsappAccountPurposePothosEnum,
+      required: false,
+      description:
+        "Initial routing purpose (defaults to GENERAL). Reassignment on existing accounts goes through updateWhatsappAccountPurpose.",
+    }),
     ...whatsappAccountSharedInputFields(t),
   }),
 });
 
 export const WhatsappAccountUpdateInputPothosObject = gqlSchemaBuilder.inputType("WhatsappAccountUpdateInput", {
   fields: t => whatsappAccountSharedInputFields(t),
+});
+
+/**
+ * Embedded Signup (coexistence) completion input. The `code` is the
+ * single-use authorization code captured by the FB.login session listener;
+ * `wabaId` is always present, `phoneNumberId`/`businessId` are optional
+ * session-logger assets. The ES `config_id` is never client input — the
+ * server resolves it from env-config.
+ */
+export const WhatsappEmbeddedSignupInputPothosObject = gqlSchemaBuilder.inputType("WhatsappEmbeddedSignupInput", {
+  fields: t => ({
+    code: t.string({
+      required: true,
+      description: "Single-use ES authorization code (max 2048 chars)",
+      directives: { constraint: { maxLength: 2048 } },
+    }),
+    wabaId: t.string({
+      required: true,
+      description: "WhatsApp Business Account ID from the session event (max 64 chars)",
+      directives: { constraint: { maxLength: 64 } },
+    }),
+    phoneNumberId: t.string({
+      required: false,
+      description: "Phone number ID when the session event carried it (max 64 chars)",
+      directives: { constraint: { maxLength: 64 } },
+    }),
+    businessId: t.string({
+      required: false,
+      description: "Meta Business ID from the session event (max 64 chars)",
+      directives: { constraint: { maxLength: 64 } },
+    }),
+  }),
 });
 
 // ─── Sync Result Types (BL3) ──────────────────────────────────────────────────

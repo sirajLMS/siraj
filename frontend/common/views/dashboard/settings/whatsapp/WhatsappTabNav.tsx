@@ -1,11 +1,13 @@
 "use client";
 
 import { usePathname, useSearchParams } from "next/navigation";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { GenericTabNav } from "@/frontend/common/views/dashboard/components/GenericTabNav";
 import { buildTabHref } from "@/frontend/common/views/dashboard/lib/tabbedPane";
 import {
   TAB_IDS,
   TAB_LABELS,
+  TAB_PERMISSIONS,
   type WhatsappConfigTab,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappConfig.constants";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
@@ -25,12 +27,17 @@ export interface WhatsappTabNavProps {
  * which uses `ResponsiveViewSwitch` internally for desktop (MUI Tabs) and
  * mobile (scrollable chip row) tiers. Tab clicks use Next.js `<Link>` hrefs
  * that update the URL — no `onTabChange` callback needed.
+ *
+ * Tabs the user has no permission for are hidden entirely (per-tab
+ * permission map from `TAB_PERMISSIONS`); the panel itself is separately
+ * gated by `RequirePermission` in `WhatsappTabPanels`.
  */
 export function WhatsappTabNav({ activeTab, pageLabels }: Readonly<WhatsappTabNavProps>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { hasPermission } = useUserStore();
 
-  const tabs = TAB_IDS.map(tab => ({
+  const tabs = TAB_IDS.filter(tab => TAB_PERMISSIONS[tab].some(permission => hasPermission(permission))).map(tab => ({
     id: tab,
     label: pageLabels[TAB_LABELS[tab]],
     href: buildTabHref(pathname, searchParams, tab),

@@ -8,6 +8,7 @@ import { CreateAccountDialog } from "@/frontend/common/views/dashboard/settings/
 import {
   validateDisplayName,
   validatePhoneNumberId,
+  validatePurpose,
   validateWabaId,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
 import type { AppLocale } from "@/shared/locale/AppLocale";
@@ -53,6 +54,7 @@ function renderDialog(overrides: Record<string, unknown> = {}) {
       validateDisplayName={validateDisplayName}
       validatePhoneNumberId={validatePhoneNumberId}
       validateWabaId={validateWabaId}
+      validatePurpose={validatePurpose}
       {...overrides}
     />,
     { locale }
@@ -81,6 +83,55 @@ describe("CreateAccountDialog", () => {
     expect(screen.getByText(labels.createAccountTitle)).toBeTruthy();
     expect(screen.getByRole("button", { name: labels.save })).toBeTruthy();
     expect(screen.getByRole("button", { name: labels.cancel })).toBeTruthy();
+  });
+
+  test("renders the portfolio info banner and header close button", () => {
+    const { onClose } = renderDialog();
+    expect(screen.getByText(labels.addNumberInfoBanner)).toBeTruthy();
+    const closeButton = screen.getByRole("button", { name: labels.embeddedSignupClose });
+    fireEvent.click(closeButton);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  test("shows the description matching the selected purpose", async () => {
+    renderDialog();
+    expect(screen.getByText(labels.purposeOptionGeneralDescription)).toBeTruthy();
+    await act(async () => {
+      fireEvent.mouseDown(screen.getByLabelText(labels.purposeLabel));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("option", { name: labels.purposeAdvertising }));
+    });
+    await waitFor(() => {
+      expect(screen.getByText(labels.purposeOptionAdvertisingDescription)).toBeTruthy();
+      expect(screen.queryByText(labels.purposeOptionGeneralDescription)).toBeNull();
+    });
+  });
+
+  test("selecting Advertising purpose updates the submitted value", async () => {
+    const { onSubmit } = renderDialog();
+    await fillField(labels.displayNameLabel, "My Account");
+    await fillField(labels.phoneNumberIdLabel, "123456789");
+    await fillField(labels.wabaIdLabel, "987654321");
+    await act(async () => {
+      fireEvent.mouseDown(screen.getByLabelText(labels.purposeLabel));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("option", { name: labels.purposeAdvertising }));
+    });
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("ADVERTISING")).toBeTruthy();
+    });
+    await clickSave();
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+      expect(firstCallArgRecord(onSubmit)).toEqual({
+        displayName: "My Account",
+        phoneNumberId: "123456789",
+        wabaId: "987654321",
+        purpose: "ADVERTISING",
+      });
+    });
   });
 
   test("shows validation error when display name is empty and Save clicked", async () => {
@@ -118,8 +169,15 @@ describe("CreateAccountDialog", () => {
         displayName: "My Account",
         phoneNumberId: "123456789",
         wabaId: "987654321",
+        purpose: "GENERAL",
       });
     });
+  });
+
+  test("renders the routing purpose select with the general default", () => {
+    renderDialog();
+    expect(screen.getByLabelText(labels.purposeLabel)).toBeTruthy();
+    expect(screen.getByText(labels.purposeGeneral)).toBeTruthy();
   });
 
   test("onClose called when Cancel button clicked", async () => {

@@ -15,6 +15,25 @@ export const MAX_CONCURRENT_CALLS = 10;
 export const FETCH_TIMEOUT_MS = 10_000;
 
 /**
+ * Fallback Graph API version when neither `WHATSAPP_GRAPH_API_VERSION` nor the
+ * legacy `WHATSAPP_API_VERSION` env-config key resolves to a value.
+ */
+export const DEFAULT_GRAPH_API_VERSION = "v25.0";
+
+/**
+ * Resolves the Graph API version for WhatsApp Cloud API calls.
+ *
+ * Resolution order: `WHATSAPP_GRAPH_API_VERSION` (canonical, DB-overridable via
+ * `env::` settings) → legacy `WHATSAPP_API_VERSION` → {@link DEFAULT_GRAPH_API_VERSION}.
+ */
+export async function resolveGraphApiVersion(): Promise<string> {
+  const configured =
+    (await resolveEnvConfig("WHATSAPP_GRAPH_API_VERSION")) ?? (await resolveEnvConfig("WHATSAPP_API_VERSION"));
+  const trimmed = configured?.trim() ?? "";
+  return trimmed === "" ? DEFAULT_GRAPH_API_VERSION : trimmed;
+}
+
+/**
  * Reads the error body from a non-2xx `Response`. Tries `response.json()`
  * first (structured Meta error envelope), falling back to `response.text()`
  * when the body is not valid JSON.
@@ -54,6 +73,6 @@ export async function resolveGraphApiContextFromEnv(
   if (!accessToken) {
     throw new Error(tErrors.whatsappAccessTokenNotConfigured);
   }
-  const apiVersion = await resolveEnvConfig("WHATSAPP_API_VERSION");
+  const apiVersion = await resolveGraphApiVersion();
   return { accessToken, apiVersion };
 }

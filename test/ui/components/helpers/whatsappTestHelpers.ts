@@ -1,6 +1,9 @@
 import {
+  WhatsappAccountPurpose,
   WhatsappLimitTier,
+  WhatsappOnboardingMode,
   WhatsappQualityRating,
+  WhatsappSyncStatus,
   WhatsappTemplateCategory,
   WhatsappTemplateStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -24,6 +27,13 @@ export function makeAccountRow(
     displayPhoneNumber: displayPhone,
     displayName: { en: displayName },
     isActive: true,
+    purpose: WhatsappAccountPurpose.General,
+    onboardingMode: WhatsappOnboardingMode.CloudApi,
+    syncStatus: WhatsappSyncStatus.NotStarted,
+    syncPhase: null,
+    syncProgress: 0,
+    syncDeadlineAt: null,
+    syncFailureReason: null,
     qualityRating: WhatsappQualityRating.Green,
     portfolioMessagingLimitTier: WhatsappLimitTier.Tier_1K,
     throughputLevel: "STANDARD",

@@ -15,7 +15,13 @@ export type ChannelDispatchResult = {
   readonly providerMessageId?: string;
   readonly error?: string;
   /**
-   * Whether a provider API call was actually attempted (Q4).
+   * Machine-readable domain error code surfaced by channel pre-flight
+   * failures (e.g. WhatsApp `whatsapp.noSenderForPurpose` /
+   * `whatsapp.accountOffboarded`).
+   */
+  readonly errorCode?: string;
+  /**
+   * Whether a provider API call was actually attempted.
    * Only set for WhatsApp sends — failed sends that reached Meta still
    * consume `portfolioMessagingLimitTier` budget.  `undefined` for other
    * channels (no budget accounting needed).

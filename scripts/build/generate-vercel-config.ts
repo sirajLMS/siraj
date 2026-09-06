@@ -39,6 +39,18 @@ const CRON_DEFINITIONS: CronDefinition[] = [
     alwaysInclude: true,
   },
   {
+    path: "/api/cron/whatsapp-sync-sweep",
+    scheduleEnv: "CRON_WHATSAPP_SYNC_SWEEP_SCHEDULE",
+    defaultSchedule: "13 * * * *",
+    alwaysInclude: true,
+  },
+  {
+    path: "/api/cron/whatsapp-webhook-sweep",
+    scheduleEnv: "CRON_WHATSAPP_WEBHOOK_SWEEP_SCHEDULE",
+    defaultSchedule: "*/5 * * * *",
+    alwaysInclude: true,
+  },
+  {
     path: "/api/cron/ticker",
     scheduleEnv: "CRON_TICKER_SCHEDULE",
     defaultSchedule: "* * * * *",

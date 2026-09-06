@@ -24,6 +24,7 @@
  */
 
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { WhatsappAccountPurpose } from "@/backend/enum/whatsapp/whatsapp-account.enum";
 import type {
   ClassInstanceSelectType,
   CommunicationPayload,
@@ -85,27 +86,42 @@ const ALL_CHANNELS: readonly NotificationChannel[] = [
  * payloads.
  */
 export const NOTIFICATION_TEMPLATE_MAP: Readonly<
-  Partial<Record<NotificationEventType, { readonly templateName: string; readonly paramsOrder: readonly string[] }>>
+  Partial<
+    Record<
+      NotificationEventType,
+      {
+        readonly templateName: string;
+        readonly paramsOrder: readonly string[];
+        /** Routing purpose — the dispatch layer resolves the sending account by it (GENERAL fallback). */
+        readonly purpose: WhatsappAccountPurpose;
+      }
+    >
+  >
 > = {
   [NotificationEventType.CLASS_REMINDER]: {
     templateName: "class_reminder_utility_v1",
     paramsOrder: ["studentName", "scheduledStartAt"],
+    purpose: WhatsappAccountPurpose.STUDENTS,
   },
   [NotificationEventType.CLASS_ACTIVATED]: {
     templateName: "class_activated_utility_v1",
     paramsOrder: ["studentName", "scheduledStartAt"],
+    purpose: WhatsappAccountPurpose.STUDENTS,
   },
   [NotificationEventType.LESSON_REPORT_SUBMITTED]: {
     templateName: "lesson_report_submitted_utility_v1",
     paramsOrder: ["reportId", "teacherName"],
+    purpose: WhatsappAccountPurpose.STUDENTS,
   },
   [NotificationEventType.LESSON_REPORT_REVIEWED]: {
     templateName: "lesson_report_reviewed_utility_v1",
     paramsOrder: ["reportId", "teacherName", "decision"],
+    purpose: WhatsappAccountPurpose.STUDENTS,
   },
   [NotificationEventType.INVOICE_GENERATED]: {
     templateName: "invoice_generated_utility_v1",
     paramsOrder: ["invoiceId", "amount", "currency"],
+    purpose: WhatsappAccountPurpose.STUDENTS,
   },
 };
 
@@ -165,6 +181,7 @@ function buildPerChannel(
             name: templateDef.templateName,
             languageCode: DEFAULT_WHATSAPP_LANGUAGE_CODE,
             paramsOrder: templateDef.paramsOrder,
+            purpose: templateDef.purpose,
           } satisfies WhatsappTemplateMetadata,
         },
       });

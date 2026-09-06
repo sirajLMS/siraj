@@ -1,5 +1,5 @@
 {
-  "manifestHash": "4f28fa2bd4146920b05812357cb37de1b70e495cb2a5437ef2a7c44f1a72bbd7",
+  "manifestHash": "6e10967deb825c2872dc04ec0890da43127740eac51cf316ebb16cb74c73b52c",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -80,6 +80,10 @@
     {
       "file": "42-carryover-items-original-partial-percentage.sql",
       "sha256": "05f69d2230f83decb853bfd60f9dc566ad6749aa8e8341aaff11a0b0dcbf737d"
+    },
+    {
+      "file": "43-whatsapp-webhook-event-processing.sql",
+      "sha256": "87776d6ea2239e21b52ad893b715b7d84e073340cc2988fafe20d8772500dbdb"
     },
     {
       "file": "4a-class_categories_and_subjects_seed.sql",
@@ -340,6 +344,7 @@
     "20260904223645_custom_40-accounting-carryover-permissions",
     "20260905024045_custom_41a-whatsapp-inbox-permissions-enum",
     "20260905024046_custom_41b-whatsapp-inbox-permissions-data",
-    "20260905191307_custom_42-carryover-items-original-partial-percentage"
+    "20260905191307_custom_42-carryover-items-original-partial-percentage",
+    "20260906091949_custom_43-whatsapp-webhook-event-processing"
   ]
 }

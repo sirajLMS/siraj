@@ -178,3 +178,109 @@ export interface GetPhoneNumberInput {
   /** Meta phone number ID (not the E.164 display number). */
   readonly phoneNumberId: string;
 }
+
+/**
+ * Wire-level sync types accepted by `POST /{phone_number_id}/smb_app_data`.
+ *
+ * Meta accepts each value exactly once per coexistence onboarding, and only
+ * within 24 hours of onboarding — the `whatsapp_sync_requests` ledger row
+ * (unique per `(accountId, syncType)`) enforces this locally. The lowercase
+ * wire values intentionally differ from the `WhatsappSyncType` DB enum
+ * members; the coexistence sync service maps enum → wire at the boundary.
+ */
+export type RequestSmbAppDataSyncType = "smb_app_state_sync" | "history";
+
+/**
+ * Input for building an `smb_app_data` one-shot sync Graph API request
+ * (`POST /{phone_number_id}/smb_app_data` on a coexistence number).
+ */
+export interface RequestSmbAppDataInput {
+  /** Meta phone number ID of the coexistence-onboarded number. */
+  readonly phoneNumberId: string;
+  /** Which one-shot stream to request (contacts state, or 180-day history). */
+  readonly syncType: RequestSmbAppDataSyncType;
+}
+
+/**
+ * Response body from Meta on a successful `smb_app_data` sync request.
+ * Acceptance only — `request_id` does not guarantee delivery; results arrive
+ * asynchronously via `history` / `smb_app_state_sync` webhooks.
+ */
+export interface RequestSmbAppDataResponseBody {
+  readonly messaging_product: string;
+  readonly request_id?: string;
+}
+
+/** Parsed result of the `smb_app_data` accept response. */
+export interface RequestSmbAppDataResult {
+  /**
+   * Meta-issued acceptance handle. Support/diagnostic correlation only —
+   * follow-up webhooks never echo it, so nothing keys off it for idempotency.
+   */
+  readonly requestId: string;
+}
+
+// ─── Embedded Signup (coexistence onboarding) wire types ─────────────────────
+
+/**
+ * Input for exchanging an Embedded Signup authorization `code` for a
+ * business-integration access token (`GET /oauth/access_token` with
+ * `client_id` + `client_secret`). Credentials come from env-config, never
+ * from client input.
+ */
+export interface ExchangeEmbeddedSignupCodeInput {
+  /** Meta App ID (`WHATSAPP_APP_ID` env-config). */
+  readonly appId: string;
+  /** Meta App Secret (`WHATSAPP_APP_SECRET` env-config). */
+  readonly appSecret: string;
+  /** Single-use authorization code produced by the `FB.login` ES flow. */
+  readonly code: string;
+}
+
+/** Response body of the Embedded Signup code exchange. */
+export interface ExchangeEmbeddedSignupCodeResponseBody {
+  readonly access_token?: string;
+  readonly token_type?: string;
+  readonly expires_in?: number;
+}
+
+/** Parsed result of the code exchange. */
+export interface ExchangeEmbeddedSignupCodeResult {
+  readonly accessToken: string;
+}
+
+/** Input for `POST /{waba_id}/subscribed_apps` (attach app to the WABA). */
+export interface SubscribeAppToWabaInput {
+  readonly wabaId: string;
+}
+
+/** Response body of the `subscribed_apps` subscription call. */
+export interface SubscribedAppsResponseBody {
+  readonly success?: boolean;
+}
+
+/**
+ * Input for the coexistence platform confirmation call
+ * (`GET /{phone_number_id}?fields=is_on_biz_app,platform_type,display_phone_number`).
+ */
+export interface GetPhoneNumberPlatformInput {
+  readonly phoneNumberId: string;
+}
+
+/** Response body of the phone-number platform fields read. */
+export interface GetPhoneNumberPlatformResponseBody {
+  readonly id?: string;
+  readonly display_phone_number?: string;
+  readonly is_on_biz_app?: boolean;
+  readonly platform_type?: string;
+}
+
+/**
+ * Parsed coexistence-confirmation result. A number qualifies for coexistence
+ * when `isOnBizApp` is true and `platformType` is `"CLOUD_API"`.
+ */
+export interface GetPhoneNumberPlatformResult {
+  readonly displayPhoneNumber: string | null;
+  readonly isOnBizApp: boolean;
+  readonly platformType: string | null;
+}

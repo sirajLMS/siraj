@@ -1034,6 +1034,28 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
     excludeFromDb: false,
   },
   {
+    key: "WHATSAPP_GRAPH_API_VERSION",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Meta Graph API version used for WhatsApp Cloud API calls (e.g., v25.0).",
+      ar: "نسخة واجهة Meta Graph API المستخدمة لنداءات WhatsApp Cloud API (مثل v25.0).",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "WHATSAPP_ES_CONFIG_ID",
+    category: "whatsapp",
+    displayStrategy: "plain",
+    description: {
+      en: "Facebook Login for Business configuration ID used by WhatsApp Embedded Signup.",
+      ar: "معرّف إعداد تسجيل الدخول عبر فيسبوك للأعمال المستخدم في تسجيل واتساب المضمّن.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
     key: "WHATSAPP_WEBHOOK_BASE_URL",
     category: "whatsapp",
     displayStrategy: "plain",

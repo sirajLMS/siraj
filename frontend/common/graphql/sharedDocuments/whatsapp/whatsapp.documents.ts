@@ -1,5 +1,7 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type {
+  CompleteWhatsappEmbeddedSignupMutation,
+  CompleteWhatsappEmbeddedSignupMutationVariables,
   CreateWhatsappAccountMutation,
   CreateWhatsappAccountMutationVariables,
   DeleteWhatsappAccountMutation,
@@ -27,6 +29,13 @@ const WHATSAPP_ACCOUNT_FIELDS = gql`
     displayPhoneNumber
     displayName
     isActive
+    purpose
+    onboardingMode
+    syncStatus
+    syncPhase
+    syncProgress
+    syncDeadlineAt
+    syncFailureReason
     qualityRating
     portfolioMessagingLimitTier
     throughputLevel
@@ -158,6 +167,18 @@ export const syncWhatsappAccountsFromMetaMutationDocument: TypedDocumentNode<Syn
   }
 `;
 
+export const completeWhatsappEmbeddedSignupMutationDocument: TypedDocumentNode<
+  CompleteWhatsappEmbeddedSignupMutation,
+  CompleteWhatsappEmbeddedSignupMutationVariables
+> = gql`
+  ${WHATSAPP_ACCOUNT_FIELDS}
+  mutation completeWhatsappEmbeddedSignup($input: WhatsappEmbeddedSignupInput!) {
+    completeWhatsappEmbeddedSignup(input: $input) {
+      ...WhatsappAccountFields
+    }
+  }
+`;
+
 export const isWhatsappConfiguredQueryDocument: TypedDocumentNode<IsWhatsappConfiguredQuery> = gql`
   query isWhatsappConfigured {
     isWhatsappConfigured
@@ -170,12 +191,11 @@ export const isWhatsappConfiguredQueryDocument: TypedDocumentNode<IsWhatsappConf
 // query root field). They are stub definitions ready to be un-commented
 // once the backend resolvers are created.
 //
-// CROSS-FILE DEPENDENCY (Task 9):
-//   Required backend resolvers:
+// Required backend work:
 //   - `whatsappTemplates` query returning `[WhatsappTemplateSnapshot!]`
 //     (or a new persisted templates type with body/buttonStructure fields)
 //   - `whatsappOptInAudit` query returning a new `WhatsappOptInAuditEntry` type
-//   Resolvers must be added in:
+//   Resolvers belong in:
 //     backend/graphql/query/whatsapp/whatsapp-account.query.ts
 //   Pothos object types in:
 //     backend/graphql/pothos/whatsapp/whatsapp-account.pothos.ts

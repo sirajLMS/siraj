@@ -39,6 +39,35 @@ void mock.module("@/backend/db/repo/whatsapp", () => ({
     create: createWhatsAppAccountMock,
     update: updateWhatsAppAccountMock,
   },
+  // Static export surface required by the inbox/ingest helper modules that
+  // hang off the whatsapp services barrel.
+  WhatsappContactRepository: {
+    upsertMany: async () => 0,
+    removeMany: async () => 0,
+    markComplete: async () => 0,
+  },
+  WhatsappConversationRepository: {
+    upsertFromWebhook: async () => null,
+    findById: async () => null,
+  },
+  WhatsappMessageRepository: {
+    upsertFromWebhook: async () => null,
+    findByWamid: async () => null,
+  },
+  WhatsappSyncRequestRepository: {
+    ensure: async () => ({ request: null, created: false }),
+    recordRequestId: async () => null,
+    updateStatus: async () => null,
+    findByAccountAndType: async () => null,
+    listByAccount: async () => [],
+    listPendingAccountIds: async () => [],
+  },
+  WhatsappWebhookEventRepository: {
+    insertBatch: async () => [],
+    claimBatch: async () => [],
+    markProcessed: async () => null,
+    markFailed: async () => null,
+  },
 }));
 
 void mock.module("@/backend/services/auth/permissions.service", () => ({
@@ -181,9 +210,13 @@ async function assertOptInBatchUpsert(targetUserId: string) {
   const { NOTIFICATION_TEMPLATE_MAP } = await import("@/backend/services/notification/notification-payloads.builders");
   const expectedCount = (Object.values(NotificationEventType) as NotificationEventType[]).filter(et => {
     const allowed = EVENT_CHANNEL_ALLOWLIST[et];
-    return allowed?.includes(NotificationChannel.WHATSAPP) && NOTIFICATION_TEMPLATE_MAP[et] != null;
+    return (!allowed || allowed.includes(NotificationChannel.WHATSAPP)) && NOTIFICATION_TEMPLATE_MAP[et] != null;
   }).length;
 
+  // Anchor for the allowlist-absolute-index bug: no allowlist entry lists
+  // WHATSAPP, so a strict `includes` filter would yield zero rows. Opt-in
+  // must always write at least one WhatsApp pref row.
+  expect(expectedCount).toBeGreaterThan(0);
   expect(inputsArg).toHaveLength(expectedCount);
   if (Array.isArray(inputsArg)) {
     for (const input of inputsArg) {
@@ -278,15 +311,21 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
       await assertOptInBatchUpsert(MOCK_USER_ID);
     });
 
-    test("disables WhatsApp opt-in — all inputs have enabled=false", async () => {
+    test("disables WhatsApp opt-in — emitted disabled prefs actually suppress the opt-in state", async () => {
       const { WhatsappAccountService } = await importService();
 
       await WhatsappAccountService.setUserWhatsappOptIn(MOCK_ACTOR_ID, mockErrors, MOCK_USER_ID, false, "graphql");
 
       const inputsArg = Array.isArray(batchUpsertMock.mock.calls[0][1]) ? batchUpsertMock.mock.calls[0][1] : [];
+      expect(inputsArg.length).toBeGreaterThan(0);
       for (const input of inputsArg) {
-        expect(input).toEqual(expect.objectContaining({ enabled: false }));
+        expect(input).toEqual(expect.objectContaining({ channel: NotificationChannel.WHATSAPP, enabled: false }));
       }
+
+      // Feed exactly the rows the service wrote back to the preferences store:
+      // the opt-in surface must now report OFF (dispatch consults the same rows).
+      getByUserIdMock.mockResolvedValueOnce(inputsArg);
+      expect(await WhatsappAccountService.isUserWhatsappOptIn(MOCK_USER_ID)).toBe(false);
     });
 
     test("writes audit event with (userId, source)", async () => {

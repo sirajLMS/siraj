@@ -23,6 +23,8 @@ Which layer are you testing?
  └── Cross-Actor Journey Tests (`test/workflows/`) → See docs/testing/workflow-journey-tests.md
      (each journey also owns a Mermaid diagram in `test/workflows/<domain>/DIAGRAMS.md` —
      keep it in sync and validate with `bun run validate:mermaid test/workflows/<domain>/DIAGRAMS.md`; rule 11 in test/workflows/AGENTS.md)
+     • Permission the SUT needs beyond seeded groups: grant it via a per-run custom group (real `group_permissions` row, cleaned up after) — never fake a `super_admin` instead.
+     • To observe dispatch internals (e.g. channel routing), spy with call-through (`spyOn(…, "dispatchWithPreferences")` without a mockReplacement); stub `globalThis.fetch` with a URL-routed step when the provider boundary must be simulated.
 ```
 
 ---

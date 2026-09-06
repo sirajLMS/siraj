@@ -122,6 +122,8 @@ export interface CronLabels {
     invalidScheduleIdFormat: string;
     tickerFailed: string;
     classRemindersFailed: string;
+    whatsappSyncSweepFailed: string;
+    whatsappWebhookSweepFailed: string;
     userContextRequired: string;
     // Cron auth errors (machine-to-machine API responses)
     unauthorized: string;

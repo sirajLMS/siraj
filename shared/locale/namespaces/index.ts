@@ -11,3 +11,4 @@ export * from "./sms";
 export * from "./translation";
 export * from "./ui";
 export * from "./whatsapp";
+export * from "./whatsappInbox";

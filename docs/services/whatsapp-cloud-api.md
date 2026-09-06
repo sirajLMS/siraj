@@ -1,6 +1,8 @@
 # WhatsApp Cloud API Integration Reference
 
-This document consolidates patterns, rules, and gotchas from the WhatsApp Cloud API integration (Tasks 1–29, with knowledge propagation captured by Task 30 per `.ai/plans/whatsapp-plan-fixes/`). It serves as the canonical reference for all WhatsApp-related backend and frontend code.
+This document consolidates patterns, rules, and gotchas from the WhatsApp Cloud API integration (Tasks 1–29, with knowledge propagation captured by Task 30 per `.ai/plans/whatsapp-plan-fixes/`). It serves as the canonical reference for the **v1 single-number** WhatsApp integration.
+
+> **v2 update (2026-09)**: Multi-number purpose routing, coexistence onboarding, and durable webhook ingest supersede several sections here (the factory is now per-account rather than a lazy singleton, `apiVersion` resolves from `WHATSAPP_GRAPH_API_VERSION`, `stripInboundMessages` was removed, and claim processing is durable). Read **`docs/services/whatsapp-coexistence-multi.md`** alongside this document — it is the canonical reference for v2 behavior.
 
 ---
 
@@ -245,12 +247,12 @@ Admin UI → Settings > WhatsApp (3 tabs: Numbers, Templates, Opt-in)
 
 ## Known Open Issues (from r3 Comprehensive Review)
 
-Tracked in `.ai/finished_plans/whatsapp/r3-comprehensive-review.md`. **Fixed: 0 / 23 as of 2026-08-17.** The 2 HIGH findings below require a backend engineering effort and are out of scope for any documentation-only plan correction.
+Tracked in `.ai/finished_plans/whatsapp/r3-comprehensive-review.md`. **Both HIGH findings are FIXED in current code** (verified against the code during the whatsapp2 inventory — `backend/db/repo/notifications/notification.repository.ts` `handleDeliveryWebhook` now runs `SELECT FOR UPDATE` + dual advisory locks inside a rank-guard, and `handleMessagesStatus` passes `userId`/`channel`/`eventType` through, so the upsert path is live; see `.ai/plans/whatsapp2/outcome/inventory-backend.md` §4).
 
-| Severity | Track | File | Issue |
-|----------|-------|------|-------|
-| HIGH | business-logic | `backend/db/repo/notifications/notification.repository.ts:346-394` | TOCTOU race in UPDATE branch — no `SELECT FOR UPDATE` / advisory lock; two concurrent webhooks can double-apply a status transition. |
-| HIGH | business-logic | `backend/services/whatsapp/whatsapp-webhook.handler.ts:161-166` | `handleMessagesStatus` never passes `userId`/`channel`/`eventType` to `handleDeliveryWebhook`, making the INSERT upsert path dead code; status webhooks that arrive before the adapter creates the delivery row are silently lost. |
+| Severity | Track | File | Issue | Status |
+|----------|-------|------|-------|--------|
+| HIGH | business-logic | `backend/db/repo/notifications/notification.repository.ts` | TOCTOU race in UPDATE branch | **FIXED** — row lock + advisory locks + rank-guard |
+| HIGH | business-logic | `backend/services/whatsapp/whatsapp-webhook.handler.ts` | `handleMessagesStatus` dropped `userId`/`channel`/`eventType`; INSERT upsert path dead | **FIXED** — args plumbed through; v2 additionally uses durable ingest (see `docs/services/whatsapp-coexistence-multi.md`) |
 
-The remaining 21 MEDIUM / LOW findings (schema drift, env-config gaps, dead code, duplication, types) are listed in full in `r3-comprehensive-review.md`.
+The remaining 21 MEDIUM / LOW findings (schema drift, env-config gaps, dead code, duplication, types) are listed in full in `r3-comprehensive-review.md`. Many were superseded or resolved by the whatsapp2 plan (`.ai/plans/whatsapp2/`).
 

@@ -47,6 +47,63 @@ export class ConflictError extends DomainError {
   }
 }
 
+/** Machine-readable domain code for sends against an offboarded WhatsApp account. */
+export const WHATSAPP_ACCOUNT_OFFBOARDED_CODE = "whatsapp.accountOffboarded";
+
+/**
+ * Thrown when a WhatsApp send targets an account that has been offboarded
+ * (`offboardedAt` set). The channel adapter raises this before any Graph API
+ * call so offboarded numbers fail fast instead of burning Meta retries.
+ */
+export class WhatsappAccountOffboardedError extends DomainError {
+  constructor(message = "WhatsApp account is offboarded", options?: ErrorOptions) {
+    super(WHATSAPP_ACCOUNT_OFFBOARDED_CODE, message, options);
+  }
+}
+
+/** Machine-readable domain code when no active WhatsApp account can serve a routing purpose. */
+export const WHATSAPP_NO_SENDER_FOR_PURPOSE_CODE = "whatsapp.noSenderForPurpose";
+
+/**
+ * Raised at dispatch time when neither the purpose-matched account nor the
+ * GENERAL fallback is active, so the send fails before any Graph API call or
+ * delivery row is created.
+ */
+export class WhatsappNoSenderForPurposeError extends DomainError {
+  constructor(message = "No active WhatsApp sender account for this purpose", options?: ErrorOptions) {
+    super(WHATSAPP_NO_SENDER_FOR_PURPOSE_CODE, message, options);
+  }
+}
+
+/** Machine-readable domain code for a failed WhatsApp Embedded Signup completion. */
+export const WHATSAPP_EMBEDDED_SIGNUP_FAILED_CODE = "whatsapp.embeddedSignupFailed";
+
+/**
+ * Thrown when Embedded Signup completion fails at any server-side step:
+ * authorization-code exchange, phone-number resolution, coexistence
+ * confirmation (`is_on_biz_app && platform_type === "CLOUD_API"`), or account
+ * persistence. Clients map `extensions.code` to localized onboarding copy.
+ */
+export class WhatsappEmbeddedSignupError extends DomainError {
+  constructor(message = "WhatsApp embedded signup failed", options?: ErrorOptions) {
+    super(WHATSAPP_EMBEDDED_SIGNUP_FAILED_CODE, message, options);
+  }
+}
+
+/** Machine-readable domain code for assigning a routing purpose to an inactive account. */
+export const WHATSAPP_PURPOSE_REQUIRES_ACTIVE_CODE = "whatsapp.purposeRequiresActive";
+
+/**
+ * Thrown when a purpose is (re)assigned to a WhatsApp account that is not
+ * active. Routing only considers active accounts, so purpose assignment on an
+ * inactive row would silently misroute — the write is rejected instead.
+ */
+export class WhatsappPurposeRequiresActiveError extends DomainError {
+  constructor(message = "Only active WhatsApp accounts can be assigned a purpose", options?: ErrorOptions) {
+    super(WHATSAPP_PURPOSE_REQUIRES_ACTIVE_CODE, message, options);
+  }
+}
+
 /**
  * DatabaseUnavailableError — thrown when the database is unreachable and all
  * bounded retries are exhausted (connection refused/reset/timeout, terminated

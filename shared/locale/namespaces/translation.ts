@@ -122,6 +122,7 @@ import { UiTagInput } from "@/shared/locale/namespaces/ui/tagInput.namespace";
 import { UiTimezoneSelect } from "@/shared/locale/namespaces/ui/timezoneSelect.namespace";
 import { UiUserSelect } from "@/shared/locale/namespaces/ui/userSelect.namespace";
 import { Whatsapp } from "@/shared/locale/namespaces/whatsapp/whatsapp.namespace";
+import { WhatsappInbox } from "@/shared/locale/namespaces/whatsappInbox/whatsappInbox.namespace";
 export const Translation = {
   Auth: {
     Login: AuthLogin,
@@ -135,6 +136,7 @@ export const Translation = {
   Sms,
   Notifications,
   Whatsapp,
+  WhatsappInbox,
   Onboarding: {
     UserEntity: OnboardingUserEntity,
   },

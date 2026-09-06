@@ -5,6 +5,11 @@ import type {
   WhatsappTemplateCategory,
   WhatsappTemplateStatus,
 } from "@/backend/enum/whatsapp/whatsapp.enum";
+import type {
+  WhatsappAccountPurpose,
+  WhatsappOnboardingMode,
+  WhatsappSyncStatus,
+} from "@/backend/enum/whatsapp/whatsapp-account.enum";
 
 /**
  * Canonical type definitions for the `whatsapp_accounts` entity.
@@ -26,16 +31,46 @@ export type WhatsappAccountReturnType = Omit<
   // Re-applied below with proper enum typing (stored as varchar in DB)
   | "qualityRating"
   | "portfolioMessagingLimitTier"
+  | "purpose"
+  | "onboardingMode"
+  | "syncStatus"
 > & {
   qualityRating: WhatsappQualityRating | null;
   portfolioMessagingLimitTier: WhatsappLimitTier | null;
+  purpose: WhatsappAccountPurpose;
+  onboardingMode: WhatsappOnboardingMode;
+  syncStatus: WhatsappSyncStatus;
 };
 
+/**
+ * Submit input for client-driven account creation. Server-managed sync
+ * tracking columns (`syncStatus`, `syncPhase`, `syncProgress`,
+ * `syncDeadlineAt`, `syncFailureReason`, `offboardedAt`) are excluded by
+ * construction — the coexistence sync lifecycle mutates them through
+ * `WhatsappAccountUpdateInput`, never through client input. `purpose` and
+ * `onboardingMode` stay client-selectable with enum typing.
+ */
 type WhatsappAccountSubmitInput = Omit<
   WhatsappAccountInsertType,
   // auto-generated
-  "id" | "createdAt" | "updatedAt" | "lastWebhookAt"
->;
+  | "id"
+  | "createdAt"
+  | "updatedAt"
+  | "lastWebhookAt"
+  // re-applied below with enum typing
+  | "purpose"
+  | "onboardingMode"
+  // sync lifecycle state — server-managed, never client-supplied
+  | "syncStatus"
+  | "syncPhase"
+  | "syncProgress"
+  | "syncDeadlineAt"
+  | "syncFailureReason"
+  | "offboardedAt"
+> & {
+  purpose?: WhatsappAccountPurpose;
+  onboardingMode?: WhatsappOnboardingMode;
+};
 
 /**
  * Partial update input for existing WhatsApp accounts.
@@ -45,10 +80,26 @@ type WhatsappAccountSubmitInput = Omit<
  * columns (which go through dedicated `SetWhatsappAccessTokenInput` /
  * `SetWhatsappTwoStepPinInput` mutations) are excluded by construction.
  * `lastWebhookAt` is intentionally retained — the webhook handler uses it
- * to stamp inbound webhook timestamps on the account row.
+ * to stamp inbound webhook timestamps on the account row. The sync-tracking
+ * columns are system-managed (webhook handler + sync service) and re-applied
+ * here with enum typing.
  */
 export type WhatsappAccountUpdateInput = Partial<
-  Omit<WhatsappAccountInsertType, "id" | "createdAt" | "updatedAt" | "encryptedAccessToken" | "encryptedTwoStepPin">
+  Omit<
+    WhatsappAccountInsertType,
+    | "id"
+    | "createdAt"
+    | "updatedAt"
+    | "encryptedAccessToken"
+    | "encryptedTwoStepPin"
+    | "purpose"
+    | "onboardingMode"
+    | "syncStatus"
+  > & {
+    purpose?: WhatsappAccountPurpose;
+    onboardingMode?: WhatsappOnboardingMode;
+    syncStatus?: WhatsappSyncStatus;
+  }
 >;
 
 /**
@@ -123,4 +174,27 @@ export type WhatsappTemplateMetadata = {
   readonly name: string;
   readonly languageCode?: string | null;
   readonly paramsOrder?: readonly string[];
+  /**
+   * Routing purpose for the send. The dispatch layer resolves the sending
+   * account by purpose (falling back to the active GENERAL account);
+   * absent means GENERAL.
+   */
+  readonly purpose?: WhatsappAccountPurpose | null;
+};
+
+/**
+ * Submit input for `completeEmbeddedSignup` (coexistence onboarding).
+ *
+ * `code` is the single-use authorization code captured by the Embedded
+ * Signup session listener; `wabaId` (and optionally `phoneNumberId`,
+ * `businessId`) come from Meta's `WA_EMBEDDED_SIGNUP` session events. When
+ * only `wabaId` is present, the server resolves the phone number via
+ * `GET /{waba_id}/phone_numbers`. `config_id` is intentionally NOT part of
+ * this input — it is resolved server-side from env-config.
+ */
+export type WhatsappEmbeddedSignupSubmitInput = {
+  readonly code: string;
+  readonly wabaId: string;
+  readonly phoneNumberId?: string;
+  readonly businessId?: string | null;
 };

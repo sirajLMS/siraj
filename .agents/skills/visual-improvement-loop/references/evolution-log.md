@@ -55,3 +55,11 @@ the agent-browser skill, or a global rule file) — and the entry records where 
   styles) — geometry numbers travel through bash, images don't need reloading to compare widths.
 - Column-width budgeting against a declared sum is wrong by ~20px (MUI filler/separators); measure
   `virtualScroller.scrollWidth` vs `clientWidth` live and iterate to ≤ container, not to the sum.
+
+## 2026-09-06 — whatsapp2 prototype parity run
+
+- MUI `Select` options must be DIRECT `MenuItem` children: any custom wrapper component makes every option valueless to SelectInput ("out-of-range value" warning; clicks dead). Symptom-first check when a Select won't select.
+- Empty-state / declined-state surfaces require SEEDED failure data to verify — route-level reachability proves nothing about state-gated banners/panels. Seed declined/failed/complete variants before the capture wave.
+- DataGrid pagination is 0-indexed; a 1-indexed VM page state produces clamped re-queries (`OFFSET -n`) and phantom "Page 2 of 1" on empty lists.
+- Very long multi-capture browser sessions stall the default agent-browser daemon; restarting as `agent-browser connect <port>` against a fresh headless Chrome (+ Playwright MCP storage inject fallback) is the working recovery.
+- Full-page screenshots can still truncate scrollable inner panes at the viewport fold — pair every capture with DOM assertions for elements that must be present (markers inside scrollable thread panes especially).

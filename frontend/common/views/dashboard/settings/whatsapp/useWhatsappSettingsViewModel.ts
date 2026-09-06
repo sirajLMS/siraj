@@ -2,7 +2,9 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
+import type { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
+  completeWhatsappEmbeddedSignupMutationDocument,
   createWhatsappAccountMutationDocument,
   deleteWhatsappAccountMutationDocument,
   isUserWhatsappOptInQueryDocument,
@@ -12,12 +14,14 @@ import {
   setWhatsappTwoStepPinMutationDocument,
   syncWhatsappAccountsFromMetaMutationDocument,
   updateWhatsappAccountMutationDocument,
+  updateWhatsappAccountPurposeMutationDocument,
   whatsappAccountsQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   WhatsappCreateInput,
   WhatsappDialogState,
+  WhatsappEmbeddedSignupPayload,
   WhatsappSettingsLabels,
   WhatsappSettingsViewModel,
   WhatsappSnackbar,
@@ -26,6 +30,7 @@ import {
   validateAccessToken,
   validateDisplayName,
   validatePhoneNumberId,
+  validatePurpose,
   validateTwoStepPin,
   validateWabaId,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
@@ -170,6 +175,8 @@ function useWhatsappMutations() {
   const [setOptIn] = useMutation(setUserWhatsappOptInMutationDocument);
   const [createAccount] = useMutation(createWhatsappAccountMutationDocument);
   const [updateAccount] = useMutation(updateWhatsappAccountMutationDocument);
+  const [updatePurpose] = useMutation(updateWhatsappAccountPurposeMutationDocument);
+  const [completeEmbeddedSignup] = useMutation(completeWhatsappEmbeddedSignupMutationDocument);
 
   return {
     deleteAccount,
@@ -180,6 +187,8 @@ function useWhatsappMutations() {
     setOptIn,
     createAccount,
     updateAccount,
+    updatePurpose,
+    completeEmbeddedSignup,
   };
 }
 
@@ -211,9 +220,9 @@ function useWhatsappDialogs() {
     setDialogState({ type: "create" });
   }, []);
 
-  const openEditNameDialog = useCallback((accountId: string, displayName: string) => {
+  const openEditNameDialog = useCallback((accountId: string, displayName: string, purpose: WhatsappAccountPurpose) => {
     setMutationError(null);
-    setDialogState({ type: "editName", accountId, displayName });
+    setDialogState({ type: "editName", accountId, displayName, purpose });
   }, []);
 
   const openEditTokenDialog = useCallback((accountId: string) => {
@@ -231,6 +240,11 @@ function useWhatsappDialogs() {
     setDialogState({ type: "deleteConfirm", accountId, displayName });
   }, []);
 
+  const openEmbeddedSignupDialog = useCallback(() => {
+    setMutationError(null);
+    setDialogState({ type: "embeddedSignup" });
+  }, []);
+
   const closeDialog = useCallback(() => {
     setMutationError(null);
     setDialogState({ type: null });
@@ -245,6 +259,7 @@ function useWhatsappDialogs() {
     openEditTokenDialog,
     openEditPinDialog,
     openDeleteConfirmDialog,
+    openEmbeddedSignupDialog,
     closeDialog,
   };
 }
@@ -281,6 +296,7 @@ function buildCreateInput(input: WhatsappCreateInput) {
     displayName: { en: input.displayName },
     phoneNumberId: input.phoneNumberId,
     wabaId: input.wabaId,
+    purpose: input.purpose,
     displayPhoneNumber: null,
     isActive: null,
     portfolioMessagingLimitTier: null,
@@ -337,6 +353,24 @@ async function updateAccountAction(
   }
 }
 
+async function updatePurposeAction(
+  accountId: string,
+  purpose: WhatsappAccountPurpose,
+  updatePurpose: (opts: { variables: { accountId: string; purpose: WhatsappAccountPurpose } }) => Promise<unknown>,
+  refetchAccounts: () => Promise<unknown>,
+  labels: Pick<WhatsappSettingsLabels["page"], "purposeUpdated" | "purposeUpdateFailed">,
+  showSnackbar: SnackbarShow
+): Promise<void> {
+  try {
+    await updatePurpose({ variables: { accountId, purpose } });
+    await refetchAccounts();
+    showSnackbar(labels.purposeUpdated, "success");
+  } catch (error) {
+    logger.error("Failed to update WhatsApp account purpose", { error });
+    showSnackbar(labels.purposeUpdateFailed, "error");
+  }
+}
+
 function useWhatsappCreateHandler({
   mutations,
   queries,
@@ -350,8 +384,9 @@ function useWhatsappCreateHandler({
   const handleCreate = useCallback(
     async (input: WhatsappCreateInput) => {
       const displayNameError = validateDisplayName(input.displayName);
-      if (displayNameError !== null) {
-        setMutationError(displayNameError);
+      const purposeError = validatePurpose(input.purpose);
+      if (displayNameError !== null || purposeError !== null) {
+        setMutationError(displayNameError ?? purposeError);
         return;
       }
       setCreating(true);
@@ -407,7 +442,46 @@ function useWhatsappUpdateDeleteHandlers({
     setDeletingId,
   });
 
-  return { deletingId, updatingId, handleEditName, handleDelete };
+  const handleUpdatePurpose = useWhatsappPurposeHandler({
+    updatePurpose: mutations.updatePurpose,
+    refetchAccounts: queries.accountsQuery.refetch,
+    labels: labels.page,
+    showSnackbar,
+    setUpdatingId,
+  });
+
+  return { deletingId, updatingId, handleEditName, handleUpdatePurpose, handleDelete };
+}
+
+interface UseWhatsappPurposeHandlerArgs {
+  updatePurpose: (opts: { variables: { accountId: string; purpose: WhatsappAccountPurpose } }) => Promise<unknown>;
+  refetchAccounts: () => Promise<unknown>;
+  labels: Pick<WhatsappSettingsLabels["page"], "purposeUpdated" | "purposeUpdateFailed">;
+  showSnackbar: SnackbarShow;
+  setUpdatingId: (value: string | null) => void;
+}
+
+function useWhatsappPurposeHandler({
+  updatePurpose,
+  refetchAccounts,
+  labels,
+  showSnackbar,
+  setUpdatingId,
+}: UseWhatsappPurposeHandlerArgs) {
+  const handleUpdatePurpose = async (accountId: string, purpose: WhatsappAccountPurpose) => {
+    const purposeError = validatePurpose(purpose);
+    if (purposeError !== null) {
+      return;
+    }
+    setUpdatingId(accountId);
+    try {
+      await updatePurposeAction(accountId, purpose, updatePurpose, refetchAccounts, labels, showSnackbar);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  return handleUpdatePurpose;
 }
 
 interface UseWhatsappEditNameHandlerArgs {
@@ -478,6 +552,47 @@ function useWhatsappDeleteHandler({
   };
 
   return handleDelete;
+}
+
+// ─── Embedded signup handler ─────────────────────────────────────────
+
+function useWhatsappEmbeddedSignupHandler({
+  mutations,
+  queries,
+  labels,
+  showSnackbar,
+}: Pick<WhatsappHandlersArgs, "mutations" | "queries" | "labels" | "showSnackbar">) {
+  const [embeddedSignupSubmitting, setEmbeddedSignupSubmitting] = useState(false);
+
+  const handleEmbeddedSignupComplete = useCallback(
+    async (payload: WhatsappEmbeddedSignupPayload) => {
+      setEmbeddedSignupSubmitting(true);
+      try {
+        await mutations.completeEmbeddedSignup({
+          variables: {
+            input: {
+              code: payload.code,
+              wabaId: payload.wabaId,
+              phoneNumberId: payload.phoneNumberId ?? null,
+              businessId: payload.businessId ?? null,
+            },
+          },
+        });
+        await queries.accountsQuery.refetch();
+        showSnackbar(labels.page.embeddedSignupSuccessTitle, "success");
+      } catch (error) {
+        logger.error("Failed to complete WhatsApp embedded signup", { error });
+        showSnackbar(labels.notifications.saveError, "error");
+        // Rethrow — the dialog maps a rejected completion onto its error phase.
+        throw error;
+      } finally {
+        setEmbeddedSignupSubmitting(false);
+      }
+    },
+    [mutations, queries, labels, showSnackbar]
+  );
+
+  return { embeddedSignupSubmitting, handleEmbeddedSignupComplete };
 }
 
 function useWhatsappUtilityHandlers({
@@ -582,6 +697,8 @@ function useRefetchers(queries: ReturnType<typeof useWhatsappQueries>) {
 
 interface WhatsappViewModelParts {
   labels: WhatsappSettingsLabels;
+  esConfigId: string | null;
+  esAppId: string | null;
   accounts: ReturnType<typeof useDerivedWhatsappData>["accounts"];
   templates: ReturnType<typeof useDerivedWhatsappData>["templates"];
   loading: boolean;
@@ -591,15 +708,17 @@ interface WhatsappViewModelParts {
   createHandler: ReturnType<typeof useWhatsappCreateHandler>;
   updateDeleteHandlers: ReturnType<typeof useWhatsappUpdateDeleteHandlers>;
   utilityHandlers: ReturnType<typeof useWhatsappUtilityHandlers>;
+  embeddedSignupHandler: ReturnType<typeof useWhatsappEmbeddedSignupHandler>;
   dialogState: WhatsappDialogState;
   mutationError: string | null;
   snackbar: WhatsappSnackbar;
   closeSnackbar: () => void;
   openCreateDialog: () => void;
-  openEditNameDialog: (accountId: string, displayName: string) => void;
+  openEditNameDialog: (accountId: string, displayName: string, purpose: WhatsappAccountPurpose) => void;
   openEditTokenDialog: (accountId: string) => void;
   openEditPinDialog: (accountId: string) => void;
   openDeleteConfirmDialog: (accountId: string, displayName: string) => void;
+  openEmbeddedSignupDialog: () => void;
   closeDialog: () => void;
   refetchAccounts: () => void;
   refetchTemplates: () => void;
@@ -610,6 +729,11 @@ interface WhatsappViewModelParts {
 function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsViewModel {
   return {
     labels: p.labels,
+    esConfigId: p.esConfigId,
+    esAppId: p.esAppId,
+    embeddedSignupSubmitting: p.embeddedSignupHandler.embeddedSignupSubmitting,
+    openEmbeddedSignupDialog: p.openEmbeddedSignupDialog,
+    handleEmbeddedSignupComplete: p.embeddedSignupHandler.handleEmbeddedSignupComplete,
     accounts: p.accounts,
     templates: p.templates,
     loading: p.loading,
@@ -632,6 +756,7 @@ function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsView
     validateWabaId,
     validateAccessToken,
     validateTwoStepPin,
+    validatePurpose,
     dialogState: p.dialogState,
     openCreateDialog: p.openCreateDialog,
     openEditNameDialog: p.openEditNameDialog,
@@ -641,6 +766,7 @@ function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsView
     closeDialog: p.closeDialog,
     handleCreate: p.createHandler.handleCreate,
     handleEditName: p.updateDeleteHandlers.handleEditName,
+    handleUpdatePurpose: p.updateDeleteHandlers.handleUpdatePurpose,
     handleDelete: p.updateDeleteHandlers.handleDelete,
     handleSubmitToken: p.utilityHandlers.handleSubmitToken,
     handleSubmitPin: p.utilityHandlers.handleSubmitPin,
@@ -698,18 +824,13 @@ function useWhatsappHandlers(
   return { createHandler, updateDeleteHandlers, utilityHandlers };
 }
 
-// ─── Main hook ─────────────────────────────────────────────────────
+// ─── Page-interaction state hook (dialog/snackbar/handlers stack) ────
 
-export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
-  const whatsappLabels = useAppTranslation(Translation.Whatsapp);
-  const queries = useWhatsappQueries();
-  const mutations = useWhatsappMutations();
-
-  const labels = useWhatsappLabels(whatsappLabels);
-  const { accounts, templates, loading, queryError, isOptedIn, isConfigured } = useDerivedWhatsappData(
-    queries,
-    mutations
-  );
+function useWhatsappPageInteractions(
+  queries: ReturnType<typeof useWhatsappQueries>,
+  mutations: ReturnType<typeof useWhatsappMutations>,
+  labels: WhatsappSettingsLabels
+) {
   const { snackbar, showSnackbar, closeSnackbar: dismissSnackbar } = useWhatsappSnackbar();
   const {
     dialogState,
@@ -720,6 +841,7 @@ export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
     openEditTokenDialog,
     openEditPinDialog,
     openDeleteConfirmDialog,
+    openEmbeddedSignupDialog,
     closeDialog,
   } = useWhatsappDialogs();
 
@@ -731,6 +853,7 @@ export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
     closeDialog,
     setMutationError,
   });
+  const embeddedSignupHandler = useWhatsappEmbeddedSignupHandler({ mutations, queries, labels, showSnackbar });
   const { refetchAccounts, refetchTemplates } = useRefetchers(queries);
   const { closeSnackbar, editingTokenForId, editingPinForId } = useWhatsappSnackbarAndEditing(
     dismissSnackbar,
@@ -738,30 +861,76 @@ export function useWhatsappSettingsViewModel(): WhatsappSettingsViewModel {
     dialogState
   );
 
-  return buildWhatsappViewModel({
-    labels,
-    accounts,
-    templates,
-    loading,
-    isOptedIn,
-    isConfigured,
-    queryError,
-    createHandler,
-    updateDeleteHandlers,
-    utilityHandlers,
+  return {
+    snackbar,
     dialogState,
     mutationError,
-    snackbar,
     closeSnackbar,
     openCreateDialog,
     openEditNameDialog,
     openEditTokenDialog,
     openEditPinDialog,
     openDeleteConfirmDialog,
+    openEmbeddedSignupDialog,
     closeDialog,
+    createHandler,
+    updateDeleteHandlers,
+    utilityHandlers,
+    embeddedSignupHandler,
     refetchAccounts,
     refetchTemplates,
     editingTokenForId,
     editingPinForId,
+  };
+}
+
+// ─── Main hook ─────────────────────────────────────────────────────
+
+export function useWhatsappSettingsViewModel(props?: {
+  esConfigId?: string | null;
+  esAppId?: string | null;
+}): WhatsappSettingsViewModel {
+  const esConfigId = props?.esConfigId ?? null;
+  const esAppId = props?.esAppId ?? null;
+  const whatsappLabels = useAppTranslation(Translation.Whatsapp);
+  const queries = useWhatsappQueries();
+  const mutations = useWhatsappMutations();
+
+  const labels = useWhatsappLabels(whatsappLabels);
+  const { accounts, templates, loading, queryError, isOptedIn, isConfigured } = useDerivedWhatsappData(
+    queries,
+    mutations
+  );
+  const page = useWhatsappPageInteractions(queries, mutations, labels);
+
+  return buildWhatsappViewModel({
+    labels,
+    esConfigId,
+    esAppId,
+    accounts,
+    templates,
+    loading,
+    isOptedIn,
+    isConfigured,
+    queryError,
+    createHandler: page.createHandler,
+    updateDeleteHandlers: page.updateDeleteHandlers,
+    utilityHandlers: page.utilityHandlers,
+    embeddedSignupHandler: page.embeddedSignupHandler,
+    dialogState: page.dialogState,
+    mutationError: page.mutationError,
+    snackbar: page.snackbar,
+    closeSnackbar: page.closeSnackbar,
+    openCreateDialog: page.openCreateDialog,
+    openEditNameDialog: page.openEditNameDialog,
+    openEditTokenDialog: page.openEditTokenDialog,
+    openEditPinDialog: page.openEditPinDialog,
+    openDeleteConfirmDialog: page.openDeleteConfirmDialog,
+    openEmbeddedSignupDialog: page.openEmbeddedSignupDialog,
+    closeDialog: page.closeDialog,
+    refetchAccounts: page.refetchAccounts,
+    refetchTemplates: page.refetchTemplates,
+    editingTokenForId: page.editingTokenForId,
+    editingPinForId: page.editingPinForId,
   });
 }

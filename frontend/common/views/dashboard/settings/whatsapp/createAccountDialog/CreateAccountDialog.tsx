@@ -1,9 +1,13 @@
 "use client";
 
-import { Alert, Dialog, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
+import CloseOutlined from "@mui/icons-material/CloseOutlined";
+import { Alert, Dialog, DialogContent, DialogTitle, IconButton, Stack, TextField, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
+import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import { DialogSaveCancelActions } from "@/frontend/common/views/dashboard/settings/whatsapp/dialogs";
 import type { WhatsappCreateInput } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import { resolvePurposeValue } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappPurposeOptions";
+import { WhatsappPurposeSelect } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappPurposeSelect";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 export interface CreateAccountDialogProps {
@@ -16,6 +20,7 @@ export interface CreateAccountDialogProps {
   readonly validateDisplayName: (value: string) => string | null;
   readonly validatePhoneNumberId: (value: string) => string | null;
   readonly validateWabaId: (value: string) => string | null;
+  readonly validatePurpose: (value: string) => string | null;
 }
 
 type WhatsappValidationKey =
@@ -24,7 +29,9 @@ type WhatsappValidationKey =
   | "validationPhoneNumberIdRequired"
   | "validationPhoneNumberIdNumeric"
   | "validationWabaIdRequired"
-  | "validationWabaIdNumeric";
+  | "validationWabaIdNumeric"
+  | "validationPurposeRequired"
+  | "validationPurposeInvalid";
 
 const VALIDATION_KEYS: ReadonlySet<string> = new Set([
   "validationDisplayNameRequired",
@@ -33,7 +40,27 @@ const VALIDATION_KEYS: ReadonlySet<string> = new Set([
   "validationPhoneNumberIdNumeric",
   "validationWabaIdRequired",
   "validationWabaIdNumeric",
+  "validationPurposeRequired",
+  "validationPurposeInvalid",
 ]);
+
+type PurposeDescriptionKey =
+  | "purposeOptionGeneralDescription"
+  | "purposeOptionStudentsDescription"
+  | "purposeOptionAdvertisingDescription";
+
+const PURPOSE_DESCRIPTION_KEYS: Readonly<Record<string, PurposeDescriptionKey>> = {
+  GENERAL: "purposeOptionGeneralDescription",
+  STUDENTS: "purposeOptionStudentsDescription",
+  ADVERTISING: "purposeOptionAdvertisingDescription",
+};
+
+function resolvePurposeDescription(purpose: string, labels: WhatsappLabels): string | null {
+  if (!(purpose in PURPOSE_DESCRIPTION_KEYS)) {
+    return null;
+  }
+  return labels[PURPOSE_DESCRIPTION_KEYS[purpose]];
+}
 
 function isValidationKey(value: string): value is WhatsappValidationKey {
   return VALIDATION_KEYS.has(value);
@@ -53,9 +80,11 @@ interface CreateFormState {
   readonly displayName: string;
   readonly phoneNumberId: string;
   readonly wabaId: string;
+  readonly purpose: string;
   readonly displayNameError: string | null;
   readonly phoneNumberIdError: string | null;
   readonly wabaIdError: string | null;
+  readonly purposeError: string | null;
 }
 
 function useCreateAccountForm(
@@ -63,14 +92,17 @@ function useCreateAccountForm(
   labels: WhatsappLabels,
   validateDisplayName: (value: string) => string | null,
   validatePhoneNumberId: (value: string) => string | null,
-  validateWabaId: (value: string) => string | null
+  validateWabaId: (value: string) => string | null,
+  validatePurpose: (value: string) => string | null
 ) {
   const [displayName, setDisplayName] = useState("");
   const [phoneNumberId, setPhoneNumberId] = useState("");
   const [wabaId, setWabaId] = useState("");
+  const [purpose, setPurpose] = useState<string>(WhatsappAccountPurpose.General);
   const [displayNameError, setDisplayNameError] = useState<string | null>(null);
   const [phoneNumberIdError, setPhoneNumberIdError] = useState<string | null>(null);
   const [wabaIdError, setWabaIdError] = useState<string | null>(null);
+  const [purposeError, setPurposeError] = useState<string | null>(null);
   const [prevOpen, setPrevOpen] = useState(open);
 
   if (prevOpen !== open) {
@@ -79,9 +111,11 @@ function useCreateAccountForm(
       setDisplayName("");
       setPhoneNumberId("");
       setWabaId("");
+      setPurpose(WhatsappAccountPurpose.General);
       setDisplayNameError(null);
       setPhoneNumberIdError(null);
       setWabaIdError(null);
+      setPurposeError(null);
     }
   }
 
@@ -109,6 +143,14 @@ function useCreateAccountForm(
     [labels, validateWabaId]
   );
 
+  const handlePurposeChange = useCallback(
+    (value: string) => {
+      setPurpose(value);
+      setPurposeError(resolveValidationError(validatePurpose(value), labels));
+    },
+    [labels, validatePurpose]
+  );
+
   const validateAll = useCallback((): CreateFormState => {
     const dErr = resolveValidationError(validateDisplayName(displayName), labels);
     setDisplayNameError(dErr);
@@ -116,19 +158,43 @@ function useCreateAccountForm(
     setPhoneNumberIdError(pErr);
     const wErr = resolveValidationError(validateWabaId(wabaId), labels);
     setWabaIdError(wErr);
-    return { displayName, phoneNumberId, wabaId, displayNameError: dErr, phoneNumberIdError: pErr, wabaIdError: wErr };
-  }, [displayName, phoneNumberId, wabaId, labels, validateDisplayName, validatePhoneNumberId, validateWabaId]);
+    const puErr = resolveValidationError(validatePurpose(purpose), labels);
+    setPurposeError(puErr);
+    return {
+      displayName,
+      phoneNumberId,
+      wabaId,
+      purpose,
+      displayNameError: dErr,
+      phoneNumberIdError: pErr,
+      wabaIdError: wErr,
+      purposeError: puErr,
+    };
+  }, [
+    displayName,
+    phoneNumberId,
+    wabaId,
+    purpose,
+    labels,
+    validateDisplayName,
+    validatePhoneNumberId,
+    validateWabaId,
+    validatePurpose,
+  ]);
 
   return {
     displayName,
     phoneNumberId,
     wabaId,
+    purpose,
     displayNameError,
     phoneNumberIdError,
     wabaIdError,
+    purposeError,
     handleDisplayNameChange,
     handlePhoneNumberIdChange,
     handleWabaIdChange,
+    handlePurposeChange,
     validateAll,
   };
 }
@@ -139,12 +205,15 @@ function CreateAccountDialogFields({
   displayName,
   phoneNumberId,
   wabaId,
+  purpose,
   displayNameError,
   phoneNumberIdError,
   wabaIdError,
+  purposeError,
   onDisplayNameChange,
   onPhoneNumberIdChange,
   onWabaIdChange,
+  onPurposeChange,
   mutationError,
 }: Readonly<{
   readonly labels: WhatsappLabels;
@@ -152,16 +221,20 @@ function CreateAccountDialogFields({
   readonly displayName: string;
   readonly phoneNumberId: string;
   readonly wabaId: string;
+  readonly purpose: string;
   readonly displayNameError: string | null;
   readonly phoneNumberIdError: string | null;
   readonly wabaIdError: string | null;
+  readonly purposeError: string | null;
   readonly onDisplayNameChange: (value: string) => void;
   readonly onPhoneNumberIdChange: (value: string) => void;
   readonly onWabaIdChange: (value: string) => void;
+  readonly onPurposeChange: (value: string) => void;
   readonly mutationError: string | null;
 }>) {
   return (
     <Stack spacing={2} sx={{ mt: 1 }}>
+      <Alert severity="info">{labels.addNumberInfoBanner}</Alert>
       <TextField
         label={labels.displayNameLabel}
         placeholder={labels.displayNameHelper}
@@ -195,12 +268,32 @@ function CreateAccountDialogFields({
         fullWidth
         disabled={loading}
       />
+      <WhatsappPurposeSelect
+        labels={labels}
+        value={purpose}
+        error={purposeError}
+        disabled={loading}
+        onChange={onPurposeChange}
+      />
+      <PurposeDescription labels={labels} purpose={purpose} />
       {mutationError !== null ? (
         <Alert severity="error" role="alert">
           {mutationError}
         </Alert>
       ) : null}
     </Stack>
+  );
+}
+
+function PurposeDescription({ labels, purpose }: Readonly<{ labels: WhatsappLabels; purpose: string }>) {
+  const description = resolvePurposeDescription(purpose, labels);
+  if (description === null) {
+    return null;
+  }
+  return (
+    <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+      {description}
+    </Typography>
   );
 }
 
@@ -214,8 +307,16 @@ export function CreateAccountDialog({
   validateDisplayName,
   validatePhoneNumberId,
   validateWabaId,
+  validatePurpose,
 }: Readonly<CreateAccountDialogProps>) {
-  const form = useCreateAccountForm(open, labels, validateDisplayName, validatePhoneNumberId, validateWabaId);
+  const form = useCreateAccountForm(
+    open,
+    labels,
+    validateDisplayName,
+    validatePhoneNumberId,
+    validateWabaId,
+    validatePurpose
+  );
 
   const handleClose = useCallback(() => {
     onClose();
@@ -223,19 +324,32 @@ export function CreateAccountDialog({
 
   const handleSubmit = useCallback(async () => {
     const state = form.validateAll();
-    if (state.displayNameError !== null || state.phoneNumberIdError !== null || state.wabaIdError !== null) {
+    const purpose = resolvePurposeValue(state.purpose);
+    if (
+      state.displayNameError !== null ||
+      state.phoneNumberIdError !== null ||
+      state.wabaIdError !== null ||
+      state.purposeError !== null ||
+      purpose === undefined
+    ) {
       return;
     }
     await onSubmit({
       displayName: state.displayName,
       phoneNumberId: state.phoneNumberId,
       wabaId: state.wabaId,
+      purpose,
     });
   }, [form, onSubmit]);
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>{labels.createAccountTitle}</DialogTitle>
+      <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+        {labels.createAccountTitle}
+        <IconButton aria-label={labels.embeddedSignupClose} onClick={handleClose} disabled={loading} size="small">
+          <CloseOutlined fontSize="small" />
+        </IconButton>
+      </DialogTitle>
       <DialogContent>
         <CreateAccountDialogFields
           labels={labels}
@@ -243,12 +357,15 @@ export function CreateAccountDialog({
           displayName={form.displayName}
           phoneNumberId={form.phoneNumberId}
           wabaId={form.wabaId}
+          purpose={form.purpose}
           displayNameError={form.displayNameError}
           phoneNumberIdError={form.phoneNumberIdError}
           wabaIdError={form.wabaIdError}
+          purposeError={form.purposeError}
           onDisplayNameChange={form.handleDisplayNameChange}
           onPhoneNumberIdChange={form.handlePhoneNumberIdChange}
           onWabaIdChange={form.handleWabaIdChange}
+          onPurposeChange={form.handlePurposeChange}
           mutationError={mutationError}
         />
       </DialogContent>

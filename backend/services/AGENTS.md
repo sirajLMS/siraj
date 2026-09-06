@@ -58,11 +58,19 @@ Each integration file gets **one** smoke test (single API call) to confirm the a
 - **Zoom refresh-token re-auth**: Treat `invalid_grant` as the sole authoritative trigger for re-auth — do NOT build proactive renewal on a hardcoded 90-day clock. See `docs/services/zoom-token-types.md`.
 - See `docs/services/meeting-providers.md` for the complete pattern reference (interface, factory, adapter examples, deployment prerequisites, rollout summary).
 
+## Multi-Instance Channel Adapters (per-account resources)
+
+- Channel/provider adapters that hold account-scoped credentials (e.g. `MetaCloudApiAdapter`) are keyed **per account row** by an instance map in the factory (`getWhatsappChannel(accountId)`, `getChannelForPurpose(purpose)`), not a module-level singleton. Credential resolution must be scoped to the adapter's own account — never fall back to "first active" or another account's token.
+- **Reset/invalidation must cover every env-config key the feature reads**: when a new `<PREFIX>_*` key is added (e.g. an API version or config id), extend the factory's invalidation set (e.g. `WHATSAPP_ENV_CONFIG_KEYS`) in the same change, or resets leave stale values live.
+- Lifecycle errors win over generic states: resolve credentials in specificity order (e.g. offboarded → inactive → missing) so domain error codes stay reachable.
+- See `docs/services/whatsapp-coexistence-multi.md` for the reference implementation (factory map, purpose routing, eviction on lifecycle webhook events).
+
 ## Important References
 
 - `docs/services/meeting-providers.md` - Meeting provider adapter/factory pattern reference
 - `docs/services/zoom-token-types.md` - Zoom token kinds semantics and constraints
-- `docs/services/whatsapp-cloud-api.md` - WhatsApp Cloud API integration reference
+- `docs/services/whatsapp-cloud-api.md` - WhatsApp Cloud API integration reference (v1)
+- `docs/services/whatsapp-coexistence-multi.md` - WhatsApp v2: multi-number purpose routing, coexistence onboarding, durable webhook ingest
 - `docs/billing/quota-system.md` - Quota System architecture reference
 - `docs/services/cron-service.md` - Cron service pattern reference
 - `docs/services/entity-cache-service.md` - Entity Cache Service pattern reference

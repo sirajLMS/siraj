@@ -1,6 +1,6 @@
 "use client";
 
-import { AddOutlined, CloudSyncOutlined } from "@mui/icons-material";
+import { AddOutlined, CloudSyncOutlined, PhonelinkSetupOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
@@ -13,6 +13,7 @@ export function NumbersHeaderShared({
   isConfigured,
   onSyncFromMeta,
   onAddAccount,
+  onConnectBusinessApp,
   titleSlot,
   buttonSize,
   syncIconSize,
@@ -22,6 +23,8 @@ export function NumbersHeaderShared({
   readonly isConfigured: boolean;
   readonly onSyncFromMeta: () => void;
   readonly onAddAccount: () => void;
+  /** Opens the embedded-signup (coexistence) dialog; omitted when unconfigured. */
+  readonly onConnectBusinessApp?: () => void;
   readonly titleSlot: ReactNode;
   readonly buttonSize: "small" | "medium" | "large";
   readonly syncIconSize: number;
@@ -31,6 +34,16 @@ export function NumbersHeaderShared({
       {titleSlot}
       <Box sx={{ display: "flex", gap: 1 }}>
         <RequirePermission permissions={AppPermission.WhatsappConfigManage}>
+          {onConnectBusinessApp ? (
+            <Button
+              size={buttonSize}
+              variant="outlined"
+              startIcon={<PhonelinkSetupOutlined />}
+              onClick={onConnectBusinessApp}
+            >
+              {labels.connectBusinessApp}
+            </Button>
+          ) : null}
           <Button size={buttonSize} variant="outlined" startIcon={<AddOutlined />} onClick={onAddAccount}>
             {labels.addAccount}
           </Button>

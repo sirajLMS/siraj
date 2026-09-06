@@ -136,6 +136,8 @@ export const whatsappEn: WhatsappLabels = {
   validationWabaIdNumeric: "WABA ID must be numeric.",
   validationAccessTokenTooShort: "Access token must be at least 50 characters.",
   validationPinFormat: "PIN must be exactly 6 digits.",
+  validationPurposeRequired: "Please select a purpose for this number.",
+  validationPurposeInvalid: "The selected purpose is not valid.",
 
   // ─── Delete confirm with interpolation (Task 1) ───────────────────
   deleteConfirmTitle: "Delete WhatsApp Number",
@@ -189,8 +191,78 @@ export const whatsappEn: WhatsappLabels = {
   optInAdminNo: "No",
   optInAdminEmpty: "No users match the search filter.",
 
+  // ─── Embedded Signup (coexistence onboarding) ───────────────────────
+  connectBusinessApp: "Connect Business App",
+  embeddedSignupTitle: "Connect WhatsApp Business App (Coexistence)",
+  embeddedSignupDescription:
+    "Connect a number already used in the WhatsApp Business app. Your team keeps using the phone app while the platform can read and send messages.",
+  embeddedSignupLaunch: "Launch Meta Embedded Signup",
+  embeddedSignupWaitingTitle: "Complete the steps in the Meta window",
+  embeddedSignupWaitingBody:
+    "Approve the connection in the Meta window (or in the WhatsApp Business app), then come back here. We'll finish setup automatically.",
+  embeddedSignupCancelledTitle: "Connection cancelled",
+  embeddedSignupCancelledBody:
+    "You left the Meta setup before finishing. Nothing was changed — you can start again whenever you're ready.",
+  embeddedSignupErrorTitle: "Connection failed",
+  embeddedSignupSuccessTitle: "Number connected",
+  embeddedSignupSuccessBody:
+    "The number is connected. Contacts and chat history sync in the background — this can take up to 24 hours.",
+  embeddedSignupRetry: "Try again",
+  embeddedSignupNotConfigured: "Embedded signup is not configured for this environment.",
+  embeddedSignupStepCompleteInApp: "Complete in the WhatsApp Business app",
+  embeddedSignupStepSync: "Sync contacts & history",
+  embeddedSignupVersionNote: "Requires WhatsApp Business app 2.24.17 or newer on the staff phone.",
+  embeddedSignupSyncInfo:
+    "Chat history and contacts sync in the background after connecting — this can take up to 24 hours. Your team keeps using the phone app in the meantime.",
+  embeddedSignupErrorBody:
+    "The connection could not be completed. No number was connected — you can restart the onboarding flow.",
+  embeddedSignupCompletingTitle: "Finishing setup",
+  embeddedSignupCompletingBody:
+    "Confirming the connection and queueing the contacts and history sync. This only takes a moment.",
+  embeddedSignupDone: "Done",
+  embeddedSignupClose: "Close",
+
   // ─── Accessibility & Permission Denied (Task 17) ───────────────────
   permissionDeniedTitle: "Access Restricted",
   permissionDeniedDescription:
     "You don't have permission to access this section. Contact an administrator if you believe this is an error.",
+
+  // ─── Tab labels (v2) ─────────────────────────────────────────────────
+  tabInbox: "Inbox",
+
+  // ─── Purpose labels ───────────────────────────────────────────────────
+  purposeLabel: "Purpose",
+  purposeHelper: "Chooses which notifications this number sends. Unassigned events fall back to the General number.",
+  purposeGeneral: "General",
+  purposeAdvertising: "Advertising",
+  purposeStudents: "Students",
+  purposeUpdated: "Number purpose updated.",
+  purposeUpdateFailed: "Failed to update number purpose.",
+
+  // ─── Onboarding mode labels ───────────────────────────────────────────
+  onboardingModeLabel: "Onboarding Mode",
+  onboardingModeCloudApi: "Cloud API",
+  onboardingModeCoexistence: "Coexistence (Business App)",
+  coexistenceRestrictionsHint:
+    "Coexistence numbers have some limits — broadcast lists and some app-only features stay in the WhatsApp Business app.",
+
+  // ─── Coexistence sync statuses ────────────────────────────────────────
+  syncStatusLabel: "Sync Status",
+  syncStatusNotStarted: "Not Started",
+  syncStatusRequested: "Requested",
+  syncStatusSyncing: "Syncing",
+  syncStatusComplete: "Complete",
+  syncStatusFailed: "Failed",
+  syncHistoryDeclined: "History Declined",
+  syncProgress: (percent: number) => `${percent}% synced`,
+  syncPhaseLabel: (phase: number) => `History sync — Phase ${phase}`,
+  syncDeadlineHint: (deadline: string) => `Expected by ${deadline}`,
+  syncDeclinedGuidance: "Inbox stays unavailable for this number until onboarding is re-run.",
+
+  // ─── Banners & option descriptions ────────────────────────────────────
+  addNumberInfoBanner: "Each number shares your portfolio messaging limit; quality is measured per number.",
+  purposeOptionGeneralDescription: "Fallback for all notifications",
+  purposeOptionStudentsDescription: "Class reminders and reports",
+  purposeOptionAdvertisingDescription: "Ad campaign replies",
+  optInDefaultOffBanner: "WhatsApp notifications are off by default; users opt in explicitly.",
 };

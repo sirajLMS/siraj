@@ -10,6 +10,7 @@ import {
   validateAccessToken,
   validateDisplayName,
   validatePhoneNumberId,
+  validatePurpose,
   validateTwoStepPin,
   validateWabaId,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
@@ -65,9 +66,11 @@ const baseProps = {
   onCloseDialog: mock(() => {}),
   onCreate: mock(noopPromise),
   onEditName: mock(noopPromise),
+  onUpdatePurpose: mock(noopPromise),
   validateDisplayName,
   validatePhoneNumberId,
   validateWabaId,
+  validatePurpose,
   validateAccessToken,
   validateTwoStepPin,
 };

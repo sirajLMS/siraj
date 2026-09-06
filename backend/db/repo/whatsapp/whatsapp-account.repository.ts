@@ -1,6 +1,7 @@
-import { asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, type SQL } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { whatsappAccounts } from "@/backend/db/schema";
+import { WhatsappAccountPurpose, WhatsappSyncStatus } from "@/backend/enum/whatsapp/whatsapp-account.enum";
 import { buildReturnType as _buildReturnType } from "@/backend/lib";
 import type {
   DBTransaction,
@@ -56,15 +57,56 @@ async function updateAndReturn(
 }
 
 /**
+ * Helper to find a single raw row matching a where clause (no mapping).
+ */
+async function findRawRow(
+  whereClause: ReturnType<typeof eq>,
+  tx?: DBTransaction
+): Promise<WhatsappAccountSelectType | null> {
+  const q = queryDb(tx);
+  const rows = await q.select().from(whatsappAccounts).where(whereClause).limit(1);
+  return rows[0] ?? null;
+}
+
+/**
  * Helper to find a single row matching a where clause and map it to ReturnType.
  */
 async function findSingleRow(
   whereClause: ReturnType<typeof eq>,
   tx?: DBTransaction
 ): Promise<WhatsappAccountReturnType | null> {
+  const row = await findRawRow(whereClause, tx);
+  return row ? toReturnType(row) : null;
+}
+
+/**
+ * Wraps `updateAndReturn` in a transaction: the shared engine for the
+ * id-targeted mutators (deactivate, sync lifecycle, offboard/reconnect).
+ */
+function mutateById(
+  id: string,
+  patch: WhatsappAccountUpdateInput,
+  tx?: DBTransaction
+): Promise<WhatsappAccountReturnType | null> {
+  return runWithTx(t => updateAndReturn(t, id, patch), tx);
+}
+
+/**
+ * First active account (oldest first), optionally narrowed by an extra
+ * condition (e.g. routing purpose). Raw SelectType for credential resolution.
+ */
+async function findFirstActive(
+  extraCondition: SQL | undefined,
+  tx?: DBTransaction
+): Promise<WhatsappAccountSelectType | null> {
   const q = queryDb(tx);
-  const rows = await q.select().from(whatsappAccounts).where(whereClause).limit(1);
-  return rows[0] ? toReturnType(rows[0]) : null;
+  const rows = await q
+    .select()
+    .from(whatsappAccounts)
+    .where(and(eq(whatsappAccounts.isActive, true), extraCondition))
+    .orderBy(asc(whatsappAccounts.createdAt))
+    .limit(1);
+  return rows[0] ?? null;
 }
 
 /**
@@ -110,6 +152,18 @@ export namespace WhatsappAccountRepository {
     return findSingleRow(eq(whatsappAccounts.id, id), tx);
   }
 
+  /**
+   * Raw single-account lookup by primary key.
+   *
+   * Returns the raw `SelectType` — **includes the decrypted access token**
+   * (the `encryptedText` custom type auto-decrypts at the driver boundary).
+   * For service-layer credential resolution only; never expose the return
+   * value to GraphQL clients.
+   */
+  export async function findRawById(id: string, tx?: DBTransaction): Promise<WhatsappAccountSelectType | null> {
+    return findRawRow(eq(whatsappAccounts.id, id), tx);
+  }
+
   export async function findByPhoneNumberId(
     phoneNumberId: string,
     tx?: DBTransaction
@@ -118,20 +172,49 @@ export namespace WhatsappAccountRepository {
   }
 
   /**
-   * Returns the first active WhatsApp account ordered by `createdAt` (r11-r01).
+   * Returns the first active WhatsApp account ordered by `createdAt`.
    *
    * Returns the raw `SelectType` — **includes decrypted `encryptedAccessToken`**.
    * Only suitable for service-layer credential resolution that needs the token;
    * never expose the return value to GraphQL clients. See `toReturnType` for why.
+   * Legacy single-account fallback retained until purpose resolution is live.
    */
   export async function findFirstActiveForCredentials(tx?: DBTransaction): Promise<WhatsappAccountSelectType | null> {
+    return findFirstActive(undefined, tx);
+  }
+
+  /**
+   * Resolve the first active account of a routing purpose, oldest first —
+   * the send-path account resolver mirroring `findFirstActiveForCredentials`.
+   *
+   * Returns the raw `SelectType` (includes the decrypted access token): for
+   * service-layer credential resolution only, never for GraphQL clients.
+   */
+  export async function findActiveByPurpose(
+    purpose: WhatsappAccountPurpose,
+    tx?: DBTransaction
+  ): Promise<WhatsappAccountSelectType | null> {
+    return findFirstActive(eq(whatsappAccounts.purpose, purpose), tx);
+  }
+
+  /**
+   * The GENERAL-purpose fallback account used when no purpose-specific
+   * account is configured. Same credential caveat as `findActiveByPurpose`.
+   */
+  export async function findActiveGeneral(tx?: DBTransaction): Promise<WhatsappAccountSelectType | null> {
+    return findActiveByPurpose(WhatsappAccountPurpose.GENERAL, tx);
+  }
+
+  /**
+   * Raw credential-bearing lookup by account id. Returns the row as-is
+   * (raw `SelectType` with the decrypted access token) regardless of
+   * `isActive` / `offboardedAt` so the channel layer can distinguish
+   * "missing or inactive" from "offboarded" for fail-fast behavior.
+   * Service-layer credential resolution only — never expose to GraphQL clients.
+   */
+  export async function findCredentialsById(id: string, tx?: DBTransaction): Promise<WhatsappAccountSelectType | null> {
     const q = queryDb(tx);
-    const rows = await q
-      .select()
-      .from(whatsappAccounts)
-      .where(eq(whatsappAccounts.isActive, true))
-      .orderBy(asc(whatsappAccounts.createdAt))
-      .limit(1);
+    const rows = await q.select().from(whatsappAccounts).where(eq(whatsappAccounts.id, id)).limit(1);
     return rows[0] ?? null;
   }
 
@@ -160,6 +243,16 @@ export namespace WhatsappAccountRepository {
     return result;
   }
 
+  /**
+   * All accounts under one WABA, regardless of `isActive`. `account_update`
+   * lifecycle webhooks are WABA-scoped (`phone_number`/`waba_id`, no
+   * `phone_number_id`), and reconnect events must still find accounts that a
+   * prior offboard deactivated — hence no active-only filter.
+   */
+  export async function findByWabaId(wabaId: string, tx?: DBTransaction): Promise<WhatsappAccountReturnType[]> {
+    return findManyRows(eq(whatsappAccounts.wabaId, wabaId), tx, asc(whatsappAccounts.createdAt));
+  }
+
   export async function listActive(tx?: DBTransaction): Promise<WhatsappAccountReturnType[]> {
     return findManyRows(eq(whatsappAccounts.isActive, true), tx, desc(whatsappAccounts.createdAt));
   }
@@ -181,7 +274,7 @@ export namespace WhatsappAccountRepository {
     input: WhatsappAccountUpdateInput,
     tx?: DBTransaction
   ): Promise<WhatsappAccountReturnType | null> {
-    return runWithTx(t => updateAndReturn(t, id, input), tx);
+    return mutateById(id, input, tx);
   }
 
   export async function setAccessToken(
@@ -199,6 +292,68 @@ export namespace WhatsappAccountRepository {
   }
 
   export async function deactivateById(id: string, tx?: DBTransaction): Promise<WhatsappAccountReturnType | null> {
-    return runWithTx(t => updateAndReturn(t, id, { isActive: false }), tx);
+    return mutateById(id, { isActive: false }, tx);
+  }
+
+  /**
+   * The one-shot coexistence sync was accepted by Meta: flip to REQUESTED and
+   * stamp the 24-hour deadline.
+   */
+  export async function markSyncRequested(
+    id: string,
+    deadlineAt: Date,
+    tx?: DBTransaction
+  ): Promise<WhatsappAccountReturnType | null> {
+    return mutateById(id, { syncStatus: WhatsappSyncStatus.REQUESTED, syncDeadlineAt: deadlineAt }, tx);
+  }
+
+  /**
+   * Advance the sync progress counters while history/state chunks stream in.
+   */
+  export async function markSyncProgress(
+    id: string,
+    progress: { phase?: number; progress: number },
+    tx?: DBTransaction
+  ): Promise<WhatsappAccountReturnType | null> {
+    return mutateById(
+      id,
+      {
+        syncStatus: WhatsappSyncStatus.SYNCING,
+        syncProgress: progress.progress,
+        ...(progress.phase === undefined ? {} : { syncPhase: progress.phase }),
+      },
+      tx
+    );
+  }
+
+  /** Sync completed: terminal COMPLETE state at 100% progress. */
+  export async function markSyncComplete(id: string, tx?: DBTransaction): Promise<WhatsappAccountReturnType | null> {
+    return mutateById(id, { syncStatus: WhatsappSyncStatus.COMPLETE, syncProgress: 100 }, tx);
+  }
+
+  /** Sync terminally failed (decline / deadline / offboard), with reason. */
+  export async function markSyncFailed(
+    id: string,
+    failureReason: string,
+    tx?: DBTransaction
+  ): Promise<WhatsappAccountReturnType | null> {
+    return mutateById(id, { syncStatus: WhatsappSyncStatus.FAILED, syncFailureReason: failureReason }, tx);
+  }
+
+  /**
+   * Meta offboarded the number (`account_update`): stamp the timestamp and
+   * deactivate the account so the send path fails fast.
+   */
+  export async function markOffboarded(
+    id: string,
+    offboardedAt: Date,
+    tx?: DBTransaction
+  ): Promise<WhatsappAccountReturnType | null> {
+    return mutateById(id, { offboardedAt, isActive: false }, tx);
+  }
+
+  /** Reconnect clears the offboard marker and re-activates the account. */
+  export async function clearOffboarded(id: string, tx?: DBTransaction): Promise<WhatsappAccountReturnType | null> {
+    return mutateById(id, { offboardedAt: null, isActive: true }, tx);
   }
 }

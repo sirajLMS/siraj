@@ -27,7 +27,8 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
+import { AppPermission, WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
+import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import {
   NumbersCreateEditDialogs,
   NumbersDeleteConfirmDialog,
@@ -172,12 +173,14 @@ function NumbersHeaderMobile({
   isConfigured,
   onSyncFromMeta,
   onAddAccount,
+  onConnectBusinessApp,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly syncing: boolean;
   readonly isConfigured: boolean;
   readonly onSyncFromMeta: () => void;
   readonly onAddAccount: () => void;
+  readonly onConnectBusinessApp?: () => void;
 }>) {
   return (
     <NumbersHeaderShared
@@ -186,6 +189,7 @@ function NumbersHeaderMobile({
       isConfigured={isConfigured}
       onSyncFromMeta={onSyncFromMeta}
       onAddAccount={onAddAccount}
+      onConnectBusinessApp={onConnectBusinessApp}
       buttonSize="small"
       syncIconSize={16}
       titleSlot={<Typography variant="titleLg">{labels.numbersTitle}</Typography>}
@@ -251,6 +255,8 @@ interface AccountsListMobileProps {
   readonly editingPinForId: string | null;
   readonly onMenuOpen: (event: React.MouseEvent<HTMLElement>, account: WhatsappAccountRow) => void;
   readonly onAddAccount: () => void;
+  /** Re-opens Embedded Signup from the failed-sync card panel (ES-gated). */
+  readonly onRetrySetup?: () => void;
 }
 
 function isCardBusy(
@@ -279,6 +285,7 @@ function AccountsListMobile({
   editingPinForId,
   onMenuOpen,
   onAddAccount,
+  onRetrySetup,
 }: Readonly<AccountsListMobileProps>) {
   const renderItem = useCallback(
     (account: WhatsappAccountRow) => {
@@ -292,6 +299,9 @@ function AccountsListMobile({
             <NumberCardContent
               account={account}
               labels={labels}
+              onRetrySetup={onRetrySetup}
+              syncDeadlineAt={account.syncDeadlineAt}
+              syncFailureReason={account.syncFailureReason}
               action={
                 <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
                   <IconButton
@@ -314,7 +324,7 @@ function AccountsListMobile({
         </NumbersListItemTransition>
       );
     },
-    [deletingId, syncingId, updatingId, editingTokenForId, editingPinForId, labels, onMenuOpen]
+    [deletingId, syncingId, updatingId, editingTokenForId, editingPinForId, labels, onMenuOpen, onRetrySetup]
   );
 
   const renderEmptyState = useCallback(
@@ -473,14 +483,20 @@ export function NumbersTabMobile({
   mutationError,
   onCreate,
   onEditName,
+  onUpdatePurpose,
   onOpenCreateDialog,
   onOpenEditNameDialog,
   onCloseDialog,
   validateDisplayName,
   validatePhoneNumberId,
   validateWabaId,
+  validatePurpose,
   validateAccessToken,
   validateTwoStepPin,
+  esConfigId,
+  esAppId,
+  onOpenEmbeddedSignup,
+  onEmbeddedSignupComplete,
 }: Readonly<NumbersTabSharedProps>) {
   const t = labels.page;
   const credMenu = useMobileCredMenuState(onSetAccessToken, onSetTwoStepPin);
@@ -494,7 +510,11 @@ export function NumbersTabMobile({
 
   const handleEditNameFromMenu = useCallback(() => {
     if (!credMenu.menuAccount?.id) return;
-    onOpenEditNameDialog(credMenu.menuAccount.id, credMenu.menuAccount.displayName?.en ?? "");
+    onOpenEditNameDialog(
+      credMenu.menuAccount.id,
+      credMenu.menuAccount.displayName?.en ?? "",
+      credMenu.menuAccount.purpose ?? WhatsappAccountPurpose.General
+    );
   }, [credMenu.menuAccount, onOpenEditNameDialog]);
 
   const handleEditTokenFromMenu = useCallback(() => {
@@ -536,6 +556,13 @@ export function NumbersTabMobile({
         isConfigured={isConfigured}
         onSyncFromMeta={onSyncFromMeta}
         onAddAccount={onOpenCreateDialog}
+        onConnectBusinessApp={
+          esConfigId && esAppId && onOpenEmbeddedSignup
+            ? () => {
+                onOpenEmbeddedSignup();
+              }
+            : undefined
+        }
       />
 
       <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mb: 2 }}>
@@ -552,6 +579,7 @@ export function NumbersTabMobile({
         editingPinForId={editingPinForId}
         onMenuOpen={credMenu.handleMenuOpen}
         onAddAccount={onOpenCreateDialog}
+        onRetrySetup={esConfigId && esAppId ? onOpenEmbeddedSignup : undefined}
       />
 
       <AccountActionMenuMobile
@@ -592,11 +620,25 @@ export function NumbersTabMobile({
         mutationError={mutationError}
         onCreate={onCreate}
         onEditName={onEditName}
+        onUpdatePurpose={onUpdatePurpose}
         onCloseDialog={onCloseDialog}
         validateDisplayName={validateDisplayName}
         validatePhoneNumberId={validatePhoneNumberId}
         validateWabaId={validateWabaId}
+        validatePurpose={validatePurpose}
       />
+
+      {onEmbeddedSignupComplete ? (
+        <EmbeddedSignupDialog
+          open={dialogState.type === "embeddedSignup"}
+          fullScreen={true}
+          labels={t}
+          configId={esConfigId ?? null}
+          appId={esAppId ?? null}
+          onComplete={onEmbeddedSignupComplete}
+          onClose={onCloseDialog}
+        />
+      ) : null}
 
       <NumbersSnackbar state={snackbar} onClose={onDismissSnackbar} />
     </Box>

@@ -94,6 +94,11 @@ describe("OptInTabContent — toggle (non-admin)", () => {
     });
   });
 
+  test("renders the default-off info banner between subtitle and toggle card", () => {
+    renderOptInTabContent();
+    expect(screen.getByText(labels.optInDefaultOffBanner)).toBeTruthy();
+  });
+
   test("opt-in status label shows 'disabled' when not opted in", () => {
     renderOptInTabContent({ isOptedIn: false });
     expect(screen.getByText(labels.optInDisabled)).toBeTruthy();

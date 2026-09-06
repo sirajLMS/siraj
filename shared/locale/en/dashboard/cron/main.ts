@@ -129,6 +129,8 @@ export const dashboardCronEn: CronLabels = {
     invalidScheduleIdFormat: "Invalid scheduleId format",
     tickerFailed: "Ticker failed",
     classRemindersFailed: "Class reminders failed",
+    whatsappSyncSweepFailed: "WhatsApp sync sweep failed",
+    whatsappWebhookSweepFailed: "WhatsApp webhook sweep failed",
     userContextRequired: "Authenticated user context is required to perform this action",
     // Cron auth errors (machine-to-machine API responses)
     unauthorized: "Unauthorized",

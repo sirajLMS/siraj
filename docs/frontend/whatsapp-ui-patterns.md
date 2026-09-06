@@ -217,6 +217,46 @@ Label helpers map enum values → i18n key strings via `Record<string, string>` 
 
 ---
 
+## v2 (2026-09): Inbox Tab, Purpose & Coexistence Surfaces
+
+The v2 plan (`.ai/plans/whatsapp2/`) added the Inbox tab, purpose chips/selects, coexistence sync surfaces, and the Embedded Signup dialog. Conventions:
+
+### Tab wiring (4th tab)
+
+- `TAB_IDS`/`TAB_LABELS`/`TAB_PERMISSIONS` in `whatsappConfig.constants.ts` gained `inbox` (`AppPermission.WhatsappInboxView`); the `WhatsappConfigTab` union is `"numbers" | "templates" | "optin" | "inbox"`.
+- `WhatsappTabNav` filters tabs by `useUserStore().hasPermission` — the tab is hidden (not just panel-gated) when the user lacks the permission. Panels remain `RequirePermission`-wrapped (belt-and-braces).
+
+### Inbox ViewModel + polling
+
+- The inbox has its OWN ViewModel (`useWhatsappInboxViewModel.ts`), separate from the settings VM: accounts query (filter options), conversations (account filter + server pagination), thread query (`skip` until a conversation is selected), client-side search over the current page.
+- **Visibility-aware polling**: conversations/thread use a 30s `pollInterval` + `cache-and-network`, but a `document.hidden` tracker (`visibilitychange` listener) passes a 0 interval while the tab is backgrounded. Don't poll in hidden tabs.
+- Server pagination uses `mode: "server"` with real `totalCount` — never client-mode fakery on a server slice.
+
+### Thread bubbles (RTL-safe)
+
+- `tabs/shared/ConversationThread.tsx` uses logical properties for bubble alignment (no physical left/right); the mobile back icon is `ArrowBackOutlined` with `transform: scaleX(-1)` under RTL via `theme.direction`.
+- Direction labels come from `getWhatsappMessageDirectionLabel` (Record lookup over `WhatsappMessageDirection`); revoked messages render an italic marker, edits append `editedLabel`, media placeholder renders the media-expired body via `HideImageOutlined`.
+
+### Purpose & sync badge surfaces (Numbers tab)
+
+- Purpose chips + sync badges reuse the `syncStatus` StatusBadge category via `getWhatsappPurposeBadgeConfig` / `getWhatsappSyncStatusBadgeConfig`; label keys resolve through `getPurposeLabelKey` / `getSyncStatusLabelKey` (Record lookups — `no-unsafe-enum-comparison` safe). **Never render raw enum values** — always resolve through the label helpers (post-implementation-review HIGH fix).
+- `NumberCardPurposeSync.tsx` composes the purpose chip, onboarding-mode chip (with `coexistenceRestrictionsHint` tooltip via MUI `titleAccess`), coexistence sync badge, and a determinate `LinearProgress` driven by `syncProgress(percent)` while REQUESTED/SYNCING.
+- Coexistence-only surfaces are conditional on `onboardingMode === Coexistence`; sync badge is hidden for pure Cloud API numbers.
+
+### Embedded Signup dialog (`embeddedSignup/`)
+
+- `EmbeddedSignupDialog` renders phase surfaces: idle/launch → waiting → submitting → success | cancelled | error | not-configured. `useEmbeddedSignupSession` owns the FB SDK lazy loader (`ensureFbSdk`, locale-aware `en_US`/`ar_AR`), the `FB.login` call (`response_type: "code"`, `extras: { setup: {}, featureType: "whatsapp_business_app_onboarding" }` — no `version` key in extras per ES v4), and the `WA_EMBEDDED_SIGNUP` message listener.
+- **Origin check**: session messages are honored ONLY from `event.origin === "https://www.facebook.com"` (post-implementation-review fix) — arbitrary windows cannot complete or pollute the flow.
+- `config_id` + App ID arrive as page props from the server (env-config), never client input; the dialog submits only `code`, `wabaId`, and optional `phoneNumberId`/`businessId`.
+- `fullScreen` on mobile like other dialogs; retry/back flows use `embeddedSignupRetry` and the `whatsappInbox` `retry`/`back` keys added during the review wave.
+
+### Purpose select + reassignment
+
+- `whatsappPurposeSelect.tsx` + `whatsappPurposeOptions.ts` provide the shared select; validation via `validatePurpose` (`validationPurposeRequired`/`validationPurposeInvalid`).
+- The **generic edit dialog only sends the purpose mutation when the value changed** (`updateWhatsappAccountPurpose`), and reassignment of an inactive number is rejected server-side (`whatsapp.purposeRequiresActive`) — surface that error's localized message rather than a generic failure.
+
+---
+
 ## Plan Debt — Deferred parent-plan items (26.3–26.6)
 
 These items were marked `[~]` (deferred) in the parent WhatsApp plan (`.ai/finished_plans/whatsapp/trackable-tasks.md:325-328`) and remain backend-engineering work — they need a GraphQL resolver before any UI data becomes real. The v1 UI renders placeholder empty arrays with a `// NOTE: deferred — parent plan 26.x` comment, so the view degrades gracefully and ships today.

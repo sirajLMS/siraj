@@ -4,6 +4,7 @@ import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { NumberCardPurposeSync } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCardPurposeSync";
 import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import { getQualityLabelKey } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappQualityLabel";
 import { getWhatsappAccountStatusBadgeConfig } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappStatusBadge";
@@ -58,6 +59,24 @@ export type NumberCardLabels = Pick<
   | "unverifiedWarningBody"
   | "warningTierExceeded"
   | "warningCoexistence"
+  | "purposeGeneral"
+  | "purposeAdvertising"
+  | "purposeStudents"
+  | "onboardingModeCloudApi"
+  | "onboardingModeCoexistence"
+  | "coexistenceRestrictionsHint"
+  | "syncStatusLabel"
+  | "syncStatusNotStarted"
+  | "syncStatusRequested"
+  | "syncStatusSyncing"
+  | "syncStatusComplete"
+  | "syncStatusFailed"
+  | "syncHistoryDeclined"
+  | "connectBusinessApp"
+  | "syncProgress"
+  | "syncPhaseLabel"
+  | "syncDeadlineHint"
+  | "syncDeclinedGuidance"
   | "qualityGreen"
   | "qualityYellow"
   | "qualityRed"
@@ -75,6 +94,16 @@ export type NumberCardLabels = Pick<
   | "throughputUnknown"
 >;
 
+/** Optional coexistence sync details/actions threaded into the number card. */
+export interface NumberCardSyncProps {
+  /** Failure reason code (e.g. `historyDeclined`) once the account snapshot surfaces it. */
+  readonly syncFailureReason?: string | null;
+  /** Sync window deadline (ISO); the streaming panel hints it while still in the future. */
+  readonly syncDeadlineAt?: string | null;
+  /** Re-opens Embedded Signup so a failed sync can be re-run from the card. */
+  readonly onRetrySetup?: () => void;
+}
+
 /** Labelled metadata pair (label caption over value) used for account attributes. */
 export function NumberCardField({ label, value }: Readonly<{ readonly label: string; readonly value: string }>) {
   return (
@@ -88,7 +117,7 @@ export function NumberCardField({ label, value }: Readonly<{ readonly label: str
 }
 
 /** Props for the shell-less account card content. */
-export interface NumberCardContentProps {
+export interface NumberCardContentProps extends NumberCardSyncProps {
   readonly account: WhatsappAccountRow;
   readonly labels: NumberCardLabels;
   /** Header action area (platform-specific — icon buttons on desktop, overflow menu on mobile). */
@@ -103,7 +132,15 @@ export interface NumberCardContentProps {
  * Typography pairs, followed by coexistence/unverified warning alerts. Hosts:
  * desktop wraps it in `NumberCard` (BaseCard shell), mobile in `MobileCardListItem`.
  */
-export function NumberCardContent({ account, labels: t, action, extraMetadata }: Readonly<NumberCardContentProps>) {
+export function NumberCardContent({
+  account,
+  labels: t,
+  action,
+  extraMetadata,
+  syncFailureReason,
+  syncDeadlineAt,
+  onRetrySetup,
+}: Readonly<NumberCardContentProps>) {
   const qualityLabel = resolveLabel(getQualityLabelKey(account.qualityRating ?? ""), t);
   const tierLabel = resolveLabel(getTierLabelKey(account.portfolioMessagingLimitTier ?? ""), t);
   const throughputLabel = resolveLabel(getThroughputLabelKey(account.throughputLevel ?? ""), t);
@@ -129,6 +166,13 @@ export function NumberCardContent({ account, labels: t, action, extraMetadata }:
             label={account.isActive ? t.isActive : t.isInactive}
           />
         </Box>
+        <NumberCardPurposeSync
+          account={account}
+          labels={t}
+          syncFailureReason={syncFailureReason}
+          syncDeadlineAt={syncDeadlineAt}
+          onRetrySetup={onRetrySetup}
+        />
         <NumberCardField label={t.qualityRating} value={qualityLabel} />
         <NumberCardField label={t.messagingTier} value={tierLabel} />
         <NumberCardField label={t.throughput24h} value={throughputLabel} />

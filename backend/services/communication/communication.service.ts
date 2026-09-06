@@ -1,11 +1,13 @@
 import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { NotificationChannel } from "@/backend/enum";
+import { WhatsappAccountPurpose } from "@/backend/enum/whatsapp/whatsapp-account.enum";
 import { logger } from "@/backend/lib";
+import { WhatsappNoSenderForPurposeError } from "@/backend/lib/errors";
 import { emailChannel } from "@/backend/services/communication/channels/email";
 import { OnAppChannel } from "@/backend/services/communication/channels/on-app.channel";
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
-import { whatsappChannel } from "@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory";
+import { getChannelForPurpose } from "@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory";
 import type {
   ChannelDispatchResult,
   CommunicationPayload,
@@ -49,6 +51,12 @@ function isStringRecord(value: unknown): value is Record<string, string> {
   return Object.values(value).every(v => typeof v === "string");
 }
 
+const WHATSAPP_PURPOSE_VALUES: ReadonlySet<string> = new Set(Object.values(WhatsappAccountPurpose));
+
+function isWhatsappAccountPurposeValue(value: unknown): value is WhatsappAccountPurpose {
+  return typeof value === "string" && WHATSAPP_PURPOSE_VALUES.has(value);
+}
+
 /**
  * Type guard: validates that an untyped value matches `WhatsappTemplateMetadata`.
  * Avoids unsafe `as` assertions by validating each property at runtime.
@@ -61,6 +69,8 @@ function isWhatsappTemplateMetadata(value: unknown): value is WhatsappTemplateMe
   if (languageCode != null && typeof languageCode !== "string") {
     return false;
   }
+  const purpose = Reflect.get(value, "purpose");
+  if (purpose != null && !isWhatsappAccountPurposeValue(purpose)) return false;
   const paramsOrder = Reflect.get(value, "paramsOrder");
   if (paramsOrder !== undefined) {
     if (!Array.isArray(paramsOrder)) return false;
@@ -120,19 +130,26 @@ export namespace CommunicationService {
   }
 
   /**
-   * Dedicated WhatsApp dispatch branch (C2 — never route through the
+   * Dedicated WhatsApp dispatch branch (never routed through the
    * email/sms-shaped `dispatchRecipientChannel`).
    *
    * Reads `metadata.whatsappTemplate` (stamped by `notification-payloads.builders`
-   * via `NOTIFICATION_TEMPLATE_MAP`, B1) and calls `whatsappChannel.send` with
-   * a proper `WhatsappPayload`.
+   * via `NOTIFICATION_TEMPLATE_MAP`) and resolves the sending account by the
+   * template's routing purpose — the active account carrying that purpose,
+   * falling back to the active GENERAL account (`getChannelForPurpose` logs
+   * the fallback). When no account qualifies the send fails fast with the
+   * `whatsapp.noSenderForPurpose` domain code; no delivery row is created.
+   *
+   * The resolved account is stamped onto the payload (`senderAccountId`,
+   * `purpose`) and into the delivery-row metadata for attribution.
    *
    * Fails fast with a clear error if `whatsappTemplate` is missing — this
    * indicates a misconfigured event (event allowlisted for WhatsApp but no
    * template in `NOTIFICATION_TEMPLATE_MAP`).
    *
-   * Q4: Propagates `result.sendAttempted` so `dispatchMulti` can log tier-budget
-   * accounting (failed sends that reached Meta still consume budget).
+   * Propagates `result.sendAttempted` so `dispatchMulti` can log tier-budget
+   * accounting (failed sends that reached Meta still consume budget), and
+   * `result.errorCode` so pre-flight domain failures stay machine-readable.
    */
   async function dispatchWhatsapp(payload: CommunicationPayload, locale?: string): Promise<ChannelDispatchResult> {
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
@@ -153,6 +170,34 @@ export namespace CommunicationService {
         error: tErrors.whatsappTemplateMissing,
       };
     }
+
+    const purpose = templateRaw.purpose ?? WhatsappAccountPurpose.GENERAL;
+    const sender = await getChannelForPurpose(purpose);
+    if (!sender) {
+      const noSender = new WhatsappNoSenderForPurposeError(tErrors.whatsappNoSenderForPurpose);
+      logger.logDomainError("dispatchWhatsapp: no active sender account for purpose", {
+        purpose,
+        userId: payload.userId,
+        eventType: payload.eventType,
+        templateName: templateRaw.name,
+        errorCode: noSender.code,
+      });
+      return {
+        channel: NotificationChannel.WHATSAPP,
+        success: false,
+        error: noSender.message,
+        errorCode: noSender.code,
+        sendAttempted: false,
+      };
+    }
+
+    logger.info("dispatchWhatsapp: routed send to account", {
+      purpose,
+      accountId: sender.accountId,
+      userId: payload.userId,
+      eventType: payload.eventType,
+      templateName: templateRaw.name,
+    });
 
     const components: WhatsappTemplateComponent[] | undefined = templateRaw.paramsOrder
       ? templateRaw.paramsOrder.map(paramName => {
@@ -218,7 +263,8 @@ export namespace CommunicationService {
     // from the locale string alone.
     const languageCode = templateRaw.languageCode ?? (locale ? locale.split("-")[0] : "en");
 
-    const result = await whatsappChannel.send(
+    const notificationMetadata = asNotificationMetadata(payload.metadata);
+    const result = await sender.channel.send(
       {
         to,
         eventType: payload.eventType,
@@ -228,7 +274,9 @@ export namespace CommunicationService {
           languageCode,
         },
         components,
-        metadata: asNotificationMetadata(payload.metadata),
+        senderAccountId: sender.accountId,
+        purpose,
+        metadata: notificationMetadata ? { ...notificationMetadata, senderAccountId: sender.accountId } : null,
       },
       locale
     );
@@ -238,6 +286,7 @@ export namespace CommunicationService {
       success: result.success,
       providerMessageId: result.providerMessageId,
       error: result.error,
+      errorCode: result.errorCode,
       sendAttempted: result.sendAttempted,
     };
   }

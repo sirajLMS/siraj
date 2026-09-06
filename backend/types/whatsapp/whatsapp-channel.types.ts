@@ -1,4 +1,5 @@
 import type { NotificationEventType } from "@/backend/enum";
+import type { WhatsappAccountPurpose } from "@/backend/enum/whatsapp/whatsapp-account.enum";
 import type { NotificationMetadata, WhatsappTemplateMetadata } from "@/backend/types";
 
 /**
@@ -46,12 +47,29 @@ export interface WhatsappPayload {
   readonly template: WhatsappTemplateRef;
   readonly components?: readonly WhatsappTemplateComponent[];
   readonly metadata?: NotificationMetadata | null;
+  /**
+   * Multi-number sender attribution: the resolved sending account's id.
+   * Set by the dispatch layer after purpose routing; nullable because legacy
+   * dispatch paths may not resolve an account before constructing the payload.
+   */
+  readonly senderAccountId?: string | null;
+  /**
+   * Routing purpose the dispatch layer used for account resolution.
+   * Carried for observability; routing decisions belong to the service layer.
+   */
+  readonly purpose?: WhatsappAccountPurpose | null;
 }
 
 export interface WhatsappSendResult {
   readonly success: boolean;
   readonly providerMessageId?: string;
   readonly error?: string;
+  /**
+   * Machine-readable domain error code (e.g. `whatsapp.accountOffboarded`).
+   * Only set for pre-flight failures where no Graph call was made and the
+   * localized `error` message is too generic to act on programmatically.
+   */
+  readonly errorCode?: string;
   readonly rateLimited?: boolean;
   /**
    * Whether a Graph API send was actually attempted (Q4).

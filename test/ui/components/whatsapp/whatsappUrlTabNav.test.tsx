@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { useEffect } from "react";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { firstCallArgString } from "@/test/ui/components/helpers/whatsappTestHelpers";
 
 expect.extend(matchers);
@@ -183,10 +184,28 @@ describe("WhatsappTabNav — tab rendering", () => {
     cleanup();
   });
 
-  test("renders all three tab links with labels", () => {
-    renderWithWrapper(<WhatsappTabNav activeTab="templates" pageLabels={labels} />, { locale });
+  test("renders all tab links with labels when permissions granted", () => {
+    renderWithWrapper(<WhatsappTabNav activeTab="templates" pageLabels={labels} />, {
+      locale,
+      permissions: [
+        AppPermission.WhatsappConfigManage,
+        AppPermission.WhatsappTemplatesManage,
+        AppPermission.WhatsappView,
+        AppPermission.WhatsappInboxView,
+      ],
+    });
     expect(screen.getByText(labels.tabNumbers)).toBeTruthy();
     expect(screen.getByText(labels.tabTemplates)).toBeTruthy();
+    expect(screen.getByText(labels.tabOptIn)).toBeTruthy();
+    expect(screen.getByText(labels.tabInbox)).toBeTruthy();
+  });
+
+  test("hides the inbox tab when the user lacks WHATSAPP_INBOX_VIEW", () => {
+    renderWithWrapper(<WhatsappTabNav activeTab="optin" pageLabels={labels} />, {
+      locale,
+      permissions: [AppPermission.WhatsappView],
+    });
+    expect(screen.queryByText(labels.tabInbox)).toBeNull();
     expect(screen.getByText(labels.tabOptIn)).toBeTruthy();
   });
 });

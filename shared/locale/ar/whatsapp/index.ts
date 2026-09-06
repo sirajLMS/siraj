@@ -136,6 +136,8 @@ export const whatsappAr: WhatsappLabels = {
   validationWabaIdNumeric: "يجب أن يكون معرّف WABA رقميًا.",
   validationAccessTokenTooShort: "يجب أن يتكون رمز الوصول من 50 حرفًا على الأقل.",
   validationPinFormat: "يجب أن يتكون رمز PIN من 6 أرقام بالضبط.",
+  validationPurposeRequired: "يرجى اختيار الغرض من هذا الرقم.",
+  validationPurposeInvalid: "الغرض المحدد غير صالح.",
 
   // ─── Delete confirm with interpolation (Task 1) ───────────────────
   deleteConfirmTitle: "حذف رقم واتساب",
@@ -189,7 +191,74 @@ export const whatsappAr: WhatsappLabels = {
   optInAdminNo: "لا",
   optInAdminEmpty: "لا يوجد مستخدمون مطابقون لمرشح البحث.",
 
+  // ─── Embedded Signup (coexistence onboarding) ───────────────────────
+  connectBusinessApp: "ربط تطبيق الأعمال",
+  embeddedSignupTitle: "ربط تطبيق واتساب للأعمال (التواجد المشترك)",
+  embeddedSignupDescription:
+    "اربط رقمًا مستخدمًا حاليًا في تطبيق واتساب للأعمال. يبقى فريقك يستخدم تطبيق الهاتف بينما تستطيع المنصة قراءة الرسائل وإرسالها.",
+  embeddedSignupLaunch: "بدء تسجيل Meta المضمّن",
+  embeddedSignupWaitingTitle: "أكمل الخطوات في نافذة Meta",
+  embeddedSignupWaitingBody:
+    "وافق على الربط في نافذة Meta (أو في تطبيق واتساب للأعمال)، ثم عد إلى هنا. سنُكمل الإعداد تلقائيًا.",
+  embeddedSignupCancelledTitle: "تم إلغاء الربط",
+  embeddedSignupCancelledBody: "غادرت إعداد Meta قبل الإكمال. لم يتغيّر شيء — يمكنك البدء من جديد متى شئت.",
+  embeddedSignupErrorTitle: "فشل الربط",
+  embeddedSignupSuccessTitle: "تم ربط الرقم",
+  embeddedSignupSuccessBody:
+    "تم ربط الرقم. تتم مزامنة جهات الاتصال وسجل المحادثات في الخلفية — وقد يستغرق ذلك حتى ٢٤ ساعة.",
+  embeddedSignupRetry: "إعادة المحاولة",
+  embeddedSignupNotConfigured: "التسجيل المضمّن غير مهيأ في هذه البيئة.",
+  embeddedSignupStepCompleteInApp: "أكمل في تطبيق واتساب للأعمال",
+  embeddedSignupStepSync: "مزامنة جهات الاتصال والسجل",
+  embeddedSignupVersionNote: "يتطلب تطبيق واتساب للأعمال بالإصدار 2.24.17 أو أحدث على هاتف الموظف.",
+  embeddedSignupSyncInfo:
+    "تتم مزامنة سجل المحادثات وجهات الاتصال في الخلفية بعد الربط — وقد يستغرق ذلك حتى ٢٤ ساعة. يستمر فريقك في استخدام تطبيق الهاتف خلال ذلك.",
+  embeddedSignupErrorBody: "تعذّر إكمال الربط. لم يتم ربط أي رقم — يمكنك إعادة بدء عملية الإعداد.",
+  embeddedSignupCompletingTitle: "جارٍ إنهاء الإعداد",
+  embeddedSignupCompletingBody: "جارٍ تأكيد الربط وجدولة مزامنة جهات الاتصال والسجل. يستغرق ذلك لحظات فقط.",
+  embeddedSignupDone: "تم",
+  embeddedSignupClose: "إغلاق",
+
   // ─── Accessibility & Permission Denied (Task 17) ───────────────────
   permissionDeniedTitle: "الوصول مقيد",
   permissionDeniedDescription: "ليس لديك إذن للوصول إلى هذا القسم. تواصل مع المسؤول إذا كنت تعتقد أن هذا خطأ.",
+
+  // ─── Tab labels (v2) ─────────────────────────────────────────────────
+  tabInbox: "البريد الوارد",
+
+  // ─── Purpose labels ───────────────────────────────────────────────────
+  purposeLabel: "الغرض",
+  purposeHelper: "يحدد الإشعارات التي يرسلها هذا الرقم. تعود الأحداث غير المعيّنة إلى الرقم العام.",
+  purposeGeneral: "عام",
+  purposeAdvertising: "إعلاني",
+  purposeStudents: "الطلاب",
+  purposeUpdated: "تم تحديث غرض الرقم.",
+  purposeUpdateFailed: "فشل تحديث غرض الرقم.",
+
+  // ─── Onboarding mode labels ───────────────────────────────────────────
+  onboardingModeLabel: "وضع الربط",
+  onboardingModeCloudApi: "Cloud API",
+  onboardingModeCoexistence: "التواجد المشترك (تطبيق الأعمال)",
+  coexistenceRestrictionsHint:
+    "لأرقام التواجد المشترك بعض القيود — تبقى القوائم البثية وبعض ميزات التطبيق حكرًا على تطبيق واتساب للأعمال.",
+
+  // ─── Coexistence sync statuses ───────────────────────────────────────
+  syncStatusLabel: "حالة المزامنة",
+  syncStatusNotStarted: "لم تبدأ",
+  syncStatusRequested: "مطلوبة",
+  syncStatusSyncing: "جارٍ المزامنة",
+  syncStatusComplete: "مكتملة",
+  syncStatusFailed: "فشلت",
+  syncHistoryDeclined: "تم رفض السجل",
+  syncProgress: (percent: number) => `تمت مزامنة ${percent}٪`,
+  syncPhaseLabel: (phase: number) => `مزامنة السجل — المرحلة ${phase}`,
+  syncDeadlineHint: (deadline: string) => `متوقع بحلول ${deadline}`,
+  syncDeclinedGuidance: "يبقى البريد الوارد غير متاح لهذا الرقم حتى تتم إعادة تشغيل الإعداد.",
+
+  // ─── لافتات وأوصاف الخيارات ────────────────────────────────────────
+  addNumberInfoBanner: "يتشارك كل رقم حد المراسلة على مستوى محفظتك؛ وتُقاس الجودة لكل رقم على حدة.",
+  purposeOptionGeneralDescription: "بديل احتياطي لجميع الإشعارات",
+  purposeOptionStudentsDescription: "تذكيرات الحصص والتقارير",
+  purposeOptionAdvertisingDescription: "ردود الحملات الإعلانية",
+  optInDefaultOffBanner: "إشعارات واتساب معطلة افتراضيًا؛ يفعّلها المستخدمون صراحةً.",
 };

@@ -12,11 +12,13 @@ import type {
   OptInTabSharedProps,
   TemplatesTabSharedProps,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
+import type { WhatsappInboxViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappInboxView.types";
 import type {
   WhatsappOptInAuditEntry,
   WhatsappOptInUserState,
   WhatsappSettingsViewModel,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import { useWhatsappInboxViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/useWhatsappInboxViewModel";
 import {
   TAB_PERMISSIONS,
   type WhatsappConfigTab,
@@ -56,6 +58,26 @@ const lazyOptInTab = createLazyView<OptInTabSharedProps>(
       default: m.OptInTabDesktop,
     }))
 );
+
+const lazyInboxTab = createLazyView<WhatsappInboxViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/InboxTab.mobile").then(m => ({
+      default: m.InboxTabMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/settings/whatsapp/tabs/InboxTab.desktop").then(m => ({
+      default: m.InboxTabDesktop,
+    }))
+);
+
+/**
+ * The inbox tab owns its own ViewModel (`useWhatsappInboxViewModel`) so its
+ * queries only fire when the tab is mounted — unrelated to the settings VM.
+ */
+function InboxTabPanel() {
+  const viewModel = useWhatsappInboxViewModel();
+  return <ResponsiveViewSwitch mobile={lazyInboxTab.mobile} desktop={lazyInboxTab.desktop} props={viewModel} />;
+}
 
 // ── Suspense fallback ──
 
@@ -122,14 +144,20 @@ function NumbersTabPanel({ viewModel }: Readonly<{ viewModel: WhatsappSettingsVi
         mutationError: viewModel.mutationError,
         onCreate: viewModel.handleCreate,
         onEditName: viewModel.handleEditName,
+        onUpdatePurpose: viewModel.handleUpdatePurpose,
         onOpenCreateDialog: viewModel.openCreateDialog,
         onOpenEditNameDialog: viewModel.openEditNameDialog,
         onCloseDialog: viewModel.closeDialog,
         validateDisplayName: viewModel.validateDisplayName,
         validatePhoneNumberId: viewModel.validatePhoneNumberId,
         validateWabaId: viewModel.validateWabaId,
+        validatePurpose: viewModel.validatePurpose,
         validateAccessToken: viewModel.validateAccessToken,
         validateTwoStepPin: viewModel.validateTwoStepPin,
+        esConfigId: viewModel.esConfigId ?? null,
+        esAppId: viewModel.esAppId ?? null,
+        onOpenEmbeddedSignup: viewModel.openEmbeddedSignupDialog,
+        onEmbeddedSignupComplete: viewModel.handleEmbeddedSignupComplete,
       }}
     />
   );
@@ -155,20 +183,13 @@ function TemplatesTabPanel({ viewModel }: Readonly<{ viewModel: WhatsappSettings
 }
 
 function OptInTabPanel({ viewModel }: Readonly<{ viewModel: WhatsappSettingsViewModel }>) {
-  // ── Task 12: opt-in history audit data ──
-  // NOTE: Backend `whatsappOptInAuditQuery` resolver does not exist yet (Task 3).
-  //       Until it ships, we pass an empty array here (the UI will show the
-  //       empty-state message). When the resolver is implemented, replace
-  //       this with the real query result from the ViewModel.
+  // The opt-in audit history query is not implemented in the backend schema
+  // yet, so this surface renders its empty state until the resolver ships and
+  // the ViewModel passes real data through.
   const auditEntries: readonly WhatsappOptInAuditEntry[] = [];
   const dateRange = { from: null as string | null, to: null as string | null };
-
-  // ── Task 13: admin consolidated opt-in view ──
-  // NOTE: Backend resolver for all-users opt-in state query does not exist
-  //       yet. Until it ships, we pass an empty array here (the admin section
-  //       will show the empty-state message). When the resolver is
-  //       implemented, replace this with the real query result from the
-  //       ViewModel.
+  // The consolidated all-users opt-in state query is likewise pending on the
+  // backend; the admin section shows its empty state until it exists.
   const adminUsers: readonly WhatsappOptInUserState[] = [];
 
   return (
@@ -194,6 +215,8 @@ const TAB_PANELS: Readonly<Record<TabId, ComponentType<{ viewModel: WhatsappSett
   numbers: NumbersTabPanel,
   templates: TemplatesTabPanel,
   optin: OptInTabPanel,
+  // The inbox tab carries its own ViewModel; the settings VM prop is unused.
+  inbox: InboxTabPanel,
 };
 
 /**

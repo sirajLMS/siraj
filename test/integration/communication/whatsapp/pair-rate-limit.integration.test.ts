@@ -13,6 +13,7 @@
  */
 import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
+import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import { MetaCloudApiAdapter, redisService, resetWhatsappChannel } from "@/backend/services";
 import type { NotificationDeliverySelectType } from "@/backend/types";
@@ -67,7 +68,11 @@ describeLive("pair-rate-limit @live-comm", () => {
   });
 
   test("two sends to same recipient < 6s apart — second is deferred, not failed (B2)", async () => {
-    const adapter = new MetaCloudApiAdapter();
+    const account = await WhatsappAccountRepository.findFirstActiveForCredentials();
+    if (!account) {
+      throw new Error("pair-rate-limit smoke requires an active whatsapp_accounts row");
+    }
+    const adapter = new MetaCloudApiAdapter(account.id);
 
     const payload = {
       to: testToPhone,
@@ -76,8 +81,10 @@ describeLive("pair-rate-limit @live-comm", () => {
       template: { name: templateName, languageCode: templateLanguage },
     };
 
-    // Clean any stale Redis pair-rate-limit key.
-    await redisService.del(`whatsapp:pair:${testToPhone}`).catch(() => {});
+    // Clean any stale Redis pair-rate-limit key. The sender segment mirrors
+    // the adapter's sender-key derivation (display number digits, else id).
+    const senderKey = account.displayPhoneNumber?.replace(/\D/g, "") || account.phoneNumberId;
+    await redisService.del(`whatsapp:pair:${senderKey}:${testToPhone}`).catch(() => {});
 
     const firstStart = Date.now();
     const firstResult = await adapter.send(payload, "en");

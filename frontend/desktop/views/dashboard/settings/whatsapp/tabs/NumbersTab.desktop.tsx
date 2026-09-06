@@ -18,6 +18,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useCallback, useState } from "react";
+import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
+import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import {
   NumbersCreateEditDialogs,
   NumbersDeleteConfirmDialog,
@@ -128,6 +130,7 @@ function AccountsListSection({
   syncingId,
   onMenuOpen,
   onOpenDeleteConfirmDialog,
+  onRetrySetup,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly accounts: ReadonlyArray<WhatsappAccountRow>;
@@ -135,6 +138,8 @@ function AccountsListSection({
   readonly syncingId: string | null;
   readonly onMenuOpen: (event: React.MouseEvent<HTMLElement>, account: WhatsappAccountRow) => void;
   readonly onOpenDeleteConfirmDialog: (accountId: string, displayName: string) => void;
+  /** Re-opens Embedded Signup from the failed-sync card panel (ES-gated). */
+  readonly onRetrySetup?: () => void;
 }>) {
   if (accounts.length === 0) {
     return (
@@ -160,6 +165,9 @@ function AccountsListSection({
             <NumberCard
               account={account}
               labels={labels}
+              onRetrySetup={onRetrySetup}
+              syncDeadlineAt={account.syncDeadlineAt}
+              syncFailureReason={account.syncFailureReason}
               action={
                 <Box>
                   <IconButton
@@ -256,7 +264,7 @@ interface CredentialMenuState {
 function useCredentialMenuState(
   onSetAccessToken: (id: string, token: string) => Promise<void>,
   onSetTwoStepPin: (id: string, pin: string) => Promise<void>,
-  onOpenEditNameDialog: (accountId: string, displayName: string) => void
+  onOpenEditNameDialog: (accountId: string, displayName: string, purpose: WhatsappAccountPurpose) => void
 ): CredentialMenuState {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuAccount, setMenuAccount] = useState<WhatsappAccountRow | null>(null);
@@ -274,7 +282,11 @@ function useCredentialMenuState(
 
   const handleEditNameFromMenu = useCallback(() => {
     if (!menuAccount?.id) return;
-    onOpenEditNameDialog(menuAccount.id, menuAccount.displayName?.en ?? "");
+    onOpenEditNameDialog(
+      menuAccount.id,
+      menuAccount.displayName?.en ?? "",
+      menuAccount.purpose ?? WhatsappAccountPurpose.General
+    );
   }, [menuAccount, onOpenEditNameDialog]);
 
   const openCredentialDialog = useCallback(
@@ -326,12 +338,14 @@ function NumbersTabDialogs({
   onDeleteAccount,
   onCreate,
   onEditName,
+  onUpdatePurpose,
   onCloseDialog,
   handleDialogClose,
   handleDialogConfirm,
   validateDisplayName,
   validatePhoneNumberId,
   validateWabaId,
+  validatePurpose,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly dialogState: WhatsappDialogState;
@@ -343,12 +357,14 @@ function NumbersTabDialogs({
   readonly onDeleteAccount: (id: string) => Promise<void>;
   readonly onCreate: (input: WhatsappCreateInput) => Promise<void>;
   readonly onEditName: (accountId: string, displayName: string) => Promise<void>;
+  readonly onUpdatePurpose: (accountId: string, purpose: WhatsappAccountPurpose) => Promise<void>;
   readonly onCloseDialog: () => void;
   readonly handleDialogClose: () => void;
   readonly handleDialogConfirm: (value: string) => Promise<void>;
   readonly validateDisplayName: (value: string) => string | null;
   readonly validatePhoneNumberId: (value: string) => string | null;
   readonly validateWabaId: (value: string) => string | null;
+  readonly validatePurpose: (value: string) => string | null;
 }>) {
   const t = labels;
   const handleDeleteConfirm = useCallback(async () => {
@@ -385,12 +401,56 @@ function NumbersTabDialogs({
         mutationError={mutationError}
         onCreate={onCreate}
         onEditName={onEditName}
+        onUpdatePurpose={onUpdatePurpose}
         onCloseDialog={onCloseDialog}
         validateDisplayName={validateDisplayName}
         validatePhoneNumberId={validatePhoneNumberId}
         validateWabaId={validateWabaId}
+        validatePurpose={validatePurpose}
       />
     </>
+  );
+}
+
+function NumbersHeaderDesktop({
+  labels,
+  syncing,
+  isConfigured,
+  onSyncFromMeta,
+  onOpenCreateDialog,
+  esConfigId,
+  esAppId,
+  onOpenEmbeddedSignup,
+}: Readonly<{
+  readonly labels: WhatsappLabels;
+  readonly syncing: boolean;
+  readonly isConfigured: boolean;
+  readonly onSyncFromMeta: () => Promise<void>;
+  readonly onOpenCreateDialog: () => void;
+  readonly esConfigId?: string | null;
+  readonly esAppId?: string | null;
+  readonly onOpenEmbeddedSignup?: () => void;
+}>) {
+  const canConnect = esConfigId && esAppId && onOpenEmbeddedSignup;
+  return (
+    <NumbersHeaderShared
+      labels={labels}
+      syncing={syncing}
+      isConfigured={isConfigured}
+      onSyncFromMeta={onSyncFromMeta}
+      onAddAccount={onOpenCreateDialog}
+      onConnectBusinessApp={canConnect ? () => onOpenEmbeddedSignup?.() : undefined}
+      buttonSize="medium"
+      syncIconSize={20}
+      titleSlot={
+        <Box>
+          <Typography variant="titleLg">{labels.numbersTitle}</Typography>
+          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+            {labels.numbersSubtitle}
+          </Typography>
+        </Box>
+      }
+    />
   );
 }
 
@@ -415,12 +475,18 @@ export function NumbersTabDesktop({
   mutationError,
   onCreate,
   onEditName,
+  onUpdatePurpose,
   onOpenCreateDialog,
   onOpenEditNameDialog,
   onCloseDialog,
   validateDisplayName,
   validatePhoneNumberId,
   validateWabaId,
+  validatePurpose,
+  esConfigId,
+  esAppId,
+  onOpenEmbeddedSignup,
+  onEmbeddedSignupComplete,
 }: Readonly<NumbersTabSharedProps>) {
   const t = labels.page;
   const {
@@ -445,22 +511,15 @@ export function NumbersTabDesktop({
 
   return (
     <Box>
-      <NumbersHeaderShared
+      <NumbersHeaderDesktop
         labels={t}
         syncing={syncing}
         isConfigured={isConfigured}
         onSyncFromMeta={onSyncFromMeta}
-        onAddAccount={onOpenCreateDialog}
-        buttonSize="medium"
-        syncIconSize={20}
-        titleSlot={
-          <Box>
-            <Typography variant="titleLg">{t.numbersTitle}</Typography>
-            <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-              {t.numbersSubtitle}
-            </Typography>
-          </Box>
-        }
+        onOpenCreateDialog={onOpenCreateDialog}
+        esConfigId={esConfigId}
+        esAppId={esAppId}
+        onOpenEmbeddedSignup={onOpenEmbeddedSignup}
       />
 
       <AccountsListSection
@@ -470,6 +529,7 @@ export function NumbersTabDesktop({
         syncingId={syncingId}
         onMenuOpen={handleMenuOpen}
         onOpenDeleteConfirmDialog={onOpenDeleteConfirmDialog}
+        onRetrySetup={esConfigId && esAppId ? onOpenEmbeddedSignup : undefined}
       />
 
       <AccountActionMenu
@@ -491,13 +551,27 @@ export function NumbersTabDesktop({
         onDeleteAccount={onDeleteAccount}
         onCreate={onCreate}
         onEditName={onEditName}
+        onUpdatePurpose={onUpdatePurpose}
         onCloseDialog={onCloseDialog}
         handleDialogClose={handleDialogClose}
         handleDialogConfirm={handleDialogConfirm}
         validateDisplayName={validateDisplayName}
         validatePhoneNumberId={validatePhoneNumberId}
         validateWabaId={validateWabaId}
+        validatePurpose={validatePurpose}
       />
+
+      {onEmbeddedSignupComplete ? (
+        <EmbeddedSignupDialog
+          open={dialogState.type === "embeddedSignup"}
+          fullScreen={false}
+          labels={t}
+          configId={esConfigId ?? null}
+          appId={esAppId ?? null}
+          onComplete={onEmbeddedSignupComplete}
+          onClose={onCloseDialog}
+        />
+      ) : null}
 
       <NumbersSnackbar state={snackbar} onClose={onDismissSnackbar} />
     </Box>

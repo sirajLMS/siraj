@@ -1,9 +1,14 @@
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
-import { decryptField } from "@/backend/lib/field-encryption";
+import { WhatsappAccountOffboardedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
-import { FETCH_TIMEOUT_MS, MAX_CONCURRENT_CALLS, readErrorBody } from "@/backend/lib/whatsapp-constants";
+import {
+  FETCH_TIMEOUT_MS,
+  MAX_CONCURRENT_CALLS,
+  readErrorBody,
+  resolveGraphApiVersion,
+} from "@/backend/lib/whatsapp-constants";
 import { sanitizeFailureReason } from "@/backend/lib/whatsapp-sanitize";
 import {
   extractMetaErrorCode,
@@ -32,7 +37,11 @@ const PAIR_RATE_LIMIT_TTL_SEC = 60;
 /** Meta error code 131056 — recipient-only rate limit; defer, do not mark FAILED (B2). */
 const META_ERROR_131056 = 131056;
 
-/** Prefix for Redis pair-rate-limit keys: `whatsapp:pair:<e164>`. */
+/**
+ * Prefix for Redis pair-rate-limit keys: `whatsapp:pair:<sender>:<recipient>`.
+ * The sender segment is the sending account's E.164 display number (digits),
+ * falling back to its Meta `phone_number_id` when no display number is synced.
+ */
 const REDIS_PAIR_KEY_PREFIX = "whatsapp:pair:";
 
 /**
@@ -125,8 +134,24 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
   private readonly waitQueue: (() => void)[] = [];
 
   /**
+   * The `whatsapp_accounts` row this adapter instance is bound to. One
+   * adapter instance per account keeps credentials and pair-rate limits
+   * isolated between numbers; instances are created/cached by
+   * `WhatsappChannelFactory`.
+   */
+  private readonly accountId: string;
+
+  constructor(accountId: string) {
+    if (!accountId.trim()) {
+      // Internal wiring error — not user-facing, no i18n needed
+      throw new Error("MetaCloudApiAdapter: accountId must be a non-empty string");
+    }
+    this.accountId = accountId;
+  }
+
+  /**
    * Local in-memory fallback for pair-rate-limiting when Redis is
-   * unavailable (r10-017). Maps recipient e164 → timestamp of last send.
+   * unavailable (r10-017). Maps `<sender>:<recipient>` → timestamp of last send.
    * Provides basic rate-limiting during Redis outages so the adapter
    * does not fully fail-open.
    *
@@ -139,11 +164,11 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
    * In-memory cache for `resolveCredentials` (r7-011). Avoids running a DB
    * query on every `send()` call. Invalidation:
    *  - Expiry: entries become stale after {@link CREDENTIALS_CACHE_TTL_MS}.
-   *  - Manual: `resetWhatsappChannel()` calls `instance.disconnect()` which
-   *    invokes {@link invalidateCredentialsCache}.
+   *  - Manual: `resetWhatsappChannel(accountId)` calls `disconnect()` on this
+   *    instance which invokes {@link invalidateCredentialsCache}.
    */
   private credentialsCache: {
-    credentials: { accessToken: string; phoneNumberId: string; apiVersion: string };
+    credentials: { accessToken: string; phoneNumberId: string; senderKey: string; apiVersion: string };
     timestamp: number;
   } | null = null;
 
@@ -158,15 +183,28 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
     }
 
     const e164 = payload.to.trim();
+
+    // Resolve per-account credentials before any side effect: offboarded,
+    // inactive, or missing accounts fail fast here without creating a
+    // delivery row and without any Graph API call.
+    let credentials: { accessToken: string; phoneNumberId: string; senderKey: string; apiVersion: string };
+    try {
+      credentials = await this.resolveCredentials();
+    } catch (error) {
+      return this.handleCredentialFailure(payload, error, locale);
+    }
+
     const delivery = await NotificationRepository.createDelivery(this.createDelivery(payload));
 
     try {
-      const { accessToken, phoneNumberId, apiVersion } = await this.resolveCredentials();
+      const { accessToken, phoneNumberId, senderKey, apiVersion } = credentials;
 
       // Pair-rate-limit guard (B2): defer if within 6s window, never marked FAILED on guard hit.
-      const deferredMs = await this.checkPairRateLimit(e164);
+      const deferredMs = await this.checkPairRateLimit(senderKey, e164);
       if (deferredMs > 0) {
         logger.info("MetaCloudApiAdapter: deferring send due to pair-rate-limit", {
+          accountId: this.accountId,
+          senderKey,
           e164,
           deferredMs,
           deliveryId: delivery.id,
@@ -186,6 +224,7 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
         e164,
         accessToken,
         phoneNumberId,
+        senderKey,
         apiVersion,
         locale,
       });
@@ -193,6 +232,7 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
       const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("MetaCloudApiAdapter: send failed", {
         deliveryId: delivery.id,
+        accountId: this.accountId,
         error: errorMessage,
       });
 
@@ -204,13 +244,46 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
     }
   }
 
+  /**
+   * Failure during credential resolution — before any delivery row or Graph
+   * API call. Offboarded accounts surface the `whatsapp.accountOffboarded`
+   * domain code; every other failure stays a generic misconfiguration.
+   */
+  private handleCredentialFailure(payload: WhatsappPayload, error: unknown, locale: string): WhatsappSendResult {
+    if (error instanceof WhatsappAccountOffboardedError) {
+      logger.logDomainError("MetaCloudApiAdapter: send to offboarded account — fail fast before Graph call", {
+        accountId: this.accountId,
+        templateName: payload.template?.name,
+      });
+      return {
+        success: false,
+        sendAttempted: false,
+        error: deliveryFailedMessage(NotificationChannel.WHATSAPP, locale),
+        errorCode: error.code,
+      };
+    }
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error("MetaCloudApiAdapter: credential resolution failed", {
+      accountId: this.accountId,
+      error: errorMessage,
+    });
+
+    return {
+      success: false,
+      sendAttempted: false,
+      error: deliveryFailedMessage(NotificationChannel.WHATSAPP, locale),
+    };
+  }
+
   private async executeWithConcurrencyLimit(params: {
     deliveryId: string;
     payload: WhatsappPayload;
     e164: string;
     accessToken: string;
     phoneNumberId: string;
-    apiVersion: string | undefined;
+    senderKey: string;
+    apiVersion: string;
     locale: string;
   }): Promise<WhatsappSendResult> {
     if (this.activeCalls >= MAX_CONCURRENT_CALLS) {
@@ -227,6 +300,7 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
         e164: params.e164,
         accessToken: params.accessToken,
         phoneNumberId: params.phoneNumberId,
+        senderKey: params.senderKey,
         apiVersion: params.apiVersion,
         locale: params.locale,
       });
@@ -243,11 +317,22 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
     e164: string;
     accessToken: string;
     phoneNumberId: string;
-    apiVersion: string | undefined;
+    senderKey: string;
+    apiVersion: string;
     locale: string;
     isRetry?: boolean;
   }): Promise<WhatsappSendResult> {
-    const { deliveryId, payload, e164, accessToken, phoneNumberId, apiVersion, locale, isRetry = false } = params;
+    const {
+      deliveryId,
+      payload,
+      e164,
+      accessToken,
+      phoneNumberId,
+      senderKey,
+      apiVersion,
+      locale,
+      isRetry = false,
+    } = params;
     const ctx: GraphApiRequestContext = { accessToken, apiVersion };
     const { url, init } = buildSendTemplateMessageRequest(ctx, {
       phoneNumberId,
@@ -266,29 +351,8 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
       const response = await fetch(url, fetchInit);
 
       if (!response.ok) {
-        // On 401, credentials may have been rotated cross-instance (e.g.
-        // token refreshed by another server instance). Invalidate the cache
-        // and retry once with fresh credentials to avoid a spurious FAILED
-        // mark on a transient stale-token condition.
         if (response.status === 401 && !isRetry) {
-          logger.warn("MetaCloudApiAdapter: 401 received — invalidating credentials cache and retrying once", {
-            deliveryId,
-          });
-          this.invalidateCredentialsCache();
-          const freshCreds = await this.resolveCredentials();
-          // Fix 5 (M7): Call executeSend directly without executeWithConcurrencyLimit
-          // since the outer call already holds a concurrency slot. Retrying through
-          // the wrapper would try to acquire a second slot and block.
-          return await this.executeSend({
-            deliveryId,
-            payload,
-            e164,
-            accessToken: freshCreds.accessToken,
-            phoneNumberId: freshCreds.phoneNumberId,
-            apiVersion: freshCreds.apiVersion,
-            locale,
-            isRetry: true,
-          });
+          return await this.retryAfterTokenRefresh(deliveryId, payload, e164, locale);
         }
 
         return await this.handleHttpError(deliveryId, response, locale);
@@ -309,7 +373,7 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
         recipientWaId: result.recipientWaId,
       });
 
-      await this.recordPairRateLimitSuccess(e164);
+      await this.recordPairRateLimitSuccess(senderKey, e164);
 
       return {
         success: true,
@@ -322,9 +386,41 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
     }
   }
 
-  private async recordPairRateLimitSuccess(e164: string): Promise<void> {
+  /**
+   * On 401, credentials may have been rotated cross-instance (e.g. refreshed
+   * by another server instance). Invalidate the cache and retry once with
+   * fresh credentials to avoid a spurious FAILED mark on a transient
+   * stale-token condition. The retry calls `executeSend` directly because the
+   * outer call already holds a concurrency slot — routing through the wrapper
+   * would try to acquire a second slot and block.
+   */
+  private async retryAfterTokenRefresh(
+    deliveryId: string,
+    payload: WhatsappPayload,
+    e164: string,
+    locale: string
+  ): Promise<WhatsappSendResult> {
+    logger.warn("MetaCloudApiAdapter: 401 received — invalidating credentials cache and retrying once", {
+      deliveryId,
+    });
+    this.invalidateCredentialsCache();
+    const freshCreds = await this.resolveCredentials();
+    return this.executeSend({
+      deliveryId,
+      payload,
+      e164,
+      accessToken: freshCreds.accessToken,
+      phoneNumberId: freshCreds.phoneNumberId,
+      senderKey: freshCreds.senderKey,
+      apiVersion: freshCreds.apiVersion,
+      locale,
+      isRetry: true,
+    });
+  }
+
+  private async recordPairRateLimitSuccess(senderKey: string, e164: string): Promise<void> {
     try {
-      const key = `${REDIS_PAIR_KEY_PREFIX}${e164}`;
+      const key = `${REDIS_PAIR_KEY_PREFIX}${senderKey}:${e164}`;
       await redisService.set(key, Date.now().toString(), { ex: PAIR_RATE_LIMIT_TTL_SEC });
     } catch (error) {
       logger.warn("MetaCloudApiAdapter: Redis pair-rate-limit recording failed", {
@@ -436,22 +532,23 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
 
   // --- Private helpers ---
 
-  private async checkPairRateLimit(e164: string): Promise<number> {
+  private async checkPairRateLimit(senderKey: string, e164: string): Promise<number> {
+    const pairKey = `${senderKey}:${e164}`;
     try {
-      const key = `${REDIS_PAIR_KEY_PREFIX}${e164}`;
+      const key = `${REDIS_PAIR_KEY_PREFIX}${pairKey}`;
       const lastStr = await redisService.get(key);
       return computeDeferMs(lastStr, Date.now());
     } catch (error) {
       // Redis unavailable — fall back to local in-memory rate limit
       logger.warn("MetaCloudApiAdapter: Redis pair-rate-limit check failed, using local fallback", {
-        e164,
+        pairKey,
         error: error instanceof Error ? error.message : String(error),
       });
       const now = Date.now();
-      const last = this.localPairRateLimit.get(e164);
+      const last = this.localPairRateLimit.get(pairKey);
       const deferMs = computeDeferMs(last?.toString() ?? null, now);
       if (deferMs === 0) {
-        this.localPairRateLimit.set(e164, now);
+        this.localPairRateLimit.set(pairKey, now);
         pruneLocalPairRateLimit(this.localPairRateLimit);
       }
       return deferMs;
@@ -469,33 +566,57 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
     };
   }
 
-  private async resolveCredentials(): Promise<{ accessToken: string; phoneNumberId: string; apiVersion: string }> {
+  /**
+   * Derives the sender segment for pair-rate-limit keys: digits of the
+   * account's display phone number, falling back to the Meta
+   * `phone_number_id` when no display number has been synced yet.
+   */
+  private static normalizeSenderKey(displayPhoneNumber: string | null, phoneNumberId: string): string {
+    const digits = displayPhoneNumber?.replace(/\D/g, "") ?? "";
+    return digits.length > 0 ? digits : phoneNumberId;
+  }
+
+  /**
+   * Resolves credentials for this adapter's bound account only. There is no
+   * cross-account fallback: a send addressed to account A must never borrow
+   * account B's token. Offboarded accounts throw
+   * {@link WhatsappAccountOffboardedError} before any Graph API call.
+   */
+  private async resolveCredentials(): Promise<{
+    accessToken: string;
+    phoneNumberId: string;
+    senderKey: string;
+    apiVersion: string;
+  }> {
     const now = Date.now();
     if (this.credentialsCache && now - this.credentialsCache.timestamp < CREDENTIALS_CACHE_TTL_MS) {
       return this.credentialsCache.credentials;
     }
 
-    const account = await WhatsappAccountRepository.findFirstActiveForCredentials();
-    if (!account) {
-      // Internal startup error — not user-facing, no i18n needed (no active WhatsApp account configured)
+    const account = await WhatsappAccountRepository.findCredentialsById(this.accountId);
+    if (account?.offboardedAt) {
+      throw new WhatsappAccountOffboardedError();
+    }
+    if (!account?.isActive) {
+      // Internal misconfiguration — not user-facing, no i18n needed
       throw new Error("No active WhatsApp account configured");
     }
 
-    const encryptedToken = account.encryptedAccessToken;
-    if (!encryptedToken) {
-      throw new Error("WhatsApp access token is null");
-    }
-    const accessToken = decryptField(encryptedToken);
+    // `encryptedText.fromDriver` decrypts at the driver boundary — the value
+    // arriving here is already the plaintext token (null when unset).
+    const accessToken = account.encryptedAccessToken;
     if (!accessToken) {
-      throw new Error("Failed to decrypt WhatsApp access token");
+      throw new Error("WhatsApp access token is null");
     }
 
     const phoneNumberId = account.phoneNumberId;
-    const apiVersion = "v20.0"; // Default fallback since apiVersion column doesn't exist in schema
+    const senderKey = MetaCloudApiAdapter.normalizeSenderKey(account.displayPhoneNumber, phoneNumberId);
+    const apiVersion = await resolveGraphApiVersion();
 
     const credentials = {
       accessToken,
       phoneNumberId,
+      senderKey,
       apiVersion,
     };
 

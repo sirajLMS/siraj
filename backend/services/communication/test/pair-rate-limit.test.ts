@@ -58,6 +58,7 @@ await mock.module("@/backend/lib/whatsapp-constants", () => ({
   FETCH_TIMEOUT_MS: 10_000,
   readErrorBody: async () => undefined,
   resolveGraphApiContextFromEnv: async () => ({}),
+  resolveGraphApiVersion: async () => "v25.0",
 }));
 
 // Mock the entire system barrel to avoid pulling in real DB services during test
@@ -102,18 +103,25 @@ const mockDelivery = {
   updatedAt: new Date(),
 };
 
+const MOCK_ACCOUNT_ID = "aadccffe-0000-0000-0000-00000000000e";
+const MOCK_SENDER_KEY = "15555550900";
+
+const mockCredentialAccount = {
+  id: MOCK_ACCOUNT_ID,
+  encryptedAccessToken: "test-token",
+  phoneNumberId: "phone-id-123",
+  displayPhoneNumber: MOCK_SENDER_KEY,
+  isActive: true,
+  offboardedAt: null,
+};
+
 await mock.module("@/backend/db/repo", () => ({
   NotificationRepository: {
     createDelivery: async () => mockDelivery,
     updateDeliveryStatus: async () => mockDelivery,
   },
   WhatsappAccountRepository: {
-    findFirstActiveForCredentials: async () => ({
-      id: "00000000-0000-0000-0000-000000000099",
-      encryptedAccessToken: "test-token",
-      phoneNumberId: "phone-id-123",
-      isActive: true,
-    }),
+    findCredentialsById: async () => mockCredentialAccount,
   },
 }));
 
@@ -126,12 +134,7 @@ await mock.module("@/backend/db/repo/notifications/notification.repository", () 
 
 await mock.module("@/backend/db/repo/whatsapp", () => ({
   WhatsappAccountRepository: {
-    findFirstActiveForCredentials: async () => ({
-      id: "[CARD_REDACTED]-[CARD_REDACTED]",
-      encryptedAccessToken: "test-token",
-      phoneNumberId: "phone-id-123",
-      isActive: true,
-    }),
+    findCredentialsById: async () => mockCredentialAccount,
   },
 }));
 
@@ -185,7 +188,7 @@ interface AdapterSendScenario {
 
 async function setupAdapterAndFetchSpy(wamid: string): Promise<AdapterSendScenario> {
   const { MetaCloudApiAdapter } = await importAdapter();
-  const adapter = new MetaCloudApiAdapter();
+  const adapter = new MetaCloudApiAdapter(MOCK_ACCOUNT_ID);
   const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
     makeOkResponse({ messages: [{ id: wamid }], messaging_product: "whatsapp" })
   );
@@ -215,9 +218,9 @@ afterEach(() => {
 });
 
 describe("B2: Pair-Rate-Limit math (MetaCloudApiAdapter)", () => {
-  test("Redis key shape is whatsapp:pair:<e164>", async () => {
+  test("Redis key shape is whatsapp:pair:<sender>:<recipient>", async () => {
     const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const adapter = new MetaCloudApiAdapter(MOCK_ACCOUNT_ID);
 
     const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
       makeOkResponse({ messages: [{ id: "wamid.key" }], messaging_product: "whatsapp" })
@@ -225,10 +228,14 @@ describe("B2: Pair-Rate-Limit math (MetaCloudApiAdapter)", () => {
 
     await adapter.send({ ...sendPayload });
 
-    expect(redisGetMock).toHaveBeenCalledWith(`${REDIS_PAIR_KEY_PREFIX}5511999999999`);
-    expect(redisSetMock).toHaveBeenCalledWith(`${REDIS_PAIR_KEY_PREFIX}5511999999999`, expect.any(String), {
-      ex: PAIR_RATE_LIMIT_TTL_SEC,
-    });
+    expect(redisGetMock).toHaveBeenCalledWith(`${REDIS_PAIR_KEY_PREFIX}${MOCK_SENDER_KEY}:5511999999999`);
+    expect(redisSetMock).toHaveBeenCalledWith(
+      `${REDIS_PAIR_KEY_PREFIX}${MOCK_SENDER_KEY}:5511999999999`,
+      expect.any(String),
+      {
+        ex: PAIR_RATE_LIMIT_TTL_SEC,
+      }
+    );
 
     fetchSpy.mockRestore();
   });
@@ -276,7 +283,7 @@ describe("B2: Pair-Rate-Limit math (MetaCloudApiAdapter)", () => {
 describe("B2: Pair-Rate-Limit GET guard path", () => {
   test("when redis GET returns null, adapter proceeds immediately and records success timestamp", async () => {
     const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const adapter = new MetaCloudApiAdapter(MOCK_ACCOUNT_ID);
     redisGetMock.mockResolvedValueOnce(null);
 
     const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
@@ -286,11 +293,15 @@ describe("B2: Pair-Rate-Limit GET guard path", () => {
     const result = await adapter.send({ ...sendPayload });
 
     expect(result.success).toBe(true);
-    expect(redisGetMock).toHaveBeenCalledWith(`${REDIS_PAIR_KEY_PREFIX}5511999999999`);
+    expect(redisGetMock).toHaveBeenCalledWith(`${REDIS_PAIR_KEY_PREFIX}${MOCK_SENDER_KEY}:5511999999999`);
     expect(fetchSpy).toHaveBeenCalled();
-    expect(redisSetMock).toHaveBeenCalledWith(`${REDIS_PAIR_KEY_PREFIX}5511999999999`, expect.any(String), {
-      ex: PAIR_RATE_LIMIT_TTL_SEC,
-    });
+    expect(redisSetMock).toHaveBeenCalledWith(
+      `${REDIS_PAIR_KEY_PREFIX}${MOCK_SENDER_KEY}:5511999999999`,
+      expect.any(String),
+      {
+        ex: PAIR_RATE_LIMIT_TTL_SEC,
+      }
+    );
 
     fetchSpy.mockRestore();
   });
@@ -331,9 +342,13 @@ describe("B2: Pair-Rate-Limit adapter behavior (guard hit / fail-open)", () => {
 
     await adapter.send({ ...sendPayload });
 
-    expect(redisSetMock).toHaveBeenCalledWith(`${REDIS_PAIR_KEY_PREFIX}5511999999999`, expect.any(String), {
-      ex: PAIR_RATE_LIMIT_TTL_SEC,
-    });
+    expect(redisSetMock).toHaveBeenCalledWith(
+      `${REDIS_PAIR_KEY_PREFIX}${MOCK_SENDER_KEY}:5511999999999`,
+      expect.any(String),
+      {
+        ex: PAIR_RATE_LIMIT_TTL_SEC,
+      }
+    );
     expect(fetchSpy).toHaveBeenCalled();
 
     fetchSpy.mockRestore();

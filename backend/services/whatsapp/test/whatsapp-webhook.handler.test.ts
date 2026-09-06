@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import { WhatsappLimitTier } from "@/backend/enum/whatsapp/whatsapp.enum";
+import {
+  WhatsappAccountPurpose,
+  WhatsappOnboardingMode,
+  WhatsappSyncStatus,
+} from "@/backend/enum/whatsapp/whatsapp-account.enum";
 import type { NotificationDeliverySelectType, WhatsappAccountReturnType } from "@/backend/types";
 
 // ---------------------------------------------------------------------------
@@ -16,6 +21,83 @@ const findByPhoneNumberIdMock = mock(async (): Promise<WhatsappAccountReturnType
 const whatsappAccountUpdateMock = mock(async (): Promise<boolean> => true);
 const createManyAuditLogsMock = mock(async (_logs: unknown[]): Promise<void> => {});
 const findByPhoneMock = mock(async (): Promise<{ id: string } | null> => null);
+
+// Durable-ingest collaborators (7.x): repo/whatsapp, channel factory, sync service.
+const claimBatchMock = mock(async (_limit?: number): Promise<unknown[]> => []);
+const claimBatchWithBackoffMock = mock(async (_limit?: number, _base?: number): Promise<unknown[]> => []);
+const markProcessedMock = mock(async (_id: string): Promise<null> => null);
+const markFailedMock = mock(async (_id: string): Promise<null> => null);
+const parkExhaustedMock = mock(async (_max: number): Promise<number> => 0);
+const upsertByIdentityMock = mock(async (): Promise<unknown> => null);
+const touchLastMessageMock = mock(async () => null);
+const upsertByWamidMock = mock(async () => null);
+const markRevokedMock = mock(async () => null);
+const applyEditMock = mock(async () => null);
+const attachMediaMock = mock(async () => null);
+const hasChunkMock = mock(async (): Promise<boolean> => false);
+const findByWamidMock = mock(async (): Promise<unknown> => null);
+const upsertFromSyncActionMock = mock(async () => null);
+const markOffboardedMock = mock(async () => null);
+const clearOffboardedMock = mock(async () => null);
+const markSyncFailedMock = mock(async () => null);
+const findByWabaIdMock = mock(async (): Promise<WhatsappAccountReturnType[]> => []);
+const resetWhatsappChannelMock = mock(async (_id?: string): Promise<void> => {});
+const handleHistoryDeclinedMock = mock(async (): Promise<boolean> => true);
+const recordHistoryProgressMock = mock(async (): Promise<void> => {});
+const markContactsSyncCompleteMock = mock(async (): Promise<boolean> => true);
+
+await mock.module("@/backend/db/repo/whatsapp", () => ({
+  WhatsappWebhookEventRepository: {
+    claimBatch: claimBatchMock,
+    claimBatchWithBackoff: claimBatchWithBackoffMock,
+    markProcessed: markProcessedMock,
+    markFailed: markFailedMock,
+    parkExhausted: parkExhaustedMock,
+  },
+  WhatsappConversationRepository: {
+    upsertByIdentity: upsertByIdentityMock,
+    touchLastMessage: touchLastMessageMock,
+  },
+  WhatsappMessageRepository: {
+    upsertByWamid: upsertByWamidMock,
+    markRevoked: markRevokedMock,
+    applyEdit: applyEditMock,
+    attachMedia: attachMediaMock,
+    hasChunk: hasChunkMock,
+    findByWamid: findByWamidMock,
+  },
+  WhatsappContactRepository: {
+    upsertFromSyncAction: upsertFromSyncActionMock,
+  },
+  WhatsappAccountRepository: {
+    markOffboarded: markOffboardedMock,
+    clearOffboarded: clearOffboardedMock,
+    markSyncFailed: markSyncFailedMock,
+    findByWabaId: findByWabaIdMock,
+  },
+}));
+
+await mock.module("@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory", () => ({
+  resetWhatsappChannel: resetWhatsappChannelMock,
+  getWhatsappChannel: async () => {
+    throw new Error("not implemented in webhook tests");
+  },
+  getChannelForPurpose: async () => null,
+  validateWhatsappChannelConfig: async () => false,
+  whatsappChannel: {
+    send: async () => ({ success: false, sendAttempted: false }),
+    validateConfig: async () => false,
+    disconnect: async () => {},
+  },
+}));
+
+await mock.module("@/backend/services/whatsapp/whatsapp-coexistence-sync.service", () => ({
+  WhatsappCoexistenceSyncService: {
+    handleHistoryDeclined: handleHistoryDeclinedMock,
+    recordHistoryProgress: recordHistoryProgressMock,
+    markContactsSyncComplete: markContactsSyncCompleteMock,
+  },
+}));
 
 await mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
   NotificationRepository: {
@@ -181,6 +263,14 @@ function makeTestAccount(overrides: Partial<WhatsappAccountReturnType> = {}): Wh
     portfolioMessagingLimitTier: null,
     throughputLevel: null,
     maxPhoneNumbersPerBusiness: null,
+    purpose: WhatsappAccountPurpose.GENERAL,
+    onboardingMode: WhatsappOnboardingMode.CLOUD_API,
+    syncStatus: WhatsappSyncStatus.NOT_STARTED,
+    syncPhase: null,
+    syncProgress: 0,
+    syncDeadlineAt: null,
+    syncFailureReason: null,
+    offboardedAt: null,
     isActive: true,
     lastWebhookAt: null,
     createdAt: new Date("2024-01-01"),
@@ -314,7 +404,11 @@ function resetMocks() {
   getDeliveryByProviderMessageIdMock.mockReset();
   getDeliveryByProviderMessageIdMock.mockResolvedValue(null);
   getDeliveriesByProviderMessageIdsMock.mockReset();
-  getDeliveriesByProviderMessageIdsMock.mockResolvedValue(new Map());
+  // Default: every queried wamid has an existing delivery row (eventType CLASS_REMINDER).
+  // Tests exercising the no-delivery-row path override this with an empty/partial map.
+  getDeliveriesByProviderMessageIdsMock.mockImplementation(
+    async (ids: string[]) => new Map(ids.map(id => [id, createDeliveryRow({ providerMessageId: id })]))
+  );
   findByPhoneNumberIdMock.mockReset();
   findByPhoneNumberIdMock.mockResolvedValue(null);
   whatsappAccountUpdateMock.mockReset();
@@ -323,6 +417,55 @@ function resetMocks() {
   createManyAuditLogsMock.mockResolvedValue(undefined);
   findByPhoneMock.mockReset();
   findByPhoneMock.mockResolvedValue(null);
+  resetDurableMocks();
+}
+
+/** Reset the durable-ingest collaborator mocks to safe defaults. */
+function resetDurableMocks() {
+  claimBatchMock.mockReset();
+  claimBatchMock.mockResolvedValue([]);
+  claimBatchWithBackoffMock.mockReset();
+  claimBatchWithBackoffMock.mockResolvedValue([]);
+  markProcessedMock.mockReset();
+  markProcessedMock.mockResolvedValue(null);
+  markFailedMock.mockReset();
+  markFailedMock.mockResolvedValue(null);
+  parkExhaustedMock.mockReset();
+  parkExhaustedMock.mockResolvedValue(0);
+  upsertByIdentityMock.mockReset();
+  upsertByIdentityMock.mockResolvedValue(null);
+  touchLastMessageMock.mockReset();
+  touchLastMessageMock.mockResolvedValue(null);
+  upsertByWamidMock.mockReset();
+  upsertByWamidMock.mockResolvedValue(null);
+  markRevokedMock.mockReset();
+  markRevokedMock.mockResolvedValue(null);
+  applyEditMock.mockReset();
+  applyEditMock.mockResolvedValue(null);
+  attachMediaMock.mockReset();
+  attachMediaMock.mockResolvedValue(null);
+  hasChunkMock.mockReset();
+  hasChunkMock.mockResolvedValue(false);
+  findByWamidMock.mockReset();
+  findByWamidMock.mockResolvedValue(null);
+  upsertFromSyncActionMock.mockReset();
+  upsertFromSyncActionMock.mockResolvedValue(null);
+  markOffboardedMock.mockReset();
+  markOffboardedMock.mockResolvedValue(null);
+  clearOffboardedMock.mockReset();
+  clearOffboardedMock.mockResolvedValue(null);
+  markSyncFailedMock.mockReset();
+  markSyncFailedMock.mockResolvedValue(null);
+  findByWabaIdMock.mockReset();
+  findByWabaIdMock.mockResolvedValue([]);
+  resetWhatsappChannelMock.mockReset();
+  resetWhatsappChannelMock.mockResolvedValue(undefined);
+  handleHistoryDeclinedMock.mockReset();
+  handleHistoryDeclinedMock.mockResolvedValue(true);
+  recordHistoryProgressMock.mockReset();
+  recordHistoryProgressMock.mockResolvedValue(undefined);
+  markContactsSyncCompleteMock.mockReset();
+  markContactsSyncCompleteMock.mockResolvedValue(true);
 }
 
 beforeEach(() => {
@@ -331,6 +474,40 @@ beforeEach(() => {
 
 afterEach(() => {
   mock.restore();
+});
+
+describe("batchResolveEventTypes lookup-failure retry (mid-point review)", () => {
+  /** Claimed durable event wrapping a single status update. */
+  function claimedStatusEvent(id: string, wamid: string) {
+    return {
+      id,
+      field: "messages",
+      payload: { value: { statuses: [makeStatusUpdateWithRecipient(wamid, "sent", "[PHONE_REDACTED]")] } },
+      attempts: 1,
+    };
+  }
+
+  test("a DB error in the event-type lookup keeps the event claimable (not marked processed)", async () => {
+    const { WhatsappWebhookHandler } = await importHandler();
+    getDeliveriesByProviderMessageIdsMock.mockRejectedValueOnce(new Error("db blip"));
+    claimBatchMock.mockResolvedValueOnce([claimedStatusEvent("evt-lookup-fail", "wamid.zk1.a1")]);
+
+    const result = await WhatsappWebhookHandler.processPendingWebhookEvents();
+
+    expect(result).toEqual({ claimed: 1, processed: 0, failed: 1 });
+    expect(markProcessedMock).not.toHaveBeenCalled();
+  });
+
+  test("the next tick processes the same event once the lookup recovers", async () => {
+    const { WhatsappWebhookHandler } = await importHandler();
+    mockResolvedUser();
+    claimBatchMock.mockResolvedValueOnce([claimedStatusEvent("evt-lookup-ok", "wamid.zk1.a2")]);
+
+    const result = await WhatsappWebhookHandler.processPendingWebhookEvents();
+
+    expect(result).toEqual({ claimed: 1, processed: 1, failed: 0 });
+    expect(markProcessedMock).toHaveBeenCalledWith("evt-lookup-ok");
+  });
 });
 
 describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
@@ -375,8 +552,8 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
     });
   });
 
-  describe("S3: defensively drops inbound messages[]", () => {
-    test("messages[] is stripped from change values before processing (non-mutating)", async () => {
+  describe("Inbound messages + statuses coexistence (S3 strip removed)", () => {
+    test("messages[] alongside statuses is never mutated; statuses still process", async () => {
       const { WhatsappWebhookHandler } = await importHandler();
 
       const body = makeWebhookBody([
@@ -779,7 +956,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
         makeWebhookBody([
           makeQualityChange({
             phone_number_id: "12345678901",
-            max_daily_conversations_per_business: "1K",
+            max_daily_conversations_per_business: "TIER_1K",
             quality_rating: "GREEN",
           }),
         ])
@@ -789,7 +966,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
       expect(whatsappAccountUpdateMock).toHaveBeenCalledWith(
         "acct-1",
         expect.objectContaining({
-          portfolioMessagingLimitTier: WhatsappLimitTier.TIER_NOT_SET,
+          portfolioMessagingLimitTier: WhatsappLimitTier.TIER_1K,
           qualityRating: "GREEN",
           lastWebhookAt: expect.any(Date),
         })
@@ -836,7 +1013,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
           makeCapabilityChange({
             phone_number_id: "12345678902",
             throughput_level: "HIGH",
-            max_daily_conversations_per_business: "100K",
+            max_daily_conversations_per_business: "TIER_100K",
             max_phone_numbers_per_business: "25",
           }),
         ])
@@ -847,7 +1024,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
         expect.objectContaining({
           throughputLevel: "HIGH",
           // max_daily_conversations_per_business is stored verbatim (not enum-validated)
-          portfolioMessagingLimitTier: WhatsappLimitTier.TIER_NOT_SET,
+          portfolioMessagingLimitTier: WhatsappLimitTier.TIER_100K,
           maxPhoneNumbersPerBusiness: "25",
         })
       );
@@ -862,7 +1039,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
       expect(auditInput.changes).toEqual(
         expect.objectContaining({
           throughputLevel: "HIGH",
-          portfolioMessagingLimitTier: WhatsappLimitTier.TIER_NOT_SET,
+          portfolioMessagingLimitTier: WhatsappLimitTier.TIER_100K,
           maxPhoneNumbersPerBusiness: "25",
         })
       );
@@ -882,7 +1059,7 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
           makeCapabilityChange({
             phone_number_id: "12345678903",
             throughput_level: "STANDARD",
-            max_daily_conversations_per_business: "1K",
+            max_daily_conversations_per_business: "TIER_1K",
           }),
         ])
       );
@@ -953,42 +1130,33 @@ describe("WhatsApp Webhook Handler (S3, B3, P3, R6, Q5)", () => {
     });
   });
 
-  // r10-008: Tests for batchResolveEventTypes fallback and allSettled partial-failure
-  describe("batchResolveEventTypes fallback (r10-008)", () => {
-    test("missing wamids get CLASS_REMINDER fallback when getDeliveriesByProviderMessageIds returns partial results", async () => {
+  // Pure-inbound statuses (no delivery row) are skipped — the handler must NOT
+  // fabricate a CLASS_REMINDER analytics event for wamids we never sent.
+  describe("batchResolveEventTypes no-delivery-row skip", () => {
+    test("statuses without a delivery row are skipped; rows with deliveries still update", async () => {
       const { WhatsappWebhookHandler } = await importHandler();
       mockResolvedUser();
-      mockResolvedUser();
 
-      // Simulate: 2 statuses, but only 1 has a matching delivery row
-      const deliveryRow = createDeliveryRow({
-        id: "delivery-1",
-        eventType: NotificationEventType.COMPLAINT_RESPONSE,
-      });
       const deliveryMap = new Map<string, NotificationDeliverySelectType>();
-      deliveryMap.set("wamid.fallback.1", deliveryRow);
-      // wamid.fallback.2 is missing from the map → should get CLASS_REMINDER fallback
+      deliveryMap.set(
+        "wamid-kn0wn-1",
+        createDeliveryRow({ id: "delivery-1", eventType: NotificationEventType.COMPLAINT_RESPONSE })
+      );
       getDeliveriesByProviderMessageIdsMock.mockResolvedValueOnce(deliveryMap);
 
       await WhatsappWebhookHandler.processEvent(
         makeWebhookBody([
           makeStatusChange([
-            makeStatusUpdateWithRecipient("wamid.fallback.1", "delivered", "1234567890"),
-            makeStatusUpdateWithRecipient("wamid.fallback.2", "delivered", "1234567890"),
+            makeStatusUpdateWithRecipient("wamid-kn0wn-1", "delivered", "[PHONE_REDACTED]"),
+            makeStatusUpdateWithRecipient("wamid-pure-1", "delivered", "[PHONE_REDACTED]"),
           ]),
         ])
       );
 
-      // Both statuses should be processed
-      expect(handleDeliveryWebhookMock).toHaveBeenCalledTimes(2);
-
-      // First call: event type from delivery row
+      expect(handleDeliveryWebhookMock).toHaveBeenCalledTimes(1);
       const firstCall = getMockCallArgAt(handleDeliveryWebhookMock, 0, 0);
+      expect(firstCall.providerMessageId).toBe("wamid-kn0wn-1");
       expect(firstCall.eventType).toBe(NotificationEventType.COMPLAINT_RESPONSE);
-
-      // Second call: CLASS_REMINDER fallback (wamid not in delivery map)
-      const secondCall = getMockCallArgAt(handleDeliveryWebhookMock, 1, 0);
-      expect(secondCall.eventType).toBe(NotificationEventType.CLASS_REMINDER);
     });
   });
 

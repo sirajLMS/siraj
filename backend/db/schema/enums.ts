@@ -46,6 +46,13 @@ import {
   SuggestionStatus,
   TeacherDueStatus,
   VacationRequestStatus,
+  WhatsappAccountPurpose,
+  WhatsappMessageDirection,
+  WhatsappOnboardingMode,
+  WhatsappSyncRequestStatus,
+  WhatsappSyncStatus,
+  WhatsappSyncType,
+  WhatsappWebhookEventStatus,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { createPgEnumFromEnum } from "@/backend/utils/db.utils";
@@ -168,3 +175,26 @@ export const paymentGatewayEnum = createPgEnumFromEnum("payment_gateway", Paymen
 export const billedUnitEnum = createPgEnumFromEnum("billed_unit", BilledUnit);
 
 export const calculationStatusEnum = createPgEnumFromEnum("calculation_status", CalculationStatus);
+
+export const whatsappAccountPurposeEnum = createPgEnumFromEnum("whatsapp_account_purpose", WhatsappAccountPurpose);
+
+export const whatsappOnboardingModeEnum = createPgEnumFromEnum("whatsapp_onboarding_mode", WhatsappOnboardingMode);
+
+export const whatsappSyncStatusEnum = createPgEnumFromEnum("whatsapp_sync_status", WhatsappSyncStatus);
+
+export const whatsappMessageDirectionEnum = createPgEnumFromEnum(
+  "whatsapp_message_direction",
+  WhatsappMessageDirection
+);
+
+export const whatsappWebhookEventStatusEnum = createPgEnumFromEnum(
+  "whatsapp_webhook_event_status",
+  WhatsappWebhookEventStatus
+);
+
+export const whatsappSyncRequestStatusEnum = createPgEnumFromEnum(
+  "whatsapp_sync_request_status",
+  WhatsappSyncRequestStatus
+);
+
+export const whatsappSyncTypeEnum = createPgEnumFromEnum("whatsapp_sync_type", WhatsappSyncType);

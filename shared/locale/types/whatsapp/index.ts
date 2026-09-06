@@ -148,6 +148,8 @@ export interface WhatsappLabels {
   readonly validationWabaIdNumeric: string;
   readonly validationAccessTokenTooShort: string;
   readonly validationPinFormat: string;
+  readonly validationPurposeRequired: string;
+  readonly validationPurposeInvalid: string;
 
   // ─── Delete confirm with interpolation (Task 1) ───────────────────
   readonly deleteConfirmTitle: string;
@@ -224,9 +226,93 @@ export interface WhatsappLabels {
   /** Empty state message when no users match the search filter. */
   readonly optInAdminEmpty: string;
 
+  // ─── Embedded Signup (coexistence onboarding) — minimal Phase-8 set ──
+  /** Header/menu button opening the embedded signup dialog. */
+  readonly connectBusinessApp: string;
+  readonly embeddedSignupTitle: string;
+  readonly embeddedSignupDescription: string;
+  readonly embeddedSignupLaunch: string;
+  readonly embeddedSignupWaitingTitle: string;
+  readonly embeddedSignupWaitingBody: string;
+  readonly embeddedSignupCancelledTitle: string;
+  readonly embeddedSignupCancelledBody: string;
+  readonly embeddedSignupErrorTitle: string;
+  readonly embeddedSignupSuccessTitle: string;
+  readonly embeddedSignupSuccessBody: string;
+  readonly embeddedSignupRetry: string;
+  readonly embeddedSignupNotConfigured: string;
+
+  // ─── Embedded Signup stepper & guidance ─────────────────────────────
+  /** Stepper step 2 label: pairing continues inside the WhatsApp Business app. */
+  readonly embeddedSignupStepCompleteInApp: string;
+  /** Stepper step 3 label: contacts/history sync after onboarding. */
+  readonly embeddedSignupStepSync: string;
+  /** Caption noting the minimum WhatsApp Business app version required. */
+  readonly embeddedSignupVersionNote: string;
+  /** Info alert: contacts/history sync in the background (up to 24h). */
+  readonly embeddedSignupSyncInfo: string;
+  /** Body copy for the error panel when the session errors or completion fails. */
+  readonly embeddedSignupErrorBody: string;
+  /** Title shown while the completion mutation is in flight. */
+  readonly embeddedSignupCompletingTitle: string;
+  /** Body shown while the completion mutation is in flight. */
+  readonly embeddedSignupCompletingBody: string;
+  /** Final action shown on the success surface (closes the dialog). */
+  readonly embeddedSignupDone: string;
+  /** Accessible label for the header close (X) button. */
+  readonly embeddedSignupClose: string;
+
   // ─── Accessibility & Permission Denied (Task 17) ───────────────────
   /** Permission denied UI title. */
   readonly permissionDeniedTitle: string;
   /** Permission denied UI description. */
   readonly permissionDeniedDescription: string;
+
+  // ─── Tab labels (v2: inbox tab) ──────────────────────────────────────
+  readonly tabInbox: string;
+
+  // ─── Purpose labels (WhatsappAccountPurpose: GENERAL/ADVERTISING/STUDENTS) ──
+  readonly purposeLabel: string;
+  readonly purposeHelper: string;
+  readonly purposeGeneral: string;
+  readonly purposeAdvertising: string;
+  readonly purposeStudents: string;
+  readonly purposeUpdated: string;
+  readonly purposeUpdateFailed: string;
+
+  // ─── Onboarding mode labels (WhatsappOnboardingMode) ──────────────────
+  readonly onboardingModeLabel: string;
+  readonly onboardingModeCloudApi: string;
+  readonly onboardingModeCoexistence: string;
+  /** Tooltip shown when a coexistence number has app-side restrictions. */
+  readonly coexistenceRestrictionsHint: string;
+
+  // ─── Coexistence sync statuses (WhatsappSyncStatus) ───────────────────
+  readonly syncStatusLabel: string;
+  readonly syncStatusNotStarted: string;
+  readonly syncStatusRequested: string;
+  readonly syncStatusSyncing: string;
+  readonly syncStatusComplete: string;
+  readonly syncStatusFailed: string;
+  /** Badge shown when the paired phone declined history sharing. */
+  readonly syncHistoryDeclined: string;
+  readonly syncProgress: (percent: number) => string;
+  /** Streaming panel: current history-sync phase while Meta streams chunks. */
+  readonly syncPhaseLabel: (phase: number) => string;
+  /** Streaming panel: localized hint for the remaining sync window deadline. */
+  readonly syncDeadlineHint: (deadline: string) => string;
+  /** Guidance sentence on the failed panel when history sharing was declined. */
+  readonly syncDeclinedGuidance: string;
+
+  // ─── Banners & option descriptions (Numbers/Opt-in surfaces) ──────────
+  /** Info banner above the numbers list: shared tier, per-number quality. */
+  readonly addNumberInfoBanner: string;
+  /** Purpose option description: GENERAL. */
+  readonly purposeOptionGeneralDescription: string;
+  /** Purpose option description: STUDENTS. */
+  readonly purposeOptionStudentsDescription: string;
+  /** Purpose option description: ADVERTISING. */
+  readonly purposeOptionAdvertisingDescription: string;
+  /** Opt-in surface banner: WhatsApp notifications default to off. */
+  readonly optInDefaultOffBanner: string;
 }

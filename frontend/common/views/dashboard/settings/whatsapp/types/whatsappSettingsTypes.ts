@@ -1,5 +1,6 @@
 import type {
   WhatsappAccountFieldsFragment,
+  WhatsappAccountPurpose,
   WhatsappTemplateSnapshotFieldsFragment,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
@@ -49,13 +50,15 @@ export interface WhatsappOptInUserState {
 /**
  * Form values for the create-account form.
  *
- * The create form only collects three fields; the remaining account fields
- * are populated server-side or via the Meta sync flow.
+ * The create form collects the three identity fields plus the routing
+ * purpose; the remaining account fields are populated server-side or via
+ * the Meta sync flow.
  */
 export interface AccountCreateFormValues {
   readonly displayName: string;
   readonly phoneNumberId: string;
   readonly wabaId: string;
+  readonly purpose: string;
 }
 
 /**
@@ -85,9 +88,24 @@ export type WhatsappSnackbar = { readonly message: string; readonly severity: "s
 
 /** Consolidated dialog state for the WhatsApp settings page. */
 export interface WhatsappDialogState {
-  readonly type: "create" | "editName" | "editToken" | "editPin" | "deleteConfirm" | null;
+  readonly type: "create" | "editName" | "editToken" | "editPin" | "deleteConfirm" | "embeddedSignup" | null;
   readonly accountId?: string;
   readonly displayName?: string;
+  /** Current routing purpose of the account being edited (pre-selects the edit dialog select). */
+  readonly purpose?: WhatsappAccountPurpose;
+}
+
+/**
+ * Payload captured from the Embedded Signup session (authorization code from
+ * the `FB.login` callback + asset IDs from the `WA_EMBEDDED_SIGNUP` session
+ * events) and submitted to `completeWhatsappEmbeddedSignup`. `config_id` is
+ * intentionally absent — it is resolved server-side from env-config.
+ */
+export interface WhatsappEmbeddedSignupPayload {
+  readonly code: string;
+  readonly wabaId: string;
+  readonly phoneNumberId?: string;
+  readonly businessId?: string;
 }
 
 /** Input for the create-account handler. */
@@ -95,6 +113,7 @@ export interface WhatsappCreateInput {
   readonly displayName: string;
   readonly phoneNumberId: string;
   readonly wabaId: string;
+  readonly purpose: WhatsappAccountPurpose;
 }
 
 /** Labels grouped by UI section (labelsBySection pattern). */
@@ -166,11 +185,12 @@ export interface WhatsappSettingsViewModel {
   readonly validateWabaId: (value: string) => string | null;
   readonly validateAccessToken: (value: string) => string | null;
   readonly validateTwoStepPin: (value: string) => string | null;
+  readonly validatePurpose: (value: string) => string | null;
 
   // ── Dialog state ─────────────────────────────────────────────────────
   readonly dialogState: WhatsappDialogState;
   readonly openCreateDialog: () => void;
-  readonly openEditNameDialog: (accountId: string, displayName: string) => void;
+  readonly openEditNameDialog: (accountId: string, displayName: string, purpose: WhatsappAccountPurpose) => void;
   readonly openEditTokenDialog: (accountId: string) => void;
   readonly openEditPinDialog: (accountId: string) => void;
   readonly openDeleteConfirmDialog: (accountId: string, displayName: string) => void;
@@ -181,6 +201,11 @@ export interface WhatsappSettingsViewModel {
   readonly handleCreate: (input: WhatsappCreateInput) => Promise<void>;
   /** Update an account's display name. Validates displayName before calling mutation. */
   readonly handleEditName: (accountId: string, displayName: string) => Promise<void>;
+  /**
+   * Assign a routing purpose via the gated `updateWhatsappAccountPurpose`
+   * mutation (server rejects assignment on inactive accounts).
+   */
+  readonly handleUpdatePurpose: (accountId: string, purpose: WhatsappAccountPurpose) => Promise<void>;
   /** Delete an account by id. */
   readonly handleDelete: (accountId: string) => Promise<void>;
   /** Set the access token for an account. */
@@ -197,6 +222,18 @@ export interface WhatsappSettingsViewModel {
   readonly refetchAccounts: () => void;
   /** Refetch templates — triggers accounts refetch since templates come from sync. */
   readonly refetchTemplates: () => void;
+
+  // ── Embedded Signup (coexistence onboarding) ────────────────────────
+  /** ES `config_id` resolved server-side from env-config (null when not configured). */
+  readonly esConfigId?: string | null;
+  /** Meta App ID used by the FB SDK init (null when not configured). */
+  readonly esAppId?: string | null;
+  /** True while the completion mutation is in flight. */
+  readonly embeddedSignupSubmitting: boolean;
+  /** Open the embedded-signup dialog. */
+  readonly openEmbeddedSignupDialog: () => void;
+  /** Submit the captured ES session payload to the backend. */
+  readonly handleEmbeddedSignupComplete: (payload: WhatsappEmbeddedSignupPayload) => Promise<void>;
 
   // ── Legacy aliases (backward compatibility) ──────────────────────────
   /** @deprecated Use handleDelete instead. */

@@ -11,6 +11,7 @@ import {
   validateCredentialForm,
   validateDisplayName,
   validatePhoneNumberId,
+  validatePurpose,
   validateTwoStepPin,
   validateWabaId,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
@@ -132,11 +133,13 @@ describe("validateAccountCreateForm", () => {
       displayName: "Test Account",
       phoneNumberId: "123456789",
       wabaId: "987654321",
+      purpose: "GENERAL",
     };
     const result = validateAccountCreateForm(values);
     expect(result.displayName).toBeNull();
     expect(result.phoneNumberId).toBeNull();
     expect(result.wabaId).toBeNull();
+    expect(result.purpose).toBeNull();
   });
 
   it("returns error keys for all invalid inputs", () => {
@@ -144,11 +147,29 @@ describe("validateAccountCreateForm", () => {
       displayName: "",
       phoneNumberId: "abc",
       wabaId: "xyz",
+      purpose: "",
     };
     const result = validateAccountCreateForm(values);
     expect(result.displayName).toBe("validationDisplayNameRequired");
     expect(result.phoneNumberId).toBe("validationPhoneNumberIdNumeric");
     expect(result.wabaId).toBe("validationWabaIdNumeric");
+    expect(result.purpose).toBe("validationPurposeRequired");
+  });
+});
+
+describe("validatePurpose", () => {
+  it("returns null for each known purpose value", () => {
+    expect(validatePurpose("GENERAL")).toBeNull();
+    expect(validatePurpose("ADVERTISING")).toBeNull();
+    expect(validatePurpose("STUDENTS")).toBeNull();
+  });
+
+  it("returns required key for an empty purpose", () => {
+    expect(validatePurpose("")).toBe("validationPurposeRequired");
+  });
+
+  it("returns invalid key for an unknown purpose", () => {
+    expect(validatePurpose("STAFF")).toBe("validationPurposeInvalid");
   });
 });
 

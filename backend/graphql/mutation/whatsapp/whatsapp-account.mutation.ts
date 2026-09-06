@@ -1,14 +1,21 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { WhatsappAccountPurposePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import {
   WhatsappAccountCreateInputPothosObject,
   WhatsappAccountPothosObject,
   WhatsappAccountUpdateInputPothosObject,
+  WhatsappEmbeddedSignupInputPothosObject,
   WhatsappSyncFromMetaResultPothosObject,
 } from "@/backend/graphql/pothos/whatsapp/whatsapp-account.pothos";
 import { withAuthResult } from "@/backend/graphql/utils";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { WhatsappAccountService } from "@/backend/services";
-import type { WhatsappAccountCreateSubmitInput, WhatsappAccountUpdateInput } from "@/backend/types";
+import type {
+  UserPermissionContext,
+  WhatsappAccountCreateSubmitInput,
+  WhatsappAccountUpdateInput,
+} from "@/backend/types";
 
 gqlSchemaBuilder.mutationFields(t => ({
   createWhatsappAccount: t.field({
@@ -21,6 +28,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     resolve: withAuthResult((actorUserId, args, tErrors) => {
       const input: WhatsappAccountCreateSubmitInput = {
         ...args.input,
+        purpose: args.input.purpose ?? undefined,
         displayName: args.input.displayName
           ? Object.fromEntries(Object.entries(args.input.displayName).filter(([, v]) => v != null))
           : null,
@@ -52,6 +60,33 @@ gqlSchemaBuilder.mutationFields(t => ({
       };
       return WhatsappAccountService.updateAccount(actorUserId, tErrors, args.id, input);
     }),
+  }),
+
+  /**
+   * Assign or change the routing purpose of an account. The service rejects
+   * purpose assignment on inactive accounts (`whatsapp.purposeRequiresActive`)
+   * and resets the channel cache so routing picks up the change immediately.
+   * The permission context is taken from ctx (no extra user-context query).
+   */
+  updateWhatsappAccountPurpose: t.field({
+    type: WhatsappAccountPothosObject,
+    description: "Assign or change the routing purpose of a WhatsApp account (active accounts only).",
+    authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
+    args: {
+      accountId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      purpose: t.arg({ type: WhatsappAccountPurposePothosEnum, required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      const actorUserId = await requireAuth(ctx);
+      const context: UserPermissionContext = {
+        permissions: ctx.permissions,
+        permissionGroups: ctx.permissionGroups,
+        isSuperAdmin: ctx.isSuperAdmin,
+        role: ctx.role,
+      };
+      const tErrors = ctx.t().errorsTranslations;
+      return WhatsappAccountService.updateAccountPurpose(actorUserId, context, tErrors, args.accountId, args.purpose);
+    },
   }),
 
   deleteWhatsappAccount: t.field({
@@ -90,6 +125,33 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: withAuthResult((actorUserId, args, tErrors) =>
       WhatsappAccountService.setTwoStepPin(actorUserId, tErrors, args.id, args.twoStepPin)
+    ),
+  }),
+
+  /**
+   * Complete WhatsApp Embedded Signup (coexistence onboarding).
+   *
+   * Exchanges the single-use ES authorization code, resolves + confirms the
+   * phone number (`is_on_biz_app` && `platform_type === "CLOUD_API"`),
+   * attaches the app to the WABA, creates the account with
+   * `onboardingMode: COEXISTENCE`, and enqueues the one-shot contacts/history
+   * sync. Failures surface as `whatsapp.embeddedSignupFailed`; a code replay
+   * fails the Meta exchange (single-use).
+   */
+  completeWhatsappEmbeddedSignup: t.field({
+    type: WhatsappAccountPothosObject,
+    description: "Complete WhatsApp Embedded Signup (coexistence) onboarding for a Business-app number.",
+    authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
+    args: {
+      input: t.arg({ type: WhatsappEmbeddedSignupInputPothosObject, required: true }),
+    },
+    resolve: withAuthResult((actorUserId, args, tErrors) =>
+      WhatsappAccountService.completeEmbeddedSignup(actorUserId, tErrors, {
+        code: args.input.code,
+        wabaId: args.input.wabaId,
+        phoneNumberId: args.input.phoneNumberId ?? undefined,
+        businessId: args.input.businessId ?? null,
+      })
     ),
   }),
 

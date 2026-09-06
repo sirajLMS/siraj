@@ -19,6 +19,12 @@
  *
  * Per-user errors are caught and logged so a single user's fetch or dispatch
  * failure does NOT poison the dispatch for other users.
+ *
+ * WhatsApp routing note: `metadata.whatsappTemplate` (stamped by the pure
+ * builders with `name`, `languageCode`, `paramsOrder`, and routing `purpose`)
+ * rides inside `payload.metadata` and is never rewritten here — recipient
+ * stamping spreads the original metadata, so the purpose reaches
+ * `CommunicationService.dispatchWhatsapp` untouched for account resolution.
  */
 
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications";
