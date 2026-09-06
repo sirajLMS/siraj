@@ -89,8 +89,8 @@ One namespace, `CarryoverBalanceService`, with ten public methods:
 | Method | Permission | Shape |
 |---|---|---|
 | `bulkCreateCarryoverBalances` | MANAGE | Locks audited sessions `FOR UPDATE`, guards (audited status, not already linked, not soft-deleted), groups per teacher with dominant currency + FX conversion, snapshots items (amount, currency, status, partial %), links sessions → `WAITING_PAID`, one carryover + audit row per teacher |
-| `bulkCarryoverToExpense` | MANAGE | Locks carryovers, rejects already-paid, expense per carryover (see stub below), rows settle (`isPaid`, `paid`, `paymentDate`, `expenseId`, …), sessions → `PAID` |
-| `unpayCarryoverBalance` | MANAGE | Locks + reverts: carryover back to unpaid (payment fields nulled, `paid "0"`), sessions `PAID → WAITING_PAID` (locked first), expense soft-delete (stub tolerates missing row) |
+| `bulkCarryoverToExpense` | MANAGE | Locks carryovers, rejects already-paid, real expense row per carryover via `ExpenseService.createInternal` in the same tx, rows settle (`isPaid`, `paid`, `paymentDate`, `expenseId`, …), sessions → `PAID` |
+| `unpayCarryoverBalance` | MANAGE | Locks + reverts: carryover back to unpaid FIRST (payment fields nulled, `paid "0"`) so the ledger's settlement-protection guard admits the delete, then the expense is soft-deleted in the same tx (missing row tolerated), sessions `PAID → WAITING_PAID` (locked first) |
 | `createCarryoverBalance` / `updateCarryoverBalance` | MANAGE | Manual CRUD; teacher is immutable (`CARRYOVER_TEACHER_IMMUTABLE` via `Object.hasOwn(input, "teacherId")`); update blocked on paid rows; update writes a full-state `"UPDATE"` audit row |
 | `deleteCarryoverBalance` / `bulkDeleteCarryoverBalances` | MANAGE | Rejects paid rows before any write (bulk is atomic); restores each session's `originalStatus` + partial % from item snapshots, unlinks, hard-deletes (items cascade); audit rows for the orphaned id survive |
 | `getReport` | VIEW | Filtered page + aggregates (totals in integer minor units, paid/unpaid split, dominant currency; fast path covers page, slow path re-scans when page < total) |
@@ -251,14 +251,25 @@ These were found the hard way (reviews, journey tests, sub-loop runs):
     grants to `super_admin` + `academy_admin`), bundled into a drizzle folder by
     `applyCustomMigrations()` (also runs inside `bun db migrate`). Seeders must
     never write these tables (`backend/db/seeds/AGENTS.md`).
-11. **Expense-adapter stub (pending Plan 6).** `createExpenseRecord`
-    (`randomUUID` reference + `logger.warn`) and `softDeleteExpenseRecord`
-    (tolerates the row never existing) live module-private inside
-    `carryover-balance.service.ts`; the full expense payload is preserved in the
-    conversion audit metadata. The service wraps adapter throws into
-    `CARRYOVER_TO_EXPENSE_FAILED` and rolls back the batch. Swapping in the real
-    Plan 6 ledger changes only these two functions — public types, audit trail,
-    and `expenseId` soft link are already in place.
+11. **Real expense ledger integration.** Settlement calls
+    `ExpenseService.createInternal(input, tx, tErrors)` (from the
+    `@/backend/services` barrel) inside the carryover transaction — one
+    `Salaries` row per carryover with `sourceEntity = "carryover_balances"` +
+    `sourceEntityId = carryover.id` and a per-carryover `clientRequestId`
+    composed from the bulk idempotency key, so the ledger's 60 s replay
+    returns the originally persisted expense on a same-window retry. Ledger
+    failures are wrapped into `CARRYOVER_TO_EXPENSE_FAILED` so the batch rolls
+    back. Unpay marks the carryover unpaid FIRST under its row lock — the
+    ledger's `assertNotSettlementProtected` guard rejects soft-deleting an
+    expense whose carryover is still paid (`EXPENSE_DELETE_VIA_UNPAY`) — then
+    calls `ExpenseService.softDelete({ id, actorUserId, reason, tx })` in the
+    same transaction; a missing row (`EXPENSE_NOT_FOUND`, e.g. references
+    minted before the ledger existed) is tolerated and the revert completes.
+    The ledger layers its own `EXPENSE_CREATE`/`EXPENSE_DELETE` audit rows
+    (entity type `EXPENSE`) alongside the carryover trail. Cleanup note: journey
+    teardown must delete the settle-write expense rows before the users/
+    teachers they reference — `expenses.created_by_user_id` is NOT NULL even
+    though its FK is `onDelete: set null`.
 12. **Adding a nullable column to a hot table breaks full-row fixtures.**
     `class_instances.carryoverBalanceId` immediately added a required key to the
     Drizzle select type — five sibling test files needed
@@ -303,8 +314,9 @@ These were found the hard way (reviews, journey tests, sub-loop runs):
 
 - Plan 4 (session-event-audit) audit-grid integration — "Carryover Balance" bulk
   action and "Linked" chip — was blocked on the sibling plan landing.
-- Plan 6 (expense ledger) replaces the expense-adapter stub; the E2E spec then
-  gains real `/accounting/expenses` assertions.
+- Plan 6 (expense ledger) landed and the stub is swapped for the real
+  `ExpenseService` (see Architecture decision #11); the E2E spec can still gain
+  real `/accounting/expenses` page assertions once the ledger UI ships.
 - UI component test suites and the E2E spec were authored under a
   written-but-unexecuted policy; first real runs may need fixture/real-dialog
   adjustments (MUI date-picker typing, autocomplete option names, demo dataset).

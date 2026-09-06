@@ -19,7 +19,7 @@ This ledger tracks all work deferred from one task to another to ensure no defer
 | D1 | Phase 6 Plan 4 audit-grid integration (6.1 bulk-carryover button, 6.2 "Linked" chip) | 6.1/6.2 | External: Plan 4 owner | ✅ Done | outcome/6-integration-outcome.md | Resolved once Plan 4's grid landed; button gated on MANAGE + Linked chip wired + E2E entry point swapped |
 | D2 | Task 8.4 staging migration rehearsal | 8.4 | External: staging env | ❌ Blocked | — | Requires staging DB + deployment access not available to this implementation run |
 | D3 | UI/E2E test first-execution (4.8/5.4 component tests + 8.1 E2E spec) | 4.8/5.4/8.1 | Post-merge enablement run | 🔄 In Progress | — | User directive: UI/E2E tests are written but must not be executed in this run; first run + fixes deferred |
-| D4 | Plan 6 `ExpenseService.createInternal`/`softDelete` real integration | 1.8/1.9 | External: Plan 6 (expense-ledger) | ❌ Blocked | — | Plan 6 has not landed; carryover uses the documented module-private expense adapter stub (outcome 1.7-1.11) — swap when Plan 6 ships |
+| D4 | Plan 6 `ExpenseService.createInternal`/`softDelete` real integration | 1.8/1.9 | External: Plan 6 (expense-ledger) | ✅ Done | outcome/d4-stub-swap-outcome.md | Stub swapped for the real `ExpenseService` (`@/backend/services` barrel): settle creates real `expenses` rows via `createInternal` (caller tx, per-carryover `clientRequestId` seed); unpay soft-deletes via `softDelete({tx})` with missing-row (E17) tolerance; unpay order flipped (carryover → unpaid first) so the ledger's `EXPENSE_DELETE_VIA_UNPAY` guard admits the settlement's own delete; journeys assert real ledger rows |
 
 ---
 

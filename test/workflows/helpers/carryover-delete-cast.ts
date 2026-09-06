@@ -1,6 +1,6 @@
 import { inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { auditLogs, carryoverBalances } from "@/backend/db/schema";
+import { auditLogs, carryoverBalances, expenses } from "@/backend/db/schema";
 import {
   createMockClassInstance,
   createTestParent,
@@ -192,12 +192,15 @@ export async function provisionCarryoverDeleteCast(prefix: string): Promise<Carr
 
 /**
  * Hard-deletes the cast in FK-safe order, INCLUDING the side-effect rows the
- * carryover services create: the append-only `audit_logs` rows (whose
- * immutability trigger is lifted for the sweep and restored in `finally`,
- * mirroring the other accounting journeys), any carryover rows left behind
- * by the journey (surviving items cascade with them; session links settle to
- * NULL via `onDelete: set null`), and the per-session status events. System
- * permission groups are untouched — only this run's memberships are revoked.
+ * carryover services create: the real expense ledger rows any settlement
+ * wrote for the cast teachers (they must go before the users/teachers they
+ * reference — `expenses.created_by_user_id` is NOT NULL despite its SET NULL
+ * FK), the append-only `audit_logs` rows (whose immutability trigger is
+ * lifted for the sweep and restored in `finally`, mirroring the other
+ * accounting journeys), any carryover rows left behind by the journey
+ * (surviving items cascade with them; session links settle to NULL via
+ * `onDelete: set null`), and the per-session status events. System permission
+ * groups are untouched — only this run's memberships are revoked.
  */
 export async function cleanupCarryoverDeleteCast(cast: CarryoverDeleteCast): Promise<void> {
   await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
@@ -206,6 +209,7 @@ export async function cleanupCarryoverDeleteCast(cast: CarryoverDeleteCast): Pro
       .delete(auditLogs)
       .where(inArray(auditLogs.actorUserId, [cast.operatorUser.id, cast.secondOperatorUser.id]));
     await db.transaction(async tx => {
+      await tx.delete(expenses).where(inArray(expenses.teacherId, [cast.teacherA.id, cast.teacherB.id]));
       await tx
         .delete(carryoverBalances)
         .where(inArray(carryoverBalances.teacherId, [cast.teacherA.id, cast.teacherB.id]));

@@ -488,8 +488,9 @@ describe("Carryover unpay journey (aggregate → to expense → unpay correction
     expenseDeletedAt = deletedExpense.deletedAt;
 
     // Ledger audit: exactly one EXPENSE_DELETE row for the settled expense.
-    expect((await readExpenseAuditRows(settledExpenseId)).filter(row => row.action === EXPENSE_DELETE_ACTION))
-      .toHaveLength(1);
+    expect(
+      (await readExpenseAuditRows(settledExpenseId)).filter(row => row.action === EXPENSE_DELETE_ACTION)
+    ).toHaveLength(1);
 
     // Missing-row tolerance: if the reference had never materialized a row,
     // the same revert would have completed — already-deleted rows are the
@@ -567,8 +568,9 @@ describe("Carryover unpay journey (aggregate → to expense → unpay correction
     expect(carryover.expenseId).toBeNull();
     const untouchedExpense = await readExpenseRow(settledExpenseId);
     expect(untouchedExpense.deletedAt?.getTime()).toBe(expenseDeletedAt?.getTime());
-    expect((await readExpenseAuditRows(settledExpenseId)).filter(row => row.action === EXPENSE_DELETE_ACTION))
-      .toHaveLength(1);
+    expect(
+      (await readExpenseAuditRows(settledExpenseId)).filter(row => row.action === EXPENSE_DELETE_ACTION)
+    ).toHaveLength(1);
     const untouchedRows = await Promise.all(sessionIds().map(id => readInstance(id)));
     for (const row of untouchedRows) {
       expect(row.calculationStatus).toBe(CalculationStatus.WAITING_PAID);
