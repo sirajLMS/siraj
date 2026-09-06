@@ -104,6 +104,23 @@ const carryover = {
   toExpenseFailed: "Failed to convert carryover to expense.",
 } as const;
 
+const expenses = {
+  notFound: "Expense not found.",
+  alreadyDeleted: "Expense is already deleted.",
+  deleteViaUnpay: "This salary expense must be removed via the carryover Unpay flow.",
+  typeImmutableForSalaries: "Type is read-only for Salaries expenses.",
+  valueImmutableForSalaries: "Value is read-only for Salaries expenses.",
+  salariesViaCarryoverOnly: "Salaries expenses are created through the carryover settlement flow.",
+  titleRequired: "Title is required.",
+  valueRequired: "Expense value is required.",
+  valueInvalid: "Expense value must be a valid non-negative amount.",
+  valueNegative: "Expense value cannot be negative.",
+  currencyRequired: "Currency is required.",
+  paymentDateInvalid: "Payment date must be a valid YYYY-MM-DD date.",
+  expenseDateInvalid: "Expense month must be in YYYY-MM format.",
+  createFailed: "Failed to persist the expense record.",
+} as const;
+
 const classSubject = {
   createFailed: "Failed to create class subject.",
 } as const;
@@ -426,6 +443,7 @@ export const errorsEn: ErrorsLabels = {
   teacherDue,
   payroll,
   carryover,
+  expenses,
   student,
   category,
   user,

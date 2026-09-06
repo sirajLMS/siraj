@@ -113,6 +113,9 @@ export enum AppPermission {
   // Accounting — carryover balance settlements
   ACCOUNTING_CARRYOVER_VIEW = "accounting.carryover_view",
   ACCOUNTING_CARRYOVER_MANAGE = "accounting.carryover_manage",
+  // Accounting — expense ledger
+  ACCOUNTING_EXPENSES_VIEW = "accounting.expenses_view",
+  ACCOUNTING_EXPENSES_MANAGE = "accounting.expenses_manage",
   // Student Metadata & Lifecycle Management
   STUDENT_REASSIGN_TEACHER = "student.reassign_teacher",
   STUDENT_MANAGE_STATUS = "student.manage_status",

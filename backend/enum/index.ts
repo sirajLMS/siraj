@@ -10,6 +10,7 @@ export * from "./books";
 export * from "./classes";
 export * from "./complaints";
 export * from "./cron";
+export * from "./expenses";
 export * from "./fx";
 export * from "./meeting";
 export * from "./notifications";

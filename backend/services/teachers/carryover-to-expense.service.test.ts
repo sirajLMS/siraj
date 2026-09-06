@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
-import { AppPermission, CalculationStatus } from "@/backend/enum";
+import { AppPermission, CalculationStatus, ExpenseType } from "@/backend/enum";
 import { DomainError, ForbiddenError, logger, NotFoundError, ValidationError } from "@/backend/lib";
 import { deriveBulkToExpenseIdempotencyKey } from "@/backend/services/teachers/carryover-idempotency";
 import type {
@@ -9,6 +9,7 @@ import type {
   ClassInstanceSelectType,
   ClassStatusEventSeedInsertInput,
   CreateAuditLogInput,
+  CreateExpenseInput,
 } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -186,6 +187,25 @@ const createManyAuditLogsMock = mock(async (inputs: readonly CreateAuditLogInput
   });
 });
 
+/** Every expense-ledger create the settle flow issued, in call order. */
+const expenseCreateCalls: { input: CreateExpenseInput; tx: unknown }[] = [];
+let createInternalError: Error | null = null;
+
+const createInternalMock = mock(async (input: CreateExpenseInput, tx: unknown) => {
+  expenseCreateCalls.push({ input, tx });
+  if (createInternalError !== null) {
+    throw createInternalError;
+  }
+  return { id: `expense-for-${input.sourceEntityId ?? "unknown"}` };
+});
+
+await mock.module("@/backend/services", () => ({
+  ExpenseService: {
+    createInternal: createInternalMock,
+    softDelete: mock(async () => ({})),
+  },
+}));
+
 /** Runs the service transaction body against the sentinel executor. */
 const dbTransactionMock = mock(async (fn: (tx: unknown) => Promise<unknown>) => fn(TX_SENTINEL));
 
@@ -256,15 +276,11 @@ function buildErrorsStub(): ErrorsLabels {
 
 const tErrors = buildErrorsStub();
 
-const EXPENSE_STUB_WARN_MESSAGE =
-  "Expense ledger unavailable; storing carryover expense reference without persisting an expense row";
-
 const loggerInfoSpy = spyOn(logger, "info").mockImplementation(() => {});
-const loggerWarnSpy = spyOn(logger, "warn").mockImplementation(() => {});
 
-/** Counts expense-adapter invocations — the stub logs once per created expense reference. */
-function expenseAdapterInvocations(): number {
-  return loggerWarnSpy.mock.calls.filter(call => call[0] === EXPENSE_STUB_WARN_MESSAGE).length;
+/** Expense-ledger create invocations — the service writes one expense row per settled carryover. */
+function expenseCreateInvocations(): number {
+  return expenseCreateCalls.length;
 }
 
 function auditRowsForAction(action: string): AuditLogReturnType[] {
@@ -293,9 +309,11 @@ function resetMocks(): void {
   permissionChecks.length = 0;
   lockedCarryoverReads.length = 0;
   linkedSessionOptions.length = 0;
+  expenseCreateCalls.length = 0;
 
   auditCounter = 0;
   permissionError = null;
+  createInternalError = null;
 
   getByIdsForUpdateMock.mockClear();
   updateCarryoverMock.mockClear();
@@ -308,10 +326,9 @@ function resetMocks(): void {
   requirePermissionMock.mockClear();
   queryAuditLogsMock.mockClear();
   createManyAuditLogsMock.mockClear();
+  createInternalMock.mockClear();
   dbTransactionMock.mockClear();
   loggerInfoSpy.mockClear();
-  loggerWarnSpy.mockClear();
-  loggerWarnSpy.mockImplementation(() => {});
 }
 
 // ---------------------------------------------------------------------------
@@ -437,11 +454,43 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense", () => {
       const itemB = result.items.find(item => item.carryoverId === CARRYOVER_B_ID);
       expect(itemA).toMatchObject({ amount: PAYABLE_A, currency: CurrencyCode.SAR });
       expect(itemB).toMatchObject({ amount: PAYABLE_B, currency: CurrencyCode.USD });
-      expect(itemA?.expenseId).not.toBe(itemB?.expenseId);
-      expect(itemA?.expenseId.length).toBeGreaterThan(0);
+      expect(itemA?.expenseId).toBe(`expense-for-${CARRYOVER_A_ID}`);
+      expect(itemB?.expenseId).toBe(`expense-for-${CARRYOVER_B_ID}`);
 
-      // One expense record per carryover, created through the ledger adapter.
-      expect(expenseAdapterInvocations()).toBe(2);
+      // One expense row per carryover, created through the real ledger service
+      // inside the shared settlement transaction.
+      expect(expenseCreateInvocations()).toBe(2);
+      const createA = expenseCreateCalls.find(call => call.input.sourceEntityId === CARRYOVER_A_ID);
+      const createB = expenseCreateCalls.find(call => call.input.sourceEntityId === CARRYOVER_B_ID);
+      expect(createA?.tx).toBe(TX_SENTINEL);
+      expect(createB?.tx).toBe(TX_SENTINEL);
+      expect(createA?.input).toMatchObject({
+        teacherId: TEACHER_ID,
+        teacherName: "Carryover Teacher",
+        title: "Teacher payout — 2026-08-01 to 2026-08-31",
+        type: ExpenseType.SALARIES,
+        expenseValue: PAYABLE_A,
+        expenseCurrency: CurrencyCode.SAR,
+        paymentDate: PAYMENT_DATE,
+        expenseDate: "2026-09",
+        note: null,
+        sourceEntity: "carryover_balances",
+        sourceEntityId: CARRYOVER_A_ID,
+        createdByUserId: ACTOR_ID,
+      });
+      expect(createB?.input).toMatchObject({
+        teacherId: TEACHER_ID,
+        expenseValue: PAYABLE_B,
+        expenseCurrency: CurrencyCode.USD,
+        sourceEntity: "carryover_balances",
+        sourceEntityId: CARRYOVER_B_ID,
+        createdByUserId: ACTOR_ID,
+      });
+      // The ledger replay key is derived per carryover from the shared bulk
+      // key, so a same-window retry of one conversion cannot mint a second row.
+      expect(createA?.input.clientRequestId).toContain("carryover-to-expense:");
+      expect(createA?.input.clientRequestId).toContain(CARRYOVER_A_ID);
+      expect(createB?.input.clientRequestId).not.toBe(createA?.input.clientRequestId);
 
       expectCarryoverSettled(CARRYOVER_A_ID, PAYABLE_A, itemA?.expenseId ?? "");
       expectCarryoverSettled(CARRYOVER_B_ID, PAYABLE_B, itemB?.expenseId ?? "");
@@ -498,7 +547,7 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense — guards", () => {
       expect(error.message).toContain("already paid");
 
       // The reject happens before the first expense record is requested.
-      expect(expenseAdapterInvocations()).toBe(0);
+      expect(expenseCreateInvocations()).toBe(0);
       expectNoWrites();
     });
   });
@@ -510,7 +559,7 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense — guards", () => {
 
       expect(permissionChecks).toHaveLength(1);
       expect(acquiredLockKeys).toHaveLength(0);
-      expect(expenseAdapterInvocations()).toBe(0);
+      expect(expenseCreateInvocations()).toBe(0);
       expectNoWrites();
     });
   });
@@ -522,7 +571,7 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense — guards", () => {
       await expectConversionError({ expenseDate: "09-2026" }, "EXPENSE_DATE_INVALID");
 
       expect(acquiredLockKeys).toHaveLength(0);
-      expect(expenseAdapterInvocations()).toBe(0);
+      expect(expenseCreateInvocations()).toBe(0);
       expectNoWrites();
     });
 
@@ -574,7 +623,7 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense — idempotency and rol
       expect(lockedCarryoverReads).toHaveLength(1);
       expect(carryoverUpdates).toHaveLength(2);
       expect(sessionPatches).toHaveLength(3);
-      expect(expenseAdapterInvocations()).toBe(2);
+      expect(expenseCreateInvocations()).toBe(2);
       expect(auditRowsForAction("CARRYOVER_TO_EXPENSE")).toHaveLength(2);
 
       // The replay path still holds the batch advisory lock.
@@ -584,16 +633,15 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense — idempotency and rol
   });
 
   describe("expense ledger failure", () => {
-    test("rolls back the entire batch when the expense adapter throws", async () => {
+    test("rolls back the entire batch when the ledger write rejects", async () => {
       populateHappyPathFixtures();
-      loggerWarnSpy.mockImplementation(() => {
-        throw new Error("expense ledger write failed");
-      });
+      createInternalError = new Error("expense ledger write failed");
 
       const error = await expectConversionError({}, "CARRYOVER_TO_EXPENSE_FAILED");
       expect(error.message).toContain("Failed to convert");
+      expect(error.cause).toBe(createInternalError);
 
-      // The adapter threw before any settlement write, so the in-tx state is
+      // The ledger call threw before any settlement write, so the in-tx state is
       // empty — matching the real database's rollback of the aborted batch.
       expectNoWrites();
 
@@ -624,7 +672,7 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense — residual branches",
       expect(error).toBeInstanceOf(NotFoundError);
       expect(error.message).toContain("Carryover balance not found");
       expect(error.message).toContain(unknownId);
-      expect(expenseAdapterInvocations()).toBe(0);
+      expect(expenseCreateInvocations()).toBe(0);
       expectNoWrites();
     });
   });
@@ -650,7 +698,7 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense — residual branches",
       expect(result.items).toHaveLength(1);
       expect(lockedCarryoverReads[0]?.ids).toEqual([CARRYOVER_A_ID]);
       expect(carryoverUpdates).toHaveLength(1);
-      expect(expenseAdapterInvocations()).toBe(1);
+      expect(expenseCreateInvocations()).toBe(1);
     });
   });
 
@@ -664,7 +712,7 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense — residual branches",
 
       expect(dbTransactionMock).not.toHaveBeenCalled();
       expect(acquiredLockKeys).toHaveLength(0);
-      expect(expenseAdapterInvocations()).toBe(0);
+      expect(expenseCreateInvocations()).toBe(0);
       expectNoWrites();
     });
   });
@@ -700,7 +748,7 @@ describe("CarryoverBalanceService.bulkCarryoverToExpense — residual branches",
 
       expect(result.items).toHaveLength(2);
       expect(carryoverUpdates).toHaveLength(2);
-      expect(expenseAdapterInvocations()).toBe(2);
+      expect(expenseCreateInvocations()).toBe(2);
     });
   });
 

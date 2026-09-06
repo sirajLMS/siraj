@@ -126,6 +126,23 @@ const carryover = {
   toExpenseFailed: "فشل تحويل رصيد الترحيل إلى مصروف.",
 } as const;
 
+const expenses = {
+  notFound: "المصروف غير موجود.",
+  alreadyDeleted: "المصروف محذوف بالفعل.",
+  deleteViaUnpay: "يجب حذف مصروف الراتب هذا عبر تدفق إلغاء دفع الترحيل.",
+  typeImmutableForSalaries: "النوع للقراءة فقط لمصروفات الرواتب.",
+  valueImmutableForSalaries: "القيمة للقراءة فقط لمصروفات الرواتب.",
+  salariesViaCarryoverOnly: "تُنشأ مصروفات الرواتب عبر تدفق تسوية الترحيل.",
+  titleRequired: "العنوان مطلوب.",
+  valueRequired: "قيمة المصروف مطلوبة.",
+  valueInvalid: "يجب أن تكون قيمة المصروف مبلغًا صالحًا غير سالب.",
+  valueNegative: "لا يمكن أن تكون قيمة المصروف سالبة.",
+  currencyRequired: "العملة مطلوبة.",
+  paymentDateInvalid: "يجب أن يكون تاريخ الدفع تاريخًا صالحًا بصيغة YYYY-MM-DD.",
+  expenseDateInvalid: "يجب أن يكون شهر المصروف بصيغة YYYY-MM.",
+  createFailed: "فشل حفظ سجل المصروف.",
+} as const;
+
 const classSubject = {
   createFailed: "فشل إنشاء مادة الفصل.",
 } as const;
@@ -424,6 +441,7 @@ export const errorsAr: ErrorsLabels = {
   teacherDue,
   payroll,
   carryover,
+  expenses,
   student,
   category,
   user,

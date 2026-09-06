@@ -1,12 +1,13 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   auditLogs,
   carryoverBalances,
   classInstances,
   classStatusEvents,
+  expenses,
   groupPermissions,
   permissionGroups,
   permissions,
@@ -14,7 +15,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import { createMockClassInstance, createTestUser, type TestDb } from "@/backend/db/test/entity-setup";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, ExpenseType } from "@/backend/enum";
 import { CalculationStatus } from "@/backend/enum/teachers/payroll-calculation.enum";
 import { ForbiddenError } from "@/backend/lib";
 import * as NotificationDispatchHelpers from "@/backend/services/notification/notification-dispatch.helpers";
@@ -24,6 +25,7 @@ import type {
   CarryoverPaidStatusFilter,
   CarryoverRow,
   ClassInstanceSelectType,
+  ExpenseSelectType,
   UserSelectType,
 } from "@/backend/types";
 import { SystemPermissionGroupSlug } from "@/shared/constants";
@@ -45,6 +47,11 @@ import {
 const CARRYOVER_CREATE_ACTION = "CARRYOVER_CREATE";
 const CARRYOVER_TO_EXPENSE_ACTION = "CARRYOVER_TO_EXPENSE";
 const CARRYOVER_UNPAID_ACTION = "CARRYOVER_UNPAID";
+/** Ledger audit discriminators for the expense the settlement writes. */
+const EXPENSE_AUDIT_ENTITY_TYPE = "EXPENSE";
+const EXPENSE_DELETE_ACTION = "EXPENSE_DELETE";
+/** Ledger provenance marker the settle flow stamps on its expense rows. */
+const EXPENSE_SOURCE_CARRYOVER = "carryover_balances";
 
 /** Hourly rate SAR 120 × a 60-minute session (see the shared payroll cast). */
 const FULL_SESSION_PAY = "120.00";
@@ -195,6 +202,23 @@ async function readCarryoverRow(carryoverId: string): Promise<CarryoverBalanceSe
   return row;
 }
 
+/** The single live/read-back expense row the settlement wrote for the run's carryover (soft-deleted states included). */
+async function readExpenseRow(expenseId: string): Promise<ExpenseSelectType> {
+  const [row] = await db.select().from(expenses).where(eq(expenses.id, expenseId)).limit(1);
+  if (!row) {
+    throw new Error(`expense ${expenseId} disappeared before it could be read`);
+  }
+  return row;
+}
+
+/** Ledger audit rows for one expense — grounds the delete-idempotency assertions. */
+async function readExpenseAuditRows(expenseId: string): Promise<{ action: string }[]> {
+  return db
+    .select({ action: auditLogs.action })
+    .from(auditLogs)
+    .where(and(eq(auditLogs.entityType, EXPENSE_AUDIT_ENTITY_TYPE), eq(auditLogs.entityId, expenseId)));
+}
+
 interface CarryoverAuditRow {
   action: string;
   entityId: string;
@@ -217,13 +241,15 @@ async function readCarryoverAuditRows(carryoverId: string): Promise<CarryoverAud
 
 /**
  * Unpay correction journey: the accounting operator aggregates two audited
- * sessions into one unpaid carryover, converts it to an expense (sessions
- * PAID, carryover paid with an expense link), then unpays it — the expense
- * soft-delete adapter tolerates the missing ledger row, the carryover returns
- * to unpaid with every settlement field cleared, and the sessions move back
- * to WAITING_PAID where the read-only viewer sees them linked again. Denial
+ * sessions into one unpaid carryover, converts it to a real expense ledger row
+ * (sessions PAID, carryover paid, `expenses` row provenance-linked to the
+ * carryover), then unpays it — the expense is soft-deleted in the same
+ * transaction (`deletedAt` set on the committed row), the carryover returns to
+ * unpaid with every settlement field cleared, and the sessions move back to
+ * WAITING_PAID where the read-only viewer sees them linked again. Denial
  * paths reject an unpay on an already-unpaid carryover and enforce the manage
- * permission honestly.
+ * permission honestly, and the rejected re-unpay leaves the soft-deleted
+ * expense untouched (idempotent-twice semantics).
  *
  * Runs UNWRAPPED from any rollback transaction by design (see
  * test/workflows/AGENTS.md): services spawn their own transactions over the
@@ -239,6 +265,8 @@ describe("Carryover unpay journey (aggregate → to expense → unpay correction
   let dispatchSpy: DispatchSpy;
   let carryoverId = "";
   let settledExpenseId = "";
+  /** `deletedAt` captured after the unpay — the rejected re-unpay must not disturb it. */
+  let expenseDeletedAt: Date | null = null;
 
   beforeAll(async () => {
     tErrors = getServerTranslations("en").errorsTranslations;
@@ -267,6 +295,9 @@ describe("Carryover unpay journey (aggregate → to expense → unpay correction
             cast.teacherUser.id,
           ])
         );
+      // The settlement wrote a real (soft-deleted) expense row for this run's
+      // carryover; remove it before the carryover rows below.
+      await db.delete(expenses).where(eq(expenses.sourceEntityId, carryoverId));
       // Carryover rows (items cascade) before the teacher they RESTRICT to.
       await db.delete(carryoverBalances).where(eq(carryoverBalances.teacherId, cast.teacher.id));
       // The journey's own audited sessions and their transition events are
@@ -369,6 +400,21 @@ describe("Carryover unpay journey (aggregate → to expense → unpay correction
     settledExpenseId = item?.expenseId ?? "";
     expect(settledExpenseId.length).toBeGreaterThan(0);
 
+    // The settlement landed a real ledger row provenance-linked to the
+    // carryover: a Salaries expense for the aggregate payable in the payment
+    // month, attributed to the operator and not yet deleted.
+    const expense = await readExpenseRow(settledExpenseId);
+    expect(expense.type).toBe(ExpenseType.SALARIES);
+    expect(expense.expenseValue).toBe(AGGREGATE_PAYABLE);
+    expect(expense.expenseCurrency).toBe(CurrencyCode.SAR);
+    expect(expense.paymentDate).toBe(PAYMENT_DATE);
+    expect(expense.expenseDate).toBe(PAYMENT_DATE.slice(0, 7));
+    expect(expense.teacherId).toBe(fixture.cast.teacher.id);
+    expect(expense.sourceEntity).toBe(EXPENSE_SOURCE_CARRYOVER);
+    expect(expense.sourceEntityId).toBe(carryoverId);
+    expect(expense.createdByUserId).toBe(fixture.cast.operatorUser.id);
+    expect(expense.deletedAt).toBeNull();
+
     // Shared-state transitions: the carryover is paid and both sessions sit
     // at PAID.
     const carryover = await readCarryoverRow(carryoverId);
@@ -432,10 +478,22 @@ describe("Carryover unpay journey (aggregate → to expense → unpay correction
       expect(row.carryoverBalanceId).toBe(carryoverId);
     }
 
-    // Ledger tolerance: the persisted expense reference never materialized a
-    // real expense row, yet the revert completed — the soft-delete step is a
-    // no-op that the service tolerates both when the row is missing and when
-    // it was already soft-deleted.
+    // The unpay soft-deletes the expense row in the same transaction: the
+    // committed row carries `deletedAt`, the deleting actor, and the unpay
+    // note as the reason — never a hard delete.
+    const deletedExpense = await readExpenseRow(settledExpenseId);
+    expect(deletedExpense.deletedAt).not.toBeNull();
+    expect(deletedExpense.deletedByUserId).toBe(fixture.cast.operatorUser.id);
+    expect(deletedExpense.deletedReason).toBe(unpayNote);
+    expenseDeletedAt = deletedExpense.deletedAt;
+
+    // Ledger audit: exactly one EXPENSE_DELETE row for the settled expense.
+    expect((await readExpenseAuditRows(settledExpenseId)).filter(row => row.action === EXPENSE_DELETE_ACTION))
+      .toHaveLength(1);
+
+    // Missing-row tolerance: if the reference had never materialized a row,
+    // the same revert would have completed — already-deleted rows are the
+    // ledger's own idempotent no-op.
 
     // Cross-actor visibility: the viewer sees the row back on the unpaid
     // surface with the sessions linked again.
@@ -500,11 +558,17 @@ describe("Carryover unpay journey (aggregate → to expense → unpay correction
     expect(teacherDenied).toBeInstanceOf(ForbiddenError);
     expect(teacherDenied.message).toContain(tErrors.insufficientPermissions);
 
-    // Every rejection left the reverted state untouched.
+    // Every rejection left the reverted state untouched — including the
+    // soft-deleted expense row: `deletedAt` is unchanged and no second
+    // EXPENSE_DELETE audit row exists (the reversal settles idempotently).
     const carryover = await readCarryoverRow(carryoverId);
     expect(carryover.isPaid).toBe(false);
     expect(carryover.paid).toBe(ZERO_PAID);
     expect(carryover.expenseId).toBeNull();
+    const untouchedExpense = await readExpenseRow(settledExpenseId);
+    expect(untouchedExpense.deletedAt?.getTime()).toBe(expenseDeletedAt?.getTime());
+    expect((await readExpenseAuditRows(settledExpenseId)).filter(row => row.action === EXPENSE_DELETE_ACTION))
+      .toHaveLength(1);
     const untouchedRows = await Promise.all(sessionIds().map(id => readInstance(id)));
     for (const row of untouchedRows) {
       expect(row.calculationStatus).toBe(CalculationStatus.WAITING_PAID);

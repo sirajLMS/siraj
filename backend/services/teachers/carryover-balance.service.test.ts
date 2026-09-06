@@ -339,6 +339,15 @@ await mock.module("@/backend/services/system/audit.service", () => ({
   AuditService: { createManyAuditLogs: createManyAuditLogsMock },
 }));
 
+// The bulk-create flow never settles, but the service module imports the real
+// expense-ledger surface — keep the barrel mocked so no real service loads.
+await mock.module("@/backend/services", () => ({
+  ExpenseService: {
+    createInternal: mock(async () => ({ id: "unused-expense-id" })),
+    softDelete: mock(async () => ({})),
+  },
+}));
+
 // ---------------------------------------------------------------------------
 // Errors stub (only the fields the bulk-create flow actually reads).
 // ---------------------------------------------------------------------------

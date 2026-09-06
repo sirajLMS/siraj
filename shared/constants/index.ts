@@ -8,6 +8,7 @@ export * from "./class-instance-detail.enum";
 export * from "./classes";
 export * from "./currency.enum";
 export * from "./day-of-week.enum";
+export * from "./expenses";
 export * from "./gender.enum";
 export * from "./group-class.enum";
 export * from "./iana-timezone.enum";

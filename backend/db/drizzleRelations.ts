@@ -660,6 +660,20 @@ export const relations = defineRelations(schema, r => ({
       to: r.classInstances.id,
     }),
   },
+  expenses: {
+    teacher: r.one.teachers({
+      from: r.expenses.teacherId,
+      to: r.teachers.id,
+    }),
+    createdByUser: r.one.users({
+      from: r.expenses.createdByUserId,
+      to: r.users.id,
+    }),
+    deletedByUser: r.one.users({
+      from: r.expenses.deletedByUserId,
+      to: r.users.id,
+    }),
+  },
   adminAuditLogs: {
     actor: r.one.users({
       from: r.adminAuditLogs.actorUserId,

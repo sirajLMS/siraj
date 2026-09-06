@@ -285,8 +285,11 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
     // customizer starts in the same mode the user is viewing (dark or light),
     // not always the default isDark. This ensures color edits apply to the
     // mode the user actually sees.
-    const currentScheme = typeof document !== "undefined" ? document.documentElement.dataset.muiColorScheme : undefined;
-    const isDark = currentScheme !== "light";
+    const currentScheme =
+      typeof document !== "undefined"
+        ? document.documentElement.dataset.muiColorScheme || document.documentElement.dataset.theme || undefined
+        : undefined;
+    const isDark = currentScheme !== undefined ? currentScheme === "dark" : get().draft.defaultColorScheme === "dark";
     const presetId = get().presetId ?? matchPresetByColors(get().draft.colors);
     set({ isCustomizeMode: true, isDark, presetId });
     writeActiveModeCssVars(get().draft, isDark, presetId);
@@ -297,8 +300,9 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
   },
   loadFromServer: draft => {
     const presetId = matchPresetByColors(draft.colors);
-    writeActiveModeCssVars(draft, get().isDark, presetId);
-    set({ draft, presetId, hydrated: true, dirty: false, past: [], future: [] });
+    const isDark = get().isCustomizeMode ? get().isDark : draft.defaultColorScheme === "dark";
+    writeActiveModeCssVars(draft, isDark, presetId);
+    set({ draft, isDark, presetId, hydrated: true, dirty: false, past: [], future: [] });
   },
   resetToDefaults: () =>
     set(state => {

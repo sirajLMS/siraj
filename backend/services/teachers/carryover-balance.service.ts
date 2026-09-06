@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db";
 import {
@@ -11,8 +10,9 @@ import {
 import { ClassStatusEventsRepository, SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { carryoverBalanceItems, students } from "@/backend/db/schema";
-import { AppPermission, CalculationStatus } from "@/backend/enum";
+import { AppPermission, CalculationStatus, ExpenseType } from "@/backend/enum";
 import { DomainError, logger, NotFoundError, sanitizePlainText, ValidationError } from "@/backend/lib";
+import { EXPENSE_SOURCE_CARRYOVER_BALANCES, ExpenseService } from "@/backend/services";
 import { requirePermission } from "@/backend/services/billing/permission-utils";
 import { AuditService } from "@/backend/services/system/audit.service";
 import {
@@ -519,51 +519,20 @@ async function resolveFxRate(
 }
 
 // ---------------------------------------------------------------------------
-// Expense ledger adapter (stub until the expense-ledger module lands)
+// Expense ledger integration
 // ---------------------------------------------------------------------------
 
 /**
- * The expense ledger module owns the canonical `expenses` write path. Until it
- * exists, this adapter preserves the call contract: it mints the expense
- * reference the carryover links to and records the full payload in the
- * carryover audit metadata, so settlements remain auditable. Swapping in the
- * real ledger service later is confined to these two functions — the carryover
- * flows, result types, and audit trail are unchanged.
+ * The expense ledger (`ExpenseService`) owns the canonical `expenses` write
+ * path: the settlement flow creates one row per carryover through
+ * `createInternal` inside its own transaction, and the unpay flow soft-deletes
+ * that row through `softDelete` inside the same transaction. The ledger's 60 s
+ * replay window keys on `clientRequestId`, so the seed composes the bulk
+ * settlement key with the carryover id — a same-window retry of an individual
+ * conversion returns the originally persisted expense instead of a duplicate.
  */
-interface ExpenseCreateCommand {
-  teacherId: string;
-  teacherName: string;
-  title: string;
-  /** Matches the ledger's `Salaries` expense type. */
-  type: string;
-  expenseValue: string;
-  expenseCurrency: CurrencyCode;
-  paymentDate: string;
-  expenseDate: string;
-  note: string | null;
-  sourceEntity: string;
-  sourceEntityId: string;
-  actorUserId: string;
-}
-
-const EXPENSE_TYPE_SALARIES = "Salaries";
-const EXPENSE_SOURCE_ENTITY = "carryover_balances";
-
-async function createExpenseRecord(command: ExpenseCreateCommand): Promise<{ id: string }> {
-  logger.warn("Expense ledger unavailable; storing carryover expense reference without persisting an expense row", {
-    teacherId: command.teacherId,
-    amount: command.expenseValue,
-    currency: command.expenseCurrency,
-    sourceEntityId: command.sourceEntityId,
-  });
-  return { id: randomUUID() };
-}
-
-async function softDeleteExpenseRecord(expenseId: string, actorUserId: string): Promise<void> {
-  logger.warn("Expense ledger unavailable; skipping expense soft-delete for carryover revert", {
-    expenseId,
-    actorUserId,
-  });
+function deriveExpenseClientRequestId(idempotencyKey: string, carryoverId: string): string {
+  return `carryover-to-expense:${idempotencyKey}:${carryoverId}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -914,30 +883,38 @@ export namespace CarryoverBalanceService {
   }
 
   /**
-   * Writes the expense record for one carryover. A ledger failure rejects with
-   * the domain error so the whole batch rolls back without partial settlement.
+   * Writes the expense row for one carryover through the expense ledger inside
+   * the caller's transaction, keyed so a same-window retry replays the
+   * originally persisted expense. A ledger failure rejects with the domain
+   * error so the whole batch rolls back without partial settlement.
    */
   async function requestExpenseRecord(
+    tx: DBTransaction,
     carryover: CarryoverBalanceSelectType,
     teacherName: string,
     context: SettlementContext,
     tErrors: ErrorsLabels
   ): Promise<string> {
     try {
-      const expense = await createExpenseRecord({
-        teacherId: carryover.teacherId,
-        teacherName,
-        title: `Teacher payout — ${carryover.fromDate ?? "?"} to ${carryover.toDate ?? "?"}`,
-        type: EXPENSE_TYPE_SALARIES,
-        expenseValue: carryover.payable,
-        expenseCurrency: carryover.teacherCurrency,
-        paymentDate: context.paymentDate,
-        expenseDate: context.expenseDate,
-        note: context.note,
-        sourceEntity: EXPENSE_SOURCE_ENTITY,
-        sourceEntityId: carryover.id,
-        actorUserId: context.actorUserId,
-      });
+      const expense = await ExpenseService.createInternal(
+        {
+          teacherId: carryover.teacherId,
+          teacherName,
+          title: `Teacher payout — ${carryover.fromDate ?? "?"} to ${carryover.toDate ?? "?"}`,
+          type: ExpenseType.SALARIES,
+          expenseValue: carryover.payable,
+          expenseCurrency: carryover.teacherCurrency,
+          paymentDate: context.paymentDate,
+          expenseDate: context.expenseDate,
+          note: context.note,
+          sourceEntity: EXPENSE_SOURCE_CARRYOVER_BALANCES,
+          sourceEntityId: carryover.id,
+          createdByUserId: context.actorUserId,
+          clientRequestId: deriveExpenseClientRequestId(context.idempotencyKey, carryover.id),
+        },
+        tx,
+        tErrors
+      );
       return expense.id;
     } catch (error) {
       throw new DomainError("CARRYOVER_TO_EXPENSE_FAILED", tErrors.carryover.toExpenseFailed, { cause: error });
@@ -995,7 +972,7 @@ export namespace CarryoverBalanceService {
     tErrors: ErrorsLabels
   ): Promise<SettlementOutcome> {
     const display = await resolveTeacherDisplay(carryover.teacherId, tx, tErrors.unknownName);
-    const expenseId = await requestExpenseRecord(carryover, display.teacherName, context, tErrors);
+    const expenseId = await requestExpenseRecord(tx, carryover, display.teacherName, context, tErrors);
     await markCarryoverPaidAndSettleSessions(tx, carryover, expenseId, context, tErrors);
 
     const auditLogId = await emitCarryoverAuditLog(tx, {
@@ -1085,11 +1062,17 @@ export namespace CarryoverBalanceService {
   }
 
   /**
-   * Reverts a paid carryover: soft-deletes the linked expense record (skipping
-   * it when the ledger already removed it), returns the carryover to unpaid,
-   * moves its sessions back from PAID to WAITING_PAID, and emits the unpay
-   * audit row. Calling it on an unpaid carryover rejects — there is nothing
-   * to reverse and the original conversion stays the authoritative record.
+   * Reverts a paid carryover: marks the carryover unpaid under its row lock,
+   * soft-deletes the linked expense inside the same transaction, moves its
+   * sessions back from PAID to WAITING_PAID, and emits the unpay audit row.
+   * The revert lands first because the expense ledger protects rows whose
+   * linked carryover is still paid (`EXPENSE_DELETE_VIA_UNPAY`) — unpaying
+   * first is what lets the settlement's own soft-delete through. A missing
+   * expense row (the reference outlives rows deleted before the ledger
+   * shipped, or rows pruned independently) is tolerated: the revert still
+   * completes. Any other ledger failure rolls back the whole revert. Calling
+   * it on an unpaid carryover rejects — there is nothing to reverse and the
+   * original conversion stays the authoritative record.
    */
   export async function unpayCarryoverBalance(
     input: UnpayCarryoverInput,
@@ -1107,10 +1090,7 @@ export namespace CarryoverBalanceService {
       if (!carryover.isPaid) {
         throw new DomainError("CARRYOVER_NOT_PAID", tErrors.carryover.notPaid);
       }
-
-      if (carryover.expenseId != null) {
-        await softDeleteExpenseRecord(carryover.expenseId, input.actorUserId);
-      }
+      const settledExpenseId = carryover.expenseId;
 
       const updated = await CarryoverBalanceRepository.update(
         input.id,
@@ -1119,6 +1099,10 @@ export namespace CarryoverBalanceService {
       );
       if (updated == null) {
         throw new NotFoundError("CARRYOVER", tErrors.carryover.notFound(input.id));
+      }
+
+      if (settledExpenseId != null) {
+        await softDeleteSettledExpense(tx, settledExpenseId, input.actorUserId, note, tErrors);
       }
 
       const linkedSessions = await CarryoverBalanceRepository.findLinkedSessions(input.id, tx, { forUpdate: true });
@@ -1141,17 +1125,45 @@ export namespace CarryoverBalanceService {
         entityType: CARRYOVER_AUDIT_ENTITY_TYPE,
         entityId: input.id,
         action: CARRYOVER_ACTION_UNPAID,
-        metadata: { expenseId: carryover.expenseId, reason: note },
+        metadata: { expenseId: settledExpenseId, reason: note },
       });
 
       logger.info("Carryover unpaid", {
         actorUserId: input.actorUserId,
         carryoverId: input.id,
-        expenseId: carryover.expenseId,
+        expenseId: settledExpenseId,
         sessionCount: linkedSessions.length,
       });
       return toCarryoverRow(updated, tx, tErrors.unknownName);
     });
+  }
+
+  /**
+   * Soft-deletes the expense the settlement wrote, inside the caller's
+   * transaction and without a second permission check (the caller owns both).
+   * Re-running after the row is gone — because it was already deleted or
+   * because the reference predates the ledger and no row ever materialized —
+   * is tolerated instead of aborting the revert.
+   */
+  async function softDeleteSettledExpense(
+    tx: DBTransaction,
+    expenseId: string,
+    actorUserId: string,
+    reason: string | null,
+    tErrors: ErrorsLabels
+  ): Promise<void> {
+    try {
+      await ExpenseService.softDelete({ id: expenseId, actorUserId, reason, tx }, tErrors);
+    } catch (error) {
+      if (error instanceof DomainError && error.code === "EXPENSE_NOT_FOUND") {
+        logger.info("Carryover unpay: expense reference has no ledger row; continuing the revert", {
+          expenseId,
+          actorUserId,
+        });
+        return;
+      }
+      throw error;
+    }
   }
 
   function validatePeriod(fromDate: string | null, toDate: string | null, tErrors: ErrorsLabels): void {

@@ -3,6 +3,7 @@ export * from "./billing.types";
 export * from "./carryover-balance.types";
 export * from "./credit.types";
 export * from "./currency.types";
+export * from "./expense.types";
 export * from "./package-plan.types";
 export * from "./payment-method.types";
 export * from "./quota.types";

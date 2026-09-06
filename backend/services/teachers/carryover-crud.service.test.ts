@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import type { PayrollCalculationPatch } from "@/backend/db/repo/scheduling/class-instances";
 import { AccountStatus, AppPermission, CalculationStatus, SchedulingMode } from "@/backend/enum";
-import { DomainError, ForbiddenError, logger } from "@/backend/lib";
+import { DomainError, ForbiddenError } from "@/backend/lib";
 import { deriveCrudIdempotencyKey } from "@/backend/services/teachers/carryover-idempotency";
 import type {
   AuditLogFilterInput,
@@ -501,6 +501,32 @@ await mock.module("@/backend/services/system/audit.service", () => ({
   AuditService: { createManyAuditLogs: createManyAuditLogsMock },
 }));
 
+/** Every soft-delete the unpay flow issued against the expense ledger, in call order. */
+const expenseSoftDeleteCalls: { id: string; actorUserId: string; reason: string | null; tx: unknown }[] = [];
+let expenseSoftDeleteError: Error | null = null;
+
+const expenseSoftDeleteMock = mock(
+  async (input: { id: string; actorUserId: string; reason?: string | null; tx?: unknown }) => {
+    expenseSoftDeleteCalls.push({
+      id: input.id,
+      actorUserId: input.actorUserId,
+      reason: input.reason ?? null,
+      tx: input.tx ?? null,
+    });
+    if (expenseSoftDeleteError !== null) {
+      throw expenseSoftDeleteError;
+    }
+    return { id: input.id };
+  }
+);
+
+await mock.module("@/backend/services", () => ({
+  ExpenseService: {
+    createInternal: mock(async () => ({ id: "unused-expense-id" })),
+    softDelete: expenseSoftDeleteMock,
+  },
+}));
+
 // ---------------------------------------------------------------------------
 // SUT import + invocation helpers
 // ---------------------------------------------------------------------------
@@ -601,18 +627,6 @@ function arrangeCarryover(overrides: Partial<CarryoverBalanceSelectType> = {}): 
   return row;
 }
 
-/** Reads `[expenseId, actorUserId]` out of each expense-stub warn call's metadata. */
-function listWarnMessages(calls: unknown[][]): [unknown, unknown][] {
-  return calls.map(call => {
-    const meta = call[1];
-    if (meta == null || typeof meta !== "object") {
-      return [undefined, undefined];
-    }
-    const { expenseId, actorUserId } = meta as { expenseId?: unknown; actorUserId?: unknown };
-    return [expenseId, actorUserId];
-  });
-}
-
 // ---------------------------------------------------------------------------
 // Per-test reset
 // ---------------------------------------------------------------------------
@@ -642,6 +656,9 @@ beforeEach(() => {
   auditQueries.length = 0;
   permissionChecks.length = 0;
   findFilteredCalls.length = 0;
+  expenseSoftDeleteCalls.length = 0;
+  expenseSoftDeleteError = null;
+  expenseSoftDeleteMock.mockClear();
 });
 
 // ---------------------------------------------------------------------------
@@ -853,75 +870,88 @@ describe("CarryoverBalanceService.bulkDeleteCarryoverBalances", () => {
 // ---------------------------------------------------------------------------
 
 describe("CarryoverBalanceService.unpayCarryoverBalance", () => {
-  test("reverts the carryover, the linked expense reference, and the paid sessions", async () => {
-    const warnSpy = spyOn(logger, "warn").mockImplementation(() => undefined);
-    try {
-      arrangeCarryover(buildPaidRow());
-      linkedSessionRows = [buildSessionRow({ calculationStatus: CalculationStatus.PAID })];
+  test("reverts the carryover, soft-deletes the linked expense in-transaction, and restores the paid sessions", async () => {
+    arrangeCarryover(buildPaidRow());
+    linkedSessionRows = [buildSessionRow({ calculationStatus: CalculationStatus.PAID })];
 
-      const row = await unpayCarryover(CARRYOVER_ID_A, "duplicate payout");
+    const row = await unpayCarryover(CARRYOVER_ID_A, "duplicate payout");
 
-      expect(listWarnMessages(warnSpy.mock.calls)).toEqual([[EXPENSE_ID, ACTOR_ID]]);
+    // The linked expense row is soft-deleted through the real ledger service,
+    // inside the same transaction (already-unpaid at that point, so the
+    // settlement-protection guard passes) and carrying the operator's note.
+    expect(expenseSoftDeleteCalls).toEqual([
+      { id: EXPENSE_ID, actorUserId: ACTOR_ID, reason: "duplicate payout", tx: FAKE_TX },
+    ]);
 
-      expect(updateCalls).toHaveLength(1);
-      const update = updateCalls[0];
-      if (!update) throw new Error("expected one carryover patch");
-      expect(update.id).toBe(CARRYOVER_ID_A);
-      expect(update.patch).toEqual({
-        isPaid: false,
-        paid: "0",
-        paymentDate: null,
-        expenseId: null,
-        paidAt: null,
-        paidByUserId: null,
-      });
+    expect(updateCalls).toHaveLength(1);
+    const update = updateCalls[0];
+    if (!update) throw new Error("expected one carryover patch");
+    expect(update.id).toBe(CARRYOVER_ID_A);
+    expect(update.patch).toEqual({
+      isPaid: false,
+      paid: "0",
+      paymentDate: null,
+      expenseId: null,
+      paidAt: null,
+      paidByUserId: null,
+    });
 
-      expect(sessionPatches).toEqual([
-        { id: SESSION_ID_A, patch: { calculationStatus: CalculationStatus.WAITING_PAID, isPartialPercentage: null } },
-      ]);
-      // The revert transitions run against rows locked FOR UPDATE in the same transaction.
-      expect(linkedSessionOptions).toEqual([{ forUpdate: true }]);
+    expect(sessionPatches).toEqual([
+      { id: SESSION_ID_A, patch: { calculationStatus: CalculationStatus.WAITING_PAID, isPartialPercentage: null } },
+    ]);
+    // The revert transitions run against rows locked FOR UPDATE in the same transaction.
+    expect(linkedSessionOptions).toEqual([{ forUpdate: true }]);
 
-      expect(eventInputs).toHaveLength(1);
-      const event = eventInputs[0];
-      if (!event) throw new Error("expected one payroll transition event");
-      expect(eventStatus(event, "fromState")).toBe(CalculationStatus.PAID);
-      expect(eventStatus(event, "toState")).toBe(CalculationStatus.WAITING_PAID);
+    expect(eventInputs).toHaveLength(1);
+    const event = eventInputs[0];
+    if (!event) throw new Error("expected one payroll transition event");
+    expect(eventStatus(event, "fromState")).toBe(CalculationStatus.PAID);
+    expect(eventStatus(event, "toState")).toBe(CalculationStatus.WAITING_PAID);
 
-      expect(auditInputs).toHaveLength(1);
-      const audit = lastAuditInput();
-      expect(audit.action).toBe("CARRYOVER_UNPAID");
-      expect(audit.metadata).toMatchObject({ expenseId: EXPENSE_ID, reason: "duplicate payout" });
+    expect(auditInputs).toHaveLength(1);
+    const audit = lastAuditInput();
+    expect(audit.action).toBe("CARRYOVER_UNPAID");
+    expect(audit.metadata).toMatchObject({ expenseId: EXPENSE_ID, reason: "duplicate payout" });
 
-      expect(row.isPaid).toBe(false);
-      expect(row.paid).toBe("0");
-      expect(row.expenseId).toBeNull();
-      expect(row.paymentDate).toBeNull();
-      expect(row.paidAt).toBeNull();
-    } finally {
-      warnSpy.mockRestore();
-    }
+    expect(row.isPaid).toBe(false);
+    expect(row.paid).toBe("0");
+    expect(row.expenseId).toBeNull();
+    expect(row.paymentDate).toBeNull();
+    expect(row.paidAt).toBeNull();
   });
 
-  test("tolerates an expense the ledger already removed", async () => {
-    const warnSpy = spyOn(logger, "warn").mockImplementation(() => undefined);
-    try {
-      arrangeCarryover(buildPaidRow({ expenseId: REMOVED_EXPENSE_ID }));
-      linkedSessionRows = [buildSessionRow({ calculationStatus: CalculationStatus.PAID })];
+  test("tolerates an expense reference whose ledger row never materialized", async () => {
+    arrangeCarryover(buildPaidRow({ expenseId: REMOVED_EXPENSE_ID }));
+    linkedSessionRows = [buildSessionRow({ calculationStatus: CalculationStatus.PAID })];
+    expenseSoftDeleteError = new DomainError("EXPENSE_NOT_FOUND", errorsEn.expenses.notFound);
 
-      const row = await unpayCarryover(CARRYOVER_ID_A);
+    const row = await unpayCarryover(CARRYOVER_ID_A);
 
-      expect(listWarnMessages(warnSpy.mock.calls)).toEqual([[REMOVED_EXPENSE_ID, ACTOR_ID]]);
-      expect(updateCalls).toHaveLength(1);
-      expect(carryoverRows[0]?.isPaid).toBe(false);
-      expect(row.isPaid).toBe(false);
+    // The missing-row reject is the documented tolerance case: the revert
+    // completes and the audit row still records the removed reference.
+    expect(expenseSoftDeleteCalls).toHaveLength(1);
+    expect(expenseSoftDeleteCalls[0]?.id).toBe(REMOVED_EXPENSE_ID);
+    expect(updateCalls).toHaveLength(1);
+    expect(carryoverRows[0]?.isPaid).toBe(false);
+    expect(row.isPaid).toBe(false);
 
-      const audit = lastAuditInput();
-      expect(audit.action).toBe("CARRYOVER_UNPAID");
-      expect(audit.metadata).toMatchObject({ expenseId: REMOVED_EXPENSE_ID, reason: null });
-    } finally {
-      warnSpy.mockRestore();
-    }
+    const audit = lastAuditInput();
+    expect(audit.action).toBe("CARRYOVER_UNPAID");
+    expect(audit.metadata).toMatchObject({ expenseId: REMOVED_EXPENSE_ID, reason: null });
+  });
+
+  test("propagates a ledger failure that is not the missing-row tolerance", async () => {
+    arrangeCarryover(buildPaidRow());
+    linkedSessionRows = [buildSessionRow({ calculationStatus: CalculationStatus.PAID })];
+    expenseSoftDeleteError = new DomainError("EXPENSE_DELETE_VIA_UNPAY", "Delete the carryover via unpay instead");
+
+    await expectDomainError("EXPENSE_DELETE_VIA_UNPAY", () => unpayCarryover(CARRYOVER_ID_A));
+
+    // The failure reached the caller unwrapped; no sessions were transitioned
+    // and no unpay audit row was emitted.
+    expect(expenseSoftDeleteCalls).toHaveLength(1);
+    expect(sessionPatches).toHaveLength(0);
+    expect(auditInputs).toHaveLength(0);
   });
 });
 
@@ -1201,21 +1231,16 @@ describe("CarryoverBalanceService.unpayCarryoverBalance — residual branches", 
   });
 
   test("skips the expense soft-delete when the paid row carries no expense reference", async () => {
-    const warnSpy = spyOn(logger, "warn").mockImplementation(() => undefined);
-    try {
-      arrangeCarryover(buildPaidRow({ expenseId: null }));
-      linkedSessionRows = [buildSessionRow({ calculationStatus: CalculationStatus.PAID })];
+    arrangeCarryover(buildPaidRow({ expenseId: null }));
+    linkedSessionRows = [buildSessionRow({ calculationStatus: CalculationStatus.PAID })];
 
-      const row = await unpayCarryover(CARRYOVER_ID_A);
+    const row = await unpayCarryover(CARRYOVER_ID_A);
 
-      expect(listWarnMessages(warnSpy.mock.calls)).toEqual([]);
-      expect(updateCalls).toHaveLength(1);
-      expect(updateCalls[0]?.patch.expenseId).toBeNull();
-      expect(row.isPaid).toBe(false);
-      expect(lastAuditInput().action).toBe("CARRYOVER_UNPAID");
-    } finally {
-      warnSpy.mockRestore();
-    }
+    expect(expenseSoftDeleteCalls).toHaveLength(0);
+    expect(updateCalls).toHaveLength(1);
+    expect(updateCalls[0]?.patch.expenseId).toBeNull();
+    expect(row.isPaid).toBe(false);
+    expect(lastAuditInput().action).toBe("CARRYOVER_UNPAID");
   });
 
   test("rejects with CARRYOVER_NOT_FOUND when the revert update loses its row", async () => {

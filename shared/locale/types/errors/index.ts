@@ -390,6 +390,27 @@ export interface CarryoverErrors {
 }
 
 /**
+ * ExpenseErrors — expense ledger errors: manual entry validation, salary
+ * provenance guards (carryover-linked rows), and soft-delete corrections.
+ */
+export interface ExpenseErrors {
+  readonly notFound: string;
+  readonly alreadyDeleted: string;
+  readonly deleteViaUnpay: string;
+  readonly typeImmutableForSalaries: string;
+  readonly valueImmutableForSalaries: string;
+  readonly salariesViaCarryoverOnly: string;
+  readonly titleRequired: string;
+  readonly valueRequired: string;
+  readonly valueInvalid: string;
+  readonly valueNegative: string;
+  readonly currencyRequired: string;
+  readonly paymentDateInvalid: string;
+  readonly expenseDateInvalid: string;
+  readonly createFailed: string;
+}
+
+/**
  * StudentErrors — student specific errors.
  */
 export interface StudentErrors {
@@ -560,6 +581,7 @@ export interface ErrorsLabels
   readonly teacherDue: TeacherDueErrors;
   readonly payroll: PayrollErrors;
   readonly carryover: CarryoverErrors;
+  readonly expenses: ExpenseErrors;
   readonly student: StudentErrors;
   readonly category: CategoryErrors;
   readonly user: UserErrors;

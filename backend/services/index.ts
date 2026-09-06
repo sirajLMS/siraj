@@ -6,6 +6,7 @@ export * from "./cache";
 export * from "./classes";
 export * from "./communication";
 export * from "./cron";
+export * from "./expenses";
 export * from "./fx";
 export * from "./group-class";
 export * from "./history";

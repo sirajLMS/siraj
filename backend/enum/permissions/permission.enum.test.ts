@@ -8,6 +8,8 @@ const accountingReportsViewKey = "accounting.reports_view";
 const accountingReportsManageKey = "accounting.reports_manage";
 const accountingCarryoverViewKey = "accounting.carryover_view";
 const accountingCarryoverManageKey = "accounting.carryover_manage";
+const accountingExpensesViewKey = "accounting.expenses_view";
+const accountingExpensesManageKey = "accounting.expenses_manage";
 
 describe("AppPermission accounting credits manage", () => {
   test("defines ACCOUNTING_CREDITS_MANAGE with the accounting.credits_manage key", () => {
@@ -81,12 +83,32 @@ describe("AppPermission accounting carryover", () => {
   });
 });
 
+describe("AppPermission accounting expenses", () => {
+  test("defines ACCOUNTING_EXPENSES_VIEW and ACCOUNTING_EXPENSES_MANAGE with their keys", () => {
+    const viewValue: string = AppPermission.ACCOUNTING_EXPENSES_VIEW;
+    const manageValue: string = AppPermission.ACCOUNTING_EXPENSES_MANAGE;
+    expect(viewValue).toBe(accountingExpensesViewKey);
+    expect(manageValue).toBe(accountingExpensesManageKey);
+  });
+
+  test("isAppPermission accepts the accounting expenses keys", () => {
+    expect(isAppPermission(accountingExpensesViewKey)).toBe(true);
+    expect(isAppPermission(accountingExpensesManageKey)).toBe(true);
+  });
+
+  test("parseAppPermission resolves the accounting expenses keys to the enum values", () => {
+    expect(parseAppPermission(accountingExpensesViewKey)).toBe(AppPermission.ACCOUNTING_EXPENSES_VIEW);
+    expect(parseAppPermission(accountingExpensesManageKey)).toBe(AppPermission.ACCOUNTING_EXPENSES_MANAGE);
+  });
+});
+
 describe("AppPermission rejection paths", () => {
   test("isAppPermission rejects unknown permission keys", () => {
     expect(isAppPermission("accounting.credits_manage_typo")).toBe(false);
     expect(isAppPermission("accounting.payroll_view_typo")).toBe(false);
     expect(isAppPermission("accounting.reports_view_typo")).toBe(false);
     expect(isAppPermission("accounting.carryover_view_typo")).toBe(false);
+    expect(isAppPermission("accounting.expenses_view_typo")).toBe(false);
     expect(isAppPermission("unknown.permission")).toBe(false);
     expect(isAppPermission("")).toBe(false);
   });

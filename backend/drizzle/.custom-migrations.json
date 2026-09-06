@@ -1,5 +1,5 @@
 {
-  "manifestHash": "6e10967deb825c2872dc04ec0890da43127740eac51cf316ebb16cb74c73b52c",
+  "manifestHash": "cb4b638d330fdf9b5fccf6815c66a4ad1910db4badab3a80048737ad08d1e358",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -84,6 +84,14 @@
     {
       "file": "43-whatsapp-webhook-event-processing.sql",
       "sha256": "87776d6ea2239e21b52ad893b715b7d84e073340cc2988fafe20d8772500dbdb"
+    },
+    {
+      "file": "44-accounting-expenses-permissions.sql",
+      "sha256": "6bb418fe911ecbffdcfd9f523d6c7ca3dd407bec31b57c374484a675e2e854b1"
+    },
+    {
+      "file": "45-expenses-table.sql",
+      "sha256": "f355293360a69029381c61c6bd905e91ec82bd15d2a0bf8e4616f7423403da5c"
     },
     {
       "file": "4a-class_categories_and_subjects_seed.sql",
@@ -345,6 +353,8 @@
     "20260905024045_custom_41a-whatsapp-inbox-permissions-enum",
     "20260905024046_custom_41b-whatsapp-inbox-permissions-data",
     "20260905191307_custom_42-carryover-items-original-partial-percentage",
+    "20260906091745_custom_44-accounting-expenses-permissions",
+    "20260906091746_custom_45-expenses-table",
     "20260906091949_custom_43-whatsapp-webhook-event-processing"
   ]
 }

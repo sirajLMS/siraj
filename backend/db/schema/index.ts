@@ -16,6 +16,7 @@ export * from "./communications";
 export * from "./cron";
 export * from "./custom-types";
 export * from "./enums";
+export * from "./expenses";
 export * from "./meeting";
 export * from "./parents";
 export * from "./permissions";

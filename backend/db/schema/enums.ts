@@ -20,6 +20,7 @@ import {
   DayOfWeek,
   DevicePlatform,
   DstMigrationResult,
+  ExpenseType,
   FxProvider,
   FxSyncStatus,
   Gender,
@@ -175,6 +176,8 @@ export const paymentGatewayEnum = createPgEnumFromEnum("payment_gateway", Paymen
 export const billedUnitEnum = createPgEnumFromEnum("billed_unit", BilledUnit);
 
 export const calculationStatusEnum = createPgEnumFromEnum("calculation_status", CalculationStatus);
+
+export const expenseTypeEnum = createPgEnumFromEnum("expense_type", ExpenseType);
 
 export const whatsappAccountPurposeEnum = createPgEnumFromEnum("whatsapp_account_purpose", WhatsappAccountPurpose);
 

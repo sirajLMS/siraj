@@ -2,14 +2,19 @@ import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { auditLogs, carryoverBalances, classInstances, classStatusEvents } from "@/backend/db/schema";
-import { NotificationEventType } from "@/backend/enum";
+import { auditLogs, carryoverBalances, classInstances, classStatusEvents, expenses } from "@/backend/db/schema";
+import { ExpenseType, NotificationEventType } from "@/backend/enum";
 import { CalculationStatus } from "@/backend/enum/teachers/payroll-calculation.enum";
 import { ForbiddenError } from "@/backend/lib";
 import { CarryoverBalanceService } from "@/backend/services";
 import * as NotificationDispatchHelpers from "@/backend/services/notification/notification-dispatch.helpers";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
-import type { BulkToExpenseResult, CarryoverBalanceSelectType, ClassInstanceSelectType } from "@/backend/types";
+import type {
+  BulkToExpenseResult,
+  CarryoverBalanceSelectType,
+  ClassInstanceSelectType,
+  ExpenseSelectType,
+} from "@/backend/types";
 import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -30,6 +35,8 @@ const TRANSITION_EVENT_TYPE = "PAYROLL_STATUS_TRANSITION";
 const CARRYOVER_AUDIT_ENTITY_TYPE = "CARRYOVER_BALANCE";
 const CARRYOVER_ACTION_CREATE = "CARRYOVER_CREATE";
 const CARRYOVER_ACTION_TO_EXPENSE = "CARRYOVER_TO_EXPENSE";
+/** Ledger provenance marker the settlement writes onto its expense rows. */
+const EXPENSE_SOURCE_CARRYOVER = "carryover_balances";
 
 /** Hourly rate SAR 120 × a 60-minute session; both cast sessions settle at this amount. */
 const SESSION_PAY = "120.00";
@@ -52,6 +59,14 @@ async function readCarryoverRow(carryoverId: string): Promise<CarryoverBalanceSe
     throw new Error(`carryover balance ${carryoverId} disappeared before it could be read`);
   }
   return row;
+}
+
+/** The real expense-ledger rows the settlement wrote for one carryover, deleted rows included. */
+async function readCarryoverExpenses(carryoverId: string): Promise<ExpenseSelectType[]> {
+  return db
+    .select()
+    .from(expenses)
+    .where(and(eq(expenses.sourceEntity, EXPENSE_SOURCE_CARRYOVER), eq(expenses.sourceEntityId, carryoverId)));
 }
 
 interface CarryoverAuditRow {
@@ -119,15 +134,12 @@ async function readSessionEvents(classInstanceId: string): Promise<SessionEventR
  * aggregates them into one carryover (sessions WAITING_PAID, linked to the
  * carryover), then converts the carryover into an expense settlement
  * (isPaid + sessions PAID + one CARRYOVER_TO_EXPENSE audit row carrying the
- * expense reference). A same-payload re-submit replays the first result with
- * no ledger growth, a second operator's settle attempt on the paid carryover
- * is denied as already-paid, and the read-only auditor sees the settled row
- * and its sessions while remaining locked out of the settle surface.
- *
- * The expense ledger itself is not yet provisioned by any module: the
- * settlement adapter returns a reference id and the full payload persists in
- * the conversion audit metadata, so this journey asserts the carryover state,
- * the audit rows, and the session statuses — never expense-table rows.
+ * expense reference), and the settlement writes a real ledger row in the
+ * `expenses` table with carryover provenance. A same-payload re-submit replays
+ * the first result with no ledger growth, a second operator's settle attempt
+ * on the paid carryover is denied as already-paid, and the read-only auditor
+ * sees the settled row and its sessions while remaining locked out of the
+ * settle surface.
  *
  * Runs UNWRAPPED from any rollback transaction by design (see
  * test/workflows/AGENTS.md): services spawn their own transactions over the
@@ -161,6 +173,10 @@ describe("Carryover to-expense settlement journey (audited sessions → carryove
 
   afterAll(async () => {
     dispatchSpy.mockRestore();
+    // The settlement persisted a real expense row for this run's carryover;
+    // it goes before the carryover rows (and before the cast deletes the
+    // teacher + operator user it references).
+    await db.delete(expenses).where(eq(expenses.sourceEntityId, carryoverId));
     // carryover_balances references the cast teacher with ON DELETE RESTRICT,
     // so this run's carryover rows (items cascade; session links set NULL on
     // delete) go before the cast cleanup deletes the teacher.
@@ -326,9 +342,30 @@ describe("Carryover to-expense settlement journey (audited sessions → carryove
       expect(instance.carryoverBalanceId).toBe(carryoverId);
     });
 
+    // Committed ledger row: exactly one Salaries expense carrying the full
+    // settlement payload, provenance-linked to the carryover and attributed to
+    // the settling operator.
+    const expenseRows = await readCarryoverExpenses(carryoverId);
+    expect(expenseRows).toHaveLength(1);
+    const expenseRow = expenseRows[0];
+    if (!expenseRow) {
+      throw new Error("the settlement wrote no expense row for the carryover");
+    }
+    expect(expenseRow.id).toBe(item?.expenseId);
+    expect(expenseRow.type).toBe(ExpenseType.SALARIES);
+    expect(expenseRow.expenseValue).toBe(CARRYOVER_PAYABLE);
+    expect(expenseRow.expenseCurrency).toBe(CurrencyCode.SAR);
+    expect(expenseRow.paymentDate).toBe(PAYMENT_DATE);
+    expect(expenseRow.expenseDate).toBe(EXPENSE_DATE);
+    expect(expenseRow.teacherId).toBe(cast.teacher.id);
+    expect(expenseRow.note).toBe(SETTLE_NOTE);
+    expect(expenseRow.sourceEntityId).toBe(carryoverId);
+    expect(expenseRow.createdByUserId).toBe(cast.operatorUser.id);
+    expect(expenseRow.deletedAt).toBeNull();
+
     // Side effect: exactly one CARRYOVER_TO_EXPENSE audit row carries the full
-    // settlement payload (the expense-ledger adapter persists no rows of its
-    // own; this metadata is the audit surface of the conversion).
+    // settlement payload (the ledger layers its own EXPENSE_CREATE row under
+    // the EXPENSE entity type, so this carryover-scoped read stays single).
     const conversionRows = (await readCarryoverAuditRows(carryoverId)).filter(
       auditRow => auditRow.action === CARRYOVER_ACTION_TO_EXPENSE
     );
@@ -401,7 +438,13 @@ describe("Carryover to-expense settlement journey (audited sessions → carryove
     expect(auditRows.filter(row => row.action === CARRYOVER_ACTION_CREATE)).toHaveLength(1);
     expect(auditRows.filter(row => row.action === CARRYOVER_ACTION_TO_EXPENSE)).toHaveLength(1);
 
-    // State is exactly where the first settlement left it.
+    // State is exactly where the first settlement left it: the ledger still
+    // holds exactly one row and the replay never wrote a duplicate.
+    const replayExpenseRows = await readCarryoverExpenses(carryoverId);
+    expect(replayExpenseRows).toHaveLength(1);
+    expect(replayExpenseRows[0]?.id).toBe(firstSettlement.items[0]?.expenseId);
+    expect(replayExpenseRows[0]?.deletedAt).toBeNull();
+
     const row = await readCarryoverRow(carryoverId);
     expect(row.isPaid).toBe(true);
     expect(row.paid).toBe(CARRYOVER_PAYABLE);
