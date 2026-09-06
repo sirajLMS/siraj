@@ -141,6 +141,7 @@ export function ParentScheduleDataGridDesktop({
             <Tooltip title={labels.schedule.history}>
               <IconButton
                 size="small"
+                aria-label={labels.schedule.history}
                 onClick={() => {
                   onHistory(row.id);
                 }}
