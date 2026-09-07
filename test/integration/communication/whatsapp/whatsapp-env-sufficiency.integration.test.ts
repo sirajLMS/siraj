@@ -195,11 +195,12 @@ describe("WhatsApp Cloud API — Environment Configuration Sufficiency", () => {
 
     expect(response.status).toBe(200);
 
-    const body = (await response.json()) as {
+    interface PhoneNumberDetailsResponse {
       id?: string;
       display_phone_number?: string;
       verified_name?: string;
-    };
+    }
+    const body: PhoneNumberDetailsResponse = await response.json();
 
     expect(body.id).toBe(envAudit.phoneNumberId);
     expect(body.display_phone_number).toBeDefined();
@@ -220,9 +221,10 @@ describe("WhatsApp Cloud API — Environment Configuration Sufficiency", () => {
 
     expect(response.status).toBe(200);
 
-    const body = (await response.json()) as {
+    interface MessageTemplatesResponse {
       data?: Array<{ name: string; status: string; language: string }>;
-    };
+    }
+    const body: MessageTemplatesResponse = await response.json();
 
     expect(Array.isArray(body.data)).toBe(true);
     expect(body.data?.length).toBeGreaterThan(0);
@@ -261,10 +263,11 @@ describe("WhatsApp Cloud API — Environment Configuration Sufficiency", () => {
       signal: AbortSignal.timeout(10_000),
     });
 
-    const result = (await response.json()) as {
+    interface SendMessageResponse {
       messages?: Array<{ id: string }>;
       error?: { code: number; message: string };
-    };
+    }
+    const result: SendMessageResponse = await response.json();
 
     // Either delivered successfully (200) OR rejected by recipient allowlist (400 code 131030)
     if (response.status === 200) {

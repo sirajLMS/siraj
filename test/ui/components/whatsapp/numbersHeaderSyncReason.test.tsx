@@ -97,31 +97,27 @@ afterEach(() => {
   cleanup();
 });
 
+async function verifyUnconfiguredSyncButton(component: React.ReactElement): Promise<void> {
+  renderWithWrapper(component, { locale, permissions: [AppPermission.WhatsappConfigManage] });
+
+  const syncButton = screen.getByRole("button", { name: labels.syncFromMeta });
+  expect(syncButton).toBeDisabled();
+
+  await hoverSyncTooltip(syncButton);
+  expect(await screen.findByText(missingEnvReason)).toBeInTheDocument();
+}
+
 describe("NumbersTab header — sync disabled reason tooltip", () => {
   test("desktop: unconfigured sync button is disabled and reveals the reason on hover", async () => {
-    renderWithWrapper(
-      <NumbersTabDesktop {...makeNumbersProps({ isConfigured: false, syncDisabledReason: missingEnvReason })} />,
-      { locale, permissions: [AppPermission.WhatsappConfigManage] }
+    await verifyUnconfiguredSyncButton(
+      <NumbersTabDesktop {...makeNumbersProps({ isConfigured: false, syncDisabledReason: missingEnvReason })} />
     );
-
-    const syncButton = screen.getByRole("button", { name: labels.syncFromMeta });
-    expect(syncButton).toBeDisabled();
-
-    await hoverSyncTooltip(syncButton);
-    expect(await screen.findByText(missingEnvReason)).toBeInTheDocument();
   });
 
   test("mobile: unconfigured sync icon button is disabled and reveals the reason on hover", async () => {
-    renderWithWrapper(
-      <NumbersTabMobile {...makeNumbersProps({ isConfigured: false, syncDisabledReason: missingEnvReason })} />,
-      { locale, permissions: [AppPermission.WhatsappConfigManage] }
+    await verifyUnconfiguredSyncButton(
+      <NumbersTabMobile {...makeNumbersProps({ isConfigured: false, syncDisabledReason: missingEnvReason })} />
     );
-
-    const syncButton = screen.getByRole("button", { name: labels.syncFromMeta });
-    expect(syncButton).toBeDisabled();
-
-    await hoverSyncTooltip(syncButton);
-    expect(await screen.findByText(missingEnvReason)).toBeInTheDocument();
   });
 
   test("desktop: busy reason tooltip shows while syncing", async () => {

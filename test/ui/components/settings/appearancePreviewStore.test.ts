@@ -1,6 +1,22 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { DEFAULT_APPEARANCE_DRAFT, useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 
+function verifyColorSchemeDetection(
+  attributeKey: "muiColorScheme" | "theme",
+  expectedDarkness: { light: boolean; dark: boolean }
+): void {
+  document.documentElement.dataset[attributeKey] = "light";
+  useAppearancePreviewStore.getState().enterCustomizeMode();
+  expect(useAppearancePreviewStore.getState().isDark).toBe(expectedDarkness.light);
+
+  useAppearancePreviewStore.getState().exitCustomizeMode();
+
+  document.documentElement.dataset[attributeKey] = "dark";
+  useAppearancePreviewStore.getState().enterCustomizeMode();
+  expect(useAppearancePreviewStore.getState().isDark).toBe(expectedDarkness.dark);
+  delete document.documentElement.dataset[attributeKey];
+}
+
 describe("appearancePreviewStore — isDark and defaultColorScheme sync", () => {
   beforeEach(() => {
     useAppearancePreviewStore.setState({
@@ -26,15 +42,7 @@ describe("appearancePreviewStore — isDark and defaultColorScheme sync", () => 
   });
 
   it("enterCustomizeMode uses document dataset muiColorScheme if present", () => {
-    document.documentElement.dataset.muiColorScheme = "light";
-    useAppearancePreviewStore.getState().enterCustomizeMode();
-    expect(useAppearancePreviewStore.getState().isDark).toBe(false);
-
-    useAppearancePreviewStore.getState().exitCustomizeMode();
-
-    document.documentElement.dataset.muiColorScheme = "dark";
-    useAppearancePreviewStore.getState().enterCustomizeMode();
-    expect(useAppearancePreviewStore.getState().isDark).toBe(true);
+    verifyColorSchemeDetection("muiColorScheme", { light: false, dark: true });
   });
 
   it("enterCustomizeMode falls back to draft.defaultColorScheme when dataset is unset", () => {
@@ -58,15 +66,7 @@ describe("appearancePreviewStore — isDark and defaultColorScheme sync", () => 
   });
 
   it("enterCustomizeMode falls back to data-theme attribute when data-mui-color-scheme is missing", () => {
-    document.documentElement.dataset.theme = "light";
-    useAppearancePreviewStore.getState().enterCustomizeMode();
-    expect(useAppearancePreviewStore.getState().isDark).toBe(false);
-    useAppearancePreviewStore.getState().exitCustomizeMode();
-
-    document.documentElement.dataset.theme = "dark";
-    useAppearancePreviewStore.getState().enterCustomizeMode();
-    expect(useAppearancePreviewStore.getState().isDark).toBe(true);
-    delete document.documentElement.dataset.theme;
+    verifyColorSchemeDetection("theme", { light: false, dark: true });
   });
 
   it("markPublished snapshots the published draft and is kept until the next customize session", () => {

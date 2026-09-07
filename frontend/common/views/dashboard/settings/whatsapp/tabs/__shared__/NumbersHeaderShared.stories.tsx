@@ -87,20 +87,24 @@ export const SyncBusy: Story = {
   },
 };
 
+async function expectSyncDisabledReason(canvas: ReturnType<typeof within>, canvasElement: HTMLElement): Promise<void> {
+  const syncButton = canvas.getByRole("button", { name: whatsappEn.syncFromMeta });
+  await expect(syncButton).toBeDisabled();
+  const tooltipAnchor = syncButton.parentElement;
+  await expect(tooltipAnchor).not.toBeNull();
+  if (tooltipAnchor === null) return;
+  await userEvent.hover(tooltipAnchor);
+  const body = within(canvasElement.ownerDocument.body);
+  await expect(await body.findByText(missingEnvReason)).toBeTruthy();
+}
+
 export const SyncDisabledUnconfigured: Story = {
   args: {
     isConfigured: false,
     syncDisabledReason: missingEnvReason,
   },
   play: async ({ canvas, canvasElement }) => {
-    const syncButton = canvas.getByRole("button", { name: whatsappEn.syncFromMeta });
-    await expect(syncButton).toBeDisabled();
-    const tooltipAnchor = syncButton.parentElement;
-    await expect(tooltipAnchor).not.toBeNull();
-    if (tooltipAnchor === null) return;
-    await userEvent.hover(tooltipAnchor);
-    const body = within(canvasElement.ownerDocument.body);
-    await expect(await body.findByText(missingEnvReason)).toBeTruthy();
+    await expectSyncDisabledReason(canvas, canvasElement);
   },
 };
 
@@ -111,14 +115,7 @@ export const SyncDisabledCompact: Story = {
     syncDisabledReason: missingEnvReason,
   },
   play: async ({ canvas, canvasElement }) => {
-    const syncButton = canvas.getByRole("button", { name: whatsappEn.syncFromMeta });
-    await expect(syncButton).toBeDisabled();
-    const tooltipAnchor = syncButton.parentElement;
-    await expect(tooltipAnchor).not.toBeNull();
-    if (tooltipAnchor === null) return;
-    await userEvent.hover(tooltipAnchor);
-    const body = within(canvasElement.ownerDocument.body);
-    await expect(await body.findByText(missingEnvReason)).toBeTruthy();
+    await expectSyncDisabledReason(canvas, canvasElement);
   },
 };
 
