@@ -70,6 +70,7 @@ import {
   seedOrGetTeacherVacationRequests,
 } from "@/backend/db/seeds/teachers";
 import { seedOrGetUserDeviceTokens, seedOrGetUsers } from "@/backend/db/seeds/users";
+import { seedOrGetWhatsappConfig } from "@/backend/db/seeds/whatsapp";
 import { logger } from "@/backend/lib/logger";
 import { ReferenceDataService } from "@/backend/services";
 import type {
@@ -138,6 +139,7 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   await seedBooksAndCategories(context, step);
   await seedPermissionGroups(context, step);
   await seedUsersAndActor(context, step, config);
+  await seedWhatsappConfig(context, step);
   await seedTeachersAndParents(context, step, config);
   await seedUserConfigs(context, step, config);
   await seedStudentsAndCredits(context, step, config);
@@ -222,6 +224,10 @@ async function seedUsersAndActor(context: SeedContext, step: RunStep, config: Se
       context.actorUserId = actor.id;
     }
   }
+}
+
+async function seedWhatsappConfig(context: SeedContext, step: RunStep): Promise<void> {
+  await step("whatsapp-config", () => seedOrGetWhatsappConfig({ actorUserId: context.actorUserId }));
 }
 
 async function seedTeachersAndParents(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {
