@@ -1,9 +1,18 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
+import { eq } from "drizzle-orm";
+import { db } from "@/backend/db";
+import { auditLogs } from "@/backend/db/schema";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
+import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import { makeTransientError } from "@/backend/lib/test/helpers";
 import {
+  auditEnvConfigChange,
+  deleteEnvConfigOverride,
   invalidateEnvConfigCache,
   preWarmEnvConfigCache,
   resolveEnvConfig,
+  toEnvSettingDbKey,
+  upsertEnvConfigOverride,
 } from "@/backend/services/system/environment-config.service";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
@@ -146,5 +155,96 @@ describe("environment-config.service — pre-warm cache", () => {
     expect(spy).toHaveBeenCalled();
 
     spy.mockRestore();
+  });
+});
+
+// ─── Tx-aware variants (real DB, rolled back) ───────────────────────────────────
+
+const ENV_DB_KEY = toEnvSettingDbKey(TEST_KEY);
+
+/**
+ * Defensive cleanup for the tx tests: the baseline for `env::STORAGE_PROVIDER`
+ * is an ABSENT row, so any leftover from an aborted run is removed first. Only
+ * this test-owned key is touched — never other `env::` rows.
+ */
+async function removeTestOverrideRow(): Promise<void> {
+  await SystemSettingsRepository.deleteSetting(ENV_DB_KEY);
+}
+
+describe("environment-config.service — tx-aware variants (rolled-back transactions)", () => {
+  test("upsertEnvConfigOverride persists within the caller's tx and is rollback-proof", async () => {
+    await removeTestOverrideRow();
+
+    await runInRollback(async tx => {
+      const result = await upsertEnvConfigOverride({ key: TEST_KEY, value: "tx-upsert-value" }, tx);
+
+      // Visible INSIDE the caller's transaction (same connection).
+      const inTx = await SystemSettingsRepository.getByKey(ENV_DB_KEY, tx);
+      expect(inTx?.value).toBe("tx-upsert-value");
+      // The returned metadata mirrors the stored row (`.returning()` —
+      // including the stored updatedAt, not a fabricated clock read).
+      expect(result.updatedAt).toEqual(inTx?.updatedAt);
+      expect(result.source).toBe("db");
+      expect(result.hasDbOverride).toBe(true);
+
+      // NOT visible outside the transaction — a plain read on a separate
+      // connection still sees no committed row.
+      const outside = await SystemSettingsRepository.getByKey(ENV_DB_KEY);
+      expect(outside).toBeNull();
+    });
+
+    // Rollback-proof: the tx rolled back → the override row is absent.
+    const afterRollback = await SystemSettingsRepository.getByKey(ENV_DB_KEY);
+    expect(afterRollback).toBeNull();
+  });
+
+  test("deleteEnvConfigOverride joins the caller's tx and the delete rolls back with it", async () => {
+    await removeTestOverrideRow();
+
+    await runInRollback(async tx => {
+      // The delete must observe the tx's OWN uncommitted write: the row only
+      // exists inside this transaction.
+      await upsertEnvConfigOverride({ key: TEST_KEY, value: "tx-value-to-delete" }, tx);
+
+      const result = await deleteEnvConfigOverride(TEST_KEY, tx);
+      expect(result.deleted).toBe(true);
+
+      const inTx = await SystemSettingsRepository.getByKey(ENV_DB_KEY, tx);
+      expect(inTx).toBeNull();
+    });
+
+    // Rollback-proof: the in-tx upsert AND its delete rolled back together —
+    // the override store is exactly as it was before the transaction.
+    const afterRollback = await SystemSettingsRepository.getByKey(ENV_DB_KEY);
+    expect(afterRollback).toBeNull();
+  });
+
+  test("auditEnvConfigChange writes inside the caller's tx and rolls back with it", async () => {
+    const outsideBefore = await db.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
+
+    await runInRollback(async tx => {
+      const actor = await createTestUserWithDefaults(tx);
+
+      await auditEnvConfigChange(actor.id, "upsert", TEST_KEY, "prior-value", "next-value", tx);
+
+      // Visible INSIDE the caller's transaction (same connection).
+      const inTx = await tx.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
+      expect(inTx).toHaveLength(1);
+      const audit = inTx[0];
+      expect(audit?.actorUserId).toBe(actor.id);
+      expect(audit?.action).toBe("UPDATE");
+      expect(audit?.previousState).toEqual({ value: "prior-value" });
+      expect(audit?.newState).toEqual({ value: "next-value" });
+      expect(audit?.metadata).toEqual({ event: "env_config.upsert", key: TEST_KEY });
+
+      // NOT visible outside the transaction (separate connection) — the audit
+      // row was not committed early.
+      const outsideDuring = await db.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
+      expect(outsideDuring).toHaveLength(outsideBefore.length);
+    });
+
+    // Rollback-proof: the tx rolled back → no audit row was persisted.
+    const afterRollback = await db.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
+    expect(afterRollback).toHaveLength(outsideBefore.length);
   });
 });

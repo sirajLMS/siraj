@@ -193,7 +193,12 @@ export function useWhatsappConfigViewModel(): WhatsappConfigTabViewModel {
   }, []);
 
   const onRetry = useCallback(() => {
-    void configQuery.refetch();
+    // Rejection-safe like onSave's refetch handling: a failed refetch is only
+    // logged — the query's own error state drives the Retry affordance, and
+    // the rejected promise must not surface as an unhandled rejection.
+    configQuery.refetch().catch((error: unknown) => {
+      logger.warn("WhatsApp configuration refetch failed", { error });
+    });
   }, [configQuery]);
 
   const onSave = useCallback(async () => {

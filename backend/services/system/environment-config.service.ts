@@ -79,8 +79,14 @@ import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants
 /** Prefix applied to env var names when reading/writing DB overrides in `system_settings`. */
 const ENV_SETTING_KEY_PREFIX = "env::";
 
-/** Returns the DB storage key for an env var (applies the `env::` prefix). */
-function toDbKey(envKey: string): string {
+/**
+ * Returns the DB storage key for an env var (applies the `env::` prefix).
+ * Exported so sibling services that write `env::` rows directly (e.g. the
+ * WhatsApp config write-through reading the prior override for its audit
+ * trail) construct the SAME key this module reads/writes — the prefix is
+ * defined once, never re-derived.
+ */
+export function toEnvSettingDbKey(envKey: string): string {
   return `${ENV_SETTING_KEY_PREFIX}${envKey}`;
 }
 
@@ -313,7 +319,7 @@ async function performDbLookup(
   key: string
 ): Promise<{ dbValue: string | undefined; dbError: boolean; wasTransient: boolean }> {
   try {
-    const setting = await SystemSettingsRepository.getByKey(toDbKey(key));
+    const setting = await SystemSettingsRepository.getByKey(toEnvSettingDbKey(key));
     if (setting?.value != null && setting.value !== "") {
       return { dbValue: setting.value, dbError: false, wasTransient: false };
     }
@@ -455,7 +461,7 @@ function serveFromCache(dbEligibleKeys: string[], result: Record<string, string 
  */
 async function lookupDbValueFor(key: string): Promise<readonly [string, string | undefined, boolean, boolean]> {
   try {
-    const setting = await SystemSettingsRepository.getByKey(toDbKey(key));
+    const setting = await SystemSettingsRepository.getByKey(toEnvSettingDbKey(key));
     if (setting?.value != null && setting.value !== "") {
       return [key, setting.value, false, false] as const;
     }
@@ -598,7 +604,7 @@ function toEntryCategory(category: string): EnvConfigCategory {
 
 /** Resolves a DB-eligible key: DB override wins, else falls back to `process.env`. */
 async function resolveDbEligibleKey(key: string): Promise<ResolvedEntry> {
-  const dbKey = toDbKey(key);
+  const dbKey = toEnvSettingDbKey(key);
   let dbValue: string | undefined;
   try {
     const setting = await SystemSettingsRepository.getByKey(dbKey);
@@ -682,10 +688,10 @@ export async function upsertEnvConfigOverride(
     );
   }
 
-  const dbKey = toDbKey(input.key);
+  const dbKey = toEnvSettingDbKey(input.key);
   logger.info(`env-config-service: upserting DB override for key "${input.key}"`);
 
-  await SystemSettingsRepository.upsertSetting(
+  const upserted = await SystemSettingsRepository.upsertSetting(
     {
       key: dbKey,
       value: input.value,
@@ -710,7 +716,9 @@ export async function upsertEnvConfigOverride(
     key: input.key,
     source: "db",
     hasDbOverride: true,
-    updatedAt: new Date(),
+    // The row's actual stored timestamp (from the upsert's `.returning()`),
+    // not a fabricated clock read that could drift from the row.
+    updatedAt: upserted.updatedAt,
   };
 }
 
@@ -738,7 +746,7 @@ export async function deleteEnvConfigOverride(key: string, tx?: DBTransaction): 
     throw new EnvConfigServiceError("ENOT_IN_REGISTRY", `Environment config key "${key}" is not in the registry.`);
   }
 
-  const dbKey = toDbKey(key);
+  const dbKey = toEnvSettingDbKey(key);
   logger.info(`env-config-service: deleting DB override for key "${key}"`);
 
   let existed = false;
@@ -792,10 +800,17 @@ export async function deleteEnvConfigOverride(key: string, tx?: DBTransaction): 
  * only `"***"` placeholders are recorded.
  *
  * Maps the env-config audit input onto the canonical `CreateAuditLogInput`
- * shape used by `AuditService.createManyAuditLogs`. When `tx` is provided the
- * audit row joins the caller's transaction; the write stays best-effort (a
- * failure is logged, never thrown) — the same contract as the Settings →
- * Environment Config tab's mutation path.
+ * shape used by `AuditService.createManyAuditLogs`. WITHOUT `tx` the write is
+ * best-effort: a failure is logged, never thrown — the same contract as the
+ * Settings → Environment Config tab's mutation path.
+ *
+ * WITH `tx` the audit row joins the caller's transaction and the error
+ * contract changes with it: the write is part of the transaction, so an audit
+ * failure throws into the caller and ABORTS that transaction — the audited
+ * change does not commit either. Callers that pass `tx` (e.g. the WhatsApp
+ * config write-through, which audits its env-propagation inside the save
+ * transaction) rely on exactly that fail-safe: an audited mutation either
+ * commits with its audit row or not at all.
  */
 export async function auditEnvConfigChange(
   actorUserId: string,
@@ -825,7 +840,7 @@ export async function auditEnvConfigChange(
     actorUserId,
     actorType: "USER",
     entityType: "SYSTEM_SETTING",
-    entityId: toDbKey(key),
+    entityId: toEnvSettingDbKey(key),
     action: action === "upsert" ? "UPDATE" : "DELETE",
     description: `${event} for ${key}`,
     previousState: auditInput.priorValue !== undefined ? { value: auditInput.priorValue } : null,

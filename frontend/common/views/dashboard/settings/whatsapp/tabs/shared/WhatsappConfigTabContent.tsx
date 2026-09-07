@@ -60,6 +60,8 @@ interface ConfigSecretFieldProps {
   readonly value: string;
   readonly helper: string;
   readonly errorKey?: WhatsappConfigValidationKey | null;
+  /** Mirrored server cap for the field — the browser blocks longer input. */
+  readonly maxLength: number;
   readonly labels: WhatsappLabels;
   readonly disabled: boolean;
   readonly onChange: (value: string) => void;
@@ -71,6 +73,7 @@ function ConfigSecretField({
   value,
   helper,
   errorKey,
+  maxLength,
   labels,
   disabled,
   onChange,
@@ -85,6 +88,7 @@ function ConfigSecretField({
       helperText={errorKey ? labels[errorKey] : helper}
       error={Boolean(errorKey)}
       disabled={disabled}
+      maxLength={maxLength}
       revealed={revealed}
       onToggleReveal={() => setRevealed(previous => !previous)}
       showValueLabel={labels.configShowSecret}
@@ -166,7 +170,7 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
         <Box component="output" sx={{ display: "flex", justifyContent: "center", py: 6 }} aria-busy>
           <CircularProgress size={28} />
         </Box>
-      ) : (
+      ) : config ? (
         <>
           {/* ── Credential fields ── */}
           <Box
@@ -191,6 +195,7 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
               value={values.appSecret}
               helper={secretHelper(config?.appSecret ?? null, t, "")}
               errorKey={fieldErrors.appSecret}
+              maxLength={WHATSAPP_CONFIG_FIELD_MAX_LENGTHS.appSecret}
               labels={t}
               disabled={readOnly}
               onChange={value => vm.onFieldChange("appSecret", value)}
@@ -260,6 +265,7 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
               value={values.accessToken}
               helper={secretHelper(config?.accessToken ?? null, t, t.configAccessTokenHelper)}
               errorKey={fieldErrors.accessToken}
+              maxLength={WHATSAPP_CONFIG_FIELD_MAX_LENGTHS.accessToken}
               labels={t}
               disabled={readOnly}
               onChange={value => vm.onFieldChange("accessToken", value)}

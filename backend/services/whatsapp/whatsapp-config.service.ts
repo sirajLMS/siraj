@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import {
   WhatsappConfigEmptyPatchError,
   WhatsappConfigRepository,
@@ -23,6 +23,7 @@ import {
   deleteEnvConfigOverride,
   invalidateEnvConfigCache,
   resolveEnvConfigMany,
+  toEnvSettingDbKey,
   upsertEnvConfigOverride,
 } from "@/backend/services/system";
 import type {
@@ -64,38 +65,71 @@ async function resolveFromEnv(): Promise<WhatsappConfigResolvedType> {
 }
 
 /**
- * Normalizes a save payload before persistence: provided strings are trimmed,
- * whitespace-only values are rejected (clearing a field requires an explicit
- * `null`, so an accidental empty submission can never wipe a stored secret),
- * over-length values are rejected against the per-field caps (visible fields
- * mirror the column widths, encrypted fields are capped at 512), control
- * characters (C0/C1 — newlines, tabs, and friends) are rejected outright, and
- * the actor attribution must be a well-formed UUID.
+ * Patch keys the normalizer knows how to handle, with a compile-time
+ * exhaustiveness tie to the seed input: `satisfies Record<keyof
+ * WhatsappConfigSeedInput, true>` stops compiling when a column is added to
+ * or renamed on `whatsapp_configs` without this record being updated — so a
+ * new field can never ship as either a silent drop or a blanket rejection.
+ * The runtime unknown-key check below derives from this single object.
+ */
+const CONFIG_PATCH_KEYS = {
+  appId: true,
+  appSecret: true,
+  verifyToken: true,
+  phoneNumberId: true,
+  wabaId: true,
+  accessToken: true,
+  esConfigId: true,
+  updatedByUserId: true,
+} as const satisfies Record<keyof WhatsappConfigSeedInput, true>;
+
+const CONFIG_PATCH_KEY_SET: ReadonlySet<string> = new Set(Object.keys(CONFIG_PATCH_KEYS));
+
+/** Type guard narrowing a payload key to the seed input's keys. */
+function isConfigPatchKey(key: string): key is keyof WhatsappConfigSeedInput {
+  return CONFIG_PATCH_KEY_SET.has(key);
+}
+
+/**
+ * Normalizes a save payload before persistence: UNKNOWN keys are rejected
+ * outright (a silently-ignored key would make the admin believe a value was
+ * saved when it was dropped), provided strings are trimmed, whitespace-only
+ * values are rejected (clearing a field requires an explicit `null`, so an
+ * accidental empty submission can never wipe a stored secret), over-length
+ * values are rejected against the per-field caps (visible fields mirror the
+ * column widths, encrypted fields are capped at 512), control and invisible
+ * format characters (C0/C1 controls, bidi overrides, zero-width characters,
+ * and U+2028/U+2029 line separators — newlines, tabs, and friends) are
+ * rejected outright, and the actor attribution must be a well-formed UUID.
  */
 function normalizeConfigInput(input: WhatsappConfigSeedInput, tErrors: ErrorsLabels): WhatsappConfigSeedInput {
   const payload: WhatsappConfigSeedInput = {};
-  for (const { field } of WHATSAPP_CONFIG_ENV_SOURCES) {
-    const value = input[field];
+  for (const key of Object.keys(input)) {
+    if (!isConfigPatchKey(key)) {
+      throw new ValidationError(tErrors.invalidInput);
+    }
+    const value = input[key];
     if (value === undefined) continue;
+    if (key === "updatedByUserId") {
+      if (value !== null && !UUID_REGEX.test(value)) {
+        throw new ValidationError(tErrors.invalidInput);
+      }
+      payload.updatedByUserId = value;
+      continue;
+    }
     if (value === null) {
-      payload[field] = null;
+      payload[key] = null;
       continue;
     }
     const trimmed = value.trim();
     if (
       trimmed === "" ||
-      trimmed.length > WHATSAPP_CONFIG_FIELD_MAX_LENGTHS[field] ||
+      trimmed.length > WHATSAPP_CONFIG_FIELD_MAX_LENGTHS[key] ||
       WHATSAPP_CONFIG_CONTROL_CHARS_PATTERN.test(trimmed)
     ) {
       throw new ValidationError(tErrors.invalidInput);
     }
-    payload[field] = trimmed;
-  }
-  if (input.updatedByUserId !== undefined) {
-    if (input.updatedByUserId !== null && !UUID_REGEX.test(input.updatedByUserId)) {
-      throw new ValidationError(tErrors.invalidInput);
-    }
-    payload.updatedByUserId = input.updatedByUserId;
+    payload[key] = trimmed;
   }
   return payload;
 }
@@ -183,10 +217,12 @@ function isPhoneNumberResponseBody(body: unknown): body is { display_phone_numbe
  *
  * Audit: one `env_config.upsert`/`env_config.delete` entry per propagated key
  * with the acting admin as the actor; the audit row joins the same
- * transaction. The audit helper masks secret keys to `"***"` per the
- * env-config registry `isSecret` flags (the sibling env-tab behavior) and
- * stays best-effort — an audit failure is logged, never thrown, matching the
- * Settings → Environment Config tab contract.
+ * transaction. The prior override value is read IN-TX before the write so the
+ * entry records the state actually being replaced or removed (absent stays
+ * absent — no phantom prior). The audit helper masks secret keys to `"***"`
+ * per the env-config registry `isSecret` flags (the sibling env-tab behavior)
+ * and stays best-effort — an audit failure is logged, never thrown, matching
+ * the Settings → Environment Config tab contract.
  *
  * Storage convention note: `system_settings.value` is stored as plaintext
  * (masked only at the GraphQL surface — the same convention as the Settings
@@ -209,6 +245,15 @@ async function propagateEnvConfigOverrides(
       if (value === undefined) {
         return;
       }
+      // Prior-override state is read IN-TX, BEFORE the upsert/delete, so the
+      // audit row records the value actually being replaced/removed (the
+      // sibling env-tab mutations resolve the prior entry the same way —
+      // `priorEntry?.value ?? undefined`). Skipped when no audit will be
+      // written (no actor attribution) so unattributed saves stay read-free.
+      const priorValue =
+        actorUserId !== undefined
+          ? ((await SystemSettingsRepository.getByKey(toEnvSettingDbKey(envKey), t))?.value ?? undefined)
+          : undefined;
       if (value === null) {
         await deleteEnvConfigOverride(envKey, t);
       } else {
@@ -221,7 +266,7 @@ async function propagateEnvConfigOverrides(
           actorUserId,
           value === null ? "delete" : "upsert",
           envKey,
-          undefined,
+          priorValue,
           value === null ? undefined : value,
           t
         );

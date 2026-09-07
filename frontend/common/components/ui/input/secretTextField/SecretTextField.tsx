@@ -12,6 +12,13 @@ export type SecretTextFieldProps = Omit<TextFieldProps, "type" | "slotProps"> & 
   readonly showValueLabel: string;
   readonly hideValueLabel: string;
   readonly readOnly?: boolean;
+  /**
+   * Character cap forwarded to the inner `<input>` — used by consumers to
+   * mirror the server-side per-field caps in the browser (plain `TextField`
+   * consumers pass `slotProps.htmlInput.maxLength` directly; `slotProps` is
+   * omitted here because this component owns the input/endAdornment slots).
+   */
+  readonly maxLength?: number;
 };
 
 function SecretRevealToggle({
@@ -58,6 +65,7 @@ export function SecretTextField({
   fullWidth = true,
   size = "small",
   autoComplete = "off",
+  maxLength,
   label,
   value,
   placeholder,
@@ -77,7 +85,10 @@ export function SecretTextField({
         fullWidth={fullWidth}
         size={size}
         {...rest}
-        slotProps={{ input: { readOnly: true, endAdornment: <SecretRevealToggle {...toggleProps} /> } }}
+        slotProps={{
+          input: { readOnly: true, endAdornment: <SecretRevealToggle {...toggleProps} /> },
+          htmlInput: { maxLength },
+        }}
       />
     );
   }
@@ -93,7 +104,7 @@ export function SecretTextField({
       autoComplete={autoComplete}
       type={revealed ? "text" : "password"}
       {...rest}
-      slotProps={{ input: { endAdornment: <SecretRevealToggle {...toggleProps} /> } }}
+      slotProps={{ input: { endAdornment: <SecretRevealToggle {...toggleProps} /> }, htmlInput: { maxLength } }}
     />
   );
 }

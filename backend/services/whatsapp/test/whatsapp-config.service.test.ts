@@ -138,6 +138,22 @@ await mock.module("@/backend/services/system/audit.service", () => ({
   },
 }));
 
+// Prior-override store for the propagation's in-tx prior-value read
+// (`SystemSettingsRepository.getByKey(dbKey, tx)`), keyed by the
+// `env::<KEY>` storage key. Mocked at the direct specifier so the REAL
+// env-config service/audit path keeps running while the reads land here.
+const priorOverrideValues = new Map<string, string>();
+const getByKeyMock = mock(async (key: string): Promise<unknown> => {
+  if (!priorOverrideValues.has(key)) return null;
+  return { key, value: priorOverrideValues.get(key) };
+});
+
+await mock.module("@/backend/db/repo/shared", () => ({
+  SystemSettingsRepository: {
+    getByKey: getByKeyMock,
+  },
+}));
+
 const actualSystem = await import("@/backend/services/system");
 
 const upsertEnvConfigOverrideMock = mock(async (input: { key: string; value: string }): Promise<unknown> => {
@@ -236,6 +252,7 @@ beforeEach(() => {
   envCacheInvalidations.length = 0;
   auditLogInputs.length = 0;
   persistedRows.length = 0;
+  priorOverrideValues.clear();
   fetchUrls.length = 0;
   fetchAuthHeaders.length = 0;
   loggerCalls.length = 0;
@@ -258,6 +275,7 @@ beforeEach(() => {
   deleteEnvConfigOverrideMock.mockClear();
   invalidateEnvConfigCacheMock.mockClear();
   createManyAuditLogsMock.mockClear();
+  getByKeyMock.mockClear();
   fetchMock.mockClear();
 });
 
@@ -367,6 +385,21 @@ describe("saveConfiguration", () => {
     expect(messageOf(nullOnly)).toBe(errorsEn.invalidInput);
 
     expect(upsertWhatsappConfigMock).not.toHaveBeenCalled();
+  });
+
+  test("a payload carrying an unknown key is rejected without touching the DB", async () => {
+    // Simulates a renamed/unknown field in a hand-built payload: the
+    // normalizer must reject it loudly instead of silently dropping it (a
+    // dropped field would make the admin believe a value was saved).
+    const payload: WhatsappConfigSeedInput = { verifyToken: "tok_ui_1" };
+    Object.assign(payload, { rogueField: "would-be-silently-dropped" });
+
+    const error = await expectRejection(WhatsappConfigService.saveConfiguration(payload, { locale: "en" }));
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(messageOf(error)).toBe(errorsEn.invalidInput);
+    expect(upsertWhatsappConfigMock).not.toHaveBeenCalled();
+    expect(envOverrideUpserts.size).toBe(0);
   });
 
   test("maps a DB failure on save to the graceful database-unavailable error", async () => {
@@ -561,6 +594,13 @@ describe("saveConfiguration — env-config audit trail", () => {
   }
 
   test("writes one audit entry per propagated key with the actor and masked secret values", async () => {
+    // Prior overrides in system_settings: the audit must record what each
+    // propagated write REPLACES — masked for secret keys, raw for non-secret
+    // ones — instead of a phantom "no prior state".
+    priorOverrideValues.set("env::WHATSAPP_APP_ID", "app_override_prior");
+    priorOverrideValues.set("env::WHATSAPP_VERIFY_TOKEN", "tok_override_prior");
+    priorOverrideValues.set("env::WHATSAPP_PHONE_NUMBER_ID", "phone_override_prior");
+
     await WhatsappConfigService.saveConfiguration(
       { appId: "app_ui_1", verifyToken: "tok_ui_1", phoneNumberId: "1050" },
       { actorUserId: ACTOR }
@@ -578,7 +618,23 @@ describe("saveConfiguration — env-config audit trail", () => {
     for (const entry of upserts) {
       expect(entry.actorUserId).toBe(ACTOR);
       expect(entry.actorType).toBe("USER");
-      expect(entry.previousState).toBeNull();
+    }
+    // Prior-value fidelity: every replaced override is recorded — masked to
+    // "***" for secret (isSecret) keys, raw for non-secret ones.
+    expect(byKey.get("env::WHATSAPP_APP_ID")?.previousState).toEqual({ value: "***" });
+    expect(byKey.get("env::WHATSAPP_VERIFY_TOKEN")?.previousState).toEqual({ value: "***" });
+    expect(byKey.get("env::WHATSAPP_PHONE_NUMBER_ID")?.previousState).toEqual({ value: "phone_override_prior" });
+    // The prior values were read in-tx (same tx handle the repo handed to the
+    // propagation hook), one per audited key.
+    expect(getByKeyMock.mock.calls.map(call => call[0])).toEqual(
+      expect.arrayContaining([
+        "env::WHATSAPP_APP_ID",
+        "env::WHATSAPP_VERIFY_TOKEN",
+        "env::WHATSAPP_PHONE_NUMBER_ID",
+      ])
+    );
+    for (const call of getByKeyMock.mock.calls) {
+      expect(call[1]).toBe(TX_TOKEN);
     }
     // The audit writes joined the caller's transaction (same tx handle the
     // repo handed to the propagation hook).
@@ -586,7 +642,9 @@ describe("saveConfiguration — env-config audit trail", () => {
     expect(createManyAuditLogsMock.mock.calls[0][1]).toBe(TX_TOKEN);
   });
 
-  test("a cleared field writes an env_config.delete audit entry", async () => {
+  test("a cleared field writes an env_config.delete audit entry with the removed prior value", async () => {
+    priorOverrideValues.set("env::WHATSAPP_WABA_ID", "waba_override_prior");
+
     await WhatsappConfigService.saveConfiguration({ wabaId: null, verifyToken: "tok_ui_1" }, { actorUserId: ACTOR });
 
     const deletes = auditEntriesFor("env_config.delete");
@@ -594,12 +652,18 @@ describe("saveConfiguration — env-config audit trail", () => {
     expect(deletes[0]?.entityId).toBe("env::WHATSAPP_WABA_ID");
     expect(deletes[0]?.actorUserId).toBe(ACTOR);
     expect(deletes[0]?.action).toBe("DELETE");
+    // The delete audit records the override value that is being removed.
+    expect(deletes[0]?.previousState).toEqual({ value: "waba_override_prior" });
+    // A delete observes no new value.
+    expect(deletes[0]?.newState).toBeNull();
   });
 
   test("without actor attribution no audit entries are written", async () => {
     await WhatsappConfigService.saveConfiguration({ verifyToken: "tok_ui_1" });
 
     expect(auditLogInputs).toHaveLength(0);
+    // No audit → no prior-value reads either: unattributed saves stay read-free.
+    expect(getByKeyMock).not.toHaveBeenCalled();
     // The propagation itself still ran.
     expect(envOverrideUpserts.get("WHATSAPP_VERIFY_TOKEN")).toBe("tok_ui_1");
   });
@@ -928,6 +992,15 @@ describe("Tier 2 — boundary inputs", () => {
       { verifyToken: "tok\twith-tab" },
       { appSecret: "sec\rwith-cr" },
       { appId: "app\u0000with-nul" },
+      // Invisible format characters (Cf): bidi overrides and zero-width
+      // characters pass a plain Cc-only pattern but must be rejected.
+      { verifyToken: "tok\u202Ewith-bidi-override" },
+      { verifyToken: "tok\u2066with-bidi-isolate" },
+      { appSecret: "sec\u200Bwith-zero-width" },
+      { appId: "app\uFEFFwith-bom" },
+      // Line/paragraph separators (Zl/Zp) — the only line breaks outside Cc.
+      { verifyToken: "tok\u2028with-line-separator" },
+      { appSecret: "sec\u2029with-paragraph-separator" },
     ];
 
     const errors = await Promise.all(

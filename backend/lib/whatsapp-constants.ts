@@ -92,15 +92,26 @@ export const WHATSAPP_CONFIG_FIELD_MAX_LENGTHS = {
 } as const satisfies Record<WhatsappConfigCredentialField, number>;
 
 /**
- * Matches the Unicode `Cc` (control) category — C0 controls (`\n`, `\r`,
- * `\t`, `\0`-`\x1F`), DEL, and C1 controls (`\u007F`-`\u009F`) — characters
- * that cannot legitimately appear in a Meta credential value and that the
- * config service's normalization rejects (paste artifacts, protocol
- * smuggling through header-bound values). Written as a property escape
- * rather than explicit `\uXXXX` ranges so no literal control characters
- * appear in the source (the sanitizer's own pattern must stay lint-clean).
+ * Matches characters that cannot legitimately appear in a Meta credential
+ * value and that the config service's normalization rejects:
+ *
+ * - `\p{Cc}` — C0 controls (`\n`, `\r`, `\t`, `\0`-`\x1F`), DEL, and C1
+ *   controls (`\u007F`-`\u009F`) — paste artifacts and protocol smuggling
+ *   through header-bound values.
+ * - `\p{Cf}` — format characters: bidi overrides/isolates
+ *   (`\u202A`-`\u202E`, `\u2066`-`\u2069`), zero-width/no-break spaces
+ *   (`\u200B`-`\u200F`, `\uFEFF`) — invisible characters that make two
+ *   visually identical tokens differ, a classic credential-comparison and
+ *   log-forgery hazard.
+ * - `\u2028`/`\u2029` — LINE/PARAGRAPH SEPARATOR, the only line breaks
+ *   outside `Cc` (they are `Zl`/`Zp`): headers and single-line config
+ *   values must never carry them.
+ *
+ * Written as property escapes / explicit escapes rather than literal control
+ * characters so no invisible character appears in the source (the sanitizer's
+ * own pattern must stay lint-clean).
  */
-export const WHATSAPP_CONFIG_CONTROL_CHARS_PATTERN = /[\p{Cc}]/u;
+export const WHATSAPP_CONFIG_CONTROL_CHARS_PATTERN = /[\p{Cc}\p{Cf}\u{2028}\u{2029}]/u;
 
 /**
  * Resolves the Graph API version for WhatsApp Cloud API calls.

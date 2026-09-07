@@ -29,6 +29,21 @@ export type WhatsappConfigSeedInput = Omit<WhatsappConfigInsertType, "id" | "cre
 export type WhatsappConfigSource = "db" | "env";
 
 /**
+ * Credential keys of the resolved type — enumerated once and projected from
+ * the `whatsapp_configs` table below, so the resolved shape is DERIVED from
+ * the schema (`string | null` per column) instead of hand-written and unable
+ * to drift from it.
+ */
+type WhatsappConfigCredentialKey =
+  | "appId"
+  | "appSecret"
+  | "verifyToken"
+  | "phoneNumberId"
+  | "wabaId"
+  | "accessToken"
+  | "esConfigId";
+
+/**
  * Credential set actively used by the integration, resolved with the
  * DB-first / env-fallback order. Row-level semantics: when a saved row
  * exists its values are authoritative as a whole (nulls stay null), so an
@@ -37,16 +52,11 @@ export type WhatsappConfigSource = "db" | "env";
  * `appSecret` and `accessToken` are decrypted values — API layers must only
  * ever expose masked views of them.
  */
-export interface WhatsappConfigResolvedType {
-  readonly source: WhatsappConfigSource;
-  readonly appId: string | null;
-  readonly appSecret: string | null;
-  readonly verifyToken: string | null;
-  readonly phoneNumberId: string | null;
-  readonly wabaId: string | null;
-  readonly accessToken: string | null;
-  readonly esConfigId: string | null;
-}
+export type WhatsappConfigResolvedType = Readonly<
+  Pick<typeof whatsappConfigs.$inferSelect, WhatsappConfigCredentialKey> & {
+    readonly source: WhatsappConfigSource;
+  }
+>;
 
 /**
  * Client-safe view of the active configuration for the settings page, built
