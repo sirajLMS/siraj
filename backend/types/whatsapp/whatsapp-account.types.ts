@@ -152,6 +152,24 @@ export type WhatsappSyncFromMetaReturnType = {
 };
 
 /**
+ * Configuration status for the WhatsApp Cloud API integration.
+ *
+ * This is an intentional **status value-object type** — it is computed on
+ * demand by the service layer (account validation + env-config resolution),
+ * not derived from a Drizzle table. `missingEnvKeys` is computed independently
+ * of account validity so UIs can explain why the env-bootstrap path is or is
+ * not available even when a valid DB account exists.
+ */
+export type WhatsappConfigurationStatusType = {
+  /** True when at least one active account validates OR the env-bootstrap path is fully configured. */
+  readonly isConfigured: boolean;
+  /** True when every required env-bootstrap key resolves to a non-empty value. */
+  readonly envBootstrapAvailable: boolean;
+  /** Exact env key names (e.g. `WHATSAPP_ACCESS_TOKEN`) that are unset or empty. */
+  readonly missingEnvKeys: readonly string[];
+};
+
+/**
  * Submit input for creating a WhatsApp account.
  * Credentials (access token, two-step PIN) are NOT included here —
  * they go through dedicated `setWhatsappAccessToken` / `setWhatsappTwoStepPin` mutations.

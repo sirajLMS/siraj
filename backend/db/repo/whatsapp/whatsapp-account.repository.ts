@@ -257,6 +257,18 @@ export namespace WhatsappAccountRepository {
     return findManyRows(eq(whatsappAccounts.isActive, true), tx, desc(whatsappAccounts.createdAt));
   }
 
+  /**
+   * All accounts regardless of `isActive`. The numbers settings surface must
+   * list synced placeholder accounts too — `syncFromMeta` creates new numbers
+   * inactive with pending credentials, and an active-only list would hide them
+   * from the very UI meant to manage them.
+   */
+  export async function listAll(tx?: DBTransaction): Promise<WhatsappAccountReturnType[]> {
+    const q = queryDb(tx);
+    const rows = await q.select().from(whatsappAccounts).orderBy(desc(whatsappAccounts.createdAt));
+    return rows.map(toReturnType);
+  }
+
   export async function create(
     input: WhatsappAccountInsertType,
     tx?: DBTransaction

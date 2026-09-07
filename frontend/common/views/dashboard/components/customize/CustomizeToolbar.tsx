@@ -165,6 +165,7 @@ export function CustomizeToolbar() {
   const undo = useAppearancePreviewStore(s => s.undo);
   const redo = useAppearancePreviewStore(s => s.redo);
   const markSaved = useAppearancePreviewStore(s => s.markSaved);
+  const markPublished = useAppearancePreviewStore(s => s.markPublished);
   const loadFromServer = useAppearancePreviewStore(s => s.loadFromServer);
   const resetToDefaults = useAppearancePreviewStore(s => s.resetToDefaults);
   const setField = useAppearancePreviewStore(s => s.setField);
@@ -281,6 +282,13 @@ export function CustomizeToolbar() {
       }
       await publish({ variables: { expectedUpdatedAt: latestUpdatedAt } });
       markSaved();
+      // Record the published snapshot so exiting customize mode restores the
+      // NEW published values (not the pre-publish DOM captures), and refresh
+      // the route so server-rendered surfaces (theme stylesheet, metadata)
+      // re-render against the freshly published row instead of waiting for a
+      // full page reload.
+      markPublished(input);
+      router.refresh();
       notifications.show(t.publishSuccess, { severity: "success" });
       announce(t.publishSuccess);
     } catch (error) {
@@ -288,6 +296,8 @@ export function CustomizeToolbar() {
         setConflictRetry(() => async () => {
           await publish({ variables: { expectedUpdatedAt: undefined } });
           markSaved();
+          markPublished(draft);
+          router.refresh();
           notifications.show(t.publishSuccess, { severity: "success" });
           announce(t.publishSuccess);
         });

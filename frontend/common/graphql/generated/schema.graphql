@@ -4208,7 +4208,9 @@ type Query {
   """Check if a user has opted in to WhatsApp notifications (REQ-10/BL1)."""
   isUserWhatsappOptIn(userId: String!): Boolean!
 
-  """Check if WhatsApp Cloud API is configured and credentials are valid."""
+  """
+  Check if WhatsApp Cloud API is configured — true when at least one active account resolves healthy credentials, or when the env bootstrap path (WHATSAPP_ACCESS_TOKEN + WHATSAPP_WABA_ID) is fully configured.
+  """
   isWhatsappConfigured: Boolean!
   latestExchangeRates(paginationArgs: PaginationArgs): [ExchangeRate!]
   latestFxSyncRun: FxSyncRun
@@ -4504,6 +4506,11 @@ type Query {
   """List all active WhatsApp business accounts."""
   whatsappAccounts: [WhatsappAccount!]
 
+  """
+  Detailed WhatsApp Cloud API configuration status — which configuration path (DB account vs env bootstrap) is satisfied and which env keys are missing.
+  """
+  whatsappConfigurationStatus: WhatsappConfigurationStatus
+
   """Paginated message thread for one inbox conversation."""
   whatsappConversationMessages(conversationId: String!, pagination: PaginationArgs): WhatsappConversationMessagesResult
 
@@ -4511,6 +4518,11 @@ type Query {
   Paginated WhatsApp inbox conversation list. Spans all accounts when `accountId` is omitted.
   """
   whatsappConversations(accountId: String, pagination: PaginationArgs): WhatsappConversationsResult
+
+  """
+  Meta App Dashboard 'Facebook Login for Business' settings URL for this app's id, where Embedded Signup allowed origins/redirect URIs are registered. Null when WHATSAPP_APP_ID is not configured.
+  """
+  whatsappEmbeddedSignupAllowedOriginsUrl: String
 
   """
   Per-account coexistence sync overview (status, progress, per-type request rows).
@@ -6573,6 +6585,12 @@ input WhatsappAccountUpdateInput {
   portfolioMessagingLimitTier: WhatsappLimitTier
   qualityRating: WhatsappQualityRating
   throughputLevel: String
+}
+
+type WhatsappConfigurationStatus {
+  envBootstrapAvailable: Boolean!
+  isConfigured: Boolean!
+  missingEnvKeys: [String!]!
 }
 
 type WhatsappContact {

@@ -425,20 +425,24 @@ function NumbersHeaderDesktop({
   labels,
   syncing,
   isConfigured,
+  syncDisabledReason,
   onSyncFromMeta,
   onOpenCreateDialog,
   esConfigId,
   esAppId,
   onOpenEmbeddedSignup,
+  embeddedSignupBlocked,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly syncing: boolean;
   readonly isConfigured: boolean;
+  readonly syncDisabledReason?: string;
   readonly onSyncFromMeta: () => Promise<void>;
   readonly onOpenCreateDialog: () => void;
   readonly esConfigId?: string | null;
   readonly esAppId?: string | null;
   readonly onOpenEmbeddedSignup?: () => void;
+  readonly embeddedSignupBlocked: boolean;
 }>) {
   const canConnect = esConfigId && esAppId && onOpenEmbeddedSignup;
   return (
@@ -446,9 +450,11 @@ function NumbersHeaderDesktop({
       labels={labels}
       syncing={syncing}
       isConfigured={isConfigured}
+      syncDisabledReason={syncDisabledReason}
       onSyncFromMeta={onSyncFromMeta}
       onAddAccount={onOpenCreateDialog}
       onConnectBusinessApp={canConnect ? () => onOpenEmbeddedSignup?.() : undefined}
+      embeddedSignupBlocked={embeddedSignupBlocked}
       buttonSize="medium"
       syncIconSize={20}
       titleSlot={
@@ -478,6 +484,7 @@ export function NumbersTabDesktop({
   onOpenDeleteConfirmDialog,
   onDismissSnackbar,
   isConfigured,
+  syncDisabledReason,
   creating,
   updatingId,
   dialogState,
@@ -494,6 +501,8 @@ export function NumbersTabDesktop({
   validatePurpose,
   esConfigId,
   esAppId,
+  embeddedSignupBlocked = false,
+  embeddedSignupAllowedOriginsUrl = null,
   onOpenEmbeddedSignup,
   onEmbeddedSignupComplete,
 }: Readonly<NumbersTabSharedProps>) {
@@ -524,11 +533,13 @@ export function NumbersTabDesktop({
         labels={t}
         syncing={syncing}
         isConfigured={isConfigured}
+        syncDisabledReason={syncDisabledReason}
         onSyncFromMeta={onSyncFromMeta}
         onOpenCreateDialog={onOpenCreateDialog}
         esConfigId={esConfigId}
         esAppId={esAppId}
         onOpenEmbeddedSignup={onOpenEmbeddedSignup}
+        embeddedSignupBlocked={embeddedSignupBlocked}
       />
 
       <AccountsListSection
@@ -578,6 +589,7 @@ export function NumbersTabDesktop({
           labels={t}
           configId={esConfigId ?? null}
           appId={esAppId ?? null}
+          allowedOriginsUrl={embeddedSignupAllowedOriginsUrl}
           onComplete={onEmbeddedSignupComplete}
           onClose={onCloseDialog}
         />

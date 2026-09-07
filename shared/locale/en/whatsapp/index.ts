@@ -33,7 +33,18 @@ export const whatsappEn: WhatsappLabels = {
   throughputLevel: "Throughput Level",
   lastWebhookAt: "Last Webhook Received",
   syncFromMeta: "Sync from Meta",
+  syncFromMetaUnavailable: (missingEnvKeys: string) =>
+    `Sync from Meta is unavailable: missing WhatsApp configuration (${missingEnvKeys}). Set these values in the environment, or add a WhatsApp account below.`,
+  syncFromMetaBusy: "Syncing from Meta…",
   syncSuccess: "Successfully synced WhatsApp accounts from Meta.",
+  syncSuccessWithCounts: (synced: number, added: number) => {
+    const syncedPhrase = synced === 1 ? "1 number" : `${synced} numbers`;
+    if (added === 0) {
+      return `Synced ${syncedPhrase} from Meta — all are already known here, nothing new was added.`;
+    }
+    const addedPhrase = added === 1 ? "1 new number was" : `${added} new numbers were`;
+    return `Synced ${syncedPhrase} from Meta — ${addedPhrase} added.`;
+  },
   syncNoChange: "No changes detected from Meta.",
   syncError: "Failed to sync from Meta. Please check credentials and try again.",
   noAccounts: 'No WhatsApp numbers configured. Click "Add Number" to get started.',
@@ -221,6 +232,12 @@ export const whatsappEn: WhatsappLabels = {
     "Confirming the connection and queueing the contacts and history sync. This only takes a moment.",
   embeddedSignupDone: "Done",
   embeddedSignupClose: "Close",
+  embeddedSignupAllowedOriginsTitle: "First-time setup: allow this app in Meta",
+  embeddedSignupAllowedOriginsBody: origin =>
+    `Meta only returns the signup code to registered origins. Before launching, add ${origin} under App Dashboard → Facebook Login for Business → Settings → Allowed domains and Valid OAuth redirect URIs.`,
+  embeddedSignupAllowedOriginsLink: "Open Meta app settings",
+  embeddedSignupRequiresHttps:
+    "Connecting a number requires a secure HTTPS connection — Meta blocks the login flow on plain HTTP. Open this page over HTTPS to continue.",
 
   // ─── Accessibility & Permission Denied (Task 17) ───────────────────
   permissionDeniedTitle: "Access Restricted",

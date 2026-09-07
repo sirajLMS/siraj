@@ -36,22 +36,23 @@ const CUSTOMIZE_TOOLBAR_HEIGHT = "48px";
  *    sidebar — that side offset is a desktop-tier concern and lives in
  *    the desktop layout.
  *
- * ## Live preview (BUG-C fix)
+ * ## Live preview
  *
  * `useAppearanceLivePreview` is mounted unconditionally (before the early
  * return) so its `useEffect` hooks run on every render. The hook itself
  * checks `store.isCustomizeMode` and only touches the DOM when customize
- * mode is active. On exit, its cleanup restores the original DOM values
- * (brand name, title, logo) so the dashboard reverts to the published state.
+ * mode is active. On exit, its cleanup restores the published DOM values
+ * (brand name, title, logo) — preferring the in-session `lastPublished`
+ * snapshot so a publish is reflected immediately without a page reload.
  *
- * ## Store sync (BUG-D fix)
+ * ## Store sync
  *
  * The `useEffect` below syncs the store's `isCustomizeMode` flag with the
  * URL-based `useCustomizeMode()` result. When `?customize=1` is present +
  * the user has permission, `enterCustomizeMode()` is called — which sets
  * the flag + writes the draft's CSS vars. On exit (URL changes), the cleanup
  * calls `exitCustomizeMode()` — which clears the inline CSS vars so the
- * published theme stylesheet resumes control.
+ * (publish-refreshed) published theme stylesheet resumes control.
  *
  * Outside customize mode this renders children unchanged.
  */
@@ -66,7 +67,7 @@ export function CustomizeModeShell({ children }: Readonly<{ children: ReactNode 
 
   // Sync the store's isCustomizeMode flag with the URL-based customizeMode.
   // On enter: set flag + write CSS vars from draft. On exit: clear flag +
-  // clear CSS vars so published theme takes over (BUG-D revert to current).
+  // clear CSS vars so the published theme takes over (revert to current published).
   useEffect(() => {
     if (customizeMode) {
       enterCustomizeMode();

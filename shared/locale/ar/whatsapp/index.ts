@@ -33,7 +33,28 @@ export const whatsappAr: WhatsappLabels = {
   throughputLevel: "مستوى معدل الإرسال",
   lastWebhookAt: "آخر webhook مستلم",
   syncFromMeta: "مزامنة من Meta",
+  syncFromMetaUnavailable: (missingEnvKeys: string) =>
+    `المزامنة من Meta غير متاحة: إعدادات واتساب التالية غير مضبوطة (${missingEnvKeys}). عيّن هذه القيم في بيئة التشغيل، أو أضف حساب واتساب أدناه.`,
+  syncFromMetaBusy: "جارٍ المزامنة من Meta…",
   syncSuccess: "تمت مزامنة حسابات واتساب من Meta بنجاح.",
+  syncSuccessWithCounts: (synced: number, added: number) => {
+    let syncedPhrase = `${synced} أرقام`;
+    if (synced === 1) {
+      syncedPhrase = "رقم واحد";
+    } else if (synced === 2) {
+      syncedPhrase = "رقمين";
+    }
+    if (added === 0) {
+      return `تمت مزامنة ${syncedPhrase} من Meta — جميعها معروفة مسبقاً هنا، ولم تُضف أرقام جديدة.`;
+    }
+    let addedPhrase = `${added} أرقام جديدة`;
+    if (added === 1) {
+      addedPhrase = "رقم جديد واحد";
+    } else if (added === 2) {
+      addedPhrase = "رقمان جديدان";
+    }
+    return `تمت مزامنة ${syncedPhrase} من Meta — تمت إضافة ${addedPhrase}.`;
+  },
   syncNoChange: "لم يتم اكتشاف أي تغييرات من Meta.",
   syncError: "فشلت المزامنة من Meta. يرجى التحقق من بيانات الاعتماد والمحاولة مرة أخرى.",
   noAccounts: 'لا توجد أرقام واتساب مُعدة. انقر على "إضافة رقم" للبدء.',
@@ -218,6 +239,12 @@ export const whatsappAr: WhatsappLabels = {
   embeddedSignupCompletingBody: "جارٍ تأكيد الربط وجدولة مزامنة جهات الاتصال والسجل. يستغرق ذلك لحظات فقط.",
   embeddedSignupDone: "تم",
   embeddedSignupClose: "إغلاق",
+  embeddedSignupAllowedOriginsTitle: "إعداد أول مرة: اسمح لهذا التطبيق في Meta",
+  embeddedSignupAllowedOriginsBody: origin =>
+    `لا ترسل Meta رمز التسجيل إلا إلى النطاقات المسجّلة. أضف ${origin} قبل الإطلاق ضمن App Dashboard ← Facebook Login for Business ← Settings في حقول «Allowed domains» و«Valid OAuth redirect URIs».`,
+  embeddedSignupAllowedOriginsLink: "افتح إعدادات تطبيق Meta",
+  embeddedSignupRequiresHttps:
+    "يتطلب ربط رقم اتصالاً آمناً عبر HTTPS — تحظر Meta تدفق تسجيل الدخول على HTTP غير المشفّر. افتح هذه الصفحة عبر HTTPS للمتابعة.",
 
   // ─── Accessibility & Permission Denied (Task 17) ───────────────────
   permissionDeniedTitle: "الوصول مقيد",

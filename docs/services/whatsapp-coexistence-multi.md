@@ -230,8 +230,13 @@ from v1 — the capability parser handles both modern and legacy shapes.)
   `CRON_WHATSAPP_WEBHOOK_SWEEP_SCHEDULE`) and `/api/cron/whatsapp-sync-sweep`
   (default hourly, `CRON_WHATSAPP_SYNC_SWEEP_SCHEDULE`). *(Note: exact default
   cadences are in the generator; the keys above control overrides.)*
-- **Health**: `isWhatsappConfigured` aggregates across active accounts;
-  `validateAccountConfig(accountId)` is the per-account hook.
+- **Health**: `isWhatsappConfigured` aggregates across active accounts OR the
+  env-bootstrap path — it is true when at least one active account validates or
+  when both `.env`-only bootstrap keys (`WHATSAPP_ACCESS_TOKEN`,
+  `WHATSAPP_WABA_ID`) resolve non-empty (the `syncFromMeta` first-provisioning
+  path). `whatsappConfigurationStatus` exposes the underlying
+  `{ isConfigured, envBootstrapAvailable, missingEnvKeys }` detail for UI
+  tooltips. `validateAccountConfig(accountId)` is the per-account hook.
 - **Permissions**: `whatsapp.inbox_view` (grant: super_admin, academy_admin,
   staff_default, supervisor_default), `whatsapp.inbox_manage` (super_admin,
   academy_admin).

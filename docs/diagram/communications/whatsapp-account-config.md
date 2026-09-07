@@ -5,7 +5,7 @@ Staff admins manage WhatsApp Business API credentials from the settings page at 
 ## Key sources
 
 - `app/(dashboard)/settings/whatsapp/page.tsx` — page entry, `withPageAuth(WHATSAPP_VIEW)`, renders `WhatsappSettingsContainer`
-- `frontend/common/views/dashboard/settings/whatsapp/useWhatsappSettingsViewModel.ts` — Apollo queries (`whatsappAccounts`, `isWhatsappConfigured`, `isUserWhatsappOptIn`) and mutation wiring
+- `frontend/common/views/dashboard/settings/whatsapp/useWhatsappSettingsViewModel.ts` — Apollo queries (`whatsappAccounts`, `whatsappConfigurationStatus`, `isUserWhatsappOptIn`) and mutation wiring
 - `backend/graphql/query/whatsapp/whatsapp-account.query.ts` — read-side fields and self-only opt-in check
 - `backend/graphql/mutation/whatsapp/whatsapp-account.mutation.ts` — CRUD, credential setters, Meta sync, opt-in toggle with authScopes
 - `backend/services/whatsapp/whatsapp-account.service.ts` — permission asserts, validation, repo calls, sync orchestration, audit, channel reset

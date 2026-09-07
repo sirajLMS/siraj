@@ -35,6 +35,7 @@ describe("useAppearanceLivePreview", () => {
     document.body.appendChild(brandLogoEl);
 
     useAppearancePreviewStore.getState().resetToDefaults();
+    useAppearancePreviewStore.setState({ lastPublished: null });
   });
 
   afterEach(() => {
@@ -114,5 +115,61 @@ describe("useAppearanceLivePreview", () => {
     rerender(<TestComponent />);
 
     expect(brandLogoEl.querySelector('[data-testid="default-logo"]')).not.toBeNull();
+  });
+
+  test("exit without a publish restores the DOM values captured at entry", () => {
+    act(() => {
+      useAppearancePreviewStore.setState({
+        isCustomizeMode: true,
+        draft: {
+          ...useAppearancePreviewStore.getState().draft,
+          siteName: "Draft Name",
+          siteTitle: "Draft Title",
+        },
+      });
+    });
+
+    render(<TestComponent />);
+    expect(brandNameEl.textContent).toBe("Draft Name");
+    expect(document.title).toBe("Draft Title");
+
+    act(() => {
+      useAppearancePreviewStore.setState({ isCustomizeMode: false });
+    });
+
+    expect(brandNameEl.textContent).toBe("Original Brand Name");
+    expect(document.title).toBe("Original Title");
+    expect(metaDescEl.content).toBe("Original Description");
+  });
+
+  test("exit after a publish restores the just-published values, not the entry captures", () => {
+    act(() => {
+      useAppearancePreviewStore.setState({
+        isCustomizeMode: true,
+        draft: {
+          ...useAppearancePreviewStore.getState().draft,
+          siteName: "Draft Name",
+          siteTitle: "Draft Title",
+        },
+      });
+    });
+
+    render(<TestComponent />);
+    expect(brandNameEl.textContent).toBe("Draft Name");
+
+    act(() => {
+      useAppearancePreviewStore.getState().markPublished({
+        ...useAppearancePreviewStore.getState().draft,
+        siteName: "Published Name",
+        siteTitle: "Published Title",
+        siteDescription: "Published Description",
+        logoUrl: null,
+      });
+      useAppearancePreviewStore.setState({ isCustomizeMode: false });
+    });
+
+    expect(brandNameEl.textContent).toBe("Published Name");
+    expect(document.title).toBe("Published Title");
+    expect(metaDescEl.content).toBe("Published Description");
   });
 });

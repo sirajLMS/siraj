@@ -1,14 +1,13 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import type { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   completeWhatsappEmbeddedSignupMutationDocument,
   createWhatsappAccountMutationDocument,
   deleteWhatsappAccountMutationDocument,
   isUserWhatsappOptInQueryDocument,
-  isWhatsappConfiguredQueryDocument,
   setUserWhatsappOptInMutationDocument,
   setWhatsappAccessTokenMutationDocument,
   setWhatsappTwoStepPinMutationDocument,
@@ -16,8 +15,11 @@ import {
   updateWhatsappAccountMutationDocument,
   updateWhatsappAccountPurposeMutationDocument,
   whatsappAccountsQueryDocument,
+  whatsappConfigurationStatusQueryDocument,
+  whatsappEmbeddedSignupAllowedOriginsUrlQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
+import { isEmbeddedSignupSupported } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import type {
   WhatsappCreateInput,
   WhatsappDialogState,
@@ -108,9 +110,29 @@ async function setTwoStepPinAction(
   }
 }
 
+/** Extracts phoneNumberId values from the untyped sync-mutation account entries. */
+function syncedAccountPhoneIds(accounts: unknown[] | null | undefined): string[] {
+  if (!accounts) {
+    return [];
+  }
+  return accounts.flatMap(account => {
+    if (typeof account !== "object" || account === null) {
+      return [];
+    }
+    const phoneNumberId: unknown = Reflect.get(account, "phoneNumberId");
+    return typeof phoneNumberId === "string" ? [phoneNumberId] : [];
+  });
+}
+
+/**
+ * Runs the Meta sync and reports real outcome feedback: how many numbers Meta
+ * returned and how many were newly added versus already managed. A bare
+ * "success" misleads when the WABA has no numbers or all are already known.
+ */
 async function syncFromMetaAction(
   syncFromMeta: () => Promise<unknown>,
   refetchAccounts: () => Promise<unknown>,
+  previousPhoneNumberIds: ReadonlySet<string>,
   setSyncing: (value: boolean) => void,
   labels: WhatsappSettingsLabels["notifications"],
   showSnackbar: SnackbarShow
@@ -119,10 +141,11 @@ async function syncFromMetaAction(
   try {
     const rawResult = await syncFromMeta();
     const result: SyncFromMetaResult = isSyncFromMetaResult(rawResult) ? rawResult : {};
-    const accountsResult = result.data?.syncWhatsappAccountsFromMeta?.accounts;
+    const syncedIds = syncedAccountPhoneIds(result.data?.syncWhatsappAccountsFromMeta?.accounts);
     await refetchAccounts();
-    if (accountsResult && accountsResult.length > 0) {
-      showSnackbar(labels.syncSuccess, "success");
+    if (syncedIds.length > 0) {
+      const addedCount = syncedIds.filter(id => !previousPhoneNumberIds.has(id)).length;
+      showSnackbar(labels.syncSuccessWithCounts(syncedIds.length, addedCount), "success");
     } else {
       showSnackbar(labels.syncNoChange, "success");
     }
@@ -162,9 +185,10 @@ function useWhatsappQueries() {
   const optInQuery = useQuery(isUserWhatsappOptInQueryDocument, {
     variables: { userId: CURRENT_USER },
   });
-  const configuredQuery = useQuery(isWhatsappConfiguredQueryDocument);
+  const configuredQuery = useQuery(whatsappConfigurationStatusQueryDocument);
+  const allowedOriginsQuery = useQuery(whatsappEmbeddedSignupAllowedOriginsUrlQueryDocument);
 
-  return { accountsQuery, optInQuery, configuredQuery };
+  return { accountsQuery, optInQuery, configuredQuery, allowedOriginsQuery };
 }
 
 function useWhatsappMutations() {
@@ -196,7 +220,7 @@ function useDerivedWhatsappData(
   queries: ReturnType<typeof useWhatsappQueries>,
   mutations: ReturnType<typeof useWhatsappMutations>
 ) {
-  const { accountsQuery, optInQuery, configuredQuery } = queries;
+  const { accountsQuery, optInQuery, configuredQuery, allowedOriginsQuery } = queries;
   const { syncResult } = mutations;
 
   const accounts = accountsQuery.data?.whatsappAccounts ?? [];
@@ -204,9 +228,37 @@ function useDerivedWhatsappData(
   const loading = accountsQuery.loading;
   const queryError = !!accountsQuery.error;
   const isOptedIn = optInQuery.data?.isUserWhatsappOptIn ?? false;
-  const isConfigured = configuredQuery.data?.isWhatsappConfigured ?? false;
+  const configurationStatus = configuredQuery.data?.whatsappConfigurationStatus ?? null;
+  const isConfigured = configurationStatus?.isConfigured ?? false;
+  const missingEnvKeys = configurationStatus?.missingEnvKeys ?? [];
+  const embeddedSignupAllowedOriginsUrl = allowedOriginsQuery.data?.whatsappEmbeddedSignupAllowedOriginsUrl ?? null;
 
-  return { accounts, templates, loading, queryError, isOptedIn, isConfigured };
+  return {
+    accounts,
+    templates,
+    loading,
+    queryError,
+    isOptedIn,
+    isConfigured,
+    missingEnvKeys,
+    embeddedSignupAllowedOriginsUrl,
+  };
+}
+
+/**
+ * Tooltip reason shown on the disabled "Sync from Meta" action: the busy
+ * label during a sync, the missing-env-keys hint when no account or env
+ * bootstrap can serve Meta sync, and no tooltip when the action is enabled.
+ */
+function resolveSyncDisabledReason(
+  syncing: boolean,
+  isConfigured: boolean,
+  missingEnvKeys: readonly string[],
+  whatsappLabels: WhatsappSettingsLabels["page"]
+): string | undefined {
+  if (syncing) return whatsappLabels.syncFromMetaBusy;
+  if (!isConfigured) return whatsappLabels.syncFromMetaUnavailable(missingEnvKeys.join(", "));
+  return undefined;
 }
 
 // ─── Dialog state hook ───────────────────────────────────────────────
@@ -266,6 +318,10 @@ function useWhatsappDialogs() {
 
 // ─── Snackbar hook ────────────────────────────────────────────────────
 
+/** Module-level stable references for the `useSyncExternalStore` reads below. */
+const NOOP_SUBSCRIBE = () => () => {};
+const SERVER_SNAPSHOT_TRUE = () => true;
+
 function useWhatsappSnackbar() {
   const [snackbar, setSnackbar] = useState<WhatsappSnackbar>(null);
 
@@ -278,6 +334,16 @@ function useWhatsappSnackbar() {
   }, []);
 
   return { snackbar, showSnackbar, closeSnackbar };
+}
+
+/**
+ * Mounted-state availability check: Meta's FB SDK rejects `FB.login` on plain
+ * HTTP pages, so the embedded-signup entry points surface a blocked state
+ * instead of launching. `useSyncExternalStore` keeps the server HTML and the
+ * first client render consistent (server snapshot reports supported).
+ */
+function useEmbeddedSignupBlocked(): boolean {
+  return !useSyncExternalStore(NOOP_SUBSCRIBE, isEmbeddedSignupSupported, SERVER_SNAPSHOT_TRUE);
 }
 
 // ─── Handlers hook ────────────────────────────────────────────────────
@@ -633,9 +699,17 @@ function useWhatsappUtilityHandlers({
   );
 
   const handleSync = useCallback(async () => {
+    // Snapshot the known numbers before syncing so the snackbar can report
+    // how many were newly added versus already managed.
+    const previousPhoneNumberIds = new Set(
+      (queries.accountsQuery.data?.whatsappAccounts ?? [])
+        .map(account => account.phoneNumberId)
+        .filter((phoneNumberId): phoneNumberId is string => typeof phoneNumberId === "string" && phoneNumberId !== "")
+    );
     await syncFromMetaAction(
       mutations.syncFromMeta,
       queries.accountsQuery.refetch,
+      previousPhoneNumberIds,
       setSyncing,
       labels.notifications,
       showSnackbar
@@ -667,6 +741,7 @@ function useWhatsappLabels(whatsappLabels: WhatsappSettingsLabels["page"]): What
       page: whatsappLabels,
       notifications: {
         syncSuccess: whatsappLabels.syncSuccess,
+        syncSuccessWithCounts: whatsappLabels.syncSuccessWithCounts,
         syncNoChange: whatsappLabels.syncNoChange,
         syncError: whatsappLabels.syncError,
         deleteSuccess: whatsappLabels.deleteSuccess,
@@ -699,12 +774,14 @@ interface WhatsappViewModelParts {
   labels: WhatsappSettingsLabels;
   esConfigId: string | null;
   esAppId: string | null;
+  embeddedSignupAllowedOriginsUrl: string | null;
   accounts: ReturnType<typeof useDerivedWhatsappData>["accounts"];
   templates: ReturnType<typeof useDerivedWhatsappData>["templates"];
   loading: boolean;
   queryError: boolean;
   isOptedIn: boolean;
   isConfigured: boolean;
+  syncDisabledReason: string | undefined;
   createHandler: ReturnType<typeof useWhatsappCreateHandler>;
   updateDeleteHandlers: ReturnType<typeof useWhatsappUpdateDeleteHandlers>;
   utilityHandlers: ReturnType<typeof useWhatsappUtilityHandlers>;
@@ -719,6 +796,7 @@ interface WhatsappViewModelParts {
   openEditPinDialog: (accountId: string) => void;
   openDeleteConfirmDialog: (accountId: string, displayName: string) => void;
   openEmbeddedSignupDialog: () => void;
+  embeddedSignupBlocked: boolean;
   closeDialog: () => void;
   refetchAccounts: () => void;
   refetchTemplates: () => void;
@@ -731,8 +809,10 @@ function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsView
     labels: p.labels,
     esConfigId: p.esConfigId,
     esAppId: p.esAppId,
+    embeddedSignupAllowedOriginsUrl: p.embeddedSignupAllowedOriginsUrl,
     embeddedSignupSubmitting: p.embeddedSignupHandler.embeddedSignupSubmitting,
     openEmbeddedSignupDialog: p.openEmbeddedSignupDialog,
+    embeddedSignupBlocked: p.embeddedSignupBlocked,
     handleEmbeddedSignupComplete: p.embeddedSignupHandler.handleEmbeddedSignupComplete,
     accounts: p.accounts,
     templates: p.templates,
@@ -740,6 +820,7 @@ function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsView
     queryError: p.queryError,
     isOptedIn: p.isOptedIn,
     isConfigured: p.isConfigured,
+    syncDisabledReason: p.syncDisabledReason,
     creating: p.createHandler.creating,
     deletingId: p.updateDeleteHandlers.deletingId,
     updatingId: p.updateDeleteHandlers.updatingId,
@@ -841,9 +922,24 @@ function useWhatsappPageInteractions(
     openEditTokenDialog,
     openEditPinDialog,
     openDeleteConfirmDialog,
-    openEmbeddedSignupDialog,
+    openEmbeddedSignupDialog: openEmbeddedSignupDialogRaw,
     closeDialog,
   } = useWhatsappDialogs();
+
+  const embeddedSignupBlocked = useEmbeddedSignupBlocked();
+
+  /**
+   * Guarded opener: on plain HTTP the FB SDK throws before the dialog can do
+   * anything, so every entry point (header connect, retry-setup) routes to a
+   * translated snackbar instead of opening the dialog.
+   */
+  const openEmbeddedSignupDialog = useCallback(() => {
+    if (!isEmbeddedSignupSupported()) {
+      showSnackbar(labels.page.embeddedSignupRequiresHttps, "error");
+      return;
+    }
+    openEmbeddedSignupDialogRaw();
+  }, [labels.page, showSnackbar, openEmbeddedSignupDialogRaw]);
 
   const { createHandler, updateDeleteHandlers, utilityHandlers } = useWhatsappHandlers({
     mutations,
@@ -872,6 +968,7 @@ function useWhatsappPageInteractions(
     openEditPinDialog,
     openDeleteConfirmDialog,
     openEmbeddedSignupDialog,
+    embeddedSignupBlocked,
     closeDialog,
     createHandler,
     updateDeleteHandlers,
@@ -897,21 +994,35 @@ export function useWhatsappSettingsViewModel(props?: {
   const mutations = useWhatsappMutations();
 
   const labels = useWhatsappLabels(whatsappLabels);
-  const { accounts, templates, loading, queryError, isOptedIn, isConfigured } = useDerivedWhatsappData(
-    queries,
-    mutations
-  );
+  const {
+    accounts,
+    templates,
+    loading,
+    queryError,
+    isOptedIn,
+    isConfigured,
+    missingEnvKeys,
+    embeddedSignupAllowedOriginsUrl,
+  } = useDerivedWhatsappData(queries, mutations);
   const page = useWhatsappPageInteractions(queries, mutations, labels);
+  const syncDisabledReason = resolveSyncDisabledReason(
+    page.utilityHandlers.syncing,
+    isConfigured,
+    missingEnvKeys,
+    whatsappLabels
+  );
 
   return buildWhatsappViewModel({
     labels,
     esConfigId,
     esAppId,
+    embeddedSignupAllowedOriginsUrl,
     accounts,
     templates,
     loading,
     isOptedIn,
     isConfigured,
+    syncDisabledReason,
     queryError,
     createHandler: page.createHandler,
     updateDeleteHandlers: page.updateDeleteHandlers,
@@ -927,6 +1038,7 @@ export function useWhatsappSettingsViewModel(props?: {
     openEditPinDialog: page.openEditPinDialog,
     openDeleteConfirmDialog: page.openDeleteConfirmDialog,
     openEmbeddedSignupDialog: page.openEmbeddedSignupDialog,
+    embeddedSignupBlocked: page.embeddedSignupBlocked,
     closeDialog: page.closeDialog,
     refetchAccounts: page.refetchAccounts,
     refetchTemplates: page.refetchTemplates,

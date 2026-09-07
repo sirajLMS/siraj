@@ -34,6 +34,7 @@ const meta = {
     labels: whatsappEn,
     configId: "cfg-es-123",
     appId: "app-456",
+    allowedOriginsUrl: "https://developers.facebook.com/apps/21202248997039/fb-business-login/settings/",
     onComplete: async () => {},
     onClose: fn(),
   },
@@ -68,4 +69,9 @@ export const Success: Story = {
 export const NotConfigured: Story = {
   name: "Not configured (no configId / appId)",
   args: { configId: null, appId: null },
+};
+
+export const AllowedOriginsUnavailable: Story = {
+  name: "Launch surface without allowed-origins link (URL unresolved)",
+  args: { allowedOriginsUrl: null },
 };

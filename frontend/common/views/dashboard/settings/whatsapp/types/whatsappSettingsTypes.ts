@@ -121,6 +121,7 @@ export interface WhatsappSettingsLabels {
   readonly page: WhatsappLabels;
   readonly notifications: {
     readonly syncSuccess: string;
+    readonly syncSuccessWithCounts: (synced: number, added: number) => string;
     readonly syncNoChange: string;
     readonly syncError: string;
     readonly deleteSuccess: string;
@@ -148,6 +149,12 @@ export interface WhatsappSettingsViewModel {
   readonly loading: boolean;
   readonly isOptedIn: boolean;
   readonly isConfigured: boolean;
+  /**
+   * Tooltip reason for the disabled "Sync from Meta" action (undefined when the
+   * action is enabled): the busy label while syncing, or the missing env keys
+   * when neither an account nor the env bootstrap can serve Meta sync.
+   */
+  readonly syncDisabledReason: string | undefined;
 
   // ── Loading states (per-row) ─────────────────────────────────────────
   /** Is the create mutation in progress. */
@@ -228,10 +235,18 @@ export interface WhatsappSettingsViewModel {
   readonly esConfigId?: string | null;
   /** Meta App ID used by the FB SDK init (null when not configured). */
   readonly esAppId?: string | null;
+  /** Meta App Dashboard "Facebook Login for Business" settings URL, resolved via GraphQL (null when not configured). */
+  readonly embeddedSignupAllowedOriginsUrl: string | null;
   /** True while the completion mutation is in flight. */
   readonly embeddedSignupSubmitting: boolean;
   /** Open the embedded-signup dialog. */
   readonly openEmbeddedSignupDialog: () => void;
+  /**
+   * True when the page is served over plain HTTP — Meta rejects FB.login
+   * outside HTTPS, so connect entry points render disabled with a hint
+   * (clicking still routes to a translated snackbar via the guarded opener).
+   */
+  readonly embeddedSignupBlocked: boolean;
   /** Submit the captured ES session payload to the backend. */
   readonly handleEmbeddedSignupComplete: (payload: WhatsappEmbeddedSignupPayload) => Promise<void>;
 

@@ -39,6 +39,8 @@ export interface EmbeddedSignupDialogProps {
   readonly configId: string | null;
   /** Server-resolved Meta App ID for FB SDK init. */
   readonly appId: string | null;
+  /** Meta App Dashboard "Facebook Login for Business" settings URL — where allowed origins are registered (null → guidance hidden). */
+  readonly allowedOriginsUrl?: string | null;
   readonly onComplete: (payload: WhatsappEmbeddedSignupPayload) => Promise<void>;
   readonly onClose: () => void;
 }
@@ -49,6 +51,7 @@ export function EmbeddedSignupDialog({
   labels,
   configId,
   appId,
+  allowedOriginsUrl = null,
   onComplete,
   onClose,
 }: Readonly<EmbeddedSignupDialogProps>) {
@@ -90,15 +93,30 @@ export function EmbeddedSignupDialog({
           <CloseOutlined fontSize="small" />
         </IconButton>
       </DialogTitle>
-      <DialogContent sx={{ pb: 1 }}>
+      <DialogContent dividers sx={{ pb: 1 }}>
         {configured ? (
-          <Box
-            sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: "stretch", gap: 3, mt: 1 }}
-          >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2.5, sm: 3 }, pt: 1 }}>
             <Stepper
-              orientation="vertical"
               activeStep={activeStep}
-              sx={{ minWidth: { sm: 200 }, justifyContent: { xs: "flex-start", sm: "center" } }}
+              alternativeLabel
+              sx={theme => ({
+                width: "100%",
+                "& .MuiStepLabel-label": {
+                  color: theme.palette.text.secondary,
+                  textWrap: "balance",
+                  mt: 0.5,
+                },
+                "& .MuiStepLabel-label.Mui-active, & .MuiStepLabel-label.Mui-completed": {
+                  color: theme.palette.text.primary,
+                  fontWeight: 600,
+                },
+                // Upcoming steps ship as dark-navy numerals on near-black
+                // circles at the default tokens; lift both to readable levels.
+                "& .MuiStepIcon-root:not(.Mui-active):not(.Mui-completed)": {
+                  color: theme.palette.action.selected,
+                  "& .MuiStepIcon-text": { fill: theme.palette.text.primary },
+                },
+              })}
             >
               {stepLabels.map((label, index) => (
                 <Step key={label} completed={phase === "success" || index < activeStep}>
@@ -106,14 +124,13 @@ export function EmbeddedSignupDialog({
                 </Step>
               ))}
             </Stepper>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <EmbeddedSignupPhaseContent
-                phase={phase}
-                labels={labels}
-                onLaunch={session.launch}
-                onRetry={session.reset}
-              />
-            </Box>
+            <EmbeddedSignupPhaseContent
+              phase={phase}
+              labels={labels}
+              allowedOriginsUrl={allowedOriginsUrl}
+              onLaunch={session.launch}
+              onRetry={session.reset}
+            />
           </Box>
         ) : (
           <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 1 }}>
@@ -122,7 +139,12 @@ export function EmbeddedSignupDialog({
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pt: 1, pb: 2 }}>
-        <Button onClick={handleClose} disabled={busy}>
+        <Button
+          onClick={handleClose}
+          disabled={busy}
+          color="inherit"
+          sx={{ color: theme => theme.palette.text.secondary }}
+        >
           {labels.cancel}
         </Button>
         {phase === "success" ? (

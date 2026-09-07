@@ -7,5 +7,5 @@ import {
 } from "@/frontend/common/components/ui/form/snackbar/FormSnackbarShared";
 
 export function FormErrorSnackbar(props: Readonly<Omit<FormSnackbarSharedProps, "icon" | "severityColor">>) {
-  return <FormSnackbarShared icon={ErrorOutlined} severityColor="error" component="alert" {...props} />;
+  return <FormSnackbarShared icon={ErrorOutlined} severityColor="error" role="alert" {...props} />;
 }

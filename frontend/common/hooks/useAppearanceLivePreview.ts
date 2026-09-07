@@ -30,10 +30,12 @@ import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePr
  *
  * ## Cleanup
  *
- * On customize mode exit (or unmount), the hook restores the original DOM
- * values captured on mount, so the dashboard reverts to the server-rendered
- * published state. This satisfies the "exit = revert to current published"
- * requirement (BUG-D).
+ * On customize mode exit (or unmount), the hook restores the published state
+ * to the DOM. When the session published changes (the store's `lastPublished`
+ * snapshot), the restore applies those values — the entry-time captures are
+ * pre-publish and would stomp the freshly published values back to the old
+ * ones. Without a publish, it restores the original DOM values captured on
+ * mount, reverting to the server-rendered published state.
  *
  * ## SSR Safety
  *
@@ -45,6 +47,7 @@ export function useAppearanceLivePreview(): void {
   const siteTitle = useAppearancePreviewStore(s => s.draft.siteTitle);
   const siteDescription = useAppearancePreviewStore(s => s.draft.siteDescription);
   const logoUrl = useAppearancePreviewStore(s => s.draft.logoUrl ?? null);
+  const lastPublished = useAppearancePreviewStore(s => s.lastPublished);
 
   // Capture the original DOM values on mount so we can restore them on exit.
   const originalsRef = useRef<{
@@ -105,26 +108,44 @@ export function useAppearanceLivePreview(): void {
     }
   }, [isCustomizeMode, logoUrl]);
 
-  // Restore originals on customize mode exit.
+  // Restore published state on customize mode exit. A publish inside the
+  // session replaces the entry-time captures as the restore target, since
+  // those captures hold pre-publish values.
   useEffect(() => {
     if (isCustomizeMode) return;
     const originals = originalsRef.current;
-    if (!originals) return;
+    if (!originals && !lastPublished) return;
 
-    document.title = originals.documentTitle;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc && originals.metaDescription !== null) {
-      metaDesc.setAttribute("content", originals.metaDescription);
+    const restoredTitle = lastPublished?.siteTitle ?? originals?.documentTitle;
+    if (restoredTitle !== undefined) {
+      document.title = restoredTitle;
     }
+    const restoredDescription = lastPublished?.siteDescription ?? originals?.metaDescription;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && restoredDescription != null) {
+      metaDesc.setAttribute("content", restoredDescription);
+    }
+    const restoredBrandName = lastPublished?.siteName ?? originals?.brandNameText;
     const brandNameEl = document.querySelector('[data-appearance-target="brand-name"]');
-    if (brandNameEl && originals.brandNameText !== null) {
-      brandNameEl.textContent = originals.brandNameText;
+    if (brandNameEl && restoredBrandName != null) {
+      brandNameEl.textContent = restoredBrandName;
     }
     const brandLogoEl = document.querySelector('[data-appearance-target="brand-logo"]');
-    if (brandLogoEl && originals.brandLogoHtml !== null) {
-      brandLogoEl.innerHTML = originals.brandLogoHtml;
+    if (brandLogoEl) {
+      if (lastPublished?.logoUrl) {
+        const img = document.createElement("img");
+        img.src = lastPublished.logoUrl;
+        img.alt = "Site logo";
+        img.style.width = "24px";
+        img.style.height = "24px";
+        img.style.objectFit = "contain";
+        img.style.borderRadius = "2px";
+        brandLogoEl.replaceChildren(img);
+      } else if (originals?.brandLogoHtml != null) {
+        brandLogoEl.innerHTML = originals.brandLogoHtml;
+      }
     }
 
     originalsRef.current = null;
-  }, [isCustomizeMode]);
+  }, [isCustomizeMode, lastPublished]);
 }

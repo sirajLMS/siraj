@@ -143,12 +143,25 @@ export const SYSTEM_SETTINGS_DATA = [
 
 type EnvConfigPlaceholderSetting = SystemSettingsService.SystemSettingUpsertInput;
 
+// ---------------------------------------------------------------------------
+// PERMANENT RULE — DO NOT REMOVE OR "SIMPLIFY" THIS FILTER:
+// WhatsApp env keys (WHATSAPP_*, category "whatsapp") must NEVER be seeded
+// into the database — not now, not in the future, not even as empty placeholder
+// rows. WhatsApp configuration lives in `.env` ONLY and must never appear in
+// `system_settings` (no `env::WHATSAPP_*` rows). Do not revert this category
+// filter, do not create any other seeder that inserts WhatsApp env keys, and
+// do not work around it by hand-writing `env::WHATSAPP_*` rows elsewhere.
+// ---------------------------------------------------------------------------
+
 /**
  * Placeholder rows for Settings → Environment Config. Empty `value` is treated as
  * "no override" by the resolver (env fallback remains intact).
+ *
+ * The `excludeFromDb` filter plus the `category !== "whatsapp"` guard above:
+ * WhatsApp keys are OUT by policy, independent of any descriptor flags.
  */
 const ENV_CONFIG_PLACEHOLDER_SETTINGS: EnvConfigPlaceholderSetting[] = ENV_CONFIG_KEYS.filter(
-  descriptor => !descriptor.excludeFromDb
+  descriptor => !descriptor.excludeFromDb && descriptor.category !== "whatsapp"
 ).map(descriptor => ({
   key: `${ENV_SETTING_KEY_PREFIX}${descriptor.key}`,
   value: "",
