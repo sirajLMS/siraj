@@ -27,6 +27,31 @@ const UPSERT_LOCK_KEY = "whatsapp-config-upsert";
 type WhatsappConfigPatchValue = WhatsappConfigSeedInput[keyof WhatsappConfigSeedInput] | undefined;
 
 /**
+ * Raised when an upsert patch carries no field at all (or only `undefined`
+ * values) while the singleton table is empty. There is no row to read back
+ * and no credential to insert — persisting an all-null singleton row would
+ * permanently shadow the `WHATSAPP_*` env fallback. Callers that legitimately
+ * mean "no change" get their existing row back instead (the table is not
+ * empty in that case); this error marks the empty-table invariant violation.
+ */
+export class WhatsappConfigEmptyPatchError extends Error {
+  constructor() {
+    super("No configuration to update: the upsert patch is empty and no whatsapp_configs row exists.");
+    this.name = "WhatsappConfigEmptyPatchError";
+  }
+}
+
+/**
+ * Callback invoked with the FINAL MERGED ROW (inserted, updated, or read
+ * back) while the advisory lock and row lock are still held, before the
+ * enclosing transaction commits. Cross-table side effects that must stay
+ * atomic with the row write (e.g. the env-config override write-through)
+ * belong here: a rejection rolls the whole transaction back, so the row and
+ * its side effects either both persist or neither does.
+ */
+type WhatsappConfigMergedRowHook = (t: DBTransaction, mergedRow: WhatsappConfigSelectType) => Promise<void>;
+
+/**
  * Runs the transactional body in the caller's scope when one is provided,
  * otherwise opens a dedicated transaction. Configuration writes mutate the
  * singleton row and must hold locks, which only exist inside a transaction
@@ -40,29 +65,44 @@ async function runWithTx<T>(runner: (t: DBTransaction) => Promise<T>, tx?: DBTra
 /**
  * Applies one update-or-insert cycle for the singleton row while holding the
  * advisory lock and the row lock. Provided fields merge onto the current row
- * (absent fields keep their values); an empty patch is a no-op read-back.
+ * (absent fields keep their values); an empty patch is a true no-op — the
+ * existing row is read back, and on an empty table it raises
+ * {@link WhatsappConfigEmptyPatchError} instead of inserting an all-null
+ * singleton. When provided, the merged-row hook runs inside the same
+ * transaction after the row write and before commit.
  */
 async function applySingletonUpsert(
   t: DBTransaction,
-  input: WhatsappConfigSeedInput
+  input: WhatsappConfigSeedInput,
+  onMergedRow?: WhatsappConfigMergedRowHook
 ): Promise<WhatsappConfigSelectType> {
   await acquireAdvisoryLock(t, UPSERT_LOCK_KEY);
   const [existing] = await withForUpdate(
     t.select().from(whatsappConfigs).orderBy(asc(whatsappConfigs.createdAt))
   ).limit(1);
+  const patchValues: WhatsappConfigPatchValue[] = Object.values(input);
+  const isEmptyPatch = !patchValues.some(value => value !== undefined);
   if (!existing) {
+    if (isEmptyPatch) {
+      throw new WhatsappConfigEmptyPatchError();
+    }
     const now = new Date();
     const [created] = await t
       .insert(whatsappConfigs)
       .values({ ...input, createdAt: now, updatedAt: now })
       .returning();
+    if (onMergedRow) {
+      await onMergedRow(t, created);
+    }
     return created;
   }
-  const patchValues: WhatsappConfigPatchValue[] = Object.values(input);
-  if (!patchValues.some(value => value !== undefined)) {
+  if (isEmptyPatch) {
     return existing;
   }
   const [updated] = await t.update(whatsappConfigs).set(input).where(eq(whatsappConfigs.id, existing.id)).returning();
+  if (onMergedRow) {
+    await onMergedRow(t, updated);
+  }
   return updated;
 }
 
@@ -105,11 +145,17 @@ export namespace WhatsappConfigRepository {
    * `appSecret` and `accessToken` are handed over as plaintext — encryption
    * happens transparently at the driver boundary, so no manual encryption
    * and no ciphertext ever passes through this method.
+   *
+   * `onMergedRow` (optional) runs INSIDE the advisory-locked transaction,
+   * after the merged row is computed and before commit — see
+   * {@link WhatsappConfigMergedRowHook}. A hook rejection fails the upsert
+   * and rolls the transaction back (the row is not persisted).
    */
   export async function upsertWhatsappConfig(
     input: WhatsappConfigSeedInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    onMergedRow?: WhatsappConfigMergedRowHook
   ): Promise<WhatsappConfigSelectType> {
-    return runWithTx(t => applySingletonUpsert(t, input), tx);
+    return runWithTx(t => applySingletonUpsert(t, input, onMergedRow), tx);
   }
 }

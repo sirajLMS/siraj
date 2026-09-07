@@ -46,6 +46,16 @@ export const WHATSAPP_CONFIG_ENV_SOURCES = [
 ] as const satisfies readonly { field: WhatsappConfigCredentialField; envKey: string }[];
 
 /**
+ * The DB-writable members of {@link WHATSAPP_CONFIG_ENV_SOURCES}, derived by
+ * filtering so each entry keeps its literal `field`/`envKey` types (a widened
+ * annotation would blur `envKey` to `string` and lose exhaustiveness).
+ */
+type WhatsappConfigDbWritableEnvSource = Extract<
+  (typeof WHATSAPP_CONFIG_ENV_SOURCES)[number],
+  { field: Exclude<WhatsappConfigCredentialField, "accessToken"> }
+>;
+
+/**
  * Subset of {@link WHATSAPP_CONFIG_ENV_SOURCES} whose env-config keys are
  * DB-manageable, i.e. safe to write through to the env-config override system
  * (`system_settings` rows under `env::<key>`) when the configuration row is
@@ -58,10 +68,10 @@ export const WHATSAPP_CONFIG_ENV_SOURCES = [
  * living only in the `whatsapp_configs` row (outbound Graph calls resolve
  * per-account tokens from `whatsapp_accounts`, not from this global key).
  */
-export const WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES: readonly {
-  field: WhatsappConfigCredentialField;
-  envKey: string;
-}[] = WHATSAPP_CONFIG_ENV_SOURCES.filter(({ field }) => field !== "accessToken");
+export const WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES: readonly WhatsappConfigDbWritableEnvSource[] =
+  WHATSAPP_CONFIG_ENV_SOURCES.filter(
+    (source): source is WhatsappConfigDbWritableEnvSource => source.field !== "accessToken"
+  );
 
 /**
  * Maximum accepted input length per credential field, enforced by the config
@@ -80,6 +90,17 @@ export const WHATSAPP_CONFIG_FIELD_MAX_LENGTHS = {
   accessToken: 512,
   esConfigId: 64,
 } as const satisfies Record<WhatsappConfigCredentialField, number>;
+
+/**
+ * Matches the Unicode `Cc` (control) category — C0 controls (`\n`, `\r`,
+ * `\t`, `\0`-`\x1F`), DEL, and C1 controls (`\u007F`-`\u009F`) — characters
+ * that cannot legitimately appear in a Meta credential value and that the
+ * config service's normalization rejects (paste artifacts, protocol
+ * smuggling through header-bound values). Written as a property escape
+ * rather than explicit `\uXXXX` ranges so no literal control characters
+ * appear in the source (the sanitizer's own pattern must stay lint-clean).
+ */
+export const WHATSAPP_CONFIG_CONTROL_CHARS_PATTERN = /[\p{Cc}]/u;
 
 /**
  * Resolves the Graph API version for WhatsApp Cloud API calls.

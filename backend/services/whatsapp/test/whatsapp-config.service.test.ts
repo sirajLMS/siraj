@@ -9,8 +9,23 @@ import type { WhatsappConfigSeedInput, WhatsappConfigSelectType } from "@/backen
 // ---------------------------------------------------------------------------
 
 const getWhatsappConfigMock = mock(async (): Promise<unknown> => null);
+
+/** Opaque transaction token the repo mock hands to the merged-row hook. */
+const TX_TOKEN = { tx: "test-transaction" };
+/** Rows that reached the mock's commit point (hook succeeded) — rollback proofs. */
+const persistedRows: Record<string, unknown>[] = [];
+
 const upsertWhatsappConfigMock = mock(
-  async (input: Record<string, unknown>): Promise<unknown> => ({ id: "cfg_stored_1", ...input })
+  async (
+    input: Record<string, unknown>,
+    _tx?: unknown,
+    onMergedRow?: (t: unknown, mergedRow: Record<string, unknown>) => Promise<void>
+  ): Promise<unknown> => {
+    const row = { id: "cfg_stored_1", ...input };
+    await onMergedRow?.(TX_TOKEN, row);
+    persistedRows.push(row);
+    return row;
+  }
 );
 
 /** Env-config override writes recorded per test (key → last value). */
@@ -19,6 +34,23 @@ const envOverrideUpserts = new Map<string, string>();
 const envOverrideDeletes: string[] = [];
 /** Env-config cache invalidations recorded per test. */
 const envCacheInvalidations: string[] = [];
+
+/**
+ * The env-config audit rows the (real) `auditEnvConfigChange` helper writes —
+ * the structural subset of `CreateAuditLogInput` the assertions read back.
+ */
+interface EnvConfigAuditLogInput {
+  actorUserId: string;
+  actorType: string;
+  action: string;
+  entityId: string;
+  previousState: unknown;
+  newState: unknown;
+  metadata: { event?: string } | null;
+}
+
+/** Audit-log inputs captured from the (real) env-config audit path. */
+const auditLogInputs: EnvConfigAuditLogInput[] = [];
 
 /** Mutable env-config values resolved per test. */
 const envValues = new Map<string, string | undefined>();
@@ -59,12 +91,21 @@ const loggerCalls: { level: string; args: unknown[] }[] = [];
 // The repository module is mocked at its direct file path — importing the
 // service must never open a real database connection, and mocking the direct
 // specifier keeps the service's import chain independent of repo-barrel
-// re-exports.
+// re-exports. The typed empty-patch error is part of the module's public
+// surface (the service rethrows it), so the mock carries a matching stub.
+class WhatsappConfigEmptyPatchErrorStub extends Error {
+  constructor() {
+    super("No configuration to update: the upsert patch is empty and no whatsapp_configs row exists.");
+    this.name = "WhatsappConfigEmptyPatchError";
+  }
+}
+
 void mock.module("@/backend/db/repo/whatsapp/whatsapp-config.repository", () => ({
   WhatsappConfigRepository: {
     getWhatsappConfig: getWhatsappConfigMock,
     upsertWhatsappConfig: upsertWhatsappConfigMock,
   },
+  WhatsappConfigEmptyPatchError: WhatsappConfigEmptyPatchErrorStub,
 }));
 
 void mock.module("@/backend/lib/logger", () => ({
@@ -75,6 +116,25 @@ void mock.module("@/backend/lib/logger", () => ({
     error: (...args: unknown[]) => loggerCalls.push({ level: "error", args }),
     debug: (...args: unknown[]) => loggerCalls.push({ level: "debug", args }),
     logDomainError: (...args: unknown[]) => loggerCalls.push({ level: "logDomainError", args }),
+  },
+}));
+
+// Audit sink — mocked at the direct specifier BEFORE the system barrel is
+// imported, so the REAL `auditEnvConfigChange` (registry masking, "***" for
+// secret keys) runs while its `AuditService` writes land in this recorder.
+const createManyAuditLogsMock = mock(
+  async (inputs: readonly EnvConfigAuditLogInput[], _tx?: unknown): Promise<unknown[]> => {
+    auditLogInputs.push(...inputs);
+    return [];
+  }
+);
+
+await mock.module("@/backend/services/system/audit.service", () => ({
+  AuditService: {
+    createManyAuditLogs: createManyAuditLogsMock,
+    upsertManyAuditLogs: async (): Promise<unknown[]> => [],
+    createManyAdminAuditLogs: async (): Promise<unknown[]> => [],
+    upsertManyAdminAuditLogs: async (): Promise<unknown[]> => [],
   },
 }));
 
@@ -174,6 +234,8 @@ beforeEach(() => {
   envOverrideUpserts.clear();
   envOverrideDeletes.length = 0;
   envCacheInvalidations.length = 0;
+  auditLogInputs.length = 0;
+  persistedRows.length = 0;
   fetchUrls.length = 0;
   fetchAuthHeaders.length = 0;
   loggerCalls.length = 0;
@@ -181,11 +243,21 @@ beforeEach(() => {
   getWhatsappConfigMock.mockResolvedValue(null);
   upsertWhatsappConfigMock.mockReset();
   upsertWhatsappConfigMock.mockImplementation(
-    async (input: Record<string, unknown>): Promise<unknown> => ({ id: "cfg_stored_1", ...input })
+    async (
+      input: Record<string, unknown>,
+      _tx?: unknown,
+      onMergedRow?: (t: unknown, mergedRow: Record<string, unknown>) => Promise<void>
+    ): Promise<unknown> => {
+      const row = { id: "cfg_stored_1", ...input };
+      await onMergedRow?.(TX_TOKEN, row);
+      persistedRows.push(row);
+      return row;
+    }
   );
   upsertEnvConfigOverrideMock.mockClear();
   deleteEnvConfigOverrideMock.mockClear();
   invalidateEnvConfigCacheMock.mockClear();
+  createManyAuditLogsMock.mockClear();
   fetchMock.mockClear();
 });
 
@@ -312,24 +384,59 @@ describe("saveConfiguration", () => {
 });
 
 describe("saveConfiguration — env-config write-through", () => {
-  test("propagates saved values as env-config overrides and invalidates their cache", async () => {
-    await WhatsappConfigService.saveConfiguration({
-      appId: "app_ui_1",
-      appSecret: "sec_ui_1",
-      verifyToken: "tok_ui_1",
-    });
-
-    expect(envOverrideUpserts.get("WHATSAPP_APP_ID")).toBe("app_ui_1");
-    expect(envOverrideUpserts.get("WHATSAPP_APP_SECRET")).toBe("sec_ui_1");
-    expect(envOverrideUpserts.get("WHATSAPP_VERIFY_TOKEN")).toBe("tok_ui_1");
-    expect(envCacheInvalidations).toEqual(
-      expect.arrayContaining(["WHATSAPP_APP_ID", "WHATSAPP_APP_SECRET", "WHATSAPP_VERIFY_TOKEN"])
+  /**
+   * Installs a repo mock that merges the patch onto the stored row (the
+   * existing-row save shape) before invoking the merged-row hook — the
+   * production repo computes the FINAL MERGED ROW inside its transaction and
+   * hands it to the propagation.
+   */
+  function withExistingRowMerge(): void {
+    upsertWhatsappConfigMock.mockImplementation(
+      async (
+        input: Record<string, unknown>,
+        _tx?: unknown,
+        onMergedRow?: (t: unknown, mergedRow: Record<string, unknown>) => Promise<void>
+      ): Promise<WhatsappConfigSelectType> => {
+        const merged = { ...DB_ROW, ...input };
+        await onMergedRow?.(TX_TOKEN, merged);
+        persistedRows.push(merged);
+        return merged;
+      }
     );
-    // Omitted fields are untouched — no override writes or invalidations.
-    expect(envOverrideUpserts.has("WHATSAPP_PHONE_NUMBER_ID")).toBe(false);
-    expect(envOverrideUpserts.has("WHATSAPP_WABA_ID")).toBe(false);
+  }
+
+  test("propagates ALL writable fields of the final merged row, not just the patch", async () => {
+    withExistingRowMerge();
+    await WhatsappConfigService.saveConfiguration({ verifyToken: "tok_ui_1" });
+
+    // Untouched fields are reconciled from the stored row — stale overrides
+    // for non-patched fields cannot survive a save.
+    // A row credential column is `string | null` — `?? undefined` normalizes
+    // the null case to the map's `undefined` (no override value) so the
+    // `toBe` argument type matches the received `string | undefined`.
+    expect(envOverrideUpserts.get("WHATSAPP_APP_ID")).toBe(DB_ROW.appId ?? undefined);
+    expect(envOverrideUpserts.get("WHATSAPP_APP_SECRET")).toBe(DB_ROW.appSecret ?? undefined);
+    expect(envOverrideUpserts.get("WHATSAPP_VERIFY_TOKEN")).toBe("tok_ui_1");
+    expect(envOverrideUpserts.get("WHATSAPP_PHONE_NUMBER_ID")).toBe(DB_ROW.phoneNumberId ?? undefined);
+    expect(envOverrideUpserts.get("WHATSAPP_WABA_ID")).toBe(DB_ROW.wabaId ?? undefined);
+    // A null field of the merged row deletes its override (no stale copy).
+    expect(envOverrideDeletes).toContain("WHATSAPP_ES_CONFIG_ID");
     expect(envOverrideUpserts.has("WHATSAPP_ES_CONFIG_ID")).toBe(false);
-    expect(envCacheInvalidations).not.toContain("WHATSAPP_PHONE_NUMBER_ID");
+    // The access token is never written through (excludeFromDb hard contract).
+    expect(envOverrideUpserts.has("WHATSAPP_ACCESS_TOKEN")).toBe(false);
+    expect(envOverrideDeletes).not.toContain("WHATSAPP_ACCESS_TOKEN");
+    // Cache invalidation covers every propagated key, still never the token.
+    expect(envCacheInvalidations).toEqual(
+      expect.arrayContaining([
+        "WHATSAPP_APP_ID",
+        "WHATSAPP_APP_SECRET",
+        "WHATSAPP_VERIFY_TOKEN",
+        "WHATSAPP_PHONE_NUMBER_ID",
+        "WHATSAPP_WABA_ID",
+        "WHATSAPP_ES_CONFIG_ID",
+      ])
+    );
+    expect(envCacheInvalidations).not.toContain("WHATSAPP_ACCESS_TOKEN");
   });
 
   test("override values match the persisted row (trimmed)", async () => {
@@ -357,18 +464,80 @@ describe("saveConfiguration — env-config write-through", () => {
     expect(envCacheInvalidations).toContain("WHATSAPP_WABA_ID");
   });
 
-  test("an override write failure does not fail the save and still invalidates the cache", async () => {
+  test("an override write failure fails the save and rolls the row back — no silent divergence", async () => {
     upsertEnvConfigOverrideMock.mockRejectedValueOnce(new Error("override write boom"));
 
-    const stored = await WhatsappConfigService.saveConfiguration({ verifyToken: "tok_ui_marker_value" });
+    const error = await expectRejection(
+      WhatsappConfigService.saveConfiguration({ verifyToken: "tok_ui_marker_value" })
+    );
 
-    expect(stored.id).toBe("cfg_stored_1");
-    expect(envCacheInvalidations).toContain("WHATSAPP_VERIFY_TOKEN");
-    expect(
-      loggerCalls.some(call => call.level === "warn" && JSON.stringify(call.args).includes("WHATSAPP_VERIFY_TOKEN"))
-    ).toBe(true);
-    // The warning carries the key name only — never the credential value.
+    // The surfaced outcome: the mutation errors instead of returning success.
+    expect(error).toBeInstanceOf(DatabaseUnavailableError);
+    // Rollback proof: the row never reached the mock's commit point, so the
+    // override store and the persisted row stay consistent.
+    expect(persistedRows).toHaveLength(0);
+    // Nothing committed — the pre-save override state is still authoritative,
+    // so no cache invalidation was needed (and none ran).
+    expect(envCacheInvalidations).toHaveLength(0);
+    // The domain-error log carries the failure without the credential value.
     expect(allLoggerOutput()).not.toContain("tok_ui_marker_value");
+  });
+
+  test("an override delete failure fails the save as well (deletes are failure-atomic)", async () => {
+    withExistingRowMerge(); // DB_ROW.esConfigId is null → delete path runs.
+    deleteEnvConfigOverrideMock.mockRejectedValueOnce(new Error("override delete boom"));
+
+    const error = await expectRejection(WhatsappConfigService.saveConfiguration({ verifyToken: "tok_ui_1" }));
+
+    expect(error).toBeInstanceOf(DatabaseUnavailableError);
+    expect(persistedRows).toHaveLength(0);
+  });
+
+  test("propagation runs inside the upsert and saves serialize on the lock", async () => {
+    const events: string[] = [];
+    // Emulates the repository's advisory lock: each upsert waits for the
+    // previous one to finish (sequential lock acquisition), so a save's
+    // propagation cannot interleave with another save's write window.
+    let lockChain: Promise<unknown> = Promise.resolve();
+    upsertWhatsappConfigMock.mockImplementation(
+      (
+        input: Record<string, unknown>,
+        _tx?: unknown,
+        onMergedRow?: (t: unknown, mergedRow: Record<string, unknown>) => Promise<void>
+      ): Promise<unknown> => {
+        const run = async (): Promise<WhatsappConfigSelectType> => {
+          const row: WhatsappConfigSelectType = { ...DB_ROW, id: "cfg_stored_1", ...input };
+          const token = row.verifyToken;
+          events.push(`begin:${token}`);
+          await onMergedRow?.(TX_TOKEN, row);
+          events.push(`commit:${token}`);
+          persistedRows.push(row);
+          return row;
+        };
+        const result = lockChain.then(run, run);
+        lockChain = result.catch(() => undefined);
+        return result;
+      }
+    );
+
+    await Promise.all([
+      WhatsappConfigService.saveConfiguration({ verifyToken: "tok-A" }),
+      WhatsappConfigService.saveConfiguration({ verifyToken: "tok-B" }),
+    ]);
+
+    expect(persistedRows).toHaveLength(2);
+    // The two write windows did not interleave: the event log strictly
+    // alternates begin → commit → begin → commit (propagation happens inside
+    // the lock window, not after it).
+    expect(events).toHaveLength(4);
+    expect(events[0]).toMatch(/^begin:/);
+    expect(events[0]?.slice("begin:".length)).toBe(events[1]?.slice("commit:".length));
+    expect(events[2]).toMatch(/^begin:/);
+    expect(events[3]).toMatch(/^commit:/);
+    // The override store ends up consistent with the WINNING row: the last
+    // committed save's token is the one the overrides carry.
+    const winner = events[3]?.slice("commit:".length);
+    expect(envOverrideUpserts.get("WHATSAPP_VERIFY_TOKEN")).toBe(winner);
   });
 
   test("skips the write-through when the caller opts out (env bootstrap seeder)", async () => {
@@ -381,6 +550,58 @@ describe("saveConfiguration — env-config write-through", () => {
     expect(envOverrideUpserts.size).toBe(0);
     expect(envOverrideDeletes).toHaveLength(0);
     expect(envCacheInvalidations).toHaveLength(0);
+  });
+});
+
+describe("saveConfiguration — env-config audit trail", () => {
+  const ACTOR = "aaaa0001-aaaa-aaaa-aaaa-aaaa0001aaaa";
+
+  function auditEntriesFor(event: string) {
+    return auditLogInputs.filter(input => input.metadata?.event === event);
+  }
+
+  test("writes one audit entry per propagated key with the actor and masked secret values", async () => {
+    await WhatsappConfigService.saveConfiguration(
+      { appId: "app_ui_1", verifyToken: "tok_ui_1", phoneNumberId: "1050" },
+      { actorUserId: ACTOR }
+    );
+
+    const upserts = auditEntriesFor("env_config.upsert");
+    expect(upserts).toHaveLength(3);
+
+    const byKey = new Map(upserts.map(entry => [entry.entityId, entry]));
+    // Secret keys (registry isSecret) are masked to "***" — never plaintext.
+    expect(byKey.get("env::WHATSAPP_APP_ID")?.newState).toEqual({ value: "***" });
+    expect(byKey.get("env::WHATSAPP_VERIFY_TOKEN")?.newState).toEqual({ value: "***" });
+    // Non-secret keys record the propagated value.
+    expect(byKey.get("env::WHATSAPP_PHONE_NUMBER_ID")?.newState).toEqual({ value: "1050" });
+    for (const entry of upserts) {
+      expect(entry.actorUserId).toBe(ACTOR);
+      expect(entry.actorType).toBe("USER");
+      expect(entry.previousState).toBeNull();
+    }
+    // The audit writes joined the caller's transaction (same tx handle the
+    // repo handed to the propagation hook).
+    expect(createManyAuditLogsMock).toHaveBeenCalledTimes(3);
+    expect(createManyAuditLogsMock.mock.calls[0][1]).toBe(TX_TOKEN);
+  });
+
+  test("a cleared field writes an env_config.delete audit entry", async () => {
+    await WhatsappConfigService.saveConfiguration({ wabaId: null, verifyToken: "tok_ui_1" }, { actorUserId: ACTOR });
+
+    const deletes = auditEntriesFor("env_config.delete");
+    expect(deletes).toHaveLength(1);
+    expect(deletes[0]?.entityId).toBe("env::WHATSAPP_WABA_ID");
+    expect(deletes[0]?.actorUserId).toBe(ACTOR);
+    expect(deletes[0]?.action).toBe("DELETE");
+  });
+
+  test("without actor attribution no audit entries are written", async () => {
+    await WhatsappConfigService.saveConfiguration({ verifyToken: "tok_ui_1" });
+
+    expect(auditLogInputs).toHaveLength(0);
+    // The propagation itself still ran.
+    expect(envOverrideUpserts.get("WHATSAPP_VERIFY_TOKEN")).toBe("tok_ui_1");
   });
 });
 
@@ -491,6 +712,88 @@ describe("seedOrGet — look-before-create", () => {
     const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
 
     const result = await seedOrGetWhatsappConfig({ hasExisting, persist });
+
+    expect(result).toBeUndefined();
+    expect(hasExisting).not.toHaveBeenCalled();
+    expect(persist).not.toHaveBeenCalled();
+  });
+
+  test("carries the service-resolved values, not a raw process.env read (override-influenced)", async () => {
+    // The raw env var holds a DIFFERENT value than the resolver returns — the
+    // resolver models a `system_settings` override (DB-first resolution), and
+    // the seed must carry the override, matching what enforcement resolves.
+    process.env.WHATSAPP_APP_ID = "raw_env_app_id";
+    try {
+      const persist = mock(
+        (_input: WhatsappConfigSeedInput): Promise<WhatsappConfigSelectType> => Promise.resolve(DB_ROW)
+      );
+
+      await seedOrGetWhatsappConfig({
+        hasExisting: async () => false,
+        resolveEnvValues: async () => ({ appId: "resolved_override_app_id" }),
+        persist,
+      });
+
+      const payload = persist.mock.calls[0][0];
+      expect(payload.appId).toBe("resolved_override_app_id");
+    } finally {
+      delete process.env.WHATSAPP_APP_ID;
+    }
+  });
+
+  test("the service resolveEnvCarryOver helper feeds the seed end-to-end", async () => {
+    // `envValues` drives the mocked `resolveEnvConfigMany` that the service's
+    // carry-over helper resolves through.
+    envValues.set("WHATSAPP_APP_ID", ENV_SEED_APP_ID);
+    envValues.set("WHATSAPP_APP_SECRET", ENV_SEED_SECRET);
+    const persist = mock(
+      (_input: WhatsappConfigSeedInput): Promise<WhatsappConfigSelectType> => Promise.resolve(DB_ROW)
+    );
+
+    await seedOrGetWhatsappConfig({
+      hasExisting: async () => false,
+      resolveEnvValues: () => WhatsappConfigService.resolveEnvCarryOver(),
+      persist,
+    });
+
+    const payload = persist.mock.calls[0][0];
+    expect(payload.appId).toBe(ENV_SEED_APP_ID);
+    expect(payload.appSecret).toBe(ENV_SEED_SECRET);
+  });
+
+  test("an over-length resolved value is skipped with a warning and seeding continues", async () => {
+    const overLengthSecret = "s".repeat(WHATSAPP_CONFIG_FIELD_MAX_LENGTHS.appSecret + 1);
+    const persist = mock(
+      (_input: WhatsappConfigSeedInput): Promise<WhatsappConfigSelectType> => Promise.resolve(DB_ROW)
+    );
+
+    const result = await seedOrGetWhatsappConfig({
+      hasExisting: async () => false,
+      resolveEnvValues: async () => ({ appId: ENV_SEED_APP_ID, appSecret: overLengthSecret }),
+      persist,
+    });
+
+    expect(result).toBeDefined();
+    expect(persist).toHaveBeenCalledTimes(1);
+    const payload = persist.mock.calls[0][0];
+    expect(payload.appId).toBe(ENV_SEED_APP_ID);
+    expect("appSecret" in payload).toBe(false);
+    // The warning names the field only — the value is never logged.
+    expect(loggerCalls.some(call => call.level === "warn" && JSON.stringify(call.args).includes("appSecret"))).toBe(
+      true
+    );
+    expect(allLoggerOutput()).not.toContain(overLengthSecret);
+  });
+
+  test("all resolved values over length — the seed stands down without an existence query", async () => {
+    const hasExisting = mock(async (): Promise<boolean> => true);
+    const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
+
+    const result = await seedOrGetWhatsappConfig({
+      hasExisting,
+      resolveEnvValues: async () => ({ appSecret: "s".repeat(WHATSAPP_CONFIG_FIELD_MAX_LENGTHS.appSecret + 1) }),
+      persist,
+    });
 
     expect(result).toBeUndefined();
     expect(hasExisting).not.toHaveBeenCalled();
@@ -616,6 +919,25 @@ describe("Tier 2 — boundary inputs", () => {
 
     expect(error).toBeInstanceOf(ValidationError);
     expect(messageOf(error)).toBe(errorsEn.invalidInput);
+    expect(upsertWhatsappConfigMock).not.toHaveBeenCalled();
+  });
+
+  test("credential values containing control characters are rejected without touching the DB", async () => {
+    const controlCharInputs: WhatsappConfigSeedInput[] = [
+      { verifyToken: "tok\nwith-newline" },
+      { verifyToken: "tok\twith-tab" },
+      { appSecret: "sec\rwith-cr" },
+      { appId: "app\u0000with-nul" },
+    ];
+
+    const errors = await Promise.all(
+      controlCharInputs.map(input => expectRejection(WhatsappConfigService.saveConfiguration(input, { locale: "en" })))
+    );
+
+    for (const error of errors) {
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(messageOf(error)).toBe(errorsEn.invalidInput);
+    }
     expect(upsertWhatsappConfigMock).not.toHaveBeenCalled();
   });
 

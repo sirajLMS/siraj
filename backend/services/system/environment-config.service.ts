@@ -63,6 +63,7 @@ import { revalidateAppearanceCache } from "@/backend/services/appearance/appeara
 import { AuditService } from "@/backend/services/system/audit.service";
 import type {
   CreateAuditLogInput,
+  DBTransaction,
   EnvConfigAuditCreateInput,
   EnvConfigAuditEvent,
   EnvConfigCategory,
@@ -662,8 +663,17 @@ export async function listEnvConfigEntries(): Promise<EnvConfigEntry[]> {
  * the new value is picked up on the next read. For branding keys
  * (`NEXT_PUBLIC_APP_BRANDING` / `APP_THEME_PRESET`) it ALSO invalidates the
  * SSR appearance cache (AC-30) — see {@link maybeInvalidateAppearanceCache}.
+ *
+ * When `tx` is provided the write joins the caller's transaction and the
+ * cache/appearance invalidations are LEFT TO THE CALLER (they must run after
+ * commit — clearing them inside the transaction would let a concurrent read
+ * re-cache the pre-commit value). Inside a transaction the write is failure-
+ * atomic: a failed upsert throws and rolls the caller's transaction back.
  */
-export async function upsertEnvConfigOverride(input: EnvConfigUpsertInput): Promise<EnvConfigUpsertReturnType> {
+export async function upsertEnvConfigOverride(
+  input: EnvConfigUpsertInput,
+  tx?: DBTransaction
+): Promise<EnvConfigUpsertReturnType> {
   const descriptor = getSettingsExposedDescriptor(input.key);
   if (descriptor === undefined) {
     throw new EnvConfigServiceError(
@@ -675,27 +685,32 @@ export async function upsertEnvConfigOverride(input: EnvConfigUpsertInput): Prom
   const dbKey = toDbKey(input.key);
   logger.info(`env-config-service: upserting DB override for key "${input.key}"`);
 
-  const row = await SystemSettingsRepository.upsertSetting({
-    key: dbKey,
-    value: input.value,
-    dataType: SystemSettingDataType.String,
-    description: descriptor.description.en,
-    category: SystemSettingCategory.System,
-    updatedByUserId: null,
-  });
+  await SystemSettingsRepository.upsertSetting(
+    {
+      key: dbKey,
+      value: input.value,
+      dataType: SystemSettingDataType.String,
+      description: descriptor.description.en,
+      category: SystemSettingCategory.System,
+      updatedByUserId: null,
+    },
+    tx
+  );
 
-  invalidateEnvConfigCache(input.key);
+  if (tx === undefined) {
+    invalidateEnvConfigCache(input.key);
 
-  // AC-30 — when a branding env-config key (NEXT_PUBLIC_APP_BRANDING / APP_THEME_PRESET)
-  // is overridden, also invalidate the SSR appearance cache so the next render picks up
-  // the new branding/preset value. Best-effort: failure here does not roll back the write.
-  maybeInvalidateAppearanceCache(input.key);
+    // AC-30 — when a branding env-config key (NEXT_PUBLIC_APP_BRANDING / APP_THEME_PRESET)
+    // is overridden, also invalidate the SSR appearance cache so the next render picks up
+    // the new branding/preset value. Best-effort: failure here does not roll back the write.
+    maybeInvalidateAppearanceCache(input.key);
+  }
 
   return {
     key: input.key,
     source: "db",
     hasDbOverride: true,
-    updatedAt: row.updatedAt ?? new Date(),
+    updatedAt: new Date(),
   };
 }
 
@@ -708,8 +723,16 @@ export async function upsertEnvConfigOverride(input: EnvConfigUpsertInput): Prom
  * resolver cache so the next read falls back to `process.env`. For branding
  * keys (`NEXT_PUBLIC_APP_BRANDING` / `APP_THEME_PRESET`) it ALSO invalidates
  * the SSR appearance cache (AC-30) — see {@link maybeInvalidateAppearanceCache}.
+ *
+ * When `tx` is provided the delete joins the caller's transaction and the
+ * cache/appearance invalidations are LEFT TO THE CALLER (they must run after
+ * commit). Inside a transaction the delete is failure-atomic: the underlying
+ * repository swallows driver errors into a `false` return, which is re-thrown
+ * here so a failed delete rolls the caller's transaction back instead of
+ * leaving a stale override behind a committed save (deleting an already-
+ * absent override is still a successful no-op).
  */
-export async function deleteEnvConfigOverride(key: string): Promise<EnvConfigDeleteReturnType> {
+export async function deleteEnvConfigOverride(key: string, tx?: DBTransaction): Promise<EnvConfigDeleteReturnType> {
   const descriptor = getSettingsExposedDescriptor(key);
   if (descriptor === undefined) {
     throw new EnvConfigServiceError("ENOT_IN_REGISTRY", `Environment config key "${key}" is not in the registry.`);
@@ -720,9 +743,14 @@ export async function deleteEnvConfigOverride(key: string): Promise<EnvConfigDel
 
   let existed = false;
   try {
-    const setting = await SystemSettingsRepository.getByKey(dbKey);
+    // Inside a transaction the existence probe runs on the SAME connection so
+    // it observes the transaction's own uncommitted writes.
+    const setting = await SystemSettingsRepository.getByKey(dbKey, tx);
     existed = setting != null;
   } catch (error) {
+    if (tx !== undefined) {
+      throw error;
+    }
     logger.warn(
       `env-config-service: pre-delete existence check failed for key "${key}". Error: ${
         error instanceof Error ? error.message : String(error)
@@ -730,13 +758,22 @@ export async function deleteEnvConfigOverride(key: string): Promise<EnvConfigDel
     );
   }
 
-  await SystemSettingsRepository.deleteSetting(dbKey);
-  invalidateEnvConfigCache(key);
+  const deleted = await SystemSettingsRepository.deleteSetting(dbKey, tx);
+  if (tx !== undefined && !deleted) {
+    // The repository swallows driver errors into `false`; inside a caller
+    // transaction that must not pass silently — throw so the transaction
+    // (and any row written by it) rolls back. Key name only, never a value.
+    throw new Error(`env-config-service: DB override delete failed for key "${key}" inside transaction`);
+  }
 
-  // AC-30 — when a branding env-config key override is removed, the SSR appearance
-  // cache must also be invalidated so the next render falls back to process.env (or
-  // the appearance_settings DB row) for branding/preset resolution.
-  maybeInvalidateAppearanceCache(key);
+  if (tx === undefined) {
+    invalidateEnvConfigCache(key);
+
+    // AC-30 — when a branding env-config key override is removed, the SSR appearance
+    // cache must also be invalidated so the next render falls back to process.env (or
+    // the appearance_settings DB row) for branding/preset resolution.
+    maybeInvalidateAppearanceCache(key);
+  }
 
   const envFallback = readFromProcessEnv(key);
   return {
@@ -755,14 +792,18 @@ export async function deleteEnvConfigOverride(key: string): Promise<EnvConfigDel
  * only `"***"` placeholders are recorded.
  *
  * Maps the env-config audit input onto the canonical `CreateAuditLogInput`
- * shape used by `AuditService.createManyAuditLogs`.
+ * shape used by `AuditService.createManyAuditLogs`. When `tx` is provided the
+ * audit row joins the caller's transaction; the write stays best-effort (a
+ * failure is logged, never thrown) — the same contract as the Settings →
+ * Environment Config tab's mutation path.
  */
 export async function auditEnvConfigChange(
   actorUserId: string,
   action: "upsert" | "delete",
   key: string,
   priorValue?: string,
-  newValue?: string
+  newValue?: string,
+  tx?: DBTransaction
 ): Promise<void> {
   const descriptor = getDescriptorIndex().get(key);
   const isSecret = descriptor?.isSecret === true;
@@ -773,8 +814,11 @@ export async function auditEnvConfigChange(
     actorUserId,
     event,
     key,
-    priorValue: isSecret ? "***" : priorValue,
-    newValue: isSecret ? "***" : newValue,
+    // Only mask values that were actually observed: an ABSENT prior/new value
+    // (undefined — "no override existed" / "nothing written") stays undefined
+    // so the audit row records `null`, never a phantom "***" prior state.
+    priorValue: priorValue !== undefined && isSecret ? "***" : priorValue,
+    newValue: newValue !== undefined && isSecret ? "***" : newValue,
   };
 
   const createAuditLogInput: CreateAuditLogInput = {
@@ -790,7 +834,7 @@ export async function auditEnvConfigChange(
   };
 
   try {
-    await AuditService.createManyAuditLogs([createAuditLogInput]);
+    await AuditService.createManyAuditLogs([createAuditLogInput], tx);
   } catch (error) {
     logger.error(
       `env-config-service: failed to write audit log for ${event} on key "${key}". Error: ${

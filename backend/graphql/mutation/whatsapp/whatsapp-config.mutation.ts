@@ -20,22 +20,25 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: WhatsappConfigurationPothosObject,
     description:
       "Creates or updates the WhatsApp Cloud API configuration with per-field merge semantics: provided fields are written, explicit nulls clear them, omitted fields keep their stored values.",
-    authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
+    // `notImpersonating` mirrors the sibling env-config mutations: credential
+    // rotation performed under an impersonated session must not be attributed
+    // to the impersonated user's stored configuration. The scopes are wrapped
+    // in `$all` explicitly: the schema builder does not set
+    // `scopeAuth.defaultStrategy`, so it defaults to "any" — a bare multi-key
+    // map would grant on the FIRST truthy scope (`notImpersonating: true`)
+    // without ever evaluating the permission check.
+    authScopes: {
+      $all: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE, notImpersonating: true },
+    },
     args: {
       input: t.arg({ type: WhatsappConfigUpdateInputPothosObject, required: true }),
     },
     resolve: withAuthResult(async (actorUserId, args, _tErrors, locale) => {
       // Omitted input fields stay `undefined` (untouched) and explicit nulls
-      // stay `null` (clear) — exactly the merge contract of the service.
-      const input: WhatsappConfigSeedInput = {
-        appId: args.input.appId,
-        appSecret: args.input.appSecret,
-        verifyToken: args.input.verifyToken,
-        phoneNumberId: args.input.phoneNumberId,
-        wabaId: args.input.wabaId,
-        accessToken: args.input.accessToken,
-        esConfigId: args.input.esConfigId,
-      };
+      // stay `null` (clear) — exactly the merge contract of the service. The
+      // input object is structurally the credential-field subset of the seed
+      // input, so it spreads as-is.
+      const input: WhatsappConfigSeedInput = { ...args.input };
       // The service throws typed DomainErrors — `ValidationError` for
       // invalid input, `DatabaseUnavailableError` when the database is
       // unreachable — and both reach clients with their `extensions.code`

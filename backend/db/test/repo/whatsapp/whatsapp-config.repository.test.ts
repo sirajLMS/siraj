@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, isNotNull, sql } from "drizzle-orm";
 import { db, isSqlite } from "@/backend/db";
-import { WhatsappConfigRepository } from "@/backend/db/repo/whatsapp";
+import { WhatsappConfigEmptyPatchError, WhatsappConfigRepository } from "@/backend/db/repo/whatsapp";
 import { whatsappConfigs } from "@/backend/db/schema";
 import {
   createTestUserWithDefaults,
@@ -235,6 +235,52 @@ describe("WhatsappConfigRepository — Tier 2 (boundaries)", () => {
     expect(unchanged.appId).toBe(first.appId);
     expect(unchanged.verifyToken).toBe(first.verifyToken);
     expect(await countRows(tx)).toBe(1);
+  });
+
+  configTest("an empty patch on an empty table raises the typed no-configuration error", async tx => {
+    // Defense in depth behind the service's empty-patch guard: with no row to
+    // read back, an empty patch must not insert an all-null singleton (which
+    // would permanently shadow the WHATSAPP_* env fallback).
+    const error = await expectSavepointError(() => WhatsappConfigRepository.upsertWhatsappConfig({}, tx), tx);
+
+    expect(error).toBeInstanceOf(WhatsappConfigEmptyPatchError);
+    expect(await countRows(tx)).toBe(0);
+  });
+
+  configTest("the merged-row hook receives the stored row inside the caller transaction", async tx => {
+    const input = configInput();
+    const hookedWith: { tx: DBTransaction | null; row: WhatsappConfigSelectType | null } = {
+      tx: null,
+      row: null,
+    };
+
+    const saved = await WhatsappConfigRepository.upsertWhatsappConfig(input, tx, async (hookTx, mergedRow) => {
+      hookedWith.tx = hookTx;
+      hookedWith.row = mergedRow;
+    });
+
+    // Same row content and the SAME transaction handle — the hook runs inside
+    // the caller's transaction (before commit), not on a separate connection.
+    expect(hookedWith.row?.id).toBe(saved.id);
+    expect(hookedWith.row?.verifyToken).toBe(input.verifyToken);
+    expect(hookedWith.tx).toBe(tx);
+  });
+
+  configTest("a merged-row hook failure fails the upsert and rolls the row write back", async tx => {
+    const input = configInput();
+
+    const error = await expectSavepointError(
+      () =>
+        WhatsappConfigRepository.upsertWhatsappConfig(input, tx, async () => {
+          throw new Error("propagation boom");
+        }),
+      tx
+    );
+
+    expect(error.message).toContain("propagation boom");
+    // The savepoint rollback undoes the row insert: a failed side effect
+    // cannot leave a committed row behind.
+    expect(await countRows(tx)).toBe(0);
   });
 });
 

@@ -22,6 +22,7 @@ import type {
 import type { WhatsappSnackbar } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import {
   validateWhatsappAppId,
+  validateWhatsappConfigMaxLengths,
   validateWhatsappPhoneNumberId,
   validateWhatsappWabaId,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappConfigFormValidation";
@@ -168,14 +169,20 @@ export function useWhatsappConfigViewModel(): WhatsappConfigTabViewModel {
   const [connectionResult, setConnectionResult] = useState<WhatsappConfigConnectionResult | null>(null);
   const [snackbar, setSnackbar] = useState<WhatsappSnackbar>(null);
 
-  const fieldErrors = useMemo<Partial<Record<WhatsappConfigFormField, WhatsappConfigValidationKey>>>(
-    () => ({
-      appId: validateWhatsappAppId(values.appId) ?? undefined,
-      phoneNumberId: validateWhatsappPhoneNumberId(values.phoneNumberId) ?? undefined,
-      wabaId: validateWhatsappWabaId(values.wabaId) ?? undefined,
-    }),
-    [values]
-  );
+  const fieldErrors = useMemo<Partial<Record<WhatsappConfigFormField, WhatsappConfigValidationKey>>>(() => {
+    // Client-side mirror of the server's per-field length caps, merged with
+    // the per-field format validators (the format key wins on both).
+    const lengthErrors = validateWhatsappConfigMaxLengths(values);
+    return {
+      appId: validateWhatsappAppId(values.appId) ?? lengthErrors.appId,
+      appSecret: lengthErrors.appSecret,
+      verifyToken: lengthErrors.verifyToken,
+      phoneNumberId: validateWhatsappPhoneNumberId(values.phoneNumberId) ?? lengthErrors.phoneNumberId,
+      wabaId: validateWhatsappWabaId(values.wabaId) ?? lengthErrors.wabaId,
+      accessToken: lengthErrors.accessToken,
+      esConfigId: lengthErrors.esConfigId,
+    };
+  }, [values]);
 
   const showSnackbar = useCallback((message: string, severity: "success" | "error") => {
     setSnackbar({ message, severity });
@@ -192,13 +199,25 @@ export function useWhatsappConfigViewModel(): WhatsappConfigTabViewModel {
   const onSave = useCallback(async () => {
     setSaving(true);
     try {
-      await updateConfig({ variables: { input: buildConfigInput(values, baseline) } });
-      await configQuery.refetch();
+      // Mutation and refetch fail separately: a failed refetch must NOT
+      // repaint a committed save as a failure — the save itself is the
+      // authoritative outcome, so the success snackbar is shown as soon as
+      // the mutation resolves and a refetch failure is only logged (the
+      // query's own error state drives the Retry affordance).
+      try {
+        await updateConfig({ variables: { input: buildConfigInput(values, baseline) } });
+      } catch (error) {
+        logger.error("Failed to save the WhatsApp configuration", { error });
+        showSnackbar(labels.configSaveError, "error");
+        return;
+      }
       resetDraft();
       showSnackbar(labels.configSaveSuccess, "success");
-    } catch (error) {
-      logger.error("Failed to save the WhatsApp configuration", { error });
-      showSnackbar(labels.configSaveError, "error");
+      try {
+        await configQuery.refetch();
+      } catch (error) {
+        logger.warn("WhatsApp configuration was saved but the follow-up refetch failed", { error });
+      }
     } finally {
       setSaving(false);
     }

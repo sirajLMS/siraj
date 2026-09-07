@@ -12,6 +12,7 @@ import type {
   WhatsappConfigTabViewModel,
   WhatsappConfigValidationKey,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappConfigView.types";
+import { WHATSAPP_CONFIG_FIELD_MAX_LENGTHS } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappConfigFormValidation";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 // ─── Field scaffolding ───────────────────────────────────────────────
@@ -21,13 +22,24 @@ interface ConfigFieldProps {
   readonly value: string;
   readonly helper: string;
   readonly errorKey: WhatsappConfigValidationKey | null | undefined;
+  /** Mirrored server cap for the field — the browser blocks longer input. */
+  readonly maxLength?: number;
   readonly labels: WhatsappLabels;
   readonly disabled: boolean;
   readonly onChange: (value: string) => void;
 }
 
 /** Plain text field that swaps its helper for the localized validation message. */
-function ConfigField({ label, value, helper, errorKey, labels, disabled, onChange }: Readonly<ConfigFieldProps>) {
+function ConfigField({
+  label,
+  value,
+  helper,
+  errorKey,
+  maxLength,
+  labels,
+  disabled,
+  onChange,
+}: Readonly<ConfigFieldProps>) {
   return (
     <TextField
       label={label}
@@ -38,6 +50,7 @@ function ConfigField({ label, value, helper, errorKey, labels, disabled, onChang
       disabled={disabled}
       fullWidth
       autoComplete="off"
+      slotProps={{ htmlInput: { maxLength } }}
     />
   );
 }
@@ -46,13 +59,22 @@ interface ConfigSecretFieldProps {
   readonly label: string;
   readonly value: string;
   readonly helper: string;
+  readonly errorKey?: WhatsappConfigValidationKey | null;
   readonly labels: WhatsappLabels;
   readonly disabled: boolean;
   readonly onChange: (value: string) => void;
 }
 
 /** Masked secret input with a reveal toggle; the stored value stays server-masked. */
-function ConfigSecretField({ label, value, helper, labels, disabled, onChange }: Readonly<ConfigSecretFieldProps>) {
+function ConfigSecretField({
+  label,
+  value,
+  helper,
+  errorKey,
+  labels,
+  disabled,
+  onChange,
+}: Readonly<ConfigSecretFieldProps>) {
   const [revealed, setRevealed] = useState(false);
 
   return (
@@ -60,7 +82,8 @@ function ConfigSecretField({ label, value, helper, labels, disabled, onChange }:
       label={label}
       value={value}
       onChange={event => onChange(event.target.value)}
-      helperText={helper}
+      helperText={errorKey ? labels[errorKey] : helper}
+      error={Boolean(errorKey)}
       disabled={disabled}
       revealed={revealed}
       onToggleReveal={() => setRevealed(previous => !previous)}
@@ -74,6 +97,15 @@ function ConfigSecretField({ label, value, helper, labels, disabled, onChange }:
 function secretHelper(storedMaskedValue: string | null, labels: WhatsappLabels, extraHelper: string): string {
   const storedPart = storedMaskedValue ? labels.configSecretStored(storedMaskedValue) : labels.configSecretNotSet;
   return extraHelper ? `${storedPart} ${extraHelper}` : storedPart;
+}
+
+/**
+ * Appends the destructive-clear notice to a visible field's guidance: for
+ * these fields an emptied input submits an explicit null, which REMOVES the
+ * stored value on save (merge semantics of the mutation).
+ */
+function clearableHelper(helper: string, clearHint: string): string {
+  return `${helper} ${clearHint}`;
 }
 
 // ─── Shared content ──────────────────────────────────────────────────
@@ -147,8 +179,9 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
             <ConfigField
               label={t.configAppId}
               value={values.appId}
-              helper={t.configAppIdHelper}
+              helper={clearableHelper(t.configAppIdHelper, t.configClearHint)}
               errorKey={fieldErrors.appId}
+              maxLength={WHATSAPP_CONFIG_FIELD_MAX_LENGTHS.appId}
               labels={t}
               disabled={readOnly}
               onChange={value => vm.onFieldChange("appId", value)}
@@ -157,6 +190,7 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
               label={t.configAppSecret}
               value={values.appSecret}
               helper={secretHelper(config?.appSecret ?? null, t, "")}
+              errorKey={fieldErrors.appSecret}
               labels={t}
               disabled={readOnly}
               onChange={value => vm.onFieldChange("appSecret", value)}
@@ -167,8 +201,9 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
                   <ConfigField
                     label={t.configVerifyToken}
                     value={tokenValue}
-                    helper={t.configVerifyTokenHelper}
-                    errorKey={null}
+                    helper={clearableHelper(t.configVerifyTokenHelper, t.configClearHint)}
+                    errorKey={fieldErrors.verifyToken}
+                    maxLength={WHATSAPP_CONFIG_FIELD_MAX_LENGTHS.verifyToken}
                     labels={t}
                     disabled={readOnly}
                     onChange={value => vm.onFieldChange("verifyToken", value)}
@@ -203,8 +238,9 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
             <ConfigField
               label={t.configPhoneNumberId}
               value={values.phoneNumberId}
-              helper={t.configPhoneNumberIdHelper}
+              helper={clearableHelper(t.configPhoneNumberIdHelper, t.configClearHint)}
               errorKey={fieldErrors.phoneNumberId}
+              maxLength={WHATSAPP_CONFIG_FIELD_MAX_LENGTHS.phoneNumberId}
               labels={t}
               disabled={readOnly}
               onChange={value => vm.onFieldChange("phoneNumberId", value)}
@@ -212,8 +248,9 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
             <ConfigField
               label={t.configWabaId}
               value={values.wabaId}
-              helper={t.configWabaIdHelper}
+              helper={clearableHelper(t.configWabaIdHelper, t.configClearHint)}
               errorKey={fieldErrors.wabaId}
+              maxLength={WHATSAPP_CONFIG_FIELD_MAX_LENGTHS.wabaId}
               labels={t}
               disabled={readOnly}
               onChange={value => vm.onFieldChange("wabaId", value)}
@@ -222,6 +259,7 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
               label={t.configAccessToken}
               value={values.accessToken}
               helper={secretHelper(config?.accessToken ?? null, t, t.configAccessTokenHelper)}
+              errorKey={fieldErrors.accessToken}
               labels={t}
               disabled={readOnly}
               onChange={value => vm.onFieldChange("accessToken", value)}
@@ -229,8 +267,9 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
             <ConfigField
               label={t.configEsConfigId}
               value={values.esConfigId}
-              helper={t.configEsConfigIdHelper}
-              errorKey={null}
+              helper={clearableHelper(t.configEsConfigIdHelper, t.configClearHint)}
+              errorKey={fieldErrors.esConfigId}
+              maxLength={WHATSAPP_CONFIG_FIELD_MAX_LENGTHS.esConfigId}
               labels={t}
               disabled={readOnly}
               onChange={value => vm.onFieldChange("esConfigId", value)}

@@ -98,6 +98,7 @@ await mock.module("@/backend/services/system", () => ({
   // itself never invokes these.
   upsertEnvConfigOverride: async () => ({}),
   deleteEnvConfigOverride: async () => ({}),
+  auditEnvConfigChange: async () => {},
 }));
 
 await mock.module("@/backend/lib/ratelimit", () => ({

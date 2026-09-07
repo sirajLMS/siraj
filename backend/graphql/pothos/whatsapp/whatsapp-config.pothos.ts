@@ -5,6 +5,7 @@ import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { maskSecretValue } from "@/backend/lib";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
+import type { WhatsappConfigCredentialField } from "@/backend/lib/whatsapp-constants";
 import { resolveEnvConfig } from "@/backend/services/system";
 import type {
   WhatsappConfigMaskedViewType,
@@ -52,10 +53,7 @@ async function deriveWhatsappWebhookUrl(): Promise<string> {
  * entity returned by the save (mutation path).
  */
 export async function toWhatsappConfigMaskedView(
-  config: Pick<
-    WhatsappConfigResolvedType,
-    "appId" | "appSecret" | "verifyToken" | "phoneNumberId" | "wabaId" | "accessToken" | "esConfigId"
-  >,
+  config: Pick<WhatsappConfigResolvedType, WhatsappConfigCredentialField>,
   source: WhatsappConfigSource
 ): Promise<WhatsappConfigMaskedViewType> {
   return {

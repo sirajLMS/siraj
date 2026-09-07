@@ -19,7 +19,8 @@ export type WhatsappConfigFormValues = Readonly<Record<WhatsappConfigFormField, 
 export type WhatsappConfigValidationKey =
   | "validationAppIdNumeric"
   | "validationPhoneNumberIdNumeric"
-  | "validationWabaIdNumeric";
+  | "validationWabaIdNumeric"
+  | "validationMaxLength";
 
 /** Normalized result of the manual connection test. */
 export interface WhatsappConfigConnectionResult {

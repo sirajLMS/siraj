@@ -330,6 +330,8 @@ export interface WhatsappLabels {
   readonly configAppId: string;
   readonly configAppIdHelper: string;
   readonly validationAppIdNumeric: string;
+  /** Shown when an input exceeds the mirrored server-side field cap. */
+  readonly validationMaxLength: string;
   readonly configAppSecret: string;
   /** Helper text echoing the server-masked stored secret. */
   readonly configSecretStored: (masked: string) => string;
@@ -361,6 +363,8 @@ export interface WhatsappLabels {
   readonly configAccessTokenHelper: string;
   readonly configEsConfigId: string;
   readonly configEsConfigIdHelper: string;
+  /** Appended to visible fields' helpers: emptied inputs remove the stored value on save. */
+  readonly configClearHint: string;
   readonly configSaveChanges: string;
   readonly configSaveSuccess: string;
   readonly configSaveError: string;

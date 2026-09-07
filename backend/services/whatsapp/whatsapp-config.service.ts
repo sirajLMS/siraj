@@ -1,12 +1,16 @@
 import { randomBytes } from "node:crypto";
 
-import { WhatsappConfigRepository } from "@/backend/db/repo/whatsapp/whatsapp-config.repository";
+import {
+  WhatsappConfigEmptyPatchError,
+  WhatsappConfigRepository,
+} from "@/backend/db/repo/whatsapp/whatsapp-config.repository";
 import { DatabaseUnavailableError, isTransientError, ValidationError } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import {
   FETCH_TIMEOUT_MS,
   readErrorBody,
   resolveGraphApiVersion,
+  WHATSAPP_CONFIG_CONTROL_CHARS_PATTERN,
   WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES,
   WHATSAPP_CONFIG_ENV_SOURCES,
   WHATSAPP_CONFIG_FIELD_MAX_LENGTHS,
@@ -15,12 +19,14 @@ import {
 import { GraphApiError } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import { buildGetPhoneNumberRequest } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
 import {
+  auditEnvConfigChange,
   deleteEnvConfigOverride,
   invalidateEnvConfigCache,
   resolveEnvConfigMany,
   upsertEnvConfigOverride,
 } from "@/backend/services/system";
 import type {
+  DBTransaction,
   WhatsappConfigResolvedType,
   WhatsappConfigSeedInput,
   WhatsappConfigSelectType,
@@ -41,7 +47,7 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
  * by field instead of passing empty strings to Meta.
  */
 async function resolveFromEnv(): Promise<WhatsappConfigResolvedType> {
-  const resolved = await resolveEnvConfigMany(WHATSAPP_CONFIG_ENV_SOURCES.map(source => source.envKey));
+  const carried = await WhatsappConfigService.resolveEnvCarryOver();
   const values: Record<WhatsappConfigCredentialField, string | null> = {
     appId: null,
     appSecret: null,
@@ -51,9 +57,8 @@ async function resolveFromEnv(): Promise<WhatsappConfigResolvedType> {
     accessToken: null,
     esConfigId: null,
   };
-  for (const { field, envKey } of WHATSAPP_CONFIG_ENV_SOURCES) {
-    const value = resolved[envKey]?.trim() ?? "";
-    values[field] = value === "" ? null : value;
+  for (const { field } of WHATSAPP_CONFIG_ENV_SOURCES) {
+    values[field] = carried[field] ?? null;
   }
   return { source: "env", ...values };
 }
@@ -63,8 +68,9 @@ async function resolveFromEnv(): Promise<WhatsappConfigResolvedType> {
  * whitespace-only values are rejected (clearing a field requires an explicit
  * `null`, so an accidental empty submission can never wipe a stored secret),
  * over-length values are rejected against the per-field caps (visible fields
- * mirror the column widths, encrypted fields are capped at 512), and the
- * actor attribution must be a well-formed UUID.
+ * mirror the column widths, encrypted fields are capped at 512), control
+ * characters (C0/C1 — newlines, tabs, and friends) are rejected outright, and
+ * the actor attribution must be a well-formed UUID.
  */
 function normalizeConfigInput(input: WhatsappConfigSeedInput, tErrors: ErrorsLabels): WhatsappConfigSeedInput {
   const payload: WhatsappConfigSeedInput = {};
@@ -76,7 +82,11 @@ function normalizeConfigInput(input: WhatsappConfigSeedInput, tErrors: ErrorsLab
       continue;
     }
     const trimmed = value.trim();
-    if (trimmed === "" || trimmed.length > WHATSAPP_CONFIG_FIELD_MAX_LENGTHS[field]) {
+    if (
+      trimmed === "" ||
+      trimmed.length > WHATSAPP_CONFIG_FIELD_MAX_LENGTHS[field] ||
+      WHATSAPP_CONFIG_CONTROL_CHARS_PATTERN.test(trimmed)
+    ) {
       throw new ValidationError(tErrors.invalidInput);
     }
     payload[field] = trimmed;
@@ -148,19 +158,35 @@ function isPhoneNumberResponseBody(body: unknown): body is { display_phone_numbe
 }
 
 /**
- * Write-through: mirrors a saved configuration onto the env-config override
- * system so the enforcement paths — the webhook verify-token handshake + HMAC
- * check and the outbound Graph API resolvers, all of which read the
- * `WHATSAPP_*` keys via `resolveEnvConfig` — pick up UI-managed credential
- * rotation without a process restart. `resolveEnvConfig` prefers a DB
- * override in `system_settings` (`env::<key>`) over `process.env`, so the
- * upsert below is what makes a save enforcement-visible; the explicit cache
- * invalidation afterwards guarantees the next read re-queries the DB even if
- * an override write failed midway.
+ * Write-through propagation, run INSIDE the repository upsert's
+ * advisory-locked transaction. Mirrors the FINAL MERGED ROW onto the
+ * env-config override system so the enforcement paths — the webhook
+ * verify-token handshake + HMAC check and the outbound Graph API resolvers,
+ * all of which read the `WHATSAPP_*` keys via `resolveEnvConfig` — pick up
+ * UI-managed credential rotation without a process restart.
+ * `resolveEnvConfig` prefers a DB override in `system_settings` (`env::<key>`)
+ * over `process.env`, so these writes are what make a save
+ * enforcement-visible.
  *
- * A field cleared to `null` deletes its override row, so no stale plaintext
- * copy of a removed credential lingers in `system_settings` (the next read
- * falls back to `process.env`, the documented env-config behavior).
+ * Field-complete by design: EVERY DB-writable key is reconciled from the
+ * merged row on every save (non-null → upsert, null → delete) — not just the
+ * patched fields — so a pre-existing `env::` override for an untouched field
+ * can never go stale relative to the committed row.
+ *
+ * Atomicity: every override write joins the caller's transaction (the
+ * `system_settings` table lives in the same Postgres database), so a failure
+ * anywhere throws and rolls the whole save back — the row and its
+ * enforcement-visible overrides either both persist or neither does. Cache
+ * invalidation is deliberately NOT done here: it must run after commit (see
+ * the save path), because clearing inside the transaction would let a
+ * concurrent read re-cache the pre-commit value.
+ *
+ * Audit: one `env_config.upsert`/`env_config.delete` entry per propagated key
+ * with the acting admin as the actor; the audit row joins the same
+ * transaction. The audit helper masks secret keys to `"***"` per the
+ * env-config registry `isSecret` flags (the sibling env-tab behavior) and
+ * stays best-effort — an audit failure is logged, never thrown, matching the
+ * Settings → Environment Config tab contract.
  *
  * Storage convention note: `system_settings.value` is stored as plaintext
  * (masked only at the GraphQL surface — the same convention as the Settings
@@ -168,38 +194,37 @@ function isPhoneNumberResponseBody(body: unknown): body is { display_phone_numbe
  * `whatsapp_configs` row encrypts `appSecret`/`accessToken` at the driver
  * boundary. `WHATSAPP_ACCESS_TOKEN` is never written through — see
  * {@link WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES}.
- *
- * Best-effort: a failed override write is logged (key name only, never a
- * value) without failing the save — the row is already persisted — and the
- * cache invalidation still runs so stale values are never served beyond one
- * re-read.
  */
-async function propagateEnvConfigOverrides(payload: WhatsappConfigSeedInput): Promise<void> {
-  // The writes are independent — collect them first, then run them in
-  // parallel. Each key still invalidates its cache even when its own write
-  // fails, so a stale value is never served beyond one re-read.
-  const writes: { envKey: string; write: Promise<unknown> }[] = [];
-  for (const { field, envKey } of WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES) {
-    const value = payload[field];
-    if (value === undefined) continue;
-    writes.push({
-      envKey,
-      write: value === null ? deleteEnvConfigOverride(envKey) : upsertEnvConfigOverride({ key: envKey, value }),
-    });
-  }
-
-  await Promise.allSettled(
-    writes.map(async ({ envKey, write }) => {
-      try {
-        await write;
-      } catch (error) {
-        logger.warn(
-          `whatsapp-config-service: env-config override write failed for "${envKey}" — enforcement paths re-resolve on the next read. Error: ${JSON.stringify(
-            toLoggableDbError(error)
-          )}`
+async function propagateEnvConfigOverrides(
+  t: DBTransaction,
+  mergedRow: WhatsappConfigSelectType,
+  actorUserId: string | undefined
+): Promise<void> {
+  await Promise.all(
+    WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES.map(async ({ field, envKey }) => {
+      const value = mergedRow[field];
+      // A stored row's credential columns are `string | null` — `undefined`
+      // cannot occur per the row type; skipped defensively so a future schema
+      // change degrades to "no propagation" instead of writing `undefined`.
+      if (value === undefined) {
+        return;
+      }
+      if (value === null) {
+        await deleteEnvConfigOverride(envKey, t);
+      } else {
+        await upsertEnvConfigOverride({ key: envKey, value }, t);
+      }
+      if (actorUserId !== undefined) {
+        // A delete observes no new value: `null` normalizes to `undefined` so
+        // the audit row records an absent new value, never a written one.
+        await auditEnvConfigChange(
+          actorUserId,
+          value === null ? "delete" : "upsert",
+          envKey,
+          undefined,
+          value === null ? undefined : value,
+          t
         );
-      } finally {
-        invalidateEnvConfigCache(envKey);
       }
     })
   );
@@ -216,8 +241,9 @@ async function propagateEnvConfigOverrides(payload: WhatsappConfigSeedInput): Pr
  * database cannot accept writes the caller receives the database-unavailable
  * domain error instead of a raw driver failure, and no credential value ever
  * appears in a thrown message or a log line. A successful save is also
- * written through to the env-config override system so the enforcement paths
- * (webhook handshake/HMAC, outbound Graph API resolution) see the new
+ * written through — atomically, inside the same advisory-locked transaction
+ * as the row write — to the env-config override system so the enforcement
+ * paths (webhook handshake/HMAC, outbound Graph API resolution) see the new
  * credentials without a process restart.
  */
 export namespace WhatsappConfigService {
@@ -267,6 +293,25 @@ export namespace WhatsappConfigService {
   }
 
   /**
+   * Resolves the `WHATSAPP_*` carry-over values for the env bootstrap seeder
+   * through the SAME resolution the env fallback uses — `resolveEnvConfigMany`
+   * (DB override in `system_settings` first, then `process.env`; blank =
+   * unset). The seeder therefore carries the values the enforcement paths
+   * actually resolve, never a raw `process.env` snapshot that a DB override
+   * could already have superseded.
+   */
+  export async function resolveEnvCarryOver(): Promise<WhatsappConfigSeedInput> {
+    const resolved = await resolveEnvConfigMany(WHATSAPP_CONFIG_ENV_SOURCES.map(source => source.envKey));
+    const carry: WhatsappConfigSeedInput = {};
+    for (const { field, envKey } of WHATSAPP_CONFIG_ENV_SOURCES) {
+      const value = resolved[envKey]?.trim() ?? "";
+      if (value === "") continue;
+      carry[field] = value;
+    }
+    return carry;
+  }
+
+  /**
    * Whether the singleton `whatsapp_configs` row currently exists.
    *
    * Unlike `resolveConfiguration` — which degrades to the env fallback on any
@@ -284,14 +329,24 @@ export namespace WhatsappConfigService {
    * entity. Delegates to the repository's advisory-lock-serialized upsert,
    * so concurrent saves converge on a single row.
    *
-   * After the row is persisted, the patch is written through to the
-   * env-config override system (an upsert per changed `WHATSAPP_*` key, a
-   * delete for cleared fields) and the env-config cache is invalidated, so
-   * the enforcement paths that resolve `WHATSAPP_*` via `resolveEnvConfig`
-   * immediately observe the new credentials. Set
-   * `propagateEnvConfigOverrides: false` to skip that propagation — the env
-   * bootstrap seeder does, because the row and the process environment then
-   * hold the same values and no redundant plaintext copy is stored.
+   * The env-config write-through is part of the same transaction as the row
+   * write: the FINAL MERGED ROW is propagated for ALL DB-writable
+   * `WHATSAPP_*` keys (non-null → `env::` override upsert, null → override
+   * delete — reconciling stale overrides for untouched fields too), and any
+   * override-write failure rolls the whole save back, so the mutation either
+   * fully succeeds or errors — a committed row can never diverge from the
+   * overrides the enforcement paths read. Because propagation runs inside
+   * the advisory lock, concurrent saves serialize end-to-end (no
+   * last-propagator-wins race). Set `propagateEnvConfigOverrides: false` to
+   * skip that propagation — the env bootstrap seeder does, because the row
+   * and the process environment then hold the same values and no redundant
+   * plaintext copy is stored.
+   *
+   * After commit, the env-config cache is invalidated per key. Locally that
+   * makes the new values immediately visible; on OTHER instances the cached
+   * value can persist for up to the env-config cache TTL (`ENV_CONFIG_CACHE_TTL_MS`,
+   * default 5 min) before their next re-read self-heals — an accepted,
+   * bounded staleness window for multi-instance deployments.
    *
    * When the database is unreachable or read-only the underlying failure is
    * logged (projected to non-sensitive metadata — driver messages can embed
@@ -305,7 +360,8 @@ export namespace WhatsappConfigService {
    *   explicit nulls) is rejected as invalid input before any database
    *   access: persisted as the first save it would store an all-null
    *   singleton row and permanently shadow the `WHATSAPP_*` env fallback.
-   * @param options.actorUserId Admin attributed as the editor of the row.
+   * @param options.actorUserId Admin attributed as the editor of the row and
+   *   as the actor of the per-key env-config audit entries.
    * @param options.locale Locale for the validation error messages.
    * @param options.propagateEnvConfigOverrides When false, skip the
    *   env-config write-through (defaults to true).
@@ -330,22 +386,44 @@ export namespace WhatsappConfigService {
       payload.updatedByUserId = options.actorUserId;
     }
 
+    const propagate = options.propagateEnvConfigOverrides !== false;
     let row: WhatsappConfigSelectType;
     try {
-      row = await WhatsappConfigRepository.upsertWhatsappConfig(payload);
+      // The propagation hook runs INSIDE the repository's advisory-locked
+      // transaction, before commit — see propagateEnvConfigOverrides.
+      row = await WhatsappConfigRepository.upsertWhatsappConfig(
+        payload,
+        undefined,
+        propagate ? (t, mergedRow) => propagateEnvConfigOverrides(t, mergedRow, options.actorUserId) : undefined
+      );
     } catch (error) {
+      if (error instanceof WhatsappConfigEmptyPatchError) {
+        // Repository-level invariant (empty patch on an empty table). The
+        // empty-patch rejection above makes it unreachable through this API;
+        // rethrow unchanged so direct repository consumers see the typed
+        // contract error instead of a misleading database-unavailable mapping.
+        throw error;
+      }
       // Projected to name/code/detail only: the raw driver error (drizzle
       // wraps failures in DrizzleQueryError) embeds the full bound params in
       // its message — plaintext verify token, ciphertext secrets — and must
-      // never reach a log line.
+      // never reach a log line. Override-write failures inside the
+      // transaction land here too: the transaction rolled back, so the row
+      // is NOT persisted and the caller sees the domain error (surfaced
+      // outcome — no silent row/override divergence).
       logger.logDomainError("whatsapp-config-service: configuration save failed — DB may be unreachable or read-only", {
         error: toLoggableDbError(error),
       });
       throw new DatabaseUnavailableError();
     }
 
-    if (options.propagateEnvConfigOverrides !== false) {
-      await propagateEnvConfigOverrides(payload);
+    if (propagate) {
+      // Post-commit cache invalidation, per propagated key. Locally the new
+      // values are immediately visible; on other instances the TTL cache
+      // self-heals within ENV_CONFIG_CACHE_TTL_MS (see the JSDoc above).
+      for (const { envKey } of WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES) {
+        invalidateEnvConfigCache(envKey);
+      }
     }
     return row;
   }

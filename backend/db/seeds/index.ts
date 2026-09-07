@@ -235,6 +235,10 @@ async function seedWhatsappConfig(context: SeedContext, step: RunStep): Promise<
       // would silently revert admin-saved credentials). A failing existence
       // check makes the seeder stand down (fail safe).
       hasExisting: () => WhatsappConfigService.hasStoredConfiguration(),
+      // Carry-over resolution through the service's env resolution (DB
+      // override first, then process.env) so the seeded row matches what the
+      // enforcement paths resolve — not a raw process.env snapshot.
+      resolveEnvValues: () => WhatsappConfigService.resolveEnvCarryOver(),
       persist: input =>
         WhatsappConfigService.saveConfiguration(input, {
           actorUserId: context.actorUserId,
