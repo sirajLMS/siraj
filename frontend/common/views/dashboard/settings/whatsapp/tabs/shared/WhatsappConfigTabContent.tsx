@@ -349,7 +349,7 @@ export function WhatsappConfigTabContent(vm: Readonly<WhatsappConfigTabViewModel
             </Button>
           </Stack>
         </>
-      )}
+      ) : null}
 
       {/* ── Snackbar ── */}
       {vm.snackbar && vm.snackbar.severity === "error" ? (

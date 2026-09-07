@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db";
-import { auditLogs } from "@/backend/db/schema";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
+import { auditLogs } from "@/backend/db/schema";
 import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
-import { makeTransientError } from "@/backend/lib/test/helpers";
+import { AuditService } from "@/backend/services/system/audit.service";
 import {
   auditEnvConfigChange,
   deleteEnvConfigOverride,
@@ -46,6 +46,21 @@ function setupEnvAndPreWarm(key: string, envValue: string): void {
 
 function mockRepoNull() {
   return spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(null);
+}
+
+/** Mirrors the repo-wide rejection-assertion idiom (typed helper, no matcher overloads). */
+async function expectRejection(promise: Promise<unknown>): Promise<unknown> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error("Expected the call to reject, but it resolved");
+}
+
+/** Assertion-safe message extraction from an unknown thrown value. */
+function messageOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 const DB_OVERRIDE_MOCK = {
@@ -183,7 +198,7 @@ describe("environment-config.service — tx-aware variants (rolled-back transact
       expect(inTx?.value).toBe("tx-upsert-value");
       // The returned metadata mirrors the stored row (`.returning()` —
       // including the stored updatedAt, not a fabricated clock read).
-      expect(result.updatedAt).toEqual(inTx?.updatedAt);
+      expect(inTx?.updatedAt).toEqual(result.updatedAt);
       expect(result.source).toBe("db");
       expect(result.hasDbOverride).toBe(true);
 
@@ -246,5 +261,40 @@ describe("environment-config.service — tx-aware variants (rolled-back transact
     // Rollback-proof: the tx rolled back → no audit row was persisted.
     const afterRollback = await db.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
     expect(afterRollback).toHaveLength(outsideBefore.length);
+  });
+
+  test("auditEnvConfigChange with tx RETHROWS an audit write failure (caller tx aborts)", async () => {
+    const outsideBefore = await db.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
+    const auditSpy = spyOn(AuditService, "createManyAuditLogs").mockRejectedValue(new Error("audit write failed"));
+
+    try {
+      await runInRollback(async tx => {
+        // The in-tx fail-safe: the audited mutation commits with its audit row
+        // or not at all — an audit failure must surface into the caller (and
+        // abort the transaction), never be swallowed.
+        const error = await expectRejection(
+          auditEnvConfigChange("actor-1", "upsert", TEST_KEY, "prior-value", "next-value", tx)
+        );
+        expect(messageOf(error)).toBe("audit write failed");
+      });
+    } finally {
+      auditSpy.mockRestore();
+    }
+
+    // Fail-safe held: the aborted tx persisted nothing.
+    const afterRollback = await db.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
+    expect(afterRollback).toHaveLength(outsideBefore.length);
+  });
+
+  test("auditEnvConfigChange without tx SWALLOWS an audit write failure (best-effort)", async () => {
+    const auditSpy = spyOn(AuditService, "createManyAuditLogs").mockRejectedValue(new Error("audit write failed"));
+
+    try {
+      // Post-hoc side effect (the sibling env-tab path): a failed audit write
+      // is logged-only — the caller's operation stands without its audit row.
+      await auditEnvConfigChange("actor-1", "upsert", TEST_KEY, "prior-value", "next-value");
+    } finally {
+      auditSpy.mockRestore();
+    }
   });
 });

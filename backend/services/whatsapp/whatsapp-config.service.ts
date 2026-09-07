@@ -220,9 +220,13 @@ function isPhoneNumberResponseBody(body: unknown): body is { display_phone_numbe
  * transaction. The prior override value is read IN-TX before the write so the
  * entry records the state actually being replaced or removed (absent stays
  * absent — no phantom prior). The audit helper masks secret keys to `"***"`
- * per the env-config registry `isSecret` flags (the sibling env-tab behavior)
- * and stays best-effort — an audit failure is logged, never thrown, matching
- * the Settings → Environment Config tab contract.
+ * per the env-config registry `isSecret` flags (the sibling env-tab behavior).
+ * Because propagation ALWAYS passes the save transaction, the audit helper's
+ * in-tx error contract applies: an audit failure is logged and rethrown,
+ * rolling the whole save back — the audited mutation commits with its audit
+ * row or not at all (fail-safe). Only the helper's no-transaction path — the
+ * Settings → Environment Config tab mutations, where the audit is a post-hoc
+ * side effect — is best-effort (logged, never thrown).
  *
  * Storage convention note: `system_settings.value` is stored as plaintext
  * (masked only at the GraphQL surface — the same convention as the Settings

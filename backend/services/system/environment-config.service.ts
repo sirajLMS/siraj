@@ -800,16 +800,20 @@ export async function deleteEnvConfigOverride(key: string, tx?: DBTransaction): 
  * only `"***"` placeholders are recorded.
  *
  * Maps the env-config audit input onto the canonical `CreateAuditLogInput`
- * shape used by `AuditService.createManyAuditLogs`. WITHOUT `tx` the write is
- * best-effort: a failure is logged, never thrown — the same contract as the
- * Settings → Environment Config tab's mutation path.
+ * shape used by `AuditService.createManyAuditLogs`. The error contract follows
+ * the transaction argument:
+ *
+ * WITHOUT `tx` the write is best-effort: a failure is logged and SWALLOWED —
+ * the function resolves and the caller's operation stands without its audit
+ * row (the same contract as the Settings → Environment Config tab's mutation
+ * path, where the audit is a post-hoc side effect).
  *
  * WITH `tx` the audit row joins the caller's transaction and the error
- * contract changes with it: the write is part of the transaction, so an audit
- * failure throws into the caller and ABORTS that transaction — the audited
- * change does not commit either. Callers that pass `tx` (e.g. the WhatsApp
- * config write-through, which audits its env-propagation inside the save
- * transaction) rely on exactly that fail-safe: an audited mutation either
+ * contract changes with it: the write is part of the transaction, so a failure
+ * is logged and then RETHROWN into the caller, ABORTING that transaction —
+ * the audited change does not commit either. Callers that pass `tx` (e.g. the
+ * WhatsApp config write-through, which audits its env-propagation inside the
+ * save transaction) rely on exactly that fail-safe: an audited mutation either
  * commits with its audit row or not at all.
  */
 export async function auditEnvConfigChange(
@@ -856,6 +860,13 @@ export async function auditEnvConfigChange(
         error instanceof Error ? error.message : String(error)
       }`
     );
+    // In-tx audits are part of the caller's atomic write: rethrowing aborts
+    // the caller's transaction, so an audited mutation either commits with
+    // its audit row or not at all. Without a tx the audit is a post-hoc side
+    // effect — the failure stays logged-only (best-effort).
+    if (tx !== undefined) {
+      throw error;
+    }
   }
 }
 
