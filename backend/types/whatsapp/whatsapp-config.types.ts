@@ -49,6 +49,31 @@ export interface WhatsappConfigResolvedType {
 }
 
 /**
+ * Client-safe view of the active configuration for the settings page, built
+ * by the GraphQL layer from a resolved or stored credential set.
+ *
+ * `appSecret` and `accessToken` are masked with the shared masked-tail helper
+ * (`maskSecretValue` — fixed bullet sentinel plus the last four characters),
+ * so no plaintext secret ever crosses the API boundary. `verifyToken` is not
+ * secret at rest (it is shared with Meta's webhook subscription) and is
+ * surfaced so admins can mirror it into the Meta developer console.
+ * `webhookUrl` is derived from the deployment origin at read time, and
+ * `source` tells the UI whether the values are database-managed or
+ * environment-managed.
+ */
+export interface WhatsappConfigMaskedViewType {
+  readonly source: WhatsappConfigSource;
+  readonly appId: string | null;
+  readonly appSecret: string | null;
+  readonly verifyToken: string | null;
+  readonly phoneNumberId: string | null;
+  readonly wabaId: string | null;
+  readonly accessToken: string | null;
+  readonly esConfigId: string | null;
+  readonly webhookUrl: string;
+}
+
+/**
  * Outcome of the lightweight Meta Graph API connectivity check. `message` is
  * a localized, user-friendly string that never contains tokens or raw
  * provider error details; `phoneNumber` is the display number Meta returns
