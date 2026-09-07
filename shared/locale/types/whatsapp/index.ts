@@ -315,4 +315,64 @@ export interface WhatsappLabels {
   readonly purposeOptionAdvertisingDescription: string;
   /** Opt-in surface banner: WhatsApp notifications default to off. */
   readonly optInDefaultOffBanner: string;
+
+  // ─── Config tab (Settings ▸ WhatsApp ▸ Config) ──────────────────────
+  /** Nav label for the Cloud API configuration tab. */
+  readonly tabConfig: string;
+  readonly configTitle: string;
+  readonly configSubtitle: string;
+  /** Caption describing where the returned values are stored (database). */
+  readonly configSourceDb: string;
+  /** Caption shown when no values are stored yet and env fallback applies. */
+  readonly configSourceEnv: string;
+  /** Banner shown when the viewer lacks the manage permission (read-only form). */
+  readonly configReadonlyNotice: string;
+  readonly configAppId: string;
+  readonly configAppIdHelper: string;
+  readonly validationAppIdNumeric: string;
+  readonly configAppSecret: string;
+  /** Helper text echoing the server-masked stored secret. */
+  readonly configSecretStored: (masked: string) => string;
+  /** Helper text for a secret field when the server has no stored value. */
+  readonly configSecretNotSet: string;
+  readonly configVerifyToken: string;
+  readonly configVerifyTokenHelper: string;
+  /** Button that generates a secure verify-token candidate. */
+  readonly configGenerateToken: string;
+  /** Tooltip for the generate button. */
+  readonly configGenerateTokenHint: string;
+  /** Snackbar after a candidate token was placed in the form (unsaved). */
+  readonly configTokenGenerated: string;
+  /** Snackbar when a token candidate could not be generated. */
+  readonly configTokenGenerateError: string;
+  /** Accessible label for the copy-verify-token button. */
+  readonly configCopyToken: string;
+  readonly configWebhookUrl: string;
+  readonly configWebhookUrlHelper: string;
+  /** Static setup guidance pointing to the Meta Developer Console. */
+  readonly configWebhookUrlGuidance: string;
+  /** Accessible label for the copy-webhook-URL button. */
+  readonly configCopyWebhookUrl: string;
+  readonly configPhoneNumberId: string;
+  readonly configPhoneNumberIdHelper: string;
+  readonly configWabaId: string;
+  readonly configWabaIdHelper: string;
+  readonly configAccessToken: string;
+  readonly configAccessTokenHelper: string;
+  readonly configEsConfigId: string;
+  readonly configEsConfigIdHelper: string;
+  readonly configSaveChanges: string;
+  readonly configSaveSuccess: string;
+  readonly configSaveError: string;
+  readonly configTestConnection: string;
+  /** Alert copy when the connection test could not be executed at all. */
+  readonly configTestConnectionError: string;
+  /** Label prefixed to the connected phone number on a successful test. */
+  readonly configConnectionPhoneNumber: string;
+  readonly configCopied: string;
+  readonly configCopyFailed: string;
+  /** Accessible label for the show-secret visibility toggle. */
+  readonly configShowSecret: string;
+  /** Accessible label for the hide-secret visibility toggle. */
+  readonly configHideSecret: string;
 }

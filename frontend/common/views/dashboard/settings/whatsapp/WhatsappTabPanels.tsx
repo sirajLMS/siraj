@@ -12,12 +12,14 @@ import type {
   OptInTabSharedProps,
   TemplatesTabSharedProps,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
+import type { WhatsappConfigTabViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappConfigView.types";
 import type { WhatsappInboxViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappInboxView.types";
 import type {
   WhatsappOptInAuditEntry,
   WhatsappOptInUserState,
   WhatsappSettingsViewModel,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import { useWhatsappConfigViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/useWhatsappConfigViewModel";
 import { useWhatsappInboxViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/useWhatsappInboxViewModel";
 import {
   TAB_PERMISSIONS,
@@ -70,6 +72,17 @@ const lazyInboxTab = createLazyView<WhatsappInboxViewModel>(
     }))
 );
 
+const lazyConfigTab = createLazyView<WhatsappConfigTabViewModel>(
+  () =>
+    import("@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/ConfigTab.mobile").then(m => ({
+      default: m.ConfigTabMobile,
+    })),
+  () =>
+    import("@/frontend/desktop/views/dashboard/settings/whatsapp/tabs/ConfigTab.desktop").then(m => ({
+      default: m.ConfigTabDesktop,
+    }))
+);
+
 /**
  * The inbox tab owns its own ViewModel (`useWhatsappInboxViewModel`) so its
  * queries only fire when the tab is mounted — unrelated to the settings VM.
@@ -77,6 +90,16 @@ const lazyInboxTab = createLazyView<WhatsappInboxViewModel>(
 function InboxTabPanel() {
   const viewModel = useWhatsappInboxViewModel();
   return <ResponsiveViewSwitch mobile={lazyInboxTab.mobile} desktop={lazyInboxTab.desktop} props={viewModel} />;
+}
+
+/**
+ * The Cloud API configuration tab owns its own ViewModel
+ * (`useWhatsappConfigViewModel`) so its queries only fire when mounted; the
+ * settings VM stays untouched by its per-field form state.
+ */
+function ConfigTabPanel() {
+  const viewModel = useWhatsappConfigViewModel();
+  return <ResponsiveViewSwitch mobile={lazyConfigTab.mobile} desktop={lazyConfigTab.desktop} props={viewModel} />;
 }
 
 // ── Suspense fallback ──
@@ -217,6 +240,8 @@ const TAB_PANELS: Readonly<Record<TabId, ComponentType<{ viewModel: WhatsappSett
   optin: OptInTabPanel,
   // The inbox tab carries its own ViewModel; the settings VM prop is unused.
   inbox: InboxTabPanel,
+  // The config tab likewise owns its ViewModel; the settings VM prop is unused.
+  config: ConfigTabPanel,
 };
 
 /**
