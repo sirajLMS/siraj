@@ -2,7 +2,7 @@
 
 This document consolidates patterns, rules, and gotchas from the WhatsApp Cloud API integration (Tasks 1–29, with knowledge propagation captured by Task 30 per `.ai/plans/whatsapp-plan-fixes/`). It serves as the canonical reference for the **v1 single-number** WhatsApp integration.
 
-> **v2 update (2026-09)**: Multi-number purpose routing, coexistence onboarding, and durable webhook ingest supersede several sections here (the factory is now per-account rather than a lazy singleton, `apiVersion` resolves from `WHATSAPP_GRAPH_API_VERSION`, `stripInboundMessages` was removed, and claim processing is durable). Read **`docs/services/whatsapp-coexistence-multi.md`** alongside this document — it is the canonical reference for v2 behavior.
+> **v2 update (2026-09)**: Multi-number purpose routing, coexistence onboarding, and durable webhook ingest supersede several sections here (the factory is now per-account rather than a lazy singleton, `apiVersion` resolves from `WHATSAPP_GRAPH_API_VERSION`, `stripInboundMessages` was removed, and claim processing is durable). Read **`docs/services/whatsapp-coexistence-multi.md`** alongside this document — it is the canonical reference for v2 behavior. For step-by-step credentials and Meta developer portal onboarding, see **`docs/services/whatsapp-env-setup-guide.md`**.
 
 ---
 
