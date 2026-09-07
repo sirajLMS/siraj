@@ -30,6 +30,8 @@ interface NavbarBrandBlockProps {
   readonly brandNameColor: string;
   readonly roleColor: string;
   readonly logoAriaLabel?: string;
+  /** Published brand logo; replaces the default icon when provided. */
+  readonly logoUrl?: string | null;
   readonly leadingSlot?: ReactNode;
 }
 
@@ -40,6 +42,7 @@ export function NavbarBrandBlock({
   brandNameColor,
   roleColor,
   logoAriaLabel,
+  logoUrl,
   leadingSlot,
 }: Readonly<NavbarBrandBlockProps>) {
   return (
@@ -57,7 +60,16 @@ export function NavbarBrandBlock({
         }}
         data-appearance-target="brand-logo"
       >
-        <SchoolOutlined sx={{ fontSize: 24 }} aria-label={logoAriaLabel} />
+        {logoUrl ? (
+          <Box
+            component="img"
+            src={logoUrl}
+            alt={logoAriaLabel ?? appTitle}
+            sx={{ width: 24, height: 24, objectFit: "contain", borderRadius: 0.5 }}
+          />
+        ) : (
+          <SchoolOutlined sx={{ fontSize: 24 }} aria-label={logoAriaLabel} />
+        )}
       </Box>
       <Box sx={{ display: { xs: "none", md: "flex" }, flexDirection: "column" }}>
         <Typography

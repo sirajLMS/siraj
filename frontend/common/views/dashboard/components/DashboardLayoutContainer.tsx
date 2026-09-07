@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import { isUsersDirectoryEnabled } from "@/backend/lib/features/is-users-directory-enabled";
+import { logger } from "@/backend/lib/logger";
+import { AppearanceSettingsService } from "@/backend/services";
+import type { AppearanceFields } from "@/backend/types";
 import type { MeQuery_me as User } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AppClientProviders as DashboardClientProviders } from "@/frontend/common/providers/AppClientProviders";
 import { DashboardClientBridge } from "@/frontend/common/views/dashboard/components/DashboardClientBridge";
@@ -47,14 +50,30 @@ export async function DashboardLayoutContainer({
   const coreLayoutT = t.coreLayout;
   const enableUsersDirectory = await isUsersDirectoryEnabled();
 
+  // Published appearance drives the navbar brand (site name + logo) so a
+  // publish through the customize overlay shows up after the next server
+  // render without touching locale files. Falls back to the translated
+  // app title + default icon when no row exists or the read fails.
+  let appearance: AppearanceFields | null = null;
+  try {
+    appearance = await AppearanceSettingsService.getFirstAppearancePublished();
+  } catch (error) {
+    logger.error("[DashboardLayoutContainer] published appearance read failed; falling back to translation brand.", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+  const appTitle = appearance?.siteName ?? coreLayoutT.appTitle;
+  const appLogoUrl = appearance?.logoUrl ?? null;
+
   return (
     <DashboardClientProviders locale={locale}>
       <DashboardClientBridge
         userProfile={userProfile}
         isSuperAdmin={isSuperAdmin}
         roleLabel={resolveNavbarRoleLabel(userProfile.role, adminT)}
-        appTitle={coreLayoutT.appTitle}
-        logoAriaLabel={coreLayoutT.appTitle}
+        appTitle={appTitle}
+        appLogoUrl={appLogoUrl}
+        logoAriaLabel={appTitle}
         initialSidebarOpen={initialSidebarOpen}
         enableUsersDirectory={enableUsersDirectory}
         hideSidebarNavigation={hideSidebarNavigation}

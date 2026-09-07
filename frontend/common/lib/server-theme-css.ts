@@ -2,7 +2,8 @@ import type { PaletteColorOptions, PaletteMode } from "@mui/material/styles";
 import { logger } from "@/backend/lib/logger";
 import { AppearanceSettingsService } from "@/backend/services";
 import type { AppearanceFields } from "@/backend/types";
-import { resolvePresetPalettes } from "@/frontend/common/providers/theme/presets/paletteFactory";
+import type { AppearancePresetId } from "@/frontend/common/providers/theme/presets";
+import { matchPresetByColors, resolvePresetPalettes } from "@/frontend/common/providers/theme/presets/paletteFactory";
 
 function hasMain(color: PaletteColorOptions | undefined): color is { main: string } {
   return color !== undefined && "main" in color;
@@ -23,6 +24,7 @@ interface ServerThemeTokens {
   readonly surface: string;
   readonly primaryContainer: string;
   readonly primaryMain: string;
+  readonly secondaryMain: string;
   readonly borderLight: string;
   readonly textPrimary: string;
   readonly textPrimaryChannel: string;
@@ -44,6 +46,7 @@ const DARK_FALLBACKS: ServerThemeTokens = {
   surface: "#1E1E1E",
   primaryContainer: "#115E59",
   primaryMain: "#2DD4BF",
+  secondaryMain: "#818CF8",
   borderLight: "#333333",
   textPrimary: "#FAFAFA",
   textPrimaryChannel: "255 255 255",
@@ -65,6 +68,7 @@ const LIGHT_FALLBACKS: ServerThemeTokens = {
   surface: "#FFFFFF",
   primaryContainer: "#CCFBF1",
   primaryMain: "#0D9488",
+  secondaryMain: "#4F46E5",
   borderLight: "#E4E4E7",
   textPrimary: "#0F172A",
   textPrimaryChannel: "0 0 0",
@@ -94,15 +98,32 @@ async function fetchPublishedAppearance(): Promise<AppearanceFields | null> {
   }
 }
 
+/**
+ * Resolve the preset id the app's palette should be built from.
+ *
+ * Priority: the published appearance's color pair is matched against the
+ * preset catalog (`matchPresetByColors`) — when it matches a preset, the
+ * full preset palette (backgrounds, surfaces, header/sidebar, dividers,
+ * shadows) is what the published theme should look like. When the published
+ * colors are custom (no catalog match) or there is no published row, the
+ * `APP_THEME_PRESET` env var (via the factory fallback) applies.
+ */
+export function resolveAppearancePresetId(appearance?: AppearanceFields | null): AppearancePresetId | undefined {
+  return matchPresetByColors(appearance?.colors ?? null) ?? undefined;
+}
+
 function extractTokens(mode: PaletteMode, appearance?: AppearanceFields | null): ServerThemeTokens {
   const isDark = mode === "dark";
-  const palettes = resolvePresetPalettes();
+  const palettes = resolvePresetPalettes(resolveAppearancePresetId(appearance));
   const palette = isDark ? palettes.dark : palettes.light;
   const fallbacks = isDark ? DARK_FALLBACKS : LIGHT_FALLBACKS;
-  const publishedPrimary = appearance?.colors[mode].primaryMain;
+  const publishedColors = appearance?.colors[mode];
+  const publishedPrimary = publishedColors?.primaryMain;
+  const publishedSecondary = publishedColors?.secondaryMain;
 
   const bg = palette.background;
   const primary = palette.primary;
+  const secondary = palette.secondary;
   const border = palette.border;
 
   return {
@@ -120,6 +141,7 @@ function extractTokens(mode: PaletteMode, appearance?: AppearanceFields | null):
     surface: palette.surface ?? fallbacks.surface,
     primaryContainer: palette.primaryContainer ?? fallbacks.primaryContainer,
     primaryMain: publishedPrimary ?? (hasMain(primary) ? primary.main : fallbacks.primaryMain),
+    secondaryMain: publishedSecondary ?? (hasMain(secondary) ? secondary.main : fallbacks.secondaryMain),
     borderLight: border?.light ?? fallbacks.borderLight,
     textPrimary: palette.text?.primary ?? fallbacks.textPrimary,
     textPrimaryChannel: fallbacks.textPrimaryChannel,
@@ -141,11 +163,19 @@ function extractTokens(mode: PaletteMode, appearance?: AppearanceFields | null):
  *     `useColorScheme().setMode()` when `colorSchemeSelector: "data"` is used
  *     (e.g. `data-dark` / `data-light`).
  *
- * When `appearance` is provided (a published row exists), the
- * `--mui-palette-primary-main` token is overridden with the published
- * per-mode `primaryMain` (AC-21), taking precedence over both the static
- * palette value and the {@link DARK_FALLBACKS} / {@link LIGHT_FALLBACKS}
- * constant. All other tokens retain their palette-or-fallback resolution.
+ * When `appearance` is provided (a published row exists), the palette is
+ * resolved from the catalog preset whose brand colors match the published
+ * row (falling back to the env preset when the colors are custom), and the
+ * `--mui-palette-primary-main` / `--mui-palette-secondary-main` tokens are
+ * overridden with the published per-mode pair (AC-21), taking precedence
+ * over both the palette values and the {@link DARK_FALLBACKS} /
+ * {@link LIGHT_FALLBACKS} constants. All other tokens retain their
+ * palette-or-fallback resolution — now from the *published* preset.
+ *
+ * The `body` background/color rules read the emitted vars via `var(--…)`,
+ * so the customize overlay's inline overrides on `<html>` (live preview)
+ * also repaint `body` — a literal color here would freeze the page
+ * background during live preset switching.
  */
 function buildModeRule(mode: PaletteMode, appearance?: AppearanceFields | null): string {
   const tokens = extractTokens(mode, appearance);
@@ -162,6 +192,7 @@ function buildModeRule(mode: PaletteMode, appearance?: AppearanceFields | null):
       --mui-palette-onSurface: ${tokens.onSurface};
       --mui-palette-onSurfaceVariant: ${tokens.onSurfaceVariant};
       --mui-palette-primary-main: ${tokens.primaryMain};
+      --mui-palette-secondary-main: ${tokens.secondaryMain};
       --mui-palette-primaryContainer: ${tokens.primaryContainer};
       --mui-palette-border-light: ${tokens.borderLight};
       --mui-palette-outlineVariant: ${tokens.outlineVariant};
@@ -173,8 +204,8 @@ function buildModeRule(mode: PaletteMode, appearance?: AppearanceFields | null):
       color-scheme: ${mode};
     }
     html[data-mui-color-scheme="${mode}"] body, html[data-theme="${mode}"] body, html[data-${mode}] body {
-      background-color: ${tokens.bgDefault};
-      color: ${tokens.onBackground};
+      background-color: var(--mui-palette-background-default, ${tokens.bgDefault});
+      color: var(--mui-palette-onBackground, ${tokens.onBackground});
     }
   `.replace(/\s+/g, " ");
 }
@@ -197,9 +228,11 @@ function buildModeRule(mode: PaletteMode, appearance?: AppearanceFields | null):
  * hydration; the selectors are mutually exclusive by attribute value, so order does not
  * affect correctness after toggle — only which rule applies during the very first paint.
  *
- * When a published appearance row exists, the `--mui-palette-primary-main` token is
- * overridden with the published per-mode `primaryMain` for **both** emitted modes
- * (AC-21), so the published brand color paints on first render regardless of which
+ * When a published appearance row exists, the palette is resolved from the
+ * catalog preset matching the published colors, and the
+ * `--mui-palette-primary-main` / `--mui-palette-secondary-main` tokens are
+ * overridden with the published per-mode pair for **both** emitted modes
+ * (AC-21), so the published brand paints on first render regardless of which
  * mode the visitor lands in. The read is cached via `unstable_cache` tag
  * `"appearance"` (AC-22) and degrades gracefully to the static palette on failure.
  */
@@ -230,4 +263,19 @@ export async function resolveServerThemeMode(cookieThemeValue?: string): Promise
   }
   const appearance = await fetchPublishedAppearance();
   return appearance?.defaultColorScheme ?? "dark";
+}
+
+/**
+ * Resolve the catalog preset id to build the MUI theme from (client bundle
+ * needs this up-front because `process.env.APP_THEME_PRESET` is build-time
+ * inlined and cannot see DB-published presets at request time).
+ *
+ * Reads the published appearance through {@link fetchPublishedAppearance}
+ * (cached, tag `"appearance"`, try/catch → `null`) and matches its colors
+ * against the preset catalog. Returns `undefined` when no preset matches —
+ * the theme builders then fall back to the `APP_THEME_PRESET` env preset.
+ */
+export async function resolvePublishedAppearancePresetId(): Promise<AppearancePresetId | undefined> {
+  const appearance = await fetchPublishedAppearance();
+  return resolveAppearancePresetId(appearance);
 }

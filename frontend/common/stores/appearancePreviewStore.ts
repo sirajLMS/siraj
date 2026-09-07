@@ -312,7 +312,10 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
         : undefined;
     const isDark = currentScheme !== undefined ? currentScheme === "dark" : get().draft.defaultColorScheme === "dark";
     const presetId = get().presetId ?? matchPresetByColors(get().draft.colors);
-    set({ isCustomizeMode: true, isDark, presetId, lastPublished: null });
+    // Reset hydration + last-visible-publish marks so each session starts by
+    // reseeding the draft from the server (the server draft may have changed
+    // since the last session, e.g. another admin published).
+    set({ isCustomizeMode: true, isDark, presetId, lastPublished: null, hydrated: false });
     writeActiveModeCssVars(get().draft, isDark, presetId);
   },
   exitCustomizeMode: () => {

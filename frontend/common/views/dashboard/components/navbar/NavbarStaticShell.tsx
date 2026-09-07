@@ -32,10 +32,18 @@ interface NavbarStaticShellProps {
   readonly appTitle: string;
   readonly roleLabel: string;
   readonly logoAriaLabel: string;
+  /** Published brand logo; replaces the default icon when provided. */
+  readonly logoUrl?: string | null;
   readonly children?: ReactNode;
 }
 
-export function NavbarStaticShell({ appTitle, roleLabel, logoAriaLabel, children }: Readonly<NavbarStaticShellProps>) {
+export function NavbarStaticShell({
+  appTitle,
+  roleLabel,
+  logoAriaLabel,
+  logoUrl,
+  children,
+}: Readonly<NavbarStaticShellProps>) {
   return (
     <AppBar
       position="fixed"
@@ -60,6 +68,7 @@ export function NavbarStaticShell({ appTitle, roleLabel, logoAriaLabel, children
           appTitle={appTitle}
           roleLabel={roleLabel}
           logoAriaLabel={logoAriaLabel}
+          logoUrl={logoUrl}
           logoBackgroundColor="color-mix(in srgb, var(--mui-palette-onHeaderContainer) 15%, transparent)"
           brandNameColor="var(--mui-palette-onHeaderContainer)"
           roleColor="color-mix(in srgb, var(--mui-palette-onHeaderContainer) 70%, transparent)"

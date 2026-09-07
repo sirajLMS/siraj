@@ -7,7 +7,11 @@ import { logger } from "@/backend/lib/logger";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
 import { AppearanceSettingsService } from "@/backend/services";
 import type { AppearanceFields } from "@/backend/types";
-import { buildServerThemeCss, resolveServerThemeMode } from "@/frontend/common/lib/server-theme-css";
+import {
+  buildServerThemeCss,
+  resolvePublishedAppearancePresetId,
+  resolveServerThemeMode,
+} from "@/frontend/common/lib/server-theme-css";
 import { THEME_COOKIE_NAME } from "@/frontend/common/lib/theme-detection";
 import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import { NewRelicBrowserAgent } from "@/frontend/common/providers/NewRelicBrowserAgent";
@@ -122,6 +126,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   const direction = locale === "ar" ? "rtl" : "ltr";
   const serverThemeCss = await buildServerThemeCss(initialTheme);
+  // Preset resolved from the published appearance row so the client MUI theme
+  // (backgrounds, surfaces, header/sidebar, …) follows the published preset
+  // instead of the build-time `APP_THEME_PRESET` env var after a publish.
+  const appearancePresetId = await resolvePublishedAppearancePresetId();
 
   return (
     <html
@@ -179,7 +187,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             matches the cookie value read above and passed to MuiProvider. */}
         <InitColorSchemeScript attribute="data" defaultMode={initialTheme} modeStorageKey="theme" nonce={nonce} />
         <LocaleProvider locale={locale}>
-          <MuiProvider initialTheme={initialTheme} nonce={nonce}>
+          <MuiProvider initialTheme={initialTheme} appearancePresetId={appearancePresetId} nonce={nonce}>
             {children}
           </MuiProvider>
         </LocaleProvider>

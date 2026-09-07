@@ -26,12 +26,19 @@ export interface DashboardLayoutProps {
   readonly userRole: string;
   readonly roleLabel: string;
   /**
-   * Localized application title (e.g. "Siraj LMS"). Resolved server-side by
-   * the layout container from `dashboard.core.layout.appTitle` and threaded
-   * through the bridge+switcher so the desktop Server Component can render
+   * Application title for the navbar brand. Resolved server-side: the
+   * published appearance `siteName` when an appearance row exists,
+   * otherwise the localized `dashboard.core.layout.appTitle`. Threaded
+   * through the bridge+switcher so the desktop shell can render
    * `<NavbarStaticShell appTitle={appTitle} />` before hydration.
    */
   readonly appTitle: string;
+  /**
+   * Published brand logo URL (appearance settings). Rendered in the brand
+   * block instead of the default icon when set; `null`/absent keeps the
+   * default icon.
+   */
+  readonly appLogoUrl?: string | null;
   /**
    * Accessibility label for the brand logo icon. Currently reused as the
    * app title for parity with the existing navbar chrome.

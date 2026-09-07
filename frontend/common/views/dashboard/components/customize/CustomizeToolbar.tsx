@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog";
 import type { AppearanceDraftInput, AppearanceSettingsQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
@@ -160,6 +160,7 @@ export function CustomizeToolbar() {
   // referentially-stable primitives that re-render on history changes.
   const draft = useAppearancePreviewStore(s => s.draft);
   const dirty = useAppearancePreviewStore(s => s.dirty);
+  const hydrated = useAppearancePreviewStore(s => s.hydrated);
   const pastLength = useAppearancePreviewStore(s => s.past.length);
   const futureLength = useAppearancePreviewStore(s => s.future.length);
   const undo = useAppearancePreviewStore(s => s.undo);
@@ -183,6 +184,16 @@ export function CustomizeToolbar() {
     variables: { draft: true },
   });
   const serverUpdatedAt = appearanceData?.appearanceSettings?.updatedAt ?? null;
+
+  // Seed the draft store from the server's draft fields once per customize
+  // session, so the sidebar and a subsequent publish act on the real server
+  // state instead of the in-memory factory defaults. Skipped while the user
+  // has unsaved local edits (their in-flight draft wins).
+  useEffect(() => {
+    if (hydrated || dirty) return;
+    const serverDraft = toAppearanceDraftInput(appearanceData?.appearanceSettings?.draftFields);
+    if (serverDraft) loadFromServer(serverDraft);
+  }, [appearanceData, hydrated, dirty, loadFromServer]);
 
   const [saveDraft, { loading: saveLoading }] = useMutation(saveAppearanceDraftMutationDocument);
   const [publish, { loading: publishLoading }] = useMutation(publishAppearanceMutationDocument);
