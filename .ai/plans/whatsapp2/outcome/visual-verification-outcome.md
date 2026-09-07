@@ -42,3 +42,28 @@ Pass 2 (9 comparisons on fixed captures): sync-states 7 (below-fold panels DOM-v
 - Inbox pagination: DataGrid is 0-indexed; VM page state must be 0-indexed and clamped (`Page 2 of 1`/`OFFSET -n` outcomes otherwise).
 - Verifying "dumb" states (empty/declined/failed) requires SEEDED state, not just route reachability — declined banner was code-complete but unverifiable until a declined account existed.
 - agent-browser dev sessions can stall on long multi-capture scripts; a second agent-browser daemon (`connect <port>`) + Playwright MCP fallback unblocked it.
+
+## Final pass (post-commit)
+
+Re-captured the last unverified states in `scratch/screenshots/whatsapp2/final/`:
+- `numbers-sync-full-a/b/b2.png` — full scroll of Numbers: syncing panel (phase label, 45% progressbar, deadline) ✓, declined error panel + guidance + retry ✓ (DOM-verified).
+- `inbox-declined-final.png` — declined banner + "Number not available — sync declined" empty block ✓.
+- `thread-full.png` — edited / revoked / media-expired markers + TODAY pill + read-only footer all viewport-confirmed (earlier pass 2 low score was a fold-truncation artifact).
+- `add-number-final.png` — purpose select end-to-end works post-fix; purpose description line renders.
+- `numbers-ar.png` / `inbox-ar.png` — AR/RTL spot check: dir="rtl", Arabic tabs/chips/columns, zero horizontal overflow.
+
+All prototype views: implemented, reachable, parity-or-better. The loop is closed.
+
+## Polish pass (style-hunt wave)
+
+Hunted: 30 captures (EN+AR, desk+mob across all 9 surfaces) + 12 rubric inspectors + 8 fix agents.
+
+**Fixed:** tab accent unified to primary (shared `GenericTabNav`), mobile numbers header collapse to icon actions, bare numbers empty state → proper CTA card, chip flow wrap, read-only banner outlined, declined-copy dedupe, dashed→solid empty borders, phone-number bidi isolation (`dir="ltr"` + unicode-bidi isolate), preview/timestamp RTL cramping, row hover + chevron affordance, thread timestamps into bubble footers + bottom padding + pinned read-only strip, ES dialog CTA nowrap + stepper balance + actions gap, add-number banner wrap/notch/helper grouping, opt-in chip padding + consent axis + compact empty grid, templates dual-CTA harmonization + framed empty state + sync icon.
+
+**Global fixes:** EN mobile header avatar bleed (root cause: CustomizeButton full label at xs → icon-only below md), gapcursor SSR error resolved (stale Turbopack cache post tiptap dedupe; verified clean).
+
+**Stories created (6):** NumberCardSyncPanels, NumberCardPurposeSync, InboxTabContent, ConversationThread, EmbeddedSignupDialog (session hook mocked via sb.mock), CreateAccountDialog.
+
+**Re-capture verification (`fixed2/`):** 10/10 surfaces PASS with DOM metrics (token colors, rects, wrapping, bidi). Zero console errors.
+
+**Deferred as out-of-scope/hand-off:** global app-shell accents, yellow Customize button prominence (app chrome), backend mid-word 140-char preview slice (`whatsapp-webhook-inbox.helpers.ts:94`), `mediaPending` key unused (no backend signal yet).

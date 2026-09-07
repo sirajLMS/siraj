@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronRightOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import type { GridColDef, GridEventListener } from "@mui/x-data-grid";
 import { useMemo } from "react";
@@ -7,6 +8,7 @@ import { StatusBadge } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ConversationThread } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/ConversationThread";
 import { InboxTabContent } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/InboxTabContent";
+import { textDirection } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/textDirection";
 import type {
   WhatsappConversationRow,
   WhatsappInboxViewModel,
@@ -23,13 +25,25 @@ function buildColumns(vm: WhatsappInboxViewModel): GridColDef<WhatsappConversati
       flex: 1,
       minWidth: 180,
       valueGetter: (_value, row) => row.displayName ?? row.username ?? row.waId ?? "",
+      renderCell: ({ row }) => {
+        const contact = row.displayName ?? row.username ?? row.waId ?? "";
+        return (
+          <Box component="span" dir={textDirection(contact)} sx={{ unicodeBidi: "isolate" }}>
+            {contact}
+          </Box>
+        );
+      },
     },
     {
       field: "lastMessagePreview",
       headerName: t.columnLastMessage,
       flex: 1.4,
       minWidth: 220,
-      renderCell: ({ value }) => value ?? "—",
+      renderCell: ({ value }) => (
+        <Box component="span" dir="auto" sx={{ unicodeBidi: "isolate" }}>
+          {typeof value === "string" && value !== "" ? value : "—"}
+        </Box>
+      ),
     },
     {
       field: "accountPurpose",
@@ -47,7 +61,27 @@ function buildColumns(vm: WhatsappInboxViewModel): GridColDef<WhatsappConversati
       headerName: t.columnLastActivity,
       flex: 0.6,
       minWidth: 150,
-      renderCell: ({ row }) => vm.formatTimestamp(row.lastMessageAt),
+      renderCell: ({ row }) => (
+        <Box component="span" dir="auto" sx={{ unicodeBidi: "isolate", whiteSpace: "nowrap" }}>
+          {vm.formatTimestamp(row.lastMessageAt)}
+        </Box>
+      ),
+    },
+    {
+      field: "__open",
+      headerName: "",
+      width: 48,
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      renderCell: () => (
+        <ChevronRightOutlined
+          sx={theme => ({
+            color: theme.palette.text.secondary,
+            transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+          })}
+        />
+      ),
     },
   ];
 }
@@ -78,7 +112,10 @@ export function InboxTabDesktop(vm: Readonly<WhatsappInboxViewModel>) {
         totalCount: vm.totalCount,
         onPageChange: vm.onPageChange,
       })}
-      sx={{ cursor: "pointer" }}
+      sx={theme => ({
+        cursor: "pointer",
+        "& .MuiDataGrid-row:hover": { backgroundColor: theme.palette.action.hover },
+      })}
     />
   );
 

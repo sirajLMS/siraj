@@ -158,6 +158,7 @@ function DesktopHistorySection({
         emptyMessage={t.optInHistoryEmpty}
         ariaLabel={t.optInHistoryTitle}
         paginationOptions={CLIENT_PAGINATION}
+        autoHeight
       />
     </Box>
   );
@@ -181,6 +182,7 @@ function DesktopAdminSection({ labels, adminUsers }: Readonly<OptInTabSharedProp
         emptyMessage={t.optInAdminEmpty}
         ariaLabel={t.optInAdminTitle}
         paginationOptions={CLIENT_PAGINATION}
+        autoHeight
       />
     </Box>
   );

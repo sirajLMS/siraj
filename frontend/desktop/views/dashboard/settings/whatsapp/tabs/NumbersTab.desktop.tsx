@@ -1,6 +1,6 @@
 "use client";
 
-import { CloudSyncOutlined, DeleteOutlined, EditOutlined, MoreVertOutlined } from "@mui/icons-material";
+import { AddOutlined, CloudSyncOutlined, DeleteOutlined, EditOutlined, MoreVertOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -18,11 +18,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useCallback, useState } from "react";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import {
   NumbersCreateEditDialogs,
   NumbersDeleteConfirmDialog,
+  NumbersEmptyStateShared,
   NumbersHeaderShared,
   NumbersListItemTransition,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/__shared__";
@@ -130,6 +132,7 @@ function AccountsListSection({
   syncingId,
   onMenuOpen,
   onOpenDeleteConfirmDialog,
+  onAddAccount,
   onRetrySetup,
 }: Readonly<{
   readonly labels: WhatsappLabels;
@@ -138,14 +141,20 @@ function AccountsListSection({
   readonly syncingId: string | null;
   readonly onMenuOpen: (event: React.MouseEvent<HTMLElement>, account: WhatsappAccountRow) => void;
   readonly onOpenDeleteConfirmDialog: (accountId: string, displayName: string) => void;
+  readonly onAddAccount: () => void;
   /** Re-opens Embedded Signup from the failed-sync card panel (ES-gated). */
   readonly onRetrySetup?: () => void;
 }>) {
   if (accounts.length === 0) {
     return (
-      <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, py: 4, textAlign: "center" }}>
-        {labels.noAccounts}
-      </Typography>
+      <NumbersEmptyStateShared
+        labels={labels}
+        cta={
+          <PrimaryPageAction startIcon={<AddOutlined />} onClick={onAddAccount}>
+            {labels.addFirstNumber}
+          </PrimaryPageAction>
+        }
+      />
     );
   }
 
@@ -529,6 +538,7 @@ export function NumbersTabDesktop({
         syncingId={syncingId}
         onMenuOpen={handleMenuOpen}
         onOpenDeleteConfirmDialog={onOpenDeleteConfirmDialog}
+        onAddAccount={onOpenCreateDialog}
         onRetrySetup={esConfigId && esAppId ? onOpenEmbeddedSignup : undefined}
       />
 

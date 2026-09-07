@@ -94,7 +94,11 @@ export function EmbeddedSignupPhaseContent({
           <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
             {labels.embeddedSignupDescription}
           </Typography>
-          <Button variant="contained" onClick={onLaunch} sx={{ alignSelf: "flex-start" }}>
+          <Button
+            variant="contained"
+            onClick={onLaunch}
+            sx={{ alignSelf: "flex-start", whiteSpace: { sm: "nowrap" }, textAlign: "center" }}
+          >
             {labels.embeddedSignupLaunch}
           </Button>
         </>

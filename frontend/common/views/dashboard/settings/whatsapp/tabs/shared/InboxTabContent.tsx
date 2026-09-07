@@ -16,6 +16,7 @@ import {
 import type { ReactNode } from "react";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { MOBILE_CONTENT_GUTTER, mobileContentGutterBelowMdSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
+import { textDirection } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/textDirection";
 import type { WhatsappInboxViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappInboxView.types";
 import type { WhatsappInboxLabels } from "@/shared/locale/types/whatsappInbox";
 
@@ -32,14 +33,20 @@ const emptyStateCardSx = (theme: Theme) => ({
   py: 8,
   px: 2,
   borderRadius: 2,
-  border: `1px dashed ${theme.palette.outline}`,
+  border: `1px solid ${theme.palette.outlineVariant}`,
   [theme.breakpoints.down("md")]: { paddingInline: theme.spacing(MOBILE_CONTENT_GUTTER) },
 });
 
 /** Persistent info banner clarifying the inbox is strictly read-only. */
 function ReadOnlyBanner({ labels }: Readonly<{ labels: WhatsappInboxLabels }>) {
   return (
-    <Alert severity="info" component="div" icon={<LockOutlined fontSize="small" />} sx={mobileContentGutterBelowMdSx}>
+    <Alert
+      severity="info"
+      variant="outlined"
+      component="div"
+      icon={<LockOutlined fontSize="small" />}
+      sx={mobileContentGutterBelowMdSx}
+    >
       <Typography variant="labelUppercase">{labels.readOnlyBannerTitle}</Typography>
       <Typography variant="bodyMd">{labels.readOnlyNotice}</Typography>
     </Alert>
@@ -78,16 +85,13 @@ function EmptyStateCard({ labels }: Readonly<{ labels: WhatsappInboxLabels }>) {
   );
 }
 
-/** Centered block below the declined-sync banner when the declined number has no conversations. */
+/** Short centered marker below the declined-sync banner; the guidance copy lives in the banner only. */
 function DeclinedEmptyState({ labels }: Readonly<{ labels: WhatsappInboxLabels }>) {
   return (
     <Stack spacing={1.5} sx={emptyStateCardSx}>
       <BlockOutlined sx={{ fontSize: 40, color: theme => theme.palette.text.secondary }} />
       <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
         {labels.syncDeclinedEmptyTitle}
-      </Typography>
-      <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, maxWidth: 480 }}>
-        {labels.historyDeclinedNotice}
       </Typography>
     </Stack>
   );
@@ -141,7 +145,12 @@ export function InboxTabContent({
             >
               <MenuItem value={ALL_ACCOUNTS_VALUE}>{labels.accountFilterAll}</MenuItem>
               {accounts.map(account => (
-                <MenuItem key={account.id} value={account.id}>
+                <MenuItem
+                  key={account.id}
+                  value={account.id}
+                  dir={textDirection(account.label)}
+                  sx={{ unicodeBidi: "isolate" }}
+                >
                   {account.label}
                 </MenuItem>
               ))}

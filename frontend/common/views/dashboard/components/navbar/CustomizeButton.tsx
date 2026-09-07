@@ -1,7 +1,7 @@
 "use client";
 
 import { PaletteOutlined } from "@mui/icons-material";
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { usePathname, useSearchParams } from "next/navigation";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -49,9 +49,20 @@ export function CustomizeButton() {
         color="warning"
         size="small"
         startIcon={<PaletteOutlined />}
-        sx={{ color: theme => theme.palette.onWarning }}
+        aria-label={t.customizeButton}
+        sx={{
+          color: theme => theme.palette.onWarning,
+          // Icon-only below md: the literal label is the widest item in the
+          // navbar's right cluster and pushes the avatar off-viewport at
+          // 390px. Desktop keeps icon + label.
+          minWidth: { xs: 40, md: 64 },
+          px: { xs: 0.5, md: 2 },
+          "& .MuiButton-startIcon": { mx: { xs: 0, md: undefined } },
+        }}
       >
-        {t.customizeButton}
+        <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>
+          {t.customizeButton}
+        </Box>
       </Button>
     </RequirePermission>
   );

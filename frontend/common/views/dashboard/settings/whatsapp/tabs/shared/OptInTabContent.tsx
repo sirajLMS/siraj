@@ -1,10 +1,10 @@
 "use client";
 
 import { LockOutlined } from "@mui/icons-material";
-import { Alert, Box, CircularProgress, FormControlLabel, Stack, Switch, Typography } from "@mui/material";
+import { Alert, Box, Chip, CircularProgress, FormControlLabel, Stack, Switch, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
+import { BaseCard, getStatusColors } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { mobileContentGutterBelowMdSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 import type { OptInTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
@@ -29,7 +29,8 @@ interface OptInTabContentProps extends OptInTabSharedProps {
  *
  * Renders:
  * 1. The opt-in toggle — a `BaseCard` containing the Switch (existing behavior
- *    preserved) and a `StatusBadge` reflecting the enabled/disabled state.
+ *    preserved), its consent copy, and a `Chip` reflecting the
+ *    enabled/disabled state.
  * 2. The audit history section: title/subtitle plus the platform-specific
  *    table/list passed via the `historySection` prop.
  * 3. The admin consolidated opt-in view wrapped in `RequirePermission` with
@@ -75,18 +76,22 @@ export function OptInTabContent({
             ) : (
               <FormControlLabel
                 control={<Switch checked={isOptedIn} onChange={e => onToggleOptIn(e.target.checked)} />}
-                label={t.optInToggle}
-                sx={{ gap: 1.5 }}
+                sx={{ gap: 1.5, alignItems: "flex-start" }}
+                label={
+                  <Stack spacing={0.5}>
+                    <Typography variant="bodyLg">{t.optInToggle}</Typography>
+                    <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+                      {t.optInConsentBody}
+                    </Typography>
+                  </Stack>
+                }
               />
             )}
-            <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mt: 1, display: "block" }}>
-              {t.optInConsentBody}
-            </Typography>
             <Box sx={{ mt: 1 }}>
-              <StatusBadge
-                category="syncStatus"
-                status={isOptedIn ? "success" : "cancelled"}
+              <Chip
+                size="small"
                 label={isOptedIn ? t.optInEnabled : t.optInDisabled}
+                sx={theme => getStatusColors(theme, "syncStatus", isOptedIn ? "success" : "cancelled")}
               />
             </Box>
           </BaseCard>

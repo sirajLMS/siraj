@@ -1,8 +1,26 @@
-import { CloudSyncOutlined, ErrorOutlined, LockOutlined, RefreshOutlined, SyncOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
+import { ErrorOutlined, LockOutlined, RefreshOutlined, SyncOutlined } from "@mui/icons-material";
+import { Box, Button, CircularProgress, Stack, type Theme, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
+
+/**
+ * Framed, vertically-centered empty-state card mirroring the inbox empty-state
+ * pattern: a dashed outline frame that fills the content area so the region
+ * reads as an intentional layout block rather than floating copy.
+ */
+const templatesEmptyStateCardSx = (theme: Theme) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  textAlign: "center" as const,
+  minHeight: 320,
+  py: 8,
+  px: 2,
+  borderRadius: 2,
+  border: `1px dashed ${theme.palette.outline}`,
+});
 
 /** Props shared by all three template shared sub-components. */
 interface TemplatesSharedBlockProps {
@@ -50,7 +68,8 @@ export function TemplatesSyncHeader({
       </Box>
       <Button
         variant="outlined"
-        startIcon={syncing ? undefined : <CloudSyncOutlined />}
+        color="primary"
+        startIcon={syncing ? undefined : <SyncOutlined />}
         disabled={syncing || !isConfigured}
         onClick={onSyncFromMeta}
         aria-busy={syncing}
@@ -76,7 +95,7 @@ export function TemplatesEmptySyncCta({
   onSyncFromMeta,
 }: Readonly<TemplatesSharedBlockProps>) {
   return (
-    <Box sx={{ textAlign: "center", py: 4 }}>
+    <Box sx={templatesEmptyStateCardSx}>
       <SyncOutlined sx={{ fontSize: 36, color: theme => theme.palette.text.secondary, mb: 1 }} />
       <Typography variant="titleLg" sx={{ mb: 0.5 }}>
         {labels.noTemplates}
@@ -97,7 +116,8 @@ export function TemplatesEmptySyncCta({
       >
         <Button
           variant="contained"
-          startIcon={syncing ? undefined : <CloudSyncOutlined />}
+          color="primary"
+          startIcon={syncing ? undefined : <SyncOutlined />}
           disabled={syncing || !isConfigured}
           onClick={onSyncFromMeta}
         >

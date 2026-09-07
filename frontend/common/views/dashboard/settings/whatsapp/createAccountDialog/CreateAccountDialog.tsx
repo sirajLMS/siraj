@@ -1,7 +1,7 @@
 "use client";
 
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
-import { Alert, Dialog, DialogContent, DialogTitle, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Dialog, DialogContent, DialogTitle, IconButton, Stack, TextField } from "@mui/material";
 import { useCallback, useState } from "react";
 import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import { DialogSaveCancelActions } from "@/frontend/common/views/dashboard/settings/whatsapp/dialogs";
@@ -234,7 +234,9 @@ function CreateAccountDialogFields({
 }>) {
   return (
     <Stack spacing={2} sx={{ mt: 1 }}>
-      <Alert severity="info">{labels.addNumberInfoBanner}</Alert>
+      <Alert severity="info" sx={{ "& .MuiAlert-message": { flexGrow: 1, textWrap: "pretty" } }}>
+        {labels.addNumberInfoBanner}
+      </Alert>
       <TextField
         label={labels.displayNameLabel}
         placeholder={labels.displayNameHelper}
@@ -272,28 +274,16 @@ function CreateAccountDialogFields({
         labels={labels}
         value={purpose}
         error={purposeError}
+        description={resolvePurposeDescription(purpose, labels)}
         disabled={loading}
         onChange={onPurposeChange}
       />
-      <PurposeDescription labels={labels} purpose={purpose} />
       {mutationError !== null ? (
         <Alert severity="error" role="alert">
           {mutationError}
         </Alert>
       ) : null}
     </Stack>
-  );
-}
-
-function PurposeDescription({ labels, purpose }: Readonly<{ labels: WhatsappLabels; purpose: string }>) {
-  const description = resolvePurposeDescription(purpose, labels);
-  if (description === null) {
-    return null;
-  }
-  return (
-    <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-      {description}
-    </Typography>
   );
 }
 

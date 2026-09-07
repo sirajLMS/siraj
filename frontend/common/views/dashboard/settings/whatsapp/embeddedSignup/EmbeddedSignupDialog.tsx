@@ -90,10 +90,16 @@ export function EmbeddedSignupDialog({
           <CloseOutlined fontSize="small" />
         </IconButton>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ pb: 1 }}>
         {configured ? (
-          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 3, mt: 1 }}>
-            <Stepper orientation="vertical" activeStep={activeStep} sx={{ minWidth: { sm: 200 } }}>
+          <Box
+            sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: "stretch", gap: 3, mt: 1 }}
+          >
+            <Stepper
+              orientation="vertical"
+              activeStep={activeStep}
+              sx={{ minWidth: { sm: 200 }, justifyContent: { xs: "flex-start", sm: "center" } }}
+            >
               {stepLabels.map((label, index) => (
                 <Step key={label} completed={phase === "success" || index < activeStep}>
                   <StepLabel error={failed && index === activeStep}>{label}</StepLabel>
@@ -115,7 +121,7 @@ export function EmbeddedSignupDialog({
           </Typography>
         )}
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
+      <DialogActions sx={{ px: 3, pt: 1, pb: 2 }}>
         <Button onClick={handleClose} disabled={busy}>
           {labels.cancel}
         </Button>

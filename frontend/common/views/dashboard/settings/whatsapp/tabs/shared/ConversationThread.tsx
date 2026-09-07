@@ -135,31 +135,33 @@ function MessageBubble({ message, labels, formatTimestamp }: Readonly<MessageBub
   const directionLabel = getWhatsappMessageDirectionLabel(labels, message.direction);
 
   return (
-    <Box sx={{ alignSelf: outbound ? "flex-end" : "flex-start", maxWidth: "80%" }}>
-      <Stack
-        spacing={0.5}
-        sx={[
-          {
-            p: 1.5,
-            borderRadius: 2,
-            borderStartStartRadius: outbound ? 8 : 2,
-            borderStartEndRadius: outbound ? 2 : 8,
-          },
-          outbound ? OUTBOUND_BUBBLE_SX : INBOUND_BUBBLE_SX,
-        ]}
-      >
-        {renderMessageBody(message, labels)}
+    <Stack
+      spacing={0.5}
+      sx={[
+        {
+          alignSelf: outbound ? "flex-end" : "flex-start",
+          maxWidth: "80%",
+          p: 1.5,
+          borderRadius: 2,
+          borderStartStartRadius: outbound ? 8 : 2,
+          borderStartEndRadius: outbound ? 2 : 8,
+        },
+        outbound ? OUTBOUND_BUBBLE_SX : INBOUND_BUBBLE_SX,
+      ]}
+    >
+      {renderMessageBody(message, labels)}
+      <Stack direction="row" spacing={1} sx={{ alignItems: "baseline" }}>
         {directionLabel !== "" && (
           <Typography variant="labelUppercase" sx={{ opacity: 0.7 }}>
             {directionLabel}
           </Typography>
         )}
+        <Typography variant="caption" sx={{ opacity: 0.7, marginInlineStart: "auto" }}>
+          {message.editedAt ? `${labels.editedLabel} · ` : ""}
+          {formatTimestamp(message.sentAt)}
+        </Typography>
       </Stack>
-      <Typography variant="bodyMd" sx={{ opacity: 0.6, mt: 0.25, textAlign: outbound ? "end" : "start" }}>
-        {message.editedAt ? `${labels.editedLabel} · ` : ""}
-        {formatTimestamp(message.sentAt)}
-      </Typography>
-    </Box>
+    </Stack>
   );
 }
 function MessageMediaPlaceholder({ labels }: Readonly<{ labels: WhatsappInboxLabels }>) {
@@ -257,7 +259,11 @@ export function ConversationThread({
           </Typography>
         </Box>
       </Stack>
-      <Stack spacing={2} sx={{ p: 2, minHeight: 240, maxHeight: 520, overflowY: "auto" }} component="section">
+      <Stack
+        spacing={2}
+        sx={{ pt: 2, px: 2, pb: 3, minHeight: 240, maxHeight: 520, overflowY: "auto" }}
+        component="section"
+      >
         <ThreadBody messages={messages} labels={labels} loading={loading} formatTimestamp={formatTimestamp} />
       </Stack>
       <Stack

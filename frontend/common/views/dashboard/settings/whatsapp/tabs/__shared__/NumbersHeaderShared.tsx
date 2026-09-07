@@ -1,11 +1,59 @@
 "use client";
 
 import { AddOutlined, CloudSyncOutlined, PhonelinkSetupOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress } from "@mui/material";
+import { Box, Button, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
+
+interface HeaderActionProps {
+  readonly icon: ReactNode;
+  readonly label: string;
+  readonly onClick: () => void;
+  readonly disabled: boolean;
+  readonly busy: boolean;
+  /** Icon-only tooltip button instead of a labelled button (mobile tier). */
+  readonly compact: boolean;
+  readonly buttonSize: "small" | "medium" | "large";
+  readonly spinnerSize: number;
+}
+
+function HeaderAction({
+  icon,
+  label,
+  onClick,
+  disabled,
+  busy,
+  compact,
+  buttonSize,
+  spinnerSize,
+}: Readonly<HeaderActionProps>) {
+  const startIcon = busy ? <CircularProgress size={spinnerSize} /> : icon;
+  if (compact) {
+    return (
+      <Tooltip title={label}>
+        <span>
+          <IconButton size={buttonSize} aria-label={label} aria-busy={busy} disabled={disabled} onClick={onClick}>
+            {startIcon}
+          </IconButton>
+        </span>
+      </Tooltip>
+    );
+  }
+  return (
+    <Button
+      size={buttonSize}
+      variant="outlined"
+      startIcon={startIcon}
+      aria-busy={busy}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  );
+}
 
 export function NumbersHeaderShared({
   labels,
@@ -17,6 +65,7 @@ export function NumbersHeaderShared({
   titleSlot,
   buttonSize,
   syncIconSize,
+  compactActions = false,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly syncing: boolean;
@@ -28,37 +77,50 @@ export function NumbersHeaderShared({
   readonly titleSlot: ReactNode;
   readonly buttonSize: "small" | "medium" | "large";
   readonly syncIconSize: number;
+  /**
+   * Collapses header actions to icon-only tooltip buttons (mobile tier) so the
+   * title keeps its own space and buttons never wrap mid-phrase on narrow viewports.
+   */
+  readonly compactActions?: boolean;
 }>) {
   return (
-    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-      {titleSlot}
-      <Box sx={{ display: "flex", gap: 1 }}>
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 1, mb: 2 }}>
+      <Box sx={{ minWidth: 0 }}>{titleSlot}</Box>
+      <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
         <RequirePermission permissions={AppPermission.WhatsappConfigManage}>
           {onConnectBusinessApp ? (
-            <Button
-              size={buttonSize}
-              variant="outlined"
-              startIcon={<PhonelinkSetupOutlined />}
+            <HeaderAction
+              icon={<PhonelinkSetupOutlined />}
+              label={labels.connectBusinessApp}
               onClick={onConnectBusinessApp}
-            >
-              {labels.connectBusinessApp}
-            </Button>
+              disabled={false}
+              busy={false}
+              compact={compactActions}
+              buttonSize={buttonSize}
+              spinnerSize={syncIconSize}
+            />
           ) : null}
-          <Button size={buttonSize} variant="outlined" startIcon={<AddOutlined />} onClick={onAddAccount}>
-            {labels.addAccount}
-          </Button>
+          <HeaderAction
+            icon={<AddOutlined />}
+            label={labels.addAccount}
+            onClick={onAddAccount}
+            disabled={false}
+            busy={false}
+            compact={compactActions}
+            buttonSize={buttonSize}
+            spinnerSize={syncIconSize}
+          />
         </RequirePermission>
-        <Button
-          size={buttonSize}
-          variant="outlined"
-          startIcon={syncing ? <CircularProgress size={syncIconSize} /> : <CloudSyncOutlined />}
-          disabled={syncing || !isConfigured}
+        <HeaderAction
+          icon={<CloudSyncOutlined />}
+          label={labels.syncFromMeta}
           onClick={onSyncFromMeta}
-          aria-label={labels.syncFromMeta}
-          aria-busy={syncing}
-        >
-          {labels.syncFromMeta}
-        </Button>
+          disabled={syncing || !isConfigured}
+          busy={syncing}
+          compact={compactActions}
+          buttonSize={buttonSize}
+          spinnerSize={syncIconSize}
+        />
       </Box>
     </Box>
   );

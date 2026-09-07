@@ -6,9 +6,16 @@ import { mswLoader } from "msw-storybook-addon/csf3";
 import { type PropsWithChildren, useEffect, useState } from "react";
 import { GLOBALS_UPDATED } from "storybook/internal/core-events";
 import { addons } from "storybook/preview-api";
+import { sb } from "storybook/test";
 import { themes } from "storybook/theming";
 import { mswHandlers } from "./msw-handlers";
 import { StoryWrapper } from "./StoryWrapper";
+
+// Spy-mockable Embedded Signup session state machine — stories override phases
+// via `mocked(useEmbeddedSignupSession)` so no FB SDK is required to render them.
+sb.mock(import("../frontend/common/views/dashboard/settings/whatsapp/embeddedSignup/useEmbeddedSignupSession.ts"), {
+  spy: true,
+});
 
 // Import global styles
 import "@/app/index.css";

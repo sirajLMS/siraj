@@ -26,12 +26,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission, WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
+import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
 import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import {
   NumbersCreateEditDialogs,
   NumbersDeleteConfirmDialog,
+  NumbersEmptyStateShared,
   NumbersHeaderShared,
   NumbersListItemTransition,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/__shared__";
@@ -190,9 +190,14 @@ function NumbersHeaderMobile({
       onSyncFromMeta={onSyncFromMeta}
       onAddAccount={onAddAccount}
       onConnectBusinessApp={onConnectBusinessApp}
+      compactActions
       buttonSize="small"
       syncIconSize={16}
-      titleSlot={<Typography variant="titleLg">{labels.numbersTitle}</Typography>}
+      titleSlot={
+        <Typography variant="titleLg" noWrap sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+          {labels.numbersTitle}
+        </Typography>
+      }
     />
   );
 }
@@ -328,17 +333,15 @@ function AccountsListMobile({
   );
 
   const renderEmptyState = useCallback(
-    (message: string) => (
-      <Box sx={{ textAlign: "center", py: 4 }}>
-        <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, mb: 2 }}>
-          {message}
-        </Typography>
-        <RequirePermission permissions={AppPermission.WhatsappConfigManage}>
+    () => (
+      <NumbersEmptyStateShared
+        labels={labels}
+        cta={
           <MobilePrimaryPageAction startIcon={<AddOutlined />} onClick={onAddAccount}>
             {labels.addFirstNumber}
           </MobilePrimaryPageAction>
-        </RequirePermission>
-      </Box>
+        }
+      />
     ),
     [labels, onAddAccount]
   );

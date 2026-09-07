@@ -20,7 +20,14 @@ function DefaultTabNavDesktop({
         borderBottom: `1px solid ${theme.palette.divider}`,
       })}
     >
-      <Tabs value={activeTab} variant="scrollable" scrollButtons="auto" allowScrollButtonsMobile>
+      <Tabs
+        value={activeTab}
+        textColor="primary"
+        indicatorColor="primary"
+        variant="scrollable"
+        scrollButtons="auto"
+        allowScrollButtonsMobile
+      >
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
 

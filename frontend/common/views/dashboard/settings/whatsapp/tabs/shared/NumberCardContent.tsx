@@ -160,7 +160,7 @@ export function NumberCardContent({
         {action}
       </Box>
       <Stack spacing={1.5} sx={{ mt: 1.5 }}>
-        <Box>
+        <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1 }}>
           <StatusBadge
             {...getWhatsappAccountStatusBadgeConfig(account.isActive)}
             label={account.isActive ? t.isActive : t.isInactive}
