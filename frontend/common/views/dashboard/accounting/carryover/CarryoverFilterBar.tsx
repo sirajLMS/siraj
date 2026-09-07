@@ -3,10 +3,10 @@
 import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
 import {
   Box,
-  Button,
   FormControl,
   FormControlLabel,
   FormLabel,
+  IconButton,
   InputAdornment,
   Paper,
   Radio,
@@ -14,6 +14,7 @@ import {
   Stack,
   Switch,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AppDateRangePicker } from "@/frontend/common/components/ui/form/date";
@@ -28,8 +29,8 @@ const SEARCH_DEBOUNCE_MS = 300;
 /** Search length accepted by both the carryover query and the CSV export route. */
 const SEARCH_INPUT_MAX_LENGTH = 200;
 
-/** Paid-status radio choices rendered start-to-end (RTL aware). */
-const PAID_STATUS_FILTERS: readonly CarryoverPaidStatusFilter[] = ["Paid", "Unpaid", "Both"];
+/** Paid-status radio choices, All-first, laid out reading-start to reading-end (mirrors under dir=rtl). */
+const PAID_STATUS_FILTERS: readonly CarryoverPaidStatusFilter[] = ["Both", "Unpaid", "Paid"];
 
 function isPaidStatusFilter(value: string): value is CarryoverPaidStatusFilter {
   return PAID_STATUS_FILTERS.some(option => option === value);
@@ -89,7 +90,7 @@ function SearchTextField({ placeholder, value, onChange }: Readonly<SearchTextFi
           maxLength: SEARCH_INPUT_MAX_LENGTH,
         },
       }}
-      sx={{ flexGrow: 1, minWidth: { xs: "100%", sm: 240 } }}
+      sx={{ width: "100%", flex: { xs: "1 1 100%", md: "1 1 0" }, minWidth: { md: 232 } }}
     />
   );
 }
@@ -106,11 +107,17 @@ function PaidStatusRadioGroup({ groupLabel, labels, value, onChange }: Readonly<
     if (isPaidStatusFilter(event.target.value)) onChange(event.target.value);
   };
   return (
-    <FormControl component="fieldset" variant="standard">
+    <FormControl component="fieldset" variant="standard" sx={{ flex: { md: "1 1 0" }, minWidth: { md: 248 } }}>
       <FormLabel id="carryover-paid-status-label" sx={{ typography: "bodyMd" }}>
         {groupLabel}
       </FormLabel>
-      <RadioGroup row aria-labelledby="carryover-paid-status-label" value={value} onChange={handleChange}>
+      <RadioGroup
+        row
+        aria-labelledby="carryover-paid-status-label"
+        value={value}
+        onChange={handleChange}
+        sx={{ flexWrap: "nowrap", gap: 1, "& .MuiFormControlLabel-root": { mx: 0 } }}
+      >
         {PAID_STATUS_FILTERS.map(status => (
           <FormControlLabel key={status} value={status} control={<Radio size="small" />} label={labels[status]} />
         ))}
@@ -143,7 +150,7 @@ function DateRangeFilter({
     onDateToChange(nextDateTo === "" ? null : nextDateTo);
   };
   return (
-    <Box sx={{ flex: { xs: "1 1 100%", md: "0 1 auto" }, minWidth: { md: 300 } }}>
+    <Box sx={{ flex: { xs: "1 1 100%", md: "1 1 0" }, minWidth: { md: 200 } }}>
       <AppDateRangePicker
         label={label}
         fromLabel={fromLabel}
@@ -162,7 +169,8 @@ interface FilterActionsProps {
   readonly includeDisabledTeachers: boolean;
   readonly onToggle: (include: boolean) => void;
   readonly clearLabel: string;
-  readonly clearDisabled: boolean;
+  /** Clear only exists while a filter is active, so it always reads as interactive. */
+  readonly showClear: boolean;
   readonly onClear: () => void;
 }
 
@@ -171,26 +179,36 @@ function FilterActions({
   includeDisabledTeachers,
   onToggle,
   clearLabel,
-  clearDisabled,
+  showClear,
   onClear,
 }: Readonly<FilterActionsProps>) {
   return (
-    <Stack direction="row" sx={{ gap: 2, alignItems: "center", marginInlineStart: "auto" }}>
+    <Stack
+      direction="row"
+      sx={{
+        gap: 1,
+        alignItems: "center",
+        flex: { xs: "1 1 100%", md: "0 0 auto" },
+        flexShrink: 1,
+        minWidth: 0,
+        justifyContent: { xs: "space-between", md: "flex-start" },
+        whiteSpace: "nowrap",
+      }}
+    >
       <FormControlLabel
         control={
           <Switch size="small" checked={includeDisabledTeachers} onChange={event => onToggle(event.target.checked)} />
         }
         label={toggleLabel}
+        sx={{ m: 0 }}
       />
-      <Button
-        size="small"
-        variant="text"
-        startIcon={<ClearOutlined fontSize="small" />}
-        disabled={clearDisabled}
-        onClick={onClear}
-      >
-        {clearLabel}
-      </Button>
+      {showClear ? (
+        <Tooltip title={clearLabel}>
+          <IconButton size="small" color="primary" aria-label={clearLabel} onClick={onClear}>
+            <ClearOutlined fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      ) : null}
     </Stack>
   );
 }
@@ -233,10 +251,10 @@ export function CarryoverFilterBar() {
     search !== "";
 
   return (
-    <Paper variant="outlined" sx={{ p: 2 }}>
+    <Paper variant="outlined" sx={{ p: 2, px: { md: 1 }, width: "100%" }}>
       <Stack
         direction={{ xs: "column", md: "row" }}
-        sx={{ flexWrap: "wrap", gap: 2, alignItems: { xs: "stretch", md: "center" } }}
+        sx={{ flexWrap: "wrap", gap: { xs: 2, md: 0.5 }, alignItems: { xs: "stretch", md: "center" } }}
       >
         <SearchTextField placeholder={t.filters.searchPlaceholder} value={inputValue} onChange={setInputValue} />
         <TeacherAutocomplete
@@ -245,7 +263,7 @@ export function CarryoverFilterBar() {
           placeholder={t.filters.teacherPlaceholder}
           value={teacherSelection}
           onChange={setTeacher}
-          sx={{ width: { xs: "100%", sm: 230 }, flexShrink: 0 }}
+          sx={{ width: { xs: "100%", md: "auto" }, flex: { md: "1 1 0" }, minWidth: { md: 190 } }}
         />
         <PaidStatusRadioGroup
           groupLabel={t.filters.paidStatus}
@@ -253,11 +271,6 @@ export function CarryoverFilterBar() {
           value={paidStatus}
           onChange={setPaidStatus}
         />
-      </Stack>
-      <Stack
-        direction={{ xs: "column", md: "row" }}
-        sx={{ flexWrap: "wrap", gap: 2, mt: 2, alignItems: { xs: "stretch", md: "center" } }}
-      >
         <DateRangeFilter
           label={t.filters.dateRange}
           fromLabel={t.filters.fromDate}
@@ -272,7 +285,7 @@ export function CarryoverFilterBar() {
           includeDisabledTeachers={includeDisabledTeachers}
           onToggle={setIncludeDisabledTeachers}
           clearLabel={t.filters.clear}
-          clearDisabled={!hasActiveFilters}
+          showClear={hasActiveFilters}
           onClear={clearFilters}
         />
       </Stack>

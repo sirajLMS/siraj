@@ -16,6 +16,7 @@ import {
   IconButton,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { format } from "date-fns";
@@ -42,6 +43,9 @@ const CARRYOVER_LIST_FIELD = "carryoverBalances";
 
 /** Terminal domain rejection surfaced as a non-dismissible in-dialog banner. */
 const ALREADY_PAID_ERROR_CODE = "CARRYOVER_ALREADY_PAID";
+
+/** Display + wire format for the payment date field (full calendar date). */
+const PAYMENT_DATE_FORMAT = "yyyy-MM-dd";
 
 /** Display + wire format for the expense month field (year-month only). */
 const EXPENSE_MONTH_FORMAT = "yyyy-MM";
@@ -269,6 +273,7 @@ export function BulkToExpenseModal({ open, carryoverIds, rows, onClose, onDone }
               label={labels.modal.bulkToExpense.paymentDate}
               value={paymentDate}
               onChange={handlePaymentDateChange}
+              format={PAYMENT_DATE_FORMAT}
               disabled={submitting}
               slotProps={{ textField: { required: true, fullWidth: true } }}
             />
@@ -287,15 +292,22 @@ export function BulkToExpenseModal({ open, carryoverIds, rows, onClose, onDone }
             multiline
             minRows={2}
             label={labels.modal.bulkToExpense.note}
+            placeholder={labels.modal.bulkToExpense.notePlaceholder}
             value={note}
             onChange={event => setNote(event.target.value)}
             fullWidth
             disabled={submitting}
-            slotProps={{ htmlInput: { maxLength: CARRYOVER_NOTE_MAX_LENGTH } }}
+            slotProps={{ htmlInput: { maxLength: CARRYOVER_NOTE_MAX_LENGTH }, inputLabel: { shrink: true } }}
           />
+          <Alert severity="warning">{labels.modal.bulkToExpense.convertConsequenceWarning}</Alert>
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+        {!canSubmit && !submitting ? (
+          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary, me: "auto" })}>
+            {labels.modal.bulkToExpense.convertFillRequiredHint}
+          </Typography>
+        ) : null}
         <Button
           variant="text"
           onClick={onClose}

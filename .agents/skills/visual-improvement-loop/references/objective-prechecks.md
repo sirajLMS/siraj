@@ -65,3 +65,15 @@ JSON.stringify({
     .filter((b) => !b.textContent.trim()).length,
 })
 ```
+
+## Known false-positive classes (verify before treating as findings)
+
+- **Console check**: the script's console counter is a substring heuristic — `[apollo.utils.errorLink]`
+  channel names and benign info lines (e.g. `refreshToken ... "Not supported on server side"`) trip it
+  on every capture. Always filter to real `[error]`-level entries manually before flagging a page.
+- **DataGrid "offscreen" overflow**: MUI X virtualizes column headers beyond the internal scroll width —
+  the offscreen check trips on grid pages constantly with no page-level overflow. Confirm via
+  `document.documentElement.scrollWidth === innerWidth` (page-level) before assigning a fix.
+- **Invisible-but-present overlays**: per-element `visibility`/`opacity` checks cannot see a modal painted
+  UNDER a fixed app bar (z-index occlusion). For any "element should be visible" assertion prefer
+  `document.elementFromPoint(x, y)` hit-testing at the element's center.

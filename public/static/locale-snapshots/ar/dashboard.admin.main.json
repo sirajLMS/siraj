@@ -30,6 +30,7 @@
   "previousPage": "الصفحة السابقة",
   "nextPage": "الصفحة التالية",
   "goToPage": "انتقل إلى صفحة",
+  "rowsPerPage": "صفوف لكل صفحة",
   "dashboardOverview": "نظرة عامة على لوحة التحكم",
   "viewAll": "عرض الكل",
   "loadingTimeoutTitle": "انتهت مهلة الطلب",

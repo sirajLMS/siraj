@@ -75,6 +75,9 @@ export function UnpayCarryoverDialog({ open, row, onClose, onDone }: Readonly<Un
       value: formatAccountingDate(row.paymentDate, locale),
     });
   }
+  if (row?.expenseId) {
+    details.push({ label: labels.modal.unpay.expenseLabel, value: row.expenseId });
+  }
 
   return (
     <CarryoverConfirmScaffold

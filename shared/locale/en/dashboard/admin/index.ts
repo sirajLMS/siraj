@@ -33,6 +33,7 @@ export const dashboardAdminEn: AdminDashboardLabels = {
   previousPage: "Previous Page",
   nextPage: "Next Page",
   goToPage: "Go to page",
+  rowsPerPage: "Rows per page",
   dashboardOverview: "Dashboard Overview",
   viewAll: "View All",
   loadingTimeoutTitle: "Request Timeout",

@@ -1,7 +1,18 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  type SelectChangeEvent,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { useState } from "react";
 import { rtlFlipIconSx } from "@/frontend/common/utils/rtlFlipIconSx";
@@ -12,6 +23,9 @@ export interface PaginationControlsSharedProps {
   readonly pageCount: number;
   readonly rowCount: number;
   readonly pageSize: number;
+  /** When both are provided, a rows-per-page selector is rendered in the footer. */
+  readonly pageSizeOptions?: readonly number[];
+  readonly onPageSizeChange?: (pageSize: number) => void;
   readonly embedded?: boolean;
   /** When false, the leading "from–to of total" range label is omitted (e.g. when a page indicator already carries position context). */
   readonly showRangeLabel?: boolean;
@@ -63,6 +77,8 @@ export function PaginationControlsScaffold({
   flush = false,
   showRangeLabel = true,
   onPageChange,
+  pageSizeOptions,
+  onPageSizeChange,
   rootGap,
   rootPaddingInline,
   rootPaddingBlock,
@@ -88,8 +104,9 @@ export function PaginationControlsScaffold({
   const setPageInput = setPageInputState;
 
   const safePageCount = Math.max(pageCount, rowCount > 0 ? 1 : 0);
-  const from = rowCount === 0 ? 0 : page * pageSize + 1;
-  const to = rowCount === 0 ? 0 : Math.min(rowCount, (page + 1) * pageSize);
+  const isEmpty = rowCount === 0;
+  const from = isEmpty ? 0 : page * pageSize + 1;
+  const to = isEmpty ? 0 : Math.min(rowCount, (page + 1) * pageSize);
 
   const commitPageInput = () => {
     const parsedPage = Number.parseInt(pageInput, 10);
@@ -102,6 +119,13 @@ export function PaginationControlsScaffold({
     onPageChange(nextPage);
     setPageInput(String(nextPage + 1));
     return undefined;
+  };
+
+  const showPageSizeSelect =
+    pageSizeOptions !== undefined && pageSizeOptions.length > 0 && onPageSizeChange !== undefined;
+
+  const handlePageSizeChange = (event: SelectChangeEvent<number>) => {
+    onPageSizeChange?.(event.target.value);
   };
 
   const rootSx = (theme: Theme) => {
@@ -142,69 +166,88 @@ export function PaginationControlsScaffold({
 
   return (
     <Box sx={rootSx}>
-      {showRangeLabel ? (
+      {!isEmpty && showRangeLabel ? (
         <Typography variant="labelMd" sx={labelSx}>
           {t.paginationRange(from, to, rowCount)}
         </Typography>
       ) : null}
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        {/* The span keeps hover working while a nav button is disabled; the
-            accessible name rides on the button itself and the tooltip only
-            describes it, so the roleless wrapper never carries naming ARIA. */}
-        <Tooltip title={t.previousPage} describeChild>
-          <span>
-            <IconButton
-              size="small"
-              aria-label={t.previousPage}
-              disabled={page <= 0 || safePageCount === 0}
-              onClick={() => onPageChange(page - 1)}
-              sx={navButtonSx}
-            >
-              <ChevronLeft fontSize="small" sx={rtlFlipIconSx} />
-            </IconButton>
-          </span>
-        </Tooltip>
-
-        <TextField
-          size="small"
-          value={pageInput}
-          disabled={safePageCount === 0}
-          onChange={event => setPageInput(event.target.value)}
-          onBlur={commitPageInput}
-          onKeyDown={event => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              commitPageInput();
-            }
-          }}
-          slotProps={{
-            htmlInput: {
-              "aria-label": t.goToPage,
-              inputMode: "numeric",
-            },
-          }}
-          sx={{ width: inputWidth, "& .MuiInputBase-input": { textAlign: "center", paddingBlock: 1 } }}
-        />
-
-        <Tooltip title={t.nextPage} describeChild>
-          <span>
-            <IconButton
-              size="small"
-              aria-label={t.nextPage}
-              disabled={safePageCount === 0 || page >= safePageCount - 1}
-              onClick={() => onPageChange(page + 1)}
-              sx={navButtonSx}
-            >
-              <ChevronRight fontSize="small" sx={rtlFlipIconSx} />
-            </IconButton>
-          </span>
-        </Tooltip>
-
+      {isEmpty ? (
         <Typography variant="labelMd" sx={labelSx}>
-          {safePageCount === 0 ? t.noData : t.pageOf(page + 1, safePageCount)}
+          {t.noData}
         </Typography>
-      </Box>
+      ) : (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {showPageSizeSelect ? (
+            <FormControl size="small" sx={{ minWidth: 112 }}>
+              <InputLabel>{t.rowsPerPage}</InputLabel>
+              <Select label={t.rowsPerPage} value={pageSize} onChange={handlePageSizeChange}>
+                {pageSizeOptions.map(option => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ) : null}
+
+          {/* The span keeps hover working while a nav button is disabled; the
+              accessible name rides on the button itself and the tooltip only
+              describes it, so the roleless wrapper never carries naming ARIA. */}
+          <Tooltip title={t.previousPage} describeChild>
+            <span>
+              <IconButton
+                size="small"
+                aria-label={t.previousPage}
+                disabled={page <= 0 || safePageCount === 0}
+                onClick={() => onPageChange(page - 1)}
+                sx={navButtonSx}
+              >
+                <ChevronLeft fontSize="small" sx={rtlFlipIconSx} />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <TextField
+            size="small"
+            value={pageInput}
+            disabled={safePageCount === 0}
+            onChange={event => setPageInput(event.target.value)}
+            onBlur={commitPageInput}
+            onKeyDown={event => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                commitPageInput();
+              }
+            }}
+            slotProps={{
+              htmlInput: {
+                "aria-label": t.goToPage,
+                inputMode: "numeric",
+              },
+            }}
+            sx={{ width: inputWidth, "& .MuiInputBase-input": { textAlign: "center", paddingBlock: 1 } }}
+          />
+
+          <Tooltip title={t.nextPage} describeChild>
+            <span>
+              <IconButton
+                size="small"
+                aria-label={t.nextPage}
+                disabled={safePageCount === 0 || page >= safePageCount - 1}
+                onClick={() => onPageChange(page + 1)}
+                sx={navButtonSx}
+              >
+                <ChevronRight fontSize="small" sx={rtlFlipIconSx} />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Typography variant="labelMd" sx={labelSx}>
+            {t.pageOf(page + 1, safePageCount)}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }

@@ -89,3 +89,34 @@ the agent-browser skill, or a global rule file) — and the entry records where 
 - Inspectors sometimes report "serif fallback" right after first-load font swap — verify computed
   `font-family` in the live page before assigning 'font mismatch' fixes; the app in this case matched
   (Hanken Grotesk) and the finding was a capture-timing artifact.
+
+## 2026-09-07 — carryover-balance-module full loop (dev-server rig, EN+AR, dark+light, 11 surfaces)
+
+- Drawer/modal painted UNDER the app bar (drawer modal z 1200 < appbar 1201): passes visibility/opacity
+  checks yet is fully invisible. Only `document.elementFromPoint()` at the supposed header coordinates
+  catches cross-sibling occlusion. Fixed with `zIndex: theme.zIndex.drawer + 2` on the Drawer.
+- `.MuiDataGrid-cell { line-height: calc(var(--height) - 1px) }` inherits into multi-line cell renderers:
+  N stacked lines × ~row height = a stack 2× the cell tall, center-clipped top/bottom — painting date-line
+  slivers at the header band and scrollbar, that look like "ghost fragments outside the grid".
+  `scrollWidth == clientWidth` checks CANNOT see vertical overflow: measure each line's
+  `getBoundingClientRect` against the cell rect. Fix: explicit compact `lineHeight` on the cell stack/lines.
+- MUI `Typography component="td"|"th"` breaks table layout — theme Typography display styles override
+  UA `table-cell`/`table-row`, exploding the table into a vertical stack. Use plain structural elements
+  (`Box component="table|thead|tbody|tr|th|td"`, real tags only — oxlint `jsx-a11y/prefer-tag-over-role`
+  rejects role-shims) and nest Typography INSIDE cells.
+- Shared agent-browser sessions get contaminated by CONCURRENT agents (stray overlays, mid-capture
+  navigation): produced a phantom "backdrop scrim lost" regression finding. Reserve a dedicated clean
+  session for golden captures and never share it with fixer agents.
+- Resuming image-inspector subagents across many rounds dies on upstream stream limits (image payload
+  accumulates in the resumed context). For round 3+, spawn FRESH inspectors handed only the final
+  capture path instead of resuming.
+- `visual-precheck.sh` console check is a substring heuristic: `[apollo.utils.errorLink]` channel names
+  and benign `refreshToken ... "Not supported on server side"` info lines trip it on every capture.
+  Manually filter for real `[error]`-level entries; a script-level filter is pending.
+- App theme is persisted in a `theme-mode` cookie (default dark), NOT via header toggle reliably —
+  dark/light captures: `agent-browser cookies set theme-mode light|dark --domain localhost` + reload.
+- RHF forms with a `CurrencyAutocompleteShared`-style primitive: passing `required` to the primitive
+  bypasses submit-gating (`showRequiredError = required && !value` renders red on fresh open). Omit
+  `required` and drive errors purely via `fieldState` (sibling PaymentForm pattern).
+- Arabic free-text separator parity: when deriving counts from a user-entered list string, split on
+  `[,;،؛]` — Arabic authors use `؛`/`،`, not `,`.

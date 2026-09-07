@@ -2,8 +2,20 @@
 
 import { useQuery } from "@apollo/client/react";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import { Alert, Avatar, Box, CircularProgress, Drawer, IconButton, Stack, Typography, useTheme } from "@mui/material";
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  CircularProgress,
+  Drawer,
+  IconButton,
+  Stack,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import type { Theme } from "@mui/material/styles";
+import { useState } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import type {
   CalculationStatus,
@@ -18,6 +30,7 @@ import {
 import { formatLockedAmount } from "@/frontend/common/lib/currency";
 import { DisabledTeacherChip } from "@/frontend/common/views/dashboard/accounting/carryover/DisabledTeacherChip";
 import { PaidStatusChip } from "@/frontend/common/views/dashboard/accounting/carryover/PaidStatusChip";
+import { UnpayCarryoverDialog } from "@/frontend/common/views/dashboard/accounting/carryover/UnpayCarryoverDialog";
 import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { useAppLocale } from "@/shared/locale";
@@ -48,6 +61,15 @@ const HEADER_SX = (theme: Theme) => ({
   px: 2.5,
   py: 2,
   borderBottom: `1px solid ${theme.palette.divider}`,
+});
+
+const FOOTER_SX = (theme: Theme) => ({
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: 1,
+  px: 2.5,
+  py: 2,
+  borderTop: `1px solid ${theme.palette.divider}`,
 });
 
 const MINUTES_PER_HOUR = 60;
@@ -91,6 +113,25 @@ function formatSessionAmount(
     return notSet;
   }
   return formatLockedAmount(amount, currency, locale);
+}
+
+/** Separator set for the free-text student roster: Latin and Arabic comma/semicolon. */
+const STUDENTS_TEXT_SEPARATOR = /[,;،؛]/;
+
+/**
+ * Stored count wins when present; manual rows sometimes carry only the
+ * free-text roster (comma- or semicolon-separated, Latin or Arabic marks), so
+ * the count is derived from it before falling back to the not-set label.
+ */
+function resolveStudentsCount(value: number | null, studentsText: string | null, notSet: string): string {
+  if (value !== null) {
+    return String(value);
+  }
+  const text = studentsText?.trim() ?? "";
+  if (text === "") {
+    return notSet;
+  }
+  return String(text.split(STUDENTS_TEXT_SEPARATOR).filter(name => name.trim() !== "").length);
 }
 
 export interface CarryoverDetailDrawerProps {
@@ -192,13 +233,12 @@ function BalanceSummary({
         <TeacherCell balance={balance} />
       </DetailField>
       <DetailField label={labels.modal.form.currency}>{balance.teacherCurrency ?? notSet}</DetailField>
-      <DetailField label={labels.column.studentsCount}>{balance.studentsCount ?? notSet}</DetailField>
+      <DetailField label={labels.column.studentsCount}>
+        {resolveStudentsCount(balance.studentsCount, balance.studentsText, notSet)}
+      </DetailField>
       <DetailField label={labels.column.totalDuration}>{balance.totalDuration ?? notSet}</DetailField>
       <DetailField label={labels.column.fromDate}>{balance.fromDate ?? notSet}</DetailField>
       <DetailField label={labels.column.toDate}>{balance.toDate ?? notSet}</DetailField>
-      <DetailField label={labels.column.paid}>
-        <PaidStatusChip paid={balance.isPaid ?? false} />
-      </DetailField>
       <DetailField label={labels.column.paymentDate}>{balance.paymentDate ?? notSet}</DetailField>
       <DetailField label={labels.column.payable}>
         <PayableValue balance={balance} notSet={notSet} />
@@ -434,6 +474,8 @@ function DrawerBody({
  * Right-side drill-down for a single carryover balance: the full record fields,
  * its paid/disabled chips, and the linked sessions table with per-session
  * snapshot amounts and current calculation statuses, all fetched on open.
+ * Paid balances expose a pinned footer with the same unpay confirm flow the
+ * list row menu uses.
  */
 export function CarryoverDetailDrawer({ carryoverId, open, onClose }: Readonly<CarryoverDetailDrawerProps>) {
   const theme = useTheme();
@@ -441,7 +483,7 @@ export function CarryoverDetailDrawer({ carryoverId, open, onClose }: Readonly<C
   const payrollLabels = useAppTranslation(DashboardBillingPayroll);
   const commonLabels = useAppTranslation(Translation.Common);
   const statusLabels: Record<CalculationStatus, string> = payrollLabels.status;
-  const { data, loading, error } = useQuery(carryoverBalanceQueryDocument, {
+  const { data, loading, error, refetch } = useQuery(carryoverBalanceQueryDocument, {
     variables: { id: carryoverId },
     fetchPolicy: "cache-and-network",
     skip: !open,
@@ -451,6 +493,11 @@ export function CarryoverDetailDrawer({ carryoverId, open, onClose }: Readonly<C
   // the generic page title instead of the template's trailing empty slot.
   const teacherName = balance?.teacherName ?? "";
   const title = teacherName === "" ? labels.title : labels.drawer.title(teacherName);
+  const [unpayOpen, setUnpayOpen] = useState(false);
+  const canUnpay = balance !== null && (balance.isPaid ?? false);
+  const handleUnpayDone = () => {
+    void refetch();
+  };
 
   return (
     <Drawer
@@ -459,6 +506,7 @@ export function CarryoverDetailDrawer({ carryoverId, open, onClose }: Readonly<C
       onClose={onClose}
       aria-label={title}
       slotProps={{ paper: { sx: PAPER_SX } }}
+      sx={drawerTheme => ({ zIndex: drawerTheme.zIndex.drawer + 2 })}
     >
       <DrawerHeader balance={balance} title={title} closeLabel={commonLabels.ariaClose} onClose={onClose} />
       <Box sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 3 }}>
@@ -480,6 +528,21 @@ export function CarryoverDetailDrawer({ carryoverId, open, onClose }: Readonly<C
           />
         ) : null}
       </Box>
+      {canUnpay ? (
+        <>
+          <Box sx={FOOTER_SX}>
+            <Button variant="outlined" color="error" onClick={() => setUnpayOpen(true)}>
+              {labels.action.unpay}
+            </Button>
+          </Box>
+          <UnpayCarryoverDialog
+            open={unpayOpen}
+            row={balance}
+            onClose={() => setUnpayOpen(false)}
+            onDone={handleUnpayDone}
+          />
+        </>
+      ) : null}
     </Drawer>
   );
 }

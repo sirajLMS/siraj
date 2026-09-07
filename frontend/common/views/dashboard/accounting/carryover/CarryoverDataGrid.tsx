@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AccountBalanceWalletOutlined,
   AddOutlined,
   DeleteOutlined,
   EditOutlined,
@@ -10,7 +11,8 @@ import {
   ReceiptLongOutlined,
   UndoOutlined,
 } from "@mui/icons-material";
-import { Box, Button, IconButton, Menu, MenuItem, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Chip, IconButton, Menu, MenuItem, Stack, Tooltip, Typography } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo, useState } from "react";
 import { ExportButton, SectionPanel } from "@/frontend/common/components/ui";
@@ -39,6 +41,66 @@ import type {
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingPayments } from "@/shared/locale/namespaces";
 import type { CarryoverLabels } from "@/shared/locale/types/dashboard/accounting/carryover";
+
+/**
+ * The MUI X grid hides its horizontal scrollbar on overlay-scrollbar
+ * platforms (macOS, Gnome Web) until the user guesses at scrolling, so a
+ * clipped trailing column reads as the end of the table. Painting a persistent
+ * thin thumb/track on the grid's horizontal scrollbar element keeps off-frame
+ * columns discoverable; the element only exists while columns overflow, so no
+ * cue appears when everything fits.
+ */
+const SCROLLBAR_CUE_SX = (theme: Theme) => ({
+  "& .MuiDataGrid-scrollbar--horizontal": {
+    scrollbarWidth: "thin",
+    scrollbarColor: `${theme.palette.action.active} ${theme.palette.action.hover}`,
+    "&[IP_REDACTED]-webkit-scrollbar": {
+      height: 8,
+    },
+    "&[IP_REDACTED]-webkit-scrollbar-track": {
+      backgroundColor: theme.palette.action.hover,
+    },
+    "&[IP_REDACTED]-webkit-scrollbar-thumb": {
+      backgroundColor: theme.palette.action.active,
+      borderRadius: theme.shape.borderRadius,
+    },
+  },
+});
+
+/**
+ * Long combined headers (e.g. the From – To period column) wrap onto a second
+ * line within the standard header height instead of clipping mid-word at the
+ * column edge; wrapping stays at word boundaries only.
+ */
+const HEADER_WRAP_SX = {
+  "& .MuiDataGrid-columnHeaderTitle": {
+    whiteSpace: "normal",
+    overflowWrap: "normal",
+    lineHeight: 1.25,
+    fontSize: "0.7rem",
+    letterSpacing: "0.04em",
+  },
+} as const;
+
+/**
+ * Zero-row geometry: the collapsed grid body would otherwise be shorter than
+ * the empty-state panel, so the panel would overflow under the footer. A
+ * min-height reserved while there are no rows gives the panel its room; once
+ * rows exist, the grid stretches past it on its own.
+ */
+const EMPTY_GRID_MIN_HEIGHT_SX = {
+  minHeight: 400,
+} as const;
+
+/** Ellipsized single-line text content for truncated cell values. */
+const ELLIPSIZED_TEXT_SX = {
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+} as const;
+
+/** Placeholder color for cells whose value is absent — always distinct from real values. */
+const EMPTY_VALUE_SX = (theme: Theme) => ({ color: theme.palette.text.disabled });
 
 /** Container callbacks that open the lifted dialogs/drawer for a row or the selection. */
 export interface CarryoverDialogCallbacks {
@@ -160,16 +222,36 @@ function CarryoverRowActionsMenu({
   );
 }
 
-/** Teacher identity cell: profile-linked name with the disabled-teacher chip alongside. */
+/**
+ * Teacher identity cell: profile-linked name with the disabled-teacher chip
+ * alongside. The name zone shrinks and ellipsizes inside the cell while the
+ * chip keeps its intrinsic width; a hover tooltip reveals the full name.
+ */
 function CarryoverTeacherCell({ row }: Readonly<{ row: CarryoverRow }>) {
+  const name = row.teacherName ?? row.teacherId ?? "";
   return (
-    <Stack direction="row" sx={{ alignItems: "center", gap: 1, minWidth: 0 }}>
-      <PersonProfileLinkCell
-        href={profileHrefForTeacher({ teacherId: row.teacherId })}
-        name={row.teacherName ?? row.teacherId ?? ""}
-        avatarUrl={row.teacherAvatarUrl}
-      />
-      {row.isDisabledTeacher === true ? <DisabledTeacherChip /> : null}
+    <Stack direction="row" sx={{ alignItems: "center", gap: 1, minWidth: 0, width: "100%" }}>
+      <Tooltip title={name}>
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            "& .MuiStack-root": { minWidth: 0, flex: 1 },
+            "& .MuiTypography-root": ELLIPSIZED_TEXT_SX,
+          }}
+        >
+          <PersonProfileLinkCell
+            href={profileHrefForTeacher({ teacherId: row.teacherId })}
+            name={name}
+            avatarUrl={row.teacherAvatarUrl}
+          />
+        </Box>
+      </Tooltip>
+      {row.isDisabledTeacher === true ? (
+        <Box sx={{ flexShrink: 0 }}>
+          <DisabledTeacherChip />
+        </Box>
+      ) : null}
     </Stack>
   );
 }
@@ -178,7 +260,7 @@ function CarryoverTeacherCell({ row }: Readonly<{ row: CarryoverRow }>) {
 function CarryoverStudentsTextCell({ value }: Readonly<{ value: string | null }>) {
   if (value === null || value.trim() === "") {
     return (
-      <Box component="span" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+      <Box component="span" sx={EMPTY_VALUE_SX}>
         —
       </Box>
     );
@@ -192,11 +274,27 @@ function CarryoverStudentsTextCell({ value }: Readonly<{ value: string | null }>
   );
 }
 
+/**
+ * Plain text cell where the absent-value placeholder renders muted so an
+ * em-dash never reads as real data beside populated cells.
+ */
+function CarryoverValueCell({ text, empty }: Readonly<{ text: string; empty: boolean }>) {
+  if (empty) {
+    return (
+      <Box component="span" sx={EMPTY_VALUE_SX}>
+        —
+      </Box>
+    );
+  }
+  return <Box component="span">{text}</Box>;
+}
+
 /** Money cell: grouped amount with the teacher currency beside it, both theme-toned. */
 function CarryoverMoneyCell({ amount, currency }: Readonly<{ amount: string | null; currency: string | null }>) {
+  const isEmpty = amount === null;
   return (
     <Stack direction="row" sx={{ alignItems: "baseline", gap: 0.5 }}>
-      <Box component="span" sx={{ fontWeight: 600 }}>
+      <Box component="span" sx={isEmpty ? EMPTY_VALUE_SX : { fontWeight: 600 }}>
         {formatAccountingMoney(amount)}
       </Box>
       {currency !== null ? (
@@ -208,26 +306,63 @@ function CarryoverMoneyCell({ amount, currency }: Readonly<{ amount: string | nu
   );
 }
 
-/** Inclusive period the carryover covers, rendered as a from/to two-line stack. */
+/**
+ * Inclusive period the carryover covers, rendered as a from/to two-line stack.
+ * The stack is pinned to the cell width and every line is single-line,
+ * ellipsized, and overflow-hidden, so a long localized date can never paint
+ * past the cell boundary; a hover tooltip reveals the complete period. The
+ * compact line-height overrides the grid cell's row-height line-height
+ * (`calc(var(--height) - 1px)` ≈ 51px per line) — without it the two lines
+ * stack to ~104px inside the 52px row and their slivers bleed past the
+ * cell's vertical bounds. Each date line is bidi-isolated (`dir="auto"` +
+ * `unicode-bidi`), so the Latin digits / Arabic month mix renders in one
+ * stable order and a stray-direction glyph can never paint at the edges.
+ */
 function CarryoverPeriodCell({ row, locale }: Readonly<{ row: CarryoverRow; locale: string }>) {
+  const from = formatAccountingDate(row.fromDate, locale);
+  const to = formatAccountingDate(row.toDate, locale);
   return (
-    <Stack sx={{ gap: 0.25 }}>
-      <Box component="span">{formatAccountingDate(row.fromDate, locale)}</Box>
-      <Box component="span" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-        {formatAccountingDate(row.toDate, locale)}
-      </Box>
-    </Stack>
+    <Tooltip title={`${from} – ${to}`}>
+      <Stack sx={{ gap: 0.25, minWidth: 0, width: "100%", overflow: "hidden", lineHeight: 1.3 }}>
+        <Box
+          component="span"
+          dir="auto"
+          sx={{ ...ELLIPSIZED_TEXT_SX, display: "block", lineHeight: 1.3, unicodeBidi: "isolate", textAlign: "start" }}
+        >
+          {from}
+        </Box>
+        <Box
+          component="span"
+          dir="auto"
+          sx={theme => ({
+            ...ELLIPSIZED_TEXT_SX,
+            display: "block",
+            lineHeight: 1.3,
+            unicodeBidi: "isolate",
+            textAlign: "start",
+            color: theme.palette.onSurfaceVariant,
+          })}
+        >
+          {to}
+        </Box>
+      </Stack>
+    </Tooltip>
   );
 }
 
-/** Paid state: the paid/unpaid chip with the settled amount beneath it when paid. */
+/**
+ * Paid state: the paid/unpaid chip with the settled amount beneath it when
+ * paid. The amount line gets a compact line-height — the grid cell inherits
+ * `line-height` equal to the full row height, so a default second line would
+ * be ~51px tall and overflow the 52px row vertically.
+ */
 function CarryoverPaidCell({ row }: Readonly<{ row: CarryoverRow }>) {
   const paid = row.isPaid === true;
   return (
-    <Stack sx={{ gap: 0.5, alignItems: "flex-start" }}>
+    <Stack sx={{ gap: 0.5, alignItems: "flex-start", overflow: "hidden" }}>
       <PaidStatusChip paid={paid} />
       {paid && row.paid !== null ? (
-        <Box component="span" sx={theme => ({ color: theme.palette.status.onActiveContainer })}>
+        <Box component="span" sx={theme => ({ color: theme.palette.status.onActiveContainer, lineHeight: 1.3 })}>
           {formatAccountingMoney(row.paid)} {row.teacherCurrency ?? ""}
         </Box>
       ) : null}
@@ -256,31 +391,35 @@ function buildCarryoverColumns(args: CarryoverColumnArgs): GridColDef<CarryoverR
     {
       field: "studentsCount",
       headerName: labels.column.studentsCount,
-      width: 110,
+      width: 100,
       align: "right",
       headerAlign: "right",
-      valueFormatter: value => (value === null ? "—" : String(numericCell(value))),
+      renderCell: ({ value }) => (
+        <CarryoverValueCell empty={value === null || value === undefined} text={String(numericCell(value))} />
+      ),
     },
     {
       field: "studentsText",
       headerName: labels.column.studentsText,
       flex: 1,
-      minWidth: 160,
+      minWidth: 150,
       sortable: false,
       renderCell: ({ row }) => <CarryoverStudentsTextCell value={row.studentsText} />,
     },
     {
       field: "totalDuration",
       headerName: labels.column.totalDuration,
-      width: 120,
+      width: 110,
       align: "right",
       headerAlign: "right",
-      valueFormatter: value => textCell(value),
+      renderCell: ({ value }) => (
+        <CarryoverValueCell empty={value === null || value === undefined} text={textCell(value)} />
+      ),
     },
     {
       field: "payable",
       headerName: labels.column.payable,
-      width: 150,
+      width: 140,
       align: "right",
       headerAlign: "right",
       renderCell: ({ row }) => <CarryoverMoneyCell amount={row.payable} currency={row.teacherCurrency} />,
@@ -288,14 +427,16 @@ function buildCarryoverColumns(args: CarryoverColumnArgs): GridColDef<CarryoverR
     {
       field: "paid",
       headerName: labels.column.paid,
-      width: 150,
+      width: 140,
       renderCell: ({ row }) => <CarryoverPaidCell row={row} />,
     },
     {
       field: "paymentDate",
       headerName: labels.column.paymentDate,
-      width: 140,
-      valueFormatter: value => formatAccountingDate(dateCell(value), locale),
+      width: 120,
+      renderCell: ({ value }) => (
+        <CarryoverValueCell empty={dateCell(value) === null} text={formatAccountingDate(dateCell(value), locale)} />
+      ),
     },
     {
       field: "fromDate",
@@ -307,14 +448,16 @@ function buildCarryoverColumns(args: CarryoverColumnArgs): GridColDef<CarryoverR
     {
       field: "createdAt",
       headerName: args.createdAtColumnLabel,
-      width: 120,
-      valueFormatter: value => formatAccountingDate(dateCell(value), locale),
+      width: 110,
+      renderCell: ({ value }) => (
+        <CarryoverValueCell empty={dateCell(value) === null} text={formatAccountingDate(dateCell(value), locale)} />
+      ),
     },
   ];
   columns.push({
     field: "actions",
     headerName: args.actionsColumnLabel,
-    width: 90,
+    width: 80,
     sortable: false,
     align: "center",
     headerAlign: "center",
@@ -394,6 +537,14 @@ function CarryoverToolbar({
           >
             {labels.action.bulkDelete}
           </Button>
+          {hasSelection ? (
+            <Chip
+              id="carryover-selection-count"
+              size="small"
+              variant="outlined"
+              label={labels.selectedCount(selectedRows.length)}
+            />
+          ) : null}
         </>
       ) : null}
       <Box sx={{ marginInlineStart: "auto", display: "flex", gap: 1 }}>
@@ -460,14 +611,16 @@ function AggregateAmount({ label, amount, currency }: Readonly<AggregateAmountPr
 
 interface CarryoverAggregateFooterProps {
   readonly aggregates: CarryoverAggregates;
+  /** Total rows across all pages of the current filter, shown as the records tally. */
+  readonly totalCount: number;
   readonly labels: CarryoverLabels;
 }
 
 /**
  * Footer card under the grid summarizing the whole filtered set (all pages):
- * total payable, total paid, and the paid vs unpaid row tallies.
+ * total payable, total paid, the record tally, and the paid vs unpaid tallies.
  */
-function CarryoverAggregateFooter({ aggregates, labels }: Readonly<CarryoverAggregateFooterProps>) {
+function CarryoverAggregateFooter({ aggregates, totalCount, labels }: Readonly<CarryoverAggregateFooterProps>) {
   return (
     <SectionPanel>
       <Stack
@@ -484,6 +637,12 @@ function CarryoverAggregateFooter({ aggregates, labels }: Readonly<CarryoverAggr
           amount={aggregates.totalPaid}
           currency={aggregates.dominantCurrency}
         />
+        <Typography
+          variant="bodyMd"
+          sx={theme => ({ color: theme.palette.onSurfaceVariant, marginInlineStart: { xs: 0, md: "auto" } })}
+        >
+          {labels.aggregate.recordsCount(totalCount)}
+        </Typography>
         <Stack direction="row" sx={{ flexWrap: "wrap", gap: 2, alignItems: "center" }}>
           <Stack direction="row" sx={{ alignItems: "center", gap: 0.5 }}>
             <PaidStatusChip paid />
@@ -530,6 +689,60 @@ function useCarryoverColumns(args: CarryoverColumnArgs): GridColDef<CarryoverRow
       onOpenDrawer,
     ]
   );
+}
+
+/**
+ * Zero-row panel rendered by the grid's no-rows slot: a muted wallet glyph,
+ * the headings, and the guidance hint. Widths are symmetric and direction-free
+ * so the panel reads identically in RTL.
+ */
+function CarryoverEmptyStateContent({ heading, hint }: Readonly<{ heading: string; hint: string }>) {
+  return (
+    <Stack
+      sx={{
+        height: "100%",
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 1,
+        px: 2,
+        py: 6,
+        textAlign: "center",
+      }}
+    >
+      <Box
+        sx={theme => ({
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          mb: 0.5,
+          backgroundColor: theme.palette.action.hover,
+          color: theme.palette.text.secondary,
+        })}
+      >
+        <AccountBalanceWalletOutlined fontSize="large" />
+      </Box>
+      <Typography variant="titleLg">{heading}</Typography>
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, maxWidth: 360 })}>
+        {hint}
+      </Typography>
+    </Stack>
+  );
+}
+
+/**
+ * Builds the zero-row slot component with the empty-state copy bound. Mirroring
+ * the data-grid overlay factories, the slot component is built by a
+ * module-scope factory: oxlint forbids defining components inline inside a
+ * render function.
+ */
+function createCarryoverNoRowsOverlay(labels: CarryoverLabels): React.ComponentType {
+  return function CarryoverNoRowsOverlay() {
+    return <CarryoverEmptyStateContent heading={labels.emptyStateHeading} hint={labels.emptyStateHint} />;
+  };
 }
 
 /**
@@ -591,6 +804,8 @@ export function CarryoverDataGrid({
   const selectedRows = useMemo(() => selectedVisibleRows(rows, selectedIds), [rows, selectedIds]);
   const allUnpaidSelected = selectionIsAllUnpaid(selectedRows);
 
+  const noRowsOverlay = useMemo(() => createCarryoverNoRowsOverlay(labels), [labels]);
+
   return (
     <Stack sx={{ gap: 1.5, width: "100%" }}>
       <CarryoverToolbar
@@ -612,8 +827,13 @@ export function CarryoverDataGrid({
           columns={columns}
           loading={isLoading}
           getRowId={row => row.id ?? ""}
-          emptyMessage={labels.empty}
           ariaLabel={labels.title}
+          slots={{ noRowsOverlay }}
+          sx={
+            rows.length === 0
+              ? [HEADER_WRAP_SX, SCROLLBAR_CUE_SX, EMPTY_GRID_MIN_HEIGHT_SX]
+              : [HEADER_WRAP_SX, SCROLLBAR_CUE_SX]
+          }
           disableColumnMenu
           disableRowSelectionOnClick
           checkboxSelection={canManageCarryover}
@@ -629,7 +849,7 @@ export function CarryoverDataGrid({
           })}
         />
       )}
-      <CarryoverAggregateFooter aggregates={aggregates} labels={labels} />
+      <CarryoverAggregateFooter aggregates={aggregates} totalCount={totalCount} labels={labels} />
     </Stack>
   );
 }

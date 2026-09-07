@@ -44,6 +44,7 @@ export interface AdminDashboardLabels {
   readonly previousPage: string;
   readonly nextPage: string;
   readonly goToPage: string;
+  readonly rowsPerPage: string;
   readonly dashboardOverview: string;
   readonly viewAll: string;
   readonly loadingTimeoutTitle: string;

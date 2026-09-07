@@ -122,12 +122,10 @@ describe("OptInTabContent — toggle (non-admin)", () => {
     expect(switchEl.closest(".MuiCard-root")).not.toBeNull();
   });
 
-  test("opt-in status renders inside a StatusBadge container", () => {
+  test("opt-in status renders inside a Chip label container", () => {
     renderOptInTabContent({ isOptedIn: true });
-    const badgeLabel = screen.getByText(labels.optInEnabled);
-    // StatusBadge wraps its label in an inline-flex span badge container —
-    // the legacy color-coded block Typography rendered directly inside the card.
-    expect(badgeLabel.parentElement?.tagName).toBe("SPAN");
+    const chipText = screen.getByText(labels.optInEnabled);
+    expect(chipText.closest(".MuiChip-root")).not.toBeNull();
   });
 });
 

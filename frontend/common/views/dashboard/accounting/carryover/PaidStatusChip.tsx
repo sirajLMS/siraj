@@ -9,7 +9,7 @@ export interface PaidStatusChipProps {
 }
 
 /**
- * Paid state of a carryover row: a green chip when paid, an unstyled default
+ * Paid state of a carryover row: a green chip when paid, an amber "pending"
  * chip when unpaid. The `aria-label` carries the full localized label so grid
  * cells stay legible to screen readers.
  */
@@ -28,7 +28,10 @@ export function PaidStatusChip({ paid }: Readonly<PaidStatusChipProps>) {
               backgroundColor: theme.palette.status.activeContainer,
               color: theme.palette.status.onActiveContainer,
             }
-          : {}
+          : {
+              backgroundColor: theme.palette.status.pendingContainer,
+              color: theme.palette.status.onPendingContainer,
+            }
       }
     />
   );

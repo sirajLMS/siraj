@@ -53,3 +53,11 @@ The orchestrator NEVER calls ReadMediaFile on screenshots in its own loop. Image
 - `agent-browser set viewport W H` must precede EVERY navigation when alternating sizes; omitting it
   silently reuses the old viewport. Verify shot dimensions (`identify file.png`) — byte-identical
   screenshots after a viewport change means the old viewport was kept.
+- Shared agent-browser sessions are contaminated by concurrent agents (stray overlays, mid-capture
+  navigation) — false "regression" findings result. Golden captures belong in a dedicated clean session
+  never shared with fixer agents; re-inject auth right before the batch.
+- This app persists theme in the `theme-mode` cookie (default dark): switch via
+  `agent-browser cookies set theme-mode light|dark --domain localhost` + reload; verify
+  `document.documentElement.dataset.muiColorScheme` (or body background) before shooting.
+- Backdrop/scrim captures: wait ~1s after opening a Dialog (MUI Fade-in ~250ms) or verify the
+  `.MuiModal-backdrop` computed opacity is 1 before the shot.

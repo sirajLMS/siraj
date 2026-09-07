@@ -6,6 +6,7 @@ import {
   gridPageSizeSelector,
   gridPaginationRowCountSelector,
   useGridApiContext,
+  useGridRootProps,
   useGridSelector,
 } from "@mui/x-data-grid";
 import {
@@ -32,12 +33,20 @@ export function PaginationControls(props: Readonly<PaginationControlsSharedProps
   return <PaginationControlsScaffold {...props} {...COMMON_SLOT_PROPS} />;
 }
 
+function resolvePageSizeOptions(options: ReadonlyArray<number | { value: number }> | undefined): readonly number[] {
+  if (!options) {
+    return [];
+  }
+  return options.map(option => (typeof option === "number" ? option : option.value));
+}
+
 export function GridPagination() {
   const apiRef = useGridApiContext();
   const page = useGridSelector(apiRef, gridPageSelector);
   const pageCount = useGridSelector(apiRef, gridPageCountSelector);
   const rowCount = useGridSelector(apiRef, gridPaginationRowCountSelector);
   const pageSize = useGridSelector(apiRef, gridPageSizeSelector);
+  const pageSizeOptions = resolvePageSizeOptions(useGridRootProps().pageSizeOptions);
 
   return (
     <PaginationControls
@@ -46,8 +55,12 @@ export function GridPagination() {
       pageCount={pageCount}
       rowCount={rowCount}
       pageSize={pageSize}
+      pageSizeOptions={pageSizeOptions}
       onPageChange={nextPage => {
         apiRef.current.setPage(nextPage);
+      }}
+      onPageSizeChange={nextPageSize => {
+        apiRef.current.setPageSize(nextPageSize);
       }}
     />
   );

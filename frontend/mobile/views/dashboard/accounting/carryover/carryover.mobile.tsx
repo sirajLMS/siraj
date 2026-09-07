@@ -30,6 +30,7 @@ import {
   MobileListCardSkeletons,
   MobileListErrorNotice,
 } from "@/frontend/common/views/dashboard/accounting/components/__shared__/mobileListStateShared";
+import { usePageBreadcrumbs } from "@/frontend/common/views/dashboard/lib/usePageBreadcrumbs";
 import {
   MobileCardList,
   MobileCardListItem,
@@ -157,6 +158,7 @@ function CarryoverCard({
   canManage,
   ...callbacks
 }: Readonly<CarryoverCardProps>) {
+  const durationSuffix = row.totalDuration === null || row.totalDuration === "" ? "" : ` · ${row.totalDuration}`;
   return (
     <MobileCardListItem variant="rounded">
       <Stack sx={{ gap: 1 }}>
@@ -167,7 +169,8 @@ function CarryoverCard({
               {row.isDisabledTeacher === true ? <DisabledTeacherChip /> : null}
             </Stack>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {labels.column.studentsCount}: {row.studentsCount ?? 0} · {row.totalDuration ?? "—"}
+              {labels.column.studentsCount}: {row.studentsCount ?? 0}
+              {durationSuffix}
             </Typography>
           </Stack>
           <Stack sx={{ alignItems: "flex-end", gap: 0.5, flexShrink: 0 }}>
@@ -195,11 +198,12 @@ function CarryoverCard({
   );
 }
 
-/** Slim totals strip above the list: payable and paid totals in the dominant currency. */
+/** Totals strip above the list: emphasized totals plus the filtered record count, stacking on narrow viewports. */
 function CarryoverAggregateStrip({
   aggregates,
   labels,
-}: Readonly<{ aggregates: CarryoverAggregates; labels: CarryoverLabels }>) {
+  totalCount,
+}: Readonly<{ aggregates: CarryoverAggregates; labels: CarryoverLabels; totalCount: number }>) {
   const currency = aggregates.dominantCurrency === null ? "" : ` ${aggregates.dominantCurrency}`;
   const items = [
     { key: "payable", label: labels.aggregate.totalPayable, amount: aggregates.totalPayable },
@@ -208,16 +212,29 @@ function CarryoverAggregateStrip({
   if (items.length === 0) return null;
 
   return (
-    <Paper
-      variant="outlined"
-      sx={{ px: 2, py: 1.5, display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}
-    >
-      {items.map(item => (
-        <Typography key={item.key} variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {item.label} {formatAccountingMoney(item.amount)}
-          {currency}
+    <Paper variant="outlined" sx={{ px: 2, py: 1.5 }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        sx={{ gap: { xs: 1.5, sm: 3 }, flexWrap: "wrap", alignItems: { sm: "flex-end" } }}
+      >
+        {items.map(item => (
+          <Stack key={item.key} sx={{ gap: 0.25 }}>
+            <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+              {item.label}
+            </Typography>
+            <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
+              {formatAccountingMoney(item.amount)}
+              {currency}
+            </Typography>
+          </Stack>
+        ))}
+        <Typography
+          variant="bodyMd"
+          sx={theme => ({ color: theme.palette.onSurfaceVariant, marginInlineStart: { sm: "auto" } })}
+        >
+          {labels.aggregate.recordsCount(totalCount)}
         </Typography>
-      ))}
+      </Stack>
     </Paper>
   );
 }
@@ -233,11 +250,17 @@ export function CarryoverMobileView(props: Readonly<CarryoverViewProps>) {
   const locale = useAppLocale();
   const listFailed = error !== null && rows.length === 0;
   const { exporting, runExport } = useCarryoverExport(props.handleExportCsv, labels);
+  // The trailing auto breadcrumb repeats the page title, so the trail keeps
+  // only the parent path.
+  const crumbs = usePageBreadcrumbs();
+  const breadcrumbs = crumbs.length > 0 ? crumbs.slice(0, -1) : crumbs;
 
   return (
     <MobilePageContainer>
       <MobilePageHeader
         title={labels.title}
+        subtitle={labels.pageSubtitle}
+        breadcrumbs={breadcrumbs}
         actions={
           <Stack direction="row" sx={{ alignItems: "center" }}>
             <IconButton aria-label={labels.action.exportCsv} onClick={runExport} disabled={exporting} size="small">
@@ -251,9 +274,9 @@ export function CarryoverMobileView(props: Readonly<CarryoverViewProps>) {
           </Stack>
         }
       />
-      <Stack sx={{ gap: 2, pb: 4 }}>
+      <Stack sx={{ gap: 2, pb: 11 }}>
         <MobileContentInset>
-          <CarryoverAggregateStrip aggregates={aggregates} labels={labels} />
+          <CarryoverAggregateStrip aggregates={aggregates} labels={labels} totalCount={totalCount} />
         </MobileContentInset>
         <MobileContentInset>
           <CarryoverFilterBar />

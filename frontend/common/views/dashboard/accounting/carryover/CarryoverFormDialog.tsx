@@ -9,10 +9,11 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  InputAdornment,
   Stack,
   TextField,
 } from "@mui/material";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
@@ -58,6 +59,11 @@ export function CarryoverFormDialog({ open, row, onClose, onSaved }: Readonly<Ca
   const { form, labels } = viewModel;
   // The edit-mode teacher field is read-only, so its helper explains why.
   const teacherLockedHint = viewModel.isEdit ? labels.modal.form.teacherLockedHint : undefined;
+  // The payable suffix mirrors the currency selection so the money amount is
+  // never read without its unit.
+  const selectedCurrencyCode = useWatch({ control: form.control, name: "teacherCurrency" });
+  const payableEndAdornment =
+    selectedCurrencyCode === null ? undefined : <InputAdornment position="end">{selectedCurrencyCode}</InputAdornment>;
 
   return (
     <Dialog {...DialogPresets.info} open={open} onClose={viewModel.submitting ? undefined : viewModel.onCancel}>
@@ -115,7 +121,10 @@ export function CarryoverFormDialog({ open, row, onClose, onSaved }: Readonly<Ca
                 error={fieldState.error !== undefined}
                 helperText={fieldState.error?.message}
                 disabled={viewModel.submitting}
-                required
+                // No `required`: CurrencySelect eagerly renders an error state
+                // whenever required && no selection, bypassing the form's
+                // submit-gated validation. RHF consumers omit it; the resolver
+                // surfaces the required error on submit via error/helperText.
                 fullWidth
               />
             )}
@@ -174,7 +183,7 @@ export function CarryoverFormDialog({ open, row, onClose, onSaved }: Readonly<Ca
                 error={fieldState.error !== undefined}
                 helperText={fieldState.error?.message}
                 aria-invalid={fieldState.error !== undefined}
-                slotProps={{ htmlInput: { min: 0, step: "any" } }}
+                slotProps={{ htmlInput: { min: 0, step: "any" }, input: { endAdornment: payableEndAdornment } }}
               />
             )}
           />
@@ -189,7 +198,7 @@ export function CarryoverFormDialog({ open, row, onClose, onSaved }: Readonly<Ca
                 fullWidth
                 disabled={viewModel.submitting}
                 error={fieldState.error !== undefined}
-                helperText={fieldState.error?.message}
+                helperText={fieldState.error?.message ?? labels.modal.form.studentsAutoFilledHelper}
                 aria-invalid={fieldState.error !== undefined}
                 slotProps={{ htmlInput: { min: 0, step: 1 } }}
               />
@@ -207,6 +216,7 @@ export function CarryoverFormDialog({ open, row, onClose, onSaved }: Readonly<Ca
                 error={fieldState.error !== undefined}
                 helperText={fieldState.error?.message}
                 aria-invalid={fieldState.error !== undefined}
+                sx={FULL_WIDTH_CELL_SX}
               />
             )}
           />
