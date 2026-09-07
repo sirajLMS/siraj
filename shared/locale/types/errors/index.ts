@@ -696,6 +696,9 @@ export interface ErrorsLabels
   readonly whatsappSyncDeadlineExpired: string;
   readonly whatsappHistoryDeclined: string;
   readonly whatsappWebhookProcessingFailed: string;
+  readonly whatsappPhoneNumberIdNotConfigured: string;
+  readonly whatsappConnectionTestSucceeded: string;
+  readonly whatsappConnectionTestFailed: string;
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   readonly emailChannelLabel: string;

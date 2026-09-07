@@ -72,7 +72,7 @@ import {
 import { seedOrGetUserDeviceTokens, seedOrGetUsers } from "@/backend/db/seeds/users";
 import { seedOrGetWhatsappConfig } from "@/backend/db/seeds/whatsapp";
 import { logger } from "@/backend/lib/logger";
-import { ReferenceDataService } from "@/backend/services";
+import { ReferenceDataService, WhatsappConfigService } from "@/backend/services";
 import type {
   ClassInstanceSelectType,
   CreditTransactionReturnType,
@@ -227,7 +227,14 @@ async function seedUsersAndActor(context: SeedContext, step: RunStep, config: Se
 }
 
 async function seedWhatsappConfig(context: SeedContext, step: RunStep): Promise<void> {
-  await step("whatsapp-config", () => seedOrGetWhatsappConfig({ actorUserId: context.actorUserId }));
+  await step("whatsapp-config", () =>
+    seedOrGetWhatsappConfig({
+      actorUserId: context.actorUserId,
+      // The service's save path is the idempotent single-row upsert, so a
+      // re-run refreshes the env-sourced values instead of adding rows.
+      persist: input => WhatsappConfigService.saveConfiguration(input, { actorUserId: context.actorUserId }),
+    })
+  );
 }
 
 async function seedTeachersAndParents(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {

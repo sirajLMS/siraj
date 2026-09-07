@@ -563,6 +563,9 @@ export const errorsAr: ErrorsLabels = {
   whatsappHistoryDeclined:
     "تم رفض مشاركة سجل المحادثات على الجهاز المقترن. تمت مزامنة جهات الاتصال فقط؛ السجل غير متاح.",
   whatsappWebhookProcessingFailed: "تعذّرت معالجة أحد أحداث webhook من واتساب وتم إيقافه للمراجعة.",
+  whatsappPhoneNumberIdNotConfigured: "معرّف رقم الهاتف لواتساب غير مُهيأ.",
+  whatsappConnectionTestSucceeded: "تم الاتصال بواجهة WhatsApp Cloud API بنجاح.",
+  whatsappConnectionTestFailed: "تعذّر الوصول إلى واجهة WhatsApp Cloud API. تحقق من بيانات الاعتماد وحاول مرة أخرى.",
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "البريد الإلكتروني",

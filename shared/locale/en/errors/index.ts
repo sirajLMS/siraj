@@ -567,6 +567,9 @@ export const errorsEn: ErrorsLabels = {
   whatsappHistoryDeclined:
     "Chat history sharing was declined on the paired device. Contacts are synced; message history is unavailable.",
   whatsappWebhookProcessingFailed: "A WhatsApp webhook event could not be processed and was parked for review.",
+  whatsappPhoneNumberIdNotConfigured: "WhatsApp phone number ID is not configured.",
+  whatsappConnectionTestSucceeded: "Connection to WhatsApp Cloud API succeeded.",
+  whatsappConnectionTestFailed: "Could not reach WhatsApp Cloud API. Check the credentials and try again.",
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "Email",
