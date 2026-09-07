@@ -6,7 +6,6 @@ import {
   WhatsappConfigurationPothosObject,
 } from "@/backend/graphql/pothos/whatsapp/whatsapp-config.pothos";
 import { withAuthResult } from "@/backend/graphql/utils";
-import { ValidationError } from "@/backend/lib/errors";
 import { WhatsappConfigService } from "@/backend/services";
 import type { WhatsappConfigSeedInput } from "@/backend/types";
 
@@ -25,7 +24,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     args: {
       input: t.arg({ type: WhatsappConfigUpdateInputPothosObject, required: true }),
     },
-    resolve: withAuthResult(async (actorUserId, args, tErrors, locale) => {
+    resolve: withAuthResult(async (actorUserId, args, _tErrors, locale) => {
       // Omitted input fields stay `undefined` (untouched) and explicit nulls
       // stay `null` (clear) — exactly the merge contract of the service.
       const input: WhatsappConfigSeedInput = {
@@ -37,19 +36,12 @@ gqlSchemaBuilder.mutationFields(t => ({
         accessToken: args.input.accessToken,
         esConfigId: args.input.esConfigId,
       };
-      try {
-        const saved = await WhatsappConfigService.saveConfiguration(input, { actorUserId, locale });
-        return toWhatsappConfigMaskedView(saved, "db");
-      } catch (error) {
-        // The service signals pre-database validation failures as plain
-        // localized errors; re-wrap as a DomainError so extensions.code
-        // reaches clients. DatabaseUnavailableError already is one and
-        // propagates unchanged.
-        if (error instanceof Error && error.message === tErrors.invalidInput) {
-          throw new ValidationError(error.message);
-        }
-        throw error;
-      }
+      // The service throws typed DomainErrors — `ValidationError` for
+      // invalid input, `DatabaseUnavailableError` when the database is
+      // unreachable — and both reach clients with their `extensions.code`
+      // unchanged; there is nothing to re-wrap by hand here.
+      const saved = await WhatsappConfigService.saveConfiguration(input, { actorUserId, locale });
+      return toWhatsappConfigMaskedView(saved, "db");
     }),
   }),
 }));

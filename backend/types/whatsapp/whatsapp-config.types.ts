@@ -50,7 +50,9 @@ export interface WhatsappConfigResolvedType {
 
 /**
  * Client-safe view of the active configuration for the settings page, built
- * by the GraphQL layer from a resolved or stored credential set.
+ * by the GraphQL layer from a resolved or stored credential set. Carries the
+ * resolved credential shape as-is (`source` plus the seven credential
+ * fields) with the webhook URL derived on top.
  *
  * `appSecret` and `accessToken` are masked with the shared masked-tail helper
  * (`maskSecretValue` — fixed bullet sentinel plus the last four characters),
@@ -61,17 +63,10 @@ export interface WhatsappConfigResolvedType {
  * `source` tells the UI whether the values are database-managed or
  * environment-managed.
  */
-export interface WhatsappConfigMaskedViewType {
-  readonly source: WhatsappConfigSource;
-  readonly appId: string | null;
-  readonly appSecret: string | null;
-  readonly verifyToken: string | null;
-  readonly phoneNumberId: string | null;
-  readonly wabaId: string | null;
-  readonly accessToken: string | null;
-  readonly esConfigId: string | null;
+export type WhatsappConfigMaskedViewType = WhatsappConfigResolvedType & {
+  /** Callback URL Meta must call for webhook events, derived at read time. */
   readonly webhookUrl: string;
-}
+};
 
 /**
  * Outcome of the lightweight Meta Graph API connectivity check. `message` is

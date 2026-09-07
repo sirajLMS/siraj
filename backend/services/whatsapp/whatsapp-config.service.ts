@@ -1,9 +1,15 @@
 import { randomBytes } from "node:crypto";
 
 import { WhatsappConfigRepository } from "@/backend/db/repo/whatsapp/whatsapp-config.repository";
-import { DatabaseUnavailableError, isTransientError } from "@/backend/lib";
+import { DatabaseUnavailableError, isTransientError, ValidationError } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
-import { FETCH_TIMEOUT_MS, readErrorBody, resolveGraphApiVersion } from "@/backend/lib/whatsapp-constants";
+import {
+  FETCH_TIMEOUT_MS,
+  readErrorBody,
+  resolveGraphApiVersion,
+  WHATSAPP_CONFIG_ENV_SOURCES,
+  type WhatsappConfigCredentialField,
+} from "@/backend/lib/whatsapp-constants";
 import { GraphApiError } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import { buildGetPhoneNumberRequest } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
 import { resolveEnvConfigMany } from "@/backend/services/system";
@@ -21,23 +27,6 @@ const VERIFY_TOKEN_BYTES = 24;
 /** RFC 4122 UUID format matcher (case-insensitive), for actor attribution. */
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-type ResolvedConfigField = Exclude<keyof WhatsappConfigResolvedType, "source">;
-
-/**
- * Mapping between the credential fields of `whatsapp_configs` and the
- * `WHATSAPP_*` env-config keys used when the database row does not exist
- * (or the database is unreachable).
- */
-const CONFIG_ENV_SOURCES = [
-  { field: "appId", envKey: "WHATSAPP_APP_ID" },
-  { field: "appSecret", envKey: "WHATSAPP_APP_SECRET" },
-  { field: "verifyToken", envKey: "WHATSAPP_VERIFY_TOKEN" },
-  { field: "phoneNumberId", envKey: "WHATSAPP_PHONE_NUMBER_ID" },
-  { field: "wabaId", envKey: "WHATSAPP_WABA_ID" },
-  { field: "accessToken", envKey: "WHATSAPP_ACCESS_TOKEN" },
-  { field: "esConfigId", envKey: "WHATSAPP_ES_CONFIG_ID" },
-] as const satisfies readonly { field: ResolvedConfigField; envKey: string }[];
-
 /**
  * Builds the env-sourced credential set. Blank values are treated as unset
  * (consistent with the env-config resolver, which never treats an empty
@@ -45,8 +34,8 @@ const CONFIG_ENV_SOURCES = [
  * by field instead of passing empty strings to Meta.
  */
 async function resolveFromEnv(): Promise<WhatsappConfigResolvedType> {
-  const resolved = await resolveEnvConfigMany(CONFIG_ENV_SOURCES.map(source => source.envKey));
-  const values: Record<ResolvedConfigField, string | null> = {
+  const resolved = await resolveEnvConfigMany(WHATSAPP_CONFIG_ENV_SOURCES.map(source => source.envKey));
+  const values: Record<WhatsappConfigCredentialField, string | null> = {
     appId: null,
     appSecret: null,
     verifyToken: null,
@@ -55,7 +44,7 @@ async function resolveFromEnv(): Promise<WhatsappConfigResolvedType> {
     accessToken: null,
     esConfigId: null,
   };
-  for (const { field, envKey } of CONFIG_ENV_SOURCES) {
+  for (const { field, envKey } of WHATSAPP_CONFIG_ENV_SOURCES) {
     const value = resolved[envKey]?.trim() ?? "";
     values[field] = value === "" ? null : value;
   }
@@ -70,7 +59,7 @@ async function resolveFromEnv(): Promise<WhatsappConfigResolvedType> {
  */
 function normalizeConfigInput(input: WhatsappConfigSeedInput, tErrors: ErrorsLabels): WhatsappConfigSeedInput {
   const payload: WhatsappConfigSeedInput = {};
-  for (const { field } of CONFIG_ENV_SOURCES) {
+  for (const { field } of WHATSAPP_CONFIG_ENV_SOURCES) {
     const value = input[field];
     if (value === undefined) continue;
     if (value === null) {
@@ -79,13 +68,13 @@ function normalizeConfigInput(input: WhatsappConfigSeedInput, tErrors: ErrorsLab
     }
     const trimmed = value.trim();
     if (trimmed === "") {
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
     payload[field] = trimmed;
   }
   if (input.updatedByUserId !== undefined) {
     if (input.updatedByUserId !== null && !UUID_REGEX.test(input.updatedByUserId)) {
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
     payload.updatedByUserId = input.updatedByUserId;
   }
@@ -168,7 +157,11 @@ export namespace WhatsappConfigService {
    * the caller.
    *
    * @param input Per-field patch — present fields are written, an explicit
-   *   `null` clears a column, absent fields keep their stored values.
+   *   `null` clears a column, absent fields keep their stored values. A
+   *   patch that provides no credential value at all (empty, or only
+   *   explicit nulls) is rejected as invalid input before any database
+   *   access: persisted as the first save it would store an all-null
+   *   singleton row and permanently shadow the `WHATSAPP_*` env fallback.
    * @param options.actorUserId Admin attributed as the editor of the row.
    * @param options.locale Locale for the validation error messages.
    */
@@ -178,9 +171,12 @@ export namespace WhatsappConfigService {
   ): Promise<WhatsappConfigSelectType> {
     const tErrors = getServerTranslations(options.locale ?? "en").errorsTranslations;
     if (options.actorUserId !== undefined && !UUID_REGEX.test(options.actorUserId)) {
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError(tErrors.invalidInput);
     }
     const payload = normalizeConfigInput(input, tErrors);
+    if (!WHATSAPP_CONFIG_ENV_SOURCES.some(({ field }) => typeof payload[field] === "string")) {
+      throw new ValidationError(tErrors.invalidInput);
+    }
     if (options.actorUserId) {
       payload.updatedByUserId = options.actorUserId;
     }
@@ -253,10 +249,26 @@ export namespace WhatsappConfigService {
         phoneNumber,
       };
     } catch (error) {
+      // Meta's error body can echo credential fragments back (its invalid-token
+      // message includes a truncated token), so the raw `GraphApiError` — which
+      // carries the full response body — is never logged. Only the stable,
+      // non-sensitive metadata fields are; non-Meta errors (network failures,
+      // timeouts) carry no credential material and pass through unchanged.
+      const loggableError =
+        error instanceof GraphApiError
+          ? {
+              name: error.name,
+              statusCode: error.statusCode,
+              code: error.code,
+              type: error.type,
+              fbtrace_id: error.fbtrace_id,
+              error_subcode: error.error_subcode,
+            }
+          : error;
       logger.logDomainError(
         `whatsapp-config-service: connection test failed for phone number ${config.phoneNumberId}`,
         {
-          error,
+          error: loggableError,
         }
       );
       return { success: false, message: tErrors.whatsappConnectionTestFailed };

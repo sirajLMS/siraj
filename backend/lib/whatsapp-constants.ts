@@ -6,6 +6,7 @@
  */
 
 import { resolveEnvConfig } from "@/backend/services";
+import type { WhatsappConfigResolvedType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Maximum concurrent Graph API calls per batch / fan-out (P1). */
@@ -19,6 +20,30 @@ export const FETCH_TIMEOUT_MS = 10_000;
  * legacy `WHATSAPP_API_VERSION` env-config key resolves to a value.
  */
 export const DEFAULT_GRAPH_API_VERSION = "v25.0";
+
+/**
+ * Credential fields of the `whatsapp_configs` singleton that map onto
+ * `WHATSAPP_*` env-config keys.
+ */
+export type WhatsappConfigCredentialField = Exclude<keyof WhatsappConfigResolvedType, "source">;
+
+/**
+ * Mapping between the credential fields of `whatsapp_configs` and the
+ * `WHATSAPP_*` env-config keys. Shared by the env bootstrap seeder (which
+ * carries configured variables into the database once) and the WhatsApp
+ * config service (which falls back to the same keys whenever the row is
+ * missing or the database is unreachable) — one source of truth so the
+ * seed-over and fallback paths can never drift apart.
+ */
+export const WHATSAPP_CONFIG_ENV_SOURCES = [
+  { field: "appId", envKey: "WHATSAPP_APP_ID" },
+  { field: "appSecret", envKey: "WHATSAPP_APP_SECRET" },
+  { field: "verifyToken", envKey: "WHATSAPP_VERIFY_TOKEN" },
+  { field: "phoneNumberId", envKey: "WHATSAPP_PHONE_NUMBER_ID" },
+  { field: "wabaId", envKey: "WHATSAPP_WABA_ID" },
+  { field: "accessToken", envKey: "WHATSAPP_ACCESS_TOKEN" },
+  { field: "esConfigId", envKey: "WHATSAPP_ES_CONFIG_ID" },
+] as const satisfies readonly { field: WhatsappConfigCredentialField; envKey: string }[];
 
 /**
  * Resolves the Graph API version for WhatsApp Cloud API calls.

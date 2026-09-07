@@ -19,8 +19,15 @@ let metaBody: unknown = { id: "105", display_phone_number: "+1 555 000 0000" };
 const fetchUrls: string[] = [];
 const fetchAuthHeaders: (string | undefined)[] = [];
 
+/** Normalizes the fetch mock's `RequestInfo | URL` input to its URL string. */
+function requestUrlOf(input: RequestInfo | URL): string {
+  if (typeof input === "string") return input;
+  if (input instanceof URL) return input.href;
+  return input.url;
+}
+
 const fetchMock = mock(async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-  const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+  const url = requestUrlOf(input);
   fetchUrls.push(url);
   fetchAuthHeaders.push(new Headers(init?.headers).get("Authorization") ?? undefined);
   return new Response(typeof metaBody === "string" ? metaBody : JSON.stringify(metaBody), { status: metaStatus });
@@ -78,7 +85,7 @@ await mock.module("@/backend/services/system", () => ({
 // ---------------------------------------------------------------------------
 
 const { WhatsappConfigService } = await import("@/backend/services/whatsapp/whatsapp-config.service");
-const { DatabaseUnavailableError } = await import("@/backend/lib");
+const { DatabaseUnavailableError, ValidationError } = await import("@/backend/lib");
 const { errorsEn } = await import("@/shared/locale/en/errors");
 
 const DB_ROW = {
@@ -99,9 +106,35 @@ const ENV_APP_ID = "app_env_1";
 const ENV_SECRET = "shhh_env_secret_value";
 const ENV_TOKEN = "tok_env_123";
 
+/**
+ * Exception-safe serialization for the leak scans: strings pass through,
+ * objects are JSON-serialized with a circular-reference guard, and anything
+ * non-serializable falls back to a "[unserializable]" marker — so nested
+ * logger content is actually scanned instead of collapsing to "[object
+ * Object]", without ever invoking an arbitrary object's `toString()`.
+ */
+function serializeForScan(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value === null || typeof value !== "object") return String(value);
+  const seen = new WeakSet<object>();
+  try {
+    return (
+      JSON.stringify(value, (_key, nested: unknown) => {
+        if (typeof nested === "object" && nested !== null) {
+          if (seen.has(nested)) return "[circular]";
+          seen.add(nested);
+        }
+        return nested;
+      }) ?? "[unserializable]"
+    );
+  } catch {
+    return "[unserializable]";
+  }
+}
+
 /** Flattens all recorded logger output into one string for leak scans. */
 function allLoggerOutput(): string {
-  return loggerCalls.map(call => call.args.map(arg => String(arg)).join(" | ")).join("\n");
+  return loggerCalls.map(call => call.args.map(arg => serializeForScan(arg)).join(" | ")).join("\n");
 }
 
 /** Assertion-safe message extraction from an unknown thrown value. */
@@ -208,13 +241,29 @@ describe("saveConfiguration", () => {
     expect(payload.updatedByUserId).toBe("aaaa0001-aaaa-aaaa-aaaa-aaaa0001aaaa");
   });
 
-  test("explicit null clears a field; absent fields stay untouched", async () => {
-    await WhatsappConfigService.saveConfiguration({ wabaId: null });
+  test("explicit null clears a field while a valued field still merges; absent fields stay untouched", async () => {
+    await WhatsappConfigService.saveConfiguration({ wabaId: null, verifyToken: "tok" });
 
     const payload = upsertWhatsappConfigMock.mock.calls[0][0];
     expect(payload.wabaId).toBeNull();
+    expect(payload.verifyToken).toBe("tok");
     expect("appId" in payload).toBe(false);
     expect("accessToken" in payload).toBe(false);
+  });
+
+  test("a patch with no credential value is rejected without touching the DB", async () => {
+    // An empty (or null-only) patch must never reach the repository: on an
+    // empty table it would insert an all-null singleton row and permanently
+    // shadow the WHATSAPP_* env fallback with null credentials.
+    const empty = await expectRejection(WhatsappConfigService.saveConfiguration({}, { locale: "en" }));
+    expect(empty).toBeInstanceOf(ValidationError);
+    expect(messageOf(empty)).toBe(errorsEn.invalidInput);
+
+    const nullOnly = await expectRejection(WhatsappConfigService.saveConfiguration({ appId: null }));
+    expect(nullOnly).toBeInstanceOf(ValidationError);
+    expect(messageOf(nullOnly)).toBe(errorsEn.invalidInput);
+
+    expect(upsertWhatsappConfigMock).not.toHaveBeenCalled();
   });
 
   test("maps a DB failure on save to the graceful database-unavailable error", async () => {
@@ -236,7 +285,7 @@ describe("generateVerifyToken", () => {
     const token = WhatsappConfigService.generateVerifyToken();
 
     expect(token).toMatch(/^[0-9a-f]{48}$/);
-    expect(token.length).toBe(48);
+    expect(token).toHaveLength(48);
   });
 
   test("tokens are unique across calls", () => {
@@ -347,7 +396,7 @@ describe("Tier 2 — boundary inputs", () => {
       WhatsappConfigService.saveConfiguration({ appSecret: "   " }, { locale: "en" })
     );
 
-    expect(error).toBeInstanceOf(Error);
+    expect(error).toBeInstanceOf(ValidationError);
     expect(messageOf(error)).toBe(errorsEn.invalidInput);
     expect(upsertWhatsappConfigMock).not.toHaveBeenCalled();
   });
@@ -357,7 +406,8 @@ describe("Tier 2 — boundary inputs", () => {
       WhatsappConfigService.saveConfiguration({ verifyToken: "tok" }, { actorUserId: "not-a-uuid" })
     );
 
-    expect((error as Error).message).toBe(errorsEn.invalidInput);
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(messageOf(error)).toBe(errorsEn.invalidInput);
     expect(upsertWhatsappConfigMock).not.toHaveBeenCalled();
   });
 });

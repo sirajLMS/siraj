@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { sql } from "drizzle-orm";
+import { eq, isNotNull, sql } from "drizzle-orm";
 import { db, isSqlite } from "@/backend/db";
 import { WhatsappConfigRepository } from "@/backend/db/repo/whatsapp";
 import { whatsappConfigs } from "@/backend/db/schema";
@@ -10,7 +10,7 @@ import {
   expectSavepointError,
   runInRollback,
 } from "@/backend/db/test/test-utils";
-import type { DBTransaction, WhatsappConfigSeedInput } from "@/backend/types";
+import type { DBTransaction, WhatsappConfigSeedInput, WhatsappConfigSelectType } from "@/backend/types";
 
 const APP_SECRET_PLAIN = "test-app-secret-9f8e7d6c5b4a";
 const ACCESS_TOKEN_PLAIN = "test-access-token-EAAG-1234567890";
@@ -24,9 +24,14 @@ function configTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     let completed = false;
     await runInRollback(async tx => {
-      // Full-table reset of the singleton credential store; the rollback
-      // restores whatever the database held before the test.
-      await tx.delete(whatsappConfigs).where(sql`TRUE`);
+      // Reset the singleton store inside the rolled-back transaction, so
+      // every case starts from the designed baseline (zero configuration
+      // rows); the rollback restores whatever the database held before the
+      // test. `isNotNull(id)` is the explicit "all rows" marker required by
+      // the `drizzle/enforce-delete-with-where` rule — the full-table delete
+      // is intentional and rollback-protected, unlike the Tier 3 case where
+      // separate-connection commits force snapshot + by-id cleanup instead.
+      await tx.delete(whatsappConfigs).where(isNotNull(whatsappConfigs.id));
       await fn(tx);
       completed = true;
     });
@@ -86,6 +91,21 @@ async function selectRawCredentials(tx: DBTransaction): Promise<RawCredentialRow
     accessToken: typeof row.access_token === "string" ? row.access_token : null,
     verifyToken: typeof row.verify_token === "string" ? row.verify_token : null,
   }));
+}
+
+/** Deletes configuration rows by primary key only — never a table-wide delete. */
+async function deleteConfigRowsById(ids: string[]): Promise<void> {
+  // Distinct primary keys delete independently, so the removals run in
+  // parallel rather than awaited one by one.
+  await Promise.all(ids.map(id => db.delete(whatsappConfigs).where(eq(whatsappConfigs.id, id))));
+}
+
+/**
+ * Full snapshot of the committed singleton store, taken before a Tier 3
+ * test starts (rollback cannot cover separate-connection commits).
+ */
+function snapshotConfigRows(): Promise<WhatsappConfigSelectType[]> {
+  return db.select().from(whatsappConfigs);
 }
 
 /**
@@ -226,18 +246,39 @@ describe("WhatsappConfigRepository — Tier 3 (concurrency)", () => {
   // and no unique constraint to fall back on, so the repository contract
   // (like every repo here) requires callers to sequence writes on a shared
   // transaction. Lock contention needs a second connection, which cannot
-  // see uncommitted rows — so these tests commit real rows and clean them
-  // up afterwards. SQLite has no advisory locks or FOR UPDATE; it
+  // see uncommitted rows — so these tests commit real rows. Cleanup is
+  // snapshot-based: the committed store is captured first, removed for the
+  // test window, and every created row is deleted by id while the snapshot
+  // is restored — the shared dev database's credential store is never
+  // wiped wholesale. SQLite has no advisory locks or FOR UPDATE; it
   // serializes writes at the file level by design.
+
+  /**
+   * Tier 3 cleanup: removes exactly the rows created during the test window
+   * (every current row absent from the snapshot, by id) and re-inserts the
+   * snapshotted rows — plaintext values re-encrypt at the driver boundary,
+   * so the restored row is byte-for-byte equivalent in content.
+   */
+  async function restoreConfigRows(snapshot: WhatsappConfigSelectType[]): Promise<void> {
+    const currentIds = (await db.select({ id: whatsappConfigs.id }).from(whatsappConfigs)).map(row => row.id);
+    const snapshotIds = new Set(snapshot.map(row => row.id));
+    await deleteConfigRowsById(currentIds.filter(id => !snapshotIds.has(id)));
+    // Distinct primary keys with `onConflictDoNothing` insert independently,
+    // so the restores run in parallel rather than awaited one by one.
+    await Promise.all(snapshot.map(row => db.insert(whatsappConfigs).values(row).onConflictDoNothing()));
+  }
+
   test.skipIf(isSqlite())(
     "parallel saves on separate connections update the existing row without duplicating it",
     async () => {
-      await db.delete(whatsappConfigs).where(sql`TRUE`);
+      const snapshot = await snapshotConfigRows();
       const first = configInput();
       const second = configInput();
-      const fixture = await db.transaction(t => WhatsappConfigRepository.upsertWhatsappConfig(first, t));
 
       try {
+        await deleteConfigRowsById(snapshot.map(row => row.id));
+        const fixture = await db.transaction(t => WhatsappConfigRepository.upsertWhatsappConfig(first, t));
+
         expect((await WhatsappConfigRepository.getWhatsappConfig())?.id).toBe(fixture.id);
 
         // One contender passes no transaction (the repository opens its own);
@@ -253,17 +294,19 @@ describe("WhatsappConfigRepository — Tier 3 (concurrency)", () => {
         const row = await WhatsappConfigRepository.getWhatsappConfig();
         expect([first.verifyToken, second.verifyToken]).toContain<string | null>(row?.verifyToken ?? null);
       } finally {
-        await db.delete(whatsappConfigs).where(sql`TRUE`);
+        await restoreConfigRows(snapshot);
       }
     }
   );
 
   test.skipIf(isSqlite())("parallel first saves from an empty table create exactly one row", async () => {
-    await db.delete(whatsappConfigs).where(sql`TRUE`);
+    const snapshot = await snapshotConfigRows();
     const first = configInput();
     const second = configInput();
 
     try {
+      await deleteConfigRowsById(snapshot.map(row => row.id));
+
       // The create path is the dangerous race: FOR UPDATE has no row to lock
       // while the table is empty, so without the upsert's transaction-scoped
       // lock both writers would insert and the table would end up with two
@@ -280,7 +323,7 @@ describe("WhatsappConfigRepository — Tier 3 (concurrency)", () => {
       const row = await WhatsappConfigRepository.getWhatsappConfig();
       expect([first.verifyToken, second.verifyToken]).toContain<string | null>(row?.verifyToken ?? null);
     } finally {
-      await db.delete(whatsappConfigs).where(sql`TRUE`);
+      await restoreConfigRows(snapshot);
     }
   });
 });
