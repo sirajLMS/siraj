@@ -46,6 +46,42 @@ export const WHATSAPP_CONFIG_ENV_SOURCES = [
 ] as const satisfies readonly { field: WhatsappConfigCredentialField; envKey: string }[];
 
 /**
+ * Subset of {@link WHATSAPP_CONFIG_ENV_SOURCES} whose env-config keys are
+ * DB-manageable, i.e. safe to write through to the env-config override system
+ * (`system_settings` rows under `env::<key>`) when the configuration row is
+ * saved.
+ *
+ * `WHATSAPP_ACCESS_TOKEN` is excluded by hard contract: its registry
+ * descriptor in `env-config-keys.ts` is `excludeFromDb: true`, so the
+ * env-config resolver never reads it from the DB and never caches it — a
+ * UI-saved access token cannot be propagated through env-config and keeps
+ * living only in the `whatsapp_configs` row (outbound Graph calls resolve
+ * per-account tokens from `whatsapp_accounts`, not from this global key).
+ */
+export const WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES: readonly {
+  field: WhatsappConfigCredentialField;
+  envKey: string;
+}[] = WHATSAPP_CONFIG_ENV_SOURCES.filter(({ field }) => field !== "accessToken");
+
+/**
+ * Maximum accepted input length per credential field, enforced by the config
+ * service's normalization. Visible fields mirror the `whatsapp_configs`
+ * column widths; the two encrypted columns (`appSecret`, `accessToken`) have
+ * no SQL width (stored as ciphertext `text`), so 512 is the service-level
+ * sanity cap — the same value the GraphQL input's `@constraint(maxLength)`
+ * carries.
+ */
+export const WHATSAPP_CONFIG_FIELD_MAX_LENGTHS = {
+  appId: 64,
+  appSecret: 512,
+  verifyToken: 255,
+  phoneNumberId: 64,
+  wabaId: 64,
+  accessToken: 512,
+  esConfigId: 64,
+} as const satisfies Record<WhatsappConfigCredentialField, number>;
+
+/**
  * Resolves the Graph API version for WhatsApp Cloud API calls.
  *
  * Resolution order: `WHATSAPP_GRAPH_API_VERSION` (canonical, DB-overridable via

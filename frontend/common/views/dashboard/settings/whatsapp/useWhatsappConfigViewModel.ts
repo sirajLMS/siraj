@@ -150,7 +150,12 @@ export function useWhatsappConfigViewModel(): WhatsappConfigTabViewModel {
   const canManage = useUserStore(state => state.hasPermission(AppPermission.WhatsappConfigManage));
   const client = useApolloClient();
 
-  const configQuery = useQuery(whatsappConfigurationQueryDocument);
+  // `notifyOnNetworkStatusChange` keeps `loading` true during every refetch
+  // (post-save refetch, post-error Retry) so consumers can gate their actions
+  // on it — the Retry button disappears while a refetch is in flight, which
+  // prevents concurrent refetch clicks, and the form stays rendered during
+  // the post-save refetch (config already exists, so no spinner flash).
+  const configQuery = useQuery(whatsappConfigurationQueryDocument, { notifyOnNetworkStatusChange: true });
   const [updateConfig] = useMutation(updateWhatsappConfigurationMutationDocument);
 
   const config = configQuery.data?.whatsappConfiguration ?? null;

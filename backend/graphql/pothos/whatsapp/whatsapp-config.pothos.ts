@@ -171,7 +171,10 @@ export const WhatsappConfigUpdateInputPothosObject = gqlSchemaBuilder.inputType(
     appSecret: t.string({
       required: false,
       description: "Meta app secret (stored encrypted). Pass null to clear.",
-      directives: { constraint: { maxLength: 255 } },
+      // 512 mirrors the service-level cap for encrypted fields (the DB column
+      // is unbounded ciphertext text); it was previously 255, a verifyToken
+      // copy-paste that contradicted the accessToken cap.
+      directives: { constraint: { maxLength: 512 } },
     }),
     verifyToken: t.string({
       required: false,

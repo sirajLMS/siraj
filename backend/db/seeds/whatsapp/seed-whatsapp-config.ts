@@ -11,6 +11,13 @@ export type WhatsappConfigSeedPersist = (input: WhatsappConfigSeedInput) => Prom
 export interface WhatsappConfigSeedOptions {
   /** Admin attributed as the initial editor of the row. */
   actorUserId?: string;
+  /**
+   * Look-before-create gate: returns true when the singleton configuration
+   * row already exists. When it does, this seeder must not persist — a
+   * re-run that re-persists the env payload would silently revert
+   * admin-saved credentials (the stored row is authoritative once written).
+   */
+  hasExisting?: () => Promise<boolean>;
   /** Persistence handler; without it env-sourced values remain authoritative. */
   persist?: WhatsappConfigSeedPersist;
 }
@@ -23,7 +30,10 @@ export interface WhatsappConfigSeedOptions {
  * Only variables set to a non-blank value are carried over (a whitespace-only
  * value counts as unset, mirroring the service's env resolution semantics);
  * when none are the seeder is a no-op and the service layer keeps resolving
- * from env.
+ * from env. The persist path runs only when the `whatsapp_configs` table has
+ * no row yet (look-before-create): once a row exists it is authoritative and
+ * a re-run leaves it untouched, so re-seeding can never revert credentials an
+ * admin saved through the settings UI.
  * Encrypted columns (`appSecret`, `accessToken`) are handed over as plaintext
  * — the `encryptedText` column type encrypts at the driver boundary, so no
  * secret is ever logged or stored unencrypted.
@@ -46,6 +56,28 @@ export async function seedOrGet(
   if (carriedFields.length === 0) {
     logger.info("WhatsApp config seed skipped — no WHATSAPP_* environment variables are set.");
     return undefined;
+  }
+
+  if (options.hasExisting) {
+    let existing: boolean;
+    try {
+      existing = await options.hasExisting();
+    } catch (error) {
+      // Fail safe: when the stored state cannot be verified, writing would
+      // risk reverting an existing admin-saved row, so the seed stands down.
+      logger.warn(
+        `WhatsApp config seed could not verify whether a configuration row already exists — leaving any stored configuration untouched. ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
+    if (existing) {
+      logger.info(
+        "WhatsApp config seed skipped — an existing configuration row was found and left untouched (stored credentials are authoritative over env re-runs)."
+      );
+      return undefined;
+    }
   }
 
   if (options.actorUserId) {

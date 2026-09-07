@@ -91,22 +91,23 @@ void mock.module("@/backend/lib/logger", () => ({
   },
 }));
 
+// The real whatsapp-constants module is imported BEFORE its mock is
+// registered, so this await resolves to the actual implementation — the mock
+// factory below then closes over the already-evaluated namespace instead of
+// re-declaring WHATSAPP_CONFIG_ENV_SOURCES by hand. There is no recursion:
+// the factory never imports the mocked specifier itself, and the repo/logger
+// mocks registered above keep this evaluation off the database.
+const actualWhatsappConstants = await import("@/backend/lib/whatsapp-constants");
+
 void mock.module("@/backend/lib/whatsapp-constants", () => ({
   MAX_CONCURRENT_CALLS: 10,
   FETCH_TIMEOUT_MS: 10_000,
   DEFAULT_GRAPH_API_VERSION: "v25.0",
   // The mock replaces the whole module, and the whatsapp services barrel
-  // evaluates whatsapp-config.service (which reads this export) — keep the
-  // factory in sync with the real module surface in whatsapp-constants.ts.
-  WHATSAPP_CONFIG_ENV_SOURCES: [
-    { field: "appId", envKey: "WHATSAPP_APP_ID" },
-    { field: "appSecret", envKey: "WHATSAPP_APP_SECRET" },
-    { field: "verifyToken", envKey: "WHATSAPP_VERIFY_TOKEN" },
-    { field: "phoneNumberId", envKey: "WHATSAPP_PHONE_NUMBER_ID" },
-    { field: "wabaId", envKey: "WHATSAPP_WABA_ID" },
-    { field: "accessToken", envKey: "WHATSAPP_ACCESS_TOKEN" },
-    { field: "esConfigId", envKey: "WHATSAPP_ES_CONFIG_ID" },
-  ],
+  // evaluates whatsapp-config.service (which reads this export) — the field↔
+  // env-key table is the real shared constant (single source of truth), not
+  // a hand-maintained copy.
+  WHATSAPP_CONFIG_ENV_SOURCES: actualWhatsappConstants.WHATSAPP_CONFIG_ENV_SOURCES,
   readErrorBody: async (response: Response) => response.json().catch(() => ""),
   resolveGraphApiVersion: async () => "v25.0",
   resolveGraphApiContextFromEnv: async () => ({ accessToken: "tok_test_a", apiVersion: "v25.0" }),

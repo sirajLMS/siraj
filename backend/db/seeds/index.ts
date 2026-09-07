@@ -230,9 +230,21 @@ async function seedWhatsappConfig(context: SeedContext, step: RunStep): Promise<
   await step("whatsapp-config", () =>
     seedOrGetWhatsappConfig({
       actorUserId: context.actorUserId,
-      // The service's save path is the idempotent single-row upsert, so a
-      // re-run refreshes the env-sourced values instead of adding rows.
-      persist: input => WhatsappConfigService.saveConfiguration(input, { actorUserId: context.actorUserId }),
+      // Look-before-create: once a whatsapp_configs row exists it is
+      // authoritative, so a re-run must not re-persist the env payload (that
+      // would silently revert admin-saved credentials). A failing existence
+      // check makes the seeder stand down (fail safe).
+      hasExisting: () => WhatsappConfigService.hasStoredConfiguration(),
+      persist: input =>
+        WhatsappConfigService.saveConfiguration(input, {
+          actorUserId: context.actorUserId,
+          // Bootstrap carry-over only: the row and the process environment
+          // hold the same values here, so writing `env::` overrides would
+          // just add redundant plaintext copies of the secrets. The UI save
+          // path keeps the write-through that makes rotation enforcement-
+          // visible. See WhatsappConfigService.saveConfiguration.
+          propagateEnvConfigOverrides: false,
+        }),
     })
   );
 }

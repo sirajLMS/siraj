@@ -92,6 +92,12 @@ await mock.module("@/backend/services/system", () => ({
   resolveEnvConfigMany: async () => ({}),
   setEnvConfig: async () => {},
   clearEnvConfigCache: () => {},
+  // The whatsapp services barrel evaluates whatsapp-config.service (which
+  // imports the env-config write path) — keep the factory in sync with the
+  // real module surface in environment-config.service.ts. The webhook route
+  // itself never invokes these.
+  upsertEnvConfigOverride: async () => ({}),
+  deleteEnvConfigOverride: async () => ({}),
 }));
 
 await mock.module("@/backend/lib/ratelimit", () => ({

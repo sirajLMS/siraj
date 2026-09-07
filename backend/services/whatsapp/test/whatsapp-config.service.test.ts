@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 
+import { seedOrGet as seedOrGetWhatsappConfig } from "@/backend/db/seeds/whatsapp/seed-whatsapp-config";
+import { WHATSAPP_CONFIG_FIELD_MAX_LENGTHS } from "@/backend/lib/whatsapp-constants";
+import type { WhatsappConfigSeedInput, WhatsappConfigSelectType } from "@/backend/types";
+
 // ---------------------------------------------------------------------------
 // Mock state (reset per test)
 // ---------------------------------------------------------------------------
@@ -8,6 +12,13 @@ const getWhatsappConfigMock = mock(async (): Promise<unknown> => null);
 const upsertWhatsappConfigMock = mock(
   async (input: Record<string, unknown>): Promise<unknown> => ({ id: "cfg_stored_1", ...input })
 );
+
+/** Env-config override writes recorded per test (key → last value). */
+const envOverrideUpserts = new Map<string, string>();
+/** Env-config override deletions recorded per test. */
+const envOverrideDeletes: string[] = [];
+/** Env-config cache invalidations recorded per test. */
+const envCacheInvalidations: string[] = [];
 
 /** Mutable env-config values resolved per test. */
 const envValues = new Map<string, string | undefined>();
@@ -69,6 +80,18 @@ void mock.module("@/backend/lib/logger", () => ({
 
 const actualSystem = await import("@/backend/services/system");
 
+const upsertEnvConfigOverrideMock = mock(async (input: { key: string; value: string }): Promise<unknown> => {
+  envOverrideUpserts.set(input.key, input.value);
+  return { key: input.key, source: "db", hasDbOverride: true, updatedAt: new Date() };
+});
+const deleteEnvConfigOverrideMock = mock(async (key: string): Promise<unknown> => {
+  envOverrideDeletes.push(key);
+  return { key, deleted: true, source: "unset" };
+});
+const invalidateEnvConfigCacheMock = mock((key?: string): void => {
+  envCacheInvalidations.push(key ?? "<all>");
+});
+
 await mock.module("@/backend/services/system", () => ({
   ...actualSystem,
   resolveEnvConfig: async (key: string) => envValues.get(key),
@@ -77,7 +100,9 @@ await mock.module("@/backend/services/system", () => ({
     for (const key of keys) result[key] = envValues.get(key);
     return result;
   },
-  invalidateEnvConfigCache: () => {},
+  invalidateEnvConfigCache: invalidateEnvConfigCacheMock,
+  upsertEnvConfigOverride: upsertEnvConfigOverrideMock,
+  deleteEnvConfigOverride: deleteEnvConfigOverrideMock,
 }));
 
 // ---------------------------------------------------------------------------
@@ -88,7 +113,7 @@ const { WhatsappConfigService } = await import("@/backend/services/whatsapp/what
 const { DatabaseUnavailableError, ValidationError } = await import("@/backend/lib");
 const { errorsEn } = await import("@/shared/locale/en/errors");
 
-const DB_ROW = {
+const DB_ROW: WhatsappConfigSelectType = {
   id: "cfg_row_1",
   appId: "app_db_1",
   appSecret: "secret_db_1",
@@ -146,6 +171,9 @@ beforeEach(() => {
   metaStatus = 200;
   metaBody = { id: "105", display_phone_number: "+1 555 000 0000" };
   envValues.clear();
+  envOverrideUpserts.clear();
+  envOverrideDeletes.length = 0;
+  envCacheInvalidations.length = 0;
   fetchUrls.length = 0;
   fetchAuthHeaders.length = 0;
   loggerCalls.length = 0;
@@ -155,6 +183,9 @@ beforeEach(() => {
   upsertWhatsappConfigMock.mockImplementation(
     async (input: Record<string, unknown>): Promise<unknown> => ({ id: "cfg_stored_1", ...input })
   );
+  upsertEnvConfigOverrideMock.mockClear();
+  deleteEnvConfigOverrideMock.mockClear();
+  invalidateEnvConfigCacheMock.mockClear();
   fetchMock.mockClear();
 });
 
@@ -277,6 +308,193 @@ describe("saveConfiguration", () => {
     if (!(error instanceof DatabaseUnavailableError)) throw new Error("unreachable");
     expect(error.code).toBe("DATABASE_UNAVAILABLE");
     expect(loggerCalls.some(call => call.level === "logDomainError")).toBe(true);
+  });
+});
+
+describe("saveConfiguration — env-config write-through", () => {
+  test("propagates saved values as env-config overrides and invalidates their cache", async () => {
+    await WhatsappConfigService.saveConfiguration({
+      appId: "app_ui_1",
+      appSecret: "sec_ui_1",
+      verifyToken: "tok_ui_1",
+    });
+
+    expect(envOverrideUpserts.get("WHATSAPP_APP_ID")).toBe("app_ui_1");
+    expect(envOverrideUpserts.get("WHATSAPP_APP_SECRET")).toBe("sec_ui_1");
+    expect(envOverrideUpserts.get("WHATSAPP_VERIFY_TOKEN")).toBe("tok_ui_1");
+    expect(envCacheInvalidations).toEqual(
+      expect.arrayContaining(["WHATSAPP_APP_ID", "WHATSAPP_APP_SECRET", "WHATSAPP_VERIFY_TOKEN"])
+    );
+    // Omitted fields are untouched — no override writes or invalidations.
+    expect(envOverrideUpserts.has("WHATSAPP_PHONE_NUMBER_ID")).toBe(false);
+    expect(envOverrideUpserts.has("WHATSAPP_WABA_ID")).toBe(false);
+    expect(envOverrideUpserts.has("WHATSAPP_ES_CONFIG_ID")).toBe(false);
+    expect(envCacheInvalidations).not.toContain("WHATSAPP_PHONE_NUMBER_ID");
+  });
+
+  test("override values match the persisted row (trimmed)", async () => {
+    await WhatsappConfigService.saveConfiguration({ verifyToken: "  spaced-token  " });
+
+    const payload = upsertWhatsappConfigMock.mock.calls[0][0];
+    expect(payload.verifyToken).toBe("spaced-token");
+    expect(envOverrideUpserts.get("WHATSAPP_VERIFY_TOKEN")).toBe("spaced-token");
+  });
+
+  test("never writes the access token through (excludeFromDb hard contract)", async () => {
+    await WhatsappConfigService.saveConfiguration({ accessToken: "tok_access_ui_1", verifyToken: "tok_ui_1" });
+
+    expect(upsertWhatsappConfigMock).toHaveBeenCalledTimes(1);
+    expect(envOverrideUpserts.has("WHATSAPP_ACCESS_TOKEN")).toBe(false);
+    expect(envCacheInvalidations).not.toContain("WHATSAPP_ACCESS_TOKEN");
+    expect(envCacheInvalidations).toContain("WHATSAPP_VERIFY_TOKEN");
+  });
+
+  test("clearing a field deletes its env-config override", async () => {
+    await WhatsappConfigService.saveConfiguration({ wabaId: null, verifyToken: "tok_ui_1" });
+
+    expect(envOverrideDeletes).toContain("WHATSAPP_WABA_ID");
+    expect(envOverrideUpserts.has("WHATSAPP_WABA_ID")).toBe(false);
+    expect(envCacheInvalidations).toContain("WHATSAPP_WABA_ID");
+  });
+
+  test("an override write failure does not fail the save and still invalidates the cache", async () => {
+    upsertEnvConfigOverrideMock.mockRejectedValueOnce(new Error("override write boom"));
+
+    const stored = await WhatsappConfigService.saveConfiguration({ verifyToken: "tok_ui_marker_value" });
+
+    expect(stored.id).toBe("cfg_stored_1");
+    expect(envCacheInvalidations).toContain("WHATSAPP_VERIFY_TOKEN");
+    expect(
+      loggerCalls.some(call => call.level === "warn" && JSON.stringify(call.args).includes("WHATSAPP_VERIFY_TOKEN"))
+    ).toBe(true);
+    // The warning carries the key name only — never the credential value.
+    expect(allLoggerOutput()).not.toContain("tok_ui_marker_value");
+  });
+
+  test("skips the write-through when the caller opts out (env bootstrap seeder)", async () => {
+    await WhatsappConfigService.saveConfiguration(
+      { appId: "app_seed_1", appSecret: "sec_seed_1" },
+      { propagateEnvConfigOverrides: false }
+    );
+
+    expect(upsertWhatsappConfigMock).toHaveBeenCalledTimes(1);
+    expect(envOverrideUpserts.size).toBe(0);
+    expect(envOverrideDeletes).toHaveLength(0);
+    expect(envCacheInvalidations).toHaveLength(0);
+  });
+});
+
+describe("hasStoredConfiguration", () => {
+  test("returns true only when the repo returns a row", async () => {
+    getWhatsappConfigMock.mockResolvedValue(DB_ROW);
+    expect(await WhatsappConfigService.hasStoredConfiguration()).toBe(true);
+
+    getWhatsappConfigMock.mockResolvedValue(null);
+    expect(await WhatsappConfigService.hasStoredConfiguration()).toBe(false);
+  });
+
+  test("propagates a failed read so callers can fail safe", async () => {
+    getWhatsappConfigMock.mockRejectedValue(new Error("read failed"));
+
+    const error = await expectRejection(WhatsappConfigService.hasStoredConfiguration());
+
+    expect(messageOf(error)).toBe("read failed");
+  });
+});
+
+describe("seedOrGet — look-before-create", () => {
+  const ENV_SEED_APP_ID = "seed_app_env";
+  const ENV_SEED_SECRET = "seed_secret_env_value";
+
+  function withSeedEnvVars(set: boolean): void {
+    if (set) {
+      process.env.WHATSAPP_APP_ID = ENV_SEED_APP_ID;
+      process.env.WHATSAPP_APP_SECRET = ENV_SEED_SECRET;
+    } else {
+      delete process.env.WHATSAPP_APP_ID;
+      delete process.env.WHATSAPP_APP_SECRET;
+    }
+  }
+
+  test("a pre-existing row is never re-persisted — env re-runs cannot revert admin-saved credentials", async () => {
+    withSeedEnvVars(true);
+    try {
+      const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
+
+      const result = await seedOrGetWhatsappConfig({ hasExisting: async () => true, persist });
+
+      expect(result).toBeUndefined();
+      expect(persist).not.toHaveBeenCalled();
+      expect(
+        loggerCalls.some(call => call.level === "info" && JSON.stringify(call.args).includes("left untouched"))
+      ).toBe(true);
+    } finally {
+      withSeedEnvVars(false);
+    }
+  });
+
+  test("an empty table persists the carried-over env fields", async () => {
+    withSeedEnvVars(true);
+    try {
+      const persist = mock(
+        (_input: WhatsappConfigSeedInput): Promise<WhatsappConfigSelectType> => Promise.resolve(DB_ROW)
+      );
+
+      const result = await seedOrGetWhatsappConfig({ hasExisting: async () => false, persist });
+
+      expect(result).toBeDefined();
+      expect(persist).toHaveBeenCalledTimes(1);
+      const payload = persist.mock.calls[0][0];
+      expect(payload.appId).toBe(ENV_SEED_APP_ID);
+      expect(payload.appSecret).toBe(ENV_SEED_SECRET);
+    } finally {
+      withSeedEnvVars(false);
+    }
+  });
+
+  test("a failing existence check fails safe — nothing is persisted", async () => {
+    withSeedEnvVars(true);
+    try {
+      const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
+
+      const result = await seedOrGetWhatsappConfig({
+        hasExisting: async () => {
+          throw new Error("read failed");
+        },
+        persist,
+      });
+
+      expect(result).toBeUndefined();
+      expect(persist).not.toHaveBeenCalled();
+      expect(loggerCalls.some(call => call.level === "warn")).toBe(true);
+    } finally {
+      withSeedEnvVars(false);
+    }
+  });
+
+  test("without the existence gate the persist path is unchanged (backward compatible)", async () => {
+    withSeedEnvVars(true);
+    try {
+      const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
+
+      await seedOrGetWhatsappConfig({ persist });
+
+      expect(persist).toHaveBeenCalledTimes(1);
+    } finally {
+      withSeedEnvVars(false);
+    }
+  });
+
+  test("no WHATSAPP_* env vars set — skipped without any existence query", async () => {
+    withSeedEnvVars(false);
+    const hasExisting = mock(async (): Promise<boolean> => true);
+    const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
+
+    const result = await seedOrGetWhatsappConfig({ hasExisting, persist });
+
+    expect(result).toBeUndefined();
+    expect(hasExisting).not.toHaveBeenCalled();
+    expect(persist).not.toHaveBeenCalled();
   });
 });
 
@@ -410,6 +628,48 @@ describe("Tier 2 — boundary inputs", () => {
     expect(messageOf(error)).toBe(errorsEn.invalidInput);
     expect(upsertWhatsappConfigMock).not.toHaveBeenCalled();
   });
+
+  test("exactly-at-limit values are accepted and stored", async () => {
+    const limits = WHATSAPP_CONFIG_FIELD_MAX_LENGTHS;
+    await WhatsappConfigService.saveConfiguration({
+      appId: "a".repeat(limits.appId),
+      appSecret: "s".repeat(limits.appSecret),
+      verifyToken: "t".repeat(limits.verifyToken),
+      phoneNumberId: "1".repeat(limits.phoneNumberId),
+      wabaId: "w".repeat(limits.wabaId),
+      accessToken: "k".repeat(limits.accessToken),
+      esConfigId: "e".repeat(limits.esConfigId),
+    });
+
+    expect(upsertWhatsappConfigMock).toHaveBeenCalledTimes(1);
+    const payload = upsertWhatsappConfigMock.mock.calls[0][0];
+    expect(payload.appId).toHaveLength(limits.appId);
+    expect(payload.verifyToken).toHaveLength(limits.verifyToken);
+    expect(payload.accessToken).toHaveLength(limits.accessToken);
+  });
+
+  test("over-limit values are rejected without touching the DB", async () => {
+    const limits = WHATSAPP_CONFIG_FIELD_MAX_LENGTHS;
+    const overLimitInputs: WhatsappConfigSeedInput[] = [
+      { appId: "a".repeat(limits.appId + 1) },
+      { appSecret: "s".repeat(limits.appSecret + 1) },
+      { verifyToken: "t".repeat(limits.verifyToken + 1) },
+      { phoneNumberId: "1".repeat(limits.phoneNumberId + 1) },
+      { wabaId: "w".repeat(limits.wabaId + 1) },
+      { accessToken: "k".repeat(limits.accessToken + 1) },
+      { esConfigId: "e".repeat(limits.esConfigId + 1) },
+    ];
+
+    const errors = await Promise.all(
+      overLimitInputs.map(input => expectRejection(WhatsappConfigService.saveConfiguration(input, { locale: "en" })))
+    );
+
+    for (const error of errors) {
+      expect(error).toBeInstanceOf(ValidationError);
+      expect(messageOf(error)).toBe(errorsEn.invalidInput);
+    }
+    expect(upsertWhatsappConfigMock).not.toHaveBeenCalled();
+  });
 });
 
 describe("Tier 3 — concurrent resilient reads", () => {
@@ -486,5 +746,38 @@ describe("Tier 4 — no credential leakage", () => {
 
     expect(error).toBeInstanceOf(DatabaseUnavailableError);
     expect(String(error)).not.toContain("duplicate key");
+  });
+
+  test("save-failure logs project drizzle driver errors — bound params never reach the log line", async () => {
+    // Mirrors drizzle 1.0.0-rc.4's DrizzleQueryError: its own message embeds
+    // the full bound parameters (here a fake plaintext verify-token marker),
+    // which is exactly the credential-leak vector — the projection must keep
+    // the message and params out of the log while keeping stable metadata.
+    const TOKEN_MARKER = "leakme-plaintext-verify-token-0f3ab1";
+    const driverError = Object.assign(
+      new Error(`Failed query: insert into "whatsapp_configs" (...) values ('${TOKEN_MARKER}')`),
+      {
+        name: "DrizzleQueryError",
+        query: 'insert into "whatsapp_configs"',
+        params: { verifyToken: TOKEN_MARKER },
+        cause: {
+          code: "23505",
+          detail: "Key (id)=(cfg_row_1) already exists.",
+          message: "duplicate key value violates unique constraint",
+        },
+      }
+    );
+    upsertWhatsappConfigMock.mockRejectedValue(driverError);
+
+    const error = await expectRejection(WhatsappConfigService.saveConfiguration({ verifyToken: TOKEN_MARKER }));
+
+    expect(error).toBeInstanceOf(DatabaseUnavailableError);
+    const output = allLoggerOutput();
+    expect(output).not.toContain(TOKEN_MARKER);
+    expect(output).not.toContain("Failed query");
+    // Stable, non-sensitive metadata survives for operators.
+    expect(output).toContain("DrizzleQueryError");
+    expect(output).toContain("23505");
+    expect(output).toContain("duplicate key value violates unique constraint");
   });
 });
