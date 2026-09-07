@@ -21,6 +21,7 @@ import { useAdminViewLabels } from "@/frontend/common/views/dashboard/classes/de
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
+import { makeClassDetailsInstance } from "@/test/ui/components/fixtures/classDetailsFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const locale: AppLocale = "ar";
@@ -53,36 +54,9 @@ const noopAsync = () => Promise.resolve();
 
 function makeInstance(overrides: Partial<ClassInstance> = {}): ClassInstance {
   return {
-    id: "ci-1",
-    courseName: "Math",
-    classType: null,
-    instanceId: "inst-1",
-    scheduledDate: "2026-08-20",
-    startTime: "10:00",
-    endTime: "11:00",
-    durationMinutes: 60,
-    status: null,
-    remarks: null,
-    hasTimezoneMismatch: false,
-    studentTimezone: null,
-    teacherTimezone: null,
-    recurringScheduleId: null,
-    payrollCredited: false,
-    isRescheduled: false,
-    isFrozen: false,
-    executionState: null,
-    outcome: null,
-    avatarUrl: null,
-    subjectId: "sub-1",
-    subjectName: "Mathematics",
-    subjectAvatarUrl: null,
+    ...makeClassDetailsInstance(),
     rateAmount: "75",
     rateCurrency: CurrencyCode.Sar,
-    isRateOverridden: false,
-    rateSource: null,
-    effectiveMeeting: null,
-    student: { id: "student-1", name: "Student One", grade: null, level: null, avatarUrl: null },
-    teacher: { id: "teacher-1", name: "Teacher One", title: null, avatarUrl: null },
     performance: null,
     ...overrides,
   };

@@ -26,17 +26,19 @@ describe("EffectiveMeetingService Benchmark", () => {
       });
 
       // Create 50 class instances
-      const instanceIds: string[] = [];
-      for (let i = 0; i < 50; i++) {
+      const indices = Array.from({ length: 50 }, (_, i) => i);
+      const instanceIds = await indices.reduce<Promise<string[]>>(async (prevPromise, i) => {
+        const acc = await prevPromise;
         const inst = await createMockClassInstance(tx, student.id, teacher.id);
-        instanceIds.push(inst.id);
+        acc.push(inst.id);
         if (i % 2 === 0) {
           await createTestClassMeetingConfig(tx, { classInstanceId: inst.id }, provider.id, {
             isDefault: true,
             details: { meetingUrl: `https://zoom.us/j/class-${i}` },
           });
         }
-      }
+        return acc;
+      }, Promise.resolve([]));
 
       // Warm up database caches
       await EffectiveMeetingService.resolveForClassInstances(instanceIds.slice(0, 5), tErrors, tx);

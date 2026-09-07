@@ -1,14 +1,14 @@
 import { describe, expect, it } from "bun:test";
 
-describe("Service Worker Script Generation", () => {
-  const generateSwScript = (buildId: string | undefined): string => {
-    return (
-      "if('serviceWorker' in navigator && window.isSecureContext){navigator.serviceWorker.register('/sw.js?build=" +
-      encodeURIComponent(buildId ?? "").replace(/'/g, "%27") +
-      "').catch(function(){});}"
-    );
-  };
+const generateSwScript = (buildId: string | undefined): string => {
+  return (
+    "if('serviceWorker' in navigator && window.isSecureContext){navigator.serviceWorker.register('/sw.js?build=" +
+    encodeURIComponent(buildId ?? "").replace(/'/g, "%27") +
+    "').catch(function(){});}"
+  );
+};
 
+describe("Service Worker Script Generation", () => {
   it("encodes standard build ID string correctly", () => {
     const script = generateSwScript("v1.0.0");
     expect(script).toBe(

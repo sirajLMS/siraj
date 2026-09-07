@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { isAppPermission } from "@/backend/enum";
 import { STUDENT_FIELD_GROUP_BY_KEY, STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
-import type { StudentFieldGroupKey } from "@/backend/types";
 
 describe("STUDENT_FIELD_GROUPS integrity", () => {
   test("defines non-empty student field groups with valid structure", () => {
@@ -27,10 +26,10 @@ describe("STUDENT_FIELD_GROUPS integrity", () => {
       expect(isAppPermission(group.editOwn)).toBe(true);
       expect(isAppPermission(group.editOther)).toBe(true);
 
-      expect(String(group.viewOwn)).toBe(`student.${group.groupKey}.view_own`);
-      expect(String(group.viewOther)).toBe(`student.${group.groupKey}.view_other`);
-      expect(String(group.editOwn)).toBe(`student.${group.groupKey}.edit_own`);
-      expect(String(group.editOther)).toBe(`student.${group.groupKey}.edit_other`);
+      expect<string>(group.viewOwn).toBe(`student.${group.groupKey}.view_own`);
+      expect<string>(group.viewOther).toBe(`student.${group.groupKey}.view_other`);
+      expect<string>(group.editOwn).toBe(`student.${group.groupKey}.edit_own`);
+      expect<string>(group.editOther).toBe(`student.${group.groupKey}.edit_other`);
     }
   });
 
@@ -39,8 +38,7 @@ describe("STUDENT_FIELD_GROUPS integrity", () => {
     expect(mapKeys).toHaveLength(STUDENT_FIELD_GROUPS.length);
 
     for (const group of STUDENT_FIELD_GROUPS) {
-      const key = group.groupKey as StudentFieldGroupKey;
-      expect(STUDENT_FIELD_GROUP_BY_KEY[key]).toBe(group);
+      expect(STUDENT_FIELD_GROUP_BY_KEY[group.groupKey]).toBe(group);
     }
   });
 

@@ -2,14 +2,39 @@ import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import type { StatusTrackingRow } from "@/backend/db/repo/scheduling/queries";
 import { AppPermission, EffectiveMeetingSource } from "@/backend/enum";
+import { StudentStatus } from "@/backend/enum/students/student-lifecycle.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import * as resolveViewerTimezoneModule from "@/backend/services/schedule/resolve-viewer-timezone";
 import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { errorsEn } from "@/shared/locale/en/errors";
 
 const tErrors = errorsEn;
+
+function createMockStatusTrackingRow(overrides: Partial<StatusTrackingRow>): StatusTrackingRow {
+  return {
+    id: "inst-1",
+    studentId: "student-1",
+    studentName: "Student A",
+    studentInitials: "SA",
+    studentAvatarUrl: null,
+    studentStatus: StudentStatus.REGULAR,
+    teacherId: "teacher-1",
+    teacherName: "Teacher 1",
+    teacherAvatarUrl: null,
+    courseName: "Math",
+    avatarUrl: null,
+    scheduledStartAt: new Date("2026-06-10T10:00:00Z"),
+    scheduledEndAt: new Date("2026-06-10T11:00:00Z"),
+    durationMinutes: 60,
+    executionState: ClassExecutionState.NOT_ACTIVATED,
+    outcome: ClassOutcome.PENDING,
+    isFrozen: false,
+    ...overrides,
+  };
+}
 
 afterEach(() => {
   spyOn(PermissionsService, "hasAnyPermission").mockRestore();
@@ -49,9 +74,9 @@ describe("ScheduleQueryService.getStatusTrackingSchedule", () => {
     });
     spyOn(resolveViewerTimezoneModule, "resolveViewerTimezone").mockResolvedValue(IanaTimezone.UTC);
 
-    const mockRows = [
-      { id: "inst-1", studentName: "Student A" } as StatusTrackingRow,
-      { id: "inst-2", studentName: "Student B" } as StatusTrackingRow,
+    const mockRows: StatusTrackingRow[] = [
+      createMockStatusTrackingRow({ id: "inst-1", studentName: "Student A" }),
+      createMockStatusTrackingRow({ id: "inst-2", studentName: "Student B" }),
     ];
     spyOn(SchedulingRepository, "getStatusTrackingRows").mockResolvedValue(mockRows);
 

@@ -83,7 +83,8 @@ describeLive("pair-rate-limit @live-comm", () => {
 
     // Clean any stale Redis pair-rate-limit key. The sender segment mirrors
     // the adapter's sender-key derivation (display number digits, else id).
-    const senderKey = account.displayPhoneNumber?.replace(/\D/g, "") || account.phoneNumberId;
+    const digits = account.displayPhoneNumber?.replace(/\D/g, "") ?? "";
+    const senderKey = digits.length > 0 ? digits : account.phoneNumberId;
     await redisService.del(`whatsapp:pair:${senderKey}:${testToPhone}`).catch(() => {});
 
     const firstStart = Date.now();

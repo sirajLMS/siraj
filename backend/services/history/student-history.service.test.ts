@@ -3,15 +3,42 @@ import { ParentRepository } from "@/backend/db/repo/parents";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { StudentHistoryRepository } from "@/backend/db/repo/students/student-history.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
-import { EffectiveMeetingSource } from "@/backend/enum";
+import { EffectiveMeetingSource, UserRole } from "@/backend/enum";
+import { StudentStatus } from "@/backend/enum/students/student-lifecycle.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import type { EffectiveMeetingReturnType } from "@/backend/types";
+import type { EffectiveMeetingReturnType, SessionSummary, StudentSelectType } from "@/backend/types";
 import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { errorsEn } from "@/shared/locale/en/errors";
 
 const tErrors = errorsEn;
+
+function createMockStudent(overrides: Partial<StudentSelectType> = {}): StudentSelectType {
+  return {
+    id: "student-1",
+    parentId: null,
+    userId: "user-1",
+    primaryTeacherId: null,
+    name: "Alice",
+    avatarUrl: null,
+    dateOfBirth: null,
+    gender: null,
+    language: null,
+    timezoneOverride: null,
+    status: StudentStatus.REGULAR,
+    classesTotal: 0,
+    classesRemaining: 0,
+    creditHoursTotal: "0.00",
+    creditHoursRemaining: "0.00",
+    version: 0,
+    hoursPerWeek: "0",
+    idempotencyKey: "key-1",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+}
 
 afterEach(() => {
   spyOn(PermissionsService, "getUserContext").mockRestore();
@@ -27,15 +54,71 @@ afterEach(() => {
   spyOn(EffectiveMeetingService, "resolveForClassInstances").mockRestore();
 });
 
+const MOCK_RAW_SESSIONS: SessionSummary[] = [
+  {
+    id: "session-1",
+    title: "Math",
+    dayOfMonth: 10,
+    time: "2026-06-10T10:00:00Z",
+    duration: 60,
+    instructor: "Teacher 1",
+    teacherId: "teacher-1",
+    timeSlot: "10:00 - 11:00",
+    room: "Zoom 1",
+    status: ClassExecutionState.COMPLETED,
+    outcome: ClassOutcome.TAKEN,
+    isFrozen: false,
+    notes: "",
+  },
+  {
+    id: "session-2",
+    title: "Math",
+    dayOfMonth: 12,
+    time: "2026-06-12T10:00:00Z",
+    duration: 60,
+    instructor: "Teacher 1",
+    teacherId: "teacher-1",
+    timeSlot: "10:00 - 11:00",
+    room: "Zoom 2",
+    status: ClassExecutionState.NOT_ACTIVATED,
+    outcome: null,
+    isFrozen: false,
+    notes: "",
+  },
+];
+
+const MOCK_EFFECTIVE_MEETING_1: EffectiveMeetingReturnType = {
+  joinUrl: "https://zoom.us/j/111",
+  providerSlug: "zoom",
+  providerName: { en: "Zoom" },
+  logoUrl: null,
+  meetingId: "111",
+  source: EffectiveMeetingSource.CLASS,
+  configId: "cfg-1",
+  providerId: "prov-1",
+  supportsAutoGeneration: false,
+};
+
+const MOCK_EFFECTIVE_MEETING_2: EffectiveMeetingReturnType = {
+  joinUrl: "https://zoom.us/j/222",
+  providerSlug: "zoom",
+  providerName: { en: "Zoom" },
+  logoUrl: null,
+  meetingId: "222",
+  source: EffectiveMeetingSource.TEACHER,
+  configId: "cfg-2",
+  providerId: "prov-1",
+  supportsAutoGeneration: false,
+};
+
 describe("StudentHistoryService.getStudentClassHistory", () => {
   test("fetches metrics, raw sessions, and batch resolves effective meeting links", async () => {
     spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      userId: "admin-1",
+      permissions: [],
+      permissionGroups: [],
       isSuperAdmin: true,
-      roles: [],
-      permissions: new Set(),
-      user: { id: "admin-1" } as unknown,
-    } as unknown as Awaited<ReturnType<typeof PermissionsService.getUserContext>>);
+      role: UserRole.SUPER_ADMIN,
+    });
 
     spyOn(StudentHistoryRepository, "getMonthlyMetrics").mockResolvedValue({
       totalClasses: 2,
@@ -44,81 +127,22 @@ describe("StudentHistoryService.getStudentClassHistory", () => {
       performance: 90,
     });
 
-    const mockRawSessions = [
-      {
-        id: "session-1",
-        dayOfMonth: 10,
-        time: "2026-06-10T10:00:00Z",
-        duration: 60,
-        instructor: "Teacher 1",
-        room: "Zoom 1",
-        status: ClassExecutionState.COMPLETED,
-        outcome: ClassOutcome.TAKEN,
-        subject: "Math",
-        notes: null,
-      },
-      {
-        id: "session-2",
-        dayOfMonth: 12,
-        time: "2026-06-12T10:00:00Z",
-        duration: 60,
-        instructor: "Teacher 1",
-        room: "Zoom 2",
-        status: ClassExecutionState.NOT_ACTIVATED,
-        outcome: null,
-        subject: "Math",
-        notes: null,
-      },
-    ];
-
-    spyOn(StudentHistoryRepository, "getMonthlyCalendar").mockResolvedValue(
-      mockRawSessions as unknown as Awaited<ReturnType<typeof StudentHistoryRepository.getMonthlyCalendar>>
-    );
-
-    spyOn(StudentRepository, "findById").mockResolvedValue({
-      id: "student-1",
-      name: "Alice",
-    } as unknown as Awaited<ReturnType<typeof StudentRepository.findById>>);
-
-    const mockEffectiveMeeting1: EffectiveMeetingReturnType = {
-      joinUrl: "https://zoom.us/j/111",
-      providerSlug: "zoom",
-      providerName: { en: "Zoom" },
-      logoUrl: null,
-      meetingId: "111",
-      source: EffectiveMeetingSource.CLASS,
-      configId: "cfg-1",
-      providerId: "prov-1",
-      supportsAutoGeneration: false,
-    };
-
-    const mockEffectiveMeeting2: EffectiveMeetingReturnType = {
-      joinUrl: "https://zoom.us/j/222",
-      providerSlug: "zoom",
-      providerName: { en: "Zoom" },
-      logoUrl: null,
-      meetingId: "222",
-      source: EffectiveMeetingSource.TEACHER,
-      configId: "cfg-2",
-      providerId: "prov-1",
-      supportsAutoGeneration: false,
-    };
+    spyOn(StudentHistoryRepository, "getMonthlyCalendar").mockResolvedValue(MOCK_RAW_SESSIONS);
+    spyOn(StudentRepository, "findById").mockResolvedValue(createMockStudent());
 
     let singleResolveCallsCount = 0;
-    const resolveSingle: (...args: unknown[]) => Promise<EffectiveMeetingReturnType> = async id => {
+    const resolveSingle = async (id: string): Promise<EffectiveMeetingReturnType> => {
       singleResolveCallsCount++;
-      return id === "session-1" ? mockEffectiveMeeting1 : mockEffectiveMeeting2;
+      return id === "session-1" ? MOCK_EFFECTIVE_MEETING_1 : MOCK_EFFECTIVE_MEETING_2;
     };
-    spyOn(EffectiveMeetingService, "resolveForClassInstance").mockImplementation(
-      resolveSingle as typeof EffectiveMeetingService.resolveForClassInstance
-    );
+    spyOn(EffectiveMeetingService, "resolveForClassInstance").mockImplementation(resolveSingle);
 
     let batchResolveCallsCount = 0;
     spyOn(EffectiveMeetingService, "resolveForClassInstances").mockImplementation(async ids => {
       batchResolveCallsCount++;
       const map = new Map();
-      if (ids.includes("session-1")) map.set("session-1", mockEffectiveMeeting1);
-      if (ids.includes("session-2")) map.set("session-2", mockEffectiveMeeting2);
+      if (ids.includes("session-1")) map.set("session-1", MOCK_EFFECTIVE_MEETING_1);
+      if (ids.includes("session-2")) map.set("session-2", MOCK_EFFECTIVE_MEETING_2);
       return map;
     });
 

@@ -287,7 +287,7 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
     // mode the user actually sees.
     const currentScheme =
       typeof document !== "undefined"
-        ? document.documentElement.dataset.muiColorScheme || document.documentElement.dataset.theme || undefined
+        ? (document.documentElement.dataset.muiColorScheme ?? document.documentElement.dataset.theme ?? undefined)
         : undefined;
     const isDark = currentScheme !== undefined ? currentScheme === "dark" : get().draft.defaultColorScheme === "dark";
     const presetId = get().presetId ?? matchPresetByColors(get().draft.colors);

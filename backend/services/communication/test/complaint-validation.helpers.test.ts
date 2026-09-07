@@ -7,7 +7,7 @@ describe("deriveComplaintMetrics performance-optimized function", () => {
     const statusCounts = [
       { status: ComplaintStatus.UNANSWERED, count: 5 },
       { status: ComplaintStatus.ANSWERED, count: 12 },
-      { status: ComplaintStatus.RESOLVED, count: 3 },
+      { status: "RESOLVED", count: 3 },
     ];
     const avgHoursData = { avgHours: 10.5 };
     const totalCountFromQueue = 0;

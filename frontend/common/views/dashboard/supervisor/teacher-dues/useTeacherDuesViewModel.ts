@@ -26,7 +26,10 @@ const EMPTY_SNACKBAR: TeacherDuesSnackbarState = {
   severity: "success",
 };
 
-export function groupDueIdsByPaymentId(dueIds: readonly string[], rows: readonly TeacherDueRow[]): Map<string, string[]> {
+export function groupDueIdsByPaymentId(
+  dueIds: readonly string[],
+  rows: readonly TeacherDueRow[]
+): Map<string, string[]> {
   // Optimization: Pre-index rows by ID to avoid O(M * N) nested array scanning.
   // Reduces lookup complexity from O(M * N) to O(N + M) where N = rows.length, M = dueIds.length.
   const rowById = new Map<string, TeacherDueRow>();

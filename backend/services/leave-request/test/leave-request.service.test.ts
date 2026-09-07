@@ -40,9 +40,10 @@ function resolveTableResponse(table: unknown): unknown[] {
 }
 
 function createChainableQuery(data: unknown[]) {
-  const limit = mock((_n: number) => Promise.resolve(data));
-  const then = (resolve: (val: unknown) => void) => resolve(data);
-  return { limit, then };
+  const promise = Promise.resolve(data);
+  return Object.assign(promise, {
+    limit: mock((_n: number) => Promise.resolve(data)),
+  });
 }
 
 const mockQueryDb = mock((_tx?: unknown) => ({
@@ -51,7 +52,10 @@ const mockQueryDb = mock((_tx?: unknown) => ({
       const data = resolveTableResponse(table);
       const whereChain = createChainableQuery(data);
       const where = mock((_condition: unknown) => whereChain);
-      return { where, limit: whereChain.limit, then: whereChain.then };
+      return Object.assign(Promise.resolve(data), {
+        where,
+        limit: whereChain.limit,
+      });
     }),
   })),
 }));
@@ -116,6 +120,16 @@ function buildMockLeaveRequest(overrides: Partial<LeaveRequestSelectType> = {}):
   };
 }
 
+async function expectServiceError(fn: () => Promise<unknown>): Promise<unknown> {
+  let caught: unknown = null;
+  try {
+    await fn();
+  } catch (err) {
+    caught = err;
+  }
+  return caught;
+}
+
 describe("LeaveRequestService", () => {
   beforeEach(() => {
     mockHasPermission = mock((_userId: string, _perm: AppPermission) => Promise.resolve(true));
@@ -137,12 +151,12 @@ describe("LeaveRequestService", () => {
       const results = await LeaveRequestService.getMyRequests(MOCK_USER_ID);
 
       expect(results).toHaveLength(2);
-      expect(results[0].id).toBe("req-1");
-      expect(results[1].id).toBe("req-2");
+      expect(results[0]?.id).toBe("req-1");
+      expect(results[1]?.id).toBe("req-2");
       expect(mockHasPermission).toHaveBeenCalledWith(MOCK_USER_ID, AppPermission.SESSION_SELF_DELAY);
     });
 
-    it("returns an empty array when caller has no leave requests", async () => {
+    it("returns empty array when user has no requests", async () => {
       mockLeaveRequestsQueryResponse = [];
 
       const results = await LeaveRequestService.getMyRequests(MOCK_USER_ID);
@@ -154,33 +168,23 @@ describe("LeaveRequestService", () => {
     it("throws UnauthorizedError when user lacks SESSION_SELF_DELAY permission", async () => {
       mockHasPermission = mock((_userId: string, _perm: AppPermission) => Promise.resolve(false));
 
-      let caughtError: unknown = null;
-      try {
-        await LeaveRequestService.getMyRequests(MOCK_USER_ID);
-      } catch (err) {
-        caughtError = err;
-      }
+      const caughtError = await expectServiceError(() => LeaveRequestService.getMyRequests(MOCK_USER_ID));
 
       expect(caughtError).toBeInstanceOf(UnauthorizedError);
-      expect((caughtError as UnauthorizedError).message).toBe(
-        getServerTranslations("en").errorsTranslations.insufficientPermissions
-      );
+      if (caughtError instanceof UnauthorizedError) {
+        expect(caughtError.message).toBe(getServerTranslations("en").errorsTranslations.insufficientPermissions);
+      }
     });
 
     it("uses locale for localized error message when provided", async () => {
       mockHasPermission = mock((_userId: string, _perm: AppPermission) => Promise.resolve(false));
 
-      let caughtError: unknown = null;
-      try {
-        await LeaveRequestService.getMyRequests(MOCK_USER_ID, "ar");
-      } catch (err) {
-        caughtError = err;
-      }
+      const caughtError = await expectServiceError(() => LeaveRequestService.getMyRequests(MOCK_USER_ID, "ar"));
 
       expect(caughtError).toBeInstanceOf(UnauthorizedError);
-      expect((caughtError as UnauthorizedError).message).toBe(
-        getServerTranslations("ar").errorsTranslations.insufficientPermissions
-      );
+      if (caughtError instanceof UnauthorizedError) {
+        expect(caughtError.message).toBe(getServerTranslations("ar").errorsTranslations.insufficientPermissions);
+      }
     });
   });
 
@@ -236,17 +240,19 @@ describe("LeaveRequestService", () => {
     it("throws UnauthorizedError when user lacks permission for create request", async () => {
       mockHasPermission = mock((_userId: string, _perm: AppPermission) => Promise.resolve(false));
 
-      await expect(
+      const caughtError = await expectServiceError(() =>
         LeaveRequestService.createStudentDelayRequest(MOCK_USER_ID, MOCK_CLASS_INSTANCE_ID, new Date(), "Reason")
-      ).rejects.toBeInstanceOf(UnauthorizedError);
+      );
+      expect(caughtError).toBeInstanceOf(UnauthorizedError);
     });
 
     it("throws NotFoundError when class instance is not found", async () => {
       mockClassInstance = null;
 
-      await expect(
+      const caughtError = await expectServiceError(() =>
         LeaveRequestService.createStudentDelayRequest(MOCK_USER_ID, MOCK_CLASS_INSTANCE_ID, new Date(), "Reason")
-      ).rejects.toBeInstanceOf(NotFoundError);
+      );
+      expect(caughtError).toBeInstanceOf(NotFoundError);
     });
 
     it("throws ValidationError when class instance is locked (within lock window)", async () => {
@@ -258,9 +264,10 @@ describe("LeaveRequestService", () => {
         scheduledStartAt: nearFutureStart,
       };
 
-      await expect(
+      const caughtError = await expectServiceError(() =>
         LeaveRequestService.createStudentDelayRequest(MOCK_USER_ID, MOCK_CLASS_INSTANCE_ID, new Date(), "Reason")
-      ).rejects.toBeInstanceOf(ValidationError);
+      );
+      expect(caughtError).toBeInstanceOf(ValidationError);
     });
 
     it("throws ConflictError when duplicate pending request exists", async () => {
@@ -273,9 +280,10 @@ describe("LeaveRequestService", () => {
       // Existing pending request
       mockLeaveRequestsQueryResponse = [buildMockLeaveRequest({ status: LeaveRequestStatus.PENDING })];
 
-      await expect(
+      const caughtError = await expectServiceError(() =>
         LeaveRequestService.createStudentDelayRequest(MOCK_USER_ID, MOCK_CLASS_INSTANCE_ID, new Date(), "Reason")
-      ).rejects.toBeInstanceOf(ConflictError);
+      );
+      expect(caughtError).toBeInstanceOf(ConflictError);
     });
   });
 
@@ -301,26 +309,29 @@ describe("LeaveRequestService", () => {
     it("throws UnauthorizedError when supervisor lacks SESSION_RESCHEDULE permission", async () => {
       mockHasPermission = mock((_userId: string, _perm: AppPermission) => Promise.resolve(false));
 
-      await expect(LeaveRequestService.rejectRequest(MOCK_OTHER_USER_ID, MOCK_REQUEST_ID)).rejects.toBeInstanceOf(
-        UnauthorizedError
+      const caughtError = await expectServiceError(() =>
+        LeaveRequestService.rejectRequest(MOCK_OTHER_USER_ID, MOCK_REQUEST_ID)
       );
+      expect(caughtError).toBeInstanceOf(UnauthorizedError);
     });
 
     it("throws NotFoundError when leave request is not found", async () => {
       mockLeaveRequestsQueryResponse = [];
 
-      await expect(LeaveRequestService.rejectRequest(MOCK_OTHER_USER_ID, MOCK_REQUEST_ID)).rejects.toBeInstanceOf(
-        NotFoundError
+      const caughtError = await expectServiceError(() =>
+        LeaveRequestService.rejectRequest(MOCK_OTHER_USER_ID, MOCK_REQUEST_ID)
       );
+      expect(caughtError).toBeInstanceOf(NotFoundError);
     });
 
     it("throws ConflictError when leave request is not PENDING", async () => {
       const alreadyApprovedRequest = buildMockLeaveRequest({ status: LeaveRequestStatus.APPROVED });
       mockLeaveRequestsQueryResponse = [alreadyApprovedRequest];
 
-      await expect(LeaveRequestService.rejectRequest(MOCK_OTHER_USER_ID, MOCK_REQUEST_ID)).rejects.toBeInstanceOf(
-        ConflictError
+      const caughtError = await expectServiceError(() =>
+        LeaveRequestService.rejectRequest(MOCK_OTHER_USER_ID, MOCK_REQUEST_ID)
       );
+      expect(caughtError).toBeInstanceOf(ConflictError);
     });
   });
 });

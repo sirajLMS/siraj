@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { groupDueIdsByPaymentId } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
+import { CurrencyCode, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { TeacherDueRow } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/types/teacherDuesTypes";
+import { groupDueIdsByPaymentId } from "@/frontend/common/views/dashboard/supervisor/teacher-dues/useTeacherDuesViewModel";
 
 describe("useTeacherDuesViewModel - groupDueIdsByPaymentId correctness & performance", () => {
   test("correctly groups due IDs by payment ID in O(N + M) time", () => {
@@ -18,11 +19,11 @@ describe("useTeacherDuesViewModel - groupDueIdsByPaymentId correctness & perform
       studentAvatarUrl: "",
       hours: "1",
       amount: "50.00",
-      currency: "USD",
-      status: "APPROVED",
+      currency: CurrencyCode.Usd,
+      status: TeacherDueStatus.Paid,
       approvedAt: "2026-03-01",
       teacherPaymentId: `payment-${i % 20}`,
-      rateSource: "BASE",
+      rateSource: null,
     }));
 
     const dueIdsToGroup = rows.map(r => r.id);

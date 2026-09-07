@@ -203,7 +203,7 @@ describe("H5 — host-header injection defense on redirect routes", () => {
     expect(setLocaleSrc).toContain("ALLOWED_ORIGINS.has");
     expect(logoutSrc).toContain("ALLOWED_ORIGINS.has");
     // Raw host header must not be interpolated into the redirect without a trust check.
-    expect(logoutSrc).not.toContain("return host ? `${proto}://${host}`");
+    expect(logoutSrc).not.toMatch(/return host \? `\$\{proto\}:\/\/\$\{host\}`/);
   });
 
   test("logout route sanitizes client IP via the shared ratelimit identifier chain", async () => {

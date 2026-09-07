@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { NotificationEventType } from "@/backend/enum";
-import type { ErrorsLabels } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 const ACTOR_ID = "11111111-1111-4111-8111-111111111111";
 const PARENT_ID = "22222222-2222-4222-8222-222222222222";
@@ -250,7 +250,7 @@ async function importService() {
   return import("@/backend/services/billing/billing-management.service");
 }
 
-const tErrorsStub = new Proxy({}, { get: () => () => "error" }) as unknown as ErrorsLabels;
+const tErrorsStub = errorsEn;
 
 describe("BillingManagementService sendPaymentReminder benchmark", () => {
   beforeEach(() => {
