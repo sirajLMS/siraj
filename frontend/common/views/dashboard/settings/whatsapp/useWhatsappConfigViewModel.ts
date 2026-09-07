@@ -27,6 +27,7 @@ import {
   validateWhatsappWabaId,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappConfigFormValidation";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 // ─── Constants ───────────────────────────────────────────────────────
 
@@ -116,6 +117,47 @@ function buildConfigInput(
   return input;
 }
 
+/** Save-flow snackbar signature (sibling convention: `useWhatsappSettingsViewModel`). */
+type SnackbarShow = (message: string, severity: "success" | "error") => void;
+
+/**
+ * Save action (module scope, mirroring the sibling settings view model's
+ * action helpers): the mutation and the follow-up refetch fail separately —
+ * a failed refetch must NOT repaint a committed save as a failure, so the
+ * success snackbar is shown as soon as the mutation resolves and a refetch
+ * failure is only logged (the query's own error state drives the Retry
+ * affordance).
+ */
+async function saveWhatsappConfigAction(
+  input: WhatsappConfigUpdateInput,
+  updateConfig: (opts: { variables: { input: WhatsappConfigUpdateInput } }) => Promise<unknown>,
+  refetch: () => Promise<unknown>,
+  resetDraft: () => void,
+  showSnackbar: SnackbarShow,
+  setSaving: (value: boolean) => void,
+  labels: Pick<WhatsappLabels, "configSaveError" | "configSaveSuccess">
+): Promise<void> {
+  setSaving(true);
+  try {
+    try {
+      await updateConfig({ variables: { input } });
+    } catch (error) {
+      logger.error("Failed to save the WhatsApp configuration", { error });
+      showSnackbar(labels.configSaveError, "error");
+      return;
+    }
+    resetDraft();
+    showSnackbar(labels.configSaveSuccess, "success");
+    try {
+      await refetch();
+    } catch (error) {
+      logger.warn("WhatsApp configuration was saved but the follow-up refetch failed", { error });
+    }
+  } finally {
+    setSaving(false);
+  }
+}
+
 // ─── Form state hook ─────────────────────────────────────────────────
 
 /**
@@ -202,30 +244,15 @@ export function useWhatsappConfigViewModel(): WhatsappConfigTabViewModel {
   }, [configQuery]);
 
   const onSave = useCallback(async () => {
-    setSaving(true);
-    try {
-      // Mutation and refetch fail separately: a failed refetch must NOT
-      // repaint a committed save as a failure — the save itself is the
-      // authoritative outcome, so the success snackbar is shown as soon as
-      // the mutation resolves and a refetch failure is only logged (the
-      // query's own error state drives the Retry affordance).
-      try {
-        await updateConfig({ variables: { input: buildConfigInput(values, baseline) } });
-      } catch (error) {
-        logger.error("Failed to save the WhatsApp configuration", { error });
-        showSnackbar(labels.configSaveError, "error");
-        return;
-      }
-      resetDraft();
-      showSnackbar(labels.configSaveSuccess, "success");
-      try {
-        await configQuery.refetch();
-      } catch (error) {
-        logger.warn("WhatsApp configuration was saved but the follow-up refetch failed", { error });
-      }
-    } finally {
-      setSaving(false);
-    }
+    await saveWhatsappConfigAction(
+      buildConfigInput(values, baseline),
+      updateConfig,
+      configQuery.refetch,
+      resetDraft,
+      showSnackbar,
+      setSaving,
+      labels
+    );
   }, [baseline, configQuery, labels, resetDraft, showSnackbar, updateConfig, values]);
 
   const onTestConnection = useCallback(async () => {

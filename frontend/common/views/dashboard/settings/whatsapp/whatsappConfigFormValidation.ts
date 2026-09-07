@@ -23,6 +23,18 @@ import type {
 const NUMERIC_PATTERN = /^\d+$/;
 
 /**
+ * Runtime-checked key guard: `WHATSAPP_CONFIG_FIELD_MAX_LENGTHS` is pinned by
+ * its own `satisfies Record<WhatsappConfigFormField, number>` to have exactly
+ * the `WhatsappConfigFormField` keys, so every own enumerable key of the
+ * record IS a form field. Iterating `Object.keys` through this guard (instead
+ * of an unsafe assertion) keeps the loop type-safe and can never drift from
+ * the caps record — the keys come from the record itself.
+ */
+function isWhatsappConfigFormField(key: string): key is WhatsappConfigFormField {
+  return Object.hasOwn(WHATSAPP_CONFIG_FIELD_MAX_LENGTHS, key);
+}
+
+/**
  * Client-side mirror of the server's per-field input caps (the backend
  * constant `WHATSAPP_CONFIG_FIELD_MAX_LENGTHS` in
  * `backend/lib/whatsapp-constants.ts`: visible fields mirror the column
@@ -96,7 +108,7 @@ export function validateWhatsappConfigMaxLengths(
   values: WhatsappConfigFormValues
 ): Partial<Record<WhatsappConfigFormField, WhatsappConfigValidationKey>> {
   const errors: Partial<Record<WhatsappConfigFormField, WhatsappConfigValidationKey>> = {};
-  for (const field of Object.keys(WHATSAPP_CONFIG_FIELD_MAX_LENGTHS) as WhatsappConfigFormField[]) {
+  for (const field of Object.keys(WHATSAPP_CONFIG_FIELD_MAX_LENGTHS).filter(isWhatsappConfigFormField)) {
     if (values[field].length > WHATSAPP_CONFIG_FIELD_MAX_LENGTHS[field]) {
       errors[field] = "validationMaxLength";
     }

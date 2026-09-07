@@ -2,7 +2,13 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 import { seedOrGet as seedOrGetWhatsappConfig } from "@/backend/db/seeds/whatsapp/seed-whatsapp-config";
 import { WHATSAPP_CONFIG_FIELD_MAX_LENGTHS } from "@/backend/lib/whatsapp-constants";
-import type { WhatsappConfigSeedInput, WhatsappConfigSelectType } from "@/backend/types";
+import type {
+  DBTransaction,
+  SystemSettingSelectType,
+  WhatsappConfigSeedInput,
+  WhatsappConfigSelectType,
+} from "@/backend/types";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 // ---------------------------------------------------------------------------
 // Mock state (reset per test)
@@ -143,9 +149,20 @@ await mock.module("@/backend/services/system/audit.service", () => ({
 // `env::<KEY>` storage key. Mocked at the direct specifier so the REAL
 // env-config service/audit path keeps running while the reads land here.
 const priorOverrideValues = new Map<string, string>();
-const getByKeyMock = mock(async (key: string): Promise<unknown> => {
-  if (!priorOverrideValues.has(key)) return null;
-  return { key, value: priorOverrideValues.get(key) };
+// Typed with the REAL `SystemSettingsRepository.getByKey(key, tx?)` signature so
+// recorded calls keep the transaction handle readable at `mock.calls[i][1]`.
+const getByKeyMock = mock(async (key: string, _tx?: DBTransaction): Promise<SystemSettingSelectType | null> => {
+  const priorValue = priorOverrideValues.get(key);
+  if (priorValue === undefined) return null;
+  return {
+    key,
+    value: priorValue,
+    dataType: SystemSettingDataType.String,
+    description: "",
+    category: SystemSettingCategory.Communication,
+    updatedByUserId: null,
+    updatedAt: new Date(0),
+  };
 });
 
 await mock.module("@/backend/db/repo/shared", () => ({
@@ -286,6 +303,12 @@ async function expectRejection(promise: Promise<unknown>): Promise<unknown> {
     return error;
   }
   throw new Error("Expected the call to reject, but it resolved");
+}
+
+/** Clears the seed env vars (module scope: captures nothing, per consistent-function-scoping). */
+function removeSeedEnvVars(): void {
+  delete process.env.WHATSAPP_APP_ID;
+  delete process.env.WHATSAPP_APP_SECRET;
 }
 
 describe("resolveConfiguration — resolution priority", () => {
@@ -627,14 +650,14 @@ describe("saveConfiguration — env-config audit trail", () => {
     // The prior values were read in-tx (same tx handle the repo handed to the
     // propagation hook), one per audited key.
     expect(getByKeyMock.mock.calls.map(call => call[0])).toEqual(
-      expect.arrayContaining([
-        "env::WHATSAPP_APP_ID",
-        "env::WHATSAPP_VERIFY_TOKEN",
-        "env::WHATSAPP_PHONE_NUMBER_ID",
-      ])
+      expect.arrayContaining(["env::WHATSAPP_APP_ID", "env::WHATSAPP_VERIFY_TOKEN", "env::WHATSAPP_PHONE_NUMBER_ID"])
     );
     for (const call of getByKeyMock.mock.calls) {
-      expect(call[1]).toBe(TX_TOKEN);
+      // The recorded handle is widened to `unknown` for the identity check:
+      // the mock's tx TYPE stays honest (real `tx?: DBTransaction` signature),
+      // while toBe compares the handle against the propagation's token.
+      const recordedTxHandle: unknown = call[1];
+      expect(recordedTxHandle).toBe(TX_TOKEN);
     }
     // The audit writes joined the caller's transaction (same tx handle the
     // repo handed to the propagation hook).
@@ -691,18 +714,15 @@ describe("seedOrGet — look-before-create", () => {
   const ENV_SEED_APP_ID = "seed_app_env";
   const ENV_SEED_SECRET = "seed_secret_env_value";
 
-  function withSeedEnvVars(set: boolean): void {
-    if (set) {
-      process.env.WHATSAPP_APP_ID = ENV_SEED_APP_ID;
-      process.env.WHATSAPP_APP_SECRET = ENV_SEED_SECRET;
-    } else {
-      delete process.env.WHATSAPP_APP_ID;
-      delete process.env.WHATSAPP_APP_SECRET;
-    }
+  // Split per sonarjs/no-selector-parameter: dedicated setters instead of a
+  // boolean selector choosing between the two actions.
+  function installSeedEnvVars(): void {
+    process.env.WHATSAPP_APP_ID = ENV_SEED_APP_ID;
+    process.env.WHATSAPP_APP_SECRET = ENV_SEED_SECRET;
   }
 
   test("a pre-existing row is never re-persisted — env re-runs cannot revert admin-saved credentials", async () => {
-    withSeedEnvVars(true);
+    installSeedEnvVars();
     try {
       const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
 
@@ -714,12 +734,12 @@ describe("seedOrGet — look-before-create", () => {
         loggerCalls.some(call => call.level === "info" && JSON.stringify(call.args).includes("left untouched"))
       ).toBe(true);
     } finally {
-      withSeedEnvVars(false);
+      removeSeedEnvVars();
     }
   });
 
   test("an empty table persists the carried-over env fields", async () => {
-    withSeedEnvVars(true);
+    installSeedEnvVars();
     try {
       const persist = mock(
         (_input: WhatsappConfigSeedInput): Promise<WhatsappConfigSelectType> => Promise.resolve(DB_ROW)
@@ -733,12 +753,12 @@ describe("seedOrGet — look-before-create", () => {
       expect(payload.appId).toBe(ENV_SEED_APP_ID);
       expect(payload.appSecret).toBe(ENV_SEED_SECRET);
     } finally {
-      withSeedEnvVars(false);
+      removeSeedEnvVars();
     }
   });
 
   test("a failing existence check fails safe — nothing is persisted", async () => {
-    withSeedEnvVars(true);
+    installSeedEnvVars();
     try {
       const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
 
@@ -753,12 +773,12 @@ describe("seedOrGet — look-before-create", () => {
       expect(persist).not.toHaveBeenCalled();
       expect(loggerCalls.some(call => call.level === "warn")).toBe(true);
     } finally {
-      withSeedEnvVars(false);
+      removeSeedEnvVars();
     }
   });
 
   test("without the existence gate the persist path is unchanged (backward compatible)", async () => {
-    withSeedEnvVars(true);
+    installSeedEnvVars();
     try {
       const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
 
@@ -766,12 +786,12 @@ describe("seedOrGet — look-before-create", () => {
 
       expect(persist).toHaveBeenCalledTimes(1);
     } finally {
-      withSeedEnvVars(false);
+      removeSeedEnvVars();
     }
   });
 
   test("no WHATSAPP_* env vars set — skipped without any existence query", async () => {
-    withSeedEnvVars(false);
+    removeSeedEnvVars();
     const hasExisting = mock(async (): Promise<boolean> => true);
     const persist = mock(async (): Promise<WhatsappConfigSelectType> => DB_ROW);
 
