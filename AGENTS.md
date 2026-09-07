@@ -18,6 +18,7 @@ All commands use Bun. The specific binary path `~/.bun/bin/bun` is required in s
 ```bash
 # Development
 bun run dev                    # Start dev server with Turbopack on port 3000
+bun run dev:https              # Dev server over HTTPS (mkcert self-signed); OS/CA setup: docs/development/https-dev-server.md
 bun run dev:safe               # Safe dev mode via scripts/safe-dev.ts
 bun run debug                  # Same as dev (alias for debugging workflows)
 bun run dev:inspect            # Start dev server with Node inspector enabled (--inspect)
@@ -482,6 +483,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/drizzle/dialect-aware-constraints.md` - Dialect-aware CHECK constraints (PG/SQLite) and soft-delete partial unique indexes
 - `docs/graphql/domain-error-extensions-code.md` - DomainError → GraphQLError extensions.code propagation pattern
 - `docs/observability/new-relic-integration.md` - New Relic APM integration (Hybrid Agent, GraphQL resolver tracing, zero dev/test overhead)
+- `docs/development/https-dev-server.md` - HTTPS dev server (`bun run dev:https`) setup: how Next/mkcert provisions certs, per-OS trust-store setup (incl. the Arch Linux `update-ca-certificates` fix), verification, reset
 
 
 ## Linting Rules
