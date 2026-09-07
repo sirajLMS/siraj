@@ -3,17 +3,16 @@
 import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
 import {
   Box,
+  Button,
   Chip,
   FormControl,
   FormHelperText,
-  IconButton,
   InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   type SelectChangeEvent,
   TextField,
-  Tooltip,
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { AppDateRangePicker } from "@/frontend/common/components/ui/form/date";
@@ -116,11 +115,11 @@ function usePersonFilterSelection(
 function renderStatusValue(
   selected: readonly string[],
   statusLabels: SessionAuditLabels["status"],
-  allLabel: string
+  placeholderLabel: string
 ): React.ReactNode {
   const statuses = selected.filter(isSessionAuditStatus);
   if (statuses.length === 0) {
-    return <Box sx={theme => ({ color: theme.palette.onSurfaceVariant })}>{allLabel}</Box>;
+    return <Box sx={theme => ({ color: theme.palette.onSurfaceVariant })}>{placeholderLabel}</Box>;
   }
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
@@ -154,7 +153,7 @@ function StatusFilterSelect({ labels, currentStatuses, setCurrentStatuses }: Rea
     setCurrentStatuses(selected.filter(isSessionAuditStatus));
   };
   return (
-    <FormControl size="small" sx={{ width: { xs: "100%", lg: "auto" }, minWidth: { lg: 230 } }}>
+    <FormControl size="small" sx={{ width: { xs: "100%", lg: "auto" }, flex: { lg: "1 1 0" }, minWidth: { lg: 180 } }}>
       <InputLabel id="session-audit-status-filter-label" shrink>
         {labels.filters.status}
       </InputLabel>
@@ -162,9 +161,10 @@ function StatusFilterSelect({ labels, currentStatuses, setCurrentStatuses }: Rea
         labelId="session-audit-status-filter-label"
         label={labels.filters.status}
         multiple
+        displayEmpty
         value={[...currentStatuses]}
         onChange={handleChange}
-        renderValue={selected => renderStatusValue(selected, labels.status, labels.filters.all)}
+        renderValue={selected => renderStatusValue(selected, labels.status, labels.filters.statusPlaceholder)}
       >
         {Object.values(SessionAuditStatus).map(status => (
           <MenuItem key={status} value={status}>
@@ -193,13 +193,15 @@ function DateRangeFilter({
   invalidRangeMessage,
   onRangeChange,
 }: Readonly<DateRangeFilterProps>) {
+  const showRangePlaceholder = (dateFrom === null || dateFrom === "") && (dateTo === null || dateTo === "");
   return (
     <Box
       sx={{
+        position: "relative",
         gridColumn: { sm: "span 2" },
         width: { xs: "100%", lg: "auto" },
-        flex: { lg: "1 1 300px" },
-        minWidth: { lg: 300 },
+        flex: { lg: "1 1 0" },
+        minWidth: { lg: 240 },
         // The read-only range trigger carries no start adornment, so MUI keeps
         // its label inside the field until a range is picked while the labeled
         // sibling controls float from the start. Pin the label in the shrunk
@@ -226,6 +228,29 @@ function DateRangeFilter({
         onChange={onRangeChange}
         size="small"
       />
+      {showRangePlaceholder ? (
+        // The trigger is a read-only input without placeholder support; a
+        // non-interactive overlay aligned with the input's inline start padding
+        // supplies the empty-state hint, hidden as soon as a range is picked.
+        <Box
+          component="span"
+          sx={theme => ({
+            position: "absolute",
+            insetInlineStart: 14,
+            insetBlockStart: "50%",
+            transform: "translateY(-50%)",
+            pointerEvents: "none",
+            color: theme.palette.text.secondary,
+            fontSize: "0.8125rem",
+            maxWidth: "calc(100% - 48px)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          })}
+        >
+          {labels.dateRangePlaceholder}
+        </Box>
+      ) : null}
       {invalidRangeMessage === null ? null : <FormHelperText error>{invalidRangeMessage}</FormHelperText>}
     </Box>
   );
@@ -268,15 +293,15 @@ export function SessionAuditFilterBar({
           sm: "repeat(2, minmax(0, 1fr))",
           md: "repeat(3, minmax(0, 1fr))",
         },
+        flex: { lg: 1 },
         flexWrap: "wrap",
-        gap: 2,
+        gap: { xs: 2, lg: 1.5 },
         alignItems: "center",
       }}
     >
       <TextField
         size="small"
         label={labels.filters.search}
-        placeholder={labels.filters.search}
         value={search}
         onChange={event => setSearch(event.target.value)}
         slotProps={{
@@ -293,21 +318,21 @@ export function SessionAuditFilterBar({
             maxLength: SEARCH_INPUT_MAX_LENGTH,
           },
         }}
-        sx={{ width: { xs: "100%", lg: "auto" }, minWidth: { lg: 260 } }}
+        sx={{ width: { xs: "100%", lg: "auto" }, flex: { lg: "1 1 0" }, minWidth: { lg: 210 } }}
       />
       <TeacherAutocomplete
         size="small"
         label={labels.filters.teacher}
         value={teacherFilter.option}
         onChange={teacherFilter.handleChange}
-        sx={{ width: { xs: "100%", lg: 230 }, flexShrink: 0 }}
+        sx={{ width: { xs: "100%", lg: "auto" }, flex: { lg: "1 1 0" }, minWidth: { lg: 180 } }}
       />
       <StudentAutocomplete
         size="small"
         label={labels.filters.student}
         value={studentFilter.option}
         onChange={studentFilter.handleChange}
-        sx={{ width: { xs: "100%", lg: 230 }, flexShrink: 0 }}
+        sx={{ width: { xs: "100%", lg: "auto" }, flex: { lg: "1 1 0" }, minWidth: { lg: 180 } }}
       />
       <StatusFilterSelect labels={labels} currentStatuses={currentStatuses} setCurrentStatuses={setCurrentStatuses} />
       <DateRangeFilter
@@ -318,16 +343,14 @@ export function SessionAuditFilterBar({
         onRangeChange={handleDateRangeChange}
       />
       {hasActiveFilters ? (
-        <Tooltip title={labels.filters.clear}>
-          <IconButton
-            size="small"
-            onClick={clearFilters}
-            aria-label={labels.filters.clear}
-            sx={{ justifySelf: "start" }}
-          >
-            <ClearOutlined fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <Button
+          size="small"
+          startIcon={<ClearOutlined fontSize="small" />}
+          onClick={clearFilters}
+          sx={{ justifySelf: "start" }}
+        >
+          {labels.filters.clear}
+        </Button>
       ) : null}
     </Box>
   );

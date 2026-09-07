@@ -27,6 +27,7 @@ export const dashboardClassAuditAr: ClassAuditLabels = {
   },
   auditTrail: {
     title: "سجل التدقيق الآلي والملاحظات",
+    noNotes: "لا توجد ملاحظات تدقيق بعد",
   },
   students: {
     title: count => `الطلاب المسجلون (${count})`,
@@ -69,6 +70,7 @@ export const dashboardClassAuditAr: ClassAuditLabels = {
   meetingIdLabel: "معرّف الاجتماع:",
   online: "عبر الإنترنت",
   meetingIdNA: "غير متوفر",
+  watchOnline: "المشاهدة عبر الإنترنت",
 };
 
 export { dashboardClassAuditAr as audit };

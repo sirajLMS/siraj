@@ -18,7 +18,7 @@ export function SessionAuditReportsMobileView(props: Readonly<SessionAuditReport
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={labels.title} actions={exportAction} />
+      <MobilePageHeader title={labels.title} breadcrumbs={[]} actions={exportAction} />
       <Stack sx={{ gap: 2, pb: 4 }}>
         <MobileContentInset>
           <SessionAuditFilterBar {...props} />

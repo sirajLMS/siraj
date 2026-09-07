@@ -12,6 +12,8 @@ import {
 } from "@/frontend/common/views/dashboard/classes/audit/components/communicationLogCard.styled";
 import { COMMUNICATION_ICONS } from "@/frontend/common/views/dashboard/classes/audit/constants";
 import type { CommunicationType } from "@/frontend/common/views/dashboard/classes/audit/types";
+import { formatAuditTimestamp } from "@/frontend/common/views/dashboard/classes/audit/utils";
+import { useAppLocale } from "@/shared/locale/localeContext";
 
 const VALID_COMMUNICATION_TYPES = new Set<string>(Object.keys(COMMUNICATION_ICONS));
 
@@ -32,6 +34,7 @@ export function CommunicationLogEntryItemShared({
 }: Readonly<{ entry: CommunicationLogEntry; config: CommunicationLogEntryItemConfig }>) {
   const type = isCommunicationType(entry.type) ? entry.type : "email";
   const Icon = COMMUNICATION_ICONS[type] ?? EmailOutlined;
+  const locale = useAppLocale();
 
   return (
     <Box
@@ -71,7 +74,7 @@ export function CommunicationLogEntryItemShared({
           ) : null}
           {entry.timestamp ? (
             <StyledEntryTimestamp variant="labelUppercase" sx={{ mt: 0.5 }}>
-              {entry.timestamp}
+              {formatAuditTimestamp(entry.timestamp, locale)}
             </StyledEntryTimestamp>
           ) : null}
         </Box>

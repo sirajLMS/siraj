@@ -51,7 +51,7 @@ import {
 } from "@/test/ui/components/fixtures/classAuditFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
-const auditLabels: ClassAuditLabels = buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel);
+const auditLabels: ClassAuditLabels = buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel, locale);
 
 afterEach(() => {
   cleanup();

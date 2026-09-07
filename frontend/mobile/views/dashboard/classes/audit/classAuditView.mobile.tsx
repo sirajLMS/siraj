@@ -7,12 +7,10 @@ import {
   type ClassAuditViewGridSlotConfig,
 } from "@/frontend/common/views/dashboard/classes/audit/components/__shared__/classAuditViewGridShared";
 import {
-  MobileContentInset,
   MobileFilterButton,
   MobilePageContainer,
   MobilePageHeader,
   MobilePrimaryPageAction,
-  MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 import { AdminNoteCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/adminNoteCard.mobile";
 import { CommunicationLogCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/communicationLogCard.mobile";
@@ -54,10 +52,6 @@ export function ClassAuditViewMobile({
           PrimaryAction: MobilePrimaryPageAction,
         }}
       />
-      <MobileContentInset sx={{ mb: 2 }}>
-        <MobileStatusBadge category="trackingStatus" status="rescheduled" label={labels.statusRescheduled} />
-      </MobileContentInset>
-
       <ClassAuditViewGridShared
         audit={audit}
         labels={labels}

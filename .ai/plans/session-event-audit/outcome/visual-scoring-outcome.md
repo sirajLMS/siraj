@@ -98,3 +98,48 @@ Stories created/maintained: `frontend/stories/dashboard/accounting/SessionAuditR
 - Title guard in Storybook iframes: `document.title` is the story id, not "Storybook".
 - Storybook HMR left a stale-looking bundle for one file mid-loop; verify live DOM (`scrollWidth`/computed styles) before trusting a "fix didn't land" conclusion from screenshots.
 - Grid width budgets: `-N px` arithmetic must account for MUI's late filler (~20px); measure `virtualScroller.scrollWidth` vs `clientWidth` directly instead of summing declared widths.
+
+---
+
+# Round 2 — live-app polish loop (2026-09-06/07)
+
+- Rig: dev server http://127.0.0.1:3000 + agent-browser (sessions sa-loop2, sa-loop2-t; teacher session via INTERNAL_DEMO_USERS + seed-default password, creds never printed).
+- Locales: en + ar. Dark pass: no.
+- UI/E2E tests: written/updated only, NOT executed (user constraint for this plan); backend tests executed (group-class service + query green). Per-file `sub-loop --lifecycle codescene` exit 0 for every touched file.
+
+## What changed in this round (functional fixes during the wave)
+
+1. **Pagination + sorting were live-broken on the reports grid** (discovered during verification): Apollo `data`-collapse during refetch made `totalCount` hit 0, and MUI clamped the page back to 1; sort used MUI's 3-state cycle whose empty state re-fell back to the current default. Fixed via `previousData` fallback + 2-state `sortingOrder`. Verified live: page 2 hydrates from `?page=1`, filter + pagination interoperate.
+2. **Drill-down was dead for every report row**: report lists 1-on-1 instances only but `/classes/[id]/audit` served group classes only. Backend `getGroupClassAudit` now falls back to an instance-derived audit payload with an `isOneOnOne` discriminator (Pothos + codegen + documents); group-only affordances (resend notifications, export students, registered-students list) are gated off for the 1-on-1 variant. `?openOverride=1` now works from any report row. Backend tests added and green.
+3. **403 view implemented**: `/accounting/reports` renders a localized `SessionAuditAccessDenied` card for users without `ACCOUNTING_REPORTS_VIEW` (specs.md:131) instead of a silent dashboard redirect; the shared `withPageAuth` redirect convention is untouched.
+4. **Rich empty state** (`SessionAuditEmptyState` panel: icon + heading + guidance + CLEAR FILTERS) replaces the bare DataGrid message, EN+AR, desktop + mobile.
+5. Audit page tab title corrected ("Class Audit"), all user-visible ISO timestamps formatted, null rows render `—`, label colon consistency, meeting-card broken-image fallbacks + empty-variant compression, mobile duplicate status chip removed, mobile reports header deduplicated.
+
+## Pass history (per capture, inspector scores)
+
+| Surface | R1 | R2 | R3 | R4 | Final |
+|---|---|---|---|---|---|
+| reports default desktop EN | 6.83 | 8.92 | 8.75 | — | accepted (8.75) |
+| reports filtered desktop EN | 7.00 | 7.67 | 8.50 | — | accepted (8.50→8.92) |
+| reports empty desktop EN | 8.33 | 8.75 | 8.67 | — | accepted (LOWs only) |
+| reports default desktop AR | 9.08 | 8.75 | — | 9.67 | READY |
+| reports empty desktop AR | 8.67 | 9.50 | — | — | READY |
+| reports default mobile | 7.17 | 7.50 | 7.33 | 9.50 | READY |
+| reports empty mobile | 6.58 | 9.17 | 8.83 | — | accepted (LOWs) |
+| 403 desktop EN / mobile / AR | 9.42 / 8.67 / 9.00 | 9.50 / 10.00 / 9.50 | — | — | READY |
+| class audit 1-on-1 desktop | 7.67 | 9.50 | — | — | READY |
+| class audit 1-on-1 mobile | 7.50 | 8.83 | 9.67 | — | READY |
+| class audit group desktop | 7.17 | 8.75 | 9.83 / 9.50 | — | READY |
+| grid scrolled (desktop) | — | 8.50 | 8.50 | 9.53 | READY |
+
+## Accepted debt (final, deliberate)
+
+| Item | Why it can't reach 10 | Why acceptable |
+|---|---|---|
+| Desktop grid: rightmost column clipped at viewport edge in default scroll position | 15-column audit table exceeds the ~1080px content box at 1440; MUI's real horizontal scrollbar cue exists in real browsers (8px thin track styled via SCROLLBAR_CUE_SX) — headless Chrome never paints it, so captures look broken | real-user affordance exists; the inline-end columns render fully when scrolled (verified: vl2-final-grid-scrolled 9.53); clamping columns harder would harm content readability |
+| CARRYOVER BALANCE ghost button detached/dim above the grid | owned by the carryover-balance plan, mid-integration on this page | out of this plan's fix scope by design; recorded for the carryover loop |
+| Mobile empty: subtext last-line orphan wrap, header mixed wrap heights | cosmetic typography micro-polish inside an already composed empty state | no readability impact |
+| Subject column "Arabic Rea…" truncation at 1440 | intentional ellipsis for long names in a dense grid; longer values surface on horizontal scroll | consistent with neighboring long-value columns |
+| 'unknown' mobile provider badge (raw slug) | mobile meeting badge kept its existing pre-plan styling | desktop humanized via `watchOnline`; mobile route is out of plan-4's component set |
+
+## Environment lessons (fed to the skill's evolution log)

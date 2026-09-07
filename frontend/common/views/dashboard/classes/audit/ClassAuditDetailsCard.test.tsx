@@ -93,6 +93,7 @@ const DETAILS_LABELS = {
   timeSlot: "Time slot",
   venue: "Venue",
   auditTrailTitle: "Audit trail",
+  auditTrailEmpty: "No audit notes",
   statusRescheduled: "Rescheduled",
   classDetails: "Class details",
 } as const;

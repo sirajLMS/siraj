@@ -1,5 +1,7 @@
 import type { GroupClassAuditQuery_groupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ClassAuditLabels } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
+import { formatAuditTimestamp } from "@/frontend/common/views/dashboard/classes/audit/utils/formatAuditTimestamp.utils";
+import type { AppLocale } from "@/shared/locale/AppLocale";
 import type { ClassAuditLabels as ClassAuditLocaleLabels } from "@/shared/locale/types/dashboard/classes/audit";
 
 type Audit = NonNullable<GroupClassAuditQuery_groupClassAudit>;
@@ -10,8 +12,14 @@ type ClassAuditT = ClassAuditLocaleLabels;
  * Shared by the class-audit ViewModel and by component-test fixtures so both
  * exercise the exact same label mapping.
  */
-export function buildClassAuditLabels(t: ClassAuditT, commonCancel: string, audit: Audit): ClassAuditLabels {
+export function buildClassAuditLabels(
+  t: ClassAuditT,
+  commonCancel: string,
+  audit: Audit,
+  locale: AppLocale
+): ClassAuditLabels {
   const registeredStudentCount = audit.registeredStudentCount ?? 0;
+  const adminNoteUpdatedAt = audit.adminNote?.lastUpdated ?? null;
   return {
     breadcrumbs: {
       dashboard: t.breadcrumbs.dashboard,
@@ -29,6 +37,7 @@ export function buildClassAuditLabels(t: ClassAuditT, commonCancel: string, audi
     timeSlot: t.fields.timeSlot,
     venue: t.fields.venue,
     auditTrailTitle: t.auditTrail.title,
+    auditTrailEmpty: t.auditTrail.noNotes,
     statusRescheduled: t.status.regularRescheduled,
     classDetails: t.fields.classDetails,
     registeredStudents: buildRegisteredStudentsLabels(t, registeredStudentCount),
@@ -40,7 +49,7 @@ export function buildClassAuditLabels(t: ClassAuditT, commonCancel: string, audi
     adminNote: {
       title: t.adminNote.title,
       titleMobile: t.adminNote.titleMobile,
-      lastUpdated: t.adminNote.lastUpdated(audit.adminNote?.lastUpdated ?? ""),
+      lastUpdated: t.adminNote.lastUpdated(adminNoteUpdatedAt ? formatAuditTimestamp(adminNoteUpdatedAt, locale) : ""),
       update: t.adminNote.update,
       edit: t.adminNote.edit,
     },

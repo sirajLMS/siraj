@@ -14,6 +14,7 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ClassAuditLabels } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 import { buildClassAuditLabels } from "@/frontend/common/views/dashboard/classes/audit/utils/classAuditLabels.utils";
+import type { AppLocale } from "@/shared/locale/AppLocale";
 import type { ClassAuditLabels as ClassAuditLocaleLabels } from "@/shared/locale/types/dashboard/classes/audit";
 
 export const CLASS_AUDIT_CLASS_NAME = "Quran Recitation - Advanced";
@@ -97,7 +98,8 @@ export const classAuditFixture = {
 export function buildClassAuditViewLabels(
   t: ClassAuditLocaleLabels,
   audit: GroupClassAudit,
-  commonCancel: string
+  commonCancel: string,
+  locale: AppLocale
 ): ClassAuditLabels {
-  return buildClassAuditLabels(t, commonCancel, audit);
+  return buildClassAuditLabels(t, commonCancel, audit, locale);
 }

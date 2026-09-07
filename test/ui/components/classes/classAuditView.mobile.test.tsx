@@ -33,7 +33,7 @@ import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 function buildProps(overrides: Partial<ClassAuditViewProps> = {}): ClassAuditViewProps {
   return {
     audit: classAuditFixture,
-    labels: buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel),
+    labels: buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel, locale),
     onGenerateReport: noopHandler,
     onEditClass: noopHandler,
     onExportStudents: noopHandler,

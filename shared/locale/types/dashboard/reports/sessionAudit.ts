@@ -6,10 +6,13 @@ export interface SessionAuditLabels {
     readonly dateRange: string;
     readonly dateFrom: string;
     readonly dateTo: string;
+    /** Muted hint inside the empty date-range trigger until a range is picked. */
+    readonly dateRangePlaceholder: string;
     readonly status: string;
+    /** Muted line inside the empty status multi-select naming what an unfiltered report covers. */
+    readonly statusPlaceholder: string;
     readonly search: string;
     readonly clear: string;
-    readonly all: string;
   };
   readonly column: {
     readonly scheduledStart: string;

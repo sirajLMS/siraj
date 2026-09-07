@@ -36,7 +36,7 @@ export function SessionAuditEmptyState({
         justifyContent: "center",
         gap: 1,
         px: 2,
-        py: 6,
+        py: { xs: 3, sm: 4 },
         textAlign: "center",
       }}
     >

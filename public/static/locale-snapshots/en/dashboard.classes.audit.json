@@ -24,7 +24,8 @@
     "regularRescheduled": "Regular (rescheduled)"
   },
   "auditTrail": {
-    "title": "Automated Audit Trail & Notes"
+    "title": "Automated Audit Trail & Notes",
+    "noNotes": "No audit notes yet"
   },
   "students": {
     "title": {
@@ -78,5 +79,6 @@
   },
   "meetingIdLabel": "Meeting ID:",
   "online": "Online",
-  "meetingIdNA": "Not available"
+  "meetingIdNA": "Not available",
+  "watchOnline": "Watch online"
 }

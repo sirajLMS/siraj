@@ -24,7 +24,8 @@
     "regularRescheduled": "عادي (مُعاد جدولته)"
   },
   "auditTrail": {
-    "title": "سجل التدقيق الآلي والملاحظات"
+    "title": "سجل التدقيق الآلي والملاحظات",
+    "noNotes": "لا توجد ملاحظات تدقيق بعد"
   },
   "students": {
     "title": {
@@ -78,5 +79,6 @@
   },
   "meetingIdLabel": "معرّف الاجتماع:",
   "online": "عبر الإنترنت",
-  "meetingIdNA": "غير متوفر"
+  "meetingIdNA": "غير متوفر",
+  "watchOnline": "المشاهدة عبر الإنترنت"
 }

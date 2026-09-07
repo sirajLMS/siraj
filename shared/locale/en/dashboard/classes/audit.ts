@@ -27,6 +27,7 @@ export const dashboardClassAuditEn: ClassAuditLabels = {
   },
   auditTrail: {
     title: "Automated Audit Trail & Notes",
+    noNotes: "No audit notes yet",
   },
   students: {
     title: count => `Registered Students (${count})`,
@@ -69,6 +70,7 @@ export const dashboardClassAuditEn: ClassAuditLabels = {
   meetingIdLabel: "Meeting ID:",
   online: "Online",
   meetingIdNA: "Not available",
+  watchOnline: "Watch online",
 };
 
 export { dashboardClassAuditEn as audit };

@@ -68,6 +68,7 @@ export interface ClassAuditLabels {
   readonly timeSlot: string;
   readonly venue: string;
   readonly auditTrailTitle: string;
+  readonly auditTrailEmpty: string;
   readonly statusRescheduled: string;
   readonly classDetails: string;
   readonly registeredStudents: RegisteredStudentsLabels;
@@ -108,6 +109,7 @@ export interface ClassAuditDetailsLabels {
   readonly timeSlot: string;
   readonly venue: string;
   readonly auditTrailTitle: string;
+  readonly auditTrailEmpty: string;
   readonly statusRescheduled: string;
   readonly classDetails: string;
 }

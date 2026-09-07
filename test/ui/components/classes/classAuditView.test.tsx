@@ -47,7 +47,7 @@ function buildReadyViewModel(overrides: Partial<ClassAuditReadyViewModel> = {}):
   return {
     status: "ready",
     audit: classAuditFixture,
-    labels: buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel),
+    labels: buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel, locale),
     onGenerateReport: noopHandler,
     onEditClass: noopHandler,
     onExportStudents: noopHandler,

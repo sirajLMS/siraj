@@ -26,7 +26,7 @@ import type {
 } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 import { buildClassAuditLabels } from "@/frontend/common/views/dashboard/classes/audit/utils/classAuditLabels.utils";
 import { useRouter } from "@/shared/i18n/navigation";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 import type { ClassAuditLabels as ClassAuditLocaleLabels } from "@/shared/locale/types/dashboard/classes/audit";
 
 type ClassAuditT = ClassAuditLocaleLabels;
@@ -79,6 +79,7 @@ export type ClassAuditViewModel = ClassAuditShellViewModel | ClassAuditReadyView
 export function useClassAuditViewModel(): ClassAuditViewModel {
   const t = useAppTranslation(Translation.Dashboard.ClassAudit);
   const common = useAppTranslation(Translation.Common);
+  const locale = useAppLocale();
   const router = useRouter();
   const params = useParams();
   const id = typeof params?.id === "string" ? params.id : "";
@@ -102,7 +103,7 @@ export function useClassAuditViewModel(): ClassAuditViewModel {
   return {
     status: "ready",
     audit,
-    labels: buildClassAuditLabels(t, common.cancel, audit),
+    labels: buildClassAuditLabels(t, common.cancel, audit, locale),
     ...handlers,
     isResending,
     onRetry: refetch,

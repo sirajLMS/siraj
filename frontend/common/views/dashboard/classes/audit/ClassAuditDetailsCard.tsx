@@ -20,7 +20,7 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
-import type { AppLocale } from "@/shared/locale/AppLocale";
+import { formatAuditTimestamp } from "@/frontend/common/views/dashboard/classes/audit/utils";
 import { useAppTranslation } from "@/shared/locale/client";
 import { useAppLocale } from "@/shared/locale/localeContext";
 import { DashboardBillingPayroll } from "@/shared/locale/namespaces";
@@ -49,6 +49,7 @@ interface ClassAuditDetailsCardProps {
     readonly timeSlot: string;
     readonly venue: string;
     readonly auditTrailTitle: string;
+    readonly auditTrailEmpty: string;
     readonly statusRescheduled: string;
     readonly classDetails: string;
   };
@@ -221,7 +222,7 @@ function DetailField({ label, children }: DetailFieldProps) {
         alignItems: "center",
       }}
     >
-      <StyledDetailLabel variant="labelMd">{label} :</StyledDetailLabel>
+      <StyledDetailLabel variant="labelMd">{label}:</StyledDetailLabel>
       {children}
     </Box>
   );
@@ -261,6 +262,7 @@ function ClassAuditHeader({ auditName, statusLabel }: Readonly<{ auditName: stri
 }
 
 function ClassAuditFields({ audit, labels }: ClassAuditDetailsCardProps) {
+  const locale = useAppLocale();
   return (
     <Box
       sx={{
@@ -281,10 +283,14 @@ function ClassAuditFields({ audit, labels }: ClassAuditDetailsCardProps) {
         </Box>
       </DetailField>
       <DetailField label={labels.originalDate}>
-        <StyledOriginalDateText variant="bodyLg">{audit.originalDate ?? ""}</StyledOriginalDateText>
+        <StyledOriginalDateText variant="bodyLg">
+          {formatAuditTimestamp(audit.originalDate, locale)}
+        </StyledOriginalDateText>
       </DetailField>
       <DetailField label={labels.rescheduledDate}>
-        <StyledEmphasizedFieldValue variant="bodyLg">{audit.rescheduledDate ?? ""}</StyledEmphasizedFieldValue>
+        <StyledEmphasizedFieldValue variant="bodyLg">
+          {formatAuditTimestamp(audit.rescheduledDate, locale)}
+        </StyledEmphasizedFieldValue>
       </DetailField>
       <DetailField label={labels.timeSlot}>
         <StyledFieldValueText variant="bodyLg" dir="ltr" sx={{ unicodeBidi: "isolate" }}>
@@ -299,19 +305,25 @@ function ClassAuditFields({ audit, labels }: ClassAuditDetailsCardProps) {
 }
 
 function ClassAuditTrail({ audit, labels }: ClassAuditDetailsCardProps) {
+  const locale = useAppLocale();
+  const hasRemark = (audit.auditRemark ?? "").trim() !== "";
   return (
     <StyledAuditTrailSection>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
         <StyledAuditTrailIcon />
         <StyledSectionTitle variant="titleLg">{labels.auditTrailTitle}</StyledSectionTitle>
       </Box>
-      <StyledRemarkQuoteBlock>
-        <StyledRemarkItalicText variant="bodyMd">&ldquo;{audit.auditRemark ?? ""}&rdquo;</StyledRemarkItalicText>
-        <StyledRemarkMetaRow>
-          <UpdateOutlined sx={{ fontSize: 14 }} />
-          <Typography variant="labelMd">{audit.auditLoggedAt ?? ""}</Typography>
-        </StyledRemarkMetaRow>
-      </StyledRemarkQuoteBlock>
+      {hasRemark ? (
+        <StyledRemarkQuoteBlock>
+          <StyledRemarkItalicText variant="bodyMd">&ldquo;{audit.auditRemark}&rdquo;</StyledRemarkItalicText>
+          <StyledRemarkMetaRow>
+            <UpdateOutlined sx={{ fontSize: 14 }} />
+            <Typography variant="labelMd">{formatAuditTimestamp(audit.auditLoggedAt, locale)}</Typography>
+          </StyledRemarkMetaRow>
+        </StyledRemarkQuoteBlock>
+      ) : (
+        <StyledNoEventsText variant="bodyMd">{labels.auditTrailEmpty}</StyledNoEventsText>
+      )}
     </StyledAuditTrailSection>
   );
 }
@@ -340,16 +352,6 @@ function selectOverrideEvents(
 function formatPaidAmount(amount: string | null, currency: CurrencyCode | null): string {
   if (amount === null) return "—";
   return currency === null ? amount : `${amount} ${currency}`;
-}
-
-function formatEventTimestamp(createdAt: string | null, locale: AppLocale): string {
-  if (createdAt === null) return "—";
-  const date = new Date(createdAt);
-  if (Number.isNaN(date.getTime())) return createdAt;
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }
 
 interface ClassAuditPayrollCardProps {
@@ -426,7 +428,7 @@ function ClassAuditPayrollCard({ payroll, statusEvents, onOverride }: Readonly<C
             overrideEvents.map(event => (
               <StyledHistoryEntry key={event.id ?? `${event.createdAt ?? "event"}-${event.description ?? ""}`}>
                 <StyledHistoryTimestamp variant="labelMd">
-                  {formatEventTimestamp(event.createdAt, locale)}
+                  {formatAuditTimestamp(event.createdAt, locale)}
                 </StyledHistoryTimestamp>
                 <StyledHistoryDescription variant="bodyMd">{event.description ?? "—"}</StyledHistoryDescription>
               </StyledHistoryEntry>

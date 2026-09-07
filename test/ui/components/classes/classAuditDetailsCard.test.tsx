@@ -22,7 +22,7 @@ import {
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 function renderDetailsCard() {
-  const labels = buildDetailsLabels(buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel));
+  const labels = buildDetailsLabels(buildClassAuditViewLabels(auditT, classAuditFixture, commonLabels.cancel, locale));
   return renderWithWrapper(<ClassAuditDetailsCard audit={classAuditFixture} labels={labels} />, { locale });
 }
 

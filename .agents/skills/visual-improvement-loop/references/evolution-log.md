@@ -63,3 +63,29 @@ the agent-browser skill, or a global rule file) — and the entry records where 
 - DataGrid pagination is 0-indexed; a 1-indexed VM page state produces clamped re-queries (`OFFSET -n`) and phantom "Page 2 of 1" on empty lists.
 - Very long multi-capture browser sessions stall the default agent-browser daemon; restarting as `agent-browser connect <port>` against a fresh headless Chrome (+ Playwright MCP storage inject fallback) is the working recovery.
 - Full-page screenshots can still truncate scrollable inner panes at the viewport fold — pair every capture with DOM assertions for elements that must be present (markers inside scrollable thread panes especially).
+
+## 2026-09-07 — session-event-audit round-2 (live-app loop)
+
+- Custom `MuiDataGrid` `noRowsOverlay` leaves MUI's default footer "no data" caption visible next to the
+  panel — hide it explicitly in the zero-row state (`& .MuiDataGrid-footerContainer .MuiTypography-root`).
+- MUI X grid `valueFormatter` is SKIPPED for nullish cells — a "render '—' for null" requirement needs
+  `renderCell`, not a formatter.
+- Overflow-cue fades can sit in the DOM yet paint invisibly (gradient into the same paper tone). Verify
+  fade cues by region-cropping the actual capture; DOM z-index checks alone give false confidence.
+  Capture-side proof is now required for any "edge affordance" finding fix.
+- Server-driven pagination: while a refetch is in flight, Apollo `data` flips undefined; if the grid's
+  totalCount derives from it, MUI clamps the page back to 0 (the "Next flips you back to page 1" bug).
+  Derive page data from `data ?? previousData` in every server-paginated view model.
+- Long Arabic month names make "medium" datetime formats exceed EN width budgets (~135px): prefer
+  numeric-month compact formats in dense grid time columns to avoid locale-coupled overflow.
+- `agent-browser` + short-lived sessions: auth expires ~10-15 min under a shared dev tree; always
+  re-inject cookies directly before a capture batch, or every later capture is a login page.
+- Chrome's screencast/`record` context intermittently fails to resolve `localhost` (ERR_NAME_NOT_RESOLVED);
+  after it begins, only restarting `agent-browser` sessions or switching to `127.0.0.1` heals it. And
+  `record start <file>` (no URL) re-navigates to the CURRENT url — fatal for one-shot deep links whose
+  query param gets consumed and stripped.
+- Next dev "Compiling…" overlay toasts and the dev-tools badge leak into captures; poll for their absence
+  before any screenshot that will be scored.
+- Inspectors sometimes report "serif fallback" right after first-load font swap — verify computed
+  `font-family` in the live page before assigning 'font mismatch' fixes; the app in this case matched
+  (Hanken Grotesk) and the finding was a capture-timing artifact.

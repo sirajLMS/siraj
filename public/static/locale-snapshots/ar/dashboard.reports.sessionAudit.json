@@ -6,10 +6,11 @@
     "dateRange": "النطاق الزمني",
     "dateFrom": "من",
     "dateTo": "إلى",
+    "dateRangePlaceholder": "اختر النطاق الزمني",
     "status": "حالة الجلسة",
+    "statusPlaceholder": "جميع الحالات",
     "search": "ابحث عن معلم / طالب",
-    "clear": "مسح الفلاتر",
-    "all": "جميع الحالات"
+    "clear": "مسح الفلاتر"
   },
   "column": {
     "scheduledStart": "بداية الجلسة",

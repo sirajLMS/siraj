@@ -2,6 +2,7 @@
 
 import { PrivacyTipOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import Link from "next/link";
 import { PrimaryPageAction } from "@/frontend/common/components/ui/button/ActionButtons";
 import type { SessionAuditLabels } from "@/shared/locale/types/dashboard/reports";
@@ -23,14 +24,19 @@ export function SessionAuditAccessDenied({ labels, permissionName }: Readonly<Se
   return (
     <Box
       role="alert"
-      sx={{
+      sx={theme => ({
         display: "flex",
+        flexDirection: "column",
         justifyContent: "center",
-        alignItems: "flex-start",
+        alignItems: "center",
+        flexGrow: 1,
         px: 2,
-        pt: { xs: 4, md: 10 },
-        minHeight: "60vh",
-      }}
+        py: 4,
+        minHeight: {
+          xs: `calc(100dvh - ${theme.layout.navbarHeight} - ${theme.layout.bottomNavHeight} - ${theme.spacing(4)})`,
+          md: `calc(100dvh - ${theme.layout.navbarHeight} - ${theme.layout.pageMargin} * 2)`,
+        },
+      })}
     >
       <Box
         sx={theme => ({
@@ -63,7 +69,7 @@ export function SessionAuditAccessDenied({ labels, permissionName }: Readonly<Se
         >
           <PrivacyTipOutlined sx={{ fontSize: 44 }} />
         </Box>
-        <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.text.primary })}>
+        <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.text.primary, textWrap: "balance" })}>
           {labels.title}
         </Typography>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, maxWidth: 420 })}>
@@ -72,6 +78,8 @@ export function SessionAuditAccessDenied({ labels, permissionName }: Readonly<Se
             component="span"
             dir="ltr"
             sx={theme => ({
+              display: "inline-flex",
+              verticalAlign: "middle",
               backgroundColor: theme.palette.surfaceContainerHighest,
               color: theme.palette.onSurface,
               borderRadius: 1,
@@ -89,9 +97,8 @@ export function SessionAuditAccessDenied({ labels, permissionName }: Readonly<Se
           label={labels.statusChip}
           sx={theme => ({
             mt: 1,
-            color: theme.palette.onErrorContainer,
-            backgroundColor: theme.palette.errorContainer,
-            borderColor: theme.palette.error.main,
+            color: theme.palette.text.secondary,
+            borderColor: alpha(theme.palette.error.main, 0.4),
             fontWeight: 600,
             letterSpacing: "0.05em",
           })}

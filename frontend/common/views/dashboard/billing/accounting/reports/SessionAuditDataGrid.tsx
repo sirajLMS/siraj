@@ -2,7 +2,7 @@
 
 import { AccountBalanceWalletOutlined, CheckCircleOutlined, OpenInNewOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, IconButton, Stack, Tooltip } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
+import { alpha, type Theme } from "@mui/material/styles";
 import type { GridCellParams, GridColDef, GridSortModel, MuiEvent } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
@@ -42,13 +42,15 @@ import type { SessionAuditLabels } from "@/shared/locale/types/dashboard/reports
 const SESSION_AUDIT_PAGE_SIZE_OPTIONS: readonly number[] = [25, 50, 100, 200];
 
 /**
- * Timestamp cells render day, short month, and time — the year is omitted so
- * the three date-time columns stay narrow enough to fit beside the name and
- * status columns; the complete timestamp remains available in cell tooltips.
+ * Timestamp cells render a numeric day/month plus short time — the year and
+ * the spelled-out month name are omitted so the three date-time columns stay
+ * narrow enough to fit beside the name and status columns. Arabic month names
+ * are wider than Latin ones, so the numeric month keeps both scripts inside
+ * the column budget; the complete timestamp remains available in cell tooltips.
  */
 const COMPACT_SESSION_TIME_FORMAT: Intl.DateTimeFormatOptions = {
   day: "numeric",
-  month: "short",
+  month: "numeric",
   hour: "2-digit",
   minute: "2-digit",
 };
@@ -115,6 +117,13 @@ const HEADER_WRAP_SX = {
   },
 } as const;
 
+/** Denser horizontal cell padding than the shared default; the columns stay readable at report widths. */
+const CELL_PAD_SX = {
+  "& .MuiDataGrid-cell": {
+    paddingInline: 8,
+  },
+} as const;
+
 /** Ellipsized single-line text content for compact cell values (datetimes). */
 const ELLIPSIZED_CELL_SX = {
   display: "block",
@@ -127,11 +136,45 @@ const ELLIPSIZED_CELL_SX = {
  * Zero-row geometry: the collapsed grid body would otherwise be shorter than
  * the empty-state panel, so the panel would overflow under the footer. A
  * min-height reserved while there are no rows gives the panel its room; once
- * rows exist, the grid stretches past it on its own.
+ * rows exist, the grid stretches past it on its own. While the panel covers
+ * the body, the footer's "no data" caption duplicates the panel heading, so
+ * it hides and the footer footprint stays — pagination reports a zero-page
+ * range either way.
  */
-const EMPTY_REPORT_MIN_HEIGHT_SX = {
-  minHeight: 400,
+const EMPTY_REPORT_SX = {
+  minHeight: 300,
+  "& .MuiDataGrid-footerContainer .MuiTypography-root": {
+    visibility: "hidden",
+  },
 } as const;
+
+/**
+ * Narrow viewport cue: columns overflow the grid's inline end and, on OS
+ * chrome that paints no scrollbar, a clipped column reads as the end of the
+ * table. The strip is an explicit overlay sibling of the grid (a pseudo
+ * element's fully-opaque paper-colored destination blends invisibly into the
+ * row surfaces in dark surfaces), rendered as a semi-transparent paper raft so
+ * chips visibly fade under it, with a 1px divider line at the strip's
+ * inline-start edge and a light elevation shadow marking the clip boundary.
+ * It rides above the virtualized row layers so chips fade under it rather
+ * than next to it; above md the persistent scrollbar cue does this job.
+ */
+const MOBILE_EDGE_FADE_SX = (theme: Theme) => ({
+  position: "absolute",
+  top: 0,
+  bottom: 0,
+  insetInlineEnd: 0,
+  width: 44,
+  pointerEvents: "none",
+  zIndex: 5,
+  background:
+    theme.direction === "rtl"
+      ? `linear-gradient(to left, transparent, ${alpha(theme.palette.background.paper, 0.35)} 45%, ${alpha(theme.palette.background.paper, 0.95)})`
+      : `linear-gradient(to right, transparent, ${alpha(theme.palette.background.paper, 0.35)} 45%, ${alpha(theme.palette.background.paper, 0.95)})`,
+  borderInlineStart: `1.5px solid ${theme.palette.action.disabledBackground}`,
+  boxShadow: theme.shadows[4],
+  display: { xs: "block", md: "none" },
+});
 
 /**
  * Cells whose own interactive content must not trigger row navigation:
@@ -415,7 +458,10 @@ function buildTimeCellColumn(
   return {
     field: kind === "open" ? "actualStartAt" : "actualEndAt",
     headerName,
-    width: 104,
+    // The compact numeric-month date-time plus the localized "in progress" /
+    // "not joined" placeholders need a little more room than the sorted-name
+    // columns; the width also holds the sort direction icon without ellipsizing.
+    width: 124,
     renderCell: ({ row }) => (
       <SessionTimeCell
         value={kind === "open" ? row.actualStartAt : row.actualEndAt}
@@ -442,7 +488,9 @@ function buildSessionAuditColumns({
     {
       field: "scheduledStartAt",
       headerName: labels.column.scheduledStart,
-      width: 108,
+      // The two-word header wraps onto two lines; below ~124px the sort icon
+      // steals the room "SCHEDULED" needs and the header ellipsizes.
+      width: 124,
       renderCell: ({ value }) => (
         <ScheduledStartCell value={value} locale={locale} fallback={labels.cell.notCalculated} />
       ),
@@ -451,13 +499,15 @@ function buildSessionAuditColumns({
       field: "teacherName",
       headerName: labels.filters.teacher,
       flex: 1.25,
-      minWidth: 120,
+      // Roomier name floor reclaims width from the numeric columns so full
+      // names render without ellipsizing at default desktop widths.
+      minWidth: 150,
       renderCell: ({ row }) => <PersonNameCell value={row.teacherName} />,
     },
     {
       field: "currentStatus",
       headerName: labels.filters.status,
-      width: 128,
+      width: 124,
       sortable: false,
       renderCell: ({ row }) =>
         row.currentStatus === null ? (
@@ -477,14 +527,14 @@ function buildSessionAuditColumns({
       field: "studentName",
       headerName: labels.filters.student,
       flex: 1.25,
-      minWidth: 120,
+      minWidth: 150,
       renderCell: ({ row }) => <PersonNameCell value={row.studentName} />,
     },
     {
       field: "subjectName",
       headerName: payrollLabels.column.subject,
       flex: 1,
-      minWidth: 100,
+      minWidth: 104,
       sortable: false,
       renderCell: ({ row }) => <PersonNameCell value={row.subjectName} />,
     },
@@ -493,7 +543,7 @@ function buildSessionAuditColumns({
     {
       field: "durationMinutes",
       headerName: labels.column.durationAssumed,
-      width: 92,
+      width: 100,
       align: "right",
       headerAlign: "right",
       valueFormatter: value => formatDurationMinutes(typeof value === "number" ? value : null, labels.cell),
@@ -501,15 +551,22 @@ function buildSessionAuditColumns({
     {
       field: "calculatedDuration",
       headerName: labels.column.calculatedDuration,
-      width: 96,
+      width: 104,
       align: "right",
       headerAlign: "right",
-      valueFormatter: value => formatDurationMinutes(typeof value === "number" ? value : null, labels.cell),
+      // renderCell rather than valueFormatter: the grid skips the value
+      // formatter for nullish values, which would leave an empty cell here
+      // instead of the "not calculated" dash.
+      renderCell: ({ row }) => <Box component="span">{formatDurationMinutes(row.calculatedDuration, labels.cell)}</Box>,
     },
     {
       field: "teacherPaidAmount",
       headerName: labels.column.paidAmount,
-      width: 96,
+      // The localized header wraps onto two lines; the fixed width must keep
+      // the longer word entire even while a sort direction icon holds room in
+      // the header, otherwise the truncated ellipsis reads as clipped copy.
+      width: 108,
+      minWidth: 108,
       align: "right",
       headerAlign: "right",
       renderCell: ({ row }) => (
@@ -535,7 +592,7 @@ function buildSessionAuditColumns({
     {
       field: "isPartialPercentage",
       headerName: payrollLabels.column.partialPercentage,
-      width: 64,
+      width: 96,
       align: "right",
       headerAlign: "right",
       sortable: false,
@@ -561,7 +618,7 @@ function buildSessionAuditColumns({
       field: "payrollNote",
       headerName: labels.column.note,
       flex: 1,
-      minWidth: 84,
+      minWidth: 72,
       sortable: false,
       renderCell: ({ row }) => <PayrollNotePopover note={row.payrollNote} labels={labels.cell} />,
     },
@@ -570,17 +627,13 @@ function buildSessionAuditColumns({
     columns.push({
       field: "actions",
       headerName: payrollLabels.column.actions,
-      width: 80,
+      // The single-word localized header must fit whole; the cell body is a
+      // single icon, so the wider header-driven floor keeps the column compact.
+      width: 92,
+      minWidth: 92,
       align: "center",
       headerAlign: "center",
       sortable: false,
-      // Single-word header is wider than the compact column: ellipsize it
-      // rather than letting the grid clip the trailing glyphs.
-      renderHeader: () => (
-        <Box component="span" sx={ELLIPSIZED_CELL_SX}>
-          {payrollLabels.column.actions}
-        </Box>
-      ),
       renderCell: ({ row }) =>
         row.instanceId === null ? null : (
           <Tooltip title={labels.action.openAuditPage}>
@@ -787,38 +840,41 @@ export function SessionAuditDataGrid({
       {error !== null ? (
         <ErrorState onRetry={refetch} />
       ) : (
-        <AppDataGrid<SessionAuditReportRow>
-          rows={rows}
-          columns={columns}
-          loading={isLoading}
-          getRowId={row => row.instanceId ?? row.id ?? ""}
-          ariaLabel={labels.title}
-          slots={{ noRowsOverlay }}
-          disableColumnMenu
-          sortingMode="server"
-          sortingOrder={SESSION_AUDIT_SORTING_ORDER}
-          sx={
-            rows.length === 0
-              ? [HEADER_WRAP_SX, SCROLLBAR_CUE_SX, EMPTY_REPORT_MIN_HEIGHT_SX]
-              : [HEADER_WRAP_SX, SCROLLBAR_CUE_SX]
-          }
-          sortModel={sortModel}
-          onSortModelChange={handleSortModelChange}
-          onCellClick={handleCellClick}
-          onCellKeyDown={handleCellKeyDown}
-          disableRowSelectionOnClick
-          checkboxSelection={canManageCarryover}
-          rowSelectionModel={selection.rowSelectionModel}
-          onRowSelectionModelChange={selection.onSelectionChange}
-          paginationOptions={buildServerPaginationOptions({
-            page,
-            pageSize,
-            totalCount,
-            onPageChange: canManageCarryover ? selection.onPageChange : setPage,
-            onPageSizeChange: canManageCarryover ? selection.onPageSizeChange : setPageSize,
-            pageSizeOptions: SESSION_AUDIT_PAGE_SIZE_OPTIONS,
-          })}
-        />
+        <Box sx={{ position: "relative" }}>
+          <AppDataGrid<SessionAuditReportRow>
+            rows={rows}
+            columns={columns}
+            loading={isLoading}
+            getRowId={row => row.instanceId ?? row.id ?? ""}
+            ariaLabel={labels.title}
+            slots={{ noRowsOverlay }}
+            disableColumnMenu
+            sortingMode="server"
+            sortingOrder={SESSION_AUDIT_SORTING_ORDER}
+            sx={
+              rows.length === 0
+                ? [HEADER_WRAP_SX, CELL_PAD_SX, SCROLLBAR_CUE_SX, EMPTY_REPORT_SX]
+                : [HEADER_WRAP_SX, CELL_PAD_SX, SCROLLBAR_CUE_SX]
+            }
+            sortModel={sortModel}
+            onSortModelChange={handleSortModelChange}
+            onCellClick={handleCellClick}
+            onCellKeyDown={handleCellKeyDown}
+            disableRowSelectionOnClick
+            checkboxSelection={canManageCarryover}
+            rowSelectionModel={selection.rowSelectionModel}
+            onRowSelectionModelChange={selection.onSelectionChange}
+            paginationOptions={buildServerPaginationOptions({
+              page,
+              pageSize,
+              totalCount,
+              onPageChange: canManageCarryover ? selection.onPageChange : setPage,
+              onPageSizeChange: canManageCarryover ? selection.onPageSizeChange : setPageSize,
+              pageSizeOptions: SESSION_AUDIT_PAGE_SIZE_OPTIONS,
+            })}
+          />
+          <Box aria-hidden sx={MOBILE_EDGE_FADE_SX} />
+        </Box>
       )}
       <SessionAuditAggregateCard
         totalPaidAmount={aggregates.totalPaidAmount}

@@ -25,6 +25,7 @@ export interface ClassAuditLabels {
   };
   readonly auditTrail: {
     readonly title: string;
+    readonly noNotes: string;
   };
   readonly students: {
     readonly title: (count: number) => string;
@@ -67,4 +68,5 @@ export interface ClassAuditLabels {
   readonly meetingIdLabel: string;
   readonly online: string;
   readonly meetingIdNA: string;
+  readonly watchOnline: string;
 }

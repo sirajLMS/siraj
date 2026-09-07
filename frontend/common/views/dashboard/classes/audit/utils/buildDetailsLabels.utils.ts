@@ -1,4 +1,3 @@
-// NEW FOR PLAN v5: Lifted pure-data helper out of tier (specs.md §5 N9 violation).
 import type {
   ClassAuditDetailsLabels,
   ClassAuditLabels,
@@ -13,6 +12,7 @@ export function buildDetailsLabels(labels: ClassAuditLabels): ClassAuditDetailsL
     timeSlot: labels.timeSlot,
     venue: labels.venue,
     auditTrailTitle: labels.auditTrailTitle,
+    auditTrailEmpty: labels.auditTrailEmpty,
     statusRescheduled: labels.statusRescheduled,
     classDetails: labels.classDetails,
   };

@@ -8,10 +8,11 @@ export const dashboardReportsSessionAuditAr: SessionAuditLabels = {
     dateRange: "النطاق الزمني",
     dateFrom: "من",
     dateTo: "إلى",
+    dateRangePlaceholder: "اختر النطاق الزمني",
     status: "حالة الجلسة",
+    statusPlaceholder: "جميع الحالات",
     search: "ابحث عن معلم / طالب",
     clear: "مسح الفلاتر",
-    all: "جميع الحالات",
   },
   column: {
     scheduledStart: "بداية الجلسة",

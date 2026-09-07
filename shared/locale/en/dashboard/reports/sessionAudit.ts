@@ -8,10 +8,11 @@ export const dashboardReportsSessionAuditEn: SessionAuditLabels = {
     dateRange: "Date range",
     dateFrom: "From",
     dateTo: "To",
+    dateRangePlaceholder: "Select date range",
     status: "Session status",
+    statusPlaceholder: "All statuses",
     search: "Search teacher / student",
     clear: "Clear filters",
-    all: "All statuses",
   },
   column: {
     scheduledStart: "Scheduled start",
