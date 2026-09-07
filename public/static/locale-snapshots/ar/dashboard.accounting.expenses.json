@@ -1,0 +1,133 @@
+{
+  "title": "سجل المصروفات",
+  "empty": "لا توجد مصروفات مطابقة للمرشحات الحالية.",
+  "loadError": "فشل تحميل المصروفات. حاول مرة أخرى.",
+  "exportFailed": "فشل تصدير CSV. حاول مرة أخرى.",
+  "exportTruncated": "تم اقتطاع التصدير إلى 10 000 صف.",
+  "selectedCount": {
+    "__fn": "count=>{if(count===0)return\"\\u0644\\u0645 \\u064A\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062F \\u0623\\u064A \\u0639\\u0646\\u0635\\u0631\";if(count===1)return\"\\u0639\\u0646\\u0635\\u0631 \\u0645\\u062D\\u062F\\u062F \\u0648\\u0627\\u062D\\u062F\";if(count===2)return\"\\u0639\\u0646\\u0635\\u0631\\u0627\\u0646 \\u0645\\u062D\\u062F\\u062F\\u0627\\u0646\";if(count>=3&&count<=10)return`${count} \\u0639\\u0646\\u0627\\u0635\\u0631 \\u0645\\u062D\\u062F\\u062F\\u0629`;return`${count} \\u0639\\u0646\\u0635\\u0631\\u0627\\u064B \\u0645\\u062D\\u062F\\u062F\\u0627\\u064B`}"
+  },
+  "deletedBadge": "محذوف",
+  "column": {
+    "title": "العنوان",
+    "type": "النوع",
+    "teacher": "المعلم",
+    "value": "القيمة",
+    "paymentDate": "تاريخ الدفع",
+    "expenseDate": "شهر المصروف",
+    "source": "المصدر",
+    "note": "ملاحظة",
+    "createdAt": "أُنشئ في",
+    "actions": "إجراءات",
+    "rowActions": {
+      "__fn": "title=>`\\u0625\\u062C\\u0631\\u0627\\u0621\\u0627\\u062A \"${title}\"`"
+    }
+  },
+  "type": {
+    "Salaries": "الرواتب",
+    "Marketing": "التسويق",
+    "Logistics": "اللوجستيات",
+    "Technology": "التقنية"
+  },
+  "source": {
+    "Manual": "يدوي",
+    "FromCarryover": "من الترحيل"
+  },
+  "action": {
+    "addNew": "إضافة جديد",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "bulkDelete": "حذف جماعي",
+    "viewSource": "عرض المصدر",
+    "exportCsv": "تصدير CSV"
+  },
+  "filters": {
+    "title": "العنوان",
+    "searchPlaceholder": "ابحث في العناوين",
+    "type": "النوع",
+    "expenseDate": "شهر المصروف",
+    "paymentDateFrom": "تاريخ الدفع من",
+    "paymentDateTo": "تاريخ الدفع إلى",
+    "paymentDateRange": "نطاق تاريخ الدفع",
+    "includeDeleted": "تضمين المحذوفة",
+    "clear": "مسح"
+  },
+  "modal": {
+    "form": {
+      "titleAdd": "إضافة مصروف",
+      "titleEdit": "تعديل المصروف",
+      "title": "العنوان",
+      "type": "النوع",
+      "teacher": "المعلم (اختياري)",
+      "value": "القيمة",
+      "currency": "العملة",
+      "paymentDate": "تاريخ الدفع",
+      "expenseDate": "شهر المصروف",
+      "note": "ملاحظة",
+      "salariesHint": "تُنشأ مصروفات الرواتب تلقائياً عبر تدفق تسوية الترحيل.",
+      "sourceBanner": {
+        "__fn": "source=>`\\u0633\\u064A\\u064F\\u0633\\u062C\\u064E\\u0651\\u0644 \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0645\\u0635\\u0631\\u0648\\u0641 \\u0628\\u0645\\u0635\\u062F\\u0631: ${source}.`"
+      },
+      "submit": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "delete": {
+      "title": "حذف هذا المصروف؟",
+      "summary": {
+        "__fn": "(title,value,currency)=>`\\u062D\\u0630\\u0641 \"${title}\" (${value} ${currency})\\u061F`"
+      },
+      "reason": "السبب (اختياري)",
+      "reasonPlaceholder": "اشرح سبب حذف هذا المصروف (بحد أقصى 500 حرف)",
+      "confirm": "حذف",
+      "cancel": "إلغاء"
+    },
+    "bulkDelete": {
+      "title": {
+        "__fn": "count=>{if(count===0)return\"\\u0644\\u0645 \\u064A\\u062A\\u0645 \\u0627\\u062E\\u062A\\u064A\\u0627\\u0631 \\u0623\\u064A \\u0645\\u0635\\u0631\\u0648\\u0641 \\u0644\\u0644\\u062D\\u0630\\u0641\";if(count===1)return\"\\u062D\\u0630\\u0641 \\u0645\\u0635\\u0631\\u0648\\u0641 \\u0648\\u0627\\u062D\\u062F\\u061F\";if(count===2)return\"\\u062D\\u0630\\u0641 \\u0645\\u0635\\u0631\\u0648\\u0641\\u064A\\u0646\\u061F\";if(count>=3&&count<=10)return`\\u062D\\u0630\\u0641 ${count} \\u0645\\u0635\\u0631\\u0648\\u0641\\u0627\\u062A\\u061F`;return`\\u062D\\u0630\\u0641 ${count} \\u0645\\u0635\\u0631\\u0648\\u0641\\u0627\\u064B\\u061F`}"
+      },
+      "confirm": "حذف",
+      "cancel": "إلغاء"
+    }
+  },
+  "validation": {
+    "titleRequired": "العنوان مطلوب.",
+    "titleTooLong": "يجب ألا يتجاوز العنوان 200 حرف.",
+    "typeRequired": "النوع مطلوب.",
+    "valueRequired": "القيمة مطلوبة.",
+    "currencyRequired": "العملة مطلوبة.",
+    "valueNegative": "لا يمكن أن تكون القيمة سالبة.",
+    "valueInvalid": "أدخل مبلغاً صالحاً بحد أقصى 12 رقماً وخانتين عشريتين.",
+    "expenseDateInvalid": "يجب أن يكون شهر المصروف بصيغة YYYY-MM.",
+    "paymentDateInvalid": "يجب أن يكون تاريخ الدفع تاريخاً صالحاً.",
+    "noteTooLong": "يجب ألا تتجاوز الملاحظة 2,000 حرف."
+  },
+  "error": {
+    "notFound": "المصروف غير موجود.",
+    "alreadyDeleted": "المصروف محذوف بالفعل.",
+    "deleteViaUnpay": "يجب حذف مصروف الراتب هذا عبر تدفق (إلغاء دفع الترحيل).",
+    "typeImmutableForSalaries": "النوع للقراءة فقط لمصروفات الرواتب.",
+    "valueImmutableForSalaries": "القيمة للقراءة فقط لمصروفات الرواتب."
+  },
+  "success": {
+    "created": "تم إنشاء المصروف.",
+    "updated": "تم تحديث المصروف.",
+    "deleted": "تم حذف المصروف.",
+    "bulkDeleted": {
+      "__fn": "count=>{if(count===0)return\"\\u0644\\u0645 \\u064A\\u062A\\u0645 \\u062D\\u0630\\u0641 \\u0623\\u064A \\u0645\\u0635\\u0631\\u0648\\u0641.\";if(count===1)return\"\\u062A\\u0645 \\u062D\\u0630\\u0641 \\u0645\\u0635\\u0631\\u0648\\u0641 \\u0648\\u0627\\u062D\\u062F.\";if(count===2)return\"\\u062A\\u0645 \\u062D\\u0630\\u0641 \\u0645\\u0635\\u0631\\u0648\\u0641\\u064A\\u0646.\";if(count>=3&&count<=10)return`\\u062A\\u0645 \\u062D\\u0630\\u0641 ${count} \\u0645\\u0635\\u0631\\u0648\\u0641\\u0627\\u062A.`;return`\\u062A\\u0645 \\u062D\\u0630\\u0641 ${count} \\u0645\\u0635\\u0631\\u0648\\u0641\\u0627\\u064B.`}"
+    }
+  },
+  "drawer": {
+    "title": {
+      "__fn": "title=>`\\u0645\\u0635\\u0631\\u0648\\u0641 \\u2014 ${title}`"
+    },
+    "createdBy": "أُنشئ بواسطة",
+    "updatedAt": "آخر تحديث",
+    "deletedBanner": "تم حذف هذا المصروف.",
+    "deletedAt": "حُذف في",
+    "deletionReason": "سبب الحذف"
+  },
+  "aggregate": {
+    "totalValue": "إجمالي القيمة",
+    "rowCount": "الصفوف"
+  }
+}

@@ -1,9 +1,15 @@
 {
   "title": "أرصدة الترحيل",
+  "pageSubtitle": "تسوية مستحقات المعلمين المجمّعة وتحويلها إلى مصروفات.",
   "empty": "لا توجد سجلات ترحيل مطابقة للمرشحات الحالية.",
+  "emptyStateHeading": "لا توجد أرصدة ترحيل",
+  "emptyStateHint": "جرّب تغيير معايير التصفية أو أضف سجلاً جديداً يدوياً.",
   "loadError": "فشل تحميل أرصدة الترحيل. حاول مرة أخرى.",
   "exportTruncated": "تم اقتطاع التصدير إلى 10 000 صف.",
   "exportFailed": "فشل تصدير CSV. حاول مرة أخرى.",
+  "selectedCount": {
+    "__fn": "count=>{if(count===0)return\"\\u0644\\u0645 \\u064A\\u062A\\u0645 \\u062A\\u062D\\u062F\\u064A\\u062F \\u0623\\u064A \\u0639\\u0646\\u0635\\u0631\";if(count===1)return\"\\u0639\\u0646\\u0635\\u0631 \\u0645\\u062D\\u062F\\u062F \\u0648\\u0627\\u062D\\u062F\";if(count===2)return\"\\u0639\\u0646\\u0635\\u0631\\u0627\\u0646 \\u0645\\u062D\\u062F\\u062F\\u0627\\u0646\";if(count>=3&&count<=10)return`${count} \\u0639\\u0646\\u0627\\u0635\\u0631 \\u0645\\u062D\\u062F\\u062F\\u0629`;return`${count} \\u0639\\u0646\\u0635\\u0631\\u0627\\u064B \\u0645\\u062D\\u062F\\u062F\\u0627\\u064B`}"
+  },
   "column": {
     "teacher": "المعلم",
     "studentsCount": "الطلاب",
@@ -50,11 +56,20 @@
       "paymentDate": "تاريخ الدفع",
       "expenseDate": "شهر المصروف",
       "note": "ملاحظة (اختياري)",
+      "notePlaceholder": "ملاحظة داخلية (بحد أقصى 2,000 حرف)",
       "summary": {
         "__fn": "(count,amount,currency)=>{if(count===1)return`\\u0631\\u0635\\u064A\\u062F \\u0648\\u0627\\u062D\\u062F \\u0628\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A ${amount} ${currency}`;if(count===2)return`\\u0631\\u0635\\u064A\\u062F\\u0627\\u0646 \\u0628\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A ${amount} ${currency}`;if(count>=3&&count<=10)return`${count} \\u0623\\u0631\\u0635\\u062F\\u0629 \\u0628\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A ${amount} ${currency}`;return`${count} \\u0631\\u0635\\u064A\\u062F\\u0627\\u064B \\u0628\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A ${amount} ${currency}`}"
       },
+      "convertConsequenceWarning": "سيتم إنشاء صف مصروف لكل رصيد ترحيل ووضعها كمدفوعة. ستصبح الجلسات المرتبطة مدفوعة.",
+      "convertFillRequiredHint": "املأ الحقول المطلوبة أعلاه للتحويل.",
       "submit": "تحويل",
       "cancel": "إلغاء"
+    },
+    "bulkCreate": {
+      "groupedSummary": {
+        "__fn": "(sessions,balances)=>{let sessionPart;if(sessions===1){sessionPart=\"\\u062C\\u0644\\u0633\\u0629 \\u0645\\u062F\\u0642\\u0642\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\"}else if(sessions===2){sessionPart=\"\\u062C\\u0644\\u0633\\u062A\\u0627\\u0646 \\u0645\\u062F\\u0642\\u062A\\u0627\\u0646\"}else if(sessions>=3&&sessions<=10){sessionPart=`${sessions} \\u062C\\u0644\\u0633\\u0627\\u062A \\u0645\\u062F\\u0642\\u0642\\u0629`}else{sessionPart=`${sessions} \\u062C\\u0644\\u0633\\u0629 \\u0645\\u062F\\u0642\\u0642\\u0629`}let balancePart;if(balances===1){balancePart=\"\\u0631\\u0635\\u064A\\u062F \\u062A\\u0631\\u062D\\u064A\\u0644 \\u0648\\u0627\\u062D\\u062F\"}else if(balances===2){balancePart=\"\\u0631\\u0635\\u064A\\u062F\\u064E\\u064A \\u062A\\u0631\\u062D\\u064A\\u0644\"}else if(balances>=3&&balances<=10){balancePart=`${balances} \\u0623\\u0631\\u0635\\u062F\\u0629 \\u062A\\u0631\\u062D\\u064A\\u0644`}else{balancePart=`${balances} \\u0631\\u0635\\u064A\\u062F \\u062A\\u0631\\u062D\\u064A\\u0644`}return`\\u0633\\u064A\\u062A\\u0645 \\u062A\\u062C\\u0645\\u064A\\u0639 ${sessionPart} \\u0641\\u064A ${balancePart}.`}"
+      },
+      "groupedConsequence": "ستنتقل الجلسات إلى حالة بانتظار الدفع."
     },
     "form": {
       "titleAdd": "إضافة رصيد ترحيل",
@@ -68,6 +83,7 @@
       "currency": "العملة",
       "studentsCount": "الطلاب",
       "studentsText": "قائمة الطلاب",
+      "studentsAutoFilledHelper": "تمت تعبئته تلقائياً من الجلسات",
       "note": "ملاحظة",
       "notePlaceholder": "ملاحظة اختيارية (بحد أقصى 2,000 حرف)",
       "submit": "حفظ",
@@ -83,7 +99,8 @@
     },
     "unpay": {
       "title": "إلغاء دفع رصيد الترحيل؟",
-      "warning": "سيتم حذف المصروف المرتبط (حذف ناعم) وستعود الجلسات المرتبطة إلى حالة بانتظار الدفع (WAITING_PAID).",
+      "warning": "سيتم حذف المصروف المرتبط (حذف ناعم) وستعود الجلسات المرتبطة إلى حالة بانتظار الدفع.",
+      "expenseLabel": "المصروف",
       "note": "سبب التصحيح (اختياري)",
       "notePlaceholder": "اشرح سبب إلغاء دفع هذا الرصيد (بحد أقصى 2,000 حرف)",
       "confirm": "إلغاء الدفع",
@@ -133,6 +150,9 @@
   "aggregate": {
     "totalPayable": "إجمالي المستحق",
     "totalPaid": "إجمالي المدفوع",
+    "recordsCount": {
+      "__fn": "count=>{if(count===0)return\"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u0633\\u062C\\u0644\\u0627\\u062A\";if(count===1)return\"\\u0633\\u062C\\u0644 \\u0648\\u0627\\u062D\\u062F\";if(count===2)return\"\\u0633\\u062C\\u0644\\u0627\\u0646\";if(count>=3&&count<=10)return`${count} \\u0633\\u062C\\u0644\\u0627\\u062A`;return`${count} \\u0633\\u062C\\u0644\\u0627\\u064B`}"
+    },
     "paidCount": {
       "__fn": "count=>{if(count===0)return\"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u0623\\u0631\\u0635\\u062F\\u0629 \\u0645\\u062F\\u0641\\u0648\\u0639\\u0629\";if(count===1)return\"\\u0631\\u0635\\u064A\\u062F \\u0645\\u062F\\u0641\\u0648\\u0639 \\u0648\\u0627\\u062D\\u062F\";if(count===2)return\"\\u0631\\u0635\\u064A\\u062F\\u0627\\u0646 \\u0645\\u062F\\u0641\\u0648\\u0639\\u0627\\u0646\";if(count>=3&&count<=10)return`${count} \\u0623\\u0631\\u0635\\u062F\\u0629 \\u0645\\u062F\\u0641\\u0648\\u0639\\u0629`;return`${count} \\u0631\\u0635\\u064A\\u062F\\u0627\\u064B \\u0645\\u062F\\u0641\\u0648\\u0639\\u0627\\u064B`}"
     },

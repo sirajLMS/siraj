@@ -8,3 +8,4 @@ import "./billing-management.mutation";
 import "./currency-hedge.mutation";
 import "./currency.mutation";
 import "./fx-ingestion.mutation";
+import "./expense.mutation";

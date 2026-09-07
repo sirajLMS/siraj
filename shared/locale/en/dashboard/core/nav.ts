@@ -122,5 +122,6 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   accountingCredits: "Credits",
   accountingPayroll: "Payroll",
   accountingCarryover: "Carryover Balances",
+  accountingExpenses: "Expense Ledger",
   accountingReports: "Full Reports",
 };

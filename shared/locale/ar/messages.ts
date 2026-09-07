@@ -2,6 +2,7 @@
 import { authAr } from "@/shared/locale/ar/auth";
 import { commonAr } from "@/shared/locale/ar/common";
 import { dashboardAccountingCarryoverAr } from "@/shared/locale/ar/dashboard/accounting/carryover.ts";
+import { dashboardAccountingExpensesAr } from "@/shared/locale/ar/dashboard/accounting/expenses.ts";
 import { dashboardAccountingPackagePlansAr } from "@/shared/locale/ar/dashboard/accounting/package-plans.ts";
 import { dashboardAccountingPaymentsAr } from "@/shared/locale/ar/dashboard/accounting/payments.ts";
 import { dashboardAccountingStudentCreditHoursAr } from "@/shared/locale/ar/dashboard/accounting/student-credit-hours.ts";
@@ -174,6 +175,7 @@ export const arMessages: Translations = {
     accountingPayments: dashboardAccountingPaymentsAr,
     accountingPackages: dashboardAccountingPackagePlansAr,
     accountingCarryover: dashboardAccountingCarryoverAr,
+    accountingExpenses: dashboardAccountingExpensesAr,
     accountingStudentCreditHours: dashboardAccountingStudentCreditHoursAr,
 
     billingExchangeRates: dashboardBillingExchangeRatesAr,

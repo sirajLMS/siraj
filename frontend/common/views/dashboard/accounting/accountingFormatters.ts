@@ -70,6 +70,19 @@ export function formatAccountingDate(value: string | null | undefined, locale: s
   });
 }
 
+/**
+ * Accounting-month wire string (`YYYY-MM`) → localized month-year label
+ * (e.g. "Sep 2026"); Arabic renders Arabic month names and digits. The date is
+ * built in local time so the formatted month never rolls back across midnights.
+ */
+export function formatAccountingMonth(value: string | null | undefined, locale: string): string {
+  if (!value) return "—";
+  const match = /^(\d{4})-(\d{2})$/.exec(value);
+  const date = match === null ? null : new Date(Number(match[1]), Number(match[2]) - 1, 1);
+  if (date === null || Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(resolveAccountingDateLocale(locale), { month: "short", year: "numeric" });
+}
+
 /** Chip color tone for the paid/unpaid status. */
 export function paymentStatusTone(isPaid: boolean): "success" | "warning" {
   return isPaid ? "success" : "warning";

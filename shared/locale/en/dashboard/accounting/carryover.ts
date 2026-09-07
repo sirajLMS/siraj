@@ -2,10 +2,14 @@ import type { CarryoverLabels } from "@/shared/locale/types/dashboard/accounting
 
 export const dashboardAccountingCarryoverEn: CarryoverLabels = {
   title: "Carryover Balances",
+  pageSubtitle: "Settle aggregate teacher payouts and convert them to expenses.",
   empty: "No carryover records match the current filters.",
+  emptyStateHeading: "No carryover balances",
+  emptyStateHint: "Try changing the filter criteria or add a new record manually.",
   loadError: "Failed to load carryover balances. Please try again.",
   exportTruncated: "Export truncated to 10 000 rows.",
   exportFailed: "CSV export failed. Please try again.",
+  selectedCount: count => (count === 1 ? "1 selected" : `${count} selected`),
 
   column: {
     teacher: "Teacher",
@@ -57,12 +61,24 @@ export const dashboardAccountingCarryoverEn: CarryoverLabels = {
       paymentDate: "Payment date",
       expenseDate: "Expense month",
       note: "Note (optional)",
+      notePlaceholder: "Internal note (max 2,000 characters)",
       summary: (count, amount, currency) =>
         count === 1
           ? `1 carryover totaling ${amount} ${currency}`
           : `${count} carryovers totaling ${amount} ${currency}`,
+      convertConsequenceWarning:
+        "This will create one expense row per carryover and mark them as paid. Linked sessions become paid.",
+      convertFillRequiredHint: "Fill the required fields above to convert.",
       submit: "Convert",
       cancel: "Cancel",
+    },
+    bulkCreate: {
+      groupedSummary: (sessions, balances) => {
+        const sessionPart = sessions === 1 ? "1 audited session" : `${sessions} audited sessions`;
+        const balancePart = balances === 1 ? "1 carryover balance" : `${balances} carryover balances`;
+        return `${sessionPart} will be grouped into ${balancePart}.`;
+      },
+      groupedConsequence: "Sessions will move to the waiting-for-payment state.",
     },
     form: {
       titleAdd: "Add Carryover Balance",
@@ -76,6 +92,7 @@ export const dashboardAccountingCarryoverEn: CarryoverLabels = {
       currency: "Currency",
       studentsCount: "Students",
       studentsText: "Students list",
+      studentsAutoFilledHelper: "Auto-filled from sessions",
       note: "Note",
       notePlaceholder: "Optional note (max 2,000 characters)",
       submit: "Save",
@@ -94,8 +111,8 @@ export const dashboardAccountingCarryoverEn: CarryoverLabels = {
     },
     unpay: {
       title: "Unpay this carryover balance?",
-      warning:
-        "The linked expense will be soft-deleted and the linked sessions will revert to WAITING_PAID (awaiting payment).",
+      warning: "The linked expense will be soft-deleted and the linked sessions will revert to awaiting payment.",
+      expenseLabel: "Expense",
       note: "Reason (optional)",
       notePlaceholder: "Explain why this carryover is being unpaid (max 2,000 characters)",
       confirm: "Unpay carryover",
@@ -156,6 +173,7 @@ export const dashboardAccountingCarryoverEn: CarryoverLabels = {
   aggregate: {
     totalPayable: "Total payable",
     totalPaid: "Total paid",
+    recordsCount: count => (count === 1 ? "1 record" : `${count} records`),
     paidCount: count => {
       if (count === 0) return "No paid carryovers";
       if (count === 1) return "1 paid carryover";

@@ -16,6 +16,7 @@ export * from "./complaints";
 // imperatively).
 import "./cron";
 
+export * from "./expenses";
 export * from "./meeting";
 export * from "./notifications";
 export * from "./parents";

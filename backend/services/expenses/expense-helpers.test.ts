@@ -3,6 +3,7 @@ import { ExpenseType } from "@/backend/enum";
 import { DomainError, ValidationError } from "@/backend/lib";
 import {
   assertExpenseIdShape,
+  canonicalizeExpenseValue,
   countExpensesByType,
   pickChanged,
   pickDominantExpenseCurrency,
@@ -122,6 +123,11 @@ describe("validateCreateInput", () => {
     expectError(() => validateCreateInput(buildInput({ expenseDate: "" }), tErrors), "EXPENSE_DATE_INVALID");
   });
 
+  test("rejects an out-of-range expense month", () => {
+    expectError(() => validateCreateInput(buildInput({ expenseDate: "2026-13" }), tErrors), "EXPENSE_DATE_INVALID");
+    expectError(() => validateCreateInput(buildInput({ expenseDate: "2026-00" }), tErrors), "EXPENSE_DATE_INVALID");
+  });
+
   test("rejects a malformed teacher id", () => {
     expectError(() => validateCreateInput(buildInput({ teacherId: "not-a-uuid" }), tErrors), "TEACHER_NOT_FOUND");
   });
@@ -130,6 +136,10 @@ describe("validateCreateInput", () => {
     const emptyCurrency = "";
     assertIsCurrencyCode(emptyCurrency);
     expectError(() => validateCreateInput(buildInput({ expenseCurrency: emptyCurrency }), tErrors), "VALIDATION");
+  });
+
+  test("rejects a malformed source entity id", () => {
+    expectError(() => validateCreateInput(buildInput({ sourceEntityId: "junk" }), tErrors), "VALIDATION");
   });
 });
 
@@ -164,6 +174,39 @@ describe("validateUpdateInput", () => {
       () => validateUpdateInput({ id: EXPENSE_ID, actorUserId: ACTOR_ID, expenseDate: "2026-1" }, tErrors),
       "EXPENSE_DATE_INVALID"
     );
+    expectError(
+      () => validateUpdateInput({ id: EXPENSE_ID, actorUserId: ACTOR_ID, expenseDate: "2026-13" }, tErrors),
+      "EXPENSE_DATE_INVALID"
+    );
+  });
+
+  test("skips validation for fields explicitly patched to null", () => {
+    expect(() =>
+      validateUpdateInput(
+        {
+          id: EXPENSE_ID,
+          actorUserId: ACTOR_ID,
+          title: null,
+          expenseValue: null,
+          paymentDate: null,
+          expenseDate: null,
+        },
+        tErrors
+      )
+    ).not.toThrow();
+  });
+});
+
+describe("canonicalizeExpenseValue", () => {
+  test("renames single-decimal, trimmed, and padded inputs to the two-decimal form", () => {
+    expect(canonicalizeExpenseValue("1.5")).toBe("1.50");
+    expect(canonicalizeExpenseValue(" 1.50 ")).toBe("1.50");
+    expect(canonicalizeExpenseValue("2500")).toBe("2500.00");
+    expect(canonicalizeExpenseValue("0")).toBe("0.00");
+  });
+
+  test("falls back to the trimmed input for unparseable amounts", () => {
+    expect(canonicalizeExpenseValue(" abc ")).toBe("abc");
   });
 });
 
@@ -231,6 +274,18 @@ describe("sumExpenseValues", () => {
   test("an empty page sums to zero", () => {
     expect(sumExpenseValues([])).toBe("0.00");
   });
+
+  test("negative stored amounts render with the minus sign", () => {
+    expect(sumExpenseValues([{ expenseValue: "-20.00" }, { expenseValue: "5.00" }])).toBe("-15.00");
+  });
+
+  test("a malformed stored amount contributes zero", () => {
+    expect(sumExpenseValues([{ expenseValue: "not-a-number" }, { expenseValue: "5.00" }])).toBe("5.00");
+  });
+
+  test("a single-decimal stored amount pads to two decimals", () => {
+    expect(sumExpenseValues([{ expenseValue: "5.5" }])).toBe("5.50");
+  });
 });
 
 describe("pickDominantExpenseCurrency", () => {
@@ -245,6 +300,11 @@ describe("pickDominantExpenseCurrency", () => {
 
   test("an empty page falls back to the default report currency", () => {
     expect(pickDominantExpenseCurrency([])).toBe(CurrencyCode.SAR);
+  });
+
+  test("a tied currency count keeps the earliest-seen currency", () => {
+    const rows = [{ expenseCurrency: CurrencyCode.USD }, { expenseCurrency: CurrencyCode.SAR }];
+    expect(pickDominantExpenseCurrency(rows)).toBe(CurrencyCode.USD);
   });
 });
 

@@ -122,5 +122,6 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   accountingCredits: "الرصيد",
   accountingPayroll: "الرواتب",
   accountingCarryover: "أرصدة الترحيل",
+  accountingExpenses: "سجل المصروفات",
   accountingReports: "التقارير الشاملة",
 };

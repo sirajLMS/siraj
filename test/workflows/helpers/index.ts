@@ -4,6 +4,8 @@ export * from "./carryover-create-cast";
 export * from "./carryover-delete-cast";
 export * from "./carryover-expense-cast";
 export * from "./cast-scaffold";
+export * from "./expense-crud-cast";
+export * from "./expense-viewer-cast";
 export * from "./journey-cast";
 export * from "./journey-errors";
 export * from "./notification-spy";

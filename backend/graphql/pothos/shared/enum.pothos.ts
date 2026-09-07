@@ -20,6 +20,7 @@ import {
   CronTriggerSource,
   DayOfWeek,
   EffectiveMeetingSource,
+  ExpenseType,
   FxProvider,
   FxProviderConfigSource,
   FxSyncStatus,
@@ -399,4 +400,9 @@ export const OnDemandStatusPothosEnum = gqlSchemaBuilder.enumType(OnDemandStatus
 
 export const EffectiveMeetingSourcePothosEnum = gqlSchemaBuilder.enumType(EffectiveMeetingSource, {
   name: "EffectiveMeetingSource",
+});
+
+export const ExpenseTypePothosEnum = gqlSchemaBuilder.enumType(ExpenseType, {
+  name: "ExpenseType",
+  description: "Expense ledger category: Salaries | Marketing | Logistics | Technology",
 });

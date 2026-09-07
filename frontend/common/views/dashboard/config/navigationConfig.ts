@@ -235,6 +235,7 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
       AppPermission.AccountingCreditsManage,
       AppPermission.AccountingPayrollView,
       AppPermission.AccountingCarryoverView,
+      AppPermission.AccountingExpensesView,
     ],
     separator: true,
   },
@@ -623,6 +624,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/accounting/carryover",
     section: "main",
     permission: PAGE_PERMISSIONS.accountingCarryoverView,
+    groupId: "grp_finance",
+  },
+  {
+    key: "accounting-expenses",
+    labelKey: "accountingExpenses",
+    iconKey: "receiptLong",
+    href: "/accounting/expenses",
+    section: "main",
+    permission: PAGE_PERMISSIONS.accountingExpensesView,
     groupId: "grp_finance",
   },
 

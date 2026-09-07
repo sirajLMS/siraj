@@ -59,8 +59,17 @@ function assertPaymentDateShape(paymentDate: string, tErrors: ErrorsLabels): voi
   }
 }
 
+/**
+ * The accounting month must be both well-shaped (`YYYY-MM`) and a real
+ * calendar month (01–12): a pattern-only check would let `2026-13` persist and
+ * then be refused back by the month filters and the CSV export.
+ */
 function assertExpenseMonthShape(expenseDate: string, tErrors: ErrorsLabels): void {
   if (!EXPENSE_MONTH_PATTERN.test(expenseDate)) {
+    throw new DomainError("EXPENSE_DATE_INVALID", tErrors.expenses.expenseDateInvalid);
+  }
+  const month = Number(expenseDate.slice(5, 7));
+  if (month < 1 || month > 12) {
     throw new DomainError("EXPENSE_DATE_INVALID", tErrors.expenses.expenseDateInvalid);
   }
 }
@@ -110,6 +119,10 @@ export function validateUpdateInput(input: UpdateExpenseInput, tErrors: ErrorsLa
   if (input.paymentDate != null) {
     assertPaymentDateShape(input.paymentDate, tErrors);
   }
+  assertOptionalUuidShape(
+    input.teacherId,
+    () => new DomainError("TEACHER_NOT_FOUND", tErrors.teacher.teacherNotFound(input.teacherId ?? ""))
+  );
 }
 /**
  * Previous values of the fields a patch actually changed — the
@@ -145,6 +158,28 @@ function toMinorUnits(amount: string): bigint | null {
   return match[1] === "-" ? -units : units;
 }
 
+/** Renders minor units as the canonical two-decimal string. */
+function formatMinorUnits(units: bigint): string {
+  const sign = units < 0n ? "-" : "";
+  const absolute = units < 0n ? -units : units;
+  const fraction = `${absolute % MINOR_UNITS_BASE}`.padStart(2, "0");
+  return `${sign}${absolute / MINOR_UNITS_BASE}.${fraction}`;
+}
+
+/**
+ * Canonical stored form for an expense amount: exactly two decimals. Inputs
+ * like `"1.5"`, `"1.50"`, or `" 1.50 "` all persist as `"1.50"` so ledger rows
+ * and exports render identically and prefix comparisons stay exact. Callers
+ * must validate the shape first (`validateCreateInput`/`validateUpdateInput`);
+ * an unparseable value falls back to its trimmed form (unreachable after
+ * validation).
+ */
+export function canonicalizeExpenseValue(amount: string): string {
+  const units = toMinorUnits(amount);
+  if (units == null) return amount.trim();
+  return formatMinorUnits(units);
+}
+
 /**
  * Sums the page's amounts as exact integer minor units (no float drift) and
  * renders the canonical two-decimal string. Rows whose stored amount fails to
@@ -152,10 +187,7 @@ function toMinorUnits(amount: string): bigint | null {
  */
 export function sumExpenseValues(rows: readonly { expenseValue: string }[]): string {
   const total = rows.reduce((acc, row) => acc + (toMinorUnits(row.expenseValue) ?? 0n), 0n);
-  const sign = total < 0n ? "-" : "";
-  const absolute = total < 0n ? -total : total;
-  const fraction = `${absolute % MINOR_UNITS_BASE}`.padStart(2, "0");
-  return `${sign}${absolute / MINOR_UNITS_BASE}.${fraction}`;
+  return formatMinorUnits(total);
 }
 
 /**

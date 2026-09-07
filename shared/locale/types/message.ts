@@ -3,6 +3,7 @@
 import type { AuthLabels } from "@/shared/locale/types/auth";
 import type { CommonLabels } from "@/shared/locale/types/common";
 import type { CarryoverLabels as AccountingCarryoverLabels } from "@/shared/locale/types/dashboard/accounting/carryover.ts";
+import type { ExpensesLabels as AccountingExpensesLabels } from "@/shared/locale/types/dashboard/accounting/expenses.ts";
 import type { PackagePlansLabels as AccountingPackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans.ts";
 import type { PaymentsLabels as AccountingPaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments.ts";
 import type { StudentCreditHoursLabels as AccountingStudentCreditHoursLabels } from "@/shared/locale/types/dashboard/accounting/student-credit-hours.ts";
@@ -149,6 +150,7 @@ export interface DashboardTranslations {
   accountingPayments: AccountingPaymentsLabels;
   accountingPackages: AccountingPackagePlansLabels;
   accountingCarryover: AccountingCarryoverLabels;
+  accountingExpenses: AccountingExpensesLabels;
   accountingStudentCreditHours: AccountingStudentCreditHoursLabels;
 
   billingExchangeRates: ExchangeRatesLabels;

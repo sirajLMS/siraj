@@ -749,6 +749,23 @@ type BulkDeleteCarryoverResult {
   id: ID
 }
 
+"""
+Atomic soft-delete of a batch of expenses with an optional operator reason. The acting operator is resolved from the request context and is never accepted as input.
+"""
+input BulkDeleteExpensesInput {
+  ids: [ID!]!
+  reason: String
+}
+
+"""
+Outcome of an atomic batch expense deletion, listing the removed expense ids
+"""
+type BulkDeleteExpensesResult {
+  auditLogIds: [ID!]
+  deleted: [ID!]
+  id: ID
+}
+
 type BulkOperationFailure {
   error: String
   path: String
@@ -1497,6 +1514,21 @@ input CreateCarryoverInput {
   toDate: String
 }
 
+"""
+Manual creation of a single expense. The acting operator is resolved from the request context and is never accepted as input. Salaries-type expenses are rejected here; they are written only by the carryover settlement flow.
+"""
+input CreateExpenseInput {
+  clientRequestId: String
+  expenseCurrency: CurrencyCode!
+  expenseDate: String!
+  expenseValue: String!
+  note: String
+  paymentDate: String!
+  teacherId: ID
+  title: String!
+  type: ExpenseType!
+}
+
 input CreateManualClassEntryInput {
   classType: ClassType
   durationMinutes: Int!
@@ -1930,6 +1962,14 @@ type DeleteClassInstanceResult {
   warnings: [String!]
 }
 
+"""
+Soft-delete of a single expense with an optional operator reason. The acting operator is resolved from the request context and is never accepted as input.
+"""
+input DeleteExpenseInput {
+  id: ID!
+  reason: String
+}
+
 type DeleteInvoiceResult {
   id: String
   notificationSummaryUpdated: Boolean
@@ -2136,6 +2176,69 @@ type ExchangeRateHistoryRow {
   rate: String
   source: String
   toCurrency: CurrencyCode
+}
+
+"""
+One expense ledger row: a manual operational spend entry or a salary payout written by the carryover settlement flow (sourceEntity/sourceEntityId provenance), with the creator's display name resolved
+"""
+type Expense {
+  createdAt: DateTime
+  createdByName: String
+  createdByUserId: ID
+  deletedAt: DateTime
+  deletedByUserId: ID
+  deletedReason: String
+  expenseCurrency: CurrencyCode
+  expenseDate: String
+  expenseValue: String
+  id: ID
+  note: String
+  paymentDate: String
+  sourceEntity: String
+  sourceEntityId: ID
+  teacherId: ID
+  teacherName: String
+  title: String
+  type: ExpenseType
+  updatedAt: DateTime
+}
+
+"""Outcome of soft-deleting a single expense"""
+type ExpenseDeleteResult {
+  deleted: Boolean
+  id: ID
+}
+
+"""
+AND-combined filters narrowing the expense list by title, type, accounting month, payment-date range, or soft-deleted inclusion
+"""
+input ExpenseFilter {
+  expenseDate: String
+  includeDeleted: Boolean
+  paymentDateFrom: String
+  paymentDateTo: String
+  title: String
+  types: [ExpenseType!]
+}
+
+"""
+One page of the expense ledger list plus the page's aggregates (total value, dominant currency, row counts per expense type)
+"""
+type ExpensePage {
+  dominantCurrency: CurrencyCode
+  id: ID
+  rowCountByType: JSON
+  rows: [Expense!]
+  totalCount: Int
+  totalValue: String
+}
+
+"""Expense ledger category: Salaries | Marketing | Logistics | Technology"""
+enum ExpenseType {
+  LOGISTICS
+  MARKETING
+  SALARIES
+  TECHNOLOGY
 }
 
 type FileInfo implements StorageObject {
@@ -2878,6 +2981,11 @@ type Mutation {
   Delete a batch of unpaid carryover balances in one transaction, unlinking their sessions back to their pre-carryover statuses.
   """
   bulkDeleteCarryoverBalances(ids: [ID!]!): BulkDeleteCarryoverResult
+
+  """
+  Atomically soft-delete a batch of expenses in one transaction with an optional operator reason; any rejection rolls the whole batch back. The id list is capped at 500 entries by the @constraint directive.
+  """
+  bulkDeleteExpenses(input: BulkDeleteExpensesInput!): BulkDeleteExpensesResult
   bulkRevokeUsersFromGroup(groupId: String!, userIds: [String!]!): Boolean
   changeParentLifecycleStatus(newStatus: ParentStatus!, parentId: String!): ChangeParentLifecycleResult
   changePassword(input: ChangePasswordInput!): Boolean
@@ -2903,6 +3011,11 @@ type Mutation {
   createClassMeetingConfig(input: ClassMeetingConfigCreateInput!): ClassMeetingConfig
   createClassSubject(input: ClassSubjectCreateInput!): ClassSubject
   createCurrencyHedge(amount: String!, currency: CurrencyCode!, hedgeType: String!, notes: String): CurrencyHedge
+
+  """
+  Manually create a single expense ledger entry. Salaries-type expenses are rejected here; they are written only by the carryover settlement flow. A client-supplied clientRequestId makes retried submissions idempotent. The acting operator is resolved from the authenticated context and is never accepted as input.
+  """
+  createExpense(input: CreateExpenseInput!): Expense
   createFolder(input: FolderCreateInput!): FileOperationResult
 
   """Create a new user with a non-specialized permission group"""
@@ -2994,6 +3107,11 @@ type Mutation {
   deleteComplaint(complaintId: String!): Boolean
   deleteCurrencyHedge(id: String!): Boolean
   deleteEnvConfigEntry(key: String!): EnvConfigDeleteResult
+
+  """
+  Soft-delete a single expense with an optional operator reason. Re-deleting an already deleted expense is an idempotent no-op. Expenses produced by a paid carryover settlement can only be removed through the unpay flow.
+  """
+  deleteExpense(input: DeleteExpenseInput!): ExpenseDeleteResult
   deleteFile(path: String!): FileOperationResult
   deleteInvoice(invoiceId: String!): DeleteInvoiceResult
 
@@ -3189,6 +3307,11 @@ type Mutation {
   updateClassSubject(id: ID!, input: ClassSubjectUpdateInput!): ClassSubject
   updateCurrencyHedge(amount: String, currency: CurrencyCode, hedgeType: String, id: String!, notes: String): CurrencyHedge
   updateDirectoryPermissions(input: DirectoryPermissionsUpdateInput!): FileOperationResult
+
+  """
+  Apply a field-level patch to an expense; only the provided fields change. The acting operator is resolved from the authenticated context and is never accepted as input.
+  """
+  updateExpense(input: UpdateExpenseInput!): Expense
   updateFxProvider(provider: FxProvider!): FxProviderConfig
 
   """Updates a manager's profile fields."""
@@ -4055,6 +4178,20 @@ type Query {
   effectiveUserPermissions(userId: String!): [String!]
   envConfigEntries: [EnvConfigEntry!]
   exchangeRateHistory(from: CurrencyCode!, maxDays: Int = 90, paginationArgs: PaginationArgs, to: CurrencyCode!): ExchangeRateHistoryResult
+
+  """Single expense by id, for the drill-down view."""
+  expense(id: ID!): Expense
+
+  """
+  Paginated, filtered expense ledger. Aggregates describe the returned page; totalCount covers the whole filtered set for pagination controls.
+  """
+  expenses(
+    filter: ExpenseFilter
+
+    """Max rows per page (max 200)"""
+    limit: Int = 50
+    offset: Int = 0
+  ): ExpensePage
   fileInfo(path: String!): FileInfo
   fileUsage(input: FileUsageCheckInput!): FileUsageResult
   folderInfo(path: String!): DirectoryInfo
@@ -6129,6 +6266,22 @@ input UpdateCarryoverInput {
   studentsText: String
   teacherCurrency: CurrencyCode
   toDate: String
+}
+
+"""
+Field-level patch for an expense; only the provided fields change. The acting operator is resolved from the request context and is never accepted as input.
+"""
+input UpdateExpenseInput {
+  expenseCurrency: CurrencyCode
+  expenseDate: String
+  expenseValue: String
+  id: ID!
+  note: String
+  paymentDate: String
+  teacherId: ID
+  teacherName: String
+  title: String
+  type: ExpenseType
 }
 
 input UpdateManagerProfileInput {

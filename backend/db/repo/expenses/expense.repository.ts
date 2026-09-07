@@ -38,11 +38,17 @@ export namespace ExpenseRepository {
     return conditions;
   }
 
+  /**
+   * Counts the filtered set with the same creator join as `findFiltered` keeps
+   * the row query — a dangling creator row must not inflate `totalCount`
+   * against the rows a page actually returns.
+   */
   async function countFiltered(conditions: SQL[], tx?: DBTransaction): Promise<number> {
     const q = queryDb(tx);
     const [row] = await q
       .select({ totalCount: sql<number>`count(*)`.mapWith(Number) })
       .from(expenses)
+      .innerJoin(users, eq(expenses.createdByUserId, users.id))
       .where(and(...conditions));
     return row?.totalCount ?? 0;
   }
@@ -140,24 +146,5 @@ export namespace ExpenseRepository {
       .where(eq(expenses.id, id))
       .returning();
     return row ?? null;
-  }
-
-  /**
-   * Soft-deletes a batch of expenses in one statement. Returns the soft-deleted
-   * rows; rows whose ids do not exist are silently skipped.
-   */
-  export async function bulkSoftDelete(
-    ids: readonly string[],
-    actorUserId: string,
-    reason: string | null,
-    tx?: DBTransaction
-  ): Promise<ExpenseSelectType[]> {
-    if (ids.length === 0) return [];
-    const executor = tx ?? db;
-    return executor
-      .update(expenses)
-      .set({ deletedAt: new Date(), deletedByUserId: actorUserId, deletedReason: reason, updatedAt: new Date() })
-      .where(inArray(expenses.id, [...ids]))
-      .returning();
   }
 }

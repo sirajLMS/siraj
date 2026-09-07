@@ -154,4 +154,7 @@ export const PAGE_PERMISSIONS = {
   // Accounting — carryover balance settlements.
   accountingCarryoverView: [AppPermission.AccountingCarryoverView] as PagePermissions,
   accountingCarryoverManage: [AppPermission.AccountingCarryoverManage] as PagePermissions,
+  // Accounting — expense ledger.
+  accountingExpensesView: [AppPermission.AccountingExpensesView] as PagePermissions,
+  accountingExpensesManage: [AppPermission.AccountingExpensesManage] as PagePermissions,
 } as const;

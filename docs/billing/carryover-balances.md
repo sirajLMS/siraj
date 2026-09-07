@@ -56,8 +56,9 @@ CSV: browser fetch("/api/carryover/export?...") → route → getServerUserConte
   `totalDuration` (text, decimal hours string), `payable` / `paid` (text, NOT NULL;
   `paid` defaults `"0"`), `teacherCurrency` (`currencyCodeEnum`), `fromDate` /
   `toDate` / `paymentDate` (TEXT ISO `YYYY-MM-DD`), `isPaid` / `isDisabledTeacher`
-  (bool, default false), `expenseId` (uuid, **deliberately no FK** — expense ledger
-  is Plan 6), `note`, `createdByUserId` (NOT NULL, FK users SET NULL),
+  (bool, default false), `expenseId` (uuid, **deliberately no FK** — loose
+  coupling to the expense ledger, `docs/billing/expense-ledger.md`), `note`,
+  `createdByUserId` (NOT NULL, FK users SET NULL),
   `paidByUserId` / `paidAt` (nullable), timestamps.
 - Indexes incl. `carryover_balances_expense_id_unique_idx` as a real
   `uniqueIndex` (a carryover links to at most one expense; NULLs don't collide in
@@ -260,9 +261,9 @@ These were found the hard way (reviews, journey tests, sub-loop runs):
     returns the originally persisted expense on a same-window retry. Ledger
     failures are wrapped into `CARRYOVER_TO_EXPENSE_FAILED` so the batch rolls
     back. Unpay marks the carryover unpaid FIRST under its row lock — the
-    ledger's `assertNotSettlementProtected` guard rejects soft-deleting an
-    expense whose carryover is still paid (`EXPENSE_DELETE_VIA_UNPAY`) — then
-    calls `ExpenseService.softDelete({ id, actorUserId, reason, tx })` in the
+    ledger's settlement-protection guard (inside `softDeleteInTx`) rejects
+    soft-deleting an expense whose carryover is still paid
+    (`EXPENSE_DELETE_VIA_UNPAY`) — then calls `ExpenseService.softDelete({ id, actorUserId, reason, tx })` in the
     same transaction; a missing row (`EXPENSE_NOT_FOUND`, e.g. references
     minted before the ledger existed) is tolerated and the revert completes.
     The ledger layers its own `EXPENSE_CREATE`/`EXPENSE_DELETE` audit rows
@@ -315,8 +316,10 @@ These were found the hard way (reviews, journey tests, sub-loop runs):
 - Plan 4 (session-event-audit) audit-grid integration — "Carryover Balance" bulk
   action and "Linked" chip — was blocked on the sibling plan landing.
 - Plan 6 (expense ledger) landed and the stub is swapped for the real
-  `ExpenseService` (see Architecture decision #11); the E2E spec can still gain
-  real `/accounting/expenses` page assertions once the ledger UI ships.
+  `ExpenseService` (see Architecture decision #11); the ledger UI + a
+  cross-module E2E spec (`test/ui/e2e/accounting/expenses.test.ts`, covering
+  the carryover settle → ledger → unpay loop) have shipped. See
+  `docs/billing/expense-ledger.md`.
 - UI component test suites and the E2E spec were authored under a
   written-but-unexecuted policy; first real runs may need fixture/real-dialog
   adjustments (MUI date-picker typing, autocomplete option names, demo dataset).

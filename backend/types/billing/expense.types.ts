@@ -17,8 +17,14 @@ import type { CurrencyCode } from "@/shared/constants/currency.enum";
 export type ExpenseSelectType = typeof expenses.$inferSelect;
 /** Insert payload for `expenses`. */
 export type ExpenseInsertType = typeof expenses.$inferInsert;
-/** Patch columns for an expense update; `id` is never patchable. */
-export type ExpenseUpdatePatch = Partial<Omit<ExpenseInsertType, "id">>;
+/**
+ * Patch columns for an expense update. The immutable identity, audit-creation,
+ * and provenance columns are excluded: they are written once at insert and can
+ * never be patched.
+ */
+export type ExpenseUpdatePatch = Partial<
+  Omit<ExpenseInsertType, "id" | "createdAt" | "createdByUserId" | "sourceEntity" | "sourceEntityId">
+>;
 
 /** Input for the manual (UI) expense creation entry point. */
 export interface CreateExpenseInput {
@@ -40,12 +46,6 @@ export interface CreateExpenseInput {
   createdByUserId: string;
   /** Client idempotency key for double-submit absorption. */
   clientRequestId?: string | null;
-}
-
-/** Input for the internal (settlement-flow) creation entry point; bypasses the permission check. */
-export interface CreateExpenseInternalInput extends CreateExpenseInput {
-  /** Marker documenting that this call path skips the actor permission check. */
-  __internal?: true;
 }
 
 export interface UpdateExpenseInput {
@@ -72,6 +72,12 @@ export interface BulkDeleteExpensesInput {
   ids: readonly string[];
   reason?: string | null;
   actorUserId: string;
+}
+
+/** Result of a single expense soft-delete (UI delete entry point). */
+export interface DeleteExpenseResult {
+  id: string;
+  deleted: boolean;
 }
 
 /** Result of an atomic bulk soft-delete: the ids applied plus the audit rows emitted. */

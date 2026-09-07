@@ -85,6 +85,7 @@ Completed migrations:
 - `IANATimezone` — `backend/enum/shared/timezone.enum.ts` → re-export from `shared/constants/iana-timezone.enum.ts`
 - `CurrencyCode` — `backend/enum/shared/currency.enum.ts` → re-export from `shared/constants/currency.enum.ts`
 - `ClassInstanceDetail` — `backend/enum/shared/class-instance-detail.enum.ts` → re-export from `shared/constants/class-instance-detail.enum.ts`
+- `ExpenseType` — `backend/enum/expenses/expense-type.enum.ts` → re-export from `shared/constants/expenses/expense-type.enum.ts`
 
 ## Linting Rules
 

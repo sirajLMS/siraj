@@ -2,6 +2,7 @@
 import { authEn } from "@/shared/locale/en/auth";
 import { commonEn } from "@/shared/locale/en/common";
 import { dashboardAccountingCarryoverEn } from "@/shared/locale/en/dashboard/accounting/carryover.ts";
+import { dashboardAccountingExpensesEn } from "@/shared/locale/en/dashboard/accounting/expenses.ts";
 import { dashboardAccountingPackagePlansEn } from "@/shared/locale/en/dashboard/accounting/package-plans.ts";
 import { dashboardAccountingPaymentsEn } from "@/shared/locale/en/dashboard/accounting/payments.ts";
 import { dashboardAccountingStudentCreditHoursEn } from "@/shared/locale/en/dashboard/accounting/student-credit-hours.ts";
@@ -174,6 +175,7 @@ export const enMessages: Translations = {
     accountingPayments: dashboardAccountingPaymentsEn,
     accountingPackages: dashboardAccountingPackagePlansEn,
     accountingCarryover: dashboardAccountingCarryoverEn,
+    accountingExpenses: dashboardAccountingExpensesEn,
     accountingStudentCreditHours: dashboardAccountingStudentCreditHoursEn,
 
     billingExchangeRates: dashboardBillingExchangeRatesEn,

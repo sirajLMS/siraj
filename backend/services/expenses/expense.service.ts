@@ -6,11 +6,13 @@ import {
   TeacherRepository,
   UserRepository,
 } from "@/backend/db/repo";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { AppPermission, ExpenseType } from "@/backend/enum";
 import { DomainError, logger, NotFoundError, sanitizePlainText } from "@/backend/lib";
 import { requirePermission } from "@/backend/services/billing/permission-utils";
 import {
   assertExpenseIdShape,
+  canonicalizeExpenseValue,
   countExpensesByType,
   EXPENSE_DELETE_REASON_MAX_LENGTH,
   EXPENSE_NOTE_MAX_LENGTH,
@@ -28,6 +30,7 @@ import type {
   AuditLogReturnType,
   BulkDeleteExpensesInput,
   BulkDeleteExpensesResult,
+  CarryoverBalanceSelectType,
   CreateAuditLogInput,
   CreateExpenseInput,
   DBTransaction,
@@ -40,6 +43,7 @@ import type {
   SoftDeleteExpenseInput,
   UpdateExpenseInput,
 } from "@/backend/types";
+import { EXPENSE_SOURCE_CARRYOVER_BALANCES } from "@/shared/constants/expenses/expense-source.constants";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Duplicate submissions inside this window collapse onto the first-applied result. */
@@ -50,9 +54,6 @@ const REPLAY_LOOKUP_PAGE_SIZE = 500;
 
 /** Defensive bound on replay-scan pages; the window holds far fewer rows in practice. */
 const REPLAY_LOOKUP_MAX_PAGES = 10;
-
-/** Provenance marker written by the carryover settlement flow. */
-export const EXPENSE_SOURCE_CARRYOVER_BALANCES = "carryover_balances";
 
 const EXPENSE_AUDIT_ENTITY_TYPE = "EXPENSE";
 const EXPENSE_ACTION_CREATE = "EXPENSE_CREATE";
@@ -227,6 +228,11 @@ export namespace ExpenseService {
    * ACCOUNTING_EXPENSES_MANAGE; `Salaries` rows are rejected here — only the
    * carryover settlement flow may write them (`createInternal`). The creator
    * attribution is always the acting user, never a client-supplied id.
+   *
+   * A submission carrying a `clientRequestId` takes a key-scoped advisory lock
+   * before the idempotency replay scan (lock-then-replay ordering), so two
+   * concurrent identical submissions serialize onto the first write instead of
+   * both inserting.
    */
   export async function create(
     input: CreateExpenseInput,
@@ -237,7 +243,25 @@ export namespace ExpenseService {
     if (input.type === ExpenseType.SALARIES) {
       throw new DomainError("EXPENSE_SALARIES_VIA_CARRYOVER_ONLY", tErrors.expenses.salariesViaCarryoverOnly);
     }
-    return db.transaction(async tx => createInternal({ ...input, createdByUserId: actorUserId }, tx, tErrors));
+    const scopedInput: CreateExpenseInput = { ...input, createdByUserId: actorUserId };
+    validateCreateInput(scopedInput, tErrors);
+    return db.transaction(async tx => {
+      await acquireCreateReplayLock(tx, scopedInput);
+      return createInternal(scopedInput, tx, tErrors);
+    });
+  }
+
+  /**
+   * Key-scoped advisory lock serializing same-key submissions: two concurrent
+   * creates carrying the same `clientRequestId` run back-to-back, so the
+   * loser's replay scan sees the winner's audit row and returns the originally
+   * persisted expense. Only the transaction-owning entry point acquires it —
+   * `createInternal` never takes locks inside a caller's transaction (the
+   * carryover settlement flow already holds its batch lock upstream).
+   */
+  async function acquireCreateReplayLock(tx: DBTransaction, input: CreateExpenseInput): Promise<void> {
+    if (input.clientRequestId == null) return;
+    await acquireAdvisoryLock(tx, `expense-create:${deriveCreateIdempotencyKey(input)}`);
   }
 
   /**
@@ -247,7 +271,10 @@ export namespace ExpenseService {
    * `create` after its permission check with a fresh tx.
    *
    * A re-submission carrying the same `clientRequestId` (and identical payload)
-   * inside the replay window returns the originally persisted row.
+   * inside the replay window returns the originally persisted row. The caller
+   * owns key-scoped serialization: `create` acquires the advisory lock itself;
+   * the settlement flow is serialized by its own batch lock upstream, so this
+   * callee deliberately takes no advisory locks inside a caller transaction.
    */
   export async function createInternal(
     input: CreateExpenseInput,
@@ -303,7 +330,7 @@ export namespace ExpenseService {
       teacherName,
       title: sanitizePlainText(input.title, EXPENSE_TITLE_MAX_LENGTH),
       type: input.type,
-      expenseValue: input.expenseValue.trim(),
+      expenseValue: canonicalizeExpenseValue(input.expenseValue),
       expenseCurrency: input.expenseCurrency,
       paymentDate: input.paymentDate,
       expenseDate: input.expenseDate,
@@ -324,17 +351,43 @@ export namespace ExpenseService {
     }
   }
 
-  /** Salary rows keep their settled type and value; corrections go through unpay + re-settle. */
+  /**
+   * A patch that links a teacher writes the FK, so the target must resolve —
+   * otherwise the update fails with a raw driver error instead of the localized
+   * not-found contract the create path uses.
+   */
+  async function assertTeacherLinkResolves(
+    input: UpdateExpenseInput,
+    tx: DBTransaction,
+    tErrors: ErrorsLabels
+  ): Promise<void> {
+    if (input.teacherId == null) return;
+    const teacher = await TeacherRepository.findById(input.teacherId, tx);
+    if (teacher == null) {
+      throw new NotFoundError("TEACHER", tErrors.teacher.teacherNotFound(input.teacherId));
+    }
+  }
+
+  /**
+   * `Salaries` rows are produced exclusively by the carryover settlement flow:
+   * the type is immutable on an existing salary row, and a non-salary row must
+   * never be re-typed INTO `Salaries` (that would mint a provenance-less salary
+   * entry no settlement flow produced). Settled values are immutable too —
+   * compared in the canonical two-decimal form the write path stores.
+   */
   function assertSalariesImmutability(
     existing: ExpenseSelectType,
     input: UpdateExpenseInput,
     tErrors: ErrorsLabels
   ): void {
+    if (input.type === ExpenseType.SALARIES && existing.type !== ExpenseType.SALARIES) {
+      throw new DomainError("EXPENSE_SALARIES_VIA_CARRYOVER_ONLY", tErrors.expenses.salariesViaCarryoverOnly);
+    }
     if (existing.type !== ExpenseType.SALARIES) return;
     if (input.type != null && input.type !== existing.type) {
       throw new DomainError("EXPENSE_TYPE_IMMUTABLE_FOR_SALARIES", tErrors.expenses.typeImmutableForSalaries);
     }
-    if (input.expenseValue != null && input.expenseValue.trim() !== existing.expenseValue) {
+    if (input.expenseValue != null && canonicalizeExpenseValue(input.expenseValue) !== existing.expenseValue) {
       throw new DomainError("EXPENSE_VALUE_IMMUTABLE_FOR_SALARIES", tErrors.expenses.valueImmutableForSalaries);
     }
   }
@@ -343,7 +396,7 @@ export namespace ExpenseService {
     const patch: ExpenseUpdatePatch = {};
     if (input.title != null) patch.title = sanitizePlainText(input.title, EXPENSE_TITLE_MAX_LENGTH);
     if (input.type != null) patch.type = input.type;
-    if (input.expenseValue != null) patch.expenseValue = input.expenseValue.trim();
+    if (input.expenseValue != null) patch.expenseValue = canonicalizeExpenseValue(input.expenseValue);
     if (input.expenseCurrency != null) patch.expenseCurrency = input.expenseCurrency;
     if (input.paymentDate != null) patch.paymentDate = input.paymentDate;
     if (input.expenseDate != null) patch.expenseDate = input.expenseDate;
@@ -378,6 +431,7 @@ export namespace ExpenseService {
         throw new DomainError("EXPENSE_ALREADY_DELETED", tErrors.expenses.alreadyDeleted);
       }
       assertSalariesImmutability(existing, input, tErrors);
+      await assertTeacherLinkResolves(input, tx, tErrors);
 
       const patch = buildUpdatePatch(input);
       const updated = await ExpenseRepository.update(input.id, patch, tx);
@@ -403,21 +457,18 @@ export namespace ExpenseService {
   }
 
   /**
-   * A `Salaries` expense linked to a carryover that is still marked paid is
-   * protected: removing it must go through the carryover unpay flow so the
-   * linked sessions revert too. The carryover row is locked while the guard
-   * reads its paid flag so a concurrent unpay cannot race the decision.
+   * Locks the carryover that produced the expense (when provenance points at
+   * one) and returns it for the paid-state guard. The lock is what keeps a
+   * concurrent unpay from racing the settlement-protection decision.
    */
-  async function assertNotSettlementProtected(
-    existing: ExpenseSelectType,
-    tx: DBTransaction,
-    tErrors: ErrorsLabels
-  ): Promise<void> {
-    if (existing.sourceEntity !== EXPENSE_SOURCE_CARRYOVER_BALANCES || existing.sourceEntityId == null) return;
-    const [carryover] = await CarryoverBalanceRepository.getByIdsForUpdate([existing.sourceEntityId], tx);
-    if (carryover?.isPaid) {
-      throw new DomainError("EXPENSE_DELETE_VIA_UNPAY", tErrors.expenses.deleteViaUnpay);
-    }
+  async function lockLinkedCarryover(
+    sourceEntity: string | null,
+    sourceEntityId: string | null,
+    tx: DBTransaction
+  ): Promise<CarryoverBalanceSelectType | null> {
+    if (sourceEntity !== EXPENSE_SOURCE_CARRYOVER_BALANCES || sourceEntityId == null) return null;
+    const [carryover] = await CarryoverBalanceRepository.getByIdsForUpdate([sourceEntityId], tx);
+    return carryover ?? null;
   }
 
   interface SoftDeleteOutcome {
@@ -429,12 +480,26 @@ export namespace ExpenseService {
    * Shared soft-delete core. Re-running it on an already-deleted expense is a
    * successful no-op that returns the current row (idempotent retry), so both
    * the UI delete and the settlement unpay can safely re-apply.
+   *
+   * Lock order is canonical across the module: the linked carryover row is
+   * locked BEFORE the expense row, matching the settlement unpay path (which
+   * locks the carryover, unpays it, then soft-deletes its settled expense), so
+   * a concurrent UI delete and unpay serialize instead of deadlocking.
+   * Provenance columns are written once at insert and never patched, so a
+   * non-locking pre-read safely supplies them; the state-dependent checks
+   * (existence, `deletedAt`) re-read the locked expense row.
    */
   async function softDeleteInTx(
     tx: DBTransaction,
     input: SoftDeleteExpenseInput,
     tErrors: ErrorsLabels
   ): Promise<SoftDeleteOutcome> {
+    const preview = await ExpenseRepository.getById(input.id, tx);
+    if (preview == null) {
+      throw new DomainError("EXPENSE_NOT_FOUND", tErrors.expenses.notFound);
+    }
+    const linkedCarryover = await lockLinkedCarryover(preview.sourceEntity, preview.sourceEntityId, tx);
+
     const existing = await ExpenseRepository.getByIdForUpdate(input.id, tx);
     if (existing == null) {
       throw new DomainError("EXPENSE_NOT_FOUND", tErrors.expenses.notFound);
@@ -442,7 +507,9 @@ export namespace ExpenseService {
     if (existing.deletedAt != null) {
       return { row: await toExpenseRowWithCreator(existing, tx, tErrors), auditLogId: null };
     }
-    await assertNotSettlementProtected(existing, tx, tErrors);
+    if (linkedCarryover?.isPaid) {
+      throw new DomainError("EXPENSE_DELETE_VIA_UNPAY", tErrors.expenses.deleteViaUnpay);
+    }
 
     const reason = input.reason == null ? null : sanitizePlainText(input.reason, EXPENSE_DELETE_REASON_MAX_LENGTH);
     const updated = await ExpenseRepository.softDelete(input.id, input.actorUserId, reason, tx);

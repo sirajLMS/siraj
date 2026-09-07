@@ -25,7 +25,7 @@ import type { CarryoverBalanceQuery_carryoverBalance } from "@/frontend/common/g
  */
 export type CarryoverConfirmRow = Pick<
   CarryoverBalanceQuery_carryoverBalance,
-  "id" | "teacherName" | "payable" | "teacherCurrency" | "paymentDate"
+  "id" | "teacherName" | "payable" | "teacherCurrency" | "paymentDate" | "expenseId"
 > & {
   readonly linkedSessionCount?: number | null;
 };
@@ -67,6 +67,8 @@ export interface CarryoverConfirmScaffoldProps {
   readonly children: ReactNode;
   readonly onClose: () => void;
   readonly onConfirm: () => void;
+  /** Disables the confirm button independently of `busy` (e.g. a blocking guard banner is showing). */
+  readonly confirmDisabled?: boolean;
 }
 
 export function CarryoverConfirmScaffold({
@@ -79,6 +81,7 @@ export function CarryoverConfirmScaffold({
   children,
   onClose,
   onConfirm,
+  confirmDisabled = false,
 }: Readonly<CarryoverConfirmScaffoldProps>) {
   return (
     <Dialog {...DialogPresets.confirm} open={open} onClose={busy ? undefined : onClose}>
@@ -98,7 +101,13 @@ export function CarryoverConfirmScaffold({
         <Button variant="text" onClick={onClose} disabled={busy} sx={CANCEL_BUTTON_SX}>
           {cancelLabel}
         </Button>
-        <Button variant="contained" onClick={onConfirm} disabled={busy} aria-busy={busy} sx={CONFIRM_BUTTON_SX}>
+        <Button
+          variant="contained"
+          onClick={onConfirm}
+          disabled={busy || confirmDisabled}
+          aria-busy={busy}
+          sx={CONFIRM_BUTTON_SX}
+        >
           {busy ? <CircularProgress size={20} sx={theme => ({ color: theme.palette.onError })} /> : confirmLabel}
         </Button>
       </DialogActions>

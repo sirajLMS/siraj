@@ -4,7 +4,13 @@ import { ExpenseRepository } from "@/backend/db/repo/expenses";
 import { createTestUser, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { ExpenseType } from "@/backend/enum";
-import type { DBTransaction, ExpenseFilters, ExpenseInsertType, ExpenseListRow } from "@/backend/types";
+import type {
+  DBTransaction,
+  ExpenseFilters,
+  ExpenseInsertType,
+  ExpenseListRow,
+  ExpenseSelectType,
+} from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 const PAGE = { limit: 50, offset: 0 };
@@ -161,27 +167,29 @@ describe("ExpenseRepository.softDelete", () => {
       expect(await ExpenseRepository.softDelete(randomUUID(), randomUUID(), null, tx)).toBeNull();
     });
   });
-});
 
-describe("ExpenseRepository.bulkSoftDelete", () => {
-  test("soft-deletes every requested row and skips unknown ids", async () => {
+  test("soft-deletes request rows one by one while unknown ids stay untouched", async () => {
     await runInRollback(async tx => {
       const first = await createExpense(tx, { title: "First" });
       const second = await createExpense(tx, { title: "Second" });
       const actor = await createTestUser(tx, {});
-      const deleted = await ExpenseRepository.bulkSoftDelete([first.id, second.id, randomUUID()], actor.id, null, tx);
-      expect(deleted).toHaveLength(2);
+
+      const deleted = await [first.id, second.id, randomUUID()].reduce<Promise<ExpenseSelectType[]>>(
+        async (collected, id) => {
+          const rows = await collected;
+          const row = await ExpenseRepository.softDelete(id, actor.id, null, tx);
+          if (row != null) rows.push(row);
+          return rows;
+        },
+        Promise.resolve([])
+      );
+
       expectIds(deleted, [first.id, second.id]);
+      expect(deleted).toHaveLength(2);
       for (const row of deleted) {
         expect(row.deletedAt).toBeInstanceOf(Date);
         expect(row.deletedByUserId).toBe(actor.id);
       }
-    });
-  });
-
-  test("returns an empty array for an empty id list", async () => {
-    await runInRollback(async tx => {
-      expect(await ExpenseRepository.bulkSoftDelete([], randomUUID(), null, tx)).toEqual([]);
     });
   });
 });
@@ -205,6 +213,24 @@ describe("ExpenseRepository.findFiltered", () => {
       const rowsOnly = await filterWith({ title: "100%" })(tx);
       expect(rowsOnly).toHaveLength(1);
       expect(rowsOnly[0]?.id).toBe(pct.id);
+    });
+  });
+
+  test("escapes the underscore wildcard in title search", async () => {
+    await runInRollback(async tx => {
+      const literal = await createExpense(tx, { title: "Wildmark_A invoice" });
+      await createExpense(tx, { title: "WildmarkXA invoice" });
+      const rows = await filterWith({ title: "Wildmark_A" })(tx);
+      expectIds(rows, [literal.id]);
+    });
+  });
+
+  test("escapes the backslash escape character in title search", async () => {
+    await runInRollback(async tx => {
+      const literal = await createExpense(tx, { title: "Wildmark\\spend receipt" });
+      await createExpense(tx, { title: "Wildmarkspend decoy" });
+      const rows = await filterWith({ title: "Wildmark\\spend" })(tx);
+      expectIds(rows, [literal.id]);
     });
   });
 
@@ -286,6 +312,41 @@ describe("ExpenseRepository.findFiltered", () => {
       expect(firstPage.rows.map(row => row.id)).toEqual([ids[4], ids[3]]);
       expect(secondPage.rows.map(row => row.id)).toEqual([ids[2], ids[1]]);
       expect(thirdPage.rows.map(row => row.id)).toEqual([ids[0]]);
+    });
+  });
+
+  test("treats SQL/quote/underscore injection payloads as literal text", async () => {
+    await runInRollback(async tx => {
+      const marker = `ExpInject-${randomUUID().slice(0, 8)}`;
+      const created = await createExpense(tx, { title: marker });
+
+      const payloads = ["_", "' OR '1'='1", `'; DROP TABLE expenses; --`, "test\\%_"];
+      // Sequential on purpose: the rollback transaction carries a single
+      // connection, so queries must not interleave.
+      await payloads.reduce(async (previous, payload) => {
+        await previous;
+        // None of the payloads occur literally in the seeded title, so nothing
+        // may match — a match would mean the pattern/payload was interpreted.
+        const page = await ExpenseRepository.findFiltered({ title: payload }, PAGE, tx);
+        expect(page.rows).toHaveLength(0);
+        expect(page.totalCount).toBe(0);
+      }, Promise.resolve());
+
+      // The table survived the DROP attempt and the plain search still works.
+      const exact = await ExpenseRepository.findFiltered({ title: marker }, PAGE, tx);
+      expectIds(exact.rows, [created.id]);
+    });
+  });
+
+  test("an offset past the end returns empty rows with the full totalCount", async () => {
+    await runInRollback(async tx => {
+      const marker = `ExpPastEnd-${randomUUID().slice(0, 8)}`;
+      await createExpense(tx, { title: `${marker} one` });
+      await createExpense(tx, { title: `${marker} two` });
+
+      const page = await ExpenseRepository.findFiltered({ title: marker }, { limit: 50, offset: 999 }, tx);
+      expect(page.rows).toHaveLength(0);
+      expect(page.totalCount).toBe(2);
     });
   });
 

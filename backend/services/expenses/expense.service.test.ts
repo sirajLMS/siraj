@@ -49,6 +49,9 @@ let transactionChain: Promise<unknown> = Promise.resolve();
 let reportRows: ExpenseListRow[] = [];
 let reportTotalCount = 0;
 
+/** Key-scoped lock acquisitions, in order, alongside replay scans — proves lock-then-replay ordering. */
+const invocationOrder: string[] = [];
+
 /**
  * Sentinel executor handed to the service callback. Repository mocks assert
  * they received this exact object, proving writes share the service
@@ -92,6 +95,7 @@ const expenseCreateMock = mock(async (input: ExpenseInsertType, tx: unknown): Pr
 const expenseGetByIdMock = mock(async (id: string, _tx?: unknown) => expenseStore.get(id) ?? null);
 const expenseGetByIdForUpdateMock = mock(async (id: string, tx: unknown) => {
   expect(tx).toBe(TX_SENTINEL);
+  invocationOrder.push("expense-lock");
   return expenseStore.get(id) ?? null;
 });
 
@@ -137,6 +141,7 @@ const userFindByIdsMock = mock(async (ids: readonly string[]) => {
 
 const carryoverLockMock = mock(async (ids: readonly string[], tx: unknown) => {
   expect(tx).toBe(TX_SENTINEL);
+  invocationOrder.push("carryover-lock");
   const found: { id: string; isPaid: boolean }[] = [];
   for (const id of ids) {
     const row = mockCarryovers.get(id);
@@ -145,11 +150,16 @@ const carryoverLockMock = mock(async (ids: readonly string[], tx: unknown) => {
   return found;
 });
 
+const acquireAdvisoryLockMock = mock(async (_tx: unknown, lockKey: string) => {
+  invocationOrder.push(`lock:${lockKey}`);
+});
+
 const queryAuditLogsMock = mock(
   async (
     filters: { actorUserId?: string; action?: string; startDate?: Date; limit?: number; offset?: number },
     _tx: unknown
   ) => {
+    invocationOrder.push("replay-scan");
     const windowStart = filters.startDate?.getTime() ?? Number.NEGATIVE_INFINITY;
     const filtered = auditStore
       .filter(
@@ -214,6 +224,10 @@ await mock.module("@/backend/db/repo", () => ({
   },
   TeacherRepository: { findById: teacherFindByIdMock },
   UserRepository: { findByIds: userFindByIdsMock },
+}));
+
+await mock.module("@/backend/db/repo/shared", () => ({
+  acquireAdvisoryLock: acquireAdvisoryLockMock,
 }));
 
 await mock.module("@/backend/services/billing/permission-utils", () => ({
@@ -310,6 +324,7 @@ function resetMocks(): void {
   auditStore.length = 0;
   permissionChecks.length = 0;
   insertPayloads.length = 0;
+  invocationOrder.length = 0;
   expenseCounter = 0;
   auditCounter = 0;
   permissionError = null;
@@ -326,6 +341,7 @@ function resetMocks(): void {
   teacherFindByIdMock.mockClear();
   userFindByIdsMock.mockClear();
   carryoverLockMock.mockClear();
+  acquireAdvisoryLockMock.mockClear();
   queryAuditLogsMock.mockClear();
   createManyAuditLogsMock.mockClear();
   requirePermissionMock.mockClear();
@@ -440,6 +456,20 @@ describe("ExpenseService.create", () => {
     expectNoWrites();
   });
 
+  test("a repository insert failure surfaces as EXPENSE_CREATE_FAILED and is logged", async () => {
+    expenseCreateMock.mockImplementationOnce(async () => {
+      throw new Error("connection reset");
+    });
+    await expectDomainError(() => createExpense(), "EXPENSE_CREATE_FAILED");
+    expect(loggerErrorSpy).toHaveBeenCalled();
+    expect(auditStore).toHaveLength(0);
+  });
+
+  test("falls back to the unknown-name marker when the creator user row is missing", async () => {
+    const created = await createExpense();
+    expect(created.createdByName).toBe("Unknown");
+  });
+
   test("a same-key re-submit inside the window replays the original row", async () => {
     const first = await createExpense({ clientRequestId: "req-double-click" });
     const second = await createExpense({ clientRequestId: "req-double-click" });
@@ -447,6 +477,41 @@ describe("ExpenseService.create", () => {
     expect(second.id).toBe(first.id);
     expect(insertPayloads).toHaveLength(1);
     expect(auditStore).toHaveLength(1);
+  });
+
+  test("takes the key-scoped advisory lock before the replay scan", async () => {
+    await createExpense({ clientRequestId: "req-lock-order" });
+
+    const lockIndex = invocationOrder.findIndex(entry => entry.startsWith("lock:expense-create:"));
+    const scanIndex = invocationOrder.indexOf("replay-scan");
+    expect(lockIndex).toBeGreaterThanOrEqual(0);
+    expect(scanIndex).toBeGreaterThanOrEqual(0);
+    expect(lockIndex).toBeLessThan(scanIndex);
+    expect(acquireAdvisoryLockMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("serializes a concurrent duplicate burst onto the first write", async () => {
+    const [first, second] = await Promise.all([
+      createExpense({ clientRequestId: "req-burst" }),
+      createExpense({ clientRequestId: "req-burst" }),
+    ]);
+
+    expect(second.id).toBe(first.id);
+    expect(insertPayloads).toHaveLength(1);
+    expect(auditStore).toHaveLength(1);
+    expect(acquireAdvisoryLockMock).toHaveBeenCalledTimes(2);
+  });
+
+  test("a create without clientRequestId takes no advisory lock", async () => {
+    await createExpense();
+    expect(acquireAdvisoryLockMock).not.toHaveBeenCalled();
+  });
+
+  test("canonicalizes the stored value to two decimals", async () => {
+    const created = await createExpense({ expenseValue: " 1.5 " });
+
+    expect(created.expenseValue).toBe("1.50");
+    expect(insertPayloads[0]?.expenseValue).toBe("1.50");
   });
 
   test("different client request ids create distinct rows", async () => {
@@ -461,6 +526,49 @@ describe("ExpenseService.create", () => {
     const second = await createExpense();
     expect(second.id).not.toBe(first.id);
     expect(insertPayloads).toHaveLength(2);
+  });
+
+  function pushCorruptAuditRow(metadata: unknown): void {
+    auditCounter += 1;
+    auditStore.push({
+      id: `seeded-audit-${auditCounter}`,
+      actorUserId: ACTOR_ID,
+      actorType: "USER",
+      entityType: "EXPENSE",
+      entityId: EXPENSE_ID,
+      action: "EXPENSE_CREATE",
+      description: null,
+      previousState: null,
+      newState: null,
+      changes: null,
+      ipAddress: null,
+      userAgent: null,
+      metadata,
+      createdAt: new Date(),
+    });
+  }
+
+  test("corrupt replay audit metadata is ignored and the create runs fresh", async () => {
+    pushCorruptAuditRow(42);
+    pushCorruptAuditRow({ idempotencyKey: 42 });
+
+    const created = await createExpense({ clientRequestId: "req-corrupt" });
+
+    expect(insertPayloads).toHaveLength(1);
+    expect(expenseStore.get(created.id)).toBeDefined();
+    // Both seeded rows are non-matching garbage; the third row is the real audit.
+    expect(auditStore).toHaveLength(3);
+  });
+
+  test("a replay whose original row is gone re-creates instead of returning a ghost", async () => {
+    const first = await createExpense({ clientRequestId: "req-vanished" });
+    expenseStore.delete(first.id);
+
+    const second = await createExpense({ clientRequestId: "req-vanished" });
+
+    expect(second.id).not.toBe(first.id);
+    expect(insertPayloads).toHaveLength(2);
+    expect(auditStore).toHaveLength(2);
   });
 });
 
@@ -515,6 +623,18 @@ describe("ExpenseService.createInternal", () => {
       "TEACHER_NOT_FOUND"
     );
     expectNoWrites();
+  });
+
+  test("falls back to the unknown-name marker when the teacher's user row is missing", async () => {
+    mockTeachers.set(TEACHER_ID, { id: TEACHER_ID, userId: TEACHER_USER_ID });
+
+    const { ExpenseService } = await importService();
+    const created = await ExpenseService.createInternal(
+      buildInput({ teacherId: TEACHER_ID, teacherName: undefined }),
+      asTx(TX_SENTINEL),
+      tErrors
+    );
+    expect(created.teacherName).toBe("Unknown");
   });
 });
 
@@ -588,12 +708,80 @@ describe("ExpenseService.update", () => {
     );
   });
 
+  test("rejects re-typing an operational expense INTO Salaries", async () => {
+    const existing = seedExpense({ type: ExpenseType.MARKETING });
+    await expectDomainError(
+      () => updateExpense({ id: existing.id, type: ExpenseType.SALARIES }),
+      "EXPENSE_SALARIES_VIA_CARRYOVER_ONLY"
+    );
+    expect(expenseStore.get(existing.id)?.type).toBe(ExpenseType.MARKETING);
+    expect(expenseUpdateMock).toHaveBeenCalledTimes(0);
+    expect(auditStore).toHaveLength(0);
+  });
+
+  test("canonicalizes a patched value to two decimals", async () => {
+    const existing = seedExpense();
+    const updated = await updateExpense({ id: existing.id, expenseValue: "7.5" });
+
+    expect(updated.expenseValue).toBe("7.50");
+    const metadata = treatAsMetadata(auditStore[0]?.metadata);
+    expect(metadata.previousValues).toEqual({ expenseValue: "100.00" });
+    expect(metadata.newValues).toEqual({ expenseValue: "7.50" });
+  });
+
+  test("rejects linking a teacher that does not exist", async () => {
+    const existing = seedExpense();
+    await expectDomainError(() => updateExpense({ id: existing.id, teacherId: TEACHER_ID }), "TEACHER_NOT_FOUND");
+    expect(teacherFindByIdMock).toHaveBeenCalledTimes(1);
+    expect(expenseUpdateMock).toHaveBeenCalledTimes(0);
+    expect(auditStore).toHaveLength(0);
+  });
+
+  test("rejects a malformed teacher id shape before the transaction opens", async () => {
+    const existing = seedExpense();
+    await expectDomainError(() => updateExpense({ id: existing.id, teacherId: "not-a-uuid" }), "TEACHER_NOT_FOUND");
+    expect(expenseGetByIdForUpdateMock).toHaveBeenCalledTimes(0);
+    expect(expenseUpdateMock).toHaveBeenCalledTimes(0);
+  });
+
+  test("relinks to an existing teacher with the caller-supplied snapshot", async () => {
+    mockTeachers.set(TEACHER_ID, { id: TEACHER_ID, userId: TEACHER_USER_ID });
+    const existing = seedExpense();
+    const updated = await updateExpense({ id: existing.id, teacherId: TEACHER_ID, teacherName: "Ustadh Ahmad" });
+
+    expect(updated.teacherId).toBe(TEACHER_ID);
+    expect(updated.teacherName).toBe("Ustadh Ahmad");
+    expect(teacherFindByIdMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("clears the teacher link without touching the teachers read", async () => {
+    const existing = seedExpense({ teacherId: TEACHER_ID, teacherName: "Old Snapshot" });
+    const updated = await updateExpense({ id: existing.id, teacherId: null, teacherName: null });
+
+    expect(updated.teacherId).toBeNull();
+    expect(updated.teacherName).toBeNull();
+    expect(teacherFindByIdMock).toHaveBeenCalledTimes(0);
+  });
+
   test("rejects a value change on a Salaries expense", async () => {
     const salaries = seedExpense({ type: ExpenseType.SALARIES, expenseValue: "2500.00" });
     await expectDomainError(
       () => updateExpense({ id: salaries.id, expenseValue: "2600.00" }),
       "EXPENSE_VALUE_IMMUTABLE_FOR_SALARIES"
     );
+  });
+
+  test("accepts a no-op type/value patch on a Salaries expense", async () => {
+    const salaries = seedExpense({ type: ExpenseType.SALARIES, expenseValue: "2500.00" });
+    const updated = await updateExpense({ id: salaries.id, type: ExpenseType.SALARIES, expenseValue: " 2500.00 " });
+    expect(updated.type).toBe(ExpenseType.SALARIES);
+    expect(updated.expenseValue).toBe("2500.00");
+  });
+
+  test("rejects when the locked row vanishes before the update write lands", async () => {
+    const existing = seedExpense();
+    expenseUpdateMock.mockImplementationOnce(async () => null);
+    await expectDomainError(() => updateExpense({ id: existing.id, title: "x" }), "EXPENSE_NOT_FOUND");
   });
 
   test("permission denial rejects before any write", async () => {
@@ -665,6 +853,48 @@ describe("ExpenseService.softDelete", () => {
     expect(deleted.deletedAt).not.toBeNull();
   });
 
+  test("locks the linked carryover before the expense row (canonical lock order)", async () => {
+    mockCarryovers.set(CARRYOVER_ID, { isPaid: false });
+    const salaries = seedExpense({
+      type: ExpenseType.SALARIES,
+      sourceEntity: "carryover_balances",
+      sourceEntityId: CARRYOVER_ID,
+    });
+
+    const deleted = await deleteExpense(salaries.id);
+
+    expect(deleted.deletedAt).not.toBeNull();
+    const carryoverLockIndex = invocationOrder.indexOf("carryover-lock");
+    const expenseLockIndex = invocationOrder.indexOf("expense-lock");
+    expect(carryoverLockIndex).toBeGreaterThanOrEqual(0);
+    expect(expenseLockIndex).toBeGreaterThanOrEqual(0);
+    expect(carryoverLockIndex).toBeLessThan(expenseLockIndex);
+  });
+
+  test("skips the carryover guard when the provenance carries no source id", async () => {
+    const orphanSource = seedExpense({ sourceEntity: "carryover_balances" });
+    const deleted = await deleteExpense(orphanSource.id);
+    expect(deleted.deletedAt).not.toBeNull();
+    expect(carryoverLockMock).not.toHaveBeenCalled();
+  });
+
+  test("deletes when the linked carryover row is no longer lockable", async () => {
+    const salaries = seedExpense({
+      type: ExpenseType.SALARIES,
+      sourceEntity: "carryover_balances",
+      sourceEntityId: CARRYOVER_ID,
+    });
+    const deleted = await deleteExpense(salaries.id);
+    expect(deleted.deletedAt).not.toBeNull();
+    expect(carryoverLockMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("rejects when the locked row vanishes before the delete write lands", async () => {
+    const existing = seedExpense();
+    expenseSoftDeleteMock.mockImplementationOnce(async () => null);
+    await expectDomainError(() => deleteExpense(existing.id), "EXPENSE_NOT_FOUND");
+  });
+
   test("permission denial rejects the public path; caller-tx path skips the check", async () => {
     const existing = seedExpense();
     permissionError = new ForbiddenError("Insufficient permissions.");
@@ -732,6 +962,41 @@ describe("ExpenseService.bulkDelete", () => {
       "FORBIDDEN"
     );
     expect(expenseStore.get(plain.id)?.deletedAt).toBeNull();
+  });
+
+  test("deduplicates repeated ids in the batch", async () => {
+    const row = seedExpense();
+    const { ExpenseService } = await importService();
+
+    const result = await ExpenseService.bulkDelete({ ids: [row.id, row.id], actorUserId: ACTOR_ID }, tErrors);
+
+    expect(result.deleted).toEqual([row.id]);
+    expect(result.auditLogIds).toHaveLength(1);
+    expect(auditStore).toHaveLength(1);
+  });
+
+  test("rejects a batch carrying a malformed id before the transaction opens", async () => {
+    const row = seedExpense();
+    const { ExpenseService } = await importService();
+
+    await expectDomainError(
+      () => ExpenseService.bulkDelete({ ids: [row.id, "junk"], actorUserId: ACTOR_ID }, tErrors),
+      "EXPENSE_NOT_FOUND"
+    );
+    expect(expenseStore.get(row.id)?.deletedAt).toBeNull();
+    expect(auditStore).toHaveLength(0);
+  });
+
+  test("an already-deleted row re-lists as deleted without a second audit row", async () => {
+    const row = seedExpense();
+    const { ExpenseService } = await importService();
+    await ExpenseService.softDelete({ id: row.id, actorUserId: ACTOR_ID, reason: "first" }, tErrors);
+
+    const result = await ExpenseService.bulkDelete({ ids: [row.id], actorUserId: ACTOR_ID }, tErrors);
+
+    expect(result.deleted).toEqual([row.id]);
+    expect(result.auditLogIds).toHaveLength(0);
+    expect(auditStore).toHaveLength(1);
   });
 });
 

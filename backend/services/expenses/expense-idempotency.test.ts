@@ -70,4 +70,18 @@ describe("deriveCreateIdempotencyKey", () => {
   test("produces a 64-char hex digest", () => {
     expect(deriveCreateIdempotencyKey(buildInput())).toMatch(/^[0-9a-f]{64}$/);
   });
+
+  test("a different actor produces a different key (no cross-user replay)", () => {
+    expect(deriveCreateIdempotencyKey(buildInput())).not.toBe(
+      deriveCreateIdempotencyKey(buildInput({ createdByUserId: "dddd9999-9999-4cc9-8999-dddddddd9999" }))
+    );
+  });
+
+  test("title, value, currency, and expense month each participate in the key", () => {
+    const base = deriveCreateIdempotencyKey(buildInput());
+    expect(deriveCreateIdempotencyKey(buildInput({ title: "Storage rent" }))).not.toBe(base);
+    expect(deriveCreateIdempotencyKey(buildInput({ expenseValue: "101.00" }))).not.toBe(base);
+    expect(deriveCreateIdempotencyKey(buildInput({ expenseCurrency: CurrencyCode.USD }))).not.toBe(base);
+    expect(deriveCreateIdempotencyKey(buildInput({ expenseDate: "2026-02" }))).not.toBe(base);
+  });
 });

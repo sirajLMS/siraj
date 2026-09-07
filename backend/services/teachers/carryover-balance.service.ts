@@ -12,7 +12,7 @@ import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { carryoverBalanceItems, students } from "@/backend/db/schema";
 import { AppPermission, CalculationStatus, ExpenseType } from "@/backend/enum";
 import { DomainError, logger, NotFoundError, sanitizePlainText, ValidationError } from "@/backend/lib";
-import { EXPENSE_SOURCE_CARRYOVER_BALANCES, ExpenseService } from "@/backend/services";
+import { ExpenseService } from "@/backend/services";
 import { requirePermission } from "@/backend/services/billing/permission-utils";
 import { AuditService } from "@/backend/services/system/audit.service";
 import {
@@ -60,6 +60,7 @@ import type {
   UpdateCarryoverInput,
 } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
+import { EXPENSE_SOURCE_CARRYOVER_BALANCES } from "@/shared/constants/expenses/expense-source.constants";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** `class_status_events.eventType` is a plain varchar column — payroll event kinds are module constants. */

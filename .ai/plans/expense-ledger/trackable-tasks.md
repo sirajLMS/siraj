@@ -442,30 +442,30 @@ bun run scripts/health/sub-loop.ts <file-path> --lifecycle duplicates
 > Gate"; docs/testing/workflow-journey-tests.md). Existing tasks are unchanged; these tasks are
 > additive and execute before this plan is treated as test-complete.
 
-- [ ] TB.1 Journey: accounting operator pays carryovers via Plan 5 (`bulkCarryoverToExpense`) → Salaries expense rows appear on the ledger with provenance (pay-to-ledger journey)
+- [x] TB.1 Journey: accounting operator pays carryovers via Plan 5 (`bulkCarryoverToExpense`) → Salaries expense rows appear on the ledger with provenance (pay-to-ledger journey)
   - Create `test/workflows/expenses/carryover-pay-to-expense-ledger.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`; spy notification dispatch via `spyOn(NotificationDispatchHelpers, "dispatchWithPreferences")`)
   - Assert: shared-state transitions (carryover `isPaid = true` + `expenseId` set inside the same tx; tx rollback leaves no orphan expense row), cross-actor visibility (operator with `ACCOUNTING_EXPENSES_VIEW` sees the `Salaries` row with `sourceEntity = 'carryover_balances'` + `sourceEntityId`; `teacherName` snapshot preserved even if teacher later deactivated — E16/E20; users without the view permission must not see it), side effects (ledger row value/currency match the carryover payable), denial paths for unauthorized actors
   - Verify: `bun run test/scripts/run-test.ts test/workflows/expenses/carryover-pay-to-expense-ledger.test.ts` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-2 (AC-2.1–AC-2.5), US-7 (AC-7.1–AC-7.2), US-5 (AC-5.6), E16, E19, E20_
-- [ ] TB.2 Journey: accounting operator unpays a carryover via Plan 5 (`unpayCarryoverBalance`) → linked Salaries expense soft-deleted and hidden from the default ledger view (unpay-to-soft-delete journey)
+- [x] TB.2 Journey: accounting operator unpays a carryover via Plan 5 (`unpayCarryoverBalance`) → linked Salaries expense soft-deleted and hidden from the default ledger view (unpay-to-soft-delete journey)
   - Create `test/workflows/expenses/carryover-unpay-expense-softdelete.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`)
   - Assert: shared-state transitions (expense `deletedAt`/`deletedByUserId` set atomically with the carryover revert in one tx; soft-delete idempotent on repeated unpay), cross-actor visibility (default filter hides the row; `includeDeleted` shows strike-through; direct `deleteExpense`/`bulkDeleteExpenses` on the protected row rejected with `EXPENSE_DELETE_VIA_UNPAY` and the operator is directed to the Unpay flow; bulk delete with one protected row rolls back atomically — E5), side effects (`audit_logs` `EXPENSE_DELETE` row with reason), denial paths
   - Verify: `bun run test/scripts/run-test.ts test/workflows/expenses/carryover-unpay-expense-softdelete.test.ts` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-3 (AC-3.5–AC-3.7), US-6 (AC-6.1–AC-6.6), E3, E4, E5_
-- [ ] TB.3 Journey: operator with MANAGE creates/edits/deletes a manual expense → VIEW-only operator and auditor observe the result + audit trail with correct actor attribution (operator-to-auditor journey)
+- [x] TB.3 Journey: operator with MANAGE creates/edits/deletes a manual expense → VIEW-only operator and auditor observe the result + audit trail with correct actor attribution (operator-to-auditor journey)
   - Create `test/workflows/expenses/expense-crud-audit-attribution.test.ts` (test-first; real services + real DB; NO `runInRollback`; committed fixtures in `beforeAll` + tracked hard delete in `afterAll`; cast helper in `test/workflows/helpers/`)
   - Assert: shared-state transitions (soft-delete never hard-deletes; `audit_logs` rows for EXPENSE_CREATE / EXPENSE_UPDATE with `previousValues` / EXPENSE_DELETE carry the acting user's `actorUserId`, never a client-supplied one), cross-actor visibility (VIEW-only operator reads the ledger but every mutation + the CSV export route rejects `INSUFFICIENT_PERMISSIONS` for a MANAGE-less actor — E17; user with neither permission cannot query at all), side effects (aggregate `getReport` excludes soft-deleted rows — AC-6.6), denial paths for unauthorized actors
   - Verify: `bun run test/scripts/run-test.ts test/workflows/expenses/expense-crud-audit-attribution.test.ts` green, then `bun run test:workflows`
   - Reference: `docs/testing/workflow-journey-tests.md`, `test/workflows/AGENTS.md`
   - _Requirements: US-3 (AC-3.2, AC-3.8–AC-3.9), US-5 (AC-5.1–AC-5.5), US-8 (AC-8.3–AC-8.4), NFR-5, NFR-6, NFR-9, E14, E17_
-- [ ] TB.4 4-Tier verification for expense service/repository/GraphQL layer
+- [x] TB.4 4-Tier verification for expense service/repository/GraphQL layer
   - Confirm Tier 1 branch coverage + Tier 4 abuse/permission cases exist and are green for: `backend/db/repo/expenses/expense.repository.ts`, `backend/services/expenses/expense.service.ts`, `backend/services/expenses/expense-helpers.ts`, `backend/services/expenses/expense-idempotency.ts`, `backend/services/teachers/carryover-balance.service.ts` (cross-tx `createInternal`/`softDelete` integration), `backend/graphql/query/expenses/expense.query.ts`, `backend/graphql/mutation/expenses/expense.mutation.ts`, `app/api/expenses/export/route.ts`
   - Fill gaps via `.agents/skills/write-tests/SKILL.md` + `.agents/skills/test-expert/SKILL.md`; repo tests inside `runInRollback` with `tx` propagation; service tests mock all external channels
   - Verify with `bun run test/scripts/run-test.ts <each test file>`
   - _Requirements: cross-cutting_
-- [ ] TB.5 Penetration verification (plan introduces new GraphQL queries/mutations + a CSV export route)
+- [x] TB.5 Penetration verification (plan introduces new GraphQL queries/mutations + a CSV export route)
   - BOLA/IDOR across the roles in this plan (expense rows leakable between tenants/permission scopes; drill-down `expense(id)` must not bypass `ACCOUNTING_EXPENSES_VIEW`); permission denial on all admin mutations (`createExpense`/`updateExpense`/`deleteExpense`/`bulkDeleteExpenses`) and on `POST/GET /api/expenses/export`; wildcard injection (`%`/`_`) on the `ILIKE '%term%'` title search (AC-4.1); CSV formula injection (`=`, `+`, `-`, `@` leading cells) in the export route; confirm `ExpenseService.createInternal` is unreachable via GraphQL (AC-5.6)
   - Via `.agents/skills/pentester/SKILL.md`
   - _Requirements: US-5 (AC-5.1–AC-5.6), AC-4.1, AC-1.6, E13_

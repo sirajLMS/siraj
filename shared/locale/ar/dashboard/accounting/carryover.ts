@@ -2,10 +2,20 @@ import type { CarryoverLabels } from "@/shared/locale/types/dashboard/accounting
 
 export const dashboardAccountingCarryoverAr: CarryoverLabels = {
   title: "أرصدة الترحيل",
+  pageSubtitle: "تسوية مستحقات المعلمين المجمّعة وتحويلها إلى مصروفات.",
   empty: "لا توجد سجلات ترحيل مطابقة للمرشحات الحالية.",
+  emptyStateHeading: "لا توجد أرصدة ترحيل",
+  emptyStateHint: "جرّب تغيير معايير التصفية أو أضف سجلاً جديداً يدوياً.",
   loadError: "فشل تحميل أرصدة الترحيل. حاول مرة أخرى.",
   exportTruncated: "تم اقتطاع التصدير إلى 10 000 صف.",
   exportFailed: "فشل تصدير CSV. حاول مرة أخرى.",
+  selectedCount: count => {
+    if (count === 0) return "لم يتم تحديد أي عنصر";
+    if (count === 1) return "عنصر محدد واحد";
+    if (count === 2) return "عنصران محددان";
+    if (count >= 3 && count <= 10) return `${count} عناصر محددة`;
+    return `${count} عنصراً محدداً`;
+  },
 
   column: {
     teacher: "المعلم",
@@ -57,14 +67,43 @@ export const dashboardAccountingCarryoverAr: CarryoverLabels = {
       paymentDate: "تاريخ الدفع",
       expenseDate: "شهر المصروف",
       note: "ملاحظة (اختياري)",
+      notePlaceholder: "ملاحظة داخلية (بحد أقصى 2,000 حرف)",
       summary: (count, amount, currency) => {
         if (count === 1) return `رصيد واحد بإجمالي ${amount} ${currency}`;
         if (count === 2) return `رصيدان بإجمالي ${amount} ${currency}`;
         if (count >= 3 && count <= 10) return `${count} أرصدة بإجمالي ${amount} ${currency}`;
         return `${count} رصيداً بإجمالي ${amount} ${currency}`;
       },
+      convertConsequenceWarning: "سيتم إنشاء صف مصروف لكل رصيد ترحيل ووضعها كمدفوعة. ستصبح الجلسات المرتبطة مدفوعة.",
+      convertFillRequiredHint: "املأ الحقول المطلوبة أعلاه للتحويل.",
       submit: "تحويل",
       cancel: "إلغاء",
+    },
+    bulkCreate: {
+      groupedSummary: (sessions, balances) => {
+        let sessionPart: string;
+        if (sessions === 1) {
+          sessionPart = "جلسة مدققة واحدة";
+        } else if (sessions === 2) {
+          sessionPart = "جلستان مدقتان";
+        } else if (sessions >= 3 && sessions <= 10) {
+          sessionPart = `${sessions} جلسات مدققة`;
+        } else {
+          sessionPart = `${sessions} جلسة مدققة`;
+        }
+        let balancePart: string;
+        if (balances === 1) {
+          balancePart = "رصيد ترحيل واحد";
+        } else if (balances === 2) {
+          balancePart = "رصيدَي ترحيل";
+        } else if (balances >= 3 && balances <= 10) {
+          balancePart = `${balances} أرصدة ترحيل`;
+        } else {
+          balancePart = `${balances} رصيد ترحيل`;
+        }
+        return `سيتم تجميع ${sessionPart} في ${balancePart}.`;
+      },
+      groupedConsequence: "ستنتقل الجلسات إلى حالة بانتظار الدفع.",
     },
     form: {
       titleAdd: "إضافة رصيد ترحيل",
@@ -78,6 +117,7 @@ export const dashboardAccountingCarryoverAr: CarryoverLabels = {
       currency: "العملة",
       studentsCount: "الطلاب",
       studentsText: "قائمة الطلاب",
+      studentsAutoFilledHelper: "تمت تعبئته تلقائياً من الجلسات",
       note: "ملاحظة",
       notePlaceholder: "ملاحظة اختيارية (بحد أقصى 2,000 حرف)",
       submit: "حفظ",
@@ -102,7 +142,8 @@ export const dashboardAccountingCarryoverAr: CarryoverLabels = {
     },
     unpay: {
       title: "إلغاء دفع رصيد الترحيل؟",
-      warning: "سيتم حذف المصروف المرتبط (حذف ناعم) وستعود الجلسات المرتبطة إلى حالة بانتظار الدفع (WAITING_PAID).",
+      warning: "سيتم حذف المصروف المرتبط (حذف ناعم) وستعود الجلسات المرتبطة إلى حالة بانتظار الدفع.",
+      expenseLabel: "المصروف",
       note: "سبب التصحيح (اختياري)",
       notePlaceholder: "اشرح سبب إلغاء دفع هذا الرصيد (بحد أقصى 2,000 حرف)",
       confirm: "إلغاء الدفع",
@@ -171,6 +212,13 @@ export const dashboardAccountingCarryoverAr: CarryoverLabels = {
   aggregate: {
     totalPayable: "إجمالي المستحق",
     totalPaid: "إجمالي المدفوع",
+    recordsCount: count => {
+      if (count === 0) return "لا توجد سجلات";
+      if (count === 1) return "سجل واحد";
+      if (count === 2) return "سجلان";
+      if (count >= 3 && count <= 10) return `${count} سجلات`;
+      return `${count} سجلاً`;
+    },
     paidCount: count => {
       if (count === 0) return "لا توجد أرصدة مدفوعة";
       if (count === 1) return "رصيد مدفوع واحد";

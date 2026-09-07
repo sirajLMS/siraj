@@ -6,10 +6,14 @@
  */
 export interface CarryoverLabels {
   readonly title: string;
+  readonly pageSubtitle: string;
   readonly empty: string;
+  readonly emptyStateHeading: string;
+  readonly emptyStateHint: string;
   readonly loadError: string;
   readonly exportTruncated: string;
   readonly exportFailed: string;
+  readonly selectedCount: (count: number) => string;
 
   readonly column: {
     readonly teacher: string;
@@ -61,9 +65,16 @@ export interface CarryoverLabels {
       readonly paymentDate: string;
       readonly expenseDate: string;
       readonly note: string;
+      readonly notePlaceholder: string;
       readonly summary: (count: number, amount: string, currency: string) => string;
+      readonly convertConsequenceWarning: string;
+      readonly convertFillRequiredHint: string;
       readonly submit: string;
       readonly cancel: string;
+    };
+    readonly bulkCreate: {
+      readonly groupedSummary: (sessions: number, balances: number) => string;
+      readonly groupedConsequence: string;
     };
     readonly form: {
       readonly titleAdd: string;
@@ -77,6 +88,7 @@ export interface CarryoverLabels {
       readonly currency: string;
       readonly studentsCount: string;
       readonly studentsText: string;
+      readonly studentsAutoFilledHelper: string;
       readonly note: string;
       readonly notePlaceholder: string;
       readonly submit: string;
@@ -92,6 +104,7 @@ export interface CarryoverLabels {
     readonly unpay: {
       readonly title: string;
       readonly warning: string;
+      readonly expenseLabel: string;
       readonly note: string;
       readonly notePlaceholder: string;
       readonly confirm: string;
@@ -136,6 +149,7 @@ export interface CarryoverLabels {
   readonly aggregate: {
     readonly totalPayable: string;
     readonly totalPaid: string;
+    readonly recordsCount: (count: number) => string;
     readonly paidCount: (count: number) => string;
     readonly unpaidCount: (count: number) => string;
   };
