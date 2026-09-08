@@ -124,6 +124,7 @@ The `createGeneralUser` mutation creates a user without a specialized profile ex
 
 Use `authScopes: { permission: AppPermission.X }` (not `authScopes: { superAdmin: true }`) for mutations accessible by non-superadmin users with the correct permission. The `superAdmin: true` authScope blocks ALL non-superadmin users — only use it for truly superadmin-only operations (e.g., impersonation, permission group simulation, system config).
 
+- **Multi-key `authScopes` maps default to "any"**: scope-auth evaluates a bare multi-key `authScopes` map with OR semantics — a second truthy scope satisfies the map. Any mutation combining `permission` with additional scopes (e.g. `notImpersonating`) MUST wrap them in `$all: { ... }` and pin the semantics with an executed-schema auth-scopes test (see `backend/graphql/test/whatsapp-config.auth-scopes.test.ts`). Secret-keeping singleton-config reference: `docs/backend/whatsapp-configuration.md`.
 - **Privileged filter flags are enforced at EVERY entry point**: when a service accepts a privileged flag (e.g. `includeDeleted`) unconditionally, both the GraphQL resolver AND any API route exposing it must re-gate it on the manage permission (e.g. `ctx.isSuperAdmin || ctx.permissions.includes(...)`) — gating only one entry point is a privilege-escalation hole. See `docs/services/session-audit-reports.md`.
 
 See `docs/auth/supervisor-permissions.md` for the supervisor permission model and the list of mutations that were fixed from `superAdmin: true` to permission-based authScopes.

@@ -121,6 +121,10 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while BASIC_CHECK
    **Never modify a file you were not assigned to.** Only the orchestrator coordinates
    multi-file changes.
 
+9. **Gate claims must carry actual exit codes.** Every per-file quality-gate claim in a report
+   must cite the exit code from the sub-loop run executed in the SAME editing session — a
+   claimed-but-unrun gate has shipped build-breaking syntax errors before.
+
 ---
 
 ### Phase 1: Start Quality Gate

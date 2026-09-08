@@ -216,3 +216,8 @@ bun run test:ui:kill         # stop stale test servers (port 3066 only — never
 ### Audit-Log Cleanup in Journeys
 
 - Journeys whose actions mirror into `audit_logs` cannot hard-delete cast users afterward — the immutability trigger (`prevent_audit_log_mod_trigger`) blocks row updates/deletes and the actor FK is `ON DELETE SET NULL`. Cleanup must: disable the trigger, delete ONLY the run's audit rows (scoped to the cast actors), re-enable the trigger in `finally`.
+
+### Bun `mock.module` Partial Factories (CRITICAL)
+
+- A `mock.module` factory MUST enumerate the mocked module's real export surface (spread the actual exports) — partial factories break unrelated suites at import time the moment the mocked module gains a new export.
+- When adding an export to any mocked module, update every partial mock factory of that module in the same change (a stale `whatsapp-constants` partial mock once broke the coexistence-sync suite).
