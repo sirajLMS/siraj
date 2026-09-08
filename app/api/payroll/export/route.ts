@@ -109,8 +109,8 @@ function parseCalculationStatuses(searchParams: URLSearchParams, tErrors: Errors
 /** Maps the export query string onto the payroll report filter contract; malformed values reject with 400. */
 function parsePayrollExportFilters(searchParams: URLSearchParams, tErrors: ErrorsLabels): PayrollReportFilters {
   return {
-    teacherId: readTrimmedParam(searchParams, "teacherId"),
-    studentId: readTrimmedParam(searchParams, "studentId"),
+    teacherId: readValidatedParam(searchParams, "teacherId", isUuidShape, tErrors),
+    studentId: readValidatedParam(searchParams, "studentId", isUuidShape, tErrors),
     dateFrom: readValidatedParam(searchParams, "dateFrom", isCalendarDate, tErrors),
     dateTo: readValidatedParam(searchParams, "dateTo", isCalendarDate, tErrors),
     calculationStatuses: parseCalculationStatuses(searchParams, tErrors),
@@ -120,6 +120,13 @@ function parsePayrollExportFilters(searchParams: URLSearchParams, tErrors: Error
 
 function isSearchWithinLimit(value: string): boolean {
   return value.length <= SEARCH_MAX_LENGTH;
+}
+
+/** Canonical hyphenated uuid shape; anything else cannot name a row in a uuid column. */
+const UUID_SHAPE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isUuidShape(value: string): boolean {
+  return UUID_SHAPE.test(value);
 }
 
 /** RFC 4180 escaping plus formula neutralization: cells starting with `=`, `+`, `-`, `@`, a tab or a CR get a `'` prefix. */
