@@ -45,16 +45,35 @@ export interface FindGapsForCalendarDateOptions {
 
 // ── Time / date utilities (pure, no side-effects) ───────────────────────────
 
+/**
+ * Fast time-to-minutes converter.
+ * Parses "HH:MM" or "HH:MM:SS" without array allocations (`split`/`map`).
+ */
 export function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(":").map(Number);
+  const firstColon = time.indexOf(":");
+  if (firstColon === -1) {
+    return Number.parseInt(time, 10) * 60;
+  }
+  const secondColon = time.indexOf(":", firstColon + 1);
+  const hours = Number.parseInt(time.slice(0, firstColon), 10);
+  const minutes = Number.parseInt(
+    secondColon === -1 ? time.slice(firstColon + 1) : time.slice(firstColon + 1, secondColon),
+    10
+  );
   return hours * 60 + minutes;
 }
 
+/**
+ * Fast UTC time-to-string formatter ("HH:MM:SS") avoiding `padStart` overhead.
+ */
 export function dateToTimeString(date: Date): string {
-  const hours = date.getUTCHours().toString().padStart(2, "0");
-  const minutes = date.getUTCMinutes().toString().padStart(2, "0");
-  const seconds = date.getUTCSeconds().toString().padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  const seconds = date.getUTCSeconds();
+  const hStr = hours < 10 ? `0${hours}` : `${hours}`;
+  const mStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
+  const sStr = seconds < 10 ? `0${seconds}` : `${seconds}`;
+  return `${hStr}:${mStr}:${sStr}`;
 }
 
 /** Minutes since UTC midnight — direct from the Date without a string round-trip. */
@@ -66,8 +85,9 @@ export function getUtcDayOfWeek(date: Date): DayOfWeek {
   return JS_DAY_TO_ENUM[date.getUTCDay()];
 }
 
+/** Fast YYYY-MM-DD extractor using `slice(0, 10)` to avoid `split` array allocations. */
 export function getUtcDateString(date: Date): string {
-  return date.toISOString().split("T")[0];
+  return date.toISOString().slice(0, 10);
 }
 
 // ── Pure validation helpers (no DB, no error throws) ─────────────────────────
@@ -87,34 +107,49 @@ export function isWithinEffectiveRange(
 function getBlockedRanges(
   dayUnavail: TeacherRecurringUnavailabilitySelectType[],
   searchStart: number,
-  searchEnd: number
-): { start: number; end: number }[] {
-  const blockedRanges: { start: number; end: number }[] = [];
-  for (const u of dayUnavail) {
+  searchEnd: number,
+  out: { start: number; end: number }[]
+): void {
+  for (let i = 0; i < dayUnavail.length; i++) {
+    const u = dayUnavail[i];
     const uStart = timeToMinutes(u.startTime);
     const uEnd = timeToMinutes(u.endTime);
     if (uStart < searchEnd && uEnd > searchStart) {
-      blockedRanges.push({
-        start: Math.max(uStart, searchStart),
-        end: Math.min(uEnd, searchEnd),
+      out.push({
+        start: uStart < searchStart ? searchStart : uStart,
+        end: uEnd > searchEnd ? searchEnd : uEnd,
       });
     }
   }
-  return blockedRanges;
 }
 
 function mergeBlockedRanges(blockedRanges: { start: number; end: number }[]): { start: number; end: number }[] {
-  const sorted = [...blockedRanges].toSorted((a, b) => a.start - b.start);
-  const mergedBlocked: { start: number; end: number }[] = [];
-  for (const range of sorted) {
-    const last = mergedBlocked.at(-1);
-    if (last && range.start <= last.end) {
-      last.end = Math.max(last.end, range.end);
+  if (blockedRanges.length <= 1) return blockedRanges;
+
+  // In-place sort to avoid spread copy / toSorted allocation
+  blockedRanges.sort((a, b) => a.start - b.start);
+  const mergedBlocked: { start: number; end: number }[] = [blockedRanges[0]];
+
+  for (let i = 1; i < blockedRanges.length; i++) {
+    const range = blockedRanges[i];
+    const last = mergedBlocked[mergedBlocked.length - 1];
+    if (range.start <= last.end) {
+      if (range.end > last.end) {
+        last.end = range.end;
+      }
     } else {
-      mergedBlocked.push({ ...range });
+      mergedBlocked.push({ start: range.start, end: range.end });
     }
   }
   return mergedBlocked;
+}
+
+function formatMinutesToHHMM(totalMinutes: number): string {
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  const hStr = h < 10 ? `0${h}` : `${h}`;
+  const mStr = m < 10 ? `0${m}` : `${m}`;
+  return `${hStr}:${mStr}`;
 }
 
 function createGap(
@@ -124,11 +159,6 @@ function createGap(
   startMinutes: number,
   endMinutes: number
 ): TeacherAvailabilityGap {
-  const startHoursStr = String(Math.floor(startMinutes / 60)).padStart(2, "0");
-  const startMinutesStr = String(startMinutes % 60).padStart(2, "0");
-  const endHoursStr = String(Math.floor(endMinutes / 60)).padStart(2, "0");
-  const endMinutesStr = String(endMinutes % 60).padStart(2, "0");
-
   return {
     id: `${teacher.teacherId}-${calendarDate}-${day}-${startMinutes}-${endMinutes}`,
     teacherId: teacher.teacherId,
@@ -136,8 +166,8 @@ function createGap(
     teacherGender: teacher.teacherGender,
     dayOfWeek: day,
     calendarDate,
-    gapStartTime: `${startHoursStr}:${startMinutesStr}`,
-    gapEndTime: `${endHoursStr}:${endMinutesStr}`,
+    gapStartTime: formatMinutesToHHMM(startMinutes),
+    gapEndTime: formatMinutesToHHMM(endMinutes),
     timezone: teacher.teacherTimezone,
   };
 }
@@ -187,10 +217,11 @@ export function getVacationBlockedRangesForDate(
   const dayEnd = new Date(`${calendarDate}T23:59:59.999Z`);
   const blocked: { start: number; end: number }[] = [];
 
-  for (const vacation of vacations) {
+  for (let i = 0; i < vacations.length; i++) {
+    const vacation = vacations[i];
     if (vacation.endAt <= dayStart || vacation.startAt > dayEnd) continue;
-    const blockStart = vacation.startAt > dayStart ? timeToMinutes(dateToTimeString(vacation.startAt)) : 0;
-    const blockEnd = vacation.endAt < dayEnd ? timeToMinutes(dateToTimeString(vacation.endAt)) : 24 * 60;
+    const blockStart = vacation.startAt > dayStart ? dateToMinutes(vacation.startAt) : 0;
+    const blockEnd = vacation.endAt < dayEnd ? dateToMinutes(vacation.endAt) : 24 * 60;
     if (blockStart < blockEnd) {
       blocked.push({ start: blockStart, end: blockEnd });
     }
@@ -203,51 +234,73 @@ export function getBookingBlockedRangesForDate(
   bookings: { scheduledStartAt: Date; scheduledEndAt: Date }[]
 ): { start: number; end: number }[] {
   const blocked: { start: number; end: number }[] = [];
-  for (const booking of bookings) {
+  for (let i = 0; i < bookings.length; i++) {
+    const booking = bookings[i];
     const bookingDate = getUtcDateString(booking.scheduledStartAt);
     if (bookingDate !== calendarDate) continue;
     blocked.push({
-      start: timeToMinutes(dateToTimeString(booking.scheduledStartAt)),
-      end: timeToMinutes(dateToTimeString(booking.scheduledEndAt)),
+      start: dateToMinutes(booking.scheduledStartAt),
+      end: dateToMinutes(booking.scheduledEndAt),
     });
   }
   return blocked;
+}
+
+function collectExtraBlocked(
+  extraBlocked: { start: number; end: number }[],
+  searchStart: number,
+  searchEnd: number,
+  out: { start: number; end: number }[]
+): void {
+  for (let j = 0; j < extraBlocked.length; j++) {
+    const blocked = extraBlocked[j];
+    if (blocked.start < searchEnd && blocked.end > searchStart) {
+      out.push({
+        start: blocked.start < searchStart ? searchStart : blocked.start,
+        end: blocked.end > searchEnd ? searchEnd : blocked.end,
+      });
+    }
+  }
 }
 
 export function findGapsForCalendarDate(options: FindGapsForCalendarDateOptions): TeacherAvailabilityGap[] {
   const { teacher, calendarDate, day, dayWindows, dayUnavail, extraBlocked, searchRange } = options;
   const { from: fromMinutes, to: toMinutes } = searchRange;
   const gaps: TeacherAvailabilityGap[] = [];
-  const effectiveWindows = dayWindows.filter(window =>
-    isWithinEffectiveRange(calendarDate, window.effectiveFrom, window.effectiveUntil)
-  );
 
-  for (const window of effectiveWindows) {
+  for (let i = 0; i < dayWindows.length; i++) {
+    const window = dayWindows[i];
+    if (!isWithinEffectiveRange(calendarDate, window.effectiveFrom, window.effectiveUntil)) {
+      continue;
+    }
+
     const windowStart = timeToMinutes(window.startTime);
     const windowEnd = timeToMinutes(window.endTime);
-    const searchStart = Math.max(windowStart, fromMinutes);
-    const searchEnd = Math.min(windowEnd, toMinutes);
+    const searchStart = windowStart > fromMinutes ? windowStart : fromMinutes;
+    const searchEnd = windowEnd < toMinutes ? windowEnd : toMinutes;
 
     if (searchStart >= searchEnd) continue;
 
-    const clippedExtra = extraBlocked
-      .filter(blocked => blocked.start < searchEnd && blocked.end > searchStart)
-      .map(blocked => ({
-        start: Math.max(blocked.start, searchStart),
-        end: Math.min(blocked.end, searchEnd),
-      }));
+    const blockedRanges: { start: number; end: number }[] = [];
+    getBlockedRanges(dayUnavail, searchStart, searchEnd, blockedRanges);
+    collectExtraBlocked(extraBlocked, searchStart, searchEnd, blockedRanges);
 
-    const blockedRanges = [...getBlockedRanges(dayUnavail, searchStart, searchEnd), ...clippedExtra];
     const mergedBlocked = mergeBlockedRanges(blockedRanges);
     const windowGaps = generateGapsFromBlocked(teacher, day, calendarDate, searchStart, searchEnd, mergedBlocked);
-    gaps.push(...windowGaps);
+    for (let k = 0; k < windowGaps.length; k++) {
+      gaps.push(windowGaps[k]);
+    }
   }
 
   return gaps;
 }
 
 export function countAvailableDays(gaps: TeacherAvailabilityGap[]): number {
-  return new Set(gaps.map(gap => gap.calendarDate)).size;
+  const uniqueDates = new Set<string>();
+  for (let i = 0; i < gaps.length; i++) {
+    uniqueDates.add(gaps[i].calendarDate);
+  }
+  return uniqueDates.size;
 }
 
 export function sortTeachers(
