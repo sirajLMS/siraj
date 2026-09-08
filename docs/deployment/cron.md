@@ -114,7 +114,7 @@ jobs:
 
 ## Build-Time Generation
 
-`vercel.json` contains platform keys and cron entries refreshed by `scripts/build/generate-vercel-config.ts` during `prebuild`.
+`vercel.json` is **gitignored** and generated during `prebuild` / GHA `vercel build` by `scripts/build/generate-vercel-config.ts` (`ignoreCommand: "exit 0"`, `fluid`, crons). Builds run only on GitHub Actions — see [vercel-prebuilt.md](./vercel-prebuilt.md). On each Vercel project set **Ignored Build Step → Don't build anything**.
 
 Hobby-safe by default (`CRON_EXECUTION_MODE` unset or `vercel-daily`). Cron expressions are validated with `cron-parser` and the build **fails fast** on invalid input:
 
@@ -135,10 +135,13 @@ cat vercel.json
 Expected output for `vercel-daily`:
 ```json
 {
+  "ignoreCommand": "exit 0",
   "fluid": true,
   "crons": [
     { "path": "/api/fx/refresh", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/class-reminders", "schedule": "0 6 * * *" }
+    { "path": "/api/cron/class-reminders", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/whatsapp-sync-sweep", "schedule": "13 * * * *" },
+    { "path": "/api/cron/whatsapp-webhook-sweep", "schedule": "*/5 * * * *" }
   ]
 }
 ```
@@ -146,10 +149,13 @@ Expected output for `vercel-daily`:
 Expected output for `vercel`:
 ```json
 {
+  "ignoreCommand": "exit 0",
   "fluid": true,
   "crons": [
     { "path": "/api/fx/refresh", "schedule": "0 6 * * *" },
     { "path": "/api/cron/class-reminders", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/whatsapp-sync-sweep", "schedule": "13 * * * *" },
+    { "path": "/api/cron/whatsapp-webhook-sweep", "schedule": "*/5 * * * *" },
     { "path": "/api/cron/ticker", "schedule": "* * * * *" }
   ]
 }

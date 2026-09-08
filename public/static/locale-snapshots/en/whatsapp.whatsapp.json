@@ -33,6 +33,9 @@
   },
   "syncFromMetaBusy": "Syncing from Meta…",
   "syncSuccess": "Successfully synced WhatsApp accounts from Meta.",
+  "syncSuccessWithCounts": {
+    "__fn": "(synced,added)=>{const syncedPhrase=synced===1?\"1 number\":`${synced} numbers`;if(added===0){return`Synced ${syncedPhrase} from Meta \\u2014 all are already known here, nothing new was added.`}const addedPhrase=added===1?\"1 new number was\":`${added} new numbers were`;return`Synced ${syncedPhrase} from Meta \\u2014 ${addedPhrase} added.`}"
+  },
   "syncNoChange": "No changes detected from Meta.",
   "syncError": "Failed to sync from Meta. Please check credentials and try again.",
   "noAccounts": "No WhatsApp numbers configured. Click \"Add Number\" to get started.",

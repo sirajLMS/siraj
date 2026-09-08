@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
 /**
  * Refresh root vercel.json cron entries at build time (prebuild).
- * Platform keys (bunVersion, fluid, $schema) live in the committed vercel.json so Vercel
- * reads bunVersion before `bun install`. Defaults to Hobby-safe schedules (vercel-daily);
+ * Platform keys (`ignoreCommand`, `fluid`, `$schema`) live in the committed vercel.json.
+ * Builds run on GitHub Actions (`.github/workflows/vercel-prebuilt.yml`); `ignoreCommand`
+ * is `exit 0` so Vercel Git never builds. Defaults to Hobby-safe schedules (vercel-daily);
  * Pro ticker only when CRON_EXECUTION_MODE=vercel. Validates cron expressions with
  * cron-parser, fails fast on invalid.
  */
@@ -19,11 +20,14 @@ interface VercelCron {
 
 interface VercelJson {
   $schema?: string;
+  /** Always cancel Vercel Git builds — deploy only via `vercel deploy --prebuilt`. */
+  ignoreCommand?: string;
   fluid: boolean;
   crons: VercelCron[];
 }
 
 const DEFAULT_SCHEMA = "https://openapi.vercel.sh/vercel.json";
+const DEFAULT_IGNORE_COMMAND = "exit 0";
 
 const CRON_DEFINITIONS: CronDefinition[] = [
   {
@@ -146,6 +150,7 @@ function main(): void {
 
   const config: VercelJson = {
     $schema: existing.$schema ?? DEFAULT_SCHEMA,
+    ignoreCommand: existing.ignoreCommand ?? DEFAULT_IGNORE_COMMAND,
     fluid: existing.fluid ?? true,
     crons,
   };

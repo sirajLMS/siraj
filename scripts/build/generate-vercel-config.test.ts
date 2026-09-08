@@ -6,6 +6,13 @@ import { join } from "node:path";
 const SCRIPT_PATH = join(process.cwd(), "scripts/build/generate-vercel-config.ts");
 const OUTPUT_PATH = join(process.cwd(), "vercel.json");
 
+const ALWAYS_INCLUDE_CRONS = [
+  "/api/cron/class-reminders",
+  "/api/cron/whatsapp-sync-sweep",
+  "/api/cron/whatsapp-webhook-sweep",
+  "/api/fx/refresh",
+] as const;
+
 function runScript(env: Record<string, string | undefined> = {}): {
   stdout: string;
   stderr: string;
@@ -23,6 +30,7 @@ function runScript(env: Record<string, string | undefined> = {}): {
 }
 
 function readConfig(): {
+  ignoreCommand?: string;
   fluid: boolean;
   crons: Array<{ path: string; schedule: string }>;
 } | null {
@@ -33,10 +41,13 @@ function readConfig(): {
 
 const COMMITTED_CONFIG = {
   $schema: "https://openapi.vercel.sh/vercel.json",
+  ignoreCommand: "exit 0",
   fluid: true,
   crons: [
     { path: "/api/fx/refresh", schedule: "0 6 * * *" },
     { path: "/api/cron/class-reminders", schedule: "0 6 * * *" },
+    { path: "/api/cron/whatsapp-sync-sweep", schedule: "13 * * * *" },
+    { path: "/api/cron/whatsapp-webhook-sweep", schedule: "*/5 * * * *" },
   ],
 };
 
@@ -45,7 +56,10 @@ function cleanup(): void {
 }
 
 function writeSeedConfig(): void {
-  writeFileSync(OUTPUT_PATH, `${JSON.stringify({ fluid: true, crons: [] }, null, 2)}\n`);
+  writeFileSync(
+    OUTPUT_PATH,
+    `${JSON.stringify({ ignoreCommand: "exit 0", fluid: true, crons: [] }, null, 2)}\n`
+  );
 }
 
 describe("generate-vercel-config", () => {
@@ -58,54 +72,56 @@ describe("generate-vercel-config", () => {
     cleanup();
   });
 
-  test("vercel-daily mode: generates 2 crons, excludes ticker", () => {
+  test("vercel-daily mode: generates always-include crons, excludes ticker", () => {
     const result = runScript({ CRON_EXECUTION_MODE: "vercel-daily" });
     expect(result.exitCode).toBe(0);
 
     const config = readConfig();
     expect(config).not.toBeNull();
     if (!config) return;
+    expect(config.ignoreCommand).toBe("exit 0");
     expect(config.fluid).toBe(true);
-    expect(config.crons).toHaveLength(2);
+    expect(config.crons).toHaveLength(ALWAYS_INCLUDE_CRONS.length);
     expect(config.crons.map(c => c.path).toSorted((a, b) => a.localeCompare(b))).toEqual([
-      "/api/cron/class-reminders",
-      "/api/fx/refresh",
+      ...ALWAYS_INCLUDE_CRONS,
     ]);
   });
 
-  test("vercel mode: generates 3 crons including ticker", () => {
+  test("vercel mode: includes ticker with always-include crons", () => {
     const result = runScript({ CRON_EXECUTION_MODE: "vercel" });
     expect(result.exitCode).toBe(0);
 
     const config = readConfig();
     expect(config).not.toBeNull();
     if (!config) return;
-    expect(config.crons).toHaveLength(3);
+    expect(config.crons).toHaveLength(ALWAYS_INCLUDE_CRONS.length + 1);
     expect(config.crons.map(c => c.path).toSorted((a, b) => a.localeCompare(b))).toEqual([
       "/api/cron/class-reminders",
       "/api/cron/ticker",
+      "/api/cron/whatsapp-sync-sweep",
+      "/api/cron/whatsapp-webhook-sweep",
       "/api/fx/refresh",
     ]);
   });
 
-  test("external mode: generates 2 crons, excludes ticker", () => {
+  test("external mode: generates always-include crons, excludes ticker", () => {
     const result = runScript({ CRON_EXECUTION_MODE: "external" });
     expect(result.exitCode).toBe(0);
 
     const config = readConfig();
     expect(config).not.toBeNull();
     if (!config) return;
-    expect(config.crons).toHaveLength(2);
+    expect(config.crons).toHaveLength(ALWAYS_INCLUDE_CRONS.length);
   });
 
-  test("standalone mode: generates 2 crons, excludes ticker", () => {
+  test("standalone mode: generates always-include crons, excludes ticker", () => {
     const result = runScript({ CRON_EXECUTION_MODE: "standalone" });
     expect(result.exitCode).toBe(0);
 
     const config = readConfig();
     expect(config).not.toBeNull();
     if (!config) return;
-    expect(config.crons).toHaveLength(2);
+    expect(config.crons).toHaveLength(ALWAYS_INCLUDE_CRONS.length);
   });
 
   test("invalid mode defaults to vercel-daily with warning", () => {
@@ -117,7 +133,7 @@ describe("generate-vercel-config", () => {
     const config = readConfig();
     expect(config).not.toBeNull();
     if (!config) return;
-    expect(config.crons).toHaveLength(2);
+    expect(config.crons).toHaveLength(ALWAYS_INCLUDE_CRONS.length);
   });
 
   test("unset mode defaults to vercel-daily without warning", () => {
@@ -128,7 +144,7 @@ describe("generate-vercel-config", () => {
     const config = readConfig();
     expect(config).not.toBeNull();
     if (!config) return;
-    expect(config.crons).toHaveLength(2);
+    expect(config.crons).toHaveLength(ALWAYS_INCLUDE_CRONS.length);
   });
 
   test("valid cron expressions pass validation", () => {
@@ -191,5 +207,16 @@ describe("generate-vercel-config", () => {
     });
     expect(result.exitCode).toBe(0);
     expect(result.stderr).not.toContain("Invalid cron expression");
+  });
+
+  test("preserves ignoreCommand from existing vercel.json", () => {
+    writeFileSync(
+      OUTPUT_PATH,
+      `${JSON.stringify({ ignoreCommand: "exit 0", fluid: true, crons: [] }, null, 2)}\n`
+    );
+    const result = runScript({ CRON_EXECUTION_MODE: "vercel-daily" });
+    expect(result.exitCode).toBe(0);
+    const config = readConfig();
+    expect(config?.ignoreCommand).toBe("exit 0");
   });
 });
