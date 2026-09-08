@@ -31,10 +31,12 @@ CRON_EXECUTION_MODE=standalone
 
 All cron schedules are configurable via environment variables (validated at build time):
 
-| Variable | Default | Description |
-|----------|---------|-------------|
+| Variable | Default (Hobby / Pro) | Description |
+|----------|----------------------|-------------|
 | `CRON_FX_REFRESH_SCHEDULE` | `0 6 * * *` | FX rate refresh (daily 06:00 UTC) |
 | `CRON_CLASS_REMINDERS_SCHEDULE` | `0 6 * * *` | Class reminders (daily 06:00 UTC) |
+| `CRON_WHATSAPP_SYNC_SWEEP_SCHEDULE` | `13 6 * * *` / `13 * * * *` | WhatsApp sync sweep (daily on Hobby; hourly on Pro) |
+| `CRON_WHATSAPP_WEBHOOK_SWEEP_SCHEDULE` | `18 6 * * *` / `*/5 * * * *` | WhatsApp webhook sweep (daily on Hobby; every 5m on Pro) |
 | `CRON_TICKER_SCHEDULE` | `* * * * *` | Ticker (every minute, Pro only) |
 
 ## External Cron Scheduler Integration
@@ -85,14 +87,13 @@ jobs:
 ## Mode Details
 
 ### `vercel-daily` (Default, Hobby-Safe)
-- Generates 2 daily crons in `vercel.json` at build time
-- Ticker **excluded** (Hobby forbids sub-daily Vercel crons)
-- Daily jobs run at 06:00 UTC
-- For sub-daily DB schedules, use `external` mode and call `/api/cron/ticker`
+- Generates always-include crons with **daily** schedules (Hobby forbids sub-daily Vercel crons)
+- WhatsApp sweeps clamp to `13 6 * * *` / `18 6 * * *` even if env sets a sub-daily expression
+- Ticker **excluded**
+- For sub-daily DB schedules / WhatsApp cadence, use `external` mode (cron-job.org) or upgrade to Pro (`CRON_EXECUTION_MODE=vercel`)
 
 ### `vercel` (Pro Only)
-- Includes all 3 crons with configured schedules
-- Ticker runs every minute (`* * * * *` by default)
+- Includes ticker + WhatsApp sub-daily defaults (`13 * * * *`, `*/5 * * * *`)
 - Requires Vercel Pro plan
 - Full sub-daily schedule support
 
@@ -140,8 +141,8 @@ Expected output for `vercel-daily`:
   "crons": [
     { "path": "/api/fx/refresh", "schedule": "0 6 * * *" },
     { "path": "/api/cron/class-reminders", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/whatsapp-sync-sweep", "schedule": "13 * * * *" },
-    { "path": "/api/cron/whatsapp-webhook-sweep", "schedule": "*/5 * * * *" }
+    { "path": "/api/cron/whatsapp-sync-sweep", "schedule": "13 6 * * *" },
+    { "path": "/api/cron/whatsapp-webhook-sweep", "schedule": "18 6 * * *" }
   ]
 }
 ```

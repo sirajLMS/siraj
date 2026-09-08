@@ -193,7 +193,13 @@ export type CronExecutionMode = "vercel" | "vercel-daily" | "external" | "standa
 export interface CronDefinition {
   path: string;
   scheduleEnv: string;
+  /** Default schedule when CRON_EXECUTION_MODE=vercel (Pro; may be sub-daily). */
   defaultSchedule: string;
+  /**
+   * Hobby-safe daily schedule used when mode is not `vercel` and the resolved
+   * schedule would run more than once per day (Vercel Hobby rejects those).
+   */
+  hobbySafeSchedule?: string;
   alwaysInclude: boolean;
 }
 

@@ -46,8 +46,8 @@ const COMMITTED_CONFIG = {
   crons: [
     { path: "/api/fx/refresh", schedule: "0 6 * * *" },
     { path: "/api/cron/class-reminders", schedule: "0 6 * * *" },
-    { path: "/api/cron/whatsapp-sync-sweep", schedule: "13 * * * *" },
-    { path: "/api/cron/whatsapp-webhook-sweep", schedule: "*/5 * * * *" },
+    { path: "/api/cron/whatsapp-sync-sweep", schedule: "13 6 * * *" },
+    { path: "/api/cron/whatsapp-webhook-sweep", schedule: "18 6 * * *" },
   ],
 };
 
@@ -85,9 +85,15 @@ describe("generate-vercel-config", () => {
     expect(config.crons.map(c => c.path).toSorted((a, b) => a.localeCompare(b))).toEqual([
       ...ALWAYS_INCLUDE_CRONS,
     ]);
+    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-sync-sweep")?.schedule).toBe(
+      "13 6 * * *"
+    );
+    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-webhook-sweep")?.schedule).toBe(
+      "18 6 * * *"
+    );
   });
 
-  test("vercel mode: includes ticker with always-include crons", () => {
+  test("vercel mode: includes ticker with Pro sub-daily WhatsApp schedules", () => {
     const result = runScript({ CRON_EXECUTION_MODE: "vercel" });
     expect(result.exitCode).toBe(0);
 
@@ -102,6 +108,29 @@ describe("generate-vercel-config", () => {
       "/api/cron/whatsapp-webhook-sweep",
       "/api/fx/refresh",
     ]);
+    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-sync-sweep")?.schedule).toBe(
+      "13 * * * *"
+    );
+    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-webhook-sweep")?.schedule).toBe(
+      "*/5 * * * *"
+    );
+  });
+
+  test("vercel-daily clamps env-overridden sub-daily WhatsApp schedules", () => {
+    const result = runScript({
+      CRON_EXECUTION_MODE: "vercel-daily",
+      CRON_WHATSAPP_SYNC_SWEEP_SCHEDULE: "13 * * * *",
+      CRON_WHATSAPP_WEBHOOK_SWEEP_SCHEDULE: "*/5 * * * *",
+    });
+    expect(result.exitCode).toBe(0);
+    expect(result.stderr).toContain("clamping to Hobby-safe");
+    const config = readConfig();
+    expect(config?.crons.find(c => c.path === "/api/cron/whatsapp-sync-sweep")?.schedule).toBe(
+      "13 6 * * *"
+    );
+    expect(config?.crons.find(c => c.path === "/api/cron/whatsapp-webhook-sweep")?.schedule).toBe(
+      "18 6 * * *"
+    );
   });
 
   test("external mode: generates always-include crons, excludes ticker", () => {
