@@ -10,7 +10,7 @@ import {
   TrendingUp,
   VerifiedUser,
 } from "@mui/icons-material";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { ExportButton } from "@/frontend/common/components/ui/button";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
@@ -66,34 +66,40 @@ export function StudentHistoryDesktopView({
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 4, gap: 2 }}>
-        <IconButton
-          onClick={onPrevMonth}
-          disabled={!canGoPrev}
-          sx={theme => ({
-            transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            opacity: canGoPrev ? 1 : 0.5,
-            pointerEvents: canGoPrev ? "auto" : "none",
-          })}
-        >
-          <ChevronLeft />
-        </IconButton>
+        <Tooltip title={t.previousMonth}>
+          <Box component="span" sx={{ display: "inline-flex" }}>
+            <IconButton
+              onClick={onPrevMonth}
+              disabled={!canGoPrev}
+              aria-label={t.previousMonth}
+              sx={theme => ({
+                transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+              })}
+            >
+              <ChevronLeft />
+            </IconButton>
+          </Box>
+        </Tooltip>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <CalendarToday sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
           <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
             {monthStr} {yearStr}
           </Typography>
         </Box>
-        <IconButton
-          onClick={onNextMonth}
-          disabled={!canGoNext}
-          sx={theme => ({
-            transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            opacity: canGoNext ? 1 : 0.5,
-            pointerEvents: canGoNext ? "auto" : "none",
-          })}
-        >
-          <ChevronRight />
-        </IconButton>
+        <Tooltip title={t.nextMonth}>
+          <Box component="span" sx={{ display: "inline-flex" }}>
+            <IconButton
+              onClick={onNextMonth}
+              disabled={!canGoNext}
+              aria-label={t.nextMonth}
+              sx={theme => ({
+                transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+              })}
+            >
+              <ChevronRight />
+            </IconButton>
+          </Box>
+        </Tooltip>
       </Box>
 
       <Box sx={{ mb: 4 }}>

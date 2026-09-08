@@ -1,0 +1,3 @@
+## 2026-09-08 - Accessible Tooltips on Disabled Navigation IconButtons
+**Learning:** In Material UI (MUI), disabled `IconButton` components suppress mouse pointer events, which prevents `<Tooltip>` wrappers from displaying tooltips on hover or focus when buttons are disabled. Wrapping disabled `IconButton` elements inside a non-disabled element (such as `<Box component="span" sx={{ display: "inline-flex" }}>`) allows hover/focus events to propagate and trigger tooltips properly.
+**Action:** Always wrap disabled icon buttons inside `<Tooltip>` with `<Box component="span" sx={{ display: "inline-flex" }}>` and provide explicit `aria-label` attributes for screen readers.

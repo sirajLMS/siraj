@@ -12,6 +12,8 @@ export const dashboardStudentHistoryAr: StudentHistoryLabels = {
   pageSubtitle: month => `حصص شهر ${month}`,
   exportPdf: "تصدير PDF",
   changeMonth: "تغيير الشهر",
+  previousMonth: "الشهر السابق",
+  nextMonth: "الشهر التالي",
   metrics: {
     totalClasses: count => `إجمالي الحصص: ${count}`,
     attendanceRate: rate => `معدل الحضور: ${rate}%`,
