@@ -62,9 +62,14 @@ export const currencies: readonly CurrencyOption[] = [
   { code: CurrencyCode.Aud, symbol: "A$", countryCode: "AU", flagEmoji: countryCodeToEmoji("AU") },
 ];
 
-/** Find a currency catalog entry by its ISO 4217 code. */
+/** Map ISO 4217 currency code to catalog option for O(1) constant-time lookup. */
+const currencyByCodeMap = new Map<string, CurrencyOption>(
+  currencies.map(currency => [currency.code as string, currency])
+);
+
+/** Find a currency catalog entry by its ISO 4217 code in O(1) time. */
 export function getCurrencyByCode(code: CurrencyCode | string): CurrencyOption | undefined {
-  return currencies.find(currency => (currency.code as string) === code);
+  return currencyByCodeMap.get(code);
 }
 
 /** Resolve the flag emoji for a currency, falling back to a globe. */
