@@ -3,40 +3,33 @@
 # ============================================================
 #
 # PURPOSE:
-#   Build Next.js on GitHub Actions (where we control Bun, CPU, and
-#   timeouts), then upload `.vercel/output` with
-#   `vercel deploy --prebuilt`. Vercel only hosts — it never runs
-#   `bun install` / `next build`.
+#   Build Next.js on GitHub Actions, then upload `.vercel/output` with
+#   `vercel deploy --prebuilt`. Vercel only hosts — it never builds.
 #
 # WHERE IT RUNS:
 #   On each *fork* when `prod` is pushed (or via workflow_dispatch).
-#   The source repo `sirajLMS/siraj` only syncs forks via
-#   `.github/workflows/deploy.yml`; this workflow is skipped there.
+#   Skipped on source repo `sirajLMS/siraj` (that repo only syncs forks).
 #
-# FLOW:
-#   sirajLMS/siraj prod push
-#     → deploy.yml syncs tree to each fork's `prod`
-#     → this workflow runs on the fork
-#     → vercel pull → vercel build --prod → vercel deploy --prebuilt --prod
+# SECRETS (GitHub Environment `production` on EACH fork):
+#   VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID
 #
-# SECRETS (add on EACH fork: Settings → Secrets and variables → Actions):
-#   VERCEL_TOKEN        — Account token with deploy access
-#                         https://vercel.com/account/tokens
-#   VERCEL_ORG_ID       — Team/user id from `vercel link` / project settings
-#   VERCEL_PROJECT_ID   — Project id from project settings
+# VERCEL ENV GOTCHA (Sensitive flag):
+#   `vercel pull` CANNOT download vars marked Sensitive. It writes the
+#   literal placeholder `[SENSITIVE]`. That poisons the build
+#   (e.g. NEXT_PUBLIC_BASE_URL="[SENSITIVE]" → Invalid URL).
 #
-# How to get ORG_ID / PROJECT_ID (once per Vercel project):
-#   vercel link
-#   cat .vercel/project.json   # → orgId, projectId
+#   Fix in Vercel → Project → Settings → Environment Variables:
+#   - Unmark Sensitive on every var needed at *build* time
+#     (especially all NEXT_PUBLIC_* — they are public in the client
+#     bundle anyway).
+#   - Runtime-only secrets (DB URLs, JWT, etc.) may stay Sensitive;
+#     this workflow strips their `[SENSITIVE]` placeholders so they
+#     do not poison dotenv. Real values are injected by Vercel at
+#     runtime after deploy.
 #
-# VERCEL SIDE (once per project — required):
-#   1. Keep the Git repo connected (optional, for dashboard linkage)
-#   2. Project Settings → Build & Deployment → Ignored Build Step
-#      → "Don't build anything"  (REQUIRED — vercel.json is gitignored)
-#   3. Production Branch: prod
-#
-# vercel.json is generated at prebuild with ignoreCommand/fluid/crons for
-# the CLI build output; it is not committed.
+# VERCEL PROJECT SETTINGS (once per project):
+#   Ignored Build Step → "Don't build anything"
+#   Production Branch → prod
 # ============================================================
 
 name: 🚀 Vercel Prebuilt Deploy
@@ -53,18 +46,16 @@ concurrency:
 jobs:
   deploy:
     name: Build & deploy prebuilt → Vercel
-    # Source repo only syncs forks; deploys happen on each fork with its own secrets.
     if: github.repository != 'sirajLMS/siraj'
     runs-on: ubuntu-latest
-    # Vercel builders timed out at ~45m on 2-core; GHA needs headroom for tsc + next build.
     timeout-minutes: 90
+    environment: production
 
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       NEXT_TELEMETRY_DISABLED: "1"
       HUSKY: "0"
-      # Match what Vercel would inject for a production build (prebuilt skips system envs).
       NEXT_PUBLIC_VERCEL_ENV: production
       VERCEL_ENV: production
 
@@ -78,19 +69,19 @@ jobs:
         run: |
           missing=0
           if [ -z "$VERCEL_TOKEN" ]; then
-            echo "::error::Missing secret VERCEL_TOKEN on ${{ github.repository }}"
+            echo "::error::Missing secret VERCEL_TOKEN on ${{ github.repository }} (environment: production)"
             missing=1
           fi
           if [ -z "$VERCEL_ORG_ID" ]; then
-            echo "::error::Missing secret VERCEL_ORG_ID on ${{ github.repository }}"
+            echo "::error::Missing secret VERCEL_ORG_ID on ${{ github.repository }} (environment: production)"
             missing=1
           fi
           if [ -z "$VERCEL_PROJECT_ID" ]; then
-            echo "::error::Missing secret VERCEL_PROJECT_ID on ${{ github.repository }}"
+            echo "::error::Missing secret VERCEL_PROJECT_ID on ${{ github.repository }} (environment: production)"
             missing=1
           fi
           if [ "$missing" -ne 0 ]; then
-            echo "Add all three secrets under Settings → Secrets and variables → Actions on this fork."
+            echo "Add secrets under Settings → Environments → production on this fork."
             exit 1
           fi
 
@@ -115,6 +106,73 @@ jobs:
 
       - name: Pull Vercel production env
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Sanitize Sensitive placeholders from pulled env
+        run: |
+          set -euo pipefail
+          ENV_FILE=".vercel/.env.production.local"
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "::error::Expected $ENV_FILE after vercel pull — file missing"
+            exit 1
+          fi
+
+          # Keys that MUST be real values at build time (not Sensitive placeholders).
+          REQUIRED_BUILD_KEYS=(
+            NEXT_PUBLIC_BASE_URL
+          )
+
+          mapfile -t sensitive_keys < <(
+            # Match KEY=[SENSITIVE] or KEY="[SENSITIVE]" (with optional spaces)
+            grep -E '^[A-Za-z_][A-Za-z0-9_]*=(\[SENSITIVE\]|"\[SENSITIVE\]")$' "$ENV_FILE" \
+              | cut -d= -f1 \
+              || true
+          )
+
+          if [ "${#sensitive_keys[@]}" -gt 0 ]; then
+            echo "::warning::vercel pull redacted ${#sensitive_keys[@]} Sensitive env var(s) as [SENSITIVE]"
+            printf '  - %s\n' "${sensitive_keys[@]}"
+          fi
+
+          missing_required=0
+          for key in "${REQUIRED_BUILD_KEYS[@]}"; do
+            if printf '%s\n' "${sensitive_keys[@]-}" | grep -qx "$key"; then
+              echo "::error::$key is marked Sensitive in Vercel — vercel pull wrote [SENSITIVE], which breaks the build."
+              echo "Unmark Sensitive on $key in Vercel → Project → Settings → Environment Variables (Production)."
+              echo "NEXT_PUBLIC_* values are embedded in the client bundle anyway; Sensitive buys nothing for them."
+              missing_required=1
+            fi
+          done
+          if [ "$missing_required" -ne 0 ]; then
+            exit 1
+          fi
+
+          # Drop runtime-only Sensitive placeholders so dotenv does not inject
+          # the literal string "[SENSITIVE]" into the build. Vercel injects the
+          # real values at runtime after deploy.
+          if [ "${#sensitive_keys[@]}" -gt 0 ]; then
+            tmp="$(mktemp)"
+            grep -Ev '^[A-Za-z_][A-Za-z0-9_]*=(\[SENSITIVE\]|"\[SENSITIVE\]")$' "$ENV_FILE" > "$tmp"
+            mv "$tmp" "$ENV_FILE"
+            echo "Stripped ${#sensitive_keys[@]} [SENSITIVE] placeholder(s) from $ENV_FILE"
+          fi
+
+          # Fail closed if any required build key is still absent after sanitization.
+          for key in "${REQUIRED_BUILD_KEYS[@]}"; do
+            if ! grep -qE "^${key}=" "$ENV_FILE"; then
+              echo "::error::$key is missing from $ENV_FILE after pull/sanitize."
+              echo "Add it as a non-Sensitive Production env var in the Vercel project."
+              exit 1
+            fi
+            value="$(grep -E "^${key}=" "$ENV_FILE" | head -1 | cut -d= -f2-)"
+            value="${value%\"}"
+            value="${value#\"}"
+            if [ -z "$value" ] || [ "$value" = "[SENSITIVE]" ]; then
+              echo "::error::$key has an empty or placeholder value after sanitize."
+              exit 1
+            fi
+          done
+
+          echo "Build-time env check passed for: ${REQUIRED_BUILD_KEYS[*]}"
 
       - name: Build (GitHub Actions — not Vercel)
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
