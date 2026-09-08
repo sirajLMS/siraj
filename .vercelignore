@@ -121,7 +121,9 @@ ai/
 
 # temp & backups
 .env.bak
-.env.example
+# Keep .env.example deployable: NFT / Vercel prebuilt packaging may lstat it;
+# the file is a non-secret template. Excluding it caused:
+#   ENOENT: lstat '/vercel/path0/.env.example'
 .env.vercel
 .env.test
 .env.redis
