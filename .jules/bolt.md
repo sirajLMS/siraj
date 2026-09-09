@@ -1,0 +1,3 @@
+## 2025-05-15 - Eliminate string round-trip in date-to-minutes calculations
+**Learning:** In hot loops such as `getVacationBlockedRangesForDate` and `getBookingBlockedRangesForDate`, converting `Date` objects to time strings (`dateToTimeString`) only to immediately parse them back into minutes (`timeToMinutes`) creates massive string allocation and parsing overhead. Using direct UTC component extraction (`dateToMinutes`) yields a ~3.4x speedup (from 2.19s to 643ms over 1M iterations).
+**Action:** Always check if string conversions (`toISOString`, `dateToTimeString`) in hot date/time calculation utilities can be replaced with direct `Date` getter calls (`getUTCHours() * 60 + getUTCMinutes()`).

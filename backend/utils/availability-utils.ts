@@ -45,8 +45,15 @@ export interface FindGapsForCalendarDateOptions {
 
 // ── Time / date utilities (pure, no side-effects) ───────────────────────────
 
+/**
+ * Optimized conversion from "HH:MM" or "HH:MM:SS" to total minutes since midnight.
+ * Avoids string splitting and array allocation.
+ */
 export function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(":").map(Number);
+  const colonIndex = time.indexOf(":");
+  if (colonIndex === -1) return 0;
+  const hours = Number.parseInt(time.slice(0, colonIndex), 10);
+  const minutes = Number.parseInt(time.slice(colonIndex + 1, colonIndex + 3), 10);
   return hours * 60 + minutes;
 }
 
@@ -189,8 +196,9 @@ export function getVacationBlockedRangesForDate(
 
   for (const vacation of vacations) {
     if (vacation.endAt <= dayStart || vacation.startAt > dayEnd) continue;
-    const blockStart = vacation.startAt > dayStart ? timeToMinutes(dateToTimeString(vacation.startAt)) : 0;
-    const blockEnd = vacation.endAt < dayEnd ? timeToMinutes(dateToTimeString(vacation.endAt)) : 24 * 60;
+    // Bolt optimization: use dateToMinutes directly instead of string round-trip dateToTimeString -> timeToMinutes
+    const blockStart = vacation.startAt > dayStart ? dateToMinutes(vacation.startAt) : 0;
+    const blockEnd = vacation.endAt < dayEnd ? dateToMinutes(vacation.endAt) : 24 * 60;
     if (blockStart < blockEnd) {
       blocked.push({ start: blockStart, end: blockEnd });
     }
@@ -206,9 +214,10 @@ export function getBookingBlockedRangesForDate(
   for (const booking of bookings) {
     const bookingDate = getUtcDateString(booking.scheduledStartAt);
     if (bookingDate !== calendarDate) continue;
+    // Bolt optimization: use dateToMinutes directly instead of string round-trip dateToTimeString -> timeToMinutes
     blocked.push({
-      start: timeToMinutes(dateToTimeString(booking.scheduledStartAt)),
-      end: timeToMinutes(dateToTimeString(booking.scheduledEndAt)),
+      start: dateToMinutes(booking.scheduledStartAt),
+      end: dateToMinutes(booking.scheduledEndAt),
     });
   }
   return blocked;
