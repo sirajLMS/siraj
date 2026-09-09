@@ -13,6 +13,84 @@ import {
 } from "@/backend/utils/availability-utils";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
+function expectBlockedRanges(
+  ranges: { start: number; end: number }[],
+  expected: { start: number; end: number }[]
+): void {
+  expect(ranges).toEqual(expected);
+}
+
+function buildGapOptions() {
+  const teacher = {
+    teacherId: "teacher-1",
+    teacherName: "Jane Doe",
+    teacherGender: "female",
+    teacherTimezone: IanaTimezone.UTC,
+  };
+  return {
+    teacher,
+    calendarDate: "2026-09-08",
+    day: DayOfWeek.TUESDAY,
+    dayWindows: [
+      {
+        id: "w1",
+        teacherId: "teacher-1",
+        dayOfWeek: DayOfWeek.TUESDAY,
+        startTime: "09:00",
+        endTime: "17:00",
+        timezoneId: null,
+        timezone: "UTC",
+        utcOffsetSnapshot: null,
+        effectiveFrom: null,
+        effectiveUntil: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+    dayUnavail: [
+      {
+        id: "u1",
+        teacherId: "teacher-1",
+        dayOfWeek: DayOfWeek.TUESDAY,
+        startTime: "12:00",
+        endTime: "13:00",
+        reason: null,
+        timezoneId: null,
+        timezone: "UTC",
+        utcOffsetSnapshot: null,
+        effectiveFrom: null,
+        effectiveUntil: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+    extraBlocked: [{ start: 600, end: 660 }], // 10:00 - 11:00
+    searchRange: { from: 0, to: 1440 },
+  };
+}
+
+function buildGap(id: string, gapStartTime: string, gapEndTime: string): TeacherAvailabilityGap {
+  return {
+    id,
+    teacherId: "teacher-1",
+    teacherName: "Jane Doe",
+    teacherGender: "female",
+    dayOfWeek: DayOfWeek.TUESDAY,
+    calendarDate: "2026-09-08",
+    gapStartTime,
+    gapEndTime,
+    timezone: IanaTimezone.UTC,
+  };
+}
+
+function buildExpectedGaps(): TeacherAvailabilityGap[] {
+  return [
+    buildGap("teacher-1-2026-09-08-TUESDAY-540-600", "09:00", "10:00"),
+    buildGap("teacher-1-2026-09-08-TUESDAY-660-720", "11:00", "12:00"),
+    buildGap("teacher-1-2026-09-08-TUESDAY-780-1020", "13:00", "17:00"),
+  ];
+}
+
 describe("availability-utils optimized functions", () => {
   test("timeToMinutes parses HH:MM and HH:MM:SS correctly", () => {
     expect(timeToMinutes("00:00")).toBe(0);
@@ -39,113 +117,29 @@ describe("availability-utils optimized functions", () => {
   });
 
   test("getVacationBlockedRangesForDate calculates blocked ranges correctly", () => {
-    const vacations = [
+    const blocked = getVacationBlockedRangesForDate("2026-09-08", [
       {
         startAt: new Date("2026-09-08T10:00:00.000Z"),
         endAt: new Date("2026-09-08T12:00:00.000Z"),
       },
-    ];
-    const blocked = getVacationBlockedRangesForDate("2026-09-08", vacations);
-    expect(blocked).toEqual([{ start: 600, end: 720 }]);
+    ]);
+    expectBlockedRanges(blocked, [{ start: 600, end: 720 }]);
   });
 
   test("getBookingBlockedRangesForDate calculates booking ranges correctly", () => {
-    const bookings = [
+    const blocked = getBookingBlockedRangesForDate("2026-09-08", [
       {
         scheduledStartAt: new Date("2026-09-08T14:00:00.000Z"),
         scheduledEndAt: new Date("2026-09-08T15:00:00.000Z"),
       },
-    ];
-    const blocked = getBookingBlockedRangesForDate("2026-09-08", bookings);
-    expect(blocked).toEqual([{ start: 840, end: 900 }]);
+    ]);
+    expectBlockedRanges(blocked, [{ start: 840, end: 900 }]);
   });
 
   test("findGapsForCalendarDate computes correct availability gaps", () => {
-    const teacher = {
-      teacherId: "teacher-1",
-      teacherName: "Jane Doe",
-      teacherGender: "female",
-      teacherTimezone: IanaTimezone.UTC,
-    };
-    const options = {
-      teacher,
-      calendarDate: "2026-09-08",
-      day: DayOfWeek.TUESDAY,
-      dayWindows: [
-        {
-          id: "w1",
-          teacherId: "teacher-1",
-          dayOfWeek: DayOfWeek.TUESDAY,
-          startTime: "09:00",
-          endTime: "17:00",
-          timezoneId: null,
-          timezone: "UTC",
-          utcOffsetSnapshot: null,
-          effectiveFrom: null,
-          effectiveUntil: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
-      dayUnavail: [
-        {
-          id: "u1",
-          teacherId: "teacher-1",
-          dayOfWeek: DayOfWeek.TUESDAY,
-          startTime: "12:00",
-          endTime: "13:00",
-          reason: null,
-          timezoneId: null,
-          timezone: "UTC",
-          utcOffsetSnapshot: null,
-          effectiveFrom: null,
-          effectiveUntil: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
-      extraBlocked: [{ start: 600, end: 660 }], // 10:00 - 11:00
-      searchRange: { from: 0, to: 1440 },
-    };
-
+    const options = buildGapOptions();
     const gaps = findGapsForCalendarDate(options);
-    const expectedGaps: TeacherAvailabilityGap[] = [
-      {
-        id: "teacher-1-2026-09-08-TUESDAY-540-600",
-        teacherId: "teacher-1",
-        teacherName: "Jane Doe",
-        teacherGender: "female",
-        dayOfWeek: DayOfWeek.TUESDAY,
-        calendarDate: "2026-09-08",
-        gapStartTime: "09:00",
-        gapEndTime: "10:00",
-        timezone: IanaTimezone.UTC,
-      },
-      {
-        id: "teacher-1-2026-09-08-TUESDAY-660-720",
-        teacherId: "teacher-1",
-        teacherName: "Jane Doe",
-        teacherGender: "female",
-        dayOfWeek: DayOfWeek.TUESDAY,
-        calendarDate: "2026-09-08",
-        gapStartTime: "11:00",
-        gapEndTime: "12:00",
-        timezone: IanaTimezone.UTC,
-      },
-      {
-        id: "teacher-1-2026-09-08-TUESDAY-780-1020",
-        teacherId: "teacher-1",
-        teacherName: "Jane Doe",
-        teacherGender: "female",
-        dayOfWeek: DayOfWeek.TUESDAY,
-        calendarDate: "2026-09-08",
-        gapStartTime: "13:00",
-        gapEndTime: "17:00",
-        timezone: IanaTimezone.UTC,
-      },
-    ];
-    expect(gaps).toEqual(expectedGaps);
-
+    expect(gaps).toEqual(buildExpectedGaps());
     expect(countAvailableDays(gaps)).toBe(1);
   });
 });

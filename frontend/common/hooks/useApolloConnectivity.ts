@@ -46,13 +46,22 @@ export const useApolloConnectivity = () => {
   const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   const isConnectedRef = useRef(false);
-  const isCheckingRef = useRef(false);
+  const inFlightCheckRef = useRef<Promise<boolean> | null>(null);
   const lastCheckTimeRef = useRef(0);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptRef = useRef(0);
 
   const checkConnectivity = useCallback(async (): Promise<boolean> => {
-    if (isCheckingRef.current) return isConnectedRef.current;
+    // Share an in-flight check instead of returning a premature `false`: the
+    // Apollo connectivity link fires a page's first queries while the initial
+    // HEAD check is still running, and returning the not-yet-updated
+    // `isConnectedRef.current` (false) would make a healthy server look
+    // offline — silently short-circuiting that first batch (e.g. the WhatsApp
+    // numbers query) with a synthetic NETWORK_ERROR before it ever reaches
+    // the server. Awaiting the same promise yields the real verdict instead.
+    if (inFlightCheckRef.current) {
+      return inFlightCheckRef.current;
+    }
 
     const now = Date.now();
     if (now - lastCheckTimeRef.current < MIN_CHECK_INTERVAL) {
@@ -60,38 +69,42 @@ export const useApolloConnectivity = () => {
     }
     lastCheckTimeRef.current = now;
 
-    isCheckingRef.current = true;
     queueMicrotask(() => setIsChecking(true));
 
-    try {
-      const connected = await fetchConnectivityStatus();
+    const checkPromise = (async (): Promise<boolean> => {
+      try {
+        const connected = await fetchConnectivityStatus();
 
-      if (connected && !isConnectedRef.current) {
-        reconnectAttemptRef.current = 0;
+        if (connected && !isConnectedRef.current) {
+          reconnectAttemptRef.current = 0;
+        }
+
+        isConnectedRef.current = connected;
+        queueMicrotask(() => {
+          setIsConnected(connected);
+          setLastChecked(new Date());
+        });
+
+        return connected;
+      } catch {
+        isConnectedRef.current = false;
+        queueMicrotask(() => {
+          setIsConnected(false);
+          setLastChecked(new Date());
+        });
+        return false;
+      } finally {
+        inFlightCheckRef.current = null;
+        queueMicrotask(() => {
+          setIsChecking(false);
+          setInitialCheckDone(true);
+        });
+        logger.debug({ caller: "useApolloConnectivity" }, "[Connectivity] Check completed");
       }
+    })();
 
-      isConnectedRef.current = connected;
-      queueMicrotask(() => {
-        setIsConnected(connected);
-        setLastChecked(new Date());
-      });
-
-      return connected;
-    } catch {
-      isConnectedRef.current = false;
-      queueMicrotask(() => {
-        setIsConnected(false);
-        setLastChecked(new Date());
-      });
-      return false;
-    } finally {
-      isCheckingRef.current = false;
-      queueMicrotask(() => {
-        setIsChecking(false);
-        setInitialCheckDone(true);
-      });
-      logger.debug({ caller: "useApolloConnectivity" }, "[Connectivity] Check completed");
-    }
+    inFlightCheckRef.current = checkPromise;
+    return checkPromise;
   }, []);
 
   const setConnected = useCallback((connected: boolean) => {

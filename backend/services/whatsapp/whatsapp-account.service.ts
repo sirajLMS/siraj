@@ -717,6 +717,37 @@ export namespace WhatsappAccountService {
     return tx ? await runner(tx) : await db.transaction(runner);
   }
 
+  /**
+   * Verifies a token against Meta's Graph API for the given phone number and
+   * reports whether Meta considers the number CONNECTED. Returns
+   * `isValid = false` (and `isConnected = false`) instead of throwing on any
+   * network or API error so callers can safely persist credentials regardless.
+   */
+  export async function checkPhoneNumberStatusWithToken(
+    phoneNumberId: string,
+    accessToken: string,
+    apiVersion: string
+  ): Promise<{ isValid: boolean; status?: string; isConnected: boolean }> {
+    try {
+      const request = buildGetPhoneNumberRequest({ accessToken, apiVersion }, { phoneNumberId });
+      const detail = await executeGraphApiFetch<GetPhoneNumberResult>(request, phoneNumberResultSchema);
+      const isConnected = detail.status?.toUpperCase() === "CONNECTED";
+      return {
+        isValid: true,
+        status: detail.status,
+        isConnected,
+      };
+    } catch (error) {
+      logger.warn(
+        `whatsapp-account-service: checkPhoneNumberStatusWithToken failed for phoneNumberId=${phoneNumberId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        { phoneNumberId, error }
+      );
+      return { isValid: false, isConnected: false };
+    }
+  }
+
   export async function setAccessToken(
     actorUserId: string,
     tErrors: ErrorsLabels,
@@ -736,12 +767,28 @@ export namespace WhatsappAccountService {
     if (trimmedToken.length > 512) {
       throw new WhatsappAccountValidationError("INVALID_INPUT", tErrors.invalidInput);
     }
+
+    // Validate the new token against Meta and derive the account's active flag
+    // from the real phone-number status. A token that cannot reach the number
+    // (or a number Meta reports as non-CONNECTED) must not be marked active.
+    const existingAccount = await WhatsappAccountRepository.findById(id, tx);
+    let isActive: boolean | undefined;
+    if (existingAccount) {
+      const apiVersion = await resolveGraphApiVersion();
+      const verification = await checkPhoneNumberStatusWithToken(
+        existingAccount.phoneNumberId,
+        trimmedToken,
+        apiVersion
+      );
+      isActive = verification.isValid && verification.isConnected;
+    }
+
     const updated = await WhatsappAccountRepository.setAccessToken(
       // The field is named `encryptedAccessToken` per the repo/schema contract.
       // The value passed here is plaintext — encryption is handled by the
       // `encryptedText` Drizzle custom type at the toDriver boundary
       // (field-encryption.ts), so the service layer never handles ciphertext.
-      { id, encryptedAccessToken: trimmedToken },
+      { id, encryptedAccessToken: trimmedToken, isActive },
       tx
     );
     if (updated) {
@@ -857,6 +904,7 @@ export namespace WhatsappAccountService {
     phone: WhatsappPhoneNumber,
     detail: GetPhoneNumberResult | undefined,
     existing: WhatsappAccountReturnType | null,
+    ctx: GraphApiRequestContext,
     wabaId: string,
     tx: DBTransaction | undefined,
     onFail: () => void
@@ -882,7 +930,12 @@ export namespace WhatsappAccountService {
     }
 
     try {
+      const isConnected = detail.status?.toUpperCase() === "CONNECTED";
+      const hasUsableToken = ctx.accessToken.trim().length > 0 && ctx.accessToken !== SYNC_STATUS_PENDING;
+
       if (existing) {
+        // Reflect Meta's real connectivity status on the account. An existing
+        // account keeps its own token; only its active flag is re-synced.
         await WhatsappAccountRepository.update(
           existing.id,
           {
@@ -890,17 +943,24 @@ export namespace WhatsappAccountService {
             qualityRating,
             portfolioMessagingLimitTier,
             throughputLevel: detail.throughput_level,
+            isActive: isConnected,
           },
           tx
         );
         return {
           ...existing,
+          isActive: isConnected,
           displayPhoneNumber: detail.display_phone_number,
           qualityRating,
           portfolioMessagingLimitTier,
           throughputLevel: detail.throughput_level,
         } satisfies WhatsappAccountReturnType;
       }
+
+      // New number: the detail fetch above already proved `ctx.accessToken` can
+      // reach this number's Graph API endpoint. When Meta reports the number
+      // CONNECTED, adopt the sync token and mark it active; otherwise store a
+      // pending placeholder so it stays visibly inactive until credentials land.
       return WhatsappAccountRepository.create(
         {
           wabaId,
@@ -909,9 +969,9 @@ export namespace WhatsappAccountService {
           qualityRating,
           portfolioMessagingLimitTier,
           throughputLevel: detail.throughput_level,
-          encryptedAccessToken: SYNC_STATUS_PENDING,
+          encryptedAccessToken: isConnected && hasUsableToken ? ctx.accessToken : SYNC_STATUS_PENDING,
           encryptedTwoStepPin: SYNC_STATUS_PENDING,
-          isActive: false,
+          isActive: isConnected && hasUsableToken,
         },
         tx
       );
@@ -936,6 +996,7 @@ export namespace WhatsappAccountService {
     phoneNumbers: readonly WhatsappPhoneNumber[],
     phoneDetails: Map<string, GetPhoneNumberResult>,
     existingByPhoneId: Map<string, WhatsappAccountReturnType | null>,
+    ctx: GraphApiRequestContext,
     wabaId: string,
     tx: DBTransaction | undefined
   ): Promise<{ accounts: WhatsappAccountReturnType[]; failedCount: number }> {
@@ -949,6 +1010,7 @@ export namespace WhatsappAccountService {
         phone,
         phoneDetails.get(phone.id),
         existingByPhoneId.get(phone.id) ?? null,
+        ctx,
         wabaId,
         tx,
         onFail
@@ -1038,6 +1100,7 @@ export namespace WhatsappAccountService {
       phoneNumbers,
       phoneDetails,
       existingByPhoneId,
+      ctx,
       wabaId,
       tx
     );

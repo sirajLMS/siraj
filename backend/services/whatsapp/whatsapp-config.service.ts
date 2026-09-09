@@ -102,6 +102,34 @@ function isConfigPatchKey(key: string): key is keyof WhatsappConfigSeedInput {
  * and U+2028/U+2029 line separators — newlines, tabs, and friends) are
  * rejected outright, and the actor attribution must be a well-formed UUID.
  */
+/**
+ * Normalizes the actor-attribution field: `null` passes through untouched,
+ * and any non-null value must be a well-formed UUID.
+ */
+function normalizeUpdatedByUserId(value: string | null, tErrors: ErrorsLabels): string | null {
+  if (value !== null && !UUID_REGEX.test(value)) {
+    throw new ValidationError(tErrors.invalidInput);
+  }
+  return value;
+}
+
+/**
+ * Normalizes a credential string field: rejects empty, over-length, and
+ * control/invisible-format-character values, otherwise returns the trimmed
+ * value.
+ */
+function normalizeCredentialValue(value: string, key: WhatsappConfigCredentialField, tErrors: ErrorsLabels): string {
+  const trimmed = value.trim();
+  if (
+    trimmed === "" ||
+    trimmed.length > WHATSAPP_CONFIG_FIELD_MAX_LENGTHS[key] ||
+    WHATSAPP_CONFIG_CONTROL_CHARS_PATTERN.test(trimmed)
+  ) {
+    throw new ValidationError(tErrors.invalidInput);
+  }
+  return trimmed;
+}
+
 function normalizeConfigInput(input: WhatsappConfigSeedInput, tErrors: ErrorsLabels): WhatsappConfigSeedInput {
   const payload: WhatsappConfigSeedInput = {};
   for (const key of Object.keys(input)) {
@@ -111,25 +139,14 @@ function normalizeConfigInput(input: WhatsappConfigSeedInput, tErrors: ErrorsLab
     const value = input[key];
     if (value === undefined) continue;
     if (key === "updatedByUserId") {
-      if (value !== null && !UUID_REGEX.test(value)) {
-        throw new ValidationError(tErrors.invalidInput);
-      }
-      payload.updatedByUserId = value;
+      payload.updatedByUserId = normalizeUpdatedByUserId(value, tErrors);
       continue;
     }
     if (value === null) {
       payload[key] = null;
       continue;
     }
-    const trimmed = value.trim();
-    if (
-      trimmed === "" ||
-      trimmed.length > WHATSAPP_CONFIG_FIELD_MAX_LENGTHS[key] ||
-      WHATSAPP_CONFIG_CONTROL_CHARS_PATTERN.test(trimmed)
-    ) {
-      throw new ValidationError(tErrors.invalidInput);
-    }
-    payload[key] = trimmed;
+    payload[key] = normalizeCredentialValue(value, key, tErrors);
   }
   return payload;
 }
@@ -163,12 +180,12 @@ function toLoggableDbError(error: unknown): { name: string; message?: string; co
     cause?: unknown;
   };
   const isQueryWrapper = "query" in source || "params" in source;
-  const cause = typeof source.cause === "object" && source.cause !== null ? source.cause : undefined;
+  const cause = isRecord(source.cause) ? source.cause : undefined;
   // `in` narrowing keeps the driver-cause fields readable without a type
   // assertion — the cause's shape stays fully opaque otherwise.
-  const causeMessage = cause !== undefined && "message" in cause ? cause.message : undefined;
-  const causeCode = cause !== undefined && "code" in cause ? cause.code : undefined;
-  const causeDetail = cause !== undefined && "detail" in cause ? cause.detail : undefined;
+  const causeMessage = readCauseField(cause, "message");
+  const causeCode = readCauseField(cause, "code");
+  const causeDetail = readCauseField(cause, "detail");
   const message = [
     typeof causeMessage === "string" ? causeMessage : undefined,
     !isQueryWrapper && typeof source.message === "string" ? source.message : undefined,
@@ -181,6 +198,22 @@ function toLoggableDbError(error: unknown): { name: string; message?: string; co
     ...(typeof code === "string" ? { code } : {}),
     ...(typeof detail === "string" ? { detail } : {}),
   };
+}
+
+/**
+ * Type guard narrowing an opaque value to a plain string-keyed record, used
+ * to read the driver `cause` object's fields without a type assertion.
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/**
+ * Reads a field off the driver `cause` object (kept opaque), returning
+ * `undefined` when the cause is absent or the field is not present.
+ */
+function readCauseField(cause: Record<string, unknown> | undefined, field: "message" | "code" | "detail"): unknown {
+  return cause !== undefined && field in cause ? cause[field] : undefined;
 }
 
 /**
@@ -243,12 +276,6 @@ async function propagateEnvConfigOverrides(
   await Promise.all(
     WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES.map(async ({ field, envKey }) => {
       const value = mergedRow[field];
-      // A stored row's credential columns are `string | null` — `undefined`
-      // cannot occur per the row type; skipped defensively so a future schema
-      // change degrades to "no propagation" instead of writing `undefined`.
-      if (value === undefined) {
-        return;
-      }
       // Prior-override state is read IN-TX, BEFORE the upsert/delete, so the
       // audit row records the value actually being replaced/removed (the
       // sibling env-tab mutations resolve the prior entry the same way —
@@ -271,7 +298,7 @@ async function propagateEnvConfigOverrides(
           value === null ? "delete" : "upsert",
           envKey,
           priorValue,
-          value === null ? undefined : value,
+          value ?? undefined,
           t
         );
       }

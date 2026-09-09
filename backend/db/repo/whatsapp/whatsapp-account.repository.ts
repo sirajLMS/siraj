@@ -293,7 +293,11 @@ export namespace WhatsappAccountRepository {
     input: SetWhatsappAccessTokenInput,
     tx?: DBTransaction
   ): Promise<WhatsappAccountReturnType | null> {
-    return updateById(input.id, { encryptedAccessToken: input.encryptedAccessToken }, tx);
+    const patch: Record<string, unknown> = { encryptedAccessToken: input.encryptedAccessToken };
+    if (input.isActive !== undefined) {
+      patch.isActive = input.isActive;
+    }
+    return updateById(input.id, patch, tx);
   }
 
   export async function setTwoStepPin(

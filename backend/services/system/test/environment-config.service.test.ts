@@ -287,14 +287,21 @@ describe("environment-config.service — tx-aware variants (rolled-back transact
   });
 
   test("auditEnvConfigChange without tx SWALLOWS an audit write failure (best-effort)", async () => {
+    const outsideBefore = await db.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
     const auditSpy = spyOn(AuditService, "createManyAuditLogs").mockRejectedValue(new Error("audit write failed"));
 
     try {
       // Post-hoc side effect (the sibling env-tab path): a failed audit write
       // is logged-only — the caller's operation stands without its audit row.
-      await auditEnvConfigChange("actor-1", "upsert", TEST_KEY, "prior-value", "next-value");
+      // The failure must be swallowed (no throw) rather than surfaced.
+      const result = await auditEnvConfigChange("actor-1", "upsert", TEST_KEY, "prior-value", "next-value");
+      expect(result).toBeUndefined();
     } finally {
       auditSpy.mockRestore();
     }
+
+    // Best-effort held: the swallowed failure persisted no audit row.
+    const afterCall = await db.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
+    expect(afterCall).toHaveLength(outsideBefore.length);
   });
 });

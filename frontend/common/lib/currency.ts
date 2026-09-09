@@ -64,12 +64,12 @@ export const currencies: readonly CurrencyOption[] = [
 
 /** Pre-built Map for O(1) currency lookups by code. */
 export const currencyByCodeMap: ReadonlyMap<string, CurrencyOption> = new Map(
-  currencies.map(currency => [currency.code as string, currency])
+  currencies.map(currency => [currency.code, currency])
 );
 
 /** Find a currency catalog entry by its ISO 4217 code in O(1) time. */
 export function getCurrencyByCode(code: CurrencyCode | string): CurrencyOption | undefined {
-  return currencyByCodeMap.get(code as string);
+  return currencyByCodeMap.get(code);
 }
 
 /** Resolve the flag emoji for a currency, falling back to a globe. */

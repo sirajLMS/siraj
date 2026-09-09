@@ -2,8 +2,11 @@
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
-import type { WhatsappConfigurationFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
-import { AppPermission, type WhatsappConfigUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  AppPermission,
+  type WhatsappConfigUpdateInput,
+  type WhatsappConfigurationFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   generateWhatsappVerifyTokenQueryDocument,
   testWhatsappConnectionQueryDocument,

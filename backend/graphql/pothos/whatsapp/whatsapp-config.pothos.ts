@@ -36,8 +36,8 @@ const WHATSAPP_CONNECTION_TEST_CACHE_ID = "whatsapp-connection-test";
  * accepted verbatim so both base-origin and full-URL conventions work.
  */
 async function deriveWhatsappWebhookUrl(): Promise<string> {
-  const configuredBase = (await resolveEnvConfig("WHATSAPP_WEBHOOK_BASE_URL"))?.trim().replace(/\/+$/, "");
-  const base = configuredBase ? configuredBase : NEXT_PUBLIC_BASE_URL;
+  const configuredBase = (await resolveEnvConfig("WHATSAPP_WEBHOOK_BASE_URL"))?.trim().replace(/\/$/, "");
+  const base = configuredBase ?? NEXT_PUBLIC_BASE_URL;
   return base.endsWith(WHATSAPP_WEBHOOK_PATH) ? base : `${base}${WHATSAPP_WEBHOOK_PATH}`;
 }
 

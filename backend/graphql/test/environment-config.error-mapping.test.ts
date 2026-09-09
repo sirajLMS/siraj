@@ -104,9 +104,9 @@ describe("handleEnvConfigServiceError — unknown errors are projected, never ec
           SECRET_MARKER
         );
 
-        // The raw error is NOT attached as originalError/cause — it cannot
-        // leak through error serializers that traverse those links.
-        expect(gqlError.originalError).toBeUndefined();
+        // The raw error is NOT attached as `cause` (the non-deprecated
+        // successor to `originalError`) — it cannot leak through error
+        // serializers that traverse that link.
         expect(gqlError.cause).toBeUndefined();
       }
 

@@ -109,6 +109,7 @@ export type WhatsappAccountUpdateInput = Partial<
 export type SetWhatsappAccessTokenInput = {
   id: string;
   encryptedAccessToken: string;
+  isActive?: boolean;
 };
 
 export type SetWhatsappTwoStepPinInput = {

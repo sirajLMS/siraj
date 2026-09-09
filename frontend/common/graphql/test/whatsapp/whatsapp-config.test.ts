@@ -38,41 +38,24 @@ const PLAIN_USER_DENIAL_GROUP = "teacher_default";
 const WEBHOOK_PATH_SUFFIX = "/api/webhooks/whatsapp";
 
 /**
- * Builds a fully-populated update input: unset optional fields are passed
- * as explicit nulls (the clear action) so every call site states its intent
- * for all seven fields.
+ * Builds an update input for all seven fields. When `preserve` is false,
+ * unset optional fields are passed as explicit nulls (the clear action);
+ * when true, they stay `undefined` so the transport drops them and the
+ * resolver treats them as omitted keys (the preserve action).
  */
 function buildConfigInput(
-  overrides: Partial<WhatsappConfigUpdateInput> & { appId: string }
+  overrides: Partial<WhatsappConfigUpdateInput> & { appId: string },
+  preserve = false
 ): WhatsappConfigUpdateInput {
+  const fallback = preserve ? undefined : null;
   return {
     appId: overrides.appId,
-    appSecret: overrides.appSecret ?? null,
-    verifyToken: overrides.verifyToken ?? null,
-    phoneNumberId: overrides.phoneNumberId ?? null,
-    wabaId: overrides.wabaId ?? null,
-    accessToken: overrides.accessToken ?? null,
-    esConfigId: overrides.esConfigId ?? null,
-  };
-}
-
-/**
- * Builds a partial update input where unlisted fields stay `undefined` — the
- * transport drops undefined keys, so they reach the resolver as omitted keys
- * (the preserve action), as opposed to buildConfigInput's explicit `null`s
- * (the clear action).
- */
-function buildPreserveInput(
-  overrides: Partial<WhatsappConfigUpdateInput> & { appId: string }
-): WhatsappConfigUpdateInput {
-  return {
-    appId: overrides.appId,
-    appSecret: overrides.appSecret,
-    verifyToken: overrides.verifyToken,
-    phoneNumberId: overrides.phoneNumberId,
-    wabaId: overrides.wabaId,
-    accessToken: overrides.accessToken,
-    esConfigId: overrides.esConfigId,
+    appSecret: overrides.appSecret ?? fallback,
+    verifyToken: overrides.verifyToken ?? fallback,
+    phoneNumberId: overrides.phoneNumberId ?? fallback,
+    wabaId: overrides.wabaId ?? fallback,
+    accessToken: overrides.accessToken ?? fallback,
+    esConfigId: overrides.esConfigId ?? fallback,
   };
 }
 
@@ -279,7 +262,7 @@ describe("WhatsApp configuration GraphQL integration tests", () => {
     // stay `undefined` on the wire (preserve) while explicit nulls would
     // clear, so this call site intentionally passes a partial input.
     await authenticatedRequest(superAdminToken, "mutate", updateWhatsappConfigurationMutationDocument, {
-      input: buildPreserveInput({ appId: "cfg-app-omitted" }),
+      input: buildConfigInput({ appId: "cfg-app-omitted" }, true),
     });
 
     const config = await readConfiguration(superAdminToken);

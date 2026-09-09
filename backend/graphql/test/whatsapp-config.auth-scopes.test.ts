@@ -37,7 +37,7 @@ function readAuthScopes(fieldName: string): unknown {
   // the access is guarded with an `in` check (no type assertion) — an
   // authScopes-less field fails loudly below instead of asserting wrongly.
   const { pothosOptions } = field;
-  if (typeof pothosOptions !== "object" || pothosOptions === null || !("authScopes" in pothosOptions)) {
+  if (!("authScopes" in pothosOptions)) {
     throw new Error(`${fieldName} does not declare authScopes`);
   }
   return pothosOptions.authScopes;
