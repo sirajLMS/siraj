@@ -161,5 +161,6 @@ export const WhatsappAccessTokenTestResultPothosObject = WhatsappAccessTokenTest
     isValid: t.exposeBoolean("isValid"),
     isConnected: t.exposeBoolean("isConnected"),
     status: t.exposeString("status", { nullable: true }),
+    reason: t.exposeString("reason", { nullable: true }),
   }),
 });

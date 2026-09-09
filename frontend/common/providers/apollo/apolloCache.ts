@@ -45,6 +45,11 @@ export function createApolloCache(): InMemoryCache {
       SupervisorMonthlySnapshot: {
         keyFields: false,
       },
+      // Transient token-test result has no `id` field — opt out of
+      // normalization so Apollo does not warn "Cache data may be lost".
+      WhatsappAccessTokenTestResult: {
+        keyFields: false,
+      },
     },
   });
 }

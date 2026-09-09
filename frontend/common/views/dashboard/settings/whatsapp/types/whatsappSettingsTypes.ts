@@ -3,7 +3,7 @@ import type {
   WhatsappAccountPurpose,
   WhatsappTemplateSnapshotFieldsFragment,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import type { WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
+import type { WhatsappTokenTestResult, WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 /** Row model for a WhatsApp account in the settings UI. */
@@ -221,7 +221,7 @@ export interface WhatsappSettingsViewModel {
   /** Validate an access token against Meta and record the test outcome in the store. */
   readonly handleTestToken: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
   /** Recorded token test outcomes, keyed by `accountId -> tokenValue -> state`. */
-  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
+  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestResult>>>>;
   /** Set the two-step PIN for an account. */
   readonly handleSubmitPin: (accountId: string, pin: string) => Promise<void>;
   /** Sync all accounts from Meta. */

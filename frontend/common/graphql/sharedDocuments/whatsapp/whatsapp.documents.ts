@@ -139,6 +139,7 @@ export const testWhatsappAccessTokenMutationDocument: TypedDocumentNode<
       isValid
       isConnected
       status
+      reason
     }
   }
 `;

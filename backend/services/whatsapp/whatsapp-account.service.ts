@@ -26,7 +26,10 @@ import {
   resolveGraphApiVersion,
 } from "@/backend/lib/whatsapp-constants";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { GraphApiError } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
+import {
+  extractMetaErrorMessage,
+  GraphApiError,
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import {
   buildExchangeEmbeddedSignupCodeRequest,
   buildGetPhoneNumberPlatformRequest,
@@ -750,6 +753,52 @@ export namespace WhatsappAccountService {
   }
 
   /**
+   * Extracts a human-readable failure reason from a thrown error. Prefers
+   * Meta's own error message when the failure is a GraphApiError (e.g.
+   * "Invalid OAuth access token", a Meta `(#code)` message), falling back to
+   * the Error's message. Returns null when nothing meaningful is available.
+   */
+  function resolveTokenTestFailureReason(error: unknown): string | null {
+    if (error instanceof GraphApiError) {
+      const metaMessage = extractMetaErrorMessage(error.errorBody);
+      if (metaMessage) {
+        return metaMessage;
+      }
+    }
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return typeof error === "string" ? error : null;
+  }
+
+  /**
+   * Same contract as `checkPhoneNumberStatusWithToken`, but additionally
+   * returns a human-readable `reason` explaining why the check failed. Used
+   * by the user-facing `testAccessToken` to show WHY a token test failed.
+   */
+  async function checkPhoneNumberWithReason(
+    phoneNumberId: string,
+    accessToken: string,
+    apiVersion: string
+  ): Promise<{ isValid: boolean; status: string | null; isConnected: boolean; reason: string | null }> {
+    try {
+      const request = buildGetPhoneNumberRequest({ accessToken, apiVersion }, { phoneNumberId });
+      const detail = await executeGraphApiFetch<GetPhoneNumberResult>(request, phoneNumberResultSchema);
+      const isConnected = detail.status?.toUpperCase() === "CONNECTED";
+      return { isValid: true, status: detail.status ?? null, isConnected, reason: null };
+    } catch (error) {
+      const reason = resolveTokenTestFailureReason(error);
+      logger.warn(
+        `whatsapp-account-service: checkPhoneNumberWithReason failed for phoneNumberId=${phoneNumberId}: ${
+          reason ?? (error instanceof Error ? error.message : String(error))
+        }`,
+        { phoneNumberId, reason }
+      );
+      return { isValid: false, status: null, isConnected: false, reason };
+    }
+  }
+
+  /**
    * Validates an access token against Meta for the account's phone number
    * WITHOUT persisting anything — the UI calls this from the token dialog's
    * "Test" action to gate the "Save" action on a confirmed-valid token.
@@ -771,11 +820,12 @@ export namespace WhatsappAccountService {
     }
 
     const apiVersion = await resolveGraphApiVersion();
-    const verification = await checkPhoneNumberStatusWithToken(account.phoneNumberId, accessToken, apiVersion);
+    const verification = await checkPhoneNumberWithReason(account.phoneNumberId, accessToken, apiVersion);
     return {
       isValid: verification.isValid,
       isConnected: verification.isConnected,
-      status: verification.status ?? null,
+      status: verification.status,
+      reason: verification.reason,
     };
   }
 

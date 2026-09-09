@@ -196,7 +196,7 @@ describe("CredentialEditDialog (via NumbersTabDesktop action menu)", () => {
 
   test("edit token dialog: Save is enabled when the token has a recorded successful test", async () => {
     const token = "a".repeat(50);
-    renderDesktopWithAccount({ tokenTestStates: { "acc-1": { [token]: "success" } } });
+    renderDesktopWithAccount({ tokenTestStates: { "acc-1": { [token]: { state: "success", reason: null } } } });
     await openActionMenu();
     await clickMenuItem(labels.editToken);
     const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);

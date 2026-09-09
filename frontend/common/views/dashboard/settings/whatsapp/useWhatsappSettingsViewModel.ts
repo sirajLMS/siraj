@@ -21,6 +21,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import {
   useWhatsappTokenTestStore,
+  type WhatsappTokenTestResult,
   type WhatsappTokenTestState,
 } from "@/frontend/common/stores/whatsappTokenTestStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -752,11 +753,12 @@ function useWhatsappTokenTestHandler(mutations: ReturnType<typeof useWhatsappMut
         const result = data?.testWhatsappAccessToken;
         const passed = result?.isValid === true && result?.isConnected === true;
         const state: WhatsappTokenTestState = passed ? "success" : "failed";
-        setTokenTest(accountId, token, state);
+        setTokenTest(accountId, token, { state, reason: passed ? null : (result?.reason ?? null) });
         return state;
       } catch (error) {
-        logger.error("Failed to test WhatsApp access token", { error });
-        setTokenTest(accountId, token, "failed");
+        const message = error instanceof Error ? error.message : String(error);
+        logger.logDomainError("Failed to test WhatsApp access token", { error: message });
+        setTokenTest(accountId, token, { state: "failed", reason: message });
         return "failed";
       }
     },
@@ -836,7 +838,7 @@ interface WhatsappViewModelParts {
   editingTokenForId: string | null;
   editingPinForId: string | null;
   handleTestToken: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
-  tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
+  tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestResult>>>>;
 }
 
 function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsViewModel {

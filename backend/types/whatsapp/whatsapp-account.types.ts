@@ -126,6 +126,8 @@ export type WhatsappAccessTokenTestResultType = {
   isValid: boolean;
   isConnected: boolean;
   status: string | null;
+  /** Human-readable explanation of why the token test failed (null when it passed). */
+  reason: string | null;
 };
 
 /**

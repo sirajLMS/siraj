@@ -6544,6 +6544,7 @@ type WeeklyWorkloadMetrics {
 type WhatsappAccessTokenTestResult {
   isConnected: Boolean
   isValid: Boolean
+  reason: String
   status: String
 }
 

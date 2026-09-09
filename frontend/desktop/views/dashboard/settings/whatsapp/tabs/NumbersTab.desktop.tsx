@@ -29,7 +29,7 @@ import {
 import { useCallback, useState } from "react";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
-import type { WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
+import type { WhatsappTokenTestResult, WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
 import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import {
   MetaNumbersLinkShared,
@@ -80,7 +80,7 @@ function CredentialEditDialog({
   readonly onClose: () => void;
   readonly onConfirm: (value: string) => Promise<void>;
   readonly onTest: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
-  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
+  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestResult>>>>;
 }>) {
   const [value, setValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -115,7 +115,10 @@ function CredentialEditDialog({
   const title = state.field === "accessToken" ? labels.editToken : labels.editPin;
   const fieldLabel = state.field === "accessToken" ? labels.accessToken : labels.twoStepPin;
   const placeholder = state.field === "accessToken" ? labels.accessTokenPlaceholder : labels.twoStepPinPlaceholder;
-  const testState = isToken ? tokenTestStates[state.accountId]?.[value] : undefined;
+  const tokenTestResult = isToken ? tokenTestStates[state.accountId]?.[value] : undefined;
+  const testState = tokenTestResult?.state;
+  const testReason = tokenTestResult?.reason ?? null;
+  const testFailed = testState === "failed";
 
   // For the token dialog, Save is gated on a successful test of the CURRENT
   // value; for the PIN dialog, only non-empty and not submitting.
@@ -134,6 +137,9 @@ function CredentialEditDialog({
           placeholder={placeholder}
           value={value}
           onChange={e => setValue(e.target.value)}
+          error={testFailed}
+          helperText={testFailed ? testReason : undefined}
+          aria-invalid={testFailed}
           sx={{ mt: 1 }}
         />
       </DialogContent>
@@ -459,7 +465,7 @@ function NumbersTabDialogs({
   readonly updatingId: string | null;
   readonly mutationError: string | null;
   readonly onTestAccessToken: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
-  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
+  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestResult>>>>;
   readonly handlers: NumbersTabDialogHandlers;
   readonly validators: NumbersTabDialogValidators;
 }>) {

@@ -30,7 +30,7 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
-import type { WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
+import type { WhatsappTokenTestResult, WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
 import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import {
   MetaNumbersLinkShared,
@@ -99,7 +99,7 @@ function CredentialEditDialogMobile({
   readonly onClose: () => void;
   readonly onConfirm: (value: string) => Promise<void>;
   readonly onTest: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
-  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
+  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestResult>>>>;
   readonly loading: boolean;
   readonly validate: (value: string) => string | null;
 }>) {
@@ -158,7 +158,12 @@ function CredentialEditDialogMobile({
   const fieldLabel = isToken ? labels.accessToken : labels.twoStepPin;
   const placeholder = isToken ? labels.accessTokenPlaceholder : labels.twoStepPinPlaceholder;
   const busy = form.submitting || loading;
-  const testState = isToken ? tokenTestStates[state.accountId]?.[form.value] : undefined;
+  const tokenTestResult = isToken ? tokenTestStates[state.accountId]?.[form.value] : undefined;
+  const testState = tokenTestResult?.state;
+  const testReason = tokenTestResult?.reason ?? null;
+  const testFailed = testState === "failed";
+  const fieldError = form.error !== null || testFailed;
+  const fieldHelperText = testFailed ? testReason : form.error;
 
   const saveDisabled = isToken
     ? busy || testing || form.value.length === 0 || testState !== "success"
@@ -176,9 +181,9 @@ function CredentialEditDialogMobile({
             placeholder={placeholder}
             value={form.value}
             onChange={handleFieldChange}
-            error={form.error !== null}
-            helperText={form.error}
-            aria-invalid={form.error !== null}
+            error={fieldError}
+            helperText={fieldHelperText ?? undefined}
+            aria-invalid={fieldError}
             disabled={busy}
           />
         </Stack>
