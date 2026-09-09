@@ -3,6 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parentHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-portal.documents";
+import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import { type ParentRulesLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface ParentRulesViewModel {
@@ -32,11 +33,11 @@ export function useParentRulesViewModel(_props: Readonly<UseParentRulesViewModel
     setHandbookLoading(true);
     try {
       if (dataRef.current?.parentHandbookUrl?.url) {
-        window.open(dataRef.current.parentHandbookUrl.url, "_blank");
+        safeOpenWindow(dataRef.current.parentHandbookUrl.url);
       } else {
         const refetchedData = await refetchRef.current();
         if (refetchedData.data?.parentHandbookUrl?.url) {
-          window.open(refetchedData.data.parentHandbookUrl.url, "_blank");
+          safeOpenWindow(refetchedData.data.parentHandbookUrl.url);
         }
       }
     } finally {
