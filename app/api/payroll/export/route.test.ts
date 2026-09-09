@@ -319,6 +319,22 @@ describe("GET /api/payroll/export", () => {
       expect(await readErrorBody(response)).toBe("Invalid input.");
       expect(getReportMock).toHaveBeenCalledTimes(0);
     });
+
+    test("returns 400 for a teacherId that is not a valid UUID shape", async () => {
+      const response = await callExport("?teacherId=not-a-uuid");
+
+      expect(response.status).toBe(400);
+      expect(await readErrorBody(response)).toBe("Invalid input.");
+      expect(getReportMock).toHaveBeenCalledTimes(0);
+    });
+
+    test("returns 400 for a studentId that is not a valid UUID shape", async () => {
+      const response = await callExport("?studentId=12345");
+
+      expect(response.status).toBe(400);
+      expect(await readErrorBody(response)).toBe("Invalid input.");
+      expect(getReportMock).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe("CSV hardening", () => {

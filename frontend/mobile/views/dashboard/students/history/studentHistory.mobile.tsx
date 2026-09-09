@@ -10,7 +10,7 @@ import {
   TrendingUp,
   VerifiedUser,
 } from "@mui/icons-material";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
@@ -173,22 +173,27 @@ function HistoryMobileActions({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <IconButton
-          onClick={onPrevMonth}
-          size="small"
-          disabled={!canGoPrev}
-          sx={theme => ({
-            backgroundColor: canGoPrev ? theme.palette.primary.main : theme.palette.action.disabledBackground,
-            color: canGoPrev ? theme.palette.onPrimary : theme.palette.action.disabled,
-            borderRadius: 2,
-            transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            "&:hover": {
-              backgroundColor: canGoPrev ? theme.palette.primary.dark : theme.palette.action.disabledBackground,
-            },
-          })}
-        >
-          <ChevronLeft sx={{ fontSize: 18 }} />
-        </IconButton>
+        <Tooltip title={t.previousMonth}>
+          <Box component="span" sx={{ display: "inline-flex" }}>
+            <IconButton
+              onClick={onPrevMonth}
+              size="small"
+              disabled={!canGoPrev}
+              aria-label={t.previousMonth}
+              sx={theme => ({
+                backgroundColor: canGoPrev ? theme.palette.primary.main : theme.palette.action.disabledBackground,
+                color: canGoPrev ? theme.palette.onPrimary : theme.palette.action.disabled,
+                borderRadius: 2,
+                transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+                "&:hover": {
+                  backgroundColor: canGoPrev ? theme.palette.primary.dark : theme.palette.action.disabledBackground,
+                },
+              })}
+            >
+              <ChevronLeft sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Box>
+        </Tooltip>
         <Box
           sx={theme => ({
             display: "flex",
@@ -204,46 +209,53 @@ function HistoryMobileActions({
           <CalendarToday sx={{ fontSize: 18 }} />
           <Typography variant="buttonText">{`${monthStr} ${yearStr}`}</Typography>
         </Box>
+        <Tooltip title={t.nextMonth}>
+          <Box component="span" sx={{ display: "inline-flex" }}>
+            <IconButton
+              onClick={onNextMonth}
+              size="small"
+              disabled={!canGoNext}
+              aria-label={t.nextMonth}
+              sx={theme => ({
+                backgroundColor: canGoNext ? theme.palette.primary.main : theme.palette.action.disabledBackground,
+                color: canGoNext ? theme.palette.onPrimary : theme.palette.action.disabled,
+                borderRadius: 2,
+                transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+                "&:hover": {
+                  backgroundColor: canGoNext ? theme.palette.primary.dark : theme.palette.action.disabledBackground,
+                },
+              })}
+            >
+              <ChevronRight sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Box>
+        </Tooltip>
+      </Box>
+      <Tooltip title={t.exportPdf}>
         <IconButton
-          onClick={onNextMonth}
-          size="small"
-          disabled={!canGoNext}
+          type="button"
+          aria-label={t.exportPdf}
+          onClick={onPrint}
           sx={theme => ({
-            backgroundColor: canGoNext ? theme.palette.primary.main : theme.palette.action.disabledBackground,
-            color: canGoNext ? theme.palette.onPrimary : theme.palette.action.disabled,
+            width: 40,
+            height: 40,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: theme.palette.surfaceContainerHigh,
             borderRadius: 2,
-            transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
+            color: theme.palette.primary.main,
+            boxShadow: theme.palette.shadow.button,
+            border: "none",
+            cursor: "pointer",
             "&:hover": {
-              backgroundColor: canGoNext ? theme.palette.primary.dark : theme.palette.action.disabledBackground,
+              backgroundColor: theme.palette.surfaceContainerHigh,
             },
           })}
         >
-          <ChevronRight sx={{ fontSize: 18 }} />
+          <PictureAsPdf />
         </IconButton>
-      </Box>
-      <IconButton
-        type="button"
-        aria-label={t.exportPdf}
-        onClick={onPrint}
-        sx={theme => ({
-          width: 40,
-          height: 40,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: theme.palette.surfaceContainerHigh,
-          borderRadius: 2,
-          color: theme.palette.primary.main,
-          boxShadow: theme.palette.shadow.button,
-          border: "none",
-          cursor: "pointer",
-          "&:hover": {
-            backgroundColor: theme.palette.surfaceContainerHigh,
-          },
-        })}
-      >
-        <PictureAsPdf />
-      </IconButton>
+      </Tooltip>
     </Box>
   );
 }

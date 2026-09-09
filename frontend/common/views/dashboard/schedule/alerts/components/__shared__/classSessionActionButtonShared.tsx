@@ -1,7 +1,7 @@
 "use client";
 
 import { AcUnitOutlined, LogoutOutlined, SummarizeOutlined } from "@mui/icons-material";
-import { alpha, Button, type ButtonProps, Tooltip } from "@mui/material";
+import { alpha, Box, Button, type ButtonProps, Tooltip } from "@mui/material";
 import type { ClassSessionAction } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 
 export interface ClassSessionActionButtonSharedOptions {
@@ -43,31 +43,33 @@ export function ClassSessionActionButtonShared({
   if (action === "contact_admin") {
     return (
       <Tooltip title={labels.contactAdmin}>
-        <Button
-          id={`contact-admin-${classId}`}
-          variant="outlined"
-          fullWidth={fullWidth}
-          disabled
-          size={options.buttonSize}
-          startIcon={<AcUnitOutlined />}
-          sx={theme => ({
-            ...theme.typography.labelUppercase,
-            px: options.buttonPx,
-            py: options.buttonPy,
-            color: theme.palette.info.main,
-            borderColor: theme.palette.info.main,
-            backgroundColor: alpha(theme.palette.info.main, 0.06),
-            borderRadius: theme.layout.radius.button,
-            fontSize: options.buttonFontSize,
-            "&.Mui-disabled": {
+        <Box component="span" sx={fullWidth ? { display: "block", width: "100%" } : { display: "inline-block" }}>
+          <Button
+            id={`contact-admin-${classId}`}
+            variant="outlined"
+            fullWidth={fullWidth}
+            disabled
+            size={options.buttonSize}
+            startIcon={<AcUnitOutlined />}
+            sx={theme => ({
+              ...theme.typography.labelUppercase,
+              px: options.buttonPx,
+              py: options.buttonPy,
               color: theme.palette.info.main,
               borderColor: theme.palette.info.main,
-              opacity: 0.7,
-            },
-          })}
-        >
-          {labels.contactAdmin}
-        </Button>
+              backgroundColor: alpha(theme.palette.info.main, 0.06),
+              borderRadius: theme.layout.radius.button,
+              fontSize: options.buttonFontSize,
+              "&.Mui-disabled": {
+                color: theme.palette.info.main,
+                borderColor: theme.palette.info.main,
+                opacity: 0.7,
+              },
+            })}
+          >
+            {labels.contactAdmin}
+          </Button>
+        </Box>
       </Tooltip>
     );
   }
@@ -141,5 +143,13 @@ export function ClassSessionActionButtonShared({
     </Button>
   );
 
-  return isDisabled ? <Tooltip title={labels.leaveDisabledReason}>{baseButton}</Tooltip> : baseButton;
+  return isDisabled ? (
+    <Tooltip title={labels.leaveDisabledReason}>
+      <Box component="span" sx={fullWidth ? { display: "block", width: "100%" } : { display: "inline-block" }}>
+        {baseButton}
+      </Box>
+    </Tooltip>
+  ) : (
+    baseButton
+  );
 }

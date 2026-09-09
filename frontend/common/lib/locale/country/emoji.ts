@@ -1,4 +1,4 @@
-import { countries } from "@/frontend/common/lib/locale/country/countries";
+import { countryByCodeMap } from "@/frontend/common/lib/locale/country/lookup";
 import { isExcludedUiCountryCode, resolveUiCountryCode } from "@/shared/lib/locale/excluded-ui-countries";
 
 const REGIONAL_INDICATOR_BASE = 0x1f1e6;
@@ -17,6 +17,6 @@ export function getCountryEmoji(countryCode: string): string {
   if (!normalizedCode) {
     return "🌐";
   }
-  const match = countries.find(country => country.code.toString() === normalizedCode);
+  const match = countryByCodeMap.get(normalizedCode);
   return match?.emoji ?? (isExcludedUiCountryCode(countryCode) ? "🌐" : countryCodeToEmoji(normalizedCode));
 }

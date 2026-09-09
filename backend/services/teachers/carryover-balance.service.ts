@@ -167,19 +167,18 @@ function convertAmountWithRate(amount: string, rate: string): string | null {
 
 /** Applies `handle` to each item in order; the shared transaction connection must never see interleaved calls. */
 async function forEachInSequence<T>(items: readonly T[], handle: (item: T) => Promise<void>): Promise<void> {
-  await items.reduce(async (previous, item) => {
-    await previous;
+  for (const item of items) {
     await handle(item);
-  }, Promise.resolve());
+  }
 }
 
 /** Maps items to results, awaiting each step in order for the same shared-connection reason. */
 async function mapInSequence<T, R>(items: readonly T[], handle: (item: T) => Promise<R>): Promise<R[]> {
-  return items.reduce<Promise<R[]>>(async (previous, item) => {
-    const results = await previous;
+  const results: R[] = [];
+  for (const item of items) {
     results.push(await handle(item));
-    return results;
-  }, Promise.resolve([]));
+  }
+  return results;
 }
 
 // ---------------------------------------------------------------------------

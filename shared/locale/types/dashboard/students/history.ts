@@ -10,6 +10,8 @@ export interface StudentHistoryLabels {
   readonly pageSubtitle: (month: string) => string;
   readonly exportPdf: string;
   readonly changeMonth: string;
+  readonly previousMonth: string;
+  readonly nextMonth: string;
   readonly metrics: {
     readonly totalClasses: (count: number) => string;
     readonly attendanceRate: (rate: number) => string;
