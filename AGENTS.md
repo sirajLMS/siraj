@@ -444,6 +444,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/services/zoom-token-types.md` - Zoom token kinds (SDK JWT, OBF, ZAK, S2S OAuth, per-user OAuth) semantics and constraints
 - `docs/services/whatsapp-cloud-api.md` - WhatsApp Cloud API integration reference (adapter, factory, webhook, dispatch, schema, opt-in, frontend)
 - `docs/services/whatsapp-coexistence-multi.md` - WhatsApp v2: multi-number purpose routing, per-account adapter/factory, coexistence onboarding, durable webhook ingest
+- `docs/backend/whatsapp-configuration.md` - WhatsApp Cloud API Config tab reference (singleton `whatsapp_configs` upsert: advisory lock + FOR UPDATE, DB-first/env write-through, secret masking, Drizzle error projection)
 - `docs/services/general-user-creation.md` - General user creation pattern (createUserOfType null extension, specialized group filtering, cache eviction)
 - `docs/billing/quota-system.md` - Quota System: append-only ledger, FIFO selection, periodic rollover, on-demand scheduling integration
 - `docs/billing/credit-hours-system.md` - Credit-Hours accounting: hour-based parallel ledger, package plans, accounting payments, XOR CHECK, push+migrate dual provisioning (plan: `.ai/plans/student-credit-hours-system`)

@@ -3354,6 +3354,11 @@ type Mutation {
   """
   updateWhatsappAccountPurpose(accountId: String!, purpose: WhatsappAccountPurpose!): WhatsappAccount
 
+  """
+  Creates or updates the WhatsApp Cloud API configuration with per-field merge semantics: provided fields are written, explicit nulls clear them, omitted fields keep their stored values.
+  """
+  updateWhatsappConfiguration(input: WhatsappConfigUpdateInput!): WhatsappConfiguration
+
   """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
   upsertEnvConfigEntry(input: EnvConfigUpsertInput!): EnvConfigUpsertResult
@@ -4200,6 +4205,11 @@ type Query {
 
   """Generates dynamic attendance and financial reports."""
   generateAttendanceReport(filters: AttendanceReportFiltersInput!): AttendanceReportPayload
+
+  """
+  Generates a cryptographically secure webhook verify-token candidate (48 hex characters). The value is not persisted — copy it into the Meta developer console and save it via updateWhatsappConfiguration.
+  """
+  generateWhatsappVerifyToken: String!
   groupClassAudit(classInstanceId: String!): GroupClassAudit
   impersonationStatus: ImpersonationStatus
   invoicePaymentSubmission(invoiceId: String!): InvoicePaymentSubmission
@@ -4482,6 +4492,11 @@ type Query {
   teacherWeeklyScheduleGrid(teacherId: String, weekDate: String!): WeeklyScheduleGrid
   teacherWorkloadMetrics(teacherId: String, weekDate: String!): WeeklyWorkloadMetrics
   teachers(limit: Int!, search: String!): [TeacherSimple!]
+
+  """
+  Runs a lightweight live check against the Meta Graph API with the active credentials and returns the localized outcome. Never throws — failures come back as success: false.
+  """
+  testWhatsappConnection: WhatsappConnectionTestResult
   translatedMessage(key: String!, namespace: String!): String
   unpaidInvoicesAlert: UnpaidInvoicesSummary
   user(id: String!): User
@@ -4505,6 +4520,11 @@ type Query {
 
   """List all active WhatsApp business accounts."""
   whatsappAccounts: [WhatsappAccount!]
+
+  """
+  Masked view of the active WhatsApp Cloud API configuration. Database values win over WHATSAPP_* environment keys; secrets are always masked.
+  """
+  whatsappConfiguration: WhatsappConfiguration
 
   """
   Detailed WhatsApp Cloud API configuration status — which configuration path (DB account vs env bootstrap) is satisfied and which env keys are missing.
@@ -6585,6 +6605,84 @@ input WhatsappAccountUpdateInput {
   portfolioMessagingLimitTier: WhatsappLimitTier
   qualityRating: WhatsappQualityRating
   throughputLevel: String
+}
+
+input WhatsappConfigUpdateInput {
+  """Permanent access token (stored encrypted). Pass null to clear."""
+  accessToken: String
+
+  """Meta app ID. Pass null to clear."""
+  appId: String
+
+  """Meta app secret (stored encrypted). Pass null to clear."""
+  appSecret: String
+
+  """Facebook Login for Business configuration ID. Pass null to clear."""
+  esConfigId: String
+
+  """Meta phone number ID. Pass null to clear."""
+  phoneNumberId: String
+
+  """Webhook verify token. Pass null to clear."""
+  verifyToken: String
+
+  """WhatsApp Business Account ID. Pass null to clear."""
+  wabaId: String
+}
+
+type WhatsappConfiguration {
+  """
+  Masked permanent access token (last four characters only) — never returned in plaintext.
+  """
+  accessToken: String
+
+  """Meta app ID."""
+  appId: String
+
+  """
+  Masked Meta app secret (last four characters only) — never returned in plaintext.
+  """
+  appSecret: String
+
+  """Facebook Login for Business configuration ID used by Embedded Signup."""
+  esConfigId: String
+  id: String
+
+  """Meta phone number ID."""
+  phoneNumberId: String
+
+  """
+  Where the active values come from: the saved database row (`db`) or the WHATSAPP_* environment keys (`env`).
+  """
+  source: String
+
+  """Webhook verify token shared with the Meta webhook subscription."""
+  verifyToken: String
+
+  """WhatsApp Business Account ID."""
+  wabaId: String
+
+  """
+  Callback URL Meta must call for webhook events, derived from the deployment origin.
+  """
+  webhookUrl: String
+}
+
+type WhatsappConnectionTestResult {
+  id: String
+
+  """
+  Localized, user-facing outcome copy — never contains tokens or provider error details.
+  """
+  message: String
+
+  """
+  Display phone number Meta returned for the configured phone number ID (successful checks only).
+  """
+  phoneNumber: String
+
+  """Whether the live Meta Graph API check succeeded."""
+  success: Boolean
 }
 
 type WhatsappConfigurationStatus {

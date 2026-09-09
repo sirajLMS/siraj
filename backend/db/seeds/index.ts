@@ -70,8 +70,9 @@ import {
   seedOrGetTeacherVacationRequests,
 } from "@/backend/db/seeds/teachers";
 import { seedOrGetUserDeviceTokens, seedOrGetUsers } from "@/backend/db/seeds/users";
+import { seedOrGetWhatsappConfig } from "@/backend/db/seeds/whatsapp";
 import { logger } from "@/backend/lib/logger";
-import { ReferenceDataService } from "@/backend/services";
+import { ReferenceDataService, WhatsappConfigService } from "@/backend/services";
 import type {
   ClassInstanceSelectType,
   CreditTransactionReturnType,
@@ -138,6 +139,7 @@ export async function runAllSeeds(context: SeedContext = {}): Promise<SeedContex
   await seedBooksAndCategories(context, step);
   await seedPermissionGroups(context, step);
   await seedUsersAndActor(context, step, config);
+  await seedWhatsappConfig(context, step);
   await seedTeachersAndParents(context, step, config);
   await seedUserConfigs(context, step, config);
   await seedStudentsAndCredits(context, step, config);
@@ -222,6 +224,33 @@ async function seedUsersAndActor(context: SeedContext, step: RunStep, config: Se
       context.actorUserId = actor.id;
     }
   }
+}
+
+async function seedWhatsappConfig(context: SeedContext, step: RunStep): Promise<void> {
+  await step("whatsapp-config", () =>
+    seedOrGetWhatsappConfig({
+      actorUserId: context.actorUserId,
+      // Look-before-create: once a whatsapp_configs row exists it is
+      // authoritative, so a re-run must not re-persist the env payload (that
+      // would silently revert admin-saved credentials). A failing existence
+      // check makes the seeder stand down (fail safe).
+      hasExisting: () => WhatsappConfigService.hasStoredConfiguration(),
+      // Carry-over resolution through the service's env resolution (DB
+      // override first, then process.env) so the seeded row matches what the
+      // enforcement paths resolve — not a raw process.env snapshot.
+      resolveEnvValues: () => WhatsappConfigService.resolveEnvCarryOver(),
+      persist: input =>
+        WhatsappConfigService.saveConfiguration(input, {
+          actorUserId: context.actorUserId,
+          // Bootstrap carry-over only: the row and the process environment
+          // hold the same values here, so writing `env::` overrides would
+          // just add redundant plaintext copies of the secrets. The UI save
+          // path keeps the write-through that makes rotation enforcement-
+          // visible. See WhatsappConfigService.saveConfiguration.
+          propagateEnvConfigOverrides: false,
+        }),
+    })
+  );
 }
 
 async function seedTeachersAndParents(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {

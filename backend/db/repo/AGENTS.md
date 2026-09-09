@@ -73,6 +73,7 @@ Each sub-directory (except `scheduling/` and `utils/` which pre-date this refact
 - `docs/billing/quota-system.md` - Quota System architecture reference
 - `docs/backend/billing-repo-factory.md` - Billing repo factory with configurable hooks pattern reference
 - `docs/backend/schema-helpers.md` - Schema column and junction table helpers pattern reference
+- `docs/backend/whatsapp-configuration.md` - WhatsApp singleton-config repository pattern (transaction-scoped advisory lock + FOR UPDATE upsert)
 - `docs/quality/linting-rules.md` - Oxlint & ESLint/sonarjs fix recipes
 
 

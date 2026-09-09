@@ -92,6 +92,15 @@ await mock.module("@/backend/services/system", () => ({
   resolveEnvConfigMany: async () => ({}),
   setEnvConfig: async () => {},
   clearEnvConfigCache: () => {},
+  // The whatsapp services barrel evaluates whatsapp-config.service (which
+  // imports the env-config write path) — keep the factory in sync with the
+  // real module surface in environment-config.service.ts. The webhook route
+  // itself never invokes these. `toEnvSettingDbKey` must mirror the real
+  // implementation, including the `env::` prefix (ENV_SETTING_KEY_PREFIX).
+  upsertEnvConfigOverride: async () => ({}),
+  deleteEnvConfigOverride: async () => ({}),
+  auditEnvConfigChange: async () => {},
+  toEnvSettingDbKey: (envKey: string): string => `env::${envKey}`,
 }));
 
 await mock.module("@/backend/lib/ratelimit", () => ({

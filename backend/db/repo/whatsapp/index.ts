@@ -1,4 +1,5 @@
 export * from "./whatsapp-account.repository";
+export * from "./whatsapp-config.repository";
 export * from "./whatsapp-contact.repository";
 export * from "./whatsapp-conversation.repository";
 export * from "./whatsapp-message.repository";

@@ -29,9 +29,10 @@ frontend/common/graphql/sharedDocuments/
 │                         student-status, student-onboarding, student-profile
 ├── suggestions/          suggestion
 ├── supervisor/           supervisor-dashboard
-└── teachers/             teacher, teacher-dashboard, teacher-notes, teacher-onboarding,
-                          teacher-portal, staff-profile, staff-directory, manager-onboarding,
-                          carryover
+├── teachers/             teacher, teacher-dashboard, teacher-notes, teacher-onboarding,
+│                          teacher-portal, staff-profile, staff-directory, manager-onboarding,
+│                          carryover
+└── whatsapp/             whatsapp, whatsapp-inbox, whatsapp-config
 ```
 
 ### Barrel pattern

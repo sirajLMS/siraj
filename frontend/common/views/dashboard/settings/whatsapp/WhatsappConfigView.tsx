@@ -11,7 +11,7 @@ import { useWhatsappTab } from "@/frontend/common/views/dashboard/settings/whats
 
 export type WhatsappConfigViewProps = WhatsappSettingsViewModel;
 
-export type WhatsappConfigTab = "numbers" | "templates" | "optin" | "inbox";
+export type WhatsappConfigTab = "numbers" | "templates" | "optin" | "inbox" | "config";
 
 // ── Lazy page shell (tier-specific page container + header) ──
 

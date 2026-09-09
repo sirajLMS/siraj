@@ -78,6 +78,7 @@ applyTo: "backend/**/*.ts"
 - **No Dynamic Imports in Pothos Files**: NEVER use `await import(...)` inside resolver functions or anywhere in `*.pothos.ts` files. Bun's module bundler marks the entire module tree as async ESM, causing `TypeError: require() async module` when CommonJS `graphql-tag` tries to `require('graphql')`. Use top-level static imports instead. This caused all GraphQL integration tests to fail.
 - **Field Factories (CRITICAL)**: When multiple Pothos object types share identical field definitions, extract them into `__shared__/` helper modules using the `_*Fields(t, options?)` pattern (e.g., `classExecutionFields(t)`, `recurringScheduleDetailFields(t, dayDetailTypeRef)`). For query/mutation fields with duplicated args/auth/resolve boilerplate, use the `make*QueryField()` / `make*MutationField()` factory pattern (e.g., `makeWeeklyScheduleQueryField`, `makePaymentMethodIdMutationField`). These factories call `gqlSchemaBuilder.queryField`/`gqlSchemaBuilder.mutationField` directly. See `docs/graphql/pothos-field-factories.md` for the complete pattern reference.
 - **DomainError (CRITICAL)**: All GraphQL resolver errors MUST extend DomainError (from `@/backend/lib/errors`) to propagate structured `extensions.code` to clients. Never throw plain `Error` in resolvers. See `docs/graphql/domain-error-extensions-code.md`.
+- **Multi-key `authScopes` maps need `$all` (CRITICAL)**: scope-auth evaluates a bare multi-key `authScopes` map under the "any" default strategy — a second truthy scope satisfies the map. Any field combining `permission` with additional scopes (e.g. `notImpersonating`) MUST wrap them in `$all: { ... }`.
 
 ### i18n / Localized Errors
 
@@ -91,6 +92,7 @@ applyTo: "backend/**/*.ts"
 - NEVER use `console.*` - ESLint will error
 - `import { logger } from '@/backend/lib/logger'`
 - Methods: `logger.info`, `logger.warn`, `logger.error`, `logger.debug`
+- **Drizzle Error Projection (CRITICAL)**: Drizzle 1.0.0-rc.4 wraps failed queries in `DrizzleQueryError` whose message embeds the FULL BOUND PARAMS — never log or rethrow raw driver errors from writes on secret-bearing tables. Project to stable metadata (`name`/`code`/`detail`) for logs AND GraphQL error surfaces (drop `message`/`params`, never attach the raw error as `originalError`/`cause`). See `docs/backend/whatsapp-configuration.md`.
 
 ### Repository Layer
 

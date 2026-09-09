@@ -14,7 +14,13 @@ import { deleteEnvConfigOverride, upsertEnvConfigOverride } from "@/backend/serv
 gqlSchemaBuilder.mutationField("upsertEnvConfigEntry", t =>
   t.field({
     type: EnvConfigUpsertResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_ENV, notImpersonating: true },
+    // The scopes are wrapped in `$all` explicitly: the schema builder does not
+    // set `scopeAuth.defaultStrategy`, so it defaults to "any" — a bare
+    // multi-key map would grant on the FIRST truthy scope
+    // (`notImpersonating: true`) without ever evaluating the permission check.
+    authScopes: {
+      $all: { permission: AppPermission.SETTINGS_EDIT_ENV, notImpersonating: true },
+    },
     args: {
       input: t.arg({ type: EnvConfigUpsertInputPothosObject, required: true }),
     },
@@ -33,7 +39,12 @@ gqlSchemaBuilder.mutationField("upsertEnvConfigEntry", t =>
 gqlSchemaBuilder.mutationField("deleteEnvConfigEntry", t =>
   t.field({
     type: EnvConfigDeleteResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_ENV, notImpersonating: true },
+    // Same `$all` wrap as the upsert above: under the builder's "any" default
+    // a bare map would grant on `notImpersonating` alone and skip the
+    // permission check.
+    authScopes: {
+      $all: { permission: AppPermission.SETTINGS_EDIT_ENV, notImpersonating: true },
+    },
     args: {
       key: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },

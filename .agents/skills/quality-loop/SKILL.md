@@ -153,6 +153,7 @@ When a full round passes clean, report:
 - Which steps passed
 - How many iterations were needed
 - Any issues that required manual fixes
+- Actual exit codes for every per-file gate claim, from the SAME editing session — never claim a gate passed without running it (claimed-but-unrun gates have shipped build-breaking errors)
 
 ## Environment Variables
 
