@@ -22,6 +22,7 @@ const settingsLabels: WhatsappSettingsLabels = {
   page: labels,
   notifications: {
     syncSuccess: labels.syncSuccess,
+    syncSuccessWithCounts: labels.syncSuccessWithCounts,
     syncNoChange: labels.syncNoChange,
     syncError: labels.syncError,
     deleteSuccess: labels.deleteSuccess,

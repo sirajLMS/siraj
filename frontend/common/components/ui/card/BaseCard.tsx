@@ -16,16 +16,21 @@ const baseCardSx =
   (interactive: boolean): SxProps<Theme> =>
   theme => ({
     borderRadius: theme.layout.radius.card,
-    border: `1px solid ${theme.palette.border.light}`,
-    boxShadow: theme.palette.shadow.card,
-    backgroundColor: theme.palette.background.paper,
+    // Use `theme.vars.*` for tokens the customize overlay (`?customize=1`)
+    // live-updates via `--mui-palette-*` inline CSS vars on `<html>`. Reading
+    // the hex from `theme.palette.*` would bake the SSR-resolved value into
+    // the emotion class, leaving cards stuck on the SSR preset (e.g. Ocean)
+    // even after clicking a different preset in the sidebar.
+    border: `1px solid ${theme.vars.palette.border.light}`,
+    boxShadow: theme.vars.palette.shadow.card,
+    backgroundColor: theme.vars.palette.background.paper,
     padding: theme.layout.cardPadding,
     cursor: interactive ? "pointer" : undefined,
     transition: theme.transitions.create(["border-color", "box-shadow"], { duration: 150, easing: "ease" }),
     ...(interactive && {
       "&:hover": {
-        borderColor: theme.palette.primary.main,
-        boxShadow: theme.palette.shadow.cardHover,
+        borderColor: theme.vars.palette.primary.main,
+        boxShadow: theme.vars.palette.shadow.cardHover,
       },
     }),
   });

@@ -28,6 +28,8 @@ export interface NumbersTabSharedProps {
   readonly onSyncFromMeta: () => Promise<void>;
   readonly onDismissSnackbar: () => void;
   readonly isConfigured: boolean;
+  /** "Why disabled" tooltip for the Sync-from-Meta header action (busy label or missing env keys). */
+  readonly syncDisabledReason?: string;
   // ── Credential dialog loading (Task 14) ──
   /** Which account's token dialog is open (null when closed). */
   readonly editingTokenForId: string | null;
@@ -64,8 +66,12 @@ export interface NumbersTabSharedProps {
   readonly esConfigId?: string | null;
   /** Server-resolved Meta App ID for the FB SDK init. */
   readonly esAppId?: string | null;
+  /** Meta App Dashboard "Facebook Login for Business" settings URL for registering allowed origins, resolved via GraphQL (null when not configured). */
+  readonly embeddedSignupAllowedOriginsUrl?: string | null;
   /** Open the embedded signup dialog. */
   readonly onOpenEmbeddedSignup?: () => void;
+  /** True when plain-HTTP serving blocks the FB login flow (disables the connect button with a hint). */
+  readonly embeddedSignupBlocked?: boolean;
   /** Submit the captured ES session payload (mutation + refetch). */
   readonly onEmbeddedSignupComplete?: (payload: WhatsappEmbeddedSignupPayload) => Promise<void>;
   // ── Credential validation ──

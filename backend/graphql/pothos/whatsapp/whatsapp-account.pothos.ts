@@ -11,6 +11,7 @@ import {
 import { whatsappAccountSharedInputFields } from "@/backend/graphql/pothos/whatsapp/__shared__/whatsappAccountFieldHelpers";
 import type {
   WhatsappAccountReturnType,
+  WhatsappConfigurationStatusType,
   WhatsappSyncFromMetaReturnType,
   WhatsappTemplateSnapshot,
 } from "@/backend/types";
@@ -136,5 +137,16 @@ export const WhatsappSyncFromMetaResultPothosObject = WhatsappSyncFromMetaResult
     id: t.exposeString("id"),
     accounts: t.expose("accounts", { type: [WhatsappAccountPothosObject] }),
     templates: t.expose("templates", { type: [WhatsappTemplateSnapshotPothosObject] }),
+  }),
+});
+
+export const WhatsappConfigurationStatusRef =
+  gqlSchemaBuilder.objectRef<WhatsappConfigurationStatusType>("WhatsappConfigurationStatus");
+
+export const WhatsappConfigurationStatusPothosObject = WhatsappConfigurationStatusRef.implement({
+  fields: t => ({
+    isConfigured: t.exposeBoolean("isConfigured", { nullable: false }),
+    envBootstrapAvailable: t.exposeBoolean("envBootstrapAvailable", { nullable: false }),
+    missingEnvKeys: t.exposeStringList("missingEnvKeys", { nullable: false }),
   }),
 });

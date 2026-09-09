@@ -52,6 +52,7 @@ function resetAppearanceStore(): void {
       dirty: false,
       resetDialogOpen: false,
       presetId: "default",
+      lastPublished: null,
     },
     false
   );

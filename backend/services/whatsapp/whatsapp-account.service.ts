@@ -42,7 +42,7 @@ import { resetWhatsappChannel } from "@/backend/services/communication/channels/
 import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
 import { NOTIFICATION_TEMPLATE_MAP } from "@/backend/services/notification/notification-payloads.builders";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import { resolveEnvConfig } from "@/backend/services/system";
+import { resolveEnvConfig, resolveEnvConfigMany } from "@/backend/services/system";
 import { AuditService } from "@/backend/services/system/audit.service";
 import { WhatsappCoexistenceSyncService } from "@/backend/services/whatsapp/whatsapp-coexistence-sync.service";
 // r10-043/r10-044/r10-045: Canonical types imported from the types layer,
@@ -64,6 +64,7 @@ import type {
   WhatsappAccountCreateSubmitInput,
   WhatsappAccountReturnType,
   WhatsappAccountUpdateInput,
+  WhatsappConfigurationStatusType,
   WhatsappEmbeddedSignupSubmitInput,
   WhatsappMessageTemplate,
   WhatsappPhoneNumber,
@@ -74,6 +75,13 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 /** Placeholder string for credentials not yet set via dedicated mutations. */
 const SYNC_STATUS_PENDING = "pending" as const;
+
+/**
+ * Env keys the env-bootstrap path for `syncFromMeta` depends on. These are
+ * `.env`-only (never DB-seeded); the resolver is read-only and never persists
+ * values to `system_settings`.
+ */
+const WHATSAPP_ENV_BOOTSTRAP_KEYS = ["WHATSAPP_ACCESS_TOKEN", "WHATSAPP_WABA_ID"] as const;
 
 /** RFC 4122 UUID format matcher (case-insensitive). */
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -86,9 +94,9 @@ export const phoneNumberResultSchema = z.object({
   id: z.string(),
   display_phone_number: z.string(),
   verified_name: z.string(),
-  quality_rating: z.string(),
-  throughput_level: z.string(),
-  portfolio_messaging_limit_tier: z.string(),
+  quality_rating: z.string().optional().default("UNKNOWN"),
+  throughput_level: z.string().optional().default("STANDARD"),
+  portfolio_messaging_limit_tier: z.string().optional().default("TIER_NOT_SET"),
   max_conversations_per_24_hours: z.number().optional(),
   status: z.string().optional(),
   code_verification_status: z.string().optional(),
@@ -125,9 +133,12 @@ export const phoneNumberListSchema = z.object({
 export const messageTemplateSchema = z.object({
   id: z.string(),
   name: z.string(),
-  language: z.object({
-    code: z.string(),
-  }),
+  language: z.union([
+    z.string().transform(code => ({ code })),
+    z.object({
+      code: z.string(),
+    }),
+  ]),
   status: z.string(),
   category: z.string(),
   components: z.array(z.unknown()).optional(),
@@ -160,6 +171,9 @@ const subscribedAppsResponseSchema = z.object({
 
 /** Meta numeric IDs (wabaId / phoneNumberId) are digit strings, ≤64 chars. */
 const META_NUMERIC_ID_REGEX = /^\d{1,64}$/;
+
+/** Meta App Dashboard root — per-app panels hang off `/<appId>/…`. */
+const META_APP_DASHBOARD_BASE_URL = "https://developers.facebook.com/apps";
 
 function isValidMetaNumericId(value: string): boolean {
   return META_NUMERIC_ID_REGEX.test(value);
@@ -346,7 +360,7 @@ async function resolveGraphApiContext(tErrors: ErrorsLabels): Promise<{ ctx: Gra
   const account = await WhatsappAccountRepository.findActiveGeneral();
   // `encryptedText.fromDriver` decrypts at the driver boundary — the column
   // value read here is already the plaintext token.
-  if (account?.encryptedAccessToken) {
+  if (account?.encryptedAccessToken && !account.encryptedAccessToken.startsWith("demo-") && account.wabaId === wabaId) {
     return { ctx: { accessToken: account.encryptedAccessToken, apiVersion }, wabaId };
   }
 
@@ -495,13 +509,18 @@ async function subscribeAppToWaba(ctx: GraphApiRequestContext, wabaId: string): 
 }
 
 export namespace WhatsappAccountService {
+  /**
+   * All accounts for the numbers management surface — active and inactive.
+   * Synced numbers are created inactive (credentials pending), so an
+   * active-only list would make the sync flow appear to add nothing.
+   */
   export async function listAccounts(
     actorUserId: string,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<WhatsappAccountReturnType[]> {
     await assertCanView(actorUserId, tErrors);
-    return WhatsappAccountRepository.listActive(tx);
+    return WhatsappAccountRepository.listAll(tx);
   }
 
   export async function getAccount(
@@ -1199,16 +1218,58 @@ export namespace WhatsappAccountService {
   }
 
   /**
-   * Aggregate configuration check across accounts: WhatsApp is considered
-   * configured when at least one active account resolves healthy credentials.
+   * Deep link to the Meta App Dashboard "Facebook Login for Business" settings
+   * panel (Client OAuth settings → Allowed domains / Valid OAuth redirect URIs),
+   * derived from the configured WhatsApp app id. Embedded Signup only returns
+   * the onboarding code to pages hosted on registered origins. Returns null
+   * when the app id is not configured.
+   */
+  export async function resolveEmbeddedSignupAllowedOriginsUrl(): Promise<string | null> {
+    const appId = await resolveEnvConfig("WHATSAPP_APP_ID");
+    if (!appId) {
+      return null;
+    }
+    return `${META_APP_DASHBOARD_BASE_URL}/${appId}/fb-business-login/settings/`;
+  }
+
+  /**
+   * Reports how WhatsApp Cloud API configuration is satisfied.
+   *
+   * WhatsApp is considered configured when at least one active account
+   * resolves healthy credentials OR the env-bootstrap path is fully configured
+   * (both `WHATSAPP_ACCESS_TOKEN` and `WHATSAPP_WABA_ID` resolve non-empty) —
+   * the bootstrap path is what powers the very first `syncFromMeta` when no
+   * account rows exist yet. `missingEnvKeys` is computed independently of
+   * account validity so callers can always explain the env-bootstrap state.
+   */
+  export async function getConfigurationStatus(): Promise<WhatsappConfigurationStatusType> {
+    const [accounts, envValues] = await Promise.all([
+      WhatsappAccountRepository.listActive(),
+      resolveEnvConfigMany([...WHATSAPP_ENV_BOOTSTRAP_KEYS]),
+    ]);
+    const missingEnvKeys = WHATSAPP_ENV_BOOTSTRAP_KEYS.filter(key => !envValues[key]?.trim());
+    const envBootstrapAvailable = missingEnvKeys.length === 0;
+
+    let hasValidAccount = false;
+    if (accounts.length > 0) {
+      const results = await Promise.all(accounts.map(account => validateAccountConfig(account.id)));
+      hasValidAccount = results.some(Boolean);
+    }
+
+    return {
+      isConfigured: hasValidAccount || envBootstrapAvailable,
+      envBootstrapAvailable,
+      missingEnvKeys,
+    };
+  }
+
+  /**
+   * Aggregate configuration check across accounts and the env-bootstrap path.
+   * Thin wrapper over {@link getConfigurationStatus}.
    */
   export async function isConfigured(): Promise<boolean> {
-    const accounts = await WhatsappAccountRepository.listActive();
-    if (accounts.length === 0) {
-      return false;
-    }
-    const results = await Promise.all(accounts.map(account => validateAccountConfig(account.id)));
-    return results.some(Boolean);
+    const status = await getConfigurationStatus();
+    return status.isConfigured;
   }
 
   export async function isUserWhatsappOptIn(userId: string, tx?: DBTransaction): Promise<boolean> {

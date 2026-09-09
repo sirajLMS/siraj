@@ -171,25 +171,31 @@ function NumbersHeaderMobile({
   labels,
   syncing,
   isConfigured,
+  syncDisabledReason,
   onSyncFromMeta,
   onAddAccount,
   onConnectBusinessApp,
+  embeddedSignupBlocked,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly syncing: boolean;
   readonly isConfigured: boolean;
+  readonly syncDisabledReason?: string;
   readonly onSyncFromMeta: () => void;
   readonly onAddAccount: () => void;
   readonly onConnectBusinessApp?: () => void;
+  readonly embeddedSignupBlocked: boolean;
 }>) {
   return (
     <NumbersHeaderShared
       labels={labels}
       syncing={syncing}
       isConfigured={isConfigured}
+      syncDisabledReason={syncDisabledReason}
       onSyncFromMeta={onSyncFromMeta}
       onAddAccount={onAddAccount}
       onConnectBusinessApp={onConnectBusinessApp}
+      embeddedSignupBlocked={embeddedSignupBlocked}
       compactActions
       buttonSize="small"
       syncIconSize={16}
@@ -478,6 +484,7 @@ export function NumbersTabMobile({
   onOpenDeleteConfirmDialog,
   onDismissSnackbar,
   isConfigured,
+  syncDisabledReason,
   editingTokenForId,
   editingPinForId,
   creating,
@@ -499,6 +506,8 @@ export function NumbersTabMobile({
   esConfigId,
   esAppId,
   onOpenEmbeddedSignup,
+  embeddedSignupBlocked = false,
+  embeddedSignupAllowedOriginsUrl = null,
   onEmbeddedSignupComplete,
 }: Readonly<NumbersTabSharedProps>) {
   const t = labels.page;
@@ -557,8 +566,10 @@ export function NumbersTabMobile({
         labels={t}
         syncing={syncing}
         isConfigured={isConfigured}
+        syncDisabledReason={syncDisabledReason}
         onSyncFromMeta={onSyncFromMeta}
         onAddAccount={onOpenCreateDialog}
+        embeddedSignupBlocked={embeddedSignupBlocked}
         onConnectBusinessApp={
           esConfigId && esAppId && onOpenEmbeddedSignup
             ? () => {
@@ -638,6 +649,7 @@ export function NumbersTabMobile({
           labels={t}
           configId={esConfigId ?? null}
           appId={esAppId ?? null}
+          allowedOriginsUrl={embeddedSignupAllowedOriginsUrl}
           onComplete={onEmbeddedSignupComplete}
           onClose={onCloseDialog}
         />

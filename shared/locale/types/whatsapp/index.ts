@@ -48,7 +48,13 @@ export interface WhatsappLabels {
   readonly throughputLevel: string;
   readonly lastWebhookAt: string;
   readonly syncFromMeta: string;
+  /** Tooltip explaining why sync is disabled: missing env-config keys listed inline. */
+  readonly syncFromMetaUnavailable: (missingEnvKeys: string) => string;
+  /** Button label while a sync is in progress (button is also disabled then). */
+  readonly syncFromMetaBusy: string;
   readonly syncSuccess: string;
+  /** Snackbar result after a Meta sync: total numbers synced + how many were newly added. */
+  readonly syncSuccessWithCounts: (synced: number, added: number) => string;
   readonly syncNoChange: string;
   readonly syncError: string;
   readonly noAccounts: string;
@@ -261,6 +267,14 @@ export interface WhatsappLabels {
   readonly embeddedSignupDone: string;
   /** Accessible label for the header close (X) button. */
   readonly embeddedSignupClose: string;
+  /** Caption above the allowed-origins deep link on the launch step. */
+  readonly embeddedSignupAllowedOriginsTitle: string;
+  /** Guidance: register this app's origin as an allowed domain before launching. */
+  readonly embeddedSignupAllowedOriginsBody: (origin: string) => string;
+  /** Anchor text for the Meta App Dashboard settings deep link (new tab). */
+  readonly embeddedSignupAllowedOriginsLink: string;
+  /** Notice shown (tooltip/snackbar) when the page is served over plain HTTP — Meta rejects FB.login outside HTTPS. */
+  readonly embeddedSignupRequiresHttps: string;
 
   // ─── Accessibility & Permission Denied (Task 17) ───────────────────
   /** Permission denied UI title. */

@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog";
 import type { AppearanceDraftInput, AppearanceSettingsQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
@@ -160,11 +160,13 @@ export function CustomizeToolbar() {
   // referentially-stable primitives that re-render on history changes.
   const draft = useAppearancePreviewStore(s => s.draft);
   const dirty = useAppearancePreviewStore(s => s.dirty);
+  const hydrated = useAppearancePreviewStore(s => s.hydrated);
   const pastLength = useAppearancePreviewStore(s => s.past.length);
   const futureLength = useAppearancePreviewStore(s => s.future.length);
   const undo = useAppearancePreviewStore(s => s.undo);
   const redo = useAppearancePreviewStore(s => s.redo);
   const markSaved = useAppearancePreviewStore(s => s.markSaved);
+  const markPublished = useAppearancePreviewStore(s => s.markPublished);
   const loadFromServer = useAppearancePreviewStore(s => s.loadFromServer);
   const resetToDefaults = useAppearancePreviewStore(s => s.resetToDefaults);
   const setField = useAppearancePreviewStore(s => s.setField);
@@ -182,6 +184,16 @@ export function CustomizeToolbar() {
     variables: { draft: true },
   });
   const serverUpdatedAt = appearanceData?.appearanceSettings?.updatedAt ?? null;
+
+  // Seed the draft store from the server's draft fields once per customize
+  // session, so the sidebar and a subsequent publish act on the real server
+  // state instead of the in-memory factory defaults. Skipped while the user
+  // has unsaved local edits (their in-flight draft wins).
+  useEffect(() => {
+    if (hydrated || dirty) return;
+    const serverDraft = toAppearanceDraftInput(appearanceData?.appearanceSettings?.draftFields);
+    if (serverDraft) loadFromServer(serverDraft);
+  }, [appearanceData, hydrated, dirty, loadFromServer]);
 
   const [saveDraft, { loading: saveLoading }] = useMutation(saveAppearanceDraftMutationDocument);
   const [publish, { loading: publishLoading }] = useMutation(publishAppearanceMutationDocument);
@@ -281,6 +293,13 @@ export function CustomizeToolbar() {
       }
       await publish({ variables: { expectedUpdatedAt: latestUpdatedAt } });
       markSaved();
+      // Record the published snapshot so exiting customize mode restores the
+      // NEW published values (not the pre-publish DOM captures), and refresh
+      // the route so server-rendered surfaces (theme stylesheet, metadata)
+      // re-render against the freshly published row instead of waiting for a
+      // full page reload.
+      markPublished(input);
+      router.refresh();
       notifications.show(t.publishSuccess, { severity: "success" });
       announce(t.publishSuccess);
     } catch (error) {
@@ -288,6 +307,8 @@ export function CustomizeToolbar() {
         setConflictRetry(() => async () => {
           await publish({ variables: { expectedUpdatedAt: undefined } });
           markSaved();
+          markPublished(draft);
+          router.refresh();
           notifications.show(t.publishSuccess, { severity: "success" });
           announce(t.publishSuccess);
         });

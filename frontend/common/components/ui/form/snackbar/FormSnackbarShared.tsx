@@ -9,7 +9,8 @@ export interface FormSnackbarSharedProps {
   readonly onClose: () => void;
   readonly icon: SvgIconComponent;
   readonly severityColor: "error" | "primary";
-  readonly component?: "alert" | "output";
+  readonly role?: "alert";
+  readonly component?: "output";
 }
 
 export function FormSnackbarShared({
@@ -18,12 +19,14 @@ export function FormSnackbarShared({
   onClose,
   icon: Icon,
   severityColor,
+  role,
   component,
 }: Readonly<FormSnackbarSharedProps>) {
   return (
     <Snackbar open={open} anchorOrigin={{ vertical: "bottom", horizontal: "center" }} onClose={onClose}>
       <Box
         {...(component ? { component } : {})}
+        {...(role ? { role } : {})}
         sx={theme => ({
           display: "flex",
           alignItems: "center",

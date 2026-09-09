@@ -4,6 +4,7 @@ import { arEG as muiArEg, enUS as muiEnUS } from "@mui/material/locale";
 import { arSD as dataGridArSD, enUS as dataGridEnUS } from "@mui/x-data-grid/locales";
 import { components } from "@/frontend/common/providers/theme/components";
 import { layoutSettings } from "@/frontend/common/providers/theme/layoutSettings";
+import type { AppearancePresetId } from "@/frontend/common/providers/theme/presets";
 import { resolvePresetPalette, resolvePresetPalettes } from "@/frontend/common/providers/theme/presets/paletteFactory";
 import { typography } from "@/frontend/common/providers/theme/typography";
 
@@ -50,14 +51,21 @@ const sharedFoundation = (direction: "rtl" | "ltr") => ({
  * `theme.palette.mode`-based component overrides (e.g. the DataGrid hover tint
  * in `components.ts`) continue to reflect the active mode, matching prior
  * behavior.
+ *
+ * `presetId` (optional) pins the palette pair to a specific catalog preset —
+ * the root layout passes the preset resolved from the *published* appearance
+ * row, so a preset published through the customize overlay persists after
+ * reload instead of silently falling back to the `APP_THEME_PRESET` env var.
+ * When omitted, `resolvePresetPalettes()` applies the env-preset fallback.
  */
 export function createAppCssVarsTheme(
   direction: "rtl" | "ltr" = "ltr",
   locale: string = "en",
-  defaultColorScheme: PaletteMode = "dark"
+  defaultColorScheme: PaletteMode = "dark",
+  presetId?: AppearancePresetId
 ) {
   const isLight = defaultColorScheme === "light";
-  const palettes = resolvePresetPalettes();
+  const palettes = resolvePresetPalettes(presetId);
 
   const themeWithLocale = createTheme(
     {
@@ -95,8 +103,13 @@ export function createAppCssVarsTheme(
  * which render a single preselected mode client-side and do not need the
  * cssVars / InitColorSchemeScript SSR machinery.
  */
-export function createAppTheme(mode: PaletteMode, direction: "rtl" | "ltr" = "ltr", locale: string = "en") {
-  const palette = resolvePresetPalette(mode);
+export function createAppTheme(
+  mode: PaletteMode,
+  direction: "rtl" | "ltr" = "ltr",
+  locale: string = "en",
+  presetId?: AppearancePresetId
+) {
+  const palette = resolvePresetPalette(mode, presetId);
 
   const themeWithLocale = createTheme(
     {

@@ -1,10 +1,11 @@
 #!/usr/bin/env bun
 /**
  * Refresh root vercel.json cron entries at build time (prebuild).
- * Platform keys (bunVersion, fluid, $schema) live in the committed vercel.json so Vercel
- * reads bunVersion before `bun install`. Defaults to Hobby-safe schedules (vercel-daily);
- * Pro ticker only when CRON_EXECUTION_MODE=vercel. Validates cron expressions with
- * cron-parser, fails fast on invalid.
+ * Platform keys (`ignoreCommand`, `fluid`, `$schema`) live in the committed vercel.json.
+ * Builds run on GitHub Actions (`.github/workflows/vercel-prebuilt.yml`); `ignoreCommand`
+ * is `exit 0` so Vercel Git never builds. Defaults to Hobby-safe schedules (vercel-daily);
+ * Pro ticker + sub-daily WhatsApp sweeps only when CRON_EXECUTION_MODE=vercel.
+ * Validates cron expressions with cron-parser, fails fast on invalid.
  */
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -19,11 +20,15 @@ interface VercelCron {
 
 interface VercelJson {
   $schema?: string;
+  /** Always cancel Vercel Git builds — deploy only via `vercel deploy --prebuilt`. */
+  ignoreCommand?: string;
   fluid: boolean;
   crons: VercelCron[];
 }
 
 const DEFAULT_SCHEMA = "https://openapi.vercel.sh/vercel.json";
+const DEFAULT_IGNORE_COMMAND = "exit 0";
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 const CRON_DEFINITIONS: CronDefinition[] = [
   {
@@ -42,12 +47,14 @@ const CRON_DEFINITIONS: CronDefinition[] = [
     path: "/api/cron/whatsapp-sync-sweep",
     scheduleEnv: "CRON_WHATSAPP_SYNC_SWEEP_SCHEDULE",
     defaultSchedule: "13 * * * *",
+    hobbySafeSchedule: "13 6 * * *",
     alwaysInclude: true,
   },
   {
     path: "/api/cron/whatsapp-webhook-sweep",
     scheduleEnv: "CRON_WHATSAPP_WEBHOOK_SWEEP_SCHEDULE",
     defaultSchedule: "*/5 * * * *",
+    hobbySafeSchedule: "18 6 * * *",
     alwaysInclude: true,
   },
   {
@@ -96,11 +103,46 @@ function validateCronExpression(expression: string, name: string): void {
   }
 }
 
+/** True when the expression fires more than once within any 24h window (Hobby-forbidden). */
+function isSubDailyCron(expression: string): boolean {
+  const interval = CronExpressionParser.parse(expression, {
+    tz: "UTC",
+    currentDate: new Date("2026-01-01T00:00:00.000Z"),
+  });
+  const first = interval.next().toDate().getTime();
+  const second = interval.next().toDate().getTime();
+  return second - first < MS_PER_DAY;
+}
+
 function getSchedule(envKey: string, defaultValue: string, name: string): string {
   const trimmed = process.env[envKey]?.trim();
   const value = trimmed && trimmed.length > 0 ? trimmed : defaultValue;
   validateCronExpression(value, name);
   return value;
+}
+
+function resolveSchedule(def: CronDefinition, mode: CronExecutionMode): string {
+  const defaultForMode = mode === "vercel" ? def.defaultSchedule : (def.hobbySafeSchedule ?? def.defaultSchedule);
+  const schedule = getSchedule(def.scheduleEnv, defaultForMode, def.path);
+
+  if (mode === "vercel" || !isSubDailyCron(schedule)) {
+    return schedule;
+  }
+
+  const fallback = def.hobbySafeSchedule;
+  if (!fallback) {
+    throw new Error(
+      `Cron ${def.path} schedule "${schedule}" runs more than once per day, which Vercel Hobby rejects. ` +
+        `Set CRON_EXECUTION_MODE=vercel (Pro) or provide a daily schedule via ${def.scheduleEnv}.`
+    );
+  }
+
+  validateCronExpression(fallback, def.path);
+  process.stderr.write(
+    `[generate-vercel-config] WARN: ${def.path} schedule "${schedule}" is sub-daily; ` +
+      `clamping to Hobby-safe "${fallback}" (set CRON_EXECUTION_MODE=vercel for Pro sub-daily crons)\n`
+  );
+  return fallback;
 }
 
 function shouldIncludeTicker(mode: CronExecutionMode): boolean {
@@ -136,7 +178,7 @@ function main(): void {
     if (def.alwaysInclude || shouldIncludeTicker(mode)) {
       crons.push({
         path: def.path,
-        schedule: getSchedule(def.scheduleEnv, def.defaultSchedule, def.path),
+        schedule: resolveSchedule(def, mode),
       });
     }
   }
@@ -146,6 +188,7 @@ function main(): void {
 
   const config: VercelJson = {
     $schema: existing.$schema ?? DEFAULT_SCHEMA,
+    ignoreCommand: existing.ignoreCommand ?? DEFAULT_IGNORE_COMMAND,
     fluid: existing.fluid ?? true,
     crons,
   };

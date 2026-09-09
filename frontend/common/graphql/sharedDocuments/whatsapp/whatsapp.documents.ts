@@ -8,7 +8,6 @@ import type {
   DeleteWhatsappAccountMutationVariables,
   IsUserWhatsappOptInQuery,
   IsUserWhatsappOptInQueryVariables,
-  IsWhatsappConfiguredQuery,
   SetUserWhatsappOptInMutation,
   SetUserWhatsappOptInMutationVariables,
   SetWhatsappAccessTokenMutation,
@@ -19,6 +18,8 @@ import type {
   UpdateWhatsappAccountMutation,
   UpdateWhatsappAccountMutationVariables,
   WhatsappAccountsQuery,
+  WhatsappConfigurationStatusQuery,
+  WhatsappEmbeddedSignupAllowedOriginsUrlQuery,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 
 const WHATSAPP_ACCOUNT_FIELDS = gql`
@@ -179,11 +180,21 @@ export const completeWhatsappEmbeddedSignupMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const isWhatsappConfiguredQueryDocument: TypedDocumentNode<IsWhatsappConfiguredQuery> = gql`
-  query isWhatsappConfigured {
-    isWhatsappConfigured
+export const whatsappConfigurationStatusQueryDocument: TypedDocumentNode<WhatsappConfigurationStatusQuery> = gql`
+  query whatsappConfigurationStatus {
+    whatsappConfigurationStatus {
+      isConfigured
+      envBootstrapAvailable
+      missingEnvKeys
+    }
   }
 `;
+
+export const whatsappEmbeddedSignupAllowedOriginsUrlQueryDocument: TypedDocumentNode<WhatsappEmbeddedSignupAllowedOriginsUrlQuery> = gql`
+    query whatsappEmbeddedSignupAllowedOriginsUrl {
+      whatsappEmbeddedSignupAllowedOriginsUrl
+    }
+  `;
 
 // ─── Pending Backend Resolver Queries ────────────────────────────────
 // The following documents target queries that do NOT yet exist in the

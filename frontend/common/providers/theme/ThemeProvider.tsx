@@ -7,6 +7,7 @@ import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 import { logger } from "@/frontend/common/lib/logger";
 import { setThemePreference } from "@/frontend/common/lib/theme-detection";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import type { AppearancePresetId } from "@/frontend/common/providers/theme/presets";
 import { createAppCssVarsTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";
 
@@ -15,6 +16,11 @@ interface AppThemeProviderProps {
   // Allow server to pass initial theme; used as `defaultMode` for the
   // CSS-variables-aware ThemeProvider so the first paint matches the cookie.
   readonly initialTheme?: PaletteMode;
+  // Preset resolved from the published appearance row on the server. Builds
+  // the MUI theme from the published preset (backgrounds, surfaces, headers,
+  // etc.) instead of the build-time `APP_THEME_PRESET` env var, so a preset
+  // published through the customize overlay persists after a reload.
+  readonly appearancePresetId?: AppearancePresetId;
 }
 
 /**
@@ -109,12 +115,15 @@ function ColorSchemeStateBridge({ children }: { readonly children: ReactNode }) 
  * `<InitColorSchemeScript />` in `app/layout.tsx` prevents the dark-mode SSR
  * hydration flash.
  */
-export function AppThemeProvider({ children, initialTheme }: AppThemeProviderProps) {
+export function AppThemeProvider({ children, initialTheme, appearancePresetId }: AppThemeProviderProps) {
   const locale = useAppLocale();
   const direction = locale === "ar" ? "rtl" : "ltr";
   const defaultMode: PaletteMode = initialTheme ?? "dark";
 
-  const theme = useMemo(() => createAppCssVarsTheme(direction, locale, defaultMode), [direction, locale, defaultMode]);
+  const theme = useMemo(
+    () => createAppCssVarsTheme(direction, locale, defaultMode, appearancePresetId),
+    [direction, locale, defaultMode, appearancePresetId]
+  );
 
   return (
     <ThemeProvider

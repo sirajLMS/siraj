@@ -418,3 +418,19 @@ describe("completeEmbeddedSignup — failure paths", () => {
     expect(fetchUrls).toHaveLength(0);
   });
 });
+
+describe("resolveEmbeddedSignupAllowedOriginsUrl", () => {
+  test("builds the App Dashboard settings deep link from the configured app id", async () => {
+    envValues.set("WHATSAPP_APP_ID", "123456789");
+
+    const url = await WhatsappAccountService.resolveEmbeddedSignupAllowedOriginsUrl();
+
+    expect(url).toBe("https://developers.facebook.com/apps/123456789/fb-business-login/settings/");
+  });
+
+  test("returns null when the app id is not configured", async () => {
+    envValues.delete("WHATSAPP_APP_ID");
+
+    expect(await WhatsappAccountService.resolveEmbeddedSignupAllowedOriginsUrl()).toBeNull();
+  });
+});

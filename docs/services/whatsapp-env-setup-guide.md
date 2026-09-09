@@ -51,7 +51,7 @@ The webhook verifies incoming events (e.g., delivery receipts, message status up
 3. In Meta Developer Dashboard:
    - Navigate to **WhatsApp** ➡️ **Configuration**.
    - Under **Webhook**, click **Edit**.
-   - **Callback URL**: `https://<your-domain>/api/webhooks/whatsapp` (or ngrok/tunnel URL for local dev).
+   - **Callback URL**: `https://<your-domain>/api/webhooks/whatsapp` (for local development, run `bun run ngrok` — see [Ngrok Tunnel Guide](../development/ngrok-webhook-tunnel.md)).
    - **Verify token**: Enter the exact same string from `WHATSAPP_VERIFY_TOKEN`.
    - Click **Verify and Save**.
 4. Under **Webhook fields**, click **Manage** and subscribe to:

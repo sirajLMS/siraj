@@ -20,6 +20,7 @@ export function DashboardLayoutDesktop({
   userRole,
   roleLabel,
   appTitle,
+  appLogoUrl,
   logoAriaLabel,
   avatarUrl,
   notificationCount,
@@ -62,7 +63,7 @@ export function DashboardLayoutDesktop({
           }),
         }}
       >
-        <NavbarStaticShell appTitle={appTitle} roleLabel={roleLabel} logoAriaLabel={logoAriaLabel}>
+        <NavbarStaticShell appTitle={appTitle} roleLabel={roleLabel} logoAriaLabel={logoAriaLabel} logoUrl={appLogoUrl}>
           <TopNavbarDesktop
             userName={userName}
             userEmail={userEmail}

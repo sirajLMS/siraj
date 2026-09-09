@@ -336,6 +336,23 @@ function useCredentialMenuState(
   };
 }
 
+interface NumbersTabDialogHandlers {
+  readonly onDeleteAccount: (id: string) => Promise<void>;
+  readonly onCreate: (input: WhatsappCreateInput) => Promise<void>;
+  readonly onEditName: (accountId: string, displayName: string) => Promise<void>;
+  readonly onUpdatePurpose: (accountId: string, purpose: WhatsappAccountPurpose) => Promise<void>;
+  readonly onCloseDialog: () => void;
+  readonly handleDialogClose: () => void;
+  readonly handleDialogConfirm: (value: string) => Promise<void>;
+}
+
+interface NumbersTabDialogValidators {
+  readonly validateDisplayName: (value: string) => string | null;
+  readonly validatePhoneNumberId: (value: string) => string | null;
+  readonly validateWabaId: (value: string) => string | null;
+  readonly validatePurpose: (value: string) => string | null;
+}
+
 function NumbersTabDialogs({
   labels,
   dialogState,
@@ -344,17 +361,8 @@ function NumbersTabDialogs({
   creating,
   updatingId,
   mutationError,
-  onDeleteAccount,
-  onCreate,
-  onEditName,
-  onUpdatePurpose,
-  onCloseDialog,
-  handleDialogClose,
-  handleDialogConfirm,
-  validateDisplayName,
-  validatePhoneNumberId,
-  validateWabaId,
-  validatePurpose,
+  handlers,
+  validators,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly dialogState: WhatsappDialogState;
@@ -363,19 +371,21 @@ function NumbersTabDialogs({
   readonly creating: boolean;
   readonly updatingId: string | null;
   readonly mutationError: string | null;
-  readonly onDeleteAccount: (id: string) => Promise<void>;
-  readonly onCreate: (input: WhatsappCreateInput) => Promise<void>;
-  readonly onEditName: (accountId: string, displayName: string) => Promise<void>;
-  readonly onUpdatePurpose: (accountId: string, purpose: WhatsappAccountPurpose) => Promise<void>;
-  readonly onCloseDialog: () => void;
-  readonly handleDialogClose: () => void;
-  readonly handleDialogConfirm: (value: string) => Promise<void>;
-  readonly validateDisplayName: (value: string) => string | null;
-  readonly validatePhoneNumberId: (value: string) => string | null;
-  readonly validateWabaId: (value: string) => string | null;
-  readonly validatePurpose: (value: string) => string | null;
+  readonly handlers: NumbersTabDialogHandlers;
+  readonly validators: NumbersTabDialogValidators;
 }>) {
   const t = labels;
+  const {
+    onDeleteAccount,
+    onCloseDialog,
+    handleDialogClose,
+    handleDialogConfirm,
+    onCreate,
+    onEditName,
+    onUpdatePurpose,
+  } = handlers;
+  const { validateDisplayName, validatePhoneNumberId, validateWabaId, validatePurpose } = validators;
+
   const handleDeleteConfirm = useCallback(async () => {
     const accountId = dialogState.accountId;
     if (!accountId) return;
@@ -425,20 +435,24 @@ function NumbersHeaderDesktop({
   labels,
   syncing,
   isConfigured,
+  syncDisabledReason,
   onSyncFromMeta,
   onOpenCreateDialog,
   esConfigId,
   esAppId,
   onOpenEmbeddedSignup,
+  embeddedSignupBlocked,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly syncing: boolean;
   readonly isConfigured: boolean;
+  readonly syncDisabledReason?: string;
   readonly onSyncFromMeta: () => Promise<void>;
   readonly onOpenCreateDialog: () => void;
   readonly esConfigId?: string | null;
   readonly esAppId?: string | null;
   readonly onOpenEmbeddedSignup?: () => void;
+  readonly embeddedSignupBlocked: boolean;
 }>) {
   const canConnect = esConfigId && esAppId && onOpenEmbeddedSignup;
   return (
@@ -446,9 +460,11 @@ function NumbersHeaderDesktop({
       labels={labels}
       syncing={syncing}
       isConfigured={isConfigured}
+      syncDisabledReason={syncDisabledReason}
       onSyncFromMeta={onSyncFromMeta}
       onAddAccount={onOpenCreateDialog}
       onConnectBusinessApp={canConnect ? () => onOpenEmbeddedSignup?.() : undefined}
+      embeddedSignupBlocked={embeddedSignupBlocked}
       buttonSize="medium"
       syncIconSize={20}
       titleSlot={
@@ -463,83 +479,54 @@ function NumbersHeaderDesktop({
   );
 }
 
-export function NumbersTabDesktop({
-  labels,
-  accounts,
-  loading,
-  syncing,
-  snackbar,
-  deletingId,
-  syncingId,
-  onSetAccessToken,
-  onSetTwoStepPin,
-  onSyncFromMeta,
-  onDeleteAccount,
-  onOpenDeleteConfirmDialog,
-  onDismissSnackbar,
-  isConfigured,
-  creating,
-  updatingId,
-  dialogState,
-  mutationError,
-  onCreate,
-  onEditName,
-  onUpdatePurpose,
-  onOpenCreateDialog,
-  onOpenEditNameDialog,
-  onCloseDialog,
-  validateDisplayName,
-  validatePhoneNumberId,
-  validateWabaId,
-  validatePurpose,
-  esConfigId,
-  esAppId,
-  onOpenEmbeddedSignup,
-  onEmbeddedSignupComplete,
-}: Readonly<NumbersTabSharedProps>) {
-  const t = labels.page;
-  const {
-    anchorEl,
-    dialogMode,
-    dialogOpen,
-    handleMenuOpen,
-    handleMenuClose,
-    handleEditNameFromMenu,
-    openCredentialDialog,
-    handleDialogClose,
-    handleDialogConfirm,
-  } = useCredentialMenuState(onSetAccessToken, onSetTwoStepPin, onOpenEditNameDialog);
-
-  if (loading) {
-    return (
-      <Box component="output" sx={{ display: "flex", justifyContent: "center", py: 4 }} aria-busy>
-        <CircularProgress size={32} />
-      </Box>
-    );
-  }
-
+function NumbersDesktopBody({
+  props,
+  anchorEl,
+  dialogMode,
+  dialogOpen,
+  handleMenuOpen,
+  handleMenuClose,
+  handleEditNameFromMenu,
+  openCredentialDialog,
+  handleDialogClose,
+  handleDialogConfirm,
+}: Readonly<{
+  props: Readonly<NumbersTabSharedProps>;
+  anchorEl: HTMLElement | null;
+  dialogMode: CredentialDialogState;
+  dialogOpen: boolean;
+  handleMenuOpen: (event: React.MouseEvent<HTMLElement>, account: WhatsappAccountRow) => void;
+  handleMenuClose: () => void;
+  handleEditNameFromMenu: () => void;
+  openCredentialDialog: (field: CredentialDialogField) => void;
+  handleDialogClose: () => void;
+  handleDialogConfirm: (value: string) => Promise<void>;
+}>) {
+  const t = props.labels.page;
   return (
     <Box>
       <NumbersHeaderDesktop
         labels={t}
-        syncing={syncing}
-        isConfigured={isConfigured}
-        onSyncFromMeta={onSyncFromMeta}
-        onOpenCreateDialog={onOpenCreateDialog}
-        esConfigId={esConfigId}
-        esAppId={esAppId}
-        onOpenEmbeddedSignup={onOpenEmbeddedSignup}
+        syncing={props.syncing}
+        isConfigured={props.isConfigured}
+        syncDisabledReason={props.syncDisabledReason}
+        onSyncFromMeta={props.onSyncFromMeta}
+        onOpenCreateDialog={props.onOpenCreateDialog}
+        esConfigId={props.esConfigId}
+        esAppId={props.esAppId}
+        onOpenEmbeddedSignup={props.onOpenEmbeddedSignup}
+        embeddedSignupBlocked={props.embeddedSignupBlocked ?? false}
       />
 
       <AccountsListSection
         labels={t}
-        accounts={accounts}
-        deletingId={deletingId}
-        syncingId={syncingId}
+        accounts={props.accounts}
+        deletingId={props.deletingId}
+        syncingId={props.syncingId}
         onMenuOpen={handleMenuOpen}
-        onOpenDeleteConfirmDialog={onOpenDeleteConfirmDialog}
-        onAddAccount={onOpenCreateDialog}
-        onRetrySetup={esConfigId && esAppId ? onOpenEmbeddedSignup : undefined}
+        onOpenDeleteConfirmDialog={props.onOpenDeleteConfirmDialog}
+        onAddAccount={props.onOpenCreateDialog}
+        onRetrySetup={props.esConfigId && props.esAppId ? props.onOpenEmbeddedSignup : undefined}
       />
 
       <AccountActionMenu
@@ -552,38 +539,58 @@ export function NumbersTabDesktop({
 
       <NumbersTabDialogs
         labels={t}
-        dialogState={dialogState}
+        dialogState={props.dialogState}
         dialogOpen={dialogOpen}
         dialogMode={dialogMode}
-        creating={creating}
-        updatingId={updatingId}
-        mutationError={mutationError}
-        onDeleteAccount={onDeleteAccount}
-        onCreate={onCreate}
-        onEditName={onEditName}
-        onUpdatePurpose={onUpdatePurpose}
-        onCloseDialog={onCloseDialog}
-        handleDialogClose={handleDialogClose}
-        handleDialogConfirm={handleDialogConfirm}
-        validateDisplayName={validateDisplayName}
-        validatePhoneNumberId={validatePhoneNumberId}
-        validateWabaId={validateWabaId}
-        validatePurpose={validatePurpose}
+        creating={props.creating}
+        updatingId={props.updatingId}
+        mutationError={props.mutationError}
+        handlers={{
+          onDeleteAccount: props.onDeleteAccount,
+          onCreate: props.onCreate,
+          onEditName: props.onEditName,
+          onUpdatePurpose: props.onUpdatePurpose,
+          onCloseDialog: props.onCloseDialog,
+          handleDialogClose,
+          handleDialogConfirm,
+        }}
+        validators={{
+          validateDisplayName: props.validateDisplayName,
+          validatePhoneNumberId: props.validatePhoneNumberId,
+          validateWabaId: props.validateWabaId,
+          validatePurpose: props.validatePurpose,
+        }}
       />
 
-      {onEmbeddedSignupComplete ? (
+      {props.onEmbeddedSignupComplete ? (
         <EmbeddedSignupDialog
-          open={dialogState.type === "embeddedSignup"}
+          open={props.dialogState.type === "embeddedSignup"}
           fullScreen={false}
           labels={t}
-          configId={esConfigId ?? null}
-          appId={esAppId ?? null}
-          onComplete={onEmbeddedSignupComplete}
-          onClose={onCloseDialog}
+          configId={props.esConfigId ?? null}
+          appId={props.esAppId ?? null}
+          allowedOriginsUrl={props.embeddedSignupAllowedOriginsUrl ?? null}
+          onComplete={props.onEmbeddedSignupComplete}
+          onClose={props.onCloseDialog}
         />
       ) : null}
 
-      <NumbersSnackbar state={snackbar} onClose={onDismissSnackbar} />
+      <NumbersSnackbar state={props.snackbar} onClose={props.onDismissSnackbar} />
     </Box>
   );
+}
+
+export function NumbersTabDesktop(props: Readonly<NumbersTabSharedProps>) {
+  const { onSetAccessToken, onSetTwoStepPin, onOpenEditNameDialog, loading } = props;
+  const menuState = useCredentialMenuState(onSetAccessToken, onSetTwoStepPin, onOpenEditNameDialog);
+
+  if (loading) {
+    return (
+      <Box component="output" sx={{ display: "flex", justifyContent: "center", py: 4 }} aria-busy>
+        <CircularProgress size={32} />
+      </Box>
+    );
+  }
+
+  return <NumbersDesktopBody props={props} {...menuState} />;
 }

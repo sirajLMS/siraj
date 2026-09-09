@@ -49,6 +49,15 @@ When creating or updating a seeder in this directory, you must adhere to the fol
 - Seeders **may** assign users to existing groups (`user_permission_groups`) and seed `user_permission_overrides` (per-user overrides only)
 - Demo student / supervisor logins come from `shared/demo-users.ts` → `seed-users.ts`; student domain rows from `students/seed-students.ts`. Groups must already exist from migrations before `seed-users` runs.
 
+### FORBIDDEN: WhatsApp env keys (PERMANENT)
+
+**No seeder may ever create database rows related to WhatsApp `.env` values — not now, not in the future.** WhatsApp configuration (`WHATSAPP_PROVIDER`, `WHATSAPP_APP_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_WABA_ID`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_API_VERSION`, `WHATSAPP_GRAPH_API_VERSION`, `WHATSAPP_ES_CONFIG_ID`, `WHATSAPP_WEBHOOK_BASE_URL`, and any future `WHATSAPP_*` key) lives in `.env` only.
+
+- **Never** insert any `env::WHATSAPP_*` row into `system_settings`, including empty placeholder rows
+- **Never** remove or weaken the `category !== "whatsapp"` filter in `shared/system-settings.ts` — it is intentional and permanent
+- **Never** write a new seeder that persists WhatsApp env values or placeholders under any mechanism
+- Do not bypass the rule by flipping `excludeFromDb`/`serverOnly` flags in `backend/lib/env-config-keys.ts`
+
 ### Standard seeder rules
 
 - **"seed or get" Pattern**: Every seeder MUST export a function named `seedOrGet`.

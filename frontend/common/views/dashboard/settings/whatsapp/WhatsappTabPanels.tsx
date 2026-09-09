@@ -159,6 +159,7 @@ function NumbersTabPanel({ viewModel }: Readonly<{ viewModel: WhatsappSettingsVi
         onSyncFromMeta: viewModel.handleSync,
         onDismissSnackbar: viewModel.closeSnackbar,
         isConfigured: viewModel.isConfigured,
+        syncDisabledReason: viewModel.syncDisabledReason,
         editingTokenForId: viewModel.editingTokenForId,
         editingPinForId: viewModel.editingPinForId,
         creating: viewModel.creating,
@@ -179,6 +180,8 @@ function NumbersTabPanel({ viewModel }: Readonly<{ viewModel: WhatsappSettingsVi
         validateTwoStepPin: viewModel.validateTwoStepPin,
         esConfigId: viewModel.esConfigId ?? null,
         esAppId: viewModel.esAppId ?? null,
+        embeddedSignupAllowedOriginsUrl: viewModel.embeddedSignupAllowedOriginsUrl,
+        embeddedSignupBlocked: viewModel.embeddedSignupBlocked,
         onOpenEmbeddedSignup: viewModel.openEmbeddedSignupDialog,
         onEmbeddedSignupComplete: viewModel.handleEmbeddedSignupComplete,
       }}

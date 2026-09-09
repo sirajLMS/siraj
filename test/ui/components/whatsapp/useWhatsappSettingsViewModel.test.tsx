@@ -18,11 +18,11 @@ import {
   createWhatsappAccountMutationDocument,
   deleteWhatsappAccountMutationDocument,
   isUserWhatsappOptInQueryDocument,
-  isWhatsappConfiguredQueryDocument,
   setUserWhatsappOptInMutationDocument,
   syncWhatsappAccountsFromMetaMutationDocument,
   updateWhatsappAccountMutationDocument,
   whatsappAccountsQueryDocument,
+  whatsappConfigurationStatusQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import type { WhatsappSettingsViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import { useWhatsappSettingsViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/useWhatsappSettingsViewModel";
@@ -146,10 +146,18 @@ function optInMock(optedIn: boolean): MockLink.MockedResponse {
   };
 }
 
-function configuredMock(configured: boolean): MockLink.MockedResponse {
+function configuredMock(configured: boolean, missingEnvKeys: string[] = []): MockLink.MockedResponse {
   return {
-    request: { query: isWhatsappConfiguredQueryDocument, variables: {} },
-    result: { data: { isWhatsappConfigured: configured } },
+    request: { query: whatsappConfigurationStatusQueryDocument, variables: {} },
+    result: {
+      data: {
+        whatsappConfigurationStatus: {
+          isConfigured: configured,
+          envBootstrapAvailable: configured,
+          missingEnvKeys,
+        },
+      },
+    },
   };
 }
 
@@ -639,6 +647,62 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
     // Opt-in toggle shows success snackbar
     await waitFor(() => {
       expect(latestCapture()?.snackbar?.severity).toBe("success");
+    });
+  });
+
+  test("Q3.18 — syncDisabledReason lists missing env keys while unconfigured", async () => {
+    renderWithWrapper(<WhatsappSettingsConsumer />, {
+      locale,
+      mocks: [accountsMock([]), optInMock(false), configuredMock(false, ["WHATSAPP_ACCESS_TOKEN", "WHATSAPP_WABA_ID"])],
+    });
+
+    await waitForLoaded();
+
+    await waitFor(() => {
+      expect(vmRef.current?.syncDisabledReason).toBe(
+        whatsappLabels.syncFromMetaUnavailable("WHATSAPP_ACCESS_TOKEN, WHATSAPP_WABA_ID")
+      );
+    });
+    expect(vmRef.current?.isConfigured).toBe(false);
+  });
+
+  test("Q3.19 — syncDisabledReason is undefined when configured and idle", async () => {
+    renderWithWrapper(<WhatsappSettingsConsumer />, {
+      locale,
+      mocks: [accountsMock([]), optInMock(false), configuredMock(true)],
+    });
+
+    await waitForLoaded();
+
+    await waitFor(() => {
+      expect(vmRef.current?.isConfigured).toBe(true);
+    });
+    expect(vmRef.current?.syncDisabledReason).toBeUndefined();
+  });
+
+  test("Q3.20 — syncDisabledReason shows the busy label while sync is in flight", async () => {
+    renderWithWrapper(<WhatsappSettingsConsumer />, {
+      locale,
+      mocks: [...baseMocks(), { ...syncMock({ added: 0, updated: 0 }), delay: 50 }, accountsMock([])],
+    });
+
+    await waitForLoaded();
+    await waitFor(() => {
+      expect(vmRef.current?.isConfigured).toBe(true);
+    });
+
+    let syncPromise: Promise<void> | undefined;
+    await act(async () => {
+      syncPromise = vmRef.current?.handleSync();
+    });
+
+    expect(vmRef.current?.syncDisabledReason).toBe(whatsappLabels.syncFromMetaBusy);
+
+    await act(async () => {
+      await syncPromise;
+    });
+    await waitFor(() => {
+      expect(vmRef.current?.syncDisabledReason).toBeUndefined();
     });
   });
 });

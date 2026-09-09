@@ -23,9 +23,15 @@ interface NavbarChromeProps {
   readonly roleLabel: string;
   readonly rightSlot: ReactNode;
   readonly leftSlot?: ReactNode;
+  /**
+   * Brand overrides resolved from the published appearance row on the
+   * server; fall back to the translated app title / default icon when absent.
+   */
+  readonly appTitle?: string;
+  readonly appLogoUrl?: string | null;
 }
 
-export function NavbarChrome({ roleLabel, rightSlot, leftSlot }: Readonly<NavbarChromeProps>) {
+export function NavbarChrome({ roleLabel, rightSlot, leftSlot, appTitle, appLogoUrl }: Readonly<NavbarChromeProps>) {
   const t = useAppTranslation(Translation.Dashboard.CoreLayout);
   const muiTheme = useTheme();
 
@@ -49,8 +55,9 @@ export function NavbarChrome({ roleLabel, rightSlot, leftSlot }: Readonly<Navbar
         }}
       >
         <NavbarBrandBlock
-          appTitle={t.appTitle}
+          appTitle={appTitle ?? t.appTitle}
           roleLabel={roleLabel}
+          logoUrl={appLogoUrl}
           logoBackgroundColor={alpha(muiTheme.palette.onHeaderContainer, 0.15)}
           brandNameColor={muiTheme.palette.onHeaderContainer}
           roleColor={alpha(muiTheme.palette.onHeaderContainer, 0.7)}

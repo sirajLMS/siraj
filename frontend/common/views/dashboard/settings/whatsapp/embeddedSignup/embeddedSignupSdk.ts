@@ -67,6 +67,15 @@ export async function ensureFbSdk(appId: string): Promise<FbSdkApi> {
 }
 
 /**
+ * Meta rejects `FB.login` on pages served over plain HTTP (the SDK throws a
+ * console error before the popup opens). Server renders and tests without a
+ * `window` report "supported" — the caller resolves the real value after mount.
+ */
+export function isEmbeddedSignupSupported(): boolean {
+  return typeof window === "undefined" || window.location.protocol === "https:";
+}
+
+/**
  * Launches the Embedded Signup login flow for the given `config_id`
  * (`whatsapp_business_app_onboarding` feature, authorization-code response).
  * Returns the `FB.login` response — the ES session events for asset IDs

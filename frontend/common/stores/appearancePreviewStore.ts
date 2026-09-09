@@ -117,9 +117,11 @@ function writeActiveModeCssVars(
 /**
  * Remove all appearance-managed inline CSS vars from `<html>`.
  *
- * Called on `exitCustomizeMode` so the app falls back to the published
- * tokens emitted by `server-theme-css.ts` (Task 8.1) once the admin leaves
- * the customizer.
+ * Called on `exitCustomizeMode` when the session did not publish, so the
+ * app falls back to the published tokens emitted by the resolved preset
+ * once the admin leaves the customizer. When the session published, the
+ * inline vars are rewritten with the published values instead of cleared
+ * (the SSR stylesheet is not patched by `router.refresh`).
  */
 function clearActiveModeCssVars(): void {
   if (typeof document === "undefined") return;
@@ -189,6 +191,15 @@ interface AppearancePreviewState {
   readonly past: ReadonlyArray<AppearanceDraftInput>;
   /** Redo stack (most-recent-first). Cleared on any new edit. */
   readonly future: ReadonlyArray<AppearanceDraftInput>;
+  /**
+   * Snapshot of the draft most recently published during this session.
+   * The exit-restore in `useAppearanceLivePreview` prefers this over the
+   * pre-entry DOM captures so the dashboard reflects a fresh publish
+   * immediately, without a page reload. Retained after exit so the
+   * exit-restore can read it; reset at the start of the next customize
+   * session by `enterCustomizeMode`.
+   */
+  readonly lastPublished: AppearanceDraftInput | null;
   /** Update a top-level draft field (siteName, siteTitle, logoUrl, defaultColorScheme, ...). */
   readonly setField: <K extends keyof AppearanceDraftInput>(key: K, value: AppearanceDraftInput[K]) => void;
   /** Replace the color pair for one mode (light or dark). */
@@ -201,7 +212,14 @@ interface AppearancePreviewState {
   readonly setMode: (isDark: boolean) => void;
   /** Enter customize mode (mounts the overlay). */
   readonly enterCustomizeMode: () => void;
-  /** Exit customize mode + clear inline CSS vars so published tokens apply. */
+  /**
+   * Exit customize mode. Without a publish this session, clears the inline
+   * CSS vars so the published stylesheet takes over. After a publish, the
+   * inline vars are instead rewritten with the published draft's values: the
+   * SSR theme stylesheet in `<head>` is not patched by `router.refresh()` and
+   * still carries the pre-publish tokens, so clearing would flash the old
+   * published theme until the next full page reload.
+   */
   readonly exitCustomizeMode: () => void;
   /** Seed the draft from the server-published row; clears history + dirty. */
   readonly loadFromServer: (draft: AppearanceDraftInput) => void;
@@ -209,6 +227,8 @@ interface AppearancePreviewState {
   readonly resetToDefaults: () => void;
   /** Clear the `dirty` flag (called by the autosave effect after a successful mutation). */
   readonly markSaved: () => void;
+  /** Record a successful publish: snapshots the published draft for exit-restore. */
+  readonly markPublished: (published: AppearanceDraftInput) => void;
   /** Pop the undo stack onto the draft; pushes the current draft to redo. */
   readonly undo: () => void;
   /** Pop the redo stack onto the draft; pushes the current draft to undo. */
@@ -235,6 +255,7 @@ const initialState = {
   resetDialogOpen: false,
   past: [] as ReadonlyArray<AppearanceDraftInput>,
   future: [] as ReadonlyArray<AppearanceDraftInput>,
+  lastPublished: null,
 };
 
 export const useAppearancePreviewStore = create<AppearancePreviewState>((set, get) => ({
@@ -290,12 +311,38 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
         ? (document.documentElement.dataset.muiColorScheme ?? document.documentElement.dataset.theme ?? undefined)
         : undefined;
     const isDark = currentScheme !== undefined ? currentScheme === "dark" : get().draft.defaultColorScheme === "dark";
-    const presetId = get().presetId ?? matchPresetByColors(get().draft.colors);
-    set({ isCustomizeMode: true, isDark, presetId });
-    writeActiveModeCssVars(get().draft, isDark, presetId);
+    const wasHydrated = get().hydrated;
+    const presetId = wasHydrated ? get().presetId : matchPresetByColors(get().draft.colors);
+    // Reset hydration + last-visible-publish marks so each session starts by
+    // reseeding the draft from the server (the server draft may have changed
+    // since the last session, e.g. another admin published).
+    set({ isCustomizeMode: true, isDark, presetId, lastPublished: null, hydrated: false });
+    // Only write CSS vars when the store already knows the active preset.
+    // On the first entry of a session, `hydrated` is false and `presetId`
+    // is the factory default ("default") — writing CSS vars here would
+    // overwrite the published preset's tokens (e.g. ocean → default) before
+    // `loadFromServer` runs. `loadFromServer` writes the correct vars once
+    // the server draft arrives.
+    if (wasHydrated) {
+      writeActiveModeCssVars(get().draft, isDark, presetId);
+    }
   },
   exitCustomizeMode: () => {
-    clearActiveModeCssVars();
+    const publishedSnapshot = get().lastPublished;
+    if (publishedSnapshot) {
+      // The SSR stylesheet still holds the pre-publish tokens; keep the newly
+      // published values on screen by writing them as inline overrides. The
+      // inline vars are mode-scoped by name (a single `--mui-palette-*` var
+      // set serves whichever mode is active), so only the active mode's
+      // values are written — a theme toggle before the next full reload
+      // falls back to the stylesheet for the other mode.
+      const presetId = matchPresetByColors(publishedSnapshot.colors) ?? get().presetId;
+      writeActiveModeCssVars(publishedSnapshot, get().isDark, presetId);
+    } else {
+      clearActiveModeCssVars();
+    }
+    // `lastPublished` stays set until the next `enterCustomizeMode` so the
+    // live-preview exit-restore can still read it.
     set({ isCustomizeMode: false });
   },
   loadFromServer: draft => {
@@ -316,6 +363,7 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
       };
     }),
   markSaved: () => set({ dirty: false }),
+  markPublished: published => set({ lastPublished: published }),
   openResetDialog: () => set({ resetDialogOpen: true }),
   closeResetDialog: () => set({ resetDialogOpen: false }),
   undo: () =>

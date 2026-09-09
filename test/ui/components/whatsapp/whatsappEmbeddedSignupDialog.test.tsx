@@ -83,6 +83,30 @@ describe("EmbeddedSignupDialog", () => {
     expect(screen.getByText(labels.embeddedSignupSyncInfo)).toBeTruthy();
   });
 
+  test("shows the allowed-origins guidance with a new-tab Meta dashboards link", () => {
+    const url = "https://developers.facebook.com/apps/123456789/fb-business-login/settings/";
+    renderDialog({ allowedOriginsUrl: url });
+    expect(screen.getByText(labels.embeddedSignupAllowedOriginsTitle)).toBeTruthy();
+    // The origin is rendered as an inline code chip, so the body is a split text run.
+    expect(
+      screen.getByText(
+        (_, el) =>
+          el?.tagName === "P" && el.textContent === labels.embeddedSignupAllowedOriginsBody(window.location.origin)
+      )
+    ).toBeTruthy();
+    expect(screen.getByText(window.location.origin).tagName).toBe("CODE");
+    const link = screen.getByRole("link", { name: labels.embeddedSignupAllowedOriginsLink });
+    expect(link.getAttribute("href")).toBe(url);
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toContain("noopener");
+  });
+
+  test("hides the allowed-origins guidance when the settings URL is unavailable", () => {
+    renderDialog({ allowedOriginsUrl: null });
+    expect(screen.queryByRole("link", { name: labels.embeddedSignupAllowedOriginsLink })).toBeNull();
+    expect(screen.queryByText(labels.embeddedSignupAllowedOriginsTitle)).toBeNull();
+  });
+
   test("header close icon closes the dialog", () => {
     const { onClose } = renderDialog();
     fireEvent.click(screen.getByRole("button", { name: labels.embeddedSignupClose }));

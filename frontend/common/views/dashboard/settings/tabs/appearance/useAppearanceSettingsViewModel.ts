@@ -39,6 +39,7 @@ export function useAppearanceSettingsViewModel(): AppearanceSettingsViewModel {
   const dirty = useAppearancePreviewStore(s => s.dirty);
   const presetId = useAppearancePreviewStore(s => s.presetId);
   const markSaved = useAppearancePreviewStore(s => s.markSaved);
+  const markPublished = useAppearancePreviewStore(s => s.markPublished);
   const applyPreset = useAppearancePreviewStore(s => s.applyPreset);
   const setField = useAppearancePreviewStore(s => s.setField);
   const resetDialogOpen = useAppearancePreviewStore(s => s.resetDialogOpen);
@@ -82,6 +83,11 @@ export function useAppearanceSettingsViewModel(): AppearanceSettingsViewModel {
       }
       await publish({ variables: { expectedUpdatedAt: undefined } });
       markSaved();
+      // Snapshot the published draft for customize-mode exit-restore, and
+      // refresh the route so server-rendered surfaces (theme stylesheet,
+      // metadata) pick up the newly published row without a page reload.
+      markPublished(input);
+      router.refresh();
       notifications.show(labels.publishSuccess, { severity: "success" });
     } catch (error) {
       logger.error("Failed to publish appearance from settings tab", { error });

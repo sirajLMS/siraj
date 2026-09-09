@@ -23,6 +23,7 @@ interface DashboardClientBridgeProps {
   readonly isSuperAdmin: boolean;
   readonly roleLabel: string;
   readonly appTitle: string;
+  readonly appLogoUrl?: string | null;
   readonly logoAriaLabel: string;
   readonly initialSidebarOpen?: boolean;
   readonly enableUsersDirectory: boolean;
@@ -110,6 +111,7 @@ export function DashboardClientBridge({
   isSuperAdmin,
   roleLabel,
   appTitle,
+  appLogoUrl,
   logoAriaLabel,
   initialSidebarOpen,
   enableUsersDirectory,
@@ -137,6 +139,7 @@ export function DashboardClientBridge({
         userRole={userProfile.role ?? ""}
         roleLabel={roleLabel}
         appTitle={appTitle}
+        appLogoUrl={appLogoUrl}
         logoAriaLabel={logoAriaLabel}
         avatarUrl={userProfile.avatarUrl ?? ""}
         notificationCount={notificationCount}

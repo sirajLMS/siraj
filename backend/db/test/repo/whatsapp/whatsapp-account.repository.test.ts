@@ -104,6 +104,16 @@ describe("WhatsappAccountRepository — reads", () => {
     expect(ids.indexOf(first.id)).toBeGreaterThanOrEqual(0);
   });
 
+  accountTest("listAll returns active and inactive accounts, newest first", async tx => {
+    const active = await makeAccount(tx);
+    const inactive = await makeAccount(tx, { isActive: false });
+
+    const ids = (await WhatsappAccountRepository.listAll(tx)).map(row => row.id);
+    expect(ids).toContain(active.id);
+    expect(ids).toContain(inactive.id);
+    expect(ids.indexOf(inactive.id)).toBeLessThan(ids.indexOf(active.id));
+  });
+
   accountTest("findByWabaId returns all accounts under the WABA including inactive ones, oldest first", async tx => {
     const wabaId = `waba-${randomUUID()}`;
     const active = await makeAccount(tx, { wabaId });

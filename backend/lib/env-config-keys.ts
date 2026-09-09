@@ -912,6 +912,12 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
 
   // WhatsApp
   // ---------------------------------------------------------------------------
+  // PERMANENT POLICY — WhatsApp env keys are `.env`-only, forever:
+  // they must NEVER be seeded into the database by any db seeder (not even as
+  // empty `env::WHATSAPP_*` placeholder rows). `backend/db/seeds/shared/system-settings.ts`
+  // enforces this with a `category !== "whatsapp"` filter; do not remove that
+  // filter and do not flip these entries' `excludeFromDb` to bypass it.
+  // ---------------------------------------------------------------------------
   {
     key: "WHATSAPP_PROVIDER",
     category: "whatsapp",

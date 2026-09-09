@@ -95,7 +95,8 @@ export function DashboardLayoutMobile({
   userName,
   userEmail,
   roleLabel,
-  appTitle: _appTitle,
+  appTitle,
+  appLogoUrl,
   logoAriaLabel: _logoAriaLabel,
   avatarUrl,
   notificationCount,
@@ -125,6 +126,8 @@ export function DashboardLayoutMobile({
     >
       <NavbarChrome
         roleLabel={roleLabel}
+        appTitle={appTitle}
+        appLogoUrl={appLogoUrl}
         leftSlot={hideSidebarNavigation ? null : <MobileMenuButton />}
         rightSlot={
           <>
