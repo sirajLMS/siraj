@@ -122,8 +122,7 @@ function getSchedule(envKey: string, defaultValue: string, name: string): string
 }
 
 function resolveSchedule(def: CronDefinition, mode: CronExecutionMode): string {
-  const defaultForMode =
-    mode === "vercel" ? def.defaultSchedule : (def.hobbySafeSchedule ?? def.defaultSchedule);
+  const defaultForMode = mode === "vercel" ? def.defaultSchedule : (def.hobbySafeSchedule ?? def.defaultSchedule);
   const schedule = getSchedule(def.scheduleEnv, defaultForMode, def.path);
 
   if (mode === "vercel" || !isSubDailyCron(schedule)) {

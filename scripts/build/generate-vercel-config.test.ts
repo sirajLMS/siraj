@@ -56,10 +56,7 @@ function cleanup(): void {
 }
 
 function writeSeedConfig(): void {
-  writeFileSync(
-    OUTPUT_PATH,
-    `${JSON.stringify({ ignoreCommand: "exit 0", fluid: true, crons: [] }, null, 2)}\n`
-  );
+  writeFileSync(OUTPUT_PATH, `${JSON.stringify({ ignoreCommand: "exit 0", fluid: true, crons: [] }, null, 2)}\n`);
 }
 
 describe("generate-vercel-config", () => {
@@ -82,15 +79,9 @@ describe("generate-vercel-config", () => {
     expect(config.ignoreCommand).toBe("exit 0");
     expect(config.fluid).toBe(true);
     expect(config.crons).toHaveLength(ALWAYS_INCLUDE_CRONS.length);
-    expect(config.crons.map(c => c.path).toSorted((a, b) => a.localeCompare(b))).toEqual([
-      ...ALWAYS_INCLUDE_CRONS,
-    ]);
-    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-sync-sweep")?.schedule).toBe(
-      "13 6 * * *"
-    );
-    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-webhook-sweep")?.schedule).toBe(
-      "18 6 * * *"
-    );
+    expect(config.crons.map(c => c.path).toSorted((a, b) => a.localeCompare(b))).toEqual([...ALWAYS_INCLUDE_CRONS]);
+    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-sync-sweep")?.schedule).toBe("13 6 * * *");
+    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-webhook-sweep")?.schedule).toBe("18 6 * * *");
   });
 
   test("vercel mode: includes ticker with Pro sub-daily WhatsApp schedules", () => {
@@ -108,12 +99,8 @@ describe("generate-vercel-config", () => {
       "/api/cron/whatsapp-webhook-sweep",
       "/api/fx/refresh",
     ]);
-    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-sync-sweep")?.schedule).toBe(
-      "13 * * * *"
-    );
-    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-webhook-sweep")?.schedule).toBe(
-      "*/5 * * * *"
-    );
+    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-sync-sweep")?.schedule).toBe("13 * * * *");
+    expect(config.crons.find(c => c.path === "/api/cron/whatsapp-webhook-sweep")?.schedule).toBe("*/5 * * * *");
   });
 
   test("vercel-daily clamps env-overridden sub-daily WhatsApp schedules", () => {
@@ -125,12 +112,8 @@ describe("generate-vercel-config", () => {
     expect(result.exitCode).toBe(0);
     expect(result.stderr).toContain("clamping to Hobby-safe");
     const config = readConfig();
-    expect(config?.crons.find(c => c.path === "/api/cron/whatsapp-sync-sweep")?.schedule).toBe(
-      "13 6 * * *"
-    );
-    expect(config?.crons.find(c => c.path === "/api/cron/whatsapp-webhook-sweep")?.schedule).toBe(
-      "18 6 * * *"
-    );
+    expect(config?.crons.find(c => c.path === "/api/cron/whatsapp-sync-sweep")?.schedule).toBe("13 6 * * *");
+    expect(config?.crons.find(c => c.path === "/api/cron/whatsapp-webhook-sweep")?.schedule).toBe("18 6 * * *");
   });
 
   test("external mode: generates always-include crons, excludes ticker", () => {
@@ -239,10 +222,7 @@ describe("generate-vercel-config", () => {
   });
 
   test("preserves ignoreCommand from existing vercel.json", () => {
-    writeFileSync(
-      OUTPUT_PATH,
-      `${JSON.stringify({ ignoreCommand: "exit 0", fluid: true, crons: [] }, null, 2)}\n`
-    );
+    writeFileSync(OUTPUT_PATH, `${JSON.stringify({ ignoreCommand: "exit 0", fluid: true, crons: [] }, null, 2)}\n`);
     const result = runScript({ CRON_EXECUTION_MODE: "vercel-daily" });
     expect(result.exitCode).toBe(0);
     const config = readConfig();

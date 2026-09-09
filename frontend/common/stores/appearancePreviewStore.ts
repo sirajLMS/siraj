@@ -311,12 +311,21 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
         ? (document.documentElement.dataset.muiColorScheme ?? document.documentElement.dataset.theme ?? undefined)
         : undefined;
     const isDark = currentScheme !== undefined ? currentScheme === "dark" : get().draft.defaultColorScheme === "dark";
-    const presetId = get().presetId ?? matchPresetByColors(get().draft.colors);
+    const wasHydrated = get().hydrated;
+    const presetId = wasHydrated ? get().presetId : matchPresetByColors(get().draft.colors);
     // Reset hydration + last-visible-publish marks so each session starts by
     // reseeding the draft from the server (the server draft may have changed
     // since the last session, e.g. another admin published).
     set({ isCustomizeMode: true, isDark, presetId, lastPublished: null, hydrated: false });
-    writeActiveModeCssVars(get().draft, isDark, presetId);
+    // Only write CSS vars when the store already knows the active preset.
+    // On the first entry of a session, `hydrated` is false and `presetId`
+    // is the factory default ("default") — writing CSS vars here would
+    // overwrite the published preset's tokens (e.g. ocean → default) before
+    // `loadFromServer` runs. `loadFromServer` writes the correct vars once
+    // the server draft arrives.
+    if (wasHydrated) {
+      writeActiveModeCssVars(get().draft, isDark, presetId);
+    }
   },
   exitCustomizeMode: () => {
     const publishedSnapshot = get().lastPublished;

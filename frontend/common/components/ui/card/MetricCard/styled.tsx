@@ -50,7 +50,11 @@ export interface StyledLabelProps {
 export const StyledLabel = styled(Typography, {
   shouldForwardProp: prop => prop !== "isError" && prop !== "density" && prop !== "mbOverride",
 })<StyledLabelProps>(({ theme, isError, density = "default", mbOverride }) => ({
-  color: isError ? theme.palette.error.main : theme.palette.primary.main,
+  // `theme.vars.*` reads the CSS-var reference so the customize overlay
+  // (`?customize=1`) live-updates the label color when the admin picks a
+  // different preset. Reading `theme.palette.*` would bake the SSR-resolved
+  // hex into the emotion class and freeze the label on the SSR preset.
+  color: isError ? theme.vars.palette.error.main : theme.vars.palette.primary.main,
   marginBottom: mbOverride ?? theme.spacing(density === "compact" ? 0.25 : 0.5),
   overflow: "hidden",
   // Single-line label with nowrap + small font + compression.
@@ -97,7 +101,7 @@ export const StyledIconWrap = styled(Box, {
   height: iconSize,
   borderRadius: "50%",
   border: "2px solid",
-  borderColor: isError ? theme.palette.error.main : theme.palette.primary.main,
+  borderColor: isError ? theme.vars.palette.error.main : theme.vars.palette.primary.main,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -125,7 +129,7 @@ export const StyledIcon = styled(
   }
 )<Omit<StyledIconProps, "icon">>(({ theme, fontSizeValue, isError }) => ({
   fontSize: fontSizeValue,
-  color: isError ? theme.palette.error.main : theme.palette.primary.main,
+  color: isError ? theme.vars.palette.error.main : theme.vars.palette.primary.main,
   transition: theme.transitions.create("color", { duration: 200, easing: "ease" }),
 }));
 

@@ -142,3 +142,5 @@ __pycache__
 # Not committed — builds never run on Vercel Git.
 vercel.json
 certificates
+.cursor-logs
+.trae
