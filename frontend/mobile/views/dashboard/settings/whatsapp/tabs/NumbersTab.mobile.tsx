@@ -11,6 +11,8 @@ import {
   MoreVertOutlined,
   PasswordOutlined,
   SearchOutlined,
+  VisibilityOffOutlined,
+  VisibilityOutlined,
 } from "@mui/icons-material";
 import {
   Box,
@@ -21,6 +23,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  InputAdornment,
   LinearProgress,
   Menu,
   MenuItem,
@@ -107,6 +110,7 @@ function CredentialEditDialogMobile({
   const onConfirmRef = useRef(onConfirm);
   const onTestRef = useRef(onTest);
   const [testing, setTesting] = useState(false);
+  const [showToken, setShowToken] = useState(false);
 
   useEffect(() => {
     onConfirmRef.current = onConfirm;
@@ -119,6 +123,7 @@ function CredentialEditDialogMobile({
   const handleClose = useCallback(() => {
     form.setValue("");
     form.setError(null);
+    setShowToken(false);
     onClose();
   }, [form, onClose]);
 
@@ -176,7 +181,7 @@ function CredentialEditDialogMobile({
         <Stack spacing={2} sx={{ mt: 1 }}>
           <TextField
             fullWidth
-            type="password"
+            type={showToken ? "text" : "password"}
             label={fieldLabel}
             placeholder={placeholder}
             value={form.value}
@@ -185,6 +190,21 @@ function CredentialEditDialogMobile({
             helperText={fieldHelperText ?? undefined}
             aria-invalid={fieldError}
             disabled={busy}
+            slotProps={{
+              input: {
+                endAdornment: isToken ? (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={showToken ? labels.hideToken : labels.showToken}
+                      onClick={() => setShowToken(previous => !previous)}
+                      edge="end"
+                    >
+                      {showToken ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
+                    </IconButton>
+                  </InputAdornment>
+                ) : undefined,
+              },
+            }}
           />
         </Stack>
       </DialogContent>

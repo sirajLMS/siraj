@@ -15,6 +15,8 @@ export const whatsappEn: WhatsappLabels = {
   editAccount: "Edit Number",
   editToken: "Edit Token",
   editPin: "Edit PIN",
+  showToken: "Show token",
+  hideToken: "Hide token",
   cancel: "Cancel",
   save: "Save",
   test: "Test",

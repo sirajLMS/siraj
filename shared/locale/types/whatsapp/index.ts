@@ -30,6 +30,10 @@ export interface WhatsappLabels {
   readonly editAccount: string;
   readonly editToken: string;
   readonly editPin: string;
+  /** aria-label for the reveal-token (eye) toggle inside the credential dialog. */
+  readonly showToken: string;
+  /** aria-label for the hide-token (eye-off) toggle inside the credential dialog. */
+  readonly hideToken: string;
   readonly cancel: string;
   readonly save: string;
   /** Access-token dialog test action: color/icon/label states. */

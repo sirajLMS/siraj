@@ -15,6 +15,8 @@ export const whatsappAr: WhatsappLabels = {
   editAccount: "تعديل الرقم",
   editToken: "تعديل الرمز",
   editPin: "تعديل رمز PIN",
+  showToken: "إظهار الرمز",
+  hideToken: "إخفاء الرمز",
   cancel: "إلغاء",
   save: "حفظ",
   test: "اختبار",
