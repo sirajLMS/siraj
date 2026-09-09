@@ -61,6 +61,8 @@ const baseProps = {
   onOpenDeleteConfirmDialog: mock(() => {}),
   onDeleteAccount: mock(noopPromise),
   onSetAccessToken: mock(noopPromise),
+  onTestAccessToken: mock(() => Promise.resolve("success" as const)),
+  tokenTestStates: {},
   onSetTwoStepPin: mock(noopPromise),
   onOpenCreateDialog: mock(() => {}),
   onOpenEditNameDialog: mock(() => {}),
@@ -79,6 +81,7 @@ const baseProps = {
 function renderDesktopWithAccount(overrides: Record<string, unknown> = {}) {
   const onSetAccessToken = mock(noopPromise);
   const onSetTwoStepPin = mock(noopPromise);
+  const onTestAccessToken = mock(() => Promise.resolve("success" as const));
   const account = makeAccountRow("acc-1", "+555", "Test Account");
   renderWithWrapper(
     <NumbersTabDesktop
@@ -87,11 +90,12 @@ function renderDesktopWithAccount(overrides: Record<string, unknown> = {}) {
       dialogState={{ type: null }}
       onSetAccessToken={onSetAccessToken}
       onSetTwoStepPin={onSetTwoStepPin}
+      onTestAccessToken={onTestAccessToken}
       {...overrides}
     />,
     { locale, permissions: [AppPermission.WhatsappConfigManage] }
   );
-  return { onSetAccessToken, onSetTwoStepPin, account };
+  return { onSetAccessToken, onSetTwoStepPin, onTestAccessToken, account };
 }
 
 async function openActionMenu() {
@@ -160,9 +164,47 @@ describe("CredentialEditDialog (via NumbersTabDesktop action menu)", () => {
     await openDialogAndExpect(labels.editToken);
   });
 
-  test("edit token dialog: typing a value enables Save and clicking Save calls onSetAccessToken", async () => {
-    const { onSetAccessToken } = renderDesktopWithAccount();
-    await submitCredentialDialog(labels.editToken, labels.accessTokenPlaceholder, "a".repeat(50), onSetAccessToken);
+  test("edit token dialog: clicking Test calls onTestAccessToken with the accountId and token", async () => {
+    const { onTestAccessToken } = renderDesktopWithAccount();
+    await openActionMenu();
+    await clickMenuItem(labels.editToken);
+    const token = "a".repeat(50);
+    const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);
+    await act(async () => {
+      fireEvent.change(input, { target: { value: token } });
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: labels.test }));
+    });
+    await waitFor(() => {
+      expect(onTestAccessToken).toHaveBeenCalledTimes(1);
+      expect(firstCallArgString(onTestAccessToken)).toBe("acc-1");
+    });
+  });
+
+  test("edit token dialog: Save stays disabled until the token has a recorded successful test", async () => {
+    renderDesktopWithAccount();
+    await openActionMenu();
+    await clickMenuItem(labels.editToken);
+    const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);
+    await act(async () => {
+      fireEvent.change(input, { target: { value: "a".repeat(50) } });
+    });
+    // Typing alone must NOT enable Save — no successful test recorded yet.
+    expectSaveDisabled();
+  });
+
+  test("edit token dialog: Save is enabled when the token has a recorded successful test", async () => {
+    const token = "a".repeat(50);
+    renderDesktopWithAccount({ tokenTestStates: { "acc-1": { [token]: "success" } } });
+    await openActionMenu();
+    await clickMenuItem(labels.editToken);
+    const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);
+    await act(async () => {
+      fireEvent.change(input, { target: { value: token } });
+    });
+    const saveBtn = screen.getByRole("button", { name: labels.save });
+    expect(saveBtn.hasAttribute("disabled")).toBe(false);
   });
 
   test("edit pin dialog: click menu Edit Pin opens dialog with title and disabled Save", async () => {

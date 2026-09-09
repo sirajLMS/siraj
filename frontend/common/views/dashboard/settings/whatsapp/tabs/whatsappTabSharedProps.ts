@@ -1,4 +1,5 @@
 import type { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
 import type {
   WhatsappAccountRow,
   WhatsappCreateInput,
@@ -24,6 +25,10 @@ export interface NumbersTabSharedProps {
   readonly onOpenDeleteConfirmDialog: (accountId: string, displayName: string) => void;
   readonly onDeleteAccount: (id: string) => Promise<void>;
   readonly onSetAccessToken: (id: string, accessToken: string) => Promise<void>;
+  /** Validate a token against Meta (no persistence); records the outcome in the store. */
+  readonly onTestAccessToken: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
+  /** Recorded token test outcomes, keyed by `accountId -> tokenValue -> state`. */
+  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
   readonly onSetTwoStepPin: (id: string, twoStepPin: string) => Promise<void>;
   readonly onSyncFromMeta: () => Promise<void>;
   readonly onDismissSnackbar: () => void;

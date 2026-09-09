@@ -17,6 +17,10 @@ export const whatsappAr: WhatsappLabels = {
   editPin: "تعديل رمز PIN",
   cancel: "إلغاء",
   save: "حفظ",
+  test: "اختبار",
+  testRunning: "جارٍ الاختبار…",
+  testPassed: "نجح الاختبار",
+  testFailed: "فشل الاختبار",
   deleteAccount: "حذف الرقم",
   deleteConfirm: "هل أنت متأكد من رغبتك في حذف رقم واتساب هذا؟ لا يمكن التراجع عن هذا الإجراء.",
   wabaId: "معرّف WABA",
@@ -58,6 +62,16 @@ export const whatsappAr: WhatsappLabels = {
   syncNoChange: "لم يتم اكتشاف أي تغييرات من Meta.",
   syncError: "فشلت المزامنة من Meta. يرجى التحقق من بيانات الاعتماد والمحاولة مرة أخرى.",
   noAccounts: 'لا توجد أرقام واتساب مُعدة. انقر على "إضافة رقم" للبدء.',
+
+  // ─── Meta phone numbers settings link ──────────────────────────────
+  metaNumbersHelpTitle: "إعدادات أرقام هواتف فيسبوك",
+  metaNumbersHelpBody:
+    "أضف أرقام واتساب الخاصة بك أو عدّلها أو احذفها من إعدادات أرقام الهواتف في مدير الأعمال من Meta.",
+  metaNumbersCopyLink: "نسخ الرابط",
+  metaNumbersCopyLinkTooltip: "انسخ رابط إعدادات أرقام الهواتف في Meta",
+  metaNumbersCopied: "تم النسخ",
+  metaNumbersOpenInNewTab: "فتح في تبويب جديد",
+  metaNumbersOpenInNewTabTooltip: "افتح إعدادات أرقام الهواتف في Meta في تبويب جديد",
 
   // ─── Templates tab ──────────────────────────────────────────────────
   templatesTitle: "قوالب الرسائل",

@@ -10,6 +10,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { whatsappAccountSharedInputFields } from "@/backend/graphql/pothos/whatsapp/__shared__/whatsappAccountFieldHelpers";
 import type {
+  WhatsappAccessTokenTestResultType,
   WhatsappAccountReturnType,
   WhatsappConfigurationStatusType,
   WhatsappSyncFromMetaReturnType,
@@ -148,5 +149,17 @@ export const WhatsappConfigurationStatusPothosObject = WhatsappConfigurationStat
     isConfigured: t.exposeBoolean("isConfigured", { nullable: false }),
     envBootstrapAvailable: t.exposeBoolean("envBootstrapAvailable", { nullable: false }),
     missingEnvKeys: t.exposeStringList("missingEnvKeys", { nullable: false }),
+  }),
+});
+
+export const WhatsappAccessTokenTestResultRef = gqlSchemaBuilder.objectRef<WhatsappAccessTokenTestResultType>(
+  "WhatsappAccessTokenTestResult"
+);
+
+export const WhatsappAccessTokenTestResultPothosObject = WhatsappAccessTokenTestResultRef.implement({
+  fields: t => ({
+    isValid: t.exposeBoolean("isValid"),
+    isConnected: t.exposeBoolean("isConnected"),
+    status: t.exposeString("status", { nullable: true }),
   }),
 });

@@ -17,6 +17,10 @@ export const whatsappEn: WhatsappLabels = {
   editPin: "Edit PIN",
   cancel: "Cancel",
   save: "Save",
+  test: "Test",
+  testRunning: "Testing…",
+  testPassed: "Test passed",
+  testFailed: "Test failed",
   deleteAccount: "Delete Number",
   deleteConfirm: "Are you sure you want to delete this WhatsApp number? This action cannot be undone.",
   wabaId: "WABA ID",
@@ -48,6 +52,16 @@ export const whatsappEn: WhatsappLabels = {
   syncNoChange: "No changes detected from Meta.",
   syncError: "Failed to sync from Meta. Please check credentials and try again.",
   noAccounts: 'No WhatsApp numbers configured. Click "Add Number" to get started.',
+
+  // ─── Meta phone numbers settings link ──────────────────────────────
+  metaNumbersHelpTitle: "Facebook Phone Numbers Settings",
+  metaNumbersHelpBody:
+    "Add, edit, or remove your WhatsApp numbers from the Meta Business Manager phone number settings.",
+  metaNumbersCopyLink: "Copy link",
+  metaNumbersCopyLinkTooltip: "Copy the Meta phone numbers settings link",
+  metaNumbersCopied: "Copied",
+  metaNumbersOpenInNewTab: "Open in new tab",
+  metaNumbersOpenInNewTabTooltip: "Open the Meta phone numbers settings in a new tab",
 
   // ─── Templates tab ──────────────────────────────────────────────────
   templatesTitle: "Message Templates",

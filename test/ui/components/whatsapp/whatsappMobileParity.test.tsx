@@ -68,6 +68,8 @@ const mobileNumbersProps = {
   onOpenDeleteConfirmDialog: mock(() => {}),
   onDeleteAccount: mock(noopPromise),
   onSetAccessToken: mock(noopPromise),
+  onTestAccessToken: mock(() => Promise.resolve("success" as const)),
+  tokenTestStates: {},
   onSetTwoStepPin: mock(noopPromise),
   onOpenCreateDialog: mock(() => {}),
   onOpenEditNameDialog: mock(() => {}),

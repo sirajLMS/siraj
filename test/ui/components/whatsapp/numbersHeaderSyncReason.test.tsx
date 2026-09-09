@@ -55,6 +55,8 @@ function makeNumbersProps(overrides: Partial<NumbersTabSharedProps> = {}): Numbe
     onOpenDeleteConfirmDialog: mock(() => {}),
     onDeleteAccount: mock(() => Promise.resolve()),
     onSetAccessToken: mock(() => Promise.resolve()),
+    onTestAccessToken: mock(() => Promise.resolve("success" as const)),
+    tokenTestStates: {},
     onSetTwoStepPin: mock(() => Promise.resolve()),
     onSyncFromMeta: mock(() => Promise.resolve()),
     onDismissSnackbar: mock(() => {}),

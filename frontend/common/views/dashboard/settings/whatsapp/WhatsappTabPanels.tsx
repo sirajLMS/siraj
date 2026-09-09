@@ -155,6 +155,8 @@ function NumbersTabPanel({ viewModel }: Readonly<{ viewModel: WhatsappSettingsVi
         onOpenDeleteConfirmDialog: viewModel.openDeleteConfirmDialog,
         onDeleteAccount: viewModel.handleDelete,
         onSetAccessToken: viewModel.handleSubmitToken,
+        onTestAccessToken: viewModel.handleTestToken,
+        tokenTestStates: viewModel.tokenTestStates,
         onSetTwoStepPin: viewModel.handleSubmitPin,
         onSyncFromMeta: viewModel.handleSync,
         onDismissSnackbar: viewModel.closeSnackbar,

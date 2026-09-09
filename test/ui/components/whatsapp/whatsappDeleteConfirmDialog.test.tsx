@@ -60,6 +60,8 @@ const baseProps = {
   onDismissSnackbar: mock(() => {}),
   onOpenDeleteConfirmDialog: mock(() => {}),
   onSetAccessToken: mock(noopPromise),
+  onTestAccessToken: mock(() => Promise.resolve("success" as const)),
+  tokenTestStates: {},
   onSetTwoStepPin: mock(noopPromise),
   onOpenCreateDialog: mock(() => {}),
   onOpenEditNameDialog: mock(() => {}),

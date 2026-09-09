@@ -1,6 +1,15 @@
 "use client";
 
-import { AddOutlined, CloudSyncOutlined, DeleteOutlined, EditOutlined, MoreVertOutlined } from "@mui/icons-material";
+import {
+  AddOutlined,
+  CheckCircleOutlined,
+  CloudSyncOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  ErrorOutlined,
+  MoreVertOutlined,
+  SearchOutlined,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -20,8 +29,10 @@ import {
 import { useCallback, useState } from "react";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
 import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import {
+  MetaNumbersLinkShared,
   NumbersCreateEditDialogs,
   NumbersDeleteConfirmDialog,
   NumbersEmptyStateShared,
@@ -60,15 +71,20 @@ function CredentialEditDialog({
   labels,
   onClose,
   onConfirm,
+  onTest,
+  tokenTestStates,
 }: Readonly<{
   readonly open: boolean;
   readonly state: CredentialDialogState;
   readonly labels: WhatsappLabels;
   readonly onClose: () => void;
   readonly onConfirm: (value: string) => Promise<void>;
+  readonly onTest: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
+  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
 }>) {
   const [value, setValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [testing, setTesting] = useState(false);
 
   const handleClose = useCallback(() => {
     setValue("");
@@ -85,9 +101,27 @@ function CredentialEditDialog({
     }
   };
 
+  const handleTest = async () => {
+    if (testing || value.length === 0) return;
+    setTesting(true);
+    try {
+      await onTest(state.accountId, value);
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const isToken = state.field === "accessToken";
   const title = state.field === "accessToken" ? labels.editToken : labels.editPin;
   const fieldLabel = state.field === "accessToken" ? labels.accessToken : labels.twoStepPin;
   const placeholder = state.field === "accessToken" ? labels.accessTokenPlaceholder : labels.twoStepPinPlaceholder;
+  const testState = isToken ? tokenTestStates[state.accountId]?.[value] : undefined;
+
+  // For the token dialog, Save is gated on a successful test of the CURRENT
+  // value; for the PIN dialog, only non-empty and not submitting.
+  const saveDisabled = isToken
+    ? submitting || testing || value.length === 0 || testState !== "success"
+    : submitting || value.length === 0;
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
@@ -105,11 +139,62 @@ function CredentialEditDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>{labels.cancel}</Button>
-        <Button variant="contained" disabled={submitting || value.length === 0} onClick={handleConfirm}>
+        {isToken ? (
+          <TestButton
+            testing={testing}
+            testState={testState}
+            disabled={value.length === 0}
+            labels={labels}
+            onTest={handleTest}
+          />
+        ) : null}
+        <Button variant="contained" disabled={saveDisabled} onClick={handleConfirm}>
           {submitting ? <CircularProgress size={20} /> : labels.save}
         </Button>
       </DialogActions>
     </Dialog>
+  );
+}
+
+/** Test action button whose color/icon/text reflects the token's test state. */
+function TestButton({
+  testing,
+  testState,
+  disabled,
+  labels,
+  onTest,
+}: Readonly<{
+  readonly testing: boolean;
+  readonly testState: WhatsappTokenTestState | undefined;
+  readonly disabled: boolean;
+  readonly labels: WhatsappLabels;
+  readonly onTest: () => void;
+}>) {
+  if (testing) {
+    return (
+      <Button disabled startIcon={<CircularProgress size={16} />}>
+        {labels.testRunning}
+      </Button>
+    );
+  }
+  if (testState === "success") {
+    return (
+      <Button color="success" onClick={onTest} startIcon={<CheckCircleOutlined />}>
+        {labels.testPassed}
+      </Button>
+    );
+  }
+  if (testState === "failed") {
+    return (
+      <Button color="error" onClick={onTest} startIcon={<ErrorOutlined />}>
+        {labels.testFailed}
+      </Button>
+    );
+  }
+  return (
+    <Button onClick={onTest} disabled={disabled} startIcon={<SearchOutlined />}>
+      {labels.test}
+    </Button>
   );
 }
 
@@ -361,6 +446,8 @@ function NumbersTabDialogs({
   creating,
   updatingId,
   mutationError,
+  onTestAccessToken,
+  tokenTestStates,
   handlers,
   validators,
 }: Readonly<{
@@ -371,6 +458,8 @@ function NumbersTabDialogs({
   readonly creating: boolean;
   readonly updatingId: string | null;
   readonly mutationError: string | null;
+  readonly onTestAccessToken: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
+  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
   readonly handlers: NumbersTabDialogHandlers;
   readonly validators: NumbersTabDialogValidators;
 }>) {
@@ -401,6 +490,8 @@ function NumbersTabDialogs({
         labels={t}
         onClose={handleDialogClose}
         onConfirm={handleDialogConfirm}
+        onTest={onTestAccessToken}
+        tokenTestStates={tokenTestStates}
       />
 
       <NumbersDeleteConfirmDialog
@@ -518,6 +609,8 @@ function NumbersDesktopBody({
         embeddedSignupBlocked={props.embeddedSignupBlocked ?? false}
       />
 
+      <MetaNumbersLinkShared labels={t} />
+
       <AccountsListSection
         labels={t}
         accounts={props.accounts}
@@ -545,6 +638,8 @@ function NumbersDesktopBody({
         creating={props.creating}
         updatingId={props.updatingId}
         mutationError={props.mutationError}
+        onTestAccessToken={props.onTestAccessToken}
+        tokenTestStates={props.tokenTestStates}
         handlers={{
           onDeleteAccount: props.onDeleteAccount,
           onCreate: props.onCreate,

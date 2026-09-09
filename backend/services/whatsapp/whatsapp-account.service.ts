@@ -61,6 +61,7 @@ import type {
   NotificationPreferenceUpdateInput,
   SubscribedAppsResponseBody,
   UserPermissionContext,
+  WhatsappAccessTokenTestResultType,
   WhatsappAccountCreateSubmitInput,
   WhatsappAccountReturnType,
   WhatsappAccountUpdateInput,
@@ -746,6 +747,36 @@ export namespace WhatsappAccountService {
       );
       return { isValid: false, isConnected: false };
     }
+  }
+
+  /**
+   * Validates an access token against Meta for the account's phone number
+   * WITHOUT persisting anything — the UI calls this from the token dialog's
+   * "Test" action to gate the "Save" action on a confirmed-valid token.
+   *
+   * @throws NotFoundError when the account row does not exist.
+   */
+  export async function testAccessToken(
+    actorUserId: string,
+    tErrors: ErrorsLabels,
+    id: string,
+    accessToken: string
+  ): Promise<WhatsappAccessTokenTestResultType> {
+    await assertCanManage(actorUserId, tErrors);
+    assertValidId(id, tErrors);
+
+    const account = await WhatsappAccountRepository.findById(id);
+    if (!account) {
+      throw new NotFoundError("WHATSAPP_ACCOUNT", tErrors.whatsappAccountNotFound(id));
+    }
+
+    const apiVersion = await resolveGraphApiVersion();
+    const verification = await checkPhoneNumberStatusWithToken(account.phoneNumberId, accessToken, apiVersion);
+    return {
+      isValid: verification.isValid,
+      isConnected: verification.isConnected,
+      status: verification.status ?? null,
+    };
   }
 
   export async function setAccessToken(

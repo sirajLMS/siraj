@@ -32,6 +32,11 @@ export interface WhatsappLabels {
   readonly editPin: string;
   readonly cancel: string;
   readonly save: string;
+  /** Access-token dialog test action: color/icon/label states. */
+  readonly test: string;
+  readonly testRunning: string;
+  readonly testPassed: string;
+  readonly testFailed: string;
   readonly deleteAccount: string;
   readonly deleteConfirm: string;
   readonly wabaId: string;
@@ -58,6 +63,22 @@ export interface WhatsappLabels {
   readonly syncNoChange: string;
   readonly syncError: string;
   readonly noAccounts: string;
+
+  // ─── Meta phone numbers settings link ──────────────────────────────
+  /** Section title linking to Facebook/Meta Business Manager phone numbers. */
+  readonly metaNumbersHelpTitle: string;
+  /** One-line description explaining the Meta phone numbers settings page. */
+  readonly metaNumbersHelpBody: string;
+  /** Button label that copies the Meta phone numbers settings link. */
+  readonly metaNumbersCopyLink: string;
+  /** Tooltip describing the copy-link action. */
+  readonly metaNumbersCopyLinkTooltip: string;
+  /** Brief feedback shown after the link is copied to the clipboard. */
+  readonly metaNumbersCopied: string;
+  /** Button label that opens the Meta phone numbers settings in a new tab. */
+  readonly metaNumbersOpenInNewTab: string;
+  /** Tooltip describing the open-in-new-tab action. */
+  readonly metaNumbersOpenInNewTabTooltip: string;
 
   // ─── Templates tab ──────────────────────────────────────────────────
   readonly templatesTitle: string;

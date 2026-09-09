@@ -2,6 +2,7 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { WhatsappAccountPurposePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import {
+  WhatsappAccessTokenTestResultPothosObject,
   WhatsappAccountCreateInputPothosObject,
   WhatsappAccountPothosObject,
   WhatsappAccountUpdateInputPothosObject,
@@ -111,6 +112,20 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: withAuthResult((actorUserId, args, tErrors) =>
       WhatsappAccountService.setAccessToken(actorUserId, tErrors, args.id, args.accessToken)
+    ),
+  }),
+
+  testWhatsappAccessToken: t.field({
+    type: WhatsappAccessTokenTestResultPothosObject,
+    description:
+      "Validate an access token against Meta for the account's phone number without persisting it (used to gate the token save action).",
+    authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
+    args: {
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      accessToken: t.arg.string({ required: true, directives: { constraint: { maxLength: 512 } } }),
+    },
+    resolve: withAuthResult((actorUserId, args, tErrors) =>
+      WhatsappAccountService.testAccessToken(actorUserId, tErrors, args.id, args.accessToken)
     ),
   }),
 

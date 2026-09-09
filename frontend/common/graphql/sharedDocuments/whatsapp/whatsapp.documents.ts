@@ -15,6 +15,8 @@ import type {
   SetWhatsappTwoStepPinMutation,
   SetWhatsappTwoStepPinMutationVariables,
   SyncWhatsappAccountsFromMetaMutation,
+  TestWhatsappAccessTokenMutation,
+  TestWhatsappAccessTokenMutationVariables,
   UpdateWhatsappAccountMutation,
   UpdateWhatsappAccountMutationVariables,
   WhatsappAccountsQuery,
@@ -124,6 +126,19 @@ export const setWhatsappAccessTokenMutationDocument: TypedDocumentNode<
   mutation setWhatsappAccessToken($id: String!, $accessToken: String!) {
     setWhatsappAccessToken(id: $id, accessToken: $accessToken) {
       ...WhatsappAccountFields
+    }
+  }
+`;
+
+export const testWhatsappAccessTokenMutationDocument: TypedDocumentNode<
+  TestWhatsappAccessTokenMutation,
+  TestWhatsappAccessTokenMutationVariables
+> = gql`
+  mutation testWhatsappAccessToken($id: String!, $accessToken: String!) {
+    testWhatsappAccessToken(id: $id, accessToken: $accessToken) {
+      isValid
+      isConnected
+      status
     }
   }
 `;

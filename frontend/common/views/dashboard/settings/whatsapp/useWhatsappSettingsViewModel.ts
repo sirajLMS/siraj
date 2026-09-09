@@ -12,12 +12,17 @@ import {
   setWhatsappAccessTokenMutationDocument,
   setWhatsappTwoStepPinMutationDocument,
   syncWhatsappAccountsFromMetaMutationDocument,
+  testWhatsappAccessTokenMutationDocument,
   updateWhatsappAccountMutationDocument,
   updateWhatsappAccountPurposeMutationDocument,
   whatsappAccountsQueryDocument,
   whatsappConfigurationStatusQueryDocument,
   whatsappEmbeddedSignupAllowedOriginsUrlQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import {
+  useWhatsappTokenTestStore,
+  type WhatsappTokenTestState,
+} from "@/frontend/common/stores/whatsappTokenTestStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { isEmbeddedSignupSupported } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import type {
@@ -195,6 +200,7 @@ function useWhatsappMutations() {
   const [deleteAccount] = useMutation(deleteWhatsappAccountMutationDocument);
   const [setAccessToken] = useMutation(setWhatsappAccessTokenMutationDocument);
   const [setTwoStepPin] = useMutation(setWhatsappTwoStepPinMutationDocument);
+  const [testAccessToken] = useMutation(testWhatsappAccessTokenMutationDocument);
   const [syncFromMeta, syncResult] = useMutation(syncWhatsappAccountsFromMetaMutationDocument);
   const [setOptIn] = useMutation(setUserWhatsappOptInMutationDocument);
   const [createAccount] = useMutation(createWhatsappAccountMutationDocument);
@@ -206,6 +212,7 @@ function useWhatsappMutations() {
     deleteAccount,
     setAccessToken,
     setTwoStepPin,
+    testAccessToken,
     syncFromMeta,
     syncResult,
     setOptIn,
@@ -733,6 +740,32 @@ function useWhatsappUtilityHandlers({
   return { syncing, optInLoading, handleSubmitToken, handleSubmitPin, handleSync, handleToggleOptIn };
 }
 
+// ─── Token test handler ──────────────────────────────────────────────
+
+function useWhatsappTokenTestHandler(mutations: ReturnType<typeof useWhatsappMutations>) {
+  const setTokenTest = useWhatsappTokenTestStore(store => store.setTokenTest);
+
+  const handleTestToken = useCallback(
+    async (accountId: string, token: string): Promise<WhatsappTokenTestState> => {
+      try {
+        const { data } = await mutations.testAccessToken({ variables: { id: accountId, accessToken: token } });
+        const result = data?.testWhatsappAccessToken;
+        const passed = result?.isValid === true && result?.isConnected === true;
+        const state: WhatsappTokenTestState = passed ? "success" : "failed";
+        setTokenTest(accountId, token, state);
+        return state;
+      } catch (error) {
+        logger.error("Failed to test WhatsApp access token", { error });
+        setTokenTest(accountId, token, "failed");
+        return "failed";
+      }
+    },
+    [mutations, setTokenTest]
+  );
+
+  return { handleTestToken };
+}
+
 // ─── Labels hook ─────────────────────────────────────────────────────
 
 function useWhatsappLabels(whatsappLabels: WhatsappSettingsLabels["page"]): WhatsappSettingsLabels {
@@ -802,6 +835,8 @@ interface WhatsappViewModelParts {
   refetchTemplates: () => void;
   editingTokenForId: string | null;
   editingPinForId: string | null;
+  handleTestToken: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
+  tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
 }
 
 function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsViewModel {
@@ -851,6 +886,8 @@ function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsView
     handleDelete: p.updateDeleteHandlers.handleDelete,
     handleSubmitToken: p.utilityHandlers.handleSubmitToken,
     handleSubmitPin: p.utilityHandlers.handleSubmitPin,
+    handleTestToken: p.handleTestToken,
+    tokenTestStates: p.tokenTestStates,
     handleSync: p.utilityHandlers.handleSync,
     handleToggleOptIn: p.utilityHandlers.handleToggleOptIn,
     refetchAccounts: p.refetchAccounts,
@@ -992,6 +1029,8 @@ export function useWhatsappSettingsViewModel(props?: {
   const whatsappLabels = useAppTranslation(Translation.Whatsapp);
   const queries = useWhatsappQueries();
   const mutations = useWhatsappMutations();
+  const { handleTestToken } = useWhatsappTokenTestHandler(mutations);
+  const tokenTestStates = useWhatsappTokenTestStore(store => store.tokenTests);
 
   const labels = useWhatsappLabels(whatsappLabels);
   const {
@@ -1044,5 +1083,7 @@ export function useWhatsappSettingsViewModel(props?: {
     refetchTemplates: page.refetchTemplates,
     editingTokenForId: page.editingTokenForId,
     editingPinForId: page.editingPinForId,
+    handleTestToken,
+    tokenTestStates,
   });
 }

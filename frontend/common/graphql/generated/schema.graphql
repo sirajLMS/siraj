@@ -3286,6 +3286,11 @@ type Mutation {
   syncWhatsappAccountsFromMeta: WhatsappSyncFromMetaResult
   testMeetingProviderConnection(input: TestMeetingConnectionInput!): TestMeetingConnectionResult
 
+  """
+  Validate an access token against Meta for the account's phone number without persisting it (used to gate the token save action).
+  """
+  testWhatsappAccessToken(accessToken: String!, id: String!): WhatsappAccessTokenTestResult
+
   """Toggle the Paid status on an accounting payment (cascades to invoice)"""
   toggleAccountingPaymentPaidStatus(input: AccountingPaymentTogglePaidInput!): AccountingPayment
 
@@ -4518,7 +4523,9 @@ type Query {
   ): [User!]
   welcomeMessage: String
 
-  """List all active WhatsApp business accounts."""
+  """
+  List all WhatsApp business accounts (active and inactive) for the numbers management surface — synced numbers start inactive and must remain visible.
+  """
   whatsappAccounts: [WhatsappAccount!]
 
   """
@@ -6534,6 +6541,12 @@ type WeeklyWorkloadMetrics {
   weeklyHoursWorked: String
 }
 
+type WhatsappAccessTokenTestResult {
+  isConnected: Boolean
+  isValid: Boolean
+  status: String
+}
+
 type WhatsappAccount {
   createdAt: DateTime
   displayName: LocalizedString
@@ -6668,6 +6681,12 @@ type WhatsappConfiguration {
   webhookUrl: String
 }
 
+type WhatsappConfigurationStatus {
+  envBootstrapAvailable: Boolean!
+  isConfigured: Boolean!
+  missingEnvKeys: [String!]!
+}
+
 type WhatsappConnectionTestResult {
   id: String
 
@@ -6683,12 +6702,6 @@ type WhatsappConnectionTestResult {
 
   """Whether the live Meta Graph API check succeeded."""
   success: Boolean
-}
-
-type WhatsappConfigurationStatus {
-  envBootstrapAvailable: Boolean!
-  isConfigured: Boolean!
-  missingEnvKeys: [String!]!
 }
 
 type WhatsappContact {

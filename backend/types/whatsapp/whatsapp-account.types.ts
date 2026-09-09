@@ -118,6 +118,17 @@ export type SetWhatsappTwoStepPinInput = {
 };
 
 /**
+ * Result of validating an access token against Meta for a phone number,
+ * without persisting anything. Returned by the `testWhatsappAccessToken`
+ * mutation so the UI can gate the save action on a confirmed-valid token.
+ */
+export type WhatsappAccessTokenTestResultType = {
+  isValid: boolean;
+  isConnected: boolean;
+  status: string | null;
+};
+
+/**
  * Template snapshot returned by Meta's list-message-templates API.
  * Used in both GraphQL sync results and service-layer return types.
  *

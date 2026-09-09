@@ -2,12 +2,15 @@
 
 import {
   AddOutlined,
+  CheckCircleOutlined,
   CloudSyncOutlined,
   DeleteOutlined,
   EditOutlined,
+  ErrorOutlined,
   KeyOutlined,
   MoreVertOutlined,
   PasswordOutlined,
+  SearchOutlined,
 } from "@mui/icons-material";
 import {
   Box,
@@ -27,8 +30,10 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated/gql/graphql";
+import type { WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
 import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup";
 import {
+  MetaNumbersLinkShared,
   NumbersCreateEditDialogs,
   NumbersDeleteConfirmDialog,
   NumbersEmptyStateShared,
@@ -83,6 +88,8 @@ function CredentialEditDialogMobile({
   labels,
   onClose,
   onConfirm,
+  onTest,
+  tokenTestStates,
   loading,
   validate,
 }: Readonly<{
@@ -91,15 +98,23 @@ function CredentialEditDialogMobile({
   readonly labels: WhatsappLabels;
   readonly onClose: () => void;
   readonly onConfirm: (value: string) => Promise<void>;
+  readonly onTest: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;
+  readonly tokenTestStates: Readonly<Record<string, Readonly<Record<string, WhatsappTokenTestState>>>>;
   readonly loading: boolean;
   readonly validate: (value: string) => string | null;
 }>) {
   const form = useCredentialForm();
   const onConfirmRef = useRef(onConfirm);
+  const onTestRef = useRef(onTest);
+  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     onConfirmRef.current = onConfirm;
   }, [onConfirm]);
+
+  useEffect(() => {
+    onTestRef.current = onTest;
+  }, [onTest]);
 
   const handleClose = useCallback(() => {
     form.setValue("");
@@ -128,11 +143,26 @@ function CredentialEditDialogMobile({
     [form, validate, labels]
   );
 
+  const handleTest = async () => {
+    if (testing || form.value.length === 0) return;
+    setTesting(true);
+    try {
+      await onTestRef.current(state.accountId, form.value);
+    } finally {
+      setTesting(false);
+    }
+  };
+
   const isToken = state.field === "accessToken";
   const title = isToken ? labels.editToken : labels.editPin;
   const fieldLabel = isToken ? labels.accessToken : labels.twoStepPin;
   const placeholder = isToken ? labels.accessTokenPlaceholder : labels.twoStepPinPlaceholder;
   const busy = form.submitting || loading;
+  const testState = isToken ? tokenTestStates[state.accountId]?.[form.value] : undefined;
+
+  const saveDisabled = isToken
+    ? busy || testing || form.value.length === 0 || testState !== "success"
+    : busy || form.value.length === 0;
 
   return (
     <Dialog open={open} onClose={handleClose} fullScreen>
@@ -157,11 +187,62 @@ function CredentialEditDialogMobile({
         <Button onClick={handleClose} disabled={busy}>
           {labels.cancel}
         </Button>
-        <Button variant="contained" disabled={busy || form.value.length === 0} onClick={handleConfirm}>
+        {isToken ? (
+          <MobileTestButton
+            testing={testing}
+            testState={testState}
+            disabled={form.value.length === 0}
+            labels={labels}
+            onTest={handleTest}
+          />
+        ) : null}
+        <Button variant="contained" disabled={saveDisabled} onClick={handleConfirm}>
           {form.submitting || loading ? <CircularProgress size={20} /> : labels.save}
         </Button>
       </DialogActions>
     </Dialog>
+  );
+}
+
+/** Test action button (mobile) whose color/icon/text reflects the token's test state. */
+function MobileTestButton({
+  testing,
+  testState,
+  disabled,
+  labels,
+  onTest,
+}: Readonly<{
+  readonly testing: boolean;
+  readonly testState: WhatsappTokenTestState | undefined;
+  readonly disabled: boolean;
+  readonly labels: WhatsappLabels;
+  readonly onTest: () => void;
+}>) {
+  if (testing) {
+    return (
+      <Button disabled startIcon={<CircularProgress size={16} />}>
+        {labels.testRunning}
+      </Button>
+    );
+  }
+  if (testState === "success") {
+    return (
+      <Button color="success" onClick={onTest} startIcon={<CheckCircleOutlined />}>
+        {labels.testPassed}
+      </Button>
+    );
+  }
+  if (testState === "failed") {
+    return (
+      <Button color="error" onClick={onTest} startIcon={<ErrorOutlined />}>
+        {labels.testFailed}
+      </Button>
+    );
+  }
+  return (
+    <Button onClick={onTest} disabled={disabled} startIcon={<SearchOutlined />}>
+      {labels.test}
+    </Button>
   );
 }
 
@@ -479,6 +560,8 @@ export function NumbersTabMobile({
   syncingId,
   onSetAccessToken,
   onSetTwoStepPin,
+  onTestAccessToken,
+  tokenTestStates,
   onSyncFromMeta,
   onDeleteAccount,
   onOpenDeleteConfirmDialog,
@@ -583,6 +666,8 @@ export function NumbersTabMobile({
         {t.numbersSubtitle}
       </Typography>
 
+      <MetaNumbersLinkShared labels={t} />
+
       <AccountsListMobile
         labels={t}
         accounts={accounts}
@@ -622,6 +707,8 @@ export function NumbersTabMobile({
         labels={t}
         onClose={credMenu.handleCredDialogClose}
         onConfirm={credMenu.handleCredDialogConfirm}
+        onTest={onTestAccessToken}
+        tokenTestStates={tokenTestStates}
         loading={credLoading}
         validate={credValidate}
       />
