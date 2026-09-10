@@ -1,7 +1,7 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { InputAdornment, TextField } from "@mui/material";
+import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
+import { IconButton, InputAdornment, TextField } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
 export interface SearchBarFieldProps {
@@ -11,12 +11,14 @@ export interface SearchBarFieldProps {
   readonly isSearching?: boolean;
   readonly onChange: (value: string) => void;
   readonly sx?: SxProps<Theme>;
+  readonly clearLabel?: string;
 }
 
 /**
- * Shared search bar field: TextField with search icon adornment and optional
- * searching helper text. Both common and mobile search bar wrappers delegate
- * here, supplying their own outer layout/Box.
+ * Shared search bar field: TextField with search icon adornment, optional
+ * clear button when input is non-empty, and optional searching helper text.
+ * Both common and mobile search bar wrappers delegate here, supplying their
+ * own outer layout/Box.
  */
 export function SearchBarField({
   value,
@@ -25,6 +27,7 @@ export function SearchBarField({
   isSearching = false,
   onChange,
   sx,
+  clearLabel = "Clear search",
 }: Readonly<SearchBarFieldProps>) {
   return (
     <TextField
@@ -44,8 +47,23 @@ export function SearchBarField({
               <SearchOutlined fontSize="small" />
             </InputAdornment>
           ),
+          endAdornment: value ? (
+            <InputAdornment position="end">
+              <IconButton
+                size="small"
+                aria-label={clearLabel}
+                onClick={() => onChange("")}
+                edge="end"
+              >
+                <ClearOutlined fontSize="small" />
+              </IconButton>
+            </InputAdornment>
+          ) : null,
         },
-        htmlInput: { autoComplete: "off" },
+        htmlInput: {
+          "aria-label": placeholder,
+          autoComplete: "off",
+        },
       }}
     />
   );
