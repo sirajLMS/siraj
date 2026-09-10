@@ -85,9 +85,17 @@ export function getUtcDayOfWeek(date: Date): DayOfWeek {
   return JS_DAY_TO_ENUM[date.getUTCDay()];
 }
 
-/** Fast YYYY-MM-DD extractor using `slice(0, 10)` to avoid `split` array allocations. */
+/**
+ * Fast YYYY-MM-DD extractor avoiding `toISOString()` overhead and intermediate string allocations.
+ * Uses direct UTC getter methods for optimal performance in schedule availability loops.
+ */
 export function getUtcDateString(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const monthStr = month < 10 ? `0${month}` : `${month}`;
+  const dayStr = day < 10 ? `0${day}` : `${day}`;
+  return `${year}-${monthStr}-${dayStr}`;
 }
 
 // ── Pure validation helpers (no DB, no error throws) ─────────────────────────
@@ -195,12 +203,15 @@ function generateGapsFromBlocked(
 }
 
 export function expandDateRange(fromDate: string, toDate: string): string[] {
+  // Short-circuit for single-day ranges to avoid Date parsing and allocations
+  if (fromDate === toDate) return [fromDate];
+
   const dates: string[] = [];
   let currentMs = Date.parse(`${fromDate}T00:00:00.000Z`);
   const endMs = Date.parse(`${toDate}T00:00:00.000Z`);
   while (currentMs <= endMs) {
     dates.push(getUtcDateString(new Date(currentMs)));
-    currentMs += 24 * 60 * 60 * 1000;
+    currentMs += 86400000; // 24 * 60 * 60 * 1000
   }
   return dates;
 }
