@@ -379,7 +379,7 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       // Defense-in-depth: hard-block demoLogin in real production deployments
       // even if IS_DEMO is accidentally set to a truthy value.
-      // L1 fix: reject on ANY Vercel deployment (preview or production), not just production.
+      // Reject on ANY Vercel deployment (preview or production), not just production.
       const isVercelDeploy = Boolean(process.env.VERCEL_ENV);
       const isProductionDeployment = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
       if (isVercelDeploy || isProductionDeployment) {
