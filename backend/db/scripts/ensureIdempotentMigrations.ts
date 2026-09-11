@@ -1,4 +1,5 @@
-import { existsSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync } from "node:fs";
+import { readdir, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { logger } from "@/backend/lib/logger";
 
@@ -208,46 +209,63 @@ export function makeMigrationSqlIdempotent(sql: string): string {
   return transformedParts.join("--> statement-breakpoint\n");
 }
 
-/**
- * Scans `backend/drizzle/` and rewrites all `migration.sql` files to be fully idempotent for PostgreSQL.
- *
- * @returns The list of relative migration file paths that were modified.
- */
-export function ensureIdempotentMigrations(): string[] {
-  if (!existsSync(DRIZZLE_DIR)) return [];
-
-  const updatedFiles: string[] = [];
-  const folders = readdirSync(DRIZZLE_DIR).filter(f => {
-    try {
-      return statSync(join(DRIZZLE_DIR, f)).isDirectory();
-    } catch {
-      return false;
-    }
-  });
-
-  for (const folder of folders) {
-    const sqlPath = join(DRIZZLE_DIR, folder, "migration.sql");
-    if (!existsSync(sqlPath)) continue;
-
-    const originalSql = readFileSync(sqlPath, "utf8");
+async function processFolderForIdempotency(drizzleDir: string, folder: string): Promise<string | null> {
+  const sqlPath = join(drizzleDir, folder, "migration.sql");
+  try {
+    const originalSql = await readFile(sqlPath, "utf8");
     const idempotentSql = makeMigrationSqlIdempotent(originalSql);
 
     if (originalSql !== idempotentSql) {
       const tmpPath = `${sqlPath}.tmp`;
-      writeFileSync(tmpPath, idempotentSql);
+      await writeFile(tmpPath, idempotentSql);
       try {
-        renameSync(tmpPath, sqlPath);
+        await rename(tmpPath, sqlPath);
       } catch (err) {
         try {
-          unlinkSync(tmpPath);
+          await unlink(tmpPath);
         } catch {
           // best-effort cleanup of the orphaned temp file; ignore errors
         }
         throw err;
       }
-      updatedFiles.push(`${folder}/migration.sql`);
+      return `${folder}/migration.sql`;
     }
+  } catch (err) {
+    if ((err as { code?: string }).code === "ENOENT") {
+      return null;
+    }
+    throw err;
   }
+  return null;
+}
+
+/**
+ * Scans `backend/drizzle/` (or target directory) and rewrites all `migration.sql` files asynchronously to be fully idempotent for PostgreSQL.
+ *
+ * @param targetDir Optional target directory to process (defaults to `backend/drizzle`).
+ * @returns The list of relative migration file paths that were modified.
+ */
+export async function ensureIdempotentMigrations(targetDir: string = DRIZZLE_DIR): Promise<string[]> {
+  if (!existsSync(targetDir)) return [];
+
+  const entries = await readdir(targetDir);
+
+  const isDirectoryFlags = await Promise.all(
+    entries.map(async f => {
+      try {
+        const stats = await stat(join(targetDir, f));
+        return stats.isDirectory();
+      } catch {
+        return false;
+      }
+    })
+  );
+
+  const folders = entries.filter((_, idx) => isDirectoryFlags[idx]);
+
+  const results = await Promise.all(folders.map(folder => processFolderForIdempotency(targetDir, folder)));
+
+  const updatedFiles = results.filter((file): file is string => file !== null);
 
   if (updatedFiles.length > 0) {
     logger.log(
@@ -318,16 +336,21 @@ export async function preCommitEnumStatements(statements: string[]): Promise<voi
  * Pre-commits enum additions declared in a single migration file before that folder runs.
  */
 export async function preCommitEnumStatementsForMigrationFile(migrationPath: string): Promise<void> {
-  if (!existsSync(migrationPath)) return;
+  try {
+    const content = await readFile(migrationPath, "utf8");
+    const statements = extractEnumAddValueStatementsFromSql(content);
+    if (statements.length === 0) return;
 
-  const content = readFileSync(migrationPath, "utf8");
-  const statements = extractEnumAddValueStatementsFromSql(content);
-  if (statements.length === 0) return;
-
-  logger.log(
-    `Ensure Enum Values Committed: Pre-executing ${statements.length} enum addition(s) from ${migrationPath}...`
-  );
-  await preCommitEnumStatements(statements);
+    logger.log(
+      `Ensure Enum Values Committed: Pre-executing ${statements.length} enum addition(s) from ${migrationPath}...`
+    );
+    await preCommitEnumStatements(statements);
+  } catch (err) {
+    if ((err as { code?: string }).code === "ENOENT") {
+      return;
+    }
+    throw err;
+  }
 }
 
 /**
@@ -336,22 +359,29 @@ export async function preCommitEnumStatementsForMigrationFile(migrationPath: str
  * Prefer {@link preCommitEnumStatementsForMigrationFile} per migration folder via
  * {@link runDrizzleMigrations}, which handles fresh databases correctly.
  */
-export async function ensureEnumValuesCommitted(): Promise<void> {
-  if (!existsSync(DRIZZLE_DIR)) return;
+export async function ensureEnumValuesCommitted(targetDir: string = DRIZZLE_DIR): Promise<void> {
+  if (!existsSync(targetDir)) return;
 
-  const folders = readdirSync(DRIZZLE_DIR).filter(f => {
-    try {
-      return statSync(join(DRIZZLE_DIR, f)).isDirectory();
-    } catch {
-      return false;
-    }
-  });
+  const entries = await readdir(targetDir);
+
+  const isDirectoryFlags = await Promise.all(
+    entries.map(async f => {
+      try {
+        const stats = await stat(join(targetDir, f));
+        return stats.isDirectory();
+      } catch {
+        return false;
+      }
+    })
+  );
+
+  const folders = entries.filter((_, idx) => isDirectoryFlags[idx]);
 
   // Migration folders must be processed in order; chain the promises to keep
   // sequential execution without awaiting inside a loop construct.
   await folders.reduce<Promise<void>>(async (previous, folder) => {
     await previous;
-    const sqlPath = join(DRIZZLE_DIR, folder, "migration.sql");
+    const sqlPath = join(targetDir, folder, "migration.sql");
     await preCommitEnumStatementsForMigrationFile(sqlPath);
   }, Promise.resolve());
 }
