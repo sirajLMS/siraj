@@ -93,11 +93,13 @@ function stripAnsiEscapes(str: string): string {
 }
 
 /**
- * Sanitize a string for safe rendering — strips ANSI and escapes HTML entities
+ * Sanitize a string for safe rendering — strips ANSI, neutralizes newlines
+ * (\r, \n) to prevent log injection/forging, and escapes HTML entities.
  */
-function sanitizeForRendering(str: string): string {
+export function sanitizeForRendering(str: string): string {
   const withoutAnsi = stripAnsiEscapes(str);
-  return withoutAnsi
+  const withoutNewlines = withoutAnsi.replace(/[\r\n]+/g, " ");
+  return withoutNewlines
     .replaceAll("&", "\x26amp;")
     .replaceAll("<", "\x26lt;")
     .replaceAll(">", "\x26gt;")
