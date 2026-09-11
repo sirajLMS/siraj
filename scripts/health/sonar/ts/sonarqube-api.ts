@@ -1,4 +1,5 @@
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
+import { readFile, unlink, writeFile } from "node:fs/promises";
 import { CONFIG, logError, logInfo, logSuccess, logWarning } from "@/scripts/health/sonar/ts/config";
 import { markStepCompleted } from "@/scripts/health/sonar/ts/state";
 
@@ -101,18 +102,20 @@ export async function changeAdminPassword(): Promise<void> {
 }
 
 export async function generateToken(): Promise<string> {
-  if (existsSync(CONFIG.SONAR_TOKEN_FILE)) {
-    const existingToken = readFileSync(CONFIG.SONAR_TOKEN_FILE, "utf8").trim();
+  try {
+    const existingToken = (await readFile(CONFIG.SONAR_TOKEN_FILE, "utf8")).trim();
     if (await validateToken(existingToken)) {
       logSuccess("Using existing SonarQube token");
       return existingToken;
     }
     logWarning("Existing SonarQube token is invalid or expired. Generating a new token...");
     try {
-      unlinkSync(CONFIG.SONAR_TOKEN_FILE);
+      await unlink(CONFIG.SONAR_TOKEN_FILE);
     } catch {
       // Ignore deletion error
     }
+  } catch {
+    // File does not exist or read failed, proceed to generate token
   }
 
   logInfo("Generating SonarQube authentication token...");
@@ -139,7 +142,7 @@ export async function generateToken(): Promise<string> {
   }
   const token = data.token;
 
-  writeFileSync(CONFIG.SONAR_TOKEN_FILE, token, { mode: 0o600 });
+  await writeFile(CONFIG.SONAR_TOKEN_FILE, token, { mode: 0o600 });
   logSuccess("Token generated and saved");
   return token;
 }
