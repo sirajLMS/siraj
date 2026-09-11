@@ -148,7 +148,7 @@ Admin UI → Settings > WhatsApp (3 tabs: Numbers, Templates, Opt-in)
 ### Mutations & Queries
 - All mutations use `requireAuth(ctx)` and `ctx.t().errorsTranslations` for i18n.
 - **All credential/config mutations call `resetWhatsappChannel()` (S4)** — token rotation takes effect without restart.
-- `createWhatsappAccount` cleans LocalizedString nulls; `deleteWhatsappAccount` **deactivates** (does not hard-delete); `syncWhatsappAccountsFromMeta` includes template snapshot.
+- `createWhatsappAccount` cleans LocalizedString nulls; `localDeactivateWhatsappAccount` **locally deactivates** (does not hard-delete, keeps the number on Meta); `syncWhatsappAccountsFromMeta` includes template snapshot.
 - Side-effect import barrels: `import "./whatsapp-account.mutation";` (registers resolvers).
 
 ## 9. Webhook Handler (Tasks 12–13)

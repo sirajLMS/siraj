@@ -23,8 +23,33 @@ export const whatsappEn: WhatsappLabels = {
   testRunning: "Testing…",
   testPassed: "Test passed",
   testFailed: "Test failed",
-  deleteAccount: "Delete Number",
-  deleteConfirm: "Are you sure you want to delete this WhatsApp number? This action cannot be undone.",
+  /** Token-test failure: Meta rejected the token as invalid/expired (code 190). */
+  tokenTestReasonInvalidToken: (reason: string) =>
+    `Meta rejected this token as invalid or expired: ${reason}. Generate a fresh System User token in Meta Business Settings and paste it here.`,
+  /** Token-test failure: Meta reported a permissions error (code 10/200). */
+  tokenTestReasonMetaPermissions: (reason: string) =>
+    `Meta rejected this token — missing permissions (${reason}). The token must belong to a System User with "Full control" (or at least partial access) on this number's WhatsApp Business Account and include the whatsapp_business_management and whatsapp_business_messaging permissions.`,
+  /** Token-test failure: any other Meta Graph API error. */
+  tokenTestReasonMetaError: (reason: string) =>
+    `Meta returned an error while validating the token: ${reason}. Note this came from Meta, not from this site's permissions.`,
+  /** Token-test failure: the number resolved but is not CONNECTED on Meta's side. */
+  tokenTestReasonNotConnected: (reason: string | null) => {
+    const status = reason ?? "unknown";
+    return `The token is valid, but Meta reports this number's status as "${status}" instead of "CONNECTED". Check the number in WhatsApp Manager — it may be unregistered, disconnected, or limited.`;
+  },
+  /** Token-test failure: Meta could not be reached (network/DNS/parse failure). */
+  tokenTestReasonNetworkError: (reason: string | null) => {
+    const detail = reason ? `: ${reason}` : "";
+    return `Could not reach Meta to validate the token${detail}. Check the server's internet connectivity and try again.`;
+  },
+  /** Token-test failure: the request was rejected by our server (auth/validation), so Meta was never asked. */
+  tokenTestReasonRequestRejected: (reason: string | null) => {
+    const detail = reason ? `: ${reason}` : "";
+    return `The server rejected the test request itself${detail}. This is a permissions/validation issue on this site — not a problem with the Meta token.`;
+  },
+  localDeactivateAccount: "Stop Using Number",
+  localDeactivateAccountTooltip: "The number stays on this system and on Meta, but the platform stops using it.",
+  localDeactivateConfirm: "Are you sure you want to stop using this WhatsApp number?",
   wabaId: "WABA ID",
   phoneNumberId: "Phone Number ID",
   displayPhoneNumber: "Display Phone Number",
@@ -34,6 +59,11 @@ export const whatsappEn: WhatsappLabels = {
   twoStepPin: "Two-Step Verification PIN",
   twoStepPinPlaceholder: "Enter 6-digit PIN",
   isActive: "Active",
+  accountStatusLabel: "System Status",
+  metaStatusLabel: "Meta Connection",
+  metaStatusConnected: "Connected",
+  metaStatusDisconnected: "Disconnected",
+  metaStatusUnknown: "Unknown",
   qualityRating: "Quality Rating",
   messagingTier: "Messaging Limit Tier",
   throughputLevel: "Throughput Level",
@@ -133,8 +163,8 @@ export const whatsappEn: WhatsappLabels = {
   optInDisabled: "WhatsApp notifications disabled",
 
   // ─── Snackbar / notification messages ──────────────────────────────
-  deleteSuccess: "WhatsApp number deleted successfully.",
-  deleteError: "Failed to delete WhatsApp number.",
+  localDeactivateSuccess: "Stopped using this number.",
+  localDeactivateError: "Failed to stop using this number.",
   saveSuccess: "WhatsApp number saved successfully.",
   saveError: "Failed to save WhatsApp number.",
   optInError: "Failed to update WhatsApp opt-in preference.",
@@ -166,10 +196,10 @@ export const whatsappEn: WhatsappLabels = {
   validationPurposeRequired: "Please select a purpose for this number.",
   validationPurposeInvalid: "The selected purpose is not valid.",
 
-  // ─── Delete confirm with interpolation (Task 1) ───────────────────
-  deleteConfirmTitle: "Delete WhatsApp Number",
-  deleteConfirmMessage: (displayName: string) =>
-    `Are you sure you want to delete "${displayName}"? This action cannot be undone.`,
+  // ─── Local-deactivate confirm with interpolation (Task 1) ───────────────────
+  localDeactivateConfirmTitle: "Stop Using WhatsApp Number",
+  localDeactivateConfirmMessage: (displayName: string) =>
+    `Are you sure you want to stop using "${displayName}"? The number stays on this system and on Meta, but the platform will stop using it.`,
 
   // ─── State labels (Task 1) ─────────────────────────────────────────
   loadingTitle: "Loading…",

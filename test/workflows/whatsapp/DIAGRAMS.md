@@ -58,3 +58,52 @@ sequenceDiagram
   meta->>worker: smb_message_echoes revoke of the echo wamid
   worker-->>worker: original message marked revokedAt
 ```
+
+## conversations.test.ts
+
+The admin actor (academy_admin + per-run config grant) syncs a Meta TEST number via `syncFromMeta` (stubbed Graph list/detail/templates calls), then drives the conversations workspace through `WhatsappConversationsService`: registry `addRecipient` (PENDING + audit), `verifyRecipient` hello_world accept (ALLOWED), a TEMPLATE `hello_world` send persisted as API_OUTBOUND, a TEXT send refused outside the 24h window until a real inbound webhook opens it, the six-recipient cap error, and a view-only staff actor denied by real permission rows while a view-only read still lists the thread.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant admin as "admin actor (academy_admin + whatsapp.config_manage)"
+  participant svc as "WhatsappConversationsService"
+  participant acct as "WhatsappAccountService.syncFromMeta"
+  participant meta as "Meta Graph API (stubbed fetch)"
+  participant worker as "WhatsappWebhookHandler.processPendingWebhookEvents"
+  participant staff as "staff actor (staff_default, view-only)"
+
+  admin->>acct: syncFromMeta
+  acct->>meta: GET /{waba}/phone_numbers + GET /{pnId}?fields=... + GET /{waba}/message_templates
+  meta-->>acct: test number (verified_name Test Number, NOT_VERIFIED, 1555 digits)
+  acct-->>admin: account row with isTestNumber = true
+
+  admin->>svc: addRecipient(recipientOne)
+  svc-->>admin: PENDING row + audit CREATE (WHATSAPP_ACCOUNT)
+  admin->>svc: verifyRecipient(recipientId)
+  svc->>meta: POST /{pnId}/messages template hello_world
+  meta-->>svc: 200 wamid
+  svc-->>admin: ALLOWED (lastErrorCode null)
+
+  admin->>svc: sendMessage TEMPLATE hello_world
+  svc->>meta: POST /{pnId}/messages
+  meta-->>svc: 200 wamid
+  svc-->>admin: message API_OUTBOUND persisted, thread preview [template] hello_world
+  admin->>svc: sendMessage TEXT (no inbound yet)
+  svc-->>admin: DomainError whatsappOutsideServiceWindow
+  meta->>worker: messages inbound from recipientOne (durable webhook ingest)
+  worker-->>worker: conversation lastInboundMessageAt stamped (window open)
+  admin->>svc: sendMessage TEXT inside window
+  svc->>meta: POST /{pnId}/messages type text
+  svc-->>admin: API_OUTBOUND text row persisted
+
+  admin->>svc: addRecipient second + fill registry to 5
+  svc-->>admin: rows 2-5 PENDING
+  admin->>svc: addRecipient sixth
+  svc-->>admin: DomainError whatsappRecipientLimitReached
+
+  staff->>svc: sendMessage TEMPLATE
+  svc-->>staff: ForbiddenError insufficientPermissions (no Graph call)
+  staff->>svc: listConversations + listConversationMessages
+  svc-->>staff: thread carries template + text + inbound rows
+```

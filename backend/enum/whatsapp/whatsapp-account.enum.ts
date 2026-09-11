@@ -62,3 +62,28 @@ export enum WhatsappSyncRequestStatus {
   COMPLETE = "COMPLETE",
   FAILED = "FAILED",
 }
+
+/**
+ * Classification of an access-token test failure, so the UI can tell a
+ * Meta-side rejection (`INVALID_TOKEN` / `META_PERMISSIONS` / `META_ERROR`)
+ * from a transport problem (`NETWORK_ERROR` — Meta unreachable, unparseable
+ * response) and carry original composition. The GraphQL request-failure path
+ * (Siraj auth/validation rejecting the mutation) never reaches the server
+ * classification — the client marks that outcome without a kind.
+ */
+export enum WhatsappTokenTestFailureKind {
+  /** Meta rejected the token itself (error code 190 / "Invalid OAuth access token"). */
+  INVALID_TOKEN = "INVALID_TOKEN",
+  /**
+   * Token lacks asset permissions on Meta's side (error code 10/200): the
+   * system user has no access to the number's WABA, or the token is missing
+   * `whatsapp_business_management` / `whatsapp_business_messaging`.
+   */
+  META_PERMISSIONS = "META_PERMISSIONS",
+  /** Any other Meta Graph API error. */
+  META_ERROR = "META_ERROR",
+  /** Meta reports the number's status is not CONNECTED (token is fine). */
+  NOT_CONNECTED = "NOT_CONNECTED",
+  /** Meta could not be reached or its response was not parseable. */
+  NETWORK_ERROR = "NETWORK_ERROR",
+}

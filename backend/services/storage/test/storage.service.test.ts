@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, spyOn, test } from "bun:test";
+import { SignedUrlRepository } from "@/backend/db/repo/shared";
 import { StorageService } from "@/backend/services/storage/storage.service";
 
 describe("StorageService.validatePath", () => {
@@ -50,5 +51,47 @@ describe("StorageService.validatePath", () => {
       const longPath = "a/".repeat(600); // 1200 chars > 1024
       expect(StorageService.validatePath(longPath)).toBe(false);
     });
+  });
+});
+
+describe("StorageService.validateSignedUrlSession", () => {
+  const spies: { mockRestore: () => void }[] = [];
+
+  afterEach(() => {
+    for (const spy of spies) {
+      spy.mockRestore();
+    }
+    spies.length = 0;
+  });
+
+  function mockSessionLookup(): void {
+    spies.push(
+      spyOn(SignedUrlRepository, "getSignedUrlById").mockImplementation(async () => ({
+        id: "session-1",
+        filePath: "documents/file.pdf",
+        contentType: "application/pdf",
+        fileSize: 100n,
+        contentHash: "hash",
+        expiresAt: new Date(Date.now() + 60000),
+        uploadedByUserId: "user-123",
+        createdAt: new Date(),
+        used: false,
+      }))
+    );
+  }
+
+  test("returns null when user matches uploadedByUserId", async () => {
+    mockSessionLookup();
+
+    const result = await StorageService.validateSignedUrlSession("session-1", "documents/file.pdf", "en", "user-123");
+    expect(result).toBeNull();
+  });
+
+  test("returns 403 error when user mismatch uploadedByUserId", async () => {
+    mockSessionLookup();
+
+    const result = await StorageService.validateSignedUrlSession("session-1", "documents/file.pdf", "en", "user-456");
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe(403);
   });
 });

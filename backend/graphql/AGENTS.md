@@ -99,7 +99,7 @@ export const {Entity}PothosObject = {Entity}Ref.implement({
 - **Object types**: `WhatsappAccountPothosObject`, `WhatsappTemplateSnapshotPothosObject` (BL3), `WhatsappSyncFromMetaResultPothosObject` (wrapper). All expose `id` for Apollo cache normalization.
 - **Input type pattern**: Use `inputType(string-named)` instead of `inputRef<BackendType>` to avoid LocalizedString null incompatibility.
 - **Credential mutations**: `setWhatsappAccessToken`, `setWhatsappTwoStepPin` — all credential/config mutations call `resetWhatsappChannel()` (S4) for token rotation without restart.
-- **Delete behavior**: `deleteWhatsappAccount` deactivates (`isActive = false`), does not hard-delete.
+- **Local-deactivate behavior**: `localDeactivateWhatsappAccount` deactivates locally (`isActive = false`), does not hard-delete and keeps the number on Meta.
 - **Side-effect barrels**: `import "./whatsapp-account.mutation";` registers resolvers via side-effect imports.
 
 ## Pothos Field Factories (Duplication Elimination)

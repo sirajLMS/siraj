@@ -23,8 +23,33 @@ export const whatsappAr: WhatsappLabels = {
   testRunning: "جارٍ الاختبار…",
   testPassed: "نجح الاختبار",
   testFailed: "فشل الاختبار",
-  deleteAccount: "حذف الرقم",
-  deleteConfirm: "هل أنت متأكد من رغبتك في حذف رقم واتساب هذا؟ لا يمكن التراجع عن هذا الإجراء.",
+  /** رفض Meta للرمز لأنه غير صالح أو منتهي الصلاحية (كود 190). */
+  tokenTestReasonInvalidToken: (reason: string) =>
+    `رفضت Meta هذا الرمز لأنه غير صالح أو منتهي الصلاحية: ${reason}. أنشئ رمز System User جديدًا من إعدادات الأعمال في Meta والصقه هنا.`,
+  /** رفض Meta بسبب أذونات ناقصة (كود 10/200). */
+  tokenTestReasonMetaPermissions: (reason: string) =>
+    `رفضت Meta هذا الرمز لنقص الأذونات (${reason}). يجب أن ينتمي الرمز إلى System User لديه تحكم كامل (أو وصول جزئي على الأقل) في حساب WhatsApp Business الخاص بهذا الرقم، وأن يتضمن إذني whatsapp_business_management و whatsapp_business_messaging.`,
+  /** أي خطأ آخر من Meta Graph API. */
+  tokenTestReasonMetaError: (reason: string) =>
+    `أعادت Meta خطأ أثناء التحقق من الرمز: ${reason}. هذا الخطأ صادر من Meta وليس من أذونات هذا الموقع.`,
+  /** الرقم موجود لكنه ليس بحالة CONNECTED لدى Meta. */
+  tokenTestReasonNotConnected: (reason: string | null) => {
+    const status = reason ?? "غير معروفة";
+    return `الرمز صالح، لكن Meta تُبلغ عن حالة هذا الرقم بأنها "${status}" بدلًا من "CONNECTED". راجع الرقم في WhatsApp Manager — قد يكون غير مسجّل أو مفصولًا أو مقيّدًا.`;
+  },
+  /** تعذّر الوصول إلى Meta (شبكة/تحليل الاستجابة). */
+  tokenTestReasonNetworkError: (reason: string | null) => {
+    const detail = reason ? `: ${reason}` : "";
+    return `تعذّر الوصول إلى Meta للتحقق من الرمز${detail}. تحقق من اتصال الإنترنت للخادم وحاول مجددًا.`;
+  },
+  /** الخادم رفض طلب الاختبار نفسه (أذونات/تحقق)، قبل التواصل مع Meta. */
+  tokenTestReasonRequestRejected: (reason: string | null) => {
+    const detail = reason ? `: ${reason}` : "";
+    return `رفض الخادم طلب الاختبار نفسه${detail}. هذه مشكلة أذونات أو تحقق في هذا الموقع، وليست مشكلة في رمز Meta.`;
+  },
+  localDeactivateAccount: "إيقاف استخدام الرقم",
+  localDeactivateAccountTooltip: "يبقى الرقم على هذا النظام وعلى Meta، لكن المنصة ستتوقف عن استخدامه.",
+  localDeactivateConfirm: "هل أنت متأكد من رغبتك في إيقاف استخدام رقم واتساب هذا؟",
   wabaId: "معرّف WABA",
   phoneNumberId: "معرّف رقم الهاتف",
   displayPhoneNumber: "رقم الهاتف المعروض",
@@ -34,6 +59,11 @@ export const whatsappAr: WhatsappLabels = {
   twoStepPin: "رمز التحقق بخطوتين",
   twoStepPinPlaceholder: "أدخل رمز PIN المكوّن من 6 أرقام",
   isActive: "نشط",
+  accountStatusLabel: "حالة النظام",
+  metaStatusLabel: "الاتصال بـ Meta",
+  metaStatusConnected: "متصل",
+  metaStatusDisconnected: "غير متصل",
+  metaStatusUnknown: "غير معروف",
   qualityRating: "تقييم الجودة",
   messagingTier: "مستوى حد المراسلة",
   throughputLevel: "مستوى معدل الإرسال",
@@ -143,8 +173,8 @@ export const whatsappAr: WhatsappLabels = {
   optInDisabled: "تم تعطيل إشعارات واتساب",
 
   // ─── Snackbar / notification messages ──────────────────────────────
-  deleteSuccess: "تم حذف رقم واتساب بنجاح.",
-  deleteError: "فشل حذف رقم واتساب.",
+  localDeactivateSuccess: "تم إيقاف استخدام الرقم.",
+  localDeactivateError: "فشل إيقاف استخدام الرقم.",
   saveSuccess: "تم حفظ رقم واتساب بنجاح.",
   saveError: "فشل حفظ رقم واتساب.",
   optInError: "فشل تحديث تفضيل الموافقة على واتساب.",
@@ -176,10 +206,10 @@ export const whatsappAr: WhatsappLabels = {
   validationPurposeRequired: "يرجى اختيار الغرض من هذا الرقم.",
   validationPurposeInvalid: "الغرض المحدد غير صالح.",
 
-  // ─── Delete confirm with interpolation (Task 1) ───────────────────
-  deleteConfirmTitle: "حذف رقم واتساب",
-  deleteConfirmMessage: (displayName: string) =>
-    `هل أنت متأكد من حذف "${displayName}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+  // ─── Local-deactivate confirm with interpolation (Task 1) ───────────────────
+  localDeactivateConfirmTitle: "إيقاف استخدام رقم واتساب",
+  localDeactivateConfirmMessage: (displayName: string) =>
+    `هل أنت متأكد من رغبتك في إيقاف استخدام "${displayName}"؟ يبقى الرقم على هذا النظام وعلى Meta، لكن المنصة ستتوقف عن استخدامه.`,
 
   // ─── State labels (Task 1) ─────────────────────────────────────────
   loadingTitle: "جارٍ التحميل…",

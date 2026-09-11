@@ -34,12 +34,12 @@ The ViewModel (`useWhatsappSettingsViewModel.ts`) is decomposed into sub-hooks w
 | Sub-hook | Responsibility |
 |----------|----------------|
 | `useWhatsappQueries` | `whatsappAccounts`, `isUserWhatsappOptIn`, `isWhatsappConfigured` queries |
-| `useWhatsappMutations` | delete, setAccessToken, setTwoStepPin, syncFromMeta, setOptIn, createAccount, updateAccount |
+| `useWhatsappMutations` | localDeactivate, setAccessToken, setTwoStepPin, syncFromMeta, setOptIn, createAccount, updateAccount |
 | `useDerivedWhatsappData` | derives accounts, templates, loading, isOptedIn, isConfigured, queryError |
 | `useWhatsappDialogs` | consolidated `dialogState` + `mutationError` |
 | `useWhatsappSnackbar` | `{ message, severity } \| null` pattern, `showSnackbar`, `closeSnackbar` |
 | `useWhatsappCreateHandler` | `handleCreate` (validates displayName), manages `creating` loading state |
-| `useWhatsappUpdateDeleteHandlers` | `handleEditName`, `handleDelete`, manages `deletingId`, `updatingId` |
+| `useWhatsappUpdateLocalDeactivateHandlers` | `handleEditName`, `handleLocalDeactivate`, manages `localDeactivatingId`, `updatingId` |
 | `useWhatsappUtilityHandlers` | `handleSubmitToken`, `handleSubmitPin`, `handleSync`, `handleToggleOptIn`, manages `syncingId`, `optInLoading` |
 | `useWhatsappLabels` | maps i18n translation keys for snackbar messages |
 | `useRefetchers` | `refetchAccounts`, `refetchTemplates` (passthrough until backend query exists) |
@@ -49,7 +49,7 @@ The ViewModel (`useWhatsappSettingsViewModel.ts`) is decomposed into sub-hooks w
 ### Per-Row Loading State Pattern
 
 - `creating: boolean` — account creation in progress
-- `deletingId: string | null` — account being deleted (matches `account.id`)
+- `localDeactivatingId: string | null` — account being locally deactivated (matches `account.id`)
 - `updatingId: string | null` — account name being updated
 - `syncingId: string | null` — bulk sync sentinel (`"all"` when syncing, `null` otherwise)
 - `editingTokenForId: string | null` — account being credential-edited (token)
@@ -61,14 +61,14 @@ Desktop/mobile components check these to show `LinearProgress` overlays and `Cir
 
 ```typescript
 interface WhatsappDialogState {
-  readonly type: "create" | "editName" | "editToken" | "editPin" | "deleteConfirm" | null;
+  readonly type: "create" | "editName" | "editToken" | "editPin" | "localDeactivateConfirm" | null;
   readonly accountId?: string;
   readonly displayName?: string;
 }
 ```
 
 - Single source of truth — no local `useState` for dialog open/close.
-- `openCreateDialog()`, `openEditNameDialog(id, name)`, `openDeleteConfirmDialog(id, name)`, `closeDialog()`.
+- `openCreateDialog()`, `openEditNameDialog(id, name)`, `openLocalDeactivateConfirmDialog(id, name)`, `closeDialog()`.
 - `mutationError: string | null` — set on validation failure, cleared by `closeDialog`/`closeSnackbar`.
 
 ### Snackbar Pattern
@@ -269,5 +269,5 @@ These items were marked `[~]` (deferred) in the parent WhatsApp plan (`.ai/finis
 | 26.5 Opt-in audit trail (user-visible) | No `whatsappOptInAudit` resolver; emitted audit log entries live only in backend audit table | Opt-in tab history section renders empty-state message (`optInHistoryEmpty`) — `OptInTabPanel` passes `auditEntries: []` with a NOTE comment |
 | 26.6 `whatsappOptInAudit` GraphQL resolver | Backend resolver never built | N/A until backend ships |
 
-**Source of grains:** the active backend resolvers in v1 are `whatsappAccounts{}`, `syncWhatsappAccountsFromMeta`, `createWhatsappAccount`, `updateWhatsappAccount{}`, `updateWhatsappAccountName`, `setAccessToken`, `setTwoStepPin`, `deleteWhatsappAccount`, `updateWhatsappLocalTemplateOptIn`. Anything else — including `whatsappTemplates{}` (templates render from the sync mutation's per-account snapshot) and `whatsappOptInAudit{}` — does NOT exist in v1 and is deferred. See this spec's `Assumptions / Non-Assumptions` block in `ui-spec/specs.md`.
+**Source of grains:** the active backend resolvers in v1 are `whatsappAccounts{}`, `syncWhatsappAccountsFromMeta`, `createWhatsappAccount`, `updateWhatsappAccount{}`, `updateWhatsappAccountName`, `setAccessToken`, `setTwoStepPin`, `localDeactivateWhatsappAccount`, `updateWhatsappLocalTemplateOptIn`. Anything else — including `whatsappTemplates{}` (templates render from the sync mutation's per-account snapshot) and `whatsappOptInAudit{}` — does NOT exist in v1 and is deferred. See this spec's `Assumptions / Non-Assumptions` block in `ui-spec/specs.md`.
 

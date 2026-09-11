@@ -75,6 +75,15 @@ await mock.module("@/backend/db/repo/whatsapp", () => ({
     markSyncFailed: markSyncFailedMock,
     findByWabaId: findByWabaIdMock,
   },
+  WhatsappTestRecipientRepository: {
+    listByAccountId: async () => [],
+    countByAccountId: async () => 0,
+    create: async () => null,
+    deleteById: async () => null,
+    findById: async () => null,
+    findByAccountAndPhone: async () => null,
+    recordVerify: async () => null,
+  },
 }));
 
 await mock.module("@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory", () => ({
@@ -272,6 +281,8 @@ function makeTestAccount(overrides: Partial<WhatsappAccountReturnType> = {}): Wh
     syncFailureReason: null,
     offboardedAt: null,
     isActive: true,
+    isTestNumber: false,
+    metaStatus: null,
     lastWebhookAt: null,
     createdAt: new Date("2024-01-01"),
     updatedAt: new Date("2024-01-01"),

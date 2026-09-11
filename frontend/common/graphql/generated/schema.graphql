@@ -454,6 +454,8 @@ enum AppPermission {
   USER_EDIT_PROFILE
   USER_VIEW_PROFILE
   WHATSAPP_CONFIG_MANAGE
+  WHATSAPP_CONVERSATIONS_MANAGE
+  WHATSAPP_CONVERSATIONS_VIEW
   WHATSAPP_INBOX_MANAGE
   WHATSAPP_INBOX_VIEW
   WHATSAPP_TEMPLATES_MANAGE
@@ -2949,6 +2951,9 @@ type Mutation {
 
   """Appends parent/student feedback to a published monthly appraisal."""
   addAppraisalFeedback(input: AddAppraisalFeedbackInput!): MonthlyAppraisalFeedback
+
+  """Register a recipient for a Meta test number's allow-list."""
+  addWhatsappTestRecipient(input: WhatsappTestRecipientAddInput!): WhatsappTestRecipient
   adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult
   adminRevokeMeetingProviderToken(input: AdminRevokeTokenInput!): AdminRevokeTokenResult
 
@@ -3145,11 +3150,6 @@ type Mutation {
   deleteUserPaymentMethod(id: ID!): Boolean
 
   """
-  Deactivate a WhatsApp account. Calls resetWhatsappChannel() on success (S4).
-  """
-  deleteWhatsappAccount(id: String!): WhatsappAccount
-
-  """
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
@@ -3161,6 +3161,11 @@ type Mutation {
   executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
   generateMeetingUrl(input: GenerateMeetingUrlInput!): GenerateMeetingUrlResult
   linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocumentRow
+
+  """
+  Stop using a WhatsApp account: deactivate it. Calls resetWhatsappChannel() on success (S4).
+  """
+  localDeactivateWhatsappAccount(id: String!): WhatsappAccount
   logTeacherSupportRequest(input: LogSupportRequestInput!): SupportRequestResult
   login(input: LoginInput!): LoginResponse
   logout: Boolean
@@ -3211,6 +3216,9 @@ type Mutation {
   """
   rejectLessonReport(rejectionReason: String!, reportId: ID!): LessonReport
   rejectPaymentProof(expectedVersion: Int, invoiceId: String!, rejectionReason: String): MarkInvoicePaidResult
+
+  """Remove a recipient from a Meta test number's allow-list registry."""
+  removeWhatsappTestRecipient(recipientId: String!): Boolean
   renameFile(input: FileRenameInput!): FileOperationResult
 
   """Student/parent requests a cancellation for an upcoming session."""
@@ -3239,6 +3247,11 @@ type Mutation {
   """
   saveAppearanceDraft(expectedUpdatedAt: String, input: AppearanceDraftInput!): AppearanceSettings
   sendPaymentReminder(studentId: String!): SendPaymentReminderResult
+
+  """
+  Send a composer message from the conversations workspace (TEXT inside the 24h service window, TEMPLATE anytime). Test numbers enforce the recipient allow-list.
+  """
+  sendWhatsappConversationMessage(input: WhatsappConversationSendInput!): WhatsappConversationSendResult
   setDefaultClassMeetingConfig(id: ID!): ClassMeetingConfig
   setDefaultMeetingConfig(id: ID!): UserMeetingConfig
   setDefaultUserPaymentMethod(id: ID!): UserPaymentMethod
@@ -3376,6 +3389,11 @@ type Mutation {
   upsertSiteContent(input: SiteContentUpsertInput!): SiteContentEntry
   upsertSystemSetting(input: SystemSettingUpsertInput!): SystemSetting
   verifyBankTransferPaymentMethod(id: ID!): UserPaymentMethod
+
+  """
+  Verify a registry recipient by sending Meta's hello_world test template; returns the row with the refreshed status, lastCheckedAt, and lastErrorCode.
+  """
+  verifyWhatsappTestRecipient(recipientId: String!): WhatsappTestRecipient
 }
 
 type MyConnectedMeetingProvider {
@@ -4542,6 +4560,16 @@ type Query {
   whatsappConversationMessages(conversationId: String!, pagination: PaginationArgs): WhatsappConversationMessagesResult
 
   """
+  One conversation thread for the workspace: the conversation detail plus its paginated messages.
+  """
+  whatsappConversationThread(id: String!, pagination: PaginationArgs): WhatsappConversationThread
+
+  """
+  Paginated conversations list for the conversations workspace; spans all accounts when `accountId` is omitted.
+  """
+  whatsappConversationThreads(accountId: String, pagination: PaginationArgs): WhatsappConversationsResult
+
+  """
   Paginated WhatsApp inbox conversation list. Spans all accounts when `accountId` is omitted.
   """
   whatsappConversations(accountId: String, pagination: PaginationArgs): WhatsappConversationsResult
@@ -4555,6 +4583,11 @@ type Query {
   Per-account coexistence sync overview (status, progress, per-type request rows).
   """
   whatsappSyncStatus(accountId: String!): WhatsappAccountSyncOverview
+
+  """
+  Registered recipients for a Meta test number (the per-account allow-list).
+  """
+  whatsappTestRecipients(accountId: String!): [WhatsappTestRecipient!]
 }
 
 """A class quota allocation for a student"""
@@ -6542,6 +6575,10 @@ type WeeklyWorkloadMetrics {
 }
 
 type WhatsappAccessTokenTestResult {
+  """
+  Machine-readable failure classification (null when the test passed): separates Meta-side rejections (INVALID_TOKEN, META_PERMISSIONS, META_ERROR, NOT_CONNECTED) from transport failures (NETWORK_ERROR) so the UI can show the right translated hint.
+  """
+  failureKind: WhatsappTokenTestFailureKind
   isConnected: Boolean
   isValid: Boolean
   reason: String
@@ -6554,8 +6591,10 @@ type WhatsappAccount {
   displayPhoneNumber: String
   id: String
   isActive: Boolean
+  isTestNumber: Boolean
   lastWebhookAt: DateTime
   maxPhoneNumbersPerBusiness: String
+  metaStatus: String
   onboardingMode: WhatsappOnboardingMode
   phoneNumberId: String
   portfolioMessagingLimitTier: WhatsappLimitTier
@@ -6738,6 +6777,58 @@ type WhatsappConversationMessagesResult {
   totalCount: Int
 }
 
+input WhatsappConversationSendInput {
+  """Sending WhatsApp account id (max 36 chars)"""
+  accountId: String!
+
+  """Free-text body; required when mode is TEXT (max 4096 chars)"""
+  body: String
+
+  """
+  Existing conversation id for the send; omitted for a brand-new recipient (max 36 chars)
+  """
+  conversationId: String
+
+  """TEXT (inside the 24h service window) or TEMPLATE (always allowed)."""
+  mode: WhatsappConversationSendMode!
+
+  """Template language code; defaults to en_US (max 35 chars)"""
+  templateLanguage: String
+
+  """Template name; required when mode is TEMPLATE (max 512 chars)"""
+  templateName: String
+
+  """
+  Recipient phone number (normalized to digits only server-side; max 32 chars)
+  """
+  to: String!
+}
+
+enum WhatsappConversationSendMode {
+  TEMPLATE
+  TEXT
+}
+
+type WhatsappConversationSendResult {
+  id: String
+  message: WhatsappMessage
+}
+
+type WhatsappConversationThread {
+  accountId: String
+  accountPurpose: WhatsappAccountPurpose
+  createdAt: DateTime
+  displayName: String
+  id: String
+  lastMessageAt: DateTime
+  lastMessagePreview: String
+  messages: WhatsappConversationMessagesResult
+  updatedAt: DateTime
+  userId: String
+  username: String
+  waId: String
+}
+
 type WhatsappConversationsResult {
   id: String
   pageInfo: PageInfo
@@ -6870,6 +6961,44 @@ enum WhatsappTemplateStatus {
   PENDING
   PENDING_DELETION
   REJECTED
+}
+
+type WhatsappTestRecipient {
+  accountId: String
+  createdAt: DateTime
+  id: String
+  lastCheckedAt: DateTime
+  lastErrorCode: String
+  note: String
+  phoneNumber: String
+  status: WhatsappTestRecipientStatus
+  updatedAt: DateTime
+}
+
+input WhatsappTestRecipientAddInput {
+  """Owning WhatsApp account id (max 36 chars)"""
+  accountId: String!
+
+  """Free-form operator note (max 200 chars)"""
+  note: String
+
+  """
+  Recipient phone number (normalized to digits only server-side; max 32 chars)
+  """
+  phoneNumber: String!
+}
+
+enum WhatsappTestRecipientStatus {
+  ALLOWED
+  PENDING
+}
+
+enum WhatsappTokenTestFailureKind {
+  INVALID_TOKEN
+  META_ERROR
+  META_PERMISSIONS
+  NETWORK_ERROR
+  NOT_CONNECTED
 }
 
 enum WhatsappWebhookEventStatus {

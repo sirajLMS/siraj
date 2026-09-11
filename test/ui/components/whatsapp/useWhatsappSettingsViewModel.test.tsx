@@ -16,8 +16,8 @@ const whatsappLabels = readTranslation(Translation.Whatsapp, locale);
 
 import {
   createWhatsappAccountMutationDocument,
-  deleteWhatsappAccountMutationDocument,
   isUserWhatsappOptInQueryDocument,
+  localDeactivateWhatsappAccountMutationDocument,
   setUserWhatsappOptInMutationDocument,
   syncWhatsappAccountsFromMetaMutationDocument,
   updateWhatsappAccountMutationDocument,
@@ -93,10 +93,10 @@ function InteractiveConsumer() {
       </button>
       <button
         type="button"
-        data-testid="open-delete"
-        onClick={() => vm.openDeleteConfirmDialog("acc-1", "Account acc-1")}
+        data-testid="open-local-deactivate"
+        onClick={() => vm.openLocalDeactivateConfirmDialog("acc-1", "Account acc-1")}
       >
-        open-delete
+        open-local-deactivate
       </button>
       <button type="button" data-testid="close-dialog" onClick={() => vm.closeDialog()}>
         close-dialog
@@ -203,13 +203,13 @@ function updateAccountMock(accountId: string, displayName: string): MockLink.Moc
   };
 }
 
-function deleteAccountMock(accountId: string): MockLink.MockedResponse {
+function localDeactivateAccountMock(accountId: string): MockLink.MockedResponse {
   return {
     request: {
-      query: deleteWhatsappAccountMutationDocument,
+      query: localDeactivateWhatsappAccountMutationDocument,
       variables: { id: accountId },
     },
-    result: { data: { deleteWhatsappAccount: true } },
+    result: { data: { localDeactivateWhatsappAccount: true } },
   };
 }
 
@@ -384,7 +384,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
 // ─── Task 18: Mutation & Handler Tests ────────────────────────────────
 // Uses InteractiveConsumer which renders action buttons to trigger handlers
 // inside act() via fireEvent. The vmRef captures the full ViewModel for
-// direct property assertions (creating, deletingId, syncingId, dialogState,
+// direct property assertions (creating, localDeactivatingId, syncingId, dialogState,
 // mutationError, snackbar, etc.).
 
 function baseMocks(accounts: ReturnType<typeof makeAccountRow>[] = [], optedIn = false): MockLink.MockedResponse[] {
@@ -487,7 +487,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
     expect(latestCapture()?.snackbar).toBeNull();
   });
 
-  test("Q3.11 — delete dialog cancel does not trigger mutation", async () => {
+  test("Q3.11 — local-deactivate dialog cancel does not trigger mutation", async () => {
     const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
     renderWithWrapper(<InteractiveConsumer />, {
       locale,
@@ -496,11 +496,11 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
 
     await waitForLoaded();
 
-    // Open delete dialog
+    // Open local-deactivate dialog
     await act(async () => {
-      vmRef.current?.openDeleteConfirmDialog("acc-1", "Account acc-1");
+      vmRef.current?.openLocalDeactivateConfirmDialog("acc-1", "Account acc-1");
     });
-    expect(vmRef.current?.dialogState.type).toBe("deleteConfirm");
+    expect(vmRef.current?.dialogState.type).toBe("localDeactivateConfirm");
 
     // Cancel by closing dialog
     await act(async () => {
@@ -508,8 +508,8 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
     });
 
     expect(vmRef.current?.dialogState.type).toBeNull();
-    // No delete loading state
-    expect(vmRef.current?.deletingId).toBeNull();
+    // No local-deactivate loading state
+    expect(vmRef.current?.localDeactivatingId).toBeNull();
     // No snackbar (mutation not called)
     expect(latestCapture()?.snackbar).toBeNull();
   });
@@ -575,24 +575,24 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
     expect(vmRef.current?.validateTwoStepPin("123456")).toBeNull();
   });
 
-  test("Q3.15 — per-row loading states: deletingId set during delete", async () => {
+  test("Q3.15 — per-row loading states: localDeactivatingId set during local deactivate", async () => {
     const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
 
     renderWithWrapper(<InteractiveConsumer />, {
       locale,
-      mocks: [...baseMocks([account]), deleteAccountMock("acc-1"), accountsMock([])],
+      mocks: [...baseMocks([account]), localDeactivateAccountMock("acc-1"), accountsMock([])],
     });
 
     await waitForLoaded();
 
-    // Delete account — should produce success snackbar and clear deletingId
+    // Locally deactivate account — should produce success snackbar and clear localDeactivatingId
     await act(async () => {
-      await vmRef.current?.handleDelete("acc-1");
+      await vmRef.current?.handleLocalDeactivate("acc-1");
     });
 
-    // After mutation completes, deletingId is cleared
+    // After mutation completes, localDeactivatingId is cleared
     await waitFor(() => {
-      expect(vmRef.current?.deletingId).toBeNull();
+      expect(vmRef.current?.localDeactivatingId).toBeNull();
     });
     // And a success snackbar is shown
     await waitFor(() => {
@@ -604,14 +604,14 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
     const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
     renderWithWrapper(<InteractiveConsumer />, {
       locale,
-      mocks: [...baseMocks([account]), deleteAccountMock("acc-1"), accountsMock([])],
+      mocks: [...baseMocks([account]), localDeactivateAccountMock("acc-1"), accountsMock([])],
     });
 
     await waitForLoaded();
 
-    // Trigger delete to produce a snackbar
+    // Trigger local deactivate to produce a snackbar
     await act(async () => {
-      await vmRef.current?.handleDelete("acc-1");
+      await vmRef.current?.handleLocalDeactivate("acc-1");
     });
 
     await waitFor(() => {

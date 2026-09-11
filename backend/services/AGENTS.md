@@ -77,6 +77,7 @@ Each integration file gets **one** smoke test (single API call) to confirm the a
 - `docs/services/general-user-creation.md` - General user creation pattern
 - `docs/backend/service-base-pattern.md` - Service base and shared helpers reference
 - `docs/backend/whatsapp-configuration.md` - WhatsApp Config tab reference (singleton-config advisory-lock upsert, DB-first/env write-through, secret masking & Drizzle error projection)
+- `docs/frontend/whatsapp-conversations.md` - WhatsApp Conversations canonical send path (24h window gating, test-number recipient registry hard-block, Meta error-code mapping, tx-after-fetch persistence)
 - `docs/backend/meeting-adapter-base.md` - Meeting provider adapter base class pattern reference
 - `docs/auth/manager-role-mapping.md` - Manager role mapping architecture & permission group slug convention
 - `docs/backend/serverless-cold-start-optimization.md` - Serverless cold-start optimization patterns

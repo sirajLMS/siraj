@@ -1,6 +1,7 @@
 import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { IconButton, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import type { GridColDef, GridValidRowModel } from "@mui/x-data-grid";
+import { TooltipIconButton } from "@/frontend/common/components/ui";
 
 export function buildEditDeleteActionsColumn<TRow extends GridValidRowModel>(
   headerName: string,
@@ -18,12 +19,16 @@ export function buildEditDeleteActionsColumn<TRow extends GridValidRowModel>(
     sortable: false,
     renderCell: ({ row }) => (
       <Stack direction="row" spacing={0.5}>
-        <IconButton size="small" aria-label={editLabel} onClick={() => handlers.onEdit(row)}>
-          <EditOutlined fontSize="small" />
-        </IconButton>
-        <IconButton size="small" aria-label={deleteLabel} onClick={() => handlers.onDelete(row)}>
-          <DeleteOutlined fontSize="small" />
-        </IconButton>
+        <TooltipIconButton
+          label={editLabel}
+          icon={<EditOutlined fontSize="small" />}
+          onClick={() => handlers.onEdit(row)}
+        />
+        <TooltipIconButton
+          label={deleteLabel}
+          icon={<DeleteOutlined fontSize="small" />}
+          onClick={() => handlers.onDelete(row)}
+        />
       </Stack>
     ),
   };

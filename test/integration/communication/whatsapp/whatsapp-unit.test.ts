@@ -13,6 +13,7 @@ import {
   buildListMessageTemplatesRequest,
   buildListPhoneNumbersRequest,
   buildSendTemplateMessageRequest,
+  buildSendTextMessageRequest,
   parseGetPhoneNumberResponse,
   parseListMessageTemplatesResponse,
   parseListPhoneNumbersResponse,
@@ -59,6 +60,27 @@ afterEach(() => {
   mock.restore();
 });
 
+/**
+ * Shared assertions for POST /{phone_number_id}/messages builders: method,
+ * auth + JSON headers, and the common envelope fields. Returns the parsed
+ * body so each builder test can assert its endpoint-specific shape.
+ */
+function expectMessagesPostInit(init: RequestInit, expectedTo: string) {
+  expect(init.method).toBe("POST");
+
+  const headers = new Headers(init.headers);
+  expect(headers.get("Authorization")).toBe("Bearer test-token-abc123");
+  expect(headers.get("Content-Type")).toBe("application/json");
+
+  if (typeof init.body !== "string") {
+    throw new Error("expected init.body to be a string");
+  }
+  const body = JSON.parse(init.body);
+  expect(body.messaging_product).toBe("whatsapp");
+  expect(body.to).toBe(expectedTo);
+  return body;
+}
+
 describe("send-template-message — buildRequest", () => {
   test("builds correct URL, method, headers, and JSON body", () => {
     const { url, init } = buildSendTemplateMessageRequest(CTX, {
@@ -69,18 +91,7 @@ describe("send-template-message — buildRequest", () => {
     });
 
     expect(url).toBe("https://graph.facebook.com/v23.0/123456789/messages");
-    expect(init.method).toBe("POST");
-
-    const headers = new Headers(init.headers);
-    expect(headers.get("Authorization")).toBe("Bearer test-token-abc123");
-    expect(headers.get("Content-Type")).toBe("application/json");
-
-    if (typeof init.body !== "string") {
-      throw new Error("expected init.body to be a string");
-    }
-    const body = JSON.parse(init.body);
-    expect(body.messaging_product).toBe("whatsapp");
-    expect(body.to).toBe("971501234567");
+    const body = expectMessagesPostInit(init, "971501234567");
     expect(body.type).toBe("template");
     expect(body.template.name).toBe("hello_world");
     expect(body.template.language.code).toBe("en_US");
@@ -159,6 +170,76 @@ describe("send-template-message — parseResponse", () => {
   });
 });
 
+describe("send-text-message — buildRequest", () => {
+  test("builds correct URL, method, headers, and JSON body", () => {
+    const { url, init } = buildSendTextMessageRequest(CTX, {
+      phoneNumberId: "123456789",
+      to: "971501234567",
+      body: "Hello from Siraj",
+    });
+
+    expect(url).toBe("https://graph.facebook.com/v23.0/123456789/messages");
+    const body = expectMessagesPostInit(init, "971501234567");
+    expect(body.recipient_type).toBe("individual");
+    expect(body.type).toBe("text");
+    expect(body.text.preview_url).toBe(false);
+    expect(body.text.body).toBe("Hello from Siraj");
+  });
+
+  test.each([
+    {
+      description: "invalid phoneNumberId (empty)",
+      params: { phoneNumberId: "", to: "971501234567", body: "hi" },
+      expectedError: "Invalid phoneNumberId",
+    },
+    {
+      description: "invalid recipient (empty)",
+      params: { phoneNumberId: "123456789", to: "", body: "hi" },
+      expectedError: "Invalid recipient",
+    },
+    {
+      description: "invalid recipient (non-numeric)",
+      params: { phoneNumberId: "123456789", to: "+971501234567", body: "hi" },
+      expectedError: "Invalid recipient",
+    },
+    {
+      description: "empty body",
+      params: { phoneNumberId: "123456789", to: "971501234567", body: "   " },
+      expectedError: "Invalid body",
+    },
+    {
+      description: "body over 4096 chars",
+      params: { phoneNumberId: "123456789", to: "971501234567", body: "a".repeat(4097) },
+      expectedError: "Invalid body",
+    },
+  ])("throws on $description", ({ params, expectedError }) => {
+    expect(() => buildSendTextMessageRequest(CTX, params)).toThrow(expectedError);
+  });
+
+  test("accepts a body of exactly 4096 chars", () => {
+    expect(() =>
+      buildSendTextMessageRequest(CTX, {
+        phoneNumberId: "123456789",
+        to: "971501234567",
+        body: "a".repeat(4096),
+      })
+    ).not.toThrow();
+  });
+});
+
+describe("send-text-message — parseResponse (shared template envelope)", () => {
+  test("reuses the same { contacts, messages } envelope as template sends", () => {
+    const result = parseSendTemplateResponse({
+      messaging_product: "whatsapp",
+      contacts: [{ input: "971501234567", wa_id: "971501234567" }],
+      messages: [{ id: "wamid.text.456" }],
+    });
+
+    expect(result.providerMessageId).toBe("wamid.text.456");
+    expect(result.recipientWaId).toBe("971501234567");
+  });
+});
+
 describe("list-phone-numbers — buildRequest", () => {
   test("builds GET URL with limit=100 on first page", () => {
     const { url, init } = buildListPhoneNumbersRequest(CTX, { wabaId: "987654321" });
@@ -214,7 +295,9 @@ describe("get-phone-number — buildRequest", () => {
   test("builds GET URL for a phone number ID", () => {
     const { url, init } = buildGetPhoneNumberRequest(CTX, { phoneNumberId: "123456789" });
 
-    expect(url).toBe("https://graph.facebook.com/v23.0/123456789");
+    expect(url).toBe(
+      "https://graph.facebook.com/v23.0/123456789?fields=code_verification_status,display_phone_number,id,quality_rating,status,verified_name,messaging_limit_tier,whatsapp_business_manager_messaging_limit"
+    );
     expect(init.method).toBe("GET");
   });
 
@@ -224,19 +307,33 @@ describe("get-phone-number — buildRequest", () => {
 });
 
 describe("get-phone-number — parseResponse", () => {
-  test("returns body as-is (passthrough)", () => {
+  test("maps Meta messaging-limit fields to portfolio_messaging_limit_tier", () => {
     const body = {
       id: "123456789",
       display_phone_number: "+971501234567",
       verified_name: "Business",
       quality_rating: "GREEN",
       throughput_level: "STANDARD",
-      portfolio_messaging_limit_tier: "TIER_1K",
+      messaging_limit_tier: "TIER_1K",
     };
 
     const result = parseGetPhoneNumberResponse(body);
-    expect(result).toEqual(body);
     expect(result.portfolio_messaging_limit_tier).toBe("TIER_1K");
+    expect(result.throughput_level).toBe("STANDARD");
+  });
+
+  test("prefers whatsapp_business_manager_messaging_limit over messaging_limit_tier", () => {
+    const body = {
+      id: "123456789",
+      display_phone_number: "+971501234567",
+      verified_name: "Business",
+      quality_rating: "GREEN",
+      messaging_limit_tier: "TIER_1K",
+      whatsapp_business_manager_messaging_limit: "TIER_10K",
+    };
+
+    const result = parseGetPhoneNumberResponse(body);
+    expect(result.portfolio_messaging_limit_tier).toBe("TIER_10K");
   });
 });
 
@@ -297,14 +394,28 @@ describe("buildRequest + mocked fetch — round-trip", () => {
     globalThis.fetch = mockedFetch;
   });
 
-  test("send-template-message: fetch with buildRequest returns parsed result", async () => {
-    const { url, init } = buildSendTemplateMessageRequest(CTX, {
-      phoneNumberId: "123456789",
-      to: "971501234567",
-      templateName: "hello_world",
-      languageCode: "en_US",
-    });
-
+  test.each([
+    {
+      name: "send-template-message",
+      buildRequest: () =>
+        buildSendTemplateMessageRequest(CTX, {
+          phoneNumberId: "123456789",
+          to: "971501234567",
+          templateName: "hello_world",
+          languageCode: "en_US",
+        }),
+    },
+    {
+      name: "send-text-message",
+      buildRequest: () =>
+        buildSendTextMessageRequest(CTX, {
+          phoneNumberId: "123456789",
+          to: "971501234567",
+          body: "Hello from Siraj",
+        }),
+    },
+  ])("$name: fetch with buildRequest returns parsed result", async ({ buildRequest }) => {
+    const { url, init } = buildRequest();
     const response = await fetch(url, { ...init, signal: AbortSignal.timeout(10_000) });
     const body = await response.json();
     const result = parseSendTemplateResponse(body);

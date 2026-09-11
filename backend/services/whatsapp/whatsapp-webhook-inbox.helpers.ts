@@ -203,9 +203,13 @@ async function persistMessageRow(
     editedAt: null,
     revokedAt: null,
   });
+  const at = message.sentAt ?? new Date();
   await WhatsappConversationRepository.touchLastMessage(conversationId, {
-    at: message.sentAt ?? new Date(),
+    at,
     preview: messagePreview(message.type, message.content),
+    // Only user-sent rows advance the inbound (24h service-window) marker;
+    // business-app echoes never do.
+    inboundAt: ctx.direction === WhatsappMessageDirection.INBOUND ? at : null,
   });
 }
 

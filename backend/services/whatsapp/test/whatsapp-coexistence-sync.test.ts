@@ -143,6 +143,8 @@ function makeAccount(overrides: Partial<WhatsappAccountSelectType> = {}): Whatsa
     encryptedAccessToken: "tok_test_a",
     encryptedTwoStepPin: "sec_test_a",
     isActive: true,
+    isTestNumber: false,
+    metaStatus: null,
     lastWebhookAt: null,
     createdAt: NOW,
     updatedAt: NOW,

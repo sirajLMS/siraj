@@ -2,12 +2,13 @@
 
 import {
   AddOutlined,
+  BlockOutlined,
   CheckCircleOutlined,
   CloudSyncOutlined,
-  DeleteOutlined,
   EditOutlined,
   ErrorOutlined,
   MoreVertOutlined,
+  PersonAddAlt1Outlined,
   SearchOutlined,
   VisibilityOffOutlined,
   VisibilityOutlined,
@@ -27,6 +28,7 @@ import {
   MenuItem,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useCallback, useState } from "react";
@@ -37,21 +39,23 @@ import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings
 import {
   MetaNumbersLinkShared,
   NumbersCreateEditDialogs,
-  NumbersDeleteConfirmDialog,
   NumbersEmptyStateShared,
   NumbersHeaderShared,
   NumbersListItemTransition,
+  NumbersLocalDeactivateConfirmDialog,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/__shared__";
 import { NumbersSnackbar } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/components/NumbersSnackbar";
 import { NumberCard } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCard";
 import { NumberCardField } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCardContent";
 import { syncPulseSx } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/whatsappAnimations";
 import type { NumbersTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
+import { resolveTokenTestFailureText } from "@/frontend/common/views/dashboard/settings/whatsapp/tokenTestFailureText";
 import type {
   WhatsappAccountRow,
   WhatsappCreateInput,
   WhatsappDialogState,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import { TestRecipientsManageDialog } from "@/frontend/common/views/dashboard/whatsapp/conversations/TestRecipientsManageDialog";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 type CredentialDialogField = "accessToken" | "twoStepPin";
@@ -122,7 +126,7 @@ function CredentialEditDialog({
   const placeholder = state.field === "accessToken" ? labels.accessTokenPlaceholder : labels.twoStepPinPlaceholder;
   const tokenTestResult = isToken ? tokenTestStates[state.accountId]?.[value] : undefined;
   const testState = tokenTestResult?.state;
-  const testReason = tokenTestResult?.reason ?? null;
+  const testFailureText = tokenTestResult ? resolveTokenTestFailureText(labels, tokenTestResult) : null;
   const testFailed = testState === "failed";
 
   // For the token dialog, Save is gated on a successful test of the CURRENT
@@ -143,7 +147,7 @@ function CredentialEditDialog({
           value={value}
           onChange={e => setValue(e.target.value)}
           error={testFailed}
-          helperText={testFailed ? testReason : undefined}
+          helperText={testFailed ? (testFailureText ?? undefined) : undefined}
           aria-invalid={testFailed}
           sx={{ mt: 1 }}
           slotProps={{
@@ -236,25 +240,63 @@ function AccountIdFields({
   );
 }
 
+/** Card affordance opening the recipients manage dialog — test numbers only. */
+function ManageRecipientsAction({
+  account,
+  label,
+  disabled,
+  onOpen,
+}: Readonly<{
+  readonly account: WhatsappAccountRow;
+  readonly label: string | undefined;
+  readonly disabled: boolean;
+  readonly onOpen: (accountId: string) => void;
+}>) {
+  if (account.isTestNumber !== true || label === undefined || label === "") {
+    return null;
+  }
+  return (
+    <Tooltip title={label}>
+      <IconButton
+        aria-label={label}
+        disabled={disabled || !account.id}
+        onClick={() => {
+          if (account.id) {
+            onOpen(account.id);
+          }
+        }}
+      >
+        <PersonAddAlt1Outlined />
+      </IconButton>
+    </Tooltip>
+  );
+}
+
 function AccountsListSection({
   labels,
   accounts,
-  deletingId,
+  localDeactivatingId,
   syncingId,
   onMenuOpen,
-  onOpenDeleteConfirmDialog,
+  onLocalDeactivateConfirmDialog,
   onAddAccount,
   onRetrySetup,
+  manageRecipientsLabel,
+  onOpenManageRecipients,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly accounts: ReadonlyArray<WhatsappAccountRow>;
-  readonly deletingId: string | null;
+  readonly localDeactivatingId: string | null;
   readonly syncingId: string | null;
   readonly onMenuOpen: (event: React.MouseEvent<HTMLElement>, account: WhatsappAccountRow) => void;
-  readonly onOpenDeleteConfirmDialog: (accountId: string, displayName: string) => void;
+  readonly onLocalDeactivateConfirmDialog: (accountId: string, displayName: string) => void;
   readonly onAddAccount: () => void;
   /** Re-opens Embedded Signup from the failed-sync card panel (ES-gated). */
   readonly onRetrySetup?: () => void;
+  /** Aria/tooltip label of the recipients manage affordance (conversations namespace). */
+  readonly manageRecipientsLabel?: string;
+  /** Opens the recipients manage dialog for a test-number account. */
+  readonly onOpenManageRecipients: (accountId: string) => void;
 }>) {
   if (accounts.length === 0) {
     return (
@@ -272,16 +314,18 @@ function AccountsListSection({
   return (
     <Stack spacing={2}>
       {accounts.map((account, index) => {
-        const isDeleting = deletingId === account.id;
+        const isLocalDeactivating = localDeactivatingId === account.id;
         const isSyncing = syncingId !== null;
         const accountLabel = account.displayName?.en ?? account.displayPhoneNumber ?? account.id ?? "";
         return (
           <NumbersListItemTransition
             key={account.id ?? account.phoneNumberId ?? index}
-            visible={!isDeleting}
-            ariaBusy={isDeleting}
+            visible={!isLocalDeactivating}
+            ariaBusy={isLocalDeactivating}
           >
-            {isDeleting ? <LinearProgress sx={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 1 }} /> : null}
+            {isLocalDeactivating ? (
+              <LinearProgress sx={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 1 }} />
+            ) : null}
             <NumberCard
               account={account}
               labels={labels}
@@ -290,25 +334,33 @@ function AccountsListSection({
               syncFailureReason={account.syncFailureReason}
               action={
                 <Box>
+                  <ManageRecipientsAction
+                    account={account}
+                    label={manageRecipientsLabel}
+                    disabled={isLocalDeactivating || isSyncing}
+                    onOpen={onOpenManageRecipients}
+                  />
                   <IconButton
                     aria-label={labels.editAccount}
-                    disabled={isDeleting || isSyncing}
+                    disabled={isLocalDeactivating || isSyncing}
                     onClick={e => onMenuOpen(e, account)}
                   >
-                    {isDeleting ? <CircularProgress size={20} /> : <MoreVertOutlined />}
+                    {isLocalDeactivating ? <CircularProgress size={20} /> : <MoreVertOutlined />}
                   </IconButton>
-                  <IconButton
-                    aria-label={labels.deleteAccount}
-                    color="error"
-                    disabled={isDeleting || isSyncing}
-                    onClick={() => {
-                      if (account.id) {
-                        onOpenDeleteConfirmDialog(account.id, accountLabel);
-                      }
-                    }}
-                  >
-                    {isDeleting ? <CircularProgress size={20} /> : <DeleteOutlined />}
-                  </IconButton>
+                  <Tooltip title={labels.localDeactivateAccountTooltip}>
+                    <IconButton
+                      aria-label={labels.localDeactivateAccount}
+                      color="error"
+                      disabled={isLocalDeactivating || isSyncing}
+                      onClick={() => {
+                        if (account.id) {
+                          onLocalDeactivateConfirmDialog(account.id, accountLabel);
+                        }
+                      }}
+                    >
+                      {isLocalDeactivating ? <CircularProgress size={20} /> : <BlockOutlined />}
+                    </IconButton>
+                  </Tooltip>
                   {isSyncing ? (
                     <Box component="span" sx={{ display: "inline-flex", ml: 0.5, alignItems: "center" }}>
                       <CloudSyncOutlined sx={syncPulseSx} />
@@ -448,7 +500,7 @@ function useCredentialMenuState(
 }
 
 interface NumbersTabDialogHandlers {
-  readonly onDeleteAccount: (id: string) => Promise<void>;
+  readonly onLocalDeactivateAccount: (id: string) => Promise<void>;
   readonly onCreate: (input: WhatsappCreateInput) => Promise<void>;
   readonly onEditName: (accountId: string, displayName: string) => Promise<void>;
   readonly onUpdatePurpose: (accountId: string, purpose: WhatsappAccountPurpose) => Promise<void>;
@@ -491,7 +543,7 @@ function NumbersTabDialogs({
 }>) {
   const t = labels;
   const {
-    onDeleteAccount,
+    onLocalDeactivateAccount,
     onCloseDialog,
     handleDialogClose,
     handleDialogConfirm,
@@ -501,12 +553,12 @@ function NumbersTabDialogs({
   } = handlers;
   const { validateDisplayName, validatePhoneNumberId, validateWabaId, validatePurpose } = validators;
 
-  const handleDeleteConfirm = useCallback(async () => {
+  const handleLocalDeactivateConfirm = useCallback(async () => {
     const accountId = dialogState.accountId;
     if (!accountId) return;
-    await onDeleteAccount(accountId);
+    await onLocalDeactivateAccount(accountId);
     onCloseDialog();
-  }, [dialogState.accountId, onDeleteAccount, onCloseDialog]);
+  }, [dialogState.accountId, onLocalDeactivateAccount, onCloseDialog]);
 
   return (
     <>
@@ -520,12 +572,12 @@ function NumbersTabDialogs({
         tokenTestStates={tokenTestStates}
       />
 
-      <NumbersDeleteConfirmDialog
-        open={dialogState.type === "deleteConfirm"}
+      <NumbersLocalDeactivateConfirmDialog
+        open={dialogState.type === "localDeactivateConfirm"}
         displayName={dialogState.displayName ?? ""}
         labels={t}
         onClose={onCloseDialog}
-        onConfirm={handleDeleteConfirm}
+        onConfirm={handleLocalDeactivateConfirm}
         fullScreen={false}
       />
 
@@ -640,12 +692,14 @@ function NumbersDesktopBody({
       <AccountsListSection
         labels={t}
         accounts={props.accounts}
-        deletingId={props.deletingId}
+        localDeactivatingId={props.localDeactivatingId}
         syncingId={props.syncingId}
         onMenuOpen={handleMenuOpen}
-        onOpenDeleteConfirmDialog={props.onOpenDeleteConfirmDialog}
+        onLocalDeactivateConfirmDialog={props.onLocalDeactivateConfirmDialog}
         onAddAccount={props.onOpenCreateDialog}
         onRetrySetup={props.esConfigId && props.esAppId ? props.onOpenEmbeddedSignup : undefined}
+        manageRecipientsLabel={t.manageRecipients}
+        onOpenManageRecipients={props.onOpenManageRecipients}
       />
 
       <AccountActionMenu
@@ -667,7 +721,7 @@ function NumbersDesktopBody({
         onTestAccessToken={props.onTestAccessToken}
         tokenTestStates={props.tokenTestStates}
         handlers={{
-          onDeleteAccount: props.onDeleteAccount,
+          onLocalDeactivateAccount: props.onLocalDeactivateAccount,
           onCreate: props.onCreate,
           onEditName: props.onEditName,
           onUpdatePurpose: props.onUpdatePurpose,
@@ -694,6 +748,10 @@ function NumbersDesktopBody({
           onComplete={props.onEmbeddedSignupComplete}
           onClose={props.onCloseDialog}
         />
+      ) : null}
+
+      {props.dialogState.type === "manageRecipients" && props.dialogState.accountId ? (
+        <TestRecipientsManageDialog accountId={props.dialogState.accountId} open={true} onClose={props.onCloseDialog} />
       ) : null}
 
       <NumbersSnackbar state={props.snackbar} onClose={props.onDismissSnackbar} />

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { WhatsappAccountPurpose, WhatsappSyncStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   createWhatsappAccountMutationDocument,
-  deleteWhatsappAccountMutationDocument,
+  localDeactivateWhatsappAccountMutationDocument,
   setWhatsappAccessTokenMutationDocument,
   updateWhatsappAccountMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/whatsapp/whatsapp.documents";
@@ -106,7 +106,9 @@ describe("WhatsApp inbox queries", () => {
       expect(result.pageInfo?.currentPage).toBe(1);
       expect(result.pageInfo?.hasMorePages).toBe(false);
     } finally {
-      await authenticatedRequest(superAdminToken, "mutate", deleteWhatsappAccountMutationDocument, { id: accountId });
+      await authenticatedRequest(superAdminToken, "mutate", localDeactivateWhatsappAccountMutationDocument, {
+        id: accountId,
+      });
     }
   });
 
@@ -140,7 +142,9 @@ describe("WhatsApp inbox queries", () => {
       expect(overview.syncProgress).toBe(0);
       expect(overview.requests).toHaveLength(0);
     } finally {
-      await authenticatedRequest(superAdminToken, "mutate", deleteWhatsappAccountMutationDocument, { id: accountId });
+      await authenticatedRequest(superAdminToken, "mutate", localDeactivateWhatsappAccountMutationDocument, {
+        id: accountId,
+      });
     }
   });
 });
@@ -163,7 +167,9 @@ describe("updateWhatsappAccountPurpose", () => {
       );
       expect(superAdminToken).toBeTruthy();
     } finally {
-      await authenticatedRequest(superAdminToken, "mutate", deleteWhatsappAccountMutationDocument, { id: accountId });
+      await authenticatedRequest(superAdminToken, "mutate", localDeactivateWhatsappAccountMutationDocument, {
+        id: accountId,
+      });
     }
   });
 
@@ -194,7 +200,9 @@ describe("updateWhatsappAccountPurpose", () => {
       expect(updated.id).toBe(accountId);
       expect(updated.isActive).toBe(true);
     } finally {
-      await authenticatedRequest(superAdminToken, "mutate", deleteWhatsappAccountMutationDocument, { id: accountId });
+      await authenticatedRequest(superAdminToken, "mutate", localDeactivateWhatsappAccountMutationDocument, {
+        id: accountId,
+      });
     }
   });
 

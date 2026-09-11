@@ -12,3 +12,4 @@ export * from "./list-message-templates.request";
 export * from "./list-phone-numbers.request";
 export * from "./request-smb-app-data.request";
 export * from "./send-template-message.request";
+export * from "./send-text-message.request";

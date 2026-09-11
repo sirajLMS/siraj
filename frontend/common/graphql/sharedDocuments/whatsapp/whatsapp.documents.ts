@@ -4,10 +4,10 @@ import type {
   CompleteWhatsappEmbeddedSignupMutationVariables,
   CreateWhatsappAccountMutation,
   CreateWhatsappAccountMutationVariables,
-  DeleteWhatsappAccountMutation,
-  DeleteWhatsappAccountMutationVariables,
   IsUserWhatsappOptInQuery,
   IsUserWhatsappOptInQueryVariables,
+  LocalDeactivateWhatsappAccountMutation,
+  LocalDeactivateWhatsappAccountMutationVariables,
   SetUserWhatsappOptInMutation,
   SetUserWhatsappOptInMutationVariables,
   SetWhatsappAccessTokenMutation,
@@ -32,6 +32,8 @@ const WHATSAPP_ACCOUNT_FIELDS = gql`
     displayPhoneNumber
     displayName
     isActive
+    isTestNumber
+    metaStatus
     purpose
     onboardingMode
     syncStatus
@@ -106,13 +108,13 @@ export const updateWhatsappAccountMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const deleteWhatsappAccountMutationDocument: TypedDocumentNode<
-  DeleteWhatsappAccountMutation,
-  DeleteWhatsappAccountMutationVariables
+export const localDeactivateWhatsappAccountMutationDocument: TypedDocumentNode<
+  LocalDeactivateWhatsappAccountMutation,
+  LocalDeactivateWhatsappAccountMutationVariables
 > = gql`
   ${WHATSAPP_ACCOUNT_FIELDS}
-  mutation deleteWhatsappAccount($id: String!) {
-    deleteWhatsappAccount(id: $id) {
+  mutation localDeactivateWhatsappAccount($id: String!) {
+    localDeactivateWhatsappAccount(id: $id) {
       ...WhatsappAccountFields
     }
   }
@@ -140,6 +142,7 @@ export const testWhatsappAccessTokenMutationDocument: TypedDocumentNode<
       isConnected
       status
       reason
+      failureKind
     }
   }
 `;

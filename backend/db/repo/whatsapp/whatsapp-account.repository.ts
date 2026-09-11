@@ -294,8 +294,8 @@ export namespace WhatsappAccountRepository {
     tx?: DBTransaction
   ): Promise<WhatsappAccountReturnType | null> {
     const patch: Record<string, unknown> = { encryptedAccessToken: input.encryptedAccessToken };
-    if (input.isActive !== undefined) {
-      patch.isActive = input.isActive;
+    if (input.metaStatus !== undefined) {
+      patch.metaStatus = input.metaStatus;
     }
     return updateById(input.id, patch, tx);
   }
@@ -365,11 +365,11 @@ export namespace WhatsappAccountRepository {
     offboardedAt: Date,
     tx?: DBTransaction
   ): Promise<WhatsappAccountReturnType | null> {
-    return mutateById(id, { offboardedAt, isActive: false }, tx);
+    return mutateById(id, { offboardedAt, isActive: false, metaStatus: "DISCONNECTED" }, tx);
   }
 
   /** Reconnect clears the offboard marker and re-activates the account. */
   export async function clearOffboarded(id: string, tx?: DBTransaction): Promise<WhatsappAccountReturnType | null> {
-    return mutateById(id, { offboardedAt: null, isActive: true }, tx);
+    return mutateById(id, { offboardedAt: null, isActive: true, metaStatus: null }, tx);
   }
 }

@@ -109,6 +109,31 @@ export function getWhatsappAccountStatusBadgeConfig(isActive: boolean | null): W
 }
 
 /**
+ * Meta connection status (`metaStatus`) → badge config:
+ * - CONNECTED → success (green)
+ * - DISCONNECTED → failed (red)
+ * - anything else / null → unknown (grey)
+ */
+const WHATSAPP_META_STATUS_BADGE: Readonly<Record<string, string>> = {
+  CONNECTED: "success",
+  DISCONNECTED: "failed",
+};
+
+/**
+ * Badge config for an account's Meta connection status (a derived Meta fact,
+ * distinct from the system `isActive` toggle). The `label` is the raw status
+ * value — callers overlay the localized label via the meta-status label-key
+ * helper.
+ */
+export function getWhatsappMetaStatusBadgeConfig(metaStatus: string | null): WhatsappStatusBadgeConfig {
+  return {
+    category: SYNC_STATUS,
+    status: (metaStatus ? WHATSAPP_META_STATUS_BADGE[metaStatus] : undefined) ?? "unknown",
+    label: metaStatus ?? "—",
+  };
+}
+
+/**
  * Coexistence sync lifecycle (`WhatsappSyncStatus`) → badge config:
  * - NOT_STARTED → unknown (grey)
  * - REQUESTED / SYNCING → running (amber)

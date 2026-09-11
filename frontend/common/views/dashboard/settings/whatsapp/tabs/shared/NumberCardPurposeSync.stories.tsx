@@ -18,6 +18,8 @@ const baseAccount: WhatsappAccountRow = {
   displayPhoneNumber: "+966 55 123 4567",
   displayName: { en: "Admissions Office", ar: "مكتب القبول" },
   isActive: true,
+  isTestNumber: false,
+  metaStatus: "CONNECTED",
   purpose: WhatsappAccountPurpose.Students,
   onboardingMode: WhatsappOnboardingMode.Coexistence,
   syncStatus: WhatsappSyncStatus.Syncing,

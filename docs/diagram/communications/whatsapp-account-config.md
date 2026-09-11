@@ -22,7 +22,7 @@ flowchart TB
   Page --> VM["useWhatsappSettingsViewModel<br/>Apollo useQuery / useMutation"]
   VM --> GQLQ["whatsapp-account.query.ts<br/>whatsappAccounts / isUserWhatsappOptIn / isWhatsappConfigured"]
   VM --> GQLM["whatsapp-account.mutation.ts"]
-  GQLM --> MCrud["createWhatsappAccount / updateWhatsappAccount / deleteWhatsappAccount<br/>WHATSAPP_CONFIG_MANAGE"]
+  GQLM --> MCrud["createWhatsappAccount / updateWhatsappAccount / localDeactivateWhatsappAccount<br/>WHATSAPP_CONFIG_MANAGE"]
   GQLM --> MCred["setWhatsappAccessToken / setWhatsappTwoStepPin<br/>superAdmin only"]
   GQLM --> MSync["syncWhatsappAccountsFromMeta<br/>WHATSAPP_CONFIG_MANAGE"]
   GQLM --> MOpt["setUserWhatsappOptIn<br/>self ok, other user requires super-admin"]

@@ -35,6 +35,7 @@ export const whatsappConversations = createTable(
     displayName: varcharColumn("display_name", { length: 255 }),
     lastMessageAt: timestampColumn("last_message_at"),
     lastMessagePreview: varcharColumn("last_message_preview", { length: 140 }),
+    lastInboundMessageAt: timestampColumn("last_inbound_message_at"),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),
     updatedAt: timestampColumn("updated_at")
       .notNull()

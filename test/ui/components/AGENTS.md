@@ -64,5 +64,6 @@ Test files are organized **one subdirectory per domain**, mirroring the componen
 | `ui/` | Shared `frontend/common/components/ui/**` components |
 | `users/` | Users directory and billing profile |
 | `whatsapp/` | WhatsApp settings domain |
+| `whatsapp-conversations/` | `/whatsapp` conversations workspace (composer, thread pane, recipients panel, container) |
 
 Keep this table current when adding/removing a domain dir.

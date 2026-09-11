@@ -128,6 +128,7 @@ import { uiTagInputAr } from "@/shared/locale/ar/ui/tag-input.ts";
 import { uiTimezoneSelectAr } from "@/shared/locale/ar/ui/timezone-select.ts";
 import { uiUserSelectAr } from "@/shared/locale/ar/ui/user-select.ts";
 import { whatsappAr } from "@/shared/locale/ar/whatsapp";
+import { whatsappConversationsAr } from "@/shared/locale/ar/whatsappConversations";
 import { whatsappInboxAr } from "@/shared/locale/ar/whatsappInbox";
 import type { Translations } from "@/shared/locale/types/message";
 
@@ -268,4 +269,5 @@ export const arMessages: Translations = {
   notificationsTranslations: notificationsAr,
   whatsappTranslations: whatsappAr,
   whatsappInboxTranslations: whatsappInboxAr,
+  whatsappConversationsTranslations: whatsappConversationsAr,
 };

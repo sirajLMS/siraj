@@ -3,14 +3,19 @@
 import { WarningOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { StatusBadge, type StatusBadgeCategory } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { NumberCardPurposeSync } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCardPurposeSync";
 import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import { getMetaStatusLabelKey } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappMetaStatusLabel";
 import { getQualityLabelKey } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappQualityLabel";
-import { getWhatsappAccountStatusBadgeConfig } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappStatusBadge";
+import {
+  getWhatsappAccountStatusBadgeConfig,
+  getWhatsappMetaStatusBadgeConfig,
+} from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappStatusBadge";
 import { getThroughputLabelKey } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappThroughputLabel";
 import { getTierLabelKey } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappTierLabel";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
+import type { WhatsappConversationsLabels } from "@/shared/locale/types/whatsappConversations";
 
 /** Reducible enum-label i18n keys (quality, tier, throughput, template status). */
 const LABEL_KEYS = [
@@ -18,6 +23,9 @@ const LABEL_KEYS = [
   "qualityYellow",
   "qualityRed",
   "qualityUnknown",
+  "metaStatusConnected",
+  "metaStatusDisconnected",
+  "metaStatusUnknown",
   "tier50",
   "tier250",
   "tier1K",
@@ -41,7 +49,11 @@ function resolveLabel(key: string, t: NumberCardLabels): string {
   return isLabelKey(key) ? t[key] : key;
 }
 
-/** Common labels needed for account card metadata and warnings. */
+/**
+ * Common labels needed for account card metadata and warnings. The optional
+ * `testNumberBadge` caption lives in the whatsappConversations namespace and is
+ * merged in by hosts that render the test-number chip.
+ */
 export type NumberCardLabels = Pick<
   WhatsappLabels,
   | "qualityRating"
@@ -50,7 +62,12 @@ export type NumberCardLabels = Pick<
   | "throughput24h"
   | "lastWebhookAt"
   | "isActive"
+  | "accountStatusLabel"
   | "isInactive"
+  | "metaStatusLabel"
+  | "metaStatusConnected"
+  | "metaStatusDisconnected"
+  | "metaStatusUnknown"
   | "wabaId"
   | "phoneNumberId"
   | "coexistenceWarningTitle"
@@ -62,8 +79,10 @@ export type NumberCardLabels = Pick<
   | "purposeGeneral"
   | "purposeAdvertising"
   | "purposeStudents"
+  | "purposeLabel"
   | "onboardingModeCloudApi"
   | "onboardingModeCoexistence"
+  | "onboardingModeLabel"
   | "coexistenceRestrictionsHint"
   | "syncStatusLabel"
   | "syncStatusNotStarted"
@@ -92,7 +111,8 @@ export type NumberCardLabels = Pick<
   | "throughputCoexistence"
   | "throughputHigh"
   | "throughputUnknown"
->;
+> &
+  Partial<Pick<WhatsappConversationsLabels, "testNumberBadge">>;
 
 /** Optional coexistence sync details/actions threaded into the number card. */
 export interface NumberCardSyncProps {
@@ -115,6 +135,27 @@ export function NumberCardField({ label, value }: Readonly<{ readonly label: str
     </Box>
   );
 }
+
+/** Caption + badge pair used to make each card state chip self-describing. */
+export function NumberCardStatusChip({
+  caption,
+  badge,
+}: Readonly<{ readonly caption: string; readonly badge: ReactNode }>) {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 700 })}>
+        {caption}
+      </Typography>
+      {badge}
+    </Box>
+  );
+}
+
+/** Badge styling for the test-number marker chip rendered beside the status chips. */
+const TEST_NUMBER_BADGE: { readonly category: StatusBadgeCategory; readonly status: string } = {
+  category: "syncStatus",
+  status: "partial",
+};
 
 /** Props for the shell-less account card content. */
 export interface NumberCardContentProps extends NumberCardSyncProps {
@@ -144,6 +185,7 @@ export function NumberCardContent({
   const qualityLabel = resolveLabel(getQualityLabelKey(account.qualityRating ?? ""), t);
   const tierLabel = resolveLabel(getTierLabelKey(account.portfolioMessagingLimitTier ?? ""), t);
   const throughputLabel = resolveLabel(getThroughputLabelKey(account.throughputLevel ?? ""), t);
+  const metaStatusLabel = resolveLabel(getMetaStatusLabelKey(account.metaStatus ?? null), t);
 
   const isCoexistence = account.throughputLevel?.toUpperCase() === "COEXISTENCE";
   const isUnverified = account.portfolioMessagingLimitTier?.toUpperCase() === "UNTIERED";
@@ -160,11 +202,25 @@ export function NumberCardContent({
         {action}
       </Box>
       <Stack spacing={1.5} sx={{ mt: 1.5 }}>
-        <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1 }}>
-          <StatusBadge
-            {...getWhatsappAccountStatusBadgeConfig(account.isActive)}
-            label={account.isActive ? t.isActive : t.isInactive}
+        <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1.5 }}>
+          <NumberCardStatusChip
+            caption={t.accountStatusLabel}
+            badge={
+              <StatusBadge
+                {...getWhatsappAccountStatusBadgeConfig(account.isActive)}
+                label={account.isActive ? t.isActive : t.isInactive}
+              />
+            }
           />
+          <NumberCardStatusChip
+            caption={t.metaStatusLabel}
+            badge={
+              <StatusBadge {...getWhatsappMetaStatusBadgeConfig(account.metaStatus ?? null)} label={metaStatusLabel} />
+            }
+          />
+          {account.isTestNumber === true && t.testNumberBadge ? (
+            <StatusBadge {...TEST_NUMBER_BADGE} label={t.testNumberBadge} />
+          ) : null}
         </Box>
         <NumberCardPurposeSync
           account={account}

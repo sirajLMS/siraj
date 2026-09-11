@@ -90,15 +90,15 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
   }),
 
-  deleteWhatsappAccount: t.field({
+  localDeactivateWhatsappAccount: t.field({
     type: WhatsappAccountPothosObject,
-    description: "Deactivate a WhatsApp account. Calls resetWhatsappChannel() on success (S4).",
+    description: "Stop using a WhatsApp account: deactivate it. Calls resetWhatsappChannel() on success (S4).",
     authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
     args: {
       id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: withAuthResult((actorUserId, args, tErrors) =>
-      WhatsappAccountService.deleteAccount(actorUserId, tErrors, args.id)
+      WhatsappAccountService.localDeactivateAccount(actorUserId, tErrors, args.id)
     ),
   }),
 

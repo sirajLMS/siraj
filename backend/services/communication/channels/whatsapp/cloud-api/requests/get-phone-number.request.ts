@@ -1,10 +1,10 @@
 /**
  * Graph API request builder: GET /{phone_number_id}
  *
- * Fetches detailed metadata for a single WhatsApp phone number, including
- * `portfolioMessagingLimitTier` which SHALL store Meta's enum verbatim
- * (`UNTIERED / TIER_50 / TIER_250 / TIER_1K / TIER_10K / TIER_100K /
- * TIER_UNLIMITED / TIER_NOT_SET`) with no transformation (Q5).
+ * Fetches detailed metadata for a single WhatsApp phone number, including the
+ * messaging-limit tier. Meta reports the tier under
+ * `whatsapp_business_manager_messaging_limit` (portfolio-scoped, post-Oct-2025)
+ * with `messaging_limit_tier` as a legacy alias — both are requested (Q5).
  *
  * The adapter uses this builder during `syncWhatsappAccountsFromMeta` to
  * enrich the bulk list response with per-number tier details (REQ-4.2).
@@ -19,6 +19,7 @@ import type {
   GetPhoneNumberResult,
   GraphApiRequestContext,
   GraphApiRequestInit,
+  PhoneNumberDetailRaw,
 } from "@/backend/types";
 
 /**
@@ -35,7 +36,16 @@ export function buildGetPhoneNumberRequest(
     throw new Error("Invalid phoneNumberId: must be a non-empty numeric string ≤64 chars");
   }
 
-  const url = buildGraphUrl(`/${input.phoneNumberId}`, ctx.apiVersion);
+  // Request the fields the parser (`phoneNumberResultSchema`) consumes. Meta
+  // omits `status` (and several others) from the default field set, so without
+  // this `fields` param `status` is always `undefined` and callers derive
+  // `isConnected=false` → `isActive=false` even for a CONNECTED number. The
+  // messaging-limit tier is likewise opt-in and must be requested explicitly.
+  const url = buildGraphUrl(
+    `/${input.phoneNumberId}`,
+    ctx.apiVersion,
+    "?fields=code_verification_status,display_phone_number,id,quality_rating,status,verified_name,messaging_limit_tier,whatsapp_business_manager_messaging_limit"
+  );
 
   return {
     url,
@@ -47,11 +57,33 @@ export function buildGetPhoneNumberRequest(
 }
 
 /**
- * Parses a successful (2xx) response body from the get-phone-number endpoint.
+ * Maps a raw `GET /{phone_number_id}` response into the canonical
+ * {@link GetPhoneNumberResult} shape.
  *
- * The adapter must NOT transform `portfolioMessagingLimitTier` — it is stored
- * as-is from Meta's response (Q5).
+ * Meta returns the messaging limit under `whatsapp_business_manager_messaging_limit`
+ * (portfolio-scoped, post-Oct-2025) with `messaging_limit_tier` as a legacy
+ * alias. Both are accepted; the stored `portfolio_messaging_limit_tier` value is
+ * kept verbatim (Q5) — the enum string itself is never transformed.
  */
-export function parseGetPhoneNumberResponse(body: GetPhoneNumberResult): GetPhoneNumberResult {
-  return body;
+export function mapPhoneNumberDetail(raw: PhoneNumberDetailRaw): GetPhoneNumberResult {
+  return {
+    id: raw.id,
+    display_phone_number: raw.display_phone_number,
+    verified_name: raw.verified_name,
+    quality_rating: raw.quality_rating,
+    throughput_level: raw.throughput_level ?? "STANDARD",
+    portfolio_messaging_limit_tier:
+      raw.whatsapp_business_manager_messaging_limit ?? raw.messaging_limit_tier ?? "TIER_NOT_SET",
+    max_conversations_per_24_hours: raw.max_conversations_per_24_hours,
+    status: raw.status,
+    code_verification_status: raw.code_verification_status,
+  };
+}
+
+/**
+ * Parses a successful (2xx) response body from the get-phone-number endpoint
+ * into the canonical result shape (delegates to {@link mapPhoneNumberDetail}).
+ */
+export function parseGetPhoneNumberResponse(body: PhoneNumberDetailRaw): GetPhoneNumberResult {
+  return mapPhoneNumberDetail(body);
 }

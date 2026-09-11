@@ -60,6 +60,7 @@ export const whatsappAccounts = createTable(
     qualityRating: varcharColumn("quality_rating", { length: 16 }),
     portfolioMessagingLimitTier: varcharColumn("portfolio_messaging_limit_tier", { length: 32 }),
     throughputLevel: varcharColumn("throughput_level", { length: 16 }),
+    metaStatus: varcharColumn("meta_status", { length: 16 }),
     maxPhoneNumbersPerBusiness: varcharColumn("max_phone_numbers_per_business", { length: 50 }),
     purpose: whatsappAccountPurposeEnum("purpose").notNull().default(WhatsappAccountPurpose.GENERAL),
     onboardingMode: whatsappOnboardingModeEnum("onboarding_mode").notNull().default(WhatsappOnboardingMode.CLOUD_API),
@@ -72,6 +73,7 @@ export const whatsappAccounts = createTable(
     encryptedAccessToken: encryptedText("encrypted_access_token").notNull(),
     encryptedTwoStepPin: encryptedText("encrypted_two_step_pin").notNull(),
     isActive: booleanColumn("is_active").notNull().default(true),
+    isTestNumber: booleanColumn("is_test_number").notNull().default(false),
     lastWebhookAt: timestampColumn("last_webhook_at"),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),
     updatedAt: timestampColumn("updated_at")

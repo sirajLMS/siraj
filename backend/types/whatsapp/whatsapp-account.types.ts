@@ -9,6 +9,7 @@ import type {
   WhatsappAccountPurpose,
   WhatsappOnboardingMode,
   WhatsappSyncStatus,
+  WhatsappTokenTestFailureKind,
 } from "@/backend/enum/whatsapp/whatsapp-account.enum";
 
 /**
@@ -47,8 +48,9 @@ export type WhatsappAccountReturnType = Omit<
  * tracking columns (`syncStatus`, `syncPhase`, `syncProgress`,
  * `syncDeadlineAt`, `syncFailureReason`, `offboardedAt`) are excluded by
  * construction — the coexistence sync lifecycle mutates them through
- * `WhatsappAccountUpdateInput`, never through client input. `purpose` and
- * `onboardingMode` stay client-selectable with enum typing.
+ * `WhatsappAccountUpdateInput`, never through client input. `isTestNumber`
+ * is likewise server-derived (set by sync-from-Meta, not client-selectable).
+ * `purpose` and `onboardingMode` stay client-selectable with enum typing.
  */
 type WhatsappAccountSubmitInput = Omit<
   WhatsappAccountInsertType,
@@ -67,6 +69,10 @@ type WhatsappAccountSubmitInput = Omit<
   | "syncDeadlineAt"
   | "syncFailureReason"
   | "offboardedAt"
+  // Meta connection status (server-derived from Meta's phone `status`)
+  | "metaStatus"
+  // Meta test-number flag — server-derived by sync-from-Meta, never client-supplied
+  | "isTestNumber"
 > & {
   purpose?: WhatsappAccountPurpose;
   onboardingMode?: WhatsappOnboardingMode;
@@ -80,7 +86,9 @@ type WhatsappAccountSubmitInput = Omit<
  * columns (which go through dedicated `SetWhatsappAccessTokenInput` /
  * `SetWhatsappTwoStepPinInput` mutations) are excluded by construction.
  * `lastWebhookAt` is intentionally retained — the webhook handler uses it
- * to stamp inbound webhook timestamps on the account row. The sync-tracking
+ * to stamp inbound webhook timestamps on the account row. `isTestNumber` is
+ * intentionally retained — sync-from-Meta sets it when the number's test
+ * status changes (it is excluded from client submit inputs). The sync-tracking
  * columns are system-managed (webhook handler + sync service) and re-applied
  * here with enum typing.
  */
@@ -109,7 +117,8 @@ export type WhatsappAccountUpdateInput = Partial<
 export type SetWhatsappAccessTokenInput = {
   id: string;
   encryptedAccessToken: string;
-  isActive?: boolean;
+  /** Meta connection status re-checked while saving the token (never the system `isActive` toggle). */
+  metaStatus?: string | null;
 };
 
 export type SetWhatsappTwoStepPinInput = {
@@ -128,6 +137,13 @@ export type WhatsappAccessTokenTestResultType = {
   status: string | null;
   /** Human-readable explanation of why the token test failed (null when it passed). */
   reason: string | null;
+  /**
+   * Machine-readable failure classification (null when the test passed) so the
+   * UI can tell Meta-side rejections apart from transport problems and pick
+   * the right translated hint instead of rendering Meta's raw, misleading
+   * message text alone.
+   */
+  failureKind: WhatsappTokenTestFailureKind | null;
 };
 
 /**

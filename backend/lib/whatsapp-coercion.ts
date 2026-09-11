@@ -153,6 +153,25 @@ export function coerceSyncType(raw: string): WhatsappSyncType {
 }
 
 /**
+ * Detect a Meta-provided test phone number from its `GET /{phone_number_id}`
+ * detail. Meta marks test numbers with the literal `verified_name`
+ * "Test Number"; defensively, a number whose verification status is anything
+ * other than `VERIFIED` and whose digits-only display phone falls in Meta's
+ * +1 555 test range is also treated as a test number. Absent signals resolve
+ * to `false` (fail-open — an unflagged test number is still enforced by Meta).
+ */
+export function isMetaTestNumber(
+  verifiedName: string | null | undefined,
+  codeVerificationStatus: string | null | undefined,
+  displayPhoneNumber: string | null | undefined
+): boolean {
+  if (verifiedName === "Test Number") return true;
+  if (!codeVerificationStatus || codeVerificationStatus === "VERIFIED") return false;
+  const digits = (displayPhoneNumber ?? "").replace(/\D/g, "");
+  return digits.startsWith("1555");
+}
+
+/**
  * Build a `WhatsappAccountReturnType` from the base fields, applying enum coercion.
  * Shared between the repository's `toReturnType` and the service's `syncFromMeta`
  * so both layers use identical coercion logic without duplication.

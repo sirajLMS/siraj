@@ -67,60 +67,28 @@ export class SessionRedisService implements ISessionRedisService {
   }
 
   /**
-   * Validate that a value is a plain object (not null, not array)
-   */
-  private isPlainObject(value: unknown): value is Record<string, unknown> {
-    return typeof value === "object" && value !== null && !Array.isArray(value);
-  }
-
-  /**
-   * Validate optional string fields on a record.
-   * Returns false if any field is present but not a string.
-   */
-  private validateOptionalStrings(obj: Record<string, unknown>, fields: string[]): boolean {
-    for (const field of fields) {
-      if (obj[field] !== undefined && typeof obj[field] !== "string") {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
    * Validate the impersonation sub-object
    */
-  private validateImpersonation(obj: Record<string, unknown>): boolean {
-    if (obj.impersonation === undefined) {
-      return true;
-    }
-    if (!this.isPlainObject(obj.impersonation)) {
-      return false;
-    }
-    if (
-      typeof obj.impersonation.targetUserId !== "string" ||
-      typeof obj.impersonation.startedAt !== "string" ||
-      typeof obj.impersonation.expiresAt !== "string" ||
-      typeof obj.impersonation.impersonationSessionId !== "string"
-    ) {
-      return false;
-    }
-    return obj.impersonation.reason === undefined || typeof obj.impersonation.reason === "string";
+  private validateImpersonation(imp: unknown): boolean {
+    if (imp === undefined) return true;
+    if (!this.isRecord(imp)) return false;
+    return (
+      typeof imp.targetUserId === "string" &&
+      typeof imp.startedAt === "string" &&
+      typeof imp.expiresAt === "string" &&
+      typeof imp.impersonationSessionId === "string" &&
+      (imp.reason === undefined || typeof imp.reason === "string")
+    );
   }
 
   /**
    * Validate the groupSimulation sub-object
    */
-  private validateGroupSimulation(obj: Record<string, unknown>): boolean {
-    if (obj.groupSimulation === undefined) {
-      return true;
-    }
-    if (!this.isPlainObject(obj.groupSimulation)) {
-      return false;
-    }
+  private validateGroupSimulation(gsim: unknown): boolean {
+    if (gsim === undefined) return true;
+    if (!this.isRecord(gsim)) return false;
     return (
-      typeof obj.groupSimulation.groupSlug === "string" &&
-      typeof obj.groupSimulation.startedAt === "string" &&
-      typeof obj.groupSimulation.expiresAt === "string"
+      typeof gsim.groupSlug === "string" && typeof gsim.startedAt === "string" && typeof gsim.expiresAt === "string"
     );
   }
 
@@ -129,26 +97,34 @@ export class SessionRedisService implements ISessionRedisService {
    * Prevents corrupted/tampered Redis data from bypassing type assertions.
    */
   private validateSessionData(data: unknown, _sessionId: string): data is RedisSessionData {
-    if (!this.isPlainObject(data)) {
+    if (!this.isRecord(data)) {
       return false;
     }
-    const obj = data;
-    if (typeof obj.userId !== "string" || typeof obj.hashedId !== "string" || typeof obj.payload !== "string") {
+
+    // Required primary fields
+    const hasRequired =
+      typeof data.userId === "string" &&
+      typeof data.hashedId === "string" &&
+      typeof data.payload === "string" &&
+      typeof data.createdAt === "string" &&
+      typeof data.lastActivityAt === "string";
+
+    if (!hasRequired) {
       return false;
     }
-    if (typeof obj.createdAt !== "string" || typeof obj.lastActivityAt !== "string") {
+
+    // Optional metadata string fields
+    const hasValidMetadata =
+      (data.ipAddress === undefined || typeof data.ipAddress === "string") &&
+      (data.userAgent === undefined || typeof data.userAgent === "string") &&
+      (data.deviceType === undefined || typeof data.deviceType === "string") &&
+      (data.deviceName === undefined || typeof data.deviceName === "string");
+
+    if (!hasValidMetadata) {
       return false;
     }
-    if (!this.validateOptionalStrings(obj, ["ipAddress", "userAgent", "deviceType", "deviceName"])) {
-      return false;
-    }
-    if (!this.validateImpersonation(obj)) {
-      return false;
-    }
-    if (!this.validateGroupSimulation(obj)) {
-      return false;
-    }
-    return true;
+
+    return this.validateImpersonation(data.impersonation) && this.validateGroupSimulation(data.groupSimulation);
   }
 
   /**

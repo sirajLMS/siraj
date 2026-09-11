@@ -5,6 +5,7 @@ import type {
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappTokenTestResult, WhatsappTokenTestState } from "@/frontend/common/stores/whatsappTokenTestStore";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
+import type { WhatsappConversationsLabels } from "@/shared/locale/types/whatsappConversations";
 
 /** Row model for a WhatsApp account in the settings UI. */
 export type WhatsappAccountRow = WhatsappAccountFieldsFragment;
@@ -89,7 +90,15 @@ export type WhatsappSnackbar = { readonly message: string; readonly severity: "s
 
 /** Consolidated dialog state for the WhatsApp settings page. */
 export interface WhatsappDialogState {
-  readonly type: "create" | "editName" | "editToken" | "editPin" | "deleteConfirm" | "embeddedSignup" | null;
+  readonly type:
+    | "create"
+    | "editName"
+    | "editToken"
+    | "editPin"
+    | "localDeactivateConfirm"
+    | "embeddedSignup"
+    | "manageRecipients"
+    | null;
   readonly accountId?: string;
   readonly displayName?: string;
   /** Current routing purpose of the account being edited (pre-selects the edit dialog select). */
@@ -119,14 +128,14 @@ export interface WhatsappCreateInput {
 
 /** Labels grouped by UI section (labelsBySection pattern). */
 export interface WhatsappSettingsLabels {
-  readonly page: WhatsappLabels;
+  readonly page: WhatsappLabels & Partial<Pick<WhatsappConversationsLabels, "testNumberBadge" | "manageRecipients">>;
   readonly notifications: {
     readonly syncSuccess: string;
     readonly syncSuccessWithCounts: (synced: number, added: number) => string;
     readonly syncNoChange: string;
     readonly syncError: string;
-    readonly deleteSuccess: string;
-    readonly deleteError: string;
+    readonly localDeactivateSuccess: string;
+    readonly localDeactivateError: string;
     readonly saveSuccess: string;
     readonly saveError: string;
     readonly optInSuccess: string;
@@ -160,8 +169,8 @@ export interface WhatsappSettingsViewModel {
   // ── Loading states (per-row) ─────────────────────────────────────────
   /** Is the create mutation in progress. */
   readonly creating: boolean;
-  /** Which account is being deleted (null when not deleting). */
-  readonly deletingId: string | null;
+  /** Which account is being locally deactivated (null when not deactivating). */
+  readonly localDeactivatingId: string | null;
   /** Which account is being updated (null when not updating). */
   readonly updatingId: string | null;
   /** Which account is being synced (null when not syncing). */
@@ -201,7 +210,9 @@ export interface WhatsappSettingsViewModel {
   readonly openEditNameDialog: (accountId: string, displayName: string, purpose: WhatsappAccountPurpose) => void;
   readonly openEditTokenDialog: (accountId: string) => void;
   readonly openEditPinDialog: (accountId: string) => void;
-  readonly openDeleteConfirmDialog: (accountId: string, displayName: string) => void;
+  readonly openLocalDeactivateConfirmDialog: (accountId: string, displayName: string) => void;
+  /** Open the test-number recipients manage dialog for an account. */
+  readonly openManageRecipientsDialog: (accountId: string) => void;
   readonly closeDialog: () => void;
 
   // ── Handlers ──────────────────────────────────────────────────────────
@@ -214,8 +225,8 @@ export interface WhatsappSettingsViewModel {
    * mutation (server rejects assignment on inactive accounts).
    */
   readonly handleUpdatePurpose: (accountId: string, purpose: WhatsappAccountPurpose) => Promise<void>;
-  /** Delete an account by id. */
-  readonly handleDelete: (accountId: string) => Promise<void>;
+  /** Locally deactivate an account by id. */
+  readonly handleLocalDeactivate: (accountId: string) => Promise<void>;
   /** Set the access token for an account. */
   readonly handleSubmitToken: (accountId: string, token: string) => Promise<void>;
   /** Validate an access token against Meta and record the test outcome in the store. */
@@ -256,8 +267,8 @@ export interface WhatsappSettingsViewModel {
   readonly handleEmbeddedSignupComplete: (payload: WhatsappEmbeddedSignupPayload) => Promise<void>;
 
   // ── Legacy aliases (backward compatibility) ──────────────────────────
-  /** @deprecated Use handleDelete instead. */
-  readonly onDeleteAccount: (id: string) => Promise<void>;
+  /** @deprecated Use handleLocalDeactivate instead. */
+  readonly onLocalDeactivateAccount: (id: string) => Promise<void>;
   /** @deprecated Use handleSubmitToken instead. */
   readonly onSetAccessToken: (id: string, accessToken: string) => Promise<void>;
   /** @deprecated Use handleSubmitPin instead. */

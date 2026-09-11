@@ -9,6 +9,7 @@ import {
   prepareUploadMutationDocument,
   uploadLearningResourceMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import { useLearningResourcesStore } from "@/frontend/common/stores/learningResourcesStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { ResourceFilterType, ResourceSortBy } from "@/frontend/common/types/shared.types";
@@ -281,7 +282,7 @@ function useCardClick(resources: readonly LearningResourceRow[]): (id: string) =
     (id: string) => {
       const resource = resources.find(r => r.id === id);
       if (resource) {
-        window.open(resource.filePath, "_blank");
+        safeOpenWindow(resource.filePath);
       }
     },
     [resources]

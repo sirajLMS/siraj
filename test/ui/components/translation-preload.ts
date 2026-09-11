@@ -30,6 +30,8 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   DashboardBillingPayroll,
   Translation.Common,
   Translation.Whatsapp,
+  Translation.WhatsappInbox,
+  Translation.WhatsappConversations,
   Translation.Dashboard.Cron,
   Translation.Dashboard.ClassAudit,
   Translation.Dashboard.CreateRecurringClass,
@@ -87,6 +89,7 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   Translation.Profile.Teacher,
   Translation.Ui.UserSelect,
   Translation.Ui.TagInput,
+  Translation.Ui.PhoneInput,
   Translation.Ui.TimezoneSelect,
 ];
 

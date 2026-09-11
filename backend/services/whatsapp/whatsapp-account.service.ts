@@ -4,13 +4,18 @@ import { NotificationPreferencesRepository } from "@/backend/db/repo/notificatio
 import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { AppPermission, NotificationChannel, NotificationEventType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { WhatsappTemplateCategory, WhatsappTemplateStatus } from "@/backend/enum/whatsapp/whatsapp.enum";
-import { type WhatsappAccountPurpose, WhatsappOnboardingMode } from "@/backend/enum/whatsapp/whatsapp-account.enum";
+import {
+  type WhatsappAccountPurpose,
+  WhatsappOnboardingMode,
+  WhatsappTokenTestFailureKind,
+} from "@/backend/enum/whatsapp/whatsapp-account.enum";
 import {
   buildReturnType,
   ConflictError,
   coerceLimitTier,
   coerceQualityRating,
   ForbiddenError,
+  isMetaTestNumber,
   isValidLimitTier,
   isValidQualityRating,
   NotFoundError,
@@ -27,6 +32,7 @@ import {
 } from "@/backend/lib/whatsapp-constants";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
+  extractMetaErrorCode,
   extractMetaErrorMessage,
   GraphApiError,
 } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
@@ -38,7 +44,10 @@ import {
   parseGetPhoneNumberPlatformResponse,
   parseSubscribeAppToWabaResponse,
 } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests";
-import { buildGetPhoneNumberRequest } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
+import {
+  buildGetPhoneNumberRequest,
+  mapPhoneNumberDetail,
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
 import { collectAllTemplates } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-message-templates.request";
 import { collectAllPhoneNumbers } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-phone-numbers.request";
 import { resetWhatsappChannel } from "@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory";
@@ -94,17 +103,20 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
  * Zod schemas for validating Graph API responses at runtime.
  * Used to safely parse API responses instead of unsafe type assertions.
  */
-export const phoneNumberResultSchema = z.object({
+const phoneNumberRawSchema = z.object({
   id: z.string(),
   display_phone_number: z.string(),
   verified_name: z.string(),
   quality_rating: z.string().optional().default("UNKNOWN"),
-  throughput_level: z.string().optional().default("STANDARD"),
-  portfolio_messaging_limit_tier: z.string().optional().default("TIER_NOT_SET"),
+  throughput_level: z.string().optional(),
+  whatsapp_business_manager_messaging_limit: z.string().optional(),
+  messaging_limit_tier: z.string().optional(),
   max_conversations_per_24_hours: z.number().optional(),
   status: z.string().optional(),
   code_verification_status: z.string().optional(),
 });
+
+export const phoneNumberResultSchema = phoneNumberRawSchema.transform(mapPhoneNumberDetail);
 
 export const graphApiPagingSchema = z
   .object({
@@ -690,7 +702,13 @@ export namespace WhatsappAccountService {
     return tx ? await runner(tx) : await db.transaction(runner);
   }
 
-  export async function deleteAccount(
+  /**
+   * Stop using a WhatsApp number: deactivate it while leaving its stored
+   * messages and inbox conversations untouched. The account row itself is
+   * kept (the number stays on the system and on Meta) and remains listed as
+   * inactive.
+   */
+  export async function localDeactivateAccount(
     actorUserId: string,
     tErrors: ErrorsLabels,
     id: string,
@@ -753,22 +771,44 @@ export namespace WhatsappAccountService {
   }
 
   /**
-   * Extracts a human-readable failure reason from a thrown error. Prefers
-   * Meta's own error message when the failure is a GraphApiError (e.g.
-   * "Invalid OAuth access token", a Meta `(#code)` message), falling back to
-   * the Error's message. Returns null when nothing meaningful is available.
+   * Extracts a human-readable failure reason AND a machine-readable failure
+   * kind from a thrown error, so the UI can pick a translated, actionable hint
+   * instead of rendering Meta's raw message alone (Meta's "You do not have
+   * sufficient permissions..." is indistinguishable from a Siraj auth error).
+   *
+   * Classification (Meta Graph API error envelope):
+   *  - code 190 or "Invalid OAuth access token" → INVALID_TOKEN
+   *  - code 10 / 200 → META_PERMISSIONS (system user lacks WABA asset access
+   *    or the token is missing whatsapp_business_management / -messaging)
+   *  - other GraphApiError → META_ERROR
+   *  - non-GraphApiError (fetch/network/parse) → NETWORK_ERROR
+   *
+   * Prefers Meta's own error message as the reason when available, falling
+   * back to the Error's message. `reason` is null when nothing meaningful
+   * exists.
    */
-  function resolveTokenTestFailureReason(error: unknown): string | null {
-    if (error instanceof GraphApiError) {
-      const metaMessage = extractMetaErrorMessage(error.errorBody);
-      if (metaMessage) {
-        return metaMessage;
-      }
-    }
+  function classifyTokenTestFailure(error: unknown): {
+    reason: string | null;
+    failureKind: WhatsappTokenTestFailureKind;
+  } {
+    let fallbackReason: string | null = null;
     if (error instanceof Error) {
-      return error.message;
+      fallbackReason = error.message;
+    } else if (typeof error === "string") {
+      fallbackReason = error;
     }
-    return typeof error === "string" ? error : null;
+    if (!(error instanceof GraphApiError)) {
+      return { reason: fallbackReason, failureKind: WhatsappTokenTestFailureKind.NETWORK_ERROR };
+    }
+    const metaMessage = extractMetaErrorMessage(error.errorBody) ?? fallbackReason;
+    const code = extractMetaErrorCode(error.errorBody);
+    if (code === 190 || metaMessage?.includes("Invalid OAuth access token")) {
+      return { reason: metaMessage, failureKind: WhatsappTokenTestFailureKind.INVALID_TOKEN };
+    }
+    if (code === 10 || code === 200) {
+      return { reason: metaMessage, failureKind: WhatsappTokenTestFailureKind.META_PERMISSIONS };
+    }
+    return { reason: metaMessage, failureKind: WhatsappTokenTestFailureKind.META_ERROR };
   }
 
   /**
@@ -780,21 +820,33 @@ export namespace WhatsappAccountService {
     phoneNumberId: string,
     accessToken: string,
     apiVersion: string
-  ): Promise<{ isValid: boolean; status: string | null; isConnected: boolean; reason: string | null }> {
+  ): Promise<{
+    isValid: boolean;
+    status: string | null;
+    isConnected: boolean;
+    reason: string | null;
+    failureKind: WhatsappTokenTestFailureKind | null;
+  }> {
     try {
       const request = buildGetPhoneNumberRequest({ accessToken, apiVersion }, { phoneNumberId });
       const detail = await executeGraphApiFetch<GetPhoneNumberResult>(request, phoneNumberResultSchema);
       const isConnected = detail.status?.toUpperCase() === "CONNECTED";
-      return { isValid: true, status: detail.status ?? null, isConnected, reason: null };
+      return {
+        isValid: true,
+        status: detail.status ?? null,
+        isConnected,
+        reason: isConnected ? null : (detail.status ?? null),
+        failureKind: isConnected ? null : WhatsappTokenTestFailureKind.NOT_CONNECTED,
+      };
     } catch (error) {
-      const reason = resolveTokenTestFailureReason(error);
+      const { reason, failureKind } = classifyTokenTestFailure(error);
       logger.warn(
         `whatsapp-account-service: checkPhoneNumberWithReason failed for phoneNumberId=${phoneNumberId}: ${
           reason ?? (error instanceof Error ? error.message : String(error))
         }`,
-        { phoneNumberId, reason }
+        { phoneNumberId, reason, failureKind }
       );
-      return { isValid: false, status: null, isConnected: false, reason };
+      return { isValid: false, status: null, isConnected: false, reason, failureKind };
     }
   }
 
@@ -826,6 +878,7 @@ export namespace WhatsappAccountService {
       isConnected: verification.isConnected,
       status: verification.status,
       reason: verification.reason,
+      failureKind: verification.failureKind,
     };
   }
 
@@ -849,11 +902,12 @@ export namespace WhatsappAccountService {
       throw new WhatsappAccountValidationError("INVALID_INPUT", tErrors.invalidInput);
     }
 
-    // Validate the new token against Meta and derive the account's active flag
-    // from the real phone-number status. A token that cannot reach the number
-    // (or a number Meta reports as non-CONNECTED) must not be marked active.
+    // Validate the new token against Meta and refresh the derived Meta
+    // connection status. The system `isActive` toggle is left untouched — it is
+    // user-controlled and separate from Meta connectivity, so saving a token
+    // must not silently activate or deactivate the number.
     const existingAccount = await WhatsappAccountRepository.findById(id, tx);
-    let isActive: boolean | undefined;
+    let metaStatus: string | null | undefined;
     if (existingAccount) {
       const apiVersion = await resolveGraphApiVersion();
       const verification = await checkPhoneNumberStatusWithToken(
@@ -861,7 +915,7 @@ export namespace WhatsappAccountService {
         trimmedToken,
         apiVersion
       );
-      isActive = verification.isValid && verification.isConnected;
+      metaStatus = verification.isValid ? (verification.status ?? null) : null;
     }
 
     const updated = await WhatsappAccountRepository.setAccessToken(
@@ -869,7 +923,7 @@ export namespace WhatsappAccountService {
       // The value passed here is plaintext — encryption is handled by the
       // `encryptedText` Drizzle custom type at the toDriver boundary
       // (field-encryption.ts), so the service layer never handles ciphertext.
-      { id, encryptedAccessToken: trimmedToken, isActive },
+      { id, encryptedAccessToken: trimmedToken, metaStatus },
       tx
     );
     if (updated) {
@@ -1009,6 +1063,11 @@ export namespace WhatsappAccountService {
         { messagingLimitTierFallback: "TIER_NOT_SET" }
       );
     }
+    const isTestNumber = isMetaTestNumber(
+      detail.verified_name,
+      detail.code_verification_status,
+      detail.display_phone_number
+    );
 
     try {
       const isConnected = detail.status?.toUpperCase() === "CONNECTED";
@@ -1016,7 +1075,8 @@ export namespace WhatsappAccountService {
 
       if (existing) {
         // Reflect Meta's real connectivity status on the account. An existing
-        // account keeps its own token; only its active flag is re-synced.
+        // account keeps its own token and its system `isActive` toggle — only
+        // the derived Meta metadata (including connection status) is re-synced.
         await WhatsappAccountRepository.update(
           existing.id,
           {
@@ -1024,17 +1084,19 @@ export namespace WhatsappAccountService {
             qualityRating,
             portfolioMessagingLimitTier,
             throughputLevel: detail.throughput_level,
-            isActive: isConnected,
+            metaStatus: detail.status ?? null,
+            isTestNumber,
           },
           tx
         );
         return {
           ...existing,
-          isActive: isConnected,
+          metaStatus: detail.status ?? null,
           displayPhoneNumber: detail.display_phone_number,
           qualityRating,
           portfolioMessagingLimitTier,
           throughputLevel: detail.throughput_level,
+          isTestNumber,
         } satisfies WhatsappAccountReturnType;
       }
 
@@ -1050,9 +1112,11 @@ export namespace WhatsappAccountService {
           qualityRating,
           portfolioMessagingLimitTier,
           throughputLevel: detail.throughput_level,
+          metaStatus: detail.status ?? null,
           encryptedAccessToken: isConnected && hasUsableToken ? ctx.accessToken : SYNC_STATUS_PENDING,
           encryptedTwoStepPin: SYNC_STATUS_PENDING,
           isActive: isConnected && hasUsableToken,
+          isTestNumber,
         },
         tx
       );

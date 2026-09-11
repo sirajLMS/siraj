@@ -173,7 +173,7 @@ function makeStudentSupervisorNavItems(includeGroupId: boolean): readonly NavIte
  * grp_feedback              | complaints-manage, suggestions-manage | ComplaintsRespond|ComplaintsList / SuggestionsList
  * grp_reports               | reports, monthly-reports, teacher-dues, lesson-reports | per-item
  * grp_admin                 | permissions, settings, dst-migration, user-profile | PermissionGroupsManage / SettingsView* / SystemBulkUpdateDst
- * grp_integrations          | whatsapp-settings                   | WhatsappView / WhatsappConfigManage
+ * grp_integrations          | whatsapp-settings, whatsapp-conversations | WhatsappView / WhatsappConfigManage / WhatsappConversationsView
  * grp_resources             | resources, books-and-bags, subjects   | ResourcesList / SubjectsList
  * grp_classes               | (Phase 2) new teacher-class-details   | ClassViewDetails
  * footer_account            | own-profile, logout                   | AuthViewOwnProfile / —
@@ -289,7 +289,11 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     labelKey: "navGroupIntegrations",
     iconKey: "hub",
     section: "main",
-    permission: [AppPermission.WhatsappView, AppPermission.WhatsappConfigManage],
+    permission: [
+      AppPermission.WhatsappView,
+      AppPermission.WhatsappConfigManage,
+      AppPermission.WhatsappConversationsView,
+    ],
     separator: true,
   },
 ] as const;
@@ -744,6 +748,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.whatsappSettings,
     groupId: "grp_integrations",
   },
+  {
+    key: "whatsapp-conversations",
+    labelKey: "whatsappConversations",
+    iconKey: "chat",
+    href: "/whatsapp",
+    section: "main",
+    permission: PAGE_PERMISSIONS.whatsappConversations,
+    groupId: "grp_integrations",
+  },
 ] as const;
 
 /**
@@ -1139,6 +1152,7 @@ function applyParentNavOverrides(items: readonly NavItem[], permissions: readonl
     "suggestions-submit",
     "schedule",
     "whatsapp-settings",
+    "whatsapp-conversations",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
@@ -1155,7 +1169,7 @@ function applyTeacherNavOverrides(items: readonly NavItem[], permissions: readon
     return [...items];
   }
 
-  const hiddenKeys = new Set(["home", "books-and-bags", "whatsapp-settings"]);
+  const hiddenKeys = new Set(["home", "books-and-bags", "whatsapp-settings", "whatsapp-conversations"]);
   // Hide the admin grouped "classes" item only when the teacher-portal
   // "teacher-class-details" entry is also available (same /classes route).
   if (items.some(item => item.key === "teacher-class-details")) {
@@ -1176,7 +1190,14 @@ function applyStudentNavOverrides(items: readonly NavItem[], permissions: readon
     return [...items];
   }
   // Student portal: hide admin-focused items
-  const hiddenKeys = new Set(["home", "search-schedule", "schedule-tracking", "own-profile", "whatsapp-settings"]);
+  const hiddenKeys = new Set([
+    "home",
+    "search-schedule",
+    "schedule-tracking",
+    "own-profile",
+    "whatsapp-settings",
+    "whatsapp-conversations",
+  ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
 
@@ -1212,6 +1233,7 @@ function applySupervisorNavOverrides(items: readonly NavItem[], permissions: rea
     "permissions",
     "settings",
     "whatsapp-settings",
+    "whatsapp-conversations",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }

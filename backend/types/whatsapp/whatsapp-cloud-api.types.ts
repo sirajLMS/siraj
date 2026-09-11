@@ -50,10 +50,35 @@ export interface GraphApiPaginatedResponse<T> {
 }
 
 /**
- * Phone number detail response from GET /{phone_number_id}.
- * Fields follow Meta's v23.0 Graph API (R2/R3/R8).
+ * Raw response body from `GET /{phone_number_id}` (Meta Graph API).
  *
- * `portfolioMessagingLimitTier` is stored verbatim (Q5) — no local mapping.
+ * Meta reports the messaging limit under
+ * `whatsapp_business_manager_messaging_limit` (portfolio-scoped since Oct 2025),
+ * while `messaging_limit_tier` remains populated as a legacy alias. The raw
+ * shape is mapped to {@link GetPhoneNumberResult} by `mapPhoneNumberDetail` in
+ * the get-phone-number request builder.
+ */
+export interface PhoneNumberDetailRaw {
+  readonly id: string;
+  readonly display_phone_number: string;
+  readonly verified_name: string;
+  readonly quality_rating: string;
+  readonly throughput_level?: string;
+  /** Portfolio-scoped messaging limit (post-Oct-2025 canonical field). */
+  readonly whatsapp_business_manager_messaging_limit?: string;
+  /** Legacy per-number messaging limit alias. */
+  readonly messaging_limit_tier?: string;
+  readonly max_conversations_per_24_hours?: number;
+  readonly status?: string;
+  readonly code_verification_status?: string;
+}
+
+/**
+ * Phone number detail result produced by the get-phone-number request pipeline.
+ *
+ * `portfolio_messaging_limit_tier` is populated from Meta's
+ * `whatsapp_business_manager_messaging_limit` / `messaging_limit_tier` fields and
+ * stored verbatim — the enum value itself is never transformed.
  */
 export interface GetPhoneNumberResult {
   readonly id: string;
@@ -61,7 +86,7 @@ export interface GetPhoneNumberResult {
   readonly verified_name: string;
   readonly quality_rating: string;
   readonly throughput_level: string;
-  /** Meta tier enum, stored verbatim (Q5). */
+  /** Meta tier enum, stored verbatim. */
   readonly portfolio_messaging_limit_tier: string;
   readonly max_conversations_per_24_hours?: number;
   readonly status?: string;
@@ -155,6 +180,23 @@ export interface SendTemplateMessageResult {
   readonly providerMessageId: string;
   /** The normalized WhatsApp ID (E.164 without `+`) of the recipient. */
   readonly recipientWaId: string;
+}
+
+/**
+ * Input for building a send-text-message Graph API request (free-text,
+ * valid only inside the 24h customer service window).
+ *
+ * The success response body and parsed result are identical to the
+ * send-template envelope — reuse `SendTemplateMessageResponseBody` /
+ * `SendTemplateMessageResult` and the shared `parseSendTemplateResponse`.
+ */
+export interface SendTextMessageInput {
+  /** Meta phone number ID (the sender's `phone_number_id`). */
+  readonly phoneNumberId: string;
+  /** Recipient WhatsApp number in E.164 format (digits only, no `+`). */
+  readonly to: string;
+  /** Free-text message body (1–4096 characters, Meta-enforced limit). */
+  readonly body: string;
 }
 
 /**

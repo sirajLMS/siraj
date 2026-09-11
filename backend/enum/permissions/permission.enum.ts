@@ -285,6 +285,9 @@ export enum AppPermission {
   // WhatsApp inbox (coexistence conversations; INBOX_MANAGE reserved for the reply composer)
   WHATSAPP_INBOX_VIEW = "whatsapp.inbox_view",
   WHATSAPP_INBOX_MANAGE = "whatsapp.inbox_manage",
+  // WhatsApp conversations workspace (list/read gated by view; send/recipients by manage)
+  WHATSAPP_CONVERSATIONS_VIEW = "whatsapp.conversations_view",
+  WHATSAPP_CONVERSATIONS_MANAGE = "whatsapp.conversations_manage",
   // Quota Management
   QUOTAS_VIEW = "quotas.view",
   QUOTAS_MANAGE = "quotas.manage",

@@ -204,6 +204,7 @@ export interface UploadPreparationInput {
   contentType: string;
   fileSize: number;
   contentHash: string;
+  uploadedByUserId?: string | null;
 }
 
 // Result types

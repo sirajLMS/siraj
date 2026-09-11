@@ -18,12 +18,14 @@ export interface NumbersTabSharedProps {
   readonly loading: boolean;
   readonly syncing: boolean;
   readonly snackbar: WhatsappSnackbar;
-  readonly deletingId: string | null;
+  readonly localDeactivatingId: string | null;
   /** Per-row syncing id (null or "all" when bulk syncing). */
   readonly syncingId: string | null;
-  /** Open the delete confirmation dialog for a specific account. */
-  readonly onOpenDeleteConfirmDialog: (accountId: string, displayName: string) => void;
-  readonly onDeleteAccount: (id: string) => Promise<void>;
+  /** Open the local-deactivation confirmation dialog for a specific account. */
+  readonly onLocalDeactivateConfirmDialog: (accountId: string, displayName: string) => void;
+  /** Open the recipients manage dialog for a test-number account. */
+  readonly onOpenManageRecipients: (accountId: string) => void;
+  readonly onLocalDeactivateAccount: (id: string) => Promise<void>;
   readonly onSetAccessToken: (id: string, accessToken: string) => Promise<void>;
   /** Validate a token against Meta (no persistence); records the outcome in the store. */
   readonly onTestAccessToken: (accountId: string, token: string) => Promise<WhatsappTokenTestState>;

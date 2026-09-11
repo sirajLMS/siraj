@@ -10,6 +10,8 @@ const accountingCarryoverViewKey = "accounting.carryover_view";
 const accountingCarryoverManageKey = "accounting.carryover_manage";
 const accountingExpensesViewKey = "accounting.expenses_view";
 const accountingExpensesManageKey = "accounting.expenses_manage";
+const whatsappConversationsViewKey = "whatsapp.conversations_view";
+const whatsappConversationsManageKey = "whatsapp.conversations_manage";
 
 describe("AppPermission accounting credits manage", () => {
   test("defines ACCOUNTING_CREDITS_MANAGE with the accounting.credits_manage key", () => {
@@ -102,6 +104,25 @@ describe("AppPermission accounting expenses", () => {
   });
 });
 
+describe("AppPermission whatsapp conversations", () => {
+  test("defines WHATSAPP_CONVERSATIONS_VIEW and WHATSAPP_CONVERSATIONS_MANAGE with their keys", () => {
+    const viewValue: string = AppPermission.WHATSAPP_CONVERSATIONS_VIEW;
+    const manageValue: string = AppPermission.WHATSAPP_CONVERSATIONS_MANAGE;
+    expect(viewValue).toBe(whatsappConversationsViewKey);
+    expect(manageValue).toBe(whatsappConversationsManageKey);
+  });
+
+  test("isAppPermission accepts the whatsapp conversations keys", () => {
+    expect(isAppPermission(whatsappConversationsViewKey)).toBe(true);
+    expect(isAppPermission(whatsappConversationsManageKey)).toBe(true);
+  });
+
+  test("parseAppPermission resolves the whatsapp conversations keys to the enum values", () => {
+    expect(parseAppPermission(whatsappConversationsViewKey)).toBe(AppPermission.WHATSAPP_CONVERSATIONS_VIEW);
+    expect(parseAppPermission(whatsappConversationsManageKey)).toBe(AppPermission.WHATSAPP_CONVERSATIONS_MANAGE);
+  });
+});
+
 describe("AppPermission rejection paths", () => {
   test("isAppPermission rejects unknown permission keys", () => {
     expect(isAppPermission("accounting.credits_manage_typo")).toBe(false);
@@ -109,6 +130,8 @@ describe("AppPermission rejection paths", () => {
     expect(isAppPermission("accounting.reports_view_typo")).toBe(false);
     expect(isAppPermission("accounting.carryover_view_typo")).toBe(false);
     expect(isAppPermission("accounting.expenses_view_typo")).toBe(false);
+    expect(isAppPermission("whatsapp.conversations_view_typo")).toBe(false);
+    expect(isAppPermission("whatsapp.conversations_manage_typo")).toBe(false);
     expect(isAppPermission("unknown.permission")).toBe(false);
     expect(isAppPermission("")).toBe(false);
   });

@@ -41,8 +41,22 @@ export interface WhatsappLabels {
   readonly testRunning: string;
   readonly testPassed: string;
   readonly testFailed: string;
-  readonly deleteAccount: string;
-  readonly deleteConfirm: string;
+  /** Token-test failure: Meta rejected the token as invalid/expired (code 190). */
+  readonly tokenTestReasonInvalidToken: (reason: string) => string;
+  /** Token-test failure: Meta reported a permissions error (code 10/200) — explain token vs app permissions. */
+  readonly tokenTestReasonMetaPermissions: (reason: string) => string;
+  /** Token-test failure: any other Meta Graph API error. */
+  readonly tokenTestReasonMetaError: (reason: string) => string;
+  /** Token-test failure: the number resolved but is not CONNECTED on Meta's side. */
+  readonly tokenTestReasonNotConnected: (reason: string | null) => string;
+  /** Token-test failure: Meta could not be reached (network/DNS/parse failure). */
+  readonly tokenTestReasonNetworkError: (reason: string | null) => string;
+  /** Token-test failure: our server rejected the request before Meta was asked (auth/validation). */
+  readonly tokenTestReasonRequestRejected: (reason: string | null) => string;
+  readonly localDeactivateAccount: string;
+  /** Tooltip explaining that stopping a number keeps it on the system and on Meta while the platform stops using it. */
+  readonly localDeactivateAccountTooltip: string;
+  readonly localDeactivateConfirm: string;
   readonly wabaId: string;
   readonly phoneNumberId: string;
   readonly displayPhoneNumber: string;
@@ -52,6 +66,13 @@ export interface WhatsappLabels {
   readonly twoStepPin: string;
   readonly twoStepPinPlaceholder: string;
   readonly isActive: string;
+  /** Caption for the system active/inactive status chip (separate from Meta connection). */
+  readonly accountStatusLabel: string;
+  /** Caption for the Meta connection-status field (separate from the system activation toggle). */
+  readonly metaStatusLabel: string;
+  readonly metaStatusConnected: string;
+  readonly metaStatusDisconnected: string;
+  readonly metaStatusUnknown: string;
   readonly qualityRating: string;
   readonly messagingTier: string;
   readonly throughputLevel: string;
@@ -149,8 +170,8 @@ export interface WhatsappLabels {
   readonly optInDisabled: string;
 
   // ─── Snackbar / notification messages (i18n) ──────────────────────
-  readonly deleteSuccess: string;
-  readonly deleteError: string;
+  readonly localDeactivateSuccess: string;
+  readonly localDeactivateError: string;
   readonly saveSuccess: string;
   readonly saveError: string;
   readonly optInError: string;
@@ -182,9 +203,9 @@ export interface WhatsappLabels {
   readonly validationPurposeRequired: string;
   readonly validationPurposeInvalid: string;
 
-  // ─── Delete confirm with interpolation (Task 1) ───────────────────
-  readonly deleteConfirmTitle: string;
-  readonly deleteConfirmMessage: (displayName: string) => string;
+  // ─── Local-deactivate confirm with interpolation (Task 1) ───────────────────
+  readonly localDeactivateConfirmTitle: string;
+  readonly localDeactivateConfirmMessage: (displayName: string) => string;
 
   // ─── State labels (Task 1) ─────────────────────────────────────────
   readonly loadingTitle: string;

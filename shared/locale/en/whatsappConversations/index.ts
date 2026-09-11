@@ -1,0 +1,79 @@
+import type { WhatsappConversationsLabels } from "@/shared/locale/types/whatsappConversations";
+
+export const whatsappConversationsEn: WhatsappConversationsLabels = {
+  title: "WhatsApp Conversations",
+  subtitle: "Chat with your contacts and manage messaging across your WhatsApp numbers.",
+
+  accountSelectorLabel: "WhatsApp number",
+
+  columnContact: "Contact",
+  searchPlaceholder: "Search by contact name or number…",
+  noConversations: "No conversations yet",
+  emptyStateDescription:
+    "Messages your contacts exchange with this number appear here. Start a conversation with a template, or reply within 24 hours of a contact's last message.",
+  noAccountsTitle: "No WhatsApp numbers connected",
+  noAccountsDescription: "Connect a WhatsApp number from Settings to start messaging your contacts.",
+  loadErrorDescription: "Something went wrong while loading conversations. Please try again.",
+  retry: "Retry",
+
+  threadHeading: "Conversation with {name}",
+  threadMessagesEmpty: "No messages in this conversation yet.",
+  lastMessageAt: "Last message: {date}",
+
+  composerModeLabel: "Message type",
+  composerModeText: "Text",
+  composerModeTemplate: "Template",
+  composerTextPlaceholder: "Type a message…",
+  composerTemplatePlaceholder: "Choose a template to open the conversation.",
+  composerRecipientLabel: "Recipient",
+  composerRecipientPlaceholder: "Select a registered recipient",
+  sendButton: "Send",
+  windowOpenHint: "Reply window open — you can send free-text messages for {duration}.",
+  windowClosedHint: "The 24-hour reply window is closed. Send a template message to reach this contact.",
+  sendErrorTitle: "Couldn't send the message",
+
+  templateNameLabel: "Template name",
+  templateNamePlaceholder: "e.g. hello_world",
+  templateLanguageLabel: "Language",
+  templateLanguagePlaceholder: "en_US",
+
+  testNumberBannerTitle: "Test number",
+  testNumberBannerBody:
+    "This is a Meta test number. It can only message recipients you register and verify here or approve in the Meta App Dashboard.",
+  metaDashboardLinkText: "Open Meta App Dashboard",
+  testNumberBadge: "Test number",
+  readOnlyBadge: "Read-only",
+
+  recipientsTitle: "Test Recipients",
+  recipientsEmptyTitle: "No recipients registered",
+  recipientsEmptyDescription:
+    "Register a recipient to start testing. Test numbers can message up to 5 verified recipients.",
+  recipientAdd: "Add Recipient",
+  recipientRemove: "Remove",
+  recipientVerify: "Verify",
+  recipientStatusPending: "Pending verification",
+  recipientStatusAllowed: "Allowed",
+  recipientLastChecked: "Last checked: {date}",
+  recipientErrorCode: "Meta error: {code}",
+  recipientAddFailed: "Couldn't add the recipient. Please try again.",
+
+  addRecipientDialogTitle: "Add Test Recipient",
+  recipientPhoneLabel: "Phone Number",
+  recipientPhonePlaceholder: "e.g. +15551234567",
+  recipientNoteLabel: "Note",
+  recipientNotePlaceholder: "Optional note (e.g. QA device)",
+  dialogCancel: "Cancel",
+  dialogSave: "Save",
+
+  removeRecipientDialogTitle: "Remove Recipient",
+  removeRecipientConfirm:
+    "Remove {phone} from the allowed recipients? This number will no longer receive messages from the test number until it is re-registered.",
+
+  newConversation: "New conversation",
+  newConversationTitle: "Start a new conversation",
+  newConversationSubtitle: "Send a template message to start a new conversation.",
+
+  manageRecipients: "Manage recipients",
+  manageRecipientsTitle: "Manage test-number recipients",
+  manageRecipientsHint: "Test numbers can only message recipients approved in your Meta App Dashboard.",
+};

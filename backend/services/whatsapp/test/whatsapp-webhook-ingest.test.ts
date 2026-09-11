@@ -61,6 +61,15 @@ await mock.module("@/backend/db/repo/whatsapp", () => ({
     markSyncFailed: markSyncFailedMock,
     findByWabaId: findByWabaIdMock,
   },
+  WhatsappTestRecipientRepository: {
+    listByAccountId: async () => [],
+    countByAccountId: async () => 0,
+    create: async () => null,
+    deleteById: async () => null,
+    findById: async () => null,
+    findByAccountAndPhone: async () => null,
+    recordVerify: async () => null,
+  },
 }));
 
 await mock.module("@/backend/services/whatsapp/whatsapp-account.service", () => ({
@@ -108,6 +117,14 @@ function getMockCallArg(mockFn: { mock: { calls: unknown[][] } }, callIndex: num
   return isRecord(arg) ? arg : {};
 }
 
+/** Second argument (conversation rollup) of the Nth touchLastMessage call. */
+function getTouchRollupArg(callIndex: number): Record<string, unknown> {
+  const calls: unknown = touchLastMessageMock.mock.calls;
+  const call = Array.isArray(calls) ? calls[callIndex] : undefined;
+  const rollup = Array.isArray(call) ? call[1] : undefined;
+  return isRecord(rollup) ? rollup : {};
+}
+
 function makeTestAccount(overrides: Partial<WhatsappAccountReturnType> = {}): WhatsappAccountReturnType {
   return {
     id: "acct-ldev-1",
@@ -128,6 +145,8 @@ function makeTestAccount(overrides: Partial<WhatsappAccountReturnType> = {}): Wh
     syncFailureReason: null,
     offboardedAt: null,
     isActive: true,
+    isTestNumber: false,
+    metaStatus: null,
     lastWebhookAt: null,
     createdAt: new Date("2024-01-01"),
     updatedAt: new Date("2024-01-01"),
@@ -587,5 +606,63 @@ describe("business_capability_update tolerant parsing", () => {
     const arg = isRecord(rawArg) ? rawArg : {};
     expect(arg).not.toHaveProperty("portfolioMessagingLimitTier");
     expect(arg).not.toHaveProperty("maxPhoneNumbersPerBusiness");
+  });
+});
+
+describe("conversation rollup inbound stamp", () => {
+  test("an inbound user message advances lastInboundMessageAt to the message timestamp", async () => {
+    const { WhatsappWebhookHandler } = await importHandler();
+    findByPhoneNumberIdMock.mockResolvedValueOnce(makeActiveInboxAccount());
+    upsertByIdentityMock.mockResolvedValue({ id: "conv-in" });
+    const timestamp = "1700000000";
+
+    await WhatsappWebhookHandler.processEvent(
+      makeWebhookBody([
+        {
+          field: "messages",
+          value: makeInboxValue({
+            messages: [
+              { id: "wamid.inbound.stamp", from: "966555000111", timestamp, type: "text", text: { body: "hello" } },
+            ],
+          }),
+        },
+      ])
+    );
+
+    expect(touchLastMessageMock).toHaveBeenCalled();
+    const stamp = getTouchRollupArg(0).inboundAt;
+    if (!(stamp instanceof Date)) {
+      throw new Error("expected touchLastMessage to receive a Date inbound stamp");
+    }
+    expect(stamp.getTime()).toBe(Number(timestamp) * 1000);
+  });
+
+  test("a business-app echo rolls the conversation forward but never marks lastInboundMessageAt", async () => {
+    const { WhatsappWebhookHandler } = await importHandler();
+    findByPhoneNumberIdMock.mockResolvedValueOnce(makeActiveInboxAccount());
+    upsertByIdentityMock.mockResolvedValue({ id: "conv-echo" });
+
+    await WhatsappWebhookHandler.processEvent(
+      makeWebhookBody([
+        {
+          field: "smb_message_echoes",
+          value: makeInboxValue({
+            message_echoes: [
+              {
+                id: "wamid.echo.stamp",
+                from: "966500000001",
+                to: "966555000111",
+                timestamp: "1700000000",
+                type: "text",
+                text: { body: "echo body" },
+              },
+            ],
+          }),
+        },
+      ])
+    );
+
+    expect(touchLastMessageMock).toHaveBeenCalled();
+    expect(getTouchRollupArg(0).inboundAt).toBeNull();
   });
 });

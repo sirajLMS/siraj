@@ -224,6 +224,55 @@ describe("WhatsappConversationRepository — touchLastMessage", () => {
     expect(stale?.lastMessagePreview).toBe("hi");
   });
 
+  conversationTest("advances lastInboundMessageAt only when the touch carries an inbound stamp", async tx => {
+    const account = await makeAccount(tx);
+    const conversation = await makeConversation(tx, account.id);
+
+    const echoTouched = await WhatsappConversationRepository.touchLastMessage(
+      conversation.id,
+      { at: atMinutesAgo(30), preview: "echo" },
+      tx
+    );
+    expect(echoTouched?.lastInboundMessageAt).toBeNull();
+
+    const inboundAt = atMinutesAgo(10);
+    const inboundTouched = await WhatsappConversationRepository.touchLastMessage(
+      conversation.id,
+      { at: inboundAt, preview: "hi", inboundAt },
+      tx
+    );
+    expect(inboundTouched?.lastInboundMessageAt?.getTime()).toBe(inboundAt.getTime());
+
+    const staleTouched = await WhatsappConversationRepository.touchLastMessage(
+      conversation.id,
+      { at: atMinutesAgo(1), preview: "newer", inboundAt: atMinutesAgo(20) },
+      tx
+    );
+    expect(staleTouched?.lastInboundMessageAt?.getTime()).toBe(inboundAt.getTime());
+  });
+
+  conversationTest("a general rollup newest-echo does not refuse an older-but-first inbound stamp", async tx => {
+    const account = await makeAccount(tx);
+    const conversation = await makeConversation(tx, account.id);
+    const echoAt = atMinutesAgo(1);
+
+    const echoTouched = await WhatsappConversationRepository.touchLastMessage(
+      conversation.id,
+      { at: echoAt, preview: "echo" },
+      tx
+    );
+    expect(echoTouched?.lastMessageAt?.getTime()).toBe(echoAt.getTime());
+
+    const inboundAt = atMinutesAgo(5);
+    const touched = await WhatsappConversationRepository.touchLastMessage(
+      conversation.id,
+      { at: inboundAt, preview: "late arrival", inboundAt },
+      tx
+    );
+    expect(touched?.lastMessageAt?.getTime()).toBe(echoAt.getTime());
+    expect(touched?.lastInboundMessageAt?.getTime()).toBe(inboundAt.getTime());
+  });
+
   conversationTest("returns null for a missing conversation", async tx => {
     const missing = await WhatsappConversationRepository.touchLastMessage(
       randomUUID(),

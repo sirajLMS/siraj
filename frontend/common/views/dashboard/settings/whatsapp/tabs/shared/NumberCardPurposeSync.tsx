@@ -4,9 +4,10 @@ import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { WhatsappOnboardingMode, WhatsappSyncStatus } from "@/frontend/common/graphql/generated/gql/graphql";
-import type {
-  NumberCardLabels,
-  NumberCardSyncProps,
+import {
+  type NumberCardLabels,
+  NumberCardStatusChip,
+  type NumberCardSyncProps,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCardContent";
 import {
   SyncCompletePanel,
@@ -127,9 +128,13 @@ export function NumberCardPurposeSync({
   const mode = account.onboardingMode ?? null;
   return (
     <Stack spacing={1.5}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-        {purpose === null ? null : <PurposeChip labels={t} purpose={purpose} />}
-        {mode === null ? null : <OnboardingModeChip labels={t} mode={mode} />}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+        {purpose === null ? null : (
+          <NumberCardStatusChip caption={t.purposeLabel} badge={<PurposeChip labels={t} purpose={purpose} />} />
+        )}
+        {mode === null ? null : (
+          <NumberCardStatusChip caption={t.onboardingModeLabel} badge={<OnboardingModeChip labels={t} mode={mode} />} />
+        )}
       </Box>
       {mode === WhatsappOnboardingMode.Coexistence ? (
         <CoexistenceSyncRow

@@ -46,6 +46,7 @@ export async function prepareUploadHelper(
       fileSize: BigInt(input.fileSize),
       contentHash: input.contentHash,
       expiresAt,
+      uploadedByUserId: input.uploadedByUserId ?? null,
       createdAt: new Date(),
       used: false,
     });

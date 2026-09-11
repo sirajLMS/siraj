@@ -6,8 +6,8 @@ import type { WhatsappAccountPurpose } from "@/frontend/common/graphql/generated
 import {
   completeWhatsappEmbeddedSignupMutationDocument,
   createWhatsappAccountMutationDocument,
-  deleteWhatsappAccountMutationDocument,
   isUserWhatsappOptInQueryDocument,
+  localDeactivateWhatsappAccountMutationDocument,
   setUserWhatsappOptInMutationDocument,
   setWhatsappAccessTokenMutationDocument,
   setWhatsappTwoStepPinMutationDocument,
@@ -44,6 +44,8 @@ import {
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
 import { CURRENT_USER } from "@/shared/constants/whatsapp-current-user";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
+import type { WhatsappConversationsLabels } from "@/shared/locale/types/whatsappConversations";
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -63,20 +65,20 @@ type SnackbarShow = (message: string, severity: "success" | "error") => void;
 
 // ─── Mutation action functions (pure async helpers) ──────────────────
 
-async function deleteAccountAction(
+async function localDeactivateAccountAction(
   id: string,
-  deleteAccount: (opts: { variables: { id: string } }) => Promise<unknown>,
+  localDeactivateAccount: (opts: { variables: { id: string } }) => Promise<unknown>,
   refetchAccounts: () => Promise<unknown>,
   labels: WhatsappSettingsLabels["notifications"],
   showSnackbar: SnackbarShow
 ): Promise<void> {
   try {
-    await deleteAccount({ variables: { id } });
+    await localDeactivateAccount({ variables: { id } });
     await refetchAccounts();
-    showSnackbar(labels.deleteSuccess, "success");
+    showSnackbar(labels.localDeactivateSuccess, "success");
   } catch (error) {
-    logger.error("Failed to delete WhatsApp account", { error });
-    showSnackbar(labels.deleteError, "error");
+    logger.error("Failed to locally deactivate WhatsApp account", { error });
+    showSnackbar(labels.localDeactivateError, "error");
   }
 }
 
@@ -198,7 +200,7 @@ function useWhatsappQueries() {
 }
 
 function useWhatsappMutations() {
-  const [deleteAccount] = useMutation(deleteWhatsappAccountMutationDocument);
+  const [localDeactivateAccount] = useMutation(localDeactivateWhatsappAccountMutationDocument);
   const [setAccessToken] = useMutation(setWhatsappAccessTokenMutationDocument);
   const [setTwoStepPin] = useMutation(setWhatsappTwoStepPinMutationDocument);
   const [testAccessToken] = useMutation(testWhatsappAccessTokenMutationDocument);
@@ -210,7 +212,7 @@ function useWhatsappMutations() {
   const [completeEmbeddedSignup] = useMutation(completeWhatsappEmbeddedSignupMutationDocument);
 
   return {
-    deleteAccount,
+    localDeactivateAccount,
     setAccessToken,
     setTwoStepPin,
     testAccessToken,
@@ -295,9 +297,14 @@ function useWhatsappDialogs() {
     setDialogState({ type: "editPin", accountId });
   }, []);
 
-  const openDeleteConfirmDialog = useCallback((accountId: string, displayName: string) => {
+  const openLocalDeactivateConfirmDialog = useCallback((accountId: string, displayName: string) => {
     setMutationError(null);
-    setDialogState({ type: "deleteConfirm", accountId, displayName });
+    setDialogState({ type: "localDeactivateConfirm", accountId, displayName });
+  }, []);
+
+  const openManageRecipientsDialog = useCallback((accountId: string) => {
+    setMutationError(null);
+    setDialogState({ type: "manageRecipients", accountId });
   }, []);
 
   const openEmbeddedSignupDialog = useCallback(() => {
@@ -318,7 +325,8 @@ function useWhatsappDialogs() {
     openEditNameDialog,
     openEditTokenDialog,
     openEditPinDialog,
-    openDeleteConfirmDialog,
+    openLocalDeactivateConfirmDialog,
+    openManageRecipientsDialog,
     openEmbeddedSignupDialog,
     closeDialog,
   };
@@ -486,7 +494,7 @@ function useWhatsappCreateHandler({
   return { creating, handleCreate };
 }
 
-function useWhatsappUpdateDeleteHandlers({
+function useWhatsappUpdateLocalDeactivateHandlers({
   mutations,
   queries,
   labels,
@@ -494,7 +502,7 @@ function useWhatsappUpdateDeleteHandlers({
   closeDialog,
   setMutationError,
 }: WhatsappHandlersArgs) {
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [localDeactivatingId, setLocalDeactivatingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const handleEditName = useWhatsappEditNameHandler({
@@ -507,13 +515,13 @@ function useWhatsappUpdateDeleteHandlers({
     setUpdatingId,
   });
 
-  const handleDelete = useWhatsappDeleteHandler({
-    deleteAccount: mutations.deleteAccount,
+  const handleLocalDeactivate = useWhatsappLocalDeactivateHandler({
+    localDeactivateAccount: mutations.localDeactivateAccount,
     refetchAccounts: queries.accountsQuery.refetch,
     notifications: labels.notifications,
     showSnackbar,
     closeDialog,
-    setDeletingId,
+    setLocalDeactivatingId,
   });
 
   const handleUpdatePurpose = useWhatsappPurposeHandler({
@@ -524,7 +532,7 @@ function useWhatsappUpdateDeleteHandlers({
     setUpdatingId,
   });
 
-  return { deletingId, updatingId, handleEditName, handleUpdatePurpose, handleDelete };
+  return { localDeactivatingId, updatingId, handleEditName, handleUpdatePurpose, handleLocalDeactivate };
 }
 
 interface UseWhatsappPurposeHandlerArgs {
@@ -598,34 +606,40 @@ function useWhatsappEditNameHandler({
   return handleEditName;
 }
 
-interface UseWhatsappDeleteHandlerArgs {
-  deleteAccount: (opts: { variables: { id: string } }) => Promise<unknown>;
+interface UseWhatsappLocalDeactivateHandlerArgs {
+  localDeactivateAccount: (opts: { variables: { id: string } }) => Promise<unknown>;
   refetchAccounts: () => Promise<unknown>;
   notifications: WhatsappSettingsLabels["notifications"];
   showSnackbar: SnackbarShow;
   closeDialog: () => void;
-  setDeletingId: (value: string | null) => void;
+  setLocalDeactivatingId: (value: string | null) => void;
 }
 
-function useWhatsappDeleteHandler({
-  deleteAccount,
+function useWhatsappLocalDeactivateHandler({
+  localDeactivateAccount,
   refetchAccounts,
   notifications,
   showSnackbar,
   closeDialog,
-  setDeletingId,
-}: UseWhatsappDeleteHandlerArgs) {
-  const handleDelete = async (accountId: string) => {
-    setDeletingId(accountId);
+  setLocalDeactivatingId,
+}: UseWhatsappLocalDeactivateHandlerArgs) {
+  const handleLocalDeactivate = async (accountId: string) => {
+    setLocalDeactivatingId(accountId);
     try {
-      await deleteAccountAction(accountId, deleteAccount, refetchAccounts, notifications, showSnackbar);
+      await localDeactivateAccountAction(
+        accountId,
+        localDeactivateAccount,
+        refetchAccounts,
+        notifications,
+        showSnackbar
+      );
       closeDialog();
     } finally {
-      setDeletingId(null);
+      setLocalDeactivatingId(null);
     }
   };
 
-  return handleDelete;
+  return handleLocalDeactivate;
 }
 
 // ─── Embedded signup handler ─────────────────────────────────────────
@@ -753,12 +767,19 @@ function useWhatsappTokenTestHandler(mutations: ReturnType<typeof useWhatsappMut
         const result = data?.testWhatsappAccessToken;
         const passed = result?.isValid === true && result?.isConnected === true;
         const state: WhatsappTokenTestState = passed ? "success" : "failed";
-        setTokenTest(accountId, token, { state, reason: passed ? null : (result?.reason ?? null) });
+        setTokenTest(accountId, token, {
+          state,
+          reason: passed ? null : (result?.reason ?? null),
+          failureKind: passed ? null : (result?.failureKind ?? null),
+        });
         return state;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         logger.logDomainError("Failed to test WhatsApp access token", { error: message });
-        setTokenTest(accountId, token, { state: "failed", reason: message });
+        // The request was rejected by our server (auth/validation/GraphQL) —
+        // Meta was never asked. failureKind stays null so the UI shows the
+        // "request rejected" hint instead of a Meta-token hint.
+        setTokenTest(accountId, token, { state: "failed", reason: message, failureKind: null });
         return "failed";
       }
     },
@@ -770,24 +791,27 @@ function useWhatsappTokenTestHandler(mutations: ReturnType<typeof useWhatsappMut
 
 // ─── Labels hook ─────────────────────────────────────────────────────
 
-function useWhatsappLabels(whatsappLabels: WhatsappSettingsLabels["page"]): WhatsappSettingsLabels {
+function useWhatsappLabels(
+  whatsappLabels: WhatsappLabels,
+  conversationsLabels: Pick<WhatsappConversationsLabels, "testNumberBadge" | "manageRecipients">
+): WhatsappSettingsLabels {
   return useMemo<WhatsappSettingsLabels>(
     () => ({
-      page: whatsappLabels,
+      page: { ...whatsappLabels, ...conversationsLabels },
       notifications: {
         syncSuccess: whatsappLabels.syncSuccess,
         syncSuccessWithCounts: whatsappLabels.syncSuccessWithCounts,
         syncNoChange: whatsappLabels.syncNoChange,
         syncError: whatsappLabels.syncError,
-        deleteSuccess: whatsappLabels.deleteSuccess,
-        deleteError: whatsappLabels.deleteError,
+        localDeactivateSuccess: whatsappLabels.localDeactivateSuccess,
+        localDeactivateError: whatsappLabels.localDeactivateError,
         saveSuccess: whatsappLabels.saveSuccess,
         saveError: whatsappLabels.saveError,
         optInSuccess: whatsappLabels.optInEnabled,
         optInError: whatsappLabels.optInError,
       },
     }),
-    [whatsappLabels]
+    [whatsappLabels, conversationsLabels]
   );
 }
 
@@ -818,7 +842,7 @@ interface WhatsappViewModelParts {
   isConfigured: boolean;
   syncDisabledReason: string | undefined;
   createHandler: ReturnType<typeof useWhatsappCreateHandler>;
-  updateDeleteHandlers: ReturnType<typeof useWhatsappUpdateDeleteHandlers>;
+  updateLocalDeactivateHandlers: ReturnType<typeof useWhatsappUpdateLocalDeactivateHandlers>;
   utilityHandlers: ReturnType<typeof useWhatsappUtilityHandlers>;
   embeddedSignupHandler: ReturnType<typeof useWhatsappEmbeddedSignupHandler>;
   dialogState: WhatsappDialogState;
@@ -829,7 +853,8 @@ interface WhatsappViewModelParts {
   openEditNameDialog: (accountId: string, displayName: string, purpose: WhatsappAccountPurpose) => void;
   openEditTokenDialog: (accountId: string) => void;
   openEditPinDialog: (accountId: string) => void;
-  openDeleteConfirmDialog: (accountId: string, displayName: string) => void;
+  openLocalDeactivateConfirmDialog: (accountId: string, displayName: string) => void;
+  openManageRecipientsDialog: (accountId: string) => void;
   openEmbeddedSignupDialog: () => void;
   embeddedSignupBlocked: boolean;
   closeDialog: () => void;
@@ -859,8 +884,8 @@ function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsView
     isConfigured: p.isConfigured,
     syncDisabledReason: p.syncDisabledReason,
     creating: p.createHandler.creating,
-    deletingId: p.updateDeleteHandlers.deletingId,
-    updatingId: p.updateDeleteHandlers.updatingId,
+    localDeactivatingId: p.updateLocalDeactivateHandlers.localDeactivatingId,
+    updatingId: p.updateLocalDeactivateHandlers.updatingId,
     syncingId: p.utilityHandlers.syncing ? "all" : null,
     editingTokenForId: p.editingTokenForId,
     editingPinForId: p.editingPinForId,
@@ -880,12 +905,13 @@ function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsView
     openEditNameDialog: p.openEditNameDialog,
     openEditTokenDialog: p.openEditTokenDialog,
     openEditPinDialog: p.openEditPinDialog,
-    openDeleteConfirmDialog: p.openDeleteConfirmDialog,
+    openLocalDeactivateConfirmDialog: p.openLocalDeactivateConfirmDialog,
+    openManageRecipientsDialog: p.openManageRecipientsDialog,
     closeDialog: p.closeDialog,
     handleCreate: p.createHandler.handleCreate,
-    handleEditName: p.updateDeleteHandlers.handleEditName,
-    handleUpdatePurpose: p.updateDeleteHandlers.handleUpdatePurpose,
-    handleDelete: p.updateDeleteHandlers.handleDelete,
+    handleEditName: p.updateLocalDeactivateHandlers.handleEditName,
+    handleUpdatePurpose: p.updateLocalDeactivateHandlers.handleUpdatePurpose,
+    handleLocalDeactivate: p.updateLocalDeactivateHandlers.handleLocalDeactivate,
     handleSubmitToken: p.utilityHandlers.handleSubmitToken,
     handleSubmitPin: p.utilityHandlers.handleSubmitPin,
     handleTestToken: p.handleTestToken,
@@ -894,7 +920,7 @@ function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsView
     handleToggleOptIn: p.utilityHandlers.handleToggleOptIn,
     refetchAccounts: p.refetchAccounts,
     refetchTemplates: p.refetchTemplates,
-    onDeleteAccount: p.updateDeleteHandlers.handleDelete,
+    onLocalDeactivateAccount: p.updateLocalDeactivateHandlers.handleLocalDeactivate,
     onSetAccessToken: p.utilityHandlers.handleSubmitToken,
     onSetTwoStepPin: p.utilityHandlers.handleSubmitPin,
     onSyncFromMeta: p.utilityHandlers.handleSync,
@@ -939,9 +965,9 @@ function useWhatsappHandlers(
   >
 ) {
   const createHandler = useWhatsappCreateHandler(args);
-  const updateDeleteHandlers = useWhatsappUpdateDeleteHandlers(args);
+  const updateLocalDeactivateHandlers = useWhatsappUpdateLocalDeactivateHandlers(args);
   const utilityHandlers = useWhatsappUtilityHandlers(args);
-  return { createHandler, updateDeleteHandlers, utilityHandlers };
+  return { createHandler, updateLocalDeactivateHandlers, utilityHandlers };
 }
 
 // ─── Page-interaction state hook (dialog/snackbar/handlers stack) ────
@@ -960,7 +986,8 @@ function useWhatsappPageInteractions(
     openEditNameDialog,
     openEditTokenDialog,
     openEditPinDialog,
-    openDeleteConfirmDialog,
+    openLocalDeactivateConfirmDialog,
+    openManageRecipientsDialog,
     openEmbeddedSignupDialog: openEmbeddedSignupDialogRaw,
     closeDialog,
   } = useWhatsappDialogs();
@@ -980,7 +1007,7 @@ function useWhatsappPageInteractions(
     openEmbeddedSignupDialogRaw();
   }, [labels.page, showSnackbar, openEmbeddedSignupDialogRaw]);
 
-  const { createHandler, updateDeleteHandlers, utilityHandlers } = useWhatsappHandlers({
+  const { createHandler, updateLocalDeactivateHandlers, utilityHandlers } = useWhatsappHandlers({
     mutations,
     queries,
     labels,
@@ -1005,12 +1032,13 @@ function useWhatsappPageInteractions(
     openEditNameDialog,
     openEditTokenDialog,
     openEditPinDialog,
-    openDeleteConfirmDialog,
+    openLocalDeactivateConfirmDialog,
+    openManageRecipientsDialog,
     openEmbeddedSignupDialog,
     embeddedSignupBlocked,
     closeDialog,
     createHandler,
-    updateDeleteHandlers,
+    updateLocalDeactivateHandlers,
     utilityHandlers,
     embeddedSignupHandler,
     refetchAccounts,
@@ -1029,12 +1057,13 @@ export function useWhatsappSettingsViewModel(props?: {
   const esConfigId = props?.esConfigId ?? null;
   const esAppId = props?.esAppId ?? null;
   const whatsappLabels = useAppTranslation(Translation.Whatsapp);
+  const conversationsLabels = useAppTranslation(Translation.WhatsappConversations);
   const queries = useWhatsappQueries();
   const mutations = useWhatsappMutations();
   const { handleTestToken } = useWhatsappTokenTestHandler(mutations);
   const tokenTestStates = useWhatsappTokenTestStore(store => store.tokenTests);
 
-  const labels = useWhatsappLabels(whatsappLabels);
+  const labels = useWhatsappLabels(whatsappLabels, conversationsLabels);
   const {
     accounts,
     templates,
@@ -1066,7 +1095,7 @@ export function useWhatsappSettingsViewModel(props?: {
     syncDisabledReason,
     queryError,
     createHandler: page.createHandler,
-    updateDeleteHandlers: page.updateDeleteHandlers,
+    updateLocalDeactivateHandlers: page.updateLocalDeactivateHandlers,
     utilityHandlers: page.utilityHandlers,
     embeddedSignupHandler: page.embeddedSignupHandler,
     dialogState: page.dialogState,
@@ -1077,7 +1106,8 @@ export function useWhatsappSettingsViewModel(props?: {
     openEditNameDialog: page.openEditNameDialog,
     openEditTokenDialog: page.openEditTokenDialog,
     openEditPinDialog: page.openEditPinDialog,
-    openDeleteConfirmDialog: page.openDeleteConfirmDialog,
+    openLocalDeactivateConfirmDialog: page.openLocalDeactivateConfirmDialog,
+    openManageRecipientsDialog: page.openManageRecipientsDialog,
     openEmbeddedSignupDialog: page.openEmbeddedSignupDialog,
     embeddedSignupBlocked: page.embeddedSignupBlocked,
     closeDialog: page.closeDialog,

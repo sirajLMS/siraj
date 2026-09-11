@@ -39,8 +39,8 @@ const settingsLabels: WhatsappSettingsLabels = {
     syncSuccessWithCounts: labels.syncSuccessWithCounts,
     syncNoChange: labels.syncNoChange,
     syncError: labels.syncError,
-    deleteSuccess: labels.deleteSuccess,
-    deleteError: labels.deleteError,
+    localDeactivateSuccess: labels.localDeactivateSuccess,
+    localDeactivateError: labels.localDeactivateError,
     saveSuccess: labels.saveSuccess,
     saveError: labels.saveError,
     optInSuccess: "Opt-in updated successfully.",
@@ -55,7 +55,7 @@ const mobileNumbersProps = {
   loading: false,
   syncing: false,
   snackbar: null,
-  deletingId: null,
+  localDeactivatingId: null,
   syncingId: null,
   editingTokenForId: null,
   editingPinForId: null,
@@ -65,8 +65,8 @@ const mobileNumbersProps = {
   mutationError: null,
   onSyncFromMeta: mock(noopPromise),
   onDismissSnackbar: mock(() => {}),
-  onOpenDeleteConfirmDialog: mock(() => {}),
-  onDeleteAccount: mock(noopPromise),
+  onLocalDeactivateConfirmDialog: mock(() => {}),
+  onLocalDeactivateAccount: mock(noopPromise),
   onSetAccessToken: mock(noopPromise),
   onTestAccessToken: mock(() => Promise.resolve("success" as const)),
   tokenTestStates: {},
@@ -125,7 +125,7 @@ describe("Mobile parity — NumbersTab CRUD", () => {
       expect(screen.getByText(labels.editName)).toBeTruthy();
       expect(screen.getByText(labels.editToken)).toBeTruthy();
       expect(screen.getByText(labels.editPin)).toBeTruthy();
-      expect(screen.getByText(labels.deleteAccount)).toBeTruthy();
+      expect(screen.getByText(labels.localDeactivateAccount)).toBeTruthy();
     });
   });
 
@@ -146,17 +146,17 @@ describe("Mobile parity — NumbersTab CRUD", () => {
     expect(screen.getByText(labels.addFirstNumber)).toBeTruthy();
   });
 
-  test("delete confirm dialog shows on mobile when dialogState.type is 'deleteConfirm'", () => {
+  test("local-deactivate confirm dialog shows on mobile when dialogState.type is 'localDeactivateConfirm'", () => {
     renderWithWrapper(
       <NumbersTabMobile
         {...mobileNumbersProps}
         accounts={[makeAccountRow("acc-1")]}
-        dialogState={{ type: "deleteConfirm", accountId: "acc-1", displayName: "Delete Me" }}
+        dialogState={{ type: "localDeactivateConfirm", accountId: "acc-1", displayName: "Delete Me" }}
       />,
       { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
-    expect(screen.getByText(labels.deleteConfirmTitle)).toBeTruthy();
-    expect(screen.getByText(labels.deleteConfirmMessage("Delete Me"))).toBeTruthy();
+    expect(screen.getByText(labels.localDeactivateConfirmTitle)).toBeTruthy();
+    expect(screen.getByText(labels.localDeactivateConfirmMessage("Delete Me"))).toBeTruthy();
   });
 });
 

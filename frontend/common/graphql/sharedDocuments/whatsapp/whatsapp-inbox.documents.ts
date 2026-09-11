@@ -16,7 +16,7 @@ import type {
  * includes `id` for Apollo cache normalization.
  */
 
-const WHATSAPP_CONVERSATION_FIELDS = gql`
+export const WHATSAPP_CONVERSATION_FIELDS = gql`
   fragment WhatsappConversationFields on WhatsappConversation {
     id
     accountId
@@ -55,7 +55,7 @@ export const whatsappConversationsQueryDocument: TypedDocumentNode<
     }
   }
 `;
-const WHATSAPP_MESSAGE_FIELDS = gql`
+export const WHATSAPP_MESSAGE_FIELDS = gql`
   fragment WhatsappMessageFields on WhatsappMessage {
     id
     conversationId

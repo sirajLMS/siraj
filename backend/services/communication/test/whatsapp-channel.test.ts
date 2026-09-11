@@ -64,6 +64,8 @@ function mockWhatsappCredentialsAccount(overrides: Partial<WhatsappAccountSelect
     syncFailureReason: null,
     offboardedAt: null,
     isActive: true,
+    isTestNumber: false,
+    metaStatus: null,
     lastWebhookAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),

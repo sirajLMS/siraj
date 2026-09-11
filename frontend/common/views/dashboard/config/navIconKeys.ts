@@ -5,6 +5,7 @@ export type NavIconKey =
   | "badge"
   | "calendarToday"
   | "category"
+  | "chat"
   | "class"
   | "currencyExchange"
   | "dashboard"

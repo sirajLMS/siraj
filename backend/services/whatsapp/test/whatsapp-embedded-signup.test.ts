@@ -132,6 +132,15 @@ void mock.module("@/backend/db/repo/whatsapp", () => ({
     markProcessed: async () => null,
     markFailed: async () => null,
   },
+  WhatsappTestRecipientRepository: {
+    listByAccountId: async () => [],
+    countByAccountId: async () => 0,
+    create: async () => null,
+    deleteById: async () => null,
+    findById: async () => null,
+    findByAccountAndPhone: async () => null,
+    recordVerify: async () => null,
+  },
 }));
 
 void mock.module("@/backend/services/auth/permissions.service", () => ({

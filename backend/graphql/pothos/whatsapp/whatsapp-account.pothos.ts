@@ -7,6 +7,7 @@ import {
   WhatsappSyncStatusPothosEnum,
   WhatsappTemplateCategoryPothosEnum,
   WhatsappTemplateStatusPothosEnum,
+  WhatsappTokenTestFailureKindPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { whatsappAccountSharedInputFields } from "@/backend/graphql/pothos/whatsapp/__shared__/whatsappAccountFieldHelpers";
 import type {
@@ -36,6 +37,8 @@ export const WhatsappAccountPothosObject = WhatsappAccountRef.implement({
     throughputLevel: t.exposeString("throughputLevel", { nullable: true }),
     maxPhoneNumbersPerBusiness: t.exposeString("maxPhoneNumbersPerBusiness", { nullable: true }),
     isActive: t.exposeBoolean("isActive"),
+    isTestNumber: t.exposeBoolean("isTestNumber"),
+    metaStatus: t.exposeString("metaStatus", { nullable: true }),
     purpose: t.expose("purpose", { type: WhatsappAccountPurposePothosEnum }),
     onboardingMode: t.expose("onboardingMode", { type: WhatsappOnboardingModePothosEnum }),
     syncStatus: t.expose("syncStatus", { type: WhatsappSyncStatusPothosEnum }),
@@ -162,5 +165,11 @@ export const WhatsappAccessTokenTestResultPothosObject = WhatsappAccessTokenTest
     isConnected: t.exposeBoolean("isConnected"),
     status: t.exposeString("status", { nullable: true }),
     reason: t.exposeString("reason", { nullable: true }),
+    failureKind: t.expose("failureKind", {
+      type: WhatsappTokenTestFailureKindPothosEnum,
+      nullable: true,
+      description:
+        "Machine-readable failure classification (null when the test passed): separates Meta-side rejections (INVALID_TOKEN, META_PERMISSIONS, META_ERROR, NOT_CONNECTED) from transport failures (NETWORK_ERROR) so the UI can show the right translated hint.",
+    }),
   }),
 });

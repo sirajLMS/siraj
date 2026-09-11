@@ -133,6 +133,7 @@ import type {
   UserSelectLabels,
 } from "@/shared/locale/types/ui";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
+import type { WhatsappConversationsLabels } from "@/shared/locale/types/whatsappConversations";
 import type { WhatsappInboxLabels } from "@/shared/locale/types/whatsappInbox";
 
 /** DashboardTranslations — group collector for all dashboard-domain labels. */
@@ -281,4 +282,5 @@ export type Translations = {
   notificationsTranslations: NotificationsLabels;
   whatsappTranslations: WhatsappLabels;
   whatsappInboxTranslations: WhatsappInboxLabels;
+  whatsappConversationsTranslations: WhatsappConversationsLabels;
 };

@@ -27,6 +27,8 @@ export function makeAccountRow(
     displayPhoneNumber: displayPhone,
     displayName: { en: displayName },
     isActive: true,
+    isTestNumber: false,
+    metaStatus: null,
     purpose: WhatsappAccountPurpose.General,
     onboardingMode: WhatsappOnboardingMode.CloudApi,
     syncStatus: WhatsappSyncStatus.NotStarted,

@@ -2,14 +2,15 @@
 
 import {
   AddOutlined,
+  BlockOutlined,
   CheckCircleOutlined,
   CloudSyncOutlined,
-  DeleteOutlined,
   EditOutlined,
   ErrorOutlined,
   KeyOutlined,
   MoreVertOutlined,
   PasswordOutlined,
+  PersonAddAlt1Outlined,
   SearchOutlined,
   VisibilityOffOutlined,
   VisibilityOutlined,
@@ -38,16 +39,18 @@ import { EmbeddedSignupDialog } from "@/frontend/common/views/dashboard/settings
 import {
   MetaNumbersLinkShared,
   NumbersCreateEditDialogs,
-  NumbersDeleteConfirmDialog,
   NumbersEmptyStateShared,
   NumbersHeaderShared,
   NumbersListItemTransition,
+  NumbersLocalDeactivateConfirmDialog,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/__shared__";
 import { NumbersSnackbar } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/components/NumbersSnackbar";
 import { NumberCardContent } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/NumberCardContent";
 import { syncPulseSx } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/whatsappAnimations";
 import type { NumbersTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
+import { resolveTokenTestFailureText } from "@/frontend/common/views/dashboard/settings/whatsapp/tokenTestFailureText";
 import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import { TestRecipientsManageDialog } from "@/frontend/common/views/dashboard/whatsapp/conversations/TestRecipientsManageDialog";
 import { MobileCardList, MobileCardListItem, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
@@ -165,10 +168,10 @@ function CredentialEditDialogMobile({
   const busy = form.submitting || loading;
   const tokenTestResult = isToken ? tokenTestStates[state.accountId]?.[form.value] : undefined;
   const testState = tokenTestResult?.state;
-  const testReason = tokenTestResult?.reason ?? null;
+  const testFailureText = tokenTestResult ? resolveTokenTestFailureText(labels, tokenTestResult) : null;
   const testFailed = testState === "failed";
   const fieldError = form.error !== null || testFailed;
-  const fieldHelperText = testFailed ? testReason : form.error;
+  const fieldHelperText = testFailed ? testFailureText : form.error;
 
   const saveDisabled = isToken
     ? busy || testing || form.value.length === 0 || testState !== "success"
@@ -323,7 +326,7 @@ function AccountActionMenuMobile({
   onEditName,
   onEditToken,
   onEditPin,
-  onDelete,
+  onLocalDeactivate,
 }: Readonly<{
   readonly labels: WhatsappLabels;
   readonly anchorEl: null | HTMLElement;
@@ -331,7 +334,7 @@ function AccountActionMenuMobile({
   readonly onEditName: () => void;
   readonly onEditToken: () => void;
   readonly onEditPin: () => void;
-  readonly onDelete: () => void;
+  readonly onLocalDeactivate: () => void;
 }>) {
   const handleClick = (action: () => void) => {
     action();
@@ -352,9 +355,9 @@ function AccountActionMenuMobile({
         <PasswordOutlined sx={{ mr: 1.5 }} fontSize="small" />
         {labels.editPin}
       </MenuItem>
-      <MenuItem onClick={() => handleClick(onDelete)} sx={theme => ({ color: theme.palette.error.main })}>
-        <DeleteOutlined sx={{ mr: 1.5 }} fontSize="small" />
-        {labels.deleteAccount}
+      <MenuItem onClick={() => handleClick(onLocalDeactivate)} sx={theme => ({ color: theme.palette.error.main })}>
+        <BlockOutlined sx={{ mr: 1.5 }} fontSize="small" />
+        {labels.localDeactivateAccount}
       </MenuItem>
     </Menu>
   );
@@ -365,7 +368,7 @@ function AccountActionMenuMobile({
 interface AccountsListMobileProps {
   readonly labels: WhatsappLabels;
   readonly accounts: ReadonlyArray<WhatsappAccountRow>;
-  readonly deletingId: string | null;
+  readonly localDeactivatingId: string | null;
   readonly syncingId: string | null;
   readonly updatingId: string | null;
   readonly editingTokenForId: string | null;
@@ -374,18 +377,53 @@ interface AccountsListMobileProps {
   readonly onAddAccount: () => void;
   /** Re-opens Embedded Signup from the failed-sync card panel (ES-gated). */
   readonly onRetrySetup?: () => void;
+  /** Aria label of the recipients manage affordance (conversations namespace). */
+  readonly manageRecipientsLabel?: string;
+  /** Opens the recipients manage dialog for a test-number account. */
+  readonly onOpenManageRecipients: (accountId: string) => void;
+}
+
+/** Card affordance opening the recipients manage dialog — test numbers only. */
+function ManageRecipientsMobileAction({
+  account,
+  label,
+  disabled,
+  onOpen,
+}: Readonly<{
+  readonly account: WhatsappAccountRow;
+  readonly label: string | undefined;
+  readonly disabled: boolean;
+  readonly onOpen: (accountId: string) => void;
+}>) {
+  if (account.isTestNumber !== true || label === undefined || label === "") {
+    return null;
+  }
+  return (
+    <IconButton
+      size="small"
+      aria-label={label}
+      disabled={disabled || !account.id}
+      onClick={() => {
+        if (account.id) {
+          onOpen(account.id);
+        }
+      }}
+    >
+      <PersonAddAlt1Outlined />
+    </IconButton>
+  );
 }
 
 function isCardBusy(
   accountId: string | null | undefined,
-  deletingId: string | null,
+  localDeactivatingId: string | null,
   updatingId: string | null,
   editingTokenForId: string | null,
   editingPinForId: string | null
 ): boolean {
   if (!accountId) return false;
   return (
-    deletingId === accountId ||
+    localDeactivatingId === accountId ||
     updatingId === accountId ||
     editingTokenForId === accountId ||
     editingPinForId === accountId
@@ -395,7 +433,7 @@ function isCardBusy(
 function AccountsListMobile({
   labels,
   accounts,
-  deletingId,
+  localDeactivatingId,
   syncingId,
   updatingId,
   editingTokenForId,
@@ -403,14 +441,16 @@ function AccountsListMobile({
   onMenuOpen,
   onAddAccount,
   onRetrySetup,
+  manageRecipientsLabel,
+  onOpenManageRecipients,
 }: Readonly<AccountsListMobileProps>) {
   const renderItem = useCallback(
     (account: WhatsappAccountRow) => {
-      const isDeleting = deletingId === account.id;
+      const isLocalDeactivating = localDeactivatingId === account.id;
       const isSyncing = syncingId !== null;
-      const isBusy = isCardBusy(account.id, deletingId, updatingId, editingTokenForId, editingPinForId);
+      const isBusy = isCardBusy(account.id, localDeactivatingId, updatingId, editingTokenForId, editingPinForId);
       return (
-        <NumbersListItemTransition visible={!isDeleting} ariaBusy={isBusy}>
+        <NumbersListItemTransition visible={!isLocalDeactivating} ariaBusy={isBusy}>
           <MobileCardListItem variant="rounded">
             {isBusy ? <LinearProgress sx={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 1 }} /> : null}
             <NumberCardContent
@@ -421,6 +461,12 @@ function AccountsListMobile({
               syncFailureReason={account.syncFailureReason}
               action={
                 <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+                  <ManageRecipientsMobileAction
+                    account={account}
+                    label={manageRecipientsLabel}
+                    disabled={isBusy || isSyncing}
+                    onOpen={onOpenManageRecipients}
+                  />
                   <IconButton
                     size="small"
                     aria-label={labels.editAccount}
@@ -441,7 +487,18 @@ function AccountsListMobile({
         </NumbersListItemTransition>
       );
     },
-    [deletingId, syncingId, updatingId, editingTokenForId, editingPinForId, labels, onMenuOpen, onRetrySetup]
+    [
+      localDeactivatingId,
+      syncingId,
+      updatingId,
+      editingTokenForId,
+      editingPinForId,
+      labels,
+      onMenuOpen,
+      onRetrySetup,
+      manageRecipientsLabel,
+      onOpenManageRecipients,
+    ]
   );
 
   const renderEmptyState = useCallback(
@@ -572,7 +629,7 @@ function SkeletonAccountCard() {
 
 /**
  * Mobile numbers tab with full CRUD: add, edit name, edit token, edit PIN,
- * delete, and sync. Uses per-card action menu (MoreVert → Menu) for all
+ * locally deactivate, and sync. Uses per-card action menu (MoreVert → Menu) for all
  * account actions. All dialogs are fullScreen on mobile for optimal UX.
  */
 export function NumbersTabMobile({
@@ -581,15 +638,15 @@ export function NumbersTabMobile({
   loading,
   syncing,
   snackbar,
-  deletingId,
+  localDeactivatingId,
   syncingId,
   onSetAccessToken,
   onSetTwoStepPin,
   onTestAccessToken,
   tokenTestStates,
   onSyncFromMeta,
-  onDeleteAccount,
-  onOpenDeleteConfirmDialog,
+  onLocalDeactivateAccount,
+  onLocalDeactivateConfirmDialog,
   onDismissSnackbar,
   isConfigured,
   syncDisabledReason,
@@ -604,6 +661,7 @@ export function NumbersTabMobile({
   onUpdatePurpose,
   onOpenCreateDialog,
   onOpenEditNameDialog,
+  onOpenManageRecipients,
   onCloseDialog,
   validateDisplayName,
   validatePhoneNumberId,
@@ -621,12 +679,12 @@ export function NumbersTabMobile({
   const t = labels.page;
   const credMenu = useMobileCredMenuState(onSetAccessToken, onSetTwoStepPin);
 
-  const handleDeleteConfirm = useCallback(async () => {
+  const handleLocalDeactivateConfirm = useCallback(async () => {
     const accountId = dialogState.accountId;
     if (!accountId) return;
-    await onDeleteAccount(accountId);
+    await onLocalDeactivateAccount(accountId);
     onCloseDialog();
-  }, [dialogState.accountId, onDeleteAccount, onCloseDialog]);
+  }, [dialogState.accountId, onLocalDeactivateAccount, onCloseDialog]);
 
   const handleEditNameFromMenu = useCallback(() => {
     if (!credMenu.menuAccount?.id) return;
@@ -645,12 +703,12 @@ export function NumbersTabMobile({
     credMenu.openCredDialog("twoStepPin");
   }, [credMenu]);
 
-  const handleDeleteFromMenu = useCallback(() => {
+  const handleLocalDeactivateFromMenu = useCallback(() => {
     if (!credMenu.menuAccount?.id) return;
     const accountLabel =
       credMenu.menuAccount.displayName?.en ?? credMenu.menuAccount.displayPhoneNumber ?? credMenu.menuAccount.id ?? "";
-    onOpenDeleteConfirmDialog(credMenu.menuAccount.id, accountLabel);
-  }, [credMenu.menuAccount, onOpenDeleteConfirmDialog]);
+    onLocalDeactivateConfirmDialog(credMenu.menuAccount.id, accountLabel);
+  }, [credMenu.menuAccount, onLocalDeactivateConfirmDialog]);
 
   if (loading) {
     return (
@@ -696,7 +754,7 @@ export function NumbersTabMobile({
       <AccountsListMobile
         labels={t}
         accounts={accounts}
-        deletingId={deletingId}
+        localDeactivatingId={localDeactivatingId}
         syncingId={syncingId}
         updatingId={updatingId}
         editingTokenForId={editingTokenForId}
@@ -704,6 +762,8 @@ export function NumbersTabMobile({
         onMenuOpen={credMenu.handleMenuOpen}
         onAddAccount={onOpenCreateDialog}
         onRetrySetup={esConfigId && esAppId ? onOpenEmbeddedSignup : undefined}
+        manageRecipientsLabel={t.manageRecipients}
+        onOpenManageRecipients={onOpenManageRecipients}
       />
 
       <AccountActionMenuMobile
@@ -713,15 +773,15 @@ export function NumbersTabMobile({
         onEditName={handleEditNameFromMenu}
         onEditToken={handleEditTokenFromMenu}
         onEditPin={handleEditPinFromMenu}
-        onDelete={handleDeleteFromMenu}
+        onLocalDeactivate={handleLocalDeactivateFromMenu}
       />
 
-      <NumbersDeleteConfirmDialog
-        open={dialogState.type === "deleteConfirm"}
+      <NumbersLocalDeactivateConfirmDialog
+        open={dialogState.type === "localDeactivateConfirm"}
         displayName={dialogState.displayName ?? ""}
         labels={t}
         onClose={onCloseDialog}
-        onConfirm={handleDeleteConfirm}
+        onConfirm={handleLocalDeactivateConfirm}
         fullScreen={true}
       />
 
@@ -764,6 +824,15 @@ export function NumbersTabMobile({
           allowedOriginsUrl={embeddedSignupAllowedOriginsUrl}
           onComplete={onEmbeddedSignupComplete}
           onClose={onCloseDialog}
+        />
+      ) : null}
+
+      {dialogState.type === "manageRecipients" && dialogState.accountId ? (
+        <TestRecipientsManageDialog
+          accountId={dialogState.accountId}
+          open={true}
+          onClose={onCloseDialog}
+          fullScreen={true}
         />
       ) : null}
 

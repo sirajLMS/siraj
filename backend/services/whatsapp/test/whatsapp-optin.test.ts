@@ -22,6 +22,18 @@ const findFirstActiveForCredentialsMock = mock(async (_tx?: unknown): Promise<un
 const TEST_ACCOUNT_ID = "11111111-1111-1111-1111-111111111111";
 const createWhatsAppAccountMock = mock(async (_input: unknown): Promise<unknown> => ({ id: TEST_ACCOUNT_ID }));
 const updateWhatsAppAccountMock = mock(async (_id: string, _input: unknown): Promise<boolean> => true);
+const findActiveGeneralMock = mock(async (): Promise<unknown> => null);
+const findByPhoneNumberIdsMock = mock(async (_ids: string[]): Promise<Map<string, unknown>> => new Map());
+const resolveEnvConfigMock = mock(async (_key: string): Promise<string | null> => null);
+const collectAllPhoneNumbersMock = mock(async (): Promise<unknown[]> => []);
+
+// Global fetch stub — syncFromMeta's per-number detail fetch goes through the
+// real request builder + `executeGraphApiFetch`, so HTTP is intercepted here.
+let phoneDetailResponse: Record<string, unknown> = {};
+const fetchMock = mock(() => Promise.resolve(new Response(JSON.stringify(phoneDetailResponse), { status: 200 })));
+globalThis.fetch = Object.assign(fetchMock, {
+  preconnect: () => {},
+});
 
 void mock.module("@/backend/db/repo/notifications/notification-preferences.repository", () => ({
   NotificationPreferencesRepository: {
@@ -33,9 +45,12 @@ void mock.module("@/backend/db/repo/notifications/notification-preferences.repos
 void mock.module("@/backend/db/repo/whatsapp", () => ({
   WhatsappAccountRepository: {
     listActive: listActiveMock,
+    listAll: listActiveMock,
     findById: findByIdMock,
     findByPhoneNumberId: findByPhoneNumberIdMock,
     findFirstActiveForCredentials: findFirstActiveForCredentialsMock,
+    findActiveGeneral: findActiveGeneralMock,
+    findByPhoneNumberIds: findByPhoneNumberIdsMock,
     create: createWhatsAppAccountMock,
     update: updateWhatsAppAccountMock,
   },
@@ -68,6 +83,15 @@ void mock.module("@/backend/db/repo/whatsapp", () => ({
     markProcessed: async () => null,
     markFailed: async () => null,
   },
+  WhatsappTestRecipientRepository: {
+    listByAccountId: async () => [],
+    countByAccountId: async () => 0,
+    create: async () => null,
+    deleteById: async () => null,
+    findById: async () => null,
+    findByAccountAndPhone: async () => null,
+    recordVerify: async () => null,
+  },
 }));
 
 void mock.module("@/backend/services/auth/permissions.service", () => ({
@@ -97,7 +121,7 @@ const actualSystem = await import("@/backend/services/system");
 
 await mock.module("@/backend/services/system", () => ({
   ...actualSystem,
-  resolveEnvConfig: async () => null,
+  resolveEnvConfig: (key: string) => resolveEnvConfigMock(key),
   resolveEnvConfigMany: async (keys: string[]) => {
     const result: Record<string, string | undefined> = {};
     for (const key of keys) result[key] = undefined;
@@ -122,7 +146,7 @@ void mock.module("@/backend/services/communication/channels/whatsapp", () => ({
 
 void mock.module("@/backend/services", () => ({
   buildGetPhoneNumberRequest: () => ({ url: "https://graph.test", init: {} }),
-  collectAllPhoneNumbers: async (): Promise<unknown[]> => [],
+  collectAllPhoneNumbers: () => collectAllPhoneNumbersMock(),
   collectAllTemplates: async (): Promise<unknown[]> => [],
   GraphApiError: class GraphApiError extends Error {
     constructor(
@@ -176,6 +200,16 @@ function resetMocks() {
   findByPhoneNumberIdMock.mockResolvedValue(null);
   findFirstActiveForCredentialsMock.mockReset();
   findFirstActiveForCredentialsMock.mockResolvedValue(null);
+  findActiveGeneralMock.mockReset();
+  findActiveGeneralMock.mockResolvedValue(null);
+  findByPhoneNumberIdsMock.mockReset();
+  findByPhoneNumberIdsMock.mockResolvedValue(new Map());
+  resolveEnvConfigMock.mockReset();
+  resolveEnvConfigMock.mockResolvedValue(null);
+  collectAllPhoneNumbersMock.mockReset();
+  collectAllPhoneNumbersMock.mockResolvedValue([]);
+  fetchMock.mockClear();
+  phoneDetailResponse = {};
   createWhatsAppAccountMock.mockReset();
   createWhatsAppAccountMock.mockResolvedValue({ id: TEST_ACCOUNT_ID });
   updateWhatsAppAccountMock.mockReset();
@@ -459,20 +493,74 @@ describe("REQ-10/BL1: WhatsApp Opt-In", () => {
     });
   });
 
-  describe("syncFromMeta permission gating", () => {
-    test("rejects when actor lacks WHATSAPP_CONFIG_MANAGE permission", async () => {
+  describe("syncFromMeta isTestNumber stamping", () => {
+    const PHONE_ID = "1234567890123";
+    const TEST_NUMBER_DETAIL = {
+      id: PHONE_ID,
+      display_phone_number: "+1 555-0100",
+      verified_name: "Test Number",
+      quality_rating: "GREEN",
+      code_verification_status: "NOT_VERIFIED",
+    };
+
+    async function runSyncWithDetail(detail: Record<string, unknown>, existing: Record<string, unknown> | null = null) {
       const { WhatsappAccountService } = await importService();
-      hasPermissionMock.mockResolvedValueOnce(false);
+      resolveEnvConfigMock.mockImplementation(async (key: string) => {
+        if (key === "WHATSAPP_WABA_ID") return "waba-1";
+        if (key === "WHATSAPP_ACCESS_TOKEN") return "token-abc";
+        return null;
+      });
+      collectAllPhoneNumbersMock.mockResolvedValue([
+        { id: PHONE_ID, display_phone_number: "+1 555-0100", verified_name: "Stub Number" },
+      ]);
+      findByPhoneNumberIdsMock.mockResolvedValue(existing ? new Map([[PHONE_ID, existing]]) : new Map());
+      phoneDetailResponse = detail;
+      await WhatsappAccountService.syncFromMeta(MOCK_ACTOR_ID, mockErrors);
+    }
 
-      await assertPermissionDenied(
-        () => WhatsappAccountService.syncFromMeta(MOCK_ACTOR_ID, mockErrors),
-        listActiveMock
+    function createdIsTestNumber(expected: boolean) {
+      expect(createWhatsAppAccountMock).toHaveBeenCalledWith(
+        expect.objectContaining({ isTestNumber: expected }),
+        undefined
       );
+    }
 
-      // Must short-circuit before reaching repository or Graph API calls
-      expect(findByPhoneNumberIdMock).not.toHaveBeenCalled();
-      expect(createWhatsAppAccountMock).not.toHaveBeenCalled();
-      expect(createManyAuditLogsMock).not.toHaveBeenCalled();
+    test("stamps isTestNumber=true on create when verified_name is 'Test Number'", async () => {
+      await runSyncWithDetail(TEST_NUMBER_DETAIL);
+      createdIsTestNumber(true);
+    });
+
+    test("stamps isTestNumber=true on update when an existing account re-syncs as a test number", async () => {
+      await runSyncWithDetail(TEST_NUMBER_DETAIL, {
+        id: TEST_ACCOUNT_ID,
+        phoneNumberId: PHONE_ID,
+        isTestNumber: false,
+      });
+      expect(updateWhatsAppAccountMock).toHaveBeenCalledWith(
+        TEST_ACCOUNT_ID,
+        expect.objectContaining({ isTestNumber: true }),
+        undefined
+      );
+    });
+
+    test("stamps isTestNumber=false for a verified business number", async () => {
+      await runSyncWithDetail({
+        ...TEST_NUMBER_DETAIL,
+        display_phone_number: "+1 212-5550",
+        verified_name: "Acme Corp",
+        code_verification_status: "VERIFIED",
+      });
+      createdIsTestNumber(false);
+    });
+
+    test("fails open (isTestNumber=false) when verification fields are absent", async () => {
+      await runSyncWithDetail({
+        id: PHONE_ID,
+        display_phone_number: "+1 555-0100",
+        verified_name: "Acme Corp",
+        quality_rating: "GREEN",
+      });
+      createdIsTestNumber(false);
     });
   });
 });

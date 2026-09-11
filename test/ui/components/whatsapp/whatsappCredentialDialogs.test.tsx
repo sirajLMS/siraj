@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react
 
 expect.extend(matchers);
 
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
+import { AppPermission, WhatsappTokenTestFailureKind } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappSettingsLabels } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import {
   validateAccessToken,
@@ -33,8 +33,8 @@ const settingsLabels: WhatsappSettingsLabels = {
     syncSuccessWithCounts: labels.syncSuccessWithCounts,
     syncNoChange: labels.syncNoChange,
     syncError: labels.syncError,
-    deleteSuccess: labels.deleteSuccess,
-    deleteError: labels.deleteError,
+    localDeactivateSuccess: labels.localDeactivateSuccess,
+    localDeactivateError: labels.localDeactivateError,
     saveSuccess: labels.saveSuccess,
     saveError: labels.saveError,
     optInSuccess: "Opt-in updated successfully.",
@@ -48,7 +48,7 @@ const baseProps = {
   loading: false,
   syncing: false,
   snackbar: null,
-  deletingId: null,
+  localDeactivatingId: null,
   syncingId: null,
   editingTokenForId: null,
   editingPinForId: null,
@@ -58,8 +58,8 @@ const baseProps = {
   mutationError: null,
   onSyncFromMeta: mock(noopPromise),
   onDismissSnackbar: mock(() => {}),
-  onOpenDeleteConfirmDialog: mock(() => {}),
-  onDeleteAccount: mock(noopPromise),
+  onLocalDeactivateConfirmDialog: mock(() => {}),
+  onLocalDeactivateAccount: mock(noopPromise),
   onSetAccessToken: mock(noopPromise),
   onTestAccessToken: mock(() => Promise.resolve("success" as const)),
   tokenTestStates: {},
@@ -196,7 +196,9 @@ describe("CredentialEditDialog (via NumbersTabDesktop action menu)", () => {
 
   test("edit token dialog: Save is enabled when the token has a recorded successful test", async () => {
     const token = "a".repeat(50);
-    renderDesktopWithAccount({ tokenTestStates: { "acc-1": { [token]: { state: "success", reason: null } } } });
+    renderDesktopWithAccount({
+      tokenTestStates: { "acc-1": { [token]: { state: "success", reason: null, failureKind: null } } },
+    });
     await openActionMenu();
     await clickMenuItem(labels.editToken);
     const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);
@@ -205,6 +207,42 @@ describe("CredentialEditDialog (via NumbersTabDesktop action menu)", () => {
     });
     const saveBtn = screen.getByRole("button", { name: labels.save });
     expect(saveBtn.hasAttribute("disabled")).toBe(false);
+  });
+
+  test("edit token dialog: failed Meta-permissions test shows a translated Meta-permissions hint", async () => {
+    const token = "a".repeat(50);
+    const reason = "You do not have sufficient permissions to perform this action.";
+    renderDesktopWithAccount({
+      tokenTestStates: {
+        "acc-1": {
+          [token]: { state: "failed", reason, failureKind: WhatsappTokenTestFailureKind.MetaPermissions },
+        },
+      },
+    });
+    await openActionMenu();
+    await clickMenuItem(labels.editToken);
+    const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);
+    await act(async () => {
+      fireEvent.change(input, { target: { value: token } });
+    });
+    expect(screen.getByText(labels.tokenTestReasonMetaPermissions(reason))).toBeInTheDocument();
+  });
+
+  test("edit token dialog: failed test with no failureKind shows the request-rejected hint", async () => {
+    const token = "a".repeat(50);
+    const reason = "server rejected";
+    renderDesktopWithAccount({
+      tokenTestStates: {
+        "acc-1": { [token]: { state: "failed", reason, failureKind: null } },
+      },
+    });
+    await openActionMenu();
+    await clickMenuItem(labels.editToken);
+    const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);
+    await act(async () => {
+      fireEvent.change(input, { target: { value: token } });
+    });
+    expect(screen.getByText(labels.tokenTestReasonRequestRejected(reason))).toBeInTheDocument();
   });
 
   test("edit pin dialog: click menu Edit Pin opens dialog with title and disabled Save", async () => {

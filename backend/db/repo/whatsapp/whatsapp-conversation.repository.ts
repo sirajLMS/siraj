@@ -187,11 +187,14 @@ export namespace WhatsappConversationRepository {
   /**
    * Atomically roll the inbox rollup columns forward. The guarded `WHERE`
    * makes the update a no-op for out-of-order (older) deliveries while still
-   * returning the current row.
+   * returning the current row. When `inboundAt` is provided, the inbound-only
+   * marker advances under its own guard — an echo posted after the user's
+   * message must not refuse the inbound stamp, and a stale replay must not
+   * move either column backwards.
    */
   export async function touchLastMessage(
     conversationId: string,
-    rollup: { at: Date; preview: string | null },
+    rollup: { at: Date; preview: string | null; inboundAt?: Date | null },
     tx?: DBTransaction
   ): Promise<WhatsappConversationReturnType | null> {
     const runner = async (t: DBTransaction) => {
@@ -205,6 +208,24 @@ export namespace WhatsappConversationRepository {
           )
         )
         .returning();
+      if (rollup.inboundAt) {
+        const inboundTouched = await t
+          .update(whatsappConversations)
+          .set({ lastInboundMessageAt: rollup.inboundAt })
+          .where(
+            and(
+              eq(whatsappConversations.id, conversationId),
+              or(
+                isNull(whatsappConversations.lastInboundMessageAt),
+                sql`${whatsappConversations.lastInboundMessageAt} <= ${rollup.inboundAt}`
+              )
+            )
+          )
+          .returning();
+        if (inboundTouched[0]) {
+          return inboundTouched[0];
+        }
+      }
       if (updated[0]) {
         return updated[0];
       }

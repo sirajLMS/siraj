@@ -62,6 +62,7 @@ import {
   TeacherProgressFeedEventKind,
   UserRole,
   WhatsappAccountPurpose,
+  WhatsappConversationSendMode,
   WhatsappLimitTier,
   WhatsappMessageDirection,
   WhatsappOnboardingMode,
@@ -71,6 +72,8 @@ import {
   WhatsappSyncType,
   WhatsappTemplateCategory,
   WhatsappTemplateStatus,
+  WhatsappTestRecipientStatus,
+  WhatsappTokenTestFailureKind,
   WhatsappWebhookEventStatus,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
@@ -338,6 +341,10 @@ export const WhatsappAccountPurposePothosEnum = gqlSchemaBuilder.enumType(Whatsa
   name: "WhatsappAccountPurpose",
 });
 
+export const WhatsappTokenTestFailureKindPothosEnum = gqlSchemaBuilder.enumType(WhatsappTokenTestFailureKind, {
+  name: "WhatsappTokenTestFailureKind",
+});
+
 export const WhatsappOnboardingModePothosEnum = gqlSchemaBuilder.enumType(WhatsappOnboardingMode, {
   name: "WhatsappOnboardingMode",
 });
@@ -360,6 +367,14 @@ export const WhatsappSyncRequestStatusPothosEnum = gqlSchemaBuilder.enumType(Wha
 
 export const WhatsappSyncTypePothosEnum = gqlSchemaBuilder.enumType(WhatsappSyncType, {
   name: "WhatsappSyncType",
+});
+
+export const WhatsappTestRecipientStatusPothosEnum = gqlSchemaBuilder.enumType(WhatsappTestRecipientStatus, {
+  name: "WhatsappTestRecipientStatus",
+});
+
+export const WhatsappConversationSendModePothosEnum = gqlSchemaBuilder.enumType(WhatsappConversationSendMode, {
+  name: "WhatsappConversationSendMode",
 });
 
 export const QuotaKindPothosEnum = gqlSchemaBuilder.enumType(QuotaKind, {
