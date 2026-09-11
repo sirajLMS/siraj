@@ -303,7 +303,11 @@ export const NewConversation: Story = {
     ),
   ],
   play: async ({ canvas }) => {
-    const action = await canvas.findByRole("button", { name: whatsappConversationsEn.newConversation }, { timeout: 5000 });
+    const action = await canvas.findByRole(
+      "button",
+      { name: whatsappConversationsEn.newConversation },
+      { timeout: 5000 }
+    );
     // The preview-wide user-store seed briefly locks the header while the
     // story's permission re-seed settles; wait until the action is interactive.
     await waitFor(() => {

@@ -151,6 +151,26 @@ async function submitCredentialDialog(
   });
 }
 
+async function expectTokenFailureHint(
+  failureKind: WhatsappTokenTestFailureKind | null,
+  reason: string,
+  expectedHint: string
+) {
+  const token = "a".repeat(50);
+  renderDesktopWithAccount({
+    tokenTestStates: {
+      "acc-1": { [token]: { state: "failed" as const, reason, failureKind } },
+    },
+  });
+  await openActionMenu();
+  await clickMenuItem(labels.editToken);
+  const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);
+  await act(async () => {
+    fireEvent.change(input, { target: { value: token } });
+  });
+  expect(screen.getByText(expectedHint)).toBeInTheDocument();
+}
+
 describe("CredentialEditDialog (via NumbersTabDesktop action menu)", () => {
   beforeEach(() => {
     cleanup();
@@ -211,39 +231,17 @@ describe("CredentialEditDialog (via NumbersTabDesktop action menu)", () => {
   });
 
   test("edit token dialog: failed Meta-permissions test shows a translated Meta-permissions hint", async () => {
-    const token = "a".repeat(50);
     const reason = "You do not have sufficient permissions to perform this action.";
-    renderDesktopWithAccount({
-      tokenTestStates: {
-        "acc-1": {
-          [token]: { state: "failed", reason, failureKind: WhatsappTokenTestFailureKind.MetaPermissions },
-        },
-      },
-    });
-    await openActionMenu();
-    await clickMenuItem(labels.editToken);
-    const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);
-    await act(async () => {
-      fireEvent.change(input, { target: { value: token } });
-    });
-    expect(screen.getByText(labels.tokenTestReasonMetaPermissions(reason))).toBeInTheDocument();
+    await expectTokenFailureHint(
+      WhatsappTokenTestFailureKind.MetaPermissions,
+      reason,
+      labels.tokenTestReasonMetaPermissions(reason)
+    );
   });
 
   test("edit token dialog: failed test with no failureKind shows the request-rejected hint", async () => {
-    const token = "a".repeat(50);
     const reason = "server rejected";
-    renderDesktopWithAccount({
-      tokenTestStates: {
-        "acc-1": { [token]: { state: "failed", reason, failureKind: null } },
-      },
-    });
-    await openActionMenu();
-    await clickMenuItem(labels.editToken);
-    const input = screen.getByPlaceholderText(labels.accessTokenPlaceholder);
-    await act(async () => {
-      fireEvent.change(input, { target: { value: token } });
-    });
-    expect(screen.getByText(labels.tokenTestReasonRequestRejected(reason))).toBeInTheDocument();
+    await expectTokenFailureHint(null, reason, labels.tokenTestReasonRequestRejected(reason));
   });
 
   test("edit pin dialog: click menu Edit Pin opens dialog with title and disabled Save", async () => {

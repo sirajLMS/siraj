@@ -1,4 +1,3 @@
-
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
@@ -73,7 +72,6 @@ function makeProps(overrides: Partial<TestRecipientsPanelProps> = {}): TestRecip
     ...overrides,
   };
 }
-
 
 function phoneHarnessProps(phone: string, onAddPhoneChange: (value: string) => void): TestRecipientsPanelProps {
   return makeProps({
@@ -156,7 +154,6 @@ describe("TestRecipientsPanel — registry rows", () => {
     }
   });
 });
-
 
 /** Fills the phone input through the paste/fill path (the same route a full autofill takes). */
 function fillPhone(e164: string) {

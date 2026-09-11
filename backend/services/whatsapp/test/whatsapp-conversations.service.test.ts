@@ -179,6 +179,9 @@ const acquireAdvisoryLockMock = mock(async (_tx: unknown, lockKey: string): Prom
 
 const inboxListConversationsMock = mock(async (): Promise<unknown> => ({ rows: [], pageInfo: null }));
 const inboxListConversationMessagesMock = mock(async (): Promise<unknown> => ({ rows: [], pageInfo: null }));
+const upsertConversationMock = mock(
+  async (_identity: { accountId: string; waId: string }): Promise<WhatsappConversationReturnType> => makeConversation()
+);
 const listByAccountIdMock = mock(async (): Promise<WhatsappTestRecipientReturnType[]> => recipientRows);
 const createRecipientMock = mock(async (input: Record<string, unknown>): Promise<WhatsappTestRecipientReturnType> => {
   if (recipientCreateError !== null) {
@@ -250,7 +253,7 @@ void mock.module("@/backend/db/repo/whatsapp", () => ({
   WhatsappConversationRepository: {
     findByIdentity: mock(async (): Promise<WhatsappConversationReturnType | null> => conversationByIdentityRow),
     findById: mock(async (): Promise<WhatsappConversationReturnType | null> => conversationByIdentityRow),
-    upsertByIdentity: mock(async (): Promise<WhatsappConversationReturnType> => makeConversation()),
+    upsertByIdentity: upsertConversationMock,
     touchLastMessage: mock(async (id: string, patch: unknown): Promise<void> => {
       touchedThreads.push({ id, patch });
     }),
@@ -430,6 +433,7 @@ beforeEach(() => {
   acquireAdvisoryLockMock.mockClear();
   inboxListConversationsMock.mockClear();
   inboxListConversationMessagesMock.mockClear();
+  upsertConversationMock.mockClear();
 });
 
 // ---------------------------------------------------------------------------
@@ -542,6 +546,28 @@ describe("sendMessage", () => {
     expect(insert.content).toEqual({ body: "[template] hello_world", name: "hello_world" });
     expect(paneMessageText(insert.content)).toBe("[template] hello_world");
     expect(result.message.wamid).toBe(SUCCESS_MESSAGE_ID);
+  });
+
+  test("auto-creates the conversation for a brand-new recipient on a template send (conversationId null)", async () => {
+    conversationByIdentityRow = null;
+    const result = await WhatsappConversationsService.sendMessage(
+      CONTEXT,
+      errorsEn,
+      conversationSendInput({
+        mode: WhatsappConversationSendMode.TEMPLATE,
+        body: undefined,
+        templateName: "hello_world",
+        conversationId: null,
+      })
+    );
+
+    expect(upsertConversationMock).toHaveBeenCalledTimes(1);
+    expect(upsertConversationMock).toHaveBeenCalledWith({ accountId: ACCOUNT_ID, waId: RECIPIENT_PHONE }, TX_SENTINEL);
+
+    const insert = messageInserts[0] as { conversationId?: string };
+    expect(insert.conversationId).toBe("conversation_1");
+    expect(touchedThreads[0]?.id).toBe("conversation_1");
+    expect(result.message).toBeDefined();
   });
 
   test("maps Meta 131030 to the recipient-allow-list error", async () => {
