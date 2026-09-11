@@ -160,22 +160,6 @@ describe("TestRecipientsPanel — registry rows", () => {
 describe("TestRecipientsPanel — add dialog", () => {
   afterEach(cleanup);
 
-  test("DEBUG save flow", async () => {
-    function LocalHarness() {
-      const [phone, setPhone] = useState("");
-      return <TestRecipientsPanel {...phoneHarnessProps(phone, setPhone)} />;
-    }
-    const { container } = renderWithWrapper(<LocalHarness />, { locale });
-    const inputs = container.querySelectorAll("input");
-    console.log("INPUTS", inputs.length, Array.from(inputs).map(i => [i.getAttribute("placeholder"), i.getAttribute("aria-label"), i.value]).map(x => x.join("|")).join(" ;; "));
-    const ph = screen.getByPlaceholderText(labels.recipientPhonePlaceholder);
-    fireEvent.input(ph, { target: { value: "+[PHONE_REDACTED]" } });
-    const inputs2 = container.querySelectorAll("input");
-    console.log("AFTER-inputs", Array.from(inputs2).map(i => [i.getAttribute("aria-label"), i.value]).map(x => x.join("~")).join(" ;; "));
-    const save = screen.getByRole("button", { name: labels.dialogSave }) as HTMLButtonElement;
-    console.log("SAVE disabled?", save.disabled, "connected?", save.isConnected);
-  });
-
   test("save stays disabled until a valid phone number is entered via the phone input", async () => {
     function LocalHarness() {
       const [phone, setPhone] = useState("");
@@ -183,9 +167,7 @@ describe("TestRecipientsPanel — add dialog", () => {
     }
     renderWithWrapper(<LocalHarness />, { locale });
     expect(screen.getByRole("button", { name: labels.dialogSave })).toBeDisabled();
-    fireEvent.input(screen.getByPlaceholderText(labels.recipientPhonePlaceholder), {
-      target: { value: "+[PHONE_REDACTED]" },
-    });
+    fireEvent.input(screen.getByPlaceholderText(labels.recipientPhonePlaceholder), { target: { value: "+[PHONE_REDACTED]" } });
     await waitFor(() => expect(screen.getByRole("button", { name: labels.dialogSave })).toBeEnabled());
   });
 
