@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
@@ -26,6 +27,12 @@ export async function ensureDirectory(dirPath: string): Promise<void> {
 }
 
 export async function calculateFileHash(filePath: string): Promise<string> {
-  const fileBuffer = await fs.readFile(filePath);
-  return crypto.createHash("sha256").update(fileBuffer).digest("base64");
+  const hash = crypto.createHash("sha256");
+  const stream = createReadStream(filePath);
+
+  for await (const chunk of stream) {
+    hash.update(chunk);
+  }
+
+  return hash.digest("base64");
 }
