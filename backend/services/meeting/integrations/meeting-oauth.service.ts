@@ -113,7 +113,7 @@ async function signOAuthState(
   // returns "OK" on success, null if the key already exists.
   const nonceKey = `oauth:nonce:${nonce}`;
   const claimed = await cacheService.setNx(nonceKey, "1", OAUTH_STATE_NONCE_TTL_MS);
-  if (claimed === null) {
+  if (!claimed) {
     throw new GraphQLError("oauthStateCollision");
   }
   return new SignJWT({
@@ -162,7 +162,7 @@ export async function verifyAndConsumeOAuthState(
     // time the consumed-marker is set; a second call (replay) returns null.
     const consumedKey = `oauth:nonce:consumed:${payload.nonce}`;
     const consumed = await cacheService.setNx(consumedKey, "1", OAUTH_STATE_NONCE_TTL_MS);
-    if (consumed === null) {
+    if (!consumed) {
       logger.warn("OAuth state rejected: nonce already consumed (replay)", {
         nonce: payload.nonce,
       });
