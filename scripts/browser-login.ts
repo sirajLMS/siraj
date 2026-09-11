@@ -31,7 +31,7 @@
  *   { filename: "<abs path>/.browser-auth/inject-mcp.js" }
  * (MCP's code sandbox has no fs/require — the file carries the cookies itself.)
  */
-import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
+import { chmod, mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
 
@@ -221,20 +221,18 @@ async function login(options: CliOptions, email: string, password: string): Prom
   return cookies;
 }
 
-function writeArtifacts(
+async function writeArtifacts(
   options: CliOptions,
   cookies: ParsedCookie[]
-): { playwrightPath: string; storageStatePath: string; mcpBridgePath: string } {
+): Promise<{ playwrightPath: string; storageStatePath: string; mcpBridgePath: string }> {
   const dir = resolve(process.cwd(), options.jarDir);
-  mkdirSync(dir, { recursive: true });
+  await mkdir(dir, { recursive: true });
 
   const jarPath = resolve(dir, "cookies.txt");
   const playwrightPath = resolve(dir, "playwright.cookies.json");
   const storageStatePath = resolve(dir, "storageState.json");
   const domain = new URL(options.baseUrl).hostname;
 
-  writeFileSync(jarPath, toNetscapeJar(cookies, domain), { mode: 0o600 });
-  chmodSync(jarPath, 0o600);
   const playwrightCookies = cookies.map(cookie => ({
     name: cookie.name,
     value: cookie.value,
@@ -245,19 +243,25 @@ function writeArtifacts(
     sameSite: "Lax" as const,
     ...(cookie.expires > 0 ? { expires: cookie.expires } : {}),
   }));
-  writeFileSync(playwrightPath, JSON.stringify(playwrightCookies, null, 2), { mode: 0o600 });
-  chmodSync(playwrightPath, 0o600);
   // Canonical Playwright format — usable directly as `browser.newContext({ storageState })`.
   const storageState = { cookies: playwrightCookies, origins: [] };
-  writeFileSync(storageStatePath, JSON.stringify(storageState, null, 2), { mode: 0o600 });
-  chmodSync(storageStatePath, 0o600);
   // Playwright MCP: the run-code sandbox has no fs/require/import, so write a
   // self-runnable injector with the cookies baked in (values never leave disk).
   const dashboardUrl = `${options.baseUrl}/dashboard`;
   const mcpBridgePath = resolve(dir, "inject-mcp.js");
   const bridgeCode = `async (page) => {\n  await page.context().addCookies(${JSON.stringify(playwrightCookies)});\n  await page.goto(${JSON.stringify(dashboardUrl)}, { waitUntil: 'networkidle' });\n  return { url: page.url(), title: await page.title() };\n}\n`;
-  writeFileSync(mcpBridgePath, bridgeCode, { mode: 0o600 });
-  chmodSync(mcpBridgePath, 0o600);
+
+  await Promise.all([
+    writeFile(jarPath, toNetscapeJar(cookies, domain), { mode: 0o600 }).then(() => chmod(jarPath, 0o600)),
+    writeFile(playwrightPath, JSON.stringify(playwrightCookies, null, 2), { mode: 0o600 }).then(() =>
+      chmod(playwrightPath, 0o600)
+    ),
+    writeFile(storageStatePath, JSON.stringify(storageState, null, 2), { mode: 0o600 }).then(() =>
+      chmod(storageStatePath, 0o600)
+    ),
+    writeFile(mcpBridgePath, bridgeCode, { mode: 0o600 }).then(() => chmod(mcpBridgePath, 0o600)),
+  ]);
+
   console.log(`✓ Cookie artifacts written (mode 600, git-ignored):`);
   console.log(`  - ${jarPath}`);
   console.log(`  - ${playwrightPath}`);
@@ -317,7 +321,7 @@ async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   const { email, password } = loadCredentials(options);
   const cookies = await login(options, email, password);
-  const { storageStatePath, mcpBridgePath } = writeArtifacts(options, cookies);
+  const { storageStatePath, mcpBridgePath } = await writeArtifacts(options, cookies);
   if (options.inject) await injectIntoAgentBrowser(cookies, options.baseUrl, options.session);
   printUsage(storageStatePath, mcpBridgePath, options.baseUrl);
 }
