@@ -865,10 +865,9 @@ export namespace ProfileService {
       permissions: new Set(permCtx.permissions),
     };
     const editGroups = collectProfileEditGroupsFromUpdate(roleIds.audience, scope, input);
-    for (const groupKey of editGroups) {
-      if (!canEditProfileFieldGroup(filterCtx, groupKey)) {
-        throwInsufficientPermissions(locale);
-      }
+    const canEditAllGroups = editGroups.every(groupKey => canEditProfileFieldGroup(filterCtx, groupKey));
+    if (!canEditAllGroups) {
+      throwInsufficientPermissions(locale);
     }
 
     await updateCoreUserFields(permCtx, targetUserId, scope, input.core, locale);
