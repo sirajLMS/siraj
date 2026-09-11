@@ -87,7 +87,7 @@ interface MermaidModule {
 const blockRe = /^```mermaid[^\n\r]*\r?\n([\s\S]*?)^```/gm;
 
 async function validateFile(file: string, mermaid: MermaidModule): Promise<boolean> {
-  const content = fs.readFileSync(file, "utf8");
+  const content = await fs.promises.readFile(file, "utf8");
   const ext = path.extname(file).toLowerCase();
 
   // .mmd → whole file is one definition

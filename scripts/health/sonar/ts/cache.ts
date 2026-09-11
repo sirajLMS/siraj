@@ -1,4 +1,5 @@
-import { existsSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync, unlinkSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { glob } from "glob";
 import { PROJECT_ROOT, SONAR_DIR } from "@/scripts/health/sonar/ts/config";
@@ -81,7 +82,7 @@ export function getCachedFingerprint(): string | null {
  */
 export async function saveProjectFingerprint(): Promise<void> {
   const current = await getProjectFingerprint();
-  writeFileSync(CACHE_FILE, current, "utf8");
+  await writeFile(CACHE_FILE, current, "utf8");
 }
 
 /**
