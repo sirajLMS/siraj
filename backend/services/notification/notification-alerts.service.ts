@@ -267,13 +267,14 @@ async function buildAlertsResult(
 
   const recentNotifications = groupRecentDeliveriesByNotification(await fetchRecentNotificationRows(userId));
 
-  const alerts: NotificationAlertReturnType[] = [];
-  for (const complaint of unansweredComplaints) {
-    alerts.push(buildComplaintAlert(complaint, tNotifications.newUnansweredComplaint));
-  }
-  for (const notification of recentNotifications) {
-    alerts.push(buildNotificationAlert(notification, tNotifications.defaultSystemNotification));
-  }
+  const alerts: NotificationAlertReturnType[] = [
+    ...unansweredComplaints.map(complaint =>
+      buildComplaintAlert(complaint, tNotifications.newUnansweredComplaint)
+    ),
+    ...recentNotifications.map(notification =>
+      buildNotificationAlert(notification, tNotifications.defaultSystemNotification)
+    ),
+  ];
 
   alerts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
