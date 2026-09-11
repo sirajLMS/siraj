@@ -1,4 +1,5 @@
-import { existsSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, statSync, unlinkSync } from "node:fs";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { glob } from "glob";
 import { PROJECT_ROOT, SONAR_DIR } from "@/scripts/health/sonar/ts/config";
@@ -23,8 +24,8 @@ export async function getProjectFingerprint(): Promise<string> {
   // Use properties to get exclusions
   const propsPath = join(PROJECT_ROOT, "sonar-project.properties");
   let exclusions: string[] = [];
-  if (existsSync(propsPath)) {
-    const props = readFileSync(propsPath, "utf8");
+  try {
+    const props = await readFile(propsPath, "utf8");
     const exclusionsLine = props.split("\n").find(l => l.startsWith("sonar.exclusions="));
     if (exclusionsLine) {
       exclusions = exclusionsLine
@@ -33,6 +34,8 @@ export async function getProjectFingerprint(): Promise<string> {
         .map(e => e.trim())
         .filter(Boolean);
     }
+  } catch {
+    // If properties file doesn't exist or can't be read, default to empty exclusions
   }
 
   // Find all relevant files
@@ -60,17 +63,17 @@ export async function getProjectFingerprint(): Promise<string> {
  */
 export async function isProjectChanged(): Promise<boolean> {
   const current = await getProjectFingerprint();
-  const cached = getCachedFingerprint();
+  const cached = await getCachedFingerprint();
   return current !== cached;
 }
 
 /**
  * 📄 Get the cached fingerprint
  */
-export function getCachedFingerprint(): string | null {
-  if (!existsSync(CACHE_FILE)) return null;
+export async function getCachedFingerprint(): Promise<string | null> {
   try {
-    return readFileSync(CACHE_FILE, "utf8").trim();
+    const cached = await readFile(CACHE_FILE, "utf8");
+    return cached.trim();
   } catch {
     return null;
   }
@@ -81,7 +84,7 @@ export function getCachedFingerprint(): string | null {
  */
 export async function saveProjectFingerprint(): Promise<void> {
   const current = await getProjectFingerprint();
-  writeFileSync(CACHE_FILE, current, "utf8");
+  await writeFile(CACHE_FILE, current, "utf8");
 }
 
 /**
