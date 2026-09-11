@@ -571,6 +571,20 @@ export const errorsEn: ErrorsLabels = {
   whatsappConnectionTestSucceeded: "Connection to WhatsApp Cloud API succeeded.",
   whatsappConnectionTestFailed: "Could not reach WhatsApp Cloud API. Check the credentials and try again.",
 
+  // ─── WhatsApp conversations errors ────────────────────────────────────────
+  whatsappRecipientNotAllowed:
+    "This number is a Meta test number and can only message recipients approved in your Meta App Dashboard. Add and verify the recipient first.",
+  whatsappRecipientNotAllowedFromMeta:
+    "Meta rejected the recipient: the number is not in the test number's allowed list. Open Meta App Dashboard to approve it, then try again.",
+  whatsappOutsideServiceWindow:
+    "Free-text replies are only allowed within 24 hours of the customer's last message. Send a template message instead.",
+  whatsappConversationSendFailed:
+    "The message could not be sent. Please verify the recipient and connectivity and try again.",
+  whatsappRecipientLimitReached: "Meta test numbers support at most 5 recipients. Remove one before adding another.",
+  whatsappRecipientConflict: "This recipient is already registered for this WhatsApp number.",
+  whatsappTemplateRequired: "Select a template to start a conversation outside the 24-hour window.",
+  whatsappMessageRequired: "Enter a message to send.",
+
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "Email",
   smsChannelLabel: "SMS",

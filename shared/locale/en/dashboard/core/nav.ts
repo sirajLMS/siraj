@@ -73,6 +73,7 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   permissions: "Permissions",
   settings: "Settings",
   whatsappSettings: "WhatsApp",
+  whatsappConversations: "WhatsApp Conversations",
   booksAndBags: "Books & Bags",
   studentTodayClasses: "Today's Classes",
   studentSchedule: "My Schedule",

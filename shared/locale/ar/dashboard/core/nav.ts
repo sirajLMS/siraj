@@ -73,6 +73,7 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   permissions: "الصلاحيات",
   settings: "الإعدادات",
   whatsappSettings: "واتساب",
+  whatsappConversations: "محادثات واتساب",
   booksAndBags: "الكتب والحقائب",
   studentTodayClasses: "حصص اليوم",
   studentSchedule: "جدولي",

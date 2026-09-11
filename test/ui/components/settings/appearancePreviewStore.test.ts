@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "bun:test";
+import { detectDocumentColorScheme } from "@/frontend/common/lib/theme-detection";
 import { DEFAULT_APPEARANCE_DRAFT, useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
 
 function verifyColorSchemeDetection(
@@ -33,6 +34,10 @@ describe("appearancePreviewStore — isDark and defaultColorScheme sync", () => 
     });
     if (typeof document !== "undefined") {
       delete document.documentElement.dataset.muiColorScheme;
+      delete document.documentElement.dataset.theme;
+      document.documentElement.removeAttribute("data-dark");
+      document.documentElement.removeAttribute("data-light");
+      document.documentElement.style.colorScheme = "";
     }
   });
 
@@ -67,6 +72,30 @@ describe("appearancePreviewStore — isDark and defaultColorScheme sync", () => 
 
   it("enterCustomizeMode falls back to data-theme attribute when data-mui-color-scheme is missing", () => {
     verifyColorSchemeDetection("theme", { light: false, dark: true });
+  });
+
+  it("enterCustomizeMode falls back to data-dark and data-light boolean attributes when datasets are missing", () => {
+    document.documentElement.setAttribute("data-light", "");
+    useAppearancePreviewStore.getState().enterCustomizeMode();
+    expect(useAppearancePreviewStore.getState().isDark).toBe(false);
+    useAppearancePreviewStore.getState().exitCustomizeMode();
+
+    document.documentElement.removeAttribute("data-light");
+    document.documentElement.setAttribute("data-dark", "");
+    useAppearancePreviewStore.getState().enterCustomizeMode();
+    expect(useAppearancePreviewStore.getState().isDark).toBe(true);
+    document.documentElement.removeAttribute("data-dark");
+  });
+
+  it("detectDocumentColorScheme respects style.colorScheme when attributes are absent", () => {
+    document.documentElement.style.colorScheme = "light";
+    expect(detectDocumentColorScheme()).toBe("light");
+
+    document.documentElement.style.colorScheme = "dark";
+    expect(detectDocumentColorScheme()).toBe("dark");
+
+    document.documentElement.style.colorScheme = "";
+    expect(detectDocumentColorScheme()).toBeUndefined();
   });
 
   it("markPublished snapshots the published draft and is kept until the next customize session", () => {

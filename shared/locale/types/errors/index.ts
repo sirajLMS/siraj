@@ -700,6 +700,16 @@ export interface ErrorsLabels
   readonly whatsappConnectionTestSucceeded: string;
   readonly whatsappConnectionTestFailed: string;
 
+  // ─── WhatsApp conversations errors ────────────────────────────────────────
+  readonly whatsappRecipientNotAllowed: string;
+  readonly whatsappRecipientNotAllowedFromMeta: string;
+  readonly whatsappOutsideServiceWindow: string;
+  readonly whatsappConversationSendFailed: string;
+  readonly whatsappRecipientLimitReached: string;
+  readonly whatsappRecipientConflict: string;
+  readonly whatsappTemplateRequired: string;
+  readonly whatsappMessageRequired: string;
+
   // ─── Delivery failure messages ───────────────────────────────────────────
   readonly emailChannelLabel: string;
   readonly smsChannelLabel: string;

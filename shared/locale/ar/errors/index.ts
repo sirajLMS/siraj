@@ -567,6 +567,19 @@ export const errorsAr: ErrorsLabels = {
   whatsappConnectionTestSucceeded: "تم الاتصال بواجهة WhatsApp Cloud API بنجاح.",
   whatsappConnectionTestFailed: "تعذّر الوصول إلى واجهة WhatsApp Cloud API. تحقق من بيانات الاعتماد وحاول مرة أخرى.",
 
+  // ─── WhatsApp conversations errors ────────────────────────────────────────
+  whatsappRecipientNotAllowed:
+    "هذا الرقم رقم اختباري من Meta، ولا يمكنه مراسلة سوى المستلمين المعتمدين في لوحة Meta App Dashboard. أضف المستلم وتحقق منه أولًا.",
+  whatsappRecipientNotAllowedFromMeta:
+    "رفضت Meta المستلم: الرقم غير مدرج في قائمة المسموح لهم للرقم الاختباري. افتح لوحة Meta App Dashboard لاعتماده، ثم حاول مرة أخرى.",
+  whatsappOutsideServiceWindow:
+    "لا يمكن إرسال ردود نصية حرة إلا خلال ٢٤ ساعة من آخر رسالة وردت من العميل. أرسل رسالة قالب بدلًا من ذلك.",
+  whatsappConversationSendFailed: "تعذّر إرسال الرسالة. تحقق من المستلم ومن الاتصال بالشبكة، ثم حاول مرة أخرى.",
+  whatsappRecipientLimitReached: "تدعم أرقام Meta الاختبارية خمسة مستلمين كحد أقصى. احذف مستلمًا قبل إضافة آخر.",
+  whatsappRecipientConflict: "هذا المستلم مسجّل بالفعل لدى رقم الواتساب هذا.",
+  whatsappTemplateRequired: "اختر قالبًا لبدء محادثة خارج نافذة الـ ٢٤ ساعة.",
+  whatsappMessageRequired: "أدخل رسالة لإرسالها.",
+
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "البريد الإلكتروني",
   smsChannelLabel: "رسائل SMS",

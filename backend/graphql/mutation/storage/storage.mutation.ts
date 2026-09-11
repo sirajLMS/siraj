@@ -62,13 +62,13 @@ function enforceBulkLimit(count: number, operation: string, tErrors: ErrorsLabel
 async function authAndSanitizeSinglePath(
   ctx: BaseContext,
   rawPath: string
-): Promise<{ sanitizedPath: string; tErrors: ErrorsLabels }> {
+): Promise<{ userId: string; sanitizedPath: string; tErrors: ErrorsLabels }> {
   const userId = await requireAuth(ctx);
   const sanitizedPath = sanitizeStoragePath(rawPath);
   validateStoragePath(sanitizedPath);
   const tErrors = ctx.t().errorsTranslations;
   await StorageAuthService.requireStorageManage(userId, tErrors);
-  return { sanitizedPath, tErrors };
+  return { userId, sanitizedPath, tErrors };
 }
 
 /**
@@ -150,9 +150,12 @@ gqlSchemaBuilder.mutationFields(t => ({
       }),
     },
     resolve: async (_parent, { input }, ctx) => {
-      const { sanitizedPath } = await authAndSanitizeSinglePath(ctx, input.path);
+      const { userId, sanitizedPath } = await authAndSanitizeSinglePath(ctx, input.path);
       const storageService = await getStorageService();
-      const result = await storageService.prepareUpload({ ...input, path: sanitizedPath }, ctx.locale);
+      const result = await storageService.prepareUpload(
+        { ...input, path: sanitizedPath, uploadedByUserId: userId },
+        ctx.locale
+      );
       logger.info("GraphQL mutation: prepareUpload completed", {
         uploadType: result.uploadType,
       });
