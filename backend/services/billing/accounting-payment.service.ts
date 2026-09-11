@@ -456,22 +456,24 @@ export namespace AccountingPaymentService {
     }
 
     const ledgerRows = await CreditRepository.listBySourcePaymentId(paymentId);
-    for (const row of ledgerRows) {
-      const delta = row.changeAmountHours ?? row.changeAmount;
-      const numericDelta = delta === null ? null : Number(delta);
-      const isAdjustment = row.reason !== PURCHASE_REASON;
-      const isNegative = numericDelta !== null && numericDelta < 0;
-      events.push({
-        id: row.id,
-        kind:
-          isNegative || isAdjustment
-            ? AccountingPaymentHistoryKind.HOURS_ADJUSTED
-            : AccountingPaymentHistoryKind.HOURS_CREDITED,
-        occurredAt: row.createdAt,
-        hoursDelta: delta === null ? null : String(delta),
-        notes: row.notes,
-      });
-    }
+    events.push(
+      ...ledgerRows.map(row => {
+        const delta = row.changeAmountHours ?? row.changeAmount;
+        const numericDelta = delta === null ? null : Number(delta);
+        const isAdjustment = row.reason !== PURCHASE_REASON;
+        const isNegative = numericDelta !== null && numericDelta < 0;
+        return {
+          id: row.id,
+          kind:
+            isNegative || isAdjustment
+              ? AccountingPaymentHistoryKind.HOURS_ADJUSTED
+              : AccountingPaymentHistoryKind.HOURS_CREDITED,
+          occurredAt: row.createdAt,
+          hoursDelta: delta === null ? null : String(delta),
+          notes: row.notes,
+        };
+      })
+    );
 
     return events.toSorted((a, b) => a.occurredAt.getTime() - b.occurredAt.getTime());
   }
