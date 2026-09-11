@@ -10,6 +10,7 @@ import {
   verifyToken,
 } from "@/backend/lib";
 import { SessionService, StorageService } from "@/backend/services";
+import { StorageUtils } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
 import { extToMime } from "@/shared/utils";
@@ -229,6 +230,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: tErrors.file.filePathRequired }, { status: 400 });
     }
 
+    const validationError = StorageUtils.validatePath(relativePath);
+    if (validationError) {
+      logger.warn("Path traversal or invalid path attempt detected in file request");
+      return NextResponse.json({ error: tErrors.file.invalidFilePath }, { status: 400 });
+    }
+
     // Allow unauthenticated access to public files (public/ directory only).
     // User avatar uploads land under public/avatars/...; the raw `avatars/`
     // prefix is intentionally NOT exempt — nothing writes there anymore and
@@ -238,15 +245,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       try {
         absolutePath = resolvePublicStoragePath(relativePath.substring("public/".length));
       } catch (error) {
-        logger.warn("Path traversal attempt detected in public file request", { path: relativePath, error });
+        logger.warn("Path traversal attempt detected in public file request", { error });
         return NextResponse.json({ error: tErrors.file.invalidFilePath }, { status: 400 });
       }
 
       try {
-        await fs.access(absolutePath);
+        const stats = await fs.stat(absolutePath);
+        if (!stats.isFile()) {
+          logger.warn("Path is not a regular file", { path: StorageUtils.sanitizePath(relativePath) });
+          return NextResponse.json({ error: tErrors.file.fileNotFound }, { status: 404 });
+        }
         return buildFileResponse(absolutePath, relativePath, request.headers.get("range"));
       } catch {
-        logger.warn("Public file not found", { path: relativePath, absolutePath });
+        logger.warn("Public file not found", { path: StorageUtils.sanitizePath(relativePath) });
         return NextResponse.json({ error: tErrors.file.fileNotFound }, { status: 404 });
       }
     }
@@ -262,14 +273,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     try {
       absolutePath = resolveLocalStoragePath(relativePath);
     } catch (error) {
-      logger.warn("Path traversal attempt detected", { path: relativePath, error });
+      logger.warn("Path traversal attempt detected", { error });
       return NextResponse.json({ error: tErrors.file.invalidFilePath }, { status: 400 });
     }
 
     try {
-      await fs.access(absolutePath);
+      const stats = await fs.stat(absolutePath);
+      if (!stats.isFile()) {
+        logger.warn("Path is not a regular file", { path: StorageUtils.sanitizePath(relativePath) });
+        return NextResponse.json({ error: tErrors.file.fileNotFound }, { status: 404 });
+      }
     } catch {
-      logger.warn("File not found", { path: relativePath });
+      logger.warn("File not found", { path: StorageUtils.sanitizePath(relativePath) });
       return NextResponse.json({ error: tErrors.file.fileNotFound }, { status: 404 });
     }
 
