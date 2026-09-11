@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import type { WhatsappTokenTestFailureKind } from "@/frontend/common/graphql/generated/gql/graphql";
 
 /** Outcome of a token test against Meta for a specific account/number. */
 export type WhatsappTokenTestState = "success" | "failed";
@@ -10,6 +11,13 @@ export interface WhatsappTokenTestResult {
   readonly state: WhatsappTokenTestState;
   /** Human-readable explanation of a failure (null when the test passed). */
   readonly reason: string | null;
+  /**
+   * Machine-readable failure classification. A value from the enum means the
+   * outcome came from Meta or the transport to Meta; null means the request
+   * was rejected before Meta was involved (Siraj auth/validation/GraphQL
+   * error) — the UI renders it with the "request rejected" hint.
+   */
+  readonly failureKind: WhatsappTokenTestFailureKind | null;
 }
 
 /**

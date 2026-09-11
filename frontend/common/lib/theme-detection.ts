@@ -31,6 +31,32 @@ function hasClientWindow() {
   return getBrowserGlobalScope().window !== undefined;
 }
 
+/**
+ * Detect the actual current app color scheme directly from the DOM document element (`<html>`).
+ * Checks `data-mui-color-scheme`, `data-theme`, boolean attributes `data-dark`/`data-light`,
+ * and `style.colorScheme` to determine whether the user is currently viewing dark or light mode.
+ */
+export function detectDocumentColorScheme(): PaletteMode | undefined {
+  if (typeof document === "undefined") {
+    return undefined;
+  }
+  const root = document.documentElement;
+  const datasetScheme = root.dataset.muiColorScheme ?? root.dataset.theme;
+  if (datasetScheme === "dark" || datasetScheme === "light") {
+    return datasetScheme;
+  }
+  if (root.hasAttribute("data-dark")) {
+    return "dark";
+  }
+  if (root.hasAttribute("data-light")) {
+    return "light";
+  }
+  if (root.style.colorScheme === "dark" || root.style.colorScheme === "light") {
+    return root.style.colorScheme;
+  }
+  return undefined;
+}
+
 export function setThemePreference(mode: PaletteMode) {
   if (hasClientWindow()) {
     globalThis.localStorage.setItem("theme", mode);

@@ -6,6 +6,7 @@ import type {
   AppearanceColorsInput,
   AppearanceDraftInput,
 } from "@/frontend/common/graphql/generated/gql/graphql";
+import { detectDocumentColorScheme } from "@/frontend/common/lib/theme-detection";
 import {
   type AppearancePreset,
   type AppearancePresetId,
@@ -306,10 +307,7 @@ export const useAppearancePreviewStore = create<AppearancePreviewState>((set, ge
     // customizer starts in the same mode the user is viewing (dark or light),
     // not always the default isDark. This ensures color edits apply to the
     // mode the user actually sees.
-    const currentScheme =
-      typeof document !== "undefined"
-        ? (document.documentElement.dataset.muiColorScheme ?? document.documentElement.dataset.theme ?? undefined)
-        : undefined;
+    const currentScheme = detectDocumentColorScheme();
     const isDark = currentScheme !== undefined ? currentScheme === "dark" : get().draft.defaultColorScheme === "dark";
     const wasHydrated = get().hydrated;
     const presetId = wasHydrated ? get().presetId : matchPresetByColors(get().draft.colors);

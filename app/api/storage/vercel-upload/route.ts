@@ -113,8 +113,8 @@ async function validateUploadPayload(
   return null;
 }
 
-async function validateSession(sessionId: string, pathName: string): Promise<NextResponse | null> {
-  const result = await StorageService.validateSignedUrlSession(sessionId, pathName);
+async function validateSession(sessionId: string, pathName: string, userId: string): Promise<NextResponse | null> {
+  const result = await StorageService.validateSignedUrlSession(sessionId, pathName, undefined, userId);
   if (result) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Step 6: Validate existing session
-    const sessionValidationError = await validateSession(sessionId, pathName);
+    const sessionValidationError = await validateSession(sessionId, pathName, userId);
     if (sessionValidationError) return sessionValidationError;
 
     // Step 7: Use Vercel's handleUpload to generate upload URL
