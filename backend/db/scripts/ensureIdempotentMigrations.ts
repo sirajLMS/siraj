@@ -1,4 +1,5 @@
-import { existsSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync } from "node:fs";
+import { readdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { logger } from "@/backend/lib/logger";
 
@@ -211,43 +212,43 @@ export function makeMigrationSqlIdempotent(sql: string): string {
 /**
  * Scans `backend/drizzle/` and rewrites all `migration.sql` files to be fully idempotent for PostgreSQL.
  *
+ * @param drizzleDir Optional directory path to scan (defaults to backend/drizzle).
  * @returns The list of relative migration file paths that were modified.
  */
-export function ensureIdempotentMigrations(): string[] {
-  if (!existsSync(DRIZZLE_DIR)) return [];
+export async function ensureIdempotentMigrations(drizzleDir: string = DRIZZLE_DIR): Promise<string[]> {
+  if (!existsSync(drizzleDir)) return [];
 
-  const updatedFiles: string[] = [];
-  const folders = readdirSync(DRIZZLE_DIR).filter(f => {
-    try {
-      return statSync(join(DRIZZLE_DIR, f)).isDirectory();
-    } catch {
-      return false;
-    }
-  });
+  const entries = await readdir(drizzleDir, { withFileTypes: true });
+  const folders = entries.filter(e => e.isDirectory()).map(e => e.name);
 
-  for (const folder of folders) {
-    const sqlPath = join(DRIZZLE_DIR, folder, "migration.sql");
-    if (!existsSync(sqlPath)) continue;
+  const results = await Promise.all(
+    folders.map(async folder => {
+      const sqlPath = join(drizzleDir, folder, "migration.sql");
+      if (!existsSync(sqlPath)) return null;
 
-    const originalSql = readFileSync(sqlPath, "utf8");
-    const idempotentSql = makeMigrationSqlIdempotent(originalSql);
+      const originalSql = await readFile(sqlPath, "utf8");
+      const idempotentSql = makeMigrationSqlIdempotent(originalSql);
 
-    if (originalSql !== idempotentSql) {
-      const tmpPath = `${sqlPath}.tmp`;
-      writeFileSync(tmpPath, idempotentSql);
-      try {
-        renameSync(tmpPath, sqlPath);
-      } catch (err) {
+      if (originalSql !== idempotentSql) {
+        const tmpPath = `${sqlPath}.tmp`;
+        await writeFile(tmpPath, idempotentSql, "utf8");
         try {
-          unlinkSync(tmpPath);
-        } catch {
-          // best-effort cleanup of the orphaned temp file; ignore errors
+          await rename(tmpPath, sqlPath);
+        } catch (err) {
+          try {
+            await unlink(tmpPath);
+          } catch {
+            // best-effort cleanup of the orphaned temp file; ignore errors
+          }
+          throw err;
         }
-        throw err;
+        return `${folder}/migration.sql`;
       }
-      updatedFiles.push(`${folder}/migration.sql`);
-    }
-  }
+      return null;
+    })
+  );
+
+  const updatedFiles = results.filter((file): file is string => file !== null);
 
   if (updatedFiles.length > 0) {
     logger.log(
@@ -320,7 +321,7 @@ export async function preCommitEnumStatements(statements: string[]): Promise<voi
 export async function preCommitEnumStatementsForMigrationFile(migrationPath: string): Promise<void> {
   if (!existsSync(migrationPath)) return;
 
-  const content = readFileSync(migrationPath, "utf8");
+  const content = await readFile(migrationPath, "utf8");
   const statements = extractEnumAddValueStatementsFromSql(content);
   if (statements.length === 0) return;
 
@@ -335,23 +336,20 @@ export async function preCommitEnumStatementsForMigrationFile(migrationPath: str
  *
  * Prefer {@link preCommitEnumStatementsForMigrationFile} per migration folder via
  * {@link runDrizzleMigrations}, which handles fresh databases correctly.
+ *
+ * @param drizzleDir Optional directory path to scan (defaults to backend/drizzle).
  */
-export async function ensureEnumValuesCommitted(): Promise<void> {
-  if (!existsSync(DRIZZLE_DIR)) return;
+export async function ensureEnumValuesCommitted(drizzleDir: string = DRIZZLE_DIR): Promise<void> {
+  if (!existsSync(drizzleDir)) return;
 
-  const folders = readdirSync(DRIZZLE_DIR).filter(f => {
-    try {
-      return statSync(join(DRIZZLE_DIR, f)).isDirectory();
-    } catch {
-      return false;
-    }
-  });
+  const entries = await readdir(drizzleDir, { withFileTypes: true });
+  const folders = entries.filter(e => e.isDirectory()).map(e => e.name);
 
   // Migration folders must be processed in order; chain the promises to keep
   // sequential execution without awaiting inside a loop construct.
   await folders.reduce<Promise<void>>(async (previous, folder) => {
     await previous;
-    const sqlPath = join(DRIZZLE_DIR, folder, "migration.sql");
+    const sqlPath = join(drizzleDir, folder, "migration.sql");
     await preCommitEnumStatementsForMigrationFile(sqlPath);
   }, Promise.resolve());
 }

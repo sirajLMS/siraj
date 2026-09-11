@@ -46,7 +46,7 @@ export async function runMigrations(closePool: boolean) {
     // Ensure all migration SQL files in backend/drizzle/ are fully idempotent for PostgreSQL
     // before running Drizzle migration runner. Prevents failures on existing DBs
     // when type/column/constraint already exists.
-    ensureIdempotentMigrations();
+    await ensureIdempotentMigrations();
   }
 
   if (dialect === "postgres") {
