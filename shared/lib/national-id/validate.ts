@@ -63,19 +63,20 @@ export function isValidEgyptianNationalId(value: string): boolean {
     return false;
   }
 
-  const digits = value.split("").map(Number);
+  // Performance optimization (Bolt): Read digits directly from string character
+  // codes (`charCodeAt(i) - 48`) instead of allocating intermediate arrays via `split("")` and `map(Number)`.
 
   // Century digit.
-  const century = digits[0];
+  const century = value.charCodeAt(0) - 48;
   if (century !== 2 && century !== 3) {
     return false;
   }
 
   // Year + month + day must form a plausible Gregorian date.
-  const yy = digits[1] * 10 + digits[2];
+  const yy = (value.charCodeAt(1) - 48) * 10 + (value.charCodeAt(2) - 48);
   const year = century === 2 ? 1900 + yy : 2000 + yy;
-  const month = digits[3] * 10 + digits[4];
-  const day = digits[5] * 10 + digits[6];
+  const month = (value.charCodeAt(3) - 48) * 10 + (value.charCodeAt(4) - 48);
+  const day = (value.charCodeAt(5) - 48) * 10 + (value.charCodeAt(6) - 48);
   if (!isValidDate(year, month, day)) {
     return false;
   }
@@ -86,7 +87,7 @@ export function isValidEgyptianNationalId(value: string): boolean {
   // (No further constraint on digits 8–13 beyond the checksum below.)
 
   // Luhn checksum over all 14 digits — the final digit is the check digit.
-  return luhnChecksumValid(digits);
+  return luhnChecksumValid(value);
 }
 
 function isValidDate(year: number, month: number, day: number): boolean {
@@ -102,14 +103,15 @@ function isValidDate(year: number, month: number, day: number): boolean {
 }
 
 /** Standard Luhn check: the last digit is the check digit for the preceding digits. */
-function luhnChecksumValid(digits: number[]): boolean {
+function luhnChecksumValid(value: string): boolean {
   let sum = 0;
+  const len = value.length; // 14 for Egyptian national ID
   // Process all digits except the final check digit.
-  for (let i = 0; i < digits.length - 1; i += 1) {
-    let d = digits[i];
+  for (let i = 0; i < len - 1; i += 1) {
+    let d = value.charCodeAt(i) - 48;
     // Double every second digit from the right (i.e. odd index from the left
     // when counting from the leftmost payload digit).
-    if ((digits.length - 2 - i) % 2 === 0) {
+    if ((len - 2 - i) % 2 === 0) {
       d *= 2;
       if (d > 9) {
         d -= 9;
@@ -118,5 +120,6 @@ function luhnChecksumValid(digits: number[]): boolean {
     sum += d;
   }
   const checkDigit = (10 - (sum % 10)) % 10;
-  return checkDigit === digits.at(-1);
+  const lastDigit = value.charCodeAt(len - 1) - 48;
+  return checkDigit === lastDigit;
 }
