@@ -11,6 +11,9 @@ const GLOBE_EMOJI = "🌐";
 // Generate at runtime via Object.keys to break literal type inference
 const IANA_TIMEZONE_IDS_STRINGS: string[] = Object.keys(IANA_TIMEZONE_LABELS);
 
+// Performance optimization: Pre-build Set for O(1) validity checks vs O(N) array scans
+const IANA_TIMEZONE_SET = new Set<string>(IANA_TIMEZONE_IDS_STRINGS);
+
 // Widened copies of the imported constants to prevent massive union type inference
 const IANA_TIMEZONE_LABELS_MAP: Record<string, { readonly en: string; readonly ar: string }> = (() => {
   const result: Record<string, { readonly en: string; readonly ar: string }> = {};
@@ -35,6 +38,33 @@ export type TimezoneOption = {
   readonly offsetMinutes: number;
   readonly emoji: string;
 };
+
+/**
+ * Performance optimization: Cache `Intl.DateTimeFormat` instances per timezone.
+ * Creating new `Intl.DateTimeFormat` objects or calling `toLocaleString` repeatedly creates
+ * expensive internal JS runtime formatting engines.
+ */
+const dtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getDateTimeFormat(timeZone: string): Intl.DateTimeFormat {
+  let dtf = dtfCache.get(timeZone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    });
+    dtfCache.set(timeZone, dtf);
+  }
+  return dtf;
+}
+
+const utcDateTimeFormat = getDateTimeFormat("UTC");
 
 function normalizeIanaTimezoneId(value: string): string {
   const slashNormalized = value.includes("/") ? value : value.replaceAll("_", "/");
@@ -117,8 +147,10 @@ export function getTimezoneOffsetLabel(ianaTimezone: string, _locale?: string, d
 function getTimezoneOffsetMinutes(ianaTimezone: string, date = new Date()): number {
   const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
   try {
-    const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
-    const tzDate = new Date(date.toLocaleString("en-US", { timeZone: normalizedTimezone }));
+    const utcStr = utcDateTimeFormat.format(date);
+    const tzStr = getDateTimeFormat(normalizedTimezone).format(date);
+    const utcDate = new Date(utcStr);
+    const tzDate = new Date(tzStr);
     return Math.round((tzDate.getTime() - utcDate.getTime()) / 60000);
   } catch {
     return 0;
@@ -134,14 +166,16 @@ export function getTimezoneSelectLabel(ianaTimezone: string, locale?: string, da
 export function getTimezoneOptions(locale?: string, date = new Date()): TimezoneOption[] {
   return IANA_TIMEZONE_IDS_STRINGS.map(id => {
     const pathLabel = getTimezonePathLabel(id, locale);
-    const offsetLabel = getTimezoneOffsetLabel(id, locale, date);
+    // Performance optimization: Calculate offset minutes once and derive offset label directly
+    const offsetMinutes = getTimezoneOffsetMinutes(id, date);
+    const offsetLabel = formatOffsetFromMinutes(offsetMinutes);
     const timezoneId = toIanaTimezone(id);
     return {
       id: timezoneId,
       label: `${pathLabel} (${offsetLabel})`,
       pathLabel,
       offsetLabel,
-      offsetMinutes: getTimezoneOffsetMinutes(id, date),
+      offsetMinutes,
       emoji: getTimezoneEmoji(id),
     };
   }).toSorted((left, right) => {
@@ -154,5 +188,6 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
 
 export function isValidIanaTimezoneId(value: string): value is IanaTimezone {
   const normalized = normalizeIanaTimezoneId(value);
-  return !isExcludedIanaTimezoneId(normalized) && IANA_TIMEZONE_IDS_STRINGS.includes(normalized);
+  // Performance optimization: O(1) set lookup instead of O(N) array search
+  return !isExcludedIanaTimezoneId(normalized) && IANA_TIMEZONE_SET.has(normalized);
 }
