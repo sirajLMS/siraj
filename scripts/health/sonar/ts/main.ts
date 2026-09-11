@@ -82,7 +82,7 @@ async function main() {
         await changeAdminPassword();
         const token = await generateToken();
         await createProject(token);
-        writeConnectionInfo(token);
+        await writeConnectionInfo(token);
         await installScanner();
         const scanStartTime = runAnalysis(token);
         await waitForAnalysisProcessing(token, scanStartTime);
@@ -90,11 +90,11 @@ async function main() {
         await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-result.json" });
       } else if (args.includes("--result")) {
         const token = await generateToken();
-        writeConnectionInfo(token);
+        await writeConnectionInfo(token);
         await fetchAndDisplayResults({ token, includeDuplications: false, outputFilename: "sonar-result.json" });
       } else if (args.includes("--full")) {
         const token = await generateToken();
-        writeConnectionInfo(token);
+        await writeConnectionInfo(token);
         await fetchAndDisplayResults({ token, includeDuplications: true, outputFilename: "sonar-full.json" });
       } else {
         logError("Invalid arguments. Use --help for usage information.");
