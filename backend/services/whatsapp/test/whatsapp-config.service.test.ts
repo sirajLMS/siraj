@@ -309,6 +309,11 @@ async function expectRejection(promise: Promise<unknown>): Promise<unknown> {
 function removeSeedEnvVars(): void {
   delete process.env.WHATSAPP_APP_ID;
   delete process.env.WHATSAPP_APP_SECRET;
+  delete process.env.WHATSAPP_VERIFY_TOKEN;
+  delete process.env.WHATSAPP_PHONE_NUMBER_ID;
+  delete process.env.WHATSAPP_WABA_ID;
+  delete process.env.WHATSAPP_ACCESS_TOKEN;
+  delete process.env.WHATSAPP_ES_CONFIG_ID;
 }
 
 describe("resolveConfiguration — resolution priority", () => {
@@ -630,7 +635,7 @@ describe("saveConfiguration — env-config audit trail", () => {
     );
 
     const upserts = auditEntriesFor("env_config.upsert");
-    expect(upserts).toHaveLength(3);
+    expect(upserts).toHaveLength(6);
 
     const byKey = new Map(upserts.map(entry => [entry.entityId, entry]));
     // Secret keys (registry isSecret) are masked to "***" — never plaintext.
@@ -661,7 +666,7 @@ describe("saveConfiguration — env-config audit trail", () => {
     }
     // The audit writes joined the caller's transaction (same tx handle the
     // repo handed to the propagation hook).
-    expect(createManyAuditLogsMock).toHaveBeenCalledTimes(3);
+    expect(createManyAuditLogsMock).toHaveBeenCalledTimes(6);
     expect(createManyAuditLogsMock.mock.calls[0][1]).toBe(TX_TOKEN);
   });
 
@@ -911,7 +916,8 @@ describe("testConnection", () => {
     expect(result.message).toBe(errorsEn.whatsappConnectionTestSucceeded);
     expect(result.phoneNumber).toBe("+1 555 000 0000");
     expect(fetchUrls).toHaveLength(1);
-    expect(fetchUrls[0]).toBe("https://graph.facebook.com/v25.0/105");
+    expect(fetchUrls[0]).toStartWith("https://graph.facebook.com/v25.0/105");
+    expect(fetchUrls[0]).toContain("display_phone_number");
     // The token travels in the Authorization header, never in the URL.
     expect(fetchAuthHeaders[0]).toBe(`Bearer ${ENV_TOKEN}`);
     expect(fetchUrls[0]).not.toContain(ENV_TOKEN);

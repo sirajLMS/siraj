@@ -72,6 +72,7 @@ export async function uploadFileToStorage(options: UploadFileToStorageOptions): 
       "Content-Type": contentType,
       "Content-MD5": contentHash,
       "Content-Length": String(fileContent.length),
+      Authorization: `Bearer ${token}`,
     },
     body: new Uint8Array(fileContent),
   });

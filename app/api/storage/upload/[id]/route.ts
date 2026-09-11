@@ -6,6 +6,7 @@ import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import { getServerUserContext, logger, resolveLocalStoragePath } from "@/backend/lib";
+import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import { isAllowedMimeType } from "@/backend/lib/storage/mime-allowlist";
 import { StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
@@ -134,6 +135,28 @@ async function finalizeUpload(
 }
 
 /**
+ * Resolve the uploading user's ID from the request. Tries cookie-based
+ * session first (via `getServerUserContext`), then falls back to the
+ * `Authorization: Bearer <token>` header — mirroring the GraphQL context
+ * factory's auth resolution so that both browser uploads (cookies) and
+ * API/test uploads (Bearer token) are supported.
+ */
+async function resolveUploadUserId(request: NextRequest): Promise<string | null> {
+  const cookieResult = await getServerUserContext();
+  if (cookieResult.userId) return cookieResult.userId;
+
+  const authHeader = request.headers.get("authorization");
+  const bearerToken = extractTokenFromHeader(authHeader);
+  if (!bearerToken) return null;
+
+  const payload = await verifyToken(bearerToken);
+  if (payload?.type === "access" && typeof payload.userId === "string") {
+    return payload.userId;
+  }
+  return null;
+}
+
+/**
  * Handle signed URL file uploads
  * PUT /api/storage/upload/[id]
  */
@@ -156,7 +179,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     // session user matches. Prevents token-sharing attacks where anyone who
     // obtains the token can write the file.
     if (signedUrl.uploadedByUserId) {
-      const { userId: sessionUserId } = await getServerUserContext();
+      const sessionUserId = await resolveUploadUserId(request);
       if (!sessionUserId || sessionUserId !== signedUrl.uploadedByUserId) {
         logger.warn("Signed URL user mismatch", {
           tokenId,

@@ -144,6 +144,12 @@ describe("WhatsApp configuration GraphQL integration tests", () => {
   });
 
   test("reports a failed connection test while credentials are unconfigured", async () => {
+    // Persist a DB config without credentials so testConnection fails reliably
+    // even in environments where fallback env vars are set.
+    await authenticatedRequest(superAdminToken, "mutate", updateWhatsappConfigurationMutationDocument, {
+      input: buildConfigInput({ appId: "cfg-unconfigured" }),
+    });
+
     const data = await authenticatedRequest(superAdminToken, "query", testWhatsappConnectionQueryDocument);
     const result = data.testWhatsappConnection;
     if (!result) throw new Error("testWhatsappConnection returned null");

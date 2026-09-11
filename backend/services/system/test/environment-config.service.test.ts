@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { auditLogs } from "@/backend/db/schema";
@@ -243,7 +243,10 @@ describe("environment-config.service — tx-aware variants (rolled-back transact
       await auditEnvConfigChange(actor.id, "upsert", TEST_KEY, "prior-value", "next-value", tx);
 
       // Visible INSIDE the caller's transaction (same connection).
-      const inTx = await tx.select().from(auditLogs).where(eq(auditLogs.entityId, ENV_DB_KEY));
+      const inTx = await tx
+        .select()
+        .from(auditLogs)
+        .where(and(eq(auditLogs.entityId, ENV_DB_KEY), eq(auditLogs.actorUserId, actor.id)));
       expect(inTx).toHaveLength(1);
       const audit = inTx[0];
       expect(audit?.actorUserId).toBe(actor.id);
