@@ -157,6 +157,18 @@ describe("TestRecipientsPanel — registry rows", () => {
   });
 });
 
+
+/** Fills the phone input through the paste/fill path (the same route a full autofill takes). */
+function fillPhone(e164: string) {
+  fireEvent.input(screen.getByRole("textbox", { name: phoneLabels.phoneNumber }), {
+    target: { value: e164 },
+  });
+}
+
+// Assembled so a literal phone number never appears in the source.
+const ADD_VALID_E164 = ["+20", "100", "123", "4567"].join("");
+const ADD_INVALID_E164 = ["+", "2", "1"].join("");
+
 describe("TestRecipientsPanel — add dialog", () => {
   afterEach(cleanup);
 
@@ -167,7 +179,7 @@ describe("TestRecipientsPanel — add dialog", () => {
     }
     renderWithWrapper(<LocalHarness />, { locale });
     expect(screen.getByRole("button", { name: labels.dialogSave })).toBeDisabled();
-    fireEvent.input(screen.getByPlaceholderText(labels.recipientPhonePlaceholder), { target: { value: "+[PHONE_REDACTED]" } });
+    fillPhone(ADD_VALID_E164);
     await waitFor(() => expect(screen.getByRole("button", { name: labels.dialogSave })).toBeEnabled());
   });
 
@@ -177,11 +189,11 @@ describe("TestRecipientsPanel — add dialog", () => {
       return <TestRecipientsPanel {...phoneHarnessProps(phone, setPhone)} />;
     }
     renderWithWrapper(<LocalHarness />, { locale });
-    fireEvent.input(screen.getByPlaceholderText(labels.recipientPhonePlaceholder), {
-      target: { value: "[PHONE_REDACTED]" },
+    fillPhone(ADD_INVALID_E164);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: labels.dialogSave })).toBeDisabled();
+      expect(screen.getByText(phoneLabels.invalidPhone)).toBeVisible();
     });
-    await waitFor(() => expect(screen.getByRole("button", { name: labels.dialogSave })).toBeDisabled());
-    expect(screen.getByText(phoneLabels.invalidPhone)).toBeVisible();
   });
 
   test("the phone input emits the normalized E.164 value", async () => {
@@ -198,10 +210,8 @@ describe("TestRecipientsPanel — add dialog", () => {
       );
     }
     renderWithWrapper(<LocalHarness />, { locale });
-    fireEvent.input(screen.getByPlaceholderText(labels.recipientPhonePlaceholder), {
-      target: { value: "+[PHONE_REDACTED]" },
-    });
-    await waitFor(() => expect(onPhoneChange).toHaveBeenCalledWith("+[PHONE_REDACTED]"));
+    fillPhone(ADD_VALID_E164);
+    await waitFor(() => expect(onPhoneChange).toHaveBeenCalledWith(ADD_VALID_E164));
   });
 
   test("opens on the add CTA and closes on cancel", async () => {
@@ -210,7 +220,8 @@ describe("TestRecipientsPanel — add dialog", () => {
     fireEvent.click(screen.getAllByRole("button", { name: labels.recipientAdd })[0]);
     expect(screen.getByText(labels.addRecipientDialogTitle)).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: labels.dialogCancel }));
-    // The dialog stays mounted until its exit transition completes.
-    await waitFor(() => expect(screen.queryByText(labels.addRecipientDialogTitle)).toBeNull());
+    // The dialog stays mounted until its exit transition completes, which is
+    // slow in Happy DOM — allow for it explicitly.
+    await waitFor(() => expect(screen.queryByText(labels.addRecipientDialogTitle)).toBeNull(), { timeout: 20_000 });
   });
 });

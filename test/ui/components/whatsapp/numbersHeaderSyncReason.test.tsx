@@ -53,6 +53,7 @@ function makeNumbersProps(overrides: Partial<NumbersTabSharedProps> = {}): Numbe
     localDeactivatingId: null,
     syncingId: null,
     onLocalDeactivateConfirmDialog: mock(() => {}),
+    onOpenManageRecipients: mock(() => {}),
     onLocalDeactivateAccount: mock(() => Promise.resolve()),
     onSetAccessToken: mock(() => Promise.resolve()),
     onTestAccessToken: mock(() => Promise.resolve("success" as const)),

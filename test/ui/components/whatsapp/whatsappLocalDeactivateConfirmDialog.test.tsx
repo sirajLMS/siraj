@@ -59,6 +59,7 @@ const baseProps = {
   onSyncFromMeta: mock(noopPromise),
   onDismissSnackbar: mock(() => {}),
   onLocalDeactivateConfirmDialog: mock(() => {}),
+  onOpenManageRecipients: mock(() => {}),
   onSetAccessToken: mock(noopPromise),
   onTestAccessToken: mock(() => Promise.resolve("success" as const)),
   tokenTestStates: {},
