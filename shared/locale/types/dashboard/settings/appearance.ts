@@ -151,7 +151,7 @@ interface AppearanceCustomizeLabels {
   /** Export JSON action label. */
   readonly exportJson: string;
 
-  // ─── Logo upload (Task 7 + BUG-E) ───────────────────────────────────
+  // ─── Logo upload ────────────────────────────────────────────────────
   /** Upload logo button label. */
   readonly logoUploadButton: string;
   /** Loading state label while reading file. */
@@ -162,7 +162,7 @@ interface AppearanceCustomizeLabels {
   readonly logoInMemoryPreview: string;
   /** Remove logo button label. */
   readonly logoRemove: string;
-  /** Toast shown when a logo is loaded into memory (BUG-E). */
+  /** Toast shown when a logo is loaded into memory. */
   readonly logoLoadedToast: string;
   /** Toast shown when the logo file exceeds the size limit. */
   readonly logoFileTooLarge: string;
