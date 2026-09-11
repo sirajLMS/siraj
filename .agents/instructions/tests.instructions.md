@@ -26,50 +26,32 @@ applyTo: "**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx,scripts/run-test
     return errorCaught as Error;
   }
   ```
-- NEVER call `getServerTranslations` from `@/shared/locale/server-graphql` directly in tests - causes the i18n loader to hang. Use `expectRepoError` pattern
+- NEVER call `getServerTranslations` from `@/shared/locale/server-graphql` directly in tests - causes the i18n loader to hang. Use the `expectRepoError` pattern above
 - `DBTransaction` type from `./test-utils` for tx params - NEVER type as `any`
 
-### Database Tests - tx Parameter Position
+### Database Tests - Helper & Schema Signatures
 
-- `tx` position VARIES per repo method - check signature before calling:
-  - `ParentRepository.getParentProfile(parentId, tx?)` - 2nd
-  - `StudentRepository.setClassesRemaining(studentId, value, expectedVersion?, tx?)` - 4th
-  - `StorageDbRepository.linkFileToParent(parentId, fileId, usageType, tx?)` - 4th
-- When in doubt, read the repo method source - never assume tx position
+- `tx` position VARIES per repo method - check the method signature before calling; never assume tx position
+- Helper signatures in `entity-setup.ts` VARY - read the source before calling
+- NEVER assume table columns or relations - read schema in `backend/db/schema/` first; many tables lack `createdAt`/`updatedAt`
 
-### Database Tests - Entity Setup Helpers
-
-- Helper signatures VARY - read source in `entity-setup.ts` before calling:
-  - `setupStudent(tx, userOverrides, parentOverrides, studentOverrides)` - 4 args, NOT `(tx, parentId, overrides)`
-  - `createTestParent(tx, userId, overrides)` - requires userId from previously created user
-  - `createTestStudent(tx, parentId, overrides)` - requires parentId from previously created parent
-- Database schema relations to remember:
-  - `students.id` is PK - does NOT have `userId` field
-  - `teachers.id` references `teachers.userId` -> `users.id`
-  - `classInstances.studentId` -> `students.id`, `classInstances.teacherId` -> `teachers.id`
-  - Must insert `teacherAssignments` between student and teacher before booking a class
-
-### Database Tests - Data & Schema
+### Database Tests - Data Setup
 
 - NEVER query seed data - always create test data using `entity-setup.ts` helpers inside `runInRollback`
-- NEVER assume table columns - read schema in `backend/db/schema/` first
-  - `storageFiles` only has `id`, `path`, `isProtected` - no `mimeType`, `size`, `bucket`
-  - Many tables lack `createdAt`/`updatedAt` - verify before inserting
 - Pre-existing data: fetch initial count BEFORE operations, assert `initialCount + newItemsCount`:
   ```ts
-  const existingCount = await db.$count(students, eq(students.parentId, testParent.id));
-  // ... perform inserts (e.g., add 20 students) ...
-  const allStudentsCount = await db.$count(students, eq(students.parentId, testParent.id));
-  expect(allStudentsCount).toBe(existingCount + 20);
+  const existingCount = await db.$count(someTable, eq(someTable.someFk, foreignKey.id));
+  // ... perform inserts ...
+  expect(await db.$count(someTable, eq(someTable.someFk, foreignKey.id))).toBe(existingCount + newItems);
   ```
-- Non-existent UUID: `"00000000-0000-0000-0000-000000000000"` or `randomUUID()`
+- Non-existent UUID: `randomUUID()`
 - Unique emails/names: use `randomUUID()` to avoid constraint violations
 - Shared timestamp: `const now = new Date();` for all `createdAt`/`updatedAt` in a test
 
 ### Database Tests - Error Assertions
 
-- Assert `.toContain()` on translated message substring (e.g., `"not found"`, `"Version mismatch"`, `"already deactivated"`) - NOT raw translation key
-- Repository methods produce localized messages - raw keys like `"studentNotFound"` never appear in `error.message`
+- Assert `.toContain()` on translated message substring (e.g., `"not found"`) - NOT the raw translation key
+- Repository methods produce localized messages - raw keys like `"entityNotFound"` never appear in `error.message`
 - Do NOT catch errors manually outside of a reusable `expectRepoError` helper
 
 ### Database Tests - Coverage & Structure
@@ -91,6 +73,7 @@ applyTo: "**/*.test.ts,**/*.test.tsx,**/*.spec.ts,**/*.spec.tsx,scripts/run-test
     await db.delete(someTable).where(eq(someTable.id, testRecord.id));
   });
   ```
+- Tests that hard-delete rows referenced by immutable-trigger tables must: disable the trigger, delete ONLY the run's rows (scoped to the test's actors), re-enable the trigger in `finally`
 
 ### Database Tests - Quality
 
@@ -135,12 +118,12 @@ When modifying `scripts/run-test/run-test.ts`:
 - NEVER import backend repos, Drizzle schemas, or services - interact via GraphQL API only
 - Test client has `errorPolicy: "all"` - GraphQL errors do NOT throw. Assert `result.error` (type `ApolloError | undefined`), NOT `result.errors`
 - Use `authenticatedRequest` helper from `helpers.ts` for authenticated queries/mutations
-- Import shared demo users from `@/shared/demo-users` - avoid hardcoded search strings like `"Default Teacher"`
+- Import shared demo users from `@/shared/demo-users` - avoid hardcoded search strings
 - Prefer optional chaining (`?.`) - complies with `@typescript-eslint/prefer-optional-chain`
 - Null guard before assertions on query results:
   ```ts
-  const teachers = result.data?.teachers;
-  if (!teachers) throw new Error("teachers should be defined");
+  const result = result.data?.entities;
+  if (!result) throw new Error("entities should be defined");
   ```
 - Dynamic headers per-query via Apollo request context:
   ```ts
@@ -201,10 +184,9 @@ bun run test:ui:kill         # stop stale test servers (port 3066 only — never
 - Required fields (no `InputMaybe`): always pass a value
 - Optional fields (`InputMaybe`): test BOTH a meaningful non-null value AND `null` in separate test cases
 - For `input` object mutations: include ALL fields of the input type, including nested input types
-- Use valid enum values from generated types (e.g., `CurrencyCode.Usd`, `AccountStatus.Activated`) — never hardcode strings
-- See `docs/testing/mutation-argument-coverage.md` for the complete pattern reference
+- Use valid enum values from generated types (e.g., `CurrencyCode.Usd`) — never hardcode strings
 
-### Linting Rules
+### Linting
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
 
@@ -213,11 +195,7 @@ bun run test:ui:kill         # stop stale test servers (port 3066 only — never
 
 - `await expect(...)` trips the `typescript(await-thenable)` lint because `expect()` is not Promise-typed. Assert resolution via `const result = await promise; expect(result)...` and rejection via `return expect(promise).rejects.toThrow(...)` (return, not await).
 
-### Audit-Log Cleanup in Journeys
-
-- Journeys whose actions mirror into `audit_logs` cannot hard-delete cast users afterward — the immutability trigger (`prevent_audit_log_mod_trigger`) blocks row updates/deletes and the actor FK is `ON DELETE SET NULL`. Cleanup must: disable the trigger, delete ONLY the run's audit rows (scoped to the cast actors), re-enable the trigger in `finally`.
-
 ### Bun `mock.module` Partial Factories (CRITICAL)
 
 - A `mock.module` factory MUST enumerate the mocked module's real export surface (spread the actual exports) — partial factories break unrelated suites at import time the moment the mocked module gains a new export.
-- When adding an export to any mocked module, update every partial mock factory of that module in the same change (a stale `whatsapp-constants` partial mock once broke the coexistence-sync suite).
+- When adding an export to any mocked module, update every partial mock factory of that module in the same change.

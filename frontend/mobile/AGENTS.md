@@ -17,25 +17,15 @@ The `frontend/mobile/` module is the **mobile-only UI layer** containing:
 
 Mobile primitives split into **three** behavioral categories (NOT all null-return):
 
-| Primitive | Group | Category | Behavior |
-|---|---|---|---|
-| `MobileFab` | `button/` | **viewport-gated null-return** | `useViewport()`; `if (!isMobile) return null` |
-| `MobileMetricCardGrid` | `card/` | **pure presentational** | always horizontal scroll row of internal `MobileMetricCard` — no `useViewport`, no Grid |
-| `MobileCardListItem` | `card/` | **pure presentational** | no `useViewport`, no null-return |
-| `MobileCardList` | `container/` | pure presentational | no `useViewport`, no null-return |
-| `MobileContentStack` | `container/` | pure presentational | no `useViewport`, no null-return; gap/pb only — no horizontal px |
-| `MobileContentInset` | `container/` | pure presentational | shared content gutter wrapper for toolbars / buttons / ad-hoc blocks |
-| `MobileSectionTitleRow` | `container/` | pure presentational | title + actions row with content gutter |
-| `MobilePageHeader` | `container/page/` | pure presentational | no `useViewport`; always content gutter; `edgeToEdge` = chrome only |
-| `MobileEmptyState` | `state/` | pure presentational | no `useViewport`; includes content gutter |
-| `dateNavigator.mobile.tsx` | `filter/` | tier-paired variant | paired with `DateNavigator.tsx` parent in `common` |
-| `localeAdornmentSwitch.mobile.tsx`, `localizedStringDrawer.mobile.tsx` | `input/localizedString/` | tier-paired variant | paired with parents in `common` |
+- **viewport-gated null-return** — call `useViewport()` and `return null` when not mobile (e.g. `MobileFab`)
+- **tier-paired variant** (`.mobile.tsx`) — paired with a same-named parent in `common`
+- **pure presentational** — no `useViewport()`, no null-return (e.g. `MobileMetricCardGrid`, `MobileCardList`, `MobileContentStack`, `MobilePageHeader`, `MobileEmptyState`)
 
 > **Do NOT "fix" pure-presentational primitives** by adding `useViewport()` null-return — they are intentionally presentational-only.
 
 ### 1b. Mobile padding ownership (edge-to-edge shell)
 
-`DashboardLayoutMobile` uses `px: 0`. Horizontal inset is **not** on `MobilePageContainer` / `MobileContentStack`.
+`DashboardLayoutMobile` uses `px: 0`. Horizontal inset is **not** on `MobilePageContainer` / `MobileContentStack`; it is owned by gutter components:
 
 | Owns gutter | Notes |
 |---|---|
@@ -46,13 +36,12 @@ Mobile primitives split into **three** behavioral categories (NOT all null-retur
 | `MobileHorizontalScrollRow` / `MobileMetricCardGrid` | Own peek-scroll padding — do not wrap in `MobileContentInset` |
 | `MobileEmptyState` | Includes content gutter |
 
-**Full-bleed containers** (heroes, edge-to-edge panels with `contentInset={false}`) must pad their own children via the helpers above or list primitives (`MobileCardList` edge-to-edge layout).
+**Full-bleed containers** (heroes, edge-to-edge panels with `contentInset={false}`) must pad their own children via the gutter helpers or via list primitives (`MobileCardList` edge-to-edge layout).
 
 ### 2. Mobile Views (`views/dashboard/**/`)
 - Mirror the `frontend/common/views/dashboard/` structure exactly (minus the `mobile/` segment)
-- Each `.mobile.tsx` file moved from `frontend/views/**/mobile/` → `frontend/mobile/views/**/`
-- Import paths rewritten: `@/frontend/views/**/mobile/...` → `@/frontend/mobile/views/**/...`
-- Switchers in `frontend/common/views/...` dynamically import from `@/frontend/mobile/views/...`
+- Mobile view files live directly at `frontend/mobile/views/**/` — there is no `mobile/` subsegment, and no view files remain under `frontend/views/**/mobile/`
+- Import paths use `@/frontend/mobile/views/**/...`; switchers in `frontend/common/views/...` dynamically import from those paths
 - **Metric cards:** Views must never import or render `MobileMetricCard`, common `MetricCard`, or common `MetricCardGrid`. Use only `MobileMetricCardGrid` (including when there is a single metric). `MobileMetricCard` is internal to the grid (+ Storybook).
 
 ### 3. Import Conventions
@@ -73,7 +62,6 @@ import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MobileMet
 ### 3a. Scaffold Import Rule (Cross-Tier)
 - Mobile view variants (`.mobile.tsx`) that share logic with desktop variants MUST import the shared scaffold from `__shared__/` directories — never from sibling desktop paths
 - Scaffold files (`*Shared.tsx`) live in `frontend/common/views/.../components/__shared__/` or `frontend/mobile/views/.../__shared__/`
-- See `docs/frontend/ui-shared-scaffold-pattern.md` for the complete pattern
 
 ### 4. Switcher Pattern (ResponsiveViewSwitch)
 - Parent switchers live at `frontend/common/views/dashboard/<domain>/XxView.tsx` (the tier-neutral home)
@@ -90,148 +78,11 @@ import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MobileMet
 
 ```
 frontend/mobile/
-├── AGENTS.md                    # This file
-├── components/
-│   └── ui/
-│       ├── index.ts             # Top-level barrel
-│       ├── button/
-│       │   ├── index.ts
-│       │   └── MobileFab.tsx
-│       ├── card/
-│       │   ├── index.ts
-│       │   ├── MobileCardListItem.tsx
-│       │   └── MobileMetricCardGrid.tsx
-│       ├── container/
-│       │   ├── index.ts
-│       │   ├── MobileCardList.tsx
-│       │   └── MobileContentStack.tsx
-│       ├── container/
-│       │   └── page/
-│       │       ├── index.ts
-│       │       └── MobilePageHeader.tsx
-│       ├── filter/
-│       │   ├── index.ts
-│       │   └── dateNavigator.mobile.tsx
-│       ├── input/
-│       │   └── localizedString/
-│       │       ├── index.ts
-│       │       ├── localeAdornmentSwitch.mobile.tsx
-│       │       └── localizedStringDrawer.mobile.tsx
-│       └── state/
-│           ├── index.ts
-│           └── MobileEmptyState.tsx
-└── views/
-    └── dashboard/
-        ├── admin/
-        │   ├── billing/
-        │   │   ├── adminBilling.mobile.tsx
-        │   │   └── components/
-        │   │       └── adminInvoiceCard.mobile.tsx
-        │   ├── home/
-        │   │   └── scheduleOverview/
-        │   │       ├── scheduleOverview.mobile.tsx
-        │   │       └── components/
-        │   │           └── scheduleOverviewCard.mobile.tsx
-        │   └── parents/
-        │       ├── home/
-        │       │   └── parentsView.mobile.tsx
-        │       └── students/
-        │           ├── students.mobile.tsx
-        │           └── components/
-        │               └── studentDirectoryCard.mobile.tsx
-        ├── billing/
-        │   ├── parentBilling.mobile.tsx
-        │   └── manual/
-        │       └── manualInvoice.mobile.tsx
-        ├── classes/
-        │   ├── audit/
-        │   │   ├── classAuditView.mobile.tsx
-        │   │   ├── adminNoteCard.mobile.tsx
-        │   │   ├── communicationLogCard.mobile.tsx
-        │   │   └── onlineMeetingCard.mobile.tsx
-        │   ├── details/
-        │   │   └── classDetailsContainer.mobile.tsx
-        │   ├── recurring/
-        │   │   └── createRecurringClassView.mobile.tsx
-        │   └── status/
-        │       └── tracking/
-        │           ├── statusTrackingView.mobile.tsx
-        │           └── statusTrackingDataGrid.mobile.tsx
-        ├── complaints/
-        │   ├── adminComplaints.mobile.tsx
-        │   └── parentComplaints.mobile.tsx
-        ├── components/
-        │   └── dashboardMetricsSection.mobile.tsx
-        ├── managers/
-        │   └── home/
-        │       └── managersView.mobile.tsx
-        ├── permissions/
-        │   ├── permissionManagementView.mobile.tsx
-        │   └── components/
-        │       └── permissionCatalogSection.mobile.tsx
-        ├── profile/
-        │   └── core/
-        │       └── notifications/
-        │           └── notificationPreferencesTab.mobile.tsx
-        ├── reports/
-        │   └── reports.mobile.tsx
-        ├── reschedule/
-        │   ├── home/
-        │   │   └── rescheduleView.mobile.tsx
-        │   └── tracking/
-        │       └── rescheduleTrackingView.mobile.tsx
-        ├── resources/
-        │   └── resources.mobile.tsx
-        ├── schedule/
-        │   └── alerts/
-        │       ├── scheduleAlertsView.mobile.tsx
-        │       ├── scheduleAlertBanners.mobile.tsx
-        │       └── institutionalReportCard.mobile.tsx
-        ├── search-schedule/
-        │   └── searchScheduleFilterDrawer.mobile.tsx
-        ├── students/
-        │   └── status/
-        │       └── components/
-        │           ├── upcomingClassesTable.mobile.tsx
-        │           └── studentStatusHeader.mobile.tsx
-        ├── subjects/
-        │   └── home/
-        │       └── subjectsView.mobile.tsx
-        ├── suggestions/
-        │   ├── adminSuggestions.mobile.tsx
-        │   └── parentSuggestions.mobile.tsx
-        ├── teachers/
-        │   ├── availability/
-        │   │   └── teacherAvailabilityView.mobile.tsx
-        │   ├── dashboard/
-        │   │   ├── teacherDashboard.mobile.tsx
-        │   │   └── components/
-        │   │       └── teacherScheduleCard.mobile.tsx
-        │   ├── futureSchedule/
-        │   │   ├── futureScheduleView.mobile.tsx
-        │   │   └── components/
-        │   │       ├── jumpToDateHeader.mobile.tsx
-        │   │       └── futureClassCard.mobile.tsx
-        │   ├── home/
-        │   │   └── teachersView.mobile.tsx
-        │   ├── reassignment/
-        │   │   └── teacherReassignmentView.mobile.tsx
-        │   └── schedule/
-        │       └── weekly/
-        │           └── teacherWeeklyScheduleView.mobile.tsx
-        ├── tools/
-        │   └── dst-migration/
-        │       ├── dstMigrationView.mobile.tsx
-        │       └── components/
-        │           └── updatedSessionsSection.mobile.tsx
-        ├── users/
-        │   └── billing-profile/
-        │       └── userBillingProfile.mobile.tsx
-        └── parent/
-            └── dashboard/
-                ├── parentDashboard.mobile.tsx
-                └── components/
-                    └── parentScheduleCard.mobile.tsx
+├── components/ui/        # Mobile* primitives; per-group barrels + top-level index.ts
+│   ├── button/ card/ state/            # per-behavior primitives
+│   ├── container/ (incl. container/page/)
+│   ├── filter/ input/                   # tier-paired .mobile.tsx variants
+└── views/dashboard/      # mirrors frontend/common/views/dashboard/ (minus the mobile/ segment)
 ```
 
 ## Verification Checklist
@@ -256,5 +107,4 @@ When making changes to this module:
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
+- NEVER use `oxlint-disable` comments; fix the root cause of Oxlint & ESLint/sonarjs findings.

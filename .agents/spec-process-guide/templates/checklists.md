@@ -164,7 +164,7 @@ This document provides comprehensive checklists for each phase of the spec-drive
 - [ ] **Journey tasks for cross-actor workflows**: Every multi-role flow in the requirements has a test-first `test/workflows/<domain>/<journey>.test.ts` task (see `docs/testing/workflow-journey-tests.md`)
 - [ ] **Penetration/E2E tasks present where applicable** (not silently omitted for backend-heavy features)
 - [ ] **Documentation Tasks**: Documentation updates are planned
-- [ ] **Knowledge Propagation Task**: Final task to propagate outcome learnings into AGENTS.md, skills, instructions, and docs is included
+- [ ] **Knowledge Propagation Task**: Final task to propagate outcome learnings into docs (canonical `docs/<domain>/<topic>.md`), skills (`.agents/skills/<skill>/SKILL.md` when a pattern fits a skill's domain), and the plan's outcome files is included. AGENTS.md and .agents/instructions files are read-only guardrails and are NEVER propagation targets
 
 ### Implementation Planning
 
@@ -411,7 +411,7 @@ This document provides comprehensive checklists for each phase of the spec-drive
 - [ ] Tasks build incrementally
 - [ ] Implementation risks identified
 - [ ] Development team has reviewed
-- [ ] Knowledge propagation task updates AGENTS.md, skills, instructions, and docs
+- [ ] Knowledge propagation task updates docs and skills only (AGENTS.md / .agents/instructions are never updated)
 ```
 
 ### Success Metrics and Measurement

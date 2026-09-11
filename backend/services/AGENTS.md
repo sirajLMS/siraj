@@ -1,21 +1,23 @@
 # Backend Service Layer Rules
 
-- **Domain-Driven Architecture**: Service layers must be constructed per domain of concern (e.g., `PermissionsService`, `ScheduleService`). 
-- **NO Monolithic Services**: Do not create generic, monolithic services (like a single `DashboardService` handling everything). 
+- **Domain-Driven Architecture**: Service layers must be constructed per domain of concern (e.g., `PermissionsService`, `ScheduleService`).
+- **NO Monolithic Services**: Do not create generic, monolithic services (like a single `DashboardService` handling everything).
 - **Business Logic Hub**: This layer should contain all business rules, orchestration, and complex permission gating before calling the repository layer.
-- **Single-Orchestrator Write Pattern**: When one user action writes multiple related rows (invoice + payment + ledger + balance), ONE service method owns the entire transaction (advisory locks, in-tx re-validation, idempotency keys, post-commit notifications) — never split the write across services. See `docs/billing/credit-hours-system.md` for a reference implementation.
-- **Replay Pre-Check Ordering (idempotent transactions)**: Inside a locked idempotent transaction, the idempotency replay pre-check must run immediately after acquiring the lock, BEFORE any state-dependent guards (existence, balance, sufficiency). A replay must return the originally persisted row even when the state that guarded the first write has since moved; running guards first makes legitimate retries throw. See `docs/billing/credit-adjustments.md`.
+- **Single-Orchestrator Write Pattern**: When one user action writes multiple related rows, ONE service method owns the entire transaction (advisory locks, in-tx re-validation, idempotency keys, post-commit notifications) — never split the write across services.
+- **Replay Pre-Check Ordering (idempotent transactions)**: Inside a locked idempotent transaction, the idempotency replay pre-check must run immediately after acquiring the lock, BEFORE any state-dependent guards (existence, balance, sufficiency). A replay must return the originally persisted row even when the state that guarded the first write has since moved; running guards first makes legitimate retries throw.
 - **SSR Usage**: Services can be used directly by Next.js Server Components (SSR) or Server Actions, so they must not rely on GraphQL-specific contexts unless passed explicitly.
 - **i18n / Localized Error Messages**: All user-facing error messages, alerts, and feedback generated in services must use the compile-time TypeScript translation system via `getServerTranslations(locale, "<namespace>")` from `@/shared/locale/server-graphql` (optionally accepts a `locale?: string` parameter). Hardcoded strings for exceptions or responses are forbidden. The legacy `getBackendTranslations` helper from `@/backend/lib/intl` is deprecated and must not be used.
 - **Type Definition Pattern**: Services should import and use types from `backend/types/` (e.g., `{Entity}ReturnType`, `{Entity}SubmitInput`, `DBTransaction`) rather than creating ad-hoc type definitions or directly referencing schema types. These types should be imported from `@/backend/types` and used for function parameters, return types, and data transformations.
-- **Service-layer `.types.ts` files are prohibited.** All types live in `backend/types/`. Provider-specific types (e.g., `FixerLatestResponse`, `ZoomTokenResponse`) are in `backend/types/<domain>/`. If a service file contains both types and runtime code, split: types → `backend/types/`, runtime → stays in the service layer with a non-`.types` filename (e.g., `.helpers.ts`, `.constants.ts`).
-- **Batch Service Methods for DataLoader**: Services that are called from GraphQL field resolvers MUST expose batch versions of single-entity lookup methods to support Pothos DataLoader batching. Batch methods accept `userIds: string[]` (or `ids: string[]`) and return `Map<string, T | null>`. Naming convention: `resolve{Entity}IdsForUsers` or `get{Entity}Contexts`. See `docs/graphql/dataloader-batching.md` for the complete pattern reference.
+- **Service-layer `.types.ts` files are prohibited.** All types live in `backend/types/`. If a service file contains both types and runtime code, split: types → `backend/types/`, runtime → stays in the service layer with a non-`.types` filename (e.g., `.helpers.ts`, `.constants.ts`).
+- **Batch Service Methods for DataLoader**: Services that are called from GraphQL field resolvers MUST expose batch versions of single-entity lookup methods to support Pothos DataLoader batching. Batch methods accept `ids: string[]` (or equivalent key arrays) and return `Map<string, T | null>`.
+- **Shared Helpers / Duplication**: When multiple service files share identical helper functions (auth preludes, config upserts, insert payload builders, session creators), extract them into `__shared__/` modules (or a shared base class) rather than duplicating them.
+- **Resolver-driven callers**: Services that receive permission checks from the GraphQL layer MUST accept the caller's permission context as a parameter instead of re-querying permissions from within the service.
 
 ## Seed services (`backend/services/seed/`)
 
-- **Not production domain services.** Modules here provision demo/seed data for `bun db seed` and GraphQL test helpers (`ensureDemoUsers`). They must never be imported from GraphQL resolvers, API routes, or production request handlers.
-- **Naming:** `*SeedService` namespaces with `seed*` write methods (e.g. `UserSeedService.seedAvatarUrl`, `StudentSeedService.seedStudentByKey`).
-- **Production safety:** All writes call `assertSeedWriteAllowed()` from `backend/lib/bootstrap-gate.ts` (blocked on real Vercel production; allowed in local dev and CI test servers via `TEST_SERVER` / `TEST_CI`).
+- **Not production domain services.** Modules here provision demo/seed data and test fixtures. They must never be imported from GraphQL resolvers, API routes, or production request handlers.
+- **Naming:** `*SeedService` namespaces with `seed*` write methods.
+- **Production safety:** All writes must go through the seed bootstrap gate (`assertSeedWriteAllowed()`) so they are blocked on real production and allowed only in local dev and CI test servers.
 
 ## Testing (`backend/services/**/*.test.ts`)
 
@@ -23,104 +25,16 @@ Service tests live next to the code they cover (`*.test.ts` or `test/` subdirect
 
 ### No real external APIs (mandatory)
 
-Service tests **must never** make real network calls to third-party providers. Always mock outbound integrations before exercising the service under test:
-
-- **Notifications:** `spyOn(CommunicationService, "dispatchMulti")`, `spyOn(..., "dispatch")`, and/or `spyOn` / `mock.module` on `dispatchWithPreferences` from `@/backend/services/notification/notification-dispatch.helpers`
-- **Email / SMS / push:** mock channel facades (`emailChannel`, `smsChannel`, `pushChannel`) or the adapters — never let tests reach Resend, Twilio, or FCM
-- **FX:** mock provider adapters or the ingestion service — never call Fixer / OpenExchangeRates live
-- **Redis / cache providers:** mock `cacheService` or `ICacheService` — never hit Upstash / Redis Cloud in service tests
-- **Permissions fan-out:** mock `PermissionsService.getUserIdsWithPermission` when the code dispatches notifications to reviewer lists
+Service tests **must never** make real network calls to third-party providers (email, SMS, push, comms channels, caches, external data feeds, etc.). Mock or spy on outbound integrations (`spyOn` on the service/dispatch entry points, or mock the channel facades/adapters) before exercising the service under test.
 
 If a test needs to confirm a live provider is wired, add a **single smoke** under `test/integration/` and run `bun run test:integration` — not here.
 
 ### Provider integration tests belong in `test/integration/`
 
-**Do NOT add `*.integration.test.ts` or live provider smokes under `backend/services/`** (including channel adapters, FX providers, or any subdirectory). Examples:
-
-- Resend / Twilio / FCM live adapter smokes → `test/integration/communication/`
-- Fixer / OpenExchangeRates live FX fetches → `test/integration/fx/`
-- Upstash / Redis Cloud → `test/integration/redis/` (when added)
-
-Run integration smokes with:
-
-- `bun run test:integration` — all provider smokes (parallel runner)
-- `bun run test:live-comm` — communication channels only
-- `bun run test:live-fx` — FX providers only
-
-Each integration file gets **one** smoke test (single API call) to confirm the adapter reaches the live provider — not full service or app behaviour.
-
-## Meeting Provider Adapters (CRITICAL)
-
-- **All meeting URL generation MUST go through `MeetingChannelFactory.getMeetingChannel(slug)`** (or the `meetingChannel` delegating object from `@/backend/services/meeting/channels/MeetingChannelFactory`). Never construct `ZoomMeetingAdapter`, `GoogleMeetAdapter`, or `MicrosoftTeamsAdapter` directly — the factory guarantees race-safe per-slug singletons, env resolution, and cache invalidation on credential changes.
-- **Hybrid auth resolution order**: org-level credentials first (S2S / service-account + DWD / client-credentials), per-user OAuth refresh-token fallback second (`MeetingProviderTokenRepository.getByUserAndProvider`), `NoOrgCredentialsNoUserTokenError` if neither are available.
-- **`providerKindToSlug(providerKind)`** is the canonical mapping from the `meeting_providers.provider_kind` column to the adapter slug. Unknown kinds throw `UnsupportedProviderKindError`.
-- **Booking-time generation is non-blocking**: `maybeGenerateUrl` runs adapter calls outside the booking DB transaction; a class booking must never fail because a provider API is down.
-- **Zoom refresh-token re-auth**: Treat `invalid_grant` as the sole authoritative trigger for re-auth — do NOT build proactive renewal on a hardcoded 90-day clock. See `docs/services/zoom-token-types.md`.
-- See `docs/services/meeting-providers.md` for the complete pattern reference (interface, factory, adapter examples, deployment prerequisites, rollout summary).
-
-## Multi-Instance Channel Adapters (per-account resources)
-
-- Channel/provider adapters that hold account-scoped credentials (e.g. `MetaCloudApiAdapter`) are keyed **per account row** by an instance map in the factory (`getWhatsappChannel(accountId)`, `getChannelForPurpose(purpose)`), not a module-level singleton. Credential resolution must be scoped to the adapter's own account — never fall back to "first active" or another account's token.
-- **Reset/invalidation must cover every env-config key the feature reads**: when a new `<PREFIX>_*` key is added (e.g. an API version or config id), extend the factory's invalidation set (e.g. `WHATSAPP_ENV_CONFIG_KEYS`) in the same change, or resets leave stale values live.
-- Lifecycle errors win over generic states: resolve credentials in specificity order (e.g. offboarded → inactive → missing) so domain error codes stay reachable.
-- See `docs/services/whatsapp-coexistence-multi.md` for the reference implementation (factory map, purpose routing, eviction on lifecycle webhook events).
-
-## Important References
-
-- `docs/services/meeting-providers.md` - Meeting provider adapter/factory pattern reference
-- `docs/services/zoom-token-types.md` - Zoom token kinds semantics and constraints
-- `docs/services/whatsapp-cloud-api.md` - WhatsApp Cloud API integration reference (v1)
-- `docs/services/whatsapp-coexistence-multi.md` - WhatsApp v2: multi-number purpose routing, coexistence onboarding, durable webhook ingest
-- `docs/billing/quota-system.md` - Quota System architecture reference
-- `docs/services/cron-service.md` - Cron service pattern reference
-- `docs/services/entity-cache-service.md` - Entity Cache Service pattern reference
-- `docs/services/general-user-creation.md` - General user creation pattern
-- `docs/backend/service-base-pattern.md` - Service base and shared helpers reference
-- `docs/backend/whatsapp-configuration.md` - WhatsApp Config tab reference (singleton-config advisory-lock upsert, DB-first/env write-through, secret masking & Drizzle error projection)
-- `docs/frontend/whatsapp-conversations.md` - WhatsApp Conversations canonical send path (24h window gating, test-number recipient registry hard-block, Meta error-code mapping, tx-after-fetch persistence)
-- `docs/backend/meeting-adapter-base.md` - Meeting provider adapter base class pattern reference
-- `docs/auth/manager-role-mapping.md` - Manager role mapping architecture & permission group slug convention
-- `docs/backend/serverless-cold-start-optimization.md` - Serverless cold-start optimization patterns
-- `docs/quality/linting-rules.md` - Oxlint & ESLint/sonarjs fix recipes
-
-## Meeting Provider Adapter Base Class (Duplication Elimination)
-
-Multiple meeting provider adapters (Zoom, Google Meet, Teams) share identical getter/setter/logic structure. Use `MeetingProviderAdapterBase` from `__shared__/meetingProviderAdapterBase.ts` as the abstract base class. See `docs/backend/meeting-adapter-base.md` for the complete pattern reference.
-
-## General User Onboarding (`createUserOfType` Null-Extension Pattern)
-
-When creating a user without a specialized profile extension (teacher, parent, student, manager), use `createUserOfType<void>` with `createExtension: async () => null` and `afterExtension: undefined`. The service rejects specialized group slugs (student, teacher, parent) via `isSpecializedGroup()` from `@/shared/constants/specialized-groups.constants` before calling the pipeline. The `groupSlug` parameter in `CreateUserOfTypeOptions` is typed as `string` (widened from `SystemPermissionGroupSlug`) to support custom non-system group slugs. See `docs/services/general-user-creation.md` for the complete pattern reference.
-
-## Service Base & Shared Helpers (Duplication Elimination)
-
-When multiple service files share identical helper functions (auth preludes, config upserts, insert payload builders, session creators), extract into `__shared__/` modules. See `docs/backend/service-base-pattern.md` for the complete pattern reference.
-
-Completed extractions:
-- `ParentServiceBase` — `backend/services/parents/__shared__/ParentServiceBase.ts`
-- `resolveTeacherId` — `backend/services/scheduling/__shared__/resolveTeacherId.ts`
-- `prepareMeetingConfigUpsert` — `backend/services/meetings/__shared__/prepareMeetingConfigUpsert.ts`
-- `buildParentInsertPayload` — `backend/services/parents/__shared__/buildParentInsertPayload.ts`
-- `buildTeacherInsertPayload` — `backend/services/teachers/__shared__/buildTeacherInsertPayload.ts`
-- `createAuthSession` — `backend/services/auth/__shared__/createAuthSession.ts`
-
-## System Permission Groups
-
-- System permission groups (`supervisor_default`, `academy_admin`, etc.) can have their **permission bundle** (`permissionIds`) edited via `updateGroup` (superadmin-only via `requireManageAccess`). Name, slug, and description are immutable for system groups. System groups cannot be deleted (`deleteGroup` throws `cannotDeleteSystemPermissionGroup`).
-- `resolveTeacherId` accepts `TEACHERS_MANAGE_SCHEDULE` as an admin-level permission (in addition to `STAFF_VIEW_DIRECTORY` and `SCHEDULE_VIEW_ALL`), allowing supervisors to view any teacher's schedule.
-- **Manager Onboarding Role Mapping**: `ManagerOnboardingService.createManager` maps `ManagerAccountType.manager` to `SystemPermissionGroupSlug.ACADEMY_ADMIN` and `ManagerAccountType.supervisor` to `SystemPermissionGroupSlug.SUPERVISOR_DEFAULT`. The `admin` account type is removed from onboarding and enum definitions. See `docs/auth/manager-role-mapping.md`.
-
-## Serverless Cold-Start Optimization
-
-- **Permission Context Propagation**: Services accepting permission checks MUST accept `UserPermissionContext` parameter from GraphQL context instead of re-querying via `PermissionsService.hasPermission(userId, ...)`. The `UserPermissionContext` type in `@/backend/types/permissions/permission.types.ts` already contains `permissions`, `permissionGroups`, `isSuperAdmin`, and `role` — passing it as the first argument to `hasPermission` eliminates 3 DB queries per call. See `docs/backend/serverless-cold-start-optimization.md`.
-- `buildAuthScopes()` in `@/backend/graphql/gqlSchemaBuilder.ts` is dependency-injectable for testability — the `getUserContext` parameter defaults to `PermissionsService.getUserContext` but can be overridden in tests.
-
-## Linting Rules
-
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
+**Do NOT add `*.integration.test.ts` or live external-API smokes under `backend/services/`** (including subdirectories). Live provider smokes belong in `test/integration/<domain>/`, are run with `bun run test:integration` (and the domain-specific live-test scripts), and each integration file gets **one** smoke test (single API call) to confirm the adapter reaches the live provider — not full service or app behaviour.
 
 ## Transactions & Concurrency (CRITICAL)
 
-- When a service method accepts a caller transaction (`tx`), it MUST skip acquiring its own advisory locks (`advisoryLock: tx == null` pattern) — a callee acquiring locks inside a caller that already holds locks deadlocks (ABBA). See `docs/services/teacher-payroll.md`.
-- Cross-table row locks taken against shared entities (e.g. expense + carryover in settlement flows) MUST follow the canonical lock order documented in the owning module (`docs/billing/expense-ledger.md`: carryover row locked BEFORE the expense row) — mismatched order between mutually-racing paths deadlocks (PG 40P01). See `docs/billing/carryover-balances.md`.
-- Idempotency keys derived from user free text MUST hash the RAW input while persisting the SANITIZED value (rules: `docs/IDEMPOTENCY.md`).
+- When a service method accepts a caller transaction (`tx`), it MUST skip acquiring its own advisory locks (`advisoryLock: tx == null` pattern) — a callee acquiring locks inside a caller that already holds locks deadlocks (ABBA).
+- Cross-table row locks taken by mutually-racing code paths MUST follow a single canonical lock order; mismatched ordering deadlocks (PG 40P01).
+- Idempotency keys derived from user free text MUST hash the RAW input while persisting the SANITIZED value.

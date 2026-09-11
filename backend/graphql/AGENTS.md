@@ -93,55 +93,27 @@ export const {Entity}PothosObject = {Entity}Ref.implement({
 - Wrapper types for collections or complex responses (e.g., paginated results) are allowed as separate definitions
 - Complex computed/derived types that don't map directly to a single table may require custom definitions (but should still import base types from `backend/types/`)
 
-## WhatsApp GraphQL Patterns
+## Shared Field Helpers
 
-- **Canonical reference**: `docs/services/whatsapp-cloud-api.md` — comprehensive WhatsApp integration patterns.
-- **Object types**: `WhatsappAccountPothosObject`, `WhatsappTemplateSnapshotPothosObject` (BL3), `WhatsappSyncFromMetaResultPothosObject` (wrapper). All expose `id` for Apollo cache normalization.
-- **Input type pattern**: Use `inputType(string-named)` instead of `inputRef<BackendType>` to avoid LocalizedString null incompatibility.
-- **Credential mutations**: `setWhatsappAccessToken`, `setWhatsappTwoStepPin` — all credential/config mutations call `resetWhatsappChannel()` (S4) for token rotation without restart.
-- **Local-deactivate behavior**: `localDeactivateWhatsappAccount` deactivates locally (`isActive = false`), does not hard-delete and keeps the number on Meta.
-- **Side-effect barrels**: `import "./whatsapp-account.mutation";` registers resolvers via side-effect imports.
-
-## Pothos Field Factories (Duplication Elimination)
-
-When multiple Pothos object types, input types, or query fields share identical field definitions, extract into `__shared__/` helper modules. See `docs/graphql/pothos-field-factories.md` for the complete pattern reference.
-
-Completed extractions:
-- `paymentFields` — `backend/graphql/pothos/billing/__shared__/paymentFieldHelpers.ts`
-- `creditTransactionFields` — `backend/graphql/pothos/billing/__shared__/creditFieldHelpers.ts`
-- `classSubjectInputFields` — `backend/graphql/pothos/classes/__shared__/classSubjectFieldHelpers.ts`
-- `teacherNoteInputFields` — `backend/graphql/pothos/teachers/__shared__/teacherNoteFieldHelpers.ts`
-- `whatsappAccountSharedInputFields` — `backend/graphql/pothos/whatsapp/__shared__/whatsappAccountFieldHelpers.ts`
-- `supportedListArgs` / `supportedListResolve` — `backend/graphql/query/billing/__shared__/makeSupportedPaymentListQueryField.ts`
-- `makeTeacherMonthlyReportQueryField` / `makeStudentMonthlyReportQueryField` — `backend/graphql/query/reports/__shared__/makeMonthlyReportQueryField.ts`
-- `resolveStudentIdFromArgsOrUser` — `backend/graphql/query/students/__shared__/resolveStudentIdFromArgsOrUser.ts`
-
-## General User Create Mutation Pattern
-
-The `createGeneralUser` mutation creates a user without a specialized profile extension. It uses `authScopes: { permission: AppPermission.STAFF_CREATE, notImpersonating: true }` to require staff create permission and block creation while impersonating. The `groupSlug` input field is a plain `String!` (not an enum) to allow any permission group slug — specialized groups are rejected at the service layer via `isSpecializedGroup()`. The result type includes `id` (resolved from `parent.user.id`) for Apollo cache normalization. See `docs/services/general-user-creation.md` for the complete pattern reference.
+When multiple Pothos object types, input types, or query fields share identical field definitions, extract them into `__shared__/` helper modules instead of duplicating them.
 
 ## authScope Pattern: `permission` vs `superAdmin`
 
 Use `authScopes: { permission: AppPermission.X }` (not `authScopes: { superAdmin: true }`) for mutations accessible by non-superadmin users with the correct permission. The `superAdmin: true` authScope blocks ALL non-superadmin users — only use it for truly superadmin-only operations (e.g., impersonation, permission group simulation, system config).
 
-- **Multi-key `authScopes` maps default to "any"**: scope-auth evaluates a bare multi-key `authScopes` map with OR semantics — a second truthy scope satisfies the map. Any mutation combining `permission` with additional scopes (e.g. `notImpersonating`) MUST wrap them in `$all: { ... }` and pin the semantics with an executed-schema auth-scopes test (see `backend/graphql/test/whatsapp-config.auth-scopes.test.ts`). Secret-keeping singleton-config reference: `docs/backend/whatsapp-configuration.md`.
-- **Privileged filter flags are enforced at EVERY entry point**: when a service accepts a privileged flag (e.g. `includeDeleted`) unconditionally, both the GraphQL resolver AND any API route exposing it must re-gate it on the manage permission (e.g. `ctx.isSuperAdmin || ctx.permissions.includes(...)`) — gating only one entry point is a privilege-escalation hole. See `docs/services/session-audit-reports.md`.
+- **Multi-key `authScopes` maps default to "any"**: scope-auth evaluates a bare multi-key `authScopes` map with OR semantics — a second truthy scope satisfies the map. Any mutation combining `permission` with additional scopes (e.g. `notImpersonating`) MUST wrap them in `$all: { ... }` and pin the semantics with an executed-schema auth-scopes test.
+- **Privileged filter flags are enforced at EVERY entry point**: when a service accepts a privileged flag (e.g. `includeDeleted`) unconditionally, both the GraphQL resolver AND any API route exposing it must re-gate it on the manage permission (e.g. `ctx.isSuperAdmin || ctx.permissions.includes(...)`) — gating only one entry point is a privilege-escalation hole.
 
-See `docs/auth/supervisor-permissions.md` for the supervisor permission model and the list of mutations that were fixed from `superAdmin: true` to permission-based authScopes.
+## Resolver Performance & Context
 
-## Serverless Cold-Start Optimization
-
-- **Permission Context Propagation**: Resolvers calling services with permission checks MUST pass `UserPermissionContext` from `ctx` instead of passing only `ctx.user.id`. This eliminates redundant `PermissionsService.getUserContext(userId)` DB queries. The context object `{ permissions: ctx.permissions, permissionGroups: ctx.permissionGroups, isSuperAdmin: ctx.isSuperAdmin, role: ctx.role }` is already populated by `createContext`. See `docs/backend/serverless-cold-start-optimization.md`.
-- **Lazy scopeAuth**: `superAdmin` scope is a lazy scope-loader function, not an eager boolean — only evaluates when a field with `authScopes: { superAdmin: true }` is actually queried. The `permission` scope uses `ctx.isSuperAdmin` and `ctx.permissions` directly (no `getUserContext` call).
+- **Permission Context Propagation**: Resolvers calling services with permission checks MUST pass `UserPermissionContext` from `ctx` instead of passing only `ctx.user.id`. This eliminates redundant `PermissionsService.getUserContext(userId)` DB queries. The context object `{ permissions: ctx.permissions, permissionGroups: ctx.permissionGroups, isSuperAdmin: ctx.isSuperAdmin, role: ctx.role }` is already populated by `createContext`.
 - **`safeUser` on `BaseContext`**: `ctx.safeUser` contains the full sanitized user object (password/rememberTokenHash stripped). Resolvers needing user data (e.g., `Query.me`) should use `ctx.safeUser` instead of calling `UserService.findById`.
-- **Session deduplication**: `preloadSession` helper in `gqlContextFactory.ts` fetches session once and passes to both `resolveAuthIdentityFromToken` and `resolveGroupSimulationFromToken` via the `preloadedSession` optional parameter.
-- **Login resolver cold-start resilience**: Rate limiter operations in the login resolver (`checkRateLimit`, `isLocked`, `recordAttempt`, `resetAttempts`) MUST use fail-open `try/catch` — transient cold-start errors must NOT block login. Critical DB reads (`findByEmail`, `createAuthSession`) MUST use `retryTransient()` from `@/backend/lib`. On exhaustion, return `SERVICE_UNAVAILABLE` (NOT `INVALID_CREDENTIALS`). See `docs/backend/login-cold-start-resilience.md`.
+- **Transient error handling**: Resolvers performing critical reads or auth-sensitive operations must treat transient infrastructure errors (cold starts, DB blips) as retryable (e.g. `retryTransient()` from `@/backend/lib`) and fail open only on non-critical auxiliary operations. On exhaustion, return a service-unavailable error code rather than an auth failure code.
 
-## DomainError → GraphQLError extensions.code
+## Error Handling
 
-- DomainError subclasses extend GraphQLError to propagate `extensions.code` to clients. All resolver errors MUST use DomainError subclasses (NotFoundError, UnauthorizedError, ForbiddenError, ValidationError, ConflictError). See `docs/graphql/domain-error-extensions-code.md`.
+- DomainError subclasses extend GraphQLError to propagate `extensions.code` to clients. All resolver errors MUST use DomainError subclasses (NotFoundError, UnauthorizedError, ForbiddenError, ValidationError, ConflictError).
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
+- NEVER use `oxlint-disable` comments — fix the root cause.

@@ -10,7 +10,7 @@ This directory contains **database-layer** tests (repository coverage, business-
 - Redis Cloud / Upstash live connection tests
 - Any `*.integration.test.ts` that calls an external SaaS API
 
-Place those in **`test/integration/`** only (e.g. `test/integration/db/neon.integration.test.ts`). Run with `bun run test:integration`. Each provider gets **one** smoke test that confirms the adapter reaches the live API — not full app/service behaviour.
+Place those in **`test/integration/`** only. Run with `bun run test:integration`. Each provider gets **one** smoke test that confirms the adapter reaches the live API — not full app/service behaviour.
 
 Tests in this directory may still exercise **multiple repositories/services together** inside `runInRollback`; that is in-process DB integration, not external provider integration.
 
@@ -23,9 +23,9 @@ Tests in this directory may still exercise **multiple repositories/services toge
    - Use the `DBTransaction` type from `./test-utils` for any helper function parameters that accept a transaction — **NEVER** type transaction parameters as `any`.
 
 2. **Clean Setup Helpers**
-   - Utilize existing helper functions in [entity-setup.ts] (e.g., `createTestUser`, `createTestStudent`, `createTestTeacher`, `setupTeacher`, `setupStudent`) to create test entities.
+   - Utilize existing helper functions in [entity-setup.ts] (e.g., `createTestUser`, `createTestStudent`) to create test entities.
    - If custom setup is required, define clear helper functions at the top of the test file.
-   - Generate unique emails, names, and idempotency keys using `randomUUID()` or distinct prefixes (e.g., `prefix: "swapA"`) to avoid unique constraint violations.
+   - Generate unique emails, names, and idempotency keys using `randomUUID()` or distinct prefixes to avoid unique constraint violations.
 
 3. **Verify Constraints and Errors Cleanly**
    - **NEVER use `expect(...).rejects.toThrow()` inside `runInRollback`** — this causes deadlocks/timeouts because the rejected promise interacts poorly with the transaction rollback mechanism. Instead, use a **try/catch helper** pattern:
@@ -41,22 +41,20 @@ Tests in this directory may still exercise **multiple repositories/services toge
        return errorCaught as Error;
      }
      ```
-   - Assert on the error message using `.toContain()` with a substring from the **translated** message (e.g., `"not found"`, `"Version mismatch"`, `"already deactivated"`), NOT the raw translation key (e.g., `"studentNotFound"`). Repository methods produce human-readable localized messages — the raw key never appears in `error.message`.
+   - Assert on the error message using `.toContain()` with a substring from the **translated** message (e.g., `"not found"`), NOT the raw translation key (e.g., `"studentNotFound"`). Repository methods produce human-readable localized messages — the raw key never appears in `error.message`.
    - Do not catch errors manually outside of a reusable helper like the one above.
 
 4. **Code Cleanliness, Strict Linting & Type Checking**
    - Clean up all unused imports and unused variables (especially those destructured from setup helpers).
-   - Run `bun tsgo` and lint via the lint queue client after creating or modifying tests. You MUST fix any resulting errors (e.g., TS6133 unused variables).
-   - You can run `bun run lint` directly — it IS the lint queue client (calls `requestFullRepoLint` from `scripts/lint-queue-client.ts` and serializes through the queue server). Make sure `bun run lint:server` is running first. For file-scoped lint, use the queue client directly: `curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint -H "Content-Type: application/json" -d '{"id":"db-test","files":["<file>"]}'`.
+   - Run `bun tsgo` and `bun run lint` after creating or modifying tests. You MUST fix any resulting errors (e.g., TS6133 unused variables).
    - Follow standard Biome/ESLint formatting and linting rules. Do not use `console.log` directly; prefer `testLogger` or no logging if not needed.
    - Make sure all TypeScript types are fully resolved. **NEVER use `any` type overrides** (e.g., `as any`) to bypass validation. Use proper `Partial<...>` or specific object typing instead.
+   - NEVER use `oxlint-disable` comments — fix the root cause.
 
-5. **Entity Relationships Mapping**
-   - Remember database schema relations:
-     - `students.id` is a primary key that points to the parent student record. It does NOT have a `userId` field.
-     - `teachers.id` references `teachers.userId` which points to `users.id`.
-     - In `classInstances`, `studentId` references `students.id` (not `users.id`), and `teacherId` references `teachers.id` (not `users.id`).
-     - Always insert `teacherAssignments` between the student and teacher before booking a class, as the scheduling repository validates this assignment.
+5. **Verify Schema Relations and Columns Before Writing Test Setup**
+   - Before inserting test data into any table (directly or via helpers), **read the schema definition** in `backend/db/schema/` to confirm the actual columns, their types, and foreign-key relationships. Do not assume columns like `mimeType`, `size`, `createdAt`, or `updatedAt` exist, and do not assume which id a foreign key points to (e.g., entity ids vs. `users.id`).
+   - Insert prerequisite join/parent records before dependent inserts when repositories validate those relationships.
+   - This applies to both direct `tx.insert()` calls and when passing `overrides` to entity-setup helpers.
 
 6. **Test Framework & Assertions**
    - Use `bun:test` for all test utilities (`describe`, `test`, `it`, `beforeAll`, `afterAll`, `expect`). Do not use Jest or Vitest imports.
@@ -72,7 +70,7 @@ Tests in this directory may still exercise **multiple repositories/services toge
    - If you must insert records outside of `runInRollback` (e.g., inside `beforeAll` for shared static data), ensure you provide an `afterAll` hook to hard-delete (`await db.delete(...)`) those specific records so they don't leak into other tests.
 
 10. **Small Methods & Zero Duplication**
-    - Tests must aggressively avoid code duplication. Extract shared setup, common actions, and repetitive assertions into small, focused helper functions (e.g., `setupBaseTest`, `expectConstraintViolation`).
+    - Tests must aggressively avoid code duplication. Extract shared setup, common actions, and repetitive assertions into small, focused helper functions.
     - Keep test cases themselves small, readable, and non-complex. If a test case or setup sequence is becoming too long or complex, split the logic into smaller, reusable functions within the file, or move them to `test-utils.ts` / `entity-setup.ts` if they apply globally.
 
 11. **Directory Structure (`logic` vs `repo`)**
@@ -100,38 +98,21 @@ Tests in this directory may still exercise **multiple repositories/services toge
     - After writing or updating a repository test, always verify coverage by running `bun test --coverage <path-to-test-file>` or `bun run test:db:coverage` for the full suite.
 
 15. **Always Create Test Data — Never Query Seed Data**
-    - Tests MUST create their own data using entity-setup helpers (`createTestUser`, `createTestParent`, `createTestStudent`, `setupStudent`, etc.) inside the `runInRollback` transaction.
+    - Tests MUST create their own data using entity-setup helpers inside the `runInRollback` transaction.
     - **NEVER** query the database for pre-existing seed data (e.g., `db.select().from(parents).limit(1)`) and use it as test input. Seed data is not guaranteed to be present or stable, and queries outside the transaction break isolation.
-    - For "not found" / "empty result" tests, use a known non-existent UUID like `"00000000-0000-0000-0000-000000000000"` or generate one with `randomUUID()`.
+    - For "not found" / "empty result" tests, use a random UUID generated with `randomUUID()`.
 
-16. **Always Pass `tx` to Repository Methods**
+16. **Always Pass `tx` to Repository Methods — Check the Signature**
     - Every repository method accepts an optional `tx` (transaction) parameter. When inside `runInRollback`, you **MUST** pass `tx` as the transaction argument to all repo method calls.
     - Failing to pass `tx` causes the repo method to use the global `db` connection, which is outside the rollback transaction — leading to state pollution, deadlocks, and non-deterministic test results.
-    - **Check the actual parameter position** of `tx` in each repo method signature before calling — it varies:
-      - `ParentRepository.getParentProfile(parentId, tx?)` — `tx` is 2nd param
-      - `StudentRepository.setClassesRemaining(studentId, value, expectedVersion?, tx?)` — `tx` is 4th param
-      - `StorageDbRepository.linkFileToParent(parentId, fileId, usageType, tx?)` — `tx` is 4th param
+    - The **position** of the `tx` parameter varies between repository methods — always check the actual method signature before calling.
 
 17. **Verify Entity Setup Helper Signatures Before Use**
-    - Always read the actual function signature in `entity-setup.ts` before calling a helper. Common mistakes:
-      - `setupStudent(tx, userOverrides, parentOverrides, studentOverrides)` — takes 4 args (tx + 3 override objects), NOT `(tx, parentId, overrides)`.
-      - `createTestParent(tx, userId, overrides)` — requires a `userId` from a previously created user, NOT a standalone call.
-      - `createTestStudent(tx, parentId, overrides)` — requires a `parentId` from a previously created parent.
-    - When in doubt, read the helper source in `entity-setup.ts` before writing the test.
+    - Always read the actual function signature in `entity-setup.ts` before calling a helper — helper signatures vary significantly (argument order, required parent ids, override objects) and are easy to get wrong from memory.
 
-18. **Verify Schema Columns Before Writing Test Setup**
-    - Before inserting test data into any table (directly or via helpers), **read the schema definition** in `backend/db/schema/` to confirm the actual columns and their types.
-    - **NEVER assume** a table has columns like `mimeType`, `size`, `bucket`, `createdAt`, `updatedAt` — many tables (e.g., `storageFiles`) only have minimal columns (`id`, `path`, `isProtected`).
-    - This applies to both direct `tx.insert()` calls and when passing `overrides` to entity-setup helpers.
-
-19. **Do Not Call `getServerTranslations` Directly in Tests**
+18. **Do Not Call `getServerTranslations` Directly in Tests**
     - Repository methods internally call `getServerTranslations(locale, "<namespace>")` (from `@/shared/locale/server-graphql`) to produce localized error messages. Tests should **NOT** call this function directly to construct expected error strings.
     - Instead, use the `expectRepoError` try/catch pattern (see Rule 3) and assert on substrings of the translated message (e.g., `expect(error.message).toContain("not found")`).
-    - This avoids potential hangs from the translation loader in the test environment and keeps tests decoupled from the translation system's internal state. The legacy `getBackendTranslations` helper is deprecated and must not be used.
+    - This avoids potential hangs from the translation loader in the test environment and keeps tests decoupled from the translation system's internal state.
 
-20. **Type Definition Pattern**: Use types defined in `backend/types/` (e.g., `{Entity}SelectType`, `{Entity}InsertType`) for testing purposes rather than creating test-specific type definitions or directly referencing schema types. Import these types from `@/backend/types` and use them in test assertions and helper functions to maintain consistency with the backend architecture.
-
-## Linting Rules
-
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
+19. **Type Definition Pattern**: Use types defined in `backend/types/` (e.g., `{Entity}SelectType`, `{Entity}InsertType`) for testing purposes rather than creating test-specific type definitions or directly referencing schema types. Import these types from `@/backend/types` and use them in test assertions and helper functions to maintain consistency with the backend architecture.

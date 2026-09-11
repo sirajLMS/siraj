@@ -24,12 +24,16 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Autocomplete: `params.slotProps.htmlInput` not `params.inputProps` (`AutocompleteRenderInputParams` no longer has `inputProps`)
 - Typography `component` prop: not valid directly - use wrapper element or `sx` workaround
 - ListItemText: use `slotProps` not `primaryTypographyProps` for font weight
+- aria-live regions: use `component="output"` with `aria-live="polite"` (oxlint `prefer-tag-over-role` rejects `role="status"` on non-`<output>` elements)
+- Reduced motion: detect with `useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true })`; pass `timeout={0}` to MUI `Fade`/`Grow`/`Slide` and skip `@keyframes` classes when reduced
+- `@keyframes`: embed directly in `sx` prop objects — not via `@mui/material/styles` `keyframes`
 - Use mui-mcp server if available for component API docs
 
 ### React 19
 
 - NEVER `FormEvent` (removed). Use `React.SubmitEvent` or `React.SyntheticEvent<HTMLFormElement>`
 - FormData casting: `(formData.get("name") as string | null) ?? ""` - avoids `@typescript-eslint/no-base-to-string`
+- `MutableRefObject` deprecated - use `RefObject<T>` (`current` is mutable)
 - Context, Provider, and useHook in separate files (Fast Refresh requirement)
   - `MyContext.tsx` - exports `Context` and `Provider`
   - `useMyHook.ts` - exports the hook
@@ -62,15 +66,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
   const { userId, context } = await getServerUserContext();
   if (!userId || !context) await redirectToLogin();
   ```
-- Server translations: `getTranslations(locale)` from `@/shared/locale/server` (synchronous, single string arg, returns property-chain — NOT awaited)
-- Client translations: `useAppTranslation("<namespace>")` from `@/shared/locale/client`
 - Redirects use plain paths (`redirect("/login")`) — there is NO `[locale]` URL segment, so never prefix paths with the locale
-
-### New Page Workflow
-
-- Mandatory: follow `NEW_PAGE_WORKFLOW.md` for all new page implementations
-- See `COMPONENT_PATTERNS.md` before building or refactoring dashboard pages
-- See `.github/CODE_REVIEW_CHECKLIST.md` when reviewing code
 
 ### Apollo & GraphQL
 
@@ -100,7 +96,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
   import type { EntityNameQuery, EntityNameQueryVariables } from "@/frontend/common/graphql/generated/gql/graphql";
   ```
 - All generated types (operation results, variables, enums, extracted field types, inputs) live in the single `graphql.ts` file. The old `graphql-types.ts` and `operations.ts` files no longer exist.
-- For nested field types, use compact extracted names: `{OperationName}_{field}` (e.g., `MeQuery_me`, `QuotaQuery_quota`)
+- For nested field types, use compact extracted names: `{OperationName}_{field}` (e.g., `MeQuery_me`)
 - NEVER inline type literals - always use generated types from `frontend/common/graphql/generated/gql/graphql`
 - Codegen after schema/document changes (both steps required):
   ```bash
@@ -112,7 +108,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 
 - Strictly typed using GraphQL generated types (import from `graphql.ts`)
 - **NO MAPPING (CRITICAL)**: No type mapping functions, no intermediate conversion layers, no indexed-access workarounds (e.g., `NonNullable<MeQuery["me"]>`). Use the exact codegen-generated extracted type name directly (e.g., `MeQuery_me`).
-- **NO SCHEMA TYPES**: No schema-level object types (e.g., `User`, `Quota`). Only operation-derived types from `graphql.ts`.
+- **NO SCHEMA TYPES**: No schema-level object types (e.g., `User`). Only operation-derived types from `graphql.ts`.
 - **NO HARDCODED TYPES**: Never redefine types that should come from codegen. If codegen doesn't emit a needed type, fix the codegen config or the document — don't create a local type.
 - Resolve type issues by adjusting GraphQL schema/queries - do NOT manually map or redefine types
 - If schema and frontend types misalign, fix the schema or query - never create mapping workarounds
@@ -125,7 +121,6 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Never delete existing theme values - map them (e.g., `boxShadow` -> `theme.palette.shadow.card`)
 - Use theme font variants (`headlineLg`, `titleLg`, `labelUppercase`, `bodyMd`) - no hardcoded font `sx`
 - No string-based palette access: `color="primary.main"` is WRONG - use `sx` callback instead
-- Reference `THEME_PALETTE.md` for all color tokens and access patterns
 
 ### Dashboard UI Patterns
 
@@ -136,11 +131,12 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - `StatusBadge` with `category` prop - no inline status chips
 - `PageHeader` + `SectionPanel` - no ad-hoc flex title blocks
 - `PrimaryPageAction`, `FilterButton`, `ExportButton` presets for actions
+
 ### i18n
 
 - All user-facing strings via the compile-time TypeScript i18n system in `@/shared/locale` - never hardcode error messages or UI text
 - Client components: `useAppTranslation("<namespace>")` from `@/shared/locale/client`
-- Server components: `getTranslations(locale)` from `@/shared/locale/server` (synchronous, returns property-chain — NOT awaited)
+- Server components: `getTranslations(locale)` from `@/shared/locale/server` (synchronous, single string arg, returns property-chain — NOT awaited)
 - Client components are wrapped in `LocaleProvider` from `@/frontend/common/providers/LocaleProvider` (NOT `NextIntlClientProvider`)
 
 ### Logging
@@ -149,8 +145,8 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - `import { logger } from '@/frontend/utils/logger'`
 - Methods: `logger.info`, `logger.warn`, `logger.error`, `logger.debug`
 - Production: info/warn/debug suppressed, error always logs
-- **Client logger `batchInterval`** MUST be at least 30s in production; `beforeunload` flush required (uses `fetch` with `keepalive: true`, NOT `navigator.sendBeacon`); error/warn logs MUST bypass min-batch-size guard. See `docs/backend/serverless-cold-start-optimization.md`.
-- **`RequirePermission`** MUST NOT log DEBUG messages by default — gate behind `process.env.NEXT_PUBLIC_DEBUG_PERMISSIONS === "true"`
+- **Client logger `batchInterval`** MUST be at least 30s in production; `beforeunload` flush required (uses `fetch` with `keepalive: true`, NOT `navigator.sendBeacon`); error/warn logs MUST bypass min-batch-size guard
+- **RequirePermission** MUST NOT log DEBUG messages by default — gate behind `process.env.NEXT_PUBLIC_DEBUG_PERMISSIONS === "true"`
 
 ### Storybook
 
@@ -166,7 +162,14 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Access control: `<RequirePermission>` wrapper for permission-gated components
 - Client data fetching: Apollo `useQuery` with generated TypedDocumentNodes
 - Server data fetching: call services via cached wrappers (never repos/DB directly)
-- **Duplicate view logic**: When desktop and mobile variants share presentation logic, extract a `*Shared.tsx` scaffold into a `__shared__/` directory at the parent level. Desktop/mobile variants import ONLY from the scaffold — never from each other. See `docs/frontend/ui-shared-scaffold-pattern.md`
+- **Duplicate view logic**: When desktop and mobile variants share presentation logic, extract a `*Shared.tsx` scaffold into a `__shared__/` directory at the parent level. Desktop/mobile variants import ONLY from the scaffold — never from each other.
+- Form `TextField`s with validation errors: `aria-invalid={!!error}`
+
+### Linting Rules
+
+- Oxlint & ESLint/sonarjs fix recipes live in the quality docs. NEVER use `oxlint-disable` comments — fix the root cause.
+- **`no-await-in-loop`**: for sequential async work use a recursive `processNext(index, ...)` helper instead of `await` in a loop body; `Promise.all` runs in parallel and is wrong for sequential flows
+- **`sonarjs/deprecation` on `document.execCommand`**: bind with an explicit type annotation — `const execCopy: (commandId: string) => boolean = globalThis.document.execCommand.bind(globalThis.document)` — the annotation sheds the deprecation marker
 
 ### Code Quality
 
@@ -185,13 +188,11 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 
 ### Code Style Rules
 
-- Review `frontend/IMPLEMENTATION_LEARNINGS.md` for error resolutions
 - No nested ternary operators - extract into if/else or separate functions (SonarJS code smell)
 - **Clean Comments & JSDoc Standards (CRITICAL)**:
   - NEVER write internal planning or tracking tags in code comments or JSDoc (e.g. no `REQ-xx`, `Task x.x`, `Phase x`, or citing `.ai/plans/`).
   - Code comments and JSDoc MUST describe the *what*, *why*, and *domain behavior* of the code in clean, production-grade technical terms.
   - Avoid redundant comments that simply restate function or component names.
-- See `frontend/IMPLEMENTATION_LEARNINGS.md` for known error resolutions to prevent repeating past mistakes
 
 ### Commands
 
@@ -201,7 +202,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Dev server: `bun run dev` (Turbopack, port 3000) or `bun run dev:safe` (safe mode)
 - Build: `bun run build`
 - Type check: `bun run tsgo` (fast TypeScript, NOT `tsc`)
-- Lint: `~/.bun/bin/bun run lint` (this script IS the lint queue client — safe to run directly; calls `requestFullRepoLint` from `scripts/lint-queue-client.ts`). For file-scoped lint, call `requestLint(id, [files])` from the client. See AGENTS.md "Lint Queue Server" section.
+- Lint: `~/.bun/bin/bun run lint` (this script IS the lint queue client — safe to run directly; calls `requestFullRepoLint` from `scripts/lint-queue-client.ts`). For file-scoped lint, call `requestLint(id, [files])` from the client.
 - Format: `bun run format` (Biome) / `bun run biome:check` (Biome lint + format + unsafe fixes)
 - Quality: `bun quality-gate` / `bun quality-gate:fresh`
 - GraphQL: `bun run generate:gqlSchema` then `bun codegen`
@@ -215,47 +216,3 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
   - `bun run test:ui` - all UI tests
   - `bun run test:ui:kill` - kill test servers on port 3066 only (never dev:3000 or start:4000)
   - `bun run test` - all tests
-
-### Meeting Integration Admin UI
-
-- **Auto-generation form affordance pattern**: Use `AutoGeneratedBadge` to indicate non-manual providers (auto-generated meeting URLs) and `AutoGenerationSupportCallout` for the 3-mode explanation (manual / auto / hybrid). These components live in `frontend/common/views/dashboard/settings/components/meetingIntegrations/`
-- **Admin Meeting Integrations tab**: The settings tab mirrors the `EnvironmentConfigTab` pattern — accordion-based provider sections with credential forms, test-connection panels, and connected-accounts tables. See `frontend/common/views/dashboard/settings/tabs/meetingIntegrations/` for structure
-- **Credential forms**: Use `EnvSecretField` for credential input fields (masks secrets, supports reveal toggle). Never use a plain `TextField` for sensitive provider credentials
-- **Revoke confirmation**: Token revocation from `ConnectedAccountsTable` MUST go through `RevokeTokenDialog` confirmation — never revoke directly on button click
-
-### Auto-Generation UI Affordance
-
-- `AutoGeneratedBadge` shows when a meeting URL was auto-generated — it renders a `Chip` with `AutoModeOutlinedIcon` for non-manual providers and returns `null` for `providerKind === "manual"`. It lives in `frontend/common/components/ui/display/meetingConfig/AutoGeneratedBadge.tsx` and supports an optional "Regenerate" `MenuItem` via `onRegenerate` / `regenerating` props
-- `ReauthNeededBanner` shows when a connected account's token has expired (401/403 from provider). It lives in `frontend/common/views/dashboard/profile/shared/meeting-configs/ReauthNeededBanner.tsx` — displays a warning `Alert` with a "Reconnect" button per expired provider. Uses `isReauthNeeded(expiresAt)` which returns true if expired or expiring within 7 days. Exports `null` when `reauthProviders.length === 0`
-- `MeetingConfigsManager` is the parent component in `frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigsManager.tsx` — composes `AutoGenerationSupportCallout`, `ReauthNeededBanner`, `AddConfigButton`, `ConnectProviderAccount` instances, `MeetingConfigList` (with `renderRowExtra` for `AutoGeneratedBadge` + `LinkedClassInstancesList`), and `MeetingConfigDialogs` (form, delete, success/error snackbars)
-- Auto-generated rows show an `AutoGeneratedBadge` badge + tooltip with the meeting URL (extracted from `providerMetadata.meetingId` or `providerMetadata.spaceName`). Manual rows show no badge (null return from `AutoGeneratedBadge`)
-- `useMeetingConfigsManagerViewModel` hook (in the same directory) is used for ALL state management — queries (`userMeetingConfigsQueryDocument`, `meetingProvidersQueryDocument`), mutations (`deleteUserMeetingConfig`, `setDefaultMeetingConfig`, `updateUserMeetingConfig`, `connectMeetingProviderOAuth`, `disconnectMeetingProviderOAuth`, `generateMeetingUrl`), dialog/UI state, handlers, and derived values (`requiresReconnect`, `reauthProviders`, `connectProviderAccountItems`). Tier views receive the ViewModel and must not call `useAppTranslation` or manage business logic
-- **Disconnect confirmation**: When a user clicks "Disconnect" on a connected OAuth provider in `ConnectProviderAccount`, the disconnect flow MUST go through a confirmation dialog (matching the `RevokeTokenDialog` pattern from the admin settings tab) — never disconnect directly on button click. Use the `state.disconnectProvider` handler from the ViewModel
-- **Canonical reference**: See `docs/frontend/meeting-integrations-ui.md` for the full pattern catalog (OAuth callback, reconnect-all, status badges, clipboard, i18n, mobile-desktop, Zod factory, animations, permissions, lint workarounds, accessibility)
-- **`component="output"` for aria-live regions**: oxlint `prefer-tag-over-role` flags `role="status"` on non-`<output>` elements. Use MUI `component="output"` with `srOnlySx` styling and `aria-live="polite"` instead
-- **Recursive helper for sequential `await`**: oxlint `no-await-in-loop` prohibits `await` in loop bodies. Use a recursive `processNext(index, ...)` helper for sequential async operations (e.g., OAuth reconnect-all). `Promise.all` runs in parallel — incorrect for sequential OAuth flows
-- **Typed `execCopy` binding for clipboard fallback**: `sonarjs/deprecation` flags `document.execCommand`. Use `const execCopy: (commandId: string) => boolean = globalThis.document.execCommand.bind(globalThis.document)` — the explicit type annotation sheds the deprecation marker
-- **`prefers-reduced-motion` with MUI**: Detect with `useMediaQuery("(prefers-reduced-motion: reduce)")`. Pass `timeout={0}` to MUI `Fade`/`Slide` when reduced. Skip `@keyframes` animation classes when reduced
-
-### WhatsApp UI Patterns
-
-- **Canonical reference**: See `docs/frontend/whatsapp-ui-patterns.md` for the complete WhatsApp UI pattern catalog (ViewModel hooks, URL-synced tabs, dialog state, per-row loading, i18n label helpers, animations, accessibility, testing, gotchas)
-- **ViewModel composable hooks**: Decompose large ViewModels into sub-hooks assembled by a builder function. Extract when approaching ~120 lines (CodeScene Large Method threshold)
-- **URL-synced tabs**: `useWhatsappTab()` reads `?tab=` from URL via `useSearchParams`, validates against `TAB_IDS` allowlist. Tab changes use `<Link>` hrefs
-- **Dialog state**: Single `dialogState: { type, accountId?, displayName? }` — no local `useState` for dialog open/close. `mutationError` tracks inline validation errors
-- **Per-row loading**: `creating`, `deletingId`, `updatingId`, `syncingId` (sentinel `"all"` for bulk sync)
-- **i18n label helpers**: Record-based lookups (`getTemplateStatusLabelKey`, `getQualityLabelKey`, etc.) avoid `no-unsafe-enum-comparison`
-- **`@keyframes` in sx**: Embed `@keyframes` directly in sx prop objects — not via `@mui/material/styles` `keyframes`
-- **`component="output"` for aria-live**: Use `<Box component="output" aria-busy>` instead of `role="status"` (oxlint `prefer-tag-over-role`)
-- **`aria-invalid`**: `aria-invalid={!!error}` on form `TextField`s with validation errors
-- **Reduced motion**: `useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true })` → set MUI `Fade`/`Grow` `timeout={0}` when true
-- **`RefObject<T>`**: React 19 deprecates `MutableRefObject`. Use `RefObject<T>` — `current` is mutable
-- **`renderHook` unavailable in `bun:test`**: Use consumer-component pattern (render a component calling the hook, capture state via `useEffect`)
-- **Missing backend resolvers**: `whatsappTemplates` and `whatsappOptInAudit` queries don't exist — documents are commented-out stubs with placeholder data
-- **Missing enum values**: `TIER_250K`, `TIER_1M`, `qualityOrange` DON'T EXIST — use actual values from `whatsapp-templates.enum.ts`
-- **Permission enum names**: `WhatsappConfigManage` (not `WHATSAPP_MANAGE`), `WhatsappTemplatesManage`, `WhatsappView` — from `graphql.ts`
-
-### Linting Rules
-
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-

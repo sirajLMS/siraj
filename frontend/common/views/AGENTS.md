@@ -113,7 +113,7 @@ Pass section slices to children: `labelsBySection.shell` → page chrome, `label
 ### Type placement
 
 1. **Exact match** → import `XLabels` from `@/shared/locale/types/...` directly.
-2. **Subset** → `Pick<BillingLabels, "pageTitle" | "pageSubtitle">` or a dedicated `*ShellLabels` in domain types.
+2. **Subset** → `Pick<XLabels, "keyA" | "keyB">` or a dedicated `*ShellLabels` in domain types.
 3. **View-shaped** → new exported type in `frontend/common/views/dashboard/<domain>/types/<feature>.types.ts`.
 4. **Component-only, props interface already in the `.tsx` file** → extend that props interface in place.
 
@@ -121,29 +121,23 @@ Pass section slices to children: `labelsBySection.shell` → page chrome, `label
 
 View-layer types may `Pick` / compose canonical `*Labels` from `@/shared/locale/types` — they must not redefine copy keys.
 
-### Reference patterns
-
-- `frontend/common/views/dashboard/settings/types/settingsAudit.types.ts` — `SettingsAuditLabels` with `filters`, `columns`, `entityTypes`, `actions`
-- Login pilot — `labels: AuthLoginLabels` passed ViewModel → components
-- Column builders that already take one `labels` object — extend that shape up to ViewModels
-
 ### Anti-patterns
 
 | Anti-pattern | Fix |
 | --- | --- |
 | Flat VM label fields (~25 strings) | `labelsBySection: { shell, columns, actions, dialogs, notifications }` |
-| Exploded props at component boundary | Pass `labels: ScheduleFilterLabels` |
+| Exploded props at component boundary | Pass one `labels: XxLabels` object |
 | Mixed utils with individual string params | Group under `labels.headers` / `labels.actions` |
 
-### Migration verification
+### Verification
 
-Every file touched in a translation/labels migration PR must pass:
+Every file touched in this layer must pass:
 
 ```bash
 bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
-Runs progressive checks: tsgo → biome → lint (queue) → codescene. Fix until exit 0. Lint queue server must be running before dispatch.
+Runs progressive checks: tsgo → biome → lint (queue) → codescene. Fix until exit 0.
 
 ## Cross-References
 
@@ -151,19 +145,9 @@ Runs progressive checks: tsgo → biome → lint (queue) → codescene. Fix unti
 - `frontend/mobile/AGENTS.md` — Mobile* primitives (3 behavioral categories)
 - `frontend/desktop/AGENTS.md` — tier-paired `.desktop.*` variants only
 - `frontend/common/components/ui/AGENTS.md` — viewport-agnostic primitives layer
-- `frontend/views/AGENTS.md` — ViewModel conventions (legacy location, will point here after Block 2)
-
-## WhatsApp Settings Patterns
-
-- **Canonical reference**: See `docs/frontend/whatsapp-ui-patterns.md` for the full pattern catalog (ViewModel hooks, URL-synced tabs, dialog state, per-row loading, i18n label helpers, animations, accessibility, testing, gotchas).
-- **ViewModel composable hooks**: The WhatsApp ViewModel decomposes into 10+ sub-hooks (`useWhatsappQueries`, `useWhatsappMutations`, `useWhatsappDialogs`, etc.) assembled by `buildWhatsappViewModel`. When a ViewModel grows past ~120 lines, extract sub-hooks early to avoid CodeScene Large Method.
-- **URL-synced tabs**: `useWhatsappTab()` reads `?tab=` from URL via `useSearchParams`, validates against `TAB_IDS` allowlist. Tab changes use `<Link>` hrefs — no `setActiveTab` needed.
-- **Dialog state**: Single `dialogState: { type, accountId?, displayName? }` — no local `useState` for dialog open/close. `mutationError` tracks inline validation errors.
-- **Per-row loading**: `creating`, `localDeactivatingId`, `updatingId`, `syncingId` (sentinel `"all"` for bulk sync).
-- **i18n label helpers**: Record-based lookups (`getTemplateStatusLabelKey`, `getQualityLabelKey`, etc.) avoid `no-unsafe-enum-comparison`.
-- **Missing backend resolvers**: `whatsappTemplates` and `whatsappOptInAudit` queries don't exist — documents are commented-out stubs with placeholder data.
+- `frontend/views/AGENTS.md` — ViewModel conventions (legacy location)
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
+- NEVER use `oxlint-disable` comments — fix the root cause.
 

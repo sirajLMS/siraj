@@ -44,13 +44,11 @@ When you add or rename a locale leaf module:
 When in doubt, run `bun run quality-gate` — the `shared/locale` lint rules
 detect missing wires.
 
-### When to delete one of the two systems
+### Never collapse the two systems
 
-Don't. The dual-bundling strategy is the documented decision today. If a future
-audit shows the lazy namespace system has zero live consumers (ine. no client
-component uses `useAppTranslation`), it can be removed — but verify with
-`grep -rn "useAppTranslation\|useTranslation" frontend/` first. The eager
-`messages.ts` tree is the canonical server surface and should remain.
+Do not merge or remove either surface. The eager `messages.ts` tree is the
+canonical server surface; the lazy `namespaces/` loaders are the canonical
+client surface. Both must stay in sync per the rule above.
 
 ## Path alias discipline
 

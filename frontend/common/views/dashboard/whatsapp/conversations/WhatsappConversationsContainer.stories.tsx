@@ -287,6 +287,31 @@ export const NoAccounts: Story = {
   },
 };
 
+export const NewConversation: Story = {
+  name: "New conversation initiation (template-locked composer)",
+  decorators: [
+    Story => (
+      <ConversationsStoryProviders
+        permissions={MANAGE_PERMISSIONS}
+        mocks={[
+          accountsMock([regularAccount]),
+          listMock(null, []),
+          listMock(REGULAR_ACCOUNT_ID, []),
+        ]}
+      >
+        <Story />
+      </ConversationsStoryProviders>
+    ),
+  ],
+  play: async ({ canvas }) => {
+    const action = await canvas.findByRole("button", { name: whatsappConversationsEn.newConversation });
+    await userEvent.click(action);
+    await canvas.findByText(whatsappConversationsEn.newConversationTitle);
+    await canvas.findByText(whatsappConversationsEn.newConversationSubtitle);
+    await canvas.findByPlaceholderText(whatsappConversationsEn.templateNamePlaceholder);
+  },
+};
+
 export const TestNumberAccount: Story = {
   name: "Test number (banner + recipient registry)",
   decorators: [

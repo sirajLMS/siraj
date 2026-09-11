@@ -9,13 +9,13 @@
 
 ## Error Boundaries
 
-- Database outages surface through `DatabaseUnavailableError` + a digest sentinel recognized by the root error boundary. See `docs/backend/db-availability-fail-fast.md`.
+- Database outages surface through `DatabaseUnavailableError` + a digest sentinel recognized by the root error boundary.
 
 ## Authentication Guards
 
 - Use `getServerUserContext()` from `@/backend/lib/auth/server-auth` to verify authentication in layout files.
 - Redirect unauthenticated users with `redirectToLogin()` from `@/frontend/common/lib/redirectToLogin` (or `redirect()` from `next/navigation`).
-- For dashboard pages, use the shared `withPageAuth()` wrapper from `app/(dashboard)/__shared__/withPageAuth.ts` instead of inline auth checks. See `docs/app/with-page-auth.md` for the complete pattern reference.
+- For dashboard pages, use the shared `withPageAuth()` wrapper from `app/(dashboard)/__shared__/withPageAuth.ts` instead of inline auth checks.
 
 ```tsx
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
@@ -38,7 +38,7 @@ if (!userId || !context) {
 | Profile view/edit | `resolveProfilePageContext` | `/dashboard` or `/profile` |
 | UX-level gating | `<RequirePermission>` on buttons/tabs/sections | Renders `fallback` (often `null`) |
 
-**Permission-gated pages** must call `requirePermissionForPage` in `page.tsx` before rendering the Container. Do **not** add container-level `<RequirePermission>` wrappers that gate entire page returns — the server guard is the security boundary and the client wrapper is trivially bypassable. Fine-grained `<RequirePermission>` on individual buttons/tabs/sections is encouraged for UX (e.g., hiding buttons users can't use). Do **not** gate `/dashboard` itself — it is the redirect landing page. See `docs/auth/permission-architecture.md` for the full 3-tier model.
+**Permission-gated pages** must call `requirePermissionForPage` in `page.tsx` before rendering the Container. Do **not** add container-level `<RequirePermission>` wrappers that gate entire page returns — the server guard is the security boundary and the client wrapper is trivially bypassable. Fine-grained `<RequirePermission>` on individual buttons/tabs/sections is encouraged for UX (e.g., hiding buttons users can't use). Do **not** gate `/dashboard` itself — it is the redirect landing page.
 
 ```tsx
 import { AppPermission } from "@/backend/enum";
@@ -117,5 +117,5 @@ const userProfile = await getCurrentUser(userId);
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
+- NEVER use `oxlint-disable` comments — fix the root cause instead.
 

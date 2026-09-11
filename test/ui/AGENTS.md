@@ -19,7 +19,7 @@ bun run build:test
 ```
 
 - Output directory: `.next-test-prod` (override with `TEST_SERVER_DIST_DIR`)
-- Uses **only** `.env.test` — injected into the `next build` / `next start` process env (no parent shell env). Per [Next.js test env rules](https://nextjs.org/docs/app/guides/environment-variables#test-environment-variables), keys already set in `process.env` are not overridden by `.env.local` or other files on disk
+- Uses **only** `.env.test` — injected into the `next build` / `next start` process env (no parent shell env). Keys already set in `process.env` are not overridden by `.env.local` or other files on disk
 - Tests do **not** run `next build` automatically; missing build fails fast with a clear error
 
 **Rebuild `build:test` after changes to:** server code, auth/cookies, middleware, API routes, or anything that affects the running Next.js app. (Only needed for production mode — dev mode hot-reloads automatically.)
@@ -85,41 +85,39 @@ function escapeRegExp(str: string): string {
 }
 const tr = (s: string): RegExp => new RegExp(escapeRegExp(s), "i");
 
-const T = getDefaultTranslations().dashboardTranslations;
-const dashboard = T.studentPortalDashboard;
-const NEXT_CLASS = tr(dashboard.nextClass);
+const T = getDefaultTranslations().<domain>Translations;
+const LABEL = tr(T.<namespace>.<key>);
 ```
 
 **For exact match (e.g., button text):**
 ```typescript
 const trExact = (s: string): RegExp => new RegExp(`^${escapeRegExp(s)}$`, "i");
-const JOIN_BUTTON = trExact(dashboard.joinNow);
+const ACTION_BUTTON = trExact(T.<namespace>.<actionKey>);
 ```
 
 **For functional translations (functions that return strings):**
 ```typescript
-const resultsCountPattern = escapeRegExp(sched.resultsCount("\\d+", "\\d+")).replace(/\\\\d\+/g, "\\d+");
-const SEARCH_OUTCOME = new RegExp(`${resultsCountPattern}|${escapeRegExp(sched.noResults)}`, "i");
+const pattern = escapeRegExp(T.<namespace>.<fnKey>("\\d+")).replace(/\\\\d\+/g, "\\d+");
+const RESULT = new RegExp(pattern, "i");
 ```
 
 **For `selectOption({ label })`:** Use the raw string value (not a regex):
 ```typescript
-await attendanceSelect.selectOption({ label: lr.present });
+await select.selectOption({ label: T.<namespace>.<optionKey> });
 ```
 
 **For `aria-label` selectors:** Use `escapeRegExp` on the translation value:
 ```typescript
-page.locator(`button[aria-label="${escapeRegExp(common.notifications)}"]`)
+page.locator(`button[aria-label="${escapeRegExp(T.<namespace>.<key>)}"]`)
 ```
 
 **Access pattern:**
 - `getDefaultTranslations()` returns the full `Translations` object
-- Access via `.dashboardTranslations.<namespace>.<key>`
-- Other top-level: `.commonTranslations`, `.uiTranslations.phoneInput`, `.errorsTranslations`
+- Access via `.<domain>Translations.<namespace>.<key>` (e.g. `.dashboardTranslations`, `.commonTranslations`, `.errorsTranslations`)
 
 ### What Counts as "Hardcoded" in E2E (Prohibited)
 
-- **Arabic/English UI labels** — e.g., `"متصل"`, `"Connected"` — must come from `getDefaultTranslations()`
+- **Arabic/English UI labels** — must come from `getDefaultTranslations()`
 - **Button text, badge text, headings, descriptions** — any text rendered by the app
 - **Alert/error messages** — use translated strings from the appropriate namespace
 
@@ -127,14 +125,13 @@ page.locator(`button[aria-label="${escapeRegExp(common.notifications)}"]`)
 
 - **Technical test data** — URLs, HTTP status codes, error codes
 - **Person names in test input** — input data, not rendered translations
-- **Provider names** — e.g., `"Zoom"`, `"Google Meet"` are brand names, not translatable UI text
+- **Provider/brand names** — e.g., `"Zoom"`, `"Google Meet"` are brand names, not translatable UI text
 
 ## Component Test Conventions
 
-- **Organization**: test files live in one subdir per domain (`meeting-integrations/`, `whatsapp/`, `navigation/`, …) — direct children are shared infra only. See `test/ui/components/AGENTS.md`.
+- **Organization**: test files live in one subdir per domain — direct children are shared infra only. See `test/ui/components/AGENTS.md`.
 - Preloads: `test/ui/test-env.ts`, `happydom-preload.ts`, `next-dynamic-mock.ts`, **`translation-preload.ts`**
 - Use `TestWrapper` for Apollo mocks — never hit a real server
-- See `frontend/common/components/ui/AGENTS.md` for component test structure
 
 ## Agent Browser Login (manual/E2E-style verification)
 
@@ -156,7 +153,7 @@ Artifacts live in git-ignored `.browser-auth/` with mode 600.
 - **Do NOT call `ReadMediaFile` directly in the main test/orchestrator context** for browser screenshots.
 - In long multi-step browser verification runs, calling `ReadMediaFile` repeatedly accumulates multiple images into the conversation history, creating multi-megabyte payloads that cause upstream LLM timeouts and stream drops (`Stream ended before producing a non-ping SSE event`).
 - **Use DOM/Text verification first**: `agent-browser snapshot -i -c`, `agent-browser eval`, and console/network logs.
-- **Isolate Visual Checks**: If an image requires visual LLM inspection, spawn a dedicated short-lived subagent (`invoke_subagent` as `Visual Inspector`) that opens the single image with `ReadMediaFile` and returns a text-only summary. The main session receives only the text summary, keeping context clean and fast.
+- **Isolate Visual Checks**: If an image requires visual LLM inspection, spawn a dedicated short-lived subagent that opens the single image with `ReadMediaFile` and returns a text-only summary. The main session receives only the text summary, keeping context clean and fast.
 
 ## Translation Rules (CRITICAL — No Hardcoded Strings)
 
@@ -168,7 +165,7 @@ The project uses a compile-time translation system (`shared/locale/`). Arabic/En
 
 ### Setup
 
-**`translation-preload.ts`** must be in the `--preload` chain for all component tests. It preloads all meeting-related translation namespaces at module level using `readTranslation` + top-level `await` so that `readTranslation` returns synchronously during tests. Without this, Suspense returns empty bodies on the first render.
+**`translation-preload.ts`** must be in the `--preload` chain for all component tests. It preloads translation namespaces at module level using `readTranslation` + top-level `await` so that `readTranslation` returns synchronously during tests. Without this, Suspense returns empty bodies on the first render.
 
 The preload file maintains an array of `NamespaceHandle` objects and calls `readTranslation(handle, locale)` for each. When you use a new translation namespace in tests, add its handle to the array in `translation-preload.ts`.
 
@@ -183,8 +180,8 @@ import { Translation } from "@/shared/locale/namespaces/translation";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 const locale: AppLocale = "ar";
-const labels = readTranslation(Translation.Dashboard.MeetingUrlStatus, locale);
-// now use labels.urlPending, labels.urlReady, etc. in assertions
+const labels = readTranslation(Translation.<Domain>.<Namespace>, locale);
+// now use labels.<key> in assertions
 ```
 
 `readTranslation` is NOT a React hook — safe to call at module level. It returns labels synchronously after preload, or throws a Promise (Suspense) if the namespace isn't cached yet. The `translation-preload.ts` file pre-warms the cache so this never throws in tests.
@@ -218,25 +215,25 @@ renderWithWrapper(<Component />, { locale });
 
 **Pattern 1 — Component accepts `labels` prop:**
 ```typescript
-const labels = readTranslation(Translation.Dashboard.SettingsMeetingIntegrations, locale);
+const labels = readTranslation(Translation.<Domain>.<Namespace>, locale);
 render(<Component labels={labels} />, {
   wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
 });
-expect(screen.getByText(labels.connectedAccounts)).toBeInTheDocument();
+expect(screen.getByText(labels.<key>)).toBeInTheDocument();
 ```
 
 **Pattern 2 — Component uses `useAppTranslation` internally:**
 ```typescript
-const labels = readTranslation(Translation.Dashboard.MeetingGeneration, locale);
+const labels = readTranslation(Translation.<Domain>.<Namespace>, locale);
 render(<Component />, {
   wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
 });
-expect(screen.getByText(labels.generationStatusSuccess)).toBeInTheDocument();
+expect(screen.getByText(labels.<key>)).toBeInTheDocument();
 ```
 
 ### What Counts as "Hardcoded" (Prohibited)
 
-- **Arabic/English UI labels** — e.g., `"متصل"`, `"Connected"`, `"تمت المصادقة"` — must come from `readTranslation(handle, locale)`
+- **Arabic/English UI labels** — must come from `readTranslation(handle, locale)`
 - **Button text, badge text, headings, descriptions** — any text rendered by the component
 - **Alert/error messages** — use translated strings from the appropriate namespace
 
@@ -244,10 +241,10 @@ expect(screen.getByText(labels.generationStatusSuccess)).toBeInTheDocument();
 
 These are test data, not UI labels — they do NOT need translation:
 
-- **Custom override strings** — e.g., `"Custom Copy Label"` passed as a prop to test label override behavior
-- **Technical test data** — URLs (`"https://meet.example.com/abc"`), HTTP status codes (`"200 OK"`), error codes (`"AUTH_FAILED"`), response times (`"150ms"`)
-- **Person names in test input** — e.g., `"أحمد محمد"`, `"سارة"` are input data, not rendered translations
-- **Provider names** — e.g., `"Zoom"`, `"Google Meet"` are brand names, not translatable UI text
+- **Custom override strings** — e.g., strings passed as a prop to test label override behavior
+- **Technical test data** — URLs, HTTP status codes, error codes, response times
+- **Person names in test input** — input data, not rendered translations
+- **Provider/brand names** — e.g., `"Zoom"`, `"Google Meet"` are brand names, not translatable UI text
 
 ### MUI v9 Class Name Gotchas
 
@@ -260,51 +257,35 @@ When asserting on MUI component classes (e.g., Alert severity):
 
 Some components render combined text (e.g., `"{label}: {value}"`) in a single paragraph. `getByText` with exact string match will fail. Use:
 
-- `screen.getByText(new RegExp(labels.testPanel.authSuccess))` — regex matcher
+- `screen.getByText(new RegExp(labels.someLabel))` — regex matcher
 - `screen.getByText(content => content.includes(labels.someLabel))` — function matcher
 - `element.textContent.includes(labels.someLabel)` — direct DOM check on a parent element
 
 ### Namespace Handle Discovery
 
-The `Translation` constant in `@/shared/locale/namespaces/translation` provides typed access to all namespaces. Common meeting-related handles:
-
-| Handle | Keys |
-|--------|------|
-| `Translation.Dashboard.MeetingUrlStatus` | `urlPending`, `urlReady`, `urlFailed`, `urlExpired`, `joinMeeting`, `copyUrl`, `retryUrlGeneration`, `urlNotGenerated`, `setupMeetingConfig` |
-| `Translation.Dashboard.OAuthFlow` | `statusConnected`, `statusNotConnected`, `statusExpiring`, `statusExpired`, `expiresInDays(n)`, `statusAriaLabel` |
-| `Translation.Ui.MeetingConfig` | Nested: `join.*`, `enhancements.*`, `manager.*`, `reauthNeeded.*` |
-| `Translation.Dashboard.SettingsMeetingIntegrations` | Flat + nested: `connectedAccounts`, `provider.*`, `status.*`, `actions.*`, `testPanel.*` |
-| `Translation.Dashboard.MeetingGeneration` | `generationStatusPending`, `generationStatusSuccess`, `generationStatusFailed`, `generationRetry`, `generationShowDetails`, `generationHideDetails` |
-| `Translation.Profile.Notifications` | Nested `connectAccount.*`: `connectButton`, `connectingLabel`, `connectedAs(email)`, `disconnectButton`, `reconnectButton`, etc. |
+The `Translation` constant in `@/shared/locale/namespaces/translation` provides typed access to all namespaces. Browse it to find the handle for the namespace your component uses.
 
 ### Apollo Mock Requirement
 
-When a component uses `useQuery` internally (e.g., `MeetingConfigFormDialog` queries `meetingProviders`), the test must provide an Apollo mock via `renderWithWrapper`'s `mocks` option:
+When a component uses `useQuery` internally, the test must provide an Apollo mock via `renderWithWrapper`'s `mocks` option:
 
 ```typescript
-import { meetingProvidersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import type { MeetingProvidersQuery } from "@/frontend/common/graphql/generated/gql/graphql";
+import { someQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 
 const mock = {
-  request: { query: meetingProvidersQueryDocument, variables: { activeOnly: true } },
-  result: { data: { meetingProviders: [/* ... */] } satisfies MeetingProvidersQuery },
+  request: { query: someQueryDocument, variables: { /* match the component's variables */ } },
+  result: { data: { /* typed via the generated query type */ } },
 };
 
 renderWithWrapper(<Component />, { mocks: [mock] });
 ```
 
-
 ## Shared Test Helpers (Duplication Elimination)
 
-Test files sharing identical mock setup (navigation, router, session activation) should import from shared helpers instead of defining inline mocks:
+Test files sharing identical mock setup (navigation, router) should import from shared helpers instead of defining inline mocks:
 
 - **Navigation mocks:** `test/ui/components/helpers/mockNavigation.tsx` — Next.js router mock, pathname mock, router state
-- **Session activate button tests:** `test/ui/components/helpers/sessionActivateButtonTests.ts` — shared test logic for activate/deactivate button
-- **Student history fixtures:** `test/ui/components/fixtures/studentHistoryFixtures.ts` — shared test data shapes
-
-See `docs/testing/mock-navigation-helpers.md` for the complete pattern reference.
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
+- NEVER use `oxlint-disable` comments — fix the root cause.

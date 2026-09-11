@@ -4,37 +4,6 @@
 
 GraphQL documents are organized **by domain** into sub-directories, each with an `index.ts` barrel that re-exports its `.documents.ts` files. The top-level `index.ts` re-exports all sub-directory barrels.
 
-```
-frontend/common/graphql/sharedDocuments/
-├── AGENTS.md             ← this file
-├── index.ts              ← re-exports all sub-directory barrels
-├── profile.documents.test.ts  ← co-located test (exception: stays at top level)
-│
-├── auth/                 auth
-├── billing/              billing-alerts, billing-management, user-billing-profile, fx-ingestion
-├── classes/              group-class, class-category, class-subject
-├── complaints/           complaint
-├── meeting/              meeting
-├── notifications/        notification-alerts, notification-preferences
-├── parents/              parent-directory, parent-documents, parent-dashboard, parent-profile,
-│                         parent-billing-history, parent-onboarding, parent-portal
-├── permissions/          permission-management
-├── profile/              profile
-├── reports/              report
-├── resources/            learning-resource, books-and-bags
-├── scheduling/           schedule, schedule-deletion, weekly-schedule, recurring-class,
-│                         availability-search, dst-migration, class-session
-├── shared/               test-helper, translation
-├── students/             student, student-directory, student-history, student-lifecycle,
-│                         student-status, student-onboarding, student-profile
-├── suggestions/          suggestion
-├── supervisor/           supervisor-dashboard
-├── teachers/             teacher, teacher-dashboard, teacher-notes, teacher-onboarding,
-│                          teacher-portal, staff-profile, staff-directory, manager-onboarding,
-│                          carryover
-└── whatsapp/             whatsapp, whatsapp-inbox, whatsapp-config
-```
-
 ### Barrel pattern
 
 Each sub-directory has an `index.ts` that re-exports its documents:
@@ -59,7 +28,7 @@ export * from "./teachers";
 |---|---|
 | **Preferred** (barrel) | `import { fooQueryDocument } from "@/frontend/common/graphql/sharedDocuments";` |
 | **Deep import** (also valid) | `import { fooQueryDocument } from "@/frontend/common/graphql/sharedDocuments/<subdir>/foo.documents";` |
-| **Never** (stale flat path) | `import { … } from "@/frontend/common/graphql/sharedDocuments/foo.documents";` ← broken after refactor |
+| **Never** (flat path) | `import { … } from "@/frontend/common/graphql/sharedDocuments/foo.documents";` |
 
 Both barrel and deep-import paths resolve to the same exports. Prefer the barrel (`@/frontend/common/graphql/sharedDocuments`) in views/hooks unless you need to avoid pulling in the full barrel tree.
 
@@ -68,7 +37,6 @@ When adding a **new** document file:
 2. Add `export * from "./<domain>.documents";` to that sub-directory's `index.ts`.
 3. Ensure the sub-directory is exported from the top-level `index.ts` (add `export * from "./<subdir>";` if it's a new sub-directory).
 4. Run `bun run generate:gqlSchema && bun codegen`.
-5. Document any new sub-directory under **Layout** above.
 
 ## File Naming
 - One file per domain: `<domain>.documents.ts` (e.g., `auth.documents.ts`, `schedule.documents.ts`)
@@ -82,7 +50,7 @@ import { gql, type TypedDocumentNode } from "@apollo/client";
 import type { EntityNameQuery, EntityNameQueryVariables } from "@/frontend/common/graphql/generated/gql/graphql";
 ```
 
-All types (operation results, variables, enums, extracted field types, inputs) live in the single `graphql.ts` file. The old `graphql-types.ts` and `operations.ts` files no longer exist.
+All types (operation results, variables, enums, extracted field types, inputs) live in the single `graphql.ts` file.
 
 ## TypedDocumentNode Convention
 The naming follows a strict, predictable pattern derived from the operation name:
@@ -97,9 +65,9 @@ The naming follows a strict, predictable pattern derived from the operation name
 - Mutation const: `<camelCaseName>MutationDocument` → `TypedDocumentNode<{PascalCaseName}Mutation, {PascalCaseName}MutationVariables>`
 - No-arg queries: omit the second type parameter → `TypedDocumentNode<{EntityName}Query>`
 - These types are **always** available after `bun run generate:gqlSchema && bun codegen` — **never** use inline type literals
-- For nested field types, use compact extracted names: `{OperationName}_{field}` (e.g., `MeQuery_me`, `QuotaQuery_quota`)
+- For nested field types, use compact extracted names: `{OperationName}_{field}` (e.g., `MeQuery_me`)
 - **NO MAPPING**: No type mapping functions, no intermediate conversion layers, no indexed-access workarounds (e.g., `NonNullable<MeQuery["me"]>`). Use the exact codegen-generated type name directly.
-- **NO SCHEMA TYPES**: No schema-level object types (e.g., `User`, `Quota`). Only operation-derived types from `graphql.ts`.
+- **NO SCHEMA TYPES**: No schema-level object types. Only operation-derived types from `graphql.ts`.
 
 ## Codegen
 After modifying any `.documents.ts` file or any backend schema/pothos file, always run:
@@ -117,5 +85,4 @@ Every query/mutation selection set **must** include the `id` field on every name
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
+- NEVER use `oxlint-disable` comments — fix the root cause instead.

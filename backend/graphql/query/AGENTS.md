@@ -10,18 +10,7 @@ This directory contains the GraphQL **query** root-field definitions (Pothos `qu
 backend/graphql/query/
 ├── index.ts             (top-level barrel — side-effect-imports every sub-directory)
 ├── AGENTS.md            (this file)
-│
-├── shared/              cross-cutting query helpers (e.g. intl)
-├── auth/                authentication queries
-├── billing/             billing queries
-├── classes/             class queries (class-category, class-session, …)
-├── scheduling/          scheduling + availability-search queries
-├── teachers/            teacher queries (teacher, teacher-dashboard, teacher-portal)
-├── parents/             parent queries (parent-portal, parent-dashboard, parent-directory)
-├── students/            student queries (student, student-history, student-status)
-├── notifications/       notification queries (notification-alerts, notification-preferences)
-├── storage/             storage queries
-└── profile/             profile queries
+└── <domain>/            one sub-directory per domain, each with its own index.ts barrel
 ```
 
 Each sub-directory contains its own `index.ts` barrel that side-effect-imports every `*.query.ts` file in that sub-directory. The top-level `backend/graphql/query/index.ts` imports every sub-directory barrel.
@@ -37,12 +26,12 @@ Each sub-directory contains its own `index.ts` barrel that side-effect-imports e
 - Field resolvers delegate to the `backend/services/` layer — never to repositories directly and never with inline business logic. See the root `backend/graphql/AGENTS.md` for the full rules (locale propagation, localized errors, Apollo cache `id` exposure, type-definition pattern).
 
 ### Import Convention
-- Use `@/` aliased imports for cross-layer dependencies (services, types, pothos objects, enums). E.g. `import { TeacherService } from "@/backend/services/teacher";`, `import { TeacherPothosObject } from "@/backend/graphql/pothos/teachers/teacher.pothos";`.
+- Use `@/` aliased imports for cross-layer dependencies (services, types, pothos objects, enums).
 - Within the same sub-directory, prefer relative imports for sibling query files (rare — usually none).
 
 ### File Organization
 - Group related root queries for the same domain in the same sub-directory.
-- File naming: `backend/graphql/query/<subdir>/<entity>.query.ts` (e.g. `backend/graphql/query/teachers/teacher.query.ts`).
+- File naming: `backend/graphql/query/<subdir>/<entity>.query.ts`.
 - Do not place Pothos object/enum/input type definitions here — those live in `backend/graphql/pothos/<subdir>/`. Query files only register root `queryField`s and their resolvers.
 
 ### Adding New Queries
@@ -54,5 +43,4 @@ Each sub-directory contains its own `index.ts` barrel that side-effect-imports e
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
+- NEVER use `oxlint-disable` comments — fix the root cause.

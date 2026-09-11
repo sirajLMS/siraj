@@ -18,7 +18,7 @@ All commands use Bun. The specific binary path `~/.bun/bin/bun` is required in s
 ```bash
 # Development
 bun run dev                    # Start dev server with Turbopack on port 3000
-bun run dev:https              # Dev server over HTTPS (mkcert self-signed); OS/CA setup: docs/development/https-dev-server.md
+bun run dev:https              # Dev server over HTTPS (mkcert self-signed)
 bun run dev:safe               # Safe dev mode via scripts/safe-dev.ts
 bun run debug                  # Same as dev (alias for debugging workflows)
 bun run dev:inspect            # Start dev server with Node inspector enabled (--inspect)
@@ -144,7 +144,7 @@ This is NOT standard Next.js. APIs and conventions differ from training data. **
 - **Max one `/` per path**: Each `export * from` path in an `index.ts` MUST NOT contain more than one `/`. Example: `export * from "./requests"` (one `/`) is allowed; `export * from "./requests/get-phone-number.request"` (two `/`) is prohibited — use `export * from "./requests"` and let the `requests/index.ts` barrel handle the rest.
 - **No imports in barrels**: `index.ts` files contain ONLY `export *` (or collision-disambiguation `export { }`) statements — never `import` statements. The only exception is GraphQL mutation/query layers where imports register types in the GraphQL schema (not re-exported).
 - **Unique export names**: When multiple files in the same directory export functions with the same generic name (e.g. `buildRequest`, `parseResponse`), rename them to unique descriptive names in the source files (e.g. `buildGetPhoneNumberRequest`, `parseGetPhoneNumberResponse`) so the barrel can use `export *` without aliasing.
-- **Collision registry**: When `export *` causes a naming collision (TS2308 or ESLint `import-x/export`), keep `export { }` for the colliding symbol and document the exception in `.ai/plans/reexport-elimination/outcome/collisions-registry.md`. See `docs/architecture/import-export-conventions.md` for full rules.
+- **Collision registry**: When `export *` causes a naming collision (TS2308 or ESLint `import-x/export`), keep `export { }` for the colliding symbol and document the exception in `.ai/plans/reexport-elimination/outcome/collisions-registry.md`.
 - **`export type { }` stays**: `export type { X } from "./file"` is NOT converted to `export *` — type-only re-exports are intentional and keep type semantics explicit.
 - **No re-export shims**: Files that only re-export from another directory (`export { X } from "@/other/dir/file"`) are prohibited. Consumers must import directly from the original source. Delete shim files and update consumers.
 
@@ -190,13 +190,12 @@ All layers use types from `backend/types/{entity}.types.ts`:
 - **NO hardcoded colors** - all colors from theme palette
 - Use theme callback: `sx={(theme) => ({ color: theme.palette.primary.main })}`
 - Use Material 3 `on<Color>` siblings for contrast (e.g., `theme.palette.onPrimary`)
-- See `frontend/THEME_PALETTE.md` for tokens
 
 ## Code Quality Workflow
 
 After making changes:
 1. Run `bun quality-gate` - it handles tsgo, oxlint, biome, lint, duplicates, codescene sequentially
-2. If DUPLICATES fails: run `bun run check:duplicates` to see cross-file clones. Fix by extracting shared scaffolds/utilities (see `docs/frontend/duplication-elimination-patterns.md`). NEVER add `jscpd:ignore` comments or modify `.jscpd.json`.
+2. If DUPLICATES fails: run `bun run check:duplicates` to see cross-file clones. Fix by extracting shared scaffolds/utilities. NEVER add `jscpd:ignore` comments or modify `.jscpd.json`.
 3. If CODESCENE fails: run `bun run codescene --file <path>` to fix
 4. Re-run `bun quality-gate` to resume from last failed stage
 5. Use `bun quality-gate:fresh` only for clean-slate verification
@@ -425,72 +424,11 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `test/ui/` - UI tests — see `test/ui/AGENTS.md`
 - `test/ui/components/` - Component tests per domain subdir (Happy DOM + mocked Apollo; no server) - see `test/ui/AGENTS.md` + `test/ui/components/AGENTS.md`
 - `test/ui/e2e/` - End-to-end tests (production server; requires `bun run build:test` first)
-- `test/workflows/` - Cross-actor journey/workflow tests (real services, real DB, committed fixtures, no `runInRollback`) - see `test/workflows/AGENTS.md` + `docs/testing/workflow-journey-tests.md`
-
-## Important References
-
-- `frontend/COMPONENT_PATTERNS.md` - Dashboard UI patterns
-- `frontend/IMPLEMENTATION_LEARNINGS.md` - Error resolutions from past mistakes
-- `frontend/NEW_PAGE_WORKFLOW.md` - Required workflow for new pages
-- `frontend/THEME_PALETTE.md` - Color tokens and access patterns
-- `docs/frontend/emotion-rtl-stylis.md` - Emotion RTL cache rules (never pass stylis `prefixer`; `::placeholder` crash)
-- `docs/IDEMPOTENCY.md` - Idempotency patterns
-- `docs/services/teacher-payroll.md` - Teacher payroll engine: money math, override idempotency, permission-filtered surfaces, migration/backfill rehearsal evidence
-- `docs/drizzle/prepared-statements.md` - Drizzle Prepared Statements 2.0 pattern reference
-- `docs/drizzle/neon-http-client.md` - Neon HTTP Client & Provider-Agnostic Stateless Queries reference
-- `docs/graphql/dataloader-batching.md` - Pothos DataLoader batching pattern reference
-- `docs/services/entity-cache-service.md` - Entity Cache Service pattern reference
-- `docs/services/meeting-providers.md` - Meeting provider adapter/factory pattern reference (auto URL generation)
-- `docs/services/zoom-token-types.md` - Zoom token kinds (SDK JWT, OBF, ZAK, S2S OAuth, per-user OAuth) semantics and constraints
-- `docs/services/whatsapp-cloud-api.md` - WhatsApp Cloud API integration reference (adapter, factory, webhook, dispatch, schema, opt-in, frontend)
-- `docs/services/whatsapp-coexistence-multi.md` - WhatsApp v2: multi-number purpose routing, per-account adapter/factory, coexistence onboarding, durable webhook ingest
-- `docs/backend/whatsapp-configuration.md` - WhatsApp Cloud API Config tab reference (singleton `whatsapp_configs` upsert: advisory lock + FOR UPDATE, DB-first/env write-through, secret masking, Drizzle error projection)
-- `docs/services/general-user-creation.md` - General user creation pattern (createUserOfType null extension, specialized group filtering, cache eviction)
-- `docs/billing/quota-system.md` - Quota System: append-only ledger, FIFO selection, periodic rollover, on-demand scheduling integration
-- `docs/billing/credit-hours-system.md` - Credit-Hours accounting: hour-based parallel ledger, package plans, accounting payments, XOR CHECK, push+migrate dual provisioning (plan: `.ai/plans/student-credit-hours-system`)
-- `docs/billing/credit-adjustments.md` - Credit Adjustment System: manual Add/Subtract/Carryover operator adjustments, server-derived idempotency (lock-then-replay-check ordering), rich-text sanitizer, carryover payout handoff (plan: `.ai/plans/credit-adjustment-system`)
-- `docs/billing/carryover-balances.md` - Carryover Balance module: teacher carryover settlement (bulk create, to-expense, unpay, delete-restore), item-snapshot design, idempotency replay, CSV export, journey tests (plan: `.ai/plans/carryover-balance-module`)
-- `docs/billing/expense-ledger.md` - Expense Ledger module: single `expenses` table for salary payouts + operational spend, `createInternal`/`softDelete` settlement seam, carryover-first lock ordering, CSV export contract, known schema issue D6 (plan: `.ai/plans/expense-ledger`)
-- `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines
-- `docs/services/cron-service.md` - Cron service pattern reference
-- `docs/services/session-audit-reports.md` - Session audit reports canonical reference (status mapper/predicate/CSV/permission model, URL-param + openOverride deep-link contracts, aggregates design)
-- `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern for common/desktop/mobile triplication
-- `docs/frontend/duplication-elimination-patterns.md` - Duplication elimination patterns A-G (scaffold extraction, shared utility, dead code deletion, store consolidation, scaffold extension, shared view scaffold, locale type consolidation) — Phase 6 eliminated 96% of duplications (475→18 pairs) with zero jscpd:ignore
-- `docs/frontend/meeting-integrations-ui.md` - Meeting Integrations UI canonical reference (MetricCardGrid, AppDataGrid, OAuth callback, reconnect-all, status badges, clipboard, i18n namespaces, mobile-desktop responsive, Zod schema factory, animations, permission-gated cross-links, lint workarounds, accessibility)
-- `docs/frontend/whatsapp-ui-patterns.md` - WhatsApp UI canonical reference (ViewModel composable hooks, URL-synced tabs, dialog state, per-row loading, i18n label helpers, StatusBadge, animations, accessibility, testing patterns, gotchas)
-- `docs/frontend/whatsapp-conversations.md` - WhatsApp Conversations page (/whatsapp) reference: composer window gating, test-number recipient registry, GraphQL surface, error mapping
-- `docs/frontend/quota-ui-patterns.md` - Quota UI canonical reference (tier isolation, RHF 3-generic pattern, cache.updateQuery for paginated lists, StatusBadge categories, MetricCard animations, reduced-motion CSS in sx, Storybook ErrorState naming, component test tier-view mocking, i18n CLDR plurals, CodeScene 150-line limit, QuotaFormAccessProvider RBAC)
-- `docs/testing/shared-test-runner.md` - Shared parallel test runner pattern
-- `docs/testing/workflow-journey-tests.md` - Cross-actor journey test layer conventions (`test/workflows/`: committed fixtures, no `runInRollback`, honest permissions, notification spying)
-- `docs/backend/shared-types-pattern.md` - Cross-layer shared types in shared/types/
-- `docs/backend/meeting-adapter-base.md` - Meeting provider adapter base class pattern reference
-- `docs/backend/billing-repo-factory.md` - Billing repo factory with configurable hooks pattern reference
-- `docs/backend/schema-helpers.md` - Schema column and junction table helpers pattern reference
-- `docs/app/with-page-auth.md` - App router page auth wrapper pattern reference
-- `docs/testing/mock-navigation-helpers.md` - Test mock navigation helpers pattern reference
-- `docs/auth/manager-role-mapping.md` - Manager role mapping architecture & permission group slug convention
-- `docs/i18n/locale-namespace-migration.md` - Locale namespace migration from monolithic to sub-module directories
-- `docs/auth/permission-architecture.md` - Client-side permission architecture (3-tier model, wrapper removal rationale)
-- `docs/auth/supervisor-permissions.md` - Supervisor permission model (teacher/student/parent management, staff exclusion, system group editing, authScope pattern)
-- `docs/i18n/cross-layer-enum-migration.md` - Cross-layer enum delete/codemod pattern (currency/timezone/class-instance-detail workflow)
-- `docs/backend/service-base-pattern.md` - Service base class, shared resolvers, insert payload builders, auth session helpers
-- `docs/backend/types-consolidation.md` - Types consolidation: moving `.types.ts` from service layer to `backend/types/`, split rules, barrel conventions
-- `docs/graphql/pothos-field-factories.md` - Pothos field helpers, input field helpers, and query field factory idioms
-- `docs/architecture/import-export-conventions.md` - Import/export barrel conventions, `export *` rules, collision registry, re-export elimination summary
-- `docs/quality/linting-rules.md` - Oxlint & ESLint/sonarjs lint rule fix recipes and config overrides
-- `docs/workflows/plan-doc-reconciliation.md` - Plan-vs-canonical-doc reconciliation workflow (docs-only plan pattern, anchor-on-text, outcome-pointer rule, known-open-issues propagation, phantom-spec-code handling, markdown link-integrity loop)
-- `docs/backend/serverless-cold-start-optimization.md` - Serverless cold-start optimization patterns (permission context, env-config pre-warm, singleton persistence, HTTP batching, client log batching)
-- `docs/backend/login-cold-start-resilience.md` - Login cold-start resilience patterns (fail-open rate limiter, retryTransient on DB reads, frontend retry on SERVICE_UNAVAILABLE, env-config transient short TTL)
-- `docs/backend/db-availability-fail-fast.md` - DB-outage handling (pool/fetch timeouts, `DatabaseUnavailableError` + digest sentinel, root error pages, `/api/health/db` probe, auto-retry UX)
-- `docs/drizzle/dialect-aware-constraints.md` - Dialect-aware CHECK constraints (PG/SQLite) and soft-delete partial unique indexes
-- `docs/graphql/domain-error-extensions-code.md` - DomainError → GraphQLError extensions.code propagation pattern
-- `docs/observability/new-relic-integration.md` - New Relic APM integration (Hybrid Agent, GraphQL resolver tracing, zero dev/test overhead)
-- `docs/development/https-dev-server.md` - HTTPS dev server (`bun run dev:https`) setup: how Next/mkcert provisions certs, per-OS trust-store setup (incl. the Arch Linux `update-ca-certificates` fix), verification, reset
-
+- `test/workflows/` - Cross-actor journey/workflow tests (real services, real DB, committed fixtures, no `runInRollback`) - see `test/workflows/AGENTS.md`
 
 ## Linting Rules
 
-- **Oxlint & ESLint/sonarjs fix recipes**: See `docs/quality/linting-rules.md` for all lint rule patterns, code examples, and config overrides. NEVER add `oxlint-disable` comments — fix the root cause.
+- **Oxlint & ESLint/sonarjs fix recipes**: NEVER add `oxlint-disable` comments — fix the root cause.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -12,8 +12,9 @@
 ## Type Safety
 - All GraphQL operations must be strongly typed using generated types from `frontend/common/graphql/generated/gql/graphql`
 - Use `TypedDocumentNode` with proper typing: `TypedDocumentNode<{EntityName}Query, {EntityName}QueryVariables>`
+- Export documents as `export const xDocument: TypedDocumentNode<XQuery> = gql\`...\`` (type annotation, not `as` cast).
 - All types (operation results, variables, enums, extracted field types) live in the single `graphql.ts` file
-- No schema-level object types are generated — only operation-derived types (the docs say "Object types should never be used")
+- No schema-level object types are generated — only operation-derived types
 - Follow the standardized naming convention for document constants as outlined in `frontend/common/graphql/sharedDocuments/AGENTS.md`
 
 ## Code Generation
@@ -26,9 +27,11 @@
 
 ## Apollo Client Usage
 - Use the shared Apollo Client instance configured in `frontend/common/graphql/`
-- Import Apollo hooks from `"@apollo/client/react"` (e.g., `import { useQuery, useApolloClient } from "@apollo/client/react";`)
-- Include `id` fields in all query selections for proper Apollo cache normalization
-- Avoid `useLazyQuery` - use stateful `useQuery` exclusively for consistent loading/error state management
+- Import Apollo hooks from `"@apollo/client/react"` (e.g., `import { useQuery, useApolloClient } from "@apollo/client/react";`) — never from the `@apollo/client` root.
+- `useLazyQuery` is banned — use stateful `useQuery` (with `skip` + manual refetch) exclusively for consistent loading/error state management.
+- Include `id` fields in every object selection for proper Apollo cache normalization. Types whose schema declares no `id` field are exempt — selecting `id` there is a validation error.
+- Mutations that return an entity type must select the full entity fragment rather than `{ id }` only, so the normalized cache receives fresh field values without a follow-up query.
+- Types that lack an `id` field (embedded / value types) must opt out of normalization via `keyFields: false` in `frontend/common/providers/apollo/apolloCache.ts` to avoid Apollo's "Cache data may be lost" warnings.
 
 ## Integration Testing
 - GraphQL integration tests are located in `frontend/common/graphql/test/`
@@ -44,7 +47,7 @@
 
 ### Positive Pattern (Required):
 - Use generated types from the single `graphql.ts` file: `{EntityName}Query`, `{EntityName}QueryVariables`, `{EntityName}Mutation`, `{EntityName}MutationVariables`
-- For extracted field types (nested object selections), use the compact naming convention: `{OperationName}_{field}_{subField}` (e.g., `MeQuery_me`, `QuotaQuery_quota`, `GroupClassAuditQuery_groupClassAudit_adminNote`)
+- For extracted field types (nested object selections), use the compact naming convention: `{OperationName}_{field}_{subField}` (e.g., `MeQuery_me`, `GroupClassAuditQuery_groupClassAudit_adminNote`)
 - Follow the standardized naming convention for document constants: `<entityName>QueryDocument`, `<entityName>MutationDocument`
 - Apply consistent patterns across all entities without creating ad-hoc type definitions
 
@@ -62,53 +65,27 @@
 // Import from the single graphql.ts file
 import type { EntityNameQuery, EntityNameQueryVariables } from "@/frontend/common/graphql/generated/gql/graphql";
 
-const entityNameQueryDocument = gql`
+const entityNameQueryDocument: TypedDocumentNode<EntityNameQuery, EntityNameQueryVariables> = gql`
   query EntityName($id: String!) {
     entityName(id: $id) {
       id
       # ... other fields
     }
   }
-` as TypedDocumentNode<EntityNameQuery, EntityNameQueryVariables>;
+`;
 
 // Or for mutations
 import type { EntityNameMutation, EntityNameMutationVariables } from "@/frontend/common/graphql/generated/gql/graphql";
 
-const entityNameMutationDocument = gql`
+const entityNameMutationDocument: TypedDocumentNode<EntityNameMutation, EntityNameMutationVariables> = gql`
   mutation EntityName($input: EntityNameInput!) {
     entityName(input: $input) {
       id
       # ... other fields
     }
   }
-` as TypedDocumentNode<EntityNameMutation, EntityNameMutationVariables>;
+`;
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
-
-## Embedded type normalization policy
-
-Types that lack an `id` field (value-type / embedded objects) must opt out of
-normalization via `keyFields: false` in `frontend/common/providers/apollo/apolloCache.ts`.
-This prevents Apollo's "Cache data may be lost" warnings when the same shape is
-written through different parent objects.
-
-Current embedded types:
-- `AdminNoteInfo` (fields: `content`, `lastUpdated`) — no `id`.
-- `OnlineMeetingInfo` (fields: `joinUrl`, `logoUrl`, `meetingId`, `platform`,
-  `providerName`, `source`) — no `id`.
-
-If you add a new GraphQL type without an `id` field, add it to `typePolicies`
-in `apolloCache.ts` with `keyFields: false` and list it here.
-
-## Apollo Client Conventions (verified 2026-08-26)
-
-1. **`id` selection mandate**: `id` is required on every object type that declares it in the schema. Types without an `id` field (e.g. `PageInfo`, `TeacherDashboardMetrics`, `StudentHistoryMetrics`) are exempt — selecting `id` where the schema doesn't declare one is a validation error.
-
-2. **Mutation payload expansion**: Mutations that return an entity type (e.g. `WhatsappAccount`) must select the full entity fragment (`...WhatsappAccountFields`) rather than `{ id }` only. This ensures Apollo's normalized cache receives fresh field values (`isActive`, `displayName`, etc.) for instant UI write-back without a follow-up query.
-
-3. **Hook imports**: `useQuery`, `useMutation`, `useLazyQuery` must be imported from `@apollo/client/react` (not `@apollo/client` root). `useLazyQuery` is banned — use `useQuery` with `skip` + manual refetch instead.
-
-4. **TypedDocumentNode style**: Export documents as `export const xDocument: TypedDocumentNode<XQuery> = gql\`...\`` (type annotation, not `as` cast).
+- NEVER use `oxlint-disable` comments — fix the root cause.

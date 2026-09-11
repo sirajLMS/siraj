@@ -544,10 +544,10 @@ After all implementation tasks and post-implementation review are complete, exec
 1. **Read ALL outcome files** in `.ai/plans/<feature-name>/outcome/`
 2. **Extract recurring patterns/gotchas** — non-obvious engineering gotchas, library/runtime breaking behaviors, or architectural invariants discovered across tasks
 3. **Filter for Global Battle-Tested Knowledge (CRITICAL)**:
-   - **DO NOT add to AGENTS.md / instructions**: Plan-specific constraints, feature business logic, temporary migration steps, entity-specific database schemas/columns, or one-off feature instructions.
-   - **DO add to AGENTS.md / instructions**: Permanent, codebase-wide architectural rules, library/tooling breaking pitfalls (Next.js 16, React 19, MUI v9, Drizzle, Apollo, Bun), concurrency/deadlock rules, or cross-cutting safety invariants that every future developer/agent must follow.
-   - **DO add to `docs/<domain>/<topic>.md`**: Deep domain architecture guides, pattern catalogs, and feature references.
-   - **Feature-Name Litmus Test (MANDATORY)**: before writing ANY bullet to an AGENTS.md / instructions / skill file, ask: *"Would this bullet be meaningful to a developer who never works on this feature?"* If not, it belongs in the canonical doc only. Never put feature route lists, sidebar placements, feature permission strings, feature file inventories, feature i18n namespaces, or feature type/entity names in rule files — generalize the invariant (e.g. "versioned updates MUST self-increment the `version` column", NOT "`PackagePlanRepository` snapshots purchased values") and let the doc own the feature specifics.
+   - **NEVER add to AGENTS.md / instructions** — AGENTS.md files and `.agents/instructions/*.md` are read-only guardrails; no spec/plan workflow task may create or update them. All learnings go to docs and skills only.
+   - **DO add to `docs/<domain>/<topic>.md`**: Deep domain architecture guides, pattern catalogs, feature references, and permanent codebase-wide architectural rules, library/tooling breaking pitfalls (Next.js 16, React 19, MUI v9, Drizzle, Apollo, Bun), concurrency/deadlock rules, or cross-cutting safety invariants.
+   - **DO add to `.agents/skills/<skill>/SKILL.md`**: Patterns that fit the skill's domain.
+   - **Feature-Name Litmus Test (MANDATORY)**: before writing ANY bullet to a skill file, ask: *"Would this bullet be meaningful to a developer who never works on this feature?"* If not, it belongs in the canonical doc only. Never put feature route lists, sidebar placements, feature permission strings, feature file inventories, feature i18n namespaces, or feature type/entity names in skill files — generalize the invariant (e.g. "versioned updates MUST self-increment the `version` column", NOT "`PackagePlanRepository` snapshots purchased values") and let the doc own the feature specifics.
 4. **Identify knowledge propagation targets** using the domain-to-artifacts mapping (below)
 5. **Propagate learnings** to permanent project knowledge:
 
@@ -556,32 +556,33 @@ After all implementation tasks and post-implementation review are complete, exec
 | Artifact | Action |
 |---|---|
 | **Canonical reference doc** | Create `docs/<domain>/<topic>.md` consolidating patterns, rules, gotchas, architecture diagrams |
-| **Layer AGENTS.md** | Add ONLY permanent, global, battle-tested architectural rules (1-2 lines, no code) and a one-line pointer to the doc in `Important References`. NEVER add plan-specific constraints or entity rules. |
 | **Skills** | Update `.agents/skills/<skill>/SKILL.md` if new patterns affect the skill's domain |
-| **Instructions** | Update `.agents/instructions/<layer>.instructions.md` if new permanent conventions should be enforced |
-| **Root AGENTS.md** | Add new doc to "Important References" section |
+
+### Forbidden Propagation Targets (CRITICAL)
+
+AGENTS.md files and `.agents/instructions/*.md` must NEVER be created or updated by any spec/plan workflow task. They are read-only guardrails consumed by sub-loop.ts discovery and plan-review validation. All learnings go to `docs/` and skills only.
 
 ### Domain-to-Artifacts Mapping
 
-| Plan Domain | Docs Subdir | AGENTS.md to Update | Skills to Update | Instructions to Update |
-|---|---|---|---|---|
-| Drizzle / DB patterns | `docs/drizzle/` | `backend/db/repo/AGENTS.md`, `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/drizzle/SKILL.md` | `backend.instructions.md` |
-| DB migrations | `docs/drizzle/` | `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/drizzle-migrations/SKILL.md`, `.agents/skills/drizzle-generate/SKILL.md` | `backend.instructions.md` |
-| GraphQL / Pothos | `docs/graphql/` | `backend/graphql/AGENTS.md`, `backend/graphql/pothos/AGENTS.md`, `frontend/common/graphql/AGENTS.md` | — | `backend.instructions.md` |
-| Backend services | `docs/services/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | — | `backend.instructions.md` |
-| Backend types / enums | `docs/backend/` | `backend/types/AGENTS.md`, `backend/enum/AGENTS.md`, `backend/AGENTS.md` | — | `backend.instructions.md` |
-| Frontend components / views | `docs/frontend/` | `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `frontend.instructions.md` |
-| Frontend mobile/desktop | `docs/frontend/` | `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md` | `.agents/skills/refactor-mobile-desktop/SKILL.md` | `mobile-desktop.instructions.md` |
-| Frontend stores / state | `docs/frontend/` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `frontend.instructions.md` |
-| Frontend GraphQL / Apollo | `docs/frontend/` | `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | — | `frontend.instructions.md` |
-| Testing (DB) | `docs/testing/` | `backend/db/test/AGENTS.md`, `backend/db/test/logic/AGENTS.md` | `.agents/skills/fix-db-tests/SKILL.md` | `tests.instructions.md` |
-| Testing (UI / E2E) | `docs/testing/` | `test/ui/AGENTS.md` | `.agents/skills/fix-tests/SKILL.md` | `tests.instructions.md` |
-| i18n / locale | `docs/i18n/` | `shared/AGENTS.md` | — | — |
-| Auth / security | `docs/auth/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/security-review/SKILL.md` | `backend.instructions.md` |
-| App Router / Next.js | `docs/app/` | `app/AGENTS.md` | — | `frontend.instructions.md` |
-| Quality gates / CI | `docs/quality/` | `AGENTS.md` (root) | `.agents/skills/quality-gate/SKILL.md`, `.agents/skills/quality-loop/SKILL.md` | — |
-| Idempotency | `docs/` (top-level) | `backend/services/AGENTS.md` | — | `backend.instructions.md` |
-| Bun / runtime | `docs/bun/` | `AGENTS.md` (root) | — | — |
+| Plan Domain | Docs Subdir | Skills to Update |
+|---|---|---|
+| Drizzle / DB patterns | `docs/drizzle/` | `.agents/skills/drizzle/SKILL.md` |
+| DB migrations | `docs/drizzle/` | `.agents/skills/drizzle-migrations/SKILL.md`, `.agents/skills/drizzle-generate/SKILL.md` |
+| GraphQL / Pothos | `docs/graphql/` | — |
+| Backend services | `docs/services/` | — |
+| Backend types / enums | `docs/backend/` | — |
+| Frontend components / views | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
+| Frontend mobile/desktop | `docs/frontend/` | `.agents/skills/refactor-mobile-desktop/SKILL.md` |
+| Frontend stores / state | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
+| Frontend GraphQL / Apollo | `docs/frontend/` | — |
+| Testing (DB) | `docs/testing/` | `.agents/skills/fix-db-tests/SKILL.md` |
+| Testing (UI / E2E) | `docs/testing/` | `.agents/skills/fix-tests/SKILL.md` |
+| i18n / locale | `docs/i18n/` | — |
+| Auth / security | `docs/auth/` | `.agents/skills/security-review/SKILL.md` |
+| App Router / Next.js | `docs/app/` | — |
+| Quality gates / CI | `docs/quality/` | `.agents/skills/quality-gate/SKILL.md`, `.agents/skills/quality-loop/SKILL.md` |
+| Idempotency | `docs/` (top-level) | — |
+| Bun / runtime | `docs/bun/` | — |
 
 ### Verification
 
@@ -627,7 +628,7 @@ For plans using `quick-spec-template.md` (1-3 day features, single combined docu
 
 ### What's Reduced
 - No mid-point review gate (plans are typically <15 tasks)
-- Knowledge propagation simplified: update only the most directly relevant AGENTS.md + create a single doc
+- Knowledge propagation simplified: create a single canonical doc only (and update any directly affected skill)
 - No plan-review gate (quick-specs skip Phase 1.5)
 - Instruction verification still happens via sub-loop auto-discovery
 
@@ -744,9 +745,7 @@ At the end of implementation, provide the user with:
 
 ### Knowledge Propagation
 - Doc created: docs/<domain>/<topic>.md
-- AGENTS.md updated: <list>
 - Skills updated: <list>
-- Instructions updated: <list>
 
 ### Outcome Files
 - <count> outcome files written to .ai/plans/<feature-name>/outcome/

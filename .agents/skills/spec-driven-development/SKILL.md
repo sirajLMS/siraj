@@ -441,7 +441,7 @@ After post-implementation review is clean:
 1. **Read ALL outcome files** in `.ai/plans/<feature-name>/outcome/`
 2. **Extract recurring patterns/gotchas** (e.g., "dialog/ vs dialogs/ directory confusion appeared 3x")
 3. **Identify knowledge propagation targets** based on plan domain (see table below)
-4. **Phase 7 Knowledge Propagation task** creates docs and updates AGENTS.md files with learnings
+4. **Phase 7 Knowledge Propagation task** creates canonical docs under `docs/` and updates relevant skill files with learnings (AGENTS.md and `.agents/instructions/` are never propagation targets)
 
 This synthesis ensures learnings don't remain siloed in outcome files but propagate to permanent project knowledge.
 
@@ -504,27 +504,6 @@ Table of files modified, methods refactored, test results.
 - `.ai/plans/<name>/outcome/` — plan outcome files
 ```
 
-### How AGENTS.md Files Reference Docs
-
-Layer AGENTS.md files reference docs using relative paths from the repo root:
-
-```markdown
-## Rules
-
-- **Prepared Statements (CRITICAL)**: All simple read-only repository methods MUST use
-  Drizzle Prepared Statements 2.0 (`sql.placeholder(...)`) defined at module level.
-  See `docs/drizzle/prepared-statements.md` for the complete pattern reference.
-```
-
-The root `AGENTS.md` lists all docs in its Important References section:
-
-```markdown
-## Important References
-
-- `docs/drizzle/prepared-statements.md` - Drizzle Prepared Statements 2.0 pattern reference
-- `docs/IDEMPOTENCY.md` - Idempotency patterns
-```
-
 ### How Skills Reference Docs
 
 Skills (`.agents/skills/<name>/SKILL.md`) reference docs in their domain-specific sections:
@@ -537,43 +516,19 @@ prepared statements pattern documented in `docs/drizzle/prepared-statements.md`.
 - ...
 ```
 
-### How Instructions Reference Docs
-
-Instruction files (`.agents/instructions/<layer>.instructions.md`) reference docs as mandatory reading:
-
-```markdown
-## Required Reading
-
-Before modifying any repository file, read:
-- `docs/drizzle/prepared-statements.md` — Prepared statements pattern
-- `backend/db/repo/AGENTS.md` — Repository layer rules
-```
-
 ### What Gets Updated
 
 After all implementation tasks are complete, the final task in every plan MUST:
 
 1. **Create a canonical reference doc** under `docs/<domain>/` consolidating all outcome learnings from the plan
-2. **Update layer AGENTS.md files** that govern the modified layers — add ONLY layer-specific architectural rules and decisions (1-2 lines, no code). Add a one-line reference to the new doc. NEVER add implementation details, code examples, or fix recipes.
-3. **Update `.agents/skills/<skill>/SKILL.md`** if the plan introduced new patterns relevant to a skill's domain — add a section with key rules and a reference to the new doc
-4. **Update `.agents/instructions/<layer>.instructions.md`** — add ONLY rules and decisions, never implementation details. Add a one-line reference to the new doc.
-5. **Update root `AGENTS.md`** Important References section with a one-line reference to the new doc only.
+2. **Update `.agents/skills/<skill>/SKILL.md`** if the plan introduced new patterns relevant to a skill's domain — add a section with key rules and a reference to the new doc
 
-### AGENTS.md & Instructions Content Policy (CRITICAL)
+### Forbidden Propagation Targets (CRITICAL)
 
-AGENTS.md files and `.agents/instructions/*.md` files MUST contain ONLY:
-1. **Global & Layer-Specific Architectural Rules** — permanent invariants and constraints unique to that layer (e.g., "shared/ must never import from frontend/backend", "all types must live in backend/types/", "pass tx to all repository calls inside runInRollback").
-2. **Library & Runtime Battle-Tested Gotchas** — non-obvious breaking changes and bug-inducing patterns with libraries (e.g. Next.js 16 breaking changes, React 19 FormEvent removal, MUI v9 style props in sx, Emotion RTL stylis plugin crash, Postgres inArray limitation with prepared statements).
-3. **Decisions** — global architectural choices and their rationale (1-2 lines, no code).
-4. **References** — one-line pointers to `docs/` for detailed patterns, code examples, domain guides, and fix recipes.
+AGENTS.md files (root and layer) and `.agents/instructions/*.md` files must **NEVER** be created or updated by any spec/plan workflow task — not by the Knowledge Propagation task, not by any implementation subtask, not by any review/fix wave. This ban is absolute and permanent ("ever never").
 
-AGENTS.md and instructions files MUST NOT contain:
-- **Plan-specific constraints & feature notes** (e.g., entity column lists, temporary migration steps, feature-specific business logic)
-- Implementation details (code examples, fix recipes, step-by-step patterns)
-- Tool usage guides (e.g., SonarQube MCP server docs)
-- Duplicated content from other AGENTS.md files or instructions files
-- Command references (those live in root AGENTS.md "Essential Commands" only)
-- Generic workflow documentation (e.g., quality-gate lifecycle, SonarQube issue management)
+- Learnings propagate ONLY to: canonical docs under `docs/<domain>/<topic>.md`, skill files (`.agents/skills/<skill>/SKILL.md`) when the pattern fits a skill's domain, and plan outcome files (`.ai/plans/<feature>/outcome/`).
+- AGENTS.md and `.agents/instructions/*.md` are **read-only guardrails**: they are read via `sub-loop.ts` auto-discovery and validated against during plan review and implementation — never written.
 
 ### The Feature-Name Litmus Test (MANDATORY before writing any rule)
 

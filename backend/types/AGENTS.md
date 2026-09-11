@@ -46,12 +46,7 @@ export type {Entity}ReturnType = Omit<{Entity}SelectType,
 
 ## Base Interface Pattern (Duplication Elimination)
 
-When multiple entity types share identical fields/methods (e.g., meeting config base, communication base entity), extract a `*Base*` type in a shared types file. See `docs/backend/shared-types-pattern.md` and `docs/frontend/duplication-elimination-patterns.md` Pattern 3 for the extraction process.
-
-Completed extractions:
-- `backend/types/meeting/meeting-config-base.types.ts` — shared shape for class-meeting-config and meeting-config types
-- `backend/types/communication/communication.types.ts` — `BaseEntity`, `BaseRepo<T>`, `DBTx` for complaint/suggestion types
-- `shared/types/pagination.types.ts` — `PaginationInput` consolidated from 3 duplicate definitions
+When multiple entity types share identical fields/methods, extract a `*Base*` type in a shared types file rather than duplicating the shape across per-entity types.
 
 ## Types Location Rules (CRITICAL)
 
@@ -60,34 +55,10 @@ Completed extractions:
 - **`backend/types/**/index.ts` barrels MUST use `./` relative paths and `export * from "./..."`.** No `@/` aliases, no `../` parent traversal, no explicit per-export `export type { ... }`.
 - **`DBTransaction` and `DBQueryExecutor` live in `@/backend/types`** (moved from `@/backend/db/db.types`). All consumers import from `@/backend/types`.
 
-### Completed Migration: Service-Layer `.types.ts` → `backend/types/`
+## Cross-Layer Enums
 
-The following `.types.ts` files were moved from the service layer into `backend/types/`:
-
-| Source (deleted) | Target | Notes |
-|---|---|---|
-| `backend/db/db.types.ts` | `backend/types/db.types.ts` | `DBTransaction`, `DBQueryExecutor` |
-| `backend/services/fx/providers/fixer/fixer.types.ts` | `backend/types/fx/fixer.types.ts` | `FixerLatestResponse` (interface only); `fixerResponseSchema` (Zod) → `fixer.helpers.ts` |
-| `backend/services/fx/providers/openexchangerates/openexchangerates.types.ts` | `backend/types/fx/openexchangerates.types.ts` | `OpenExchangeRatesResponse` |
-| `backend/services/communication/channels/email/resend/resend.types.ts` | `backend/types/communication/resend.types.ts` | `ResendEmailContext`, `ResendSendResponse`, `ResendErrorResponse` |
-| `backend/services/communication/channels/push/fcm/fcm.types.ts` | `backend/types/communication/fcm.types.ts` | Interfaces only; `FCM_*` consts → `fcm.helpers.ts` |
-| `backend/services/communication/channels/sms/twilio/twilio.types.ts` | `backend/types/communication/twilio.types.ts` | `TwilioSmsContext`, `TwilioMessageResponse`, `TwilioRateLimitConfig` |
-| `backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types.ts` | (types already in `backend/types/whatsapp/`) | Runtime helpers → `meta-cloud-api.helpers.ts` |
-| `backend/services/meeting/channels/google-meet/google-meet.types.ts` | `backend/types/meeting/channels/google-meet.types.ts` | Google Meet interfaces |
-| `backend/services/meeting/channels/microsoft-teams/microsoft-teams.types.ts` | `backend/types/meeting/channels/microsoft-teams.types.ts` | Teams interfaces |
-| `backend/services/meeting/channels/zoom/zoom.types.ts` | `backend/types/meeting/channels/zoom.types.ts` | Zoom interfaces |
-
-## Cross-Layer Enum Migration
-
-When an enum exists in both `shared/constants/` (canonical) and `backend/enum/` (duplicate), convert the backend file to a re-export shim. See `docs/i18n/cross-layer-enum-migration.md` for the complete migration workflow.
-
-Completed migrations:
-- `IANATimezone` — `backend/enum/shared/timezone.enum.ts` → re-export from `shared/constants/iana-timezone.enum.ts`
-- `CurrencyCode` — `backend/enum/shared/currency.enum.ts` → re-export from `shared/constants/currency.enum.ts`
-- `ClassInstanceDetail` — `backend/enum/shared/class-instance-detail.enum.ts` → re-export from `shared/constants/class-instance-detail.enum.ts`
-- `ExpenseType` — `backend/enum/expenses/expense-type.enum.ts` → re-export from `shared/constants/expenses/expense-type.enum.ts`
+- When the same enum exists in both `shared/constants/` (canonical) and `backend/enum/` (duplicate), convert the backend file to a re-export shim pointing at the shared constant.
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
+- NEVER use `oxlint-disable` comments; fix the root cause per the project linting documentation.

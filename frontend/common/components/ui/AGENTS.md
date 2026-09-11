@@ -3,15 +3,15 @@
 This document governs the **viewport-agnostic** (shared) UI primitives in `frontend/common/components/ui/`. These primitives are imported by BOTH mobile and desktop tier views — they contain no viewport logic.
 
 For tier-specific primitives, see:
-- [`frontend/mobile/AGENTS.md`](../../mobile/AGENTS.md) — `Mobile*`-prefixed primitives (3 behavioral categories)
+- [`frontend/mobile/AGENTS.md`](../../mobile/AGENTS.md) — `Mobile*`-prefixed primitives
 - [`frontend/desktop/AGENTS.md`](../../desktop/AGENTS.md) — tier-paired `.desktop.*` variants only
 
 ### Form field labels
 
 - **ALWAYS** use MUI Material labels on form inputs: `label` on `TextField` / Autocomplete / date-time `slotProps.textField`, or `FormControl` + `InputLabel` + `Select`.
 - **NEVER** render a separate label above an input (`Box component="label"`, `Typography` field label, or retired `FieldWrapper`-style wrappers).
-- Prefer outlined controls so the label notches into the border (see `TimezoneSelect`).
-- `labelSx` is only for non-input section/stat chrome — not for form fields. See `frontend/COMPONENT_PATTERNS.md` Forms section.
+- Prefer outlined controls so the label notches into the border.
+- `labelSx` is only for non-input section/stat chrome — not for form fields.
 
 ### Component Directory Structure
 
@@ -31,14 +31,6 @@ frontend/common/components/ui/<component-name>/
 - **NEVER** use default exports for components
 - **NEVER** re-export `Mobile*` or `Desktop*`-prefixed primitives from this layer — they belong in `frontend/mobile/components/ui` / `frontend/desktop/components/ui`
 
-### Person / audience Autocomplete (`input/userSelect/`)
-
-- Common owns the Autocomplete **engine** + audience facades + hooks; types/utils live only here.
-- Desktop/mobile **compose** the common facade with locked platform styles — they must **not** re-export common under a new name.
-- Views must import tier components (`TeacherAutocompleteDesktop` / `TeacherAutocompleteMobile`, etc.), never common facades.
-- Speak in **audience** / **permission** terms — never “role” for these pickers.
-- Options cache: `frontend/common/stores/userAutocompleteStore.ts` (no selected value).
-
 ### Mobile vs Desktop Isolation Rules
 
 **ESLint Enforcement:** `eslint.config.mjs` enforces `no-restricted-imports` for:
@@ -52,25 +44,6 @@ frontend/common/components/ui/<component-name>/
 - **NEVER** add viewport branching logic (`if (isMobile) ...`) in versioned files
 - **ONLY** the switcher component (`<ComponentName>View.tsx`, which lives in `frontend/common/views/`) may consume `useViewport()` via `ResponsiveViewSwitch`
 - Mobile and desktop components must be **pure presentation** — zero business logic, zero hooks (except purely local UI state like tooltip/popover open state)
-
-**ESLint Configuration Pattern (already enforced):**
-
-```javascript
-// eslint.config.mjs
-{
-  files: ['frontend/**/*.mobile.tsx', 'frontend/**/*.desktop.tsx'],
-  rules: {
-    'no-restricted-imports': [
-      'error',
-      {
-        patterns: [
-          { group: ['@mui/material/useMediaQuery', '@/frontend/hooks/useMediaQuery', '@/frontend/hooks/useViewport'], message: 'Viewport hooks forbidden in mobile/desktop components. Use the View.tsx switcher instead.' }
-        ]
-      }
-    ]
-  }
-}
-```
 
 ### ViewModel Pattern
 
@@ -88,27 +61,14 @@ frontend/common/components/ui/<component-name>/
 **ViewModel Hook Template:**
 
 ```typescript
-// frontend/common/views/dashboard/dataGrid/useAppDataGridViewModel.ts
-import { useAppDataGridStore } from '@/frontend/common/stores/appDataGridStore';
-import { useQuery } from '@apollo/client/react';
-import { AppDataGridQueryDocument } from '@/frontend/common/graphql/sharedDocuments/appDataGrid.documents';
+// frontend/common/views/dashboard/<domain>/use<ComponentName>ViewModel.ts
+export function use<ComponentName>ViewModel() {
+  const { filters, pagination, setFilters, setPagination } = use<ComponentName>Store();
 
-export function useAppDataGridViewModel() {
-  const { filters, pagination, setFilters, setPagination, openDialog, closeDialog } = useAppDataGridStore();
-  
-  const { data, loading, error, refetch } = useQuery(AppDataGridQueryDocument, {
+  const { data, loading, error, refetch } = useQuery(<ComponentName>QueryDocument, {
     variables: { filters, pagination },
     fetchPolicy: 'cache-and-network',
   });
-
-  const handleFilterChange = (newFilters: FiltersType) => {
-    setFilters(newFilters);
-    setPagination({ ...pagination, page: 1 });
-  };
-
-  const handlePageChange = (page: number, pageSize: number) => {
-    setPagination({ page, pageSize });
-  };
 
   return {
     // Data
@@ -119,12 +79,8 @@ export function useAppDataGridViewModel() {
     // State
     filters,
     pagination,
-    dialogOpen: openDialog,
     // Handlers
-    onFilterChange: handleFilterChange,
-    onPageChange: handlePageChange,
-    onOpenDialog: openDialog,
-    onCloseDialog: closeDialog,
+    onFilterChange: setFilters,
     onRefresh: refetch,
   };
 }
@@ -132,21 +88,21 @@ export function useAppDataGridViewModel() {
 
 **Switcher Component Template (lazy loading via ResponsiveViewSwitch):**
 
-The switcher lives in `frontend/common/views/dashboard/<domain>/` (post-Block-2 relocation). It dynamically imports mobile and desktop tier views:
+The switcher lives in `frontend/common/views/dashboard/<domain>/`. It dynamically imports mobile and desktop tier views:
 
 ```tsx
-// frontend/common/views/dashboard/dataGrid/AppDataGridView.tsx
+// frontend/common/views/dashboard/<domain>/<ComponentName>View.tsx
 import { createLazyView, ResponsiveViewSwitch } from '@/frontend/common/components/ui/container/ResponsiveViewSwitch';
-import { type AppDataGridViewModel, useAppDataGridViewModel } from './useAppDataGridViewModel';
+import { type <ComponentName>ViewModel, use<ComponentName>ViewModel } from './use<ComponentName>ViewModel';
 
 // createLazyView MUST be at module top level (required by next/dynamic).
-const lazyViews = createLazyView<AppDataGridViewModel>(
-  () => import("@/frontend/mobile/views/dashboard/dataGrid/AppDataGrid.mobile").then(m => ({ default: m.AppDataGridMobileView })),
-  () => import("@/frontend/desktop/views/dashboard/dataGrid/AppDataGrid.desktop").then(m => ({ default: m.AppDataGridDesktopView })),
+const lazyViews = createLazyView<<ComponentName>ViewModel>(
+  () => import("@/frontend/mobile/views/dashboard/<domain>/<ComponentName>.mobile").then(m => ({ default: m.<ComponentName>MobileView })),
+  () => import("@/frontend/desktop/views/dashboard/<domain>/<ComponentName>.desktop").then(m => ({ default: m.<ComponentName>DesktopView })),
 );
 
-export function AppDataGridView() {
-  const viewModel = useAppDataGridViewModel();
+export function <ComponentName>View() {
+  const viewModel = use<ComponentName>ViewModel();
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 ```
@@ -172,9 +128,7 @@ export function AppDataGridView() {
 
 Shared components (no suffix) are for truly viewport-agnostic UI primitives that render identically on mobile and desktop. Both tiers import them from `@/frontend/common/components/ui`.
 
-**Examples:** `AppDataGrid`, `PageHeader`, `SectionPanel`, `StatusBadge`, `BaseCard`, `PageContainer`, `ActionIconLink`, `PersonProfileLink`, `PaginationControls`.
-
-**Metric cards:** Common `MetricCard` / `MetricCardGrid` exist as shared/grid primitives, but **views must not import the card**. Mobile views use only `MobileMetricCardGrid`; desktop views use only `DesktopMetricCardGrid` (including single-metric cases). Cards are internal to the grid (+ Storybook).
+When a parent switcher in this layer needs both tier halves, it lazy-imports them via dynamic `import()` — such files are NOT `.mobile.tsx`/`.desktop.tsx`, so the ESLint cross-tier rule does not fire on them.
 
 **Rules:**
 - **ONLY** create a non-suffixed component in `common` when it has **zero** viewport-dependent rendering
@@ -183,20 +137,11 @@ Shared components (no suffix) are for truly viewport-agnostic UI primitives that
 - Export from `index.ts` using named exports
 - The ONLY component in this layer that imports `useViewport()` is `ResponsiveViewSwitch` (the infrastructure switcher)
 
-### Tier-paired parent switchers (in this layer)
-
-Three un-suffixed parent switchers in `frontend/common/components/ui/` lazy-import BOTH tier halves via dynamic `import()`:
-- `filter/DateNavigator.tsx` — imports `dateNavigator.mobile.tsx` + `dateNavigator.desktop.tsx`
-- `input/localizedString/LocaleAdornmentSwitch.tsx` — imports `localeAdornmentSwitch.mobile.tsx` + `localeAdornmentSwitch.desktop.tsx`
-- `input/localizedString/LocalizedStringDrawer.tsx` — imports `localizedStringDrawer.mobile.tsx` + `localizedStringDrawer.desktop.tsx`
-
-These files are NOT `.mobile.tsx`/`.desktop.tsx`; their cross-tier dynamic `import()` is allowed (ESLint cross-tier rule only fires on tier-versioned files).
-
 ### MUI v9 Compliance
 
 **MANDATORY:** Follow all MUI v9 breaking changes documented in `frontend/AGENTS.md` and `.agents/instructions/frontend.instructions.md`.
 
-**Key Rules (repeated for emphasis):**
+**Key Rules:**
 - **NEVER** use style props directly on MUI components (`fontWeight`, `textAlign`, `mb`, `mt`, `p`, `display`, `gap`, `alignItems`, `justifyContent`, `flexWrap`, `component`, etc.)
 - **ALWAYS** use `sx` prop: `<Typography sx={{ fontWeight: 700, mb: 1 }}>`
 - **ALWAYS** use theme callback for palette access: `sx={(theme) => ({ color: theme.palette.primary.main })}`
@@ -204,17 +149,9 @@ These files are NOT `.mobile.tsx`/`.desktop.tsx`; their cross-tier dynamic `impo
 - **NEVER** use `*Outline` icon names — use `*Outlined` (e.g., `ErrorOutlined`, `CheckCircleOutlined`)
 - **NEVER** use `FormEvent` — use `React.SubmitEvent` or `React.SyntheticEvent<HTMLFormElement>`
 - **ALWAYS** cast FormData: `(formData.get('name') as string | null) ?? ''`
-
-**Typography Variants:** Use theme variants (`headlineLg`, `titleLg`, `labelUppercase`, `bodyMd`) — avoid hardcoded font `sx`.
-
-**See Also:**
-- `frontend/AGENTS.md` — MUI Breaking Changes section
-- `frontend/THEME_PALETTE.md` — Color tokens and access patterns
-- `frontend/COMPONENT_PATTERNS.md` — Dashboard UI patterns
+- Use theme typography variants (`headlineLg`, `titleLg`, `labelUppercase`, `bodyMd`) — avoid hardcoded font `sx`.
 
 ### Testing
-
-**MANDATORY:** Follow all test rules in `.agents/instructions/tests.instructions.md` and `tests.instructions.md`.
 
 **UI Component Test Rules:**
 - **ALWAYS** write component tests in `test/ui/components/` mirroring the component structure
@@ -227,28 +164,23 @@ These files are NOT `.mobile.tsx`/`.desktop.tsx`; their cross-tier dynamic `impo
 **Test Structure:**
 ```
 test/ui/components/
-├── dataGrid/
-│   ├── AppDataGrid.mobile.test.tsx
-│   ├── AppDataGrid.desktop.test.tsx
-│   ├── AppDataGridView.test.tsx
-│   └── useAppDataGridViewModel.test.ts
+├── <domain>/
+│   ├── <Component>.mobile.test.tsx
+│   ├── <Component>.desktop.test.tsx
+│   ├── <Component>View.test.tsx
+│   └── use<Component>ViewModel.test.ts
 ```
 
 ### Cross-References
 
 - **Frontend Root Rules:** `frontend/AGENTS.md` — MUI v9, React 19, logging, quality gate, theming
 - **Views Layer Rules:** `frontend/views/AGENTS.md` — ViewModel pattern, domain structure, Storybook
-- **Common Views (switcher home):** `frontend/common/views/AGENTS.md` — switcher/Container/ViewModel relocation home
+- **Common Views (switcher home):** `frontend/common/views/AGENTS.md` — switcher/ViewModel home
 - **Stores Layer Rules:** `frontend/common/stores/AGENTS.md` — Zustand patterns, persistence, serialization
-- **Mobile Module:** `frontend/mobile/AGENTS.md` — Mobile* primitives (3 behavioral categories)
+- **Mobile Module:** `frontend/mobile/AGENTS.md` — Mobile* primitives
 - **Desktop Module:** `frontend/desktop/AGENTS.md` — tier-paired `.desktop.*` variants
-- **Test Rules:** `tests.instructions.md` — runInRollback, tx propagation, entity setup, coverage
+- **Test Rules:** `.agents/instructions/tests.instructions.md`
 - **Mobile/Desktop Instructions:** `.agents/instructions/mobile-desktop.instructions.md` — detailed mobile/desktop pattern
-- **Theme Palette:** `frontend/THEME_PALETTE.md` — color tokens and access patterns
-- **Component Patterns:** `frontend/COMPONENT_PATTERNS.md` — dashboard UI patterns
-- **Implementation Learnings:** `frontend/IMPLEMENTATION_LEARNINGS.md` — error resolutions
-- **New Page Workflow:** `frontend/NEW_PAGE_WORKFLOW.md` — required workflow for new pages
-- **Code Review Checklist:** `.github/CODE_REVIEW_CHECKLIST.md` — review guidelines
 
 ### Quick Reference: Do's and Don'ts
 
@@ -269,15 +201,13 @@ test/ui/components/
 
 ## Duplication Elimination — Shared Scaffold Pattern
 
-When a UI component exists in common/desktop/mobile tiers with similar logic, extract a `*Shared.tsx` scaffold with slot props. See `docs/frontend/ui-shared-scaffold-pattern.md` for the complete pattern reference.
+When a UI component exists in common/desktop/mobile tiers with similar logic, extract a `*Shared.tsx` scaffold with slot props.
 
 Key rules:
 - Scaffold file: `<ComponentName>Shared.tsx` in `common/components/ui/<category>/`
 - All styling via MUI v9 `sx` prop (NEVER direct style props)
 - Tier variants import ONLY the shared scaffold from `common/` (no cross-tier imports)
-- See `docs/frontend/duplication-elimination-patterns.md` for deletion and consolidation patterns
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
-
+- **NEVER** use `oxlint-disable` comments — fix the root cause.

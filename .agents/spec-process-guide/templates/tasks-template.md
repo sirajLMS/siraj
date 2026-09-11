@@ -415,12 +415,9 @@ Use this template to create actionable implementation plans that break down your
     - If no matching subdirectory exists, create one: `mkdir -p docs/<domain>/`
     - File naming: `kebab-case.md` (e.g., `prepared-statements.md`, `dataloader-batching.md`)
     - Follow the docs file structure: Why → Pattern → Rules → Anti-patterns → Rollout Summary → Related Documents
-  - Update layer AGENTS.md files with new rules/patterns discovered during implementation
-    - Add rules inline with a reference to the new doc: `See docs/<domain>/<topic>.md for the complete pattern reference.`
   - Update `.agents/skills/<skill>/SKILL.md` if new patterns affect the skill's domain
     - Add a domain-specific section with key rules and a reference to the new doc
-  - Update `.agents/instructions/<layer>.instructions.md` if new conventions should be enforced by instruction files
-  - Update root `AGENTS.md` Important References section with the new doc
+  - **NEVER create or update `AGENTS.md` files or `.agents/instructions/*.md` files** — knowledge propagation targets are ONLY canonical docs under `docs/` and skill files. `AGENTS.md` and `.agents/instructions` are read-only guardrails (used by sub-loop.ts discovery and plan-review validation), never write targets.
   - Run global check: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file (exit code 0)
   - Write outcome file: `.ai/plans/<feature-name>/outcome/10-knowledge-propagation-outcome.md`
   - Update progress: Mark task 10 as `[x]` in `trackable-tasks.md`
@@ -428,28 +425,28 @@ Use this template to create actionable implementation plans that break down your
 
 ### Domain-to-Artifacts Mapping (Reference for Knowledge Propagation)
 
-Use this table to determine which docs subdir, AGENTS.md files, skills, and instructions to update:
+Use this table to determine which docs subdir and skills to update. AGENTS.md and .agents/instructions are NEVER updated by spec/plan workflows — they are read-only guardrails.
 
-| Plan Domain | Docs Subdir | AGENTS.md to Update | Skills to Update | Instructions to Update |
-|---|---|---|---|---|
-| Drizzle / DB patterns | `docs/drizzle/` | `backend/db/repo/AGENTS.md`, `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/drizzle/SKILL.md` | `.agents/instructions/backend.instructions.md` |
-| DB migrations | `docs/drizzle/` | `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/drizzle-migrations/SKILL.md`, `.agents/skills/drizzle-generate/SKILL.md` | `.agents/instructions/backend.instructions.md` |
-| GraphQL / Pothos | `docs/graphql/` | `backend/graphql/AGENTS.md`, `backend/graphql/pothos/AGENTS.md`, `frontend/common/graphql/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
-| Backend services | `docs/services/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
-| Backend types / enums | `docs/backend/` | `backend/types/AGENTS.md`, `backend/enum/AGENTS.md`, `backend/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
-| Frontend components / views | `docs/frontend/` | `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/components/ui/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `.agents/instructions/frontend.instructions.md` |
-| Frontend mobile/desktop | `docs/frontend/` | `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md` | `.agents/skills/refactor-mobile-desktop/SKILL.md` | `.agents/instructions/mobile-desktop.instructions.md` |
-| Frontend stores / state | `docs/frontend/` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `.agents/instructions/frontend.instructions.md` |
-| Frontend GraphQL / Apollo | `docs/frontend/` | `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
-| Testing (DB) | `docs/testing/` | `backend/db/test/AGENTS.md`, `backend/db/test/logic/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-db-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| Testing (UI / E2E) | `docs/testing/` | `test/ui/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| Testing (general) | `docs/testing/` | `scripts/run-test/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| i18n / locale | `docs/i18n/` | `shared/AGENTS.md` | — | — |
-| Auth / security | `docs/auth/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/idor-testing/SKILL.md`, `.agents/skills/pentester/SKILL.md`, `.agents/skills/backend-security-review/SKILL.md`, `.agents/skills/security-and-hardening/SKILL.md` | `.agents/instructions/backend.instructions.md` |
-| App Router / Next.js | `docs/app/` | `app/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
-| Quality gates / CI | `docs/quality/` | `AGENTS.md` (root) | `.agents/skills/quality-gate/SKILL.md`, `.agents/skills/quality-loop/SKILL.md` | — |
-| Idempotency | `docs/` (top-level) | `backend/services/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
-| Bun / runtime | `docs/bun/` | `AGENTS.md` (root) | — | — |
+| Plan Domain | Docs Subdir | Skills to Update |
+|---|---|---|
+| Drizzle / DB patterns | `docs/drizzle/` | `.agents/skills/drizzle/SKILL.md` |
+| DB migrations | `docs/drizzle/` | `.agents/skills/drizzle-migrations/SKILL.md`, `.agents/skills/drizzle-generate/SKILL.md` |
+| GraphQL / Pothos | `docs/graphql/` | — |
+| Backend services | `docs/services/` | — |
+| Backend types / enums | `docs/backend/` | — |
+| Frontend components / views | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
+| Frontend mobile/desktop | `docs/frontend/` | `.agents/skills/refactor-mobile-desktop/SKILL.md` |
+| Frontend stores / state | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
+| Frontend GraphQL / Apollo | `docs/frontend/` | — |
+| Testing (DB) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-db-tests/SKILL.md` |
+| Testing (UI / E2E) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
+| Testing (general) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
+| i18n / locale | `docs/i18n/` | — |
+| Auth / security | `docs/auth/` | `.agents/skills/idor-testing/SKILL.md`, `.agents/skills/pentester/SKILL.md`, `.agents/skills/backend-security-review/SKILL.md`, `.agents/skills/security-and-hardening/SKILL.md` |
+| App Router / Next.js | `docs/app/` | — |
+| Quality gates / CI | `docs/quality/` | `.agents/skills/quality-gate/SKILL.md`, `.agents/skills/quality-loop/SKILL.md` |
+| Idempotency | `docs/` (top-level) | — |
+| Bun / runtime | `docs/bun/` | — |
 
 ---
 

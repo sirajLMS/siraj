@@ -7,12 +7,10 @@
     - `sx={(theme) => ({ color: theme.palette.primary.main })}`
 - **Universal Contrast**: Use Material 3 `on<Color>` siblings instead of `contrastText` (e.g., `theme.palette.onPrimary`).
 - **NO DELETION**: Never delete existing theme values like `boxShadow`. Map them to `theme.palette.shadow.card`.
-- Refer to **THEME_PALETTE.md** for all color tokens and access patterns.
-- **Emotion RTL**: Never pass stylis’s `prefixer` into RTL Emotion caches (`stylisPlugins: [rtlPlugin]` only). See `docs/frontend/emotion-rtl-stylis.md`.
+- **Emotion RTL**: Never pass stylis’s `prefixer` into RTL Emotion caches (`stylisPlugins: [rtlPlugin]` only) — the prefixer crashes on `::placeholder` selectors.
 
 ## Code Style Rules
 
-- **Review [IMPLEMENTATION_LEARNINGS.md](IMPLEMENTATION_LEARNINGS.md)** for detailed error resolutions to prevent repeating previous mistakes.
 - **No nested ternary operators** - SonarJS will flag them as code smells
 - Extract nested ternaries into if/else statements or separate functions
 - **Clean Comments & JSDoc Standards (CRITICAL)**:
@@ -49,10 +47,6 @@
 - **ListItemText primary slot fontWeight**: Use `slotProps` or wrap content instead of passing `fontWeight` directly in `primaryTypographyProps`.
 
 ## Dashboard UI Patterns
-
-**Read [COMPONENT_PATTERNS.md](COMPONENT_PATTERNS.md) before building or refactoring dashboard pages.**
-**Use [.github/CODE_REVIEW_CHECKLIST.md](.github/CODE_REVIEW_CHECKLIST.md) when reviewing code.**
-**See `docs/frontend/meeting-integrations-ui.md` for the canonical reference on meeting integration UI patterns (MetricCardGrid, AppDataGrid, OAuth callback, reconnect-all, status badges, clipboard, i18n, mobile-desktop, Zod factory, animations, permissions).**
 
 - **Layout (desktop):** Use `PageContainer` inside views — never add outer `p: 2/3` (double-padding with `DashboardLayout.pageMargin`).
 - **Layout (mobile):** `DashboardLayoutMobile` is edge-to-edge (`px: 0`). Do **not** put horizontal padding on `MobilePageContainer` / `MobileContentStack`. Content owns inset via `mobileContentGutterSx`, `MobileContentInset`, `MobilePageHeader`, scroll rows, and section panels — see `frontend/mobile/AGENTS.md`.
@@ -92,7 +86,6 @@
   ```
 - **ESLint enforcement**: `no-restricted-imports` rules block cross-imports and `useMediaQuery` usage in versioned files (see `eslint.config.mjs`).
 - **Existing patterns**: See `frontend/views/AGENTS.md` for ViewModel conventions and `frontend/common/stores/AGENTS.md` for serialization rules.
-- **Cross-reference**: See `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `.agents/instructions/mobile-desktop.instructions.md`.
 
 ### Duplication Elimination via Scaffold Extraction
 
@@ -100,18 +93,7 @@ When eliminating desktop↔mobile code duplication, use the `*Shared.tsx` / `__s
 - Create shared component in `frontend/common/components/ui/__shared__/*Shared.tsx` with `SharedOptions` interface
 - Create options file `*Shared.options.ts` with `DESKTOP_OPTIONS` and `MOBILE_OPTIONS`
 - Desktop/mobile files become thin wrappers (1-5 lines) importing the scaffold + options
-- See `docs/frontend/ui-shared-scaffold-pattern.md` for the full pattern
-- See `docs/frontend/duplication-elimination-patterns.md` for all Patterns A-G
 - NEVER use `jscpd:ignore` — fix the root cause instead
-
-## Important References
-
-- `docs/frontend/meeting-integrations-ui.md` - Meeting integration UI patterns canonical reference
-- `docs/frontend/whatsapp-ui-patterns.md` - WhatsApp UI patterns canonical reference
-- `docs/frontend/quota-ui-patterns.md` - Quota UI patterns canonical reference
-- `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern
-- `docs/frontend/duplication-elimination-patterns.md` - Duplication elimination patterns
-- `docs/frontend/emotion-rtl-stylis.md` - Emotion RTL stylis cache rules
 
 ### New MUI v9 Patterns
 
@@ -137,10 +119,10 @@ When eliminating desktop↔mobile code duplication, use the `*Shared.tsx` / `__s
 
 ## Performance & Serverless Optimization
 
-- **Client logger `batchInterval`** MUST be at least 30s in production; `beforeunload` flush is required (uses `fetch` with `keepalive: true`, NOT `navigator.sendBeacon`); error/warn logs MUST bypass min-batch-size guard via `hasPriorityLog` flag
-- **`RequirePermission`** MUST NOT log DEBUG messages by default — gate behind `process.env.NEXT_PUBLIC_DEBUG_PERMISSIONS === "true"`
-- **Poll interval optimization**: `NOTIFICATION_COUNT_POLL_INTERVAL_MS` is 120s (not 60s); `useIdleDetection` pauses polling after 5 min idle; `visibilitychange` pauses when tab hidden
+- **Client logger `batchInterval`** MUST be at least 30s in production; `beforeunload` flush is required (uses `fetch` with `keepalive: true`, NOT `navigator.sendBeacon`); error/warn logs MUST bypass min-batch-size guard via `hasPriorityLog` flag.
+- **`RequirePermission`** MUST NOT log DEBUG messages by default — gate behind `process.env.NEXT_PUBLIC_DEBUG_PERMISSIONS === "true"`.
+- **Client-side polling** MUST idle-pause after sustained inactivity and pause when the tab is hidden (`visibilitychange`).
 
 ## Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
+- NEVER use `oxlint-disable` comments — fix the root cause.

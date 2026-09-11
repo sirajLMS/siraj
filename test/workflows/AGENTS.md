@@ -1,17 +1,14 @@
 # Workflow / Journey Test Layer Rules
 
 This directory contains **cross-actor journey tests**: sequential, multi-actor workflows executed
-through the real service layer against the real test database. Canonical reference:
-`docs/testing/workflow-journey-tests.md`.
+through the real service layer against the real test database.
 
 ## Hard rules
 
 1. **NO `runInRollback` — ever.** Services use the global `db` and spawn their own top-level
    transactions; an outer rollback wrapper would deadlock or miss committed rows. This layer is
-   the documented exception to the db/test rollback rule. Precedents:
-   `backend/db/test/logic/lms/accounting-payment-workflow.test.ts` (~lines 40–44, committed
-   `beforeAll` fixtures + `afterAll` hard delete) and
-   `backend/db/test/logic/permissions/permission-management.service.test.ts` (~lines 120–124).
+   the documented exception to the db/test rollback rule: use committed `beforeAll` fixtures
+   plus `afterAll` hard delete.
 2. **Committed fixtures + tracked cleanup.** Create the full actor cast in `beforeAll` inside a
    committing `db.transaction(...)`. Track every created row id (including side-effect rows the
    services create: lesson reports, teacher dues, credit transactions, idempotency-keyed rows) and
