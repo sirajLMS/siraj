@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { readCookie } from "@/app/global-error.helpers";
 import { DATABASE_UNAVAILABLE_DIGEST } from "@/shared/constants";
 
 /**
@@ -54,13 +55,6 @@ const GLOBAL_ERROR_STRINGS: Record<"en" | "ar", GlobalErrorStrings> = {
     },
   },
 };
-
-function readCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = new RegExp(`(?:^|; )${name}=([^;]*)`).exec(document.cookie);
-  if (!match) return null;
-  return decodeURIComponent(match[1] ?? "");
-}
 
 function resolveLocale(): "en" | "ar" {
   return readCookie("NEXT_LOCALE") === "ar" ? "ar" : "en";
