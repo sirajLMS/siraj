@@ -95,22 +95,22 @@ function createNeonPool(): Pool {
   return applyFailFastResilience(pool);
 }
 
-const createNeonDb = () => {
+const createNeonDb = (existingPool?: Pool | null) => {
   logger.info("Initializing Neon serverless Pool connection");
-  const pool = createNeonPool();
+  const pool = existingPool ?? createNeonPool();
   const db = drizzleNeon({ client: pool, relations });
   return db;
 };
 
 export type NeonDbType = ReturnType<typeof createNeonDb>;
 
-const createPostgresDb = () => {
+const createPostgresDb = (existingPool?: PgPool | null) => {
   logger.info(
     isVercelRuntime()
       ? "Initializing Vercel Fluid compute PostgreSQL connection pool"
       : "Initializing PostgreSQL connection pool"
   );
-  const pool = createPgPool();
+  const pool = existingPool ?? createPgPool();
   const db = drizzlePostgres({ client: pool, relations });
   return db;
 };
@@ -127,7 +127,7 @@ function logConnectionStrategy(strategy: DbConnectionStrategy): void {
   logger.info(`Creating database connection (strategy: ${strategy}, mode: ${mode}, provider: ${provider})`);
 }
 
-export function createDatabase(): NeonDbType | PostgresDbType {
+export function createDatabase(pool?: PgPool | Pool | null): NeonDbType | PostgresDbType {
   // SQLite (libsql) path — resolved BEFORE the Postgres env checks so a
   // SQLite-only deployment does not need a valid Postgres DATABASE_URL.
   //
@@ -155,9 +155,9 @@ export function createDatabase(): NeonDbType | PostgresDbType {
   logConnectionStrategy(strategy);
 
   if (strategy === "neon-serverless") {
-    return createNeonDb();
+    return createNeonDb(pool instanceof Pool ? pool : null);
   }
-  return createPostgresDb();
+  return createPostgresDb(pool instanceof PgPool ? pool : null);
 }
 
 export function createPool(): PgPool | Pool | null {

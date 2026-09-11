@@ -52,8 +52,8 @@ import {
   makeRecipientRow,
   NON_REGISTRY_PHONE,
   PENDING_PHONE,
-  recipientsMock,
   REGULAR_ACCOUNT_ID,
+  recipientsMock,
   TEST_ACCOUNT_ID,
   threadMock,
   workspaceMocks,
@@ -323,144 +323,132 @@ describe("WhatsappConversationsContainer — mocked Apollo workspace", () => {
     expect(screen.queryByText(errorLabels.whatsappConversationSendFailed)).toBeNull();
   });
 
+  interface InitiationTestConfig {
+    accountId: string;
+    isTestNumber?: boolean;
+    to: string;
+    initiatedConversation: ReturnType<typeof makeConversationRow>;
+    sendResultId: string;
+    extraMocks?: MockLink.MockedResponse[];
+    selectRecipient: () => Promise<void> | void;
+    expectedRegionName: string;
+  }
+
+  function buildInitiationMocks(config: InitiationTestConfig): MockLink.MockedResponse[] {
+    const seededConversation = makeConversationRow(CONVERSATION_ID, config.accountId);
+    const sentMessage = makeMessageRow(config.sendResultId, new Date().toISOString(), {
+      conversationId: INITIATED_CONVERSATION_ID,
+      accountId: config.accountId,
+      direction: WhatsappMessageDirection.ApiOutbound,
+      content: "[template] hello_world",
+    });
+    return [
+      accountsMock([makeAccountRow(config.accountId, config.isTestNumber ? { isTestNumber: true } : undefined)]),
+      conversationListPageMock(null, 0, [seededConversation], 1),
+      conversationListPageMock(config.accountId, 0, [seededConversation], 1),
+      conversationListPageMock(config.accountId, 0, [seededConversation, config.initiatedConversation], 2),
+      threadMock(config.initiatedConversation, []),
+      ...(config.extraMocks ?? []),
+      {
+        request: {
+          query: sendWhatsappConversationMessageMutationDocument,
+          variables: {
+            input: {
+              accountId: config.accountId,
+              conversationId: null,
+              to: config.to,
+              mode: WhatsappConversationSendMode.Template,
+              templateName: "hello_world",
+              templateLanguage: null,
+              body: null,
+            },
+          },
+        },
+        result: {
+          data: {
+            sendWhatsappConversationMessage: {
+              __typename: "WhatsappConversationSendResult",
+              id: config.sendResultId,
+              message: { __typename: "WhatsappMessage", ...sentMessage },
+            },
+          },
+        },
+      },
+    ];
+  }
+
+  async function submitInitiatedTemplateConversation(config: InitiationTestConfig) {
+    renderWorkspace(buildInitiationMocks(config), MANAGE_PERMISSIONS);
+
+    if (config.isTestNumber) {
+      await screen.findByText(labels.recipientsTitle);
+    } else {
+      await screen.findByRole("button", { name: new RegExp(CONTACT_NAME) });
+    }
+
+    fireEvent.click(await screen.findByRole("button", { name: labels.newConversation }));
+
+    if (config.isTestNumber) {
+      expect(await screen.findByText(labels.newConversationTitle)).toBeVisible();
+      expect(screen.getByRole("button", { name: labels.composerModeText })).toBeDisabled();
+    }
+    expect(await screen.findByText(labels.newConversationSubtitle)).toBeVisible();
+
+    await config.selectRecipient();
+
+    fireEvent.change(screen.getByPlaceholderText(labels.templateNamePlaceholder), {
+      target: { value: ["hello", "world"].join("_") },
+    });
+
+    const sendButton = screen.getByRole("button", { name: labels.sendButton });
+    await waitFor(() => expect(sendButton).toBeEnabled());
+    fireEvent.click(sendButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole("region", { name: config.expectedRegionName })).toBeVisible();
+    });
+  }
+
   test("start new conversation: registry target, template-locked, selects the new thread after send", async () => {
-    const seededConversation = makeConversationRow(CONVERSATION_ID, TEST_ACCOUNT_ID);
     const initiatedConversation = makeConversationRow(INITIATED_CONVERSATION_ID, TEST_ACCOUNT_ID, {
       waId: PENDING_PHONE,
       displayName: INITIATED_CONTACT,
     });
     const recipients = [makeRecipientRow("rcp-1", WhatsappTestRecipientStatus.Pending)];
-    const sentMessage = makeMessageRow("msg-init-1", new Date().toISOString(), {
-      conversationId: INITIATED_CONVERSATION_ID,
+
+    await submitInitiatedTemplateConversation({
       accountId: TEST_ACCOUNT_ID,
-      direction: WhatsappMessageDirection.ApiOutbound,
-      content: "[template] hello_world",
-    });
-    renderWorkspace(
-      [
-        accountsMock([makeAccountRow(TEST_ACCOUNT_ID, { isTestNumber: true })]),
-        conversationListPageMock(null, 0, [seededConversation], 1),
-        conversationListPageMock(TEST_ACCOUNT_ID, 0, [seededConversation], 1),
-        conversationListPageMock(TEST_ACCOUNT_ID, 0, [seededConversation, initiatedConversation], 2),
-        threadMock(initiatedConversation, []),
-        recipientsMock(recipients),
-        {
-          request: {
-            query: sendWhatsappConversationMessageMutationDocument,
-            variables: {
-              input: {
-                accountId: TEST_ACCOUNT_ID,
-                conversationId: null,
-                to: PENDING_PHONE,
-                mode: WhatsappConversationSendMode.Template,
-                templateName: "hello_world",
-                templateLanguage: null,
-                body: null,
-              },
-            },
-          },
-          result: {
-            data: {
-              sendWhatsappConversationMessage: {
-                __typename: "WhatsappConversationSendResult",
-                id: "send-init-1",
-                message: { __typename: "WhatsappMessage", ...sentMessage },
-              },
-            },
-          },
-        },
-      ],
-      MANAGE_PERMISSIONS
-    );
-
-    await screen.findByText(labels.recipientsTitle);
-    fireEvent.click(await screen.findByRole("button", { name: labels.newConversation }));
-
-    expect(await screen.findByText(labels.newConversationTitle)).toBeVisible();
-    expect(screen.getByText(labels.newConversationSubtitle)).toBeVisible();
-    expect(screen.getByRole("button", { name: labels.composerModeText })).toBeDisabled();
-
-    fireEvent.mouseDown(screen.getByRole("combobox", { name: labels.composerRecipientLabel }));
-    fireEvent.click(await screen.findByRole("option", { name: PENDING_PHONE }));
-    fireEvent.change(screen.getByPlaceholderText(labels.templateNamePlaceholder), {
-      target: { value: ["hello", "world"].join("_") },
-    });
-
-    const sendButton = screen.getByRole("button", { name: labels.sendButton });
-    await waitFor(() => expect(sendButton).toBeEnabled());
-    fireEvent.click(sendButton);
-
-    await waitFor(() => {
-      expect(screen.getByRole("region", { name: INITIATED_CONTACT })).toBeVisible();
+      isTestNumber: true,
+      to: PENDING_PHONE,
+      initiatedConversation,
+      sendResultId: "send-init-1",
+      extraMocks: [recipientsMock(recipients)],
+      selectRecipient: async () => {
+        fireEvent.mouseDown(screen.getByRole("combobox", { name: labels.composerRecipientLabel }));
+        fireEvent.click(await screen.findByRole("option", { name: PENDING_PHONE }));
+      },
+      expectedRegionName: INITIATED_CONTACT,
     });
   });
 
   test("regular account: initiation targets a typed phone via the phone input", async () => {
-    const seededConversation = makeConversationRow(CONVERSATION_ID, REGULAR_ACCOUNT_ID);
     const initiatedConversation = makeConversationRow(INITIATED_CONVERSATION_ID, REGULAR_ACCOUNT_ID, {
       waId: NEW_RECIPIENT_DIGITS,
       displayName: null,
       username: null,
     });
-    const sentMessage = makeMessageRow("msg-init-2", new Date().toISOString(), {
-      conversationId: INITIATED_CONVERSATION_ID,
+
+    await submitInitiatedTemplateConversation({
       accountId: REGULAR_ACCOUNT_ID,
-      direction: WhatsappMessageDirection.ApiOutbound,
-      content: "[template] hello_world",
-    });
-    renderWorkspace(
-      [
-        accountsMock([makeAccountRow(REGULAR_ACCOUNT_ID)]),
-        conversationListPageMock(null, 0, [seededConversation], 1),
-        conversationListPageMock(REGULAR_ACCOUNT_ID, 0, [seededConversation], 1),
-        conversationListPageMock(REGULAR_ACCOUNT_ID, 0, [seededConversation, initiatedConversation], 2),
-        threadMock(initiatedConversation, []),
-        {
-          request: {
-            query: sendWhatsappConversationMessageMutationDocument,
-            variables: {
-              input: {
-                accountId: REGULAR_ACCOUNT_ID,
-                conversationId: null,
-                to: NEW_RECIPIENT_DIGITS,
-                mode: WhatsappConversationSendMode.Template,
-                templateName: "hello_world",
-                templateLanguage: null,
-                body: null,
-              },
-            },
-          },
-          result: {
-            data: {
-              sendWhatsappConversationMessage: {
-                __typename: "WhatsappConversationSendResult",
-                id: "send-init-2",
-                message: { __typename: "WhatsappMessage", ...sentMessage },
-              },
-            },
-          },
-        },
-      ],
-      MANAGE_PERMISSIONS
-    );
-
-    await screen.findByRole("button", { name: new RegExp(CONTACT_NAME) });
-    fireEvent.click(screen.getByRole("button", { name: labels.newConversation }));
-
-    expect(await screen.findByText(labels.newConversationSubtitle)).toBeVisible();
-    fireEvent.input(screen.getByPlaceholderText(labels.composerRecipientPlaceholder), {
-      target: { value: NEW_RECIPIENT_E164 },
-    });
-    fireEvent.change(screen.getByPlaceholderText(labels.templateNamePlaceholder), {
-      target: { value: ["hello", "world"].join("_") },
-    });
-
-    const sendButton = screen.getByRole("button", { name: labels.sendButton });
-    await waitFor(() => expect(sendButton).toBeEnabled());
-    fireEvent.click(sendButton);
-
-    await waitFor(() => {
-      expect(screen.getByRole("region", { name: NEW_RECIPIENT_DIGITS })).toBeVisible();
+      to: NEW_RECIPIENT_DIGITS,
+      initiatedConversation,
+      sendResultId: "send-init-2",
+      selectRecipient: () => {
+        fireEvent.input(screen.getByPlaceholderText(labels.composerRecipientPlaceholder), {
+          target: { value: NEW_RECIPIENT_E164 },
+        });
+      },
+      expectedRegionName: NEW_RECIPIENT_DIGITS,
     });
   });
 });

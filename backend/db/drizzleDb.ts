@@ -50,7 +50,7 @@ function initDatabase() {
   logger.debug(`   DB_PROVIDER=${provider}`);
   logger.debug(`   DB_STRATEGY=${strategy}`);
 
-  return createDatabase();
+  return createDatabase(getDrizzleDbPool());
 }
 
 export const db = getGlobalSingleton(DB_KEY, initDatabase);

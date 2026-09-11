@@ -82,13 +82,18 @@ function assertIsErrorsLabels(value: unknown): asserts value is ErrorsLabels {
   }
 }
 
-const tErrorsStub = {
-  insufficientPermissions: "Insufficient permissions",
-  billing: {
-    parentNotFound: "Parent not found",
-  },
-};
-assertIsErrorsLabels(tErrorsStub);
+function createErrorsStub(): ErrorsLabels {
+  const stub: unknown = {
+    insufficientPermissions: "Insufficient permissions",
+    billing: {
+      parentNotFound: "Parent not found",
+    },
+  };
+  assertIsErrorsLabels(stub);
+  return stub;
+}
+
+const tErrorsStub = createErrorsStub();
 
 async function importService() {
   return import("@/backend/services/billing/billing-history.service");
@@ -114,24 +119,57 @@ describe("BillingHistoryService IDOR protection", () => {
     getUserContextMock.mockClear();
   });
 
+  async function verifyParentInvoiceHistory(options: {
+    actorUserId: string;
+    targetParentId: string | null;
+    targetUserId: string;
+    expectedParentId: string;
+  }): Promise<void> {
+    const { BillingHistoryService } = await importService();
+    const result = await BillingHistoryService.getParentInvoiceHistory(
+      options.actorUserId,
+      options.targetParentId,
+      options.targetUserId,
+      tErrorsStub
+    );
+    expect(result.id).toBe(`parent-invoice-history-${options.expectedParentId}`);
+    expect(getInvoicesForParentMock).toHaveBeenCalledWith(options.expectedParentId, null, null);
+  }
+
+  async function verifyParentBillingSummary(options: {
+    actorUserId: string;
+    targetParentId: string | null;
+    targetUserId: string;
+    expectedParentId: string;
+  }): Promise<void> {
+    const { BillingHistoryService } = await importService();
+    const result = await BillingHistoryService.getParentBillingSummary(
+      options.actorUserId,
+      options.targetParentId,
+      options.targetUserId,
+      tErrorsStub
+    );
+    expect(result.id).toBe(`parent-billing-summary-${options.expectedParentId}`);
+    expect(getParentBillingSummaryMock).toHaveBeenCalledWith(options.expectedParentId);
+  }
+
   describe("getParentInvoiceHistory", () => {
     test("allows a parent to fetch their own invoice history", async () => {
-      const { BillingHistoryService } = await importService();
-      const result = await BillingHistoryService.getParentInvoiceHistory(
-        USER_ID_1,
-        PARENT_ID_1,
-        USER_ID_1,
-        tErrorsStub
-      );
-      expect(result.id).toBe(`parent-invoice-history-${PARENT_ID_1}`);
-      expect(getInvoicesForParentMock).toHaveBeenCalledWith(PARENT_ID_1, null, null);
+      await verifyParentInvoiceHistory({
+        actorUserId: USER_ID_1,
+        targetParentId: PARENT_ID_1,
+        targetUserId: USER_ID_1,
+        expectedParentId: PARENT_ID_1,
+      });
     });
 
     test("allows a parent to fetch their history without parentId explicit (resolved via fallbackUserId)", async () => {
-      const { BillingHistoryService } = await importService();
-      const result = await BillingHistoryService.getParentInvoiceHistory(USER_ID_1, null, USER_ID_1, tErrorsStub);
-      expect(result.id).toBe(`parent-invoice-history-${PARENT_ID_1}`);
-      expect(getInvoicesForParentMock).toHaveBeenCalledWith(PARENT_ID_1, null, null);
+      await verifyParentInvoiceHistory({
+        actorUserId: USER_ID_1,
+        targetParentId: null,
+        targetUserId: USER_ID_1,
+        expectedParentId: PARENT_ID_1,
+      });
     });
 
     test("prevents cross-tenant IDOR when non-admin parent requests another parent's invoice history", async () => {
@@ -144,41 +182,32 @@ describe("BillingHistoryService IDOR protection", () => {
     });
 
     test("allows admin with BILLING_VIEW_UNPAID_INVOICES to fetch another parent's invoice history", async () => {
-      const { BillingHistoryService } = await importService();
-      const result = await BillingHistoryService.getParentInvoiceHistory(
-        ADMIN_USER_ID,
-        PARENT_ID_2,
-        USER_ID_2,
-        tErrorsStub
-      );
-      expect(result.id).toBe(`parent-invoice-history-${PARENT_ID_2}`);
-      expect(getInvoicesForParentMock).toHaveBeenCalledWith(PARENT_ID_2, null, null);
+      await verifyParentInvoiceHistory({
+        actorUserId: ADMIN_USER_ID,
+        targetParentId: PARENT_ID_2,
+        targetUserId: USER_ID_2,
+        expectedParentId: PARENT_ID_2,
+      });
     });
 
     test("allows super admin to fetch any parent's invoice history", async () => {
-      const { BillingHistoryService } = await importService();
-      const result = await BillingHistoryService.getParentInvoiceHistory(
-        SUPER_ADMIN_USER_ID,
-        PARENT_ID_2,
-        USER_ID_2,
-        tErrorsStub
-      );
-      expect(result.id).toBe(`parent-invoice-history-${PARENT_ID_2}`);
-      expect(getInvoicesForParentMock).toHaveBeenCalledWith(PARENT_ID_2, null, null);
+      await verifyParentInvoiceHistory({
+        actorUserId: SUPER_ADMIN_USER_ID,
+        targetParentId: PARENT_ID_2,
+        targetUserId: USER_ID_2,
+        expectedParentId: PARENT_ID_2,
+      });
     });
   });
 
   describe("getParentBillingSummary", () => {
     test("allows a parent to fetch their own billing summary", async () => {
-      const { BillingHistoryService } = await importService();
-      const result = await BillingHistoryService.getParentBillingSummary(
-        USER_ID_1,
-        PARENT_ID_1,
-        USER_ID_1,
-        tErrorsStub
-      );
-      expect(result.id).toBe(`parent-billing-summary-${PARENT_ID_1}`);
-      expect(getParentBillingSummaryMock).toHaveBeenCalledWith(PARENT_ID_1);
+      await verifyParentBillingSummary({
+        actorUserId: USER_ID_1,
+        targetParentId: PARENT_ID_1,
+        targetUserId: USER_ID_1,
+        expectedParentId: PARENT_ID_1,
+      });
     });
 
     test("prevents cross-tenant IDOR when non-admin parent requests another parent's billing summary", async () => {
@@ -191,15 +220,12 @@ describe("BillingHistoryService IDOR protection", () => {
     });
 
     test("allows admin with BILLING_VIEW_UNPAID_INVOICES to fetch another parent's billing summary", async () => {
-      const { BillingHistoryService } = await importService();
-      const result = await BillingHistoryService.getParentBillingSummary(
-        ADMIN_USER_ID,
-        PARENT_ID_2,
-        USER_ID_2,
-        tErrorsStub
-      );
-      expect(result.id).toBe(`parent-billing-summary-${PARENT_ID_2}`);
-      expect(getParentBillingSummaryMock).toHaveBeenCalledWith(PARENT_ID_2);
+      await verifyParentBillingSummary({
+        actorUserId: ADMIN_USER_ID,
+        targetParentId: PARENT_ID_2,
+        targetUserId: USER_ID_2,
+        expectedParentId: PARENT_ID_2,
+      });
     });
   });
 });

@@ -86,54 +86,35 @@ describe("SessionRedisService", () => {
     expect(await service.getSession("sess_arr")).toBeNull();
   });
 
-  test("returns null when required field is missing or not a string", async () => {
+  async function assertInvalidSessionReturnsNull(sessionId: string, invalidPayload: unknown) {
     const redis = createMockRedis();
     const service = new SessionRedisService(redis);
 
-    const invalid = { ...validSession, userId: 123 };
-    await redis.set("session:sess_bad_user", JSON.stringify(invalid));
-
-    const result = await service.getSession("sess_bad_user");
+    await redis.set(`session:${sessionId}`, JSON.stringify(invalidPayload));
+    const result = await service.getSession(sessionId);
     expect(result).toBeNull();
+  }
+
+  test("returns null when required field is missing or not a string", async () => {
+    await assertInvalidSessionReturnsNull("sess_bad_user", { ...validSession, userId: 123 });
   });
 
   test("returns null when optional string field is invalid type", async () => {
-    const redis = createMockRedis();
-    const service = new SessionRedisService(redis);
-
-    const invalid = { ...validSession, ipAddress: 127001 };
-    await redis.set("session:sess_bad_ip", JSON.stringify(invalid));
-
-    const result = await service.getSession("sess_bad_ip");
-    expect(result).toBeNull();
+    await assertInvalidSessionReturnsNull("sess_bad_ip", { ...validSession, ipAddress: 127001 });
   });
 
   test("returns null when impersonation sub-object is invalid", async () => {
-    const redis = createMockRedis();
-    const service = new SessionRedisService(redis);
-
-    const invalid = {
+    await assertInvalidSessionReturnsNull("sess_bad_imp", {
       ...validSession,
       impersonation: { ...validSession.impersonation, targetUserId: 999 },
-    };
-    await redis.set("session:sess_bad_imp", JSON.stringify(invalid));
-
-    const result = await service.getSession("sess_bad_imp");
-    expect(result).toBeNull();
+    });
   });
 
   test("returns null when groupSimulation sub-object is invalid", async () => {
-    const redis = createMockRedis();
-    const service = new SessionRedisService(redis);
-
-    const invalid = {
+    await assertInvalidSessionReturnsNull("sess_bad_gsim", {
       ...validSession,
       groupSimulation: { ...validSession.groupSimulation, groupSlug: null },
-    };
-    await redis.set("session:sess_bad_gsim", JSON.stringify(invalid));
-
-    const result = await service.getSession("sess_bad_gsim");
-    expect(result).toBeNull();
+    });
   });
 
   test("stores session using setSession", async () => {

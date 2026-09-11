@@ -6,6 +6,23 @@ import path from "node:path";
 import { calculateFileHash, cleanLocalPath, getAbsolutePath } from "@/backend/storage/disk/local/utils";
 import { StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 
+async function createTestFileAndComputeHash(
+  filename: string,
+  content: Buffer
+): Promise<{ computedHash: string; expectedHash: string }> {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "hash-test-"));
+  const testFile = path.join(tempDir, filename);
+
+  try {
+    await fs.writeFile(testFile, content);
+    const expectedHash = crypto.createHash("sha256").update(content).digest("base64");
+    const computedHash = await calculateFileHash(testFile);
+    return { computedHash, expectedHash };
+  } finally {
+    await fs.rm(tempDir, { recursive: true, force: true });
+  }
+}
+
 describe("local storage utils", () => {
   describe("cleanLocalPath", () => {
     it("should remove leading and trailing slashes", () => {
@@ -35,34 +52,18 @@ describe("local storage utils", () => {
 
   describe("calculateFileHash", () => {
     it("should correctly compute base64 sha256 hash using streams for small files", async () => {
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "hash-test-"));
-      const testFile = path.join(tempDir, "small.txt");
       const content = Buffer.from("Hello World Security Test");
-
-      await fs.writeFile(testFile, content);
-
-      const expectedHash = crypto.createHash("sha256").update(content).digest("base64");
-      const computedHash = await calculateFileHash(testFile);
+      const { computedHash, expectedHash } = await createTestFileAndComputeHash("small.txt", content);
 
       expect(computedHash).toBe(expectedHash);
-
-      await fs.rm(tempDir, { recursive: true, force: true });
     });
 
     it("should correctly compute base64 sha256 hash using streams for multi-chunk files", async () => {
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "hash-test-"));
-      const testFile = path.join(tempDir, "large.txt");
       // Create 256KB buffer to exceed standard stream chunk size (64KB)
       const content = Buffer.alloc(256 * 1024, "a");
-
-      await fs.writeFile(testFile, content);
-
-      const expectedHash = crypto.createHash("sha256").update(content).digest("base64");
-      const computedHash = await calculateFileHash(testFile);
+      const { computedHash, expectedHash } = await createTestFileAndComputeHash("large.txt", content);
 
       expect(computedHash).toBe(expectedHash);
-
-      await fs.rm(tempDir, { recursive: true, force: true });
     });
 
     it("should reject when file does not exist", async () => {

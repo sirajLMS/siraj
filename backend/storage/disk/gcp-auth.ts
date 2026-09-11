@@ -1,6 +1,5 @@
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 import { Storage } from "@google-cloud/storage";
-import { GoogleAuth } from "google-auth-library";
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 
@@ -58,14 +57,9 @@ function validateGcpCredentials(credentials: GcpCredentials, source: string): vo
  * Creates a Storage client from credentials
  */
 function createStorageClient(credentials: GcpCredentials, defaultProjectId?: string): Storage {
-  const auth = new GoogleAuth({
-    credentials,
-    scopes: ["https://www.googleapis.com/auth/cloud-platform"],
-  });
-
   return new Storage({
     projectId: credentials.project_id ?? defaultProjectId,
-    authClient: auth,
+    credentials,
   });
 }
 

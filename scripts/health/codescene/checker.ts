@@ -58,7 +58,7 @@ function updateQualityStateIfOwned(results: CheckResults) {
       const state = parsed;
       if (state.owner === "codescene") {
         state.owner = "quality-gate";
-        state.stage = "SONAR_SCAN";
+        state.stage = "CODESCENE";
         state.lifecycle = "NEED_CONFIRM";
         state.lastRun = new Date().toISOString();
         fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2), "utf-8");

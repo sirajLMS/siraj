@@ -43,7 +43,7 @@ function setValueAtPath(target: Record<string, unknown>, path: string, value: un
   }
 
   const lastSegment = segments[segments.length - 1];
-  if (lastSegment !== undefined) {
+  if (lastSegment) {
     current[lastSegment] = value;
   }
 }

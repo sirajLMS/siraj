@@ -258,6 +258,58 @@ describe("StudentHistoryService.getStudentClassHistory", () => {
   });
 });
 
+function mockEmptyHistoryDependencies() {
+  spyOn(StudentHistoryRepository, "getMonthlyMetrics").mockResolvedValue({
+    totalClasses: 0,
+    attendanceRate: 0,
+    hoursStudied: 0,
+    performance: 0,
+  });
+  spyOn(StudentHistoryRepository, "getMonthlyCalendar").mockResolvedValue([]);
+  spyOn(StudentRepository, "findById").mockResolvedValue(createMockStudent());
+  spyOn(EffectiveMeetingService, "resolveForClassInstances").mockResolvedValue(new Map());
+}
+
+interface MockAuthSetupParams {
+  role: UserRole;
+  profileOverrides?: Partial<StudentProfileRowMock>;
+  parentRecord?: ParentSelectType | null;
+  teacherRecord?: TeacherSelectType | null;
+  permission?: AppPermission;
+}
+
+function mockAuthSetup({
+  role,
+  profileOverrides = {},
+  parentRecord = null,
+  teacherRecord = null,
+  permission,
+}: MockAuthSetupParams) {
+  spyOn(PermissionsService, "getUserContext").mockResolvedValue({
+    permissions: [],
+    permissionGroups: [],
+    isSuperAdmin: false,
+    role,
+  });
+  spyOn(StudentRepository, "findProfileById").mockResolvedValue(
+    createMockProfile({ userId: "student-user-id", ...profileOverrides })
+  );
+  spyOn(ParentRepository, "findByUserId").mockResolvedValue(parentRecord);
+  spyOn(TeacherRepository, "findByUserId").mockResolvedValue(teacherRecord);
+
+  if (permission) {
+    spyOn(PermissionsService, "hasPermission").mockImplementation(async (_userId, perm) => {
+      return perm === permission;
+    });
+  }
+}
+
+async function assertHistoryAuthorized(userId: string) {
+  mockEmptyHistoryDependencies();
+  const result = await StudentHistoryService.getStudentClassHistory(userId, "student-1", 2026, 6, tErrors);
+  expect(result).toBeDefined();
+}
+
 describe("StudentHistoryService authorization and ownership enforcement", () => {
   test("super admin bypasses student lookup and ownership checks", async () => {
     spyOn(PermissionsService, "getUserContext").mockResolvedValue({
@@ -267,19 +319,7 @@ describe("StudentHistoryService authorization and ownership enforcement", () => 
       role: UserRole.SUPER_ADMIN,
     });
     const findProfileSpy = spyOn(StudentRepository, "findProfileById");
-    spyOn(StudentHistoryRepository, "getMonthlyMetrics").mockResolvedValue({
-      totalClasses: 0,
-      attendanceRate: 0,
-      hoursStudied: 0,
-      performance: 0,
-    });
-    spyOn(StudentHistoryRepository, "getMonthlyCalendar").mockResolvedValue([]);
-    spyOn(StudentRepository, "findById").mockResolvedValue(createMockStudent());
-    spyOn(EffectiveMeetingService, "resolveForClassInstances").mockResolvedValue(new Map());
-
-    const result = await StudentHistoryService.getStudentClassHistory("admin-1", "student-1", 2026, 6, tErrors);
-
-    expect(result).toBeDefined();
+    await assertHistoryAuthorized("admin-1");
 
     expect(findProfileSpy).not.toHaveBeenCalled();
   });
@@ -297,17 +337,10 @@ describe("StudentHistoryService authorization and ownership enforcement", () => 
   });
 
   test("non-owner with legacy HISTORY_VIEW_CALENDAR permission but missing STUDENT_HISTORY_VIEW_OTHER is rejected", async () => {
-    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      permissions: [],
-      permissionGroups: [],
-      isSuperAdmin: false,
+    mockAuthSetup({
       role: UserRole.TEACHER,
+      profileOverrides: { parentId: "parent-id", primaryTeacherId: "teacher-id" },
     });
-    spyOn(StudentRepository, "findProfileById").mockResolvedValue(
-      createMockProfile({ userId: "student-user-id", parentId: "parent-id", primaryTeacherId: "teacher-id" })
-    );
-    spyOn(ParentRepository, "findByUserId").mockResolvedValue(null);
-    spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null);
 
     spyOn(PermissionsService, "hasPermission").mockImplementation(async (_userId, permission) => {
       if (permission === AppPermission.STUDENT_HISTORY_VIEW_OTHER) return false;
@@ -319,128 +352,39 @@ describe("StudentHistoryService authorization and ownership enforcement", () => 
   });
 
   test("non-owner with STUDENT_HISTORY_VIEW_OTHER permission is authorized", async () => {
-    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      permissions: [],
-      permissionGroups: [],
-      isSuperAdmin: false,
+    mockAuthSetup({
       role: UserRole.TEACHER,
+      profileOverrides: { parentId: "parent-id", primaryTeacherId: "teacher-id" },
+      permission: AppPermission.STUDENT_HISTORY_VIEW_OTHER,
     });
-    spyOn(StudentRepository, "findProfileById").mockResolvedValue(
-      createMockProfile({ userId: "student-user-id", parentId: "parent-id", primaryTeacherId: "teacher-id" })
-    );
-    spyOn(ParentRepository, "findByUserId").mockResolvedValue(null);
-    spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null);
-
-    spyOn(PermissionsService, "hasPermission").mockImplementation(async (_userId, permission) => {
-      return permission === AppPermission.STUDENT_HISTORY_VIEW_OTHER;
-    });
-
-    spyOn(StudentHistoryRepository, "getMonthlyMetrics").mockResolvedValue({
-      totalClasses: 0,
-      attendanceRate: 0,
-      hoursStudied: 0,
-      performance: 0,
-    });
-    spyOn(StudentHistoryRepository, "getMonthlyCalendar").mockResolvedValue([]);
-    spyOn(StudentRepository, "findById").mockResolvedValue(createMockStudent());
-    spyOn(EffectiveMeetingService, "resolveForClassInstances").mockResolvedValue(new Map());
-
-    const result = await StudentHistoryService.getStudentClassHistory("staff-user-id", "student-1", 2026, 6, tErrors);
-
-    expect(result).toBeDefined();
+    await assertHistoryAuthorized("staff-user-id");
   });
 
   test("owner student with legacy HISTORY_VIEW_CALENDAR permission is authorized", async () => {
-    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      permissions: [],
-      permissionGroups: [],
-      isSuperAdmin: false,
+    mockAuthSetup({
       role: UserRole.STUDENT,
+      permission: AppPermission.HISTORY_VIEW_CALENDAR,
     });
-    spyOn(StudentRepository, "findProfileById").mockResolvedValue(createMockProfile({ userId: "student-user-id" }));
-
-    spyOn(PermissionsService, "hasPermission").mockImplementation(async (_userId, permission) => {
-      return permission === AppPermission.HISTORY_VIEW_CALENDAR;
-    });
-
-    spyOn(StudentHistoryRepository, "getMonthlyMetrics").mockResolvedValue({
-      totalClasses: 0,
-      attendanceRate: 0,
-      hoursStudied: 0,
-      performance: 0,
-    });
-    spyOn(StudentHistoryRepository, "getMonthlyCalendar").mockResolvedValue([]);
-    spyOn(StudentRepository, "findById").mockResolvedValue(createMockStudent());
-    spyOn(EffectiveMeetingService, "resolveForClassInstances").mockResolvedValue(new Map());
-
-    const result = await StudentHistoryService.getStudentClassHistory("student-user-id", "student-1", 2026, 6, tErrors);
-
-    expect(result).toBeDefined();
+    await assertHistoryAuthorized("student-user-id");
   });
 
   test("owner parent with STUDENT_HISTORY_VIEW_OTHER permission is authorized", async () => {
-    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      permissions: [],
-      permissionGroups: [],
-      isSuperAdmin: false,
+    mockAuthSetup({
       role: UserRole.PARENT,
+      profileOverrides: { parentId: "parent-record-id" },
+      parentRecord: createMockParent("parent-record-id", "parent-user-id"),
+      permission: AppPermission.STUDENT_HISTORY_VIEW_OTHER,
     });
-    spyOn(StudentRepository, "findProfileById").mockResolvedValue(
-      createMockProfile({ userId: "student-user-id", parentId: "parent-record-id" })
-    );
-    spyOn(ParentRepository, "findByUserId").mockResolvedValue(createMockParent("parent-record-id", "parent-user-id"));
-    spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null);
-
-    spyOn(PermissionsService, "hasPermission").mockImplementation(async (_userId, permission) => {
-      return permission === AppPermission.STUDENT_HISTORY_VIEW_OTHER;
-    });
-
-    spyOn(StudentHistoryRepository, "getMonthlyMetrics").mockResolvedValue({
-      totalClasses: 0,
-      attendanceRate: 0,
-      hoursStudied: 0,
-      performance: 0,
-    });
-    spyOn(StudentHistoryRepository, "getMonthlyCalendar").mockResolvedValue([]);
-    spyOn(StudentRepository, "findById").mockResolvedValue(createMockStudent());
-    spyOn(EffectiveMeetingService, "resolveForClassInstances").mockResolvedValue(new Map());
-
-    const result = await StudentHistoryService.getStudentClassHistory("parent-user-id", "student-1", 2026, 6, tErrors);
-
-    expect(result).toBeDefined();
+    await assertHistoryAuthorized("parent-user-id");
   });
 
   test("owner primary teacher with HISTORY_VIEW_CALENDAR permission is authorized", async () => {
-    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      permissions: [],
-      permissionGroups: [],
-      isSuperAdmin: false,
+    mockAuthSetup({
       role: UserRole.TEACHER,
+      profileOverrides: { primaryTeacherId: "teacher-record-id" },
+      teacherRecord: createMockTeacher("teacher-record-id", "teacher-user-id"),
+      permission: AppPermission.HISTORY_VIEW_CALENDAR,
     });
-    spyOn(StudentRepository, "findProfileById").mockResolvedValue(
-      createMockProfile({ userId: "student-user-id", primaryTeacherId: "teacher-record-id" })
-    );
-    spyOn(ParentRepository, "findByUserId").mockResolvedValue(null);
-    spyOn(TeacherRepository, "findByUserId").mockResolvedValue(
-      createMockTeacher("teacher-record-id", "teacher-user-id")
-    );
-
-    spyOn(PermissionsService, "hasPermission").mockImplementation(async (_userId, permission) => {
-      return permission === AppPermission.HISTORY_VIEW_CALENDAR;
-    });
-
-    spyOn(StudentHistoryRepository, "getMonthlyMetrics").mockResolvedValue({
-      totalClasses: 0,
-      attendanceRate: 0,
-      hoursStudied: 0,
-      performance: 0,
-    });
-    spyOn(StudentHistoryRepository, "getMonthlyCalendar").mockResolvedValue([]);
-    spyOn(StudentRepository, "findById").mockResolvedValue(createMockStudent());
-    spyOn(EffectiveMeetingService, "resolveForClassInstances").mockResolvedValue(new Map());
-
-    const result = await StudentHistoryService.getStudentClassHistory("teacher-user-id", "student-1", 2026, 6, tErrors);
-
-    expect(result).toBeDefined();
+    await assertHistoryAuthorized("teacher-user-id");
   });
 });

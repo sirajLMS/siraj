@@ -81,7 +81,7 @@ describe("StudentFilterUtils", () => {
       expect(m1.whereClauses).toHaveLength(0);
 
       const m2 = createMockQb();
-      expect(StudentFilterUtils.applyFilters(m2.qb, undefined)).toBe(m2.qb);
+      expect(StudentFilterUtils.applyFilters(m2.qb)).toBe(m2.qb);
       expect(m2.whereClauses).toHaveLength(0);
 
       const m3 = createMockQb();
@@ -153,52 +153,43 @@ describe("StudentFilterUtils", () => {
       expect(mStatus.whereClauses).toHaveLength(1);
     });
 
-    test("applies createdAt filters individually", () => {
-      const date1 = new Date("2026-01-01T00:00:00Z");
-      const date2 = new Date("2026-06-01T00:00:00Z");
+    function verifyDateFilters(date1: Date, date2: Date, keyPrefix: "createdAt" | "birthDate"): void {
+      const keys = [
+        "",
+        "Not",
+        "From",
+        "To",
+        "After",
+        "Before",
+        "OnOrAfter",
+        "OnOrBefore",
+        "IsEmpty",
+        "IsNotEmpty",
+      ] as const;
 
-      const filters: Partial<Types.StudentFilterArgs>[] = [
-        { createdAt: date1 },
-        { createdAtNot: date1 },
-        { createdAtFrom: date1 },
-        { createdAtTo: date2 },
-        { createdAtAfter: date1 },
-        { createdAtBefore: date2 },
-        { createdAtOnOrAfter: date1 },
-        { createdAtOnOrBefore: date2 },
-        { createdAtIsEmpty: true },
-        { createdAtIsNotEmpty: true },
-      ];
+      for (const suffix of keys) {
+        const key = `${keyPrefix}${suffix}` as keyof Types.StudentFilterArgs;
+        let value: unknown;
+        if (suffix === "IsEmpty" || suffix === "IsNotEmpty") {
+          value = true;
+        } else if (suffix === "To" || suffix === "Before" || suffix === "OnOrBefore") {
+          value = date2;
+        } else {
+          value = date1;
+        }
 
-      for (const partial of filters) {
         const m = createMockQb();
-        StudentFilterUtils.applyFilters(m.qb, makeFilterArgs(partial));
+        StudentFilterUtils.applyFilters(m.qb, makeFilterArgs({ [key]: value }));
         expect(m.whereClauses).toHaveLength(1);
       }
+    }
+
+    test("applies createdAt filters individually", () => {
+      verifyDateFilters(new Date("2026-01-01T00:00:00Z"), new Date("2026-06-01T00:00:00Z"), "createdAt");
     });
 
     test("applies birthDate filters individually", () => {
-      const date1 = new Date("2012-03-15");
-      const date2 = new Date("2018-09-20");
-
-      const filters: Partial<Types.StudentFilterArgs>[] = [
-        { birthDate: date1 },
-        { birthDateNot: date1 },
-        { birthDateFrom: date1 },
-        { birthDateTo: date2 },
-        { birthDateAfter: date1 },
-        { birthDateBefore: date2 },
-        { birthDateOnOrAfter: date1 },
-        { birthDateOnOrBefore: date2 },
-        { birthDateIsEmpty: true },
-        { birthDateIsNotEmpty: true },
-      ];
-
-      for (const partial of filters) {
-        const m = createMockQb();
-        StudentFilterUtils.applyFilters(m.qb, makeFilterArgs(partial));
-        expect(m.whereClauses).toHaveLength(1);
-      }
+      verifyDateFilters(new Date("2012-03-15"), new Date("2018-09-20"), "birthDate");
     });
 
     test("applies multi-field filter combination simultaneously", () => {
@@ -239,7 +230,7 @@ describe("StudentFilterUtils", () => {
       expect(m1.orderByExpressions).toHaveLength(1);
 
       const m2 = createMockQb();
-      StudentFilterUtils.applyOrdering(m2.qb, undefined);
+      StudentFilterUtils.applyOrdering(m2.qb);
       expect(m2.orderByExpressions).toHaveLength(1);
 
       const m3 = createMockQb();

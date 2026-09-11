@@ -84,8 +84,12 @@ export async function runMigrations(closePool: boolean) {
 }
 
 if (require.main === module) {
-  runMigrations(true).catch((err: unknown) => {
-    logger.error("Migration failed:", err);
-    process.exit(1);
-  });
+  runMigrations(true)
+    .then(() => {
+      process.exit(0);
+    })
+    .catch((err: unknown) => {
+      logger.error("Migration failed:", err);
+      process.exit(1);
+    });
 }
