@@ -188,7 +188,7 @@ bun run test:ui:kill         # stop stale test servers (port 3066 only — never
 
 ### Linting
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
+- NEVER use `oxlint-disable` comments — fix the root cause.
 
 
 ### Async Assertion Style (lint-enforced)

@@ -23,12 +23,8 @@ drizzle-best-practices/
 ## Usage
 
 1. Read `SKILL.md` for the main skill instructions
-2. Browse `references/` for detailed documentation on specific topics
-3. Reference files are loaded on-demand — read only what you need
-
-Comprehensive best practices guide for Drizzle ORM with PostgreSQL. Contains guidance across
-8 categories, prioritized by impact to help AI agents generate correct, performant, and
-idiomatic Drizzle code.
+2. Browse `references/` for detailed documentation on specific topics (full index in `references/_sections.md`)
+3. Reference files are loaded on-demand — read only what you need. Each one pairs an incorrect and a correct code example with a brief rationale.
 
 ## When to Apply
 
@@ -55,42 +51,6 @@ Reference these guidelines when:
 | 6 | Performance | MEDIUM | `perf-` |
 | 7 | Database Drivers | MEDIUM | `driver-` |
 | 8 | Advanced Patterns | LOW | `advanced-` |
-
-## How to Use
-
-Read individual reference files for detailed explanations and code examples:
-
-```
-references/engine-postgres.md
-references/schema-table-definitions.md
-references/schema-column-types.md
-references/schema-indexes-constraints.md
-references/query-select-patterns.md
-references/query-mutations.md
-references/query-filters-operators.md
-references/query-error-handling.md
-references/relations-defining.md
-references/relations-querying.md
-references/migrations-config.md
-references/migrations-workflow.md
-references/types-inference.md
-references/types-custom-types.md
-references/types-validators.md
-references/perf-prepared-statements.md
-references/perf-batch-operations.md
-references/driver-postgres.md
-references/driver-serverless.md
-references/advanced-dynamic-queries.md
-references/advanced-sql-operator.md
-references/_sections.md
-```
-
-Each reference file contains:
-
-- Brief explanation of why it matters
-- Incorrect code example with explanation
-- Correct code example with explanation
-- Links to official Drizzle documentation
 
 ## References
 

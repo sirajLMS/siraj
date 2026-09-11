@@ -532,23 +532,23 @@ AGENTS.md files (root and layer) and `.agents/instructions/*.md` files must **NE
 
 ### The Feature-Name Litmus Test (MANDATORY before writing any rule)
 
-Before adding ANY bullet to an AGENTS.md, instructions, or skill file, apply this test:
+Before adding ANY bullet to a skill file, apply this test:
 
-> **If a developer who never works on this feature would find the bullet meaningless, it does NOT belong in the rule file — it belongs in the canonical `docs/<domain>/<topic>.md` only.**
+> **If a developer who never works on this feature would find the bullet meaningless, it does NOT belong in the skill file — it belongs in the canonical `docs/<domain>/<topic>.md` only.**
 
 Concrete violations to never repeat:
 - **Route lists & navigation placement** for the feature (e.g. "`/accounting/payments`, sidebar group `grp_accounting`") — feature UX notes, belong in the doc.
 - **Feature permission strings** (e.g. `ACCOUNTING_PAYMENTS_VIEW`) — feature access matrix, belongs in the doc.
-- **Feature file inventories** (e.g. "object types in `accounting.pothos.ts`, 5 queries + 6 mutations in `accounting.documents.ts`") — the doc owns file maps, not rule files.
+- **Feature file inventories** (e.g. "object types in `accounting.pothos.ts`, 5 queries + 6 mutations in `accounting.documents.ts`") — the doc owns file maps, not skill files.
 - **Feature type/entity names in rule bullets** (e.g. `CreditHourTransactionSubmitInput`, `PackagePlanRepository`) — generalize the rule ("versioned updates MUST self-increment the `version` column") or drop it; the doc names the reference implementation.
 - **Feature i18n namespace lists** — doc-only content.
 
-Rule files get ONLY the generic invariant extracted from the feature's experience, plus at most a one-line pointer to the canonical doc. The doc — never the rule file — names the feature's routes, permissions, files, and entities.
+Skill files get ONLY the generic invariant extracted from the feature's experience, plus at most a one-line pointer to the canonical doc. The doc — never the skill file — names the feature's routes, permissions, files, and entities.
 
 When propagating learnings from a plan:
 - Plan details and task outcomes → `.ai/plans/<feature-name>/outcome/`
 - Full patterns, code examples, domain architecture, and implementation details → `docs/<domain>/<topic>.md`
-- Permanent, global architectural rules and library battle-tested gotchas → AGENTS.md / instructions (1-2 lines + doc reference in Important References)
+- Permanent, generic patterns and reusable gotchas → the relevant `.agents/skills/<skill>/SKILL.md` (1-2 lines + doc reference)
 
 ### Knowledge Propagation Task Template
 
@@ -556,10 +556,8 @@ When propagating learnings from a plan:
 - [ ] X. **Knowledge Propagation & Documentation**
   - Read all outcome files in `.ai/plans/<feature-name>/outcome/` to synthesize all learnings
   - Create canonical reference doc under `docs/<domain>/<topic>.md` consolidating patterns, rules, and gotchas
-  - Update layer AGENTS.md files with layer-specific rules/decisions (no implementation details) and a one-line doc reference
   - Update `.agents/skills/<skill>/SKILL.md` if new patterns affect the skill's domain
-  - Update `.agents/instructions/<layer>.instructions.md` with rules/decisions only and a one-line doc reference
-  - Update root `AGENTS.md` Important References section with a one-line reference to the new doc
+  - NEVER create or update AGENTS.md files or `.agents/instructions/*.md` files (forbidden propagation targets)
   - Run global check: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file (0 errors, 0 warnings)
   - Write outcome file: `.ai/plans/<feature-name>/outcome/X.Y-knowledge-propagation-outcome.md`
   - Update progress: Mark task X.Y as `[x]` in `tasks.md`
@@ -567,39 +565,36 @@ When propagating learnings from a plan:
 
 ### Complete Domain-to-Artifacts Mapping
 
-Use this table to determine which docs subdir, AGENTS.md files, skills, and instructions to update for a given plan domain:
+Use this table to determine which docs subdir and skills to update for a given plan domain:
 
-| Plan Domain | Docs Subdir | AGENTS.md to Update | Skills to Update | Instructions to Update |
-|---|---|---|---|---|
-| Drizzle / DB patterns | `docs/drizzle/` | `backend/db/repo/AGENTS.md`, `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/drizzle/SKILL.md` | `.agents/instructions/backend.instructions.md` |
-| DB migrations | `docs/drizzle/` | `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/drizzle-migrations/SKILL.md`, `.agents/skills/drizzle-generate/SKILL.md` | `.agents/instructions/backend.instructions.md` |
-| GraphQL / Pothos | `docs/graphql/` | `backend/graphql/AGENTS.md`, `backend/graphql/pothos/AGENTS.md`, `frontend/common/graphql/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
-| Backend services | `docs/services/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
-| Backend types / enums | `docs/backend/` | `backend/types/AGENTS.md`, `backend/enum/AGENTS.md`, `backend/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
-| Frontend components / views | `docs/frontend/` | `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/components/ui/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `.agents/instructions/frontend.instructions.md` |
-| Frontend mobile/desktop | `docs/frontend/` | `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md` | `.agents/skills/refactor-mobile-desktop/SKILL.md` | `.agents/instructions/mobile-desktop.instructions.md` |
-| Frontend stores / state | `docs/frontend/` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `.agents/instructions/frontend.instructions.md` |
-| Frontend GraphQL / Apollo | `docs/frontend/` | `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
-| Testing (DB) | `docs/testing/` | `backend/db/test/AGENTS.md`, `backend/db/test/logic/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-db-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| Testing (UI / E2E) | `docs/testing/` | `test/ui/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| Testing (general) | `docs/testing/` | `scripts/run-test/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| i18n / locale | `docs/i18n/` | `shared/AGENTS.md` | — | — |
-| Auth / security | `docs/auth/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/idor-testing/SKILL.md`, `.agents/skills/pentester/SKILL.md`, `.agents/skills/backend-security-review/SKILL.md`, `.agents/skills/security-and-hardening/SKILL.md` | `.agents/instructions/backend.instructions.md` |
-| App Router / Next.js | `docs/app/` | `app/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
-| Quality gates / CI | `docs/quality/` | `AGENTS.md` (root) | `.agents/skills/quality-gate/SKILL.md`, `.agents/skills/quality-loop/SKILL.md` | — |
-| Idempotency | `docs/` (top-level) | `backend/services/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
-| Bun / runtime | `docs/bun/` | `AGENTS.md` (root) | — | — |
+| Plan Domain | Docs Subdir | Skills to Update |
+|---|---|---|
+| Drizzle / DB patterns | `docs/drizzle/` | `.agents/skills/drizzle/SKILL.md` |
+| DB migrations | `docs/drizzle/` | `.agents/skills/drizzle-migrations/SKILL.md`, `.agents/skills/drizzle-generate/SKILL.md` |
+| GraphQL / Pothos | `docs/graphql/` | — |
+| Backend services | `docs/services/` | — |
+| Backend types / enums | `docs/backend/` | — |
+| Frontend components / views | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
+| Frontend mobile/desktop | `docs/frontend/` | `.agents/skills/refactor-mobile-desktop/SKILL.md` |
+| Frontend stores / state | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
+| Frontend GraphQL / Apollo | `docs/frontend/` | — |
+| Testing (DB) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-db-tests/SKILL.md` |
+| Testing (UI / E2E) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
+| Testing (general) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
+| i18n / locale | `docs/i18n/` | — |
+| Auth / security | `docs/auth/` | `.agents/skills/idor-testing/SKILL.md`, `.agents/skills/pentester/SKILL.md`, `.agents/skills/backend-security-review/SKILL.md`, `.agents/skills/security-and-hardening/SKILL.md` |
+| App Router / Next.js | `docs/app/` | — |
+| Quality gates / CI | `docs/quality/` | `.agents/skills/quality-gate/SKILL.md`, `.agents/skills/quality-loop/SKILL.md` |
+| Idempotency | `docs/` (top-level) | — |
+| Bun / runtime | `docs/bun/` | — |
 
 ### Example: Full Propagation for a Drizzle Plan
 
 Given a plan that introduced prepared statements across repositories:
 
 1. **Create doc**: `docs/drizzle/prepared-statements.md` with pattern, rules, anti-patterns, rollout summary
-2. **Update `backend/db/repo/AGENTS.md`**: Add "Prepared Statements (CRITICAL)" rule referencing the doc
-3. **Update `backend/AGENTS.md`**: Add prepared statements bullet to Repository Layer section
-4. **Update `.agents/skills/drizzle/SKILL.md`**: Add "Prepared Statements" section with key rules and doc reference
-5. **Update root `AGENTS.md`**: Add `docs/drizzle/prepared-statements.md` to Important References
-6. **Quality check**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file
+2. **Update `.agents/skills/drizzle/SKILL.md`**: Add "Prepared Statements" section with key rules and doc reference
+3. **Quality check**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file
 
 ## Standard Task Enhancement Rules (Applied to Every Feature Plan)
 

@@ -165,4 +165,4 @@ applyTo: "backend/**/*.ts"
 
 ### Linting Rules
 
-- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
+- NEVER use `oxlint-disable` comments — fix the root cause.
