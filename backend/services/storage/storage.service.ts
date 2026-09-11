@@ -90,7 +90,8 @@ export namespace StorageService {
   export async function validateSignedUrlSession(
     sessionId: string,
     filePath: string,
-    locale?: string
+    locale?: string,
+    userId?: string
   ): Promise<{
     error: string;
     status: number;
@@ -120,6 +121,15 @@ export namespace StorageService {
         receivedPath: filePath,
       });
       return { error: tErrors.filePathMismatch, status: 400 };
+    }
+
+    if (session.uploadedByUserId && session.uploadedByUserId !== userId) {
+      logger.warn("Signed URL user mismatch in session validation", {
+        sessionId,
+        signedUrlUserId: session.uploadedByUserId,
+        userId,
+      });
+      return { error: tErrors.invalidUploadSession, status: 403 };
     }
 
     logger.info("✅ Validated upload session", { sessionId, filePath });
