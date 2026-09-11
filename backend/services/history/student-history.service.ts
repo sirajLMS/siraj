@@ -30,6 +30,13 @@ function toClassOutcome(value: string | null): ClassOutcome | null {
 }
 
 export namespace StudentHistoryService {
+  /**
+   * Asserts that a user has permission to view the class history for a student.
+   * Super-admins are granted immediate access.
+   * For non-admin actors, student ownership (as the student self, their parent, or primary teacher)
+   * is strictly enforced before honoring `STUDENT_HISTORY_VIEW_OWN` or legacy `HISTORY_VIEW_CALENDAR`.
+   * Non-owners must possess `STUDENT_HISTORY_VIEW_OTHER` permission.
+   */
   async function assertCanViewStudentHistory(userId: string, studentId: string, tErrors: ErrorsLabels): Promise<void> {
     // M1 fix: for non-admin actors, enforce ownership before honoring any
     // view permission shortcut. Previously, HISTORY_VIEW_CALENDAR caused an
