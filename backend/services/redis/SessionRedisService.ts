@@ -66,89 +66,65 @@ export class SessionRedisService implements ISessionRedisService {
     logger.debug("Session stored in Redis", { userId: data.userId });
   }
 
-  /**
-   * Validate that a value is a plain object (not null, not array)
-   */
-  private isPlainObject(value: unknown): value is Record<string, unknown> {
-    return typeof value === "object" && value !== null && !Array.isArray(value);
-  }
-
-  /**
-   * Validate optional string fields on a record.
-   * Returns false if any field is present but not a string.
-   */
-  private validateOptionalStrings(obj: Record<string, unknown>, fields: string[]): boolean {
-    for (const field of fields) {
-      if (obj[field] !== undefined && typeof obj[field] !== "string") {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Validate the impersonation sub-object
-   */
-  private validateImpersonation(obj: Record<string, unknown>): boolean {
-    if (obj.impersonation === undefined) {
-      return true;
-    }
-    if (!this.isPlainObject(obj.impersonation)) {
-      return false;
-    }
-    if (
-      typeof obj.impersonation.targetUserId !== "string" ||
-      typeof obj.impersonation.startedAt !== "string" ||
-      typeof obj.impersonation.expiresAt !== "string" ||
-      typeof obj.impersonation.impersonationSessionId !== "string"
-    ) {
-      return false;
-    }
-    return obj.impersonation.reason === undefined || typeof obj.impersonation.reason === "string";
-  }
-
-  /**
-   * Validate the groupSimulation sub-object
-   */
-  private validateGroupSimulation(obj: Record<string, unknown>): boolean {
-    if (obj.groupSimulation === undefined) {
-      return true;
-    }
-    if (!this.isPlainObject(obj.groupSimulation)) {
-      return false;
-    }
+  private validateImpersonation(imp: unknown): boolean {
+    if (imp === undefined) return true;
+    if (typeof imp !== "object" || imp === null || Array.isArray(imp)) return false;
+    const impObj = imp as Record<string, unknown>;
     return (
-      typeof obj.groupSimulation.groupSlug === "string" &&
-      typeof obj.groupSimulation.startedAt === "string" &&
-      typeof obj.groupSimulation.expiresAt === "string"
+      typeof impObj.targetUserId === "string" &&
+      typeof impObj.startedAt === "string" &&
+      typeof impObj.expiresAt === "string" &&
+      typeof impObj.impersonationSessionId === "string" &&
+      (impObj.reason === undefined || typeof impObj.reason === "string")
+    );
+  }
+
+  private validateGroupSimulation(gsim: unknown): boolean {
+    if (gsim === undefined) return true;
+    if (typeof gsim !== "object" || gsim === null || Array.isArray(gsim)) return false;
+    const gsimObj = gsim as Record<string, unknown>;
+    return (
+      typeof gsimObj.groupSlug === "string" &&
+      typeof gsimObj.startedAt === "string" &&
+      typeof gsimObj.expiresAt === "string"
     );
   }
 
   /**
    * Validate that parsed data conforms to RedisSessionData shape.
    * Prevents corrupted/tampered Redis data from bypassing type assertions.
+   * Direct unrolled validation avoids array allocations and helper function call overhead.
    */
   private validateSessionData(data: unknown, _sessionId: string): data is RedisSessionData {
-    if (!this.isPlainObject(data)) {
+    if (typeof data !== "object" || data === null || Array.isArray(data)) {
       return false;
     }
-    const obj = data;
-    if (typeof obj.userId !== "string" || typeof obj.hashedId !== "string" || typeof obj.payload !== "string") {
+    const obj = data as Record<string, unknown>;
+
+    // Required primary fields
+    const hasRequired =
+      typeof obj.userId === "string" &&
+      typeof obj.hashedId === "string" &&
+      typeof obj.payload === "string" &&
+      typeof obj.createdAt === "string" &&
+      typeof obj.lastActivityAt === "string";
+
+    if (!hasRequired) {
       return false;
     }
-    if (typeof obj.createdAt !== "string" || typeof obj.lastActivityAt !== "string") {
+
+    // Optional metadata string fields
+    const hasValidMetadata =
+      (obj.ipAddress === undefined || typeof obj.ipAddress === "string") &&
+      (obj.userAgent === undefined || typeof obj.userAgent === "string") &&
+      (obj.deviceType === undefined || typeof obj.deviceType === "string") &&
+      (obj.deviceName === undefined || typeof obj.deviceName === "string");
+
+    if (!hasValidMetadata) {
       return false;
     }
-    if (!this.validateOptionalStrings(obj, ["ipAddress", "userAgent", "deviceType", "deviceName"])) {
-      return false;
-    }
-    if (!this.validateImpersonation(obj)) {
-      return false;
-    }
-    if (!this.validateGroupSimulation(obj)) {
-      return false;
-    }
-    return true;
+
+    return this.validateImpersonation(obj.impersonation) && this.validateGroupSimulation(obj.groupSimulation);
   }
 
   /**
