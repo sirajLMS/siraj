@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { logger } from "@/backend/lib/logger";
 
@@ -320,7 +321,7 @@ export async function preCommitEnumStatements(statements: string[]): Promise<voi
 export async function preCommitEnumStatementsForMigrationFile(migrationPath: string): Promise<void> {
   if (!existsSync(migrationPath)) return;
 
-  const content = readFileSync(migrationPath, "utf8");
+  const content = await readFile(migrationPath, "utf8");
   const statements = extractEnumAddValueStatementsFromSql(content);
   if (statements.length === 0) return;
 
