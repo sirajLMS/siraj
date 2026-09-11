@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { AppPermission, UserRole } from "@/backend/enum";
+import { db } from "@/backend/db/drizzleDb";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
+import { AppPermission, NotificationDeliveryStatus, UserRole } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { NotificationAlertsService } from "@/backend/services/notification/notification-alerts.service";
 import type { UserPermissionContext } from "@/backend/types";
@@ -125,6 +128,67 @@ describe("NotificationAlertsService.getAlerts (UserPermissionContext overload)",
     await expectNoGetUserContextCall(spy, () =>
       NotificationAlertsService.getAlerts(TEST_USER_ID, superAdminContext(), "en")
     );
+  });
+});
+
+describe("NotificationAlertsService.markAlertsRead (counting and error logging)", () => {
+  let dbSpy: ReturnType<typeof spyOn>;
+  let recordSpy: ReturnType<typeof spyOn>;
+  let loggerSpy: ReturnType<typeof spyOn>;
+  let getUserCtxSpy: ReturnType<typeof spyOn>;
+
+  beforeEach(() => {
+    getUserCtxSpy = spyOn(PermissionsService, "getUserContext").mockResolvedValue(viewAlertsContext());
+    loggerSpy = spyOn(logger, "warn").mockImplementation(() => logger);
+  });
+
+  afterEach(() => {
+    getUserCtxSpy.mockRestore();
+    loggerSpy.mockRestore();
+    dbSpy?.mockRestore();
+    recordSpy?.mockRestore();
+  });
+
+  test("accurately counts successful marks and logs warnings for failed delivery marks", async () => {
+    // Mock db.select chain for fetchMarkableDeliveryRows
+    const mockCandidates = [
+      { id: "del-1", status: NotificationDeliveryStatus.PENDING },
+      { id: "del-2", status: NotificationDeliveryStatus.SENT },
+      { id: "del-3", status: NotificationDeliveryStatus.FAILED },
+    ];
+
+    type MockChain = {
+      from: () => MockChain;
+      where: () => MockChain;
+      orderBy: () => MockChain;
+      limit: () => Promise<typeof mockCandidates>;
+    };
+
+    const chain: MockChain = {
+      from: () => chain,
+      where: () => chain,
+      orderBy: () => chain,
+      limit: () => Promise.resolve(mockCandidates),
+    };
+    dbSpy = spyOn(db, "select").mockReturnValue(chain as unknown as ReturnType<typeof db.select>);
+
+    // Mock recordDeliveryOpened to succeed for del-1 and del-3, but fail for del-2
+    recordSpy = spyOn(NotificationRepository, "recordDeliveryOpened").mockImplementation(async (id: string) => {
+      if (id === "del-2") {
+        throw new Error("DB lock timeout");
+      }
+      return undefined as unknown as Awaited<ReturnType<typeof NotificationRepository.recordDeliveryOpened>>;
+    });
+
+    const result = await NotificationAlertsService.markAlertsRead(TEST_USER_ID, "en");
+
+    expect(result.updatedCount).toBe(2);
+    expect(recordSpy).toHaveBeenCalledTimes(3);
+    expect(loggerSpy).toHaveBeenCalledTimes(1);
+    expect(loggerSpy).toHaveBeenCalledWith("markAlertsRead: failed to mark delivery OPENED", {
+      deliveryId: "del-2",
+      error: "DB lock timeout",
+    });
   });
 });
 

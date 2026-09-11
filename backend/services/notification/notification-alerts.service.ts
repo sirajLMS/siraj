@@ -397,17 +397,16 @@ export namespace NotificationAlertsService {
         })
       );
 
-      let updatedCount = 0;
-      for (const result of markResults) {
+      const updatedCount = markResults.reduce((count, result) => {
         if (result.success) {
-          updatedCount++;
-          continue;
+          return count + 1;
         }
         logger.warn("markAlertsRead: failed to mark delivery OPENED", {
           deliveryId: result.candidate.id,
           error: result.error instanceof Error ? result.error.message : String(result.error),
         });
-      }
+        return count;
+      }, 0);
 
       return { updatedCount };
     } catch (error) {
