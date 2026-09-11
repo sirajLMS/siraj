@@ -1,4 +1,5 @@
-import { existsSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync } from "node:fs";
+import { readdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { logger } from "@/backend/lib/logger";
 
@@ -213,41 +214,45 @@ export function makeMigrationSqlIdempotent(sql: string): string {
  *
  * @returns The list of relative migration file paths that were modified.
  */
-export function ensureIdempotentMigrations(): string[] {
+export async function ensureIdempotentMigrations(): Promise<string[]> {
   if (!existsSync(DRIZZLE_DIR)) return [];
 
-  const updatedFiles: string[] = [];
-  const folders = readdirSync(DRIZZLE_DIR).filter(f => {
-    try {
-      return statSync(join(DRIZZLE_DIR, f)).isDirectory();
-    } catch {
-      return false;
-    }
-  });
+  const entries = await readdir(DRIZZLE_DIR, { withFileTypes: true }).catch(() => []);
 
-  for (const folder of folders) {
-    const sqlPath = join(DRIZZLE_DIR, folder, "migration.sql");
-    if (!existsSync(sqlPath)) continue;
+  const folders = entries.filter(e => e.isDirectory()).map(e => e.name);
 
-    const originalSql = readFileSync(sqlPath, "utf8");
-    const idempotentSql = makeMigrationSqlIdempotent(originalSql);
-
-    if (originalSql !== idempotentSql) {
-      const tmpPath = `${sqlPath}.tmp`;
-      writeFileSync(tmpPath, idempotentSql);
+  const results = await Promise.all(
+    folders.map(async folder => {
+      const sqlPath = join(DRIZZLE_DIR, folder, "migration.sql");
+      let originalSql: string;
       try {
-        renameSync(tmpPath, sqlPath);
-      } catch (err) {
-        try {
-          unlinkSync(tmpPath);
-        } catch {
-          // best-effort cleanup of the orphaned temp file; ignore errors
-        }
-        throw err;
+        originalSql = await readFile(sqlPath, "utf8");
+      } catch {
+        return null;
       }
-      updatedFiles.push(`${folder}/migration.sql`);
-    }
-  }
+
+      const idempotentSql = makeMigrationSqlIdempotent(originalSql);
+
+      if (originalSql !== idempotentSql) {
+        const tmpPath = `${sqlPath}.tmp`;
+        await writeFile(tmpPath, idempotentSql);
+        try {
+          await rename(tmpPath, sqlPath);
+        } catch (err) {
+          try {
+            await unlink(tmpPath);
+          } catch {
+            // best-effort cleanup of the orphaned temp file; ignore errors
+          }
+          throw err;
+        }
+        return `${folder}/migration.sql`;
+      }
+      return null;
+    })
+  );
+
+  const updatedFiles = results.filter((f): f is string => f !== null);
 
   if (updatedFiles.length > 0) {
     logger.log(
@@ -318,9 +323,13 @@ export async function preCommitEnumStatements(statements: string[]): Promise<voi
  * Pre-commits enum additions declared in a single migration file before that folder runs.
  */
 export async function preCommitEnumStatementsForMigrationFile(migrationPath: string): Promise<void> {
-  if (!existsSync(migrationPath)) return;
+  let content: string;
+  try {
+    content = await readFile(migrationPath, "utf8");
+  } catch {
+    return;
+  }
 
-  const content = readFileSync(migrationPath, "utf8");
   const statements = extractEnumAddValueStatementsFromSql(content);
   if (statements.length === 0) return;
 
@@ -339,13 +348,12 @@ export async function preCommitEnumStatementsForMigrationFile(migrationPath: str
 export async function ensureEnumValuesCommitted(): Promise<void> {
   if (!existsSync(DRIZZLE_DIR)) return;
 
-  const folders = readdirSync(DRIZZLE_DIR).filter(f => {
-    try {
-      return statSync(join(DRIZZLE_DIR, f)).isDirectory();
-    } catch {
-      return false;
-    }
-  });
+  const entries = await readdir(DRIZZLE_DIR, { withFileTypes: true }).catch(() => []);
+
+  const folders = entries
+    .filter(e => e.isDirectory())
+    .map(e => e.name)
+    .sort();
 
   // Migration folders must be processed in order; chain the promises to keep
   // sequential execution without awaiting inside a loop construct.
