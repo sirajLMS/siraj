@@ -31,8 +31,8 @@ const settingsLabels: WhatsappSettingsLabels = {
     syncSuccessWithCounts: labels.syncSuccessWithCounts,
     syncNoChange: labels.syncNoChange,
     syncError: labels.syncError,
-    deleteSuccess: labels.deleteSuccess,
-    deleteError: labels.deleteError,
+    localDeactivateSuccess: labels.localDeactivateSuccess,
+    localDeactivateError: labels.localDeactivateError,
     saveSuccess: labels.saveSuccess,
     saveError: labels.saveError,
     optInSuccess: "Opt-in updated successfully.",
@@ -48,7 +48,7 @@ const baseProps = {
   loading: false,
   syncing: false,
   snackbar: null,
-  deletingId: null,
+  localDeactivatingId: null,
   syncingId: null,
   editingTokenForId: null,
   editingPinForId: null,
@@ -58,7 +58,7 @@ const baseProps = {
   mutationError: null,
   onSyncFromMeta: mock(noopPromise),
   onDismissSnackbar: mock(() => {}),
-  onOpenDeleteConfirmDialog: mock(() => {}),
+  onLocalDeactivateConfirmDialog: mock(() => {}),
   onSetAccessToken: mock(noopPromise),
   onTestAccessToken: mock(() => Promise.resolve("success" as const)),
   tokenTestStates: {},
@@ -77,7 +77,7 @@ const baseProps = {
   validateTwoStepPin,
 };
 
-describe("DeleteConfirmDialog (via NumbersTabDesktop)", () => {
+describe("LocalDeactivateConfirmDialog (via NumbersTabDesktop)", () => {
   beforeEach(() => {
     cleanup();
   });
@@ -86,28 +86,28 @@ describe("DeleteConfirmDialog (via NumbersTabDesktop)", () => {
     cleanup();
   });
 
-  test("shows account display name in the delete confirm message", () => {
-    const mockOnDelete = mock(noopPromise);
+  test("shows account display name in the local-deactivate confirm message", () => {
+    const mockOnLocalDeactivate = mock(noopPromise);
     renderWithWrapper(
       <NumbersTabDesktop
         {...baseProps}
         accounts={[makeAccountRow("acc-99", "+555", "My Test Account")]}
-        dialogState={{ type: "deleteConfirm", accountId: "acc-99", displayName: "My Test Account" }}
-        onDeleteAccount={mockOnDelete}
+        dialogState={{ type: "localDeactivateConfirm", accountId: "acc-99", displayName: "My Test Account" }}
+        onLocalDeactivateAccount={mockOnLocalDeactivate}
       />,
       { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
-    expect(screen.getByText(labels.deleteConfirmMessage("My Test Account"))).toBeTruthy();
+    expect(screen.getByText(labels.localDeactivateConfirmMessage("My Test Account"))).toBeTruthy();
   });
 
-  test("Cancel button does NOT call onDeleteAccount", async () => {
-    const onDelete = mock(noopPromise);
+  test("Cancel button does NOT call onLocalDeactivateAccount", async () => {
+    const onLocalDeactivate = mock(noopPromise);
     const onClose = mock(() => {});
     renderWithWrapper(
       <NumbersTabDesktop
         {...baseProps}
-        dialogState={{ type: "deleteConfirm", accountId: "acc-1", displayName: "Account 1" }}
-        onDeleteAccount={onDelete}
+        dialogState={{ type: "localDeactivateConfirm", accountId: "acc-1", displayName: "Account 1" }}
+        onLocalDeactivateAccount={onLocalDeactivate}
         onCloseDialog={onClose}
       />,
       { locale, permissions: [AppPermission.WhatsappConfigManage] }
@@ -115,25 +115,25 @@ describe("DeleteConfirmDialog (via NumbersTabDesktop)", () => {
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: labels.cancel }));
     });
-    expect(onDelete).toHaveBeenCalledTimes(0);
+    expect(onLocalDeactivate).toHaveBeenCalledTimes(0);
   });
 
-  test("Confirm button calls onDeleteAccount with the correct account ID", async () => {
-    const onDelete = mock(noopPromise);
+  test("Confirm button calls onLocalDeactivateAccount with the correct account ID", async () => {
+    const onLocalDeactivate = mock(noopPromise);
     renderWithWrapper(
       <NumbersTabDesktop
         {...baseProps}
-        dialogState={{ type: "deleteConfirm", accountId: "acc-42", displayName: "Account 42" }}
-        onDeleteAccount={onDelete}
+        dialogState={{ type: "localDeactivateConfirm", accountId: "acc-42", displayName: "Account 42" }}
+        onLocalDeactivateAccount={onLocalDeactivate}
       />,
       { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: labels.deleteAccount }));
+      fireEvent.click(screen.getByRole("button", { name: labels.localDeactivateAccount }));
     });
     await waitFor(() => {
-      expect(onDelete).toHaveBeenCalledTimes(1);
-      expect(firstCallArgString(onDelete)).toBe("acc-42");
+      expect(onLocalDeactivate).toHaveBeenCalledTimes(1);
+      expect(firstCallArgString(onLocalDeactivate)).toBe("acc-42");
     });
   });
 });

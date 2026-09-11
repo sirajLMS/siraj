@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
-export function NumbersDeleteConfirmDialog({
+export function NumbersLocalDeactivateConfirmDialog({
   open,
   displayName,
   labels,
@@ -32,10 +32,10 @@ export function NumbersDeleteConfirmDialog({
       onClose={onClose}
       onConfirm={handleConfirm}
       isLoading={submitting}
-      title={labels.deleteConfirmTitle}
-      body={labels.deleteConfirmMessage(displayName)}
+      title={labels.localDeactivateConfirmTitle}
+      body={labels.localDeactivateConfirmMessage(displayName)}
       cancelLabel={labels.cancel}
-      confirmLabel={labels.deleteAccount}
+      confirmLabel={labels.localDeactivateAccount}
       fullScreen={fullScreen}
     />
   );
