@@ -413,17 +413,23 @@ export namespace AvailabilityService {
  * at the given point in time. Positive = ahead of UTC, negative = behind.
  * Uses Intl.DateTimeFormat to avoid depending on a full timezone library.
  */
+const dtfCache = new Map<string, Intl.DateTimeFormat>();
+
 function getTzOffsetMs(timezone: string, date: Date): number {
-  const dtf = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
+  let dtf = dtfCache.get(timezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    dtfCache.set(timezone, dtf);
+  }
   const parts = dtf.formatToParts(date);
   const map = new Map(parts.map(p => [p.type, p.value]));
   const asUtc = Date.UTC(
@@ -473,12 +479,14 @@ function buildPatternOccurrences(
       const targetDayNum = DAY_MAP[d.dayOfWeek.toUpperCase()];
       if (targetDayNum !== dayOfWeekNum) continue;
 
-      const [hoursStr, minutesStr] = d.startTime.split(":");
-      const hours = Number.parseInt(hoursStr ?? "0", 10);
-      const minutes = Number.parseInt(minutesStr ?? "0", 10);
+      const totalMin = timeToMinutes(d.startTime);
+      const hours = Math.floor(totalMin / 60);
+      const minutes = totalMin % 60;
 
-      const dateStr = curr.toISOString().split("T")[0];
-      const localStr = `${dateStr}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
+      const dateStr = getUtcDateString(curr);
+      const hStr = hours < 10 ? `0${hours}` : `${hours}`;
+      const mStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
+      const localStr = `${dateStr}T${hStr}:${mStr}:00`;
       const slotStart = new Date(localStr + "Z");
       try {
         const offsetMs = getTzOffsetMs(timezone, slotStart);

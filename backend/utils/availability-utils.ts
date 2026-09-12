@@ -213,6 +213,7 @@ export function getVacationBlockedRangesForDate(
   calendarDate: string,
   vacations: { startAt: Date; endAt: Date }[]
 ): { start: number; end: number }[] {
+  if (vacations.length === 0) return [];
   const dayStart = new Date(`${calendarDate}T00:00:00.000Z`);
   const dayEnd = new Date(`${calendarDate}T23:59:59.999Z`);
   const blocked: { start: number; end: number }[] = [];
@@ -233,15 +234,19 @@ export function getBookingBlockedRangesForDate(
   calendarDate: string,
   bookings: { scheduledStartAt: Date; scheduledEndAt: Date }[]
 ): { start: number; end: number }[] {
+  if (bookings.length === 0) return [];
+  const dayStart = new Date(`${calendarDate}T00:00:00.000Z`);
+  const dayEnd = new Date(`${calendarDate}T23:59:59.999Z`);
   const blocked: { start: number; end: number }[] = [];
+
   for (let i = 0; i < bookings.length; i++) {
     const booking = bookings[i];
-    const bookingDate = getUtcDateString(booking.scheduledStartAt);
-    if (bookingDate !== calendarDate) continue;
-    blocked.push({
-      start: dateToMinutes(booking.scheduledStartAt),
-      end: dateToMinutes(booking.scheduledEndAt),
-    });
+    if (booking.scheduledEndAt <= dayStart || booking.scheduledStartAt > dayEnd) continue;
+    const blockStart = booking.scheduledStartAt > dayStart ? dateToMinutes(booking.scheduledStartAt) : 0;
+    const blockEnd = booking.scheduledEndAt < dayEnd ? dateToMinutes(booking.scheduledEndAt) : 24 * 60;
+    if (blockStart < blockEnd) {
+      blocked.push({ start: blockStart, end: blockEnd });
+    }
   }
   return blocked;
 }
@@ -332,10 +337,14 @@ export function sortTeachers(
 
 export function groupByTeacherId<T extends { teacherId: string }>(rows: T[]): Map<string, T[]> {
   const grouped = new Map<string, T[]>();
-  for (const row of rows) {
-    const list = grouped.get(row.teacherId) ?? [];
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    let list = grouped.get(row.teacherId);
+    if (!list) {
+      list = [];
+      grouped.set(row.teacherId, list);
+    }
     list.push(row);
-    grouped.set(row.teacherId, list);
   }
   return grouped;
 }
