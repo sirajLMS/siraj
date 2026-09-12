@@ -10,6 +10,7 @@
     "dev:https": "NEXT_DIST_DIR=.next-dev next dev --turbopack --experimental-https -p 3000 -H 0.0.0.0",
     "dev:inspect": "NEXT_DIST_DIR=.next-dev NODE_OPTIONS='--inspect' next dev --turbopack -p 3000 -H 0.0.0.0",
     "ngrok": "bun run scripts/ngrok.ts",
+    "whatsapp:webhook-setup": "bun run scripts/whatsapp-webhook-setup.ts",
     "prebuild": "tsx scripts/locale-snapshots.ts && tsx scripts/build/generate-vercel-config.ts",
     "locale:snapshots": "tsx scripts/locale-snapshots.ts",
     "build": "tsx scripts/lib/run-locked-cmd.ts build NODE_ENV=production next build",
