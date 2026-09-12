@@ -181,16 +181,34 @@ ${BOLD}Examples:${RESET}
 
 // ── Health Check for Dev Server ─────────────────────────────────────────────
 
-async function checkLocalServer(port: number): Promise<boolean> {
+/**
+ * Probe one protocol against the local webhook endpoint. The HTTPS probe
+ * accepts the self-signed localhost certificate Next.js `--experimental-https`
+ * generates (Bun fetch `tls` option).
+ */
+async function probeLocalEndpoint(protocol: "http" | "https", port: number): Promise<boolean> {
   try {
-    const res = await fetch(`http://localhost:${port}/api/webhooks/whatsapp`, {
+    const res = await fetch(`${protocol}://localhost:${port}/api/webhooks/whatsapp`, {
       method: "GET",
       signal: AbortSignal.timeout(1000),
+      ...(protocol === "https" ? { tls: { rejectUnauthorized: false } } : {}),
     });
     return res.status !== 0;
   } catch {
     return false;
   }
+}
+
+/**
+ * Probe-then-forward: detect which protocol the local dev server actually
+ * speaks. `dev:https` serves TLS on its port while `dev` serves plain HTTP —
+ * forwarding the wrong protocol makes every Meta webhook POST fail at the
+ * TLS handshake (ngrok inspection shows status 0) before our code ever runs.
+ */
+async function detectLocalProtocol(port: number): Promise<"http" | "https" | null> {
+  if (await probeLocalEndpoint("http", port)) return "http";
+  if (await probeLocalEndpoint("https", port)) return "https";
+  return null;
 }
 
 // ── Extract error message from log record ───────────────────────────────────
@@ -221,8 +239,19 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  // 2. Build ngrok command
-  const ngrokArgs = ["ngrok", "http", String(options.port), "--log", "stdout", "--log-format", "json"];
+  // 2. Detect the local server's protocol (dev = HTTP, dev:https = TLS) so the
+  // tunnel forwards to the scheme the server actually speaks.
+  const localProtocol = await detectLocalProtocol(options.port);
+  const forwardTarget = localProtocol === "https" ? `https://localhost:${options.port}` : String(options.port);
+
+  // 3. Build ngrok command
+  const ngrokArgs = ["ngrok", "http", forwardTarget, "--log", "stdout", "--log-format", "json"];
+
+  if (localProtocol === "https") {
+    // Next.js --experimental-https generates a self-signed localhost cert, so
+    // the upstream TLS verification must be disabled.
+    ngrokArgs.push("--upstream-tls-verify=false");
+  }
 
   if (options.authtoken) {
     ngrokArgs.push("--authtoken", options.authtoken);
@@ -231,9 +260,10 @@ async function main(): Promise<void> {
     ngrokArgs.push("--url", options.domain.startsWith("http") ? options.domain : `https://${options.domain}`);
   }
 
-  log(`${GRAY}Starting ngrok tunnel for port ${options.port}...${RESET}`);
+  const protocolSuffix = localProtocol ? ` (${localProtocol.toUpperCase()})` : "";
+  log(`${GRAY}Starting ngrok tunnel for port ${options.port}${protocolSuffix}...${RESET}`);
 
-  // 3. Spawn ngrok process
+  // 4. Spawn ngrok process
   const child = Bun.spawn(ngrokArgs, {
     stdout: "pipe",
     stderr: "pipe",
@@ -274,12 +304,14 @@ async function main(): Promise<void> {
 
     const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN ?? "(not set in .env)";
     const callbackUrl = `${url}/api/webhooks/whatsapp`;
-    const serverRunning = await checkLocalServer(options.port);
+    const serverRunning = localProtocol !== null;
 
     log("\n" + "═".repeat(70));
     log(`${BOLD}${GREEN}  NGROK TUNNEL ONLINE${RESET}`);
     log("═".repeat(70));
-    log(`  ${BOLD}Forwarding:${RESET}        ${CYAN}${url}${RESET}  ->  http://localhost:${options.port}`);
+    log(
+      `  ${BOLD}Forwarding:${RESET}        ${CYAN}${url}${RESET}  ->  ${localProtocol ?? "http"}://localhost:${options.port}`
+    );
     if (inspectAddr) {
       log(`  ${BOLD}Web Inspection:${RESET}    http://${inspectAddr}`);
     }
@@ -290,11 +322,11 @@ async function main(): Promise<void> {
     log("═".repeat(70));
 
     if (!serverRunning) {
-      log(`\n${YELLOW}${BOLD}[NOTICE]${RESET} Local server not responding on http://localhost:${options.port}.`);
+      log(`\n${YELLOW}${BOLD}[NOTICE]${RESET} Local server not responding on http(s)://localhost:${options.port}.`);
       log(`         Make sure you start the Next.js dev server in another terminal:`);
-      log(`         ${CYAN}bun run dev${RESET}\n`);
+      log(`         ${CYAN}bun run dev${RESET} or ${CYAN}bun run dev:https${RESET}\n`);
     } else {
-      log(`\n${GREEN}✓ Local server detected on port ${options.port}.${RESET}\n`);
+      log(`\n${GREEN}✓ Local server detected on port ${options.port} (${localProtocol?.toUpperCase()}).${RESET}\n`);
     }
 
     log(`${GRAY}Press Ctrl+C to stop the tunnel.${RESET}\n`);

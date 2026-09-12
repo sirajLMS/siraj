@@ -70,6 +70,25 @@ const nextConfig: NextConfig = {
   // Ensure the full newrelic package is traced into serverless function bundles on Vercel.
   // Without this, @vercel/nft may tree-shake parts of the agent that are dynamically loaded.
   outputFileTracingIncludes: { "/*": ["./node_modules/newrelic/**/*"] },
+  // Keep the file trace free of repo-only files excluded by .vercelignore. The tracer
+  // pulls colocated test trees (e.g. backend/storage/disk/local/utils.test.ts, swept in
+  // via backend/lib/storage/local-storage-path.ts -> utils.ts) and local-only dirs
+  // (logs/, scratch/, graphql_tests_logs/) into every server trace. Deploying prebuilt
+  // then fails: Vercel lstats each traced path under /vercel/path0 and ENOENTs on
+  // anything .vercelignore stripped from the upload.
+  //   ENOENT: no such file or directory, lstat '/vercel/path0/backend/storage/disk/local/utils.test.ts'
+  outputFileTracingExcludes: {
+    "/*": [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.spec.tsx",
+      "logs/**/*",
+      "scratch/**/*",
+      "graphql_tests_logs/**/*",
+      "newrelic_agent.log",
+    ],
+  },
   turbopack: {},
   experimental: {
     // TS7 lands as a CLI-only compiler (no JS API) — let `next build` type-check
