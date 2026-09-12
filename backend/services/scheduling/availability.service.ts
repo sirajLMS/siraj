@@ -412,21 +412,45 @@ export namespace AvailabilityService {
  * Returns the timezone offset in milliseconds for the given IANA timezone
  * at the given point in time. Positive = ahead of UTC, negative = behind.
  * Uses Intl.DateTimeFormat to avoid depending on a full timezone library.
+ *
+ * Both formatters are cached per timezone — Intl.DateTimeFormat construction
+ * is expensive and this function runs per candidate slot in availability search.
  */
+const dtfCache = new Map<string, Intl.DateTimeFormat>();
+const utcFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: "UTC",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
+
 function getTzOffsetMs(timezone: string, date: Date): number {
-  const dtf = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
-  const parts = dtf.formatToParts(date);
+  let dtf = dtfCache.get(timezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    dtfCache.set(timezone, dtf);
+  }
+  const asTz = partsToEpochMs(dtf.formatToParts(date));
+  const asUtc = partsToEpochMs(utcFormatter.formatToParts(date));
+  return asTz - asUtc;
+}
+
+function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
   const map = new Map(parts.map(p => [p.type, p.value]));
-  const asUtc = Date.UTC(
+  return Date.UTC(
     Number(map.get("year")),
     Number(map.get("month")) - 1,
     Number(map.get("day")),
@@ -434,7 +458,6 @@ function getTzOffsetMs(timezone: string, date: Date): number {
     Number(map.get("minute")),
     Number(map.get("second"))
   );
-  return asUtc - date.getTime();
 }
 
 const DAY_MAP: Record<string, number> = {
@@ -473,12 +496,14 @@ function buildPatternOccurrences(
       const targetDayNum = DAY_MAP[d.dayOfWeek.toUpperCase()];
       if (targetDayNum !== dayOfWeekNum) continue;
 
-      const [hoursStr, minutesStr] = d.startTime.split(":");
-      const hours = Number.parseInt(hoursStr ?? "0", 10);
-      const minutes = Number.parseInt(minutesStr ?? "0", 10);
+      const totalMin = timeToMinutes(d.startTime);
+      const hours = Math.floor(totalMin / 60);
+      const minutes = totalMin % 60;
 
-      const dateStr = curr.toISOString().split("T")[0];
-      const localStr = `${dateStr}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
+      const dateStr = getUtcDateString(curr);
+      const hStr = hours < 10 ? `0${hours}` : `${hours}`;
+      const mStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
+      const localStr = `${dateStr}T${hStr}:${mStr}:00`;
       const slotStart = new Date(localStr + "Z");
       try {
         const offsetMs = getTzOffsetMs(timezone, slotStart);

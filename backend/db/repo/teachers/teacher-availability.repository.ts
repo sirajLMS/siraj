@@ -33,10 +33,6 @@ import { PaginationUtils } from "@/backend/utils/pagination.utils";
 import { parseDayOfWeek, parseGender, parseIanaTimezone } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
-function dayOfWeekEquals(value: string, day: DayOfWeek): boolean {
-  return parseDayOfWeek(value) === parseDayOfWeek(day);
-}
-
 export namespace TeacherAvailabilityRepository {
   async function acquireAvailabilityLock(tx: DBTransaction, teacherId: string): Promise<void> {
     await acquireAdvisoryLock(tx, `teacher_availability_${teacherId}`);
@@ -379,6 +375,95 @@ export namespace TeacherAvailabilityRepository {
     minResultCriteria: MinResultCriteria;
   }
 
+  function groupByDayOfWeek<T extends { dayOfWeek: string }>(rows: T[]): Map<DayOfWeek, T[]> {
+    const map = new Map<DayOfWeek, T[]>();
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const dayEnum = parseDayOfWeek(row.dayOfWeek);
+      if (!dayEnum) continue;
+      let list = map.get(dayEnum);
+      if (!list) {
+        list = [];
+        map.set(dayEnum, list);
+      }
+      list.push(row);
+    }
+    return map;
+  }
+
+  function groupBookingsByDate(
+    bookings: { scheduledStartAt: Date; scheduledEndAt: Date }[]
+  ): Map<string, { scheduledStartAt: Date; scheduledEndAt: Date }[]> {
+    const map = new Map<string, { scheduledStartAt: Date; scheduledEndAt: Date }[]>();
+    for (let i = 0; i < bookings.length; i++) {
+      const b = bookings[i];
+      const startDateStr = getUtcDateString(b.scheduledStartAt);
+      let startList = map.get(startDateStr);
+      if (!startList) {
+        startList = [];
+        map.set(startDateStr, startList);
+      }
+      startList.push(b);
+
+      const endDateStr = getUtcDateString(b.scheduledEndAt);
+      if (endDateStr !== startDateStr) {
+        let endList = map.get(endDateStr);
+        if (!endList) {
+          endList = [];
+          map.set(endDateStr, endList);
+        }
+        endList.push(b);
+      }
+    }
+    return map;
+  }
+
+  function computeTeacherGapsForDate(
+    teacher: TeacherShortInfo,
+    calendarDate: string,
+    day: DayOfWeek,
+    windowsByDay: Map<DayOfWeek, Types.TeacherAvailabilityWindowSelectType[]>,
+    unavailByDay: Map<DayOfWeek, Types.TeacherRecurringUnavailabilitySelectType[]>,
+    bookingsByDate: Map<string, { scheduledStartAt: Date; scheduledEndAt: Date }[]>,
+    vacations: { startAt: Date; endAt: Date }[],
+    timeRange: MinuteRange
+  ): Types.TeacherAvailabilityGap[] {
+    const dayWindows = windowsByDay.get(day) ?? [];
+    if (dayWindows.length === 0) return [];
+
+    const candidateUnavail = unavailByDay.get(day) ?? [];
+    const dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[] = [];
+    for (let uIdx = 0; uIdx < candidateUnavail.length; uIdx++) {
+      const u = candidateUnavail[uIdx];
+      if (isWithinEffectiveRange(calendarDate, u.effectiveFrom, u.effectiveUntil)) {
+        dayUnavail.push(u);
+      }
+    }
+
+    const dateBookings = bookingsByDate.get(calendarDate) ?? [];
+    const vacationBlocked = getVacationBlockedRangesForDate(calendarDate, vacations);
+    const bookingBlocked = getBookingBlockedRangesForDate(calendarDate, dateBookings);
+
+    let extraBlocked: { start: number; end: number }[];
+    if (vacationBlocked.length === 0) {
+      extraBlocked = bookingBlocked;
+    } else if (bookingBlocked.length === 0) {
+      extraBlocked = vacationBlocked;
+    } else {
+      extraBlocked = vacationBlocked.concat(bookingBlocked);
+    }
+
+    return findGapsForCalendarDate({
+      teacher,
+      calendarDate,
+      day,
+      dayWindows,
+      dayUnavail,
+      extraBlocked,
+      searchRange: timeRange,
+    });
+  }
+
   function buildTeacherSearchResults(options: BuildTeacherSearchResultsOptions): Types.AvailabilitySearchTeacher[] {
     const { allTeachers, availabilityData, dateFilter, timeRange, minResultCriteria } = options;
     const { windowsByTeacher, unavailabilitiesByTeacher, vacationsByTeacher, bookingsByTeacher } = availabilityData;
@@ -386,40 +471,34 @@ export namespace TeacherAvailabilityRepository {
     const { minAvailableDays, minTotalGaps } = minResultCriteria;
     const result: Types.AvailabilitySearchTeacher[] = [];
 
-    for (const teacher of allTeachers) {
-      const windows = windowsByTeacher.get(teacher.teacherId) ?? [];
-      const unavailabilities = unavailabilitiesByTeacher.get(teacher.teacherId) ?? [];
+    for (let tIdx = 0; tIdx < allTeachers.length; tIdx++) {
+      const teacher = allTeachers[tIdx];
+      const windowsByDay = groupByDayOfWeek(windowsByTeacher.get(teacher.teacherId) ?? []);
+      const unavailByDay = groupByDayOfWeek(unavailabilitiesByTeacher.get(teacher.teacherId) ?? []);
+      const bookingsByDate = groupBookingsByDate(bookingsByTeacher.get(teacher.teacherId) ?? []);
       const vacations = vacationsByTeacher.get(teacher.teacherId) ?? [];
-      const bookings = bookingsByTeacher.get(teacher.teacherId) ?? [];
       const gaps: Types.TeacherAvailabilityGap[] = [];
 
-      for (const calendarDate of calendarDates) {
+      for (let d = 0; d < calendarDates.length; d++) {
+        const calendarDate = calendarDates[d];
         const day = getDayOfWeekFromDateString(calendarDate);
         if (allowedDays && !allowedDays.has(day)) {
           continue;
         }
 
-        const dayWindows = windows.filter(window => dayOfWeekEquals(window.dayOfWeek, day));
-        const dayUnavail = unavailabilities.filter(
-          unavailability =>
-            dayOfWeekEquals(unavailability.dayOfWeek, day) &&
-            isWithinEffectiveRange(calendarDate, unavailability.effectiveFrom, unavailability.effectiveUntil)
-        );
-        const extraBlocked = [
-          ...getVacationBlockedRangesForDate(calendarDate, vacations),
-          ...getBookingBlockedRangesForDate(calendarDate, bookings),
-        ];
-
-        const dayGaps = findGapsForCalendarDate({
+        const dayGaps = computeTeacherGapsForDate(
           teacher,
           calendarDate,
           day,
-          dayWindows,
-          dayUnavail,
-          extraBlocked,
-          searchRange: timeRange,
-        });
-        gaps.push(...dayGaps);
+          windowsByDay,
+          unavailByDay,
+          bookingsByDate,
+          vacations,
+          timeRange
+        );
+        for (let gIdx = 0; gIdx < dayGaps.length; gIdx++) {
+          gaps.push(dayGaps[gIdx]);
+        }
       }
 
       const availableDaysCount = countAvailableDays(gaps);
