@@ -162,6 +162,10 @@ export type WhatsappTemplateSnapshot = {
   readonly language: string;
   readonly status: WhatsappTemplateStatus | null;
   readonly category: WhatsappTemplateCategory | null;
+  /** Body component text; null when the template has no BODY component. */
+  readonly bodyText: string | null;
+  /** Count of `{{n}}` placeholders in the BODY text (0 when BODY has none); null when there is no BODY component. */
+  readonly bodyParamsCount: number | null;
   readonly lastSyncedAt?: Date | null;
 };
 

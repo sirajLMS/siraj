@@ -8,6 +8,8 @@ import type {
   SendWhatsappConversationMessageMutationVariables,
   VerifyWhatsappTestRecipientMutation,
   VerifyWhatsappTestRecipientMutationVariables,
+  WhatsappAccountTemplatesQuery,
+  WhatsappAccountTemplatesQueryVariables,
   WhatsappConversationsListQuery,
   WhatsappConversationsListQueryVariables,
   WhatsappConversationThreadQuery,
@@ -117,6 +119,24 @@ export const whatsappTestRecipientsQueryDocument: TypedDocumentNode<
   query WhatsappTestRecipients($accountId: String!) {
     whatsappTestRecipients(accountId: $accountId) {
       ...WhatsappTestRecipientFields
+    }
+  }
+`;
+
+export const whatsappAccountTemplatesQueryDocument: TypedDocumentNode<
+  WhatsappAccountTemplatesQuery,
+  WhatsappAccountTemplatesQueryVariables
+> = gql`
+  query WhatsappAccountTemplates($accountId: String!) {
+    whatsappAccountTemplates(accountId: $accountId) {
+      id
+      name
+      language
+      status
+      category
+      bodyText
+      bodyParamsCount
+      lastSyncedAt
     }
   }
 `;

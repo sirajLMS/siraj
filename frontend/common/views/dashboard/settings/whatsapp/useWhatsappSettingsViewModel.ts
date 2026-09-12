@@ -936,9 +936,11 @@ function buildWhatsappViewModel(p: WhatsappViewModelParts): WhatsappSettingsView
  * The backend `whatsappTemplates` query resolver does NOT exist (see Task 3 outcome).
  * Templates are only available from the `syncWhatsappAccountsFromMeta` mutation result.
  * `refetchTemplates` triggers `refetchAccounts()` — this does NOT re-fetch templates
- * from the server because no `whatsappTemplates` query exists. Templates persist only
+ * from the server. Templates persist only
  * for the lifetime of the Apollo cache entry from the last sync mutation.
- * Backend resolver creation is out of scope for this frontend-only plan (Task 9 dependency).
+ * Note: a per-account live query `whatsappAccountTemplates` now exists for the
+ * conversations composer; this settings tab still uses the sync snapshot cache.
+ * Backend resolver remediation is out of scope for this frontend-only plan.
  */
 // ─── Snackbar + editing derivation ────────────────────────────────────
 

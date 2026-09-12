@@ -709,6 +709,8 @@ export interface ErrorsLabels
   readonly whatsappRecipientConflict: string;
   readonly whatsappTemplateRequired: string;
   readonly whatsappMessageRequired: string;
+  readonly whatsappTemplatesFetchFailed: string;
+  readonly whatsappTemplateParamsMismatch: string;
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   readonly emailChannelLabel: string;

@@ -23,6 +23,9 @@ This ledger tracks all work deferred from one task to another to ensure no defer
 | D5 | Extract `hasErrorCode`/`isUniqueViolation` to `backend/lib` | post-review | cross-cutting follow-up ticket | ❌ Blocked | — | Duplicated across `whatsapp-conversations.service` and billing services |
 | D6 | `accountPurpose` on the thread detail type | post-review | design-03 follow-up | ❌ Blocked | — | Populated on the list row only; the detail needs a joined query per design-03 |
 | D7 | E2E for `/whatsapp` (task 5.3) | 5.3 | post-v1 | ⚠️ Partial | 5.1 journey | Requires `build:test` + live WhatsApp env creds; covered by the journey test `test/workflows/whatsapp/conversations.test.ts` |
+| D8 | Parameterized template variable entry in composer | composer patch 2026-09-12 | follow-up (post-v1) | ❌ Blocked | — | Picker disables parameter-bearing templates with a "requires variables" note; Meta `132000` is mapped to `WHATSAPP_TEMPLATE_PARAMS_MISMATCH`. Variable input UX not implemented |
+| D9 | Settings templates tab live query adoption | composer patch 2026-09-12 | follow-up (post-v1) | ❌ Blocked | — | Tab still reads the sync-snapshot cache; could adopt `whatsappAccountTemplates` (live Meta read) later |
+| D10 | Media/interactive composer message types | composer patch 2026-09-12 | follow-up (post-v1) | ❌ Blocked | — | Composer supports text + template only; media/interactive sends out of scope |
 
 ---
 

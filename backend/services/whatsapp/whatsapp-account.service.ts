@@ -3,7 +3,6 @@ import { db } from "@/backend/db/drizzleDb";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { AppPermission, NotificationChannel, NotificationEventType, SystemPermissionGroupSlug } from "@/backend/enum";
-import { WhatsappTemplateCategory, WhatsappTemplateStatus } from "@/backend/enum/whatsapp/whatsapp.enum";
 import {
   type WhatsappAccountPurpose,
   WhatsappOnboardingMode,
@@ -40,6 +39,9 @@ import {
   buildExchangeEmbeddedSignupCodeRequest,
   buildGetPhoneNumberPlatformRequest,
   buildSubscribeAppToWabaRequest,
+  buildTemplateSnapshot,
+  graphApiPagingSchema,
+  messageTemplateListSchema,
   parseExchangeEmbeddedSignupCodeResponse,
   parseGetPhoneNumberPlatformResponse,
   parseSubscribeAppToWabaResponse,
@@ -79,10 +81,8 @@ import type {
   WhatsappAccountUpdateInput,
   WhatsappConfigurationStatusType,
   WhatsappEmbeddedSignupSubmitInput,
-  WhatsappMessageTemplate,
   WhatsappPhoneNumber,
   WhatsappSyncFromMetaReturnType,
-  WhatsappTemplateSnapshot,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -118,19 +118,6 @@ const phoneNumberRawSchema = z.object({
 
 export const phoneNumberResultSchema = phoneNumberRawSchema.transform(mapPhoneNumberDetail);
 
-export const graphApiPagingSchema = z
-  .object({
-    cursors: z
-      .object({
-        before: z.string().optional(),
-        after: z.string().optional(),
-      })
-      .optional(),
-    next: z.string().optional(),
-    previous: z.string().optional(),
-  })
-  .optional();
-
 export const phoneNumberListSchema = z.object({
   data: z.array(
     z.object({
@@ -143,26 +130,6 @@ export const phoneNumberListSchema = z.object({
       code_verification_status: z.string().optional(),
     })
   ),
-  paging: graphApiPagingSchema,
-});
-
-export const messageTemplateSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  language: z.union([
-    z.string().transform(code => ({ code })),
-    z.object({
-      code: z.string(),
-    }),
-  ]),
-  status: z.string(),
-  category: z.string(),
-  components: z.array(z.unknown()).optional(),
-  created_time: z.string().optional(),
-});
-
-export const messageTemplateListSchema = z.object({
-  data: z.array(messageTemplateSchema),
   paging: graphApiPagingSchema,
 });
 
@@ -403,14 +370,6 @@ async function executeGraphApiFetch<T>(request: GraphApiRequestInit, schema: z.Z
   }
   const raw: unknown = await response.json();
   return schema.parse(raw);
-}
-
-function isValidTemplateStatus(value: string): value is WhatsappTemplateStatus {
-  return (Object.values(WhatsappTemplateStatus) as string[]).includes(value);
-}
-
-function isValidTemplateCategory(value: string): value is WhatsappTemplateCategory {
-  return (Object.values(WhatsappTemplateCategory) as string[]).includes(value);
 }
 
 // ─── Embedded Signup (coexistence onboarding) helpers ───────────────────────
@@ -1184,41 +1143,6 @@ export namespace WhatsappAccountService {
 
     const accounts = accountResults.filter((r): r is WhatsappAccountReturnType => r !== null);
     return { accounts, failedCount };
-  }
-
-  /** Map collected templates to the snapshot type, coercing unknown enums. */
-  function buildTemplateSnapshot(templates: readonly WhatsappMessageTemplate[]): WhatsappTemplateSnapshot[] {
-    const now = new Date();
-    return templates.map(t => {
-      let status: WhatsappTemplateStatus;
-      if (isValidTemplateStatus(t.status)) {
-        status = t.status;
-      } else {
-        logger.warn(
-          `whatsapp-account-service: unknown template status "${t.status}" from Meta — falling back to PENDING`,
-          { templateId: t.id, templateName: t.name, status: t.status }
-        );
-        status = WhatsappTemplateStatus.PENDING;
-      }
-      let category: WhatsappTemplateCategory;
-      if (isValidTemplateCategory(t.category)) {
-        category = t.category;
-      } else {
-        logger.warn(
-          `whatsapp-account-service: unknown template category "${t.category}" from Meta — falling back to MARKETING`,
-          { templateId: t.id, templateName: t.name, category: t.category }
-        );
-        category = WhatsappTemplateCategory.MARKETING;
-      }
-      return {
-        id: t.id,
-        name: t.name,
-        language: t.language.code,
-        category,
-        status,
-        lastSyncedAt: now,
-      };
-    });
   }
 
   export async function syncFromMeta(

@@ -1,5 +1,6 @@
 import type {
   WhatsappConversationSendMode,
+  WhatsappTemplateCategory,
   WhatsappTestRecipientFieldsFragment,
   WhatsappTestRecipientStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -46,10 +47,13 @@ export type WhatsappComposerLabels = Pick<
   | "composerTemplatePlaceholder"
   | "composerRecipientLabel"
   | "composerRecipientPlaceholder"
-  | "templateNameLabel"
-  | "templateNamePlaceholder"
   | "templateLanguageLabel"
   | "templateLanguagePlaceholder"
+  | "templatePickerLabel"
+  | "templatePickerPlaceholder"
+  | "templatePickerEmpty"
+  | "templatePickerError"
+  | "templatePickerRetry"
   | "sendButton"
   | "windowOpenHint"
   | "windowClosedHint"
@@ -105,6 +109,20 @@ export interface WhatsappConversationsAccountOption {
 }
 
 /**
+ * One APPROVED Meta template pre-shaped for the composer picker. `key`
+ * (`name|language`) distinguishes the same template across languages;
+ * `paramsCount > 0` marks templates whose variables the composer cannot fill.
+ */
+export interface WhatsappTemplateOption {
+  readonly key: string;
+  readonly name: string;
+  readonly language: string;
+  readonly category: WhatsappTemplateCategory | null;
+  readonly bodyText: string;
+  readonly paramsCount: number;
+}
+
+/**
  * Registry row pre-shaped for presentation: status copy, formatted last-check
  * line, and the Meta error line are already localized/interpolated by the VM.
  */
@@ -152,7 +170,7 @@ export interface WhatsappConversationsViewModel {
   readonly onCloseThread: () => void;
   /** True after the new-conversation action fires until a thread opens. */
   readonly isInitiating: boolean;
-  /** Closes any open thread and resets the composer into template-locked initiation mode. */
+  /** Closes any open thread and resets the composer, defaulting initiation to template mode. */
   readonly onStartNewConversation: () => void;
 
   readonly threadMessages: readonly WhatsappMessageRow[];
@@ -168,6 +186,15 @@ export interface WhatsappConversationsViewModel {
   readonly onTemplateNameChange: (value: string) => void;
   readonly templateLanguage: string;
   readonly onTemplateLanguageChange: (value: string) => void;
+  /** APPROVED templates of the selected account, live from Meta. */
+  readonly templateOptions: readonly WhatsappTemplateOption[];
+  readonly templatesLoading: boolean;
+  readonly templatesError: boolean;
+  readonly onRetryTemplates: () => void;
+  /** Applies a picked template to the composer; `null` clears name + language. */
+  readonly onTemplateSelect: (option: WhatsappTemplateOption | null) => void;
+  /** Note shown on picker rows whose variables the composer cannot fill. */
+  readonly templateParamsUnsupportedText: string;
   /** True while no conversation is open — the composer must resolve a target. */
   readonly showRecipientPicker: boolean;
   /** On a test account, new-conversation targets come from the registry only. */

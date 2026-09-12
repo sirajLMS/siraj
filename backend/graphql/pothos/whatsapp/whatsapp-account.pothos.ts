@@ -129,6 +129,8 @@ export const WhatsappTemplateSnapshotPothosObject = WhatsappTemplateSnapshotRef.
     language: t.exposeString("language"),
     status: t.expose("status", { type: WhatsappTemplateStatusPothosEnum, nullable: true }),
     category: t.expose("category", { type: WhatsappTemplateCategoryPothosEnum, nullable: true }),
+    bodyText: t.exposeString("bodyText", { nullable: true }),
+    bodyParamsCount: t.exposeInt("bodyParamsCount", { nullable: true }),
     lastSyncedAt: t.expose("lastSyncedAt", { type: "DateTime", nullable: true }),
   }),
 });

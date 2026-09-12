@@ -139,7 +139,9 @@ Admin UI → Settings > WhatsApp (3 tabs: Numbers, Templates, Opt-in)
 ### Pothos Object Types
 - `WhatsappAccountPothosObject` exposes all `WhatsappAccountReturnType` fields. `id` field **always exposed** for Apollo cache normalization.
 - Input types split: `WhatsappAccountCreateInputPothosObject` (includes credentials) vs `WhatsappAccountUpdateInputPothosObject` (excludes credentials).
-- `WhatsappTemplateSnapshotPothosObject` (BL3): id, name, language, status, category.
+- `WhatsappTemplateSnapshotPothosObject` (BL3): id, name, language, status, category, plus
+  nullable `bodyText` and `bodyParamsCount` (count of `{{n}}` placeholders in the BODY component),
+  exposed for the conversations composer's template picker via `whatsappAccountTemplates`.
 - `WhatsappSyncFromMetaResultPothosObject` wrapper for sync results.
 
 ### inputType Pattern

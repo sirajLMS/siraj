@@ -23,6 +23,7 @@ import {
   AppPermission,
   WhatsappConversationSendMode,
   WhatsappMessageDirection,
+  WhatsappTemplateStatus,
   WhatsappTestRecipientStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
@@ -50,11 +51,13 @@ import {
   makeConversationRow,
   makeMessageRow,
   makeRecipientRow,
+  makeTemplateRow,
   NON_REGISTRY_PHONE,
   PENDING_PHONE,
   REGULAR_ACCOUNT_ID,
   recipientsMock,
   TEST_ACCOUNT_ID,
+  templatesMock,
   threadMock,
   workspaceMocks,
 } from "@/test/ui/components/whatsapp-conversations/whatsappConversationsFixtures";
@@ -138,6 +141,29 @@ function assertInlineText(text: string) {
   return screen.getByText(content => content.includes(text));
 }
 
+/**
+ * Clicks the pager's next button until the target row renders. The list
+ * collapses to a no-data branch while account/list refetches run, so an early
+ * click can land on a node that is being replaced; recursion keeps a single
+ * click in flight per attempt so the page can never advance twice past the
+ * target. (oxlint `no-await-in-loop` — recursive sequential pattern.)
+ */
+async function clickNextUntilRowVisible(rowName: string, attempt = 0): Promise<void> {
+  try {
+    await screen.findByText(rowName, undefined, { timeout: 1000 });
+    return;
+  } catch (error) {
+    if (attempt >= 6) {
+      throw error;
+    }
+    const next = screen.queryByRole("button", { name: adminLabels.nextPage });
+    if (next && !next.hasAttribute("disabled")) {
+      fireEvent.click(next);
+    }
+    await clickNextUntilRowVisible(rowName, attempt + 1);
+  }
+}
+
 function windowOpenStaticPart(): string {
   const [head] = labels.windowOpenHint.split("{duration}");
   return head ?? labels.windowOpenHint;
@@ -161,11 +187,13 @@ describe("WhatsappConversationsContainer — mocked Apollo workspace", () => {
     // selection moves it into the thread pane, so captured element
     // references go stale.
     await waitFor(() => expect(screen.getByPlaceholderText(labels.composerTextPlaceholder)).toBeEnabled());
-    expect(assertInlineText(windowOpenStaticPart())).toBeVisible();
+    // The textarea stays enabled while thread data loads (the window is
+    // advisory now), so the open hint lands a render later — poll for it.
+    await waitFor(() => expect(assertInlineText(windowOpenStaticPart())).toBeVisible());
     expect(screen.queryByText(labels.testNumberBannerTitle)).toBeNull();
   });
 
-  test("window closed: text disabled, closed hint, and a template name is required before send", async () => {
+  test("window closed: hint stays advisory — typing and template send both remain possible", async () => {
     const staleInbound = new Date(Date.now() - 48 * 3_600_000).toISOString();
     renderWorkspace(
       workspaceMocks({
@@ -176,16 +204,57 @@ describe("WhatsappConversationsContainer — mocked Apollo workspace", () => {
     );
 
     await openDefaultThread();
-    await waitFor(() => expect(screen.getByPlaceholderText(labels.composerTextPlaceholder)).toBeDisabled());
+    // The window estimate no longer locks the textarea; Meta is the gate.
+    await waitFor(() => expect(screen.getByPlaceholderText(labels.composerTextPlaceholder)).toBeEnabled());
     expect(await screen.findByText(labels.windowClosedHint)).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: labels.composerModeTemplate }));
+    // Text mode blocks only on an empty body.
     const sendButton = screen.getByRole("button", { name: labels.sendButton });
     expect(sendButton).toBeDisabled();
-
-    const templateNameField = screen.getByPlaceholderText(labels.templateNamePlaceholder);
-    fireEvent.change(templateNameField, { target: { value: "hello_world" } });
+    fireEvent.change(screen.getByPlaceholderText(labels.composerTextPlaceholder), {
+      target: { value: "See you tomorrow" },
+    });
     await waitFor(() => expect(sendButton).toBeEnabled());
+
+    // Template mode still requires a template before send.
+    fireEvent.click(screen.getByRole("button", { name: labels.composerModeTemplate }));
+    await waitFor(() => expect(sendButton).toBeDisabled());
+    fireEvent.change(screen.getByPlaceholderText(labels.templatePickerPlaceholder), {
+      target: { value: "hello_world" },
+    });
+    await waitFor(() => expect(sendButton).toBeEnabled());
+  });
+
+  test("template picker lists APPROVED templates only and selecting fills name + language", async () => {
+    renderWorkspace(
+      workspaceMocks({
+        account: makeAccountRow(REGULAR_ACCOUNT_ID),
+        messages: [makeMessageRow("msg-1", new Date(Date.now() - 5 * 60_000).toISOString())],
+        templates: [
+          makeTemplateRow("tpl-approved", "order_update"),
+          makeTemplateRow("tpl-pending", "review_reminder", { status: WhatsappTemplateStatus.Pending }),
+        ],
+      }),
+      MANAGE_PERMISSIONS
+    );
+
+    await openDefaultThread();
+    fireEvent.click(screen.getByRole("button", { name: labels.composerModeTemplate }));
+    // The workspace re-renders as account/templates queries resolve; open the
+    // popup with retries so a composer remount can't close it mid-open.
+    await waitFor(
+      () => {
+        fireEvent.mouseDown(screen.getByRole("combobox", { name: labels.templatePickerLabel }));
+        expect(screen.getByRole("option", { name: /order_update/ })).toBeVisible();
+      },
+      { timeout: 8000 }
+    );
+    expect(screen.queryByRole("option", { name: /review_reminder/ })).toBeNull();
+    fireEvent.click(screen.getByRole("option", { name: /order_update/ }));
+    await waitFor(() => {
+      expect(screen.getByLabelText(labels.templatePickerLabel)).toHaveValue("order_update");
+      expect(screen.getByLabelText(labels.templateLanguageLabel)).toHaveValue("en_US");
+    });
   });
 
   test("test number: banner + registry render, picker is registry-only, and no target blocks send", async () => {
@@ -207,7 +276,7 @@ describe("WhatsappConversationsContainer — mocked Apollo workspace", () => {
 
     // Template send needs a recipient before a template choice matters.
     fireEvent.click(screen.getByRole("button", { name: labels.composerModeTemplate }));
-    const templateNameField = await screen.findByPlaceholderText(labels.templateNamePlaceholder);
+    const templateNameField = await screen.findByPlaceholderText(labels.templatePickerPlaceholder);
     fireEvent.change(templateNameField, { target: { value: "hello_world" } });
     const sendButton = screen.getByRole("button", { name: labels.sendButton });
     expect(sendButton).toBeDisabled();
@@ -268,6 +337,7 @@ describe("WhatsappConversationsContainer — mocked Apollo workspace", () => {
       permissions: MANAGE_PERMISSIONS,
       mocks: [
         accountsMock([account]),
+        templatesMock(REGULAR_ACCOUNT_ID, []),
         conversationListPageMock(null, 0, [pageZeroRow], 45),
         conversationListPageMock(REGULAR_ACCOUNT_ID, 0, [pageZeroRow], 45),
         conversationListPageMock(REGULAR_ACCOUNT_ID, 1, [pageOneBefore], 45),
@@ -279,15 +349,8 @@ describe("WhatsappConversationsContainer — mocked Apollo workspace", () => {
     });
 
     await screen.findByText("Rowan Page Zero");
-    // The pager collapses to the no-data branch while the default-account
-    // effect re-fires the query, so each next-page click waits for the
-    // button to exist again.
-    const nextToPageOne = await screen.findByRole("button", { name: adminLabels.nextPage });
-    fireEvent.click(nextToPageOne);
-    await screen.findByText("Rowan Page One Before");
-    const nextToPageTwo = await screen.findByRole("button", { name: adminLabels.nextPage });
-    fireEvent.click(nextToPageTwo);
-    await screen.findByText("Rowan Page Two");
+    await clickNextUntilRowVisible("Rowan Page One Before");
+    await clickNextUntilRowVisible("Rowan Page Two");
 
     // Refetch on the now-nonexistent page reports the shrink; the view model
     // re-anchors to the last existing page instead of showing the empty state.
@@ -344,6 +407,7 @@ describe("WhatsappConversationsContainer — mocked Apollo workspace", () => {
     });
     return [
       accountsMock([makeAccountRow(config.accountId, config.isTestNumber ? { isTestNumber: true } : undefined)]),
+      templatesMock(config.accountId, [makeTemplateRow("tpl-hello-world", "hello_world")]),
       conversationListPageMock(null, 0, [seededConversation], 1),
       conversationListPageMock(config.accountId, 0, [seededConversation], 1),
       conversationListPageMock(config.accountId, 0, [seededConversation, config.initiatedConversation], 2),
@@ -390,13 +454,14 @@ describe("WhatsappConversationsContainer — mocked Apollo workspace", () => {
 
     if (config.isTestNumber) {
       expect(await screen.findByText(labels.newConversationTitle)).toBeVisible();
-      expect(screen.getByRole("button", { name: labels.composerModeText })).toBeDisabled();
+      // Text mode stays switchable — the window check is advisory only.
+      expect(screen.getByRole("button", { name: labels.composerModeText })).toBeEnabled();
     }
     expect(await screen.findByText(labels.newConversationSubtitle)).toBeVisible();
 
     await config.selectRecipient();
 
-    fireEvent.change(screen.getByPlaceholderText(labels.templateNamePlaceholder), {
+    fireEvent.change(screen.getByPlaceholderText(labels.templatePickerPlaceholder), {
       target: { value: ["hello", "world"].join("_") },
     });
 
@@ -409,7 +474,7 @@ describe("WhatsappConversationsContainer — mocked Apollo workspace", () => {
     });
   }
 
-  test("start new conversation: registry target, template-locked, selects the new thread after send", async () => {
+  test("start new conversation: registry target, template-default composer, selects the new thread after send", async () => {
     const initiatedConversation = makeConversationRow(INITIATED_CONVERSATION_ID, TEST_ACCOUNT_ID, {
       waId: PENDING_PHONE,
       displayName: INITIATED_CONTACT,

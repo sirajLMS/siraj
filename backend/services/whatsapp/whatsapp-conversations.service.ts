@@ -14,7 +14,12 @@ import {
 import { WhatsappMessageDirection } from "@/backend/enum/whatsapp/whatsapp-inbox.enum";
 import { DomainError, ForbiddenError, NotFoundError, ValidationError } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
-import { FETCH_TIMEOUT_MS, readErrorBody, resolveGraphApiVersion } from "@/backend/lib/whatsapp-constants";
+import {
+  FETCH_TIMEOUT_MS,
+  readErrorBody,
+  resolveGraphApiVersion,
+  WHATSAPP_CREDENTIAL_PLACEHOLDER,
+} from "@/backend/lib/whatsapp-constants";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   extractMetaErrorCode,
@@ -23,6 +28,9 @@ import {
 import {
   buildSendTemplateMessageRequest,
   buildSendTextMessageRequest,
+  buildTemplateSnapshot,
+  collectAllTemplates,
+  messageTemplateListSchema,
   parseSendTemplateResponse,
 } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests";
 import { AuditService } from "@/backend/services/system/audit.service";
@@ -32,6 +40,8 @@ import type {
   CreateAuditLogInput,
   DBTransaction,
   GraphApiRequestContext,
+  GraphApiRequestInit,
+  ListMessageTemplatesResponseBody,
   SendTemplateMessageResponseBody,
   SendTemplateMessageResult,
   UserPermissionContext,
@@ -44,17 +54,21 @@ import type {
   WhatsappConversationsListInput,
   WhatsappConversationsPaginatedResult,
   WhatsappConversationThreadResult,
+  WhatsappMessageTemplate,
+  WhatsappTemplateSnapshot,
   WhatsappTestRecipientReturnType,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**
  * Orchestrator for the `/whatsapp` conversations workspace: recipients
- * registry (test-number allow-list bookkeeping), verified test sends, and the
- * composer `sendMessage` path with Meta's test-number / 24h service-window
- * gating. Conversation reads delegate to `WhatsappInboxService`. Every entry
- * point takes the caller's `UserPermissionContext` (already on the GraphQL
- * context) so permission checks never re-fetch the context.
+ * registry (test-number allow-list bookkeeping), verified test sends, the
+ * composer `sendMessage` path, and the template picker read. Meta remains the
+ * authority on the 24h customer-service window (its rejection codes map to
+ * domain errors) — the local `lastInboundMessageAt` state is advisory only.
+ * Conversation reads delegate to `WhatsappInboxService`. Every entry point
+ * takes the caller's `UserPermissionContext` (already on the GraphQL context)
+ * so permission checks never re-fetch the context.
  */
 
 /** Meta caps a test number's recipient allow-list at 5 entries. */
@@ -62,9 +76,11 @@ const MAX_TEST_NUMBER_RECIPIENTS = 5;
 /** Meta's "recipient not in allowed list" error code, returned by test numbers. */
 const META_ERROR_RECIPIENT_NOT_IN_ALLOWED_LIST = 131030;
 /** Meta's re-engagement error code: the 24h customer-service window closed before the send. */
+const META_ERROR_RE_ENGAGEMENT_REQUIRED = 131047;
+/** Meta's out-of-window variant on the send API: the 24h customer-service window closed before the send. */
 const META_ERROR_OUTSIDE_SERVICE_WINDOW = 132047;
-/** Meta's customer-service window: free-text sends stay within 24h of the last inbound message. */
-const SERVICE_WINDOW_MS = 24 * 60 * 60 * 1000;
+/** Meta's error code for a template send whose parameter component count differs from the template definition. */
+const META_ERROR_TEMPLATE_PARAMS_MISMATCH = 132000;
 /** Approved Meta sample template used for the recipient verify test-send. */
 const VERIFY_TEMPLATE_NAME = "hello_world";
 const VERIFY_TEMPLATE_LANGUAGE = "en_US";
@@ -207,13 +223,14 @@ async function requireAccount(
 /**
  * Per-account Graph API context, matching the per-account branch of the
  * account-sync credential resolution (DB-managed token over the env-global
- * bootstrap token).
+ * bootstrap token). The unpersisted-token placeholder counts as "missing":
+ * rows created without credentials must not dispatch a live Graph call.
  */
 async function accountGraphContext(
   account: WhatsappAccountSelectType,
   tErrors: ErrorsLabels
 ): Promise<GraphApiRequestContext> {
-  if (!account.encryptedAccessToken) {
+  if (!account.encryptedAccessToken || account.encryptedAccessToken === WHATSAPP_CREDENTIAL_PLACEHOLDER) {
     throw new DomainError("WHATSAPP_CONFIG", tErrors.whatsappAccessTokenNotConfigured);
   }
   return { accessToken: account.encryptedAccessToken, apiVersion: await resolveGraphApiVersion() };
@@ -224,10 +241,7 @@ async function accountGraphContext(
  * keep their own fetch wrappers with different error contracts, so this one
  * only throws `GraphApiError` on non-2xx and returns the parsed JSON body.
  */
-async function executeSendRequest(request: {
-  url: string;
-  init: RequestInit;
-}): Promise<SendTemplateMessageResponseBody> {
+async function executeGraphApiCall<TBody>(request: { url: string; init: RequestInit }): Promise<TBody> {
   const response = await fetch(request.url, {
     ...request.init,
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
@@ -236,8 +250,22 @@ async function executeSendRequest(request: {
     const errorBody = await readErrorBody(response);
     throw new GraphApiError(response.status, errorBody);
   }
-  const body: SendTemplateMessageResponseBody = await response.json();
+  const body: TBody = await response.json();
   return body;
+}
+
+/** Execute a composer/verify send and return the raw send response body. */
+async function executeSendRequest(request: {
+  url: string;
+  init: RequestInit;
+}): Promise<SendTemplateMessageResponseBody> {
+  return executeGraphApiCall<SendTemplateMessageResponseBody>(request);
+}
+
+/** Execute a template-list page fetch, validating the wire shape before it reaches callers. */
+async function executeTemplateListRequest(request: GraphApiRequestInit): Promise<ListMessageTemplatesResponseBody> {
+  const raw = await executeGraphApiCall<unknown>(request);
+  return messageTemplateListSchema.parse(raw);
 }
 
 export namespace WhatsappConversationsService {
@@ -305,6 +333,33 @@ export namespace WhatsappConversationsService {
   ): Promise<WhatsappTestRecipientReturnType[]> {
     await assertCanViewConversations(context, tErrors);
     return WhatsappTestRecipientRepository.listByAccountId(input.accountId, tx);
+  }
+
+  /**
+   * Message templates for one account, listed live from Meta with the
+   * account's own credentials (view-permission gated). Mirrors the
+   * sync-from-Meta snapshot mapping — the composer picker reads the same
+   * shape without waiting for a background sync. Any Graph API or transport
+   * failure maps to the templates-fetch error.
+   */
+  export async function listAccountTemplates(
+    context: UserPermissionContext,
+    tErrors: ErrorsLabels,
+    input: { accountId: string },
+    tx?: DBTransaction
+  ): Promise<WhatsappTemplateSnapshot[]> {
+    await assertCanViewConversations(context, tErrors);
+    const account = await requireAccount(input.accountId, tErrors, tx);
+    const ctx = await accountGraphContext(account, tErrors);
+    let templates: readonly WhatsappMessageTemplate[];
+    try {
+      templates = await collectAllTemplates(ctx, { wabaId: account.wabaId }, executeTemplateListRequest);
+    } catch (error) {
+      throw new DomainError("WHATSAPP_TEMPLATES_FETCH_FAILED", tErrors.whatsappTemplatesFetchFailed, {
+        cause: error,
+      });
+    }
+    return buildTemplateSnapshot(templates);
   }
 
   /**
@@ -468,10 +523,13 @@ export namespace WhatsappConversationsService {
    * 1. manage-permission gate, account resolution, digits-only normalization;
    * 2. payload validation per mode (TEMPLATE requires a name, TEXT a body);
    * 3. test-number hard block — the recipient must be ALLOWED in the registry;
-   * 4. TEXT additionally requires an open 24h customer-service window (the
-   *    conversation's `lastInboundMessageAt`);
+   * 4. the 24h customer-service window is NOT gated locally: the local
+   *    `lastInboundMessageAt` state can lag Meta's truth (inbound webhooks do
+   *    not reach local dev), so Meta is the authority and its rejections are
+   *    mapped onto domain errors;
    * 5. Graph API send with the account's own credentials; Meta's 131030 maps
-   *    to the recipient-allow-list error, 132047 to the outside-service-window
+   *    to the recipient-allow-list error, 131047/132047 to the
+   *    outside-service-window error, 132000 to the template-params-mismatch
    *    error, everything else (other Graph API failures, builder validation
    *    failures, network/timeout) to send-failed;
    * 6. persist the message as API_OUTBOUND (idempotent via wamid), roll the
@@ -510,12 +568,6 @@ export namespace WhatsappConversationsService {
       }
     }
     const conversation = await resolveSendConversation(account.id, input, to, tErrors, tx);
-    if (
-      input.mode === WhatsappConversationSendMode.TEXT &&
-      !isServiceWindowOpen(conversation?.lastInboundMessageAt ?? null)
-    ) {
-      throw new DomainError("WHATSAPP_OUTSIDE_SERVICE_WINDOW", tErrors.whatsappOutsideServiceWindow);
-    }
     // The Meta HTTP call is complete before any transaction opens below.
     const result = await dispatchSend(account, input, to, body, templateName, tErrors);
     const sentAt = new Date();
@@ -598,16 +650,12 @@ async function resolveSendConversation(
   return conversation;
 }
 
-/** True while the 24h customer-service window measured from the last inbound message is open. */
-function isServiceWindowOpen(lastInboundAt: Date | null | undefined): boolean {
-  return lastInboundAt != null && Date.now() - lastInboundAt.getTime() <= SERVICE_WINDOW_MS;
-}
-
 /**
  * Build + execute the Graph API send with the account's per-account
  * credentials, translating every failure: Meta's 131030 maps to the
- * recipient-allow-list error, 132047 to the outside-service-window error, and
- * every other failure — other Graph API rejections, request-builder
+ * recipient-allow-list error, 131047 and 132047 map to the
+ * outside-service-window error, 132000 maps to the template-params-mismatch
+ * error, and every other failure — other Graph API rejections, request-builder
  * validation errors, network/timeout failures — maps to the generic
  * send-failed error. Already-localized domain errors (e.g. the
  * missing-credentials config error) propagate unchanged.
@@ -636,16 +684,19 @@ async function dispatchSend(
     if (error instanceof DomainError) {
       throw error;
     }
-    if (
-      error instanceof GraphApiError &&
-      extractMetaErrorCode(error.errorBody) === META_ERROR_RECIPIENT_NOT_IN_ALLOWED_LIST
-    ) {
+    const metaCode = error instanceof GraphApiError ? extractMetaErrorCode(error.errorBody) : undefined;
+    if (metaCode === META_ERROR_RECIPIENT_NOT_IN_ALLOWED_LIST) {
       throw new DomainError("WHATSAPP_RECIPIENT_NOT_ALLOWED", tErrors.whatsappRecipientNotAllowedFromMeta, {
         cause: error,
       });
     }
-    if (error instanceof GraphApiError && extractMetaErrorCode(error.errorBody) === META_ERROR_OUTSIDE_SERVICE_WINDOW) {
+    if (metaCode === META_ERROR_OUTSIDE_SERVICE_WINDOW || metaCode === META_ERROR_RE_ENGAGEMENT_REQUIRED) {
       throw new DomainError("WHATSAPP_OUTSIDE_SERVICE_WINDOW", tErrors.whatsappOutsideServiceWindow, {
+        cause: error,
+      });
+    }
+    if (metaCode === META_ERROR_TEMPLATE_PARAMS_MISMATCH) {
+      throw new DomainError("WHATSAPP_TEMPLATE_PARAMS_MISMATCH", tErrors.whatsappTemplateParamsMismatch, {
         cause: error,
       });
     }

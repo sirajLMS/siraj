@@ -9,6 +9,7 @@ import {
   WhatsappConversationSendMode,
   type WhatsappConversationsListQuery,
   WhatsappMessageDirection,
+  WhatsappTemplateStatus,
   WhatsappTestRecipientStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
@@ -17,6 +18,7 @@ import {
   sendWhatsappConversationMessageMutationDocument,
   verifyWhatsappTestRecipientMutationDocument,
   whatsappAccountsQueryDocument,
+  whatsappAccountTemplatesQueryDocument,
   whatsappConversationsListQueryDocument,
   whatsappConversationThreadQueryDocument,
   whatsappTestRecipientsQueryDocument,
@@ -30,6 +32,7 @@ import type {
   WhatsappConversationsViewModel,
   WhatsappMessageRow,
   WhatsappRecipientViewRow,
+  WhatsappTemplateOption,
   WhatsappTestRecipientRow,
 } from "@/frontend/common/views/dashboard/whatsapp/conversations/types/whatsappConversationsView.types";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -175,6 +178,8 @@ function mapSendError(error: unknown, labels: ErrorsLabels): string {
       WHATSAPP_OUTSIDE_SERVICE_WINDOW: l => l.whatsappOutsideServiceWindow,
       WHATSAPP_TEMPLATE_REQUIRED: l => l.whatsappTemplateRequired,
       WHATSAPP_MESSAGE_REQUIRED: l => l.whatsappMessageRequired,
+      WHATSAPP_TEMPLATES_FETCH_FAILED: l => l.whatsappTemplatesFetchFailed,
+      WHATSAPP_TEMPLATE_PARAMS_MISMATCH: l => l.whatsappTemplateParamsMismatch,
     },
     labels,
     labels.whatsappConversationSendFailed,
@@ -538,18 +543,44 @@ export function useWhatsappConversationsViewModel(): WhatsappConversationsViewMo
   const registryTargetPhones = useMemo(() => recipientRows.map(row => row.phoneNumber), [recipientRows]);
   const showRecipientPicker = selectedConversation === null;
 
-  // A brand-new thread has no open 24h window, so initiation forces the
-  // composer to template mode; the text toggle is disabled in the composer.
-  const composerMode = showRecipientPicker ? WhatsappConversationSendMode.Template : composer.mode;
-  const onComposerModeChange = useCallback(
-    (next: WhatsappConversationSendMode) => {
-      if (showRecipientPicker && next === WhatsappConversationSendMode.Text) {
-        return;
-      }
-      composer.onModeChange(next);
-    },
-    [showRecipientPicker, composer]
+  const templatesQuery = useQuery(whatsappAccountTemplatesQueryDocument, {
+    variables: { accountId: selectedAccount?.id ?? "" },
+    skip: !selectedAccount,
+    fetchPolicy: "cache-and-network",
+  });
+
+  const templateOptions = useMemo<WhatsappTemplateOption[]>(
+    () =>
+      (templatesQuery.data?.whatsappAccountTemplates ?? [])
+        .filter(row => row.status === WhatsappTemplateStatus.Approved)
+        .map(row => ({
+          key: `${row.name ?? ""}|${row.language ?? ""}`,
+          name: row.name ?? "",
+          language: row.language ?? "",
+          category: row.category ?? null,
+          bodyText: row.bodyText ?? "",
+          paramsCount: row.bodyParamsCount ?? 0,
+        })),
+    [templatesQuery.data]
   );
+
+  const onTemplateSelect = useCallback(
+    (option: WhatsappTemplateOption | null) => {
+      composer.setTemplateName(option?.name ?? "");
+      composer.setTemplateLanguage(option?.language ?? "");
+    },
+    [composer]
+  );
+
+  const onRetryTemplates = useCallback(() => {
+    void templatesQuery.refetch();
+  }, [templatesQuery]);
+
+  // Initiation defaults to template mode (a brand-new thread has no open 24h
+  // window), but the text toggle stays switchable: the window state is
+  // advisory only and Meta is the authoritative gate.
+  const composerMode = composer.mode;
+  const onComposerModeChange = composer.onModeChange;
   const onStartNewConversation = useCallback(() => {
     filters.onCloseThread();
     filters.setInitiating(true);
@@ -575,29 +606,13 @@ export function useWhatsappConversationsViewModel(): WhatsappConversationsViewMo
     if (!selectedAccount.isActive) {
       return errorLabels.whatsappAccountOffboarded;
     }
+    // Window state stays advisory: Meta is the authoritative gate and reports
+    // WHATSAPP_OUTSIDE_SERVICE_WINDOW on send; only empty payloads block here.
     if (composerMode === WhatsappConversationSendMode.Text) {
-      if (!selectedConversation || !windowOpen) {
-        return errorLabels.whatsappOutsideServiceWindow;
-      }
-      if (composer.textBody.trim() === "") {
-        return errorLabels.whatsappMessageRequired;
-      }
-      return null;
+      return composer.textBody.trim() === "" ? errorLabels.whatsappMessageRequired : null;
     }
-    if (composer.templateName.trim() === "") {
-      return errorLabels.whatsappTemplateRequired;
-    }
-    return null;
-  }, [
-    canManage,
-    selectedAccount,
-    selectedConversation,
-    windowOpen,
-    composerMode,
-    composer.textBody,
-    composer.templateName,
-    errorLabels,
-  ]);
+    return composer.templateName.trim() === "" ? errorLabels.whatsappTemplateRequired : null;
+  }, [canManage, selectedAccount, composerMode, composer.textBody, composer.templateName, errorLabels]);
 
   const sendDisabled = !canManage || !selectedAccount || targetTo === "" || sendBlockReason !== null;
 
@@ -821,6 +836,12 @@ export function useWhatsappConversationsViewModel(): WhatsappConversationsViewMo
     onTemplateNameChange: composer.setTemplateName,
     templateLanguage: composer.templateLanguage,
     onTemplateLanguageChange: composer.setTemplateLanguage,
+    templateOptions,
+    templatesLoading: templatesQuery.loading,
+    templatesError: templatesQuery.error !== undefined,
+    onRetryTemplates,
+    onTemplateSelect,
+    templateParamsUnsupportedText: labels.templatePickerParamsUnsupported,
     showRecipientPicker,
     registryTargetOnly: isTestAccount,
     registryTargetPhones,

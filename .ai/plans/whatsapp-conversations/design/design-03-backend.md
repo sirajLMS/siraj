@@ -44,3 +44,15 @@
 Domain errors extend `WhatsappConversationDomainError` (`DomainError`) in a new module or
 `backend/lib/errors.ts` additions; messages built with `tErrors` (i18n keys in `errors`
 namespace, en+ar). extensions.code flows per `docs/graphql/domain-error-extensions-code.md`.
+
+## Post-implementation patch (2026-09-12)
+
+- Step 4 (local TEXT window pre-block) was **removed** — advisory-only semantics because
+  inbound webhooks never reach local dev, making the DB window state blind while Meta's is
+  authoritative. Step 5's error mapping was extended: Meta `131047` and `132047` both map to
+  `WHATSAPP_OUTSIDE_SERVICE_WINDOW`; `132000` maps to new `WHATSAPP_TEMPLATE_PARAMS_MISMATCH`;
+  `131030` mapping is unchanged.
+- New `whatsappAccountTemplates(accountId)` query (permission
+  `whatsapp.conversations_view`) lists WABA templates live from Meta and exposes
+  `bodyText`/`bodyParamsCount` on `WhatsappTemplateSnapshot` for the composer picker.
+

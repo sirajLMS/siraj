@@ -60,8 +60,13 @@ export function WhatsappConversationsWorkspacePane({
       onTemplateNameChange={vm.onTemplateNameChange}
       templateLanguage={vm.templateLanguage}
       onTemplateLanguageChange={vm.onTemplateLanguageChange}
+      templateOptions={vm.templateOptions}
+      templatesLoading={vm.templatesLoading}
+      templatesError={vm.templatesError}
+      onRetryTemplates={vm.onRetryTemplates}
+      onTemplateSelect={vm.onTemplateSelect}
+      templateParamsUnsupportedText={vm.templateParamsUnsupportedText}
       showRecipientPicker={vm.showRecipientPicker}
-      textModeLocked={vm.showRecipientPicker}
       registryTargetOnly={vm.registryTargetOnly}
       registryTargetPhones={vm.registryTargetPhones}
       recipientSelection={vm.recipientSelection}

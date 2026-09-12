@@ -584,6 +584,10 @@ export const errorsEn: ErrorsLabels = {
   whatsappRecipientConflict: "This recipient is already registered for this WhatsApp number.",
   whatsappTemplateRequired: "Select a template to start a conversation outside the 24-hour window.",
   whatsappMessageRequired: "Enter a message to send.",
+  whatsappTemplatesFetchFailed:
+    "Could not load message templates from Meta. Check this number's access token, then try again.",
+  whatsappTemplateParamsMismatch:
+    "This template requires variables ({{1}}, {{2}}, …). Filling template variables is not supported yet — pick a template without variables.",
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "Email",

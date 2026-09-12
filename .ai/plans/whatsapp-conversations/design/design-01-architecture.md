@@ -41,6 +41,23 @@ the same Graph API plumbing as `syncWhatsappAccountsFromMeta` detail fetches
 webhook ingest; window check = `now - last_inbound < 24h`. Rationale: O(1) read, no
 message-scan.
 
+## Post-implementation patch (2026-09-12)
+
+- **D5 window check is now advisory, not a hard block.** The local
+  `last_inbound_message_at` pre-block in `sendMessage` was removed: inbound webhooks do not
+  reach local dev, so the DB window is blind while Meta's is authoritative. Meta errors are
+  now mapped instead: `131047` and `132047` → `WHATSAPP_OUTSIDE_SERVICE_WINDOW`,
+  `131030` → `WHATSAPP_RECIPIENT_NOT_ALLOWED` (unchanged), `132000` → new
+  `WHATSAPP_TEMPLATE_PARAMS_MISMATCH` ("template requires variables — not supported yet").
+  Verified live: a text send to an allowlisted recipient succeeded with the DB window null.
+- **New query `whatsappAccountTemplates(accountId)`** (permission
+  `whatsapp.conversations_view`) lists the account's WABA templates LIVE from Meta.
+  `collectAllTemplates` + `messageTemplateListSchema` + `buildTemplateSnapshot` were rehomed
+  from `whatsapp-account.service.ts` into `…/whatsapp/cloud-api/requests/`.
+- **Composer**: template name becomes an Autocomplete fed by that query (APPROVED only),
+  auto-fills language, disables parameter-bearing templates, keeps freeSolo; text mode is
+  no longer locally window-blocked. Outcome: `outcome/composer-template-picker-and-advisory-window.md`.
+
 ## Alternatives considered
 
 - Template-only composer — rejected: no real chat UX.

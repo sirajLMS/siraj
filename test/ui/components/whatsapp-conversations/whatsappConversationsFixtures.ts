@@ -1,15 +1,19 @@
 import type { MockLink } from "@apollo/client/testing";
 import {
   type WhatsappAccountsQuery,
+  type WhatsappAccountTemplatesQuery,
   WhatsappLimitTier,
   WhatsappMessageDirection,
   WhatsappOnboardingMode,
   WhatsappQualityRating,
   WhatsappSyncStatus,
+  WhatsappTemplateCategory,
+  WhatsappTemplateStatus,
   type WhatsappTestRecipientStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   whatsappAccountsQueryDocument,
+  whatsappAccountTemplatesQueryDocument,
   whatsappConversationsListQueryDocument,
   whatsappConversationThreadQueryDocument,
   whatsappTestRecipientsQueryDocument,
@@ -150,6 +154,26 @@ export function makeRecipientRow(
   };
 }
 
+export type WhatsappTemplateMockRow = NonNullable<WhatsappAccountTemplatesQuery["whatsappAccountTemplates"]>[number];
+
+export function makeTemplateRow(
+  id: string,
+  name: string,
+  overrides: Partial<WhatsappTemplateMockRow> = {}
+): WhatsappTemplateMockRow {
+  return {
+    id,
+    name,
+    language: "en_US",
+    status: WhatsappTemplateStatus.Approved,
+    category: WhatsappTemplateCategory.Utility,
+    bodyText: "Hello, this is a reminder.",
+    bodyParamsCount: 0,
+    lastSyncedAt: "2026-09-01T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
 // Apollo's InMemoryCache auto-appends `__typename` to every selection, so each
 // mocked object level needs the runtime type name or cache normalization drops
 // the fields (rows surface as all-null records in the view model).
@@ -180,6 +204,10 @@ function messageResult(row: WhatsappMessageRow) {
 
 function recipientResult(row: WhatsappTestRecipientRow) {
   return { __typename: "WhatsappTestRecipient", ...row };
+}
+
+function templateResult(row: WhatsappTemplateMockRow) {
+  return { __typename: "WhatsappTemplateSnapshot", ...row };
 }
 
 function unlimited(partial: MockLink.MockedResponse): MockLink.MockedResponse {
@@ -278,25 +306,51 @@ export function recipientsMock(rows: readonly WhatsappTestRecipientRow[]): MockL
   });
 }
 
+export function templatesMock(accountId: string, rows: readonly WhatsappTemplateMockRow[]): MockLink.MockedResponse {
+  return unlimited({
+    request: { query: whatsappAccountTemplatesQueryDocument, variables: { accountId } },
+    result: { data: { whatsappAccountTemplates: rows.map(templateResult) } },
+  });
+}
+
+/**
+ * Erroring template query for one account; drives the picker's warning alert
+ * without affecting the rest of the workspace mocks.
+ */
+export function templatesErrorMock(accountId: string): MockLink.MockedResponse {
+  return unlimited({
+    request: { query: whatsappAccountTemplatesQueryDocument, variables: { accountId } },
+    error: new Error("templates fetch failed"),
+  });
+}
+
 export interface WorkspaceFixtureOptions {
   readonly account: WhatsappAccountMockRow;
   readonly messages?: readonly WhatsappMessageRow[];
   readonly recipients?: readonly WhatsappTestRecipientRow[];
+  /** Templates for the selected account; `"error"` makes the query fail. */
+  readonly templates?: readonly WhatsappTemplateMockRow[] | "error";
 }
 
 /**
  * MockLink set for one workspace state: the accounts query, the conversations
  * list as fired both before and after the default-account selection effect,
- * the thread query for the single seeded conversation, and — when supplied —
- * the test-recipient registry for the selected account.
+ * the thread query for the single seeded conversation, the templates pick for
+ * the selected account, and — when supplied — the test-recipient registry.
  */
-export function workspaceMocks({ account, messages, recipients }: WorkspaceFixtureOptions): MockLink.MockedResponse[] {
+export function workspaceMocks({
+  account,
+  messages,
+  recipients,
+  templates,
+}: WorkspaceFixtureOptions): MockLink.MockedResponse[] {
   const conversation = makeConversationRow(CONVERSATION_ID, account.id ?? "");
   const mocks: MockLink.MockedResponse[] = [
     accountsMock([account]),
     conversationListMock(null, [conversation]),
     conversationListMock(account.id, [conversation]),
     threadMock(conversation, messages ?? []),
+    templates === "error" ? templatesErrorMock(account.id ?? "") : templatesMock(account.id ?? "", templates ?? []),
   ];
   if (recipients) {
     mocks.push(recipientsMock(recipients));

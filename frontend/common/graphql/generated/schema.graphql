@@ -4542,6 +4542,11 @@ type Query {
   welcomeMessage: String
 
   """
+  Message templates for one account, listed live from Meta with the account's credentials (body text + parameter count surfaced for the composer picker).
+  """
+  whatsappAccountTemplates(accountId: String!): [WhatsappTemplateSnapshot!]
+
+  """
   List all WhatsApp business accounts (active and inactive) for the numbers management surface — synced numbers start inactive and must remain visible.
   """
   whatsappAccounts: [WhatsappAccount!]
@@ -6946,6 +6951,8 @@ enum WhatsappTemplateCategory {
 }
 
 type WhatsappTemplateSnapshot {
+  bodyParamsCount: Int
+  bodyText: String
   category: WhatsappTemplateCategory
   id: String
   language: String

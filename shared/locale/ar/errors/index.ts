@@ -579,6 +579,9 @@ export const errorsAr: ErrorsLabels = {
   whatsappRecipientConflict: "هذا المستلم مسجّل بالفعل لدى رقم الواتساب هذا.",
   whatsappTemplateRequired: "اختر قالبًا لبدء محادثة خارج نافذة الـ ٢٤ ساعة.",
   whatsappMessageRequired: "أدخل رسالة لإرسالها.",
+  whatsappTemplatesFetchFailed: "تعذّر تحميل قوالب الرسائل من Meta. تحقق من رمز الوصول لهذا الرقم، ثم حاول مرة أخرى.",
+  whatsappTemplateParamsMismatch:
+    "يتطلب هذا القالب متغيرات ({{1}}، {{2}}، …). لا يتوفّر ملء متغيرات القوالب بعد — اختر قالبًا بدون متغيرات.",
 
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "البريد الإلكتروني",

@@ -3,6 +3,7 @@
 import { SendOutlined } from "@mui/icons-material";
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   CircularProgress,
@@ -18,7 +19,10 @@ import {
 } from "@mui/material";
 import { PhoneInput } from "@/frontend/common/components/ui/input/phoneInput/PhoneInput";
 import { WhatsappConversationSendMode } from "@/frontend/common/graphql/generated/gql/graphql";
-import type { WhatsappComposerLabels } from "@/frontend/common/views/dashboard/whatsapp/conversations/types/whatsappConversationsView.types";
+import type {
+  WhatsappComposerLabels,
+  WhatsappTemplateOption,
+} from "@/frontend/common/views/dashboard/whatsapp/conversations/types/whatsappConversationsView.types";
 
 export interface ComposerSharedProps {
   readonly labels: WhatsappComposerLabels;
@@ -30,10 +34,15 @@ export interface ComposerSharedProps {
   readonly onTemplateNameChange: (value: string) => void;
   readonly templateLanguage: string;
   readonly onTemplateLanguageChange: (value: string) => void;
+  readonly templateOptions: readonly WhatsappTemplateOption[];
+  readonly templatesLoading: boolean;
+  readonly templatesError: boolean;
+  readonly onRetryTemplates: () => void;
+  readonly onTemplateSelect: (option: WhatsappTemplateOption | null) => void;
+  /** Note shown on picker rows whose variables the composer cannot fill. */
+  readonly templateParamsUnsupportedText: string;
   /** True when no conversation is open — a target must be picked/typed. */
   readonly showRecipientPicker: boolean;
-  /** True while starting a brand-new thread — text replies need a 24h window. */
-  readonly textModeLocked: boolean;
   /** On test numbers the target must come from the local registry. */
   readonly registryTargetOnly: boolean;
   readonly registryTargetPhones: readonly string[];
@@ -54,9 +63,8 @@ export interface ComposerSharedProps {
 function ModeToggle({
   labels,
   mode,
-  textModeLocked,
   onModeChange,
-}: Readonly<Pick<ComposerSharedProps, "labels" | "mode" | "textModeLocked" | "onModeChange">>) {
+}: Readonly<Pick<ComposerSharedProps, "labels" | "mode" | "onModeChange">>) {
   return (
     <ToggleButtonGroup
       exclusive
@@ -69,9 +77,7 @@ function ModeToggle({
         }
       }}
     >
-      <ToggleButton value={WhatsappConversationSendMode.Text} disabled={textModeLocked}>
-        {labels.composerModeText}
-      </ToggleButton>
+      <ToggleButton value={WhatsappConversationSendMode.Text}>{labels.composerModeText}</ToggleButton>
       <ToggleButton value={WhatsappConversationSendMode.Template}>{labels.composerModeTemplate}</ToggleButton>
     </ToggleButtonGroup>
   );
@@ -136,6 +142,116 @@ function RecipientPicker({
   );
 }
 
+function TemplatePicker({
+  labels,
+  templateName,
+  onTemplateNameChange,
+  onTemplateSelect,
+  templateOptions,
+  templatesLoading,
+  templatesError,
+  onRetryTemplates,
+  templateParamsUnsupportedText,
+}: Readonly<
+  Pick<
+    ComposerSharedProps,
+    | "labels"
+    | "templateName"
+    | "onTemplateNameChange"
+    | "onTemplateSelect"
+    | "templateOptions"
+    | "templatesLoading"
+    | "templatesError"
+    | "onRetryTemplates"
+    | "templateParamsUnsupportedText"
+  >
+>) {
+  return (
+    <Stack spacing={1}>
+      <Autocomplete<WhatsappTemplateOption, false, false, true>
+        freeSolo
+        size="small"
+        fullWidth
+        options={templateOptions}
+        getOptionLabel={option => (typeof option === "string" ? option : option.name)}
+        isOptionEqualToValue={(option, value) => {
+          if (typeof option === "string" || typeof value === "string") {
+            return option === value;
+          }
+          return option.key === value.key;
+        }}
+        getOptionDisabled={option => option.paramsCount > 0}
+        loading={templatesLoading}
+        inputValue={templateName}
+        onInputChange={(_event, value, reason) => {
+          if (reason === "input") {
+            onTemplateNameChange(value);
+          }
+        }}
+        onChange={(_event, option) => {
+          if (option === null) {
+            onTemplateSelect(null);
+            return;
+          }
+          if (typeof option === "string") {
+            return;
+          }
+          onTemplateSelect(option);
+        }}
+        noOptionsText={labels.templatePickerEmpty}
+        renderOption={(props, option) => {
+          const { key, ...optionProps } = props;
+          return (
+            <Box key={key} component="li" {...optionProps} dir="ltr" sx={{ unicodeBidi: "isolate" }}>
+              <Stack spacing={0}>
+                <Typography variant="bodyMd">{`${option.name} · ${option.language}`}</Typography>
+                {option.paramsCount > 0 ? (
+                  <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+                    {templateParamsUnsupportedText}
+                  </Typography>
+                ) : null}
+                {option.paramsCount === 0 && option.bodyText !== "" ? (
+                  <Typography variant="bodyMd" noWrap sx={{ color: theme => theme.palette.text.secondary }}>
+                    {option.bodyText}
+                  </Typography>
+                ) : null}
+              </Stack>
+            </Box>
+          );
+        }}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label={labels.templatePickerLabel}
+            placeholder={labels.templatePickerPlaceholder}
+            helperText={labels.composerTemplatePlaceholder}
+            slotProps={{ ...params.slotProps, htmlInput: { ...params.slotProps?.htmlInput, dir: "ltr" } }}
+          />
+        )}
+      />
+      {templatesError ? (
+        <Alert
+          severity="warning"
+          component="div"
+          action={
+            <Button color="inherit" size="small" onClick={onRetryTemplates}>
+              {labels.templatePickerRetry}
+            </Button>
+          }
+        >
+          {labels.templatePickerError}
+        </Alert>
+      ) : null}
+      {/* freeSolo suppresses the popup's noOptionsText, so the empty state is surfaced inline instead. */}
+      {!templatesLoading && !templatesError && templateOptions.length === 0 ? (
+        <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+          {labels.templatePickerEmpty}
+        </Typography>
+      ) : null}
+    </Stack>
+  );
+}
+
 function ModeBody({
   labels,
   mode,
@@ -143,9 +259,14 @@ function ModeBody({
   onTextBodyChange,
   templateName,
   onTemplateNameChange,
+  onTemplateSelect,
+  templateOptions,
+  templatesLoading,
+  templatesError,
+  onRetryTemplates,
+  templateParamsUnsupportedText,
   templateLanguage,
   onTemplateLanguageChange,
-  windowOpen,
 }: Readonly<
   Pick<
     ComposerSharedProps,
@@ -155,22 +276,29 @@ function ModeBody({
     | "onTextBodyChange"
     | "templateName"
     | "onTemplateNameChange"
+    | "onTemplateSelect"
+    | "templateOptions"
+    | "templatesLoading"
+    | "templatesError"
+    | "onRetryTemplates"
+    | "templateParamsUnsupportedText"
     | "templateLanguage"
     | "onTemplateLanguageChange"
-    | "windowOpen"
   >
 >) {
   if (mode === WhatsappConversationSendMode.Template) {
     return (
       <Stack spacing={1.5}>
-        <TextField
-          size="small"
-          fullWidth
-          label={labels.templateNameLabel}
-          placeholder={labels.templateNamePlaceholder}
-          helperText={labels.composerTemplatePlaceholder}
-          value={templateName}
-          onChange={event => onTemplateNameChange(event.target.value)}
+        <TemplatePicker
+          labels={labels}
+          templateName={templateName}
+          onTemplateNameChange={onTemplateNameChange}
+          onTemplateSelect={onTemplateSelect}
+          templateOptions={templateOptions}
+          templatesLoading={templatesLoading}
+          templatesError={templatesError}
+          onRetryTemplates={onRetryTemplates}
+          templateParamsUnsupportedText={templateParamsUnsupportedText}
         />
         <TextField
           size="small"
@@ -192,7 +320,6 @@ function ModeBody({
       maxRows={6}
       placeholder={labels.composerTextPlaceholder}
       value={textBody}
-      disabled={!windowOpen}
       onChange={event => onTextBodyChange(event.target.value)}
       slotProps={{ htmlInput: { dir: "auto" } }}
     />
@@ -212,11 +339,12 @@ function InitiationHeading({ labels }: Readonly<Pick<ComposerSharedProps, "label
 
 /**
  * Message composer for the `/whatsapp` workspace: text/template mode toggle,
- * window-gated free-text area, template name + language inputs, recipient
- * picker for new conversations (registry-restricted on test numbers), and the
- * send action with localized block reasons and mapped send errors. Initiating
- * a brand-new thread locks the composer to template mode with a heading and
- * the template-required hint.
+ * advisory window hint, approved-template picker (live from Meta, with
+ * freeSolo fallback for manual names) plus a language input, recipient picker
+ * for new conversations (registry-restricted on test numbers), and the send
+ * action with localized block reasons and mapped send errors. The 24h window
+ * is advisory only — Meta is the authoritative gate and rejects out-of-window
+ * sends with WHATSAPP_OUTSIDE_SERVICE_WINDOW.
  */
 export function ComposerShared({
   labels,
@@ -228,8 +356,13 @@ export function ComposerShared({
   onTemplateNameChange,
   templateLanguage,
   onTemplateLanguageChange,
+  templateOptions,
+  templatesLoading,
+  templatesError,
+  onRetryTemplates,
+  onTemplateSelect,
+  templateParamsUnsupportedText,
   showRecipientPicker,
-  textModeLocked,
   registryTargetOnly,
   registryTargetPhones,
   recipientSelection,
@@ -248,8 +381,8 @@ export function ComposerShared({
   const isWindowClosedHint = !windowOpen && !showRecipientPicker && showWindowHint;
   return (
     <Stack spacing={1.5}>
-      {textModeLocked ? <InitiationHeading labels={labels} /> : null}
-      <ModeToggle labels={labels} mode={mode} textModeLocked={textModeLocked} onModeChange={onModeChange} />
+      {showRecipientPicker ? <InitiationHeading labels={labels} /> : null}
+      <ModeToggle labels={labels} mode={mode} onModeChange={onModeChange} />
       <RecipientPicker
         labels={labels}
         showRecipientPicker={showRecipientPicker}
@@ -267,9 +400,14 @@ export function ComposerShared({
         onTextBodyChange={onTextBodyChange}
         templateName={templateName}
         onTemplateNameChange={onTemplateNameChange}
+        onTemplateSelect={onTemplateSelect}
+        templateOptions={templateOptions}
+        templatesLoading={templatesLoading}
+        templatesError={templatesError}
+        onRetryTemplates={onRetryTemplates}
+        templateParamsUnsupportedText={templateParamsUnsupportedText}
         templateLanguage={templateLanguage}
         onTemplateLanguageChange={onTemplateLanguageChange}
-        windowOpen={windowOpen}
       />
       {showWindowHint && (
         <Typography

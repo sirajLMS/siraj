@@ -2,6 +2,7 @@ import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { WhatsappTemplateSnapshotPothosObject } from "@/backend/graphql/pothos/whatsapp/whatsapp-account.pothos";
 import {
   WhatsappConversationThreadPothosObject,
   WhatsappTestRecipientPothosObject,
@@ -80,6 +81,22 @@ gqlSchemaBuilder.queryFields(t => ({
     resolve: (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
       return WhatsappConversationsService.listRecipients(permissionContext(ctx), tErrors, {
+        accountId: args.accountId,
+      });
+    },
+  }),
+
+  whatsappAccountTemplates: t.field({
+    type: [WhatsappTemplateSnapshotPothosObject],
+    description:
+      "Message templates for one account, listed live from Meta with the account's credentials (body text + parameter count surfaced for the composer picker).",
+    authScopes: { permission: AppPermission.WHATSAPP_CONVERSATIONS_VIEW },
+    args: {
+      accountId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+    },
+    resolve: (_root, args, ctx) => {
+      const tErrors = ctx.t().errorsTranslations;
+      return WhatsappConversationsService.listAccountTemplates(permissionContext(ctx), tErrors, {
         accountId: args.accountId,
       });
     },

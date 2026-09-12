@@ -16,6 +16,15 @@ export const MAX_CONCURRENT_CALLS = 10;
 export const FETCH_TIMEOUT_MS = 10_000;
 
 /**
+ * Placeholder written into the `whatsapp_accounts` credential columns when no
+ * real credential exists yet (`createAccount` without a token, or a
+ * `syncFromMeta` number Meta does not report as CONNECTED). Any per-account
+ * Graph API caller must treat it as "credentials not configured" and fail
+ * locally instead of dispatching a doomed request.
+ */
+export const WHATSAPP_CREDENTIAL_PLACEHOLDER = "pending" as const;
+
+/**
  * Fallback Graph API version when neither `WHATSAPP_GRAPH_API_VERSION` nor the
  * legacy `WHATSAPP_API_VERSION` env-config key resolves to a value.
  */

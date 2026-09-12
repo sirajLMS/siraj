@@ -17,6 +17,7 @@ import {
   removeWhatsappTestRecipientMutationDocument,
   sendWhatsappConversationMessageMutationDocument,
   verifyWhatsappTestRecipientMutationDocument,
+  whatsappAccountTemplatesQueryDocument,
   whatsappConversationsListQueryDocument,
   whatsappConversationThreadQueryDocument,
   whatsappTestRecipientsQueryDocument,
@@ -35,9 +36,10 @@ import {
  * permission gating (`WHATSAPP_CONVERSATIONS_VIEW` / `_MANAGE` at resolver +
  * service), recipient registry lifecycle (add/list/remove, duplicate +
  * unknown-id error codes), thread unknown-id guard, and the composer send
- * validation/service-window error codes. Live Meta sends are not exercised
- * here (covered by the service unit suite) — verify/send happy paths would
- * require a real Meta round-trip.
+ * validation/credential error codes (the 24h window itself is enforced by
+ * Meta, not locally). Live Meta sends are not exercised here (covered by the
+ * service unit suite) — verify/send/template happy paths would require a real
+ * Meta round-trip.
  */
 
 const UNAUTHORIZED_GROUP = "teacher_default";
@@ -156,6 +158,13 @@ describe("whatsapp conversations queries", () => {
 
   test("denies whatsappTestRecipients without WHATSAPP_CONVERSATIONS_VIEW", async () => {
     const denied = await assertOperationDenied(UNAUTHORIZED_GROUP, "query", whatsappTestRecipientsQueryDocument, {
+      accountId: randomUUID(),
+    });
+    expect(denied).toBe(true);
+  });
+
+  test("denies whatsappAccountTemplates without WHATSAPP_CONVERSATIONS_VIEW", async () => {
+    const denied = await assertOperationDenied(UNAUTHORIZED_GROUP, "query", whatsappAccountTemplatesQueryDocument, {
       accountId: randomUUID(),
     });
     expect(denied).toBe(true);
@@ -303,9 +312,12 @@ describe("sendWhatsappConversationMessage", () => {
   const sendErrorCases: { name: string; overrides: Partial<WhatsappConversationSendInput>; code: string }[] = [
     { name: "rejects a TEXT send without a body", overrides: {}, code: "VALIDATION" },
     {
-      name: "rejects a TEXT send outside the 24h window (no conversation)",
+      // The 24h window is Meta-authoritative now — a window-blind TEXT send is
+      // no longer blocked locally; it proceeds to the send attempt, which fails
+      // here only because the test account carries no Meta access token.
+      name: "attempts a TEXT send when the local window state is absent (fails later on missing credentials)",
       overrides: { body: "hello there" },
-      code: "WHATSAPP_OUTSIDE_SERVICE_WINDOW",
+      code: "WHATSAPP_CONFIG",
     },
     {
       name: "rejects a send referencing an unknown conversation",

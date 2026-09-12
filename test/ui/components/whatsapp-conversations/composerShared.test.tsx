@@ -4,11 +4,15 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { WhatsappConversationSendMode } from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  WhatsappConversationSendMode,
+  WhatsappTemplateCategory,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   ComposerShared,
   type ComposerSharedProps,
 } from "@/frontend/common/views/dashboard/whatsapp/conversations/ComposerShared";
+import type { WhatsappTemplateOption } from "@/frontend/common/views/dashboard/whatsapp/conversations/types/whatsappConversationsView.types";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
@@ -29,6 +33,22 @@ const noop = () => {};
 // Digits joined so no literal phone number appears in the source.
 const FREE_TEXT_E164 = ["+1", "555", "010", "0125"].join("");
 
+function makeTemplateOption(name: string, overrides: Partial<WhatsappTemplateOption> = {}): WhatsappTemplateOption {
+  return {
+    key: `${name}|en_US`,
+    name,
+    language: "en_US",
+    category: WhatsappTemplateCategory.Utility,
+    bodyText: "Your order is on the way.",
+    paramsCount: 0,
+    ...overrides,
+  };
+}
+
+const ORDER_TEMPLATE = makeTemplateOption("order_update");
+const PARAMS_TEMPLATE = makeTemplateOption("booking_confirm", { paramsCount: 1 });
+const TEMPLATE_OPTIONS: readonly WhatsappTemplateOption[] = [ORDER_TEMPLATE, PARAMS_TEMPLATE];
+
 function makeProps(overrides: Partial<ComposerSharedProps> = {}): ComposerSharedProps {
   return {
     labels,
@@ -40,8 +60,13 @@ function makeProps(overrides: Partial<ComposerSharedProps> = {}): ComposerShared
     onTemplateNameChange: noop,
     templateLanguage: "",
     onTemplateLanguageChange: noop,
+    templateOptions: [],
+    templatesLoading: false,
+    templatesError: false,
+    onRetryTemplates: noop,
+    onTemplateSelect: noop,
+    templateParamsUnsupportedText: labels.templatePickerParamsUnsupported,
     showRecipientPicker: false,
-    textModeLocked: false,
     registryTargetOnly: false,
     registryTargetPhones: [],
     recipientSelection: "",
@@ -71,9 +96,9 @@ describe("ComposerShared — service window gating", () => {
     expect(screen.getByPlaceholderText(labels.composerTextPlaceholder)).toBeEnabled();
   });
 
-  test("disables free text and shows the window-closed hint when the window is closed", () => {
+  test("keeps free text editable and shows the advisory hint when the window looks closed", () => {
     renderComposer(makeProps({ windowOpen: false, windowStatusHint: labels.windowClosedHint }));
-    expect(screen.getByPlaceholderText(labels.composerTextPlaceholder)).toBeDisabled();
+    expect(screen.getByPlaceholderText(labels.composerTextPlaceholder)).toBeEnabled();
     expect(screen.getByText(labels.windowClosedHint)).toBeVisible();
   });
 
@@ -89,10 +114,10 @@ describe("ComposerShared — service window gating", () => {
     expect(screen.getByRole("group", { name: labels.composerModeLabel })).toBeVisible();
   });
 
-  test("renders distinctly-labelled template name and language fields in template mode", () => {
+  test("renders distinctly-labelled template picker and language fields in template mode", () => {
     renderComposer(makeProps({ mode: WhatsappConversationSendMode.Template }));
-    expect(screen.getByLabelText(labels.templateNameLabel)).toBeVisible();
-    expect(screen.getByPlaceholderText(labels.templateNamePlaceholder)).toBeVisible();
+    expect(screen.getByLabelText(labels.templatePickerLabel)).toBeVisible();
+    expect(screen.getByPlaceholderText(labels.templatePickerPlaceholder)).toBeVisible();
     expect(screen.getByLabelText(labels.templateLanguageLabel)).toBeVisible();
     expect(screen.getByPlaceholderText(labels.templateLanguagePlaceholder)).toBeVisible();
     expect(screen.queryByPlaceholderText(labels.composerTextPlaceholder)).toBeNull();
@@ -101,12 +126,11 @@ describe("ComposerShared — service window gating", () => {
   test("shows the translated block reason and disables send", () => {
     renderComposer(
       makeProps({
-        windowOpen: false,
-        sendBlockReason: errorLabels.whatsappOutsideServiceWindow,
+        sendBlockReason: errorLabels.whatsappMessageRequired,
         sendDisabled: true,
       })
     );
-    expect(screen.getByText(errorLabels.whatsappOutsideServiceWindow)).toBeVisible();
+    expect(screen.getByText(errorLabels.whatsappMessageRequired)).toBeVisible();
     expect(screen.getByRole("button", { name: labels.sendButton })).toBeDisabled();
   });
 
@@ -157,23 +181,73 @@ describe("ComposerShared — recipient targeting", () => {
 describe("ComposerShared — new-conversation initiation", () => {
   afterEach(cleanup);
 
-  test("locks text mode and renders the translated initiation heading and hint", () => {
+  test("renders the translated initiation heading and leaves the text toggle enabled", () => {
     renderComposer(
       makeProps({
         showRecipientPicker: true,
-        textModeLocked: true,
         mode: WhatsappConversationSendMode.Template,
       })
     );
     expect(screen.getByText(labels.newConversationTitle)).toBeVisible();
     expect(screen.getByText(labels.newConversationSubtitle)).toBeVisible();
-    expect(screen.getByRole("button", { name: labels.composerModeText })).toBeDisabled();
+    expect(screen.getByRole("button", { name: labels.composerModeText })).toBeEnabled();
     expect(screen.getByRole("button", { name: labels.composerModeTemplate })).toBeEnabled();
   });
 
-  test("initiation still unlocks once a thread is open", () => {
-    renderComposer(makeProps({ showRecipientPicker: false, textModeLocked: false }));
+  test("no initiation heading once a thread is open", () => {
+    renderComposer(makeProps({ showRecipientPicker: false }));
     expect(screen.getByRole("button", { name: labels.composerModeText })).toBeEnabled();
     expect(screen.queryByText(labels.newConversationTitle)).toBeNull();
+  });
+});
+
+describe("ComposerShared — template picker", () => {
+  afterEach(cleanup);
+
+  test("lists the offered approved templates", async () => {
+    renderComposer(makeProps({ mode: WhatsappConversationSendMode.Template, templateOptions: TEMPLATE_OPTIONS }));
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: labels.templatePickerLabel }));
+    expect(await screen.findByRole("option", { name: /order_update/ })).toBeVisible();
+    expect(screen.getByRole("option", { name: /booking_confirm/ })).toBeVisible();
+  });
+
+  test("selecting an option hands the full option to the view model", async () => {
+    const onTemplateSelect = mock((_option: WhatsappTemplateOption | null) => {});
+    renderComposer(
+      makeProps({ mode: WhatsappConversationSendMode.Template, templateOptions: TEMPLATE_OPTIONS, onTemplateSelect })
+    );
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: labels.templatePickerLabel }));
+    fireEvent.click(await screen.findByRole("option", { name: /order_update/ }));
+    expect(onTemplateSelect).toHaveBeenCalledWith(ORDER_TEMPLATE);
+  });
+
+  test("options with variables are disabled and annotated with the unsupported note", async () => {
+    renderComposer(makeProps({ mode: WhatsappConversationSendMode.Template, templateOptions: TEMPLATE_OPTIONS }));
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: labels.templatePickerLabel }));
+    const option = await screen.findByRole("option", { name: /booking_confirm/ });
+    expect(option).toHaveAttribute("aria-disabled", "true");
+    expect(option.textContent).toContain(labels.templatePickerParamsUnsupported);
+  });
+
+  test("freeSolo typing still reports the raw template name", () => {
+    const onTemplateNameChange = mock((_value: string) => {});
+    renderComposer(makeProps({ mode: WhatsappConversationSendMode.Template, onTemplateNameChange }));
+    fireEvent.change(screen.getByPlaceholderText(labels.templatePickerPlaceholder), {
+      target: { value: "custom_template" },
+    });
+    expect(onTemplateNameChange).toHaveBeenCalledWith("custom_template");
+  });
+
+  test("shows the empty-state copy when no approved templates exist", () => {
+    renderComposer(makeProps({ mode: WhatsappConversationSendMode.Template, templateOptions: [] }));
+    expect(screen.getByText(labels.templatePickerEmpty)).toBeVisible();
+  });
+
+  test("a templates load error shows the warning alert and its retry action fires onRetryTemplates", () => {
+    const onRetryTemplates = mock(() => {});
+    renderComposer(makeProps({ mode: WhatsappConversationSendMode.Template, templatesError: true, onRetryTemplates }));
+    expect(screen.getByText(labels.templatePickerError)).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: labels.templatePickerRetry }));
+    expect(onRetryTemplates).toHaveBeenCalledTimes(1);
   });
 });

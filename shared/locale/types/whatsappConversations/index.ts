@@ -61,6 +61,14 @@ export interface WhatsappConversationsLabels {
   readonly templateLanguageLabel: string;
   readonly templateLanguagePlaceholder: string;
 
+  // ─── Template picker ────────────────────────────────────────────────────
+  readonly templatePickerLabel: string;
+  readonly templatePickerPlaceholder: string;
+  readonly templatePickerEmpty: string;
+  readonly templatePickerError: string;
+  readonly templatePickerRetry: string;
+  readonly templatePickerParamsUnsupported: string;
+
   // ─── Test-number banner + badges ────────────────────────────────────────
   readonly testNumberBannerTitle: string;
   readonly testNumberBannerBody: string;

@@ -29,13 +29,21 @@ export const whatsappConversationsAr: WhatsappConversationsLabels = {
   composerRecipientPlaceholder: "اختر مستلمًا مسجَّلًا",
   sendButton: "إرسال",
   windowOpenHint: "نافذة الرد مفتوحة — يمكنك إرسال رسائل نصية حرة لمدة {duration}.",
-  windowClosedHint: "انتهت نافذة الرد البالغة 24 ساعة. أرسل رسالة قالب للتواصل مع هذا العميل.",
+  windowClosedHint:
+    "يبدو أن نافذة المراسلة البالغة 24 ساعة مغلقة. يمكنك إرسال قالب في أي وقت؛ أما النص الحر فيعمل بمجرد أن يراسل العميل هذا الرقم (ردّه يفتح نافذة مدتها 24 ساعة).",
   sendErrorTitle: "تعذّر إرسال الرسالة",
 
   templateNameLabel: "اسم القالب",
   templateNamePlaceholder: "مثال: hello_world",
   templateLanguageLabel: "اللغة",
   templateLanguagePlaceholder: "en_US",
+
+  templatePickerLabel: "قالب الرسالة",
+  templatePickerPlaceholder: "ابحث في القوالب المعتمدة…",
+  templatePickerEmpty: "لم يُعثر على قوالب معتمدة — زامِن القوالب من Meta ضمن الإعدادات ← واتساب.",
+  templatePickerError: "فشل تحميل القوالب.",
+  templatePickerRetry: "إعادة المحاولة",
+  templatePickerParamsUnsupported: "يتطلب متغيرات — غير مدعوم بعد",
 
   testNumberBannerTitle: "رقم تجريبي",
   testNumberBannerBody:

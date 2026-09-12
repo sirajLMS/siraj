@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 
 import { AppPermission, UserRole } from "@/backend/enum";
+import { WhatsappTemplateCategory, WhatsappTemplateStatus } from "@/backend/enum/whatsapp/whatsapp.enum";
 import {
   WhatsappAccountPurpose,
   WhatsappOnboardingMode,
@@ -481,14 +482,19 @@ describe("sendMessage", () => {
     await expectServiceError(callSendText, DomainError, errorsEn.whatsappRecipientNotAllowed);
   });
 
-  test("rejects TEXT when the 24h window is stale (outsideServiceWindow)", async () => {
+  test("attempts a TEXT send even when the local window is stale (Meta is the window authority)", async () => {
     conversationByIdentityRow = makeConversation({ lastInboundMessageAt: new Date(Date.now() - 25 * 60 * 60 * 1000) });
-    await expectServiceError(callSendText, DomainError, errorsEn.whatsappOutsideServiceWindow);
+    await WhatsappConversationsService.sendMessage(CONTEXT, errorsEn, conversationSendInput());
+    expect(fetchBodies).toHaveLength(1);
+    expect(messageInserts).toHaveLength(1);
   });
 
-  test("rejects TEXT when no prior conversation exists (outsideServiceWindow)", async () => {
+  test("attempts a TEXT send when no prior conversation exists locally", async () => {
     conversationByIdentityRow = null;
-    await expectServiceError(callSendText, DomainError, errorsEn.whatsappOutsideServiceWindow);
+    await WhatsappConversationsService.sendMessage(CONTEXT, errorsEn, conversationSendInput());
+    expect(fetchBodies).toHaveLength(1);
+    expect(upsertConversationMock).toHaveBeenCalledTimes(1);
+    expect(messageInserts).toHaveLength(1);
   });
 
   test("sends TEXT inside the window and persists the API_OUTBOUND message", async () => {
@@ -582,6 +588,22 @@ describe("sendMessage", () => {
     metaStatus = 400;
     metaBody = metaFailureBody(132047);
     await expectServiceError(callSendText, DomainError, errorsEn.whatsappOutsideServiceWindow);
+    expect(messageInserts).toHaveLength(0);
+  });
+
+  test("maps Meta 131047 (re-engagement required) to the outside-service-window error", async () => {
+    conversationByIdentityRow = makeConversation();
+    metaStatus = 400;
+    metaBody = metaFailureBody(131047);
+    await expectServiceError(callSendText, DomainError, errorsEn.whatsappOutsideServiceWindow);
+    expect(messageInserts).toHaveLength(0);
+  });
+
+  test("maps Meta 132000 to the template-params-mismatch error", async () => {
+    conversationByIdentityRow = makeConversation();
+    metaStatus = 400;
+    metaBody = metaFailureBody(132000);
+    await expectServiceError(callSendText, DomainError, errorsEn.whatsappTemplateParamsMismatch);
     expect(messageInserts).toHaveLength(0);
   });
 
@@ -831,6 +853,100 @@ describe("listRecipients", () => {
       errorsEn.insufficientPermissions
     );
     expect(listByAccountIdMock).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// listAccountTemplates
+// ---------------------------------------------------------------------------
+
+describe("listAccountTemplates", () => {
+  function callListTemplates() {
+    return WhatsappConversationsService.listAccountTemplates(CONTEXT, errorsEn, { accountId: ACCOUNT_ID });
+  }
+
+  function fetchCallCount(): number {
+    return invocationOrder.filter(step => step === "fetch").length;
+  }
+
+  test("denies callers without the view permission before calling Meta", async () => {
+    viewAllowed = false;
+    await expectServiceError(callListTemplates, ForbiddenError, errorsEn.insufficientPermissions);
+    expect(fetchCallCount()).toBe(0);
+  });
+
+  test("maps Meta templates to snapshots with coerced enums and computed body fields", async () => {
+    metaBody = {
+      data: [
+        {
+          id: "tmpl_1",
+          name: "order_ready",
+          language: "en_US",
+          status: "APPROVED",
+          category: "UTILITY",
+          components: [
+            { type: "HEADER", format: "TEXT", text: "Order update" },
+            { type: "BODY", text: "Hi {{1}}, order {{2}} is ready" },
+          ],
+        },
+        {
+          id: "tmpl_2",
+          name: "flat_notice",
+          language: { code: "ar" },
+          status: "REJECTED",
+          category: "MARKETING",
+          components: [{ type: "BODY", text: "No placeholders here" }],
+        },
+        {
+          id: "tmpl_3",
+          name: "bodyless_cta",
+          language: "en_US",
+          status: "META_FUTURE_STATUS",
+          category: "META_FUTURE_CATEGORY",
+          components: [{ type: "BUTTONS", buttons: [] }],
+        },
+      ],
+    };
+    const snapshots = await WhatsappConversationsService.listAccountTemplates(CONTEXT, errorsEn, {
+      accountId: ACCOUNT_ID,
+    });
+
+    expect(snapshots).toHaveLength(3);
+    expect(snapshots[0]).toMatchObject({
+      id: "tmpl_1",
+      name: "order_ready",
+      language: "en_US",
+      status: WhatsappTemplateStatus.APPROVED,
+      category: WhatsappTemplateCategory.UTILITY,
+      bodyText: "Hi {{1}}, order {{2}} is ready",
+      bodyParamsCount: 2,
+    });
+    expect(snapshots[1]).toMatchObject({
+      id: "tmpl_2",
+      language: "ar",
+      status: WhatsappTemplateStatus.REJECTED,
+      bodyText: "No placeholders here",
+      bodyParamsCount: 0,
+    });
+    // Unknown Meta enum values fall back instead of failing the listing.
+    expect(snapshots[2]).toMatchObject({
+      id: "tmpl_3",
+      status: WhatsappTemplateStatus.PENDING,
+      category: WhatsappTemplateCategory.MARKETING,
+      bodyText: null,
+      bodyParamsCount: null,
+    });
+  });
+
+  test("maps a Graph API failure to the templates-fetch error", async () => {
+    metaStatus = 400;
+    metaBody = metaFailureBody(190);
+    await expectServiceError(callListTemplates, DomainError, errorsEn.whatsappTemplatesFetchFailed);
+  });
+
+  test("maps a network failure to the templates-fetch error", async () => {
+    metaFetchRejection = new TypeError("fetch failed");
+    await expectServiceError(callListTemplates, DomainError, errorsEn.whatsappTemplatesFetchFailed);
   });
 });
 

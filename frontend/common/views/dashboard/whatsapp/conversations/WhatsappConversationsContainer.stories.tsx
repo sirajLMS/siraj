@@ -6,15 +6,19 @@ import { expect, userEvent, waitFor } from "storybook/test";
 import {
   AppPermission,
   type WhatsappAccountsQuery,
+  type WhatsappAccountTemplatesQuery,
   WhatsappLimitTier,
   WhatsappMessageDirection,
   WhatsappOnboardingMode,
   WhatsappQualityRating,
   WhatsappSyncStatus,
+  WhatsappTemplateCategory,
+  WhatsappTemplateStatus,
   WhatsappTestRecipientStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   whatsappAccountsQueryDocument,
+  whatsappAccountTemplatesQueryDocument,
   whatsappConversationsListQueryDocument,
   whatsappConversationThreadQueryDocument,
   whatsappTestRecipientsQueryDocument,
@@ -192,6 +196,37 @@ function recipientsMock(): MockLink.MockedResponse {
   };
 }
 
+type WhatsappTemplateMockRow = NonNullable<WhatsappAccountTemplatesQuery["whatsappAccountTemplates"]>[number];
+
+function templateRow(id: string, name: string, paramsCount: number): WhatsappTemplateMockRow {
+  return {
+    id,
+    name,
+    language: "en_US",
+    status: WhatsappTemplateStatus.Approved,
+    category: WhatsappTemplateCategory.Utility,
+    bodyText: "Hello, this is a reminder.",
+    bodyParamsCount: paramsCount,
+    lastSyncedAt: "2026-09-01T00:00:00.000Z",
+  };
+}
+
+function templatesMock(accountId: string): MockLink.MockedResponse {
+  return {
+    request: { query: whatsappAccountTemplatesQueryDocument, variables: { accountId } },
+    result: {
+      data: {
+        whatsappAccountTemplates: [
+          { __typename: "WhatsappTemplateSnapshot", ...templateRow("tpl-1", "hello_world", 0) },
+          { __typename: "WhatsappTemplateSnapshot", ...templateRow("tpl-2", "event_reminder", 0) },
+          { __typename: "WhatsappTemplateSnapshot", ...templateRow("tpl-3", "order_update", 1) },
+        ],
+      },
+    },
+    maxUsageCount: Number.POSITIVE_INFINITY,
+  };
+}
+
 function accountsMock(rows: readonly WhatsappAccountMockRow[]): MockLink.MockedResponse {
   return {
     request: { query: whatsappAccountsQueryDocument },
@@ -205,8 +240,9 @@ const testAccount = makeAccount(TEST_ACCOUNT_ID, { isTestNumber: true, displayNa
 
 /**
  * Mock set for one workspace state: accounts, the list fired before and after
- * the default-account selection effect, and the opened-thread query. The
- * recipients query only fires while a test number is selected.
+ * the default-account selection effect, the opened-thread query, and the
+ * templates pick. The recipients query only fires while a test number is
+ * selected.
  */
 function workspaceMocks(account: WhatsappAccountMockRow, includeRecipients: boolean): MockLink.MockedResponse[] {
   const conversation = conversationRow(CONVERSATION_ID, account.id ?? "");
@@ -215,6 +251,7 @@ function workspaceMocks(account: WhatsappAccountMockRow, includeRecipients: bool
     listMock(null, [conversation]),
     listMock(account.id, [conversation]),
     threadMock(),
+    templatesMock(account.id ?? ""),
   ];
   if (includeRecipients) {
     mocks.push(recipientsMock());
@@ -291,12 +328,17 @@ export const NoAccounts: Story = {
 };
 
 export const NewConversation: Story = {
-  name: "New conversation initiation (template-locked composer)",
+  name: "New conversation initiation (template-default composer)",
   decorators: [
     Story => (
       <ConversationsStoryProviders
         permissions={MANAGE_PERMISSIONS}
-        mocks={[accountsMock([regularAccount]), listMock(null, []), listMock(REGULAR_ACCOUNT_ID, [])]}
+        mocks={[
+          accountsMock([regularAccount]),
+          listMock(null, []),
+          listMock(REGULAR_ACCOUNT_ID, []),
+          templatesMock(REGULAR_ACCOUNT_ID),
+        ]}
       >
         <Story />
       </ConversationsStoryProviders>
@@ -318,7 +360,7 @@ export const NewConversation: Story = {
     await userEvent.click(action);
     await canvas.findByText(whatsappConversationsEn.newConversationTitle);
     await canvas.findByText(whatsappConversationsEn.newConversationSubtitle);
-    await canvas.findByPlaceholderText(whatsappConversationsEn.templateNamePlaceholder);
+    await canvas.findByPlaceholderText(whatsappConversationsEn.templatePickerPlaceholder);
   },
 };
 
