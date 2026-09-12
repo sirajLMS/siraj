@@ -123,6 +123,7 @@ import { UiTimezoneSelect } from "@/shared/locale/namespaces/ui/timezoneSelect.n
 import { UiUserSelect } from "@/shared/locale/namespaces/ui/userSelect.namespace";
 import { Whatsapp } from "@/shared/locale/namespaces/whatsapp/whatsapp.namespace";
 import { WhatsappConversations } from "@/shared/locale/namespaces/whatsappConversations/whatsappConversations.namespace";
+import { WhatsappGroups } from "@/shared/locale/namespaces/whatsappGroups/whatsappGroups.namespace";
 import { WhatsappInbox } from "@/shared/locale/namespaces/whatsappInbox/whatsappInbox.namespace";
 export const Translation = {
   Auth: {
@@ -139,6 +140,7 @@ export const Translation = {
   Whatsapp,
   WhatsappInbox,
   WhatsappConversations,
+  WhatsappGroups,
   Onboarding: {
     UserEntity: OnboardingUserEntity,
   },

@@ -74,6 +74,7 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   settings: "Settings",
   whatsappSettings: "WhatsApp",
   whatsappConversations: "WhatsApp Conversations",
+  whatsappGroups: "WhatsApp Groups",
   booksAndBags: "Books & Bags",
   studentTodayClasses: "Today's Classes",
   studentSchedule: "My Schedule",

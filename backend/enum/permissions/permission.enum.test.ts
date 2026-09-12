@@ -12,6 +12,8 @@ const accountingExpensesViewKey = "accounting.expenses_view";
 const accountingExpensesManageKey = "accounting.expenses_manage";
 const whatsappConversationsViewKey = "whatsapp.conversations_view";
 const whatsappConversationsManageKey = "whatsapp.conversations_manage";
+const whatsappGroupsViewKey = "whatsapp.groups_view";
+const whatsappGroupsManageKey = "whatsapp.groups_manage";
 
 describe("AppPermission accounting credits manage", () => {
   test("defines ACCOUNTING_CREDITS_MANAGE with the accounting.credits_manage key", () => {
@@ -123,6 +125,25 @@ describe("AppPermission whatsapp conversations", () => {
   });
 });
 
+describe("AppPermission whatsapp groups", () => {
+  test("defines WHATSAPP_GROUPS_VIEW and WHATSAPP_GROUPS_MANAGE with their keys", () => {
+    const viewValue: string = AppPermission.WHATSAPP_GROUPS_VIEW;
+    const manageValue: string = AppPermission.WHATSAPP_GROUPS_MANAGE;
+    expect(viewValue).toBe(whatsappGroupsViewKey);
+    expect(manageValue).toBe(whatsappGroupsManageKey);
+  });
+
+  test("isAppPermission accepts the whatsapp groups keys", () => {
+    expect(isAppPermission(whatsappGroupsViewKey)).toBe(true);
+    expect(isAppPermission(whatsappGroupsManageKey)).toBe(true);
+  });
+
+  test("parseAppPermission resolves the whatsapp groups keys to the enum values", () => {
+    expect(parseAppPermission(whatsappGroupsViewKey)).toBe(AppPermission.WHATSAPP_GROUPS_VIEW);
+    expect(parseAppPermission(whatsappGroupsManageKey)).toBe(AppPermission.WHATSAPP_GROUPS_MANAGE);
+  });
+});
+
 describe("AppPermission rejection paths", () => {
   test("isAppPermission rejects unknown permission keys", () => {
     expect(isAppPermission("accounting.credits_manage_typo")).toBe(false);
@@ -132,6 +153,8 @@ describe("AppPermission rejection paths", () => {
     expect(isAppPermission("accounting.expenses_view_typo")).toBe(false);
     expect(isAppPermission("whatsapp.conversations_view_typo")).toBe(false);
     expect(isAppPermission("whatsapp.conversations_manage_typo")).toBe(false);
+    expect(isAppPermission("whatsapp.groups_view_typo")).toBe(false);
+    expect(isAppPermission("whatsapp.groups_manage_typo")).toBe(false);
     expect(isAppPermission("unknown.permission")).toBe(false);
     expect(isAppPermission("")).toBe(false);
   });

@@ -268,6 +268,9 @@ void mock.module("@/backend/db/repo/whatsapp", () => ({
   WhatsappContactRepository: {},
   WhatsappSyncRequestRepository: {},
   WhatsappWebhookEventRepository: {},
+  WhatsappGroupRepository: {},
+  WhatsappGroupMessageRepository: {},
+  WhatsappGroupParticipantRepository: {},
 }));
 
 // Merge with the real modules so other services loaded through the

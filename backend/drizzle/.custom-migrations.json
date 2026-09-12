@@ -1,5 +1,5 @@
 {
-  "manifestHash": "c73e0f10b07dfda8c7bf9ade0f31ea28cb99296970818e5c550eda6ef6b4aa95",
+  "manifestHash": "8ed302f48f1131adbb15478085c85cd42640a77a58b422f03fb12d1fe2feb8a4",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -100,6 +100,14 @@
     {
       "file": "46b-whatsapp-conversations-permissions-data.sql",
       "sha256": "186fbe0463e83d86d00d00ba4639ab41fb506b73d2dd278f0da02b52a0d5ee07"
+    },
+    {
+      "file": "47a-whatsapp-groups-permissions-enum.sql",
+      "sha256": "9e0aeb61f613f3a9ca230cf4d5e660eb4b238ffb59360e3ec66685a5cdd7416f"
+    },
+    {
+      "file": "47b-whatsapp-groups-permissions-data.sql",
+      "sha256": "ab759ab10e0d796e8e4da659bf3f24215edecaccced8466e46c51046dc2836e2"
     },
     {
       "file": "4a-class_categories_and_subjects_seed.sql",
@@ -365,6 +373,8 @@
     "20260906091746_custom_45-expenses-table",
     "20260906091949_custom_43-whatsapp-webhook-event-processing",
     "20260910130858_custom_46a-whatsapp-conversations-permissions-enum",
-    "20260910130859_custom_46b-whatsapp-conversations-permissions-data"
+    "20260910130859_custom_46b-whatsapp-conversations-permissions-data",
+    "20260912105815_custom_47a-whatsapp-groups-permissions-enum",
+    "20260912105816_custom_47b-whatsapp-groups-permissions-data"
   ]
 }

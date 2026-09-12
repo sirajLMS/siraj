@@ -98,6 +98,7 @@ const SUPER_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.SuggestionsList,
   AppPermission.SuggestionsReview,
   AppPermission.SuggestionsDelete,
+  AppPermission.WhatsappGroupsView,
 ];
 
 describe("super admin sidebar navigation", () => {
@@ -116,6 +117,7 @@ describe("super admin sidebar navigation", () => {
     expect(keys).toContain("dst-migration");
     expect(keys).toContain("reports");
     expect(keys).toContain("billing-admin");
+    expect(keys).toContain("whatsapp-groups");
     expect(keys).not.toContain("logout");
 
     expect(keys).not.toContain("today-classes");

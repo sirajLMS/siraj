@@ -68,6 +68,7 @@ const ACADEMY_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.TeachersEdit,
   AppPermission.TeachersList,
   AppPermission.StudentsEdit,
+  AppPermission.WhatsappGroupsView,
 ];
 
 describe("academy admin sidebar navigation", () => {
@@ -83,6 +84,7 @@ describe("academy admin sidebar navigation", () => {
     expect(keys).not.toContain("complaints-manage");
     expect(keys).toContain("reports");
     expect(keys).toContain("billing-admin");
+    expect(keys).toContain("whatsapp-groups");
     expect(keys).not.toContain("logout");
     expect(keys).not.toContain("parent-your-students");
     expect(keys).not.toContain("your-students");

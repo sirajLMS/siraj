@@ -77,6 +77,7 @@ export interface DashboardNavigationLabels {
   readonly settings: string;
   readonly whatsappSettings: string;
   readonly whatsappConversations: string;
+  readonly whatsappGroups: string;
   readonly booksAndBags: string;
   readonly studentTodayClasses: string;
   readonly studentSchedule: string;

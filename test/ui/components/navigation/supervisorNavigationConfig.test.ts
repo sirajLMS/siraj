@@ -36,6 +36,7 @@ const SUPERVISOR_PERMISSIONS: AppPermission[] = [
   AppPermission.ParentManageStatus,
   AppPermission.ComplaintsList,
   AppPermission.ComplaintsRespond,
+  AppPermission.WhatsappGroupsView,
 ];
 
 describe("supervisor sidebar navigation", () => {
@@ -59,6 +60,7 @@ describe("supervisor sidebar navigation", () => {
     expect(keys).toContain("students");
     expect(keys).toContain("teachers");
     expect(keys).toContain("parents");
+    expect(keys).not.toContain("whatsapp-groups");
     expect(keys).not.toContain("staff");
     expect(keys).not.toContain("feedback-manage");
 

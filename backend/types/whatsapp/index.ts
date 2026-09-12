@@ -3,6 +3,7 @@ export * from "./whatsapp-channel.types";
 export * from "./whatsapp-cloud-api.types";
 export * from "./whatsapp-config.types";
 export * from "./whatsapp-conversations.types";
+export * from "./whatsapp-groups.types";
 export * from "./whatsapp-inbox.types";
 export * from "./whatsapp-sync.types";
 export * from "./whatsapp-webhook.types";

@@ -1,0 +1,72 @@
+import type { WhatsappGroupsLabels } from "@/shared/locale/types/whatsappGroups";
+
+export const whatsappGroupsEn: WhatsappGroupsLabels = {
+  title: "WhatsApp Groups",
+  subtitle: "Manage your WhatsApp groups, invites, and group messaging.",
+
+  listTitle: "Groups",
+  listSubtitle: "Groups synced from your connected WhatsApp numbers.",
+  searchPlaceholder: "Search groups by name…",
+  emptyState: "No groups yet",
+  noAccountsState: "No WhatsApp numbers connected",
+
+  createGroup: "Create Group",
+  createGroupTitle: "Create WhatsApp Group",
+  createGroupDescription: "Set the group subject, description, and join-approval mode.",
+  subjectLabel: "Subject",
+  subjectPlaceholder: "e.g. Grade 5 — Parents",
+  descriptionLabel: "Description",
+  descriptionPlaceholder: "Optional group description",
+  approvalModeLabel: "Join approval",
+  approvalModeAuto: "Auto-approve members",
+  approvalModeRequired: "Require admin approval",
+
+  syncGroups: "Sync Groups",
+  syncStarted: "Sync started",
+  syncCompleted: "Synced {count} groups",
+
+  inviteLinkTitle: "Invite Link",
+  inviteLinkEmpty: "No invite link available for this group.",
+  copyInviteLink: "Copy Invite Link",
+  copied: "Copied",
+  resetInviteLink: "Reset Invite Link",
+  resetInviteLinkConfirm: "Reset the invite link for this group?",
+  resetInviteLinkWarning:
+    "The current link stops working immediately and cannot be recovered. Share the new link with members.",
+
+  joinRequestsTitle: "Join Requests",
+  joinRequestsEmpty: "No pending join requests.",
+  pendingBadge: "{count} pending",
+  approveRequest: "Approve",
+  rejectRequest: "Reject",
+  approved: "Request approved",
+  rejected: "Request rejected",
+
+  participantsTitle: "Participants",
+  participantsEmpty: "No participants in this group.",
+  removeParticipant: "Remove",
+  removeParticipantConfirm: "Remove this participant from the group? They will need a new invite to rejoin.",
+
+  messagesTitle: "Group Messages",
+  messagesEmpty: "No messages in this group yet.",
+  messagePlaceholder: "Type a message…",
+  send: "Send",
+  sending: "Sending…",
+  pin: "Pin",
+  unpin: "Unpin",
+  pinned: "Pinned",
+
+  deleteGroup: "Delete Group",
+  deleteGroupConfirm: "Delete this group?",
+  deleteGroupWarning: "This removes the group for all participants and cannot be undone.",
+
+  errorGeneric: "Something went wrong. Please try again.",
+  permissionDenied: "You don't have permission to manage WhatsApp groups.",
+  loadingMore: "Loading more…",
+  refresh: "Refresh",
+
+  createdAtLabel: "Created: {date}",
+  lastSyncedAtLabel: "Last synced: {date}",
+  suspendedBadge: "Suspended",
+  activeBadge: "Active",
+};

@@ -110,6 +110,7 @@ export const PAGE_PERMISSIONS = {
   lessonReportsSubmit: [AppPermission.LessonReportsSubmit] as PagePermissions,
   whatsappSettings: [AppPermission.WhatsappView] as PagePermissions,
   whatsappConversations: [AppPermission.WhatsappConversationsView] as PagePermissions,
+  whatsappGroups: [AppPermission.WhatsappGroupsView] as PagePermissions,
   settings: [
     AppPermission.SettingsView,
     AppPermission.SettingsEditGeneral,

@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { WhatsappMessageDirection } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappMessageRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappInboxView.types";
 import { getWhatsappMessageDirectionLabel } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappInboxDirectionLabel";
+import { useAutoScrollToEnd } from "@/frontend/common/views/dashboard/whatsapp/conversations/useAutoScrollToEnd";
 import type { WhatsappInboxLabels } from "@/shared/locale/types/whatsappInbox";
 
 export interface ConversationThreadProps {
@@ -240,6 +241,8 @@ export function ConversationThread({
   formatTimestamp,
   onBack,
 }: Readonly<ConversationThreadProps>) {
+  const lastMessageId = messages.length > 0 ? (messages[messages.length - 1]?.id ?? null) : null;
+  const scrollContainerRef = useAutoScrollToEnd<HTMLElement>(lastMessageId, loading);
   return (
     <Stack sx={{ borderRadius: 2, overflow: "hidden", border: theme => `1px solid ${theme.palette.outlineVariant}` }}>
       <Stack
@@ -260,6 +263,7 @@ export function ConversationThread({
         </Box>
       </Stack>
       <Stack
+        ref={scrollContainerRef}
         spacing={2}
         sx={{ pt: 2, px: 2, pb: 3, minHeight: 240, maxHeight: 520, overflowY: "auto" }}
         component="section"

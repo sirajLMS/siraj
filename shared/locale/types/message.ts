@@ -134,6 +134,7 @@ import type {
 } from "@/shared/locale/types/ui";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 import type { WhatsappConversationsLabels } from "@/shared/locale/types/whatsappConversations";
+import type { WhatsappGroupsLabels } from "@/shared/locale/types/whatsappGroups";
 import type { WhatsappInboxLabels } from "@/shared/locale/types/whatsappInbox";
 
 /** DashboardTranslations — group collector for all dashboard-domain labels. */
@@ -283,4 +284,5 @@ export type Translations = {
   whatsappTranslations: WhatsappLabels;
   whatsappInboxTranslations: WhatsappInboxLabels;
   whatsappConversationsTranslations: WhatsappConversationsLabels;
+  whatsappGroupsTranslations: WhatsappGroupsLabels;
 };

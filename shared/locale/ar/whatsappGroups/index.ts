@@ -1,0 +1,71 @@
+import type { WhatsappGroupsLabels } from "@/shared/locale/types/whatsappGroups";
+
+export const whatsappGroupsAr: WhatsappGroupsLabels = {
+  title: "مجموعات واتساب",
+  subtitle: "أدِر مجموعات واتساب ودعواتها ومراسلاتها الجماعية.",
+
+  listTitle: "المجموعات",
+  listSubtitle: "مجموعات تمت مزامنتها من أرقام واتساب المربوطة لديك.",
+  searchPlaceholder: "ابحث في المجموعات بالاسم…",
+  emptyState: "لا توجد مجموعات بعد",
+  noAccountsState: "لا توجد أرقام واتساب مربوطة",
+
+  createGroup: "إنشاء مجموعة",
+  createGroupTitle: "إنشاء مجموعة واتساب",
+  createGroupDescription: "حدّد اسم المجموعة ووصفها ووضع اعتماد طلبات الانضمام.",
+  subjectLabel: "اسم المجموعة",
+  subjectPlaceholder: "مثال: الصف الخامس — أولياء الأمور",
+  descriptionLabel: "الوصف",
+  descriptionPlaceholder: "وصف اختياري للمجموعة",
+  approvalModeLabel: "اعتماد الانضمام",
+  approvalModeAuto: "قبول الأعضاء تلقائيًا",
+  approvalModeRequired: "يتطلب موافقة المشرف",
+
+  syncGroups: "مزامنة المجموعات",
+  syncStarted: "بدأت المزامنة",
+  syncCompleted: "تمت مزامنة {count} مجموعة",
+
+  inviteLinkTitle: "رابط الدعوة",
+  inviteLinkEmpty: "لا يوجد رابط دعوة متاح لهذه المجموعة.",
+  copyInviteLink: "نسخ رابط الدعوة",
+  copied: "تم النسخ",
+  resetInviteLink: "إعادة تعيين رابط الدعوة",
+  resetInviteLinkConfirm: "هل تريد إعادة تعيين رابط الدعوة لهذه المجموعة؟",
+  resetInviteLinkWarning: "سيتوقف الرابط الحالي عن العمل فورًا ولا يمكن استرجاعه. شارك الرابط الجديد مع الأعضاء.",
+
+  joinRequestsTitle: "طلبات الانضمام",
+  joinRequestsEmpty: "لا توجد طلبات انضمام معلقة.",
+  pendingBadge: "{count} معلق",
+  approveRequest: "قبول",
+  rejectRequest: "رفض",
+  approved: "تم قبول الطلب",
+  rejected: "تم رفض الطلب",
+
+  participantsTitle: "المشاركون",
+  participantsEmpty: "لا يوجد مشاركون في هذه المجموعة.",
+  removeParticipant: "إزالة",
+  removeParticipantConfirm: "هل تريد إزالة هذا المشارك من المجموعة؟ سيحتاج إلى دعوة جديدة للانضمام مرة أخرى.",
+
+  messagesTitle: "رسائل المجموعة",
+  messagesEmpty: "لا توجد رسائل في هذه المجموعة بعد.",
+  messagePlaceholder: "اكتب رسالة…",
+  send: "إرسال",
+  sending: "جارٍ الإرسال…",
+  pin: "تثبيت",
+  unpin: "إلغاء التثبيت",
+  pinned: "مثبّتة",
+
+  deleteGroup: "حذف المجموعة",
+  deleteGroupConfirm: "هل تريد حذف هذه المجموعة؟",
+  deleteGroupWarning: "سيؤدي هذا إلى إزالة المجموعة لجميع المشاركين ولا يمكن التراجع عنه.",
+
+  errorGeneric: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  permissionDenied: "ليست لديك صلاحية إدارة مجموعات واتساب.",
+  loadingMore: "جارٍ تحميل المزيد…",
+  refresh: "تحديث",
+
+  createdAtLabel: "تاريخ الإنشاء: {date}",
+  lastSyncedAtLabel: "آخر مزامنة: {date}",
+  suspendedBadge: "موقوفة",
+  activeBadge: "نشطة",
+};

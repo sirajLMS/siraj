@@ -293,6 +293,7 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
       AppPermission.WhatsappView,
       AppPermission.WhatsappConfigManage,
       AppPermission.WhatsappConversationsView,
+      AppPermission.WhatsappGroupsView,
     ],
     separator: true,
   },
@@ -757,6 +758,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.whatsappConversations,
     groupId: "grp_integrations",
   },
+  {
+    key: "whatsapp-groups",
+    labelKey: "whatsappGroups",
+    iconKey: "group",
+    href: "/whatsapp/groups",
+    section: "main",
+    permission: PAGE_PERMISSIONS.whatsappGroups,
+    groupId: "grp_integrations",
+  },
 ] as const;
 
 /**
@@ -1153,6 +1163,7 @@ function applyParentNavOverrides(items: readonly NavItem[], permissions: readonl
     "schedule",
     "whatsapp-settings",
     "whatsapp-conversations",
+    "whatsapp-groups",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
@@ -1169,7 +1180,13 @@ function applyTeacherNavOverrides(items: readonly NavItem[], permissions: readon
     return [...items];
   }
 
-  const hiddenKeys = new Set(["home", "books-and-bags", "whatsapp-settings", "whatsapp-conversations"]);
+  const hiddenKeys = new Set([
+    "home",
+    "books-and-bags",
+    "whatsapp-settings",
+    "whatsapp-conversations",
+    "whatsapp-groups",
+  ]);
   // Hide the admin grouped "classes" item only when the teacher-portal
   // "teacher-class-details" entry is also available (same /classes route).
   if (items.some(item => item.key === "teacher-class-details")) {
@@ -1197,6 +1214,7 @@ function applyStudentNavOverrides(items: readonly NavItem[], permissions: readon
     "own-profile",
     "whatsapp-settings",
     "whatsapp-conversations",
+    "whatsapp-groups",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }
@@ -1234,6 +1252,7 @@ function applySupervisorNavOverrides(items: readonly NavItem[], permissions: rea
     "settings",
     "whatsapp-settings",
     "whatsapp-conversations",
+    "whatsapp-groups",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }

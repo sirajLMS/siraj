@@ -288,6 +288,9 @@ export enum AppPermission {
   // WhatsApp conversations workspace (list/read gated by view; send/recipients by manage)
   WHATSAPP_CONVERSATIONS_VIEW = "whatsapp.conversations_view",
   WHATSAPP_CONVERSATIONS_MANAGE = "whatsapp.conversations_manage",
+  // WhatsApp groups workspace (list/membership gated by view; creation/invites/join requests by manage)
+  WHATSAPP_GROUPS_VIEW = "whatsapp.groups_view",
+  WHATSAPP_GROUPS_MANAGE = "whatsapp.groups_manage",
   // Quota Management
   QUOTAS_VIEW = "quotas.view",
   QUOTAS_MANAGE = "quotas.manage",

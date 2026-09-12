@@ -712,6 +712,17 @@ export interface ErrorsLabels
   readonly whatsappTemplatesFetchFailed: string;
   readonly whatsappTemplateParamsMismatch: string;
 
+  // ─── WhatsApp groups errors (Meta Groups API error codes) ────────────────
+  readonly whatsappGroupNotEligible: string;
+  readonly whatsappGroupUnknown: string;
+  readonly whatsappGroupSuspended: string;
+  readonly whatsappGroupRateLimitHit: string;
+  readonly whatsappGroupCreateLimitReached: string;
+  readonly whatsappGroupCreationTemporarilyDisabled: string;
+  readonly whatsappGroupParticipantNotInGroup: string;
+  readonly whatsappGroupJoinRequestNotFound: string;
+  readonly whatsappGroupActionFailed: string;
+
   // ─── Delivery failure messages ───────────────────────────────────────────
   readonly emailChannelLabel: string;
   readonly smsChannelLabel: string;

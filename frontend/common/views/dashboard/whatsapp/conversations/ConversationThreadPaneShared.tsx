@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import type { WhatsappMessageDirection } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappMessageRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappInboxView.types";
 import { getWhatsappMessageDirectionLabel } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappInboxDirectionLabel";
+import { useAutoScrollToEnd } from "@/frontend/common/views/dashboard/whatsapp/conversations/useAutoScrollToEnd";
 import type { WhatsappConversationsLabels } from "@/shared/locale/types/whatsappConversations";
 import type { WhatsappInboxLabels } from "@/shared/locale/types/whatsappInbox";
 
@@ -149,6 +150,8 @@ export function ConversationThreadPaneShared({
   onBack,
   composer,
 }: Readonly<ConversationThreadPaneSharedProps>) {
+  const lastMessageId = messages.length > 0 ? (messages[messages.length - 1]?.id ?? null) : null;
+  const scrollContainerRef = useAutoScrollToEnd<HTMLElement>(lastMessageId, loading);
   return (
     <Stack sx={{ borderRadius: 2, overflow: "hidden", border: theme => `1px solid ${theme.palette.outlineVariant}` }}>
       <Stack
@@ -176,6 +179,7 @@ export function ConversationThreadPaneShared({
         </Box>
       </Stack>
       <Stack
+        ref={scrollContainerRef}
         spacing={1}
         sx={{ px: 2, pt: 2, pb: 2, minHeight: 240, maxHeight: 480, overflowY: "auto" }}
         component="section"

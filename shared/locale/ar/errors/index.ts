@@ -583,6 +583,21 @@ export const errorsAr: ErrorsLabels = {
   whatsappTemplateParamsMismatch:
     "يتطلب هذا القالب متغيرات ({{1}}، {{2}}، …). لا يتوفّر ملء متغيرات القوالب بعد — اختر قالبًا بدون متغيرات.",
 
+  // ─── WhatsApp groups errors (Meta Groups API error codes) ────────────────
+  whatsappGroupNotEligible:
+    "رقم الواتساب هذا غير مؤهل للمجموعات. تتطلب Meta حساب أعمال رسميًا — اطلب حالة OBA في WhatsApp Manager، ثم حاول مرة أخرى.",
+  whatsappGroupUnknown:
+    "لم يعد الوصول إلى هذه المجموعة ممكنًا: قد تكون محذوفة، أو أُزيل الرقم منها. حدّث قائمة المجموعات.",
+  whatsappGroupSuspended: "عُلّقت هذه المجموعة بواسطة واتساب لمخالفتها سياسات المنصة.",
+  whatsappGroupRateLimitHit: "عمليات مجموعات كثيرة جدًا من هذا الرقم في فترة قصيرة. انتظر قليلًا، ثم حاول مرة أخرى.",
+  whatsappGroupCreateLimitReached:
+    "تم بلوغ حد المجموعات التي يمكن إنشاؤها بهذا الرقم. احذف المجموعات غير المستخدمة، ثم حاول مرة أخرى.",
+  whatsappGroupCreationTemporarilyDisabled:
+    "إنشاء المجموعات معطّل مؤقتًا لهذا الرقم بسبب حدود سياسة المراسلة. حاول مرة أخرى لاحقًا.",
+  whatsappGroupParticipantNotInGroup: "أحد المشاركين ليس عضوًا في هذه المجموعة.",
+  whatsappGroupJoinRequestNotFound: "أحد طلبات الانضمام المحددة لم يعد موجودًا — ربما عولج مسبقًا.",
+  whatsappGroupActionFailed: "تعذّر إتمام عملية المجموعة. يرجى المحاولة مرة أخرى.",
+
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "البريد الإلكتروني",
   smsChannelLabel: "رسائل SMS",

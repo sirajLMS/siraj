@@ -456,6 +456,8 @@ enum AppPermission {
   WHATSAPP_CONFIG_MANAGE
   WHATSAPP_CONVERSATIONS_MANAGE
   WHATSAPP_CONVERSATIONS_VIEW
+  WHATSAPP_GROUPS_MANAGE
+  WHATSAPP_GROUPS_VIEW
   WHATSAPP_INBOX_MANAGE
   WHATSAPP_INBOX_VIEW
   WHATSAPP_TEMPLATES_MANAGE
@@ -2966,6 +2968,11 @@ type Mutation {
   approveLessonReport(reportId: ID!): LessonReport
   approvePaymentProof(expectedVersion: Int, invoiceId: String!): MarkInvoicePaidResult
 
+  """
+  Approve pending join requests on Meta; returns the provider's outcome (approved list + per-request failures). Local membership reconciliation is owned by the participants-update webhook.
+  """
+  approveWhatsappGroupJoinRequests(input: WhatsappGroupIdsInput!): WhatsappJoinRequestsOutcome
+
   """Soft-archive a package plan (hidden from catalogs, history intact)"""
   archivePackagePlan(id: ID!): PackagePlan
   assignPermissionGroupToUser(input: AssignPermissionGroupToUserInput!): Boolean
@@ -3067,6 +3074,11 @@ type Mutation {
   """Create a new WhatsApp business account record."""
   createWhatsappAccount(input: WhatsappAccountCreateInput!): WhatsappAccount
 
+  """
+  Create a group on Meta under the owning WhatsApp account and register it locally; returns the local group row.
+  """
+  createWhatsappGroup(input: WhatsappGroupCreateInput!): WhatsappGroup
+
   """Retry a failed cron run."""
   cronRunRetry(input: CronRunRetryInput!): CronRun
 
@@ -3150,6 +3162,11 @@ type Mutation {
   deleteUserPaymentMethod(id: ID!): Boolean
 
   """
+  Delete a group on Meta, then soft-delete the local row. A Meta-rejected delete leaves the group active.
+  """
+  deleteWhatsappGroup(groupId: String!): Boolean
+
+  """
   Special GraphQL endpoint for demo fast login. It bypasses password checks and logs in a user using the provided permission group slug. Intended strictly for demonstration purposes and secured by environment variables.
   """
   demoLogin(input: DemoLoginInput!): LoginResponse
@@ -3160,6 +3177,11 @@ type Mutation {
   ensureDemoUsers: Boolean
   executeDstBulkUpdate(description: String!, offsetMinutes: Int!): DstMigrationReport
   generateMeetingUrl(input: GenerateMeetingUrlInput!): GenerateMeetingUrlResult
+
+  """
+  Read the current group invite link from Meta and cache it on the local row; returns the link.
+  """
+  getWhatsappGroupInviteLink(groupId: String!): String
   linkDocumentToParent(fileId: String!, parentId: String!, usageType: String!): ParentDocumentRow
 
   """
@@ -3184,6 +3206,11 @@ type Mutation {
   moveStorageItems(input: StorageItemsMoveInput!): BulkOperationResult
   overrideClassInstanceRate(classInstanceId: ID!, rateAmount: String, rateCurrency: CurrencyCode): ClassInstanceDetail
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
+
+  """
+  Pin a message inside a group on Meta (pin lifetime in days is required) and stamp the local pin state; returns the message id.
+  """
+  pinWhatsappGroupMessage(input: WhatsappGroupPinInput!): String
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
 
   """
@@ -3217,6 +3244,16 @@ type Mutation {
   rejectLessonReport(rejectionReason: String!, reportId: ID!): LessonReport
   rejectPaymentProof(expectedVersion: Int, invoiceId: String!, rejectionReason: String): MarkInvoicePaidResult
 
+  """
+  Reject pending join requests on Meta; returns the provider's outcome (per-request failures). Local membership reconciliation is owned by the participants-update webhook.
+  """
+  rejectWhatsappGroupJoinRequests(input: WhatsappGroupIdsInput!): WhatsappJoinRequestsOutcome
+
+  """
+  Remove participants from a group on Meta; the provider's outcome arrives asynchronously via the participants-update webhook.
+  """
+  removeWhatsappGroupParticipants(input: WhatsappGroupParticipantsInput!): WhatsappRemoveParticipantsOutcome
+
   """Remove a recipient from a Meta test number's allow-list registry."""
   removeWhatsappTestRecipient(recipientId: String!): Boolean
   renameFile(input: FileRenameInput!): FileOperationResult
@@ -3235,6 +3272,11 @@ type Mutation {
   resetAppearanceDraft: AppearanceSettings
   resetClass(classInstanceId: ID!): Boolean
 
+  """
+  Revoke the current group invite link on Meta, issue and cache a new one; every previously shared link becomes invalid.
+  """
+  resetWhatsappGroupInviteLink(groupId: String!): String
+
   """Creates a response to an existing complaint (admin only)."""
   respondToComplaint(input: RespondToComplaintInput!): ComplaintResponse
 
@@ -3252,6 +3294,11 @@ type Mutation {
   Send a composer message from the conversations workspace (TEXT inside the 24h service window, TEMPLATE anytime). Test numbers enforce the recipient allow-list.
   """
   sendWhatsappConversationMessage(input: WhatsappConversationSendInput!): WhatsappConversationSendResult
+
+  """
+  Send a message to a group from the owning account (TEXT when templateName is omitted, TEMPLATE with a synced language code otherwise); the sent message is persisted as API_OUTBOUND.
+  """
+  sendWhatsappGroupMessage(input: WhatsappGroupSendInput!): WhatsappGroupSendResult
   setDefaultClassMeetingConfig(id: ID!): ClassMeetingConfig
   setDefaultMeetingConfig(id: ID!): UserMeetingConfig
   setDefaultUserPaymentMethod(id: ID!): UserPaymentMethod
@@ -3297,6 +3344,11 @@ type Mutation {
   Sync WhatsApp phone numbers and message templates from Meta Graph API (BL3: includes template snapshot).
   """
   syncWhatsappAccountsFromMeta: WhatsappSyncFromMetaResult
+
+  """
+  Sync groups from Meta into the local registry (one list page, live info fetch per group); returns the synced count. Resolves the account by id when given, otherwise the active GENERAL-purpose account.
+  """
+  syncWhatsappGroups(accountId: String): Int
   testMeetingProviderConnection(input: TestMeetingConnectionInput!): TestMeetingConnectionResult
 
   """
@@ -3311,6 +3363,11 @@ type Mutation {
   Revert a paid carryover balance: soft-delete the expense record, mark the carryover unpaid, and return the linked sessions to awaiting settlement.
   """
   unpayCarryoverBalance(id: ID!, note: String): CarryoverBalance
+
+  """
+  Unpin a message inside a group on Meta and clear the local pin state; returns the message id. Unpin has no expiry — the input's expirationDays is ignored.
+  """
+  unpinWhatsappGroupMessage(input: WhatsappGroupPinInput!): String
 
   """Edit an accounting payment (gateway/note-only or creditHours delta)"""
   updateAccountingPayment(input: AccountingPaymentEditInput!): AccountingPayment
@@ -3376,6 +3433,11 @@ type Mutation {
   Creates or updates the WhatsApp Cloud API configuration with per-field merge semantics: provided fields are written, explicit nulls clear them, omitted fields keep their stored values.
   """
   updateWhatsappConfiguration(input: WhatsappConfigUpdateInput!): WhatsappConfiguration
+
+  """
+  Update a group's subject/description on Meta (a staged profile picture switches to multipart upload) and persist the text fields locally.
+  """
+  updateWhatsappGroupSettings(input: WhatsappGroupSettingsUpdateInput!): WhatsappGroup
 
   """Uploads a new learning resource to the academy library."""
   uploadLearningResource(input: ResourceUploadInput!): LearningResourceRow
@@ -4583,6 +4645,26 @@ type Query {
   Meta App Dashboard 'Facebook Login for Business' settings URL for this app's id, where Embedded Signup allowed origins/redirect URIs are registered. Null when WHATSAPP_APP_ID is not configured.
   """
   whatsappEmbeddedSignupAllowedOriginsUrl: String
+
+  """
+  One group row for the workspace: subject, description, approval mode, participant rollups and sync state.
+  """
+  whatsappGroup(groupId: String!): WhatsappGroup
+
+  """
+  Pending join requests for one group, listed live from Meta with the owning account's credentials.
+  """
+  whatsappGroupJoinRequests(groupId: String!): [WhatsappGroupJoinRequest!]
+
+  """
+  Paginated message thread for one group, newest-first with the thread's total count.
+  """
+  whatsappGroupMessages(groupId: String!, pagination: PaginationArgs): WhatsappGroupMessagesResult
+
+  """
+  Paginated groups list for the workspace; spans all accounts when `accountId` is omitted, filtered by group subject with `search`.
+  """
+  whatsappGroups(accountId: String, pagination: PaginationArgs, search: String): WhatsappGroupsResult
 
   """
   Per-account coexistence sync overview (status, progress, per-type request rows).
@@ -6855,6 +6937,185 @@ input WhatsappEmbeddedSignupInput {
   wabaId: String!
 }
 
+type WhatsappGroup {
+  accountId: String!
+  createdAt: DateTime!
+  creationTimestamp: DateTime
+  description: String
+  groupJid: String!
+  id: String!
+  inviteLink: String
+  joinApprovalMode: WhatsappGroupJoinApprovalMode!
+  pendingJoinRequestCount: Int!
+  subject: String!
+  suspended: Boolean!
+  syncedAt: DateTime
+  totalParticipantCount: Int!
+  updatedAt: DateTime!
+}
+
+input WhatsappGroupCreateInput {
+  """Owning WhatsApp account id (max 36 chars)"""
+  accountId: String!
+
+  """Optional group description (max 2048 chars)"""
+  description: String
+
+  """How the group admits new members: admin approval or automatic."""
+  joinApprovalMode: WhatsappGroupJoinApprovalMode
+
+  """Group subject (1-128 characters, Meta-enforced limit)"""
+  subject: String!
+}
+
+input WhatsappGroupIdsInput {
+  """Meta group id (max 256 chars)"""
+  groupId: String!
+
+  """
+  Pending join request ids to approve or reject (max 100, each max 128 chars)
+  """
+  joinRequestIds: [String!]!
+}
+
+enum WhatsappGroupJoinApprovalMode {
+  ApprovalRequired
+  AutoApprove
+}
+
+type WhatsappGroupJoinRequest {
+  creationTimestamp: String!
+  id: String
+  joinRequestId: String!
+  waId: String!
+}
+
+type WhatsappGroupMessage {
+  accountId: String!
+  content: JSON!
+  createdAt: DateTime!
+  direction: WhatsappMessageDirection!
+  fromWaId: String
+  groupId: String!
+  id: String!
+  mediaId: String
+  mediaMime: String
+  pinExpiresAt: DateTime
+  pinnedAt: DateTime
+  sentAt: DateTime
+  status: String
+  type: String!
+  wamid: String!
+}
+
+type WhatsappGroupMessagesResult {
+  id: String!
+  pageInfo: PageInfo
+  rows: [WhatsappGroupMessage!]!
+  totalCount: Int!
+}
+
+type WhatsappGroupParticipant {
+  addedVia: String
+  createdAt: DateTime!
+  groupId: String!
+  id: String!
+  joinedAt: DateTime
+  waId: String!
+}
+
+input WhatsappGroupParticipantsInput {
+  """Meta group id (max 256 chars)"""
+  groupId: String!
+
+  """
+  Participant WhatsApp ids, normalized to digits only server-side (max 100, each max 32 chars)
+  """
+  participants: [String!]!
+}
+
+input WhatsappGroupPinInput {
+  """Pin lifetime in days (1-30, Meta-enforced maximum)"""
+  expirationDays: Int
+
+  """Meta group id (max 256 chars)"""
+  groupId: String!
+
+  """WhatsApp message id (wamid) to pin or unpin (max 128 chars)"""
+  messageId: String!
+
+  """Pin operation: pin or unpin."""
+  operation: String!
+}
+
+input WhatsappGroupSendInput {
+  """
+  Free-text message body (max 4096 chars); required when templateName is omitted
+  """
+  body: String
+
+  """Meta group id (max 256 chars)"""
+  groupId: String!
+
+  """Render URL previews in the free-text body."""
+  previewUrl: Boolean
+
+  """Optional group-id template parameter binding (max 256 chars)"""
+  templateGroupIdParameter: String
+
+  """Exact language code from the synced template payload (max 16 chars)"""
+  templateLanguageCode: String
+
+  """Approved template name from Meta Template Manager (max 256 chars)"""
+  templateName: String
+}
+
+type WhatsappGroupSendResult {
+  groupId: String!
+  id: String
+  providerMessageId: String!
+}
+
+input WhatsappGroupSettingsUpdateInput {
+  """Updated group description (max 2048 chars)"""
+  description: String
+
+  """Meta group id (max 256 chars)"""
+  groupId: String!
+
+  """
+  Local file path staged for multipart upload to the media endpoint (max 1024 chars)
+  """
+  profilePicturePath: String
+
+  """Updated group subject (max 128 chars)"""
+  subject: String
+}
+
+type WhatsappGroupsResult {
+  id: String!
+  pageInfo: PageInfo
+  rows: [WhatsappGroup!]!
+  totalCount: Int!
+}
+
+type WhatsappJoinRequestError {
+  code: Int
+  message: String
+}
+
+type WhatsappJoinRequestFailure {
+  errors: [WhatsappJoinRequestError!]!
+  id: String
+  joinRequestId: String!
+}
+
+type WhatsappJoinRequestsOutcome {
+  approved: [String!]
+  failed: [WhatsappJoinRequestFailure!]!
+  id: String
+}
+
 enum WhatsappLimitTier {
   TIER_1K
   TIER_10K
@@ -6903,6 +7164,23 @@ enum WhatsappQualityRating {
   RED
   UNKNOWN
   YELLOW
+}
+
+type WhatsappRemoveParticipantError {
+  code: Int
+  message: String
+}
+
+type WhatsappRemoveParticipantFailure {
+  errors: [WhatsappRemoveParticipantError!]!
+  id: String
+  input: String!
+}
+
+type WhatsappRemoveParticipantsOutcome {
+  failed: [WhatsappRemoveParticipantFailure!]!
+  id: String
+  removed: [String!]
 }
 
 type WhatsappSyncFromMetaResult {

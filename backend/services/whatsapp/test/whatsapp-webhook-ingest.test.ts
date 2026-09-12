@@ -70,6 +70,9 @@ await mock.module("@/backend/db/repo/whatsapp", () => ({
     findByAccountAndPhone: async () => null,
     recordVerify: async () => null,
   },
+  WhatsappGroupRepository: {},
+  WhatsappGroupMessageRepository: {},
+  WhatsappGroupParticipantRepository: {},
 }));
 
 await mock.module("@/backend/services/whatsapp/whatsapp-account.service", () => ({

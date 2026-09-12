@@ -589,6 +589,22 @@ export const errorsEn: ErrorsLabels = {
   whatsappTemplateParamsMismatch:
     "This template requires variables ({{1}}, {{2}}, …). Filling template variables is not supported yet — pick a template without variables.",
 
+  // ─── WhatsApp groups errors (Meta Groups API error codes) ────────────────
+  whatsappGroupNotEligible:
+    "This WhatsApp number is not eligible for Groups. Meta requires an Official Business Account — request OBA status in WhatsApp Manager, then try again.",
+  whatsappGroupUnknown:
+    "This group is no longer reachable: it may have been deleted, or the number was removed from it. Refresh the group list.",
+  whatsappGroupSuspended: "This group was suspended by WhatsApp for violating platform policies.",
+  whatsappGroupRateLimitHit:
+    "Too many group operations from this number in a short period. Wait a moment, then try again.",
+  whatsappGroupCreateLimitReached:
+    "The limit for groups created with this number has been reached. Delete unused groups, then try again.",
+  whatsappGroupCreationTemporarilyDisabled:
+    "Group creation is temporarily disabled for this number due to messaging policy limits. Try again later.",
+  whatsappGroupParticipantNotInGroup: "One of the participants is not a member of this group.",
+  whatsappGroupJoinRequestNotFound: "A selected join request no longer exists — it may have been processed already.",
+  whatsappGroupActionFailed: "The group operation could not be completed. Please try again.",
+
   // ─── Delivery failure messages ───────────────────────────────────────────
   emailChannelLabel: "Email",
   smsChannelLabel: "SMS",

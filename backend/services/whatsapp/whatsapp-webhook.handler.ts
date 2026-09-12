@@ -10,6 +10,15 @@ import { resetWhatsappChannel } from "@/backend/services/communication/channels/
 import { AuditService } from "@/backend/services/system/audit.service";
 import { WhatsappAccountService } from "@/backend/services/whatsapp";
 import {
+  handleGroupLifecycleField,
+  handleGroupParticipantsField,
+  handleGroupSettingsField,
+  handleGroupStatusField,
+  ingestGroupInboundMessage,
+  ingestGroupMessageStatuses,
+  isGroupStatusUpdate,
+} from "@/backend/services/whatsapp/whatsapp-webhook-groups.helpers";
+import {
   ingestEchoesValue,
   ingestHistoryValue,
   ingestInboundMessages,
@@ -208,6 +217,18 @@ async function dispatchChange(
     case "messages":
       await handleMessagesField(value, wabaId, recipientUserIdCache);
       break;
+    case "group_lifecycle_update":
+      await handleGroupLifecycleField(value, wabaId);
+      break;
+    case "group_participants_update":
+      await handleGroupParticipantsField(value, wabaId);
+      break;
+    case "group_settings_update":
+      await handleGroupSettingsField(value, wabaId);
+      break;
+    case "group_status_update":
+      await handleGroupStatusField(value, wabaId);
+      break;
     case "history":
       await dispatchAccountBoundField(value, wabaId, "history");
       break;
@@ -275,7 +296,18 @@ async function handleMessagesField(
     if (!account) {
       throw new Error("whatsapp-webhook-handler: no account for inbound messages change");
     }
-    await ingestInboundMessages(account, value);
+    // Inbound records carrying group_id are group-thread messages — they go
+    // to the group message table and must never create 1:1 conversations.
+    const direct = value.messages.filter(
+      message => !(isRecord(message) && typeof message.group_id === "string" && message.group_id.length > 0)
+    );
+    const groupMessages = value.messages.filter(
+      message => isRecord(message) && typeof message.group_id === "string" && message.group_id.length > 0
+    );
+    await Promise.all(groupMessages.map(message => ingestGroupInboundMessage(account, message)));
+    if (direct.length > 0) {
+      await ingestInboundMessages(account, { ...value, messages: direct });
+    }
   }
 }
 
@@ -328,7 +360,13 @@ async function handleMessagesStatus(
   if (!rawStatuses || !Array.isArray(rawStatuses)) {
     return;
   }
-  const statuses = rawStatuses.filter(isStatusUpdate);
+  // Group-addressed statuses rewrite the group message table's own status
+  // column; they never touch the notification-delivery analytics path.
+  const groupStatuses = rawStatuses.filter(isGroupStatusUpdate);
+  if (groupStatuses.length > 0) {
+    await ingestGroupMessageStatuses(groupStatuses);
+  }
+  const statuses = rawStatuses.filter(status => !isGroupStatusUpdate(status) && isStatusUpdate(status));
   const eventTypeMap = await batchResolveEventTypes(statuses);
   const results = await Promise.allSettled(
     statuses.map(s => processStatusUpdate(s, recipientUserIdCache, eventTypeMap))

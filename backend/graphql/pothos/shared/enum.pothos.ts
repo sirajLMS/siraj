@@ -63,6 +63,7 @@ import {
   UserRole,
   WhatsappAccountPurpose,
   WhatsappConversationSendMode,
+  WhatsappGroupJoinApprovalMode,
   WhatsappLimitTier,
   WhatsappMessageDirection,
   WhatsappOnboardingMode,
@@ -375,6 +376,10 @@ export const WhatsappTestRecipientStatusPothosEnum = gqlSchemaBuilder.enumType(W
 
 export const WhatsappConversationSendModePothosEnum = gqlSchemaBuilder.enumType(WhatsappConversationSendMode, {
   name: "WhatsappConversationSendMode",
+});
+
+export const WhatsappGroupJoinApprovalModePothosEnum = gqlSchemaBuilder.enumType(WhatsappGroupJoinApprovalMode, {
+  name: "WhatsappGroupJoinApprovalMode",
 });
 
 export const QuotaKindPothosEnum = gqlSchemaBuilder.enumType(QuotaKind, {

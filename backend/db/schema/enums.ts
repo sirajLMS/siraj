@@ -48,6 +48,7 @@ import {
   TeacherDueStatus,
   VacationRequestStatus,
   WhatsappAccountPurpose,
+  WhatsappGroupJoinApprovalMode,
   WhatsappMessageDirection,
   WhatsappOnboardingMode,
   WhatsappSyncRequestStatus,
@@ -180,6 +181,11 @@ export const calculationStatusEnum = createPgEnumFromEnum("calculation_status", 
 export const expenseTypeEnum = createPgEnumFromEnum("expense_type", ExpenseType);
 
 export const whatsappAccountPurposeEnum = createPgEnumFromEnum("whatsapp_account_purpose", WhatsappAccountPurpose);
+
+export const whatsappGroupJoinApprovalModeEnum = createPgEnumFromEnum(
+  "whatsapp_group_join_approval_mode",
+  WhatsappGroupJoinApprovalMode
+);
 
 export const whatsappOnboardingModeEnum = createPgEnumFromEnum("whatsapp_onboarding_mode", WhatsappOnboardingMode);
 
