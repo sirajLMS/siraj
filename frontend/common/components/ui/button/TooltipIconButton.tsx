@@ -32,8 +32,9 @@ export function TooltipIconButton({
   sx,
 }: Readonly<TooltipIconButtonProps>): ReactNode {
   const tooltipTitle = disabled && disabledReason ? disabledReason : label;
+  const ariaLabel = disabled && disabledReason ? `${label} (${disabledReason})` : label;
   const button = (
-    <IconButton size={size} color={color} aria-label={label} onClick={onClick} disabled={disabled} sx={sx}>
+    <IconButton size={size} color={color} aria-label={ariaLabel} onClick={onClick} disabled={disabled} sx={sx}>
       {icon}
     </IconButton>
   );
@@ -41,7 +42,7 @@ export function TooltipIconButton({
   return (
     <Tooltip title={tooltipTitle}>
       {disabled ? (
-        <Box component="span" sx={{ display: "inline-flex" }}>
+        <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
           {button}
         </Box>
       ) : (
