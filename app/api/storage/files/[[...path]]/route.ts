@@ -229,6 +229,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: tErrors.file.filePathRequired }, { status: 400 });
     }
 
+    if (!StorageService.validatePath(relativePath)) {
+      logger.warn("Invalid file path detected in storage request", { path: relativePath });
+      return NextResponse.json({ error: tErrors.file.invalidFilePath }, { status: 400 });
+    }
+
     // Allow unauthenticated access to public files (public/ directory only).
     // User avatar uploads land under public/avatars/...; the raw `avatars/`
     // prefix is intentionally NOT exempt — nothing writes there anymore and
