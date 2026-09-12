@@ -408,32 +408,64 @@ export namespace AvailabilityService {
   };
 }
 
+const tzDtfCache = new Map<string, Intl.DateTimeFormat>();
+const weekdayDtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getDtf(timezone: string): Intl.DateTimeFormat {
+  let dtf = tzDtfCache.get(timezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    tzDtfCache.set(timezone, dtf);
+  }
+  return dtf;
+}
+
+function getWeekdayDtf(timezone: string): Intl.DateTimeFormat {
+  let dtf = weekdayDtfCache.get(timezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: timezone });
+    weekdayDtfCache.set(timezone, dtf);
+  }
+  return dtf;
+}
+
 /**
  * Returns the timezone offset in milliseconds for the given IANA timezone
  * at the given point in time. Positive = ahead of UTC, negative = behind.
- * Uses Intl.DateTimeFormat to avoid depending on a full timezone library.
+ * Uses cached Intl.DateTimeFormat instances to avoid CPU & allocation overhead.
  */
 function getTzOffsetMs(timezone: string, date: Date): number {
-  const dtf = new Intl.DateTimeFormat("en-US", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  });
+  const dtf = getDtf(timezone);
   const parts = dtf.formatToParts(date);
-  const map = new Map(parts.map(p => [p.type, p.value]));
-  const asUtc = Date.UTC(
-    Number(map.get("year")),
-    Number(map.get("month")) - 1,
-    Number(map.get("day")),
-    Number(map.get("hour")) === 24 ? 0 : Number(map.get("hour")),
-    Number(map.get("minute")),
-    Number(map.get("second"))
-  );
+  let year = 0;
+  let month = 0;
+  let day = 0;
+  let hour = 0;
+  let minute = 0;
+  let second = 0;
+
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (p.type === "year") year = Number.parseInt(p.value, 10);
+    else if (p.type === "month") month = Number.parseInt(p.value, 10) - 1;
+    else if (p.type === "day") day = Number.parseInt(p.value, 10);
+    else if (p.type === "hour") {
+      hour = Number.parseInt(p.value, 10);
+      if (hour === 24) hour = 0;
+    } else if (p.type === "minute") minute = Number.parseInt(p.value, 10);
+    else if (p.type === "second") second = Number.parseInt(p.value, 10);
+  }
+
+  const asUtc = Date.UTC(year, month, day, hour, minute, second);
   return asUtc - date.getTime();
 }
 
@@ -453,6 +485,7 @@ const TZ_DAY_MAP: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu
  * Builds a list of { start, end } occurrences for each matching day-of-week
  * and start-time within [startDate, endDate], interpreting times in the
  * given timezone.
+ * Optimized to reuse cached DateTimeFormats and avoid string splitting/formatting.
  */
 function buildPatternOccurrences(
   days: { dayOfWeek: string; startTime: string }[],
@@ -463,23 +496,35 @@ function buildPatternOccurrences(
 ): { start: Date; end: Date }[] {
   const occurrences: { start: Date; end: Date }[] = [];
   const curr = new Date(startDate);
+  const weekdayDtf = getWeekdayDtf(timezone);
+
+  // Pre-parse start times and target days before entering loop
+  const parsedDays = days.map(d => {
+    const colonIdx = d.startTime.indexOf(":");
+    const hours = colonIdx === -1 ? Number.parseInt(d.startTime, 10) : Number.parseInt(d.startTime.slice(0, colonIdx), 10);
+    const minutes = colonIdx === -1 ? 0 : Number.parseInt(d.startTime.slice(colonIdx + 1), 10);
+    return {
+      targetDayNum: DAY_MAP[d.dayOfWeek.toUpperCase()],
+      hours: Number.isNaN(hours) ? 0 : hours,
+      minutes: Number.isNaN(minutes) ? 0 : minutes,
+    };
+  });
+
+  const durationMs = durationMinutes * 60 * 1000;
 
   while (curr.getTime() <= endDate.getTime()) {
-    const currMs = curr.getTime();
-    const tzDay = new Date(currMs).toLocaleString("en-US", { weekday: "short", timeZone: timezone });
+    const tzDay = weekdayDtf.format(curr);
     const dayOfWeekNum = TZ_DAY_MAP[tzDay] ?? curr.getUTCDay();
 
-    for (const d of days) {
-      const targetDayNum = DAY_MAP[d.dayOfWeek.toUpperCase()];
-      if (targetDayNum !== dayOfWeekNum) continue;
+    for (let i = 0; i < parsedDays.length; i++) {
+      const d = parsedDays[i];
+      if (d.targetDayNum !== dayOfWeekNum) continue;
 
-      const [hoursStr, minutesStr] = d.startTime.split(":");
-      const hours = Number.parseInt(hoursStr ?? "0", 10);
-      const minutes = Number.parseInt(minutesStr ?? "0", 10);
+      const year = curr.getUTCFullYear();
+      const month = curr.getUTCMonth();
+      const date = curr.getUTCDate();
+      const slotStart = new Date(Date.UTC(year, month, date, d.hours, d.minutes, 0));
 
-      const dateStr = curr.toISOString().split("T")[0];
-      const localStr = `${dateStr}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
-      const slotStart = new Date(localStr + "Z");
       try {
         const offsetMs = getTzOffsetMs(timezone, slotStart);
         slotStart.setTime(slotStart.getTime() - offsetMs);
@@ -488,7 +533,7 @@ function buildPatternOccurrences(
         logger.debug(error);
       }
 
-      const slotEnd = new Date(slotStart.getTime() + durationMinutes * 60 * 1000);
+      const slotEnd = new Date(slotStart.getTime() + durationMs);
       occurrences.push({ start: slotStart, end: slotEnd });
     }
     curr.setUTCDate(curr.getUTCDate() + 1);
