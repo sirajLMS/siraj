@@ -177,6 +177,11 @@ jobs:
       - name: Build (GitHub Actions — not Vercel)
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Sanitize prebuilt deployment refs
+        run: |
+          set -euo pipefail
+          bun run scripts/build/sanitize-prebuilt-refs.ts
+
       - name: Deploy prebuilt artifacts
         id: deploy
         run: |
@@ -194,4 +199,5 @@ jobs:
             echo "- **Commit:** \`${{ github.sha }}\`"
             echo "- **URL:** ${{ steps.deploy.outputs.url }}"
             echo "- **Build location:** GitHub Actions (Vercel Git builds ignored)"
+            echo "- **Refs sanitized:** stray traced refs pruned from .vc-config.json filePathMap"
           } >> "$GITHUB_STEP_SUMMARY"

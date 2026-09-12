@@ -12,6 +12,7 @@
     "ngrok": "bun run scripts/ngrok.ts",
     "whatsapp:webhook-setup": "bun run scripts/whatsapp-webhook-setup.ts",
     "prebuild": "tsx scripts/locale-snapshots.ts && tsx scripts/build/generate-vercel-config.ts",
+    "postbuild": "bun run scripts/build/sanitize-prebuilt-refs.ts",
     "locale:snapshots": "tsx scripts/locale-snapshots.ts",
     "build": "tsx scripts/lib/run-locked-cmd.ts build NODE_ENV=production next build",
     "start": "next start -p 4000 -H 0.0.0.0",
