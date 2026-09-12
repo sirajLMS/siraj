@@ -11,6 +11,9 @@ const GLOBE_EMOJI = "🌐";
 // Generate at runtime via Object.keys to break literal type inference
 const IANA_TIMEZONE_IDS_STRINGS: string[] = Object.keys(IANA_TIMEZONE_LABELS);
 
+// Set lookup keeps validity checks O(1) instead of scanning the ~420-entry ID array
+const IANA_TIMEZONE_SET = new Set<string>(IANA_TIMEZONE_IDS_STRINGS);
+
 // Widened copies of the imported constants to prevent massive union type inference
 const IANA_TIMEZONE_LABELS_MAP: Record<string, { readonly en: string; readonly ar: string }> = (() => {
   const result: Record<string, { readonly en: string; readonly ar: string }> = {};
@@ -35,6 +38,49 @@ export type TimezoneOption = {
   readonly offsetMinutes: number;
   readonly emoji: string;
 };
+
+/**
+ * Cache `Intl.DateTimeFormat` instances per timezone. Instantiating formatters repeatedly
+ * is expensive, so each timezone's offset formatter is created once and reused.
+ */
+const dtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getTimezonePartsFormatter(timeZone: string): Intl.DateTimeFormat {
+  let dtf = dtfCache.get(timeZone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    dtfCache.set(timeZone, dtf);
+  }
+  return dtf;
+}
+
+/**
+ * Offset of `timeZone` from UTC in milliseconds at `date`, derived from
+ * `formatToParts` wall-clock components instead of reparsing a formatted
+ * string (whose shape is implementation-defined across engines).
+ */
+function getTimezoneOffsetMs(timeZone: string, date: Date): number {
+  const parts = getTimezonePartsFormatter(timeZone).formatToParts(date);
+  const values = new Map(parts.map(part => [part.type, part.value]));
+  const asUtc = Date.UTC(
+    Number(values.get("year")),
+    Number(values.get("month")) - 1,
+    Number(values.get("day")),
+    Number(values.get("hour")) === 24 ? 0 : Number(values.get("hour")),
+    Number(values.get("minute")),
+    Number(values.get("second"))
+  );
+  return asUtc - date.getTime();
+}
 
 function normalizeIanaTimezoneId(value: string): string {
   const slashNormalized = value.includes("/") ? value : value.replaceAll("_", "/");
@@ -117,9 +163,7 @@ export function getTimezoneOffsetLabel(ianaTimezone: string, _locale?: string, d
 function getTimezoneOffsetMinutes(ianaTimezone: string, date = new Date()): number {
   const normalizedTimezone = normalizeIanaTimezoneId(ianaTimezone);
   try {
-    const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
-    const tzDate = new Date(date.toLocaleString("en-US", { timeZone: normalizedTimezone }));
-    return Math.round((tzDate.getTime() - utcDate.getTime()) / 60000);
+    return Math.round(getTimezoneOffsetMs(normalizedTimezone, date) / 60000);
   } catch {
     return 0;
   }
@@ -134,14 +178,16 @@ export function getTimezoneSelectLabel(ianaTimezone: string, locale?: string, da
 export function getTimezoneOptions(locale?: string, date = new Date()): TimezoneOption[] {
   return IANA_TIMEZONE_IDS_STRINGS.map(id => {
     const pathLabel = getTimezonePathLabel(id, locale);
-    const offsetLabel = getTimezoneOffsetLabel(id, locale, date);
+    // Compute the offset once per timezone and derive the label from it
+    const offsetMinutes = getTimezoneOffsetMinutes(id, date);
+    const offsetLabel = formatOffsetFromMinutes(offsetMinutes);
     const timezoneId = toIanaTimezone(id);
     return {
       id: timezoneId,
       label: `${pathLabel} (${offsetLabel})`,
       pathLabel,
       offsetLabel,
-      offsetMinutes: getTimezoneOffsetMinutes(id, date),
+      offsetMinutes,
       emoji: getTimezoneEmoji(id),
     };
   }).toSorted((left, right) => {
@@ -154,5 +200,5 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
 
 export function isValidIanaTimezoneId(value: string): value is IanaTimezone {
   const normalized = normalizeIanaTimezoneId(value);
-  return !isExcludedIanaTimezoneId(normalized) && IANA_TIMEZONE_IDS_STRINGS.includes(normalized);
+  return !isExcludedIanaTimezoneId(normalized) && IANA_TIMEZONE_SET.has(normalized);
 }
