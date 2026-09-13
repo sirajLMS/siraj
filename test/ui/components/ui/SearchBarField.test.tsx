@@ -24,7 +24,7 @@ describe("SearchBarField", () => {
     expect(screen.queryByRole("button", { name: "Clear search" })).not.toBeInTheDocument();
   });
 
-  test("renders clear button when value is non-empty and handles click", async () => {
+  test("renders clear button wrapped in tooltip when value is non-empty and handles click", async () => {
     const handleChange = mock(() => {});
     const user = userEvent.setup();
 
@@ -34,6 +34,9 @@ describe("SearchBarField", () => {
 
     const clearBtn = screen.getByRole("button", { name: "Clear search text" });
     expect(clearBtn).toBeInTheDocument();
+
+    await user.hover(clearBtn);
+    expect(await screen.findByText("Clear search text")).toBeInTheDocument();
 
     await user.click(clearBtn);
     expect(handleChange).toHaveBeenCalledWith("");
