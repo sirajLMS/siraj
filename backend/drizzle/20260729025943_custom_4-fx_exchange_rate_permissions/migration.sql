@@ -9,7 +9,7 @@
 -- cannot run inside a transaction block, so it sits above the DO $$ block.
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'billing.view_exchange_rates';--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'billing.refresh_exchange_rates'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'billing.refresh_exchange_rates';

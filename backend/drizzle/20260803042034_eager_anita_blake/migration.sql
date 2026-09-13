@@ -64,126 +64,126 @@ DO $$ BEGIN
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'whatsapp.view'
     ) THEN
         ALTER TYPE "app_permission" ADD VALUE 'whatsapp.view';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'whatsapp.config_manage'
     ) THEN
         ALTER TYPE "app_permission" ADD VALUE 'whatsapp.config_manage';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'whatsapp.templates_manage'
     ) THEN
         ALTER TYPE "app_permission" ADD VALUE 'whatsapp.templates_manage';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'quotas.view'
     ) THEN
         ALTER TYPE "app_permission" ADD VALUE 'quotas.view';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'quotas.manage'
     ) THEN
         ALTER TYPE "app_permission" ADD VALUE 'quotas.manage';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'cron.manage'
     ) THEN
         ALTER TYPE "app_permission" ADD VALUE 'cron.manage';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_execution_state') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_PENDING_CREDITS'
     ) THEN
         ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_PENDING_CREDITS';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_execution_state') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_CONFLICT_HELD'
     ) THEN
         ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_CONFLICT_HELD';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_execution_state') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_NO_CREDITS_CANCELLED'
     ) THEN
         ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_NO_CREDITS_CANCELLED';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'class_execution_state') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'class_execution_state' AND e.enumlabel = 'ON_DEMAND_NO_CREDITS_ABSENT'
     ) THEN
         ALTER TYPE "class_execution_state" ADD VALUE 'ON_DEMAND_NO_CREDITS_ABSENT';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_channel') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_channel' AND e.enumlabel = 'WHATSAPP'
     ) THEN
         ALTER TYPE "notification_channel" ADD VALUE 'WHATSAPP';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'QUOTA_EXPIRING_SOON'
     ) THEN
         ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_EXPIRING_SOON';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'QUOTA_EXPIRED'
     ) THEN
         ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_EXPIRED';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'QUOTA_LOW_BALANCE'
     ) THEN
         ALTER TYPE "notification_event_type" ADD VALUE 'QUOTA_LOW_BALANCE';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_INSTANCE_PENDING_CREDIT'
     ) THEN
         ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_PENDING_CREDIT';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_INSTANCE_REMINDER_T3'
     ) THEN
         ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_REMINDER_T3';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_INSTANCE_REMINDER_T1'
     ) THEN
         ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_INSTANCE_REMINDER_T1';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ON_DEMAND_TEACHER_DAILY_DIGEST'
     ) THEN
         ALTER TYPE "notification_event_type" ADD VALUE 'ON_DEMAND_TEACHER_DAILY_DIGEST';

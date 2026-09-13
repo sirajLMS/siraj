@@ -66,98 +66,98 @@ ALTER TABLE recurring_schedules
 ALTER TABLE class_instances
   ADD COLUMN IF NOT EXISTS subject_id uuid REFERENCES class_subjects(id) ON DELETE RESTRICT;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'subjects.list'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'subjects.list';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'subjects.create'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'subjects.create';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'subjects.update'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'subjects.update';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'subjects.delete'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'subjects.delete';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'categories.list'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'categories.list';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'categories.create'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'categories.create';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'categories.update'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'categories.update';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'categories.delete'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'categories.delete';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'subjects.view_resources'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'subjects.view_resources';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'subjects.manage_resources'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'subjects.manage_resources';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'notes.list'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'notes.list';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'notes.create'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'notes.create';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'notes.update'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'notes.update';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'notes.delete'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'notes.delete';

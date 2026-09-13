@@ -1,12 +1,12 @@
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'payment_methods.manage_catalogs'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'payment_methods.manage_catalogs';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'payment_methods.verify_bank_transfer'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'payment_methods.verify_bank_transfer';

@@ -1,593 +1,593 @@
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'teacher.view_profile'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'teacher.view_profile';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.core_identity.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.core_identity.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.core_identity.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.core_identity.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.core_identity.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.core_identity.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.core_identity.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.core_identity.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.core_contact.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.core_contact.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.core_contact.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.core_contact.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.core_contact.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.core_contact.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.core_contact.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.core_contact.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_professional.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_professional.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_professional.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_professional.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_professional.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_professional.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_professional.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_professional.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_identity.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_identity.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_identity.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_identity.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_identity.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_identity.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_identity.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_identity.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_social.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_social.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_social.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_social.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_social.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_social.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_social.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_social.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_identity.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_identity.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_identity.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_identity.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_identity.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_identity.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_identity.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_identity.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_billing.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_billing.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_billing.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_billing.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_billing.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_billing.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_billing.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_billing.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_account.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_account.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_account.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_account.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_account.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_account.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_account.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_account.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_students.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_students.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_students.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_students.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_students.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_students.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.parent_students.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.parent_students.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_students.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_students.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_students.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_students.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_students.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_students.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.teacher_students.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.teacher_students.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.staff_role.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.staff_role.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.staff_role.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.staff_role.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.staff_role.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.staff_role.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.staff_role.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.staff_role.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.staff_permissions.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.staff_permissions.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.staff_permissions.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.staff_permissions.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.staff_permissions.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.staff_permissions.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.staff_permissions.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.staff_permissions.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.payment_methods.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.payment_methods.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.payment_methods.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.payment_methods.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.payment_methods.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.payment_methods.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.payment_methods.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.payment_methods.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.meeting_configs.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.meeting_configs.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.meeting_configs.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.meeting_configs.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.meeting_configs.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.meeting_configs.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'profile.meeting_configs.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'profile.meeting_configs.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_identity.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_identity.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_identity.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_identity.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_identity.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_identity.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_identity.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_identity.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_academic.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_academic.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_academic.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_academic.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_academic.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_academic.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_academic.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_academic.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_teacher.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_teacher.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_teacher.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_teacher.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_teacher.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_teacher.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_teacher.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_teacher.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_parent.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_parent.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_parent.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_parent.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_parent.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_parent.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_parent.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_parent.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_schedule.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_schedule.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_schedule.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_schedule.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_schedule.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_schedule.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_schedule.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_schedule.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_history.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_history.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_history.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_history.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_history.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_history.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_history.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_history.edit_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_quota_edit.view_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_quota_edit.view_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_quota_edit.view_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_quota_edit.view_other';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_quota_edit.edit_own'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_quota_edit.edit_own';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'student.student_quota_edit.edit_other'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'student.student_quota_edit.edit_other';

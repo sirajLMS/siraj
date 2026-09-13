@@ -1,5 +1,5 @@
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'billing.manage_currencies'
     ) THEN
         ALTER TYPE app_permission ADD VALUE 'billing.manage_currencies';

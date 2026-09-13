@@ -9,35 +9,35 @@ DO $$ BEGIN
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'accounting.payments_view'
     ) THEN
         ALTER TYPE "app_permission" ADD VALUE 'accounting.payments_view';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'accounting.payments_manage'
     ) THEN
         ALTER TYPE "app_permission" ADD VALUE 'accounting.payments_manage';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'invoice_type' AND e.enumlabel = 'CREDIT_HOURS_PACKAGE'
     ) THEN
         ALTER TYPE "invoice_type" ADD VALUE 'CREDIT_HOURS_PACKAGE';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ACCOUNTING_PAYMENT_RECORDED'
     ) THEN
         ALTER TYPE "notification_event_type" ADD VALUE 'ACCOUNTING_PAYMENT_RECORDED';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_event_type') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'notification_event_type' AND e.enumlabel = 'ACCOUNTING_LOW_HOURS'
     ) THEN
         ALTER TYPE "notification_event_type" ADD VALUE 'ACCOUNTING_LOW_HOURS';

@@ -37,6 +37,11 @@ function transformAddConstraint(trimmed: string): string | null {
  *
  * This prevents PostgreSQL from marking an active transaction as modifying the enum type when the
  * value is already present in `pg_enum` (which would trigger error 55P04 on subsequent queries).
+ *
+ * The block first checks that the enum type itself exists: when a migration folder is ordered
+ * before the folder that creates the type, the `ADD VALUE` must degrade to a no-op and leave
+ * value creation to the later `CREATE TYPE` (which lists every value), mirroring the skip policy
+ * in {@link preCommitEnumStatements}. Without the type check the `ALTER TYPE` raises PG 42704.
  */
 function transformAlterTypeAddValue(trimmed: string): string | null {
   if (/\bALTER\s+TYPE\b/i.test(trimmed) && /\bADD\s+VALUE\b/i.test(trimmed) && !/DO\s+\$\$/i.test(trimmed)) {
@@ -45,10 +50,35 @@ function transformAlterTypeAddValue(trimmed: string): string | null {
       const fullType = match[1];
       const typeName = match[2];
       const enumVal = match[3];
-      return `DO $$ BEGIN\n    IF NOT EXISTS (\n        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = '${typeName}' AND e.enumlabel = ${enumVal}\n    ) THEN\n        ALTER TYPE ${fullType} ADD VALUE ${enumVal};\n    END IF;\nEND $$;`;
+      return `DO $$ BEGIN\n    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = '${typeName}') AND NOT EXISTS (\n        SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = '${typeName}' AND e.enumlabel = ${enumVal}\n    ) THEN\n        ALTER TYPE ${fullType} ADD VALUE ${enumVal};\n    END IF;\nEND $$;`;
     }
   }
   return null;
+}
+
+/**
+ * Upgrades enum `ADD VALUE` DO-blocks previously emitted by {@link transformAlterTypeAddValue}
+ * that only check `pg_enum` for the value. Those blocks still attempt `ALTER TYPE ... ADD VALUE`
+ * when the enum type itself does not exist yet — e.g. when the folder adding a value is ordered
+ * before the folder creating the type — aborting the migration with PG 42704
+ * (`type "..." does not exist`). Injects the same type-existence guard the current template
+ * emits, so the statement degrades to a no-op and the later `CREATE TYPE` (which lists every
+ * value) creates the value. Returns null for blocks already carrying the guard.
+ */
+function upgradeAlterTypeAddValueGuard(trimmed: string): string | null {
+  if (!/DO\s+\$\$/i.test(trimmed)) return null;
+  if (!/\bALTER\s+TYPE\b/i.test(trimmed) || !/\bADD\s+VALUE\b/i.test(trimmed)) return null;
+  if (!/IF\s+NOT\s+EXISTS\s*\(\s*SELECT\s+1\s+FROM\s+pg_type\s+t\s+JOIN\s+pg_enum/i.test(trimmed)) return null;
+  if (/IF\s+EXISTS\s*\(\s*SELECT\s+1\s+FROM\s+pg_type\s+WHERE\s+typname/i.test(trimmed)) return null;
+
+  const typeMatch = /\bALTER\s+TYPE\s+"?(\w+)"?\s+ADD\s+VALUE/i.exec(trimmed);
+  const typeName = typeMatch?.[1];
+  if (!typeName) return null;
+
+  return trimmed.replace(
+    /IF\s+NOT\s+EXISTS\s*\(/i,
+    `IF EXISTS (SELECT 1 FROM pg_type WHERE typname = '${typeName}') AND NOT EXISTS (`
+  );
 }
 
 function transformAlterColumnType(trimmed: string): string | null {
@@ -156,6 +186,8 @@ function transformRenameConstraint(trimmed: string): string | null {
 /**
  * Transforms a single SQL statement to be idempotent for PostgreSQL.
  * Handles `CREATE TYPE`, `CREATE TABLE`, `CREATE [UNIQUE] INDEX`, `ADD COLUMN`, `ADD CONSTRAINT`, `RENAME CONSTRAINT`, `ALTER TYPE ... ADD VALUE`, `ALTER COLUMN ... TYPE`, and join-table `INSERT`s.
+ * Also upgrades previously wrapped enum `ADD VALUE` DO-blocks, injecting the type-existence
+ * guard ({@link upgradeAlterTypeAddValueGuard}).
  *
  * @param stmt The SQL statement string to transform.
  * @returns The transformed, idempotent SQL statement.
@@ -169,6 +201,9 @@ export function transformStatementIdempotent(stmt: string): string {
 
   const alterTypeAddValue = transformAlterTypeAddValue(trimmed);
   if (alterTypeAddValue) return alterTypeAddValue;
+
+  const upgradedEnumGuard = upgradeAlterTypeAddValueGuard(trimmed);
+  if (upgradedEnumGuard) return upgradedEnumGuard;
 
   const createType = transformCreateType(trimmed);
   if (createType) return createType;

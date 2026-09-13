@@ -4,28 +4,28 @@ DO $$ BEGIN
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_permission') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'app_permission' AND e.enumlabel = 'accounting.credits_manage'
     ) THEN
         ALTER TYPE "app_permission" ADD VALUE 'accounting.credits_manage';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'credit_reason') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'credit_reason' AND e.enumlabel = 'CREDIT_ADJUSTMENT_ADD'
     ) THEN
         ALTER TYPE "credit_reason" ADD VALUE 'CREDIT_ADJUSTMENT_ADD';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'credit_reason') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'credit_reason' AND e.enumlabel = 'CREDIT_ADJUSTMENT_SUBTRACT'
     ) THEN
         ALTER TYPE "credit_reason" ADD VALUE 'CREDIT_ADJUSTMENT_SUBTRACT';
     END IF;
 END $$;--> statement-breakpoint
 DO $$ BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'credit_reason') AND NOT EXISTS (
         SELECT 1 FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid WHERE t.typname = 'credit_reason' AND e.enumlabel = 'CREDIT_ADJUSTMENT_CARRYOVER'
     ) THEN
         ALTER TYPE "credit_reason" ADD VALUE 'CREDIT_ADJUSTMENT_CARRYOVER';
