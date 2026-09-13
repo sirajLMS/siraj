@@ -5,6 +5,63 @@ import { isExcludedIanaTimezoneId, resolveExcludedIanaTimezoneId } from "@/share
 
 const IANA_TIMEZONE_SET = new Set<string>(IANA_TIMEZONE_IDS);
 
+/**
+ * Cache Intl.DateTimeFormat instances to avoid expensive JS runtime ICU / DateTimeFormat
+ * object instantiation on every date formatting or offset calculation call.
+ */
+const dtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getDtf(locale: string, timeZone: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale}:${timeZone}:${JSON.stringify(options)}`;
+  let dtf = dtfCache.get(key);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat(locale, { timeZone, ...options });
+    dtfCache.set(key, dtf);
+  }
+  return dtf;
+}
+
+const DATE_PARTS_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+};
+
+const OFFSET_PARTS_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+};
+
+function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
+  let year = 0;
+  let month = 0;
+  let day = 0;
+  let hour = 0;
+  let minute = 0;
+  let second = 0;
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (p.type === "year") year = +p.value;
+    else if (p.type === "month") month = +p.value - 1;
+    else if (p.type === "day") day = +p.value;
+    else if (p.type === "hour") hour = +p.value === 24 ? 0 : +p.value;
+    else if (p.type === "minute") minute = +p.value;
+    else if (p.type === "second") second = +p.value;
+  }
+  return Date.UTC(year, month, day, hour, minute, second);
+}
+
+function getOffsetMs(ianaTimezone: string, d: Date): number {
+  const tzDtf = getDtf("en-US", ianaTimezone, OFFSET_PARTS_OPTIONS);
+  const utcDtf = getDtf("en-US", "UTC", OFFSET_PARTS_OPTIONS);
+  return partsToEpochMs(tzDtf.formatToParts(d)) - partsToEpochMs(utcDtf.formatToParts(d));
+}
+
 export function normalizeIanaTimezone(value: string): string {
   return resolveExcludedIanaTimezoneId(value);
 }
@@ -16,40 +73,38 @@ export function isValidIanaTimezone(value: string): boolean {
 
 export function formatInstantInTimezone(date: Date, ianaTimezone: string, locale?: string): string {
   const localeTag = locale ? getLatnLocaleTag(locale) : "en-US";
+  const formatOptions: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  };
   try {
-    return new Intl.DateTimeFormat(localeTag, {
-      timeZone: ianaTimezone,
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }).format(date);
+    return getDtf(localeTag, ianaTimezone, formatOptions).format(date);
   } catch (error) {
     logger.error("Failed to format date in timezone, falling back to UTC", {
       error,
       ianaTimezone,
       date: Number.isNaN(date.getTime()) ? "Invalid Date" : date.toISOString(),
     });
-    return new Intl.DateTimeFormat(localeTag, {
-      timeZone: "UTC",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }).format(date);
+    return getDtf(localeTag, "UTC", formatOptions).format(date);
   }
 }
 
 export function getDayBoundaries(date: Date, ianaTimezone: string): { startOfDayUtc: Date; endOfDayUtc: Date } {
   try {
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: ianaTimezone,
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    }).formatToParts(date);
+    const dtf = getDtf("en-US", ianaTimezone, DATE_PARTS_OPTIONS);
+    const parts = dtf.formatToParts(date);
 
-    const yearPart = parts.find(p => p.type === "year")?.value;
-    const monthPart = parts.find(p => p.type === "month")?.value;
-    const dayPart = parts.find(p => p.type === "day")?.value;
+    let yearPart: string | undefined;
+    let monthPart: string | undefined;
+    let dayPart: string | undefined;
+
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      if (p.type === "year") yearPart = p.value;
+      else if (p.type === "month") monthPart = p.value;
+      else if (p.type === "day") dayPart = p.value;
+    }
 
     if (!yearPart || !monthPart || !dayPart) {
       throw new Error("Missing date parts");
@@ -59,21 +114,15 @@ export function getDayBoundaries(date: Date, ianaTimezone: string): { startOfDay
     const month = Number.parseInt(monthPart, 10) - 1;
     const day = Number.parseInt(dayPart, 10);
 
-    const getOffsetMs = (d: Date) => {
-      const utcDate = new Date(d.toLocaleString("en-US", { timeZone: "UTC" }));
-      const tzDate = new Date(d.toLocaleString("en-US", { timeZone: ianaTimezone }));
-      return tzDate.getTime() - utcDate.getTime();
-    };
-
     const guessStart = new Date(Date.UTC(year, month, day, 0, 0, 0));
-    const offsetStart = getOffsetMs(guessStart);
+    const offsetStart = getOffsetMs(ianaTimezone, guessStart);
     let startOfDayUtc = new Date(guessStart.getTime() - offsetStart);
-    startOfDayUtc = new Date(guessStart.getTime() - getOffsetMs(startOfDayUtc));
+    startOfDayUtc = new Date(guessStart.getTime() - getOffsetMs(ianaTimezone, startOfDayUtc));
 
     const guessEnd = new Date(Date.UTC(year, month, day, 24, 0, 0));
-    const offsetEnd = getOffsetMs(guessEnd);
+    const offsetEnd = getOffsetMs(ianaTimezone, guessEnd);
     let endOfDayUtc = new Date(guessEnd.getTime() - offsetEnd);
-    endOfDayUtc = new Date(guessEnd.getTime() - getOffsetMs(endOfDayUtc));
+    endOfDayUtc = new Date(guessEnd.getTime() - getOffsetMs(ianaTimezone, endOfDayUtc));
 
     return { startOfDayUtc, endOfDayUtc };
   } catch (error) {
