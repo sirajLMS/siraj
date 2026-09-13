@@ -5,33 +5,86 @@
  * The @vercel/next builder records every traced repo file in each function's
  * `.vc-config.json` `filePathMap`. When deploying with `vercel deploy
  * --prebuilt`, the CLI re-adds those paths to the upload list (buildFileTree
- * prebuilt refs), which bypasses the `.vercelignore` filter that applies only
- * to the directory walk. Any traced path that does not exist in the working
- * tree (logs/, scratch/ and other runtime-only output, or files removed since
- * the build) then fails the archive step with:
- *   ENOENT: no such file or directory, lstat '/vercel/path0/...'
+ * prebuilt refs). Two failure modes hit the archive/extract steps:
  *
- * This script drops filePathMap entries whose target does not exist on disk.
- * filePathMap values are repo-relative source refs consumed only as upload
- * refs — the function launcher never reads them — so pruning is runtime-safe.
- * Stray `.nft.json` trace files under the output (non-adapter consumers) are
- * pruned the same way.
+ * 1. Refs whose target does not exist in the working tree (logs/, scratch/
+ *    and other runtime-only output, or files removed since the build) fail
+ *    the local archive step with:
+ *      ENOENT: no such file or directory, lstat '/vercel/path0/...'
+ * 2. If a `.vercelignore`/`.nowignore` is present, refs it excludes survive
+ *    the CLI's collision check as a warning ("...excludes N files the
+ *    prebuilt functions need") and fail Vercel's server-side extract step on
+ *    the same ENOENT, because the file is absent from the uploaded archive.
+ *    (This repo deleted `.vercelignore` for exactly that reason — the rules
+ *    below stay as a guard in case an ignore file returns.)
+ *
+ * This script drops filePathMap entries that are either missing on disk or
+ * excluded by a user ignore file — mirroring the CLI's own matching semantics
+ * (clearRelative rule parsing, default exceptions for dependency/output paths
+ * such as node_modules, .next, .yarn/cache, pnp store, venv, __pycache__, target).
+ * filePathMap values are
+ * repo-relative source refs consumed only as upload refs — the function
+ * launcher never reads them — so pruning is runtime-safe. Stray `.nft.json`
+ * trace files under the output (non-adapter consumers) are pruned the same
+ * way.
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
+import ignore from "ignore";
 
 const OUTPUT_DIR = join(process.cwd(), ".vercel", "output");
 const FUNCTIONS_DIR = join(OUTPUT_DIR, "functions");
+
+/**
+ * Default-ignored paths the CLI keeps in the upload set even when a user
+ * ignore file matches them (vercel CLI buildFileTree FILEPATHMAP_VERCELIGNORE_EXCEPTIONS).
+ */
+const FILEPATHMAP_VERCELIGNORE_EXCEPTIONS = [
+  "node_modules",
+  ".next",
+  ".yarn/cache",
+  ".pnp*",
+  ".venv",
+  "venv",
+  "__pycache__",
+  "/target",
+];
 
 interface VcConfig {
   filePathMap?: Record<string, string>;
   [key: string]: unknown;
 }
 
-function isInside(parent: string, child: string): boolean {
-  const rel = relative(parent, child);
-  return rel !== "" && !rel.startsWith("..") && !isAbsolute(rel);
+/** Mirrors the CLI's clearRelative: strips a leading `./` per rule line. */
+function clearRelative(rules: string): string {
+  return rules.replace(/(\n|^)\.\//g, "$1");
+}
+
+interface UserIgnore {
+  ig: ReturnType<typeof ignore>;
+  ignoreFileName: string;
+}
+
+function readUserIgnore(repoRoot: string): UserIgnore | null {
+  const vercelignore = join(repoRoot, ".vercelignore");
+  const nowignore = join(repoRoot, ".nowignore");
+  const hasVercelignore = existsSync(vercelignore);
+  const hasNowignore = existsSync(nowignore);
+  if (hasVercelignore && hasNowignore) {
+    throw new Error("Cannot use both a `.vercelignore` and `.nowignore` file. Please delete the `.nowignore` file.");
+  }
+  if (!hasVercelignore && !hasNowignore) return null;
+  const ignoreFile = hasVercelignore ? vercelignore : nowignore;
+  const ig = ignore();
+  ig.add(clearRelative(readFileSync(ignoreFile, "utf-8")));
+  return { ig, ignoreFileName: hasVercelignore ? ".vercelignore" : ".nowignore" };
+}
+
+const filePathMapIgnoreExceptions = ignore().add(FILEPATHMAP_VERCELIGNORE_EXCEPTIONS.join("\n"));
+
+function isFilePathMapIgnoreException(posixRel: string): boolean {
+  return filePathMapIgnoreExceptions.ignores(posixRel);
 }
 
 function* walk(dir: string): Generator<string> {
@@ -47,7 +100,7 @@ function* walk(dir: string): Generator<string> {
   }
 }
 
-function sanitizeFilePathMap(configPath: string, repoRoot: string): number {
+function sanitizeFilePathMap(configPath: string, repoRoot: string, userIgnore: UserIgnore | null): number {
   let config: VcConfig;
   try {
     config = JSON.parse(readFileSync(configPath, "utf-8"));
@@ -65,6 +118,10 @@ function sanitizeFilePathMap(configPath: string, repoRoot: string): number {
   let pruned = 0;
   for (const [key, value] of Object.entries(filePathMap)) {
     if (typeof value !== "string" || !existsSync(resolve(repoRoot, value))) {
+      pruned++;
+      continue;
+    }
+    if (userIgnore?.ig.ignores(value) && !isFilePathMapIgnoreException(value)) {
       pruned++;
       continue;
     }
@@ -120,13 +177,14 @@ function main(): void {
   }
 
   const repoRoot = process.cwd();
+  const userIgnore = readUserIgnore(repoRoot);
   let prunedRefs = 0;
   let prunedTraces = 0;
 
   if (existsSync(FUNCTIONS_DIR)) {
     for (const configPath of walk(FUNCTIONS_DIR)) {
       if (!configPath.endsWith(".vc-config.json")) continue;
-      prunedRefs += sanitizeFilePathMap(configPath, repoRoot);
+      prunedRefs += sanitizeFilePathMap(configPath, repoRoot, userIgnore);
     }
   }
 
@@ -144,4 +202,4 @@ if (import.meta.main) {
   main();
 }
 
-export { isInside, main, sanitizeFilePathMap, sanitizeNftJson };
+export { main, sanitizeFilePathMap, sanitizeNftJson };

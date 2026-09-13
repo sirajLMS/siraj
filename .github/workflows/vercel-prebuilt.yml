@@ -102,7 +102,9 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install Vercel CLI
-        run: bun add --global vercel@latest
+        # Pinned so prebuilt deploy semantics (e.g. the CLI 59 filePathMap
+        # collision check) stop drifting between deploys.
+        run: bun add --global vercel@59
 
       - name: Pull Vercel production env
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}

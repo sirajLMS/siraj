@@ -24,7 +24,11 @@ function runScript(cwd: string): { stderr: string; exitCode: number } {
   };
 }
 
-function buildFixture({ refs, traceFiles = {} }: FixtureOptions): string {
+function buildFixture({
+  refs,
+  traceFiles = {},
+  withVercelignore = false,
+}: FixtureOptions & { withVercelignore?: boolean }): string {
   const functionsDir = join(FIXTURE_ROOT, ".vercel/output/functions/login.func");
   const nextServerDir = join(functionsDir, ".next/server");
   mkdirSync(nextServerDir, { recursive: true });
@@ -43,6 +47,10 @@ function buildFixture({ refs, traceFiles = {} }: FixtureOptions): string {
     join(functionsDir, ".vc-config.json"),
     `${JSON.stringify({ operationType: "Page", handler: "___next_launcher.cjs", filePathMap }, null, 2)}\n`
   );
+
+  if (withVercelignore) {
+    writeFileSync(join(repoRoot, ".vercelignore"), ["# fixture", "backend/storage/disk/local/gone.ts"].join("\n"));
+  }
 
   // Trace dir sits 6 levels below the fixture root: .vercel/output/functions/login.func/.next/server
   const files: string[] = [];
@@ -139,5 +147,38 @@ describe("sanitize-prebuilt-refs", () => {
     const result = runScript(FIXTURE_ROOT);
     expect(result.exitCode).toBe(0);
     expect(result.stderr).toContain("No .vercel/output");
+  });
+
+  test("prunes refs excluded by .vercelignore even when they exist on disk", () => {
+    buildFixture({
+      refs: {
+        "backend/storage/disk/local/utils.ts": true,
+        "backend/storage/disk/local/gone.ts": true, // exists, but .vercelignore excludes it
+        "node_modules/pg/lib/index.js": true, // default exception — kept
+      },
+      withVercelignore: true,
+    });
+
+    const result = runScript(FIXTURE_ROOT);
+    expect(result.exitCode).toBe(0);
+
+    const config = readVcConfig();
+    expect(Object.keys(config.filePathMap ?? {}).toSorted((a, b) => a.localeCompare(b))).toEqual([
+      "backend/storage/disk/local/utils.ts",
+      "node_modules/pg/lib/index.js",
+    ]);
+    expect(result.stderr).toContain("Pruned 1 filePathMap refs");
+  });
+
+  test("fails when both .vercelignore and .nowignore exist (mirrors the CLI conflict check)", () => {
+    buildFixture({
+      refs: { "backend/storage/disk/local/utils.ts": true },
+    });
+    writeFileSync(join(FIXTURE_ROOT, ".vercelignore"), "backend/storage/disk/local/gone.ts\n");
+    writeFileSync(join(FIXTURE_ROOT, ".nowignore"), "backend/storage/disk/local/gone.ts\n");
+
+    const result = runScript(FIXTURE_ROOT);
+    expect(result.exitCode).not.toBe(0);
+    expect(result.stderr).toContain("Cannot use both a `.vercelignore` and `.nowignore` file");
   });
 });
