@@ -67,13 +67,14 @@ export default function proxy(request: NextRequest) {
   const fbScriptSrc = " https://connect.facebook.net";
   const fbConnectSrc = " https://graph.facebook.com https://www.facebook.com https://web.facebook.com";
   const fbFrameSrc = " https://www.facebook.com https://web.facebook.com";
+  const devImgSrc = isDev ? " http://localhost http://127.0.0.1 https://localhost https://127.0.0.1" : "";
   const cspValue =
     `default-src 'self'; ` +
     `script-src 'self' 'nonce-${nonce}' https://vercel.live${devScriptSrc}${fbScriptSrc}` +
     (isDev ? " 'unsafe-eval' 'unsafe-inline'" : "") +
     `; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ` +
     `font-src 'self' https://fonts.gstatic.com; ` +
-    `img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com https://*.blob.vercel-storage.com http://localhost http://127.0.0.1 https://localhost https://127.0.0.1; ` +
+    `img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com https://*.blob.vercel-storage.com${devImgSrc}; ` +
     `connect-src 'self' https://*.nr-data.net https://*.newrelic.com https://*.upstash.com https://vercel.live https://*.blob.vercel-storage.com${devConnectSrc}${fbConnectSrc}; ` +
     `frame-src 'self'${fbFrameSrc}; ` +
     `frame-ancestors 'none';` +

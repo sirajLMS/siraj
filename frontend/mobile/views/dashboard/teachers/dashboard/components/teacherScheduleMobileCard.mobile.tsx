@@ -19,14 +19,13 @@ import {
   MobileActionIconLink,
   MobileCardListItem,
   type MobileCardListItemProps,
+  MobilePersonProfileLink,
   MobileStatusBadge,
-  MobileUserAvatar,
 } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { SessionActivateButtonMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/sessionActivateButton.mobile";
 import { TeacherActiveSessionControlsMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherActiveSessionControls.mobile";
 import { TeacherScheduleStatusContentMobile } from "@/frontend/mobile/views/dashboard/teachers/dashboard/components/teacherScheduleStatusContent.mobile";
-import { Link } from "@/shared/i18n";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
 
 type ScheduleCardAccentBorder = MobileCardListItemProps["accentBorder"];
@@ -155,47 +154,6 @@ function renderFooterAction(
   return null;
 }
 
-function StudentNameLink({
-  studentName,
-  studentHref: href,
-}: {
-  readonly studentName: string;
-  readonly studentHref?: string;
-}) {
-  if (href) {
-    return (
-      <Link href={href} style={{ textDecoration: "none" }}>
-        <Typography
-          sx={{
-            typography: "titleLg",
-            color: theme => theme.palette.primary.main,
-            display: "block",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            "&:hover": { textDecoration: "underline" },
-          }}
-        >
-          {studentName}
-        </Typography>
-      </Link>
-    );
-  }
-  return (
-    <Typography
-      sx={{
-        typography: "titleLg",
-        color: theme => theme.palette.primary.main,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {studentName}
-    </Typography>
-  );
-}
-
 function CardHeader({
   row,
   labels,
@@ -220,7 +178,14 @@ function CardHeader({
             {labels.activeControls.liveNow}
           </Typography>
         )}
-        <StudentNameLink studentName={row.studentName} studentHref={href} />
+        <MobilePersonProfileLink
+          href={href}
+          name={row.studentName}
+          showAvatar={false}
+          typographyVariant="titleLg"
+          fontWeight={700}
+          emphasizeLink
+        />
         {!canActivate || row.status === "pending" || row.status === "connecting" ? null : (
           <Box sx={{ mt: 0.75 }}>
             <MobileStatusBadge
@@ -286,37 +251,20 @@ function StudentInfoRow({ row }: { readonly row: TeacherScheduleRow }) {
   return (
     <Box
       sx={theme => ({
-        display: "flex",
-        alignItems: "center",
-        gap: 1.5,
         py: 1,
         mb: 1.5,
         borderTop: `1px solid ${theme.palette.border.light}`,
       })}
     >
-      <MobileUserAvatar label={row.studentName} size={32}>
-        {row.studentInitials}
-      </MobileUserAvatar>
-      {href ? (
-        <Link href={href} style={{ textDecoration: "none" }}>
-          <Typography
-            sx={{
-              typography: "bodyMd",
-              color: theme => theme.palette.primary.main,
-              minWidth: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              "&:hover": { textDecoration: "underline" },
-            }}
-          >
-            {row.studentName}
-          </Typography>
-        </Link>
-      ) : (
-        <Typography sx={{ typography: "bodyMd", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-          {row.studentName}
-        </Typography>
-      )}
+      <MobilePersonProfileLink
+        href={href}
+        name={row.studentName}
+        showAvatar
+        avatarSize={32}
+        fallbackInitial={row.studentInitials?.[0] ?? "?"}
+        typographyVariant="bodyMd"
+        fontWeight={400}
+      />
     </Box>
   );
 }

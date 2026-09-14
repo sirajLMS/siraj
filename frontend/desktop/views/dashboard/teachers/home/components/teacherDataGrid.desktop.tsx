@@ -15,6 +15,7 @@ import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/te
 interface TeacherDataGridProps {
   readonly rows: readonly TeacherDirectoryRow[];
   readonly labels: TeachersDirectoryLabels;
+  readonly loading?: boolean;
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
@@ -65,6 +66,7 @@ function renderOptionsCell(params: GridRenderCellParams<TeacherDirectoryRow>, op
 export function TeacherDataGrid({
   rows,
   labels,
+  loading,
   page = 0,
   pageSize = 10,
   totalCount,
@@ -151,6 +153,8 @@ export function TeacherDataGrid({
       rows={rows}
       columns={columns}
       rowHeight={72}
+      loading={loading}
+      emptyMessage={t.emptyMessage}
       disableRowSelectionOnClick
       getRowId={row => row.id ?? ""}
       paginationOptions={

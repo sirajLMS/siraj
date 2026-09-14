@@ -12,11 +12,10 @@ import {
   markInvoicePaidResolver,
   SendPaymentReminderResultRef,
 } from "@/backend/graphql/pothos/billing/billing-management.pothos";
-import { resolveDisplayAmountFields } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject, InvoiceTypePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuthWithRateLimit } from "@/backend/graphql/shared";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { BillingManagementService } from "@/backend/services";
+import { BillingManagementService, resolveDisplayAmountFields } from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("createManualInvoice", t =>
   t.field({

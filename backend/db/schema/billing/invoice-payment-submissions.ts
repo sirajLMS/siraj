@@ -1,5 +1,4 @@
 import {
-  createEnum,
   createTable,
   index,
   textColumn,
@@ -8,14 +7,9 @@ import {
   uuidDefaultColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { invoices } from "@/backend/db/schema/billing/billing";
+import { invoicePaymentSubmissionStatusEnum } from "@/backend/db/schema/enums";
 import { storageFiles } from "@/backend/db/schema/storage/storage";
 import { users } from "@/backend/db/schema/users/users";
-
-export const invoicePaymentSubmissionStatusEnum = createEnum("invoice_payment_submission_status", [
-  "pending",
-  "approved",
-  "rejected",
-]);
 
 export const invoicePaymentSubmissions = createTable(
   "invoice_payment_submissions",

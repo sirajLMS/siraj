@@ -1,14 +1,11 @@
-// Auto-extracted from pothos/ (types-review R3-P3).
-// Mutation field registrations relocated to the mutation layer per mutation/AGENTS.md.
-
 import { AppPermission } from "@/backend/enum";
 import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { StudentStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import {
   ChangeStudentStatusResultRef,
   ReassignStudentTeacherResultRef,
-} from "@/backend/graphql/pothos/students/student-lifecycle.pothos";
+  StudentStatusPothosObject,
+} from "@/backend/graphql/pothos";
 import { StudentLifecycleService } from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("reassignStudentTeacher", t =>

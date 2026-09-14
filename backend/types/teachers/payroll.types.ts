@@ -1,6 +1,19 @@
 import type { CalculationStatus } from "@/backend/enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
+/**
+ * Grace-period thresholds (minutes) used when payroll calculations compare a
+ * teacher's actual entry time against the scheduled session window.
+ */
+export interface PayrollGraceSettings {
+  /** Grace applied to sessions at or below the threshold duration. */
+  shortMinutes: number;
+  /** Grace applied to sessions above the threshold duration. */
+  longMinutes: number;
+  /** Scheduled-duration cutoff that selects the short vs long grace. */
+  thresholdMinutes: number;
+}
+
 /** Input for computing the payroll snapshot of a single class instance. */
 export interface PayrollCalculationInput {
   instanceId: string;

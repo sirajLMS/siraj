@@ -8,10 +8,13 @@ import type {
   DBTransaction,
   ExpenseFilters,
   ExpenseInsertType,
-  ExpenseListRow,
+  ExpensePageResult,
   ExpenseSelectType,
 } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
+
+/** The list page row: persisted columns plus the creator's display name (join-resolved). */
+type ExpenseListPageRow = ExpensePageResult["rows"][number];
 
 const PAGE = { limit: 50, offset: 0 };
 
@@ -31,7 +34,7 @@ function buildExpenseInput(createdByUserId: string, overrides: Partial<ExpenseIn
 async function createExpense(
   tx: DBTransaction,
   overrides: Partial<ExpenseInsertType> = {}
-): Promise<ExpenseListRow & { userId: string; userName: string }> {
+): Promise<ExpenseListPageRow & { userId: string; userName: string }> {
   const user = await createTestUser(tx, {});
   const row = await ExpenseRepository.create(buildExpenseInput(user.id, overrides), tx);
   return { ...row, createdByName: user.name, userId: user.id, userName: user.name };
@@ -56,7 +59,7 @@ function expectIds(rows: ReadonlyArray<{ id: string }>, ids: string[]): void {
   );
 }
 
-function filterWith(filters: ExpenseFilters): (tx: DBTransaction) => Promise<ExpenseListRow[]> {
+function filterWith(filters: ExpenseFilters): (tx: DBTransaction) => Promise<ExpenseListPageRow[]> {
   return async tx => (await ExpenseRepository.findFiltered(filters, PAGE, tx)).rows;
 }
 

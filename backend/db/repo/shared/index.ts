@@ -7,3 +7,4 @@ export * from "./signedUrl.repository";
 export * from "./soft-delete.repository";
 export * from "./system-settings.repository";
 export * from "./timezone.repository";
+export * from "./with-current-user";

@@ -2,8 +2,6 @@
 
 import type { GridColDef } from "@mui/x-data-grid";
 import { useCallback, useMemo } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
@@ -24,6 +22,7 @@ import {
   renderStatusTrackingJoinCell,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingGridShared";
 import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
+import { DesktopAppDataGrid, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
 import {
   DesktopPersonProfileLinkCell,
@@ -111,7 +110,7 @@ export function StatusTrackingDataGridDesktop({
         renderCell: ({ row }) => {
           const status = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
           return (
-            <StatusBadge
+            <DesktopStatusBadge
               category="sessionTracking"
               status={status}
               label={labels[STATUS_LABEL_KEYS[status]]}
@@ -151,7 +150,7 @@ export function StatusTrackingDataGridDesktop({
   }, [labels, locale, onActivate, onReschedule, onVerify, renderProfileCell]);
 
   return (
-    <AppDataGrid<StatusTrackingScheduleRow>
+    <DesktopAppDataGrid<StatusTrackingScheduleRow>
       rows={rows}
       columns={columns}
       loading={loading}

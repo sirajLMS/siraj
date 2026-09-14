@@ -103,6 +103,23 @@ export type AuditLogFilterInput = {
 };
 
 /**
+ * Filter options for the Settings → Audit tab query. Mirrors the GraphQL
+ * `SettingsAuditLogFilter` input, where absent arguments arrive as `null`
+ * (unlike {@link AuditLogFilterInput}, whose fields are plain optionals).
+ * Entity/action values are raw strings at this boundary; the resolver narrows
+ * them to the canonical union types before calling the service.
+ */
+export type SettingsAuditLogFilterInput = {
+  entityType?: string | null;
+  action?: string | null;
+  actorUserId?: string | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  limit?: number | null;
+  offset?: number | null;
+};
+
+/**
  * Result of audit log query with pagination
  */
 export type AuditLogQueryResult = {
@@ -122,60 +139,3 @@ export type CreateAdminAuditLogInput = {
   readonly ipAddress?: string | null;
   readonly createdAt?: Date;
 };
-
-// Single-source const arrays for runtime validation (derived from the unions above).
-export const AUDIT_ENTITY_TYPE_VALUES = [
-  "SYSTEM",
-  "STUDENT",
-  "INVOICE",
-  "PAYMENT",
-  "PERMISSION",
-  "PERMISSION_GROUP",
-  "USER_PERMISSION",
-  "EXCHANGE_RATE",
-  "SYSTEM_SETTING",
-  "SITE_CONTENT",
-  "SESSION_CONFIG",
-  "ENV_CONFIG",
-  "USER",
-  "TEACHER",
-  "PARENT",
-  "CLASS_INSTANCE",
-  "RECURRING_SCHEDULE",
-  "LEAVE_REQUEST",
-  "COMPLAINT",
-  "LEARNING_RESOURCE",
-  "SUGGESTION",
-  "BOOK",
-  "MEETING_PROVIDER_TOKEN",
-  "WHATSAPP_ACCOUNT",
-  "CARRYOVER_BALANCE",
-  "EXPENSE",
-] as const satisfies readonly AuditEntityType[];
-
-export const AUDIT_ACTION_VALUES = [
-  "CREATE",
-  "UPDATE",
-  "DELETE",
-  "UPSERT",
-  "STATUS_CHANGE",
-  "REFUND",
-  "GRANT",
-  "REVOKE",
-  "ASSIGN",
-  "UNASSIGN",
-  "APPROVE",
-  "REJECT",
-  "ACTIVATE",
-  "DEACTIVATE",
-  "RESTORE",
-  "TEACHER_SUPPORT_REQUEST",
-  "WHATSAPP_OPT_IN",
-  "CARRYOVER_CREATE",
-  "CARRYOVER_TO_EXPENSE",
-  "CARRYOVER_UNPAID",
-  "CARRYOVER_DELETE",
-  "EXPENSE_CREATE",
-  "EXPENSE_UPDATE",
-  "EXPENSE_DELETE",
-] as const satisfies readonly AuditAction[];

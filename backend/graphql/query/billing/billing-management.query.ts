@@ -3,9 +3,8 @@
 
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { InvoicePaymentSubmissionRef } from "@/backend/graphql/pothos/billing/billing-management.pothos";
-import { setBillingFxDisplayCurrencyForInvoiceParent } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { BillingManagementService } from "@/backend/services";
+import { BillingManagementService, setBillingFxDisplayCurrencyForInvoiceParent } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("invoicePaymentSubmission", t =>
   t.field({

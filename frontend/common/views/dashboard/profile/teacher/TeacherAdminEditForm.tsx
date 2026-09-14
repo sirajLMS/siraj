@@ -1,24 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Stack } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { type UseFormReturn, useForm } from "react-hook-form";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
-import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
-import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
-import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
-import {
-  AdminResetPasswordSection,
-  type AdminResetPasswordSectionRef,
-} from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
+import { ProfileEditFormShell } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileEditFormShell";
 import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
-import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
@@ -71,13 +61,7 @@ function useTeacherEditForm(teacherData: TeacherEditData, labels: { readonly inv
   return form;
 }
 
-function useSubmitFeedbackStates() {
-  const [successOpen, setSuccessOpen] = useState(false);
-  const [errorOpen, setErrorOpen] = useState(false);
-  return { successOpen, errorOpen, setSuccessOpen, setErrorOpen };
-}
-
-interface SectionsGridProps {
+interface SectionsProps {
   readonly labels: TeacherProfileViewLabels;
   readonly teacherData: TeacherEditData;
   readonly targetUserId: string;
@@ -86,12 +70,12 @@ interface SectionsGridProps {
   readonly form: UseFormReturn<TeacherAdminEditFormData>;
 }
 
-function TeacherFormSectionsGrid({ labels, teacherData, targetUserId, scope, canEdit, form }: SectionsGridProps) {
+function TeacherFormSections({ labels, teacherData, targetUserId, scope, canEdit, form }: SectionsProps) {
   const sectionLabels = toTeacherSectionLabels(labels);
   const personalFieldLabels = toTeacherPersonalFieldLabels(labels);
 
   return (
-    <Box sx={PROFILE_SECTION_GRID_SX}>
+    <>
       {canEdit("core_identity") ? (
         <AccountSection
           labels={sectionLabels}
@@ -132,7 +116,7 @@ function TeacherFormSectionsGrid({ labels, teacherData, targetUserId, scope, can
       {canEdit("teacher_identity") ? (
         <AdminOnlySection labels={sectionLabels} mode="edit" register={form.register} />
       ) : null}
-    </Box>
+    </>
   );
 }
 
@@ -154,41 +138,17 @@ export function TeacherAdminEditForm({
   const scope = ProfileScope.OTHER;
   const { canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
-  const { successOpen, errorOpen, setSuccessOpen, setErrorOpen } = useSubmitFeedbackStates();
   const form = useTeacherEditForm(teacherData, { invalidTimezone: t.validation.invalidTimezone });
-  const resetPasswordRef = useRef<AdminResetPasswordSectionRef>(null);
-  const { resetPassword } = useAdminResetPassword(base.adminResetPassword.success, base.adminResetPassword.error);
-
-  const onValidSubmit = useCallback(
-    async (values: TeacherAdminEditFormData) => {
-      await executeProfileSubmit(values, {
-        onSubmit,
-        resetPasswordRef,
-        resetPassword,
-        targetUserId,
-        setSuccessOpen,
-        setErrorOpen,
-      });
-    },
-    [onSubmit, resetPassword, targetUserId, setSuccessOpen, setErrorOpen]
-  );
-
-  const handleSubmit = useCallback(
-    (e: React.SyntheticEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      void form.handleSubmit(onValidSubmit)(e);
-    },
-    [form, onValidSubmit]
-  );
-
   const canResetPassword = canAdminResetPassword();
-  const teacherName = teacherData.name ?? "";
-  const teacherEmail = teacherData.email ?? "";
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
-      <Stack spacing={3}>
-        {canEdit("core_identity") ? (
+    <ProfileEditFormShell
+      form={form}
+      targetUserId={targetUserId}
+      isSaving={isSaving}
+      onSubmitValid={onSubmit}
+      avatar={
+        canEdit("core_identity") ? (
           <AvatarImageField
             control={form.control}
             name="avatarUrl"
@@ -196,8 +156,10 @@ export function TeacherAdminEditForm({
             title={base.editAvatarTitle}
             onUploadAvatar={onUploadAvatar}
           />
-        ) : null}
-        <TeacherFormSectionsGrid
+        ) : null
+      }
+      sections={
+        <TeacherFormSections
           labels={labels}
           teacherData={teacherData}
           targetUserId={targetUserId}
@@ -205,24 +167,13 @@ export function TeacherAdminEditForm({
           canEdit={canEdit}
           form={form}
         />
-        {canResetPassword && (
-          <AdminResetPasswordSection
-            ref={resetPasswordRef}
-            targetUserId={targetUserId}
-            userName={teacherName}
-            userEmail={teacherEmail}
-          />
-        )}
-        <PrimaryPageAction type="submit" disabled={isSaving}>
-          {isSaving ? t.shell.loading : t.actions.save}
-        </PrimaryPageAction>
-      </Stack>
-      <FormSuccessSnackbar
-        open={successOpen}
-        message={base.actions.saveSuccess}
-        onClose={() => setSuccessOpen(false)}
-      />
-      <FormErrorSnackbar open={errorOpen} message={base.actions.saveError} onClose={() => setErrorOpen(false)} />
-    </Box>
+      }
+      submitLabels={{ save: t.actions.save, loading: t.shell.loading }}
+      snackbarLabels={{ saveSuccess: base.actions.saveSuccess, saveError: base.actions.saveError }}
+      resetPasswordLabels={{ success: base.adminResetPassword.success, error: base.adminResetPassword.error }}
+      resetPasswordSection={
+        canResetPassword ? { userName: teacherData.name ?? "", userEmail: teacherData.email ?? "" } : undefined
+      }
+    />
   );
 }

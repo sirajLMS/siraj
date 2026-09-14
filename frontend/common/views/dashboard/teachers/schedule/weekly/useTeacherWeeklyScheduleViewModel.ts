@@ -89,6 +89,8 @@ type BaseViewModelFields = Pick<
   | "hasScheduleDeleteClass"
   | "labels"
   | "meetingJoinLabels"
+  | "selectedDay"
+  | "onSelectDay"
   | "createRecurringClassDialog"
   | "handleRefetch"
 >;
@@ -491,7 +493,7 @@ export function useTeacherWeeklyScheduleViewModel(
   const notifications = useNotifications();
   const client = useApolloClient();
   const router = useRouter();
-  const { selectedWeekDate, ensureSelectedWeekDate } = useWeeklyScheduleStore();
+  const { selectedWeekDate, ensureSelectedWeekDate, selectedDay, setSelectedDay } = useWeeklyScheduleStore();
 
   useEffect(() => {
     ensureSelectedWeekDate();
@@ -582,6 +584,13 @@ export function useTeacherWeeklyScheduleViewModel(
     }
   }, [formState.createdClassInstanceId, router]);
 
+  const onSelectDay = useCallback(
+    (day: string) => {
+      setSelectedDay(day);
+    },
+    [setSelectedDay]
+  );
+
   const createRecurringClassDialog = buildCreateRecurringClassDialog({
     formState,
     days,
@@ -612,6 +621,8 @@ export function useTeacherWeeklyScheduleViewModel(
     hasScheduleDeleteClass: permissions.hasScheduleDeleteClass,
     labels: t,
     meetingJoinLabels,
+    selectedDay,
+    onSelectDay,
     createRecurringClassDialog,
     handleRefetch,
   };

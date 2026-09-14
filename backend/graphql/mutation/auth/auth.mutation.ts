@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { hashSync } from "bcryptjs";
 import { GraphQLError } from "graphql";
 import { cookies, headers } from "next/headers";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
@@ -40,6 +41,22 @@ import { AuthUtils } from "@/backend/utils";
 
 function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string, accessToken?: string) {
   applyAuthCookies(ctx.cookies, sessionId, refreshToken, accessToken);
+}
+
+/**
+ * Fixed input string whose bcrypt hash is compared when the login email matches
+ * no user. Running the same bcrypt cost as real password verification keeps the
+ * unknown-email failure path indistinguishable in time from the known-email
+ * wrong-password path.
+ */
+const TIMING_EQUALIZER_PAD = "siraj-timing-equalizer-1f4c9d";
+const DUMMY_HASH_ROUNDS = 12;
+
+let cachedDummyPasswordHash: string | null = null;
+
+function getDummyPasswordHash(): string {
+  cachedDummyPasswordHash ??= hashSync(TIMING_EQUALIZER_PAD, DUMMY_HASH_ROUNDS);
+  return cachedDummyPasswordHash;
 }
 
 /**
@@ -263,6 +280,10 @@ gqlSchemaBuilder.mutationFields(t => ({
       }
 
       if (!user) {
+        // Timing-equalize with the found-user path: run a real bcrypt compare
+        // against a valid dummy hash so response latency does not reveal email
+        // existence.
+        await comparePassword(password, getDummyPasswordHash());
         // Still record attempt even if user doesn't exist to prevent enumeration
         await failOpen("recordAttempt (user not found)", () => RateLimitService.recordAttempt(ipAddress, email.value), {
           attempts: 0,
@@ -505,7 +526,11 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, args, ctx) => {
       const { userId: actorUserId } = await requireAuthWithRateLimit(ctx);
-      return AuthPasswordService.changePassword(actorUserId, args.input, ctx.locale);
+      const changed = await AuthPasswordService.changePassword(actorUserId, args.input, ctx.locale);
+      // The password change revoked the caller's sessions — clear the auth cookies
+      // so the rotated session forces re-authentication.
+      clearAuthCookies(ctx.cookies);
+      return changed;
     },
   }),
 }));

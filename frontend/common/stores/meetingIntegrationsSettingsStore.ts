@@ -13,6 +13,7 @@ import type {
 import type {
   MeetingIntegrationConnectedAccount,
   MeetingIntegrationProviderSummary,
+  RevokeTarget,
   TestMeetingConnectionResult,
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 
@@ -35,6 +36,8 @@ interface MeetingIntegrationsSettingsUiState {
   readonly revokingFor: { userId: string; providerSlug: MeetingIntegrationProviderSlug } | null;
   readonly metadataDialogAccount: MeetingIntegrationConnectedAccount | null;
   readonly metadataDialogProviderSlug: MeetingIntegrationProviderSlug | null;
+  /** Provider accordion row targeted by the revoke-confirmation dialog (dialog state survives tier switches). */
+  readonly revokeTarget: RevokeTarget | null;
   readonly setExpandedSlug: (slug: MeetingIntegrationProviderSlug | null) => void;
   readonly setLoadingAccountsFor: (slug: MeetingIntegrationProviderSlug | null) => void;
   readonly setConnectedAccounts: (
@@ -49,6 +52,7 @@ interface MeetingIntegrationsSettingsUiState {
   readonly setRevokingFor: (value: { userId: string; providerSlug: MeetingIntegrationProviderSlug } | null) => void;
   readonly setMetadataDialogAccount: (account: MeetingIntegrationConnectedAccount | null) => void;
   readonly setMetadataDialogProviderSlug: (slug: MeetingIntegrationProviderSlug | null) => void;
+  readonly setRevokeTarget: (target: RevokeTarget | null) => void;
   readonly reset: () => void;
 
   // ---
@@ -113,6 +117,7 @@ const initialState = {
   revokingFor: null as { userId: string; providerSlug: MeetingIntegrationProviderSlug } | null,
   metadataDialogAccount: null as MeetingIntegrationConnectedAccount | null,
   metadataDialogProviderSlug: null as MeetingIntegrationProviderSlug | null,
+  revokeTarget: null as RevokeTarget | null,
 
   // New fields (Task 28)
   testingProviderSlug: null as MeetingIntegrationProviderSlug | null,
@@ -147,6 +152,7 @@ export const useMeetingIntegrationsSettingsStore = create<MeetingIntegrationsSet
   setRevokingFor: value => set({ revokingFor: value }),
   setMetadataDialogAccount: account => set({ metadataDialogAccount: account }),
   setMetadataDialogProviderSlug: slug => set({ metadataDialogProviderSlug: slug }),
+  setRevokeTarget: target => set({ revokeTarget: target }),
   reset: () => set(initialState),
 
   // New setters (Task 28)

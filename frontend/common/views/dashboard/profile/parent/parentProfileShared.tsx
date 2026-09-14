@@ -10,6 +10,7 @@ import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/pare
 import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
 import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
 import {
+  type AssociatedStudentsSectionVariantProps,
   type ParentAdminData,
   toParentSharedBaseLabels,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
@@ -23,7 +24,7 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface ParentProfileSlotProps {
   readonly ViewContentWrapper: React.FC<{ readonly children: ReactNode }>;
-  readonly SectionPanel: React.FC<{ readonly title?: ReactNode; readonly children?: ReactNode }>;
+  readonly StudentsSection: React.FC<AssociatedStudentsSectionVariantProps>;
 }
 
 function resolveAdminData(
@@ -53,15 +54,14 @@ export function ParentProfileShared({
   displayCurrency,
   profileTimezone,
   profilePhone,
-  parentId: _parentId,
-  meetingTabHref: _meetingTabHref,
-  associatedStudents: _associatedStudents,
+  parentId,
+  associatedStudents,
   canView,
   slots,
 }: Readonly<ParentProfileViewModel> & { readonly slots: ParentProfileSlotProps }) {
   const { base: t, parent: pt } = labels;
   const tErrors = useAppTranslation(Translation.Errors);
-  const { ViewContentWrapper, SectionPanel } = slots;
+  const { ViewContentWrapper, StudentsSection } = slots;
 
   if (activeTab === "notifications" && scope === ProfileScope.OWN) {
     return <NotificationPreferencesTab isActive />;
@@ -143,7 +143,7 @@ export function ParentProfileShared({
           errors: tErrors,
         }}
         adminData={adminData}
-        parentId={_parentId}
+        parentId={parentId}
       />
     );
   };
@@ -160,11 +160,12 @@ export function ParentProfileShared({
       return null;
     }
     return (
-      <SectionPanel title={pt.sections.students}>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {pt.students.empty}
-        </Typography>
-      </SectionPanel>
+      <StudentsSection
+        labels={{ parent: pt, base: t }}
+        rows={associatedStudents?.rows ?? []}
+        loading={loading}
+        emptyMessage={pt.students.empty}
+      />
     );
   };
 

@@ -32,3 +32,14 @@ export function withAuthVoid<TArgs>(
     return true;
   };
 }
+
+/**
+ * Resolves the common authenticated resolver context: the acting user id and
+ * the locale-bound error translations for the request. Resolvers that need
+ * both values inline (rather than a wrapper) use this directly.
+ */
+export async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
+  const actorUserId = await requireAuth(ctx);
+  const tErrors = ctx.t().errorsTranslations;
+  return { actorUserId, tErrors };
+}

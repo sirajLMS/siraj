@@ -1,6 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ClassCategoryService } from "@/backend/services";
-import type { ClassCategoryReturnType } from "@/backend/types";
+import type { ClassCategoryReturnType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
 
 export const ClassCategoryPothosObject = gqlSchemaBuilder
   .loadableObjectRef<ClassCategoryReturnType, string>("ClassCategory", {
@@ -23,22 +23,26 @@ export const ClassCategoryPothosObject = gqlSchemaBuilder
     }),
   });
 
-export const ClassCategoryCreateInputPothos = gqlSchemaBuilder.inputType("ClassCategoryCreateInput", {
-  fields: t => ({
-    name: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
-    slug: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
-    description: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
-    isActive: t.boolean({ required: false }),
-    sortOrder: t.int({ required: false, directives: { constraint: { min: 0, max: 999 } } }),
-  }),
-});
+export const ClassCategoryCreateInputPothos = gqlSchemaBuilder
+  .inputRef<ClassCategorySubmitInput>("ClassCategoryCreateInput")
+  .implement({
+    fields: t => ({
+      name: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
+      slug: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
+      description: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
+      isActive: t.boolean({ required: false }),
+      sortOrder: t.int({ required: false, directives: { constraint: { min: 0, max: 999 } } }),
+    }),
+  });
 
-export const ClassCategoryUpdateInputPothos = gqlSchemaBuilder.inputType("ClassCategoryUpdateInput", {
-  fields: t => ({
-    name: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
-    slug: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
-    description: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
-    isActive: t.boolean({ required: false }),
-    sortOrder: t.int({ required: false, directives: { constraint: { min: 0, max: 999 } } }),
-  }),
-});
+export const ClassCategoryUpdateInputPothos = gqlSchemaBuilder
+  .inputRef<ClassCategoryUpdateInput>("ClassCategoryUpdateInput")
+  .implement({
+    fields: t => ({
+      name: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
+      slug: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
+      description: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
+      isActive: t.boolean({ required: false }),
+      sortOrder: t.int({ required: false, directives: { constraint: { min: 0, max: 999 } } }),
+    }),
+  });

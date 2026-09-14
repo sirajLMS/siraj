@@ -86,6 +86,7 @@ const teacher = {
   vacationRequestNotFound: (id: string) => `طلب الإجازة غير موجود: ${id}`,
   createFailed: "فشل إنشاء ملف المعلم.",
   upsertFailed: "فشل عملية إدراج/تحديث المعلم.",
+  noteNotFound: (id: string) => `الملاحظة غير موجودة: ${id}`,
   noteCreateFailed: "فشل إنشاء ملاحظة المعلم.",
   staffProfileCreateFailed: "فشل إنشاء ملف الموظف.",
   staffProfileUpdateFailed: "فشل تحديث ملف الموظف.",
@@ -145,6 +146,7 @@ const expenses = {
 
 const classSubject = {
   createFailed: "فشل إنشاء مادة الفصل.",
+  notFound: (id: string) => `المادة غير موجودة: ${id}`,
 } as const;
 
 const leaveQuota = {
@@ -470,6 +472,7 @@ export const errorsAr: ErrorsLabels = {
   rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
   duplicateRequest: "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",
   internalServerError: "حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.",
+  requestTooLarge: "حجم الطلب كبير جداً.",
   insufficientPermissions: "ليس لديك الصلاحيات الكافية لتنفيذ هذا الإجراء.",
   unauthorized: "يجب تسجيل الدخول أولاً.",
   unauthorizedAction: "غير مصرح لك بتنفيذ هذا الإجراء.",

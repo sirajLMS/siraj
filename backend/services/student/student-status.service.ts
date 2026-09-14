@@ -1,9 +1,12 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { StudentStatus } from "@/backend/enum";
+import { ForbiddenError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import { assertStudentFieldView, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
+import { canViewStudentFieldGroup } from "@/backend/services/profile/profile-field-filter";
+import { assertStudentReadAccess, resolveIsAssociatedViewer } from "@/backend/services/student/student-access.helpers";
+import { buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 import type { StudentUpcomingClassesResult } from "@/backend/types";
 import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { parseClassExecutionState, parseClassOutcome, parseStudentStatus } from "@/shared/lib/enum";
@@ -16,16 +19,21 @@ export namespace StudentStatusService {
     tErrors: ErrorsLabels,
     range?: { from?: Date | null; to?: Date | null } | null
   ): Promise<StudentUpcomingClassesResult> {
-    const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
-    try {
-      assertStudentFieldView(fieldCtx, "student_schedule");
-    } catch {
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertStudentReadAccess(actorUserId, studentId, tErrors);
 
     const student = await StudentRepository.findById(studentId);
     if (!student) {
       throw new Error(tErrors.studentNotFound(studentId));
+    }
+
+    const fieldCtx = await buildStudentFieldFilterContext(actorUserId, studentId);
+    const isAssociatedViewer = await resolveIsAssociatedViewer(actorUserId, studentId);
+    if (!isAssociatedViewer && !canViewStudentFieldGroup(fieldCtx, "student_schedule")) {
+      logger.logDomainError("getUpcomingClasses: schedule view denied for non-associated viewer", {
+        actorUserId,
+        studentId,
+      });
+      throw new ForbiddenError(tErrors.insufficientPermissions);
     }
 
     const normalizedRange = range

@@ -1,4 +1,5 @@
 import type { CalculationStatus } from "@/backend/enum";
+import type { SessionAuditReportSortFieldEnum } from "@/backend/enum/billing/session-audit.enum";
 
 import type { SessionAuditStatus } from "@/shared/constants/classes/session-audit-status";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -24,18 +25,9 @@ export interface SessionAuditReportFilters {
   includeDeleted?: boolean | null;
 }
 
-/** Sortable columns of the session audit report. */
+/** Sortable columns of the session audit report, derived from the runtime enum. */
 export type SessionAuditReportSortField =
-  | "scheduledStartAt"
-  | "scheduledEndAt"
-  | "actualStartAt"
-  | "actualEndAt"
-  | "durationMinutes"
-  | "calculatedDuration"
-  | "teacherPaidAmount"
-  | "calculationStatus"
-  | "teacherName"
-  | "studentName";
+  `${(typeof SessionAuditReportSortFieldEnum)[keyof typeof SessionAuditReportSortFieldEnum]}`;
 
 export interface SessionAuditReportSort {
   field: SessionAuditReportSortField;

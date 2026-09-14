@@ -86,21 +86,21 @@ const DEFAULT_TEMPLATE_LANGUAGE = "en_US";
 
 type ConversationActorInput = { readonly actorUserId: string };
 
-export type AddWhatsappRecipientInput = ConversationActorInput & {
+type AddWhatsappRecipientInput = ConversationActorInput & {
   readonly accountId: string;
   readonly phoneNumber: string;
   readonly note?: string | null;
 };
 
-export type RemoveWhatsappRecipientInput = ConversationActorInput & {
+type RemoveWhatsappRecipientInput = ConversationActorInput & {
   readonly recipientId: string;
 };
 
-export type VerifyWhatsappRecipientInput = ConversationActorInput & {
+type VerifyWhatsappRecipientInput = ConversationActorInput & {
   readonly recipientId: string;
 };
 
-export type SendWhatsappConversationMessageInput = ConversationActorInput & WhatsappConversationSendInput;
+type SendWhatsappConversationMessageInput = ConversationActorInput & WhatsappConversationSendInput;
 
 async function assertCanViewConversations(context: UserPermissionContext, tErrors: ErrorsLabels): Promise<void> {
   const ok = await PermissionsService.hasPermission(context, AppPermission.WHATSAPP_CONVERSATIONS_VIEW);

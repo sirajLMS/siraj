@@ -129,7 +129,7 @@ export interface ListMessageTemplatesInput {
  * One component block of a message template (HEADER / BODY / FOOTER / BUTTONS).
  * Only the fields the app consumes are typed; Meta may carry more.
  */
-export interface WhatsappMessageTemplateComponent {
+interface WhatsappMessageTemplateComponent {
   /** Component slot name, e.g. `HEADER`, `BODY`, `FOOTER`, `BUTTONS`. */
   readonly type: string;
   /** Raw component text. Present on HEADER/BODY/FOOTER placeholders. */

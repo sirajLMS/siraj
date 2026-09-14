@@ -2,12 +2,14 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
-import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
-import { ErrorState, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
-import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
+import { ErrorState, PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import {
+  CopyMeetingUrlButton,
+  MeetingGenerationStatusIndicator,
+} from "@/frontend/common/components/ui/display/meetingConfig";
 import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
@@ -63,44 +65,12 @@ function configLabel(config: ClassMeetingConfigFieldsFragment, locale: string): 
   return config.provider?.slug ?? config.id ?? "";
 }
 
-type MeetingGenerationStatus = "pending" | "generated" | "failed";
+type IndicatorStatus = "pending" | "success" | "failed";
 
-function resolveGenerationStatus(statusValue: string | null | undefined): MeetingGenerationStatus {
-  if (statusValue === "generated") return "generated";
+function resolveGenerationStatus(statusValue: string | null | undefined): IndicatorStatus {
+  if (statusValue === "generated") return "success";
   if (statusValue === "failed") return "failed";
   return "pending";
-}
-
-function MeetingGenerationStatusIndicator({
-  status,
-  labels,
-}: {
-  readonly status: MeetingGenerationStatus;
-  readonly labels: MeetingConfigEnhancementLabels;
-}): React.ReactNode {
-  const statusMap: Record<MeetingGenerationStatus, { badgeStatus: string; label: string }> = {
-    pending: { badgeStatus: "pending", label: labels.generationPending },
-    generated: { badgeStatus: "success", label: labels.generationSuccess },
-    failed: { badgeStatus: "failed", label: labels.generationFailed },
-  };
-  const entry = statusMap[status];
-  return <StatusBadge category="syncStatus" status={entry.badgeStatus} label={entry.label} />;
-}
-
-function formatExpiry(expiresAt: string | null, labels: MeetingConfigEnhancementLabels): string | null {
-  if (!expiresAt) return null;
-  const expiryDate = new Date(expiresAt);
-  if (Number.isNaN(expiryDate.getTime())) return null;
-  const now = Date.now();
-  const diffMs = expiryDate.getTime() - now;
-  if (diffMs <= 0) return labels.expired;
-  const diffHours = diffMs / (1000 * 60 * 60);
-  if (diffHours < 24) {
-    const roundedHours = Math.max(1, Math.round(diffHours));
-    return labels.expiresInHours(roundedHours);
-  }
-  const diffDays = Math.round(diffHours / 24);
-  return labels.expiresInDays(diffDays);
 }
 
 function StatusExtra({
@@ -117,25 +87,21 @@ function StatusExtra({
   const configId = config.id;
   const statusEntry = configId ? statusMap.get(configId) : undefined;
 
-  const status = statusEntry ? resolveGenerationStatus(statusEntry.meetingUrlStatus) : "pending";
-  const meetingUrl = statusEntry?.details?.meetingUrl ?? null;
-  const hasUrl = meetingUrl != null && meetingUrl.trim() !== "";
-  const expiryText = statusEntry ? formatExpiry(statusEntry.meetingUrlExpiresAt, enhancements) : null;
-  const isFailed = status === "failed";
-
   if (!configId || !statusEntry) return null;
+
+  const status = resolveGenerationStatus(statusEntry.meetingUrlStatus);
+  const meetingUrl = statusEntry.details?.meetingUrl ?? null;
+  const hasUrl = meetingUrl != null && meetingUrl.trim() !== "";
+  const isFailed = status === "failed";
 
   return (
     <Stack sx={{ flexDirection: "row", gap: 1, alignItems: "center", flexWrap: "wrap", mt: 1 }}>
-      <MeetingGenerationStatusIndicator status={status} labels={enhancements} />
-
-      {isFailed ? (
-        <Tooltip title={enhancements.retryGeneration}>
-          <IconButton size="small" aria-label={enhancements.retryGeneration} onClick={() => onRetry(configId)}>
-            <RefreshOutlinedIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      ) : null}
+      <MeetingGenerationStatusIndicator
+        status={status}
+        error={statusEntry.meetingUrlError}
+        expiresAt={statusEntry.meetingUrlExpiresAt}
+        onRetry={isFailed ? () => onRetry(configId) : undefined}
+      />
 
       {hasUrl && meetingUrl ? (
         <CopyMeetingUrlButton
@@ -143,12 +109,6 @@ function StatusExtra({
           ariaLabel={enhancements.copyMeetingUrl}
           tooltipLabel={enhancements.copyMeetingUrl}
         />
-      ) : null}
-
-      {expiryText ? (
-        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
-          {expiryText}
-        </Typography>
       ) : null}
     </Stack>
   );

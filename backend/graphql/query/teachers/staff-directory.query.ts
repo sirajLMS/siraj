@@ -1,6 +1,5 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { resolveDisplayAmountFields } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import {
   ManagerDirectoryResultPothosObject,
@@ -9,7 +8,7 @@ import {
 } from "@/backend/graphql/pothos/teachers/staff-directory.pothos";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ManagerDirectoryService } from "@/backend/services";
+import { ManagerDirectoryService, resolveDisplayAmountFields } from "@/backend/services";
 import type { DisplayAmountReturnType } from "@/backend/types";
 
 const STAFF_DIRECTORY_DEFAULT_LIMIT = 20;

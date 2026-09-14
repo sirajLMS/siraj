@@ -4,8 +4,8 @@ import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   RecurringScheduleDetailReturnType,
-  RecurringScheduleRepositoryRow,
   RecurringScheduleSelectType,
+  RecurringScheduleWithNamesReturnType,
 } from "@/backend/types";
 import { parseIanaTimezone } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -14,7 +14,9 @@ import type { ErrorsLabels } from "@/shared/locale";
  * Type guard to check if a RecurringScheduleSelectType row has the extended properties
  * attached by the repository via Object.assign.
  */
-function isRecurringScheduleRepositoryRow(row: RecurringScheduleSelectType): row is RecurringScheduleRepositoryRow {
+function isRecurringScheduleWithNamesRow(
+  row: RecurringScheduleSelectType
+): row is RecurringScheduleWithNamesReturnType {
   return (
     typeof row === "object" &&
     "studentName" in row &&
@@ -83,7 +85,7 @@ export namespace RecurringScheduleDetailService {
       pageSize?: number;
       search?: string;
     }
-  ): Promise<{ rows: RecurringScheduleRepositoryRow[]; totalCount: number }> {
+  ): Promise<{ rows: RecurringScheduleWithNamesReturnType[]; totalCount: number }> {
     const canViewList = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_LIST);
     const canViewAll = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_VIEW_ALL);
 
@@ -94,14 +96,14 @@ export namespace RecurringScheduleDetailService {
     const result = await RecurringScheduleRepository.findAll(undefined, options);
     // Repository returns rows with studentName and teacherUserName attached via Object.assign
     // but typed as RecurringScheduleSelectType[]. Use type guard to narrow safely.
-    const rows: RecurringScheduleRepositoryRow[] = result.rows.map(row => {
-      if (!isRecurringScheduleRepositoryRow(row)) {
+    const rows: RecurringScheduleWithNamesReturnType[] = result.rows.map(row => {
+      if (!isRecurringScheduleWithNamesRow(row)) {
         // Should never happen if repository is correct, but fallback for safety
         return {
           ...row,
           studentName: "",
           teacherUserName: "",
-        } satisfies RecurringScheduleRepositoryRow;
+        } satisfies RecurringScheduleWithNamesReturnType;
       }
       return {
         id: row.id,
@@ -128,7 +130,7 @@ export namespace RecurringScheduleDetailService {
         deletedAt: row.deletedAt,
         studentName: row.studentName,
         teacherUserName: row.teacherUserName,
-      } satisfies RecurringScheduleRepositoryRow;
+      } satisfies RecurringScheduleWithNamesReturnType;
     });
     return {
       rows,

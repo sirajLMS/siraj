@@ -1,6 +1,5 @@
 "use client";
 
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { AssignedStudentsTabShared } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabShared";
 import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabTypes";
 import type { AssignedStudentsTabSlotProps } from "@/frontend/common/views/dashboard/profile/teacher/students/types/assignedStudentsTabShared.types";
@@ -11,25 +10,16 @@ const ClassFilterWrapper: Required<AssignedStudentsTabSlotProps>["ClassFilterWra
   <MobileHorizontalScrollRow>{children}</MobileHorizontalScrollRow>
 );
 
-const ListView: AssignedStudentsTabSlotProps["ListView"] = ({ rows, pagination, labelsBySection }) => {
-  const pagedRows = rows.slice(pagination.page * pagination.pageSize, (pagination.page + 1) * pagination.pageSize);
-
-  return (
-    <AssignedStudentsCardList
-      rows={pagedRows}
-      labels={{
-        columns: labelsBySection.columns,
-        emptyMessage: labelsBySection.list.mobileEmptyMessage,
-      }}
-      paginationOptions={buildServerPaginationOptions({
-        page: pagination.page,
-        pageSize: pagination.pageSize,
-        totalCount: pagination.totalCount,
-        onPageChange: pagination.onPageChange,
-      })}
-    />
-  );
-};
+const ListView: AssignedStudentsTabSlotProps["ListView"] = ({ rows, pagination, labelsBySection }) => (
+  <AssignedStudentsCardList
+    rows={rows}
+    labels={{
+      columns: labelsBySection.columns,
+      emptyMessage: labelsBySection.list.mobileEmptyMessage,
+    }}
+    paginationOptions={pagination}
+  />
+);
 
 export function AssignedStudentsTabMobileView({ ...viewModel }: Readonly<AssignedStudentsTabViewModel>) {
   return <AssignedStudentsTabShared viewModel={viewModel} slots={{ ListView, ClassFilterWrapper }} />;

@@ -1,14 +1,29 @@
 "use client";
 
 import { GroupsOutlined } from "@mui/icons-material";
-import { Avatar, Box, Chip, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Skeleton, Stack, Typography } from "@mui/material";
+import type { ReactNode } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import { PaginationControls } from "@/frontend/common/components/ui/filter";
+import { ClassAvatar } from "@/frontend/common/components/ui/avatar";
+import { FilterChip } from "@/frontend/common/components/ui/filter";
+import type { ServerListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type {
   WhatsappGroupRow,
   WhatsappGroupsListLabels,
 } from "@/frontend/common/views/dashboard/whatsapp/groups/types/whatsappGroupsView.types";
+
+export interface GroupsListShellArgs {
+  readonly toolbar: ReactNode;
+  readonly skeleton: ReactNode | null;
+  readonly empty: ReactNode | null;
+  readonly rows: readonly WhatsappGroupRow[];
+  readonly renderRow: (row: WhatsappGroupRow) => ReactNode;
+  readonly paginationOptions: ServerListPaginationOptions;
+  readonly rowsAriaLabel: string;
+}
+
+export type GroupsListShell = (args: GroupsListShellArgs) => ReactNode;
 
 export interface GroupsListSharedProps {
   readonly labels: WhatsappGroupsListLabels;
@@ -17,10 +32,8 @@ export interface GroupsListSharedProps {
   readonly groups: readonly WhatsappGroupRow[];
   readonly loading: boolean;
   readonly selectedGroupId: string | null;
-  readonly totalCount: number;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly onPageChange: (page: number) => void;
+  readonly paginationOptions: ServerListPaginationOptions;
+  readonly listShell: GroupsListShell;
   readonly onSelectGroup: (groupId: string) => void;
   readonly formatTimestamp: (iso: string | null) => string;
 }
@@ -71,7 +84,7 @@ function GroupsListRow({ group, labels, selected, onSelectGroup, formatTimestamp
         "&:focus-visible": { backgroundColor: theme.palette.action.hover },
       })}
     >
-      <Avatar sx={{ width: 40, height: 40, flexShrink: 0 }}>{group.subject.slice(0, 2) || "?"}</Avatar>
+      <ClassAvatar label={group.subject} sx={{ width: 40, height: 40, flexShrink: 0 }} />
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
           variant="titleLg"
@@ -87,7 +100,7 @@ function GroupsListRow({ group, labels, selected, onSelectGroup, formatTimestamp
         </Typography>
         {pendingBadgeText !== null && (
           <Stack direction="row" spacing={0.75} sx={{ mt: 0.5, flexWrap: "wrap" }}>
-            <Chip size="small" variant="outlined" color="warning" label={pendingBadgeText} />
+            <FilterChip label={pendingBadgeText} />
           </Stack>
         )}
       </Box>
@@ -114,11 +127,13 @@ function withCount(template: string, count: number): string {
 function withDate(template: string, date: string): string {
   return template.replaceAll("{date}", date);
 }
+
 /**
- * Shared groups list panel for the `/whatsapp` groups workspace: search
- * toolbar, bordered row list with the subject, pending-join-request badge and
- * sync state, and server-driven pagination. Used verbatim by both tiers —
- * there are no viewport-specific code paths inside.
+ * Shared groups list scaffold for the `/whatsapp` groups workspace: search
+ * toolbar, row list with the subject, pending-join-request chip and sync
+ * state, and server-driven pagination options. The outer list chrome is
+ * tier-owned — the tier supplies a `listShell` slot that receives the
+ * toolbar, skeleton/empty branches, rendered rows and pagination options.
  */
 export function GroupsListShared({
   labels,
@@ -127,49 +142,39 @@ export function GroupsListShared({
   groups,
   loading,
   selectedGroupId,
-  totalCount,
-  page,
-  pageSize,
-  onPageChange,
+  paginationOptions,
+  listShell,
   onSelectGroup,
   formatTimestamp,
 }: Readonly<GroupsListSharedProps>) {
   const showSkeleton = loading && groups.length === 0;
   const showEmpty = !loading && groups.length === 0;
-  return (
-    <Stack sx={{ borderRadius: 2, overflow: "hidden", border: theme => `1px solid ${theme.palette.outlineVariant}` }}>
+  return listShell({
+    toolbar: (
       <Stack spacing={2} sx={{ p: 2 }}>
         <SearchBarField value={search} placeholder={labels.searchPlaceholder} onChange={onSearchChange} />
       </Stack>
-      {showSkeleton && (
-        <Stack spacing={1} sx={{ px: 2, pb: 2 }} aria-busy>
-          {LIST_SKELETON_KEYS.map(key => (
-            <Skeleton key={key} variant="rounded" height={64} />
-          ))}
-        </Stack>
-      )}
-      {showEmpty && <GroupsListEmptyState labels={labels} />}
-      {!showSkeleton && !showEmpty && (
-        <Stack aria-label={labels.listTitle}>
-          {groups.map(group => (
-            <GroupsListRow
-              key={group.id}
-              group={group}
-              labels={labels}
-              selected={group.id === selectedGroupId}
-              onSelectGroup={onSelectGroup}
-              formatTimestamp={formatTimestamp}
-            />
-          ))}
-        </Stack>
-      )}
-      <PaginationControls
-        page={page}
-        pageCount={Math.max(1, Math.ceil(totalCount / pageSize))}
-        rowCount={totalCount}
-        pageSize={pageSize}
-        onPageChange={onPageChange}
+    ),
+    skeleton: showSkeleton ? (
+      <Stack spacing={1} sx={{ px: 2, pb: 2 }} aria-busy>
+        {LIST_SKELETON_KEYS.map(key => (
+          <Skeleton key={key} variant="rounded" height={64} />
+        ))}
+      </Stack>
+    ) : null,
+    empty: showEmpty ? <GroupsListEmptyState labels={labels} /> : null,
+    rows: groups,
+    renderRow: row => (
+      <GroupsListRow
+        key={row.id}
+        group={row}
+        labels={labels}
+        selected={row.id === selectedGroupId}
+        onSelectGroup={onSelectGroup}
+        formatTimestamp={formatTimestamp}
       />
-    </Stack>
-  );
+    ),
+    paginationOptions,
+    rowsAriaLabel: labels.listTitle,
+  });
 }

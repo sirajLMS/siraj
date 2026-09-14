@@ -76,7 +76,7 @@ export class WhatsappNoSenderForPurposeError extends DomainError {
 }
 
 /** Machine-readable domain code for a failed WhatsApp Embedded Signup completion. */
-export const WHATSAPP_EMBEDDED_SIGNUP_FAILED_CODE = "whatsapp.embeddedSignupFailed";
+const WHATSAPP_EMBEDDED_SIGNUP_FAILED_CODE = "whatsapp.embeddedSignupFailed";
 
 /**
  * Thrown when Embedded Signup completion fails at any server-side step:
@@ -91,7 +91,7 @@ export class WhatsappEmbeddedSignupError extends DomainError {
 }
 
 /** Machine-readable domain code for assigning a routing purpose to an inactive account. */
-export const WHATSAPP_PURPOSE_REQUIRES_ACTIVE_CODE = "whatsapp.purposeRequiresActive";
+const WHATSAPP_PURPOSE_REQUIRES_ACTIVE_CODE = "whatsapp.purposeRequiresActive";
 
 /**
  * Thrown when a purpose is (re)assigned to a WhatsApp account that is not

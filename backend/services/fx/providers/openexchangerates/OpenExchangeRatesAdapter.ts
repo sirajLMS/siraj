@@ -57,6 +57,11 @@ export class OpenExchangeRatesAdapter extends FxAdapterBase {
   }
 
   protected buildApiUrl(): string {
+    // OER only supports `app_id` as a URL query param (no header auth), so
+    // the key necessarily travels in the URL. No error path or log line may
+    // ever interpolate this URL — errors carry only the provider name and
+    // HTTP status (see the shared adapter base) so the credential cannot
+    // leak into messages, logs, or traces.
     const symbols = this.buildSymbolsParam();
     return (
       `${OER_LATEST_ENDPOINT}?app_id=${encodeURIComponent(this.appId)}` +

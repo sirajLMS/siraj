@@ -281,6 +281,20 @@ export type DisplayAmountReturnType = {
   readonly stale: boolean;
 };
 
+/**
+ * Context slice consumed by `FxDisplayService` for per-request billing FX
+ * display-currency resolution. Structurally satisfied by the GraphQL request
+ * context, which callers pass explicitly; the service layer depends on this
+ * type instead of the GraphQL layer. `billingFxDisplayCurrency*` fields are
+ * memoization slots mutated by the service during a request.
+ */
+export type BillingFxDisplayContext = {
+  readonly user?: { readonly id: string; readonly displayCurrency: CurrencyCode | null };
+  readonly locale: string;
+  billingFxDisplayCurrency?: CurrencyCode | null;
+  billingFxDisplayCurrencyByUserId?: Map<string, CurrencyCode | null>;
+};
+
 export type ManualInvoiceResult = {
   readonly id: string;
   readonly parentId: string;

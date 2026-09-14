@@ -23,10 +23,10 @@ const lazyViews = createLazyView<ParentProfileViewModel>(
 );
 
 export function ParentProfileContainer(props: Readonly<UseParentProfileViewModelProps>) {
-  // NEW FOR PLAN v5: identity-hook (`useProfileFieldAccess` → reads
-  // `useUserStore`) lifted to the Container so the mobile/desktop tier views
-  // don't call hooks directly. Per specs.md §6.1 the Container owns all
-  // identity plumbing; the tier view stays pure.
+  // The identity hook (`useProfileFieldAccess`, backed by `useUserStore`) is
+  // lifted into the Container so mobile/desktop tier views stay hook-free:
+  // the Container owns all identity plumbing and passes `canView` down to
+  // the ViewModel.
   const { canView } = useProfileFieldAccess({ scope: props.scope });
   const viewModel = useParentProfileViewModel({ ...props, canView });
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;

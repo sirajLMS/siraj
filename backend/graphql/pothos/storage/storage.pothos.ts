@@ -1,21 +1,11 @@
-import { FileSortField, FileTypes, UploadType } from "@/backend/enum/storage";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { OrderSortDirectionPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  FileTypePothosObject,
+  OrderSortDirectionPothosObject,
+  SortByPothosObject,
+  UploadTypePothosObject,
+} from "@/backend/graphql/pothos/shared/enum.pothos";
 import type * as Types from "@/backend/types";
-
-// File type enum
-export const FileTypePothosObject = gqlSchemaBuilder.enumType(FileTypes, {
-  name: "FileType",
-});
-
-// Upload type enum
-export const UploadTypePothosObject = gqlSchemaBuilder.enumType(UploadType, {
-  name: "UploadType",
-});
-
-export const SortByPothosObject = gqlSchemaBuilder.enumType(FileSortField, {
-  name: "FileSortField",
-});
 
 // Upload preparation result
 export const UploadPreparationPothosObject = gqlSchemaBuilder

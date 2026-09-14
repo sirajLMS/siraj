@@ -11,7 +11,7 @@ import type { PersonOption } from "@/frontend/common/components/ui/input/userSel
 export type CarryoverPaidStatusFilter = "Paid" | "Unpaid" | "Both";
 
 /** Rows per server page on first load; mirrors the `carryoverBalances` resolver default. */
-export const CARRYOVER_DEFAULT_PAGE_SIZE = 50;
+const CARRYOVER_DEFAULT_PAGE_SIZE = 50;
 
 /** Page-size choices offered by the carryover list pager. */
 export const CARRYOVER_PAGE_SIZE_OPTIONS: readonly number[] = [25, 50, 100];

@@ -26,7 +26,7 @@ const messageTemplateComponentSchema = z.object({
   text: z.string().optional(),
 });
 
-export const messageTemplateSchema = z.object({
+const messageTemplateSchema = z.object({
   id: z.string(),
   name: z.string(),
   language: z.union([

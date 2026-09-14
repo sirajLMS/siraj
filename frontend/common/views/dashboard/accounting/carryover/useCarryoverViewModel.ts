@@ -37,7 +37,7 @@ const FALLBACK_EXPORT_FILENAME = "carryover-balances.csv";
 export type CarryoverRow = CarryoverBalancesQuery_carryoverBalances_rows;
 
 /** Paid/unpaid row tallies for the full filtered set. */
-export interface CarryoverRowCountByPaid {
+interface CarryoverRowCountByPaid {
   readonly paid: number;
   readonly unpaid: number;
 }
@@ -67,7 +67,7 @@ export interface CarryoverCsvExportOutcome {
 }
 
 /** Filter, pagination, and bulk-selection state with store actions for the carryover list. */
-export interface CarryoverFilterSlice {
+interface CarryoverFilterSlice {
   readonly teacherId: string | null;
   /** Selected teacher option (drives the filter autocomplete's displayed selection). */
   readonly teacherOption: PersonOption | null;

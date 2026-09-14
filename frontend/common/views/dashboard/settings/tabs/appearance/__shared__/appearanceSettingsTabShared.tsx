@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography, type ButtonProps } from "@mui/material";
 import type { ComponentType } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { AppearanceResetDialog } from "@/frontend/common/views/dashboard/appearance/shared/AppearanceResetDialog";
@@ -11,6 +11,13 @@ import type {
   AppearanceSettingsViewModel,
 } from "@/frontend/common/views/dashboard/settings/types/appearanceSettings.types";
 
+/** Tier action presets: desktop passes the DesktopActionButtons, mobile the MobileActionButtons variants. */
+export interface AppearanceActionSlots {
+  readonly PrimaryAction: ComponentType<ButtonProps>;
+  readonly SecondaryAction: ComponentType<ButtonProps>;
+  readonly ExportAction: ComponentType<ButtonProps>;
+}
+
 export interface AppearanceSettingsTabSharedProps {
   readonly viewModel: AppearanceSettingsViewModel;
   /**
@@ -18,6 +25,7 @@ export interface AppearanceSettingsTabSharedProps {
    * `MobileSectionPanel`. Both satisfy {@link AppearanceSectionPanelSlotProps}.
    */
   readonly SectionPanel: ComponentType<AppearanceSectionPanelSlotProps>;
+  readonly slots: AppearanceActionSlots;
 }
 
 /**
@@ -25,10 +33,17 @@ export interface AppearanceSettingsTabSharedProps {
  * draft status row, brand-color preview cards, quick preset grid, action bar,
  * and the reset confirmation dialog.
  *
- * Both tiers pass their section panel via the `SectionPanel` slot; all copy
- * and behavior come from the ViewModel (scaffold never calls hooks).
+ * Both tiers pass their section panel and action presets via the `SectionPanel`
+ * and `slots` props; all copy and behavior come from the ViewModel (scaffold
+ * never calls hooks).
  */
-export function AppearanceSettingsTabShared({ viewModel, SectionPanel }: Readonly<AppearanceSettingsTabSharedProps>) {
+export function AppearanceSettingsTabShared({
+  viewModel,
+  SectionPanel,
+  slots,
+}: Readonly<AppearanceSettingsTabSharedProps>) {
+  const { PrimaryAction, SecondaryAction, ExportAction } = slots;
+
   return (
     <Stack sx={{ gap: 3 }}>
       <Box>
@@ -43,9 +58,9 @@ export function AppearanceSettingsTabShared({ viewModel, SectionPanel }: Readonl
 
       <SectionPanel
         actions={
-          <Button variant="contained" color="primary" onClick={viewModel.onEnterCustomizeMode}>
+          <PrimaryAction onClick={viewModel.onEnterCustomizeMode}>
             {viewModel.labels.enterCustomizeMode}
-          </Button>
+          </PrimaryAction>
         }
       >
         <Stack sx={{ gap: 2 }}>
@@ -103,24 +118,17 @@ export function AppearanceSettingsTabShared({ viewModel, SectionPanel }: Readonl
       </SectionPanel>
 
       <Stack direction={{ xs: "column", sm: "row" }} sx={{ gap: 2 }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={viewModel.onSaveDraft}
-          disabled={viewModel.saveDraftDisabled}
-        >
+        <SecondaryAction onClick={viewModel.onSaveDraft} disabled={viewModel.saveDraftDisabled}>
           {viewModel.labels.saveDraft}
-        </Button>
-        <Button variant="contained" color="primary" onClick={viewModel.onPublish} disabled={viewModel.publishLoading}>
+        </SecondaryAction>
+        <PrimaryAction onClick={viewModel.onPublish} disabled={viewModel.publishLoading}>
           {viewModel.labels.publishNow}
-        </Button>
-        <Button variant="text" color="inherit" onClick={viewModel.onOpenResetDialog} disabled={viewModel.resetLoading}>
+        </PrimaryAction>
+        <SecondaryAction onClick={viewModel.onOpenResetDialog} disabled={viewModel.resetLoading}>
           {viewModel.labels.resetToDefaults}
-        </Button>
+        </SecondaryAction>
         <Box sx={{ flexGrow: 1 }} />
-        <Button variant="text" color="inherit" onClick={viewModel.onExportJson}>
-          {viewModel.labels.exportJson}
-        </Button>
+        <ExportAction onClick={viewModel.onExportJson}>{viewModel.labels.exportJson}</ExportAction>
       </Stack>
 
       <AppearanceResetDialog

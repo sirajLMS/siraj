@@ -97,11 +97,7 @@ async function callGetTeacherAppraisalStudents(month: Date | undefined) {
 async function expectAddFeedbackRejects(body: string, expectedErrorClass: new (...args: never[]) => Error) {
   await expectRejects(
     async () =>
-      MonthlyAppraisalService.addFeedback(
-        { appraisalId: MOCK_APPRAISAL_ID, authorUserId: MOCK_PARENT_USER_ID, body },
-        MOCK_PARENT_USER_ID,
-        "en"
-      ),
+      MonthlyAppraisalService.addFeedback({ appraisalId: MOCK_APPRAISAL_ID, body }, MOCK_PARENT_USER_ID, "en"),
     expectedErrorClass
   );
 }
@@ -163,8 +159,6 @@ function buildMockTeacherAssignedStudent(
 function buildSubmitInput(overrides: Partial<MonthlyAppraisalSubmitInput> = {}): MonthlyAppraisalSubmitInput {
   return {
     studentId: MOCK_STUDENT_ID,
-    // Forged teacherId — service MUST ignore this and use auth context.
-    teacherId: "forged-teacher-id-from-client",
     month: MID_MONTH,
     behaviorGrade: 4,
     behaviorComment: "Good behavior",
@@ -288,7 +282,7 @@ describe("MonthlyAppraisalService", () => {
   describe("Tier 1 — addFeedback", () => {
     test("happy path: parent appends feedback", async () => {
       const result = await MonthlyAppraisalService.addFeedback(
-        { appraisalId: MOCK_APPRAISAL_ID, authorUserId: MOCK_PARENT_USER_ID, body: "Thank you!" },
+        { appraisalId: MOCK_APPRAISAL_ID, body: "Thank you!" },
         MOCK_PARENT_USER_ID,
         "en"
       );
@@ -506,7 +500,6 @@ describe("MonthlyAppraisalService", () => {
     test("undefined grades (sparse rubric) → ok", async () => {
       const sparseInput: MonthlyAppraisalSubmitInput = {
         studentId: MOCK_STUDENT_ID,
-        teacherId: "forged",
         month: MID_MONTH,
         learningTargets: "Sparse targets only",
       };
@@ -542,7 +535,7 @@ describe("MonthlyAppraisalService", () => {
 
     test("feedback body with Arabic unicode + RTL preserved", async () => {
       await MonthlyAppraisalService.addFeedback(
-        { appraisalId: MOCK_APPRAISAL_ID, authorUserId: MOCK_PARENT_USER_ID, body: "شكراً على التقييم" },
+        { appraisalId: MOCK_APPRAISAL_ID, body: "شكراً على التقييم" },
         MOCK_PARENT_USER_ID,
         "en"
       );
@@ -565,7 +558,7 @@ describe("MonthlyAppraisalService", () => {
 
     test("body is trimmed before persistence", async () => {
       await MonthlyAppraisalService.addFeedback(
-        { appraisalId: MOCK_APPRAISAL_ID, authorUserId: MOCK_PARENT_USER_ID, body: "  Hello  " },
+        { appraisalId: MOCK_APPRAISAL_ID, body: "  Hello  " },
         MOCK_PARENT_USER_ID,
         "en"
       );
@@ -583,7 +576,7 @@ describe("MonthlyAppraisalService", () => {
       let errorCaught: Error | null = null;
       try {
         await MonthlyAppraisalService.addFeedback(
-          { appraisalId: "nonexistent-appraisal-id", authorUserId: MOCK_PARENT_USER_ID, body: "Hi" },
+          { appraisalId: "nonexistent-appraisal-id", body: "Hi" },
           MOCK_PARENT_USER_ID,
           "en"
         );
@@ -615,7 +608,7 @@ describe("MonthlyAppraisalService", () => {
     });
 
     test("addFeedback twice (append) — repo.appendFeedback called twice with same appraisalId", async () => {
-      const input = { appraisalId: MOCK_APPRAISAL_ID, authorUserId: MOCK_PARENT_USER_ID, body: "First reply" };
+      const input = { appraisalId: MOCK_APPRAISAL_ID, body: "First reply" };
       await MonthlyAppraisalService.addFeedback(input, MOCK_PARENT_USER_ID, "en");
       await MonthlyAppraisalService.addFeedback({ ...input, body: "Second reply" }, MOCK_PARENT_USER_ID, "en");
       expect(appraisalAppendFeedbackSpy).toHaveBeenCalledTimes(2);
@@ -630,13 +623,17 @@ describe("MonthlyAppraisalService", () => {
 
   // ─── Tier 4: security ───────────────────────────────────────────────
   describe("Tier 4 — security & tenancy", () => {
-    test("forged teacherId in input is ignored (auth-derived teacherId wins)", async () => {
-      const forgedInput = buildSubmitInput({ teacherId: "forged-teacher-id-from-client" });
-      await MonthlyAppraisalService.submitAppraisal(forgedInput, MOCK_TEACHER_USER_ID, "en");
-      const upsertCall = appraisalUpsertSpy.mock.calls[0];
-      const callArgTeacherId = upsertCall?.[0]?.teacherId;
-      expect(callArgTeacherId).toBe(MOCK_TEACHER_ID);
-      expect(callArgTeacherId).not.toBe("forged-teacher-id-from-client");
+    test("submit input carries no identity fields (auth-derived teacherId only)", () => {
+      // The canonical submit input type has no `teacherId` field — a forged
+      // identity cannot be expressed, so the auth-derived teacher is the only
+      // possible source for the repo upsert.
+      const input: MonthlyAppraisalSubmitInput = {
+        studentId: MOCK_STUDENT_ID,
+        month: MID_MONTH,
+        learningTargets: "No identity fields in the input contract",
+      };
+      expect("teacherId" in input).toBe(false);
+      expect("authorUserId" in input).toBe(false);
     });
 
     test("teacher without assignment to student → ForbiddenError", async () => {
@@ -710,7 +707,7 @@ describe("MonthlyAppraisalService", () => {
       await expectRejects(
         async () =>
           MonthlyAppraisalService.addFeedback(
-            { appraisalId: MOCK_APPRAISAL_ID, authorUserId: MOCK_PARENT_USER_ID, body: "Hi" },
+            { appraisalId: MOCK_APPRAISAL_ID, body: "Hi" },
             MOCK_PARENT_USER_ID,
             "en"
           ),
@@ -786,11 +783,7 @@ describe("MonthlyAppraisalService", () => {
 
       await expectRejects(
         async () =>
-          MonthlyAppraisalService.addFeedback(
-            { appraisalId: MOCK_APPRAISAL_ID, authorUserId: "orphan-user-uuid", body: "Hi" },
-            "orphan-user-uuid",
-            "en"
-          ),
+          MonthlyAppraisalService.addFeedback({ appraisalId: MOCK_APPRAISAL_ID, body: "Hi" }, "orphan-user-uuid", "en"),
         ForbiddenError
       );
       expect(appraisalAppendFeedbackSpy).not.toHaveBeenCalled();

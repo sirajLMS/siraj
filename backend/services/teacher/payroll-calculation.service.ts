@@ -14,7 +14,7 @@ import { DomainError, logger, NotFoundError, sanitizePlainText, ValidationError 
 import { requirePermission } from "@/backend/services/billing/permission-utils";
 import { resolveClassRate } from "@/backend/services/pricing/rate-resolver.service";
 import { AuditService } from "@/backend/services/system/audit.service";
-import { type PayrollGraceSettings, resolveGraceSettings } from "@/backend/services/teacher/payroll-grace-settings";
+import { resolveGraceSettings } from "@/backend/services/teacher/payroll-grace-settings";
 import { deriveOverrideIdempotencyKey } from "@/backend/services/teacher/payroll-override.idempotency";
 import type {
   ClassInstanceSelectType,
@@ -23,6 +23,7 @@ import type {
   DBTransaction,
   PayrollCalculationInput,
   PayrollCalculationResult,
+  PayrollGraceSettings,
   PayrollOverrideInput,
   PayrollOverrideResult,
   PayrollReportFilters,

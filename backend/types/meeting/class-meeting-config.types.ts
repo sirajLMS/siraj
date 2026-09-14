@@ -22,6 +22,13 @@ export type ClassMeetingConfigReturnType = MeetingConfigBaseReturnType & {
   readonly recurringScheduleId: string | null;
 };
 
+/**
+ * Public (GraphQL) DTO for `class_meeting_configs`, bound directly by the
+ * Pothos `ClassMeetingConfig` object. The `encryptedSecret` column is
+ * structurally excluded — only the masked service-layer projection surfaces.
+ */
+export type ClassMeetingConfigPublicReturnType = Omit<ClassMeetingConfigReturnType, "encryptedSecret">;
+
 export type ClassMeetingConfigSubmitInput = MeetingConfigBaseSubmitInput & {
   readonly classInstanceId?: string | null;
   readonly recurringScheduleId?: string | null;

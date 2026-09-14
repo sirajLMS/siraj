@@ -41,6 +41,22 @@ const MAX_GRAPHQL_DEPTH = 7;
  */
 const MAX_BATCHED_OPERATIONS = 10;
 
+/**
+ * Maximum POST body size (bytes) accepted for GraphQL operations. Hard reject
+ * happens in `withRateLimit` BEFORE Apollo parses the body. Content-Length is
+ * used as a cheap pre-read filter; chunked bodies without Content-Length are
+ * measured after the read, so oversized payloads never reach full parsing.
+ */
+const MAX_GRAPHQL_BODY_BYTES = 256 * 1024;
+
+function createPayloadTooLargeResponse(locale: string): NextResponse {
+  const tErrors = getServerTranslations(locale).errorsTranslations;
+  return NextResponse.json(
+    { errors: [{ message: tErrors.requestTooLarge, extensions: { code: "PAYLOAD_TOO_LARGE" } }] },
+    { status: 413 }
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -224,6 +240,67 @@ async function chargeOperationRateLimitUnits(
 }
 
 /**
+ * Validates a batched GraphQL request body before Apollo parses it and
+ * derives the operation count that drives per-operation rate-limit
+ * accounting. Batched requests (JSON array body) carry multiple operations
+ * in one POST — see the security decision block on `allowBatchedHttpRequests`
+ * in `createApolloServer`.
+ *
+ * Oversized bodies are rejected 413 BEFORE Apollo parses/clones them:
+ * Content-Length is a cheap pre-filter, and chunked bodies (no
+ * Content-Length) are measured after the read.
+ */
+async function validateGraphqlRequestBody(
+  request: NextRequest,
+  identifier: string
+): Promise<{ rejection: Response | null; operationCount: number }> {
+  if (request.method !== "POST") {
+    return { rejection: null, operationCount: 1 };
+  }
+
+  const contentLengthHeader = request.headers.get("content-length");
+  if (contentLengthHeader !== null) {
+    const contentLength = Number.parseInt(contentLengthHeader, 10);
+    if (Number.isFinite(contentLength) && contentLength > MAX_GRAPHQL_BODY_BYTES) {
+      const locale = await getLocale();
+      logger.warn(`GraphQL request rejected: body of ${contentLength} bytes from ${identifier}`);
+      return { rejection: createPayloadTooLargeResponse(locale), operationCount: 1 };
+    }
+  }
+
+  let operationCount = 1;
+  try {
+    const body: unknown = await request.clone().json();
+    // JSON.stringify length is a cheap upper-bound approximation of the raw
+    // body size; legitimate queries/mutations stay far below the cap.
+    if (JSON.stringify(body).length > MAX_GRAPHQL_BODY_BYTES) {
+      const locale = await getLocale();
+      logger.warn(`GraphQL request rejected: parsed body exceeds ${MAX_GRAPHQL_BODY_BYTES} bytes from ${identifier}`);
+      return { rejection: createPayloadTooLargeResponse(locale), operationCount: 1 };
+    }
+    if (Array.isArray(body) && body.length > 0) {
+      operationCount = body.length;
+      if (operationCount > MAX_BATCHED_OPERATIONS) {
+        const locale = await getLocale();
+        const tErrors = getServerTranslations(locale).errorsTranslations;
+        logger.warn(`GraphQL batched request rejected: ${operationCount} operations from ${identifier}`);
+        return {
+          rejection: NextResponse.json(
+            { errors: [{ message: tErrors.invalidRequestFormat, extensions: { code: "BAD_REQUEST" } }] },
+            { status: 400 }
+          ),
+          operationCount: 1,
+        };
+      }
+    }
+  } catch {
+    // malformed body — let Apollo handle it
+  }
+
+  return { rejection: null, operationCount };
+}
+
+/**
  * Rate limiting middleware wrapper
  * Checks rate limit before processing the request
  */
@@ -233,29 +310,9 @@ async function withRateLimit(
 ): Promise<Response> {
   const identifier = getClientIdentifier(request);
 
-  // Batched GraphQL requests (JSON array body) carry multiple operations in
-  // one POST. Batch size is validated here and the operation count drives
-  // per-operation rate-limit accounting below — see the security decision
-  // block on `allowBatchedHttpRequests` in `createApolloServer`.
-  let operationCount = 1;
-  if (request.method === "POST") {
-    try {
-      const body: unknown = await request.clone().json();
-      if (Array.isArray(body) && body.length > 0) {
-        operationCount = body.length;
-        if (operationCount > MAX_BATCHED_OPERATIONS) {
-          const locale = await getLocale();
-          const tErrors = getServerTranslations(locale).errorsTranslations;
-          logger.warn(`GraphQL batched request rejected: ${operationCount} operations from ${identifier}`);
-          return NextResponse.json(
-            { errors: [{ message: tErrors.invalidRequestFormat, extensions: { code: "BAD_REQUEST" } }] },
-            { status: 400 }
-          );
-        }
-      }
-    } catch {
-      // malformed body — let Apollo handle it
-    }
+  const { rejection, operationCount } = await validateGraphqlRequestBody(request, identifier);
+  if (rejection) {
+    return rejection;
   }
 
   // Check rate limit

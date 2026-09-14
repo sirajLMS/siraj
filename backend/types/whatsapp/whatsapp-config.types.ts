@@ -11,7 +11,7 @@ import type { whatsappConfigs } from "@/backend/db/schema";
  * unmasked; API layers expose masked views instead.
  */
 export type WhatsappConfigSelectType = typeof whatsappConfigs.$inferSelect;
-export type WhatsappConfigInsertType = typeof whatsappConfigs.$inferInsert;
+type WhatsappConfigInsertType = typeof whatsappConfigs.$inferInsert;
 
 /**
  * Payload for creating/updating the configuration row from seeding or
@@ -19,6 +19,23 @@ export type WhatsappConfigInsertType = typeof whatsappConfigs.$inferInsert;
  * excluded — the driver applies their defaults on insert.
  */
 export type WhatsappConfigSeedInput = Omit<WhatsappConfigInsertType, "id" | "createdAt" | "updatedAt">;
+
+/**
+ * Per-field credential patch of the public GraphQL configuration mutation.
+ * Every field is optional and nullable, mirroring the schema exactly: a
+ * provided string is written (merged with the stored row), an explicit `null`
+ * clears the stored value, and an omitted field keeps its current value.
+ * Secrets are accepted in plaintext and encrypted at the driver boundary;
+ * they are never echoed back — the mutation returns the masked view instead.
+ */
+export type WhatsappConfigUpdateInput = Readonly<
+  Partial<
+    Pick<
+      typeof whatsappConfigs.$inferInsert,
+      "appId" | "appSecret" | "verifyToken" | "phoneNumberId" | "wabaId" | "accessToken" | "esConfigId"
+    >
+  >
+>;
 
 /**
  * Where the active credential values were resolved from. `"db"` means the

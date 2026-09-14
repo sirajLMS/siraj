@@ -1,8 +1,8 @@
 "use client";
 
-import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
-import { Box, CircularProgress, Link as MuiLink, Stack, Typography } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { BaseCard } from "@/frontend/common/components/ui";
+import { MeetingUrlCell, MeetingUrlStatusBadge } from "@/frontend/common/components/ui/display/meetingConfig";
 import type { MeetingConfigLinkedClassInstancesLabels } from "@/shared/locale/types/ui";
 
 // Design decision: instances are passed as props rather than fetched internally.
@@ -66,47 +66,28 @@ export function LinkedClassInstancesList({
 
   return (
     <Stack spacing={1} sx={{ maxHeight: 300, overflow: "auto" }}>
-      {instances.map(instance => (
-        <Stack
-          key={instance.id}
-          spacing={0.5}
-          sx={theme => ({
-            border: "1px solid",
-            borderColor: theme.palette.divider,
-            borderRadius: 1,
-            p: 1.5,
-          })}
-        >
-          <Typography sx={{ typography: "labelMd", fontWeight: 600 }}>
-            {instance.title || labels.classInstanceTitle}
-          </Typography>
-          {instance.startTime ? (
-            <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
-              {labels.startTime}: {formatStartTime(instance.startTime)}
-            </Typography>
-          ) : null}
-          {instance.meetingJoinUrl ? (
-            <MuiLink
-              href={instance.meetingJoinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                typography: "bodyMd",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.5,
-                textDecorationColor: "currentColor",
-                alignSelf: "flex-start",
-              }}
-            >
-              {labels.meetingUrl}
-              <OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />
-            </MuiLink>
-          ) : (
-            <StatusBadge category="syncStatus" status="pending" label={labels.urlPendingBadge} />
-          )}
-        </Stack>
-      ))}
+      {instances.map(instance => {
+        const joinUrl = instance.meetingJoinUrl;
+        return (
+          <BaseCard key={instance.id}>
+            <Stack spacing={0.75}>
+              <Typography sx={{ typography: "labelMd", fontWeight: 600 }}>
+                {instance.title || labels.classInstanceTitle}
+              </Typography>
+              {instance.startTime ? (
+                <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+                  {labels.startTime}: {formatStartTime(instance.startTime)}
+                </Typography>
+              ) : null}
+              {joinUrl ? (
+                <MeetingUrlCell meetingUrl={joinUrl} joinLabel={labels.meetingUrl} compact badgeSize="small" />
+              ) : (
+                <MeetingUrlStatusBadge status="pending" size="small" tooltip={labels.urlPendingBadge} />
+              )}
+            </Stack>
+          </BaseCard>
+        );
+      })}
     </Stack>
   );
 }

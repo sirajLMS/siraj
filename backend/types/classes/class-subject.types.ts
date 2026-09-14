@@ -2,6 +2,7 @@ import type { classSubjects, subjectResources } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export type ClassSubjectSelectType = typeof classSubjects.$inferSelect;
+export type ClassSubjectInsertType = typeof classSubjects.$inferInsert;
 
 export type ClassSubjectReturnType = Omit<ClassSubjectSelectType, "createdAt" | "updatedAt" | "deletedAt"> & {
   resources?: SubjectResourceReturnType[];

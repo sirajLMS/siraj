@@ -1,15 +1,12 @@
-// Auto-extracted from pothos/ (types-review R3-P3).
-// Mutation field registrations relocated to the mutation layer per mutation/AGENTS.md.
-
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   LeaveRequestPothosObject,
   RequestSessionCancelInputPothosObject,
   RequestSessionDelayInputPothosObject,
-} from "@/backend/graphql/pothos/scheduling/leave-request.pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { LeaveRequestService } from "@/backend/services/leave-request/leave-request.service";
+} from "@/backend/graphql/pothos";
+import { requireAuth } from "@/backend/graphql/utils";
+import { LeaveRequestService } from "@/backend/services";
 import type { LeaveRequestSelectType } from "@/backend/types";
 
 gqlSchemaBuilder.mutationField("requestSessionDelay", t =>

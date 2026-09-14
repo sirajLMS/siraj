@@ -11,6 +11,7 @@ import type {
   WhatsappConfigMaskedViewType,
   WhatsappConfigResolvedType,
   WhatsappConfigSource,
+  WhatsappConfigUpdateInput,
   WhatsappConnectionTestResult,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -159,45 +160,47 @@ export const WhatsappConnectionTestResultPothosObject = WhatsappConnectionTestRe
  * in plaintext and encrypted at the driver boundary; they are never echoed
  * back — the mutation returns the masked view instead.
  */
-export const WhatsappConfigUpdateInputPothosObject = gqlSchemaBuilder.inputType("WhatsappConfigUpdateInput", {
-  fields: t => ({
-    appId: t.string({
-      required: false,
-      description: "Meta app ID. Pass null to clear.",
-      directives: { constraint: { maxLength: 64 } },
+export const WhatsappConfigUpdateInputPothosObject = gqlSchemaBuilder
+  .inputRef<WhatsappConfigUpdateInput>("WhatsappConfigUpdateInput")
+  .implement({
+    fields: t => ({
+      appId: t.string({
+        required: false,
+        description: "Meta app ID. Pass null to clear.",
+        directives: { constraint: { maxLength: 64 } },
+      }),
+      appSecret: t.string({
+        required: false,
+        description: "Meta app secret (stored encrypted). Pass null to clear.",
+        // 512 mirrors the service-level cap for encrypted fields (the DB column
+        // is unbounded ciphertext text); it was previously 255, a verifyToken
+        // copy-paste that contradicted the accessToken cap.
+        directives: { constraint: { maxLength: 512 } },
+      }),
+      verifyToken: t.string({
+        required: false,
+        description: "Webhook verify token. Pass null to clear.",
+        directives: { constraint: { maxLength: 255 } },
+      }),
+      phoneNumberId: t.string({
+        required: false,
+        description: "Meta phone number ID. Pass null to clear.",
+        directives: { constraint: { maxLength: 64 } },
+      }),
+      wabaId: t.string({
+        required: false,
+        description: "WhatsApp Business Account ID. Pass null to clear.",
+        directives: { constraint: { maxLength: 64 } },
+      }),
+      accessToken: t.string({
+        required: false,
+        description: "Permanent access token (stored encrypted). Pass null to clear.",
+        directives: { constraint: { maxLength: 512 } },
+      }),
+      esConfigId: t.string({
+        required: false,
+        description: "Facebook Login for Business configuration ID. Pass null to clear.",
+        directives: { constraint: { maxLength: 64 } },
+      }),
     }),
-    appSecret: t.string({
-      required: false,
-      description: "Meta app secret (stored encrypted). Pass null to clear.",
-      // 512 mirrors the service-level cap for encrypted fields (the DB column
-      // is unbounded ciphertext text); it was previously 255, a verifyToken
-      // copy-paste that contradicted the accessToken cap.
-      directives: { constraint: { maxLength: 512 } },
-    }),
-    verifyToken: t.string({
-      required: false,
-      description: "Webhook verify token. Pass null to clear.",
-      directives: { constraint: { maxLength: 255 } },
-    }),
-    phoneNumberId: t.string({
-      required: false,
-      description: "Meta phone number ID. Pass null to clear.",
-      directives: { constraint: { maxLength: 64 } },
-    }),
-    wabaId: t.string({
-      required: false,
-      description: "WhatsApp Business Account ID. Pass null to clear.",
-      directives: { constraint: { maxLength: 64 } },
-    }),
-    accessToken: t.string({
-      required: false,
-      description: "Permanent access token (stored encrypted). Pass null to clear.",
-      directives: { constraint: { maxLength: 512 } },
-    }),
-    esConfigId: t.string({
-      required: false,
-      description: "Facebook Login for Business configuration ID. Pass null to clear.",
-      directives: { constraint: { maxLength: 64 } },
-    }),
-  }),
-});
+  });

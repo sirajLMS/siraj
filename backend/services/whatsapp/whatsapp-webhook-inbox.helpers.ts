@@ -35,7 +35,7 @@ const PREVIEW_MAX = 140;
 const UNKNOWN_MESSAGE_TYPE = "unknown";
 
 /** Meta Unix-seconds timestamp string → Date; anything else → null. */
-export function parseWebhookTimestamp(raw: unknown): Date | null {
+function parseWebhookTimestamp(raw: unknown): Date | null {
   if (typeof raw === "string" && /^\d{9,13}$/.test(raw)) {
     const ms = Number(raw) * 1000;
     const date = new Date(ms);
@@ -328,7 +328,7 @@ function isMutationType(type: unknown): boolean {
  * message is upserted directly with content — wamid keying makes either order
  * converge.
  */
-export async function ingestMediaFollowUps(
+async function ingestMediaFollowUps(
   account: WhatsappAccountReturnType,
   raw: unknown,
   direction: WhatsappMessageDirection
@@ -382,7 +382,7 @@ function followUpInboundPeer(raw: unknown): PeerIdentity {
  * timestamp). Unknown item shapes are skipped — Meta forwards exactly these
  * shapes, and anything unrecognized must not poison the event.
  */
-export function contactSyncActionOf(item: Record<string, unknown>): "add" | "remove" | null {
+function contactSyncActionOf(item: Record<string, unknown>): "add" | "remove" | null {
   if (item.action === "add" || item.action === "remove") {
     return item.action;
   }
@@ -453,7 +453,7 @@ export async function ingestStateSyncValue(
  * Ingest one echo record: revoke/edit mutate the original row; everything
  * else is a business-app send mirrored into the inbox (direction ECHO).
  */
-export async function ingestEchoMessage(
+async function ingestEchoMessage(
   account: WhatsappAccountReturnType,
   raw: Record<string, unknown>,
   contacts: Record<string, unknown>[]
@@ -621,7 +621,7 @@ export async function ingestHistoryValue(
  * Peer identity for an echo (business → user): the peer is the recipient
  * (`to` / `to_user_id`), enriched with the contacts[] username when present.
  */
-export function echoPeer(raw: Record<string, unknown>, usernames: Map<string, string>): PeerIdentity {
+function echoPeer(raw: Record<string, unknown>, usernames: Map<string, string>): PeerIdentity {
   const waId = toSafeString(raw.to) ?? null;
   const userId = toSafeString(raw.to_user_id) ?? null;
   const username = (waId ? usernames.get(waId) : undefined) ?? (userId ? usernames.get(userId) : undefined) ?? null;
@@ -629,7 +629,7 @@ export function echoPeer(raw: Record<string, unknown>, usernames: Map<string, st
 }
 
 /** Peer identity for an inbound (user → business) record: the sender. */
-export function inboundPeer(raw: Record<string, unknown>, usernames: Map<string, string>): PeerIdentity {
+function inboundPeer(raw: Record<string, unknown>, usernames: Map<string, string>): PeerIdentity {
   const waId = toSafeString(raw.from) ?? null;
   const userId = toSafeString(raw.from_user_id) ?? null;
   const username = (waId ? usernames.get(waId) : undefined) ?? (userId ? usernames.get(userId) : undefined) ?? null;
@@ -637,7 +637,7 @@ export function inboundPeer(raw: Record<string, unknown>, usernames: Map<string,
 }
 
 /** Map of wa_id/user_id → username from a webhook `contacts[]` array. */
-export function contactUsernameMap(rawContacts: unknown): Map<string, string> {
+function contactUsernameMap(rawContacts: unknown): Map<string, string> {
   const map = new Map<string, string>();
   if (!Array.isArray(rawContacts)) {
     return map;
@@ -661,7 +661,7 @@ export function contactUsernameMap(rawContacts: unknown): Map<string, string> {
 }
 
 /** Map of wa_id/user_id → display name from a webhook `contacts[]` array. */
-export function contactNameMap(rawContacts: unknown): Map<string, string> {
+function contactNameMap(rawContacts: unknown): Map<string, string> {
   const map = new Map<string, string>();
   if (!Array.isArray(rawContacts)) {
     return map;

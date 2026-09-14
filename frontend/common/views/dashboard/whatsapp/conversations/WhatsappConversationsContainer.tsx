@@ -25,5 +25,3 @@ export function WhatsappConversationsContainer() {
   const viewModel = useWhatsappConversationsViewModel();
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export default WhatsappConversationsContainer;

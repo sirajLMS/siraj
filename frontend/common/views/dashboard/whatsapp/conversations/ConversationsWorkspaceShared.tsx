@@ -1,8 +1,12 @@
 "use client";
 
 import { Box } from "@mui/material";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { ComposerShared } from "@/frontend/common/views/dashboard/whatsapp/conversations/ComposerShared";
-import { ConversationListShared } from "@/frontend/common/views/dashboard/whatsapp/conversations/ConversationListShared";
+import {
+  ConversationListShared,
+  type ConversationListShell,
+} from "@/frontend/common/views/dashboard/whatsapp/conversations/ConversationListShared";
 import { ConversationThreadPaneShared } from "@/frontend/common/views/dashboard/whatsapp/conversations/ConversationThreadPaneShared";
 import { TestNumberBanner } from "@/frontend/common/views/dashboard/whatsapp/conversations/TestNumberBanner";
 import { TestRecipientsPanel } from "@/frontend/common/views/dashboard/whatsapp/conversations/TestRecipientsPanel";
@@ -19,7 +23,10 @@ export function WhatsappConversationsBanner({ vm }: SharedViewModelProps) {
 }
 
 /** Account selector + search + conversation list with pagination. */
-export function WhatsappConversationsListBlock({ vm }: SharedViewModelProps) {
+export function WhatsappConversationsListBlock({
+  vm,
+  listShell,
+}: SharedViewModelProps & { readonly listShell: ConversationListShell }) {
   return (
     <ConversationListShared
       labels={vm.labelsBySection.list}
@@ -31,10 +38,13 @@ export function WhatsappConversationsListBlock({ vm }: SharedViewModelProps) {
       conversations={vm.conversations}
       loading={vm.conversationsLoading}
       selectedConversationId={vm.selectedConversation?.id ?? null}
-      totalCount={vm.conversationsTotalCount}
-      page={vm.conversationsPage}
-      pageSize={vm.conversationsPageSize}
-      onPageChange={vm.onConversationsPageChange}
+      paginationOptions={buildServerPaginationOptions({
+        page: vm.conversationsPage,
+        pageSize: vm.conversationsPageSize,
+        totalCount: vm.conversationsTotalCount,
+        onPageChange: vm.onConversationsPageChange,
+      })}
+      listShell={listShell}
       onSelectConversation={vm.onSelectConversation}
       formatTimestamp={vm.formatTimestamp}
       accountLabel={vm.accountLabel}

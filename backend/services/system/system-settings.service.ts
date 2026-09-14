@@ -6,7 +6,12 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
 import { getStorageService } from "@/backend/storage/storage.service";
-import type { CreateAuditLogInput, DBTransaction, SystemSettingSelectType } from "@/backend/types";
+import type {
+  CreateAuditLogInput,
+  DBTransaction,
+  SystemSettingSelectType,
+  SystemSettingUpsertInput,
+} from "@/backend/types";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -186,14 +191,6 @@ export namespace SystemSettingsService {
     return uploadHandbookWithConfig(userId, fileName, fileBuffer, tErrors, TEACHER_HANDBOOK_UPLOAD);
   }
 
-  export type SystemSettingUpsertInput = {
-    key: string;
-    value: string;
-    dataType?: SystemSettingDataType;
-    description: string;
-    category: SystemSettingCategory;
-  };
-
   export async function upsertManySettings(inputs: SystemSettingUpsertInput[], updatedByUserId: string | null = null) {
     return Promise.all(
       inputs.map(input =>
@@ -203,22 +200,6 @@ export namespace SystemSettingsService {
         })
       )
     );
-  }
-
-  /**
-   * Input for upserting a generic, non-env, non-handbook system setting via the
-   * Settings → General System Settings tab. `category` defaults to `"system"`
-   * at the repository layer.
-   */
-  interface GenericSettingUpsertInput {
-    /** System-setting key, e.g. `site_name`, `maintenance_mode`, `default_page_size`. */
-    key: string;
-    /** String value — DB stores all settings as strings; the UI casts for display. */
-    value: string;
-    dataType?: SystemSettingDataType;
-    description?: string;
-    /** Defaults to `SystemSettingCategory.System` at the repo layer. Stage-3 owns `env::*` and FX uses `SystemSettingCategory.Billing`. */
-    category?: SystemSettingCategory;
   }
 
   /**
@@ -328,7 +309,7 @@ export namespace SystemSettingsService {
    * - Emits a best-effort audit log (`action: "UPSERT"`).
    */
   export async function upsertGenericSetting(
-    input: GenericSettingUpsertInput,
+    input: SystemSettingUpsertInput,
     actorUserId: string,
     tErrors: ErrorsLabels,
     tx?: DBTransaction

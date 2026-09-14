@@ -25,5 +25,3 @@ export function WhatsappGroupsContainer() {
   const viewModel = useWhatsappGroupsViewModel();
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
-
-export default WhatsappGroupsContainer;

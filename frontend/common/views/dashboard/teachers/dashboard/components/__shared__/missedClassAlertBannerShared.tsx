@@ -1,17 +1,13 @@
 "use client";
 
-import { WarningAmberOutlined } from "@mui/icons-material";
+import { CloseOutlined, WarningAmberOutlined } from "@mui/icons-material";
 import { Alert, Box, Typography } from "@mui/material";
-import type { ComponentType, ReactNode } from "react";
+import type { ReactNode } from "react";
+import { TooltipIconButton } from "@/frontend/common/components/ui";
 import type { MissedClassAlertBannerProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
-
-interface MissedClassAlertBannerSharedSlots {
-  readonly DismissButton: ComponentType<{ readonly onDismiss: () => void; readonly ariaLabel: string }>;
-}
 
 export interface MissedClassAlertBannerSharedProps extends MissedClassAlertBannerProps {
   readonly onDismiss?: () => void;
-  readonly slots: MissedClassAlertBannerSharedSlots;
 }
 
 interface MissedClassAlertBannerContentProps {
@@ -63,17 +59,24 @@ export function MissedClassAlertBannerShared({
   labels,
   fixed = false,
   onDismiss,
-  slots,
 }: Readonly<MissedClassAlertBannerSharedProps>) {
   const description = labels.description(alert.scheduledTime);
-  const { DismissButton } = slots;
 
   return (
     <MissedClassAlertBannerContent
       title={labels.title}
       description={description}
       fixed={fixed}
-      action={onDismiss ? <DismissButton onDismiss={onDismiss} ariaLabel={labels.title} /> : undefined}
+      action={
+        onDismiss ? (
+          <TooltipIconButton
+            label={labels.title}
+            onClick={onDismiss}
+            icon={<CloseOutlined fontSize="small" />}
+            sx={theme => ({ color: theme.palette.error.main })}
+          />
+        ) : undefined
+      }
     />
   );
 }

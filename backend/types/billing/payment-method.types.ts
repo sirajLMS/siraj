@@ -98,6 +98,60 @@ export type UserPaymentMethodReturnType = Omit<UserPaymentMethodSelectType, "typ
   direction: PaymentDirection;
 };
 
+/**
+ * Public (GraphQL) projection of `PaymentMethodDetails`.
+ *
+ * Sensitive identifier fields (iban, accountNumber, routingNumber, phone, url,
+ * identifier) reach this boundary only in masked form — the service layer
+ * applies `buildMaskedPaymentMethod` / `buildMaskedTransactionSnapshot` before
+ * rows are returned to callers, and raw/encrypted values never surface here.
+ */
+export type PaymentMethodDetailsPublicReturnType = {
+  readonly walletId?: string;
+  readonly phone?: string;
+  readonly paymentLinkId?: string;
+  readonly url?: string;
+  readonly onlineAccountId?: string;
+  readonly identifier?: string;
+  readonly iban?: string;
+  readonly bankName?: string;
+  readonly beneficiaryName?: string;
+  readonly swiftBic?: string;
+  readonly accountNumber?: string;
+  readonly routingNumber?: string;
+  readonly note?: string;
+};
+
+/**
+ * Public (GraphQL) DTO for `user_payment_methods`, bound directly by the
+ * Pothos `UserPaymentMethod` object so the GraphQL surface cannot expose
+ * raw payment detail credentials — only the masked details projection above.
+ */
+export type UserPaymentMethodPublicReturnType = Omit<UserPaymentMethodReturnType, "details"> & {
+  readonly details: PaymentMethodDetailsPublicReturnType;
+};
+
+/**
+ * GraphQL input shape for payment-method details — mirrors the nullable
+ * `PaymentMethodDetailsInput` Pothos input. Null/undefined fields are omitted
+ * when normalizing into the JSONB `PaymentMethodDetails` union.
+ */
+export type PaymentMethodDetailsInputType = {
+  readonly walletId?: string | null;
+  readonly phone?: string | null;
+  readonly paymentLinkId?: string | null;
+  readonly url?: string | null;
+  readonly onlineAccountId?: string | null;
+  readonly identifier?: string | null;
+  readonly iban?: string | null;
+  readonly bankName?: string | null;
+  readonly beneficiaryName?: string | null;
+  readonly swiftBic?: string | null;
+  readonly accountNumber?: string | null;
+  readonly routingNumber?: string | null;
+  readonly note?: string | null;
+};
+
 export type UserPaymentMethodSubmitInput = Omit<
   UserPaymentMethodInsertType,
   "id" | "createdAt" | "updatedAt" | "verifiedAt" | "verifiedByUserId" | "type" | "direction"
@@ -155,7 +209,7 @@ export type PaymentMethodDefaults = {
 // ---------------------------------------------------------------------------
 
 export type SupportedMobileWalletSelectType = typeof supportedMobileWallets.$inferSelect;
-type SupportedMobileWalletInsertType = typeof supportedMobileWallets.$inferInsert;
+export type SupportedMobileWalletInsertType = typeof supportedMobileWallets.$inferInsert;
 
 export type SupportedMobileWalletReturnType = Omit<SupportedMobileWalletSelectType, "supportedDirections"> & {
   supportedDirections: PaymentDirection;
@@ -175,7 +229,7 @@ export type UpdateSupportedMobileWalletInput = Partial<SupportedMobileWalletSubm
 // ---------------------------------------------------------------------------
 
 export type SupportedPaymentLinkSelectType = typeof supportedPaymentLinks.$inferSelect;
-type SupportedPaymentLinkInsertType = typeof supportedPaymentLinks.$inferInsert;
+export type SupportedPaymentLinkInsertType = typeof supportedPaymentLinks.$inferInsert;
 
 export type SupportedPaymentLinkReturnType = Omit<SupportedPaymentLinkSelectType, "supportedDirections"> & {
   supportedDirections: PaymentDirection;
@@ -195,7 +249,7 @@ export type UpdateSupportedPaymentLinkInput = Partial<SupportedPaymentLinkSubmit
 // ---------------------------------------------------------------------------
 
 export type SupportedOnlineAccountSelectType = typeof supportedOnlineAccounts.$inferSelect;
-type SupportedOnlineAccountInsertType = typeof supportedOnlineAccounts.$inferInsert;
+export type SupportedOnlineAccountInsertType = typeof supportedOnlineAccounts.$inferInsert;
 
 export type SupportedOnlineAccountReturnType = Omit<
   SupportedOnlineAccountSelectType,

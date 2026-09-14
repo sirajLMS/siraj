@@ -9,7 +9,7 @@
 export type EmbeddedSignupPhase = "idle" | "waiting" | "submitting" | "success" | "cancelled" | "error";
 
 /** `authResponse` slice returned by the FB.login callback when a code is granted. */
-export interface FbLoginAuthResponse {
+interface FbLoginAuthResponse {
   readonly code?: string;
 }
 

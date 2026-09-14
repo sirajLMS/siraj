@@ -13,6 +13,8 @@ export interface SessionAuditLabels {
     readonly statusPlaceholder: string;
     readonly search: string;
     readonly clear: string;
+    /** Tooltip and aria-label of the per-field clear affordance on the search input. */
+    readonly clearSearch: string;
   };
   readonly column: {
     readonly scheduledStart: string;

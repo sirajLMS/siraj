@@ -4,13 +4,14 @@ import {
   PaymentPothosObject,
   TeacherPaymentPothosObject,
 } from "@/backend/graphql/pothos/billing/billing-payments.pothos";
-import {
-  resolveDisplayAmountFields,
-  setBillingFxDisplayCurrencyForInvoiceParent,
-} from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PaymentMethodService, PermissionsService } from "@/backend/services";
+import {
+  PaymentMethodService,
+  PermissionsService,
+  resolveDisplayAmountFields,
+  setBillingFxDisplayCurrencyForInvoiceParent,
+} from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("recordPayment", t =>
   t.field({

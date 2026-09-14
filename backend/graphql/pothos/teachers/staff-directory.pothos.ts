@@ -3,7 +3,6 @@ import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-d
 import { AccountStatusPothosObject, CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
-  DisplayAmountReturnType,
   ManagerDirectoryMetrics,
   ManagerDirectoryResult,
   ManagerDirectoryRow,
@@ -90,8 +89,7 @@ export const ManagerDirectoryRowPothosObject = ManagerDirectoryRowRef.implement(
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: (parent: ManagerDirectoryRow & { displayAmount?: DisplayAmountReturnType | null }) =>
-        parent.displayAmount ?? null,
+      resolve: (parent: ManagerDirectoryRow) => parent.displayAmount ?? null,
     }),
   }),
 });

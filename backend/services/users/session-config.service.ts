@@ -36,6 +36,7 @@ import type {
   DBTransaction,
   SessionConfigSelectType,
   SessionConfigUpsertInput,
+  SessionConfigValidationErrorCode,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -47,12 +48,6 @@ const TTL_SECONDS_MAX = 604800 * 4;
 const MAX_CONCURRENT_MIN = 1;
 /** Maximum allowed concurrent-session cap. */
 const MAX_CONCURRENT_MAX = 50;
-
-/** Discriminator for typed service validation errors (machine-readable). */
-export type SessionConfigValidationErrorCode =
-  | "ETTL_OUT_OF_RANGE"
-  | "EMAX_CONCURRENT_OUT_OF_RANGE"
-  | "EROLE_NAME_REQUIRED";
 
 /**
  * Typed error thrown by the session-config service when input validation fails.

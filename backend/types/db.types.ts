@@ -12,3 +12,10 @@ export type DBTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
  * - NeonHttpDatabase (HTTP client for stateless reads)
  */
 export type DBQueryExecutor = DBTransaction | typeof db | NeonHttpDatabase<typeof relations>;
+
+/**
+ * Read-side query executor: either an open transaction or the pooled
+ * connection. Repository read methods treat both members interchangeably;
+ * services accept this union for optional `tx` parameters on read paths.
+ */
+export type ReadExecutor = DBTransaction | typeof db;

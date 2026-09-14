@@ -1,10 +1,8 @@
-// Auto-extracted from pothos/ (types-review R3-P3).
-// Query field registrations relocated to the query layer per query/AGENTS.md.
-
 import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { RecurringSchedulesPaginatedResultRef } from "@/backend/graphql/pothos/scheduling/recurring-schedule.pothos";
+import { RecurringSchedulesPaginatedResultRef } from "@/backend/graphql/pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { RecurringScheduleDetailService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("recurringSchedules", t =>
   t.field({
@@ -17,10 +15,6 @@ gqlSchemaBuilder.queryField("recurringSchedules", t =>
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
       const userId = requireUserId(ctx);
-
-      const { RecurringScheduleDetailService } = await import(
-        "@/backend/services/schedule/recurring-schedule-detail.service"
-      );
 
       const page = args.pagination?.page ?? 1;
       const pageSize = args.pagination?.first ?? 20;

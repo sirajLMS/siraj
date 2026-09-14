@@ -2,7 +2,7 @@
 
 import { Box, type Theme, Typography } from "@mui/material";
 
-export type ScheduleLegendSwatchSpec =
+type ScheduleLegendSwatchSpec =
   | { readonly kind: "dot"; readonly color: (theme: Theme) => string }
   | { readonly kind: "filled"; readonly color: (theme: Theme) => string }
   | { readonly kind: "outlined" };

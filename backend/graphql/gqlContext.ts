@@ -15,8 +15,8 @@ export type BaseContext = {
     | undefined;
   /**
    * The full user record from `findSafeById`, with `password` and
-   * `rememberTokenHash` stripped (R4-34). Populated in `createContext` so the
-   * `Query.me` resolver can avoid a redundant `UserService.findById` call (R3-8).
+   * `rememberTokenHash` stripped. Populated in `createContext` so the
+   * `Query.me` resolver can avoid a redundant `UserService.findById` call.
    * `null` when the user was not found; `undefined` when no `userId` was provided.
    */
   safeUser: SanitizedUserSelectType | null | undefined;
@@ -103,8 +103,11 @@ export async function createContext({
 
   const safeUser = await UserService.findSafeById(userId);
 
-  // R4-34: Strip password and rememberTokenHash before storing on the context.
-  const safeUserForContext = safeUser ? { ...safeUser, password: undefined, rememberTokenHash: undefined } : null;
+  // Strip password and rememberTokenHash before storing on the context; the
+  // sanitized type rejects any real value for these credential fields.
+  const safeUserForContext = safeUser
+    ? ({ ...safeUser, password: undefined, rememberTokenHash: undefined } satisfies SanitizedUserSelectType)
+    : null;
 
   return {
     user: { id: userId, displayCurrency: safeUser?.displayCurrency ?? null },

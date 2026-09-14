@@ -53,6 +53,7 @@ function renderView() {
       labels={labels}
       metrics={null}
       rows={[]}
+      loading={false}
       totalTeachers={0}
       page={0}
       pageSize={10}

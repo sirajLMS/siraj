@@ -1,4 +1,4 @@
-export * from "./appearance.types";
+export * from "./appearance";
 export * from "./audit";
 export * from "./auth";
 export * from "./billing";

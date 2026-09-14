@@ -1,11 +1,12 @@
 import { OrderSortDirection } from "@/backend/enum";
-import { StudentsOrderByColumn } from "@/backend/enum/students";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { PothosInputFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import {
   AppLanguagePothosObject,
   GenderPothosObject,
   OrderSortDirectionPothosObject,
   StudentStatusPothosObject,
+  StudentsOrderByColumnPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { StudentManagementService } from "@/backend/services";
@@ -28,11 +29,7 @@ export function getDateField(value: unknown, field: string): Date | null {
   return v instanceof Date ? v : null;
 }
 
-export type InputFieldBuilder = Parameters<
-  NonNullable<Parameters<ReturnType<typeof gqlSchemaBuilder.inputRef<StudentCreateInput>>["implement"]>[0]["fields"]>
->[0];
-
-export function optionalStudentInputFields(t: InputFieldBuilder) {
+export function optionalStudentInputFields(t: PothosInputFieldBuilder) {
   return {
     primaryTeacherId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     dateOfBirth: t.field({ type: "DateTime", required: false }),
@@ -178,10 +175,6 @@ export const StudentFilterArgsPothosObject = gqlSchemaBuilder
       birthDateIsNotEmpty: t.boolean(),
     }),
   });
-
-export const StudentsOrderByColumnPothosObject = gqlSchemaBuilder.enumType(StudentsOrderByColumn, {
-  name: "StudentsOrderByColumn",
-});
 
 export const StudentsOrderByClausePothosObject = gqlSchemaBuilder
   .inputRef<StudentsOrderByClause>("StudentsOrderByClause")

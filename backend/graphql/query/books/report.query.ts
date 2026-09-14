@@ -3,9 +3,8 @@
 
 import { GraphQLError } from "graphql";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { resolveDisplayAmountFields } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { AttendanceReportFiltersInput, AttendanceReportPayloadObj } from "@/backend/graphql/pothos/books/report.pothos";
-import { ReportService } from "@/backend/services";
+import { ReportService, resolveDisplayAmountFields } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("generateAttendanceReport", t =>
   t.field({

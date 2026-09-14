@@ -14,7 +14,7 @@ import type { SessionAuditLabels } from "@/shared/locale/types/dashboard/reports
  * payroll calculation status: a row counts as paid only once its teacher
  * compensation has been fully settled.
  */
-export interface SessionAuditPaidRowCounts {
+interface SessionAuditPaidRowCounts {
   readonly paid: number;
   readonly unpaid: number;
 }

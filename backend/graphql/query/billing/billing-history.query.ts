@@ -12,14 +12,14 @@ import {
   prepareParentScopedResolver,
   StudentCreditRowPothosObject,
 } from "@/backend/graphql/pothos/billing/billing-history.pothos";
-import {
-  populateBillingFxDisplayCurrencyByUserId,
-  resolveDisplayAmountFields,
-} from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { BillingHistoryService } from "@/backend/services";
+import {
+  BillingHistoryService,
+  populateBillingFxDisplayCurrencyByUserId,
+  resolveDisplayAmountFields,
+} from "@/backend/services";
 
 gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
   t.field({

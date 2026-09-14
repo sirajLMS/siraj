@@ -15,7 +15,7 @@ import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type ClassDetailsToolbarViewMode = "teacher" | "parent" | "admin" | "student";
+type ClassDetailsToolbarViewMode = "teacher" | "parent" | "admin" | "student";
 
 export interface ClassDetailsToolbarAreaProps {
   readonly instance: ClassInstance;

@@ -12,12 +12,8 @@ import {
 import {
   Box,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
   IconButton,
   Skeleton,
@@ -25,7 +21,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
+import { BaseFormDialogSection } from "@/frontend/common/components/ui/dialog/BaseFormDialogSection";
+import { FilterChip } from "@/frontend/common/components/ui/filter";
 import type {
   WhatsappGroupJoinRequestRow,
   WhatsappGroupRow,
@@ -264,60 +263,6 @@ function ParticipantsBlock({ labels, canManage, group, onAskRemove }: Readonly<P
   );
 }
 
-interface RemoveParticipantDialogProps {
-  readonly labels: WhatsappGroupsDetailLabels;
-  readonly cancelLabel: string;
-  readonly open: boolean;
-  readonly removing: boolean;
-  readonly waId: string;
-  readonly valid: boolean;
-  readonly onWaIdChange: (value: string) => void;
-  readonly onClose: () => void;
-  readonly onConfirm: () => void;
-}
-
-function RemoveParticipantDialog({
-  labels,
-  cancelLabel,
-  open,
-  removing,
-  waId,
-  valid,
-  onWaIdChange,
-  onClose,
-  onConfirm,
-}: Readonly<RemoveParticipantDialogProps>) {
-  return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" aria-labelledby="remove-participant-dialog">
-      <DialogTitle id="remove-participant-dialog">{labels.removeParticipant}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={2}>
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-            {labels.removeParticipantConfirm}
-          </Typography>
-          <TextField
-            size="small"
-            label={labels.participantsTitle}
-            value={waId}
-            onChange={event => onWaIdChange(event.target.value)}
-            slotProps={{ htmlInput: { dir: "ltr" } }}
-            aria-invalid={!valid}
-            fullWidth
-          />
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button color="inherit" onClick={onClose} disabled={removing}>
-          {cancelLabel}
-        </Button>
-        <Button variant="contained" color="error" onClick={onConfirm} disabled={removing || !valid}>
-          {labels.removeParticipant}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
-
 interface GroupInfoHeaderProps {
   readonly labels: WhatsappGroupsDetailLabels;
   readonly canManage: boolean;
@@ -354,11 +299,11 @@ function GroupInfoHeader({
         )}
         <Stack direction="row" spacing={0.75} sx={{ mt: 0.5, flexWrap: "wrap", alignItems: "center" }}>
           {group.suspended ? (
-            <Chip size="small" color="error" label={labels.suspendedBadge} />
+            <StatusBadge category="syncStatus" status="failed" label={labels.suspendedBadge} />
           ) : (
-            <Chip size="small" color="success" label={labels.activeBadge} />
+            <StatusBadge category="syncStatus" status="success" label={labels.activeBadge} />
           )}
-          <Chip size="small" variant="outlined" label={approvalModeLabel} />
+          <FilterChip label={approvalModeLabel} />
           <Typography variant="caption" sx={{ color: theme => theme.palette.text.secondary }}>
             {withDate(labels.createdAtLabel, formatTimestamp(group.createdAt))}
           </Typography>
@@ -380,46 +325,6 @@ function GroupInfoHeader({
         )}
       </Stack>
     </Stack>
-  );
-}
-
-interface ResetInviteLinkDialogProps {
-  readonly labels: WhatsappGroupsDetailLabels;
-  readonly cancelLabel: string;
-  readonly open: boolean;
-  readonly resetting: boolean;
-  readonly onClose: () => void;
-  readonly onConfirm: () => void;
-}
-
-function ResetInviteLinkDialog({
-  labels,
-  cancelLabel,
-  open,
-  resetting,
-  onClose,
-  onConfirm,
-}: Readonly<ResetInviteLinkDialogProps>) {
-  return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" aria-labelledby="reset-invite-link-dialog">
-      <DialogTitle id="reset-invite-link-dialog">{labels.resetInviteLink}</DialogTitle>
-      <DialogContent>
-        <Stack spacing={1}>
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.warning.main }}>
-            {labels.resetInviteLinkWarning}
-          </Typography>
-          <Typography variant="bodyMd">{labels.resetInviteLinkConfirm}</Typography>
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button color="inherit" onClick={onClose} disabled={resetting}>
-          {cancelLabel}
-        </Button>
-        <Button variant="contained" color="error" onClick={onConfirm} disabled={resetting}>
-          {labels.resetInviteLink}
-        </Button>
-      </DialogActions>
-    </Dialog>
   );
 }
 
@@ -545,17 +450,38 @@ function DetailDialogs({
 }: Readonly<DetailDialogsProps>) {
   return (
     <>
-      <RemoveParticipantDialog
-        labels={labels}
-        cancelLabel={commonLabels.cancel}
+      <Dialog
         open={removeParticipantOpen}
-        removing={removingParticipant}
-        waId={removeParticipantWaId}
-        valid={removeParticipantValid}
-        onWaIdChange={onRemoveParticipantWaIdChange}
         onClose={onCloseRemoveParticipant}
-        onConfirm={onConfirmRemoveParticipant}
-      />
+        fullWidth
+        maxWidth="xs"
+        aria-labelledby="remove-participant-dialog"
+      >
+        <BaseFormDialogSection
+          title={labels.removeParticipant}
+          titleId="remove-participant-dialog"
+          onClose={onCloseRemoveParticipant}
+          onConfirm={onConfirmRemoveParticipant}
+          isLoading={removingParticipant}
+          cancelLabel={commonLabels.cancel}
+          confirmLabel={labels.removeParticipant}
+        >
+          <Stack spacing={2}>
+            <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+              {labels.removeParticipantConfirm}
+            </Typography>
+            <TextField
+              size="small"
+              label={labels.participantsTitle}
+              value={removeParticipantWaId}
+              onChange={event => onRemoveParticipantWaIdChange(event.target.value)}
+              slotProps={{ htmlInput: { dir: "ltr" } }}
+              aria-invalid={!removeParticipantValid}
+              fullWidth
+            />
+          </Stack>
+        </BaseFormDialogSection>
+      </Dialog>
       <BaseDeleteDialog
         open={deleteOpen}
         onClose={onCloseDelete}
@@ -565,25 +491,60 @@ function DetailDialogs({
         body={labels.deleteGroupWarning}
         cancelLabel={commonLabels.cancel}
         confirmLabel={labels.deleteGroupConfirm}
+        dialogId="delete-group-dialog"
       />
-      <ResetInviteLinkDialog
-        labels={labels}
-        cancelLabel={commonLabels.cancel}
+      <BaseDeleteDialog
         open={resetOpen}
-        resetting={resetting}
         onClose={onCloseReset}
         onConfirm={onConfirmReset}
-      />
+        isLoading={resetting}
+        title={labels.resetInviteLink}
+        body={labels.resetInviteLinkWarning}
+        cancelLabel={commonLabels.cancel}
+        confirmLabel={labels.resetInviteLink}
+        dialogId="reset-invite-link-dialog"
+      >
+        {labels.resetInviteLinkConfirm}
+      </BaseDeleteDialog>
     </>
+  );
+}
+
+function DetailLoadingState() {
+  return (
+    <Stack spacing={2} sx={{ p: 2 }} aria-busy>
+      <Skeleton variant="rounded" height={48} />
+      <Skeleton variant="rounded" height={32} />
+      <Skeleton variant="rounded" height={96} />
+    </Stack>
+  );
+}
+
+interface DetailErrorStateProps {
+  readonly labels: WhatsappGroupsDetailLabels;
+  readonly onRefresh: () => void;
+}
+
+function DetailErrorState({ labels, onRefresh }: Readonly<DetailErrorStateProps>) {
+  return (
+    <Stack spacing={1.5} sx={{ p: 2, alignItems: "center", textAlign: "center", py: 6 }}>
+      <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
+        {labels.errorGeneric}
+      </Typography>
+      <Button size="small" startIcon={<RefreshOutlined />} onClick={onRefresh}>
+        {labels.refresh}
+      </Button>
+    </Stack>
   );
 }
 
 /**
  * Group detail panel for the `/whatsapp` groups workspace: info header with
- * sync/approval chips, invite-link block (copy + reset), pending join-request
- * review (approve/reject per request), participant rollup with the
- * remove-participant dialog, and the delete-group confirmation. The message
- * thread renders through the `children` slot below the management blocks.
+ * the sync status badge and approval filter chip, invite-link block (copy +
+ * reset), pending join-request review (approve/reject per request),
+ * participant rollup with the remove-participant dialog, and the
+ * delete-group confirmation. The message thread renders through the
+ * `children` slot below the management blocks.
  */
 export function GroupDetailShared({
   labels,
@@ -624,24 +585,9 @@ export function GroupDetailShared({
 }: Readonly<GroupDetailSharedProps>) {
   let body: React.ReactNode;
   if (loading) {
-    body = (
-      <Stack spacing={2} sx={{ p: 2 }} aria-busy>
-        <Skeleton variant="rounded" height={48} />
-        <Skeleton variant="rounded" height={32} />
-        <Skeleton variant="rounded" height={96} />
-      </Stack>
-    );
+    body = <DetailLoadingState />;
   } else if (error) {
-    body = (
-      <Stack spacing={1.5} sx={{ p: 2, alignItems: "center", textAlign: "center", py: 6 }}>
-        <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
-          {labels.errorGeneric}
-        </Typography>
-        <Button size="small" startIcon={<RefreshOutlined />} onClick={onRefresh}>
-          {labels.refresh}
-        </Button>
-      </Stack>
-    );
+    body = <DetailErrorState labels={labels} onRefresh={onRefresh} />;
   } else if (group) {
     body = (
       <DetailLoadedBody

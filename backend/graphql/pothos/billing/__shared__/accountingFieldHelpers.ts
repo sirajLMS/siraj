@@ -1,14 +1,9 @@
-import type { ObjectFieldBuilder } from "@pothos/core";
-import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { PothosObjectFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { PaymentGatewayPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { AccountingPaymentReturnType, PackagePlanSelectType } from "@/backend/types";
 
-type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
-type PackagePlanFieldBuilder = ObjectFieldBuilder<BuilderTypes, PackagePlanSelectType>;
-type AccountingPaymentFieldBuilder = ObjectFieldBuilder<BuilderTypes, AccountingPaymentReturnType>;
-
 /** Shared field map for the PackagePlan object (catalog views). */
-export function packagePlanFields(t: PackagePlanFieldBuilder) {
+export function packagePlanFields(t: PothosObjectFieldBuilder<PackagePlanSelectType>) {
   return {
     id: t.exposeString("id"),
     codename: t.exposeString("codename"),
@@ -27,7 +22,7 @@ export function packagePlanFields(t: PackagePlanFieldBuilder) {
 }
 
 /** Shared field map for the AccountingPayment object (list/detail views). */
-export function accountingPaymentFields(t: AccountingPaymentFieldBuilder) {
+export function accountingPaymentFields(t: PothosObjectFieldBuilder<AccountingPaymentReturnType>) {
   return {
     id: t.exposeString("id"),
     invoiceId: t.exposeString("invoiceId"),

@@ -20,7 +20,7 @@ import type {
  */
 
 /** Exact-replay dedupe horizon: identical body hashes inside this window are acked without re-inserting. */
-export const WEBHOOK_REPLAY_WINDOW_MS = 5 * 60 * 1000;
+const WEBHOOK_REPLAY_WINDOW_MS = 5 * 60 * 1000;
 
 /**
  * Meta usually delivers a single change per POST but documents bursts up to
@@ -54,7 +54,7 @@ export function isValidWamid(wamid: unknown): wamid is string {
  * The stored payload keeps the raw `value`, the change field name, and the
  * owning entry's WABA id so the worker can re-dispatch without the envelope.
  */
-export function collectEventRows(body: unknown, payloadHash: string): WhatsappWebhookEventInsertType[] {
+function collectEventRows(body: unknown, payloadHash: string): WhatsappWebhookEventInsertType[] {
   if (!isRecord(body) || !Array.isArray(body.entry)) {
     return [];
   }

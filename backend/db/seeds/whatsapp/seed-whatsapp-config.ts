@@ -10,7 +10,7 @@ import type { WhatsappConfigSeedInput, WhatsappConfigSelectType } from "@/backen
  * Persists a configuration row and returns the stored entity. Wired by the
  * master controller to the WhatsApp config service bootstrap method.
  */
-export type WhatsappConfigSeedPersist = (input: WhatsappConfigSeedInput) => Promise<WhatsappConfigSelectType>;
+type WhatsappConfigSeedPersist = (input: WhatsappConfigSeedInput) => Promise<WhatsappConfigSelectType>;
 
 export interface WhatsappConfigSeedOptions {
   /** Admin attributed as the initial editor of the row. */

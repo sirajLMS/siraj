@@ -15,6 +15,10 @@ import type {
   WhatsappGroupParticipantReturnType,
   WhatsappGroupReturnType,
   WhatsappGroupsPaginatedResult,
+  WhatsappJoinRequestErrorType,
+  WhatsappJoinRequestFailureType,
+  WhatsappRemoveParticipantErrorType,
+  WhatsappRemoveParticipantFailureType,
 } from "@/backend/types";
 
 /**
@@ -124,10 +128,9 @@ export const WhatsappGroupMessagesResultPothosObject = WhatsappGroupMessagesResu
 
 // ─── Outcome wrappers ────────────────────────────────────────────────────────
 
-const WhatsappJoinRequestErrorRef = gqlSchemaBuilder.objectRef<{
-  readonly code?: number;
-  readonly message?: string;
-}>("WhatsappJoinRequestError");
+const WhatsappJoinRequestErrorRef = gqlSchemaBuilder.objectRef<WhatsappJoinRequestErrorType>(
+  "WhatsappJoinRequestError"
+);
 
 export const WhatsappJoinRequestErrorPothosObject = WhatsappJoinRequestErrorRef.implement({
   fields: t => ({
@@ -136,13 +139,9 @@ export const WhatsappJoinRequestErrorPothosObject = WhatsappJoinRequestErrorRef.
   }),
 });
 
-const WhatsappJoinRequestFailureRef = gqlSchemaBuilder.objectRef<{
-  readonly joinRequestId: string;
-  readonly errors: readonly {
-    readonly code?: number;
-    readonly message?: string;
-  }[];
-}>("WhatsappJoinRequestFailure");
+const WhatsappJoinRequestFailureRef = gqlSchemaBuilder.objectRef<WhatsappJoinRequestFailureType>(
+  "WhatsappJoinRequestFailure"
+);
 
 export const WhatsappJoinRequestFailurePothosObject = WhatsappJoinRequestFailureRef.implement({
   fields: t => ({
@@ -163,10 +162,9 @@ export const WhatsappJoinRequestsOutcomePothosObject = WhatsappJoinRequestsOutco
   }),
 });
 
-const WhatsappRemoveParticipantErrorRef = gqlSchemaBuilder.objectRef<{
-  readonly code?: number;
-  readonly message?: string;
-}>("WhatsappRemoveParticipantError");
+const WhatsappRemoveParticipantErrorRef = gqlSchemaBuilder.objectRef<WhatsappRemoveParticipantErrorType>(
+  "WhatsappRemoveParticipantError"
+);
 
 export const WhatsappRemoveParticipantErrorPothosObject = WhatsappRemoveParticipantErrorRef.implement({
   fields: t => ({
@@ -175,13 +173,9 @@ export const WhatsappRemoveParticipantErrorPothosObject = WhatsappRemoveParticip
   }),
 });
 
-const WhatsappRemoveParticipantFailureRef = gqlSchemaBuilder.objectRef<{
-  readonly input: string;
-  readonly errors: readonly {
-    readonly code?: number;
-    readonly message?: string;
-  }[];
-}>("WhatsappRemoveParticipantFailure");
+const WhatsappRemoveParticipantFailureRef = gqlSchemaBuilder.objectRef<WhatsappRemoveParticipantFailureType>(
+  "WhatsappRemoveParticipantFailure"
+);
 
 export const WhatsappRemoveParticipantFailurePothosObject = WhatsappRemoveParticipantFailureRef.implement({
   fields: t => ({

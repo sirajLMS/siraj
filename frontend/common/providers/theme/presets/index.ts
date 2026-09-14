@@ -23,7 +23,7 @@
  * base MUI palette modules) so the catalog imports cleanly from the
  * `ThemeProvider` tree without crossing module boundaries.
  */
-import type { PerModeColors } from "@/backend/types/appearance.types";
+import type { PerModeColors } from "@/backend/types";
 
 /**
  * Identifier union for the six built-in preset themes.

@@ -1,11 +1,17 @@
 "use client";
 
 import { FileDownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { IconButton, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { ExportButton, PersonProfileLinkCell, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
+import {
+  ExportButton,
+  PersonProfileLinkCell,
+  SectionPanel,
+  StatusBadge,
+  TooltipIconButton,
+} from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import {
   GroupClassAttendanceStatus,
@@ -35,10 +41,6 @@ interface RegisteredStudentsSectionProps {
 
 const StyledStudentIdText = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurfaceVariant,
-}));
-
-const StyledViewActionButton = styled(IconButton)(({ theme }) => ({
-  color: theme.palette.primary.main,
 }));
 
 function getAttendanceChipProps(
@@ -116,17 +118,16 @@ export function RegisteredStudentsSection({
         align: "right",
         headerAlign: "center",
         renderCell: ({ row }) => (
-          <StyledViewActionButton
-            size="small"
+          <TooltipIconButton
+            label={labels.viewStudentAriaLabel(row.name ?? "")}
+            icon={<VisibilityOutlined fontSize="small" />}
+            color="primary"
             onClick={() => {
               if (row.id) {
                 onViewStudent(row.id);
               }
             }}
-            aria-label={labels.viewStudentAriaLabel(row.name ?? "")}
-          >
-            <VisibilityOutlined fontSize="small" />
-          </StyledViewActionButton>
+          />
         ),
       },
     ],

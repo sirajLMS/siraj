@@ -13,6 +13,7 @@ export const dashboardReportsSessionAuditAr: SessionAuditLabels = {
     statusPlaceholder: "جميع الحالات",
     search: "ابحث عن معلم / طالب",
     clear: "مسح الفلاتر",
+    clearSearch: "مسح البحث",
   },
   column: {
     scheduledStart: "بداية الجلسة",

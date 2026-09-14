@@ -1,23 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Stack } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
-import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
-import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
-import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
+import { ProfileEditFormShell } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileEditFormShell";
 import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
-import {
-  AdminResetPasswordSection,
-  type AdminResetPasswordSectionRef,
-} from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
-import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/staff/sections/CompensationSection";
@@ -99,26 +89,6 @@ function CompensationSectionRenderer({
   return null;
 }
 
-function useFormSubmitHandler(
-  onSubmit: StaffProfileEditFormProps["onSubmit"],
-  setSuccessOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  setErrorOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  resetPasswordRef: React.RefObject<AdminResetPasswordSectionRef | null>,
-  resetPassword: (userId: string, newPassword: string, sendEmail: boolean) => Promise<boolean>,
-  targetUserId: string
-) {
-  return async (values: StaffAdminEditFormData) => {
-    await executeProfileSubmit(values, {
-      onSubmit,
-      resetPasswordRef,
-      resetPassword,
-      targetUserId,
-      setSuccessOpen,
-      setErrorOpen,
-    });
-  };
-}
-
 function useFormResetEffect(
   form: ReturnType<typeof useForm<StaffAdminEditFormData>>,
   staffData: StaffProfileData,
@@ -157,13 +127,6 @@ export function StaffProfileEditForm({
   const scope = isAdminScope ? ProfileScope.OTHER : ProfileScope.OWN;
   const { canView, canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
-  const [successOpen, setSuccessOpen] = useState(false);
-  const [errorOpen, setErrorOpen] = useState(false);
-  const resetPasswordRef = useRef<AdminResetPasswordSectionRef>(null);
-  const { resetPassword } = useAdminResetPassword(
-    labels.base.adminResetPassword.success,
-    labels.base.adminResetPassword.error
-  );
   const validationLabels = { invalidTimezone: labels.staff.validation.invalidTimezone };
   const form = useForm<StaffAdminEditFormData>({
     resolver: zodResolver(
@@ -183,14 +146,6 @@ export function StaffProfileEditForm({
   });
 
   useFormResetEffect(form, staffData, avatarUrl, displayCurrency, profileTimezone);
-  const onValidSubmit = useFormSubmitHandler(
-    onSubmit,
-    setSuccessOpen,
-    setErrorOpen,
-    resetPasswordRef,
-    resetPassword,
-    targetUserId
-  );
 
   const showAccountSection = canEdit("core_identity") || (isAdminScope && canEdit("staff_role"));
   const showCompensationViewSection =
@@ -198,66 +153,63 @@ export function StaffProfileEditForm({
   const showCompensationEditSection = isAdminScope && canEdit("staff_role");
 
   const canResetPassword = isAdminScope && canAdminResetPassword();
-  const staffName = staffData.name ?? "";
-  const staffEmail = staffData.email ?? "";
 
   return (
-    <Stack spacing={3}>
-      <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
-        <Stack spacing={3}>
-          {canEdit("core_identity") ? (
-            <AvatarImageField
+    <ProfileEditFormShell
+      form={form}
+      targetUserId={targetUserId}
+      isSaving={isSaving}
+      onSubmitValid={onSubmit}
+      avatar={
+        canEdit("core_identity") ? (
+          <AvatarImageField
+            control={form.control}
+            name="avatarUrl"
+            label={labels.staff.fields.avatar}
+            title={labels.base.editAvatarTitle}
+            onUploadAvatar={onUploadAvatar}
+          />
+        ) : null
+      }
+      sections={
+        <>
+          {showAccountSection ? (
+            <AccountSection
+              mode="edit"
+              labels={sectionLabels}
+              scope={scope}
+              staffData={staffData}
+              isAdminScope={isAdminScope}
+              register={form.register}
               control={form.control}
-              name="avatarUrl"
-              label={labels.staff.fields.avatar}
-              title={labels.base.editAvatarTitle}
-              onUploadAvatar={onUploadAvatar}
             />
           ) : null}
-          <Box sx={PROFILE_SECTION_GRID_SX}>
-            {showAccountSection ? (
-              <AccountSection
-                mode="edit"
-                labels={sectionLabels}
-                scope={scope}
-                staffData={staffData}
-                isAdminScope={isAdminScope}
-                register={form.register}
-                control={form.control}
-              />
-            ) : null}
-            {canEdit("core_contact") ? (
-              <ContactSection mode="edit" labels={sectionLabels} scope={scope} control={form.control} />
-            ) : null}
-            <CompensationSectionRenderer
-              showCompensationEditSection={showCompensationEditSection}
-              showCompensationViewSection={showCompensationViewSection}
-              compensationViewLabels={compensationViewLabels}
-              st={labels.staff}
-              form={form}
-              staffData={staffData}
-            />
-          </Box>
-          {canResetPassword && (
-            <AdminResetPasswordSection
-              ref={resetPasswordRef}
-              targetUserId={targetUserId}
-              userName={staffName}
-              userEmail={staffEmail}
-            />
-          )}
-          <PrimaryPageAction type="submit" disabled={isSaving}>
-            {labels.base.actions.save}
-          </PrimaryPageAction>
-        </Stack>
-      </Box>
-      {!isAdminScope && <ChangePasswordSection />}
-      <FormSuccessSnackbar
-        open={successOpen}
-        message={labels.base.actions.saveSuccess}
-        onClose={() => setSuccessOpen(false)}
-      />
-      <FormErrorSnackbar open={errorOpen} message={labels.base.actions.saveError} onClose={() => setErrorOpen(false)} />
-    </Stack>
+          {canEdit("core_contact") ? (
+            <ContactSection mode="edit" labels={sectionLabels} scope={scope} control={form.control} />
+          ) : null}
+          <CompensationSectionRenderer
+            showCompensationEditSection={showCompensationEditSection}
+            showCompensationViewSection={showCompensationViewSection}
+            compensationViewLabels={compensationViewLabels}
+            st={labels.staff}
+            form={form}
+            staffData={staffData}
+          />
+        </>
+      }
+      submitLabels={{ save: labels.base.actions.save, loading: labels.base.shell.loading }}
+      snackbarLabels={{
+        saveSuccess: labels.base.actions.saveSuccess,
+        saveError: labels.base.actions.saveError,
+      }}
+      resetPasswordLabels={{
+        success: labels.base.adminResetPassword.success,
+        error: labels.base.adminResetPassword.error,
+      }}
+      resetPasswordSection={
+        canResetPassword ? { userName: staffData.name ?? "", userEmail: staffData.email ?? "" } : undefined
+      }
+      changePasswordSection={isAdminScope ? null : <ChangePasswordSection />}
+    />
   );
 }

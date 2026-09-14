@@ -2,20 +2,20 @@ import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { appraisalFeedback, monthlyAppraisals, users } from "@/backend/db/schema";
 import type {
-  AppraisalFeedbackInput,
+  AppraisalFeedbackAppendInput,
   AppraisalFeedbackReturnType,
   DBTransaction,
   MonthlyAppraisalReturnType,
   MonthlyAppraisalSelectType,
-  MonthlyAppraisalSubmitInput,
+  MonthlyAppraisalUpsertInput,
 } from "@/backend/types";
 
 /**
  * Monthly Appraisal repository — data-access only.
  *
- * Tenancy / ownership is enforced at the service layer (Task 2.2): the repo
- * accepts `studentId` / `teacherId` as plain parameters and trusts whatever
- * the service passes (the service verifies `teacher.teaches(student)` and
+ * Tenancy / ownership is enforced at the service layer: the repo accepts
+ * `studentId` / `teacherId` as plain parameters and trusts whatever the
+ * service passes (the service verifies `teacher.teaches(student)` and
  * `parent.owns(student)` before calling).
  *
  * Read paths use `queryDb(tx)` (Neon HTTP rule); write paths use
@@ -90,7 +90,7 @@ export namespace MonthlyAppraisalRepository {
    * Returns the upserted row with its feedback thread attached.
    */
   export async function upsert(
-    input: MonthlyAppraisalSubmitInput,
+    input: MonthlyAppraisalUpsertInput,
     tx?: DBTransaction
   ): Promise<MonthlyAppraisalReturnType> {
     const executor = tx ?? db;
@@ -224,7 +224,7 @@ export namespace MonthlyAppraisalRepository {
    * author's display name joined for UI rendering.
    */
   export async function appendFeedback(
-    input: AppraisalFeedbackInput,
+    input: AppraisalFeedbackAppendInput,
     tx?: DBTransaction
   ): Promise<AppraisalFeedbackReturnType> {
     const executor = tx ?? db;

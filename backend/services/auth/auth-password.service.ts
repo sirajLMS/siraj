@@ -1,3 +1,4 @@
+import { SessionRepository } from "@/backend/db/repo";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum/notifications/notificationDeliveries.enum";
@@ -27,6 +28,9 @@ export namespace AuthPasswordService {
 
     const hashedNewPassword = await hashPassword(input.newPassword);
     await UserRepository.updatePassword(userId, hashedNewPassword, undefined, locale);
+
+    // Revoke all sessions for the user so the rotated password forces re-authentication.
+    await SessionRepository.deleteByUserId(userId);
 
     return true;
   }
@@ -59,6 +63,9 @@ export namespace AuthPasswordService {
     // Hash and update
     const hashedPassword = await hashPassword(input.newPassword);
     await UserRepository.updatePassword(targetUserId, hashedPassword, undefined, locale);
+
+    // Revoke all sessions for the target user so the old password stops working immediately.
+    await SessionRepository.deleteByUserId(targetUserId);
 
     // Audit log
     const emailSent = input.sendNotificationEmail ?? true;

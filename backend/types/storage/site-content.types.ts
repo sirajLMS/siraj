@@ -1,4 +1,4 @@
-import type { siteContent } from "@/backend/db/schema/storage/site-content";
+import type { siteContent } from "@/backend/db/schema";
 
 export type SiteContentSelectType = typeof siteContent.$inferSelect;
 

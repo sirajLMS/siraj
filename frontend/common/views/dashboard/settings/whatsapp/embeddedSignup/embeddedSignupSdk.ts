@@ -14,7 +14,7 @@ import type {
 } from "@/frontend/common/views/dashboard/settings/whatsapp/embeddedSignup/embeddedSignupTypes";
 
 /** Graph version passed to FB.init — the SDK init version, not our API version. */
-export const FB_SDK_GRAPH_VERSION = "v25.0";
+const FB_SDK_GRAPH_VERSION = "v25.0";
 
 /** DOM id used for the injected SDK script (loaded at most once per page). */
 const FB_SDK_SCRIPT_ID = "facebook-jssdk";

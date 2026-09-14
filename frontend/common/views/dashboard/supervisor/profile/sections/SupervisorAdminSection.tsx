@@ -2,6 +2,7 @@
 
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AdminSectionShared } from "@/frontend/common/views/dashboard/profile/components/__shared__/adminSectionShared";
+import { toAccountStatusDefaultValue } from "@/frontend/common/views/dashboard/profile/shared/studentStatusHelpers";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -83,7 +84,7 @@ export function SupervisorAdminSection(props: SupervisorAdminSectionProps) {
             ? t.adminResetPassword.statusActivated
             : t.adminResetPassword.statusDeactivated,
       }))}
-      editStatusDefaultValue={profile.status ?? ""}
+      editStatusDefaultValue={toAccountStatusDefaultValue(profile.status)}
       canEditStatus={canEditStatus()}
       targetUserId={profile.userId}
       userName={profile.name}

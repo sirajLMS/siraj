@@ -4,6 +4,7 @@
 // Prefer deep imports (e.g. `import { StudentStatus } from "@/backend/enum/students/student-lifecycle.enum"`)
 // rather than importing from this index file.
 
+export * from "./audit";
 export * from "./auth/auth.enum";
 export * from "./billing";
 export * from "./books";

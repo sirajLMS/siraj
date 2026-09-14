@@ -1,19 +1,6 @@
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { logger } from "@/backend/lib/logger";
-import type { DBTransaction, SystemSettingSelectType } from "@/backend/types";
-
-/**
- * Grace-period thresholds (minutes) used when payroll calculations compare a
- * teacher's actual entry time against the scheduled session window.
- */
-export interface PayrollGraceSettings {
-  /** Grace applied to sessions at or below the threshold duration. */
-  shortMinutes: number;
-  /** Grace applied to sessions above the threshold duration. */
-  longMinutes: number;
-  /** Scheduled-duration cutoff that selects the short vs long grace. */
-  thresholdMinutes: number;
-}
+import type { DBTransaction, PayrollGraceSettings, SystemSettingSelectType } from "@/backend/types";
 
 const DEFAULT_PAYROLL_GRACE_SETTINGS: PayrollGraceSettings = {
   shortMinutes: 3,

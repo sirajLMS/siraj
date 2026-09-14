@@ -79,7 +79,15 @@ const MOBILE_SLOTS: TeacherWeeklyScheduleViewSharedSlots = {
   ),
   HeaderActions: MobileHeaderActions,
   WorkloadMetrics: MobileWorkloadMetrics,
-  ScheduleGrid: ({ schedule, onRemoveClass, hasScheduleDeleteClass, labels, meetingJoinLabels }) => (
+  ScheduleGrid: ({
+    schedule,
+    onRemoveClass,
+    hasScheduleDeleteClass,
+    labels,
+    meetingJoinLabels,
+    selectedDay,
+    onSelectDay,
+  }) => (
     <MobileSectionPanel contentInset={false}>
       <MobileScheduleList
         classes={schedule.classes}
@@ -87,6 +95,8 @@ const MOBILE_SLOTS: TeacherWeeklyScheduleViewSharedSlots = {
         hasScheduleDeleteClass={hasScheduleDeleteClass}
         labels={labels}
         meetingJoinLabels={meetingJoinLabels}
+        selectedDay={selectedDay}
+        onSelectDay={onSelectDay}
       />
     </MobileSectionPanel>
   ),

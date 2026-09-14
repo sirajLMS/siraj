@@ -3,8 +3,12 @@ import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { SessionConfigValidationError, type SessionConfigValidationErrorCode } from "@/backend/services";
-import type { SessionConfigSelectType, SessionConfigUpsertInput } from "@/backend/types";
+import { SessionConfigValidationError } from "@/backend/services";
+import type {
+  SessionConfigSelectType,
+  SessionConfigUpsertInput,
+  SessionConfigValidationErrorCode,
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export function resolveSessionConfigValidationMessage(

@@ -1,10 +1,10 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import { classInstances, creditTransactions, lessonReports, students } from "@/backend/db/schema";
 import { AppPermission, AttendanceEvaluation, CreditReason } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { assertStudentReadAccess } from "@/backend/services/student/student-access.helpers";
 import type { StudentHeader, StudentMonthlyReportReturnType } from "@/backend/types";
 import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { getServerTranslations } from "@/shared/locale";
@@ -22,31 +22,8 @@ export namespace StudentMonthlyReportService {
     );
     if (hasMonthlyPermission) return;
 
-    const [studentRow] = await db
-      .select({
-        id: students.id,
-        userId: students.userId,
-        parentId: students.parentId,
-      })
-      .from(students)
-      .where(eq(students.id, studentId))
-      .limit(1);
-
-    if (!studentRow) {
-      throwStudentNotFound(studentId, locale);
-    }
-
-    // Self: student viewing own report
-    if (studentRow.userId === actorUserId) return;
-
-    // Parent: parent viewing child's report
-    if (studentRow.parentId) {
-      const parent = await ParentRepository.findByUserId(actorUserId);
-      if (parent?.id === studentRow.parentId) return;
-    }
-
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-    throw new Error(tErrors.unauthorizedAction);
+    await assertStudentReadAccess(actorUserId, studentId, tErrors);
   }
 
   async function loadStudentHeader(studentId: string, locale?: string): Promise<StudentHeader> {

@@ -13,12 +13,15 @@ import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocume
  * `studentProfileQueryDocument` initializer under CodeScene's Large Method
  * threshold.
  *
+ * `EFFECTIVE_MEETING_FIELDS` is interpolated once at the `studentProfileQueryDocument`
+ * level so both consuming fragments spread it without duplicating the fragment
+ * definition inside a single document.
+ *
  * Naming follows the in-file fragment convention used by sibling documents
  * files (e.g. `MEETING_PROVIDER_FIELDS` in `meeting/meeting.documents.ts`).
  */
 
 const STUDENT_UPCOMING_CLASS_FIELDS = gql`
-  ${EFFECTIVE_MEETING_FIELDS}
   fragment StudentUpcomingClassFields on StudentUpcomingClass {
     id
     instructor
@@ -51,7 +54,6 @@ const STUDENT_HISTORY_METRICS_FIELDS = gql`
 `;
 
 const STUDENT_HISTORY_SESSION_FIELDS = gql`
-  ${EFFECTIVE_MEETING_FIELDS}
   fragment StudentHistorySessionFields on StudentHistorySession {
     id
     title
@@ -74,6 +76,7 @@ const STUDENT_HISTORY_SESSION_FIELDS = gql`
 `;
 
 export const studentProfileQueryDocument: TypedDocumentNode<StudentProfileQuery, StudentProfileQueryVariables> = gql`
+  ${EFFECTIVE_MEETING_FIELDS}
   ${STUDENT_UPCOMING_CLASS_FIELDS}
   ${STUDENT_HISTORY_METRICS_FIELDS}
   ${STUDENT_HISTORY_SESSION_FIELDS}

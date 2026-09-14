@@ -1,12 +1,8 @@
-import type { InputFieldBuilder } from "@pothos/core";
-import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { PothosInputFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import {
   WhatsappLimitTierPothosEnum,
   WhatsappQualityRatingPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-
-type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
-type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
 
 /**
  * Shared input field definitions for WhatsApp account create/update inputs.

@@ -19,7 +19,10 @@ export type StatusBadgeCategory =
   | "cronScheduleStatus"
   | "overrideStatus"
   | "groupType"
-  | "creditTransaction";
+  | "creditTransaction"
+  | "expenseType"
+  | "expenseSource"
+  | "payrollCalculation";
 
 export type StatusPaletteKey = "active" | "pending" | "blocked" | "confirmed" | "completed" | "cancelled";
 

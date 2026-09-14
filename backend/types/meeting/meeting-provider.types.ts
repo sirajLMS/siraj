@@ -1,4 +1,5 @@
 import type { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers";
+import type { LocalizedString } from "@/shared/types";
 
 // ============================================================================
 // `meeting_providers` — admin-managed catalog
@@ -44,3 +45,39 @@ type MeetingProviderInsertType = typeof meetingProviders.$inferInsert;
 export type MeetingProviderSubmitInput = Omit<MeetingProviderInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type UpdateMeetingProviderInput = Partial<MeetingProviderSubmitInput>;
+
+/**
+ * Raw GraphQL input shape for the provider catalog create mutation. Catalog
+ * discriminator and kind values arrive as raw strings at this boundary — the
+ * mutation normalizer narrows them to the canonical unions before calling the
+ * service — and localized fields carry the `LocalizedString` scalar payload.
+ */
+export type MeetingProviderCreateInput = {
+  readonly slug: string;
+  readonly name: LocalizedString;
+  readonly description?: LocalizedString | null;
+  readonly instructions?: LocalizedString | null;
+  readonly urlAllowlist: readonly string[];
+  readonly urlExample?: string | null;
+  readonly logoUrl?: string | null;
+  readonly fieldSchema: MeetingProviderFieldSchemaInput;
+  readonly providerKind?: string | null;
+  readonly isActive?: boolean | null;
+};
+
+/**
+ * Raw GraphQL input shape for the provider catalog update mutation — every
+ * field is optional, matching the nullable field set of the GraphQL input.
+ */
+export type MeetingProviderUpdateInput = {
+  readonly slug?: string | null;
+  readonly name?: LocalizedString | null;
+  readonly description?: LocalizedString | null;
+  readonly instructions?: LocalizedString | null;
+  readonly urlAllowlist?: readonly string[] | null;
+  readonly urlExample?: string | null;
+  readonly logoUrl?: string | null;
+  readonly fieldSchema?: MeetingProviderFieldSchemaInput | null;
+  readonly providerKind?: string | null;
+  readonly isActive?: boolean | null;
+};

@@ -28,10 +28,9 @@ import type {
   QuotaSelectType,
   QuotaSubmitInput,
   QuotaUpdateInput,
+  ReadExecutor,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
-
-type ReadExecutor = DBTransaction | typeof db;
 
 export namespace QuotaService {
   /**
@@ -224,19 +223,14 @@ export namespace QuotaService {
     }
 
     // For multiple associated students without a single-studentId filter,
-    // fetch all quotas (no pagination) then filter+paginate in-memory so that
-    // pagination operates on the scoped set rather than across all students.
+    // scope the query in SQL via the repository's student-ID list read so
+    // pagination and totalCount operate on the associated-student set rather
+    // than across all quotas.
     if (associatedStudentIds.length > 1 && !filter?.studentId) {
-      const allRes = await QuotaRepository.listAllPaginated(tx, filter, null);
-      const idSet = new Set(associatedStudentIds);
-      const filteredRows = allRes.rows.filter(q => idSet.has(q.studentId));
-      const total = filteredRows.length;
-      const page = pagination
-        ? filteredRows.slice(pagination.offset, pagination.offset + pagination.perPage)
-        : filteredRows;
+      const scopedRes = await QuotaRepository.listByStudentIdsPaginated(tx, associatedStudentIds, filter, pagination);
       return {
-        rows: page.map(mapQuotaToReturnType),
-        totalCount: total,
+        rows: scopedRes.rows.map(mapQuotaToReturnType),
+        totalCount: scopedRes.totalCount,
       };
     }
 

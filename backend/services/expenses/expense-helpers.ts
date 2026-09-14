@@ -37,7 +37,7 @@ export function assertExpenseIdShape(id: string, tErrors: ErrorsLabels): void {
 }
 
 /** Optional foreign-key id: only the shape is checked; absence is valid. */
-export function assertOptionalUuidShape(id: string | null | undefined, error: () => Error): void {
+function assertOptionalUuidShape(id: string | null | undefined, error: () => Error): void {
   if (id != null && !UUID_CANONICAL_PATTERN.test(id)) {
     throw error();
   }

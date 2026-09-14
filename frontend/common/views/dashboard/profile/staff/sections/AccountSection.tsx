@@ -126,7 +126,7 @@ export function AccountSection(props: AccountSectionProps) {
     ) : null;
 
   return (
-    <Stack>
+    <>
       <CoreIdentitySection
         mode="view"
         scope={props.scope}
@@ -158,6 +158,6 @@ export function AccountSection(props: AccountSectionProps) {
           onConfirm={handleResetConfirm}
         />
       ) : null}
-    </Stack>
+    </>
   );
 }

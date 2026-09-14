@@ -19,5 +19,5 @@ export interface SupportedCurrencyUpsertInput {
   readonly countryCode?: CountryCode | null;
   readonly decimals?: number | null;
   readonly sortOrder?: number;
-  readonly isActive?: boolean;
+  readonly isActive?: boolean | null;
 }

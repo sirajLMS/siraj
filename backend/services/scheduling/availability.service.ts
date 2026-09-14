@@ -1,4 +1,3 @@
-import type { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { VacationRequestStatus } from "@/backend/enum";
@@ -18,13 +17,12 @@ import type {
   CrossStaffSearchInput,
   DBTransaction,
   ProcessVacationRequestInput,
+  ReadExecutor,
   SlotAvailabilityInput,
   SubmitVacationRequestInput,
   TeacherVacationRequestSelectType,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-
-type ReadExecutor = DBTransaction | typeof db;
 
 // Type guard: `ReadExecutor` is a union of `DBTransaction | typeof db`. Both
 // members share Drizzle's query interface, so repositories treat them

@@ -30,23 +30,29 @@ describe("ProfileHeader", () => {
     expect(screen.getByText("user@example.com")).toBeInTheDocument();
   });
 
-  test("renders the student role label inside a badge", () => {
+  test("renders the student role label inside a neutral outlined chip", () => {
     renderHeader({ roleLabel: base.role.student });
-    const badge = screen.getByText(base.role.student);
-    expect(badge.parentElement?.tagName).toBe("SPAN");
+    const chip = screen.getByText(base.role.student).closest(".MuiChip-root");
+    expect(chip).not.toBeNull();
+    expect(chip?.className).toContain("MuiChip-outlined");
+    expect(chip?.className).not.toContain("MuiChip-filled");
   });
 
-  test("renders the teacher role label inside a badge", () => {
+  test("renders the teacher role label inside a neutral outlined chip", () => {
     renderHeader({ roleLabel: base.role.teacher });
-    const badge = screen.getByText(base.role.teacher);
-    expect(badge.parentElement?.tagName).toBe("SPAN");
+    const chip = screen.getByText(base.role.teacher).closest(".MuiChip-root");
+    expect(chip).not.toBeNull();
+    expect(chip?.className).toContain("MuiChip-outlined");
+    expect(chip?.className).not.toContain("MuiChip-filled");
   });
 
-  test("renders a server-derived staff role name inside a badge", () => {
+  test("renders a server-derived staff role name inside a neutral outlined chip", () => {
     const roleName = "Academic Manager";
     renderHeader({ roleLabel: roleName });
-    const badge = screen.getByText(roleName);
-    expect(badge.parentElement?.tagName).toBe("SPAN");
+    const chip = screen.getByText(roleName).closest(".MuiChip-root");
+    expect(chip).not.toBeNull();
+    expect(chip?.className).toContain("MuiChip-outlined");
+    expect(chip?.className).not.toContain("MuiChip-filled");
   });
 
   test("renders no badge when the role label is absent", () => {

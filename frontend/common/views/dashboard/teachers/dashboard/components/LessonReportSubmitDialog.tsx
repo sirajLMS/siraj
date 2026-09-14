@@ -3,12 +3,6 @@
 import {
   Alert,
   Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   FormControl,
   FormHelperText,
   InputLabel,
@@ -20,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
+import { FormDialogShell } from "@/frontend/common/components/ui/dialog";
 import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql";
 import { logger } from "@/frontend/common/utils/logger";
 import { lessonReportFormSchema } from "@/frontend/common/views/dashboard/teachers/dashboard/schemas/lessonReportFormSchema";
@@ -51,8 +45,6 @@ interface LessonReportSubmitDialogProps {
 }
 
 export type { LessonReportSubmitDialogProps };
-
-const LESSON_REPORT_DIALOG_TITLE_ID = "lesson-report-submit-dialog-title";
 
 function buildInitialForm(defaultDurationMinutes?: number) {
   return {
@@ -123,107 +115,91 @@ export function LessonReportSubmitDialog({
   };
 
   return (
-    <Dialog
-      {...DialogPresets.info}
-      fullScreen={fullScreen}
+    <FormDialogShell
       open={open}
-      onClose={submitting ? undefined : onClose}
-      aria-labelledby={LESSON_REPORT_DIALOG_TITLE_ID}
+      title={labels.dialogTitle}
+      onClose={onClose}
+      onSubmit={handleFormSubmit}
+      submitting={submitting}
+      cancelLabel={labels.cancel}
+      submitLabel={labels.submit}
+      submittingLabel={labels.submitting}
+      fullScreen={fullScreen}
     >
-      <form onSubmit={handleFormSubmit}>
-        <DialogTitle id={LESSON_REPORT_DIALOG_TITLE_ID} sx={{ typography: "titleLg" }}>
-          {labels.dialogTitle}
-        </DialogTitle>
-        <DialogContent dividers>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            {error && <Alert severity="error">{error}</Alert>}
+      <Stack spacing={3} sx={{ mt: 1 }}>
+        {error && <Alert severity="error">{error}</Alert>}
 
-            <FormControl fullWidth required error={Boolean(errors.attendanceEvaluation)}>
-              <InputLabel id="attendance-evaluation-label">{labels.attendanceEvaluation}</InputLabel>
-              <Select
-                labelId="attendance-evaluation-label"
-                value={form.attendanceEvaluation}
-                label={labels.attendanceEvaluation}
-                disabled={submitting}
-                onChange={e => {
-                  setForm(prev => ({ ...prev, attendanceEvaluation: e.target.value }));
-                  setErrors(prev => ({ ...prev, attendanceEvaluation: "" }));
-                }}
-              >
-                {ATTENDANCE_OPTIONS.map(option => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {labels[option.labelKey]}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.attendanceEvaluation && <FormHelperText>{errors.attendanceEvaluation}</FormHelperText>}
-            </FormControl>
-
-            <TextField
-              label={labels.durationMinutes}
-              type="number"
-              required
-              fullWidth
-              value={form.durationMinutes}
-              disabled={submitting}
-              error={Boolean(errors.durationMinutes)}
-              helperText={errors.durationMinutes}
-              onChange={e => {
-                setForm(prev => ({ ...prev, durationMinutes: Number(e.target.value) }));
-                setErrors(prev => ({ ...prev, durationMinutes: "" }));
-              }}
-              slotProps={{ htmlInput: { min: 1, max: 600, step: 1 } }}
-            />
-
-            <Box>
-              <Typography variant="bodyMd" sx={{ mb: 1 }}>
-                {labels.completionPercentage}: {form.completionPercentage}%
-              </Typography>
-              <Slider
-                value={form.completionPercentage}
-                min={0}
-                max={100}
-                step={1}
-                disabled={submitting}
-                onChange={(_, value) => {
-                  setForm(prev => ({ ...prev, completionPercentage: Array.isArray(value) ? value[0] : value }));
-                  setErrors(prev => ({ ...prev, completionPercentage: "" }));
-                }}
-                valueLabelDisplay="auto"
-              />
-              {errors.completionPercentage && <FormHelperText error>{errors.completionPercentage}</FormHelperText>}
-            </Box>
-
-            <TextField
-              label={labels.teacherNotes}
-              multiline
-              rows={4}
-              fullWidth
-              value={form.teacherNotes}
-              disabled={submitting}
-              error={Boolean(errors.teacherNotes)}
-              helperText={errors.teacherNotes}
-              onChange={e => {
-                setForm(prev => ({ ...prev, teacherNotes: e.target.value }));
-                setErrors(prev => ({ ...prev, teacherNotes: "" }));
-              }}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button onClick={onClose} disabled={submitting}>
-            {labels.cancel}
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
+        <FormControl fullWidth required error={Boolean(errors.attendanceEvaluation)}>
+          <InputLabel id="attendance-evaluation-label">{labels.attendanceEvaluation}</InputLabel>
+          <Select
+            labelId="attendance-evaluation-label"
+            value={form.attendanceEvaluation}
+            label={labels.attendanceEvaluation}
             disabled={submitting}
-            startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : undefined}
+            onChange={e => {
+              setForm(prev => ({ ...prev, attendanceEvaluation: e.target.value }));
+              setErrors(prev => ({ ...prev, attendanceEvaluation: "" }));
+            }}
           >
-            {submitting ? labels.submitting : labels.submit}
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+            {ATTENDANCE_OPTIONS.map(option => (
+              <MenuItem key={option.value} value={option.value}>
+                {labels[option.labelKey]}
+              </MenuItem>
+            ))}
+          </Select>
+          {errors.attendanceEvaluation && <FormHelperText>{errors.attendanceEvaluation}</FormHelperText>}
+        </FormControl>
+
+        <TextField
+          label={labels.durationMinutes}
+          type="number"
+          required
+          fullWidth
+          value={form.durationMinutes}
+          disabled={submitting}
+          error={Boolean(errors.durationMinutes)}
+          helperText={errors.durationMinutes}
+          onChange={e => {
+            setForm(prev => ({ ...prev, durationMinutes: Number(e.target.value) }));
+            setErrors(prev => ({ ...prev, durationMinutes: "" }));
+          }}
+          slotProps={{ htmlInput: { min: 1, max: 600, step: 1 } }}
+        />
+
+        <Box>
+          <Typography variant="bodyMd" sx={{ mb: 1 }}>
+            {labels.completionPercentage}: {form.completionPercentage}%
+          </Typography>
+          <Slider
+            value={form.completionPercentage}
+            min={0}
+            max={100}
+            step={1}
+            disabled={submitting}
+            onChange={(_, value) => {
+              setForm(prev => ({ ...prev, completionPercentage: Array.isArray(value) ? value[0] : value }));
+              setErrors(prev => ({ ...prev, completionPercentage: "" }));
+            }}
+            valueLabelDisplay="auto"
+          />
+          {errors.completionPercentage && <FormHelperText error>{errors.completionPercentage}</FormHelperText>}
+        </Box>
+
+        <TextField
+          label={labels.teacherNotes}
+          multiline
+          rows={4}
+          fullWidth
+          value={form.teacherNotes}
+          disabled={submitting}
+          error={Boolean(errors.teacherNotes)}
+          helperText={errors.teacherNotes}
+          onChange={e => {
+            setForm(prev => ({ ...prev, teacherNotes: e.target.value }));
+            setErrors(prev => ({ ...prev, teacherNotes: "" }));
+          }}
+        />
+      </Stack>
+    </FormDialogShell>
   );
 }

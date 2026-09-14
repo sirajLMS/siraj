@@ -24,7 +24,7 @@ import {
 } from "@/backend/services/notification/notification-payloads.builders";
 import { NotificationSyncService } from "@/backend/services/system/notification-sync.service";
 import type * as Types from "@/backend/types";
-import type { DBTransaction } from "@/backend/types";
+import type { DBTransaction, UserPermissionContext } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseInvoiceStatus, parseInvoiceType } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -630,7 +630,7 @@ export namespace BillingManagementService {
   export async function verifyInvoiceAccess(
     actorUserId: string,
     invoiceId: string,
-    context: { isSuperAdmin?: boolean; permissions?: string[] } | null,
+    context: UserPermissionContext | null,
     tErrors: ErrorsLabels
   ): Promise<Types.InvoiceSelectType> {
     const invoice = await BillingRepository.getInvoiceById(invoiceId);
@@ -638,11 +638,11 @@ export namespace BillingManagementService {
       throw new NotFoundError("INVOICE", tErrors.billing.invoiceNotFound(invoiceId));
     }
 
-    const actorPermissions = context?.permissions ?? [];
+    const effectiveContext = context ?? (await PermissionsService.getUserContext(actorUserId));
     const hasBillingAccess =
-      context?.isSuperAdmin === true ||
-      actorPermissions.includes(AppPermission.INVOICES_LIST) ||
-      actorPermissions.includes(AppPermission.BILLING_VIEW_UNPAID_INVOICES);
+      effectiveContext.isSuperAdmin ||
+      effectiveContext.permissions.includes(AppPermission.INVOICES_LIST) ||
+      effectiveContext.permissions.includes(AppPermission.BILLING_VIEW_UNPAID_INVOICES);
 
     if (!hasBillingAccess) {
       const parent = await ParentRepository.findByUserId(actorUserId);

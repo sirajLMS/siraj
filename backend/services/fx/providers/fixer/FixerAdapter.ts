@@ -102,17 +102,16 @@ export class FixerAdapter extends FxAdapterBase {
   }
 
   protected buildApiUrl(): string {
+    // The API key is NEVER placed in the URL — it travels only via the
+    // `apikey` request header (see customFetchHeaders) so it cannot leak
+    // into error messages, logs, or upstream request traces.
     const symbols = this.buildSymbolsParam();
-    return (
-      `${FIXER_LATEST_ENDPOINT}?access_key=${encodeURIComponent(this.apiKey)}` +
-      `&base=EUR&symbols=${encodeURIComponent(symbols)}`
-    );
+    return `${FIXER_LATEST_ENDPOINT}?base=EUR&symbols=${encodeURIComponent(symbols)}`;
   }
 
   protected customFetchHeaders(): Record<string, string> {
-    // apilayer.com requires the access key in the `apikey` header; the
-    // legacy data.fixer.io hostname ignores it. Sending both keeps the
-    // adapter working against either hostname.
+    // apilayer.com authenticates via the `apikey` header; this is the sole
+    // credential channel for the request.
     return { apikey: this.apiKey };
   }
 

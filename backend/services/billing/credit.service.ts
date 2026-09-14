@@ -12,15 +12,20 @@ import { assertAssociatedOrManage, requirePermission } from "@/backend/services/
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type {
+  AdjustmentTxParams,
+  AdjustmentTxResult,
+  CarryoverBlock,
   CreateAuditLogInput,
   CreditAdjustmentInput,
   CreditAdjustmentReturnType,
   CreditBalanceReturnType,
+  CreditClassesSubmitInput,
   CreditHourBalanceReturnType,
+  CreditHoursSubmitInput,
   CreditTransactionReturnType,
   CreditTransactionSelectType,
-  CreditTransactionSubmitInput,
   DBTransaction,
+  IdempotentBookingLedgerOp,
   PaginationArgs,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -84,14 +89,6 @@ function mapToReturnType(row: CreditTransactionSelectType): CreditTransactionRet
 /** Maps an adjustment ledger row to the operator-facing return shape. */
 function mapToAdjustmentReturnType(row: CreditTransactionSelectType): CreditAdjustmentReturnType {
   return mapToReturnType(row);
-}
-
-/** Fully-present carryover block of an adjustment input. */
-interface CarryoverBlock {
-  teacherId: string;
-  fromDate: string;
-  toDate: string;
-  paymentDate: string;
 }
 
 /** Narrows the optional carryover fields, failing validation when any is missing. */
@@ -188,26 +185,6 @@ async function resolveDuplicateAdjustment(idempotencyKey: string): Promise<Credi
   const resolved = await CreditRepository.findByIdempotencyKeys([idempotencyKey]);
   const row = resolved[0];
   return row ? mapToAdjustmentReturnType(row) : null;
-}
-
-/** Shared parameters of a single adjustment transaction. */
-interface AdjustmentTxParams {
-  actorUserId: string;
-  input: CreditAdjustmentInput;
-  tErrors: ErrorsLabels;
-  idempotencyKey: string;
-  /** Signed class-credit delta for the ledger row. */
-  signedHours: number;
-  reason: CreditReason;
-  /** Present only for subtract-with-carryover adjustments. */
-  carryover?: CarryoverBlock;
-}
-
-/** Outcome of an adjustment transaction: the committed/returned row and whether it was newly persisted. */
-interface AdjustmentTxResult {
-  row: CreditAdjustmentReturnType;
-  /** False when the idempotency pre-check replayed an earlier persisted row. */
-  createdNewRow: boolean;
 }
 
 /**
@@ -400,7 +377,7 @@ async function subtractWithCarryover(
 /** Shared purchase logic: insert ledger row, adjust student classes, refresh quotas. */
 async function executePurchase(
   tx: DBTransaction,
-  input: CreditTransactionSubmitInput,
+  input: CreditClassesSubmitInput,
   actorUserId: string,
   idempotencyKey: string,
   tErrors: ErrorsLabels
@@ -429,7 +406,7 @@ export namespace CreditService {
    * admin user) and the `randomUUID`-based idempotency key generator used by
    * the public `recordPurchase` method.
    */
-  function validatePurchaseInput(input: CreditTransactionSubmitInput, tErrors: ErrorsLabels): void {
+  function validatePurchaseInput(input: CreditClassesSubmitInput, tErrors: ErrorsLabels): void {
     if (!input.studentId || input.studentId.trim().length === 0) {
       throw new ValidationError(tErrors.credit.invalidInput);
     }
@@ -441,7 +418,7 @@ export namespace CreditService {
 
   export async function recordPurchaseIfMissing(
     actorUserId: string,
-    input: CreditTransactionSubmitInput,
+    input: CreditClassesSubmitInput,
     idempotencyKey: string,
     tErrors: ErrorsLabels
   ): Promise<CreditTransactionReturnType | null> {
@@ -495,13 +472,7 @@ export namespace CreditService {
    * duplicates RETURN the existing row instead of throwing.
    */
   export async function recordHourPurchase(
-    input: {
-      studentId: string;
-      hours: number;
-      creditedByUserId: string;
-      sourcePaymentId?: string | null;
-      notes?: string | null;
-    },
+    input: CreditHoursSubmitInput,
     idempotencyKey: string,
     tx: DBTransaction,
     tErrors: ErrorsLabels
@@ -535,7 +506,7 @@ export namespace CreditService {
    */
   export async function recordHourPurchaseIfMissing(
     actorUserId: string,
-    input: { studentId: string; hours: number; notes?: string | null },
+    input: Omit<CreditHoursSubmitInput, "creditedByUserId">,
     idempotencyKey: string,
     tErrors: ErrorsLabels
   ): Promise<CreditTransactionReturnType | null> {
@@ -669,7 +640,7 @@ export namespace CreditService {
 
   export async function recordPurchase(
     actorUserId: string,
-    input: CreditTransactionSubmitInput,
+    input: CreditClassesSubmitInput,
     tErrors: ErrorsLabels
   ): Promise<CreditTransactionReturnType> {
     await requirePermission(actorUserId, AppPermission.CREDITS_MANAGE, tErrors);
@@ -1018,20 +989,6 @@ async function updateStudentBalances(
       await QuotaService.refreshStudentOndemandInstances(studentId, tx);
     })
   );
-}
-
-interface IdempotentBookingLedgerOp {
-  studentId: string;
-  classInstanceId: string;
-  creditedByUserId: string;
-  idempotencyKey: string;
-  tx: DBTransaction;
-  operation: "deduct" | "refund";
-  unit?: "classes" | "hours";
-  successLogMessage: string;
-  errorLogMessage: string;
-  applyLedgerChange: (effectiveIdempotencyKey: string) => Promise<unknown>;
-  adjustStudentClasses: () => Promise<unknown>;
 }
 
 async function runIdempotentBookingLedgerOp(op: IdempotentBookingLedgerOp): Promise<void> {

@@ -2,8 +2,8 @@
 
 import { Box, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { FilterChip } from "@/frontend/common/components/ui";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
-import { StatusBadge } from "@/frontend/common/components/ui/badge";
 
 export type ProfileHeaderProps = {
   readonly name: string;
@@ -43,24 +43,12 @@ export function ProfileHeader({ name, email, roleLabel, avatarUrl, showAvatar = 
             spacing={1}
             sx={{ alignItems: { xs: "flex-start", sm: "center" }, mb: 0.5 }}
           >
-            <Typography
-              sx={theme => ({
-                color: theme.palette.text.primary,
-                fontWeight: 600,
-                fontSize: theme.typography.h5.fontSize,
-              })}
-            >
+            <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.text.primary })}>
               {name}
             </Typography>
-            {roleLabel ? <StatusBadge category="session" status="active" label={roleLabel} size="small" /> : null}
+            {roleLabel ? <FilterChip label={roleLabel} /> : null}
           </Stack>
-          <Typography
-            sx={theme => ({
-              color: theme.palette.text.secondary,
-              fontSize: theme.typography.body1.fontSize,
-              wordBreak: "break-word",
-            })}
-          >
+          <Typography variant="bodyLg" sx={theme => ({ color: theme.palette.text.secondary, wordBreak: "break-word" })}>
             {email}
           </Typography>
         </Box>

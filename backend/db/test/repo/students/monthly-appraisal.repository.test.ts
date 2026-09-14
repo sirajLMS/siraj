@@ -6,7 +6,7 @@ import { MonthlyAppraisalRepository } from "@/backend/db/repo/students";
 import { appraisalFeedback, monthlyAppraisals } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestTeacher, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { DBTransaction, MonthlyAppraisalSubmitInput } from "@/backend/types";
+import type { DBTransaction, MonthlyAppraisalUpsertInput } from "@/backend/types";
 
 /**
  * Repo tests for `MonthlyAppraisalRepository` — 4-tier coverage per task 2.1.TE.
@@ -99,8 +99,8 @@ function buildSubmitInput(
   studentId: string,
   teacherId: string,
   month: Date,
-  overrides: Partial<MonthlyAppraisalSubmitInput> = {}
-): MonthlyAppraisalSubmitInput {
+  overrides: Partial<MonthlyAppraisalUpsertInput> = {}
+): MonthlyAppraisalUpsertInput {
   return {
     studentId,
     teacherId,

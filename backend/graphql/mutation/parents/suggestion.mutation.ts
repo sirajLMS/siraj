@@ -1,18 +1,29 @@
-// Auto-extracted from pothos/ (types-review R3-P3).
-// Mutation field registrations relocated to the mutation layer per mutation/AGENTS.md.
-
 import { GraphQLError } from "graphql";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import {
-  authenticatedSuggestionMutation,
   MarkSuggestionDuplicateInputPothosObject,
   RespondToSuggestionInputPothosObject,
-  requireAuth,
   SubmitSuggestionInputPothosObject,
   SuggestionPothosObject,
 } from "@/backend/graphql/pothos/parents/suggestion.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { SuggestionService } from "@/backend/services";
+import type { SuggestionReturnType, SuggestionSelectType } from "@/backend/types";
+
+/**
+ * Auth+mapping prelude shared by every suggestion mutation: resolves the
+ * caller through the shared requireAuth util and maps the service result
+ * through the service's canonical return-type mapper.
+ */
+async function authenticatedSuggestionMutation(
+  ctx: BaseContext,
+  serviceCall: (userId: string) => Promise<SuggestionSelectType>
+): Promise<SuggestionReturnType> {
+  const userId = await requireAuth(ctx);
+  return SuggestionService.mapSuggestionReturnType(await serviceCall(userId));
+}
 
 gqlSchemaBuilder.mutationField("submitSuggestion", t =>
   t.field({
@@ -95,7 +106,7 @@ gqlSchemaBuilder.mutationField("deleteSuggestion", t =>
       suggestionId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = requireAuth(ctx);
+      const userId = await requireAuth(ctx);
 
       await SuggestionService.deleteSuggestion(userId, args.suggestionId, ctx.locale);
       return true;

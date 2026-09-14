@@ -1,19 +1,11 @@
 "use client";
 
-import { KeyOutlined, VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Checkbox,
-  FormControlLabel,
-  IconButton,
-  InputAdornment,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { KeyOutlined } from "@mui/icons-material";
+import { Box, Checkbox, FormControlLabel, Stack, Typography } from "@mui/material";
 import { type Ref, useCallback, useImperativeHandle, useState } from "react";
 import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
 import { SectionPanel } from "@/frontend/common/components/ui";
+import { SecretTextField } from "@/frontend/common/components/ui/input/secretTextField";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import { countPasswordClasses, PASSWORD_MIN_LENGTH } from "@/shared/utils/password-schema";
 
@@ -110,9 +102,12 @@ export function AdminResetPasswordSection({
           <Typography variant="bodyMd">{t.description(userName, userEmail)}</Typography>
         </Stack>
         <Box>
-          <TextField
+          <SecretTextField
+            revealed={showNewPassword}
+            onToggleReveal={() => setShowNewPassword(prev => !prev)}
+            showValueLabel={t.showPassword}
+            hideValueLabel={t.hidePassword}
             label={t.newPassword}
-            type={showNewPassword ? "text" : "password"}
             value={newPassword}
             onChange={e => {
               setNewPassword(e.target.value);
@@ -120,21 +115,8 @@ export function AdminResetPasswordSection({
             }}
             error={newPasswordError.length > 0}
             helperText={newPasswordError}
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowNewPassword(prev => !prev)}
-                      edge="end"
-                      aria-label={showNewPassword ? t.hidePassword : t.showPassword}
-                    >
-                      {showNewPassword ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
+            fullWidth
+            autoComplete="new-password"
           />
           <PasswordStrengthMeter
             password={newPassword}
@@ -146,9 +128,12 @@ export function AdminResetPasswordSection({
             }}
           />
         </Box>
-        <TextField
+        <SecretTextField
+          revealed={showConfirmPassword}
+          onToggleReveal={() => setShowConfirmPassword(prev => !prev)}
+          showValueLabel={t.showPassword}
+          hideValueLabel={t.hidePassword}
           label={t.confirmPassword}
-          type={showConfirmPassword ? "text" : "password"}
           value={confirmPassword}
           onChange={e => {
             setConfirmPassword(e.target.value);
@@ -156,21 +141,8 @@ export function AdminResetPasswordSection({
           }}
           error={confirmPasswordError.length > 0 || liveMismatch}
           helperText={confirmHelperText}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowConfirmPassword(prev => !prev)}
-                    edge="end"
-                    aria-label={showConfirmPassword ? t.hidePassword : t.showPassword}
-                  >
-                    {showConfirmPassword ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
+          fullWidth
+          autoComplete="new-password"
         />
         <FormControlLabel
           control={

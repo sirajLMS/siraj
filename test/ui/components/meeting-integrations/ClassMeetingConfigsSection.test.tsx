@@ -217,9 +217,9 @@ describe("ClassMeetingConfigsSection", () => {
       mocks,
     });
 
-    // generationSuccess label from enhancements
+    // generationSuccess label from the shared MeetingGenerationStatusIndicator
     await waitFor(() => {
-      expect(screen.getByText("تم توليد رابط الاجتماع بنجاح.")).toBeInTheDocument();
+      expect(screen.getByText("تم توليد الرابط بنجاح")).toBeInTheDocument();
     });
   });
 
@@ -253,11 +253,10 @@ describe("ClassMeetingConfigsSection", () => {
       mocks,
     });
 
-    // retryGeneration aria-label from enhancements
+    // Shared indicator failed render: failed label + retry button (accessible name from text)
     await waitFor(() => {
-      // generationFailed label shown as chip text, retryGeneration as aria-label
-      expect(screen.getByText("تعذّر توليد رابط الاجتماع.")).toBeInTheDocument();
-      expect(screen.getByLabelText("إعادة التوليد")).toBeInTheDocument();
+      expect(screen.getByText("فشل التوليد")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "إعادة التوليد" })).toBeInTheDocument();
     });
   });
 
@@ -271,28 +270,25 @@ describe("ClassMeetingConfigsSection", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByLabelText("إعادة التوليد")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "إعادة التوليد" })).toBeInTheDocument();
     });
     // Clicking retry should not throw
-    fireEvent.click(screen.getByLabelText("إعادة التوليد"));
+    fireEvent.click(screen.getByRole("button", { name: "إعادة التوليد" }));
     // No assertion on mutation result — just verify click doesn't crash
   });
 
-  test("shows expiry text for configs with near-future expiry", async () => {
+  test("shows expiry timestamp for configs with expiry via shared indicator", async () => {
     const configs = [makeConfig({ id: "c1", label: "إعداد 1" })];
-    // Set expiry to 5 hours from now — should show "expires in N hours" label
-    const futureExpiry = new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString();
-    const statusEntries = [makeStatusEntry("c1", { meetingUrlStatus: "generated", meetingUrlExpiresAt: futureExpiry })];
+    const statusEntries = [makeStatusEntry("c1", { meetingUrlExpiresAt: "2025-12-31T23:59:59Z" })];
     const mocks = makeClassMocks({ configs, statusEntries });
     renderWithWrapper(<ClassMeetingConfigsSection classInstanceId={CLASS_INSTANCE_ID} canManage />, {
       permissions: [AppPermission.MeetingConfigsManageClass],
       mocks,
     });
 
-    // expiresInHours(5) from enhancements → "ينتهي خلال 5 ساعات"
+    // Shared indicator formats expiresAt with toLocaleString (includes the year)
     await waitFor(() => {
-      const expiryText = screen.getByText(/ينتهي خلال 5/);
-      expect(expiryText).toBeInTheDocument();
+      expect(screen.getByText(/2025/)).toBeInTheDocument();
     });
   });
 });

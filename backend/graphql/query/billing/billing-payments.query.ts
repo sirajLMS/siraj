@@ -1,12 +1,15 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaymentPothosObject } from "@/backend/graphql/pothos/billing/billing-payments.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import {
+  BillingHistoryService,
+  BillingManagementService,
+  PermissionsService,
   resolveDisplayAmountFields,
   setBillingFxDisplayCurrencyForInvoiceParent,
-} from "@/backend/graphql/pothos/billing/fx-display.pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { BillingHistoryService, BillingManagementService, PermissionsService } from "@/backend/services";
+} from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("invoicePayments", t =>
   t.field({
@@ -29,7 +32,12 @@ gqlSchemaBuilder.queryField("invoicePayments", t =>
       // does NOT grant access to ANY invoice; the caller must either be a
       // super-admin / have an invoices-list permission, OR be the parent who
       // owns the invoice. This closes the IDOR on invoiceId.
-      const context = { isSuperAdmin: ctx.isSuperAdmin, permissions: ctx.permissions };
+      const context: UserPermissionContext = {
+        permissions: ctx.permissions,
+        permissionGroups: ctx.permissionGroups,
+        isSuperAdmin: ctx.isSuperAdmin,
+        role: ctx.role,
+      };
       await BillingManagementService.verifyInvoiceAccess(actorUserId, args.invoiceId, context, tErrors);
 
       await setBillingFxDisplayCurrencyForInvoiceParent(ctx, args.invoiceId, actorUserId);

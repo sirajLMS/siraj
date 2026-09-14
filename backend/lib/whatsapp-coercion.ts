@@ -53,7 +53,7 @@ export function isValidAccountPurpose(value: string): value is WhatsappAccountPu
 /**
  * Type guard: does `value` match a known `WhatsappOnboardingMode` member?
  */
-export function isValidOnboardingMode(value: string): value is WhatsappOnboardingMode {
+function isValidOnboardingMode(value: string): value is WhatsappOnboardingMode {
   return (Object.values(WhatsappOnboardingMode) as string[]).includes(value);
 }
 
@@ -91,7 +91,7 @@ function coerceSyncStatus(raw: string): WhatsappSyncStatus {
 /**
  * Type guard: does `value` match a known `WhatsappMessageDirection` member?
  */
-export function isValidMessageDirection(value: string): value is WhatsappMessageDirection {
+function isValidMessageDirection(value: string): value is WhatsappMessageDirection {
   return (Object.values(WhatsappMessageDirection) as string[]).includes(value);
 }
 
@@ -107,7 +107,7 @@ export function coerceMessageDirection(raw: string): WhatsappMessageDirection {
 /**
  * Type guard: does `value` match a known `WhatsappWebhookEventStatus` member?
  */
-export function isValidWebhookEventStatus(value: string): value is WhatsappWebhookEventStatus {
+function isValidWebhookEventStatus(value: string): value is WhatsappWebhookEventStatus {
   return (Object.values(WhatsappWebhookEventStatus) as string[]).includes(value);
 }
 
@@ -124,7 +124,7 @@ export function coerceWebhookEventStatus(raw: string): WhatsappWebhookEventStatu
 /**
  * Type guard: does `value` match a known `WhatsappSyncRequestStatus` member?
  */
-export function isValidSyncRequestStatus(value: string): value is WhatsappSyncRequestStatus {
+function isValidSyncRequestStatus(value: string): value is WhatsappSyncRequestStatus {
   return (Object.values(WhatsappSyncRequestStatus) as string[]).includes(value);
 }
 
@@ -140,7 +140,7 @@ export function coerceSyncRequestStatus(raw: string): WhatsappSyncRequestStatus 
 /**
  * Type guard: does `value` match a known `WhatsappSyncType` member?
  */
-export function isValidSyncType(value: string): value is WhatsappSyncType {
+function isValidSyncType(value: string): value is WhatsappSyncType {
   return (Object.values(WhatsappSyncType) as string[]).includes(value);
 }
 

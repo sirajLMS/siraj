@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
-import { Alert, Chip } from "@mui/material";
+import { Alert, Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
@@ -154,6 +154,66 @@ function MobileFooter({ progressFeed, labels, onDownloadHandbook, onContactCoord
   );
 }
 
+interface WelcomeSummaryRowProps {
+  readonly summary: string;
+}
+
+function WelcomeSummaryRow({ summary }: WelcomeSummaryRowProps) {
+  return (
+    <MobileSectionTitleRow
+      title={
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <CalendarMonthOutlined sx={theme => ({ color: theme.palette.primary.main })} />
+          <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
+            {summary}
+          </Typography>
+        </Box>
+      }
+    />
+  );
+}
+
+interface ManualEntryDialogSlotProps {
+  readonly open: boolean;
+  readonly defaultActive: boolean;
+  readonly teacherId: string;
+  readonly subjects: TeacherDashboardViewModel["subjects"];
+  readonly subjectsLoading: boolean;
+  readonly labels: TeacherDashboardViewModel["labels"]["manualClassEntry"];
+  readonly onClose: () => void;
+  readonly onSubmit: TeacherDashboardViewModel["onManualEntrySubmit"];
+}
+
+function ManualEntryDialogSlot({
+  open,
+  defaultActive,
+  teacherId,
+  subjects,
+  subjectsLoading,
+  labels,
+  onClose,
+  onSubmit,
+}: ManualEntryDialogSlotProps) {
+  return (
+    <ManualClassEntryDialogMobile
+      open={open}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      defaultActive={defaultActive}
+      subjects={subjects}
+      subjectsLoading={subjectsLoading}
+      labels={labels}
+      studentSelect={
+        <ManualClassEntryStudentSelectMobile
+          teacherId={teacherId}
+          open={open}
+          studentLabel={labels.studentLabel}
+        />
+      }
+    />
+  );
+}
+
 export function TeacherDashboardMobileView({
   userName,
   metricItems,
@@ -224,11 +284,7 @@ export function TeacherDashboardMobileView({
             actions={headerActions}
           />
 
-          <MobileSectionTitleRow
-            title={
-              <Chip icon={<CalendarMonthOutlined />} label={welcomeMobileSummary} variant="outlined" size="small" />
-            }
-          />
+          <WelcomeSummaryRow summary={welcomeMobileSummary} />
 
           <MobileMetricCardGrid metrics={metricItems} />
 
@@ -259,21 +315,15 @@ export function TeacherDashboardMobileView({
         </MobileContentStack>
       </MobilePageContainer>
 
-      <ManualClassEntryDialogMobile
+      <ManualEntryDialogSlot
         open={manualEntryOpen}
-        onClose={onManualEntryClose}
-        onSubmit={onManualEntrySubmit}
         defaultActive={manualEntryDefaultActive}
+        teacherId={teacherId}
         subjects={subjects}
         subjectsLoading={subjectsLoading}
         labels={labels.manualClassEntry}
-        studentSelect={
-          <ManualClassEntryStudentSelectMobile
-            teacherId={teacherId}
-            open={manualEntryOpen}
-            studentLabel={labels.manualClassEntry.studentLabel}
-          />
-        }
+        onClose={onManualEntryClose}
+        onSubmit={onManualEntrySubmit}
       />
     </>
   );

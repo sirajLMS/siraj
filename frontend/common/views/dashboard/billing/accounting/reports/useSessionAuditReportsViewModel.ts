@@ -40,13 +40,13 @@ const EMPTY_ROW_COUNT_BY_STATUS: Record<SessionAuditStatus, number> = {
 };
 
 /** Paid/unpaid row tallies for one report page. */
-export interface SessionAuditRowCountByPaid {
+interface SessionAuditRowCountByPaid {
   readonly paid: number;
   readonly unpaid: number;
 }
 
 /** Aggregate summary for the current report page, normalized from the raw JSON scalars. */
-export interface SessionAuditReportAggregates {
+interface SessionAuditReportAggregates {
   readonly rowCountByStatus: Record<SessionAuditStatus, number>;
   readonly rowCountByPaid: SessionAuditRowCountByPaid;
   readonly totalPaidAmount: string;
@@ -75,19 +75,19 @@ interface SessionAuditReportFilterFields {
 }
 
 /** Filter fields plus the sort pair, as consumed by the CSV export route. */
-export interface SessionAuditExportParams extends SessionAuditReportFilterFields {
+interface SessionAuditExportParams extends SessionAuditReportFilterFields {
   readonly sortField: SessionAuditReportSortField;
   readonly sortDirection: OrderSortDirection;
 }
 
 /** Result of a completed CSV export download; null means the export failed. */
-export interface SessionAuditCsvExportOutcome {
+interface SessionAuditCsvExportOutcome {
   /** True when the exported set exceeded the server-side 10 000-row export ceiling. */
   readonly truncated: boolean;
 }
 
 /** Filter, sort, and pagination state with store actions for the session audit report. */
-export interface SessionAuditFilterSlice {
+interface SessionAuditFilterSlice {
   readonly teacherId: string | null;
   readonly studentId: string | null;
   readonly dateFrom: string | null;
@@ -252,7 +252,7 @@ function extractDownloadFilename(disposition: string | null): string {
  * Statuses are comma-joined (the route also accepts them as repeatable
  * params) and the sort direction is lowercase per the route contract.
  */
-export function buildSessionAuditExportCsvUrl(p: SessionAuditExportParams): string {
+function buildSessionAuditExportCsvUrl(p: SessionAuditExportParams): string {
   const params = new URLSearchParams();
   if (p.teacherId !== null && p.teacherId !== "") params.set("teacherId", p.teacherId);
   if (p.studentId !== null && p.studentId !== "") params.set("studentId", p.studentId);

@@ -10,6 +10,8 @@ export interface FilterChipProps {
    * active filter. Omit it for a read-only indicator of applied filters.
    */
   readonly onClear?: () => void;
+  /** Text direction hint for mixed-script labels (e.g. LTR phone numbers). */
+  readonly dir?: "ltr" | "rtl" | "auto";
   readonly sx?: SxProps<Theme>;
 }
 
@@ -19,6 +21,6 @@ export interface FilterChipProps {
  * primitive — pass `onClear` from the ViewModel handler when dismissal is
  * supported.
  */
-export function FilterChip({ label, onClear, sx }: Readonly<FilterChipProps>) {
-  return <Chip size="small" variant="outlined" label={label} onDelete={onClear} sx={sx} />;
+export function FilterChip({ label, onClear, dir, sx }: Readonly<FilterChipProps>) {
+  return <Chip size="small" variant="outlined" label={label} onDelete={onClear} dir={dir} sx={sx} />;
 }

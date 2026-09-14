@@ -1,6 +1,6 @@
 "use client";
 
-import { MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { MenuItem, Stack, TextField, Typography } from "@mui/material";
 import { type Control, Controller, type UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
@@ -69,23 +69,21 @@ function BillingEditSection({
           name="lifecycleStatus"
           control={control}
           render={({ field, fieldState }) => (
-            <Stack spacing={0.5}>
-              <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>
-                {t.fields.lifecycleStatus}
-              </Typography>
-              <Select
-                {...field}
-                value={field.value ?? ParentStatus.Regular}
-                fullWidth
-                size="small"
-                error={Boolean(fieldState.error)}
-              >
-                <MenuItem value={ParentStatus.Regular}>{t.status.regular}</MenuItem>
-                <MenuItem value={ParentStatus.OnTrial}>{t.status.on_trial}</MenuItem>
-                <MenuItem value={ParentStatus.OnLeave}>{t.status.on_leave}</MenuItem>
-                <MenuItem value={ParentStatus.Suspended}>{t.status.suspended}</MenuItem>
-              </Select>
-            </Stack>
+            <TextField
+              {...field}
+              select
+              label={t.fields.lifecycleStatus}
+              value={field.value ?? ParentStatus.Regular}
+              fullWidth
+              size="small"
+              error={Boolean(fieldState.error)}
+              helperText={fieldState.error?.message}
+            >
+              <MenuItem value={ParentStatus.Regular}>{t.status.regular}</MenuItem>
+              <MenuItem value={ParentStatus.OnTrial}>{t.status.on_trial}</MenuItem>
+              <MenuItem value={ParentStatus.OnLeave}>{t.status.on_leave}</MenuItem>
+              <MenuItem value={ParentStatus.Suspended}>{t.status.suspended}</MenuItem>
+            </TextField>
           )}
         />
         <TextField label={t.fields.invoiceType} fullWidth size="small" {...register("invoiceType")} />

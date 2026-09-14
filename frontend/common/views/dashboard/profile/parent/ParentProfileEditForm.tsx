@@ -1,18 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Stack } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { type Control, type UseFormRegister, useForm } from "react-hook-form";
-import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
-import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type UseAvatarUploadResult, useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
-import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
-import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
+import { ProfileEditFormShell } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileEditFormShell";
 import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
 import {
   type ParentAdminEditFormData,
@@ -31,11 +26,6 @@ import {
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
 import { useParentProfileEditFormViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileEditFormViewModel";
-import {
-  AdminResetPasswordSection,
-  type AdminResetPasswordSectionRef,
-} from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
-import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { ProfileScope } from "@/shared/constants/profile.enum";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
@@ -103,29 +93,6 @@ function useParentEditForm(parentData: ParentEditData, isAdminScope: boolean, in
   return form;
 }
 
-function useParentSubmitFeedback(
-  onSubmit: ParentEditFormSubmit,
-  resetPasswordRef: React.RefObject<AdminResetPasswordSectionRef | null>,
-  resetPassword: (userId: string, newPassword: string, sendEmail: boolean) => Promise<boolean>,
-  targetUserId: string
-) {
-  const [successOpen, setSuccessOpen] = useState(false);
-  const [errorOpen, setErrorOpen] = useState(false);
-
-  const onValidSubmit = async (values: ParentAdminEditFormData) => {
-    await executeProfileSubmit(values, {
-      onSubmit,
-      resetPasswordRef,
-      resetPassword,
-      targetUserId,
-      setSuccessOpen,
-      setErrorOpen,
-    });
-  };
-
-  return { successOpen, errorOpen, setSuccessOpen, setErrorOpen, onValidSubmit };
-}
-
 type ParentEditFormSectionsProps = {
   readonly parentData: ParentEditData;
   readonly targetUserId: string;
@@ -151,7 +118,7 @@ function ParentEditFormSections({
   const { parent: pt } = sectionLabels;
 
   return (
-    <Box sx={PROFILE_SECTION_GRID_SX}>
+    <>
       {canEdit("core_identity") ? (
         <AccountSection
           mode="edit"
@@ -183,29 +150,6 @@ function ParentEditFormSections({
           ) : null}
         </>
       ) : null}
-    </Box>
-  );
-}
-
-type ParentEditFormSnackbarsProps = {
-  readonly successOpen: boolean;
-  readonly errorOpen: boolean;
-  readonly setSuccessOpen: (open: boolean) => void;
-  readonly setErrorOpen: (open: boolean) => void;
-  readonly labels: { readonly saveSuccess: string; readonly saveError: string };
-};
-
-function ParentEditFormSnackbars({
-  successOpen,
-  errorOpen,
-  setSuccessOpen,
-  setErrorOpen,
-  labels,
-}: ParentEditFormSnackbarsProps) {
-  return (
-    <>
-      <FormSuccessSnackbar open={successOpen} message={labels.saveSuccess} onClose={() => setSuccessOpen(false)} />
-      <FormErrorSnackbar open={errorOpen} message={labels.saveError} onClose={() => setErrorOpen(false)} />
     </>
   );
 }
@@ -229,57 +173,42 @@ export function ParentProfileEditForm({
   const { canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar }: AvatarUploader = useAvatarUpload({ storageOwnerKey: targetUserId });
   const form = useParentEditForm(parentData, isAdminScope, pt.validation.invalidTimezone);
-  const resetPasswordRef = useRef<AdminResetPasswordSectionRef>(null);
-  const { resetPassword } = useAdminResetPassword(t.adminResetPassword.success, t.adminResetPassword.error);
-  const feedback = useParentSubmitFeedback(onSubmit, resetPasswordRef, resetPassword, targetUserId);
-
-  const scopeContext: ScopeContext = { scope, isAdminScope, canEdit };
   const canResetPassword = isAdminScope && canAdminResetPassword();
-  const parentName = parentData.name ?? "";
-  const parentEmail = parentData.email ?? "";
 
   return (
-    <Stack spacing={3}>
-      <Box component="form" onSubmit={form.handleSubmit(feedback.onValidSubmit)}>
-        <Stack spacing={3}>
-          {canEdit("core_identity") ? (
-            <AvatarImageField
-              control={form.control}
-              name="avatarUrl"
-              label={pt.fields.avatar}
-              title={t.editAvatarTitle}
-              onUploadAvatar={onUploadAvatar}
-            />
-          ) : null}
-          <ParentEditFormSections
-            parentData={parentData}
-            targetUserId={targetUserId}
-            scopeContext={scopeContext}
-            register={form.register}
+    <ProfileEditFormShell
+      form={form}
+      targetUserId={targetUserId}
+      isSaving={isSaving}
+      onSubmitValid={onSubmit}
+      avatar={
+        canEdit("core_identity") ? (
+          <AvatarImageField
             control={form.control}
-            labels={labels}
+            name="avatarUrl"
+            label={pt.fields.avatar}
+            title={t.editAvatarTitle}
+            onUploadAvatar={onUploadAvatar}
           />
-          {canResetPassword && (
-            <AdminResetPasswordSection
-              ref={resetPasswordRef}
-              targetUserId={targetUserId}
-              userName={parentName}
-              userEmail={parentEmail}
-            />
-          )}
-          <PrimaryPageAction type="submit" disabled={isSaving}>
-            {isSaving ? t.shell.loading : t.actions.save}
-          </PrimaryPageAction>
-        </Stack>
-      </Box>
-      {isAdminScope ? null : <ChangePasswordSection />}
-      <ParentEditFormSnackbars
-        successOpen={feedback.successOpen}
-        errorOpen={feedback.errorOpen}
-        setSuccessOpen={feedback.setSuccessOpen}
-        setErrorOpen={feedback.setErrorOpen}
-        labels={{ saveSuccess: t.actions.saveSuccess, saveError: t.actions.saveError }}
-      />
-    </Stack>
+        ) : null
+      }
+      sections={
+        <ParentEditFormSections
+          parentData={parentData}
+          targetUserId={targetUserId}
+          scopeContext={{ scope, isAdminScope, canEdit }}
+          register={form.register}
+          control={form.control}
+          labels={labels}
+        />
+      }
+      submitLabels={{ save: t.actions.save, loading: t.shell.loading }}
+      snackbarLabels={{ saveSuccess: t.actions.saveSuccess, saveError: t.actions.saveError }}
+      resetPasswordLabels={{ success: t.adminResetPassword.success, error: t.adminResetPassword.error }}
+      resetPasswordSection={
+        canResetPassword ? { userName: parentData.name ?? "", userEmail: parentData.email ?? "" } : undefined
+      }
+      changePasswordSection={isAdminScope ? null : <ChangePasswordSection />}
+    />
   );
 }

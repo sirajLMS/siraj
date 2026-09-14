@@ -52,18 +52,6 @@ type PackagePlanUpdateShape = {
   readonly version?: number | null;
 };
 
-type AccountingPaymentSubmitShape = {
-  readonly studentId: string;
-  readonly packagePlanId?: string | null;
-  readonly creditHours: number;
-  readonly amount: number;
-  readonly currency: string | null;
-  readonly paymentGateway: string | null;
-  readonly paymentDate: string | Date;
-  readonly isPaidStatusOn?: boolean | null;
-  readonly paymentNote?: string | null;
-};
-
 type AccountingPaymentUpdateShape = {
   readonly id: string;
   readonly paymentGateway?: string | null;
@@ -113,12 +101,12 @@ function normalizePackagePlanUpdate(input: PackagePlanUpdateShape): PackagePlanU
   return patch;
 }
 
-function normalizeAccountingPaymentSubmit(input: AccountingPaymentSubmitShape): AccountingPaymentSubmitInput {
+function normalizeAccountingPaymentSubmit(input: AccountingPaymentSubmitInput): AccountingPaymentSubmitInput {
   return {
     studentId: input.studentId,
     packagePlanId: input.packagePlanId ?? null,
-    creditHours: input.creditHours ?? 0,
-    amount: input.amount ?? 0,
+    creditHours: input.creditHours,
+    amount: input.amount,
     currency: currencyOf(input.currency),
     paymentGateway: gatewayOf(input.paymentGateway),
     paymentDate: new Date(input.paymentDate),

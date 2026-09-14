@@ -1,5 +1,5 @@
 import { ComplaintStatus } from "@/backend/enum";
-import type { ComplaintMetrics } from "@/backend/types";
+import type { ComplaintAvgHoursData, ComplaintMetrics, ComplaintStatusCountData } from "@/backend/types";
 
 /**
  * Display formatting — converts hours to a human-readable duration string.
@@ -15,19 +15,6 @@ function formatDuration(hours: number): string {
     const remainingHours = Math.round(hours % 24);
     return `${days}d ${remainingHours}h`;
   }
-}
-
-/**
- * Raw status count data returned by the repository layer.
- * The service layer uses this to derive the final `ComplaintMetrics`.
- */
-export interface ComplaintStatusCountData {
-  status: string;
-  count: number;
-}
-
-export interface ComplaintAvgHoursData {
-  avgHours: number | null;
 }
 
 /**

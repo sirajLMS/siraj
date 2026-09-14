@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Button, Typography } from "@mui/material";
-import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import {
   WeeklyScheduleSlotItemShared,
   type WeeklyScheduleSlotItemSharedOptions,
@@ -218,17 +217,16 @@ export default function MobileScheduleList({
   hasScheduleDeleteClass,
   labels,
   meetingJoinLabels,
+  selectedDay,
+  onSelectDay,
 }: Readonly<MobileScheduleListProps>) {
-  const selectedDay = useWeeklyScheduleStore(state => state.selectedDay);
-  const setSelectedDay = useWeeklyScheduleStore(state => state.setSelectedDay);
-
   const getClassesForSlot = (day: string, time: string) => {
     return classes.filter(c => c.day?.toLowerCase() === day && c.startTime === time);
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <DaySelector selectedDay={selectedDay} onSelect={setSelectedDay} labels={labels} />
+      <DaySelector selectedDay={selectedDay} onSelect={onSelectDay} labels={labels} />
 
       <Box
         sx={theme => ({

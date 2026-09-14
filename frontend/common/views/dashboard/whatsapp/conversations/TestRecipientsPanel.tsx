@@ -17,7 +17,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { StatusBadge } from "@/frontend/common/components/ui";
+import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui/button/ActionButtons";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { PhoneInput } from "@/frontend/common/components/ui/input/phoneInput/PhoneInput";
 import { META_WHATSAPP_API_SETUP_URL } from "@/frontend/common/views/dashboard/whatsapp/conversations/TestNumberBanner";
 import type {
@@ -55,7 +57,6 @@ export interface TestRecipientsPanelProps {
 }
 
 const ADD_DIALOG_ID = "whatsapp-add-test-recipient-dialog";
-const REMOVE_DIALOG_ID = "whatsapp-remove-test-recipient-dialog";
 
 function RecipientStatusLine({ row }: Readonly<{ row: WhatsappRecipientViewRow }>) {
   return (
@@ -90,7 +91,6 @@ function RecipientRow({ row, labels, canManage, verifying, onAskRemove, onVerify
       direction={{ xs: "column", md: "row" }}
       spacing={1.5}
       sx={{
-        px: 2,
         py: 1.5,
         alignItems: { xs: "stretch", md: "center" },
         borderTop: theme => `1px solid ${theme.palette.outlineVariant}`,
@@ -196,63 +196,11 @@ function AddRecipientDialog({
   );
 }
 
-function RemoveRecipientDialog({
-  labels,
-  open,
-  confirmText,
-  busy,
-  onClose,
-  onConfirm,
-}: Readonly<{
-  labels: WhatsappRecipientPanelLabels;
-  open: boolean;
-  confirmText: string;
-  busy: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-}>) {
-  return (
-    <Dialog open={open} onClose={onClose} aria-labelledby={REMOVE_DIALOG_ID} maxWidth="xs" fullWidth>
-      <DialogTitle id={REMOVE_DIALOG_ID}>{labels.removeRecipientDialogTitle}</DialogTitle>
-      <DialogContent>
-        <Typography variant="bodyMd">{confirmText}</Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={busy}>
-          {labels.dialogCancel}
-        </Button>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={onConfirm}
-          disabled={busy}
-          startIcon={busy ? <CircularProgress size={16} /> : undefined}
-        >
-          {labels.recipientRemove}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
-
 type PanelActionProps = Pick<TestRecipientsPanelProps, "labels" | "canManage" | "limitReached" | "onOpenAdd">;
-
-function PanelHeader({ labels, canManage, limitReached, onOpenAdd }: Readonly<PanelActionProps>) {
-  return (
-    <Stack direction="row" spacing={1} sx={{ p: 2, alignItems: "center", justifyContent: "space-between" }}>
-      <Typography variant="titleLg">{labels.recipientsTitle}</Typography>
-      {canManage && (
-        <Button size="small" variant="outlined" startIcon={<AddOutlined />} onClick={onOpenAdd} disabled={limitReached}>
-          {labels.recipientAdd}
-        </Button>
-      )}
-    </Stack>
-  );
-}
 
 function PanelLoadingSkeletons() {
   return (
-    <Stack spacing={1} sx={{ px: 2, pb: 2 }} aria-busy>
+    <Stack spacing={1} aria-busy>
       <Skeleton variant="rounded" height={56} />
       <Skeleton variant="rounded" height={56} />
     </Stack>
@@ -261,7 +209,7 @@ function PanelLoadingSkeletons() {
 
 function PanelEmptyState({ labels, canManage, limitReached, onOpenAdd }: Readonly<PanelActionProps>) {
   return (
-    <Stack spacing={1.25} sx={{ px: 2, py: 5, alignItems: "center", textAlign: "center" }}>
+    <Stack spacing={1.25} sx={{ py: 5, alignItems: "center", textAlign: "center" }}>
       <PersonAddAlt1Outlined sx={{ fontSize: 36, color: theme => theme.palette.text.secondary }} />
       <Typography variant="titleLg" sx={{ fontWeight: 700 }}>
         {labels.recipientsEmptyTitle}
@@ -270,15 +218,9 @@ function PanelEmptyState({ labels, canManage, limitReached, onOpenAdd }: Readonl
         {labels.recipientsEmptyDescription}
       </Typography>
       {canManage && (
-        <Button
-          size="small"
-          variant="contained"
-          startIcon={<AddOutlined />}
-          onClick={onOpenAdd}
-          disabled={limitReached}
-        >
+        <PrimaryPageAction size="small" startIcon={<AddOutlined />} onClick={onOpenAdd} disabled={limitReached}>
           {labels.recipientAdd}
-        </Button>
+        </PrimaryPageAction>
       )}
     </Stack>
   );
@@ -316,7 +258,7 @@ function PanelBody({
   return (
     <>
       {notice !== null && notice !== "" && (
-        <Alert severity="error" component="div" sx={{ mx: 2, mb: 1.5 }}>
+        <Alert severity="error" component="div" sx={{ mb: 1.5 }}>
           {notice}
         </Alert>
       )}
@@ -341,7 +283,7 @@ function PanelBody({
 
 function MetaDashboardHintLink({ bannerLabels }: Readonly<{ bannerLabels: WhatsappTestNumberBannerLabels }>) {
   return (
-    <Box sx={{ px: 2, py: 1.5, borderTop: theme => `1px dashed ${theme.palette.outlineVariant}` }}>
+    <Box sx={{ py: 1.5, borderTop: theme => `1px dashed ${theme.palette.outlineVariant}` }}>
       <Link
         href={META_WHATSAPP_API_SETUP_URL}
         target="_blank"
@@ -364,10 +306,20 @@ function MetaDashboardHintLink({ bannerLabels }: Readonly<{ bannerLabels: Whatsa
 export function TestRecipientsPanel(props: Readonly<TestRecipientsPanelProps>) {
   const { labels, bannerLabels, canManage, limitReached, onOpenAdd } = props;
   return (
-    <Stack sx={{ borderRadius: 2, overflow: "hidden", border: theme => `1px solid ${theme.palette.outlineVariant}` }}>
-      <PanelHeader labels={labels} canManage={canManage} limitReached={limitReached} onOpenAdd={onOpenAdd} />
-      <PanelBody {...props} />
-      <MetaDashboardHintLink bannerLabels={bannerLabels} />
+    <>
+      <SectionPanel
+        title={labels.recipientsTitle}
+        actions={
+          canManage ? (
+            <FilterButton size="small" startIcon={<AddOutlined />} onClick={onOpenAdd} disabled={limitReached}>
+              {labels.recipientAdd}
+            </FilterButton>
+          ) : undefined
+        }
+      >
+        <PanelBody {...props} />
+        <MetaDashboardHintLink bannerLabels={bannerLabels} />
+      </SectionPanel>
       <AddRecipientDialog
         labels={labels}
         open={props.addOpen}
@@ -381,14 +333,17 @@ export function TestRecipientsPanel(props: Readonly<TestRecipientsPanelProps>) {
         onNoteChange={props.onAddNoteChange}
         onSubmit={props.onSubmitAdd}
       />
-      <RemoveRecipientDialog
-        labels={labels}
+      <BaseDeleteDialog
         open={props.removeTarget !== null}
-        confirmText={props.removeConfirmText}
-        busy={props.busy}
         onClose={props.onCloseRemove}
         onConfirm={props.onConfirmRemove}
+        isLoading={props.busy}
+        title={labels.removeRecipientDialogTitle}
+        body={props.removeConfirmText}
+        cancelLabel={labels.dialogCancel}
+        confirmLabel={labels.recipientRemove}
+        dialogId="whatsapp-remove-test-recipient-dialog"
       />
-    </Stack>
+    </>
   );
 }

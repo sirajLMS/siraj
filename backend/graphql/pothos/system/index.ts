@@ -5,4 +5,5 @@ export * from "./session-config.pothos";
 export * from "./settings-audit.pothos";
 export * from "./site-appearance-settings.pothos";
 export * from "./site-content-settings.pothos";
+export * from "./test-helper.pothos";
 export * from "./timezones-settings.pothos";

@@ -3,7 +3,6 @@ import { createHash } from "node:crypto";
 import type { PayrollCalculationPatch } from "@/backend/db/repo/scheduling/class-instances";
 import { AppPermission, CalculationStatus, OnDemandStatus, SchedulingMode } from "@/backend/enum";
 import { DomainError, ForbiddenError, logger, NotFoundError } from "@/backend/lib";
-import type { PayrollGraceSettings } from "@/backend/services/teacher/payroll-grace-settings";
 import type {
   ClassInstanceSelectType,
   ClassStatusEventSeedInsertInput,
@@ -11,6 +10,7 @@ import type {
   DBTransaction,
   PayrollCalculationInput,
   PayrollCalculationResult,
+  PayrollGraceSettings,
   PayrollReportFilters,
   PayrollReportPage,
   PayrollReportRow,

@@ -1,9 +1,8 @@
 "use client";
 
-import { Box, Chip } from "@mui/material";
+import { Box } from "@mui/material";
 import type { ProfileTabNavVariantProps } from "@/frontend/common/views/dashboard/profile/core/profileTabNavTypes";
-import type { ProfileTabDefinition } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
-import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
+import { MobileHorizontalScrollRow, MobileTabPill } from "@/frontend/mobile/components/ui";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type ProfileTabNavMobileViewProps = ProfileTabNavVariantProps;
@@ -30,36 +29,12 @@ export function ProfileTabNavMobileView({
       aria-label={t.ariaProfileSections}
     >
       <MobileHorizontalScrollRow>
-        {availableTabs.map((tab: ProfileTabDefinition) => (
-          <Chip
+        {availableTabs.map(tab => (
+          <MobileTabPill
             key={tab.id}
-            role="tab"
-            tabIndex={0}
-            aria-selected={currentTab === tab.id}
             label={labels.shell.tabs[tab.id]}
+            isActive={currentTab === tab.id}
             onClick={() => onTabChange(tab.id)}
-            onKeyDown={event => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                onTabChange(tab.id);
-              }
-            }}
-            sx={theme => ({
-              flexShrink: 0,
-              ...(currentTab === tab.id
-                ? {
-                    bgcolor: theme.palette.primary.main,
-                    color: theme.palette.onPrimary,
-                    borderColor: theme.palette.primary.dark,
-                  }
-                : {
-                    bgcolor: "transparent",
-                    color: theme.palette.text.primary,
-                    borderColor: theme.palette.divider,
-                  }),
-              borderWidth: 1,
-              borderStyle: "solid",
-            })}
           />
         ))}
       </MobileHorizontalScrollRow>

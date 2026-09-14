@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, Button, Skeleton, Typography } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import type { ReactNode } from "react";
+import { ErrorState } from "@/frontend/common/components/ui";
 import { ProfileSkeleton } from "@/frontend/common/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/common/views/dashboard/profile/core/ProfileTabNav";
 import type { ProfileShellProps } from "@/frontend/common/views/dashboard/profile/core/profileShellTypes";
@@ -46,17 +47,7 @@ export function ProfileShellShared({
   }
 
   if (error) {
-    return (
-      <Box sx={{ py: 4, textAlign: "center" }}>
-        <Typography sx={theme => ({ color: theme.palette.error.main })}>{error}</Typography>
-        <Typography sx={{ mt: 2, color: theme => theme.palette.text.secondary }}>{labels.shell.error.retry}</Typography>
-        {onRetry ? (
-          <Button variant="outlined" sx={{ mt: 2 }} onClick={onRetry}>
-            {labels.actions.retry}
-          </Button>
-        ) : null}
-      </Box>
-    );
+    return <ErrorState message={error ?? undefined} retryLabel={labels.actions.retry} onRetry={onRetry} />;
   }
 
   const contentKey = currentTab ?? "content";

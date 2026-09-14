@@ -1,23 +1,31 @@
 import { isIP } from "node:net";
 
+const BRACKETED_IPV6 = /^\[([^\]]+)\](?::\d+)?$/;
+const IPV4_WITH_PORT = /^(\d{1,3}(?:\.\d{1,3}){3}):\d+$/;
+
 /**
- * Sanitize an IP address: strip optional IPv4 port suffix, validate against IPv4
- * or IPv6 format, and fall back to `127.0.0.1` when the value is missing or
- * does not match. Returns `null` when the input is falsy.
+ * Sanitize an IP address for use as a rate-limit identifier: validate against
+ * IPv4 or IPv6 format and strip bracket or port decoration, falling back to
+ * `127.0.0.1` when the value is missing or unparseable. Returns `null` when
+ * the input is falsy.
  *
- * Uses Node's built-in `net.isIP()` for robust validation covering IPv4-mapped
- * IPv6, bracketed forms, zone IDs, and all other edge cases that a hand-rolled
- * regex would miss.
+ * Order matters: full IPv6 must be validated before any `:` handling, since
+ * IPv6 addresses are colon-delimited and a naive split collapses distinct
+ * addresses into a single shared bucket. Uses Node's built-in `net.isIP()`
+ * for validation covering IPv4-mapped IPv6 and all other edge cases.
  */
 export function sanitizeIpAddress(ip: string | null | undefined): string | null {
   if (!ip) return null;
-  // Strip IPv4 port suffix (IPv4:port format)
-  const parts = ip.split(":");
-  const cleanIp = parts.length === 2 ? parts[0] : ip;
-  if (isIP(cleanIp) === 4) return cleanIp;
-  // IPv6 addresses contain multiple colons — validate and return as-is.
-  // Also handle bracketed IPv6 forms like [::1] by stripping brackets.
-  const unbracketed = cleanIp.startsWith("[") && cleanIp.endsWith("]") ? cleanIp.slice(1, -1) : cleanIp;
-  if (isIP(unbracketed) === 6) return unbracketed;
+
+  const bracketed = BRACKETED_IPV6.exec(ip);
+  if (bracketed && isIP(bracketed[1]) === 6) return bracketed[1];
+
+  if (isIP(ip) === 6) return ip;
+
+  const withPort = IPV4_WITH_PORT.exec(ip);
+  if (withPort && isIP(withPort[1]) === 4) return withPort[1];
+
+  if (isIP(ip) === 4) return ip;
+
   return "127.0.0.1";
 }

@@ -83,6 +83,17 @@ type LeaveRequestInsertType = typeof leaveRequests.$inferInsert;
 
 export type CreateLeaveRequestInput = Omit<LeaveRequestInsertType, "id">;
 
+export type RequestSessionDelayInput = {
+  classInstanceId: string;
+  proposedStartAt: Date;
+  reason?: string | null;
+};
+
+export type RequestSessionCancelInput = {
+  classInstanceId: string;
+  reason?: string | null;
+};
+
 export type UpsertStudentLeaveQuotaInput = {
   studentId: string;
   periodYear: number;

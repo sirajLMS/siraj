@@ -153,3 +153,27 @@ describe("TeacherScheduleMobileCard shell states", () => {
     expect(ruleText).toContain(`${ACCENT_WIDTH_CSS} ${theme.palette.info.main}`);
   });
 });
+
+describe("TeacherScheduleMobileCard student profile link", () => {
+  test("renders profile links targeting studentHref(studentId) on the header and the info row", () => {
+    const row = makeRow({ studentId: "student-1", meetingJoinUrl: null });
+    const result = renderCard(row);
+
+    // Both the header name and the avatar info-row link resolve through the
+    // same canonical student profile target.
+    const profileLinks = result.container.querySelectorAll('a[href="/students/student-1/profile?tab=status"]');
+    expect(profileLinks).toHaveLength(2);
+  });
+
+  test("falls back to non-linked typography when the student id is absent", () => {
+    const row = makeRow({ studentId: undefined });
+    const result = renderCard(row);
+
+    expect(result.container.querySelectorAll('a[href^="/students/"]')).toHaveLength(0);
+    const nameNodes = within(result.container).getAllByText("سارة أحمد");
+    expect(nameNodes.length).toBeGreaterThan(0);
+    for (const nameNode of nameNodes) {
+      expect(nameNode.closest("a")).toBeNull();
+    }
+  });
+});

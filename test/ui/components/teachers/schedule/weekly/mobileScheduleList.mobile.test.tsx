@@ -37,10 +37,14 @@ function renderList({
   classes = [makeDeletableScheduledClass()],
   onRemoveClass = mock((_: string) => {}),
   hasScheduleDeleteClass = true,
+  selectedDay = "monday",
+  onSelectDay = mock((_: string) => {}),
 }: {
   readonly classes?: readonly ScheduledClass[];
   readonly onRemoveClass?: (id: string) => void;
   readonly hasScheduleDeleteClass?: boolean;
+  readonly selectedDay?: string;
+  readonly onSelectDay?: (day: string) => void;
 } = {}) {
   return render(
     <MobileScheduleList
@@ -49,6 +53,8 @@ function renderList({
       hasScheduleDeleteClass={hasScheduleDeleteClass}
       labels={weeklyScheduleLabels}
       meetingJoinLabels={meetingJoinLabels}
+      selectedDay={selectedDay}
+      onSelectDay={onSelectDay}
     />,
     {
       wrapper: ({ children }: { readonly children: ReactNode }) => (
@@ -154,8 +160,8 @@ describe("MobileScheduleList store-driven delete dialog", () => {
   });
 });
 
-describe("MobileScheduleList day selector (store-backed)", () => {
-  test("defaults to monday and switches the filtered day via the store", () => {
+describe("MobileScheduleList day selector (props-driven)", () => {
+  test("filters slots from the selectedDay prop only and reports day clicks via onSelectDay", () => {
     const mondayClass = makeDeletableScheduledClass({
       id: "class-mon",
       day: "monday",
@@ -166,16 +172,28 @@ describe("MobileScheduleList day selector (store-backed)", () => {
       day: "tuesday",
       subjectName: "Fixture Tuesday Subject",
     });
+    const onSelectDay = mock((_: string) => {});
 
-    renderList({ classes: [mondayClass, tuesdayClass] });
+    const { rerender } = renderList({ classes: [mondayClass, tuesdayClass], onSelectDay });
 
-    expect(useWeeklyScheduleStore.getState().selectedDay).toBe("monday");
     expect(screen.getByText("Fixture Monday Subject")).toBeInTheDocument();
     expect(screen.queryByText("Fixture Tuesday Subject")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: weeklyScheduleLabels.days.tue }));
+    expect(onSelectDay).toHaveBeenCalledWith("tuesday");
 
-    expect(useWeeklyScheduleStore.getState().selectedDay).toBe("tuesday");
+    rerender(
+      <MobileScheduleList
+        classes={[mondayClass, tuesdayClass]}
+        onRemoveClass={mock((_: string) => {})}
+        hasScheduleDeleteClass={true}
+        labels={weeklyScheduleLabels}
+        meetingJoinLabels={meetingJoinLabels}
+        selectedDay="tuesday"
+        onSelectDay={onSelectDay}
+      />
+    );
+
     expect(screen.queryByText("Fixture Monday Subject")).toBeNull();
     expect(screen.getByText("Fixture Tuesday Subject")).toBeInTheDocument();
   });

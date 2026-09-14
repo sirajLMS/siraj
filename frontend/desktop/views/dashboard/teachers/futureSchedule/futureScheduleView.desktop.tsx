@@ -13,8 +13,16 @@ import { JumpToDateHeaderDesktop } from "@/frontend/desktop/views/dashboard/teac
 import { MiniCalendarDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/miniCalendar.desktop";
 import { SupportContactDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/supportContact.desktop";
 
-// Desktop intentionally keeps the plain card stack — no list primitive or
-// pager — so the wrapper just materializes each row through renderItem.
+/**
+ * Desktop list wrapper for the teacher's future classes: materializes each
+ * row as a plain card in a stacked fragment list — no list primitive or pager.
+ *
+ * The underlying `teacherFutureSchedule` aggregate is intentionally
+ * unpaginated: the query is server-scoped to a single `teacherId` and returns
+ * every upcoming class for that teacher, so the desktop tier renders the
+ * complete set inline (the mobile tier paginates the same rows via its list
+ * primitive).
+ */
 function FutureClassListDesktop({ rows, getKey, renderItem }: FutureClassListWrapperProps) {
   return (
     <>

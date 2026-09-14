@@ -14,12 +14,23 @@ export type UserSelectType = typeof users.$inferSelect;
 export type UserInsertType = typeof users.$inferInsert;
 
 /**
- * A full `UserSelectType` with `password` and `rememberTokenHash` optional
- * (set to `undefined` when stripped for security — see `BaseContext.safeUser`, R4-34).
- * Used by `gqlContext.ts`, `auth.utils.ts`, and related tests.
+ * A `UserSelectType` guaranteed to carry no credential material. `password` and
+ * `rememberTokenHash` are removed from the shape and typed as `never`, so any
+ * attempt to assign a real value to either field fails to compile. Produced by
+ * stripping the fields from `UserService.findSafeById` before the record is
+ * stored on `BaseContext.safeUser` in `gqlContext.ts`.
  */
-export type SanitizedUserSelectType = Omit<UserSelectType, "password" | "rememberTokenHash"> &
-  Partial<Pick<UserSelectType, "password" | "rememberTokenHash">>;
+export type SanitizedUserSelectType = Omit<UserSelectType, "password" | "rememberTokenHash"> & {
+  password?: never;
+  rememberTokenHash?: never;
+};
+
+/**
+ * Input accepted by user-to-return-type converters: either the full record
+ * (credentials still present, stripped during conversion) or an already
+ * sanitized record with credentials removed.
+ */
+export type UserReturnTypeInput = UserSelectType | SanitizedUserSelectType;
 
 // Return type
 // Canonical: {Entity}ReturnType must omit forbidden fields, re-apply enums, and add resolved optionals
@@ -41,14 +52,6 @@ export type UserReturnType = Omit<
   displayCurrency: CurrencyCode | null; // Re-apply enum (nullable)
   teacherId?: string | null; // Resolved optional: teacherId if applies
   parentId?: string | null; // Resolved optional: parentId if applies
-};
-
-export type UserCreateInput = {
-  name: string;
-  email: { value: string };
-  /** Pre-hashed password (bcrypt). The repository layer stores this as-is — hashing is the service layer's responsibility. */
-  passwordHash: string;
-  avatarUrl?: string | null;
 };
 
 /**

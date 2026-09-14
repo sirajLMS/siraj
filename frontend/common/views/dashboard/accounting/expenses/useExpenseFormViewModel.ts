@@ -145,8 +145,8 @@ function createExpenseFormSchema(copy: ExpenseValidationCopy) {
     });
 }
 
-export type ExpenseFormInput = z.input<ReturnType<typeof createExpenseFormSchema>>;
-export type ExpenseFormData = z.output<ReturnType<typeof createExpenseFormSchema>>;
+type ExpenseFormInput = z.input<ReturnType<typeof createExpenseFormSchema>>;
+type ExpenseFormData = z.output<ReturnType<typeof createExpenseFormSchema>>;
 
 /** Post-validation view of the form where the required select fields are non-null. */
 type ValidExpenseData = Omit<ExpenseFormData, "type" | "expenseCurrency" | "paymentDate" | "expenseMonth"> & {

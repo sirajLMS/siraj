@@ -1,6 +1,20 @@
 import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 
-export type SessionAuditStatus = "open" | "end" | "Absent" | "absent_student";
+/**
+ * Canonical runtime enum for the session audit report statuses. It is the
+ * single source of truth for both frontend and backend: the GraphQL enum
+ * registration and the report domain model derive their status values from
+ * this enum so the wire values can never drift.
+ */
+export enum SessionAuditStatusEnum {
+  open = "open",
+  end = "end",
+  Absent = "Absent",
+  absent_student = "absent_student",
+}
+
+/** String-union view of the canonical audit statuses for type positions. */
+export type SessionAuditStatus = `${(typeof SessionAuditStatusEnum)[keyof typeof SessionAuditStatusEnum]}`;
 
 /**
  * Maps the execution-state + outcome + actual-start-at triple of a class

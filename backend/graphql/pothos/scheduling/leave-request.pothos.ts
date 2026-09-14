@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import type { LeaveRequestSelectType } from "@/backend/types";
+import type {
+  LeaveRequestSelectType,
+  RequestSessionCancelInput,
+  RequestSessionDelayInput,
+} from "@/backend/types";
 
 // ---------------------------------------------------------------------------
 // Object type — single canonical, includes `id` (Apollo cache normalization).
@@ -31,11 +35,7 @@ export const LeaveRequestPothosObject = LeaveRequestRef.implement({
 // ---------------------------------------------------------------------------
 
 export const RequestSessionDelayInputPothosObject = gqlSchemaBuilder
-  .inputRef<{
-    classInstanceId: string;
-    proposedStartAt: Date;
-    reason?: string | null;
-  }>("RequestSessionDelayInput")
+  .inputRef<RequestSessionDelayInput>("RequestSessionDelayInput")
   .implement({
     description: "Input for a student/parent requesting a session delay (reschedule).",
     fields: t => ({
@@ -46,10 +46,7 @@ export const RequestSessionDelayInputPothosObject = gqlSchemaBuilder
   });
 
 export const RequestSessionCancelInputPothosObject = gqlSchemaBuilder
-  .inputRef<{
-    classInstanceId: string;
-    reason?: string | null;
-  }>("RequestSessionCancelInput")
+  .inputRef<RequestSessionCancelInput>("RequestSessionCancelInput")
   .implement({
     description: "Input for a student/parent requesting a session cancellation.",
     fields: t => ({

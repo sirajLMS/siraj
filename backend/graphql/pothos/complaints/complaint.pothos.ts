@@ -1,6 +1,9 @@
-import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponsePothosObject } from "@/backend/graphql/pothos/complaints/complaintResponses.pothos";
+import {
+  ComplaintCategoryPothosEnum,
+  ComplaintStatusPothosEnum,
+} from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
   ComplaintFileMetadataInput,
@@ -13,16 +16,6 @@ import type {
   ComplaintSubmitWithFilesInput,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
-
-export const ComplaintCategoryPothosEnum = gqlSchemaBuilder.enumType(ComplaintCategory, {
-  name: "ComplaintCategory",
-  description: "Categories for parent complaints.",
-});
-
-export const ComplaintStatusPothosEnum = gqlSchemaBuilder.enumType(ComplaintStatus, {
-  name: "ComplaintStatus",
-  description: "Status of a complaint in the support queue.",
-});
 
 export const ComplaintFileRef = gqlSchemaBuilder.objectRef<ComplaintFileReturnType>("ComplaintFile");
 

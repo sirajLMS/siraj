@@ -1,27 +1,37 @@
 "use client";
 
 import { ForumOutlined } from "@mui/icons-material";
-import {
-  Avatar,
-  Box,
-  Chip,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Skeleton, Stack, Typography } from "@mui/material";
+import type { ReactNode } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import { PaginationControls } from "@/frontend/common/components/ui/filter";
+import { UserAvatar } from "@/frontend/common/components/ui/avatar";
+import { FilterChip, type ServerListPaginationOptions } from "@/frontend/common/components/ui/filter";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { textDirection } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/textDirection";
+import { WhatsappAccountSelect } from "@/frontend/common/views/dashboard/whatsapp/components";
 import type {
   WhatsappConversationListLabels,
   WhatsappConversationRow,
   WhatsappConversationsAccountOption,
 } from "@/frontend/common/views/dashboard/whatsapp/conversations/types/whatsappConversationsView.types";
+
+/**
+ * Everything the tier shell owns: the scaffold hands the toolbar, the
+ * loading/empty branches, the prepared rows with their renderer, the server
+ * pagination config, and the list's aria label — the shell decides the panel
+ * chrome, the row container, and the pager.
+ */
+export interface ConversationListShellArgs {
+  readonly toolbar: ReactNode;
+  readonly skeleton: ReactNode | null;
+  readonly empty: ReactNode | null;
+  readonly rows: readonly WhatsappConversationRow[];
+  readonly renderRow: (row: WhatsappConversationRow) => ReactNode;
+  readonly paginationOptions: ServerListPaginationOptions;
+  readonly rowsAriaLabel: string;
+}
+
+export type ConversationListShell = (args: ConversationListShellArgs) => ReactNode;
 
 export interface ConversationListSharedProps {
   readonly labels: WhatsappConversationListLabels;
@@ -33,10 +43,8 @@ export interface ConversationListSharedProps {
   readonly conversations: readonly WhatsappConversationRow[];
   readonly loading: boolean;
   readonly selectedConversationId: string | null;
-  readonly totalCount: number;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly onPageChange: (page: number) => void;
+  readonly paginationOptions: ServerListPaginationOptions;
+  readonly listShell: ConversationListShell;
   readonly onSelectConversation: (conversationId: string) => void;
   readonly formatTimestamp: (iso: string | null) => string;
   readonly accountLabel: (accountId: string | null) => string | null;
@@ -64,31 +72,23 @@ function ListToolbar({
 >) {
   return (
     <Stack spacing={2} sx={{ p: 2 }}>
-      <FormControl size="small" fullWidth>
-        <InputLabel id="whatsapp-conversations-account-select">{labels.accountSelectorLabel}</InputLabel>
-        <Select
-          labelId="whatsapp-conversations-account-select"
-          value={accountId ?? ""}
-          label={labels.accountSelectorLabel}
-          onChange={event => {
-            if (event.target.value !== "") {
-              onAccountChange(event.target.value);
-            }
-          }}
-        >
-          {accounts.map(account => (
-            <MenuItem
-              key={account.id}
-              value={account.id}
-              dir={textDirection(account.label)}
-              sx={{ unicodeBidi: "isolate" }}
-            >
-              {account.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <WhatsappAccountSelect
+        label={labels.accountSelectorLabel}
+        accounts={accounts}
+        value={accountId}
+        onChange={onAccountChange}
+      />
       <SearchBarField value={search} placeholder={labels.searchPlaceholder} onChange={onSearchChange} />
+    </Stack>
+  );
+}
+
+function ListSkeleton() {
+  return (
+    <Stack spacing={1} sx={{ px: 2, pb: 2 }} aria-busy>
+      {LIST_SKELETON_KEYS.map(key => (
+        <Skeleton key={key} variant="rounded" height={64} />
+      ))}
     </Stack>
   );
 }
@@ -151,7 +151,7 @@ function ConversationListRow({
         "&:focus-visible": { backgroundColor: theme.palette.action.hover },
       })}
     >
-      <Avatar sx={{ width: 40, height: 40, flexShrink: 0 }}>{contact.slice(0, 2) || "?"}</Avatar>
+      <UserAvatar label={contact} sx={{ width: 40, height: 40 }} />
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography
           variant="titleLg"
@@ -184,7 +184,7 @@ function ConversationListRow({
         {(showAccountChip || isTestNumber) && (
           <Stack direction="row" spacing={0.75} sx={{ mt: 0.5, flexWrap: "wrap" }}>
             {showAccountChip && accountLabel !== null && (
-              <Chip size="small" variant="outlined" dir="auto" label={accountLabel} sx={{ maxWidth: 220 }} />
+              <FilterChip label={accountLabel ?? ""} dir="auto" sx={{ maxWidth: 220 }} />
             )}
             {isTestNumber && <StatusBadge category="syncStatus" status="partial" label={labels.testNumberBadge} />}
           </Stack>
@@ -207,10 +207,12 @@ function ConversationListRow({
 }
 
 /**
- * Shared conversation list panel for the `/whatsapp` workspace: number
- * selector + contact search toolbar, bordered row list with contact preview
- * and the owning account chip, and server-driven pagination. Used verbatim by
- * both tiers — there are no viewport-specific code paths inside.
+ * Tier-neutral conversation list scaffold for the `/whatsapp` workspace:
+ * account selector + contact search toolbar, contact rows with preview and
+ * the owning account chip, and the loading/empty branches. The tier-specific
+ * shell (panel chrome, row container, pager) is injected via `listShell` —
+ * desktop renders a `SectionPanel` with sibling pagination controls, mobile a
+ * `MobileSectionPanel` wrapping an edge-to-edge `MobileCardList`.
  */
 export function ConversationListShared({
   labels,
@@ -222,10 +224,8 @@ export function ConversationListShared({
   conversations,
   loading,
   selectedConversationId,
-  totalCount,
-  page,
-  pageSize,
-  onPageChange,
+  paginationOptions,
+  listShell,
   onSelectConversation,
   formatTimestamp,
   accountLabel,
@@ -234,8 +234,9 @@ export function ConversationListShared({
   const showSkeleton = loading && conversations.length === 0;
   const showEmpty = !loading && conversations.length === 0;
   const showAccountChip = accounts.length > 1;
-  return (
-    <Stack sx={{ borderRadius: 2, overflow: "hidden", border: theme => `1px solid ${theme.palette.outlineVariant}` }}>
+
+  return listShell({
+    toolbar: (
       <ListToolbar
         labels={labels}
         accounts={accounts}
@@ -244,38 +245,24 @@ export function ConversationListShared({
         search={search}
         onSearchChange={onSearchChange}
       />
-      {showSkeleton && (
-        <Stack spacing={1} sx={{ px: 2, pb: 2 }} aria-busy>
-          {LIST_SKELETON_KEYS.map(key => (
-            <Skeleton key={key} variant="rounded" height={64} />
-          ))}
-        </Stack>
-      )}
-      {showEmpty && <ListEmptyState labels={labels} />}
-      {!showSkeleton && !showEmpty && (
-        <Stack aria-label={labels.columnContact}>
-          {conversations.map(conversation => (
-            <ConversationListRow
-              key={conversation.id}
-              conversation={conversation}
-              labels={labels}
-              selected={conversation.id === selectedConversationId}
-              showAccountChip={showAccountChip}
-              accountLabel={accountLabel(conversation.accountId)}
-              isTestNumber={accountIsTestNumber(conversation.accountId)}
-              onSelectConversation={onSelectConversation}
-              formatTimestamp={formatTimestamp}
-            />
-          ))}
-        </Stack>
-      )}
-      <PaginationControls
-        page={page}
-        pageCount={Math.max(1, Math.ceil(totalCount / pageSize))}
-        rowCount={totalCount}
-        pageSize={pageSize}
-        onPageChange={onPageChange}
+    ),
+    skeleton: showSkeleton ? <ListSkeleton /> : null,
+    empty: showEmpty ? <ListEmptyState labels={labels} /> : null,
+    rows: conversations,
+    renderRow: conversation => (
+      <ConversationListRow
+        key={conversation.id}
+        conversation={conversation}
+        labels={labels}
+        selected={conversation.id === selectedConversationId}
+        showAccountChip={showAccountChip}
+        accountLabel={accountLabel(conversation.accountId)}
+        isTestNumber={accountIsTestNumber(conversation.accountId)}
+        onSelectConversation={onSelectConversation}
+        formatTimestamp={formatTimestamp}
       />
-    </Stack>
-  );
+    ),
+    paginationOptions,
+    rowsAriaLabel: labels.columnContact,
+  });
 }

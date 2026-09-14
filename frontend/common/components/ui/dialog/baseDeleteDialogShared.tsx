@@ -18,14 +18,23 @@ export function BaseDeleteDialogScaffold({
   body,
   cancelLabel,
   confirmLabel,
+  dialogId,
   confirmSx,
   fullScreen,
+  children,
   CancelActionButton,
   ConfirmActionButton,
 }: Readonly<BaseDeleteDialogScaffoldProps>) {
   return (
-    <Dialog open={open} onClose={isLoading ? undefined : onClose} maxWidth="xs" fullWidth fullScreen={fullScreen}>
-      <DialogTitle sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <Dialog
+      open={open}
+      onClose={isLoading ? undefined : onClose}
+      maxWidth="xs"
+      fullWidth
+      fullScreen={fullScreen}
+      aria-labelledby={dialogId}
+    >
+      <DialogTitle id={dialogId} sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Box
           sx={theme => ({
             width: 64,
@@ -49,6 +58,7 @@ export function BaseDeleteDialogScaffold({
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, textAlign: "center" })}>
           {body}
         </Typography>
+        {children && <Box sx={{ mt: 2 }}>{children}</Box>}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
         <CancelActionButton fullWidth onClick={onClose} disabled={isLoading} sx={{ py: 1.5 }}>

@@ -1,10 +1,11 @@
 "use client";
 
-import { MenuItem, Stack, TextField } from "@mui/material";
+import { Stack, TextField } from "@mui/material";
 import type { UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import { AccountStatusSelect } from "@/frontend/common/views/dashboard/profile/shared/AccountStatusSelect";
 import { AdminStatusSection } from "@/frontend/common/views/dashboard/profile/shared/AdminStatusSection";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import {
@@ -36,10 +37,15 @@ export function AdminOnlySection(props: AdminOnlySectionProps) {
       <SectionPanel title={t.sections.adminOnly}>
         <Stack spacing={2}>
           <TextField label={t.fields.nationalId} fullWidth size="small" {...props.register("nationalId")} />
-          <TextField label={t.fields.status} fullWidth size="small" select {...props.register("status")}>
-            <MenuItem value={AccountStatus.Activated}>{t.status.activated}</MenuItem>
-            <MenuItem value={AccountStatus.Deactivated}>{t.status.deactivated}</MenuItem>
-          </TextField>
+          <AccountStatusSelect
+            name="status"
+            label={t.fields.status}
+            options={[
+              { value: AccountStatus.Activated, label: t.status.activated },
+              { value: AccountStatus.Deactivated, label: t.status.deactivated },
+            ]}
+            register={props.register}
+          />
         </Stack>
       </SectionPanel>
     );

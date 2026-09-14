@@ -35,6 +35,8 @@ export interface TeacherWeeklyScheduleViewSharedSlots {
       hasScheduleDeleteClass: boolean;
       labels: ScheduleLabels;
       meetingJoinLabels: TeacherWeeklyScheduleViewProps["meetingJoinLabels"];
+      selectedDay: string;
+      onSelectDay: (day: string) => void;
     }>
   >;
   readonly LegendBar?: FC<Readonly<{ labels: ScheduleLabels; schedule: Schedule }>>;
@@ -78,6 +80,8 @@ export function TeacherWeeklyScheduleViewShared({
   hasScheduleDeleteClass,
   labels,
   meetingJoinLabels,
+  selectedDay,
+  onSelectDay,
   slots,
 }: Readonly<TeacherWeeklyScheduleViewProps> & {
   readonly slots: TeacherWeeklyScheduleViewSharedSlots;
@@ -124,6 +128,8 @@ export function TeacherWeeklyScheduleViewShared({
         hasScheduleDeleteClass={hasScheduleDeleteClass}
         labels={labels}
         meetingJoinLabels={meetingJoinLabels}
+        selectedDay={selectedDay}
+        onSelectDay={onSelectDay}
       />
 
       {LegendBar ? <LegendBar labels={t} schedule={schedule} /> : null}

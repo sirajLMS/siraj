@@ -5,7 +5,7 @@ import {
   DeleteClassInstanceResultPothosObject,
   LeaveProcessResultPothosObject,
   RescheduleClassInputPothosObject,
-} from "@/backend/graphql/pothos/classes/class-session.pothos";
+} from "@/backend/graphql/pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { type ClassActionFn, ClassSessionService } from "@/backend/services";

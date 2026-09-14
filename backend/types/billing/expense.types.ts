@@ -62,12 +62,6 @@ export interface UpdateExpenseInput {
   actorUserId: string;
 }
 
-export interface DeleteExpenseInput {
-  id: string;
-  reason?: string | null;
-  actorUserId: string;
-}
-
 export interface BulkDeleteExpensesInput {
   ids: readonly string[];
   reason?: string | null;
@@ -107,44 +101,27 @@ export interface ExpenseFilters {
 }
 
 /**
- * One expense row as read by the list query: the persisted columns plus the
- * creator's display name resolved by join. Timestamps stay as `Date` here;
- * the service layer serializes them for API consumers.
+ * Page-level result of the expense ledger list query as returned by the
+ * repository: the persisted rows plus the creator's display name resolved by
+ * join, with timestamps still as `Date`. The service layer serializes each
+ * row into the canonical `ExpenseRow` (ISO strings) for API consumers.
  */
-export type ExpenseListRow = ExpenseSelectType & {
-  createdByName: string;
-};
-
 export interface ExpensePageResult {
-  rows: ExpenseListRow[];
+  rows: (ExpenseSelectType & { createdByName: string })[];
   totalCount: number;
 }
 
 /**
- * One expense as returned to API consumers; timestamps are serialized as
- * ISO strings.
+ * The canonical expense row returned to API consumers, derived from the
+ * persisted columns: timestamps are serialized as ISO strings and the
+ * creator's display name is resolved by join.
  */
-export interface ExpenseRow {
-  id: string;
-  teacherId: string | null;
-  teacherName: string | null;
-  title: string;
-  type: ExpenseType;
-  expenseValue: string;
-  expenseCurrency: CurrencyCode;
-  paymentDate: string;
-  expenseDate: string;
-  note: string | null;
-  sourceEntity: string | null;
-  sourceEntityId: string | null;
-  createdByUserId: string;
+export type ExpenseRow = Omit<ExpenseSelectType, "createdAt" | "updatedAt" | "deletedAt"> & {
   createdByName: string;
   deletedAt: string | null;
-  deletedByUserId: string | null;
-  deletedReason: string | null;
   createdAt: string;
   updatedAt: string;
-}
+};
 
 export interface ExpensePage {
   rows: ExpenseRow[];

@@ -29,7 +29,7 @@ const NO_TARGET: ExpensesOverlayTarget = { kind: "none" };
 const EMPTY_ROWS: readonly ExpenseRow[] = [];
 
 /** Opens the expense detail drawer for a list row; a missing id never opens anything. */
-export type OpenExpenseDrawer = (row: ExpenseRow) => void;
+type OpenExpenseDrawer = (row: ExpenseRow) => void;
 
 /** Props served to both responsive tier views: the full view model plus the lifted overlay openers. */
 export type ExpensesViewProps = ExpensesViewModel &

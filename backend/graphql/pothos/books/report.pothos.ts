@@ -1,17 +1,11 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
-import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { ReportGroupingMode } from "@/backend/services";
+import { CurrencyCodePothosObject, ReportGroupingModeEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   AttendanceReportPaidAmountReturnType,
   AttendanceReportResult,
   AttendanceReportRowReturnType,
 } from "@/backend/types";
-
-export const ReportGroupingModeEnum = gqlSchemaBuilder.enumType(ReportGroupingMode, {
-  name: "ReportGroupingMode",
-  description: "Determines how the attendance data is aggregated.",
-});
 
 export const AttendanceReportFiltersInput = gqlSchemaBuilder.inputType("AttendanceReportFiltersInput", {
   description: "Filters applied to the dynamic attendance query engine.",

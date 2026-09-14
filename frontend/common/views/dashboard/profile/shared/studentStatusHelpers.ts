@@ -1,4 +1,4 @@
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import { AccountStatus, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
 
 export const STUDENT_STATUS_OPTIONS = [
@@ -37,4 +37,20 @@ export function getStudentStatusColor(
     default:
       return "activated";
   }
+}
+
+/**
+ * Maps a raw DB status string to the account-status value the shared admin
+ * section select expects: only a deactivated account edits as deactivated,
+ * every other lifecycle state (or an unset value) edits as activated.
+ */
+const ACCOUNT_STATUS_EDIT_DEFAULT_BY_STATUS: Record<string, AccountStatus> = {
+  [StudentStatus.Deactivated]: AccountStatus.Deactivated,
+};
+
+export function toAccountStatusDefaultValue(status: string | null): AccountStatus {
+  if (status != null && status in ACCOUNT_STATUS_EDIT_DEFAULT_BY_STATUS) {
+    return ACCOUNT_STATUS_EDIT_DEFAULT_BY_STATUS[status];
+  }
+  return AccountStatus.Activated;
 }

@@ -1,17 +1,5 @@
+import type { CarryoverAggregateInstance } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-
-/**
- * Minimal session shape consumed by the carryover aggregation helpers.
- * Structural — Drizzle `ClassInstanceSelectType` rows satisfy it without
- * mapping, and the fields are optional so partially-selected instances
- * (e.g. from narrowed selects) still type-check.
- */
-export interface CarryoverAggregateInstance {
-  teacherId: string;
-  teacherPaidCurrency?: CurrencyCode | null;
-  calculatedDuration?: number | null;
-  scheduledStartAt?: Date | string | null;
-}
 
 const ISO_DATE_LENGTH = 10;
 const HALF_UNIT = 0.5;

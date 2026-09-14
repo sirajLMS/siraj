@@ -1,17 +1,20 @@
-import { ParentRepository } from "@/backend/db/repo/parents";
 import { StudentRepository } from "@/backend/db/repo/students";
-import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
-import { type AppLanguage, AppPermission, type Gender, StudentStatus } from "@/backend/enum";
+import { type AppLanguage, type Gender, StudentStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
 import {
   canEditStudentFieldGroup,
   filterStudentProfileByFieldGroups,
 } from "@/backend/services/profile/profile-field-filter";
-import { STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
+import { assertStudentReadAccess, resolveIsAssociatedViewer } from "@/backend/services/student/student-access.helpers";
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
-import type { StudentFieldFilterContext, StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types";
+import type {
+  StudentFieldFilterContext,
+  StudentProfileCoreReturnType,
+  StudentProfileEditInput,
+  StudentProfileReturnType,
+} from "@/backend/types";
 import {
   parseAppLanguage,
   parseCurrencyCodeOrNull,
@@ -27,77 +30,9 @@ type GetProfileOptions = {
   readonly includeUpcomingClasses?: boolean;
 };
 
-async function hasAnyStudentViewPermission(actorUserId: string): Promise<boolean> {
-  const viewKeys = STUDENT_FIELD_GROUPS.flatMap(group => [group.viewOwn, group.viewOther]);
-  return PermissionsService.hasAnyPermission(actorUserId, viewKeys);
-}
-
-async function assertCanViewStudentProfile(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
-  const hasLegacy = await PermissionsService.hasPermission(actorUserId, AppPermission.STUDENT_VIEW_ASSOCIATED);
-  if (hasLegacy) {
-    return;
-  }
-  if (await hasAnyStudentViewPermission(actorUserId)) {
-    return;
-  }
-  throw new Error(tErrors.insufficientPermissions);
-}
-
-async function resolveIsAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
-  const profile = await StudentRepository.findProfileById(studentId);
-  if (!profile) {
-    return false;
-  }
-
-  // LMS — Student login accounts can view their own profile.
-  if (profile.userId === actorUserId) {
-    return true;
-  }
-
-  const parent = await ParentRepository.findByUserId(actorUserId);
-  if (parent !== null && parent.id === profile.parentId) {
-    return true;
-  }
-
-  const teacher = await TeacherRepository.findByUserId(actorUserId);
-  if (teacher !== null && profile.primaryTeacherId === teacher.id) {
-    return true;
-  }
-
-  return false;
-}
-
 function mapProfileRow(
   row: NonNullable<Awaited<ReturnType<typeof StudentRepository.findProfileById>>>
-): Pick<
-  StudentProfileReturnType,
-  | "id"
-  | "name"
-  | "status"
-  | "avatarUrl"
-  | "dateOfBirth"
-  | "gender"
-  | "language"
-  | "timezoneOverride"
-  | "email"
-  | "phone"
-  | "timezone"
-  | "displayCurrency"
-  | "parentId"
-  | "parentUserId"
-  | "parentName"
-  | "parentEmail"
-  | "parentPhone"
-  | "primaryTeacherId"
-  | "teacherUserId"
-  | "teacherName"
-  | "hoursPerWeek"
-  | "classesRemaining"
-  | "classesTotal"
-  | "version"
-  | "createdAt"
-  | "updatedAt"
-> {
+): StudentProfileCoreReturnType {
   return {
     id: row.id,
     name: row.name,
@@ -135,7 +70,7 @@ export namespace StudentProfileService {
     tErrors: ErrorsLabels,
     options: GetProfileOptions = {}
   ): Promise<StudentProfileReturnType> {
-    await assertCanViewStudentProfile(actorUserId, tErrors);
+    await assertStudentReadAccess(actorUserId, studentId, tErrors);
 
     const row = await StudentRepository.findProfileById(studentId);
     if (!row) {

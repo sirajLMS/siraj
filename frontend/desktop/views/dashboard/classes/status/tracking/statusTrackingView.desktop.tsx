@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Box, Fab } from "@mui/material";
+import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { DesktopLayoutProps } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import {
@@ -24,20 +24,6 @@ const StyledTotalSessionsBadge = styled(Box)(({ theme }) => ({
   color: theme.palette.text.secondary,
   fontFamily: theme.typography.fontFamily,
   fontWeight: 500,
-}));
-
-const StyledDesktopFab = styled(Fab)(({ theme }) => ({
-  position: "fixed",
-  bottom: 32,
-  right: 32,
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.onPrimary,
-  "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-    transform: "scale(1.1)",
-  },
-  transition: theme.transitions.create(["transform", "background-color"], { duration: 150, easing: "ease" }),
-  "&:active": { transform: "scale(0.95)" },
 }));
 
 /**
@@ -103,10 +89,6 @@ export function StatusTrackingDesktopView({
       </DesktopSectionPanel>
 
       <SuspensionAnalytics labels={analytics} suspendedCount={suspendedCount} onOpenAuditLogs={onOpenAuditLogs} />
-
-      <StyledDesktopFab id="status-desktop-fab-btn" aria-label={shell.newReport} onClick={onNewReport}>
-        <AddOutlined />
-      </StyledDesktopFab>
     </DesktopPageContainer>
   );
 }

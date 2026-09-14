@@ -1,9 +1,16 @@
 /**
- * Frontend mirror of profile field group keys.
+ * Canonical registry of profile/student field-group keys and permission key builders.
+ *
+ * Pure key lists live here so both frontend and backend consume a single source of
+ * truth: backend permission manifests (backend/types + backend/services) reference
+ * these key types and builders instead of redefining them.
+ *
  * Backend uses dot-notation keys (profile.core_identity.view_own).
  * Frontend user store uses GraphQL enum names (PROFILE_CORE_IDENTITY_VIEW_OWN).
  * Resolve via shared/lib/field-group-permission-key.ts — not profileFieldPermissionKey().
  */
+export type FieldGroupAction = "view_own" | "view_other" | "edit_own" | "edit_other";
+
 export const PROFILE_FIELD_GROUP_KEYS = [
   "core_identity",
   "core_contact",
@@ -38,14 +45,14 @@ export type StudentFieldGroupKey = (typeof STUDENT_FIELD_GROUP_KEYS)[number];
 
 export function profileFieldPermissionKey(
   group: ProfileFieldGroupKey,
-  action: "view_own" | "view_other" | "edit_own" | "edit_other"
+  action: FieldGroupAction
 ): string {
   return `profile.${group}.${action}`;
 }
 
 export function studentFieldPermissionKey(
   group: StudentFieldGroupKey,
-  action: "view_own" | "view_other" | "edit_own" | "edit_other"
+  action: FieldGroupAction
 ): string {
   return `student.${group}.${action}`;
 }

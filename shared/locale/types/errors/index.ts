@@ -255,6 +255,7 @@ export interface SubjectResourceErrors {
  */
 export interface ClassSubjectErrors {
   readonly createFailed: string;
+  readonly notFound: (id: string) => string;
 }
 
 /**
@@ -338,6 +339,7 @@ export interface TeacherErrors {
   readonly vacationRequestNotFound: (id: string) => string;
   readonly createFailed: string;
   readonly upsertFailed: string;
+  readonly noteNotFound: (id: string) => string;
   readonly noteCreateFailed: string;
   readonly staffProfileCreateFailed: string;
   readonly staffProfileUpdateFailed: string;
@@ -609,6 +611,7 @@ export interface ErrorsLabels
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;
   readonly internalServerError: string;
+  readonly requestTooLarge: string;
   readonly insufficientPermissions: string;
   readonly unauthorized: string;
   readonly unauthorizedAction: string;

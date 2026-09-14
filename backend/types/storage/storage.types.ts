@@ -1,4 +1,4 @@
-import type { invoiceFiles, storageDirectories, storageFiles } from "@/backend/db/schema/storage/storage";
+import type { invoiceFiles, storageDirectories, storageFiles } from "@/backend/db/schema";
 import type { OrderSortDirection } from "@/backend/enum";
 import type { FileSortField, FileTypes, UploadType } from "@/backend/enum/storage/storage.enum";
 // Type aliases to match Kotlin entities

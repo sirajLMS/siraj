@@ -2,13 +2,13 @@ import type {
   adminAuditLogs,
   authRateLimits,
   passwordResetTokens,
-  sessionConfig,
   sessionMetadata,
   sessions,
 } from "@/backend/db/schema";
 import type { AppPermission, UserRole } from "@/backend/enum";
 import type { Email } from "@/backend/lib/email";
 import type { UserReturnType } from "@/backend/types";
+import type { Translations } from "@/shared/locale";
 
 export type CurrentUserProfile = UserReturnType & {
   permissions: AppPermission[];
@@ -29,8 +29,6 @@ export type SessionSelectType = typeof sessions.$inferSelect;
 export type SessionInsertType = typeof sessions.$inferInsert;
 
 export type SessionMetadataSelectType = typeof sessionMetadata.$inferSelect;
-
-export type SessionConfigSelectType = typeof sessionConfig.$inferSelect;
 
 // Redis session data structure
 export type RedisImpersonationSessionData = {
@@ -107,6 +105,16 @@ export type RefreshTokenResponse = {
   token: string;
   user: UserReturnType;
 };
+
+/**
+ * Result of the shared auth prelude that combines authentication with the
+ * global rate limiter: the authenticated user id plus the error-translation
+ * bundle already bound to the request locale.
+ */
+export interface AuthRateLimitResult {
+  readonly userId: string;
+  readonly tErrors: Translations["errorsTranslations"];
+}
 
 export type AuthRateLimitInsertType = typeof authRateLimits.$inferInsert;
 

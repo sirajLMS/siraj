@@ -2,20 +2,10 @@
 
 import { useMutation } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  MenuItem,
-  Stack,
-  TextField,
-} from "@mui/material";
+import { Checkbox, Dialog, FormControlLabel, MenuItem, Stack, TextField } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { type Control, Controller, type UseFormReturn, useForm, useWatch } from "react-hook-form";
+import { BaseFormDialogSection } from "@/frontend/common/components/ui/dialog";
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
 import {
@@ -375,8 +365,14 @@ export function PaymentMethodFormDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{isEdit ? t.editTitle : t.addTitle}</DialogTitle>
-      <DialogContent>
+      <BaseFormDialogSection
+        title={isEdit ? t.editTitle : t.addTitle}
+        cancelLabel={t.cancel}
+        confirmLabel={t.save}
+        onClose={onClose}
+        onConfirm={() => void onSubmit()}
+        isLoading={saving}
+      >
         <PaymentMethodFormFields
           isEdit={isEdit}
           form={form}
@@ -394,15 +390,7 @@ export function PaymentMethodFormDialog({
           setSelectedOnlineAccount={setSelectedOnlineAccount}
           managerLabels={t}
         />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={saving}>
-          {t.cancel}
-        </Button>
-        <Button variant="contained" onClick={() => void onSubmit()} disabled={saving}>
-          {t.save}
-        </Button>
-      </DialogActions>
+      </BaseFormDialogSection>
     </Dialog>
   );
 }

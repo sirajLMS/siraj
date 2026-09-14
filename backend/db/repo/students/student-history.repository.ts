@@ -1,7 +1,8 @@
 import { and, eq, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { classInstancePerformance, classInstances, teachers, users } from "@/backend/db/schema";
-import type { DBTransaction, SessionSummary } from "@/backend/types";
+import type { DBTransaction, StudentHistorySession } from "@/backend/types";
+import { parseClassExecutionState, parseClassOutcome } from "@/shared/lib/enum";
 
 export namespace StudentHistoryRepository {
   export async function getMonthlyCalendar(
@@ -10,7 +11,7 @@ export namespace StudentHistoryRepository {
     month: number,
     _locale?: string,
     tx?: DBTransaction
-  ): Promise<SessionSummary[]> {
+  ): Promise<StudentHistorySession[]> {
     const q = queryDb(tx);
 
     // JavaScript months are 0-indexed in Date constructor, but here we expect 1-indexed from GraphQL API
@@ -49,8 +50,8 @@ export namespace StudentHistoryRepository {
         title: "Class Session", // Fallback, would normally resolve course name if courses table existed
         time: date.toISOString(),
         duration: r.instance.durationMinutes,
-        status: r.instance.executionState,
-        outcome: r.instance.outcome,
+        status: parseClassExecutionState(r.instance.executionState),
+        outcome: parseClassOutcome(r.instance.outcome),
         isFrozen: r.instance.isFrozen,
         instructor: r.user.name,
         teacherId: r.teacher.id,

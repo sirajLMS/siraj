@@ -1,11 +1,32 @@
 import type { classInstances } from "@/backend/db/schema/classes/scheduling";
-import type { ClassInstancePerformanceSelectType, EffectiveMeetingReturnType } from "@/backend/types";
+import type {
+  ClassInstancePerformanceSelectType,
+  ClassSubjectSelectType,
+  EffectiveMeetingReturnType,
+  RecurringScheduleSelectType,
+  StudentSelectType,
+  TeacherSelectType,
+  UserSelectType,
+} from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 // Foundation types from schema
 export type ClassInstanceSelectType = typeof classInstances.$inferSelect;
 export type ClassInstanceInsertType = typeof classInstances.$inferInsert;
+
+/**
+ * Class instance enriched with the relations joined by
+ * `SchedulingRepository.getClassInstanceById` (subject, recurring schedule,
+ * student, teacher-with-user, and the resolved avatar URL).
+ */
+export type ClassInstanceWithRelations = ClassInstanceSelectType & {
+  subject?: ClassSubjectSelectType;
+  recurring?: RecurringScheduleSelectType;
+  avatarUrl: string | null;
+  student?: StudentSelectType;
+  teacher?: TeacherSelectType & { user: UserSelectType };
+};
 
 export type ClassInstanceStudentReturnType = {
   id: string;

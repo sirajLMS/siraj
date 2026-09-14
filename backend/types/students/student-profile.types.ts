@@ -37,6 +37,15 @@ export type StudentProfileReturnType = {
 };
 
 /**
+ * Core profile shape resolved from the repository row before viewer/permission
+ * filtering and relationship enrichment are applied.
+ */
+export type StudentProfileCoreReturnType = Omit<
+  StudentProfileReturnType,
+  "isAssociatedViewer" | "isOwnStudentProfile" | "upcomingClasses" | "classHistory"
+>;
+
+/**
  * Own-profile edit payload for LMS students.
  * Excludes email, teacher assignment, academic/quota fields, and parent reassignment.
  */

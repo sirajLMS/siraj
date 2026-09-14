@@ -7,7 +7,7 @@ import type {
   CreateExpenseInput,
   DBTransaction,
   ExpenseInsertType,
-  ExpenseListRow,
+  ExpensePageResult,
   ExpenseRow,
   ExpenseSelectType,
   ExpenseUpdatePatch,
@@ -46,7 +46,7 @@ let auditCounter = 0;
 let permissionError: Error | null = null;
 let transactionChain: Promise<unknown> = Promise.resolve();
 
-let reportRows: ExpenseListRow[] = [];
+let reportRows: ExpensePageResult["rows"] = [];
 let reportTotalCount = 0;
 
 /** Key-scoped lock acquisitions, in order, alongside replay scans — proves lock-then-replay ordering. */
@@ -1004,7 +1004,7 @@ describe("ExpenseService.bulkDelete", () => {
 // getById + getReport
 // ---------------------------------------------------------------------------
 
-function toListRow(row: ExpenseSelectType, createdByName: string): ExpenseListRow {
+function toListRow(row: ExpenseSelectType, createdByName: string): ExpensePageResult["rows"][number] {
   return Object.assign({}, row, { createdByName });
 }
 

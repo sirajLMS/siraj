@@ -12,6 +12,8 @@ export interface SearchBarFieldProps {
   readonly onChange: (value: string) => void;
   readonly sx?: SxProps<Theme>;
   readonly clearLabel?: string;
+  /** Cap mirrored onto the native input's maxLength when the consumer enforces one. */
+  readonly maxLength?: number;
 }
 
 /**
@@ -28,6 +30,7 @@ export function SearchBarField({
   onChange,
   sx,
   clearLabel = "Clear search",
+  maxLength,
 }: Readonly<SearchBarFieldProps>) {
   return (
     <TextField
@@ -57,7 +60,7 @@ export function SearchBarField({
             </InputAdornment>
           ) : null,
         },
-        htmlInput: { "aria-label": placeholder, autoComplete: "off" },
+        htmlInput: { "aria-label": placeholder, autoComplete: "off", ...(maxLength === undefined ? null : { maxLength }) },
       }}
     />
   );

@@ -7,18 +7,19 @@ import {
   Box,
   Button,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   Stack,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import {
+  createAutocompletePaperSlotProps,
+  createAutocompletePopperSlotProps,
+} from "@/frontend/common/components/ui/input/autocompletePopperSlotProps";
 import { PhoneInput } from "@/frontend/common/components/ui/input/phoneInput/PhoneInput";
 import { WhatsappConversationSendMode } from "@/frontend/common/graphql/generated/gql/graphql";
+import { WhatsappRecipientSelect } from "@/frontend/common/views/dashboard/whatsapp/components";
 import type {
   WhatsappComposerLabels,
   WhatsappTemplateOption,
@@ -110,25 +111,13 @@ function RecipientPicker({
   }
   if (registryTargetOnly) {
     return (
-      <FormControl size="small" fullWidth>
-        <InputLabel id="whatsapp-conversations-recipient-select">{labels.composerRecipientLabel}</InputLabel>
-        <Select
-          labelId="whatsapp-conversations-recipient-select"
-          value={recipientSelection}
-          label={labels.composerRecipientLabel}
-          displayEmpty
-          onChange={event => onRecipientSelectionChange(event.target.value)}
-        >
-          <MenuItem value="" disabled>
-            {labels.composerRecipientPlaceholder}
-          </MenuItem>
-          {registryTargetPhones.map(phone => (
-            <MenuItem key={phone} value={phone} dir="ltr" sx={{ unicodeBidi: "isolate" }}>
-              {phone}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <WhatsappRecipientSelect
+        label={labels.composerRecipientLabel}
+        placeholder={labels.composerRecipientPlaceholder}
+        phones={registryTargetPhones}
+        value={recipientSelection}
+        onChange={onRecipientSelectionChange}
+      />
     );
   }
   return (
@@ -199,6 +188,14 @@ function TemplatePicker({
           onTemplateSelect(option);
         }}
         noOptionsText={labels.templatePickerEmpty}
+        slotProps={{
+          popper: createAutocompletePopperSlotProps<WhatsappTemplateOption>({
+            matchAnchorWidth: true,
+            disablePortal: false,
+            listAttached: false,
+          }),
+          paper: createAutocompletePaperSlotProps<WhatsappTemplateOption>(false),
+        }}
         renderOption={(props, option) => {
           const { key, ...optionProps } = props;
           return (

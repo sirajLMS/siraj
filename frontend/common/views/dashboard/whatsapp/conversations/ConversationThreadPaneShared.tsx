@@ -136,7 +136,9 @@ function MessageItem({ message, inboxLabels, formatTimestamp }: Readonly<Message
  * Conversation thread pane for the `/whatsapp` workspace: header with the
  * contact name and last-activity line, scrollable message history, and an
  * optional composer docked below. Message bubbles align outbound traffic to
- * the inline end so the layout stays correct in RTL.
+ * the inline end so the layout stays correct in RTL. Unlike the workspace
+ * list panels, this pane keeps its own bordered chrome — chat panes are
+ * message surfaces, not SectionPanel list shells.
  */
 export function ConversationThreadPaneShared({
   labels,

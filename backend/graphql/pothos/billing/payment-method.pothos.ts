@@ -11,6 +11,8 @@ import type {
   PaymentMethodCatalogSnapshot,
   PaymentMethodDefaults,
   PaymentMethodDetails,
+  PaymentMethodDetailsInputType,
+  PaymentMethodDetailsPublicReturnType,
   PaymentMethodTransactionSnapshot,
   SupportedCommonShape,
   SupportedMobileWalletReturnType,
@@ -18,7 +20,7 @@ import type {
   SupportedPaymentLinkReturnType,
   UpdateUserPaymentMethodInput,
   UserPaymentMethodInitialGqlInput,
-  UserPaymentMethodReturnType,
+  UserPaymentMethodPublicReturnType,
   UserPaymentMethodSubmitGqlInput,
 } from "@/backend/types";
 
@@ -26,7 +28,7 @@ function isRecordLike(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function detailField(key: string, details: PaymentMethodDetails): string | null {
+function detailField(key: string, details: PaymentMethodDetailsPublicReturnType): string | null {
   if (key in details && isRecordLike(details)) {
     const record: Record<string, unknown> = details;
     const value = record[key];
@@ -35,7 +37,8 @@ function detailField(key: string, details: PaymentMethodDetails): string | null 
   return null;
 }
 
-const PaymentMethodDetailsRef = gqlSchemaBuilder.objectRef<PaymentMethodDetails>("PaymentMethodDetails");
+const PaymentMethodDetailsRef =
+  gqlSchemaBuilder.objectRef<PaymentMethodDetailsPublicReturnType>("PaymentMethodDetails");
 
 const PaymentMethodDetailsPothosObject = PaymentMethodDetailsRef.implement({
   fields: t => ({
@@ -101,7 +104,7 @@ export const PaymentMethodTransactionSnapshotPothosObject = PaymentMethodTransac
   }),
 });
 
-const UserPaymentMethodRef = gqlSchemaBuilder.objectRef<UserPaymentMethodReturnType>("UserPaymentMethod");
+const UserPaymentMethodRef = gqlSchemaBuilder.objectRef<UserPaymentMethodPublicReturnType>("UserPaymentMethod");
 
 export const UserPaymentMethodPothosObject = UserPaymentMethodRef.implement({
   fields: t => ({
@@ -193,21 +196,7 @@ const PaymentMethodDetailsInputPothos = gqlSchemaBuilder.inputType("PaymentMetho
   }),
 });
 
-export function normalizePaymentMethodDetailsInput(input: {
-  readonly walletId?: string | null;
-  readonly phone?: string | null;
-  readonly paymentLinkId?: string | null;
-  readonly url?: string | null;
-  readonly onlineAccountId?: string | null;
-  readonly identifier?: string | null;
-  readonly iban?: string | null;
-  readonly bankName?: string | null;
-  readonly beneficiaryName?: string | null;
-  readonly swiftBic?: string | null;
-  readonly accountNumber?: string | null;
-  readonly routingNumber?: string | null;
-  readonly note?: string | null;
-}): PaymentMethodDetails {
+export function normalizePaymentMethodDetailsInput(input: PaymentMethodDetailsInputType): PaymentMethodDetails {
   return {
     ...(input.walletId == null ? {} : { walletId: input.walletId }),
     ...(input.phone == null ? {} : { phone: input.phone }),

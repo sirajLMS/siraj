@@ -1,9 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  DisplayAmountPothosObject,
-  resolveDisplayAmountFields,
-  setBillingFxDisplayCurrencyForSubject,
-} from "@/backend/graphql/pothos/billing/fx-display.pothos";
+import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
   CurrencyCodePothosObject,
   InvoiceStatusPothosObject,
@@ -12,6 +8,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { resolveDisplayAmountFields, setBillingFxDisplayCurrencyForSubject } from "@/backend/services";
 import type {
   AdminBillingSummaryResult,
   BillingCurrencyTotal,

@@ -15,7 +15,7 @@ const EXPENSES_LIST_FIELD = "expenses";
  * carryover balance is still paid; the operator must go through the Unpay flow
  * instead of deleting directly.
  */
-export const EXPENSE_DELETE_VIA_UNPAY_CODE = "EXPENSE_DELETE_VIA_UNPAY";
+const EXPENSE_DELETE_VIA_UNPAY_CODE = "EXPENSE_DELETE_VIA_UNPAY";
 
 /**
  * Row snapshot the expense delete confirmations restate. Grid rows satisfy this

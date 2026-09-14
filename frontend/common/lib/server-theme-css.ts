@@ -108,7 +108,7 @@ async function fetchPublishedAppearance(): Promise<AppearanceFields | null> {
  * colors are custom (no catalog match) or there is no published row, the
  * `APP_THEME_PRESET` env var (via the factory fallback) applies.
  */
-export function resolveAppearancePresetId(appearance?: AppearanceFields | null): AppearancePresetId | undefined {
+function resolveAppearancePresetId(appearance?: AppearanceFields | null): AppearancePresetId | undefined {
   return matchPresetByColors(appearance?.colors ?? null) ?? undefined;
 }
 

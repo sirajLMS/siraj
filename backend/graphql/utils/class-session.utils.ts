@@ -1,7 +1,6 @@
-import type { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { ClassSessionService, EffectiveMeetingService } from "@/backend/services";
-import type { ClassInstanceDetailReturnType, ClassInstancePerformanceSelectType } from "@/backend/types";
+import type { ClassInstanceDetailReturnType, ClassInstancePerformanceSelectType, ClassInstanceWithRelations } from "@/backend/types";
 import { ClassExecutionState, type ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import {
   parseClassExecutionState,
@@ -11,8 +10,6 @@ import {
   parseIanaTimezoneOrNull,
 } from "@/shared/lib/enum";
 import type { ErrorsLabels, SessionLabels } from "@/shared/locale";
-
-type ClassInstanceWithRelations = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
 
 /**
  * Maps the execution state and outcome to a valid ClassExecutionState value

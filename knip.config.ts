@@ -51,6 +51,11 @@ const config: KnipConfig = {
     "app/**/*.{ts,tsx}",
     "backend/**/*.{ts,tsx}",
     "frontend/**/*.{ts,tsx}",
+    // MDX: knip's built-in MDX compiler is registered via the @mdx-js peer of
+    // @storybook/addon-docs (bun.lock); without this extension in `project` knip emits a
+    // "compiled extension excluded" config hint. No .mdx files exist in the repo yet —
+    // this covers future Storybook docs pages so their imports would be followed.
+    "frontend/**/*.mdx",
     "shared/**/*.{ts,tsx}",
     "scripts/**/*.{ts,tsx}",
     "test/**/*.{ts,tsx}",

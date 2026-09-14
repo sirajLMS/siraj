@@ -33,7 +33,7 @@ export type WhatsappConversationListLabels = Pick<
   | "columnContact"
 >;
 
-export type WhatsappConversationThreadLabels = Pick<
+type WhatsappConversationThreadLabels = Pick<
   WhatsappConversationsLabels,
   "threadHeading" | "threadMessagesEmpty" | "lastMessageAt"
 >;

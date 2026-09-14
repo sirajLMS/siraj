@@ -1,4 +1,3 @@
-// Auto-extracted from pothos/ (types-review R3-P3).
 // Query field registrations relocated to the query layer per query/AGENTS.md.
 
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -10,8 +9,9 @@ import {
 import { StudentDirectoryPayloadPothosObject } from "@/backend/graphql/pothos/students/student-directory.pothos";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { toStudentFilterArgsOrNull } from "@/backend/graphql/utils/student-filter.utils";
 import { StudentDirectoryService } from "@/backend/services";
-import type { StudentFilterArgs, StudentsOrderByClause } from "@/backend/types";
+import type { StudentsOrderByClause } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("studentDirectory", t =>
   t.field({
@@ -29,44 +29,7 @@ gqlSchemaBuilder.queryField("studentDirectory", t =>
       const pagination = parsePaginationArgs(args.paginationArgs);
 
       // Convert GraphQL filter args to typed Service args
-      let filters: StudentFilterArgs | null = null;
-      if (args.filterArgs) {
-        filters = {
-          name: args.filterArgs.name ?? undefined,
-          nameNotContains: args.filterArgs.nameNotContains ?? undefined,
-          nameEquals: args.filterArgs.nameEquals ?? undefined,
-          nameNotEquals: args.filterArgs.nameNotEquals ?? undefined,
-          nameStartsWith: args.filterArgs.nameStartsWith ?? undefined,
-          nameEndsWith: args.filterArgs.nameEndsWith ?? undefined,
-          nameIsEmpty: args.filterArgs.nameIsEmpty ?? undefined,
-          nameIsNotEmpty: args.filterArgs.nameIsNotEmpty ?? undefined,
-          parentId: args.filterArgs.parentId ?? undefined,
-          primaryTeacherId: args.filterArgs.primaryTeacherId ?? undefined,
-          gender: args.filterArgs.gender ?? undefined,
-          language: args.filterArgs.language ?? undefined,
-          status: args.filterArgs.status ?? undefined,
-          createdAt: args.filterArgs.createdAt ?? undefined,
-          createdAtNot: args.filterArgs.createdAtNot ?? undefined,
-          createdAtFrom: args.filterArgs.createdAtFrom ?? undefined,
-          createdAtTo: args.filterArgs.createdAtTo ?? undefined,
-          createdAtAfter: args.filterArgs.createdAtAfter ?? undefined,
-          createdAtBefore: args.filterArgs.createdAtBefore ?? undefined,
-          createdAtOnOrAfter: args.filterArgs.createdAtOnOrAfter ?? undefined,
-          createdAtOnOrBefore: args.filterArgs.createdAtOnOrBefore ?? undefined,
-          createdAtIsEmpty: args.filterArgs.createdAtIsEmpty ?? undefined,
-          createdAtIsNotEmpty: args.filterArgs.createdAtIsNotEmpty ?? undefined,
-          birthDate: args.filterArgs.birthDate ?? undefined,
-          birthDateNot: args.filterArgs.birthDateNot ?? undefined,
-          birthDateFrom: args.filterArgs.birthDateFrom ?? undefined,
-          birthDateTo: args.filterArgs.birthDateTo ?? undefined,
-          birthDateAfter: args.filterArgs.birthDateAfter ?? undefined,
-          birthDateBefore: args.filterArgs.birthDateBefore ?? undefined,
-          birthDateOnOrAfter: args.filterArgs.birthDateOnOrAfter ?? undefined,
-          birthDateOnOrBefore: args.filterArgs.birthDateOnOrBefore ?? undefined,
-          birthDateIsEmpty: args.filterArgs.birthDateIsEmpty ?? undefined,
-          birthDateIsNotEmpty: args.filterArgs.birthDateIsNotEmpty ?? undefined,
-        };
-      }
+      const filters = toStudentFilterArgsOrNull(args.filterArgs);
 
       // Convert orderBy clauses to typed Service args
       let orderBy: StudentsOrderByClause[] | null = null;

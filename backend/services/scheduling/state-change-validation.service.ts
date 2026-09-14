@@ -1,10 +1,9 @@
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
-import type { DBTransaction } from "@/backend/db/repo/scheduling/shared";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
 import { ConflictError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type * as Types from "@/backend/types";
+import type { ClassInstanceInsertType, ClassInstanceSelectType, DBTransaction } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**
@@ -23,7 +22,7 @@ import type { ErrorsLabels } from "@/shared/locale";
  */
 export async function checkStateChangeAuth(
   t: DBTransaction,
-  existing: Types.ClassInstanceSelectType,
+  existing: ClassInstanceSelectType,
   actorUserId: string,
   tErrors: ErrorsLabels
 ): Promise<void> {
@@ -60,8 +59,8 @@ export async function checkStateChangeAuth(
  *   - COMPLETED can come from RUNNING, or ACTIVATED+NOT_ACTIVATED with early outcomes
  */
 export async function validateStateTransition(
-  existing: Types.ClassInstanceSelectType,
-  state: Partial<Types.ClassInstanceInsertType>,
+  existing: ClassInstanceSelectType,
+  state: Partial<ClassInstanceInsertType>,
   tErrors: ErrorsLabels
 ): Promise<void> {
   if (state.executionState === "ACTIVATED") {
@@ -90,8 +89,8 @@ export async function validateStateTransition(
  * and the new instance must not be the same as the original.
  */
 export async function validateRescheduleState(
-  original: Types.ClassInstanceSelectType,
-  input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
+  original: ClassInstanceSelectType,
+  input: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt">,
   tErrors: ErrorsLabels
 ): Promise<void> {
   if (original.id === input.id) {

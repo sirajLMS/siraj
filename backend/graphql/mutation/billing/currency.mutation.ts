@@ -1,14 +1,14 @@
-// Auto-extracted from pothos/ (types-review R3-P3).
-// Mutation field registrations relocated to the mutation layer per mutation/AGENTS.md.
+// Mutation field registrations for supported currencies.
+// Per mutation/AGENTS.md, Pothos objects live in the pothos layer; this file only registers fields.
 
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
-  resolveAuthCtx,
   SupportedCurrencyPothosObject,
   SupportedCurrencyUpsertInputPothos,
 } from "@/backend/graphql/pothos/billing/currency.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { resolveAuthCtx } from "@/backend/graphql/utils";
 import { CurrencyCatalogService as CurrencyService } from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("activateSupportedCurrency", t =>

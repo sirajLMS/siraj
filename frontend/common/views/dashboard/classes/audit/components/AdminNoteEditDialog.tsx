@@ -1,7 +1,8 @@
 "use client";
 
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { AdminNoteDialogLabels } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 
 export interface AdminNoteEditDialogProps {
@@ -40,12 +41,12 @@ export function AdminNoteEditDialog({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={isSaving}>
+        <FilterButton onClick={onClose} disabled={isSaving}>
           {labels.cancel}
-        </Button>
-        <Button onClick={onSave} variant="contained" disabled={isSaving}>
+        </FilterButton>
+        <PrimaryPageAction onClick={onSave} disabled={isSaving}>
           {labels.save}
-        </Button>
+        </PrimaryPageAction>
       </DialogActions>
     </Dialog>
   );

@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@mui/material";
 import { SessionAuditDataGrid } from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditDataGrid";
 import { SessionAuditFilterBar } from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditFilterBar";
 import type { SessionAuditReportsViewProps } from "@/frontend/common/views/dashboard/billing/accounting/reports/SessionAuditReportsContainer";
@@ -21,9 +20,7 @@ export function SessionAuditReportsDesktopView(props: Readonly<SessionAuditRepor
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.title} actions={exportAction} />
       <DesktopSectionPanel actions={<SessionAuditFilterBar {...props} />} contentPadding={false} sx={{ mt: 3 }}>
-        <Box sx={{ width: "100%", p: 2 }}>
-          <SessionAuditDataGrid {...reportProps} />
-        </Box>
+        <SessionAuditDataGrid {...reportProps} />
       </DesktopSectionPanel>
     </DesktopPageContainer>
   );

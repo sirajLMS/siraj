@@ -6,20 +6,18 @@ import {
   Button,
   Checkbox,
   CircularProgress,
-  DialogContent,
-  DialogTitle,
   FormControlLabel,
   InputAdornment,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
+import { BaseFormDialogSection } from "@/frontend/common/components/ui/dialog";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
 import { MeetingConfigTypeFields } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
 import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
 import type { UseMeetingConfigFormStateReturn } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
-import { EntityFormDialogActions } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
 import type { MeetingConfigEnhancementLabels } from "@/shared/locale/types/ui";
 
 /** Enhancement label keys consumed by the form content (Test Config + copy URL). */
@@ -156,82 +154,79 @@ export function MeetingConfigFormDialogContent({
   const showTestButton = onTestConfig != null && enhancementLabels != null;
 
   return (
-    <>
-      <DialogTitle>{isEdit ? t.editTitle : t.addTitle}</DialogTitle>
-      <DialogContent>
-        <Box
-          id={formId}
-          component="form"
-          onSubmit={e => {
-            e.preventDefault();
-            onSave();
-          }}
-        >
-          <Stack spacing={2.5} sx={{ pt: 1 }}>
-            <TextField label={t.label} value={label} onChange={e => setLabel(e.target.value)} fullWidth size="small" />
-            <MeetingProviderSelect
-              value={provider}
-              onChangeAction={setProvider}
-              label={t.provider}
-              disabled={providerSelectDisabled}
+    <BaseFormDialogSection
+      title={isEdit ? t.editTitle : t.addTitle}
+      cancelLabel={cancelLabel}
+      confirmLabel={saveLabel}
+      onClose={onClose}
+      isLoading={saving}
+      formId={formId}
+    >
+      <Box
+        id={formId}
+        component="form"
+        onSubmit={e => {
+          e.preventDefault();
+          onSave();
+        }}
+      >
+        <Stack spacing={2.5} sx={{ pt: 1 }}>
+          <TextField label={t.label} value={label} onChange={e => setLabel(e.target.value)} fullWidth size="small" />
+          <MeetingProviderSelect
+            value={provider}
+            onChangeAction={setProvider}
+            label={t.provider}
+            disabled={providerSelectDisabled}
+          />
+          {providerChanged ? <Alert severity="warning">{t.providerChangeWarning}</Alert> : null}
+          {instructions ? (
+            <Alert severity="info">
+              {provider?.name ? (
+                <LocalizedStringDisplay value={provider.name} typographyVariant="labelMd" sx={{ fontWeight: 700 }} />
+              ) : null}
+              <Typography sx={{ typography: "bodyMd", mt: provider?.name ? 0.5 : 0 }}>{instructions}</Typography>
+            </Alert>
+          ) : null}
+          <MeetingConfigTypeFields
+            provider={provider}
+            value={details}
+            onChangeAction={value => {
+              setDetails({
+                meetingUrl: value.meetingUrl,
+                username: value.username ?? "",
+                password: value.password ?? "",
+                tenantId: value.tenantId ?? "",
+              });
+              setUrlError(null);
+            }}
+            passwordHelperText={hasSecretOnEdit ? t.passwordLeaveBlank : undefined}
+            onGenerateUrl={onGenerateUrl}
+            generating={generating}
+            generationError={generationError}
+          />
+          {urlError ? (
+            <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>
+              {urlError}
+            </Typography>
+          ) : null}
+          {saveError ? <Alert severity="error">{saveError}</Alert> : null}
+          <FormControlLabel
+            control={<Checkbox checked={isDefault} onChange={event => setIsDefault(event.target.checked)} />}
+            label={t.setAsDefault}
+          />
+          {showTestButton && enhancementLabels && onTestConfig ? (
+            <TestConfigSection
+              enhancementLabels={enhancementLabels}
+              onTestConfig={onTestConfig}
+              testing={testing ?? false}
+              saving={saving}
+              providerId={provider?.id}
+              previewUrl={previewUrl ?? null}
+              testError={testError ?? null}
             />
-            {providerChanged ? <Alert severity="warning">{t.providerChangeWarning}</Alert> : null}
-            {instructions ? (
-              <Alert severity="info">
-                {provider?.name ? (
-                  <LocalizedStringDisplay value={provider.name} typographyVariant="labelMd" sx={{ fontWeight: 700 }} />
-                ) : null}
-                <Typography sx={{ typography: "bodyMd", mt: provider?.name ? 0.5 : 0 }}>{instructions}</Typography>
-              </Alert>
-            ) : null}
-            <MeetingConfigTypeFields
-              provider={provider}
-              value={details}
-              onChangeAction={value => {
-                setDetails({
-                  meetingUrl: value.meetingUrl,
-                  username: value.username ?? "",
-                  password: value.password ?? "",
-                  tenantId: value.tenantId ?? "",
-                });
-                setUrlError(null);
-              }}
-              passwordHelperText={hasSecretOnEdit ? t.passwordLeaveBlank : undefined}
-              onGenerateUrl={onGenerateUrl}
-              generating={generating}
-              generationError={generationError}
-            />
-            {urlError ? (
-              <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>
-                {urlError}
-              </Typography>
-            ) : null}
-            {saveError ? <Alert severity="error">{saveError}</Alert> : null}
-            <FormControlLabel
-              control={<Checkbox checked={isDefault} onChange={event => setIsDefault(event.target.checked)} />}
-              label={t.setAsDefault}
-            />
-            {showTestButton && enhancementLabels && onTestConfig ? (
-              <TestConfigSection
-                enhancementLabels={enhancementLabels}
-                onTestConfig={onTestConfig}
-                testing={testing ?? false}
-                saving={saving}
-                providerId={provider?.id}
-                previewUrl={previewUrl ?? null}
-                testError={testError ?? null}
-              />
-            ) : null}
-          </Stack>
-        </Box>
-      </DialogContent>
-      <EntityFormDialogActions
-        formId={formId}
-        cancelLabel={cancelLabel}
-        saveLabel={saveLabel}
-        onClose={onClose}
-        isLoading={saving}
-      />
-    </>
+          ) : null}
+        </Stack>
+      </Box>
+    </BaseFormDialogSection>
   );
 }

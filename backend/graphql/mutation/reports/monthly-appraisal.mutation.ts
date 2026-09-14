@@ -24,14 +24,7 @@ gqlSchemaBuilder.mutationField("submitMonthlyAppraisal", t =>
     },
     resolve: async (_root, args, ctx): Promise<MonthlyAppraisalReturnType> => {
       const userId = await requireAuth(ctx);
-      return MonthlyAppraisalService.submitAppraisal(
-        {
-          ...args.input,
-          teacherId: "", // service resolves from auth context; placeholder satisfies the type
-        },
-        userId,
-        ctx.locale
-      );
+      return MonthlyAppraisalService.submitAppraisal(args.input, userId, ctx.locale);
     },
   })
 );
@@ -46,15 +39,7 @@ gqlSchemaBuilder.mutationField("addAppraisalFeedback", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      return MonthlyAppraisalService.addFeedback(
-        {
-          appraisalId: args.input.appraisalId,
-          authorUserId: "", // service resolves from auth context
-          body: args.input.body,
-        },
-        userId,
-        ctx.locale
-      );
+      return MonthlyAppraisalService.addFeedback(args.input, userId, ctx.locale);
     },
   })
 );

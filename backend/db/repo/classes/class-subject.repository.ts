@@ -39,14 +39,15 @@ function buildSubjectConflictSet(input: ClassSubjectSubmitInput, now: Date) {
   };
 }
 
-async function findExistingSubject(t: DBTransaction, id: string): Promise<ClassSubjectSelectType> {
+async function findExistingSubject(t: DBTransaction, id: string, locale?: string): Promise<ClassSubjectSelectType> {
   const [existing] = await t
     .select()
     .from(classSubjects)
     .where(and(eq(classSubjects.id, id), isNull(classSubjects.deletedAt)))
     .limit(1);
   if (!existing) {
-    throw new Error(`Subject ${id} not found`);
+    const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(i18n.classSubject.notFound(id));
   }
   return existing;
 }
@@ -75,7 +76,7 @@ export namespace ClassSubjectRepository {
   async function fetchSubjectByField(
     field: "id" | "slug",
     value: string,
-    _locale: string | undefined,
+    locale: string | undefined,
     tx: DBTransaction | undefined
   ): Promise<ClassSubjectSelectType> {
     try {
@@ -87,7 +88,8 @@ export namespace ClassSubjectRepository {
         .limit(1);
 
       if (!result) {
-        throw new Error(`Subject ${value} not found`);
+        const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(i18n.classSubject.notFound(value));
       }
 
       return result;
@@ -127,13 +129,13 @@ export namespace ClassSubjectRepository {
   export async function updateSubject(
     id: string,
     input: ClassSubjectUpdateInput,
-    _locale?: string,
+    locale?: string,
     tx?: DBTransaction
   ): Promise<ClassSubjectSelectType> {
     return runInClassTransaction(
       tx,
       async (t): Promise<ClassSubjectSelectType> => {
-        const existing = await findExistingSubject(t, id);
+        const existing = await findExistingSubject(t, id, locale);
 
         const now = new Date();
         const [updated] = await t
@@ -159,11 +161,11 @@ export namespace ClassSubjectRepository {
     );
   }
 
-  export async function deleteSubject(id: string, _locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
+  export async function deleteSubject(id: string, locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
     return runInClassTransaction(
       tx,
       async (t): Promise<{ id: string }> => {
-        await findExistingSubject(t, id);
+        await findExistingSubject(t, id, locale);
 
         const now = new Date();
         await t.update(classSubjects).set({ deletedAt: now, updatedAt: now }).where(eq(classSubjects.id, id));

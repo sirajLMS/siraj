@@ -33,7 +33,7 @@ export function TeacherExtensionSection({ register, control, errors, labels }: R
   const translate = toSectionTranslations(labels);
 
   return (
-    <Grid container spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
+    <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 6 }}>
         <TextField
           {...register("nationalId")}

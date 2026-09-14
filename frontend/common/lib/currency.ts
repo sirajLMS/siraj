@@ -63,7 +63,7 @@ export const currencies: readonly CurrencyOption[] = [
 ];
 
 /** Pre-built Map for O(1) currency lookups by code. */
-export const currencyByCodeMap: ReadonlyMap<string, CurrencyOption> = new Map(
+const currencyByCodeMap: ReadonlyMap<string, CurrencyOption> = new Map(
   currencies.map(currency => [currency.code, currency])
 );
 

@@ -11,11 +11,11 @@ import type { WhatsappMessageTemplate, WhatsappTemplateSnapshot } from "@/backen
 /** `{{n}}` positional parameter placeholder inside a template BODY text. */
 const BODY_PARAM_PATTERN = /\{\{\d+\}\}/g;
 
-export function isValidTemplateStatus(value: string): value is WhatsappTemplateStatus {
+function isValidTemplateStatus(value: string): value is WhatsappTemplateStatus {
   return (Object.values(WhatsappTemplateStatus) as string[]).includes(value);
 }
 
-export function isValidTemplateCategory(value: string): value is WhatsappTemplateCategory {
+function isValidTemplateCategory(value: string): value is WhatsappTemplateCategory {
   return (Object.values(WhatsappTemplateCategory) as string[]).includes(value);
 }
 

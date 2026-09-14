@@ -1,7 +1,6 @@
-import type { ObjectFieldBuilder } from "@pothos/core";
 import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
-import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { PothosObjectFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
@@ -12,9 +11,6 @@ function isMethodTransactionSnapshot(snapshot: SnapshotUnion | null): snapshot i
   if (!snapshot) return false;
   return !("proof" in snapshot);
 }
-
-type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
-type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
 
 async function shouldRevealPaymentSnapshot(ctx: BaseContext): Promise<boolean> {
   if (!ctx.user?.id) return false;

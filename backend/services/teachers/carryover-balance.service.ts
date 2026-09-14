@@ -40,10 +40,10 @@ import type {
   BulkToExpenseInput,
   BulkToExpenseItemResult,
   BulkToExpenseResult,
-  CarryoverBalanceItemInsertType,
   CarryoverBalanceItemSelectType,
   CarryoverBalanceSelectType,
   CarryoverFilters,
+  CarryoverItemDraft,
   CarryoverLinkedSession,
   CarryoverLinkedSessionRow,
   CarryoverPage,
@@ -56,6 +56,12 @@ import type {
   DBTransaction,
   DeleteCarryoverInput,
   DeleteCarryoverResult,
+  GroupCreationOutcome,
+  PreparedGroupCarryover,
+  SessionStatusTransition,
+  SettlementContext,
+  SettlementOutcome,
+  TeacherDisplayFields,
   UnpayCarryoverInput,
   UpdateCarryoverInput,
 } from "@/backend/types";
@@ -99,29 +105,6 @@ const CARRYOVER_ACTION_CREATE: AuditAction = "CARRYOVER_CREATE";
 const CARRYOVER_ACTION_TO_EXPENSE: AuditAction = "CARRYOVER_TO_EXPENSE";
 const CARRYOVER_ACTION_DELETE: AuditAction = "CARRYOVER_DELETE";
 const CARRYOVER_ACTION_UNPAID: AuditAction = "CARRYOVER_UNPAID";
-
-interface TeacherDisplayFields {
-  teacherName: string;
-  teacherAvatarUrl: string | null;
-}
-
-interface SessionStatusTransition {
-  instanceId: string;
-  fromStatus: CalculationStatus;
-  toStatus: CalculationStatus;
-  teacherPaidAmount: string | null;
-  /**
-   * `class_instances_partial_percentage_chk` ties the live partial-pay
-   * percentage to the PARTIALLY status, so every transition drives the column
-   * explicitly: null when the target is not PARTIALLY, the snapshot value when
-   * reverting back to it.
-   */
-  isPartialPercentage: number | null;
-}
-
-// One snapshot per aggregated session; the carryover id is attached at insert
-// time once the parent row exists.
-type CarryoverItemDraft = Omit<CarryoverBalanceItemInsertType, "carryoverId" | "id" | "createdAt">;
 
 // ---------------------------------------------------------------------------
 // Decimal-string money helpers (integer minor units end-to-end)
@@ -616,20 +599,6 @@ async function buildItemDrafts(
   return { drafts, payable: formatAmountMinorUnits(payableMinorUnits) };
 }
 
-interface GroupCreationOutcome {
-  group: BulkCreateCarryoverGroupResult;
-  auditLogId: string | null;
-}
-
-interface PreparedGroupCarryover {
-  carryover: CarryoverBalanceSelectType;
-  drafts: CarryoverItemDraft[];
-  dominantCurrency: CurrencyCode;
-  studentsCount: number;
-  totalDuration: string;
-  payable: string;
-}
-
 /** Resolves the group's aggregate values (dominant currency, students text, hours, payable) and inserts the carryover row. */
 async function insertGroupCarryoverRow(
   tx: DBTransaction,
@@ -836,19 +805,6 @@ export namespace CarryoverBalanceService {
       });
       return { groups: created, totalInstanceIds: instanceIds, auditLogIds };
     });
-  }
-
-  interface SettlementContext {
-    paymentDate: string;
-    expenseDate: string;
-    note: string | null;
-    actorUserId: string;
-    idempotencyKey: string;
-  }
-
-  interface SettlementOutcome {
-    item: BulkToExpenseItemResult;
-    auditLogId: string | null;
   }
 
   function assertAllCarryoversFound(

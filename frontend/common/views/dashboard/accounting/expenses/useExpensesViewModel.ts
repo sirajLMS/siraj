@@ -58,7 +58,7 @@ export interface ExpenseCsvExportOutcome {
 }
 
 /** Filter, pagination, and bulk-selection state with store actions for the expense list. */
-export interface ExpenseFilterSlice {
+interface ExpenseFilterSlice {
   /** Free-text title search exactly as typed; the debounced value drives the query and export. */
   readonly title: string;
   readonly types: readonly ExpenseType[];

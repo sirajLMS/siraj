@@ -45,7 +45,7 @@ const MINUTE_MS = 60 * 1000;
  * the fixture itself (migrated-data style, mirroring the payroll cast's
  * unattended terminal row), so no session lifecycle choreography runs here.
  */
-export interface CarryoverAuditedSession {
+interface CarryoverAuditedSession {
   instance: ClassInstanceSelectType;
   teacherId: string;
   amount: string;

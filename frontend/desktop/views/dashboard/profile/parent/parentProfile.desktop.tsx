@@ -2,7 +2,7 @@ import { Grid, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { ParentProfileShared } from "@/frontend/common/views/dashboard/profile/parent/parentProfileShared";
 import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
-import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
+import { AssociatedStudentsSectionDesktopView } from "@/frontend/desktop/views/dashboard/profile/parent/sections/associatedStudentsSection.desktop";
 
 function DesktopViewContentWrapper({ children }: Readonly<{ children: ReactNode }>) {
   return (
@@ -16,7 +16,7 @@ function DesktopViewContentWrapper({ children }: Readonly<{ children: ReactNode 
 
 const desktopSlots = {
   ViewContentWrapper: DesktopViewContentWrapper,
-  SectionPanel: DesktopSectionPanel,
+  StudentsSection: AssociatedStudentsSectionDesktopView,
 };
 
 export function ParentProfileDesktopView(props: Readonly<ParentProfileViewModel>) {

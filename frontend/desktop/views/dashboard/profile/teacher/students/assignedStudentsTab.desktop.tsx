@@ -13,11 +13,7 @@ const ListView: AssignedStudentsTabSlotProps["ListView"] = ({ rows, loading, pag
       columns: labelsBySection.columns,
       emptyMessage: labelsBySection.list.desktopEmptyMessage,
     }}
-    page={pagination.page}
-    pageSize={pagination.pageSize}
-    onPaginationModelChange={model => {
-      pagination.onPaginationModelChange(model.page, model.pageSize);
-    }}
+    paginationOptions={pagination}
   />
 );
 

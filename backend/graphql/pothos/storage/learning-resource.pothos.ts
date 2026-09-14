@@ -1,15 +1,17 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import type { LearningResourceReturnType } from "@/backend/types";
+import type { LearningResourceReturnType, LearningResourceSubmitInput } from "@/backend/types";
 
 // ─── Input Types ──────────────────────────────────────────────────────────────
 
-export const ResourceUploadInput = gqlSchemaBuilder.inputType("ResourceUploadInput", {
-  fields: t => ({
-    displayName: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
-    filePath: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-    fileId: t.id({ required: true }),
-  }),
-});
+export const ResourceUploadInput = gqlSchemaBuilder
+  .inputRef<LearningResourceSubmitInput>("ResourceUploadInput")
+  .implement({
+    fields: t => ({
+      displayName: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+      filePath: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
+      fileId: t.id({ required: true }),
+    }),
+  });
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 

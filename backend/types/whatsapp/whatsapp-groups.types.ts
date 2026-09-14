@@ -104,7 +104,7 @@ export interface GroupInviteLinkRaw {
 }
 
 /** One pending join request from the group join-requests list endpoint. */
-export interface GroupJoinRequestRaw {
+interface GroupJoinRequestRaw {
   readonly join_request_id: string;
   readonly wa_id: string;
   readonly creation_timestamp: string;
@@ -131,13 +131,41 @@ export interface GroupJoinRequestsListRaw {
  */
 export interface JoinRequestsOutcome {
   readonly approved: readonly string[];
-  readonly failed: readonly {
-    readonly joinRequestId: string;
-    readonly errors: readonly {
-      readonly code?: number;
-      readonly message?: string;
-    }[];
-  }[];
+  readonly failed: readonly WhatsappJoinRequestFailureType[];
+}
+
+/**
+ * One per-request error reported by Meta on a failed approve/reject
+ * join-requests call. Shares the same per-participant error shape Meta uses
+ * on remove-participants failures.
+ */
+export type WhatsappJoinRequestErrorType = WhatsappRemoveParticipantErrorType;
+
+/**
+ * One failed approve/reject join-requests entry: the Meta join-request ID
+ * that failed alongside Meta's per-request error codes/messages.
+ */
+export interface WhatsappJoinRequestFailureType {
+  readonly joinRequestId: string;
+  readonly errors: readonly WhatsappJoinRequestErrorType[];
+}
+
+/**
+ * One per-participant error reported by Meta on a failed remove-participants
+ * call.
+ */
+export interface WhatsappRemoveParticipantErrorType {
+  readonly code?: number;
+  readonly message?: string;
+}
+
+/**
+ * One failed remove-participants entry: the normalized participant input that
+ * failed alongside Meta's per-participant error codes/messages.
+ */
+export interface WhatsappRemoveParticipantFailureType {
+  readonly input: string;
+  readonly errors: readonly WhatsappRemoveParticipantErrorType[];
 }
 
 /**
@@ -147,13 +175,7 @@ export interface JoinRequestsOutcome {
  */
 export interface RemoveParticipantsOutcome {
   readonly removed: readonly string[];
-  readonly failed: readonly {
-    readonly input: string;
-    readonly errors: readonly {
-      readonly code?: number;
-      readonly message?: string;
-    }[];
-  }[];
+  readonly failed: readonly WhatsappRemoveParticipantFailureType[];
 }
 
 /**
@@ -330,6 +352,20 @@ export interface WhatsappGroupSendInput {
 }
 
 /**
+ * Input for the group join-request approval service/mutation. `joinRequestIds`
+ * are the Meta join-request IDs from the pending list; the provider's parsed
+ * outcome (approved list + per-request failures) is returned verbatim — local
+ * membership reconciliation is left to the `group_participants_update`
+ * webhook.
+ */
+export interface ApproveWhatsappGroupJoinRequestsInput {
+  /** Caller performing the mutation (resolved from GraphQL ctx by the service layer). */
+  readonly actorUserId: string;
+  readonly groupId: string;
+  readonly joinRequestIds: string[];
+}
+
+/**
  * Input for the groups pin/unpin service/mutation. `operation` selects the
  * pin or unpin action; `expirationDays` bounds the pin lifetime.
  */
@@ -338,6 +374,75 @@ export interface WhatsappGroupPinInput {
   readonly messageId: string;
   readonly operation: "pin" | "unpin";
   readonly expirationDays?: number;
+  /** Caller performing the mutation (resolved from GraphQL ctx by the service layer). */
+  readonly actorUserId: string;
+}
+
+/**
+ * Input for the groups reject-join-requests service/mutation. `joinRequestIds`
+ * are the pending request ids from the group join-requests list; the parsed
+ * per-request failure outcome is reconciled asynchronously by the
+ * `group_participants_update` webhook.
+ */
+export interface RejectWhatsappGroupJoinRequestsInput {
+  readonly groupId: string;
+  readonly joinRequestIds: string[];
+  /** Caller performing the mutation (resolved from GraphQL ctx by the service layer). */
+  readonly actorUserId: string;
+}
+
+/**
+ * Input for the groups unpin service/mutation. Unpin has no expiry — the
+ * `expirationDays` bound only applies to pins.
+ */
+export interface UnpinWhatsappGroupMessageInput {
+  readonly groupId: string;
+  readonly messageId: string;
+  /** Caller performing the mutation (resolved from GraphQL ctx by the service layer). */
+  readonly actorUserId: string;
+}
+
+/**
+ * Input for the groups remove-participants service/mutation. Meta is the
+ * authority on group membership — the removed/failed outcome arrives
+ * asynchronously via the `group_participants_update` webhook, so this input
+ * carries only the target group and the participant list to remove.
+ */
+export interface RemoveWhatsappGroupParticipantsInput {
+  readonly groupId: string;
+  readonly participants: string[];
+  /** Caller performing the mutation (resolved from GraphQL ctx by the service layer). */
+  readonly actorUserId: string;
+}
+
+/**
+ * Input for the Meta-side groups sync service/mutation. `accountId` scopes
+ * the sync to one account when given; otherwise the service resolves the
+ * active GENERAL-purpose account (falling back to the first active account).
+ */
+export interface SyncWhatsappGroupsInput {
+  readonly accountId?: string | null;
+  /** Caller performing the mutation (resolved from GraphQL ctx by the service layer). */
+  readonly actorUserId: string;
+}
+
+/**
+ * Input for the groups delete service/mutation. The Meta delete must succeed
+ * before the local row is soft-deleted, so this input only names the target
+ * group.
+ */
+export interface DeleteWhatsappGroupInput {
+  readonly groupId: string;
+  /** Caller performing the mutation (resolved from GraphQL ctx by the service layer). */
+  readonly actorUserId: string;
+}
+
+/**
+ * Service input for the groups create mutation: the canonical
+ * {@link WhatsappGroupCreateInput} plus the caller performing the mutation
+ * (resolved from GraphQL ctx by the service layer).
+ */
+export interface WhatsappGroupCreateServiceInput extends WhatsappGroupCreateInput {
   /** Caller performing the mutation (resolved from GraphQL ctx by the service layer). */
   readonly actorUserId: string;
 }

@@ -2,7 +2,7 @@ import { languages } from "@/frontend/common/lib/locale/language/languages";
 import type { LanguageType } from "@/frontend/common/lib/locale/language/types";
 
 /** Pre-built Map for O(1) language lookups by code. */
-export const languageByCodeMap: ReadonlyMap<string, LanguageType> = new Map(
+const languageByCodeMap: ReadonlyMap<string, LanguageType> = new Map(
   languages.map(language => [language.code as string, language])
 );
 

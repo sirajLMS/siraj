@@ -1,12 +1,12 @@
+import { AUDIT_ACTION_VALUES, AUDIT_ENTITY_TYPE_VALUES } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  AUDIT_ACTION_VALUES,
-  AUDIT_ENTITY_TYPE_VALUES,
-  type AuditAction,
-  type AuditEntityType,
-  type AuditLogFilterInput,
-  type AuditLogQueryResult,
-  type AuditLogReturnType,
+import type {
+  AuditAction,
+  AuditEntityType,
+  AuditLogFilterInput,
+  AuditLogQueryResult,
+  AuditLogReturnType,
+  SettingsAuditLogFilterInput,
 } from "@/backend/types";
 
 const VALID_ENTITY_TYPES = new Set<string>(AUDIT_ENTITY_TYPE_VALUES);
@@ -58,33 +58,22 @@ export const SettingsAuditLogsResultPothosObject = SettingsAuditLogsResultRef.im
   }),
 });
 
-export const SettingsAuditLogFilterPothosObject = gqlSchemaBuilder.inputRef("SettingsAuditLogFilter").implement({
-  description: "Filter and pagination options for the settings audit log query.",
-  fields: t => ({
-    entityType: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
-    action: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
-    actorUserId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
-    startDate: t.field({ type: "DateTime", required: false }),
-    endDate: t.field({ type: "DateTime", required: false }),
-    limit: t.int({ required: false, defaultValue: 50, directives: { constraint: { min: 0, max: 500 } } }),
-    offset: t.int({ required: false, defaultValue: 0, directives: { constraint: { min: 0, max: 1000000 } } }),
-  }),
-});
+export const SettingsAuditLogFilterPothosObject = gqlSchemaBuilder
+  .inputRef<SettingsAuditLogFilterInput>("SettingsAuditLogFilter")
+  .implement({
+    description: "Filter and pagination options for the settings audit log query.",
+    fields: t => ({
+      entityType: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+      action: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+      actorUserId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
+      startDate: t.field({ type: "DateTime", required: false }),
+      endDate: t.field({ type: "DateTime", required: false }),
+      limit: t.int({ required: false, defaultValue: 50, directives: { constraint: { min: 0, max: 500 } } }),
+      offset: t.int({ required: false, defaultValue: 0, directives: { constraint: { min: 0, max: 1000000 } } }),
+    }),
+  });
 
-export function toAuditLogFilterInput(
-  filter:
-    | {
-        entityType?: string | null;
-        action?: string | null;
-        actorUserId?: string | null;
-        startDate?: Date | null;
-        endDate?: Date | null;
-        limit?: number | null;
-        offset?: number | null;
-      }
-    | null
-    | undefined
-): AuditLogFilterInput {
+export function toAuditLogFilterInput(filter: SettingsAuditLogFilterInput | null | undefined): AuditLogFilterInput {
   return {
     entityType: filter?.entityType && isAuditEntityType(filter.entityType) ? filter.entityType : undefined,
     action: filter?.action && isAuditAction(filter.action) ? filter.action : undefined,

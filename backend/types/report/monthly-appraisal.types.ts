@@ -23,16 +23,13 @@ export type MonthlyAppraisalSelectType = typeof monthlyAppraisals.$inferSelect;
 type AppraisalFeedbackSelectType = typeof appraisalFeedback.$inferSelect;
 
 /**
- * Sparse-field rubric payload submitted by a teacher.
- *
- * `teacherId` is resolved from auth context in the service layer (Task 2.2),
- * never trusted from client input — but the repo input type allows it so the
- * service can pass the verified value through. `month` is normalized to the
- * first day of its month by the service before reaching the repo.
+ * Sparse-field rubric payload submitted by a teacher. Carries no identity
+ * fields: `teacherId` is resolved from auth context in the service layer and
+ * never trusted from client input. `month` is normalized to the first day of
+ * its month by the service before reaching the repo.
  */
 export type MonthlyAppraisalSubmitInput = {
   studentId: string;
-  teacherId: string;
   month: Date;
   behaviorGrade?: number | null;
   behaviorComment?: string | null;
@@ -46,13 +43,28 @@ export type MonthlyAppraisalSubmitInput = {
 };
 
 /**
- * Feedback append input. `authorUserId` is resolved from auth context in the
- * service layer (Task 2.2); the repo trusts whatever it is given.
+ * Repo-facing upsert payload: the submitted rubric plus the verified
+ * `teacherId` resolved from auth context at the service layer.
+ */
+export type MonthlyAppraisalUpsertInput = MonthlyAppraisalSubmitInput & {
+  teacherId: string;
+};
+
+/**
+ * Feedback append payload. Carries no identity fields: `authorUserId` is
+ * resolved from auth context in the service layer.
  */
 export type AppraisalFeedbackInput = {
   appraisalId: string;
-  authorUserId: string;
   body: string;
+};
+
+/**
+ * Repo-facing feedback payload: the submitted feedback plus the verified
+ * `authorUserId` resolved from auth context at the service layer.
+ */
+export type AppraisalFeedbackAppendInput = AppraisalFeedbackInput & {
+  authorUserId: string;
 };
 
 /**

@@ -49,8 +49,10 @@ import {
 } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests";
 import { accountGraphContext, executeGraphApiCall } from "@/backend/services/whatsapp/whatsapp-graph.helpers";
 import type {
+  ApproveWhatsappGroupJoinRequestsInput,
   CreateGroupResponseBody,
   DBTransaction,
+  DeleteWhatsappGroupInput,
   GraphApiRequestContext,
   GraphApiRequestInit,
   GroupInfo,
@@ -59,12 +61,16 @@ import type {
   GroupMessageSendResult,
   JoinRequestsOutcome,
   ListGroupsRaw,
+  RejectWhatsappGroupJoinRequestsInput,
   RemoveParticipantsOutcome,
+  RemoveWhatsappGroupParticipantsInput,
   SendGroupMessageInput,
   SendTemplateMessageResponseBody,
+  SyncWhatsappGroupsInput,
+  UnpinWhatsappGroupMessageInput,
   UserPermissionContext,
   WhatsappAccountSelectType,
-  WhatsappGroupCreateInput,
+  WhatsappGroupCreateServiceInput,
   WhatsappGroupInsertType,
   WhatsappGroupJoinRequest,
   WhatsappGroupMessagesListInput,
@@ -118,36 +124,6 @@ const META_GROUP_ERROR_TRANSLATIONS: Readonly<Record<number, (tErrors: ErrorsLab
 const DEFAULT_JOIN_APPROVAL_MODE = WhatsappGroupJoinApprovalMode.ApprovalRequired;
 /** Milliseconds in one day (pin-expiry computation). */
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-type GroupActorInput = { readonly actorUserId: string };
-
-export type DeleteWhatsappGroupInput = GroupActorInput & {
-  readonly groupId: string;
-};
-
-export type SyncWhatsappGroupsInput = GroupActorInput & {
-  readonly accountId?: string | null;
-};
-
-export type ApproveWhatsappGroupJoinRequestsInput = GroupActorInput & {
-  readonly groupId: string;
-  readonly joinRequestIds: string[];
-};
-
-export type RejectWhatsappGroupJoinRequestsInput = GroupActorInput & {
-  readonly groupId: string;
-  readonly joinRequestIds: string[];
-};
-
-export type RemoveWhatsappGroupParticipantsInput = GroupActorInput & {
-  readonly groupId: string;
-  readonly participants: string[];
-};
-
-export type UnpinWhatsappGroupMessageInput = GroupActorInput & {
-  readonly groupId: string;
-  readonly messageId: string;
-};
 
 async function assertCanViewGroups(context: UserPermissionContext, tErrors: ErrorsLabels): Promise<void> {
   const ok = await PermissionsService.hasPermission(context, AppPermission.WHATSAPP_GROUPS_VIEW);
@@ -879,9 +855,3 @@ export namespace WhatsappGroupsService {
   }
 }
 
-/**
- * Service input for `createGroup`: the canonical create input plus the
- * caller performing the mutation (resolved from GraphQL ctx by the service
- * layer).
- */
-export type WhatsappGroupCreateServiceInput = GroupActorInput & WhatsappGroupCreateInput;

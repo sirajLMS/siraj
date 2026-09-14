@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, Card, Skeleton, Stack } from "@mui/material";
+import { Box, Skeleton, Stack } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
+import { BaseCard } from "@/frontend/common/components/ui";
 
 interface SkeletonCardConfig {
   readonly id: string;
@@ -19,14 +20,14 @@ export interface ProfileSkeletonSharedOptions {
 
 function SkeletonCard({ config }: Readonly<{ readonly config: SkeletonCardConfig }>) {
   return (
-    <Card>
+    <BaseCard sx={{ padding: 0 }}>
       <Skeleton variant="text" width="80%" sx={{ fontSize: "1.25rem", mb: 1.5 }} />
       <Skeleton variant="rectangular" height={config.skeletonHeight} sx={{ mb: 1.5, borderRadius: 1 }} />
       {config.textWidths.map((width, wIndex) => {
         const showMargin = wIndex > 0;
         return <Skeleton key={width} variant="text" width={width} sx={showMargin ? { mt: 1 } : undefined} />;
       })}
-    </Card>
+    </BaseCard>
   );
 }
 

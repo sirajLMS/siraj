@@ -20,7 +20,10 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
   fields: t => ({
     id: t.exposeString("id"),
     name: t.exposeString("name"),
-    email: t.exposeString("email"),
+    email: t.exposeString("email", {
+      authScopes: (parent, _args, ctx) => ctx.isSuperAdmin || ctx.user?.id === parent.id,
+      unauthorizedResolver: () => null,
+    }),
     emailVerifiedAt: t.expose("emailVerifiedAt", {
       type: "DateTime",
       nullable: true,
@@ -28,7 +31,11 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
-    phone: t.exposeString("phone", { nullable: true }),
+    phone: t.exposeString("phone", {
+      nullable: true,
+      authScopes: (parent, _args, ctx) => ctx.isSuperAdmin || ctx.user?.id === parent.id,
+      unauthorizedResolver: () => null,
+    }),
     status: t.expose("status", { type: AccountStatusPothosObject }),
     notificationCount: t.int({ resolve: () => 0 }),
     displayCurrency: t.field({

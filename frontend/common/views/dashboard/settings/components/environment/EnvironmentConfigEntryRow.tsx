@@ -1,7 +1,9 @@
 "use client";
 
 import { DeleteOutlined, SaveOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui/button";
 import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { EnvSecretField } from "@/frontend/common/views/dashboard/settings/components/environment/EnvSecretField";
 import type { EnvironmentConfigViewModel } from "@/frontend/common/views/dashboard/settings/types/environmentConfig.types";
@@ -15,6 +17,16 @@ type EnvironmentConfigEntryRowProps = {
   readonly viewModel: EnvironmentConfigViewModel;
   readonly layout?: "grid" | "stacked";
 };
+
+const SOURCE_BADGE_STATUSES: Record<string, string> = {
+  db: "success",
+  env: "partial",
+  unset: "unknown",
+};
+
+function resolveSourceStatus(source: string | null | undefined): string {
+  return SOURCE_BADGE_STATUSES[source ?? "unset"] ?? SOURCE_BADGE_STATUSES.unset;
+}
 
 function resolveSourceLabel(source: string | null | undefined, labels: EnvironmentConfigViewModel["labels"]): string {
   switch (source) {
@@ -67,21 +79,22 @@ function KeyBlock({ configKey, description, editable, labels }: KeyBlockProps) {
 }
 
 interface SourceBlockProps {
+  readonly source: string | null | undefined;
   readonly sourceLabel: string;
   readonly hasDbOverride: boolean | null;
   readonly labels: EnvironmentConfigViewModel["labels"];
 }
 
-function SourceBlock({ sourceLabel, hasDbOverride, labels }: SourceBlockProps) {
+function SourceBlock({ source, sourceLabel, hasDbOverride, labels }: SourceBlockProps) {
   return (
     <Stack sx={{ gap: 1, minWidth: 0 }}>
       <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary })}>
         {labels.columns.source}
       </Typography>
       <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
-        <Chip size="small" variant="outlined" label={sourceLabel} />
+        <StatusBadge category="syncStatus" status={resolveSourceStatus(source)} label={sourceLabel} />
         {hasDbOverride ? (
-          <Chip size="small" color="primary" variant="outlined" label={labels.badges.dbOverride} />
+          <StatusBadge category="overrideStatus" status="active" label={labels.badges.dbOverride} />
         ) : null}
       </Stack>
     </Stack>
@@ -144,26 +157,13 @@ function ValueBlock({
 
       {editable ? (
         <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
-          <Button
-            size="small"
-            variant="contained"
-            startIcon={<SaveOutlined />}
-            disabled={!dirty || saving}
-            onClick={handleSave}
-          >
+          <PrimaryPageAction size="small" startIcon={<SaveOutlined />} disabled={!dirty || saving} onClick={handleSave}>
             {labels.actions.save}
-          </Button>
+          </PrimaryPageAction>
           {hasDbOverride ? (
-            <Button
-              size="small"
-              variant="outlined"
-              color="secondary"
-              startIcon={<DeleteOutlined />}
-              disabled={saving}
-              onClick={handleRevert}
-            >
+            <FilterButton size="small" startIcon={<DeleteOutlined />} disabled={saving} onClick={handleRevert}>
               {labels.actions.revert}
-            </Button>
+            </FilterButton>
           ) : null}
         </Stack>
       ) : null}
@@ -239,7 +239,9 @@ export function EnvironmentConfigEntryRow({
   const emptyPlaceholder = labels.emptyValue;
 
   const keyBlock = <KeyBlock configKey={entryKey} description={description} editable={editable} labels={labels} />;
-  const sourceBlock = <SourceBlock sourceLabel={sourceLabel} hasDbOverride={entry.hasDbOverride} labels={labels} />;
+  const sourceBlock = (
+    <SourceBlock source={entry.source} sourceLabel={sourceLabel} hasDbOverride={entry.hasDbOverride} labels={labels} />
+  );
   const valueBlock = (
     <ValueBlock
       configKey={entryKey}

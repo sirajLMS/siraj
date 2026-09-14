@@ -1,4 +1,6 @@
-type CoreInvoiceStatus = "UNPAID" | "PAYMENT_PENDING" | "PAID" | "CANCELLED";
+import type { InvoiceStatus } from "@/shared/constants/billing.enum";
+
+type CoreInvoiceStatus = `${InvoiceStatus}`;
 
 export type AdminInvoiceStatus = "OVERDUE" | "PENDING" | CoreInvoiceStatus;
 

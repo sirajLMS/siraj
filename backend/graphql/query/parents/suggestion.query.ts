@@ -1,14 +1,11 @@
-// Auto-extracted from pothos/ (types-review R3-P3).
 // Query field registrations relocated to the query layer per query/AGENTS.md.
 
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import {
   AdminSuggestionResultPothosObject,
-  normalizeSuggestion,
-  normalizeSuggestionSearchResult,
   ParentSuggestionOptionsPothosObject,
-  requireAuth,
   SuggestionContributorStatsPothosObject,
   SuggestionFilterPothosObject,
   SuggestionPothosObject,
@@ -26,7 +23,7 @@ gqlSchemaBuilder.queryField("adminSuggestions", t =>
       filter: t.arg({ type: SuggestionFilterPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = requireAuth(ctx);
+      const userId = await requireAuth(ctx);
 
       const result: SuggestionQueueResult = await SuggestionService.getAdminSuggestions(
         userId,
@@ -41,7 +38,7 @@ gqlSchemaBuilder.queryField("adminSuggestions", t =>
 
       return {
         id: result.id,
-        suggestions: result.suggestions.map(normalizeSuggestion),
+        suggestions: result.suggestions,
         metrics: result.metrics,
       };
     },
@@ -57,15 +54,13 @@ gqlSchemaBuilder.queryField("parentSuggestions", t =>
       options: t.arg({ type: ParentSuggestionOptionsPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = requireAuth(ctx);
+      const userId = await requireAuth(ctx);
 
-      const suggestions = await SuggestionService.getParentSuggestions(
+      return SuggestionService.getParentSuggestions(
         userId,
         { limit: args.options.limit, offset: args.options.offset },
         ctx.locale
       );
-
-      return suggestions.map(normalizeSuggestion);
     },
   })
 );
@@ -80,10 +75,9 @@ gqlSchemaBuilder.queryField("searchSuggestions", t =>
       excludeId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = requireAuth(ctx);
+      const userId = await requireAuth(ctx);
 
-      const results = await SuggestionService.searchSuggestions(userId, args.query, args.excludeId, ctx.locale);
-      return results.map(normalizeSuggestionSearchResult);
+      return SuggestionService.searchSuggestions(userId, args.query, args.excludeId, ctx.locale);
     },
   })
 );
@@ -97,7 +91,7 @@ gqlSchemaBuilder.queryField("suggestionContributorStats", t =>
       days: t.arg.int({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = requireAuth(ctx);
+      const userId = await requireAuth(ctx);
       return SuggestionService.getContributorStats(userId, args.days, ctx.locale);
     },
   })

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { ProfileByUserIdQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
 import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabTypes";
@@ -69,11 +70,9 @@ function filterRowsByClass(rows: readonly AssignedStudentsRow[], selectedClass: 
 function handleClassChangeHandler(
   className: string,
   t: ProfileStudentsLabels,
-  setSelectedClass: React.Dispatch<React.SetStateAction<string>>,
-  setPage: React.Dispatch<React.SetStateAction<number>>
+  setSelectedClass: React.Dispatch<React.SetStateAction<string>>
 ): void {
   setSelectedClass(className === t.allClasses ? "all" : className);
-  setPage(0);
 }
 
 function buildLabelsBySection(t: ProfileStudentsLabels) {
@@ -104,24 +103,11 @@ function buildClassFilter(
   };
 }
 
-function buildPagination(
-  page: number,
-  pageSize: number,
-  totalCount: number,
-  setPage: React.Dispatch<React.SetStateAction<number>>,
-  setPageSize: React.Dispatch<React.SetStateAction<number>>
-) {
-  return {
-    page,
-    pageSize,
-    totalCount,
-    onPageChange: setPage,
-    onPaginationModelChange: (nextPage: number, nextPageSize: number) => {
-      setPage(nextPage);
-      setPageSize(nextPageSize);
-    },
-  };
-}
+const CLIENT_PAGINATION_OPTIONS: ListPaginationOptions = {
+  mode: "client",
+  pageSize: 10,
+  pageSizeOptions: [5, 10, 25],
+};
 
 export function useAssignedStudentsTabViewModel(
   props: Readonly<UseAssignedStudentsTabViewModelProps>
@@ -129,8 +115,6 @@ export function useAssignedStudentsTabViewModel(
   const { assignedStudents, loading, hasError, onRetry } = props;
   const t = useAppTranslation(Translation.Profile.Base).students;
   const [selectedClass, setSelectedClass] = useState<string>("all");
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
 
   const rows = useMemo(() => buildRows(assignedStudents, t), [assignedStudents, t]);
 
@@ -138,9 +122,7 @@ export function useAssignedStudentsTabViewModel(
 
   const filteredRows = useMemo(() => filterRowsByClass(rows, selectedClass), [rows, selectedClass]);
 
-  const totalCount = filteredRows.length;
-
-  const handleClassChange = (className: string) => handleClassChangeHandler(className, t, setSelectedClass, setPage);
+  const handleClassChange = (className: string) => handleClassChangeHandler(className, t, setSelectedClass);
 
   return {
     labelsBySection: buildLabelsBySection(t),
@@ -154,6 +136,6 @@ export function useAssignedStudentsTabViewModel(
     onRetry,
     empty: buildEmptyState(t),
     classFilter: buildClassFilter(classOptions, selectedClass, handleClassChange, t),
-    pagination: buildPagination(page, pageSize, totalCount, setPage, setPageSize),
+    pagination: CLIENT_PAGINATION_OPTIONS,
   };
 }

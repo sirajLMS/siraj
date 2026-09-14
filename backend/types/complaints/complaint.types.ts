@@ -3,7 +3,7 @@ import type { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import type { ComplaintResponseReturnType, PageInfo } from "@/backend/types";
 
 export type ComplaintSelectType = typeof complaints.$inferSelect;
-type ComplaintInsertType = typeof complaints.$inferInsert;
+export type ComplaintInsertType = typeof complaints.$inferInsert;
 
 export type ComplaintSubmitInput = Omit<
   ComplaintInsertType,
@@ -67,10 +67,19 @@ export type ComplaintQueueResult = {
   pageInfo?: PageInfo | null;
 };
 
+export type ComplaintStatusCountData = {
+  status: string;
+  count: number;
+};
+
+export type ComplaintAvgHoursData = {
+  avgHours: number | null;
+};
+
 export type ComplaintQueueRawResult = {
   id: string;
   complaints: ReadonlyArray<ComplaintReturnType>;
-  rawMetrics: { statusCounts: { status: string; count: number }[]; avgResolutionHours: number };
+  rawMetrics: { statusCounts: ComplaintStatusCountData[]; avgResolutionHours: number };
 };
 
 export type ComplaintQueuePaginatedResult = {

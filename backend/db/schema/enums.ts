@@ -24,6 +24,7 @@ import {
   FxProvider,
   FxSyncStatus,
   Gender,
+  InvoicePaymentSubmissionStatus,
   InvoiceStatus,
   InvoiceType,
   LeaveRequesterType,
@@ -102,6 +103,11 @@ export const classExecutionStateEnum = createPgEnumFromEnum("class_execution_sta
 export const invoiceStatusEnum = createPgEnumFromEnum("invoice_status", InvoiceStatus);
 
 export const invoiceTypeEnum = createPgEnumFromEnum("invoice_type", InvoiceType);
+
+export const invoicePaymentSubmissionStatusEnum = createPgEnumFromEnum(
+  "invoice_payment_submission_status",
+  InvoicePaymentSubmissionStatus
+);
 
 export const paymentMethodTypeEnum = createPgEnumFromEnum("payment_method_type", PaymentMethodType);
 

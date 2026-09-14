@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import type { ReactNode } from "react";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button/DesktopActionButtons";
@@ -23,12 +23,6 @@ export interface SettingsTabGridSharedProps<R extends { readonly id: string }> {
 }
 
 const ROOT_SX = { display: "flex", flexDirection: "column", gap: 3 } as const;
-const HEADER_SX = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  gap: 2,
-} as const;
 
 export function SettingsTabGridShared<R extends { readonly id: string }>({
   rows,
@@ -44,20 +38,18 @@ export function SettingsTabGridShared<R extends { readonly id: string }>({
 }: Readonly<SettingsTabGridSharedProps<R>>) {
   return (
     <Box sx={ROOT_SX}>
-      <Box sx={HEADER_SX}>
-        <Box>
-          <Typography sx={{ typography: "titleLg", mb: 1 }}>{title}</Typography>
-          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
-            {subtitle}
-          </Typography>
-        </Box>
-        {canManage ? (
-          <DesktopPrimaryPageAction onClick={onAdd} startIcon={<AddOutlined />}>
-            {addLabel}
-          </DesktopPrimaryPageAction>
-        ) : null}
-      </Box>
-      <DesktopSectionPanel contentPadding={false}>
+      <DesktopSectionPanel
+        title={title}
+        subTitle={subtitle}
+        contentPadding={false}
+        actions={
+          canManage ? (
+            <DesktopPrimaryPageAction onClick={onAdd} startIcon={<AddOutlined />}>
+              {addLabel}
+            </DesktopPrimaryPageAction>
+          ) : null
+        }
+      >
         <DesktopAppDataGrid
           rows={rows}
           columns={columns}

@@ -37,7 +37,7 @@ export const ALLOWED_PHONE = ["1", "555", "010", "0124"].join("");
 export const NON_REGISTRY_PHONE = ["9", "876", "543", "210"].join("");
 export const CONTACT_WA_ID = ["9", "665", "012", "34567"].join("");
 
-export const LIST_PAGINATION = {
+const LIST_PAGINATION = {
   first: 20,
   skip: 0,
   after: null,
@@ -46,7 +46,7 @@ export const LIST_PAGINATION = {
   page: null,
   maxCount: null,
 };
-export const THREAD_PAGINATION = {
+const THREAD_PAGINATION = {
   first: 50,
   skip: 0,
   after: null,
@@ -317,7 +317,7 @@ export function templatesMock(accountId: string, rows: readonly WhatsappTemplate
  * Erroring template query for one account; drives the picker's warning alert
  * without affecting the rest of the workspace mocks.
  */
-export function templatesErrorMock(accountId: string): MockLink.MockedResponse {
+function templatesErrorMock(accountId: string): MockLink.MockedResponse {
   return unlimited({
     request: { query: whatsappAccountTemplatesQueryDocument, variables: { accountId } },
     error: new Error("templates fetch failed"),

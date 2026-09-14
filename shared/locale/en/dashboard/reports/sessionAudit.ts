@@ -13,6 +13,7 @@ export const dashboardReportsSessionAuditEn: SessionAuditLabels = {
     statusPlaceholder: "All statuses",
     search: "Search teacher / student",
     clear: "Clear filters",
+    clearSearch: "Clear search",
   },
   column: {
     scheduledStart: "Scheduled start",

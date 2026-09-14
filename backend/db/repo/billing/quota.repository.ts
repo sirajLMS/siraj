@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { and, count, desc, eq, gt, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
 
 import { type db, queryDb, queryWithPagination, withForUpdate } from "@/backend/db";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
@@ -315,34 +315,10 @@ export namespace QuotaRepository {
   };
 
   /**
-   * Returns a paginated list of non-deleted quotas with optional filtering
-   * and the total count of matching rows.
-   *
-   * `totalCount` is computed via a **separate COUNT query** (`SELECT count(*)
-   * FROM quotas WHERE …`) that runs in parallel with the paginated data query
-   * via `Promise.all`. The two queries share the same `WHERE` clause but are
-   * independent — the COUNT is always the full matching set regardless of
-   * page offset/limit, so the caller gets an accurate total for pagination UI.
-   *
-   * **Pagination limitation**: The `queryWithPagination` helper applies
-   * offset/limit to the data query only. The COUNT query is unbounded — it
-   * scans all matching rows on every request. For very large datasets this
-   * adds a second full-scan per page load. Approximate counts or cached
-   * totals could mitigate this but are not currently implemented.
-   *
-   * **Pagination accuracy**: When `pagination` is `null`, this method
-   * returns all matching rows (no LIMIT/OFFSET) with the full count.
-   * The caller (`QuotaService.listQuotas`) uses this for the multi-student
-   * IDOR-scoped branch to fetch all rows, filter in-memory by associated
-   * student IDs, then slice for the requested page — ensuring correct
-   * pagination and totalCount on the scoped set.
+   * Builds the shared WHERE conditions for paginated quota list reads,
+   * honoring the optional filter (studentId, status, kind, search).
    */
-  export const listAllPaginated = async (
-    tx?: ReadExecutor,
-    filter?: QuotaPaginatedFilter | null,
-    pagination?: PaginationArgs | null
-  ): Promise<{ rows: QuotaSelectType[]; totalCount: number }> => {
-    const q = queryDb(tx);
+  const buildQuotaFilterConditions = (filter?: QuotaPaginatedFilter | null) => {
     const conditions = [isNull(quotas.deletedAt)];
 
     if (filter?.studentId) {
@@ -359,6 +335,34 @@ export namespace QuotaRepository {
       conditions.push(sql`${quotas.name} ILIKE ${searchPattern}`);
     }
 
+    return conditions;
+  };
+
+  /**
+   * Runs the paginated quota list query for the given WHERE conditions and
+   * returns the matching rows plus the total count.
+   *
+   * `totalCount` is computed via a **separate COUNT query** (`SELECT count(*)
+   * FROM quotas WHERE …`) that runs in parallel with the paginated data query
+   * via `Promise.all`. The COUNT is always the full matching set regardless
+   * of page offset/limit, so the caller gets an accurate total for
+   * pagination UI.
+   *
+   * **Pagination limitation**: The `queryWithPagination` helper applies
+   * offset/limit to the data query only. The COUNT query is unbounded — it
+   * scans all matching rows on every request. For very large datasets this
+   * adds a second full-scan per page load. Approximate counts or cached
+   * totals could mitigate this but are not currently implemented.
+   *
+   * **Pagination accuracy**: When `pagination` is `null`, all matching rows
+   * are returned (no LIMIT/OFFSET) with the full count.
+   */
+  const runPaginatedQuotaList = async (
+    tx: ReadExecutor | undefined,
+    conditions: SQL[],
+    pagination?: PaginationArgs | null
+  ): Promise<{ rows: QuotaSelectType[]; totalCount: number }> => {
+    const q = queryDb(tx);
     const whereClause = and(...conditions);
     const baseQuery = q.select().from(quotas).where(whereClause).orderBy(desc(quotas.createdAt)).$dynamic();
 
@@ -371,6 +375,42 @@ export namespace QuotaRepository {
       rows,
       totalCount: countRow[0]?.value ?? 0,
     };
+  };
+
+  /**
+   * Returns a paginated list of non-deleted quotas with optional filtering
+   * and the total count of matching rows.
+   */
+  export const listAllPaginated = async (
+    tx?: ReadExecutor,
+    filter?: QuotaPaginatedFilter | null,
+    pagination?: PaginationArgs | null
+  ): Promise<{ rows: QuotaSelectType[]; totalCount: number }> =>
+    runPaginatedQuotaList(tx, buildQuotaFilterConditions(filter), pagination);
+
+  /**
+   * Returns a paginated list of non-deleted quotas restricted to the given
+   * student IDs, with the same filter and pagination shape as
+   * {@link listAllPaginated}.
+   *
+   * Student scoping happens in SQL via `inArray(quotas.studentId, ids)` so
+   * pagination and totalCount operate on the scoped set — callers never need
+   * to fetch all quotas and filter in memory. Uses a plain array with a
+   * dynamic query (NOT `sql.placeholder`): the PostgreSQL prepared-statement
+   * protocol cannot expand array parameters for `IN` clauses.
+   */
+  export const listByStudentIdsPaginated = async (
+    tx?: ReadExecutor,
+    studentIds?: string[] | null,
+    filter?: QuotaPaginatedFilter | null,
+    pagination?: PaginationArgs | null
+  ): Promise<{ rows: QuotaSelectType[]; totalCount: number }> => {
+    if (!studentIds || studentIds.length === 0) return { rows: [], totalCount: 0 };
+
+    const conditions = buildQuotaFilterConditions(filter);
+    conditions.push(inArray(quotas.studentId, [...new Set(studentIds)]));
+
+    return runPaginatedQuotaList(tx, conditions, pagination);
   };
 
   export const update = async (

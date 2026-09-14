@@ -49,6 +49,26 @@ export type MeetingConfigBaseReturnType = MeetingConfigBaseSelectType & {
   readonly provider?: MeetingProviderSelectType;
 };
 
+/**
+ * Public (GraphQL) DTO for meeting configs, bound directly by the Pothos
+ * `UserMeetingConfig` / `ClassMeetingConfig` objects. The `encryptedSecret`
+ * column is structurally excluded — the GraphQL surface only exposes
+ * `hasSecret` and the service-layer masked `providerMetadata`, so raw or
+ * encrypted secret values can never reach clients through this boundary.
+ */
+export type MeetingConfigPublicReturnType = Omit<MeetingConfigBaseReturnType, "encryptedSecret">;
+
+/**
+ * Shared Pothos field-builder shape covering the common GraphQL-exposed
+ * fields of the user and class meeting config objects. Derived from
+ * {@link MeetingConfigPublicReturnType} so shared field definitions can
+ * never reference the sensitive DB fields that the public DTO omits.
+ */
+export type MeetingConfigPublicShape = Pick<
+  MeetingConfigPublicReturnType,
+  "providerId" | "provider" | "details" | "hasSecret" | "providerMetadata" | "createdAt" | "updatedAt"
+>;
+
 export type MeetingConfigBaseSubmitInput = Omit<
   MeetingConfigBaseInsertType,
   "id" | "createdAt" | "updatedAt" | "encryptedSecret" | "providerMetadata"

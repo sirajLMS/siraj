@@ -2,12 +2,7 @@ import { GraphQLError } from "graphql";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
-import type { Translations } from "@/shared/locale";
-
-export interface AuthRateLimitResult {
-  readonly userId: string;
-  readonly tErrors: Translations["errorsTranslations"];
-}
+import type { AuthRateLimitResult } from "@/backend/types";
 
 export async function requireAuthWithRateLimit(ctx: BaseContext): Promise<AuthRateLimitResult> {
   const userId = await requireAuth(ctx);

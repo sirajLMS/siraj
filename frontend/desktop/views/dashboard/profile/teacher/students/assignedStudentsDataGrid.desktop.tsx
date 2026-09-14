@@ -2,6 +2,7 @@
 
 import { Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
+import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
 import { formatStatusLabel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsStatusFormatters";
@@ -14,18 +15,14 @@ type AssignedStudentsDataGridProps = {
   readonly rows: readonly AssignedStudentsRow[];
   readonly labels: AssignedStudentsListLabels;
   readonly loading: boolean;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly onPaginationModelChange: (model: { page: number; pageSize: number }) => void;
+  readonly paginationOptions: ListPaginationOptions;
 };
 
 export function AssignedStudentsDataGrid({
   rows,
   labels,
   loading,
-  page: _page,
-  pageSize,
-  onPaginationModelChange: _onPaginationModelChange,
+  paginationOptions,
 }: Readonly<AssignedStudentsDataGridProps>) {
   const { columns } = labels;
 
@@ -110,7 +107,7 @@ export function AssignedStudentsDataGrid({
       columns={gridColumns}
       loading={loading}
       emptyMessage={labels.emptyMessage}
-      paginationOptions={{ mode: "client", pageSize, pageSizeOptions: [5, 10, 25] }}
+      paginationOptions={paginationOptions}
       sx={{ border: "none" }}
     />
   );

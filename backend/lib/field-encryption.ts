@@ -6,6 +6,11 @@ if (!ENCRYPTION_KEY_RAW) {
   throw new Error("DATABASE_ENCRYPTION_KEY environment variable is not defined");
 }
 
+const nodeEnv = process.env.NODE_ENV ?? "development";
+if (nodeEnv === "production" && ENCRYPTION_KEY_RAW.trim().length < 32) {
+  throw new Error("DATABASE_ENCRYPTION_KEY must be at least 32 characters in production");
+}
+
 // Derive 32-byte key using SHA-256
 const ENCRYPTION_KEY = crypto.createHash("sha256").update(ENCRYPTION_KEY_RAW).digest();
 const IV_LENGTH = 12;

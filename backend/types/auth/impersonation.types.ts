@@ -1,4 +1,4 @@
-import type { impersonationSessions } from "@/backend/db/schema/auth/impersonation";
+import type { impersonationSessions } from "@/backend/db/schema";
 
 type ImpersonationSessionSelectType = typeof impersonationSessions.$inferSelect;
 

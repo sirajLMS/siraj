@@ -5,7 +5,7 @@ import type { InputFieldBuilder, ObjectFieldBuilder } from "@pothos/core";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 
 // Extract the actual SchemaTypes from the builder instance.
-type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
+export type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 
 // Generic object field builder parameterized by the parent shape.
 export type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;

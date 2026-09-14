@@ -4,7 +4,7 @@ import { create } from "zustand";
 import type { ExpenseType } from "@/frontend/common/graphql/generated/gql/graphql";
 
 /** Rows per server page on first load; mirrors the `expenses` resolver convention. */
-export const EXPENSE_DEFAULT_PAGE_SIZE = 50;
+const EXPENSE_DEFAULT_PAGE_SIZE = 50;
 
 /** Page-size choices offered by the expense list pager. */
 export const EXPENSE_PAGE_SIZE_OPTIONS: readonly number[] = [25, 50, 100];

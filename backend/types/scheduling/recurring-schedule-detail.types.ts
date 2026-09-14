@@ -51,7 +51,7 @@ export type RecurringSchedulesPaginatedResult = {
  * Repository returns rows with studentName and teacherUserName attached via Object.assign
  * but typed as RecurringScheduleSelectType[]. This type represents the actual shape.
  */
-export type RecurringScheduleRepositoryRow = RecurringScheduleSelectType & {
+export type RecurringScheduleWithNamesReturnType = RecurringScheduleSelectType & {
   readonly studentName: string;
   readonly teacherUserName: string;
 };

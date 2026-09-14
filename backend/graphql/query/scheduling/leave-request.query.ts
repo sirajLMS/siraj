@@ -1,11 +1,8 @@
-// Auto-extracted from pothos/ (types-review R3-P3).
-// Query field registrations relocated to the query layer per query/AGENTS.md.
-
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { LeaveRequestPothosObject } from "@/backend/graphql/pothos/scheduling/leave-request.pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { LeaveRequestService } from "@/backend/services/leave-request/leave-request.service";
+import { LeaveRequestPothosObject } from "@/backend/graphql/pothos";
+import { requireAuth } from "@/backend/graphql/utils";
+import { LeaveRequestService } from "@/backend/services";
 import type { LeaveRequestSelectType } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("myLeaveRequests", t =>

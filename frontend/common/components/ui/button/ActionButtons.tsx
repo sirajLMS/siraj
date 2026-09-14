@@ -30,3 +30,9 @@ export const ExportButton = makeButton("contained", theme => ({
   backgroundColor: theme.palette.primary.main,
   "&:hover": { backgroundColor: theme.palette.primary.dark },
 }));
+
+export const DangerActionButton = makeButton("contained", theme => ({
+  backgroundColor: theme.palette.error.main,
+  color: theme.palette.onError,
+  "&:hover": { backgroundColor: theme.palette.error.dark },
+}));

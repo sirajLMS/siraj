@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import {
-  type CarryoverAggregateInstance,
   computeTotalDurationHours,
   groupInstancesByTeacher,
   maxDate,
@@ -9,6 +8,7 @@ import {
   resolveDominantCurrency,
   truncateWithEllipsis,
 } from "@/backend/services/teachers";
+import type { CarryoverAggregateInstance } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 function buildInstance(overrides: Partial<CarryoverAggregateInstance> = {}): CarryoverAggregateInstance {

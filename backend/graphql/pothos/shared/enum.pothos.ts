@@ -10,6 +10,8 @@ import {
   BilledUnit,
   BookingStatus,
   CalculationStatus,
+  ComplaintCategory,
+  ComplaintStatus,
   CountryCode,
   CreditAdjustmentType,
   CreditReason,
@@ -53,11 +55,13 @@ import {
   QuotaPeriodType,
   QuotaStatus,
   RateSource,
+  ReportGroupingMode,
   RescheduleDateLabel,
   SchedulingMode,
   SessionAuditReportSortFieldEnum,
   SessionAuditStatusEnum,
   StudentStatus,
+  SuggestionStatus,
   TeacherDueStatus,
   TeacherProgressFeedEventKind,
   UserRole,
@@ -78,6 +82,8 @@ import {
   WhatsappWebhookEventStatus,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { FileSortField, FileTypes, UploadType } from "@/backend/enum/storage/storage.enum";
+import { StudentsOrderByColumn } from "@/backend/enum/students/student-order.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -425,4 +431,40 @@ export const EffectiveMeetingSourcePothosEnum = gqlSchemaBuilder.enumType(Effect
 export const ExpenseTypePothosEnum = gqlSchemaBuilder.enumType(ExpenseType, {
   name: "ExpenseType",
   description: "Expense ledger category: Salaries | Marketing | Logistics | Technology",
+});
+
+export const ComplaintCategoryPothosEnum = gqlSchemaBuilder.enumType(ComplaintCategory, {
+  name: "ComplaintCategory",
+  description: "Categories for parent complaints.",
+});
+
+export const ComplaintStatusPothosEnum = gqlSchemaBuilder.enumType(ComplaintStatus, {
+  name: "ComplaintStatus",
+  description: "Status of a complaint in the support queue.",
+});
+
+export const SuggestionStatusPothosEnum = gqlSchemaBuilder.enumType(SuggestionStatus, {
+  name: "SuggestionStatus",
+  description: "Status of a suggestion in the review pipeline.",
+});
+
+export const FileTypePothosObject = gqlSchemaBuilder.enumType(FileTypes, {
+  name: "FileType",
+});
+
+export const UploadTypePothosObject = gqlSchemaBuilder.enumType(UploadType, {
+  name: "UploadType",
+});
+
+export const SortByPothosObject = gqlSchemaBuilder.enumType(FileSortField, {
+  name: "FileSortField",
+});
+
+export const ReportGroupingModeEnum = gqlSchemaBuilder.enumType(ReportGroupingMode, {
+  name: "ReportGroupingMode",
+  description: "Determines how the attendance data is aggregated.",
+});
+
+export const StudentsOrderByColumnPothosObject = gqlSchemaBuilder.enumType(StudentsOrderByColumn, {
+  name: "StudentsOrderByColumn",
 });

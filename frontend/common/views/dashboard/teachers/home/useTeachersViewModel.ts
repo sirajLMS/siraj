@@ -16,6 +16,7 @@ export interface TeachersViewModel {
   readonly labels: TeachersDirectoryLabels;
   readonly metrics: TeacherDirectoryMetrics | null | undefined;
   readonly rows: readonly TeacherDirectoryRow[];
+  readonly loading: boolean;
   readonly totalTeachers: number;
   readonly searchQuery: string;
   readonly onSearchChange: (query: string) => void;
@@ -33,7 +34,7 @@ export function useTeachersViewModel(_props: Readonly<UseTeachersViewModelProps>
   const { searchQuery, setSearchQuery, page, pageSize, setPage } = useTeacherDirectoryStore();
   const { hasPermission } = useUserStore();
 
-  const { data } = useQuery(teacherDirectoryQueryDocument, {
+  const { data, loading } = useQuery(teacherDirectoryQueryDocument, {
     variables: {
       search: searchQuery || null,
       paginationArgs: {
@@ -57,6 +58,7 @@ export function useTeachersViewModel(_props: Readonly<UseTeachersViewModelProps>
     labels,
     metrics: directory?.metrics ?? null,
     rows: directory?.rows ?? [],
+    loading,
     totalTeachers: directory?.totalTeachers ?? 0,
     searchQuery,
     onSearchChange: setSearchQuery,

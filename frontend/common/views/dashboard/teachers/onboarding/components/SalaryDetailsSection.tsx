@@ -29,13 +29,7 @@ export function SalaryDetailsSection({ register, control, errors, labels }: Read
   const currencySymbol = getCurrencySymbol(rateCurrency ?? CurrencyCode.Usd);
 
   return (
-    <Grid
-      container
-      spacing={3}
-      sx={theme => ({
-        p: theme.layout.cardPadding,
-      })}
-    >
+    <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 8 }}>
         <TextField
           {...register("hourlyRate")}

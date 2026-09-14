@@ -32,10 +32,11 @@ export interface AccountingPaymentSubmitInput {
   currency: CurrencyCode;
   paymentGateway: PaymentGateway;
   paymentDate: Date;
-  isPaidStatusOn?: boolean;
+  /** GraphQL optional input fields may carry explicit null; coerced via Boolean() in the service. */
+  isPaidStatusOn?: boolean | null;
   paymentNote?: string | null;
-  /** Actor that recorded the payment — invoice createdByUserId. */
-  actorUserId?: string;
+  /** GraphQL optional input fields may carry explicit null; the service uses its own actorUserId parameter. */
+  actorUserId?: string | null;
 }
 
 export interface AccountingPaymentUpdateInput {

@@ -5,8 +5,9 @@ import { Stack, Typography } from "@mui/material";
 import type { WhatsappConversationShellLabels } from "@/frontend/common/views/dashboard/whatsapp/conversations/types/whatsappConversationsView.types";
 
 /**
- * Full-page empty state when the tenant has no connected WhatsApp numbers —
- * no list, composer, or registry can function without one.
+ * Empty-state content when the tenant has no connected WhatsApp numbers —
+ * no list, composer, or registry can function without one. Renders only the
+ * icon and copy block; the consuming desktop view owns the panel chrome.
  */
 export function NoWhatsappAccountsState({
   labels,
@@ -17,10 +18,7 @@ export function NoWhatsappAccountsState({
       sx={{
         alignItems: "center",
         textAlign: "center",
-        py: 10,
-        px: 2,
-        borderRadius: 2,
-        border: theme => `1px dashed ${theme.palette.outlineVariant}`,
+        py: 6,
       }}
     >
       <WhatsappIcon sx={{ fontSize: 48, color: theme => theme.palette.text.secondary }} />

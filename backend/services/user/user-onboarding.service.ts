@@ -149,8 +149,8 @@ export namespace UserOnboardingService {
       const user = await UserRepository.create(
         {
           name: coreInput.name,
-          email: { value: coreInput.email },
-          passwordHash,
+          email: coreInput.email,
+          password: passwordHash,
           ...(coreInput.avatarUrl === undefined ? {} : { avatarUrl: coreInput.avatarUrl }),
         },
         locale,

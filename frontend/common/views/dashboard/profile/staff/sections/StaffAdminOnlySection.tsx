@@ -1,10 +1,10 @@
 "use client";
 
-import { MenuItem, TextField } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AdminSectionShared } from "@/frontend/common/views/dashboard/profile/components/__shared__/adminSectionShared";
+import { AccountStatusSelect } from "@/frontend/common/views/dashboard/profile/shared/AccountStatusSelect";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffAdminEditFormData } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
@@ -14,7 +14,7 @@ type StaffAdminData = {
   readonly userId: string;
   readonly name: string | null;
   readonly email: string | null;
-  readonly status: string | null;
+  readonly status: AccountStatus | null;
 };
 
 type AdminOnlySectionProps = {
@@ -38,10 +38,15 @@ export function AdminOnlySection(props: AdminOnlySectionProps) {
   if (props.mode === "edit") {
     return (
       <SectionPanel title={t.sections.role}>
-        <TextField label={t.fields.status} fullWidth size="small" select {...props.register("status")}>
-          <MenuItem value={AccountStatus.Activated}>{t.fields.statusActive}</MenuItem>
-          <MenuItem value={AccountStatus.Deactivated}>{t.fields.statusInactive}</MenuItem>
-        </TextField>
+        <AccountStatusSelect
+          name="status"
+          label={t.fields.status}
+          options={[
+            { value: AccountStatus.Activated, label: t.fields.statusActive },
+            { value: AccountStatus.Deactivated, label: t.fields.statusInactive },
+          ]}
+          register={props.register}
+        />
       </SectionPanel>
     );
   }

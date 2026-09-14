@@ -1,8 +1,4 @@
-import type { InputFieldBuilder } from "@pothos/core";
-import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-
-type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
-type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
+import type { PothosInputFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 
 /**
  * Shared input field definitions for TeacherNote create/update inputs.

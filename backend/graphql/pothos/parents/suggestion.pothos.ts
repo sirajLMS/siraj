@@ -1,7 +1,5 @@
-import { GraphQLError } from "graphql";
-import { SuggestionStatus } from "@/backend/enum";
-import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { SuggestionStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   DuplicateSuggestionInput,
   ParentSuggestionOptions,
@@ -12,26 +10,8 @@ import type {
   SuggestionQueueResult,
   SuggestionReturnType,
   SuggestionSearchResultType,
-  SuggestionSelectType,
   SuggestionSubmitInput,
 } from "@/backend/types";
-
-export function requireAuth(ctx: Pick<BaseContext, "user" | "t">): string {
-  if (!ctx.user?.id) {
-    const tErrors = ctx.t().errorsTranslations;
-    throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
-  }
-  return ctx.user.id;
-}
-
-export function isSuggestionStatus(value: string): value is SuggestionStatus {
-  return (Object.values(SuggestionStatus) as readonly string[]).includes(value);
-}
-
-export const SuggestionStatusPothosEnum = gqlSchemaBuilder.enumType(SuggestionStatus, {
-  name: "SuggestionStatus",
-  description: "Status of a suggestion in the review pipeline.",
-});
 
 export const SuggestionRef = gqlSchemaBuilder.objectRef<SuggestionReturnType>("Suggestion");
 
@@ -179,51 +159,3 @@ export const MarkSuggestionDuplicateInputPothosObject = gqlSchemaBuilder
       duplicateOfId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     }),
   });
-
-export function normalizeSuggestion(suggestion: SuggestionReturnType): SuggestionReturnType {
-  return {
-    ...suggestion,
-    parentName: suggestion.parentName ?? null,
-    reviewedByUserName: suggestion.reviewedByUserName ?? null,
-    duplicateOfBody: suggestion.duplicateOfBody ?? null,
-    duplicateOfSubmitterName: suggestion.duplicateOfSubmitterName ?? null,
-    responseCount: suggestion.responseCount ?? 0,
-  };
-}
-
-export function normalizeSuggestionSearchResult(result: SuggestionSearchResultType): SuggestionSearchResultType {
-  return {
-    ...result,
-    parentName: result.parentName ?? "",
-  };
-}
-
-export function toSuggestionReturnType(result: SuggestionSelectType): SuggestionReturnType {
-  return normalizeSuggestion({
-    id: result.id,
-    parentId: result.parentId,
-    submitterName: result.submitterName,
-    body: result.body,
-    status: isSuggestionStatus(result.status) ? result.status : SuggestionStatus.PENDING,
-    duplicateOfId: result.duplicateOfId ?? null,
-    adminResponse: result.adminResponse ?? null,
-    reviewedByUserId: result.reviewedByUserId ?? null,
-    reviewedAt: result.reviewedAt ?? null,
-    emailSentAt: result.emailSentAt ?? null,
-    createdAt: result.createdAt,
-    parentName: "",
-    reviewedByUserName: null,
-    duplicateOfBody: null,
-    duplicateOfSubmitterName: null,
-    responseCount: 0,
-  });
-}
-
-export async function authenticatedSuggestionMutation(
-  ctx: Pick<BaseContext, "user" | "t" | "locale">,
-  serviceCall: (userId: string) => Promise<SuggestionSelectType>
-): Promise<SuggestionReturnType> {
-  const userId = requireAuth(ctx);
-  const result = await serviceCall(userId);
-  return toSuggestionReturnType(result);
-}

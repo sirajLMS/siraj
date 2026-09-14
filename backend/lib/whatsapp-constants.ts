@@ -28,7 +28,7 @@ export const WHATSAPP_CREDENTIAL_PLACEHOLDER = "pending" as const;
  * Fallback Graph API version when neither `WHATSAPP_GRAPH_API_VERSION` nor the
  * legacy `WHATSAPP_API_VERSION` env-config key resolves to a value.
  */
-export const DEFAULT_GRAPH_API_VERSION = "v25.0";
+const DEFAULT_GRAPH_API_VERSION = "v25.0";
 
 /**
  * Credential fields of the `whatsapp_configs` singleton that map onto

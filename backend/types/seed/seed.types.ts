@@ -37,3 +37,30 @@ export type SeedStudentInput = {
   readonly timezoneOverride: string | null;
   readonly idempotencyKey: string;
 };
+
+/** GraphQL-facing result of the createTestEntities test-helper mutation. */
+export type TestEntitiesReturnType = {
+  studentUserEmail: string;
+  studentUserId: string;
+  studentId: string;
+  studentName: string;
+  parentUserEmail: string;
+  parentUserId: string;
+  parentId: string;
+  parentName: string;
+  teacherUserEmail: string;
+  teacherUserId: string;
+  teacherId: string;
+  teacherName: string;
+};
+
+/** GraphQL-facing result of the createTestGroupClass test-helper mutation. */
+export type TestGroupClassReturnType = {
+  groupClassId: string;
+};
+
+/** GraphQL-facing result of the createTestSuperAdmin test-helper mutation. */
+export type TestSuperAdminReturnType = {
+  userId: string;
+  email: string;
+};

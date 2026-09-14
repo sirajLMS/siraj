@@ -1,6 +1,7 @@
 import type { classCategories } from "@/backend/db/schema";
 
 export type ClassCategorySelectType = typeof classCategories.$inferSelect;
+export type ClassCategoryInsertType = typeof classCategories.$inferInsert;
 
 export type ClassCategoryReturnType = Omit<ClassCategorySelectType, "createdAt" | "updatedAt" | "deletedAt">;
 

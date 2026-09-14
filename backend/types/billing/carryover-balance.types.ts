@@ -22,6 +22,49 @@ export type CarryoverBalanceItemSelectType = typeof carryoverBalanceItems.$infer
 /** Insert payload for `carryover_balance_items`. */
 export type CarryoverBalanceItemInsertType = typeof carryoverBalanceItems.$inferInsert;
 
+/**
+ * One snapshot per aggregated session; the carryover id is attached at insert
+ * time once the parent row exists.
+ */
+export type CarryoverItemDraft = Omit<CarryoverBalanceItemInsertType, "carryoverId" | "id" | "createdAt">;
+
+/** Teacher display name + avatar resolved via teachers → users for carryover rows and drill-down views. */
+export interface TeacherDisplayFields {
+  teacherName: string;
+  teacherAvatarUrl: string | null;
+}
+
+/**
+ * One payroll status transition applied to a linked session during carryover
+ * create, settle, unpay, or delete flows.
+ */
+export interface SessionStatusTransition {
+  instanceId: string;
+  fromStatus: CalculationStatus;
+  toStatus: CalculationStatus;
+  teacherPaidAmount: string | null;
+  /**
+   * `class_instances_partial_percentage_chk` ties the live partial-pay
+   * percentage to the PARTIALLY status, so every transition drives the column
+   * explicitly: null when the target is not PARTIALLY, the snapshot value when
+   * reverting back to it.
+   */
+  isPartialPercentage: number | null;
+}
+
+/**
+ * Minimal session shape consumed by the carryover aggregation helpers.
+ * Structural — Drizzle `ClassInstanceSelectType` rows satisfy it without
+ * mapping, and the fields are optional so partially-selected instances
+ * (e.g. from narrowed selects) still type-check.
+ */
+export interface CarryoverAggregateInstance {
+  teacherId: string;
+  teacherPaidCurrency?: CurrencyCode | null;
+  calculatedDuration?: number | null;
+  scheduledStartAt?: Date | string | null;
+}
+
 /** Input for the bulk carryover-creation service (audited instances grouped by teacher). */
 export interface BulkCreateCarryoverInput {
   instanceIds: readonly string[];
@@ -49,6 +92,22 @@ export interface BulkCreateCarryoverResult {
   auditLogIds: string[];
 }
 
+/** Internal outcome of one per-teacher group creation, including the audit row id. */
+export interface GroupCreationOutcome {
+  group: BulkCreateCarryoverGroupResult;
+  auditLogId: string | null;
+}
+
+/** Aggregate values and item snapshots prepared for one teacher group's carryover insert. */
+export interface PreparedGroupCarryover {
+  carryover: CarryoverBalanceSelectType;
+  drafts: CarryoverItemDraft[];
+  dominantCurrency: CurrencyCode;
+  studentsCount: number;
+  totalDuration: string;
+  payable: string;
+}
+
 /** Input for the bulk carryover-to-expense conversion. */
 export interface BulkToExpenseInput {
   carryoverIds: readonly string[];
@@ -72,6 +131,21 @@ export interface BulkToExpenseItemResult {
 export interface BulkToExpenseResult {
   items: BulkToExpenseItemResult[];
   auditLogIds: string[];
+}
+
+/** Shared settlement parameters for the bulk carryover-to-expense conversion. */
+export interface SettlementContext {
+  paymentDate: string;
+  expenseDate: string;
+  note: string | null;
+  actorUserId: string;
+  idempotencyKey: string;
+}
+
+/** Internal outcome of one per-carryover settlement, including the audit row id. */
+export interface SettlementOutcome {
+  item: BulkToExpenseItemResult;
+  auditLogId: string | null;
 }
 
 export interface CreateCarryoverInput {
@@ -146,7 +220,7 @@ export interface CarryoverFilters {
  * teachers → users). Timestamps stay as `Date` here; the service layer
  * serializes them for API consumers.
  */
-export type CarryoverBalanceListRow = CarryoverBalanceSelectType & {
+type CarryoverBalanceListRow = CarryoverBalanceSelectType & {
   teacherName: string;
   teacherAvatarUrl: string | null;
 };

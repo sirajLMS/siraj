@@ -31,7 +31,6 @@ export type WhatsappMessageReturnType = Omit<WhatsappMessageSelectType, "directi
 };
 
 export type WhatsappContactSelectType = typeof whatsappContacts.$inferSelect;
-export type WhatsappContactInsertType = typeof whatsappContacts.$inferInsert;
 /**
  * `removedAt` and `lastActionAt` are internal sync bookkeeping (soft-remove +
  * last-writer-wins guard) — they stay on `SelectType` for the contact repo,

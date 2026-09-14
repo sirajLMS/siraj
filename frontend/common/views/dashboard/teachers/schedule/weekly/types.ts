@@ -37,10 +37,12 @@ interface TeacherWeeklySchedule {
 export interface MobileScheduleListProps {
   readonly classes: readonly ScheduledClass[];
   readonly onRemoveClass: (id: string) => void;
-  // NEW FOR PLAN v5: gate-prop lifted out of tier per specs §6.1 + §3 N3.
   readonly hasScheduleDeleteClass: boolean;
   readonly labels: TeacherWeeklyScheduleLabels;
   readonly meetingJoinLabels: MeetingConfigJoinLabels;
+  /** Day filter for the day-scoped list; owned by the ViewModel. */
+  readonly selectedDay: string;
+  readonly onSelectDay: (day: string) => void;
 }
 
 export interface WeeklyScheduleGridProps {
@@ -68,6 +70,9 @@ export interface TeacherWeeklyScheduleViewProps {
   readonly hasScheduleDeleteClass: boolean;
   readonly labels: TeacherWeeklyScheduleLabels;
   readonly meetingJoinLabels: MeetingConfigJoinLabels;
+  /** Day filter for the day-scoped schedule list; owned by the ViewModel. */
+  readonly selectedDay: string;
+  readonly onSelectDay: (day: string) => void;
 }
 
 // NEW FOR PLAN v5: CreateRecurringClassDialogViewModel — the ViewModel-owned

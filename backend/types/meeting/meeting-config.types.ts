@@ -50,6 +50,13 @@ export type UserMeetingConfigReturnType = MeetingConfigBaseReturnType & {
   readonly userId: string;
 };
 
+/**
+ * Public (GraphQL) DTO for `user_meeting_configs`, bound directly by the
+ * Pothos `UserMeetingConfig` object. The `encryptedSecret` column is
+ * structurally excluded — only the masked service-layer projection surfaces.
+ */
+export type UserMeetingConfigPublicReturnType = Omit<UserMeetingConfigReturnType, "encryptedSecret">;
+
 export type UserMeetingConfigSubmitInput = MeetingConfigBaseSubmitInput & {
   readonly userId: string;
 };
@@ -66,6 +73,18 @@ export type UpdateUserMeetingConfigInput = Partial<Omit<UserMeetingConfigSubmitI
 // ============================================================================
 // Generate Meeting URL — preview path (non-persisting)
 // ============================================================================
+
+/**
+ * Raw GraphQL input shape for the meeting URL preview. Optional fields stay
+ * nullable to match the GraphQL field set; the resolver spreads only the
+ * provided values into the channel adapter call.
+ */
+export type GenerateMeetingUrlInput = {
+  readonly providerId: string;
+  readonly topic: string;
+  readonly startDateTime?: string | null;
+  readonly durationMinutes?: number | null;
+};
 
 export type GenerateMeetingUrlResult = {
   readonly joinUrl: string;

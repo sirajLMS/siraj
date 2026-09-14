@@ -1,17 +1,13 @@
-import type { ObjectFieldBuilder } from "@pothos/core";
-import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { PothosObjectFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { CreditAdjustmentTypePothosEnum, CreditReasonPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { CreditTransactionReturnType } from "@/backend/types";
-
-type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
-type PothosObjectFieldBuilder = ObjectFieldBuilder<BuilderTypes, CreditTransactionReturnType>;
 
 /**
  * Shared field definitions for credit transaction Pothos objects.
  * Used by CreditTransactionPothosObject, CreditPurchaseResultPothosObject, and
  * CreditAdjustmentResultPothosObject.
  */
-export function creditTransactionFields(t: PothosObjectFieldBuilder) {
+export function creditTransactionFields(t: PothosObjectFieldBuilder<CreditTransactionReturnType>) {
   return {
     id: t.exposeString("id"),
     studentId: t.exposeString("studentId"),

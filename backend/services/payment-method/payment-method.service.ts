@@ -1,14 +1,17 @@
 import { db } from "@/backend/db/drizzleDb";
 import {
   BillingRepository,
+  ParentRepository,
   SupportedMobileWalletRepository,
   SupportedOnlineAccountRepository,
   SupportedPaymentLinkRepository,
+  TeacherRepository,
   UserPaymentMethodRepository,
-} from "@/backend/db/repo/billing";
+} from "@/backend/db/repo";
 import { teacherPayments } from "@/backend/db/schema";
 import { AppPermission, ProfileScope } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { ForbiddenError, NotFoundError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { parsePaymentMethodDetails, userPaymentMethodSubmitInputSchema } from "@/backend/lib/payment-method.validation";
 import { encryptBankTransferDetails } from "@/backend/lib/payment-method-jsonb";
@@ -430,6 +433,14 @@ export namespace PaymentMethodService {
       if (!supportsTransactionDirection(method.direction, PaymentDirection.PAYIN)) {
         throw new Error(tErrors.insufficientPermissions);
       }
+      const invoice = await BillingRepository.getInvoiceById(input.invoiceId, tx);
+      if (invoice === null) {
+        throw new NotFoundError("INVOICE", tErrors.billing.invoiceNotFound(input.invoiceId));
+      }
+      const parentUserId = await ParentRepository.findUserIdByParentId(invoice.parentId, tx);
+      if (method.userId !== parentUserId) {
+        throw new ForbiddenError(tErrors.insufficientPermissions);
+      }
       snapshotSource = { userPaymentMethodId: input.userPaymentMethodId };
     } else if (input.inlineMethod) {
       snapshotSource = { inline: input.inlineMethod };
@@ -470,6 +481,14 @@ export namespace PaymentMethodService {
 
     if (!supportsTransactionDirection(method.direction, PaymentDirection.PAYOUT)) {
       throw new Error(tErrors.insufficientPermissions);
+    }
+
+    const teacher = await TeacherRepository.findActiveById(input.teacherId, tx);
+    if (teacher === null) {
+      throw new NotFoundError("TEACHER", tErrors.teacher.teacherNotFound(input.teacherId));
+    }
+    if (method.userId !== teacher.userId) {
+      throw new ForbiddenError(tErrors.insufficientPermissions);
     }
 
     if (!input.isTestPayment && method.type === PaymentMethodType.BANK_TRANSFER && method.verifiedAt === null) {

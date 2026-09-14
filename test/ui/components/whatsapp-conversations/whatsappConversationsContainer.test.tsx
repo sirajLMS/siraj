@@ -14,11 +14,14 @@ await mock.module("@/frontend/common/views/dashboard/whatsapp/conversations/What
 }));
 
 import type { MockLink } from "@apollo/client/testing";
+import { Stack } from "@mui/material";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import { PaginationControls } from "@/frontend/common/components/ui/filter";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import {
   AppPermission,
   WhatsappConversationSendMode,
@@ -30,7 +33,10 @@ import {
   addWhatsappTestRecipientMutationDocument,
   sendWhatsappConversationMessageMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { ConversationListShared } from "@/frontend/common/views/dashboard/whatsapp/conversations/ConversationListShared";
+import {
+  ConversationListShared,
+  type ConversationListShell,
+} from "@/frontend/common/views/dashboard/whatsapp/conversations/ConversationListShared";
 import type { WhatsappConversationsViewModel } from "@/frontend/common/views/dashboard/whatsapp/conversations/types/whatsappConversationsView.types";
 import { useWhatsappConversationsViewModel } from "@/frontend/common/views/dashboard/whatsapp/conversations/useWhatsappConversationsViewModel";
 import { WhatsappConversationsContainer } from "@/frontend/common/views/dashboard/whatsapp/conversations/WhatsappConversationsContainer";
@@ -91,6 +97,22 @@ function WhatsappConversationsContainerTestImpl() {
  * Renders the conversation list straight from the view model plus a retry
  * trigger, exercising the pagination clamps without the workspace chrome.
  */
+const listShell: ConversationListShell = args => (
+  <Stack>
+    {args.toolbar}
+    {args.skeleton}
+    {args.empty}
+    {args.rows.length > 0 && <Stack aria-label={args.rowsAriaLabel}>{args.rows.map(args.renderRow)}</Stack>}
+    <PaginationControls
+      page={args.paginationOptions.page}
+      pageCount={Math.max(1, Math.ceil(args.paginationOptions.totalCount / args.paginationOptions.pageSize))}
+      rowCount={args.paginationOptions.totalCount}
+      pageSize={args.paginationOptions.pageSize}
+      onPageChange={args.paginationOptions.onPageChange}
+    />
+  </Stack>
+);
+
 function PageClampHarness() {
   const vm = useWhatsappConversationsViewModel();
   return (
@@ -105,10 +127,13 @@ function PageClampHarness() {
         conversations={vm.conversations}
         loading={vm.conversationsLoading}
         selectedConversationId={vm.selectedConversation?.id ?? null}
-        totalCount={vm.conversationsTotalCount}
-        page={vm.conversationsPage}
-        pageSize={vm.conversationsPageSize}
-        onPageChange={vm.onConversationsPageChange}
+        paginationOptions={buildServerPaginationOptions({
+          page: vm.conversationsPage,
+          pageSize: vm.conversationsPageSize,
+          totalCount: vm.conversationsTotalCount,
+          onPageChange: vm.onConversationsPageChange,
+        })}
+        listShell={listShell}
         onSelectConversation={vm.onSelectConversation}
         formatTimestamp={vm.formatTimestamp}
         accountLabel={vm.accountLabel}

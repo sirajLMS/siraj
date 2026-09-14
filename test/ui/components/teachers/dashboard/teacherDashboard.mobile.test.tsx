@@ -19,8 +19,8 @@ const ACTIVATION_ERROR = "activation-error-marker";
 await mockNextNavigation("/");
 
 // Child sections own their data concerns; this suite targets the page
-// header primitive, the date-summary chip, and MobileContentInset gutter
-// ownership around the alert wrappers.
+// header primitive, the welcome summary typography (chip-free), and
+// MobileContentInset gutter ownership around the alert wrappers.
 await mock.module(
   "@/frontend/mobile/views/dashboard/teachers/dashboard/components/manualClassEntryDialog.mobile",
   () => ({
@@ -162,13 +162,17 @@ describe("TeacherDashboardMobileView header", () => {
     expect(getEmotionStylesForElement(subtitle)).toContain("margin-inline-start: 16px");
   });
 
-  test("renders the date summary as a chip with the calendar icon", () => {
+  test("renders the welcome summary as plain typography with the calendar icon and no chip chrome", () => {
     const { container } = renderView();
-    const summaryText = within(container).getByText(WELCOME_SUMMARY);
+    const page = within(container);
 
-    const chip = summaryText.closest(".MuiChip-root");
-    if (!chip) throw new Error("date summary chip not found");
-    expect(chip.querySelector("[data-testid='CalendarMonthOutlinedIcon']")).not.toBeNull();
+    expect(container.querySelector(".MuiChip-root")).toBeNull();
+
+    const summaryText = page.getByText(WELCOME_SUMMARY);
+    expect(summaryText).toBeVisible();
+    expect(summaryText.closest(".MuiTypography-root")).not.toBeNull();
+    expect(summaryText.closest(".MuiChip-root")).toBeNull();
+    expect(container.querySelector("[data-testid='CalendarMonthOutlinedIcon']")).not.toBeNull();
   });
 });
 

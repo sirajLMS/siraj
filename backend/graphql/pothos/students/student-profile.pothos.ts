@@ -7,7 +7,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { StudentClassHistoryPothosObject } from "@/backend/graphql/pothos/students/student-history.pothos";
 import { StudentUpcomingClassesResultPothosObject } from "@/backend/graphql/pothos/students/student-status.pothos";
-import type { StudentProfileReturnType } from "@/backend/types";
+import type { StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types";
 
 export const StudentProfileRef = gqlSchemaBuilder.objectRef<StudentProfileReturnType>("StudentProfile");
 
@@ -51,3 +51,20 @@ export const StudentProfilePothosObject = StudentProfileRef.implement({
     }),
   }),
 });
+
+export const StudentProfileEditInputPothosObject = gqlSchemaBuilder
+  .inputRef<StudentProfileEditInput>("StudentProfileEditInput")
+  .implement({
+    fields: t => ({
+      studentId: t.id({ required: false }),
+      phone: t.string({ required: false }),
+      timezone: t.string({ required: false }),
+      displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
+      dateOfBirth: t.field({ type: "DateTime", required: false }),
+      gender: t.field({ type: GenderPothosObject, required: false }),
+      language: t.field({ type: AppLanguagePothosObject, required: false }),
+      timezoneOverride: t.string({ required: false }),
+      avatarUrl: t.string({ required: false }),
+      parentPhone: t.string({ required: false }),
+    }),
+  });

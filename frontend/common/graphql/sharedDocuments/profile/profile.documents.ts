@@ -4,13 +4,9 @@ import type {
   UpdateOwnProfileMutation,
   UpdateUserProfileMutation,
 } from "@/frontend/common/graphql/generated/gql/graphql";
-import {
-  PAYMENT_METHOD_DEFAULTS_FIELDS,
-  USER_PAYMENT_METHOD_FIELDS,
-} from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
+import { PAYMENT_METHOD_DEFAULTS_FIELDS } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
 
 export const profileByUserIdQueryDocument: TypedDocumentNode<ProfileByUserIdQuery> = gql`
-  ${USER_PAYMENT_METHOD_FIELDS}
   ${PAYMENT_METHOD_DEFAULTS_FIELDS}
   query ProfileByUserId($userId: String!) {
     profileByUserId(userId: $userId) {
@@ -278,7 +274,6 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<UpdateOwnProfil
 `;
 
 export const updateUserProfileMutationDocument: TypedDocumentNode<UpdateUserProfileMutation> = gql`
-  ${USER_PAYMENT_METHOD_FIELDS}
   ${PAYMENT_METHOD_DEFAULTS_FIELDS}
   mutation UpdateUserProfile($userId: String!, $input: UpdateUserProfileInput!) {
     updateUserProfile(userId: $userId, input: $input) {

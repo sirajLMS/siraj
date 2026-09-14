@@ -4,7 +4,13 @@ import { users } from "@/backend/db/schema";
 import type { AccountStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
-import type { DBTransaction, UserCreateInput, UserInsertType, UserReturnType, UserSelectType } from "@/backend/types";
+import type {
+  DBTransaction,
+  UserCreateCoreInput,
+  UserInsertType,
+  UserReturnType,
+  UserSelectType,
+} from "@/backend/types";
 import { AuthUtils, escapeLikeWildcards } from "@/backend/utils";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { getServerTranslations } from "@/shared/locale";
@@ -187,7 +193,7 @@ export namespace UserRepository {
   };
 
   export const create = async (
-    input: UserCreateInput,
+    input: UserCreateCoreInput,
     locale?: string,
     tx?: DBTransaction
   ): Promise<UserReturnType> => {
@@ -200,8 +206,8 @@ export namespace UserRepository {
         .insert(users)
         .values({
           name: input.name,
-          email: input.email.value,
-          password: input.passwordHash,
+          email: input.email,
+          password: input.password,
           emailVerifiedAt: now,
           createdAt: now,
           updatedAt: now,
@@ -211,7 +217,7 @@ export namespace UserRepository {
       return AuthUtils.toUserReturnType(result);
     } catch (err) {
       logger.error(err);
-      throw new Error(errorsTranslations.userCreateFailed(input.email.value), { cause: err });
+      throw new Error(errorsTranslations.userCreateFailed(input.email), { cause: err });
     }
   };
 

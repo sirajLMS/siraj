@@ -95,7 +95,7 @@ export const MonthlyAppraisalStudentEntryPothosObject = MonthlyAppraisalStudentE
 // ---------------------------------------------------------------------------
 
 export const SubmitMonthlyAppraisalInputPothosObject = gqlSchemaBuilder
-  .inputRef<Omit<MonthlyAppraisalSubmitInput, "teacherId">>("SubmitMonthlyAppraisalInput")
+  .inputRef<MonthlyAppraisalSubmitInput>("SubmitMonthlyAppraisalInput")
   .implement({
     description:
       "Input for a teacher submitting/updating a monthly appraisal. `teacherId` is resolved from auth context.",
@@ -115,7 +115,7 @@ export const SubmitMonthlyAppraisalInputPothosObject = gqlSchemaBuilder
   });
 
 export const AddAppraisalFeedbackInputPothosObject = gqlSchemaBuilder
-  .inputRef<Omit<AppraisalFeedbackInput, "authorUserId">>("AddAppraisalFeedbackInput")
+  .inputRef<AppraisalFeedbackInput>("AddAppraisalFeedbackInput")
   .implement({
     description: "Input for a parent/student appending feedback to a published monthly appraisal.",
     fields: t => ({

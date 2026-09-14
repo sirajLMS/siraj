@@ -16,7 +16,7 @@ export type WhatsappGroupMessageRow = WhatsappGroupMessageFieldsFragment & { rea
 /** Join-request row with a non-null id after Apollo normalization. */
 export type WhatsappGroupJoinRequestRow = WhatsappGroupJoinRequestFieldsFragment & { readonly id: string };
 
-export type WhatsappGroupsShellLabels = Pick<
+type WhatsappGroupsShellLabels = Pick<
   WhatsappGroupsLabels,
   "title" | "subtitle" | "noAccountsState" | "createGroup" | "syncGroups" | "permissionDenied"
 >;
@@ -91,7 +91,7 @@ export type WhatsappGroupsMessagesLabels = Pick<
   | "errorGeneric"
 >;
 
-export interface WhatsappGroupsLabelsBySection {
+interface WhatsappGroupsLabelsBySection {
   readonly shell: WhatsappGroupsShellLabels;
   readonly list: WhatsappGroupsListLabels;
   readonly create: WhatsappGroupsCreateLabels;

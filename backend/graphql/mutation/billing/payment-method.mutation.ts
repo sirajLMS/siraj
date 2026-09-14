@@ -1,4 +1,3 @@
-import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { makePaymentMethodIdMutationField } from "@/backend/graphql/mutation/billing/__shared__/makePaymentMethodListMutationField";
 import {
@@ -16,7 +15,7 @@ import {
   UserPaymentMethodPothosObject,
   UserPaymentMethodUpdateInputPothos,
 } from "@/backend/graphql/pothos/billing/payment-method.pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { resolveAuthCtx } from "@/backend/graphql/utils";
 import { PaymentCatalogService, PaymentMethodService } from "@/backend/services";
 import type {
   SupportedMobileWalletSubmitInput,
@@ -26,14 +25,6 @@ import type {
   UpdateSupportedOnlineAccountInput,
   UpdateSupportedPaymentLinkInput,
 } from "@/backend/types";
-
-type ErrorsTranslations = ReturnType<BaseContext["t"]>["errorsTranslations"];
-
-async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsTranslations }> {
-  const actorUserId = await requireAuth(ctx);
-  const tErrors = ctx.t().errorsTranslations;
-  return { actorUserId, tErrors };
-}
 
 // Pothos input types are structurally compatible with the catalog submit-input
 // types at runtime, but differ in optional/enum field shapes (e.g. `CountryCode`
@@ -77,8 +68,7 @@ gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
       input: t.arg({ type: UserPaymentMethodCreateInputPothos, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       return PaymentMethodService.createUserPaymentMethod(
         actorUserId,
         {
@@ -139,8 +129,7 @@ gqlSchemaBuilder.mutationField("deleteUserPaymentMethod", t =>
       id: t.arg.id({ required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { actorUserId, tErrors } = await resolveAuthCtx(ctx);
       await PaymentMethodService.deleteUserPaymentMethod(actorUserId, args.id, tErrors);
       return true;
     },

@@ -124,8 +124,8 @@ function createCarryoverFormSchema(copy: CarryoverValidationCopy) {
     });
 }
 
-export type CarryoverFormInput = z.input<ReturnType<typeof createCarryoverFormSchema>>;
-export type CarryoverFormData = z.output<ReturnType<typeof createCarryoverFormSchema>>;
+type CarryoverFormInput = z.input<ReturnType<typeof createCarryoverFormSchema>>;
+type CarryoverFormData = z.output<ReturnType<typeof createCarryoverFormSchema>>;
 
 /** Post-validation view of the form where the required picker fields are non-null. */
 type ValidCarryoverData = Omit<CarryoverFormData, "teacher" | "teacherCurrency"> & {

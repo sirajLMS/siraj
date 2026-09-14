@@ -64,6 +64,7 @@ const teacher = {
   vacationRequestNotFound: (id: string) => `Vacation request not found: ${id}`,
   createFailed: "Failed to create teacher profile.",
   upsertFailed: "Teacher upsert failed.",
+  noteNotFound: (id: string) => `Note not found: ${id}`,
   noteCreateFailed: "Failed to create teacher note.",
   staffProfileCreateFailed: "Failed to create staff profile.",
   staffProfileUpdateFailed: "Failed to update staff profile.",
@@ -123,6 +124,7 @@ const expenses = {
 
 const classSubject = {
   createFailed: "Failed to create class subject.",
+  notFound: (id: string) => `Subject not found: ${id}`,
 } as const;
 
 const leaveQuota = {
@@ -475,6 +477,7 @@ export const errorsEn: ErrorsLabels = {
   rateLimitExceeded: "Too many requests. Please try again later.",
   duplicateRequest: "Duplicate request detected. This operation has already been processed.",
   internalServerError: "An unexpected error occurred. Please try again later.",
+  requestTooLarge: "The request body is too large.",
   insufficientPermissions: "You do not have sufficient permissions to perform this action.",
   unauthorized: "You must be logged in first.",
   unauthorizedAction: "You are not authorized to perform this action.",

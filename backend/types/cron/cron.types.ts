@@ -210,3 +210,13 @@ export interface QueryablePool {
   query(text: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[]; rowCount: number }>;
   end(): Promise<void>;
 }
+
+/** @internal — adapter-state type for the custom-SQL queue adapter. Holds the
+ *  lazily-created pool plus the run-id ↔ queue-id tracking maps used to
+ *  correlate queue jobs with their originating cron runs. Not a canonical
+ *  API-facing type and must not be referenced outside the cron queue adapter. */
+export type CustomSqlState = {
+  pool: QueryablePool | null;
+  runIdToQueueId: Map<string, string>;
+  queueIdToRunId: Map<string, string>;
+};

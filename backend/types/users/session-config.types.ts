@@ -1,12 +1,16 @@
+import type { sessionConfig } from "@/backend/db/schema";
+
 /**
  * Canonical types for the `session_config` table (Settings → Session & Security tab).
- *
- * Only the new {@link SessionConfigUpsertInput} mutation input type is defined here.
- * The DB-derived {@link SessionConfigSelectType} and {@link SessionConfigInsertType}
- * are owned by the auth domain (`backend/types/auth/auth.types.ts`, since the
- * `session_config` table is owned by auth) and are reachable via `@/backend/types`
- * through the auth domain barrel.
  */
+
+export type SessionConfigSelectType = typeof sessionConfig.$inferSelect;
+
+/** Discriminator for typed session-config validation errors (machine-readable). */
+export type SessionConfigValidationErrorCode =
+  | "ETTL_OUT_OF_RANGE"
+  | "EMAX_CONCURRENT_OUT_OF_RANGE"
+  | "EROLE_NAME_REQUIRED";
 
 /**
  * Input shape accepted by `SessionConfigRepository.upsert` /

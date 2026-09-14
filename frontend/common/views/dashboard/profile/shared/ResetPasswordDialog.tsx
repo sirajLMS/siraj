@@ -1,23 +1,12 @@
 "use client";
 
-import { KeyOutlined, VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { KeyOutlined } from "@mui/icons-material";
+import { Box, Checkbox, Dialog, FormControlLabel, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
+import { BaseFormDialogSection } from "@/frontend/common/components/ui/dialog";
 import type { ResetPasswordDialogProps } from "@/frontend/common/components/ui/dialog/types/resetPasswordDialog.types";
+import { SecretTextField } from "@/frontend/common/components/ui/input/secretTextField";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import { countPasswordClasses, PASSWORD_MIN_LENGTH } from "@/shared/utils/password-schema";
 
@@ -80,35 +69,27 @@ export function ResetPasswordDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <Box
-          sx={theme => ({
-            width: 64,
-            height: 64,
-            borderRadius: "50%",
-            backgroundColor: theme.palette.primaryContainer,
-            color: theme.palette.primary.main,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            mb: 2,
-          })}
-        >
-          <KeyOutlined sx={{ fontSize: 32 }} />
-        </Box>
-        <Typography variant="headlineMd" component="span">
-          {t.adminResetPassword.title}
-        </Typography>
-      </DialogTitle>
-      <DialogContent>
+      <BaseFormDialogSection
+        icon={<KeyOutlined sx={{ fontSize: 32 }} />}
+        title={t.adminResetPassword.title}
+        cancelLabel={t.adminResetPassword.cancelButton}
+        confirmLabel={t.adminResetPassword.resetButton}
+        confirmLoadingLabel={t.adminResetPassword.resettingButton}
+        onClose={onClose}
+        onConfirm={handleConfirm}
+        isLoading={isLoading}
+      >
         <Stack spacing={3} sx={{ pt: 1 }}>
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, textAlign: "center" })}>
             {t.adminResetPassword.description(userName, userEmail)}
           </Typography>
 
-          <FormControl fullWidth error={!!errors.password}>
-            <TextField
-              type={showPassword ? "text" : "password"}
+          <Box>
+            <SecretTextField
+              revealed={showPassword}
+              onToggleReveal={() => setShowPassword(prev => !prev)}
+              showValueLabel={t.adminResetPassword.showPassword}
+              hideValueLabel={t.adminResetPassword.hidePassword}
               value={password}
               label={t.adminResetPassword.newPassword}
               onChange={e => handlePasswordChange(e.target.value)}
@@ -116,24 +97,6 @@ export function ResetPasswordDialog({
               helperText={errors.password}
               fullWidth
               autoComplete="new-password"
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        type="button"
-                        onClick={() => setShowPassword(prev => !prev)}
-                        edge="end"
-                        aria-label={
-                          showPassword ? t.adminResetPassword.hidePassword : t.adminResetPassword.showPassword
-                        }
-                      >
-                        {showPassword ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
               disabled={isLoading}
             />
             <PasswordStrengthMeter
@@ -145,61 +108,31 @@ export function ResetPasswordDialog({
                 strong: t.adminResetPassword.strengthStrong,
               }}
             />
-          </FormControl>
+          </Box>
 
-          <FormControl fullWidth error={!!errors.confirmPassword}>
-            <TextField
-              type={showPassword ? "text" : "password"}
-              value={confirmPassword}
-              label={t.adminResetPassword.confirmPassword}
-              onChange={e => handleConfirmPasswordChange(e.target.value)}
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword}
-              fullWidth
-              autoComplete="new-password"
-              disabled={isLoading}
-            />
-          </FormControl>
+          <SecretTextField
+            revealed={showPassword}
+            onToggleReveal={() => setShowPassword(prev => !prev)}
+            showValueLabel={t.adminResetPassword.showPassword}
+            hideValueLabel={t.adminResetPassword.hidePassword}
+            value={confirmPassword}
+            label={t.adminResetPassword.confirmPassword}
+            onChange={e => handleConfirmPasswordChange(e.target.value)}
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword}
+            fullWidth
+            autoComplete="new-password"
+            disabled={isLoading}
+          />
 
-          <FormControl component="fieldset" fullWidth>
-            <Stack direction="row" spacing={2} sx={{ mt: 1, alignItems: "center" }}>
-              <input
-                type="checkbox"
-                id="send-email-checkbox"
-                checked={sendEmail}
-                onChange={e => setSendEmail(e.target.checked)}
-                disabled={isLoading}
-              />
-              <Box
-                component="label"
-                htmlFor="send-email-checkbox"
-                sx={theme => ({ cursor: "pointer", fontSize: theme.typography.bodyMd.fontSize, fontWeight: 500 })}
-              >
-                {t.adminResetPassword.sendEmailLabel}
-              </Box>
-            </Stack>
-          </FormControl>
+          <FormControlLabel
+            control={
+              <Checkbox checked={sendEmail} onChange={e => setSendEmail(e.target.checked)} disabled={isLoading} />
+            }
+            label={t.adminResetPassword.sendEmailLabel}
+          />
         </Stack>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        <Button fullWidth onClick={onClose} disabled={isLoading} sx={{ py: 1.5 }}>
-          {t.adminResetPassword.cancelButton}
-        </Button>
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={handleConfirm}
-          disabled={isLoading}
-          sx={theme => ({
-            py: 1.5,
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.onPrimary,
-            "&:hover": { backgroundColor: theme.palette.primary.dark },
-          })}
-        >
-          {isLoading ? t.adminResetPassword.resettingButton : t.adminResetPassword.resetButton}
-        </Button>
-      </DialogActions>
+      </BaseFormDialogSection>
     </Dialog>
   );
 }

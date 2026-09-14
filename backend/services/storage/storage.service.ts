@@ -1,7 +1,12 @@
-import { ParentRepository } from "@/backend/db/repo/parents";
-import { SignedUrlRepository } from "@/backend/db/repo/shared";
-import { SiteContentRepository, StorageDbRepository } from "@/backend/db/repo/storage";
-import { TeacherRepository } from "@/backend/db/repo/teachers";
+import {
+  BillingRepository,
+  ComplaintRepository,
+  ParentRepository,
+  SignedUrlRepository,
+  SiteContentRepository,
+  StorageDbRepository,
+  TeacherRepository,
+} from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -13,6 +18,7 @@ import type {
   SiteContentUpsertInput,
   StorageItemProtectionUpdateInput,
   StorageUploadValidationParams,
+  UserPermissionContext,
   ValidReferenceTable,
 } from "@/backend/types";
 import { StorageUtils } from "@/backend/utils/storage.utils";
@@ -34,6 +40,38 @@ const VALID_REFERENCE_TABLES: readonly ValidReferenceTable[] = [
 
 function isValidReferenceTable(value: string): value is ValidReferenceTable {
   return (VALID_REFERENCE_TABLES as readonly string[]).includes(value);
+}
+
+async function resolveParentIdForReferenceTable(
+  referenceTable: "invoices" | "complaints",
+  referenceId: string
+): Promise<string | null> {
+  if (referenceTable === "invoices") {
+    return (await BillingRepository.getInvoiceById(referenceId))?.parentId ?? null;
+  }
+  return (await ComplaintRepository.getComplaintById(referenceId))?.parentId ?? null;
+}
+
+/**
+ * Ownership for reference tables that do not point directly at a user.
+ * Invoices and complaints are owned through their parent (parents.userId);
+ * learning resources are available to any caller with RESOURCES_LIST.
+ */
+async function checkUserAccessThroughReferenceTable(
+  userId: string,
+  referenceTable: ValidReferenceTable,
+  referenceId: string,
+  userContext: UserPermissionContext
+): Promise<boolean> {
+  if (referenceTable === "learning_resources") {
+    return userContext.permissions.includes(AppPermission.RESOURCES_LIST);
+  }
+  if (referenceTable !== "invoices" && referenceTable !== "complaints") return false;
+
+  const parentId = await resolveParentIdForReferenceTable(referenceTable, referenceId);
+  if (!parentId) return false;
+  const ownerUserId = await ParentRepository.findUserIdByParentId(parentId);
+  return ownerUserId === userId;
 }
 
 // --- Extended StorageService ---
@@ -219,15 +257,30 @@ export namespace StorageService {
       return null;
     }
 
-    // Check access through related entities in parallel
+    // Check access through related entities and reference tables in parallel.
+    // Invoice/complaint attachments resolve ownership through the invoice's or
+    // complaint's parent (parents.userId); learning resources are available to
+    // callers holding RESOURCES_LIST.
     const entityUsages = usages.filter(
       (u): u is typeof u & { referenceTable: "teachers" | "parents" } =>
         u.referenceTable === "teachers" || u.referenceTable === "parents"
     );
     const entityChecks = entityUsages.map(u => checkUserAccessThroughEntity(userId, u.referenceTable, u.referenceId));
 
-    const hasEntityAccess = (await Promise.all(entityChecks)).some(Boolean);
-    if (hasEntityAccess) return null;
+    const referenceChecks = usages
+      .filter(
+        u =>
+          u.referenceTable === "invoices" ||
+          u.referenceTable === "complaints" ||
+          u.referenceTable === "learning_resources"
+      )
+      .map(u => checkUserAccessThroughReferenceTable(userId, u.referenceTable, u.referenceId, userContext));
+
+    const [hasEntityAccess, hasReferenceAccess] = await Promise.all([
+      Promise.all(entityChecks).then(results => results.some(Boolean)),
+      Promise.all(referenceChecks).then(results => results.some(Boolean)),
+    ]);
+    if (hasEntityAccess || hasReferenceAccess) return null;
 
     return { error: tErrors.forbidden, status: 403 };
   }

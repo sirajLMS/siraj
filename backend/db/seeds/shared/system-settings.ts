@@ -4,7 +4,7 @@ import { ENV_CONFIG_KEYS } from "@/backend/lib/env-config-keys";
 import { logger } from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
-import type { SystemSettingSelectType } from "@/backend/types";
+import type { SystemSettingSelectType, SystemSettingUpsertInput } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { getServerTranslations } from "@/shared/locale";
@@ -141,7 +141,7 @@ export const SYSTEM_SETTINGS_DATA = [
   ),
 ] as const;
 
-type EnvConfigPlaceholderSetting = SystemSettingsService.SystemSettingUpsertInput;
+type EnvConfigPlaceholderSetting = SystemSettingUpsertInput;
 
 // ---------------------------------------------------------------------------
 // PERMANENT RULE — DO NOT REMOVE OR "SIMPLIFY" THIS FILTER:

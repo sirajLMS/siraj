@@ -1,6 +1,6 @@
 import type { staffProfiles } from "@/backend/db/schema";
 import type { AccountStatus, OverrideState } from "@/backend/enum";
-import type { PageInfo } from "@/backend/types";
+import type { DisplayAmountReturnType, PageInfo } from "@/backend/types";
 
 type StaffProfileSelectType = typeof staffProfiles.$inferSelect;
 export type StaffProfileInsertType = typeof staffProfiles.$inferInsert;
@@ -38,6 +38,7 @@ export interface ManagerDirectoryRow {
   readonly roleName: string | null;
   readonly hourlyRate: string | null;
   readonly rateCurrency: import("@/shared/constants/currency.enum").CurrencyCode | null;
+  readonly displayAmount?: DisplayAmountReturnType | null;
 }
 
 export interface ManagerDirectoryFilters {

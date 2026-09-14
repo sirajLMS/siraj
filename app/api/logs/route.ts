@@ -1,6 +1,7 @@
 import { mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
+import { CacheDbRepository } from "@/backend/db/repo";
 import { getServerUserContext } from "@/backend/lib";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { checkRateLimit, clientLogsRateLimiter } from "@/backend/lib/ratelimit";
@@ -28,6 +29,46 @@ const SAFE_SESSION_ID_REGEX = /^[a-zA-Z0-9-]+$/;
 const MAX_LOG_ENTRIES_PER_BATCH = 100;
 const MAX_LOG_MESSAGE_LENGTH = 4000;
 const MAX_LOG_BATCH_BYTES = 262144; // 256 KiB total batch cap
+
+/**
+ * Per-user daily byte budget: caps the total client-log payload accepted per
+ * user per day (256 KiB). Tracked in the shared cache keyed per userId with a
+ * TTL anchored to end-of-day, so the running total resets each day.
+ */
+const MAX_DAILY_LOG_BYTES = 262144;
+const DAILY_BYTES_CACHE_PREFIX = "client-logs-bytes:";
+
+function endOfDay(date: Date): Date {
+  const end = new Date(date);
+  end.setHours(23, 59, 59, 999);
+  return end;
+}
+
+/**
+ * Accumulate the batch byte size into the per-user daily total and report
+ * whether the batch fits within the budget. The last batch that fits within
+ * the budget is accepted; a batch that would push the running total past the
+ * cap is rejected. The cache read/write is best-effort: on a cache outage the
+ * budget check fails open rather than blocking the telemetry channel.
+ */
+async function checkDailyByteBudget(userId: string, batchBytes: number): Promise<boolean> {
+  const key = `${DAILY_BYTES_CACHE_PREFIX}${userId}`;
+  try {
+    const existing = await CacheDbRepository.get(key);
+    const currentTotal = existing ? Number.parseInt(existing.value, 10) || 0 : 0;
+    const newTotal = currentTotal + batchBytes;
+
+    if (newTotal > MAX_DAILY_LOG_BYTES) {
+      return false;
+    }
+
+    const expiresAt = existing?.expiresAt ?? endOfDay(new Date());
+    await CacheDbRepository.set(key, String(newTotal), expiresAt);
+    return true;
+  } catch {
+    return true;
+  }
+}
 
 function truncateLogField(value: string): string {
   return value.length > MAX_LOG_MESSAGE_LENGTH ? value.slice(0, MAX_LOG_MESSAGE_LENGTH) : value;
@@ -225,7 +266,8 @@ export async function POST(request: NextRequest) {
 
     // Total batch byte cap — rejects oversized payloads before disk write
     // (prevent disk-exhaustion via unbounded log batches).
-    if (Buffer.byteLength(JSON.stringify(body)) > MAX_LOG_BATCH_BYTES) {
+    const batchBytes = Buffer.byteLength(JSON.stringify(body));
+    if (batchBytes > MAX_LOG_BATCH_BYTES) {
       return NextResponse.json({ error: tErrors.invalidRequestFormat }, { status: 400 });
     }
 
@@ -234,6 +276,12 @@ export async function POST(request: NextRequest) {
     // extra buckets.
     const logsRateLimit = await checkRateLimit(`client-logs:${userId}`, clientLogsRateLimiter);
     if (!logsRateLimit.success) {
+      return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
+    }
+
+    // Per-user daily byte budget — the batch payload size counts against a
+    // 256 KiB/day running total keyed on the authenticated userId.
+    if (!(await checkDailyByteBudget(userId, batchBytes))) {
       return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
     }
 

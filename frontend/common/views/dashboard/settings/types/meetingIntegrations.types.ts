@@ -47,6 +47,16 @@ export type MeetingIntegrationConnectedAccount = {
   readonly scopes?: readonly string[];
 };
 
+/**
+ * Provider accordion row targeted by the revoke-confirmation dialog. Carried in
+ * the meeting-integrations Zustand store so the dialog state survives tier
+ * switches (React unmounts one tier and mounts the other during resize).
+ */
+export type RevokeTarget = {
+  readonly account: MeetingIntegrationConnectedAccount;
+  readonly providerSlug: MeetingIntegrationProviderSlug;
+};
+
 export type MeetingIntegrationsViewModel = {
   readonly labels: SettingsMeetingIntegrationsLabels;
   readonly locale: "en" | "ar";
@@ -71,6 +81,14 @@ export type MeetingIntegrationsViewModel = {
   readonly revokingFor: { userId: string; providerSlug: MeetingIntegrationProviderSlug } | null;
   readonly metadataDialogAccount: MeetingIntegrationConnectedAccount | null;
   readonly metadataDialogProviderSlug: MeetingIntegrationProviderSlug | null;
+
+  // Revoke-confirmation dialog state (Zustand-backed so it survives tier switches)
+  readonly revokeTarget?: RevokeTarget | null;
+  readonly onRevokeRequest?: (
+    account: MeetingIntegrationConnectedAccount,
+    providerSlug: MeetingIntegrationProviderSlug
+  ) => void;
+  readonly onRevokeCancel?: () => void;
 
   readonly runTest: (providerSlug: MeetingIntegrationProviderSlug, mode: MeetingConnectionTestMode) => Promise<void>;
   readonly revokeAccount: (userId: string, providerSlug: MeetingIntegrationProviderSlug) => Promise<void>;

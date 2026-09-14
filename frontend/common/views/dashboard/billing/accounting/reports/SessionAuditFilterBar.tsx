@@ -1,21 +1,20 @@
 "use client";
 
-import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
+import { ClearOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
   Chip,
   FormControl,
   FormHelperText,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   type SelectChangeEvent,
-  TextField,
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { AppDateRangePicker } from "@/frontend/common/components/ui/form/date";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField/SearchBarField";
 import {
   type PersonOption,
   StudentAutocomplete,
@@ -299,25 +298,12 @@ export function SessionAuditFilterBar({
         alignItems: "center",
       }}
     >
-      <TextField
-        size="small"
-        label={labels.filters.search}
+      <SearchBarField
         value={search}
-        onChange={event => setSearch(event.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-          htmlInput: {
-            "aria-label": labels.filters.search,
-            autoComplete: "off",
-            maxLength: SEARCH_INPUT_MAX_LENGTH,
-          },
-        }}
+        onChange={setSearch}
+        placeholder={labels.filters.search}
+        maxLength={SEARCH_INPUT_MAX_LENGTH}
+        clearLabel={labels.filters.clearSearch}
         sx={{ width: { xs: "100%", lg: "auto" }, flex: { lg: "1 1 0" }, minWidth: { lg: 210 } }}
       />
       <TeacherAutocomplete

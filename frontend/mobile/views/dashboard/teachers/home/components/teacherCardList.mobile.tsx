@@ -109,6 +109,7 @@ export function TeacherCardList({
         getKey={row => row.id ?? ""}
         paginationOptions={paginationOptions}
         layout="edge-to-edge"
+        emptyMessage={labels.emptyMessage}
         renderItem={row => <TeacherCard row={row} t={labels} />}
       />
     </Box>

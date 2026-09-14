@@ -42,19 +42,3 @@ export interface WhatsappWebhookSweepResult extends WhatsappWebhookWorkerResult 
   /** PENDING rows whose attempts exhausted the retry budget (parked FAILED). */
   parked: number;
 }
-
-/**
- * Webhook `change.field` values the durable-ingest worker dispatches on.
- * Unknown/future fields are preserved (stored and logged), never rejected.
- */
-export type WhatsappWebhookEventField =
-  | "messages"
-  | "history"
-  | "smb_app_state_sync"
-  | "smb_message_echoes"
-  | "account_update"
-  | "phone_number_quality_update"
-  | "business_capability_update"
-  | "message_template_status_update"
-  | "message_template_quality_update"
-  | "template_category_update";

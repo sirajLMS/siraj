@@ -1,16 +1,22 @@
 "use client";
 
 import { Alert, Button, Typography } from "@mui/material";
+import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { CreateGroupDialog } from "@/frontend/common/views/dashboard/whatsapp/groups/CreateGroupDialog";
 import { GroupDetailShared } from "@/frontend/common/views/dashboard/whatsapp/groups/GroupDetailShared";
 import { GroupMessagesShared } from "@/frontend/common/views/dashboard/whatsapp/groups/GroupMessagesShared";
-import { GroupsListShared } from "@/frontend/common/views/dashboard/whatsapp/groups/GroupsListShared";
+import {
+  GroupsListShared,
+  type GroupsListShell,
+} from "@/frontend/common/views/dashboard/whatsapp/groups/GroupsListShared";
 import type { WhatsappGroupsViewModel } from "@/frontend/common/views/dashboard/whatsapp/groups/types/whatsappGroupsView.types";
 
 type SharedViewModelProps = Readonly<{ vm: WhatsappGroupsViewModel }>;
 
+type WhatsappGroupsListBlockProps = Readonly<SharedViewModelProps & { readonly listShell: GroupsListShell }>;
+
 /** Groups list with search, pending badges and server-driven pagination. */
-export function WhatsappGroupsListBlock({ vm }: SharedViewModelProps) {
+export function WhatsappGroupsListBlock({ vm, listShell }: WhatsappGroupsListBlockProps) {
   return (
     <GroupsListShared
       labels={vm.labelsBySection.list}
@@ -19,10 +25,13 @@ export function WhatsappGroupsListBlock({ vm }: SharedViewModelProps) {
       groups={vm.groups}
       loading={vm.groupsLoading}
       selectedGroupId={vm.selectedGroupId}
-      totalCount={vm.groupsTotalCount}
-      page={vm.groupsPage}
-      pageSize={vm.groupsPageSize}
-      onPageChange={vm.onGroupsPageChange}
+      paginationOptions={buildServerPaginationOptions({
+        page: vm.groupsPage,
+        pageSize: vm.groupsPageSize,
+        totalCount: vm.groupsTotalCount,
+        onPageChange: vm.onGroupsPageChange,
+      })}
+      listShell={listShell}
       onSelectGroup={vm.onSelectGroup}
       formatTimestamp={vm.formatTimestamp}
     />

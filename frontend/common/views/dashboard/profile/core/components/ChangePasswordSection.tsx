@@ -1,10 +1,10 @@
 "use client";
 
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Alert, Box, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
+import { Alert, Box, Stack } from "@mui/material";
 import { useState } from "react";
 import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
 import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import { SecretTextField } from "@/frontend/common/components/ui/input/secretTextField";
 import { useChangePasswordSectionViewModel } from "@/frontend/common/views/dashboard/profile/core/useChangePasswordSectionViewModel";
 
 export function ChangePasswordSection() {
@@ -39,59 +39,37 @@ export function ChangePasswordSection() {
         {errorMsg ? <Alert severity="error">{errorMsg}</Alert> : null}
         {successMsg ? <Alert severity="success">{successMsg}</Alert> : null}
 
-        <TextField
-          type={showCurrent ? "text" : "password"}
+        <SecretTextField
+          revealed={showCurrent}
+          onToggleReveal={() => {
+            setShowCurrent(prev => !prev);
+          }}
+          showValueLabel={tProfile.showPassword}
+          hideValueLabel={tProfile.hidePassword}
           label={tProfile.currentPassword}
           value={currentPassword}
           onChange={e => setCurrentPassword(e.target.value)}
           required
           fullWidth
           size="small"
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => {
-                      setShowCurrent(!showCurrent);
-                    }}
-                    edge="end"
-                    aria-label={showCurrent ? tProfile.hidePassword : tProfile.showPassword}
-                  >
-                    {showCurrent ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
+          autoComplete="current-password"
         />
 
         <Box>
-          <TextField
-            type={showNew ? "text" : "password"}
+          <SecretTextField
+            revealed={showNew}
+            onToggleReveal={() => {
+              setShowNew(prev => !prev);
+            }}
+            showValueLabel={tProfile.showPassword}
+            hideValueLabel={tProfile.hidePassword}
             label={tProfile.newPassword}
             value={newPassword}
             onChange={e => setNewPassword(e.target.value)}
             required
             fullWidth
             size="small"
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => {
-                        setShowNew(!showNew);
-                      }}
-                      edge="end"
-                      aria-label={showNew ? tProfile.hidePassword : tProfile.showPassword}
-                    >
-                      {showNew ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
+            autoComplete="new-password"
           />
           <PasswordStrengthMeter
             password={newPassword}
@@ -104,8 +82,13 @@ export function ChangePasswordSection() {
           />
         </Box>
 
-        <TextField
-          type={showConfirm ? "text" : "password"}
+        <SecretTextField
+          revealed={showConfirm}
+          onToggleReveal={() => {
+            setShowConfirm(prev => !prev);
+          }}
+          showValueLabel={tProfile.showPassword}
+          hideValueLabel={tProfile.hidePassword}
           label={tProfile.confirmPassword}
           value={confirmPassword}
           onChange={e => setConfirmPassword(e.target.value)}
@@ -114,23 +97,7 @@ export function ChangePasswordSection() {
           size="small"
           error={passwordsDoNotMatch}
           helperText={passwordsDoNotMatch ? tProfile.passwordMismatch : undefined}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => {
-                      setShowConfirm(!showConfirm);
-                    }}
-                    edge="end"
-                    aria-label={showConfirm ? tProfile.hidePassword : tProfile.showPassword}
-                  >
-                    {showConfirm ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
+          autoComplete="new-password"
         />
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 1 }}>

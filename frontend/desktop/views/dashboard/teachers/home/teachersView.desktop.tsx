@@ -16,6 +16,7 @@ export interface TeachersDesktopViewProps {
   readonly labels: TeachersDirectoryLabels;
   readonly metrics: TeacherDirectoryMetrics | null | undefined;
   readonly rows: readonly TeacherDirectoryRow[];
+  readonly loading: boolean;
   readonly totalTeachers: number;
   readonly page: number;
   readonly pageSize: number;
@@ -35,6 +36,7 @@ export function TeachersDesktopView({
   labels,
   metrics,
   rows,
+  loading,
   totalTeachers,
   page,
   pageSize,
@@ -71,6 +73,7 @@ export function TeachersDesktopView({
         <TeacherDataGrid
           rows={rows}
           labels={labels}
+          loading={loading}
           page={page}
           pageSize={pageSize}
           totalCount={totalCount}

@@ -3,6 +3,7 @@ import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/te
 export const dashboardTeachersDirectoryEn: TeachersDirectoryLabels = {
   pageTitle: "Teachers Directory",
   pageSubtitle: "Manage and view all teachers",
+  emptyMessage: "No teachers found",
   metrics: {
     activated: "Activated",
     deactivated: "Deactivated",

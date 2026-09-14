@@ -1,19 +1,16 @@
 /**
- * GraphQL-facing enums for the session audit report.
+ * Backend-facing facade for the session audit report enums.
  *
- * The report's domain layer works with string-literal unions (the canonical
- * `SessionAuditStatus` union in `@/shared/constants` and the
- * `SessionAuditReportSortField` union in `backend/types`), but the Pothos enum
- * registration needs a runtime enum object. These enums carry the identical
- * values so the GraphQL wire values match the domain values one to one.
+ * `SessionAuditStatusEnum` is canonical in `shared/constants` (frontend and
+ * backend both consume it) and is re-exported here per the cross-layer enum
+ * migration rules, so backend consumers keep the `@/backend/enum` facade.
+ *
+ * `SessionAuditReportSortFieldEnum` is backend-only: the report domain model
+ * derives its sort-field union from this runtime enum, and the Pothos enum
+ * registration consumes it once from `backend/graphql/pothos/shared`.
  */
 
-export enum SessionAuditStatusEnum {
-  open = "open",
-  end = "end",
-  Absent = "Absent",
-  absent_student = "absent_student",
-}
+export { SessionAuditStatusEnum } from "@/shared/constants/classes/session-audit-status";
 
 export enum SessionAuditReportSortFieldEnum {
   scheduledStartAt = "scheduledStartAt",

@@ -291,6 +291,76 @@ export const getStatusColors: GetStatusColorsFn = (
         }
       );
     }
+    case "expenseType": {
+      const map: Record<string, { backgroundColor: string; color: string }> = {
+        SALARIES: {
+          backgroundColor: theme.palette.status.completedContainer,
+          color: theme.palette.status.onCompletedContainer,
+        },
+        MARKETING: {
+          backgroundColor: theme.palette.warningContainer,
+          color: theme.palette.onWarningContainer,
+        },
+        LOGISTICS: {
+          backgroundColor: theme.palette.infoContainer,
+          color: theme.palette.onInfoContainer,
+        },
+        TECHNOLOGY: {
+          backgroundColor: theme.palette.successContainer,
+          color: theme.palette.onSuccessContainer,
+        },
+      };
+      return (
+        map[status] ?? {
+          backgroundColor: theme.palette.surfaceContainerHigh,
+          color: theme.palette.onSurfaceVariant,
+        }
+      );
+    }
+    case "expenseSource": {
+      const map: Record<string, { backgroundColor: string; color: string }> = {
+        carryover: {
+          backgroundColor: theme.palette.infoContainer,
+          color: theme.palette.onInfoContainer,
+        },
+      };
+      return (
+        map[status] ?? {
+          backgroundColor: theme.palette.surfaceContainerHigh,
+          color: theme.palette.onSurfaceVariant,
+        }
+      );
+    }
+    case "payrollCalculation": {
+      const map: Record<string, { backgroundColor: string; color: string }> = {
+        REFUND: {
+          backgroundColor: theme.palette.errorContainer,
+          color: theme.palette.onErrorContainer,
+        },
+        CALCULATED: {
+          backgroundColor: theme.palette.infoContainer,
+          color: theme.palette.onInfoContainer,
+        },
+        PARTIALLY: {
+          backgroundColor: theme.palette.warningContainer,
+          color: theme.palette.onWarningContainer,
+        },
+        WAITING_PAID: {
+          backgroundColor: theme.palette.secondaryContainer,
+          color: theme.palette.onSecondaryContainer,
+        },
+        PAID: {
+          backgroundColor: theme.palette.successContainer,
+          color: theme.palette.onSuccessContainer,
+        },
+      };
+      return (
+        map[status] ?? {
+          backgroundColor: theme.palette.surfaceContainerHigh,
+          color: theme.palette.onSurfaceVariant,
+        }
+      );
+    }
     default:
       return {
         backgroundColor: theme.palette.surfaceContainerHigh,

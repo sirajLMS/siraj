@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   AdminSectionShared,
   EditResetPasswordSlot,
@@ -8,7 +9,7 @@ import type { AdminResetPasswordSectionRef } from "@/frontend/common/views/dashb
 import {
   getStudentStatusColor,
   getStudentStatusLabel,
-  STUDENT_STATUS_OPTIONS,
+  toAccountStatusDefaultValue,
 } from "@/frontend/common/views/dashboard/profile/shared/studentStatusHelpers";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
@@ -59,11 +60,11 @@ export function StudentAdminSection(props: StudentAdminSectionProps) {
       statusBadgeCategory="studentAccount"
       statusColor={getStudentStatusColor(studentData.status)}
       statusLabel={getStudentStatusLabel(studentData.status, tStatus)}
-      editStatusOptions={STUDENT_STATUS_OPTIONS.map(status => ({
-        value: status,
-        label: tStatus.statusOptions[status],
-      }))}
-      editStatusDefaultValue={studentData.status}
+      editStatusOptions={[
+        { value: AccountStatus.Activated, label: tBase.adminResetPassword.statusActivated },
+        { value: AccountStatus.Deactivated, label: tBase.adminResetPassword.statusDeactivated },
+      ]}
+      editStatusDefaultValue={toAccountStatusDefaultValue(studentData.status)}
       canEditStatus={canEditStatus()}
       targetUserId={targetUserId}
       userName={studentName}

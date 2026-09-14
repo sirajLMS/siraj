@@ -1,10 +1,11 @@
 "use client";
 
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AdminSectionShared } from "@/frontend/common/views/dashboard/profile/components/__shared__/adminSectionShared";
 import {
   getStudentStatusColor,
   getStudentStatusLabel,
-  STUDENT_STATUS_OPTIONS,
+  toAccountStatusDefaultValue,
 } from "@/frontend/common/views/dashboard/profile/shared/studentStatusHelpers";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
@@ -45,11 +46,11 @@ export function AdminOnlySection(props: AdminOnlySectionProps) {
       statusBadgeCategory="studentAccount"
       statusColor={getStudentStatusColor(profile.status)}
       statusLabel={getStudentStatusLabel(profile.status, tStatus)}
-      editStatusOptions={STUDENT_STATUS_OPTIONS.map(status => ({
-        value: status,
-        label: tStatus.statusOptions[status],
-      }))}
-      editStatusDefaultValue={profile.status}
+      editStatusOptions={[
+        { value: AccountStatus.Activated, label: tBase.adminResetPassword.statusActivated },
+        { value: AccountStatus.Deactivated, label: tBase.adminResetPassword.statusDeactivated },
+      ]}
+      editStatusDefaultValue={toAccountStatusDefaultValue(profile.status)}
       canEditStatus={canEditStatus()}
       targetUserId={targetUserId}
       userName={profile.name}

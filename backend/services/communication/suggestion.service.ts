@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { ParentRepository, SuggestionRepository } from "@/backend/db/repo/parents";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { UserRepository } from "@/backend/db/repo/users";
@@ -27,7 +28,47 @@ function isSuggestionStatus(value: string): value is SuggestionStatus {
   return (Object.values(SuggestionStatus) as readonly string[]).includes(value);
 }
 
+function anonymizeContributorId(rawUserId: string): string {
+  return createHash("sha256").update(rawUserId).digest("hex").slice(0, 12);
+}
+
+function anonymizeContributorName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return parts.map(part => `${part.charAt(0).toUpperCase()}.`).join(" ");
+}
+
+function normalizeSuggestion(suggestion: SuggestionReturnType): SuggestionReturnType {
+  return {
+    ...suggestion,
+    parentName: suggestion.parentName ?? null,
+    reviewedByUserName: suggestion.reviewedByUserName ?? null,
+    duplicateOfBody: suggestion.duplicateOfBody ?? null,
+    duplicateOfSubmitterName: suggestion.duplicateOfSubmitterName ?? null,
+    responseCount: suggestion.responseCount ?? 0,
+  };
+}
+
 export namespace SuggestionService {
+  export function mapSuggestionReturnType(result: SuggestionSelectType): SuggestionReturnType {
+    return normalizeSuggestion({
+      id: result.id,
+      parentId: result.parentId,
+      submitterName: result.submitterName,
+      body: result.body,
+      status: isSuggestionStatus(result.status) ? result.status : SuggestionStatus.PENDING,
+      duplicateOfId: result.duplicateOfId ?? null,
+      adminResponse: result.adminResponse ?? null,
+      reviewedByUserId: result.reviewedByUserId ?? null,
+      reviewedAt: result.reviewedAt ?? null,
+      emailSentAt: result.emailSentAt ?? null,
+      createdAt: result.createdAt,
+      parentName: "",
+      reviewedByUserName: null,
+      duplicateOfBody: null,
+      duplicateOfSubmitterName: null,
+      responseCount: 0,
+    });
+  }
   export async function submitSuggestion(
     actorUserId: string,
     input: SuggestionSubmitInput,
@@ -191,7 +232,7 @@ export namespace SuggestionService {
         count: suggestions.length,
       });
 
-      return suggestions;
+      return suggestions.map(normalizeSuggestion);
     } catch (error) {
       logger.error("Failed to get parent suggestions", { actorUserId, parentId: parent.id, error });
       throw error;
@@ -400,13 +441,22 @@ export namespace SuggestionService {
     try {
       const result = await SuggestionRepository.getContributorStats(days);
 
+      const anonymized: SuggestionContributorStats = {
+        ...result,
+        contributors: result.contributors.map(contributor => ({
+          id: anonymizeContributorId(contributor.id),
+          name: anonymizeContributorName(contributor.name),
+          suggestionCount: contributor.suggestionCount,
+        })),
+      };
+
       logger.info("Suggestion contributor stats retrieved", {
         actorUserId,
         days,
-        uniqueContributorCount: result.uniqueContributorCount,
+        uniqueContributorCount: anonymized.uniqueContributorCount,
       });
 
-      return result;
+      return anonymized;
     } catch (error) {
       logger.error("Failed to get suggestion contributor stats", { actorUserId, days, error });
       throw error;

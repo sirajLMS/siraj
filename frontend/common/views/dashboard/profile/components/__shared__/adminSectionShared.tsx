@@ -1,11 +1,16 @@
 "use client";
 
 import { KeyOutlined } from "@mui/icons-material";
-import { IconButton, MenuItem, Stack, TextField, Tooltip } from "@mui/material";
+import { IconButton, Stack, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
+import type { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import {
+  type AccountStatusOption,
+  AccountStatusSelect,
+} from "@/frontend/common/views/dashboard/profile/shared/AccountStatusSelect";
 import {
   AdminResetPasswordSection,
   type AdminResetPasswordSectionRef,
@@ -19,12 +24,7 @@ type StatusBadgeCategory = "studentAccount" | "staffAccount";
 
 type StatusColor = "activated" | "deactivated" | "suspended" | "on_leave" | "on_trial";
 
-interface StatusOption {
-  readonly value: string;
-  readonly label: string;
-}
-
-interface AdminSectionSharedProps {
+interface AdminSectionSharedProps<TStatus extends string = AccountStatus> {
   readonly mode: "view" | "edit";
   readonly sectionTitle: string;
   readonly accountStatusLabel: string;
@@ -33,8 +33,8 @@ interface AdminSectionSharedProps {
   readonly statusBadgeCategory: StatusBadgeCategory;
   readonly statusColor: StatusColor;
   readonly statusLabel: string;
-  readonly editStatusOptions: readonly StatusOption[];
-  readonly editStatusDefaultValue: string;
+  readonly editStatusOptions: readonly AccountStatusOption<TStatus>[];
+  readonly editStatusDefaultValue: TStatus;
   readonly canEditStatus: boolean;
   readonly targetUserId: string | null;
   readonly userName: string;
@@ -70,7 +70,9 @@ function ResetPasswordIconButton({
   );
 }
 
-export function AdminSectionShared(props: Readonly<AdminSectionSharedProps>) {
+export function AdminSectionShared<TStatus extends string = AccountStatus>(
+  props: Readonly<AdminSectionSharedProps<TStatus>>
+) {
   const tBase = useAppTranslation(Translation.Profile.Base);
   const { canAdminResetPassword } = useProfileFieldAccess({ scope: undefined });
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
@@ -96,19 +98,11 @@ export function AdminSectionShared(props: Readonly<AdminSectionSharedProps>) {
       <SectionPanel title={props.sectionTitle}>
         <Stack spacing={2}>
           {props.canEditStatus ? (
-            <TextField
+            <AccountStatusSelect
               label={props.accountStatusLabel}
-              fullWidth
-              size="small"
-              select
+              options={props.editStatusOptions}
               defaultValue={props.editStatusDefaultValue}
-            >
-              {props.editStatusOptions.map(option => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
+            />
           ) : null}
           {props.extraEditFields}
           {props.renderEditResetPassword}
@@ -118,31 +112,29 @@ export function AdminSectionShared(props: Readonly<AdminSectionSharedProps>) {
   }
 
   return (
-    <Stack>
+    <>
       <SectionPanel title={props.sectionTitle}>
         <Stack spacing={2}>
           {props.extraViewFields}
-          <Stack spacing={0.5}>
-            <LabeledField
-              label={props.accountStatusLabel}
-              value={
-                <Stack spacing={0.5} direction="row" sx={{ alignItems: "center" }}>
-                  <StatusBadge
-                    category={props.statusBadgeCategory}
-                    status={props.statusColor}
-                    label={props.statusLabel}
+          <LabeledField
+            label={props.accountStatusLabel}
+            value={
+              <Stack spacing={0.5} direction="row" sx={{ alignItems: "center" }}>
+                <StatusBadge
+                  category={props.statusBadgeCategory}
+                  status={props.statusColor}
+                  label={props.statusLabel}
+                />
+                {canResetPassword && hasValidTarget && (
+                  <ResetPasswordIconButton
+                    tooltip={tBase.adminResetPassword.title}
+                    onClick={() => setResetPasswordOpen(true)}
+                    disabled={false}
                   />
-                  {canResetPassword && hasValidTarget && (
-                    <ResetPasswordIconButton
-                      tooltip={tBase.adminResetPassword.title}
-                      onClick={() => setResetPasswordOpen(true)}
-                      disabled={false}
-                    />
-                  )}
-                </Stack>
-              }
-            />
-          </Stack>
+                )}
+              </Stack>
+            }
+          />
         </Stack>
       </SectionPanel>
       {canResetPassword && hasValidTarget && (
@@ -157,7 +149,7 @@ export function AdminSectionShared(props: Readonly<AdminSectionSharedProps>) {
           onConfirm={handleResetConfirm}
         />
       )}
-    </Stack>
+    </>
   );
 }
 

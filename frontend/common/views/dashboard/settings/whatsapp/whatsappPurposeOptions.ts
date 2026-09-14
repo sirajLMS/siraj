@@ -37,7 +37,7 @@ const PURPOSE_LABEL_KEYS: Readonly<Record<string, string>> = {
  * Maps a `WhatsappAccountPurpose` value (or null/unknown) to its whatsapp
  * locale label key, falling back to the general label.
  */
-export function getPurposeLabelKey(purpose: string | null): string {
+function getPurposeLabelKey(purpose: string | null): string {
   return PURPOSE_LABEL_KEYS[purpose ?? ""] ?? "purposeGeneral";
 }
 

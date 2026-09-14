@@ -8,7 +8,7 @@ import type {
   TeacherImportantNoteSubmitInput,
   TeacherImportantNoteUpdateInput,
 } from "@/backend/types";
-import { getServerTranslations } from "@/shared/locale";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace TeacherNotesRepository {
   export async function getActiveNotes(
@@ -81,7 +81,7 @@ export namespace TeacherNotesRepository {
   export async function updateNote(
     id: string,
     input: TeacherImportantNoteUpdateInput,
-    _locale?: string,
+    locale?: string,
     tx?: DBTransaction
   ): Promise<TeacherImportantNoteSelectType> {
     const run = async (t: DBTransaction): Promise<TeacherImportantNoteSelectType> => {
@@ -92,7 +92,8 @@ export namespace TeacherNotesRepository {
         .limit(1);
 
       if (!existing) {
-        throw new Error(`Note ${id} not found`);
+        const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(i18n.teacher.noteNotFound(id));
       }
 
       const now = new Date();
@@ -124,7 +125,7 @@ export namespace TeacherNotesRepository {
     }
   }
 
-  export async function deleteNote(id: string, _locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
+  export async function deleteNote(id: string, locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
     const run = async (t: DBTransaction): Promise<{ id: string }> => {
       const [existing] = await t
         .select()
@@ -133,7 +134,8 @@ export namespace TeacherNotesRepository {
         .limit(1);
 
       if (!existing) {
-        throw new Error(`Note ${id} not found`);
+        const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(i18n.teacher.noteNotFound(id));
       }
 
       const now = new Date();

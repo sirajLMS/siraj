@@ -1,4 +1,4 @@
-import type { learningResources } from "@/backend/db/schema/communications/communications";
+import type { learningResources } from "@/backend/db/schema";
 
 type LearningResourceSelectType = typeof learningResources.$inferSelect;
 
@@ -12,7 +12,7 @@ export type LearningResourceSubmitInput = {
   readonly displayName: string;
   readonly filePath: string;
   readonly fileId: string;
-  readonly uploadedByUserId?: string;
+  readonly uploadedByUserId?: string | null;
 };
 
 export interface LearningResourceListResult {

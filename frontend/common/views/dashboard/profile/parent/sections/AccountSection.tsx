@@ -85,18 +85,16 @@ export function AccountSection(props: AccountSectionProps) {
         control={props.control}
         additionalEditContent={
           canEditStatusField ? (
-            <Stack spacing={2}>
-              <TextField
-                label={t.fields.accountStatus}
-                fullWidth
-                size="small"
-                select
-                {...props.register("lifecycleStatus")}
-              >
-                <MenuItem value={AccountStatus.Activated}>{t.accountStatus.activated}</MenuItem>
-                <MenuItem value={AccountStatus.Deactivated}>{t.accountStatus.deactivated}</MenuItem>
-              </TextField>
-            </Stack>
+            <TextField
+              label={t.fields.accountStatus}
+              fullWidth
+              size="small"
+              select
+              {...props.register("lifecycleStatus")}
+            >
+              <MenuItem value={AccountStatus.Activated}>{t.accountStatus.activated}</MenuItem>
+              <MenuItem value={AccountStatus.Deactivated}>{t.accountStatus.deactivated}</MenuItem>
+            </TextField>
           ) : null
         }
       />
@@ -134,7 +132,7 @@ export function AccountSection(props: AccountSectionProps) {
   };
 
   return (
-    <Stack>
+    <>
       <CoreIdentitySection
         mode="view"
         scope={props.scope}
@@ -178,6 +176,6 @@ export function AccountSection(props: AccountSectionProps) {
           onConfirm={handleResetConfirm}
         />
       )}
-    </Stack>
+    </>
   );
 }

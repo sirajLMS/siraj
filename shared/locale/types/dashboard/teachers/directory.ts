@@ -1,6 +1,7 @@
 export interface TeachersDirectoryLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
+  readonly emptyMessage: string;
   readonly metrics: {
     readonly activated: string;
     readonly deactivated: string;

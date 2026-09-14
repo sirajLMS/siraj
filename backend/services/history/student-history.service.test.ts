@@ -11,7 +11,7 @@ import { EffectiveMeetingService } from "@/backend/services/meeting/class-meetin
 import type {
   EffectiveMeetingReturnType,
   ParentSelectType,
-  SessionSummary,
+  StudentHistorySession,
   StudentSelectType,
   TeacherSelectType,
 } from "@/backend/types";
@@ -132,7 +132,7 @@ afterEach(() => {
   spyOn(EffectiveMeetingService, "resolveForClassInstances").mockRestore();
 });
 
-const MOCK_RAW_SESSIONS: SessionSummary[] = [
+const MOCK_RAW_SESSIONS: StudentHistorySession[] = [
   {
     id: "session-1",
     title: "Math",
