@@ -1,8 +1,6 @@
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
+"use client";
+
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 
 interface AppearanceResetDialogLabels {
   readonly resetConfirmTitle: string;
@@ -21,15 +19,15 @@ export interface AppearanceResetDialogProps {
 
 export function AppearanceResetDialog({ open, loading, labels, onClose, onConfirm }: AppearanceResetDialogProps) {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{labels.resetConfirmTitle}</DialogTitle>
-      <DialogContent>{labels.resetConfirmBody}</DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{labels.resetConfirmCancel}</Button>
-        <Button onClick={onConfirm} color="error" variant="contained" disabled={loading}>
-          {labels.resetConfirmConfirm}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      isLoading={loading}
+      onClose={onClose}
+      onConfirm={onConfirm}
+      title={labels.resetConfirmTitle}
+      body={labels.resetConfirmBody}
+      cancelLabel={labels.resetConfirmCancel}
+      confirmLabel={labels.resetConfirmConfirm}
+    />
   );
 }
