@@ -1,7 +1,7 @@
 "use client";
 
 import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
-import { IconButton, InputAdornment, TextField } from "@mui/material";
+import { IconButton, InputAdornment, TextField, Tooltip } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
 export interface SearchBarFieldProps {
@@ -49,9 +49,11 @@ export function SearchBarField({
           ),
           endAdornment: value ? (
             <InputAdornment position="end">
-              <IconButton size="small" aria-label={clearLabel} onClick={() => onChange("")} edge="end">
-                <ClearOutlined fontSize="small" />
-              </IconButton>
+              <Tooltip title={clearLabel}>
+                <IconButton size="small" aria-label={clearLabel} onClick={() => onChange("")} edge="end">
+                  <ClearOutlined fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </InputAdornment>
           ) : null,
         },

@@ -460,6 +460,17 @@ function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
   );
 }
 
+const weekdayDtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getWeekdayDtf(timezone: string): Intl.DateTimeFormat {
+  let dtf = weekdayDtfCache.get(timezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: timezone });
+    weekdayDtfCache.set(timezone, dtf);
+  }
+  return dtf;
+}
+
 const DAY_MAP: Record<string, number> = {
   SUNDAY: 0,
   MONDAY: 1,
@@ -486,10 +497,11 @@ function buildPatternOccurrences(
 ): { start: Date; end: Date }[] {
   const occurrences: { start: Date; end: Date }[] = [];
   const curr = new Date(startDate);
+  const weekdayDtf = getWeekdayDtf(timezone);
+  const durationMs = durationMinutes * 60 * 1000;
 
   while (curr.getTime() <= endDate.getTime()) {
-    const currMs = curr.getTime();
-    const tzDay = new Date(currMs).toLocaleString("en-US", { weekday: "short", timeZone: timezone });
+    const tzDay = weekdayDtf.format(curr);
     const dayOfWeekNum = TZ_DAY_MAP[tzDay] ?? curr.getUTCDay();
 
     for (const d of days) {
@@ -513,7 +525,7 @@ function buildPatternOccurrences(
         logger.debug(error);
       }
 
-      const slotEnd = new Date(slotStart.getTime() + durationMinutes * 60 * 1000);
+      const slotEnd = new Date(slotStart.getTime() + durationMs);
       occurrences.push({ start: slotStart, end: slotEnd });
     }
     curr.setUTCDate(curr.getUTCDate() + 1);

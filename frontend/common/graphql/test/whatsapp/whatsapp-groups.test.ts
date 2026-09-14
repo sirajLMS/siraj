@@ -369,13 +369,13 @@ describe("whatsapp groups mutations", () => {
       { input: buildSendInput(randomUUID(), { body: "hi" }) },
       "WHATSAPP_GROUP_NOT_FOUND"
     );
-    await withTestAccount(async token => {
+    await withTestAccount(async accountToken => {
       // A real group row is required for the blank-body guard: create one
       // locally via the create mutation. On this account the Graph create
       // fails (no Meta access token), so fall back to the unknown id — the
       // guard ordering places NOT_FOUND ahead of payload validation.
       await expectMutationErrorCode(
-        token,
+        accountToken,
         sendWhatsappGroupMessageMutationDocument,
         { input: buildSendInput(randomUUID(), { body: null }) },
         "WHATSAPP_GROUP_NOT_FOUND"

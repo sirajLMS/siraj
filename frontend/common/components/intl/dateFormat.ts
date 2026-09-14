@@ -34,6 +34,24 @@ function toDate(date: DateInput): Date {
   return parsed;
 }
 
+/**
+ * Global cache for Intl.DateTimeFormat instances.
+ * Creating new Intl.DateTimeFormat instances is computationally expensive (up to ~100x slower).
+ * Caching by locale tag and options serialization eliminates repeated construction overhead
+ * in high-frequency date formatting renders (e.g., DataGrid cells, list items, calendar grids).
+ */
+const dtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getDateTimeFormatter(localeTag: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const cacheKey = `${localeTag}:${JSON.stringify(options)}`;
+  let dtf = dtfCache.get(cacheKey);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat(localeTag, options);
+    dtfCache.set(cacheKey, dtf);
+  }
+  return dtf;
+}
+
 function formatWithFallback(
   date: DateInput,
   locale: string,
@@ -48,7 +66,7 @@ function formatWithFallback(
     return fallback;
   }
 
-  return new Intl.DateTimeFormat(getLatnLocaleTag(locale), options).format(parsed);
+  return getDateTimeFormatter(getLatnLocaleTag(locale), options).format(parsed);
 }
 
 /**
@@ -101,12 +119,14 @@ export const formatTime = createFormatFunction({
   minute: "2-digit",
 });
 
+const MONTH_YEAR_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+};
+
 /**
  * Locale-aware month and year (e.g. "July 2026").
  */
 export function formatMonthYear(date: DateInput, locale: string): string {
-  return new Intl.DateTimeFormat(getLatnLocaleTag(locale), {
-    year: "numeric",
-    month: "long",
-  }).format(toDate(date));
+  return getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_YEAR_OPTIONS).format(toDate(date));
 }

@@ -194,11 +194,12 @@ All layers use types from `backend/types/{entity}.types.ts`:
 ## Code Quality Workflow
 
 After making changes:
-1. Run `bun quality-gate` - it handles tsgo, oxlint, biome, lint, duplicates, codescene sequentially
+1. Run `bun quality-gate` - it handles tsgo, oxlint, biome, lint, duplicates, unused (knip), codescene sequentially
 2. If DUPLICATES fails: run `bun run check:duplicates` to see cross-file clones. Fix by extracting shared scaffolds/utilities. NEVER add `jscpd:ignore` comments or modify `.jscpd.json`.
-3. If CODESCENE fails: run `bun run codescene --file <path>` to fix
-4. Re-run `bun quality-gate` to resume from last failed stage
-5. Use `bun quality-gate:fresh` only for clean-slate verification
+3. If UNUSED fails: run `bun run check:unused` to see knip findings (unused files/exports/deps, config hints). Fix the code first; only extend `knip.config.ts` ignores for genuine blind spots (side-effect imports, tool-loaded files) with a comment explaining why.
+4. If CODESCENE fails: run `bun run codescene --file <path>` to fix
+5. Re-run `bun quality-gate` to resume from last failed stage
+6. Use `bun quality-gate:fresh` only for clean-slate verification
 
 **⚠️ NEVER CLEAR CACHES.** Neither `quality-gate` nor `quality-loop` may ever clear cache files.
 This includes:
@@ -309,7 +310,7 @@ within each lifecycle stage. Key rules:
 
 - Subagents are dispatched **per lifecycle stage only** — no mixing stages in the same wave
 - Each stage must fully complete before advancing to the next
-- Stage order: `tsgo` → `oxlint` → `biome:check` → `lint` → `duplicates` → `codescene`
+- Stage order: `tsgo` → `oxlint` → `biome:check` → `lint` → `duplicates` → `unused` (knip) → `codescene`
 
 ### Subagent Dispatch Model
 
@@ -340,6 +341,10 @@ the script exits 0. The `--lifecycle` arg controls the target stage:
 
 **Progressive enforcement**: no skipping ahead. If tsgo fails, only fix tsgo — don't run
 oxlint/biome/lint/duplicates/codescene until tsgo passes.
+
+The `unused` (knip `check:unused`) gate stage has **no sub-loop lifecycle** — knip analysis is
+whole-repo, not per-file. Subagents fixing UNUSED findings verify with `--lifecycle lint` on
+their file, and the orchestrator re-runs `bun run check:unused` to verify globally.
 
 ### Instruction File & AGENTS.md Discovery (Per-File)
 

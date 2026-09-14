@@ -2,7 +2,7 @@
 name: quality-gate
 description: >
   Run the project's `bun quality-gate` command and follow its output instructions to resolve
-  all reported issues across stages (BASIC_CHECKS, DUPLICATES, CODESCENE).
+  all reported issues across stages (BASIC_CHECKS, DUPLICATES, UNUSED, CODESCENE).
   Dispatches parallel subagents (one per file) within each lifecycle stage — no interleaving
   across stages. Each subagent calls `scripts/health/sub-loop.ts` for progressive per-file
   verification (tsgo → oxlint → biome → lint:type-aware → check:duplicates → codescene, in strict
@@ -160,8 +160,8 @@ asks to resume from existing state, or if you are certain the persisted state is
 (e.g., you just ran `:fresh` moments ago and only made targeted fixes since).
 
 Read the output carefully. It will indicate:
-- Which stage failed (`BASIC_CHECKS`, `DUPLICATES`, or `CODESCENE`)
-- The owner of the failure (`quality-gate`, `duplicates`, or `codescene`)
+- Which stage failed (`BASIC_CHECKS`, `DUPLICATES`, `UNUSED`, or `CODESCENE`)
+- The owner of the failure (`quality-gate`, `duplicates`, `unused`, or `codescene`)
 - Specific remediation instructions (printed in colored text)
 
 State is persisted in `.quality-gate-state.json`. Re-running `bun quality-gate` resumes from the
@@ -178,6 +178,7 @@ Map the failed stage to the correct remediation workflow:
 |---|---|---|
 | `BASIC_CHECKS` | `quality-gate` | Fix tsgo (grouped parallel) → oxlint (parallel) → biome (parallel) → lint (parallel) |
 | `DUPLICATES` | `duplicates` | Fix cross-file duplications — dispatch parallel subagents per file. See `docs/frontend/duplication-elimination-patterns.md` and `docs/frontend/ui-shared-scaffold-pattern.md` for remediation patterns. Zero `jscpd:ignore` and zero `.jscpd.json` changes are hard rules. |
+| `UNUSED` | `unused` | Fix knip findings (unused files/exports/types/deps, duplicate exports, config hints) — `bun run check:unused` exits 1 on ANY finding, hints included. Fix code first; `knip.config.ts` ignore/entry additions only for genuine blind spots, with an explanatory comment. |
 | `CODESCENE` | `codescene` | Fix CodeScene warnings — dispatch parallel subagents per file |
 
 If the owner is NOT `quality-gate`, the recovery check runs automatically on the next `bun quality-gate`
@@ -322,7 +323,7 @@ scaffold pairs, re-export shims, parallel i18n implementations).
 
 6. Re-run `bun check:duplicates` to verify no new clones.
 
-7. Resume: re-run `bun quality-gate` — it advances to CODESCENE stage.
+7. Resume: re-run `bun quality-gate` — it advances to UNUSED stage.
 
 **Remediation patterns:**
 - Extract shared scaffold: `docs/frontend/ui-shared-scaffold-pattern.md`
@@ -331,6 +332,47 @@ scaffold pairs, re-export shims, parallel i18n implementations).
 **Hard rules:**
 - Zero `jscpd:ignore` comments — fix the root cause instead
 - Zero `.jscpd.json` modifications — never widen ignore patterns to pass the gate
+
+---
+
+### Phase 6.75: Fix UNUSED (knip)
+
+The `UNUSED` stage runs `bun run check:unused` (knip, full-repo import-graph analysis) and gates on
+**any** finding — unused files, dependencies, unlisted dependencies, exports, exported types,
+duplicate exports, **and configuration/tag hints** (hints exit 1 via `--treat-config-hints-as-errors`
+and `--treat-tag-hints-as-errors`, so a hints-only tree does not silently pass).
+
+1. Run `bun run check:unused` to get the findings grouped by issue type.
+   For deeper investigation, `bun run scripts/unused/knip-categorize.ts` writes a categorized JSON
+   report to `.unused/`, and `bun run scripts/unused/knip-analyze.ts` derives insights from it.
+
+2. Group findings by type and fix them:
+   - **Unused files/exports/exported types** — delete them, or wire the export into a consumer.
+     Verify a "unused" script is truly not invoked via `bun run` / `drizzle-kit` / shell first.
+   - **Unused/unlisted dependencies** — remove from `package.json`, or add/move to the correct
+     dependency group if a tool loads it at runtime.
+   - **Duplicate exports** — keep one canonical source; re-export through the barrel.
+   - **Configuration hints** — update `knip.config.ts` so entry/ignore patterns match reality.
+     Ignore additions must each carry a comment naming the blind spot they cover (side-effect
+     imports, `bun --preload`, tool-loaded files), mirroring the existing commented ignores.
+
+3. **Dispatch parallel subagents per file** for code deletions/extractions. Knip is whole-repo,
+   so there is NO `unused` sub-loop lifecycle — each subagent runs:
+   ```bash
+   bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+   ```
+   (This keeps touched files clean through tsgo → oxlint → biome → lint; knip verification is global.)
+
+4. Re-run `bun run check:unused` and iterate until it exits 0.
+
+5. Resume: re-run `bun quality-gate` — it advances to CODESCENE stage.
+
+**Hard rules:**
+- Fix the code BEFORE touching `knip.config.ts`; config changes are the documented exception,
+  not the default remediation.
+- Deleting an enum member backfilling a Drizzle `pgEnum` column or a Pothos-registered type breaks
+  the GraphQL/DB contract — `backend/enum/**` and `shared/constants/**/*.enum.ts` are ignored for
+  this reason; follow the same reasoning before deleting "unused" schema-adjacent symbols.
 
 ---
 
@@ -364,7 +406,7 @@ scaffold pairs, re-export shims, parallel i18n implementations).
 Re-run `bun quality-gate` until all stages pass.
 
 The state machine behavior:
-- If the previous owner was `codescene` or `duplicates`, the script runs a recovery check first.
+- If the previous owner was `codescene`, `unused`, or `duplicates`, the script runs a recovery check first.
 - If the recovery check passes, ownership returns to `quality-gate` and stages continue.
 - If the recovery check fails, the script exits — fix remaining issues and re-run.
 - When all stages pass: `✨✨ ALL QUALITY GATES PASSED! ✨✨` and lifecycle = DONE.

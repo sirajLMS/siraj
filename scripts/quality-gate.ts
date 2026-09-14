@@ -13,12 +13,12 @@ import { withProcessLock } from "@/scripts/lib/process-lock";
 
 const STATE_FILE = join(process.cwd(), ".quality-gate-state.json");
 
-type QualityStage = "BASIC_CHECKS" | "DUPLICATES" | "CODESCENE";
+type QualityStage = "BASIC_CHECKS" | "DUPLICATES" | "UNUSED" | "CODESCENE";
 type QualityLifecycle = "FRESH" | "NEED_CONFIRM" | "DONE";
 
 interface QualityState {
   stage: QualityStage;
-  owner: "quality-gate" | "duplicates" | "codescene";
+  owner: "quality-gate" | "duplicates" | "unused" | "codescene";
   lifecycle: QualityLifecycle;
   lastRun: string;
 }
@@ -48,6 +48,39 @@ const CODESCENE_INSTRUCTIONS = `
 /**
  * CODESCENE REMEDIATION PROMPT:
  * CodeScene has identified code health warnings. Fix them before rerunning quality-gate.
+ */
+`;
+
+const UNUSED_INSTRUCTIONS = `
+/**
+ * UNUSED CODE REMEDIATION PROMPT:
+ * knip (check:unused) detected unused code, unused dependencies, or configuration hints.
+ * Hints are treated as errors (exit 1) — the gate must pass with zero knip findings.
+ *
+ * Fix options:
+ *   1. Unused files — delete the file, or add knip entry/ignore coverage if the file is
+ *      loaded by side effect (see existing entry/ignore comment blocks in knip.config.ts).
+ *   2. Unused exports / exported types — delete them, or wire them back into a consumer.
+ *      For tooling scripts, verify the symbol isn't invoked via "bun run" before deleting.
+ *   3. Unused/unlisted dependencies — remove from package.json, or move to the correct
+ *      dependency group (e.g. devDependencies) if a tool loads it at runtime.
+ *   4. Duplicate exports — a symbol is exported from two modules; keep one canonical
+ *      source and re-export through the barrel.
+ *   5. Configuration hints (".mdx excluded by project", stale entry/ignore patterns) —
+ *      update knip.config.ts to match reality. Adding an ignore that hides real
+ *      findings is not a fix.
+ *
+ * Deep-dive tooling (optional):
+ *   bun run scripts/unused/knip-categorize.ts   # categorized JSON report into .unused/
+ *   bun run scripts/unused/knip-analyze.ts      # analysis insights from that report
+ *
+ * Hard rules:
+ *   - NEVER add knip.config.ts ignore/entry entries just to silence findings — ignores
+ *     must only cover genuine analysis blind spots (side-effect imports, dynamic string
+ *     imports, tool-loaded files), each with a comment explaining why it exists.
+ *   - Fix the code first; treat knip.config.ts changes as the documented exception.
+ *
+ * After fixing, rerun: bun quality-gate
  */
 `;
 
@@ -129,6 +162,15 @@ async function performStage(stage: QualityStage): Promise<boolean> {
       }
       return true;
     }
+    case "UNUSED": {
+      const check = await runCommand("bun", ["check:unused"]);
+      if (!check.success) {
+        console.warn("⚠️ Unused code/dependencies or knip configuration hints detected (check:unused).");
+        console.log("\x1b[36m%s\x1b[0m", UNUSED_INSTRUCTIONS);
+        return false;
+      }
+      return true;
+    }
     case "CODESCENE": {
       const check = await runCommand("bun", ["codescene"]);
       if (!check.success) {
@@ -142,7 +184,7 @@ async function performStage(stage: QualityStage): Promise<boolean> {
   throw new Error(`Unhandled case in performStage`);
 }
 
-const STAGES: QualityStage[] = ["BASIC_CHECKS", "DUPLICATES", "CODESCENE"];
+const STAGES: QualityStage[] = ["BASIC_CHECKS", "DUPLICATES", "UNUSED", "CODESCENE"];
 
 async function recoverOwnership(state: QualityState): Promise<void> {
   console.log(`\n🔍 Checking if "${state.owner}" issues are resolved...`);
@@ -150,6 +192,11 @@ async function recoverOwnership(state: QualityState): Promise<void> {
 
   if (state.owner === "duplicates") {
     const check = await runCommand("bun", ["check:duplicates"]);
+    if (check.success) resolved = true;
+  }
+
+  if (state.owner === "unused") {
+    const check = await runCommand("bun", ["check:unused"]);
     if (check.success) resolved = true;
   }
 
@@ -179,6 +226,7 @@ async function executeStages(startIndex: number, lifecycle: QualityLifecycle): P
     if (!success) {
       let owner: QualityState["owner"] = "quality-gate";
       if (currentStage === "DUPLICATES") owner = "duplicates";
+      if (currentStage === "UNUSED") owner = "unused";
       if (currentStage === "CODESCENE") owner = "codescene";
 
       saveState(currentStage, owner, "NEED_CONFIRM");
