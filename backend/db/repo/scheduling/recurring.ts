@@ -13,10 +13,10 @@ import {
   recurringSchedules,
   teachers,
 } from "@/backend/db/schema";
+import { getTimezoneOffsetMs } from "@/backend/lib/timezone";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { CreateRecurringScheduleInput, RateSnapshot } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 /**
@@ -99,9 +99,7 @@ function computeScheduledStartForDay(
 
   const getOffsetMs = (d: Date) => {
     try {
-      const utcDate = new Date(d.toLocaleString("en-US", { timeZone: IanaTimezone.UTC }));
-      const tzDate = new Date(d.toLocaleString("en-US", { timeZone: timezone }));
-      return tzDate.getTime() - utcDate.getTime();
+      return getTimezoneOffsetMs(timezone, d);
     } catch {
       return 0;
     }
@@ -254,9 +252,7 @@ export async function clearWeeklySchedule(
 
 function getOffsetMinutes(ianaTimezone: string, d: Date): number | null {
   try {
-    const utcDate = new Date(d.toLocaleString("en-US", { timeZone: IanaTimezone.UTC }));
-    const tzDate = new Date(d.toLocaleString("en-US", { timeZone: ianaTimezone }));
-    return Math.round((tzDate.getTime() - utcDate.getTime()) / 60000);
+    return Math.round(getTimezoneOffsetMs(ianaTimezone, d) / 60000);
   } catch {
     return null;
   }

@@ -38,14 +38,73 @@ export function formatInstantInTimezone(date: Date, ianaTimezone: string, locale
   }
 }
 
-export function getDayBoundaries(date: Date, ianaTimezone: string): { startOfDayUtc: Date; endOfDayUtc: Date } {
-  try {
-    const parts = new Intl.DateTimeFormat("en-US", {
+/**
+ * Cache Intl.DateTimeFormat instances per timezone to avoid heavy instantiation
+ * overhead during date/time offset calculations.
+ */
+const tzPartsFormatterCache = new Map<string, Intl.DateTimeFormat>();
+const utcPartsFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: "UTC",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
+
+function getTzPartsFormatter(ianaTimezone: string): Intl.DateTimeFormat {
+  let dtf = tzPartsFormatterCache.get(ianaTimezone);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat("en-US", {
       timeZone: ianaTimezone,
       year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    }).formatToParts(date);
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+    tzPartsFormatterCache.set(ianaTimezone, dtf);
+  }
+  return dtf;
+}
+
+function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
+  let year = 0;
+  let month = 0;
+  let day = 0;
+  let hour = 0;
+  let minute = 0;
+  let second = 0;
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (p.type === "year") year = Number(p.value);
+    else if (p.type === "month") month = Number(p.value) - 1;
+    else if (p.type === "day") day = Number(p.value);
+    else if (p.type === "hour") hour = Number(p.value) === 24 ? 0 : Number(p.value);
+    else if (p.type === "minute") minute = Number(p.value);
+    else if (p.type === "second") second = Number(p.value);
+  }
+  return Date.UTC(year, month, day, hour, minute, second);
+}
+
+/**
+ * Computes the UTC offset in milliseconds for a given timezone and instant.
+ * Fast, cached implementation replacing slow `toLocaleString` calls.
+ */
+export function getTimezoneOffsetMs(ianaTimezone: string, date: Date): number {
+  const dtf = getTzPartsFormatter(ianaTimezone);
+  const asTz = partsToEpochMs(dtf.formatToParts(date));
+  const asUtc = partsToEpochMs(utcPartsFormatter.formatToParts(date));
+  return asTz - asUtc;
+}
+
+export function getDayBoundaries(date: Date, ianaTimezone: string): { startOfDayUtc: Date; endOfDayUtc: Date } {
+  try {
+    const parts = getTzPartsFormatter(ianaTimezone).formatToParts(date);
 
     const yearPart = parts.find(p => p.type === "year")?.value;
     const monthPart = parts.find(p => p.type === "month")?.value;
@@ -59,21 +118,15 @@ export function getDayBoundaries(date: Date, ianaTimezone: string): { startOfDay
     const month = Number.parseInt(monthPart, 10) - 1;
     const day = Number.parseInt(dayPart, 10);
 
-    const getOffsetMs = (d: Date) => {
-      const utcDate = new Date(d.toLocaleString("en-US", { timeZone: "UTC" }));
-      const tzDate = new Date(d.toLocaleString("en-US", { timeZone: ianaTimezone }));
-      return tzDate.getTime() - utcDate.getTime();
-    };
-
     const guessStart = new Date(Date.UTC(year, month, day, 0, 0, 0));
-    const offsetStart = getOffsetMs(guessStart);
+    const offsetStart = getTimezoneOffsetMs(ianaTimezone, guessStart);
     let startOfDayUtc = new Date(guessStart.getTime() - offsetStart);
-    startOfDayUtc = new Date(guessStart.getTime() - getOffsetMs(startOfDayUtc));
+    startOfDayUtc = new Date(guessStart.getTime() - getTimezoneOffsetMs(ianaTimezone, startOfDayUtc));
 
     const guessEnd = new Date(Date.UTC(year, month, day, 24, 0, 0));
-    const offsetEnd = getOffsetMs(guessEnd);
+    const offsetEnd = getTimezoneOffsetMs(ianaTimezone, guessEnd);
     let endOfDayUtc = new Date(guessEnd.getTime() - offsetEnd);
-    endOfDayUtc = new Date(guessEnd.getTime() - getOffsetMs(endOfDayUtc));
+    endOfDayUtc = new Date(guessEnd.getTime() - getTimezoneOffsetMs(ianaTimezone, endOfDayUtc));
 
     return { startOfDayUtc, endOfDayUtc };
   } catch (error) {
