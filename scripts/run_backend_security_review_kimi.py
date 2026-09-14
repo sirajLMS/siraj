@@ -29,8 +29,47 @@ DEFAULT_LOCAL_BASE_URL = "http://localhost:20128/v1"
 DEFAULT_NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 DEFAULT_MODEL = "nvidia/moonshotai/kimi-k3"
 
-# Scope Decision: Full backend (GraphQL, Services, Repos, DB Migrations, API Routes, Edge Middleware)
-DEFAULT_INCLUDE_PATTERNS = "backend/**,app/api/**,proxy.ts"
+# Standardized Scope: Core backend surfaces, DB migrations, security-relevant types, API routes, edge middleware
+DEFAULT_INCLUDE_PATTERNS = (
+    "backend/graphql/**,"
+    "backend/services/**,"
+    "backend/db/repo/**,"
+    "backend/db/schema/**,"
+    "backend/db/migration/**,"
+    "backend/lib/**,"
+    "backend/enum/**,"
+    "backend/utils/**,"
+    "backend/storage/**,"
+    "backend/types/auth/**,"
+    "backend/types/permissions/**,"
+    "app/api/**,"
+    "proxy.ts"
+)
+
+DEFAULT_IGNORE_PATTERNS = [
+    "**/drizzle/**",
+    "**/drizzle-sqlite/**",
+    "**/snapshot.json",
+    "**/backend/db/scripts/**",
+    "**/backend/db/seeds/**",
+    "**/backend/services/seed/**",
+    "**/backend/db/test/**",
+    "**/test/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.md",
+    "backend/storage/disk/**",
+    "backend/lib/env-config-keys.ts",
+    "**/index.ts",
+    "**/node_modules/**",
+    "**/.git/**",
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.jpeg",
+    "**/*.gif",
+    "**/*.svg",
+    "**/*.pdf",
+]
 
 
 # ==============================================================================
@@ -236,31 +275,50 @@ Provide exact, production-ready TypeScript code snippets with proper imports and
 
 def optimize_code_whitespace(raw_xml: str) -> str:
     """
-    Minify whitespace without losing any code, symbols, or line numbers:
+    Minify whitespace without losing any functions, bodies, queries, or logic:
+    - Strips compile-time only "import type { ... }" statements
+    - Collapses multiline value imports into single-line imports
     - Strips trailing whitespace from every line
     - Normalizes leading indentation from 4 spaces to 2 spaces
     - Eliminates consecutive empty lines
     """
     import re
+
+    # 1. Strip compile-time only "import type" statements
+    raw_xml = re.sub(
+        r"^\s*import\s+type\s+\{[\s\S]*?\}\s*from\s*[\"'][^\"']+[\"'];?\n?",
+        "",
+        raw_xml,
+        flags=re.MULTILINE,
+    )
+
+    # 2. Collapse multiline value imports into a single line
+    def repl_import(m):
+        kind = m.group(1)
+        inner = re.sub(r"\s+", " ", m.group(2)).strip()
+        mod = m.group(3)
+        return f"{kind}{{{inner}}} from {mod};"
+
+    raw_xml = re.sub(
+        r"^(import\s+)\{([^}]+)\}\s*from\s*([\"'][^\"']+[\"']);?",
+        repl_import,
+        raw_xml,
+        flags=re.MULTILINE,
+    )
+
+    # 3. Indentation compression & trailing whitespace/empty line removal
     out_lines = []
     for line in raw_xml.splitlines():
         line = line.rstrip()
         if not line:
             continue
-        # Check for line number prefix from repomix (e.g., "  123:   code" or "  123 |   code")
-        m = re.match(r"^(\s*\d+\s*[:|]\s*)(.*)$", line)
+        m = re.match(r"^(\s+)(.*)$", line)
         if m:
-            prefix, code = m.groups()
-            code_m = re.match(r"^(\s+)(.*)$", code)
-            if code_m:
-                spaces, rest = code_m.groups()
-                # Compress 4 spaces to 2 spaces indentation
-                level = len(spaces.replace("\t", "    ")) // 4
-                rem = len(spaces.replace("\t", "    ")) % 4
-                indent = ("  " * level) + (" " * (rem // 2))
-                out_lines.append(f"{prefix.strip()}|{indent}{rest}")
-            else:
-                out_lines.append(f"{prefix.strip()}|{code}")
+            spaces, rest = m.groups()
+            level = len(spaces.replace("\t", "    ")) // 4
+            rem = len(spaces.replace("\t", "    ")) % 4
+            indent = ("  " * level) + (" " * (rem // 2))
+            out_lines.append(f"{indent}{rest}")
         else:
             out_lines.append(line)
     return "\n".join(out_lines)
@@ -270,37 +328,17 @@ def run_repomix(
     include_patterns: str,
     output_file: Path,
     compress: bool = False,
-    show_line_numbers: bool = True,
+    show_line_numbers: bool = False,
     remove_comments: bool = True,
     remove_empty_lines: bool = True,
     extra_ignore: Optional[str] = None,
 ) -> bool:
-    """Pack codebase using repomix with include patterns, preserving full function bodies."""
-    print(f"📦 Packing codebase with Repomix (include: '{include_patterns}', full function bodies: {not compress})...")
+    """Pack codebase using repomix with standardized include/ignore patterns, preserving full function bodies."""
+    print(f"📦 Packing codebase with Repomix (include: '{include_patterns}', full function bodies: {not compress}, line numbers: {show_line_numbers})...")
     
     runner = "bunx" if subprocess.run(["which", "bun"], capture_output=True).returncode == 0 else "npx"
     
-    # Include all backend/db/migration SQL files; exclude only generated drizzle diffs/snapshots, tests, and non-code assets
-    ignore_patterns = [
-        "**/drizzle/**",
-        "**/drizzle-sqlite/**",
-        "**/snapshot.json",
-        "**/backend/db/scripts/**",
-        "**/backend/db/seeds/**",
-        "**/backend/db/test/**",
-        "**/test/**",
-        "**/*.test.ts",
-        "**/*.spec.ts",
-        "**/*.md",
-        "**/node_modules/**",
-        "**/.git/**",
-        "**/*.png",
-        "**/*.jpg",
-        "**/*.jpeg",
-        "**/*.gif",
-        "**/*.svg",
-        "**/*.pdf",
-    ]
+    ignore_patterns = list(DEFAULT_IGNORE_PATTERNS)
     if extra_ignore:
         ignore_patterns.append(extra_ignore)
     
@@ -514,12 +552,12 @@ def main():
     print(f"📁 Root: {project_root}")
     print(f"🎯 Target Plan Output: {args.output_plan}")
 
-    # 1. Repomix bundling (Preserves full function bodies by default)
+    # 1. Repomix bundling (Preserves full function bodies by default, line numbers stripped)
     success = run_repomix(
         include_patterns=args.include,
         output_file=args.repomix_output,
         compress=args.compress,
-        show_line_numbers=True,
+        show_line_numbers=False,
     )
     if not success:
         sys.exit(1)
@@ -528,7 +566,7 @@ def main():
     print(f"📖 Reading repomix bundle ({args.repomix_output})...")
     raw_backend_code = args.repomix_output.read_text(encoding="utf-8")
     
-    print(f"✨ Optimizing whitespace (preserving full function bodies & line numbers)...")
+    print(f"✨ Optimizing whitespace (preserving full function bodies)...")
     backend_code = optimize_code_whitespace(raw_backend_code)
     reduction = len(raw_backend_code) - len(backend_code)
     pct = (reduction / len(raw_backend_code)) * 100 if raw_backend_code else 0
@@ -539,8 +577,8 @@ def main():
 
     # Calculate estimated input tokens and safe output token budget
     total_prompt_chars = len(system_prompt) + len(user_prompt)
-    # Using 3.85 chars/token estimate
-    estimated_input_tokens = int(total_prompt_chars / 3.85)
+    # Using 4.15 chars/token estimate for code XML
+    estimated_input_tokens = int(total_prompt_chars / 4.15)
     
     context_limit = args.context_limit
     safety_margin = 10000
