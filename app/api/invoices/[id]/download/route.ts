@@ -29,7 +29,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: tErrors.internalServerError }, { status: 500 });
     }
 
-    return NextResponse.redirect(new URL(`/api/storage/files/${pdfFile.filePath}`, request.url));
+    const safeEncodedPath = pdfFile.filePath
+      .split("/")
+      .map(segment => encodeURIComponent(segment))
+      .join("/");
+
+    return NextResponse.redirect(new URL(`/api/storage/files/${safeEncodedPath}`, request.url));
   } catch (error) {
     if (error instanceof NotFoundError) {
       return NextResponse.json({ error: tErrors.invoiceNotFoundShort }, { status: 404 });
