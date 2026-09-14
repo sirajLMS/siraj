@@ -35,6 +35,15 @@ type CopyState = "default" | "copied" | "error";
 const DEFAULT_COPIED_MS = 2000;
 const ICON_SWAP_MS = 150;
 
+/** Visually-hidden style for sr-only live regions (e.g. copy-to-clipboard feedback). */
+const srOnlySx = {
+  position: "absolute",
+  left: -9999,
+  width: 1,
+  height: 1,
+  overflow: "hidden",
+} as const;
+
 /**
  * Clipboard write with fallback for older browsers.
  * Returns `true` if the text was written, `false` otherwise.
@@ -149,12 +158,16 @@ export function CopyMeetingUrlButton({
   const isError = copyState === "error";
 
   let tooltipText: string;
+  let effectiveAriaLabel: string;
   if (isCopied) {
     tooltipText = labels.urlCopied;
+    effectiveAriaLabel = labels.urlCopied;
   } else if (isError) {
     tooltipText = labels.urlCopyFailed;
+    effectiveAriaLabel = labels.urlCopyFailed;
   } else {
     tooltipText = tooltipLabel ?? labels.copyMeetingUrl;
+    effectiveAriaLabel = resolvedAriaLabel;
   }
 
   const iconColor = resolveIconColor(copyState);
@@ -166,67 +179,79 @@ export function CopyMeetingUrlButton({
     </Fade>
   );
 
+  const liveRegion = (
+    <Box component="output" sx={srOnlySx} aria-live="polite">
+      {isCopied ? labels.urlCopied : isError ? labels.urlCopyFailed : ""}
+    </Box>
+  );
+
   if (variant === "button") {
     return (
-      <Tooltip title={tooltipText}>
-        <span>
-          <Button
-            size={size}
-            variant="text"
-            disabled={disabled}
-            onClick={handleCopy}
-            aria-label={resolvedAriaLabel}
-            aria-pressed={isCopied}
-            startIcon={iconNode}
-            sx={theme => ({
-              color: iconColor(theme),
-              "&:hover": {
-                backgroundColor: alpha(theme.palette.success.main, 0.08),
-              },
-            })}
-          >
-            {labels.copyMeetingUrl}
-          </Button>
-        </span>
-      </Tooltip>
+      <>
+        <Tooltip title={tooltipText}>
+          <span aria-disabled={disabled ? true : undefined}>
+            <Button
+              size={size}
+              variant="text"
+              disabled={disabled}
+              onClick={handleCopy}
+              aria-label={effectiveAriaLabel}
+              aria-pressed={isCopied}
+              startIcon={iconNode}
+              sx={theme => ({
+                color: iconColor(theme),
+                "&:hover": {
+                  backgroundColor: alpha(theme.palette.success.main, 0.08),
+                },
+              })}
+            >
+              {labels.copyMeetingUrl}
+            </Button>
+          </span>
+        </Tooltip>
+        {liveRegion}
+      </>
     );
   }
 
   if (variant === "text") {
     return (
-      <Tooltip title={tooltipText}>
-        <Box
-          sx={theme => ({
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.5,
-            color: iconColor(theme),
-            "&:hover": disabled ? {} : { color: theme.palette.primary.main },
-          })}
-        >
-          <button
-            type="button"
-            onClick={handleCopy}
-            disabled={disabled}
-            aria-label={resolvedAriaLabel}
-            aria-pressed={isCopied}
-            style={{
+      <>
+        <Tooltip title={tooltipText}>
+          <Box
+            sx={theme => ({
               display: "inline-flex",
               alignItems: "center",
-              gap: 4,
-              background: "none",
-              border: "none",
-              cursor: disabled ? "default" : "pointer",
-              padding: 0,
-              color: "inherit",
-              font: "inherit",
-            }}
+              gap: 0.5,
+              color: iconColor(theme),
+              "&:hover": disabled ? {} : { color: theme.palette.primary.main },
+            })}
           >
-            {iconNode}
-            <Box sx={{ typography: "bodyMd" }}>{labels.copyMeetingUrl}</Box>
-          </button>
-        </Box>
-      </Tooltip>
+            <button
+              type="button"
+              onClick={handleCopy}
+              disabled={disabled}
+              aria-label={effectiveAriaLabel}
+              aria-pressed={isCopied}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                background: "none",
+                border: "none",
+                cursor: disabled ? "default" : "pointer",
+                padding: 0,
+                color: "inherit",
+                font: "inherit",
+              }}
+            >
+              {iconNode}
+              <Box sx={{ typography: "bodyMd" }}>{labels.copyMeetingUrl}</Box>
+            </button>
+          </Box>
+        </Tooltip>
+        {liveRegion}
+      </>
     );
   }
 
@@ -235,7 +260,7 @@ export function CopyMeetingUrlButton({
       size={size}
       disabled={disabled}
       onClick={handleCopy}
-      aria-label={resolvedAriaLabel}
+      aria-label={effectiveAriaLabel}
       aria-pressed={isCopied}
       sx={theme => ({
         color: iconColor(theme),
@@ -248,5 +273,10 @@ export function CopyMeetingUrlButton({
     </IconButton>
   );
 
-  return <Tooltip title={tooltipText}>{disabled ? <span>{iconButton}</span> : iconButton}</Tooltip>;
+  return (
+    <>
+      <Tooltip title={tooltipText}>{disabled ? <span aria-disabled={true}>{iconButton}</span> : iconButton}</Tooltip>
+      {liveRegion}
+    </>
+  );
 }
