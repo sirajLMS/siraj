@@ -31,14 +31,24 @@ afterEach(() => {
 });
 
 describe("isTestHelperEnabled", () => {
-  test("allows local development", () => {
-    setEnv("NODE_ENV", "development");
+  test("allows dedicated test server (TEST_SERVER=1)", () => {
+    setEnv("TEST_SERVER", "1");
     expect(isTestHelperEnabled()).toBe(true);
   });
 
-  test("allows test NODE_ENV", () => {
-    setEnv("NODE_ENV", "test");
+  test("allows CI test jobs (TEST_CI=true)", () => {
+    setEnv("TEST_CI", "true");
     expect(isTestHelperEnabled()).toBe(true);
+  });
+
+  test("blocks local development without test harness flags", () => {
+    setEnv("NODE_ENV", "development");
+    expect(isTestHelperEnabled()).toBe(false);
+  });
+
+  test("blocks test NODE_ENV without test harness flags", () => {
+    setEnv("NODE_ENV", "test");
+    expect(isTestHelperEnabled()).toBe(false);
   });
 
   test("blocks production NODE_ENV without test harness flags", () => {
@@ -46,40 +56,31 @@ describe("isTestHelperEnabled", () => {
     expect(isTestHelperEnabled()).toBe(false);
   });
 
-  test("allows production NODE_ENV on dedicated test server", () => {
+  test("allows dedicated test server with production NODE_ENV", () => {
     setEnv("NODE_ENV", "production");
     setEnv("TEST_SERVER", "1");
     expect(isTestHelperEnabled()).toBe(true);
   });
 
-  test("allows production NODE_ENV in CI test jobs", () => {
-    setEnv("NODE_ENV", "production");
-    setEnv("TEST_CI", "true");
-    expect(isTestHelperEnabled()).toBe(true);
-  });
-
   test("blocks Vercel production even when TEST_SERVER is set", () => {
-    setEnv("NODE_ENV", "production");
     setEnv("TEST_SERVER", "1");
     setEnv("VERCEL_ENV", "production");
     expect(isTestHelperEnabled()).toBe(false);
   });
 
   test("blocks Vercel production even when TEST_CI is set", () => {
-    setEnv("NODE_ENV", "development");
     setEnv("TEST_CI", "true");
     setEnv("VERCEL_ENV", "production");
     expect(isTestHelperEnabled()).toBe(false);
   });
 
   test("blocks Vercel production with no test flags", () => {
-    setEnv("NODE_ENV", "production");
     setEnv("VERCEL_ENV", "production");
     expect(isTestHelperEnabled()).toBe(false);
   });
 
-  test("blocks Vercel preview deployments running production NODE_ENV", () => {
-    setEnv("NODE_ENV", "production");
+  test("blocks Vercel preview deployments even when TEST_SERVER is set", () => {
+    setEnv("TEST_SERVER", "1");
     setEnv("VERCEL_ENV", "preview");
     expect(isTestHelperEnabled()).toBe(false);
   });
