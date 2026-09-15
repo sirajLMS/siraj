@@ -3,9 +3,9 @@
 import ErrorOutlinedIcon from "@mui/icons-material/ErrorOutlined";
 import { Box, TextField, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { deleteExpenseMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
-import { CarryoverConfirmScaffold } from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverConfirmScaffold";
 import {
   type ExpenseConfirmRow,
   isExpenseDeleteViaUnpayError,
@@ -80,10 +80,11 @@ export function DeleteExpenseDialog({ open, row, onClose, onDone }: Readonly<Del
         );
 
   return (
-    <CarryoverConfirmScaffold
+    <BaseDeleteDialog
       open={open}
-      busy={action.busy}
+      isLoading={action.busy}
       title={labels.modal.delete.title}
+      body=""
       cancelLabel={labels.modal.delete.cancel}
       confirmLabel={labels.modal.delete.confirm}
       closeAriaLabel={commonLabels.ariaClose}
@@ -121,6 +122,6 @@ export function DeleteExpenseDialog({ open, row, onClose, onDone }: Readonly<Del
           slotProps={{ htmlInput: { maxLength: DELETE_REASON_MAX_LENGTH } }}
         />
       </Box>
-    </CarryoverConfirmScaffold>
+    </BaseDeleteDialog>
   );
 }

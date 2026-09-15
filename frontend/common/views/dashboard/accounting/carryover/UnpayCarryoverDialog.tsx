@@ -2,19 +2,21 @@
 
 import { Stack, TextField } from "@mui/material";
 import { useCallback, useState } from "react";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { unpayCarryoverBalanceMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
   formatAccountingDate,
   formatAccountingMoney,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import {
-  type CarryoverConfirmDetail,
-  CarryoverConfirmDetails,
   type CarryoverConfirmRow,
-  CarryoverConfirmScaffold,
-} from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverConfirmScaffold";
-import { useCarryoverConfirmAction } from "@/frontend/common/views/dashboard/accounting/carryover/useCarryoverConfirmAction";
+  useCarryoverConfirmAction,
+} from "@/frontend/common/views/dashboard/accounting/carryover/useCarryoverConfirmAction";
 import { CARRYOVER_NOTE_MAX_LENGTH } from "@/frontend/common/views/dashboard/accounting/carryover/useCarryoverFormViewModel";
+import {
+  type ConfirmSummaryDetail,
+  ConfirmSummaryDetails,
+} from "@/frontend/common/views/dashboard/accounting/components/ConfirmSummaryDetails";
 import { useAppTranslation } from "@/shared/locale/client";
 import { useAppLocale } from "@/shared/locale/localeContext";
 import { DashboardAccountingCarryover, Translation } from "@/shared/locale/namespaces";
@@ -62,7 +64,7 @@ export function UnpayCarryoverDialog({ open, row, onClose, onDone }: Readonly<Un
     onDone,
   });
 
-  const details: CarryoverConfirmDetail[] = [
+  const details: ConfirmSummaryDetail[] = [
     { label: labels.column.teacher, value: row?.teacherName ?? "—" },
     {
       label: labels.column.payable,
@@ -80,9 +82,9 @@ export function UnpayCarryoverDialog({ open, row, onClose, onDone }: Readonly<Un
   }
 
   return (
-    <CarryoverConfirmScaffold
+    <BaseDeleteDialog
       open={open}
-      busy={action.busy}
+      isLoading={action.busy}
       title={labels.modal.unpay.title}
       body={labels.modal.unpay.warning}
       cancelLabel={labels.modal.unpay.cancel}
@@ -91,7 +93,7 @@ export function UnpayCarryoverDialog({ open, row, onClose, onDone }: Readonly<Un
       onConfirm={action.confirm}
     >
       <Stack sx={{ gap: 2 }}>
-        <CarryoverConfirmDetails details={details} />
+        <ConfirmSummaryDetails details={details} />
         <TextField
           value={note}
           onChange={event => setNote(event.target.value)}
@@ -104,6 +106,6 @@ export function UnpayCarryoverDialog({ open, row, onClose, onDone }: Readonly<Un
           slotProps={{ htmlInput: { maxLength: CARRYOVER_NOTE_MAX_LENGTH } }}
         />
       </Stack>
-    </CarryoverConfirmScaffold>
+    </BaseDeleteDialog>
   );
 }

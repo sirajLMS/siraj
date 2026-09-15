@@ -4,14 +4,14 @@ import { useApolloClient, useMutation } from "@apollo/client/react";
 import { Box } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { bulkDeleteExpensesMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import {
-  type CarryoverConfirmDetail,
-  CarryoverConfirmDetails,
-  CarryoverConfirmScaffold,
-} from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverConfirmScaffold";
+  type ConfirmSummaryDetail,
+  ConfirmSummaryDetails,
+} from "@/frontend/common/views/dashboard/accounting/components/ConfirmSummaryDetails";
 import type { ExpenseConfirmRow } from "@/frontend/common/views/dashboard/accounting/expenses/useExpenseConfirmAction";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingExpenses, Translation } from "@/shared/locale/namespaces";
@@ -29,7 +29,7 @@ export interface BulkDeleteExpensesDialogProps {
 }
 
 /** Restates each targeted expense as a title + amount line in the confirm summary. */
-function buildBulkDeleteDetails(rows: readonly ExpenseConfirmRow[]): CarryoverConfirmDetail[] {
+function buildBulkDeleteDetails(rows: readonly ExpenseConfirmRow[]): ConfirmSummaryDetail[] {
   return rows.map(row => ({
     label: row.title ?? "—",
     value: `${formatAccountingMoney(row.expenseValue)} ${row.expenseCurrency ?? ""}`.trim(),
@@ -80,10 +80,11 @@ export function BulkDeleteExpensesDialog({ open, rows, onClose, onDone }: Readon
   }, [ids, runMutation, client, notifications, labels, commonLabels, onDone, onClose]);
 
   return (
-    <CarryoverConfirmScaffold
+    <BaseDeleteDialog
       open={open}
-      busy={loading}
+      isLoading={loading}
       title={labels.modal.bulkDelete.title(ids.length)}
+      body=""
       cancelLabel={labels.modal.bulkDelete.cancel}
       confirmLabel={labels.modal.bulkDelete.confirm}
       closeAriaLabel={commonLabels.ariaClose}
@@ -91,8 +92,8 @@ export function BulkDeleteExpensesDialog({ open, rows, onClose, onDone }: Readon
       onConfirm={confirm}
     >
       <Box sx={{ pt: 1 }}>
-        <CarryoverConfirmDetails details={details} />
+        <ConfirmSummaryDetails details={details} />
       </Box>
-    </CarryoverConfirmScaffold>
+    </BaseDeleteDialog>
   );
 }

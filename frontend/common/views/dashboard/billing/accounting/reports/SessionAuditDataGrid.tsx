@@ -7,6 +7,7 @@ import type { GridCellParams, GridColDef, GridSortModel, MuiEvent } from "@mui/x
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { formatDateTime, parseDateInput } from "@/frontend/common/components/intl/dateFormat";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { usePageLocalRowSelection } from "@/frontend/common/components/ui/dataGrid/usePageLocalRowSelection";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
@@ -17,7 +18,6 @@ import {
   SessionAuditReportSortField,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
 import { CarryoverBulkCreateDialog } from "@/frontend/common/views/dashboard/billing/accounting/reports/CarryoverBulkCreateDialog";
 import {
   formatDurationMinutes,
@@ -337,7 +337,7 @@ interface CalculationStatusCellProps {
 }
 
 /**
- * Plan-3 payroll status cell: grey dash while uncalculated, the status chip
+ * Payroll status cell: grey dash while uncalculated, the status badge
  * otherwise, and for paid rows a success marker whose tooltip reveals when the
  * payment was made.
  */
@@ -355,7 +355,7 @@ function CalculationStatusCell({
       </Box>
     );
   }
-  const chip = <CalculationStatusChip status={status} labels={statusLabels} />;
+  const chip = <StatusBadge category="payrollCalculation" status={status} label={statusLabels[status]} />;
   if (status === CalculationStatus.Paid && paymentDateIso !== null) {
     return (
       <Stack direction="row" sx={{ alignItems: "center", gap: 0.5 }}>

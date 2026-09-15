@@ -3,15 +3,15 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { bulkDeleteCarryoverBalancesMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import type { CarryoverConfirmRow } from "@/frontend/common/views/dashboard/accounting/carryover/useCarryoverConfirmAction";
 import {
-  type CarryoverConfirmDetail,
-  CarryoverConfirmDetails,
-  type CarryoverConfirmRow,
-  CarryoverConfirmScaffold,
-} from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverConfirmScaffold";
+  type ConfirmSummaryDetail,
+  ConfirmSummaryDetails,
+} from "@/frontend/common/views/dashboard/accounting/components/ConfirmSummaryDetails";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingCarryover, Translation } from "@/shared/locale/namespaces";
 
@@ -28,7 +28,7 @@ export interface BulkDeleteCarryoverDialogProps {
 }
 
 /** Restates each targeted carryover as a teacher + payable line in the confirm summary. */
-function buildBulkDeleteDetails(rows: readonly CarryoverConfirmRow[]): CarryoverConfirmDetail[] {
+function buildBulkDeleteDetails(rows: readonly CarryoverConfirmRow[]): ConfirmSummaryDetail[] {
   return rows.map(row => ({
     label: row.teacherName ?? "—",
     value: `${formatAccountingMoney(row.payable)} ${row.teacherCurrency ?? ""}`.trim(),
@@ -77,9 +77,9 @@ export function BulkDeleteCarryoverDialog({ open, rows, onClose, onDone }: Reado
   }, [ids, runMutation, client, notifications, labels, commonLabels, onDone, onClose]);
 
   return (
-    <CarryoverConfirmScaffold
+    <BaseDeleteDialog
       open={open}
-      busy={loading}
+      isLoading={loading}
       title={labels.action.bulkDelete}
       body=""
       cancelLabel={labels.modal.delete.cancel}
@@ -87,7 +87,7 @@ export function BulkDeleteCarryoverDialog({ open, rows, onClose, onDone }: Reado
       onClose={onClose}
       onConfirm={confirm}
     >
-      <CarryoverConfirmDetails details={details} />
-    </CarryoverConfirmScaffold>
+      <ConfirmSummaryDetails details={details} />
+    </BaseDeleteDialog>
   );
 }

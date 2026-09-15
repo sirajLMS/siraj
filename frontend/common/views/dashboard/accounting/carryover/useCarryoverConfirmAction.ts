@@ -4,11 +4,24 @@ import type { TypedDocumentNode } from "@apollo/client";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useRef } from "react";
+import type { CarryoverBalanceQuery_carryoverBalance } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getGraphQLErrorMessage } from "@/frontend/common/utils/errorUtils";
-import type { CarryoverConfirmRow } from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverConfirmScaffold";
 
 /** Root field holding the carryover list page; dropped after writes because aggregates depend on every row. */
 const CARRYOVER_LIST_FIELD = "carryoverBalances";
+
+/**
+ * Row snapshot the carryover confirm dialogs operate on. Grid rows satisfy
+ * this shape directly; `linkedSessionCount` stays optional because the list
+ * selection does not expose it yet, so hosts pass it only when it is known
+ * ahead of time.
+ */
+export type CarryoverConfirmRow = Pick<
+  CarryoverBalanceQuery_carryoverBalance,
+  "id" | "teacherName" | "payable" | "teacherCurrency" | "paymentDate" | "expenseId"
+> & {
+  readonly linkedSessionCount?: number | null;
+};
 
 export interface UseCarryoverConfirmActionOptions<TData, TVariables extends Record<string, unknown>> {
   readonly open: boolean;

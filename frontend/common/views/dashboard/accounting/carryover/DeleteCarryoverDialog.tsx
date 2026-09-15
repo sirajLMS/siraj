@@ -3,14 +3,14 @@
 import WarningAmberOutlined from "@mui/icons-material/WarningAmberOutlined";
 import { Box, Stack, Typography } from "@mui/material";
 import { useCallback } from "react";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { deleteCarryoverBalanceMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import {
-  CarryoverConfirmDetails,
   type CarryoverConfirmRow,
-  CarryoverConfirmScaffold,
-} from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverConfirmScaffold";
-import { useCarryoverConfirmAction } from "@/frontend/common/views/dashboard/accounting/carryover/useCarryoverConfirmAction";
+  useCarryoverConfirmAction,
+} from "@/frontend/common/views/dashboard/accounting/carryover/useCarryoverConfirmAction";
+import { ConfirmSummaryDetails } from "@/frontend/common/views/dashboard/accounting/components/ConfirmSummaryDetails";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingCarryover, Translation } from "@/shared/locale/namespaces";
 
@@ -55,9 +55,9 @@ export function DeleteCarryoverDialog({ open, row, onClose, onDone }: Readonly<D
   const linkedSessionCount = row?.linkedSessionCount ?? 0;
 
   return (
-    <CarryoverConfirmScaffold
+    <BaseDeleteDialog
       open={open}
-      busy={action.busy}
+      isLoading={action.busy}
       title={labels.modal.delete.title}
       body=""
       cancelLabel={labels.modal.delete.cancel}
@@ -66,7 +66,7 @@ export function DeleteCarryoverDialog({ open, row, onClose, onDone }: Readonly<D
       onConfirm={action.confirm}
     >
       <Stack sx={{ gap: 2 }}>
-        <CarryoverConfirmDetails details={details} />
+        <ConfirmSummaryDetails details={details} />
         {linkedSessionCount > 0 && (
           <Box
             sx={theme => ({
@@ -83,6 +83,6 @@ export function DeleteCarryoverDialog({ open, row, onClose, onDone }: Readonly<D
           </Box>
         )}
       </Stack>
-    </CarryoverConfirmScaffold>
+    </BaseDeleteDialog>
   );
 }

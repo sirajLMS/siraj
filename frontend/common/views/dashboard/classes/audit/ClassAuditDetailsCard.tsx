@@ -19,7 +19,6 @@ import {
   type GroupClassAuditQuery_groupClassAudit as GroupClassAudit,
 } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
-import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
 import { formatAuditTimestamp } from "@/frontend/common/views/dashboard/classes/audit/utils";
 import { useAppTranslation } from "@/shared/locale/client";
 import { useAppLocale } from "@/shared/locale/localeContext";
@@ -328,7 +327,7 @@ function ClassAuditTrail({ audit, labels }: ClassAuditDetailsCardProps) {
   );
 }
 
-/** Bridges the locale status labels (literal keys) onto the generated enum keys the status chip consumes. */
+/** Bridges the locale status labels (literal keys) onto the generated enum keys the status badge consumes. */
 function buildStatusLabels(status: PayrollLabels["status"]): Record<CalculationStatus, string> {
   return {
     [CalculationStatus.NotCalculated]: status.NOT_CALCULATED,
@@ -395,7 +394,11 @@ function ClassAuditPayrollCard({ payroll, statusEvents, onOverride }: Readonly<C
             {payroll.calculationStatus === null ? (
               <StyledFieldValueText variant="bodyLg">—</StyledFieldValueText>
             ) : (
-              <CalculationStatusChip status={payroll.calculationStatus} labels={statusLabels} />
+              <StatusBadge
+                category="payrollCalculation"
+                status={payroll.calculationStatus}
+                label={statusLabels[payroll.calculationStatus]}
+              />
             )}
           </DetailField>
           <DetailField label={payrollLabels.column.calculatedDuration}>

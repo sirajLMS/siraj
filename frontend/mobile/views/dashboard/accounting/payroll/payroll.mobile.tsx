@@ -21,6 +21,7 @@ import {
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import { PayrollExportCsvButton } from "@/frontend/mobile/views/dashboard/accounting/payroll/components/payrollExportCsvButton.mobile";
 import type { PayrollLabels } from "@/shared/locale/types/dashboard/billing/payroll";
 
 /** Height of each placeholder card while the first page loads. */
@@ -80,14 +81,17 @@ function PayrollReportCard({ row, labels, statusLabels, locale }: Readonly<Payro
  * the report rows as cards with server pagination.
  */
 export function PayrollReportsMobileView(props: Readonly<PayrollReportsViewProps>) {
-  const { labels, statusLabels, rows, loading, error } = props;
+  const { labels, statusLabels, rows, loading, error, onExportCsv } = props;
   const { page, pageSize, totalCount, onPageChange, onPageSizeChange } = props;
   const locale = useAppLocale();
   const reportFailed = error && rows.length === 0;
 
   return (
     <MobilePageContainer>
-      <MobilePageHeader title={labels.title} />
+      <MobilePageHeader
+        title={labels.title}
+        actions={<PayrollExportCsvButton labels={labels} onExportCsv={onExportCsv} />}
+      />
       <Stack sx={{ gap: 2, pb: 4 }}>
         <MobileContentInset>
           <PayrollReportsFilterBar {...props} />
