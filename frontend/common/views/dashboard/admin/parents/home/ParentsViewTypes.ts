@@ -64,14 +64,13 @@ export interface ParentsDataGridLabels {
 }
 
 export interface ParentsViewModel extends BaseParentsViewProps {
-  // NEW FOR PLAN v5: desktop variant adds `loading?` — mobile omits (uses sentinel rows / skeleton-in-list).
-  // BaseParentsViewProps already carries metrics, rows, labelsBySection, pagination, handlers, and permission booleans.
+  // VARIANT JUSTIFICATION: extra field loading — desktop tier renders a grid-level loading overlay
+  // via DesktopAppDataGrid's `loading` prop; the mobile twin has no equivalent overlay (sentinel rows).
   readonly loading?: boolean;
 }
 
-// NEW FOR PLAN v5: BaseParentsViewProps lifted per specs.md §4.1 Class C — desktop variant adds `loading?: boolean`
-// that the mobile variant omits (mobile uses sentinel rows / skeleton-in-list). Each tier interface extends this base
-// and tags itself with `// VARIANT JUSTIFICATION: extra field <name>` per §3 allowance table.
+// Shared props for the parents directory tier views. Each tier interface extends this base and
+// tags itself with `// VARIANT JUSTIFICATION: extra field <name>` when it adds a tier-only field.
 export interface BaseParentsViewProps {
   readonly metrics: readonly MetricItem[];
   readonly rows: readonly ParentDirectoryRow[];
@@ -79,6 +78,7 @@ export interface BaseParentsViewProps {
   readonly page?: number;
   readonly pageSize?: number;
   readonly totalCount?: number;
+  readonly searchQuery: string;
   readonly lifecycleStatusFilter: ParentStatus | null;
   readonly filterPanelOpen: boolean;
   readonly onAddParent: () => void;
@@ -89,8 +89,7 @@ export interface BaseParentsViewProps {
   readonly onExport: () => void;
   readonly onLifecycleStatusFilterChange: (status: ParentStatus | null) => void;
   readonly onResetFilters: () => void;
-  // NEW FOR PLAN v5: lifted permission booleans consumed by the tier views
-  // instead of `RequirePermission` wrappers (specs.md §3 N3).
+  // Permission gates lifted into the ViewModel so tier views render without `RequirePermission`.
   readonly canParentsCreate: boolean;
   readonly canParentManageStatus: boolean;
 }

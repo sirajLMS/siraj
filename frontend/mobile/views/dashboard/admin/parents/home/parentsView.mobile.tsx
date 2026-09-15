@@ -1,7 +1,6 @@
 "use client";
 
 import { Stack } from "@mui/material";
-import { useState } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { BaseParentsViewProps } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
@@ -21,28 +20,6 @@ import { ParentCardListMobile } from "@/frontend/mobile/views/dashboard/admin/pa
 
 export type ParentsViewMobileProps = BaseParentsViewProps;
 
-function ParentMobileSearchField({
-  placeholder,
-  onSearch,
-}: {
-  readonly placeholder: string;
-  readonly onSearch: (query: string) => void;
-}) {
-  // Local input state keeps the shared search field controlled; the canonical
-  // query lives in the parents store via `onSearch`.
-  const [query, setQuery] = useState("");
-  return (
-    <SearchBarField
-      value={query}
-      placeholder={placeholder}
-      onChange={value => {
-        setQuery(value);
-        onSearch(value);
-      }}
-    />
-  );
-}
-
 export function ParentsViewMobile({
   metrics,
   rows,
@@ -50,6 +27,7 @@ export function ParentsViewMobile({
   page,
   pageSize,
   totalCount,
+  searchQuery,
   lifecycleStatusFilter,
   filterPanelOpen,
   onAddParent,
@@ -79,7 +57,7 @@ export function ParentsViewMobile({
 
       <MobileContentStack gap={2} paddingBottom={4}>
         <MobileContentInset>
-          <ParentMobileSearchField placeholder={filters.searchPlaceholder} onSearch={onSearch} />
+          <SearchBarField value={searchQuery} placeholder={filters.searchPlaceholder} onChange={onSearch} />
         </MobileContentInset>
 
         <MobileMetricCardGrid metrics={metrics} />

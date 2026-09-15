@@ -9,17 +9,15 @@ import {
   type MeetingProviderFormSharedProps,
 } from "@/frontend/common/views/dashboard/admin/meeting-providers/form/__shared__/meetingProviderFormShared";
 import type { MeetingProviderFormViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/form/types";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
+import { DesktopPageContainer, DesktopPageHeader, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 
 const desktopSlots: MeetingProviderFormSharedProps["slots"] = {
   PageContainer: DesktopPageContainer,
   PageHeader: DesktopPageHeader,
+  SectionPanel: DesktopSectionPanel,
 };
 
 const desktopStyles: MeetingProviderFormSharedProps["styles"] = {
-  sectionPaperPadding: 3,
-  sectionTitleVariant: "h6",
-  sectionTitleMb: 2,
   sectionStackSpacing: 3,
   capabilitiesStackSpacing: 1.5,
   fieldsStackSpacing: 2,

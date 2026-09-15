@@ -10,7 +10,6 @@ import {
   FormControlLabel,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   Skeleton,
   Stack,
@@ -37,15 +36,11 @@ interface MeetingProviderFormSharedSlots {
     readonly subtitle: string;
     readonly actions?: ReactNode;
   }>;
+  /** Bordered section shell with title bar (DesktopSectionPanel or MobileSectionPanel). */
+  readonly SectionPanel: React.ComponentType<{ readonly title: string; readonly children: ReactNode }>;
 }
 
 interface MeetingProviderFormSharedStyleProps {
-  /** Section paper padding (3 desktop / 2 mobile). */
-  readonly sectionPaperPadding: number;
-  /** Typography variant for section titles (h6 desktop / subtitle1 mobile). */
-  readonly sectionTitleVariant: "h6" | "subtitle1";
-  /** Section title bottom margin (2 desktop / 1.5 mobile). */
-  readonly sectionTitleMb: number;
   /** Stack spacing between form sections (3 desktop / 2.5 mobile). */
   readonly sectionStackSpacing: number;
   /** Stack spacing inside capabilities section (1.5 desktop / 1 mobile). */
@@ -88,19 +83,22 @@ export interface MeetingProviderFormSharedProps {
 
 /* ────────────────────────── Shared section types ────────────────────────── */
 
-type SectionFormProps = Pick<MeetingProviderFormSharedProps, "t" | "control" | "errors" | "isSaving" | "styles">;
+type SectionFormProps = Pick<
+  MeetingProviderFormSharedProps,
+  "t" | "control" | "errors" | "isSaving" | "slots" | "styles"
+>;
 
-type LogoSectionProps = Pick<SectionFormProps, "t" | "control" | "isSaving" | "styles">;
+type LogoSectionProps = Pick<SectionFormProps, "t" | "control" | "isSaving" | "slots" | "styles">;
 
-type IdentitySectionProps = Pick<SectionFormProps, "t" | "control" | "errors" | "isSaving" | "styles"> & {
+type IdentitySectionProps = Pick<SectionFormProps, "t" | "control" | "errors" | "isSaving" | "slots" | "styles"> & {
   readonly isEdit: boolean;
 };
 
-type UrlAllowlistSectionProps = Pick<SectionFormProps, "t" | "control" | "errors" | "isSaving" | "styles"> & {
+type UrlAllowlistSectionProps = Pick<SectionFormProps, "t" | "control" | "errors" | "isSaving" | "slots" | "styles"> & {
   readonly isUrlExampleValid: boolean;
 };
 
-type CapabilitiesSectionProps = Pick<SectionFormProps, "t" | "control" | "isSaving" | "styles"> & {
+type CapabilitiesSectionProps = Pick<SectionFormProps, "t" | "control" | "isSaving" | "slots" | "styles"> & {
   readonly isActiveValue: boolean;
 };
 
@@ -112,36 +110,11 @@ type ActionsBarProps = Pick<SectionFormProps, "t" | "isSaving" | "styles"> & {
 
 /* ────────────────────────── Shared components ────────────────────────── */
 
-function FormSectionPaper({
-  title,
-  children,
-  styles,
-}: Readonly<{
-  title: string;
-  children: ReactNode;
-  styles: MeetingProviderFormSharedStyleProps;
-}>) {
-  return (
-    <Paper
-      elevation={0}
-      sx={theme => ({
-        p: styles.sectionPaperPadding,
-        borderRadius: theme.layout.radius.card,
-        border: `1px solid ${theme.palette.outlineVariant}`,
-        backgroundColor: theme.palette.surfaceContainerLow,
-      })}
-    >
-      <Typography variant={styles.sectionTitleVariant} sx={{ mb: styles.sectionTitleMb, fontWeight: 600 }}>
-        {title}
-      </Typography>
-      {children}
-    </Paper>
-  );
-}
+function LogoSection({ t, control, isSaving, slots }: Readonly<LogoSectionProps>) {
+  const { SectionPanel } = slots;
 
-function LogoSection({ t, control, isSaving, styles }: Readonly<LogoSectionProps>) {
   return (
-    <FormSectionPaper title={t.fields.logoUrl} styles={styles}>
+    <SectionPanel title={t.fields.logoUrl}>
       <Controller<MeetingProviderFormData, "logoUrl">
         name="logoUrl"
         control={control}
@@ -154,13 +127,15 @@ function LogoSection({ t, control, isSaving, styles }: Readonly<LogoSectionProps
           />
         )}
       />
-    </FormSectionPaper>
+    </SectionPanel>
   );
 }
 
-function IdentitySection({ t, control, errors, isSaving, isEdit, styles }: Readonly<IdentitySectionProps>) {
+function IdentitySection({ t, control, errors, isSaving, isEdit, slots, styles }: Readonly<IdentitySectionProps>) {
+  const { SectionPanel } = slots;
+
   return (
-    <FormSectionPaper title={t.fields.name} styles={styles}>
+    <SectionPanel title={t.fields.name}>
       <Stack spacing={styles.fieldsStackSpacing}>
         <Controller<MeetingProviderFormData, "slug">
           name="slug"
@@ -205,7 +180,7 @@ function IdentitySection({ t, control, errors, isSaving, isEdit, styles }: Reado
           minRows={2}
         />
       </Stack>
-    </FormSectionPaper>
+    </SectionPanel>
   );
 }
 
@@ -215,10 +190,13 @@ function UrlAllowlistSection({
   errors,
   isSaving,
   isUrlExampleValid,
+  slots,
   styles,
 }: Readonly<UrlAllowlistSectionProps>) {
+  const { SectionPanel } = slots;
+
   return (
-    <FormSectionPaper title={t.fields.urlAllowlist} styles={styles}>
+    <SectionPanel title={t.fields.urlAllowlist}>
       <Stack spacing={styles.fieldsStackSpacing}>
         <Controller<MeetingProviderFormData, "urlAllowlist">
           name="urlAllowlist"
@@ -256,13 +234,22 @@ function UrlAllowlistSection({
           )}
         />
       </Stack>
-    </FormSectionPaper>
+    </SectionPanel>
   );
 }
 
-function CapabilitiesSection({ t, control, isSaving, isActiveValue, styles }: Readonly<CapabilitiesSectionProps>) {
+function CapabilitiesSection({
+  t,
+  control,
+  isSaving,
+  isActiveValue,
+  slots,
+  styles,
+}: Readonly<CapabilitiesSectionProps>) {
+  const { SectionPanel } = slots;
+
   return (
-    <FormSectionPaper title={t.fields.capabilities} styles={styles}>
+    <SectionPanel title={t.fields.capabilities}>
       <Stack spacing={styles.capabilitiesStackSpacing}>
         <Controller<MeetingProviderFormData, "providerKind">
           name="providerKind"
@@ -332,7 +319,7 @@ function CapabilitiesSection({ t, control, isSaving, isActiveValue, styles }: Re
           )}
         />
       </Stack>
-    </FormSectionPaper>
+    </SectionPanel>
   );
 }
 
@@ -371,6 +358,7 @@ type FormBodyProps = {
   readonly isUrlExampleValid: boolean;
   readonly onSubmit: () => void;
   readonly onCancel: () => void;
+  readonly slots: MeetingProviderFormSharedSlots;
   readonly styles: MeetingProviderFormSharedStyleProps;
   readonly isEdit: boolean;
   readonly slugValue: string;
@@ -387,6 +375,7 @@ function FormBody({
   isUrlExampleValid,
   onSubmit,
   onCancel,
+  slots,
   styles,
   isEdit,
   slugValue,
@@ -410,14 +399,23 @@ function FormBody({
       ) : null}
 
       <Stack spacing={styles.sectionStackSpacing}>
-        <LogoSection t={t} control={control} isSaving={isSaving} styles={styles} />
-        <IdentitySection t={t} control={control} errors={errors} isSaving={isSaving} isEdit={isEdit} styles={styles} />
+        <LogoSection t={t} control={control} isSaving={isSaving} slots={slots} styles={styles} />
+        <IdentitySection
+          t={t}
+          control={control}
+          errors={errors}
+          isSaving={isSaving}
+          isEdit={isEdit}
+          slots={slots}
+          styles={styles}
+        />
         <UrlAllowlistSection
           t={t}
           control={control}
           errors={errors}
           isSaving={isSaving}
           isUrlExampleValid={isUrlExampleValid}
+          slots={slots}
           styles={styles}
         />
         <CapabilitiesSection
@@ -425,6 +423,7 @@ function FormBody({
           control={control}
           isSaving={isSaving}
           isActiveValue={isActiveValue}
+          slots={slots}
           styles={styles}
         />
         <ActionsBar
@@ -516,6 +515,7 @@ export function MeetingProviderFormShared({
         isUrlExampleValid={isUrlExampleValid}
         onSubmit={onSubmit}
         onCancel={onCancel}
+        slots={slots}
         styles={styles}
         isEdit={isEdit}
         slugValue={slugValue}

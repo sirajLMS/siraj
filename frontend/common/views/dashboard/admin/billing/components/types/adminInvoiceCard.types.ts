@@ -1,7 +1,4 @@
-// NEW FOR PLAN v5: Unified Props for the AdminInvoiceCard pair (Class B
-// per specs.md §4.1 — the mobile/desktop interfaces were byte-identical
-// modulo the tier suffix). Both tier files now import this single type.
-
+import type { Button } from "@mui/material";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import type {
   AdminInvoiceRow,
@@ -23,8 +20,9 @@ export interface AdminInvoiceCardProps {
 
 /**
  * Slot props supplied by each tier wrapper to `AdminInvoiceCardShared`.
- * Only the tier-specific primitives (`StatusBadge`, `PersonProfileLink`) vary
- * between desktop and mobile — everything else is byte-identical scaffold.
+ * Only the tier-specific primitives (`StatusBadge`, `PersonProfileLink`,
+ * `ActionButton`) vary between desktop and mobile — everything else is
+ * identical scaffold.
  */
 export interface AdminInvoiceCardSlotProps {
   readonly StatusBadge: React.ComponentType<{
@@ -39,4 +37,5 @@ export interface AdminInvoiceCardSlotProps {
     readonly typographyVariant: "titleLg";
     readonly fontWeight: number;
   }>;
+  readonly ActionButton: React.ComponentType<React.ComponentProps<typeof Button>>;
 }

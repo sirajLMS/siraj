@@ -13,6 +13,7 @@ import type { ExchangeRatesViewModel } from "@/frontend/common/views/dashboard/a
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
 import {
   DesktopAppDataGrid,
+  DesktopFilterButton,
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
@@ -75,9 +76,9 @@ function RateTableContent({
     <>
       <Box sx={{ ...desktopSectionContentInsetSx, display: "flex", justifyContent: "flex-end", pb: 0 }}>
         {canOverride ? (
-          <Button variant="outlined" onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
+          <DesktopFilterButton onClick={onOpenManualOverride} disabled={billingActionsDisabled}>
             {manualOverrideTitle}
-          </Button>
+          </DesktopFilterButton>
         ) : null}
       </Box>
       <DesktopAppDataGrid

@@ -91,6 +91,8 @@ export function CatalogGridShared<R extends PaymentCatalogRow>({
         columns={columns}
         loading={loading}
         getRowId={row => row.id ?? ""}
+        emptyMessage={pc.notSet}
+        ariaLabel={pc.pageTitle}
         paginationOptions={{ mode: "client" }}
       />
     </Box>

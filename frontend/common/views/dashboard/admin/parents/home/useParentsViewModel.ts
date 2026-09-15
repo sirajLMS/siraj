@@ -193,9 +193,8 @@ function buildDirectoryQueryVariables(
 }
 
 function useParentPermissionGates(): Pick<ParentsViewModel, "canParentsCreate" | "canParentManageStatus"> {
-  // NEW FOR PLAN v5: read the user's permissions ONCE in the ViewModel and
-  // expose boolean gates. Tier parents views no longer import `RequirePermission`
-  // or call `useUserStore()` (specs.md §3 N3).
+  // Read the user's permissions once in the ViewModel and expose boolean gates so tier
+  // views do not import `RequirePermission` or call `useUserStore()` directly.
   const hasPermission = useUserStore(state => state.hasPermission);
   const canParentsCreate = hasPermission(AppPermission.ParentsCreate);
   const canParentManageStatus = hasPermission(AppPermission.ParentManageStatus);
@@ -272,8 +271,15 @@ export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>):
 
   const { canParentsCreate, canParentManageStatus } = useParentPermissionGates();
 
-  const { page, pageSize, lifecycleStatusFilter, filterPanelOpen, setLifecycleStatusFilter, resetFilters } =
-    useParentsStore();
+  const {
+    searchQuery,
+    page,
+    pageSize,
+    lifecycleStatusFilter,
+    filterPanelOpen,
+    setLifecycleStatusFilter,
+    resetFilters,
+  } = useParentsStore();
 
   const { data, loading } = useParentsDirectoryQuery();
   const directory = data?.parentDirectory;
@@ -291,12 +297,12 @@ export function useParentsViewModel(_props: Readonly<UseParentsViewModelProps>):
     page,
     pageSize,
     totalCount: directory ? (directory.totalCount ?? 0) : undefined,
+    searchQuery,
     lifecycleStatusFilter,
     filterPanelOpen,
     onLifecycleStatusFilterChange: setLifecycleStatusFilter,
     onResetFilters: resetFilters,
     ...handlers,
-    // NEW FOR PLAN v5: lifted permission booleans consumed by the tier views.
     canParentsCreate,
     canParentManageStatus,
   };

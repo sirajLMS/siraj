@@ -1,7 +1,6 @@
 "use client";
 
 import { AccountBalanceWalletOutlined, AddOutlined, TimelineOutlined } from "@mui/icons-material";
-import { Button } from "@mui/material";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { StudentCreditFooterShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/studentCreditFooterShared";
@@ -14,6 +13,7 @@ import {
   MobileContentStack,
   MobileEmptyState,
   MobileFab,
+  MobileFilterButton,
   MobilePageContainer,
   MobilePageHeader,
   MobileSectionPanel,
@@ -29,14 +29,14 @@ function ExchangeRatesLink({ labels }: { readonly labels: AdminBillingViewModel[
   return (
     <MobileContentInset sx={{ mb: 2, display: "flex", gap: 1.5, flexWrap: "wrap" }}>
       <Link href="/billing/exchange-rates" style={{ textDecoration: "none" }}>
-        <Button variant="outlined" size="small" startIcon={<TimelineOutlined />}>
+        <MobileFilterButton size="small" startIcon={<TimelineOutlined />}>
           {labels.exchangeRatesLink}
-        </Button>
+        </MobileFilterButton>
       </Link>
       <Link href="/quotas" style={{ textDecoration: "none" }}>
-        <Button variant="outlined" size="small" startIcon={<AccountBalanceWalletOutlined />}>
+        <MobileFilterButton size="small" startIcon={<AccountBalanceWalletOutlined />}>
           {labels.quotasLink}
-        </Button>
+        </MobileFilterButton>
       </Link>
     </MobileContentInset>
   );

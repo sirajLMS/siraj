@@ -2,11 +2,11 @@
 
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import {
-  StudentEnrollmentStatus as EnrollmentEnum,
-  type StudentDirectoryRowExtended,
-  type StudentEnrollmentStatus,
+import type {
+  StudentDirectoryRowExtended,
+  StudentEnrollmentStatus,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 
 interface StudentDirectoryCardStatsProps {
   readonly row: StudentDirectoryRowExtended;
@@ -33,17 +33,6 @@ const valueSx = (theme: Theme) => ({
   color: theme.palette.primary.main,
 });
 
-const labelBgColor = (status: StudentEnrollmentStatus, theme: Theme) => {
-  switch (status) {
-    case EnrollmentEnum.REGULAR:
-      return theme.palette.status.active;
-    case EnrollmentEnum.PROSPECT:
-      return theme.palette.status.pending;
-    default:
-      return theme.palette.status.cancelled;
-  }
-};
-
 export function StudentDirectoryCardStats({
   row,
   weeklyHoursLabel,
@@ -58,25 +47,11 @@ export function StudentDirectoryCardStats({
       </Box>
       <Box>
         <Typography sx={labelSx}>{enrollmentStatusLabel}</Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, marginInlineStart: 0 }}>
-          <Box
-            sx={theme => ({
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              backgroundColor: labelBgColor(row.enrollmentStatus, theme),
-            })}
-          />
-          <Typography
-            sx={theme => ({
-              ...theme.typography.bodyMd,
-              fontWeight: 500,
-              color: theme.palette.text.primary,
-            })}
-          >
-            {enrollmentLabels[row.enrollmentStatus]}
-          </Typography>
-        </Box>
+        <MobileStatusBadge
+          category="enrollment"
+          status={row.enrollmentStatus}
+          label={enrollmentLabels[row.enrollmentStatus]}
+        />
       </Box>
     </Box>
   );

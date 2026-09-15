@@ -2,7 +2,6 @@
 
 import { FilterListOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { useState } from "react";
 import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { BaseParentsViewProps } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { ParentFilterPanel } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterPanel";
@@ -23,29 +22,6 @@ export interface ParentsViewDesktopProps extends BaseParentsViewProps {
   readonly loading?: boolean;
 }
 
-function ParentSearchField({
-  placeholder,
-  onSearch,
-}: {
-  readonly placeholder: string;
-  readonly onSearch: (query: string) => void;
-}) {
-  // Local input state keeps the shared search field controlled; the canonical
-  // query lives in the parents store via `onSearch`.
-  const [query, setQuery] = useState("");
-  return (
-    <SearchBarField
-      value={query}
-      placeholder={placeholder}
-      onChange={value => {
-        setQuery(value);
-        onSearch(value);
-      }}
-      sx={{ width: 300 }}
-    />
-  );
-}
-
 export function ParentsViewDesktop({
   metrics,
   rows,
@@ -54,6 +30,7 @@ export function ParentsViewDesktop({
   page,
   pageSize,
   totalCount,
+  searchQuery,
   lifecycleStatusFilter,
   filterPanelOpen,
   onAddParent,
@@ -76,7 +53,12 @@ export function ParentsViewDesktop({
         subtitle={shell.pageSubtitle}
         actions={
           <>
-            <ParentSearchField placeholder={filters.searchPlaceholder} onSearch={onSearch} />
+            <SearchBarField
+              value={searchQuery}
+              placeholder={filters.searchPlaceholder}
+              onChange={onSearch}
+              sx={{ width: 300 }}
+            />
             {canParentsCreate ? (
               <DesktopPrimaryPageAction onClick={onAddParent}>{actions.addParent}</DesktopPrimaryPageAction>
             ) : null}
@@ -84,9 +66,7 @@ export function ParentsViewDesktop({
         }
       />
 
-      <Box sx={{ mb: 4 }}>
-        <DesktopMetricCardGrid metrics={metrics} />
-      </Box>
+      <DesktopMetricCardGrid metrics={metrics} />
 
       <DesktopSectionPanel
         contentPadding={false}

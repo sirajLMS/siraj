@@ -1,7 +1,7 @@
 "use client";
 
 import { VisibilityOutlined } from "@mui/icons-material";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
@@ -39,7 +39,7 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
     onViewPaymentDetails,
     onDeleteInvoice,
   } = props;
-  const { StatusBadge, PersonProfileLink } = slots;
+  const { StatusBadge, PersonProfileLink, ActionButton } = slots;
 
   const actionsEnabled = canManage && !billingActionsDisabled;
   const isPayable = actionsEnabled && isPayableUnpaidStatus(row.status);
@@ -49,7 +49,7 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
   const actionLabel = row.status === "OVERDUE" ? labels.adminTable.markAsPaid : labels.adminTable.quickPay;
   const invoiceNumber = formatInvoiceDisplayId(row.id);
 
-  const fullActionButtonSx = { mt: 1.5, textTransform: "uppercase", fontWeight: 700 } as const;
+  const fullActionButtonSx = { mt: 1.5 } as const;
 
   return (
     <Box sx={{ py: 2 }}>
@@ -75,19 +75,17 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
         </Typography>
       </Box>
       {showViewRejection ? (
-        <Button
+        <ActionButton
           fullWidth
-          variant="outlined"
           onClick={() => onViewPaymentDetails?.({ invoiceId: row.id, parentUserId: row.parentUserId })}
           sx={fullActionButtonSx}
         >
           {labels.adminTable.viewRejection}
-        </Button>
+        </ActionButton>
       ) : null}
       {isPayable ? (
-        <Button
+        <ActionButton
           fullWidth
-          variant="outlined"
           onClick={() =>
             onMarkAsPaid({
               id: row.id,
@@ -101,17 +99,16 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
           sx={fullActionButtonSx}
         >
           {actionLabel}
-        </Button>
+        </ActionButton>
       ) : null}
       {row.status === "PAYMENT_PENDING" && actionsEnabled ? (
-        <Button
+        <ActionButton
           fullWidth
-          variant="outlined"
           onClick={() => onViewPaymentDetails?.({ invoiceId: row.id, parentUserId: row.parentUserId })}
           sx={fullActionButtonSx}
         >
           {labels.adminTable.reviewSubmission}
-        </Button>
+        </ActionButton>
       ) : null}
       {row.status === "PAID" && onViewPaymentDetails ? (
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
@@ -125,15 +122,9 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
         </Box>
       ) : null}
       {showDelete ? (
-        <Button
-          fullWidth
-          variant="outlined"
-          color="error"
-          onClick={() => onDeleteInvoice?.(row.id)}
-          sx={fullActionButtonSx}
-        >
+        <ActionButton fullWidth color="error" onClick={() => onDeleteInvoice?.(row.id)} sx={fullActionButtonSx}>
           {labels.adminTable.deleteInvoice}
-        </Button>
+        </ActionButton>
       ) : null}
     </Box>
   );

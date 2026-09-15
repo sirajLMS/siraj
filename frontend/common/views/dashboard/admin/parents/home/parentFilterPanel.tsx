@@ -1,7 +1,7 @@
 "use client";
 
-import { Chip, Collapse, Stack, Typography } from "@mui/material";
-import { FilterButton } from "@/frontend/common/components/ui";
+import { Collapse, Stack, Typography } from "@mui/material";
+import { FilterButton, FilterChip } from "@/frontend/common/components/ui";
 import type { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { toParentLifecycleStatus } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import { LIFECYCLE_STATUS_FILTER_OPTIONS } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterConstants";
@@ -35,16 +35,20 @@ export function ParentFilterPanel({
         {LIFECYCLE_STATUS_FILTER_OPTIONS.map(status => {
           const displayStatus = toParentLifecycleStatus(status);
           const isActive = lifecycleStatusFilter === status;
+          if (isActive) {
+            return (
+              <FilterChip
+                key={status}
+                label={statusLabels[displayStatus]}
+                onClear={() => onLifecycleStatusFilterChange(null)}
+              />
+            );
+          }
           return (
-            <Chip
+            <FilterChip
               key={status}
               label={statusLabels[displayStatus]}
-              size="small"
-              variant={isActive ? "filled" : "outlined"}
-              color={isActive ? "primary" : "default"}
-              onClick={() => {
-                onLifecycleStatusFilterChange(lifecycleStatusFilter === status ? null : status);
-              }}
+              onClick={() => onLifecycleStatusFilterChange(status)}
             />
           );
         })}

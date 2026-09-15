@@ -1,19 +1,11 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import {
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
-  Stack,
-  TextField,
-} from "@mui/material";
+import { Checkbox, FormControl, FormControlLabel, Stack, TextField } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useEffect, useMemo } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
+import { EntityFormDialog } from "@/frontend/common/components/ui/dialog";
 import { CountryAutocomplete } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { CountryCode, type CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -22,7 +14,6 @@ import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/cu
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { logger } from "@/frontend/common/utils/logger";
 import type { SupportedCurrencyRow } from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel";
-import { EntityFormDialogActions } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types";
 
@@ -266,35 +257,33 @@ export function SupportedCurrencyActivateDialog({
   } = useActivateCurrencyDialog({ open, row, onClose, onSaved, excludedCodes });
 
   return (
-    <Dialog open={open} onClose={saving ? undefined : handleClose} fullWidth maxWidth="sm">
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <Stack
-          id={FORM_ID}
-          component="form"
-          spacing={2}
-          sx={{ pt: 1 }}
-          onSubmit={event => {
-            event.preventDefault();
-            void onSubmit();
-          }}
-        >
-          <ActivateCurrencyFormFields
-            control={control}
-            errors={errors}
-            isEdit={isEdit}
-            excludedCodes={excludedCodes}
-            t={t}
-          />
-        </Stack>
-      </DialogContent>
-      <EntityFormDialogActions
-        formId={FORM_ID}
-        cancelLabel={t.cancel}
-        saveLabel={t.save}
-        onClose={handleClose}
-        isLoading={saving}
-      />
-    </Dialog>
+    <EntityFormDialog
+      open={open}
+      onClose={handleClose}
+      title={title}
+      formId={FORM_ID}
+      cancelLabel={t.cancel}
+      saveLabel={t.save}
+      isLoading={saving}
+    >
+      <Stack
+        id={FORM_ID}
+        component="form"
+        spacing={2}
+        sx={{ pt: 1 }}
+        onSubmit={event => {
+          event.preventDefault();
+          void onSubmit();
+        }}
+      >
+        <ActivateCurrencyFormFields
+          control={control}
+          errors={errors}
+          isEdit={isEdit}
+          excludedCodes={excludedCodes}
+          t={t}
+        />
+      </Stack>
+    </EntityFormDialog>
   );
 }

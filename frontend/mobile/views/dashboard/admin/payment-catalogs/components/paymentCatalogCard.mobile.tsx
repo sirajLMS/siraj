@@ -1,7 +1,7 @@
 "use client";
 
 import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, Chip, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type {
   CatalogGridActionHandlers,
@@ -40,7 +40,9 @@ export function PaymentCatalogCardMobile({ labels, row, onEdit, onDelete }: Read
           />
         </Box>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-          <Chip size="small" label={dirLabel} />
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {dirLabel}
+          </Typography>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 0.5 }}>
           <IconButton size="small" aria-label={labels.edit} onClick={() => onEdit(row)}>

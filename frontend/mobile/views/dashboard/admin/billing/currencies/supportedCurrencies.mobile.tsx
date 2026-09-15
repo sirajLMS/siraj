@@ -16,6 +16,7 @@ import type {
 } from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel";
 import {
   MobileCardListItem,
+  MobileContentInset,
   MobileCountryDisplay,
   MobileCurrencyDisplay,
   MobilePrimaryPageAction,
@@ -150,9 +151,11 @@ export function SupportedCurrenciesMobileView({
           />
         )}
         footer={
-          <Alert severity="info" sx={{ mt: 2 }}>
-            {shell.footerNote}
-          </Alert>
+          <MobileContentInset>
+            <Alert severity="info" sx={{ mt: 2 }}>
+              {shell.footerNote}
+            </Alert>
+          </MobileContentInset>
         }
       />
       {canManage ? (

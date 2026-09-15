@@ -7,17 +7,15 @@ import {
   type MeetingProviderFormSharedProps,
 } from "@/frontend/common/views/dashboard/admin/meeting-providers/form/__shared__/meetingProviderFormShared";
 import type { MeetingProviderFormViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/form/types";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader, MobileSectionPanel } from "@/frontend/mobile/components/ui";
 
 const mobileSlots: MeetingProviderFormSharedProps["slots"] = {
   PageContainer: MobilePageContainer,
   PageHeader: MobilePageHeader,
+  SectionPanel: MobileSectionPanel,
 };
 
 const mobileStyles: MeetingProviderFormSharedProps["styles"] = {
-  sectionPaperPadding: 2,
-  sectionTitleVariant: "subtitle1",
-  sectionTitleMb: 1.5,
   sectionStackSpacing: 2.5,
   capabilitiesStackSpacing: 1,
   fieldsStackSpacing: 2,
