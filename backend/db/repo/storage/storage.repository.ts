@@ -377,6 +377,29 @@ export namespace StorageDbRepository {
     }
   };
 
+  function isPublicStoragePath(path: string): boolean {
+    return path === "public" || path.startsWith("public/");
+  }
+
+  /**
+   * Domain junction writers (invoice files, complaint attachments) must never
+   * reference a file stored under the anonymous public namespace. Resolves the
+   * stored path from the junction insert's fileId and rejects public paths.
+   */
+  async function assertFilePathNotPublic(fileId: string, tx?: DBTransaction, locale?: string): Promise<void> {
+    const q = queryDb(tx);
+    const [row] = await q
+      .select({ path: storageFiles.path })
+      .from(storageFiles)
+      .where(eq(storageFiles.id, fileId))
+      .limit(1);
+    if (row && isPublicStoragePath(row.path)) {
+      logger.warn("Blocked domain file link into public namespace", { fileId, path: row.path });
+      const { file } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(file.forbidden);
+    }
+  }
+
   interface JunctionInsertParams {
     table: string;
     fileId: string;
@@ -389,42 +412,51 @@ export namespace StorageDbRepository {
    * Helper to perform the actual junction table insertion in a type-safe way.
    * Exported so StorageService can call it from the service layer.
    */
-  export async function performJunctionInsert(params: JunctionInsertParams, locale?: string): Promise<void> {
+  export async function performJunctionInsert(
+    params: JunctionInsertParams,
+    locale?: string,
+    tx?: DBTransaction
+  ): Promise<void> {
     const { table, fileId, refId, type, createdAt } = params;
+    const dbToQuery = tx ?? db;
     switch (table) {
       case "users":
-        await db.insert(userFiles).values({ fileId, userId: refId, usageType: type, createdAt });
+        await dbToQuery.insert(userFiles).values({ fileId, userId: refId, usageType: type, createdAt });
         break;
       case "teachers":
-        await db.insert(teacherFiles).values({ fileId, teacherId: refId, usageType: type, createdAt });
+        await dbToQuery.insert(teacherFiles).values({ fileId, teacherId: refId, usageType: type, createdAt });
         break;
       case "students":
-        await db.insert(studentFiles).values({ fileId, studentId: refId, usageType: type, createdAt });
+        await dbToQuery.insert(studentFiles).values({ fileId, studentId: refId, usageType: type, createdAt });
         break;
       case "parents":
-        await db.insert(parentFiles).values({ fileId, parentId: refId, usageType: type, createdAt });
+        await dbToQuery.insert(parentFiles).values({ fileId, parentId: refId, usageType: type, createdAt });
         break;
       case "invoices":
-        await db.insert(invoiceFiles).values({ fileId, invoiceId: refId, usageType: type, createdAt });
+        await assertFilePathNotPublic(fileId, tx, locale);
+        await dbToQuery.insert(invoiceFiles).values({ fileId, invoiceId: refId, usageType: type, createdAt });
         break;
       case "complaints":
-        await db.insert(complaintFiles).values({ fileId, complaintId: refId, usageType: type, createdAt });
+        await assertFilePathNotPublic(fileId, tx, locale);
+        await dbToQuery.insert(complaintFiles).values({ fileId, complaintId: refId, usageType: type, createdAt });
         break;
       case "learning_resources":
-        await db
+        await dbToQuery
           .insert(learningResourceFiles)
           .values({ fileId, learningResourceId: refId, usageType: type, createdAt });
         break;
       case "staff_profiles":
-        await db.insert(staffProfileFiles).values({ fileId, staffProfileId: refId, usageType: type, createdAt });
+        await dbToQuery.insert(staffProfileFiles).values({ fileId, staffProfileId: refId, usageType: type, createdAt });
         break;
       case "recurring_schedules":
-        await db
+        await dbToQuery
           .insert(recurringScheduleFiles)
           .values({ fileId, recurringScheduleId: refId, usageType: type, createdAt });
         break;
       case "class_instances":
-        await db.insert(classInstanceFiles).values({ fileId, classInstanceId: refId, usageType: type, createdAt });
+        await dbToQuery
+          .insert(classInstanceFiles)
+          .values({ fileId, classInstanceId: refId, usageType: type, createdAt });
         break;
       default: {
         const { invalidInput } = getServerTranslations(locale ?? "en").errorsTranslations;
@@ -675,6 +707,7 @@ export namespace StorageDbRepository {
     createdAt: Date = new Date()
   ): Promise<{ id: string; fileId: string; invoiceId: string; usageType: string; createdAt: Date }> => {
     const dbToQuery = tx ?? db;
+    await assertFilePathNotPublic(fileId, tx);
 
     const [result] = await dbToQuery
       .insert(invoiceFiles)

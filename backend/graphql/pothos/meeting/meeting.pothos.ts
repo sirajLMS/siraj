@@ -169,7 +169,7 @@ export function meetingConfigDetailsInputCommonFields<Req extends boolean>(t: Po
 
 export function meetingConfigLabelInputCommonFields<Req extends boolean>(t: PothosInputFieldBuilder, required: Req) {
   return {
-    providerId: t.string({ required }),
+    providerId: t.string({ required, directives: { constraint: { maxLength: 100 } } }),
     label: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     isDefault: t.boolean({ required }),
     ...meetingConfigDetailsInputCommonFields(t, required),

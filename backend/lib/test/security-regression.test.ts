@@ -82,10 +82,9 @@ describe("H2 — no module-level authorization caches", () => {
   test("permission-utils.ts does not declare a module-level authz Map", async () => {
     const src = await readSrc("backend/services/billing/permission-utils.ts");
     // The H2 fix removed the module-level viewerCache/studentIdsCache Maps and
-    // moved to cachedRead + tag-based invalidation. Guard against regression.
+    // moved to tag-indexed cachedRead. Guard against regression.
     expect(src).not.toMatch(/const\s+\w*[Cc]ache\s*=\s*new\s+Map/);
-    // Tag-based invalidation must be present.
-    expect(src).toContain("invalidateTags");
+    // Caching must go through the shared tag-indexed cache service.
     expect(src).toContain("cachedRead");
   });
 });
@@ -100,10 +99,14 @@ describe("H4 — trusted-proxy client identification", () => {
 });
 
 describe("H3 — GraphQL batched-request amplification", () => {
-  test("graphql route disables allowBatchedHttpRequests in production", async () => {
+  test("graphql route keeps batching enabled with hard compensating controls", async () => {
     const src = await readSrc("app/api/graphql/route.ts");
-    // The flag must be gated on isProduction, not hard-coded true.
-    expect(src).toContain("allowBatchedHttpRequests: !isProduction");
+    // Batching stays enabled in all environments (a prior outage forced the
+    // revert); the amplification risk is bounded by compensating controls.
+    expect(src).toContain("allowBatchedHttpRequests: true");
+    // Hard cap: batches above MAX_BATCHED_OPERATIONS are rejected (400).
+    expect(src).toMatch(/MAX_BATCHED_OPERATIONS\s*=\s*10/);
+    expect(src).toMatch(/operationCount\s*>\s*MAX_BATCHED_OPERATIONS/);
     // Operation-aware body guard must be present in withRateLimit.
     expect(src).toMatch(/Array\.isArray\(body\)/);
   });

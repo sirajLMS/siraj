@@ -94,7 +94,7 @@ export const PayrollOverrideInputPothos = gqlSchemaBuilder.inputType("PayrollOve
     partialPercentage: t.int({ required: false, directives: { constraint: { min: 0, max: 100 } } }),
     note: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
     force: t.boolean({ required: false }),
-    clientRequestId: t.string({ required: false }),
+    clientRequestId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
   }),
 });
 

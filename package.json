@@ -21,7 +21,7 @@
     "biome:lint": "bunx @biomejs/biome lint --write .",
     "biome:imports": "bunx @biomejs/biome check --write --formatter-enabled=false --linter-enabled=false .",
     "tsgo": "bun run scripts/restore-next-env-dts.ts && bun run scripts/lib/run-locked-cmd.ts tsgo tsgo -b --noEmit",
-    "generate:gqlSchema": "bun run backend/graphql/generateGqlSchema.ts",
+    "generate:gqlSchema": "TEST_SERVER=1 bun run backend/graphql/generateGqlSchema.ts",
     "generate:iana-timezones": "bun run scripts/generate-iana-timezone-enum.ts",
     "generate:jwt-secrets": "bun run scripts/generate-jwt-secrets.ts",
     "codegen": "graphql-codegen",

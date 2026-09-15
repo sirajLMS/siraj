@@ -1,5 +1,5 @@
 {
-  "manifestHash": "653b0fb0ace904a3d2bb47e24a1210a6d6b7441d7e40c13153d4ae4cf1570d48",
+  "manifestHash": "2cb955213c70329bbe75e412b057c2cdd938c30756d98f097c645bd12d09ee57",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -112,6 +112,10 @@
     {
       "file": "48-storage-and-meeting-integrations-permissions.sql",
       "sha256": "ba8f602f2961e62f123f8048b4a5631e6137ac762818f9b95e5492a74449ddb7"
+    },
+    {
+      "file": "49-rls-guc-fail-closed.sql",
+      "sha256": "54a2aa0cc2cb132467a0b30b086f8f94b2b80fc689ded97cf7ac1af2b8d9f765"
     },
     {
       "file": "4a-class_categories_and_subjects_seed.sql",
@@ -386,6 +390,7 @@
     "20260912105816_custom_47b-whatsapp-groups-permissions-data",
     "20260914223712_custom_48-prune-view-other-defaults",
     "20260915082413_custom_6e-prune-view-other-defaults",
-    "20260915212326_custom_48-storage-and-meeting-integrations-permissions"
+    "20260915212326_custom_48-storage-and-meeting-integrations-permissions",
+    "20260915220953_custom_49-rls-guc-fail-closed"
   ]
 }

@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
-import { storageFiles } from "@/backend/db/schema";
+import { storageFiles, userFiles } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { DBTransaction } from "@/backend/types";
@@ -15,6 +16,27 @@ async function createTestFile(tx: DBTransaction, path?: string) {
     })
     .returning();
   return file;
+}
+
+async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  expect(errorCaught).not.toBeNull();
+  if (errorCaught instanceof Error) return errorCaught;
+  throw new Error(String(errorCaught));
+}
+
+function testPublicPathBlocked(name: string, logic: (tx: DBTransaction) => Promise<unknown>) {
+  test(name, async () => {
+    await runInRollback(async tx => {
+      const error = await expectRepoError(() => logic(tx));
+      expect(error.message).toContain("Forbidden");
+    });
+  });
 }
 
 describe("StorageDbRepository — getFilesForParent & linkFileToParent", () => {
@@ -73,6 +95,52 @@ describe("StorageDbRepository — getFilesForParent & linkFileToParent", () => {
     await runInRollback(async tx => {
       const result = await StorageDbRepository.getFilesForParent("00000000-0000-0000-0000-000000000000", tx);
       expect(result).toEqual([]);
+    });
+  });
+});
+
+describe("StorageDbRepository — public-path guard on domain junction writers", () => {
+  testPublicPathBlocked("blocks linkFileToInvoice when the file lives under public/", async tx => {
+    const file = await createTestFile(tx, "public/avatars/leak.png");
+    await StorageDbRepository.linkFileToInvoice(`invoice-${randomUUID()}`, file.id, "PAYMENT_PROOF", tx);
+  });
+
+  testPublicPathBlocked("blocks linkFileToInvoice for the bare public path", async tx => {
+    const file = await createTestFile(tx, "public");
+    await StorageDbRepository.linkFileToInvoice(`invoice-${randomUUID()}`, file.id, "PAYMENT_PROOF", tx);
+  });
+
+  testPublicPathBlocked(
+    "blocks performJunctionInsert into complaintFiles when the file lives under public/",
+    async tx => {
+      const file = await createTestFile(tx, "public/complaints/leak.png");
+      await StorageDbRepository.performJunctionInsert(
+        { table: "complaints", fileId: file.id, refId: randomUUID(), type: "ATTACHMENT", createdAt: new Date() },
+        undefined,
+        tx
+      );
+    }
+  );
+
+  test("allows public paths on non-domain junction tables", async () => {
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, {
+        name: "Public Avatar User",
+        email: `pub-avatar-${randomUUID()}@test.com`,
+      });
+      const file = await createTestFile(tx, `public/avatars/${randomUUID()}.png`);
+
+      await StorageDbRepository.performJunctionInsert(
+        { table: "users", fileId: file.id, refId: user.id, type: "avatar", createdAt: new Date() },
+        undefined,
+        tx
+      );
+      const [usage] = await tx.select().from(userFiles).where(eq(userFiles.fileId, file.id));
+      expect(usage).toBeDefined();
+
+      const parent = await createTestParent(tx, user.id);
+      const link = await StorageDbRepository.linkFileToParent(parent.id, file.id, "avatar", tx);
+      expect(link.parentId).toBe(parent.id);
     });
   });
 });

@@ -1,6 +1,7 @@
 // Auto-extracted from pothos/ (types-review R3-P3).
 // Mutation field registrations relocated to the mutation layer per mutation/AGENTS.md.
 
+import { GraphQLError } from "graphql";
 import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/backend/graphql/pothos/complaints/complaint.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { isComplaintCategory, isComplaintStatus } from "@/backend/lib";
+import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { ComplaintService } from "@/backend/services";
 import type { ComplaintReturnType, ComplaintSelectType } from "@/backend/types";
 
@@ -23,6 +25,14 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
     },
     resolve: async (_root, args, ctx): Promise<ComplaintReturnType> => {
       const userId = await requireAuth(ctx);
+
+      const tErrors = ctx.t().errorsTranslations;
+      const rateLimitResult = await checkRateLimit(ctx.ipAddress ?? "[unknown]", authRateLimiter);
+      if (!rateLimitResult.success) {
+        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
+          extensions: { code: "TOO_MANY_ATTEMPTS" },
+        });
+      }
 
       const created: ComplaintSelectType = await ComplaintService.submitComplaint(
         userId,

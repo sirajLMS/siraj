@@ -1,4 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { PothosInputFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { CurrencyCodePothosObject, ExpenseTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { BulkDeleteExpensesResult, DeleteExpenseResult, ExpensePage, ExpenseRow } from "@/backend/types";
 
@@ -91,18 +92,24 @@ export const ExpenseFilterPothosInput = gqlSchemaBuilder.inputType("ExpenseFilte
   }),
 });
 
+function expenseCommonInputFields<Req extends boolean>(t: PothosInputFieldBuilder, required: Req) {
+  return {
+    teacherId: t.id({ required: false }),
+    title: t.string({ required, directives: { constraint: { maxLength: 200 } } }),
+    type: t.field({ type: ExpenseTypePothosEnum, required }),
+    expenseValue: t.string({ required, directives: { constraint: { maxLength: 50 } } }),
+    expenseCurrency: t.field({ type: CurrencyCodePothosObject, required }),
+    paymentDate: t.string({ required, directives: { constraint: { format: "date" } } }),
+    expenseDate: t.string({ required, directives: { constraint: { maxLength: 30 } } }),
+    note: t.string({ required: false }),
+  };
+}
+
 export const CreateExpenseInputPothos = gqlSchemaBuilder.inputType("CreateExpenseInput", {
   description:
     "Manual creation of a single expense. The acting operator is resolved from the request context and is never accepted as input. Salaries-type expenses are rejected here; they are written only by the carryover settlement flow.",
   fields: t => ({
-    teacherId: t.id({ required: false }),
-    title: t.string({ required: true, directives: { constraint: { maxLength: 200 } } }),
-    type: t.field({ type: ExpenseTypePothosEnum, required: true }),
-    expenseValue: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
-    expenseCurrency: t.field({ type: CurrencyCodePothosObject, required: true }),
-    paymentDate: t.string({ required: true, directives: { constraint: { format: "date" } } }),
-    expenseDate: t.string({ required: true, directives: { constraint: { maxLength: 30 } } }),
-    note: t.string({ required: false }),
+    ...expenseCommonInputFields(t, true),
     clientRequestId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
   }),
 });
@@ -112,14 +119,7 @@ export const UpdateExpenseInputPothos = gqlSchemaBuilder.inputType("UpdateExpens
     "Field-level patch for an expense; only the provided fields change. The acting operator is resolved from the request context and is never accepted as input.",
   fields: t => ({
     id: t.id({ required: true }),
-    title: t.string({ required: false, directives: { constraint: { maxLength: 200 } } }),
-    type: t.field({ type: ExpenseTypePothosEnum, required: false }),
-    expenseValue: t.string({ required: false }),
-    expenseCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
-    paymentDate: t.string({ required: false, directives: { constraint: { format: "date" } } }),
-    expenseDate: t.string({ required: false, directives: { constraint: { maxLength: 30 } } }),
-    note: t.string({ required: false }),
-    teacherId: t.id({ required: false }),
+    ...expenseCommonInputFields(t, false),
     teacherName: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
   }),
 });

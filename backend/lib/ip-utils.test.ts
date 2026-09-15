@@ -31,7 +31,7 @@ describe("sanitizeIpAddress", () => {
   });
 
   test("keeps IPv4-mapped IPv6 addresses", () => {
-    const mapped = ["[IP_REDACTED]:", "c000:280"].join("");
+    const mapped = ["::ffff:", "c000:280"].join("");
     expect(sanitizeIpAddress(mapped)).toBe(mapped);
   });
 

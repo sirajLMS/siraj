@@ -200,7 +200,7 @@ export const CarryoverFilterPothosInput = gqlSchemaBuilder.inputType("CarryoverF
     "AND-combined filters narrowing the carryover list to a teacher, paid status, date range, or free-text search over the teacher name and students text",
   fields: t => ({
     teacherId: t.id({ required: false }),
-    paidStatus: t.string({ required: false }),
+    paidStatus: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
     dateFrom: t.string({ required: false, directives: { constraint: { format: "date" } } }),
     dateTo: t.string({ required: false, directives: { constraint: { format: "date" } } }),
     includeDisabledTeachers: t.boolean({ required: false }),
@@ -217,7 +217,7 @@ export const BulkCreateCarryoverInputPothos = gqlSchemaBuilder.inputType("BulkCr
       required: true,
       directives: { constraint: { maxItems: 500 } },
     }),
-    clientRequestId: t.string({ required: false }),
+    clientRequestId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     note: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
   }),
 });
@@ -228,9 +228,9 @@ export const BulkToExpenseInputPothos = gqlSchemaBuilder.inputType("BulkToExpens
   fields: t => ({
     carryoverIds: t.field({ type: ["ID"], required: true, directives: { constraint: { maxItems: 500 } } }),
     paymentDate: t.string({ required: true, directives: { constraint: { format: "date" } } }),
-    expenseDate: t.string({ required: false }),
+    expenseDate: t.string({ required: false, directives: { constraint: { maxLength: 30 } } }),
     note: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
-    clientRequestId: t.string({ required: false }),
+    clientRequestId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
   }),
 });
 
@@ -240,7 +240,7 @@ export const CreateCarryoverInputPothos = gqlSchemaBuilder.inputType("CreateCarr
   fields: t => ({
     teacherId: t.id({ required: true }),
     ...carryoverInputFields(t, { payable: true, teacherCurrency: true }),
-    clientRequestId: t.string({ required: false }),
+    clientRequestId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
   }),
 });
 

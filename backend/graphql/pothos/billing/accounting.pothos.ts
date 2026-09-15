@@ -133,7 +133,7 @@ export const PackagePlanUpdateInputType = gqlSchemaBuilder
     description: "Input for updating a package plan (optimistic-lock aware)",
     fields: t => ({
       id: t.id({ required: true }),
-      displayName: t.string({ required: false }),
+      displayName: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       description: t.string({ required: false }),
       creditHours: t.float({ required: false }),
       priceAmount: t.float({ required: false }),
