@@ -6,7 +6,12 @@ const ENV_KEYS = ["NODE_ENV", "TEST_SERVER", "TEST_CI", "VERCEL_ENV"] as const;
 const originalEnv: Record<string, string | undefined> = {};
 
 function setEnv(key: string, value: string | undefined): void {
-  Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true });
+  Reflect.defineProperty(process.env, key, {
+    value,
+    writable: true,
+    configurable: true,
+    enumerable: true,
+  });
 }
 
 function clearEnv(key: string): void {

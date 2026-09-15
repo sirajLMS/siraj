@@ -5,17 +5,18 @@ import { ForbiddenError } from "@/backend/lib/errors";
 import { TeacherService } from "@/backend/services/teacher/teacher.service";
 import { errorsEn } from "@/shared/locale/en/errors";
 
-const tErrors = errorsEn.errorsTranslations;
+const tErrors = errorsEn;
 
-function permissionContext(
-  overrides: Partial<{ permissions: AppPermission[]; isSuperAdmin: boolean }> = {}
-): { permissions: AppPermission[]; isSuperAdmin: boolean } {
+function permissionContext(overrides: Partial<{ permissions: AppPermission[]; isSuperAdmin: boolean }> = {}): {
+  permissions: AppPermission[];
+  isSuperAdmin: boolean;
+} {
   return { permissions: [], isSuperAdmin: false, ...overrides };
 }
 
 describe("TeacherService.searchTeachers", () => {
   test("allows super admin with empty permissions", async () => {
-    const stubTeachers = [{ id: "teacher-1", name: "Stub Teacher" }];
+    const stubTeachers = [{ id: "teacher-1", name: "Stub Teacher", avatarUrl: null }];
     const repoSpy = spyOn(TeacherRepository, "searchTeachers").mockResolvedValue(stubTeachers);
 
     const result = await TeacherService.searchTeachers(

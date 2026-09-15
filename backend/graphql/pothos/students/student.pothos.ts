@@ -137,17 +137,17 @@ export const StudentFilterArgsPothosObject = gqlSchemaBuilder
   .inputRef<StudentFilterArgs>("StudentFilterArgs")
   .implement({
     fields: t => ({
-      name: t.string(),
-      nameNotContains: t.string(),
-      nameEquals: t.string(),
-      nameNotEquals: t.string(),
-      nameStartsWith: t.string(),
-      nameEndsWith: t.string(),
+      name: t.string({ directives: { constraint: { maxLength: 100 } } }),
+      nameNotContains: t.string({ directives: { constraint: { maxLength: 100 } } }),
+      nameEquals: t.string({ directives: { constraint: { maxLength: 100 } } }),
+      nameNotEquals: t.string({ directives: { constraint: { maxLength: 100 } } }),
+      nameStartsWith: t.string({ directives: { constraint: { maxLength: 100 } } }),
+      nameEndsWith: t.string({ directives: { constraint: { maxLength: 100 } } }),
       nameIsEmpty: t.boolean(),
       nameIsNotEmpty: t.boolean(),
 
-      parentId: t.string(),
-      primaryTeacherId: t.string(),
+      parentId: t.string({ directives: { constraint: { maxLength: 36 } } }),
+      primaryTeacherId: t.string({ directives: { constraint: { maxLength: 36 } } }),
       gender: t.field({ type: GenderPothosObject }),
       language: t.field({ type: AppLanguagePothosObject }),
       status: t.field({ type: StudentStatusPothosObject }),

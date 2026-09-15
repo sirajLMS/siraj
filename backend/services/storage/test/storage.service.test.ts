@@ -64,7 +64,7 @@ describe("StorageService.validateSignedUrlSession", () => {
     spies.length = 0;
   });
 
-  function mockSessionLookup(): void {
+  function mockSessionLookup(uploadedByUserId: string | null = "user-123"): void {
     spies.push(
       spyOn(SignedUrlRepository, "getSignedUrlById").mockImplementation(async () => ({
         id: "session-1",
@@ -73,7 +73,7 @@ describe("StorageService.validateSignedUrlSession", () => {
         fileSize: 100n,
         contentHash: "hash",
         expiresAt: new Date(Date.now() + 60000),
-        uploadedByUserId: "user-123",
+        uploadedByUserId,
         createdAt: new Date(),
         used: false,
       }))
@@ -91,6 +91,30 @@ describe("StorageService.validateSignedUrlSession", () => {
     mockSessionLookup();
 
     const result = await StorageService.validateSignedUrlSession("session-1", "documents/file.pdf", "en", "user-456");
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe(403);
+  });
+
+  test("returns 403 error when session is unbound and caller is anonymous", async () => {
+    mockSessionLookup(null);
+
+    const result = await StorageService.validateSignedUrlSession("session-1", "documents/file.pdf", "en");
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe(403);
+  });
+
+  test("returns 403 error when session is unbound even for an authenticated caller", async () => {
+    mockSessionLookup(null);
+
+    const result = await StorageService.validateSignedUrlSession("session-1", "documents/file.pdf", "en", "user-123");
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe(403);
+  });
+
+  test("returns 403 error when no userId is provided for a bound session", async () => {
+    mockSessionLookup();
+
+    const result = await StorageService.validateSignedUrlSession("session-1", "documents/file.pdf", "en");
     expect(result).not.toBeNull();
     expect(result?.status).toBe(403);
   });

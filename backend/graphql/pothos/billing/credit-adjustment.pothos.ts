@@ -15,9 +15,9 @@ export const CreditAdjustmentInputPothosRef = gqlSchemaBuilder
       notes: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
       internalNotes: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
       carryoverTeacherId: t.id({ required: false }),
-      carryoverFromDate: t.string({ required: false }),
-      carryoverToDate: t.string({ required: false }),
-      carryoverPaymentDate: t.string({ required: false }),
+      carryoverFromDate: t.string({ required: false, directives: { constraint: { maxLength: 30 } } }),
+      carryoverToDate: t.string({ required: false, directives: { constraint: { maxLength: 30 } } }),
+      carryoverPaymentDate: t.string({ required: false, directives: { constraint: { maxLength: 30 } } }),
     }),
   });
 

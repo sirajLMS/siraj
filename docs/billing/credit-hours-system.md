@@ -45,7 +45,7 @@ Frontend documents: `frontend/common/graphql/sharedDocuments/accounting/` (Typed
 
 - Routes: `app/(dashboard)/accounting/{payments,packages}/{,new,[id],[id]/edit}` — each gates permission server-side and switches desktop/mobile via `ResponsiveViewSwitch`.
 - ViewModels: flat in `frontend/common/views/dashboard/accounting/` (`useXxxViewModel.ts`), Zustand filter store in `frontend/common/stores/`.
-- Views: `frontend/desktop/views/dashboard/accounting/*.desktop.tsx`, `frontend/mobile/.../*.mobile.tsx`; shared scaffolds in `components/` (`PackagePlanSelectShared`, `DesktopListStateGate`).
+- Views: `frontend/desktop/views/dashboard/accounting/*.desktop.tsx`, `frontend/mobile/.../*.mobile.tsx`; shared scaffolds in `components/` (`PackagePlanAutocomplete`, `DesktopListStateGate`).
 - i18n: `dashboard.accounting.{payments,package-plans,student-credit-hours}` namespaces (+ EN/AR JSON snapshots); nav labels `accountingPayments[New]` / `accountingPackages[New]`.
 - Student surface: profile tab `credit-hours` (`StudentCreditHoursTab`) — balance cards, consumed vs remaining, low-balance alert, recent hour activity.
 

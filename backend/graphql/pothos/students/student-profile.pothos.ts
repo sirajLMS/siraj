@@ -57,14 +57,14 @@ export const StudentProfileEditInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       studentId: t.id({ required: false }),
-      phone: t.string({ required: false }),
-      timezone: t.string({ required: false }),
+      phone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+      timezone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
       displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
       dateOfBirth: t.field({ type: "DateTime", required: false }),
       gender: t.field({ type: GenderPothosObject, required: false }),
       language: t.field({ type: AppLanguagePothosObject, required: false }),
-      timezoneOverride: t.string({ required: false }),
-      avatarUrl: t.string({ required: false }),
-      parentPhone: t.string({ required: false }),
+      timezoneOverride: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+      avatarUrl: t.string({ required: false, directives: { constraint: { maxLength: 2048 } } }),
+      parentPhone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
     }),
   });

@@ -4,6 +4,7 @@ import {
   TestGroupClassPothosObject,
   TestSuperAdminPothosObject,
 } from "@/backend/graphql/pothos/system";
+import { logger } from "@/backend/lib/logger";
 import { assertTestHelperAllowed, isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
 import { TestHelperService } from "@/backend/services";
 

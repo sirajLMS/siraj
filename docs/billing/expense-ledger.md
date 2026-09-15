@@ -43,7 +43,7 @@ CSV: browser fetch("/api/expenses/export?...") → route → getServerUserContex
 | CSV route | `app/api/expenses/export/route.ts` |
 | Frontend documents | `frontend/common/graphql/sharedDocuments/billing/expense.documents.ts` (6 operations + `ExpenseFields` fragment, all 19 `Expense` fields with `id` first) |
 | Store | `frontend/common/stores/expenseFilterStore.ts` (flat non-persisted; fields mirror `ExpenseFilter` 1:1; `EXPENSE_PAGE_SIZE_OPTIONS`) |
-| Views | `frontend/common/views/dashboard/accounting/expenses/` (ExpensesContainer, `useExpensesViewModel`, ExpensesDataGrid, ExpenseFilterBar, ExpenseTypeChip/ExpenseSourceChip, ExpenseFormDialog + form ViewModel, DeleteExpenseDialog/BulkDeleteExpensesDialog + `useExpenseConfirmAction`, ExpenseDetailDrawer); tier views `frontend/desktop|mobile/views/dashboard/accounting/expenses/` |
+| Views | `frontend/common/views/dashboard/accounting/expenses/` (ExpensesContainer, `useExpensesViewModel`, ExpensesDataGrid, ExpenseFilterBar, `StatusBadge` (shared, category-mapped) for type/source badges, ExpenseFormDialog + form ViewModel, DeleteExpenseDialog/BulkDeleteExpensesDialog + `useExpenseConfirmAction`, ExpenseDetailDrawer); tier views `frontend/desktop|mobile/views/dashboard/accounting/expenses/` |
 | Routes (App Router) | `app/(dashboard)/accounting/expenses/page.tsx` + `[id]/page.tsx`, both behind `withPageAuth([ACCOUNTING_EXPENSES_VIEW])`; the drawer deep-link mirrors the carryover `[id]` convention |
 | Nav | `frontend/common/views/dashboard/config/navigationConfig.ts` — `accounting-expenses` under `grp_finance` (`receiptLong` icon), gated on `ACCOUNTING_EXPENSES_VIEW`; label key `accountingExpenses` in `dashboard.core.nav` |
 | i18n | `dashboard.accounting.expenses` namespace (EN/AR, CLDR plurals; 70 keys per locale) + server-side `errors.expenses` leaf (14 keys, EN/AR) |
@@ -278,8 +278,9 @@ All user-facing messages come from the compile-time `errors.expenses` leaf
 
 ## Frontend essentials
 
-- **Grid**: `ExpensesDataGrid` — type chip (semantic status color pairs),
-  source chip (`Manual` static / `From Carryover` → router push to
+- **Grid**: `ExpensesDataGrid` — type badge via shared `StatusBadge`
+  (category-mapped semantic status color pairs), source badge (`Manual` static
+  / `From Carryover` → router push to
   `/accounting/carryover/<sourceEntityId>`, which opens the carryover detail
   drawer), teacher `PersonProfileLinkCell`, struck-through soft-deleted rows
   (only surfaced with `includeDeleted`), row menu (Edit / Delete /

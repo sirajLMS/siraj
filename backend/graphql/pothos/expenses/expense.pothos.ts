@@ -82,9 +82,9 @@ export const ExpenseFilterPothosInput = gqlSchemaBuilder.inputType("ExpenseFilte
   description:
     "AND-combined filters narrowing the expense list by title, type, accounting month, payment-date range, or soft-deleted inclusion",
   fields: t => ({
-    title: t.string({ required: false }),
+    title: t.string({ required: false, directives: { constraint: { maxLength: 200 } } }),
     types: t.field({ type: [ExpenseTypePothosEnum], required: false }),
-    expenseDate: t.string({ required: false }),
+    expenseDate: t.string({ required: false, directives: { constraint: { maxLength: 30 } } }),
     paymentDateFrom: t.string({ required: false, directives: { constraint: { format: "date" } } }),
     paymentDateTo: t.string({ required: false, directives: { constraint: { format: "date" } } }),
     includeDeleted: t.boolean({ required: false }),
@@ -98,12 +98,12 @@ export const CreateExpenseInputPothos = gqlSchemaBuilder.inputType("CreateExpens
     teacherId: t.id({ required: false }),
     title: t.string({ required: true, directives: { constraint: { maxLength: 200 } } }),
     type: t.field({ type: ExpenseTypePothosEnum, required: true }),
-    expenseValue: t.string({ required: true }),
+    expenseValue: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
     expenseCurrency: t.field({ type: CurrencyCodePothosObject, required: true }),
     paymentDate: t.string({ required: true, directives: { constraint: { format: "date" } } }),
-    expenseDate: t.string({ required: true }),
+    expenseDate: t.string({ required: true, directives: { constraint: { maxLength: 30 } } }),
     note: t.string({ required: false }),
-    clientRequestId: t.string({ required: false }),
+    clientRequestId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
   }),
 });
 
@@ -117,10 +117,10 @@ export const UpdateExpenseInputPothos = gqlSchemaBuilder.inputType("UpdateExpens
     expenseValue: t.string({ required: false }),
     expenseCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
     paymentDate: t.string({ required: false, directives: { constraint: { format: "date" } } }),
-    expenseDate: t.string({ required: false }),
+    expenseDate: t.string({ required: false, directives: { constraint: { maxLength: 30 } } }),
     note: t.string({ required: false }),
     teacherId: t.id({ required: false }),
-    teacherName: t.string({ required: false }),
+    teacherName: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
   }),
 });
 
