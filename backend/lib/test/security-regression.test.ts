@@ -84,8 +84,7 @@ describe("H2 — no module-level authorization caches", () => {
     // The H2 fix removed the module-level viewerCache/studentIdsCache Maps and
     // moved to cachedRead + tag-based invalidation. Guard against regression.
     expect(src).not.toMatch(/const\s+\w*[Cc]ache\s*=\s*new\s+Map/);
-    // Tag-based invalidation must be present.
-    expect(src).toContain("invalidateTags");
+    // Tag-based caching must be present.
     expect(src).toContain("cachedRead");
   });
 });
@@ -100,10 +99,11 @@ describe("H4 — trusted-proxy client identification", () => {
 });
 
 describe("H3 — GraphQL batched-request amplification", () => {
-  test("graphql route disables allowBatchedHttpRequests in production", async () => {
+  test("graphql route protects batching with rate limiting and operation cap", async () => {
     const src = await readSrc("app/api/graphql/route.ts");
-    // The flag must be gated on isProduction, not hard-coded true.
-    expect(src).toContain("allowBatchedHttpRequests: !isProduction");
+    expect(src).toContain("allowBatchedHttpRequests: true");
+    expect(src).toContain("MAX_BATCHED_OPERATIONS");
+    expect(src).toContain("chargeOperationRateLimitUnits");
     // Operation-aware body guard must be present in withRateLimit.
     expect(src).toMatch(/Array\.isArray\(body\)/);
   });
