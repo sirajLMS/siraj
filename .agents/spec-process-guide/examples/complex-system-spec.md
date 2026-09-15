@@ -226,7 +226,7 @@ interface DomainEvent {
 - Contract testing between services
 
 ### System-Level Testing
-- End-to-end tests for complete user workflows
+- Journey tests for complete workflows
 - Load testing for scalability validation
 - Chaos engineering for resilience testing
 
@@ -397,7 +397,7 @@ interface DomainEvent {
   - _Requirements: 4.3, 4.4_
 
 - [ ] 10. Integration testing and deployment
-- [ ] 10.1 Create end-to-end test suite
+- [ ] 10.1 Create workflow journey test suite
   - Implement complete user workflow tests across all services
   - Add load testing for system scalability validation
   - Create chaos engineering tests for resilience validation
@@ -792,7 +792,7 @@ interface ProcessingConfig {
 
 - [ ] 7. Implement comprehensive monitoring
 - [ ] 7.1 Create pipeline metrics and observability
-  - Implement end-to-end latency tracking
+  - Implement full-pipeline latency tracking
   - Add throughput metrics for each pipeline stage
   - Create data lineage tracking and visualization
   - Write tests for metrics collection accuracy
@@ -836,7 +836,7 @@ interface ProcessingConfig {
   - _Requirements: 1.2, 4.1_
 
 - [ ] 10. Integration testing and validation
-- [ ] 10.1 Create end-to-end testing suite
+- [ ] 10.1 Create workflow testing suite
   - Implement complete data flow testing from ingestion to output
   - Add load testing for throughput requirements validation
   - Create chaos engineering tests for fault tolerance

@@ -68,7 +68,7 @@ Users cannot reset passwords; link points to `old-domain.com` instead of `app.ex
 
 ## How
 - Update `EMAIL_BASE_URL` in email service configuration
-- Test password reset flow end-to-end in staging
+- Test password reset complete flow in staging
 
 ## Acceptance
 Password reset email contains correct link that successfully loads reset page

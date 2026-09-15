@@ -221,21 +221,21 @@ Tasks that can't be implemented because prerequisite work isn't complete.
 - Ensure foundational components are implemented first
 - Use task numbering that reflects implementation order
 
-#### 3. No Integration or End-to-End Tasks
+#### 3. No Integration or Journey Workflow Tasks
 
 **The Problem:**
 All tasks focus on individual components without connecting them together.
 
 **Missing Elements:**
 - Integration between components
-- End-to-end workflow testing
+- Cross-actor journey workflow testing
 - System-level validation
 
 **The Solution:**
 Always include integration tasks:
 ```markdown
 - [ ] 5.1 Integrate authentication with API endpoints
-- [ ] 5.2 Create end-to-end user registration flow
+- [ ] 5.2 Create multi-actor user registration flow
 - [ ] 5.3 Test complete login/logout workflow
 ```
 

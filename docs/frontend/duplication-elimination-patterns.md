@@ -197,22 +197,9 @@ This document consolidates the patterns used to eliminate code duplication in th
 
 **See:** `docs/app/with-page-auth.md`
 
-## Pattern 15: Test Mock Navigation Helpers
+## Pattern 15: Test Mock Navigation Helpers (Historical)
 
-**When to use:** 20+ UI test files contain identical mock navigation setup (Next.js router mock, pathname mock, router state setters).
-
-**Process:**
-1. Extract mock navigation helpers to `test/ui/components/helpers/mockNavigation.tsx`
-2. Extract session activate button test logic to `test/ui/components/helpers/sessionActivateButtonTests.ts`
-3. Extract student history fixtures to `test/ui/components/fixtures/studentHistoryFixtures.ts`
-4. Each test imports the helpers instead of defining inline mocks
-
-**Example (Phase 3):**
-- Helpers: `test/ui/components/helpers/mockNavigation.tsx`, `test/ui/components/helpers/sessionActivateButtonTests.ts`
-- Fixtures: `test/ui/components/fixtures/studentHistoryFixtures.ts`
-- Result: 34 clones eliminated across 20+ test files
-
-**See:** `docs/testing/mock-navigation-helpers.md`
+**Note:** UI component tests and their navigation helpers were retired and archived in the `backup/historical-ui-e2e-tests` branch. Clones were eliminated by extracting shared mock navigation and fixtures.
 
 ## Pattern 16: Within-File Clone Extraction (Phase 7)
 
@@ -369,7 +356,6 @@ After any duplication elimination:
 - `docs/backend/billing-repo-factory.md`
 - `docs/backend/schema-helpers.md`
 - `docs/app/with-page-auth.md`
-- `docs/testing/mock-navigation-helpers.md`
 - `docs/i18n/locale-namespace-migration.md`
 - `docs/testing/shared-test-runner.md`
 

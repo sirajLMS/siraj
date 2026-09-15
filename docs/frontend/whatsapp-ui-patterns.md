@@ -151,20 +151,7 @@ Label helpers map enum values → i18n key strings via `Record<string, string>` 
 - **Consumer-component pattern**: `renderHook` unavailable in `bun:test`. Render a component that calls the hook, capture state via `useEffect` → `captures` array.
 - **`vmRef`**: `RefObject<ViewModel | null>` at module scope. Assignment inside `useEffect` (not render body) to satisfy `react-hooks/immutability` ESLint rule.
 - **MockLink**: `MockLink` from `@apollo/client/testing` with `{ request: { query, variables }, result: { data } }`. Variables must match EXACTLY (including nulls).
-- **`renderWithWrapper`** from `TestWrapper.tsx`: `{ locale, themeMode, permissions, mocks, viewport }`. Default locale is `"ar"` — pass `{ locale: "en" }` for English.
-- **`baseMocks()`**: Reusable factory for 3 query mocks (accounts, optIn, configured). Must include `configuredMock` or MockLink warns.
-- **Type guards for mock calls**: `mock.calls` is `readonly unknown[][]` in `bun:test`. Use `firstCallArgString`, `firstCallArgRecord`, etc. from test helpers — NOT `as unknown as Type` casts.
-- **GraphQL enum values**: Generated enums from `graphql-types.ts` are TypeScript enum objects (`WhatsappQualityRating.Green`), NOT string literals.
-- **Test runner command**:
-  ```bash
-  SIRAJ_TEST_RUNNER_OK=1 ~/.bun/bin/bun --env-file=.env.test test <file> \
-    --preload ./test/ui/test-env.ts \
-    --preload ./test/ui/components/happydom-preload.ts \
-    --preload ./test/ui/components/next-dynamic-mock.ts
-  ```
-- **MobileCardList Suspense**: Uses `next/dynamic` → tests need `findByText`/`waitFor`, not synchronous `getByText`.
-- **GenericTabNav dynamic import**: Mock directly with `mock.module` in test files since `next-dynamic-mock.ts` doesn't cache it.
-- **`mockNextNavigation`**: Called at module scope before tests `await mockNextNavigation("/dashboard", { includeRouter: false, routingIncludeReplaceAndPrefetch: false })`.
+- **Historical UI tests**: Component test patterns previously used with happy-dom are archived in `backup/historical-ui-e2e-tests`. Storybook stories serve as visual baselines.
 
 ## Gotchas
 

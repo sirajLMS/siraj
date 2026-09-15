@@ -378,7 +378,7 @@ When working with <files>, follow the pattern documented in `docs/<domain>/<topi
 | Frontend stores / state | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
 | Frontend GraphQL / Apollo | `docs/frontend/` | — |
 | Testing (DB) | `docs/testing/` | `.agents/skills/fix-db-tests/SKILL.md` |
-| Testing (UI / E2E) | `docs/testing/` | `.agents/skills/fix-tests/SKILL.md` |
+| Testing (Workflows) | `docs/testing/` | `.agents/skills/fix-tests/SKILL.md` |
 | Testing (general) | `docs/testing/` | `.agents/skills/fix-tests/SKILL.md` |
 | i18n / locale | `docs/i18n/` | — |
 | Auth / security | `docs/auth/` | `.agents/skills/security-review/SKILL.md` |

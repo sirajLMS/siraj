@@ -15,7 +15,6 @@ interface CliOptions {
   port: number;
   bail: boolean;
   coverage: boolean;
-  e2e: boolean;
   testPaths: string[];
   help: boolean;
 }
@@ -61,7 +60,6 @@ function parseCliArgs(args: string[]): CliOptions {
   let port = DEFAULT_PORT;
   let bail = true;
   let coverage = false;
-  let e2e = false;
   const testPaths: string[] = [];
   let help = false;
 
@@ -83,8 +81,6 @@ function parseCliArgs(args: string[]): CliOptions {
       bail = false;
     } else if (arg === "--coverage" || arg === "-c") {
       coverage = true;
-    } else if (arg === "--e2e") {
-      e2e = true;
     } else if (arg.startsWith("--port=")) {
       port = Number(arg.split("=")[1]) || DEFAULT_PORT;
     } else if (!arg.startsWith("-")) {
@@ -96,23 +92,18 @@ function parseCliArgs(args: string[]): CliOptions {
     testPaths.push(DEFAULT_TEST_PATH);
   }
 
-  if (testPaths.some(p => p.includes("test/ui/e2e") || p.includes("test/ui/"))) {
-    e2e = true;
-  }
-
-  return { port, bail, coverage, e2e, testPaths, help };
+  return { port, bail, coverage, testPaths, help };
 }
 
 function printHelp(): void {
   process.stdout.write(`
-run-server-tests.ts - Unified Clean TUI Runner for GraphQL Integration & E2E Tests
+run-server-tests.ts - Unified Clean TUI Runner for GraphQL Integration Tests
 
 USAGE:
   bun run test/scripts/run-server-tests.ts [options] [test-files...]
 
 OPTIONS:
   --port <number>     Port for the dedicated test server (default: ${DEFAULT_PORT})
-  --e2e               Run E2E suite with Playwright preloads and 5-min timeout
   --coverage, -c      Run tests with coverage instrumentation
   --no-bail           Do not stop immediately on first test failure (default: bails on error)
   -h, --help          Show this help message
@@ -120,9 +111,6 @@ OPTIONS:
 EXAMPLES:
   # Run all GraphQL integration tests:
   bun run test:graphql
-
-  # Run all E2E tests:
-  bun run test:ui:e2e
 
   # Run a specific test file:
   bun run test:graphql frontend/common/graphql/test/auth/impersonation.test.ts
@@ -538,13 +526,10 @@ async function setupTestParser(
   await Promise.all([handleTestOutput(testProc.stdout), handleTestOutput(testProc.stderr), testProc.exited]);
 }
 
-function buildTestArgs(bunBin: string, e2e: boolean, coverage: boolean, bail: boolean, testPaths: string[]): string[] {
-  const timeout = e2e ? "300000" : "120000";
+function buildTestArgs(bunBin: string, coverage: boolean, bail: boolean, testPaths: string[]): string[] {
+  const timeout = "120000";
   const testEnvFile = process.env.TEST_ENV_FILE ?? ".env.test";
   const args = [bunBin, `--env-file=${testEnvFile}`, "test", "--parallel=1", `--timeout=${timeout}`];
-  if (e2e) {
-    args.push("--preload", "./test/ui/test-env.ts");
-  }
   if (coverage) {
     args.push("--coverage");
   }
@@ -565,7 +550,7 @@ function handleServerReadyFailure(port: number, ticker: ReturnType<typeof setInt
 }
 
 async function main(): Promise<void> {
-  const { port, bail, coverage, e2e, testPaths, help } = parseCliArgs(process.argv.slice(2));
+  const { port, bail, coverage, testPaths, help } = parseCliArgs(process.argv.slice(2));
 
   if (help) {
     printHelp();
@@ -697,7 +682,7 @@ async function main(): Promise<void> {
 
     state.lastServerAction = "Server ready. Executing tests...";
 
-    const testArgs = buildTestArgs(process.execPath, e2e, coverage, bail, testPaths);
+    const testArgs = buildTestArgs(process.execPath, coverage, bail, testPaths);
 
     const isProductionMode = process.env.TEST_SERVER_MODE === "production";
     const distDir = isProductionMode ? ".next-test-prod" : ".next-test-dev";
@@ -711,7 +696,6 @@ async function main(): Promise<void> {
         GRAPHQL_TEST_PORT: String(port),
         TEST_SERVER_PORT: String(port),
         TEST_SERVER_MODE: serverMode,
-        TEST_E2E_WARMUP: e2e ? "1" : "0",
         NEXT_DIST_DIR: distDir,
       },
       stdio: ["ignore", "pipe", "pipe"],

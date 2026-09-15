@@ -55,70 +55,6 @@ function getDevTestServerEnv(distDir: string): NodeJS.ProcessEnv {
   });
 }
 
-async function warmUpRoute(route: string, base: string, fetchFn: typeof fetch, routeTimeoutMs: number): Promise<void> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), routeTimeoutMs);
-  try {
-    await fetchFn(`${base}${route}`, { redirect: "follow", signal: controller.signal });
-    testLogger.debug(`Warmed up route: ${route}`);
-  } catch (err) {
-    testLogger.warn(`Failed to warm up route ${route}: ${err instanceof Error ? err.message : String(err)}`);
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-/**
- * Routes visited by E2E tests (see test/ui/e2e/*.test.ts).
- * Pre-compiling these in dev mode eliminates per-test first-visit compilation latency.
- * Public routes can be warmed without auth; protected routes redirect to /login
- * but still compile the route component tree during the redirect cycle.
- */
-const E2E_WARMUP_ROUTES = [
-  "/",
-  "/login",
-  "/dashboard",
-  "/profile",
-  "/quotas",
-  "/quotas/new",
-  "/quotas/insights",
-  "/search-schedule",
-  "/students/credits",
-  "/lesson-reports",
-  "/billing-profile",
-  "/teachers/onboarding",
-  "/accounting/credits",
-  "/accounting/credits/adjust",
-] as const;
-
-async function warmUpRouteBatches(
-  routes: readonly string[],
-  base: string,
-  fetchFn: typeof fetch,
-  routeTimeoutMs: number,
-  batchSize: number
-): Promise<void> {
-  if (routes.length === 0) return;
-  const batch = routes.slice(0, batchSize);
-  const remaining = routes.slice(batchSize);
-  await Promise.all(batch.map(route => warmUpRoute(route, base, fetchFn, routeTimeoutMs)));
-  return warmUpRouteBatches(remaining, base, fetchFn, routeTimeoutMs, batchSize);
-}
-
-async function warmUpDevServerRoutes(): Promise<void> {
-  const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
-  const base = `http://localhost:${getTestPort()}`;
-  const routeTimeoutMs = 240_000;
-
-  testLogger.info(`Warming up ${E2E_WARMUP_ROUTES.length} Next.js dev server routes...`);
-  await warmUpRouteBatches(E2E_WARMUP_ROUTES, base, fetchFn, routeTimeoutMs, 12);
-
-  const stabilizing = await waitForServerReady(30_000);
-  if (!stabilizing) {
-    testLogger.warn("Server did not stabilize after warmup");
-  }
-}
-
 async function pollServerReady(url: string, fetchFn: typeof fetch, deadline: number): Promise<boolean> {
   if (Date.now() >= deadline) return false;
   try {
@@ -163,9 +99,7 @@ async function assertProductionBuildExists(distDir: string): Promise<void> {
     await access(join(process.cwd(), distDir, "BUILD_ID"));
     testLogger.info(`Using production test build at ${distDir}`);
   } catch {
-    throw new Error(
-      `Production test build not found at ${distDir}. Run "bun run build:test" before running UI/E2E tests.`
-    );
+    throw new Error(`Production test build not found at ${distDir}.`);
   }
 }
 
@@ -209,14 +143,6 @@ async function spawnServerOnPort(port: number): Promise<ChildProcess> {
   return proc;
 }
 
-function shouldWarmUpRoutes(): boolean {
-  if (process.env.TEST_E2E_WARMUP === "1") return true;
-  return process.argv.some(arg => {
-    const norm = arg.replaceAll("\\", "/");
-    return norm.endsWith("test/ui/e2e") || norm.endsWith("test/ui/e2e/");
-  });
-}
-
 async function startServer(): Promise<void> {
   const mode = getTestServerMode();
   const readyTimeoutMs = mode === "production" ? 10_000 : 400_000;
@@ -238,9 +164,6 @@ async function startServer(): Promise<void> {
   if (isReady) {
     testLogger.info(`Next.js ${mode} test server is ready on port ${port}!`);
     await restoreCanonicalNextEnvDts();
-    if (mode === "dev" && shouldWarmUpRoutes()) {
-      await warmUpDevServerRoutes();
-    }
     return;
   }
 
@@ -285,7 +208,7 @@ export async function startTestServer() {
     getTestServerMode() === "dev" &&
     (await isServerRunningOnPort(DEV_SERVER_PORT))
   ) {
-    testLogger.info(`Reusing existing Next.js dev server on port ${DEV_SERVER_PORT} for E2E tests.`);
+    testLogger.info(`Reusing existing Next.js dev server on port ${DEV_SERVER_PORT} for tests.`);
     setTestPort(DEV_SERVER_PORT);
     reusesExistingDevServer = true;
     await ensureDemoUsersForTestsSafe();
@@ -308,7 +231,7 @@ async function ensureDemoUsersForTestsSafe(): Promise<void> {
     const { ensureDemoUsersForTests } = await import("@/test/helpers/graphql-test-helpers");
     await ensureDemoUsersForTests();
   } catch (err) {
-    testLogger.warn(`Could not ensure demo users for E2E tests: ${err instanceof Error ? err.message : String(err)}`);
+    testLogger.warn(`Could not ensure demo users for tests: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
 

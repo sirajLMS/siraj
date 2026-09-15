@@ -245,13 +245,9 @@ flag.
 - Repo suite: `backend/db/test/repo/whatsapp/whatsapp-test-recipient.repo.test.ts`.
 - GraphQL integration: `frontend/common/graphql/test/whatsapp/whatsapp-conversations.test.ts`
   (denials for every field, send error codes).
-- UI components: `test/ui/components/whatsapp-conversations/*` (container, composer,
-  thread pane, recipients panel).
 - Cross-actor journey (real services + DB, stubbed Meta fetch):
   `test/workflows/whatsapp/conversations.test.ts` — sync → verify → template → window-gated
   text → cap → honest denial.
-- No E2E spec yet (requires the production test build + live WhatsApp credentials; the
-  journey test stands in).
 
 ## Manual steps outside the codebase
 

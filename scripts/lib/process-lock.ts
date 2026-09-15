@@ -13,7 +13,7 @@
  *   - `.quality-gate-lock/codescene/`   → serializes: CodeScene scans
  *   - `.quality-gate-lock/sonar/`       → serializes: SonarQube scans
  *   - `.quality-gate-lock/duplicates/`  → serializes: jscpd duplication checks
- *   - `.quality-gate-lock/build/`       → serializes: next build, build:test
+ *   - `.quality-gate-lock/build/`       → serializes: next build
  *   - `.quality-gate-lock/test/`        → serializes: bun test runs
  *   - `.quality-gate-lock/default/`     → fallback for uncategorized tasks
  *

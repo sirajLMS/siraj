@@ -104,7 +104,7 @@ This is the equal-or-better check: implementation must match or beat the prototy
 
 ## Phase 8 — Close-out & evolve
 
-- Re-run the affected component-test suites plus the plan's E2E/high-level journeys touching the same pages.
+- Re-run the affected service/workflow journey suites touching the same pages.
 - Write the outcome following `references/outcome-template.md` exactly — score history per pass, pre-check failures found, fix-wave inventory, accepted debt with both justifications, capture lessons.
 - **Evolve the skill (mandatory):** review the run for reusable lessons — new capture pitfalls, story tricks, fix recipes, inspector failure modes. Append each to `references/evolution-log.md` (dated, plan-linked) AND promote it in the same change: capture lessons into the protocol references, fix shapes into `references/fix-patterns.md`, and only GENERAL invariants into global rule files (AGENTS.md, instructions, agent-browser skill) — feature specifics stay in the plan outcome. A visual run that changed nothing in this skill is a run that taught nothing; if genuinely nothing was learned, the log gets a one-line "no new lessons" entry so the review visibly happened.
 - Brief IN-CHAT summary for the user: per-surface final scores, what changed, what was consciously not done.

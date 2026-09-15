@@ -72,7 +72,7 @@ Before executing any task, verify:
 3. **Tasks reference requirements**: Each task should have `_Requirements: REQ-N_` traceability tags.
 4. **No stale in-progress markers**: No `[-]` markers from a previous incomplete run (if found, resume from that point).
 5. **Journey coverage (cross-actor workflows)**: If `specs.md` contains a "Cross-Actor Workflow Scenarios" / journeys section, every captured journey MUST have a corresponding `test/workflows/<domain>/<journey>.test.ts` task (see `docs/testing/workflow-journey-tests.md`). If missing, pause and flag it to the user before executing — the plan is incomplete.
-6. **Test-kind inventory**: Scan the plan for which test layers it mandates (repo `test:db`, services `test:services`, journeys `test:workflows`, GraphQL `test:graphql`, UI components, E2E). Record the inventory in memory — the Test-Layer Coverage Gate (below) verifies all of them ran before completion.
+6. **Test-kind inventory**: Scan the plan for which test layers it mandates (repo `test:db`, services `test:services`, journeys `test:workflows`, GraphQL `test:graphql`). Record the inventory in memory — the Test-Layer Coverage Gate (below) verifies all of them ran before completion.
 7. **X.Y subtask pipeline presence (PLAN-INDEPENDENT MANDATE)**: Check whether implementation tasks carry the mandatory `X.Y.QL` / `X.Y.TE` / `X.Y.SEC` / `X.Y.SR` / `X.Y.IV` subtask pipeline. **If the plan text omits it, that is a plan deficiency, not permission to skip**: the orchestrator MUST inject the pipeline into every per-subagent prompt at dispatch time (see Per-Task Execution Flow). Same rule for the 4-Tier framework in `X.Y.TE` — it applies to every implementation task even when the plan never mentions it.
 
 ### Step 3: Establish the Plan Inventory
@@ -111,7 +111,7 @@ Dispatch the executing subagent with the matching prototype artifacts attached t
 
 ### Prototype fidelity rules (CRITICAL)
 
-- **Prototype data is 100% FAKE** — every name, row, metric, count, date, currency amount, and status in the screenshot/HTML is invented placeholder data. **Zero fake data may survive into the implementation.** EVERY rendered value must come from a real data source end-to-end: mock state is prohibited even temporarily — wire the actual path at implementation time (GraphQL document → generated Apollo hook → Pothos resolver → service → repository → Drizzle query; or server-component → service), never leaving hardcoded literals in JSX, fixtures, or stores. The only permitted exception is recognized scaffolding state (`AppSkeleton` placeholders, empty states via `AppEmptyState`, error states) — never fabricated rows.
+- **Prototype data is 100% FAKE** — every name, row, metric, count, date, currency amount, and status in the screenshot/HTML is invented placeholder data. **Zero fake data may survive into the implementation.** EVERY rendered value must come from a real data source across the full stack: mock state is prohibited even temporarily — wire the actual path at implementation time (GraphQL document → generated Apollo hook → Pothos resolver → service → repository → Drizzle query; or server-component → service), never leaving hardcoded literals in JSX, fixtures, or stores. The only permitted exception is recognized scaffolding state (`AppSkeleton` placeholders, empty states via `AppEmptyState`, error states) — never fabricated rows.
 - A prototype is an **imagination aid, not the final target**. The final implementation must be **equal or better** than the prototype: same information architecture and UX flow, but upgraded to project standards (MUI components, theme palette tokens, i18n via `shared/locale`, RTL support, accessibility, AppDataGrid/PageContainer/shared-scaffold patterns).
 - **Never copy prototype HTML/CSS verbatim** — no Tailwind classes, no inline hex colors, no hardcoded strings. Translate, don't transplant.
 - **Respect domain conventions over prototype shorthand** — e.g. if the prototype shows a table, implement `AppDataGrid` with the established grid patterns; if it shows a dialog, follow the existing dialog/form (RHF + Zod) patterns.
@@ -385,8 +385,7 @@ Each builder/adapter/service task MUST include paired tests as subtasks using [.
 
 **When to defer tests:**
 - Simple utility functions — batch at phase end
-- UI component tests — batch at phase end
-- E2E & Penetration tests — requires complete feature (executed in Phase 5 / review wave via [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md))
+- Penetration & security tests — requires complete feature (executed in Phase 5 / review wave via [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md))
 
 **Evidence:** whatsapp Task 4 builders shipped without tests; integration issues discovered late. Interleaved tests provide immediate feedback.
 
@@ -511,8 +510,6 @@ Before the Knowledge Propagation task, verify every test layer the plan mandated
 | Service unit | plan's `backend/services/**/*.test.ts` tasks ran green | `bun run test:services` |
 | **Cross-actor journeys** | every journey from the specs' journeys section ran green | `bun run test:workflows` |
 | GraphQL integration | plan's resolver/mutation test tasks ran green | `bun run test:graphql` |
-| UI components | plan's component test tasks ran green | `bun run test:ui:components` |
-| E2E | only if the plan mandated it | `bun run test:ui:e2e` |
 
 If a prescribed layer has no tasks or never ran, stop and either execute it or get an explicit user decision to defer (with a `deferred-items.md` row). Do not silently skip.
 
@@ -576,7 +573,7 @@ AGENTS.md files and `.agents/instructions/*.md` must NEVER be created or updated
 | Frontend stores / state | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
 | Frontend GraphQL / Apollo | `docs/frontend/` | — |
 | Testing (DB) | `docs/testing/` | `.agents/skills/fix-db-tests/SKILL.md` |
-| Testing (UI / E2E) | `docs/testing/` | `.agents/skills/fix-tests/SKILL.md` |
+| Testing (Workflows) | `docs/testing/` | `.agents/skills/fix-tests/SKILL.md` |
 | i18n / locale | `docs/i18n/` | — |
 | Auth / security | `docs/auth/` | `.agents/skills/security-review/SKILL.md` |
 | App Router / Next.js | `docs/app/` | — |
@@ -740,8 +737,6 @@ At the end of implementation, provide the user with:
 - Service unit: ✅ / ❌ (test:services)
 - Cross-actor journeys: ✅ / ❌ / N/A (test:workflows — N/A only when specs define no journeys)
 - GraphQL integration: ✅ / ❌ (test:graphql)
-- UI components: ✅ / ❌ (test:ui:components)
-- E2E: ✅ / ❌ / N/A (only if mandated)
 
 ### Knowledge Propagation
 - Doc created: docs/<domain>/<topic>.md

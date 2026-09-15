@@ -850,10 +850,10 @@ sequenceDiagram
 - **Database Testing**: [Approach and tools]
 - **External Service Testing**: [Mocking strategy]
 
-### End-to-End Testing
-- **User Scenarios**: [Key user journeys to test]
-- **Testing Tools**: [E2E testing framework]
-- **Test Environment**: [Environment setup]
+### Workflow Journey Testing
+- **User Scenarios**: [Key cross-actor user journeys to test]
+- **Testing Approach**: [Service-level cross-actor workflows with real DB and fixtures]
+- **Verification**: [Assertions on multi-step state transitions]
 """
 
     return design
@@ -996,7 +996,7 @@ def generate_tasks_doc(feature_name, components):
 
 - [ ] {task_num}.2 Implement integration tests
   - Test component interactions
-  - Validate end-to-end workflows
+  - Validate service journey workflows
   - Test error handling and edge cases
   - _Requirements: All_
 

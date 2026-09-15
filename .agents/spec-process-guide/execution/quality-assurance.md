@@ -202,13 +202,13 @@ For each task:
 - Test component interactions
 - Use real databases/services where practical
 - Validate API contracts
-- Test critical user workflows
+- Test critical service workflows
 
-**End-to-End Tests (10%)**
-- Test complete user journeys
-- Use production-like environment
+**Workflow Journey Tests (10%)**
+- Test complete multi-actor journeys
+- Use real services and committed fixtures
 - Focus on critical business flows
-- Minimal but comprehensive coverage
+- Verify permission resolution and cross-actor side effects
 
 #### Continuous Integration Testing
 
@@ -220,7 +220,7 @@ stages:
   - integration: Integration test execution
   - security: Security vulnerability scanning
   - performance: Performance regression testing
-  - e2e: End-to-end test execution
+  - workflow: Cross-actor journey workflow tests
 ```
 
 ## Quality Gates and Checkpoints
@@ -292,7 +292,7 @@ stages:
 - [ ] Documentation is complete
 
 #### Before Feature Release
-- [ ] End-to-end tests pass
+- [ ] Workflow journey tests pass
 - [ ] User acceptance criteria are validated
 - [ ] Performance benchmarks are met
 - [ ] Security scan is clean
@@ -313,10 +313,9 @@ stages:
 - **Database Testing**: Testcontainers, in-memory databases
 - **Message Queue Testing**: Embedded brokers
 
-#### End-to-End Testing
-- **Web Applications**: Playwright, Cypress, Selenium
-- **Mobile Applications**: Appium, Detox
-- **API Testing**: Newman, Karate
+#### Workflow Journey Testing
+- **Cross-Actor Workflows**: Service-level multi-actor journey test suites
+- **API & Contract Testing**: GraphQL and endpoint validation
 
 #### Performance Testing
 - **Load Testing**: k6, JMeter, Artillery
@@ -399,7 +398,7 @@ stages:
 **Symptoms**: Tests require frequent updates
 **Solutions**:
 - Improve test design and abstraction
-- Use page object patterns for UI tests
+- Use helper abstraction patterns for integration tests
 - Reduce coupling between tests and implementation
 - Regular test refactoring
 

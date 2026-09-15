@@ -134,7 +134,6 @@ Use this template to create actionable implementation plans that break down your
 | Frontend Common | `/home/ahmed/Projects/siraj/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/common/stores/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md` |
 | Frontend Desktop | `/home/ahmed/Projects/siraj/frontend/desktop/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/mobile-desktop.instructions.md` |
 | Frontend Mobile | `/home/ahmed/Projects/siraj/frontend/mobile/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/mobile-desktop.instructions.md` |
-| Test UI | `/home/ahmed/Projects/siraj/test/ui/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md` |
 | Journey/Workflow Tests | `/home/ahmed/Projects/siraj/test/workflows/AGENTS.md` | `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md` |
 
 ### Drizzle Schema Convention (Reference)
@@ -314,7 +313,7 @@ Use this template to create actionable implementation plans that break down your
 - [ ] 6.2 Implement [Feature] user flows
   - Create complete user interaction flows
   - Add form validation and error handling
-  - Write end-to-end tests for user scenarios
+  - Write workflow tests for user scenarios
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
   - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
@@ -439,7 +438,7 @@ Use this table to determine which docs subdir and skills to update. AGENTS.md an
 | Frontend stores / state | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
 | Frontend GraphQL / Apollo | `docs/frontend/` | — |
 | Testing (DB) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-db-tests/SKILL.md` |
-| Testing (UI / E2E) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
+| Testing (Workflows) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
 | Testing (general) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
 | i18n / locale | `docs/i18n/` | — |
 | Auth / security | `docs/auth/` | `.agents/skills/idor-testing/SKILL.md`, `.agents/skills/pentester/SKILL.md`, `.agents/skills/backend-security-review/SKILL.md`, `.agents/skills/security-and-hardening/SKILL.md` |
@@ -486,7 +485,7 @@ Each task should reference specific requirements:
 Every implementation task should include testing:
 - **Unit Tests**: For individual components and functions
 - **Integration Tests**: For component interactions
-- **End-to-End Tests**: For complete user scenarios
+- **Workflow Tests**: For multi-step service journeys
 - **Performance Tests**: For non-functional requirements
 
 ---
@@ -636,7 +635,7 @@ Use this checklist when executing each task:
 ### Testing Quality
 - [ ] Unit test coverage meets minimum threshold
 - [ ] Integration tests cover key scenarios
-- [ ] End-to-end tests validate user workflows
+- [ ] Workflow tests validate user workflows
 - [ ] Performance tests meet requirements
 
 ### Documentation Quality

@@ -146,10 +146,10 @@ Use quality assurance practices when:
 
 ```
        /\
-      /  \     E2E Tests (10%)
-     /____\    Integration Tests (20%)
+      /  \     Workflow / Journey Tests (20%)
+     /____\    Integration Tests (30%)
     /      \
-   /________\   Unit Tests (70%)
+   /________\   Unit Tests (50%)
 ```
 
 ### Unit Testing
@@ -158,17 +158,11 @@ Use quality assurance practices when:
 - Mock external dependencies
 - Target 80%+ coverage
 
-### Integration Testing
-- Test component interactions
-- Use real dependencies where practical
-- Validate API contracts
-- Test critical workflows
-
-### End-to-End Testing
-- Test complete user journeys
-- Production-like environment
-- Focus on critical business flows
-- Minimal but comprehensive
+### Integration & Workflow Testing
+- Test component and service interactions
+- Use real dependencies where practical (transactions, rollback)
+- Validate API and GraphQL contracts
+- Test critical workflows across services and repositories
 
 ### Test-Driven Development
 

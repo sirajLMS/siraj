@@ -375,7 +375,7 @@ Tasks focused only on feature implementation without adequate testing, leading t
   - Implement registration API endpoint with error handling
   - Write integration tests for registration flow including error scenarios
   - Create registration form with client-side validation
-  - Write end-to-end tests for complete registration user journey
+  - Write workflow journey tests for complete registration user journey
   - _Requirements: 1.1_
 
 - [ ] 2. Add user login with security testing
@@ -384,13 +384,13 @@ Tasks focused only on feature implementation without adequate testing, leading t
   - Create login API endpoint with rate limiting
   - Write integration tests for login flow including brute force scenarios
   - Build login form with proper error handling
-  - Write end-to-end tests for login user journey and security measures
+  - Write workflow journey tests for login user journey and security measures
   - _Requirements: 2.1_
 ```
 
 **Recovery Strategy:**
 - Add testing requirements to every implementation task
-- Include unit, integration, and end-to-end testing
+- Include unit, integration, and workflow journey testing
 - Consider security testing for sensitive functionality
 - Plan for both positive and negative test scenarios
 

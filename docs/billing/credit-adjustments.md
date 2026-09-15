@@ -332,8 +332,6 @@ assert the invocation contract via a spy).
 | Repository | `backend/db/test/repo/billing/credit-adjustment.repository.test.ts`, `credit.repository.test.ts`, student/teacher `findActiveById` + directory suites | Insert shapes, FK + unique-index driver rejection (savepoint-wrapped), soft-delete filtering, LIKE wildcard literalness, parameterized FTS |
 | Migration | `backend/db/test/migrations/credit-adjustment-columns.test.ts` | Columns/types/defaults, enum values, indexes, FK delete rule, idempotent re-application |
 | GraphQL mutation | `backend/graphql/mutation/billing/credit-adjustment.mutation.test.ts` | Registration, full input pass-through (null + non-null), `FORBIDDEN`/`VALIDATION`/`UNAUTHENTICATED` extensions propagation |
-| Components | `test/ui/components/accounting/CreditAdjustForm.test.tsx`, `StudentCreditsList.test.tsx`, `test/ui/components/ui/RichTextEditor.test.tsx` | Type-switch UX, carryover submit payload, double-click single mutation, inline INSUFFICIENT_CLASSES, deep-link preselection, cache evictions, whitespace-reason rejection, capped-list hint, editor contracts, axe-core zero-violation |
-| E2E | `test/ui/e2e/accounting-credits.test.ts` | Permission-gated pages + sidebar item both directions, full Add/Subtract/Carryover flow against the dev test server |
 | Sanitizer | `backend/lib/sanitize/richTextSanitizer.test.ts` | Allowlist branches, container strips, stray-`<` escaping, seeded fuzz, named XSS-payload neutralization |
 
 ## Related Documents

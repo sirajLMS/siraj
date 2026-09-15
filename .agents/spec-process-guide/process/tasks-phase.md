@@ -232,7 +232,7 @@ The tasks phase serves to:
 - Wire up dependency injection
 - Implement external API integrations
 - Connect frontend to backend services
-- Add end-to-end integration tests
+- Add workflow integration tests
 
 **Pattern**:
 ```markdown
@@ -286,7 +286,7 @@ AGENTS.md files and `.agents/instructions/*.md` are read-only guardrails — the
 | Frontend stores / state | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
 | Frontend GraphQL / Apollo | `docs/frontend/` | — |
 | Testing (DB) | `docs/testing/` | `.agents/skills/fix-db-tests/SKILL.md` |
-| Testing (UI / E2E) | `docs/testing/` | `.agents/skills/fix-tests/SKILL.md` |
+| Testing (Workflows) | `docs/testing/` | `.agents/skills/fix-tests/SKILL.md` |
 | Testing (general) | `docs/testing/` | `.agents/skills/fix-tests/SKILL.md` |
 | i18n / locale | `docs/i18n/` | — |
 | Auth / security | `docs/auth/` | `.agents/skills/security-review/SKILL.md` |
@@ -322,9 +322,9 @@ AGENTS.md files and `.agents/instructions/*.md` are read-only guardrails — the
 **Best for**: MVP development, user-facing applications, agile development
 **Sequence**:
 ```markdown
-1. Core user registration (end-to-end)
-2. User authentication (end-to-end)
-3. User profile management (end-to-end)
+1. Core user registration
+2. User authentication
+3. User profile management
 4. Advanced features and optimizations
 ```
 
@@ -561,7 +561,7 @@ Auth Service needs User Service
   - Write security-focused integration tests
   - _Requirements: 4.1, 2.3_
 
-- [ ] 5.2 End-to-end integration testing
+- [ ] 5.2 Workflow journey testing
   - Create complete user registration and login flow tests
   - Test error scenarios and edge cases
   - Validate security measures and token handling
@@ -617,7 +617,7 @@ This example demonstrates complex dependency management and multiple sequencing 
   - Create directory structure for models, services, repositories, and API layers
   - Define TypeScript interfaces for Product, Category, Inventory, and Order types
   - Set up configuration management for database, caching, and external services
-  - Configure testing framework with unit, integration, and e2e test support
+  - Configure testing framework with unit and integration test support
   - _Requirements: 1.1, 1.2_
 
 - [ ] 1.2 Create database schema and migrations
@@ -737,9 +737,9 @@ This example demonstrates complex dependency management and multiple sequencing 
   - Write performance tests to validate caching effectiveness
   - _Requirements: 8.1, 8.2_
 
-- [ ] 7. End-to-end integration and testing (depends on 6.1, 6.2, 6.3)
-- [ ] 7.1 Create comprehensive end-to-end test scenarios
-  - Write e2e tests for complete product lifecycle workflows
+- [ ] 7. Workflow integration and testing (depends on 6.1, 6.2, 6.3)
+- [ ] 7.1 Create comprehensive workflow test scenarios
+  - Write workflow journey tests for complete product lifecycle workflows
   - Test inventory management scenarios including edge cases
   - Validate category management and product assignment flows
   - Create performance tests for high-load scenarios
@@ -759,7 +759,7 @@ This example demonstrates complex dependency management and multiple sequencing 
 2. **Parallel Development Opportunities**: Tasks 2.1, 2.2, 2.3 can be worked on simultaneously after 1.x is complete
 3. **Risk Management**: Core functionality (models, repositories) before advanced features
 4. **Incremental Value**: Each completed section provides working, testable functionality
-5. **Comprehensive Testing**: Unit, integration, and e2e tests throughout
+5. **Comprehensive Testing**: Unit, integration, and workflow journey tests throughout
 6. **Real-world Complexity**: Handles concurrency, external integrations, and performance concerns
 
 ## Task Writing Best Practices

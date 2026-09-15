@@ -30,17 +30,12 @@ const config: KnipConfig = {
     "backend/graphql/mutation/index.ts",
 
     // Bun --preload test roots — loaded via `bun test --preload <file>` CLI flag,
-    // never statically imported (package.json scripts: test:ui:components, test:ui:e2e, etc.)
-    "test/ui/test-env.ts",
-    "test/ui/e2e-preload.ts",
-    "test/ui/components/happydom-preload.ts",
-    "test/ui/components/next-dynamic-mock.ts",
-    "test/ui/components/translation-preload.ts",
+    // never statically imported
     "test/integration/preload/live-comm-preload.ts",
     "test/integration/preload/live-fx-preload.ts",
 
     // Shell-invoked test runners — executed via `bun run test/scripts/…` from
-    // package.json scripts (test:graphql, build:test, test:ui:*, etc.), never imported
+    // package.json scripts (test:graphql, etc.), never imported
     "test/scripts/**/*.ts",
 
     // Storybook stories — mirrors .storybook/main.ts `stories` glob; components exercised

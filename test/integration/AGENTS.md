@@ -21,7 +21,6 @@ Live **provider smokes** only — one real API round-trip per external service t
 | Service unit tests (mocked deps) | `backend/services/**/*.test.ts` — run `bun run test:services` |
 | PG repo / logic tests (`runInRollback`) | `backend/db/test/` — run `bun run test:db` |
 | GraphQL API tests | `frontend/common/graphql/test/` |
-| UI / E2E | `test/ui/` — see `test/ui/AGENTS.md` |
 
 Never add `*.integration.test.ts` under `backend/services/` or `backend/db/test/` for external SaaS providers.
 

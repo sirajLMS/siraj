@@ -90,7 +90,7 @@ Scan all changed files in scope and check for each of the following violations. 
   - `bun run format` / `bun biome:check` (Biome formatter/linter)
   - `bun run generate:gqlSchema` + `bun codegen` (GraphQL codegen)
   - `bun quality-gate` / `bun quality-gate:fresh`
-  - Layer-specific test scripts: `test:db`, `test:db:sequential`, `test:graphql`, `test:ui:components`, `test:ui:e2e`
+  - Layer-specific test scripts: `test:db`, `test:db:sequential`, `test:services`, `test:graphql`, `test:workflows`
 - Scripts referencing `npm`, `yarn`, or `pnpm` instead of `bun`.
 - Scripts not using `~/.bun/bin/bun` binary path where required.
 

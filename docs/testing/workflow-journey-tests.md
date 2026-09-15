@@ -31,10 +31,9 @@ machinery (DataLoader, subscriptions, cookies) stays with the GraphQL integratio
 | **Journey (this layer)** | `test/workflows/` | **Cross-actor workflows through real services, committed fixtures** |
 | Service unit | `backend/services/**/*.test.ts` | Single service, mocked externals, heavy mocking allowed |
 | GraphQL integration | `frontend/common/graphql/test/` | Resolvers, schema, permissions over HTTP |
-| E2E | `test/ui/e2e/` | Browser-driven user flows |
 
-Journeys fill the gap between service unit tests (one actor, mocked boundaries) and E2E (full
-stack, browser): they prove that a multi-step workflow behaves correctly when each step is taken
+Journeys fill the gap between service unit tests (one actor, mocked boundaries) and full-stack integration:
+they prove that a multi-step workflow behaves correctly when each step is taken
 by a *different actor* with *real permission resolution* against *real committed rows*.
 
 Use a journey test when:

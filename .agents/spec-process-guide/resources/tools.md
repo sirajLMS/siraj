@@ -317,12 +317,12 @@ graph TD
 - Include requirement IDs in test descriptions
 - Generate coverage reports for requirements
 
-#### Cypress/Playwright
-**Best for**: End-to-end testing, user scenario validation
+#### Integration Testing Tools
+**Best for**: API testing, integration validation, cross-actor workflow testing
 
 **Integration Tips**:
-- Create test scenarios from user stories
-- Use data attributes for requirement traceability
+- Create test scenarios from user workflows
+- Use structured assertions for requirement traceability
 - Generate test reports with requirement mapping
 - Integrate with CI/CD for continuous validation
 
@@ -597,8 +597,7 @@ jobs:
 | Project Mgmt | GitHub Projects | Code integration | Free/Paid | Low | Excellent |
 | Diagramming | Mermaid | Code-based | Free | Medium | Excellent |
 | Diagramming | Lucidchart | Professional | Paid | Low | Good |
-| Testing | Jest | Unit testing | Free | Medium | Good |
-| Testing | Cypress | E2E testing | Free/Paid | Medium | Good |
+| Testing | Bun Test / Jest | Unit & Integration testing | Free | Medium | Good |
 | CI/CD | GitHub Actions | GitHub integration | Free/Paid | Medium | Excellent |
 | CI/CD | Jenkins | Enterprise | Free | High | Good |
 
@@ -613,7 +612,7 @@ jobs:
 - **Documentation**: GitHub + Markdown
 - **Project Management**: Linear or GitHub Projects
 - **Diagramming**: Mermaid (embedded in docs)
-- **Testing**: Jest + Cypress
+- **Testing**: Bun Test / Jest
 - **CI/CD**: GitHub Actions
 - **Communication**: Slack
 
@@ -670,7 +669,7 @@ jobs:
 - **Documentation**: Notion + GitHub
 - **Project Management**: Linear + Jira (for complex projects)
 - **Diagramming**: Mermaid + Lucidchart
-- **Testing**: Jest + Playwright + TestRail
+- **Testing**: Bun Test / Jest + TestRail
 - **CI/CD**: GitHub Actions + Jenkins
 - **Communication**: Slack + Microsoft Teams
 

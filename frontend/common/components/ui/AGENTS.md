@@ -151,25 +151,12 @@ When a parent switcher in this layer needs both tier halves, it lazy-imports the
 - **ALWAYS** cast FormData: `(formData.get('name') as string | null) ?? ''`
 - Use theme typography variants (`headlineLg`, `titleLg`, `labelUppercase`, `bodyMd`) — avoid hardcoded font `sx`.
 
-### Testing
+### Verification
 
-**UI Component Test Rules:**
-- **ALWAYS** write component tests in `test/ui/components/` mirroring the component structure
-- **ALWAYS** test both mobile and desktop variants separately
-- **ALWAYS** test the ViewModel hook in isolation (unit test)
-- **ALWAYS** test the switcher component with mocked `useViewport`
-- **NEVER** test implementation details — test behavior via rendered output
-- **ALWAYS** use Storybook stories as visual regression baselines
-
-**Test Structure:**
-```
-test/ui/components/
-├── <domain>/
-│   ├── <Component>.mobile.test.tsx
-│   ├── <Component>.desktop.test.tsx
-│   ├── <Component>View.test.tsx
-│   └── use<Component>ViewModel.test.ts
-```
+**Component Verification Rules:**
+- **ALWAYS** create Storybook stories for components covering both mobile and desktop viewports
+- **ALWAYS** test ViewModel hooks with isolated unit tests if domain logic requires verification
+- **ALWAYS** use Storybook stories as visual baselines
 
 ### Cross-References
 

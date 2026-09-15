@@ -181,7 +181,7 @@ interface AuthService {
   - Build REST endpoints for registration, login, and logout
   - Implement proper HTTP status codes and error responses
   - Add request/response validation and sanitization
-  - Write end-to-end API tests
+  - Write API integration tests
   - _Requirements: 1.1, 2.1, 3.4_
 
 - [ ] 10. Add monitoring and logging

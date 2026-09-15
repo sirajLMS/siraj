@@ -77,11 +77,6 @@ ctx.cookies.delete("refresh_token");
 ctx.cookies.delete("access_token"); // ← add this
 ```
 
-### Step 4: Update E2E test helper (verify, don't break)
-
-**File**: `test/ui/e2e/helpers.ts` (line ~54)
-
-The E2E helper already manually sets the `access_token` cookie as a Playwright cookie. This should still work — no changes needed, but verify the cookie attributes match (especially `httpOnly` and `sameSite`).
 
 ### Step 5: Add security comment to server-auth.ts
 
@@ -93,7 +88,6 @@ Document that `access_token` is an httpOnly cookie set by `setAuthCookies()` in 
 
 Search the codebase for other references to `access_token` cookie and ensure they are consistent. Known references:
 - `backend/lib/auth/server-auth.ts:13` — reads it ✅
-- `test/ui/e2e/helpers.ts:54` — sets it manually ✅
 
 ## Files to Modify
 
@@ -106,7 +100,6 @@ Search the codebase for other references to `access_token` cookie and ensure the
 
 | File | Why |
 |------|-----|
-| `test/ui/e2e/helpers.ts` | Already sets `access_token` — confirm cookie attributes align |
 | `frontend/providers/apollo/AuthProvider.tsx` | No change needed — still stores token in React state for Apollo auth link |
 | `frontend/providers/apollo/utils.ts` | No change needed — `Authorization: Bearer` header still sent from React state |
 

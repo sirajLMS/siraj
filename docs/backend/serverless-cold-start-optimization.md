@@ -568,8 +568,7 @@ Accept as known upstream issue. Monitor for fix. If `url.parse` is removed in a 
 | B | 4 | `backend/services/system/test/environment-config.service.test.ts` |
 | C | 2 | `backend/graphql/mutation/auth/test/auth.mutation.test.ts` |
 | C2 | 3 (+4 existing) | `backend/services/auth/test/session.service.test.ts` |
-| D | 3 | `test/ui/components/DashboardClientBridge.test.tsx` |
-| E | 6 + 14 | `test/ui/components/RequirePermission.test.tsx` + `frontend/common/lib/logger/test/logger.test.ts` |
+| E | 14 | `frontend/common/lib/logger/test/logger.test.ts` |
 | E2 | 9 | `frontend/common/graphql/test/batching.test.ts` |
 | E3 | 12 | `backend/graphql/test/gqlContext.dedup.test.ts` |
 

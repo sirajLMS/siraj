@@ -402,7 +402,7 @@ interface ProfileService {
 ## Testing Strategy
 - Unit tests for validation logic
 - Integration tests for API endpoints
-- E2E test for profile edit flow
+- Workflow journey test for profile edit flow
 ```
 
 ## Next Steps

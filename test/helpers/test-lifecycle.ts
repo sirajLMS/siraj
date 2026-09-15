@@ -10,11 +10,10 @@ let serverStartPromise: Promise<void> | null = null;
  * Setup the shared Next.js test server for this describe block.
  *
  * - In dev mode: a dedicated test dev server is spawned on port 3099 using .next-test-dev.
- * - In production mode: a `next start` server is spawned on port 3099 using
- *   .next-test-prod (requires `bun run build:test` beforehand).
+ * - In production mode: a `next start` server is spawned on port 3099 using .next-test-prod.
  * - Sequential tests reuse the already-running server instantly.
- * - The server persists across test files during multi-test runs (e.g. test:graphql,
- *   test:ui:e2e) to preserve route warmup and compilation state.
+ * - The server persists across test files during multi-test runs (e.g. test:graphql)
+ *   to preserve route compilation state.
  */
 export function setupTestServerLifecycle() {
   beforeAll(async () => {

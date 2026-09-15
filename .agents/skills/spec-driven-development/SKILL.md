@@ -259,7 +259,7 @@ This state machine + side-effect matrix becomes the journey test's assertion set
 
 **Task Sequencing Strategies:**
 - **Foundation-First + Interleaved Tests (RECOMMENDED):** Core interfaces before dependent components, with each implementation task including its paired test as a subtask
-- **Feature-Slice:** End-to-end vertical slices for early validation
+- **Feature-Slice:** Vertical full-feature slices for early validation
 - **Risk-First:** Tackle uncertain areas early
 - **Hybrid:** Combine approaches based on project needs
 
@@ -296,8 +296,7 @@ Every implementation task (X.Y) in `trackable-tasks.md` must follow the 5-stage 
 
 **When to defer tests:**
 - Simple utility functions (test in batch)
-- UI component tests (can batch at phase end)
-- E2E & Penetration tests (requires complete feature — executed in Phase 5 via [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md))
+- Penetration & security tests (requires complete feature — executed in Phase 5 via [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md))
 
 **Evidence:** whatsapp "Task 4 builders shipped without @live-comm tests; Task 5 adapter shipped without integration tests" — integration issues discovered late. Interleaved tests provide immediate feedback.
 
@@ -579,7 +578,7 @@ Use this table to determine which docs subdir and skills to update for a given p
 | Frontend stores / state | `docs/frontend/` | `.agents/skills/frontend-patterns/SKILL.md` |
 | Frontend GraphQL / Apollo | `docs/frontend/` | — |
 | Testing (DB) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-db-tests/SKILL.md` |
-| Testing (UI / E2E) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
+| Testing (Workflows) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
 | Testing (general) | `docs/testing/` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` |
 | i18n / locale | `docs/i18n/` | — |
 | Auth / security | `docs/auth/` | `.agents/skills/idor-testing/SKILL.md`, `.agents/skills/pentester/SKILL.md`, `.agents/skills/backend-security-review/SKILL.md`, `.agents/skills/security-and-hardening/SKILL.md` |

@@ -139,22 +139,7 @@ globalThis.window.location.href = `/login?redirect=${encodedRedirect}`;
 
 ### Phase 5: Verification
 
-#### Step 5.1: Update E2E test helper
-
-**File**: `test/ui/e2e/helpers.ts:52-59`
-
-The helper manually sets `access_token` as a non-httpOnly Playwright cookie. After the fix, the real app flow sets it as httpOnly. Update the helper to match:
-```ts
-await context.addCookies([{
-  name: "access_token",
-  value: token,
-  domain: "localhost",
-  path: "/",
-  httpOnly: true,
-  sameSite: "Strict",
-  secure: false,
-}]);
-```
+Verify login and dashboard redirect behaviors with dev server.
 
 #### Step 5.2: Run quality gate
 
@@ -166,7 +151,6 @@ bun quality-gate
 
 ```bash
 bun run test:graphql
-bun run test:ui:e2e
 ```
 
 ## Cookie Lifecycle After Fix
@@ -222,7 +206,6 @@ Logout:
 | `app/[locale]/(auth)/layout.tsx` | **New file** — server-side auth guard, redirect authenticated users to `/dashboard` | 2 |
 | `app/[locale]/page.tsx` | Smart redirect based on auth state | 3 |
 | `frontend/providers/apollo/utils.ts` | Remove locale prefix from error link redirect URL | 4 |
-| `test/ui/e2e/helpers.ts` | Match cookie attributes (httpOnly, sameSite) to real flow | 5 |
 
 ## Files to Verify (No Changes Expected)
 

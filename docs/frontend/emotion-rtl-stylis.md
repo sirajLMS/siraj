@@ -48,7 +48,6 @@ stylisPlugins: [prefixer, rtlPlugin];
 Canonical app cache: `frontend/common/lib/emotion-cache.tsx`.  
 Same pattern required in:
 
-- `test/ui/components/TestWrapper.tsx`
 - `.storybook/StoryWrapper.tsx`
 
 ### `stylis` version
@@ -67,13 +66,12 @@ Same pattern required in:
 - [ ] New Emotion RTL cache? Plugins = `[rtlPlugin]` only — no stylis `prefixer`.
 - [ ] Touching `stylis` in `package.json` / overrides? Stay on `4.2.0` unless Emotion upgrades.
 - [ ] Adding `::placeholder` in `sx`/`styled`? Confirm RTL login (and any TextField-heavy) pages still render.
-- [ ] Updating TestWrapper / StoryWrapper caches? Mirror `emotion-cache.tsx`.
+- [ ] Updating StoryWrapper caches? Mirror `emotion-cache.tsx`.
 
 ## Related files
 
 | File | Role |
 |------|------|
 | `frontend/common/lib/emotion-cache.tsx` | App LTR/RTL Emotion caches |
-| `test/ui/components/TestWrapper.tsx` | Component-test Emotion caches |
 | `.storybook/StoryWrapper.tsx` | Storybook Emotion caches |
 | `package.json` (`stylis`, `overrides.stylis`) | Pinned to `4.2.0` |

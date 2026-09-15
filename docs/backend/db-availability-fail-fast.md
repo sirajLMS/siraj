@@ -98,8 +98,6 @@ auto-retry loop; usable for uptime monitors.
 ## Tests
 
 - `backend/lib/test/db-unavailable.test.ts` — error class + classification.
-- `test/ui/components/errors/FullScreenErrorView.test.tsx` — both variants,
-  retry behavior, confidential-copy guarantee.
 
 ## Related
 

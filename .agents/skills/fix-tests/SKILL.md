@@ -2,7 +2,7 @@
 name: fix-tests
 description: >
   Fix failing tests across any domain in the codebase (database repositories,
-  backend services, GraphQL integration, UI components, and E2E tests). Asks scoping
+  backend services, GraphQL integration, and workflows). Asks scoping
   questions to confirm targeted test files or domains, checks existing skills, executes
   log-captured test runs, applies domain-specific fixes, verifies code quality via per-file
   sub-loop (tsgo → oxlint → biome → lint:type-aware), and confirms clean type-checking. Use when any test fails
@@ -33,9 +33,7 @@ Before diagnosing or editing code:
      - `Backend Services` (`bun run test:services` / `backend/services/`)
      - `Database Repositories` (`bun run test:db` / `backend/db/test/`)
      - `GraphQL Integration` (`bun run test:graphql` / `frontend/common/graphql/test/`)
-     - `UI Components` (`bun run test:ui:components` / `test/ui/components/`)
-     - `UI End-to-End (E2E)` (`bun run test:ui:e2e` / `test/ui/e2e/`)
-     - `All UI Tests` (`bun run test:ui`)
+     - `Workflows` (`bun run test:workflows` / `test/workflows/`)
 
 ---
 
@@ -52,9 +50,7 @@ Or run domain test suites:
 - **DB Tests**: `bun run test:db`
 - **Backend Services Tests**: `bun run test:services`
 - **GraphQL Integration Tests**: `bun run test:graphql`
-- **UI Component Tests**: `bun run test:ui:components`
-- **UI E2E Tests**: `bun run build:test` (REQUIRED FIRST!), then `bun run test:ui:e2e`
-- **UI Static Isolation Tests**: `bun run test:ui:static`
+- **Workflow Journey Tests**: `bun run test:workflows`
 
 ---
 
@@ -94,20 +90,13 @@ Apply domain-specific rules based on where the test failure occurs:
 - **Notification Contact Info**: When testing services that call `dispatchWithPreferences`, mock `UserRepository.findSafeById` to return `{ email: "...", phone: "..." }` so email/sms payloads pass through without being dropped as contactless.
 
 #### 3. GraphQL Integration (`frontend/common/graphql/test/`)
-- **Server Harness**: CI runs with `TEST_SERVER_MODE=production` against `.next-test-prod`.
 - **GraphQL Documents**: Place documents in `frontend/common/graphql/sharedDocuments/`.
 - **Always Include `id`**: Every queried object type MUST include the `id` field for Apollo Client cache normalization.
 - **`testClient` Helper**: Use `testClient` rather than raw `fetch`.
 
-#### 4. UI Components (`test/ui/components/`)
-- **Preloads**: Executed with Happy DOM + preloads (`test-env.ts`, `happydom-preload.ts`, `next-dynamic-mock.ts`).
-- **MUI & Theme**: Wrap rendered components in theme and locale providers if testing standalone components.
-- **Store Reset**: Reset Zustand store states between test cases.
-
-#### 5. End-to-End (E2E) (`test/ui/e2e/`)
-- **Build First**: ALWAYS run `bun run build:test` before running E2E tests.
-- **Test Server Port**: Test servers use fixed port `3066`.
-- **Stuck Server Recovery**: If the test port is occupied, run `bun run test:ui:kill` (NEVER kill dev port 3000 or start port 4000).
+#### 4. Cross-Actor Workflows (`test/workflows/`)
+- **Real DB & Services**: Real services + real DB, committed fixtures with tracked `afterAll` cleanup, NO `runInRollback`.
+- **Mermaid Diagrams**: Validate workflow diagram sync via `bun run validate:mermaid`.
 
 ---
 

@@ -148,7 +148,7 @@ The design phase serves to:
 ### Step 7: Define Testing Strategy
 
 **Testing Strategy Elements**:
-1. **Testing Levels**: Unit, integration, and end-to-end testing approaches
+1. **Testing Levels**: Unit, integration, and workflow journey testing approaches
 2. **Test Coverage**: What aspects of the system will be tested
 3. **Testing Tools**: Frameworks and tools for different types of testing
 4. **Quality Gates**: Criteria for determining when testing is sufficient

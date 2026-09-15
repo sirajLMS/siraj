@@ -71,7 +71,7 @@ export function killListenersOnPort(port: number): number {
 }
 
 /** The standard dev server port. When a dev server is already running here,
- * E2E tests in dev mode will reuse it instead of spawning a separate test server. */
+ * dev mode tests will reuse it instead of spawning a separate test server. */
 export const DEV_SERVER_PORT = 3000;
 
 export function getTestServerPortCandidates(): number[] {
@@ -139,10 +139,6 @@ export function getTestApiUrl(path: string): string {
   return `${getTestBaseUrl()}${normalizedPath}`;
 }
 
-function isUiTestRun(): boolean {
-  return process.argv.some(arg => arg.replaceAll("\\", "/").includes("test/ui"));
-}
-
 export function getTestDistDir(): string {
   if (getTestServerMode() === "production") {
     return getProductionBuildDistDir();
@@ -157,7 +153,6 @@ function getProductionBuildDistDir(): string {
 export function getTestServerMode(): "dev" | "production" {
   if (process.env.TEST_SERVER_MODE === "production") return "production";
   if (process.env.TEST_SERVER_MODE === "dev") return "dev";
-  if (isUiTestRun()) return "production";
   return "dev";
 }
 

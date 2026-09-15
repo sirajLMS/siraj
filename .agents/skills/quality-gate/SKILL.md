@@ -552,7 +552,7 @@ When dispatching many subagents (e.g., fixing 100+ files with oxlint violations)
 6. **Handle device crashes.** After a crash, check `git diff` to find files with partial changes. Reset broken
   files with `git checkout -- <file>` before re-dispatching. Use `sub-loop-uncommitted.ts` to validate all
   uncommitted files at once.
-7. **No GraphQL or UI/E2E tests.** Subagents should NOT run tests that require a Next.js server. DB and service
+7. **No server-dependent integration tests.** Subagents should NOT run tests that require a Next.js server. DB and service
   tests CAN be run if needed.
 8. **Commit and push frequently.** After each batch of files passes sub-loop, commit and push to preserve progress.
 

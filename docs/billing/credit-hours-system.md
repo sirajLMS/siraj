@@ -53,8 +53,7 @@ Frontend documents: `frontend/common/graphql/sharedDocuments/accounting/` (Typed
 
 - Repo tests: `backend/db/test/repo/billing/{package-plan,accounting-payment}.repository.test.ts` (rollback-tx pattern).
 - Workflow tests: `backend/db/test/logic/lms/{credit-hours-workflow,accounting-payment-workflow}.test.ts` (committed fixtures + hard-delete cleanup, AGENTS rule 9).
-- UI component tests: `test/ui/components/accounting/` (Happy-DOM; assertions only on i18n strings; Apollo documents mocked with exact variables).
-- Runners: `bun run test:db`, `bun run test:services`, `bun run test:graphql`, `bun run test:ui:components`.
+- Runners: `bun run test:db`, `bun run test:services`, `bun run test:graphql`, `bun run test:workflows`.
 
 ## Migration Path (for environments)
 

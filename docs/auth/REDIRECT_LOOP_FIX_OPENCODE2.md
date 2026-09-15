@@ -51,9 +51,9 @@ The access token is returned in the **GraphQL response body**, not as a cookie. 
   └──────(refreshToken succeeds, isAuthenticated=true)──────────────────┘
 ```
 
-### Why E2E tests didn't catch this
+### Why previous tests didn't catch this
 
-The E2E helper (`test/ui/e2e/helpers.ts:52-58`) manually injects the `access_token` cookie via Playwright's `context.addCookies()`, bypassing the bug:
+Browser auth helpers manually injected the `access_token` cookie, bypassing the bug:
 
 ```ts
 await context.addCookies([
@@ -163,11 +163,6 @@ Document the `access_token` cookie lifecycle so future developers understand the
 // access_token cookie — so subsequent SSR loads succeed without a loop.
 const token = cookieStore.get("access_token")?.value;
 ```
-
-### 5. Verify E2E test helper — `test/ui/e2e/helpers.ts`
-
-The E2E helper already sets the `access_token` cookie manually (line 52-58). After the fix, this will still work — the cookie set by `setAuthCookies()` during the `demoLogin` mutation is the same cookie the helper injects. No code changes needed, but verify the test still passes.
-
 ---
 
 ## Cookie Reference After Fix
@@ -228,7 +223,6 @@ Both are refreshed by the same `refreshToken` mutation. The React state version 
 | `frontend/providers/apollo/AuthProvider.tsx` | Client-side auth — `login()`, `checkAuth()`, `logout()` |
 | `frontend/providers/apollo/utils.ts` | Apollo `authLink` — sends `Authorization: Bearer` header |
 | `frontend/views/auth/login/index.tsx` | Login page — redirects to `/dashboard` when `isAuthenticated=true` |
-| `test/ui/e2e/helpers.ts` | E2E workaround — manually sets `access_token` cookie |
 
 ## Previously Fixed Related Issues
 

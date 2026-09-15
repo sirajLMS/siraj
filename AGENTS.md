@@ -8,7 +8,7 @@ Siraj is a Next.js 16 (App Router) full-stack application using:
 - **Runtime**: Bun (not Node.js)
 - **Frontend**: React 19, MUI v9, Apollo Client v4, Zustand
 - **Backend**: Pothos GraphQL, Drizzle ORM, PostgreSQL
-- **Testing**: Bun test runner, Vitest for Storybook, Playwright for E2E
+- **Testing**: Bun test runner, Vitest for Storybook
 - **i18n**: **Custom compile-time TypeScript system** in `shared/locale/` (replaces legacy `next-intl`; see `shared/AGENTS.md` for rules). Locale is cookie/header-driven (`NEXT_LOCALE`) — URLs are NOT locale-prefixed (no `[locale]` segment under `app/`).
 
 ## Essential Commands
@@ -39,7 +39,6 @@ bun run generate:gqlSchema     # Generate GraphQL schema from Pothos
 bun codegen                    # Generate TypeScript types from schema
 
 # Testing (layer-specific)
-bun run build:test             # Build production bundle for UI/E2E tests (.next-test-prod) — REQUIRED before test:ui:e2e
 bun run test                   # All tests
 bun run test:db                # Database repository tests (parallel via test/scripts/run-db-tests-parallel.ts)
 bun run test:db:sequential     # Database tests (sequential, for debugging)
@@ -50,10 +49,6 @@ bun run test:live-fx           # FX provider integration subset
 bun run test:services          # Backend services tests (parallel via test/scripts/run-services-tests-parallel.ts)
 bun run test:services:sequential # Backend services tests (sequential, for debugging)
 bun run test:graphql           # GraphQL integration tests (dev server via test/scripts/run-server-tests.ts)
-bun run test:ui:components     # UI component tests (Happy DOM, no server)
-bun run test:ui:e2e            # End-to-end tests (dev/production server — test/scripts/run-server-tests.ts --e2e)
-bun run test:ui                # All UI tests (components + e2e + static)
-bun run test:ui:kill           # Kill test servers on port 3099 only (never dev:3000 or start:4000)
 bun run test:workflows         # Cross-actor journey/workflow tests (test/workflows/; real services, committed fixtures)
 
 # Authenticate an agent-driven browser (agent-browser / Playwright) with .env credentials.
@@ -111,8 +106,7 @@ This is NOT standard Next.js. APIs and conventions differ from training data. **
 
 ### Browser Automation Login (agent-browser / Playwright)
 - Never type real email credentials into the login form — the AI prompt layer redacts them (they arrive as `[EMAIL_REDACTED]` placeholders the server Email scalar rejects).
-- Use `bun run scripts/browser-login.ts` (reads `.env` `ADMIN_EMAIL`/`ADMIN_PASSWORD`); with `--inject` it applies cookies to the active agent-browser session. Playwright MCP: `browser_run_code_unsafe` with `filename: ".browser-auth/inject-mcp.js"`. Playwright scripts: `newContext({ storageState: ".browser-auth/storageState.json" })`.
-- Full flow details: `test/ui/AGENTS.md` → "Agent Browser Login".
+- Use `bun run scripts/browser-login.ts` (reads `.env` `ADMIN_EMAIL`/`ADMIN_PASSWORD`); with `--inject` it applies cookies to the active agent-browser session. Playwright MCP: `browser_run_code_unsafe` with `filename: ".browser-auth/inject-mcp.js"`. Playwright scripts: `newContext({ storageState: ".browser-auth/storageState.json" })`. See `scripts/browser-login.ts` for options.
 
 ### Logging
 - **NEVER use `console.*` directly** - ESLint will error
@@ -380,8 +374,6 @@ both `backend.instructions.md` and `tests.instructions.md`). Read ALL matching f
 | `backend/db/test/` | `backend/db/test/AGENTS.md`, `backend/AGENTS.md` |
 | `backend/types/` | `backend/types/AGENTS.md`, `backend/AGENTS.md` |
 | `scripts/run-test/` | `scripts/run-test/AGENTS.md` |
-| `test/ui/` | `test/ui/AGENTS.md` |
-| `test/ui/components/` | `test/ui/components/AGENTS.md`, `test/ui/AGENTS.md` |
 
 ### Fix-Or-Report Rule for Cross-File Violations
 
@@ -426,9 +418,6 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `backend/db/test/repo/` - Repository unit tests (100% coverage required)
 - `backend/db/test/logic/` - Business logic integration tests
 - `frontend/common/graphql/test/` - GraphQL integration tests (dev server; use testClient, not raw fetch)
-- `test/ui/` - UI tests — see `test/ui/AGENTS.md`
-- `test/ui/components/` - Component tests per domain subdir (Happy DOM + mocked Apollo; no server) - see `test/ui/AGENTS.md` + `test/ui/components/AGENTS.md`
-- `test/ui/e2e/` - End-to-end tests (production server; requires `bun run build:test` first)
 - `test/workflows/` - Cross-actor journey/workflow tests (real services, real DB, committed fixtures, no `runInRollback`) - see `test/workflows/AGENTS.md`
 
 ## Linting Rules

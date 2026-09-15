@@ -363,7 +363,7 @@ Simple config change revealed:
    - Track file size distribution
 
 ## Definition of Done
-- [ ] 50MB files upload successfully end-to-end
+- [ ] 50MB files upload successfully across pipeline
 - [ ] All infrastructure limits updated
 - [ ] Monitoring in place
 - [ ] Storage cost impact documented

@@ -45,7 +45,7 @@ CSV: browser fetch("/api/carryover/export?...") → route → getServerUserConte
 | Routes (App Router) | `app/(dashboard)/accounting/carryover/page.tsx` (+ `[id]/page.tsx` deep-link drawer), both behind `withPageAuth([ACCOUNTING_CARRYOVER_VIEW])` |
 | i18n | `dashboard.accounting.carryover` namespace (`shared/locale/{types,en,ar}/dashboard/accounting/carryover.ts` + `carryover.namespace.ts`); service errors in `errors.carryover.*`; nav label `accountingCarryover` in `dashboard.core.nav` |
 | Audit | `AuditAction` `CARRYOVER_CREATE` / `CARRYOVER_TO_EXPENSE` / `CARRYOVER_UNPAID` / `CARRYOVER_DELETE` (+ generic `"UPDATE"`), entity type `CARRYOVER_BALANCE` in `backend/types/audit/audit.types.ts` |
-| Tests | Repo/migration: `backend/db/test/repo/teachers/carryover.repository.test.ts`, `backend/db/test/repo/scheduling/class-instances-carryover.repository.test.ts`, `backend/db/test/migrations/carryover-tables.test.ts`. Service: three co-located mock-module suites in `backend/services/teachers/` + two pure-helper suites. GraphQL: `carryover.query.test.ts` / `carryover.mutation.test.ts` (in-process real-schema harness). Route: `app/api/carryover/export/route.test.ts`. UI component suites co-located in the carryover views dir; E2E `test/ui/e2e/accounting/carryover.test.ts`. Journeys: `test/workflows/accounting/carryover-{bulk-create,to-expense,unpay,delete}.journey.test.ts` |
+| Tests | Repo/migration: `backend/db/test/repo/teachers/carryover.repository.test.ts`, `backend/db/test/repo/scheduling/class-instances-carryover.repository.test.ts`, `backend/db/test/migrations/carryover-tables.test.ts`. Service: three co-located mock-module suites in `backend/services/teachers/` + two pure-helper suites. GraphQL: `carryover.query.test.ts` / `carryover.mutation.test.ts` (in-process real-schema harness). Route: `app/api/carryover/export/route.test.ts`. Journeys: `test/workflows/accounting/carryover-{bulk-create,to-expense,unpay,delete}.journey.test.ts` |
 
 ## Schema Tables
 
@@ -316,13 +316,8 @@ These were found the hard way (reviews, journey tests, sub-loop runs):
 - Plan 4 (session-event-audit) audit-grid integration — "Carryover Balance" bulk
   action and "Linked" chip — was blocked on the sibling plan landing.
 - Plan 6 (expense ledger) landed and the stub is swapped for the real
-  `ExpenseService` (see Architecture decision #11); the ledger UI + a
-  cross-module E2E spec (`test/ui/e2e/accounting/expenses.test.ts`, covering
-  the carryover settle → ledger → unpay loop) have shipped. See
-  `docs/billing/expense-ledger.md`.
-- UI component test suites and the E2E spec were authored under a
-  written-but-unexecuted policy; first real runs may need fixture/real-dialog
-  adjustments (MUI date-picker typing, autocomplete option names, demo dataset).
+  `ExpenseService` (see Architecture decision #11); the ledger UI has shipped.
+  See `docs/billing/expense-ledger.md`.
 - Cross-plan clone pairs (CSV export route, list ViewModel, dialog scaffolds) are
   recorded as jscpd follow-ups for a shared export/ViewModel scaffold.
 - Frontend layer can adopt `CARRYOVER_PAID_STATUS_VALUES` from

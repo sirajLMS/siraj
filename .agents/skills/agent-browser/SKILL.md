@@ -101,7 +101,7 @@ Choose the right tool based on the core task:
   AGENT_BROWSER_SESSION=<session> bun run scripts/browser-login.ts --inject
   agent-browser open http://localhost:3000/profile               # already authenticated
   ```
-- Cookie/state artifacts live in git-ignored `.browser-auth/` (mode 600). Playwright paths use the same script — see `test/ui/AGENTS.md` ("Agent Browser Login").
+- Cookie/state artifacts live in git-ignored `.browser-auth/` (mode 600). Browser automation paths use the same script to obtain session cookies.
 
 ### 5a. URLs are NOT locale-prefixed (Siraj)
 

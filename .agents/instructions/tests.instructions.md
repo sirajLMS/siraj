@@ -138,37 +138,15 @@ When modifying `scripts/run-test/run-test.ts`:
 - Never duplicate standard test setup (login mutations, entity extraction) - centralize in `helpers.ts`
 - Type annotations from `@/backend/types` for consistency
 
-### UI Tests (`test/ui/`)
-
-See `test/ui/AGENTS.md` for full rules. Summary:
-
-- **Production server for E2E** — `test/ui/e2e/` runs against `next start` (`.next-test-prod`), not `next dev`.
-- **Build prerequisite** — Run `bun run build:test` before `test:ui:e2e` or `test:ui`. Tests do not build automatically.
-- **Rebuild after server changes** — Re-run `build:test` after auth, middleware, API routes, or other server/runtime changes.
-- **Component tests** (`test/ui/components/`) — Happy DOM + mocked Apollo; no server, no `build:test` required.
-- **GraphQL vs UI** — `test:graphql` still uses the dev server (test-helper mutations). Only `test/ui/` defaults to production.
-- **Agent browser verification (agent-browser / Playwright MCP)** — never type credentials into the login form: the AI layer redacts emails and the server's Email scalar rejects the placeholder values. Use `bun run scripts/browser-login.ts --inject` (agent-browser) or the generated `.browser-auth/inject-mcp.js` / `storageState.json` (Playwright) — see `test/ui/AGENTS.md` → "Agent Browser Login".
-
-```bash
-bun run build:test           # once before E2E (or after server code changes)
-bun run test:ui:components   # no build needed
-bun run test:ui:e2e          # requires build:test
-bun run test:ui              # components + e2e + static
-bun run test:ui:kill         # stop stale test servers (port 3066 only — never 3000/4000)
-```
-
 ### Test Execution Commands
 
-- `bun run build:test` - production Next.js build for UI/E2E (`.next-test-prod`, `.env.test` only)
 - `bun run test:db` - database repo tests (parallel)
 - `bun run test:db:sequential` - sequential DB tests (debugging)
 - `bun run test:db:coverage` - database tests with coverage report
+- `bun run test:services` - backend services tests (parallel)
+- `bun run test:services:sequential` - sequential services tests (debugging)
 - `bun run test:graphql` - GraphQL integration tests (dev server)
-- `bun run test:ui:components` - UI component tests (no server)
-- `bun run test:ui:e2e` - E2E tests (production server; run `build:test` first)
-- `bun run test:ui:static` - mobile/desktop import isolation checks
-- `bun run test:ui` - all UI tests
-- `bun run test:ui:kill` - kill test servers on port 3066 only (never dev:3000 or start:4000)
+- `bun run test:workflows` - cross-actor journey tests (real services, real DB)
 - `bun run test` - all tests across all layers
 
 ### Quality

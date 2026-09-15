@@ -48,11 +48,9 @@ function printWarning(): void {
 }
 
 if (!isApprovedRunner()) {
-  const isGraphqlOrE2e = process.argv.some(
-    arg => arg.includes("frontend/common/graphql/test") || arg.includes("test/ui/e2e")
-  );
+  const isGraphql = process.argv.some(arg => arg.includes("frontend/common/graphql/test"));
 
-  if (isGraphqlOrE2e) {
+  if (isGraphql) {
     const rawArgs = process.argv.filter(
       a =>
         a !== process.execPath &&

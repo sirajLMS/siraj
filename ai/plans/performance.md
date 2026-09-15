@@ -108,7 +108,7 @@ Packages verified NOT to import (dead deps already removed in Wave 1-D): `lodash
 
 | Subagent | Files | Task |
 |---|---|---|
-| **4-H Extract TeacherDashboardContainer** | `frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer.tsx` (483 lines); new sub-components under `frontend/common/views/dashboard/teachers/dashboard/components/`; new Zustand store `frontend/common/stores/teacherDashboardStore.ts` | Slice into sub-components: `TeacherDashboardHeader`, `TeacherDashboardMetricsIsland`, `TeacherScheduleIsland`, `TeacherHandbookIsland`, etc. Move 6 `useState` hooks (lines 200–205) into the new Zustand store (per AGENTS.md mandate — mutable state must live in Zustand for tier-switch survival). Move 6 mutations into their respective feature islands so they only register when the island mounts. Target: coordinator file < 150 lines (CodeScene "Perfect Health"). Run `bun run test:ui:components` for affected component tests. This subagent may dispatch its own exploration sub-sub-agents (max 2 concurrent) for the sub-component extraction, but file ownership stays with 4-H. |
+| **4-H Extract TeacherDashboardContainer** | `frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer.tsx` (483 lines); new sub-components under `frontend/common/views/dashboard/teachers/dashboard/components/`; new Zustand store `frontend/common/stores/teacherDashboardStore.ts` | Slice into sub-components: `TeacherDashboardHeader`, `TeacherDashboardMetricsIsland`, `TeacherScheduleIsland`, `TeacherHandbookIsland`, etc. Move 6 `useState` hooks (lines 200–205) into the new Zustand store (per AGENTS.md mandate — mutable state must live in Zustand for tier-switch survival). Move 6 mutations into their respective feature islands so they only register when the island mounts. Target: coordinator file < 150 lines (CodeScene "Perfect Health"). Run `bun run tsgo` to verify type safety. This subagent may dispatch its own exploration sub-sub-agents (max 2 concurrent) for the sub-component extraction, but file ownership stays with 4-H. |
 | **4-I Throttle ColorSchemeStateBridge** | `frontend/common/providers/theme/ThemeProvider.tsx` (lines 42–48) | Switch `useEffect` → `useLayoutEffect`; deep-diff against a ref before writing; batch all 4 attribute writes (`data-theme`, `colorScheme`, `lang`, `dir`) into a single DOM mutation pass. |
 
 **Verification (per subagent):** `bun run scripts/health/sub-loop.ts <file> --lifecycle lint`.
@@ -148,7 +148,7 @@ The `shared/AGENTS.md:75` migration narrative and the `shared/messages/` referen
 
 - **Wave 2 RSC boundaries:** New Server Component shells must not transitively import client-only code (no `useAppTranslation`, no `useViewport`, no `useMediaQuery`). When using MUI components server-side, verify they don't pull client-only context. `<InitColorSchemeScript>` placement in `<body>` (per the noted Next.js 16 gotcha) is already correct and stays as-is.
 - **Wave 3 F2 auth timing:** `refreshToken` + recovery registration interactions need careful testing before commit — affects session refresh lifecycle. Subagent 3-F2 must verify via existing auth tests.
-- **Wave 4 H large refactor:** Run `bun run test:ui:components` for affected component tests before the full quality-gate. May surface CodeScene health regression — subagent 4-H must verify each extracted sub-component < 150 lines.
+- **Wave 4 H large refactor:** Run `bun tsgo` before the full quality-gate. May surface CodeScene health regression — subagent 4-H must verify each extracted sub-component < 150 lines.
 
 ---
 
