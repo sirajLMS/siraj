@@ -11,12 +11,6 @@
  * @module
  */
 
-import type {
-  AccessTokenFormValues,
-  AccountCreateFormValues,
-  AccountCredentialFormValues,
-} from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
-
 /** Maximum allowed length for display name. */
 const DISPLAY_NAME_MAX_LENGTH = 100;
 
@@ -125,58 +119,4 @@ export function validatePurpose(value: string): string | null {
     return "validationPurposeInvalid";
   }
   return null;
-}
-
-/** Validation result for the create-account form. */
-export interface AccountCreateFormValidationResult {
-  readonly displayName: string | null;
-  readonly phoneNumberId: string | null;
-  readonly wabaId: string | null;
-  readonly purpose: string | null;
-}
-
-/**
- * Validates all fields of the create-account form.
- *
- * @returns An object with error keys for each field, or `null` for valid fields.
- */
-export function validateAccountCreateForm(values: AccountCreateFormValues): AccountCreateFormValidationResult {
-  return {
-    displayName: validateDisplayName(values.displayName),
-    phoneNumberId: validatePhoneNumberId(values.phoneNumberId),
-    wabaId: validateWabaId(values.wabaId),
-    purpose: validatePurpose(values.purpose),
-  };
-}
-
-/** Validation result for the access-token form. */
-export interface AccessTokenFormValidationResult {
-  readonly accessToken: string | null;
-}
-
-/**
- * Validates all fields of the access-token form.
- *
- * @returns An object with the error key for the access token field, or `null`.
- */
-export function validateAccessTokenForm(values: AccessTokenFormValues): AccessTokenFormValidationResult {
-  return {
-    accessToken: validateAccessToken(values.accessToken),
-  };
-}
-
-/** Validation result for the credential form (two-step PIN). */
-export interface AccountCredentialFormValidationResult {
-  readonly twoStepPin: string | null;
-}
-
-/**
- * Validates all fields of the credential form (two-step PIN).
- *
- * @returns An object with the error key for the two-step PIN field, or `null`.
- */
-export function validateCredentialForm(values: AccountCredentialFormValues): AccountCredentialFormValidationResult {
-  return {
-    twoStepPin: validateTwoStepPin(values.twoStepPin),
-  };
 }

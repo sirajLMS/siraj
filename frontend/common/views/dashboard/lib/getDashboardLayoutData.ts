@@ -22,7 +22,7 @@ import type { NavGroup, NavItem } from "@/frontend/common/views/dashboard/types/
 export const PROFILE_NAV_KEY = "own-profile";
 
 /** True when the pathname is the account footer profile route (`/profile` or a sub-route). */
-export function isProfileRouteActive(pathname: string): boolean {
+function isProfileRouteActive(pathname: string): boolean {
   const stripped = stripLocaleFromPath(pathname);
   return stripped === "/profile" || stripped.startsWith("/profile/");
 }

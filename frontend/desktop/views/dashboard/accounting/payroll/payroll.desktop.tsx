@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@mui/material";
 import { DesktopListStateGate } from "@/frontend/common/views/dashboard/accounting/components/DesktopListStateGate";
 import type { PayrollReportsViewProps } from "@/frontend/common/views/dashboard/accounting/payroll/PayrollReportsContainer";
 import { PayrollReportsDataGrid } from "@/frontend/common/views/dashboard/accounting/payroll/PayrollReportsDataGrid";
@@ -18,16 +17,9 @@ export function PayrollReportsDesktopView(props: Readonly<PayrollReportsViewProp
   return (
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.title} />
-      <DesktopSectionPanel
-        title={labels.title}
-        actions={<PayrollReportsFilterBar {...props} />}
-        contentPadding={false}
-        sx={{ mt: 3 }}
-      >
+      <DesktopSectionPanel title={labels.title} actions={<PayrollReportsFilterBar {...props} />} contentPadding={false}>
         <DesktopListStateGate error={error} loading={loading} hasRows={rows.length > 0} errorMessage={labels.loadError}>
-          <Box sx={{ width: "100%", p: 2 }}>
-            <PayrollReportsDataGrid {...props} />
-          </Box>
+          <PayrollReportsDataGrid {...props} />
         </DesktopListStateGate>
       </DesktopSectionPanel>
     </DesktopPageContainer>

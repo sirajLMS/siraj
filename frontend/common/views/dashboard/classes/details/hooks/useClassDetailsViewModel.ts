@@ -76,7 +76,7 @@ type OverrideRateDialogStoreSlice = {
   readonly openDialog: (amount: string, currency: CurrencyCode | null) => void;
 };
 
-export function buildOverrideRateDialog(
+function buildOverrideRateDialog(
   store: OverrideRateDialogStoreSlice,
   handlers: Handlers,
   seedAmount: string,

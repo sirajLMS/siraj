@@ -21,7 +21,7 @@ import {
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import type { AdminInvoiceStatus } from "@/shared/types";
 
-export interface AdminInvoicesDataGridLabels {
+interface AdminInvoicesDataGridLabels {
   readonly invoiceId: string;
   readonly studentName: string;
   readonly dateIssued: string;

@@ -26,7 +26,7 @@ const SESSION_AUDIT_STATUS_COLORS: Record<SessionAuditStatus, SessionAuditStatus
  * entry is older than this renders as a plain (non-pulsing) chip, since it
  * reads as a historical row rather than something happening right now.
  */
-export const SESSION_AUDIT_PULSE_WINDOW_MS = 24 * 60 * 60 * 1000;
+const SESSION_AUDIT_PULSE_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /**
  * A session pulses only while it is genuinely live and fresh: the status is

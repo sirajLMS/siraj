@@ -13,7 +13,7 @@ export type TeacherProfileViewLabels = {
 
 type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
 
-export type TeacherOwnData = NonNullable<ProfileData["teacherOwnProfile"]>;
+type TeacherOwnData = NonNullable<ProfileData["teacherOwnProfile"]>;
 export type TeacherAdminData = NonNullable<ProfileData["teacherAdminProfile"]>;
 export type TeacherViewData = TeacherOwnData | TeacherAdminData;
 

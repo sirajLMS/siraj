@@ -1,7 +1,8 @@
 "use client";
 
 import { ArchiveOutlined } from "@mui/icons-material";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { Button } from "@mui/material";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import type { UsePackagePlanFormViewModel } from "@/frontend/common/views/dashboard/accounting/usePackagePlanFormViewModel";
 
 interface PackagePlanArchiveDialogLabels {
@@ -28,20 +29,16 @@ function PackagePlanArchiveDialogShared({
   labels,
 }: Readonly<PackagePlanArchiveDialogSharedProps>) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{labels.title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{labels.body}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={archiving}>
-          {labels.cancel}
-        </Button>
-        <Button color="error" variant="contained" onClick={onConfirm} disabled={archiving}>
-          {labels.confirm}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      onClose={onClose}
+      onConfirm={onConfirm}
+      isLoading={archiving}
+      title={labels.title}
+      body={labels.body}
+      cancelLabel={labels.cancel}
+      confirmLabel={labels.confirm}
+    />
   );
 }
 

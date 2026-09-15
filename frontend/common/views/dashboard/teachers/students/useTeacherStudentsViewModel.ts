@@ -33,7 +33,7 @@ interface TeacherStudentsColumnLabels {
   readonly hours: string;
 }
 
-export interface TeacherStudentsLabels {
+interface TeacherStudentsLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly noStudents: string;

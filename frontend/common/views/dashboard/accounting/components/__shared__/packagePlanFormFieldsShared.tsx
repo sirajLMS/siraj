@@ -1,22 +1,9 @@
 "use client";
 
-import {
-  Chip,
-  FormControl,
-  FormControlLabel,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  Switch,
-  type SxProps,
-  TextField,
-  type Theme,
-} from "@mui/material";
+import { Box, Chip, FormControlLabel, Stack, Switch, type SxProps, TextField, type Theme } from "@mui/material";
 import { type Control, Controller, type FieldErrors } from "react-hook-form";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
+import { CurrencySelectController } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySelectControllerShared";
 import {
-  PACKAGE_PLAN_CURRENCY_LABELS,
   PACKAGE_PLAN_CURRENCY_OPTIONS,
   PACKAGE_PLAN_VALIDITY_CHOICES,
 } from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanFormFieldsShared.options";
@@ -183,26 +170,15 @@ export function PackagePlanPriceAmountField(props: Readonly<PackagePlanSizedVali
 
 export function PackagePlanCurrencyField({ control, labels, sx }: Readonly<PackagePlanSizedFieldProps>) {
   return (
-    <Controller
-      name="currency"
-      control={control}
-      render={({ field }) => (
-        <FormControl size="small" sx={sx}>
-          <InputLabel>{labels.currency}</InputLabel>
-          <Select<CurrencyCode>
-            value={field.value}
-            label={labels.currency}
-            onChange={e => field.onChange(e.target.value)}
-          >
-            {PACKAGE_PLAN_CURRENCY_OPTIONS.map(code => (
-              <MenuItem key={code} value={code}>
-                {PACKAGE_PLAN_CURRENCY_LABELS[code] ?? code}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      )}
-    />
+    <Box sx={sx}>
+      <CurrencySelectController
+        name="currency"
+        control={control}
+        label={labels.currency}
+        allowedCodes={PACKAGE_PLAN_CURRENCY_OPTIONS}
+        fullWidth
+      />
+    </Box>
   );
 }
 

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
+import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import {
   Alert,
   AlertTitle,
@@ -17,11 +18,14 @@ import type { Theme } from "@mui/material/styles";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
-import type { ExpenseQuery_expense } from "@/frontend/common/graphql/generated/gql/graphql";
+import { StatusBadge } from "@/frontend/common/components/ui";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField/LabeledField";
+import { PersonProfileLink } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLink";
+import { type ExpenseQuery_expense, ExpenseType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { expenseQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { formatLockedAmount } from "@/frontend/common/lib/currency";
-import { ExpenseSourceChip } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseSourceChip";
-import { ExpenseTypeChip } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseTypeChip";
+import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
+import { EXPENSE_SOURCE_CARRYOVER_BALANCES } from "@/shared/constants/expenses";
 import { useAppLocale } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingExpenses, Translation } from "@/shared/locale/namespaces";
@@ -39,8 +43,6 @@ const SUMMARY_GRID_SX = {
 } as const;
 
 const FULL_WIDTH_SX = { gridColumn: "1 / -1" } as const;
-
-const fieldLabelSx = (theme: Theme) => ({ color: theme.palette.onSurfaceVariant });
 
 const HEADER_SX = (theme: Theme) => ({
   display: "flex",
@@ -61,32 +63,27 @@ export interface ExpenseDetailDrawerProps {
   readonly onClose: () => void;
 }
 
-interface DetailFieldProps {
-  readonly label: string;
-  readonly fullWidth?: boolean;
-  readonly children: React.ReactNode;
-}
-
-/** One labeled field cell in the summary grid: uppercase caption above its value. */
-function DetailField({ label, fullWidth, children }: Readonly<DetailFieldProps>) {
-  return (
-    <Box sx={fullWidth ? FULL_WIDTH_SX : undefined}>
-      <Typography variant="labelUppercase" sx={fieldLabelSx}>
-        {label}
-      </Typography>
-      <Box sx={{ typography: "bodyMd", mt: 0.5 }}>{children}</Box>
-    </Box>
-  );
+/** Localized label for an expense type, so badge cells carry the full copy. */
+function expenseTypeLabel(labels: ExpensesLabels, type: ExpenseType): string {
+  const labelsByType: Record<ExpenseType, string> = {
+    [ExpenseType.Salaries]: labels.type.Salaries,
+    [ExpenseType.Marketing]: labels.type.Marketing,
+    [ExpenseType.Logistics]: labels.type.Logistics,
+    [ExpenseType.Technology]: labels.type.Technology,
+  };
+  return labelsByType[type];
 }
 
 function DrawerHeader({
   expense,
   title,
+  labels,
   closeLabel,
   onClose,
 }: {
   readonly expense: ExpenseDetail | null;
   readonly title: string;
+  readonly labels: ExpensesLabels;
   readonly closeLabel: string;
   readonly onClose: () => void;
 }) {
@@ -98,7 +95,7 @@ function DrawerHeader({
         </Typography>
         {expense?.type ? (
           <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
-            <ExpenseTypeChip type={expense.type} />
+            <StatusBadge category="expenseType" status={expense.type} label={expenseTypeLabel(labels, expense.type)} />
           </Stack>
         ) : null}
       </Box>
@@ -152,6 +149,52 @@ function ExpenseValue({ expense, notSet }: { readonly expense: ExpenseDetail; re
   );
 }
 
+/**
+ * Provenance field for the summary grid: a neutral "Manual" badge for
+ * hand-entered rows, and a clickable "From Carryover" badge for rows produced
+ * by the carryover settlement flow — activating it hands the linked balance id
+ * to `onViewSource` so the caller opens the carryover detail drawer. A
+ * carryover marker without a resolvable linked id (unreachable per the server
+ * invariant) renders nothing rather than a mislabeled Manual badge.
+ */
+function ExpenseSourceBadge({
+  expense,
+  labels,
+  onViewSource,
+}: {
+  readonly expense: ExpenseDetail;
+  readonly labels: ExpensesLabels;
+  readonly onViewSource: (sourceEntityId: string) => void;
+}) {
+  if (expense.sourceEntity === EXPENSE_SOURCE_CARRYOVER_BALANCES && expense.sourceEntityId !== null) {
+    const sourceId = expense.sourceEntityId;
+    const label = labels.source.FromCarryover;
+    return (
+      <Box
+        component="button"
+        type="button"
+        aria-label={label}
+        onClick={() => onViewSource(sourceId)}
+        sx={(theme: Theme) => ({
+          padding: 0,
+          border: "none",
+          background: "none",
+          cursor: "pointer",
+          borderRadius: theme.shape.borderRadius,
+          "&:focus-visible": {
+            outline: `2px solid ${theme.palette.primary.main}`,
+            outlineOffset: 2,
+          },
+        })}
+      >
+        <StatusBadge category="expenseSource" status="carryover" label={label} icon={<LinkOutlinedIcon />} />
+      </Box>
+    );
+  }
+  if (expense.sourceEntity !== null) return null;
+  return <StatusBadge category="expenseSource" status="manual" label={labels.source.Manual} />;
+}
+
 function ExpenseSummary({
   expense,
   labels,
@@ -167,26 +210,33 @@ function ExpenseSummary({
   const notSet = commonLabels.notSet;
   return (
     <Box sx={SUMMARY_GRID_SX}>
-      <DetailField label={labels.column.value}>
-        <ExpenseValue expense={expense} notSet={notSet} />
-      </DetailField>
-      <DetailField label={labels.modal.form.currency}>{expense.expenseCurrency ?? notSet}</DetailField>
-      <DetailField label={labels.column.teacher}>{expense.teacherName ?? notSet}</DetailField>
-      <DetailField label={labels.column.paymentDate}>{expense.paymentDate ?? notSet}</DetailField>
-      <DetailField label={labels.column.expenseDate}>{expense.expenseDate ?? notSet}</DetailField>
-      <DetailField label={labels.column.source}>
-        <ExpenseSourceChip
-          sourceEntity={expense.sourceEntity}
-          sourceEntityId={expense.sourceEntityId}
-          onViewSource={onViewSource}
-        />
-      </DetailField>
-      <DetailField label={labels.drawer.createdBy}>{expense.createdByName ?? notSet}</DetailField>
-      <DetailField label={labels.column.createdAt}>{formatOptionalDate(expense.createdAt, locale, notSet)}</DetailField>
-      <DetailField label={labels.drawer.updatedAt}>{formatOptionalDate(expense.updatedAt, locale, notSet)}</DetailField>
-      <DetailField label={labels.column.note} fullWidth>
-        {expense.note ?? notSet}
-      </DetailField>
+      <LabeledField label={labels.column.value} value={<ExpenseValue expense={expense} notSet={notSet} />} />
+      <LabeledField label={labels.modal.form.currency} value={expense.expenseCurrency ?? notSet} />
+      <LabeledField
+        label={labels.column.teacher}
+        value={
+          expense.teacherName === null ? (
+            notSet
+          ) : (
+            <PersonProfileLink
+              name={expense.teacherName}
+              href={profileHrefForTeacher({ teacherId: expense.teacherId })}
+            />
+          )
+        }
+      />
+      <LabeledField label={labels.column.paymentDate} value={expense.paymentDate ?? notSet} />
+      <LabeledField label={labels.column.expenseDate} value={expense.expenseDate ?? notSet} />
+      <LabeledField
+        label={labels.column.source}
+        value={<ExpenseSourceBadge expense={expense} labels={labels} onViewSource={onViewSource} />}
+      />
+      <LabeledField label={labels.drawer.createdBy} value={expense.createdByName ?? notSet} />
+      <LabeledField label={labels.column.createdAt} value={formatOptionalDate(expense.createdAt, locale, notSet)} />
+      <LabeledField label={labels.drawer.updatedAt} value={formatOptionalDate(expense.updatedAt, locale, notSet)} />
+      <Box sx={FULL_WIDTH_SX}>
+        <LabeledField label={labels.column.note} value={expense.note ?? notSet} />
+      </Box>
     </Box>
   );
 }
@@ -224,7 +274,7 @@ function DrawerBody({
 
 /**
  * Right-side drill-down for a single expense: the full record fields, its type
- * chip, and the provenance source chip. The carryover-sourced chip deep-links
+ * badge, and the provenance source badge. The carryover-sourced badge deep-links
  * into the matching carryover balance route; soft-deleted records get a
  * warning banner with the deletion reason. The detail query runs only while
  * the drawer is open.
@@ -259,7 +309,13 @@ export function ExpenseDetailDrawer({ expenseId, open, onClose }: Readonly<Expen
       aria-label={title}
       slotProps={{ paper: { sx: PAPER_SX } }}
     >
-      <DrawerHeader expense={expense} title={title} closeLabel={commonLabels.ariaClose} onClose={onClose} />
+      <DrawerHeader
+        expense={expense}
+        title={title}
+        labels={labels}
+        closeLabel={commonLabels.ariaClose}
+        onClose={onClose}
+      />
       <Box sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 3 }}>
         {expense !== null && expense.deletedAt !== null ? (
           <DeletedBanner expense={expense} labels={labels} commonLabels={commonLabels} />

@@ -12,7 +12,7 @@ import { useNotificationsDrawerViewModel } from "@/frontend/common/views/dashboa
 import { TeacherProfileCompletionRedirect } from "@/frontend/common/views/dashboard/components/TeacherProfileCompletionRedirect";
 import { getDashboardLayoutData } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
 
-export const NOTIFICATION_COUNT_POLL_INTERVAL_MS = 120_000;
+const NOTIFICATION_COUNT_POLL_INTERVAL_MS = 120_000;
 
 const IDLE_TIMEOUT_MS = 300_000;
 const IDLE_EVENTS: readonly (keyof WindowEventMap)[] = ["mousemove", "keydown", "mousedown", "touchstart", "focus"];

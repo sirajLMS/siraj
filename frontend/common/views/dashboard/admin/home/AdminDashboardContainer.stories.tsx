@@ -5,6 +5,10 @@ import { USER_SELECT_LIMIT } from "@/frontend/common/components/ui/input/userSel
 import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import { isAdminMetricKey } from "@/frontend/common/views/dashboard/admin/__shared__/adminDashboardView";
+import {
+  MOCK_SCHEDULE,
+  MOCK_TEACHERS,
+} from "@/frontend/common/views/dashboard/admin/home/adminDashboardStoriesFixtures";
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import {
@@ -15,7 +19,6 @@ import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboar
 import { AdminDashboardDesktopView } from "@/frontend/desktop/views/dashboard/admin/home/adminDashboard.desktop";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import { type AdminDashboardLabels, Translation, useAppTranslation } from "@/shared/locale";
-import { MOCK_SCHEDULE, MOCK_TEACHERS } from "./adminDashboardStoriesFixtures";
 
 function noopSubmit() {}
 

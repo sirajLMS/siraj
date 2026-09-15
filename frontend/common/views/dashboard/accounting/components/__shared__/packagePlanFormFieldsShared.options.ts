@@ -8,13 +8,6 @@ export const PACKAGE_PLAN_CURRENCY_OPTIONS: readonly CurrencyCode[] = [
   CurrencyCode.Aed,
 ];
 
-export const PACKAGE_PLAN_CURRENCY_LABELS: Record<string, string> = {
-  Egp: "EGP",
-  Usd: "USD",
-  Sar: "SAR",
-  Aed: "AED",
-};
-
 export const PACKAGE_PLAN_VALIDITY_CHOICES: readonly number[] = [1, 3, 6, 12];
 
 /** Per-tier sizing overrides for the package plan form fields (undefined = natural size). */

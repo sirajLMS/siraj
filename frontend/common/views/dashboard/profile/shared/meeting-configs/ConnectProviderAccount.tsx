@@ -13,7 +13,7 @@ import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 export type ConnectionState = "disconnected" | "connecting" | "connected" | "expiring" | "expired";
 
-export type ConnectProviderAccountLabels = Pick<
+type ConnectProviderAccountLabels = Pick<
   ProfileNotificationsLabels["connectAccount"],
   | "connectButton"
   | "connectingLabel"

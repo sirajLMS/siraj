@@ -41,7 +41,7 @@ const EMPTY_ROW_COUNTS: Record<CalculationStatus, number> = {
 export type PayrollReportRow = PayrollReportQuery_payrollReport_rows;
 
 /** Filter fields exactly as the report consumes them (search already debounced). */
-export interface PayrollReportFilterFields {
+interface PayrollReportFilterFields {
   readonly teacherId: string | null;
   readonly studentId: string | null;
   readonly dateFrom: string | null;
@@ -215,7 +215,7 @@ function extractDownloadFilename(disposition: string | null): string {
  * mirror the report filter input one-to-one; statuses are comma-joined (the
  * route also accepts them as repeatable params).
  */
-export function buildPayrollExportCsvUrl(fields: PayrollReportFilterFields): string {
+function buildPayrollExportCsvUrl(fields: PayrollReportFilterFields): string {
   const params = new URLSearchParams();
   if (fields.teacherId !== null && fields.teacherId !== "") params.set("teacherId", fields.teacherId);
   if (fields.studentId !== null && fields.studentId !== "") params.set("studentId", fields.studentId);

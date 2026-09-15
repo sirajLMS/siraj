@@ -12,7 +12,7 @@ import type {
 } from "@/frontend/common/views/dashboard/settings/types/appearanceSettings.types";
 
 /** Tier action presets: desktop passes the DesktopActionButtons, mobile the MobileActionButtons variants. */
-export interface AppearanceActionSlots {
+interface AppearanceActionSlots {
   readonly PrimaryAction: ComponentType<ButtonProps>;
   readonly SecondaryAction: ComponentType<ButtonProps>;
   readonly ExportAction: ComponentType<ButtonProps>;

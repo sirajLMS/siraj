@@ -5,7 +5,7 @@ import type { CurrencyCode, SupportedCurrencyFieldsFragment } from "@/frontend/c
 import { type CurrencyOption, currencies } from "@/frontend/common/lib/currency";
 import { countryCodeToEmoji } from "@/frontend/common/lib/locale";
 
-export type SupportedCurrencyRow = Pick<
+type SupportedCurrencyRow = Pick<
   SupportedCurrencyFieldsFragment,
   "code" | "symbol" | "countryCode" | "decimals" | "sortOrder" | "isActive"
 > & { readonly code: CurrencyCode };

@@ -1,25 +1,24 @@
 "use client";
 
-import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
+import { ClearOutlined } from "@mui/icons-material";
 import {
   Box,
   FormControl,
   FormControlLabel,
   FormLabel,
   IconButton,
-  InputAdornment,
-  Paper,
   Radio,
   RadioGroup,
   Stack,
   Switch,
-  TextField,
   Tooltip,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AppDateRangePicker } from "@/frontend/common/components/ui/form/date";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import { TeacherAutocomplete } from "@/frontend/common/components/ui/input/userSelect";
 import { type CarryoverPaidStatusFilter, useCarryoverFilterStore } from "@/frontend/common/stores/carryoverFilterStore";
+import { FilterBarShellShared } from "@/frontend/common/views/dashboard/accounting/components/__shared__/filterBarShellShared";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingCarryover } from "@/shared/locale/namespaces";
 
@@ -61,38 +60,6 @@ function useDebouncedSearchInput(search: string, setSearch: (value: string) => v
     return () => clearTimeout(timeout);
   }, [inputValue, search, setSearch]);
   return { inputValue, setInputValue };
-}
-
-interface SearchTextFieldProps {
-  readonly placeholder: string;
-  readonly value: string;
-  readonly onChange: (value: string) => void;
-}
-
-function SearchTextField({ placeholder, value, onChange }: Readonly<SearchTextFieldProps>) {
-  return (
-    <TextField
-      size="small"
-      placeholder={placeholder}
-      value={value}
-      onChange={event => onChange(event.target.value)}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchOutlined fontSize="small" />
-            </InputAdornment>
-          ),
-        },
-        htmlInput: {
-          "aria-label": placeholder,
-          autoComplete: "off",
-          maxLength: SEARCH_INPUT_MAX_LENGTH,
-        },
-      }}
-      sx={{ width: "100%", flex: { xs: "1 1 100%", md: "1 1 0" }, minWidth: { md: 232 } }}
-    />
-  );
 }
 
 interface PaidStatusRadioGroupProps {
@@ -251,35 +218,45 @@ export function CarryoverFilterBar() {
     search !== "";
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, px: { md: 1 }, width: "100%" }}>
-      <Stack
-        direction={{ xs: "column", md: "row" }}
-        sx={{ flexWrap: "wrap", gap: { xs: 2, md: 0.5 }, alignItems: { xs: "stretch", md: "center" } }}
-      >
-        <SearchTextField placeholder={t.filters.searchPlaceholder} value={inputValue} onChange={setInputValue} />
-        <TeacherAutocomplete
-          size="small"
-          label={t.filters.teacher}
-          placeholder={t.filters.teacherPlaceholder}
-          value={teacherSelection}
-          onChange={setTeacher}
-          sx={{ width: { xs: "100%", md: "auto" }, flex: { md: "1 1 0" }, minWidth: { md: 190 } }}
-        />
-        <PaidStatusRadioGroup
-          groupLabel={t.filters.paidStatus}
-          labels={paidStatusLabels}
-          value={paidStatus}
-          onChange={setPaidStatus}
-        />
-        <DateRangeFilter
-          label={t.filters.dateRange}
-          fromLabel={t.filters.fromDate}
-          toLabel={t.filters.toDate}
-          dateFrom={dateFrom}
-          dateTo={dateTo}
-          onDateFromChange={setDateFrom}
-          onDateToChange={setDateTo}
-        />
+    <FilterBarShellShared
+      paperSx={{ px: { md: 1 } }}
+      stackSx={{ gap: { xs: 2, md: 0.5 } }}
+      content={
+        <>
+          <SearchBarField
+            placeholder={t.filters.searchPlaceholder}
+            value={inputValue}
+            onChange={setInputValue}
+            clearLabel={t.filters.clear}
+            maxLength={SEARCH_INPUT_MAX_LENGTH}
+            sx={{ width: "100%", flex: { xs: "1 1 100%", md: "1 1 0" }, minWidth: { md: 232 } }}
+          />
+          <TeacherAutocomplete
+            size="small"
+            label={t.filters.teacher}
+            placeholder={t.filters.teacherPlaceholder}
+            value={teacherSelection}
+            onChange={setTeacher}
+            sx={{ width: { xs: "100%", md: "auto" }, flex: { md: "1 1 0" }, minWidth: { md: 190 } }}
+          />
+          <PaidStatusRadioGroup
+            groupLabel={t.filters.paidStatus}
+            labels={paidStatusLabels}
+            value={paidStatus}
+            onChange={setPaidStatus}
+          />
+          <DateRangeFilter
+            label={t.filters.dateRange}
+            fromLabel={t.filters.fromDate}
+            toLabel={t.filters.toDate}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onDateFromChange={setDateFrom}
+            onDateToChange={setDateTo}
+          />
+        </>
+      }
+      actions={
         <FilterActions
           toggleLabel={t.filters.includeDisabledTeachers}
           includeDisabledTeachers={includeDisabledTeachers}
@@ -288,7 +265,7 @@ export function CarryoverFilterBar() {
           showClear={hasActiveFilters}
           onClear={clearFilters}
         />
-      </Stack>
-    </Paper>
+      }
+    />
   );
 }

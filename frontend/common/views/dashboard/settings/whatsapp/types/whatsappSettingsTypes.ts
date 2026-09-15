@@ -50,40 +50,6 @@ export interface WhatsappOptInUserState {
 }
 
 /**
- * Form values for the create-account form.
- *
- * The create form collects the three identity fields plus the routing
- * purpose; the remaining account fields are populated server-side or via
- * the Meta sync flow.
- */
-export interface AccountCreateFormValues {
-  readonly displayName: string;
-  readonly phoneNumberId: string;
-  readonly wabaId: string;
-  readonly purpose: string;
-}
-
-/**
- * Form values for the access-token dialog form (Task 2 — activated).
- *
- * The access token is sent via the dedicated `setWhatsappAccessToken` mutation,
- * not as part of the account create/update payload.
- */
-export interface AccessTokenFormValues {
-  readonly accessToken: string;
-}
-
-/**
- * Form values for the two-step PIN dialog form (Task 2 — activated).
- *
- * The PIN is sent via the dedicated `setWhatsappTwoStepPin` mutation,
- * not as part of the account create/update payload.
- */
-export interface AccountCredentialFormValues {
-  readonly twoStepPin: string;
-}
-
-/**
  * New snackbar pattern: `null` when closed, `{ message, severity }` when open.
  */
 export type WhatsappSnackbar = { readonly message: string; readonly severity: "success" | "error" } | null;

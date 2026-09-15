@@ -14,22 +14,22 @@ import {
 } from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 
-export interface ProfileEditFormSubmitLabels {
+interface ProfileEditFormSubmitLabels {
   readonly save: string;
   readonly loading?: string;
 }
 
-export interface ProfileEditFormSnackbarLabels {
+interface ProfileEditFormSnackbarLabels {
   readonly saveSuccess: string;
   readonly saveError: string;
 }
 
-export interface ProfileEditFormResetPasswordLabels {
+interface ProfileEditFormResetPasswordLabels {
   readonly success: string;
   readonly error: string;
 }
 
-export interface ProfileEditFormResetPasswordSection {
+interface ProfileEditFormResetPasswordSection {
   readonly userName: string;
   readonly userEmail: string;
 }

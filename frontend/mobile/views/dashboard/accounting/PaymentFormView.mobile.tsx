@@ -1,23 +1,26 @@
 "use client";
 
 import { SaveOutlined, SyncOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, FormControlLabel, Stack, Switch, TextField } from "@mui/material";
+import { Box, CircularProgress, Stack, TextField } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { type ChangeEvent, useState } from "react";
 import { Controller } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
-import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
+import {
+  PaymentDecimalControllerField,
+  PaymentPaidStatusControllerField,
+  PaymentStudentControllerField,
+} from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentFormFieldsShared";
 import { paymentReadOnlyFieldSx } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentFormFieldsShared.styles";
-import { PackagePlanSelectShared } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanSelectShared";
+import { PackagePlanAutocomplete } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanAutocomplete";
 import {
   CurrencyMismatchAlert,
   GatewaySelectField,
   PaymentNoteField,
 } from "@/frontend/common/views/dashboard/accounting/components/PaymentFormFields";
 import type { UsePaymentFormViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentFormViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobilePageContainer, MobilePageHeader, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import { MobileAppDatePicker } from "@/frontend/mobile/components/ui/form/date";
 import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 
@@ -27,7 +30,6 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
     control,
     editControl,
     errors,
-    editErrors,
     handleSubmit,
     handleEditSubmit,
     isSubmitting,
@@ -47,30 +49,23 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
 
   const submitButtons = (
     <>
-      <Button
+      <MobilePrimaryPageAction
         type="submit"
-        variant="contained"
-        size="large"
         disabled={isSubmitting}
         startIcon={isSubmitting ? <SyncOutlined /> : <SaveOutlined />}
       >
         {isSubmitting ? t.form.saving : t.form.submit}
-      </Button>
-      <Button
+      </MobilePrimaryPageAction>
+      <MobilePrimaryPageAction
         variant="text"
         color="inherit"
         onClick={() => router.push("/accounting/payments")}
         disabled={isSubmitting}
       >
         {t.form.cancel}
-      </Button>
+      </MobilePrimaryPageAction>
     </>
   );
-
-  // Keep the resolved student option (id + display name) in local state so the
-  // autocomplete shows the human-readable name instead of the raw id after
-  // re-renders triggered by other form fields (e.g. package auto-fill).
-  const [selectedStudent, setSelectedStudent] = useState<PersonOption | null>(null);
 
   if (isEditing && loadingExisting) {
     return (
@@ -106,20 +101,12 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
               sx={paymentReadOnlyFieldSx}
             />
 
-            <Controller
-              name="creditHours"
+            <PaymentDecimalControllerField
               control={editControl}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  size="small"
-                  type="number"
-                  label={t.form.credit}
-                  error={Boolean(editErrors.creditHours)}
-                  helperText={editErrors.creditHours?.message}
-                  slotProps={{ htmlInput: { step: 0.5, min: 0.5, inputMode: "decimal" } }}
-                />
-              )}
+              name="creditHours"
+              label={t.form.credit}
+              inputStep={0.5}
+              inputMin={0.5}
             />
 
             <Controller
@@ -150,30 +137,18 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
       ) : (
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <Stack spacing={2.5} sx={{ px: 2, pb: 6 }}>
-            <Controller
-              name="studentId"
+            <PaymentStudentControllerField
               control={control}
-              render={({ field }) => (
-                <StudentAutocompleteMobile
-                  value={selectedStudent}
-                  onChange={option => {
-                    setSelectedStudent(option ?? null);
-                    field.onChange(option?.id ?? "");
-                  }}
-                  label={t.form.student}
-                  placeholder={t.form.studentPlaceholder}
-                  error={Boolean(errors.studentId)}
-                  helperText={errors.studentId?.message}
-                  fullWidth
-                />
-              )}
+              label={t.form.student}
+              placeholder={t.form.studentPlaceholder}
+              StudentAutocomplete={StudentAutocompleteMobile}
             />
 
             <Controller
               name="packagePlanId"
               control={control}
               render={({ field }) => (
-                <PackagePlanSelectShared
+                <PackagePlanAutocomplete
                   value={field.value}
                   onChange={field.onChange}
                   label={t.form.packagePlan}
@@ -186,37 +161,21 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
             />
 
             <Stack direction="row" spacing={1.5}>
-              <Controller
+              <PaymentDecimalControllerField
+                control={control}
                 name="creditHours"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    size="small"
-                    type="number"
-                    label={t.form.credit}
-                    error={Boolean(errors.creditHours)}
-                    helperText={errors.creditHours?.message}
-                    slotProps={{ htmlInput: { step: 0.5, min: 0.5, inputMode: "decimal" } }}
-                    sx={{ flex: 1 }}
-                  />
-                )}
+                label={t.form.credit}
+                inputStep={0.5}
+                inputMin={0.5}
+                sx={{ flex: 1 }}
               />
-              <Controller
-                name="amount"
+              <PaymentDecimalControllerField
                 control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    size="small"
-                    type="number"
-                    label={t.form.paid}
-                    error={Boolean(errors.amount)}
-                    helperText={errors.amount?.message}
-                    slotProps={{ htmlInput: { step: 0.01, min: 0, inputMode: "decimal" } }}
-                    sx={{ flex: 1 }}
-                  />
-                )}
+                name="amount"
+                label={t.form.paid}
+                inputStep={0.01}
+                inputMin={0}
+                sx={{ flex: 1 }}
               />
             </Stack>
 
@@ -268,21 +227,10 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
               )}
             />
 
-            <Controller
-              name="isPaidStatusOn"
+            <PaymentPaidStatusControllerField
               control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={field.value}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => field.onChange(e.target.checked)}
-                    />
-                  }
-                  label={field.value ? t.form.paidToggleOn : t.form.paidToggleOff}
-                  sx={{ mx: 0, py: 0.5 }}
-                />
-              )}
+              onLabel={t.form.paidToggleOn}
+              offLabel={t.form.paidToggleOff}
             />
 
             <Controller

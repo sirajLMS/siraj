@@ -1,7 +1,6 @@
 "use client";
 
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import { Box } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { bulkDeleteCarryoverBalancesMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
@@ -82,15 +81,13 @@ export function BulkDeleteCarryoverDialog({ open, rows, onClose, onDone }: Reado
       open={open}
       busy={loading}
       title={labels.action.bulkDelete}
+      body=""
       cancelLabel={labels.modal.delete.cancel}
       confirmLabel={labels.modal.delete.confirm}
-      closeAriaLabel={commonLabels.ariaClose}
       onClose={onClose}
       onConfirm={confirm}
     >
-      <Box sx={{ pt: 1 }}>
-        <CarryoverConfirmDetails details={details} />
-      </Box>
+      <CarryoverConfirmDetails details={details} />
     </CarryoverConfirmScaffold>
   );
 }

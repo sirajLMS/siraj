@@ -25,12 +25,12 @@ export interface ManagementControlsCardSlotProps {
   readonly SubmitAction: React.ComponentType<SharedActionButtonProps>;
 }
 
-export interface SharedCardContainerProps {
+interface SharedCardContainerProps {
   readonly sx?: SxProps<Theme>;
   readonly children: ReactNode;
 }
 
-export interface SharedStatusBadgeProps {
+interface SharedStatusBadgeProps {
   readonly category: "studentAccount";
   readonly status: string;
   readonly label: string;
@@ -43,7 +43,7 @@ export interface SharedTeacherAutocompleteProps {
   readonly placeholder: string;
 }
 
-export interface SharedActionButtonProps {
+interface SharedActionButtonProps {
   readonly children: ReactNode;
   readonly disabled?: boolean;
   readonly fullWidth?: boolean;

@@ -370,7 +370,7 @@ Below is the verified, living catalog of existing UI components available in the
 2. **Mandatory 5-Subtask Breakdown for Every Task (X.Y)**:
    Every fix item in the plan MUST be broken down with:
    - `- [ ] X.Y.QL **Quality Loop**: bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene (exit code 0)`
-   - `- [ ] X.Y.TE **Test Engineering**: Author/expand frontend unit/component tests (Happy DOM) verifying component replacement`
+   - `- [ ] X.Y.TE **Test Engineering**: Author/expand Storybook stories and/or ViewModel unit tests verifying component replacement`
    - `- [ ] X.Y.SEC **Security & Tenancy Audit**: Verify access control (<RequirePermission>) and no sensitive client leaks`
    - `- [ ] X.Y.SR **Semantic Review**: Pre-completion gate (validate shared UI primitive usage, paginationOptions, no raw unstyled inputs/tables/chips)`
    - `- [ ] X.Y.IV **Instruction Verification**: Validate against auto-discovered AGENTS.md and .agents/instructions/frontend.instructions.md`

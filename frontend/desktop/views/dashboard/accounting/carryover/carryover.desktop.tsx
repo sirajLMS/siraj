@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@mui/material";
 import type { CarryoverViewProps } from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverContainer";
 import { CarryoverDataGrid } from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverDataGrid";
 import { CarryoverFilterBar } from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverFilterBar";
@@ -33,9 +32,7 @@ export function CarryoverDesktopView(props: Readonly<CarryoverViewProps>) {
           hasRows={rows.length > 0}
           errorMessage={labels.loadError}
         >
-          <Box sx={{ width: "100%", p: 2 }}>
-            <CarryoverDataGrid {...props} />
-          </Box>
+          <CarryoverDataGrid {...props} />
         </DesktopListStateGate>
       </DesktopSectionPanel>
     </DesktopPageContainer>

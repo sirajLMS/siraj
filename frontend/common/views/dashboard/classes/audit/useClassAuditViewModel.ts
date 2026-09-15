@@ -64,7 +64,7 @@ interface ClassAuditShellViewModel {
   readonly onRetry: () => void;
 }
 
-export interface ClassAuditReadyViewModel extends Omit<ClassAuditViewProps, "audit" | "labels"> {
+interface ClassAuditReadyViewModel extends Omit<ClassAuditViewProps, "audit" | "labels"> {
   readonly status: "ready";
   readonly audit: Audit;
   readonly labels: ClassAuditLabels;

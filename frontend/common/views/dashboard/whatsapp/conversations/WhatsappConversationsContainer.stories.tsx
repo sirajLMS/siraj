@@ -393,8 +393,7 @@ export const ViewOnlyPermission: Story = {
     ),
   ],
   play: async ({ canvas }) => {
-    // Covers the read-only chrome; the disabled send button itself is asserted
-    // deterministically by the container component test (Happy DOM).
+    // Covers the read-only chrome and recipient action states.
     await canvas.findByText(whatsappConversationsEn.readOnlyBadge, undefined, { timeout: 5000 });
     await expect(canvas.queryByRole("button", { name: whatsappConversationsEn.recipientAdd })).toBeNull();
     await expect(canvas.queryByRole("button", { name: whatsappConversationsEn.recipientVerify })).toBeNull();

@@ -66,7 +66,7 @@ export const PAYMENT_METHOD_TRANSACTION_SNAPSHOT_FIELDS = gql`
   ${PAYMENT_METHOD_DETAILS_FIELDS}
 `;
 
-export const USER_PAYMENT_METHOD_FIELDS = gql`
+const USER_PAYMENT_METHOD_FIELDS = gql`
   fragment UserPaymentMethodFields on UserPaymentMethod {
     id
     userId

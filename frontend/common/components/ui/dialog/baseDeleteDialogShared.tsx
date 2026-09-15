@@ -18,6 +18,7 @@ export function BaseDeleteDialogScaffold({
   body,
   cancelLabel,
   confirmLabel,
+  confirmDisabled,
   dialogId,
   confirmSx,
   fullScreen,
@@ -67,7 +68,7 @@ export function BaseDeleteDialogScaffold({
         <ConfirmActionButton
           fullWidth
           onClick={onConfirm}
-          disabled={isLoading}
+          disabled={isLoading || Boolean(confirmDisabled)}
           aria-busy={isLoading}
           sx={
             confirmSx ??

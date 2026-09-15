@@ -126,7 +126,7 @@ export function getTestPort(): number {
   return FIXED_TEST_PORT;
 }
 
-export function getTestBaseUrl(): string {
+function getTestBaseUrl(): string {
   return `http://localhost:${getTestPort()}`;
 }
 

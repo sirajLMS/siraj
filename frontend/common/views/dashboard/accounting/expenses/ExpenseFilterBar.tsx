@@ -1,28 +1,27 @@
 "use client";
 
-import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
+import { ClearOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
   Chip,
   FormControl,
   FormControlLabel,
-  InputAdornment,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   type SelectChangeEvent,
   Stack,
   Switch,
-  TextField,
 } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { useEffect, useState } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { AppDatePicker, AppDateRangePicker } from "@/frontend/common/components/ui/form/date";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField/SearchBarField";
 import { ExpenseType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useExpenseFilterStore } from "@/frontend/common/stores/expenseFilterStore";
-import { ExpenseTypeChip } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseTypeChip";
+import { FilterBarShellShared } from "@/frontend/common/views/dashboard/accounting/components/__shared__/filterBarShellShared";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardAccountingExpenses } from "@/shared/locale/namespaces";
 
@@ -81,35 +80,25 @@ function useDebouncedTitleInput(title: string, setTitle: (value: string) => void
   return { inputValue, setInputValue };
 }
 
-interface TitleSearchFieldProps {
-  readonly placeholder: string;
-  readonly value: string;
-  readonly onChange: (value: string) => void;
-}
-
-function TitleSearchField({ placeholder, value, onChange }: Readonly<TitleSearchFieldProps>) {
+/** Collapsed multi-select preview: a few type badges, then a "+N" overflow chip. */
+function renderTypeValue(
+  selected: readonly string[],
+  labelsByType: Record<ExpenseType, string>,
+  placeholderLabel: string
+): React.ReactNode {
+  const types = selected.filter(isExpenseType);
+  if (types.length === 0) {
+    return <Box sx={theme => ({ color: theme.palette.onSurfaceVariant })}>{placeholderLabel}</Box>;
+  }
   return (
-    <TextField
-      size="small"
-      placeholder={placeholder}
-      value={value}
-      onChange={event => onChange(event.target.value)}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchOutlined fontSize="small" />
-            </InputAdornment>
-          ),
-        },
-        htmlInput: {
-          "aria-label": placeholder,
-          autoComplete: "off",
-          maxLength: TITLE_INPUT_MAX_LENGTH,
-        },
-      }}
-      sx={{ width: "100%", flex: { xs: "1 1 100%", md: "1 1 0" }, minWidth: { md: 220 } }}
-    />
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+      {types.slice(0, TYPE_CHIP_PREVIEW_LIMIT).map(type => (
+        <StatusBadge key={type} category="expenseType" status={type} label={labelsByType[type]} />
+      ))}
+      {types.length > TYPE_CHIP_PREVIEW_LIMIT ? (
+        <Chip size="small" sx={{ height: "auto" }} label={`+${types.length - TYPE_CHIP_PREVIEW_LIMIT}`} />
+      ) : null}
+    </Box>
   );
 }
 
@@ -120,25 +109,7 @@ interface TypeFilterSelectProps {
   readonly onChange: (types: readonly ExpenseType[]) => void;
 }
 
-/** Collapsed multi-select preview: a few type chips, then a "+N" overflow chip. */
-function renderTypeValue(selected: readonly string[], placeholderLabel: string): React.ReactNode {
-  const types = selected.filter(isExpenseType);
-  if (types.length === 0) {
-    return <Box sx={theme => ({ color: theme.palette.onSurfaceVariant })}>{placeholderLabel}</Box>;
-  }
-  return (
-    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-      {types.slice(0, TYPE_CHIP_PREVIEW_LIMIT).map(type => (
-        <ExpenseTypeChip key={type} type={type} />
-      ))}
-      {types.length > TYPE_CHIP_PREVIEW_LIMIT ? (
-        <Chip size="small" sx={{ height: "auto" }} label={`+${types.length - TYPE_CHIP_PREVIEW_LIMIT}`} />
-      ) : null}
-    </Box>
-  );
-}
-
-/** Multi-select of expense types; chips preview the selection, the label marks an empty one. */
+/** Multi-select of expense types; badges preview the selection, the label marks an empty one. */
 function TypeFilterSelect({ label, labelsByType, value, onChange }: Readonly<TypeFilterSelectProps>) {
   const handleChange = (event: SelectChangeEvent<string[]>) => {
     const next = event.target.value;
@@ -157,7 +128,7 @@ function TypeFilterSelect({ label, labelsByType, value, onChange }: Readonly<Typ
         displayEmpty
         value={[...value]}
         onChange={handleChange}
-        renderValue={selected => renderTypeValue(selected, label)}
+        renderValue={selected => renderTypeValue(selected, labelsByType, label)}
       >
         {EXPENSE_TYPES.map(type => (
           <MenuItem key={type} value={type}>
@@ -334,23 +305,31 @@ export function ExpenseFilterBar() {
     includeDeleted;
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, width: "100%" }}>
-      <Stack
-        direction={{ xs: "column", md: "row" }}
-        sx={{ flexWrap: "wrap", gap: 2, alignItems: { xs: "stretch", md: "center" } }}
-      >
-        <TitleSearchField placeholder={t.filters.searchPlaceholder} value={inputValue} onChange={setInputValue} />
-        <TypeFilterSelect label={t.filters.type} labelsByType={labelsByType} value={types} onChange={setTypes} />
-        <MonthFilter label={t.filters.expenseDate} expenseDate={expenseDate} onChange={setExpenseDate} />
-        <PaymentDateRangeFilter
-          label={t.filters.paymentDateRange}
-          fromLabel={t.filters.paymentDateFrom}
-          toLabel={t.filters.paymentDateTo}
-          paymentDateFrom={paymentDateFrom}
-          paymentDateTo={paymentDateTo}
-          onDateFromChange={setPaymentDateFrom}
-          onDateToChange={setPaymentDateTo}
-        />
+    <FilterBarShellShared
+      content={
+        <>
+          <SearchBarField
+            value={inputValue}
+            onChange={setInputValue}
+            placeholder={t.filters.searchPlaceholder}
+            maxLength={TITLE_INPUT_MAX_LENGTH}
+            clearLabel={t.filters.clear}
+            sx={{ width: "100%", flex: { xs: "1 1 100%", md: "1 1 0" }, minWidth: { md: 220 } }}
+          />
+          <TypeFilterSelect label={t.filters.type} labelsByType={labelsByType} value={types} onChange={setTypes} />
+          <MonthFilter label={t.filters.expenseDate} expenseDate={expenseDate} onChange={setExpenseDate} />
+          <PaymentDateRangeFilter
+            label={t.filters.paymentDateRange}
+            fromLabel={t.filters.paymentDateFrom}
+            toLabel={t.filters.paymentDateTo}
+            paymentDateFrom={paymentDateFrom}
+            paymentDateTo={paymentDateTo}
+            onDateFromChange={setPaymentDateFrom}
+            onDateToChange={setPaymentDateTo}
+          />
+        </>
+      }
+      actions={
         <FilterActions
           toggleLabel={t.filters.includeDeleted}
           includeDeleted={includeDeleted}
@@ -359,7 +338,7 @@ export function ExpenseFilterBar() {
           showClear={hasActiveFilters}
           onClear={clearFilters}
         />
-      </Stack>
-    </Paper>
+      }
+    />
   );
 }

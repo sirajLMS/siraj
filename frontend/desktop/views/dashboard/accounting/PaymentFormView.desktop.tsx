@@ -14,7 +14,7 @@ import {
   PaymentStudentControllerField,
 } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentFormFieldsShared";
 import { paymentReadOnlyFieldSx } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentFormFieldsShared.styles";
-import { PackagePlanSelectShared } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanSelectShared";
+import { PackagePlanAutocomplete } from "@/frontend/common/views/dashboard/accounting/components/PackagePlanAutocomplete";
 import {
   CurrencyMismatchAlert,
   GatewaySelectField,
@@ -237,7 +237,7 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
                     name="packagePlanId"
                     control={control}
                     render={({ field }) => (
-                      <PackagePlanSelectShared
+                      <PackagePlanAutocomplete
                         value={field.value}
                         onChange={field.onChange}
                         label={t.form.packagePlan}

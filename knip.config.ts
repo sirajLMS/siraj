@@ -45,12 +45,12 @@ const config: KnipConfig = {
   project: [
     "app/**/*.{ts,tsx}",
     "backend/**/*.{ts,tsx}",
-    "frontend/**/*.{ts,tsx}",
-    // MDX: knip's built-in MDX compiler is registered via the @mdx-js peer of
-    // @storybook/addon-docs (bun.lock); without this extension in `project` knip emits a
-    // "compiled extension excluded" config hint. No .mdx files exist in the repo yet —
-    // this covers future Storybook docs pages so their imports would be followed.
-    "frontend/**/*.mdx",
+    // MDX: knip registers its MDX compiler via the @mdx-js dependency of
+    // @storybook/addon-docs (bun.lock). Without a user-defined project pattern covering
+    // `.mdx`, knip emits a "Compiled extension excluded by project" config hint.
+    // Extending this brace glob covers the extension (and future Storybook docs pages)
+    // while still matching all TS/TSX sources.
+    "frontend/**/*.{ts,tsx,mdx}",
     "shared/**/*.{ts,tsx}",
     "scripts/**/*.{ts,tsx}",
     "test/**/*.{ts,tsx}",
@@ -74,11 +74,9 @@ const config: KnipConfig = {
     "frontend/common/lib/payment-method.ts",
 
     // Namespace-member usage invisible to knip's member tracking:
-    // - recurring-schedule-detail/payment-catalog: consumed via `const { X } = await import(...)` dynamic imports
     // - appearance-settings getResolvedAppearance: consumed by service tests via the services barrel
     // - supported-*-repo `listAll`: consumed through the generic `CatalogRepo` type parameter of
     //   buildCatalogMethods() (payment-catalog.service.ts), not by class-name member access
-    "backend/services/schedule/recurring-schedule-detail.service.ts",
     "backend/services/payment-method/payment-catalog.service.ts",
     "backend/services/appearance/appearance-settings.service.ts",
     "backend/db/repo/billing/supported-payment-link.repository.ts",

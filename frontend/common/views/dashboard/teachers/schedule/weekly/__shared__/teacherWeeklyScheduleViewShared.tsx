@@ -42,7 +42,7 @@ export interface TeacherWeeklyScheduleViewSharedSlots {
   readonly LegendBar?: FC<Readonly<{ labels: ScheduleLabels; schedule: Schedule }>>;
 }
 
-export function ClearScheduleDialogShared({
+function ClearScheduleDialogShared({
   labels,
   open,
   onCancel,

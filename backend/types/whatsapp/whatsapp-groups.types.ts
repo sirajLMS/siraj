@@ -251,7 +251,7 @@ export type WhatsappGroupMessageReturnType = Omit<WhatsappGroupMessageSelectType
  * to the owning WhatsApp account; the (accountId, groupJid) pair is unique
  * per Meta's constraint on the underlying table.
  */
-export interface WhatsappGroupCreateInput {
+interface WhatsappGroupCreateInput {
   readonly accountId: string;
   readonly subject: string;
   readonly description?: string;

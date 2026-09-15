@@ -99,7 +99,7 @@ You are an expert Frontend Architect and Code Reviewer auditing the Siraj LMS fr
 2. **Mandatory 5-Subtask Breakdown for Every Task (X.Y)**:
    Every fix item in the plan MUST be broken down with:
    - `- [ ] X.Y.QL **Quality Loop**: bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene (exit code 0)`
-   - `- [ ] X.Y.TE **Test Engineering**: Author/expand frontend unit/component tests (Happy DOM)`
+   - `- [ ] X.Y.TE **Test Engineering**: Author/expand Storybook stories and/or ViewModel unit tests`
    - `- [ ] X.Y.SEC **Security & Tenancy Audit**: Probe for client-side permission leaks, unescaped HTML, or sensitive state exposure`
    - `- [ ] X.Y.SR **Semantic Review**: Pre-completion gate (no hardcoded colors, no direct MUI v9 style props, no raw strings)`
    - `- [ ] X.Y.IV **Instruction Verification**: Validate against auto-discovered AGENTS.md and .agents/instructions/frontend.instructions.md`

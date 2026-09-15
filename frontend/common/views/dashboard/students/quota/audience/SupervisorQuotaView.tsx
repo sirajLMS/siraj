@@ -33,7 +33,7 @@ import {
 import { SupervisorQuotaMetrics } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/supervisorQuotaMetrics";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
-export type SupervisorQuotaMetricsRenderer = (params: { readonly metrics: readonly MetricItem[] }) => ReactNode;
+type SupervisorQuotaMetricsRenderer = (params: { readonly metrics: readonly MetricItem[] }) => ReactNode;
 
 interface SupervisorQuotaViewProps {
   readonly t: StudentQuotaLabels;

@@ -7,7 +7,6 @@ export {
   type MobileLayoutProps,
   type RawMetric,
   SessionStatus,
-  type StatusActionLabels,
   type StatusActionProps,
   type StatusTrackingCardListProps,
   type StatusTrackingDataGridProps,

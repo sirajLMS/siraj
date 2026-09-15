@@ -9,12 +9,18 @@ import {
   MoreVertOutlined,
   ReceiptLongOutlined,
 } from "@mui/icons-material";
-import { Box, Button, Chip, IconButton, Menu, MenuItem, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Chip, IconButton, Menu, MenuItem, Stack, Tooltip, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useMemo, useState } from "react";
-import { ExportButton, SectionPanel } from "@/frontend/common/components/ui";
+import {
+  DangerActionButton,
+  ExportButton,
+  PrimaryPageAction,
+  SectionPanel,
+  StatusBadge,
+} from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { usePageLocalRowSelection } from "@/frontend/common/components/ui/dataGrid/usePageLocalRowSelection";
 import { PersonProfileLinkCell } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLinkCell";
@@ -29,14 +35,13 @@ import {
   formatAccountingMoney,
   formatAccountingMonth,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
-import { ExpenseSourceChip } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseSourceChip";
-import { ExpenseTypeChip } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseTypeChip";
 import type {
   ExpenseAggregates,
   ExpenseCsvExportOutcome,
   ExpenseRow,
   ExpensesViewModel,
 } from "@/frontend/common/views/dashboard/accounting/expenses/useExpensesViewModel";
+import { EXPENSE_SOURCE_CARRYOVER_BALANCES } from "@/shared/constants/expenses";
 import type { ExpensesLabels } from "@/shared/locale/types/dashboard/accounting/expenses";
 
 /**
@@ -169,7 +174,7 @@ function useExpensesExport(
  * The server reports `rowCountByType` keyed by the backend enum's display
  * value ("Salaries"), while grid rows carry the GraphQL codegen enum
  * ("SALARIES") — the footer maps back through this table to reuse the same
- * type chips the grid column renders.
+ * type badges the grid column renders.
  */
 const AGGREGATE_KEY_BY_TYPE: Record<ExpenseType, string> = {
   [ExpenseType.Salaries]: "Salaries",
@@ -177,6 +182,19 @@ const AGGREGATE_KEY_BY_TYPE: Record<ExpenseType, string> = {
   [ExpenseType.Logistics]: "Logistics",
   [ExpenseType.Technology]: "Technology",
 };
+
+/** Maps the codegen enum to the localized-label keys of the expenses namespace. */
+const TYPE_LABEL_KEY_BY_TYPE: Record<ExpenseType, keyof ExpensesLabels["type"]> = {
+  [ExpenseType.Salaries]: "Salaries",
+  [ExpenseType.Marketing]: "Marketing",
+  [ExpenseType.Logistics]: "Logistics",
+  [ExpenseType.Technology]: "Technology",
+};
+
+/** Localized label for an expense type, so badge cells carry the full copy. */
+function expenseTypeLabel(labels: ExpensesLabels, type: ExpenseType): string {
+  return labels.type[TYPE_LABEL_KEY_BY_TYPE[type]];
+}
 
 const EXPENSE_TYPES: readonly ExpenseType[] = [
   ExpenseType.Salaries,
@@ -215,16 +233,9 @@ function ExpenseTitleCell({ row, labels }: Readonly<{ row: ExpenseRow; labels: E
         </Box>
       </Tooltip>
       {deleted ? (
-        <Chip
-          label={labels.deletedBadge}
-          size="small"
-          aria-label={labels.deletedBadge}
-          sx={(theme: Theme) => ({
-            flexShrink: 0,
-            backgroundColor: theme.palette.errorContainer,
-            color: theme.palette.onErrorContainer,
-          })}
-        />
+        <Box sx={{ flexShrink: 0 }}>
+          <StatusBadge category="session" status="cancelled" label={labels.deletedBadge} />
+        </Box>
       ) : null}
     </Stack>
   );
@@ -391,6 +402,31 @@ function ExpenseRowActionsMenu({
   );
 }
 
+/**
+ * Provenance cell: a neutral "Manual" badge for hand-entered rows, a "From
+ * Carryover" badge for settlement-produced rows, and nothing for a carryover
+ * marker without a resolvable linked id (unreachable per the server
+ * invariant). The deep link stays available through the row actions menu.
+ */
+function ExpenseSourceBadgeCell({
+  sourceEntity,
+  sourceEntityId,
+  labels,
+}: Readonly<{ sourceEntity: string | null; sourceEntityId: string | null; labels: ExpensesLabels }>) {
+  if (sourceEntity === EXPENSE_SOURCE_CARRYOVER_BALANCES && sourceEntityId !== null) {
+    return (
+      <StatusBadge
+        category="expenseSource"
+        status="carryover"
+        label={labels.source.FromCarryover}
+        icon={<LinkOutlined fontSize="small" />}
+      />
+    );
+  }
+  if (sourceEntity !== null) return null;
+  return <StatusBadge category="expenseSource" status="manual" label={labels.source.Manual} />;
+}
+
 interface ExpensesColumnArgs extends ExpensesDialogCallbacks {
   readonly labels: ExpensesLabels;
   readonly locale: string;
@@ -412,7 +448,11 @@ function buildExpensesColumns(args: ExpensesColumnArgs): GridColDef<ExpenseRow>[
       headerName: labels.column.type,
       width: 130,
       renderCell: ({ row }) =>
-        row.type === null ? <ExpenseValueCell text="—" empty /> : <ExpenseTypeChip type={row.type} />,
+        row.type === null ? (
+          <ExpenseValueCell text="—" empty />
+        ) : (
+          <StatusBadge category="expenseType" status={row.type} label={expenseTypeLabel(labels, row.type)} />
+        ),
     },
     {
       field: "teacherName",
@@ -452,11 +492,7 @@ function buildExpensesColumns(args: ExpensesColumnArgs): GridColDef<ExpenseRow>[
       width: 150,
       sortable: false,
       renderCell: ({ row }) => (
-        <ExpenseSourceChip
-          sourceEntity={row.sourceEntity}
-          sourceEntityId={row.sourceEntityId}
-          onViewSource={args.onViewSource}
-        />
+        <ExpenseSourceBadgeCell sourceEntity={row.sourceEntity} sourceEntityId={row.sourceEntityId} labels={labels} />
       ),
     },
     {
@@ -542,20 +578,15 @@ function ExpensesToolbar({
     <Stack direction="row" sx={{ gap: 1, flexWrap: "wrap", alignItems: "center" }}>
       {canManageExpenses ? (
         <>
-          <Button
+          <DangerActionButton
             id="expenses-bulk-delete"
             size="small"
-            variant="outlined"
             startIcon={<DeleteOutlined />}
             disabled={!hasSelection}
             onClick={() => onOpenDelete(selectedRows)}
-            sx={(theme: Theme) => ({
-              color: theme.palette.error.main,
-              borderColor: theme.palette.error.main,
-            })}
           >
             {labels.action.bulkDelete}
-          </Button>
+          </DangerActionButton>
           {hasSelection ? (
             <Chip
               id="expenses-selection-count"
@@ -577,15 +608,14 @@ function ExpensesToolbar({
           {labels.action.exportCsv}
         </ExportButton>
         {canManageExpenses ? (
-          <Button
+          <PrimaryPageAction
             id="expenses-add-new"
             size="small"
-            variant="contained"
             startIcon={<AddOutlined />}
             onClick={() => onOpenForm(null)}
           >
             {labels.action.addNew}
-          </Button>
+          </PrimaryPageAction>
         ) : null}
       </Box>
     </Stack>
@@ -629,12 +659,18 @@ function AggregateCount({ label, count }: Readonly<{ label: string; count: numbe
   );
 }
 
-/** Type tally in the footer: the same chip the grid rows render plus its row count. */
-function ExpenseTypeTally({ typeKey, count }: Readonly<{ typeKey: string; count: number }>) {
+/** Type tally in the footer: the same badge the grid rows render plus its row count. */
+function ExpenseTypeTally({
+  typeKey,
+  labels,
+  count,
+}: Readonly<{ typeKey: string; labels: ExpensesLabels; count: number }>) {
   const type = expenseTypeFromAggregateKey(typeKey);
   return (
     <Stack direction="row" sx={{ alignItems: "center", gap: 0.5 }}>
-      {type !== null ? <ExpenseTypeChip type={type} /> : null}
+      {type !== null ? (
+        <StatusBadge category="expenseType" status={type} label={expenseTypeLabel(labels, type)} />
+      ) : null}
       <Typography variant="bodyMd">{count}</Typography>
     </Stack>
   );
@@ -650,7 +686,7 @@ interface ExpensesAggregateFooterProps {
 /**
  * Footer card under the grid summarizing the whole filtered set (all pages):
  * the total value in the dominant currency, the records tally, and the
- * per-type tallies with the same chips the rows render.
+ * per-type tallies with the same badges the rows render.
  */
 function ExpensesAggregateFooter({ aggregates, totalCount, labels }: Readonly<ExpensesAggregateFooterProps>) {
   const typeTallies = Object.entries(aggregates.rowCountByType);
@@ -671,7 +707,7 @@ function ExpensesAggregateFooter({ aggregates, totalCount, labels }: Readonly<Ex
           sx={{ flexWrap: "wrap", gap: 2, alignItems: "center", marginInlineStart: { xs: 0, md: "auto" } }}
         >
           {typeTallies.map(([typeKey, count]) => (
-            <ExpenseTypeTally key={typeKey} typeKey={typeKey} count={count} />
+            <ExpenseTypeTally key={typeKey} typeKey={typeKey} labels={labels} count={count} />
           ))}
         </Stack>
       </Stack>

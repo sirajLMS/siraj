@@ -189,6 +189,56 @@ describe("ComplaintRepository — submitComplaint", () => {
   });
 });
 
+describe("ComplaintRepository — insertComplaint", () => {
+  complaintTest("creates a complaint record with explicit status", async tx => {
+    const { parent, student } = await setupParentWithStudent(tx, "Insert");
+
+    const result = await ComplaintRepository.insertComplaint(
+      {
+        parentId: parent.id,
+        studentId: student.id,
+        category: ComplaintCategory.OTHER,
+        submitterEmail: `insert-${randomUUID()}@test.com`,
+        body: "Inserted complaint",
+        status: ComplaintStatus.UNANSWERED,
+      },
+      tx
+    );
+
+    expect(result).toBeDefined();
+    expect(result.id).toBeDefined();
+    expect(result.parentId).toBe(parent.id);
+    expect(result.studentId).toBe(student.id);
+    expect(result.category).toBe("OTHER");
+    expect(result.body).toBe("Inserted complaint");
+    expect(result.status).toBe(ComplaintStatus.UNANSWERED);
+    expect(result.createdAt).toBeInstanceOf(Date);
+    expect(result.updatedAt).toBeInstanceOf(Date);
+  });
+
+  complaintTest("creates a complaint with explicit timestamps", async tx => {
+    const { parent } = await setupParentWithStudent(tx, "InsertTs");
+    const now = new Date();
+
+    const result = await ComplaintRepository.insertComplaint(
+      {
+        parentId: parent.id,
+        category: ComplaintCategory.OTHER,
+        submitterEmail: `insert-ts-${randomUUID()}@test.com`,
+        body: "Timestamped complaint",
+        status: ComplaintStatus.ANSWERED,
+        createdAt: now,
+        updatedAt: now,
+      },
+      tx
+    );
+
+    expect(result.status).toBe(ComplaintStatus.ANSWERED);
+    expect(result.createdAt).toBeInstanceOf(Date);
+    expect(result.updatedAt).toBeInstanceOf(Date);
+  });
+});
+
 describe("ComplaintRepository — getComplaintsByParent", () => {
   complaintTest("returns only the specified parent's complaints", async tx => {
     const parentA = await setupParentWithStudent(tx, "IdorA");

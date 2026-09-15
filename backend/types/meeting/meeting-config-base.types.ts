@@ -56,7 +56,7 @@ export type MeetingConfigBaseReturnType = MeetingConfigBaseSelectType & {
  * `hasSecret` and the service-layer masked `providerMetadata`, so raw or
  * encrypted secret values can never reach clients through this boundary.
  */
-export type MeetingConfigPublicReturnType = Omit<MeetingConfigBaseReturnType, "encryptedSecret">;
+type MeetingConfigPublicReturnType = Omit<MeetingConfigBaseReturnType, "encryptedSecret">;
 
 /**
  * Shared Pothos field-builder shape covering the common GraphQL-exposed

@@ -25,10 +25,7 @@ export type HasPermissionPredicate = (permission: AppPermission) => boolean;
  * declared permissions (OR-semantics — a list counts as satisfied when ANY
  * permission is present).
  */
-export function itemPermissionAllowsItem(
-  item: Pick<NavItem, "permission">,
-  hasPermission: HasPermissionPredicate
-): boolean {
+function itemPermissionAllowsItem(item: Pick<NavItem, "permission">, hasPermission: HasPermissionPredicate): boolean {
   if (!item.permission) {
     return true;
   }

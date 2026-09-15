@@ -1,21 +1,8 @@
 "use client";
 
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import WarningAmberOutlined from "@mui/icons-material/WarningAmberOutlined";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Typography,
-} from "@mui/material";
-import type { Theme } from "@mui/material/styles";
+import { Box, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { CarryoverBalanceQuery_carryoverBalance } from "@/frontend/common/graphql/generated/gql/graphql";
 
 /**
@@ -30,88 +17,57 @@ export type CarryoverConfirmRow = Pick<
   readonly linkedSessionCount?: number | null;
 };
 
-const TITLE_ICON_SX = (theme: Theme) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: 40,
-  height: 40,
-  borderRadius: "50%",
-  flexShrink: 0,
-  backgroundColor: theme.palette.errorContainer,
-  color: theme.palette.error.main,
-});
-
-const CANCEL_BUTTON_SX = (theme: Theme) => ({
-  color: theme.palette.text.secondary,
-  fontWeight: 700,
-  borderRadius: 1.5,
-});
-
-const CONFIRM_BUTTON_SX = (theme: Theme) => ({
-  fontWeight: 700,
-  borderRadius: 1.5,
-  backgroundColor: theme.palette.error.main,
-  color: theme.palette.onError,
-  "&:hover": { backgroundColor: theme.palette.error.dark },
-});
-
 export interface CarryoverConfirmScaffoldProps {
   readonly open: boolean;
   /** In-flight mutation; locks Escape/backdrop close and both actions. */
   readonly busy: boolean;
   readonly title: string;
+  readonly body?: string;
   readonly cancelLabel: string;
   readonly confirmLabel: string;
-  readonly closeAriaLabel: string;
-  readonly children: ReactNode;
+  /** Disable the confirm action independently of loading state (e.g. guard conditions). */
+  readonly confirmDisabled?: boolean;
+  /** Accessible label for the close action (if host exposes one). */
+  readonly closeAriaLabel?: string;
+  /** Label/value detail blocks (the target summary, audit note, guard banner). */
+  readonly children?: ReactNode;
   readonly onClose: () => void;
   readonly onConfirm: () => void;
-  /** Disables the confirm button independently of `busy` (e.g. a blocking guard banner is showing). */
-  readonly confirmDisabled?: boolean;
 }
 
+/**
+ * Carryover confirm dialog contract collapsed onto the shared
+ * `BaseDeleteDialog` scaffold: title / body / cancel / confirm with the detail
+ * list rendered through the children slot.
+ */
 export function CarryoverConfirmScaffold({
   open,
   busy,
   title,
+  body = "",
   cancelLabel,
   confirmLabel,
+  confirmDisabled,
   closeAriaLabel,
   children,
   onClose,
   onConfirm,
-  confirmDisabled = false,
 }: Readonly<CarryoverConfirmScaffoldProps>) {
   return (
-    <Dialog {...DialogPresets.confirm} open={open} onClose={busy ? undefined : onClose}>
-      <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Box sx={TITLE_ICON_SX} aria-hidden>
-          <WarningAmberOutlined fontSize="small" />
-        </Box>
-        <Typography component="span" variant="titleLg" sx={{ flex: 1, fontWeight: 700 }}>
-          {title}
-        </Typography>
-        <IconButton aria-label={closeAriaLabel} onClick={onClose} disabled={busy} size="small">
-          <CloseOutlinedIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>{children}</DialogContent>
-      <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        <Button variant="text" onClick={onClose} disabled={busy} sx={CANCEL_BUTTON_SX}>
-          {cancelLabel}
-        </Button>
-        <Button
-          variant="contained"
-          onClick={onConfirm}
-          disabled={busy || confirmDisabled}
-          aria-busy={busy}
-          sx={CONFIRM_BUTTON_SX}
-        >
-          {busy ? <CircularProgress size={20} sx={theme => ({ color: theme.palette.onError })} /> : confirmLabel}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      isLoading={busy}
+      title={title}
+      body={body}
+      cancelLabel={cancelLabel}
+      confirmLabel={confirmLabel}
+      confirmDisabled={confirmDisabled}
+      closeAriaLabel={closeAriaLabel}
+      onClose={onClose}
+      onConfirm={onConfirm}
+    >
+      {children}
+    </BaseDeleteDialog>
   );
 }
 

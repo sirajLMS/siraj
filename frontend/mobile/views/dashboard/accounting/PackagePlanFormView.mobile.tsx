@@ -21,7 +21,12 @@ import {
 } from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanFormFieldsShared";
 import { MOBILE_PACKAGE_PLAN_FORM_STYLES } from "@/frontend/common/views/dashboard/accounting/components/__shared__/packagePlanFormFieldsShared.options";
 import type { UsePackagePlanFormViewModel } from "@/frontend/common/views/dashboard/accounting/usePackagePlanFormViewModel";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import {
+  MobileContentInset,
+  MobileContentStack,
+  MobilePageContainer,
+  MobilePageHeader,
+} from "@/frontend/mobile/components/ui";
 
 const styles = MOBILE_PACKAGE_PLAN_FORM_STYLES;
 
@@ -62,50 +67,57 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
       <MobilePageHeader title={title} subtitle={t.pageSubtitle} />
 
       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <Stack spacing={2.5} sx={{ px: 2, pb: 6 }}>
-          <PackagePlanCodenameField control={control} errors={errors} labels={t.form} isEditing={isEditing} />
+        <MobileContentInset>
+          <MobileContentStack gap={2.5} paddingBottom={6}>
+            <PackagePlanCodenameField control={control} errors={errors} labels={t.form} isEditing={isEditing} />
 
-          <PackagePlanDisplayNameField control={control} errors={errors} labels={t.form} />
+            <PackagePlanDisplayNameField control={control} errors={errors} labels={t.form} />
 
-          <PackagePlanDescriptionField control={control} labels={t.form} />
+            <PackagePlanDescriptionField control={control} labels={t.form} />
 
-          <Stack direction="row" spacing={1.5}>
-            <PackagePlanCreditHoursField control={control} errors={errors} labels={t.form} sx={styles.numericField} />
-            <PackagePlanPriceAmountField control={control} errors={errors} labels={t.form} sx={styles.numericField} />
-          </Stack>
+            <Stack direction="row" spacing={1.5}>
+              <PackagePlanCreditHoursField control={control} errors={errors} labels={t.form} sx={styles.numericField} />
+              <PackagePlanPriceAmountField control={control} errors={errors} labels={t.form} sx={styles.numericField} />
+            </Stack>
 
-          <Stack direction="row" spacing={1.5}>
-            <PackagePlanCurrencyField control={control} labels={t.form} sx={styles.currencyField} />
-            <PackagePlanSortOrderField control={control} errors={errors} labels={t.form} sx={styles.sortOrderField} />
-          </Stack>
+            <Stack direction="row" spacing={1.5}>
+              <PackagePlanCurrencyField control={control} labels={t.form} sx={styles.currencyField} />
+              <PackagePlanSortOrderField control={control} errors={errors} labels={t.form} sx={styles.sortOrderField} />
+            </Stack>
 
-          <PackagePlanValidityMonthsField control={control} errors={errors} labels={t.form} sx={styles.validityStack} />
-
-          <PackagePlanActiveField control={control} labels={t.form} />
-
-          <Button
-            type="submit"
-            variant="contained"
-            size="large"
-            disabled={isSubmitting}
-            startIcon={isSubmitting ? <SyncOutlined /> : <SaveOutlined />}
-          >
-            {isSubmitting ? t.form.saving : t.form.submit}
-          </Button>
-
-          {isEditing ? (
-            <PackagePlanArchiveTriggerButton
-              archiving={archiving}
-              planActive={existing?.active ?? true}
-              onOpen={() => setArchiveDialogOpen(true)}
-              label={t.archiveConfirm}
+            <PackagePlanValidityMonthsField
+              control={control}
+              errors={errors}
+              labels={t.form}
+              sx={styles.validityStack}
             />
-          ) : null}
 
-          <Button variant="text" onClick={() => router.push("/accounting/packages")} disabled={isSubmitting}>
-            {t.form.cancel}
-          </Button>
-        </Stack>
+            <PackagePlanActiveField control={control} labels={t.form} />
+
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              disabled={isSubmitting}
+              startIcon={isSubmitting ? <SyncOutlined /> : <SaveOutlined />}
+            >
+              {isSubmitting ? t.form.saving : t.form.submit}
+            </Button>
+
+            {isEditing ? (
+              <PackagePlanArchiveTriggerButton
+                archiving={archiving}
+                planActive={existing?.active ?? true}
+                onOpen={() => setArchiveDialogOpen(true)}
+                label={t.archiveConfirm}
+              />
+            ) : null}
+
+            <Button variant="text" onClick={() => router.push("/accounting/packages")} disabled={isSubmitting}>
+              {t.form.cancel}
+            </Button>
+          </MobileContentStack>
+        </MobileContentInset>
       </Box>
 
       <PackagePlanArchiveSectionShared

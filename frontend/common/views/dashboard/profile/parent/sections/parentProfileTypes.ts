@@ -38,7 +38,7 @@ export type AssociatedStudentsSectionLabels = {
 };
 
 type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
-export type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;
+type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;
 export type ParentAdminData = NonNullable<ProfileData["parentAdminProfile"]>;
 export type ParentViewData = ParentOwnData | ParentAdminData;
 export type AssociatedStudents = ProfileData["associatedStudents"];

@@ -21,7 +21,7 @@ export interface RecurringSchedulesListLabelsBySection {
   readonly filters: RecurringSchedulesListFilterLabels;
 }
 
-export type RecurringScheduleListItem = RecurringSchedulesQuery_recurringSchedules_rows;
+type RecurringScheduleListItem = RecurringSchedulesQuery_recurringSchedules_rows;
 
 export interface RecurringSchedulesListViewModel {
   readonly labelsBySection: RecurringSchedulesListLabelsBySection;

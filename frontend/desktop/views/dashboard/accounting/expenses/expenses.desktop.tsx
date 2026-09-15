@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@mui/material";
 import { DesktopListStateGate } from "@/frontend/common/views/dashboard/accounting/components/DesktopListStateGate";
 import { ExpenseFilterBar } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseFilterBar";
 import type { ExpensesViewProps } from "@/frontend/common/views/dashboard/accounting/expenses/ExpensesContainer";
@@ -33,9 +32,7 @@ export function ExpensesDesktopView(props: Readonly<ExpensesViewProps>) {
           hasRows={rows.length > 0}
           errorMessage={labels.loadError}
         >
-          <Box sx={{ width: "100%", p: 2 }}>
-            <ExpensesDataGrid {...props} />
-          </Box>
+          <ExpensesDataGrid {...props} />
         </DesktopListStateGate>
       </DesktopSectionPanel>
     </DesktopPageContainer>

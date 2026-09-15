@@ -5,7 +5,7 @@ import { arSD as dataGridArSD, enUS as dataGridEnUS } from "@mui/x-data-grid/loc
 import { components } from "@/frontend/common/providers/theme/components";
 import { layoutSettings } from "@/frontend/common/providers/theme/layoutSettings";
 import type { AppearancePresetId } from "@/frontend/common/providers/theme/presets";
-import { resolvePresetPalette, resolvePresetPalettes } from "@/frontend/common/providers/theme/presets/paletteFactory";
+import { resolvePresetPalettes } from "@/frontend/common/providers/theme/presets/paletteFactory";
 import { typography } from "@/frontend/common/providers/theme/typography";
 
 const locales = (locale: string = "en") => {
@@ -87,38 +87,6 @@ export function createAppCssVarsTheme(
           },
 
       ...sharedFoundation(direction),
-
-      components: components(),
-    },
-    ...locales(locale)
-  );
-
-  return responsiveFontSizes(themeWithLocale);
-}
-
-/**
- * Build a single-mode theme (legacy shape, no `cssVariables`).
- *
- * Retained for Storybook (`StoryWrapper`) and component tests (`TestWrapper`)
- * which render a single preselected mode client-side and do not need the
- * cssVars / InitColorSchemeScript SSR machinery.
- */
-export function createAppTheme(
-  mode: PaletteMode,
-  direction: "rtl" | "ltr" = "ltr",
-  locale: string = "en",
-  presetId?: AppearancePresetId
-) {
-  const palette = resolvePresetPalette(mode, presetId);
-
-  const themeWithLocale = createTheme(
-    {
-      ...sharedFoundation(direction),
-
-      palette: {
-        mode,
-        ...palette,
-      },
 
       components: components(),
     },

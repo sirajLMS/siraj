@@ -21,9 +21,9 @@ import {
 } from "@mui/material";
 import { type ReactNode, useId } from "react";
 import { Controller } from "react-hook-form";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
-import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
 import {
   NOTE_MAX_LENGTH,
   type OverrideDialogRow,
@@ -106,9 +106,10 @@ export function OverrideDialog({ open, row, onClose, onApplied }: Readonly<Overr
                   viewModel.summary.calculationStatus === null ? (
                     "—"
                   ) : (
-                    <CalculationStatusChip
+                    <StatusBadge
+                      category="payrollCalculation"
                       status={viewModel.summary.calculationStatus}
-                      labels={viewModel.statusLabels}
+                      label={viewModel.statusLabels[viewModel.summary.calculationStatus]}
                     />
                   )
                 }

@@ -8,7 +8,7 @@ export type AvailabilitySearchValidationLabels = {
   readonly invalidGender: string;
 };
 
-export const availabilitySearchSchemaFactory = (labels: AvailabilitySearchValidationLabels) =>
+const availabilitySearchSchemaFactory = (labels: AvailabilitySearchValidationLabels) =>
   z.object({
     fromTime: z.date().nullable(),
     toTime: z.date().nullable(),

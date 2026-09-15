@@ -125,7 +125,7 @@ export interface SuspensionAnalyticsLabels {
   readonly days: readonly string[];
 }
 
-export interface StatusActionLabels {
+interface StatusActionLabels {
   readonly joinSession: string;
   readonly activate: string;
   readonly reschedule: string;

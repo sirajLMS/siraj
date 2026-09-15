@@ -51,7 +51,7 @@ export interface CarryoverAggregates {
 }
 
 /** Filter fields exactly as the report consumes them (search already debounced). */
-export interface CarryoverFilterFields {
+interface CarryoverFilterFields {
   readonly teacherId: string | null;
   readonly paidStatus: CarryoverPaidStatusFilter;
   readonly dateFrom: string | null;
@@ -217,7 +217,7 @@ function extractDownloadFilename(disposition: string | null): string {
  * both on the server) and includeDisabledTeachers is always sent so the export
  * exactly matches the grid the operator is looking at.
  */
-export function buildCarryoverExportCsvUrl(fields: CarryoverFilterFields): string {
+function buildCarryoverExportCsvUrl(fields: CarryoverFilterFields): string {
   const params = new URLSearchParams();
   if (fields.teacherId !== null && fields.teacherId !== "") params.set("teacherId", fields.teacherId);
   if (fields.paidStatus !== "Both") params.set("paidStatus", fields.paidStatus);

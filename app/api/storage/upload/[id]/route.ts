@@ -175,19 +175,21 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const locale = resolveLocaleFromRequest(request);
     const tErrors = getServerTranslations(locale).errorsTranslations;
 
-    // M2 fix: if the signed URL has an uploadedByUserId, verify the current
-    // session user matches. Prevents token-sharing attacks where anyone who
-    // obtains the token can write the file.
-    if (signedUrl.uploadedByUserId) {
-      const sessionUserId = await resolveUploadUserId(request);
-      if (!sessionUserId || sessionUserId !== signedUrl.uploadedByUserId) {
-        logger.warn("Signed URL user mismatch", {
-          tokenId,
-          signedUrlUserId: signedUrl.uploadedByUserId,
-          sessionUserId,
-        });
-        return NextResponse.json({ error: tErrors.file.invalidOrExpiredToken }, { status: 403 });
-      }
+    // Signed URLs must be bound to their uploader at creation time; an unbound
+    // session is rejected so any holder of the token cannot write the file.
+    if (!signedUrl.uploadedByUserId) {
+      logger.warn("Signed URL session is not bound to an uploader", { tokenId });
+      return NextResponse.json({ error: tErrors.file.invalidOrExpiredToken }, { status: 403 });
+    }
+
+    const sessionUserId = await resolveUploadUserId(request);
+    if (!sessionUserId || sessionUserId !== signedUrl.uploadedByUserId) {
+      logger.warn("Signed URL user mismatch", {
+        tokenId,
+        signedUrlUserId: signedUrl.uploadedByUserId,
+        sessionUserId,
+      });
+      return NextResponse.json({ error: tErrors.file.invalidOrExpiredToken }, { status: 403 });
     }
 
     const validationResponse = validateHeaders(request, signedUrl, tErrors);

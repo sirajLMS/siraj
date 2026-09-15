@@ -129,7 +129,7 @@ export const RescheduleTrackingInputPothosObject = gqlSchemaBuilder
   .inputRef<RescheduleTrackingInput>("RescheduleTrackingInput")
   .implement({
     fields: t => ({
-      search: t.string(),
+      search: t.string({ directives: { constraint: { maxLength: 255 } } }),
       status: t.field({ type: LeaveRequestStatusPothosObject, required: false }),
     }),
   });

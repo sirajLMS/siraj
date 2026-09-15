@@ -100,7 +100,8 @@ export namespace ComplaintRepository {
 
   export const insertComplaint = async (
     input: ComplaintInsertInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<ComplaintSelectType> => {
     const q = queryDb(tx);
     const now = new Date();
@@ -120,7 +121,8 @@ export namespace ComplaintRepository {
       .returning();
 
     if (!created) {
-      throw new Error("Failed to create seed complaint");
+      const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(i18n.complaint.createFailed);
     }
 
     return created;

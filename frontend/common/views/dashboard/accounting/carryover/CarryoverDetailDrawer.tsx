@@ -1,22 +1,15 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
+import BlockOutlinedIcon from "@mui/icons-material/BlockOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  CircularProgress,
-  Drawer,
-  IconButton,
-  Stack,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Drawer, IconButton, Stack, Typography, useTheme } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { useState } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
+import { StatusBadge } from "@/frontend/common/components/ui";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField";
+import { PersonProfileLink } from "@/frontend/common/components/ui/display/personProfileLink";
 import type {
   CalculationStatus,
   CarryoverBalanceLinkedSessionsQuery_carryoverBalanceLinkedSessions,
@@ -28,10 +21,8 @@ import {
   carryoverBalanceQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { formatLockedAmount } from "@/frontend/common/lib/currency";
-import { DisabledTeacherChip } from "@/frontend/common/views/dashboard/accounting/carryover/DisabledTeacherChip";
-import { PaidStatusChip } from "@/frontend/common/views/dashboard/accounting/carryover/PaidStatusChip";
+import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { UnpayCarryoverDialog } from "@/frontend/common/views/dashboard/accounting/carryover/UnpayCarryoverDialog";
-import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { useAppLocale } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale/client";
@@ -143,35 +134,16 @@ export interface CarryoverDetailDrawerProps {
   readonly onClose: () => void;
 }
 
-interface DetailFieldProps {
-  readonly label: string;
-  readonly fullWidth?: boolean;
-  readonly children: React.ReactNode;
-}
-
-/** One labeled field cell in the summary grid: uppercase caption above its value. */
-function DetailField({ label, fullWidth, children }: Readonly<DetailFieldProps>) {
-  return (
-    <Box sx={fullWidth ? FULL_WIDTH_SX : undefined}>
-      <Typography variant="labelUppercase" sx={fieldLabelSx}>
-        {label}
-      </Typography>
-      <Box sx={{ typography: "bodyMd", mt: 0.5 }}>{children}</Box>
-    </Box>
-  );
-}
-
-function DrawerHeader({
-  balance,
-  title,
-  closeLabel,
-  onClose,
-}: {
+interface DrawerHeaderProps {
   readonly balance: CarryoverDetail | null;
   readonly title: string;
+  readonly labels: CarryoverLabels;
   readonly closeLabel: string;
   readonly onClose: () => void;
-}) {
+}
+
+function DrawerHeader({ balance, title, labels, closeLabel, onClose }: Readonly<DrawerHeaderProps>) {
+  const paid = balance?.isPaid ?? false;
   return (
     <Box sx={HEADER_SX}>
       <Box sx={{ minWidth: 0 }}>
@@ -180,8 +152,19 @@ function DrawerHeader({
         </Typography>
         {balance ? (
           <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
-            <PaidStatusChip paid={balance.isPaid ?? false} />
-            {balance.isDisabledTeacher ? <DisabledTeacherChip /> : null}
+            <StatusBadge
+              category="session"
+              status={paid ? "active" : "pending"}
+              label={paid ? labels.chip.paid : labels.chip.unpaid}
+            />
+            {balance.isDisabledTeacher ? (
+              <StatusBadge
+                category="staffAccount"
+                status="deactivated"
+                label={labels.chip.disabledTeacher}
+                icon={<BlockOutlinedIcon fontSize="small" />}
+              />
+            ) : null}
           </Stack>
         ) : null}
       </Box>
@@ -192,16 +175,15 @@ function DrawerHeader({
   );
 }
 
+/** Teacher identity cell: profile-linked name with the snapshot avatar. */
 function TeacherCell({ balance }: { readonly balance: CarryoverDetail }) {
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-      <Avatar
-        src={balance.teacherAvatarUrl ?? undefined}
-        alt={balance.teacherName ?? ""}
-        sx={{ width: 32, height: 32 }}
-      />
-      {balance.teacherName}
-    </Stack>
+    <PersonProfileLink
+      name={balance.teacherName ?? ""}
+      href={profileHrefForTeacher({ teacherId: balance.teacherId })}
+      avatarUrl={balance.teacherAvatarUrl}
+      avatarSize={32}
+    />
   );
 }
 
@@ -229,24 +211,21 @@ function BalanceSummary({
   const notSet = commonLabels.notSet;
   return (
     <Box sx={SUMMARY_GRID_SX}>
-      <DetailField label={labels.column.teacher}>
-        <TeacherCell balance={balance} />
-      </DetailField>
-      <DetailField label={labels.modal.form.currency}>{balance.teacherCurrency ?? notSet}</DetailField>
-      <DetailField label={labels.column.studentsCount}>
-        {resolveStudentsCount(balance.studentsCount, balance.studentsText, notSet)}
-      </DetailField>
-      <DetailField label={labels.column.totalDuration}>{balance.totalDuration ?? notSet}</DetailField>
-      <DetailField label={labels.column.fromDate}>{balance.fromDate ?? notSet}</DetailField>
-      <DetailField label={labels.column.toDate}>{balance.toDate ?? notSet}</DetailField>
-      <DetailField label={labels.column.paymentDate}>{balance.paymentDate ?? notSet}</DetailField>
-      <DetailField label={labels.column.payable}>
-        <PayableValue balance={balance} notSet={notSet} />
-      </DetailField>
-      <DetailField label={labels.column.studentsText}>{balance.studentsText ?? notSet}</DetailField>
-      <DetailField label={labels.modal.form.note} fullWidth>
-        {balance.note ?? notSet}
-      </DetailField>
+      <LabeledField label={labels.column.teacher} value={<TeacherCell balance={balance} />} />
+      <LabeledField label={labels.modal.form.currency} value={balance.teacherCurrency ?? notSet} />
+      <LabeledField
+        label={labels.column.studentsCount}
+        value={resolveStudentsCount(balance.studentsCount, balance.studentsText, notSet)}
+      />
+      <LabeledField label={labels.column.totalDuration} value={balance.totalDuration ?? notSet} />
+      <LabeledField label={labels.column.fromDate} value={balance.fromDate ?? notSet} />
+      <LabeledField label={labels.column.toDate} value={balance.toDate ?? notSet} />
+      <LabeledField label={labels.column.paymentDate} value={balance.paymentDate ?? notSet} />
+      <LabeledField label={labels.column.payable} value={<PayableValue balance={balance} notSet={notSet} />} />
+      <LabeledField label={labels.column.studentsText} value={balance.studentsText ?? notSet} />
+      <Box sx={FULL_WIDTH_SX}>
+        <LabeledField label={labels.modal.form.note} value={balance.note ?? notSet} />
+      </Box>
     </Box>
   );
 }
@@ -289,7 +268,11 @@ function LinkedSessionRow({
         {session.currentStatus === null ? (
           <Typography variant="bodyMd">{notSet}</Typography>
         ) : (
-          <CalculationStatusChip status={session.currentStatus} labels={statusLabels} />
+          <StatusBadge
+            category="payrollCalculation"
+            status={session.currentStatus}
+            label={statusLabels[session.currentStatus]}
+          />
         )}
       </Box>
     </Box>
@@ -508,7 +491,13 @@ export function CarryoverDetailDrawer({ carryoverId, open, onClose }: Readonly<C
       slotProps={{ paper: { sx: PAPER_SX } }}
       sx={drawerTheme => ({ zIndex: drawerTheme.zIndex.drawer + 2 })}
     >
-      <DrawerHeader balance={balance} title={title} closeLabel={commonLabels.ariaClose} onClose={onClose} />
+      <DrawerHeader
+        balance={balance}
+        title={title}
+        labels={labels}
+        closeLabel={commonLabels.ariaClose}
+        onClose={onClose}
+      />
       <Box sx={{ flex: 1, overflowY: "auto", px: 2.5, py: 3 }}>
         <DrawerBody
           balance={balance}

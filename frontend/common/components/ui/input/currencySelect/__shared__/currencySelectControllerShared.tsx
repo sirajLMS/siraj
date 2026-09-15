@@ -2,27 +2,30 @@
 
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 
-export interface CurrencySelectControllerProps<T extends FieldValues> {
+export interface CurrencySelectControllerProps<T extends FieldValues, TTransformedValues = T> {
   readonly name: FieldPath<T>;
-  readonly control: Control<T>;
+  readonly control: Control<T, undefined, TTransformedValues>;
   readonly label: string;
   readonly required?: boolean;
   readonly error?: boolean;
   readonly helperText?: string;
+  readonly allowedCodes?: readonly CurrencyCode[];
   readonly fullWidth?: boolean;
 }
 
-export function CurrencySelectController<T extends FieldValues>({
+export function CurrencySelectController<T extends FieldValues, TTransformedValues = T>({
   name,
   control,
   label,
   required,
   error,
   helperText,
+  allowedCodes,
   fullWidth,
-}: Readonly<CurrencySelectControllerProps<T>>) {
+}: Readonly<CurrencySelectControllerProps<T, TTransformedValues>>) {
   return (
     <Controller
       name={name}
@@ -40,6 +43,7 @@ export function CurrencySelectController<T extends FieldValues>({
             required={required}
             error={error}
             helperText={helperText}
+            allowedCodes={allowedCodes}
             fullWidth={fullWidth}
           />
         );

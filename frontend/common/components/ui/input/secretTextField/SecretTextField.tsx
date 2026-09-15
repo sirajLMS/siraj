@@ -4,7 +4,7 @@ import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField, type TextFieldProps, Tooltip } from "@mui/material";
 import type React from "react";
 
-export const HIDDEN_SECRET_MASK = "••••••••";
+const HIDDEN_SECRET_MASK = "••••••••";
 
 export type SecretTextFieldProps = Omit<TextFieldProps, "type" | "slotProps"> & {
   readonly revealed: boolean;

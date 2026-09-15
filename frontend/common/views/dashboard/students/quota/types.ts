@@ -1,5 +1,4 @@
 import type { ElementType } from "react";
-import { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 
 export interface StudentProfileData extends StudentQuotaFormData {
@@ -29,8 +28,3 @@ export interface FormActionsProps {
   readonly readOnly?: boolean;
   readonly showCancel?: boolean;
 }
-
-export const GENDER_OPTIONS: readonly { readonly value: Gender; readonly labelKey: string }[] = [
-  { value: Gender.Male, labelKey: "male" },
-  { value: Gender.Female, labelKey: "female" },
-] as const;

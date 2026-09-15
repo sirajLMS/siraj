@@ -1,6 +1,6 @@
 import { StudentRepository } from "@/backend/db/repo/students";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { canEditStudentFieldGroup, canViewStudentFieldGroup } from "@/backend/services/profile/profile-field-filter";
+import { canEditStudentFieldGroup } from "@/backend/services/profile/profile-field-filter";
 import type { StudentFieldFilterContext } from "@/backend/types";
 
 import { getServerTranslations } from "@/shared/locale";
@@ -38,13 +38,6 @@ export async function buildStudentFieldFilterContext(
 
 export function assertStudentFieldEdit(ctx: StudentFieldFilterContext, groupKey: string, locale?: string): void {
   if (!canEditStudentFieldGroup(ctx, groupKey)) {
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-    throw new Error(tErrors.insufficientPermissions);
-  }
-}
-
-export function assertStudentFieldView(ctx: StudentFieldFilterContext, groupKey: string, locale?: string): void {
-  if (!canViewStudentFieldGroup(ctx, groupKey)) {
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
     throw new Error(tErrors.insufficientPermissions);
   }

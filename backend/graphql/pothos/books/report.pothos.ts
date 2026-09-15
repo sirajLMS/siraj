@@ -10,9 +10,21 @@ import type {
 export const AttendanceReportFiltersInput = gqlSchemaBuilder.inputType("AttendanceReportFiltersInput", {
   description: "Filters applied to the dynamic attendance query engine.",
   fields: t => ({
-    fromDate: t.string({ required: true, description: "ISO Date String representing start bound" }),
-    toDate: t.string({ required: true, description: "ISO Date String representing end bound" }),
-    teacherId: t.string({ required: false, description: "Optional UUID to filter by a specific teacher" }),
+    fromDate: t.string({
+      required: true,
+      description: "ISO Date String representing start bound",
+      directives: { constraint: { maxLength: 30 } },
+    }),
+    toDate: t.string({
+      required: true,
+      description: "ISO Date String representing end bound",
+      directives: { constraint: { maxLength: 30 } },
+    }),
+    teacherId: t.string({
+      required: false,
+      description: "Optional UUID to filter by a specific teacher",
+      directives: { constraint: { maxLength: 36 } },
+    }),
     groupBy: t.field({ type: ReportGroupingModeEnum, required: true }),
   }),
 });

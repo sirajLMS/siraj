@@ -26,7 +26,7 @@ import type { TeacherDashboardLabels } from "@/shared/locale";
 
 type ManualClassEntryLabels = TeacherDashboardLabels["manualClassEntry"];
 
-export interface ManualClassEntrySubmitData {
+interface ManualClassEntrySubmitData {
   readonly studentId: string;
   readonly subjectId: string;
   readonly scheduledStartAt: string;

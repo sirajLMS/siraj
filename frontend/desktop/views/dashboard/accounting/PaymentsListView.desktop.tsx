@@ -4,25 +4,16 @@ import {
   ClearOutlined,
   CreditScoreOutlined,
   HourglassTopOutlined,
+  OpenInNewOutlined,
   PaymentsOutlined,
   PendingActionsOutlined,
 } from "@mui/icons-material";
-import {
-  Box,
-  Chip,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-  Tooltip,
-} from "@mui/material";
+import { Box, FormControl, IconButton, InputLabel, MenuItem, Select, Stack, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { ActionIconLink } from "@/frontend/common/components/ui";
 import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
@@ -31,16 +22,17 @@ import {
   formatAccountingDate,
   formatAccountingMoney,
   numericCell,
-  paymentStatusTone,
   textCell,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import { usePaymentsPersonFilterSelection } from "@/frontend/common/views/dashboard/accounting/components/__shared__/paymentsPersonFiltersShared";
 import { DesktopListStateGate } from "@/frontend/common/views/dashboard/accounting/components/DesktopListStateGate";
 import type { PaymentsListViewModel } from "@/frontend/common/views/dashboard/accounting/usePaymentsListViewModel";
+import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { DesktopAppDateRangePicker } from "@/frontend/desktop/components/ui/form/date";
 import {
   ParentAutocompleteDesktop,
   StudentAutocompleteDesktop,
@@ -91,23 +83,17 @@ function FiltersBar(props: Readonly<PaymentsListViewModel>) {
         onChange={handleParentChange}
         sx={{ width: 220, flexShrink: 0 }}
       />
-      <TextField
+      <DesktopAppDateRangePicker
+        label={t.filters.title}
+        fromLabel={t.filters.fromDate}
+        toLabel={t.filters.toDate}
+        fromDate={fromDate ?? ""}
+        toDate={toDate ?? ""}
+        onChange={(from, to) => {
+          setFromDate(from || null);
+          setToDate(to || null);
+        }}
         size="small"
-        type="date"
-        label={t.filters.fromDate}
-        value={fromDate ?? ""}
-        onChange={e => setFromDate(e.target.value || null)}
-        slotProps={{ inputLabel: { shrink: true } }}
-        sx={{ minWidth: 165 }}
-      />
-      <TextField
-        size="small"
-        type="date"
-        label={t.filters.toDate}
-        value={toDate ?? ""}
-        onChange={e => setToDate(e.target.value || null)}
-        slotProps={{ inputLabel: { shrink: true } }}
-        sx={{ minWidth: 165 }}
       />
       <FormControl size="small" sx={{ minWidth: 150 }}>
         <InputLabel id="accounting-payments-paid-filter-label">{t.columns.status}</InputLabel>
@@ -224,10 +210,9 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
         headerName: t.columns.status,
         width: 118,
         renderCell: params => (
-          <Chip
-            size="small"
-            variant={params.row.isPaidStatusOn ? "outlined" : "filled"}
-            color={paymentStatusTone(Boolean(params.row.isPaidStatusOn))}
+          <DesktopStatusBadge
+            category="session"
+            status={params.row.isPaidStatusOn ? "active" : "pending"}
             label={params.row.isPaidStatusOn ? t.status.paid : t.status.unpaid}
           />
         ),
@@ -241,9 +226,9 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
           // VIEW-safe: this opens the (role-scoped) detail page — it must NOT
           // read as a manage ("Edit") action for VIEW-only roles like staff.
           <Tooltip title={t.paymentDetails}>
-            <Link href={`/accounting/payments/${params.row.id}`} style={{ textDecoration: "none" }}>
-              <Chip size="small" label={t.paymentDetails} clickable />
-            </Link>
+            <ActionIconLink href={`/accounting/payments/${params.row.id}`} aria-label={t.paymentDetails}>
+              <OpenInNewOutlined fontSize="small" />
+            </ActionIconLink>
           </Tooltip>
         ),
       },
@@ -304,14 +289,9 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
 
       <DesktopMetricCardGrid metrics={metricItems} size={{ md: 3, lg: 3 }} />
 
-      <DesktopSectionPanel
-        contentPadding={false}
-        title={t.pageTitle}
-        actions={<FiltersBar {...props} />}
-        sx={{ mt: 3 }}
-      >
+      <DesktopSectionPanel contentPadding={false} title={t.pageTitle} actions={<FiltersBar {...props} />}>
         <DesktopListStateGate error={error} loading={loading} hasRows={rows.length > 0} errorMessage={t.loadError}>
-          <Box sx={{ width: "100%", height: 560, p: 2 }}>
+          <Box sx={{ width: "100%", height: 560 }}>
             <AppDataGrid
               rows={rows}
               columns={columns}

@@ -3,6 +3,7 @@
 import {
   AccountBalanceWalletOutlined,
   AddOutlined,
+  BlockOutlined,
   DeleteOutlined,
   EditOutlined,
   EventNoteOutlined,
@@ -11,11 +12,18 @@ import {
   ReceiptLongOutlined,
   UndoOutlined,
 } from "@mui/icons-material";
-import { Box, Button, Chip, IconButton, Menu, MenuItem, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Chip, IconButton, Menu, MenuItem, Stack, Tooltip, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo, useState } from "react";
-import { ExportButton, SectionPanel } from "@/frontend/common/components/ui";
+import {
+  DangerActionButton,
+  ExportButton,
+  FilterButton,
+  PrimaryPageAction,
+  SectionPanel,
+  StatusBadge,
+} from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { usePageLocalRowSelection } from "@/frontend/common/components/ui/dataGrid/usePageLocalRowSelection";
 import { PersonProfileLinkCell } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLinkCell";
@@ -30,8 +38,6 @@ import {
   numericCell,
   textCell,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
-import { DisabledTeacherChip } from "@/frontend/common/views/dashboard/accounting/carryover/DisabledTeacherChip";
-import { PaidStatusChip } from "@/frontend/common/views/dashboard/accounting/carryover/PaidStatusChip";
 import { useCarryoverExport } from "@/frontend/common/views/dashboard/accounting/carryover/useCarryoverExport";
 import type {
   CarryoverAggregates,
@@ -222,12 +228,17 @@ function CarryoverRowActionsMenu({
   );
 }
 
+interface CarryoverTeacherCellProps {
+  readonly row: CarryoverRow;
+  readonly disabledTeacherLabel: string;
+}
+
 /**
  * Teacher identity cell: profile-linked name with the disabled-teacher chip
  * alongside. The name zone shrinks and ellipsizes inside the cell while the
  * chip keeps its intrinsic width; a hover tooltip reveals the full name.
  */
-function CarryoverTeacherCell({ row }: Readonly<{ row: CarryoverRow }>) {
+function CarryoverTeacherCell({ row, disabledTeacherLabel }: Readonly<CarryoverTeacherCellProps>) {
   const name = row.teacherName ?? row.teacherId ?? "";
   return (
     <Stack direction="row" sx={{ alignItems: "center", gap: 1, minWidth: 0, width: "100%" }}>
@@ -249,7 +260,12 @@ function CarryoverTeacherCell({ row }: Readonly<{ row: CarryoverRow }>) {
       </Tooltip>
       {row.isDisabledTeacher === true ? (
         <Box sx={{ flexShrink: 0 }}>
-          <DisabledTeacherChip />
+          <StatusBadge
+            category="staffAccount"
+            status="deactivated"
+            label={disabledTeacherLabel}
+            icon={<BlockOutlined fontSize="small" />}
+          />
         </Box>
       ) : null}
     </Stack>
@@ -350,17 +366,23 @@ function CarryoverPeriodCell({ row, locale }: Readonly<{ row: CarryoverRow; loca
   );
 }
 
+interface CarryoverPaidCellProps {
+  readonly row: CarryoverRow;
+  readonly paidLabel: string;
+  readonly unpaidLabel: string;
+}
+
 /**
  * Paid state: the paid/unpaid chip with the settled amount beneath it when
  * paid. The amount line gets a compact line-height — the grid cell inherits
  * `line-height` equal to the full row height, so a default second line would
  * be ~51px tall and overflow the 52px row vertically.
  */
-function CarryoverPaidCell({ row }: Readonly<{ row: CarryoverRow }>) {
+function CarryoverPaidCell({ row, paidLabel, unpaidLabel }: Readonly<CarryoverPaidCellProps>) {
   const paid = row.isPaid === true;
   return (
     <Stack sx={{ gap: 0.5, alignItems: "flex-start", overflow: "hidden" }}>
-      <PaidStatusChip paid={paid} />
+      <StatusBadge category="session" status={paid ? "active" : "pending"} label={paid ? paidLabel : unpaidLabel} />
       {paid && row.paid !== null ? (
         <Box component="span" sx={theme => ({ color: theme.palette.status.onActiveContainer, lineHeight: 1.3 })}>
           {formatAccountingMoney(row.paid)} {row.teacherCurrency ?? ""}
@@ -386,7 +408,7 @@ function buildCarryoverColumns(args: CarryoverColumnArgs): GridColDef<CarryoverR
       headerName: labels.column.teacher,
       flex: 1,
       minWidth: 180,
-      renderCell: ({ row }) => <CarryoverTeacherCell row={row} />,
+      renderCell: ({ row }) => <CarryoverTeacherCell row={row} disabledTeacherLabel={labels.chip.disabledTeacher} />,
     },
     {
       field: "studentsCount",
@@ -428,7 +450,9 @@ function buildCarryoverColumns(args: CarryoverColumnArgs): GridColDef<CarryoverR
       field: "paid",
       headerName: labels.column.paid,
       width: 140,
-      renderCell: ({ row }) => <CarryoverPaidCell row={row} />,
+      renderCell: ({ row }) => (
+        <CarryoverPaidCell row={row} paidLabel={labels.chip.paid} unpaidLabel={labels.chip.unpaid} />
+      ),
     },
     {
       field: "paymentDate",
@@ -513,30 +537,24 @@ function CarryoverToolbar({
     <Stack direction="row" sx={{ gap: 1, flexWrap: "wrap", alignItems: "center" }}>
       {canManageCarryover ? (
         <>
-          <Button
+          <FilterButton
             id="carryover-bulk-to-expense"
             size="small"
-            variant="outlined"
             startIcon={<ReceiptLongOutlined />}
             disabled={!hasSelection || !selectionAllUnpaid}
             onClick={onOpenBulkToExpense}
           >
             {labels.action.bulkToExpense}
-          </Button>
-          <Button
+          </FilterButton>
+          <DangerActionButton
             id="carryover-bulk-delete"
             size="small"
-            variant="outlined"
             startIcon={<DeleteOutlined />}
             disabled={!hasSelection}
             onClick={() => onOpenDelete(selectedRows)}
-            sx={theme => ({
-              color: theme.palette.error.main,
-              borderColor: theme.palette.error.main,
-            })}
           >
             {labels.action.bulkDelete}
-          </Button>
+          </DangerActionButton>
           {hasSelection ? (
             <Chip
               id="carryover-selection-count"
@@ -558,15 +576,14 @@ function CarryoverToolbar({
           {labels.action.exportCsv}
         </ExportButton>
         {canManageCarryover ? (
-          <Button
+          <PrimaryPageAction
             id="carryover-add-new"
             size="small"
-            variant="contained"
             startIcon={<AddOutlined />}
             onClick={() => onOpenForm(null)}
           >
             {labels.action.addNew}
-          </Button>
+          </PrimaryPageAction>
         ) : null}
       </Box>
     </Stack>
@@ -645,11 +662,11 @@ function CarryoverAggregateFooter({ aggregates, totalCount, labels }: Readonly<C
         </Typography>
         <Stack direction="row" sx={{ flexWrap: "wrap", gap: 2, alignItems: "center" }}>
           <Stack direction="row" sx={{ alignItems: "center", gap: 0.5 }}>
-            <PaidStatusChip paid />
+            <StatusBadge category="session" status="active" label={labels.chip.paid} />
             <Typography variant="bodyMd">{labels.aggregate.paidCount(aggregates.rowCountByPaid.paid)}</Typography>
           </Stack>
           <Stack direction="row" sx={{ alignItems: "center", gap: 0.5 }}>
-            <PaidStatusChip paid={false} />
+            <StatusBadge category="session" status="pending" label={labels.chip.unpaid} />
             <Typography variant="bodyMd">{labels.aggregate.unpaidCount(aggregates.rowCountByPaid.unpaid)}</Typography>
           </Stack>
         </Stack>

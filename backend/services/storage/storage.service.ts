@@ -161,7 +161,12 @@ export namespace StorageService {
       return { error: tErrors.filePathMismatch, status: 400 };
     }
 
-    if (session.uploadedByUserId && session.uploadedByUserId !== userId) {
+    if (!session.uploadedByUserId) {
+      logger.warn("Signed URL session is not bound to an uploader", { sessionId, filePath });
+      return { error: tErrors.invalidUploadSession, status: 403 };
+    }
+
+    if (session.uploadedByUserId !== userId) {
       logger.warn("Signed URL user mismatch in session validation", {
         sessionId,
         signedUrlUserId: session.uploadedByUserId,

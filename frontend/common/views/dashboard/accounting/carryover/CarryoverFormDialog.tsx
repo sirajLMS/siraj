@@ -2,7 +2,6 @@
 
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import {
-  Button,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -14,6 +13,7 @@ import {
   TextField,
 } from "@mui/material";
 import { Controller, useWatch } from "react-hook-form";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect";
@@ -244,24 +244,17 @@ export function CarryoverFormDialog({ open, row, onClose, onSaved }: Readonly<Ca
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        <Button
-          variant="text"
-          onClick={viewModel.onCancel}
-          disabled={viewModel.submitting}
-          sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 700, borderRadius: 1.5 })}
-        >
+        <FilterButton onClick={viewModel.onCancel} disabled={viewModel.submitting}>
           {labels.modal.form.cancel}
-        </Button>
-        <Button
+        </FilterButton>
+        <PrimaryPageAction
           type="submit"
           form={FORM_ID}
-          variant="contained"
           disabled={viewModel.submitting || !viewModel.canSubmit}
           aria-busy={viewModel.submitting}
-          sx={{ fontWeight: 700, borderRadius: 1.5 }}
         >
           {viewModel.submitting ? <CircularProgress size={20} color="inherit" /> : labels.modal.form.submit}
-        </Button>
+        </PrimaryPageAction>
       </DialogActions>
     </Dialog>
   );

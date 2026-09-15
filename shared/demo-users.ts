@@ -115,13 +115,8 @@ function sanitizeDemoUser(user: InternalDemoUser): DemoUser {
   return { name, email, isSuperAdmin, groupSlug };
 }
 
-export const superAdmins: DemoUser[] = internalSuperAdmins.map(sanitizeDemoUser);
-export const academyAdmins: DemoUser[] = internalAcademyAdmins.map(sanitizeDemoUser);
-export const teachers: DemoUser[] = internalTeachers.map(sanitizeDemoUser);
 export const supervisors: DemoUser[] = internalSupervisors.map(sanitizeDemoUser);
-export const staff: DemoUser[] = internalStaff.map(sanitizeDemoUser);
 export const students: DemoUser[] = internalStudents.map(sanitizeDemoUser);
-export const parents: DemoUser[] = internalParents.map(sanitizeDemoUser);
 
 export const INTERNAL_DEMO_USERS: InternalDemoUser[] = [
   ...internalSuperAdmins,

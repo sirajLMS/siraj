@@ -42,7 +42,7 @@ export interface ExpenseAggregates {
 }
 
 /** Filter fields exactly as the report consumes them (title search already debounced). */
-export interface ExpenseFilterFields {
+interface ExpenseFilterFields {
   readonly title: string;
   readonly types: readonly ExpenseType[];
   readonly expenseDate: string | null;
@@ -192,7 +192,7 @@ const EXPENSE_TYPE_EXPORT_VALUE: Record<ExpenseType, string> = {
  * the route contract one-to-one; includeDeleted is always sent so the export
  * exactly matches the grid the operator is looking at.
  */
-export function buildExpensesExportCsvUrl(fields: ExpenseFilterFields): string {
+function buildExpensesExportCsvUrl(fields: ExpenseFilterFields): string {
   const params = new URLSearchParams();
   if (fields.title !== "") params.set("title", fields.title);
   if (fields.types.length > 0) {

@@ -1,17 +1,19 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { AddOutlined, ChevronRightOutlined, SearchOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, Chip, InputAdornment, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { AddOutlined, ChevronRightOutlined } from "@mui/icons-material";
+import { Alert, Box, Button, Chip, Tooltip, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { BaseAvatar } from "@/frontend/common/components/ui/avatar";
 import { SectionPanel } from "@/frontend/common/components/ui/container";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid";
+import { PersonProfileLinkCell } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLinkCell";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField";
 import type { StudentsDirectoryQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { studentsDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-directory.documents";
+import { studentHref } from "@/frontend/common/utils/profileHref";
 import { rtlFlipIconSx } from "@/frontend/common/utils/rtlFlipIconSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { useRouter } from "@/shared/i18n/navigation";
@@ -40,27 +42,17 @@ function creditBalanceColor(classesRemaining: number | null): CreditChipColor {
 }
 
 function StudentCell({ row }: Readonly<{ row: StudentCreditsRow }>) {
-  const truncated = {
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  } as const;
   return (
-    <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", minWidth: 0, width: "100%" }}>
-      {/* Phones drop the avatar so the squeezed name column keeps as much text width as possible. */}
-      <BaseAvatar
-        label={row.name ?? undefined}
-        src={row.avatarUrl}
-        size={32}
-        sx={{ display: { xs: "none", sm: "flex" } }}
+    <Box sx={{ minWidth: 0, width: "100%" }}>
+      <PersonProfileLinkCell
+        href={row.id === null ? null : studentHref(row.id)}
+        name={row.name ?? "—"}
+        avatarUrl={row.avatarUrl}
+        avatarSize={32}
+        typographyVariant="bodyMd"
+        fontWeight={600}
       />
-      <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ ...truncated, fontWeight: 600, fontSize: 13 }}>{row.name ?? "—"}</Typography>
-        <Typography sx={{ ...truncated, fontSize: 12, color: theme => theme.palette.onSurfaceVariant }}>
-          {row.email ?? "—"}
-        </Typography>
-      </Box>
-    </Stack>
+    </Box>
   );
 }
 
@@ -229,62 +221,43 @@ export function StudentCreditsList() {
   );
 
   return (
-    <SectionPanel>
-      {/* The title/toolbar row lives inside the panel body so the header-to-grid rhythm stays one
-          24px stack gap instead of the double-padded panel header band. */}
-      <Stack spacing={3}>
-        <Stack
-          direction="row"
-          sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5 }}
-        >
-          <Typography variant="titleLg" sx={{ color: theme => theme.palette.onSurface }}>
-            {credits.title}
-          </Typography>
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", flexWrap: "wrap" }}>
-            <TextField
-              size="small"
-              placeholder={directory.searchPlaceholder}
-              value={searchInput}
-              onChange={event => setSearchInput(event.target.value)}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchOutlined fontSize="small" />
-                    </InputAdornment>
-                  ),
-                },
-                htmlInput: { "aria-label": directory.searchPlaceholder, autoComplete: "off" },
-              }}
-              sx={{ minWidth: { xs: "100%", sm: 260 } }}
-            />
-            <Link href="/accounting/credits/adjust" style={{ textDecoration: "none" }}>
-              <Button variant="contained" startIcon={<AddOutlined />}>
-                {credits.adjustCredits}
-              </Button>
-            </Link>
-          </Stack>
-        </Stack>
-        {error ? <Alert severity="error">{directory.errors.loadFailed}</Alert> : null}
-        {hitsFetchCap ? (
-          <Typography sx={{ fontSize: 12, color: theme => theme.palette.onSurfaceVariant }}>
-            {credits.resultsCappedHint(DIRECTORY_FETCH_LIMIT)}
-          </Typography>
-        ) : null}
-        {/* autoHeight sizes the grid to its rows: no clipped last row and no dead space under it. */}
-        <AppDataGrid<StudentCreditsRow>
-          rows={rows}
-          columns={columns}
-          loading={loading}
-          emptyMessage={directory.noEntries}
-          ariaLabel={credits.title}
-          rowHeight={64}
-          disableColumnMenu
-          autoHeight
-          paginationOptions={{ mode: "client" }}
-          sx={gridSx}
-        />
-      </Stack>
+    <SectionPanel
+      title={credits.title}
+      actions={
+        <>
+          <SearchBarField
+            value={searchInput}
+            placeholder={directory.searchPlaceholder}
+            onChange={setSearchInput}
+            sx={{ minWidth: { xs: "100%", sm: 260 } }}
+          />
+          <Link href="/accounting/credits/adjust" style={{ textDecoration: "none" }}>
+            <Button variant="contained" startIcon={<AddOutlined />}>
+              {credits.adjustCredits}
+            </Button>
+          </Link>
+        </>
+      }
+    >
+      {error ? <Alert severity="error">{directory.errors.loadFailed}</Alert> : null}
+      {hitsFetchCap ? (
+        <Typography sx={{ fontSize: 12, color: theme => theme.palette.onSurfaceVariant }}>
+          {credits.resultsCappedHint(DIRECTORY_FETCH_LIMIT)}
+        </Typography>
+      ) : null}
+      {/* autoHeight sizes the grid to its rows: no clipped last row and no dead space under it. */}
+      <AppDataGrid<StudentCreditsRow>
+        rows={rows}
+        columns={columns}
+        loading={loading}
+        emptyMessage={directory.noEntries}
+        ariaLabel={credits.title}
+        rowHeight={64}
+        disableColumnMenu
+        autoHeight
+        paginationOptions={{ mode: "client" }}
+        sx={gridSx}
+      />
     </SectionPanel>
   );
 }

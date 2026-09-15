@@ -1,14 +1,6 @@
 import { AccountStatus, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
 
-export const STUDENT_STATUS_OPTIONS = [
-  StudentStatus.Regular,
-  StudentStatus.Suspended,
-  StudentStatus.OnLeave,
-  StudentStatus.OnTrial,
-  StudentStatus.Deactivated,
-] as const;
-
 export function getStudentStatusLabel(status: string | null, tStatus: StudentStatusLabels): string {
   const statusLabels: Record<string, string> = {
     [StudentStatus.Regular]: tStatus.statusOptions.REGULAR,

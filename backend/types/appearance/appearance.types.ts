@@ -25,7 +25,7 @@ import type { PaletteMode } from "@mui/material/styles";
  * Backs the `AppearanceColorPair` / `AppearanceColorPairInput` GraphQL types
  * and the per-mode fields of {@link PerModeColors}.
  */
-export interface AppearanceColorPair {
+interface AppearanceColorPair {
   /** Main brand color for the mode. */
   primaryMain: string;
   /** Secondary brand color for the mode. */
@@ -85,7 +85,7 @@ export interface AppearanceFields {
  *
  * Timestamps are ISO strings (serialized by the repository before returning).
  */
-export type AppearanceSettingsSelectType = {
+type AppearanceSettingsSelectType = {
   id: string;
   /** Published (active-mode) primary color, e.g. `#2DD4BF`. */
   primaryMain: string;
@@ -149,18 +149,3 @@ export type AppearanceSettingsReturnType = Omit<AppearanceSettingsSelectType, ne
  * session context, never accepted from client input (BOPLA).
  */
 export type AppearanceSettingsSubmitInput = AppearanceFields;
-
-/**
- * GraphQL input shape for the `saveAppearanceDraft` mutation. Mirrors
- * {@link AppearanceSettingsSubmitInput} (= {@link AppearanceFields}) with two
- * field-type adjustments required by Pothos input semantics:
- *   - `defaultColorScheme` is `string` (not `PaletteMode`) because there is
- *     no canonical `PaletteMode` enum registered in `backend/enum/`. The
- *     resolver coerces it to `PaletteMode`.
- *   - `logoUrl` is `string | null | undefined` (omittable + nullable). The
- *     resolver normalizes `undefined` to `null` to match the service shape.
- */
-export type AppearanceDraftInput = Omit<AppearanceSettingsSubmitInput, "defaultColorScheme" | "logoUrl"> & {
-  defaultColorScheme: string;
-  logoUrl?: string | null;
-};

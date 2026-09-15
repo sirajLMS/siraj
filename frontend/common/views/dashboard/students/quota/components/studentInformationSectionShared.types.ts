@@ -7,7 +7,7 @@ import type { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphq
  * Props the shared scaffold passes to whichever language display
  * ({@code DesktopLanguageDisplay} or {@code MobileLanguageDisplay}) the tier injects.
  */
-export interface StudentInfoLanguageDisplayProps {
+interface StudentInfoLanguageDisplayProps {
   readonly code: AppLanguage | null;
   readonly fallback?: string;
 }

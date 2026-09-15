@@ -10,6 +10,10 @@ export interface BaseDeleteDialogSharedProps {
   body: string;
   cancelLabel: string;
   confirmLabel: string;
+  /** Disable the confirm action independently of loading state (e.g. guard conditions). */
+  confirmDisabled?: boolean;
+  /** Accessible label for the close action (if host exposes one). */
+  closeAriaLabel?: string;
   /** Accessible labelled-by id for the dialog title (wired to the Dialog's aria-labelledby). */
   dialogId?: string;
   /** Optional override for the confirm button sx (default uses error palette) */

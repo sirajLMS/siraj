@@ -106,38 +106,32 @@ describe("AuthPasswordService.changePassword", () => {
     spies.restore();
   });
 
-  test("does not revoke sessions when the current password is invalid", async () => {
+  test.each([
+    {
+      caseName: "the current password is invalid",
+      getOverrides: () => ({ currentPassword: `Wrong-${randomUUID().slice(0, 8)}!` }),
+      expectedError: tErrors.auth.currentPasswordInvalid,
+      checkUpdateSpy: true,
+    },
+    {
+      caseName: "the new password and confirmation do not match",
+      getOverrides: () => ({ confirmPassword: `Other-${randomUUID().slice(0, 8)}!` }),
+      expectedError: tErrors.auth.passwordsDoNotMatch,
+      checkUpdateSpy: false,
+    },
+  ])("does not revoke sessions when $caseName", async ({ getOverrides, expectedError, checkUpdateSpy }) => {
     const spies = setupMocks();
-
-    const error = await expectRejection(() =>
-      AuthPasswordService.changePassword(
-        USER_ID,
-        defaultInput({ currentPassword: `Wrong-${randomUUID().slice(0, 8)}!` }),
-        "en"
-      )
-    );
-
-    expect(error.message).toContain(tErrors.auth.currentPasswordInvalid);
-    expect(spies.updatePasswordSpy).not.toHaveBeenCalled();
-    expect(spies.deleteSessionsSpy).not.toHaveBeenCalled();
-
-    spies.restore();
-  });
-
-  test("does not revoke sessions when the new password and confirmation do not match", async () => {
-    const spies = setupMocks();
-
-    const error = await expectRejection(() =>
-      AuthPasswordService.changePassword(
-        USER_ID,
-        defaultInput({ confirmPassword: `Other-${randomUUID().slice(0, 8)}!` }),
-        "en"
-      )
-    );
-
-    expect(error.message).toContain(tErrors.auth.passwordsDoNotMatch);
-    expect(spies.deleteSessionsSpy).not.toHaveBeenCalled();
-
-    spies.restore();
+    try {
+      const error = await expectRejection(() =>
+        AuthPasswordService.changePassword(USER_ID, defaultInput(getOverrides()), "en")
+      );
+      expect(error.message).toContain(expectedError);
+      if (checkUpdateSpy) {
+        expect(spies.updatePasswordSpy).not.toHaveBeenCalled();
+      }
+      expect(spies.deleteSessionsSpy).not.toHaveBeenCalled();
+    } finally {
+      spies.restore();
+    }
   });
 });

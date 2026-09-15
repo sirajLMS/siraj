@@ -200,26 +200,30 @@ describe("whatsapp groups queries", () => {
     });
   });
 
-  test("whatsappGroup rejects an unknown group id", async () => {
+  test.each([
+    {
+      targetQuery: "whatsappGroup",
+      run: (token: string) =>
+        testClient.query({
+          query: whatsappGroupQueryDocument,
+          variables: { groupId: randomUUID() },
+          errorPolicy: "all",
+          context: { headers: { Authorization: `Bearer ${token}` } },
+        }),
+    },
+    {
+      targetQuery: "whatsappGroupMessages",
+      run: (token: string) =>
+        testClient.query({
+          query: whatsappGroupMessagesQueryDocument,
+          variables: { groupId: randomUUID(), pagination: FULL_PAGINATION },
+          errorPolicy: "all",
+          context: { headers: { Authorization: `Bearer ${token}` } },
+        }),
+    },
+  ])("$targetQuery rejects an unknown group id", async ({ run }) => {
     const token = await loginSuperAdmin();
-    const result = await testClient.query({
-      query: whatsappGroupQueryDocument,
-      variables: { groupId: randomUUID() },
-      errorPolicy: "all",
-      context: { headers: { Authorization: `Bearer ${token}` } },
-    });
-    expect(result.error).toBeDefined();
-    expect(extractGqlErrorCode(result.error)).toBe("WHATSAPP_GROUP_NOT_FOUND");
-  });
-
-  test("whatsappGroupMessages rejects an unknown group id", async () => {
-    const token = await loginSuperAdmin();
-    const result = await testClient.query({
-      query: whatsappGroupMessagesQueryDocument,
-      variables: { groupId: randomUUID(), pagination: FULL_PAGINATION },
-      errorPolicy: "all",
-      context: { headers: { Authorization: `Bearer ${token}` } },
-    });
+    const result = await run(token);
     expect(result.error).toBeDefined();
     expect(extractGqlErrorCode(result.error)).toBe("WHATSAPP_GROUP_NOT_FOUND");
   });
@@ -290,75 +294,84 @@ describe("whatsapp groups mutations", () => {
     });
   });
 
-  test("invite-link get/reset reject an unknown group id", async () => {
+  test.each([
+    {
+      description: "invite-link get/reset",
+      verify: async (token: string, unknown: string) => {
+        await expectMutationErrorCode(
+          token,
+          getWhatsappGroupInviteLinkMutationDocument,
+          { groupId: unknown },
+          "WHATSAPP_GROUP_NOT_FOUND"
+        );
+        await expectMutationErrorCode(
+          token,
+          resetWhatsappGroupInviteLinkMutationDocument,
+          { groupId: unknown },
+          "WHATSAPP_GROUP_NOT_FOUND"
+        );
+      },
+    },
+    {
+      description: "delete",
+      verify: async (token: string, unknown: string) => {
+        await expectMutationErrorCode(
+          token,
+          deleteWhatsappGroupMutationDocument,
+          { groupId: unknown },
+          "WHATSAPP_GROUP_NOT_FOUND"
+        );
+      },
+    },
+    {
+      description: "join-request approve/reject",
+      verify: async (token: string, unknown: string) => {
+        const input = { groupId: unknown, joinRequestIds: [randomUUID()] };
+        await expectMutationErrorCode(
+          token,
+          approveWhatsappGroupJoinRequestsMutationDocument,
+          { input },
+          "WHATSAPP_GROUP_NOT_FOUND"
+        );
+        await expectMutationErrorCode(
+          token,
+          rejectWhatsappGroupJoinRequestsMutationDocument,
+          { input },
+          "WHATSAPP_GROUP_NOT_FOUND"
+        );
+      },
+    },
+    {
+      description: "participant removal",
+      verify: async (token: string, unknown: string) => {
+        await expectMutationErrorCode(
+          token,
+          removeWhatsappGroupParticipantsMutationDocument,
+          { input: { groupId: unknown, participants: [fixturePhone("6667777")] } },
+          "WHATSAPP_GROUP_NOT_FOUND"
+        );
+      },
+    },
+    {
+      description: "pin/unpin",
+      verify: async (token: string, unknown: string) => {
+        await expectMutationErrorCode(
+          token,
+          pinWhatsappGroupMessageMutationDocument,
+          { input: { groupId: unknown, messageId: "wamid.unknown", operation: "pin", expirationDays: 7 } },
+          "WHATSAPP_GROUP_NOT_FOUND"
+        );
+        await expectMutationErrorCode(
+          token,
+          unpinWhatsappGroupMessageMutationDocument,
+          { input: { groupId: unknown, messageId: "wamid.unknown", operation: "unpin", expirationDays: null } },
+          "WHATSAPP_GROUP_NOT_FOUND"
+        );
+      },
+    },
+  ])("$description reject an unknown group id", async ({ verify }) => {
     const token = await loginSuperAdmin();
-    const unknown = randomUUID();
-    await expectMutationErrorCode(
-      token,
-      getWhatsappGroupInviteLinkMutationDocument,
-      { groupId: unknown },
-      "WHATSAPP_GROUP_NOT_FOUND"
-    );
-    await expectMutationErrorCode(
-      token,
-      resetWhatsappGroupInviteLinkMutationDocument,
-      { groupId: unknown },
-      "WHATSAPP_GROUP_NOT_FOUND"
-    );
-  });
-
-  test("delete rejects an unknown group id", async () => {
-    const token = await loginSuperAdmin();
-    await expectMutationErrorCode(
-      token,
-      deleteWhatsappGroupMutationDocument,
-      { groupId: randomUUID() },
-      "WHATSAPP_GROUP_NOT_FOUND"
-    );
-  });
-
-  test("join-request approve/reject reject an unknown group id", async () => {
-    const token = await loginSuperAdmin();
-    const input = { groupId: randomUUID(), joinRequestIds: [randomUUID()] };
-    await expectMutationErrorCode(
-      token,
-      approveWhatsappGroupJoinRequestsMutationDocument,
-      { input },
-      "WHATSAPP_GROUP_NOT_FOUND"
-    );
-    await expectMutationErrorCode(
-      token,
-      rejectWhatsappGroupJoinRequestsMutationDocument,
-      { input },
-      "WHATSAPP_GROUP_NOT_FOUND"
-    );
-  });
-
-  test("participant removal rejects an unknown group id", async () => {
-    const token = await loginSuperAdmin();
-    await expectMutationErrorCode(
-      token,
-      removeWhatsappGroupParticipantsMutationDocument,
-      { input: { groupId: randomUUID(), participants: [fixturePhone("6667777")] } },
-      "WHATSAPP_GROUP_NOT_FOUND"
-    );
-  });
-
-  test("pin/unpin reject an unknown group id", async () => {
-    const token = await loginSuperAdmin();
-    const groupId = randomUUID();
-    await expectMutationErrorCode(
-      token,
-      pinWhatsappGroupMessageMutationDocument,
-      { input: { groupId, messageId: "wamid.unknown", operation: "pin", expirationDays: 7 } },
-      "WHATSAPP_GROUP_NOT_FOUND"
-    );
-    await expectMutationErrorCode(
-      token,
-      unpinWhatsappGroupMessageMutationDocument,
-      { input: { groupId, messageId: "wamid.unknown", operation: "unpin", expirationDays: null } },
-      "WHATSAPP_GROUP_NOT_FOUND"
-    );
+    await verify(token, randomUUID());
   });
 
   test("send rejects an unknown group id and a blank body without a template", async () => {

@@ -7,7 +7,6 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
   Alert,
   Box,
-  Button,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -22,6 +21,7 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
 import { formatDateInput } from "@/frontend/common/components/intl/dateFormat";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
 import type {
@@ -56,10 +56,7 @@ const DATE_PAIR_SX = {
   gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
 } as const;
 
-export type BulkToExpenseRow = Pick<
-  CarryoverBalancesQuery_carryoverBalances_rows,
-  "id" | "payable" | "teacherCurrency"
->;
+type BulkToExpenseRow = Pick<CarryoverBalancesQuery_carryoverBalances_rows, "id" | "payable" | "teacherCurrency">;
 
 export interface BulkToExpenseModalProps {
   /** Whether the dialog is visible; every open starts a fresh session. */
@@ -308,24 +305,12 @@ export function BulkToExpenseModal({ open, carryoverIds, rows, onClose, onDone }
             {labels.modal.bulkToExpense.convertFillRequiredHint}
           </Typography>
         ) : null}
-        <Button
-          variant="text"
-          onClick={onClose}
-          disabled={submitting}
-          sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 700, borderRadius: 1.5 })}
-        >
+        <FilterButton onClick={onClose} disabled={submitting}>
           {labels.modal.bulkToExpense.cancel}
-        </Button>
-        <Button
-          type="submit"
-          form={FORM_ID}
-          variant="contained"
-          disabled={submitting || !canSubmit}
-          aria-busy={submitting}
-          sx={{ fontWeight: 700, borderRadius: 1.5 }}
-        >
+        </FilterButton>
+        <PrimaryPageAction type="submit" form={FORM_ID} disabled={submitting || !canSubmit} aria-busy={submitting}>
           {submitting ? <CircularProgress size={20} color="inherit" /> : labels.modal.bulkToExpense.submit}
-        </Button>
+        </PrimaryPageAction>
       </DialogActions>
     </Dialog>
   );

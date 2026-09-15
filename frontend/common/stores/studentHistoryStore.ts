@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import type { ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 
-export interface StudentHistoryMonthBounds {
+interface StudentHistoryMonthBounds {
   readonly year: number;
   readonly month: number;
 }

@@ -1,28 +1,27 @@
 "use client";
 
-import { ClearOutlined, SearchOutlined } from "@mui/icons-material";
+import { ClearOutlined } from "@mui/icons-material";
 import {
   Box,
   Chip,
   FormControl,
   IconButton,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   type SelectChangeEvent,
-  Stack,
-  TextField,
   Tooltip,
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { AppDateRangePicker } from "@/frontend/common/components/ui/form/date";
+import { SearchBarField } from "@/frontend/common/components/ui/input/searchBarField/SearchBarField";
 import {
   type PersonOption,
   StudentAutocomplete,
   TeacherAutocomplete,
 } from "@/frontend/common/components/ui/input/userSelect";
 import { CalculationStatus } from "@/frontend/common/graphql/generated/gql/graphql";
+import { FilterBarShellShared } from "@/frontend/common/views/dashboard/accounting/components/__shared__/filterBarShellShared";
 import type {
   PayrollReportRow,
   PayrollReportsViewModel,
@@ -173,82 +172,72 @@ export function PayrollReportsFilterBar({
   };
 
   return (
-    <Stack
-      direction={{ xs: "column", md: "row" }}
-      sx={{ flexWrap: "wrap", gap: 2, alignItems: { xs: "stretch", md: "center" } }}
-    >
-      <TextField
-        size="small"
-        placeholder={labels.filters.search}
-        value={search}
-        onChange={event => setSearch(event.target.value)}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-          htmlInput: {
-            "aria-label": labels.filters.search,
-            autoComplete: "off",
-            maxLength: SEARCH_INPUT_MAX_LENGTH,
-          },
-        }}
-        sx={{ minWidth: { xs: "100%", sm: 260 } }}
-      />
-      <TeacherAutocomplete
-        size="small"
-        label={labels.filters.teacher}
-        value={teacherFilter.option}
-        onChange={teacherFilter.handleChange}
-        sx={{ width: { xs: "100%", sm: 230 }, flexShrink: 0 }}
-      />
-      <StudentAutocomplete
-        size="small"
-        label={labels.filters.student}
-        value={studentFilter.option}
-        onChange={studentFilter.handleChange}
-        sx={{ width: { xs: "100%", sm: 230 }, flexShrink: 0 }}
-      />
-      <Box sx={{ flex: { xs: "1 1 100%", md: "1 1 300px" }, minWidth: { md: 300 } }}>
-        <AppDateRangePicker
-          label={labels.filters.dateRange}
-          fromLabel={labels.filters.dateFrom}
-          toLabel={labels.filters.dateTo}
-          fromDate={dateFrom ?? ""}
-          toDate={dateTo ?? ""}
-          onChange={handleDateRangeChange}
-          size="small"
-        />
-      </Box>
-      <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 230 } }}>
-        <InputLabel id="payroll-reports-status-filter-label" shrink>
-          {labels.filters.status}
-        </InputLabel>
-        <Select
-          labelId="payroll-reports-status-filter-label"
-          label={labels.filters.status}
-          multiple
-          value={[...calculationStatuses]}
-          onChange={handleStatusesChange}
-          renderValue={selected => renderStatusValue(selected, statusLabels, labels.filters.all)}
-        >
-          {Object.values(CalculationStatus).map(status => (
-            <MenuItem key={status} value={status}>
-              {statusLabels[status]}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      {hasActiveFilters ? (
-        <Tooltip title={labels.filters.clear}>
-          <IconButton size="small" onClick={clearFilters} aria-label={labels.filters.clear}>
-            <ClearOutlined fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      ) : null}
-    </Stack>
+    <FilterBarShellShared
+      content={
+        <>
+          <SearchBarField
+            value={search}
+            onChange={setSearch}
+            placeholder={labels.filters.search}
+            maxLength={SEARCH_INPUT_MAX_LENGTH}
+            clearLabel={labels.filters.clear}
+            sx={{ minWidth: { xs: "100%", sm: 260 } }}
+          />
+          <TeacherAutocomplete
+            size="small"
+            label={labels.filters.teacher}
+            value={teacherFilter.option}
+            onChange={teacherFilter.handleChange}
+            sx={{ width: { xs: "100%", sm: 230 }, flexShrink: 0 }}
+          />
+          <StudentAutocomplete
+            size="small"
+            label={labels.filters.student}
+            value={studentFilter.option}
+            onChange={studentFilter.handleChange}
+            sx={{ width: { xs: "100%", sm: 230 }, flexShrink: 0 }}
+          />
+          <Box sx={{ flex: { xs: "1 1 100%", md: "1 1 300px" }, minWidth: { md: 300 } }}>
+            <AppDateRangePicker
+              label={labels.filters.dateRange}
+              fromLabel={labels.filters.dateFrom}
+              toLabel={labels.filters.dateTo}
+              fromDate={dateFrom ?? ""}
+              toDate={dateTo ?? ""}
+              onChange={handleDateRangeChange}
+              size="small"
+            />
+          </Box>
+          <FormControl size="small" sx={{ minWidth: { xs: "100%", sm: 230 } }}>
+            <InputLabel id="payroll-reports-status-filter-label" shrink>
+              {labels.filters.status}
+            </InputLabel>
+            <Select
+              labelId="payroll-reports-status-filter-label"
+              label={labels.filters.status}
+              multiple
+              value={[...calculationStatuses]}
+              onChange={handleStatusesChange}
+              renderValue={selected => renderStatusValue(selected, statusLabels, labels.filters.all)}
+            >
+              {Object.values(CalculationStatus).map(status => (
+                <MenuItem key={status} value={status}>
+                  {statusLabels[status]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </>
+      }
+      actions={
+        hasActiveFilters ? (
+          <Tooltip title={labels.filters.clear}>
+            <IconButton size="small" onClick={clearFilters} aria-label={labels.filters.clear}>
+              <ClearOutlined fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        ) : null
+      }
+    />
   );
 }

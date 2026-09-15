@@ -2,6 +2,7 @@
 
 import {
   AddOutlined,
+  BlockOutlined,
   DeleteOutlined,
   EditOutlined,
   EventNoteOutlined,
@@ -11,6 +12,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Divider, IconButton, Menu, MenuItem, Paper, Stack, Typography } from "@mui/material";
 import { type ReactNode, useState } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import {
@@ -19,8 +21,6 @@ import {
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import type { CarryoverViewProps } from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverContainer";
 import { CarryoverFilterBar } from "@/frontend/common/views/dashboard/accounting/carryover/CarryoverFilterBar";
-import { DisabledTeacherChip } from "@/frontend/common/views/dashboard/accounting/carryover/DisabledTeacherChip";
-import { PaidStatusChip } from "@/frontend/common/views/dashboard/accounting/carryover/PaidStatusChip";
 import { useCarryoverExport } from "@/frontend/common/views/dashboard/accounting/carryover/useCarryoverExport";
 import type {
   CarryoverAggregates,
@@ -35,6 +35,7 @@ import {
   MobileCardList,
   MobileCardListItem,
   MobileContentInset,
+  MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
@@ -166,7 +167,14 @@ function CarryoverCard({
           <Stack sx={{ gap: 0.5, minWidth: 0 }}>
             <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
               <Typography variant="titleLg">{row.teacherName ?? "—"}</Typography>
-              {row.isDisabledTeacher === true ? <DisabledTeacherChip /> : null}
+              {row.isDisabledTeacher === true ? (
+                <StatusBadge
+                  category="staffAccount"
+                  status="deactivated"
+                  label={labels.chip.disabledTeacher}
+                  icon={<BlockOutlined fontSize="small" />}
+                />
+              ) : null}
             </Stack>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {labels.column.studentsCount}: {row.studentsCount ?? 0}
@@ -177,7 +185,11 @@ function CarryoverCard({
             <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
               {formatAccountingMoney(row.payable)} {row.teacherCurrency ?? ""}
             </Typography>
-            <PaidStatusChip paid={row.isPaid === true} />
+            <StatusBadge
+              category="session"
+              status={row.isPaid === true ? "active" : "pending"}
+              label={row.isPaid === true ? labels.chip.paid : labels.chip.unpaid}
+            />
           </Stack>
         </Box>
         <Divider />
@@ -274,7 +286,7 @@ export function CarryoverMobileView(props: Readonly<CarryoverViewProps>) {
           </Stack>
         }
       />
-      <Stack sx={{ gap: 2, pb: 11 }}>
+      <MobileContentStack gap={2} paddingBottom={11}>
         <MobileContentInset>
           <CarryoverAggregateStrip aggregates={aggregates} labels={labels} totalCount={totalCount} />
         </MobileContentInset>
@@ -313,7 +325,7 @@ export function CarryoverMobileView(props: Readonly<CarryoverViewProps>) {
             )}
           />
         )}
-      </Stack>
+      </MobileContentStack>
     </MobilePageContainer>
   );
 }

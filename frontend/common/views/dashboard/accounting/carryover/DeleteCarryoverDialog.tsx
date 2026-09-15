@@ -1,7 +1,7 @@
 "use client";
 
 import WarningAmberOutlined from "@mui/icons-material/WarningAmberOutlined";
-import { Box, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useCallback } from "react";
 import { deleteCarryoverBalanceMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
@@ -59,13 +59,13 @@ export function DeleteCarryoverDialog({ open, row, onClose, onDone }: Readonly<D
       open={open}
       busy={action.busy}
       title={labels.modal.delete.title}
+      body=""
       cancelLabel={labels.modal.delete.cancel}
       confirmLabel={labels.modal.delete.confirm}
-      closeAriaLabel={commonLabels.ariaClose}
       onClose={onClose}
       onConfirm={action.confirm}
     >
-      <Box sx={{ display: "grid", gap: 2, pt: 1 }}>
+      <Stack sx={{ gap: 2 }}>
         <CarryoverConfirmDetails details={details} />
         {linkedSessionCount > 0 && (
           <Box
@@ -82,7 +82,7 @@ export function DeleteCarryoverDialog({ open, row, onClose, onDone }: Readonly<D
             <Typography variant="bodyMd">{labels.modal.delete.linkedSessionsWarning(linkedSessionCount)}</Typography>
           </Box>
         )}
-      </Box>
+      </Stack>
     </CarryoverConfirmScaffold>
   );
 }

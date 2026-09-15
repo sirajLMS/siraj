@@ -262,7 +262,7 @@ function supportedInputCommonFields(t: PothosInputFieldBuilder, required: boolea
 
 function mobileWalletInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
-    slug: t.string({ required }),
+    slug: t.string({ required, directives: { constraint: { maxLength: 100 } } }),
     name: t.field({ type: "LocalizedString", required }),
     ...supportedInputCommonFields(t, false),
     countryCode: t.field({ type: CountryCodePothosObject, required: false }),
@@ -273,7 +273,7 @@ function mobileWalletInputCommonFields(t: PothosInputFieldBuilder, required: boo
 
 function paymentLinkInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
-    slug: t.string({ required }),
+    slug: t.string({ required, directives: { constraint: { maxLength: 100 } } }),
     name: t.field({ type: "LocalizedString", required }),
     ...supportedInputCommonFields(t, false),
     urlAllowlist: t.stringList({ required, directives: { constraint: { maxItems: 50, maxLength: 2048 } } }),

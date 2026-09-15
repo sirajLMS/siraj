@@ -123,4 +123,9 @@ if (isTestHelperEnabled()) {
       },
     })
   );
+} else if (process.env.NODE_ENV !== "production") {
+  logger.warn("Test-helper mutations are NOT registered: TEST_SERVER and TEST_CI are unset", {
+    testServer: process.env.TEST_SERVER ?? null,
+    testCi: process.env.TEST_CI ?? null,
+  });
 }

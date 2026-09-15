@@ -54,7 +54,7 @@ type AppearanceMode = keyof AppearanceColorsInput;
  * draft can be passed directly to `saveAppearanceDraftMutationDocument`
  * without mapping (per `frontend/common/stores/AGENTS.md` — NO MAPPING).
  */
-export const DEFAULT_APPEARANCE_DRAFT: AppearanceDraftInput = {
+const DEFAULT_APPEARANCE_DRAFT: AppearanceDraftInput = {
   colors: {
     light: { primaryMain: "#0D9488", secondaryMain: "#4F46E5" },
     dark: { primaryMain: "#2DD4BF", secondaryMain: "#818CF8" },

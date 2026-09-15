@@ -83,16 +83,6 @@ export function formatAccountingMonth(value: string | null | undefined, locale: 
   return date.toLocaleDateString(resolveAccountingDateLocale(locale), { month: "short", year: "numeric" });
 }
 
-/** Chip color tone for the paid/unpaid status. */
-export function paymentStatusTone(isPaid: boolean): "success" | "warning" {
-  return isPaid ? "success" : "warning";
-}
-
-/** Chip color tone for package plan active/archived. */
-export function planActiveTone(active: boolean): "success" | "default" {
-  return active ? "success" : "default";
-}
-
 /**
  * Payment-gateway label for detail surfaces: payments recorded without a
  * gateway (null or the NONE member) render the shared muted dash, matching the

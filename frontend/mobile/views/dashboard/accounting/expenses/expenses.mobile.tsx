@@ -1,19 +1,19 @@
 "use client";
 
 import { AddOutlined, DeleteOutlined, EditOutlined, LinkOutlined, MoreVertOutlined } from "@mui/icons-material";
-import { Box, Chip, IconButton, Menu, MenuItem, Paper, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Menu, MenuItem, Paper, Stack, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { type ReactNode, useState } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { ExpenseType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { formatAccountingMoney } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import {
   MobileListCardSkeletons,
   MobileListErrorNotice,
 } from "@/frontend/common/views/dashboard/accounting/components/__shared__/mobileListStateShared";
 import { ExpenseFilterBar } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseFilterBar";
-import { ExpenseSourceChip } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseSourceChip";
 import type { ExpensesViewProps } from "@/frontend/common/views/dashboard/accounting/expenses/ExpensesContainer";
-import { ExpenseTypeChip } from "@/frontend/common/views/dashboard/accounting/expenses/ExpenseTypeChip";
 import type {
   ExpenseAggregates,
   ExpenseRow,
@@ -23,9 +23,11 @@ import {
   MobileCardList,
   MobileCardListItem,
   MobileContentInset,
+  MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import { EXPENSE_SOURCE_CARRYOVER_BALANCES } from "@/shared/constants/expenses";
 import type { ExpensesLabels } from "@/shared/locale/types/dashboard/accounting/expenses";
 
 /** Height of each placeholder card while the first page loads. */
@@ -56,6 +58,33 @@ interface ExpenseMenuItem {
   readonly run: () => void;
   readonly disabled?: boolean;
   readonly danger?: boolean;
+}
+
+/** Localized label for an expense type, so badge cells carry the full copy. */
+function expenseTypeLabel(labels: ExpensesLabels, type: ExpenseType): string {
+  const labelsByType: Record<ExpenseType, string> = {
+    [ExpenseType.Salaries]: labels.type.Salaries,
+    [ExpenseType.Marketing]: labels.type.Marketing,
+    [ExpenseType.Logistics]: labels.type.Logistics,
+    [ExpenseType.Technology]: labels.type.Technology,
+  };
+  return labelsByType[type];
+}
+
+/** Provenance badge row: Manual for hand-entered rows, From Carryover for settlement rows. */
+function expenseSourceBadges(row: ExpenseRow, labels: ExpensesLabels): ReactNode {
+  if (row.sourceEntity === EXPENSE_SOURCE_CARRYOVER_BALANCES && row.sourceEntityId !== null) {
+    return (
+      <StatusBadge
+        category="expenseSource"
+        status="carryover"
+        label={labels.source.FromCarryover}
+        icon={<LinkOutlined fontSize="small" />}
+      />
+    );
+  }
+  if (row.sourceEntity !== null) return null;
+  return <StatusBadge category="expenseSource" status="manual" label={labels.source.Manual} />;
 }
 
 interface ExpenseRowMenuProps {
@@ -153,7 +182,7 @@ interface ExpenseCardProps extends Omit<ExpenseRowMenuProps, "menuAriaLabel"> {
 
 /**
  * One expense row as a mobile card: tappable body (opens the detail drawer)
- * with title + amount, the type/source chip row with the deleted badge, the
+ * with title + amount, the type/source badge row with the deleted badge, the
  * teacher line when set, and a per-card overflow menu holding the row actions.
  * Soft-deleted rows render dimmed with a struck-through title.
  */
@@ -190,19 +219,11 @@ function ExpenseCard({
               </Typography>
             </Box>
             <Stack direction="row" sx={{ alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-              {row.type !== null ? <ExpenseTypeChip type={row.type} /> : null}
-              <ExpenseSourceChip sourceEntity={row.sourceEntity} sourceEntityId={row.sourceEntityId} />
-              {deleted ? (
-                <Chip
-                  label={labels.deletedBadge}
-                  size="small"
-                  aria-label={labels.deletedBadge}
-                  sx={theme => ({
-                    backgroundColor: theme.palette.errorContainer,
-                    color: theme.palette.onErrorContainer,
-                  })}
-                />
+              {row.type !== null ? (
+                <StatusBadge category="expenseType" status={row.type} label={expenseTypeLabel(labels, row.type)} />
               ) : null}
+              {expenseSourceBadges(row, labels)}
+              {deleted ? <StatusBadge category="session" status="cancelled" label={labels.deletedBadge} /> : null}
             </Stack>
             {row.teacherName !== null && row.teacherName !== "" ? (
               <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -278,7 +299,7 @@ export function ExpensesMobileView(props: Readonly<ExpensesViewProps>) {
           ) : null
         }
       />
-      <Stack sx={{ gap: 2, pb: 11 }}>
+      <MobileContentStack gap={2} paddingBottom={11}>
         <MobileContentInset>
           <ExpenseAggregateStrip aggregates={aggregates} labels={labels} totalCount={totalCount} />
         </MobileContentInset>
@@ -316,7 +337,7 @@ export function ExpensesMobileView(props: Readonly<ExpensesViewProps>) {
             )}
           />
         )}
-      </Stack>
+      </MobileContentStack>
     </MobilePageContainer>
   );
 }

@@ -8,17 +8,14 @@ import {
   StarOutlined,
   TrendingUpOutlined,
 } from "@mui/icons-material";
-import { Box, Chip, IconButton, Stack, Tooltip } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useMemo } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import {
-  formatAccountingMoney,
-  numericCell,
-  planActiveTone,
-} from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
+import { formatAccountingMoney, numericCell } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
 import { DesktopListStateGate } from "@/frontend/common/views/dashboard/accounting/components/DesktopListStateGate";
 import type { PackagePlansListViewModel } from "@/frontend/common/views/dashboard/accounting/usePackagePlansListViewModel";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
@@ -111,10 +108,9 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
         headerName: t.columns.active,
         width: 110,
         renderCell: params => (
-          <Chip
-            size="small"
-            color={planActiveTone(Boolean(params.row.active))}
-            variant={params.row.active ? "filled" : "outlined"}
+          <StatusBadge
+            category="session"
+            status={params.row.active ? "active" : "cancelled"}
             label={params.row.active ? t.columns.active : t.archived}
           />
         ),
@@ -201,13 +197,12 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
 
       <DesktopMetricCardGrid metrics={metricItems} size={{ md: 3, lg: 3 }} />
 
-      <DesktopSectionPanel contentPadding={false} title={t.pageTitle} sx={{ mt: 3 }}>
+      <DesktopSectionPanel contentPadding={false} title={t.pageTitle}>
         <DesktopListStateGate error={error} loading={loading} hasRows={rows.length > 0} errorMessage={t.loadError}>
           <Box
             sx={{
               width: "100%",
               height: 540,
-              p: 2,
               "& .archived-plan-row": {
                 opacity: 0.62,
                 filter: "grayscale(0.45)",

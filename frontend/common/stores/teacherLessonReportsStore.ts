@@ -8,7 +8,7 @@ type LessonReportStatusValue = `${LessonReportStatus}`;
 /** Filter value for the teacher lesson reports history list (`ALL` shows every status). */
 export type TeacherLessonReportStatusFilter = "ALL" | LessonReportStatusValue;
 
-export const TEACHER_LESSON_REPORTS_DEFAULT_STATUS_FILTER: TeacherLessonReportStatusFilter = "ALL";
+const TEACHER_LESSON_REPORTS_DEFAULT_STATUS_FILTER: TeacherLessonReportStatusFilter = "ALL";
 
 interface TeacherLessonReportsState {
   readonly statusFilter: TeacherLessonReportStatusFilter;

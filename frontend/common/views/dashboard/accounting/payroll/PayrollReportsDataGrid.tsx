@@ -5,7 +5,7 @@ import { Box, Button, Stack, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useMemo, useState } from "react";
-import { ExportButton, SectionPanel } from "@/frontend/common/components/ui";
+import { ExportButton, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { CalculationStatus } from "@/frontend/common/graphql/generated/gql/graphql";
@@ -18,7 +18,6 @@ import {
   numericCell,
   textCell,
 } from "@/frontend/common/views/dashboard/accounting/accountingFormatters";
-import { CalculationStatusChip } from "@/frontend/common/views/dashboard/accounting/payroll/CalculationStatusChip";
 import type {
   PayrollReportAggregates,
   PayrollReportRow,
@@ -171,7 +170,11 @@ function buildPayrollReportColumns({
         row.calculationStatus === null ? (
           "—"
         ) : (
-          <CalculationStatusChip status={row.calculationStatus} labels={statusLabels} />
+          <StatusBadge
+            category="payrollCalculation"
+            status={row.calculationStatus}
+            label={statusLabels[row.calculationStatus]}
+          />
         ),
     },
     {
@@ -246,7 +249,7 @@ function AggregateFooter({ aggregates, labels, statusLabels }: Readonly<Aggregat
           <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1.5 }}>
             {Object.values(CalculationStatus).map(status => (
               <Stack key={status} direction="row" sx={{ alignItems: "center", gap: 0.5 }}>
-                <CalculationStatusChip status={status} labels={statusLabels} />
+                <StatusBadge category="payrollCalculation" status={status} label={statusLabels[status]} />
                 <Typography variant="bodyMd">{aggregates.rowCountByStatus[status]}</Typography>
               </Stack>
             ))}

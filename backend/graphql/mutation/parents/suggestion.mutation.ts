@@ -33,14 +33,22 @@ gqlSchemaBuilder.mutationField("submitSuggestion", t =>
     args: {
       input: t.arg({ type: SubmitSuggestionInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) =>
-      authenticatedSuggestionMutation(ctx, userId =>
+    resolve: async (_root, args, ctx) => {
+      const tErrors = ctx.t().errorsTranslations;
+      const rateLimitResult = await checkRateLimit(ctx.ipAddress ?? "[unknown]", authRateLimiter);
+      if (!rateLimitResult.success) {
+        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
+          extensions: { code: "TOO_MANY_ATTEMPTS" },
+        });
+      }
+      return authenticatedSuggestionMutation(ctx, userId =>
         SuggestionService.submitSuggestion(
           userId,
           { submitterName: args.input.submitterName, body: args.input.body },
           ctx.locale
         )
-      ),
+      );
+    },
   })
 );
 

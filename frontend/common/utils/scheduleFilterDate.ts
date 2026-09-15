@@ -11,7 +11,7 @@ export function parseScheduleFilterDate(date: string): Date | null {
   return isValid(parsedDate) ? parsedDate : null;
 }
 
-export function formatScheduleFilterDate(date: Date): string {
+function formatScheduleFilterDate(date: Date): string {
   return format(date, SCHEDULE_DATE_FILTER_FORMAT);
 }
 

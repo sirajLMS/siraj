@@ -20,11 +20,6 @@ export function toStaffSharedBaseLabels(base: ProfileLabels): ProfileSharedBaseL
   };
 }
 
-export type StaffRoleSectionLabels = {
-  readonly staff: ProfileStaffLabels;
-  readonly base: Pick<ProfileLabels, "notSet">;
-};
-
 export type StaffPermissionsSectionLabels = ProfileStaffLabels["permissions"];
 
 type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
@@ -37,10 +32,3 @@ export type StaffProfileViewLabels = {
 export type StaffProfileData = NonNullable<ProfileData["staffProfile"]>;
 export type StaffPermissionGroups = ProfileData["staffPermissionGroups"];
 export type StaffPermissionOverrides = ProfileData["staffPermissionOverrides"];
-
-export function toDisplayValue(value: string | null | undefined, fallback: string): string {
-  if (!value || value.trim().length === 0) {
-    return fallback;
-  }
-  return value;
-}

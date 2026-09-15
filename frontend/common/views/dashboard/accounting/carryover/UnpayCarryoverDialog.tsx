@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, TextField, Typography } from "@mui/material";
+import { Stack, TextField } from "@mui/material";
 import { useCallback, useState } from "react";
 import { unpayCarryoverBalanceMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
@@ -84,16 +84,13 @@ export function UnpayCarryoverDialog({ open, row, onClose, onDone }: Readonly<Un
       open={open}
       busy={action.busy}
       title={labels.modal.unpay.title}
+      body={labels.modal.unpay.warning}
       cancelLabel={labels.modal.unpay.cancel}
       confirmLabel={labels.modal.unpay.confirm}
-      closeAriaLabel={commonLabels.ariaClose}
       onClose={onClose}
       onConfirm={action.confirm}
     >
-      <Box sx={{ display: "grid", gap: 2, pt: 1 }}>
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-          {labels.modal.unpay.warning}
-        </Typography>
+      <Stack sx={{ gap: 2 }}>
         <CarryoverConfirmDetails details={details} />
         <TextField
           value={note}
@@ -106,7 +103,7 @@ export function UnpayCarryoverDialog({ open, row, onClose, onDone }: Readonly<Un
           disabled={action.busy}
           slotProps={{ htmlInput: { maxLength: CARRYOVER_NOTE_MAX_LENGTH } }}
         />
-      </Box>
+      </Stack>
     </CarryoverConfirmScaffold>
   );
 }

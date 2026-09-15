@@ -91,7 +91,7 @@ function pickDate(record: Record<string, unknown>, key: string): Date | undefine
  * validated against the canonical backend enums, and every unmapped field
  * resolves to `undefined`.
  */
-export function toStudentFilterArgs(value: unknown): StudentFilterArgs {
+function toStudentFilterArgs(value: unknown): StudentFilterArgs {
   if (!isRecord(value)) return EMPTY_STUDENT_FILTER_ARGS;
   return {
     ...EMPTY_STUDENT_FILTER_ARGS,
