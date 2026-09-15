@@ -15,8 +15,8 @@ import {
 } from "@/backend/db/schema";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { CreateRecurringScheduleInput, RateSnapshot } from "@/backend/types";
+import { getOffsetMinutes, getOffsetMs } from "@/backend/lib/timezone";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 /**
@@ -97,17 +97,7 @@ function computeScheduledStartForDay(
 
   const guess = new Date(Date.UTC(year, month, date, hours, minutes, 0, 0));
 
-  const getOffsetMs = (d: Date) => {
-    try {
-      const utcDate = new Date(d.toLocaleString("en-US", { timeZone: IanaTimezone.UTC }));
-      const tzDate = new Date(d.toLocaleString("en-US", { timeZone: timezone }));
-      return tzDate.getTime() - utcDate.getTime();
-    } catch {
-      return 0;
-    }
-  };
-
-  const offsetMs = getOffsetMs(guess);
+  const offsetMs = getOffsetMs(timezone, guess);
 
   return new Date(guess.getTime() - offsetMs);
 }
@@ -250,16 +240,6 @@ export async function clearWeeklySchedule(
     return { refundedInstances, quotaSchedules };
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
-}
-
-function getOffsetMinutes(ianaTimezone: string, d: Date): number | null {
-  try {
-    const utcDate = new Date(d.toLocaleString("en-US", { timeZone: IanaTimezone.UTC }));
-    const tzDate = new Date(d.toLocaleString("en-US", { timeZone: ianaTimezone }));
-    return Math.round((tzDate.getTime() - utcDate.getTime()) / 60000);
-  } catch {
-    return null;
-  }
 }
 
 async function insertRecurringScheduleRow(t: DBTransaction, input: CreateRecurringScheduleInput, now: Date) {

@@ -56,10 +56,24 @@ function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
   return Date.UTC(year, month, day, hour, minute, second);
 }
 
-function getOffsetMs(ianaTimezone: string, d: Date): number {
-  const tzDtf = getDtf("en-US", ianaTimezone, OFFSET_PARTS_OPTIONS);
-  const utcDtf = getDtf("en-US", "UTC", OFFSET_PARTS_OPTIONS);
-  return partsToEpochMs(tzDtf.formatToParts(d)) - partsToEpochMs(utcDtf.formatToParts(d));
+export function getOffsetMs(ianaTimezone: string, d: Date): number {
+  try {
+    const tzDtf = getDtf("en-US", ianaTimezone, OFFSET_PARTS_OPTIONS);
+    const utcDtf = getDtf("en-US", "UTC", OFFSET_PARTS_OPTIONS);
+    return partsToEpochMs(tzDtf.formatToParts(d)) - partsToEpochMs(utcDtf.formatToParts(d));
+  } catch {
+    return 0;
+  }
+}
+
+export function getOffsetMinutes(ianaTimezone: string, d: Date): number | null {
+  try {
+    const tzDtf = getDtf("en-US", ianaTimezone, OFFSET_PARTS_OPTIONS);
+    const utcDtf = getDtf("en-US", "UTC", OFFSET_PARTS_OPTIONS);
+    return Math.round((partsToEpochMs(tzDtf.formatToParts(d)) - partsToEpochMs(utcDtf.formatToParts(d))) / 60000);
+  } catch {
+    return null;
+  }
 }
 
 export function normalizeIanaTimezone(value: string): string {

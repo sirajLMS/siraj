@@ -3,6 +3,8 @@ import { logger } from "@/backend/lib/logger";
 import {
   formatInstantInTimezone,
   getDayBoundaries,
+  getOffsetMinutes,
+  getOffsetMs,
   isValidIanaTimezone,
   normalizeIanaTimezone,
 } from "@/backend/lib/timezone";
@@ -31,6 +33,24 @@ describe("timezone lib", () => {
     test("returns non-standard strings unchanged", () => {
       expect(normalizeIanaTimezone("Unknown/Zone")).toBe("Unknown/Zone");
       expect(normalizeIanaTimezone("")).toBe("");
+    });
+  });
+
+  describe("getOffsetMs and getOffsetMinutes", () => {
+    test("calculates correct offset in ms and minutes for EST/EDT (America/New_York)", () => {
+      const winterDate = new Date("2025-01-15T12:00:00Z"); // EST: UTC-5
+      expect(getOffsetMs("America/New_York", winterDate)).toBe(-5 * 3600 * 1000);
+      expect(getOffsetMinutes("America/New_York", winterDate)).toBe(-300);
+
+      const summerDate = new Date("2025-07-15T12:00:00Z"); // EDT: UTC-4
+      expect(getOffsetMs("America/New_York", summerDate)).toBe(-4 * 3600 * 1000);
+      expect(getOffsetMinutes("America/New_York", summerDate)).toBe(-240);
+    });
+
+    test("returns 0 / null for invalid timezones safely", () => {
+      const date = new Date("2025-01-15T12:00:00Z");
+      expect(getOffsetMs("Invalid/Timezone", date)).toBe(0);
+      expect(getOffsetMinutes("Invalid/Timezone", date)).toBeNull();
     });
   });
 
