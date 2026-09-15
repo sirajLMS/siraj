@@ -7,26 +7,18 @@ import {
 } from "@/frontend/common/views/dashboard/students/status/components/__shared__/policyOverviewCardShared";
 
 const DESKTOP_OPTIONS: PolicyOverviewCardSharedOptions = {
-  headerSx: theme => ({
-    px: 3,
-    py: 2.5,
-    borderBottom: `1px solid ${theme.palette.border.main}`,
-    display: "flex",
-    alignItems: "center",
-    gap: 1.5,
-    backgroundColor: theme.palette.background.default,
+  headerPx: 3,
+  headerPy: 2.5,
+  headerGap: 1.5,
+  bodyPadding: 3,
+  iconSx: theme => ({ color: theme.palette.primary.main }),
+  titleSx: theme => ({
+    typography: "titleLg",
+    color: theme.palette.primary.main,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
   }),
-  gavelSx: theme => ({ color: theme.palette.primary.main }),
-  titleTypography: {
-    variant: "titleLg",
-    sx: theme => ({
-      color: theme.palette.primary.main,
-      fontWeight: 700,
-      textTransform: "uppercase",
-      letterSpacing: "0.05em",
-    }),
-  },
-  contentSx: { p: 3, position: "relative" },
   infoIconFontSize: 120,
   contentGap: 3,
   bannerPadding: 3,

@@ -854,4 +854,3 @@ export namespace WhatsappGroupsService {
     return { messageId: input.messageId };
   }
 }
-

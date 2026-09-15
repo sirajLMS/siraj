@@ -1,7 +1,7 @@
 "use client";
 
 import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, type SxProps, type Theme, Typography, useTheme } from "@mui/material";
 import { useCallback } from "react";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForUser, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
@@ -10,6 +10,8 @@ import type { StudentStatusPageData } from "@/frontend/common/views/dashboard/st
 import type { StudentStatusHeaderSharedProps } from "@/frontend/common/views/dashboard/students/status/types/studentStatusHeaderShared.types";
 import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 import { useRouter } from "@/shared/i18n/navigation";
+
+const ACTION_BUTTON_SX: SxProps<Theme> = theme => ({ borderRadius: theme.layout.radius.button });
 
 const STATUS_BADGE_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "regular",
@@ -118,10 +120,16 @@ function StudentInfo({
 function HeaderActions({
   student,
   buttonFullWidth,
-}: Readonly<{ student: StudentStatusPageData; buttonFullWidth: boolean }>) {
+  slots,
+}: Readonly<{
+  student: StudentStatusPageData;
+  buttonFullWidth: boolean;
+  slots: StudentStatusHeaderSharedProps["slots"];
+}>) {
   const t = useStudentStatusLabels();
   const router = useRouter();
   const { canView } = useStudentFieldAccess();
+  const { FilterButton } = slots;
 
   const showHistory = canView("student_history");
   const showContactParent = canView("student_parent") && Boolean(student.parentUserId);
@@ -144,44 +152,24 @@ function HeaderActions({
   return (
     <Box sx={{ display: "flex", gap: 1.5, width: { xs: "100%", md: "auto" } }}>
       {showHistory ? (
-        <Button
+        <FilterButton
           fullWidth={buttonFullWidth}
-          variant="outlined"
           startIcon={<HistoryOutlined />}
           onClick={handleViewHistory}
-          sx={theme => ({
-            borderRadius: "button",
-            color: theme.palette.primary.main,
-            borderColor: theme.palette.primary.main,
-            "&:hover": {
-              borderColor: theme.palette.primary.dark,
-              backgroundColor: theme.palette.primaryContainer,
-              color: theme.palette.onPrimaryContainer,
-            },
-          })}
+          sx={ACTION_BUTTON_SX}
         >
           {t.actions.viewHistory}
-        </Button>
+        </FilterButton>
       ) : null}
       {showContactParent ? (
-        <Button
+        <FilterButton
           fullWidth={buttonFullWidth}
-          variant="outlined"
           startIcon={<MailOutlined />}
           onClick={handleContactParent}
-          sx={theme => ({
-            borderRadius: "button",
-            color: theme.palette.primary.main,
-            borderColor: theme.palette.primary.main,
-            "&:hover": {
-              borderColor: theme.palette.primary.dark,
-              backgroundColor: theme.palette.primaryContainer,
-              color: theme.palette.onPrimaryContainer,
-            },
-          })}
+          sx={ACTION_BUTTON_SX}
         >
           {t.actions.contactParent}
-        </Button>
+        </FilterButton>
       ) : null}
     </Box>
   );
@@ -196,14 +184,14 @@ export function StudentStatusHeaderShared({ student, embedded, slots }: Readonly
       return (
         <Box sx={slots.embeddedWrapperSx}>
           <Box sx={slots.embeddedInnerWrapperSx}>
-            <HeaderActions student={student} buttonFullWidth={slots.buttonFullWidth} />
+            <HeaderActions student={student} buttonFullWidth={slots.buttonFullWidth} slots={slots} />
           </Box>
         </Box>
       );
     }
     return (
       <Box sx={slots.embeddedWrapperSx}>
-        <HeaderActions student={student} buttonFullWidth={slots.buttonFullWidth} />
+        <HeaderActions student={student} buttonFullWidth={slots.buttonFullWidth} slots={slots} />
       </Box>
     );
   }
@@ -229,7 +217,7 @@ export function StudentStatusHeaderShared({ student, embedded, slots }: Readonly
         <StudentAvatar student={student} showAvatar={showAvatar} slots={slots} />
         <StudentInfo student={student} slots={slots} />
       </Box>
-      <HeaderActions student={student} buttonFullWidth={slots.buttonFullWidth} />
+      <HeaderActions student={student} buttonFullWidth={slots.buttonFullWidth} slots={slots} />
     </Box>
   );
 }

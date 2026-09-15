@@ -1,4 +1,3 @@
-import type { Theme } from "@mui/material";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -52,11 +51,4 @@ export interface MobileWeeklyScrollerProps {
 
 export interface PerformanceStreakProps {
   readonly streakDays: readonly number[];
-}
-
-export interface MobileMetricProps {
-  readonly title: string;
-  readonly icon: React.ReactNode;
-  readonly value: React.ReactNode;
-  readonly bg: string | ((theme: Theme) => string);
 }

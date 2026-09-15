@@ -3,11 +3,12 @@
 import { BookOutlined, InfoOutlined, SyncProblemOutlined } from "@mui/icons-material";
 import { CourseDetailsSectionShared } from "@/frontend/common/views/dashboard/students/quota/components/courseDetailsSectionShared";
 import type { CourseDetailsSectionSlotProps } from "@/frontend/common/views/dashboard/students/quota/components/courseDetailsSectionShared.types";
+import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { SectionHeaderMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/sectionHeader.mobile";
 
 const mobileSlots: CourseDetailsSectionSlotProps = {
   renderHeader: title => <SectionHeaderMobile title={title} mobileIcon={BookOutlined} />,
-  teacherLabelId: "student-quota-teacher-label-mobile",
+  TeacherAutocomplete: TeacherAutocompleteMobile,
   rootGap: 3,
   fieldsContainerSx: { display: "flex", flexDirection: "column", gap: 2 },
   overrideEndAdornment: {

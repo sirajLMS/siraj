@@ -1,19 +1,14 @@
 "use client";
 
-import {
-  CalendarToday,
-  ChevronLeft,
-  ChevronRight,
-  PictureAsPdf,
-  School,
-  Timer,
-  TrendingUp,
-  VerifiedUser,
-} from "@mui/icons-material";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { CalendarToday, PictureAsPdf, School, Timer, TrendingUp, VerifiedUser } from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 import { ExportButton } from "@/frontend/common/components/ui/button";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import {
+  type MonthNavigatorMonthDisplayProps,
+  MonthNavigatorShared,
+} from "@/frontend/common/views/dashboard/students/history/components/__shared__";
 import { StudentHistoryLabelsProvider } from "@/frontend/common/views/dashboard/students/history/studentHistoryLabelsContext";
 import type { StudentHistoryMetrics } from "@/frontend/common/views/dashboard/students/history/types";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
@@ -49,61 +44,13 @@ function HistoryHeader({ studentName, monthStr, onPrint, t }: Readonly<HistoryHe
   );
 }
 
-interface MonthNavigatorProps {
-  readonly monthStr: string;
-  readonly yearStr: number;
-  readonly canGoPrev: boolean;
-  readonly canGoNext: boolean;
-  readonly onPrevMonth: () => void;
-  readonly onNextMonth: () => void;
-  readonly t: StudentHistoryLabels;
-}
-
-function MonthNavigator({
-  monthStr,
-  yearStr,
-  canGoPrev,
-  canGoNext,
-  onPrevMonth,
-  onNextMonth,
-  t,
-}: Readonly<MonthNavigatorProps>) {
+function DesktopMonthDisplay({ monthStr, yearStr }: Readonly<MonthNavigatorMonthDisplayProps>) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 4, gap: 2 }}>
-      <Tooltip title={t.previousMonth}>
-        <Box component="span" sx={{ display: "inline-flex" }}>
-          <IconButton
-            onClick={onPrevMonth}
-            disabled={!canGoPrev}
-            aria-label={t.previousMonth}
-            sx={theme => ({
-              transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            })}
-          >
-            <ChevronLeft />
-          </IconButton>
-        </Box>
-      </Tooltip>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <CalendarToday sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {monthStr} {yearStr}
-        </Typography>
-      </Box>
-      <Tooltip title={t.nextMonth}>
-        <Box component="span" sx={{ display: "inline-flex" }}>
-          <IconButton
-            onClick={onNextMonth}
-            disabled={!canGoNext}
-            aria-label={t.nextMonth}
-            sx={theme => ({
-              transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-            })}
-          >
-            <ChevronRight />
-          </IconButton>
-        </Box>
-      </Tooltip>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <CalendarToday sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
+      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+        {monthStr} {yearStr}
+      </Typography>
     </Box>
   );
 }
@@ -171,14 +118,19 @@ export function StudentHistoryDesktopView({
   const body = (
     <>
       <HistoryHeader studentName={studentName} monthStr={monthStr} onPrint={onPrint} t={t} />
-      <MonthNavigator
+      <MonthNavigatorShared
         monthStr={monthStr}
         yearStr={yearStr}
         canGoPrev={canGoPrev}
         canGoNext={canGoNext}
         onPrevMonth={onPrevMonth}
         onNextMonth={onNextMonth}
-        t={t}
+        labels={t}
+        tier={{
+          MonthDisplay: DesktopMonthDisplay,
+          chevronSize: "medium",
+          containerSx: { display: "flex", alignItems: "center", justifyContent: "center", mb: 4, gap: 2 },
+        }}
       />
       <Box sx={{ mb: 4 }}>
         <DesktopMetricCardGrid metrics={buildHistoryMetrics(metrics, t)} size={{ xs: 12, sm: 6, md: 3 }} />

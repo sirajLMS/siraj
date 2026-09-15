@@ -57,9 +57,7 @@ async function expectRejection(fn: () => Promise<unknown>): Promise<Error> {
 function setupMocks(opts: { deletedSessionCount?: number } = {}) {
   const findUserSpy = spyOn(UserRepository, "findUserByIdOrThrow").mockResolvedValue(mockUser());
   const updatePasswordSpy = spyOn(UserRepository, "updatePassword").mockResolvedValue(mockUser());
-  const deleteSessionsSpy = spyOn(SessionRepository, "deleteByUserId").mockResolvedValue(
-    opts.deletedSessionCount ?? 2
-  );
+  const deleteSessionsSpy = spyOn(SessionRepository, "deleteByUserId").mockResolvedValue(opts.deletedSessionCount ?? 2);
 
   return {
     findUserSpy: findUserSpy,
@@ -73,7 +71,9 @@ function setupMocks(opts: { deletedSessionCount?: number } = {}) {
   };
 }
 
-function defaultInput(overrides: { currentPassword?: string; newPassword?: string; confirmPassword?: string } = {}): ChangePasswordInput {
+function defaultInput(
+  overrides: { currentPassword?: string; newPassword?: string; confirmPassword?: string } = {}
+): ChangePasswordInput {
   return {
     currentPassword: overrides.currentPassword ?? currentPassword,
     newPassword: overrides.newPassword ?? newPassword,
@@ -110,7 +110,11 @@ describe("AuthPasswordService.changePassword", () => {
     const spies = setupMocks();
 
     const error = await expectRejection(() =>
-      AuthPasswordService.changePassword(USER_ID, defaultInput({ currentPassword: `Wrong-${randomUUID().slice(0, 8)}!` }), "en")
+      AuthPasswordService.changePassword(
+        USER_ID,
+        defaultInput({ currentPassword: `Wrong-${randomUUID().slice(0, 8)}!` }),
+        "en"
+      )
     );
 
     expect(error.message).toContain(tErrors.auth.currentPasswordInvalid);
@@ -124,7 +128,11 @@ describe("AuthPasswordService.changePassword", () => {
     const spies = setupMocks();
 
     const error = await expectRejection(() =>
-      AuthPasswordService.changePassword(USER_ID, defaultInput({ confirmPassword: `Other-${randomUUID().slice(0, 8)}!` }), "en")
+      AuthPasswordService.changePassword(
+        USER_ID,
+        defaultInput({ confirmPassword: `Other-${randomUUID().slice(0, 8)}!` }),
+        "en"
+      )
     );
 
     expect(error.message).toContain(tErrors.auth.passwordsDoNotMatch);

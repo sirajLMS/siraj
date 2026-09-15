@@ -1,8 +1,8 @@
 "use client";
 
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
-import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
 import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { DialogPresets } from "@/frontend/common/components/ui/dialog/dialogPresets";
 import type { AdminNoteDialogLabels } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 
 export interface AdminNoteEditDialogProps {

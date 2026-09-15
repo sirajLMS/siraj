@@ -8,6 +8,8 @@ import type {
   StudentInfoDatePickerProps,
   StudentInformationSectionSlotProps,
 } from "@/frontend/common/views/dashboard/students/quota/components/studentInformationSectionShared.types";
+import { DesktopLanguageDisplay } from "@/frontend/desktop/components/ui/display/language";
+import { GenderSelectorDesktop } from "@/frontend/desktop/components/ui/input/genderSelector";
 import { SectionHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/sectionHeader.desktop";
 
 function DesktopSectionHeader({ title, icon }: Readonly<{ title: string; icon: ElementType }>) {
@@ -16,6 +18,8 @@ function DesktopSectionHeader({ title, icon }: Readonly<{ title: string; icon: E
 
 const DESKTOP_SLOTS: StudentInformationSectionSlotProps = {
   DatePicker: AppDatePicker as ComponentType<StudentInfoDatePickerProps>,
+  LanguageDisplay: DesktopLanguageDisplay,
+  GenderSelector: GenderSelectorDesktop,
   SectionHeader: DesktopSectionHeader,
   sectionHeaderIcon: BadgeOutlined,
   rootGap: 4,

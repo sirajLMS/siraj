@@ -29,8 +29,6 @@ export interface UseAudienceAutocompleteArgs {
   readonly value?: PersonOption | null;
   readonly scope?: UserSelectScope | null;
   readonly skip?: boolean;
-  /** When true, do not hit network — use extractRows from a static/preloaded path via buildVariables only when not skipped. */
-  readonly clientFilterOnly?: boolean;
 }
 
 export interface UseAudienceAutocompleteResult {

@@ -10,6 +10,7 @@ import type {
 } from "@/frontend/common/views/dashboard/students/status/types";
 import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
+import { MobileFilterButton } from "@/frontend/mobile/components/ui/button";
 
 const STATUS_DOT_COLOR_MAP: Record<string, string> = {
   [StudentStatus.Regular]: "success",
@@ -62,6 +63,7 @@ export function StudentStatusHeaderMobile({ student, embedded = false }: Readonl
         AvatarComponent: MobileUserAvatar,
         StatusDot: MobileStatusDot,
         StatusBadgeComponent: MobileStatusBadge,
+        FilterButton: MobileFilterButton,
         buttonFullWidth: true,
         embeddedWrapperSx: MOBILE_EMBEDDED_WRAPPER_SX,
       }}

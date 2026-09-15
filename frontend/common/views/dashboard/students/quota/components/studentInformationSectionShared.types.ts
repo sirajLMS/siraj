@@ -1,5 +1,16 @@
 import type { SxProps, Theme } from "@mui/material";
 import type { ComponentType, ElementType } from "react";
+import type { GenderSelectorProps } from "@/frontend/common/components/ui/input/genderSelector";
+import type { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql";
+
+/**
+ * Props the shared scaffold passes to whichever language display
+ * ({@code DesktopLanguageDisplay} or {@code MobileLanguageDisplay}) the tier injects.
+ */
+export interface StudentInfoLanguageDisplayProps {
+  readonly code: AppLanguage | null;
+  readonly fallback?: string;
+}
 
 /**
  * Props the shared scaffold passes to whichever date picker
@@ -36,6 +47,10 @@ export interface StudentInfoDatePickerProps {
 export interface StudentInformationSectionSlotProps {
   /** Tier-specific date picker (AppDatePicker or MobileAppDatePicker). */
   readonly DatePicker: ComponentType<StudentInfoDatePickerProps>;
+  /** Tier-specific language display (DesktopLanguageDisplay or MobileLanguageDisplay). */
+  readonly LanguageDisplay: ComponentType<StudentInfoLanguageDisplayProps>;
+  /** Tier-specific gender selector (GenderSelectorDesktop or GenderSelectorMobile); rendered read-only. */
+  readonly GenderSelector: ComponentType<GenderSelectorProps>;
   /** Tier-specific section header accepting a title and icon prop (see wrappers in each tier file). */
   readonly SectionHeader: ComponentType<{
     readonly title: string;
@@ -49,7 +64,7 @@ export interface StudentInformationSectionSlotProps {
   readonly fieldsGap: number;
   /** CSS grid template for fields (e.g. "1fr 1fr" or "1fr"). Desktop 2 cols, mobile 1 col. */
   readonly gridTemplateColumns: string;
-  /** Horizontal padding on the gender form control. Desktop 0, mobile 0.5. */
+  /** Horizontal padding on the gender field container. Desktop 0, mobile 0.5. */
   readonly genderFieldPx: number;
   /** Optional sx overrides for the outer container. */
   readonly rootSx?: SxProps<Theme>;

@@ -1,9 +1,11 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { useMemo } from "react";
 import type { ClassSession, MobileWeeklyScrollerProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui";
 import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 
 type CalendarDayKey = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
@@ -97,25 +99,20 @@ export function MobileWeeklyScroller({
   );
 
   return (
-    <Box
-      sx={theme => ({
-        backgroundColor: theme.palette.surfaceContainerLowest,
-        borderRadius: "xl",
-        boxShadow: theme.palette.shadow.card,
-        border: `1px solid ${theme.palette.border.light}`,
-        p: 2,
-        mb: 3,
-      })}
+    <MobileSectionPanel
+      sx={{ mb: 3 }}
+      contentInset={false}
+      title={
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
+            {t.weeklyAttendance}
+          </Typography>
+          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
+            {t.week(selectedWeek)}
+          </Typography>
+        </Box>
+      }
     >
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
-          {t.weeklyAttendance}
-        </Typography>
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t.week(selectedWeek)}
-        </Typography>
-      </Box>
-
       <Box
         sx={{
           display: "flex",
@@ -123,6 +120,8 @@ export function MobileWeeklyScroller({
           alignItems: "center",
           overflowX: "auto",
           gap: 1,
+          paddingInline: theme => theme.spacing(2),
+          py: 2,
           msOverflowStyle: "none",
           scrollbarWidth: "none",
           "&::-webkit-scrollbar": { display: "none" },
@@ -153,7 +152,7 @@ export function MobileWeeklyScroller({
                 backgroundColor: isSelected ? theme.palette.primaryContainer : "transparent",
                 color: isSelected ? theme.palette.onPrimaryContainer : "inherit",
                 boxShadow: isSelected ? theme.palette.shadow.cardHover : "none",
-                ...(isSelected && { outline: `1px solid ${theme.palette.primary.main}33` }),
+                ...(isSelected && { outline: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` }),
                 "&:hover": {
                   backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLow,
                 },
@@ -189,6 +188,6 @@ export function MobileWeeklyScroller({
           );
         })}
       </Box>
-    </Box>
+    </MobileSectionPanel>
   );
 }

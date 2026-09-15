@@ -15,13 +15,15 @@ const CANCEL = "Discard changes";
 const SUBMIT = "Submit report";
 const SUBMITTING = "Submitting report...";
 
-function renderShell(props: {
-  readonly onClose?: () => void;
-  readonly onSubmit?: (event: { preventDefault: () => void }) => void;
-  readonly submitting?: boolean;
-  readonly submittingLabel?: string;
-  readonly fullScreen?: boolean;
-} = {}) {
+function renderShell(
+  props: {
+    readonly onClose?: () => void;
+    readonly onSubmit?: (event: { preventDefault: () => void }) => void;
+    readonly submitting?: boolean;
+    readonly submittingLabel?: string;
+    readonly fullScreen?: boolean;
+  } = {}
+) {
   return renderWithWrapper(
     <FormDialogShell
       open

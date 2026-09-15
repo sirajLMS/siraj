@@ -97,13 +97,6 @@ const MOBILE_TIER: StudentQuotaTierConfig = {
     innerDirection: "column",
     innerGap: 1.5,
     innerWidth: "100%",
-    saveButtonHeight: 56,
-    saveButtonPx: 0,
-    saveButtonWidth: "100%",
-    cancelButtonHeight: 48,
-    cancelButtonPx: 0,
-    cancelButtonHoverBg: "surfaceContainerLow",
-    cancelButtonWidth: "100%",
   },
   wrapContextualHelperCards: wrapContextualHelperCardsDefault,
 };

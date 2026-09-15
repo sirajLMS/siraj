@@ -1,10 +1,11 @@
 "use client";
 
 import { type SvgIconComponent, WarningAmberOutlined } from "@mui/icons-material";
-import { Alert, Box, Paper, Stack, Typography } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
+import { Alert, Box, Stack, Typography } from "@mui/material";
 import type { ReactElement } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge";
+import { BaseCard } from "@/frontend/common/components/ui/card";
+import { EmptyState, LoadingState } from "@/frontend/common/components/ui/state";
 import type { StudentQuotasQuery_studentQuotas } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   getExpiryWarningThreshold,
@@ -36,7 +37,7 @@ export function QuotaBalanceCard({ quota, t, showName = true }: Readonly<QuotaBa
   const expiring = isExpiringSoon(quota.validUntil);
 
   return (
-    <Paper sx={{ p: 3 }} elevation={showName ? 2 : 0} variant="outlined">
+    <BaseCard sx={showName ? undefined : { boxShadow: "none" }}>
       <Stack sx={{ gap: 1.5 }}>
         {showName && quota.name != null ? <Typography variant="titleLg">{quota.name}</Typography> : null}
         <Stack sx={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -80,7 +81,7 @@ export function QuotaBalanceCard({ quota, t, showName = true }: Readonly<QuotaBa
           </Alert>
         ) : null}
       </Stack>
-    </Paper>
+    </BaseCard>
   );
 }
 
@@ -90,52 +91,13 @@ export interface QuotaEmptyStateProps {
 }
 
 export function QuotaEmptyState({ message, icon: Icon }: Readonly<QuotaEmptyStateProps>): ReactElement {
-  return (
-    <Box
-      sx={{
-        p: 4,
-        textAlign: "center",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 1,
-      }}
-    >
-      {Icon ? <Icon sx={theme => ({ color: theme.palette.text.secondary, fontSize: 48 })} /> : null}
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {message}
-      </Typography>
-    </Box>
-  );
+  return <EmptyState title={message} icon={Icon ? <Icon /> : undefined} />;
 }
 
 export function QuotaLoadingSkeleton({ t }: Readonly<{ t: StudentQuotaLabels }>): ReactElement {
   return (
-    <Box component="output" aria-busy="true" sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
-      <Box
-        sx={(theme: Theme) => ({
-          height: 60,
-          borderRadius: theme.layout.radius.badge,
-          backgroundColor: theme.palette.surfaceContainerHigh,
-        })}
-      />
-      <Box
-        sx={(theme: Theme) => ({
-          height: 120,
-          borderRadius: theme.layout.radius.badge,
-          backgroundColor: theme.palette.surfaceContainerHigh,
-        })}
-      />
-      <Box
-        sx={(theme: Theme) => ({
-          height: 120,
-          borderRadius: theme.layout.radius.badge,
-          backgroundColor: theme.palette.surfaceContainerHigh,
-        })}
-      />
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {t.audience.loadingData}
-      </Typography>
+    <Box component="output" aria-busy="true">
+      <LoadingState message={t.audience.loadingData} embedded />
     </Box>
   );
 }

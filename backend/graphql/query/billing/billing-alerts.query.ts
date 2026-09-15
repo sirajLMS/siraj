@@ -1,6 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { UnpaidInvoicesSummaryPothosObject } from "@/backend/graphql/pothos/billing/billing-alerts.pothos";
-import { BillingAlertsService, populateBillingFxDisplayCurrencyByUserId, resolveDisplayAmountFields } from "@/backend/services";
+import {
+  BillingAlertsService,
+  populateBillingFxDisplayCurrencyByUserId,
+  resolveDisplayAmountFields,
+} from "@/backend/services";
 
 gqlSchemaBuilder.queryFields(t => ({
   unpaidInvoicesAlert: t.field({

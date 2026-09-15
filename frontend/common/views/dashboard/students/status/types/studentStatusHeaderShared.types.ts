@@ -1,4 +1,4 @@
-import type { SxProps, Theme } from "@mui/material";
+import type { ButtonProps, SxProps, Theme } from "@mui/material";
 import type { StudentStatusPageData } from "@/frontend/common/views/dashboard/students/status/types";
 
 /**
@@ -32,9 +32,21 @@ interface StudentStatusBadgeSlotProps {
 }
 
 /**
+ * Props for the action-button slot component supplied by each tier.
+ *
+ * Desktop passes `DesktopFilterButton`; mobile passes `MobileFilterButton`.
+ */
+interface StudentStatusFilterButtonSlotProps {
+  readonly FilterButton: React.ComponentType<ButtonProps>;
+}
+
+/**
  * Slot props supplied by each tier wrapper to {@link StudentStatusHeaderShared}.
  */
-interface StudentStatusHeaderSlotProps extends StudentStatusAvatarSlotProps, StudentStatusBadgeSlotProps {
+interface StudentStatusHeaderSlotProps
+  extends StudentStatusAvatarSlotProps,
+    StudentStatusBadgeSlotProps,
+    StudentStatusFilterButtonSlotProps {
   /** Whether action buttons should use `fullWidth`. Mobile = true, desktop = false. */
   readonly buttonFullWidth: boolean;
   /** sx for the embedded-mode outer wrapper Box. */

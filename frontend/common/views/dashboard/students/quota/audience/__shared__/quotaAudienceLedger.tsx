@@ -1,7 +1,9 @@
 "use client";
 
-import { Paper, Stack, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
+import type { GridColDef } from "@mui/x-data-grid";
 import type { ReactElement } from "react";
+import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import {
   formatDate,
   formatDelta,
@@ -21,37 +23,55 @@ export interface LedgerEntriesListProps {
   readonly t: StudentQuotaLabels;
 }
 
+function buildLedgerColumns(t: StudentQuotaLabels): GridColDef<LedgerEntry>[] {
+  return [
+    {
+      field: "reason",
+      headerName: t.audience.reason,
+      flex: 1.5,
+      minWidth: 140,
+      renderCell: params => (
+        <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
+          {getLedgerReasonLabel(params.value, t)}
+        </Typography>
+      ),
+    },
+    {
+      field: "createdAt",
+      headerName: t.audience.ledgerDate,
+      flex: 1,
+      minWidth: 120,
+      renderCell: params => formatDate(params.value),
+    },
+    {
+      field: "delta",
+      headerName: t.audience.delta,
+      type: "number",
+      flex: 0.8,
+      minWidth: 100,
+      renderCell: params => (
+        <Typography
+          variant="bodyMd"
+          sx={theme => ({
+            fontWeight: 700,
+            color: (params.value ?? 0) >= 0 ? theme.palette.success.main : theme.palette.error.main,
+          })}
+        >
+          {formatDelta(params.value)}
+        </Typography>
+      ),
+    },
+  ];
+}
+
 export function LedgerEntriesList({ entries, t }: Readonly<LedgerEntriesListProps>): ReactElement {
-  if (entries.length === 0) {
-    return (
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {t.audience.noLedgerEntries}
-      </Typography>
-    );
-  }
   return (
-    <Stack sx={{ gap: 1 }}>
-      {entries.map(entry => (
-        <Paper key={entry.id ?? ""} variant="outlined" sx={{ p: 1.5 }}>
-          <Stack sx={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-            <Stack sx={{ gap: 0.5 }}>
-              <Typography variant="labelSm">{getLedgerReasonLabel(entry.reason, t)}</Typography>
-              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-                {formatDate(entry.createdAt)}
-              </Typography>
-            </Stack>
-            <Typography
-              variant="labelMd"
-              sx={theme => ({
-                fontWeight: 700,
-                color: (entry.delta ?? 0) >= 0 ? theme.palette.success.main : theme.palette.error.main,
-              })}
-            >
-              {formatDelta(entry.delta)}
-            </Typography>
-          </Stack>
-        </Paper>
-      ))}
-    </Stack>
+    <AppDataGrid
+      rows={entries}
+      columns={buildLedgerColumns(t)}
+      ariaLabel={t.audience.recentLedgerEntries}
+      emptyMessage={t.audience.noLedgerEntries}
+      paginationOptions={{ mode: "client", pageSize: 5 }}
+    />
   );
 }

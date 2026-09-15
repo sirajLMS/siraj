@@ -217,14 +217,10 @@ export function useStudentProfilePageViewModel(
   const tStatus = useAppTranslation(Translation.Dashboard.StudentStatus);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { currentMonth, ensureCurrentMonth } = useStudentHistoryStore();
+  const { year, month } = useStudentHistoryStore();
   const tabParam = searchParams.get("tab");
 
-  useEffect(() => {
-    ensureCurrentMonth();
-  }, [ensureCurrentMonth]);
-
-  const safeCurrentMonth = currentMonth;
+  const safeCurrentMonth = useMemo(() => new Date(year, month - 1, 1), [year, month]);
 
   const { profile, loading, loadingState, refetch } = useStudentProfileQueryState(studentId, null, safeCurrentMonth);
 

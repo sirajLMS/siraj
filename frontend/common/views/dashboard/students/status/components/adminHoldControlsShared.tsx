@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StatusUpdateFormData } from "@/frontend/common/views/dashboard/students/status/schemas/statusUpdateSchema";
@@ -13,25 +13,18 @@ function StatusSelectionField() {
   const { control } = useFormContext<StatusUpdateFormData>();
 
   return (
-    <Box>
-      <Typography
-        variant="labelMd"
-        sx={theme => ({
-          color: theme.palette.onSurfaceVariant,
-          textTransform: "uppercase",
-          fontWeight: 700,
-          mb: 1,
-          display: "block",
-        })}
-      >
-        {t.fields.accountStatus}
-      </Typography>
-      <Controller
-        name="status"
-        control={control}
-        render={({ field }) => (
+    <Controller
+      name="status"
+      control={control}
+      render={({ field }) => (
+        <FormControl fullWidth>
+          <InputLabel id="admin-hold-account-status-label" shrink>
+            {t.fields.accountStatus}
+          </InputLabel>
           <Select
             {...field}
+            labelId="admin-hold-account-status-label"
+            label={t.fields.accountStatus}
             fullWidth
             sx={theme => ({
               borderRadius: "button",
@@ -47,9 +40,9 @@ function StatusSelectionField() {
             <MenuItem value={StudentStatus.OnTrial}>{t.statusOptions.ON_TRIAL}</MenuItem>
             <MenuItem value={StudentStatus.Deactivated}>{t.statusOptions.DEACTIVATED}</MenuItem>
           </Select>
-        )}
-      />
-    </Box>
+        </FormControl>
+      )}
+    />
   );
 }
 
@@ -79,18 +72,6 @@ function ReasonEntryField({ slots }: Readonly<{ slots: AdminHoldControlsSlotProp
 
   return (
     <Box>
-      <Typography
-        variant="labelMd"
-        sx={theme => ({
-          color: theme.palette.onSurfaceVariant,
-          textTransform: "uppercase",
-          fontWeight: 700,
-          mb: 1,
-          display: "block",
-        })}
-      >
-        {t.fields.statusReason}
-      </Typography>
       <Controller
         name="reason"
         control={control}
@@ -100,9 +81,11 @@ function ReasonEntryField({ slots }: Readonly<{ slots: AdminHoldControlsSlotProp
             multiline
             rows={4}
             fullWidth
+            label={t.fields.statusReason}
             placeholder={t.fields.statusReasonPlaceholder}
             error={Boolean(errors.reason)}
             helperText={errors.reason?.message}
+            aria-invalid={Boolean(errors.reason)}
             sx={theme => ({
               "& .MuiOutlinedInput-root": {
                 borderRadius: "button",

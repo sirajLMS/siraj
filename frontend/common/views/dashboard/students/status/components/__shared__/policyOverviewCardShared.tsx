@@ -1,15 +1,12 @@
 import { CheckCircleOutlined, GavelOutlined, InfoOutlined } from "@mui/icons-material";
-import { Box, Divider, Paper, Typography } from "@mui/material";
-import type { SxProps, Theme } from "@mui/material/styles";
+import { Box, Divider, Typography } from "@mui/material";
+import {
+  AdminControlPanelShared,
+  type AdminControlPanelSharedOptions,
+} from "@/frontend/common/components/ui/container/__shared__/adminControlPanelShared";
 import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 
-export interface PolicyOverviewCardSharedOptions {
-  readonly headerSx: SxProps<Theme>;
-  readonly gavelSx: SxProps<Theme>;
-  readonly titleTypography:
-    | { readonly variant?: "titleLg"; readonly sx: SxProps<Theme> }
-    | { readonly variant: undefined; readonly sx: SxProps<Theme> };
-  readonly contentSx: SxProps<Theme>;
+export interface PolicyOverviewCardSharedOptions extends AdminControlPanelSharedOptions {
   readonly infoIconFontSize: number;
   readonly contentGap: number;
   readonly bannerPadding: number;
@@ -43,29 +40,11 @@ function PolicyItem({ title, description }: Readonly<{ readonly title: string; r
 
 export function PolicyOverviewCardShared({ options }: Readonly<{ readonly options: PolicyOverviewCardSharedOptions }>) {
   const t = useStudentStatusLabels();
-  const { headerSx, gavelSx, titleTypography, contentSx, infoIconFontSize, contentGap } = options;
+  const { infoIconFontSize, contentGap } = options;
 
   return (
-    <Paper
-      elevation={0}
-      sx={theme => ({
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: "xl",
-        boxShadow: theme.palette.shadow.card,
-        border: `1px solid ${theme.palette.border.main}`,
-        overflow: "hidden",
-        width: "100%",
-        position: "relative",
-      })}
-    >
-      <Box sx={headerSx}>
-        <GavelOutlined sx={gavelSx} />
-        <Typography {...(titleTypography.variant ? { variant: titleTypography.variant } : {})} sx={titleTypography.sx}>
-          {t.sections.policyOverview}
-        </Typography>
-      </Box>
-
-      <Box sx={contentSx}>
+    <AdminControlPanelShared title={t.sections.policyOverview} icon={GavelOutlined} options={options}>
+      <Box sx={{ position: "relative" }}>
         <Box
           sx={{
             position: "absolute",
@@ -85,7 +64,7 @@ export function PolicyOverviewCardShared({ options }: Readonly<{ readonly option
           <PolicyItem title={t.policies.onLeaveTitle} description={t.policies.onLeaveDesc} />
         </Box>
       </Box>
-    </Paper>
+    </AdminControlPanelShared>
   );
 }
 

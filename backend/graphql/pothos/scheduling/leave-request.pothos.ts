@@ -1,9 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import type {
-  LeaveRequestSelectType,
-  RequestSessionCancelInput,
-  RequestSessionDelayInput,
-} from "@/backend/types";
+import type { LeaveRequestSelectType, RequestSessionCancelInput, RequestSessionDelayInput } from "@/backend/types";
 
 // ---------------------------------------------------------------------------
 // Object type — single canonical, includes `id` (Apollo cache normalization).

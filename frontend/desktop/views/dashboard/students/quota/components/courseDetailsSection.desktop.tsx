@@ -3,11 +3,12 @@
 import { AutoStoriesOutlined, EditNoteOutlined } from "@mui/icons-material";
 import { CourseDetailsSectionShared } from "@/frontend/common/views/dashboard/students/quota/components/courseDetailsSectionShared";
 import type { CourseDetailsSectionSlotProps } from "@/frontend/common/views/dashboard/students/quota/components/courseDetailsSectionShared.types";
+import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { SectionHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/quota/components/sectionHeader.desktop";
 
 const desktopSlots: CourseDetailsSectionSlotProps = {
   renderHeader: title => <SectionHeaderDesktop title={title} desktopIcon={AutoStoriesOutlined} />,
-  teacherLabelId: "student-quota-teacher-label",
+  TeacherAutocomplete: TeacherAutocompleteDesktop,
   rootGap: 4,
   fieldsContainerSx: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4 },
   overrideEndAdornment: {

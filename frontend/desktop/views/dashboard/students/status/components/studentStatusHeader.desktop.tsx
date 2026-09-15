@@ -5,6 +5,7 @@ import { StudentStatusHeaderShared } from "@/frontend/common/views/dashboard/stu
 import type { StudentStatusHeaderProps } from "@/frontend/common/views/dashboard/students/status/types";
 import { DesktopUserAvatar } from "@/frontend/desktop/components/ui/avatar/DesktopUserAvatar";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopFilterButton } from "@/frontend/desktop/components/ui/button";
 
 const DESKTOP_EMBEDDED_WRAPPER_SX: SxProps<Theme> = {
   display: "flex",
@@ -28,6 +29,7 @@ export function StudentStatusHeaderDesktop({ student, embedded = false }: Readon
       slots={{
         AvatarComponent: DesktopUserAvatar,
         StatusBadgeComponent: DesktopStatusBadge,
+        FilterButton: DesktopFilterButton,
         buttonFullWidth: false,
         embeddedWrapperSx: DESKTOP_EMBEDDED_WRAPPER_SX,
         embeddedInnerWrapperSx: DESKTOP_EMBEDDED_INNER_SX,

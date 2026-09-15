@@ -7,27 +7,18 @@ import {
 } from "@/frontend/common/views/dashboard/students/status/components/__shared__/policyOverviewCardShared";
 
 const MOBILE_OPTIONS: PolicyOverviewCardSharedOptions = {
-  headerSx: theme => ({
-    px: 2.5,
-    py: 2,
-    borderBottom: `1px solid ${theme.palette.border.main}`,
-    display: "flex",
-    alignItems: "center",
-    gap: 1,
-    backgroundColor: theme.palette.background.default,
+  headerPx: 2.5,
+  headerPy: 2,
+  headerGap: 1,
+  bodyPadding: 2.5,
+  iconSx: theme => ({ color: theme.palette.primary.main, fontSize: 20 }),
+  titleSx: theme => ({
+    typography: "titleLg",
+    color: theme.palette.primary.main,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
   }),
-  gavelSx: theme => ({ color: theme.palette.primary.main, fontSize: 20 }),
-  titleTypography: {
-    variant: undefined,
-    sx: theme => ({
-      typography: "titleLg",
-      color: theme.palette.primary.main,
-      fontWeight: 700,
-      textTransform: "uppercase",
-      letterSpacing: "0.05em",
-    }),
-  },
-  contentSx: { p: 2.5, position: "relative" },
   infoIconFontSize: 100,
   contentGap: 2.5,
   bannerPadding: 2.5,

@@ -1,6 +1,10 @@
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { ClassSessionService, EffectiveMeetingService } from "@/backend/services";
-import type { ClassInstanceDetailReturnType, ClassInstancePerformanceSelectType, ClassInstanceWithRelations } from "@/backend/types";
+import type {
+  ClassInstanceDetailReturnType,
+  ClassInstancePerformanceSelectType,
+  ClassInstanceWithRelations,
+} from "@/backend/types";
 import { ClassExecutionState, type ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import {
   parseClassExecutionState,

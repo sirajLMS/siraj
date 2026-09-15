@@ -1,5 +1,5 @@
 {
-  "manifestHash": "10e7e94f9fc071508b0bda40e34324c8e0b672251fda63b0474a450a3bbb58ec",
+  "manifestHash": "271ed5680085331820b37cc5f442c40002545a6a004d6b4c7230060c1466b023",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -110,10 +110,6 @@
       "sha256": "ab759ab10e0d796e8e4da659bf3f24215edecaccced8466e46c51046dc2836e2"
     },
     {
-      "file": "48-prune-view-other-defaults.sql",
-      "sha256": "0c59152cf9b5638e6ae66dc239c6d4fb22ec7cc92fee6dce2d48ce9cdea33ed3"
-    },
-    {
       "file": "4a-class_categories_and_subjects_seed.sql",
       "sha256": "23a1c3208b5e2375fcf43aba08bf7fedf2e8406e5fd7507748896d3bc6b13d54"
     },
@@ -160,6 +156,10 @@
     {
       "file": "6d-profile-fine-grained-only.sql",
       "sha256": "fa7e5bdab68023bd3179ff5a5b01456159695bf8dde3f3ad5daf02380f4b90ae"
+    },
+    {
+      "file": "6e-prune-view-other-defaults.sql",
+      "sha256": "0c59152cf9b5638e6ae66dc239c6d4fb22ec7cc92fee6dce2d48ce9cdea33ed3"
     },
     {
       "file": "7a-settings-permissions-enum.sql",
@@ -380,6 +380,7 @@
     "20260910130859_custom_46b-whatsapp-conversations-permissions-data",
     "20260912105815_custom_47a-whatsapp-groups-permissions-enum",
     "20260912105816_custom_47b-whatsapp-groups-permissions-data",
-    "20260914223712_custom_48-prune-view-other-defaults"
+    "20260914223712_custom_48-prune-view-other-defaults",
+    "20260915082413_custom_6e-prune-view-other-defaults"
   ]
 }

@@ -3,6 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import type { PerformanceStreakProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
+import { MobileSectionPanel } from "@/frontend/mobile/components/ui";
 
 const MAX_STREAK_HEIGHT = 48;
 const MIN_STREAK_HEIGHT = 16;
@@ -13,14 +14,15 @@ export function PerformanceStreakMobile({ streakDays }: Readonly<PerformanceStre
   const t = useStudentHistoryLabels().performanceStreak;
 
   return (
-    <Box
+    <MobileSectionPanel
+      edgeToEdge={false}
+      contentInset={false}
       sx={theme => ({
         mt: 4,
+        position: "relative",
         backgroundColor: theme.palette.primary.main,
         p: 3,
         borderRadius: 4,
-        position: "relative",
-        overflow: "hidden",
         boxShadow: theme.palette.shadow.card,
       })}
     >
@@ -72,6 +74,6 @@ export function PerformanceStreakMobile({ streakDays }: Readonly<PerformanceStre
           filter: "blur(24px)",
         })}
       />
-    </Box>
+    </MobileSectionPanel>
   );
 }

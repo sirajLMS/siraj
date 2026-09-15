@@ -7,7 +7,9 @@ import type {
   StudentInfoDatePickerProps,
   StudentInformationSectionSlotProps,
 } from "@/frontend/common/views/dashboard/students/quota/components/studentInformationSectionShared.types";
+import { MobileLanguageDisplay } from "@/frontend/mobile/components/ui/display/language";
 import { MobileAppDatePicker } from "@/frontend/mobile/components/ui/form/date";
+import { GenderSelectorMobile } from "@/frontend/mobile/components/ui/input/genderSelector";
 import { SectionHeaderMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/sectionHeader.mobile";
 
 function MobileSectionHeader({ title, icon }: Readonly<{ title: string; icon: ElementType }>) {
@@ -16,6 +18,8 @@ function MobileSectionHeader({ title, icon }: Readonly<{ title: string; icon: El
 
 const MOBILE_SLOTS: StudentInformationSectionSlotProps = {
   DatePicker: MobileAppDatePicker as ComponentType<StudentInfoDatePickerProps>,
+  LanguageDisplay: MobileLanguageDisplay,
+  GenderSelector: GenderSelectorMobile,
   SectionHeader: MobileSectionHeader,
   sectionHeaderIcon: BadgeOutlined,
   rootGap: 3,

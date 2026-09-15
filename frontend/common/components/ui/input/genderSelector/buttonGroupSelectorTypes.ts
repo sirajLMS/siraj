@@ -18,6 +18,7 @@ export type ButtonGroupSelectorSharedProps<TValue> = {
   readonly required?: boolean;
   readonly fullWidth?: boolean;
   readonly allowEmpty?: boolean;
+  readonly disabled?: boolean;
   readonly options?: ButtonGroupSelectorOptions;
 };
 
@@ -36,6 +37,7 @@ export type GenderSelectorSharedProps = {
   readonly fullWidth?: boolean;
   readonly labels?: Partial<GenderSelectorLabels>;
   readonly allowEmpty?: boolean;
+  readonly disabled?: boolean;
   readonly options?: ButtonGroupSelectorOptions;
 };
 

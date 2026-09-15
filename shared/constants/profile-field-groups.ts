@@ -43,16 +43,10 @@ export const STUDENT_FIELD_GROUP_KEYS = [
 
 export type StudentFieldGroupKey = (typeof STUDENT_FIELD_GROUP_KEYS)[number];
 
-export function profileFieldPermissionKey(
-  group: ProfileFieldGroupKey,
-  action: FieldGroupAction
-): string {
+export function profileFieldPermissionKey(group: ProfileFieldGroupKey, action: FieldGroupAction): string {
   return `profile.${group}.${action}`;
 }
 
-export function studentFieldPermissionKey(
-  group: StudentFieldGroupKey,
-  action: FieldGroupAction
-): string {
+export function studentFieldPermissionKey(group: StudentFieldGroupKey, action: FieldGroupAction): string {
   return `student.${group}.${action}`;
 }

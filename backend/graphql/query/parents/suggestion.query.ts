@@ -2,7 +2,6 @@
 
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import {
   AdminSuggestionResultPothosObject,
   ParentSuggestionOptionsPothosObject,
@@ -11,6 +10,7 @@ import {
   SuggestionPothosObject,
   SuggestionSearchResultPothosObject,
 } from "@/backend/graphql/pothos/parents/suggestion.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { SuggestionService } from "@/backend/services";
 import type { SuggestionQueueResult } from "@/backend/types";
 

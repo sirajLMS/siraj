@@ -1,1 +1,6 @@
-export type { StudentHistoryMetrics } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
+export interface StudentHistoryMetrics {
+  readonly totalClasses: number;
+  readonly attendanceRate: number;
+  readonly hoursStudied: number;
+  readonly performance: number;
+}

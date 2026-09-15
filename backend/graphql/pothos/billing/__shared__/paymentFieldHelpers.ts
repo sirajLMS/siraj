@@ -1,8 +1,8 @@
 import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
-import type { PothosObjectFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/pothos/billing/payment-method.pothos";
+import type { PothosObjectFieldBuilder } from "@/backend/graphql/pothos/shared/builder-types";
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { buildMaskedTransactionSnapshot, PermissionsService } from "@/backend/services";
 import type { PaymentFieldShape, PaymentMethodTransactionSnapshot, SnapshotUnion } from "@/backend/types";

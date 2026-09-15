@@ -1,6 +1,6 @@
 import { GraphQLError } from "graphql";
-import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
+import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   MarkSuggestionDuplicateInputPothosObject,
   RespondToSuggestionInputPothosObject,

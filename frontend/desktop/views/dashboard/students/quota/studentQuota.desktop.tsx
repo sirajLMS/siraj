@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@mui/material";
 import type { ReactElement } from "react";
 import { StudentQuotaView } from "@/frontend/common/views/dashboard/students/quota/components/__shared__/studentQuotaShared";
 import type { StudentQuotaTierConfig } from "@/frontend/common/views/dashboard/students/quota/components/__shared__/studentQuotaShared.types";
@@ -25,9 +24,7 @@ function renderDesktopHeader({
   t: { readonly breadcrumbs: { readonly students: string; readonly adjustQuota: string } };
 }>): ReactElement {
   return (
-    <Box sx={{ display: "flex", mb: 3 }}>
-      <DesktopPageHeader title={t.breadcrumbs.adjustQuota} titleVariant="titleLg" breadcrumbs={desktopBreadcrumbs(t)} />
-    </Box>
+    <DesktopPageHeader title={t.breadcrumbs.adjustQuota} titleVariant="titleLg" breadcrumbs={desktopBreadcrumbs(t)} />
   );
 }
 
@@ -50,13 +47,6 @@ const DESKTOP_TIER: StudentQuotaTierConfig = {
     innerDirection: "row",
     innerGap: 2,
     innerWidth: "auto",
-    saveButtonHeight: 48,
-    saveButtonPx: 5,
-    saveButtonWidth: "auto",
-    cancelButtonHeight: 48,
-    cancelButtonPx: 4,
-    cancelButtonHoverBg: "transparent",
-    cancelButtonWidth: "auto",
   },
   wrapContextualHelperCards: wrapContextualHelperCardsDefault,
 };

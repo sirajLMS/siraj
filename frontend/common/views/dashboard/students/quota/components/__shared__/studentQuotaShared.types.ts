@@ -38,19 +38,18 @@ interface QuotaFormCardSx {
   readonly formGap: number;
 }
 
+/**
+ * Layout-only knobs that genuinely differ between tiers. Button appearance
+ * (height, padding, width, hover surface) is preset-encoded in the
+ * MobilePrimaryPageAction / DesktopPrimaryPageAction primitives and must not
+ * be re-created per tier.
+ */
 interface QuotaFormActionsSx {
   readonly containerPaddingTop: number;
   readonly containerDirection: "row" | "column";
   readonly innerDirection: "row" | "column";
   readonly innerGap: number;
   readonly innerWidth: "auto" | "100%";
-  readonly saveButtonHeight: number;
-  readonly saveButtonPx: number;
-  readonly saveButtonWidth: "auto" | "100%";
-  readonly cancelButtonHeight: number;
-  readonly cancelButtonPx: number;
-  readonly cancelButtonHoverBg: "transparent" | "surfaceContainerLow";
-  readonly cancelButtonWidth: "auto" | "100%";
 }
 
 type ContextualHelperCardsWrapper = (children: ReactElement) => ReactElement;

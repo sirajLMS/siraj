@@ -204,11 +204,7 @@ function ManualEntryDialogSlot({
       subjectsLoading={subjectsLoading}
       labels={labels}
       studentSelect={
-        <ManualClassEntryStudentSelectMobile
-          teacherId={teacherId}
-          open={open}
-          studentLabel={labels.studentLabel}
-        />
+        <ManualClassEntryStudentSelectMobile teacherId={teacherId} open={open} studentLabel={labels.studentLabel} />
       }
     />
   );

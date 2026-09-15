@@ -1,4 +1,12 @@
-import { FormControl, InputLabel, MenuItem, Select, type SelectChangeEvent, type SxProps, type Theme } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  type SelectChangeEvent,
+  type SxProps,
+  type Theme,
+} from "@mui/material";
 import type { ReactNode } from "react";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";

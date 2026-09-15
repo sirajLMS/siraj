@@ -1,6 +1,7 @@
 import type { SxProps, Theme } from "@mui/material";
 import type { SystemStyleObject } from "@mui/system/styleFunctionSx";
-import type { ElementType, ReactNode } from "react";
+import type { ComponentType, ElementType, ReactNode } from "react";
+import type { TeacherAutocompleteProps } from "@/frontend/common/components/ui/input/userSelect";
 
 /**
  * Props for the end-adornment shown inside the "classes left" field when
@@ -33,16 +34,16 @@ type ClassesLeftInputSxFactory = (theme: Theme) => SystemStyleObject<Theme>;
  * {@link CourseDetailsSectionShared}.
  *
  * The scaffold renders the full course-details section body (teacher
- * select, total classes, classes left fields plus the restricted
+ * picker, total classes, classes left fields plus the restricted
  * state) and lets the mobile/desktop caller swap the tier-specific
- * section header, icons, label IDs, layout, and "classes left" override
- * styling.
+ * section header, icons, teacher picker facade, layout, and
+ * "classes left" override styling.
  */
 export interface CourseDetailsSectionSlotProps {
   /** Renders the tier-specific section header with the given title. */
   readonly renderHeader: (title: string) => ReactNode;
-  /** Unique id for the teacher select's InputLabel (avoids collisions). */
-  readonly teacherLabelId: string;
+  /** Tier-specific permission-scoped teacher picker facade. */
+  readonly TeacherAutocomplete: ComponentType<TeacherAutocompleteProps>;
   /** Outer container gap. Desktop 4, mobile 3. */
   readonly rootGap: number;
   /** CSS layout for fields container. Desktop uses grid, mobile uses flex column. */

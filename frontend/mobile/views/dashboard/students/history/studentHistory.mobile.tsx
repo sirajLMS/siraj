@@ -2,7 +2,6 @@
 
 import {
   CalendarToday,
-  ChevronLeft,
   ChevronRight,
   PictureAsPdf,
   School,
@@ -13,18 +12,44 @@ import {
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import {
+  type MonthNavigatorMonthDisplayProps,
+  MonthNavigatorShared,
+} from "@/frontend/common/views/dashboard/students/history/components/__shared__";
 import { StudentHistoryLabelsProvider } from "@/frontend/common/views/dashboard/students/history/studentHistoryLabelsContext";
-import type { ClassSession, MobileMetricProps } from "@/frontend/common/views/dashboard/students/history/types";
+import type { ClassSession, StudentHistoryMetrics } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
+import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page";
 import { ClassSessionListMobile } from "@/frontend/mobile/views/dashboard/students/history/components/classSessionList.mobile";
 import { MobileWeeklyScroller } from "@/frontend/mobile/views/dashboard/students/history/components/mobileWeeklyScroller.mobile";
 import { PerformanceStreakMobile } from "@/frontend/mobile/views/dashboard/students/history/components/performanceStreak.mobile";
 import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+
+function MobileMonthDisplay({ monthStr, yearStr }: Readonly<MonthNavigatorMonthDisplayProps>) {
+  return (
+    <Box
+      sx={theme => ({
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        backgroundColor: theme.palette.primary.main,
+        px: 2,
+        py: 1,
+        borderRadius: 2,
+        color: theme.palette.onPrimary,
+      })}
+    >
+      <CalendarToday sx={{ fontSize: 18 }} />
+      <Typography variant="buttonText">{`${monthStr} ${yearStr}`}</Typography>
+    </Box>
+  );
+}
 
 function deriveStreakDays(
   classes: Readonly<Partial<Record<number, ClassSession>>>,
@@ -71,10 +96,10 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
       >
         <Typography variant="labelMd">{t.breadcrumbs.archive}</Typography>
         <ChevronRight
-          sx={{
+          sx={theme => ({
             fontSize: 16,
-            transform: theme => (theme.direction === "rtl" ? "scaleX(-1)" : undefined),
-          }}
+            transform: theme.direction === "rtl" ? ("scaleX(-1)" as const) : undefined,
+          })}
         />
         <Typography
           variant="labelMd"
@@ -102,45 +127,41 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
   );
 }
 
-function HistoryMobileMetricsGrid({
-  metrics,
-}: Readonly<{ metrics: { totalClasses: number; attendanceRate: number; hoursStudied: number; performance: number } }>) {
+function HistoryMobileMetricsGrid({ metrics }: Readonly<{ metrics: StudentHistoryMetrics }>) {
   const t = useStudentHistoryLabels();
-  return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: 1.5,
-        mb: 3,
-      }}
-    >
-      <MobileMetric
-        title={t.metrics.totalClasses(metrics.totalClasses)}
-        icon={<School sx={theme => ({ color: theme.palette.onPrimaryContainer, fontSize: 18 })} />}
-        value={metrics.totalClasses}
-        bg={theme => theme.palette.primaryContainer}
-      />
-      <MobileMetric
-        title={t.metrics.attendanceRate(metrics.attendanceRate)}
-        icon={<VerifiedUser sx={theme => ({ color: theme.palette.onSecondaryContainer, fontSize: 18 })} />}
-        value={t.percentValue(metrics.attendanceRate)}
-        bg={theme => theme.palette.secondaryContainer}
-      />
-      <MobileMetric
-        title={t.metrics.hoursStudied(metrics.hoursStudied)}
-        icon={<Timer sx={theme => ({ color: theme.palette.onTertiaryContainer, fontSize: 18 })} />}
-        value={t.hoursShort(metrics.hoursStudied)}
-        bg={theme => theme.palette.tertiaryContainer}
-      />
-      <MobileMetric
-        title={t.metrics.performance(metrics.performance)}
-        icon={<TrendingUp sx={theme => ({ color: theme.palette.onErrorContainer, fontSize: 18 })} />}
-        value={t.percentValue(metrics.performance)}
-        bg={theme => theme.palette.errorContainer}
-      />
-    </Box>
-  );
+  const items: MetricItem[] = [
+    {
+      key: "totalClasses",
+      count: metrics.totalClasses,
+      labelKey: "totalClasses",
+      label: t.metrics.totalClasses(metrics.totalClasses),
+      icon: School,
+    },
+    {
+      key: "attendanceRate",
+      count: t.percentValue(metrics.attendanceRate),
+      labelKey: "attendanceRate",
+      label: t.metrics.attendanceRate(metrics.attendanceRate),
+      icon: VerifiedUser,
+    },
+    {
+      key: "hoursStudied",
+      count: t.hoursShort(metrics.hoursStudied),
+      labelKey: "hoursStudied",
+      label: t.metrics.hoursStudied(metrics.hoursStudied),
+      icon: Timer,
+    },
+    {
+      key: "performance",
+      count: t.percentValue(metrics.performance),
+      labelKey: "performance",
+      label: t.metrics.performance(metrics.performance),
+      icon: TrendingUp,
+      variant: "error",
+    },
+  ];
+
+  return <MobileMetricCardGrid metrics={items} stretchCells sx={{ mb: 3 }} />;
 }
 
 function HistoryMobileActions({
@@ -172,65 +193,28 @@ function HistoryMobileActions({
         mb: 2,
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Tooltip title={t.previousMonth}>
-          <Box component="span" sx={{ display: "inline-flex" }}>
-            <IconButton
-              onClick={onPrevMonth}
-              size="small"
-              disabled={!canGoPrev}
-              aria-label={t.previousMonth}
-              sx={theme => ({
-                backgroundColor: canGoPrev ? theme.palette.primary.main : theme.palette.action.disabledBackground,
-                color: canGoPrev ? theme.palette.onPrimary : theme.palette.action.disabled,
-                borderRadius: 2,
-                transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-                "&:hover": {
-                  backgroundColor: canGoPrev ? theme.palette.primary.dark : theme.palette.action.disabledBackground,
-                },
-              })}
-            >
-              <ChevronLeft sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Box>
-        </Tooltip>
-        <Box
-          sx={theme => ({
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            backgroundColor: theme.palette.primary.main,
-            px: 2,
-            py: 1,
+      <MonthNavigatorShared
+        monthStr={monthStr}
+        yearStr={yearStr}
+        canGoPrev={canGoPrev}
+        canGoNext={canGoNext}
+        onPrevMonth={onPrevMonth}
+        onNextMonth={onNextMonth}
+        labels={t}
+        tier={{
+          MonthDisplay: MobileMonthDisplay,
+          chevronSize: "small",
+          stepperButtonSx: enabled => theme => ({
+            backgroundColor: enabled ? theme.palette.primary.main : theme.palette.action.disabledBackground,
+            color: enabled ? theme.palette.onPrimary : theme.palette.action.disabled,
             borderRadius: 2,
-            color: theme.palette.onPrimary,
-          })}
-        >
-          <CalendarToday sx={{ fontSize: 18 }} />
-          <Typography variant="buttonText">{`${monthStr} ${yearStr}`}</Typography>
-        </Box>
-        <Tooltip title={t.nextMonth}>
-          <Box component="span" sx={{ display: "inline-flex" }}>
-            <IconButton
-              onClick={onNextMonth}
-              size="small"
-              disabled={!canGoNext}
-              aria-label={t.nextMonth}
-              sx={theme => ({
-                backgroundColor: canGoNext ? theme.palette.primary.main : theme.palette.action.disabledBackground,
-                color: canGoNext ? theme.palette.onPrimary : theme.palette.action.disabled,
-                borderRadius: 2,
-                transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
-                "&:hover": {
-                  backgroundColor: canGoNext ? theme.palette.primary.dark : theme.palette.action.disabledBackground,
-                },
-              })}
-            >
-              <ChevronRight sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Box>
-        </Tooltip>
-      </Box>
+            "&:hover": {
+              backgroundColor: enabled ? theme.palette.primary.dark : theme.palette.action.disabledBackground,
+            },
+          }),
+          containerSx: { display: "flex", alignItems: "center", gap: 1 },
+        }}
+      />
       <Tooltip title={t.exportPdf}>
         <IconButton
           type="button"
@@ -256,51 +240,6 @@ function HistoryMobileActions({
           <PictureAsPdf />
         </IconButton>
       </Tooltip>
-    </Box>
-  );
-}
-
-function MobileMetric({ title, icon, value, bg }: Readonly<MobileMetricProps>) {
-  return (
-    <Box
-      sx={theme => ({
-        backgroundColor: theme.palette.surfaceContainerLowest,
-        p: 2,
-        borderRadius: "xl",
-        border: `1px solid ${theme.palette.border.light}`,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-      })}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          mb: 1,
-        }}
-      >
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {title}
-        </Typography>
-        <Box
-          sx={theme => ({
-            width: 32,
-            height: 32,
-            borderRadius: "full",
-            backgroundColor: typeof bg === "function" ? bg(theme) : bg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          })}
-        >
-          {icon}
-        </Box>
-      </Box>
-      <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-        {value}
-      </Typography>
     </Box>
   );
 }

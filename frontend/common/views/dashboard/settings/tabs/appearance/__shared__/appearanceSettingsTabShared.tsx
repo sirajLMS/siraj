@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Stack, Typography, type ButtonProps } from "@mui/material";
+import { Box, type ButtonProps, Stack, Typography } from "@mui/material";
 import type { ComponentType } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { AppearanceResetDialog } from "@/frontend/common/views/dashboard/appearance/shared/AppearanceResetDialog";
@@ -58,9 +58,7 @@ export function AppearanceSettingsTabShared({
 
       <SectionPanel
         actions={
-          <PrimaryAction onClick={viewModel.onEnterCustomizeMode}>
-            {viewModel.labels.enterCustomizeMode}
-          </PrimaryAction>
+          <PrimaryAction onClick={viewModel.onEnterCustomizeMode}>{viewModel.labels.enterCustomizeMode}</PrimaryAction>
         }
       >
         <Stack sx={{ gap: 2 }}>

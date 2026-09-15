@@ -60,7 +60,11 @@ export function SearchBarField({
             </InputAdornment>
           ) : null,
         },
-        htmlInput: { "aria-label": placeholder, autoComplete: "off", ...(maxLength === undefined ? null : { maxLength }) },
+        htmlInput: {
+          "aria-label": placeholder,
+          autoComplete: "off",
+          ...(maxLength === undefined ? null : { maxLength }),
+        },
       }}
     />
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { VideocamOffOutlined } from "@mui/icons-material";
-import { Box, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import type { ComponentProps, ComponentType } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -16,6 +16,7 @@ import type {
 } from "@/frontend/common/views/dashboard/students/status/types";
 import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
@@ -57,71 +58,13 @@ function profileLinkColumn(config: ProfileLinkColumnConfig): GridColDef<Upcoming
   };
 }
 
-function DesktopHeader({ pendingCount }: Readonly<{ pendingCount: number }>) {
-  const t = useStudentStatusLabels();
-  return (
-    <Box
-      sx={theme => ({
-        px: 3,
-        py: 2.5,
-        borderBottom: `1px solid ${theme.palette.border.main}`,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        backgroundColor: theme.palette.background.default,
-      })}
-    >
-      <Box>
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t.sections.upcomingClasses}
-        </Typography>
-        <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-          {t.table.footerInfo}
-        </Typography>
-      </Box>
-      {pendingCount > 0 ? (
-        <Box
-          sx={theme => ({
-            backgroundColor: theme.palette.primaryContainer,
-            color: theme.palette.onPrimaryContainer,
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 1,
-          })}
-        >
-          <Typography variant="labelMd" sx={{ fontWeight: 700 }}>
-            {t.table.pendingHolds(pendingCount)}
-          </Typography>
-        </Box>
-      ) : null}
-    </Box>
-  );
-}
+type UpcomingClassesColumnsContext = {
+  readonly t: ReturnType<typeof useStudentStatusLabels>;
+  readonly locale: ReturnType<typeof useAppLocale>;
+};
 
-function DesktopFooter() {
-  const t = useStudentStatusLabels();
-  return (
-    <Box
-      sx={theme => ({
-        px: 3,
-        py: 2,
-        backgroundColor: theme.palette.background.default,
-        borderTop: `1px solid ${theme.palette.border.main}`,
-        textAlign: "right",
-      })}
-    >
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontStyle: "italic" })}>
-        {t.table.footerInfo}
-      </Typography>
-    </Box>
-  );
-}
-
-export function UpcomingClassesTableDesktop({ classes }: Readonly<UpcomingClassesTableProps>) {
-  const t = useStudentStatusLabels();
-  const locale = useAppLocale();
-
-  const columns: GridColDef<UpcomingClassDisplay>[] = [
+function buildUpcomingClassesColumns({ t, locale }: UpcomingClassesColumnsContext): GridColDef<UpcomingClassDisplay>[] {
+  return [
     profileLinkColumn({
       field: "subjectName",
       headerName: t.table.subject,
@@ -175,20 +118,11 @@ export function UpcomingClassesTableDesktop({ classes }: Readonly<UpcomingClasse
       flex: 0.9,
       minWidth: 130,
       renderCell: params => (
-        <Box
-          sx={theme => ({
-            backgroundColor: params.row.isFrozen ? theme.palette.errorContainer : theme.palette.background.default,
-            color: params.row.isFrozen ? theme.palette.onErrorContainer : theme.palette.onSurfaceVariant,
-            px: 1,
-            py: 0.5,
-            borderRadius: 1,
-            display: "inline-block",
-          })}
-        >
-          <Typography variant="labelMd" sx={{ fontWeight: 600 }}>
-            {params.row.isFrozen ? t.table.frozen : t.table.active}
-          </Typography>
-        </Box>
+        <DesktopStatusBadge
+          category="classSession"
+          status={params.row.isFrozen ? "hold" : "active"}
+          label={params.row.isFrozen ? t.table.frozen.toUpperCase() : t.table.active.toUpperCase()}
+        />
       ),
     },
     {
@@ -231,20 +165,27 @@ export function UpcomingClassesTableDesktop({ classes }: Readonly<UpcomingClasse
       ),
     },
   ];
+}
+
+export function UpcomingClassesTableDesktop({ classes }: Readonly<UpcomingClassesTableProps>) {
+  const t = useStudentStatusLabels();
+  const locale = useAppLocale();
+
+  const columns = buildUpcomingClassesColumns({ t, locale });
+
+  const pendingCount = classes.filter(c => c.isFrozen).length;
 
   return (
-    <Paper
-      elevation={0}
-      sx={theme => ({
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: "xl",
-        boxShadow: theme.palette.shadow.card,
-        border: `1px solid ${theme.palette.border.main}`,
-        overflow: "hidden",
-        width: "100%",
-      })}
+    <DesktopSectionPanel
+      title={t.sections.upcomingClasses}
+      subTitle={t.table.footerInfo}
+      actions={
+        pendingCount > 0 ? (
+          <DesktopStatusBadge category="classSession" status="hold" label={t.table.pendingHolds(pendingCount)} />
+        ) : null
+      }
+      contentPadding={false}
     >
-      <DesktopHeader pendingCount={classes.filter(c => c.isFrozen).length} />
       <DesktopAppDataGrid
         rows={classes}
         columns={columns}
@@ -265,7 +206,6 @@ export function UpcomingClassesTableDesktop({ classes }: Readonly<UpcomingClasse
           },
         })}
       />
-      <DesktopFooter />
-    </Paper>
+    </DesktopSectionPanel>
   );
 }

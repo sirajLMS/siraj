@@ -1,9 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponsePothosObject } from "@/backend/graphql/pothos/complaints/complaintResponses.pothos";
-import {
-  ComplaintCategoryPothosEnum,
-  ComplaintStatusPothosEnum,
-} from "@/backend/graphql/pothos/shared/enum.pothos";
+import { ComplaintCategoryPothosEnum, ComplaintStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
   ComplaintFileMetadataInput,

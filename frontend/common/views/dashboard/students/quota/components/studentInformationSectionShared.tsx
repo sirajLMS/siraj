@@ -1,24 +1,9 @@
 "use client";
 
-import {
-  Box,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  FormLabel,
-  InputAdornment,
-  InputLabel,
-  OutlinedInput,
-  Radio,
-  RadioGroup,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, FormHelperText, TextField, Typography } from "@mui/material";
 import { format, isValid, parse } from "date-fns";
 import { Controller, useFormContext } from "react-hook-form";
-import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
-import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { AppLanguage, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
@@ -27,13 +12,9 @@ import type {
   StudentInformationSectionSlotProps,
 } from "@/frontend/common/views/dashboard/students/quota/components/studentInformationSectionShared.types";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
-import { GENDER_OPTIONS } from "@/frontend/common/views/dashboard/students/quota/types";
 import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/useQuotaFormAccess";
-import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 const DATE_FORMAT = "yyyy-MM-dd";
-
-type QuotaFieldKey = keyof StudentQuotaLabels["fields"];
 
 function parseDateValue(dateStr: string): Date | null {
   if (!dateStr) return null;
@@ -41,9 +22,20 @@ function parseDateValue(dateStr: string): Date | null {
   return isValid(parsed) ? parsed : null;
 }
 
-function isQuotaFieldKey(value: string, fields: StudentQuotaLabels["fields"]): value is QuotaFieldKey {
-  return value in fields;
+function toAppLanguage(value: string): AppLanguage | null {
+  if (value === "ar") return AppLanguage.Ar;
+  if (value === "en") return AppLanguage.En;
+  return null;
 }
+
+function toFormGender(value: string): Gender | null {
+  if (value === "MALE") return Gender.Male;
+  if (value === "FEMALE") return Gender.Female;
+  return null;
+}
+
+// Read-only section: gender selection handlers are inert so the form value stays unchanged.
+const noopGenderSelection = () => undefined;
 
 function StudentNameField() {
   const { labels: t } = useQuotaFormAccess();
@@ -106,9 +98,10 @@ function DateOfBirthField({ DatePicker }: Readonly<{ DatePicker: StudentInformat
   );
 }
 
-function LanguageField() {
+function LanguageField({
+  LanguageDisplay,
+}: Readonly<{ LanguageDisplay: StudentInformationSectionSlotProps["LanguageDisplay"] }>) {
   const { labels: t } = useQuotaFormAccess();
-  const locale = useAppLocale();
   const {
     control,
     formState: { errors },
@@ -118,28 +111,25 @@ function LanguageField() {
       name="language"
       control={control}
       render={({ field }) => (
-        <FormControl fullWidth variant="outlined" error={Boolean(errors.language)} sx={quotaInputSx}>
-          <InputLabel shrink>{t.fields.language}</InputLabel>
-          <OutlinedInput
-            label={t.fields.language}
-            readOnly
-            value={field.value ? getLanguageDisplayName(field.value, locale) : ""}
-            startAdornment={
-              field.value ? (
-                <InputAdornment position="start">
-                  <LocaleEmoji emoji={getLanguageEmoji(field.value)} />
-                </InputAdornment>
-              ) : undefined
-            }
-          />
-          {errors.language?.message ? <FormHelperText>{errors.language.message}</FormHelperText> : null}
-        </FormControl>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+          <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+            {t.fields.language}
+          </Typography>
+          <LanguageDisplay code={toAppLanguage(field.value)} fallback={t.common.notSet} />
+          {errors.language?.message ? <FormHelperText error>{errors.language.message}</FormHelperText> : null}
+        </Box>
       )}
     />
   );
 }
 
-function GenderField({ genderFieldPx }: Readonly<{ genderFieldPx: number }>) {
+function GenderField({
+  GenderSelector,
+  genderFieldPx,
+}: Readonly<{
+  GenderSelector: StudentInformationSectionSlotProps["GenderSelector"];
+  genderFieldPx: number;
+}>) {
   const { labels: t } = useQuotaFormAccess();
   const {
     control,
@@ -150,42 +140,30 @@ function GenderField({ genderFieldPx }: Readonly<{ genderFieldPx: number }>) {
       name="gender"
       control={control}
       render={({ field }) => {
-        const hasGender = field.value === "MALE" || field.value === "FEMALE";
+        const gender = toFormGender(field.value);
 
         return (
-          <FormControl error={Boolean(errors.gender)} component="fieldset" sx={{ px: genderFieldPx }}>
-            <FormLabel component="legend">{t.fields.gender}</FormLabel>
-            {hasGender ? (
-              <RadioGroup {...field} row sx={{ height: "48px", justifyContent: "center" }}>
-                {GENDER_OPTIONS.map(option => (
-                  <FormControlLabel
-                    key={option.value}
-                    value={option.value}
-                    disabled
-                    control={
-                      <Radio
-                        sx={theme => ({
-                          color: theme.palette.border.main,
-                          "&.Mui-checked": { color: theme.palette.primary.main },
-                        })}
-                      />
-                    }
-                    label={
-                      <Typography variant="bodyMd">
-                        {isQuotaFieldKey(option.labelKey, t.fields) ? t.fields[option.labelKey] : ""}
-                      </Typography>
-                    }
-                    sx={option.value === GENDER_OPTIONS[0].value ? { mr: 4 } : undefined}
-                  />
-                ))}
-              </RadioGroup>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, px: genderFieldPx }}>
+            {gender ? (
+              <GenderSelector
+                gender={gender}
+                setGenderAction={noopGenderSelection}
+                error={Boolean(errors.gender)}
+                fullWidth
+                labels={{ title: t.fields.gender, male: t.fields.male, female: t.fields.female }}
+              />
             ) : (
-              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 1.5 })}>
-                {t.common.notSet}
-              </Typography>
+              <Box>
+                <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
+                  {t.fields.gender}
+                </Typography>
+                <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 1.5 })}>
+                  {t.common.notSet}
+                </Typography>
+              </Box>
             )}
             {errors.gender ? <FormHelperText>{errors.gender.message}</FormHelperText> : null}
-          </FormControl>
+          </Box>
         );
       }}
     />
@@ -197,6 +175,8 @@ export function StudentInformationSectionShared({ slots }: Readonly<StudentInfor
   const { canView } = useStudentFieldAccess();
   const {
     DatePicker,
+    LanguageDisplay,
+    GenderSelector,
     SectionHeader,
     sectionHeaderIcon: SectionHeaderIcon,
     rootGap,
@@ -218,8 +198,8 @@ export function StudentInformationSectionShared({ slots }: Readonly<StudentInfor
       <Box sx={{ display: "grid", gridTemplateColumns, gap: fieldsGap }}>
         <StudentNameField />
         <DateOfBirthField DatePicker={DatePicker} />
-        <LanguageField />
-        <GenderField genderFieldPx={genderFieldPx} />
+        <LanguageField LanguageDisplay={LanguageDisplay} />
+        <GenderField GenderSelector={GenderSelector} genderFieldPx={genderFieldPx} />
       </Box>
     </Box>
   );

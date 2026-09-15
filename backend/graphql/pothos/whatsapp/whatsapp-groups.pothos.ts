@@ -128,9 +128,8 @@ export const WhatsappGroupMessagesResultPothosObject = WhatsappGroupMessagesResu
 
 // ─── Outcome wrappers ────────────────────────────────────────────────────────
 
-const WhatsappJoinRequestErrorRef = gqlSchemaBuilder.objectRef<WhatsappJoinRequestErrorType>(
-  "WhatsappJoinRequestError"
-);
+const WhatsappJoinRequestErrorRef =
+  gqlSchemaBuilder.objectRef<WhatsappJoinRequestErrorType>("WhatsappJoinRequestError");
 
 export const WhatsappJoinRequestErrorPothosObject = WhatsappJoinRequestErrorRef.implement({
   fields: t => ({
@@ -139,9 +138,8 @@ export const WhatsappJoinRequestErrorPothosObject = WhatsappJoinRequestErrorRef.
   }),
 });
 
-const WhatsappJoinRequestFailureRef = gqlSchemaBuilder.objectRef<WhatsappJoinRequestFailureType>(
-  "WhatsappJoinRequestFailure"
-);
+const WhatsappJoinRequestFailureRef =
+  gqlSchemaBuilder.objectRef<WhatsappJoinRequestFailureType>("WhatsappJoinRequestFailure");
 
 export const WhatsappJoinRequestFailurePothosObject = WhatsappJoinRequestFailureRef.implement({
   fields: t => ({

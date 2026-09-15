@@ -171,4 +171,12 @@ describe("ParentQuotaView", () => {
       expect(screen.getByText(t.audience.parentTitle)).toBeVisible();
     });
   });
+
+  test("renders avatar initials fallback when child has no avatar image", async () => {
+    renderParentView([meQueryMock, childrenMock([mockChild]), studentQuotasMock, ledgerMock]);
+
+    await waitFor(() => {
+      expect(screen.getAllByText("CO").length).toBeGreaterThan(0);
+    });
+  });
 });

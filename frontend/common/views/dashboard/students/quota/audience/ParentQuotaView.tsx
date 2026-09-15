@@ -1,8 +1,9 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { Avatar, Box, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { type ReactElement, useState } from "react";
+import { UserAvatar } from "@/frontend/common/components/ui/avatar";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth";
 import { parentAssociatedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -65,7 +66,7 @@ export function ParentQuotaView({ t }: Readonly<ParentQuotaViewProps>): ReactEle
         {children.map(child => (
           <Tab
             key={child.id ?? ""}
-            icon={child.avatarUrl != null ? <Avatar src={child.avatarUrl} sx={{ width: 28, height: 28 }} /> : undefined}
+            icon={<UserAvatar src={child.avatarUrl} label={child.name ?? t.common.notSet} size={28} />}
             iconPosition="start"
             label={child.name ?? t.common.notSet}
           />
@@ -74,9 +75,7 @@ export function ParentQuotaView({ t }: Readonly<ParentQuotaViewProps>): ReactEle
       {selectedChild?.id != null ? (
         <Stack sx={{ gap: 2 }}>
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.5 }}>
-            {selectedChild.avatarUrl != null ? (
-              <Avatar src={selectedChild.avatarUrl} sx={{ width: 48, height: 48 }} />
-            ) : null}
+            <UserAvatar src={selectedChild.avatarUrl} label={selectedChild.name ?? t.common.notSet} size={48} />
             <Typography variant="titleLg">{selectedChild.name ?? t.common.notSet}</Typography>
           </Stack>
           <ChildQuotaContent studentId={selectedChild.id} t={t} />

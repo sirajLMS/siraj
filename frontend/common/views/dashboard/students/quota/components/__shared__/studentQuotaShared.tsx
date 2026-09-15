@@ -88,48 +88,12 @@ function FormActionsShared({
         }}
       >
         {readOnly ? null : (
-          <PrimaryAction
-            type="submit"
-            disabled={isSaving || isSaved}
-            startIcon={saveIcon}
-            sx={(theme: Theme) => ({
-              height: actionsSx.saveButtonHeight,
-              px: actionsSx.saveButtonPx,
-              backgroundColor: isSaved ? theme.palette.primary.main : theme.palette.success.main,
-              color: isSaved ? theme.palette.onPrimary : theme.palette.onSuccess,
-              "&:hover": { backgroundColor: isSaved ? theme.palette.primary.dark : theme.palette.success.dark },
-              "&.Mui-disabled": {
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.onPrimary,
-                opacity: 0.8,
-              },
-              width: actionsSx.saveButtonWidth,
-            })}
-          >
+          <PrimaryAction type="submit" disabled={isSaving || isSaved} startIcon={saveIcon}>
             {saveText}
           </PrimaryAction>
         )}
         {showCancel ? (
-          <PrimaryAction
-            type="button"
-            variant="text"
-            onClick={onCancel}
-            disabled={isSaving}
-            sx={(theme: Theme) => ({
-              height: actionsSx.cancelButtonHeight,
-              px: actionsSx.cancelButtonPx,
-              width: actionsSx.cancelButtonWidth,
-              ...(actionsSx.cancelButtonHoverBg === "surfaceContainerLow"
-                ? {
-                    color: theme.palette.onSurfaceVariant,
-                    "&:hover": { color: theme.palette.error.main, backgroundColor: theme.palette.surfaceContainerLow },
-                  }
-                : {
-                    color: theme.palette.onSurfaceVariant,
-                    "&:hover": { color: theme.palette.error.main, backgroundColor: theme.palette.action.hover },
-                  }),
-            })}
-          >
+          <PrimaryAction type="button" variant="text" onClick={onCancel} disabled={isSaving}>
             {labels.actions.cancel}
           </PrimaryAction>
         ) : null}

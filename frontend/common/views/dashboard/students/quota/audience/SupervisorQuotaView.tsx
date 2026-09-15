@@ -1,16 +1,26 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import {
+  AddOutlined,
+  ArchiveOutlined,
+  CheckCircleOutlined,
+  ClassOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EventBusyOutlined,
+  type SvgIconComponent,
+} from "@mui/icons-material";
+import { Box, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
-import type { ReactElement } from "react";
-import { PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
+import type { ReactElement, ReactNode } from "react";
+import { ActionIconLink, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { AppPermission, type QuotasQuery_quotas_rows } from "@/frontend/common/graphql/generated/gql/graphql";
 import { quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
 import {
   QuotaEmptyState,
@@ -20,13 +30,56 @@ import {
   getQuotaKindLabel,
   getQuotaStatusLabel,
 } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceStatus.utils";
+import { SupervisorQuotaMetrics } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/supervisorQuotaMetrics";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
+
+export type SupervisorQuotaMetricsRenderer = (params: { readonly metrics: readonly MetricItem[] }) => ReactNode;
 
 interface SupervisorQuotaViewProps {
   readonly t: StudentQuotaLabels;
+  /** Tier metrics grid (Desktop/MobileMetricCardGrid) injected by tier composition. */
+  readonly renderMetricsGrid?: SupervisorQuotaMetricsRenderer;
 }
 
 type QuotaRow = QuotasQuery_quotas_rows;
+
+const SUPERVISOR_QUOTA_METRIC_ICONS: Record<string, SvgIconComponent> = {
+  totalClasses: ClassOutlined,
+  active: CheckCircleOutlined,
+  expired: EventBusyOutlined,
+  archived: ArchiveOutlined,
+};
+
+function buildSupervisorQuotaMetrics(params: {
+  readonly t: StudentQuotaLabels;
+  readonly totalCount: number;
+  readonly activeCount: number;
+  readonly expiredCount: number;
+  readonly archivedCount: number;
+}): MetricItem[] {
+  const { t, totalCount, activeCount, expiredCount, archivedCount } = params;
+  const counts: Record<string, number> = {
+    totalClasses: totalCount,
+    active: activeCount,
+    expired: expiredCount,
+    archived: archivedCount,
+  };
+  const labels: Record<string, string> = {
+    totalClasses: t.audience.totalClasses,
+    active: t.audience.statuses.ACTIVE,
+    expired: t.audience.statuses.EXPIRED,
+    archived: t.audience.statuses.ARCHIVED,
+  };
+
+  return Object.keys(labels).map(key => ({
+    key,
+    count: counts[key] ?? 0,
+    labelKey: key,
+    label: labels[key],
+    icon: SUPERVISOR_QUOTA_METRIC_ICONS[key] ?? ClassOutlined,
+    variant: key === "expired" ? "error" : "default",
+  }));
+}
 
 function formatDate(dateStr: string | null | undefined): string {
   if (dateStr == null || dateStr.length === 0) return "";
@@ -43,7 +96,7 @@ function buildQuotaColumns(t: StudentQuotaLabels, canManage: boolean): GridColDe
       flex: 1.5,
       minWidth: 160,
       renderCell: params => (
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+        <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
           {params.value ?? t.common.notSet}
         </Typography>
       ),
@@ -91,7 +144,11 @@ function buildQuotaColumns(t: StudentQuotaLabels, canManage: boolean): GridColDe
       type: "number",
       flex: 0.8,
       minWidth: 100,
-      renderCell: params => <Box sx={{ fontWeight: 700 }}>{params.value ?? 0}</Box>,
+      renderCell: params => (
+        <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
+          {params.value ?? 0}
+        </Typography>
+      ),
     },
     {
       field: "validFrom",
@@ -128,30 +185,25 @@ function buildQuotaColumns(t: StudentQuotaLabels, canManage: boolean): GridColDe
     sortable: false,
     filterable: false,
     renderCell: params => (
-      <Stack sx={{ flexDirection: "row", gap: 0.5, alignItems: "center" }}>
-        <Link href={`/quotas/${params.row.id ?? ""}/edit`} style={{ textDecoration: "none" }}>
-          <Button size="small" startIcon={<EditOutlined />} sx={{ minWidth: "auto", textTransform: "none" }}>
-            {t.audience.editQuota}
-          </Button>
-        </Link>
-        <Link href={`/quotas/${params.row.id ?? ""}/delete`} style={{ textDecoration: "none" }}>
-          <Button
-            size="small"
-            color="error"
-            startIcon={<DeleteOutlined />}
-            sx={{ minWidth: "auto", textTransform: "none" }}
-          >
-            {t.audience.deleteQuota}
-          </Button>
-        </Link>
-      </Stack>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", gap: 0.5 }}>
+        <Tooltip title={t.audience.editQuota}>
+          <ActionIconLink href={`/quotas/${params.row.id ?? ""}/edit`} aria-label={t.audience.editQuota}>
+            <EditOutlined fontSize="small" />
+          </ActionIconLink>
+        </Tooltip>
+        <Tooltip title={t.audience.deleteQuota}>
+          <ActionIconLink href={`/quotas/${params.row.id ?? ""}/delete`} aria-label={t.audience.deleteQuota}>
+            <DeleteOutlined fontSize="small" />
+          </ActionIconLink>
+        </Tooltip>
+      </Box>
     ),
   };
 
   return [...baseColumns, actionsColumn];
 }
 
-export function SupervisorQuotaView({ t }: Readonly<SupervisorQuotaViewProps>): ReactElement {
+export function SupervisorQuotaView({ t, renderMetricsGrid }: Readonly<SupervisorQuotaViewProps>): ReactElement {
   const hasPermission = useUserStore(s => s.hasPermission);
   const canManage = hasPermission(AppPermission.QuotasManage);
 
@@ -175,9 +227,13 @@ export function SupervisorQuotaView({ t }: Readonly<SupervisorQuotaViewProps>): 
   }
 
   const columns = buildQuotaColumns(t, canManage);
-  const activeCount = quotas.filter(q => String(q.status) === "ACTIVE").length;
-  const expiredCount = quotas.filter(q => String(q.status) === "EXPIRED").length;
-  const archivedCount = quotas.filter(q => String(q.status) === "ARCHIVED").length;
+  const metrics = buildSupervisorQuotaMetrics({
+    t,
+    totalCount,
+    activeCount: quotas.filter(q => String(q.status) === "ACTIVE").length,
+    expiredCount: quotas.filter(q => String(q.status) === "EXPIRED").length,
+    archivedCount: quotas.filter(q => String(q.status) === "ARCHIVED").length,
+  });
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -193,40 +249,7 @@ export function SupervisorQuotaView({ t }: Readonly<SupervisorQuotaViewProps>): 
           ) : null
         }
       >
-        <Stack sx={{ flexDirection: "row", gap: 2, flexWrap: "wrap" }}>
-          <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
-            <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t.audience.totalClasses}
-            </Typography>
-            <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
-              {totalCount}
-            </Typography>
-          </Paper>
-          <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
-            <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t.audience.statuses.ACTIVE}
-            </Typography>
-            <Typography variant="headlineMd" sx={theme => ({ fontWeight: 700, color: theme.palette.success.main })}>
-              {activeCount}
-            </Typography>
-          </Paper>
-          <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
-            <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t.audience.statuses.EXPIRED}
-            </Typography>
-            <Typography variant="headlineMd" sx={theme => ({ fontWeight: 700, color: theme.palette.error.main })}>
-              {expiredCount}
-            </Typography>
-          </Paper>
-          <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
-            <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {t.audience.statuses.ARCHIVED}
-            </Typography>
-            <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
-              {archivedCount}
-            </Typography>
-          </Paper>
-        </Stack>
+        {renderMetricsGrid ? renderMetricsGrid({ metrics }) : <SupervisorQuotaMetrics metrics={metrics} />}
         <AppDataGrid
           rows={quotas}
           columns={columns}

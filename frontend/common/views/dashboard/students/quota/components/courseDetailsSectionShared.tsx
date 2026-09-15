@@ -1,42 +1,28 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
-import {
-  Box,
-  CircularProgress,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, TextField, Typography } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
+import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type { CourseDetailsSectionSharedProps } from "@/frontend/common/views/dashboard/students/quota/components/courseDetailsSectionShared.types";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/useQuotaFormAccess";
 
-function TeacherField({ teacherLabelId }: Readonly<{ teacherLabelId: string }>) {
+function TeacherField({
+  TeacherAutocomplete,
+}: Readonly<{
+  TeacherAutocomplete: CourseDetailsSectionSharedProps["slots"]["TeacherAutocomplete"];
+}>) {
   const { labels: t, canViewTeacher } = useQuotaFormAccess();
   const {
     control,
     formState: { errors },
   } = useFormContext<StudentQuotaFormData>();
 
-  const { data, loading } = useQuery(teachersQueryDocument, {
-    variables: { search: "", limit: 100 },
-    skip: !canViewTeacher,
-  });
-
   if (!canViewTeacher) {
     return null;
   }
-
-  const teachers = data?.teachers ?? [];
 
   return (
     <Controller
@@ -44,34 +30,22 @@ function TeacherField({ teacherLabelId }: Readonly<{ teacherLabelId: string }>) 
       control={control}
       render={({ field }) => {
         const currentValue = field.value ?? "";
-        const isInOptions = teachers.some(teacher => teacher?.name === currentValue);
-        const showCurrentAsExtra = !loading && currentValue !== "" && !isInOptions;
+        const selectedOption: PersonOption | null =
+          currentValue === "" ? null : { id: currentValue, name: currentValue };
 
         return (
-          <FormControl fullWidth variant="outlined" error={Boolean(errors.teacher)} sx={quotaInputSx}>
-            <InputLabel id={teacherLabelId} shrink>
-              {t.fields.teacher}
-            </InputLabel>
-            <Select {...field} labelId={teacherLabelId} label={t.fields.teacher} displayEmpty disabled>
-              {loading && (
-                <MenuItem disabled value="">
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <CircularProgress size={16} />
-                    <Typography variant="bodyMd">{t.fields.loadingTeachers}</Typography>
-                  </Box>
-                </MenuItem>
-              )}
-              {showCurrentAsExtra && <MenuItem value={currentValue}>{currentValue}</MenuItem>}
-              {teachers.map(teacher =>
-                teacher?.name ? (
-                  <MenuItem key={teacher.id ?? ""} value={teacher.name}>
-                    {teacher.name}
-                  </MenuItem>
-                ) : null
-              )}
-            </Select>
-            {errors.teacher ? <FormHelperText>{errors.teacher.message}</FormHelperText> : null}
-          </FormControl>
+          <TeacherAutocomplete
+            value={selectedOption}
+            onChange={(next: PersonOption | null) => {
+              field.onChange(next?.name ?? "");
+            }}
+            label={t.fields.teacher}
+            error={Boolean(errors.teacher)}
+            helperText={errors.teacher?.message}
+            disabled
+            fullWidth
+            sx={quotaInputSx}
+          />
         );
       }}
     />
@@ -178,7 +152,7 @@ export function CourseDetailsSectionShared({ slots }: Readonly<CourseDetailsSect
   const { labels: t, canViewTeacher, canViewQuota } = useQuotaFormAccess();
   const {
     renderHeader,
-    teacherLabelId,
+    TeacherAutocomplete,
     rootGap,
     fieldsContainerSx,
     overrideEndAdornment,
@@ -195,7 +169,7 @@ export function CourseDetailsSectionShared({ slots }: Readonly<CourseDetailsSect
       {renderHeader(t.sections.courseDetails)}
 
       <Box sx={fieldsContainerSx}>
-        <TeacherField teacherLabelId={teacherLabelId} />
+        <TeacherField TeacherAutocomplete={TeacherAutocomplete} />
         <TotalClassesField />
         <ClassesLeftField
           overrideEndAdornment={overrideEndAdornment}

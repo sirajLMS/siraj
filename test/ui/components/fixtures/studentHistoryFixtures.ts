@@ -6,7 +6,11 @@
  * - test/ui/components/studentHistoryMobile.test.tsx
  * - test/ui/components/studentSessionsContainer.test.tsx
  * - test/ui/components/studentProfileContainer.test.tsx
+ * - test/ui/components/students/studentHistoryBounds.mobile.test.tsx
+ * - test/ui/components/students/studentHistoryBounds.desktop.test.tsx
  */
+
+import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryViewModel";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -237,3 +241,62 @@ export function createSingleSessionHistoryMockData(
 
 export const HISTORY_YEAR = 2026;
 export const HISTORY_MONTH = 7;
+
+// ---------------------------------------------------------------------------
+// Students-domain tier view props (mobile/desktop history views)
+// ---------------------------------------------------------------------------
+
+export interface StudentHistoryViewPropsFixtureOptions {
+  /** Labels object from the history ViewModel (the `readTranslation` result in tests). */
+  readonly labels: StudentHistoryViewModel["labels"];
+  /** Month currently shown in the navigator. */
+  readonly currentMonth: Date;
+  /** Earliest navigable month; `undefined` means the past is unbounded. */
+  readonly enrollmentMonth?: Date;
+  /** Latest navigable month; `undefined` means the future is unbounded. */
+  readonly nowMonth?: Date;
+}
+
+/**
+ * Build the full history ViewModel props so tests can render the tier views
+ * directly. Lets tests drive the `enrollmentMonth`/`nowMonth` navigator bounds
+ * that the container currently does not populate.
+ */
+export function createStudentHistoryViewProps({
+  labels,
+  currentMonth,
+  enrollmentMonth,
+  nowMonth,
+}: StudentHistoryViewPropsFixtureOptions): StudentHistoryViewModel {
+  return {
+    studentName: "Ahmed Student",
+    currentMonth,
+    metrics: { totalClasses: 2, attendanceRate: 90, hoursStudied: 2, performance: 85 },
+    classes: {},
+    selectedWeek: 1,
+    selectedDay: null,
+    onSelectWeek: () => {},
+    onSelectDay: () => {},
+    onPrevMonth: () => {},
+    onNextMonth: () => {},
+    onPrint: () => {},
+    enrollmentMonth,
+    nowMonth,
+    locale: "en",
+    labels,
+    loading: false,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Bounds dates for navigator enablement tests
+// ---------------------------------------------------------------------------
+
+/** May 2026 — enrollment floor of the navigable range. */
+export const HISTORY_ENROLLMENT_MONTH = new Date(2026, 4, 1);
+
+/** July 2026 — month rendered under test. */
+export const HISTORY_MONTH_UNDER_TEST = new Date(2026, 6, 1);
+
+/** September 2026 — current-month ceiling of the navigable range. */
+export const HISTORY_NOW_MONTH = new Date(2026, 8, 1);

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, type Theme, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { formatTime } from "@/frontend/common/components/intl/dateFormat";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -10,7 +10,7 @@ import {
   isJoinableClassSession,
 } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
-import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 import { Link } from "@/shared/i18n";
@@ -20,6 +20,12 @@ const STATUS_LABEL_KEYS: Readonly<Record<AttendanceStatus, string>> = {
   [AttendanceStatus.ABSENT]: "absent",
   [AttendanceStatus.LATE]: "late",
   [AttendanceStatus.PRESENT]: "present",
+};
+
+const ATTENDANCE_BADGE_STATUSES: Readonly<Record<AttendanceStatus, string>> = {
+  [AttendanceStatus.ABSENT]: "missed",
+  [AttendanceStatus.LATE]: "late",
+  [AttendanceStatus.PRESENT]: "active",
 };
 
 function getStatusLabel(status: AttendanceStatus, labels: Readonly<Record<string, string>>): string {
@@ -51,31 +57,6 @@ function SessionListHeader({ title, dateStr }: Readonly<{ title: string; dateStr
       </Typography>
     </Box>
   );
-}
-
-function getStatusColors(status: AttendanceStatus, theme: Theme): { backgroundColor: string; color: string } {
-  if (status === AttendanceStatus.PRESENT) {
-    return {
-      backgroundColor: theme.palette.status.activeContainer,
-      color: theme.palette.status.onActiveContainer,
-    };
-  }
-  if (status === AttendanceStatus.ABSENT) {
-    return {
-      backgroundColor: theme.palette.errorContainer,
-      color: theme.palette.onErrorContainer,
-    };
-  }
-  if (status === AttendanceStatus.LATE) {
-    return {
-      backgroundColor: theme.palette.warningContainer ?? theme.palette.tertiaryContainer,
-      color: theme.palette.onWarningContainer ?? theme.palette.onTertiaryContainer,
-    };
-  }
-  return {
-    backgroundColor: theme.palette.secondaryContainer,
-    color: theme.palette.onSecondaryContainer,
-  };
 }
 
 function splitSessionTimeDisplay(time: string, locale: string): { timeValue: string; timePeriod: string } {
@@ -162,20 +143,11 @@ function ClassSessionCard({
             </Box>
 
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
-              <Box
-                sx={theme => ({
-                  ...getStatusColors(session.status, theme),
-                  px: 1,
-                  py: 0.25,
-                  borderRadius: 1,
-                  typography: "labelSm",
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                })}
-              >
-                {statusLabel}
-              </Box>
+              <MobileStatusBadge
+                category="classSession"
+                status={ATTENDANCE_BADGE_STATUSES[session.status] ?? session.status}
+                label={statusLabel}
+              />
               <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
                 {durationLabel}
               </Typography>

@@ -4,6 +4,7 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { SupervisorQuotaView } from "@/frontend/common/views/dashboard/students/quota/audience/SupervisorQuotaView";
 import type { AppLocale } from "@/shared/locale/AppLocale";
@@ -103,6 +104,23 @@ describe("SupervisorQuotaView", () => {
 
     await waitFor(() => {
       expect(screen.getByText(t.audience.supervisorTitle)).toBeVisible();
+    });
+  });
+
+  test("renders edit and delete action links with row hrefs when user can manage quotas", async () => {
+    renderWithWrapper(<SupervisorQuotaView t={t} />, {
+      locale,
+      viewport: "desktop",
+      permissions: [AppPermission.QuotasManage],
+      mocks: [quotasMock],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("link", { name: t.audience.editQuota })).toHaveAttribute("href", "/quotas/quota-1/edit");
+      expect(screen.getByRole("link", { name: t.audience.deleteQuota })).toHaveAttribute(
+        "href",
+        "/quotas/quota-1/delete"
+      );
     });
   });
 });
