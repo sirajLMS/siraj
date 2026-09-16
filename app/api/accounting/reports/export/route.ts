@@ -141,6 +141,8 @@ function buildCsvResponseHeaders(totalCount: number): Headers {
   headers.set("Content-Type", "text/csv; charset=utf-8");
   headers.set("Content-Disposition", 'attachment; filename="session-audit-report.csv"');
   headers.set("X-Export-Truncated", totalCount > EXPORT_ROW_LIMIT ? "true" : "false");
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("Content-Security-Policy", "default-src 'none'; sandbox");
   return headers;
 }
 
