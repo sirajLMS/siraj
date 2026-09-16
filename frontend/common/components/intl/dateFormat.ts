@@ -42,7 +42,7 @@ function toDate(date: DateInput): Date {
  */
 const dtfCache = new Map<string, Intl.DateTimeFormat>();
 
-function getDateTimeFormatter(localeTag: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+export function getDateTimeFormatter(localeTag: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
   const cacheKey = `${localeTag}:${JSON.stringify(options)}`;
   let dtf = dtfCache.get(cacheKey);
   if (!dtf) {

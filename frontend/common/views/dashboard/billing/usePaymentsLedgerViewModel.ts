@@ -3,6 +3,7 @@
 import { useApolloClient, useQuery } from "@apollo/client/react";
 import { ChildCareOutlined } from "@mui/icons-material";
 import { useEffect, useMemo } from "react";
+import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type {
   MyPaymentsLedgerQuery_myPaymentsLedger,
@@ -66,7 +67,7 @@ function formatLedgerDate(isoDate: string, locale: AppLocale): string {
   if (!isoDate) return MISSING_VALUE;
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return MISSING_VALUE;
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }).format(date);
+  return formatDate(date, locale, MISSING_VALUE);
 }
 
 /** Money amounts are decimal strings from the API; always render two fraction digits. */

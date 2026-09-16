@@ -3,6 +3,7 @@
 import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import {
   AppPermission,
   type WhatsappAccountsQuery,
@@ -45,6 +46,10 @@ const POLL_INTERVAL_MS = 30_000;
 const SERVICE_WINDOW_MS = 24 * 60 * 60 * 1000;
 const RECIPIENT_LIMIT = 5;
 const E164_SHAPE = /^\+\d{8,15}$/;
+const WHATSAPP_TIMESTAMP_OPTIONS: Intl.DateTimeFormatOptions = {
+  dateStyle: "medium",
+  timeStyle: "short",
+};
 
 /**
  * 0-based page translated to GraphQL `first`/`skip` — the same contract the
@@ -485,10 +490,8 @@ export function useWhatsappConversationsViewModel(): WhatsappConversationsViewMo
       if (!iso) {
         return "";
       }
-      return new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(new Date(iso));
+      const localeTag = locale === "ar" ? "ar" : "en";
+      return getDateTimeFormatter(localeTag, WHATSAPP_TIMESTAMP_OPTIONS).format(new Date(iso));
     },
     [locale]
   );

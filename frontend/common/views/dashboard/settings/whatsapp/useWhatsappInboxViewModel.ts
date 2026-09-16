@@ -2,6 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { type WhatsappAccountsQuery, WhatsappSyncStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   whatsappAccountsQueryDocument,
@@ -22,6 +23,10 @@ import { useAppLocale } from "@/shared/locale/localeContext";
 const PAGE_SIZE = 20;
 const THREAD_PAGE_SIZE = 50;
 const POLL_INTERVAL_MS = 30_000;
+const WHATSAPP_TIMESTAMP_OPTIONS: Intl.DateTimeFormatOptions = {
+  dateStyle: "medium",
+  timeStyle: "short",
+};
 
 /**
  * Page-index convention: the VM keeps the 0-based page expected by the shared
@@ -218,10 +223,8 @@ export function useWhatsappInboxViewModel(): WhatsappInboxViewModel {
       if (!iso) {
         return "";
       }
-      return new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(new Date(iso));
+      const localeTag = locale === "ar" ? "ar" : "en";
+      return getDateTimeFormatter(localeTag, WHATSAPP_TIMESTAMP_OPTIONS).format(new Date(iso));
     },
     [locale]
   );
