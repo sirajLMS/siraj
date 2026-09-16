@@ -22,6 +22,8 @@ export interface CopyMeetingUrlButtonProps {
   readonly size?: "small" | "medium" | "large";
   /** Disable the button. */
   readonly disabled?: boolean;
+  /** Optional explanation of why the action is disabled. */
+  readonly disabledReason?: string;
   /** Callback when copy succeeds (URL was written to clipboard). */
   readonly onCopySuccess?: () => void;
   /** Callback when copy fails (clipboard write rejected/unsupported). */
@@ -34,6 +36,14 @@ type CopyState = "default" | "copied" | "error";
 
 const DEFAULT_COPIED_MS = 2000;
 const ICON_SWAP_MS = 150;
+
+const srOnlySx = {
+  position: "absolute",
+  left: -9999,
+  width: 1,
+  height: 1,
+  overflow: "hidden",
+} as const;
 
 /**
  * Clipboard write with fallback for older browsers.
@@ -91,6 +101,7 @@ export function CopyMeetingUrlButton({
   ariaLabel,
   size = "small",
   disabled = false,
+  disabledReason,
   onCopySuccess,
   onCopyError,
   copiedDurationMs = DEFAULT_COPIED_MS,
@@ -144,7 +155,8 @@ export function CopyMeetingUrlButton({
     }
   }, [disabled, meetingUrl, copiedDurationMs, onCopySuccess, onCopyError]);
 
-  const resolvedAriaLabel = ariaLabel ?? labels.copyMeetingUrl;
+  const baseAriaLabel = ariaLabel ?? labels.copyMeetingUrl;
+  const resolvedAriaLabel = disabled && disabledReason ? `${baseAriaLabel} (${disabledReason})` : baseAriaLabel;
   const isCopied = copyState === "copied";
   const isError = copyState === "error";
 
@@ -153,9 +165,13 @@ export function CopyMeetingUrlButton({
     tooltipText = labels.urlCopied;
   } else if (isError) {
     tooltipText = labels.urlCopyFailed;
+  } else if (disabled && disabledReason) {
+    tooltipText = disabledReason;
   } else {
     tooltipText = tooltipLabel ?? labels.copyMeetingUrl;
   }
+
+  const statusAnnouncement = isCopied ? labels.urlCopied : isError ? labels.urlCopyFailed : "";
 
   const iconColor = resolveIconColor(copyState);
   const swapIcon = isCopied ? <CheckOutlinedIcon fontSize={size} /> : <ContentCopyOutlinedIcon fontSize={size} />;
@@ -166,33 +182,74 @@ export function CopyMeetingUrlButton({
     </Fade>
   );
 
+  const liveRegion = (
+    <Box component="output" sx={srOnlySx} aria-live="polite">
+      {statusAnnouncement}
+    </Box>
+  );
+
   if (variant === "button") {
+    const buttonElement = (
+      <Button
+        size={size}
+        variant="text"
+        disabled={disabled}
+        onClick={handleCopy}
+        aria-label={resolvedAriaLabel}
+        aria-pressed={isCopied}
+        startIcon={iconNode}
+        sx={theme => ({
+          color: iconColor(theme),
+          "&:hover": {
+            backgroundColor: alpha(theme.palette.success.main, 0.08),
+          },
+        })}
+      >
+        {labels.copyMeetingUrl}
+      </Button>
+    );
+
     return (
       <Tooltip title={tooltipText}>
-        <span>
-          <Button
-            size={size}
-            variant="text"
-            disabled={disabled}
-            onClick={handleCopy}
-            aria-label={resolvedAriaLabel}
-            aria-pressed={isCopied}
-            startIcon={iconNode}
-            sx={theme => ({
-              color: iconColor(theme),
-              "&:hover": {
-                backgroundColor: alpha(theme.palette.success.main, 0.08),
-              },
-            })}
-          >
-            {labels.copyMeetingUrl}
-          </Button>
-        </span>
+        <Box sx={{ display: "inline-flex", alignItems: "center" }}>
+          {liveRegion}
+          {disabled ? (
+            <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+              {buttonElement}
+            </Box>
+          ) : (
+            buttonElement
+          )}
+        </Box>
       </Tooltip>
     );
   }
 
   if (variant === "text") {
+    const textElement = (
+      <button
+        type="button"
+        onClick={handleCopy}
+        disabled={disabled}
+        aria-label={resolvedAriaLabel}
+        aria-pressed={isCopied}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
+          background: "none",
+          border: "none",
+          cursor: disabled ? "default" : "pointer",
+          padding: 0,
+          color: "inherit",
+          font: "inherit",
+        }}
+      >
+        {iconNode}
+        <Box sx={{ typography: "bodyMd" }}>{labels.copyMeetingUrl}</Box>
+      </button>
+    );
+
     return (
       <Tooltip title={tooltipText}>
         <Box
@@ -204,27 +261,14 @@ export function CopyMeetingUrlButton({
             "&:hover": disabled ? {} : { color: theme.palette.primary.main },
           })}
         >
-          <button
-            type="button"
-            onClick={handleCopy}
-            disabled={disabled}
-            aria-label={resolvedAriaLabel}
-            aria-pressed={isCopied}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 4,
-              background: "none",
-              border: "none",
-              cursor: disabled ? "default" : "pointer",
-              padding: 0,
-              color: "inherit",
-              font: "inherit",
-            }}
-          >
-            {iconNode}
-            <Box sx={{ typography: "bodyMd" }}>{labels.copyMeetingUrl}</Box>
-          </button>
+          {liveRegion}
+          {disabled ? (
+            <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+              {textElement}
+            </Box>
+          ) : (
+            textElement
+          )}
         </Box>
       </Tooltip>
     );
@@ -248,5 +292,18 @@ export function CopyMeetingUrlButton({
     </IconButton>
   );
 
-  return <Tooltip title={tooltipText}>{disabled ? <span>{iconButton}</span> : iconButton}</Tooltip>;
+  return (
+    <Tooltip title={tooltipText}>
+      <Box sx={{ display: "inline-flex", alignItems: "center" }}>
+        {liveRegion}
+        {disabled ? (
+          <Box component="span" aria-disabled={true} sx={{ display: "inline-flex" }}>
+            {iconButton}
+          </Box>
+        ) : (
+          iconButton
+        )}
+      </Box>
+    </Tooltip>
+  );
 }
