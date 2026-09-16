@@ -2,11 +2,12 @@
 
 import { useQuery } from "@apollo/client/react";
 import { AddOutlined, ChevronRightOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, Chip, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, Tooltip, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { SectionPanel } from "@/frontend/common/components/ui/container";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid";
 import { PersonProfileLinkCell } from "@/frontend/common/components/ui/display/personProfileLink/PersonProfileLinkCell";
@@ -22,8 +23,6 @@ import { DashboardBillingCreditAdjustment, DashboardStudentDirectory } from "@/s
 
 type StudentCreditsRow = StudentsDirectoryQuery["studentsDirectory"][number];
 
-type CreditChipColor = "success" | "warning" | "error" | "default";
-
 /** Server-side search cap; the fetched page is paginated client-side by the grid. */
 export const DIRECTORY_FETCH_LIMIT = 500;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -34,11 +33,11 @@ function buildAdjustHref(studentId: string): string {
   return `/accounting/credits/adjust?studentId=${studentId}`;
 }
 
-function creditBalanceColor(classesRemaining: number | null): CreditChipColor {
-  if (classesRemaining === null) return "default";
-  if (classesRemaining <= 0) return "error";
-  if (classesRemaining <= LOW_BALANCE_THRESHOLD) return "warning";
-  return "success";
+function creditBalanceStatus(classesRemaining: number | null): string {
+  if (classesRemaining === null) return "UNSET";
+  if (classesRemaining <= 0) return "EXHAUSTED";
+  if (classesRemaining <= LOW_BALANCE_THRESHOLD) return "LOW";
+  return "AVAILABLE";
 }
 
 function StudentCell({ row }: Readonly<{ row: StudentCreditsRow }>) {
@@ -72,7 +71,7 @@ function TeacherCell({ teacherName }: Readonly<{ teacherName: string | null }>) 
 
 function BalanceCell({ row }: Readonly<{ row: StudentCreditsRow }>) {
   const label = `${row.classesRemaining ?? "—"} / ${row.classesTotal ?? "—"}`;
-  return <Chip size="small" color={creditBalanceColor(row.classesRemaining)} label={label} />;
+  return <StatusBadge category="creditBalance" status={creditBalanceStatus(row.classesRemaining)} label={label} />;
 }
 
 function AdjustAction({ studentId, label }: Readonly<{ studentId: string | null; label: string }>) {

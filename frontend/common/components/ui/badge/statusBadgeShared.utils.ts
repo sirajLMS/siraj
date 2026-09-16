@@ -361,6 +361,29 @@ export const getStatusColors: GetStatusColorsFn = (
         }
       );
     }
+    case "creditBalance": {
+      // Unmapped keys (i.e. UNSET, the null balance) fall through to the grey fallback.
+      const map: Record<string, { backgroundColor: string; color: string }> = {
+        EXHAUSTED: {
+          backgroundColor: theme.palette.errorContainer,
+          color: theme.palette.onErrorContainer,
+        },
+        LOW: {
+          backgroundColor: theme.palette.warningContainer,
+          color: theme.palette.onWarningContainer,
+        },
+        AVAILABLE: {
+          backgroundColor: theme.palette.successContainer,
+          color: theme.palette.onSuccessContainer,
+        },
+      };
+      return (
+        map[status] ?? {
+          backgroundColor: theme.palette.surfaceContainerHigh,
+          color: theme.palette.onSurfaceVariant,
+        }
+      );
+    }
     default:
       return {
         backgroundColor: theme.palette.surfaceContainerHigh,

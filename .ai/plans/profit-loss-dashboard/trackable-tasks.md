@@ -28,14 +28,14 @@
 > Goal: add the `_VIEW` permission + verify the indexes that the
 > P&L queries depend on. Zero schema changes — this plan is read-only.
 
-### 0.1 Add `ACCOUNTING_PROFITS_VIEW` permission
-- ✏️ `backend/enum/permissions/permission.enum.ts` — add the new value. **No `_MANAGE` permission is defined** (AC-8.3 — dashboard is read-only).
-- ✏️ `backend/db/seeds/auth/seed-user-permission-overrides.ts` (or wherever permission-groups are seeded) — grant to the "Accounting" / "Finance Manager" default group.
-- 🧪 `backend/enum/permissions/permission.enum.test.ts` — assert the new value parses via `isAppPermission`.
-- 🔁 `bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts --lifecycle codescene`
+### 0.1 Add `ACCOUNTING_PROFITS_VIEW` permission — [x]
+- [x] ✏️ `backend/enum/permissions/permission.enum.ts` — add the new value. **No `_MANAGE` permission is defined** (AC-8.3 — dashboard is read-only).
+- [x] ✏️ Permission grant — applied as `backend/db/migration/50-accounting-profits-permissions.sql` + auto-bundled drizzle migration (permission rows/grants are owned by migration SQL, not seeders — seeds/AGENTS.md). Granted to `super_admin` + `academy_admin`.
+- [x] 🧪 `backend/enum/permissions/permission.enum.test.ts` — assert the new value parses via `isAppPermission`.
+- [x] 🔁 `bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts --lifecycle codescene` — exit 0 (also passed for the test file)
 
-### 0.2 Verify required indexes exist
-- 🔁 Read schema files to confirm the indexes listed in implementation.md §2.3 exist:
+### 0.2 Verify required indexes exist — [x]
+- [x] 🔁 Read schema files to confirm the indexes listed in implementation.md §2.3 exist:
   - `class_instances_scheduled_start_at_idx` (existing)
   - `class_instances_calculation_status_idx` 🔗 Plan 3
   - `class_instances_teacher_status_scheduled_idx` 🔗 Plan 3
@@ -48,12 +48,12 @@
 - 🆕 (only if any are missing) `backend/db/migrations/<timestamp>_add_profit_loss_indexes.sql` — additive `CREATE INDEX IF NOT EXISTS` statements.
 - 🔁 `bun run db:migrate` (if migration was needed)
 
-### 0.3 Phase-0 regression smoke
-- 🔁 `bun test backend/db/test/repo/scheduling/scheduling.repository.test.ts`
-- 🔁 `bun test backend/services/teachers/payroll-calculation.service.test.ts` 🔗 Plan 3
-- 🔁 `bun test backend/services/teachers/carryover-balance.service.test.ts` 🔗 Plan 5 (if landed)
-- 🔁 `bun test backend/services/expenses/expense.service.test.ts` 🔗 Plan 6 (if landed)
-- ✅ Confirm existing flows still pass.
+### 0.3 Phase-0 regression smoke — [x]
+- [x] 🔁 `backend/db/test/repo/scheduling/scheduling.repository.test.ts` — 26 pass / 0 fail
+- [x] 🔁 `backend/services/teacher/payroll-calculation.service.test.ts` 🔗 Plan 3 — 52 pass / 0 fail
+- [x] 🔁 `backend/services/teachers/carryover-balance.service.test.ts` 🔗 Plan 5 (if landed) — 21 pass / 0 fail
+- [x] 🔁 `backend/services/expenses/expense.service.test.ts` 🔗 Plan 6 (if landed) — 55 pass / 0 fail
+- [x] ✅ Confirm existing flows still pass.
 
 ---
 
@@ -63,33 +63,34 @@
 > aggregates, FX conversion, and FX warnings.
 
 ### 1.1 Types
-- 🆕 `backend/types/accounting/profit-loss.types.ts` — `ProfitLossInput`, `ProfitLossPagination`, `ProfitLossPaymentRow`, `ProfitLossPaymentsPage`, `ProfitLossExpenseRow`, `ProfitLossExpensesPage`, `ProfitLossIncomeRow`, `ProfitLossIncomePage`, `ProfitLossSummary`, `FxWarning`, `ProfitLossReport`.
-- 🔁 `bun run scripts/health/sub-loop.ts backend/types/accounting/profit-loss.types.ts --lifecycle codescene`
+- [x] 🆕 `backend/types/billing/profit-loss.types.ts` — `ProfitLossInput`, `ProfitLossPagination`, `ProfitLossPaymentRow`, `ProfitLossPaymentsPage`, `ProfitLossExpenseRow`, `ProfitLossExpensesPage`, `ProfitLossIncomeRow`, `ProfitLossIncomePage`, `ProfitLossSummary`, `FxWarning`, `ProfitLossReport`.
+- [x] 🔁 `bun run scripts/health/sub-loop.ts backend/types/billing/profit-loss.types.ts --lifecycle codescene` — exit 0
 
 ### 1.2 Repository extensions — class_instances
-- ✏️ `backend/db/repo/scheduling/class-instances.ts` — add `findProfitLossPayments({ month, limit, offset })` that runs the joined SQL query (sessions + teachers + students + class_subjects, filtered by `execution_state = COMPLETED` + `calculation_status IN (...)` + `to_char(scheduled_start_at, 'YYYY-MM') = month` + `deleted_at IS NULL`).
-- 🧪 `backend/db/test/repo/scheduling/profit-loss-payments.repository.test.ts` — month filter correctness; status filter excludes `NOT_CALCULATED`; pagination.
-- 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/scheduling/class-instances.ts --lifecycle codescene`
+- [x] ✏️ `backend/db/repo/scheduling/class-instances.ts` — add `findProfitLossPayments({ month, limit, offset })` that runs the joined SQL query (sessions + teachers + students + class_subjects, filtered by `execution_state = COMPLETED` + `calculation_status IN (...)` + `to_char(scheduled_start_at, 'YYYY-MM') = month` + `deleted_at IS NULL`).
+- [x] 🧪 `backend/db/test/repo/scheduling/profit-loss-payments.repository.test.ts` — month filter correctness; status filter excludes `NOT_CALCULATED`; pagination.
+- [x] 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/scheduling/class-instances.ts --lifecycle codescene`
 
-### 1.3 Repository extensions — expenses
-- ✏️ `backend/db/repo/expenses/expense.repository.ts` 🔗 Plan 6 — add `findProfitLossExpenses({ month, limit, offset })` (filtered by `expense_date = month` + `deleted_at IS NULL`).
-- 🧪 `backend/db/test/repo/expenses/profit-loss-expenses.repository.test.ts` — month filter; soft-delete exclusion; pagination.
-- 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/expenses/expense.repository.ts --lifecycle codescene`
+### 1.3 Repository extensions — expenses — [x]
+- [x] ✏️ `backend/db/repo/expenses/expense.repository.ts` 🔗 Plan 6 — add `findProfitLossExpenses({ month, limit, offset })` (filtered by `expense_date = month` + `deleted_at IS NULL`).
+- [x] 🧪 `backend/db/test/repo/expenses/profit-loss-expenses.repository.test.ts` — month filter; soft-delete exclusion; pagination. (+ per-type rowCountByType aggregate derivation; see `outcome/1.3-outcome.md`)
+- [x] 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/expenses/expense.repository.ts --lifecycle codescene`
 
-### 1.4 Repository extensions — payments
-- ✏️ `backend/db/repo/billing/payments.repository.ts` (or wherever the existing payments repo lives) — add `findProfitLossIncome({ month, limit, offset })` (filtered by `to_char(created_at, 'YYYY-MM') = month` + `deleted_at IS NULL`; joined with students + parents + payment_catalogs + invoices).
-- 🧪 `backend/db/test/repo/billing/profit-loss-income.repository.test.ts` — month filter; pagination; joined columns.
-- 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/billing/payments.repository.ts --lifecycle codescene`
+### 1.4 Repository extensions — payments — [x]
+- [x] ✏️ `backend/db/repo/billing/accounting-payment.repository.ts` (path corrected — the plan's `payments.repository.ts` does not exist; helpers in `accounting-payment-helpers.ts`) — added `findProfitLossIncome(filters: { month }, pagination: { limit, offset }, tx?)` (filtered by `to_char(created_at, 'YYYY-MM') = month` + `invoices.deleted_at IS NULL` — payments has no `deleted_at`; joined with students + parents/users + packagePlans, columns per AC-5.2; returns `Omit<ProfitLossIncomePage, "aggregate">` — the FX aggregate is service-side).
+- [x] 🧪 `backend/db/test/repo/billing/profit-loss-income.repository.test.ts` — month filter; pagination; joined columns; soft-delete exclusion; null parent name — 5 pass / 0 fail.
+- [x] 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/billing/accounting-payment.repository.ts --lifecycle codescene` — exit 0 (also passed for the test file)
 
 ### 1.5 Repository extensions — credit_transactions
-- ✏️ `backend/db/repo/billing/credit-transactions.repository.ts` 🔗 Plan 2 — add `findSubtractCreditsByInstanceIds(instanceIds)` returning a `Map<instanceId, { amount, currency }>` for `adjustmentType = Subtract` rows linked to those instances.
-- 🧪 `backend/db/test/repo/billing/credit-subtract.repository.test.ts` — returns the right amount per instance; missing instance → not in the map.
-- 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/billing/credit-transactions.repository.ts --lifecycle codescene`
+- [x] ✏️ `backend/db/repo/billing/credit.repository.ts` 🔗 Plan 2 — added `findSubtractCreditsByInstanceIds(instanceIds, tx?)` returning a `Map<instanceId, { amount, currency }>` for `adjustmentType = Subtract` rows linked to those instances (actual credit repo file — `credit-transactions.repository.ts` does not exist).
+- [x] 🧪 `backend/db/test/repo/billing/profit-loss-credit-subtract.repository.test.ts` — returns the right amount per instance; missing instance → not in the map; empty input → empty map; multiple rows sum; non-SUBTRACT rows excluded.
+- [x] 🔁 `bun run scripts/health/sub-loop.ts backend/db/repo/billing/credit.repository.ts --lifecycle codescene` — exit 0
 
-### 1.6 FX conversion + aggregation helpers
-- 🆕 `backend/services/accounting/profit-loss-helpers.ts` — `convertCurrency(amount, from, to)` (uses `FxService.getLatestRate`; returns `null` when rate missing), `aggregateWithFx(rows, getAmount, getCurrency, targetCurrency)` → `{ sum, dominantCurrency, excludedRowCount }`, `collectFxWarnings(allRows, targetCurrency)` → `FxWarning[]`, `composeProfitsSummary(currency, payments, expenses, income)` → `ProfitLossSummary`, `validateMonth(month, tErrors)`.
-- 🧪 `backend/services/accounting/profit-loss-helpers.test.ts` — happy path; FX-missing row excluded; Net Profit Margin computed correctly; Net Profit Margin null when Total Payments = 0; month validation rejects bad formats.
-- 🔁 `bun run scripts/health/sub-loop.ts backend/services/accounting/profit-loss-helpers.ts --lifecycle codescene`
+### 1.6 FX conversion + aggregation helpers — [x]
+- [x] 🆕 `backend/services/accounting/profit-loss-helpers.ts` — `convertCurrency(amount, from, to)` (uses `FxService.getLatestRate`; returns `null` when rate missing), `aggregateWithFx(rows, getAmount, getCurrency, targetCurrency)` → `{ sum, dominantCurrency, excludedRowCount }`, `collectFxWarnings(allRows, targetCurrency)` → `FxWarning[]`, `composeProfitsSummary(currency, payments, expenses, income)` → `ProfitLossSummary`, `validateMonth(month, tErrors)`.
+  > Edit complete; the FX read path is `BillingRepository.getLatestExchangeRateForDisplay` (no `FxService.getLatestRate` exists) and `tErrors` is the `ProfitLossLabels` bundle — see `outcome/1.6-outcome.md`.
+- [x] 🧪 `backend/services/accounting/profit-loss-helpers.test.ts` — happy path; FX-missing row excluded; Net Profit Margin computed correctly; Net Profit Margin null when Total Payments = 0; month validation rejects bad formats.
+- [x] 🔁 `bun run scripts/health/sub-loop.ts backend/services/accounting/profit-loss-helpers.ts --lifecycle codescene` — exit 0 (also passed for the test file and the accounting barrel)
 
 ### 1.7 `getReport` orchestrator + per-tab fetchers
 - 🆕 `backend/services/accounting/profit-loss.service.ts` — implement `getReport(actorUserId, input, pagination, tErrors)` per §3.2: permission check, month validation, `Promise.all` of the 3 tab fetchers, compose profits summary, collect FX warnings, structured logging. Implement `getPaymentsPage`, `getExpensesPage`, `getIncomePaymentsPage` per §3.3–§3.5.
@@ -160,22 +161,26 @@
 > Goal: route exists, nav item renders, permission gating works. No tabs yet.
 
 ### 3.1 Page-permission entries
-- ✏️ `frontend/common/types/page-permissions.types.ts` — add `accountingProfitsView`. **No `_MANAGE` entry** (AC-8.3).
+- [x] ✏️ `frontend/common/types/page-permissions.types.ts` — add `accountingProfitsView`. **No `_MANAGE` entry** (AC-8.3).
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/types/page-permissions.types.ts --lifecycle codescene`
 
 ### 3.2 Sidebar nav item
-- ✏️ `frontend/common/views/dashboard/config/navigationConfig.ts` — add `accounting-profits` item to `SIDEBAR_NAV_ITEMS` under `grp_finance`; add `AppPermission.ACCOUNTING_PROFITS_VIEW` to `grp_finance` group `permission` array.
+- [x] ✏️ `frontend/common/views/dashboard/config/navigationConfig.ts` — add `accounting-profits` item to `SIDEBAR_NAV_ITEMS` under `grp_finance`; add `AppPermission.ACCOUNTING_PROFITS_VIEW` to `grp_finance` group `permission` array.
+  > Edit complete; sub-loop passes exit 0 — the `accountingProfits` label key
+  > was registered in `DashboardNavigationLabels` (`dashboard.core.nav`) with
+  > EN "Profit & Loss" / AR "الأرباح والخسائر" and snapshots regenerated (see
+  > `outcome/3.2-nav-key-fix-outcome.md`).
 - 🔁 `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/config/navigationConfig.ts --lifecycle codescene`
 
 ### 3.3 i18n namespace
-- 🆕 `shared/locale/namespaces/dashboard/accounting/profit-loss.namespace.ts` — define all keys (EN + AR) per implementation.md §7.1.
-- 🆕 `shared/locale/en/dashboard/accounting/profitLoss.ts` — EN translations.
-- 🆕 `shared/locale/ar/dashboard/accounting/profitLoss.ts` — AR translations.
-- 🔁 `bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/accounting/profit-loss.namespace.ts --lifecycle codescene`
+- [x] 🆕 `shared/locale/namespaces/dashboard/accounting/profit-loss.namespace.ts` — define all keys (EN + AR) per implementation.md §7.1.
+- [x] 🆕 `shared/locale/en/dashboard/accounting/profitLoss.ts` — EN translations.
+- [x] 🆕 `shared/locale/ar/dashboard/accounting/profitLoss.ts` — AR translations.
+- [x] 🔁 `bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/accounting/profit-loss.namespace.ts --lifecycle codescene` (also run on the type schema and both leaf files — all exit 0; see `outcome/3.3-3.4-outcome.md`)
 
 ### 3.4 Locale snapshot
-- 🔁 `bun run locale:snapshots` — generate `public/static/locale-snapshots/{en,ar}/dashboard.accounting.profitLoss.json`.
-- ✅ Verify snapshots committed.
+- [x] 🔁 `bun run locale:snapshots` — generate `public/static/locale-snapshots/{en,ar}/dashboard.accounting.profitLoss.json`.
+- [x] ✅ Verify snapshots committed.
 
 ### 3.5 Route shell
 - 🆕 `app/(dashboard)/accounting/profits/page.tsx` — server component that renders `<ProfitLossDashboard />`.

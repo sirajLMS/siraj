@@ -22,7 +22,8 @@ export type StatusBadgeCategory =
   | "creditTransaction"
   | "expenseType"
   | "expenseSource"
-  | "payrollCalculation";
+  | "payrollCalculation"
+  | "creditBalance";
 
 export type StatusPaletteKey = "active" | "pending" | "blocked" | "confirmed" | "completed" | "cancelled";
 
