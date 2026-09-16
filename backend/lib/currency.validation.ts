@@ -6,6 +6,8 @@
 
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
+const CURRENCY_CODES = new Set<string>(Object.values(CurrencyCode));
+
 /**
  * Type guard to check if a value is a valid CurrencyCode.
  * @param value The value to check
@@ -13,7 +15,7 @@ import { CurrencyCode } from "@/shared/constants/currency.enum";
  */
 function isCurrencyCode(value: unknown): value is CurrencyCode {
   if (typeof value !== "string") return false;
-  return (Object.values(CurrencyCode) as readonly string[]).includes(value);
+  return CURRENCY_CODES.has(value);
 }
 
 /**
