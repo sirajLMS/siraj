@@ -446,16 +446,28 @@ function getTzOffsetMs(timezone: string, date: Date): number {
   return asTz - asUtc;
 }
 
+/**
+ * Converts formatted date parts to UTC epoch milliseconds without allocating
+ * intermediate Array or Map objects. Eliminates GC pressure in timezone offset
+ * calculations during availability and schedule search loops.
+ */
 function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
-  const map = new Map(parts.map(p => [p.type, p.value]));
-  return Date.UTC(
-    Number(map.get("year")),
-    Number(map.get("month")) - 1,
-    Number(map.get("day")),
-    Number(map.get("hour")) === 24 ? 0 : Number(map.get("hour")),
-    Number(map.get("minute")),
-    Number(map.get("second"))
-  );
+  let year = 0;
+  let month = 0;
+  let day = 0;
+  let hour = 0;
+  let minute = 0;
+  let second = 0;
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (p.type === "year") year = +p.value;
+    else if (p.type === "month") month = +p.value - 1;
+    else if (p.type === "day") day = +p.value;
+    else if (p.type === "hour") hour = +p.value === 24 ? 0 : +p.value;
+    else if (p.type === "minute") minute = +p.value;
+    else if (p.type === "second") second = +p.value;
+  }
+  return Date.UTC(year, month, day, hour, minute, second);
 }
 
 const weekdayDtfCache = new Map<string, Intl.DateTimeFormat>();
