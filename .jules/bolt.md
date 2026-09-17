@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-09-17 - Caching Intl.DisplayNames, Intl.NumberFormat, and Set lookups in Locale & Currency Helpers
+
+**Learning:** High-frequency locale and currency helpers (`getCountryDisplayName`, `getLanguageDisplayName`, `getCurrencyDisplayName`, and `formatLockedAmount`) created fresh runtime `Intl.DisplayNames` and `Intl.NumberFormat` instances on every call, while currency validation re-allocated `Object.values(CurrencyCode)` arrays on every call.
+**Action:** Cache `Intl.DisplayNames` and `Intl.NumberFormat` instances in module-level `Map` caches per locale/currency/options key and replace `Object.values().includes()` with module-level `Set.has()` checks.

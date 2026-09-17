@@ -6,6 +6,9 @@
 
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
+/** Pre-built Set for O(1) enum membership checks without array allocations. */
+const CURRENCY_SET: ReadonlySet<string> = new Set<string>(Object.values(CurrencyCode));
+
 /**
  * Type guard to check if a value is a valid CurrencyCode.
  * @param value The value to check
@@ -13,7 +16,7 @@ import { CurrencyCode } from "@/shared/constants/currency.enum";
  */
 function isCurrencyCode(value: unknown): value is CurrencyCode {
   if (typeof value !== "string") return false;
-  return (Object.values(CurrencyCode) as readonly string[]).includes(value);
+  return CURRENCY_SET.has(value);
 }
 
 /**
