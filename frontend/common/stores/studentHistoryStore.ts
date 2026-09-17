@@ -12,12 +12,14 @@ export interface StudentHistoryState {
   /** Student the current selection belongs to; selections re-scope when it changes. */
   readonly studentId: string;
   readonly year: number;
-  /** 1-based month number (January = 1). */
+  /** 1-based month number (January = 1). `0` marks the not-yet-initialized sentinel. */
   readonly month: number;
   readonly selectedWeek: number;
   readonly selectedDay: number | null;
   /** Day-of-month → class session map currently displayed across both viewport tiers. */
   readonly classes: Readonly<Partial<Record<number, ClassSession>>>;
+  /** Lazily initializes year/month from the current date on first access. Idempotent. */
+  readonly ensureInitialMonth: () => void;
   readonly selectWeek: (week: number) => void;
   readonly selectDay: (day: number | null) => void;
   readonly setClasses: (classes: Readonly<Partial<Record<number, ClassSession>>>) => void;
@@ -37,16 +39,22 @@ function isAtOrAfter(year: number, month: number, bounds: StudentHistoryMonthBou
   return year > bounds.year || (year === bounds.year && month >= bounds.month);
 }
 
-const INITIAL_YEAR = new Date().getFullYear();
-const INITIAL_MONTH = new Date().getMonth() + 1;
+const UNINITIALIZED_MONTH = 0;
 
 export const useStudentHistoryStore = create<StudentHistoryState>((set, get) => ({
   studentId: "",
-  year: INITIAL_YEAR,
-  month: INITIAL_MONTH,
+  year: new Date().getFullYear(),
+  month: UNINITIALIZED_MONTH,
   selectedWeek: 1,
   selectedDay: null,
   classes: {},
+
+  ensureInitialMonth: () => {
+    if (get().month === UNINITIALIZED_MONTH) {
+      const now = new Date();
+      set({ year: now.getFullYear(), month: now.getMonth() + 1 });
+    }
+  },
 
   selectWeek: week => set({ selectedWeek: week }),
   selectDay: day => set({ selectedDay: day }),

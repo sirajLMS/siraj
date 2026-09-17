@@ -39,6 +39,8 @@ export interface MonthlyAppraisalLabels {
     readonly learningTargets: string;
     readonly learningTargetsPlaceholder: string;
     readonly learningTargetsRequired: string;
+    /** Caption under the dialog title summarizing grading rules. */
+    readonly subtitle: string;
     readonly submit: string;
     readonly cancel: string;
     readonly successMessage: string;
@@ -77,5 +79,7 @@ export interface MonthlyAppraisalLabels {
     readonly feedbackFailed: string;
     readonly gradeOutOfRange: string;
     readonly monthRequired: string;
+    /** Form guard error when the student identifier is absent. */
+    readonly studentIdMissing: string;
   };
 }

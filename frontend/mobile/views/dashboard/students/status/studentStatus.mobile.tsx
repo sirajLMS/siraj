@@ -67,18 +67,17 @@ export function StudentStatusMobileView({
         {canEditStatus && selectedStatus === StudentStatus.Suspended ? <SuspensionWarningBannerMobile /> : null}
 
         {canEditStatus ? (
-          <Box
-            component="form"
+          <form
             onSubmit={e => {
               void methods.handleSubmit(handleSubmit)(e);
             }}
-            sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+            style={{ display: "flex", flexDirection: "column", gap: 12 }}
           >
             <FormProvider {...methods}>
               <AdminHoldControlsMobile isUpdating={isUpdating} />
             </FormProvider>
             <PolicyOverviewCardMobile />
-          </Box>
+          </form>
         ) : (
           <ReadOnlyStatusCardShared status={student.status} options={MOBILE_READ_ONLY_OPTIONS} />
         )}

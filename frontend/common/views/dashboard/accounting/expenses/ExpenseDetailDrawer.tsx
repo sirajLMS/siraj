@@ -171,23 +171,25 @@ function ExpenseSourceBadge({
     const label = labels.source.FromCarryover;
     return (
       <Box
-        component="button"
-        type="button"
-        aria-label={label}
-        onClick={() => onViewSource(sourceId)}
         sx={(theme: Theme) => ({
-          padding: 0,
-          border: "none",
-          background: "none",
-          cursor: "pointer",
-          borderRadius: theme.shape.borderRadius,
-          "&:focus-visible": {
+          display: "inline-block",
+          "& > button": {
+            display: "block",
+            padding: 0,
+            border: "none",
+            background: "none",
+            cursor: "pointer",
+            borderRadius: theme.shape.borderRadius,
+          },
+          "& > button:focus-visible": {
             outline: `2px solid ${theme.palette.primary.main}`,
             outlineOffset: 2,
           },
         })}
       >
-        <StatusBadge category="expenseSource" status="carryover" label={label} icon={<LinkOutlinedIcon />} />
+        <button type="button" aria-label={label} onClick={() => onViewSource(sourceId)}>
+          <StatusBadge category="expenseSource" status="carryover" label={label} icon={<LinkOutlinedIcon />} />
+        </button>
       </Box>
     );
   }

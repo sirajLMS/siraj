@@ -1,7 +1,7 @@
 "use client";
 
 import { ForumOutlined } from "@mui/icons-material";
-import { Box, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, ButtonBase, Skeleton, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar";
@@ -130,21 +130,19 @@ function ConversationListRow({
 }: Readonly<ConversationListRowProps>) {
   const contact = contactName(conversation);
   return (
-    <Box
-      component="button"
+    <ButtonBase
       type="button"
       onClick={() => onSelectConversation(conversation.id)}
       aria-pressed={selected}
       sx={theme => ({
-        all: "unset",
         display: "flex",
         gap: 1.5,
         width: "100%",
         boxSizing: "border-box",
         px: 2,
         py: 1.5,
-        cursor: "pointer",
         alignItems: "center",
+        textAlign: "start",
         backgroundColor: selected ? theme.palette.action.selected : "transparent",
         borderRadius: 1,
         "&:hover": { backgroundColor: theme.palette.action.hover },
@@ -202,7 +200,7 @@ function ConversationListRow({
       >
         {formatTimestamp(conversation.lastMessageAt)}
       </Typography>
-    </Box>
+    </ButtonBase>
   );
 }
 

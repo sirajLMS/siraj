@@ -16,7 +16,7 @@ import {
 } from "@/frontend/desktop/components/ui";
 
 const StyledWarningIcon = styled(WarningAmberOutlined)(({ theme }) => ({
-  fontSize: 16,
+  fontSize: theme.typography.bodyLg.fontSize,
   color: theme.palette.warning.main,
 }));
 

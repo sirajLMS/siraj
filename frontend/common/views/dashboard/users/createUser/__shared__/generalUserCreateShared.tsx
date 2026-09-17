@@ -434,12 +434,11 @@ export function GeneralUserCreateShared({
 
   return (
     <FormProvider {...form}>
-      <Box
-        component="form"
+      <form
         onSubmit={e => {
           void handleSubmit(onSubmit)(e);
         }}
-        sx={{ display: "flex", flexDirection: "column", gap: formGap }}
+        style={{ display: "flex", flexDirection: "column", gap: formGap }}
       >
         {/* Section 1: User Details */}
         <SectionPanel title={labels.sections.userDetails}>
@@ -473,7 +472,7 @@ export function GeneralUserCreateShared({
         {FormErrorSnackbar ? (
           <FormErrorSnackbar open={Boolean(submitError)} message={submitError ?? ""} onClose={onDismissError} />
         ) : null}
-      </Box>
+      </form>
     </FormProvider>
   );
 }

@@ -131,7 +131,8 @@ async function handleRateUpdate(
   hourlyRate: string | null,
   rateCurrency: CurrencyCode | null,
   setRateError: (error: string | null) => void,
-  setRateSuccess: (success: boolean) => void
+  setRateSuccess: (success: boolean) => void,
+  rateErrorMessage: string
 ): Promise<void> {
   setRateError(null);
   setRateSuccess(false);
@@ -139,7 +140,7 @@ async function handleRateUpdate(
     await updateRecurringScheduleRate(updateRateMut, recurringScheduleId, hourlyRate, rateCurrency);
     setRateSuccess(true);
   } catch (err) {
-    setRateError(err instanceof Error ? err.message : "Failed to update rate");
+    setRateError(err instanceof Error ? err.message : rateErrorMessage);
   }
 }
 
@@ -171,9 +172,17 @@ export function useRecurringScheduleDetailViewModel(
 
   const handleUpdateRate = useCallback(
     async (hourlyRate: string | null, rateCurrency: CurrencyCode | null) => {
-      await handleRateUpdate(updateRateMut, id, hourlyRate, rateCurrency, setRateError, setRateSuccess);
+      await handleRateUpdate(
+        updateRateMut,
+        id,
+        hourlyRate,
+        rateCurrency,
+        setRateError,
+        setRateSuccess,
+        t.rateErrorMessage
+      );
     },
-    [id, updateRateMut]
+    [id, t.rateErrorMessage, updateRateMut]
   );
 
   const summary = useMemo(() => (schedule ? buildScheduleSummary(schedule, t) : ""), [schedule, t]);

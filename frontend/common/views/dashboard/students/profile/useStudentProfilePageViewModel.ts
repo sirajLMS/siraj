@@ -218,6 +218,7 @@ export function useStudentProfilePageViewModel(
   const searchParams = useSearchParams();
   const router = useRouter();
   const { year, month } = useStudentHistoryStore();
+  const ensureInitialMonth = useStudentHistoryStore(state => state.ensureInitialMonth);
   const tabParam = searchParams.get("tab");
 
   const safeCurrentMonth = useMemo(() => new Date(year, month - 1, 1), [year, month]);
@@ -238,6 +239,10 @@ export function useStudentProfilePageViewModel(
 
   const historyYear = safeCurrentMonth ? safeCurrentMonth.getFullYear() : 0;
   const historyMonth = safeCurrentMonth ? safeCurrentMonth.getMonth() + 1 : 0;
+
+  useEffect(() => {
+    ensureInitialMonth();
+  }, [ensureInitialMonth]);
 
   useEffect(() => {
     if (activeTabForQuery !== "history") {

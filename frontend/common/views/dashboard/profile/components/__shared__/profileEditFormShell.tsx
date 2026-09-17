@@ -88,7 +88,7 @@ export function ProfileEditFormShell<TFieldValues extends FieldValues>({
 
   return (
     <Stack spacing={3}>
-      <Box component="form" onSubmit={handleFormSubmit}>
+      <form onSubmit={handleFormSubmit}>
         <Stack spacing={3}>
           {avatar}
           <Box sx={PROFILE_SECTION_GRID_SX}>{sections}</Box>
@@ -104,7 +104,7 @@ export function ProfileEditFormShell<TFieldValues extends FieldValues>({
             {submitText}
           </PrimaryPageAction>
         </Stack>
-      </Box>
+      </form>
       {changePasswordSection}
       <FormSuccessSnackbar
         open={successOpen}

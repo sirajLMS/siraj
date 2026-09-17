@@ -60,7 +60,7 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
                 component="div"
                 sx={theme => ({
                   color: theme.palette.text.secondary,
-                  fontSize: 11,
+                  fontSize: theme.typography.labelUppercase.fontSize,
                   maxWidth: 320,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -92,7 +92,10 @@ export function PackagePlansListDesktop(props: Readonly<PackagePlansListViewMode
             <Box component="span" sx={{ fontWeight: 600 }}>
               {formatAccountingMoney(params.row.priceAmount)}
             </Box>
-            <Box component="span" sx={theme => ({ color: theme.palette.text.secondary, fontSize: 12 })}>
+            <Box
+              component="span"
+              sx={theme => ({ color: theme.palette.text.secondary, fontSize: theme.typography.caption.fontSize })}
+            >
               {params.row.currency ?? ""}
             </Box>
           </Stack>

@@ -27,4 +27,31 @@ export interface StudentPortalDashboardLabels {
   readonly minutesShort: (minutes: number) => string;
   readonly hoursShort: (hours: number) => string;
   readonly durationMinutesShort: (minutes: number) => string;
+
+  /** Quick-action strip + open-requests widget above the student dashboard body. */
+  readonly widgets: {
+    readonly quickAction: {
+      readonly complaints: string;
+      readonly payments: string;
+      readonly calendar: string;
+      readonly appraisals: string;
+    };
+    readonly openRequests: {
+      readonly title: string;
+      readonly emptyState: string;
+      readonly emptyStateDescription: string;
+      readonly viewAll: string;
+      readonly requestType: {
+        readonly delay: string;
+        readonly cancel: string;
+      };
+      readonly status: {
+        readonly pending: string;
+        readonly approved: string;
+        readonly rejected: string;
+        readonly rescheduled: string;
+        readonly cancelled: string;
+      };
+    };
+  };
 }

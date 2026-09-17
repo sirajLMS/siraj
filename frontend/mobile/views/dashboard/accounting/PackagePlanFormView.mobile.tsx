@@ -66,7 +66,7 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
     <MobilePageContainer>
       <MobilePageHeader title={title} subtitle={t.pageSubtitle} />
 
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <MobileContentInset>
           <MobileContentStack gap={2.5} paddingBottom={6}>
             <PackagePlanCodenameField control={control} errors={errors} labels={t.form} isEditing={isEditing} />
@@ -118,7 +118,7 @@ export function PackagePlanFormMobile(props: Readonly<UsePackagePlanFormViewMode
             </Button>
           </MobileContentStack>
         </MobileContentInset>
-      </Box>
+      </form>
 
       <PackagePlanArchiveSectionShared
         t={t}

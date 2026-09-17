@@ -1,7 +1,7 @@
 "use client";
 
 import { SyncOutlined } from "@mui/icons-material";
-import { Box, Fade, Stack } from "@mui/material";
+import { Fade, Stack } from "@mui/material";
 import { FormProvider } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { useQuotaFormShell } from "@/frontend/common/views/dashboard/billing/quota/useQuotaFormShell";
@@ -35,7 +35,7 @@ export function QuotaFormMobileView(props: Readonly<UseQuotaFormViewModel>) {
         <MobilePageContainer>
           <MobilePageHeader title={pageTitle} breadcrumbs={breadcrumbs} />
           <FormProvider {...form}>
-            <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ px: { xs: 2, md: 3 } }}>
+            <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ paddingInline: 16 }}>
               <Stack spacing={3}>
                 <QuotaFormSectionMobile
                   control={control}
@@ -65,7 +65,7 @@ export function QuotaFormMobileView(props: Readonly<UseQuotaFormViewModel>) {
                   </MobilePrimaryPageAction>
                 )}
               </Stack>
-            </Box>
+            </form>
           </FormProvider>
 
           <FormSuccessSnackbar

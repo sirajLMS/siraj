@@ -117,53 +117,54 @@ export function FullScreenErrorView({ error, onRetry, databaseUnavailableHint }:
 
   return (
     <Fade in timeout={prefersReducedMotion ? 0 : 400}>
-      <Box
-        component="main"
-        sx={theme => ({
-          minHeight: "100dvh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          px: 3,
-          py: 6,
-          backgroundColor: theme.palette.background.default,
-        })}
-      >
-        <Stack sx={{ alignItems: "center", textAlign: "center", gap: 2.5, maxWidth: 440 }}>
-          <Box
-            sx={theme => ({
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 88,
-              height: 88,
-              borderRadius: "50%",
-              backgroundColor: alpha(theme.palette.error.main, 0.12),
-              color: theme.palette.error.main,
-            })}
-          >
-            <Icon sx={{ fontSize: 44 }} />
-          </Box>
-          <Typography variant="headlineLg">{title}</Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {description}
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            onClick={handleRetry}
-            disabled={pending}
-            startIcon={pending ? <CircularProgress size={16} color="inherit" /> : <RefreshOutlined />}
-          >
-            {pending ? labels.retrying : labels.retry}
-          </Button>
-          {isDatabase ? (
-            <Typography variant="bodyMd" component="output" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {labels.autoRetryHint}
+      <main>
+        <Box
+          sx={theme => ({
+            minHeight: "100dvh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            px: 3,
+            py: 6,
+            backgroundColor: theme.palette.background.default,
+          })}
+        >
+          <Stack sx={{ alignItems: "center", textAlign: "center", gap: 2.5, maxWidth: 440 }}>
+            <Box
+              sx={theme => ({
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 88,
+                height: 88,
+                borderRadius: "50%",
+                backgroundColor: alpha(theme.palette.error.main, 0.12),
+                color: theme.palette.error.main,
+              })}
+            >
+              <Icon sx={{ fontSize: 44 }} />
+            </Box>
+            <Typography variant="headlineLg">{title}</Typography>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {description}
             </Typography>
-          ) : null}
-        </Stack>
-      </Box>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleRetry}
+              disabled={pending}
+              startIcon={pending ? <CircularProgress size={16} color="inherit" /> : <RefreshOutlined />}
+            >
+              {pending ? labels.retrying : labels.retry}
+            </Button>
+            {isDatabase ? (
+              <Typography variant="bodyMd" component="output" sx={theme => ({ color: theme.palette.text.secondary })}>
+                {labels.autoRetryHint}
+              </Typography>
+            ) : null}
+          </Stack>
+        </Box>
+      </main>
     </Fade>
   );
 }

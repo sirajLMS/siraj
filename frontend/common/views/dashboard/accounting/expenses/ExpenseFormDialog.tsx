@@ -161,7 +161,7 @@ export function ExpenseFormDialog({ open, row, onClose, onSaved }: Readonly<Expe
                     const next: unknown = event.target.value;
                     if (next === "" || isExpenseType(next)) field.onChange(next === "" ? null : next);
                   }}
-                  inputProps={{ "aria-invalid": fieldState.error !== undefined }}
+                  slotProps={{ input: { "aria-invalid": fieldState.error !== undefined } }}
                 >
                   {EXPENSE_TYPES.map(type => (
                     <MenuItem key={type} value={type} disabled={type === ExpenseType.Salaries}>

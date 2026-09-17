@@ -177,18 +177,18 @@ export function LifecycleFormBody({
   };
 
   return (
-    <Box
-      component="form"
+    <form
       onSubmit={e => {
         void methods.handleSubmit(handleSubmit)(e);
       }}
-      sx={{ display: "flex", flexDirection: "column", gap: "gutter" }}
     >
-      <FormProvider {...methods}>
-        <LifecycleControls labels={labels} isUpdating={isUpdating} />
-      </FormProvider>
-      <PolicyOverviewCard labels={labels} />
-      {children}
-    </Box>
+      <Box sx={theme => ({ display: "flex", flexDirection: "column", gap: theme.layout.gutter })}>
+        <FormProvider {...methods}>
+          <LifecycleControls labels={labels} isUpdating={isUpdating} />
+        </FormProvider>
+        <PolicyOverviewCard labels={labels} />
+        {children}
+      </Box>
+    </form>
   );
 }

@@ -38,8 +38,13 @@ export function useStudentHistoryViewModel(props: Readonly<UseStudentHistoryView
 
   const { year, month, selectedWeek, selectedDay, selectWeek, selectDay, prevMonth, nextMonth, resetForStudent } =
     useStudentHistoryStore();
+  const ensureInitialMonth = useStudentHistoryStore(state => state.ensureInitialMonth);
   const setClasses = useStudentHistoryStore(state => state.setClasses);
   const nowMonth = useMemo(() => startOfMonth(new Date()), []);
+
+  useEffect(() => {
+    ensureInitialMonth();
+  }, [ensureInitialMonth]);
 
   useEffect(() => {
     if (!studentId) return;

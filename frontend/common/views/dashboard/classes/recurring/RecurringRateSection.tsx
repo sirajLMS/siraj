@@ -73,11 +73,7 @@ export function RecurringRateSection({
 
   return (
     <SectionPanel title={labels.title}>
-      <Box
-        component="form"
-        onSubmit={handleSubmit(handleValidSubmit)}
-        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-      >
+      <form onSubmit={handleSubmit(handleValidSubmit)} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         <TextField
           label={labels.hourlyRateLabel}
           fullWidth
@@ -110,7 +106,7 @@ export function RecurringRateSection({
             {labels.clearLabel}
           </Button>
         </Box>
-      </Box>
+      </form>
     </SectionPanel>
   );
 }

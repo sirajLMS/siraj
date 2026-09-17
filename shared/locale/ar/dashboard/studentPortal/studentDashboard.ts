@@ -29,4 +29,30 @@ export const dashboardStudentPortalDashboardAr: StudentPortalDashboardLabels = {
   minutesShort: minutes => `${minutes} د`,
   hoursShort: hours => `${hours} س`,
   durationMinutesShort: minutes => `${minutes} دقيقة`,
+
+  widgets: {
+    quickAction: {
+      complaints: "الشكاوى",
+      payments: "المدفوعات",
+      calendar: "التقويم",
+      appraisals: "التقييمات",
+    },
+    openRequests: {
+      title: "الطلبات المفتوحة",
+      emptyState: "لا توجد طلبات بعد",
+      emptyStateDescription: "لم تقدّم أي طلب تأجيل أو إلغاء حتى الآن.",
+      viewAll: "عرض جميع الطلبات",
+      requestType: {
+        delay: "تأجيل",
+        cancel: "إلغاء",
+      },
+      status: {
+        pending: "قيد الانتظار",
+        approved: "مقبول",
+        rejected: "مرفوض",
+        rescheduled: "معاد جدولته",
+        cancelled: "ملغى",
+      },
+    },
+  },
 };

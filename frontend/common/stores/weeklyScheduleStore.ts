@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 
 export interface WeeklyScheduleState {
   readonly selectedWeekDate: string;
@@ -34,7 +35,7 @@ export const useWeeklyScheduleStore = create<WeeklyScheduleState>((set, get) => 
   selectedDay: "monday",
   ensureSelectedWeekDate: () => {
     if (get().selectedWeekDate === "") {
-      set({ selectedWeekDate: new Date().toISOString().split("T")[0] });
+      set({ selectedWeekDate: getTodayScheduleFilterDate() });
     }
   },
   setSelectedWeekDate: (date: string) => {

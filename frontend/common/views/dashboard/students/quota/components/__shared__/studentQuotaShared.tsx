@@ -178,34 +178,36 @@ function QuotaFormCardShared({
               commonLabels: tc,
             }}
           >
-            <Box
-              component="form"
+            <form
               onSubmit={e => {
                 e.preventDefault();
                 if (!readOnly) {
                   void methods.handleSubmit(onSubmit)(e);
                 }
               }}
-              sx={{
-                p: cardSx.formPadding,
-                display: "flex",
-                flexDirection: "column",
-                gap: cardSx.formGap,
-              }}
             >
-              <StudentInformationSection />
-              <CourseDetailsSection />
-              <FormActionsShared
-                labels={t}
-                isSaving={isSaving}
-                isSaved={isSaved}
-                studentData={studentData}
-                onCancel={onCancel}
-                readOnly={readOnly}
-                showCancel={!embedded}
-                tier={tier}
-              />
-            </Box>
+              <Box
+                sx={{
+                  p: cardSx.formPadding,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: cardSx.formGap,
+                }}
+              >
+                <StudentInformationSection />
+                <CourseDetailsSection />
+                <FormActionsShared
+                  labels={t}
+                  isSaving={isSaving}
+                  isSaved={isSaved}
+                  studentData={studentData}
+                  onCancel={onCancel}
+                  readOnly={readOnly}
+                  showCancel={!embedded}
+                  tier={tier}
+                />
+              </Box>
+            </form>
           </QuotaFormAccessProvider>
         </FormProvider>
       </Box>

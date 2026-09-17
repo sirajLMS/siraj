@@ -250,9 +250,9 @@ function BreakdownTable({ groups, totals, locale, cellLabels, columnLabels }: Re
               <Typography variant="bodyMd">{formatHours(group.totalMinutes, locale)}</Typography>
             </Box>
             <Box component="td" sx={NUMERIC_CELL_SX}>
-              <Typography variant="bodyMd" dir="ltr" component="span" sx={{ display: "block" }}>
+              <Box component="span" dir="ltr" sx={{ typography: "bodyMd", display: "block" }}>
                 {formatPayable(group.totalPaid, group.currency, locale)}
-              </Typography>
+              </Box>
             </Box>
           </Box>
         ))}
@@ -284,9 +284,9 @@ function BreakdownTable({ groups, totals, locale, cellLabels, columnLabels }: Re
             component="td"
             sx={theme => ({ ...NUMERIC_CELL_SX, borderTop: `1px solid ${theme.palette.outlineVariant}` })}
           >
-            <Typography variant="bodyMd" dir="ltr" component="span" sx={{ display: "block", fontWeight: 700 }}>
+            <Box component="span" dir="ltr" sx={{ typography: "bodyMd", display: "block", fontWeight: 700 }}>
               {formatPayable(totals.totalPaid, totals.currency, locale)}
-            </Typography>
+            </Box>
           </Box>
         </Box>
       </Box>
@@ -406,9 +406,9 @@ export function CarryoverBulkCreateDialog({
           <Alert severity="info" icon={<InfoOutlinedIcon fontSize="small" />}>
             {labels.dialog.intro}
           </Alert>
-          <Typography variant="bodyMd" component="p" sx={{ m: 0 }}>
+          <Box component="p" sx={{ typography: "bodyMd", m: 0 }}>
             {carryoverLabels.modal.bulkCreate.groupedSummary(totals.sessions, teacherGroups.length)}
-          </Typography>
+          </Box>
           <BreakdownTable
             groups={teacherGroups}
             totals={totals}

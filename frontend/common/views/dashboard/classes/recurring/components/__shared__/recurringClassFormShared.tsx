@@ -108,13 +108,12 @@ export function RecurringClassFormShared({
   const FieldsComponent = options.fieldsComponent;
 
   return (
-    <Box
-      component="form"
+    <form
       onSubmit={e => {
         e.preventDefault();
         void handleSubmit(onSubmit)(e);
       }}
-      sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
+      style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
     >
       <StyledScrollableFormBody paddingScale={options.scrollableBodyPaddingScale}>
         <FieldsComponent
@@ -181,6 +180,6 @@ export function RecurringClassFormShared({
           )}
         </StyledFormActions>
       </StyledScrollableFormBody>
-    </Box>
+    </form>
   );
 }

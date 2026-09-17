@@ -9,4 +9,5 @@ export const uiCatalogImageUploadAr = {
   invalidType: "نوع الملف غير مدعوم. يُسمح فقط بـ PNG أو JPG أو WebP.",
   fileTooLarge: (maxMb: number) => `حجم الملف يتجاوز ${maxMb} ميجابايت.`,
   uploadFailed: "تعذّر رفع الصورة. حاول مرة أخرى.",
+  readFailed: "تعذّر قراءة الملف كرابط بيانات",
 };

@@ -28,6 +28,7 @@ export function ConfirmSummaryDetails({ details }: Readonly<ConfirmSummaryDetail
         borderRadius: 2,
         backgroundColor: theme.palette.surfaceContainerLow,
         border: `1px solid ${theme.palette.outlineVariant}`,
+        "& dt, & dd": { m: 0 },
       })}
     >
       {details.map(detail => (
@@ -35,12 +36,16 @@ export function ConfirmSummaryDetails({ details }: Readonly<ConfirmSummaryDetail
           key={detail.label}
           sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 2 }}
         >
-          <Typography component="dt" variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {detail.label}
-          </Typography>
-          <Typography component="dd" variant="bodyMd" sx={{ m: 0, fontWeight: 600 }}>
-            {detail.value}
-          </Typography>
+          <dt>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {detail.label}
+            </Typography>
+          </dt>
+          <dd>
+            <Typography variant="bodyMd" sx={{ fontWeight: 600 }}>
+              {detail.value}
+            </Typography>
+          </dd>
         </Box>
       ))}
     </Box>

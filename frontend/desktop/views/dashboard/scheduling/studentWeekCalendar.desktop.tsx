@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { ChevronLeftOutlined, ChevronRightOutlined } from "@mui/icons-material";
 import {
   Alert,
@@ -16,44 +15,19 @@ import {
 } from "@mui/material";
 import { alpha, type Theme } from "@mui/material/styles";
 import { useState } from "react";
-import { studentClassesRangeQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { SessionActions } from "@/frontend/common/views/dashboard/scheduling/session-actions/SessionActions";
+import {
+  addDays,
+  type StudentClassRow,
+  sameDay,
+  useStudentWeekCalendarViewModel,
+} from "@/frontend/common/views/dashboard/scheduling/student-week-calendar/useStudentWeekCalendarViewModel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
-interface StudentClassRow {
-  id: string;
-  scheduledStartAt: string;
-  scheduledEndAt: string;
-  subjectName: string | null;
-  instructor: string;
-  outcome: string;
-  executionState: string;
-}
-
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 7);
 
-function startOfWeek(date: Date): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - d.getDay());
-  return d;
-}
-
-function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-}
-
-function sameDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
-function formatHour(hour: number): string {
-  const period = hour >= 12 ? "PM" : "AM";
-  const displayHour = ((hour + 11) % 12) + 1;
-  return `${displayHour}:00 ${period}`;
+function formatHour(hour: number, locale: string): string {
+  return new Date(0, 0, 0, hour).toLocaleTimeString(locale, { hour: "numeric", hour12: true });
 }
 
 function OutcomeChip({ outcome }: Readonly<{ outcome: string }>) {
@@ -75,7 +49,11 @@ function OutcomeChip({ outcome }: Readonly<{ outcome: string }>) {
   );
 }
 
-function SessionCard({ cls }: Readonly<{ cls: StudentClassRow }>) {
+function SessionCard({
+  cls,
+  locale,
+  defaultSubject,
+}: Readonly<{ cls: StudentClassRow; locale: string; defaultSubject: string }>) {
   const startDate = new Date(cls.scheduledStartAt);
   const now = new Date();
   const lockHours = 12;
@@ -100,7 +78,7 @@ function SessionCard({ cls }: Readonly<{ cls: StudentClassRow }>) {
               variant="caption"
               sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700, fontSize: "0.7rem" })}
             >
-              {startDate.toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" })}
+              {startDate.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
             </Typography>
             <Typography
               variant="caption"
@@ -113,7 +91,7 @@ function SessionCard({ cls }: Readonly<{ cls: StudentClassRow }>) {
                 fontSize: "0.75rem",
               }}
             >
-              {cls.subjectName ?? "Session"}
+              {cls.subjectName ?? defaultSubject}
             </Typography>
             <Typography
               variant="caption"
@@ -143,18 +121,24 @@ function SessionCard({ cls }: Readonly<{ cls: StudentClassRow }>) {
 // to light/dark themes. Kept at module scope (no parent vars needed).
 const gridLineColor = (theme: Theme) => alpha(theme.palette.text.primary, 0.08);
 
-function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[]; weekStart: Date }>) {
+function WeekGrid({
+  classes,
+  weekStart,
+  locale,
+  defaultSubject,
+}: Readonly<{ classes: readonly StudentClassRow[]; weekStart: Date; locale: string; defaultSubject: string }>) {
   const now = new Date();
+  const dayFormatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: 600 }}>
       <Box sx={theme => ({ display: "flex", borderBottom: `1px solid ${gridLineColor(theme)}` })}>
         <Box sx={{ minWidth: 60, p: 1 }} />
-        {DAYS.map((day, idx) => {
+        {Array.from({ length: 7 }, (_, idx) => {
           const dayDate = addDays(weekStart, idx);
           const isToday = sameDay(dayDate, now);
           return (
             <Box
-              key={day}
+              key={dayDate.toISOString()}
               sx={theme => ({
                 flex: 1,
                 p: 1,
@@ -167,7 +151,7 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
               })}
             >
               <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary, fontWeight: 600 })}>
-                {day}
+                {dayFormatter.format(dayDate)}
               </Typography>
               <Typography
                 variant="h6"
@@ -206,17 +190,17 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
               })}
             >
               <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled, fontSize: "0.7rem" })}>
-                {formatHour(hour)}
+                {formatHour(hour, locale)}
               </Typography>
             </Box>
           ))}
         </Box>
-        {DAYS.map((day, idx) => {
+        {Array.from({ length: 7 }, (_, idx) => {
           const dayDate = addDays(weekStart, idx);
           const dayClasses = classes.filter(c => sameDay(new Date(c.scheduledStartAt), dayDate));
           return (
             <Box
-              key={day}
+              key={dayDate.toISOString()}
               sx={theme => ({
                 flex: 1,
                 borderLeft: `1px solid ${gridLineColor(theme)}`,
@@ -242,7 +226,7 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
                     key={cls.id}
                     sx={{ position: "absolute", top: hourIndex * 60 + 2, left: 2, right: 2, zIndex: 1 }}
                   >
-                    <SessionCard cls={cls} />
+                    <SessionCard cls={cls} locale={locale} defaultSubject={defaultSubject} />
                   </Box>
                 );
               })}
@@ -255,43 +239,28 @@ function WeekGrid({ classes, weekStart }: Readonly<{ classes: StudentClassRow[];
 }
 
 export function StudentWeekCalendarContainer() {
-  const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
   const [studentId] = useState("741f9933-8c5f-4507-acb8-fca09adcbe58");
-
-  const weekEnd = addDays(weekStart, 7);
-  const { data, loading, error } = useQuery(studentClassesRangeQueryDocument, {
-    variables: { studentId, from: weekStart.toISOString(), to: weekEnd.toISOString() },
-    fetchPolicy: "cache-and-network",
-  });
-
-  const classes: StudentClassRow[] = (data?.studentUpcomingClasses?.classes ?? []).map(cls => ({
-    id: cls.id ?? "",
-    scheduledStartAt: cls.scheduledStartAt ?? "",
-    scheduledEndAt: cls.scheduledEndAt ?? "",
-    subjectName: cls.subjectName ?? null,
-    instructor: cls.instructor ?? "",
-    outcome: cls.outcome ?? "",
-    executionState: cls.executionState ?? "",
-  }));
+  const { labels, locale, weekStart, goToPreviousWeek, goToNextWeek, goToToday, classes, loading, error } =
+    useStudentWeekCalendarViewModel(studentId);
 
   return (
     <DesktopPageContainer>
-      <DesktopPageHeader title="Weekly Schedule" />
+      <DesktopPageHeader title={labels.pageTitle} />
       <Stack direction="row" sx={{ alignItems: "center", mb: 2, gap: 1 }}>
-        <IconButton onClick={() => setWeekStart(addDays(weekStart, -7))} aria-label="Previous week">
+        <IconButton onClick={goToPreviousWeek} aria-label={labels.previousWeek}>
           <ChevronLeftOutlined />
         </IconButton>
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          {weekStart.toLocaleDateString("en", { month: "long", day: "numeric" })} —{" "}
-          {addDays(weekStart, 6).toLocaleDateString("en", { month: "long", day: "numeric", year: "numeric" })}
+          {weekStart.toLocaleDateString(locale, { month: "long", day: "numeric" })} —{" "}
+          {addDays(weekStart, 6).toLocaleDateString(locale, { month: "long", day: "numeric", year: "numeric" })}
         </Typography>
-        <IconButton onClick={() => setWeekStart(addDays(weekStart, 7))} aria-label="Next week">
+        <IconButton onClick={goToNextWeek} aria-label={labels.nextWeek}>
           <ChevronRightOutlined />
         </IconButton>
         <Button
           variant="outlined"
           size="small"
-          onClick={() => setWeekStart(startOfWeek(new Date()))}
+          onClick={goToToday}
           sx={theme => ({
             borderRadius: 2,
             textTransform: "none",
@@ -304,12 +273,12 @@ export function StudentWeekCalendarContainer() {
             },
           })}
         >
-          Today
+          {labels.today}
         </Button>
       </Stack>
       {error ? (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Failed to load schedule.
+          {labels.failedToLoad}
         </Alert>
       ) : null}
       {loading ? (
@@ -319,7 +288,7 @@ export function StudentWeekCalendarContainer() {
       ) : (
         <Card variant="outlined">
           <CardContent sx={{ p: 0 }}>
-            <WeekGrid classes={classes} weekStart={weekStart} />
+            <WeekGrid classes={classes} weekStart={weekStart} locale={locale} defaultSubject={labels.defaultSubject} />
           </CardContent>
         </Card>
       )}

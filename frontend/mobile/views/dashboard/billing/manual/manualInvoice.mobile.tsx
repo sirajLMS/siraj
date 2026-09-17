@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ManualInvoiceViewModel } from "@/frontend/common/views/dashboard/billing/manual/useManualInvoiceViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
@@ -43,8 +42,7 @@ export function ManualInvoiceMobileView({
     <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} edgeToEdge={false} />
 
-      <Box
-        component="form"
+      <form
         onSubmit={event => {
           event.preventDefault();
         }}
@@ -74,7 +72,7 @@ export function ManualInvoiceMobileView({
             onSubmitAndSendEmail={onSubmitAndSendEmailClick}
           />
         </StyledFormFieldset>
-      </Box>
+      </form>
     </MobilePageContainer>
   );
 }

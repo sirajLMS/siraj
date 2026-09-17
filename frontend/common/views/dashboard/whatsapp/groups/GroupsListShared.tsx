@@ -1,7 +1,7 @@
 "use client";
 
 import { GroupsOutlined } from "@mui/icons-material";
-import { Box, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, ButtonBase, Skeleton, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { ClassAvatar } from "@/frontend/common/components/ui/avatar";
@@ -63,21 +63,19 @@ function GroupsListRow({ group, labels, selected, onSelectGroup, formatTimestamp
   const pendingBadgeText =
     group.pendingJoinRequestCount > 0 ? withCount(labels.pendingBadge, group.pendingJoinRequestCount) : null;
   return (
-    <Box
-      component="button"
+    <ButtonBase
       type="button"
       onClick={() => onSelectGroup(group.id)}
       aria-pressed={selected}
       sx={theme => ({
-        all: "unset",
         display: "flex",
         gap: 1.5,
         width: "100%",
         boxSizing: "border-box",
         px: 2,
         py: 1.5,
-        cursor: "pointer",
         alignItems: "center",
+        textAlign: "start",
         backgroundColor: selected ? theme.palette.action.selected : "transparent",
         borderRadius: 1,
         "&:hover": { backgroundColor: theme.palette.action.hover },
@@ -114,7 +112,7 @@ function GroupsListRow({ group, labels, selected, onSelectGroup, formatTimestamp
           {withDate(labels.createdAtLabel, formatTimestamp(group.creationTimestamp))}
         </Typography>
       </Stack>
-    </Box>
+    </ButtonBase>
   );
 }
 

@@ -159,7 +159,10 @@ export function PaymentsListDesktop(props: Readonly<PaymentsListViewModel>) {
             <Box component="span" sx={{ fontWeight: 600 }}>
               {formatAccountingMoney(params.row.amount)}
             </Box>
-            <Box component="span" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontSize: 12 })}>
+            <Box
+              component="span"
+              sx={theme => ({ color: theme.palette.onSurfaceVariant, fontSize: theme.typography.caption.fontSize })}
+            >
               {params.row.currency ?? ""}
             </Box>
           </Stack>

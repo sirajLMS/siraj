@@ -223,39 +223,41 @@ export function SearchScheduleFormShared({
 
   return (
     <>
-      <Box component="form" onSubmit={handleSubmit} sx={formBoxSx}>
-        <FormRangePickers
-          labels={labels}
-          draft={draft}
-          dateRangeBoxSx={dateRangeBoxSx}
-          timeRangeBoxSx={timeRangeBoxSx}
-          onDraftChange={onDraftChange}
-        />
+      <form onSubmit={handleSubmit}>
+        <Box sx={formBoxSx}>
+          <FormRangePickers
+            labels={labels}
+            draft={draft}
+            dateRangeBoxSx={dateRangeBoxSx}
+            timeRangeBoxSx={timeRangeBoxSx}
+            onDraftChange={onDraftChange}
+          />
 
-        <Box sx={teacherBoxSx}>
-          <TeacherAutocomplete
-            value={selectedTeacher}
-            onChange={onSelectTeacher}
-            label={labels.teacherName}
-            placeholder={labels.teacherNamePlaceholder}
+          <Box sx={teacherBoxSx}>
+            <TeacherAutocomplete
+              value={selectedTeacher}
+              onChange={onSelectTeacher}
+              label={labels.teacherName}
+              placeholder={labels.teacherNamePlaceholder}
+            />
+          </Box>
+
+          <FormActionRow
+            SortMenu={SortMenu}
+            labels={labels}
+            draft={draft}
+            sortMenuAnchorEl={sortMenuAnchorEl}
+            onSortMenuOpen={onSortMenuOpen}
+            onSortMenuClose={onSortMenuClose}
+            onSortChange={onSortChange}
+            onOpenFormFilterDrawer={onOpenFormFilterDrawer}
+            activeFilterCount={activeFilterCount}
+            actionRowBoxSx={actionRowBoxSx}
+            innerActionsBoxSx={innerActionsBoxSx}
+            isSearching={isSearching}
           />
         </Box>
-
-        <FormActionRow
-          SortMenu={SortMenu}
-          labels={labels}
-          draft={draft}
-          sortMenuAnchorEl={sortMenuAnchorEl}
-          onSortMenuOpen={onSortMenuOpen}
-          onSortMenuClose={onSortMenuClose}
-          onSortChange={onSortChange}
-          onOpenFormFilterDrawer={onOpenFormFilterDrawer}
-          activeFilterCount={activeFilterCount}
-          actionRowBoxSx={actionRowBoxSx}
-          innerActionsBoxSx={innerActionsBoxSx}
-          isSearching={isSearching}
-        />
-      </Box>
+      </form>
 
       <FilterDrawer
         labels={labels}

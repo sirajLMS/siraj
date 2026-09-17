@@ -90,5 +90,8 @@ export const dashboardSettingsAppearanceEn: SettingsAppearanceTabLabels = {
     logoLoadFailed: "Logo load failed",
     primaryColor: "Primary",
     secondaryColor: "Secondary",
+    siteName: "Site Name",
+    siteTitle: "Site Title",
+    siteDescription: "Site Description",
   },
 };

@@ -134,5 +134,6 @@ export interface DashboardNavigationLabels {
   readonly accountingPayroll: string;
   readonly accountingCarryover: string;
   readonly accountingExpenses: string;
+  readonly accountingProfits: string;
   readonly accountingReports: string;
 }

@@ -30,6 +30,7 @@ export const monthlyAppraisalAr: MonthlyAppraisalLabels = {
     learningTargets: "أهداف التعلّم",
     learningTargetsPlaceholder: "صف أهداف التعلّم للشهر القادم...",
     learningTargetsRequired: "أهداف التعلّم مطلوبة.",
+    subtitle: "التقديرات 1–5 (اختياري) · أهداف التعلّم مطلوبة",
     submit: "حفظ التقييم",
     cancel: "إلغاء",
     successMessage: "تم حفظ التقييم بنجاح.",
@@ -68,5 +69,6 @@ export const monthlyAppraisalAr: MonthlyAppraisalLabels = {
     feedbackFailed: "فشل إضافة الملاحظة.",
     gradeOutOfRange: "يجب أن تكون التقديرات بين 1 و5.",
     monthRequired: "يرجى اختيار الشهر.",
+    studentIdMissing: "معرّف الطالب مفقود.",
   },
 };

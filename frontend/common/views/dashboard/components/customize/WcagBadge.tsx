@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import { contrastRatio, pickOnPrimary, wcagGrade } from "@/shared/lib/color-contrast.utils";
 
 /**
@@ -46,8 +47,8 @@ export function WcagBadge({ hex }: WcagBadgeProps) {
   // Semantic MUI palette tokens (per `frontend/AGENTS.md` "NO hardcoded
   // colors" rule). `onSuccess` / `onError` are the Material 3 contrast
   // siblings — same convention the rest of the dashboard uses for chip text.
-  const pillBg = isFail ? "var(--mui-palette-error-main)" : "var(--mui-palette-success-main)";
-  const pillFg = isFail ? "var(--mui-palette-onError)" : "var(--mui-palette-onSuccess)";
+  const pillBg = (theme: Theme) => (isFail ? theme.palette.error.main : theme.palette.success.main);
+  const pillFg = (theme: Theme) => (isFail ? theme.palette.onError : theme.palette.onSuccess);
 
   return (
     <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
@@ -60,8 +61,8 @@ export function WcagBadge({ hex }: WcagBadgeProps) {
           px: 0.75,
           py: 0.25,
           borderRadius: 0.5,
-          backgroundColor: pillBg,
-          color: pillFg,
+          backgroundColor: pillBg(theme),
+          color: pillFg(theme),
           fontSize: theme.typography.labelSm.fontSize,
           fontWeight: 700,
           lineHeight: 1.4,
@@ -72,7 +73,7 @@ export function WcagBadge({ hex }: WcagBadgeProps) {
       >
         {grade}
       </Box>
-      <Typography variant="caption" sx={{ fontFamily: "monospace", color: "var(--mui-palette-text-secondary)" }}>
+      <Typography variant="caption" sx={theme => ({ fontFamily: "monospace", color: theme.palette.text.secondary })}>
         {ratio.toFixed(2)}:1
       </Typography>
     </Stack>

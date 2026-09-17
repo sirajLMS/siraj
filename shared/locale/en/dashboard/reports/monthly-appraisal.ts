@@ -30,6 +30,7 @@ export const monthlyAppraisalEn: MonthlyAppraisalLabels = {
     learningTargets: "Learning Targets",
     learningTargetsPlaceholder: "Describe the learning targets for next month...",
     learningTargetsRequired: "Learning targets are required.",
+    subtitle: "Grades 1-5 (optional) · Learning targets required",
     submit: "Save Appraisal",
     cancel: "Cancel",
     successMessage: "Appraisal saved successfully.",
@@ -68,5 +69,6 @@ export const monthlyAppraisalEn: MonthlyAppraisalLabels = {
     feedbackFailed: "Failed to add feedback.",
     gradeOutOfRange: "Grades must be between 1 and 5.",
     monthRequired: "Please select a month.",
+    studentIdMissing: "Student ID is missing.",
   },
 };

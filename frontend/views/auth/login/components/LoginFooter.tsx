@@ -18,7 +18,7 @@ const StyledFooterContainer = styled(Box)(({ theme }) => ({
 
 const StyledFooterText = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
-  fontSize: "0.75rem",
+  fontSize: theme.typography.caption.fontSize,
   letterSpacing: "0.02em",
 }));
 

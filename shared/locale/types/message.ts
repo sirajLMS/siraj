@@ -6,6 +6,7 @@ import type { CarryoverLabels as AccountingCarryoverLabels } from "@/shared/loca
 import type { ExpensesLabels as AccountingExpensesLabels } from "@/shared/locale/types/dashboard/accounting/expenses.ts";
 import type { PackagePlansLabels as AccountingPackagePlansLabels } from "@/shared/locale/types/dashboard/accounting/package-plans.ts";
 import type { PaymentsLabels as AccountingPaymentsLabels } from "@/shared/locale/types/dashboard/accounting/payments.ts";
+import type { ProfitLossLabels as AccountingProfitLossLabels } from "@/shared/locale/types/dashboard/accounting/profit-loss.ts";
 import type { StudentCreditHoursLabels as AccountingStudentCreditHoursLabels } from "@/shared/locale/types/dashboard/accounting/student-credit-hours.ts";
 // ─── dashboard/leaf interfaces (collected into DashboardTranslations) ────
 import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
@@ -61,6 +62,7 @@ import type { SessionAuditLabels } from "@/shared/locale/types/dashboard/reports
 import type { BooksAndBagsLabels, ResourcesLabels } from "@/shared/locale/types/dashboard/resources";
 import type { ScheduleTrackingParentLabels } from "@/shared/locale/types/dashboard/schedule-tracking/main.ts";
 import type { SelfServiceRescheduleLabels } from "@/shared/locale/types/dashboard/scheduling/self-service-reschedule";
+import type { StudentWeekCalendarLabels } from "@/shared/locale/types/dashboard/scheduling/student-week-calendar";
 import type { SettingsLabels } from "@/shared/locale/types/dashboard/settings/main.ts";
 import type { StaffDirectoryLabels } from "@/shared/locale/types/dashboard/staff/directory.ts";
 import type { StaffOnboardingLabels } from "@/shared/locale/types/dashboard/staff/onboarding.ts";
@@ -154,6 +156,7 @@ export interface DashboardTranslations {
   accountingCarryover: AccountingCarryoverLabels;
   accountingExpenses: AccountingExpensesLabels;
   accountingStudentCreditHours: AccountingStudentCreditHoursLabels;
+  accountingProfitLoss: AccountingProfitLossLabels;
 
   billingExchangeRates: ExchangeRatesLabels;
   billingCurrencyHedges: CurrencyHedgesLabels;
@@ -199,6 +202,7 @@ export interface DashboardTranslations {
   permissions: PermissionsLabels;
   settings: SettingsLabels;
   selfServiceReschedule: SelfServiceRescheduleLabels;
+  studentWeekCalendar: StudentWeekCalendarLabels;
   monthlyAppraisal: MonthlyAppraisalLabels;
   reports: ReportsLabels;
   sessionAudit: SessionAuditLabels;

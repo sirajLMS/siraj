@@ -1,11 +1,21 @@
 "use client";
 
+import { format, startOfMonth } from "date-fns";
 import { create } from "zustand";
 import { ReportGroupingMode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 
-const DEFAULT_FROM_DATE = "2023-08-01";
-const DEFAULT_TO_DATE = "2023-08-31";
+const DATE_FILTER_FORMAT = "yyyy-MM-dd";
+
+/** First day of the current month, local time. */
+function defaultFromDate(): string {
+  return format(startOfMonth(new Date()), DATE_FILTER_FORMAT);
+}
+
+/** Today, local time. */
+function defaultToDate(): string {
+  return format(new Date(), DATE_FILTER_FORMAT);
+}
 
 interface ReportsActiveFilters {
   readonly fromDate: string;
@@ -36,19 +46,19 @@ export interface ReportsState {
   toggleFiltersExpanded: () => void;
 }
 
-const defaultActiveFilters: ReportsActiveFilters = {
-  fromDate: DEFAULT_FROM_DATE,
-  toDate: DEFAULT_TO_DATE,
+const defaultActiveFilters = (): ReportsActiveFilters => ({
+  fromDate: defaultFromDate(),
+  toDate: defaultToDate(),
   teacherId: null,
   groupBy: ReportGroupingMode.Teacher,
-};
+});
 
 export const useReportsStore = create<ReportsState>(set => ({
-  fromDate: DEFAULT_FROM_DATE,
-  toDate: DEFAULT_TO_DATE,
+  fromDate: defaultFromDate(),
+  toDate: defaultToDate(),
   teacherId: "",
   reportType: "by_teacher",
-  activeFilters: defaultActiveFilters,
+  activeFilters: defaultActiveFilters(),
   filtersExpanded: false,
   setFromDate: date => set({ fromDate: date }),
   setToDate: date => set({ toDate: date }),

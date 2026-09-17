@@ -54,6 +54,7 @@ import { DashboardBooksAndBags } from "@/shared/locale/namespaces/dashboard/reso
 import { DashboardResources } from "@/shared/locale/namespaces/dashboard/resources/main.namespace";
 import { DashboardScheduleTrackingParent } from "@/shared/locale/namespaces/dashboard/schedule-tracking/main.namespace";
 import { DashboardSchedulingSelfServiceReschedule } from "@/shared/locale/namespaces/dashboard/scheduling/self-service-reschedule.namespace";
+import { DashboardSchedulingStudentWeekCalendar } from "@/shared/locale/namespaces/dashboard/scheduling/student-week-calendar.namespace";
 import { DashboardSettingsEnvironment } from "@/shared/locale/namespaces/dashboard/settings/environment.namespace";
 import { DashboardSettingsGeneral } from "@/shared/locale/namespaces/dashboard/settings/general.namespace";
 import { DashboardSettings } from "@/shared/locale/namespaces/dashboard/settings/main.namespace";
@@ -201,6 +202,7 @@ export const Translation = {
     Reports: DashboardReports,
     SessionAudit: DashboardReportsSessionAudit,
     SelfServiceReschedule: DashboardSchedulingSelfServiceReschedule,
+    StudentWeekCalendar: DashboardSchedulingStudentWeekCalendar,
     MonthlyAppraisal: DashboardMonthlyAppraisal,
     RescheduleForm: DashboardRescheduleForm,
     RescheduleTracking: DashboardRescheduleTracking,

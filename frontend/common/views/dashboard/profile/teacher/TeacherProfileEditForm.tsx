@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
@@ -88,7 +88,7 @@ export function TeacherProfileEditForm({
 
   return (
     <Stack spacing={3}>
-      <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
+      <form onSubmit={form.handleSubmit(onValidSubmit)}>
         <Stack spacing={3}>
           <TeacherProfileOwnEditFormBody
             canEdit={canEdit}
@@ -108,7 +108,7 @@ export function TeacherProfileEditForm({
             {isSaving ? t.shell.loading : t.actions.save}
           </PrimaryPageAction>
         </Stack>
-      </Box>
+      </form>
       <ChangePasswordSection />
       <FormSuccessSnackbar
         open={successOpen}

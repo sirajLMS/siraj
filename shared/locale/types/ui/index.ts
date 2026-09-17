@@ -13,6 +13,7 @@ export interface CatalogImageUploadLabels {
   readonly invalidType: string;
   readonly fileTooLarge: (maxMb: number) => string;
   readonly uploadFailed: string;
+  readonly readFailed: string;
 }
 
 export interface CountrySelectLabels {

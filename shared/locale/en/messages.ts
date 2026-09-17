@@ -5,6 +5,7 @@ import { dashboardAccountingCarryoverEn } from "@/shared/locale/en/dashboard/acc
 import { dashboardAccountingExpensesEn } from "@/shared/locale/en/dashboard/accounting/expenses.ts";
 import { dashboardAccountingPackagePlansEn } from "@/shared/locale/en/dashboard/accounting/package-plans.ts";
 import { dashboardAccountingPaymentsEn } from "@/shared/locale/en/dashboard/accounting/payments.ts";
+import { dashboardAccountingProfitLossEn } from "@/shared/locale/en/dashboard/accounting/profitLoss.ts";
 import { dashboardAccountingStudentCreditHoursEn } from "@/shared/locale/en/dashboard/accounting/student-credit-hours.ts";
 import { dashboardAdminEn } from "@/shared/locale/en/dashboard/admin";
 import { dashboardDstMigrationEn } from "@/shared/locale/en/dashboard/admin/dstMigration.ts";
@@ -61,6 +62,7 @@ import { dashboardBooksAndBagsEn } from "@/shared/locale/en/dashboard/resources/
 import { dashboardResourcesEn } from "@/shared/locale/en/dashboard/resources/main.ts";
 import { dashboardScheduleTrackingParentEn } from "@/shared/locale/en/dashboard/schedule-tracking/main.ts";
 import { selfServiceRescheduleEn } from "@/shared/locale/en/dashboard/scheduling/self-service-reschedule";
+import { studentWeekCalendarEn } from "@/shared/locale/en/dashboard/scheduling/student-week-calendar";
 import { dashboardSettingsEn } from "@/shared/locale/en/dashboard/settings/main.ts";
 import { dashboardStaffDirectoryEn } from "@/shared/locale/en/dashboard/staff/directory.ts";
 import { dashboardStaffOnboardingEn } from "@/shared/locale/en/dashboard/staff/onboarding.ts";
@@ -179,6 +181,7 @@ export const enMessages: Translations = {
     accountingCarryover: dashboardAccountingCarryoverEn,
     accountingExpenses: dashboardAccountingExpensesEn,
     accountingStudentCreditHours: dashboardAccountingStudentCreditHoursEn,
+    accountingProfitLoss: dashboardAccountingProfitLossEn,
 
     billingExchangeRates: dashboardBillingExchangeRatesEn,
     billingCurrencyHedges: dashboardBillingCurrencyHedgesEn,
@@ -224,6 +227,7 @@ export const enMessages: Translations = {
     permissions: dashboardPermissionsEn,
     settings: dashboardSettingsEn,
     selfServiceReschedule: selfServiceRescheduleEn,
+    studentWeekCalendar: studentWeekCalendarEn,
     monthlyAppraisal: monthlyAppraisalEn,
     reports: dashboardReportsEn,
     sessionAudit: dashboardReportsSessionAuditEn,

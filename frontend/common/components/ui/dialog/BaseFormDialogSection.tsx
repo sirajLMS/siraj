@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, CircularProgress, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import type { BaseFormDialogSectionProps } from "@/frontend/common/components/ui/dialog/types/baseFormDialogSection.types";
 
 export function BaseFormDialogSection({
@@ -39,9 +39,9 @@ export function BaseFormDialogSection({
             {icon}
           </Box>
         ) : null}
-        <Typography variant="headlineMd" component="span">
+        <Box component="span" sx={{ typography: "headlineMd" }}>
           {title}
-        </Typography>
+        </Box>
       </DialogTitle>
       <DialogContent>{children}</DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>

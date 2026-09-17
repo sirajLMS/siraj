@@ -29,4 +29,30 @@ export const dashboardStudentPortalDashboardEn: StudentPortalDashboardLabels = {
   minutesShort: minutes => `${minutes}m`,
   hoursShort: hours => `${hours}h`,
   durationMinutesShort: minutes => `${minutes} min`,
+
+  widgets: {
+    quickAction: {
+      complaints: "Complaints",
+      payments: "Payments",
+      calendar: "Calendar",
+      appraisals: "Appraisals",
+    },
+    openRequests: {
+      title: "Open Requests",
+      emptyState: "No requests yet",
+      emptyStateDescription: "You haven't submitted any delay or cancel requests.",
+      viewAll: "View All Requests",
+      requestType: {
+        delay: "Delay",
+        cancel: "Cancel",
+      },
+      status: {
+        pending: "Pending",
+        approved: "Approved",
+        rejected: "Rejected",
+        rescheduled: "Rescheduled",
+        cancelled: "Cancelled",
+      },
+    },
+  },
 };

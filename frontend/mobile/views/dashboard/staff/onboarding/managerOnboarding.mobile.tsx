@@ -52,12 +52,11 @@ export function ManagerOnboardingMobileView({
     <MobilePageContainer>
       <MobilePageHeader title={t.pageTitle} subtitle={t.pageSubtitle} edgeToEdge={false} />
 
-      <Box
-        component="form"
+      <form
         onSubmit={e => {
           void handleSubmit(onSubmit)(e);
         }}
-        sx={{ display: "flex", flexDirection: "column", gap: 2, px: { xs: 2, md: 3 }, pb: 4 }}
+        style={{ display: "flex", flexDirection: "column", gap: 8, paddingInline: 16, paddingBottom: 32 }}
       >
         <StyledFormWrapper>
           <MobileSectionPanel title={userEntityLabels.sectionTitle}>
@@ -95,7 +94,7 @@ export function ManagerOnboardingMobileView({
             </MobilePrimaryPageAction>
           </StyledFormActions>
         </StyledFormWrapper>
-      </Box>
+      </form>
 
       <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
       <MobileFormErrorSnackbar open={Boolean(submitError)} message={submitError ?? ""} onClose={onDismissError} />

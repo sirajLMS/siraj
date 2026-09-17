@@ -2,7 +2,6 @@
 
 import {
   Alert,
-  Box,
   Button,
   Checkbox,
   CircularProgress,
@@ -162,9 +161,8 @@ export function MeetingConfigFormDialogContent({
       isLoading={saving}
       formId={formId}
     >
-      <Box
+      <form
         id={formId}
-        component="form"
         onSubmit={e => {
           e.preventDefault();
           onSave();
@@ -226,7 +224,7 @@ export function MeetingConfigFormDialogContent({
             />
           ) : null}
         </Stack>
-      </Box>
+      </form>
     </BaseFormDialogSection>
   );
 }

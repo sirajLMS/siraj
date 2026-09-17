@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRightOutlined } from "@mui/icons-material";
-import { Avatar, Box, Stack, Typography } from "@mui/material";
+import { Avatar, Box, ButtonBase, Stack, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { ConversationThread } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/ConversationThread";
 import { InboxTabContent } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/InboxTabContent";
@@ -24,8 +24,7 @@ function ConversationCard({ conversation, vm }: Readonly<ConversationCardProps>)
   const contact = conversation.displayName ?? conversation.username ?? conversation.waId ?? "";
   return (
     <MobileCardListItem interactive accentBorder={{ color: "primary", side: "inline-start" }}>
-      <Box
-        component="button"
+      <ButtonBase
         type="button"
         onClick={() => vm.onSelectConversation(conversation.id)}
         aria-label={vm.labels.openThread}
@@ -93,7 +92,7 @@ function ConversationCard({ conversation, vm }: Readonly<ConversationCardProps>)
             transform: theme.direction === "rtl" ? "scaleX(-1)" : "scaleX(1)",
           })}
         />
-      </Box>
+      </ButtonBase>
     </MobileCardListItem>
   );
 }

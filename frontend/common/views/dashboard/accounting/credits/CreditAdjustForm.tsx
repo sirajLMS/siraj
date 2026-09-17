@@ -339,13 +339,21 @@ function SelectedStudentCard({ row, balanceLabel }: SelectedStudentCardProps) {
           {row.name}
         </Typography>
         {row.teacherName ? (
-          <Typography sx={theme => ({ fontSize: 12, color: theme.palette.text.secondary })}>
+          <Typography
+            sx={theme => ({ fontSize: theme.typography.caption.fontSize, color: theme.palette.text.secondary })}
+          >
             {row.teacherName}
           </Typography>
         ) : null}
       </Box>
       <Stack direction="row" sx={{ alignItems: "center", gap: 1, flexShrink: 0 }}>
-        <Typography sx={theme => ({ typography: "labelUppercase", fontSize: 10, color: theme.palette.text.secondary })}>
+        <Typography
+          sx={theme => ({
+            typography: "labelUppercase",
+            fontSize: theme.typography.labelSm.fontSize,
+            color: theme.palette.text.secondary,
+          })}
+        >
           {balanceLabel}
         </Typography>
         <Chip size="small" label={`${row.classesRemaining ?? "—"} / ${row.classesTotal ?? "—"}`} />

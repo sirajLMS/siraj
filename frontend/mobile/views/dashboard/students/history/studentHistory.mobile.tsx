@@ -97,7 +97,7 @@ function HistoryMobileHeader({ studentName, monthStr }: Readonly<{ studentName: 
         <Typography variant="labelMd">{t.breadcrumbs.archive}</Typography>
         <ChevronRight
           sx={theme => ({
-            fontSize: 16,
+            fontSize: theme.typography.bodyLg.fontSize,
             transform: theme.direction === "rtl" ? ("scaleX(-1)" as const) : undefined,
           })}
         />

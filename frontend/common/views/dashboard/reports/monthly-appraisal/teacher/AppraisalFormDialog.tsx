@@ -22,6 +22,7 @@ import {
   studentAppraisalDetailForFormQueryDocument,
   submitMonthlyAppraisalMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 interface AppraisalFormData {
   studentId: string;
@@ -59,20 +60,22 @@ interface AppraisalFormDialogProps {
 }
 
 const RUBRIC_FIELDS = [
-  { key: "behavior", label: "Behavior", gradeKey: "behaviorGrade", commentKey: "behaviorComment" },
-  { key: "attendance", label: "Attendance", gradeKey: "attendanceGrade", commentKey: "attendanceComment" },
-  { key: "punctuality", label: "Punctuality", gradeKey: "punctualityGrade", commentKey: "punctualityComment" },
-  { key: "overall", label: "Overall Appraisal", gradeKey: "overallGrade", commentKey: "overallComment" },
+  { key: "behavior", labelKey: "behavior", gradeKey: "behaviorGrade", commentKey: "behaviorComment" },
+  { key: "attendance", labelKey: "attendance", gradeKey: "attendanceGrade", commentKey: "attendanceComment" },
+  { key: "punctuality", labelKey: "punctuality", gradeKey: "punctualityGrade", commentKey: "punctualityComment" },
+  { key: "overall", labelKey: "overall", gradeKey: "overallGrade", commentKey: "overallComment" },
 ] as const;
 
 function RubricField({
   label,
+  commentPlaceholder,
   grade,
   comment,
   onGradeChange,
   onCommentChange,
 }: Readonly<{
   label: string;
+  commentPlaceholder: string;
   grade: number | null;
   comment: string;
   onGradeChange: (value: number | null) => void;
@@ -98,7 +101,7 @@ function RubricField({
         size="small"
         multiline
         rows={2}
-        placeholder="Optional comment..."
+        placeholder={commentPlaceholder}
         value={comment}
         onChange={e => onCommentChange(e.target.value)}
         sx={{ mt: 0.5 }}
@@ -122,6 +125,8 @@ export function AppraisalFormDialog({
     fetchPolicy: "cache-and-network",
   });
   const existingAppraisal = existingData?.studentMonthlyAppraisals?.[0];
+  const t = useAppTranslation(Translation.Dashboard.MonthlyAppraisal);
+  const locale = useAppLocale();
 
   const [formData, setFormData] = useState<AppraisalFormData>({
     studentId,
@@ -151,11 +156,11 @@ export function AppraisalFormDialog({
 
   const handleSubmit = () => {
     if (!formData.learningTargets.trim()) {
-      setError("Learning targets are required.");
+      setError(t.form.learningTargetsRequired);
       return;
     }
     if (!studentId) {
-      setError("Student ID is missing.");
+      setError(t.errors.monthRequired);
       return;
     }
     setError(null);
@@ -188,7 +193,7 @@ export function AppraisalFormDialog({
     });
   };
 
-  const monthLabel = new Date(month).toLocaleDateString("en", { month: "long", year: "numeric" });
+  const monthLabel = new Date(month).toLocaleDateString(locale, { month: "long", year: "numeric" });
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
@@ -198,7 +203,7 @@ export function AppraisalFormDialog({
             {studentName} — {monthLabel}
           </Typography>
           <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-            Grades 1-5 (optional) · Learning targets required
+            {t.form.subtitle}
           </Typography>
         </Box>
         <IconButton size="small" onClick={onClose} aria-label="close">
@@ -214,7 +219,8 @@ export function AppraisalFormDialog({
         {RUBRIC_FIELDS.map(field => (
           <RubricField
             key={field.key}
-            label={field.label}
+            label={t.form.rubric[field.labelKey]}
+            commentPlaceholder={t.form.rubric.commentPlaceholder}
             grade={formData[field.gradeKey]}
             comment={formData[field.commentKey]}
             onGradeChange={v => updateGrade(field.gradeKey, v)}
@@ -224,14 +230,14 @@ export function AppraisalFormDialog({
         <Divider sx={{ my: 2 }} />
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-            Learning Targets *
+            {`${t.form.learningTargets} *`}
           </Typography>
           <TextField
             fullWidth
             size="small"
             multiline
             rows={3}
-            placeholder="Describe the learning targets for next month..."
+            placeholder={t.form.learningTargetsPlaceholder}
             value={formData.learningTargets}
             onChange={e => updateComment("learningTargets", e.target.value)}
             required
@@ -241,7 +247,7 @@ export function AppraisalFormDialog({
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5 }}>
         <Button onClick={onClose} sx={{ textTransform: "none" }}>
-          Cancel
+          {t.form.cancel}
         </Button>
         <Button
           variant="contained"
@@ -251,7 +257,7 @@ export function AppraisalFormDialog({
           onClick={handleSubmit}
           sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
         >
-          Save Appraisal
+          {t.form.submit}
         </Button>
       </DialogActions>
     </Dialog>

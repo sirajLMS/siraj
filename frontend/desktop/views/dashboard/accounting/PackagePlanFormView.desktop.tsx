@@ -161,18 +161,17 @@ export function PackagePlanFormDesktop(props: Readonly<UsePackagePlanFormViewMod
         }
       />
 
-      <Box
-        component="form"
+      <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        sx={{ maxWidth: 1140, width: "100%", mx: "auto" }}
+        style={{ maxWidth: 1140, width: "100%", marginInline: "auto" }}
       >
         <Stack spacing={3}>
           <PackagePlanIdentitySection t={t} control={control} errors={errors} isEditing={isEditing} />
           <PackagePlanPricingSection t={t} control={control} errors={errors} />
           <PackagePlanFormActions t={t} isSubmitting={isSubmitting} />
         </Stack>
-      </Box>
+      </form>
 
       <PackagePlanArchiveSectionShared
         t={t}

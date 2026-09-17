@@ -1,25 +1,11 @@
 "use client";
 
-import { Chip } from "@mui/material";
+import { Box } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useState } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import type { SessionAuditStatus } from "@/shared/constants/classes/session-audit-status";
 import type { SessionAuditLabels } from "@/shared/locale/types/dashboard/reports";
-
-type SessionAuditStatusChipColor = "default" | "info" | "success" | "error" | "warning";
-
-/**
- * Semantic chip color per session audit status: running sessions are blue,
- * ended sessions green, teacher absence red, and student absence amber.
- * Colors resolve through `theme.palette`, so light/dark modes and palette
- * presets stay honored.
- */
-const SESSION_AUDIT_STATUS_COLORS: Record<SessionAuditStatus, SessionAuditStatusChipColor> = {
-  open: "info",
-  end: "success",
-  Absent: "error",
-  absent_student: "warning",
-};
 
 /**
  * Recency window for the live-session pulse: a running session whose room
@@ -78,15 +64,15 @@ export function SessionAuditStatusChip({
   const pulseActive = isSessionAuditPulseActive(status, actualStartAt, actualEndAt, renderTimestamp);
 
   return (
-    <Chip
-      size="small"
-      color={SESSION_AUDIT_STATUS_COLORS[status]}
-      label={label}
+    <Box
+      component="span"
       aria-label={label}
       data-pulse-active={pulseActive || undefined}
       sx={
         pulseActive
           ? theme => ({
+              display: "inline-flex",
+              borderRadius: theme.layout.radius.badge,
               animation: "sessionAuditStatusPulse 1.6s ease-in-out infinite",
               "@keyframes sessionAuditStatusPulse": {
                 "0%, 100%": { boxShadow: `0 0 0 0 ${alpha(theme.palette.info.main, 0.4)}` },
@@ -96,8 +82,10 @@ export function SessionAuditStatusChip({
                 animation: "none",
               },
             })
-          : undefined
+          : { display: "inline-flex" }
       }
-    />
+    >
+      <StatusBadge category="sessionAudit" status={status} label={label} />
+    </Box>
   );
 }

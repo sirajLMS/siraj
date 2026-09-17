@@ -155,7 +155,10 @@ function buildPayrollReportColumns({
             {formatAccountingMoney(row.teacherPaidAmount)}
           </Box>
           {row.teacherPaidCurrency !== null ? (
-            <Box component="span" sx={theme => ({ color: theme.palette.onSurfaceVariant, fontSize: 12 })}>
+            <Box
+              component="span"
+              sx={theme => ({ color: theme.palette.onSurfaceVariant, fontSize: theme.typography.caption.fontSize })}
+            >
               {row.teacherPaidCurrency}
             </Box>
           ) : null}

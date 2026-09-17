@@ -5,6 +5,7 @@ import { dashboardAccountingCarryoverAr } from "@/shared/locale/ar/dashboard/acc
 import { dashboardAccountingExpensesAr } from "@/shared/locale/ar/dashboard/accounting/expenses.ts";
 import { dashboardAccountingPackagePlansAr } from "@/shared/locale/ar/dashboard/accounting/package-plans.ts";
 import { dashboardAccountingPaymentsAr } from "@/shared/locale/ar/dashboard/accounting/payments.ts";
+import { dashboardAccountingProfitLossAr } from "@/shared/locale/ar/dashboard/accounting/profitLoss.ts";
 import { dashboardAccountingStudentCreditHoursAr } from "@/shared/locale/ar/dashboard/accounting/student-credit-hours.ts";
 import { dashboardAdminAr } from "@/shared/locale/ar/dashboard/admin";
 import { dashboardDstMigrationAr } from "@/shared/locale/ar/dashboard/admin/dstMigration.ts";
@@ -61,6 +62,7 @@ import { dashboardBooksAndBagsAr } from "@/shared/locale/ar/dashboard/resources/
 import { dashboardResourcesAr } from "@/shared/locale/ar/dashboard/resources/main.ts";
 import { dashboardScheduleTrackingParentAr } from "@/shared/locale/ar/dashboard/schedule-tracking/main.ts";
 import { selfServiceRescheduleAr } from "@/shared/locale/ar/dashboard/scheduling/self-service-reschedule";
+import { studentWeekCalendarAr } from "@/shared/locale/ar/dashboard/scheduling/student-week-calendar";
 import { dashboardSettingsAr } from "@/shared/locale/ar/dashboard/settings/main.ts";
 import { dashboardStaffDirectoryAr } from "@/shared/locale/ar/dashboard/staff/directory.ts";
 import { dashboardStaffOnboardingAr } from "@/shared/locale/ar/dashboard/staff/onboarding.ts";
@@ -179,6 +181,7 @@ export const arMessages: Translations = {
     accountingCarryover: dashboardAccountingCarryoverAr,
     accountingExpenses: dashboardAccountingExpensesAr,
     accountingStudentCreditHours: dashboardAccountingStudentCreditHoursAr,
+    accountingProfitLoss: dashboardAccountingProfitLossAr,
 
     billingExchangeRates: dashboardBillingExchangeRatesAr,
     billingCurrencyHedges: dashboardBillingCurrencyHedgesAr,
@@ -224,6 +227,7 @@ export const arMessages: Translations = {
     permissions: dashboardPermissionsAr,
     settings: dashboardSettingsAr,
     selfServiceReschedule: selfServiceRescheduleAr,
+    studentWeekCalendar: studentWeekCalendarAr,
     monthlyAppraisal: monthlyAppraisalAr,
     reports: dashboardReportsAr,
     sessionAudit: dashboardReportsSessionAuditAr,

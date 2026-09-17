@@ -205,14 +205,14 @@ type FileSelectDeps = {
 
 const isReaderResultString = (value: string | ArrayBuffer | null): value is string => typeof value === "string";
 
-const readAsDataUrl = (file: File): Promise<string> => {
+const readAsDataUrl = (file: File, t: TranslationBundle): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.addEventListener("load", () => {
       if (isReaderResultString(reader.result)) {
         resolve(reader.result);
       } else {
-        reject(new Error("Failed to read file as data URL"));
+        reject(new Error(t.readFailed));
       }
     });
     reader.addEventListener("error", reject);
@@ -235,7 +235,7 @@ const applyFileSelectResult = async (result: SelectResult, deps: FileSelectDeps)
       deps.setLocalPreview(result.file);
       if (!deps.onUploadAction) {
         try {
-          const dataUrl = await readAsDataUrl(result.file);
+          const dataUrl = await readAsDataUrl(result.file, deps.t);
           deps.onImageUrlChangeAction?.(dataUrl);
           deps.setUploadState("ready");
         } catch {

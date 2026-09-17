@@ -1,16 +1,9 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import {
-  CancelOutlined,
-  CheckCircleOutlined,
-  ChevronRightOutlined,
-  EventBusyOutlined,
-  HourglassEmptyOutlined,
-  SwapHorizOutlined,
-} from "@mui/icons-material";
+import { ChevronRightOutlined } from "@mui/icons-material";
 import { Alert, Box, Button, Card, CardContent, Chip, CircularProgress, Stack, Typography } from "@mui/material";
-import type { ReactElement } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { myLeaveRequestsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 
 interface OpenRequestsWidgetProps {
@@ -42,13 +35,6 @@ interface LeaveRequestRow {
 }
 
 function StatusChip({ status, labels }: Readonly<{ status: string; labels: OpenRequestsWidgetProps["statusLabels"] }>) {
-  const colorMap: Record<string, "default" | "success" | "error" | "warning" | "info"> = {
-    PENDING: "warning",
-    APPROVED: "success",
-    REJECTED: "error",
-    RESCHEDULED: "info",
-    CANCELLED: "default",
-  };
   const labelMap: Record<string, string> = {
     PENDING: labels.pending,
     APPROVED: labels.approved,
@@ -56,26 +42,7 @@ function StatusChip({ status, labels }: Readonly<{ status: string; labels: OpenR
     RESCHEDULED: labels.rescheduled,
     CANCELLED: labels.cancelled,
   };
-  const iconEl = (() => {
-    const icons: Record<string, ReactElement> = {
-      PENDING: <HourglassEmptyOutlined fontSize="small" />,
-      APPROVED: <CheckCircleOutlined fontSize="small" />,
-      REJECTED: <CancelOutlined fontSize="small" />,
-      RESCHEDULED: <SwapHorizOutlined fontSize="small" />,
-      CANCELLED: <EventBusyOutlined fontSize="small" />,
-    };
-    return icons[status];
-  })();
-  return (
-    <Chip
-      size="small"
-      color={colorMap[status] ?? "default"}
-      variant="outlined"
-      icon={iconEl}
-      label={labelMap[status] ?? status}
-      sx={{ borderRadius: 2 }}
-    />
-  );
+  return <StatusBadge category="requestStatus" status={status} label={labelMap[status] ?? status} />;
 }
 
 export function OpenRequestsWidget({ labels, statusLabels, requestTypeLabels }: Readonly<OpenRequestsWidgetProps>) {

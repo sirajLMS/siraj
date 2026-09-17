@@ -240,7 +240,9 @@ export function StudentCreditsList() {
     >
       {error ? <Alert severity="error">{directory.errors.loadFailed}</Alert> : null}
       {hitsFetchCap ? (
-        <Typography sx={{ fontSize: 12, color: theme => theme.palette.onSurfaceVariant }}>
+        <Typography
+          sx={{ fontSize: theme => theme.typography.caption.fontSize, color: theme => theme.palette.onSurfaceVariant }}
+        >
           {credits.resultsCappedHint(DIRECTORY_FETCH_LIMIT)}
         </Typography>
       ) : null}

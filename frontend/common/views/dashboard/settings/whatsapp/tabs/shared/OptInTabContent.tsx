@@ -1,10 +1,10 @@
 "use client";
 
 import { LockOutlined } from "@mui/icons-material";
-import { Alert, Box, Chip, CircularProgress, FormControlLabel, Stack, Switch, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, FormControlLabel, Stack, Switch, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { BaseCard, getStatusColors } from "@/frontend/common/components/ui";
+import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { mobileContentGutterBelowMdSx } from "@/frontend/common/utils/sx/mobileContentGutterSx";
 import type { OptInTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
@@ -88,10 +88,10 @@ export function OptInTabContent({
               />
             )}
             <Box sx={{ mt: 1 }}>
-              <Chip
-                size="small"
+              <StatusBadge
+                category="syncStatus"
+                status={isOptedIn ? "success" : "cancelled"}
                 label={isOptedIn ? t.optInEnabled : t.optInDisabled}
-                sx={theme => getStatusColors(theme, "syncStatus", isOptedIn ? "success" : "cancelled")}
               />
             </Box>
           </BaseCard>

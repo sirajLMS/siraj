@@ -151,11 +151,10 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
 
       {isEditing ? (
         /* ── EDIT: only hours / gateway / note stay mutable (invoice snapshot locked) ── */
-        <Box
-          component="form"
+        <form
           onSubmit={handleEditSubmit(onEditSubmit)}
           noValidate
-          sx={{ maxWidth: 1100, width: "100%", mx: "auto" }}
+          style={{ maxWidth: 1100, width: "100%", marginInline: "auto" }}
         >
           <Stack spacing={3}>
             <DesktopSectionPanel title={t.paymentDetails}>
@@ -211,14 +210,13 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
 
             {formActions}
           </Stack>
-        </Box>
+        </form>
       ) : (
         /* ── CREATE: full form with package auto-fill (hours/amount/currency stay editable) ── */
-        <Box
-          component="form"
+        <form
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          sx={{ maxWidth: 1100, width: "100%", mx: "auto" }}
+          style={{ maxWidth: 1100, width: "100%", marginInline: "auto" }}
         >
           <Stack spacing={3}>
             <Stack direction="row" spacing={3} sx={{ alignItems: "flex-start" }}>
@@ -343,7 +341,7 @@ export function PaymentFormDesktop(props: Readonly<UsePaymentFormViewModel>) {
 
             {formActions}
           </Stack>
-        </Box>
+        </form>
       )}
 
       <FormSuccessSnackbar open={showSuccess} message={t.saveSuccess} onClose={onDismissSuccess} />

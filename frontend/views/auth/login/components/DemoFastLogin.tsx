@@ -16,7 +16,7 @@ const StyledContainer = styled(Box)({
 // adapts to light/dark themes.
 const RoleIconWrapper = styled(Box, {
   shouldForwardProp: prop => prop !== "tintColor",
-})<{ tintColor: string }>(({ tintColor }) => ({
+})<{ tintColor: string }>(({ theme, tintColor }) => ({
   width: 28,
   height: 28,
   borderRadius: "50%",
@@ -27,7 +27,7 @@ const RoleIconWrapper = styled(Box, {
   color: tintColor,
   flexShrink: 0,
   "& svg": {
-    fontSize: 16,
+    fontSize: theme.typography.bodyLg.fontSize,
   },
 }));
 

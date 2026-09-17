@@ -89,5 +89,8 @@ export const dashboardSettingsAppearanceAr: SettingsAppearanceTabLabels = {
     logoLoadFailed: "فشل تحميل الشعار",
     primaryColor: "أساسي",
     secondaryColor: "ثانوي",
+    siteName: "اسم الموقع",
+    siteTitle: "عنوان الموقع",
+    siteDescription: "وصف الموقع",
   },
 };

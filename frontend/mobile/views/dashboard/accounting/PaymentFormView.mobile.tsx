@@ -90,7 +90,7 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
       <MobilePageHeader title={title} subtitle={isEditing ? t.editFormSubtitle : t.formSubtitle} />
 
       {isEditing ? (
-        <Box component="form" onSubmit={handleEditSubmit(onEditSubmit)} noValidate>
+        <form onSubmit={handleEditSubmit(onEditSubmit)} noValidate>
           <MobileContentInset>
             <MobileContentStack gap={2.5} paddingBottom={6}>
               <TextField
@@ -141,9 +141,9 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
               {submitButtons}
             </MobileContentStack>
           </MobileContentInset>
-        </Box>
+        </form>
       ) : (
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <MobileContentInset>
             <MobileContentStack gap={2.5} paddingBottom={6}>
               <PaymentStudentControllerField
@@ -259,7 +259,7 @@ export function PaymentFormMobile(props: Readonly<UsePaymentFormViewModel>) {
               {submitButtons}
             </MobileContentStack>
           </MobileContentInset>
-        </Box>
+        </form>
       )}
 
       <FormSuccessSnackbar open={showSuccess} message={t.saveSuccess} onClose={onDismissSuccess} />

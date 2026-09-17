@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 
 export interface FutureScheduleDateState {
   readonly selectedDate: string;
@@ -13,7 +14,7 @@ export const useFutureScheduleDateStore = create<FutureScheduleDateState>((set, 
   selectedDate: "",
   ensureSelectedDate: () => {
     if (get().selectedDate === "") {
-      set({ selectedDate: new Date().toISOString().split("T")[0] });
+      set({ selectedDate: getTodayScheduleFilterDate() });
     }
   },
   setSelectedDate: (date: string) => {

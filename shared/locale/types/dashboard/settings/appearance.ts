@@ -172,4 +172,12 @@ interface AppearanceCustomizeLabels {
   readonly primaryColor: string;
   /** Secondary color label. */
   readonly secondaryColor: string;
+
+  // ─── Brand identity fields ──────────────────────────────────────────
+  /** "Site Name" text field label. */
+  readonly siteName: string;
+  /** "Site Title" text field label. */
+  readonly siteTitle: string;
+  /** "Site Description" multiline field label. */
+  readonly siteDescription: string;
 }

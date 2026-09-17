@@ -19,6 +19,8 @@ function getStatusPaletteEntry(theme: Theme, key: string): string {
   return typeof value === "string" ? value : "";
 }
 
+type SettledPaletteKey = "completed" | "pending" | "blocked" | "confirmed";
+
 /**
  * Resolves a (category, status) pair to a semantic palette key.
  *
@@ -83,7 +85,7 @@ const resolveStatusPaletteKey: ResolveStatusPaletteKeyFn = (
       return map[status] ?? "pending";
     }
     case "invoice": {
-      const map: Record<string, "completed" | "pending" | "blocked" | "confirmed"> = {
+      const map: Record<string, SettledPaletteKey> = {
         PAID: "completed",
         PENDING: "pending",
         UNPAID: "pending",
@@ -102,7 +104,7 @@ const resolveStatusPaletteKey: ResolveStatusPaletteKeyFn = (
       return map[status] ?? "pending";
     }
     case "syncStatus": {
-      const map: Record<string, "completed" | "pending" | "blocked" | "confirmed"> = {
+      const map: Record<string, SettledPaletteKey> = {
         success: "completed",
         running: "pending",
         partial: "confirmed",
@@ -151,6 +153,25 @@ const resolveStatusPaletteKey: ResolveStatusPaletteKeyFn = (
       const map: Record<string, "confirmed" | "pending"> = {
         system: "confirmed",
         custom: "pending",
+      };
+      return map[status] ?? "pending";
+    }
+    case "requestStatus": {
+      const map: Record<string, "pending" | "confirmed" | "blocked" | "cancelled"> = {
+        PENDING: "pending",
+        APPROVED: "confirmed",
+        REJECTED: "blocked",
+        RESCHEDULED: "confirmed",
+        CANCELLED: "cancelled",
+      };
+      return map[status] ?? "pending";
+    }
+    case "sessionAudit": {
+      const map: Record<string, SettledPaletteKey> = {
+        open: "confirmed",
+        end: "completed",
+        Absent: "blocked",
+        absent_student: "pending",
       };
       return map[status] ?? "pending";
     }

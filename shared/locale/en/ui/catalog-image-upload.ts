@@ -9,4 +9,5 @@ export const uiCatalogImageUploadEn = {
   invalidType: "Unsupported file type. Only PNG, JPG, or WebP are allowed.",
   fileTooLarge: (maxMb: number) => `File exceeds ${maxMb} MB.`,
   uploadFailed: "Image upload failed. Please try again.",
+  readFailed: "Failed to read file as data URL",
 };

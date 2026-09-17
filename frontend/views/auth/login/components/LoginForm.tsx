@@ -90,8 +90,8 @@ const StyledSubmitButton = styled(Button)(({ theme }) => ({
   paddingTop: 14,
   paddingBottom: 14,
   minHeight: 52,
-  borderRadius: 12,
-  fontSize: "0.875rem",
+  borderRadius: theme.layout.radius.button,
+  fontSize: theme.typography.bodyMd.fontSize,
   fontWeight: 700,
   letterSpacing: "0.08em",
   textTransform: "uppercase",
@@ -327,18 +327,13 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
   const finalLoginResult = externalLoginResult ?? loginResult;
 
   return (
-    <Box
-      component="form"
+    <form
       noValidate
       onSubmit={e => {
         e.preventDefault();
         void handleSubmit(onSubmit)(e);
       }}
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 3,
-      }}
+      style={{ display: "flex", flexDirection: "column", gap: 24 }}
     >
       {isRetrying && (
         <Alert severity="info" sx={{ mb: 1 }}>
@@ -375,6 +370,6 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
       >
         {isSubmitting || isRetrying ? <CircularProgress size={24} color="inherit" /> : labels.signIn}
       </StyledSubmitButton>
-    </Box>
+    </form>
   );
 }

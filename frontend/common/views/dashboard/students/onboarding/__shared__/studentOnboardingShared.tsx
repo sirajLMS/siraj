@@ -76,12 +76,11 @@ export function StudentOnboardingFormBodyShared({
   const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
 
   return (
-    <Box
-      component="form"
+    <form
       onSubmit={e => {
         void handleSubmit(onSubmit)(e);
       }}
-      sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+      style={{ display: "flex", flexDirection: "column", gap: 24 }}
     >
       <options.SectionPanel title={userEntityLabels.sectionTitle}>
         <UserEntityFieldsSection
@@ -152,6 +151,6 @@ export function StudentOnboardingFormBodyShared({
           {isSubmitting ? labels.processing : labels.create}
         </options.PrimaryPageAction>
       </Box>
-    </Box>
+    </form>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined, DeleteOutlined, EditOutlined, LinkOutlined, MoreVertOutlined } from "@mui/icons-material";
-import { Box, IconButton, Menu, MenuItem, Paper, Stack, Typography } from "@mui/material";
+import { Box, ButtonBase, IconButton, Menu, MenuItem, Paper, Stack, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { type ReactNode, useState } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
@@ -199,8 +199,7 @@ function ExpenseCard({
   return (
     <MobileCardListItem variant="rounded" dimmed={deleted}>
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-        <Box
-          component="button"
+        <ButtonBase
           type="button"
           onClick={() => onOpenDrawer(row)}
           aria-label={labels.drawer.title(title)}
@@ -231,7 +230,7 @@ function ExpenseCard({
               </Typography>
             ) : null}
           </Stack>
-        </Box>
+        </ButtonBase>
         <ExpenseRowMenu row={row} labels={labels} menuAriaLabel={menuAriaLabel} canManage={canManage} {...callbacks} />
       </Box>
     </MobileCardListItem>

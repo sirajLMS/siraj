@@ -27,7 +27,7 @@ export interface DialogShellSharedProps {
 
 const FORM_SX = { mt: 1, display: "flex", flexDirection: "column", gap: 3 } as const;
 
-/** Shared dialog shell: Dialog → Title → Content → Box form → Actions. */
+/** Shared dialog shell: Dialog → Title → Content → form → Actions. */
 export function DialogShellShared({
   open,
   onClose,
@@ -66,9 +66,9 @@ export function DialogShellShared({
     <Dialog open={open} onClose={isLoading ? undefined : onClose} {...slots.dialogProps}>
       <DialogTitle id={titleId}>{dialogTitle}</DialogTitle>
       <DialogContent sx={{ pt: 1 }}>
-        <Box component="form" id={formId} onSubmit={onSubmit} sx={FORM_SX}>
-          {children}
-        </Box>
+        <form id={formId} onSubmit={onSubmit}>
+          <Box sx={FORM_SX}>{children}</Box>
+        </form>
       </DialogContent>
       <DialogActions sx={slots.actionsSx}>
         <DialogActionsRenderer slots={slots} cancelBtn={cancelBtn} saveBtn={saveBtn} />
