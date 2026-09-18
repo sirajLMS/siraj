@@ -47,6 +47,21 @@ export enum BookingStatus {
 type StringEnum<T extends string> = Record<string, T>;
 
 /**
+ * Cache Set instances of enum values to avoid repeated Object.values(enumObject)
+ * array allocations and linear O(N) scans during high-frequency enum parsing.
+ */
+const enumValueSetCache = new WeakMap<object, Set<unknown>>();
+
+function getEnumValueSet(enumObject: object): Set<unknown> {
+  let set = enumValueSetCache.get(enumObject);
+  if (!set) {
+    set = new Set(Object.values(enumObject));
+    enumValueSetCache.set(enumObject, set);
+  }
+  return set;
+}
+
+/**
  * Parses a string value against a string enum object.
  */
 function parseEnumValue<T extends string>(
@@ -58,10 +73,9 @@ function parseEnumValue<T extends string>(
     return fallback;
   }
 
-  const enumValues = Object.values(enumObject);
-  const match = enumValues.find(v => v === value);
-  if (match !== undefined) {
-    return match;
+  const valueSet = getEnumValueSet(enumObject);
+  if (valueSet.has(value)) {
+    return value as T;
   }
 
   return fallback;
@@ -259,12 +273,7 @@ export const parseGroupClassAttendanceStatus = (
   value: string | null | undefined,
   fallback: GroupClassAttendanceStatus = GroupClassAttendanceStatus.PENDING
 ): GroupClassAttendanceStatus => {
-  const validValues = Object.values(GroupClassAttendanceStatus);
-  if (value === null || value === undefined) {
-    return fallback;
-  }
-  const match = validValues.find(v => (v as string) === value);
-  return match ?? fallback;
+  return parseEnumValue(GroupClassAttendanceStatus, value, fallback) ?? fallback;
 };
 
 /**
