@@ -243,6 +243,8 @@ describe("GET /api/expenses/export", () => {
       expect(response.status).toBe(200);
       expect(response.headers.get("Content-Type")).toBe("text/csv; charset=utf-8");
       expect(response.headers.get("Content-Disposition")).toBe(`attachment; filename="expenses-${dateStamp}.csv"`);
+      expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+      expect(response.headers.get("Content-Security-Policy")).toBe("default-src 'none'; sandbox");
       expect(response.headers.get("X-Export-Truncated")).toBe("false");
 
       expect(getReportMock).toHaveBeenCalledTimes(1);
