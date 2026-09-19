@@ -50,6 +50,8 @@ interface SidebarShellProps {
   readonly avatarUrl: string;
   readonly logoutLabel: string;
   readonly toggleGroupAriaLabel: (label: string) => string;
+  readonly expandSidebarLabel: string;
+  readonly collapseSidebarLabel: string;
 }
 
 interface SidebarNavItemProps {
@@ -677,6 +679,8 @@ function SidebarDesktop({
   avatarUrl,
   logoutLabel,
   toggleGroupAriaLabel,
+  expandSidebarLabel,
+  collapseSidebarLabel,
 }: {
   readonly sidebarWidth: string;
   readonly navGroups: readonly TranslatedNavGroup[];
@@ -687,6 +691,8 @@ function SidebarDesktop({
   readonly avatarUrl: string;
   readonly logoutLabel: string;
   readonly toggleGroupAriaLabel: (label: string) => string;
+  readonly expandSidebarLabel: string;
+  readonly collapseSidebarLabel: string;
 }) {
   const customizeMode = useCustomizeMode();
   const collapsedWidth = customizeMode ? "64px" : "80px";
@@ -755,42 +761,45 @@ function SidebarDesktop({
             },
           })}
         >
-          <IconButton
-            className="toggle-button"
-            sx={(theme: Theme) => ({
-              position: "absolute",
-              top: "50%",
-              insetInlineEnd: "-16px",
-              transform: "translateY(-50%) scale(0.8)",
-              opacity: 0,
-              transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
-              backgroundColor: "var(--mui-palette-background-paper)",
-              border: "1px solid var(--mui-palette-border-light)",
-              width: "32px",
-              height: "32px",
-              color: "var(--mui-palette-onSurface)",
-              "&:hover": {
+          <Tooltip title={isCollapsed ? expandSidebarLabel : collapseSidebarLabel} placement="right">
+            <IconButton
+              className="toggle-button"
+              aria-label={isCollapsed ? expandSidebarLabel : collapseSidebarLabel}
+              sx={(theme: Theme) => ({
+                position: "absolute",
+                top: "50%",
+                insetInlineEnd: "-16px",
+                transform: "translateY(-50%) scale(0.8)",
+                opacity: 0,
+                transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
                 backgroundColor: "var(--mui-palette-background-paper)",
-                borderColor: "var(--mui-palette-border-light)",
-              },
-            })}
-          >
-            {isCollapsed ? (
-              <ChevronRight
-                fontSize="small"
-                sx={theme => ({
-                  transform: theme.direction === "rtl" ? " scaleX(-1)" : "scaleX(1)",
-                })}
-              />
-            ) : (
-              <ChevronLeft
-                fontSize="small"
-                sx={theme => ({
-                  transform: theme.direction === "rtl" ? " scaleX(-1)" : "scaleX(1)",
-                })}
-              />
-            )}
-          </IconButton>
+                border: "1px solid var(--mui-palette-border-light)",
+                width: "32px",
+                height: "32px",
+                color: "var(--mui-palette-onSurface)",
+                "&:hover": {
+                  backgroundColor: "var(--mui-palette-background-paper)",
+                  borderColor: "var(--mui-palette-border-light)",
+                },
+              })}
+            >
+              {isCollapsed ? (
+                <ChevronRight
+                  fontSize="small"
+                  sx={theme => ({
+                    transform: theme.direction === "rtl" ? " scaleX(-1)" : "scaleX(1)",
+                  })}
+                />
+              ) : (
+                <ChevronLeft
+                  fontSize="small"
+                  sx={theme => ({
+                    transform: theme.direction === "rtl" ? " scaleX(-1)" : "scaleX(1)",
+                  })}
+                />
+              )}
+            </IconButton>
+          </Tooltip>
         </Box>
       )}
     </Box>
@@ -807,6 +816,8 @@ export function SidebarShell({
   avatarUrl,
   logoutLabel,
   toggleGroupAriaLabel,
+  expandSidebarLabel,
+  collapseSidebarLabel,
 }: SidebarShellProps) {
   return (
     <>
@@ -830,6 +841,8 @@ export function SidebarShell({
         avatarUrl={avatarUrl}
         logoutLabel={logoutLabel}
         toggleGroupAriaLabel={toggleGroupAriaLabel}
+        expandSidebarLabel={expandSidebarLabel}
+        collapseSidebarLabel={collapseSidebarLabel}
       />
     </>
   );
