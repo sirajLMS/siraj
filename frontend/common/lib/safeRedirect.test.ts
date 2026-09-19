@@ -27,6 +27,23 @@ describe("safeRedirect", () => {
       expect(isRelativeSafePath("/\\\\evil.com")).toBe(false);
     });
 
+    it("rejects percent-encoded open redirect attempts and control characters", () => {
+      expect(isRelativeSafePath("/%2f/evil.com")).toBe(false);
+      expect(isRelativeSafePath("/%5c/evil.com")).toBe(false);
+      expect(isRelativeSafePath("/%5C/evil.com")).toBe(false);
+      expect(isRelativeSafePath("/%252f/evil.com")).toBe(false);
+      expect(isRelativeSafePath("/%2f%2fevil.com")).toBe(false);
+      expect(isRelativeSafePath("/%0a/evil.com")).toBe(false);
+      expect(isRelativeSafePath("/%0d/evil.com")).toBe(false);
+      expect(isRelativeSafePath("/%09/evil.com")).toBe(false);
+      expect(isRelativeSafePath("/%invalid")).toBe(false);
+    });
+
+    it("accepts safe relative paths with percent-encoded query parameters or spaces", () => {
+      expect(isRelativeSafePath("/search?q=%20test")).toBe(true);
+      expect(isRelativeSafePath("/path%20with%20space")).toBe(true);
+    });
+
     it("rejects control-character and whitespace bypasses", () => {
       expect(isRelativeSafePath("/\t/evil.com")).toBe(false);
       expect(isRelativeSafePath("/\n/evil.com")).toBe(false);

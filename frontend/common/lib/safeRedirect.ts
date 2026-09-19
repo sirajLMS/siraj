@@ -14,18 +14,38 @@ export function isRelativeSafePath(url: string): boolean {
   if (url.startsWith("//") || url.startsWith("/\\")) {
     return false;
   }
+
+  // Perform iterative URI decoding to handle percent-encoded characters (e.g. %2f, %5c, double-encoding)
+  let decoded = url;
+  try {
+    let passes = 0;
+    while (decoded.includes("%") && passes < 3) {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+      passes++;
+    }
+  } catch {
+    // Malformed percent-encoding is unsafe
+    return false;
+  }
+
+  if (decoded.startsWith("//") || decoded.startsWith("/\\")) {
+    return false;
+  }
+
   // Reject ASCII control characters (0x00-0x1F, 0x7F) anywhere — browsers
   // strip them, so a value like "/\tevil.com" would otherwise survive the
   // bare prefix check and resolve as a host change in `new URL()`.
-  for (let i = 0; i < url.length; i++) {
-    const code = url.charCodeAt(i);
+  for (let i = 0; i < decoded.length; i++) {
+    const code = decoded.charCodeAt(i);
     if (code <= 0x1f || code === 0x7f) {
       return false;
     }
   }
   // Reject whitespace directly after the leading slash (browser URL
   // normalization can collapse "/ evil.com" into a host change).
-  if (/\s/.test(url[1] ?? "")) {
+  if (/\s/.test(decoded[1] ?? "")) {
     return false;
   }
   return true;
