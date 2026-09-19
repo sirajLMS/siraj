@@ -1,3 +1,4 @@
+import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CreditAdjustmentInputPothosRef,
@@ -10,7 +11,7 @@ gqlSchemaBuilder.mutationField("recordCreditAdjustment", t =>
   t.field({
     type: CreditAdjustmentResultPothosObject,
     description: "Record a manual credit adjustment (Add / Subtract / Subtract With Carryover) for a student",
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.ACCOUNTING_CREDITS_MANAGE },
     args: {
       input: t.arg({ type: CreditAdjustmentInputPothosRef, required: true }),
     },

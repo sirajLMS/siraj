@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, inArray, isNull, lte, type SQL, sql } from "drizzle-orm";
 import { caseInsensitiveLike, db, queryDb, withForUpdate } from "@/backend/db";
 import { expenses, users } from "@/backend/db/schema";
+import { DomainError } from "@/backend/lib/errors";
 import type {
   DBTransaction,
   ExpenseFilters,
@@ -8,6 +9,8 @@ import type {
   ExpensePageResult,
   ExpenseSelectType,
   ExpenseUpdatePatch,
+  ProfitLossExpenseRow,
+  ProfitLossExpensesPageFilter,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 
@@ -85,6 +88,52 @@ export namespace ExpenseRepository {
     };
   }
 
+  /**
+   * Profit & Loss dashboard read: one page of the expense ledger for a single
+   * accounting month (`expenseDate` is the YYYY-MM month the expense belongs
+   * to), soft-deleted rows excluded so the report reflects live spend only.
+   * Returns the display columns the dashboard tab renders — teacher snapshot,
+   * decimal-string value, provenance linkage, note — with `totalCount` covering
+   * the full month before limit/offset. Newest payout first; the id tiebreak
+   * keeps pagination deterministic. Rows are the expense-ledger projection
+   * without `convertedAmount` — currency conversion is the service layer's
+   * concern, which completes the row into the full dashboard shape.
+   */
+  export async function findProfitLossExpenses(
+    input: ProfitLossExpensesPageFilter,
+    tx?: DBTransaction
+  ): Promise<{ rows: Omit<ProfitLossExpenseRow, "convertedAmount">[]; totalCount: number }> {
+    const conditions = [eq(expenses.expenseDate, input.month), isNull(expenses.deletedAt)];
+    const q = queryDb(tx);
+
+    const pageRows = await q
+      .select({
+        id: expenses.id,
+        title: expenses.title,
+        type: expenses.type,
+        teacherName: expenses.teacherName,
+        expenseValue: expenses.expenseValue,
+        expenseCurrency: expenses.expenseCurrency,
+        paymentDate: expenses.paymentDate,
+        sourceEntity: expenses.sourceEntity,
+        sourceEntityId: expenses.sourceEntityId,
+        note: expenses.note,
+      })
+      .from(expenses)
+      .where(and(...conditions))
+      .orderBy(desc(expenses.paymentDate), expenses.id)
+      .limit(input.limit)
+      .offset(input.offset);
+
+    const [countRow] = await q
+      .select({ totalCount: sql<number>`count(*)`.mapWith(Number) })
+      .from(expenses)
+      .where(and(...conditions));
+    const totalCount = countRow?.totalCount ?? 0;
+
+    return { rows: pageRows, totalCount };
+  }
+
   export async function getById(id: string, tx?: DBTransaction): Promise<ExpenseSelectType | null> {
     const q = queryDb(tx);
     const [row] = await q.select().from(expenses).where(eq(expenses.id, id)).limit(1);
@@ -106,7 +155,7 @@ export namespace ExpenseRepository {
     const executor = tx ?? db;
     const [row] = await executor.insert(expenses).values(input).returning();
     if (!row) {
-      throw new Error("expense insert returned no rows");
+      throw new DomainError("EXPENSE_INSERT_FAILED", "expense insert returned no rows");
     }
     return row;
   }

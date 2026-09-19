@@ -119,7 +119,6 @@ For every file created/modified in this plan, read the applicable AGENTS.md and 
 | `frontend/desktop/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
 | `frontend/mobile/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
 | `frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | `frontend.instructions.md` |
-| `test/ui/components/verify/**` | `AGENTS.md`, `test/ui/AGENTS.md` | `tests.instructions.md` |
 
 ### Quality Loop (Per File)
 
@@ -148,7 +147,6 @@ For EVERY file created/modified, read these instruction files BEFORE writing cod
 | `frontend/desktop/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
 | `frontend/mobile/views/verify/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
 | `frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | `frontend.instructions.md` |
-| `test/ui/components/verify/**` | `AGENTS.md`, `test/ui/AGENTS.md` | `tests.instructions.md` |
 
 **Cross-file rule**: If a change requires modifying another file not in your task, report as CROSS-FILE DEPENDENCY — do NOT modify it yourself.
 
@@ -159,16 +157,10 @@ After implementing components, create corresponding test files:
 | Component Layer | Test Type | Test File Pattern | Command |
 |-----------------|-----------|-------------------|---------|
 | `shared/locale/**` | Unit (types + translations) | `shared/locale/**/*.test.ts` | `bun test shared/locale/certificates/verification.test.ts` |
-| `app/verify/**` | E2E (page rendering) | `test/ui/e2e/verify/**/*.spec.ts` | `bun run test:ui:e2e -- test/ui/e2e/verify` |
-| `frontend/common/views/verify/**` | Unit + Integration | `test/ui/components/verify/**/*.test.tsx` | `bun run test:ui:components -- test/ui/components/verify` |
-| `frontend/desktop/views/verify/**` | Unit + Integration | `test/ui/components/verify/desktop/**/*.test.tsx` | `bun run test:ui:components -- test/ui/components/verify/desktop` |
-| `frontend/mobile/views/verify/**` | Unit + Integration | `test/ui/components/verify/mobile/**/*.test.tsx` | `bun run test:ui:components -- test/ui/components/verify/mobile` |
 | `frontend/common/graphql/...` | GraphQL Integration | `frontend/common/graphql/test/verify/**/*.test.ts` | `bun run test:graphql` |
 
 **Test coverage requirements**:
 - Unit tests: 100% coverage for `shared/locale/types/**` and pure utility functions
-- Component tests: Render with all statuses (valid, revoked, expired, notFound, loading, error), test interactions (share, print, download, language toggle), verify RTL layout
-- E2E tests: Full verification flow from `/verify` → enter code → redirect → result display → share/print
 
 ### AC Mapping Verification
 
@@ -371,7 +363,6 @@ bun run scripts/health/sub-loop.ts shared/locale/types/message.ts --lifecycle co
 bun run scripts/health/sub-loop.ts app/verify/layout.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/e2e/verify/layout.spec.ts` — verify layout renders without auth, correct locale
 
 #### 2.2 Create verify [code] page
 
@@ -393,7 +384,6 @@ bun run scripts/health/sub-loop.ts app/verify/layout.tsx --lifecycle codescene
 bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/e2e/verify/page.spec.ts` — verify page loads, passes code to container
 
 #### 2.3 Verify route renders
 
@@ -484,7 +474,6 @@ bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certi
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationContainer.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/VerificationContainer.test.tsx` — test all status mappings, rate limit countdown, error parsing
 
 #### 3.4 Create VerificationView (responsive switch)
 
@@ -505,7 +494,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationCont
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test responsive delegate, status rendering
 
 #### 3.5 Create types file for verify views
 
@@ -521,7 +509,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/types.ts --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/types.test.ts` — verify type exports
 
 **AGENTS.md files to read for this task**:
 - `AGENTS.md` (root — path aliases, logging, Apollo conventions)
@@ -565,7 +552,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/types.ts --lifec
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationStatusBadge.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/VerificationStatusBadge.test.tsx` — test all three statuses, icons, aria-labels, responsive sizing
 
 #### 4.2 Create CertificateMetadataPanel component (desktop)
 
@@ -595,7 +581,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationStat
 bun run scripts/health/sub-loop.ts frontend/desktop/views/verify/CertificateMetadataPanel.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/desktop/CertificateMetadataPanel.test.tsx` — test all fields, RTL, date formatting, locale handling
 
 #### 4.3 Create CertificateMetadataPanel component (mobile)
 
@@ -616,7 +601,6 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/verify/CertificateMeta
 bun run scripts/health/sub-loop.ts frontend/mobile/views/verify/CertificateMetadataPanel.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/mobile/CertificateMetadataPanel.test.tsx` — test stacked layout, accordion, touch targets, RTL
 
 #### 4.4 Create CertificatePreview component
 
@@ -645,7 +629,6 @@ bun run scripts/health/sub-loop.ts frontend/mobile/views/verify/CertificateMetad
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/CertificatePreview.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/CertificatePreview.test.tsx` — test visual rendering, responsive, watermark, right-click disable, aspect ratio
 
 #### 4.5 Wire result components into VerificationView
 
@@ -664,7 +647,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/CertificatePrevi
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test all status flows, component composition
 
 #### 4.6 Create RevocationInfo and ExpirationInfo components
 
@@ -684,7 +666,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/RevocationInfo.t
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/ExpirationInfo.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/RevocationInfo.test.tsx` and `ExpirationInfo.test.tsx` — test no revocationReason, locale date formatting, theme colors
 
 #### 4.7 Create AcademyBranding component
 
@@ -709,7 +690,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/ExpirationInfo.t
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/AcademyBranding.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/AcademyBranding.test.tsx` — test logo fallback, RTL, trust signal, print hidden, no theme override
 
 #### 4.8 Create DownloadButton component
 
@@ -735,7 +715,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/AcademyBranding.
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/DownloadButton.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/DownloadButton.test.tsx` — test conditional render, click handler, print hidden, error state
 
 #### 4.9 Create RevokedState component
 
@@ -760,7 +739,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/DownloadButton.t
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/RevokedState.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/RevokedState.test.tsx` — test no revocationReason, date formatting, aria-live, theme colors
 
 #### 4.10 Create ExpiredState component
 
@@ -784,7 +762,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/RevokedState.tsx
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/ExpiredState.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/ExpiredState.test.tsx` — test validity period interpolation, date formatting, aria-live
 
 #### 4.11 Create NotFoundState component
 
@@ -808,7 +785,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/ExpiredState.tsx
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/NotFoundState.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/NotFoundState.test.tsx` — test manual entry link, aria-live, rate-limit collapsed usage
 
 **AGENTS.md files to read for this task**:
 - `AGENTS.md` (root — MUI v9 rules, theme palette, no hardcoded colors)
@@ -849,7 +825,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/NotFoundState.ts
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationLoading.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/VerificationLoading.test.tsx` — test skeleton render, aria-busy, aria-live
 
 #### 5.2 Create ErrorState component
 
@@ -872,7 +847,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationLoad
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/ErrorState.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/ErrorState.test.tsx` — test all props, role=alert, aria-live, retry callback
 
 #### 5.3 Create RateLimitError component
 
@@ -894,7 +868,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/ErrorState.tsx -
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/RateLimitError.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/RateLimitError.test.tsx` — test countdown, pluralization, auto-retry, aria-live
 
 #### 5.4 Wire states into VerificationView
 
@@ -916,7 +889,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/RateLimitError.t
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test all status state rendering
 
 **AGENTS.md files to read for this task**:
 - `AGENTS.md` (root — accessibility, MUI v9)
@@ -965,7 +937,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/ShareButtons.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/ShareButtons.test.tsx` — test Web Share API fallback, social URLs, copy to clipboard, RTL
 
 #### 6.2 Create PrintButton component
 
@@ -985,7 +956,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/ShareButtons.tsx
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/PrintButton.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/PrintButton.test.tsx` — test print call, print hidden
 
 #### 6.3 Create print CSS for verification page
 
@@ -1015,7 +985,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/PrintButton.tsx 
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/verifyPrintStyles.ts --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/verifyPrintStyles.test.ts` — test print-only classes, watermark logic per status
 
 #### 6.4 Create PrintHeader component (print-only)
 
@@ -1041,7 +1010,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/verifyPrintStyle
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/PrintHeader.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/PrintHeader.test.tsx` — test print-only render, watermark per status, notFound exclusion
 
 #### 6.5 Wire share and print into VerificationView
 
@@ -1057,7 +1025,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/PrintHeader.tsx 
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/VerificationView.test.tsx` — test share/print buttons present in valid/revoked/expired, absent in notFound
 
 **AGENTS.md files to read for this task**:
 - `AGENTS.md` (root — MUI v9, theme palette)
@@ -1113,7 +1080,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/verify/VerificationView
 bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/e2e/verify/seo.spec.ts` — verify meta tags, canonical URL, robots directive, OG tags
 
 #### 7.2 Implement generateMetadata for /verify (manual entry)
 
@@ -1133,7 +1099,6 @@ bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codesc
 bun run scripts/health/sub-loop.ts app/verify/page.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/e2e/verify/manual-entry-seo.spec.ts` — verify generic meta tags
 
 #### 7.3 Add ISR cache headers to verify route
 
@@ -1157,7 +1122,6 @@ bun run scripts/health/sub-loop.ts app/verify/page.tsx --lifecycle codescene
 bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/e2e/verify/isr.spec.ts` — verify cache headers, ISR behavior
 
 #### 7.4 Create OG image generation/fallback
 
@@ -1184,7 +1148,6 @@ bun run scripts/health/sub-loop.ts app/verify/[code]/page.tsx --lifecycle codesc
 bun run scripts/health/sub-loop.ts app/verify/[code]/opengraph-image.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/e2e/verify/og-image.spec.ts` — verify OG image generation, fallback
 
 #### 7.5 Add JSON-LD structured data for valid certificates
 
@@ -1214,7 +1177,6 @@ bun run scripts/health/sub-loop.ts app/verify/[code]/opengraph-image.tsx --lifec
 bun run scripts/health/sub-loop.ts frontend/common/views/verify/StructuredData.tsx --lifecycle codescene
 ```
 
-**Testing**: Create `test/ui/components/verify/StructuredData.test.tsx` — test JSON-LD schema, only for valid, ISO dates
 
 **AGENTS.md files to read for this task**:
 - `AGENTS.md` (root — path aliases, logging)
@@ -1563,24 +1525,6 @@ bun run scripts/health/sub-loop.ts frontend/views/public/verify/PublicVerificati
 bun run scripts/health/sub-loop.ts app/[locale]/verify/[certificateNumber]/page.tsx --lifecycle codescene
 ```
 
-#### 12.3 Test loading state
-
-**File to create**: `test/ui/components/verify/PublicVerificationPage.test.tsx`
-- Renders with `status="loading"` — verifies CircularProgress and "Verifying certificate..." text appear
-- No certificate card shown in loading state
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicVerificationPage.test.tsx --lifecycle codescene
-```
-
-**AGENTS.md files to read**:
-- `AGENTS.md` (root — path aliases, i18n client)
-- `frontend/AGENTS.md` (MUI v9, client component patterns)
-- `frontend/views/AGENTS.md` (if exists — view patterns)
-
----
-
 ### Task 13: VerificationSearchPage (Landing Page)
 
 **Estimated time**: 3-4 hours
@@ -1626,25 +1570,6 @@ bun run scripts/health/sub-loop.ts frontend/views/public/verify/VerificationSear
 ```bash
 bun run scripts/health/sub-loop.ts app/[locale]/verify/page.tsx --lifecycle codescene
 ```
-
-#### 13.3 Test search form submit
-
-**File to create** (append to existing or new): `test/ui/components/verify/VerificationSearchPage.test.tsx`
-- Verifies typing a certificate number + submit calls `router.push`
-- Verifies recent searches chips render from store state
-- Verifies invalid/empty input does not navigate
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/VerificationSearchPage.test.tsx --lifecycle codescene
-```
-
-**AGENTS.md files to read**:
-- `AGENTS.md` (root — React 19 form events, path aliases)
-- `frontend/AGENTS.md` (MUI v9, LoadingButton)
-- `frontend/stores/AGENTS.md` (Zustand store usage)
-
----
 
 ### Task 14: QrScanner Component
 
@@ -1693,26 +1618,6 @@ bun run scripts/health/sub-loop.ts test/ui/components/verify/VerificationSearchP
 bun run scripts/health/sub-loop.ts frontend/views/public/verify/QrScanner.tsx --lifecycle codescene
 ```
 
-#### 14.3 Test scanner dialog open/close
-
-**File to create**: `test/ui/components/verify/QrScanner.test.tsx`
-- Mocks `html5-qrcode` module
-- Verifies dialog opens when `open=true`
-- Verifies `onClose` called when dialog close button clicked
-- Verifies manual entry fallback link calls `onClose`
-- Verifies error alert renders when camera permission is denied (mock throws)
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/QrScanner.test.tsx --lifecycle codescene
-```
-
-**AGENTS.md files to read**:
-- `AGENTS.md` (root — package installs, path aliases)
-- `frontend/AGENTS.md` (MUI Dialog, useMediaQuery)
-
----
-
 ### Task 15: PublicCertificateCard Component
 
 **Estimated time**: 2-3 hours
@@ -1747,26 +1652,6 @@ bun run scripts/health/sub-loop.ts test/ui/components/verify/QrScanner.test.tsx 
 bun run scripts/health/sub-loop.ts frontend/views/public/verify/PublicCertificateCard.tsx --lifecycle codescene
 ```
 
-#### 15.2 Test card rendering
-
-**File to create**: `test/ui/components/verify/PublicCertificateCard.test.tsx`
-- Renders with valid certificate — verifies recipient name, template name, certificate number appear
-- Renders with showActions=true — verifies download/print/share buttons appear
-- Renders with showActions=false — verifies no action buttons
-- Renders with expired status — verifies warning badge
-- Responsive: does not crash on mobile viewport
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicCertificateCard.test.tsx --lifecycle codescene
-```
-
-**AGENTS.md files to read**:
-- `AGENTS.md` (root — MUI v9 sx prop, no style props)
-- `frontend/AGENTS.md` (MUI Card patterns, theme palette access)
-
----
-
 ### Task 16: ShareCertificateDialog Component
 
 **Estimated time**: 3 hours
@@ -1800,27 +1685,6 @@ bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicCertificateCa
 ```bash
 bun run scripts/health/sub-loop.ts frontend/views/public/verify/ShareCertificateDialog.tsx --lifecycle codescene
 ```
-
-#### 16.2 Test share dialog
-
-**File to create**: `test/ui/components/verify/ShareCertificateDialog.test.tsx`
-- Renders when open=true — verifies verification URL TextField, social buttons, QR code appear
-- Verifies copy button calls navigator.clipboard.writeText (mocked)
-- Verifies WhatsApp link href contains wa.me and the certificate number
-- Verifies Telegram link href contains t.me/share/url
-- Verifies Email link href starts with mailto:
-- Verifies dialog closes when onClose called
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/ShareCertificateDialog.test.tsx --lifecycle codescene
-```
-
-**AGENTS.md files to read**:
-- `AGENTS.md` (root — path aliases)
-- `frontend/AGENTS.md` (MUI Dialog, TextField, IconButton patterns)
-
----
 
 ### Task 17: Verification API Route Handler
 
@@ -1993,243 +1857,6 @@ bun run scripts/health/sub-loop.ts app/robots.ts --lifecycle codescene
 bun run scripts/health/sub-loop.ts frontend/stores/verificationStore.ts --lifecycle codescene
 ```
 
-#### 19.2 Test store
-
-**File to create**: `test/ui/stores/verificationStore.test.ts`
-- Tests `verify` action with mocked fetch:
-  - Valid response → status="valid", result.certificate populated
-  - 404 → status="not_found"
-  - Revoked → status="invalid", result.revocationReason populated
-  - Network error → status="error", error.message populated
-- Tests `addRecentSearch`: adds to front, dedupes, caps at 5
-- Tests `openShareDialog`/`closeShareDialog` toggle `shareDialogOpen`
-- Tests `reset` clears all state
-- Tests `openScanner`/`closeScanner` toggle `scannerOpen`
-- Tests `handleScanResult` sets certificateNumber + closes scanner
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/stores/verificationStore.test.ts --lifecycle codescene
-```
-
-**AGENTS.md files to read**:
-- `AGENTS.md` (root — Zustand stores, path aliases)
-- `frontend/stores/AGENTS.md` (store patterns, persist middleware conventions)
-
----
-
-### Task 20: Component Tests (5 Test Files)
-
-**Estimated time**: 4-5 hours
-**Dependencies**: Tasks 12-16 (components to test), Task 19 (store)
-
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T21.
-
-This task creates 5 component test files for the public verification components. All tests use Happy DOM + mocked Apollo/fetch (no real server). Follows the pattern in existing `test/ui/components/verify/` tests.
-
-#### 20.1 PublicVerificationPage.test.tsx
-
-**File to create**: `test/ui/components/verify/PublicVerificationPage.test.tsx`
-
-**Tests**:
-- Loading state: renders CircularProgress + "Verifying certificate..." text
-- Valid state: renders PublicCertificateCard + verification details + action buttons
-- Revoked state: renders Alert severity=error + revocation reason + date + "Contact the academy" + no download/print
-- Not found state: renders Alert severity=info + "does not exist" + search field
-- Error state: renders error message + retry button
-- Mocks: `useVerificationStore` (via `zustand/testing` or by overriding the store)
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicVerificationPage.test.tsx --lifecycle codescene
-```
-
-#### 20.2 VerificationSearchPage.test.tsx
-
-**File to create**: `test/ui/components/verify/VerificationSearchPage.test.tsx`
-
-**Tests**:
-- Renders hero + search form + accordion
-- Typing certificate number + submit calls `router.push` with correct path
-- Empty input does not navigate (validation)
-- Recent searches chips render from store state
-- Clicking a recent search chip re-verifies (calls router.push)
-- QR scanner button opens QrScanner dialog
-- Accordion expand/collapse works
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/VerificationSearchPage.test.tsx --lifecycle codescene
-```
-
-#### 20.3 QrScanner.test.tsx
-
-**File to create**: `test/ui/components/verify/QrScanner.test.tsx`
-
-**Tests**:
-- Dialog opens when `open=true`
-- Dialog closes when close button or backdrop clicked (calls `onClose`)
-- Camera permission denied: renders error Alert + manual entry link
-- No camera: renders file upload fallback button
-- Manual entry link calls `onClose`
-- Mocks `html5-qrcode` module with `vi.mock('html5-qrcode')`
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/QrScanner.test.tsx --lifecycle codescene
-```
-
-#### 20.4 PublicCertificateCard.test.tsx
-
-**File to create**: `test/ui/components/verify/PublicCertificateCard.test.tsx`
-
-**Tests**:
-- Renders recipient name, certificate number (mono font), template name, issue/expiry dates
-- Valid status: renders success Chip
-- Revoked status: renders error Chip
-- Expired status: renders warning Chip
-- showActions=true: renders download (if downloadEnabled), print, share buttons
-- showActions=false: no action buttons
-- Academy logo Avatar renders with correct src
-- Expiry date null: renders "N/A"
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/PublicCertificateCard.test.tsx --lifecycle codescene
-```
-
-#### 20.5 ShareCertificateDialog.test.tsx
-
-**File to create**: `test/ui/components/verify/ShareCertificateDialog.test.tsx`
-
-**Tests**:
-- open=true renders dialog with URL TextField, social buttons, QR code
-- open=false renders nothing
-- Copy button calls `navigator.clipboard.writeText` (mocked)
-- WhatsApp href contains `wa.me` + encoded certificate number
-- Telegram href contains `t.me/share/url`
-- Email href starts with `mailto:`
-- onClose called when dialog closed
-- QR code QRCodeSVG renders with correct URL value
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/verify/ShareCertificateDialog.test.tsx --lifecycle codescene
-```
-
-**AGENTS.md files to read**:
-- `AGENTS.md` (root — test runner, run-test script)
-- `test/ui/AGENTS.md` (component test patterns, Happy DOM, mocking)
-- `frontend/AGENTS.md` (component patterns)
-
----
-
-### Task 21: E2E Tests (5 Tests)
-
-**Estimated time**: 5-6 hours
-**Dependencies**: Tasks 12-19 (all components + store + API), `bun run build:test` (production server)
-
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T20.
-
-#### 21.1 Build production server
-
-**Action**: `bun run build:test` (required before E2E — see AGENTS.md)
-
-#### 21.2 E2E: Verify valid certificate
-
-**File to create**: `test/ui/e2e/verify/verify-valid.spec.ts`
-
-**Test**:
-- Navigate to `/${locale}/verify/${validCertNumber}` (use a seeded test certificate)
-- Verifies loading spinner appears briefly
-- Verifies "Certificate Verified" + CheckCircleOutlined icon (green)
-- Verifies recipient name, certificate number, template name, issue date appear
-- Verifies download/print/share buttons visible
-- Verifies verification details card with timestamp + verification ID
-- Verifies QR code renders (img with src containing QR)
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/verify/verify-valid.spec.ts --lifecycle codescene
-```
-
-#### 21.3 E2E: Verify revoked certificate
-
-**File to create**: `test/ui/e2e/verify/verify-revoked.spec.ts`
-
-**Test**:
-- Navigate to `/${locale}/verify/${revokedCertNumber}`
-- Verifies Alert severity=error with "revoked" text
-- Verifies revocation reason + date appear
-- Verifies "Contact the academy" text
-- Verifies NO download/print buttons
-- Verifies red theme (error color)
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/verify/verify-revoked.spec.ts --lifecycle codescene
-```
-
-#### 21.4 E2E: Verify not found certificate
-
-**File to create**: `test/ui/e2e/verify/verify-not-found.spec.ts`
-
-**Test**:
-- Navigate to `/${locale}/verify/INVALID-CODE-12345`
-- Verifies Alert severity=info with "not found" text
-- Verifies "does not exist in our system" text with the entered code
-- Verifies search field appears to re-enter certificate number
-- Verifies typing a new code + submit navigates to the new verify page
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/verify/verify-not-found.spec.ts --lifecycle codescene
-```
-
-#### 21.5 E2E: QR scan flow
-
-**File to create**: `test/ui/e2e/verify/qr-scan.spec.ts`
-
-**Test**:
-- Navigate to `/${locale}/verify` (search page)
-- Click QR scanner button
-- Verifies scanner dialog opens
-- Mocks camera scan result (or file upload with test QR image) — on scan, extracts certificate number
-- Verifies redirect to `/${locale}/verify/${scannedCertNumber}`
-- Verifies valid certificate page renders (for a valid scanned cert)
-- Desktop fallback: upload a QR image file, verifies decode + redirect
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/verify/qr-scan.spec.ts --lifecycle codescene
-```
-
-#### 21.6 E2E: Share dialog flow
-
-**File to create**: `test/ui/e2e/verify/share-dialog.spec.ts`
-
-**Test**:
-- Navigate to a valid certificate verify page
-- Click Share button
-- Verifies ShareCertificateDialog opens
-- Verifies verification URL TextField contains the correct URL
-- Click copy button → verifies clipboard write (or at least button click does not crash)
-- Verifies WhatsApp link has correct href with `wa.me`
-- Verifies Telegram link has correct href with `t.me`
-- Verifies QR code image renders
-- Close dialog → verifies it disappears
-
-**Quality loop**: 
-```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/verify/share-dialog.spec.ts --lifecycle codescene
-```
-
-**AGENTS.md files to read**:
-- `AGENTS.md` (root — E2E test commands, build:test prerequisite)
-- `test/ui/AGENTS.md` (E2E patterns, Playwright, production server)
-
----
-
 ### Task 22: Quality Loop Per File
 
 **Estimated time**: 2-3 hours
@@ -2373,8 +2000,6 @@ bun run scripts/health/sub-loop.ts test/ui/e2e/verify/share-dialog.spec.ts --lif
 | 17 | Verification API route handler | 3 | 0 | 4h |
 | 18 | SEO/Social meta tags | 0 | 2 | 3-4h |
 | 19 | useVerificationStore (Zustand) | 2 | 0 | 3h |
-| 20 | Component tests (5 files) | 5 | 0 | 4-5h |
-| 21 | E2E tests (5 tests) | 5 | 0 | 5-6h |
 | 22 | Quality loop per file | 0 | 0 | 2-3h |
 | 23 | Knowledge propagation (supplementary) | 0 | 4 | 1-2h |
 | **Total** | | **~58 files** | **~21 edits** | **~80h** |
@@ -2392,15 +2017,13 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
 - Task 17 (API route handler) depends on Plan 5 (cross-plan) + Task 19 (rate limiter).
 - Task 18 (SEO meta) depends on Task 12 (page route) + Plan 5 (verifyForMetadata).
 - Task 19 (Zustand store) depends on Task 17 (API route — store fetches from it).
-- Task 20 (component tests) depends on Tasks 12-16 + Task 19 — all components + store must exist.
-- Task 21 (E2E tests) depends on Tasks 12-19 + `bun run build:test` — all components + API + store must work.
-- Task 22 (quality loop) depends on all Tasks 12-21 complete.
+- Task 22 (quality loop) depends on all Tasks 12-19 complete.
 - Task 23 (knowledge propagation) depends on all Tasks 12-22 complete.
 
 **Parallelism groups**:
 - Group A (i18n + route): Tasks 1-2 (sequential) → enables 12, 13, 18
 - Group B (QR scanner): Task 14 (independent after 1) → enables 13
-- Group C (API + store): Tasks 17, 19 (sequential — store fetches from API) → enables 12, 20
+- Group C (API + store): Tasks 17, 19 (sequential — store fetches from API) → enables 12
 - Group D (components): Tasks 12, 15, 16 (sequential — page → card → dialog) → enables 20
 - Group E (tests): Tasks 20, 21 (after all components + store)
 - Group F (quality + propagation): Tasks 22, 23 (last)
@@ -2557,38 +2180,6 @@ Tasks 1-3 are sequential (each depends on the previous). Tasks 4, 5, 6, and 7 ca
     ```bash
     bun run scripts/health/sub-loop.ts backend/graphql/pothos/certificate-verification.ts --lifecycle codescene
     ```
-
-### R4-T12: Component Tests
-- [ ] Create `test/ui/components/verification/CaptchaWidget.test.tsx`
-  - Test reCAPTCHA rendering
-  - Test token generation
-  - Test failure fallback
-- [ ] Create `test/ui/components/verification/ShareWidget.test.tsx`
-  - Test URL copy
-  - Test QR code generation
-  - Test embed code copy
-  - Test social media share links
-- [ ] Create `test/ui/components/verification/VerificationError.test.tsx`
-  - Test invalid ID format
-  - Test not found state
-  - Test revoked state
-  - Test expired state
-  - Test server error
-- [ ] Create `test/ui/components/verification/VerificationPage.test.tsx`
-  - Test successful verification
-  - Test multi-language rendering
-  - Test dark mode toggle
-  - Test keyboard navigation
-
-### R4-T13: E2E Tests
-- [ ] Create `test/ui/e2e/verification-flow.spec.ts`
-  - Test full verification flow: enter ID → see valid certificate
-  - Test revoked certificate flow: enter ID → see revoked banner
-  - Test expired certificate flow: enter ID → see expired banner
-  - Test invalid ID flow: enter ID → see not found
-  - Test share widget: click share → copy URL → verify URL works
-  - Test multi-language: switch to Arabic → verify RTL rendering
-  - Test dark mode: toggle theme → verify dark palette
 
 ### R4-T14: Knowledge Propagation
 - [ ] Create `docs/frontend/public-verification-page-patterns.md`

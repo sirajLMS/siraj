@@ -2,13 +2,13 @@
 
 **Verdict: NEEDS UPDATE**
 
-The plan's render-API usage (async `await render(...)` returning HTML, with `toPlainText` for text) is fundamentally correct, but the install/import surface is off: React Email v6 unified everything into the single `react-email` package, and `@react-email/components` + `@react-email/render` should be **dropped** (or only `react-email` imported). The `@react-email/render` package still exists as a separate leaf (currently `2.1.0`) and `render` is re-exported from it, but the official v6 migration guide tells consumers to import `render` from `react-email` directly.
+The design's render-API usage (async `await render(...)` returning HTML, with `toPlainText` for text) is fundamentally correct, but the install/import surface is off: React Email v6 unified everything into the single `react-email` package, and `@react-email/components` + `@react-email/render` should be **dropped** (or only `react-email` imported). The `@react-email/render` package still exists as a separate leaf (currently `2.1.0`) and `render` is re-exported from it, but the official v6 migration guide tells consumers to import `render` from `react-email` directly.
 
 ---
 
 ## Original claim being verified (verbatim)
 
-From `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md`:
+From the design:
 
 > Line 75:
 > **Adopt [React Email v6](https://react.email) (`react-email@6` + `@react-email/components` + `@react-email/render` + `@react-email/ui`) paired with [`@react-email/editor@^1.6`](https://react.email/docs/editor/overview) (TipTap/ProseMirror visual editor that serializes to React Email components and exports email-ready HTML + plain text).**
@@ -27,7 +27,7 @@ From `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_084
 > }
 > ```
 
-The plan also states the render path runs in a Next.js 16 RSC server context (`backend/services/communication/email-template.service.ts`).
+The design also states the render path runs in a Next.js 16 RSC server context (`backend/services/communication/email-template.service.ts`).
 
 ---
 
@@ -148,13 +148,13 @@ bun add @react-email/editor
      export default config;
      ```
 
-     Only add this if an actual RSC error appears; the plan should not bake it in preemptively, but should mention it as a known fallback.
+     Only add this if an actual RSC error appears; the design should not bake it in preemptively, but should mention it as a known fallback.
 
 - The official `react-email` CLI dev server does not support async Server Components, but that does not affect programmatic `render()` calls from a backend service — only the standalone preview workspace.
 
 ---
 
-## Recommended adjustments to the plan
+## Recommended adjustments to the design
 
 1. **Line 75 — install set is wrong for v6.** Replace
    `react-email@6 + @react-email/components + @react-email/render + @react-email/ui`
@@ -177,7 +177,7 @@ bun add @react-email/editor
 
 5. **Optional: note the server-external-packages fallback.** Add a one-line note near the render implementation: "If a `ReactServerComponentsError: importing a component that imports react-dom/server` appears in the Next.js 16 build, add `react-email` to `serverExternalPackages` in `next.config.ts`." Do not add it preemptively.
 
-6. **`renderAsync` must not appear anywhere in the plan.** It was removed in current versions. The plan currently does not reference it, so no change needed — keep it that way.
+6. **`renderAsync` must not appear anywhere in the design.** It was removed in current versions. The design currently does not reference it, so no change needed — keep it that way.
 
 ---
 

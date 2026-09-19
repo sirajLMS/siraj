@@ -10,7 +10,8 @@
     "status": "حالة الجلسة",
     "statusPlaceholder": "جميع الحالات",
     "search": "ابحث عن معلم / طالب",
-    "clear": "مسح الفلاتر"
+    "clear": "مسح الفلاتر",
+    "clearSearch": "مسح البحث"
   },
   "column": {
     "scheduledStart": "بداية الجلسة",

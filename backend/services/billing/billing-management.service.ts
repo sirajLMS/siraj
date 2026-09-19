@@ -7,7 +7,7 @@ import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { invoices } from "@/backend/db/schema";
 import { AppPermission, InvoicePaymentSubmissionStatus } from "@/backend/enum";
-import { ForbiddenError, logger, NotFoundError } from "@/backend/lib";
+import { assertUuidShape, ForbiddenError, logger, NotFoundError } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   assertInvoiceBelongsToParentUser,
@@ -326,7 +326,7 @@ async function finalizeInvoicePaid(
     throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: existingInvoice.status }));
   }
 
-  const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tErrors, tx);
+  const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, submittedByUserId, tErrors, tx);
   await linkProofToInvoice(invoiceId, proofFileId, tx);
 
   const submittedAt = new Date();
@@ -404,7 +404,7 @@ export namespace BillingManagementService {
       actorUserId,
       invoiceId,
       async (tx, txErrors) => {
-        const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, txErrors, tx);
+        const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, actorUserId, txErrors, tx);
         await linkProofToInvoice(invoiceId, proofFileId, tx);
 
         const submittedAt = new Date();
@@ -633,6 +633,7 @@ export namespace BillingManagementService {
     context: UserPermissionContext | null,
     tErrors: ErrorsLabels
   ): Promise<Types.InvoiceSelectType> {
+    assertUuidShape(invoiceId, () => new NotFoundError("INVOICE", tErrors.billing.invoiceNotFound(invoiceId)));
     const invoice = await BillingRepository.getInvoiceById(invoiceId);
     if (!invoice) {
       throw new NotFoundError("INVOICE", tErrors.billing.invoiceNotFound(invoiceId));

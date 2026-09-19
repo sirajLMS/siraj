@@ -210,10 +210,10 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
             durationMinutes: 60,
             classType: "REGULAR",
             idempotencyKey: randomUUID(),
-            quotaDeducted: true,
           },
           tx
         );
+        await SchedulingRepository.setQuotaDeducted(created.id, true, tx);
         expect(created.id).toBeDefined();
       });
     });

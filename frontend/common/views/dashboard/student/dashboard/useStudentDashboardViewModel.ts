@@ -62,6 +62,7 @@ function useStudentDashboardLabels(t: StudentDashboardLabels): StudentDashboardL
       minutesShort: t.minutesShort,
       hoursShort: t.hoursShort,
       durationMinutesShort: t.durationMinutesShort,
+      widgets: t.widgets,
     }),
     [t]
   );

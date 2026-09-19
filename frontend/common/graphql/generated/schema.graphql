@@ -198,6 +198,7 @@ enum AppPermission {
   ACCOUNTING_PAYMENTS_VIEW
   ACCOUNTING_PAYROLL_MANAGE
   ACCOUNTING_PAYROLL_VIEW
+  ACCOUNTING_PROFITS_VIEW
   ACCOUNTING_REPORTS_MANAGE
   ACCOUNTING_REPORTS_VIEW
   APPRAISAL_FEEDBACK
@@ -2410,6 +2411,16 @@ enum FxSyncStatus {
   Success
 }
 
+"""
+FX-missing exclusion grouped by currency pair, powering the report's warning banner: rows kept in their original currency because no exchange rate was available
+"""
+type FxWarning {
+  id: ID
+  originalCurrency: CurrencyCode
+  rowCount: Int
+  targetCurrency: CurrencyCode
+}
+
 enum Gender {
   FEMALE
   MALE
@@ -2958,6 +2969,11 @@ type Mutation {
   addWhatsappTestRecipient(input: WhatsappTestRecipientAddInput!): WhatsappTestRecipient
   adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult
   adminRevokeMeetingProviderToken(input: AdminRevokeTokenInput!): AdminRevokeTokenResult
+
+  """
+  Anonymizes a person's PII and soft-deletes their user account. Irreversible.
+  """
+  anonymizeUser(confirmPassword: String!, userId: String!): Boolean
 
   """
   Apply an operator override (Refund / Calculated / Not Calculated / Partially) to a class instance's payroll calculation. The acting operator is resolved from the authenticated context and is never accepted as input.
@@ -4183,6 +4199,139 @@ enum ProfileScope {
   OWN
 }
 
+"""
+One expense-ledger row with the teacher name resolved for salary payouts and the amount converted into the target currency (null when the FX rate is missing)
+"""
+type ProfitLossExpenseRow {
+  convertedAmount: String
+  expenseCurrency: CurrencyCode
+  expenseValue: String
+  id: ID
+  note: String
+  paymentDate: DateTime
+  sourceEntity: String
+  sourceEntityId: ID
+  teacherName: String
+  title: String
+  type: ExpenseType
+}
+
+type ProfitLossExpensesAggregate {
+  dominantCurrency: CurrencyCode
+  excludedRowCount: Int
+  id: ID
+  rowCountByType: JSON
+  totalExpenses: String
+}
+
+"""
+One page of the Expenses tab plus aggregates over the whole accounting month, including per-type row counts
+"""
+type ProfitLossExpensesPage {
+  aggregate: ProfitLossExpensesAggregate
+  id: ID
+  rows: [ProfitLossExpenseRow!]
+  totalCount: Int
+}
+
+type ProfitLossIncomeAggregate {
+  dominantCurrency: CurrencyCode
+  excludedRowCount: Int
+  id: ID
+  totalIncomePayments: String
+}
+
+"""
+One page of the Income Payments tab plus aggregates over the whole accounting month; rows whose FX rate is missing are excluded from the sums and counted instead
+"""
+type ProfitLossIncomePage {
+  aggregate: ProfitLossIncomeAggregate
+  id: ID
+  rows: [ProfitLossIncomeRow!]
+  totalCount: Int
+}
+
+"""
+One income payment with the joined student and parent display fields, package and invoice provenance, and the amount converted into the target currency (null when the FX rate is missing)
+"""
+type ProfitLossIncomeRow {
+  amount: String
+  convertedAmount: String
+  currency: CurrencyCode
+  id: ID
+  invoiceId: ID
+  packageName: String
+  parentName: String
+  paymentDate: DateTime
+  paymentId: ID
+  paymentMethodType: PaymentMethodType
+  studentName: String
+}
+
+"""
+One completed class session in the Payments tab: joined teacher, student, and subject display fields, the student-side charge, the manual credit subtraction, and the teacher-side amount converted into the target currency (null when the FX rate is missing)
+"""
+type ProfitLossPaymentRow {
+  calculationStatus: CalculationStatus
+  convertedAmount: String
+  durationMinutes: Int
+  id: ID
+  instanceId: ID
+  manualSubtractCredits: String
+  manualSubtractCreditsCurrency: CurrencyCode
+  scheduledStartAt: DateTime
+  studentName: String
+  studentPaidAmount: String
+  studentPaidCurrency: CurrencyCode
+  subjectName: String
+  teacherName: String
+}
+
+type ProfitLossPaymentsAggregate {
+  dominantCurrency: CurrencyCode
+  excludedRowCount: Int
+  id: ID
+  totalOriginalCurrency: String
+  totalPayments: String
+}
+
+"""
+One page of the Payments tab plus aggregates over the whole accounting month; rows whose FX rate is missing are excluded from the sums and counted instead
+"""
+type ProfitLossPaymentsPage {
+  aggregate: ProfitLossPaymentsAggregate
+  id: ID
+  rows: [ProfitLossPaymentRow!]
+  totalCount: Int
+}
+
+"""
+Read-only profit & loss payload for one accounting month: the three tab pages, the executive summary, and the FX-exclusion warnings, all converted into the selected target currency
+"""
+type ProfitLossReport {
+  currency: CurrencyCode
+  expensesPage: ProfitLossExpensesPage
+  fxWarnings: [FxWarning!]
+  id: ID
+  incomePaymentsPage: ProfitLossIncomePage
+  month: String
+  paymentsPage: ProfitLossPaymentsPage
+  profitsSummary: ProfitLossSummary
+}
+
+"""
+Four-row executive summary over the selected month, all amounts as precision-safe decimal strings in the target currency; the margin is null when there is no payments base to divide by
+"""
+type ProfitLossSummary {
+  currency: CurrencyCode
+  id: ID
+  netProfit: String
+  netProfitMargin: String
+  totalExpenses: String
+  totalIncomePayments: String
+  totalPayments: String
+}
+
 type Query {
   """Get a single accounting payment by id"""
   accountingPayment(id: ID!): AccountingPayment
@@ -4408,6 +4557,22 @@ type Query {
   """List all permission catalog entries."""
   permissions: [Permission!]
   profileByUserId(userId: String!): UnifiedProfile
+
+  """
+  Read-only profit & loss payload for one accounting month: the three tab pages, the executive summary, and the FX-exclusion warnings, all converted into the selected target currency.
+  """
+  profitLossReport(
+    currency: CurrencyCode!
+    expensesLimit: Int = 50
+    expensesOffset: Int = 0
+    incomePaymentsLimit: Int = 50
+    incomePaymentsOffset: Int = 0
+
+    """Accounting month in YYYY-MM format."""
+    month: String!
+    paymentsLimit: Int = 50
+    paymentsOffset: Int = 0
+  ): ProfitLossReport
 
   """Get a specific quota by ID"""
   quota(id: ID!): Quota

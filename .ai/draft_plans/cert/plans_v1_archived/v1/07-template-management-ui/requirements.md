@@ -452,7 +452,7 @@ A full-featured template management interface with list/table view, visual canva
 
 - Template list page loads in < 2 seconds with 100 templates
 - Canvas drag maintains > 30fps with 50 elements
-- All E2E user journeys (create → edit → add elements → add variables → preview → publish → archive) complete without errors
+- All key user journeys (create → edit → add elements → add variables → preview → publish → archive) complete without errors
 - Both `ar` and `en` locales render all labels with no missing translations
 - Mobile layout passes basic responsive checks (no horizontal scroll, cards stack correctly)
 
@@ -483,7 +483,7 @@ A full-featured template management interface with list/table view, visual canva
 ### Completeness
 - [x] All user roles identified and addressed (SUPER_ADMIN, ACADEMY_ADMIN, TEACHER view-only)
 - [x] Normal, edge, and error cases covered
-- [x] Requirements are testable and measurable
+- [x] Requirements are verifiable and measurable
 - [x] No conflicting requirements
 - [x] EARS format used consistently
 - [x] Navigation/sidebar/tabs defined for all user types

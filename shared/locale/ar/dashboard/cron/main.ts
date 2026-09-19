@@ -115,6 +115,7 @@ export const dashboardCronAr: CronLabels = {
     concurrencyConflict: "هناك تشغيل قيد التنفيذ لهذه الجدولة بالفعل",
     queueBackendNotAvailable: "الواجهة الخلفية لقائمة الانتظار المكوَّنة غير متاحة",
     permissionDenied: "ليس لديك صلاحية إدارة جدولات كرون",
+    payloadTooLarge: "حمولة مهمة كرون كبيرة جداً. الحد الأقصى المسموح به هو 64 كيلوبايت.",
     invalidTimezone: tz => `منطقة زمنية غير صالحة: ${tz}`,
     runNotFound: id => `التشغيل غير موجود: ${id}`,
     manualTriggerConflict: "هناك تشغيل قيد التنفيذ لهذه الجدولة بالفعل",

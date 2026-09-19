@@ -30,6 +30,7 @@ import {
   PaymentMethodService,
   PermissionsService,
   ProfileService,
+  ProfitLossService,
   StaffProfileService,
   StorageService,
   StudentMonthlyReportService,
@@ -48,6 +49,7 @@ import type {
 import { SystemPermissionGroupSlug } from "@/shared/constants";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import type { ProfitLossLabels } from "@/shared/locale/types/dashboard/accounting";
 import {
   assignSystemGroup,
   expectJourneyError,
@@ -63,6 +65,19 @@ async function expectNotFound(fn: () => Promise<unknown>, expectedMessage: strin
   const error = await expectJourneyError(fn);
   expect(error.message).toContain(expectedMessage);
   return error;
+}
+
+/** Current accounting month in YYYY-MM form; requirePermission throws before labels are consumed. */
+function currentAccountingMonth(): string {
+  const now = new Date();
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Minimal labels stub for the P&L boundary tests — the permission gate rejects before month validation. */
+function assertIsProfitLossLabels(value: unknown): asserts value is ProfitLossLabels {
+  if (typeof value !== "object" || value == null) {
+    throw new Error("tLabelsStub must be an object");
+  }
 }
 
 /**
@@ -130,6 +145,14 @@ describe("Multi-account BOLA regression suite (parent/teacher/student/storage/bi
       throw new Error(`expected ForbiddenError, got ${error.constructor.name}: ${error.message}`);
     }
     return error;
+  }
+
+  function profitLossLabels(): ProfitLossLabels {
+    const stub = {
+      error: { monthInvalid: "invalid month", paginationInvalid: "invalid pagination" },
+    } satisfies Partial<ProfitLossLabels>;
+    assertIsProfitLossLabels(stub);
+    return stub;
   }
 
   /** Mirrors the `recordPayment` GraphQL resolver's `recordPayin` input shape. */
@@ -427,6 +450,18 @@ describe("Multi-account BOLA regression suite (parent/teacher/student/storage/bi
       );
       expect(hasPermission).toBe(false);
     });
+
+    test("Parent A cannot read the profit & loss report (accounting.profits_view denied by default)", async () => {
+      await expectForbidden(() =>
+        ProfitLossService.getReport(
+          cast.parentAUser.id,
+          { month: currentAccountingMonth(), currency: CurrencyCode.SAR },
+          {},
+          tErrors,
+          profitLossLabels()
+        )
+      );
+    });
   });
 
   describe("teacher default boundary", () => {
@@ -437,6 +472,18 @@ describe("Multi-account BOLA regression suite (parent/teacher/student/storage/bi
     test("Teacher A cannot open Teacher B's teacher-profile-for-edit (teacher_default holds no edit_other)", async () => {
       await expectDenied(() =>
         StaffProfileService.getTeacherProfileForEdit(cast.teacherAUser.id, cast.teacherB.id, "en")
+      );
+    });
+
+    test("Teacher A cannot read the profit & loss report (accounting.profits_view denied by default)", async () => {
+      await expectForbidden(() =>
+        ProfitLossService.getReport(
+          cast.teacherAUser.id,
+          { month: currentAccountingMonth(), currency: CurrencyCode.SAR },
+          {},
+          tErrors,
+          profitLossLabels()
+        )
       );
     });
   });
@@ -611,16 +658,26 @@ describe("Multi-account BOLA regression suite (parent/teacher/student/storage/bi
     });
 
     test("malformed (non-UUID) ids fail cleanly without leaking data", async () => {
-      await expectJourneyError(() => StudentProfileService.getProfile(cast.parentAUser.id, "not-a-uuid", tErrors));
-      await expectJourneyError(() =>
+      const profileError = await expectJourneyError(() =>
+        StudentProfileService.getProfile(cast.parentAUser.id, "not-a-uuid", tErrors)
+      );
+      const reportError = await expectJourneyError(() =>
         StudentMonthlyReportService.getMonthlyReport(cast.parentAUser.id, "not-a-uuid", REPORT_YEAR, REPORT_MONTH, "en")
       );
-      await expectJourneyError(() =>
+      const payinError = await expectJourneyError(() =>
         PaymentMethodService.recordPayin(payinInput("not-a-uuid", cast.methodBId), tErrors)
       );
-      await expectJourneyError(() =>
+      const submissionError = await expectJourneyError(() =>
         BillingManagementService.getInvoicePaymentSubmission(cast.parentAUser.id, "not-a-uuid", tErrors)
       );
+
+      for (const error of [profileError, reportError, payinError, submissionError]) {
+        expect(error).toBeInstanceOf(Error);
+        // Fail cleanly = a controlled domain error message, never an internal
+        // stack/SQL echo that would leak schema details.
+        expect(error.message.length).toBeGreaterThan(0);
+        expect(error.message).not.toContain("select");
+      }
     });
   });
 });

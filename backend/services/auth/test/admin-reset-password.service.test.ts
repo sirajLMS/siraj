@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { UserRepository } from "@/backend/db/repo/users";
+import { generateTestPassword } from "@/backend/db/test/test-utils";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum/notifications/notificationDeliveries.enum";
 import { logger } from "@/backend/lib/logger";
 import { AuthPasswordService } from "@/backend/services/auth/auth-password.service";
@@ -13,9 +14,6 @@ import { errorsEn } from "@/shared/locale/en/errors";
 const ACTOR_ID = randomUUID();
 const TARGET_ID = randomUUID();
 const tErrors = errorsEn;
-function generateTestPassword(): string {
-  return `TestPass-${randomUUID().slice(0, 8)}!`;
-}
 
 let testPassword: string;
 
@@ -28,7 +26,7 @@ function mockTargetUser() {
     id: TARGET_ID,
     name: "Target User",
     email: "target@example.com",
-    password: `TestPass-${randomUUID().slice(0, 8)}!`,
+    password: generateTestPassword(),
     status: "ACTIVATED" as const,
     isSuperAdmin: false,
     deletedAt: null,

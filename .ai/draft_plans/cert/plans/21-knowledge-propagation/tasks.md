@@ -284,15 +284,12 @@ Tasks grouped by wave (each wave runs as parallel subagents):
   - Include table of contents at top
 
 - **T5.2**: Write `docs/certificates/TESTING_PATTERNS.md`
-  - **Read before writing**: `siraj_analysis/10-testing-quality-patterns.md`, `backend/db/test/AGENTS.md`, `test/ui/AGENTS.md`, Plan 20 design.md and tasks.md
+  - **Read before writing**: `siraj_analysis/10-testing-quality-patterns.md`, `backend/db/test/AGENTS.md`, Plan 20 design.md and tasks.md
   - Section 1: Entity-setup helpers — helper table (Helper | Params | Returns | Notes)
   - Section 2: Repository tests — runInRollback description, tx propagation description, coverage requirement, file location table
   - Section 3: Service tests — mocked repos vs real DB description, parallel runner description
   - Section 4: GraphQL integration tests — testClient description, auth scope setup table, file locations
-  - Section 5: Component tests — renderWithWrapper description, MockLink description, fixture table
-  - Section 6: E2E tests — Playwright description, production server requirement, cert flow fixture table
-  - Section 7: Storybook stories — page-level and component-level description, mock store table
-  - Section 8: Cross-references to `.agents/instructions/tests.instructions.md`
+  - Section 5: Cross-references to `.agents/instructions/tests.instructions.md`
   - Include table of contents at top
 
 ### Quality Check
@@ -443,7 +440,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 - **T8.3**: Update `frontend/common/stores/AGENTS.md`
   - **Read before writing**: existing `frontend/common/stores/AGENTS.md`, `docs/certificates/FRONTEND_PATTERNS.md`
-  - Add "Certificate Stores" section with subsections: store list, naming, mock stores
+  - Add "Certificate Stores" section with subsections: store list, naming
   - Add cross-reference to `docs/certificates/FRONTEND_PATTERNS.md`
 
 - **T8.4**: Update `frontend/common/graphql/AGENTS.md`
@@ -532,7 +529,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 - **T10.3**: Update `.agents/instructions/tests.instructions.md`
   - **Read before writing**: existing `.agents/instructions/tests.instructions.md`
-  - Add certificate subsections: entity-setup helpers, repo tests, GraphQL tests, component tests, E2E tests, Storybook, gotchas
+  - Add certificate subsections: entity-setup helpers, repo tests, GraphQL tests, gotchas
   - Ensure subsections are additive
 
 ### Quality Check

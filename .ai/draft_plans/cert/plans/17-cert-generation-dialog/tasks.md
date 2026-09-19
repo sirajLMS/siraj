@@ -32,9 +32,7 @@ Phase 3: Tier Views + ViewModel + Container (T11–T14)
 
 Phase 4: Integration + Testing + Knowledge (T15–T19)
   T14 ──► T15 (Wire launch points into cert list + template detail)
-  T14 ──► T16 (Component tests)
-  T14 ──► T17 (E2E tests)
-  T15, T16, T17 ──► T18 (Accessibility audit)
+  T15 ──► T18 (Accessibility audit)
   T18 ──► T19 (Knowledge propagation + outcome)
 ```
 
@@ -391,7 +389,7 @@ Phase 4: Integration + Testing + Knowledge (T15–T19)
 - **Dependencies**: T10
 - **Estimated**: 3h
 
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T22 (Component Tests — 6 test files).
+> **Parallelizable**: This task runs as a subagent in Wave 9.
 
 ---
 
@@ -445,25 +443,17 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: T10 (Accessibility & Keyboard Nav), T21 (Wire Wizard into Cert List)
 - Rationale: T10 depends on T09 (Wave 7 complete); T21 depends on T20 (Wave 7 complete). No cross-dependency.
 
-### Wave 9: T11 (Phase 3 Knowledge), T22
-- Tasks: T11 (Knowledge Propagation & Documentation), T22 (Component Tests — 6 test files)
-- Rationale: T11 depends on T10 (Wave 8 complete); T22 depends on T21 (Wave 8 complete). No cross-dependency.
+### Wave 9: T11 (Phase 3 Knowledge)
+- Tasks: T11 (Knowledge Propagation & Documentation)
+- Rationale: T11 depends on T10 (Wave 8 complete).
 
-### Wave 10: T11 (Phase 5 Component Tests), T12, T13
-- Tasks: T11 (Component Tests — Round 2), T12 (E2E Tests — Round 2), T13 (Knowledge Propagation — Round 2)
-- Rationale: All three have no internal task dependencies (Phase 5 round 2 tasks). They can run as parallel subagents.
-
-### Wave 11: T23
-- Tasks: T23 (CsvUploadZone Component Tests)
-- Rationale: T23 depends on T18 (Wave 3 complete) and T22 (Wave 9 complete). Must wait for both.
-
-### Wave 12: T24
-- Tasks: T24 (E2E Tests — 6 tests)
-- Rationale: T24 depends on T21 (Wave 8 complete), T22 (Wave 9 complete), and T23 (Wave 11 complete).
+### Wave 10: T13
+- Tasks: T13 (Knowledge Propagation — Round 2)
+- Rationale: No internal task dependencies (Phase 5 round 2). Can run as a parallel subagent.
 
 ### Wave 13: T25
 - Tasks: T25 (Quality Loop Per File — V2)
-- Rationale: T25 depends on all Phase 6 + Phase 7 tasks (T14–T24) being complete.
+- Rationale: T25 depends on all Phase 6 + Phase 7 tasks (T14–T21) being complete.
 
 ### Wave 14: T26
 - Tasks: T26 (Knowledge Propagation — V2)
@@ -473,25 +463,21 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: T-R4-01 (CSV Column Mapper), T-R4-03 (Duplicate Detection Panel), T-R4-05 (Recipient Validation Panel), T-R4-07 (Progress Cancellation Enhancement), T-R4-12 (Email Notification Enhancement), T-R4-14 (Pre-Flight Validation), T-R4-18 (Performance Monitor + CSV Web Worker)
 - Rationale: All Round 4 component tasks that depend only on Phase 6 tasks (T17, T18, T19) which are complete by Wave 6. No interdependencies among them — each implements an independent feature panel. Store slice references are spec declarations, not hard ordering (T-R4-20 implements them).
 
-### Wave 16: T-R4-02, T-R4-04, T-R4-06, T-R4-08, T-R4-10, T-R4-13, T-R4-15, T-R4-16, T-R4-17
-- Tasks: T-R4-02 (CSV Column Mapper Tests), T-R4-04 (Duplicate Detection Tests), T-R4-06 (Recipient Validation Tests), T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (Generation Queue Dialog), T-R4-13 (Email Notification Tests), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), T-R4-17 (Error States Enhancement)
-- Rationale: Test tasks (T-R4-02, T-R4-04, T-R4-06, T-R4-13) depend on their component tasks from Wave 15. T-R4-08 depends on T-R4-07 (Wave 15 complete). T-R4-10 depends on T-R4-07 and T19 (Wave 15 + Wave 6 complete). T-R4-15 depends on T-R4-07 (Wave 15 complete). T-R4-16 and T-R4-17 depend on T14–T21 (Waves 1–8 complete) and T-R4-07 (Wave 15 complete). No cross-dependencies.
-
-### Wave 17: T-R4-09, T-R4-11, T-R4-19
-- Tasks: T-R4-09 (Cancellation + Failure Recovery Tests), T-R4-11 (Generation Queue Dialog Tests), T-R4-19 (Pre-Flight + Batch + Performance Tests)
-- Rationale: T-R4-09 depends on T-R4-07 and T-R4-08 (Wave 15 + Wave 16 complete). T-R4-11 depends on T-R4-10 (Wave 16 complete). T-R4-19 depends on T-R4-14, T-R4-15, and T-R4-18 (Wave 15 + Wave 16 complete). No cross-dependencies.
+### Wave 16: T-R4-08, T-R4-10, T-R4-15, T-R4-16, T-R4-17
+- Tasks: T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (Generation Queue Dialog), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), T-R4-17 (Error States Enhancement)
+- Rationale: T-R4-08 depends on T-R4-07 (Wave 15 complete). T-R4-10 depends on T-R4-07 and T19 (Wave 15 + Wave 6 complete). T-R4-15 depends on T-R4-07 (Wave 15 complete). T-R4-16 and T-R4-17 depend on T14–T21 (Waves 1–8 complete) and T-R4-07 (Wave 15 complete). No cross-dependencies.
 
 ### Wave 18: T-R4-20
 - Tasks: T-R4-20 (Zustand Store — Round 4 Slices)
 - Rationale: T-R4-20 implements all store slices needed by the Round 4 components. Depends on T14 (Wave 1 complete) and all T-R4-01 through T-R4-18 (Waves 15–17 complete). Must run after all component specs are finalized.
 
-### Wave 19: T-R4-21, T-R4-22, T-R4-23
-- Tasks: T-R4-21 (Mock Store for Storybook), T-R4-22 (E2E Tests — Round 4 Flows), T-R4-23 (i18n — Round 4 Translations)
-- Rationale: T-R4-21 depends on T-R4-20 (Wave 18 complete). T-R4-22 depends on T24 (Wave 12 complete) and all T-R4-01 through T-R4-19 (Waves 15–17 complete) and T-R4-20 (Wave 18 complete). T-R4-23 depends on all T-R4-01 through T-R4-19 (Waves 15–17 complete). All three can run in parallel.
+### Wave 19: T-R4-23
+- Tasks: T-R4-23 (i18n — Round 4 Translations)
+- Rationale: T-R4-23 depends on all T-R4-01 through T-R4-19 (Waves 15–17 complete).
 
 ### Wave 20: T-R4-24
 - Tasks: T-R4-24 (Knowledge Propagation — Round 4)
-- Rationale: T-R4-24 depends on T-R4-20 through T-R4-23 (Waves 18–19 complete). Must run after all R4 implementation and testing.
+- Rationale: T-R4-24 depends on T-R4-20 and T-R4-23 (Waves 18–19 complete). Must run after all R4 implementation.
 
 ### Final Wave: Knowledge Propagation & Quality Gate
 - Task: T-R4-25 (Quality Gate — Round 4 Full Pass)
@@ -546,35 +532,7 @@ This single command runs type checking, formatting, linting, and codescene code-
 
 ---
 
-## Phase 5: Testing & Knowledge Propagation (Round 2)
-
-### T11: Component Tests
-- [ ] Test wizard step navigation (forward/backward)
-- [ ] Test template selection state
-- [ ] Test recipient selection (individual, group, CSV modes)
-- [ ] Test CSV upload and preview parsing
-- [ ] Test variable mapping
-- [ ] Test options form
-- [ ] Test progress tracker display
-- [ ] Test cancel confirmation
-- [ ] Test partial failure retry
-- [ ] Test download all (ZIP)
-- File: `test/ui/components/cert-generation-dialog.test.tsx`
-- _Requirements: AC-17.37 through AC-17.56_
-- Quality Loop: `bun tsgo && bun biome:check && bun run lint --files test/ui/components/cert-generation-dialog.test.tsx`
-
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T12 (E2E Tests) and T13 (Knowledge Propagation).
-
-### T12: E2E Tests
-- [ ] Test full generation flow: select template → select recipients → map variables → set options → generate
-- [ ] Test CSV upload flow end-to-end
-- [ ] Test generation cancellation
-- [ ] Test partial failure and retry
-- File: `test/ui/e2e/cert-generation.spec.ts`
-- _Requirements: AC-17.37 through AC-17.56_
-- Quality Loop: `bun tsgo && bun biome:check`
-
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T11 (Component Tests) and T13 (Knowledge Propagation).
+## Phase 5: Knowledge Propagation (Round 2)
 
 ### T13: Knowledge Propagation
 - [ ] Create `docs/certificates/generation-pipeline.md` documenting:
@@ -588,7 +546,7 @@ This single command runs type checking, formatting, linting, and codescene code-
 - File: `docs/certificates/generation-pipeline.md`
 - _Requirements: AC-17.45, AC-17.46, AC-17.47, AC-17.48, AC-17.49, AC-17.50_
 
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T11 (Component Tests) and T12 (E2E Tests).
+> **Parallelizable**: This task runs as a subagent in Wave 10.
 
 ---
 
@@ -856,129 +814,7 @@ T20 ──► T21 (Integration: wire wizard into cert list)
 
 ---
 
-## Phase 7: V2 Testing (T22–T25)
-
-### T22: Component Tests (6 test files)
-
-- [ ] **Test file 1**: `test/ui/components/cert-generation/wizard/CertificateGenerationWizard.test.tsx`
-  - Test wizard opens/closes
-  - Test step navigation (Next/Back, disabled states)
-  - Test step validation gating (Next disabled when invalid)
-- [ ] **Test file 2**: `test/ui/components/cert-generation/wizard/Step1TemplateSelection.test.tsx`
-  - Test template gallery rendering
-  - Test search filtering
-  - Test template selection (radio single-select)
-  - Test refresh button
-  - Test loading/empty/error states
-  - Test variable list display with Required/Optional badges
-- [ ] **Test file 3**: `test/ui/components/cert-generation/wizard/Step2RecipientSelection.test.tsx`
-  - Test individual mode: add/remove recipient, bulk paste
-  - Test group mode: group selection + member preview
-  - Test recipient count badge
-  - Test validation (min 1 recipient)
-  - Test variable preview expansion
-- [ ] **Test file 4**: `test/ui/components/cert-generation/wizard/Step3VariableMapping.test.tsx`
-  - Test three-column layout
-  - Test auto-mapping (matched by name)
-  - Test manual mapping (select source)
-  - Test static value inputs (text, number, date, select)
-  - Test live preview cycling (next/prev recipient)
-  - Test validation (required variables must be mapped)
-  - Test optional unmapped warning
-  - Test resolution status icons (resolved/partial/missing)
-- [ ] **Test file 5**: `test/ui/components/cert-generation/wizard/Step4ReviewGenerate.test.tsx`
-  - Test summary card (template, recipients, mapping summary)
-  - Test options form (language, paper size, watermark, send email)
-  - Test advanced settings accordion (concurrent, quality, retry, verification page)
-  - Test generate button loading state
-- [ ] **Test file 6**: `test/ui/components/cert-generation/wizard/GenerationProgressView.test.tsx`
-  - Test progress bar (determinate value)
-  - Test live log panel rendering + auto-scroll
-  - Test stats cards (generated/failed/pending/in-progress)
-  - Test cancel button + confirmation dialog
-  - Test result screen (success, failed retry, view certificates, generate more)
-- [ ] All tests use Happy DOM + mocked Apollo + mocked store
-- [ ] Run per-file quality loop for each test file (full progressive chain: tsgo → biome → lint → codescene):
-  ```bash
-  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/CertificateGenerationWizard.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/Step1TemplateSelection.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/Step2RecipientSelection.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/Step3VariableMapping.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/Step4ReviewGenerate.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert-generation/wizard/GenerationProgressView.test.tsx --lifecycle codescene
-  ```
-- **Requirements**: AC-17.37 through AC-17.56
-- **Files created**: 6 test files under `test/ui/components/cert-generation/wizard/`
-- **Dependencies**: T21
-- **Estimated**: 8h
-
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T11 (Knowledge Propagation & Documentation).
-
-### T23: CsvUploadZone Component Tests
-
-- [ ] Create `test/ui/components/cert-generation/wizard/CsvUploadZone.test.tsx`
-- [ ] Test drag-and-drop file acceptance
-- [ ] Test file size validation (reject > 5MB)
-- [ ] Test row count validation (reject > 1000 rows)
-- [ ] Test CSV parsing + preview table (first 5 rows)
-- [ ] Test column mapping dialog auto-detection (name, email, phone)
-- [ ] Test manual column remapping
-- [ ] Test validation (name + email required)
-- [ ] Test template download link
-- [ ] Test error states (invalid CSV, missing columns)
-- [ ] Quality Loop: `bun tsgo && bun biome:check`
-- **Requirements**: REQ-17.16, REQ-17.17
-- **Files created**: `test/ui/components/cert-generation/wizard/CsvUploadZone.test.tsx`
-- **Dependencies**: T18, T22
-- **Estimated**: 3h
-
-### T24: E2E Tests (6 tests)
-
-- [ ] Create `test/ui/e2e/cert-generation-wizard.spec.ts`
-- [ ] **E2E Test 1: Full generation flow**
-  - Navigate to certificate list → click "Generate"
-  - Step 1: select a template → Next
-  - Step 2: add 2 individual recipients → Next
-  - Step 3: verify auto-mapped variables, leave defaults → Next
-  - Step 4: review summary → click "Generate Certificates"
-  - Progress view: wait for completion → verify success result screen
-  - Click "View Certificates" → verify navigation to certificate list
-- [ ] **E2E Test 2: CSV upload flow**
-  - Step 1: select template → Next
-  - Step 2: switch to individual tab → CSV upload
-  - Drag a test CSV file → verify preview table
-  - Complete column mapping → Apply
-  - Verify recipients populated from CSV → Next → complete generation
-- [ ] **E2E Test 3: Group selection**
-  - Step 1: select template → Next
-  - Step 2: switch to "Recipient Group" tab
-  - Select a group from dropdown → verify member count + preview
-  - Next → map variables → generate → verify success
-- [ ] **E2E Test 4: Variable mapping**
-  - Step 1: select a template with many variables → Next
-  - Step 2: add recipients (individual) → Next
-  - Step 3: verify auto-mapped variables (green)
-  - Manually map an unmapped variable to a recipient field
-  - Set a static value for another variable
-  - Use Next/Prev recipient to verify live preview
-  - Verify warning for unmapped optional variables → continue → generate
-- [ ] **E2E Test 5: Failed retry**
-  - Mock partial failure (some certificates fail during generation)
-  - Progress view: verify log shows ❌ entries
-  - Result screen: verify failed count
-  - Click "Retry Failed" → verify retry log entries → verify completion
-- [ ] **E2E Test 6: Cancel generation**
-  - Start generation (large batch)
-  - Progress view: wait for some certificates to process
-  - Click "Cancel" → verify confirmation dialog
-  - Confirm cancel → verify generation stops
-  - Verify partial result state
-- [ ] All E2E tests require `bun run build:test` first (production server)
-- [ ] Quality Loop: `bun tsgo && bun biome:check`
-- **Requirements**: AC-17.37 through AC-17.56
-- **Files created**: `test/ui/e2e/cert-generation-wizard.spec.ts`
-- **Dependencies**: T21, T22, T23
-- **Estimated**: 8h
+## Phase 7: V2 Quality + Knowledge (T25–T26)
 
 ### T25: Quality Loop Per File (V2)
 
@@ -997,11 +833,9 @@ T20 ──► T21 (Integration: wire wizard into cert list)
   - `frontend/views/dashboard/cert/certificates/generate/Step4ReviewGenerate.tsx`
   - `frontend/views/dashboard/cert/certificates/generate/GenerationProgressView.tsx`
   - `frontend/views/dashboard/cert/certificates/generate/CsvUploadZone.tsx`
-  - All 6 component test files
-  - 1 E2E test file
 - [ ] Run full quality gate at end: `bun quality-gate`
 - **Requirements**: All quality requirements
-- **Dependencies**: T14–T24
+- **Dependencies**: T14–T21
 - **Estimated**: 4h
 
 ### T26: Knowledge Propagation (V2)
@@ -1034,14 +868,14 @@ T20 ──► T21 (Integration: wire wizard into cert list)
 Phase 1 (Foundation): T01 → T02 → T03              (store + GraphQL + i18n)
 Phase 2 (6-step steps): T04 → T05 → T06 → T07 → T08 (4 step components + report)
 Phase 3 (6-step integration): T09 → T10 → T11        (integration + accessibility + knowledge)
-Phase 5 (6-step testing R2): T11–T13                 (component tests + E2E + knowledge)
+Phase 5 (Knowledge R2): T13                           (knowledge)
 Phase 6 (V2 4-step): T14 → T15 → T16 → T17 → T18 → T19 → T20 → T21 (store + 4 steps + progress + CSV + integration)
-Phase 7 (V2 testing): T22 → T23 → T24 → T25 → T26   (component tests + CSV tests + E2E + quality + knowledge)
+Phase 7 (V2 quality + knowledge): T25 → T26           (quality loop + knowledge)
 ```
 
-**Execution order**: T01, T03, T14 via parallel subagents → T02, T04, T15 via parallel subagents → T05, T18 via parallel subagents → T06, T16 via parallel subagents → T07, T17 via parallel subagents → T08, T19 via parallel subagents → T09, T20 via parallel subagents → T10, T21 via parallel subagents → T11, T22 via parallel subagents → T11, T12, T13 via parallel subagents → T23 → T24 → T25 → T26
+**Execution order**: T01, T03, T14 via parallel subagents → T02, T04, T15 via parallel subagents → T05, T18 via parallel subagents → T06, T16 via parallel subagents → T07, T17 via parallel subagents → T08, T19 via parallel subagents → T09, T20 via parallel subagents → T10, T21 via parallel subagents → T11 via parallel subagent → T13 via parallel subagent → T25 → T26
 
-Total: 26 tasks, ~88 hours estimated (Phases 1–3: 38h, Phases 5–7: 50h)
+Total: 22 tasks, ~69 hours estimated (Phases 1–3: 38h, Phases 5–7: 31h)
 
 ---
 
@@ -1097,27 +931,6 @@ Round 4 tasks implement the production hardening features described in the Round
 
 > **Parallelizable**: This task runs as a subagent in Wave 15 alongside T-R4-03 (DuplicateDetectionPanel), T-R4-05 (RecipientValidationPanel), T-R4-07 (Progress Cancellation Enhancement), T-R4-12 (Email Notification Enhancement), T-R4-14 (Pre-Flight Validation), and T-R4-18 (Performance Monitor + CSV Web Worker).
 
-#### T-R4-02: CsvColumnMapperDialog Tests
-
-- [ ] Create `test/ui/components/cert-generation/wizard/CsvColumnMapperDialog.test.tsx`
-- [ ] Test drag-and-drop mapping (simulate drag start + drop events)
-- [ ] Test auto-detection by header name (name, email, phone aliases)
-- [ ] Test fuzzy matching (Levenshtein ≤ 2)
-- [ ] Test manual override via `Select`
-- [ ] Test static value inputs (text, number, date, select variants)
-- [ ] Test mapping validation — required variables must be mapped
-- [ ] Test duplicate column detection (error when same column mapped twice)
-- [ ] Test unmapped optional variable warning (non-blocking)
-- [ ] Test mapping persistence (localStorage save/load)
-- [ ] Test "Reset to auto-detect" clears persisted mapping
-- [ ] Test preview rendering (first 3 rows)
-- [ ] Use Happy DOM + mocked Apollo + mocked store
-- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
-- [ ] **Dependencies**: T-R4-01
-- [ ] **Estimated**: 4h
-
-> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-04 (DuplicateDetectionPanel Tests), T-R4-06 (RecipientValidationPanel Tests), T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-13 (Email Notification Tests), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
-
 ### Phase R4-P2: Duplicate Detection (R4-2)
 
 #### T-R4-03: DuplicateDetectionPanel Component
@@ -1144,29 +957,10 @@ Round 4 tasks implement the production hardening features described in the Round
   ```
 - [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`
 - [ ] Create `backend/types/duplicateDetection.types.ts` with `DuplicateGroup`, `DuplicateResolution` types
-- [ ] **Dependencies**: T-R4-09 (store slice), T17 (Step2RecipientSelection)
+- [ ] **Dependencies**: T-R4-20 (store slices), T17 (Step2RecipientSelection)
 - [ ] **Estimated**: 5h
 
 > **Parallelizable**: This task runs as a subagent in Wave 15 alongside T-R4-01 (CsvColumnMapperDialog), T-R4-05 (RecipientValidationPanel), T-R4-07 (Progress Cancellation Enhancement), T-R4-12 (Email Notification Enhancement), T-R4-14 (Pre-Flight Validation), and T-R4-18 (Performance Monitor + CSV Web Worker).
-
-#### T-R4-04: DuplicateDetectionPanel Tests
-
-- [ ] Create `test/ui/components/cert-generation/wizard/DuplicateDetectionPanel.test.tsx`
-- [ ] Test detection: 2 recipients with same email → 1 group detected
-- [ ] Test detection by ID (no email)
-- [ ] Test bulk "Keep First" — removes all but first in each group
-- [ ] Test bulk "Keep Last" — removes all but last in each group
-- [ ] Test bulk "Keep All" — no removal
-- [ ] Test per-group resolution via `Select`
-- [ ] Test export duplicates CSV download
-- [ ] Test panel hidden when no duplicates
-- [ ] Test panel shown when duplicates exist
-- [ ] Use Happy DOM + mocked store
-- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
-- [ ] **Dependencies**: T-R4-03
-- [ ] **Estimated**: 3h
-
-> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-02 (CsvColumnMapperDialog Tests), T-R4-06 (RecipientValidationPanel Tests), T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-13 (Email Notification Tests), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
 
 ### Phase R4-P3: Recipient Validation (R4-3)
 
@@ -1208,27 +1002,6 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Estimated**: 6h
 
 > **Parallelizable**: This task runs as a subagent in Wave 15 alongside T-R4-01 (CsvColumnMapperDialog), T-R4-03 (DuplicateDetectionPanel), T-R4-07 (Progress Cancellation Enhancement), T-R4-12 (Email Notification Enhancement), T-R4-14 (Pre-Flight Validation), and T-R4-18 (Performance Monitor + CSV Web Worker).
-
-#### T-R4-06: RecipientValidationPanel Tests
-
-- [ ] Create `test/ui/components/cert-generation/wizard/RecipientValidationPanel.test.tsx`
-- [ ] Test email format validation (valid + invalid emails)
-- [ ] Test required field check (missing name → error)
-- [ ] Test phone validation in E.164 mode
-- [ ] Test name validation with "no special chars" enabled
-- [ ] Test error table rendering with row numbers
-- [ ] Test "Edit Row" button triggers `onFixRow`
-- [ ] Test export errors CSV download
-- [ ] Test validation settings (`Switch` toggles change validation behavior)
-- [ ] Test "Block generation on warnings" toggle
-- [ ] Test debounced validation (500ms delay)
-- [ ] Test summary banner severity changes (error/warning/success)
-- [ ] Use Happy DOM + mocked store
-- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
-- [ ] **Dependencies**: T-R4-05
-- [ ] **Estimated**: 4h
-
-> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-02 (CsvColumnMapperDialog Tests), T-R4-04 (DuplicateDetectionPanel Tests), T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-13 (Email Notification Tests), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
 
 ### Phase R4-P4: Progress Cancellation + Partial Failure (R4-4, R4-5)
 
@@ -1272,7 +1045,7 @@ Round 4 tasks implement the production hardening features described in the Round
     backend/types/generationWebSocket.types.ts --lifecycle codescene
   ```
 - [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`, `frontend/stores/AGENTS.md`
-- [ ] **Dependencies**: T19, T-R4-11 (store slice)
+- [ ] **Dependencies**: T19, T-R4-20 (store slices)
 - [ ] **Estimated**: 6h
 
 > **Parallelizable**: This task runs as a subagent in Wave 15 alongside T-R4-01 (CsvColumnMapperDialog), T-R4-03 (DuplicateDetectionPanel), T-R4-05 (RecipientValidationPanel), T-R4-12 (Email Notification Enhancement), T-R4-14 (Pre-Flight Validation), and T-R4-18 (Performance Monitor + CSV Web Worker).
@@ -1312,34 +1085,7 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Dependencies**: T-R4-07, T-R4-12 (store slice)
 - [ ] **Estimated**: 5h
 
-> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-02 (CsvColumnMapperDialog Tests), T-R4-04 (DuplicateDetectionPanel Tests), T-R4-06 (RecipientValidationPanel Tests), T-R4-10 (GenerationQueueDialog), T-R4-13 (Email Notification Tests), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
-
-#### T-R4-09: Cancellation + Failure Recovery Tests
-
-- [ ] Modify `test/ui/components/cert-generation/wizard/GenerationProgressView.test.tsx`
-- [ ] Test cancel button integrated in progress bar
-- [ ] Test confirmation dialog shows partial progress
-- [ ] Test "Keep Generating" dismisses dialog
-- [ ] Test "Cancel Generation" calls `cancelGeneration()` + WebSocket cancel
-- [ ] Test post-cancel state shows "Cancelled — N of M"
-- [ ] Test "Resume Generation" button
-- [ ] Test WebSocket message handling (progress, log, cancelled, completed, error)
-- [ ] Test polling fallback when WS disconnected
-- [ ] Create `test/ui/components/cert-generation/wizard/FailureRecoveryPanel.test.tsx`
-- [ ] Test failure summary card with category breakdown
-- [ ] Test failed recipients table rendering
-- [ ] Test "Retry This" per row
-- [ ] Test "Retry All Failed"
-- [ ] Test "Export Failed as CSV"
-- [ ] Test "Resume from Last Success"
-- [ ] Test "Skip Failed & Complete"
-- [ ] Test max retry limit (3 → `failed_final`)
-- [ ] Use Happy DOM + mocked Apollo + mocked store
-- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
-- [ ] **Dependencies**: T-R4-07, T-R4-08
-- [ ] **Estimated**: 5h
-
-> **Parallelizable**: This task runs as a subagent in Wave 17 alongside T-R4-11 (GenerationQueueDialog Tests) and T-R4-19 (Pre-Flight + Batch + Performance Tests).
+> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-10 (GenerationQueueDialog), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
 
 ### Phase R4-P5: Generation Queue (R4-6)
 
@@ -1389,30 +1135,10 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Instruction verification**: read `.agents/instructions/frontend.instructions.md`, `backend.instructions.md`
 - [ ] After GraphQL schema changes: `bun run generate:gqlSchema && bun codegen`
 - [ ] Create `backend/types/generationQueue.types.ts` with `GenerationJob`, `JobStatus`, `JobPriority` types
-- [ ] **Dependencies**: T-R4-13 (store slice), T19, T-R4-07
+- [ ] **Dependencies**: T-R4-20 (store slices), T19, T-R4-07
 - [ ] **Estimated**: 8h
 
-> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-02 (CsvColumnMapperDialog Tests), T-R4-04 (DuplicateDetectionPanel Tests), T-R4-06 (RecipientValidationPanel Tests), T-R4-08 (Partial Failure Recovery Panel), T-R4-13 (Email Notification Tests), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
-
-#### T-R4-11: GenerationQueueDialog Tests
-
-- [ ] Create `test/ui/components/cert-generation/wizard/GenerationQueueDialog.test.tsx`
-- [ ] Test queue list rendering with multiple jobs
-- [ ] Test status chip colors per status
-- [ ] Test priority change triggers mutation + re-sort
-- [ ] Test pause/resume actions
-- [ ] Test remove job action
-- [ ] Test reorder (up/down arrows)
-- [ ] Test "Start Now" moves to position 1
-- [ ] Test estimated time display
-- [ ] Test queueBadge count in wizard footer
-- [ ] Test WebSocket queue update handling
-- [ ] Use Happy DOM + mocked Apollo + mocked store
-- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
-- [ ] **Dependencies**: T-R4-10
-- [ ] **Estimated**: 4h
-
-> **Parallelizable**: This task runs as a subagent in Wave 17 alongside T-R4-09 (Cancellation + Failure Recovery Tests) and T-R4-19 (Pre-Flight + Batch + Performance Tests).
+> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-08 (Partial Failure Recovery Panel), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
 
 ### Phase R4-P6: Email Notification (R4-7)
 
@@ -1451,24 +1177,6 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Estimated**: 6h
 
 > **Parallelizable**: This task runs as a subagent in Wave 15 alongside T-R4-01 (CsvColumnMapperDialog), T-R4-03 (DuplicateDetectionPanel), T-R4-05 (RecipientValidationPanel), T-R4-07 (Progress Cancellation Enhancement), T-R4-14 (Pre-Flight Validation), and T-R4-18 (Performance Monitor + CSV Web Worker).
-
-#### T-R4-13: Email Notification Tests
-
-- [ ] Modify `test/ui/components/cert-generation/wizard/Step4ReviewGenerate.test.tsx`
-- [ ] Test "Send Email" switch toggles email section visibility
-- [ ] Test email template selector populates from query
-- [ ] Test email preview renders HTML
-- [ ] Test preview recipient cycling
-- [ ] Test "Send test email" calls mutation
-- [ ] Test "Send Later" switch shows `DateTimePicker`
-- [ ] Test "Track delivery" toggle
-- [ ] Test bounce handling: "Re-send email" appears for bounced recipients
-- [ ] Use Happy DOM + mocked Apollo
-- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
-- [ ] **Dependencies**: T-R4-12
-- [ ] **Estimated**: 3h
-
-> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-02 (CsvColumnMapperDialog Tests), T-R4-04 (DuplicateDetectionPanel Tests), T-R4-06 (RecipientValidationPanel Tests), T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-15 (Batch Control Enhancement), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
 
 ### Phase R4-P7: Pre-Flight + Batch Control + Accessibility + Errors + Performance (R4-8 through R4-12)
 
@@ -1530,7 +1238,7 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Dependencies**: T-R4-07, T-R4-16 (store slice)
 - [ ] **Estimated**: 5h
 
-> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-02 (CsvColumnMapperDialog Tests), T-R4-04 (DuplicateDetectionPanel Tests), T-R4-06 (RecipientValidationPanel Tests), T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-13 (Email Notification Tests), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
+> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-16 (Accessibility Enhancement), and T-R4-17 (Error States Enhancement).
 
 #### T-R4-16: Accessibility Enhancement
 
@@ -1572,7 +1280,7 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Dependencies**: T14–T21 (all wizard + step components), T-R4-07
 - [ ] **Estimated**: 6h
 
-> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-02 (CsvColumnMapperDialog Tests), T-R4-04 (DuplicateDetectionPanel Tests), T-R4-06 (RecipientValidationPanel Tests), T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-13 (Email Notification Tests), T-R4-15 (Batch Control Enhancement), and T-R4-17 (Error States Enhancement).
+> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-15 (Batch Control Enhancement), and T-R4-17 (Error States Enhancement).
 
 #### T-R4-17: Error States Enhancement
 
@@ -1608,7 +1316,7 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Dependencies**: T14–T21, T-R4-07
 - [ ] **Estimated**: 5h
 
-> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-02 (CsvColumnMapperDialog Tests), T-R4-04 (DuplicateDetectionPanel Tests), T-R4-06 (RecipientValidationPanel Tests), T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-13 (Email Notification Tests), T-R4-15 (Batch Control Enhancement), and T-R4-16 (Accessibility Enhancement).
+> **Parallelizable**: This task runs as a subagent in Wave 16 alongside T-R4-08 (Partial Failure Recovery Panel), T-R4-10 (GenerationQueueDialog), T-R4-15 (Batch Control Enhancement), and T-R4-16 (Accessibility Enhancement).
 
 #### T-R4-18: Performance Monitor + CSV Web Worker
 
@@ -1642,39 +1350,6 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Estimated**: 5h
 
 > **Parallelizable**: This task runs as a subagent in Wave 15 alongside T-R4-01 (CsvColumnMapperDialog), T-R4-03 (DuplicateDetectionPanel), T-R4-05 (RecipientValidationPanel), T-R4-07 (Progress Cancellation Enhancement), T-R4-12 (Email Notification), and T-R4-14 (Pre-Flight Validation).
-
-#### T-R4-19: Pre-Flight + Batch + Performance Tests
-
-- [ ] Create `test/ui/components/cert-generation/wizard/PreFlightCheckDialog.test.tsx`
-  - Test template status check (active/archived)
-  - Test variable coverage check
-  - Test image availability check (mock HEAD requests)
-  - Test font availability check
-  - Test "Preview First 3 Certificates"
-  - Test generate disabled on error
-- [ ] Create `test/ui/components/cert-generation/wizard/BatchControl.test.tsx` (can be in ProgressView test)
-  - Test auto-batch sizing for various recipient counts
-  - Test manual batch size via `Slider`
-  - Test dual-level progress bar
-  - Test batch log panel
-  - Test "Continue to next batch?" dialog
-  - Test memory monitoring + auto-pause
-- [ ] Create `test/ui/components/cert-generation/wizard/PerformanceMonitor.test.tsx`
-  - Test metric recording
-  - Test budget check
-  - Test budget violation snackbar
-  - Test repeated violations → persistent alert
-  - Test auto-optimization rules
-- [ ] Create `test/ui/components/cert-generation/wizard/csvParseWorker.test.ts`
-  - Test worker parses CSV correctly
-  - Test worker handles malformed CSV (reports line number)
-  - Test worker performance under load (mock large file)
-- [ ] Use Happy DOM + mocked Apollo + mocked store
-- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
-- [ ] **Dependencies**: T-R4-14, T-R4-15, T-R4-18
-- [ ] **Estimated**: 6h
-
-> **Parallelizable**: This task runs as a subagent in Wave 17 alongside T-R4-09 (Cancellation + Failure Recovery Tests) and T-R4-11 (GenerationQueueDialog Tests).
 
 ### Phase R4-P8: Zustand Store Slices + Knowledge Propagation
 
@@ -1720,80 +1395,6 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Dependencies**: T14 (store from Phase 6), all T-R4-01 through T-R4-18
 - [ ] **Estimated**: 4h
 
-#### T-R4-21: Mock Store for Storybook
-
-- [ ] Create `frontend/stores/mock/useGenerationStoreMock.ts`
-- [ ] Mock implementation of all Round 4 slices with sample data:
-  - Mock CSV mappings with 3 matched, 2 manual
-  - Mock duplicate groups (1 group of 2)
-  - Mock validation results (2 valid, 1 error, 1 warning)
-  - Mock recipient results (5 generated, 2 failed with different categories)
-  - Mock queue (3 jobs: queued, running, completed)
-  - Mock email delivery statuses (sent, delivered, bounced)
-  - Mock pre-flight checks (3 pass, 1 warning)
-  - Mock batch groups (3 groups, 2 completed, 1 processing)
-  - Mock performance metrics (within budget)
-- [ ] Used by Storybook stories + component tests
-- [ ] Read `frontend/stores/AGENTS.md`
-- [ ] **Quality Loop**:
-  ```bash
-  ~/.bun/bin/bun run scripts/health/sub-loop.ts frontend/stores/mock/useGenerationStoreMock.ts --lifecycle codescene
-  ```
-- [ ] **Dependencies**: T-R4-20
-- [ ] **Estimated**: 3h
-
-> **Parallelizable**: This task runs as a subagent in Wave 19 alongside T-R4-22 (E2E Tests — Round 4 Flows) and T-R4-23 (i18n — Round 4 Translations).
-
-#### T-R4-22: E2E Tests — Round 4 Flows
-
-- [ ] Modify `test/ui/e2e/cert-generation-wizard.spec.ts` — add Round 4 E2E tests:
-- [ ] **E2E Test 7: CSV column mapping**
-  - Step 1: select template → Next
-  - Step 2: switch to CSV upload → drag test CSV with misnamed columns
-  - Column mapping dialog: drag "full_name" → "name" variable, drag "e-mail" → "email"
-  - Apply mapping → verify recipients populated → complete generation
-- [ ] **E2E Test 8: Duplicate detection**
-  - Step 2: upload CSV with duplicate emails (3 rows, 2 duplicates)
-  - Verify duplicate panel appears with group
-  - Click "Keep First (All Groups)" → verify 1 recipient removed
-  - Complete generation
-- [ ] **E2E Test 9: Recipient validation**
-  - Step 2: add recipient with invalid email "not-an-email"
-  - Verify validation error banner appears
-  - Verify "Export Error Report" downloads CSV
-  - Fix email → verify error clears
-- [ ] **E2E Test 10: Cancel + resume**
-  - Start generation with 50 recipients
-  - Wait for ~10 to complete → click Cancel → confirm
-  - Verify "Cancelled — 10 of 50" state
-  - Click "Resume Generation" → verify remaining 40 processed
-- [ ] **E2E Test 11: Partial failure + retry**
-  - Mock 5 failures across categories
-  - Verify failure recovery panel with breakdown
-  - Click "Retry All Failed" → verify retry log entries → completion
-  - Click "Export Failed as CSV" → verify download
-- [ ] **E2E Test 12: Queue management**
-  - Queue 3 generation jobs (different templates)
-  - Open queue dialog → verify 3 jobs listed
-  - Change priority of job 2 to "urgent" → verify re-sort
-  - Pause running job → verify status change
-  - Resume job → verify completion
-- [ ] **E2E Test 13: Pre-flight + batch**
-  - Select template with missing image → verify pre-flight shows image warning
-  - Fix image → pre-flight passes → "Preview First 3"
-  - Set manual batch size to 10 → generate 30 recipients → verify 3 batches in log
-- [ ] **E2E Test 14: Email notification**
-  - Step 4: enable "Send Email" → select email template
-  - Click "Preview" → verify rendered email
-  - Click "Send test email" → verify toast
-  - Complete generation → verify email delivery status tracked
-- [ ] All E2E tests require `bun run build:test` first
-- [ ] **Quality Loop**: `bun tsgo && bun biome:check`
-- [ ] **Dependencies**: T24 (existing E2E), all T-R4-01 through T-R4-19
-- [ ] **Estimated**: 10h
-
-> **Parallelizable**: This task runs as a subagent in Wave 19 alongside T-R4-21 (Mock Store for Storybook) and T-R4-23 (i18n — Round 4 Translations).
-
 #### T-R4-23: i18n — Round 4 Translations
 
 - [ ] Create `shared/locale/en/certificates/generation-r4.ts`
@@ -1814,7 +1415,7 @@ Round 4 tasks implement the production hardening features described in the Round
 - [ ] **Dependencies**: All T-R4-01 through T-R4-19 (keys referenced by components)
 - [ ] **Estimated**: 4h
 
-> **Parallelizable**: This task runs as a subagent in Wave 19 alongside T-R4-21 (Mock Store for Storybook) and T-R4-22 (E2E Tests — Round 4 Flows).
+> **Parallelizable**: This task runs as a subagent in Wave 19.
 
 #### T-R4-24: Knowledge Propagation — Round 4
 
@@ -1843,7 +1444,6 @@ Round 4 tasks implement the production hardening features described in the Round
   - Performance monitor pattern
 - [ ] Update `frontend/stores/AGENTS.md` with:
   - Zustand slice composition pattern for large stores
-  - Mock store pattern for Round 4 state
 - [ ] Update root `AGENTS.md` Important References section with Round 4 additions
 - [ ] Update `.agents/instructions/frontend.instructions.md` with new conventions:
   - HTML5 Drag-and-Drop API pattern (no external library)
@@ -1851,7 +1451,7 @@ Round 4 tasks implement the production hardening features described in the Round
   - aria-live region pattern for progress announcements
 - [ ] Mark all Phase R4-P1 through R4-P8 tasks as `[x]` in this file
 - [ ] **Quality Loop**: `bun tsgo && bun biome:check` on all modified doc + AGENTS files
-- [ ] **Dependencies**: T-R4-20 through T-R4-23
+- [ ] **Dependencies**: T-R4-20, T-R4-23
 - [ ] **Estimated**: 4h
 
 #### T-R4-25: Quality Gate — Round 4 Full Pass
@@ -1861,11 +1461,6 @@ Round 4 tasks implement the production hardening features described in the Round
   bun quality-gate:fresh
   ```
 - [ ] Fix any tsgo, biome, lint, codescene, or sonar results issues
-- [ ] Run all tests:
-  ```bash
-  bun run test:ui:components   # Component tests
-  bun run build:test && bun run test:ui:e2e  # E2E tests
-  ```
 - [ ] Verify all Round 4 files pass progressive sub-loop:
   ```bash
   for f in $(find frontend/ -path "*certificates/generate/*" -name "*.tsx" -o -name "*.ts" | sort) \
@@ -1891,22 +1486,22 @@ Phase 2 (Steps): T04 → T05 → T06 → T07 → T08
 Phase 3 (Integration): T09 → T10 → T11
 Phase 5 (Testing R2): T11–T13
 Phase 6 (V2 4-step): T14 → T15 → T16 → T17 → T18 → T19 → T20 → T21
-Phase 7 (V2 Testing): T22 → T23 → T24 → T25 → T26
+Phase 7 (V2 quality + knowledge): T25 → T26
 
 Round 4 (Production Hardening):
-  R4-P1 (CSV Mapping):       T-R4-01 → T-R4-02
-  R4-P2 (Duplicates):       T-R4-03 → T-R4-04
-  R4-P3 (Validation):       T-R4-05 → T-R4-06
-  R4-P4 (Cancel + Failure): T-R4-07 → T-R4-08 → T-R4-09
-  R4-P5 (Queue):            T-R4-10 → T-R4-11
-  R4-P6 (Email):            T-R4-12 → T-R4-13
-  R4-P7 (Preflight+Batch+   T-R4-14 → T-R4-15 → T-R4-16 → T-R4-17 → T-R4-18 → T-R4-19
+  R4-P1 (CSV Mapping):       T-R4-01
+  R4-P2 (Duplicates):       T-R4-03
+  R4-P3 (Validation):       T-R4-05
+  R4-P4 (Cancel + Failure): T-R4-07 → T-R4-08
+  R4-P5 (Queue):            T-R4-10
+  R4-P6 (Email):            T-R4-12
+  R4-P7 (Preflight+Batch+   T-R4-14 → T-R4-15 → T-R4-16 → T-R4-17 → T-R4-18
          A11y+Errors+Perf):
-  R4-P8 (Store+Knowledge):  T-R4-20 → T-R4-21 → T-R4-22 → T-R4-23 → T-R4-24 → T-R4-25
+  R4-P8 (Store+Knowledge):  T-R4-20 → T-R4-23 → T-R4-24 → T-R4-25
 ```
 
-**Execution order**: T-R4-01, T-R4-03, T-R4-05, T-R4-07, T-R4-12, T-R4-14, T-R4-18 via parallel subagents → T-R4-02, T-R4-04, T-R4-06, T-R4-08, T-R4-10, T-R4-13, T-R4-15, T-R4-16, T-R4-17 via parallel subagents → T-R4-09, T-R4-11, T-R4-19 via parallel subagents → T-R4-20 → T-R4-21, T-R4-22, T-R4-23 via parallel subagents → T-R4-24 → T-R4-25
+**Execution order**: T-R4-01, T-R4-03, T-R4-05, T-R4-07, T-R4-12, T-R4-14, T-R4-18 via parallel subagents → T-R4-08, T-R4-10, T-R4-15, T-R4-16, T-R4-17 via parallel subagents → T-R4-20 → T-R4-23 via parallel subagent → T-R4-24 → T-R4-25
 
-Round 4 Total: 25 tasks, ~121 hours estimated
+Round 4 Total: 16 tasks, ~79 hours estimated
 
-Grand Total (all phases + Round 4): 51 tasks, ~209 hours
+Grand Total (all phases + Round 4): 38 tasks, ~148 hours

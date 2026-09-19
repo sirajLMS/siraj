@@ -11,7 +11,7 @@ import {
 import { teacherPayments } from "@/backend/db/schema";
 import { AppPermission, ProfileScope } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import { ForbiddenError, NotFoundError } from "@/backend/lib/errors";
+import { assertUuidShape, ForbiddenError, NotFoundError } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import { parsePaymentMethodDetails, userPaymentMethodSubmitInputSchema } from "@/backend/lib/payment-method.validation";
 import { encryptBankTransferDetails } from "@/backend/lib/payment-method-jsonb";
@@ -424,6 +424,17 @@ export namespace PaymentMethodService {
     tx?: DBTransaction,
     _locale?: string
   ) {
+    assertUuidShape(
+      input.invoiceId,
+      () => new NotFoundError("INVOICE", tErrors.billing.invoiceNotFound(input.invoiceId))
+    );
+    if (input.userPaymentMethodId) {
+      assertUuidShape(
+        input.userPaymentMethodId,
+        () =>
+          new NotFoundError("PAYMENT_METHOD", tErrors.billing.paymentMethodNotFound(input.userPaymentMethodId ?? ""))
+      );
+    }
     let snapshotSource:
       | { userPaymentMethodId: string }
       | { inline: Pick<UserPaymentMethodSubmitInput, "type" | "label" | "details"> };

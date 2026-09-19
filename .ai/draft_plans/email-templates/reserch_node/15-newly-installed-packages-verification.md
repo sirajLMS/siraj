@@ -1,6 +1,6 @@
 # Node-modules verification — newly installed packages (2026-08-02)
 
-**Scope:** Three packages the plan requires that were NOT installed at the time of the v1-v5 SWE reviews. Installed today via `bun add` (no version pins → latest) and verified against `node_modules`.
+**Scope:** Three required packages that were NOT installed at the time of the v1-v5 SWE reviews. Installed today via `bun add` (no version pins → latest) and verified against `node_modules`.
 
 **Bun runtime:** 1.3.14 (`~/.bun/bin/bun --version`)
 **Installation commands:**
@@ -20,7 +20,7 @@ Already installed (transitively or directly — confirmed NOT to reinstall):
 - `web-streams-polyfill` — present in `node_modules` (transitive)
 - `dompurify` — present in `node_modules` (peer dep of `isomorphic-dompurify`)
 - `@smithy/fetch-http-handler@^5.6.13` — already direct dep; ALSO pulled in transitively by `@aws-sdk/client-sesv2` (`package.json:44` in the SDK)
-- `@aws-sdk/client-ses` (SES v1) — already installed; plan keeps it for legacy paths
+- `@aws-sdk/client-ses` (SES v1) — already installed; kept for legacy paths
 
 ---
 
@@ -67,9 +67,9 @@ export { addHook, clearConfig, clearWindow, DOMPurify as default, isSupported,
   sanitize, setConfig, version };
 ```
 
-**Plan claim verification:**
+**Claim verification:**
 
-| Plan assumption | Verdict |
+| Assumption | Verdict |
 |---|---|
 | `import DOMPurify from "isomorphic-dompurify"` (default import) | ✅ `DOMPurify as default` — default export is the full `DOMPurify` interface |
 | `DOMPurify.sanitize(html, { ALLOWED_TAGS, ALLOWED_ATTR })` API shape | ✅ `sanitize` is typed as `DOMPurify["sanitize"]` — accepts the standard `Config` |
@@ -78,7 +78,7 @@ export { addHook, clearConfig, clearWindow, DOMPurify as default, isSupported,
 | `addHook`/`removeHook` for advanced sanitization | ✅ Re-exported from `dompurify` — same hook API |
 | SSR-safe (uses jsdom on Node, dompurify-direct on browser) | ✅ `browser.js` does NOT touch jsdom; `index.js` (Node) uses jsdom internally |
 
-**Bun runtime smoke test (Phase 0 GO/NO-GO gate — V4-6):**
+**Bun runtime smoke check (V4-6):**
 
 ```sh
 ~/.bun/bin/bun -e "import DOMPurify from 'isomorphic-dompurify'; ..."
@@ -111,9 +111,9 @@ script stripped: true
 onerror stripped: true
 ```
 
-**Phase 0 GO/NO-GO gate verdict: ✅ PASS — isomorphic-dompurify works under Bun 1.3.14. The fallback to jsdom + dompurify (V4-6) is NOT necessary. The plan's `safeRender()` wrapper can use `isomorphic-dompurify` directly.**
+**Verdict: ✅ PASS — isomorphic-dompurify works under Bun 1.3.14. The fallback to jsdom + dompurify (V4-6) is NOT necessary. A `safeRender()` wrapper can use `isomorphic-dompurify` directly.**
 
-**Caveat for implementer:** `isomorphic-dompurify` on the server makes a synchronous renderInContext call against jsdom. The jsdom instance is created lazily on first `sanitize()` call. Under Bun 1.3.14 this works (verified above), but test the first-call latency on cold starts — if it's >100ms, consider warming it at module load.
+**Caveat for implementer:** `isomorphic-dompurify` on the server makes a synchronous renderInContext call against jsdom. The jsdom instance is created lazily on first `sanitize()` call. Under Bun 1.3.14 this works (verified above), but check the first-call latency on cold starts — if it's >100ms, consider warming it at module load.
 
 ---
 
@@ -183,18 +183,18 @@ const command = new SendEmailCommand(input);
 const response = await client.send(command); // { MessageId: "STRING_VALUE" }
 ```
 
-**Plan claim verification (plan lines 138, 391):**
+**Claim verification:**
 
-| Plan assumption | Verdict |
+| Assumption | Verdict |
 |---|---|
 | `@aws-sdk/client-sesv2` exports `SESv2Client` + `SendEmailCommand` | ✅ Both exported as named exports from the package barrel |
-| SESv2 `SendEmailCommand` accepts `Content.Simple.Attachments[]` for native attachments | ✅ Confirmed in `SendEmailCommand.d.ts` JSDoc — exactly the shape the plan describes |
+| SESv2 `SendEmailCommand` accepts `Content.Simple.Attachments[]` for native attachments | ✅ Confirmed in `SendEmailCommand.d.ts` JSDoc — exactly the documented SESv2 shape |
 | Attachment fields: `RawContent: Uint8Array`, `FileName`, `ContentDisposition`, `ContentId`, `ContentType`, `ContentTransferEncoding` | ✅ All 7 fields present on the `Attachment` interface in models |
 | `ContentDisposition: "ATTACHMENT" \|\| "INLINE"` literal union | ✅ Exact literal union preserved |
 | `ContentTransferEncoding: "BASE64" \|\| "QUOTED_PRINTABLE" \|\| "SEVEN_BIT"` literal union | ✅ Exact literal union preserved |
-| Outbound cap is 10 MB | ✅ Documented (SESv2 quota, NOT 40 MB — plan v4 fix already corrected this) |
-| `SESv2Client` constructor accepts `requestHandler` for `@smithy/fetch-http-handler` Bun-safe wiring | ✅ `requestHandler?: __HttpHandlerUserInput` exists on `SESv2ClientConfig` — plan line 393 claim holds |
-| `@smithy/fetch-http-handler` is included transitively so plan line 393 wiring works | ✅ Listed in `client-sesv2/package.json:44` as a direct SDK dep — installing `@aws-sdk/client-sesv2` brings it along |
+| Outbound cap is 10 MB | ✅ Documented (SESv2 quota, NOT 40 MB) |
+| `SESv2Client` constructor accepts `requestHandler` for `@smithy/fetch-http-handler` Bun-safe wiring | ✅ `requestHandler?: __HttpHandlerUserInput` exists on `SESv2ClientConfig` |
+| `@smithy/fetch-http-handler` is included transitively, so the wiring works | ✅ Listed in `client-sesv2/package.json:44` as a direct SDK dep — installing `@aws-sdk/client-sesv2` brings it along |
 | Default AWS credential chain (`@aws-sdk/credential-provider-node`) ships in-box | ✅ Confirmed in `package.json:38` — no `@aws-sdk/credential-providers` peer install needed |
 
 **Integration pattern (verified — implementer copy-paste):**
@@ -239,7 +239,7 @@ const { MessageId } = await sesv2.send(cmd);
 - `TooManyRequestsException` (client fault)
 - Base: `SESv2ServiceException`
 
-Adapter should map these to a typed `EmailProviderError` enum (or similar) per the plan's `EmailProviderName` union (todo 4).
+Adapter should map these to a typed `EmailProviderError` enum (or similar) keyed by `EmailProviderName`.
 
 ---
 
@@ -271,9 +271,9 @@ export = NextBundleAnalyzer
 
 **Direct dependency:** `webpack-bundle-analyzer@4.10.1` (bundling visualization library).
 
-**Plan claim verification (todo 20b, V5-9):**
+**Claim verification:**
 
-| Plan assumption | Verdict |
+| Assumption | Verdict |
 |---|---|
 | `@next/bundle-analyzer` not installed — install first as dev dep | ✅ Installed today as devDependency |
 | Run via `NEXT_BUNDLE_ANALYZER=enabled bun run build` | ✅ Package convention: `enabled` flag toggles the analyzer. The exported `NextBundleAnalyzer({ enabled })` returns a wrapper that wraps the user `NextConfig`; the analyzer becomes active when `process.env.NEXT_BUNDLE_ANALYZER` is set (matching its option's `enabled` flag) |
@@ -308,17 +308,17 @@ Then run `NEXT_BUNDLE_ANALYZER=enabled bun run build` to produce the report. The
 
 ## 4. Cross-cutting findings
 
-### 4.1 Plan-line corrections still needed (NONE — all already addressed by v5 review)
+### 4.1 Corrections still needed (NONE — all already addressed by v5 review)
 - All three packages were noted as missing by prior SWE reviews:
-  - `isomorphic-dompurify` — v2 review (V2-5) → v3 (V3-15) → v4 (V4-6 Phase 0 gate) — now installed + Phase 0 verified ✅
+  - `isomorphic-dompurify` — v2 review (V2-5) → v3 (V3-15) → v4 (V4-6) — now installed + verified ✅
   - `@aws-sdk/client-sesv2` — v1 review originally + v4 (V4-6 missing dep note) — now installed ✅
   - `@next/bundle-analyzer` — v5 (V5-9) "not installed" — now installed ✅
 
 ### 4.2 `@smithy/fetch-http-handler` is NOT a peer dep of `@aws-sdk/client-sesv2`
 The SDK lists it as a direct runtime dep (not peer) — so installing `@aws-sdk/client-sesv2` brings it along automatically. The repo also keeps a direct dep on it (line 95 of `package.json`) for explicit Bun-safety intent. No removal needed.
 
-### 4.3 Bun compatibility — Phase 0 GO/NO-GO gate verdict summary
-| Test | Result |
+### 4.3 Bun compatibility — verification summary
+| Check | Result |
 |---|---|
 | `import DOMPurify from 'isomorphic-dompurify'` under Bun | ✅ works |
 | `DOMPurify.sanitize(dirtyHtml, config)` under Bun | ✅ sanitizes correctly (strips `<script>`, `onerror`) |
@@ -326,30 +326,12 @@ The SDK lists it as a direct runtime dep (not peer) — so installing `@aws-sdk/
 | `import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2"` | ✅ compiles + imports cleanly |
 | `import NextBundleAnalyzer from "@next/bundle-analyzer"` | ✅ imports cleanly |
 
-The Phase 0 gate (todo 21b) is **GREEN** — `safeRender()` can use `isomorphic-dompurify` directly. No jsdom fallback wiring needed.
+The verdict is **GREEN** — `safeRender()` can use `isomorphic-dompurify` directly. No jsdom fallback wiring needed.
 
 ### 4.4 Recommended `bun.lockb` / `package.json` state after install
 - Added to `dependencies`: `"isomorphic-dompurify": "^3.21.0"`, `"@aws-sdk/client-sesv2": "^3.1101.0"`
 - Added to `devDependencies`: `"@next/bundle-analyzer": "^16.2.12"`
 - Net new package count (transitive): `isomorphic-dompurify` + 0 transitive (dompurify already present); `@aws-sdk/client-sesv2` net-new tree (78 deps); `@next/bundle-analyzer` + 1 dep (`webpack-bundle-analyzer@4.10.1`)
-
-### 4.5 SWE plan line references (for traceability)
-- todo 1 (line ~140): `bun add ... @aws-sdk/client-sesv2` — ✅ done
-- todo 12 (line ~62): `DOMPurify (isomorphic-dompurify)` defense-in-depth — ✅ import verified
-- todo 12a (line ~66): CSP hardening of preview iframe — unaffected by package install
-- todo 20b (line ~107): `@next/bundle-analyzer` install step — ✅ done
-- todo 21b (line ~118): Phase 0 GO/NO-GO gate for isomorphic-dompurify — ✅ PASSED
-- todo 21c (line ~122): `EMAIL_TEMPLATES_ENABLED` env flag — uses `getBooleanEnv`, not tied to these packages
-- V5-4 (line ~943): existing `email-templates.ts` migration — unaffected by package install
-- V5-7 (line ~866): i18n server path clarification — unaffected
-- V5-10 (line ~72): `notificationEventId` metadata key decision — unaffected
-
-### 4.6 Plan updates recommended after this research
-- **todo 21b note (line ~120):** change "MUST verify before any implementation" → "VERIFIED 2026-08-02 — `isomorphic-dompurify@3.21.0` Bun smoke (sanitize + script/onerror stripping) PASSED. Phase 0 gate is GREEN."
-- **todo 1 (line ~140):** mark `@aws-sdk/client-sesv2`, `isomorphic-dompurify` as installed; only `@react-email/ui` (optional dev) remains uninstalled, defer until standalone preview server is needed.
-- **todo 20b (line ~107):** mark `@next/bundle-analyzer` as installed; renamve the "install first" instruction to "installed — see `.ai/plans/email-templates/reserch_node/15-newly-installed-packages-verification.md`".
-
-No functional code edits to the plan are required — the v5 review's recommendation to apply Phase 0 fixes (V5-1, V5-2) remains the only plan-text work. The package install is additive infrastructure.
 
 ---
 
@@ -365,7 +347,7 @@ No functional code edits to the plan are required — the v5 review's recommenda
    },
 ```
 
-## Appendix B — Bun smoke test command (reproducible)
+## Appendix B — Bun smoke command (reproducible)
 
 ```sh
 ~/.bun/bin/bun -e "
@@ -393,8 +375,8 @@ onerror stripped: true
 The full `SendEmailCommand.d.ts` JSDoc embedded in the package (truncated here for size) has an end-to-end working example. See `node_modules/@aws-sdk/client-sesv2/dist-types/commands/SendEmailCommand.d.ts` lines 14-83 for the authoritative example. Adapt it directly into `backend/services/communication/channels/email/adapters/SESv2EmailAdapter.ts`.
 
 ## Appendix D — Files NOT installed or not required
-- `jsdom` — plan's V4-6 fallback; NOT needed because isomorphic-dompurify works under Bun. Listed only as a contingency in the plan.
+- `jsdom` — the V4-6 fallback; NOT needed because isomorphic-dompurify works under Bun. Listed only as a contingency.
 - `dompurify` — already installed transitively (peer of `isomorphic-dompurify`). Not directly required.
 - `web-streams-polyfill` — already installed (transitive). Used by client-side preview iframe (Safari polyfill), not server bundle.
-- `@react-email/ui` — only needed for the standalone `react-email dev` preview server. Plan recommends deferring until actually needed (todo 1 line ~140 says "optional").
+- `@react-email/ui` — only needed for the standalone `react-email dev` preview server; deferring until actually needed is recommended (it's optional).
 - `@aws-sdk/credential-providers` — NOT needed because `@aws-sdk/client-sesv2` ships `@aws-sdk/credential-provider-node` (default chain) as a direct runtime dep. See Appendix in section 2 above.

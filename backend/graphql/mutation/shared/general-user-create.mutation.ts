@@ -9,8 +9,10 @@ gqlSchemaBuilder.mutationField("createGeneralUser", t =>
     type: GeneralUserCreateResultPothosObject,
     description: "Create a new user with a non-specialized permission group",
     authScopes: {
-      permission: AppPermission.STAFF_CREATE,
-      notImpersonating: true,
+      $all: {
+        permission: AppPermission.STAFF_CREATE,
+        notImpersonating: true,
+      },
     },
     args: {
       input: t.arg({ type: GeneralUserCreateInputPothosObject, required: true }),

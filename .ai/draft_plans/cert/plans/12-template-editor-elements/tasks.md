@@ -62,17 +62,14 @@ Task 16 (Element Properties Panel)    Task 17 (Alignment Guide Engine)  Task 18 
   │                              Task 19 (Multi-Select Toolbar)         │
   │                                    │                                │
   ▼                                    ▼                                ▼
-Task 20 (Element Library Palette) ─── Task 22 (Drag-and-Drop Palette → Canvas)
-  │                                        │
-  ▼                                        ▼
-Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
-                                           │
-                                           ▼
-                                     Task 25 (Quality Loop Per File)
-                                           │
-                                           ▼
-                                     Task 26 (Knowledge Propagation — New Components)
-                                           │
+Task 20 (Element Library Palette) ──── Task 22 (Drag-and-Drop Palette → Canvas)
+                                             │
+                                             ▼
+                                       Task 25 (Quality Loop Per File)
+                                             │
+                                             ▼
+                                       Task 26 (Knowledge Propagation — New Components)
+                                             │
                                            ▼
                                      Task 27 (Comprehensive Testing — Original)
 ```
@@ -105,13 +102,11 @@ Task 23 (Component Tests: 6 files) ── Task 24 (E2E Tests: 6 tests)
 | 20 | Element Library Palette (Left Sidebar) | 4, 21 | 4 |
 | 21 | Extended Zustand Element Store (Clipboard, Groups, History) | 2 | 4 |
 | 22 | Drag-and-Drop from Palette to Canvas | 11, 20, 21 | 2 |
-| 23 | Component Tests for New Components (6 test files) | 16–22 | 8 |
-| 24 | E2E Tests for Interactive Editor Workflows (6 tests) | 16–22 | 6 |
-| 25 | Quality Loop Per File | 16–24 | 3 |
+| 25 | Quality Loop Per File | 16–22 | 3 |
 | 26 | Knowledge Propagation (New Components) | 16–25 | 2 |
 | 27 | Comprehensive Testing (Original) | 1–14 complete | 24 |
 
-**Execution order**: T1 → T2 → T3, T21 (via parallel subagents) → T4, T8 (via parallel subagents) → T5 → T6 → T7 → T9, T10, T12 (via parallel subagents) → T11 → T13, T14 (via parallel subagents) → T15 → T16, T17, T18, T19, T20, T27 (via parallel subagents) → T22 → T23, T24 (via parallel subagents) → T25 → T26
+**Execution order**: T1 → T2 → T3, T21 (via parallel subagents) → T4, T8 (via parallel subagents) → T5 → T6 → T7 → T9, T10, T12 (via parallel subagents) → T11 → T13, T14 (via parallel subagents) → T15 → T16, T17, T18, T19, T20, T27 (via parallel subagents) → T22 → T25 → T26
 
 ---
 
@@ -171,13 +166,9 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: T22
 - Rationale: Depends on T11 + T20 + T21 — single convergent task
 
-### Wave 14: T23, T24
-- Tasks: T23, T24
-- Rationale: Both depend on Tasks 16–22 — independent of each other (component tests vs E2E tests), can run in parallel
-
-### Wave 15: T25
+### Wave 14: T25
 - Tasks: T25
-- Rationale: Quality loop depends on Tasks 16–24 — must wait for all prior waves
+- Rationale: Quality loop depends on Tasks 16–22 — must wait for all prior waves
 
 ### Final Wave: Knowledge Propagation
 - Task: T26
@@ -1345,182 +1336,11 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 ---
 
-## Task 23 — Component Tests for New Components (6 test files)
-
-**Goal**: Create component tests (Happy DOM + mocked Apollo) for the six new components from Tasks 16–22.
-
-> **Parallelizable**: This task runs as a subagent in Wave 14 alongside T24.
-
-**Files to Create:**
-- `test/ui/components/cert/templates/editor/ElementPropertiesPanel.test.tsx`
-- `test/ui/components/cert/templates/editor/AlignmentGuides.test.tsx`
-- `test/ui/components/cert/templates/editor/ElementContextMenu.test.tsx`
-- `test/ui/components/cert/templates/editor/MultiSelectToolbar.test.tsx`
-- `test/ui/components/cert/templates/editor/ElementLibrary.test.tsx`
-- `test/ui/components/cert/templates/editor/PaletteDropZone.test.tsx`
-
-**Subtasks:**
-
-### 23a — ElementPropertiesPanel.test.tsx
-1. Renders Position & Size accordion (expanded) with X/Y/Width/Height/Rotation/lock-aspect-ratio inputs
-2. Renders Appearance accordion with opacity slider, border radius (shapes only), shadow dropdown, z-index buttons
-3. Renders Element-Specific accordion with type-specific fields for each element type (text, image, shape, qr_code, signature, background)
-4. Shows empty state when no element selected
-5. Shows multi-select badge + batch actions when 2+ elements selected
-6. Rotates slider fires `updateElement` with new rotation value
-7. Z-index buttons call correct store actions (`bringToFront`, etc.)
-
-### 23b — AlignmentGuides.test.tsx
-1. `computeSmartGuides` returns a vertical line when dragged element center aligns with candidate center (within threshold)
-2. `computeEdgeGuides` returns lines for matched top/bottom/left/right edges
-3. `computeDistributionGuides` returns indicators when 3+ elements have equal gaps
-4. `computePageGuides` returns center + edge guides for the canvas
-5. `snapToGuides` clamps position to nearest guide when within threshold
-6. Component renders null when `interactionState` is idle
-7. Guide color is `theme.palette.primary.main` at 0.5 opacity
-
-### 23c — ElementContextMenu.test.tsx
-1. Opens at cursor position on right-click
-2. All menu items render with correct labels and shortcuts
-3. Cut/Copy/Paste/Duplicate/Delete call correct store actions
-4. Z-order items (bring forward/back/to front/to back) call correct actions
-5. Align submenu shows 6 alignment options
-6. Distribute submenu shows horizontal/vertical
-7. Group/Ungroup items call correct actions
-8. Disabled states: Paste disabled when clipboard empty, Align disabled with < 2 selected, Distribute disabled with < 3 selected
-9. Keyboard navigation works (arrows, Enter, Escape)
-10. Menu position clamped to viewport edges
-
-### 23d — MultiSelectToolbar.test.tsx
-1. Renders when 2+ elements selected; hidden otherwise
-2. 6 align buttons call `alignElements` with correct alignment values
-3. 2 distribute buttons call `distributeElements`; disabled when < 3 selected
-4. Group button calls `group()`
-5. Same Size button calls `matchSize(firstSelectedId)`
-6. Delete button calls `deleteElements()`
-7. Bounding box is dashed rectangle around all selected elements
-8. SelectionRectangle: marquee drag selects intersecting elements on pointerup
-
-### 23e — ElementLibrary.test.tsx
-1. Renders four collapsible sections (Text, Media, Shapes, Background)
-2. Each section contains correct palette items with icon + i18n label
-3. Click on Heading palette item calls `addElement('static_text', centerPos, headingDefaults)`
-4. Drag start sets `DataTransfer` payload with `{ elementType, defaults }` JSON
-5. Items with unimplemented backend types render disabled with "Coming soon" tooltip
-6. First section expanded by default
-7. All labels from i18n (no hardcoded strings)
-
-### 23f — PaletteDropZone.test.tsx
-1. Drop with valid payload calls `addElement` at converted canvas coordinates
-2. Drop position clamped within canvas bounds
-3. New element auto-selected after drop
-4. Drop with no payload (or invalid JSON) is ignored
-5. Dragover sets `preventDefault` (drop allowed)
-
-**Instruction Verification:**
-- Read: `test/ui/AGENTS.md` — component tests use Happy DOM, no server
-- Read: `.agents/instructions/tests.instructions.md`
-- Read: `.agents/instructions/frontend.instructions.md`
-- Mock Apollo with `MockedProvider`; mock Zustand store with `createMockStore` pattern
-- No `console.*` in tests (use `logger`)
-- All test files follow naming convention: `*.test.tsx`
-
-**Quality Loop:**
-- `bun run test:ui:components` for component tests
-- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle codescene` on each test file
-- Target: 90%+ line coverage for each new component
-
----
-
-## Task 24 — E2E Tests for Interactive Editor Workflows (6 tests)
-
-**Goal**: Create end-to-end tests (Playwright, production server) for the interactive editor workflows involving the new components: adding elements, dragging, multi-select align, context menu, undo/redo.
-
-> **Parallelizable**: This task runs as a subagent in Wave 14 alongside T23.
-
-**Depends On**: Tasks 16–22 complete
-
-**Files to Create:**
-- `test/ui/e2e/cert/templates/editor/TemplateEditorAddTextElement.e2e.test.ts`
-- `test/ui/e2e/cert/templates/editor/TemplateEditorAddImage.e2e.test.ts`
-- `test/ui/e2e/cert/templates/editor/TemplateEditorDragElement.e2e.test.ts`
-- `test/ui/e2e/cert/templates/editor/TemplateEditorMultiSelectAlign.e2e.test.ts`
-- `test/ui/e2e/cert/templates/editor/TemplateEditorContextMenu.e2e.test.ts`
-- `test/ui/e2e/cert/templates/editor/TemplateEditorUndoRedo.e2e.test.ts`
-
-**Subtasks:**
-
-### 24a — Add Text Element
-1. Navigate to template editor
-2. Click "Heading" in the Element Library palette
-3. Verify a new `static_text` element appears at canvas center with 32px default font
-4. Verify the ElementPropertiesPanel shows the element's properties
-5. Verify the element is auto-selected (selection outline visible)
-
-### 24b — Add Image
-1. Navigate to template editor
-2. Drag "Image" from Element Library palette to the canvas at a specific position
-3. Verify the image element is created at the drop position (not canvas center — drag was used)
-4. Verify the Image-specific properties form shows (source URL, fit mode, border radius, opacity)
-5. Enter a URL in the source field and verify the canvas renders the image preview
-
-### 24c — Drag Element
-1. Navigate to template editor with a pre-existing element
-2. Click the element to select it
-3. Drag it 50px to the right
-4. Verify the ElementPropertiesPanel X input updates to the new position
-5. Verify alignment guides appear when the element center aligns with the canvas center
-6. Verify the element snaps to the center guide (within 5px threshold)
-7. Verify guides disappear after drag end
-
-### 24d — Multi-Select Align
-1. Add 3 elements (text, image, shape) to the canvas
-2. Shift+click to select all 3
-3. Verify the MultiSelectToolbar appears above the bounding box
-4. Click "Align Left"
-5. Verify all 3 elements have the same left X coordinate
-6. Click "Distribute Horizontally"
-7. Verify the horizontal gaps between elements are equal (within 1px tolerance)
-8. Verify the context menu "Distribute" submenu is now enabled (3+ selected)
-
-### 24e — Context Menu
-1. Add an element to the canvas
-2. Right-click the element
-3. Verify the context menu opens at cursor position
-4. Click "Duplicate" — verify a duplicate element appears offset by 10px
-5. Right-click again, click "Bring to Front" — verify the element moves to top z-order
-6. Right-click, hover "Align ▸", click "Center" — verify element centers horizontally on canvas
-7. Press Escape — verify context menu closes
-
-### 24f — Undo/Redo
-1. Add a text element (this is the first history entry)
-2. Move it to a new position (history entry 2)
-3. Change the font size in properties (history entry 3)
-4. Press Ctrl+Z — verify font size reverts to default
-5. Press Ctrl+Z — verify position reverts to original
-6. Press Ctrl+Z — verify element is deleted (addElement command undone)
-7. Press Ctrl+Shift+Z (redo) — verify element reappears
-8. Press Ctrl+Z another 2x — verify position and font size are restored
-
-**Instruction Verification:**
-- Read: `test/ui/AGENTS.md` — E2E tests use production server (.next-test-prod)
-- Read: `.agents/instructions/tests.instructions.md`
-- `bun run build:test` MUST run before `bun run test:ui:e2e`
-- Playwright selectors use `getByRole` / `getByLabel` (a11y-friendly, per test/ui/AGENTS.md)
-- No `console.*` in tests
-- Each test file is independent (creates its own test data; does not depend on test ordering)
-
-**Quality Loop:**
-- `bun run build:test && bun run test:ui:e2e` for E2E tests
-- `bun run scripts/health/sub-loop.ts <test-file> --lifecycle codescene` on each test file
-
----
-
 ## Task 25 — Quality Loop Per File
 
-**Goal**: Run the per-file quality loop (tsgo → biome → lint) on every new file created in Tasks 16–24 before marking the plan as complete.
+**Goal**: Run the per-file quality loop (tsgo → biome → lint) on every new file created in Tasks 16–22 before marking the plan as complete.
 
-**Files:** All files created in Tasks 16–24
+**Files:** All files created in Tasks 16–22
 
 **Subtasks:**
  1. For each new file, run: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`
@@ -1542,7 +1362,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 ## Task 26 — Knowledge Propagation
 
-**Goal**: Document the new patterns learned from Tasks 16–24 and propagate knowledge to future plans and AGENTS.md files.
+**Goal**: Document the new patterns learned from Tasks 16–22 and propagate knowledge to future plans and AGENTS.md files.
 
 **Files to Create/Modify:**
 - `frontend/COMPONENT_PATTERNS.md` (add: alignment guide overlay pattern, context menu pattern, multi-select toolbar pattern, drag-and-drop palette pattern, history command undo/redo pattern)
@@ -1585,17 +1405,9 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 **Files to Create/Modify:**
 - `backend/db/test/repo/elementRepository.test.ts` — Repository tests for element CRUD
 - `backend/db/test/logic/elementLogic.test.ts` — Business logic integration tests
-- `frontend/common/views/dashboard/certificates/templateEditor/desktop/TemplateElementLayerPanel.desktop.test.tsx`
-- `frontend/common/views/dashboard/certificates/templateEditor/desktop/TemplateElementPropertyPanel.desktop.test.tsx`
-- `frontend/common/views/dashboard/certificates/templateEditor/desktop/TemplateElementContextMenu.desktop.test.tsx`
-- `frontend/common/views/dashboard/certificates/templateEditor/desktop/ElementCanvas.desktop.test.tsx`
-- `frontend/common/views/dashboard/certificates/templateEditor/mobile/ElementList.mobile.test.tsx`
-- `frontend/common/views/dashboard/certificates/templateEditor/mobile/ElementEditDialog.mobile.test.tsx`
-- `frontend/common/views/dashboard/certificates/templateEditor/mobile/AddElementBottomSheet.mobile.test.tsx`
 - `frontend/common/stores/templateElementEditorStore.test.ts` — Zustand store tests
 - `frontend/common/hooks/useTemplateElementViewModel.test.ts` — ViewModel tests
 - `frontend/common/graphql/test/certificateTemplateElements.integration.test.ts` — GraphQL integration tests
-- `test/ui/e2e/certificateTemplateElements.e2e.test.ts` — End-to-end tests
 
 **Subtasks:**
 
@@ -1618,63 +1430,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 4. `renormalizeZIndices` — produces dense 0..N from sparse input
 5. `checkTemplateEditable` — returns false when template.status === 'published'
 6. Optimistic locking: `expectedTemplateVersion` mismatch throws `OptimisticLockError`
-
-### 16c — Desktop Component Tests (Happy DOM + mocked Apollo)
-1. `TemplateElementLayerPanel.desktop.test.tsx`
-   - Renders elements in z-index order
-   - Visibility toggle updates cache via `useSetElementVisibilityMutation`
-   - Lock toggle updates cache via `useSetElementLockMutation`
-   - @dnd-kit drag reorder triggers `useReorderElementsMutation` with correct from/to indices
-   - Keyboard reorder (Space to pick up, arrows to move, Space to drop) works
-   - Context menu opens on right-click; actions call correct mutations
-   - Empty state shows i18n message when no elements
-   - Selection syncs with canvas store (`selectedIds` from Plan 11)
-2. `TemplateElementPropertyPanel.desktop.test.tsx`
-   - Shows "no selection" state when `selectedIds` empty
-   - Shows single element form when one selected (all 6 types)
-   - Shows multi-selection state with batch actions when multiple selected
-   - All shared controls (PositionSizeInputs, OpacitySlider, ColorPickerField, FontPicker) render
-   - Type-specific fields render correctly per element type
-   - Validation shows inline errors with i18n keys
-   - Save button disabled when invalid; enabled when valid
-   - Unsaved changes dialog appears on element switch with dirty form
-3. `TemplateElementContextMenu.desktop.test.tsx`
-   - Opens on right-click on canvas element
-   - Shows z-order actions (bring forward/back, to front/back)
-   - Shows duplicate, copy, paste, delete actions
-   - Keyboard navigation (arrows, Enter, Escape) works
-   - Disabled actions when element locked
-4. `ElementCanvas.desktop.test.tsx`
-   - Renders all element types with correct visual representation
-   - Selection outline and resize handles visible on selected element
-   - Drag to move updates position via `useUpdateElementPropertiesMutation`
-   - Resize handles update dimensions with min constraints
-   - Rotate handle updates rotation (normalized 0..360)
-   - Click empty space deselects
-   - Multi-select with Shift+Click
-   - Keyboard nudge (arrows) moves selected element
-
-### 16d — Mobile Component Tests (Happy DOM + mocked Apollo)
-1. `ElementList.mobile.test.tsx`
-   - Renders elements in z-index order with type icons
-   - Hidden elements shown at 0.5 opacity with VisibilityOff icon
-   - Locked elements show Lock icon
-   - Tap row opens ElementEditDialog with correct element data
-   - Up/down reorder buttons call `useReorderElementsMutation`
-   - Empty state shows i18n message
-2. `ElementEditDialog.mobile.test.tsx`
-   - Full-screen dialog with focus trap
-   - Mini-canvas thumbnail renders (120×80px) with element highlighted
-   - Form fields match desktop property panel (shared + type-specific)
-   - Save calls mutation; close triggers unsaved changes check
-   - Delete button shows confirmation dialog with i18n message
-   - Keyboard navigation (Tab order, Escape to close)
-3. `AddElementBottomSheet.mobile.test.tsx`
-   - Slides up from bottom with drag handle
-   - Shows 6 element type cards with icons and labels
-   - Tap type creates element via `useCreateElementMutation` at canvas center
-   - Auto-closes after creation; list scrolls to new item
-   - Cancel button dismisses without action
 
 ### 16e — Zustand Store Tests
 1. `draftElements` CRUD — createDraft, updateDraft, deleteDraft, clearDraft
@@ -1701,18 +1456,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 3. Subscription (if implemented) for real-time collaborative updates
 4. Cache eviction/updates verified for each mutation
 
-### 16h — End-to-End Tests (production server, Playwright)
-1. **Desktop happy path**: Open editor → add all 6 element types → edit properties → reorder layers → save → verify persistence
-2. **Desktop multi-select**: Shift+click multiple → verify batch actions in context menu → duplicate group
-3. **Desktop keyboard**: Full keyboard shortcut coverage (Ctrl+D, Delete, Ctrl+C/V, Z-order shortcuts, Escape, Undo/Redo)
-4. **Mobile happy path**: Open editor → tap FAB → add element → edit in dialog → reorder with buttons → back to template list
-5. **Mobile dirty dialog**: Edit → tap another row without save → verify unsaved dialog → discard → verify no persistence
-6. **Permission denied**: User without `certificates.templates.manage` → editor shows read-only state
-7. **Published template**: Published template → editor shows banner, all edits disabled
-8. **Optimistic lock conflict**: Two tabs editing same template → second save shows conflict dialog
-9. **RTL layout**: Arabic locale → all panels mirror correctly; layer panel on right; text alignment RTL
-10. **Dark mode**: Both themes → all colors from theme palette; no hardcoded colors
-
 **Requirements References:**
 - REQ-12.1 through REQ-12.24 (all functional requirements)
 - NFR-12.1 through NFR-12.15 (all non-functional requirements)
@@ -1721,26 +1464,22 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 **Instruction Verification:**
 - Read: `scripts/run-test/AGENTS.md` — database tests MUST use `runInRollback` wrapper
 - Read: `backend/db/test/AGENTS.md` — repo tests 100% coverage required
-- Read: `test/ui/AGENTS.md` — E2E tests use production server (.next-test-prod)
 - Read: `frontend/common/graphql/AGENTS.md` — GraphQL tests use testClient, not raw fetch
-- All test files follow naming convention: `*.test.ts` / `*.test.tsx` / `*.e2e.test.ts`
+- All test files follow naming convention: `*.test.ts` / `*.test.tsx`
 - Database tests use entity-setup helpers from `backend/db/test/helpers/entity-setup.ts`
-- E2E tests require `bun run build:test` before running
 - No `console.*` in tests (use `logger`)
 
 **Quality Loop:**
 - `bun run test:db` for database tests (parallel via scripts/run-db-tests-parallel.ts)
-- `bun run test:ui:components` for component tests (Happy DOM)
 - `bun run test:graphql` for GraphQL integration tests (dev server)
-- `bun run build:test && bun run test:ui:e2e` for E2E tests (production server)
 - `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` on each new test file
-- Target: 90%+ line coverage for new components; 100% for repo layer
+- Target: 100% for repo layer
 
 ---
 
 ## Task Verification Checklist
 
-After all **27 tasks** complete, verify:
+After all **25 tasks** complete, verify:
 
 - [ ] `bun run tsgo` passes with zero errors (including generated GraphQL types)
 - [ ] `bun biome:check` passes with zero issues
@@ -1775,8 +1514,8 @@ After all **27 tasks** complete, verify:
 - [ ] All form `TextField` components have `label` prop
 - [ ] Keyboard navigation works: Tab through all panels, no traps
 - [ ] Z-index renormalized to dense 0..N after batch reorder (not sparse)
-- [ ] All 27 tasks pass individual quality loops
-- [ ] Test coverage targets met: 90%+ components, 100% repo layer
+- [ ] All 25 tasks pass individual quality loops
+- [ ] Test coverage targets met: 100% repo layer
 
 ---
 
@@ -1784,43 +1523,43 @@ After all **27 tasks** complete, verify:
 
 | Requirement | Acceptance Criteria | Covered By Task(s) | Verification Method |
 |---|---|---|---|
-| **REQ-12.1** (6 element types) | All 6 element types (static_text, data_text, data_date, image, qr_code, shape) creatable and renderable | Task 3 (Desktop Property Panel), Task 5 (Mobile Edit Dialog), Task 7 (Element Creation), Task 16 (Testing) | E2E test adds all 6 types; component tests render each |
+| **REQ-12.1** (6 element types) | All 6 element types (static_text, data_text, data_date, image, qr_code, shape) creatable and renderable | Task 3 (Desktop Property Panel), Task 5 (Mobile Edit Dialog), Task 7 (Element Creation), Task 16 (Testing) | Manual verification of all 6 types |
 | **REQ-12.2** (Element properties) | Each element type has complete property form with all specified fields | Task 2 (Shared Controls), Task 3 (Type-specific fields), Task 5 (Mobile forms), Task 16 (Tests) | Form field inventory per type matches design.md spec |
-| **REQ-12.3** (Layer panel) | Desktop layer panel shows elements by z-index with visibility/lock toggles and drag-reorder | Task 4 (Layer Panel), Task 10 (@dnd-kit integration), Task 16 (Tests) | Layer panel test; drag reorder E2E |
-| **REQ-12.4** (Property panel) | Desktop property panel shows common + type-specific fields in accordion sections | Task 3 (Property Panel), Task 16 (Tests) | Property panel component test |
-| **REQ-12.5** (Mobile list) | Mobile element list with tap-to-edit dialog and reorder buttons | Task 5 (Element List + Edit Dialog), Task 6 (Add Element), Task 16 (Tests) | Mobile component tests; mobile E2E |
-| **REQ-12.6** (Rotation 0–360) | Rotation normalized to 0–360 range; rotate handle works | Task 7 (Canvas interactions), Task 9 (Normalization utility), Task 16 (Tests) | Unit test for normalizeRotation; canvas E2E |
-| **REQ-12.7** (Z-index renormalization) | Batch reorder produces dense 0..N z-indices | Task 8 (Batch z-index), Task 10 (Drag reorder), Task 16 (Tests) | Logic test for renormalizeZIndices; reorder E2E |
+| **REQ-12.3** (Layer panel) | Desktop layer panel shows elements by z-index with visibility/lock toggles and drag-reorder | Task 4 (Layer Panel), Task 10 (@dnd-kit integration), Task 16 (Tests) | Layer panel verification; manual drag reorder check |
+| **REQ-12.4** (Property panel) | Desktop property panel shows common + type-specific fields in accordion sections | Task 3 (Property Panel), Task 16 (Tests) | Property panel manual verification |
+| **REQ-12.5** (Mobile list) | Mobile element list with tap-to-edit dialog and reorder buttons | Task 5 (Element List + Edit Dialog), Task 6 (Add Element), Task 16 (Tests) | Manual verification of mobile list |
+| **REQ-12.6** (Rotation 0–360) | Rotation normalized to 0–360 range; rotate handle works | Task 7 (Canvas interactions), Task 9 (Normalization utility), Task 16 (Tests) | Unit test for normalizeRotation; manual canvas check |
+| **REQ-12.7** (Z-index renormalization) | Batch reorder produces dense 0..N z-indices | Task 8 (Batch z-index), Task 10 (Drag reorder), Task 16 (Tests) | Logic test for renormalizeZIndices |
 | **REQ-12.8** (Image upload) | Image element supports file upload + preview + URL input | Task 11 (Image upload), Task 16 (Tests) | Image upload integration test |
 | **REQ-12.9** (QR code config) | QR element has size, error correction, data source (variable/verification_url/custom) | Task 3 (QR form fields), Task 16 (Tests) | QR form field test |
 | **REQ-12.10** (Shape config) | Shape element supports rectangle, circle, line with type-specific properties | Task 3 (Shape form fields), Task 16 (Tests) | Shape form field test |
 | **REQ-12.11** (Data text variable binding) | data_text links to variable via autocomplete selector | Task 3 (Data text form), Task 16 (Tests) | Data text form test |
 | **REQ-12.12** (Data date format) | data_date has format selector (iso, arabicFullMonth, numeric, custom) | Task 3 (Data date form), Task 16 (Tests) | Data date form test |
 | **REQ-12.13** (Styling properties) | All styling props available: fontSize, fontWeight, fontFamily, color, textAlign, opacity, rotation, zIndex, borderWidth, borderColor, backgroundColor, borderRadius, padding | Task 2 (Shared controls), Task 3 (Type-specific), Task 16 (Tests) | Property inventory test |
-| **REQ-12.14** (Resize handles) | 8 resize handles + rotate handle per element type; min size constraints | Task 7 (Canvas resize), Task 9 (Min size utility), Task 16 (Tests) | Canvas resize E2E; min size unit test |
-| **REQ-12.15** (Interaction states) | Selected, hovered, dragging, resizing, rotating, focused, locked, hidden states implemented | Task 7 (Canvas states), Task 16 (Tests) | Visual regression tests; state E2E |
-| **REQ-12.16** (Context menu) | Desktop right-click shows z-order, duplicate, copy/paste, delete | Task 4 (Context menu), Task 16 (Tests) | Context menu component test |
-| **REQ-12.17** (Multi-select) | Shift+click multi-select; batch actions in context menu | Task 7 (Multi-select), Task 4 (Batch context menu), Task 16 (Tests) | Multi-select E2E |
-| **REQ-12.18** (Keyboard shortcuts) | All shortcuts work: Ctrl+D, Delete, Ctrl+C/V, Z-order, Escape, Undo/Redo | Task 7 (Canvas keyboard), Task 14 (Accessibility), Task 16 (Tests) | Keyboard shortcut E2E |
+| **REQ-12.14** (Resize handles) | 8 resize handles + rotate handle per element type; min size constraints | Task 7 (Canvas resize), Task 9 (Min size utility), Task 16 (Tests) | Min size unit test; manual canvas resize check |
+| **REQ-12.15** (Interaction states) | Selected, hovered, dragging, resizing, rotating, focused, locked, hidden states implemented | Task 7 (Canvas states), Task 16 (Tests) | Manual state verification |
+| **REQ-12.16** (Context menu) | Desktop right-click shows z-order, duplicate, copy/paste, delete | Task 4 (Context menu), Task 16 (Tests) | Manual context menu verification |
+| **REQ-12.17** (Multi-select) | Shift+click multi-select; batch actions in context menu | Task 7 (Multi-select), Task 4 (Batch context menu), Task 16 (Tests) | Manual multi-select verification |
+| **REQ-12.18** (Keyboard shortcuts) | All shortcuts work: Ctrl+D, Delete, Ctrl+C/V, Z-order, Escape, Undo/Redo | Task 7 (Canvas keyboard), Task 14 (Accessibility), Task 16 (Tests) | Manual keyboard shortcut verification |
 | **REQ-12.19** (GraphQL mutations) | 10 mutations: create/update/delete/duplicate/reorder/setVisibility/setLock/copy/paste/batchZIndex | Task 1 (GraphQL documents), Task 16 (Integration tests) | GraphQL integration tests |
-| **REQ-12.20** (Validation) | Client + server validation with inline i18n errors; save disabled when invalid | Task 3 (Validation), Task 9 (Validation utils), Task 16 (Tests) | Validation unit + component tests |
+| **REQ-12.20** (Validation) | Client + server validation with inline i18n errors; save disabled when invalid | Task 3 (Validation), Task 9 (Validation utils), Task 16 (Tests) | Validation unit tests |
 | **REQ-12.21** (Zustand store) | Draft state management with dirty tracking, original snapshot, selectors | Task 8 (Store), Task 16 (Store tests) | Store unit tests |
-| **REQ-12.22** (Color picker) | ChromePicker in MUI Popover; hex TextField validates; no alpha | Task 2 (ColorPickerField), Task 16 (Tests) | ColorPickerField component test |
-| **REQ-12.23** (Font picker) | Autocomplete with font preview in own font; from ALLOWED_FONTS | Task 2 (FontPicker), Task 16 (Tests) | FontPicker component test |
-| **REQ-12.24** (Accessibility) | WCAG AA; ARIA labels; keyboard nav; focus trap; RTL; screen reader | Task 14 (Accessibility), Task 16 (E2E a11y) | A11y audit; screen reader test; RTL E2E |
+| **REQ-12.22** (Color picker) | ChromePicker in MUI Popover; hex TextField validates; no alpha | Task 2 (ColorPickerField), Task 16 (Tests) | ColorPickerField manual verification |
+| **REQ-12.23** (Font picker) | Autocomplete with font preview in own font; from ALLOWED_FONTS | Task 2 (FontPicker), Task 16 (Tests) | FontPicker manual verification |
+| **REQ-12.24** (Accessibility) | WCAG AA; ARIA labels; keyboard nav; focus trap; RTL; screen reader | Task 14 (Accessibility), Task 16 | A11y audit; screen reader check; manual RTL check |
 | **NFR-12.1** (Performance) | Canvas renders 60fps with 100 elements; panel updates <100ms | Task 16 (Performance test) | Lighthouse / React Profiler |
 | **NFR-12.2** (i18n compliance) | All user strings use compile-time translation; EN+AR keys match | Task 12 (i18n), Task 16 (i18n tests) | Build-time type check; locale diff |
-| **NFR-12.3** (Theme palette) | No hardcoded colors; all from theme.palette | Task 16 (Visual test) | grep for hardcoded hex/rgb |
+| **NFR-12.3** (Theme palette) | No hardcoded colors; all from theme.palette | Task 16 | grep for hardcoded hex/rgb |
 | **NFR-12.4–12.6** (A11y details) | Labels, keyboard nav, color contrast per WCAG AA | Task 14 (Accessibility), Task 16 (Tests) | Axe-core; manual keyboard test |
-| **NFR-12.7** (Loading states) | Skeleton loaders for panel content; button loading states | Task 16 (Component tests) | Visual test with slow network |
-| **NFR-12.8** (Empty states) | Layer panel, property panel, mobile list have empty state messages | Task 3, 4, 5 (Empty states), Task 16 (Tests) | Component test empty props |
+| **NFR-12.7** (Loading states) | Skeleton loaders for panel content; button loading states | Task 16 | Manual check with slow network |
+| **NFR-12.8** (Empty states) | Layer panel, property panel, mobile list have empty state messages | Task 3, 4, 5 (Empty states), Task 16 (Tests) | Manual check of empty props |
 | **NFR-12.9** (Error states) | Inline validation errors; toast for network/permission; dialog for conflicts | Task 3 (Validation), Task 16 (Error handling tests) | Error injection tests |
-| **NFR-12.10** (Interaction states) | All 9 states visually distinct per element interaction states table | Task 7 (Canvas states), Task 16 (Visual tests) | Visual regression per state |
-| **NFR-12.11** (Optimistic locking) | expectedTemplateVersion in all mutations; conflict dialog | Task 1 (GraphQL), Task 9 (Logic), Task 16 (Conflict E2E) | Concurrency E2E test |
-| **NFR-12.12** (Permission gating) | certificates.templates.manage gates all edit UI | Task 13 (Permissions), Task 16 (Permission E2E) | E2E with/without permission |
+| **NFR-12.10** (Interaction states) | All 9 states visually distinct per element interaction states table | Task 7 (Canvas states), Task 16 | Manual visual check per state |
+| **NFR-12.11** (Optimistic locking) | expectedTemplateVersion in all mutations; conflict dialog | Task 1 (GraphQL), Task 9 (Logic), Task 16 | Concurrency logic test |
+| **NFR-12.12** (Permission gating) | certificates.templates.manage gates all edit UI | Task 13 (Permissions), Task 16 | Manual verification with/without permission |
 | **NFR-12.13** (Mobile/desktop isolation) | No useMediaQuery in tier files; Switcher uses ResponsiveViewSwitch | Task 3, 4, 5, 6, 7 (Tier files), Task 16 (Lint check) | grep for useMediaQuery |
-| **NFR-12.14** (RTL support) | Arabic locale mirrors panels; text alignment RTL | Task 14 (RTL), Task 16 (RTL E2E) | RTL E2E test |
-| **NFR-12.15** (Dark mode) | Both themes work; colors from theme.palette | Task 16 (Dark mode E2E) | Theme toggle E2E |
+| **NFR-12.14** (RTL support) | Arabic locale mirrors panels; text alignment RTL | Task 14 (RTL), Task 16 | Manual RTL check |
+| **NFR-12.15** (Dark mode) | Both themes work; colors from theme.palette | Task 16 | Manual theme toggle check |
 
 ---
 
@@ -1959,27 +1698,6 @@ After all **27 tasks** complete, verify:
   - Transform origin: 9-point grid visual selector (top-left, top-center, etc.)
   - Rotation snap: 15° increments with Shift key
   - **Quality loop**: tsgo + biome + lint
-
-### R4-T13: Component Tests
-- [ ] Create `test/ui/components/template-editor-properties/ColorPicker.test.tsx`
-  - Test hex/rgb/hsl input modes
-  - Test alpha channel
-  - Test recent colors swatch
-  - Test contrast checker badges
-- [ ] Create `test/ui/components/template-editor-properties/LayerPanel.test.tsx`
-  - Test drag reorder
-  - Test visibility toggle
-  - Test lock
-  - Test z-index numeric input
-- [ ] Create `test/ui/components/template-editor-properties/ShadowEditor.test.tsx`
-  - Test shadow presets
-  - Test inner shadow toggle
-  - Test blur/spread values
-- [ ] Create `test/ui/components/template-editor-properties/TransformPanel.test.tsx`
-  - Test rotation snap with Shift
-  - Test scale with uniform lock
-  - Test flip horizontal/vertical
-  - Test transform origin selection
 
 ### R4-T14: Knowledge Propagation
 - [ ] Create `docs/frontend/element-properties-patterns.md`
@@ -2180,41 +1898,6 @@ After all **27 tasks** complete, verify:
 
 ### R5-T14: Plan 12 R5 Test Suite + Knowledge Propagation
 
-- [ ] Create `test/ui/components/panels/FillPropertyPanel.test.tsx` (new)
-  - Test: Selecting fill type "Pattern" mounts `PatternFillEditor`; Solid mounts `SolidFillEditor`; etc.
-  - Test: Disable fill toggle preserves `fill` object in element (verifying `elementData.fill !== null`)
-  - Test: Opacity slider propagates to `fill.globalOpacity`
-  - Test: Blend mode dropdown writes one of 16 enumerated values
-  - Test: PatternFillEditor's "Browse" button opens `PatternPickerDialog`
-  - Test: ImageFillEditor's upload path writes data via `URL.createObjectURL`
-  - Test: GradientMeshEditor renders `meshPoints.length` crosshairs, add/remove point buttons work
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/panels/StrokePropertyPanel.test.tsx` (new)
-  - Test: Stroke on/off toggle disables the panel; re-enabling preserves prior settings
-  - Test: StrokeLayerEditor writes `layer.width` up to 50, clamps at 50
-  - Test: StrokeLayersList adds new layer (default stroke layer), max 5 then disabled
-  - Test: dnd-kit reorder permutations actually reorder `stroke.layers` array
-  - Test: Visibility toggle hides layer from canvas (verified via `fillStrokeStore.fillStrokeCache` clearing and `multi-stroke` rendering output)
-  - Test: Cap icons Butt/Round/Square map to `strokeLinecap='butt|round|square'`
-  - Test: Join icons Miter/Round/Bevel map to `strokeLinejoin='miter|round|bevel'`
-  - Test: Miter limit `TextField` visible only when `join='miter'`
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/dialogs/GradientEditorDialog.test.tsx` (new)
-  - Test: Opening dialog initializes preview bar from element's current gradient
-  - Test: Click on preview bar at position 30% adds a stop at 30%
-  - Test: Drag stop horizontally changes `stop.position`
-  - Test: Double-click stop opens color picker; color picker `onChange` updates stop color
-  - Test: Save preset writes to `fillStrokeStore.gradientPresets` (verifying length increment and FIFO eviction at 50+)
-  - Test: Apply preset from library sets element gradient to preset values
-  - Test: Import CSS string `linear-gradient(45deg, #ff0000, #0000ff)` parses to `{type:'linear-gradient', angle:45, stops:[{pos:0,color:'#FF0000'},{pos:100,color:'#0000FF'}]}`
-  - Test: Export CSS string contains the expected string format (round-trip with import)
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/dialogs/PatternPickerDialog.test.tsx` (new)
-  - Test: Tabs switch categories (Basic shows 6 patterns, Geometric shows different patterns, etc.)
-  - Test: Search filters patterns by name
-  - Test: Selecting a pattern highlights it; Apply button emits selection
-  - Test: Upload custom pattern stores in `customPatternLibrary` and selects it
-  - **Quality loop**: tsgo + biome + lint queue client
 - [ ] Create `test/unit/fillStrokeUtils.test.ts` (new)
   - Test: `cssToGradient` parses linear, radial, conic strings (multiple variants)
   - Test: `gradientToCss` outputs valid CSS gradient strings
@@ -2250,7 +1933,7 @@ After all **27 tasks** complete, verify:
 | R5-T11 | `dialogs/GradientEditorDialog.tsx` | same | same |
 | R5-T12 | `dialogs/PatternPickerDialog.tsx` | same | same |
 | R5-T13 | `frontend/common/stores/cert/templateElementEditorStore.ts` (modify) | `frontend/common/stores/AGENTS.md` (if exists) or `frontend/stores/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| R5-T14 | `test/ui/components/panels/{FillPropertyPanel,StrokePropertyPanel}.test.tsx`, `test/ui/components/dialogs/{GradientEditorDialog,PatternPickerDialog}.test.tsx`, `test/unit/fillStrokeUtils.test.ts`, `frontend/IMPLEMENTATION_LEARNINGS.md` (append), `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| R5-T14 | `test/unit/fillStrokeUtils.test.ts`, `frontend/IMPLEMENTATION_LEARNINGS.md` (append), `frontend/COMPONENT_PATTERNS.md` (append) | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 
 ### Round 5 Execution Order (Plan 12)
 
@@ -2475,30 +2158,6 @@ Phase R5-I (sequential after all above): R5-T14 (test suite + knowledge propagat
 
 ### R5-CS-T14: Plan 12 R5 Color System Test Suite + Knowledge Propagation
 
-- [ ] Create `test/ui/components/template-editor-properties/dialogs/ColorPicker.test.tsx` (new)
-  - Test open/close dialog
-  - Test context-aware label rendering (fill/stroke/shadow/gradientStop/swatch)
-  - Test HSL ↔ RGB ↔ HSV ↔ HEX ↔ CMYK mode switching is lossless
-  - Test mode persistence (`localStorage`)
-  - Test alpha slider updates color.alpha
-  - Test color history swatches clickable
-  - Test OK applies color, Cancel reverts
-- [ ] Create `test/ui/components/template-editor-properties/dialogs/ColorHarmonySection.test.tsx` (new)
-  - Test all 7 harmony schemes produce correct swatch counts and hue rotations
-  - Test base color change updates harmony swatches
-  - Test "Apply all to swatches" calls store `addSwatchGroup`
-- [ ] Create `test/ui/components/template-editor-properties/SwatchesPanel.test.tsx` (new)
-  - Test tab switching (Document/Custom/Recent)
-  - Test swatch add (via "+" → dialog → confirm)
-  - Test swatch edit (double-click → dialog)
-  - Test swatch delete (right-click → Delete)
-  - Test display size toggle (16/24/32px)
-  - Test export to JSON
-  - Test import from JSON
-- [ ] Create `test/ui/components/template-editor-properties/dialogs/ColorPicker2DArea.test.tsx` (new)
-  - Test click → marker moves + hue saturation/lightness updates
-  - Test drag → continuous update
-  - Test keyboard arrow keys move marker
 - [ ] Update `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only) — note gotchas:
   - The 2D area must NOT redraw canvas on marker drag (only on hue change) for performance
   - Lossless mode switching requires `{ hex, alpha }` as canonical; derived views (HSL/RGB) are display-only
@@ -2559,7 +2218,6 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
 | R5S-C (Panels) | R5S-T3–R5S-T6 | `AlignPanel.tsx`, `DistributePanel.tsx`, `SpacingControls.tsx`, `MatchSizePanel.tsx` | R5S-T1, R5S-T2, Plan 10 R5S-T1 (types), Plan 11 R5S-T6 (actions) |
 | R5S-D (Settings sub-panel) | R5S-T7 | `SnapSettingsSubPanel.tsx` | R5S-T1, Plan 10 R5S-T5 (SnapSettings type & defaults) |
 | R5S-E (i18n) | R5S-T8 | `shared/locale/.../templateEditor.ts` (en + ar) | All panel components landed |
-| R5S-F (Test & docs) | R5S-T9 | `test/ui/components/AlignPanel.test.tsx`, `DistributePanel.test.tsx`, `MatchSizePanel.test.tsx` | R5S-T3 – R5S-T6, R5S-T7 |
 
 *Total estimated time*: ~14h (with parallelism ~6h wall-clock).
 
@@ -2656,22 +2314,6 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
   - **Implementation**: pure arrow functions, no `next-intl` imports, no `shared/messages/` references. Per `shared/AGENTS.md` compile-time patterns.
   - **Both** en and ar locales must receive the same key set with proper RTL formatting for ar (when applicable — note: most labels are nouns/short phrases, so RTL mostly affects sentence layout, not strings themselves).
   - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] **R5S-T9: Component tests for Snap & Align panels**
-  - **Files**:
-    - `test/ui/components/AlignPanel.test.tsx` (new)
-    - `test/ui/components/DistributePanel.test.tsx` (new)
-    - `test/ui/components/MatchSizePanel.test.tsx` (new)
-  - **Tests**:
-    - **Align**: disabled when 1 element selected (non-canvas align target); enabled when target=canvas even for 1 element; align-to-key radio disabled when no key object; buttons trigger `alignElements` with correct axis.
-    - **Distribute**: disabled below 3 elements; spacing-mode gap input editable only when `from==='spacing'`; "Distribute with {n}px gap" calls `distributeSpacing(n, axis)`; distribute mode buttons call `distributeElements(mode, from)`.
-    - **MatchSize**: disabled < 2; "all identical" notice shown when uniform sizes; `key` reference disabled when no key; reference-kind radio defaults to `'first'`.
-  - **Setup**: mock Apollo/Canvas Store with `vi.fn()` for actions; render via `RenderResult` from `@testing-library/react`; `useAppTranslation` from `@/shared/locale/client` (mocked or real depending on existing test setup — see `test/ui/AGENTS.md`).
-  - **Quality loop**: tsgo + biome + lint queue client
-    ```bash
-    bun run test:ui:components -- --testPathPattern="SnapAlign.*Panel"
-    ```
-    Plus tsgo + biome + lint queue client for the test files.
 
 ## Round 5: Custom Shapes & Boolean Tasks
 
@@ -2824,66 +2466,6 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
   - Implement English translations for all R5 keys
   - **Quality loop**: tsgo + biome + lint queue client
 
-### R5-T13: Component Tests for Shape Property Controls
-
-- [ ] Create `test/ui/components/template-editor-shapes/RectangleControls.test.tsx`
-  - Test corner radius uniform slider updates value
-  - Test per-corner mode shows 4 fields
-  - Test per-corner individual field updates
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/template-editor-shapes/EllipseControls.test.tsx`
-  - Test arc/pie controls hidden for full ellipse (start=0, end=360)
-  - Test start/end angle sliders update values
-  - Test arc mode toggle (Arc vs Pie)
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/template-editor-shapes/TriangleControls.test.tsx`
-  - Test triangle type toggle (equilateral/isosceles/scalene)
-  - Test direction toggle (up/down/left/right)
-  - Test equilateral locks width=height
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/template-editor-shapes/PolygonControls.test.tsx`
-  - Test sides count within bounds (3–12)
-  - Test +/− buttons increment/decrement
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/template-editor-shapes/StarControls.test.tsx`
-  - Test points count within bounds (3–20)
-  - Test inner radius slider updates value (10–90%)
-  - Test outer radius display
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/template-editor-shapes/LineControls.test.tsx`
-  - Test thickness slider
-  - Test line style toggle (solid/dashed/dotted)
-  - Test arrow start/end dropdowns
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/template-editor-shapes/CustomShapeControls.test.tsx`
-  - Test path data read-only display
-  - Test unlock toggles to editable mode
-  - Test "Save as Custom Shape" calls store action
-  - Test "Replace from Library" opens picker dialog
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/template-editor-shapes/BooleanOperationControls.test.tsx`
-  - Test operation type dropdown changes boolean config
-  - Test operand list renders with correct order
-  - Test operand visibility toggle
-  - Test flatten button shows confirmation dialog
-  - Test flatten confirm calls `flattenBooleanElement`
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/template-editor-shapes/ShapePropertiesSection.test.tsx`
-  - Test section appears for shape elements only
-  - Test shape type dropdown converts element
-  - Test dimensions with chain lock (proportional resize)
-  - Test position origin toggle (top-left vs center)
-  - Test rotation slider + reset button
-  - **Quality loop**: tsgo + biome + lint queue client
-
 ### R5-T14: Knowledge Propagation
 
 - [ ] Create `docs/frontend/shape-properties-patterns.md`
@@ -2965,15 +2547,6 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
   - Namespace: `certificateEditor`
   - Keys: zoomLevel, fitToScreen, actualSize, zoomToSelection, zoomToAll, panSpeed, smoothScroll, scrollDuration, overscrollBounce, arrowKeyPan, pageKeyScroll, mouseWheelZoom, zoomModifier, pixelGridAtHighZoom, showScrollbars, navigatorSize, viewportColor, previewQuality, autoUpdate, showRulerMarkings, miniMapSize, miniMapPosition, thumbnailScale, showElementNames, miniMapOpacity, scrollPosition, viewportSize, centerOnCanvas, centerOnSelection, scrollToElement
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
-
-- [ ] R5Z-T8. Test suite for zoom/navigation panels
-  - Test ZoomPropertyPanel renders correct zoom level
-  - Test preset buttons set zoom correctly
-  - Test NavigationPropertyPanel scroll position display
-  - Test ZoomSettingsPanel toggles update store
-  - Test NavigatorPropertyPanel and MiniMapPropertyPanel settings
-  - File: `test/ui/components/certificate-editor/zoom-panels.test.tsx`
   - _Quality loop_: tsgo + biome + lint queue client
 
 - [ ] R5Z-T9. Knowledge propagation & documentation
@@ -3286,35 +2859,6 @@ This is the **fourth** Round 5 task domain in Plan 12 (following Fill/Stroke R5,
   - English translations matching Arabic keys exactly
   - **Quality loop**: tsgo + biome + lint queue client
 
-### R5-C16: Component Tests
-
-- [ ] Create `test/ui/components/template-editor-properties/CharacterPanel.test.tsx`:
-  - Test font family Autocomplete renders preview
-  - Test font weight selector filters unavailable weights
-  - Test size slider/TextField bidirectional sync
-  - Test kerning/tracking/leading sliders update store
-  - Test stroke editor Outside/Center/Inside mapping
-  - Test shadow enable toggle
-
-- [ ] Create `test/ui/components/template-editor-properties/ParagraphPanel.test.tsx`:
-  - Test alignment dispatches correct ParagraphStyles
-  - Test columns slider sets `column-count`
-  - Test list type toggle reveals bullet/numbered controls
-  - Test hyphenation enable sets `hyphens: auto`
-  - Test orphan/widow control switches
-
-- [ ] Create `test/ui/components/template-editor-properties/TextOnPathSection.test.tsx`:
-  - Test bind lists only path elements
-  - Test unbind clears pathId
-  - Test startOffset slider bounds
-  - Test flip checkbox toggles
-
-- [ ] Create `test/ui/components/template-editor-properties/FontFamilyPicker.test.tsx`:
-  - Test grouping by category
-  - Test live preview loads font on hover
-  - Test search filters by family name + category
-  - Test failed font shows warning icon
-
 ### R5-C17: Knowledge Propagation
 
 - [ ] Update `docs/frontend/typography-engine.md` (created in Plan 10 R5-A14) with panel UI section:
@@ -3332,7 +2876,7 @@ Phase R5-C-b (parallel):     R5-C2 style controls (kerning/tracking/leading/base
 Phase R5-C-c (parallel):     R5-C5 text on path, R5-C6 vertical text, R5-C8 alignment controls, R5-C9 spacing/indent, R5-C10 wrap/columns, R5-C11 lists/hyphenation/orphan-widow
 Phase R5-C-d (sequential):   R5-C7 CharacterPanel container (depends on R5-C1..C6), R5-C12 ParagraphPanel container (depends on R5-C8..C11)
 Phase R5-C-e (sequential):   R5-C13 docking + quick access + keyboard shortcuts (depends on R5-C7, R5-C12)
-Phase R5-C-f (parallel):     R5-C14 mobile sheets, R5-C15 i18n AR + EN, R5-C16 tests
+Phase R5-C-f (parallel):     R5-C14 mobile sheets, R5-C15 i18n AR + EN
 Phase R5-C-g (sequential):   R5-C17 knowledge propagation (depends on all)
 ```
 
@@ -3459,38 +3003,6 @@ Phase R5-C-g (sequential):   R5-C17 knowledge propagation (depends on all)
 
 ### R5-T10: Test Suite
 
-- [ ] Create `test/ui/components/editor/contextMenus/layersPanelContextMenu.test.ts` (new)
-  - Test: full menu has Properties, Duplicate, Delete, Merge Down, Merge Visible, Flatten Image, z-order block, Group, Ungroup, Lock/Unlock, Hide/Show, Convert to Smart Object, Rasterize, Clipping Mask, Release Clipping Mask, Select Similar, Find Layer in order
-  - Test: background layer — Delete disabled (greyed, not hidden); Duplicate disabled; Group disabled when selectionCount < 2; Ungroup hidden when not group type
-  - Test: Lock toggle label/shortcut switches based on isLocked; Hide toggle based on isHidden
-  - Test: Merge Down hidden when hasMergeTarget=false; Merge Visible hidden when visibleHiddenLayers < 2; Flatten Image hidden when totalLayers < 2
-  - Test: Convert to Smart Object hidden when already smart object; Rasterize hidden when canRasterize=false
-  - Test: Create Clipping Mask hidden when hasClippingMask=true; Release hidden when hasClippingMask=false
-  - Test: Select Similar hidden when no other layers of same type exist
-  - Test: Find Layer always visible and dispatches `findLayer(layerId)` on select
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/dialogs/LayerPropertiesDialog.test.tsx` (new)
-  - Test: name field prefilled with element.name; empty name triggers helper error and disables OK
-  - Test: color tag picker — clicking a swatch updates the selected border; only one swatch selected at a time; selected swatch has visible border
-  - Test: opacity slider updates canvas element live via `updateLayerOpacity` (debounced — at most one update in 100ms)
-  - Test: Cancel reverts to snapshot (no update); OK commits (final update === dialog state)
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/contextMenus/propertiesPanelContextMenu.test.ts` (new)
-  - Test: Copy Properties disabled when selectionCount === 0; enabled when selectionCount >= 1
-  - Test: Paste Properties disabled when `!contextMenuStore.copiedProperties`; enabled otherwise
-  - Test: Reset to Defaults disabled when selectionCount === 0; Mini Confirm text appears when isDangerous=true and user clicks
-  - Test: Options... always enabled
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/dialogs/PropertiesPanelOptionsDialog.test.tsx` (new)
-  - Test: Typography checkbox only visible when at least one text element in selection
-  - Test: OK saves to uiStore.propertyPanelCollapsedGroups; Cancel reverts
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/contextMenus/composeElementMenu.test.ts` (new)
-  - Test: composing for a text selection produces base element items + separator + text additions
-  - Test: composing for a mixed (text + image) selection produces base items + separator + text additions + image additions
-  - Test: separator appears exactly once between base and additions (regardless of how many element types)
-  - Test: composing for a single shape selection produces shape additions including Boolean Operation submenu when selectionCount >= 2
-  - **Quality loop**: tsgo + biome + lint queue client
 - [ ] Create `test/unit/canvasStoreLayersActions.test.ts` (new)
   - Test: `mergeLayersDown(A, B)` returns new group id; original A and B removed; new group at B's z-index
   - Test: `mergeVisibleLayers` skips hidden elements and background
@@ -3504,18 +3016,6 @@ Phase R5-C-g (sequential):   R5-C17 knowledge propagation (depends on all)
   - Test: all actions no-op when `isolationDepth > 0` (merge/flatten/smartObject/rasterize/clipping)
   - Test: undo after `mergeLayersDown` restores both original elements
   - Test: undo after `flattenImage` restores all originals (verified history entry was `isDangerous: true`)
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/EditorLayersPanel.integration.test.tsx` (new)
-  - Test: right-clicking layer row opens the layers panel context menu at cursor position
-  - Test: double-clicking a group layer row enters isolation mode (canvas shows isolation chrome)
-  - Test: double-clicking a text row falls through to rename behavior (existing)
-  - Test: Alt+click on 4px divider between two rows calls `createClippingMask(topId, bottomId)`
-  - Test: consuming `scrollToLayerId` scrolls the matching row into view and clears the flag
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/EditorPropertiesPanel.integration.test.tsx` (new)
-  - Test: right-clicking panel body opens properties panel context menu at cursor
-  - Test: kebab button click opens the same menu at the button location
-  - Test: property panel group accordions render collapsed/expanded per `uiStore.propertyPanelCollapsedGroups`
   - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5-T11: Knowledge Propagation
@@ -3551,7 +3051,7 @@ Phase R5-C-g (sequential):   R5-C17 knowledge propagation (depends on all)
 | R5-T7 | `shared/locale/types/certificateTemplateEditor.ts` (modify), `shared/locale/<locale>/<domain>.ts` files (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T8 | `EditorLayersPanel.tsx` (modify from Plan 11 R4) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T9 | `EditorPropertiesPanel.tsx` (modify from Plan 11 R4) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| R5-T10 | `test/ui/components/editor/contextMenus/{layersPanelContextMenu,propertiesPanelContextMenu,composeElementMenu}.test.ts`, `test/ui/components/editor/dialogs/{LayerPropertiesDialog,PropertiesPanelOptionsDialog}.test.tsx`, `test/unit/canvasStoreLayersActions.test.ts`, `test/ui/components/editor/{EditorLayersPanel.integration,EditorPropertiesPanel.integration}.test.tsx` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| R5-T10 | `test/unit/canvasStoreLayersActions.test.ts` | `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5-T11 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 12 Context Menus)
@@ -3636,15 +3136,6 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5K-T8. Test suite for element-specific keyboard shortcuts
-  - Test text typography shortcuts (bold/italic/underline toggle)
-  - Test font size shortcuts (±1, ±10)
-  - Test kerning/leading shortcuts
-  - Test shape shortcuts (corner radius, sides, points)
-  - Test layer panel navigation
-  - File: `test/ui/components/certificate-editor/element-shortcuts.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
-
 ---
 
 ## Round 5: Transform Tasks
@@ -3660,7 +3151,6 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
 | TR-T03 | `NumericTransformDialog` | TR-T05, Plan 11 TR-T01 | 2.5 |
 | TR-T04 | `useTemplateElementEditorStore` additions (`numericTransformDialogOpen`) + reset handler | — (first) | 1 |
 | TR-T05 | Transform i18n keys AR + EN (panel + dialog) | — (first) | 1 |
-| TR-T06 | Tests — panel + dialog + reset | TR-T01, TR-T03 | 2 |
 | TR-T07 | Knowledge propagation | ALL above | 1 |
 
 ### Instruction File & AGENTS.md Discovery (Plan 12 Transform)
@@ -3672,7 +3162,6 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
 | TR-T03 | `frontend/views/dashboard/cert/templates/editor/property-panel/NumericTransformDialog.tsx` (new) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `frontend.instructions.md` |
 | TR-T04 | `frontend/common/stores/cert/useTemplateElementEditorStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `frontend.instructions.md` |
 | TR-T05 | `shared/locale/types/dashboard/certificates/templateEditor.ts`, `shared/locale/{ar,en}/dashboard/certificates/templateEditor.ts` (modify — append) | `shared/AGENTS.md`, `AGENTS.md` | `frontend.instructions.md` |
-| TR-T06 | `test/ui/components/panels/{TransformPropertyPanelSection,NumericTransformDialog}.test.tsx` (new ×2) | `test/ui/AGENTS.md`, `AGENTS.md` | `tests.instructions.md`, `frontend.instructions.md` |
 | TR-T07 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/AGENTS.md` (append) | `AGENTS.md` | — |
 
 ### TR-T01 — `TransformPropertyPanelSection` + `OriginSelector`
@@ -3751,28 +3240,6 @@ Phase R5-G (sequential): R5-T11 (knowledge propagation — waits on all of above
 - [ ] Per `shared/AGENTS.md`: plain strings are plain template literals; no interpolation → no `(param: string) => string` signature
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
-### TR-T06 — Tests: Transform Property Panel + Numeric Dialog + Reset
-
-- [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
-- [ ] Create `test/ui/components/panels/TransformPropertyPanelSection.test.tsx`:
-  - Renders position X/Y from selected element's transform
-  - Renders W/H with chain-lock; clicking chain toggles `proportionalLock`
-  - Changing rotation `TextField` updates element's `transform.rotation` (mock the store)
-  - Skew X/Y clamps to -45..+45
-  - Flip H button calls `applyFlip(true)` (or the equivalent registered handler — mock accordingly)
-  - Reset button calls `resetElementTransform(elementId)` (mock store action)
-  - Origin selector cycles through 3 states
-  - Live update commits within 16ms of typing (verify debounce)
-  - Each committed field change triggers an undo snapshot
-- [ ] Create `test/ui/components/panels/NumericTransformDialog.test.tsx`:
-  - Opens when `numericTransformDialogOpen === true`
-  - Apply button commits the transform and closes dialog
-  - Copy Transformed duplicates elements (mock service) and applies transform to clones; dialog stays open
-  - Cancel discards local draft; closes dialog
-  - absolute/relative toggle changes position semantics (relative mode adds to current)
-- [ ] Mock Zustand stores via existing `test/ui/components` Happy DOM pattern (no backend)
-- [ ] **Quality loop**: tsgo + biome + lint queue client
-
 ### TR-T07 — Knowledge Propagation (Plan 12 R6)
 
 - [ ] Update `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only):
@@ -3796,11 +3263,10 @@ Phase TR-A (par):  TR-T02 (ChainLockButton search — first; decisive for TR-T01
                    TR-T05 (i18n — independent)
 Phase TR-B (seq):  TR-T01 (TransformPropertyPanelSection — waits on TR-T02 + TR-T05)
 Phase TR-C (seq):  TR-T03 (NumericTransformDialog — waits on TR-T02 + TR-T05)
-Phase TR-D (par):  TR-T06 (tests ×2 — wait on TR-T01, TR-T03)
 Phase TR-E (seq):  TR-T07 (knowledge propagation)
 ```
 
-**Plan 12 R6 total**: ~11 hours → ~6 wall-clock hours (parallelism in TR-A and TR-D)
+**Plan 12 R6 total**: ~9 hours → ~5 wall-clock hours (parallelism in TR-A)
 
 ### Plan 12 Combined Total Time (Rounds 1-6)
 
@@ -3839,7 +3305,7 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
   ├── MASK-P08 (store additions refinement — ensure MaskPropertyPanel store actions are complete)
   │       └── (MASK-P09 integration verification — depends on MASK-P01..P08)
   │
-  └── MASK-P09 (component tests + knowledge propagation)
+  └── MASK-P09 (knowledge propagation)
 ```
 
 **Execution order**: MASK-P01 first → (MASK-P02, MASK-P03, MASK-P04, MASK-P05, MASK-P06, MASK-P07, MASK-P08 parallel after P01) → MASK-P09 (waits all)
@@ -4082,37 +3548,13 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
     bun run scripts/health/sub-loop.ts frontend/common/stores/cert/certTemplateEditorStore.ts --lifecycle codescene
     ```
 
-### MASK-P09: Component Tests + Knowledge Propagation
+### MASK-P09: Knowledge Propagation
 
 **Estimated time**: 4 hours
 **Depends on**: MASK-P01 through MASK-P08
 **Requirements**: all design sub-sections
 
 - [ ] **Read applicable AGENTS.md**:
-  - `test/ui/AGENTS.md`, `AGENTS.md`
-
-- [ ] **Read applicable instruction files**:
-  - `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
-
-- [ ] **Create** `test/ui/components/editor/mask/panels/{MaskPropertyPanel,RefineEdgeDialog,OpacityMaskEditor,ClippingMaskProperties,MaskBrushSettings,QuickMaskPanel}.test.tsx`:
-  - Each test:
-    - Renders component with mocked Apollo + mocked Zustand store
-    - `MaskPropertyPanel`: density/feather/smooth/contrast/shiftEdge sliders call `setMaskProperty` on `onChangeCommitted`; view mode `ToggleButtonGroup` calls `setMaskViewMode`; Invert/Apply/Delete buttons dispatch correct actions; Apply/Delete show confirmation `Dialog`; Disable toggles label
-    - `RefineEdgeDialog`: all sliders call `setRefineEdgeSettings` on live change (no local state); Output `RadioGroup` updates output field; Cancel closes without applying; Apply calls `applyRefineEdge`; `keepMounted` preserves state
-    - `OpacityMaskEditor`: dual thumbnails render; link icon toggles `toggleOpacityMaskLink`; clip checkbox toggles; invert button calls; mask thumbnail click enters `maskMode='edit'` with `targetPath='opacityMask'`
-    - `ClippingMaskProperties`: `isClipped` shows base name + release button; `isBase` shows clipped list + edit shape button; interpolation keys produce correct labels
-    - `MaskBrushSettings`: sliders update store; pressure checkbox disabled when no pen; gradient tool context shows color pickers instead of hardness
-    - `QuickMaskPanel`: mode toggle → `setQuickMaskOptions({ mode })`; color picker → `{ color }`; opacity slider → `{ opacity }`
-  - All tests verify: i18n keys present (`aria-label`, `Tooltip` title contains expected text), no hardcoded colors (mocked theme palette used), `sx={{}}` only (no style props in rendered output)
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] **Create** `test/ui/e2e/editor-mask-panel.test.tsx`:
-  - E2E: select element with mask → mask property panel appears → drag density slider → canvas mask updates; switch view mode → canvas display changes; click Apply → confirmation dialog → confirm → mask baked
-  - E2E: open Refine Edge dialog → drag smooth slider → on-canvas preview updates live → Apply → mask refined
-  - E2E: select clipped element → clipping properties appears → click Release → element unclipped
-  - Requires `bun run build:test` before E2E
-  - **Quality loop**: tsgo + biome + lint queue client
-
 - [ ] **Append** to `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only):
   - "Mask property panel sliders commit on `onChangeCommitted`, NOT `onChange` — per-move commits cause store churn and canvas re-render thrash."
   - "Refine Edge dialog is stateless — all slider changes write to `refineSettings` in the store, and Plan 11's preview reads from there. Never duplicate live-preview state in the dialog."
@@ -4141,7 +3583,7 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
 | MASK-P06 | `QuickMaskPanel.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | MASK-P07 | `shared/locale/types/templateEditor.ts`, `shared/locale/ar/.../templateEditor.ts`, `shared/locale/en/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | MASK-P08 | `certTemplateEditorStore.ts` (verify/modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| MASK-P09 | `test/ui/components/editor/mask/panels/*.test.tsx`, `test/ui/e2e/editor-mask-panel.test.tsx`, `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| MASK-P09 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 
 ### Round 5 Execution Order (Plan 12 — Masking)
 
@@ -4149,7 +3591,7 @@ MASK-T01 (maskTypes.ts shared types — from Plan 10, already created)
 Phase R5M-A (sequential): MASK-P01 (MaskPropertyPanel — depends on Plan 10 T01/T02 being committed)
 Phase R5M-B (parallel after P01): MASK-P02 (RefineEdgeDialog), MASK-P03 (OpacityMaskEditor), MASK-P04 (ClippingMaskProperties), MASK-P05 (MaskBrushSettings), MASK-P06 (QuickMaskPanel), MASK-P07 (i18n), MASK-P08 (store refinement)
   ^ all 7 are independent of each other — full parallel
-Phase R5M-C (sequential after all): MASK-P09 (test suite + knowledge propagation)
+Phase R5M-C (sequential after all): MASK-P09 (knowledge propagation)
 ```
 
 **Plan 12 R5 mask total estimated time**: ~30 hours (~18 wall-clock hours via full-parallel Phase R5M-B)
@@ -4236,16 +3678,6 @@ Phase R5M-C (sequential after all): MASK-P09 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5FX-T10. Test suite for effects property panel
-  - Test shadow controls (set offset, blur, color, opacity)
-  - Test glow controls
-  - Test filter controls
-  - Test effects stack reordering
-  - Test preset application
-  - Test blend mode switching
-  - File: `test/ui/components/certificate-editor/effects-panel.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
-
 ## Round 5: Advanced Layers Tasks
 
 - [ ] R5LY-T1. Create `LayersPanelEnhanced` component
@@ -4321,17 +3753,6 @@ Phase R5M-C (sequential after all): MASK-P09 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5LY-T9. Test suite for layers panel
-  - Test drag-to-reorder
-  - Test lock/unlock toggle
-  - Test show/hide toggle
-  - Test rename via double-click
-  - Test context menu actions
-  - Test keyboard navigation
-  - Test isolation mode
-  - File: `test/ui/components/certificate-editor/layers-panel.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
-
 ## Round 5: Asset Library Tasks
 
 - [ ] R5AL-T1. Create `AssetPropertiesSection` component
@@ -4374,15 +3795,6 @@ Phase R5M-C (sequential after all): MASK-P09 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5AL-T7. Test suite for asset properties panel
-  - Test metadata display for different asset types
-  - Test replace asset action preserves position/size/effects
-  - Test variations selector
-  - Test usage indicator
-  - Test export to library
-  - File: `test/ui/components/certificate-editor/asset-properties.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
-
 ## Round 5: Guides & Grid Tasks
 
 - [ ] R5GG-T1. Create guides & grid properties panel section
@@ -4415,14 +3827,6 @@ Phase R5M-C (sequential after all): MASK-P09 (test suite + knowledge propagation
 - [ ] R5GG-T4. Add i18n keys for guides & grid properties panel
   - guidesList, addGuide, guidePosition, clearAll, gridSettings, gridSize, subdivisions, gridColor, showGrid, snapToGrid, snapToGuides, snapToElements, snapTolerance, lockGuides, unitsLabel
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
-
-- [ ] R5GG-T5. Test suite for guides & grid properties panel
-  - Test guide list display and add/delete
-  - Test grid settings controls
-  - Test snap tolerance slider
-  - Test toggle functionality
-  - File: `test/ui/components/certificate-editor/guides-grid-panel.test.tsx`
   - _Quality loop_: tsgo + biome + lint queue client
 
 ## Round 5: Pen Tool Tasks
@@ -4476,14 +3880,6 @@ Phase R5M-C (sequential after all): MASK-P09 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5PV-T7. Test suite for pen tool properties panel
-  - Test path data display (length, points, segments)
-  - Test anchor point editor (select, move, convert)
-  - Test path operations (close, reverse, simplify, offset)
-  - Test boolean operations (union, subtract, intersect, exclude)
-  - File: `test/ui/components/certificate-editor/pen-tool-properties.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
-
 ## Round 5: History & States Tasks
 
 - [ ] R5H-T1. Create per-element history section in properties panel
@@ -4526,15 +3922,6 @@ Phase R5M-C (sequential after all): MASK-P09 (test suite + knowledge propagation
 - [ ] R5H-T6. Add i18n keys for element history
   - elementHistory, revertToPrevious, historyBrush, selectiveUndo, compareWithState, changedProperties, batchHistory, lastChanges
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
-
-- [ ] R5H-T7. Test suite for element history features
-  - Test per-element history dropdown
-  - Test property snapshots
-  - Test history brush selective undo
-  - Test state comparison highlight
-  - Test batch history revert
-  - File: `test/ui/components/certificate-editor/element-history.test.tsx`
   - _Quality loop_: tsgo + biome + lint queue client
 
 ## Round 5: Canvas Pro Tasks
@@ -4581,15 +3968,6 @@ Phase R5M-C (sequential after all): MASK-P09 (test suite + knowledge propagation
 - [ ] R5C-T6. Add i18n keys for canvas pro properties
   - dpiUnit, printSizePreview, artboardRelative, canvasAbsolute, pageOwnership, moveToPage, cmykValues, gamutWarning, nearestCMYK, bleedWarning, fitToBleed, distanceFromMargin, exportResolution, inheritFromDocument, highResBadge, dpiWarning
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint queue client
-
-- [ ] R5C-T7. Test suite for canvas pro properties
-  - Test DPI-aware display
-  - Test artboard context properties
-  - Test CMYK values and gamut warning
-  - Test bleed awareness
-  - Test export resolution override
-  - File: `test/ui/components/certificate-editor/canvas-pro-properties.test.tsx`
   - _Quality loop_: tsgo + biome + lint queue client
 
 ## Round 5: Workspace & Panel Tasks
@@ -4650,12 +4028,3 @@ Phase R5M-C (sequential after all): MASK-P09 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5W-T8. Test suite for properties panel workspace
-  - Test tab system switching
-  - Test auto-collapse behavior
-  - Test contextual tabs per element type
-  - Test size modes
-  - Test quick properties mini panel
-  - Test panel persistence
-  - File: `test/ui/components/certificate-editor/properties-panel-workspace.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client

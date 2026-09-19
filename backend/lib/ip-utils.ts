@@ -29,3 +29,18 @@ export function sanitizeIpAddress(ip: string | null | undefined): string | null 
 
   return "127.0.0.1";
 }
+
+/**
+ * Sanitize the first entry of a comma-separated forwarding chain (e.g.
+ * `x-vercel-forwarded-for`, `cf-connecting-ip`) for use as a rate-limit
+ * identifier. Returns null when no entry parses as an IP, so the caller falls
+ * back to the shared anonymous bucket instead of trusting a raw, possibly
+ * client-influenced chain string as a bucket key.
+ */
+export function sanitizeForwardedFor(forwardedFor: string | null | undefined): string | null {
+  if (!forwardedFor) return null;
+  const entry = forwardedFor.split(",")[0]?.trim() ?? "";
+  if (!entry) return null;
+  const sanitized = sanitizeIpAddress(entry);
+  return sanitized === "127.0.0.1" && isIP(entry) === 0 ? null : sanitized;
+}

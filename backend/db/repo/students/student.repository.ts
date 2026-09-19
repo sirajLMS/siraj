@@ -1,7 +1,7 @@
 import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db, isSqlite, queryDb, queryWithPagination } from "@/backend/db";
-import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
+import { acquireAdvisoryLock, withCurrentUser } from "@/backend/db/repo/shared";
 import {
   parents,
   recurringScheduleDays,
@@ -863,4 +863,48 @@ export namespace StudentRepository {
 
     return [...studentIds];
   };
+
+  /**
+   * Right-to-be-forgotten scrub: anonymize the directly-owned student rows
+   * (the user's own student account and, for parents, their children) and
+   * return the affected-row counts so the caller can assert the scrub matched
+   * every row the pre-read found. The pre-read SELECT and the scrubbing
+   * UPDATE both run inside `withCurrentUser`: the students table carries
+   * FORCE RLS with fail-closed `current_user_id()` policies, so a connection
+   * that never sets the GUC matches zero rows and a partial erasure would
+   * commit silently. Runs inside the caller's transaction.
+   */
+  export const scrubForAnonymization = async (
+    tx: DBTransaction,
+    input: {
+      readonly userId: string;
+      readonly parentId: string | null;
+      readonly scrubbedName: string;
+    }
+  ): Promise<{ readonly priorCount: number; readonly scrubbedCount: number; readonly scrubbedIds: string[] }> =>
+    withCurrentUser(tx, input.userId, async t => {
+      const where = or(
+        eq(students.userId, input.userId),
+        input.parentId ? eq(students.parentId, input.parentId) : undefined
+      );
+      const priorRows = await t.select({ id: students.id }).from(students).where(where);
+      const scrubbedRows = await t
+        .update(students)
+        .set({
+          name: input.scrubbedName,
+          dateOfBirth: null,
+          avatarUrl: null,
+          gender: null,
+          language: null,
+          timezoneOverride: null,
+          updatedAt: new Date(),
+        })
+        .where(where)
+        .returning({ id: students.id });
+      return {
+        priorCount: priorRows.length,
+        scrubbedCount: scrubbedRows.length,
+        scrubbedIds: scrubbedRows.map(row => row.id),
+      };
+    });
 }

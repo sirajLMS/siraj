@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
-import { and, desc, eq, gte, inArray, lte, ne, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, lte, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { type QueryDbHandle, queryDb, queryWithPagination } from "@/backend/db";
 import { invoices, packagePlans, parents, payments, students, users } from "@/backend/db/schema";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { DomainError } from "@/backend/lib/errors";
 import type * as Types from "@/backend/types";
 import type { DBTransaction, PaginationArgs } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -74,7 +75,7 @@ export namespace AccountingPaymentRepository {
         updatedAt: now,
       })
       .returning();
-    if (!row) throw new Error("accounting payment insert returned no rows");
+    if (!row) throw new DomainError("ACCOUNTING_PAYMENT_INSERT_FAILED", "Accounting payment insert returned no rows");
     return row;
   };
 
@@ -184,6 +185,77 @@ export namespace AccountingPaymentRepository {
       .orderBy(desc(payments.paymentDate), desc(payments.createdAt))
       .limit(1);
     return row?.currency ?? null;
+  };
+
+  /**
+   * Profit & Loss dashboard read: one page of the income payments recorded in
+   * a single accounting month (filter on the payment's `created_at` calendar
+   * month), with soft-deleted invoices excluded so the report reflects live
+   * income only. Returns the display columns the dashboard tab renders —
+   * student/parent names, payment method, package and invoice provenance —
+   * with `totalCount` covering the full month before limit/offset; the
+   * FX-derived `aggregate` is composed by the service from these rows.
+   * Newest first; the id tiebreak keeps pagination deterministic.
+   */
+  export const findProfitLossIncome = async (
+    filters: Types.ProfitLossIncomeFilter,
+    pagination: { limit: number; offset: number },
+    tx?: DBTransaction
+  ): Promise<Omit<Types.ProfitLossIncomePage, "aggregate">> => {
+    // Inner joins are intentional: a payment must hang off a live invoice and
+    // student to be reportable income; students and parents carry no
+    // soft-delete columns of their own, so `invoices.deletedAt` is the only
+    // soft-delete predicate in the chain.
+    const conditions = [sql`to_char(${payments.createdAt}, 'YYYY-MM') = ${filters.month}`, isNull(invoices.deletedAt)];
+    const parentUsers = alias(users, "pl_income_parent_users");
+    const q = queryDb(tx);
+
+    const pageRows = await q
+      .select({
+        paymentId: payments.id,
+        paymentDate: payments.createdAt,
+        amount: payments.amount,
+        currency: payments.currency,
+        paymentMethodType: payments.paymentMethodType,
+        studentName: students.name,
+        parentName: parentUsers.name,
+        packageName: packagePlans.displayName,
+        invoiceId: payments.invoiceId,
+      })
+      .from(payments)
+      .innerJoin(invoices, eq(payments.invoiceId, invoices.id))
+      .innerJoin(students, eq(invoices.studentId, students.id))
+      .leftJoin(parents, eq(students.parentId, parents.id))
+      .leftJoin(parentUsers, eq(parents.userId, parentUsers.id))
+      .leftJoin(packagePlans, eq(payments.packagePlanId, packagePlans.id))
+      .where(and(...conditions))
+      .orderBy(desc(payments.createdAt), payments.id)
+      .limit(pagination.limit)
+      .offset(pagination.offset);
+
+    const [countRow] = await q
+      .select({ totalCount: sql<number>`count(*)`.mapWith(Number) })
+      .from(payments)
+      .innerJoin(invoices, eq(payments.invoiceId, invoices.id))
+      .innerJoin(students, eq(invoices.studentId, students.id))
+      .where(and(...conditions));
+    const totalCount = countRow?.totalCount ?? 0;
+
+    return {
+      rows: pageRows.map(row => ({
+        paymentId: row.paymentId,
+        paymentDate: row.paymentDate.toISOString(),
+        studentName: row.studentName,
+        parentName: row.parentName,
+        amount: row.amount,
+        currency: row.currency,
+        convertedAmount: null,
+        paymentMethodType: row.paymentMethodType,
+        packageName: row.packageName,
+        invoiceId: row.invoiceId,
+      })),
+      totalCount,
+    };
   };
 
   export const update = async (

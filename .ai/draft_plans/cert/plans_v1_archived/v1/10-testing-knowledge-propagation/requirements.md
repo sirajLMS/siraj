@@ -1,4 +1,4 @@
-# Requirements: Testing & Knowledge Propagation (Plan 10)
+# Plan 10 — Testing & Knowledge Propagation Requirements
 
 ## Document Information
 
@@ -60,8 +60,6 @@ Create 7 repository test suites (100% coverage), 4 service test suites, 2 GraphQ
 - Quality validation (tsgo, biome, lint — zero errors)
 
 **Out of Scope:**
-- UI component tests (covered by Plan 07/08 execution)
-- E2E tests (covered by Plan 07/08 execution)
 - Seed data creation (covered by Plan 01)
 - Performance/load testing
 - Security penetration testing
@@ -357,7 +355,7 @@ Create 7 repository test suites (100% coverage), 4 service test suites, 2 GraphQ
 #### Acceptance Criteria
 
 1. **WHEN** the PDF rendering document is created **THEN** the system **SHALL** place it at `docs/certificates/pdf-rendering.md`.
-2. **WHEN** the document is written **THEN** it **SHALL** cover: rendering engine technology (Puppeteer/Playwright or whatever Plan 06 uses), template-to-PDF data flow, variable substitution pipeline, element rendering order (z-index, page setup), QR code generation for verification, font handling for Arabic/English, storage integration (where PDFs are saved), error handling and retry, performance considerations.
+2. **WHEN** the document is written **THEN** it **SHALL** cover: rendering engine technology (Puppeteer, or whatever engine Plan 06 uses), template-to-PDF data flow, variable substitution pipeline, element rendering order (z-index, page setup), QR code generation for verification, font handling for Arabic/English, storage integration (where PDFs are saved), error handling and retry, performance considerations.
 3. **WHEN** the document references code **THEN** it **SHALL** use relative file paths to the rendering engine source and service files.
 4. **WHEN** the document covers i18n **THEN** it **SHALL** explain RTL (right-to-left) rendering for Arabic certificates.
 

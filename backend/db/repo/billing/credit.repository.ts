@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { and, asc, count, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { type db, queryDb, queryWithPagination } from "@/backend/db";
 import { creditTransactions, students } from "@/backend/db/schema";
-import { CreditReason } from "@/backend/enum";
+import { CreditAdjustmentType, CreditReason } from "@/backend/enum";
 import { DomainError } from "@/backend/lib/errors";
 import {
   type CreditAdjustmentInsertInput,
@@ -477,5 +477,47 @@ export namespace CreditRepository {
     // produce different keys, defeating the unique-contract dedup mechanism).
     const prefix = createHash("sha256").update(content).digest("hex").slice(0, 36);
     return `${prefix}-credit-${Buffer.from(content).toString("base64").slice(0, 24)}`;
+  };
+
+  /**
+   * Batched dashboard read: sums the manually subtracted credit amount per
+   * class instance for SUBTRACT adjustment rows linked to those instances.
+   * Subtract rows persist negative deltas, so the map carries the positive
+   * subtracted magnitude that the caller can display or add directly. Credit
+   * ledger rows carry no currency column, so `currency` is always null here —
+   * enrichment from a monetary source (e.g. the session's currency) is the
+   * caller's concern. Instances without subtract rows are absent from the
+   * map. An empty `instanceIds` input returns an empty map (an `inArray`
+   * filter over an empty array is invalid SQL on PostgreSQL).
+   */
+  export const findSubtractCreditsByInstanceIds = async (
+    instanceIds: string[],
+    tx?: DBTransaction
+  ): Promise<Map<string, { amount: number; currency: null }>> => {
+    if (instanceIds.length === 0) return new Map();
+    const q = queryDb(tx);
+    const rows = await q
+      .select({
+        classInstanceId: creditTransactions.classInstanceId,
+        subtractedAmount: sql<number>`COALESCE(SUM(ABS(${creditTransactions.changeAmount})), 0)`.mapWith(Number),
+      })
+      .from(creditTransactions)
+      .where(
+        and(
+          inArray(creditTransactions.classInstanceId, [...instanceIds]),
+          eq(creditTransactions.adjustmentType, CreditAdjustmentType.SUBTRACT)
+        )
+      )
+      .groupBy(creditTransactions.classInstanceId);
+    const byInstance = new Map<string, { amount: number; currency: null }>();
+    for (const row of rows) {
+      if (row.classInstanceId) {
+        byInstance.set(row.classInstanceId, {
+          amount: row.subtractedAmount,
+          currency: null,
+        });
+      }
+    }
+    return byInstance;
   };
 }

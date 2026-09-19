@@ -2,13 +2,12 @@
 
 **Date**: 2026-08-01
 **Verified package**: `@react-email/editor@1.6.13` (installed at `/home/ahmed/Projects/siraj-mail/node_modules/@react-email/editor/`)
-**Plan under review**: `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md`
 
 ---
 
 ## 1. Confirmed version
 
-- **Installed**: `1.6.13` — matches the plan's expected `1.6.x` / `1.6.13`.
+- **Installed**: `1.6.13`.
 - Source: `node_modules/@react-email/editor/package.json` line 4: `"version": "1.6.13"`.
 
 ---
@@ -35,7 +34,7 @@ CSS asset subpaths (string-form mapping, single-condition):
 | `./styles/inspector.css` | `./dist/ui/inspector/inspector.css` |
 | `./themes/default.css` | `./dist/ui/themes/default.css` |
 
-Notes for the plan:
+Notes:
 - Subpath **`./core`** is present and mapped.
 - Subpath **`./themes/default.css`** is present, mapped, and the file physically exists (see §6).
 - There is **no** bare `./styles` aggregate CSS export — `./styles/*` is split into three specific files. `./dist/style.css` (a 4th bundle file) is NOT exposed through the `exports` map; import via deep path at your own risk. Stick to the four documented subpaths.
@@ -61,20 +60,20 @@ There is no symbol named `EmailEditorComponent` in the shipped type tree. Verifi
 
 ### 3b. Named export, not default
 
-Confirmed: the export clause is `export { EmailEditor, type EmailEditorProps, type EmailEditorRef }`. No `export default` is present in `dist/index.d.mts` or `dist/index.mjs`. The plan's `dynamic(() => import('@react-email/editor').then(m => m.EmailEditor), { ssr: false })` (plan line 481) is the correct access pattern — `m.default` would be `undefined`.
+Confirmed: the export clause is `export { EmailEditor, type EmailEditorProps, type EmailEditorRef }`. No `export default` is present in `dist/index.d.mts` or `dist/index.mjs`. `dynamic(() => import('@react-email/editor').then(m => m.EmailEditor), { ssr: false })` is the correct access pattern — `m.default` would be `undefined`.
 
 ### 3c. `'use client'` directive
 
-**DISCREPANCY** — needs plan update.
+**DISCREPANCY** — important nuance.
 
-The plan (line 480) is *ambiguous*: it says "Add `'use client'` directive on `EmailTemplateEditorPage.tsx`" — that part is correct (the consumer file needs the directive). But the plan-prose as written may be read by an implementer as "*the editor ships a 'use client' directive*", which is the document the user explicitly asked us to check.
+The `'use client'` directive must be added on the consumer page (`EmailTemplateEditorPage.tsx`). It would be wrong to assume the editor itself ships the directive.
 
 Verified reality (grep across every `.mjs` and `.cjs` in `dist/`):
 
 - **The `@react-email/editor` package does NOT ship a `'use client'` directive in any runtime file.** `grep -c "use client"` against all 22 compiled files = `0` for every file. `head -1 dist/index.mjs` shows the first line is `import { n as composeReactEmail } from "./core-CtoP6qua.mjs";` — no directive before it.
 - The `.d.mts` likewise has no directive line.
 
-Implication for the plan: the directive **must be added by the consumer** (`EmailTemplateEditorPage.tsx`) and is **not provided transitively by the editor package**. The plan's line 480 ("Add `'use client'` directive on `EmailTemplateEditorPage.tsx`") is correct; any implementer note elsewhere implying the directive comes from `@react-email/editor` is wrong and should be removed. (No such note found in plan lines 75–90, 268, 480–491, 558 — the plan is internally consistent on this point. Flagging this only because the user's task explicitly asked us to verify where the directive lives.)
+Implication: the directive **must be added by the consumer** (`EmailTemplateEditorPage.tsx`) and is **not provided transitively by the editor package**.
 
 ### 3d. `EmailEditorProps` fields (verbatim)
 
@@ -129,10 +128,10 @@ All methods on the ref (exhaustive):
 | `getJSON` | `() => JSONContent` | TipTap JSON document |
 | `editor` | `Editor \| null` | Underlying TipTap `Editor` instance (null until ready) |
 
-Plan-relevant confirmations:
+Confirmations:
 
-- **`getJSON()` exists** — signature `() => JSONContent`. The runtime (`dist/index.mjs` `buildRef`) returns `editor?.getJSON() ?? { type: "doc", content: [] }` when the editor is null, so it never throws — it falls back to an empty doc. Plan line 268 ("`@react-email/editor`'s `getJSON()` returns opaque TipTap `JSONContent`") is **VERIFIED**.
-- **`getEmail()` exists** — verified. Returns `Promise<{ html: string; text: string }>`. Note it is **`async`** at the runtime level (`await composeReactEmail({ editor })`). Plan line 90 ("`getJSON()` and possibly `getEmail()` ref methods") is VERIFIED for both — refine plan to state the async signature explicitly and to mention `getEmailHtml()` / `getEmailText()` as additional helpers.
+- **`getJSON()` exists** — signature `() => JSONContent`. The runtime (`dist/index.mjs` `buildRef`) returns `editor?.getJSON() ?? { type: "doc", content: [] }` when the editor is null, so it never throws — it falls back to an empty doc. `@react-email/editor`'s `getJSON()` returns opaque TipTap `JSONContent`.
+- **`getEmail()` exists** — verified. Returns `Promise<{ html: string; text: string }>`. Note it is **`async`** at the runtime level (`await composeReactEmail({ editor })`). Both `getJSON()` and `getEmail()` ref methods exist; note the async signature and the additional `getEmailHtml()` / `getEmailText()` helpers.
 
 ---
 
@@ -173,7 +172,7 @@ Import form to use in the codebase:
 import { EmailNode, type EmailNodeConfig } from '@react-email/editor/core';
 ```
 
-Full surface exported from `./core` (for plan reference):
+Full surface exported from `./core`:
 `CustomPlaceholder`, `DispatchOptions`, `EditorEventHandler`, `EditorEventMap`, `EditorEventName`, `EditorEventSubscription`, `EmailMark`, `EmailMarkConfig`, `EmailNode`, `EmailNodeConfig`, `EventHandler`, `EventSubscription`, `MarkRendererComponent`, `NodeClickedEvent`, `NodeRendererComponent`, `PlaceholderItem`, `SerializedMark`, `composeReactEmail`, `editorEventBus`, `isDocumentVisuallyEmpty`, `useEditorEvent`.
 
 ### `EmailNode` class shape (verbatim from `dist/index-96kvkFPM.d.mts` §`src/core/serializer/email-node.d.ts`)
@@ -233,15 +232,15 @@ Use `EmailNode.create({ name, renderToReactEmail: (props) => <MyComp {...props} 
   /* Layer 0: layout (inlined at build time via postcss-import) */
   ```
 
-Important nuance for the plan (line 482): the file comment says **"Opt-in"** — meaning the CSS is NOT auto-imported by the editor component. However, the live docs at `https://react.email/docs/editor/api-reference/email-editor` (fetched 2026-08-01) state that `EmailEditor` **automatically imports** `@react-email/editor/themes/default.css`. Reading the runtime `dist/index.mjs`, the component does NOT itself issue a static `import '...themes/default.css'` statement at the top of the module — so the auto-apply is achieved either by a bundler `sideEffects` entry (the package.json sets `sideEffects: ["**/*.css"]`, allowing CSS to be tree-shaken correctly) or by the user opting in. **We should keep the explicit import the plan currently mandates** (line 482: `import '@react-email/editor/themes/default.css'`) — this is the safer, reproducible behavior. Marking as VERIFIED with caveat.
+Important nuance: the file comment says **"Opt-in"** — meaning the CSS is NOT auto-imported by the editor component. However, the live docs at `https://react.email/docs/editor/api-reference/email-editor` (fetched 2026-08-01) state that `EmailEditor` **automatically imports** `@react-email/editor/themes/default.css`. Reading the runtime `dist/index.mjs`, the component does NOT itself issue a static `import '...themes/default.css'` statement at the top of the module — so the auto-apply is achieved either by a bundler `sideEffects` entry (the package.json sets `sideEffects: ["**/*.css"]`, allowing CSS to be tree-shaken correctly) or by the user opting in. **Keep the explicit import** (`import '@react-email/editor/themes/default.css'`) — this is the safer, reproducible behavior.
 
-CSS custom properties present in the file (substring matches on the file): `--re-bg`, `--re-text`, `--re-border`, `--re-hover`, `--re-active`, `--re-radius`, `--re-radius-sm`. The plan's "Layer A (editor chrome)" var list (plan line 484) is **VERIFIED accurate**. (`--re-text-muted` is named in the plan but the canonical token in the CSS is `--re-text-muted` — present.)
+CSS custom properties present in the file (substring matches on the file): `--re-bg`, `--re-text`, `--re-border`, `--re-hover`, `--re-active`, `--re-radius`, `--re-radius-sm`. The "Layer A (editor chrome)" var list is **verified accurate**. (`--re-text-muted` is also present as a canonical token in the CSS.)
 
 ---
 
 ## 7. peerDependencies vs dependencies — TipTap
 
-**VERIFIED**. The plan's claim (line 75, 83, 558) — "`@tiptap/*` bundled transitively by `@react-email/editor`" / "TipTap 3.17.x is a direct dep (NOT peer)" — is correct.
+**VERIFIED**. `@tiptap/*` is bundled transitively by `@react-email/editor`, and TipTap 3.17.x is a direct dep (NOT peer).
 
 `package.json` `peerDependencies` (verbatim):
 
@@ -285,7 +284,7 @@ Only `react` and `react-dom` are peer. **No `@tiptap/*` peer.**
 @tiptap/suggestion                 ^3.17.1
 ```
 
-Other notable direct deps: `@floating-ui/react-dom ^2.1.8`, `@radix-ui/react-popover ^1.0.0`, `@radix-ui/react-slot ^1.2.3`, `hast-util-from-html ^2.0.3`, `prismjs ^1.30.0`, and **`react-email 6.9.1`** (pinned exact, no caret — meaning the editor's bundled React Email serializer is fixed to 6.9.1; the consumer app's `react-email` will dedupe against this version). The plan's claim (line 77) of "`react-email@6` unified `@react-email/components` + `@react-email/render` INTO itself" is consistent with the editor pinning `react-email` (not the legacy `@react-email/render` package).
+Other notable direct deps: `@floating-ui/react-dom ^2.1.8`, `@radix-ui/react-popover ^1.0.0`, `@radix-ui/react-slot ^1.2.3`, `hast-util-from-html ^2.0.3`, `prismjs ^1.30.0`, and **`react-email 6.9.1`** (pinned exact, no caret — meaning the editor's bundled React Email serializer is fixed to 6.9.1; the consumer app's `react-email` will dedupe against this version). `react-email@6` unified `@react-email/components` + `@react-email/render` INTO itself, which is consistent with the editor pinning `react-email` (not the legacy `@react-email/render` package).
 
 ---
 
@@ -298,26 +297,26 @@ Other notable direct deps: `@floating-ui/react-dom ^2.1.8`, `@radix-ui/react-pop
   - Component signature: `React.ForwardRefExoticComponent<EmailEditorProps & React.RefAttributes<EmailEditorRef>>` — matches installed `.d.mts`.
   - Props list matches the installed `EmailEditorProps` interface (all 11 props present, in order).
   - Ref API verbatim matches the installed `EmailEditorRef` interface.
-  - Claims `EmailEditor` **automatically** imports `@react-email/editor/themes/default.css` (see §6 caveat — keep the explicit import the plan calls for, both are safe).
+  - Claims `EmailEditor` **automatically** imports `@react-email/editor/themes/default.css` (see §6 caveat — keep the explicit import; both approaches are safe).
 - `https://www.resend.com/docs/knowledge-base/embed-react-email-editor` — request **timed out**; no further cross-check possible. Any historical Resend doc reference to `EmailEditorComponent` would be outdated anyway — the installed package today uses **`EmailEditor`** exclusively (verified by type-tree grep). The historical name change is reflected in the current `react.email` canonical docs.
 
-No alternative export name (`EmailEditorComponent`, `ReactEmailEditor`, etc.) was found in the installed type tree. The plan's use of `EmailEditor` is correct.
+No alternative export name (`EmailEditorComponent`, `ReactEmailEditor`, etc.) was found in the installed type tree — `EmailEditor` is the correct name.
 
 ---
 
 ## 9. Verdict
 
-**VERIFIED** with two minor refinements to add for implementation clarity (not blocking corrections):
+**VERIFIED**, with the following notes for implementation clarity:
 
-1. **Plan line 90** (`getJSON()` and possibly `getEmail()` ref methods) — refine to:
+1. **Ref surface**:
    > `getJSON(): JSONContent` (sync, returns `{type:'doc',content:[]}` before editor ready), plus `getEmail(): Promise<{html,text}>`, `getEmailHtml(): Promise<string>`, `getEmailText(): Promise<string>`, and `editor: Editor | null`.
-   The plan currently under-states the available ref surface by saying "possibly `getEmail()`" — `getEmail()` definitely exists; `getEmailHtml()` / `getEmailText()` should also be noted so implementers use the precise helper rather than parsing `getEmail()`.
+   `getEmail()` definitely exists; use the precise helper (`getEmailHtml()` / `getEmailText()`) rather than parsing `getEmail()`.
 
-2. **Plan line 480** (`'use client'` directive on `EmailTemplateEditorPage.tsx`) — VERIFIED correct. The directive **must come from the consumer file**, because the editor package ships NO `'use client'` directive in any `.mjs`/`.cjs`/`.d.mts` (grep-confirmed). No plan edit required; flagging only so implementers don't wait for the package to provide it.
+2. **`'use client'` directive on `EmailTemplateEditorPage.tsx`** — the directive **must come from the consumer file**, because the editor package ships NO `'use client'` directive in any `.mjs`/`.cjs`/`.d.mts` (grep-confirmed).
 
-3. **Plan line 482** (`import '@react-email/editor/themes/default.css'`) — VERIFIED, file exists at `dist/ui/themes/default.css`, subpath `./themes/default.css` is mapped in `exports`. The `--re-*` CSS variable list on plan line 484 is accurate against the file. Safe to retain the explicit import even though online docs claim auto-import (the bundler `sideEffects` flag could vary between Next/Turbopack and Webpack).
+3. **`import '@react-email/editor/themes/default.css'`** — file exists at `dist/ui/themes/default.css`, subpath `./themes/default.css` is mapped in `exports`. The `--re-*` CSS variable list is accurate against the file. Safe to use the explicit import even though online docs claim auto-import (the bundler `sideEffects` flag could vary between Next/Turbopack and Webpack).
 
-**No corrections required for** plan lines 75, 83, 268, 480–491, 558 concerning the export name/method names/Tiptap dep status. The plan accurately states:
+**Confirmed:**
 - named `EmailEditor` export (NOT default, NOT `EmailEditorComponent`) ✓
 - `'use client'` belongs on the consumer page ✓
 - `getJSON()` returns opaque `JSONContent` ✓
@@ -327,7 +326,7 @@ No alternative export name (`EmailEditorComponent`, `ReactEmailEditor`, etc.) wa
 
 ---
 
-## Appendix: copy-pasteable imports for the plan
+## Appendix: copy-pasteable imports
 
 ```ts
 // Main editor component (named export, NOT default)
@@ -347,7 +346,7 @@ import {
 import '@react-email/editor/themes/default.css';
 ```
 
-Ref-type declaration to re-use in the plan (verbatim from `dist/index.d.mts`):
+Ref-type declaration (verbatim from `dist/index.d.mts`):
 
 ```ts
 interface EmailEditorRef {

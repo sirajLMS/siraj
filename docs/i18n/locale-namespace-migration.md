@@ -74,3 +74,12 @@ When migrating locale files, verify:
 - `shared/AGENTS.md`
 - `.ai/plans/duplications/outcome/3.4-locale-meeting-config-migration-outcome.md`
 - `.agents/instructions/frontend.instructions.md`
+
+## Tooling: Locale Validation & Snapshots
+
+- There is **no `locale:validate` script** in the repo. The validator is
+  `bun run locale:snapshots`, which processes all locale snapshots and reports
+  count processed / count written (e.g. "Processed 268 snapshots (2 written)").
+- Run it after editing any locale file; a written snapshot confirms the
+  generated snapshot output picked up the change — verify the new entries with
+  a grep of the snapshot file rather than assuming the write succeeded.

@@ -18,8 +18,13 @@ export class VercelAdapter extends BaseAdapter<VercelContext> {
       throw new Error("BLOB_READ_WRITE_TOKEN environment variable is required for Vercel Blob storage");
     }
 
-    const rawAccess = getStringEnv("VERCEL_BLOB_ACCESS", "public");
-    const access: "public" | "private" = isBlobAccess(rawAccess) ? rawAccess : "public";
+    const rawAccess = getStringEnv("VERCEL_BLOB_ACCESS", "private");
+    if (!isBlobAccess(rawAccess)) {
+      logger.warn(
+        `Invalid VERCEL_BLOB_ACCESS value "${rawAccess}" ignored; defaulting blob access to "private". Set it explicitly to "public" or "private".`
+      );
+    }
+    const access: "public" | "private" = isBlobAccess(rawAccess) ? rawAccess : "private";
     const context: VercelContext = {
       baseUrl: NEXT_PUBLIC_BASE_URL,
       token,

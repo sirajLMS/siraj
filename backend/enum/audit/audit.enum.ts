@@ -56,4 +56,7 @@ export const AUDIT_ACTION_VALUES = [
   "EXPENSE_CREATE",
   "EXPENSE_UPDATE",
   "EXPENSE_DELETE",
+  "LOGIN_SUCCESS",
+  "LOGIN_FAILED",
+  "USER_ANONYMIZED",
 ] as const satisfies readonly AuditAction[];

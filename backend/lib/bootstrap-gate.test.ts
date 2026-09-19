@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { assertSeedWriteAllowed, isSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 
-const ENV_KEYS = ["NODE_ENV", "TEST_SERVER", "TEST_CI", "VERCEL_ENV"] as const;
+const ENV_KEYS = ["NODE_ENV", "TEST_SERVER", "TEST_CI", "VERCEL_ENV", "TEST_HARNESS_KEY"] as const;
 
 const originalEnv: Record<string, string | undefined> = {};
 
 function setEnv(key: string, value: string | undefined): void {
-  Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true });
+  Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true, enumerable: true });
 }
 
 function clearEnv(key: string): void {
@@ -41,10 +41,17 @@ describe("isSeedWriteAllowed", () => {
     expect(isSeedWriteAllowed()).toBe(false);
   });
 
-  test("allows production NODE_ENV on dedicated test server", () => {
+  test("allows production NODE_ENV on dedicated test server with valid TEST_HARNESS_KEY", () => {
     setEnv("NODE_ENV", "production");
     setEnv("TEST_SERVER", "1");
+    setEnv("TEST_HARNESS_KEY", "a".repeat(32));
     expect(isSeedWriteAllowed()).toBe(true);
+  });
+
+  test("blocks production NODE_ENV test server without TEST_HARNESS_KEY", () => {
+    setEnv("NODE_ENV", "production");
+    setEnv("TEST_SERVER", "1");
+    expect(isSeedWriteAllowed()).toBe(false);
   });
 
   test("blocks Vercel production even on test server", () => {

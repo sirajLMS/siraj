@@ -1,16 +1,16 @@
 # Nodemailer Adapter API Verification
 
-> Subagent research report. Verifies the installed `nodemailer@9.0.3` + `@types/nodemailer@8.0.1` packages against plan lines 317 & 558 (`SmtpEmailAdapter.ts` adapter; Bun compatibility check).
+> Research report on the installed `nodemailer@9.0.3` + `@types/nodemailer@8.0.1` packages (`SmtpEmailAdapter.ts` adapter; Bun compatibility check).
 
-## VERDICT: VERIFIED (one minor `encoding`-literal-union refinement for the plan)
+## VERDICT: VERIFIED (one minor `encoding`-literal-union refinement)
 
-The adapter API surface the plan relies on (`createTransport`, `Transporter.sendMail`, `MailOptions`, `Attachment`, `SMTPOptions`) is intact in the installed packages. The only precision adjustment: the `Attachment.encoding` field is typed as a plain `string` (not a literal union `"base64" | "utf-8" | ...`) in the .d.ts — the OTT plan should treat it as `string` and constrain via JSDoc/runtime validation if it wants an enum.
+The adapter API surface (`createTransport`, `Transporter.sendMail`, `MailOptions`, `Attachment`, `SMTPOptions`) is intact in the installed packages. The only precision adjustment: the `Attachment.encoding` field is typed as a plain `string` (not a literal union `"base64" | "utf-8" | ...`) in the .d.ts — treat it as `string` and constrain via JSDoc/runtime validation if an enum is wanted.
 
 ---
 
 ## 1. Confirmed versions
 
-| Package | Installed | Plan expected | `main` / `types` |
+| Package | Installed | Expected | `main` / `types` |
 |---|---|---|---|
 | `nodemailer` | `9.0.3` ✅ | `9.0.3` | `main: "lib/nodemailer.js"`, no `module`, no `types` field (ships **no own types**; relies on `@types/nodemailer`). |
 | `@types/nodemailer` | `8.0.1` ✅ | `8.0.1` | `types: "index.d.ts"` (DefinitelyTyped, `typeScriptVersion: "5.3"`). |
@@ -63,7 +63,7 @@ sendMail(mailOptions: Mail.Options & Partial<DefaultTransportOptions>): Promise<
 sendMail(mailOptions: Mail.Options): Promise<T>;                                            // :202
 ```
 
-**Promise-returning when the callback parameter is omitted.** Under `async/await` — `await transporter.sendMail(opts)` → `Promise<SMTPTransport.SentMessageInfo>`. ✅ matches the plan's intended `await transporter.sendMail({...})` usage.
+**Promise-returning when the callback parameter is omitted.** Under `async/await` — `await transporter.sendMail(opts)` → `Promise<SMTPTransport.SentMessageInfo>`. ✅ matches the intended `await transporter.sendMail({...})` usage.
 
 Also: `verify()` returns `Promise<true>` (mailer/index.d.ts:188-189); `close(): void` (line 178); `isIdle(): boolean` (line 181).
 
@@ -109,7 +109,7 @@ Also: `verify()` returns `Promise<true>` (mailer/index.d.ts:188-189); `close(): 
 
 `Address` (mailer/index.d.ts:30-34): `{ name?: string \| undefined; address: string }`.
 
-This confirms every field the plan enumerates (To, From, Subject, HTML, Text, Attachments) plus expands the picture (cc, bcc, replyTo, headers, envelope, messageId, priority, etc.).
+This confirms the core fields (To, From, Subject, HTML, Text, Attachments) plus expands the picture (cc, bcc, replyTo, headers, envelope, messageId, priority, etc.).
 
 ---
 
@@ -141,9 +141,9 @@ interface Attachment extends AttachmentLike {
 
 Inherited from `AttachmentLike` (via `extends`): `content?: string | Buffer | Readable | undefined` and `path?: string | Url | undefined`.
 
-### Cross-check vs. plan §"Attachment type fields"
+### Cross-check: attachment type fields
 
-| Plan claim | .d.ts reality | Status |
+| Claim | .d.ts reality | Status |
 |---|---|---|
 | `filename` | `filename?: string \| false \| undefined` | ✅ |
 | `content` (`Buffer \| string \| Stream`) | `content?: string \| Buffer \| Readable \| undefined` (`Readable` = `NodeJS.ReadableStream`) | ✅ |
@@ -151,11 +151,11 @@ Inherited from `AttachmentLike` (via `extends`): `content?: string | Buffer | Re
 | `path` | `path?: string \| Url \| undefined` | ✅ (also accepts `url.Url` and data-URI strings) |
 | `contentType` | `contentType?: string \| undefined` | ✅ |
 | `encoding` (`"base64" \| "utf-8" \| ...` literal union) | **`encoding?: string \| undefined`** — **plain `string`, NOT a literal union** | ⚠️ Minor refinement — see verdict |
-| (implied) `raw`, `contentDisposition`, `contentTransferEncoding`, `headers` | All present | ✅ Plan omitted these but they exist. |
+| (implied) `raw`, `contentDisposition`, `contentTransferEncoding`, `headers` | All present | ✅ These also exist. |
 
-**Refinement needed by the plan**: the OTT plan describes `encoding` as a literal union `"base64" | "utf-8" | "hex" | "binary" | "7bit" | "8bit"`. The installed `@types/nodemailer@8.0.1` types it as **bare `string`**. The valid runtime values are documented (online docs: `'base64'`, `'hex'`, `'binary'`, `'utf8'`/`'utf-8'`, etc.), but TypeScript will not narrow — so if the siraj adapter wants compile-time enum enforcement it must declare its own literal union and cast before passing to nodemailer.
+**Refinement**: a literal-union reading of `encoding` as a literal union `"base64" | "utf-8" | "hex" | "binary" | "7bit" | "8bit"`. The installed `@types/nodemailer@8.0.1` types it as **bare `string`**. The valid runtime values are documented (online docs: `'base64'`, `'hex'`, `'binary'`, `'utf8'`/`'utf-8'`, etc.), but TypeScript will not narrow — so if the siraj adapter wants compile-time enum enforcement it must declare its own literal union and cast before passing to nodemailer.
 
-Everything else matches the plan exactly.
+Everything else matches exactly.
 
 ---
 
@@ -171,9 +171,9 @@ interface Options extends MailOptions, TransportOptions, SMTPConnection.Options 
 }
 ```
 
-The actual SMTP socket config comes from `SMTPConnection.Options` — `node_modules/@types/nodemailer/lib/smtp-connection/index.d.ts:122-159`. Verified fields the plan names:
+The actual SMTP socket config comes from `SMTPConnection.Options` — `node_modules/@types/nodemailer/lib/smtp-connection/index.d.ts:122-159`. Verified fields:
 
-| Plan field | Type | .d.ts location |
+| Field | Type | .d.ts location |
 |---|---|---|
 | `host` | `string \| undefined` | smtp-connection/index.d.ts:124 |
 | `port` | `number \| undefined` | :126 |
@@ -184,7 +184,7 @@ The actual SMTP socket config comes from `SMTPConnection.Options` — `node_modu
 | (extra) `ignoreTLS`, `requireTLS`, `opportunisticTLS` | `boolean \| undefined` | smtp-connection/:132, :134, :136 |
 | (extra) `connectionTimeout`, `greetingTimeout`, `socketTimeout`, `dnsTimeout` | `number (ms) \| undefined` | :144-150 |
 
-So the plan's `{ host, port, secure, auth }` shape is fully supported. `auth: { user, pass }` is exactly `SMTPConnection.Credentials` (`{ user: string; pass: string }`) — works with **no `type` field** because `AuthenticationTypeLogin` makes `type` optional and the `login` discriminator is the default at runtime.
+So the `{ host, port, secure, auth }` shape is fully supported. `auth: { user, pass }` is exactly `SMTPConnection.Credentials` (`{ user: string; pass: string }`) — works with **no `type` field** because `AuthenticationTypeLogin` makes `type` optional and the `login` discriminator is the default at runtime.
 
 `SMTPTransport.MailOptions` (smtp-transport/index.d.ts:24-27) extends `Mail.Options` with `auth` + `dsn` — used when per-send auth overrides the transporter's auth.
 
@@ -202,15 +202,15 @@ So the plan's `{ host, port, secure, auth }` shape is fully supported. `auth: { 
 
 The upstream nodemailer maintainer (`andris9`) explicitly closed the Bun-tracking mirror issue (`nodemailer/nodemailer#1644`) in July 2024 with: *"Nodemailer has guaranteed support only for Node."*
 
-### Recommendations for the siraj SMTP adapter (consistent with plan line 317):
+### Recommendations for the siraj SMTP adapter:
 
-1. **Prefer API providers** (SES, Postmark, Mailgun) for production; keep SMTP as a fallback only — exactly what plan line 317 says.
+1. **Prefer API providers** (SES, Postmark, Mailgun) for production; keep SMTP as a fallback only.
 2. **Reuse a single transporter** across the process; do NOT `createTransport()` per send (per `11-bun-compatibility.md`).
 3. **Disable pooling** under Bun: set `pool: false` in transport options (community-confirmed workaround — repeated handshakes are cheaper than Bun closing pooled sockets). Maintain `transporter.close()` on shutdown.
 4. Avoid `STARTTLS`-upgrade scenarios (`secure: false` on port 587) where possible; prefer `secure: true` on port 465 (TLS from the start) — sidesteps the `usocket.upgradeTLS` gap.
-5. Add CI smoke tests that actually run SMTP under Bun to catch regressions; the plan's §558 "Bun compatibility checks" line correctly references #10329.
+5. Add CI smoke runs that actually send SMTP under Bun to catch regressions; references #10329.
 
-These caveats are still live in 2026 with Bun 1.3.x; no fix has landed. The plan's caution is justified and current.
+These caveats are still live in 2026 with Bun 1.3.x; no fix has landed. This caution is justified and current.
 
 ---
 
@@ -228,4 +228,4 @@ All_online docs are consistent with the installed `.d.ts` types. No drift.
 
 ## One-line verdict
 
-**VERIFIED** — with one refinement: the plan's `Attachment.encoding` literal-union claim (`"base64" | "utf-8" | ...`) should be downgraded to `string` to match `@types/nodemailer@8.0.1` (`mailer/index.d.ts:51`); declare your own literal union in the siraj adapter type layer if compile-time enum enforcement is wanted.
+**VERIFIED** — with one refinement: the `Attachment.encoding` literal-union reading (`"base64" | "utf-8" | ...`) should be downgraded to `string` to match `@types/nodemailer@8.0.1` (`mailer/index.d.ts:51`); declare your own literal union in the siraj adapter type layer if compile-time enum enforcement is wanted.

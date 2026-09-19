@@ -1,5 +1,5 @@
 {
-  "manifestHash": "2cb955213c70329bbe75e412b057c2cdd938c30756d98f097c645bd12d09ee57",
+  "manifestHash": "02b11dea350f52f88b45115cee519920a343cc1ba967aeab6e17cc6790459353",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -140,6 +140,10 @@
     {
       "file": "5-billing_fx_admin_permissions.sql",
       "sha256": "1248e234618ba59611715a49f2c9f7b863267b92d096aedf7bde412b9d5c5a01"
+    },
+    {
+      "file": "50-accounting-profits-permissions.sql",
+      "sha256": "b136c3af8ccb11d588dc91186fc39532b99792cfd6bc7fdf86429bd91b181f9a"
     },
     {
       "file": "5a-billing_manage_currencies_permission.sql",
@@ -391,6 +395,7 @@
     "20260914223712_custom_48-prune-view-other-defaults",
     "20260915082413_custom_6e-prune-view-other-defaults",
     "20260915212326_custom_48-storage-and-meeting-integrations-permissions",
-    "20260915220953_custom_49-rls-guc-fail-closed"
+    "20260915220953_custom_49-rls-guc-fail-closed",
+    "20260915233221_custom_50-accounting-profits-permissions"
   ]
 }

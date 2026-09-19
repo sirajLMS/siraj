@@ -139,7 +139,9 @@ const CountryAdornment: React.FC<CountryAdornmentProps> = ({
       aria-label={countryCallingCodeLabel}
       sx={theme => ({
         ...slotInputSx,
-        width: `${Math.max(prefixDigits.length + 1, 2)}ch`,
+        // `ch` measures only the normal-weight "0" advance — the bold active slot and the
+        // wider "+" glyph need more room, otherwise the last digit clips by a few px.
+        width: `calc(${Math.max(prefixDigits.length + 1, 2)}ch + 0.5em)`,
         flexShrink: 0,
         paddingInlineEnd: 0.25,
         color: prefixInvalid ? theme.palette.error.main : "inherit",
@@ -198,8 +200,6 @@ const PhoneTextField: React.FC<PhoneTextFieldProps> = ({
     value={nationalDisplay}
     onChange={() => {}}
     onBlur={onBlurAction}
-    onKeyDown={onNationalKeyDown}
-    onFocus={onNationalFocus}
     inputRef={nationalInputRef}
     sx={{
       "& .MuiInputBase-input": {
@@ -217,6 +217,10 @@ const PhoneTextField: React.FC<PhoneTextFieldProps> = ({
       inputLabel: { shrink: true },
       input: { startAdornment },
       htmlInput: {
+        // onKeyDown/onFocus must live on the native input: attached at the TextField
+        // root they also catch bubbled events from the prefix input and the flag button.
+        onKeyDown: onNationalKeyDown,
+        onFocus: onNationalFocus,
         onInput: onNationalInput,
         onSelect: onNationalSelect,
         autoComplete: "tel",

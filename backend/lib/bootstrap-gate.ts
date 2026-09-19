@@ -5,8 +5,9 @@ import { isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
  *
  * Production GraphQL/API handlers must never call seed services. This gate blocks
  * those writes when `NODE_ENV=production` unless an explicit test harness is active
- * (`TEST_SERVER=1`, `TEST_CI=true`). Always hard-denied on Vercel production
- * (`VERCEL_ENV=production`).
+ * (`TEST_SERVER=1`, `TEST_CI=true`) AND a `TEST_HARNESS_KEY` secret of at least 32
+ * characters is present (see `isTestHelperEnabled`). Always hard-denied on Vercel
+ * production (`VERCEL_ENV=production`).
  *
  * @see backend/services/seed/ — services that call {@link assertSeedWriteAllowed}
  * @see backend/lib/test-helper-gate.ts — GraphQL test-helper mutation gate

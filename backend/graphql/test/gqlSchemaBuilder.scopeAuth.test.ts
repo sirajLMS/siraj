@@ -115,24 +115,22 @@ describe("buildAuthScopes — superAdmin scope (lazy)", () => {
     expect(getUserContext).toHaveBeenCalledTimes(0);
   });
 
-  test("impersonating (realUserId differs): calls getUserContext with actor id", async () => {
+  test("impersonating: evaluates the EFFECTIVE user's status, no getUserContext", async () => {
     const { getUserContext, scopes } = makeScopesWithFake(
       { userId: "impersonated-user", isSuperAdmin: false, isImpersonating: true, realUserId: "admin-actor" },
       true
     );
-    expect(await scopes.superAdmin()).toBe(true);
-    expect(getUserContext).toHaveBeenCalledTimes(1);
-    expect(getUserContext.mock.calls[0][0]).toBe("admin-actor");
+    expect(await scopes.superAdmin()).toBe(false);
+    expect(getUserContext).toHaveBeenCalledTimes(0);
   });
 
-  test("impersonating, actor not superadmin: false", async () => {
+  test("impersonating with effective user superadmin: true, no getUserContext", async () => {
     const { getUserContext, scopes } = makeScopesWithFake(
-      { userId: "impersonated-user", isSuperAdmin: true, isImpersonating: true, realUserId: "staff-actor" },
+      { userId: "impersonated-user", isSuperAdmin: true, isImpersonating: true, realUserId: "admin-actor" },
       false
     );
-    expect(await scopes.superAdmin()).toBe(false);
-    expect(getUserContext).toHaveBeenCalledTimes(1);
-    expect(getUserContext.mock.calls[0][0]).toBe("staff-actor");
+    expect(await scopes.superAdmin()).toBe(true);
+    expect(getUserContext).toHaveBeenCalledTimes(0);
   });
 
   test("actorUserId fallback: calls getUserContext with actorUserId", async () => {

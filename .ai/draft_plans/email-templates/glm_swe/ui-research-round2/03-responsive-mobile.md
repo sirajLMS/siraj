@@ -2,134 +2,134 @@
 
 ## Summary
 
-The v6 plan establishes a solid tier-neutral ViewModel + switcher + Container architecture with explicit `frontend/mobile/views/` and `frontend/desktop/views/` tiers. However, **the Frontend section (lines 781-1096) and i18n section (lines 1097-1187) lack explicit responsive/mobile specifications for 9 of 10 audit categories**. The plan describes *what* components exist but not *how they adapt* across breakpoints, touch, SafeArea, or mobile-first patterns. This audit identifies 4 Critical, 6 High, 8 Medium, and 5 Low-priority gaps with specific v7 edits.
+The v6 design establishes a solid tier-neutral ViewModel + switcher + Container architecture with explicit `frontend/mobile/views/` and `frontend/desktop/views/` tiers. However, **the Frontend section (lines 781-1096) and i18n section (lines 1097-1187) lack explicit responsive/mobile definitions for 9 of 10 audit categories**. The design describes *what* components exist but not *how they adapt* across breakpoints, touch, SafeArea, or mobile-first patterns. This audit identifies 4 Critical, 6 High, 8 Medium, and 5 Low-priority gaps with specific v7 edits.
 
 ---
 
 ## Critical Gaps
 
 ### 1. No responsive column hiding strategy for AppDataGrid (List View)
-**Plan references:** §C lines 860-870 define 7 columns.  
-**Gap:** Zero specification of which columns hide at `xs` (<600px), `sm` (600-900px), `md` (900-1200px).  
+**Design references:** §C lines 860-870 define 7 columns.  
+**Gap:** Zero definition of which columns hide at `xs` (<600px), `sm` (600-900px), `md` (900-1200px).  
 **Codebase reality:** `AppDataGrid.tsx` wraps MUI X DataGrid v9 but **does not expose `columnVisibilityModel` or responsive column hiding**. The `slots` prop explicitly excludes `pagination` but has no column visibility configuration. MUI X DataGrid v9 supports `columnVisibilityModel` + `onColumnVisibilityModelChange` — but this is not wired.  
 **Impact:** Mobile list will render all 7 columns horizontally (overflow) or require horizontal scroll — unusable on 375px.
 
-### 2. Inspector panel on mobile — no Drawer anchor specified
-**Plan references:** §D line 911 says "bottom-anchored `<Drawer anchor='bottom'>`" for mobile inspector.  
-**Gap:** No specification of:  
+### 2. Inspector panel on mobile — no Drawer anchor defined
+**Design references:** §D line 911 says "bottom-anchored `<Drawer anchor='bottom'>`" for mobile inspector.  
+**Gap:** No definition of:  
 - Drawer max height (85vh like filter drawers? `maxHeight: "85vh"` in mobile filter drawer line 189)  
 - Whether it blocks the soft keyboard (critical: Inspector must stay accessible above keyboard)  
 - Swipe-to-dismiss gesture (mobile pattern: swipe down to close bottom sheet)  
 - Backdrop click behavior  
 - Whether the header `TuneOutlined` IconButton has `aria-expanded` + `aria-controls`
 
-### 3. Preview tab viewport selector on mobile — no alternative specified
-**Plan references:** §E line 939: "On mobile tier: iframe is full-width (selector hidden)".  
-**Gap:** "Hidden" is not a mobile pattern. A **mobile viewport simulator makes no sense on a mobile device**. Idiomatic alternatives not specified:  
+### 3. Preview tab viewport selector on mobile — no alternative defined
+**Design references:** §E line 939: "On mobile tier: iframe is full-width (selector hidden)".  
+**Gap:** "Hidden" is not a mobile pattern. A **mobile viewport simulator makes no sense on a mobile device**. Idiomatic alternatives not defined:  
 - Remove selector entirely (assume mobile viewport = device)  
 - Show "Desktop preview" link opening new tab at `/email-templates/[id]?viewport=desktop`  
 - Toggle between "Mobile preview (current)" / "Desktop preview" via segmented control  
 **Impact:** If selector renders hidden but exists in DOM, it adds dead code and confusion.
 
 ### 4. Send Test dialog — no mobile bottom sheet pattern
-**Plan references:** §F line 945: "MUI `<Dialog>` + `EntityFormDialogActions`".  
-**Gap:** On mobile, a centered modal is non-idiomatic. Should be a **bottom sheet (Drawer anchor="bottom")** matching the localizedStringDrawer pattern (line 280: `anchor="bottom"`). No spec for:  
+**Design references:** §F line 945: "MUI `<Dialog>` + `EntityFormDialogActions`".  
+**Gap:** On mobile, a centered modal is non-idiomatic. Should be a **bottom sheet (Drawer anchor="bottom")** matching the localizedStringDrawer pattern (line 280: `anchor="bottom"`). No definition for:  
 - Sample props editor: single column stack on mobile vs two-column desktop  
-- Rate-limit notice: toast vs inline banner (plan says inline error but not mobile variant)  
+- Rate-limit notice: toast vs inline banner (design says inline error but not mobile variant)  
 - "Send to my own email" quick button placement
 
 ---
 
 ## High-Priority Gaps
 
-### 5. Three-tab Design/Preview/Code — mobile tab behavior unspecified
-**Plan references:** §D lines 893-903 describe `<Slide>` transitions.  
-**Gap:** On mobile, three tabs may not fit horizontally. MUI `Tabs` supports `variant="scrollable"` but plan doesn't specify:  
+### 5. Three-tab Design/Preview/Code — mobile tab behavior undefined
+**Design references:** §D lines 893-903 describe `<Slide>` transitions.  
+**Gap:** On mobile, three tabs may not fit horizontally. MUI `Tabs` supports `variant="scrollable"` but design doesn't define:  
 - Use `variant="scrollable"` with `scrollButtons="auto"` on mobile?  
 - Or convert to **segmented control** (toggle button group) on mobile?  
 - Tab labels: full "Design/Preview/Code" vs icons only on `xs`?  
 - Slide animation direction on mobile (horizontal swipe gesture support?)
 
 ### 6. Save/Publish/Send Test actions — no sticky bottom bar on mobile
-**Plan references:** §D line 916: "sticky bottom of Inspector (`EntityFormDialogActions` slot)".  
+**Design references:** §D line 916: "sticky bottom of Inspector (`EntityFormDialogActions` slot)".  
 **Gap:** On mobile, the Inspector is a bottom Drawer — actions at its bottom are **buried above the keyboard**. Need a **sticky bottom action bar** (fixed, above SafeArea inset) that:  
 - Persists when Inspector Drawer is closed  
 - Uses `pb: env(safe-area-inset-bottom)` (pattern exists in `bottomNavbar.mobile.tsx:29` and `localizedStringDrawer.desktop.tsx:193`)  
 - Shows primary (Save Draft), secondary (Publish), tertiary (Send Test) with correct hierarchy
 
-### 7. Merge-tag picker — no mobile full-screen modal spec
-**Plan references:** §D lines 912-915: `VariableMentionPicker` as popover.  
-**Gap:** On mobile, a popover is too small for variable selection. Should be **full-screen modal** (Drawer anchor="bottom" with `maxHeight: 100%` or Dialog `fullScreen={true}`). No spec for:  
+### 7. Merge-tag picker — no mobile full-screen modal definition
+**Design references:** §D lines 912-915: `VariableMentionPicker` as popover.  
+**Gap:** On mobile, a popover is too small for variable selection. Should be **full-screen modal** (Drawer anchor="bottom" with `maxHeight: 100%` or Dialog `fullScreen={true}`). No definition for:  
 - Search/filter within picker on mobile  
 - Recent/frequently used section  
 - Keyboard dismissal on item tap
 
-### 8. TipTap editor mobile UX — no touch-optimized toolbar spec
-**Plan references:** §D line 916 mentions TipTap; §B line 820 mentions `ScopedCssBaseline`.  
+### 8. TipTap editor mobile UX — no touch-optimized toolbar definition
+**Design references:** §D line 916 mentions TipTap; §B line 820 mentions `ScopedCssBaseline`.  
 **Gap:** `@react-email/editor` bundles TipTap but **no mention of**:  
-- `TouchSensor` vs `PointerSensor` for dnd-kit in editor (plan installs `@dnd-kit/core` + `sortable`)  
+- `TouchSensor` vs `PointerSensor` for dnd-kit in editor (design installs `@dnd-kit/core` + `sortable`)  
 - Floating bubble menu position on mobile (above selection vs fixed bottom)  
 - Slash command menu mobile layout (full-width vs popover)  
 - Whether editor auto-focuses on mobile (soft keyboard covers 50% viewport)  
 - Block type selector on mobile (dropdown vs segmented control)
 
 ### 9. Keyboard appearing — Inspector accessibility not addressed
-**Plan references:** §D line 911 (mobile Inspector Drawer).  
+**Design references:** §D line 911 (mobile Inspector Drawer).  
 **Gap:** When soft keyboard opens on mobile:  
 - The bottom-anchored Inspector Drawer **will be pushed up or covered**  
-- No spec for: `resize` observer to adjust Drawer `maxHeight`, `visualViewport` API, or `keyboard-aware-scroll-view` pattern  
+- No definition for: `resize` observer to adjust Drawer `maxHeight`, `visualViewport` API, or `keyboard-aware-scroll-view` pattern  
 - MUI Drawer has no built-in keyboard awareness
 
-### 10. Pull-to-refresh on mobile list view — not specified
-**Plan references:** §C line 860 DataGrid usage.  
-**Gap:** Mobile lists should support **pull-to-refresh** (swipe down from top). MUI DataGrid doesn't have this built-in. Need wrapper component or `react-pull-to-refresh` integration. Plan mentions "Phase 2" for bulk actions but omits this mobile-native pattern.
+### 10. Pull-to-refresh on mobile list view — not defined
+**Design references:** §C line 860 DataGrid usage.  
+**Gap:** Mobile lists should support **pull-to-refresh** (swipe down from top). MUI DataGrid doesn't have this built-in. Need wrapper component or `react-pull-to-refresh` integration. Design mentions "Phase 2" for bulk actions but omits this mobile-native pattern.
 
 ---
 
 ## Medium-Priority Gaps
 
 ### 11. Swipe-to-archive on mobile list rows
-**Plan references:** §C line 870 row actions menu (icon button → Menu).  
-**Gap:** iOS/Android mail apps use **swipe left → Archive/Delete**. No spec for:  
+**Design references:** §C line 870 row actions menu (icon button → Menu).  
+**Gap:** iOS/Android mail apps use **swipe left → Archive/Delete**. No definition for:  
 - `@dnd-kit` sortable with `KeyboardSensor` + `TouchSensor` for swipe actions  
 - Or MUI `SwipeableDrawer` pattern per row  
 - Undo toast after swipe action
 
 ### 12. Tap vs long-press distinction
-**Plan references:** §C line 865 "Clickable row click → navigate to editor".  
-**Gap:** No spec for:  
+**Design references:** §C line 865 "Clickable row click → navigate to editor".  
+**Gap:** No definition for:  
 - Tap = navigate to editor  
 - Long-press = context menu (Edit/Preview/Duplicate/Archive)  
-- This is standard mobile list behavior; current plan only has icon-button menu
+- This is standard mobile list behavior; current design only has icon-button menu
 
 ### 13. Search bar collapse on mobile
-**Plan references:** §C line 876-878: Search in page header actions slot.  
-**Gap:** On mobile, header actions stack vertically (`MobilePageHeader.tsx:149` `flexDirection: "column"`). Search input becomes full-width. No spec for:  
+**Design references:** §C line 876-878: Search in page header actions slot.  
+**Gap:** On mobile, header actions stack vertically (`MobilePageHeader.tsx:149` `flexDirection: "column"`). Search input becomes full-width. No definition for:  
 - Collapse to search icon (magnifier) → tap expands to full-width input  
 - Or keep full-width (current) but ensure it doesn't push Create button off-screen
 
 ### 14. Filter chips horizontal scroll on mobile
-**Plan references:** §C lines 879-885: Scope, Status, Locale, Segmented view control.  
-**Gap:** Four filter groups won't fit on 375px. No spec for:  
+**Design references:** §C lines 879-885: Scope, Status, Locale, Segmented view control.  
+**Gap:** Four filter groups won't fit on 375px. No definition for:  
 - `HorizontalScrollRow` (exists as `MobileHorizontalScrollRow` in mobile primitives)  
 - Or collapsible "Filters" bottom sheet (like `searchScheduleFilterDrawer.mobile.tsx`)  
 - Active filter count badge positioning
 
 ### 15. Pagination: numbered pages desktop vs "Load more" mobile
-**Plan references:** §C line 886: `ListPaginationOptions` (10/25/50).  
-**Gap:** Mobile pagination should be **"Load more" button** (infinite scroll) or simple Previous/Next, not numbered pages. `MobilePaginationControls` exists but supports page input + numbered — not "Load more". No spec for which pattern.
+**Design references:** §C line 886: `ListPaginationOptions` (10/25/50).  
+**Gap:** Mobile pagination should be **"Load more" button** (infinite scroll) or simple Previous/Next, not numbered pages. `MobilePaginationControls` exists but supports page input + numbered — not "Load more". No definition for which pattern.
 
 ### 16. Bulk action bar position on mobile
-**Plan references:** §C line 887: "bulk Archive button appears in the header actions slot".  
-**Gap:** On mobile, header is far from selected rows. Should be **fixed bottom bar** (like Gmail) showing "3 selected • Archive • Cancel". No spec.
+**Design references:** §C line 887: "bulk Archive button appears in the header actions slot".  
+**Gap:** On mobile, header is far from selected rows. Should be **fixed bottom bar** (like Gmail) showing "3 selected • Archive • Cancel". No definition.
 
 ### 17. History drawer — mobile full-screen vs desktop right-docked
-**Plan references:** §D line 922: `<Drawer anchor="right">` for desktop.  
-**Gap:** Plan says desktop = right drawer. Mobile not specified. Should be **full-screen bottom sheet** (`anchor="bottom"`, `maxHeight: "90vh"`) matching `localizedStringDrawer.mobile.tsx`. Restore confirmation modal also needs mobile variant (full-screen Dialog or bottom sheet).
+**Design references:** §D line 922: `<Drawer anchor="right">` for desktop.  
+**Gap:** Design says desktop = right drawer. Mobile not defined. Should be **full-screen bottom sheet** (`anchor="bottom"`, `maxHeight: "90vh"`) matching `localizedStringDrawer.mobile.tsx`. Restore confirmation modal also needs mobile variant (full-screen Dialog or bottom sheet).
 
-### 18. dnd-kit touch sensors — activation distance not specified
-**Plan references:** §G line 959: `@dnd-kit/sortable` `useSortable` + `DragOverlay`.  
-**Gap:** `@dnd-kit/core` requires `sensors: [PointerSensor, TouchSensor({ activationConstraint: { distance: 8 } })]` for touch. No spec for:  
+### 18. dnd-kit touch sensors — activation distance not defined
+**Design references:** §G line 959: `@dnd-kit/sortable` `useSortable` + `DragOverlay`.  
+**Gap:** `@dnd-kit/core` requires `sensors: [PointerSensor, TouchSensor({ activationConstraint: { distance: 8 } })]` for touch. No definition for:  
 - Activation distance (8px default may be too sensitive)  
 - `KeyboardSensor` for accessibility  
 - Whether drag handles are always visible or appear on hover/long-press
@@ -139,7 +139,7 @@ The v6 plan establishes a solid tier-neutral ViewModel + switcher + Container ar
 ## Low-Priority Gaps / Nice-to-haves
 
 ### 19. iOS SafeArea insets — only partially implemented
-**Plan references:** §B line 851 `SectionPanel`; §D line 916 sticky bottom.  
+**Design references:** §B line 851 `SectionPanel`; §D line 916 sticky bottom.  
 **Gap:** `bottomNavbar.mobile.tsx:29` and `localizedStringDrawer.desktop.tsx:193` use `env(safe-area-inset-bottom)`. But:  
 - `MobilePageContainer` has no SafeArea padding  
 - Editor sticky action bar (Gap #6) needs it  
@@ -147,37 +147,37 @@ The v6 plan establishes a solid tier-neutral ViewModel + switcher + Container ar
 - MUI v9 `CssBaseline` does **not** add SafeArea CSS — must be explicit
 
 ### 20. Mobile landscape orientation — narrow height not addressed
-**Plan references:** None.  
+**Design references:** None.  
 **Gap:** Editor viewport in landscape (height ~320px with keyboard) needs:  
 - Compact Inspector (collapsible sections)  
 - Reduced toolbar density  
 - Preview iframe height calculation
 
 ### 21. dnd-kit bundle impact on mobile
-**Plan references:** §G line 955: `@dnd-kit/core@^6.3.1` + `@dnd-kit/sortable@^10.0.0` installed but UNUSED.  
-**Gap:** ~45KB gzipped added to editor route. No spec for:  
+**Design references:** §G line 955: `@dnd-kit/core@^6.3.1` + `@dnd-kit/sortable@^10.0.0` installed but UNUSED.  
+**Gap:** ~45KB gzipped added to editor route. No definition for:  
 - Code-split dnd-kit (only load on editor route — already via `EmailEditorWrapper` dynamic import)  
 - Simplified mobile editor fallback (read-only preview + basic edits) without dnd-kit
 
 ### 22. TipTap bundle weight on mobile
-**Plan references:** §B line 824: "Turbopack dev-compile slowdown with Prism.js".  
-**Gap:** `@react-email/editor` bundles TipTap + Prism.js (~200KB+). No spec for:  
+**Design references:** §B line 824: "Turbopack dev-compile slowdown with Prism.js".  
+**Gap:** `@react-email/editor` bundles TipTap + Prism.js (~200KB+). No definition for:  
 - Lazy-load editor only when Design tab active (current: mounts on editor route)  
 - "Simplified mobile editor" fallback (plain textarea + merge-tag picker) for slow devices
 
 ### 23. Routing — same routes or mobile master-detail?
-**Plan references:** §A lines 828-830: `/email-templates` and `/email-templates/[id]`.  
-**Gap:** Plan uses same routes for both tiers. Mobile idiomatic pattern:  
+**Design references:** §A lines 828-830: `/email-templates` and `/email-templates/[id]`.  
+**Gap:** Design uses same routes for both tiers. Mobile idiomatic pattern:  
 - `/email-templates` = full-screen list  
 - Tap row → push `/email-templates/[id]` full-screen detail (master-detail)  
 - Native back gesture (iOS edge swipe) must preserve editor state (Zustand survives tier switch per AGENTS.md)  
-- Bottom nav entry: is "Email Templates" in mobile bottom nav? (plan §A line 834 adds sidebar entry only)
+- Bottom nav entry: is "Email Templates" in mobile bottom nav? (design §A line 834 adds sidebar entry only)
 
 ---
 
-## Verified Items (Plan Aligns with Codebase)
+## Verified Items (Design Aligns with Codebase)
 
-| Item | Plan Location | Codebase Evidence |
+| Item | Design Location | Codebase Evidence |
 |------|---------------|-------------------|
 | Tier-neutral ViewModel + switcher + Container pattern | §Frontend lines 787-795 | `FeedbackManageView.tsx`, `FeedbackManagePageContainer.tsx`, `FeedbackManagePageChrome.tsx` |
 | `ResponsiveViewSwitch` with `createLazyView` + dynamic imports | §Frontend lines 789-793 | `ResponsiveViewSwitch.tsx`, `createLazyView.ts` |
@@ -191,8 +191,8 @@ The v6 plan establishes a solid tier-neutral ViewModel + switcher + Container ar
 | Mobile bottom nav with SafeArea inset | `bottomNavbar.mobile.tsx:29` | `pb: "env(safe-area-inset-bottom)"` |
 | Mobile pagination controls (`MobilePaginationControls`) | Search results | `paginationControls.mobile.tsx` |
 | `Slide` tab transitions with `slideDirection` | §G line 956 | `preferencesChannelTabs.mobile.tsx:140` |
-| `usePrefersReducedMotion` hook (NEW) | §G lines 964-981 | Specified in plan; not yet in codebase |
-| `EmailEditorWrapper` with `next/dynamic({ssr:false})` | §Frontend lines 805-818 | Specified in plan; pattern is intentional deviation |
+| `usePrefersReducedMotion` hook (NEW) | §G lines 964-981 | Defined in design; not yet in codebase |
+| `EmailEditorWrapper` with `next/dynamic({ssr:false})` | §Frontend lines 805-818 | Defined in design; pattern is intentional deviation |
 
 ---
 
@@ -222,7 +222,7 @@ The v6 plan establishes a solid tier-neutral ViewModel + switcher + Container ar
 
 ---
 
-## Recommended v7 Plan Edits
+## Recommended v7 Design Edits
 
 ### Add new subsection **R. Responsive & Mobile Specification** (after §Q, before i18n section)
 
@@ -267,7 +267,7 @@ This section makes explicit the responsive behavior, touch interactions, and mob
 ##### R.5 Editor View — Three Tabs (Design/Preview/Code) Mobile
 - **Variant**: `variant="scrollable"` `scrollButtons="auto"` on mobile (`xs`, `sm`). Desktop = default.
 - **Labels**: Full text on `≥sm`; icons only on `xs` (Design=✏️, Preview=👁️, Code=📝) with `aria-label`.
-- **Transitions**: Keep `<Slide direction={slideDirection}>` (plan §G). On mobile, `slideDirection` computed from swipe gesture (hammer.js or `touchstart`/`touchend` delta) for native feel.
+- **Transitions**: Keep `<Slide direction={slideDirection}>` (design §G). On mobile, `slideDirection` computed from swipe gesture (hammer.js or `touchstart`/`touchend` delta) for native feel.
 
 ##### R.6 Editor View — Sticky Bottom Action Bar (Mobile)
 - **Position**: Fixed bottom, `zIndex: appBar + 1`, `pb: env(safe-area-inset-bottom)`.
@@ -276,7 +276,7 @@ This section makes explicit the responsive behavior, touch interactions, and mob
 - **Keyboard shortcut hint**: Show "⌘S Save" / "⌘Enter Publish" labels on desktop only (`sx={{ display: { xs: 'none', md: 'inline' }}}`).
 
 ##### R.7 Editor View — Merge-Tag Picker Mobile
-- **Component**: `VariableMentionPicker` (plan §D line 913).
+- **Component**: `VariableMentionPicker` (design §D line 913).
 - **Mobile**: Full-screen bottom sheet (`Drawer anchor="bottom" maxHeight="100%"` with `borderTopLeftRadius: 16, borderTopRightRadius: 16`).
 - **Sections**: Search input (auto-focus) → Recent (last 5 used) → By Scope (grouped).
 - **Insert**: Tap item → inserts `{{fieldName}}` at cursor in Subject field (focus returns to Subject), closes drawer.
@@ -301,7 +301,7 @@ This section makes explicit the responsive behavior, touch interactions, and mob
 
 ##### R.11 History Drawer — Mobile Full-Screen
 - **Mobile**: `Drawer anchor="bottom" maxHeight="90vh"` (same as Inspector).
-- **Desktop**: `Drawer anchor="right" width={360}` (plan §D).
+- **Desktop**: `Drawer anchor="right" width={360}` (design §D).
 - **Restore confirmation**: Mobile = full-screen Dialog (`fullScreen={true}`). Desktop = centered Dialog.
 
 ##### R.12 Touch Interactions — dnd-kit Configuration
@@ -317,7 +317,7 @@ const sensors = useSensors(
 );
 ```
 - **Activation distance**: 8px (prevents accidental drag on scroll).
-- **DragOverlay**: `dropAnimation: { sideEffects: (active, over) => { /* lift/settle */ } }` (plan §G).
+- **DragOverlay**: `dropAnimation: { sideEffects: (active, over) => { /* lift/settle */ } }` (design §G).
 - **Drag handles**: Always visible on mobile (no hover). `touch-action: none` on handle.
 
 ##### R.13 Pull-to-Refresh — Mobile List
@@ -352,10 +352,10 @@ const sensors = useSensors(
 ##### R.17 Routing & Navigation — Mobile Master-Detail
 - **Routes**: Same (`/email-templates`, `/email-templates/[id]`) — tier switcher handles presentation.
 - **Mobile pattern**: List = full-screen. Tap row → push editor full-screen. Back gesture (iOS edge swipe) = `router.back()` — Zustand store preserves `isDirty`, `designJson`, `sampleProps` across nav (store survives tier switch per AGENTS.md line 14).
-- **Bottom nav**: Add `emailTemplates` to `bottomNavItems` in `DashboardLayoutMobile` props (plan §A line 834 adds sidebar only). Icon: `EmailOutlined`. Label: `dashboard.emailTemplates.navLabel`.
+- **Bottom nav**: Add `emailTemplates` to `bottomNavItems` in `DashboardLayoutMobile` props (design §A line 834 adds sidebar only). Icon: `EmailOutlined`. Label: `dashboard.emailTemplates.navLabel`.
 
 ##### R.18 Reduced Motion — All Custom Animations
-- **Hook**: `usePrefersReducedMotion()` (plan §G lines 964-981) — **must be implemented** in `frontend/common/lib/use-prefers-reduced-motion.ts`.
+- **Hook**: `usePrefersReducedMotion()` (design §G lines 964-981) — **must be implemented** in `frontend/common/lib/use-prefers-reduced-motion.ts`.
 - **Guard every custom animation**:
   - List entrance stagger (§G line 957): `if (reduced) return { initial: false, animate: { opacity: 1, y: 0 } }`
   - Success checkmark (§G line 958): `if (reduced) return <SuccessIcon />` (no motion)
@@ -383,7 +383,7 @@ const sensors = useSensors(
 
 **§G Animations** — after line 963 add R.12, R.13, R.18.
 
-**§A-B-C-D-E-F-G** — all sections referencing mobile behavior should cross-reference **§R** (e.g., "See §R.4 for mobile Inspector Drawer spec").
+**§A-B-C-D-E-F-G** — all sections referencing mobile behavior should cross-reference **§R** (e.g., "See §R.4 for mobile Inspector Drawer definition").
 
 ---
 

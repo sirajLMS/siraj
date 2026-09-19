@@ -456,4 +456,14 @@ export namespace SuggestionRepository {
       })),
     };
   };
+
+  /**
+   * Right-to-be-forgotten scrub: delete every suggestion submitted by the
+   * anonymized subject's parent row. `submitter_name` and `body` are
+   * NOT NULL, so rows are deleted rather than nulled. Runs inside the
+   * caller's transaction.
+   */
+  export const deleteByParentId = async (parentId: string, tx: DBTransaction): Promise<void> => {
+    await tx.delete(suggestions).where(eq(suggestions.parentId, parentId));
+  };
 }

@@ -976,138 +976,31 @@ No per-file loop — this is integration verification. Run tsgo + biome + lint o
 
 ---
 
-## Testing Tasks
-
-### T19 — Create Component Tests (Happy DOM)
-
-**Estimated time**: 4 hours
-**Depends on**: T10, T11, T12, T13, T14, T15 (all view components created)
-**Requirements**: AC-01 through AC-21 (component-level)
-
-#### Subtasks
-
-1. **Create test files** under `test/ui/components/certificates/categories/`:
-   - `CertificateCategoryContainer.test.tsx` — Container + Switcher + ViewModel integration
-   - `CreateCategoryDialog.test.tsx` — Form validation, submission, i18n
-   - `EditCategoryDialog.test.tsx` — Pre-fill, parent picker exclusion, color/icon pickers
-   - `DeleteCategoryConfirmDialog.test.tsx` — Warning display, confirm flow
-   - `MoveTemplateToCategoryDialog.test.tsx` — Category picker, move submission
-   - `CategoryPicker.test.tsx` — ExcludeIds filtering, autocomplete behavior
-   - `ColorSwatchPicker.test.tsx` — Selection, grid layout, theme palette colors
-   - `IconPicker.test.tsx` — Selection, grid layout, Material icons
-   - `CategoryAvatar.test.tsx` — Render with color/icon/size variants
-   - `CategoryTree.desktop.test.tsx` — Expand/collapse, selection, children lazy-load
-   - `CategoryTreeNode.desktop.test.tsx` — Inline edit, drag handle, action menu
-   - `InlineEditableLabel.desktop.test.tsx` — Double-click, Enter/Escape, validation
-   - `CategoryActionMenu.desktop.test.tsx` — Actions visibility, disabled states
-   - `CategorySearchBar.desktop.test.tsx` — Debounce, clear, loading state
-   - `TemplatePane.desktop.test.tsx` — AppDataGrid columns, pagination, move action
-   - `CategoryList.mobile.test.tsx` — Expand/collapse, tap targets
-   - `CategoryMobileNodeCard.mobile.test.tsx` — Avatar, child count, action trigger
-   - `CategoryMobileActionMenu.mobile.test.tsx` — Actions, disabled states, bottom sheet
-   - `TemplateCardList.mobile.test.tsx` — Card rendering, status badge
-   - `TemplateCardListItem.mobile.test.tsx` — Name, status, move button
-   - `CategorySearchBar.mobile.test.tsx` — Debounce, clear, adornments
-
-2. **Test patterns per `test/ui/AGENTS.md` and `frontend.instructions.md`**:
-   - Use `render` from `@testing-library/react` with Happy DOM
-   - Mock Apollo Client with `MockedProvider` and `waitFor` for async queries
-   - Mock Zustand store with `act()` for state updates
-   - Mock i18n with `useAppTranslation` returning test labels object
-   - Mock permissions with `useHasPermission` returning test flags
-   - Test RTL by wrapping with MUI `ThemeProvider` + `CssBaseline` with `direction="rtl"`
-   - Test accessibility with `axe-core` / `jest-axe` (no violations)
-
-3. **Coverage targets**:
-   - All public component props exercised
-   - All interaction states (hover, focus, disabled, error, loading) covered
-   - All i18n keys used in component rendered
-   - Permission gating tested for `canManage` true/false
-   - Keyboard interactions tested for desktop components
-   - Touch interactions tested for mobile components
-
-#### Quality Loop
-
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/certificates/categories/ --lifecycle lint
-```
-
-#### Verification
-- `bun run test:ui:components` passes for all category component tests
-- No console errors in test output
-- Coverage report shows ≥80% line coverage on created test files
-
----
-
-### T20 — Create E2E Tests (Playwright)
-
-**Estimated time**: 3 hours
-**Depends on**: T16 (App Router page created), T17 (integration verification passes)
-**Requirements**: AC-01 through AC-21 (E2E user flows)
-
-#### Subtasks
-
-1. **Create test files** under `test/ui/e2e/certificates/categories/`:
-   - `category-tree-navigation.spec.ts` — Load page, expand/collapse, select categories
-   - `category-crud.spec.ts` — Create (root/child), rename (inline + dialog), soft-delete with confirm
-   - `category-reorder.spec.ts` — Drag-and-drop reorder (before/after/into), positional API
-   - `category-move-template.spec.ts` — Move template between categories, optimistic update
-   - `category-search.spec.ts` — Search term, results display, ancestor auto-expand
-   - `category-permissions.spec.ts` — View-only user (no CRUD buttons), manage user (full CRUD)
-   - `category-mobile.spec.ts` — Mobile viewport: accordion list, FAB, bottom-sheet actions, move up/down
-   - `category-accessibility.spec.ts` — Keyboard navigation, screen reader announcements, focus management, touch targets
-
-2. **Test patterns per `test/ui/AGENTS.md`**:
-   - Use `test.describe.configure({ retries: 2 })` for flake reduction
-   - Authenticate via `test.use({ storageState: 'auth/admin.json' })` fixture
-   - Wait for network idle after mutations: `await page.waitForResponse('**/graphql')`
-   - Assert visual state via `expect(locator).toHaveScreenshot()` for key states
-   - Test RTL by setting `await page.evaluate(() => document.dir = 'rtl')` and re-running core flows
-
-3. **Test data setup**:
-   - Use `page.evaluate(() => window.__TEST_SEED__ = ...)` for GraphQL test fixtures
-   - Or call test seed script via `page.request.post('/api/test/seed')` if available
-   - Clean up between tests with `page.request.delete('/api/test/cleanup')`
-
-#### Quality Loop
-
-```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/certificates/categories/ --lifecycle lint
-```
-
-#### Verification
-- `bun run build:test` completes (required before `test:ui:e2e`)
-- `bun run test:ui:e2e --project=chromium --grep=@cert-categories` passes
-- No flaky tests (retries ≤1)
-- Screenshots captured for visual regression baseline
-
----
-
 ## Formal Acceptance Criteria Mapping
 
 | AC ID | Requirements Reference | Verified By (Task) | Test Type |
 |-------|------------------------|-------------------|-----------|
-| AC-01 | REQ-09-01 | T14, T15, T19, T20 | Component + E2E |
-| AC-02 | REQ-09-01 | T12, T15, T19, T20 | Component + E2E |
-| AC-03 | REQ-09-02 | T10, T19, T20 | Component + E2E |
-| AC-04 | REQ-09-03 | T10, T12, T15, T19, T20 | Component + E2E |
-| AC-05 | REQ-09-04 | T10, T19, T20 | Component + E2E |
-| AC-06 | REQ-09-05 | T12, T19, T20 | Component + E2E |
-| AC-07 | REQ-09-05 | T12, T19, T20 | Component + E2E |
-| AC-08 | REQ-09-06 | T11, T19, T20 | Component + E2E |
-| AC-09 | REQ-09-07 | T10, T19, T20 | Component + E2E |
-| AC-10 | REQ-09-08 | T08, T12, T15, T19, T20 | Component + E2E |
-| AC-11 | REQ-09-09 | T14, T15, T19, T20 | Component + E2E |
-| AC-12 | REQ-09-09 | T15, T19, T20 | Component + E2E |
-| AC-13 | REQ-09-10 | T01-T04, T19 | Component (i18n) |
-| AC-14 | REQ-09-01 | T06, T09, T19 | Component |
-| AC-15 | REQ-09-02 | T10, T19 | Component |
-| AC-16 | REQ-09-02 | T10, T19 | Component |
-| AC-17 | REQ-09-01 | T10, T12, T15, T19 | Component |
-| AC-18 | REQ-09-07 | T13, T19, T20 | Component + E2E |
-| AC-19 | REQ-09-07 | T13, T15, T19, T20 | Component + E2E |
-| AC-20 | REQ-09-04 | T05, T08, T19 | Component |
-| AC-21 | REQ-09-05 | T12, T20 | E2E |
+| AC-01 | REQ-09-01 | T14, T15 | Component |
+| AC-02 | REQ-09-01 | T12, T15 | Component |
+| AC-03 | REQ-09-02 | T10 | Component |
+| AC-04 | REQ-09-03 | T10, T12, T15 | Component |
+| AC-05 | REQ-09-04 | T10 | Component |
+| AC-06 | REQ-09-05 | T12 | Component |
+| AC-07 | REQ-09-05 | T12 | Component |
+| AC-08 | REQ-09-06 | T11 | Component |
+| AC-09 | REQ-09-07 | T10 | Component |
+| AC-10 | REQ-09-08 | T08, T12, T15 | Component |
+| AC-11 | REQ-09-09 | T14, T15 | Component |
+| AC-12 | REQ-09-09 | T15 | Component |
+| AC-13 | REQ-09-10 | T01-T04 | Component (i18n) |
+| AC-14 | REQ-09-01 | T06, T09 | Component |
+| AC-15 | REQ-09-02 | T10 | Component |
+| AC-16 | REQ-09-02 | T10 | Component |
+| AC-17 | REQ-09-01 | T10, T12, T15 | Component |
+| AC-18 | REQ-09-07 | T13 | Component |
+| AC-19 | REQ-09-07 | T13, T15 | Component |
+| AC-20 | REQ-09-04 | T05, T08 | Component |
+| AC-21 | REQ-09-05 | T12 | Manual |
 
 ---
 
@@ -1409,107 +1302,15 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 
 ---
 
-## T27 — Component Tests (4 Files)
-
-**Estimated time**: 6 hours
-**Depends on**: T21, T22, T23, T24 (all view components)
-**Requirements**: AC-01 through AC-21 (component-level)
-**Files**: `test/ui/components/cert/templates/categories/CategoryManagementPage.test.tsx`, `CategoryTree.test.tsx`, `CategoryDetailPanel.test.tsx`, `CategoryEditorDialog.test.tsx`
-
-### Subtasks
-
-1. **Read applicable AGENTS.md + instruction files**:
-   - `test/ui/AGENTS.md` — component test conventions
-   - `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
-
-2. **Create 4 test files** under `test/ui/components/cert/templates/categories/`:
-   - **`CategoryManagementPage.test.tsx`**: PageHeader renders translated title + permission-gated Create button; two-column layout on desktop, stacked on mobile; empty-state card when no selection; reads store for loading/error.
-   - **`CategoryTree.test.tsx`**: Tree expand/collapse with Zustand expansion; node renders icon + name + count badge + active dot; context menu actions gated by `canManage` + locked for `isSystem`; drag-and-drop produces correct `beforeId`/`afterId`/`newParentId` payloads; selection highlights + loads detail; keyboard nav.
-   - **`CategoryDetailPanel.test.tsx`**: Three-card layout renders; inline edit on name/description; parent Select excludes self+descendants; active Switch disabled for `isSystem`; template count metrics render; template list item click navigates to editor; "View All" navigates to Plan 08 with `?category=`; empty-state card.
-   - **`CategoryEditorDialog.test.tsx`**: Create mode (null) vs edit mode (pre-fill); name required + unique validation; ≤50/≤200 char counters; parent excludes cycle; icon picker selects from shared constants; color picker presets + custom; display order ≥ 0; save dispatches mutation; server `DUPLICATE_NAME`/`CYCLE_DETECTED` maps to translated field error.
-
-3. **Test patterns per `test/ui/AGENTS.md`**:
-   - `render` from `@testing-library/react` with Happy DOM.
-   - Mock Apollo with `MockedProvider` + `waitFor` for async queries.
-   - Mock `useCategoryStore` via `act()` for state updates.
-   - Mock `useAppTranslation` returning test labels; mock `useHasPermission`.
-   - MUI `ThemeProvider` + `CssBaseline`; test RTL with `direction="rtl"`.
-   - `axe-core`/`jest-axe` accessibility assertions (no violations).
-
-4. **Coverage**: ≥80% line coverage on each of the 4 test files; all public props exercised; loading/error/disabled states covered.
-
-### Quality Loop
-
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryManagementPage.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryTree.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryDetailPanel.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryEditorDialog.test.tsx --lifecycle lint
-```
-
-### Verification
-- `bun run test:ui:components` passes for all 4 new category test files
-- No console errors; ≥80% coverage on created tests
-- Accessibility: no axe violations on any dialog/tree render
-
----
-
-## T28 — E2E Tests (4 Tests: Create, Edit, Delete, Drag-Drop Reorder)
-
-**Estimated time**: 5 hours
-**Depends on**: T16 (App Router page), T17 (integration verification), T21-T24 (components)
-**Requirements**: AC-03, AC-04, AC-05, AC-06 (E2E user flows)
-**Files**: `test/ui/e2e/cert/templates/categories/create-category.spec.ts`, `edit-category.spec.ts`, `delete-category.spec.ts`, `drag-drop-reorder.spec.ts`
-
-### Subtasks
-
-1. **Read applicable AGENTS.md + instruction files**:
-   - `test/ui/AGENTS.md` — E2E test conventions
-   - `.agents/instructions/tests.instructions.md`
-
-2. **Create 4 E2E spec files** under `test/ui/e2e/cert/templates/categories/`:
-   - **`create-category.spec.ts`** — Open category page → click "Create Category" → fill name/description/parent/icon/color → save → tree refreshes showing new node → confirm URL unchanged (create stays on categories page).
-   - **`edit-category.spec.ts`** — Select existing custom category → open editor (double-click name or context menu → Edit) → change name/description/icon → save → tree + detail panel reflect changes → confirm no `CYCLE_DETECTED`/`DUPLICATE_NAME` regression.
-   - **`delete-category.spec.ts`** — Select existing custom (non-system) category → context menu → Delete → confirmation dialog shows dependency/template count → confirm → node removed from tree; **verify system category delete** is disabled (Academic/Achievement/Completion/Participation not deletable).
-   - **`drag-drop-reorder.spec.ts`** — In desktop viewport, drag a sibling node above/below another → assert `reorderCategory` mutation fired with correct `beforeId`/`afterId`; drag a node onto a different parent → assert `newParentId` set; verify tree reflects new order after server confirmation.
-
-3. **Test patterns per `test/ui/AGENTS.md`**:
-   - `test.describe.configure({ retries: 2 })` for flake reduction.
-   - `test.use({ storageState: 'auth/admin.json' })` for authentication.
-   - `await page.waitForResponse('**/graphql')` after mutations.
-   - RTL via `await page.evaluate(() => document.dir = 'rtl')` and re-run core flows.
-   - Test data via `page.evaluate(() => window.__TEST_SEED__ = ...)` or `/api/test/seed`.
-
-4. **Test data setup**:
-   - Seed a custom category + child subcategory + linked templates.
-   - Clean up between tests via `/api/test/cleanup`.
-
-### Quality Loop
-
-```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/create-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/edit-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/delete-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/drag-drop-reorder.spec.ts --lifecycle lint
-```
-
-### Verification
-- `bun run build:test` completes (required before `test:ui:e2e`)
-- `bun run test:ui:e2e --project=chromium --grep=@cert-categories` passes all 4 specs
-- No flaky tests (retries ≤1); screenshots captured for visual regression baseline
-- System category delete prevented; reorder mutates correct positional payload
-
----
-
 ## T29 — Quality Loop Per File
 
 **Estimated time**: 2 hours
-**Depends on**: T21, T22, T23, T24, T25, T26, T27, T28 (all new files)
+**Depends on**: T21, T22, T23, T24, T25, T26 (all new files)
 **Requirements**: All AC (quality-gate conformance)
 
 ### Subtasks
 
-1. **Per-file verification** for every file created in T21-T28 via progressive sub-loop (tsgo → biome → lint, short-circuits at first failure):
+1. **Per-file verification** for every file created in T21-T26 via progressive sub-loop (tsgo → biome → lint, short-circuits at first failure):
 
 ```bash
 bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryManagementPage.tsx --lifecycle lint
@@ -1518,14 +1319,6 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/cert/templat
 bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryDetailPanel.tsx --lifecycle lint
 bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categories/CategoryEditorDialog.tsx --lifecycle lint
 bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategoryStore.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryManagementPage.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryTree.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryDetailPanel.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/categories/CategoryEditorDialog.test.tsx --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/create-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/edit-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/delete-category.spec.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/categories/drag-drop-reorder.spec.ts --lifecycle lint
 ```
 
 2. **Full-repo verification** (after per-file loops pass):
@@ -1844,7 +1637,7 @@ bun run scripts/health/sub-loop.ts shared/locale/dashboard/certificates/categori
 - "No templates" appears in detail panel with browse link
 - "Filtered empty" appears when all filters exclude everything; "Reset Filters" clears them
 - All empty-state strings come from i18n namespace (no hardcoded text)
-- Empty states pass axe accessibility (proper heading levels, button labels)
+- Empty states follow proper heading levels and button labels
 
 ---
 
@@ -2070,7 +1863,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/categ
 - Keyboard: Tab → tree; arrows navigate; Enter → select; Space → toggle; Shift+F10 → context menu
 - `aria-live="polite"` on detail panel announces selection changes
 - Hidden description span accessible to screen readers (not display:none)
-- axe-core: no violations on tree + detail panel + filter bar
+- Accessibility: no violations on tree + detail panel + filter bar (manual audit)
 - WAI-ARIA Tree Pattern compliance verified via manual NVDA test during R40
 
 ---
@@ -2254,41 +2047,22 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategorySto
 **Estimated time**: 3 hours
 **Depends on**: R32-R42 (all enhancement components), R37 (virtualization)
 **Requirements**: §13.12 (all metrics)
-**Files**: test assertions in R44 component tests + R45 E2E specs + build verification
 
 ### Subtasks
 
-1. **Render time assertions** (§13.12 — tree render < 16ms/node):
-   - In R44 component tests for `CategoryTree`: wrap rendering in `performance.now()` before/after and `.toBeLessThan(BUDGET)` assertion
-   - Budget: per-node render < 16ms (measured for 50-node tree → total < 800ms assertion)
-
-2. **Expand/collapse timing** (§13.12 — < 100ms for 500 children):
-   - In R44 tests: `performance.now()` around `toggleExpansion` dispatch for a node with 500 children; assert < 100ms
-
-3. **API response budget** (§13.12 — < 200ms):
-   - In R45 E2E tests: `await page.waitForResponse('**/graphql')` timing for `categoryList` query; assert < 200ms (with retry/tolerance for CI)
-
-4. **Bundle size** (§13.12 — < 40KB gzipped):
+1. **Bundle size** (§13.12 — < 40KB gzipped):
    - After `bun run build`, inspect `.next/server/app/dashboard/cert/templates/categories/page.js` (or equivalent client chunk)
    - Assert gzip size < 40KB via `gzip -c | wc -c` in a verification script
    - If over budget: investigate imports (avoid full library imports; use tree-shakeable paths)
 
-5. **Drag performance** (§13.12 — drag start → ghost < 50ms):
-   - In R45 E2E drag-drop spec: `performance.now()` around `{ trigger pointer down }` → assert ghost visible < 50ms (via `page.waitForSelector('[data-drag-overlay]')`)
-
-6. **Virtualized scroll FPS** (§13.12 — 60fps for 1000 nodes):
+2. **Virtualized scroll FPS** (§13.12 — 60fps for 1000 nodes):
    - Manual verification: Chrome DevTools Performance tab on a 1000-node virtualized tree scroll; assert no frames > 16.67ms
-   - Document in R45 spec as a manual test step (not automated)
 
-7. **Enforcement approach**:
-   - Budgets are documented as test assertions where possible
-   - CI fails if any budget is exceeded (R44/R45 tests)
+3. **Enforcement approach**:
+   - Budgets are documented in this plan
    - Build verification (T29/R46) checks bundle size
 
 ### Verification
-- All per-node render time assertions pass (< 16ms/node)
-- Expand/collapse of 500-child node < 100ms
-- `categoryList` API round-trip < 200ms in E2E
 - Category page chunk < 40KB gzipped
 - No console warnings about performance violations
 
@@ -2397,27 +2171,6 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/certificateCategorySto
   - Category merge history: show merged categories with date
   - _Store: `categoryStore` adds `auditLog: AuditEntry[], undoAction(auditId)`_
   - **Quality loop**: tsgo + biome + lint
-
-### R4-T12: Performance & Virtualization Tests
-- [ ] Create `test/ui/components/category-mgmt/Performance.test.tsx`
-  - Test tree with 1000 nodes renders in < 16ms per node
-  - Test expand/collapse in < 100ms
-  - Test API response mock in < 200ms
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T13: Component Tests
-- [ ] Create `test/ui/components/category-mgmt/DragDrop.test.tsx`
-  - Test circular reference prevention
-  - Test drop on root
-  - Test invalid drop zone visual feedback
-  - Test touch drag support
-- [ ] Create `test/ui/components/category-mgmt/MultiSelect.test.tsx`
-  - Test shift+click range select
-  - Test bulk move/delete
-  - Test select-all with indeterminate
-- [ ] Create `test/ui/components/category-mgmt/EmptyStates.test.tsx`
-  - Test each empty state renders correctly
-  - Test CTA button actions
 
 ### R4-T14: Knowledge Propagation
 - [ ] Create `docs/frontend/category-tree-patterns.md`

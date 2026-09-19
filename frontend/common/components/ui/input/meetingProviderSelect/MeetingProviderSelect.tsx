@@ -1,11 +1,9 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import { Alert, Button, Stack } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { AppPermission, type MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
-import { meetingProvidersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link } from "@/shared/i18n";
@@ -13,6 +11,9 @@ import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type MeetingProviderSelectProps = {
+  /** Active meeting providers to offer; supplied by the caller (e.g. {@link MeetingProviderSelectContainer}). */
+  readonly options: readonly MeetingProviderFieldsFragment[];
+  readonly loading?: boolean;
   readonly value: MeetingProviderFieldsFragment | null;
   readonly onChangeAction: (provider: MeetingProviderFieldsFragment | null) => void;
   readonly disabled?: boolean;
@@ -22,6 +23,8 @@ export type MeetingProviderSelectProps = {
 };
 
 export function MeetingProviderSelect({
+  options,
+  loading = false,
   value,
   onChangeAction,
   disabled,
@@ -33,11 +36,7 @@ export function MeetingProviderSelect({
   const t = useAppTranslation(Translation.Ui.MeetingConfig).providerSelect;
   const { hasPermission } = useUserStore();
   const canManageCatalog = hasPermission(AppPermission.MeetingProvidersManageCatalog);
-  const { data, loading } = useQuery(meetingProvidersQueryDocument, {
-    variables: { activeOnly: true },
-  });
 
-  const options = data?.meetingProviders ?? [];
   const showEmptyCatalog = !loading && options.length === 0;
 
   return (
@@ -60,7 +59,7 @@ export function MeetingProviderSelect({
         </Alert>
       ) : null}
       <Autocomplete
-        options={options}
+        options={[...options]}
         loading={loading}
         disabled={disabled ?? showEmptyCatalog}
         value={value}

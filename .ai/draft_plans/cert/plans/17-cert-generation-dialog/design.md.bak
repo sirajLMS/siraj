@@ -902,7 +902,6 @@ Three locale files + one namespace file + one type interface file:
 | `shared/locale/namespaces/dashboard/certificates/generation.namespace.ts` | `AGENTS.md`, `shared/AGENTS.md` |
 | `frontend/common/views/dashboard/cert-list/components/GenerateCertificatesDialog.tsx` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` |
 | `app/(dashboard)/certificates/page.tsx` (if modified for launch button) | `AGENTS.md`, `app/AGENTS.md` |
-| `test/ui/components/certificates/generation/` | `AGENTS.md`, `test/ui/AGENTS.md` |
 
 ### Key Rules from AGENTS.md
 
@@ -2347,7 +2346,6 @@ Ensures the entire wizard dialog is WCAG 2.1 AA compliant: ARIA roles for wizard
 - Use MUI v9's built-in `Stepper` `aria` props where available
 - For custom table keyboard nav: add `onKeyDown` handler with a key map
 - For `aria-live` regions: render a visually-hidden `Box` (`sx={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}`) that updates its text content
-- Test with NVDA / VoiceOver during E2E (manual verification — not automated)
 
 ### R4-11. Error States
 

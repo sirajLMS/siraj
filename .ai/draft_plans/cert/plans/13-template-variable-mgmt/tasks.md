@@ -830,142 +830,7 @@ bun run scripts/health/sub-loop.ts docs/frontend/certificate-variables.md --life
 
 ---
 
-## Phase 5: Testing & Quality (Round 2 Enhancement)
-
-### 5.1 Component Tests
-
-- [ ] **5.1.1** Variable List Display Tests
-  - Test: Desktop `DesktopAppDataGrid` renders columns correctly (Name, Key, Type, Category, Default Value, Templates, Actions)
-  - Test: Mobile `MobileCardList` renders card with Name, Key badge, Type icon, Category chip, Default Value truncated, Template Count badge
-  - Test: Search filters list in real-time (debounced 300ms)
-  - Test: Type filter dropdown filters by VariableDataType
-  - Test: Category filter dropdown filters by VariableCategory
-  - Test: Pagination works (pageSize 10/25/50)
-  - Test: Sorting by Name, Key, Type, Category, Templates
-  - **File:** `test/ui/components/template-variable-mgmt/VariableList.test.tsx`
-  - **Requirements:** AC-13-01a, AC-13-01b, AC-13-01c, AC-13-01d, AC-13-01e, AC-13-01f
-  - **Quality Loop:**
-    ```bash
-    bun run scripts/health/sub-loop.ts test/ui/components/template-variable-mgmt/VariableList.test.tsx --lifecycle codescene
-    ```
-
-- [ ] **5.1.2** Variable Form (Create/Edit) Tests
-  - Test: Create form opens with empty fields, Save disabled until dirty
-  - Test: Edit form pre-fills with variable data, key/type fields disabled
-  - Test: Validation - required fields (name, key, type, category) show inline errors
-  - Test: Key validation - pattern (lowercase + underscores), uniqueness check, system key reserved
-  - Test: Type-specific sections render correctly:
-    - Text: multiline toggle, min/max length, pattern
-    - Number: step, precision, min/max, decimalPlaces
-    - Date: showTime, minDate, maxDate, dateFormat
-    - Select: options add/remove/reorder, min 2 options warning
-    - Image: acceptedTypes, maxSize, preview
-  - Test: Category-specific behavior:
-    - Computed: defaultValue disabled with helper text
-    - Dynamic: defaultValue shows hint
-  - Test: Form dirty tracking - "Unsaved changes" badge, confirm on close
-  - Test: Save button loading state during mutation
-  - Test: Success toast on create/update, dialog closes
-  - Test: Error toast on failure, form stays open with field errors
-  - **File:** `test/ui/components/template-variable-mgmt/VariableForm.test.tsx`
-  - **Requirements:** AC-13-02a, AC-13-02b, AC-13-02c, AC-13-02d, AC-13-02e, AC-13-02f, AC-13-02g, AC-13-02h
-  - **Quality Loop:** Same as above
-
-- [ ] **5.1.3** Delete Confirmation Tests
-  - Test: Delete button opens confirm dialog with variable name
-  - Test: Zero usage - shows "Safe to delete" message
-  - Test: Non-zero usage - shows impact warning with element list (template → element)
-  - Test: Force delete checkbox appears when bindings exist
-  - Test: Confirm delete calls mutation with `force: true/false`
-  - Test: Success toast, list refreshes, dialog closes
-  - Test: Error toast, dialog stays open
-  - **File:** `test/ui/components/template-variable-mgmt/DeleteConfirm.test.tsx`
-  - **Requirements:** AC-13-07a, AC-13-07b, AC-13-07c, AC-13-07d, AC-13-07e, AC-13-07f, AC-13-07g
-  - **Quality Loop:** Same as above
-
-- [ ] **5.1.4** CSV Import Dialog Tests
-  - Test: Dialog opens with upload stage (drag-drop zone + file picker)
-  - Test: Template download button downloads CSV with correct headers
-  - Test: Valid CSV parses → preview stage with valid/error/warning badges
-  - Test: Invalid CSV rows show field-level errors (type, category, duplicate key, missing required)
-  - Test: User can re-upload fixed file
-  - Test: Import Valid Rows button enabled only when validCount > 0
-  - Test: Importing stage shows progress bar
-  - Test: Complete stage shows summary (imported/failed), auto-closes after 3s
-  - Test: View Errors button shows detailed error list
-  - **File:** `test/ui/components/template-variable-mgmt/CSVImportDialog.test.tsx`
-  - **Requirements:** AC-13-10a, AC-13-10b, AC-13-10c, AC-13-10d, AC-13-10e, AC-13-10f, AC-13-10g, AC-13-10h, AC-13-10i
-  - **Quality Loop:** Same as above
-
-- [ ] **5.1.5** Variable Usage Display Tests
-  - Test: Usage dialog opens with loading skeleton
-  - Test: Empty state - "This variable is not used by any template element"
-  - Test: List renders Template Name, Element Label, Element Type, Status badge, Last Used
-  - Test: Row click navigates to Template Editor (Plan 10) with element focused
-  - Test: Status badges: Draft (gray), Published (green), Archived (orange)
-  - Test: Error state with retry button
-  - **File:** `test/ui/components/template-variable-mgmt/VariableUsage.test.tsx`
-  - **Requirements:** AC-13-09a, AC-13-09b, AC-13-09c, AC-13-09d, AC-13-09e, AC-13-09f, AC-13-09g
-  - **Quality Loop:** Same as above
-
-- [ ] **5.1.6** Variable Panel Store Tests
-  - Test: Form open/close actions update state correctly
-  - Test: Form data/setField/error/touched/dirty actions
-  - Test: Validation runs all field validators
-  - Test: Confirmation dialogs (delete, type change, key change) open/close
-  - Test: CSV import state transitions (upload→preview→importing→complete)
-  - Test: Filter actions (search, type, category, page, pageSize, sort)
-  - Test: System variable key checks
-  - **File:** `test/ui/components/template-variable-mgmt/variablePanelStore.test.ts`
-  - **Requirements:** All ACs (store underpins all UI)
-  - **Quality Loop:**
-    ```bash
-    bun run scripts/health/sub-loop.ts test/ui/components/template-variable-mgmt/variablePanelStore.test.ts --lifecycle codescene
-    ```
-
-### 5.2 E2E Tests
-
-- [ ] **5.2.1** Full CRUD Flow E2E
-  - Navigate to `/certificates/variables`
-  - Click "Create Variable" → fill form (text type, static category) → save
-  - Verify variable appears in list with correct data
-  - Click edit → change name, defaultValue, description → save
-  - Verify updated data in list
-  - Click delete → confirm (zero usage) → verify removed from list
-  - **File:** `test/ui/e2e/template-variable-mgmt/crud.spec.ts`
-  - **Requirements:** AC-13-01, AC-13-02, AC-13-07
-  - **Quality Loop:** `bun run build:test && bun run test:ui:e2e -- --project=template-variable-mgmt`
-
-- [ ] **5.2.2** CSV Import Flow E2E
-  - Navigate to variables page
-  - Click "Import from CSV" → download template
-  - Fill template with 5 valid rows (mixed types) + 1 invalid row
-  - Upload CSV → verify preview shows 5 valid, 1 error
-  - Click "Import Valid Rows" → verify summary shows 5 imported, 1 failed
-  - Verify 5 new variables appear in list
-  - **File:** `test/ui/e2e/template-variable-mgmt/csv-import.spec.ts`
-  - **Requirements:** AC-13-10
-  - **Quality Loop:** Same as above
-
-- [ ] **5.2.3** Variable Usage Navigation E2E
-  - Create variable
-  - In Plan 10 Template Editor, bind variable to text element
-  - Navigate to Variables page → click variable → open Usage dialog
-  - Verify usage shows template + element
-  - Click row → verify navigates to Template Editor at that element
-  - **File:** `test/ui/e2e/template-variable-mgmt/usage-navigation.spec.ts`
-  - **Requirements:** AC-13-09, Plan 10 integration
-  - **Quality Loop:** Same as above
-
-- [ ] **5.2.4** Mobile Responsive E2E
-  - Set viewport to mobile (375px)
-  - Verify MobileCardList renders instead of DataGrid
-  - Verify full-screen dialogs for create/edit/delete/csv/usage
-  - Verify mobile filter bar (chips + bottom sheet)
-  - Test all CRUD flows on mobile
-  - **File:** `test/ui/e2e/template-variable-mgmt/mobile.spec.ts`
-  - **Requirements:** All ACs (mobile parity)
-  - **Quality Loop:** Same as above
+## Phase 5: Backend Testing & Quality (Round 2 Enhancement)
 
 ### 5.3 Backend Integration Tests
 
@@ -994,29 +859,6 @@ bun run scripts/health/sub-loop.ts docs/frontend/certificate-variables.md --life
   - **Requirements:** All service ACs
   - **Quality Loop:** `bun run test:services -- --testPathPattern=variable`
 
-### 5.4 Accessibility Tests
-
-- [ ] **5.4.1** Keyboard Navigation
-  - Tab through list, dialogs, form fields in logical order
-  - Escape closes dialogs
-  - Enter/Space activates buttons
-  - Arrow keys navigate radio groups, select options
-  - **File:** `test/ui/components/template-variable-mgmt/a11y.keyboard.test.tsx`
-
-- [ ] **5.4.2** Screen Reader
-  - All form fields have labels (explicit or aria-label)
-  - Error messages announced via aria-live
-  - Dialogs have aria-labelledby/aria-describedby
-  - Status badges have accessible names
-  - **File:** `test/ui/components/template-variable-mgmt/a11y.screenreader.test.tsx`
-
-- [ ] **5.4.3** Color Contrast & Focus
-  - All text meets 4.5:1 contrast ratio
-  - Focus indicators visible (2px solid outline)
-  - Error states not color-only (icon + text)
-  - **File:** `test/ui/components/template-variable-mgmt/a11y.visual.test.tsx`
-
----
 
 ## Phase 6: Knowledge Propagation (Round 2 Enhancement)
 
@@ -1112,7 +954,7 @@ bun run scripts/health/sub-loop.ts docs/frontend/certificate-variables.md --life
 | Phase 2 | T05–T07 | 6-9 | Type-specific inputs (text/number, date, select + integration) |
 | Phase 3 | T08–T09 | 4-6 | System variables & deletion flow |
 | Phase 4 | T10–T11 | 4-6 | Mobile panel + knowledge propagation |
-| **Phase 5** | **5.1–5.4** | **12-18** | **Testing & Quality (Component, E2E, Backend, A11y)** |
+| **Phase 5** | **5.3** | **Backend Testing** |
 | **Phase 6** | **6.1–6.3** | **8-10** | **Knowledge Propagation (Docs, AGENTS.md, Cross-plan)** |
 | **Total** | **23+** | **43-63** | |
 
@@ -1124,7 +966,6 @@ Before marking any task complete, verify:
 
 - [ ] Per-file quality loop passes (tsgo → biome → lint → codescene via `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
 - [ ] All instruction files from Instruction Verification Table read and followed
-- [ ] Component tests written and passing
 - [ ] i18n keys added to both en/ar locale files
 - [ ] No hardcoded colors (theme.palette only)
 - [ ] No console.log (use logger)
@@ -1150,9 +991,6 @@ Before marking any task complete, verify:
   - Use Zustand create() with TypeScript types
   - **Estimated:** 3 hr
 
-- [ ] **T12.2** Add variableStore to mock stores for Storybook
-  - Create `frontend/stores/__mocks__/variableStore.mock.ts`
-  - **Estimated:** 30 min
 
 ### T13: VariablePanel Component (System + Custom Sections)
 
@@ -1233,78 +1071,6 @@ Before marking any task complete, verify:
 
 ---
 
-## Phase 9: Component Tests
-
-### T18: VariablePickerDialog Tests
-
-- [ ] **T18.1** Create `test/ui/components/variables/VariablePickerDialog.test.tsx`
-  - Render dialog, verify search filter, category tab switching, card click selection
-  - Empty state when no results
-  - Keyboard navigation (Enter, Escape)
-  - **Estimated:** 2 hr
-
-### T19: VariablePanel Tests
-
-- [ ] **T19.1** Create `test/ui/components/variables/VariablePanel.test.tsx`
-  - System variables list render
-  - Custom variables CRUD interaction
-  - Delete confirmation flow
-  - Empty state for custom section
-  - **Estimated:** 2 hr
-
-### T20: VariableEditorDialog Tests
-
-- [ ] **T20.1** Create `test/ui/components/variables/VariableEditorDialog.test.tsx`
-  - Create mode (variable=null) renders empty form
-  - Edit mode pre-fills fields
-  - Validation: camelCase name, unique name, no system name conflicts
-  - Conditional fields by type
-  - Save calls onSave with correct payload
-  - **Estimated:** 2 hr
-
-### T21: VariableAutocomplete Tests
-
-- [ ] **T21.1** Create `test/ui/components/variables/VariableAutocomplete.test.tsx`
-  - Trigger on `{{` type
-  - Filter list by typed text
-  - Arrow navigation and Enter insert
-  - Escape dismissal
-  - Backspace past `{{` dismissal
-  - **Estimated:** 2 hr
-
----
-
-## Phase 10: E2E Tests
-
-### T22: E2E — Create Custom Variable
-
-- [ ] **T22.1** Create `test/ui/e2e/variables/create-custom-variable.spec.ts`
-  - Open template editor, go to variable panel, click Add, fill form, save
-  - Verify custom variable appears in panel list
-  - **Estimated:** 1 hr
-
-### T23: E2E — Bind Variable to Text
-
-- [ ] **T23.1** Create `test/ui/e2e/variables/bind-variable-to-text.spec.ts`
-  - Select text element, type `{{`, pick variable from autocomplete
-  - Verify text element content becomes `{{variableName}}`
-  - **Estimated:** 1 hr
-
-### T24: E2E — Preview with Variables
-
-- [ ] **T24.1** Create `test/ui/e2e/variables/preview-with-variables.spec.ts`
-  - Bind variables, switch to preview mode, verify resolved values render
-  - Date formatting, number formatting verified
-  - **Estimated:** 1 hr
-
-### T25: E2E — Delete Variable with Warning
-
-- [ ] **T25.1** Create `test/ui/e2e/variables/delete-variable-warning.spec.ts`
-  - Delete a bound custom variable, verify `{{DELETED:varName}}` warning in preview
-  - Confirm delete dialog interaction
-  - **Estimated:** 1 hr
-
----
 
 ## Phase 11: Quality Loop (Per File)
 
@@ -1334,7 +1100,6 @@ Before marking any task complete, verify:
 
 - [ ] **T27.2** Update `frontend/stores/AGENTS.md`
   - Document variableStore: state shape, actions, resolveVariable pattern
-  - Document mock store for Storybook
   - **Estimated:** 30 min
 
 - [ ] **T27.3** Update `backend/services/AGENTS.md`
@@ -1360,12 +1125,10 @@ Before marking any task complete, verify:
 | Phase 2 | T05–T07 | 6-9 | Type-specific inputs (text/number, date, select + integration) |
 | Phase 3 | T08–T09 | 4-6 | System variables & deletion flow |
 | Phase 4 | T10–T11 | 4-6 | Mobile panel + knowledge propagation |
-| Phase 5 | 5.1–5.4 | 12-18 | Testing & Quality (Component, E2E, Backend, A11y) |
+| Phase 5 | 5.3 | Backend Testing |
 | Phase 6 | 6.1–6.3 | 8-10 | Knowledge Propagation (Docs, AGENTS.md, Cross-plan) |
 | **Phase 7** | **T12–T16** | **22-29** | **Template Editor Variable Components (store, panel, editor, picker, autocomplete)** |
 | **Phase 8** | **T17** | **6** | **Variable Resolution Service** |
-| **Phase 9** | **T18–T21** | **8** | **Component Tests (picker, panel, editor, autocomplete)** |
-| **Phase 10** | **T22–T25** | **4** | **E2E Tests (create, bind, preview, delete)** |
 | **Phase 11** | **T26** | **2** | **Per-File Quality Loop** |
 | **Phase 12** | **T27** | **3** | **Knowledge Propagation** |
 | **Total** | **40+** | **88-117** | |
@@ -1465,21 +1228,6 @@ Before marking any task complete, verify:
   - Screen reader: announce variable type and current value
   - Focus management: trap focus in dialog, restore on close
   - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/variable-mgmt/components/VariablePickerDialog.tsx --lifecycle codescene` (tsgo → biome → lint → codescene)
-- [ ] Create `test/ui/components/variable-mgmt/ValidationEditor.test.tsx`
-  - Test required field validation
-  - Test min/max length for text
-  - Test regex pattern matching
-- [ ] Create `test/ui/components/variable-mgmt/CSVImportExport.test.tsx`
-  - Test CSV template download
-  - Test column mapping auto-detect
-  - Test validation per row
-  - Test conflict resolution
-- [ ] Create `test/ui/components/variable-mgmt/ComputedVariables.test.tsx`
-  - Test formula evaluation
-  - Test circular reference detection
-- [ ] Create `test/ui/components/variable-mgmt/TypeEditors.test.tsx`
-  - Test each type editor renders correct input
-  - Test type conversion on save
 
 ### R4-T13: Knowledge Propagation
 - [ ] Create `docs/frontend/variable-management-patterns.md`

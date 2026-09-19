@@ -21,6 +21,7 @@ import {
   createManualClassEntryWithAssertions,
   ensureTestSubjectId,
   loginAndProvision,
+  loginSuperAdmin,
   setupTestServerLifecycle,
   testClient,
 } from "@/test/helpers";
@@ -410,7 +411,7 @@ describe("GraphQL Class Session Integration Tests", () => {
 
   afterAll(async () => {
     if (adminToken && studentUserId && teacherUserId && parentUserId) {
-      await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, {
+      await authenticatedRequest(await loginSuperAdmin(), "mutate", cleanupTestEntitiesMutationDocument, {
         studentUserId,
         teacherUserId,
         parentUserId,

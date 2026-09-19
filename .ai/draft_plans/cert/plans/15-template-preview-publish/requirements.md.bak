@@ -763,39 +763,7 @@ This knowledge must be captured in the design document and propagated to depende
 ---
 
 ## 6. Testing Requirements
-
-### 6.1 Component Tests (Happy DOM)
-
-| Component | Test Cases | Mocks Required |
-|----------|-----------|----------------|
-| CertificatePreviewCanvas | Renders all 5 element types at correct positions; shows skeleton on loading; shows error on failure; shows empty state when no elements; renders read-only banner when readOnly=true | Apollo mock for template query |
-| SampleDataPanel | Renders one input per variable type (text, date, boolean, number); shows "no variables" when empty; calls onTestValueChange on input; calls onResetSampleData on reset click; loads recipient data on selection | ViewModel mock |
-| PreviewToolbar | Zoom buttons call correct handlers; download format toggle works; publish button disabled when not draft; version history button calls handler; archive button hidden without canManage; "Back to Draft" replaces publish in version mode | ViewModel mock |
-| PublishDialog | Shows summary (name, dimensions, element count, variable count); version notes input updates on change; confirm disabled when loading or validation errors; shows unsaved changes warning when hasUnsavedChanges=true; shows re-render warning | ViewModel mock, validation result mock |
-| ArchiveDialog | Shows template name; shows certificate count warning; confirm triggers mutation; cancel closes dialog | ViewModel mock |
-| UnarchiveDialog | Shows confirm message; confirm triggers mutation; cancel closes | ViewModel mock |
-| RevertDialog | Shows target version number and date; shows "certs not affected" warning; confirm triggers mutation; cancel closes | ViewModel mock |
-| VersionHistory | Renders list of versions newest first; shows "no versions" when empty; preview button calls onPreviewVersion; revert button hidden without canManage; current version badge shows | Apollo mock for versions query |
-| DownloadPreviewButton | PDF format triggers server call; image format triggers client-side canvas capture; loading spinner shown during download; disabled when no elements | html2canvas mock |
-
-### 6.2 E2E Tests (Production Server)
-
-| Test | Steps | Expected |
-|------|-------|----------|
-| Preview page loads | Navigate to `/certificates/templates/{id}/preview`; wait for canvas | Canvas shows background image + elements; toolbar visible; sample data panel visible |
-| Sample data updates preview | Open preview; type a value in sample data panel for a variable | Canvas data element updates to show typed value |
-| Zoom controls (desktop) | Click zoom in button 3 times; click zoom out; click fit to screen; click actual size | Canvas scales accordingly; zoom % label updates |
-| Download as image | Click format toggle to "Image"; click download button | File download triggered with .png extension |
-| Publish workflow | Click publish button; dialog opens; click confirm | Success snackbar shows version number; template status updates |
-| Publish validation blocks | Create empty template (no elements); click publish | Dialog shows validation errors; confirm button disabled |
-| Archive workflow | Click archive; dialog opens; click confirm | Success snackbar; status changes to archived; archive button replaced by unarchive |
-| Version history | Publish a template; open version history | Version entry shows v1 with correct date/element count |
-| Version preview | Open version history; click preview on v1 | Canvas switches to read-only mode; "Back to Draft" button visible |
-| Revert to version | Open version history; click revert on v1; confirm | Success snackbar; canvas re-renders with v1 content |
-| Deep link to version | Navigate to `?version={vId}` URL | Page loads in version preview mode directly |
-| Permission gating | Login as user without `CertificateTemplateManage`; navigate to preview | Publish/archive/revert buttons hidden |
-
-### 6.3 GraphQL Integration Tests
+### 6.1 GraphQL Integration Tests
 
 | Test | Description |
 |------|-------------|

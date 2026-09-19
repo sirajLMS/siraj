@@ -9,6 +9,7 @@ import {
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { NotFoundError } from "@/backend/lib/errors";
 import { AccountingPaymentService, PackagePlanService } from "@/backend/services";
 import type { AccountingPaymentFilter } from "@/backend/types";
 
@@ -63,10 +64,11 @@ gqlSchemaBuilder.queryField("packagePlan", t =>
     authScopes: { loggedIn: true },
     args: { id: t.arg.id({ required: true }) },
     resolve: async (_root, args, ctx) => {
+      const tErrors = ctx.t().errorsTranslations;
       await requireAuth(ctx);
       try {
         const plan = await PackagePlanService.getById(args.id);
-        if (!plan) throw new Error("Package plan not found");
+        if (!plan) throw new NotFoundError("PACKAGE_PLAN", tErrors.notFound);
         return plan;
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);

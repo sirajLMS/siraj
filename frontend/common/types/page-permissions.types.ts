@@ -159,4 +159,6 @@ export const PAGE_PERMISSIONS = {
   // Accounting — expense ledger.
   accountingExpensesView: [AppPermission.AccountingExpensesView] as PagePermissions,
   accountingExpensesManage: [AppPermission.AccountingExpensesManage] as PagePermissions,
+  // Accounting — profit & loss executive dashboard (read-only).
+  accountingProfitsView: [AppPermission.AccountingProfitsView] as PagePermissions,
 } as const;

@@ -1,8 +1,7 @@
 # Research 09 — Pothos v4 API Verification (inputRef / enumType / authScopes)
 
-Verifies plan lines 456–471 of
-`/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md`
-against the installed `@pothos/core` and `@pothos/plugin-scope-auth`, and against
+Verification of the proposed Pothos API for the email-template system against
+the installed `@pothos/core` and `@pothos/plugin-scope-auth`, and against
 the repo's existing `notification-preferences` Pothos pattern.
 
 ---
@@ -60,7 +59,7 @@ export const NotificationPreferencePothosObject = NotificationPreferenceRef.impl
 });
 ```
 
-### Input object — `inputRef<T>("Name").implement({...})` (the API the plan proposes)
+### Input object — `inputRef<T>("Name").implement({...})` (the proposed API)
 
 ```ts
 export const NotificationPreferenceInputPothosObject = gqlSchemaBuilder
@@ -75,7 +74,7 @@ export const NotificationPreferenceInputPothosObject = gqlSchemaBuilder
 ```
 > Note also the exporting name convention: `…PothosObject` is used for BOTH the
 > object type and the input type in this repo (e.g.
-> `NotificationPreferenceInputPothosObject`). The plan's proposed name
+> `NotificationPreferenceInputPothosObject`). The name
 > `EmailTemplateInputPothosObject` matches this convention.
 
 ### Queries and mutations
@@ -153,9 +152,9 @@ export declare const ImplementableInputObjectRef: new <Types extends SchemaTypes
 ### Decision
 
 **The repo's actual usage (`inputRef<T>("Name").implement({...})`) wins.** The
-plan's proposed API for `EmailTemplateInputPothosObject` is correct:
+proposed API for `EmailTemplateInputPothosObject` is correct:
 `gqlSchemaBuilder.inputRef<EmailTemplateSubmitInput>("EmailTemplateInput").implement({...})`
-(direct quote from plan line 463).
+
 
 `builder.inputType("Name", {...})` is a valid alternative API in Pothos v4, but
 the repo consistently uses the `inputRef<T>(...).implement(...)` form (see
@@ -189,7 +188,7 @@ export const NotificationEventTypePothosObject = gqlSchemaBuilder.enumType(Notif
 });
 ```
 
-For the email-template work the plan introduces three new enums — `EmailScope`,
+For the email-template work three new enums are introduced — `EmailScope`,
 `EmailTemplateStatus`, `EmailEditorPermission`. To follow the repo pattern they
 MUST:
 1. Be defined as TypeScript `enum`s in `backend/enum/<subdir>/<entity>.enum.ts`.
@@ -261,7 +260,7 @@ scopeAuth: {
 },
 ```
 
-So `authScopes: { superAdmin: true, notImpersonating: true }` (plan line 469)
+So `authScopes: { superAdmin: true, notImpersonating: true }`
 evaluates to **`superAdmin === true AND notImpersonating === true`** at runtime.
 
 Note: the `AuthScopes` type registered on the builder is the canonical list of
@@ -277,18 +276,18 @@ AuthScopes: {
 };
 ```
 
-`superAdmin` and `notImpersonating` are both registered here, so the plan's
+`superAdmin` and `notImpersonating` are both registered here, so
 `{ superAdmin: true, notImpersonating: true }` is type-safe and semantically
 AND. No new scope keys need to be registered for the email-template work.
 
-### Existing usage in the repo (matches plan)
+### Existing usage in the repo
 
 - `backend/graphql/pothos/auth/impersonation.pothos.ts:82`
   `authScopes: { superAdmin: true, notImpersonating: true, notSimulatingGroup: true }`
 - `backend/graphql/mutation/billing/billing-payments.mutation.ts:68`
   `authScopes: { superAdmin: true, notImpersonating: true }`
 
-The plan's exact `{ superAdmin: true, notImpersonating: true }` is therefore the
+The `{ superAdmin: true, notImpersonating: true }` shape is therefore the
 correct, repo-idiomatic auth guard for the email-template mutations.
 
 ---
@@ -311,7 +310,7 @@ correct, repo-idiomatic auth guard for the email-template mutations.
 
 ## 7. Verdict
 
-**VERIFIED.** The plan's Pothos API choices for the email-template system
+**VERIFIED.** The Pothos API choices for the email-template system
 match the installed `@pothos/core@4.13.1` + `@pothos/plugin-scope-auth@4.1.7`
 and reproduce the repo's existing `notification-preferences.pothos.ts` pattern
 exactly:
@@ -336,5 +335,4 @@ exactly:
   `values: [...]` form. This is the `NotificationChannelPothosObject` pattern
   at `backend/graphql/pothos/shared/enum.pothos.ts:153-159`.
 
-**No corrections needed for the plan.** The plan's stated pattern at lines
-456–471 is correct and idiomatic for the installed Pothos v4 version.
+No corrections needed — the pattern is correct and idiomatic for the installed Pothos v4 version.

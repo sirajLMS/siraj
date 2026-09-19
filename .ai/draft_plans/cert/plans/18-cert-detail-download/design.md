@@ -43,7 +43,6 @@ The certificate detail feature follows the Siraj three-location frontend split p
 | 22 | `shared/locale/en/dashboard/certificates/detail.ts` | i18n English | English translations |
 | 23 | `shared/locale/ar/dashboard/certificates/detail.ts` | i18n Arabic | Arabic translations with pluralization |
 | 24 | `shared/locale/namespaces/dashboard/certificates/detail.namespace.ts` | i18n Namespace | Namespace registration exporting `DashboardCertificateDetail` |
-| 25 | `frontend/common/views/dashboard/cert-detail/certDetailContainer.stories.tsx` | Storybook | Stories: loading, error, data, revoked, expired, pending, failed |
 
 > **Note:** The `certificates` sub-directory under `sharedDocuments/` may already exist from Plan 16 (list management). Co-locate `certDetail.documents.ts` alongside any existing `certList.documents.ts` and update the barrel `index.ts`.
 
@@ -844,7 +843,6 @@ File: `frontend/common/stores/certDetailStore.ts`
 
 - Store is client-side only (Zustand, NOT persisted — NOT wrapped with `persist()` middleware).
 - Dialog/form state lives here so views don't need prop drilling.
-- **C.8 note:** Storybook tests likely use MSW handlers for GraphQL queries, NOT manual store mocks. Verify whether `frontend/common/stores/__mocks__/` exists before creating a mock; if it doesn't, mock the store inline in stories. Do NOT promise a mock file that may not exist.
 - Follows `frontend/common/stores/AGENTS.md` conventions (non-persisted, minimal cross-tier state).
 
 ---
@@ -1284,25 +1282,7 @@ When `TriggerPdfRenderMutation` returns `success: false` and a `renderId` (rende
 
 ## 12. Testing Strategy
 
-### 12.1 Component Tests (test/ui/components/)
-
-| Component | Test Cases |
-|-----------|-----------|
-| CertDetailContainer | Loading state, error state (404/not found), error state (403/access denied), data display, permission flags |
-| CertificateStatusBadge | All 5 status values (pending=warning, issued=success, revoked=error, expired=default, failed=error), tooltip display |
-| CertificatePreview | Renders preview, zoom controls, loading state |
-| CertificateInfoPanel | All sections render, fields display correctly, orientation-based layout |
-| DownloadMenu | Menu opens, format selection (PDF/PNG/JPG), loading state, disabled state when no permission, error toast on failure |
-| ShareDialog | Open/close, copy verification link, copied feedback, email share link, WhatsApp share link, download QR as PNG |
-| QrCodeDisplay | SVG generation (200x200), QR content matches verification URL, loading state, error fallback, PNG download (1024x1024) |
-| VerificationLinkCopy | Copy to clipboard, "Copied!" feedback, clipboard API failure handling, read-only TextField display |
-| StatusTimeline | Empty state, multiple entries, expand/collapse, sort toggle (newest/oldest), pagination — Load More, loading more state, event count display (pluralization) |
-| RevokeDialog | Open/close, reason selection, "Other" conditional field, validation (other reason required), confirm, loading, success, error |
-| ReissueDialog | Open/close, optional reason, confirm, loading, success, error |
-| CertificateActionsBar | Permission-gated button visibility, disabled states with tooltip, revoke/reissue conditional on status |
-| DashboardAccessDeniedContent | Renders access denied message (NEW component per C.11) |
-
-### 12.2 Integration Tests (frontend/common/graphql/test/)
+### 12.1 Integration Tests (frontend/common/graphql/test/)
 
 | Test | Scope |
 |------|-------|
@@ -1314,37 +1294,6 @@ When `TriggerPdfRenderMutation` returns `success: false` and a `renderId` (rende
 | CertCreateDownloadUrlMutation | Mints single-use URL, returns `{ url, expiresAt }` |
 | CertCreateImageDownloadUrlMutation | Mints single-use URL for PNG/JPG |
 | TriggerPdfRenderMutation | Returns `{ success, renderId }` for async rendering |
-
-### 12.3 E2E Tests (test/ui/e2e/)
-
-| Test | Scope |
-|------|-------|
-| Navigate to detail from list | Click certificate in list → detail loads with correct data |
-| Download PDF | Click download → PDF menu → file downloaded |
-| Download PNG | Click download → PNG menu → file downloaded |
-| Download JPG | Click download → JPG menu → file downloaded |
-| Share dialog | Click share → dialog opens → copy link works → email link opens mailto → QR download works |
-| Revoke certificate | Open dialog, select reason, confirm → status changes to `revoked` |
-| Re-issue certificate | Open dialog (from revoked state), confirm → navigated to new certificate |
-| Audit trail display | Audit entries visible, expandable, paginated, Load More works |
-| Copy verification URL | Copy button copies to clipboard |
-| QR code display | QR code renders in verification section |
-| Mobile responsive | Actions in overflow/bottom bar, accordions working, bottom action bar visible |
-| Permission-based access | Teacher cannot see revoke; parent cannot see audit timeline |
-| UUID validation | Invalid UUID in URL → not found page (no GraphQL call) |
-
-### 12.4 Storybook Stories
-
-| Story | Variants |
-|-------|----------|
-| CertDetailContainer | Loading, error (not found), error (access denied), issued, revoked, expired, pending, failed |
-| RevokeDialog | Empty, with reason selected, "Other" selected, validation error, loading |
-| ReissueDialog | Empty, with reason, loading |
-| StatusTimeline | Empty, single entry, multiple entries, expanded entry, loading more |
-| QrCodeDisplay | Default (SVG 200x200), loading, error |
-| DownloadMenu | Default, loading, disabled |
-| ShareDialog | Open, copy success, QR downloaded |
-| VerificationLinkCopy | Default, copied, copy failed |
 
 ---
 
@@ -1523,7 +1472,7 @@ Plan 02 §4.1 `CertificateStatus` defines exactly 5 lowercase db values: `pendin
 - §3.3 revocation: "Revoke button visible only if `status === 'active'`" → must be `issued`.
 - §5.1 `CertificateDetailQueryDocument.status` enum comment: "ACTIVE / REVOKED / EXPIRED" → must be `pending`/`issued`/`revoked`/`expired`/`failed`.
 - §3.4 AuditTimeline icons include Reactivate → RestoreIcon — reactivate is `revoked → issued`. There is **no** restore-from-`expired` semantic in Plan 02's transition set (Plan 04 owns `ALLOWED_STATUS_TRANSITIONS`). Confirm with Plan 04 whether `expired` is reactivatable; this plan currently treats expired the same as revoked for Reactivate.
-- `CertificateStatusBadge` test (§12.1) "All 3 status colors" → must be 5.
+- `CertificateStatusBadge` "All 3 status colors" → must be 5.
 - REQ-18-01 header "status badge (active/revoked/expired)" → fix to the 5-status set.
 
 This is a **cross-plan contract break** with Plan 02 AND with Plans 16/17 (which use `pending`/`issued`/`revoked`/`expired` but invent `draft`). The three plans must align to one canonical set: `pending`, `issued`, `revoked`, `expired`, `failed`. **Action:** sweep this design.md and requirements.md for `ACTIVE`/`active` and `serial` (see C.2) and replace.
@@ -1585,7 +1534,6 @@ The store design mixes UI dialog state (revoke/reactivate forms) with audit-time
 - Keep in store: `revokeDialogOpen`, `revokeReason`/`revokeOtherReason`/`revokeNotes`, `isRevoking`, `reactivateDialogOpen`, `isReactivating` (cross desktop/mobile views both render these dialogs and need shared state).
 - Move to `useCertificateDetailViewModel` `useRef`/local state: `expandedAuditIds` (timeline-local, only renders in one tier at a time), `auditSortOrder` (also timeline-local — store only if used by both tier views; the desktop+mobile both show audit, so keep in store), `activeDownloadCertId` (download flow local to action).
 - `Set<string>` is non-serializable BUT the store is non-persisted (matches the AGENTS.md "non-persisted store" mitigation), so OK. Add a single-code-review-check comment confirming this store is NOT wrapped with `persist`.
-- "Mock store implementation for Storybook" §6 — verify the project has a Storybook mocking convention (probably via MSW for queries, not store mocks). The sharedDocuments AGENTS.md doesn't mention store mocks; check `frontend/common/stores/__mocks__/` doesn't exist before promising one. Likely Storybook tests use MSW handlers (the repo has `*.stories.tsx` everywhere and `MSW`)
 
 ### C.9 Audit trail query — pagination missing + caching policy mismatch
 
@@ -2203,7 +2151,6 @@ toggleQrOverlay: () => void;
 | Bundle size (all new R4 components) | < 40KB gzip | Dynamic import of viewer; tree-shake revision diff |
 
 - All measurements logged via `logger.debug` with `performance.measure` results (NEVER `console.log`).
-- Budget violations alert via Storybook addon-performance (optional; local validation).
 
 ### R4.11 Print Preview
 

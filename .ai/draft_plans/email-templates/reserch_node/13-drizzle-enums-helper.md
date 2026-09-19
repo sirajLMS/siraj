@@ -1,18 +1,17 @@
 # 13 — Drizzle Enum Helper & `jsonb.$type<>()` Verification
 
-**Plan reference:** `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md` (lines 351, 357, 380)
 **Date:** 2026-08-01
 
 ---
 
 ## 1. Verdict on `createPgEnumFromEnum` existence in `enums.ts`
 
-**VERIFIED — the helper EXISTS and IS USED as the plan describes.**
+**VERIFIED — the helper EXISTS and IS USED as expected.**
 
 - `backend/db/schema/enums.ts:40` — `import { createPgEnumFromEnum } from "@/backend/utils/db.utils";`
 - `backend/db/schema/enums.ts:84` — `export const notificationChannelEnum = createPgEnumFromEnum("notification_channel", NotificationChannel);`
 
-The plan's claim ("see how `notificationChannelEnum` is built from the `NotificationChannel` TS enum") is **accurate**.
+`notificationChannelEnum` is built from the `NotificationChannel` TS enum — **accurate**.
 
 ## 2. The actual helper (verbatim)
 
@@ -182,7 +181,7 @@ Backing TS enum imported at `enums.ts:27` per the import block (lines 2–38):
 
 ## 5. `.array()` usage today
 
-**NO.** Grep for `.array()` across `backend/db/schema/**/*.ts` returned **zero matches**. There are no array-of-enum (or any-array) columns in the schema today. The plan's proposal to use `pgEnum(...).array()` (claim 8 / lines 248–296) would be a **first-time-use case** in this repo. The earlier FINAL-VERIFICATION-SUMMARY already flagged this and recommended the safer `jsonb.$type<readonly EmailEditorPermission[]>()` fallback — that recommendation stands.
+**NO.** Grep for `.array()` across `backend/db/schema/**/*.ts` returned **zero matches**. There are no array-of-enum (or any-array) columns in the schema today. Using `pgEnum(...).array()` would be a **first-time-use case** in this repo. The earlier FINAL-VERIFICATION-SUMMARY already flagged this and recommended the safer `jsonb.$type<readonly EmailEditorPermission[]>()` fallback — that recommendation stands.
 
 ## 6. `jsonb.$type<>()` canonical pattern in repo
 
@@ -199,7 +198,7 @@ The pattern `jsonb("<field>").$type<T>()` is used pervasively. Representative ca
 | `backend/db/schema/classes/scheduling.ts:173` | `meetingConfigSnapshot: jsonb("meeting_config_snapshot").$type<MeetingConfigSnapshot>(),` |
 | `backend/db/schema/billing/billing.ts:93` | `$type<PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot>()` |
 
-### `readonly T[]` as `$type<>` argument (plan line 380)
+### `readonly T[]` as `$type<>` argument
 
 **YES — the repo already uses `readonly T[]` inside `$type<>`.** Two exact precedents:
 
@@ -211,7 +210,7 @@ The pattern `jsonb("<field>").$type<T>()` is used pervasively. Representative ca
     urlAllowlist: jsonb("url_allowlist").$type<readonly string[]>().notNull(),
 ```
 
-This is a direct precedent for the plan's proposed `attachmentRules: jsonb("attachment_rules").$type<readonly EmailEditorPermission[]>().notNull()` (plan line 380). The `readonly` modifier is repo-idiomatic for `jsonb` array payloads.
+This is a direct precedent for `attachmentRules: jsonb("attachment_rules").$type<readonly EmailEditorPermission[]>().notNull()`. The `readonly` modifier is repo-idiomatic for `jsonb` array payloads.
 
 ### Enum columns can also carry `$type<T>()` — repo precedent
 
@@ -227,4 +226,4 @@ The repo also applies `$type<T>()` after enum-column calls, not just `jsonb`. Ex
 
 ## 7. One-line verdict
 
-**VERIFIED.** The helper `createPgEnumFromEnum` DOES exist at `backend/utils/db.utils.ts:3` (imported at `enums.ts:40`) and is the canonical pattern — `notificationChannelEnum` at `enums.ts:84` is built exactly as the plan claims. The plan (lines 351, 357) is **accurate as written**; no correction to the helper name or import path is needed. Plan line 380's proposed `jsonb.$type<readonly EmailEditorPermission[]>()` is also repo-idiomatic — direct precedent at `backend/db/schema/meeting/meeting-providers.ts:13` and `backend/db/schema/billing/supported-payment-links.ts:13`. The only adjacent caveat (already captured in FINAL-VERIFICATION-SUMMARY claim 8) is that `.array()` on pgEnums is a first-time use case in this repo (zero matches), so `jsonb.$type<readonly T[]>()` remains the safer fallback per existing convention.
+**VERIFIED.** The helper `createPgEnumFromEnum` DOES exist at `backend/utils/db.utils.ts:3` (imported at `enums.ts:40`) and is the canonical pattern — `notificationChannelEnum` at `enums.ts:84` is built exactly this way; no correction to the helper name or import path is needed. A `jsonb.$type<readonly EmailEditorPermission[]>()` column is also repo-idiomatic — direct precedent at `backend/db/schema/meeting/meeting-providers.ts:13` and `backend/db/schema/billing/supported-payment-links.ts:13`. The only adjacent caveat (already captured in FINAL-VERIFICATION-SUMMARY claim 8) is that `.array()` on pgEnums is a first-time use case in this repo (zero matches), so `jsonb.$type<readonly T[]>()` remains the safer fallback per existing convention.

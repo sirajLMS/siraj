@@ -1,8 +1,12 @@
 import { GraphQLError, GraphQLScalarType, Kind, type ValueNode } from "graphql";
-import type { AppLocale } from "@/shared/locale";
-import { isAppLocale, type LocalizedString } from "@/shared/types/localized-string";
+import { type AppLocale, getServerTranslations } from "@/shared/locale";
+import { DEFAULT_CONTENT_LOCALE, isAppLocale, type LocalizedString } from "@/shared/types/localized-string";
 
 const MAX_VALUE_LENGTH = 4096;
+
+// Scalar parsers run outside the request context, so the fallback message uses
+// the default content locale; clients localize via `extensions.scalarCode`.
+const tErrors = getServerTranslations(DEFAULT_CONTENT_LOCALE).errorsTranslations;
 
 /**
  * Machine-stable error codes for LocalizedString validation failures.
@@ -22,7 +26,7 @@ function isStringRecord(value: unknown): value is Record<string, unknown> {
 
 function validateLocalizedMap(value: unknown): LocalizedString {
   if (!isStringRecord(value)) {
-    throw new GraphQLError("LocalizedString must be an object keyed by AppLocale", {
+    throw new GraphQLError(tErrors.invalidInput, {
       extensions: { code: "BAD_USER_INPUT", scalarCode: LocalizedStringScalarError.NotObject },
     });
   }
@@ -32,17 +36,17 @@ function validateLocalizedMap(value: unknown): LocalizedString {
 
   for (const [key, val] of Object.entries(obj)) {
     if (!isAppLocale(key)) {
-      throw new GraphQLError('LocalizedString keys must be AppLocale values ("ar" | "en").', {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: { code: "BAD_USER_INPUT", scalarCode: LocalizedStringScalarError.InvalidLocaleKey, key },
       });
     }
     if (typeof val !== "string") {
-      throw new GraphQLError("LocalizedString values must be strings.", {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: { code: "BAD_USER_INPUT", scalarCode: LocalizedStringScalarError.ValueNotString, key },
       });
     }
     if (val.length > MAX_VALUE_LENGTH) {
-      throw new GraphQLError("LocalizedString value exceeds maximum length.", {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: {
           code: "BAD_USER_INPUT",
           scalarCode: LocalizedStringScalarError.ValueTooLong,
@@ -59,7 +63,7 @@ function validateLocalizedMap(value: unknown): LocalizedString {
 
 function parseLiteral(ast: ValueNode): LocalizedString {
   if (ast.kind !== Kind.OBJECT) {
-    throw new GraphQLError("LocalizedString must be an object keyed by AppLocale", {
+    throw new GraphQLError(tErrors.invalidInput, {
       extensions: { code: "BAD_USER_INPUT", scalarCode: LocalizedStringScalarError.NotObject },
     });
   }
@@ -69,17 +73,17 @@ function parseLiteral(ast: ValueNode): LocalizedString {
   for (const field of ast.fields) {
     const key = field.name.value;
     if (!isAppLocale(key)) {
-      throw new GraphQLError('LocalizedString keys must be AppLocale values ("ar" | "en").', {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: { code: "BAD_USER_INPUT", scalarCode: LocalizedStringScalarError.InvalidLocaleKey, key },
       });
     }
     if (field.value.kind !== Kind.STRING) {
-      throw new GraphQLError("LocalizedString values must be strings.", {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: { code: "BAD_USER_INPUT", scalarCode: LocalizedStringScalarError.ValueNotString, key },
       });
     }
     if (field.value.value.length > MAX_VALUE_LENGTH) {
-      throw new GraphQLError("LocalizedString value exceeds maximum length.", {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: {
           code: "BAD_USER_INPUT",
           scalarCode: LocalizedStringScalarError.ValueTooLong,

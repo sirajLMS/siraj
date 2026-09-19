@@ -5410,8 +5410,6 @@ Type schema modifications in `shared/locale/namespaces/dashboard/certificates/te
     -H "Content-Type: application/json" \
     -d '{"id":"r5-layers-canvas","files":["frontend/views/dashboard/certificates/template-editor/canvas/CanvasLayerCompositor.ts"]}'
   ```
-- `bun run test:ui:components` — canvas rendering tests (add `CanvasLayerCompositor.test.ts` verifying: hidden layer skipped, group opacity cascade, clipping mask shape, mask alpha multiply, blend mode Canvas2D fast path + WebGL fallback)
-- Visual regression: snapshot the `CanvasRenderer` with a 3-layer template (text + shape + image, one hidden, one clipped) — ensures z-order and visibility render correctly
 
 ## Round 5: Snap & Align Engine — Snap Rendering, Smart Guides, Transform Handles
 
@@ -7091,7 +7089,6 @@ sx={{
 **WYSIWYG guarantee:**
 - The canvas renders at the template's native resolution (e.g., 1123×794 for A4 landscape at 96 DPI).
 - The PDF renderer (Plan 06) uses the same `font-family`, `font-size`, `letter-spacing`, `line-height`, `text-decoration`, `text-transform`, `text-shadow`, and `font-variation-settings` values.
-- A visual diff test (`test/ui/components/canvas/textPdfParity.test.tsx`) renders the same `RichTextContent` on canvas and in a mock PDF page, comparing bounding boxes for each text run. Tolerance: ±1px per run.
 
 **Arabic shaping:**
 - The renderer sets `direction: "rtl"` and `unicode-bidi: "plaintext"` when the text content contains >50% Arabic characters (detected via Unicode range `[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]`).

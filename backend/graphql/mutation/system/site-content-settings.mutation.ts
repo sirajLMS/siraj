@@ -16,8 +16,10 @@ gqlSchemaBuilder.mutationField("upsertSiteContent", t =>
   t.field({
     type: SiteContentEntryPothosObject,
     authScopes: {
-      permission: AppPermission.SETTINGS_SITE_CONTENT_MANAGE,
-      notImpersonating: true,
+      $all: {
+        permission: AppPermission.SETTINGS_SITE_CONTENT_MANAGE,
+        notImpersonating: true,
+      },
     },
     args: {
       input: t.arg({ type: SiteContentUpsertInputPothosObject, required: true }),
@@ -41,8 +43,10 @@ gqlSchemaBuilder.mutationField("updateSiteContentPublishState", t =>
   t.field({
     type: SiteContentEntryPothosObject,
     authScopes: {
-      permission: AppPermission.SETTINGS_SITE_CONTENT_MANAGE,
-      notImpersonating: true,
+      $all: {
+        permission: AppPermission.SETTINGS_SITE_CONTENT_MANAGE,
+        notImpersonating: true,
+      },
     },
     args: {
       id: t.arg.id({ required: true }),
@@ -70,8 +74,10 @@ gqlSchemaBuilder.mutationField("deleteSiteContent", t =>
   t.field({
     type: "Boolean",
     authScopes: {
-      permission: AppPermission.SETTINGS_SITE_CONTENT_MANAGE,
-      notImpersonating: true,
+      $all: {
+        permission: AppPermission.SETTINGS_SITE_CONTENT_MANAGE,
+        notImpersonating: true,
+      },
     },
     args: {
       id: t.arg.id({ required: true }),

@@ -210,12 +210,12 @@ export function assertCanManageAppearance(ctx: BaseContext, tErrors: ErrorsLabel
  * can immediately retry with the new value (Overwrite) without an extra
  * refetch round-trip.
  */
-export async function runAppearanceMutation<T>(fn: () => Promise<T>): Promise<T> {
+export async function runAppearanceMutation<T>(tErrors: ErrorsLabels, fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (error) {
     if (isAppearanceConflictError(error)) {
-      throw new GraphQLError(error.message, {
+      throw new GraphQLError(tErrors.appearance.conflict, {
         extensions: {
           code: APPEARANCE_CONFLICT_ERROR_CODE,
           serverUpdatedAt: error.serverUpdatedAt,

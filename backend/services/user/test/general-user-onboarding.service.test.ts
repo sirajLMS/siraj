@@ -2,7 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
-import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { GeneralUserOnboardingService } from "@/backend/services/user/general-user-onboarding.service";
@@ -12,10 +12,6 @@ const DEFAULT_ACTOR_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const NONEXISTENT_SLUG = `nonexistent-${randomUUID()}`;
 
 const tErrors = errorsEn;
-
-function generateTestPassword(): string {
-  return `TestPass-${randomUUID().slice(0, 8)}!`;
-}
 
 function generateTestEmail(): string {
   return `test-${randomUUID()}@example.com`;

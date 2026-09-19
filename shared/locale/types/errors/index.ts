@@ -466,6 +466,8 @@ interface SchedulingSharedErrors {
   readonly recurringClassDaysRequired: () => string;
   readonly invalidDuration: () => string;
   readonly subjectRequired: () => string;
+  readonly sessionLocked: (params: { lockHours: number }) => string;
+  readonly leaveRequestNoLongerPending: string;
 }
 
 /**
@@ -543,6 +545,8 @@ export interface AppearanceErrors {
   readonly publishFailed: string;
   readonly resetFailed: string;
   readonly unauthorized: string;
+  /** Optimistic-concurrency conflict (AC-33) — another admin saved first. */
+  readonly conflict: string;
 }
 
 /**
@@ -609,6 +613,8 @@ export interface ErrorsLabels
   readonly serviceOutage: ServiceOutageErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
+  /** Raised when an erasure scrub affected fewer rows than expected (partial scrub rolled back). */
+  readonly anonymizationScrubIncomplete: string;
   readonly duplicateRequest: string;
   readonly internalServerError: string;
   readonly requestTooLarge: string;

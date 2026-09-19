@@ -129,9 +129,6 @@ THEN the `docs/certificates/` directory SHALL include a `TESTING_PATTERNS.md` fi
 - The entity-setup helper extensions for certificates (cert, template, element, variable, group, group item)
 - The `runInRollback` test pattern for certificate repository tests
 - The test client pattern for certificate GraphQL integration tests
-- The mock Apollo provider pattern for certificate component tests
-- The E2E test pattern for certificate flows (generation, verification, template management)
-- The Storybook story pattern for certificate components
 
 **REQ-21.10 (docs-i18n-patterns)**
 WHEN the documentation is created
@@ -206,7 +203,7 @@ WHEN the frontend `AGENTS.md` files are updated for the certificate feature
 THEN the following files SHALL receive certificate-specific sections:
 - `frontend/AGENTS.md`: certificate view organization, Apollo hook patterns for certificates, Zustand store conventions for certificate state, MUI component patterns for certificates
 - `frontend/views/AGENTS.md`: certificate page component structure, DataGrid configuration for certificate lists, generation dialog composition, template editor view organization
-- `frontend/common/stores/AGENTS.md`: certificate store naming convention, store composition pattern, mock store pattern for Storybook
+- `frontend/common/stores/AGENTS.md`: certificate store naming convention, store composition pattern
 - `frontend/common/graphql/AGENTS.md`: certificate GraphQL document file organization, naming conventions, `id` field inclusion rule, no `useLazyQuery` rule, import from `@apollo/client/react`
 
 **REQ-21.18 (app-agents-md-update)**
@@ -252,9 +249,6 @@ THEN it SHALL include:
 - Certificate entity-setup helper naming conventions and signatures
 - Certificate repository test file naming and location conventions
 - Certificate GraphQL integration test patterns (testClient usage, auth scope setup)
-- Certificate component test patterns (renderWithWrapper, MockLink setup)
-- Certificate E2E test patterns (Playwright, production server, cert flow fixtures)
-- Certificate Storybook story patterns
 - Certificate-specific test gotchas (PDF render mocking, storage adapter mocking, cron route testing)
 
 ---
@@ -367,7 +361,7 @@ All documentation-related user-facing strings (e.g., documentation index labels,
 - [ ] `FRONTEND_PATTERNS.md` documents view organization, Apollo hooks, Zustand stores, MUI patterns, i18n
 - [ ] `STORAGE_PATTERNS.md` documents adapter pattern, signed URLs, orphan detection, quota, cache invalidation
 - [ ] `CRON_PATTERNS.md` documents Vercel Cron pattern, auth guard, Redis lock, failure isolation, idempotency, env config
-- [ ] `TESTING_PATTERNS.md` documents entity-setup helpers, runInRollback, test client, component tests, E2E, Storybook
+- [ ] `TESTING_PATTERNS.md` documents entity-setup helpers, runInRollback, test client
 - [ ] `I18N_PATTERNS.md` documents namespace structure, sub-domains, pluralization, type schema, locale implementation
 - [ ] `TEMPLATE_EDITOR.md` documents canvas architecture, element types, variable system, preview/publish, versioning
 - [ ] `VERIFICATION_SYSTEM.md` documents code generation, public page, log entries, retention, QR codes
@@ -386,7 +380,7 @@ All documentation-related user-facing strings (e.g., documentation index labels,
 - [ ] `backend/enum/AGENTS.md` documents certificate enums (status, template status, element type, batch status, verification status)
 - [ ] `frontend/AGENTS.md` documents certificate view organization, Apollo hooks, Zustand stores, MUI patterns
 - [ ] `frontend/views/AGENTS.md` documents certificate page structure, DataGrid, generation dialog, template editor
-- [ ] `frontend/common/stores/AGENTS.md` documents certificate store naming, composition, mock store pattern
+- [ ] `frontend/common/stores/AGENTS.md` documents certificate store naming, composition
 - [ ] `frontend/common/graphql/AGENTS.md` documents certificate documents, naming, id inclusion, no lazy query
 - [ ] `app/AGENTS.md` documents certificates routes (public verify, admin dashboard, cron routes), locale routing, server component flow
 
@@ -394,7 +388,7 @@ All documentation-related user-facing strings (e.g., documentation index labels,
 
 - [ ] `.agents/instructions/frontend.instructions.md` has certificate naming conventions, Apollo hooks, stores, documents, MUI notes, i18n notes, gotchas
 - [ ] `.agents/instructions/backend.instructions.md` has certificate service, repository, type, Pothos, enum, cron, env var, cache, gotchas
-- [ ] `.agents/instructions/tests.instructions.md` has certificate entity-setup, repo tests, GraphQL integration, component, E2E, Storybook, gotchas
+- [ ] `.agents/instructions/tests.instructions.md` has certificate entity-setup, repo tests, GraphQL integration, gotchas
 
 ### AC-21.4: Skill Updates
 

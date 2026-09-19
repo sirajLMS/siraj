@@ -21,7 +21,7 @@ import {
 gqlSchemaBuilder.mutationField("refreshExchangeRates", t =>
   t.field({
     type: RefreshExchangeRatesResultPothosObject,
-    authScopes: { permission: AppPermission.BILLING_REFRESH_EXCHANGE_RATES, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_REFRESH_EXCHANGE_RATES, notImpersonating: true } },
     args: {
       force: t.arg.boolean({ required: false, defaultValue: false }),
     },
@@ -51,7 +51,7 @@ gqlSchemaBuilder.mutationField("refreshExchangeRates", t =>
 gqlSchemaBuilder.mutationField("updateFxProvider", t =>
   t.field({
     type: FxProviderConfigPothosObject,
-    authScopes: { permission: AppPermission.BILLING_MANAGE_FX_PROVIDER, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_MANAGE_FX_PROVIDER, notImpersonating: true } },
     args: {
       provider: t.arg({ type: FxProviderPothosEnum, required: true }),
     },
@@ -65,7 +65,7 @@ gqlSchemaBuilder.mutationField("updateFxProvider", t =>
 gqlSchemaBuilder.mutationField("upsertManualExchangeRate", t =>
   t.field({
     type: UpsertManualExchangeRateResultPothosObject,
-    authScopes: { permission: AppPermission.BILLING_OVERRIDE_EXCHANGE_RATES, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_OVERRIDE_EXCHANGE_RATES, notImpersonating: true } },
     args: {
       fromCurrency: t.arg({ type: CurrencyCodePothosObject, required: true }),
       toCurrency: t.arg({ type: CurrencyCodePothosObject, required: true }),

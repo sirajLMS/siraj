@@ -111,7 +111,7 @@ There is also a `testInRollback(name, fn)` convenience wrapper (`test-utils.ts:4
 
 ### 2.1 Framework
 
-All tests use **Bun's built-in test runner** (`bun:test`). No separate Vitest/Jest config for the main suites — `package.json` "test" is:
+All tests use **Bun's native test runner** (`bun:test`). No separate Vitest/Jest config for the main suites — `package.json` "test" is:
 ```json
 "test": "bun --env-file=.env.test test --timeout=60000"
 ```
@@ -121,7 +121,6 @@ Concrete test scripts:
 - `test:db` → `bun --env-file=.env.test scripts/run-db-tests-parallel.ts`
 - `test:services` → `... scripts/run-services-tests-parallel.ts`
 - `test:graphql` → `bun --env-file=.env.test test frontend/common/graphql/test/ --timeout=120000`
-- `test:ui:components` / `test:ui:e2e` / `test:ui:static`
 - `test:integration` → `... scripts/run-integration-tests-parallel.ts`
 
 ### 2.2 Example: repository test (`repo/`)
@@ -360,144 +359,6 @@ Key AGENTS rules:
 
 ---
 
-## 6. UI Component Tests (`test/ui/`)
-
-### 6.1 Layout & layers (`test/ui/AGENTS.md`)
-
-All `test:ui*` run with `TEST_SERVER_MODE=production`, preloaded via `test/ui/test-env.ts`.
-
-| Layer | Path | Server | Notes |
-|---|---|---|---|
-| Component | `test/ui/components/` | None | Happy DOM + mocked Apollo. No browser, no network. |
-| E2E | `test/ui/e2e/` | Production (`next start`) | Playwright via `bun:test`. `setupBrowserLifecycle()` → `setupTestServerLifecycle()` |
-| Static | `test/ui/mobile-desktop-isolation.test.ts` | None | Import-boundary scans |
-
-`test/ui/components/` ≈ 40 files: `TestWrapper.tsx`, preloads (`happydom-preload.ts`, `next-dynamic-mock.ts`, `jest-dom.d.ts`), `fixtures/`, plus `*.test.tsx` for components (RequirePermission, SessionActivateButton.desktop/.mobile, dashboardContainer, studentHistoryContainer, navigationConfig variants, etc.).
-
-### 6.2 `TestWrapper.tsx` — the mocked Apollo + providers wrapper
-
-`test/ui/components/TestWrapper.tsx:39` — wraps a component for `@testing-library/react` `render()` with:
-- `LocaleProvider` + `ThemeContext.Provider` + `CacheProvider` (Emotion LTR/RTL cache) + `ThemeProvider` (MUI) + `ViewportProvider` + `ApolloProvider`.
-- `ApolloClient` with `MockLink(mocks)` (no real network), `errorPolicy: "all"`, `fetchPolicy: "no-cache"`.
-- `useUserStore.setState({ permissions })` seeds permissions.
-- Props: `locale` (default `"ar"`), `themeMode` (`"dark"`), `permissions`, `mocks` (MockedResponse[]), `viewport`.
-- `renderWithWrapper(ui, options)` — convenience wrapper.
-
-### 6.3 Example (`RequirePermission.test.tsx`)
-
-```typescript
-import { afterEach, describe, expect, test } from "bun:test";
-import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, screen } from "@testing-library/react";
-expect.extend(matchers);
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "..."
-import { useUserStore } from "@/frontend/common/stores/userStore";
-import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
-
-afterEach(() => {
-  cleanup();
-  useUserStore.setState({ permissions: [] }, false);
-});
-
-test("renders children when user has permission", () => {
-  renderWithWrapper(<RequirePermission permissions={[AppPermission.DashboardSearch]}>...</RequirePermission>, { permissions: [AppPermission.DashboardSearch] });
-  expect(screen.getByText("Protected Content")).toBeVisible();
-});
-```
-
-- Uses `@testing-library/jest-dom` matchers extended onto bun `expect`.
-- `cleanup()` + store reset in `afterEach`.
-- `bun:test` test functions (not jest/vitest).
-
-### 6.4 Preloads (component tests)
-
-`test:ui:components` (`package.json:36`) sets:
-```
---preload ./test/ui/test-env.ts
---preload ./test/ui/components/happydom-preload.ts
---preload ./test/ui/components/next-dynamic-mock.ts
-```
-
-### 6.5 Static isolation test
-
-`test/ui/mobile-desktop-isolation.test.ts:1-57` — runtime safety net for ESLint boundary rules. Scans `frontend/mobile/views/` and `frontend/desktop/views/` for:
-- `.mobile.tsx` files importing `.desktop` files (and vice versa)
-- `.mobile.tsx`/`.desktop.tsx` importing `useMediaQuery` from `@mui/material`
-Comment-stripping before regex to avoid false positives. This guards against a broken ESLint config letting violations through.
-
----
-
-## 7. E2E Tests (Playwright via `bun:test`)
-
-### 7.1 Lifecycle (`test/ui/e2e/lifecycle.ts:1-51`)
-
-```typescript
-import { chromium } from "playwright";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { getTestBaseUrl } from "..."
-
-let browser: Browser | null = null;
-export function setupBrowserLifecycle() {
-  setupTestServerLifecycle();             // reuse GraphQL test server (prod mode under test/ui)
-  beforeAll(async () => { browser = await chromium.launch({ headless: true }); });
-  afterAll(async () => { if (browser) { await browser.close(); browser = null; } });
-}
-
-export async function createContext(viewport = { width:1280, height:720 }): Promise<BrowserContext> {
-  const ctx = await browser.newContext({ baseURL: getTestBaseUrl(), viewport });
-  ctx.setDefaultTimeout(30_000);
-  ctx.setDefaultNavigationTimeout(60_000);
-  return ctx;
-}
-export async function createMobileContext() {
-  return browser.newContext({ baseURL: getTestBaseUrl(), viewport: { width:375, height:812 }, isMobile:true, hasTouch:true });
-}
-```
-
-- Built **on top of** the GraphQL test harness — `setupTestServerLifecycle()` is reused. Under `test/ui/`, `testPort.ts` switches `getTestServerMode()` to production → `testServer.ts` spawns `next start` (not `next dev`).
-- Requires `bun run build:test` first → `.next-test-prod` bundle (override with `TEST_SERVER_DIST_DIR`).
-
-### 7.2 Login helpers (`test/ui/e2e/helpers.ts`)
-
-- `DEMO_USERS` map of `{academyAdmin, teacher, parent, supervisor, staff, student}` → `{ email, password: "12345678", groupSlug }` sourced from `@/shared/demo-users`.
-- `loginAsDemoUser(page, context, groupSlug)` — authenticates via `Bun.fetch` POST to `/api/graphql` with `demoLogin` mutation (NOT Playwright `context.request`), parses `Set-Cookie`, asserts the required auth cookies `["session_id","refresh_token","access_token"]` are present, adds them to the context, then navigates to `/dashboard` + `waitForDashboardReady`.
-- Retries on `429` (rate limit) and navigation errors; exponential backoff.
-- `AUTH_COOKIE_SECURE=false` required in `.env.test` so cookies work over `http://localhost`.
-- Other helpers: `authenticateDemoUser`, `gotoAppRoute`, `closeE2eSession` (5s-close-timeout), `assertElementVisible/Hidden`, `createMobileContext` (390×844 iPhone).
-
-### 7.3 Example (`test/ui/e2e/admin-dashboard.test.ts:1-75`)
-
-```typescript
-import { afterEach, describe, expect, test } from "bun:test";
-import { closeE2eSession, DEMO_USERS, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
-import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
-
-setupBrowserLifecycle();
-let context: BrowserContext; let page: Page;
-afterEach(async () => { await closeE2eSession(page, context); ... });
-
-describe.serial("Admin Dashboard E2E", () => {
-  test("Admin sees search input", async () => {
-    context = await createContext();
-    page = await context.newPage();
-    await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
-    const textbox = page.getByRole("textbox");
-    await textbox.first().waitFor({ state: "visible" });
-    expect(await textbox.first().isVisible()).toBe(true);
-  });
-  // ... timezone columns, search filter, mobile viewport variants
-});
-```
-
-Conventions (AGENTS):
-- `describe.serial` for ordered suites.
-- No `happydom-preload` in E2E (conflicts with Playwright).
-- No `waitForTimeout` / `networkidle` — use Playwright auto-waiting assertions.
-- Bilingual selectors: `/search schedule availability|البحث عن توفر الجدول/i`.
-
----
-
 ## 8. Quality Gate Pipeline (`scripts/quality-gate.ts`)
 
 ### 8.1 Stages — strict order, persisted
@@ -626,7 +487,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 Schema `2.5.6`. Key settings (`biome.json`):
 
 - **VCS**: enabled, git, uses ignore file.
-- **Files includes** everything except: `frontend/common/graphql/generated`, `**/.ai`, `**/.agents`, `.next*`, `public`. Notably `.storybook/**` IS linted.
+- **Files includes** everything except: `frontend/common/graphql/generated`, `**/.ai`, `**/.agents`, `.next*`, `public`.
 - **Formatter** (enabled): `indentStyle: space`, `indentWidth: 2`, `lineWidth: 120`, `lineEnding: lf`, `bracketSpacing: true`.
 - **JavaScript formatter**: `quoteStyle: double`, `trailingCommas: es5`, `semicolons: always`, `arrowParentheses: asNeeded`, `bracketSameLine: false`, `quoteProperties: asNeeded`. Parser `unsafeParameterDecoratorsEnabled: true` (for decorators).
 - **Linter** (recommended preset) with overrides:
@@ -646,11 +507,11 @@ Scripts (`package.json`): `format` (`biome format --write .`), `biome:check` (`b
 A `defineConfig` flat config composing many layers.
 
 ### 11.1 Plugins / extends
-- `@eslint/js` recommended, `eslint-config-next` (core-web-vitals + typescript), `react-hooks`, `react-refresh`, `eslint-plugin-sonarjs` (recommended), `eslint-plugin-storybook` (flat/recommended), `typescript-eslint` (recommended, applied to `**/*.{ts,tsx}`).
+- `@eslint/js` recommended, `eslint-config-next` (core-web-vitals + typescript), `react-hooks`, `react-refresh`, `eslint-plugin-sonarjs` (recommended), `typescript-eslint` (recommended, applied to `**/*.{ts,tsx}`).
 - `@cspell/eslint-plugin` is **disabled** for performance (commented out).
 
 ### 11.2 Global ignores (`globalIgnores`)
-All dot-directories anywhere (`**/.*/**`) **except `.storybook`**, plus `.next*`, `node_modules`, `out`, `build`, `dist`, `logs`, `storage`, `scratch`, `draft`, `storybook-static`, `docs`, `*.d.ts`, `next-env.d.ts`, `*.lock`, `*.log`, all `*.md`, `*.html`, `messages/**`, `frontend/common/graphql/generated/**`, `unRefactored_tests/**`.
+All dot-directories anywhere (`**/.*/**`), plus `.next*`, `node_modules`, `out`, `build`, `dist`, `logs`, `storage`, `scratch`, `draft`, `docs`, `*.d.ts`, `next-env.d.ts`, `*.lock`, `*.log`, all `*.md`, `*.html`, `messages/**`, `frontend/common/graphql/generated/**`, `unRefactored_tests/**`.
 
 ### 11.3 Core rules (TS/React files)
 - React: `react-hooks/recommended` + `react-hooks/set-state-in-effect: off`; `react-refresh/only-export-components: warn`.
@@ -662,14 +523,14 @@ All dot-directories anywhere (`**/.*/**`) **except `.storybook`**, plus `.next*`
 
 ### 11.4 Architecture-enforcing custom rules (the important ones for a new feature)
 
-**Path alias enforcement**: relative `./` or `../` imports are **banned** outside `index.ts` barrels (and `.storybook`). Use the `@/` alias:
+**Path alias enforcement**: relative `./` or `../` imports are **banned** outside `index.ts` barrels. Use the `@/` alias:
 ```javascript
 "no-restricted-syntax": ["error", {
   selector: "ImportDeclaration[source.value=/^\\.\\.?\\//]",
   message: "Imports must use @/ path alias, not relative ./ or ../ — see AGENTS.md",
 }]
 ```
-(file scope: `app/`, `backend/`, `frontend/`, `shared/`, `test/`, `scripts/`, `.storybook/` — **this includes new test files for a cert feature**).
+(file scope: `app/`, `backend/`, `frontend/`, `shared/`, `test/`, `scripts/` — **this includes new test files for a cert feature**).
 
 **Layer isolation**:
 - `shared/**` must not import `@/frontend/**`, `@/backend/**`, `@/app/**`.
@@ -692,72 +553,11 @@ All dot-directories anywhere (`**/.*/**`) **except `.storybook`**, plus `.next*`
 
 **Next.js special files**: `react-refresh/only-export-components: off` for `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`, `template.tsx`, `default.tsx`, `route.ts`.
 
-**Test relaxations**: UI test files (`test/ui/**`) have `react-refresh/only-export-components: off`. Backend DB tests, scripts, and config have `no-console: off` plus several Sonar rules relaxed (`no-nested-functions`, `no-os-command-from-path`, `no-hardcoded-ip`, `sql-queries`, `no-unnecessary-condition`).
+**Test relaxations**: Backend DB tests, scripts, and config have `no-console: off` plus several Sonar rules relaxed (`no-nested-functions`, `no-os-command-from-path`, `no-hardcoded-ip`, `sql-queries`, `no-unnecessary-condition`).
 
 ### 11.5 Custom ESLint rules directory
 
 `scripts/eslint-rules/` exists (not opened in detail — likely project-local rule plugins). `scripts/ts6-eslint-patch.cjs` bridges eslint with the TS6/TS7 native-preview parser.
-
----
-
-## 12. Storybook
-
-**Yes**, Storybook is configured at `.storybook/` (v10.x via `@storybook/nextjs-vite`). `frontend/stores/` is empty/absent in this checkout — Storybook lives at the repo root under `.storybook/` and stories are co-located beside components.
-
-### 12.1 `.storybook/main.ts`
-
-```typescript
-const config: StorybookConfig = {
-  stories: ["../frontend/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
-  addons: [
-    "@chromatic-com/storybook",
-    "@storybook/addon-vitest",
-    "@storybook/addon-a11y",
-    "@storybook/addon-docs",
-    "@storybook/addon-mcp",
-    "msw-storybook-addon",
-  ],
-  framework: "@storybook/nextjs-vite",
-  staticDirs: ["../public"],
-  async viteFinal(config) {
-    return mergeConfig(config, {
-      resolve: { alias: { "react-leaflet/package.json": ..., "@": path.resolve(__dirname, "..") } },
-      optimizeDeps: { exclude: ["react-leaflet", "@react-leaflet/core"] },
-    });
-  },
-};
-```
-
-### 12.2 `.storybook/preview.tsx`
-
-- Global types (toolbar): `locale` (ar/en), `theme` (light/dark), `viewport` (mobile/tablet/desktop). Defaults `ar` / `dark` / `desktop`.
-- `loaders: [mswLoader(...)]` — starts an MSW `setupWorker` per story with `onUnhandledRequest: "bypass"`.
-- `parameters.msw.handlers: mswHandlers` (from `.storybook/msw-handlers.ts`).
-- `parameters.a11y.test: "todo"` — shows a11y violations in UI only (not CI-failing yet).
-- `parameters.nextjs.appDirectory: true`.
-- `decorators: [withAllProviders]` wrapping every story in `StoryWrapper`.
-
-### 12.3 `.storybook/StoryWrapper.tsx`
-
-Full provider stack mirroring the app:
-- `LocaleProvider` + `ThemeContext.Provider` + Emotion `CacheProvider` (LTR/RTL caches `sb-ltr`/`sb-rtl`) + MUI `ThemeProvider` (CSS-vars theme `createAppCssVarsTheme`, `modeStorageKey="sb-theme"` to isolate from the app localStorage key).
-- `StorybookColorSchemeBridge` syncs Storybook globals → MUI `useColorScheme()` + DOM `data-theme`/`data-mui-color-scheme`/`dir`/`lang` attributes.
-- Seeds `useUserStore` with a mock admin user + ~50 admin AppPermissions (so every story has full permission visibility).
-- `isUiComponent` detection (from `frontend/components/ui/` or titles starting `UI/`/`Form/`) wraps content in a centered `Box` with viewport-based `maxWidth`.
-
-### 12.4 Other `.storybook/` files
-- `manager.ts` — Storybook manager customization.
-- `msw-handlers.ts` — MSW handlers stubbing GraphQL/REST for isolated stories.
-- `tsconfig.json` — Storybook-specific TS config.
-
-### 12.5 Scripts (`package.json`)
-```json
-"storybook": "NODE_OPTIONS='--no-deprecation' storybook dev -p 6006",
-"build-storybook": "NODE_OPTIONS='--no-deprecation' storybook build",
-```
-Storybook is **linted explicitly** (`.storybook/**` is the only dot-dir not in ESLint/Biome ignores) and uses sibling-relative imports within `.storybook/` (the `no-restricted-syntax` path-alias rule is disabled for `.storybook/` files — `eslint.config.mjs:319`). There is a `storybook-static/` directory (build output, ignored from both linters).
-
-devDependencies of note: `storybook@^10.5.5`, `@storybook/nextjs-vite`, addons (a11y, docs, mcp, onboarding, themes, vitest), `@chromatic-com/storybook`, `msw`, `msw-storybook-addon`. Playwright is present (used for E2E + `@vitest/browser-playwright`).
 
 ---
 
@@ -768,10 +568,8 @@ For a new "certificate" feature, the established patterns to follow:
 1. **DB schema** goes in `backend/db/schema/`; repository in `backend/db/repo/`; **100% coverage** repo tests in `backend/db/test/repo/<domain>/` using `runInRollback` + `entity-setup.ts` helpers (extend `entity-setup.ts` with `createTestCertificate`-style helpers as needed). Add `logic/` tests for certificate-issuance workflows.
 2. **Backend services** tests in `backend/services/<cert>/` — covered by the parallel services runner (file-isolation prevents Bun module-registry/mock pollution).
 3. **GraphQL** documents in `frontend/common/graphql/sharedDocuments/<cert>/` (run `bun run generate:gqlSchema` + `bun codegen`); integration tests in `frontend/common/graphql/test/<cert>/` using `testClient`, `setupTestServerLifecycle`, `loginDemoUser`/`provisionTestEntities`/`authenticatedRequest` from `test/helpers.ts`.
-4. **UI components** (.mobile/.desktop tier variants + shared): unit tests in `test/ui/components/` with `renderWithWrapper` + `MockLink`; ensure the mobile/desktop isolation ESLint rules (and the static isolation test) stay satisfied. Add `.stories.tsx` files co-located for Storybook (ar/en, dark/light, mobile/tablet/desktop globals).
-5. **E2E** in `test/ui/e2e/` using `setupBrowserLifecycle` + `loginAsDemoUser` + Playwright auto-waiting assertions (no `waitForTimeout`/`networkidle`); run after `bun run build:test`.
-6. **Quality gate**: per-file loop via `bun run scripts/health/sub-loop.ts <path> --lifecycle codescene`; full gate via `bun run quality-gate` (tsgo → biome → lint → codescene → sonar). Keep a `lint:server` running for the queue.
-7. **Conventions**: `@/` alias only (no relative imports outside barrels), `bun:test` (never jest/vitest globals), `expect(...).toBeVisible()` with `@testing-library/jest-dom`, RTL/Arabic-bilingual selectors in E2E, no `console.*`, no `any`/`!`. Assert error substrings on the *translated* message (never raw i18n keys), and pass `tx` to every repo call inside `runInRollback`.
+4. **Quality gate**: per-file loop via `bun run scripts/health/sub-loop.ts <path> --lifecycle codescene`; full gate via `bun run quality-gate` (tsgo → biome → lint → codescene → sonar). Keep a `lint:server` running for the queue.
+5. **Conventions**: `@/` alias only (no relative imports outside barrels), `bun:test` (never jest/vitest globals), no `console.*`, no `any`/`!`. Assert error substrings on the *translated* message (never raw i18n keys), and pass `tx` to every repo call inside `runInRollback`.
 
 ---
 
@@ -804,14 +602,4 @@ For a new "certificate" feature, the established patterns to follow:
 | Dynamic port allocation | `frontend/common/graphql/test/testPort.ts` |
 | GraphQL test helpers | `frontend/common/graphql/test/helpers.ts` |
 | Sample GraphQL test | `frontend/common/graphql/test/students/status-tracking.test.ts` |
-| UI test rules | `test/ui/AGENTS.md` |
-| Component test wrapper | `test/ui/components/TestWrapper.tsx` |
-| Sample component test | `test/ui/components/RequirePermission.test.tsx` |
-| Mobile/desktop isolation test | `test/ui/mobile-desktop-isolation.test.ts` |
-| E2E lifecycle (Playwright) | `test/ui/e2e/lifecycle.ts` |
-| E2E login helpers | `test/ui/e2e/helpers.ts` |
-| Sample E2E test | `test/ui/e2e/admin-dashboard.test.ts` |
-| Storybook config | `.storybook/main.ts` |
-| Storybook preview | `.storybook/preview.tsx` |
-| Storybook story wrapper | `.storybook/StoryWrapper.tsx` |
 | Test scripts | `package.json` (scripts: test*) |

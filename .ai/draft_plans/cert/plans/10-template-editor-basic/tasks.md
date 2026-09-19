@@ -1109,88 +1109,10 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 
 ---
 
-## T25 — Component Tests for Editor Chrome Components
-
-> **Files**:
-> - `test/ui/components/editor/EditorToolbar.test.tsx`
-> - `test/ui/components/editor/EditorLayout.test.tsx`
-> - `test/ui/components/editor/EditorStatusBar.test.tsx`
-> - `test/ui/components/editor/useEditorShortcuts.test.ts`
-> **Depends On**: T20, T21, T22, T23, T24
-> **Time Budget**: 3-4 hours
-
-### Subtasks
-
-1. Create test directory `test/ui/components/editor/`
-2. **EditorToolbar.test.tsx**: render toolbar with mock props, assert Save/Undo/Redo/Zoom buttons render, test disabled states (canUndo=false disables Undo), test "Edited" badge visibility when isDirty, test mobile More menu collapse
-3. **EditorLayout.test.tsx**: render layout with placeholder children, assert 3-panel structure, assert tab switching updates store active panel, assert resize handle present
-4. **EditorStatusBar.test.tsx**: render status bar, assert selected element info display, assert cursor coordinates format, assert zoom/grid/snap display, assert hidden on mobile (mock useMediaQuery)
-5. **useEditorShortcuts.test.ts**: simulate keydown events (Ctrl+S, Ctrl+Z, Ctrl+Y, Ctrl+Shift+Z, Ctrl++, Ctrl+-, Ctrl+0, Ctrl+G, Ctrl+Shift+S, Escape, Delete), assert correct store action called, assert preventDefault called, assert text-field suppression works, assert modal-open suppression works
-6. Mock Apollo + Zustand store in test setup per `test/ui/AGENTS.md` patterns
-7. Use Happy DOM environment (no server)
-
-### Quality Loop
-
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorToolbar.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorLayout.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorStatusBar.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/useEditorShortcuts.test.ts --lifecycle codescene
-```
-
-### Verification
-- `bun run test:ui:components` passes for all editor chrome test files
-- All tests use proper mock patterns (no console.*)
-
----
-
-## T26 — E2E Tests for Editor Save/Undo/Redo/Zoom
-
-> **Files**:
-> - `test/ui/e2e/editor-save-undo-redo.spec.ts`
-> - `test/ui/e2e/editor-zoom-grid-snap.spec.ts`
-> **Depends On**: T22, T23, T24, T25 (components + unit tests), `bun run build:test` (production bundle)
-> **Time Budget**: 3-4 hours
-
-### Subtasks
-
-1. Ensure `bun run build:test` has been run (production bundle in `.next-test-prod`)
-2. Create `test/ui/e2e/editor-save-undo-redo.spec.ts`:
-   - Navigate to template editor page, assert toolbar renders
-   - Edit a field, assert "Edited" badge appears
-   - Press Ctrl+S, assert save mutation fires, badge disappears
-   - Make a change, press Ctrl+Z, assert change is reverted
-   - Press Ctrl+Y (or Ctrl+Shift+Z), assert change is restored
-   - Assert Undo/Redo buttons disabled when stacks empty
-3. Create `test/ui/e2e/editor-zoom-grid-snap.spec.ts`:
-   - Navigate to template editor, assert default zoom 100%
-   - Press Ctrl++ (Ctrl+=), assert zoom increases to 110%
-   - Press Ctrl+-, assert zoom decreases to 100%
-   - Press Ctrl+0, assert zoom resets to 100%
-   - Press Ctrl+G, assert grid toggle (visual check via data attribute or grid overlay visible)
-   - Press Ctrl+Shift+S, assert snap toggle indicator in status bar changes
-   - Assert Resize handle is draggable and panel width changes
-4. Use Playwright test patterns from existing `test/ui/e2e/` files
-5. Mock backend responses or use test database seed for template data
-
-### Quality Loop
-
-```bash
-bun run scripts/health/sub-loop.ts test/ui/e2e/editor-save-undo-redo.spec.ts --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/e2e/editor-zoom-grid-snap.spec.ts --lifecycle codescene
-```
-
-### Verification
-- `bun run test:ui:e2e` passes for both editor E2E specs
-- Save, undo, redo, zoom, grid, snap flows verified end-to-end
-- No data races between auto-save and manual save (single-flight guard)
-
----
-
 ## T27 — Quality Loop for All Editor Chrome Files
 
-> **Files**: All files created in T20–T26
-> **Depends On**: T20, T21, T22, T23, T24, T25, T26
+> **Files**: All files created in T20–T24
+> **Depends On**: T20, T21, T22, T23, T24
 > **Time Budget**: 1-2 hours
 
 ### Subtasks
@@ -1318,15 +1240,12 @@ T29 (store) ─┬─> T30 (toolbar overflow)
               ├─> T36 (error boundaries)
               ├─> T38 (responsive)
               ├─> T40 (tab management)
-              ├─> T41 (status bar enhancements)
-              └─> T43 (test suite)
+              └─> T41 (status bar enhancements)
 T33 (unsaved changes guard) depends on T29
 T33 → T34 (auto-save uses guard for "Save" button)
 T37 (accessibility) depends on T31, T36
 T39 (performance budgets) depends on T29 (store), T34 (autosave)
 T42 (i18n) depends on T29 (needs key types)
-T43 (tests) depends on T30–T42
-T44 (knowledge propagation) depends on T43
 ```
 
 ---
@@ -1457,7 +1376,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 - `bun tsgo` passes for both files
 - `bun biome:check` passes
 - Lint queue client returns `exitCode: 0`
-- Toolbar items collapse into the overflow menu when the container is < 600px wide (manual test or E2E in T43)
+- Toolbar items collapse into the overflow menu when the container is < 600px wide
 - `aria-label` present on all `IconButton` components
 - `Tooltip` renders on hover with shortcut text
 - Overflow trigger is keyboard accessible (`Tab` to focus, `Enter` to open)
@@ -1633,7 +1552,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 - `bun tsgo` passes
 - `bun biome:check` passes
 - Lint returns `exitCode: 0`
-- beforeunload fires when `isDirty` (test in T43)
+- beforeunload fires when `isDirty`
 - In-app navigation shows dialog when `isDirty`
 - "Save" saves then navigates; "Don't Save" discards then navigates; "Cancel" stays
 
@@ -1691,7 +1610,7 @@ bun run scripts/health/sub-loop.ts frontend/stores/cert/templateEditorStore.ts -
 - `bun tsgo` passes for all three files
 - `bun biome:check` passes
 - Lint returns `exitCode: 0`
-- Auto-save fires 3s after last edit (test in T43)
+- Auto-save fires 3s after last edit
 - Network error triggers retry with exponential backoff (mock in unit test)
 - Conflict error opens `ConflictDialog`
 - Single-flight: only one save mutation in-flight at a time (assert no double-save in test)
@@ -1740,7 +1659,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 - `bun tsgo` passes
 - `bun biome:check` passes
 - Lint returns `exitCode: 0`
-- Skeletons render while `loading === true` (E2E test in T43)
+- Skeletons render while `loading === true`
 - All toolbar buttons disabled while loading
 
 ---
@@ -1799,7 +1718,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 - `bun tsgo` passes for all
 - `bun biome:check` passes
 - Lint returns `exitCode: 0`
-- Throwing in a canvas render shows the fallback UI with "Retry" (test in T43)
+- Throwing in a canvas render shows the fallback UI with "Retry"
 - Auto-save error shows Snackbar with "Retry now" action
 - No `console.*` — all errors via `logger.error`
 
@@ -1907,7 +1826,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 - `bun tsgo` passes for all three
 - `bun biome:check` passes
 - Lint returns `exitCode: 0`
-- Mobile (< 768px): single panel, swipe drawer, bottom action bar (E2E in T43 with `page.setViewportSize`)
+- Mobile (< 768px): single panel, swipe drawer, bottom action bar
 - Tablet (768-1023px): two-panel, sidebar toggle, condensed status bar
 - Desktop (> 1023px): three-panel resizable (from T31, unchanged)
 
@@ -1950,7 +1869,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 - `bun tsgo` passes
 - `bun biome:check` passes
 - Lint returns `exitCode: 0`
-- `performance.now()` calls do not throw in Happy DOM (test env) — if `performance.now()` is not available, fallback to `Date.now()`.
+- `performance.now()` calls include a fallback to `Date.now()` if unavailable.
 - No `console.*` usage.
 
 ---
@@ -2003,8 +1922,8 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 - `bun tsgo` passes
 - `bun biome:check` passes
 - Lint returns `exitCode: 0`
-- Dragging tabs reorders them (test in T43)
-- Closing a dirty tab shows `UnsavedChangesDialog` (test in T43)
+- Dragging tabs reorders them
+- Closing a dirty tab shows `UnsavedChangesDialog`
 - Opening with no tabs shows `RecentTemplatesList`
 
 ---
@@ -2051,7 +1970,7 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 - Lint returns `exitCode: 0`
 - Status bar shows all new cells (manual test in dev server)
 - "Saved 2 min ago" updates every 30s
-- Connection status icon changes based on `navigator.onLine` (test in T43)
+- Connection status icon changes based on `navigator.onLine`
 - Branch info hidden in production build
 - No hardcoded colors — all theme palette refs
 
@@ -2111,76 +2030,12 @@ bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templ
 - `bun biome:check` passes
 - Lint returns `exitCode: 0`
 - AR and EN translations match the type interface (TypeScript errors if not)
-- `bun run test:ui:components` still passes (i18n keys resolve in component tests)
-
----
-
-## T43 — Test Suite for Round 4
-
-> **Files** (all in `test/ui/components/editor/` unless noted):
-> - `ToolbarOverflow.test.tsx`
-> - `UnsavedChangesDialog.test.tsx`
-> - `AutosaveIndicator.test.tsx`
-> - `useAutosave.test.ts`
-> - `ShortcutManager.test.ts`
-> - `ConflictDialog.test.tsx`
-> - `EditorTabBar.test.tsx`
-> - `ErrorBoundaries.test.tsx`
-> - `SrLiveRegion.test.tsx`
-> - `test/ui/e2e/editor-prod-hardening.spec.ts`
-> **Depends On**: T30–T42 (all implementation tasks), `bun run build:test` (for E2E spec)
-> **Time Budget**: 5-6 hours
-
-### Subtasks
-
-1. Read AGENTS.md: `test/ui/AGENTS.md`, `AGENTS.md`
-2. Read `.agents/instructions/tests.instructions.md`
-3. **ToolbarOverflow.test.tsx**: render `ToolbarOverflow` with 3 mock `ToolbarOverflowItem`s, simulate `ResizeObserver` (mock via `window.ResizeObserver` override in test setup) where container width = 300px — assert 1 item moved to overflow `Menu`. Test keyboard: `Tab` focuses overflow trigger, `Enter` opens menu, `Escape` closes. Assert `aria-label` on each item and the trigger.
-4. **UnsavedChangesDialog.test.tsx**: render dialog with `open=true`, assert title, assert 3 buttons (Save, Don't Save, Cancel). Click "Save" → assert `onSave` callback called. Click "Don't Save" → `onDontSave`. Click "Cancel" → `onCancel`. Assert focus trap works (Tab cycles within dialog). Assert `Escape` does NOT close (override MUI default for a submission-required dialog).
-5. **AutosaveIndicator.test.tsx**: render with store mock in 4 states (`idle+isDirty`, `saving`, `saved`, `error`). Assert correct icon + text in each. Assert `aria-live` attribute. Assert no re-render when an unrelated store field changes (perf).
-6. **useAutosave.test.ts**: render hook + mock store. Test debounce (3s passes → save called). Test debounce cleared on unmount. Test single-flight (two saves queued while one in-flight → only latest executes). Test retry exponential backoff by mocking mutation rejection with network error — assert `autoSaveRetryCount` increments. Test conflict handling (mock mutation reject with `conflict` code → `conflictDialogOpen === true`).
-7. **ShortcutManager.test.ts**: `registerShortcut` two handlers same combo + equal priority → second returns `false`, `logger.warn` recorded (mock logger). Higher priority → replaces. Dispatch: the highest-priority matching scope fires; lower-priority suppressed. Disabled shortcut in `disabledShortcuts` → skipped. Scope activation: only matching scope + always `'editor'` fires.
-8. **ConflictDialog.test.tsx**: render with `open=true`. Assert "Keep mine" calls `save({ force: true })`. Assert "Use theirs" calls `resetLocalFromServer`. Assert "Cancel" calls `clearConflictDialog`. Assert version numbers render.
-9. **EditorTabBar.test.tsx**: render with mock `openTemplates` (3 items). Assert 3 tabs render, active tab styled. Click close on a dirty tab → assert `UnsavedChangesDialog` opens. Drag (dnd-kit mock) → assert `reorderTemplates` called. Click tab → assert `setActiveTemplate` called.
-10. **ErrorBoundaries.test.tsx**: render `CanvasErrorBoundary` with a child that throws (React overrides). Assert fallback renders with "Retry" + "Report". Click "Retry" → `setState({ hasError: false })` → child re-renders. Test `PanelErrorBoundary` with `panelName="Layers"`. Assert `logger.error` called on catch (not `console.error`).
-11. **SrLiveRegion.test.tsx**: render with `message="Saving…"`. Assert the sr-only `div` `textContent === "Saving…"`. Update `message` to "Saved" → assert `textContent` updates. Assert `aria-live="polite"`. Assert visually hidden (check computed style or `sx` props).
-12. **editor-prod-hardening.spec.ts** (E2E): requires `bun run build:test` first.
-    - Navigate to editor with a test template, assert skeleton shown while loading, then content renders.
-    - Resize viewport to 500px, assert toolbar overflow menu appears with `MoreVertOutlined` icon. Open it, assert hidden items present.
-    - Make a change (type in a field), assert `AutosaveIndicator` shows "Unsaved". Wait 3s, assert auto-save fires and indicator shows "Saved".
-    - Click `CloseOutlined` on a dirty tab, assert `UnsavedChangesDialog` appears. Click "Don't Save", assert tab closes.
-    - Dispatch a render error in canvas (mock via a bad template element), assert `CanvasErrorBoundary` fallback renders with "Retry".
-    - Test mobile viewport (375px), assert `EditorMobileLayout` renders with `BottomNavigation` + bottom action bar.
-    - Test offline: `page.context().setOffline(true)`, make an edit, assert network indicator shows disconnected. Revert online, assert indicator updates and queue flushes.
-
-### Quality Loop
-
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/editor/ToolbarOverflow.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/UnsavedChangesDialog.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/AutosaveIndicator.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/useAutosave.test.ts --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/ShortcutManager.test.ts --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/ConflictDialog.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/EditorTabBar.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/ErrorBoundaries.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/editor/SrLiveRegion.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/e2e/editor-prod-hardening.spec.ts --lifecycle codescene
-```
-
-### Verification
-
-- `bun run test:ui:components` passes for all R4 component test files
-- `bun run test:ui:e2e` passes for `editor-prod-hardening.spec.ts`
-- All tests use proper mock patterns (no `console.*`)
-- Happy DOM env used for component tests; Playwright for E2E
-- `beforeunload` test fires when `isDirty` true (component test via `window.dispatchEvent(new Event('beforeunload'))`)
 
 ---
 
 ## T44 — Knowledge Propagation for Round 4
 
-> **Depends On**: T43 (test suite passes), T27 (Round 1-3 quality gate)
+> **Depends On**: T27 (Round 1-3 quality gate)
 > **Time Budget**: 2-3 hours
 
 ### Subtasks
@@ -2206,7 +2061,7 @@ bun run scripts/health/sub-loop.ts test/ui/e2e/editor-prod-hardening.spec.ts --l
     - Reuse `useUnsavedChangesGuard` for the generation dialog's unsaved-changes warning.
     - Read `networkOnline` + `offlineQueue` for offline dialog states.
 12. **Do NOT create summary markdown files** — per `AGENTS.md` rules; knowledge transfer via inline comments + session todos + design.md/tasks.md.
-13. Update the task AGENTS.md / instruction discovery table in this file (Task table at §"Instruction File & AGENTS.md Discovery Summary" — append rows for T29–T43; do not modify existing rows). The rows should list which AGENTS.md and instruction files apply to each new file, following the same mapping convention as the existing rows.
+13. Update the task AGENTS.md / instruction discovery table in this file (Task table at §"Instruction File & AGENTS.md Discovery Summary" — append rows for T29–T42; do not modify existing rows). The rows should list which AGENTS.md and instruction files apply to each new file, following the same mapping convention as the existing rows.
 
 ### Instruction File & AGENTS.md Discovery (Round 4 Append)
 
@@ -2226,7 +2081,6 @@ bun run scripts/health/sub-loop.ts test/ui/e2e/editor-prod-hardening.spec.ts --l
 | T40 | `EditorTabBar.tsx`, `RecentTemplatesList.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | T41 | `EditorStatusBar.tsx` (modify), `utils/formatRelativeTime.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | T42 | `shared/locale/types/dashboard/certificates/templateEditor.ts` (modify), `shared/locale/ar/.../templateEditor.ts` (modify), `shared/locale/en/.../templateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| T43 | All test files in `test/ui/components/editor/` + `test/ui/e2e/editor-prod-hardening.spec.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | T44 | Inline comments only (per Knowledge Propagation subtask) | `AGENTS.md` | — |
 
 ### Verification
@@ -2254,8 +2108,7 @@ Phase R4-E (sequential):  T34 (auto-save hook — depends on T33 guard + T29 sto
 Phase R4-F (parallel):    T36 (error boundaries — depends on T31 animations), T38 (responsive — depends on store)
 Phase R4-G (sequential):  T37 (accessibility — depends on T31 panel animation + T36 boundaries)
 Phase R4-H (sequential):  T39 (performance budgets — depends on T34 hook)
-Phase R4-I (sequential):  T43 (test suite — depends on T30–T42 all)
-Phase R4-J (sequential):  T44 (knowledge propagation — depends on T43)
+Phase R4-J (sequential):  T44 (knowledge propagation — depends on T29–T42)
 ```
 
 **Round 4 total estimated time**: 38 hours (parallelizable to ~22 wall-clock hours via the parallel phases R4-B and R4-F)
@@ -2286,12 +2139,10 @@ FX-T01 (effectTypes.ts shared types + preset factories)
   │
   ├─→ FX-T05 (i18n keys: AR + EN, type schema extend)
   │       └─→ (FX-T06 integration verification — depends on FX-T01..FX-T05)
-  │
-  └─→ FX-T07 (component tests + E2E toolbar test)
         └─→ FX-T08 (knowledge propagation — frontend patterns doc append)
 ```
 
-**Execution order**: FX-T01 → (FX-T02 in parallel; FX-T05 type-schema branch) → FX-T03 → FX-T04 → FX-T06 → FX-T07 → FX-T08
+**Execution order**: FX-T01 → (FX-T02 in parallel; FX-T05 type-schema branch) → FX-T03 → FX-T04 → FX-T06 → FX-T08
 
 **Estimated effort**: 18 hours (parallelizable to ~12 wall-clock hours via the early FX-T02/FX-T05 split)
 
@@ -2496,45 +2347,6 @@ FX-T01 (effectTypes.ts shared types + preset factories)
 
 ---
 
-### FX-T07 — Component Tests + E2E
-
-**Estimated time**: 3 hours
-**Depends on**: FX-T06 (passes integration verification)
-
-- [ ] **Read applicable AGENTS.md**: `test/ui/AGENTS.md`, `AGENTS.md`
-- [ ] **Read applicable instruction files**: `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
-
-- [ ] **Create** `test/ui/components/editor/effectToolbar/QuickEffectsButton.test.tsx`:
-  - Disabled when `selectedElementId === null`
-  - Enabled when an element is selected
-  - Badge dot appears when selected element has `effects.length > 0`
-  - Click opens menu (mock the `Popover` open state)
-
-- [ ] **Create** `test/ui/components/editor/effectToolbar/QuickEffectsMenu.test.tsx`:
-  - All 4 shadow presets + 2 glow presets + 4 adjustment presets render as tiles
-  - Clicking a shadow preset calls `onApplyPresetFactory` (mocked) with the matching factory and closes menu
-  - Clicking "More Effects…" calls `onRequestMoreEffects()` and closes menu
-
-- [ ] **Create** `test/ui/components/editor/effectToolbar/QuickToggleButtons.test.tsx`:
-  - First click on ShadowToggle applies Soft Drop preset and remembers it
-  - Second click on ShadowToggle removes the remembered preset's effect layer from the selected element
-  - GlowToggle similar
-
-- [ ] **Extend** the existing E2E executor editor spec (per R4-T10n path) with a scenario:
-  - Select an element, hit `Ctrl+Shift+E`, click "Soft Drop" preset tile, assert element's `effects` array length is 1 via canvas store.
-  - **Note**: This E2E test needs the canvas store to bebservable. If not directly introspectable from Playwright, assert via the visual diff (drop shadow visible on element).
-
-- [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
-**Files to Create/Modify:**
-- `test/ui/components/editor/effectToolbar/QuickEffectsButton.test.tsx` (new)
-- `test/ui/components/editor/effectToolbar/QuickEffectsMenu.test.tsx` (new)
-- `test/ui/components/editor/effectToolbar/QuickToggleButtons.test.tsx` (new)
-- `test/ui/e2e/effectToolbar.spec.tsx` or extension of an existing editor E2E spec (new or modify)
-
----
-
 ### FX-T08 — Knowledge Propagation
 
 **Estimated time**: 1 hour
@@ -2563,7 +2375,6 @@ Phase FX-B (parallel):    FX-T02 (toolbar button), FX-T05 (i18n type schema bran
 Phase FX-C (sequential):  FX-T03 (dropdown menu)
 Phase FX-D (sequential):  FX-T04 (quick toggles)
 Phase FX-E (sequential):  FX-T06 (integration verification)
-Phase FX-F (sequential):  FX-T07 (component + E2E tests)
 Phase FX-G (sequential):  FX-T08 (knowledge propagation)
 ```
 
@@ -2684,34 +2495,6 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
 
 ### R5-T7: Plan 10 R5 Test Suite
 
-- [ ] Create `test/ui/components/editor/ToolbarFillSwatch.test.tsx` (new)
-  - Test: disabled state when no element selected
-  - Test: popover opens on click, swatches update fill color
-  - Test: hex input validates 6-digit hex (rejects 5-digit, accepts with optional alpha)
-  - Test: opacity slider updates `fill.solidOpacity`
-  - Test: "Open Fill Panel" button calls `setLastEditedSection('fill')` and `setPanelExpanded('fill', true)`
-  - Test: no-fill checkerboard slash overlay renders when `fill.type === 'none'`
-  - Test: swatch shows gradient thumbnail (CSS gradient) when `fill.type === 'linear-gradient'`
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/ToolbarStrokeSwatch.test.tsx` (new)
-  - Test: stroke chip presets (0, 1, 2, 5, 10px) update `stroke.layers[0].width`
-  - Test: chip click flips `stroke.layers[0].type` from `'none'` to `'solid'`
-  - Test: stroke swatch disabled when `stroke.enabled === false`
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/ToolbarFillStrokeToggle.test.tsx` (new)
-  - Test: toggle fill flips `fill.enabled`
-  - Test: toggle stroke flips `stroke.enabled`
-  - Test: swap color exchange — solid fill `#FF0000` and solid stroke `#0000FF` become `#0000FF` fill and `#FF0000` stroke
-  - Test: swap is disabled when fill has `type: 'linear-gradient'` and no solid color; the disabled Tooltip shows
-  - Test: reset restores per-element-type defaults (shape → no fill, black 1px stroke; text → black fill, no stroke)
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/useFillStrokeShortcuts.test.tsx` (new)
-  - Test: `Shift+F` keys fire `onToggleFill` only when an element is selected
-  - Test: `Shift+S` fires `onToggleStroke`
-  - Test: `Shift+X` swaps colors
-  - Test: `Shift+R` resets to defaults
-  - Test: shortcuts do not fire when the text input has focus (scope switching per R4.3 — `'panel'` scope suppresses editor-scope shortcuts)
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/unit/fillStrokeUtils.test.ts` (new)
   - Test `fillToSvgAttrs`: solid color returns `{ fill: '#FF0000' }`; linear gradient returns `{ fill: 'url(#grad-...)', fillDef: '<linearGradient>...</linearGradient>' }`
   - Test `fillToCss`: linear gradient returns `linear-gradient(90deg, #ff0000 0%, #0000ff 100%)`
@@ -2744,7 +2527,7 @@ Phase FX-G (sequential):  FX-T08 (knowledge propagation)
 | R5-T4 | `ToolbarStrokeSwatch.tsx`, `ToolbarStrokeWidthInput.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T5 | `ToolbarFillStrokeToggle.tsx`, `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T6 | `useFillStrokeShortcuts.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| R5-T7 | `test/ui/components/editor/{ToolbarFillSwatch,ToolbarStrokeSwatch,ToolbarFillStrokeToggle,useFillStrokeShortcuts}.test.tsx`, `test/unit/fillStrokeUtils.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| R5-T7 | `test/unit/fillStrokeUtils.test.ts` | `AGENTS.md` | `.agents/instructions/tests.instructions.md` |
 | R5-T8 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (all append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 10)
@@ -3077,65 +2860,12 @@ bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/templ
 
 ---
 
-## T50 — Component Tests for Pen Tool Toolbar
-
-> **Files**:
-> - `test/ui/components/template-editor-toolbar/PenToolGroup.test.tsx` (new)
-> - `test/ui/components/template-editor-toolbar/PenToolOptionsBar.test.tsx` (new)
-> - `test/ui/components/template-editor-toolbar/usePenToolShortcuts.test.ts` (new)
-> **Depends On**: T46–T49 (all components and i18n keys)
-> **Time Budget**: 3 hours
-
-### Subtasks
-
-- [ ] Read `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`
-- [ ] Create `test/ui/components/template-editor-toolbar/PenToolGroup.test.tsx`:
-  - Test renders 6 menu items when dropdown opened
-  - Test clicking a menu item calls `setActiveTool` with correct tool
-  - Test dropdown trigger button shows correct active tool label
-  - Test `disabled` prop propagates to all controls
-  - Test tooltip text includes keyboard shortcut hint
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/template-editor-toolbar/PenToolOptionsBar.test.tsx`:
-  - Test drawing mode toggle has 3 options (Shape, Path, Selection)
-  - Test drawing mode toggle only renders for `'pen'` and `'curvaturePen'` tools
-  - Test Auto-add/delete switch toggles store state
-  - Test Rubber band switch toggles store state
-  - Test Path operations dropdown only renders when `hasActivePath === true`
-  - Test selecting a path operation calls `setPathOperation`
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/template-editor-toolbar/usePenToolShortcuts.test.ts`:
-  - Test `P` key calls `setActiveTool('pen')`
-  - Test `Shift+P` cycles pen variants (pen → curvaturePen → freeformPen → pen)
-  - Test `A` key calls `setActiveTool('directSelection')`
-  - Test `Escape` calls `cancelDrawingPath()` when drawing, `setActiveTool('select')` when not
-  - Test `Enter` calls `finishDrawingPath()` when drawing
-  - Test shortcuts only fire when canvas is focused
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
-### Files to Create/Modify
-
-- `test/ui/components/template-editor-toolbar/PenToolGroup.test.tsx` (new)
-- `test/ui/components/template-editor-toolbar/PenToolOptionsBar.test.tsx` (new)
-- `test/ui/components/template-editor-toolbar/usePenToolShortcuts.test.ts` (new)
-
-### Quality Loop
-
-```bash
-bun run scripts/health/sub-loop.ts test/ui/components/template-editor-toolbar/PenToolGroup.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/template-editor-toolbar/PenToolOptionsBar.test.tsx --lifecycle codescene
-bun run scripts/health/sub-loop.ts test/ui/components/template-editor-toolbar/usePenToolShortcuts.test.ts --lifecycle codescene
-```
-
----
-
 ## Round 5 Execution Order
 
 ```
 Phase R5-A (sequential):  T45 (types + store)
 Phase R5-B (parallel):    T46 (pen tool toolbar group), T48 (keyboard shortcuts), T49 (i18n keys)
 Phase R5-C (sequential):  T47 (tool options bar — depends on T46 toolbar group + T45 store)
-Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
 ```
 
 **Round 5 total estimated time**: 20 hours (parallelizable to ~12 wall-clock hours via the parallel phase R5-B)
@@ -3286,41 +3016,6 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
 
 ### R5-T10: Test Suite
 
-- [ ] Create `test/ui/components/editor/contextMenus/ContextMenuHost.test.tsx` (new)
-  - Test: menu opens at the right-click position reported by `e.clientX/clientY`
-  - Test: menu flips openUp / openLeft when overflow would occur near the viewport edge
-  - Test: Escape closes the menu, outside click closes, window blur closes
-  - Test: `aria-activedescendant` matches the active item id (no DOM focus movement)
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/contextMenus/menuItemFilter.test.ts` (new)
-  - Test: Cut/Copy disabled when `selectionCount === 0` and visible
-  - Test: Paste hidden when `!clipboardHasContent`
-  - Test: image-specific items hidden when selection has no image elements
-  - Test: Group disabled when `selectionCount <= 1`; Ungroup disabled when no selected is a group
-  - Test: Lock toggle `checked` when all selected are locked
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/contextMenus/SubmenuTrigger.test.tsx` (new)
-  - Test: hover > 200ms opens submenu; mouse-leave at 150ms cancels open
-  - Test: rollback timer keeps submenu open during diagonal mouse moves from parent to submenu
-  - Test: ArrowRight opens immediately, ArrowLeft collapses
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/contextMenus/ToolbarContextMenu.test.tsx` (new)
-  - Test: right-click on toolbar opens menu with Edit Toolbar, Show Tool Names, Icon Size submenu, Reset
-  - Test: toggle Show Tool Names updates `uiStore.toolbarShowToolNames`
-  - Test: Icon Size submenu → Small sets `toolbarIconSize = 'small'`
-  - Test: Reset Toolbar restores default customization
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/contextMenus/SwatchesContextMenu.test.tsx` (new)
-  - Test: right-click on empty swatch area shows New/Import but not Edit/Delete
-  - Test: right-click on selected swatch shows full menu with Edit/Delete enabled
-  - Test: Delete swatch shows confirm Mini Dialog before removing
-  - Test: Import Swatches appends and dedupes by hex
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/contextMenus/ColorPanelContextMenu.test.tsx` (new)
-  - Test: Copy as Hex/RGB/HSL write the correct format to `navigator.clipboard.writeText`
-  - Test: Add to Swatches disabled when swatch already exists
-  - Test: Color Picker Mode submenu persists selection in `uiStore.colorPickerMode`
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Create `test/unit/colorFormatUtils.test.ts` (new)
   - Test: `rgbToHex({255,255,255}) === '#FFFFFF'`, `rgbToHex({0,0,0}) === '#000000'`
   - Test: round-trip `rgbToHsl` then `hslToRgb` within tolerance
@@ -3360,7 +3055,7 @@ Phase R5-D (sequential):  T50 (tests — depends on T46–T49)
 | R5-T7 | `contextMenus/PropertiesPanelContextMenu.tsx`, `contextMenus/ColorPanelContextMenu.tsx`, `utils/colorFormatUtils.ts` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T8 | `contextMenus/MenuBarContextMenu.tsx`, `contextMenus/useOutsideClickClose.ts`, `contextMenus/contextMenuTheme.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T9 | `contextMenus/useContextMenuShortcuts.ts` | `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| R5-T10 | `test/ui/components/editor/contextMenus/{ContextMenuHost,menuItemFilter,SubmenuTrigger,ToolbarContextMenu,SwatchesContextMenu,ColorPanelContextMenu}.test.tsx`, `test/unit/{colorFormatUtils,swatchImportExport}.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| R5-T10 | `test/unit/{colorFormatUtils,swatchImportExport}.test.ts` | `AGENTS.md` | `.agents/instructions/tests.instructions.md` |
 | R5-T11 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (all append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 10 Context Menus)
@@ -3398,11 +3093,10 @@ LY-T01 (store: panel-chrome state + derived selectors)
   │       └─→ (LY-T06 integration — depends on LY-T02..LY-T05)
   │
   └─→ LY-T07 (LayerPanelOptionsDialog)
-         └─→ LY-T08 (component tests + a11y verification)
-                └─→ LY-T09 (knowledge propagation)
+         └─→ LY-T09 (knowledge propagation)
 ```
 
-**Execution order**: LY-T01 → LY-T02 → (LY-T03, LY-T04 in parallel; LY-T05 type-schema branch) → LY-T07 → LY-T06 → LY-T08 → LY-T09
+**Execution order**: LY-T01 → LY-T02 → (LY-T03, LY-T04 in parallel; LY-T05 type-schema branch) → LY-T07 → LY-T06 → LY-T09
 
 **Estimated effort**: 14 hours (parallelizable to ~9 wall-clock hours via LY-T03/LY-T04 parallelism)
 
@@ -3645,56 +3339,10 @@ LY-T01 (store: panel-chrome state + derived selectors)
 
 ---
 
-### LY-T08 — Component Tests + a11y Verification
-
-**Estimated time**: 1.5 hours
-**Depends on**: LY-T02, LY-T03, LY-T04, LY-T07
-**Requirements**: design.md §R5.9
-
-- [ ] **Read applicable AGENTS.md**:
-  - `test/ui/AGENTS.md` (test runner conventions)
-  - `AGENTS.md` root
-
-- [ ] **Read applicable instruction files**:
-  - `.agents/instructions/tests.instructions.md`
-
-- [ ] Create `test/ui/components/layersPanel/LayersWorkspacePanel.test.tsx`:
-  - Test dock positions: render with each of `right`/`left`/`floating`/`collapsed` — assert the appropriate slot class/styles
-  - Test resize bar drag fires `setPanelWidth` with clamped values (240 min, 480 max)
-  - Test the collapsed-state icon click restores dock to `right`
-
-- [ ] Create `test/ui/components/layersPanel/AdvancedLayersPanelHeader.test.tsx`:
-  - Test the layer count badge reflects `selectTopLevelLayerCount`
-  - Test quick filter `ToggleButton`s dispatch `setLayerQuickFilter` on click
-  - Test search field updates `layerFilterText`; `Escape` clears
-  - Test ≡ menu opens and `Delete Hidden Layers` triggers a confirm dialog
-  - Test all `aria-label`s are non-empty (no literal "Layers")
-
-- [ ] Create `test/ui/components/layersPanel/LayerPanelOptionsDialog.test.tsx`:
-  - Test thumbnail size, sort order, dock position controls update store
-  - Test `Escape` closes the dialog without dispatch (MUI default behavior)
-
-- [ ] Create `test/ui/components/layersPanel/AdvancedLayersList.test.tsx`:
-  - Test empty state renders when `topLevelLayerCount === 0` (icon + empty-state text)
-  - Test list is flat (< 50 rows) vs virtualized (≥ 50 rows)
-  - Test scroll-to-selected fires when a hidden selection becomes active
-
-- [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-  - Files: all test files in `test/ui/components/layersPanel/`
-
-**Files to Create/Modify:**
-- `test/ui/components/layersPanel/LayersWorkspacePanel.test.tsx` (new)
-- `test/ui/components/layersPanel/AdvancedLayersPanelHeader.test.tsx` (new)
-- `test/ui/components/layersPanel/LayerPanelOptionsDialog.test.tsx` (new)
-- `test/ui/components/layersPanel/AdvancedLayersList.test.tsx` (new)
-
----
-
 ### LY-T09 — Knowledge Propagation
 
 **Estimated time**: 30 minutes
-**Depends on**: LY-T01..LY-T08
+**Depends on**: LY-T01..LY-T07
 **Requirements**: AGENTS.md §"AI Agent Communication Rules" (no SUMMARY.md; DO chat summary)
 
 - [ ] **Modify** `frontend/COMPONENT_PATTERNS.md` (append-only):
@@ -3722,7 +3370,6 @@ Phase LY-B (sequential):  LY-T02 (LayersWorkspacePanel shell)
 Phase LY-C (parallel):    LY-T03 (header), LY-T04 (list shell), LY-T05 (i18n type-schema branch)
 Phase LY-D (sequential):  LY-T07 (options dialog)
 Phase LY-E (sequential):  LY-T06 (integration)
-Phase LY-F (sequential):  LY-T08 (tests + a11y)
 Phase LY-G (sequential):  LY-T09 (knowledge propagation)
 ```
 
@@ -3830,47 +3477,6 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
   - Each contained component shows a `Tooltip` with i18n label + shortcut
   - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-### R5S-T8: Test Suite (Plan 10 Snap & Align)
-
-- [ ] Create `test/ui/components/editor/AlignToolbarCluster.test.tsx` (new)
-  - Test: hidden when 0 or 1 element selected
-  - Test: 6 buttons visible + tooltip-with-shortcut text when 2+ selected
-  - Test: clicking each button dispatches `onAlign` with correct axis
-  - Test: disabled state shows grey, no dispatch
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/AlignToSelect.test.tsx` (new)
-  - Test: default value is `selection`
-  - Test: `key` option disabled when `keyObjectId === null`
-  - Test: switching alignTarget to `key` then clearing key object auto-resets to `selection`
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/DistributeToolbarCluster.test.tsx` (new)
-  - Test: disabled & shows `requiresThree` Tooltip when 2 elements selected
-  - Test: 4 distribute buttons + gap field enabled with 3 elements
-  - Test: gap field disabled unless `distributeFrom === 'spacing'`
-  - Test: pressing Enter in gap field dispatches `onDistributeSpacing(gap, lastTouchedAxis)`
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/ViewMenuSnapSection.test.tsx` (new)
-  - Test: toggling `view.snap` flips all sub-toggles' disabled state
-  - Test: submenu items have correct `aria-checked` from store state
-  - Test: opening Snap Settings triggers dialog open
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/SnapSettingsDialog.test.tsx` (new)
-  - Test: `snapThreshold` slider 2–20, snaps to integer
-  - Test: `smartGuideColor` RadioGroup choices map to `SmartGuideColorToken`
-  - Test: swatch `bgcolor` resolves to `theme.palette[token].main` (not a literal hex)
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/useAlignShortcuts.test.tsx` (new)
-  - Test: `Alt+A` triggers panel open (or focuses toolbar cluster)
-  - Test: `Ctrl+Shift+Left` dispatches `alignElements('left', alignTarget)` with current selection
-  - Test: shortcuts do not fire when an `INPUT` is focused
-  - Test: no collision with `useFillStrokeShortcuts` priority 15 — both hooks mount, both dispatch their own accelerators only
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/editor/KeyObjectBadge.test.tsx` (new)
-  - Test: chip hidden when `keyObjectId === null`
-  - Test: chip shows element name + icon when set
-  - Test: Esc clears the key object
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
 ### R5S-T9: Knowledge Propagation (Plan 10 Snap & Align)
 
 - [ ] Update `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only)
@@ -3895,7 +3501,6 @@ Phase LY-G (sequential):  LY-T09 (knowledge propagation)
 | R5S-T5 | `frontend/views/dashboard/cert/templates/editor/toolbar/KeyObjectBadge.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5S-T6 | `frontend/views/dashboard/cert/templates/editor/useAlignShortcuts.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5S-T7 | `EditorToolbar.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| R5S-T8 | `test/ui/components/editor/{AlignToolbarCluster,AlignToSelect,DistributeToolbarCluster,ViewMenuSnapSection,SnapSettingsDialog,useAlignShortcuts,KeyObjectBadge}.test.tsx` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5S-T9 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Snap & Align Execution Order (Plan 10)
@@ -3905,7 +3510,6 @@ Phase R5S-A (sequential): R5S-T1 (types + i18n keys — everything depends on th
 Phase R5S-B (parallel): R5S-T2 (Align cluster), R5S-T3 (Distribute cluster), R5S-T5 (Key object badge) — all wait on T1
 Phase R5S-C (sequential): R5S-T4 (View menu + snap settings dialog) — depends on T1 only but interacts with T2/T3 visual layout
 Phase R5S-D (parallel): R5S-T6 (shortcuts hook — waits on T2/T3 store actions), R5S-T7 (EditorToolbar modify — waits on T2/T3/T5) — both wait on the components existing
-Phase R5S-E (parallel): R5S-T8 (test suite — waits on T2-T7 implementation)
 Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
 ```
 
@@ -4134,39 +3738,6 @@ Phase R5S-F (sequential): R5S-T9 (knowledge propagation)
   - Weight labels: Thin, ExtraLight, Light, Regular, Medium, SemiBold, Bold, ExtraBold, Black
   - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-### R5-A13: Component Tests
-
-- [ ] Create `test/ui/components/template-editor-typography/RichTextToolbar.test.tsx`:
-  - Test bold toggle sets fontWeight to 700, untoggle restores
-  - Test italic toggle sets fontStyle to "italic"
-  - Test font family Autocomplete preview renders in font
-  - Test alignment ToggleButtonGroup dispatches correct callback
-  - Mock `useAppTranslation` returning expected labels
-
-- [ ] Create `test/ui/components/template-editor-typography/RichTextRenderer.test.tsx`:
-  - Test mixed content renders 4 spans with correct CSS properties
-  - Test unstyled text between spans uses baseStyles
-  - Test RTL detection sets `dir="rtl"` on Arabic-dominant text
-  - Test adjacent identical-style spans are merged
-
-- [ ] Create `test/ui/components/template-editor-typography/InlineTextEditor.test.tsx`:
-  - Test typing updates content.text and shifts span offsets
-  - Test Enter creates new ParagraphStyles
-  - Test Escape exits edit mode
-  - Test clipboard copy/paste with rich-text payload
-
-- [ ] Create `test/ui/components/template-editor-typography/FindReplaceDialog.test.tsx`:
-  - Test case-sensitive search
-  - Test whole-word search
-  - Test regex search with valid and invalid patterns
-  - Test replace and replace-all update text + shift offsets
-
-- [ ] Create `test/ui/components/template-editor-typography/FontManager.test.tsx`:
-  - Test category tabs filter fonts
-  - Test search query filters by family name
-  - Test font card shows available weights
-  - Test upload button triggers file input
-
 ### R5-A14: Knowledge Propagation
 
 - [ ] Create `docs/frontend/typography-engine.md`:
@@ -4188,7 +3759,6 @@ Phase R5-C (parallel):     R5-A3 toolbar + renderer, R5-A4 inline editor, R5-A5 
 Phase R5-D (parallel):     R5-A8 FontManager + FontCard, R5-A9 variable font controls, R5-A10 pairing suggestions
 Phase R5-E (sequential):   R5-A11 GraphQL integration (depends on all components)
 Phase R5-F (parallel):     R5-A12 i18n AR + EN (depends on A1 key structure)
-Phase R5-G (parallel):     R5-A13 tests (depends on all components)
 Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 ```
 
@@ -4210,8 +3780,7 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 | TR-T04 | `useEditorShortcuts` — Ctrl+T, Ctrl+Shift+T, Shift+Ctrl+]/[ | TR-T06 | 1.5 |
 | TR-T05 | Transform i18n keys (AR + EN) | TR-T03 (to confirm exact key list) | 1 |
 | TR-T06 | `certTemplateEditorStore` action shims + `transformHandlers` surface | — (first) | 2 |
-| TR-T07 | Component tests for Toolbar + EditMenu | TR-T02, TR-T03 | 2 |
-| TR-T08 | Knowledge propagation | ALL above | 1 |
+| TR-T08 | Knowledge propagation | TR-T01–TR-T06 | 1 |
 
 ### Instruction File & AGENTS.md Discovery (Plan 10 Transform)
 
@@ -4223,7 +3792,6 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
 | TR-T04 | `frontend/views/dashboard/cert/templates/editor/useEditorShortcuts.ts` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `frontend.instructions.md` |
 | TR-T05 | `shared/locale/types/dashboard/certificates/templateEditor.ts`, `shared/locale/{ar,en}/dashboard/certificates/templateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `frontend.instructions.md` |
 | TR-T06 | `frontend/common/stores/cert/certTemplateEditorStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `frontend.instructions.md` |
-| TR-T07 | `test/ui/components/editor/{ToolbarFreeTransformButton,EditorEditMenu}.test.tsx` | `test/ui/AGENTS.md`, `AGENTS.md` | `tests.instructions.md`, `frontend.instructions.md` |
 | TR-T08 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append) | `AGENTS.md` | — |
 
 ### TR-T01 — `useLastTransformRecord` Hook
@@ -4321,23 +3889,6 @@ Phase R5-H (sequential):   R5-A14 knowledge propagation (depends on all)
   - Define `TransformHandlers` interface inline here: `{ setMode?, applyRotate九十?, applyFlip?, repeatTransform? }` — partials so Plan 11 can register a subset
 - [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-### TR-T07 — Component Tests: Toolbar Free Transform + Edit Menu
-
-- [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
-- [ ] Create `test/ui/components/editor/ToolbarFreeTransformButton.test.tsx`:
-  - Renders disabled when 0 selected
-  - Renders disabled when 2+ selected
-  - Click calls `setActiveTool('freeTransform')` when exactly 1 selected
-  - `aria-pressed="true"` when `activeTool === 'freeTransform'`
-- [ ] Create `test/ui/components/editor/EditorEditMenu.test.tsx`:
-  - Opens submenu on click
-  - Mode-toggle items `disabled` when not in Free Transform
-  - Rotate 90 CW calls `applyRotate九十` when ≥1 element selected
-  - Numeric… calls `openNumericTransformDialog`
-  - Transform Again `disabled` when `lastTransform === null`
-- [ ] Mock Zustand stores via existing `test/ui/components` Happy DOM pattern (no backend)
-- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
 ### TR-T08 — Knowledge Propagation (Plan 10 R6)
 
 - [ ] Update `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only):
@@ -4358,7 +3909,6 @@ Phase TR-A (seq):  TR-T06 (store shims — first, no deps)
 Phase TR-B (par):  TR-T01 (lastTransform hook), TR-T02 (toolbar button)          [wait on TR-T06]
 Phase TR-C (par):  TR-T03 (edit menu), TR-T04 (shortcuts hook)                  [wait on TR-T06; TR-T03 also waits on TR-T01/T02]
 Phase TR-D (seq):  TR-T05 (i18n — wait on TR-T03 for exact key refs)
-Phase TR-E (par):  TR-T07 (tests — wait on TR-T02, TR-T03)
 Phase TR-F (seq):  TR-T08 (knowledge propagation)
 ```
 
@@ -4530,20 +4080,6 @@ Phase TR-F (seq):  TR-T08 (knowledge propagation)
   - Test `addToColorHistory` dedups + caps at 20
   - Test `addCustomSwatch` / `removeCustomSwatch`
   - Test `openColorPicker` captures `previousColor`
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/template-editor/ToolbarColorCluster.test.tsx` (new)
-  - Test fill/stroke swatches render current colors
-  - Test swap button swaps colors
-  - Test reset button resets defaults
-  - Test eyedropper toggle activates/deactivates
-  - Test quick swatches dropdown opens and applies on click
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-- [ ] Create `test/ui/components/template-editor/SwatchesPanel.test.tsx` (new)
-  - Test tab switching (Document/Custom/Recent)
-  - Test display size toggle updates swatch tile sizes
-  - Test swatch add (custom "+" → creates entry in customSwatches)
-  - Test swatch edit (double-click → triggers color picker open)
-  - Test swatch delete (right-click menu → Delete)
   - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 - [ ] Update `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only) — document gotchas:
   - MUI v9 has NO `ColorizeOutline` icon — use `ColorizeOutlined` (see frontend/AGENTS.md)
@@ -4766,14 +4302,14 @@ bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/canva
   - Ensure no key conflicts with existing shortcuts (R, G are currently used for rectangle/pen tools — when in guide-edit mode, these shortcuts should be overridden)
 
 - [ ] 2.3 Create unit test hooks for keyboard shortcut conflict detection:
-  - `frontend/common/views/dashboard/cert-template-editor/hooks/__tests__/guideGridShortcuts.test.ts`
+  - `frontend/common/views/dashboard/cert-template-editor/hooks/__tests__/gridHotkeyConflictRules.test.ts`
   - Test: no duplicate `id` values
   - Test: no conflicting key+modifier combos with existing shortcuts
 
 **Files to Create/Modify:**
 - `frontend/common/views/dashboard/cert-template-editor/utils/guideGridShortcuts.ts` (create)
 - `frontend/common/views/dashboard/cert-template-editor/hooks/useKeyboardShortcuts.ts` (modify — merge)
-- `frontend/common/views/dashboard/cert-template-editor/hooks/__tests__/guideGridShortcuts.test.ts` (create)
+- `frontend/common/views/dashboard/cert-template-editor/hooks/__tests__/gridHotkeyConflictRules.test.ts` (create)
 
 **Requirements References:** REQ-10-R5G-02 (keyboard shortcuts)
 
@@ -4783,7 +4319,7 @@ bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/canva
 ```bash
 bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/utils/guideGridShortcuts.ts --lifecycle codescene
 bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/hooks/useKeyboardShortcuts.ts --lifecycle codescene
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/hooks/__tests__/guideGridShortcuts.test.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/hooks/__tests__/gridHotkeyConflictRules.test.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -5056,46 +4592,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template
 
 ---
 
-### R5-G-T08: Integration Tests — View Menu, Toolbar, InfoBar Composition (~3h)
-
-**Objective:** Write integration tests that verify the View menu, toolbar buttons, and info bar all correctly read from and write to the `useGuideGridStore`.
-
-**Subtasks:**
-- [ ] 8.1 Create integration test `frontend/common/views/dashboard/cert-template-editor/components/__tests__/guideGridIntegration.test.tsx`:
-  - Test: clicking "Show Rulers" in ViewMenu toggles `showRulers` in store
-  - Test: clicking rulers toolbar button toggles `showRulers`
-  - Test: ViewMenu "Lock Guides" toggles `lockGuides`
-  - Test: ViewMenu "Clear Guides" removes all guides from `guides` array
-  - Test: selecting an element updates InfoBar dimensions and position
-  - Test: dragging an element updates InfoBar delta readout
-  - Test: InfoBar zoom updates when `useCanvasStore.zoom` changes
-  - Test: InfoBar cursor position updates when mouse moves over canvas
-
-- [ ] 8.2 Create Storybook story for ViewMenu:
-  - `frontend/common/views/dashboard/cert-template-editor/components/__stories__/ViewMenu.stories.tsx`
-  - Stories: default (all toggles off), all-on (all toggles on), guides-only-on
-
-**Files to Create:**
-- `frontend/common/views/dashboard/cert-template-editor/components/__tests__/guideGridIntegration.test.tsx`
-- `frontend/common/views/dashboard/cert-template-editor/components/__stories__/ViewMenu.stories.tsx`
-
-**Requirements References:** REQ-10-R5G-11 (integration), REQ-10-R5G-12 (stories)
-
-**Quality loop:** tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
-**Quality loop:**
-```bash
-bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template-editor/components/__tests__/guideGridIntegration.test.tsx --lifecycle codescene
-```
-
-**Instruction Verification:**
-- Read `frontend/AGENTS.md` — use test runner `bun run scripts/run-test/run-test.ts`
-- Read `.agents/instructions/tests.instructions.md`
-
-**Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
----
-
 ### Round 5 Guides & Grid Time Estimate (Plan 10 portion)
 
 | Task | Hours |
@@ -5107,12 +4603,11 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-template
 | R5-G-T05: InfoBar component | ~4h |
 | R5-G-T06: BleedIndicator component | ~3h |
 | R5-G-T07: Shortcut display utility | ~1h |
-| R5-G-T08: Integration tests | ~3h |
-| **Total** | **~27h** |
+| **Total** | **~24h** |
 
-> **Parallelism**: T01 + T02 can start immediately (no store dependency). T03–T06 depend on `guideGridStore` (Plan 11 §R5-G.13). T07 has no dependencies. T08 depends on T03–T06.
+> **Parallelism**: T01 + T02 can start immediately (no store dependency). T03–T06 depend on `guideGridStore` (Plan 11 §R5-G.13). T07 has no dependencies.
 >
-> **Dependency graph**: T01 → T03, T04 (i18n keys); T02 → T03 (shortcut labels); Plan 11 R5-G-T13 (store) → T03, T04, T05, T06; T03+T04+T05+T06 → T08
+> **Dependency graph**: T01 → T03, T04 (i18n keys); T02 → T03 (shortcut labels); Plan 11 R5-G-T13 (store) → T03, T04, T05, T06
 
 
 ## Round 5: Custom Shapes & Boolean Tasks
@@ -5132,9 +4627,7 @@ T47 ─> T51 (SVG import utility)
 T47 ─> T52 (URL import utility)
 T46 + T47 ─> T53 (shape tool settings dialog integration)
 T45 ─> T55 (i18n keys for R5)
-T45–T55 ─> T56 (component tests)
-T45–T55 ─> T57 (e2e shape drawing test)
-T45–T57 ─> T58 (knowledge propagation)
+T45–T55 ─> T58 (knowledge propagation)
 ```
 
 ---
@@ -5221,9 +4714,6 @@ T45–T57 ─> T58 (knowledge propagation)
 
 - [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-**Tests**:
-- `test/ui/components/editor/ShapeToolGroup.test.tsx` — verify tool selection sets `activeShapeTool` in store, each toggle button renders correct icon, only one active at a time
-
 ---
 
 ## T47 — Custom Shape Library Panel
@@ -5272,10 +4762,6 @@ T45–T57 ─> T58 (knowledge propagation)
 
 - [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-**Tests**:
-- `test/ui/components/editor/ShapeLibraryPanel.test.tsx` — verify category sections render, search filters shapes, clicking shape calls `onSelectShape`, recently used section appears after selection
-- `test/ui/components/editor/shapePresets.test.ts` — verify all preset data is valid (non-empty pathData, valid viewBox)
-
 ---
 
 ## T48 — Boolean Operation Toolbar
@@ -5312,9 +4798,6 @@ T45–T57 ─> T58 (knowledge propagation)
 
 - [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-**Tests**:
-- `test/ui/components/editor/BooleanToolbar.test.tsx` — verify toolbar hidden when <2 shapes selected, appears when ≥2 selected, each button triggers correct store action, flatten shows confirmation dialog
-
 ---
 
 ## T49 — Shape Tool Settings Dialog
@@ -5344,9 +4827,6 @@ T45–T57 ─> T58 (knowledge propagation)
 
 - [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-**Tests**:
-- `test/ui/components/editor/ShapeToolSettingsDialog.test.tsx` — verify default values display, config changes update store, preview shape updates
-
 ---
 
 ## T50 — Shape Tool Keyboard Shortcuts
@@ -5375,9 +4855,6 @@ T45–T57 ─> T58 (knowledge propagation)
 5. Run quality loop
 
 - [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
-**Tests**:
-- `test/ui/components/editor/shapeToolShortcuts.test.tsx` — verify each key sets correct tool, shortcuts disabled when text field focused, Escape returns to select mode
 
 ---
 
@@ -5417,9 +4894,6 @@ T45–T57 ─> T58 (knowledge propagation)
 
 - [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-**Tests**:
-- `test/ui/components/editor/svgImport.test.ts` — verify valid SVG parses correctly, invalid SVG throws `InvalidSvgError`, multi-path SVG merges paths, empty SVG throws error
-
 ---
 
 ## T52 — SVG URL Import Utility
@@ -5452,9 +4926,6 @@ T45–T57 ─> T58 (knowledge propagation)
 4. Run quality loop per file
 
 - [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
-**Tests**:
-- `test/ui/components/editor/svgUrlImport.test.ts` — verify CORS failure throws error, valid SVG URL returns preset, non-SVG URL throws `InvalidSvgError`, network error throws `FetchError`
 
 ---
 
@@ -5497,9 +4968,6 @@ T45–T57 ─> T58 (knowledge propagation)
 
 - [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-**Tests**:
-- `test/ui/components/editor/booleanShortcuts.test.tsx` — verify shortcuts only active when ≥2 shapes selected, each shortcut triggers correct boolean op
-
 ---
 
 ## T55 — i18n Keys for Round 5
@@ -5529,67 +4997,12 @@ T45–T57 ─> T58 (knowledge propagation)
 
 ---
 
-## T56 — Round 5 Component Tests
-
-> **Files**:
-> - `test/ui/components/editor/ShapeToolGroup.test.tsx` (new)
-> - `test/ui/components/editor/ShapeLibraryPanel.test.tsx` (new)
-> - `test/ui/components/editor/BooleanToolbar.test.tsx` (new)
-> - `test/ui/components/editor/ShapeToolSettingsDialog.test.tsx` (new)
-> - `test/ui/components/editor/svgImport.test.ts` (new)
-> - `test/ui/components/editor/svgUrlImport.test.ts` (new)
-> - `test/ui/components/editor/shapeToolShortcuts.test.tsx` (new)
-> - `test/ui/components/editor/booleanShortcuts.test.tsx` (new)
-> - `test/ui/components/editor/shapePresets.test.ts` (new)
-> **Depends On**: T46–T55 all
-> **Time Budget**: 3-4 hours
-
-### Subtasks
-
-1. Read `.agents/instructions/tests.instructions.md`, `test/ui/AGENTS.md`
-2. Create test files per the test specs in tasks T46–T54
-3. Use Happy DOM + mocked Apollo (no server)
-4. Mock `useTemplateEditorStore` and `useCanvasStore` for component tests
-5. Run quality loop per test file
-
-- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
----
-
-## T57 — Round 5 E2E Test: Shape Drawing & Boolean Operations
-
-> **Files**:
-> - `test/ui/e2e/editor-shapes.spec.ts` (new)
-> **Depends On**: T56 (component tests pass), `bun run build:test` (production test build)
-> **Time Budget**: 2 hours
-
-### Subtasks
-
-1. Read `test/ui/AGENTS.md` for E2E conventions (production server, Playwright)
-2. Run `bun run build:test` before E2E tests
-3. Test flow:
-   a. Open template editor
-   b. Select rectangle tool (press `R`)
-   c. Click+drag on canvas to draw rectangle
-   d. Verify rectangle element appears on canvas
-   e. Select ellipse tool (press `E`), Shift+drag to draw circle
-   f. Verify circle is proportional (width === height)
-   g. Select both shapes, press `Ctrl+Shift+U` to unite
-   h. Verify boolean result shape appears
-   i. Open shape library panel, click a preset shape
-   j. Verify shape is placed on canvas
-4. Run quality loop
-
-- [ ] **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
----
-
 ## T58 — Round 5 Knowledge Propagation
 
 > **Files**:
 > - `frontend/COMPONENT_PATTERNS.md` (append — shape tool patterns)
 > - `frontend/IMPLEMENTATION_LEARNINGS.md` (append — shape rendering lessons)
-> **Depends On**: T56, T57
+> **Depends On**: T45–T55
 > **Time Budget**: 1 hour
 
 ### Subtasks
@@ -5601,7 +5014,7 @@ T45–T57 ─> T58 (knowledge propagation)
    - Shape rendering lessons (SVG element types per shape, path generation)
    - Boolean operation caching strategies (LRU cache, cache invalidation)
    - SVG import gotchas (DOMParser, CORS validation)
-3. Update task AGENTS.md discovery table with T45–T58 rows
+3. Update task AGENTS.md discovery table with T45–T55 rows
 4. Run quality checks
 
 ---
@@ -5621,8 +5034,6 @@ T45–T57 ─> T58 (knowledge propagation)
 | T53 | `ShapeToolGroup.tsx` (modify), `ShapeToolSettingsDialog.tsx` (wire) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | T54 | `useEditorShortcuts.ts` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | T55 | `shared/locale/types/cert/certificateTemplateEditor.ts` (modify), `shared/locale/ar/.../certificateTemplateEditor.ts` (modify), `shared/locale/en/.../certificateTemplateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| T56 | All test files in `test/ui/components/editor/` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
-| T57 | `test/ui/e2e/editor-shapes.spec.ts` (new) | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md` |
 | T58 | `frontend/COMPONENT_PATTERNS.md` (append), `frontend/IMPLEMENTATION_LEARNINGS.md` (append) | `AGENTS.md` | — |
 
 ### Verification
@@ -5646,9 +5057,7 @@ Phase R5-C (parallel):    T49 (settings dialog), T50 (shape shortcuts), T54 (boo
 Phase R5-D (parallel):    T51 (SVG import), T52 (URL import)
 Phase R5-E (sequential):  T53 (settings integration — depends on T46+T49)
 Phase R5-F (sequential):  T55 (i18n — depends on T45 type defs)
-Phase R5-G (sequential):  T56 (component tests — depends on T46–T55)
-Phase R5-H (sequential):  T57 (E2E test — depends on T56)
-Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
+Phase R5-I (sequential):  T58 (knowledge propagation — depends on T45–T55)
 ```
 
 **Round 5 total estimated time**: 22 hours (parallelizable to ~14 wall-clock hours via parallel phases R5-B, R5-C, R5-D)
@@ -5834,7 +5243,7 @@ Phase R5-I (sequential):  T58 (knowledge propagation — depends on T56+T57)
   - Test import/export round-trip
   - Test reset to default
   - Test modifier key behavior (Shift constrain, Alt duplicate)
-  - File: `test/ui/components/certificate-editor/keyboard-shortcuts.test.tsx`
+  - File: `test/unit/certificate-editor/keyboard-hotkeys.test.ts`
   - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] R5K-T10. Knowledge propagation & documentation
@@ -5864,7 +5273,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   │       └─→ MASK-T07 (LayersPanelMaskAddButtons + MaskIcon integration + LayerRowMaskThumbnail + LayersPanelAltClickHandler + LayerRow clipping indicator modify)
   ├─→ MASK-T09 (i18n: AR + EN keys + type schema extend)
   │       └─→ (MASK-T10 integration verification — depends on MASK-T01..T09)
-  └─→ MASK-T10 (component tests + E2E toolbar test + knowledge propagation)
+  └─→ MASK-T10 (test verification + knowledge propagation)
 ```
 
 **Execution order**: MASK-T01 → (MASK-T02 parallel; MASK-T09 type-schema branch) → MASK-T03, T04, T05, T06, T07 (parallel after T02) → MASK-T08 (waits on T03 ready) → MASK-T10 (waits on all)
@@ -6152,34 +5561,14 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
   - Implement all `mask.*` keys in English
   - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-### MASK-T10: Component Tests + Knowledge Propagation
+### MASK-T10: Test Verification + Knowledge Propagation
 
 **Estimated time**: 3 hours
 **Depends on**: MASK-T01 through MASK-T09
 **Requirements**: all design sub-sections
 
-- [ ] **Read applicable AGENTS.md**:
-  - `test/ui/AGENTS.md`, `AGENTS.md`
-
 - [ ] **Read applicable instruction files**:
   - `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
-
-- [ ] **Create** `test/ui/components/editor/mask/{ToolbarMaskButtons,EditorLayerMenu,ToolbarQuickMaskButton,QuickMaskOptionsPopover,ToolbarMaskBrushTools,LayersPanelMaskAddButtons,LayersPanelAltClickHandler,LayerRowMaskThumbnail,useMaskShortcuts,MaskIcon}.test.tsx`:
-  - Each test:
-    - Renders component with mock Apollo + mock Zustand store
-    - Tests: button disabled states (no selection, multiple selection), click → store action dispatched, tooltip/aria-label present, active state visual
-    - `LayersPanelAltClickHandler` test: Alt key down → highlight visible; click → `createClippingMask` called; already clipped → `releaseClippingMask` called
-    - `LayerRowMaskThumbnail` test: mask click → `setActiveMaskTarget` + `setMaskMode('edit')`; alt+click → `maskViewMode = 'maskOnly'`; shift+click → `toggleMaskVisibility`; link icon toggle → `linked` property flipped
-    - `useMaskShortcuts` test: Q key → `toggleQuickMask`; Ctrl+Alt+G → `createClippingMask`; `\\` → `toggleMaskVisibility`; macOS mode swaps Ctrl→Cmd
-    - `EditorLayerMenu` test: menu structure correct; context-sensitive labels (Create vs Release clipping); destructive operations show confirmation dialog
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
-- [ ] **Create** `test/ui/e2e/editor-mask-toolbar.test.tsx`:
-  - E2E: select element → click Add Layer Mask button → mask added to store; verify layers panel shows mask thumbnail
-  - E2E: Q key → quick mask toggled; Q again → converts to selection
-  - E2E: Ctrl+Alt+G with 2 selected elements → clipping mask created; Ctrl+Alt+G again → released
-  - Requires `bun run build:test` before E2E
-  - **Quality loop**: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 - [ ] **Append** to `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only):
   - Entry: "Mask buttons require single-selection — multi-selection disables them. Alt+click between layers must use a global keydown/keyup listener (not per-row onClick) to avoid race conditions."
@@ -6207,7 +5596,7 @@ MASK-T01 (maskTypes.ts shared types + MaskIcon custom SvgIcon)
 | MASK-T07 | `LayersPanelMaskAddButtons.tsx`, `LayerRowMaskThumbnail.tsx`, `LayersPanelAltClickHandler.tsx`, `LayerRow.tsx` (modify) | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | MASK-T08 | `useMaskShortcuts.ts` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | MASK-T09 | `shared/locale/types/templateEditor.ts`, `shared/locale/ar/.../templateEditor.ts`, `shared/locale/en/.../templateEditor.ts` | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| MASK-T10 | `test/ui/components/editor/mask/*.test.tsx`, `test/ui/e2e/editor-mask-toolbar.test.tsx`, `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| MASK-T10 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 
 ### Round 5 Execution Order (Plan 10 — Masking)
 
@@ -6216,7 +5605,7 @@ Phase R5M-A (sequential): MASK-T01 (types + icon — everything depends on maskT
 Phase R5M-B (parallel after T01): MASK-T02 (store — imports types), MASK-T09 (i18n — imports nothing, pure locale)
 Phase R5M-C (parallel after T02): MASK-T03 (ToolbarMaskButtons), MASK-T04 (EditorLayerMenu), MASK-T05 (QuickMask button+popover), MASK-T06 (MaskBrushTools), MASK-T07 (Layers panel mask UI)
   ─── MASK-T08 (shortcuts — waits on T03 for action wiring, can start T08 after T03's first commit)
-Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation)
+Phase R5M-D (sequential after all): MASK-T10 (test verification + knowledge propagation)
 ```
 
 **Plan 10 R5 mask total estimated time**: ~28 hours (~16 wall-clock hours via parallel phases R5M-B, R5M-C)
@@ -6271,14 +5660,6 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-- [ ] R5AL-T6. Test suite for asset library toolbar and panel
-  - Test toolbar button opens panel
-  - Test panel tabs switch categories
-  - Test search filters assets
-  - Test import upload flow
-  - Test drag-and-drop to canvas
-  - File: `test/ui/components/certificate-editor/asset-library-panel.test.tsx`
-  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ## Round 5: History & States Tasks
 
@@ -6334,14 +5715,6 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
 - [ ] R5H-T7. Add i18n keys for history
   - history, undo, redo, stepForward, stepBackward, clearHistory, purgeHistory, newSnapshot, historySettings, maxStates, autoFlush, nonlinearHistory, snapshotInterval, restoreSnapshot
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
-  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
-- [ ] R5H-T8. Test suite for history panel
-  - Test undo/redo button states (disabled/enabled)
-  - Test jumping to a specific state
-  - Test clear history
-  - Test snapshots create and restore
-  - File: `test/ui/components/certificate-editor/history-panel.test.tsx`
   - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
 ## Round 5: Canvas Pro Tasks
@@ -6413,16 +5786,6 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-- [ ] R5C-T9. Test suite for canvas pro
-  - Test artboard creation/duplication/deletion
-  - Test artboard panel switching
-  - Test multi-page add/delete/duplicate/reorder
-  - Test document setup dialog
-  - Test CMYK preview toggle
-  - Test export options dialog
-  - File: `test/ui/components/certificate-editor/canvas-pro.test.tsx`
-  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
-
 ## Round 5: Workspace & Panel Tasks
 
 - [ ] R5W-T1. Create Window menu with workspace presets
@@ -6479,11 +5842,3 @@ Phase R5M-D (sequential after all): MASK-T10 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene
 
-- [ ] R5W-T8. Test suite for workspace
-  - Test workspace preset switching
-  - Test panel dock/undock/floating
-  - Test panel resize
-  - Test toolbar customization
-  - Test workspace persistence
-  - File: `test/ui/components/certificate-editor/workspace.test.tsx`
-  - _Quality loop_: tsgo + biome + lint + codescene via sub-loop.ts --lifecycle codescene

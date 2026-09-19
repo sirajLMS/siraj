@@ -1,8 +1,8 @@
 # Round 5 Audit: §H — Validation Schemas
 
 ## Summary
-- INVALID specs: 4 (H1, H2, H3, H5)
-- PARTIAL specs: 2 (H4)
+- INVALID designs: 4 (H1, H2, H3, H5)
+- PARTIAL designs: 2 (H4)
 - Fixes recommended: 15
 
 ## H1 — INVALID (scope enum wrong, non-DB fields, wrong type)

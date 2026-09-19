@@ -90,7 +90,8 @@ export default function proxy(request: NextRequest) {
   // deployment is served over HTTPS behind a real edge (avoid breaking local
   // dev where HSTS would lock the browser into https://localhost).
   if (process.env.NODE_ENV === "production") {
-    response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    // Aligned with next.config.ts HSTS (2 years, preload).
+    response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
     response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   }

@@ -1,6 +1,6 @@
 import { describe, expect, spyOn, test } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { UserRepository } from "@/backend/db/repo/users";
+import { generateTestPassword } from "@/backend/db/test/test-utils";
 import { AccountStatus, UserRole } from "@/backend/enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -40,7 +40,7 @@ function mockTargetUser(overrides: Partial<{ isSuperAdmin: boolean; status: stri
     id: TARGET_ID,
     name: "Target User",
     email: "target@example.com",
-    password: `TestPass-${randomUUID().slice(0, 8)}!`,
+    password: generateTestPassword(),
     status: overrides.status ?? AccountStatus.ACTIVATED,
     isSuperAdmin: overrides.isSuperAdmin ?? false,
     deletedAt: overrides.deletedAt ?? null,

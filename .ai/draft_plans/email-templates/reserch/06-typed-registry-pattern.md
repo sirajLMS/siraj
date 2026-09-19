@@ -1,6 +1,6 @@
 # Research 06 — Verifying the Typed Email Template Registry Pattern
 
-**Plan source:** `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md` (lines 144–194)
+**Scope:** lines 144–194 of the design.
 **Scope:** TypeScript compile-time behavior of the proposed `EMAIL_TEMPLATES` registry and the `EmailTemplateProps<S>` derived type feeding `renderEmailTemplate<S>(scope, props, locale, ...)`.
 **Repo toolchain:** `tsgo` (TS 7.0.2 native Go port, `@typescript/native-preview`) per `package.json` lines 18, 202, 237. TS 7 maintains full type-checking parity with TS 6.0 / 5.9.
 
@@ -8,13 +8,13 @@
 
 ## VERDICT: NEEDS UPDATE ❗
 
-The pattern compiles *syntactically* but **does not deliver the type narrowing it advertises**. As written, `EmailTemplateProps<S>` collapses to an intersection-of-all-prop-types (effectively picks the common keys with narrowed-to-overlap value types, or `never` for non-overlapping props). The `renderEmailTemplate<S>` body will not type-check when it indexes `EMAIL_TEMPLATES[scope]` generically, and callers do NOT get the discriminated-union narrowing promised by the plan. A bounded refactor (mapped type + intermediate typed variable + `defineEmailTemplate<P>` helper) fixes all six issues while preserving the design intent. See **Corrected Pattern** below.
+The pattern compiles *syntactically* but **does not deliver the type narrowing it advertises**. As written, `EmailTemplateProps<S>` collapses to an intersection-of-all-prop-types (effectively picks the common keys with narrowed-to-overlap value types, or `never` for non-overlapping props). The `renderEmailTemplate<S>` body will not type-check when it indexes `EMAIL_TEMPLATES[scope]` generically, and callers do NOT get the discriminated-union narrowing promised by the design. A bounded refactor (mapped type + intermediate typed variable + `defineEmailTemplate<P>` helper) fixes all six issues while preserving the design intent. See **Corrected Pattern** below.
 
 The underlying limitation is a documented, long-standing TypeScript design constraint — see `microsoft/TypeScript#47109` (ahejlsberg, 2021) and its offspring `#30581`. It is **not fixed** in TypeScript 7.0 (`tsgo`), which is intentional behavioral parity with TS 6.0/5.9 (per the `typescript-go` README parity table).
 
 ---
 
-## The original pattern quoted verbatim (plan lines 144–191)
+## The original pattern quoted verbatim (lines 144–191)
 
 ```tsx
 import type { ComponentType } from "react";
@@ -78,7 +78,7 @@ export async function renderEmailTemplate<S extends EmailScope>(
 
 > "By casual inspection this seems perfectly safe, but the type checker doesn't see it that way. From its viewpoint, the type of `rec.v` is `string | number | boolean` and the type of `rec.f` is `(v: never) => void`, the `never` originating from the intersection `string & number & boolean`. The type is basically trying to check if a `v` from *some* record can be passed as an argument to an `f` from *some* record — but not necessarily the *same* record."
 
-For the plan's pattern, the registry's `component` field after generic `S`-indexing widens from the per-entry `ComponentType<ComplaintResponseEmailProps>` | `ComponentType<InvoiceGeneratedEmailProps>` | … union, where `satisfies` does NOT preserve the per-key generic assignment; it flattens to a single record type whose every value is `ComponentType<…> & ComponentType<…> & …`. Barring refractors/waiting, indexing it by generic `S` computes `P = Parameters<UnionOfAllComponents>[0]` ⇒ the intersection of every prop type ⇒ **not** `ComplaintResponseEmailProps` when `S` is `EmailScope.COMPLAINT_RESPONSE`.
+For the design's pattern, the registry's `component` field after generic `S`-indexing widens from the per-entry `ComponentType<ComplaintResponseEmailProps>` | `ComponentType<InvoiceGeneratedEmailProps>` | … union, where `satisfies` does NOT preserve the per-key generic assignment; it flattens to a single record type whose every value is `ComponentType<…> & ComponentType<…> & …`. Barring refractors/waiting, indexing it by generic `S` computes `P = Parameters<UnionOfAllComponents>[0]` ⇒ the intersection of every prop type ⇒ **not** `ComplaintResponseEmailProps` when `S` is `EmailScope.COMPLAINT_RESPONSE`.
 
 So the `EmailTemplateProps<S>` type alias lives in TS's view as the same widened type for every `S`, defeating the whole point of `S extends EmailScope` discrimination.
 
@@ -113,9 +113,9 @@ There is additionally a *known* TS 5.x–7.x wrinkle with the `as const satisfie
 
 **Syntactically yes; semantically the combo is "validate-per-entry then re-narrow everything" — the per-entry validation result is what each entry's type effectively becomes after `as const` widens literals to readonly literal types.** The two operators don't *conflict* the way the question fears.
 
-**Justification:** TS supports `as const satisfies T` (order matters: `as const` first, `satisfies` second). The plan reverses the order per-entry (`{ ... } satisfies EmailTemplateDefinition<P>`) *and* wraps the outer object in `as const`. This is unusual but valid. Each entry is first `satisfies`-checked against its `P` (good — inline shape errors with intellisense), then the outer `as const` freezes the entry type to a readonly literal-typed version, dropping the generic `P` binding. The documented safe idiom (https://typescriptworld.com/typescript-satisfies-operator-deep-dive, https://kevinqdam.com/blog/as-const-satisfies-type/) is **`as const satisfies T` on the outer object literal** (in that exact order), not per-entry `satisfies` plus outer `as const`.
+**Justification:** TS supports `as const satisfies T` (order matters: `as const` first, `satisfies` second). The design reverses the order per-entry (`{ ... } satisfies EmailTemplateDefinition<P>`) *and* wraps the outer object in `as const`. This is unusual but valid. Each entry is first `satisfies`-checked against its `P` (good — inline shape errors with intellisense), then the outer `as const` freezes the entry type to a readonly literal-typed version, dropping the generic `P` binding. The documented safe idiom (https://typescriptworld.com/typescript-satisfies-operator-deep-dive, https://kevinqdam.com/blog/as-const-satisfies-type/) is **`as const satisfies T` on the outer object literal** (in that exact order), not per-entry `satisfies` plus outer `as const`.
 
-Practical side-effects of the plan's ordering:
+Practical side-effects of the design's ordering:
 1. Lost intellisense: per-entry inline errors at the value position rather than at the field — actually GOOD for catching typos. Keep the per-entry `satisfies` for that reason.
 2. Lost literal-preservation intent: outer `as const` makes everything deeply readonly; the `subject`/`attachments`/`defaultLocaleTexts` arrow functions become readonly properties of `const` function values. This is benign for `ComponentType` consumers but valuable for the `readonly` modifiers used by downstream code (`readonly scope: EmailScope`, etc.).
 
@@ -146,7 +146,7 @@ The following are the actual behaviors as written:
 
 ### (5) Does `tsgo` (TS 7.0 native port, repo's chosen checker) handle this pattern correctly?
 
-**Yes for syntax/spec compliance; no for the modeled narrowing.** `tsgo` is TS 7.0.2 (`@typescript/native-preview`, `package.json` line 202) which has full type-checker parity with TS 6.0/5.9 (per the `typescript-go` README parity table and https://www.infoworld.com/article/4100582/microsoft-steers-native-port-of-typescript-to-early-2026-release.html). The `satisfies` operator is fully supported (it shipped in 4.9 and has been stable since). The correlated-union limitation (`#47109`) is **intentional and unchanged** in TS 7 — there is no relaxation planned; the only known TS 7 change nearby is declaration-emit `readonly`-modifier preservation (https://github.com/microsoft/typescript-go/issues/3192, PR #3246), which does not affect type-checking of this pattern.
+**Yes for syntax compliance; no for the modeled narrowing.** `tsgo` is TS 7.0.2 (`@typescript/native-preview`, `package.json` line 202) which has full type-checker parity with TS 6.0/5.9 (per the `typescript-go` README parity table and https://www.infoworld.com/article/4100582/microsoft-steers-native-port-of-typescript-to-early-2026-release.html). The `satisfies` operator is fully supported (it shipped in 4.9 and has been stable since). The correlated-union limitation (`#47109`) is **intentional and unchanged** in TS 7 — there is no planned relaxation; the only known TS 7 change nearby is declaration-emit `readonly`-modifier preservation (https://github.com/microsoft/typescript-go/issues/3192, PR #3246), which does not affect type-checking of this pattern.
 
 So: `bun tsgo` will compile the file, emit correct `d.ts` (modulo typical `as const satisfies` `--isolatedDeclarations` quirks the repo does not enable), and report the narrowing failures described in (1) and (4). It will NOT fix them.
 
@@ -342,17 +342,17 @@ export async function renderEmailTemplate<S extends EmailScope>(
 
 ### Caveat about `EmailScope`
 
-The above assumes `EmailScope` is an **enum (string or numeric backed) — single literal key per case**. That's how the plan declares it. Per `microsoft/TypeScript#13948`, single-literal computed keys are preserved as named properties (not widened to `string` index signatures). The candidate fix PR `microsoft/TypeScript#63113` (which would distribute *union* computed keys) was *closed* in maintenance mode — its absence does not affect single-literal enum-member keys. So **enum-member computed keys work as written**.
+The above assumes `EmailScope` is an **enum (string or numeric backed) — single literal key per case**. That's how the design declares it. Per `microsoft/TypeScript#13948`, single-literal computed keys are preserved as named properties (not widened to `string` index signatures). The candidate fix PR `microsoft/TypeScript#63113` (which would distribute *union* computed keys) was *closed* in maintenance mode — its absence does not affect single-literal enum-member keys. So **enum-member computed keys work as written**.
 
 If you ever switch `EmailScope` to a `const EmailScope = { … } as const` *object literal* (the modern alternative to `enum`), the same pattern works: keyof `typeof EmailScope` is a literal union, and `EmailPropsByScope` can be keyed by that union — enum vs. object-literal is orthogonal to this fix.
 
 ---
 
-## Recommended plan adjustment (exact line references)
+## Recommended adjustment (exact line references)
 
-Edit `email_template_system_(react_email_+_editor)_08419060.plan.md`:
+Apply to the design:
 
-| Plan line(s) | Current text | Replace with |
+| Line(s) | Current text | Replace with |
 |---|---|---|
 | 162 (comment "Registry discriminated union") | `// 2. Registry discriminated union (one entry per EmailScope)` | `// 2. Per-scope props map (base mapping for #47109-style correlated narrowing)` |
 | 162b — *insert new block above line 163* | — | The `EmailPropsByScope` interface (corrected §3) and the `EmailTemplateRegistry` mapped type (§4). Cite `microsoft/TypeScript#47109` in a one-line comment so future maintainers know why the indirection is required. |
@@ -361,7 +361,7 @@ Edit `email_template_system_(react_email_+_editor)_08419060.plan.md`:
 | 182–191 (`renderEmailTemplate` signature + body) | Signature is fine; body must index `EMAIL_TEMPLATES[scope]` into a locally-annotated `def: EmailTemplateDefinition<EmailPropsByScope[S]>` (corrected §9) for the `subject(props, locale)` / `attachments(props, locale)` calls to type-check. |
 | 194 (comment "This pattern satisfies: typesafe, no text unions, …") | Add trailing sentence: "Relies on `microsoft/TypeScript#47109` (mapped-type + base-map recipe); validated against `tsgo` 7.0.2 — full parity with TS 6.0/5.9 type checker." |
 
-**Optional but recommended**: add a unit test `backend/services/communication/templates/__tests__/email-template.registry.types.test.ts` containing.compile-time assertions (using `// @ts-expect-error` on a wrong-scope call and `satisfies` checks on right-scope calls) so that any TS upgrade silently breaking the narrowing will fail the build.
+**Optional but recommended**: keep compile-time assertions in place (using `// @ts-expect-error` on a wrong-scope call and `satisfies` checks on right-scope calls) so that any TS upgrade silently breaking the narrowing fails the build.
 
 ---
 

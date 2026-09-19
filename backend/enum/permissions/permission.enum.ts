@@ -116,6 +116,8 @@ export enum AppPermission {
   // Accounting — expense ledger
   ACCOUNTING_EXPENSES_VIEW = "accounting.expenses_view",
   ACCOUNTING_EXPENSES_MANAGE = "accounting.expenses_manage",
+  // Accounting — profit & loss dashboard
+  ACCOUNTING_PROFITS_VIEW = "accounting.profits_view",
   // Student Metadata & Lifecycle Management
   STUDENT_REASSIGN_TEACHER = "student.reassign_teacher",
   STUDENT_MANAGE_STATUS = "student.manage_status",

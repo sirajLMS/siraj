@@ -16,3 +16,22 @@ export function maskSecretValue(value: string | undefined): string | undefined {
   }
   return `••••••••${value.slice(-4)}`;
 }
+
+/**
+ * Shape of a value produced by `encryptField`: the versioned
+ * `v1:iv:cipherText:authTag` format — 12-byte IV (24 hex chars) and 16-byte
+ * auth tag (32 hex chars) — or, for rows written before versioning, the same
+ * shape without the `v1:` prefix.
+ */
+const ENCRYPTED_FIELD_PATTERN = /^(v1:)?[0-9a-f]{24}:[0-9a-f]+:[0-9a-f]{32}$/;
+
+/**
+ * True when the value matches the `encryptField` ciphertext format (versioned
+ * `v1:` prefix or legacy un-prefixed). Used to distinguish rows already
+ * encrypted at rest from legacy plaintext rows.
+ *
+ * Pure, side-effect free.
+ */
+export function isEncryptedFieldValue(value: string): boolean {
+  return ENCRYPTED_FIELD_PATTERN.test(value);
+}

@@ -12,7 +12,7 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("ensureDemoUsers", t =>
     t.field({
       type: "Boolean",
-      authScopes: { loggedIn: true },
+      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
       resolve: async () => {
         assertTestHelperAllowed();
         return await TestHelperService.ensureDemoUsers();
@@ -23,7 +23,7 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("createTestEntities", t =>
     t.field({
       type: TestEntitiesPothosObject,
-      authScopes: { loggedIn: true },
+      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
       args: {
         prefix: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
         classesRemaining: t.arg.int({ required: false }),
@@ -38,7 +38,7 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("cleanupTestEntities", t =>
     t.field({
       type: "Boolean",
-      authScopes: { loggedIn: true },
+      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
       args: {
         studentUserId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
         teacherUserId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
@@ -57,7 +57,7 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("createTestGroupClass", t =>
     t.field({
       type: TestGroupClassPothosObject,
-      authScopes: { loggedIn: true },
+      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
       args: {
         classInstanceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
         teacherName: t.arg.string({ required: true, directives: { constraint: { maxLength: 200 } } }),
@@ -72,7 +72,7 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("cleanupTestGroupClass", t =>
     t.field({
       type: "Boolean",
-      authScopes: { loggedIn: true },
+      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
       args: {
         groupClassId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       },
@@ -86,7 +86,7 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("createTestSuperAdmin", t =>
     t.field({
       type: TestSuperAdminPothosObject,
-      authScopes: { superAdmin: true, notImpersonating: true },
+      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
       args: {
         prefix: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       },
@@ -100,7 +100,7 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("cleanupTestSuperAdmin", t =>
     t.field({
       type: "Boolean",
-      authScopes: { loggedIn: true },
+      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
       args: {
         userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       },
@@ -114,7 +114,7 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("cleanupTestManager", t =>
     t.field({
       type: "Boolean",
-      authScopes: { loggedIn: true },
+      authScopes: { $all: { superAdmin: true, notImpersonating: true } },
       args: {
         userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       },

@@ -7,7 +7,7 @@ import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display"
 import { MeetingConfigSelect } from "@/frontend/common/components/ui/input/meetingConfigSelect/MeetingConfigSelect";
 import type { MeetingConfigSelectOption } from "@/frontend/common/components/ui/input/meetingConfigSelect/types";
 import { MeetingConfigTypeFields } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
-import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
+import { MeetingProviderSelectContainer } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelectContainer";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import type { RecurringMeetingConfigValidation } from "@/frontend/common/views/dashboard/classes/recurring/types";
@@ -63,7 +63,7 @@ function RecurringMeetingConfigNewModeFields({
 }: RecurringMeetingConfigNewModeFieldsProps) {
   return (
     <Stack spacing={2}>
-      <MeetingProviderSelect
+      <MeetingProviderSelectContainer
         value={value.newProvider}
         onChangeAction={provider => {
           onChangeAction({ ...value, newProvider: provider });

@@ -1,14 +1,13 @@
 # SES Client API Verification
 
-**Plan referenced:** `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md` (lines 313-314)
 **Target package:** `@aws-sdk/client-ses@3.1101.0` (`/home/ahmed/Projects/siraj-mail/node_modules/@aws-sdk/client-ses`)
 **HTTP handler:** `@smithy/fetch-http-handler@5.6.13`
 
 ---
 
-## 1. VERDICT: **NEEDS UPDATE** (plan confuses SES v1 with SES v2)
+## 1. VERDICT: **NEEDS UPDATE** (SES v1 vs SES v2 confusion)
 
-The plan claims `SendEmailCommand` (from `@aws-sdk/client-ses`) supports attachments natively via
+A common misconception is that `SendEmailCommand` (from `@aws-sdk/client-ses`) supports attachments natively via
 `Content.Simple.Attachments[]`. **This is wrong**. The `Content.Simple` structure and the
 `Attachments[]` field do NOT exist in `@aws-sdk/client-ses@3.1101.0` — they belong to the **SESv2**
 API (`@aws-sdk/client-sesv2`), which is **NOT installed** in this repo (`package.json` only lists
@@ -20,7 +19,7 @@ no `Attachments` field — `SendEmail` cannot send attachments. To send attachme
 package you MUST use `SendRawEmailCommand` and construct a MIME multipart/mixed message yourself
 (`RawMessage.Data: Uint8Array`).
 
-The `Content.Simple.Attachments[]` field the plan describes exists on the **SESv2**
+The `Content.Simple.Attachments[]` field belongs to the **SESv2**
 `SendEmailCommand` (`@aws-sdk/client-sesv2`), which would need to be added as a dependency.
 
 ---
@@ -72,16 +71,16 @@ Class export. Constructor takes `SendRawEmailCommandInput` which `extends SendRa
 Definition: `dist-types/models/models_0.d.ts:2944` (`export interface SendEmailRequest`).
 
 Top-level fields (all confirmed by reading the interface):
-- `Source: string | undefined` (REQUIRED) — the From address. ✅ matches plan claim that `Source`
-  is the From field. Verified at `models_0.d.ts:2956` ("The email address that is sending the
+- `Source: string | undefined` (REQUIRED) — the From address.
+  Verified at `models_0.d.ts:2956` ("The email address that is sending the
   email").
 - `Destination: Destination | undefined` (REQUIRED) — `ToAddresses`/`CcAddresses`/`BccAddresses`.
 - `Message: Message | undefined` (REQUIRED) — see below.
 - `ReplyToAddresses?`, `ReturnPath?`, `SourceArn?`, `ReturnPathArn?`, `Tags?`,
   `ConfigurationSetName?` (all optional).
 
-**There is NO `Content` field on `SendEmailRequest`.** The plan's `Content.Simple.Attachments[]`
-path does not exist.
+**There is NO `Content` field on `SendEmailRequest`.** The `Content.Simple.Attachments[]`
+path does not exist in this package.
 
 ### `Message` shape (`models_0.d.ts:2576`)
 ```
@@ -98,8 +97,7 @@ export interface Body {
     Html?: Content | undefined;
 }
 ```
-So `Message.Body.Html` and `Message.Body.Text` DO exist (plan line "Content.Simple.Body.Html" is
-correct in spirit but lives at `Message.Body.Html`, not `Content.Simple.Body.Html`).
+So `Message.Body.Html` and `Message.Body.Text` DO exist (they live at `Message.Body.Html`, not the SESv2-style `Content.Simple.Body.Html`).
 
 ### `Content` shape (`models_0.d.ts:31`)
 ```
@@ -113,7 +111,7 @@ export interface Content {
 `grep -i "Attachments"` across `dist-types/` returns only prose comments (e.g. the `ConnectAction`
 docstring at `models_0.d.ts:559-560`: "maximum email size (including headers) is 40 MB … up to 10
 attachments"). There is **no `Attachments[]` property** on `SendEmailRequest`, `Message`, or `Body`.
-The `Filename`/`Content` (base64)/`ContentId` per-attachment shape the plan references is the SESv2
+The `Filename`/`Content` (base64)/`ContentId` per-attachment shape belongs to the SESv2
 `Attachment` type (see §5) — not present here.
 
 ---
@@ -157,8 +155,8 @@ Path in SESv2 input: `Content.Simple.Attachments[]` (note: `Simple`, not `Messag
 - `SendEmailCommand` JSDoc (`SendEmailCommand.d.ts`): *"The maximum message size is 10 MB."*
 - `SendRawEmailCommand` JSDoc: *"The maximum message size, including attachments, is 10 MB."*
 - The "40 MB / 10 attachments" figure in `models_0.d.ts:559-560` is for *inbound* email (SES
-  receiving via `ConnectAction`) — **NOT** outbound sending. The plan's "up to 40 MB" outbound
-  claim for `SendEmailCommand` is incorrect; outbound limit is **10 MB** for both commands.
+  receiving via `ConnectAction`) — **NOT** outbound sending. The outbound limit for
+  `SendEmailCommand` is **10 MB** for both commands, not 40 MB.
 - AWS docs ("send-email-raw.html") confirm outbound is handled via `SendEmail` API v2 with content
   type `raw`, or via the v1 `SendRawEmail` — both subject to the 10 MB SES message-size cap.
 
@@ -175,8 +173,8 @@ export { type AdditionalRequestParameters, FetchHttpHandler,
          type FetchHttpHandlerOptions, keepAliveSupport } from "./fetch-http-handler";
 ```
 ➡️ The export is **`FetchHttpHandler`** (PascalCase, named) plus the `FetchHttpHandlerOptions`
-type. There is NO lowercase `fetchHttpHandler` export in this version — the plan's import shape is
-correct.
+type. There is NO lowercase `fetchHttpHandler` export in this version; the import shape
+`import { FetchHttpHandler } from '@smithy/fetch-http-handler'` is correct.
 
 `dist-types/fetch-http-handler.d.ts` (constructor section):
 ```
@@ -207,7 +205,7 @@ const client = new SESClient({
 ### Bun 1.3.x rationale
 `@smithy/fetch-http-handler` uses the global `fetch()` (Bun has native `fetch`), avoiding the
 Node `https`-agent path in `@smithy/node-http-handler` that triggers Bun HTTPS-hang issue #26066.
-This part of the plan claim is reasonable.
+This rationale is sound.
 
 ---
 
@@ -240,7 +238,7 @@ role with no extra code. `@aws-sdk/credential-providers` is only needed for non-
 
 ---
 
-## 9. Precise correction needed for the plan (lines 313-314)
+## 9. Summary of corrections
 
 1. **`SendEmailCommand` does NOT support attachments** in `@aws-sdk/client-ses@3.1101.0`. The
    `Content.Simple.Attachments[]` path is a **SESv2** (`@aws-sdk/client-sesv2`) construct that is
@@ -259,8 +257,8 @@ role with no extra code. `@aws-sdk/credential-providers` is only needed for non-
    `@aws-sdk/client-sesv2`, not `@aws-sdk/client-ses`. `FetchHttpHandler` usage
    (`requestHandler: new FetchHttpHandler()`) and credential handling (default chain via
    `@aws-sdk/credential-provider-node`, no extra peer dep) remain identical.
-4. `Source` IS the From field ✅ (correct in plan). In `SendEmailRequest` it is REQUIRED; in
+4. `Source` IS the From field ✅. In `SendEmailRequest` it is REQUIRED; in
    `SendRawEmailRequest` it is optional (falls back to the `From:` MIME header).
 5. FetchHttpHandler import (`import { FetchHttpHandler } from '@smithy/fetch-http-handler'`,
    `requestHandler: new FetchHttpHandler()` in `SESClient` config) is **VERIFIED** — exact exported
-   symbol name and constructor signature match the plan.
+   symbol name and constructor signature confirmed.

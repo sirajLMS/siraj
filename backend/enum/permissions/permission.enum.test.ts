@@ -10,6 +10,7 @@ const accountingCarryoverViewKey = "accounting.carryover_view";
 const accountingCarryoverManageKey = "accounting.carryover_manage";
 const accountingExpensesViewKey = "accounting.expenses_view";
 const accountingExpensesManageKey = "accounting.expenses_manage";
+const accountingProfitsViewKey = "accounting.profits_view";
 const whatsappConversationsViewKey = "whatsapp.conversations_view";
 const whatsappConversationsManageKey = "whatsapp.conversations_manage";
 const whatsappGroupsViewKey = "whatsapp.groups_view";
@@ -106,6 +107,25 @@ describe("AppPermission accounting expenses", () => {
   });
 });
 
+describe("AppPermission accounting profits view", () => {
+  test("defines ACCOUNTING_PROFITS_VIEW with the accounting.profits_view key", () => {
+    const enumValue: string = AppPermission.ACCOUNTING_PROFITS_VIEW;
+    expect(enumValue).toBe(accountingProfitsViewKey);
+  });
+
+  test("isAppPermission accepts the accounting.profits_view key", () => {
+    expect(isAppPermission(accountingProfitsViewKey)).toBe(true);
+  });
+
+  test("parseAppPermission resolves the accounting.profits_view key to the enum value", () => {
+    expect(parseAppPermission(accountingProfitsViewKey)).toBe(AppPermission.ACCOUNTING_PROFITS_VIEW);
+  });
+
+  test("no manage variant exists for the read-only profit & loss dashboard", () => {
+    expect(isAppPermission("accounting.profits_manage")).toBe(false);
+  });
+});
+
 describe("AppPermission whatsapp conversations", () => {
   test("defines WHATSAPP_CONVERSATIONS_VIEW and WHATSAPP_CONVERSATIONS_MANAGE with their keys", () => {
     const viewValue: string = AppPermission.WHATSAPP_CONVERSATIONS_VIEW;
@@ -151,6 +171,7 @@ describe("AppPermission rejection paths", () => {
     expect(isAppPermission("accounting.reports_view_typo")).toBe(false);
     expect(isAppPermission("accounting.carryover_view_typo")).toBe(false);
     expect(isAppPermission("accounting.expenses_view_typo")).toBe(false);
+    expect(isAppPermission("accounting.profits_view_typo")).toBe(false);
     expect(isAppPermission("whatsapp.conversations_view_typo")).toBe(false);
     expect(isAppPermission("whatsapp.conversations_manage_typo")).toBe(false);
     expect(isAppPermission("whatsapp.groups_view_typo")).toBe(false);

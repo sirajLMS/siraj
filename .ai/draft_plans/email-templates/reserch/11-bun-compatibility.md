@@ -1,16 +1,16 @@
 # Bun 1.3.14 Compatibility Verification — Email Template Dependencies
 
-> Subagent research report. Verifies Bun install/runtime compatibility of every dep the plan adds (plan line 6 + related attachments), then cross-checks against the React Email v6 package-shape research (`01-react-email-v6-package-shape.md`) which already established that `@react-email/components` and `@react-email/render` are **folded into `react-email` in v6** and must be dropped from the install set.
+> Subagent research report. Verifies Bun install/runtime compatibility of every dep the design adds (line 6 + related attachments), then cross-checks against the React Email v6 package-shape research (`01-react-email-v6-package-shape.md`) which already established that `@react-email/components` and `@react-email/render` are **folded into `react-email` in v6** and must be dropped from the install set.
 
 ## VERDICT: NEEDS UPDATE
 
-All remaining deps install and run cleanly on the repo's Bun runtime, **but the install set on plan line 6 is wrong** for v6 (lists two deprecated packages) and two provider-SDK entries have Bun runtime caveats worth surfacing. The single most important fix is dropping `@react-email/components` and `@react-email/render` and pinning `@react-email/editor` to `^1.1` (the `^1.6` in the plan does not exist yet — see `02-react-email-editor-capabilities.md`).
+All remaining deps install and run cleanly on the repo's Bun runtime, **but the install set on line 6 is wrong** for v6 (lists two deprecated packages) and two provider-SDK entries have Bun runtime caveats worth surfacing. The single most important fix is dropping `@react-email/components` and `@react-email/render` and pinning `@react-email/editor` to `^1.1` (the `^1.6` in the design does not exist yet — see `02-react-email-editor-capabilities.md`).
 
 ---
 
-## The deps being verified (from plan line 6 + attachments)
+## The deps being verified (from line 6 + attachments)
 
-| # | Plan dep | Latest (Aug 2026) | v6 status | Verdict |
+| # | Dep | Latest (Aug 2026) | v6 status | Verdict |
 |---|---|---|---|---|
 | 1 | `react-email@6` | 6.9.1 | Unified package — KEEP | VERIFIED |
 | 2 | `@react-email/editor` | 1.1.2 (Apr 2026) | Separate — KEEP (pin `^1.1`, not `^1.6`) | VERIFIED |
@@ -61,7 +61,7 @@ Cross-check confirmations (from `01-react-email-v6-package-shape.md`):
 - **Bun install**: ✅ 34 dependencies, **all pure JS** — `@floating-ui/react-dom`, `@radix-ui/react-popover`, `@radix-ui/react-slot`, ~25 `@tiptap/*` packages (`^3.17.1`), `hast-util-from-html`, `prismjs`, and `react-email@6.0.1` (workspace dep). No native modules, no postinstall scripts. Peer: `react ^18.0 || ^19.0` — satisfies. **The `@tiptap/*` packages are NOT installed separately**: the editor bundles them as direct dependencies. As confirmed by the registry metadata for `@react-email/editor` and several integration guides: *"the single `@react-email/editor` package includes the necessary dependencies for both [TipTap and ProseMirror], so you do not need to install TipTap or ProseMirror separately for standard usage."*
 - **Bun runtime**: ✅ TipTap/ProseMirror are pure JS rich-text frameworks (no native modules). Bun supports `node:stream`, Web streams, DOM APIs used by the editor. Several community tutorials (e.g. "First look at React Email Editor") explicitly use Bun (`bun add @react-email/editor`) and report it works. **One Next.js 16 caveat**: the editor uses browser APIs and must be in a `'use client'` component; set `immediatelyRender: false` on the underlying Tiptap editor to avoid SSR hydration mismatch errors (TipTap Next.js guide).
 - **Known issues**:
-  - **Version mismatch in the plan**: the plan says `@react-email/editor@^1.6`. **`^1.6` does not exist** — published range is `1.0.0` → `1.1.2` (Apr 2026) per the registry metadata confirmed in `02-react-email-editor-capabilities.md`. Install `@react-email/editor@^1.1` instead.
+  - **Version mismatch in the design**: the design says `@react-email/editor@^1.6`. **`^1.6` does not exist** — published range is `1.0.0` → `1.1.2` (Apr 2026) per the registry metadata confirmed in `02-react-email-editor-capabilities.md`. Install `@react-email/editor@^1.1` instead.
   - **Prism.js code-block grammars** slow Next.js dev compiles (documented editor gotcha, not Bun-specific). Escape hatch if it bites: `pnpm patch` / `patch-package` to strip unused grammars from `dist/components/...prism.cjs`.
 
 ### 3. `@react-email/components` — SKIP (deprecated in v6)
@@ -83,9 +83,9 @@ Cross-check confirmations (from `01-react-email-v6-package-shape.md`):
 - **Bun runtime**: ⚠️ **Works for typical SMTP send**, but Bun's Node stream/socket compatibility has historical edge cases under sustained SMTP use. **Known Bun issues**:
   - oven-sh/bun#10329 — *"Nodemailer — Cannot send message: smtp connection socket is already destroyed"* (open, labels: `bug`, `ecosystem`, `node:stream`). Original report April 2024, last updated Nov 2025.
   - oven-sh/bun#6101 — *"Nodemailer `ECONNREFUSED: Failed to connect`"* — fixed in **Bun 1.0.7** (Oct 2023) by PR #6206.
-  - oven-sh/bun#3701 — *"Using Nodemailer, sending emails in a loop only has ≅1/3 success rate"* — Bun 0.6.x era; integration tests now run nodemailer in every PR per the maintainer reply.
+  - oven-sh/bun#3701 — *"Using Nodemailer, sending emails in a loop only has ≅1/3 success rate"* — Bun 0.6.x era; the maintainer reply indicates this has since improved.
   - nodemailer/nodemailer#1644 — the upstream maintainer (`andris9`) explicitly closed a Bun-tracking issue with: *"Nodemailer has guaranteed support only for Node."* (Jul 2024).
-- **Recommendation**: Nodemailer works for low-volume transactional SMTP under Bun 1.2+, but for production email the siraj plan should prefer the API-based providers (SES / Postmark / Mailgun) which use `fetch` and avoid the SMTP socket/transport layer entirely. If SMTP is unavoidable: reuse a single transporter (do not `createTransport` per send), and set conservative `maxConnections`/`maxMessages`.
+- **Recommendation**: Nodemailer works for low-volume transactional SMTP under Bun 1.2+, but for production email the siraj design should prefer the API-based providers (SES / Postmark / Mailgun) which use `fetch` and avoid the SMTP socket/transport layer entirely. If SMTP is unavoidable: reuse a single transporter (do not `createTransport` per send), and set conservative `maxConnections`/`maxMessages`.
 
 ### 7. `@aws-sdk/client-ses` (current 3.1101.0) — VERIFIED with caveats
 
@@ -107,13 +107,13 @@ Cross-check confirmations (from `01-react-email-v6-package-shape.md`):
 - **Bun runtime**: ⚠️ Two caveats, both surmountable:
   1. **Constructor requires a `FormData` impl.** The README is explicit: *"starting from version 3.0 you need to pass FormData (we need this to keep library universal). For node.js you can use built-in FormData or `form-data` library."* Under Bun you can either:
      - Pass the **global `FormData`** (Bun implements it 🟢 Fully implemented — no extra dep needed), OR
-     - `bun add form-data` and pass `import FormData from 'form-data'` (the canonical Node pattern shown in Mailgun's docs and in third-party Bun tutorials). The plan should add `form-data` to the install set if it wants maximum compatibility with the documented usage; otherwise rely on global `FormData` and set `useFetch: true` on the client (see below).
+     - `bun add form-data` and pass `import FormData from 'form-data'` (the canonical Node pattern shown in Mailgun's docs and in third-party Bun tutorials). The design should add `form-data` to the install set if it wants maximum compatibility with the documented usage; otherwise rely on global `FormData` and set `useFetch: true` on the client (see below).
   2. **Default transport is `axios` (uses `node:http`/`node:https`)** — subject to the same Bun HTTPS regression family as the AWS SDK (#26066). To avoid it, Mailgun's SDK exposes `useFetch: true` on the client options: it switches the underlying transport to global `fetch` ("Cloudflare Workers / Vercel: pass `useFetch: true` … Node / Bun / AWS Lambda: works with the configuration above"). Recommended under Bun.
 - **No known Bun GitHub issues** specific to `mailgun.js` found.
 
 ### 10. `@tiptap/*` (peer of `@react-email/editor`, `^3.17.1`) — VERIFIED
 
-- **Bun install**: ✅ All ~25 `@tiptap/*` packages are **direct dependencies of `@react-email/editor`**, not peers you install separately. The editor's own `package.json` pins them at `^3.17.1`. Per the editor's "getting started" docs and multiple integration guides, the editor bundles TipTap and ProseMirror — you do NOT need `bun add @tiptap/react @tiptap/pm @tiptap/starter-kit` in the siraj plan; the editor pulls them transitively.
+- **Bun install**: ✅ All ~25 `@tiptap/*` packages are **direct dependencies of `@react-email/editor`**, not peers you install separately. The editor's own `package.json` pins them at `^3.17.1`. Per the editor's "getting started" docs and multiple integration guides, the editor bundles TipTap and ProseMirror — you do NOT need `bun add @tiptap/react @tiptap/pm @tiptap/starter-kit` in this design; the editor pulls them transitively.
 - **Bun runtime**: ✅ TipTap and ProseMirror are pure JS (no native modules). Bun supports all DOM APIs they use at runtime. The only Bun-adjacent issue historically was the SSR hydration mismatch in Next.js, fixed by `immediatelyRender: false` (TipTap's Next.js guide) — a Next.js/React concern, not Bun.
 
 ---
@@ -148,11 +148,11 @@ Notes:
 
 ---
 
-## Exact plan-line edits
+## Exact line edits
 
-### Plan line 6 (the install-set list) — REPLACE
+### Line 6 (the install-set list) — REPLACE
 
-**Before (current plan, from line 6):**
+**Before (current design, line 6):**
 ```
 react-email@6
 @react-email/editor
@@ -182,7 +182,7 @@ nodemailer                          # SMTP fallback; prefer API providers under 
 # @tiptap/*                         # @react-email/editor bundles these — do not install separately
 ```
 
-### Plan line 75 (the install claim quoted by `02-react-email-editor-capabilities.md`)
+### Line 75 (the install claim quoted by `02-react-email-editor-capabilities.md`)
 
 **Before:**
 > **Adopt [React Email v6](https://react.email) (`react-email@6` + `@react-email/components` + `@react-email/render` + `@react-email/ui`) paired with [`@react-email/editor@^1.6`](https://react.email/docs/editor/overview) (TipTap/ProseMirror visual editor that serializes to React Email components and exports email-ready HTML + plain text).**
@@ -190,7 +190,7 @@ nodemailer                          # SMTP fallback; prefer API providers under 
 **After:**
 > **Adopt [React Email v6](https://react.email) (`react-email@^6`) paired with [`@react-email/editor@^1.1`](https://react.email/docs/editor/overview) (TipTap/ProseMirror visual editor that serializes to React Email components and exports email-ready HTML + plain text). `@react-email/components` and `@react-email/render` are folded into `react-email` in v6 and MUST NOT be installed separately. `@react-email/ui` is the dev-only preview-server UI (optional, install as `-D` only if running the standalone `react-email dev` harness).**
 
-### Transports section of the plan — ADD
+### Transports section of the design — ADD
 
 > The repo's `package.json` defines `trustedDependencies: ["sharp"]`, which **replaces** Bun's default allowlist. None of the new email deps (react-email, @react-email/editor, @aws-sdk/client-ses, postmark, mailgun.js, form-data, nodemailer) ship a `postinstall` script, so no `trustedDependencies` row needs to be added. No `overrides` entry is required either (existing `eslint-import-resolver-typescript` override is unrelated).
 >
@@ -206,7 +206,7 @@ nodemailer                          # SMTP fallback; prefer API providers under 
 ## Sources
 
 - Repo `package.json` (lines 142-159 deps, 245-250 trustedDeps/overrides) and `bun.lock` (lockfileVersion 1; `resend` peerDependencies block).
-- `01-react-email-v6-package-shape.md`, `02-react-email-editor-capabilities.md`, `03-react-email-render-api.md` (already in `.ai/plans/email-templates/reserch/`) — for the v6 unification + version reality of `@react-email/editor`.
+- `01-react-email-v6-package-shape.md`, `02-react-email-editor-capabilities.md`, `03-react-email-render-api.md` (already in `.ai/draft_plans/email-templates/reserch/`) — for the v6 unification + version reality of `@react-email/editor`.
 - https://www.npmjs.com/package/react-email (`6.9.1`, no `engines`, no `peerDependencies` on the umbrella package).
 - https://www.npmjs.com/package/@aws-sdk/client-ses (`3.1101.0`), https://www.npmjs.com/package/nodemailer (`9.0.3`, "supports Node.js v6.0.0+"), https://www.npmjs.com/package/postmark (`5.1.0`, "uses the native Fetch API and has no runtime dependencies"), https://www.npmjs.com/package/mailgun.js (`13.3.0`, "Requires node.js >= 18.x"; "starting from version 3.0 you need to pass FormData").
 - https://registry.npmjs.org/@react-email/ui and https://registry.npmjs.org/react-email (registry metadata: both at `6.9.1`, no `engines`, no `bin`, no `peerDependencies`).

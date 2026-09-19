@@ -14,7 +14,10 @@
  *     are illegal to persist in DB).
  *  2. Otherwise, the resolver looks up the DB override in `system_settings` under the key
  *     `env::<KEY>`. The `env::` prefix is applied transparently; callers pass the bare
- *     env var name (e.g. `resolveEnvConfig("SMTP_HOST")`).
+ *     env var name (e.g. `resolveEnvConfig("SMTP_HOST")`). For `isSecret` keys the stored
+ *     value is DECRYPTED here (aes-256-gcm via the shared field-encryption helpers) before
+ *     being returned — legacy plaintext rows pass through decryption while the
+ *     plaintext-passthrough migration window is open.
  *  3. If the DB override is a non-empty string, that value is returned (and cached per
  *     key with a TTL of 5 minutes by default).
  *  4. Otherwise, the resolver falls back to `process.env[key]`.
@@ -27,6 +30,8 @@
  *   Validates the key against the registry, rejects `excludeFromDb` keys,
  *   persists via `SystemSettingsRepository.upsertSetting` under `env::<key>`,
  *   and invalidates the resolver cache so the new value is picked up.
+ *   Keys flagged `isSecret` are ENCRYPTED at rest (aes-256-gcm via the shared
+ *   field-encryption helpers) before being persisted; the read path decrypts.
  *   For branding keys (`NEXT_PUBLIC_APP_BRANDING` / `APP_THEME_PRESET`) it ALSO
  *   invalidates the SSR appearance cache (AC-30) so the next render picks up
  *   the new branding/preset value.
@@ -52,13 +57,20 @@
  */
 
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
-import { isTransientError, maskSecretValue } from "@/backend/lib";
+import {
+  decryptField,
+  encryptField,
+  type FieldEncryptionContext,
+  isTransientError,
+  maskSecretValue,
+} from "@/backend/lib";
 import {
   ENV_CONFIG_KEYS,
   type EnvConfigKeyDescriptor,
   isEnvConfigKeyExposedInSettings,
 } from "@/backend/lib/env-config-keys";
 import { logger } from "@/backend/lib/logger";
+import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
 import { revalidateAppearanceCache } from "@/backend/services/appearance/appearance-settings.service";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type {
@@ -88,6 +100,20 @@ const ENV_SETTING_KEY_PREFIX = "env::";
  */
 export function toEnvSettingDbKey(envKey: string): string {
   return `${ENV_SETTING_KEY_PREFIX}${envKey}`;
+}
+
+/**
+ * Row context bound into encrypted env-config overrides as GCM additional
+ * authenticated data (see `field-encryption`). The `env::`-prefixed setting key
+ * uniquely identifies the `system_settings` row (it is the primary key), so it
+ * serves as the row identity — ciphertext can only be decrypted (or spliced
+ * into) the setting row it was written for.
+ *
+ * Exported so the backfill script that re-encrypts legacy plaintext overrides
+ * constructs the SAME context as the write/read paths here.
+ */
+export function envConfigEncryptionContext(envKey: string): FieldEncryptionContext {
+  return { table: "system_settings", column: "value", rowId: toEnvSettingDbKey(envKey) };
 }
 
 /**
@@ -126,6 +152,33 @@ function maybeInvalidateAppearanceCache(envKey: string): void {
 function readFromProcessEnv(envKey: string): string | undefined {
   const value = process.env[envKey];
   return value === "" || value === undefined ? undefined : value;
+}
+
+/**
+ * Decrypts a stored DB override value for an `isSecret` key before it is resolved
+ * into a runtime env value. Non-secret values pass through verbatim. Secret values
+ * go through `decryptField` with the setting row's encryption context:
+ * - `v1:`-prefixed ciphertext decrypts under the versioned key with the row
+ *   context verified as GCM additional authenticated data.
+ * - Legacy plaintext rows (written before at-rest encryption) pass through
+ *   unchanged while the plaintext-passthrough migration window is open; once
+ *   the window closes, a non-ciphertext value throws.
+ * - A row that LOOKS encrypted but fails to decrypt resolves to `undefined`
+ *   (logged) so the caller falls back to `process.env` instead of leaking
+ *   ciphertext into consumers.
+ *
+ * Key name only, never a value, appears in log lines.
+ */
+function decryptDbOverrideIfSecret(envKey: string, dbValue: string): string | undefined {
+  if (getDescriptorIndex().get(envKey)?.isSecret !== true) {
+    return dbValue;
+  }
+  const decrypted = decryptField(dbValue, envConfigEncryptionContext(envKey));
+  if (decrypted === null) {
+    logger.error(`env-config: DB override decryption failed for key "${envKey}" — falling back to process.env`);
+    return undefined;
+  }
+  return decrypted;
 }
 
 /** Lazily-built index of registered env-config descriptors, keyed by env var name. */
@@ -321,7 +374,7 @@ async function performDbLookup(
   try {
     const setting = await SystemSettingsRepository.getByKey(toEnvSettingDbKey(key));
     if (setting?.value != null && setting.value !== "") {
-      return { dbValue: setting.value, dbError: false, wasTransient: false };
+      return { dbValue: decryptDbOverrideIfSecret(key, setting.value), dbError: false, wasTransient: false };
     }
     return { dbValue: undefined, dbError: false, wasTransient: false };
   } catch (error) {
@@ -463,7 +516,7 @@ async function lookupDbValueFor(key: string): Promise<readonly [string, string |
   try {
     const setting = await SystemSettingsRepository.getByKey(toEnvSettingDbKey(key));
     if (setting?.value != null && setting.value !== "") {
-      return [key, setting.value, false, false] as const;
+      return [key, decryptDbOverrideIfSecret(key, setting.value), false, false] as const;
     }
   } catch (error) {
     const transient = isTransientError(error);
@@ -609,7 +662,7 @@ async function resolveDbEligibleKey(key: string): Promise<ResolvedEntry> {
   try {
     const setting = await SystemSettingsRepository.getByKey(dbKey);
     if (setting?.value != null && setting.value !== "") {
-      dbValue = setting.value;
+      dbValue = decryptDbOverrideIfSecret(key, setting.value);
     }
   } catch (error) {
     logger.warn(
@@ -642,6 +695,11 @@ export async function listEnvConfigEntries(): Promise<EnvConfigEntry[]> {
     const { key, category, description, isSecret, displayStrategy } = descriptor;
     const resolved = resolvedResults[i];
 
+    let value = resolved.value;
+    if (descriptor.maskUrlCredentials === true && value !== undefined) {
+      value = sanitizeUrlCredentials(value);
+    }
+
     return {
       key,
       category: toEntryCategory(category),
@@ -649,7 +707,7 @@ export async function listEnvConfigEntries(): Promise<EnvConfigEntry[]> {
       description,
       isSecret,
       excludeFromDb: false,
-      value: isSecret ? maskSecretValue(resolved.value) : resolved.value,
+      value: isSecret ? maskSecretValue(value) : value,
       source: resolved.source,
       hasDbOverride: resolved.hasDbOverride,
       editable: true,
@@ -691,10 +749,18 @@ export async function upsertEnvConfigOverride(
   const dbKey = toEnvSettingDbKey(input.key);
   logger.info(`env-config-service: upserting DB override for key "${input.key}"`);
 
+  // Secrets are encrypted at rest (aes-256-gcm via the shared field-encryption
+  // helpers, bound to the setting row's encryption context) before they touch
+  // `system_settings`; decryption happens on the read path. Non-secret values
+  // are stored verbatim.
+  const storedValue = descriptor.isSecret
+    ? encryptField(input.value, envConfigEncryptionContext(input.key))
+    : input.value;
+
   const upserted = await SystemSettingsRepository.upsertSetting(
     {
       key: dbKey,
-      value: input.value,
+      value: storedValue,
       dataType: SystemSettingDataType.String,
       description: descriptor.description.en,
       category: SystemSettingCategory.System,
@@ -797,7 +863,10 @@ export async function deleteEnvConfigOverride(key: string, tx?: DBTransaction): 
  * Audit an env-config change to the `audit_logs` table.
  *
  * For `isSecret` keys, the raw `priorValue`/`newValue` are NEVER written —
- * only `"***"` placeholders are recorded.
+ * only `"***"` placeholders are recorded. For URL-shaped `maskUrlCredentials`
+ * keys that are not fully secret, embedded credentials are sanitized
+ * (`sanitizeUrlCredentials`) on both the prior and the new value before the
+ * row is written.
  *
  * Maps the env-config audit input onto the canonical `CreateAuditLogInput`
  * shape used by `AuditService.createManyAuditLogs`. The error contract follows
@@ -826,18 +895,37 @@ export async function auditEnvConfigChange(
 ): Promise<void> {
   const descriptor = getDescriptorIndex().get(key);
   const isSecret = descriptor?.isSecret === true;
+  const maskUrlCreds = descriptor?.maskUrlCredentials === true;
 
   const event: EnvConfigAuditEvent = action === "upsert" ? "env_config.upsert" : "env_config.delete";
+
+  /**
+   * Masks one recorded audit value. Only values that were actually observed are
+   * masked: an ABSENT prior/new value (undefined — "no override existed" /
+   * "nothing written") stays undefined so the audit row records `null`, never a
+   * phantom "***" prior state. Secret keys record "***" only; URL-shaped keys
+   * that are not fully secret record the value with embedded credentials
+   * sanitized (host/port stay visible).
+   */
+  const maskAuditValue = (value: string | undefined): string | undefined => {
+    if (value === undefined) {
+      return undefined;
+    }
+    if (isSecret) {
+      return "***";
+    }
+    if (maskUrlCreds) {
+      return sanitizeUrlCredentials(value);
+    }
+    return value;
+  };
 
   const auditInput: EnvConfigAuditCreateInput = {
     actorUserId,
     event,
     key,
-    // Only mask values that were actually observed: an ABSENT prior/new value
-    // (undefined — "no override existed" / "nothing written") stays undefined
-    // so the audit row records `null`, never a phantom "***" prior state.
-    priorValue: priorValue !== undefined && isSecret ? "***" : priorValue,
-    newValue: newValue !== undefined && isSecret ? "***" : newValue,
+    priorValue: maskAuditValue(priorValue),
+    newValue: maskAuditValue(newValue),
   };
 
   const createAuditLogInput: CreateAuditLogInput = {

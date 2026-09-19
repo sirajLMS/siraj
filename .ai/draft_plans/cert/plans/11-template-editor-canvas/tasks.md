@@ -34,18 +34,15 @@ T01: Canvas Types (CanvasElement, CanvasState, CanvasTool, InteractionState)
         │      ├──> T10j: Custom Resize & Rotate Handle Components
         │      ├──> T10k: Alignment Guide Overlay Component
         │      ├──> T10l: Keyboard Shortcut Handler
-        │      ├──> T10m: Component Tests (12 test files)
-        │      ├──> T10n: E2E Canvas Interaction Tests (10 tests)
         │      ├──> T10o: Quality Loop Per File
         │      └──> T10p: Knowledge Propagation & Documentation Update
         ├──> T11: Mobile View (FAB, bottom sheet, touch gestures)
         ├──> T12: ViewModel + Container + App Router Page + GraphQL Documents
-        └──> T13: UI Testing (component + integration + E2E)
-T01..T13, T10a..T10p ──> T14: Quality Gate (tsgo, biome, lint, codescene)
+T01..T12, T10a..T10p ──> T14: Quality Gate (tsgo, biome, lint, codescene)
 T14 ──> T15: Knowledge Propagation & Documentation
 ```
 
-**Execution order**: T01 → (T02, T03 via parallel subagents after T01) → T04 → (T05, T06 via parallel subagents after T04) → (T07, T08 via parallel subagents after T06) → (T09, T10, T11, T12, T13 via parallel subagents after T03/T04) → (T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10k, T10l via parallel subagents after T10) → (T10m, T10n, T10o, T10p via parallel subagents after T10a-T10l) → T14 → T15
+**Execution order**: T01 → (T02, T03 via parallel subagents after T01) → T04 → (T05, T06 via parallel subagents after T04) → (T07, T08 via parallel subagents after T06) → (T09, T10, T11, T12 via parallel subagents after T03/T04) → (T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10k, T10l via parallel subagents after T10) → (T10o, T10p via parallel subagents after T10a-T10l) → T14 → T15
 
 ---
 
@@ -73,21 +70,21 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: T07 (Rotation Handle), T08 (Snap-to-Grid + Alignment Guides)
 - Rationale: Both extend T06's SelectionHandles. Rotation adds a `rotating` interaction branch; snap/guides add a parallel guide-rendering layer. Disjoint concerns.
 
-### Wave 6: T09, T10, T11, T12, T13
-- Tasks: T09 (Canvas Toolbar), T10 (Rulers + Keyboard Shortcuts + Zoom/Pan), T11 (Mobile View), T12 (ViewModel + Container + GraphQL), T13 (UI Testing)
-- Rationale: All depend on the store (T03) and/or the surface (T04) which are complete by Wave 3/4. Toolbar, rulers/shortcuts, mobile view, ViewModel/GraphQL wiring, and test scaffolding target separate files and have no interdependencies among each other.
+### Wave 6: T09, T10, T11, T12
+- Tasks: T09 (Canvas Toolbar), T10 (Rulers + Keyboard Shortcuts + Zoom/Pan), T11 (Mobile View), T12 (ViewModel + Container + GraphQL)
+- Rationale: All depend on the store (T03) and/or the surface (T04) which are complete by Wave 3/4. Toolbar, rulers/shortcuts, mobile view, ViewModel/GraphQL wiring target separate files and have no interdependencies among each other.
 
 ### Wave 7: T10a, T10b, T10c, T10d, T10e, T10f, T10g, T10h, T10i, T10j, T10k, T10l
 - Tasks: All T10a–T10l React Flow sub-components
 - Rationale: All depend on T10 (Ruler/Zoom/Keyboard foundation) and the store (T03). Each component owns its own file (`nodes/TextNode.tsx`, `nodes/ImageNode.tsx`, etc.) with no cross-imports until integration. The palette (T10g), context menu (T10h), store (T10i), handles (T10j), overlay (T10k), and shortcut handler (T10l) all target disjoint modules.
 
-### Wave 8: T10m, T10n, T10o, T10p
-- Tasks: T10m (Component Tests), T10n (E2E Tests), T10o (Quality Loop), T10p (Knowledge Propagation)
-- Rationale: T10m and T10n test bodies depend on all T10a–T10l components existing — they run after Wave 7. T10o applies the per-file quality loop over the new files. T10p propagates learnings to docs. Tests, quality, and docs touch disjoint file sets.
+### Wave 8: T10o, T10p
+- Tasks: T10o (Quality Loop), T10p (Knowledge Propagation)
+- Rationale: T10o applies the per-file quality loop over the new files after Wave 7. T10p propagates learnings to docs. Quality and docs touch disjoint file sets.
 
 ### Wave 9: T14
 - Tasks: T14 (Quality Gate)
-- Rationale: Full quality-gate run (tsgo → biome → lint → codescene → sonar) over the entire plan output. Must run after every implementation task in T01–T13 and T10a–T10p is complete.
+- Rationale: Full quality-gate run (tsgo → biome → lint → codescene → sonar) over the entire plan output. Must run after every implementation task in T01–T12 and T10a–T10p is complete.
 
 ### Final Wave: Knowledge Propagation
 - Task: T15 (Knowledge Propagation & Documentation)
@@ -608,7 +605,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 
 **Objective:** Create the canvas toolbar with: add element dropdown, zoom controls, grid toggle, undo/redo buttons, and save button.
 
-> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T10 (Rulers + Keyboard Shortcuts + Zoom/Pan), T11 (Mobile View), T12 (ViewModel + Container + GraphQL), T13 (UI Testing). All depend on T03 (store) / T04 (canvas surface) and target disjoint module surfaces (toolbar vs. rulers/shortcuts vs. mobile vs. ViewModel/GraphQL vs. test scaffolding).
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T10 (Rulers + Keyboard Shortcuts + Zoom/Pan), T11 (Mobile View), T12 (ViewModel + Container + GraphQL). All depend on T03 (store) / T04 (canvas surface) and target disjoint module surfaces (toolbar vs. rulers/shortcuts vs. mobile vs. ViewModel/GraphQL).
 
 **Subtasks:**
 - [ ] 9.1 Create `CanvasToolbar` component:
@@ -681,7 +678,7 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
 
 **Objective:** Implement pixel rulers (top + left), comprehensive keyboard shortcuts, and zoom/pan interactions.
 
-> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T09 (Canvas Toolbar), T11 (Mobile View), T12 (ViewModel + Container + GraphQL), T13 (UI Testing). All depend on T03 (store) / T04 (canvas surface) and target disjoint module surfaces (rulers/shortcuts/zoom vs. toolbar vs. mobile vs. ViewModel/GraphQL vs. test scaffolding).
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T09 (Canvas Toolbar), T11 (Mobile View), T12 (ViewModel + Container + GraphQL). All depend on T03 (store) / T04 (canvas surface) and target disjoint module surfaces (rulers/shortcuts/zoom vs. toolbar vs. mobile vs. ViewModel/GraphQL).
 
 **Subtasks:**
 - [ ] 10.1 Create `CanvasRuler` component:
@@ -772,7 +769,6 @@ bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates
   - Content max length 1000 chars (enforced via `maxLength` attribute)
   - Min size 20×20px enforced
 
-- [ ] 10a.2 Create test file `test/ui/components/cert/templates/editor/nodes/TextNode.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/nodes/TextNode.tsx`
@@ -809,7 +805,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
   - Show placeholder with `ImageOutlined` icon when `src` is empty/broken
   - Apply `dropShadow` via inline style if set
 
-- [ ] 10b.2 Create test file `test/ui/components/cert/templates/editor/nodes/ImageNode.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/nodes/ImageNode.tsx`
@@ -851,7 +846,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
   - Stroke dasharray: solid=`none`, dashed=`8 4`, dotted=`2 2`
   - Resize maintains proportions for circle (rx === ry enforced)
 
-- [ ] 10c.2 Create test file `test/ui/components/cert/templates/editor/nodes/ShapeNode.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/nodes/ShapeNode.tsx`
@@ -888,7 +882,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
   - Square constraint: `width === height` (resize locks 1:1)
   - Preview mode: render actual QR with live variable data
 
-- [ ] 10d.2 Create test file `test/ui/components/cert/templates/editor/nodes/QRCodeNode.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/nodes/QRCodeNode.tsx`
@@ -929,7 +922,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
     - Drawn: open signature pad dialog
   - Color applies to text elements only
 
-- [ ] 10e.2 Create test file `test/ui/components/cert/templates/editor/nodes/SignatureNode.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/nodes/SignatureNode.tsx`
@@ -971,7 +963,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
     - `waves`: SVG background pattern
   - Only one background node at a time (enforced in `addNode` store action)
 
-- [ ] 10f.2 Create test file `test/ui/components/cert/templates/editor/nodes/BackgroundNode.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/nodes/BackgroundNode.tsx`
@@ -1007,7 +998,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
   - Keyboard accessible: each card is focusable, Enter adds element at canvas center
   - `aria-label` and `aria-describedby` per card
 
-- [ ] 10g.2 Create test file `test/ui/components/cert/templates/editor/ElementLibraryPalette.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/ElementLibraryPalette.tsx`
@@ -1048,7 +1038,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
   - MUI icons for each action
   - Auto-closes after item click
 
-- [ ] 10h.2 Create test file `test/ui/components/cert/templates/editor/CanvasContextMenu.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/CanvasContextMenu.tsx`
@@ -1089,7 +1078,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 
 - [ ] 10i.2 Create barrel export `frontend/common/stores/canvasStore.types.ts` for `CertNodeData`, `SerializedNode`, `CertElementType` types
 
-- [ ] 10i.3 Create test file `test/ui/components/cert/templates/editor/useCanvasStore.test.ts`
 
 **Files to Create:**
 - `frontend/common/stores/useCanvasStore.ts`
@@ -1133,7 +1121,6 @@ bun run scripts/health/sub-loop.ts frontend/common/stores/useCanvasStore.ts --li
   - Shift snaps to 15° increments
   - Rotation angle displayed as tooltip during rotation
 
-- [ ] 10j.3 Create test file `test/ui/components/cert/templates/editor/handles/Handles.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/handles/ResizeHandles.tsx`
@@ -1171,7 +1158,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
   - Snap threshold: configurable (default 5px)
   - Performance: guides memoized to prevent unnecessary re-renders
 
-- [ ] 10k.2 Create test file `test/ui/components/cert/templates/editor/AlignmentGuideOverlay.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/AlignmentGuideOverlay.tsx`
@@ -1222,7 +1208,6 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
   - Prevent shortcuts when text node is in edit mode (ignore all when `document.activeElement` is contentEditable)
   - Debounce arrow nudges for undo coalescing (500ms merge window)
 
-- [ ] 10l.2 Create test file `test/ui/components/cert/templates/editor/useCanvasKeyboard.test.tsx`
 
 **Files to Create:**
 - `frontend/views/dashboard/cert/templates/editor/useCanvasKeyboard.ts`
@@ -1241,223 +1226,11 @@ bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/edito
 
 ---
 
-### T10m: Component Tests for Node Types & UI Components (~4h)
-
-**Objective:** Write comprehensive component tests for all 7 new component files (6 node types + ElementLibraryPalette + CanvasContextMenu + handles + alignment overlay).
-
-> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10n (E2E Tests), T10o (Quality Loop), T10p (Knowledge Propagation). Test bodies depend on all T10a–T10l components existing (Wave 7 complete). Tests, quality, and docs touch disjoint file sets.
-
-**Subtasks:**
-- [ ] 10m.1 Create `test/ui/components/cert/templates/editor/nodes/TextNode.test.tsx`:
-  - Renders text content with correct styles
-  - Double-click enters edit mode
-  - Variable placeholders highlighted in edit mode
-  - Blur commits content
-  - Min size enforced
-
-- [ ] 10m.2 Create `test/ui/components/cert/templates/editor/nodes/ImageNode.test.tsx`:
-  - Renders image with correct `object-fit`
-  - Shows placeholder for empty src
-  - Double-click opens replacement dialog
-
-- [ ] 10m.3 Create `test/ui/components/cert/templates/editor/nodes/ShapeNode.test.tsx`:
-  - Renders each shape type correctly (rectangle, circle, ellipse, line, triangle, star, hexagon)
-  - Gradient fill applied
-  - Stroke styles (solid, dashed, dotted) applied
-
-- [ ] 10m.4 Create `test/ui/components/cert/templates/editor/nodes/QRCodeNode.test.tsx`:
-  - Renders QR code SVG/Canvas
-  - Static value rendering
-  - Edit mode overlay shown
-
-- [ ] 10m.5 Create `test/ui/components/cert/templates/editor/nodes/SignatureNode.test.tsx`:
-  - Placeholder mode with name/title
-  - Uploaded mode with image
-  - Drawn mode with base64
-  - "Authorized by" label shown when `showLabel`
-
-- [ ] 10m.6 Create `test/ui/components/cert/templates/editor/nodes/BackgroundNode.test.tsx`:
-  - Solid color background
-  - Gradient background
-  - Image background with fit modes
-  - Pattern backgrounds (dots, grid, lines, waves)
-
-- [ ] 10m.7 Create `test/ui/components/cert/templates/editor/ElementLibraryPalette.test.tsx`:
-  - Renders 8 element cards
-  - Drag start sets dataTransfer
-  - Keyboard accessible (Tab + Enter to add)
-
-- [ ] 10m.8 Create `test/ui/components/cert/templates/editor/CanvasContextMenu.test.tsx`:
-  - Opens on contextMenu event
-  - Shows general items
-  - Shows element-type-specific items per node type
-  - Item click triggers correct store action
-  - Canvas background menu shows grid/snap/zoom items
-
-- [ ] 10m.9 Create `test/ui/components/cert/templates/editor/Handles.test.tsx`:
-  - 8 resize handles rendered in correct positions
-  - Rotate handle rendered above node
-  - Pointer events initiate correct interactions
-
-- [ ] 10m.10 Create `test/ui/components/cert/templates/editor/AlignmentGuideOverlay.test.tsx`:
-  - Guides rendered when dragging
-  - Guides removed when not dragging
-  - Guide color from theme
-
-- [ ] 10m.11 Create `test/ui/components/cert/templates/editor/useCanvasStore.test.ts`:
-  - addNode creates node with correct defaults
-  - updateNode patches data
-  - deleteNode removes from array
-  - duplicateNode creates copy with offset + new UUID
-  - copyNodes/pasteNodes works
-  - Z-index renormalization after bringToFront/sendToBack
-  - toggleNodeLock toggles locked state
-
-- [ ] 10m.12 Create `test/ui/components/cert/templates/editor/useCanvasKeyboard.test.tsx`:
-  - Delete removes selected nodes
-  - Ctrl+D duplicates
-  - Arrow keys nudge by 1px (Shift = 10px)
-  - Escape clears selection
-  - Shortcuts ignored in text edit mode
-
-**Files to Create:**
-- `test/ui/components/cert/templates/editor/nodes/TextNode.test.tsx`
-- `test/ui/components/cert/templates/editor/nodes/ImageNode.test.tsx`
-- `test/ui/components/cert/templates/editor/nodes/ShapeNode.test.tsx`
-- `test/ui/components/cert/templates/editor/nodes/QRCodeNode.test.tsx`
-- `test/ui/components/cert/templates/editor/nodes/SignatureNode.test.tsx`
-- `test/ui/components/cert/templates/editor/nodes/BackgroundNode.test.tsx`
-- `test/ui/components/cert/templates/editor/ElementLibraryPalette.test.tsx`
-- `test/ui/components/cert/templates/editor/CanvasContextMenu.test.tsx`
-- `test/ui/components/cert/templates/editor/Handles.test.tsx`
-- `test/ui/components/cert/templates/editor/AlignmentGuideOverlay.test.tsx`
-- `test/ui/components/cert/templates/editor/useCanvasStore.test.ts`
-- `test/ui/components/cert/templates/editor/useCanvasKeyboard.test.tsx`
-
-**Dependencies:** T10a through T10l must be complete before tests
-
-**Requirements References:** REQ-11-01 through REQ-11-13
-
-**Quality Loop (per file):**
-```bash
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/nodes/TextNode.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/nodes/ImageNode.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/nodes/ShapeNode.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/nodes/QRCodeNode.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/nodes/SignatureNode.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/nodes/BackgroundNode.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/ElementLibraryPalette.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/CanvasContextMenu.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/Handles.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/AlignmentGuideOverlay.test.tsx
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/useCanvasStore.test.ts
-bun run scripts/run-test/run-test.ts test/ui/components/cert/templates/editor/useCanvasKeyboard.test.tsx
-```
-
-**Instruction Verification:**
-- Read `.agents/instructions/tests.instructions.md`
-- Read `test/ui/AGENTS.md`
-- Verify: Happy DOM mocks, Apollo client mocking pattern, no real server
-
----
-
-### T10n: E2E Canvas Interaction Tests (~6h)
-
-**Objective:** Write 10 E2E tests covering the full canvas interaction flow: drag, select, resize, rotate, delete, copy/paste, undo/redo, zoom/pan, context menu.
-
-> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10m (Component Tests), T10o (Quality Loop), T10p (Knowledge Propagation). E2E test bodies depend on all T10a–T10l components existing (Wave 7 complete). Tests, quality, and docs touch disjoint file sets.
-
-**Prerequisites:** `bun run build:test` must complete successfully before running E2E tests.
-
-**Subtasks:**
-- [ ] 10n.1 Create `test/ui/e2e/cert/canvas.spec.ts` with 10 test cases:
-
-  **Test 1: Drag element to canvas**
-  - Navigate to template editor canvas page
-  - Drag "Add Text" from ElementLibraryPalette onto canvas
-  - Verify a new text node appears at drop position
-  - Verify node has default text content and styles
-
-  **Test 2: Select element**
-  - Click on a text node on the canvas
-  - Verify selection highlight (NodeToolbar, resize handles) appears
-  - Verify SelectedNodeIds in store updates
-  - Ctrl+click second node → verify multi-select
-
-  **Test 3: Resize element**
-  - Select a text node
-  - Drag the south-east resize handle outward by 100px
-  - Verify node dimensions updated (width + 100, height + 100)
-  - Verify min size 20×20 enforced (resize below min rejected)
-
-  **Test 4: Rotate element**
-  - Select a shape node
-  - Drag the rotation handle 90° clockwise
-  - Verify node rotation is approximately 90°
-  - Shift+rotate → verify snaps to 15° increments
-
-  **Test 5: Delete element**
-  - Select a node
-  - Press Delete key
-  - Verify node removed from canvas
-  - Verify SelectedNodeIds cleared
-
-  **Test 6: Copy/paste element**
-  - Select a QR code node
-  - Press Ctrl+C
-  - Press Ctrl+V
-  - Verify pasted node appears with new UUID and +20px offset
-  - Verify pasted node is selected
-
-  **Test 7: Undo/redo**
-  - Make a change (move a node)
-  - Press Ctrl+Z → verify node returns to original position
-  - Press Ctrl+Shift+Z → verify node moves back to new position
-
-  **Test 8: Zoom/pan**
-  - Press Ctrl+= → verify canvas zoom increases
-  - Press Ctrl+- → verify canvas zoom decreases
-  - Press Ctrl+0 → verify canvas fits to screen
-  - Spacebar+drag → verify canvas pans
-
-  **Test 9: Context menu**
-  - Right-click on a node
-  - Verify context menu opens at cursor position
-  - Click "Duplicate" → verify duplicated node appears
-  - Right-click on canvas background → verify canvas-specific menu items
-  - Click "Toggle Grid" → verify grid toggles
-
-  **Test 10: Drag from ElementLibraryPalette to create node**
-  - Drag "Add Signature" from palette to canvas
-  - Verify signature node appears in placeholder mode
-  - Double-click signature node → verify mode selector opens
-  - Double-click text node → verify content editable mode
-
-**Files to Create:**
-- `test/ui/e2e/cert/canvas.spec.ts`
-
-**Dependencies:** T10a through T10l complete, `bun run build:test` succeeds
-
-**Requirements References:** REQ-11-01 through REQ-11-13
-
-**Quality Loop:**
-```bash
-bun run build:test
-bun run scripts/run-test/run-test.ts test/ui/e2e/cert/canvas.spec.ts
-```
-
-**Instruction Verification:**
-- Read `test/ui/AGENTS.md`, `test/ui/e2e/AGENTS.md`
-- Read `.agents/instructions/tests.instructions.md`
-- Verify: production server required, Playwright selectors, `bun run build:test` prerequisite
-
----
-
 ### T10o: Quality Loop Per File (~2h)
 
 **Objective:** Run the per-file quality verification loop on every new file created in T10a–T10l before they are integrated.
 
-> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10m (Component Tests), T10n (E2E Tests), T10p (Knowledge Propagation). Quality loop runs over the new files from Wave 7. Tests, quality, and docs touch disjoint file sets.
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10p (Knowledge Propagation). Quality loop runs over the new files from Wave 7. Tests, quality, and docs touch disjoint file sets.
 
 **Subtasks:**
 - [ ] 10o.1 For each new file, run the progressive verification loop:
@@ -1499,7 +1272,7 @@ bun run scripts/run-test/run-test.ts test/ui/e2e/cert/canvas.spec.ts
 
 **Objective:** Update all relevant project documentation, AGENTS.md files, skills, and instruction files with the new React Flow canvas component patterns.
 
-> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10m (Component Tests), T10n (E2E Tests), T10o (Quality Loop). Documentation updates depend on Wave 7 components being complete. Tests, quality, and docs touch disjoint file sets.
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T10o (Quality Loop). Documentation updates depend on Wave 7 components being complete. Tests, quality, and docs touch disjoint file sets.
 
 **Subtasks:**
 - [ ] 10p.1 Read all outcome files in `.ai/plans/cert-plan-11/outcome/`:
@@ -1752,8 +1525,6 @@ bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
 | T10j | `.agents/instructions/frontend.instructions.md` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
 | T10k | `.agents/instructions/frontend.instructions.md` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
 | T10l | `.agents/instructions/frontend.instructions.md` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
-| T10m | `.agents/instructions/tests.instructions.md` | `test/ui/AGENTS.md`, `frontend/AGENTS.md` |
-| T10n | `.agents/instructions/tests.instructions.md` | `test/ui/AGENTS.md`, `test/ui/e2e/AGENTS.md`, root `AGENTS.md` |
 | T10o | `.agents/instructions/frontend.instructions.md` | `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, root `AGENTS.md` |
 | T10p | `.agents/instructions/frontend.instructions.md` | `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, root `AGENTS.md` |
 | T11 | `.agents/instructions/frontend.instructions.md` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, root `AGENTS.md` |
@@ -1867,8 +1638,6 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 **Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`.
 
 **Tests:**
-- `test/ui/components/canvas/useDragOverlap.test.tsx` — unit test AABB intersection logic
-- `test/ui/components/canvas/CanvasComponent.test.tsx` — verify `maxZoom={4}` and `minZoom={0.1}` props passed
 
 ---
 
@@ -1916,8 +1685,6 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/collisionUtils.test.ts` — pure function tests for `computeNudgeDirection` with various overlap configurations
-- `test/ui/components/canvas/CanvasContextMenu-nudge.test.tsx` — verify nudge items appear/disappear based on overlap state
 
 ---
 
@@ -1957,7 +1724,6 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/CanvasOffscreenIndicators.test.tsx` — verify badges appear when nodes are scrolled out of view, and that clicking badge calls `focusNode`
 
 ---
 
@@ -2028,9 +1794,6 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 **Instruction Verification:** Read `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`. Note MUI v9: NO style props (use `sx` prop), Outlined icon names.
 
 **Tests:**
-- `test/ui/components/canvas/nodes/ResizableNodeWrapper.test.tsx` — verify 8 handles render on selected node, no handles on unselected
-- `test/ui/components/canvas/nodes/qrCodeNode-square.test.tsx` — verify QRNode enforces square always
-- `test/ui/components/canvas/PropertyPanel-size.test.tsx` — verify panel input updates node size with debounce, min/max validation
 
 ---
 
@@ -2096,9 +1859,6 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/snapToGrid.test.tsx` — verify that dragging a node snaps its position to nearest 16px grid when `snapEnabled`
-- `test/ui/components/canvas/snapToNodes.test.tsx` — verify that a node near another node's left edge snaps to align
-- `test/ui/components/canvas/grid-size-selector.test.tsx` — verify the toolbar ToggleButtonGroup updates store
 
 ---
 
@@ -2191,9 +1951,6 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/alignmentUtils.test.ts` — verify `alignLeft`, `alignRight`, `distributeH` produce correct node positions
-- `test/ui/components/canvas/multiSelect.test.tsx` — verify shift+click adds/removes, rubber band selection, multi-drag moves all
-- `test/ui/components/canvas/AlignmentToolbar.test.tsx` — verify toolbar only shows when ≥2 selected, buttons call store actions
 
 ---
 
@@ -2268,9 +2025,6 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/clipboardStore.test.ts` — verify save/load, localStorage round-trip, zod validation
-- `test/ui/components/canvas/pasteNodes.test.tsx` — verify paste places nodes at viewport center, multi-paste offset increments
-- `test/ui/components/canvas/crossTab.test.ts` — simulate `storage` event and verify store loads externally-written clipboard
 
 ---
 
@@ -2326,8 +2080,6 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/useLongPress.test.tsx` — verify callback fires after 500ms hold, cancels if finger moves >10px
-- `test/ui/components/canvas/touchGestures.test.tsx` — verify tap→select, double-tap→edit dispatch correct store actions
 
 ---
 
@@ -2447,34 +2199,11 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 
 > **Parallelizable**: This task runs as a subagent in Wave 4 (R5 Fill/Stroke) alongside R5-T7, R5-T8. It waits on R5-T6 and all Wave 2 component tasks being complete. Each Wave 4 task targets a separate integration surface.
 
-- [ ] Create `test/ui/components/canvas/FillRenderer.test.tsx` (new)
-  - Test: type='none' renders `<rect fill="none" />`
-  - Test: type='solid' with opacity 50 renders `<rect fill="#FF0000" fillOpacity="0.5" />`
-  - Test: linear gradient generates a `<linearGradient>` def with x1/y1/x2/y2 from angle 90 (top-to-bottom)
-  - Test: radial gradient generates `<radialGradient>` with cx/cy/r/fx/fy
-  - Test: conic gradient approach A renders an HTML `<div>` overlay with `conic-gradient(...)` CSS
-  - Test: pattern fill generates `<pattern patternUnits="userSpaceOnUse" patternTransform="rotate(...) scale(...)">`
-  - Test: image fill generates `<image href={url} clipPath={...} />`
-  - Test: gradient mesh calls the meshRasterizer and renders an SVG `<image>` with `dataURL` fill
-  - **Quality loop**: tsgo + biome + lint queue client
 - [ ] Create `test/unit/meshRasterizer.test.ts` (new)
   - Test: single mesh point — entire buffer is that point's color
   - Test: 4 corner points (red/yellow/blue/green) produce recognizable 4-quadrant interpolation
   - Test: `smoothing: 0` vs `smoothing: 100` produces sharper vs smoother gradient interpolation
   - Test: `blockSize: 4` vs `blockSize: 1` — both produce same color at the center within tolerance
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/canvas/GradientEditorOverlay.test.tsx` (new)
-  - Test: linear overlay renders endpoint handles at correct positions (computed from `gradient.angle`)
-  - Test: drag stop square changes `stop.position`
-  - Test: double-click stop square opens mini color picker
-  - Test: press `Escape` closes the editor (`gradientEditorActive → false`)
-  - Test: radial overlay has center crosshair, radius handle, focal point handle
-  - Test: conic overlay has center + rotation dial handle
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/canvas/MultiStrokeRenderer.test.tsx` (new)
-  - Test: 3 stroke layers render 3 `<use>` elements referencing the same shape path with differing stroke attributes
-  - Test: paint-order `fill-stroke` draws fill on top; `stroke-fill` draws fill under (verified via SVG output order)
-  - Test: stroke position `inside` adds `<clipPath>` + shrunk inner shape
   - **Quality loop**: tsgo + biome + lint queue client
 - [ ] Create `test/unit/fillStrokeCache.test.ts` (new)
   - Test: cache hit when key matches — no recomputation (mock `fillToSvgAttrs` returns `spy`, expect single call)
@@ -2508,7 +2237,7 @@ These tasks implement the Round 4 production-hardening enhancements defined in t
 | R5-T6 | `renderers/StrokeRenderer.tsx` (modify — extends T5) | same | same |
 | R5-T7 | `FillRenderer.tsx` (modify), `StrokeRenderer.tsx` (modify), `ToolbarBlendModeToggle.tsx`, `utils/fillStrokeCache.ts` | same | same |
 | R5-T8 | `useCanvasStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | same |
-| R5-T9 | `test/ui/components/canvas/{FillRenderer,GradientEditorOverlay,MultiStrokeRenderer}.test.tsx`, `test/unit/{meshRasterizer,fillStrokeCache}.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| R5-T9 | `test/unit/{meshRasterizer,fillStrokeCache}.test.ts` | `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5-T10 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 11)
@@ -2690,38 +2419,6 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
   - Test `snapEnabled=false` with `smartGuidesEnabled=true` returns snappedX/Y=null but populates guides
   - Test edge case: source outside artboard bounds snapes to outer artboard border via `snapToArtboard` candidate
   - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/canvas/SmartGuideOverlay.test.tsx` (new)
-  - Test: renders center line when `activeGuides` contains `{ kind: 'centerH', y: 50 }`
-  - Test: renders equal-spacing arrows for `{ kind: 'equalSpacingV', ... }`
-  - Test: `stroke` resolves to `theme.palette[colorToken].main` via CSS var (not a literal hex)
-  - Test: empty mount when `snapSettings.smartGuidesEnabled === false`
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/canvas/MeasurementBadge.test.tsx` (new)
-  - Test: `size` variant label renders `"W: 320 px / H: 240 px"` (verified via i18n function mock)
-  - Test: `position` variant renders `"X: 12 px / Y: 30 px"`
-  - Test: `angle` variant renders `"θ: 45°"`
-  - Test: badge unmounts on `pointerup` (covered via interaction hook test)
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/canvas/GroupTransformFrame.test.tsx` (new)
-  - Test: when 3 elements selected, frame bbox = union of rects
-  - Test: dragging corner of bbox scales elements proportionally (verify `newX = bboxLeft + (oldX - bboxLeft) * scaleX`)
-  - Test: rotating group rotates each element center around bbox center, stacks individual rotation
-  - Test: snap applies to bbox edges, not per element (snap once, apply delta to all)
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/canvas/useAlignDistributeActions.test.ts` (new — exercises the store actions from R5S-T6)
-  - Test: `alignElements('left', 'selection')` sets all `x` to `min(x)`
-  - Test: `alignElements('horizontalCenter', 'canvas')` sets `newX = (canvasW - w) / 2` for each
-  - Test: aligning to `'key'` reference uses `keyObjectId`, fails silently when key object unset (auto-revert to `'selection'`)
-  - Test: `distributeElements('horizontalCenters')` even-spaces centers; with 3 elements, targetStart center ends at start center with equal gaps
-  - Test: `distributeElements('spacingHorizontal')` produces equal element-width gaps: `(extent - sumWidths) / (n - 1)`
-  - Test: `distributeSpacing(20, 'horizontal')` places elements with exactly 20px gaps between them
-  - Test: `matchSize(refId, 'width', 'largest')` picks the largest element as reference (max `width`)
-  - Test: single undo entry per align/distribute/matchSize dispatch (verify `HistoryManager.push` called exactly once)
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/canvas/useSnapFeedback.test.ts` (new)
-  - Test: `setFeedback` coalesces multiple calls within the same rAF cycle (verified via mocked `requestAnimationFrame`)
-  - Test: `clearFeedback` empties state on `pointerup`
-  - **Quality loop**: tsgo + biome + lint queue client
 
 ### R5S-T9: Knowledge Propagation (Plan 11 Snap & Align)
 
@@ -2749,7 +2446,7 @@ Phase R5-G (sequential): R5-T10 (knowledge propagation)
 | R5S-T5 | `frontend/views/dashboard/cert/templates/editor/overlays/GroupTransformFrame.tsx` (new), `useCanvasInteractions.ts` (modify), `canvas/CanvasArea.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5S-T6 | `frontend/common/stores/useCanvasStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5S-T7 | `shared/locale/types/.../templateEditor.ts`, `shared/locale/{en,ar}/.../templateEditor.ts` (modify) | `shared/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| R5S-T8 | `test/unit/snapEngine.test.ts`, `test/ui/components/canvas/{SmartGuideOverlay,MeasurementBadge,GroupTransformFrame,useAlignDistributeActions,useSnapFeedback}.test.{ts,tsx}` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| R5S-T8 | `test/unit/snapEngine.test.ts` | `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5S-T9 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Snap & Align Execution Order (Plan 11)
@@ -2827,11 +2524,10 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
   │
   └─→ LYC-T10 (integration: wire compositor into CanvasRenderer + CanvasLayerRenderer)
          └─→ LYC-T11 (i18n: canvas.layers keys + AR/EN)
-                └─→ LYC-T12 (tests)
-                       └─→ LYC-T13 (knowledge propagation)
+                └─→ LYC-T13 (knowledge propagation)
 ```
 
-**Execution order**: LYC-T01 → (LYC-T02, LYC-T03, LYC-T04, LYC-T06, LYC-T07, LYC-T08 via parallel subagents; LYC-T09 after LYC-T08; LYC-T05 after LYC-T04) → LYC-T10 → LYC-T11 → LYC-T12 → LYC-T13
+**Execution order**: LYC-T01 → (LYC-T02, LYC-T03, LYC-T04, LYC-T06, LYC-T07, LYC-T08 via parallel subagents; LYC-T09 after LYC-T08; LYC-T05 after LYC-T04) → LYC-T10 → LYC-T11 → LYC-T13
 
 **Estimated effort**: 22 hours (parallelizable to ~14 wall-clock hours)
 
@@ -2849,9 +2545,9 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 - Tasks: LYC-T05 (Blend Mode Apply — after LYC-T04), LYC-T09 (Opacity Slider — after LYC-T08)
 - Rationale: LYC-T05 depends on LYC-T04 (Opacity Lock). LYC-T09 depends on LYC-T08 (Lock Opacity Slider). These run after their respective Wave 2 parents.
 
-### Wave 3 (LYC): LYC-T10 → LYC-T11 → LYC-T12 → LYC-T13
-- Tasks: LYC-T10 → LYC-T11 → LYC-T12 → LYC-T13 (sequential integration and testing)
-- Rationale: Integration test, E2E test, quality loop, and knowledge propagation — each depends on the prior.
+### Wave 3 (LYC): LYC-T10 → LYC-T11 → LYC-T13
+- Tasks: LYC-T10 → LYC-T11 → LYC-T13 (sequential integration)
+- Rationale: quality loop and knowledge propagation — each depends on the prior.
 
 ### Final Wave (LYC): Knowledge Propagation
 - Task: LYC-T13 (Knowledge Propagation & Documentation)
@@ -3189,52 +2885,10 @@ LYC-T01 (CanvasLayerCompositor core — build layer tree, flat render list)
 
 ---
 
-### LYC-T12 — Compositor + Blend Mode Tests
-
-**Estimated time**: 2.5 hours
-**Depends on**: LYC-T10, LYC-T11
-**Requirements**: design.md §R5.11
-
-- [ ] **Read applicable AGENTS.md**:
-  - `test/ui/AGENTS.md` (test runner conventions)
-  - `AGENTS.md` root
-
-- [ ] **Read applicable instruction files**:
-  - `.agents/instructions/tests.instructions.md`
-
-- [ ] Create `test/ui/components/canvas/CanvasLayerCompositor.test.ts`:
-  - Test `compose(...)` skips `visible === false` layers
-  - Test `compose(...)` skips layers whose ancestor group has `visible === false`
-  - Test `compose(...)` applies `effectiveOpacity` = layer opacity × product of ancestor group opacities (multi-level group nesting)
-  - Test `composeClippingGroup` — clipped layer's `clipBaseId` matches the nearest below non-clipped base
-  - Test `applyLayerMask` — disabled mask → fast path skip; enabled mask → offscreen + `destination-in` path
-  - Test `applyBlendMode` — `source-over` is a no-op fast path; `multiply` uses Canvas2D `globalCompositeOperation = 'multiply'`; a WebGL-only mode (e.g., `vivid-light`) returns `WebGLBlendRequired` marker
-
-- [ ] Create `test/ui/components/canvas/WebGLBlendPipeline.test.ts`:
-  - Test fallback path — when `WebGL2RenderingContext` is undefined (simulated via `Object.defineProperty`), `compositeBlend` falls back to `source-over` and calls `logger.warn`
-  - Test lazy init — `getContext` is called only on first non-Canvas2D request, not before
-
-- [ ] Create `test/ui/components/canvas/CanvasRenderer.layers.test.tsx`:
-  - Render a 3-layer template (text + shape + image, one hidden, one clipped to the shape)
-  - Snapshot the canvas — verify hidden layer is not in the rendered pixels (compare to a snapshot with all visible)
-  - Test drag-to-reorder transient bump: simulate `setTransientLayerOrder(['image', 'shape', 'text'])` → verify canvas re-renders in the new order before `commitLayerOrder` is called
-  - Test `prefers-reduced-motion` gating on visibility toggle transitions
-
-- [ ] Run quality loop.
-  - **Quality loop**: tsgo + biome + lint queue client
-  - Files: all test files in `test/ui/components/canvas/`
-
-**Files to Create/Modify:**
-- `test/ui/components/canvas/CanvasLayerCompositor.test.ts` (new)
-- `test/ui/components/canvas/WebGLBlendPipeline.test.ts` (new)
-- `test/ui/components/canvas/CanvasRenderer.layers.test.tsx` (new)
-
----
-
 ### LYC-T13 — Knowledge Propagation
 
 **Estimated time**: 30 minutes
-**Depends on**: LYC-T01..LYC-T12
+**Depends on**: LYC-T01..LYC-T11
 **Requirements**: AGENTS.md §"AI Agent Communication Rules"
 
 - [ ] **Modify** `frontend/COMPONENT_PATTERNS.md` (append):
@@ -3266,8 +2920,7 @@ Phase LYC-C (sequential within branch):
   LYC-T09 (WebGL pipeline) — after LYC-T08
 Phase LYC-D: LYC-T10 (integration)
 Phase LYC-E: LYC-T11 (i18n)
-Phase LYC-F: LYC-T12 (tests)
-Phase LYC-G: LYC-T13 (knowledge propagation)
+Phase LYC-F: LYC-T13 (knowledge propagation)
 ```
 
 **Round 5 Advanced Layers Panel total (Plan 11 chunk)**: ~22 hours → ~14 wall-clock hours via Phase LYC-B parallel subagents (6 tasks via parallel subagents)
@@ -3305,7 +2958,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 | TR-T10 | `FreeTransformOptionsBar` (mode toggles + W/H inputs + chain lock + ref point grid) | TR-T01, TR-T03 | 2 |
 | TR-T11 | Live transform rendering in `ElementRenderer` | TR-T01, TR-T02 | 1.5 |
 | TR-T12 | Register `transformHandlers` bridge to Plan 10 store | TR-T02 | 1 |
-| TR-T13 | Component + unit tests (4 files) | ALL above | 3 |
+| TR-T13 | transformMath unit tests | ALL above | 1 |
 | TR-T14 | Knowledge propagation | ALL above | 1 |
 
 ### Instruction File & AGENTS.md Discovery (Plan 11 Transform)
@@ -3324,7 +2977,7 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 | TR-T10 | `frontend/views/dashboard/cert/templates/editor/canvas/FreeTransformOptionsBar.tsx` (new) | same | `frontend.instructions.md` |
 | TR-T11 | `frontend/views/dashboard/cert/templates/editor/canvas/ElementRenderer.tsx` (modify) | same | `frontend.instructions.md` |
 | TR-T12 | `frontend/views/dashboard/cert/templates/editor/canvas/FreeTransformController.ts` (modify — register hooks) | same | `frontend.instructions.md` |
-| TR-T13 | `test/ui/components/editor/canvas/{FreeTransformOverlay,FreeTransformOptionsBar,WarpGridOverlay,transformMath}.test.tsx` (new ×4) | `test/ui/AGENTS.md`, `AGENTS.md` | `tests.instructions.md`, `frontend.instructions.md` |
+| TR-T13 | `test/unit/transformMath.test.ts` (new) | `AGENTS.md` | `tests.instructions.md`, `frontend.instructions.md` |
 | TR-T14 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append) | `AGENTS.md` | — |
 
 ### TR-T01 — Canonical Transform Types File
@@ -3516,26 +3169,11 @@ Phase LYC-G: LYC-T13 (knowledge propagation)
 - [ ] Cross-plan contract: Plan 10's `EditorEditMenu` (R6-T3) calls these shims; Plan 10 doesn't import canvas math, just calls the registered callback in Plan 11's controller (per `frontend/AGENTS.md` "register-handler" pattern from R6-T8)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
-### TR-T13 — Component + Math Tests
+### TR-T13 — transformMath Unit Tests
 
-> **Parallelizable**: This task runs as a subagent in Wave 7 (TR). The test suite waits on all TR components (T01–T12) being complete.
+> **Parallelizable**: This task runs as a subagent in Wave 7 (TR). The unit tests exercise the pure transform math functions.
 
-- [ ] Read `test/ui/AGENTS.md`, `AGENTS.md`, `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
-- [ ] Create `test/ui/components/editor/canvas/FreeTransformOverlay.test.tsx`:
-  - Renders 8 handles + rotation handle in scale mode
-  - Shows only edge handles in skew mode
-  - Shows only corner handles in distort/perspective mode
-  - Hides in warp mode
-- [ ] Create `test/ui/components/editor/canvas/FreeTransformOptionsBar.test.tsx`:
-  - Mode toggle calls `setMode`
-  - Chain lock `IconButton` toggles `proportionalLock`
-  - Reference point grid updates `referencePoint`
-  - `%`/`px` toggle swaps `InputAdornment`
-- [ ] Create `test/ui/components/editor/canvas/WarpGridOverlay.test.tsx`:
-  - Renders 9 handles in custom mode
-  - Renders preset-parameter inputs in `arc` mode
-  - Dragging a handle updates `warpPoints` (mocked store)
-- [ ] Create `test/ui/components/editor/canvas/transformMath.test.ts`:
+- [ ] Create `test/unit/transformMath.test.ts`:
   - `solveProjective` returns identity matrix for `src === dest`
   - `solveProjective` returns expected matrix for a known affine transform
   - `computeSkewFromDrag` clamps to ±45°
@@ -3569,7 +3207,7 @@ Phase TR-D (seq):  TR-T08 (perspective) — depends on TR-T07 (uses solveProject
 Phase TR-E (seq):  TR-T02 (FreeTransformController — depends on all utils)
 Phase TR-F (via parallel subagents):  TR-T03 (overlay), TR-T10 (options bar), TR-T11 (ElementRenderer modify), TR-T12 (register handlers in controller) [wait on TR-T02]
 Phase TR-G (via parallel subagents):  TR-T09 (WarpGridOverlay + WarpRenderer component-level — wait on warpPresets from TR-B + controller from TR-T02)
-Phase TR-H (via parallel subagents):  TR-T13 (test suite ×4 files — wait on all components)
+Phase TR-H (via parallel subagents):  TR-T13 (transformMath unit tests)
 Phase TR-I (seq):  TR-T14 (knowledge propagation)
 ```
 
@@ -3601,7 +3239,7 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
 - Rationale: Waits on warpPresets from Wave 2 + controller from Wave 4.
 
 ### Wave 7 (TR): TR-T13
-- Tasks: TR-T13 (test suite ×4 files)
+- Tasks: TR-T13 (transformMath unit tests)
 - Rationale: Test suite waits on all components. Single-task wave.
 
 ### Final Wave (TR): TR-T14
@@ -3789,51 +3427,12 @@ Phase TR-I (seq):  TR-T14 (knowledge propagation)
 
 ### R5-B11: i18n Extension
 
-> **Parallelizable**: This task runs as a subagent in Wave 6 (R5 Typography) alongside R5-B12. Both wait on all Wave 4 component tasks (B7, B8, B9, B10). B11 (i18n) and B12 (tests) have disjoint file sets.
+> **Parallelizable**: This task runs as a subagent in Wave 6 (R5 Typography) It waits on all Wave 4 component tasks (B7, B8, B9, B10).
 
 - [ ] Add canvas text i18n keys to `shared/locale/ar/.../templateEditor.ts` and `shared/locale/en/.../templateEditor.ts`:
   - `typography.placeholder.empty` → EN: "Double-click to edit", AR: "انقر مرتين للتعديل"
   - `typography.textOnPath.bindToPath`, `unbind`, `startOffset`, `baselineOffset`, `flip`, `noPath`, `direction`, `forward`, `reverse`
   - **Quality loop**: tsgo + biome + lint queue client
-
-### R5-B12: Component Tests
-
-> **Parallelizable**: This task runs as a subagent in Wave 6 (R5 Typography) alongside R5-B11. Both wait on all Wave 4 component tasks (B7, B8, B9, B10). B11 (i18n) and B12 (tests) have disjoint file sets.
-
-- [ ] Create `test/ui/components/canvas/TextRenderer.test.tsx`:
-  - Test `textRendering: optimizeLegibility` is applied
-  - Test RTL detection sets `dir="rtl"` on Arabic text
-  - Test multi-line wrapping with mixed spans
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/canvas/useTextOverflow.test.ts`:
-  - Test `truncate` mode adds ellipsis when text exceeds bounds
-  - Test `shrink` mode reduces font size to fit (binary search, stops at `minFontSize`)
-  - Test `clip` mode hides overflow
-  - Test `expand` mode grows height
-
-- [ ] Create `test/ui/components/canvas/useTextMeasurement.test.ts`:
-  - Test wrapped line count
-  - Test `lineWidths` array per-wrapped-line
-  - Test cache invalidation on content/bounds change
-
-- [ ] Create `test/ui/components/canvas/TextOnPath.test.tsx`:
-  - Test glyph positioning along a simple horizontal line
-  - Test `startOffset` shifts text along path
-  - Test `flip` rotates glyphs 180°
-  - Test `baselineOffset` moves text perpendicular to path
-  - Test SVG fallback for >100 glyphs
-
-- [ ] Create `test/ui/components/canvas/useInlineEditMode.test.tsx`:
-  - Test double-click enters edit mode
-  - Test Escape exits and commits
-  - Test click-outside exits and commits
-  - Test arrow keys move caret
-
-- [ ] Create `test/ui/components/canvas/textPdfParity.test.tsx`:
-  - Render same `RichTextContent` on mock canvas and mock PDF page
-  - Compare bounding boxes per text run (±1px tolerance)
-  - Test mixed span styles parity
 
 ### R5-B13: Knowledge Propagation
 
@@ -3852,7 +3451,7 @@ Phase R5-B-b (via parallel subagents):     R5-B2 measurement, R5-B3 hit area, R5
 Phase R5-B-c (sequential):   R5-B6 inline edit mode (depends on R5-B1)
 Phase R5-B-d (via parallel subagents):     R5-B7 placeholder, R5-B9 vertical text, R5-B10 text shadow
 Phase R5-B-e (sequential):   R5-B8 text on path (depends on types + measurement)
-Phase R5-B-f (via parallel subagents):     R5-B11 i18n AR + EN, R5-B12 tests (depends on all components)
+Phase R5-B-f (via parallel subagents):     R5-B11 i18n AR + EN (depends on all components)
 Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 ```
 
@@ -3880,9 +3479,9 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 - Tasks: R5-B8 (text on path)
 - Rationale: Sequential — depends on types + measurement from earlier waves.
 
-### Wave 6 (R5-B): R5-B11, R5-B12
-- Tasks (via parallel subagents): R5-B11 (i18n AR + EN), R5-B12 (tests)
-- Rationale: B11 (i18n) is independent of code. B12 (tests) depends on all components. Both run via parallel subagents — disjoint file sets.
+### Wave 6 (R5-B): R5-B11
+- Tasks (via parallel subagents): R5-B11 (i18n AR + EN)
+- Rationale: B11 (i18n) is independent of code. It runs via parallel subagents.
 
 ### Final Wave (R5-B): R5-B13
 - Task: R5-B13 (Knowledge Propagation)
@@ -4008,50 +3607,6 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 
 > **Parallelizable**: This task runs as a subagent in Wave 4 (R5 CM). It waits on all Wave 3 implementation tasks (T6, T7, T9) being complete.
 
-- [ ] Create `test/ui/components/editor/contextMenus/useCanvasContextMenu.test.tsx` (new)
-  - Test: right-click on empty canvas with no selection open-menu with "New Element" submenu and NOT Cut/Copy
-  - Test: right-click on element (with `data-element-id`) routes to `buildElementContextMenu`
-  - Test: menu position matches `{x: e.clientX, y: e.clientY}`
-  - Test: canvas coordinates attached to `item.data` (paste-in-place) — verify by inspecting an item's onSelect call args
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/contextMenus/canvasContextMenu.test.ts` (new)
-  - Test: empty-area menu has Select All, Deselect All, Zoom items, Document Setup, Canvas Properties
-  - Test: Paste hidden when `!clipboardHasContent`; visible when clipboard has content
-  - Test: Invert Selection hidden when `selectionCount === 0`
-  - Test: Grid/Guides submenu toggle items show correct checked state
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/contextMenus/elementContextMenu.test.ts` (new)
-  - Test: full template has Cut, Copy, Paste, Paste in Front, Paste in Back, z-order block, Duplicate block, group/ungroup, lock/unlock/hide, transform submenu, align/distribute, image items, Delete
-  - Test: When `selectionCount === 1`, Align submenu hidden; when `>= 2`, visible
-  - Test: When `selectionCount < 3`, Distribute submenu hidden
-  - Test: Image items hidden when selection has no image element
-  - Test: Export As Image disabled (not hidden) when `selectionCount !== 1`
-  - Test: Delete shows `isDangerous: true` and Mini Confirm dialog text switches between singular/plural on count
-  - Test: Group disabled when `selectionCount <= 1`; Ungroup disabled when no selected is a group
-  - Test: Lock toggle checked when all selected are uniformly locked
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/contextMenus/elementTypeMenuItems.test.ts` (new)
-  - Test: text element produces Edit Text, Change Font submenu (with separator + Browse All at end), font size hot, Align Text submenu, bold/italic/underline toggles, separator, Convert to Outlines/Path
-  - Test: image element produces Replace Image, Extract Image, separator, Edit Externally, Reset Adjustments, separator, Crop to Shape, Set as Background
-  - Test: shape element produces Edit Shape, Change Shape Type submenu, separator, Boolean Operation submenu (visible when `selectionCount >= 2`), Flatten, separator, Convert to Outlines
-  - Test: group element produces Enter Isolation Mode, Ungroup, separator, Group Properties...
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/contextMenus/rulerContextMenu.test.ts` (new)
-  - Test: Items include New Guide..., Units submenu (Pixels checked), Show Rulers toggle, Lock Guides, Clear Guides (disabled when no guides), Reset Ruler Origin
-  - Test: Orientation inferred — horizontal ruler click prefills New Guide as horizontal
-  - Test: Snap toggles show correct checked state from `uiStore`
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/dialogs/DuplicateSpecialDialog.test.tsx` (new)
-  - Test: Number of Copies input clamps at min 1 max 100
-  - Test: Translate vs Rotate toggle switches visible fields
-  - Test: Scale per copy slider 0-200 — default 100
-  - Test: Confirm button dispatches `canvasStore.duplicateSpecial` with the correct args shape; Cancel reverts (no dispatch)
-  - **Quality loop**: tsgo + biome + lint queue client
-- [ ] Create `test/ui/components/editor/dialogs/NumericTransformDialog.test.tsx` (new)
-  - Test: opening the dialog snapshots the current transform
-  - Test: typing in X updates the canvas live preview via `canvasStore.updateElementTransform` (debounced 100ms — assert at most one update in 100ms)
-  - Test: Cancel reverts to snapshot; Apply commits (final update === dialog state)
-  - **Quality loop**: tsgo + biome + lint queue client
 - [ ] Create `test/unit/canvasStoreContextActions.test.ts` (new)
   - Test: `duplicateSpecial` with count=3 + translate spacing (10, 10) yields 3 new elements positioned at incremental offsets
   - Test: `alignElements` with `'left'` aligns all left edges to minimum left
@@ -4094,7 +3649,7 @@ Phase R5-B-g (sequential):   R5-B13 knowledge propagation (depends on all)
 | R5-T7 | `dialogs/NumericTransformDialog.tsx` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T8 | `contextMenus/contextMenuBehavior.ts`, `frontend/common/stores/cert/canvasStore.ts` (modify), `frontend/common/stores/cert/uiStore.ts` (modify) | `frontend/stores/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | R5-T9 | `CanvasArea.tsx` (modify) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| R5-T10 | `test/ui/components/editor/contextMenus/{useCanvasContextMenu,canvasContextMenu,elementContextMenu,elementTypeMenuItems,rulerContextMenu}.test.ts`, `test/ui/components/editor/dialogs/{DuplicateSpecialDialog,NumericTransformDialog}.test.tsx`, `test/unit/canvasStoreContextActions.test.ts` | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| R5-T10 | `test/unit/canvasStoreContextActions.test.ts` | `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 | R5-T11 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/AGENTS.md` (append-only) | `frontend/AGENTS.md`, `AGENTS.md` | — |
 
 ### Round 5 Execution Order (Plan 11 Context Menus)
@@ -4196,8 +3751,6 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/ShapeNode.test.tsx` — verify each shape type renders correct SVG element, correct attributes, pointer-events logic
-- `test/ui/components/canvas/shapePathGenerators.test.ts` — verify path generation for rectangle (uniform + per-corner radius), polygon (sides 3–12), star (points 3–20), triangle (all types + directions), arc paths
 
 ---
 
@@ -4259,8 +3812,6 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/useShapeDrawing.test.tsx` — verify draw rectangle (normal), draw square (Shift), draw from center (Alt), accidental click discarded, custom shape placement
-- `test/ui/components/canvas/shapeDrawingPreview.test.tsx` — verify preview renders ghost outline, preview not saveable
 
 ---
 
@@ -4321,8 +3872,6 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/pathParser.test.ts` — verify parse/serialize round-trip, insert anchor, delete anchor, move anchor, convert anchor type
-- `test/ui/components/canvas/ShapeEditMode.test.tsx` — verify anchor rendering, drag updates path, insert/delete/convert operations, exit on Escape
 
 ---
 
@@ -4388,7 +3937,6 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/booleanPathMath.test.ts` — verify unite of two overlapping rectangles, subtract creates cutout, intersect produces overlap area, exclude produces XOR, merge creates compound path, flatten produces single baked path, error on degenerate paths
 
 ---
 
@@ -4423,7 +3971,6 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/shapePathCache.test.ts` — verify cache hit returns same string, cache miss computes and stores, LRU eviction at 500 limit, `clearShapePathCache` empties cache
 
 ---
 
@@ -4458,7 +4005,6 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/CornerRadiusHandle.test.tsx` — verify handle visible only on selected rect, drag updates radius, radius clamped to valid range
 
 ---
 
@@ -4496,7 +4042,6 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/ShapeSidesHandle.test.tsx` — verify +/− increments/decrements sides within bounds, star inner radius handle updates value, handle hidden when not selected
 
 ---
 
@@ -4529,7 +4074,6 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/ShapeHover.test.tsx` — verify hover adds outline, mouse leave removes it, color from theme
 
 ---
 
@@ -4565,32 +4109,12 @@ These tasks implement the Round 5 custom shapes and boolean operations design de
 **Quality Loop:** Per-file progressive verification via `sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene).
 
 **Tests:**
-- `test/ui/components/canvas/ShapeErrorStates.test.tsx` — verify invalid path renders fallback, boolean failure renders first operand + toast, SVG import error shows alert
 
 ---
 
-### T-R5-10: Round 5 Canvas Component Tests
-
-> **Files**:
-> - `test/ui/components/canvas/ShapeNode.test.tsx` (new)
-> - `test/ui/components/canvas/shapePathGenerators.test.ts` (new)
-> - `test/ui/components/canvas/useShapeDrawing.test.tsx` (new)
-> - `test/ui/components/canvas/pathParser.test.ts` (new)
-> - `test/ui/components/canvas/ShapeEditMode.test.tsx` (new)
-> - `test/ui/components/canvas/booleanPathMath.test.ts` (new)
-> - `test/ui/components/canvas/shapePathCache.test.ts` (new)
-> - `test/ui/components/canvas/CornerRadiusHandle.test.tsx` (new)
-> - `test/ui/components/canvas/ShapeSidesHandle.test.tsx` (new)
-> - `test/ui/components/canvas/ShapeHover.test.tsx` (new)
-> - `test/ui/components/canvas/ShapeErrorStates.test.tsx` (new)
-> **Depends On**: T-R5-01 through T-R5-09 all
-> **Time Budget**: 3-4 hours
-
 ### Subtasks
 
-1. Read `.agents/instructions/tests.instructions.md`, `test/ui/AGENTS.md`
 2. Create all test files per specs in T-R5-01 through T-R5-09
-3. Use Happy DOM + mocked stores (no server)
 4. Mock `useCanvasStore` and `useTemplateEditorStore` for component tests
 5. Run quality loop per test file
 
@@ -4606,7 +4130,7 @@ Phase R5-B (via parallel subagents):    T-R5-02 (drawing interaction), T-R5-03 (
 Phase R5-C (sequential):  T-R5-04 (boolean path math — depends on path generator)
 Phase R5-D (via parallel subagents):    T-R5-05 (caching), T-R5-06 (corner radius handle), T-R5-07 (sides handle), T-R5-08 (hover)
 Phase R5-E (sequential):  T-R5-09 (error states)
-Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
+Phase R5-F (sequential):  T-R5-09 (error states)
 ```
 
 **Round 5 total estimated time**: 28 hours (parallelizable to ~16 wall-clock hours)
@@ -4629,8 +4153,8 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 - Tasks (via parallel subagents): T-R5-05 (caching), T-R5-06 (corner radius handle), T-R5-07 (sides handle), T-R5-08 (hover)
 - Rationale: All independent feature tasks that extend the shape rendering. Disjoint modules.
 
-### Wave 5 (R5 Shapes): T-R5-09 → T-R5-10
-- Tasks: T-R5-09 (error states) → T-R5-10 (component tests) — sequential.
+### Wave 5 (R5 Shapes): T-R5-09
+- Tasks: T-R5-09 (error states).
 - Rationale: T09 (error states) then T10 (tests — depends on all above).
 
 ## Round 5: Zoom & Navigation Tasks
@@ -4702,14 +4226,6 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
   - File: `frontend/views/certificate-editor/components/CanvasScrollBars.tsx`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5Z-T10. Test suite for zoom/navigation canvas rendering
-  - Test zoom transforms apply correctly
-  - Test zoom-to-point scroll offset calculation
-  - Test LOD rendering at threshold boundaries
-  - Test viewport intersection filtering
-  - Test mini-map viewport rectangle positioning
-  - File: `test/ui/components/certificate-editor/zoom-rendering.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
 
 ## Round 5: Color System Tasks
 
@@ -4840,28 +4356,9 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 - [ ] Verify the overlay z-index sits above canvas content (theme.zIndex.tooltip - 1 for tint, +1 for readout/crosshair)
 - [ ] **Quality loop**: tsgo + biome + lint queue client
 
-### R5-CS-T10: Test suite — eyedropper interaction + color sampling
-
-> **Parallelizable**: This task runs as a subagent in Wave 4 (R5-CS) alongside R5-CS-T11. T10 (tests) depends on all components. T11 (i18n) is independent of code. Disjoint file sets.
-
-- [ ] Create `frontend/desktop/views/dashboard/certificates/template-editor/canvas/sampling/__tests__/eyedropper.test.tsx`
-- [ ] Test cases (use Happy DOM renderer):
-  1. `useEyedropperStore.activate('fill')` sets `isActive: true`, `paintSlot: 'fill'`
-  2. `deactivate()` clears `cursorScreenPos`, `cursorCanvasPos`, `sampledColor`
-  3. `sampleColorAt` returns the averaged RGB for 1×1 / 3×3 / 5×5 / 11×11 / 51×51 sample sizes — use a mock `CanvasPixelBuffer`
-  4. `Alt+click` flips target slot from `activePaintSlot` (fill → stroke, stroke → fill)
-  5. `Escape` returns to `select` tool without applying color
-  6. Sample out of bounds → returns null
-  7. If `paintSlot = 'fill'`, committed color ends up in `useColorSystemStore.fillColor` (not `strokeColor`)
-  8. Sample source `'currentLayer'` only reads pixels in the current layer's buffer
-  9. Sample source `'currentLayerBelow'` excludes the current layer itself
-  10. Picked color is added to `colorHistory` and `quickSwatches`
-- [ ] Use existing test patterns: `import { describe, test, expect, vi, beforeEach } from 'bun:test'` (or vitest if the test file is .test.tsx under /test/ui)
-- [ ] **Quality loop**: tsgo + biome + lint queue client
-
 ### R5-CS-T11: i18n consumption + documentation propagation
 
-> **Parallelizable**: This task runs as a subagent in Wave 4 (R5-CS) alongside R5-CS-T10. T10 (tests) depends on all components. T11 (i18n) is independent of code. Disjoint file sets.
+> **Parallelizable**: This task runs as a subagent in Wave 4 (R5-CS) T11 (i18n) is independent of code.
 
 - [ ] Add i18n implementations for `toolbarEyedropper.sampleSize.*` and `toolbarEyedropper.sampleFrom.*` in all locale files under `shared/locale/<lang>/dashboard/certificates/templateEditor.json` (Plan 10 owns the type additions — Plan 11 only adds the implementation string values)
 - [ ] Verify there are NO duplicate `Round 5` block ids in any design file (this Plan 11 R5-CS section names are unique to Plan 11)
@@ -4881,7 +4378,7 @@ Phase R5-F (sequential):  T-R5-10 (component tests — depends on all above)
 | R5-CS-A: State + Buffer | R5-CS-T1, R5-CS-T3, R5-CS-T4 | 14h |
 | R5-CS-B: Interaction Hooks | R5-CS-T2, R5-CS-T9 | 9h |
 | R5-CS-C: UI Components | R5-CS-T6, R5-CS-T5, R5-CS-T7, R5-CS-T8 | 22h |
-| R5-CS-D: Testing + i18n | R5-CS-T10, R5-CS-T11 | 11h |
+| R5-CS-D: i18n | R5-CS-T11 | 1h |
 | **Plan 11 R5 total** | **11 tasks** | **~56h** |
 
 Parallelism within phases: T1, T3, T4 are independent (via parallel subagents), then T2 + T9 on already-built stores, then UI components T5–T8 via parallel subagents.
@@ -4900,9 +4397,9 @@ Parallelism within phases: T1, T3, T4 are independent (via parallel subagents), 
 - Tasks (via parallel subagents): R5-CS-T6 (EyedropperTool), R5-CS-T5 (ColorPickerPopover), R5-CS-T7 (RecentColors), R5-CS-T8 (ColorSliderPanel)
 - Rationale: All UI components depend on hooks from Wave 2. Each targets a separate component file.
 
-### Wave 4 (R5-CS): R5-CS-T10, R5-CS-T11
-- Tasks (via parallel subagents): R5-CS-T10 (test suite), R5-CS-T11 (i18n)
-- Rationale: T10 (tests) depends on all components. T11 (i18n) is independent of code. Disjoint file sets.
+### Wave 4 (R5-CS): R5-CS-T11
+- Tasks (via parallel subagents): R5-CS-T11 (i18n)
+- Rationale: T11 (i18n) is independent of code.
 
 ---
 
@@ -4935,7 +4432,7 @@ R5FX-T01 (effectsPipeline.ts — orchestrator)
   ├─→ R5FX-T15 (canvasStore.ts modifications + EffectElementWrapper.tsx)
   │       └─→ depends on R5FX-T01..T14 all complete
   │
-  └─→ R5FX-T16 (integration tests + knowledge propagation)
+  └─→ R5FX-T16 (knowledge propagation)
           └─→ depends on R5FX-T15
 ```
 
@@ -5291,28 +4788,8 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` for 
 
 ---
 
-### R5FX-T16: Integration Tests + Knowledge Propagation
+### R5FX-T16: Knowledge Propagation
 
-- [ ] Create `test/ui/components/template-editor/effectRendering/effectsPipeline.test.tsx`
-  - Test: single drop shadow → produces CSS `drop-shadow(...)` string
-  - Test: multiple shadows → produces SVG `<feMerge>` markup
-  - Test: gaussian blur → CSS `blur()`; motion blur → SVG-only
-  - Test: brightness/contrast → CSS `brightness() contrast()`
-  - Test: levels → SVG `<feComponentTransfer>`
-  - Test: blend mode `multiply` → `mixBlendMode: 'multiply'`
-  - Test: blend mode `vivid-light` → SVG `<feBlend>` fallback
-  - Test: global light override on shadow with `useGlobalLight: true`
-  - Test: overlay pseudo-element style generation
-  - Test: effect cache hit on unchanged params
-  - Mock `canvasStore` with test fixtures
-  - **Quality loop**: tsgo + biome + lint queue client
-
-- [ ] Create `test/ui/components/template-editor/effectRendering/EffectSvgContainer.test.tsx`
-  - Test: renders `null` when no SVG effects
-  - Test: renders `<svg>` with `<filter>` when element has SVG-requiring effect
-  - Test: filter id matches `el-${elementId}-fx` pattern
-  - Test: re-renders only when filter definitions change
-  - **Quality loop**: tsgo + biome + lint queue client
 
 - [ ] Knowledge propagation — append to `frontend/IMPLEMENTATION_LEARNINGS.md`
   - Document: "CSS filter vs SVG filter decision tree for effects" — when to use CSS (native support, performant) vs SVG (advanced effects, 46-mode blend)
@@ -5412,7 +4889,6 @@ Per-file: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` for 
   - Test drag constrain angles (0, 45, 90, etc.)
   - Test layer order shortcuts
   - Test Space temporarily activates hand tool
-  - File: `test/ui/components/certificate-editor/canvas-keyboard.test.tsx`
   - _Quality loop_: tsgo + biome + lint queue client
 
 ---
@@ -5723,30 +5199,16 @@ MASK-T02 (store additions from Plan 10)                                         
   - When clipping mask active and base shape selected → dashed outline (`theme.palette.divider`, `opacity: 0.4`, `strokeDasharray: "4 4"`) shows clip boundary over clipped elements
   - **Quality loop**: tsgo + biome + lint queue client
 
-### MASK-C12: Component Tests + Knowledge Propagation
+### MASK-C12: Knowledge Propagation
 
 **Estimated time**: 3 hours
 **Depends on**: MASK-C01 through MASK-C11
 **Requirements**: all design sub-sections
 
-- [ ] **Read applicable AGENTS.md**:
-  - `test/ui/AGENTS.md`, `AGENTS.md`
 
 - [ ] **Read applicable instruction files**:
   - `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
 
-- [ ] **Create** `test/ui/components/editor/mask/renderers/{ClippingMaskRenderer,LayerMaskRenderer,VectorMaskPathOverlay,MaskEditingOverlay,QuickMaskOverlay,ClipGroupRenderer,OpacityMaskRenderer,MaskThumbnailCanvas,RefineEdgePreviewOverlay,ClipIndicatorOverlay}.test.tsx`:
-  - Clipping mask: rect/ellipse/path/text/image/group base shapes → correct `<clipPath>` generated; multiple clipped elements share same clip; transform follows base
-  - Layer mask: pixel mask → `<mask>` with `<image>`; vector mask → `<clipPath>`; both → nested `<g>`; density/feather/contrast/smooth/shiftEdge/inverted filters applied correctly
-  - Vector mask overlay: path rendered at screen-space 1px; `isActive` → anchors editable
-  - Mask editing overlay: all 6 view modes render correct display; exit restores maskMode/activeTool
-  - Mask brush: brush/pencil/gradient/eraser draw correct patterns; pressure scales opacity; `pointerup` → `commitMaskStroke` called with dataUri
-  - Quick mask: both modes render overlay correctly; exit → selection contains non-zero pixels
-  - Clip group: elements sorted by layer order; base shape below clipped; base shape edit dims clipped
-  - Opacity mask: mask-type luminance; clip/invert filters; independent transform
-  - Mask thumbnail: 32×32 render; disabled → red X; `React.memo` prevents re-render on unrelated changes
-  - Refine Edge preview: sliders update preview; decontaminate samples edge; marching ants animation
-  - **Quality loop**: tsgo + biome + lint queue client
 
 - [ ] **Append** to `frontend/IMPLEMENTATION_LEARNINGS.md` (append-only):
   - "Mask pixel buffer MUST be `useRef<OffscreenCanvas>` — storing in Zustand causes 1MB+ serialization per stroke."
@@ -5778,7 +5240,7 @@ MASK-T02 (store additions from Plan 10)                                         
 | MASK-C09 | `MaskThumbnailCanvas.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | MASK-C10 | `RefineEdgePreviewOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | MASK-C11 | `ClippingMaskRenderer.tsx` (modify), `ClipIndicatorOverlay.tsx` | `frontend/views/AGENTS.md`, `AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| MASK-C12 | `test/ui/components/editor/mask/renderers/*.test.tsx`, `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `test/ui/AGENTS.md`, `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
+| MASK-C12 | `frontend/IMPLEMENTATION_LEARNINGS.md`, `frontend/COMPONENT_PATTERNS.md` (append) | `AGENTS.md` | `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md` |
 
 ### Round 5 Execution Order (Plan 11 — Masking)
 
@@ -5864,15 +5326,6 @@ Phase R5M-G (sequential after all): MASK-C12 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5GG-T8. Test suite for guides & grid canvas features
-  - Test smart guides appear during drag
-  - Test guide creation from ruler
-  - Test guide move/delete/lock
-  - Test grid overlay rendering
-  - Test snap to grid
-  - Test snap to guides
-  - File: `test/ui/components/certificate-editor/guides-grid-canvas.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
 
 ## Round 5: Asset Library Tasks
 
@@ -5929,15 +5382,6 @@ Phase R5M-G (sequential after all): MASK-C12 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5AL-T8. Test suite for asset canvas features
-  - Test drop zone accepts assets
-  - Test asset preview rendering
-  - Test asset cache LRU behavior
-  - Test QR code generation and rendering
-  - Test barcode rendering
-  - Test smart resizing constraints
-  - File: `test/ui/components/certificate-editor/asset-canvas.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
 
 ## Round 5: History & States Tasks
 
@@ -5985,13 +5429,6 @@ Phase R5M-G (sequential after all): MASK-C12 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5H-T7. Test suite for history canvas features
-  - Test state replay engine (diff application)
-  - Test scrubber preview
-  - Test non-linear branching
-  - Test snapshots and comparison overlay
-  - File: `test/ui/components/certificate-editor/history-canvas.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
 
 ## Round 5: Canvas Pro Tasks
 
@@ -6041,14 +5478,6 @@ Phase R5M-G (sequential after all): MASK-C12 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5C-T7. Test suite for canvas pro features
-  - Test artboard rendering with boundaries
-  - Test DPI-aware rendering
-  - Test multi-page layout
-  - Test CMYK preview filter
-  - Test bleed/margin overlay toggle
-  - File: `test/ui/components/certificate-editor/canvas-pro-features.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
 
 ## Round 5: Workspace & Panel Tasks
 
@@ -6099,14 +5528,6 @@ Phase R5M-G (sequential after all): MASK-C12 (test suite + knowledge propagation
   - Files: `shared/locale/en/certificateTemplateEditor.ts`, `shared/locale/ar/certificateTemplateEditor.ts`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5W-T7. Test suite for canvas workspace
-  - Test panel layout resizing
-  - Test tab bar switching/reorder/close
-  - Test floating toolbar docking
-  - Test minimap navigation
-  - Test inspector overlay
-  - File: `test/ui/components/certificate-editor/canvas-workspace.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client
 
 ## Round 5: Pen Tool Tasks — Plan 11 (Canvas Path Drawing, Bezier Rendering, Anchor Point Interaction)
 
@@ -6150,11 +5571,3 @@ Phase R5M-G (sequential after all): MASK-C12 (test suite + knowledge propagation
   - File: `frontend/views/certificate-editor/components/canvas/PenToolSnapping.tsx`
   - _Quality loop_: tsgo + biome + lint queue client
 
-- [ ] R5P-T6. Test suite for pen tool canvas interactions
-  - Test anchor point placement
-  - Test bezier handle creation
-  - Test path editing (move, convert, add anchors)
-  - Test curve rendering
-  - Test snapping
-  - File: `test/ui/components/certificate-editor/pen-tool-canvas.test.tsx`
-  - _Quality loop_: tsgo + biome + lint queue client

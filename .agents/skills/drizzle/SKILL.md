@@ -50,6 +50,7 @@ Full reference: `docs/drizzle/prepared-statements.md`
 
 - **CHECK constraints** MUST use `checkConstraint(name, pgSql, sqliteSql)` from `backend/db/schema/__shared__/dialectAwareBuilder.ts` — raw `check()` from `drizzle-orm` is PG-only and silently no-ops on SQLite.
 - **Soft-deleted tables**: enforce uniqueness with a partial unique index `WHERE deleted_at IS NULL` so archiving frees the value.
+- **Raw SQL bulk fixtures**: satisfy every NOT NULL + composite CHECK clause of the target table before inserting — check `pg_get_constraintdef` for state-machine-style CHECKs (e.g. a terminal execution state requires a non-pending outcome and actual timestamps), generate one idempotency key per row when the column is NOT NULL + unique, and satisfy FK chains in dependency order (a NOT NULL FK means the referenced row must exist first). Enum columns store their exact PG enum strings — camelCase values (`'Salaries'`) are not interchangeable with their SCREAMING_CASE constant names.
 
 Full reference: `docs/drizzle/dialect-aware-constraints.md`.
 

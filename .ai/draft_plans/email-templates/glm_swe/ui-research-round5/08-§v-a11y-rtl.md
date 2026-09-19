@@ -1,8 +1,8 @@
 # Round 5 Audit: §V — Accessibility & RTL Depth
 
 ## Summary
-- INVALID specs: 3 (V2 contradicts §G1, V5 contradicts §G4, §G2 omits aria-busy)
-- PARTIAL specs: 5 (V1, V3, V6, V7, V8)
+- INVALID designs: 3 (V2 contradicts §G1, V5 contradicts §G4, §G2 omits aria-busy)
+- PARTIAL designs: 5 (V1, V3, V6, V7, V8)
 - NEW gaps: 8
 - v9 fixes verified correct: 3/3 (each carries caveats)
 
@@ -64,17 +64,17 @@
 4. **10 missing i18n keys** (P0 BUILD-BREAKER): `dnd.*`, `editor.shortcuts.*`, `mergeTag.triggerLabel` — V4-3 lockstep makes these TypeScript compile errors
 5. **V3 incomplete region count**: polite only, assertive region missing
 6. **`...defaultAnnouncements` spread redundant** when all four handlers overridden
-7. **`active.data.current?.blockLabel`** convention-only — no spec says where to supply it
+7. **`active.data.current?.blockLabel`** convention-only — no design says where to supply it
 
 ## NEW Gaps (A11y not covered)
 1. Editor CANVAS iframe has no `title` attribute (only preview iframe specified)
-2. No `dir="rtl"` spec for editor canvas iframe or preview iframe (sandbox doesn't inherit parent's `dir`)
+2. No `dir="rtl"` design for editor canvas iframe or preview iframe (sandbox doesn't inherit parent's `dir`)
 3. No mention of repo's actual RTL mechanism (`createTheme({ direction })` + `stylis-plugin-rtl` cache swap)
-4. No roving tabindex spec for editor toolbar (sequential Tab through ~5-10 buttons)
+4. No roving tabindex design for editor toolbar (sequential Tab through ~5-10 buttons)
 5. No landmark roles declared (`<main>`, `<nav>`, `<aside>` with `aria-label`)
 6. No focus-visible specification (custom theming may break WCAG-compliant focus rings)
-7. No focus-management spec for sortable list reorder (where does focus go after keyboard move?)
-8. No DragOverlay announcements spec (dnd-kit `DragOverlay` renders clone — SR user needs separate ARIA status)
+7. No focus-management design for sortable list reorder (where does focus go after keyboard move?)
+8. No DragOverlay announcements design (dnd-kit `DragOverlay` renders clone — SR user needs separate ARIA status)
 
 ## Recommendations for v10
 **P0 (build-breaking):**
@@ -93,8 +93,7 @@
 9. Add `title`/`aria-label` for editor canvas iframe
 10. Specify `dir="rtl"` injection for iframes when locale=ar
 11. Reference repo's actual RTL mechanism explicitly
-12. Add landmark role spec for editor page
+12. Add landmark role design for editor page
 13. Specify roving tabindex for editor toolbar
 14. Specify focus management after sortable reorder
-15. Add Storybook RTL variant for editor canvas iframe + DragOverlay
-16. Prefer centralized `VisuallyHidden` component over inline sx clip recipe
+15. Prefer centralized `VisuallyHidden` component over inline sx clip recipe

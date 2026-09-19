@@ -1,12 +1,12 @@
 # 08 — Pothos Patterns Verification (Email Template System)
 
-**Verdict: VERIFIED with minor plan-line updates needed.**
+**Verdict: VERIFIED with minor line updates needed.**
 
-The plan's mental model of Pothos v4 (object / input / enum / authScopes) matches both the current Pothos docs and the codebase convention. The two items that need plan-line edits are: (a) `sendTestEmail` must live in the **mutation** file (the plan already says mutation — confirmed correct, *not* a fix), and (b) enum registration must NOT happen inline in `emailTemplate.pothos.ts` — it must be added to `backend/graphql/pothos/shared/enum.pothos.ts` and imported. The plan's bullet list does not explicitly call out the shared-enum registration, so it should.
+The design's mental model of Pothos v4 (object / input / enum / authScopes) matches both the current Pothos docs and the codebase convention. The two items that need line edits are: (a) the send-email mutation must live in the **mutation** file (the design already says mutation — confirmed correct, *not* a fix), and (b) enum registration must NOT happen inline in `emailTemplate.pothos.ts` — it must be added to `backend/graphql/pothos/shared/enum.pothos.ts` and imported. The design's bullet list does not explicitly call out the shared-enum registration, so it should.
 
 ---
 
-## 1. Original plan claims (lines 341–348, quoted verbatim)
+## 1. Original claims (lines 341–348, quoted verbatim)
 
 ```
 ### GraphQL surface (NEW — none today)
@@ -15,7 +15,7 @@ Following single-canonical-object rule ([backend/AGENTS.md](backend/AGENTS.md)):
 
 - [`backend/graphql/pothos/email/emailTemplate.pothos.ts`](backend/graphql/pothos/email/emailTemplate.pothos.ts) — `EmailTemplatePothosObject` (canonical), `EmailTemplateInputPothosObject`, `EmailTemplatePreviewPothosObject`
 - [`backend/graphql/query/email/emailTemplates.query.ts`](backend/graphql/query/email/emailTemplates.query.ts) — `emailTemplates(scope?, status?, pagination)` list + `emailTemplate(id)`
-- [`backend/graphql/mutation/email/emailTemplate.mutations.ts`](backend/graphql/mutation/email/emailTemplate.mutations.ts) — `createEmailTemplate`, `updateEmailTemplate`, `publishEmailTemplate`, `archiveEmailTemplate`, `sendTestEmail`, with `authScopes` for SUPER_ADMIN only by default + per-template `allowedEditorGroups` enforcement
+- [`backend/graphql/mutation/email/emailTemplate.mutations.ts`](backend/graphql/mutation/email/emailTemplate.mutations.ts) — `createEmailTemplate`, `updateEmailTemplate`, `publishEmailTemplate`, `archiveEmailTemplate`, `sendEmail`, with `authScopes` for SUPER_ADMIN only by default + per-template `allowedEditorGroups` enforcement
 - [`backend/graphql/query/email/emailTemplatePreview.query.ts`](backend/graphql/query/email/emailTemplatePreview.query.ts) — `previewEmailTemplate(templateId, sampleProps)` returns HTML string for iframe
 ```
 
@@ -64,7 +64,7 @@ So this is **Pothos v4** (`@pothos/core@^4.13.1`) with the **`@pothos/plugin-sco
 > ```
 > `values` is only required when `param` is **not** an enum. When `param` IS a TS enum, Pothos auto-derives the values from the enum members; you only need to supply `name`.
 
-So the plan's intention (register from a TS enum backing `EmailScope` etc.) is correct: **`gqlSchemaBuilder.enumType(EmailScope, { name: "EmailScope" })` — no `values` map required**.
+So the design's intention (register from a TS enum backing `EmailScope` etc.) is correct: **`gqlSchemaBuilder.enumType(EmailScope, { name: "EmailScope" })` — no `values` map required**.
 
 **CRITICAL codebase rule (from `backend/graphql/AGENTS.md` and `backend/graphql/pothos/AGENTS.md`):** the enum registration MUST live in `backend/graphql/pothos/shared/enum.pothos.ts`, NOT in the domain `emailTemplate.pothos.ts` file. The domain file only imports the registered `*PothosEnum` and uses it as a field type. Hardcoding `values: [...]` in a domain `.pothos.ts` file is explicitly **PROHIBITED**.
 
@@ -117,7 +117,7 @@ export const NotificationPreferenceInputPothosObject = gqlSchemaBuilder
   });
 ```
 
-So the plan's `EmailTemplateInputPothosObject` should be built with `gqlSchemaBuilder.inputRef<EmailTemplateSubmitInput>("EmailTemplateInput").implement({ fields: t => ({...}) })` — matching the canonical repo pattern, not the bare `builder.inputType('Name', { fields })` shown in the Pothos docs.
+So the design's `EmailTemplateInputPothosObject` should be built with `gqlSchemaBuilder.inputRef<EmailTemplateSubmitInput>("EmailTemplateInput").implement({ fields: t => ({...}) })` — matching the canonical repo pattern, not the bare `builder.inputType('Name', { fields })` shown in the Pothos docs.
 
 ### 3.3 `authScopes` — object-level AND field/mutation-level, function form supported, per-call enforcement supported
 
@@ -161,7 +161,7 @@ Other examples of the convention (field-level `authScopes`):
 - `backend/graphql/mutation/scheduling/schedule.mutation.ts:19` — `authScopes: { superAdmin: true }`
 - `backend/graphql/mutation/classes/class-session.mutation.ts:170` — `authScopes: { superAdmin: true }`
 
-**For the plan:** "SUPER_ADMIN only by default" maps cleanly to `authScopes: { superAdmin: true, notImpersonating: true }` (the repo's standard guard for admin mutations). For per-template `allowedEditorGroups` enforcement, two viable patterns:
+**For the design:** "SUPER_ADMIN only by default" maps cleanly to `authScopes: { superAdmin: true, notImpersonating: true }` (the repo's standard guard for admin mutations). For per-template `allowedEditorGroups` enforcement, two viable patterns:
 
 - **Pattern A (scope-gate + service check):** `authScopes: { superAdmin: true, notImpersonating: true }` on the field, then in the resolver call a service method that enforces `allowedEditorGroups` for non-super-admin actors. Simplest, matches the existing repo style.
 - **Pattern B (dynamic scope):** register a new scope in the `AuthScopes` map (e.g. `emailTemplateEditor: (templateId: string) => Promise<boolean>`) and use `authScopes: (parent, args, ctx) => ({ $any: { superAdmin: true, emailTemplateEditor: args.id } })`. More declarative but requires extending `PothosTypes.AuthScopes` in `gqlSchemaBuilder.ts`.
@@ -170,7 +170,7 @@ Other examples of the convention (field-level `authScopes`):
 
 ### 3.4 "Single canonical GraphQL object type per entity" rule
 
-**CONFIRMED** — this rule is enforced by **`backend/graphql/AGENTS.md`** ("Single Canonical Object Type Pattern (CRITICAL RULE)") and by **`backend/AGENTS.md`** ("Single Canonical Object Type Pattern (CRITICAL RULE)"). The plan's citation of `backend/AGENTS.md` is correct.
+**CONFIRMED** — this rule is enforced by **`backend/graphql/AGENTS.md`** ("Single Canonical Object Type Pattern (CRITICAL RULE)") and by **`backend/AGENTS.md`** ("Single Canonical Object Type Pattern (CRITICAL RULE)"). The design's citation of `backend/AGENTS.md` is correct.
 
 Quote from `backend/graphql/AGENTS.md` (lines 55–62):
 
@@ -185,13 +185,13 @@ Quote from `backend/graphql/AGENTS.md` (lines 55–62):
 - Define input types using types from `backend/types/` (e.g., `{Entity}SubmitInput`)
 ```
 
-The negative pattern (prohibited) is also spelled out: creating multiple GraphQL object types for the same entity, or defining local types in Pothos files. **The plan's `EmailTemplatePreviewPothosObject` is allowed** under the "Exception Policy" (lines 91–94): "Wrapper types for collections or complex responses (e.g., paginated results) are allowed as separate definitions." A `Preview` wrapper returning `{ html: string }` qualifies as a complex-response wrapper — but it must still import its base shape from `backend/types`, e.g. `EmailTemplatePreviewReturnType`.
+The negative pattern (prohibited) is also spelled out: creating multiple GraphQL object types for the same entity, or defining local types in Pothos files. **The design's `EmailTemplatePreviewPothosObject` is allowed** under the "Exception Policy" (lines 91–94): "Wrapper types for collections or complex responses (e.g., paginated results) are allowed as separate definitions." A `Preview` wrapper returning `{ html: string }` qualifies as a complex-response wrapper — but it must still import its base shape from `backend/types`, e.g. `EmailTemplatePreviewReturnType`.
 
-### 3.5 Does `sendTestEmail` belong as a mutation? — YES (confirmed)
+### 3.5 Does the send-email field belong as a mutation? — YES (confirmed)
 
-`sendTestEmail` has a side effect (it sends an email). GraphQL/Pothos convention: **root fields with side effects must be mutations**. The `backend/graphql/mutation/AGENTS.md` confirms mutations are reserved for "root mutation fields" registered via `gqlSchemaBuilder.mutationField(...)`; queries ("`backend/graphql/query/AGENTS.md`") are for root query fields. The Pothos docs (scope-auth plugin) state: "Subscription and Mutation root fields work the same way" for `authScopes` — i.e. mutations are first-class root fields. So the plan is correct: **`sendTestEmail` is a mutation**.
+The send-email field has a side effect (it sends an email). GraphQL/Pothos convention: **root fields with side effects must be mutations**. The `backend/graphql/mutation/AGENTS.md` confirms mutations are reserved for "root mutation fields" registered via `gqlSchemaBuilder.mutationField(...)`; queries ("`backend/graphql/query/AGENTS.md`") are for root query fields. The Pothos docs (scope-auth plugin) state: "Subscription and Mutation root fields work the same way" for `authScopes` — i.e. mutations are first-class root fields. So the design is correct: **the send-email field is a mutation**.
 
-> Minor note: the plan's filename `emailTemplate.mutations.ts` uses the plural `mutations`, whereas every existing repo file is singular (`*.mutation.ts`). This is a **naming-convention drift** — see "Recommended plan edits" below.
+> Minor note: the design's filename `emailTemplate.mutations.ts` uses the plural `mutations`, whereas every existing repo file is singular (`*.mutation.ts`). This is a **naming-convention drift** — see "Recommended edits" below.
 
 ### 3.6 Codebase convention cross-check (mandatory) — `notification-preferences.pothos.ts`
 
@@ -362,7 +362,7 @@ gqlSchemaBuilder.mutationField("createEmailTemplate", t =>
   })
 );
 
-gqlSchemaBuilder.mutationField("sendTestEmail", t =>
+gqlSchemaBuilder.mutationField("sendEmail", t =>
   t.field({
     type: EmailTemplatePothosObject, // or a dedicated EmailSendResultPothosObject
     authScopes: { superAdmin: true, notImpersonating: true },
@@ -373,7 +373,7 @@ gqlSchemaBuilder.mutationField("sendTestEmail", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      return EmailTemplateService.sendTestEmail(actorUserId, args.templateId, args.recipient, args.sampleProps ?? {}, ctx.locale);
+      return EmailTemplateService.sendEmail(actorUserId, args.templateId, args.recipient, args.sampleProps ?? {}, ctx.locale);
     },
   })
 );
@@ -383,7 +383,7 @@ gqlSchemaBuilder.mutationField("sendTestEmail", t =>
 
 > `allowedEditorGroups` for non-super-admin editors is enforced inside `EmailTemplateService` (Pattern A) — the `authScopes` gate stays `superAdmin: true` by default. If/when editors below super-admin need access, switch to `authScopes: { $any: { superAdmin: true, permission: AppPermission.EMAIL_TEMPLATE_EDIT } }` (requires declaring `EMAIL_TEMPLATE_EDIT` in `AppPermission`).
 
-## 5. Exact recommended plan-line edits
+## 5. Exact recommended line edits
 
 1. **Line 345** — append a note: `EmailTemplatePreviewPothosObject` is a wrapper type (allowed under the "Exception Policy" in `backend/graphql/AGENTS.md`); its base shape `EmailTemplatePreviewReturnType` must still be imported from `@/backend/types`.
 
@@ -394,7 +394,7 @@ gqlSchemaBuilder.mutationField("sendTestEmail", t =>
 
 4. **Line 347** — clarify `authScopes` placement: it lives on each `t.field({ authScopes: {...} })` call in the mutation file (field-level), NOT on the object type. Default: `authScopes: { superAdmin: true, notImpersonating: true }`. Per-template `allowedEditorGroups` for non-super-admin editors is enforced inside the service layer (Pattern A); if declarative per-template scoping is required later, extend the `AuthScopes` map in `gqlSchemaBuilder.ts` and use the function form `authScopes: (parent, args, ctx) => ({...})`.
 
-5. **Line 346 & 348** — confirm `emailTemplates`/`emailTemplate` and `previewEmailTemplate` are queries (root `queryFields`), while `sendTestEmail` is a **mutation** (side effect — sends an email). The plan already gets this right; no edit needed beyond confirming.
+5. **Line 346 & 348** — confirm `emailTemplates`/`emailTemplate` and `previewEmailTemplate` are queries (root `queryFields`), while the send-email field is a **mutation** (side effect — sends an email). The design already gets this right; no edit needed beyond confirming.
 
 ---
 

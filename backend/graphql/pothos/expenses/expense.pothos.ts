@@ -101,7 +101,7 @@ function expenseCommonInputFields<Req extends boolean>(t: PothosInputFieldBuilde
     expenseCurrency: t.field({ type: CurrencyCodePothosObject, required }),
     paymentDate: t.string({ required, directives: { constraint: { format: "date" } } }),
     expenseDate: t.string({ required, directives: { constraint: { maxLength: 30 } } }),
-    note: t.string({ required: false }),
+    note: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
   };
 }
 
@@ -129,7 +129,7 @@ export const DeleteExpenseInputPothos = gqlSchemaBuilder.inputType("DeleteExpens
     "Soft-delete of a single expense with an optional operator reason. The acting operator is resolved from the request context and is never accepted as input.",
   fields: t => ({
     id: t.id({ required: true }),
-    reason: t.string({ required: false }),
+    reason: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
   }),
 });
 
@@ -142,6 +142,6 @@ export const BulkDeleteExpensesInputPothos = gqlSchemaBuilder.inputType("BulkDel
       required: true,
       directives: { constraint: { maxItems: 500 } },
     }),
-    reason: t.string({ required: false }),
+    reason: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
   }),
 });

@@ -7,7 +7,6 @@ import {
   uniqueIndex,
   uuidColumn,
   uuidDefaultColumn,
-  varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { countryCodeEnum, currencyCodeEnum, genderEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
@@ -27,10 +26,10 @@ export const teachers = createTable(
       .references(() => users.id, { onDelete: "restrict" }),
     nationality: countryCodeEnum("nationality"),
     nationalId: encryptedText("national_id"),
-    phone: varcharColumn("phone", { length: 50 }),
+    phone: encryptedText("phone"),
     // PG-only: `date` column has no dialect-aware helper — degraded to TEXT.
     // SQLite stores ISO date strings (YYYY-MM-DD); app layer handles parsing.
-    dateOfBirth: textColumn("date_of_birth"),
+    dateOfBirth: encryptedText("date_of_birth"),
     gender: genderEnum("gender"),
     address: textColumn("address"),
     qualifications: textColumn("qualifications"),

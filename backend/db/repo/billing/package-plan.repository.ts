@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { queryDb, queryWithPagination } from "@/backend/db";
 import { packagePlans } from "@/backend/db/schema";
+import { DomainError } from "@/backend/lib/errors";
 import type * as Types from "@/backend/types";
 import type { DBTransaction, PaginationArgs } from "@/backend/types";
 
@@ -39,7 +40,7 @@ export namespace PackagePlanRepository {
         updatedAt: now,
       })
       .returning();
-    if (!row) throw new Error("package plan insert returned no rows");
+    if (!row) throw new DomainError("PACKAGE_PLAN_INSERT_FAILED", "package plan insert returned no rows");
     return row;
   };
 

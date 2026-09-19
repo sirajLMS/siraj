@@ -1,6 +1,6 @@
-# i18n Repo Verdict — Email Template Plan (lines 493–514)
+# i18n Repo Verdict — Email Template i18n Call Shape
 
-Verifies the plan's claims about the i18n call shape used by
+Verifies the i18n call shape used by
 `backend/services/communication/templates/email-templates.ts` and the
 `EmailsLabels` namespace.
 
@@ -28,7 +28,7 @@ export function getServerTranslations(locale: string): ReturnType<typeof getTran
 }
 ```
 
-**Conclusion**: The plan is CORRECT — the function is single-arg
+**Conclusion**: The function is single-arg
 `(locale: string)`, fires synchronously, and returns the whole `Translations`
 object. There is **NO 2-arg variant** of `getServerTranslations`. Grep for
 
@@ -89,8 +89,8 @@ So **two distinct functions exist**, both single-arg and synchronous:
 | `getServerTranslations(locale)` | `@/shared/locale/server-graphql` — re-exported by `@/shared/locale` | API routes, scripts, services, repos, tests |
 
 They differ only in the import path / barrel. `getServerTranslations` is a thin
-trampoline that delegates to `getTranslations`. **The plan is using the correct
-one** (`getServerTranslations`) for the `email-template.service.ts` backend
+trampoline that delegates to `getTranslations`. **`getServerTranslations` is the correct
+choice** for the `email-template.service.ts` backend
 service path — that file (`backend/services/...`) sits in the "API routes /
 scripts / services / tests" bucket per AGENTS.md, which is the bucket
 `getServerTranslations` is meant for.
@@ -147,8 +147,7 @@ export interface SuggestionAcknowledgedEmailLabels {
 
 **`errors` field?** — **NO.** The `EmailsLabels` interface today contains
 exactly two members: `complaintResponse` and `suggestionAcknowledged`. There is
-no `errors`, `<template-name>Errors`, or any error sub-namespace. The plan's
-proposal to add a new errors implant (lines 499–510 of the plan) is therefore an
+no `errors`, `<template-name>Errors`, or any error sub-namespace. A new errors implant is therefore an
 ADDITION, not a refactor of existing fields.
 
 ### Wiring
@@ -241,20 +240,20 @@ Confirmed:
   `backend/graphql/AGENTS.md`, `backend/services/AGENTS.md`,
   `backend/db/repo/AGENTS.md`, `backend/db/test/AGENTS.md`,
   `.agents/instructions/backend.instructions.md`,
-  `.agents/agents/review-backend.agent.md`, `.cursor/plans/teacher_*.plan.md`.
+  `.agents/agents/review-backend.agent.md`.
 
 `/home/ahmed/Projects/siraj-mail/package.json` does NOT contain the string
 `next-intl` (grep zero-hit). The package is fully removed. There is no live
 `import` of `next-intl`, `getBackendTranslations`, or `NextIntlClientProvider`
-anywhere in source. The plan's premise that `next-intl` is gone is **VERIFIED**.
+anywhere in source. The premise that `next-intl` is gone is **VERIFIED**.
 
 ---
 
 ## 7. Cross-layer hard rule (shared/AGENTS.md) for the new namespace file
 
 `shared/AGENTS.md` Layer Isolation (lines 7–11) bans any `shared/**` file from
-importing `@/frontend/**`, `@/backend/**`, or `@/app/**`. The plan's proposed
-new emails `errors` group will live under `shared/locale/types/emails/` and
+importing `@/frontend/**`, `@/backend/**`, or `@/app/**`. A
+new emails `errors` group would live under `shared/locale/types/emails/` and
 `shared/locale/{en,ar}/emails/` — all `shared/**` territory — so it can only
 import from `@/shared/**` (e.g. the email-template-namespace leaf interfaces).
 Any new error keys whose values need to interpolate runtime data (template id,
@@ -262,8 +261,8 @@ provider name, reason) should follow the Interpolation Pattern
 (`(param: string) => string` typed function) — the en/ar implants already use
 this pattern.
 
-The plan must NOT import email-render specifics (`@react-email/*`, provider
-SDK shapes) into the `shared/locale/emails` errors interface — those belong in
+The `shared/locale/emails` errors interface must NOT import email-render specifics (`@react-email/*`, provider
+SDK shapes) — those belong in
 `backend/services/communication/templates/*` and are passed in as parameters.
 
 ---
@@ -277,37 +276,33 @@ Several instruction files still describe the i18n API as `getServerTranslations(
 - `app/AGENTS.md` (per the `app/AGENTS.md` line 104 already correctly states sync — only the wider doc set is wrong)
 - `backend/db/repo/AGENTS.md:42`, `backend/services/AGENTS.md:7`,
   `backend/db/test/AGENTS.md:128`, `.agents/instructions/backend.instructions.md:71,90`,
-  `.agents/agents/review-backend.agent.md:90–91`,
-  `.ai/plans/quota/implementation.md:291`,
-  `.cursor/plans/teacher_desktop_layout_5fae6c00.plan.md:37`
+  `.agents/agents/review-backend.agent.md:90–91`.
 
-This is a repo-wide doc drift issue, not something the email-template plan
-introduces. The plan, by adopting the actual single-arg sync shape (as it
-does — see plan lines 495 and 511), is correct.
+This is a repo-wide doc drift issue, not specific to the email-template work.
+Adopting the actual single-arg sync shape is correct.
 
 ---
 
 ## 9. One-line verdict
 
-**VERIFIED.** The plan's i18n premises are correct on every check:
+**VERIFIED.** The i18n premises are correct on every check:
 
 1. `getServerTranslations(locale)` is single-arg and synchronous — confirmed at
    `shared/locale/server-graphql.ts:3`. No 2-arg variant exists anywhere in
    source (every code call site is `getServerTranslations(locale)` or
    `getServerTranslations(locale ?? "en")`).
 2. `email-templates.ts:32` and `:89` call it WITHOUT `await` and WITHOUT a
-   2nd argument — exactly as the plan describes.
+   2nd argument.
 3. `EmailsLabels` (`shared/locale/types/emails/index.ts:28–31`) has NO `errors`
-   field today — only `complaintResponse` + `suggestionAcknowledged`; the
-   proposed errors implant at plan lines 499–510 is a NEW addition.
+   field today — only `complaintResponse` + `suggestionAcknowledged`; a
+   proposed errors implant would be a NEW addition.
 4. Extending `shared/locale/en/emails/index.ts` and
    `shared/locale/ar/emails/index.ts` is the correct path for the En/AR
    implants (existing files already implement `emailsEn` / `emailsAr`).
 5. `next-intl` is absent from `package.json` and from any live import — zero
    source hits, only doc/comment remnants.
 
-The ONLY corrective note for the plan: it must use the **single-arg sync**
+The ONLY corrective note: use the **single-arg sync**
 call shape (`getServerTranslations(locale ?? "en").emailsTranslations.<newGroup>`)
 — NOT the stale 2-arg await form that several instruction files incorrectly
-describe. The plan already does this in its examples (lines 495, 511), so no
-change needed.
+describe.

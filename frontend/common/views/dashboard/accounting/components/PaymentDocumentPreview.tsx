@@ -306,7 +306,7 @@ export function PaymentDocumentPreview({
                   component="a"
                   href={downloadHref}
                   target="_blank"
-                  rel="noopener"
+                  rel="noopener noreferrer"
                 >
                   <DownloadOutlined fontSize="small" />
                 </IconButton>

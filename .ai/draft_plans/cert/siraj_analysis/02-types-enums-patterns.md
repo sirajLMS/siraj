@@ -1,6 +1,6 @@
 # Siraj Backend — Types & Enums Layer Analysis
 
-> Analysis artifact for the certificate feature integration. Documents the canonical type-system patterns, enum definitions, permission model, and end-to-end type flow used across the backend.
+> Analysis artifact for the certificate feature integration. Documents the canonical type-system patterns, enum definitions, permission model, and the complete type flow used across the backend.
 >
 > Working directory: `/home/ahmed/Projects/siraj-cert`
 
@@ -625,7 +625,7 @@ export type StudentCreditStatus  = "negative_balance" | "active_credit";
 
 ---
 
-## 8. Type Flow Through Layers — Students end-to-end
+## 8. Type Flow Through Layers — Students (full pipeline)
 
 Tracing the `Student` entity from DB schema → types → repo → service → GraphQL.
 
@@ -746,7 +746,7 @@ export const StudentsOrderByClausePothosObject = gqlSchemaBuilder.inputRef<Stude
 - Enum fields map to the shared Pothos enum wrappers (`StudentStatusPothosObject`, `GenderPothosObject`, `AppLanguagePothosObject`), which themselves wrap the `backend/enum` TS enums.
 - Input/filter types are typed against backend `StudentCreateInput`/`StudentFilterArgs`/`PartialStudentUpdateInput`/`StudentsOrderByClause`/`StudentsWithFiltersResponse` — exactly enforcing the contracts from the types layer.
 
-### 8.6 End-to-end chain summary
+### 8.6 Full-chain summary
 ```
 backend/db/schema/students/students.ts        (Drizzle pgTable; columns use PG enums from enums.ts)
    │ $inferSelect / $inferInsert

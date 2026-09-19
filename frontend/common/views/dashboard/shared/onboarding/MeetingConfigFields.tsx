@@ -2,7 +2,7 @@
 
 import { Grid, Stack, TextField, Typography } from "@mui/material";
 import type { FieldError } from "react-hook-form";
-import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
+import { MeetingProviderSelectContainer } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelectContainer";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface MeetingConfigFieldsLabels {
@@ -49,7 +49,7 @@ export function MeetingConfigFields({
       </Typography>
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <MeetingProviderSelect
+          <MeetingProviderSelectContainer
             value={meetingProviderValue}
             onChangeAction={onMeetingProviderChange}
             label={labels.fields.meetingProvider}

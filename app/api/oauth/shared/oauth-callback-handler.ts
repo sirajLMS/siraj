@@ -15,10 +15,10 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-
 import { getServerUserContext } from "@/backend/lib";
 import { ensureEnvironmentValidated } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
+import { checkRateLimit, getClientIdentifier, oauthCallbackRateLimiter } from "@/backend/lib/ratelimit";
 import { buildCallbackRedirectUri, MeetingOAuthService, verifyAndConsumeOAuthState } from "@/backend/services";
 import type { OAuthCallbackConfig } from "@/backend/types";
 import { isRelativeSafePath } from "@/frontend/common/lib/safeRedirect";
@@ -48,6 +48,17 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
 
   const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
   const tErrors = getServerTranslations(locale).errorsTranslations;
+
+  // Rate-limit callbacks per client IP: each callback triggers an outbound
+  // provider token exchange, so flooding the endpoint amplifies outbound
+  // requests. Fail-closed (failOpen: false) — a cache outage must not allow
+  // unbounded flooding of the token-exchange leg.
+  const rateLimit = await checkRateLimit(getClientIdentifier(request), oauthCallbackRateLimiter, {
+    failOpen: false,
+  });
+  if (!rateLimit.success) {
+    return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
+  }
 
   const url = request.nextUrl;
   const code = url.searchParams.get("code");
@@ -83,6 +94,7 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
   }
 
   const { userId, returnPath } = statePayload;
+  const codeVerifier = statePayload.codeVerifier;
   const redirectUri = buildCallbackRedirectUri(providerSlug);
 
   // Defense-in-depth: validate returnPath to prevent open redirect
@@ -92,7 +104,7 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
   }
 
   try {
-    await MeetingOAuthService.exchangeAndPersistTokens(cfg, userId, code, redirectUri);
+    await MeetingOAuthService.exchangeAndPersistTokens(cfg, userId, code, redirectUri, codeVerifier);
   } catch (error) {
     logger.error(`${logTag}: token exchange or persistence failed`, {
       userId,

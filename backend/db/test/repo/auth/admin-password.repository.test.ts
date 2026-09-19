@@ -1,19 +1,14 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { UserRepository } from "@/backend/db/repo/users";
 
 import { users } from "@/backend/db/schema";
-import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { comparePassword, hashPassword } from "@/backend/lib/auth/password";
 import type { DBTransaction } from "@/backend/types";
 import { getErrorMessage } from "@/shared/utils/error";
 
-const NONEXISTENT_ID = "00000000-0000-0000-0000-000000000000";
-
-function generateTestPassword(): string {
-  return `TestPass-${randomUUID().slice(0, 8)}!`;
-}
+const NONEXISTENT_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 
 let testPassword: string;
 

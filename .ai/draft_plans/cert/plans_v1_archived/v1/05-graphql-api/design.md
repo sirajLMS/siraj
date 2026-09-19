@@ -598,9 +598,12 @@ export const CertificateVerificationStatusPothosEnum = gqlSchemaBuilder.enumType
   name: "CertificateVerificationStatus",
 });
 
-export const TemplateStatusPothosEnum = gqlSchemaBuilder.enumType(TemplateStatus, {
-  name: "TemplateStatus",
-});
+export const TemplateStatusPothosEnum = gqlSchemaBuilder.enumType(
+  TemplateStatus,
+  {
+    name: "TemplateStatus",
+  },
+);
 
 export const TemplateElementTypePothosEnum = gqlSchemaBuilder.enumType(TemplateElementType, {
   name: "TemplateElementType",

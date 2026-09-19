@@ -933,4 +933,27 @@ export namespace NotificationRepository {
       totalCount: totalCount?.count ?? 0,
     };
   };
+
+  /**
+   * Right-to-be-forgotten scrub: delete every device-token row of the
+   * anonymized subject (token + device name are irreversibly identifying).
+   * Runs inside the caller's transaction.
+   */
+  export const deleteDeviceTokensByUserId = async (userId: string, tx: DBTransaction): Promise<void> => {
+    await tx.delete(userDeviceTokens).where(eq(userDeviceTokens.userId, userId));
+  };
+
+  /**
+   * Right-to-be-forgotten scrub: null the content columns (title, body,
+   * webhook payload) of every notification delivery attributed to the
+   * anonymized subject. Rows stay for delivery-lifecycle audit; the
+   * identity-free lifecycle columns (status, timestamps) remain. Runs
+   * inside the caller's transaction.
+   */
+  export const scrubDeliveryContentByUserId = async (userId: string, tx: DBTransaction): Promise<void> => {
+    await tx
+      .update(notificationDeliveries)
+      .set({ title: null, body: null, webhookPayload: null })
+      .where(eq(notificationDeliveries.userId, userId));
+  };
 }

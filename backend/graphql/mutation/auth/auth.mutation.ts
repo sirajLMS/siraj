@@ -30,6 +30,7 @@ import {
   AuthPasswordService,
   DemoAuthService,
   ImpersonationService,
+  LoginAuditService,
   PermissionGroupSimulationService,
   RateLimitService,
   SessionService,
@@ -52,12 +53,9 @@ function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: strin
 const TIMING_EQUALIZER_PAD = "siraj-timing-equalizer-1f4c9d";
 const DUMMY_HASH_ROUNDS = 12;
 
-let cachedDummyPasswordHash: string | null = null;
-
-function getDummyPasswordHash(): string {
-  cachedDummyPasswordHash ??= hashSync(TIMING_EQUALIZER_PAD, DUMMY_HASH_ROUNDS);
-  return cachedDummyPasswordHash;
-}
+// Precomputed at module load so no request thread ever runs the synchronous
+// bcrypt hash; the unknown-email failure path only pays an async compare.
+const DUMMY_PASSWORD_HASH = hashSync(TIMING_EQUALIZER_PAD, DUMMY_HASH_ROUNDS);
 
 /**
  * Execute a rate-limit operation with fail-open behavior for transient errors.
@@ -69,7 +67,7 @@ async function failOpen<T>(operation: string, fn: () => Promise<T>, fallback: T)
     return await fn();
   } catch (error) {
     if (isTransientError(error)) {
-      logger.warn(`${operation} failed (cold-start transient), failing open`);
+      logger.error(`${operation} failed (transient infrastructure error), failing open`);
       return fallback;
     }
     throw error;
@@ -244,15 +242,10 @@ gqlSchemaBuilder.mutationFields(t => ({
       const ipAddress = ctx.ipAddress ?? "127.0.0.1";
       const tErrors = ctx.t().errorsTranslations;
 
-      // 0. Enforce auth rate limit before any credential checks
-      // Fail-open: if cache service is cold-starting, proceed with login rather than
-      // falsely rejecting with "too many attempts"
-      const rateLimitResult = await failOpen("Rate limit check", () => checkRateLimit(ipAddress, authRateLimiter), {
-        success: true,
-        limit: 0,
-        remaining: 0,
-        reset: 0,
-      });
+      // 0. Enforce auth rate limit before any credential checks.
+      // checkRateLimit is fail-closed: cache outages reject logins rather
+      // than unconditionally allowing them.
+      const rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
       if (!rateLimitResult.success) {
         throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
           extensions: { code: "TOO_MANY_ATTEMPTS" },
@@ -283,13 +276,14 @@ gqlSchemaBuilder.mutationFields(t => ({
         // Timing-equalize with the found-user path: run a real bcrypt compare
         // against a valid dummy hash so response latency does not reveal email
         // existence.
-        await comparePassword(password, getDummyPasswordHash());
+        await comparePassword(password, DUMMY_PASSWORD_HASH);
         // Still record attempt even if user doesn't exist to prevent enumeration
         await failOpen("recordAttempt (user not found)", () => RateLimitService.recordAttempt(ipAddress, email.value), {
           attempts: 0,
           lockedUntil: null,
           isLocked: false,
         });
+        await LoginAuditService.recordUnknownEmailLoginFailure(email.value, ipAddress);
         throw new GraphQLError(tErrors.auth.invalidCredentials, {
           extensions: { code: "INVALID_CREDENTIALS" },
         });
@@ -306,6 +300,7 @@ gqlSchemaBuilder.mutationFields(t => ({
           () => RateLimitService.recordAttempt(ipAddress, email.value),
           { attempts: 0, lockedUntil: null, isLocked: false }
         );
+        await LoginAuditService.recordWrongPasswordLoginFailure(user.id, ipAddress);
         if (result.isLocked) {
           throw new GraphQLError(tErrors.auth.accountLocked, {
             extensions: { code: "TOO_MANY_ATTEMPTS" },
@@ -338,6 +333,8 @@ gqlSchemaBuilder.mutationFields(t => ({
 
         // Set httpOnly cookies for session and refresh token
         setAuthCookies(ctx, sessionId, refreshToken, accessToken);
+
+        await LoginAuditService.recordLoginSuccess(user.id, ipAddress);
 
         return {
           token: accessToken,
@@ -372,17 +369,9 @@ gqlSchemaBuilder.mutationFields(t => ({
       const tErrors = ctx.t().errorsTranslations;
       const ipAddress = ctx.ipAddress ?? "127.0.0.1";
 
-      // 0. Enforce auth rate limit before any checks (fail-open for cold-start resilience, mirroring login)
-      const rateLimitResult = await failOpen(
-        "Demo rate limit check",
-        () => checkRateLimit(ipAddress, authRateLimiter),
-        {
-          success: true,
-          limit: 0,
-          remaining: 0,
-          reset: 0,
-        }
-      );
+      // 0. Enforce auth rate limit before any checks (fail-closed on cache
+      // errors, mirroring login)
+      const rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
       if (!rateLimitResult.success) {
         throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
           // ← compile-time ✅

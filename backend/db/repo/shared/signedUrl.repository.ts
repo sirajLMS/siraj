@@ -1,8 +1,8 @@
-import { and, eq, gt, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gt, lt, sql } from "drizzle-orm";
 import { db, withForUpdate } from "@/backend/db";
 import { signedUrls } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
-import type { SignedUrlInsertType, SignedUrlSelectType } from "@/backend/types";
+import type { DBTransaction, SignedUrlInsertType, SignedUrlSelectType } from "@/backend/types";
 
 // ============================================================================
 // Prepared Statements (Drizzle Prepared Statements 2.0)
@@ -32,6 +32,25 @@ export namespace SignedUrlRepository {
   export const getSignedUrlById = async (id: string): Promise<SignedUrlSelectType | null> => {
     const result = await findSignedUrlByIdPrepared.execute({ id });
     return result[0] || null;
+  };
+
+  /**
+   * Latest signed URL for a stored file path. Used to attribute an uploaded
+   * file to its uploader (upload provenance) when validating that the actor
+   * referencing a file id is the one who uploaded it.
+   */
+  export const getLatestByFilePath = async (
+    filePath: string,
+    tx?: DBTransaction
+  ): Promise<SignedUrlSelectType | null> => {
+    const q = tx ?? db;
+    const [row] = await q
+      .select()
+      .from(signedUrls)
+      .where(eq(signedUrls.filePath, filePath))
+      .orderBy(desc(signedUrls.createdAt))
+      .limit(1);
+    return row ?? null;
   };
 
   /**

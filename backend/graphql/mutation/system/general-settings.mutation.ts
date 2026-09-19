@@ -15,7 +15,7 @@ import { SystemSettingsService } from "@/backend/services";
 gqlSchemaBuilder.mutationField("upsertSystemSetting", t =>
   t.field({
     type: SystemSettingPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_GENERAL, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.SETTINGS_EDIT_GENERAL, notImpersonating: true } },
     args: {
       input: t.arg({ type: SystemSettingUpsertInputPothos, required: true }),
     },
@@ -46,7 +46,7 @@ gqlSchemaBuilder.mutationField("upsertSystemSetting", t =>
 gqlSchemaBuilder.mutationField("deleteSystemSetting", t =>
   t.field({
     type: "Boolean",
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_GENERAL, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.SETTINGS_EDIT_GENERAL, notImpersonating: true } },
     args: {
       key: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },

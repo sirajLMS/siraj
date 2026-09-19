@@ -55,6 +55,8 @@ fi
 echo "🔍 Extracting and decrypting active NVIDIA keys from OmniRoute DB..."
 
 TMP_DIR=$(mktemp -d)
+# Ensure decrypted keys never linger in the temp dir on mid-script failure
+trap 'rm -rf "$TMP_DIR"' EXIT
 KEYS_FILE="${TMP_DIR}/active_keys.txt"
 
 OMNIROUTE_DB="$OMNIROUTE_DB" OMNIROUTE_ENV="$OMNIROUTE_ENV" KEYS_FILE="$KEYS_FILE" bun -e '

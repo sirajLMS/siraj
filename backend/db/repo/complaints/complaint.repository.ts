@@ -428,4 +428,14 @@ export namespace ComplaintRepository {
       .where(eq(complaintFiles.complaintId, complaintId))
       .orderBy(desc(complaintFiles.createdAt));
   };
+
+  /**
+   * Right-to-be-forgotten scrub: delete every complaint submitted by the
+   * anonymized subject's parent row. `submitter_email` and `body` are
+   * NOT NULL, so rows are deleted (responses and file junctions follow via
+   * cascade) rather than nulled. Runs inside the caller's transaction.
+   */
+  export const deleteByParentId = async (parentId: string, tx: DBTransaction): Promise<void> => {
+    await tx.delete(complaints).where(eq(complaints.parentId, parentId));
+  };
 }

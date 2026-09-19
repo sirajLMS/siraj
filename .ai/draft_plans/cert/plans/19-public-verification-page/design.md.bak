@@ -275,16 +275,6 @@ Every file that this plan creates or edits, with full path and component type:
 | `shared/locale/namespaces/translation.ts` | Edit — add `Certificates: { Verification }` |
 | `shared/locale/types/message.ts` | Edit — add `VerificationLabels` to `MessageSchema` |
 
-### Test Files
-
-| File | Type | Purpose |
-|------|------|---------|
-| `test/ui/components/verify/VerificationContainer.test.tsx` | Component test | Container: loading, valid, revoked, expired, not-found, error states |
-| `test/ui/components/verify/VerificationView.test.tsx` | Component test | View: responsive switch, state delegation |
-| `test/ui/components/verify/ShareButtons.test.tsx` | Component test | Share: clipboard, Web Share API, social links |
-| `test/ui/components/verify/LanguageToggle.test.tsx` | Component test | Language toggle: cookie set, router replace |
-| `test/ui/components/verify/ManualCodeForm.test.tsx` | Component test | Form: validation, submit, navigation |
-| `test/ui/e2e/verify/verify-page.spec.ts` | E2E test | Full page: QR scan flow, invalid code, revoked, print |
 
 ---
 
@@ -1662,7 +1652,7 @@ Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on 20
 - **View location**: `frontend/common/views/verify/` (NOT nested under `frontend/common/views/dashboard/`) is a reasonable adaptation. The existing convention is `frontend/common/views/dashboard/<domain>/`, but `this` public page is single-tier/mobile-first and not dashboard-scoped, so a non-`dashboard/` sibling is appropriate. The tier view paths `frontend/mobile/views/verify/` and `frontend/desktop/views/verify/` follow the established tier split.
 - **No `frontend/stores/` reference**: This plan correctly uses `frontend/common/graphql/sharedDocuments/` for the Apollo document and does not reference the non-existent `frontend/stores/` path. (`VerificationContainer` keeps state in component state, not a Zustand store — appropriate for a stateless public page.)
 - **GraphQL document conventions**: `VerifyCertificateQueryDocument` in `frontend/common/graphql/sharedDocuments/certificates.verification.documents.ts` follows the `<domain>.documents.ts` + `{Entity}QueryDocument` naming documented in `frontend/common/graphql/AGENTS.md`. The `certificates` domain is new (no existing `.documents.ts` for it), so this is additive, not a path mismatch.
-- **AGENTS.md / instruction file references**: All referenced files exist (`frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md`, `test/ui/AGENTS.md`, `shared/AGENTS.md`, `app/AGENTS.md`, `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`). Knowledge-propagation targets (`frontend/NEW_PAGE_WORKFLOW.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/IMPLEMENTATION_LEARNINGS.md`) all exist.
+- **AGENTS.md / instruction file references**: All referenced files exist (`frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md`, `shared/AGENTS.md`, `app/AGENTS.md`, `.agents/instructions/frontend.instructions.md`). Knowledge-propagation targets (`frontend/NEW_PAGE_WORKFLOW.md`, `frontend/COMPONENT_PATTERNS.md`, `frontend/IMPLEMENTATION_LEARNINGS.md`) all exist.
 - **No existing QR/verify pattern** in the repo — this is greenfield, so the plan is creating the verification UI from scratch (no stale references to override).
 
 ### Corrections Made

@@ -66,7 +66,10 @@ export type AuditAction =
   | "CARRYOVER_DELETE"
   | "EXPENSE_CREATE"
   | "EXPENSE_UPDATE"
-  | "EXPENSE_DELETE";
+  | "EXPENSE_DELETE"
+  | "LOGIN_SUCCESS"
+  | "LOGIN_FAILED"
+  | "USER_ANONYMIZED";
 
 /**
  * Input for creating an audit log entry

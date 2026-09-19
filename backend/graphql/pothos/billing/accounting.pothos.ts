@@ -111,7 +111,7 @@ export const PackagePlanInput = gqlSchemaBuilder.inputRef<PackagePlanSubmitInput
   fields: t => ({
     codename: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
     displayName: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
-    description: t.string({ required: false }),
+    description: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
     creditHours: t.float({
       required: true,
       directives: { constraint: { min: 0.01, max: 100000 } },
@@ -134,7 +134,7 @@ export const PackagePlanUpdateInputType = gqlSchemaBuilder
     fields: t => ({
       id: t.id({ required: true }),
       displayName: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-      description: t.string({ required: false }),
+      description: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
       creditHours: t.float({ required: false }),
       priceAmount: t.float({ required: false }),
       currency: t.field({ type: CurrencyCodePothosObject, required: false }),
@@ -164,7 +164,7 @@ export const AccountingPaymentInput = gqlSchemaBuilder
       paymentGateway: t.field({ type: PaymentGatewayPothosObject, required: true }),
       paymentDate: t.field({ type: "DateTime", required: true }),
       isPaidStatusOn: t.boolean({ required: false }),
-      paymentNote: t.string({ required: false }),
+      paymentNote: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
     }),
   });
 
@@ -175,7 +175,7 @@ export const AccountingPaymentUpdateInputObject = gqlSchemaBuilder
     fields: t => ({
       id: t.id({ required: true }),
       paymentGateway: t.field({ type: PaymentGatewayPothosObject, required: false }),
-      paymentNote: t.string({ required: false }),
+      paymentNote: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
       creditHours: t.float({ required: false }),
       expectedInvoiceVersion: t.int({ required: false }),
     }),

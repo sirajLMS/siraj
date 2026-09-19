@@ -163,6 +163,16 @@ export class ZoomMeetingAdapter extends MeetingAdapterBase {
   }
 
   async deleteMeeting(meetingId: string): Promise<void> {
+    // Zoom meeting IDs are purely numeric; anything else means the stored
+    // value was corrupted or tampered with — refuse before it is interpolated
+    // into the provider URL.
+    if (!/^\d+$/.test(meetingId)) {
+      logger.warn("ZoomMeetingAdapter: refusing deleteMeeting with non-numeric meeting id", {
+        meetingIdLength: meetingId.length,
+      });
+      return;
+    }
+
     let accessToken: string;
     const hasOrgCreds = !!(this.accountId && this.clientId && this.clientSecret);
 
@@ -199,11 +209,15 @@ export class ZoomMeetingAdapter extends MeetingAdapterBase {
     if (token) {
       try {
         const body = new URLSearchParams({ token: token.accessToken });
-        await fetch("https://zoom.us/oauth/revoke", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: body.toString(),
-        });
+        await fetchWithTimeout(
+          "https://zoom.us/oauth/revoke",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: body.toString(),
+          },
+          this.providerSlug
+        );
       } catch (error) {
         logger.warn("ZoomMeetingAdapter: token revocation failed", {
           message: error instanceof Error ? error.message : String(error),

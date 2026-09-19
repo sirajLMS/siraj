@@ -79,6 +79,7 @@ export type DemoLoginInput = {
 export type LogoutUserInput = {
   readonly sessionId?: string | null;
   readonly accessToken?: string | null;
+  readonly refreshToken?: string | null;
   readonly ipAddress?: string | null;
   readonly locale?: string;
 };

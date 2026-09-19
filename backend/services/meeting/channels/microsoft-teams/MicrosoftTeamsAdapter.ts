@@ -1,6 +1,7 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import {
+  fetchWithTimeout,
   isRecord,
   isTokenExpired,
   MeetingAdapterBase,
@@ -139,7 +140,7 @@ export class MicrosoftTeamsAdapter extends MeetingAdapterBase {
       throw new NoOrgCredentialsNoUserTokenError("microsoft_teams");
     }
     const accessToken = await this.getAccessToken();
-    const url = `${MS_GRAPH_BASE}/users/${this.organizerUserId}/onlineMeetings/${meetingId}`;
+    const url = `${MS_GRAPH_BASE}/users/${this.organizerUserId}/onlineMeetings/${encodeURIComponent(meetingId)}`;
 
     const { signal, cancel } = withTimeout(REQUEST_TIMEOUT_MS);
     try {
@@ -171,11 +172,15 @@ export class MicrosoftTeamsAdapter extends MeetingAdapterBase {
       } else {
         try {
           const body = new URLSearchParams({ token: token.accessToken });
-          await fetch(`https://login.microsoftonline.com/${encodeURIComponent(this.tenantId)}/oauth2/v2.0/logout`, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: body.toString(),
-          });
+          await fetchWithTimeout(
+            `https://login.microsoftonline.com/${encodeURIComponent(this.tenantId)}/oauth2/v2.0/logout`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: body.toString(),
+            },
+            this.providerSlug
+          );
         } catch (error) {
           logger.warn("MicrosoftTeamsAdapter: token revocation failed", {
             message: error instanceof Error ? error.message : String(error),

@@ -6,6 +6,20 @@ import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import { calculateHash } from "@/backend/storage/disk/vercel/utils";
 import type * as Types from "@/backend/types";
 
+const PUBLIC_PATH_PREFIX = "public";
+
+export function isPublicStoragePath(filePath: string): boolean {
+  return filePath === PUBLIC_PATH_PREFIX || filePath.startsWith(`${PUBLIC_PATH_PREFIX}/`);
+}
+
+/**
+ * Public blob access is granted only for objects stored under `public/` paths;
+ * everything else is private even when the operator override allows public.
+ */
+export function resolveBlobAccess(access: "public" | "private", filePath: string): "public" | "private" {
+  return access === "public" && isPublicStoragePath(filePath) ? "public" : "private";
+}
+
 export async function prepareUpload(
   ctx: VercelContext,
   input: Types.UploadPreparationInput
@@ -21,7 +35,7 @@ export async function prepareUpload(
       id: sessionId,
       url: `${ctx.baseUrl}/api/storage/vercel-upload`,
       uploadType: UploadType.VERCEL_BLOB_CLIENT,
-      access: ctx.access,
+      access: resolveBlobAccess(ctx.access, cleanedPath),
     };
   });
 }
@@ -41,7 +55,7 @@ export async function uploadFile(
       const blob = await put(cleanedFilePath, buffer, {
         token: ctx.token,
         contentType: contentType,
-        access: ctx.access,
+        access: resolveBlobAccess(ctx.access, cleanedFilePath),
       });
 
       const hash = calculateHash(buffer);

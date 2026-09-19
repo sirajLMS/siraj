@@ -3,7 +3,9 @@ import { logger } from "@/frontend/common/utils/logger";
 
 export type PrepareUploadFn = (options: {
   variables: { input: { path: string; fileSize: number; contentType: string; contentHash: string } };
-}) => Promise<{ data?: { prepareUpload?: { id: string; url: string; uploadType: UploadType } | null } }>;
+}) => Promise<{
+  data?: { prepareUpload?: { id: string; url: string; uploadType: UploadType; access?: string } | null };
+}>;
 
 /**
  * Compute the base64-encoded SHA-256 hash of a `File`.
@@ -57,11 +59,12 @@ async function uploadViaVercelBlob(
   file: File,
   handleUploadUrl: string,
   sessionId: string,
-  contentType: string
+  contentType: string,
+  access: "public" | "private"
 ): Promise<string> {
   const { upload } = await import("@vercel/blob/client");
   const blob = await upload(filePath, file, {
-    access: "public",
+    access,
     handleUploadUrl,
     clientPayload: JSON.stringify({
       sessionId,
@@ -103,7 +106,11 @@ export async function performClientStorageUpload(params: PerformClientStorageUpl
   const { id: sessionId, url, uploadType } = prepData.prepareUpload;
 
   if (uploadType === UploadType.VercelBlobClient) {
-    return uploadViaVercelBlob(params.filePath, params.file, url, sessionId, params.contentType);
+    // Use the server-decided access level; the server resolves "public" only
+    // for `public/` paths. Default to "private" (fail-closed) when absent —
+    // server-side probes remain the authoritative enforcement.
+    const access = prepData.prepareUpload.access === "public" ? "public" : "private";
+    return uploadViaVercelBlob(params.filePath, params.file, url, sessionId, params.contentType, access);
   }
 
   return uploadViaSignedUrl(url, params.file, params.contentType, contentHash);

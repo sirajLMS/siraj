@@ -30,6 +30,15 @@ function getSonarProperties() {
 
 const sonarProps = getSonarProperties();
 
+// The scanner resets the local Sonar admin password — a committed fallback
+// credential would be a standing secret in the repo, so fail loudly instead.
+const sonarAdminPassword = process.env.SONAR_ADMIN_PASSWORD;
+if (!sonarAdminPassword) {
+  throw new Error(
+    "SONAR_ADMIN_PASSWORD environment variable is not set — refusing to use a committed fallback credential"
+  );
+}
+
 export const CONFIG = {
   SONAR_HOST: "http://localhost:9000",
   SONAR_TOKEN_FILE: join(SONAR_DIR, ".sonar-token"),
@@ -38,7 +47,7 @@ export const CONFIG = {
   PROJECT_KEY: sonarProps["sonar.projectKey"] || "project_key",
   PROJECT_NAME: sonarProps["sonar.projectName"] || "Certificate Generation and Verification System",
   ADMIN_DEFAULT_PASSWORD: "admin",
-  ADMIN_NEW_PASSWORD: process.env.SONAR_ADMIN_PASSWORD ?? ["Admin", "123", "!@#$"].join(""),
+  ADMIN_NEW_PASSWORD: sonarAdminPassword,
   SCANNER_VERSION: "6.2.1.4610",
   SCANNER_DIR: join(process.env.HOME ?? process.env.USERPROFILE ?? "", ".sonar-scanner"),
 };

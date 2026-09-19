@@ -114,13 +114,13 @@ describe("GraphQL Schedule Integration Tests", () => {
     parentUserId = r.parentUserId;
     parentId = r.parentId;
 
-    const sa = await provisionTestSuperAdmin(adminToken, "SchedTestSA");
+    const sa = await provisionTestSuperAdmin(r.superAdminToken, "SchedTestSA");
     expect(sa.token).not.toBe("");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
 
     // Provision a second teacher for cross-access tests
-    const secondEntities = await provisionTestEntities(adminToken, "SchedTest2");
+    const secondEntities = await provisionTestEntities(r.superAdminToken, "SchedTest2");
     expect(secondEntities.teacherId).not.toBe("");
     secondTeacherId = secondEntities.teacherId;
     secondStudentId = secondEntities.studentId;
@@ -435,7 +435,7 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupTestEntities(adminToken, {
+    await cleanupTestEntities(superAdminToken, {
       studentUserId,
       teacherUserId,
       parentUserId,
@@ -443,7 +443,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       teacherId,
       parentId,
     });
-    await cleanupTestEntities(adminToken, {
+    await cleanupTestEntities(superAdminToken, {
       studentUserId: secondStudentUserId,
       teacherUserId: secondTeacherUserId,
       parentUserId: secondParentUserId,

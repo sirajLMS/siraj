@@ -117,6 +117,7 @@ export const dashboardCronEn: CronLabels = {
     concurrencyConflict: "A run for this schedule is already in progress",
     queueBackendNotAvailable: "The configured queue backend is not available",
     permissionDenied: "You do not have permission to manage cron schedules",
+    payloadTooLarge: "The cron job payload is too large. Maximum allowed size is 64 KB.",
     invalidTimezone: tz => `Invalid timezone: ${tz}`,
     runNotFound: id => `Run not found: ${id}`,
     manualTriggerConflict: "A run is already in progress for this schedule",

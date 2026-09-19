@@ -11,7 +11,7 @@
 
 > **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
 >
-> **Execution order**: 1.1 → 1.2 → (1.3, 1.5 via parallel subagents) → 1.4 → (2.1, 2.2, 2.8, 2.11 via parallel subagents) → (2.3, 2.13, 2.14, 2.21 via parallel subagents) → (2.4, 2.5, 2.22, 2.23 via parallel subagents) → (2.6, 2.9, 2.10, 2.15, 2.18, 2.19 via parallel subagents) → (2.7, 2.12, 2.16, 2.17, 2.20 via parallel subagents) → (2.24, 2.25, 3.1, 3.2, 3.3 via parallel subagents) → (2.26, 3.4 via parallel subagents) → 3.5 → (R4-T1, R4-T2, R4-T3 via parallel subagents) → R4-T11 → (3.6, 2.27, R4-T12 via parallel subagents — knowledge propagation)
+> **Execution order**: 1.1 → 1.2 → (1.3, 1.5 via parallel subagents) → 1.4 → (2.1, 2.2, 2.8, 2.11 via parallel subagents) → (2.3, 2.13, 2.14, 2.21 via parallel subagents) → (2.4, 2.5, 2.22, 2.23 via parallel subagents) → (2.6, 2.9, 2.10, 2.15, 2.18, 2.19 via parallel subagents) → (2.7, 2.16, 2.17, 2.20 via parallel subagents) → (3.1, 3.3 via parallel subagents) → (2.26, 3.4 via parallel subagents) → 3.5 → (R4-T1, R4-T2, R4-T3 via parallel subagents) → (3.6, 2.27, R4-T12 via parallel subagents — knowledge propagation)
 
 ---
 
@@ -35,18 +35,18 @@
 │ State  File   Import   Export   Preview  Batch    Mobile           │
 │ Store  Utils  Actions  Actions  Modal    Import   Adaptation       │
 │                                                │                    │
-│ 2.8  2.9  2.10 2.11 2.12                      │                    │
-│ TypeScript  Role     Error   i18n      E2E   │                    │
-│ Types    Matrix   Handling  Keys     Tests  │                    │
+│ 2.8  2.9  2.10 2.11                                              │
+│ TypeScript  Role     Error   i18n                                 │
+│ Types    Matrix   Handling  Keys                                   │
 └─────────────────────────────────────────────────────────────────────┘
         │
         ▼
 ┌─────────────────────────────────────────────────────────────────────┐
 │ PHASE 3: Integration & Quality (Sequential after 2.x)               │
 ├─────────────────────────────────────────────────────────────────────┤
-│ 3.1  → 3.2  → 3.3  → 3.4  → 3.5                                    │
-│ Unit   E2E   Access    Perf    Quality   Docs                      │
-│ Tests  Tests ibility  Tests  Gate      + AGENTS.md                 │
+│ 3.1  → 3.3  → 3.4  → 3.5                                           │
+│ Unit   Access   Perf    Quality   Docs                              │
+│ Tests ibility  Tests  Gate      + AGENTS.md                         │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -88,17 +88,17 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: 2.6 (Batch Results Summary), 2.9 (Role-Based Access Matrix), 2.10 (Error Handling), 2.15 (Export Step 1 — Format), 2.18 (Import Step 1 — Upload), 2.19 (Import Step 2 — Validation)
 - Rationale: 2.6 depends on 2.5; 2.9 depends on 2.4 and 2.5; 2.10 depends on 2.5; 2.15 depends on 2.13; 2.18 depends on 2.14 and 2.21; 2.19 depends on 2.14 and 2.23 — all complete after Wave 7. No interdependencies among them.
 
-### Wave 9: 2.7, 2.12, 2.16, 2.17, 2.20
-- Tasks: 2.7 (Mobile/Desktop Adaptation), 2.12 (E2E Tests), 2.16 (Export Step 2 — Options), 2.17 (Export Step 3 — Progress), 2.20 (Import Steps 3+4 — Preview & Import)
-- Rationale: 2.7 depends on 2.4, 2.5, 2.6; 2.12 depends on 2.4–2.7; 2.16 depends on 2.13 and 2.15; 2.17 depends on 2.13 and 2.15; 2.20 depends on 2.14, 2.22, 2.23 — all complete after Wave 8. No interdependencies among them.
+### Wave 9: 2.7, 2.16, 2.17, 2.20
+- Tasks: 2.7 (Mobile/Desktop Adaptation), 2.16 (Export Step 2 — Options), 2.17 (Export Step 3 — Progress), 2.20 (Import Steps 3+4 — Preview & Import)
+- Rationale: 2.7 depends on 2.4, 2.5, 2.6; 2.16 depends on 2.13 and 2.15; 2.17 depends on 2.13 and 2.15; 2.20 depends on 2.14, 2.22, 2.23 — all complete after Wave 8. No interdependencies among them.
 
-### Wave 10: 2.24, 2.25, 3.1, 3.2, 3.3
-- Tasks: 2.24 (Enhanced Component Tests), 2.25 (Enhanced E2E Tests), 3.1 (Backend Unit Tests), 3.2 (Frontend Unit Tests), 3.3 (Accessibility Audit)
-- Rationale: 2.24 depends on all 2.13–2.23; 2.25 depends on 2.15–2.20; 3.1 depends on 1.1–1.3; 3.2 depends on 2.1–2.6; 3.3 depends on 2.5 and 2.6 — all complete after Wave 9. Test tasks are independent of each other (different test suites).
+### Wave 10: 3.1, 3.3
+- Tasks: 3.1 (Backend Unit Tests), 3.3 (Accessibility Audit)
+- Rationale: 3.1 depends on 1.1–1.3; 3.3 depends on 2.5 and 2.6 — all complete after Wave 9. Test tasks are independent of each other (different test suites).
 
 ### Wave 11: 2.26, 3.4
-- Tasks: 2.26 (Quality Loop Per File — Enhanced UI), 3.4 (Performance Tests)
-- Rationale: 2.26 depends on all 2.13–2.25; 3.4 depends on 3.2 — both complete after Wave 10. No interdependency between them.
+- Tasks: 2.26 (Quality Loop Per File — Enhanced Wizard Components), 3.4 (Performance Tests)
+- Rationale: 2.26 depends on all 2.13–2.23; 3.4 completes after Wave 10. No interdependency between them.
 
 ### Wave 12: 3.5
 - Tasks: 3.5 (Quality Gate)
@@ -107,10 +107,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 ### Wave 13: R4-T1, R4-T2, R4-T3
 - Tasks: R4-T1 (File Validation), R4-T2 (Progress Indicators), R4-T3 (Error Recovery System — includes TemplateDiff, BatchExport, Import Hooks, ExportFormats, Version Service, ExportWizard A11y, File Processing Utils as sub-items)
 - Rationale: Round 4 enhancement tasks — each creates/modifies distinct files with no interdependencies. All build on patterns established by prior waves.
-
-### Wave 14: R4-T11
-- Tasks: R4-T11 (Component Tests for Round 4)
-- Rationale: Depends on R4-T1–R4-T3. Tests the components created in Wave 13.
 
 ### Final Wave: Knowledge Propagation
 - Tasks: 3.6 (Documentation & Knowledge Propagation), 2.27 (Knowledge Propagation — Enhanced UI), R4-T12 (Knowledge Propagation — Round 4)
@@ -307,10 +303,8 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - [ ] Actions: `resetImport()`, `setFile(file)`, `startValidation()`, `setPreview(data)`, `startImport()`, `markSuccess(templateId)`, `markError(error)`
 - [ ] `partialize` excludes `selectedFile` (non-serializable)
 - [ ] Export store for `useImportExportStore` hook
-- [ ] Storybook story for store state transitions
 
 **Quality checks:**
-- [ ] Unit test: `test/ui/components/certificates/importExport/ImportStateMachine.spec.ts` (all states + invalid transitions)
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/common/stores/importExportStore.ts --lifecycle codescene
@@ -346,7 +340,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - [ ] `extractImagesFromZip(zipBlob: Blob): Map<string, Blob>` — for batch import
 
 **Quality checks:**
-- [ ] Unit test: `test/ui/components/certificates/importExport/ExportFileFormat.spec.ts` (valid JSON, ZIP, corrupt)
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/importExport/utils/fileReader.ts --lifecycle codescene
@@ -381,7 +374,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - [ ] Component: `ImportValidationBadge` showing pass/fail + warning count + expandable details
 
 **Quality checks:**
-- [ ] Unit test: `test/ui/components/certificates/importExport/ImportFormatDetect.test.tsx` (format detection, validation edge cases)
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/importExport/schemas/importSchema.ts --lifecycle codescene
@@ -417,7 +409,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - [ ] `ExportFormatSelector` component: radio for "JSON (single)" vs "ZIP (batch)"
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/certificates/importExport/TemplateExportActions.test.tsx` (export triggers, permissions, loading)
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/importExport/TemplateExportDesktop.tsx --lifecycle codescene
@@ -463,7 +454,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - [ ] Wrap import trigger in `RequirePermission` with `certificates.templates.manage`
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/certificates/importExport/ImportPreviewModal.test.tsx` (render warnings/errors, import button state, a11y)
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/importExport/TemplateImportDesktop.tsx --lifecycle codescene
@@ -503,7 +493,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - [ ] Dismiss on close, auto-close after 10s (optional)
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/certificates/importExport/ImportResultsSummary.test.tsx`
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/importExport/ImportResultsSummary.desktop.tsx --lifecycle codescene
@@ -519,7 +508,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 ### TASK 2.7: Mobile/Desktop Adaptation
 
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.12, 2.16, 2.17, 2.20.
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.16, 2.17, 2.20.
 
 **Files to create/modify:**
 - `frontend/common/views/dashboard/certificates/importExport/ImportExportView.tsx` (switcher)
@@ -540,7 +529,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - [ ] Shared state via Zustand (survives tier switch on resize)
 
 **Quality checks:**
-- [ ] Static test: `bun run test:ui:static` (mobile-desktop isolation)
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/importExport/ImportExportView.tsx --lifecycle codescene
@@ -600,7 +588,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - [ ] Test: verify UI hidden for Content Creator, Reviewer, Student, Parent, Teacher
 
 **Quality checks:**
-- [ ] E2E test: role-based visibility (see Task 3.4)
 - [ ] Run per-file quality loop for each file modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/importExport/TemplateExportDesktop.tsx --lifecycle codescene
@@ -664,7 +651,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - [ ] Use `useAppTranslation('certificates.templates.importExport')` in components
 
 **Quality checks:**
-- [ ] i18n test: verify English + Arabic render in Storybook
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts shared/locale/certificates/templates/importExport.en.ts --lifecycle codescene
@@ -678,46 +664,13 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 ---
 
-### TASK 2.12: E2E Tests (Playwright)
-
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.16, 2.17, 2.20.
-
-**Files to create/modify:**
-- `test/ui/e2e/importExport/importExport-flow.spec.ts` (new)
-- `test/ui/e2e/importExport/importExport-batch.spec.ts` (new)
-
-**Requirements references:** REQ-NFR-003, all AC
-
-**Subtasks:**
-- [ ] Single import flow: select file → preview → import → verify redirect to editor
-- [ ] Single export flow: click export → verify download → verify file content
-- [ ] Batch export: select 3 templates → export → verify ZIP contains 3 JSON + manifest
-- [ ] Batch import: upload ZIP → preview → import → verify results summary
-- [ ] Role test: login as Content Creator → verify import hidden, export visible
-- [ ] Mobile viewport: test import/export on 375px width
-- [ ] Error cases: corrupt JSON, oversized file, invalid enum
-
-**Quality checks:**
-- [ ] `bun run build:test` first (required for E2E)
-- [ ] `bun run test:ui:e2e` passes
-- [ ] Screenshots for visual regression (if configured)
-- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
-  ```bash
-  bun run scripts/health/sub-loop.ts test/ui/e2e/importExport/importExport-flow.spec.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/e2e/importExport/importExport-batch.spec.ts --lifecycle codescene
-  ```
-
-**Instruction verification:**
-- [ ] Read `test/ui/AGENTS.md` — E2E test patterns
-- [ ] Read `test/ui/e2e/` existing tests for patterns
-
 ---
 
 ## 4. Integration & Quality Tasks (Phase 3)
 
 ### TASK 3.1: Unit Tests (Backend)
 
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.24, 2.25, 3.2, 3.3.
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 3.3.
 
 **Files:** `backend/db/test/services/`
 - [ ] `templateExport.test.ts` — 3+ cases (valid, not found, with image)
@@ -728,24 +681,13 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 ---
 
-### TASK 3.2: Unit Tests (Frontend Components)
-
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.24, 2.25, 3.1, 3.3.
-
-**Files:** `test/ui/components/certificates/importExport/`
-- [ ] `TemplateExportActions.test.tsx` — 4+ cases
-- [ ] `ImportPreviewModal.test.tsx` — 4+ cases (warnings, errors, a11y)
-- [ ] `ImportStateMachine.spec.ts` — 8+ state transitions
-- [ ] `ExportFileFormat.spec.ts` — 5+ schema variants
-- [ ] `ImportFormatDetect.test.tsx` — 4+ format detections
-
 ---
 
 ### TASK 3.3: Accessibility Audit
 
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.24, 2.25, 3.1, 3.2.
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 3.1.
 
-- [ ] Run axe-core on import/export modals (automated in E2E)
+- [ ] Run axe-core on import/export modals
 - [ ] Manual keyboard navigation test (Tab, Enter, Escape)
 - [ ] Screen reader test (NVDA/VoiceOver): progress announcements, error reading
 - [ ] Color contrast verification (theme tokens used, no hardcoded colors)
@@ -758,10 +700,10 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 > **Parallelizable**: This task runs as a subagent in Wave 11 alongside 2.26.
 
-- [ ] Single export < 2s (template with 50 elements) — measure in E2E
-- [ ] Batch export (50 templates) < 30s — measure in E2E
+- [ ] Single export < 2s (template with 50 elements)
+- [ ] Batch export (50 templates) < 30s
 - [ ] Single import validation < 1s — unit test with performance.now()
-- [ ] Batch import (50 templates) < 60s — measure in E2E
+- [ ] Batch import (50 templates) < 60s
 - [ ] Memory check: no leaks during batch ZIP creation
 
 ---
@@ -822,11 +764,9 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 | 2.9 | Role Matrix | 2 | 2.4, 2.5 (Plan 08/10 integration) | 2 |
 | 2.10 | Error Handling | 2 | 2.5 | 2 |
 | 2.11 | i18n Keys | 2 | - | 2 |
-| 2.12 | E2E Tests | 2 | 2.4-2.7, build:test | 3 |
 | 3.1 | Backend Unit Tests | 3 | 1.1-1.3 | 3 |
-| 3.2 | Frontend Unit Tests | 3 | 2.1-2.6 | 3 |
 | 3.3 | Accessibility Audit | 3 | 2.5, 2.6 | 2 |
-| 3.4 | Performance Tests | 3 | 3.2 | 2 |
+| 3.4 | Performance Tests | 3 | - | 2 |
 | 3.5 | Quality Gate | 3 | All above | 2 |
 | 3.6 | Documentation | 3 | 3.5 | 2 |
 
@@ -888,13 +828,12 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 ### Quality
 - [ ] `bun quality-gate` passes
 - [ ] All unit tests pass
-- [ ] E2E tests pass
 - [ ] Performance metrics met
 ---
 
 ## 9. Enhanced UI Tasks — Wizard Components (Phase 2.5)
 
-These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Conflict Resolution Card, dedicated Zustand stores, validation service, tests, and knowledge propagation. They augment Tasks 2.1–2.12 and should be executed after the Phase 1 backend tasks and in parallel with Phase 2.x front-end tasks.
+These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Conflict Resolution Card, dedicated Zustand stores, validation service, tests, and knowledge propagation. They augment Tasks 2.1–2.11 and should be executed after the Phase 1 backend tasks and in parallel with Phase 2.x front-end tasks.
 
 ---
 
@@ -920,7 +859,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] No `console.*` — use `logger` from `@/frontend/utils/logger` for debug logging
 
 **Quality checks:**
-- [ ] Unit test: `test/ui/components/cert/templates/ExportStore.test.ts` — state transitions, partialize, reset
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/stores/cert/templateExportStore.ts --lifecycle codescene
@@ -954,7 +892,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] `reset` clears all state including revoking any blob URLs
 
 **Quality checks:**
-- [ ] Unit test: `test/ui/components/cert/templates/ImportStore.test.ts` — state transitions, validation flow, conflict resolution
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/stores/cert/templateImportStore.ts --lifecycle codescene
@@ -990,7 +927,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] Use `useAppTranslation(Translation.Dashboard.CertificateImportExport)` hook
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/cert/templates/ExportFormatStep.test.tsx` — renders 5 cards, click selects format, Next disabled initially
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/export/ExportWizardDialog.tsx --lifecycle codescene
@@ -1007,7 +943,7 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 
 ### TASK 2.16: ExportWizardDialog — Step 2 (Format Options)
 
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.12, 2.17, 2.20.
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.17, 2.20.
 
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/export/steps/ExportOptionsStep.tsx` (new)
@@ -1028,7 +964,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] All MUI `sx` prop styling (no direct style props)
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/cert/templates/ExportOptionsStep.test.tsx` — renders correct options per format, checkbox/select changes update store
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/export/steps/ExportOptionsStep.tsx --lifecycle codescene
@@ -1042,7 +977,7 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 
 ### TASK 2.17: ExportWizardDialog — Step 3 (Progress & Download)
 
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.12, 2.16, 2.20.
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.16, 2.20.
 
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/export/steps/ExportProgressStep.tsx` (new)
@@ -1061,7 +996,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] If `isExporting` and progress < 100: show indeterminate fallback if progress is 0
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/cert/templates/ExportProgressStep.test.tsx` — progress bar renders, download disabled until 100%, retry on error
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/export/steps/ExportProgressStep.tsx --lifecycle codescene
@@ -1097,7 +1031,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] All text via `useAppTranslation(Translation.Dashboard.CertificateImportExport)`
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/cert/templates/ImportUploadStep.test.tsx` — drop zone renders, file select triggers store update, URL toggle works, paste toggle works
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/import/ImportWizardDialog.tsx --lifecycle codescene
@@ -1135,7 +1068,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] Loading: `CircularProgress` while validation in flight (`isImporting` on store)
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/cert/templates/ImportValidationStep.test.tsx` — renders 4 checks, expandable details, Next disabled on blocking errors
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/import/steps/ImportValidationStep.tsx --lifecycle codescene
@@ -1149,7 +1081,7 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 
 ### TASK 2.20: ImportWizardDialog — Step 3 (Preview & Conflicts) + Step 4 (Import)
 
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.12, 2.16, 2.17.
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside 2.7, 2.16, 2.17.
 
 **Files to create/modify:**
 - `frontend/views/dashboard/cert/templates/import/steps/ImportPreviewStep.tsx` (new)
@@ -1176,8 +1108,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] Auto-trigger `startImport()` on step mount via `useEffect`
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/cert/templates/ImportPreviewStep.test.tsx` — preview renders, conflict card shows when conflicts exist, Import button triggers store action
-- [ ] Component test: `test/ui/components/cert/templates/ImportProgressStep.test.tsx` — progress bar renders, View Template on success, Retry on error
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/import/steps/ImportPreviewStep.tsx --lifecycle codescene
@@ -1216,7 +1146,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] Error states use `error.main` theme color, success uses `success.main`
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/cert/templates/FileDropZone.test.tsx` — renders idle state, drag-over visual, file dropped, oversize file error, wrong type error, URL toggle, paste toggle, keyboard accessible, aria-label
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/import/FileDropZone.tsx --lifecycle codescene
@@ -1253,7 +1182,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] All text from i18n keys
 
 **Quality checks:**
-- [ ] Component test: `test/ui/components/cert/templates/ConflictResolutionCard.test.tsx` — renders 3 options, default is rename, text field enabled only on rename, radio change updates store, overwrite warning visible
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/import/ConflictResolutionCard.tsx --lifecycle codescene
@@ -1303,7 +1231,6 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 - [ ] No `console.*` — use `logger` for debug
 
 **Quality checks:**
-- [ ] Unit test: `test/ui/components/cert/templates/TemplateValidationService.test.ts` — schema pass/fail, version check, asset validation, variable duplicate detection (6+ cases)
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/views/dashboard/cert/templates/import/validation/templateValidationService.ts --lifecycle codescene
@@ -1320,255 +1247,7 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 
 ---
 
-### TASK 2.24: Enhanced Component Tests (6 Test Files)
-
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.25, 3.1, 3.2, 3.3.
-
-**Files to create/modify:**
-- `test/ui/components/cert/templates/ExportFormatStep.test.tsx` (new)
-- `test/ui/components/cert/templates/ExportOptionsStep.test.tsx` (new)
-- `test/ui/components/cert/templates/ExportProgressStep.test.tsx` (new)
-- `test/ui/components/cert/templates/ImportUploadStep.test.tsx` (new)
-- `test/ui/components/cert/templates/ImportValidationStep.test.tsx` (new)
-- `test/ui/components/cert/templates/ImportPreviewStep.test.tsx` (new)
-- `test/ui/components/cert/templates/ImportProgressStep.test.tsx` (new)
-- `test/ui/components/cert/templates/FileDropZone.test.tsx` (new)
-- `test/ui/components/cert/templates/ConflictResolutionCard.test.tsx` (new)
-- `test/ui/components/cert/templates/ExportStore.test.ts` (new)
-- `test/ui/components/cert/templates/ImportStore.test.ts` (new)
-- `test/ui/components/cert/templates/TemplateValidationService.test.ts` (new)
-
-**Requirements references:** All enhanced tasks, AC-004, AC-008
-
-**Test framework:** Happy DOM + Vitest (via `bun run test:ui:components`), mock Apollo client and Zustand stores
-
-**Subtasks:**
-
-**ExportFormatStep.test.tsx:**
-- [ ] Renders 5 format cards (JSON, ZIP, PDF, PNG, SVG)
-- [ ] Clicking a card selects it (updates store)
-- [ ] Next button disabled until format selected
-- [ ] Correct icons render per format
-- [ ] i18n labels render
-
-**ExportOptionsStep.test.tsx:**
-- [ ] Renders JSON options when format=json
-- [ ] Renders ZIP options when format=zip
-- [ ] Renders PDF options with quality + page size selects when format=pdf
-- [ ] Renders PNG options with resolution + transparent when format=png
-- [ ] Renders SVG options with embedFonts when format=svg
-- [ ] Checkbox/select changes update store
-- [ ] Back button returns to format step
-
-**ExportProgressStep.test.tsx:**
-- [ ] LinearProgress renders with correct value
-- [ ] Download button disabled until progress=100
-- [ ] Clicking download triggers browser download (mock anchor click)
-- [ ] Error state shows Alert + Retry button
-- [ ] File size formatted correctly (KB/MB)
-
-**ImportUploadStep.test.tsx:**
-- [ ] FileDropZone renders with correct accepted types
-- [ ] File drop sets store file
-- [ ] URL toggle reveals text field
-- [ ] Paste JSON toggle reveals textarea
-- [ ] Oversize file shows error alert
-- [ ] Wrong file type shows error alert
-
-**ImportValidationStep.test.tsx:**
-- [ ] Renders 4 validation check rows
-- [ ] Pass status shows CheckCircleOutlined
-- [ ] Warning status shows WarningAmberOutlined
-- [ ] Fail status shows ErrorOutlined
-- [ ] Expandable details toggle on row click
-- [ ] Next button disabled when blocking errors exist
-- [ ] Next button enabled when only warnings
-
-**ImportPreviewStep.test.tsx:**
-- [ ] Mini canvas preview renders
-- [ ] Conflict card renders when conflicts.length > 0
-- [ ] No-conflict state shows success Alert
-- [ ] Import button triggers startImport
-- [ ] Template metadata (title, dimensions, counts) displayed
-
-**ImportProgressStep.test.tsx:**
-- [ ] LinearProgress renders
-- [ ] Success shows Alert + View Template button
-- [ ] Error shows Alert + Retry button
-- [ ] View Template calls onImported
-
-**FileDropZone.test.tsx:**
-- [ ] Idle state renders dashed border + cloud icon + text
-- [ ] Drag-over state changes border + background
-- [ ] File dropped calls onFileDropped
-- [ ] Click triggers hidden file input
-- [ ] Oversize file error state
-- [ ] Wrong type error state
-- [ ] Keyboard accessible (Enter/Space triggers file input)
-- [ ] aria-label set from i18n
-
-**ConflictResolutionCard.test.tsx:**
-- [ ] Renders 3 radio options
-- [ ] Default selection is rename (option 2)
-- [ ] Text field enabled only when resolution=rename
-- [ ] Text field has auto-generated "{title} (Imported)" value
-- [ ] Overwrite option shows warning text
-- [ ] Skip option shows "No changes" text
-- [ ] Radio change calls onResolutionChange
-
-**ExportStore.test.ts:**
-- [ ] Initial state correct
-- [ ] setFormat updates format
-- [ ] setOption updates specific option
-- [ ] reset clears all state
-- [ ] partialize excludes runtime fields
-- [ ] startExport sets isExporting
-
-**ImportStore.test.ts:**
-- [ ] Initial state correct
-- [ ] setFile updates file
-- [ ] startValidation populates validationResults
-- [ ] setResolution updates resolution
-- [ ] startImport sets isImporting + progress
-- [ ] reset clears all state
-- [ ] partialize excludes File object
-
-**TemplateValidationService.test.ts:**
-- [ ] Valid template passes all 4 checks
-- [ ] Missing required field → schema check returns fail
-- [ ] Wrong schema version → version check returns warning
-- [ ] Corrupt base64 image → asset check returns fail
-- [ ] Duplicate variable names → variable check returns warning
-- [ ] Empty export → appropriate errors
-
-**Quality checks:**
-- [ ] All test files pass via `bun run test:ui:components`
-- [ ] Use mock Apollo client (`MockedProvider`) for GraphQL operations
-- [ ] Use `renderHook` + `act` for Zustand store tests
-- [ ] Accessible queries: `getByRole`, `getByLabelText` (not `getByTestId`)
-- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
-  ```bash
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ExportFormatStep.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ExportOptionsStep.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ExportProgressStep.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ImportUploadStep.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ImportValidationStep.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ImportPreviewStep.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ImportProgressStep.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/FileDropZone.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ConflictResolutionCard.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ExportStore.test.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/ImportStore.test.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/templates/TemplateValidationService.test.ts --lifecycle codescene
-  ```
-
-**Instruction verification:**
-- [ ] Read `test/ui/AGENTS.md` — component test patterns
-- [ ] Read `test/ui/components/AGENTS.md` (if exists) — Happy DOM setup
-- [ ] Read `frontend/AGENTS.md` — testing conventions
-
 ---
-
-### TASK 2.25: Enhanced E2E Tests (6 E2E Test Specs)
-
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside 2.24, 3.1, 3.2, 3.3.
-
-**Files to create/modify:**
-- `test/ui/e2e/cert/templates/export-json.spec.ts` (new)
-- `test/ui/e2e/cert/templates/export-zip.spec.ts` (new)
-- `test/ui/e2e/cert/templates/import-json.spec.ts` (new)
-- `test/ui/e2e/cert/templates/import-zip.spec.ts` (new)
-- `test/ui/e2e/cert/templates/drag-drop.spec.ts` (new)
-- `test/ui/e2e/cert/templates/conflict-resolution.spec.ts` (new)
-
-**Requirements references:** All AC, REQ-NFR-003
-
-**Prerequisite:** `bun run build:test` must complete before running E2E tests
-
-**Subtasks:**
-
-**export-json.spec.ts:**
-- [ ] Login as Certificate Admin
-- [ ] Navigate to Template List page
-- [ ] Click Export on a template row
-- [ ] Wizard opens → select JSON format → Next
-- [ ] Verify format-specific options render → Next (Export)
-- [ ] Progress bar animates → completion
-- [ ] Download button enabled → click → verify file downloaded (.playwright downloads API)
-- [ ] Verify downloaded file is valid JSON (parse + schema check)
-- [ ] Verify audit log entry (if testable via API)
-
-**export-zip.spec.ts:**
-- [ ] Login as Certificate Admin
-- [ ] Navigate to Template List page
-- [ ] Select 3 templates via checkboxes
-- [ ] Click "Export Selected" in bulk action bar
-- [ ] Wizard opens → select ZIP format → Next
-- [ ] Verify ZIP options render (compress, includeThumbnails) → Next (Export)
-- [ ] Progress completes → download ZIP
-- [ ] Verify ZIP contains 3 JSON files + manifest.json
-- [ ] Verify each JSON is valid template schema
-
-**import-json.spec.ts:**
-- [ ] Login as Certificate Admin
-- [ ] Navigate to Template List page
-- [ ] Click Import button
-- [ ] Wizard opens → upload a valid JSON template file (via test fixture)
-- [ ] Validation step shows 4 green checks → Next
-- [ ] Preview step shows template metadata + no conflicts → Import
-- [ ] Progress bar → success Alert with "View Template" button
-- [ ] Click View Template → verify navigation to Template Editor
-- [ ] Verify imported template exists in Template List
-
-**import-zip.spec.ts:**
-- [ ] Login as Certificate Admin
-- [ ] Navigate to Template List page
-- [ ] Click Import button
-- [ ] Upload a ZIP archive containing 3 templates (test fixture)
-- [ ] Validation step shows per-template results
-- [ ] Preview step shows batch template list
-- [ ] Import → progress shows batch progress
-- [ ] Verify results summary shows 3 imported
-- [ ] Navigate Template List → verify 3 new templates
-
-**drag-drop.spec.ts:**
-- [ ] Login as Certificate Admin
-- [ ] Open Import wizard
-- [ ] Simulate file drag-drop via Playwright `setInputFiles` on drop zone input
-- [ ] Verify drop zone visual state changes (border highlight)
-- [ ] Verify file accepted → validation step
-- [ ] Test URL import: toggle URL input → enter URL → fetch → validation
-- [ ] Test paste JSON: toggle textarea → paste JSON → validate → progress
-
-**conflict-resolution.spec.ts:**
-- [ ] Login as Certificate Admin
-- [ ] Import a template JSON file whose title matches an existing template
-- [ ] Validation passes → Preview step shows ConflictResolutionCard
-- [ ] Verify 3 radio options (Overwrite / Rename / Skip) rendered
-- [ ] Default selection = Rename — verify text field with "(Imported)" suffix
-- [ ] Click Overwrite → warning text visible → Import → verify existing template replaced
-- [ ] Repeat with Rename → verify new template with "(Imported)" suffix created
-- [ ] Repeat with Skip → verify no changes, wizard closes
-
-**Quality checks:**
-- [ ] All E2E specs pass via `bun run test:ui:e2e`
-- [ ] `bun run build:test` completed before running
-- [ ] Test fixtures: valid template JSON, valid ZIP archive, corrupted JSON, oversized file
-- [ ] Use Playwright `page.waitForDownload()` and `page.waitForSelector()` appropriately
-- [ ] Screenshots on failure (Playwright config)
-- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
-  ```bash
-  bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/export-json.spec.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/export-zip.spec.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/import-json.spec.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/import-zip.spec.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/drag-drop.spec.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/e2e/cert/templates/conflict-resolution.spec.ts --lifecycle codescene
-  ```
-
-**Instruction verification:**
-- [ ] Read `test/ui/AGENTS.md` — E2E test patterns, fixture conventions
-- [ ] Read `test/ui/e2e/AGENTS.md` (if exists) — Playwright config
 
 ---
 
@@ -1576,10 +1255,10 @@ These tasks cover the enhanced Export Wizard, Import Wizard, File Drop Zone, Con
 
 > **Parallelizable**: This task runs as a subagent in Wave 11 alongside 3.4.
 
-**Files:** All files created in Tasks 2.13–2.25
+**Files:** All files created in Tasks 2.13–2.23
 
 **Subtasks:**
-For each new file created in Tasks 2.13 through 2.25, run the per-file verification loop BEFORE importing or using the file elsewhere:
+For each new file created in Tasks 2.13 through 2.23, run the per-file verification loop BEFORE importing or using the file elsewhere:
 
 - [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
@@ -1679,9 +1358,7 @@ After all files pass individually:
 | 2.21 | FileDropZone Component | 2.5 | - | 3 |
 | 2.22 | ConflictResolutionCard | 2.5 | 2.14 | 2 |
 | 2.23 | File Validation Service | 2.5 | 2.3 (schema) | 4 |
-| 2.24 | Enhanced Component Tests | 2.5 | All 2.13–2.23 | 6 |
-| 2.25 | Enhanced E2E Tests | 2.5 | 2.15–2.20, build:test | 5 |
-| 2.26 | Quality Loop Per File | 2.5 | All 2.13–2.25 | 3 |
+| 2.26 | Quality Loop Per File | 2.5 | All 2.13–2.23 | 3 |
 | 2.27 | Knowledge Propagation | 2.5 | 2.26 | 2 |
 
 **Additional Estimated: ~45 hours** (total project now ~105 hours)
@@ -1720,8 +1397,6 @@ After all files pass individually:
 - [ ] Variable validator detects duplicate names
 
 ### Tests
-- [ ] All 12 component tests pass
-- [ ] All 6 E2E tests pass
 - [ ] Accessibility: keyboard navigation, screen reader announcements, focus trap
 - [ ] Responsive: mobile/tablet/desktop layouts correct
 
@@ -1814,28 +1489,6 @@ After all files pass individually:
   - Web Worker for compression: separate thread for ZIP creation
   - Memory management: revoke object URLs after use
   - **Quality loop**: `bun run scripts/health/sub-loop.ts frontend/views/dashboard/certificates/template-import-export/utils/fileProcessing.ts --lifecycle codescene`
-### R4-T11: Component Tests
-
-> **Parallelizable**: This task runs as a subagent in Wave 14 (alone — depends on all Round 4 enhancements).
-
-- [ ] Create `test/ui/components/template-import-export/FileValidator.test.tsx`
-  - Test file size limits
-  - Test format validation
-  - Test content validation
-- [ ] Create `test/ui/components/template-import-export/ErrorRecovery.test.tsx`
-  - Test retry with backoff
-  - Test skip and continue
-  - Test rollback on failure
-- [ ] Create `test/ui/components/template-import-export/TemplateDiff.test.tsx`
-  - Test side-by-side rendering
-  - Test highlighted changes
-  - Test merge strategy selection
-- [ ] Run per-file quality loop for each file created (full progressive chain: tsgo → biome → lint → codescene):
-  ```bash
-  bun run scripts/health/sub-loop.ts test/ui/components/template-import-export/FileValidator.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/template-import-export/ErrorRecovery.test.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/template-import-export/TemplateDiff.test.tsx --lifecycle codescene
-  ```
 
 ### R4-T12: Knowledge Propagation
 

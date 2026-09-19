@@ -20,12 +20,6 @@ This plan does not introduce new application code — it tests code built across
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    E2E (Playwright)                       │
-│  test/ui/e2e/cert/ — production server, full lifecycle    │
-├─────────────────────────────────────────────────────────┤
-│              UI Component Tests (Happy DOM)               │
-│  test/ui/components/cert/ — mocked Apollo, no server      │
-├─────────────────────────────────────────────────────────┤
 │           GraphQL Integration Tests                        │
 │  frontend/common/graphql/test/cert/ — shared dev server   │
 ├─────────────────────────────────────────────────────────┤
@@ -38,9 +32,6 @@ This plan does not introduce new application code — it tests code built across
 ├─────────────────────────────────────────────────────────┤
 │              Entity Setup Helpers                         │
 │  backend/db/test/entity-setup.ts — cert helpers added     │
-├─────────────────────────────────────────────────────────┤
-│              Storybook Stories                            │
-│  frontend/**/cert/**/*.stories.tsx — visual canvas        │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -60,14 +51,6 @@ Service Layer (backend/services/cert/)
 GraphQL Integration Tests (testClient → shared Next.js dev server)
     ↓ validates
 GraphQL API (backend/graphql/pothos/ → services → repos → DB)
-
-UI Component Tests (renderWithWrapper + MockLink, no server)
-    ↓ validates
-Frontend Components (frontend/views/dashboard/certificates/)
-
-E2E Tests (Playwright → production Next.js server)
-    ↓ validates
-Full Stack (browser → Next.js → GraphQL → services → repos → DB)
 ```
 
 ---
@@ -162,59 +145,6 @@ Full Stack (browser → Next.js → GraphQL → services → repos → DB)
 
 **Alternative Considered**: Assert on response time (batch should be faster) — rejected: flaky in CI, not deterministic.
 
-### DD-7: UI Component Test Architecture
-
-**Decision**: Use the existing `TestWrapper.tsx` + `renderWithWrapper` pattern with `MockLink` for mocked Apollo responses. No real server is started. Component tests run with Happy DOM preload.
-
-**Rationale**: Per `test/ui/AGENTS.md`, component tests use `@testing-library/react` with `bun:test`, wrapped in `TestWrapper` which provides `LocaleProvider`, `ThemeProvider`, `ApolloProvider` with `MockLink`. This isolates component rendering and interaction from backend state. Mocked responses are defined per-test using `MockedResponse[]`.
-
-**Mock Structure**:
-| Component Test | Mocked GraphQL Operations | States Tested |
-|----------------|--------------------------|---------------|
-| Template list | `certificateTemplatesQueryDocument` (success, error, empty) | rendering, filters, pagination, loading, error, empty |
-| Certificate list | `certificatesQueryDocument` (success with N rows, error, empty) | rendering, bulk select, status badges, filters, pagination |
-| Generation dialog | `generateCertificateMutationDocument` (success, error), `recipientGroupsQueryDocument` | form interaction, submit, progress, success, error |
-| Verification page | `verifyCertificateQueryDocument` (valid, revoked, expired, not-found, loading) | all result states, bilingual RTL/LTR, share |
-
-### DD-8: E2E Test Architecture
-
-**Decision**: E2E tests use `setupBrowserLifecycle` (Playwright + production Next.js server) and `loginAsDemoUser` for authentication. Tests run in `describe.serial` order. Requires `bun run build:test` first.
-
-**Rationale**: Per `test/ui/AGENTS.md` and `siraj_analysis/10-testing-quality-patterns.md` §7, E2E tests:
-- Use Playwright via `bun:test` (not Vitest)
-- Reuse `setupTestServerLifecycle` from GraphQL test harness but in production mode
-- Use `loginAsDemoUser` helper (Bun.fetch POST to `/api/graphql`, not Playwright `context.request`)
-- Use Playwright auto-waiting assertions (no `waitForTimeout`, no `networkidle`)
-- Use bilingual selectors: `/search schedule availability|البحث عن توفر الجدول/i`
-- `closeE2eSession(page, context)` in `afterEach`
-- `describe.serial` for ordered test suites
-
-**E2E Test Flow**:
-1. `setupBrowserLifecycle()` → starts production Next.js server, launches Chromium
-2. `createContext()` / `createMobileContext()` → new browser context with base URL
-3. `loginAsDemoUser(page, context, groupSlug)` → authenticate via GraphQL, set cookies
-4. Navigate to certificate routes, perform interactions
-5. Auto-waiting assertions (Playwright `expect` + `getByRole`/`getByText`)
-6. `closeE2eSession(page, context)` → close page and context
-
-### DD-9: Storybook Story Design
-
-**Decision**: Stories are co-located beside components as `*.stories.tsx` files. Stories provide visual canvas for interactive design review and regression baseline.
-
-**Rationale**: Per `.storybook/main.ts` (`siraj_analysis/10-testing-quality-patterns.md` §12.1), Storybook globs `../frontend/**/*.stories.@(js|jsx|mjs|ts|tsx)`. Stories use MSW for mocking GraphQL (via `.storybook/msw-handlers.ts`). Each story provides `ar`/`en` locale and `light`/`dark` theme variants.
-
-**Story Variants Per Component**:
-| Story | Variants | Decorators |
-|-------|----------|------------|
-| Template list | populated / empty / loading / error | `withAllProviders` (auto) |
-| Certificate list | populated / empty / loading / error | `withAllProviders` |
-| Generation dialog | open-form / open-submitting / open-success / open-error | `withAllProviders` |
-| Verification page | valid / revoked / expired / not-found | `withAllProviders` |
-| Visual canvas | with-elements / empty / grid-on / grid-off | `withAllProviders` |
-| Element editor | text / image / qr / shape | `withAllProviders` |
-| Variable manager | with-variables / empty / type-specific | `withAllProviders` |
-| Status badge | draft / pending / issued / revoked / expired | `withAllProviders` |
-
 ---
 
 ## 3. Test Data Strategy
@@ -270,18 +200,6 @@ The existing `loc(en, ar?)` helper from `entity-setup.ts` is reused for certific
 
 No mocking at the service/repository level — integration tests exercise the full stack from GraphQL resolver through service, repository, and real database. The shared dev server connects to the test database. Data cleanup happens via `cleanupTestSuperAdmin` and idempotent test entity creation.
 
-### 4.3 UI Component Test Mocking
-
-| Layer | Mock Strategy |
-|-------|--------------|
-| Apollo Client | `MockLink` with `MockedResponse[]` per test — each mock defines query, variables, and response |
-| Router | Implicit via Happy DOM (no real routing) |
-| User store | `useUserStore.setState({ permissions })` seeded in `TestWrapper` |
-| Clipboard | `navigator.clipboard.writeText` mocked via `vi` or bun mock for share button tests |
-
-### 4.4 E2E Test Mocking
-
-No mocking — E2E tests execute against the real production build. The only setup is authentication via `loginAsDemoUser` and entity provisioning via GraphQL mutations.
 
 ---
 
@@ -312,13 +230,6 @@ Integration tests assert on Apollo `result.error`:
 3. Assert `result.data?.<field>` is falsy when errors occur
 4. Assert error message content from the GraphQL error response
 
-### 5.4 UI Component Test Errors
-
-Component tests assert on error rendering:
-1. Provide a mocked Apollo response with `errors` array
-2. Assert error state component is visible (`screen.getByText(...)`)
-3. Assert error message text matches expected translated content
-
 ---
 
 ## 6. i18n Design
@@ -345,9 +256,6 @@ Test-specific translations live in the existing `certificates.errors` namespace 
 ### 6.2 Locale in Tests
 
 - DB tests: `getServerTranslations("en")` for English error substrings (deterministic)
-- UI component tests: `TestWrapper` defaults to `locale="ar"` (Arabic RTL); also test `locale="en"` for LTR
-- E2E tests: bilingual selectors `/English text|النص العربي/i`; test both `ar` and `en` locales for verification page
-- Storybook stories: both `ar` and `en` locale variants, `light` and `dark` theme variants
 
 ---
 
@@ -369,15 +277,6 @@ Same loop as DB test files.
 **For GraphQL test files** (`frontend/common/graphql/test/cert/*.test.ts`):
 Same loop. Additionally, `bun run generate:gqlSchema` + `bun codegen` must be up to date (document imports must resolve).
 
-**For UI test files** (`test/ui/components/cert/*.test.tsx`):
-Same loop.
-
-**For E2E test files** (`test/ui/e2e/cert/*.test.ts`):
-Same loop.
-
-**For Storybook stories** (`frontend/**/*.cert.stories.tsx`):
-Same loop.
-
 ### 7.2 Full Quality Gate
 
 After all test files are created, run the full quality gate:
@@ -392,9 +291,6 @@ After all test files are created, verify the test suites pass:
 1. `bun run test:db` — DB repository tests (parallel runner)
 2. `bun run test:services` — Service tests (parallel runner)
 3. `bun run test:graphql` — GraphQL integration tests (shared dev server)
-4. `bun run test:ui:components` — UI component tests (Happy DOM)
-5. `bun run build:test` then `bun run test:ui:e2e` — E2E tests (production build)
-6. `bun run build-storybook` — Storybook build (visual stories)
 
 ---
 
@@ -409,9 +305,6 @@ After all test files are created, verify the test suites pass:
 | `backend/db/test/entity-setup.ts` (modified) | `AGENTS.md` (root), `backend/db/test/AGENTS.md`, `backend/AGENTS.md` | `backend.instructions.md`, `tests.instructions.md` |
 | `backend/services/cert/test/*.test.ts` | `AGENTS.md` (root), `backend/services/AGENTS.md`, `backend/AGENTS.md` | `backend.instructions.md`, `tests.instructions.md` |
 | `frontend/common/graphql/test/cert/*.test.ts` | `AGENTS.md` (root), `frontend/common/graphql/test/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` | `frontend.instructions.md`, `tests.instructions.md` |
-| `test/ui/components/cert/*.test.tsx` | `AGENTS.md` (root), `test/ui/AGENTS.md` | `frontend.instructions.md`, `tests.instructions.md` |
-| `test/ui/e2e/cert/*.test.ts` | `AGENTS.md` (root), `test/ui/AGENTS.md` | `frontend.instructions.md`, `tests.instructions.md` |
-| `frontend/**/cert/**/*.stories.tsx` | `AGENTS.md` (root), `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md`, `mobile-desktop.instructions.md` |
 
 ### 8.2 Key Rules to Enforce
 
@@ -434,14 +327,6 @@ From `frontend/common/graphql/test/AGENTS.md`:
 4. Strict layer separation — hit only GraphQL API (Rule 10)
 5. `errorPolicy: "all"` — assert against `result.error` (Rule 5)
 
-From `test/ui/AGENTS.md`:
-1. Component tests use Happy DOM + mocked Apollo, no server
-2. E2E tests use Playwright via `bun:test`, production server
-3. No `waitForTimeout` / `networkidle` — Playwright auto-waiting assertions
-4. Bilingual selectors in E2E
-5. `describe.serial` for ordered E2E suites
-6. Mobile/desktop isolation test must still pass
-
 ---
 
 ## 9. Data Model References
@@ -454,8 +339,6 @@ From `test/ui/AGENTS.md`:
 | DB logic tests | All above + `students` (for recipient assignment) | All above (transactional workflows) |
 | Service tests | All above (via repos) | All above (via repos) + PDF render, storage, email mocks |
 | GraphQL tests | All above (via full stack) | All above (via full stack) |
-| UI component tests | None (mocked Apollo) | None (mocked Apollo) |
-| E2E tests | All above (via production server) | All above (via production server) |
 
 ### Existing Tables Reused
 
@@ -477,7 +360,6 @@ During test creation, the implementer discovers:
 - Whether entity-setup helper signatures match repository method signatures (positional `tx` variance per AGENTS Rule 16)
 - Whether GraphQL resolver auth scopes correctly match AppPermission entries
 - Whether DataLoader batch sizes are correct for N+1 prevention
-- Whether E2E selectors need bilingual variants (Arabic-first default locale)
 
 ### 10.2 What This Plan Documents
 
@@ -491,7 +373,6 @@ During test creation, the implementer discovers:
 All knowledge propagation tasks are deferred to Plan 21 (Knowledge Propagation). This plan focuses on test creation only. Plan 21 will:
 - Update `backend/db/test/AGENTS.md` with cert test directory refs
 - Update `frontend/common/graphql/test/AGENTS.md` with cert test directory ref
-- Update `test/ui/AGENTS.md` with cert test refs
 - Create `.ai/draft_plans/cert/plans/20-testing-quality/outcome/cert-testing-learnings.md` with outcomes from this plan (per the spec-driven-development skill outcome-protocol; `cert-testing-learnings.md` is a cross-task summary outcome doc)
 
 ---
@@ -506,13 +387,10 @@ Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on 20
   - `backend/db/test/logic/<domain>/*.test.ts` (e.g. existing `billing/billing-safeguards.test.ts`, `billing/payment-idempotency.test.ts`) — plan's `backend/db/test/logic/cert/*.test.ts` matches.
   - `backend/services/<domain>/test/` subdir convention exists (`auth/test/`, `billing/test/`, etc.) — plan's `backend/services/cert/test/*.test.ts` matches.
   - `frontend/common/graphql/test/<domain>/*.test.ts` (existing `auth/`, `billing/`, `classes/`, … dirs) — plan's `frontend/common/graphql/test/cert/*.test.ts` matches.
-  - `test/ui/components/` and `test/ui/e2e/` exist with the exact conventions documented in `test/ui/AGENTS.md`. Plan's `test/ui/components/cert/*.test.tsx` and `test/ui/e2e/cert/*.test.ts` match.
-- **Test runner scripts** (verified against `package.json`): `test:db` (parallel via `scripts/run-db-tests-parallel.ts`), `test:services` (parallel), `test:graphql` (shared dev server, dev mode), `test:ui:components` (Happy DOM, preloads `test-env.ts`/`happydom-preload.ts`/`next-dynamic-mock.ts`), `test:ui:e2e` (production server, **requires `build:test` first**), `build:test`. Plan's command usage (T26/PhaseE) is accurate.
+- **Test runner scripts** (verified against `package.json`): `test:db` (parallel via `scripts/run-db-tests-parallel.ts`), `test:services` (parallel), `test:graphql` (shared dev server, dev mode). Plan's command usage (T26/PhaseE) is accurate.
 - **`runInRollback`**: exported from `@/backend/db/test/test-utils` (verified). Plan correctly wraps all DB repo/logic tests in it.
 - **GraphQL test helper exports** all verified to exist in `frontend/common/graphql/test/`: `testClient` (`testClient.ts`), `setupTestServerLifecycle` (`lifecycle.ts`), `loginDemoUser`, `provisionTestEntities`, `loginAndProvision` (`helpers.ts`), `assertOperationDenied`, `expectMutationError`. Plan's import statements are valid.
-- **UI test helper exports** all verified to exist: `TestWrapper` + `renderWithWrapper` (`test/ui/components/TestWrapper.tsx`), `setupBrowserLifecycle` + `createContext` + `createMobileContext` (`test/ui/e2e/lifecycle.ts`), `loginAsDemoUser` + `DEMO_USERS` + `closeE2eSession` + `authenticateDemoUser` (`test/ui/e2e/helpers.ts`). Plan's E2E imports (T23/T24/T25) are valid.
-- **`build:test` before E2E**: Plan correctly prescribes `bun run build:test` then `bun run test:ui:e2e` (matches `test/ui/AGENTS.md` "E2E tests DO require build:test").
-- **AGENTS.md / instruction file references**: all referenced files exist (`backend/db/test/AGENTS.md`, `backend/db/repo/AGENTS.md`, `frontend/common/graphql/test/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`, `frontend/views/AGENTS.md` — which exists at the top level).
+- **AGENTS.md / instruction file references**: all referenced files exist (`backend/db/test/AGENTS.md`, `backend/db/repo/AGENTS.md`, `frontend/common/graphql/test/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`, `frontend/views/AGENTS.md` — which exists at the top level).
 - **Entity-setup helpers** `createTestCertificate` / `setupCertificateTestEntities` referenced by T2 are NEW helpers to be ADDED to `backend/db/test/entity-setup.ts` (T2 modifies that file); the generic `setupTestEntities` already exists there. This is intentional (additive), not a path mismatch.
 
 ### Corrections Made
@@ -531,22 +409,20 @@ Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on 20
 
 ### Coverage
 
-1. **All layers tested — GOOD.** Repo, service, GraphQL, UI component, E2E, Storybook are all covered. The layered diagram (design.md §1) is accurate against the verified test dirs (`backend/db/test/repo/`, `backend/db/test/logic/`, `backend/services/<domain>/test/`, `frontend/common/graphql/test/`, `test/ui/components/`, `test/ui/e2e/`).
+1. **All layers tested — GOOD.** Repo, service, GraphQL are all covered. The layered diagram (design.md §1) is accurate against the verified test dirs (`backend/db/test/repo/`, `backend/db/test/logic/`, `backend/services/<domain>/test/`, `frontend/common/graphql/test/`).
 2. **Edge cases — GAPS (P1).** The plan lists happy paths + auth-scope + DataLoader N+1, but the following edges are **not enumerated** as test cases anywhere:
    - **Empty template** (a template with zero elements) → render / generation should fail fast (`groupEmpty`/`missingRequiredVariable` is covered, but "template has no elements" is distinct).
    - **Missing variable values** in a recipient group item (key present in template but absent in item) → covered by `missingRequiredVariable` — confirm explicit test exists.
    - **Storage failure during generation** (signed URL issuance fails, or upload returns 5xx) → service must roll back the certificate insert. No test is named for storage-failure rollback.
    - **Idempotency re-entry**: same idempotency key submitted twice concurrently (race) → only one cert created. Not listed.
    - **Verification of a soft-deleted certificate** → must still return its last-known status (or `NOT_FOUND`?) — decision untested.
-   - **Rate-limited verification** returns `RATE_LIMITED` extension → assert Apollo error link parses `retryAfter` (UI component test on VerificationView should cover this; listed under "verification page: valid/revoked/expired/not-found/loading" but **rate-limited state is missing** from the component-test mock list).
-   **Fix:** add explicit edge-case rows to the repo/service/component test tables (§DD-2 table, DD-7 mock table) for storage-failure-rollback, idempotency race, empty-template, and rate-limited-UI.
-3. **E2E comprehensiveness — ADEQUATE but light on negative paths.** T23/T24/T25 cover generation, verification, template mgmt. **Missing E2E:** (a) verification of a revoked cert shows revoked UI; (b) expired cert shows expired UI; (c) manual code entry `/verify` → submit redirects to result. Only "valid" is implied. **Fix:** enumerate the status permutations as E2E assertions within T24.
+   **Fix:** add explicit edge-case rows to the repo/service test tables (§DD-2 table) for storage-failure-rollback, idempotency race, and empty-template.
+3. **Negative-path coverage — ADEQUATE.** The verification query result permutations (revoked, expired, manual code entry) must be asserted in the GraphQL integration tests. **Fix:** enumerate the status permutations as GraphQL test assertions within T24.
 
 ### Test Patterns
 
 4. **`runInRollback` + `tx` propagation — CORRECT** and matches `backend/db/test/AGENTS.md` Rules 1, 3 (verified the AGENTS.md content). DD-3's `expectRepoError` helper matches the AGENTS.md pattern verbatim.
 5. **`testClient` for GraphQL — CORRECT** and matches `frontend/common/graphql/test/AGENTS.md` (verified `testClient.ts`, `lifecycle.ts`, `helpers.ts` exist with the named exports). Import aliases in DD-5 are valid.
-6. **`TestWrapper` + `renderWithWrapper` for UI — CORRECT** (verified `test/ui/components/TestWrapper.tsx`). DD-7 is accurate.
 7. **tx position variance — RISK (P2).** `tests.instructions.md` explicitly warns "tx position VARIES per repo method — read signature before calling" and listsexamples. The plan's composition helper `setupCertificateTestEntities` calls `createTestCertificate(tx, templateId, studentId)` with `tx` first — this matches the entity-setup convention (`createTestStudent(tx, parentId, overrides)`), but the plan does **not** warn that the new cert **repo methods** under test might have `tx` NOT in first position (Plan 3 repos). **Fix:** add a note: "Before writing repo tests, confirm each `Certificate*Repository` method's `tx` parameter position from Plan 3 source — do not assume first position."
 8. **`getServerTranslations` ban in tests — CORRECTLY FOLLOWED.** `tests.instructions.md` Rule prohibits calling it directly (loader hangs). DD-3 says "import `getServerTranslations` from `@/shared/locale/server-graphql`" and use in `beforeAll` to seed `tErrors`. **CONTRADICTION (P1):** this directly violates the instruction-file rule "NEVER call `getServerTranslations` from `@/shared/locale/server-graphql` directly in tests - causes the i18n loader to hang". The AGENTS.md (Rule 3) allows substring matching but the instruction file bans the direct call. **Fix:** reconcile — the established pattern uses `expectRepoError` with hard-coded English substrings (e.g. `"not found"`, `"version mismatch"`) WITHOUT importing translations, OR uses a separate non-hanging translation reader. Plan 20 must defer to the instruction file: do **not** import `getServerTranslations` in `backend/db/test/` tests; instead assert against literal English substrings documented in §6.1 (the substring table already provides them). Remove the `beforeAll` `tErrors` initialization step.
 
@@ -566,14 +442,13 @@ Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on 20
 ### Reality-Check Corrections to Apply
 
 A. **Remove `getServerTranslations` import from DB tests** (issue #8 / instruction-file contradiction). Use literal English substrings from §6.1.
-B. **Add edge-case tests**: storage-failure-rollback, idempotency concurrent re-entry, empty-template, soft-deleted-cert verification, rate-limited UI state (issue #2).
-C. **Add E2E status permutations** (revoked/expired/manual-entry) to T24 (issue #3).
+B. **Add edge-case tests**: storage-failure-rollback, idempotency concurrent re-entry, empty-template, soft-deleted-cert verification (issue #2).
+C. **Enumerate verification status permutations** (revoked/expired/manual-entry) in the GraphQL tests (issue #3).
 D. **Confirm `tx` position variance** for new cert repo methods before writing tests (issue #7).
 E. **Make `createTestRecipientGroupItem` take explicit `studentId`** to avoid double-student creation (issue #14).
 F. **Reconcile per-task codescene** inclusion (issue #10).
 
 ### Remaining Risks
 
-- **Test runtime**: 3 E2E suites (T23–T25) each require `bun run build:test` first. The plan does not state whether the build is shared (one build for all 3) or per-suite. State "build once, run all 3 E2E suites against the single bu".
+- **Test runtime**: heavy cert GraphQL tests may extend total suite time. Batch related scenarios within a single test file where feasible to limit server-lifecycle overhead.
 - **GraphQL tests depend on dev server lifecycle**: `setupTestServerLifecycle` uses a heartbeat for concurrency. If cert tests are heavy (DataLoader, full stack) they may time out the shared server's idle window. Ensure ≥1 cert GraphQL test runs early to keep the heartbeat alive, or the lifecycle may tear down mid-suite. Note this as an operational risk.
-- **Storybook stories in `frontend/**/cert/**/*.stories.tsx`**: verified `.storybook/main.ts` globs `../frontend/**/*.stories.tsx`. But stories that mock GraphQL via MSW need handlers in `.storybook/msw-handlers.ts`. The plan lists MSW usage but not whether cert query handlers must be registered there (they must). **Fix:** add a task to extend `.storybook/msw-handlers.ts` with `verifyCertificate`, `certificateTemplates`, `certificates`, `generateCertificate`, `recipientGroups` handlers.

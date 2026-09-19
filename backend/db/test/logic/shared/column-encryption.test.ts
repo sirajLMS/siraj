@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { teachers, userMeetingConfigs, users } from "@/backend/db/schema";
 import { createTestMeetingConfig, createTestMeetingProvider } from "@/backend/db/test/entity-setup";
-import { executeTxSql, runInRollback } from "@/backend/db/test/test-utils";
+import { executeTxSql, generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import type { DBTransaction, TeacherInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -14,7 +14,7 @@ async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date
     .values({
       name: "Crypto Teacher",
       email,
-      password: `TestPass-${randomUUID().slice(0, 8)}!`,
+      password: generateTestPassword(),
       createdAt: now,
       updatedAt: now,
     })

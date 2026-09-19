@@ -15,7 +15,6 @@ import type {
   GraphApiRequestContext,
   GraphApiRequestInit,
   SendTemplateMessageInput,
-  SendTemplateMessageResponseBody,
   SendTemplateMessageResult,
 } from "@/backend/types";
 
@@ -74,11 +73,31 @@ export function buildSendTemplateMessageRequest(
 
 /**
  * Parses a successful (2xx) response body from the send-template-message endpoint.
+ * Accepts `unknown` (the raw JSON value) and narrows at runtime — the body is
+ * now read through the byte-budget guard in the adapter, so it arrives as
+ * untyped JSON.
  * @throws {Error} if the response shape is unexpected (missing `messages[0].id`).
  */
-export function parseSendTemplateResponse(body: SendTemplateMessageResponseBody): SendTemplateMessageResult {
-  const messageId = body.messages?.[0]?.id;
-  const waId = body.contacts?.[0]?.wa_id;
+export function parseSendTemplateResponse(body: unknown): SendTemplateMessageResult {
+  const parsed = typeof body === "object" && body !== null ? body : null;
+  const messages = parsed && "messages" in parsed && Array.isArray(parsed.messages) ? parsed.messages : [];
+  const contacts = parsed && "contacts" in parsed && Array.isArray(parsed.contacts) ? parsed.contacts : [];
+  const firstMessage = messages[0];
+  const firstContact = contacts[0];
+  const messageId =
+    typeof firstMessage === "object" &&
+    firstMessage !== null &&
+    "id" in firstMessage &&
+    typeof firstMessage.id === "string"
+      ? firstMessage.id
+      : undefined;
+  const waId =
+    typeof firstContact === "object" &&
+    firstContact !== null &&
+    "wa_id" in firstContact &&
+    typeof firstContact.wa_id === "string"
+      ? firstContact.wa_id
+      : undefined;
 
   if (!messageId) {
     // Internal adapter error — not user-facing, no i18n needed (unexpected Meta API response shape)

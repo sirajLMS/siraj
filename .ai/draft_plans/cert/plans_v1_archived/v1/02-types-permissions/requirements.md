@@ -301,7 +301,10 @@ Create 8 type definition files in `backend/types/certificates/`, add 11 `AppPerm
 1. **WHEN** Pothos enum registration is performed **THE SYSTEM SHALL** register all 6 certificate-domain enums in `backend/graphql/pothos/shared/enum.pothos.ts` using the existing pattern:
    ```typescript
    gqlSchemaBuilder.enumType(CertificateStatus, { name: "CertificateStatus" });
-   gqlSchemaBuilder.enumType(TemplateStatus, { name: "TemplateStatus" });
+   gqlSchemaBuilder.enumType(
+     TemplateStatus,
+     { name: "TemplateStatus" },
+   );
    gqlSchemaBuilder.enumType(TemplateElementType, { name: "TemplateElementType" });
    gqlSchemaBuilder.enumType(TemplateVariableType, { name: "TemplateVariableType" });
    gqlSchemaBuilder.enumType(CertificateOrientation, { name: "CertificateOrientation" });

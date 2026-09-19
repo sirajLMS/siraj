@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, isNull, lte, notInArray, or, type SQL, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, lt, lte, notInArray, or, type SQL, sql } from "drizzle-orm";
 import { caseInsensitiveLike, db, type QueryDbHandle, queryDb, withForUpdate } from "@/backend/db";
 import {
   type ClassInstanceUpsertManyOptions,
@@ -15,12 +15,13 @@ import {
 import { updateInstanceState } from "@/backend/db/repo/scheduling/state-changes";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
-import { type CalculationStatus, OnDemandStatus } from "@/backend/enum";
+import { CalculationStatus, OnDemandStatus } from "@/backend/enum";
+import { PROFIT_LOSS_MONTH_PATTERN } from "@/backend/lib";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type * as Types from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
-import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 /**
@@ -119,7 +120,7 @@ export const getClassInstanceById = async (id: string, tx?: DBTransaction) => {
 };
 
 export const createClassInstance = async (
-  input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
+  input: Types.ClassInstanceCreateInput,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceSelectType> => {
@@ -168,7 +169,7 @@ export const createClassInstance = async (
 
 export const updateClassInstance = async (
   id: string,
-  input: Partial<Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">>,
+  input: Types.ClassInstanceUpdateInput,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceSelectType> => {
@@ -216,6 +217,17 @@ export const updateClassInstance = async (
   };
 
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
+};
+
+/**
+ * Sets the quota-deduction flag on one class instance. Dedicated narrow write
+ * for the billing flows (quota/credit redemption, reschedule re-deduction,
+ * fixture setup) that own the `quotaDeducted` column — the general
+ * create/update paths deliberately cannot set quota or rate-snapshot columns.
+ */
+export const setQuotaDeducted = async (id: string, quotaDeducted: boolean, tx?: DBTransaction): Promise<void> => {
+  const client = tx ?? db;
+  await client.update(classInstances).set({ quotaDeducted, updatedAt: new Date() }).where(eq(classInstances.id, id));
 };
 
 export const deleteClassInstance = async (
@@ -760,6 +772,140 @@ export async function findPayrollReportRows(
       subjectName: row.subjectName,
       isStudentAbsence: row.isStudentAbsence,
       isTeacherAbsence: row.isTeacherAbsence,
+    })),
+    totalCount,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Profit & Loss report reads
+// ---------------------------------------------------------------------------
+
+/**
+ * Calculation statuses that mark a completed session as reportable in the
+ * P&L payments tab. `NOT_CALCULATED` sessions are excluded — their payroll
+ * snapshot (payable minutes and payout amount) has not been produced yet.
+ */
+const PROFIT_LOSS_CALCULATION_STATUSES = [
+  CalculationStatus.CALCULATED,
+  CalculationStatus.PARTIALLY,
+  CalculationStatus.REFUND,
+  CalculationStatus.WAITING_PAID,
+  CalculationStatus.PAID,
+] as const;
+
+/** First instant (UTC) of a `YYYY-MM` accounting month. */
+function startOfUtcMonth(month: string): Date {
+  return new Date(`${month}-01T00:00:00.000Z`);
+}
+
+/**
+ * First instant (UTC) of the month after `month` — the exclusive upper bound
+ * of the `YYYY-MM` range filter. Callers must pass a pattern-validated month:
+ * `Date.UTC` maps two-digit years to 1900+year, so a malformed input would
+ * silently produce a bound in the wrong century.
+ */
+function startOfNextUtcMonth(month: string): Date {
+  const [year, monthNumber] = month.split("-").map(Number);
+  // Fail closed: `Date.UTC` remaps years 0-99 to 1900+year, so a malformed
+  // month must never reach the boundary computation.
+  if (!Number.isInteger(year) || year < 1000 || year > 9999) {
+    throw new Error(`startOfNextUtcMonth requires a 4-digit year, got ${month}`);
+  }
+  // Date.UTC takes a 0-based month; passing the 1-based value lands on the
+  // 1st of the following month.
+  return new Date(Date.UTC(year, monthNumber, 1));
+}
+
+/**
+ * Reads one page of the P&L payments tab: completed class sessions inside
+ * the `YYYY-MM` accounting month whose payroll calculation has been produced
+ * (`NOT_CALCULATED` excluded), joined with the teacher, student, and subject
+ * display fields. Timestamp bounds are bound as JS Dates so the same SQL
+ * runs on PostgreSQL (timestamptz) and SQLite (epoch-millis) without
+ * dialect-specific casts. Soft-deleted sessions are excluded like every
+ * other read path in this repository. `totalCount` is counted by a parallel
+ * single-table query with the same filters and no LIMIT/OFFSET, so it always
+ * reflects the full filtered set independently of the requested page.
+ *
+ * Data-access only: the returned rows carry the raw joined values — the
+ * payable-minutes snapshot (`calculatedDuration` with the scheduled duration
+ * fallback included by the query) and the raw payroll snapshot columns. The
+ * service layer owns every report-facing derivation: mapping the payroll
+ * snapshot to the student-side charge, the zero-amount fallback, the house
+ * default currency, FX conversion, and the manual credit subtraction.
+ */
+export async function findProfitLossPayments(
+  options: { month: string; limit: number; offset: number },
+  tx?: DBTransaction
+): Promise<{
+  rows: Omit<
+    Types.ProfitLossPaymentRepoRow,
+    "convertedAmount" | "manualSubtractCredits" | "manualSubtractCreditsCurrency"
+  >[];
+  totalCount: number;
+}> {
+  // Malformed months (wildcards, non-calendar months) match nothing — the
+  // service validates the month upstream, but the repository must never widen
+  // a hostile month into an unbounded scan or fail on an invalid date bound.
+  if (!PROFIT_LOSS_MONTH_PATTERN.test(options.month)) {
+    return { rows: [], totalCount: 0 };
+  }
+  const q = queryDb(tx);
+  const conditions: (SQL | undefined)[] = [
+    eq(classInstances.executionState, ClassExecutionState.COMPLETED),
+    inArray(classInstances.calculationStatus, [...PROFIT_LOSS_CALCULATION_STATUSES]),
+    gte(classInstances.scheduledStartAt, startOfUtcMonth(options.month)),
+    lt(classInstances.scheduledStartAt, startOfNextUtcMonth(options.month)),
+    isNull(classInstances.deletedAt),
+  ];
+
+  const [rows, [{ count: totalCount }]] = await Promise.all([
+    q
+      .select({
+        instanceId: classInstances.id,
+        scheduledStartAt: classInstances.scheduledStartAt,
+        calculatedDuration: classInstances.calculatedDuration,
+        durationMinutes: classInstances.durationMinutes,
+        teacherPaidAmount: classInstances.teacherPaidAmount,
+        teacherPaidCurrency: classInstances.teacherPaidCurrency,
+        calculationStatus: classInstances.calculationStatus,
+        teacherName: users.name,
+        studentName: students.name,
+        subjectName: classSubjects.name,
+      })
+      .from(classInstances)
+      .innerJoin(teachers, eq(classInstances.teacherId, teachers.id))
+      .innerJoin(users, eq(teachers.userId, users.id))
+      .innerJoin(students, eq(classInstances.studentId, students.id))
+      .innerJoin(classSubjects, eq(classInstances.subjectId, classSubjects.id))
+      .where(and(...conditions))
+      .orderBy(desc(classInstances.scheduledStartAt), classInstances.id)
+      .limit(options.limit)
+      .offset(options.offset),
+    // The filters reference only `class_instances` columns and the report
+    // joins are inner joins over enforced NOT NULL foreign keys, so the
+    // unjoined count equals the joined row count.
+    q
+      .select({ count: sql<number>`count(*)`.mapWith(Number) })
+      .from(classInstances)
+      .where(and(...conditions)),
+  ]);
+
+  return {
+    rows: rows.map(row => ({
+      instanceId: row.instanceId,
+      scheduledStartAt: row.scheduledStartAt.toISOString(),
+      teacherName: row.teacherName,
+      studentName: row.studentName,
+      subjectName: row.subjectName,
+      // Prefers the payable `calculatedDuration` snapshot over the scheduled
+      // duration; the raw amount/currency snapshot columns are passed through
+      // unchanged for the service layer to map.
+      durationMinutes: row.calculatedDuration ?? row.durationMinutes,
+      teacherPaidAmount: row.teacherPaidAmount,
+      teacherPaidCurrency: row.teacherPaidCurrency,
+      calculationStatus: row.calculationStatus,
     })),
     totalCount,
   };

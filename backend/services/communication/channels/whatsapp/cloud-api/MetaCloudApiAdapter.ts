@@ -3,12 +3,7 @@ import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { WhatsappAccountOffboardedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
-import {
-  FETCH_TIMEOUT_MS,
-  MAX_CONCURRENT_CALLS,
-  readErrorBody,
-  resolveGraphApiVersion,
-} from "@/backend/lib/whatsapp-constants";
+import { FETCH_TIMEOUT_MS, MAX_CONCURRENT_CALLS, resolveGraphApiVersion } from "@/backend/lib/whatsapp-constants";
 import { sanitizeFailureReason } from "@/backend/lib/whatsapp-sanitize";
 import {
   extractMetaErrorCode,
@@ -20,6 +15,11 @@ import {
 } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 import { redisService } from "@/backend/services/redis";
+import {
+  noFollowRedirectInit,
+  readJsonWithByteBudget,
+  readResponseBodyWithByteBudget,
+} from "@/backend/services/shared";
 import type {
   CreateNotificationDeliveryInput,
   GraphApiRequestContext,
@@ -345,6 +345,7 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
     const fetchInit: RequestInit = {
       ...init,
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      ...noFollowRedirectInit(),
     };
 
     try {
@@ -358,7 +359,7 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
         return await this.handleHttpError(deliveryId, response, locale);
       }
 
-      const body = await response.json();
+      const body = await readJsonWithByteBudget(response);
       const result = parseSendTemplateResponse(body);
 
       await NotificationRepository.updateDeliveryStatus({
@@ -430,7 +431,16 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
   }
 
   private async handleHttpError(deliveryId: string, response: Response, locale: string): Promise<WhatsappSendResult> {
-    const errorBody = await readErrorBody(response);
+    // Budgeted read of Meta's error envelope (structured JSON when present,
+    // raw text otherwise). Replaces `readErrorBody` here so error bodies are
+    // also bounded by the response-size guard.
+    const errorText = await readResponseBodyWithByteBudget(response);
+    let errorBody: unknown;
+    try {
+      errorBody = JSON.parse(errorText) as unknown;
+    } catch {
+      errorBody = errorText;
+    }
 
     const statusCode = response.status;
     const metaErrorCode = extractMetaErrorCode(errorBody);

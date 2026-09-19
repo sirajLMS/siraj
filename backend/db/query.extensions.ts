@@ -38,11 +38,13 @@ export function fullTextSearch(
   // Sanitize and split the search text into words
   const words = searchText.trim().split(/\s+/).filter(Boolean);
 
-  // For each word, remove FTS special characters and append the prefix operator
+  // For each word, strip every tsquery metacharacter by keeping only letters
+  // (any script) and digits, then append the prefix operator
   const queryParts = words
     .map(word => {
-      // Remove characters that have special meaning in tsquery
-      const sanitizedWord = word.replace(/[&|!():]/g, "");
+      // Whitelist word characters — a strip-list would let tsquery metachars
+      // like quotes or asterisks through and 500 on to_tsquery syntax errors
+      const sanitizedWord = word.replace(/[^\p{L}\p{N}_]/gu, "");
       if (sanitizedWord) {
         // Append prefix operator for partial matching
         return `${sanitizedWord}:*`;

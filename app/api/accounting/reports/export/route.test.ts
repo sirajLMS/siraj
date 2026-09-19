@@ -11,11 +11,11 @@ import type { ErrorsLabels } from "@/shared/locale";
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const USER_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
-const INSTANCE_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
-const TEACHER_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
-const STUDENT_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
-const SUBJECT_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
+const USER_ID = "3f8a2c1e-5b47-4d69-9c2a-8e1f4a7b6d01";
+const INSTANCE_ID = "6c4d8e2f-1a37-4b58-8d9e-2f5a7c9b3e02";
+const TEACHER_ID = "55ad3ab2-71c4-4af2-9b68-7d0e1f2a3b4c";
+const STUDENT_ID = "9b1f4c3d-7e28-4a5f-8c6d-3e2b1a9f8c03";
+const SUBJECT_ID = "1d2c3b4a-5e6f-4789-8a9b-0c1d2e3f4a04";
 const EXPORT_URL = "http://localhost:3000/api/accounting/reports/export";
 const EXPORT_ROW_LIMIT = 10_000;
 
@@ -95,6 +95,24 @@ const getReportMock = mock(
     _tErrors: ErrorsLabels
   ): Promise<SessionAuditReportPage> => buildReportPage([buildReportRow()])
 );
+
+const checkRateLimitMock = mock(async () => ({
+  success: true,
+  limit: 10,
+  remaining: 9,
+  reset: Date.now() + 600_000,
+}));
+
+await mock.module("@/backend/lib/ratelimit", () => ({
+  checkRateLimit: checkRateLimitMock,
+  exportRateLimiter: {},
+  storageUploadRateLimiter: {},
+  apiRateLimiter: {},
+  graphqlRateLimiter: {},
+  authRateLimiter: {},
+  clientLogsRateLimiter: {},
+  getClientIdentifier: (request: Request) => request.headers.get("x-forwarded-for") ?? "test-ip",
+}));
 
 await mock.module("@/backend/lib", () => ({
   ForbiddenError,
@@ -183,6 +201,7 @@ beforeEach(() => {
   requirePermissionMock.mockClear();
   hasPermissionMock.mockClear();
   getReportMock.mockClear();
+  checkRateLimitMock.mockClear();
 });
 
 // ---------------------------------------------------------------------------
@@ -236,6 +255,17 @@ describe("GET /api/accounting/reports/export", () => {
       expect(requirePermissionMock).toHaveBeenCalledTimes(1);
       expect(requirePermissionMock.mock.calls[0]?.[0]).toBe(USER_ID);
       expect(requirePermissionMock.mock.calls[0]?.[1]).toBe(AppPermission.ACCOUNTING_REPORTS_VIEW);
+      expect(getReportMock).toHaveBeenCalledTimes(0);
+    });
+
+    test("returns 429 and never queries the report when the export rate limit is exceeded", async () => {
+      checkRateLimitMock.mockResolvedValueOnce({ success: false, limit: 10, remaining: 0, reset: Date.now() + 60_000 });
+
+      const response = await callExport();
+
+      expect(response.status).toBe(429);
+      expect(await readErrorBody(response)).toBe("Too many requests. Please try again later.");
+      expect(requirePermissionMock).toHaveBeenCalledTimes(0);
       expect(getReportMock).toHaveBeenCalledTimes(0);
     });
   });

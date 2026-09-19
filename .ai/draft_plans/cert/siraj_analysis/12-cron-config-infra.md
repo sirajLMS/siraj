@@ -430,7 +430,7 @@ Migrations output to `backend/drizzle/`. Only the `public` schema is managed.
 - `paths: { "@/*": ["./*"] }` — `@/backend/...` resolves from repo root.
 - `types: ["bun"]`.
 - Excludes `.ai`, `.agents`, `.next*`, `node_modules`, `dist/out/build`, `frontend/common/graphql/generated`, `**/unRefactored_tests`.
-- Includes `.storybook`, `next-env.d.ts`, generated `.next*/types`.
+- Includes `next-env.d.ts`, generated `.next*/types`.
 
 ### 10.4 `vercel.json` (recap)
 `{ "fluid": true, "crons": [ ... two 06:00 UTC daily jobs ... ] }`.

@@ -16,7 +16,7 @@ import { sql } from "drizzle-orm";
 import { AuditRepository } from "@/backend/db/repo/audit";
 import { auditLogs, users } from "@/backend/db/schema";
 import { IP_ADDRESS_1 } from "@/backend/db/test/const";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { StudentStatus } from "@/backend/enum";
 import type { CreateAuditLogInput, DBTransaction } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -33,7 +33,7 @@ async function createAuditActor(tx: DBTransaction, name: string): Promise<string
     .values({
       name,
       email: `audit-${randomUUID()}@example.com`,
-      password: `TestPass-${randomUUID().slice(0, 8)}!`,
+      password: generateTestPassword(),
       createdAt: now,
       updatedAt: now,
     })

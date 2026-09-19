@@ -6,7 +6,7 @@
 - Phase inconsistencies: **5** (Phase Mapping subsection-range mismatches for §S, §W, §X, §Y, §Z)
 - Missing i18n keys: **10** (5 shortcut keys + 4 dnd keys + 1 mergeTag label)
 - Locked decision count correct: **NO** — changelogs say "30"; actual unique `V#-#` ids = **33**
-- Todo-section alignment issues: **1** (todo 30 §G1 path contradiction vs §V2)
+- Item-section alignment issues: **1** (item 30 §G1 path contradiction vs §V2)
 - Section ordering issues: **2** (§G/§H inserted physically AFTER §Q-era content, before §S — grouped-by-insertion not alphabetical; plus §A–§F do not use the lettered H3 convention §G/§H/§S–§Z do)
 - v9 changelog accuracy: **INACCURATE** — 3 factual defects (decision count, 235KB size, "3 locations" of seed-fix)
 - Codebase path mismatches: **3** (`frontend/stores/` does not exist; `eslint.config.js` vs actual `.mjs`; Round-4 dir 232.6 KB not 235 KB — minor)
@@ -15,7 +15,7 @@
 
 ## 1. Dangling References
 
-Every `§` token in the plan was tokenized (`§` + optional letter + optional digits). The 71 distinct targets referenced resolve as follows:
+Every `§` token in the design was tokenized (`§` + optional letter + optional digits). The 71 distinct targets referenced resolve as follows:
 
 | Ref | Target | Exists? | Notes |
 |-----|--------|---------|-------|
@@ -26,7 +26,7 @@ Every `§` token in the plan was tokenized (`§` + optional letter + optional di
 | §F | forward-ref to §H | YES via line 2202 ("§F→§H") | **Mild**: no `### F.` lettered header exists; §F is only referenced as a *pointer* (`§F→§H`) — no body defines §F. Acceptable cross-pointer, not a dangling body-forward. |
 | §G | Accessibility & Interaction Patterns | **YES (L1440, created v9)** | RESOLVED ✅ |
 | §H | Validation Schemas | **YES (L1538, created v9)** | RESOLVED ✅ |
-| §I–§J | (referenced once each) | §I: pointer only (L…); §J: line 2033 (`§J confirms…`) → resolves to "Accessibility/Test strategy" named H3 | No `§I` body header; appears only as enumeration in V1 ("§F, §G, §H, §I entirely absent") — historical, now stale after §G/§H insertion. |
+| §I–§J | (referenced once each) | §I: pointer only (L…); §J: line 2033 (`§J confirms…`) → resolves to "Accessibility" named H3 | No `§I` body header; appears only as enumeration in V1 ("§F, §G, §H, §I entirely absent") — historical, now stale after §G/§H insertion. |
 | §K, §L, §M, §N, §O | Frontend named H3 sections | YES (all have `### ` headings) | OK |
 | §P (incl. §P1/P2/P7/P8) | State Transitions section (§P) | YES | OK — but note: V-phase-mapping table (L2220) does NOT list §P–§R rows; that's by design (only §S–§Z + new §G/§H). |
 | §Q, §R | Data-flow / Responsive sections | YES | OK |
@@ -45,16 +45,16 @@ Every `§` token in the plan was tokenized (`§` + optional letter + optional di
 ### 2.1 Phase definitions (L2214–2218) vs frontmatter todos
 - **Phase 0** (L2214): "Todos 1, 21b." — frontmatter ids 1, 21b present ✅
 - **Phase 1** (L2215): "Todos 1-8, 3a, 7a, 7b." — all present ✅. **§Y3 fix verified:** Phase 1 text explicitly says `no seeds — seeds are Phase 2` ✅
-- **Phase 2** (L2216): "Todos 9-12, 12a, 14-17, 16a, 19, 21a." + **`seed default email templates` (todo 19, per §Y3 correction)** ✅ — §Y3 fix is in place.
+- **Phase 2** (L2216): "Todos 9-12, 12a, 14-17, 16a, 19, 21a." + **`seed default email templates` (item 19, per §Y3 correction)** ✅ — §Y3 fix is in place.
 - **Phase 3** (L2217): "Todos 13, 18, 20, 20a, 21c." ✅
 - **Phase 4** (L2218): "Todos 20b, 21." ✅
 
 ### 2.2 New v9 todos 22-31 — phase placement in `note:` fields
-| todo | section | `note:` phase claim | consistency |
+| item | section | `note:` phase claim | consistency |
 |------|---------|---------------------|------------|
 | 22 §S | S5/S6/S7 | "Phase 1 (registry/errors) + Phase 2 (GraphQL error mapping)" | OK ✅ (matches table L2224) |
 | 23 §T | T1/T2/T10 | "Phase 2. T6 bundle analysis deferred to Phase 4" | OK ✅ |
-| 24 §U | U2/U3/U7 | "Phase 1 (U1 Email scalar) + Phase 2 (U3, U7)" | **MINOR**: todo content says U2, note phase list starts "U1" — U1 vs U2 swap, harmless (both Phase 1). |
+| 24 §U | U2/U3/U7 | "Phase 1 (U1 Email scalar) + Phase 2 (U3, U7)" | **MINOR**: item content says U2, note phase list starts "U1" — U1 vs U2 swap, harmless (both Phase 1). |
 | 25 §V | V3/V7/V8 | "Phase 2 — ships with UI" | OK ✅ |
 | 26 §W | W2/W4/W5 | "Phase 1 (W1) + Phase 2 (W2-W4) + Phase 3 (W5)" | OK ✅ |
 | 27 §X | X1/X4/X6 | "Phase 1 (X1) + Phase 2 (X4) + Phase 4 (X6)" | OK ✅ |
@@ -130,20 +130,20 @@ Additionally: §W row phase column omits Phase-3 entry for W10 (W10 is in §W bo
 
 ---
 
-## 5. Todo Completeness
+## 5. Item Completeness
 
-### 5.1 Todo ids present in frontmatter: 1, 2, 3, 3a, 4, 5, 6, 7, 7a, 7b, 8, 9, 10, 11, 12, 12a, 13, 14, 15, 16, 16a, 17, 18, 19, 20, 20a, 20b, 21, 21a, 21b, 21c, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31. **41 todos totzl; primary ids 1-31 (with alpha suffixes) — all present.**
+### 5.1 Item ids present in frontmatter: 1, 2, 3, 3a, 4, 5, 6, 7, 7a, 7b, 8, 9, 10, 11, 12, 12a, 13, 14, 15, 16, 16a, 17, 18, 19, 20, 20a, 20b, 21, 21a, 21b, 21c, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31. **41 todos totzl; primary ids 1-31 (with alpha suffixes) — all present.**
 
-### 5.2 Every major section has ≥1 todo:
-- §G → todo 30 ✅
-- §H → todo 31 ✅
+### 5.2 Every major section has ≥1 item:
+- §G → item 30 ✅
+- §H → item 31 ✅
 - §S–§Z → todos 22-29 respectively ✅
 
 ### 5.3 Cross-references from todos to sections — verification
-All todos 22-31 `content:` strings cite their parent section reference (e.g. todo 30 says "§G — …"); all parent sections exist. **No todo references a non-existent section.** ✅
+All todos 22-31 `content:` strings cite their parent section reference (e.g. item 30 says "§G — …"); all parent sections exist. **No item references a non-existent section.** ✅
 
-### 5.4 ONE path contradiction in todo 30 (§G1) vs §V2:
-- **Todo 30 / §G1 (L1446):** `usePrefersReducedMotion()` lives in `frontend/stores/preferencesStore.ts` (a Zustand store + hook).
+### 5.4 ONE path contradiction in item 30 (§G1) vs §V2:
+- **Item 30 / §G1 (L1446):** `usePrefersReducedMotion()` lives in `frontend/stores/preferencesStore.ts` (a Zustand store + hook).
 - **§V2 (L1823):** same hook lives at `frontend/common/hooks/usePrefersReducedMotion.ts`.
 - TWO different file paths for the SAME symbol. Codebase check confirms `frontend/stores/` **does not exist** (real store dir is `frontend/common/stores/`) and `frontend/common/hooks/` exists (houses many hooks but no `usePrefersReducedMotion.ts`). Either §G1 or §V2 must yield — they contradict on BOTH path and architecture (store-state-driven vs matchMedia-hook).
 
@@ -155,7 +155,7 @@ All todos 22-31 `content:` strings cite their parent section reference (e.g. tod
 
 | Line | Section |
 |------|---------|
-| ~169-1391 | Named H3 sections (Library decision, Scope enum, Registry, Multi-provider, DB schema, Backend types, Repo, Service, GraphQL, i18n §A/§B as #### sub, React Email, Render pipeline, Logging, Migration, Test strategy, Future WhatsApp, Phasing) |
+| ~169-1391 | Named H3 sections (Library decision, Scope enum, Registry, Multi-provider, DB schema, Backend types, Repo, Service, GraphQL, i18n §A/§B as #### sub, React Email, Render pipeline, Logging, Migration, Future WhatsApp, Phasing) |
 | 1440 | **§G** (new in v9) |
 | 1538 | **§H** (new in v9) |
 | 1615 | §S |
@@ -168,7 +168,7 @@ All todos 22-31 `content:` strings cite their parent section reference (e.g. tod
 | 2099 | §Z |
 
 ### 6.2 Ordering anomaly #1 — lettered scheme is not contiguous
-The plan uses TWO parallel conventions:
+The design uses TWO parallel conventions:
 - The early UI/UX sections (introduced v6/v7) use **named H3s** ("### Service layer", "### GraphQL surface", "i18n #### A/B"). They map logically to §D–§O but **never carry a `### X.` lettered header**.
 - The audit closure sections (v8/v9) use the **`### <letter>. Title (vX — Round Y Audit)`** convention exclusively (§G, §H, §S-§Z).
 
@@ -190,8 +190,8 @@ Consequence: ref readers can find §G/§H/§S-§Z by header search, but a `§F�
 | Claim | Verified |
 |-------|----------|
 | "9 parallel audit subagents, each validating one v8 section (§S–§Z)" | ⚠️ §S-§Z = 8 sections, plus a cross-section agent = 9 reports total. Wording "each validating one v8 section" overcounts: 8 sections + 1 cross-section = 9, so "9 subagents … (§S–§Z)" implies 9 INDEPENDENT section audits — actually 8. **Minor inaccuracy.** |
-| "Total 19 INVALID specs corrected" | Plausible (matches §S/§T/§U/V/W/X/Y/Z bullet tallies: S6+S7+S8+S5=4; T1/T2/T6/T10=4; U3/U7=2; V3/V7/V8=3; W2/W4/W5/W9=4; X1/X4/X6=3; Y1/Y3/Y6/Y7=4; Z1/Z3/Z4/Z8/Z6=5 = ~29 → shadowed by "19 INVALID + dozens PARTIAL"). Roughly consistent. |
-| "19 INVALID specs corrected, plus dozens of PARTIAL specs deepened" | OK |
+| "Total 19 INVALID designs corrected" | Plausible (matches §S/§T/§U/V/W/X/Y/Z bullet tallies: S6+S7+S8+S5=4; T1/T2/T6/T10=4; U3/U7=2; V3/V7/V8=3; W2/W4/W5/W9=4; X1/X4/X6=3; Y1/Y3/Y6/Y7=4; Z1/Z3/Z4/Z8/Z6=5 = ~29 → shadowed by "19 INVALID + dozens PARTIAL"). Roughly consistent. |
+| "19 INVALID designs corrected, plus dozens of PARTIAL designs deepened" | OK |
 | §S corrections listed (S5/S6/S7/S8) | Match §S body ✅ |
 | §T (T1/T2/T6/T10) | Match ✅ |
 | §U (U3/U7) | Match ✅ |
@@ -202,10 +202,10 @@ Consequence: ref readers can find §G/§H/§S-§Z by header search, but a `§F�
 | §Z (Z1/Z3/Z4/Z8/Z6) | Match ✅ |
 | "Created §G" with hooks G1-G4 | Match ✅ |
 | "Created §H" with H1-H5 | Match ✅ |
-| "Phase corrections: Seed phase contradiction fixed at 3 locations" | **INACCURATE** — searched: only **1 explicit** place in Phase-definitions says "no seeds/seeds are Phase 2" (Phase 1 L2215 + Phase 2 L2216 = 1 pair of statements) plus todo 19 note = 1 + §Y3 body = 1. Even counting generously (Phase-1 sentence, Phase-2 sentence, todo 19 note, §Y3 section heading) = **4 locations**, not 3. The "3 locations" tally is unexplained/loose. Minor inaccuracy. |
+| "Phase corrections: Seed phase contradiction fixed at 3 locations" | **INACCURATE** — searched: only **1 explicit** place in Phase-definitions says "no seeds/seeds are Phase 2" (Phase 1 L2215 + Phase 2 L2216 = 1 pair of statements) plus item 19 note = 1 + §Y3 body = 1. Even counting generously (Phase-1 sentence, Phase-2 sentence, item 19 note, §Y3 section heading) = **4 locations**, not 3. The "3 locations" tally is unexplained/loose. Minor inaccuracy. |
 | "i18n: added `duplicateSlug` … referenced in §S6/S7 but absent from catalogue" | ✅ `duplicateSlug` IS now in §B `error.*` (L1264) — confirmed present. |
 | "Locked-decision count corrected (30 V-numbered … not '12')" | **INACCURATE** — actual count is 33, not 30 (see §4). |
-| "Research files at `.ai/plans/email-templates/glm_swe/ui-research-round4/01-09-*.md` (9 reports, ~235KB total)" | **INACCURATE (minor)** — 9 files exist ✅ (names 01-09), but total size is **238,196 bytes = 232.6 KiB (~233 KB)**, not "235KB". Off by ~5 KB (2%). Path pattern `01-09-*.md` is correct. |
+| "Research files at `.ai/designs/email-templates/glm_swe/ui-research-round4/01-09-*.md` (9 reports, ~235KB total)" | **INACCURATE (minor)** — 9 files exist ✅ (names 01-09), but total size is **238,196 bytes = 232.6 KiB (~233 KB)**, not "235KB". Off by ~5 KB (2%). Path pattern `01-09-*.md` is correct. |
 
 ### 7.2 Net verdict
 **v9 changelog is INACCURATE** with 3 defects of varying severity:
@@ -213,21 +213,20 @@ Consequence: ref readers can find §G/§H/§S-§Z by header search, but a `§F�
 2. **P2** — "~235KB" Round-4 size is ~233 KB (cosmetic).
 3. **P3** — "3 locations" of seed-fix is unspecified/loose (cosmetic), and "9 parallel subagents validating §S–§Z" is actually 8 section audits + 1 cross-section audit.
 
-All *factual* spec-correction bullets (S/T/U/V/W/X/Y/Z, §G/§H creation, duplicateSlug addition) ARE accurate.
+All *factual* design-correction bullets (S/T/U/V/W/X/Y/Z, §G/§H creation, duplicateSlug addition) ARE accurate.
 
 ---
 
 ## 8. Codebase Path Validation
 
-| Plan claim | Path/spec | Verified result | Issue |
+| Design claim | Path/design | Verified result | Issue |
 |------------|-----------|-----------------|-------|
 | §G1: `frontend/stores/preferencesStore.ts` (create new) | L1446 | `frontend/stores/` **does not exist**. Existing stores live at `frontend/common/stores/` (verified). | **MISMATCH** — new file should be `frontend/common/stores/preferencesStore.ts` OR §G1's path should be corrected. |
 | §V2: `frontend/common/hooks/usePrefersReducedMotion.ts` | L1823 | `frontend/common/hooks/` EXISTS (useApolloConnectivity.ts, useAppLocale.ts, …) but `usePrefersReducedMotion.ts` does not (to be created). | OK (to-create) — **but contradicts §G1's store location** (§5.4 / §6 above). |
 | §Z1: `shared/locale/types/emails/` for `EmailLabels` | L2102 | EXISTS ✅, contains `index.ts` | OK |
 | §H: `shared/lib/validations/emailTemplate.ts` (create new) | L1545 | `shared/lib/validations/` **does not exist** — `shared/lib/` has `datetime`, `locale`, `logger`, `meeting`, `national-id`, `phone`, `schedule`, `social`, `timezone` subdirs but NO `validations/`. | **TO-CREATE** ✅ (matches §H intent) — but path is new; ensure `shared/AGENTS.md` allows the new subdir. No mismatch — just a new path. |
 | §S7: `backend/enum/notifications/email-template-error-code.enum.ts` (create) | L1661 | `backend/enum/notifications/` EXISTS (contains `index.ts`, `notificationDeliveries.enum.ts`). | OK (to-create in existing dir) ✅ |
-| §W2: `test/ui/components/email-templates/mocks/` (create) | L1905 | `test/ui/components/` EXISTS. `email-templates/` subdir not present yet. | OK (to-create) ✅ |
-| §Z7: `eslint.config.js` + `biome.json` overrides for backend `.tsx` | L2152 | Repo has `eslint.config.mjs` (NOT `.js`) and `biome.json`. | **MISMATCH (minor)** — plan says `eslint.config.js`; actuality `eslint.config.mjs`. |
+| §Z7: `eslint.config.js` + `biome.json` overrides for backend `.tsx` | L2152 | Repo has `eslint.config.mjs` (NOT `.js`) and `biome.json`. | **MISMATCH (minor)** — design says `eslint.config.js`; actuality `eslint.config.mjs`. |
 
 **Codebase path mismatches: 3** (§G1 dir, §H stale to-create OK by intent — not a mismatch; eslint extension).
 
@@ -239,7 +238,7 @@ Prioritized by severity. **P0 = blocks implementation correctness, P1 = blocks a
 
 ### P0 — Must fix before implementation begins
 1. **Add 10 missing i18n keys to §B catalogue** (§3.2): `dashboard.emailTemplates.editor.shortcuts.{saveDraft,publish,sendTest,close,mergeTags}`, `dashboard.emailTemplates.dnd.{started,over,dropped,cancelled}`, `dashboard.emailTemplates.mergeTag.triggerLabel`. Without these, the v9 V7 fix (announcements) and G4 keyboard-shortcut wiring cannot ship — `t('editor.shortcuts.*')` / `t('dnd.*')` calls (L1534, L1875-1878) will resolve to missing keys at runtime.
-2. **Resolve §G1 vs §V2 path/architecture contradiction** (§5.4). Decide ONE: either (a) the reduced-motion signal is a Zustand store at `frontend/common/stores/preferencesStore.ts` + a thin `usePrefersReducedMotion` reader (per §G1), OR (b) a self-contained matchMedia hook at `frontend/common/hooks/usePrefersReducedMotion.ts` (per §V2). The two specs describe different mechanisms for the same hook. Also fix the path `frontend/stores/` → `frontend/common/stores/` (codebase-correct).
+2. **Resolve §G1 vs §V2 path/architecture contradiction** (§5.4). Decide ONE: either (a) the reduced-motion signal is a Zustand store at `frontend/common/stores/preferencesStore.ts` + a thin `usePrefersReducedMotion` reader (per §G1), OR (b) a self-contained matchMedia hook at `frontend/common/hooks/usePrefersReducedMotion.ts` (per §V2). The two designs describe different mechanisms for the same hook. Also fix the path `frontend/stores/` → `frontend/common/stores/` (codebase-correct).
 3. **Add UI i18n keys for currently-unbound GraphQL error codes** (§3.3): `RATE_LIMITED`, `INVALID_EMAIL`, `INVALID_SAMPLE_PROPS` need canonical `dashboard.emailTemplates.error.*` mapping keys (the existing `toast.rateLimited` / `sendTest.rateLimited` are toast-context, not error-code bindings).
 
 ### P1 — Audit credibility / phase-traceability
@@ -250,14 +249,14 @@ Prioritized by severity. **P0 = blocks implementation correctness, P1 = blocks a
 ### P2 — Cosmetic / documentation hygiene
 7. **Round-4 size**: change "~235KB" → "~233KB" (or "~232 KiB") at L2190 for accuracy.
 8. **Subagent count wording** (L2175): "9 parallel audit subagents, each validating one v8 section (§S–§Z)" → "8 section-audit subagents (§S-§Z) + 1 cross-section consistency subagent" (the §S-§Z set is 8, not 9).
-9. **"3 locations" of seed-fix** (L2186): either enumerate the 3 (Phase-1 line, Phase-2 line, todo-19 note) or restate as "across Phase-1/Phase-2 definitions + todo 19 note + §Y3 body".
+9. **"3 locations" of seed-fix** (L2186): either enumerate the 3 (Phase-1 line, Phase-2 line, item-19 note) or restate as "across Phase-1/Phase-2 definitions + item 19 note + §Y3 body".
 10. **eslint config filename** (§Z7/L2152): `eslint.config.js` → `eslint.config.mjs`.
 11. **Historical labels**: §G header note (L1442) and §H header note (L1540) reference "lines 790, 884, 1038" and "lines 1971-1972" — these line citations are from v8-era file and have not drifted (verified still valid in v9 file), so OK to keep; just flag that any *future* edit above those lines will silently invalidate the citations. Consider converting to anchor refs.
 
 ### Carry-forward (NON-issues, verified clean)
-- §Y3 Phase-2 seed fix: correctly applied (Phase-1 says "no seeds", Phase-2 says "seeds", todo 19 note updated) ✅
+- §Y3 Phase-2 seed fix: correctly applied (Phase-1 says "no seeds", Phase-2 says "seeds", item 19 note updated) ✅
 - `duplicateSlug` i18n key: present in §B ✅
 - §G and §H sections: both created and now resolve all pre-existing dangling refs ✅
 - Todos 22-31: all correctly assigned to sections and phases ✅
 - No "12" decision count residue remains anywhere ✅
-- `shared/lib/validations/`, `backend/enum/notifications/`, `test/ui/components/email-templates/mocks/` — all are correctly spec'd as new (to-create) paths in existing parent dirs ✅
+- `shared/lib/validations/`, `backend/enum/notifications/` — all are correctly design'd as new (to-create) paths in existing parent dirs ✅

@@ -30,7 +30,7 @@ gqlSchemaBuilder.queryFields(t => ({
 
   simulatablePermissionGroups: t.field({
     type: [SimulatablePermissionGroupPothosObject],
-    authScopes: { superAdmin: true, notImpersonating: true },
+    authScopes: { $all: { superAdmin: true, notImpersonating: true } },
     resolve: async (_parent, _args, ctx) => {
       const actorUserId = ctx.realUserId ?? ctx.user?.id;
       if (!actorUserId) {
@@ -48,7 +48,7 @@ gqlSchemaBuilder.queryFields(t => ({
 gqlSchemaBuilder.mutationFields(t => ({
   startPermissionGroupSimulation: t.field({
     type: StartPermissionGroupSimulationResponsePothosObject,
-    authScopes: { superAdmin: true, notImpersonating: true },
+    authScopes: { $all: { superAdmin: true, notImpersonating: true } },
     args: {
       groupSlug: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },

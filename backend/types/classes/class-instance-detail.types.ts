@@ -16,6 +16,25 @@ export type ClassInstanceSelectType = typeof classInstances.$inferSelect;
 export type ClassInstanceInsertType = typeof classInstances.$inferInsert;
 
 /**
+ * Insert input accepted by `SchedulingRepository.createClassInstance`.
+ * Narrowed so callers cannot set server-managed columns: timestamps
+ * (`createdAt`/`updatedAt`), and the quota/rate snapshot columns
+ * (`quotaDeducted`, `rateAmount`, `rateCurrency`, `isRateOverridden`,
+ * `rateSource`) that are owned exclusively by QuotaService / the
+ * rate-resolver cascade and their guarded repository write paths.
+ */
+export type ClassInstanceCreateInput = Omit<
+  ClassInstanceInsertType,
+  "createdAt" | "updatedAt" | "quotaDeducted" | "rateAmount" | "rateCurrency" | "isRateOverridden" | "rateSource"
+>;
+
+/**
+ * Update input accepted by `SchedulingRepository.updateClassInstance`.
+ * Same narrowing as `ClassInstanceCreateInput`, applied partially.
+ */
+export type ClassInstanceUpdateInput = Partial<ClassInstanceCreateInput>;
+
+/**
  * Class instance enriched with the relations joined by
  * `SchedulingRepository.getClassInstanceById` (subject, recurring schedule,
  * student, teacher-with-user, and the resolved avatar URL).

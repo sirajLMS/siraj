@@ -143,11 +143,19 @@ function usePrefixUpdate(
   );
 }
 
+type PrefixKeyDownState = {
+  readonly prefixDigits: string;
+  readonly nationalDigits: string;
+};
+
 function usePrefixKeyDown(
-  prefixDigits: string,
+  state: PrefixKeyDownState,
   updateFromPrefix: (nextPrefix: string) => void,
+  setNationalDigits: (digits: string) => void,
+  emitChange: (prefixDigits: string, nationalDigits: string) => void,
   focusNational: () => void
 ): (event: React.KeyboardEvent<HTMLInputElement>) => void {
+  const { prefixDigits, nationalDigits } = state;
   return useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === "Backspace") {
@@ -168,13 +176,26 @@ function usePrefixKeyDown(
       if (/^\d$/.test(event.key)) {
         event.preventDefault();
         if (!canAppendCallingCodeDigit(prefixDigits, event.key)) {
+          // The calling code is already complete — carry the extra digit into the
+          // national slot instead of swallowing the keystroke.
+          if (isCallingCodeComplete(prefixDigits)) {
+            const nextNational = `${nationalDigits}${event.key}`;
+            setNationalDigits(nextNational);
+            emitChange(prefixDigits, nextNational);
+            focusNational();
+          }
           return;
         }
         updateFromPrefix(`${prefixDigits}${event.key}`);
       }
     },
-    [prefixDigits, updateFromPrefix, focusNational]
+    [prefixDigits, nationalDigits, updateFromPrefix, setNationalDigits, emitChange, focusNational]
   );
+}
+
+/** Count digits in a formatted display string before a display index (maps selections to digit ranges). */
+function countDigitsUpTo(display: string, displayIndex: number): number {
+  return display.slice(0, displayIndex).replace(/\D/g, "").length;
 }
 
 type NationalKeyDownState = {
@@ -195,7 +216,22 @@ function useNationalKeyDown(
   return useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === "Backspace") {
+        const input = event.currentTarget;
+        const selectionStart = input.selectionStart ?? 0;
+        const selectionEnd = input.selectionEnd ?? 0;
         event.preventDefault();
+        if (selectionStart < selectionEnd) {
+          // Backspace over a selection deletes exactly the digits it spans (select-all
+          // clears the whole number); focus stays, so the next Backspace hops to the prefix.
+          const nextNational =
+            nationalDigits.slice(0, countDigitsUpTo(nationalDisplay, selectionStart)) +
+            nationalDigits.slice(countDigitsUpTo(nationalDisplay, selectionEnd));
+          if (nextNational !== nationalDigits) {
+            setNationalDigits(nextNational);
+            emitChange(prefixDigits, nextNational);
+          }
+          return;
+        }
         if (nationalDigits.length > 0) {
           const nextNational = nationalDigits.slice(0, -1);
           setNationalDigits(nextNational);
@@ -471,7 +507,13 @@ function usePhoneInputHandlers(
     emitChange,
     focusPrefix
   );
-  const handlePrefixKeyDown = usePrefixKeyDown(prefixDigits, updateFromPrefix, focusNational);
+  const handlePrefixKeyDown = usePrefixKeyDown(
+    { prefixDigits, nationalDigits },
+    updateFromPrefix,
+    state.setNationalDigits,
+    emitChange,
+    focusNational
+  );
   const handleNationalKeyDown = useNationalKeyDown(
     { prefixDigits, nationalDigits, region, defaultRegion, nationalDisplay },
     state.setNationalDigits,

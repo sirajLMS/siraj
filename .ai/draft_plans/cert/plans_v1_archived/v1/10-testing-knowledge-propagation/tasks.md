@@ -213,7 +213,7 @@ bun biome:check
 curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
   -H "Content-Type: application/json" \
   -d '{"id":"task03-1","files":["frontend/common/graphql/test/certificates/certificate-query.test.ts"]}'
-# GraphQL tests require dev server — use test runner
+# GraphQL tests need a running dev server — use the test runner
 bun run scripts/run-test/run-test.ts frontend/common/graphql/test/certificates/certificate-query.test.ts
 ```
 

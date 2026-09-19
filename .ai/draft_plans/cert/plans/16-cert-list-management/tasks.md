@@ -47,7 +47,7 @@ Task 1 (i18n namespace)
 
 ### Execution Order
 
-**Execution order**: T1 → T2 → T3 → T4 → (T5, T6, T7, T8 via parallel subagents after T4) → T9 → T10 → T11 → T12 → (T13, T14 via parallel subagents after T12) → (T15, T16 via parallel subagents after T13/T14) → T17 → (T18, T19 via parallel subagents after T17) → T20 → T21
+**Execution order**: T1 → T2 → T3 → T4 → (T5, T6, T7, T8 via parallel subagents after T4) → T9 → T10 → T11 → T12 → (T13, T14 via parallel subagents after T12) → (T15, T16 via parallel subagents after T13/T14) → T17 → T20 → T21
 
 1. **Task 1**: i18n namespace (foundation — all components need labels)
 2. **Task 2**: Zustand store (state management foundation — all views depend on it)
@@ -94,7 +94,7 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 
 ### Wave 7: T10
 - Tasks: T10 (Integration verification)
-- Rationale: Depends on T4–T9 (all components built). Verifies end-to-end integration. Sequential dependency on Wave 6.
+- Rationale: Depends on T4–T9 (all components built). Verifies full-stack integration. Sequential dependency on Wave 6.
 
 ### Wave 8: T11
 - Tasks: T11 (Knowledge propagation — base)
@@ -116,13 +116,9 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: T17 (useCertificateListStore enhanced)
 - Rationale: Depends on T2 (existing certListStore), T3 (GraphQL documents), and T15/T16 (annotations to revoke/export actions). Extends the existing store with new dialog/view-mode actions. Sequential dependency on Wave 11.
 
-### Wave 13: T18, T19
-- Tasks: T18 (5 component tests), T19 (6 E2E tests)
-- Rationale: Both depend on T12–T17 (all components exist). Component tests (T18) use mocked Apollo (no server); E2E tests (T19) require `build:test` and run on the test port range. They are independent test suites — safe to run as 2 parallel subagents. (T19 requires `build:test` prerequisite but does not depend on T18 results.)
-
-### Wave 14: T20
+### Wave 13: T20
 - Tasks: T20 (Quality loop per file)
-- Rationale: Depends on T12–T19 (all new files exist). Runs per-file progressive quality gate and full-repo quality gate. Must complete after all test files exist. Sequential dependency on Wave 13.
+- Rationale: Depends on T12–T17 (all new files exist). Runs per-file progressive quality gate and full-repo quality gate. Must complete after all new files exist. Sequential dependency on Wave 12.
 
 ### Final Wave: Knowledge Propagation
 - Task: T21 (Knowledge propagation — certificate list UI)
@@ -145,7 +141,6 @@ For every file created/modified in this plan, read the applicable AGENTS.md and 
 | `frontend/mobile/views/dashboard/cert-list/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md` | `frontend.instructions.md` |
 | `frontend/common/stores/certListStore.ts` | `AGENTS.md`, `frontend/common/stores/AGENTS.md` | `frontend.instructions.md` |
 | `frontend/common/graphql/sharedDocuments/certificates/**` | `AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | `frontend.instructions.md` |
-| `test/ui/components/cert-list/**` | `AGENTS.md`, `test/ui/AGENTS.md` | `tests.instructions.md` |
 
 ### Quality Loop (Per File)
 
@@ -716,7 +711,7 @@ Also add translation key for `sidebar.certificates` in the sidebar i18n namespac
 
 **Estimated time**: 2-3 hours
 **Dependencies**: Tasks 4-9 (all components built)
-**Requirements**: All requirements (verify end-to-end)
+**Requirements**: All requirements (verify full-flow integration)
 
 ### Subtasks
 
@@ -1022,146 +1017,10 @@ Phase H (sequential):  Task 11 (Knowledge propagation)
 
 ---
 
-## Task 18: Create Component Tests (5 test files)
-
-**Estimated time**: 5-6 hours
-**Dependencies**: Tasks 12–17 (all components exist), Plan 5 (mock Apollo providers)
-> **Parallelizable**: This task runs as a subagent in Wave 13 alongside T19.
-**Requirements**: REQ-16.1–16.40 (behavioural coverage), §Component test conventions
-
-### Subtasks
-
-> All component tests use Happy DOM + mocked Apollo (per existing `test/ui/components/` conventions; see `test/ui/AGENTS.md`). Use the existing Storybook mock stores; do NOT spin up the dev server here.
-
-#### 18.1 CertificateListPage test
-
-**File to create**: `test/ui/components/cert/CertificateListPage.test.tsx`
-
-**Coverage**:
-- Renders PageHeader with "Certificates" title and "Manage all issued certificates" subtitle.
-- "Generate Certificates" button links to `/[locale]/certificates/generate`.
-- FilterBar controls dispatch the corresponding store actions.
-- View-mode toggle switches between table and grid representation.
-
-#### 18.2 CertificateTable test
-
-**File to create**: `test/ui/components/cert/CertificateTable.test.tsx`
-
-**Coverage**:
-- Renders all columns in §B (certificateNumber, recipientName, recipientEmail, template, status, issueDate, expiryDate, actions).
-- Header click toggles sort and dispatches `setSort`.
-- Row click navigates to the detail URL (`/certificates/[id]`).
-- Row action buttons render and invoke the correct handler (View/Download/Revoke/Verify).
-- `BatchOperationsBar` appears when 1+ row selected; Bulk Revoke opens `RevokeCertificateDialog` with the selected IDs.
-- Page-size selector offers `[10, 25, 50, 100]` and dispatches `setPageSize`.
-
-#### 18.3 CertificateCard test
-
-**File to create**: `test/ui/components/cert/CertificateCard.test.tsx`
-
-**Coverage**:
-- Renders certificate number, recipient name, status badge, dates, template name.
-- CardActionArea click invokes the `onView` handler.
-- Each CardActions button invokes its own handler; none propagate to the card click.
-- Thumbnail region uses a 4:3 aspect ratio style.
-
-#### 18.4 RevokeCertificateDialog test
-
-**File to create**: `test/ui/components/cert/RevokeCertificateDialog.test.tsx`
-
-**Coverage**:
-- Renders the warning `<Alert>` with singular/plural copy based on `certificateIds.length`.
-- Bulk list of certificate numbers scrollable.
-- "Other" reason reveals the custom reason field; Revoke stays disabled until filled.
-- Notify recipient `Switch` toggles state.
-- Confirm dispatches `revokeCertificates({ ids, reason, customReason, notifyRecipient })` and calls `onRevoked`.
-
-#### 18.5 CertificateExportDialog test
-
-**File to create**: `test/ui/components/cert/CertificateExportDialog.test.tsx`
-
-**Coverage**:
-- Renders all four format options.
-- CSV/Excel reveal column-selection checkboxes.
-- PDF formats reveal the "Include preview thumbnails" Switch.
-- Confirm dispatches `exportCertificates({ format, columns, includeThumbnails, certificateIds })` with the current selection.
-
-**AGENTS.md files to read**:
-- `test/ui/AGENTS.md` and `tests.instructions.md` (component-test conventions, mock Apollo, no server).
-- `frontend/AGENTS.md` (for MUI v9 style notes when writing assertions).
-
-**Quality loop per file**: tsgo + biome + lint via `sub-loop.ts --lifecycle codescene`. For per-test-file run use `bun run scripts/run-test/run-test.ts <test-path>`.
-
----
-
-## Task 19: Create E2E Tests (6 tests)
-
-**Estimated time**: 4-5 hours
-**Dependencies**: Task 10 (dev server integration verified), Tasks 12–17 (page, table, card, dialogs)
-> **Parallelizable**: This task runs as a subagent in Wave 13 alongside T18.
-**Requirements**: REQ-16.1–16.40 (end-to-end verification on a production build)
-
-### Prerequisites
-
-- Run `bun run build:test` before executing E2E tests (per `package.json` → `test:ui:e2e`).
-- Tests run against the production-style test bundle (`.next-test-prod`) on the test port range 3001, 3020–3199 (never the dev:3000 server).
-- Use the project's Playwright helpers — see `test/ui/AGENTS.md`.
-
-### Subtasks
-
-#### 19.1 E2E: View certificate list in table mode
-
-**File to create**: `test/ui/e2e/cert/list-view-table.spec.ts`
-
-**Coverage**: Load `/certificates`, verify the table renders with column headers, page-size selector defaults and at least one row visible.
-
-#### 19.2 E2E: View certificate list in grid mode
-
-**File to create**: `test/ui/e2e/cert/list-view-grid.spec.ts`
-
-**Coverage**: Click the view-mode toggle to Grid, verify the grid renders cards in 1-3 columns by breakpoint and that the page navigation matches the table pager.
-
-#### 19.3 E2E: Filter certificates by status
-
-**File to create**: `test/ui/e2e/cert/filter-by-status.spec.ts`
-
-**Coverage**: Select each status option (Issued, Revoked, Expired, Pending) and verify the visible rows reflect the filter; reset the filter to "All".
-
-#### 19.4 E2E: Search certificates
-
-**File to create**: `test/ui/e2e/cert/search-certificates.spec.ts`
-
-**Coverage**: Type a recipient name / certificate number / email fragment into the search field and verify the list narrows to matching rows (respecting the 300ms debounce).
-
-#### 19.5 E2E: Revoke certificate
-
-**File to create**: `test/ui/e2e/cert/revoke-certificate.spec.ts`
-
-**Coverage**:
-- Single revoke: open row actions → click Revoke → dialog appears with singular copy → select "Incorrect Information" → set notify on → confirm → toast success → row status changes to Revoked.
-- Bulk revoke: select two rows via checkboxes → `BatchOperationsBar` appears → click "Revoke All" → dialog appears with plural copy → choose "Academic Violation" → confirm → both rows now show Revoked status.
-
-#### 19.6 E2E: Export certificates
-
-**File to create**: `test/ui/e2e/cert/export-certificates.spec.ts`
-
-**Coverage**:
-- Open the Export dialog from the FilterBar with no rows selected; choose CSV with a subset of columns; verify the export triggers a download request (mock the export endpoint).
-- Select two rows → Bulk bar → "Export Selected" → choose PDF (combined) → enable thumbnails → confirm → verify the download URL is requested.
-- Verify CSV column-selection checkboxes are hidden for PDF (combined/zip), and that the thumbnail Switch is hidden for CSV/Excel.
-
-**AGENTS.md files to read**:
-- `test/ui/AGENTS.md` and `tests.instructions.md` (Playwright conventions, the `build:test` prerequisite, test-port range).
-- `frontend/AGENTS.md`, root `AGENTS.md`.
-
-**Quality loop**: run E2E tests via `bun run test:ui:e2e` after `bun run build:test`. For per-file log capture use `bun run scripts/run-test/run-test.ts <test-path>`.
-
----
-
 ## Task 20: Quality Loop Per File
 
 **Estimated time**: 1-2 hours
-**Dependencies**: Tasks 12–19 (all new files exist)
+**Dependencies**: Tasks 12–17 (all new files exist)
 **Requirements**: §Relevant Quality Commands, quality-gate workflow
 
 ### Subtasks
@@ -1183,17 +1042,6 @@ Where `<file-path>` is one of:
 - `frontend/views/dashboard/cert/certificates/list/CertificateExportDialog.tsx`
 - `frontend/common/stores/certListStore.ts`
 - `frontend/common/stores/certListStore.types.ts`
-- `test/ui/components/cert/CertificateListPage.test.tsx`
-- `test/ui/components/cert/CertificateTable.test.tsx`
-- `test/ui/components/cert/CertificateCard.test.tsx`
-- `test/ui/components/cert/RevokeCertificateDialog.test.tsx`
-- `test/ui/components/cert/CertificateExportDialog.test.tsx`
-- `test/ui/e2e/cert/list-view-table.spec.ts`
-- `test/ui/e2e/cert/list-view-grid.spec.ts`
-- `test/ui/e2e/cert/filter-by-status.spec.ts`
-- `test/ui/e2e/cert/search-certificates.spec.ts`
-- `test/ui/e2e/cert/revoke-certificate.spec.ts`
-- `test/ui/e2e/cert/export-certificates.spec.ts`
 
 The loop runs tsgo → biome → lint-queue-client and short-circuits at the first failing check. Fix errors at the file level before advancing.
 
@@ -1230,8 +1078,6 @@ Must pass clean before this task is marked complete. Do NOT run `bun sonar-scan`
 - `RevokeCertificateDialog` (single vs. bulk) and `CertificateExportDialog` (format + column/options) reusable dialog pattern (Tasks 15/16).
 - FilterBar → store action wiring sequence + 300ms debounce pattern (Task 12.2).
 - View-mode toggle (Table | Grid) wiring using `setViewMode` (Task 12).
-- Component test fixtures (mock Apollo + Storybook mock store) used by Tasks 18.1–18.5.
-- E2E test layout under `test/ui/e2e/cert/` for Plan 21 reference (Tasks 19.1–19.6).
 
 #### 21.3 Verify quality gate
 
@@ -1260,10 +1106,8 @@ Phase I (sequential):  Task 12 (CertificateListPage)
 Phase J (parallel):    Task 13 (CertificateTable), Task 14 (CertificateCard + Grid)
 Phase K (parallel):     Task 15 (RevokeCertificateDialog), Task 16 (CertificateExportDialog)
 Phase L (sequential):  Task 17 (useCertificateListStore enhanced)
-Phase M (parallel):    Task 18 (5 component tests)
-Phase N (sequential):  Task 19 (6 E2E tests) — requires build:test, runs on the test port range
-Phase O (sequential):  Task 20 (Quality loop per file)
-Phase P (sequential):  Task 21 (Knowledge propagation — list UI)
+Phase M (sequential):  Task 20 (Quality loop per file)
+Phase N (sequential):  Task 21 (Knowledge propagation — list UI)
 ```
 
 **Total estimated time**: 38 hours (parallelizable to ~24 wall-clock hours with 4-way parallelism in Phase E and K)
@@ -1391,29 +1235,6 @@ Phase P (sequential):  Task 21 (Knowledge propagation — list UI)
   - Bulk operations: < 2s for 100 certificates
   - Export CSV 1000 rows: < 5s
   - Memory usage: < 50MB for 10,000 certificates in virtual list
-
-### R4-T13: Component Tests
-- [ ] Create `test/ui/components/cert-list/AdvancedSearchBar.test.tsx`
-  - Test full-text search
-  - Test filter chips
-  - Test saved searches
-  - Test search persistence in URL
-- [ ] Create `test/ui/components/cert-list/BulkOperationsBar.test.tsx`
-  - Test selection count display
-  - Test bulk download
-  - Test bulk revoke confirmation
-  - Test undo bulk delete
-- [ ] Create `test/ui/components/cert-list/ColumnConfig.test.tsx`
-  - Test column toggle
-  - Test column reorder
-  - Test column resize
-- [ ] Create `test/ui/components/cert-list/TagManager.test.tsx`
-  - Test add tag
-  - Test bulk tag
-  - Test filter by tag
-- [ ] Create `test/ui/components/cert-list/EmptyState.test.tsx`
-  - Test each empty state variant
-  - Test retry button
 
 ### R4-T14: Knowledge Propagation
 - [ ] Create `docs/frontend/certificate-list-management-patterns.md`

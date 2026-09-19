@@ -2,44 +2,44 @@
 
 ## Summary
 
-Audited the v6 Frontend (§A-O, lines 781-1096) and i18n (§A-B, lines 1097-1187) sections of the email template plan against actual codebase Apollo/GraphQL precedents. **v6 contains zero Apollo cache policies, optimistic response definitions, pagination merge strategy, retry configuration, or real-time sync patterns** — these are critical data-flow omissions that will cause inconsistent UX and race conditions at runtime. The plan correctly identifies component structure and UI interactions but treats GraphQL as a pure transport layer rather than a cache-first sync system.
+Audited the v6 Frontend (§A-O, lines 781-1096) and i18n (§A-B, lines 1097-1187) sections of the email template design against actual codebase Apollo/GraphQL precedents. **v6 contains zero Apollo cache policies, optimistic response definitions, pagination merge strategy, retry configuration, or real-time sync patterns** — these are critical data-flow omissions that will cause inconsistent UX and race conditions at runtime. The design correctly identifies component structure and UI interactions but treats GraphQL as a pure transport layer rather than a cache-first sync system.
 
 ---
 
 ## Critical Gaps
 
-### 1. No Apollo Cache Policies Specified (fetchPolicy, normalize, redirect)
-- **Plan state**: §M (line 1076) only says "useQuery from @apollo/client/react, no useLazyQuery" — zero mention of `fetchPolicy`, cache normalization keys, or list→detail cache redirects.
+### 1. No Apollo Cache Policies Defined (fetchPolicy, normalize, redirect)
+- **Design state**: §M (line 1076) only says "useQuery from @apollo/client/react, no useLazyQuery" — zero mention of `fetchPolicy`, cache normalization keys, or list→detail cache redirects.
 - **Codebase precedent**: `useTeachersViewModel.ts:62` uses `fetchPolicy: "cache-and-network"`; 50+ other ViewModels use the same. The Apollo cache (`apolloCache.ts:10-22`) defines `merge: false` for `AdminDashboardScheduleResult.rows` but has **no typePolicies for `EmailTemplate` or `EmailTemplates`**.
 - **Impact**: Without explicit `fetchPolicy`, list view uses Apollo default (`cache-first`) → stale data after mutations; detail view won't redirect from list cache without `typePolicies.EmailTemplates.fields.rows.read`/`merge` or a `cache.redirect` for `EmailTemplate:keyArgs`. Editor "Save Draft" then navigating back will show stale list.
 
 ### 2. Zero Optimistic Response Definitions
-- **Plan state**: §D (lines 916-922) describes Save Draft / Publish / Archive / Send Test UI but has **no `optimisticResponse`**, no `update` cache functions, no rollback strategy.
+- **Design state**: §D (lines 916-922) describes Save Draft / Publish / Archive / Send Test UI but has **no `optimisticResponse`**, no `update` cache functions, no rollback strategy.
 - **Codebase precedent**: **No optimistic responses exist anywhere in the codebase** (grep `optimisticResponse` → 0 results). Mutations use `refetchQueries` arrays (e.g., `useSubjectMutations.ts:46-53`) — full refetch on every write. This is the established pattern but causes flicker and 1-2s perceived latency.
 - **Impact**: User clicks "Save Draft" → waits for round-trip → toast appears. No instant UI feedback. If mutation fails, no automatic UI rollback (toast error only).
 
 ### 3. Pagination Strategy Undefined (cursor vs offset, merge, filter reset)
-- **Plan state**: §C (lines 886, 862) mentions `ListPaginationOptions` (10/25/50) and `pageSize` stored in Zustand, but **no GraphQL pagination spec** (Relay cursor? offset/limit? `first`/`after`? `page`/`perPage`?).
+- **Design state**: §C (lines 886, 862) mentions `ListPaginationOptions` (10/25/50) and `pageSize` stored in Zustand, but **no GraphQL pagination definition** (Relay cursor? offset/limit? `first`/`after`? `page`/`perPage`?).
 - **Codebase precedent**: `teacherDirectoryQueryDocument` (line 42-68) uses `paginationArgs: { first, page, skip, after, before, last, maxCount }` — **hybrid offset+cursor**. `StudentDirectory` query (student-directory.documents.ts:38-68) returns `pageInfo { count, currentPage, hasMorePages, lastPage, perPage, total }` — classic offset pagination. **No `merge` function** in cache for paginated lists; `apolloCache.ts` only has `merge: false` for `AdminDashboardScheduleResult.rows`.
-- **Impact**: Email templates list pagination will use whatever the backend returns (likely offset). Filter change must reset to page 1 — not specified. No cache merge → page 2 data won't combine with page 1 on refetch.
+- **Impact**: Email templates list pagination will use whatever the backend returns (likely offset). Filter change must reset to page 1 — not defined. No cache merge → page 2 data won't combine with page 1 on refetch.
 
 ### 4. Refetch Policies After Mutations — Only `refetchQueries` Arrays
-- **Plan state**: §D mentions "Confirm dialog → archive" etc. but no refetch policy. §M says "Apollo hooks useQuery".
+- **Design state**: §D mentions "Confirm dialog → archive" etc. but no refetch policy. §M says "Apollo hooks useQuery".
 - **Codebase precedent**: All mutations use `refetchQueries: [queryDocument]` (see `useSubjectMutations.ts:46-53`, `usePermissionMutations.ts:80-88`). **Background refetch on window focus** exists as a reusable hook (`useRefetchOnWindowFocus.ts:1-18`) but is **only used in billing views** (grep shows 2 usages). Not applied to list/editor views universally.
 - **Impact**: After Save/Publish/Archive, list view refetches correctly (via `refetchQueries`), but editor detail view won't auto-refresh unless it also uses `refetchQueries` on its detail query. No focus-refetch → stale editor if tab backgrounded during auto-save.
 
 ### 5. No Stale-While-Revalidate (SWR) Strategy
-- **Plan state**: §B (lines 852-856) specifies skeletons + `<Suspense fallback>` + `ErrorState` with "Retry" button wired to `refetch`. No mention of `fetchPolicy: "cache-and-network"` or `nextFetchPolicy`.
+- **Design state**: §B (lines 852-856) defines skeletons + `<Suspense fallback>` + `ErrorState` with "Retry" button wired to `refetch`. No mention of `fetchPolicy: "cache-and-network"` or `nextFetchPolicy`.
 - **Codebase precedent**: `useTeachersViewModel.ts:62` uses `cache-and-network` (shows cached instantly, refetches in background). `useStudentDashboardViewModel.ts` (3 occurrences) and `useAdminBillingViewModel.ts` (3 occurrences) also use it. **No ViewModel uses `nextFetchPolicy`**.
 - **Impact**: List view with `cache-first` (default) shows stale data until manual refetch. Editor view needs `cache-and-network` to show last-saved draft immediately while fetching server version.
 
 ### 6. No Error Retry Policy / Apollo Retry Link
-- **Plan state**: §B line 856 mentions "Retry" button → `refetch`. §F line 948 mentions rate-limit inline error. **No Apollo-level retry**, no bounded retries, no user-facing retry for transient network errors.
+- **Design state**: §B line 856 mentions "Retry" button → `refetch`. §F line 948 mentions rate-limit inline error. **No Apollo-level retry**, no bounded retries, no user-facing retry for transient network errors.
 - **Codebase precedent**: **Zero `RetryLink` or `retryAttempts` config** in Apollo client (`AppApolloProvider.tsx:41-64`). The error link (`apollo.utils.ts:299-325`) handles auth recovery + network connectivity notification only. No automatic retry for `NETWORK_ERROR` / `TIMEOUT`. Manual "Retry" button in `ErrorState` is the only retry mechanism.
 - **Impact**: Transient network blip → red error screen → user must click Retry. No exponential backoff, no silent retry.
 
 ### 7. No Real-Time / subscribeToMore / Polling / Conflict Resolution
-- **Plan state**: §D (line 922) has History Drawer with "Restore" button — purely manual. No mention of live updates when another admin publishes same template.
+- **Design state**: §D (line 922) has History Drawer with "Restore" button — purely manual. No mention of live updates when another admin publishes same template.
 - **Codebase precedent**: **Zero `subscribeToMore`, `useSubscription`, or `pollInterval`** in any ViewModel (grep → 0 results). The closest is `useFxLiveRefresh.ts` (custom hook) and billing poll interval hook — both are manual polling, not GraphQL subscriptions.
 - **Impact**: Two admins editing same template → last write wins silently. No "someone else published v4, refresh?" toast. No auto-merge.
 
@@ -48,24 +48,24 @@ Audited the v6 Frontend (§A-O, lines 781-1096) and i18n (§A-B, lines 1097-1187
 ## High-Priority Gaps
 
 ### 8. Send Test Data Flow — Cache Reset Behavior Unspecified
-- **Plan state**: §F (lines 943-951) describes Send Test dialog with `sendTestEmail` mutation, `sampleProps` JSON, rate-limit notice.
+- **Design state**: §F (lines 943-951) describes Send Test dialog with `sendTestEmail` mutation, `sampleProps` JSON, rate-limit notice.
 - **Codebase precedent**: Mutations use `useMutation` hook (not `client.mutate`). `useManualInvoiceViewModel.ts:141-177` shows pattern: `useMutation` with `onCompleted`/`onError` callbacks setting Zustand flags. **No mutation uses `optimisticResponse` or cache `update`**.
-- **Gap**: Plan does not specify:
+- **Gap**: Design does not define:
   - Whether `sendTestEmail` mutation should invalidate `previewEmailTemplate` cache
   - Whether `sampleProps` location is passed as mutation variable or read from store at call time
   - Whether successful send should clear `sampleProps` in Zustand or keep for retry
-- **Impact**: Inconsistent handling of test-email state vs editor state.
+- **Impact**: Inconsistent handling of the send-test dialog state vs editor state.
 
 ### 9. Merge-Tag Introspection — Static List vs Dynamic Query Caching
-- **Plan state**: §D (lines 912-915) describes `VariableMentionPicker` listing `Props` keys from `EmailPropsByScope` as "lawful insert tokens". No GraphQL query mentioned.
+- **Design state**: §D (lines 912-915) describes `VariableMentionPicker` listing `Props` keys from `EmailPropsByScope` as "lawful insert tokens". No GraphQL query mentioned.
 - **Codebase precedent**: `useAudienceAutocomplete.ts` uses a GraphQL query (`searchTeacherAvailabilityQueryDocument` or similar) with `useQuery` for dynamic autocomplete. **No static enum-list pattern** exists for merge-tag-like data.
 - **Gap**: Should merge tags come from a GraphQL query (cached, searchable) or a static client-side map? If GraphQL, need a `mergeTagIntrospectionQueryDocument` in `email.documents.ts` with proper caching. If static, must be in a shared constants file, not in the store.
 - **Impact**: Editor merge-tag picker will either not work (no data source) or be hardcoded and diverge from backend scope definitions.
 
 ### 10. Zustand UI Store vs Apollo Cache Delineation — ViewModel Hook Pattern
-- **Plan state**: §O (line 1093-1095) mentions `emailTemplateEditorStore.ts` holding "filters, dialog open, locale/version selector, segmented control, sort, dirty flag, sampleProps". Says "NO `File`/`Blob` in persist-enabled stores; keep non-serializable editor refs in `useRef` inside ViewModel".
+- **Design state**: §O (line 1093-1095) mentions `emailTemplateEditorStore.ts` holding "filters, dialog open, locale/version selector, segmented control, sort, dirty flag, sampleProps". Says "NO `File`/`Blob` in persist-enabled stores; keep non-serializable editor refs in `useRef` inside ViewModel".
 - **Codebase precedent**: `manualInvoiceUiStore.ts` (lines 10-40) — holds `selectedParentId`, `isSubmitting`, `showSuccess`, `reset()`. `useManualInvoiceViewModel.ts` holds `useForm` control, `useWatch` values, `useMutation` callbacks, and `useRef` for file objects. **Pattern: Zustand = serializable UI state only; ViewModel = Apollo hooks + form control + refs**.
-- **Gap**: Plan doesn't define which fields live in Apollo cache vs Zustand:
+- **Gap**: Design doesn't define which fields live in Apollo cache vs Zustand:
   - `designJson` (huge JSON) → should be in `useRef` or Apollo cache (detail query), NOT Zustand
   - `isDirty` → Zustand (correct)
   - `version` / `lastEdited` → Apollo cache (from detail query)
@@ -76,8 +76,8 @@ Audited the v6 Frontend (§A-O, lines 781-1096) and i18n (§A-B, lines 1097-1187
 
 ## Medium-Priority Gaps
 
-### 11. List View `fetchPolicy` Not Specified Per Filter/Page Change
-- Plan assumes `ListPaginationOptions` in Zustand drives pagination but doesn't specify `fetchPolicy: "cache-and-network"` on the list query, nor `nextFetchPolicy: "cache-first"` for subsequent pages.
+### 11. List View `fetchPolicy` Not Defined Per Filter/Page Change
+- Design assumes `ListPaginationOptions` in Zustand drives pagination but doesn't define `fetchPolicy: "cache-and-network"` on the list query, nor `nextFetchPolicy: "cache-first"` for subsequent pages.
 
 ### 12. Editor Detail Query Cache Redirect from List Not Defined
 - No `typePolicies.EmailTemplate` with `keyArgs: ["id"]` or `cache.redirects` to read single template from list cache. Editor will re-fetch on mount even if list already has data.
@@ -85,11 +85,11 @@ Audited the v6 Frontend (§A-O, lines 781-1096) and i18n (§A-B, lines 1097-1187
 ### 13. No `context: { fetchOptions: { nextFetchPolicy } }` for Background Refetch After Mutation
 - `refetchQueries` triggers full network request. Could use `await refetchQueries({ include: "active" })` with `fetchPolicy: "network-only"` for forced refresh, but not documented.
 
-### 14. History Drawer Version Query Not Specified
+### 14. History Drawer Version Query Not Defined
 - §D line 922 says "History drawer listing prior versions by version integer". No GraphQL document for `templateVersions(templateId)` query, no caching strategy (should be `cache-first`, rarely changes), no pagination.
 
 ### 15. Preview Tab `previewEmailTemplate` Query Cache Policy
-- §E line 932-937: iframe `srcDoc` from compiled HTML. GraphQL query `previewEmailTemplate` accepts `sampleProps`. No `fetchPolicy` specified. Should be `network-only` (always fresh render) or `cache-and-network` with short TTL.
+- §E line 932-937: iframe `srcDoc` from compiled HTML. GraphQL query `previewEmailTemplate` accepts `sampleProps`. No `fetchPolicy` defined. Should be `network-only` (always fresh render) or `cache-and-network` with short TTL.
 
 ---
 
@@ -102,16 +102,16 @@ Audited the v6 Frontend (§A-O, lines 781-1096) and i18n (§A-B, lines 1097-1187
 - Editor shows "v3" badge (§D line 907). Could optimistically increment version in cache on Save Draft, rollback on error. Currently no precedent.
 
 ### 18. Debounced Auto-Save Cache Write
-- Plan mentions Ctrl+S save. Could add auto-save every 30s → write to Apollo cache (`client.writeQuery`) without mutation, full save on explicit action. No precedent.
+- Design mentions Ctrl+S save. Could add auto-save every 30s → write to Apollo cache (`client.writeQuery`) without mutation, full save on explicit action. No precedent.
 
 ### 19. Merge Tag Query with `@defer` for Large Scope Prop Lists
 - If scope has 100+ merge tags, `@defer` could stream them. Not in current codegen config.
 
 ---
 
-## Verified Items (Plan Matches Codebase Conventions)
+## Verified Items (Design Matches Codebase Conventions)
 
-| Item | Plan Reference | Codebase Verification |
+| Item | Design Reference | Codebase Verification |
 |------|----------------|----------------------|
 | `useQuery` only, no `useLazyQuery` | §M line 1076 | `frontend/AGENTS.md:29` + all ViewModels |
 | Import from `@apollo/client/react` | §M line 1076 | All ViewModels: `import { useQuery } from "@apollo/client/react"` |
@@ -126,7 +126,7 @@ Audited the v6 Frontend (§A-O, lines 781-1096) and i18n (§A-B, lines 1097-1187
 | `createApolloCache` with `merge: false` for paginated rows | — | `apolloCache.ts:10-22` |
 | PersistedQueryLink + HttpLink + AuthLink chain | — | `AppApolloProvider.tsx:42-57` |
 | `createLazyView` + `ResponsiveViewSwitch` for tier split | §A lines 788-803 | `frontend/views/AGENTS.md:17-22` |
-| `EmailEditorWrapper` with `next/dynamic({ ssr: false })` | §A lines 805-818 | Plan-specific (new pattern, TipTap requires it) |
+| `EmailEditorWrapper` with `next/dynamic({ ssr: false })` | §A lines 805-818 | Design-specific (new pattern, TipTap requires it) |
 
 ---
 
@@ -145,7 +145,7 @@ Audited the v6 Frontend (§A-O, lines 781-1096) and i18n (§A-B, lines 1097-1187
 
 ---
 
-## Recommended v7 Plan Edits
+## Recommended v7 Design Edits
 
 ### §M GraphQL Documents (lines 1067-1096) — ADD:
 ```markdown
@@ -215,7 +215,7 @@ typePolicies: {
 - `Send Test (SendTestEmailMutationDocument)`: no cache change; only toast on success
 ```
 
-### §C List View (lines 858-889) — ADD Pagination Spec:
+### §C List View (lines 858-889) — ADD Pagination Definition:
 ```markdown
 **Pagination Strategy**:
 - GraphQL: `paginationArgs: { first: pageSize, page: pageNumber, skip: null, after: null }` (offset-style matching `teacherDirectoryQueryDocument`)

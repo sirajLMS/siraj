@@ -1,8 +1,6 @@
 # Research 12 — Pothos Enum Registration Pattern Verification
 
-Verifies plan line 460 of
-`/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md`
-against the installed `@pothos/core@4.13.1` and the repo's existing
+Verification against the installed `@pothos/core@4.13.1` and the repo's existing
 `NotificationEventType` / `NotificationChannel` registration.
 
 Concern: confirm whether `builder.enumType(Enum, {...})` is the correct
@@ -49,7 +47,7 @@ From `backend/graphql/pothos/shared/enum.pothos.ts`:
 
 The repo's own `backend/graphql/AGENTS.md` and
 `backend/graphql/pothos/AGENTS.md` use `XxxPothosEnum` in their positive
-examples (e.g. `ProfileModePothosEnum`). So the plan's existing choice of
+examples (e.g. `ProfileModePothosEnum`). So the choice of
 `EmailScopePothosEnum`, `EmailTemplateStatusPothosEnum`, and
 `EmailEditorPermissionPothosEnum` (from research file 09) matches the
 AGENTS.md-sanctioned convention. Either `*PothosEnum` or `*PothosObject`
@@ -95,8 +93,8 @@ Supporting types:
   enum object via `valuesFromEnum(Enum)` in
   `node_modules/@pothos/core/esm/utils/enums.d.ts:3`.
 
-So the plan's note "Pothos v4 uses the enum-object form (passing the TS
-enum directly), not string values" is **correct** — and is the *only* form
+So: Pothos v4 uses the enum-object form (passing the TS
+enum directly), not string values — **correct** — and is the *only* form
 permitted by the repo's own AGENTS.md rules (see lines in
 `backend/graphql/AGENTS.md` "Pothos Enum Registration Pattern (CRITICAL
 RULE)").
@@ -176,7 +174,7 @@ ordering enforced by Pothos itself:
    import "@/backend/graphql/pothos/schema.types";
    ```
 3. `backend/graphql/pothos/index.ts:7-25` barrels every domain including
-   the new `email` domain (which the plan adds) *and* `shared` (line 19:
+   the new `email` domain *and* `shared` (line 19:
    `export * from "@/backend/graphql/pothos/shared"`), which pulls in
    `shared/index.ts:1` → `shared/enum.pothos.ts`.
 
@@ -195,7 +193,7 @@ ordering enforced by Pothos itself:
       evaluation does not matter — Pothos resolves refs lazily when the
       schema is built, not at module-eval time.
 
-However, there is a **failure mode** the plan must avoid:
+However, there is a **failure mode** to avoid:
 
 - ❌ If `emailTemplate.pothos.ts` references `EmailEditorPermissionPothosEnum`
   via `t.expose(..., { type: EmailEditorPermissionPothosEnum })` but the
@@ -206,7 +204,7 @@ However, there is a **failure mode** the plan must avoid:
   which is the *opposite* mistake, throws `"EmailEditorPermission" has
   already been declared` per AGENTS.md.)
 
-So the precise rule for the plan is:
+So the precise rule is:
 
 > `EmailEditorPermission`, `EmailScope`, `EmailTemplateStatus` **MUST be
 > registered once** in `backend/graphql/pothos/shared/enum.pothos.ts` and
@@ -220,12 +218,12 @@ So the precise rule for the plan is:
 
 No special "import this enum file before the object file" line is needed
 in the domain Pothos file — the existing barrel handles it. The
-*reachability* requirement is the real "BEFORE" the plan refers to, and
+*reachability* requirement is the real "BEFORE" constraint, and
 it is satisfied by the barrel.
 
 ---
 
-## 6. Quoted call shape the plan should follow
+## 6. Quoted call shape to follow
 
 For the three new enums, the registration block to add to
 `backend/graphql/pothos/shared/enum.pothos.ts` (matching
@@ -273,7 +271,7 @@ from `gqlSchema.definitions.ts`.
 
 ## 7. One-line verdict
 
-**VERIFIED** — The plan line 460 statement is correct: the Pothos v4 enum
+**VERIFIED** — The Pothos v4 enum
 registration API is `gqlSchemaBuilder.enumType(<TS enum>, { name: "…" })`
 (`@pothos/core@4.13.1`, `node_modules/@pothos/core/esm/builder.d.ts:53`,
 `builder-options.d.ts:45`); all enum registrations live in
@@ -282,8 +280,8 @@ must **import the registered ref** (`NotificationChannelPothosObject`
 style, `notification-preferences.pothos.ts:17,27` shows it), and the
 "BEFORE" requirement is satisfied by adding the `email` domain to the
 `backend/graphql/pothos/index.ts` barrel (Pothos resolves refs lazily at
-`toSchema()` time). The only nuance beyond the plan's wording is that
+`toSchema()` time). The only nuance is that
 module-evaluation *order* is not what matters — *reachability* from
-`gqlSchema.definitions.ts` is. The plan is otherwise accurate; the
-"`*PothosObject`" suffix in the plan is fine but the AGENTS.md-sanctioned
+`gqlSchema.definitions.ts` is. The
+"`*PothosObject`" suffix works at runtime but the AGENTS.md-sanctioned
 suffix is `*PothosEnum` (research file 09 already uses `*PothosEnum`).

@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { db, queryDb, queryWithPagination } from "@/backend/db";
 import { whatsappContacts } from "@/backend/db/schema";
 import type {
@@ -193,6 +193,21 @@ export namespace WhatsappContactRepository {
       );
     return row?.value ?? 0;
   }
+
+  /**
+   * Right-to-be-forgotten scrub: erase the identity columns of every contact
+   * row whose phone number belongs to the anonymized subject. Nulled phone
+   * numbers drop the row from the (account, phone) partial unique index, so
+   * no constraint conflicts are possible. Runs inside the caller's
+   * transaction when `tx` is provided.
+   */
+  export const anonymizeByPhoneNumbers = async (phoneNumbers: readonly string[], tx: DBTransaction): Promise<void> => {
+    if (phoneNumbers.length === 0) return;
+    await tx
+      .update(whatsappContacts)
+      .set({ phoneNumber: null, fullName: null, firstName: null })
+      .where(inArray(whatsappContacts.phoneNumber, [...phoneNumbers]));
+  };
 }
 
 /**

@@ -38,6 +38,7 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
   let parentUserId = "";
   let parentId = "";
   let superAdminToken = "";
+  let seedSuperAdminToken = "";
   let superAdminUserId = "";
 
   test("provision test entities and super admin", async () => {
@@ -51,7 +52,9 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
     parentUserId = r.parentUserId;
     parentId = r.parentId;
 
-    const sa = await provisionTestSuperAdmin(adminToken, "ReportTestSA");
+    seedSuperAdminToken = r.superAdminToken;
+
+    const sa = await provisionTestSuperAdmin(seedSuperAdminToken, "ReportTestSA");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
 
@@ -139,7 +142,7 @@ describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
   });
 
   test("cleanup provisioned entities", async () => {
-    await cleanupTestEntities(adminToken, {
+    await cleanupTestEntities(seedSuperAdminToken, {
       studentUserId,
       teacherUserId,
       parentUserId,

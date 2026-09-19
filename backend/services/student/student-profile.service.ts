@@ -1,6 +1,7 @@
 import { StudentRepository } from "@/backend/db/repo/students";
 import { UserRepository } from "@/backend/db/repo/users";
 import { type AppLanguage, type Gender, StudentStatus } from "@/backend/enum";
+import { assertUuidShape } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
 import {
@@ -70,6 +71,7 @@ export namespace StudentProfileService {
     tErrors: ErrorsLabels,
     options: GetProfileOptions = {}
   ): Promise<StudentProfileReturnType> {
+    assertUuidShape(studentId, () => new Error(tErrors.studentNotFound(studentId)));
     await assertStudentReadAccess(actorUserId, studentId, tErrors);
 
     const row = await StudentRepository.findProfileById(studentId);

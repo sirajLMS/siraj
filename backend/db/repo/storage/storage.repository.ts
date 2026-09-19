@@ -755,4 +755,33 @@ export namespace StorageDbRepository {
 
     return null;
   };
+
+  /**
+   * Right-to-be-forgotten scrub: delete the file-junction rows linking
+   * storage files to the anonymized subject (user, parent, teacher, and
+   * student identities). The `storage_file` rows themselves stay so shared
+   * files referenced by other owners keep their path registry; physical
+   * blob removal is handled by the storage cleanup workflow. Runs inside
+   * the caller's transaction.
+   */
+  export const deleteOwnerFileJunctions = async (
+    owner: {
+      readonly userId: string;
+      readonly parentId?: string | null;
+      readonly teacherId?: string | null;
+      readonly studentIds: readonly string[];
+    },
+    tx: DBTransaction
+  ): Promise<void> => {
+    await tx.delete(userFiles).where(eq(userFiles.userId, owner.userId));
+    if (owner.parentId) {
+      await tx.delete(parentFiles).where(eq(parentFiles.parentId, owner.parentId));
+    }
+    if (owner.teacherId) {
+      await tx.delete(teacherFiles).where(eq(teacherFiles.teacherId, owner.teacherId));
+    }
+    if (owner.studentIds.length > 0) {
+      await tx.delete(studentFiles).where(inArray(studentFiles.studentId, [...owner.studentIds]));
+    }
+  };
 }

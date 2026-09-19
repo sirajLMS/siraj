@@ -1,7 +1,6 @@
 # Mailgun Adapter API Verification (mailgun.js@13.3.0 + form-data@4.0.6)
 
-Verifies plan line 316 in
-`/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md`.
+API verification of the mailgun.js send-email surface.
 
 ## 1. Confirmed versions
 
@@ -57,8 +56,8 @@ export type MailgunClientOptions = {
 };
 ```
 
-This disagrees with the plan's stated constructor shape `new Mailgun(opts)`
-where `opts` includes `apiKey` / `url`/`host` / `publicApiKey`. The actual v13
+A `new Mailgun(opts)` constructor shape with
+`opts` including `apiKey` / `url`/`host` / `publicApiKey` is wrong for v13. The actual v13
 shape is two-stage: `new Mailgun(FormData)` then `mg.client({ username, key, url, public_key })`.
 
 ## 3. `messages.create(...)` signature (NOT `.send`)
@@ -79,8 +78,8 @@ create(domain: string, data: MailgunMessageData): Promise<MessagesSendResult>;
 
 There is **no `.send()` method in v13 typings** — the older `messages().send()`
 API was renamed to `messages.create(domain, data)`. Every README example also
-uses `mg.messages.create(domain, params)`. The plan's "(or `.send(...)`)"
-fallback does NOT exist in v13 and should be dropped.
+uses `mg.messages.create(domain, params)`. The older
+`.send(...)` fallback does NOT exist in v13 and should not be used.
 
 `MailgunClient` (the object returned by `.client(...)`) exposes `messages`
 directly as a property of type `IMessagesClient` — so the call is
@@ -133,13 +132,11 @@ Findings:
   `CustomFile`, an array, a raw Buffer, a string path, or `CustomFile[]`. The
   cleanest typed shape for a Buffer attachment is
   `{ data: Buffer, filename: string, contentType?: string }` (a `CustomFile`).
-  **The plan's negative claim "NOT per-attachment contentId" is correct — there
-  is no `contentId` field on `CustomFile`.**
+  There is **no per-attachment `contentId`** — `CustomFile` has no `contentId` field.
 - **`inline`** is a TOP-LEVEL field (confirmed: `inline?: any;` on
   `MailgunMessageData`, sibling to `attachment`). It is intentionally typed as
   `any` (not strongly typed), but the README clearly documents it as the
-  channel for inline images. The plan's claim "top-level field NOT per-attachment"
-  is VERIFIED.
+  channel for inline images. Confirmed: `inline` is a top-level field, not per-attachment.
 - `Content-ID` derivation from filename: no `.d.ts` directly models this, but
   the canonical README example (`node_modules/mailgun.js/README.md` lines
   ~543–564 and identical text at
@@ -197,8 +194,7 @@ Findings:
   In ESM: `import FormData from 'form-data'`. In CJS: `require('form-data')`.
 - `.append(key, value, options?)` — third argument is either an
   `AppendOptions` object or a bare `string` (interpreted as filename in the
-  string overload). Confirmation of plan claim
-  `.append(field, value, options)` with `{ filename, contentType }`: VERIFIED
+  string overload). `.append(field, value, options)` with `{ filename, contentType }`: VERIFIED
   (those two keys exist in `AppendOptions`; the shape also includes optional
   `header` for full MIME-header control and `knownLength` / `filepath`).
 
@@ -216,20 +212,15 @@ Findings:
 
 ## 7. Verdict: NEEDS UPDATE
 
-The plan's Mailgun claim is **substantively correct** (top-level `inline`
-field, `Content-ID` from filename, per-attachment `contentId` absent,
-FormData-wrapped Buffer attachments), but four specific API-shape details in
-plan line 316 / §"Adapters to implement" need correction to match v13 typings:
+The overall picture (top-level `inline` field, `Content-ID` from filename, per-attachment `contentId` absent, FormData-wrapped Buffer attachments) is **substantively correct**, but four specific API-shape details need correction to match v13 typings:
 
 1. **Constructor is two-stage, not one**: `new Mailgun(FormData)` injects the
    form-data library, then `mg.client({ username, key, url, public_key })`
-   produces the messages client. The plan's "`opts` includes `apiKey`,
-   `url`/`host`, `publicApiKey`" must be replaced with
+   produces the messages client. Client options keys are
    `username: "api"`, `key`, `url`, `public_key` (no `apiKey` / `host` /
    `publicApiKey` keys exist — see `MailgunClientOptions.d.ts`).
 2. **Method is `.create(domain, data)`**, NOT `.send(...)`. The v13 typings
-   expose only `IMessagesClient.create`. Plan parenthetical "(or `.send(...)`)"
-   should be removed.
+   expose only `IMessagesClient.create` — there is no `.send(...)`.
 3. **Property access, not function call**: `mg.messages.create(...)` —
    `messages` is a client property (`IMessagesClient`), not a factory `messages()`
    returning a client. The historical `mg.messages().send(...)` pattern from
@@ -237,7 +228,7 @@ plan line 316 / §"Adapters to implement" need correction to match v13 typings:
 4. **`inline` typed as `any`**: confirmed top-level sibling of `attachment` on
    `MailgunMessageData` (so the adapter must cast to satisfy strict TS), and
    the recommended attachment shape for Buffers is `CustomFile` =
-   `{ data: Buffer, filename: string, contentType?: string }` — the plan's
+   `{ data: Buffer, filename: string, contentType?: string }` — an
    `EmailAttachment { content, filename, contentType, contentId, encoding }`
    type should be mapped by the Mailgun adapter to `{ data: content,
    filename, contentType }` for both `attachment` and `inline`, discarding

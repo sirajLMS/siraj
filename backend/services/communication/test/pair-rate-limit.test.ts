@@ -149,6 +149,15 @@ await mock.module("@/backend/db/schema", () => ({
   sessionCache: {},
 }));
 
+await mock.module("@/backend/services/shared", async () => {
+  const guard = await import("@/backend/services/shared/outbound-fetch-guard");
+  return {
+    noFollowRedirectInit: guard.noFollowRedirectInit,
+    readJsonWithByteBudget: guard.readJsonWithByteBudget,
+    readResponseBodyWithByteBudget: guard.readResponseBodyWithByteBudget,
+  };
+});
+
 const mockLimit = async (): Promise<unknown[]> => [];
 const mockWhereChain = () => ({ limit: mockLimit });
 const mockFromChain = () => ({ where: mockWhereChain });

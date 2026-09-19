@@ -1,10 +1,15 @@
+import { del } from "@vercel/blob";
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { type NextRequest, NextResponse } from "next/server";
-import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
-import { ALLOWED_MIME_TYPES } from "@/backend/lib/storage";
+import { extractTokenFromHeader, getStringEnv, logger, verifyToken } from "@/backend/lib";
+import { checkRateLimit, storageUploadRateLimiter } from "@/backend/lib/ratelimit";
+import { ALLOWED_MIME_TYPES, isImageContentType, verifyImageMagicBytes } from "@/backend/lib/storage";
 import { SessionService, StorageService } from "@/backend/services";
+import { isPublicStoragePath } from "@/backend/storage/disk/vercel/operations";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
+
+const MAGIC_HEADER_BYTES = 16;
 
 export type VercelUploadUrlClientPlayload = {
   sessionId: string;
@@ -44,13 +49,16 @@ function parseClientPayload(raw: string | null | undefined): VercelUploadUrlClie
   }
 }
 
-function parseTokenPayload(raw: string): { sessionId?: string } {
+function parseTokenPayload(raw: string): { sessionId?: string; contentType?: string } {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!isRecord(parsed)) {
       return {};
     }
-    return typeof parsed.sessionId === "string" ? { sessionId: parsed.sessionId } : {};
+    return {
+      ...(typeof parsed.sessionId === "string" ? { sessionId: parsed.sessionId } : {}),
+      ...(typeof parsed.contentType === "string" ? { contentType: parsed.contentType } : {}),
+    };
   } catch {
     return {};
   }
@@ -122,6 +130,52 @@ async function validateSession(sessionId: string, pathName: string, userId: stri
 }
 
 /**
+ * Fetch the first bytes of a completed blob and verify the magic-byte
+ * signature for image content types. Returns true when the content is
+ * acceptable or when verification is not possible for public paths (lenient);
+ * for non-public paths verification failures are treated as definitive so the
+ * caller deletes the blob.
+ */
+async function hasValidMagicBytes(blobUrl: string, contentType: string, pathname: string): Promise<boolean> {
+  if (!contentType || !isImageContentType(contentType)) {
+    return true;
+  }
+
+  const isPublicPath = isPublicStoragePath(pathname);
+
+  try {
+    const token = getStringEnv("BLOB_READ_WRITE_TOKEN", "");
+    const response = await fetch(blobUrl, {
+      headers: {
+        Range: `bytes=0-${MAGIC_HEADER_BYTES - 1}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    if (!response.ok && response.status !== 206) {
+      logger.error("Unable to fetch uploaded blob for magic-byte verification", {
+        status: response.status,
+        pathname,
+        isPublicPath,
+      });
+      // Public paths stay lenient so a transient fetch failure cannot block
+      // all public uploads; non-public blobs fail closed (deleted by caller).
+      return isPublicPath;
+    }
+
+    const headerBytes = Buffer.from(await response.arrayBuffer());
+    if (headerBytes.length === 0) {
+      logger.error("Magic-byte verification received an empty blob body", { pathname, isPublicPath });
+      return isPublicPath;
+    }
+    return verifyImageMagicBytes(contentType, headerBytes);
+  } catch (error) {
+    logger.error("Magic-byte verification of uploaded blob failed to run", { pathname, isPublicPath, error });
+    return isPublicPath;
+  }
+}
+
+/**
  * Handle Vercel Blob client SDK upload requests
  * POST /api/storage/vercel-upload
  */
@@ -143,6 +197,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       userId,
       authenticated: !!userId,
     });
+
+    const rateLimit = await checkRateLimit(`storage-upload:${userId}`, storageUploadRateLimiter);
+    if (!rateLimit.success) {
+      logger.warn("Storage upload rate limit exceeded", { userId });
+      return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
+    }
 
     // Step 2: Parse request body from Vercel SDK
     const rawBody: unknown = await request.json();
@@ -231,6 +291,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             sessionId,
             pathname: pathName,
             userId,
+            contentType,
           }),
         });
       },
@@ -245,6 +306,42 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           // Parse token payload
           const rawPayload = parseTokenPayload(tokenPayload ?? "{}");
           const parsedSessionId = rawPayload.sessionId;
+
+          // Reject blobs whose contents do not match the declared image type.
+          if (!(await hasValidMagicBytes(blob.url, rawPayload.contentType ?? "", blob.pathname))) {
+            logger.warn("Uploaded blob failed magic-byte verification; deleting", {
+              pathname: blob.pathname,
+              contentType: rawPayload.contentType,
+            });
+
+            const token = getStringEnv("BLOB_READ_WRITE_TOKEN", "");
+            await del(blob.url, { token });
+            return;
+          }
+
+          // The client SDK does not token-encode `access`, so a client could
+          // still have published a non-public path. Enforce server-side: a
+          // non-public blob that is anonymously readable is deleted.
+          if (!isPublicStoragePath(blob.pathname)) {
+            try {
+              const probeResponse = await fetch(blob.url);
+              if (probeResponse.ok) {
+                logger.warn("Uploaded non-public blob is anonymously readable; deleting", {
+                  pathname: blob.pathname,
+                });
+
+                const token = getStringEnv("BLOB_READ_WRITE_TOKEN", "");
+                await del(blob.url, { token });
+                return;
+              }
+            } catch (probeError) {
+              // A failed probe must not break the completion callback.
+              logger.warn("Anonymous-readability probe of uploaded blob failed", {
+                pathname: blob.pathname,
+                error: probeError instanceof Error ? probeError.message : String(probeError),
+              });
+            }
+          }
 
           // Mark session as used
           if (parsedSessionId) {

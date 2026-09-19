@@ -14,7 +14,6 @@ import type {
   CurrencyOptionRowComponent,
   LocaleEmojiComponent,
 } from "@/frontend/common/components/ui/input/currencySelect/types/currencyAutocompleteShared.types";
-import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
 import { type CurrencyOption, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -180,13 +179,14 @@ export const CurrencyAutocompleteShared: React.FC<CurrencyAutocompleteSharedProp
   getPaperSlotProps,
   optionRowSx,
   fullWidthDefault,
+  options: allOptions,
+  catalogLoaded = true,
 }: Readonly<CurrencyAutocompleteSharedProps>): React.ReactNode => {
   const t = useAppTranslation(Translation.Ui.CurrencySelect);
   const locale = useAppLocale();
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 
-  const { options: allOptions, loaded: catalogLoaded } = useCurrencyCatalog();
   const options = useMemo(() => {
     if (!catalogLoaded && currency) {
       const selected = allOptions.find(opt => opt.code === currency.code);

@@ -110,6 +110,7 @@ export interface CronLabels {
     concurrencyConflict: string;
     queueBackendNotAvailable: string;
     permissionDenied: string;
+    payloadTooLarge: string;
     invalidTimezone: (tz: string) => string;
     runNotFound: (id: string) => string;
     manualTriggerConflict: string;

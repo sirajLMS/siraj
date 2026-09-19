@@ -2,23 +2,23 @@
 
 ## Summary
 
-**32 gaps identified** across 8 categories. **Critical: 6**, **High: 10**, **Medium: 10**, **Low: 6**. v6 specification covers skeletons and happy-path UI well, but omits mutation-level loading states, optimistic transitions, conflict resolution, network-edge guards, and several form/editor edge cases. Most gaps map to existing repo patterns (Zustand `isLoading`/`error`, `useNotifications` toast, `useManualInvoiceViewModel` `isSubmitting`/`showSuccess`, `useApolloConnectivity` offline detection, `MetricCard` stagger entrance) — fixes are low-effort insertions.
+**32 gaps identified** across 8 categories. **Critical: 6**, **High: 10**, **Medium: 10**, **Low: 6**. v6 definition covers skeletons and happy-path UI well, but omits mutation-level loading states, optimistic transitions, conflict resolution, network-edge guards, and several form/editor edge cases. Most gaps map to existing repo patterns (Zustand `isLoading`/`error`, `useNotifications` toast, `useManualInvoiceViewModel` `isSubmitting`/`showSuccess`, `useApolloConnectivity` offline detection, `MetricCard` stagger entrance) — fixes are low-effort insertions.
 
 ---
 
 ## Critical Gaps (must-fix before implementation)
 
-1. **Inspector panel skeleton missing** — [§B L854] Plan specifies `EmailEditorSkeleton` with "editor frame block shimmer + Inspector panel shimmer" but no dedicated Inspector-only skeleton for when the editor loads faster than template data (common on slow connections). The Inspector (scope/locale/version/editor groups/subject/attachments) should shimmer independently. **Fix**: Add `InspectorSkeleton` component to `EmailEditorSkeleton.tsx` reusing `<Skeleton variant="rectangular" height={...} />` per MUI pattern; ViewModel exposes `inspectorLoading` (Apollo `loading` from template query) separate from `editorLoading`.
+1. **Inspector panel skeleton missing** — [§B L854] Design defines `EmailEditorSkeleton` with "editor frame block shimmer + Inspector panel shimmer" but no dedicated Inspector-only skeleton for when the editor loads faster than template data (common on slow connections). The Inspector (scope/locale/version/editor groups/subject/attachments) should shimmer independently. **Fix**: Add `InspectorSkeleton` component to `EmailEditorSkeleton.tsx` reusing `<Skeleton variant="rectangular" height={...} />` per MUI pattern; ViewModel exposes `inspectorLoading` (Apollo `loading` from template query) separate from `editorLoading`.
 
-2. **No button-level `loading` prop on mutation buttons** — [§D L916–920] Save Draft, Publish, Send Test buttons have no inline spinner state. Plan mentions `<CircularProgress size={20} color="inherit">` inside buttons (§G L960) but never wires it. **Fix**: ViewModel returns `isSaving`, `isPublishing`, `isSendingTest` booleans (Apollo `loading` from each mutation); tier views pass `loading={isSaving}` to `<Button>`. Precedent: `useManualInvoiceViewModel` L251 `isSubmitting` drives button spinner in `ManualInvoice.desktop.tsx`.
+2. **No button-level `loading` prop on mutation buttons** — [§D L916–920] Save Draft, Publish, Send Test buttons have no inline spinner state. Design mentions `<CircularProgress size={20} color="inherit">` inside buttons (§G L960) but never wires it. **Fix**: ViewModel returns `isSaving`, `isPublishing`, `isSendingTest` booleans (Apollo `loading` from each mutation); tier views pass `loading={isSaving}` to `<Button>`. Precedent: `useManualInvoiceViewModel` L251 `isSubmitting` drives button spinner in `ManualInvoice.desktop.tsx`.
 
 3. **No optimistic UI on Save Draft** — [§D L916] Save Draft has no local-first update. User sees no feedback until server responds (slow on large templates). **Fix**: On `saveDraft` mutation start: (a) set `isDirty=false` locally, (b) update Zustand `lastSavedContent = currentDesignJson`, (c) show transient "Saving…" on button, (d) on success → "Saved ✓" toast + 2s auto-dismiss; on error → rollback `isDirty=true`, restore `designJson` from `lastSavedContent`, toast error. Precedent: `useManualInvoiceViewModel` L146–149 uses `onCompleted`/`onError` for success/error UI; `usePaymentCatalogAdminViewModel` L115–120 shows `handleSaved` with `notifications.show` + `refetchActive`.
 
 4. **No conflict detection / version-mismatch handling** — [§D L918] Publish confirm dialog exists but no 409-style "version changed by another admin" flow. i18n key `dashboard.emailTemplates.error.versionMismatch` exists (L1160) but no UI. **Fix**: Server returns `VERSION_MISMATCH` (expected: N, got: M); client shows `<Dialog>` with "Template was edited by another admin (v{M}). Overwrite their changes or reload?" Actions: `Overwrite` (force publish with current version) / `Reload` (fetch latest, re-apply local edits via diff). Requires GraphQL error code mapping in ViewModel `onError` branch.
 
-5. **No offline indicator / mutation gating** — [§G L982] `useApolloConnectivity` exists (L39–199) with `isConnected` + auto-reconnect + toast on disconnect, but plan never wires it to email editor. **Fix**: In `useEmailTemplateEditorViewModel`, subscribe to `useApolloConnectivity().isConnected`; when `false`, disable Save/Publish/Send Test buttons with tooltip "Offline — changes cannot be saved"; show top banner `<Alert severity="warning">You're offline. Changes will sync when reconnected.</Alert>`. Persist draft to `sessionStorage` on `beforeunload` if offline (see Gap 25).
+5. **No offline indicator / mutation gating** — [§G L982] `useApolloConnectivity` exists (L39–199) with `isConnected` + auto-reconnect + toast on disconnect, but design never wires it to email editor. **Fix**: In `useEmailTemplateEditorViewModel`, subscribe to `useApolloConnectivity().isConnected`; when `false`, disable Save/Publish/Send Test buttons with tooltip "Offline — changes cannot be saved"; show top banner `<Alert severity="warning">You're offline. Changes will sync when reconnected.</Alert>`. Persist draft to `sessionStorage` on `beforeunload` if offline (see Gap 25).
 
-6. **Session expiry mid-edit not handled** — No plan for JWT expiry during edit. **Fix**: Apollo link error interceptor detects `UNAUTHENTICATED`/`FORBIDDEN` on any mutation → toast "Session expired. Please log in." + persist full `designJson` + inspector fields to `sessionStorage` keyed by template ID → redirect to login; on post-login redirect back to editor, pre-fill from `sessionStorage` and show toast "Draft restored from previous session." Precedent: `useApolloConnectivity` L102–119 shows notification + retry pattern; `logger.error` used per repo rule (L152).
+6. **Session expiry mid-edit not handled** — No design for JWT expiry during edit. **Fix**: Apollo link error interceptor detects `UNAUTHENTICATED`/`FORBIDDEN` on any mutation → toast "Session expired. Please log in." + persist full `designJson` + inspector fields to `sessionStorage` keyed by template ID → redirect to login; on post-login redirect back to editor, pre-fill from `sessionStorage` and show toast "Draft restored from previous session." Precedent: `useApolloConnectivity` L102–119 shows notification + retry pattern; `logger.error` used per repo rule (L152).
 
 ---
 
@@ -26,13 +26,13 @@
 
 7. **History drawer: no loading/error/empty states** — [§D L922] "Empty state when no revisions exist" covered, but no `loading` (versions fetching), no `error` (fetch failed), no `restoreInFlight` (button spinner), no `restoreConflict` (concurrent edit), no `previewBeforeRestore`. **Fix**: Drawer content = conditional: `loading ? <HistorySkeleton /> : error ? <ErrorState onRetry={refetchHistory} /> : empty ? <EmptyState /> : <VersionList />`. Each row "Restore" button has `loading` prop; on click → optimistic `isRestoring[v]=true`; on error → rollback + toast `versionMismatch`.
 
-8. **Send Test: missing validation UI before submit** — [§F L946–948] To input has Zod email validation but no inline error display spec; sample props JSON has no validation (invalid JSON → silent fail or 500). **Fix**: `react-hook-form` + Zod on both fields; `<FormHelperText error>` on invalid email; `try { JSON.parse(sampleProps) } catch` → inline error "Invalid JSON"; disable Submit until both valid. Precedent: `useManualInvoiceViewModel` L188–199 shows RHF + Zod + `FormHelperText error` pattern.
+8. **Send Test: missing validation UI before submit** — [§F L946–948] To input has Zod email validation but no inline error display definition; sample props JSON has no validation (invalid JSON → silent fail or 500). **Fix**: `react-hook-form` + Zod on both fields; `<FormHelperText error>` on invalid email; `try { JSON.parse(sampleProps) } catch` → inline error "Invalid JSON"; disable Submit until both valid. Precedent: `useManualInvoiceViewModel` L188–199 shows RHF + Zod + `FormHelperText error` pattern.
 
 9. **Send Test: no success toast with "Test sent to X" + checkmark** — [§F L950] Mentions `SuccessCheckMark` animation but no confirmation toast text. i18n has `toast.testSent: (to: string) => string` (L1157). **Fix**: On mutation `onCompleted`: `notifications.show(t("toast.testSent", { to }), { severity: "success" })` + trigger `SuccessCheckMark` in dialog before close (L958). Precedent: `usePaymentCatalogAdminViewModel` L118 `notifications.show(labels.saveSuccess, { severity: "success" })`.
 
-10. **Send Test: rate-limit notice state** — [§F L948] "If mutation returns `RATE_LIMITED` error, render inline error text" but no UI spec for countdown or static notice. **Fix**: On `RATE_LIMITED` error (includes `retryAfterSeconds`), show inline `<Alert severity="warning">Rate limited. Try again in {countdown}s</Alert>` with live countdown (decrement every second); disable Submit during countdown. Also static notice "Max 5 test emails/min" always visible per plan.
+10. **Send Test: rate-limit notice state** — [§F L948] "If mutation returns `RATE_LIMITED` error, render inline error text" but no UI definition for countdown or static notice. **Fix**: On `RATE_LIMITED` error (includes `retryAfterSeconds`), show inline `<Alert severity="warning">Rate limited. Try again in {countdown}s</Alert>` with live countdown (decrement every second); disable Submit during countdown. Also static notice "Max 5 test emails/min" always visible per design.
 
-11. **List view: empty search results distinct from empty state** — [§C L876] "Empty state" component reused but no `noSearchResults` i18n key distinction (L1163 has `noSearchResults` but plan doesn't wire it). **Fix**: DataGrid `emptyMessage` prop receives conditional: `hasActiveFilters ? t("empty.noSearchResults") : t("empty.emptyState")`. EmptyState `action` button (Create) only shown when `!hasActiveFilters`. Precedent: `ErrorState` L5–8 takes `retryLabel`/`onRetry` for contextual retry.
+11. **List view: empty search results distinct from empty state** — [§C L876] "Empty state" component reused but no `noSearchResults` i18n key distinction (L1163 has `noSearchResults` but design doesn't wire it). **Fix**: DataGrid `emptyMessage` prop receives conditional: `hasActiveFilters ? t("empty.noSearchResults") : t("empty.emptyState")`. EmptyState `action` button (Create) only shown when `!hasActiveFilters`. Precedent: `ErrorState` L5–8 takes `retryLabel`/`onRetry` for contextual retry.
 
 12. **List view: server-side pagination error + retry** — [§C L861] `AppDataGrid` takes `loading` prop but no error boundary for page fetch failure. **Fix**: ViewModel exposes `paginationError` (Apollo `error` from query); DataGrid wrapper renders `<ErrorState embedded onRetry={refetchPage} retryLabel={t("common.retry")} message={t("error.loadFailed")} />` inside grid container when error + !loading. `refetchPage` calls Apollo `refetch` with current page variables.
 
@@ -40,9 +40,9 @@
 
 14. **List view: no row-level loading during bulk/single archive** — [§C L887] Phase 2 bulk actions have no per-row spinner. **Fix**: DataGrid row renderer receives `isArchiving[id]` map; row actions menu "Archive" item disabled when `isArchiving[id]`; show `<CircularProgress size={16} />` next to row. Other rows remain interactive.
 
-15. **Preview tab: no loading/error/empty states** — [§E L930–942] Preview tab spec covers iframe + CSP + viewport selector but no states for: (a) compiling HTML (loading), (b) template has invalid merge tags → DOMPurify/render fails (error), (c) body not yet rendered (empty), (d) unsaved draft warning banner. **Fix**: Preview ViewModel returns `previewStatus: "idle" | "compiling" | "ready" | "error"`; tab renders conditional: `compiling ? <Skeleton /> : error ? <ErrorState onRetry={recompile} /> : empty ? <EmptyState /> : <IframePreview />` + `unsaved ? <Alert severity="info">Preview reflects unsaved changes</Alert> : null`. Precedent: `ErrorState` pattern L11–35.
+15. **Preview tab: no loading/error/empty states** — [§E L930–942] Preview tab definition covers iframe + CSP + viewport selector but no states for: (a) compiling HTML (loading), (b) template has invalid merge tags → DOMPurify/render fails (error), (c) body not yet rendered (empty), (d) unsaved draft warning banner. **Fix**: Preview ViewModel returns `previewStatus: "idle" | "compiling" | "ready" | "error"`; tab renders conditional: `compiling ? <Skeleton /> : error ? <ErrorState onRetry={recompile} /> : empty ? <EmptyState /> : <IframePreview />` + `unsaved ? <Alert severity="info">Preview reflects unsaved changes</Alert> : null`. Precedent: `ErrorState` pattern L11–35.
 
-16. **Stale tab detection (multi-tab edit)** — [§D L925] Plan covers `beforeunload` + in-app nav guard but not detection when another tab saves. **Fix**: Apollo `watchQuery` on template (or lightweight poll every 30s) compares `version` field; if server version > local version → show non-blocking `<Snackbar>` "Template updated in another tab. Click to reload." On click → `router.refresh()` + re-fetch. Alternative: `focus` event listener triggers version check. Precedent: `useApolloConnectivity` L168–187 uses `online`/`offline` listeners — same pattern for `focus`.
+16. **Stale tab detection (multi-tab edit)** — [§D L925] Design covers `beforeunload` + in-app nav guard but not detection when another tab saves. **Fix**: Apollo `watchQuery` on template (or lightweight poll every 30s) compares `version` field; if server version > local version → show non-blocking `<Snackbar>` "Template updated in another tab. Click to reload." On click → `router.refresh()` + re-fetch. Alternative: `focus` event listener triggers version check. Precedent: `useApolloConnectivity` L168–187 uses `online`/`offline` listeners — same pattern for `focus`.
 
 ---
 
@@ -62,11 +62,11 @@
 
 22. **History drawer: restore conflict (version edited by another admin)** — [Gap 4] applies to restore too. Server returns `VERSION_MISMATCH` on restore mutation; same Overwrite/Reload dialog.
 
-23. **List view: stale data after background refetch** — [§C L861] Apollo cache updates but plan doesn't specify list re-render behavior. **Fix**: `useQuery` with `fetchPolicy: "cache-and-network"` (default) auto-re-renders; document this in ViewModel comment. No extra code needed — just verify.
+23. **List view: stale data after background refetch** — [§C L861] Apollo cache updates but design doesn't define list re-render behavior. **Fix**: `useQuery` with `fetchPolicy: "cache-and-network"` (default) auto-re-renders; document this in ViewModel comment. No extra code needed — just verify.
 
-24. **Bulk action confirmation dialog** — [§C L887] "Confirm dialog" mentioned but no spec. **Fix**: Dialog title `t("dialog.bulkArchiveConfirm", { count })`; body `t("dialog.bulkArchiveBody")`; actions Cancel / Archive; `loading` on Archive button during mutation.
+24. **Bulk action confirmation dialog** — [§C L887] "Confirm dialog" mentioned but no definition. **Fix**: Dialog title `t("dialog.bulkArchiveConfirm", { count })`; body `t("dialog.bulkArchiveBody")`; actions Cancel / Archive; `loading` on Archive button during mutation.
 
-25. **Draft persistence to sessionStorage for offline/refresh** — [Gap 5, 6] No plan for `sessionStorage` backup. **Fix**: `useEffect` on `designJson` + inspector fields → `sessionStorage.setItem("emailTemplateDraft:{id}", JSON.stringify({ designJson, subject, attachmentRules, sampleProps, timestamp }))`; on editor mount, if `isNew` false and `sessionStorage` has newer timestamp than `lastEdited` → prompt "Unsaved draft found. Restore?" (distinct from server version).
+25. **Draft persistence to sessionStorage for offline/refresh** — [Gap 5, 6] No design for `sessionStorage` backup. **Fix**: `useEffect` on `designJson` + inspector fields → `sessionStorage.setItem("emailTemplateDraft:{id}", JSON.stringify({ designJson, subject, attachmentRules, sampleProps, timestamp }))`; on editor mount, if `isNew` false and `sessionStorage` has newer timestamp than `lastEdited` → prompt "Unsaved draft found. Restore?" (distinct from server version).
 
 ---
 
@@ -102,7 +102,6 @@
 - ✅ `StatusBadge` extension with `emailTemplate` category (Draft=warning, Published=success, Archived=disabled)
 - ✅ Complete i18n key catalogue (two namespaces: `emails.errors` + `dashboard.emailTemplates`; 7-file atomic changesets with V4-3 lockstep)
 - ✅ `usePrefersReducedMotion` hook — closes production gap
-- ✅ Storybook stories table (15 components) + test files table (12 unit + 1 E2E)
 - ✅ Feature flag visual cue (lock icon + disabled actions when `EMAIL_TEMPLATES_ENABLED=false`)
 
 ---
@@ -126,7 +125,7 @@
 
 ---
 
-## Recommended v7 Plan Edits
+## Recommended v7 Design Edits
 
 **Insert new sub-section "P. State Transitions & Edge Cases" after §O (Feature Flag Visual Cue) in the Frontend section (~line 1091):**
 
@@ -185,7 +184,7 @@
 - Session expiry: Apollo error link interceptor → on `UNAUTHENTICATED`/`FORBIDDEN` during editor mutation → persist full editor state to `sessionStorage["emailTemplateDraft:{id}"]` → `notifications.show(t("sessionExpired"), { severity: "error", actionText: "Log in", onAction: () => router.push("/login?redirect=" + encodeURIComponent(window.location.pathname)) })`. Post-login redirect restores from `sessionStorage` + toast "Draft restored."
 
 **P8. Form/Editor Edge Cases**
-- `beforeunload`: `window.addEventListener("beforeunload", e => { if (isDirty) { e.preventDefault(); e.returnValue = "" } })` (existing plan §D).
+- `beforeunload`: `window.addEventListener("beforeunload", e => { if (isDirty) { e.preventDefault(); e.returnValue = "" } })` (existing design §D).
 - In-app nav guard: back button `<IconButton onClick={isDirty ? openDiscardDialog : onBack} />`; tab clicks intercepted via `Tabs onChange={isDirty ? openDiscardDialog : setTab}`.
 - Logout guard: auth store `logout` action checks `emailTemplateEditorStore.isDirty` → confirm dialog before clearing auth.
 - Idle timeout: (future) same as logout guard.

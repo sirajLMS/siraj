@@ -24,7 +24,7 @@ import {
 gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
   t.field({
     type: ParentInvoiceHistoryResultPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.BILLING_VIEW_HISTORY },
     args: {
       parentId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
       userId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
@@ -98,7 +98,7 @@ gqlSchemaBuilder.queryField("adminBillingSummary", t =>
 gqlSchemaBuilder.queryField("studentCreditStatus", t =>
   t.field({
     type: [StudentCreditRowPothosObject],
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.BILLING_VIEW_HISTORY },
     resolve: async (_root, _args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
@@ -110,7 +110,7 @@ gqlSchemaBuilder.queryField("studentCreditStatus", t =>
 gqlSchemaBuilder.queryField("parentBillingSummary", t =>
   t.field({
     type: ParentBillingSummaryPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.BILLING_VIEW_HISTORY },
     args: {
       parentId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
       userId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),

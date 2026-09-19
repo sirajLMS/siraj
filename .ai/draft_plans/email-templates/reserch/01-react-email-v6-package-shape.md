@@ -2,13 +2,13 @@
 
 ## Verdict: NEEDS UPDATE
 
-The plan's install set is **partially correct but outdated and over-specified**. The core premise of the plan — that React Email v6 is "paired with separate `@react-email/components`, `@react-email/render`, `@react-email/ui` packages that you install alongside `react-email`" — is **factually wrong** for v6. In v6, components and the `render` utility have been **merged INTO** the unified `react-email` package. You no longer install or import from `@react-email/components` or `@react-email/render`.
+The design's install set is **partially correct but outdated and over-specified**. The core premise of the design — that React Email v6 is "paired with separate `@react-email/components`, `@react-email/render`, `@react-email/ui` packages that you install alongside `react-email`" — is **factually wrong** for v6. In v6, components and the `render` utility have been **merged INTO** the unified `react-email` package. You no longer install or import from `@react-email/components` or `@react-email/render`.
 
 ---
 
 ## The Original Claim (verbatim)
 
-> The plan at `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md` claims that the email template system should install these separate npm packages: `react-email@6`, `@react-email/editor`, `@react-email/components`, `@react-email/render`, `@react-email/ui`. The plan asserts React Email v6 is paired with separate `@react-email/components`, `@react-email/render`, `@react-email/ui` packages that you install alongside `react-email`.
+> The design claims that the email template system should install these separate npm packages: `react-email@6`, `@react-email/editor`, `@react-email/components`, `@react-email/render`, `@react-email/ui`. The design asserts React Email v6 is paired with separate `@react-email/components`, `@react-email/render`, `@react-email/ui` packages that you install alongside `react-email`.
 
 ---
 
@@ -115,7 +115,7 @@ const text = toPlainText(html);
 
 **`@react-email/ui` is a REAL, currently-published npm package** (v6.9.1, in lockstep with `react-email`). It is NOT deprecated and NOT merged into `react-email`. It is the renamed successor to `@react-email/preview-server` and provides the **local development preview server UI** ("A live preview of your emails right in your browser"). It is used internally by the `react-email` CLI (`npx react-email dev`).
 
-**Important gotcha:** `@react-email/ui` is NOT something you import components from in your application code. You do NOT import `Html`, `Body`, `render`, etc. from `@react-email/ui`. It is purely the dev-preview harness. The plan's implication that `@react-email/ui` is one of the "component/render" packages you install alongside `react-email` to build emails is misleading — it's the dev-tooling package.
+**Important gotcha:** `@react-email/ui` is NOT something you import components from in your application code. You do NOT import `Html`, `Body`, `render`, etc. from `@react-email/ui`. It is purely the dev-preview harness. The design's implication that `@react-email/ui` is one of the "component/render" packages you install alongside `react-email` to build emails is misleading — it's the dev-tooling package.
 
 ---
 
@@ -187,9 +187,9 @@ This is only needed if you want the standalone `react-email dev` preview UI / st
 
 ---
 
-## The Correct Minimal Install Set for the Plan
+## The Correct Minimal Install Set for the Design
 
-If the plan needs: components + render-to-HTML/text + the visual editor, the correct install is:
+If the design needs: components + render-to-HTML/text + the visual editor, the correct install is:
 
 ```sh
 bun add react-email @react-email/editor
@@ -201,7 +201,7 @@ Optionally add the preview server for local dev:
 bun add -D @react-email/ui
 ```
 
-### Corrected install command (primary, for the siraj-mail plan)
+### Corrected install command (primary, for the siraj-mail design)
 
 ```sh
 bun add react-email @react-email/editor
@@ -209,7 +209,7 @@ bun add react-email @react-email/editor
 bun add -D @react-email/ui
 ```
 
-### Corrected import surface for the plan
+### Corrected import surface for the design
 
 Components and render (all from `react-email`):
 
@@ -259,9 +259,9 @@ import '@react-email/editor/themes/default.css';
 
 6. **Browser runtime polyfill.** From the `render` docs: *"When running in the browser, to properly support Safari and browsers running on iOS, you will need to polyfill the ReadableByteStreamController API."* They recommend `npm i web-streams-polyfill` and `import "web-streams-polyfill/polyfill";` in a root file. Relevant only if you render emails client-side (e.g., in the editor's in-app preview). For server-side rendering (Next.js Server Components / API routes), this is not needed.
 
-7. **`render` is async in v6.** Always `await render(<Template />)`. In v4, `renderAsync` was the async variant; in v5 that was collapsed into a single async `render`. Keep this in mind for the plan's render helpers.
+7. **`render` is async in v6.** Always `await render(<Template />)`. In v4, `renderAsync` was the async variant; in v5 that was collapsed into a single async `render`. Keep this in mind for the design's render helpers.
 
-8. **Editor sub-entry points require granular imports.** If the plan needs custom extensions, import `EmailNode` from `@react-email/editor/core`, not from the bare `@react-email/editor` root. Bare root only exposes `EmailEditor` and the top-level API.
+8. **Editor sub-entry points require granular imports.** If the design needs custom extensions, import `EmailNode` from `@react-email/editor/core`, not from the bare `@react-email/editor` root. Bare root only exposes `EmailEditor` and the top-level API.
 
 9. **Default editor theme is a CSS file import.** `import '@react-email/editor/themes/default.css'` — this is a side-effect import, ensure the bundler (Turbopack/webpack) handles CSS imports from node_modules. Standard in Next.js 16.
 
@@ -269,14 +269,14 @@ import '@react-email/editor/themes/default.css';
 
 ---
 
-## Summary of Corrections the Plan Needs
+## Summary of Corrections the Design Needs
 
 1. **Drop `@react-email/components` and `@react-email/render` from the install set.** In v6, both are folded into `react-email`. Installing them is redundant and adds duplicate `render` implementations.
 
 2. **Keep `@react-email/editor`** — it IS a separate package and the visual editor is the headline feature of v6. Correct.
 
-3. **Re-scope `@react-email/ui`.** It is NOT a component/render package. It is the dev-preview-server UI (rename of `@react-email/preview-server`). If the plan needs the standalone dev preview server, install it as a **devDependency**, but do not import application components from it. If the plan's intent was "UI components," that's wrong — UI components come from `react-email`.
+3. **Re-scope `@react-email/ui`.** It is NOT a component/render package. It is the dev-preview-server UI (rename of `@react-email/preview-server`). If the design needs the standalone dev preview server, install it as a **devDependency**, but do not import application components from it. If the design's intent was "UI components," that's wrong — UI components come from `react-email`.
 
-4. **Update all imports in the plan to use `react-email`** as the single import path for `Html`, `Body`, `Container`, `Button`, `Heading`, `Text`, `Section`, `Link`, `Hr`, `Img`, `Tailwind`, `render`, `pretty`, `toPlainText`. Specifically: `import { render } from 'react-email'` (NOT `@react-email/render`); `import { Html, Body, Container, Button } from 'react-email'` (NOT `@react-email/components`).
+4. **Update all imports in the design to use `react-email`** as the single import path for `Html`, `Body`, `Container`, `Button`, `Heading`, `Text`, `Section`, `Link`, `Hr`, `Img`, `Tailwind`, `render`, `pretty`, `toPlainText`. Specifically: `import { render } from 'react-email'` (NOT `@react-email/render`); `import { Html, Body, Container, Button } from 'react-email'` (NOT `@react-email/components`).
 
 5. **Editor imports stay on `@react-email/editor`** (and sub-paths `/core`, `/extensions`, `/ui`, `/plugins`, `/utils`, `/themes/default.css`).

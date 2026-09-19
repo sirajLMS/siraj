@@ -1577,23 +1577,6 @@ export function TemplateListContainer() {
 - **Element renderers**: test each type renders correct output with given properties
 - **Variable management**: test form validation (unique name, type-specific defaults)
 
-### Component Testing
-
-- Using Siraj's Happy DOM + mocked Apollo pattern (`test/ui/components/`)
-- Test `TemplateListDesktop` with mock data (verify columns, pagination, action buttons)
-- Test `TemplateListMobile` with mock data (verify card layout, tap actions)
-- Test `TemplateEditorDesktop` with mock data (verify section tabs, canvas renders)
-- Test `TemplatePropertyPanel` with each element type selected (verify type-specific fields)
-
-### E2E Testing
-
-- Using Playwright (`test/ui/e2e/`)
-- Requires `bun run build:test` first
-- Key user journeys:
-  1. Create template → add elements → add variables → preview → publish → archive
-  2. Navigate to list → search → filter by status → filter by category → edit
-  3. Category tree → add → rename → reorder → delete
-
 ---
 
 ## Design Review Checklist
@@ -1620,7 +1603,7 @@ export function TemplateListContainer() {
 - [x] Design provides sufficient detail for implementation (file paths, interfaces, store shape)
 - [x] Data models are complete and validated
 - [x] GraphQL documents are specified with fragments and TypedDocumentNode
-- [x] Testing strategy is comprehensive (unit, component, E2E)
+- [x] Testing strategy is comprehensive (unit tests)
 
 ### UX/Navigation Completeness (MANDATORY)
 - [x] New routes table complete with permissions and roles

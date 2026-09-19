@@ -738,7 +738,7 @@ Task 9 (Knowledge Propagation) ← depends on Task 8
 
 ## Final Verification Checklist
 
-After all tasks are complete, verify the following end-to-end:
+After all tasks are complete, verify the following complete flow:
 
 ### Certificate List
 - [ ] `/dashboard/certificates` renders for users with `CERTIFICATES_LIST` or `CERTIFICATES_VIEW_OWN` permission

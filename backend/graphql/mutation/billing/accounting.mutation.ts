@@ -12,6 +12,7 @@ import {
   PackagePlanUpdateInputType,
 } from "@/backend/graphql/pothos/billing/accounting.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { NotFoundError } from "@/backend/lib/errors";
 import { AccountingPaymentService, PackagePlanService, requirePermission } from "@/backend/services";
 import type {
   AccountingPaymentSubmitInput,
@@ -153,7 +154,7 @@ gqlSchemaBuilder.mutationField("createPackagePlan", t =>
   t.field({
     type: PackagePlanPothosObject,
     description: "Create a credit-hour package plan",
-    authScopes: { loggedIn: true },
+    authScopes: { $all: { loggedIn: true, notImpersonating: true } },
     args: { input: t.arg({ type: PackagePlanInput, required: true }) },
     resolve: (_root, args, ctx) =>
       executeAccountingMutation(ctx, (actorUserId, tErrors) =>
@@ -166,7 +167,7 @@ gqlSchemaBuilder.mutationField("updatePackagePlan", t =>
   t.field({
     type: PackagePlanPothosObject,
     description: "Update a credit-hour package plan (snapshot-invariant)",
-    authScopes: { loggedIn: true },
+    authScopes: { $all: { loggedIn: true, notImpersonating: true } },
     args: { input: t.arg({ type: PackagePlanUpdateInputType, required: true }) },
     resolve: (_root, args, ctx) =>
       executeAccountingMutation(ctx, (actorUserId, tErrors) =>
@@ -179,13 +180,13 @@ gqlSchemaBuilder.mutationField("archivePackagePlan", t =>
   t.field({
     type: PackagePlanPothosObject,
     description: "Soft-archive a package plan (hidden from catalogs, history intact)",
-    authScopes: { loggedIn: true },
+    authScopes: { $all: { loggedIn: true, notImpersonating: true } },
     args: { id: t.arg.id({ required: true }) },
     resolve: (_root, args, ctx) =>
       executeAccountingMutation(ctx, async (actorUserId, tErrors) => {
         await PackagePlanService.archive(actorUserId, args.id, tErrors);
         const plan = await PackagePlanService.getById(args.id);
-        if (!plan) throw new Error("Package plan not found after archive");
+        if (!plan) throw new NotFoundError("PACKAGE_PLAN", tErrors.notFound);
         return plan;
       }),
   })
@@ -195,7 +196,7 @@ gqlSchemaBuilder.mutationField("recordAccountingPayment", t =>
   t.field({
     type: AccountingPaymentPothosObject,
     description: "Record an accounting payment that credits hours to a student",
-    authScopes: { loggedIn: true },
+    authScopes: { $all: { loggedIn: true, notImpersonating: true } },
     args: { input: t.arg({ type: AccountingPaymentInput, required: true }) },
     resolve: (_root, args, ctx) =>
       executeAccountingMutation(ctx, (actorUserId, tErrors) =>
@@ -208,7 +209,7 @@ gqlSchemaBuilder.mutationField("updateAccountingPayment", t =>
   t.field({
     type: AccountingPaymentPothosObject,
     description: "Edit an accounting payment (gateway/note-only or creditHours delta)",
-    authScopes: { loggedIn: true },
+    authScopes: { $all: { loggedIn: true, notImpersonating: true } },
     args: { input: t.arg({ type: AccountingPaymentUpdateInputObject, required: true }) },
     resolve: (_root, args, ctx) =>
       executeAccountingMutation(ctx, (actorUserId, tErrors) =>
@@ -221,7 +222,7 @@ gqlSchemaBuilder.mutationField("toggleAccountingPaymentPaidStatus", t =>
   t.field({
     type: AccountingPaymentPothosObject,
     description: "Toggle the Paid status on an accounting payment (cascades to invoice)",
-    authScopes: { loggedIn: true },
+    authScopes: { $all: { loggedIn: true, notImpersonating: true } },
     args: { input: t.arg({ type: AccountingPaymentTogglePaidInputObject, required: true }) },
     resolve: (_root, args, ctx) =>
       executeAccountingMutation(ctx, (actorUserId, tErrors) =>

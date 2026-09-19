@@ -136,6 +136,12 @@ dev.log
 # Browser login cookies created by scripts/browser-login.ts (contain session tokens)
 .browser-auth/
 
+# OpenHands local secrets (contains API keys — must never be committed)
+.openhands/secrets.json
+
+# Local vision-API key for scripts/analyze_image.py (must never be committed)
+scripts/.image-analysis-key
+
 __pycache__
 .tmp/
 

@@ -21,7 +21,7 @@ import { MeetingIntegrationService, MeetingOAuthService } from "@/backend/servic
 gqlSchemaBuilder.mutationField("testMeetingProviderConnection", t =>
   t.field({
     type: TestMeetingConnectionResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_MEETING_INTEGRATIONS, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.SETTINGS_EDIT_MEETING_INTEGRATIONS, notImpersonating: true } },
     args: {
       input: t.arg({ type: TestMeetingConnectionInputPothosObject, required: true }),
     },
@@ -40,7 +40,7 @@ gqlSchemaBuilder.mutationField("testMeetingProviderConnection", t =>
 gqlSchemaBuilder.mutationField("adminRevokeMeetingProviderToken", t =>
   t.field({
     type: AdminRevokeTokenResultPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_MEETING_INTEGRATIONS, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.SETTINGS_EDIT_MEETING_INTEGRATIONS, notImpersonating: true } },
     args: {
       input: t.arg({ type: AdminRevokeTokenInputPothosObject, required: true }),
     },

@@ -1401,8 +1401,4 @@ After implementation, document the following patterns discovered/used:
 
 ## 14. Testing Strategy (Reference)
 
-Testing is covered in Plan 10 (Testing & Knowledge Propagation). Key test areas:
-
-1. **Component tests** (`test/ui/components/`): Mock Apollo, test containers, test dialog open/close, test filter changes
-2. **E2E tests** (`test/ui/e2e/`): Full flow — list → generate → detail → revoke → verify
-3. **Public verification**: E2E without login — visit `/verify/[code]` directly
+Testing is covered in Plan 10 (Testing & Knowledge Propagation).

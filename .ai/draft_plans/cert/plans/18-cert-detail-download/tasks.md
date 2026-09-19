@@ -11,25 +11,24 @@
 ## Task Dependency Graph & Execution Order
 
 ```
-T00 ─┬──► T04 ─┬──► T05 ──► T07 ──► T11 ┐
-T01 ─┤         ├──► T06 ──► T07 ──► T11 ┃
-T02 ─┤         ├──► T08 ──► T07 ──► T11 ┃──► T11, T12 (Phase 1–4 complete)
-T03 ─┘         ├──► T09 ──► T07 ──► T11 ┃
-               ├──► T10 ──► T07 ──► T11 ┃
-               └──► T16 ──► T07 ──► T11 ┘
+T00 ─┬──► T04 ─┬──► T05 ──► T07 ┐
+T01 ─┤         ├──► T06 ──► T07 ┃
+T02 ─┤         ├──► T08 ──► T07 ┃──► T12 (Phase 1–4 complete)
+T03 ─┘         ├──► T09 ──► T07 ┃
+               ├──► T10 ──► T07 ┃
+               └──► T16 ──► T07 ┘
 T39 (independent) ──► R4 backend schema
 T13 ──► T15 ──► T17, T32
 T14 ──► T28, T30
 T18, T19 ──► T31, T38
-T20 ──► T24
 T21 ──► T30, T37
 T22 ──► T33, T34
 T23 ──► T28, T29, T31, T34
-T24, T25, T26, T27 (Phase 3 R2 gate)
-T28–T34 ──► T35 ──► T40 ──► T41 ──► T42 ──► T43 ──► T44
+T26, T27 (Phase 3 R2 gate)
+T28–T34 ──► T35 ──► T40 ──► T43 ──► T44
 ```
 
-**Execution order**: (T00, T01, T02, T03, T39 via parallel subagents) → (T04 via parallel subagents after Wave 1) → (T05, T06, T08, T09, T10, T16 via parallel subagents after T04) → (T07, T13, T14, T18, T19, T20, T21, T22, T23 via parallel subagents after Wave 3) → (T11, T12, T15, T28, T30, T31, T33, T34, T37, T38 via parallel subagents after Wave 4) → (T17, T29, T32, T36 via parallel subagents after Wave 5) → (T24, T35 via parallel subagents after Wave 6) → (T25, T40 via parallel subagents after Wave 7) → (T26, T41 via parallel subagents after Wave 8) → (T27, T42 via parallel subagents after Wave 9) → T43 → T44
+**Execution order**: (T00, T01, T02, T03, T39 via parallel subagents) → (T04 via parallel subagents after Wave 1) → (T05, T06, T08, T09, T10, T16 via parallel subagents after T04) → (T07, T13, T14, T18, T19, T20, T21, T22, T23 via parallel subagents after Wave 3) → (T12, T15, T28, T30, T31, T33, T34, T37, T38 via parallel subagents after Wave 4) → (T17, T29, T32, T36 via parallel subagents after Wave 5) → (T35 via parallel subagents after Wave 6) → (T40 via parallel subagents after Wave 7) → (T26 via parallel subagents after Wave 8) → (T27 via parallel subagents after Wave 9) → T43 → T44
 
 ---
 
@@ -53,33 +52,33 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: T07 (print via iframe), T13 (presentation shell), T14 (preview viewer), T18 (audit trail tab), T19 (download history tab), T20 (revoke confirm dialog), T21 (PDF download button), T22 (QR verification card), T23 (store extension)
 - Rationale: T07 depends on T06 (completed in Wave 3); T13 depends on T05 (Wave 3); T14 depends on T06; T18/T19 depend on T09; T20 depends on T08; T21 depends on T06; T22 depends on T10; T23 depends on T06/T01/T02 — all prerequisites satisfied, no cross-dependencies within the wave
 
-### Wave 5: T11, T12, T15, T28, T30, T31, T33, T34, T37, T38
-- Tasks: T11 (component tests), T12 (knowledge propagation), T15 (details panel), T28 (zoom/pan gestures), T30 (download format menu), T31 (certificate timeline visualization), T33 (share link generation), T34 (QR code card enhancement), T37 (print preview), T38 (audit trail download tracking)
-- Rationale: T11/T12 depend on T01–T10 (all prior); T15 depends on T13; T28 depends on T13/T23; T30 depends on T21/T06/T02; T31 depends on T18/T09/T23; T33 depends on T22/T10; T34 depends on T22/T23; T37 depends on T13/T21; T38 depends on T19/T06 — all interdependencies resolved after Wave 4
+### Wave 5: T12, T15, T28, T30, T31, T33, T34, T37, T38
+- Tasks: T12 (knowledge propagation), T15 (details panel), T28 (zoom/pan gestures), T30 (download format menu), T31 (certificate timeline visualization), T33 (share link generation), T34 (QR code card enhancement), T37 (print preview), T38 (audit trail download tracking)
+- Rationale: T12 depends on T01–T10 (all prior); T15 depends on T13; T28 depends on T13/T23; T30 depends on T21/T06/T02; T31 depends on T18/T09/T23; T33 depends on T22/T10; T34 depends on T22/T23; T37 depends on T13/T21; T38 depends on T19/T06 — all interdependencies resolved after Wave 4
 
 ### Wave 6: T17, T29, T32, T36
 - Tasks: T17 (variable values tab), T29 (full-screen viewer), T32 (revision history panel), T36 (loading & error states)
 - Rationale: T17 depends on T02/T15/T03; T29 depends on T28/T23; T32 depends on T15/T01; T36 depends on T13/T28/T30/T06 — all are available after Wave 5
 
-### Wave 7: T24, T35
-- Tasks: T24 (component tests R2), T35 (accessibility audit R4)
-- Rationale: T24 depends on T13–T22 (all prior R2); T35 depends on T28–T34 (all R4 components) — both barriers met simultaneously
+### Wave 7: T35
+- Tasks: T35 (accessibility audit R4)
+- Rationale: T35 depends on T28–T34 (all R4 components) — barrier met after Wave 6
 
-### Wave 8: T25, T40
-- Tasks: T25 (E2E tests R2), T40 (i18n keys for R4)
-- Rationale: T25 depends on T13–T22 + T24 (Wave 7); T40 depends on T28–T38 (Wave 5) — both prerequisites resolve synchronously
+### Wave 8: T40
+- Tasks: T40 (i18n keys for R4)
+- Rationale: T40 depends on T28–T38 (Wave 5) — prerequisite resolves after Wave 7
 
-### Wave 9: T26, T41
-- Tasks: T26 (quality loop R2), T41 (R4 component tests)
-- Rationale: T26 depends on T13–T25 (Wave 8 for T25); T41 depends on T28–T40 (Wave 8 for T40) + T24 — both release after Wave 8 completes
+### Wave 9: T26
+- Tasks: T26 (quality loop R2)
+- Rationale: T26 depends on T13–T23 — releases after Wave 8 completes
 
-### Wave 10: T27, T42
-- Tasks: T27 (knowledge propagation R2), T42 (R4 E2E tests)
-- Rationale: T27 depends on T13–T26 (Wave 9); T42 depends on T28–T40 + T41 (Wave 9) — concurrent readiness
+### Wave 10: T27
+- Tasks: T27 (knowledge propagation R2)
+- Rationale: T27 depends on T13–T26 (Wave 9) — ready after Wave 9
 
 ### Wave 11: T43
 - Tasks: T43 (R4 quality loop per file)
-- Rationale: Depends on T28–T42 (all Wave 10 done); must wait for all R4 files and tests to exist
+- Rationale: Depends on T28–T40 (all Wave 10 done); must wait for all R4 files to exist
 
 ### Final Wave: Knowledge Propagation
 - Task: T44 (R4 knowledge propagation)
@@ -107,11 +106,11 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 | AC-18-09 | Audit trail (paginated, server-sorted, load more, C.9) | T09 |
 | AC-18-10 | Status badge (5 canonical values: pending/issued/revoked/expired/failed, C.1) | T05 |
 | AC-18-11 | Verification URL (`NEXT_PUBLIC_PUBLIC_BASE_URL`, C.13) + QR (200x200 SVG, 1024x1024 PNG download) | T10 |
-| AC-18-11a | Share dialog (copy, email, WhatsApp, QR download) | T11 |
+| AC-18-11a | Share dialog (copy, email, WhatsApp, QR download) | T10 |
 | AC-18-12 | Mobile responsive (accordion, bottom action bar, pinch-to-zoom) | T05 |
 | AC-18-13 | Permission-based access (`AppPermission` keys, DashboardAccessDeniedContent, C.3/C.11) | T03, T05 |
 | AC-18-14 | Breadcrumb navigation back to list | T05 |
-| AC-18-15 | Keyboard accessibility | T05, T08, T09, T10, T11 |
+| AC-18-15 | Keyboard accessibility | T05, T08, T09, T10 |
 
 ---
 
@@ -130,7 +129,6 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 | T08 | Frontend | `frontend.instructions.md` | `frontend/AGENTS.md` |
 | T09 | Frontend | `frontend.instructions.md` | `frontend/AGENTS.md`, `frontend/views/AGENTS.md` |
 | T10 | Frontend | `frontend.instructions.md` | `frontend/AGENTS.md` |
-| T11 | Frontend | `frontend.instructions.md`, `tests.instructions.md` | `frontend/AGENTS.md`, `test/ui/AGENTS.md` |
 | T12 | Cross-cutting | — | Root `AGENTS.md` |
 
 ---
@@ -226,7 +224,6 @@ bun run scripts/health/sub-loop.ts package.json --lifecycle codescene
   - Client-side only (not persisted)
   - Follows `frontend/common/stores/AGENTS.md` conventions
 
-- [ ] 1.5 Create mock store at `frontend/common/stores/__mocks__/certDetailStore.ts` for Storybook and component tests
 
 **Files to create:**
 - `shared/locale/types/dashboard/certificates/detail.ts` (modify — add detail namespaces)
@@ -1093,75 +1090,6 @@ bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/S
 
 ---
 
-### T11: Component Tests
-
-**Goal:** Write component tests for the certificate detail page, dialogs, audit timeline, QR/copy components, and ShareDialog — all aligned with C.1 (5 status values), C.7 (reissue not reactivate), C.9 (paginated server-sort), C.13 (env var URLs).
-
-**Duration:** 4-5 hours
-
-**Subtasks:**
-
-- [ ] 11.1 Write component tests at `test/ui/components/cert-detail/`:
-  - `CertDetailContainer.test.tsx` — loading state, error state (404/not found → DashboardNotFoundContent), error state (403/access denied → DashboardAccessDeniedContent — C.11), data display with permission flags (C.3: AppPermission-based)
-  - `CertificateStatusBadge.test.tsx` — all 5 status values (C.1: pending=warning, issued=success, revoked=error, expired=warning, failed=error — NOT 3 values), tooltip display with `status.tooltip.lastChanged(date)` interpolation
-  - `DownloadMenu.test.tsx` — menu opens, format selection (PDF/PNG/JPG), loading state per format, disabled state when downloading, error toast for C.5 error codes (PDF_OBJECT_MISSING, PDF_CORRUPTED, TEMPLATE_NOT_FOUND)
-  - `RevokeDialog.test.tsx` — open/close, reason selection (DATA_ERROR, WRONG_RECIPIENT, DUPLICATE, OTHER — C.7), "Other" conditional field, validation (reason + other reason required when OTHER selected), confirm disabled when invalid, loading state, error state (Alert inside dialog)
-  - `ReissueDialog.test.tsx` — open/close, optional reason, confirm (creates NEW cert — C.7), loading state, error state (Alert inside dialog)
-  - `ShareDialog.test.tsx` — open/close, copy verification link (clipboard API), "Copied!" feedback, email link opens `mailto:`, WhatsApp link opens `https://wa.me/`, QR download button at 1024x1024
-  - `StatusTimeline.test.tsx` — empty state, single entry, multiple entries, expand/collapse (C.8: ViewModel-managed expandedIds), C.9: Load More button when hasMore=true, loading more state, NO client sort toggle, event count with pluralization (0/1/2/3-10/11-99/100+ — Arabic)
-  - `QrCodeDisplay.test.tsx` — SVG generation (200x200), QR content matches `${NEXT_PUBLIC_PUBLIC_BASE_URL}/verify/${verificationCode}` (C.13), loading state (skeleton), error fallback ("QR unavailable")
-  - `VerificationLinkCopy.test.tsx` — copy to clipboard, "Copied!" feedback, clipboard API failure handling, read-only TextField display, "Open Verification Page" link
-  - `CertificateActionsBar.test.tsx` — permission-gated button visibility (C.3: use AppPermission.CertificateView/Manage/Revoke/Generate), Revoke visible only when `status === 'ISSUED'` (C.1: not 'active'), Re-issue visible only when `status === 'REVOKED'` (C.7: New name)
-  - `CertificateInfoPanel.test.tsx` — field display (C.2: certificateNumber, recipientName, entryDate, expiryDate, templateName, etc. — NOT serial/studentName/studentId), date formatting via `formatDate` (C.10)
-  - `DashboardAccessDeniedContent.test.tsx` — renders access denied message, "Back to Certificates" button (C.11: NEW component, split from 404)
-
-- [ ] 11.2 Test setup:
-  - Use Happy DOM environment (no server)
-  - Mock Apollo Client with `MockedProvider` (in `test/ui/components/cert-detail/__mocks__/`)
-  - Mock `certDetailStore` from `frontend/common/stores/__mocks__/certDetailStore.ts`
-  - Mock `qrcode` library with `jest.mock('qrcode')` or similar stub
-  - Mock `navigator.clipboard` for copy tests (C.13 env var URL)
-  - Mock `process.env.NEXT_PUBLIC_PUBLIC_BASE_URL` for URL construction tests (C.13)
-  - C.10: Mock `formatDate` utility from `@/frontend/common/lib/dateFormat`
-
-- [ ] 11.3 Run tests:
-  ```bash
-  bun run test:ui:components -- --testPathPattern="test/ui/components/cert-detail/"
-  ```
-
-**Files to create:**
-- `test/ui/components/cert-detail/CertDetailContainer.test.tsx`
-- `test/ui/components/cert-detail/CertificateStatusBadge.test.tsx`
-- `test/ui/components/cert-detail/DownloadMenu.test.tsx`
-- `test/ui/components/cert-detail/RevokeDialog.test.tsx`
-- `test/ui/components/cert-detail/ReissueDialog.test.tsx`
-- `test/ui/components/cert-detail/ShareDialog.test.tsx`
-- `test/ui/components/cert-detail/StatusTimeline.test.tsx`
-- `test/ui/components/cert-detail/QrCodeDisplay.test.tsx`
-- `test/ui/components/cert-detail/VerificationLinkCopy.test.tsx`
-- `test/ui/components/cert-detail/CertificateActionsBar.test.tsx`
-- `test/ui/components/cert-detail/CertificateInfoPanel.test.tsx`
-- `test/ui/components/cert-detail/DashboardAccessDeniedContent.test.tsx`
-
-**Dependencies:** All prior tasks (T01–T10)
-
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T15, T28, T30, T31, T33, T34, T37, T38.
-
-**Requirements covered:** Validates REQ-18-01 through REQ-18-13, all C.1 through C.13 reality check fixes
-
-**Quality loop per test file:**
-```bash
-bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.tsx
-```
-
-**Instruction verification:**
-- `test/ui/AGENTS.md` — test conventions
-- `.agents/instructions/tests.instructions.md`
-
-**Outcome file:** `.ai/plans/cert-plan-18/outcome/T11-outcome.md`
-
----
-
 ### T12: Knowledge Propagation
 
 **Goal:** Document all patterns created by this plan for reuse across other Plans (04, 12, 13, 15, 16) so future implementers can follow the same conventions. Key patterns: Split Download (C.4), Off-Screen Print (C.6), Re-issue (C.7), Paginated Server-Sorted Audit (C.9), URL Construction (C.13), Access Denied Component (C.11), and the full ViewModel-Via-Container pattern with presentation-tier Delegation.
@@ -1231,7 +1159,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Status:** Supplemental — appended atop T00–T12; no removals.
 **Dependencies:** T00–T10 (store, queries, i18n, download/print plumbing, audit/verify wiring).
 
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T15, T28, T30, T31, T33, T34, T37, T38.
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T15, T28, T30, T31, T33, T34, T37, T38.
 
 ### T13: CertificateDetailPage Presentation Shell
 
@@ -1298,7 +1226,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 4 hours
 **Dependencies:** T13 (parent shell).
 
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T28, T30, T31, T33, T34, T37, T38.
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T28, T30, T31, T33, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T15-outcome.md`
 
 ---
@@ -1502,8 +1430,6 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 23.6 `reset()` action: clears state back to initial (used on unmount).
 - [ ] 23.7 Confirm non-persisted (no `persist` HOC) — add `// non-persisted: C.8 mitigation` header comment.
 - [ ] 23.8 Apollo cache eviction wiring (evict `CertificateDetail:ROOT_ID` after revoke).
-- [ ] 23.9 Storybook mock story: MSW handlers for query/mutations (do NOT custom-build store mock; C.8 note).
-- [ ] 23.10 Story for All Events / User / System filter transitions.
 - [ ] 23.11 Quality loop (codescene lifecycle).
 
 **Duration:** 8 hours
@@ -1514,68 +1440,14 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 ---
 
-### T24: Component Tests (6 Test Files)
-
-**Goal:** Per-component Happy DOM tests covering core interactions and i18n.
-
-**Files:**
-- `test/ui/components/cert-detail/CertificateDetailPage.test.tsx` (renders shell, breadcrumb, hides Revoke when REVOKED)
-- `test/ui/components/cert-detail/CertificatePreviewViewer.test.tsx` (zoom in/out, rotate, fullscreen toggle, print button clicks)
-- `test/ui/components/cert-detail/CertificateDetailsPanel.test.tsx` (tab switch a11y, lazy-render)
-- `test/ui/components/cert-detail/RevokeConfirmDialog.test.tsx` (open/close, OTHER-reason conditional, confirm success snackbar)
-- `test/ui/components/cert-detail/PdfDownloadButton.test.tsx` (loading state, disabled state, error retry)
-- `test/ui/components/cert-detail/QrVerificationCard.test.tsx` (QR canvas generated, download-PNG click)
-
-**Subtasks:**
-- [ ] 24.1 Add `test/ui/components/cert-detail/` directory per `test/ui/AGENTS.md`.
-- [ ] 24.2 Each test mocks Apollo query/mutation handlers via MSW or `MockedProvider`.
-- [ ] 24.3 Use `render-with-Intl` pattern from existing UI tests.
-- [ ] 24.4 Each test file includes ≥3 test cases for robust coverage.
-- [ ] 24.5 Run all six tests via `bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.tsx` per `tests.instructions.md`.
-- [ ] 24.6 Verify with `frontend/AGENTS.md` + `test/ui/AGENTS.md` instructions.
-- [ ] 24.7 Quality loop per test file: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each file.
-
-**Duration:** 14 hours
-**Dependencies:** All T13–T22 implementation tasks.
-
-> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T35.
-**Outcome file:** `.ai/plans/cert-18/outcome/T24-outcome.md`
-
----
-
-### T25: End-to-End Tests (6 Tests)
-
-**Goal:** Playwright E2E covering the six canonical user journeys — view detail, zoom preview, download PDF, view audit trail, revoke certificate, copy verification URL.
-
-**Files:** `test/ui/e2e/cert-detail-18.spec.ts`
-
-**Subtasks:**
-- [ ] 25.1 Build production bundle in advance: `bun run build:test` (REQUIRED per `test/ui/AGENTS.md`).
-- [ ] 25.2 Test 1 — View certificate detail page: navigate from list, assert breadcrumb + header + status badge + two-column layout visible.
-- [ ] 25.3 Test 2 — Zoom preview: click zoom-in twice, assert zoom-% label change, click reset, click rotate, assert rotation state via data attribute.
-- [ ] 25.4 Test 3 — Download PDF: click Download PDF, assert network request to mint-signed-url endpoint, assert download triggered (mock the actual file via Playwright route intercept).
-- [ ] 25.5 Test 4 — View audit trail: click Audit tab, assert timeline events rendered, click Load more, assert additional events appear.
-- [ ] 25.6 Test 5 — Revoke certificate: click Revoke, choose reason (e.g. `DISHONESTY`), toggle notify switch off, confirm — assert success snackbar + badge updates to REVOKED + Revoke button hidden.
-- [ ] 25.7 Test 6 — Copy verification URL: in Overview tab, click Copy icon on verification URL, assert clipboard contains `NEXT_PUBLIC_PUBLIC_BASE_URL/verify/<code>` (use Playwright `browserContext.grantPermissions(['clipboard-read', 'clipboard-write'])`).
-- [ ] 25.8 Each test seeds a fresh certificate via Playwright fixture (use `globalSetup` script — mirror Plan 16 fixture pattern).
-- [ ] 25.9 Quality loop per test file: `bun run scripts/health/sub-loop.ts test/ui/e2e/cert-detail-18.spec.ts --lifecycle codescene`.
-
-**Duration:** 16 hours
-**Dependencies:** T13–T22 implementation tasks done + T24 component tests.
-
-> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T40.
-**Outcome file:** `.ai/plans/cert-18/outcome/T25-outcome.md`
-
----
-
 ### T26: Quality Loop Per File (Cross-Task)
 
 **Goal:** Run the per-file verification loop (`scripts/health/sub-loop.ts --lifecycle codescene`) on every new file before integration; ensures no tsgo/biome/lint/codescene regressions.
 
-**Files:** all new files from T13–T25.
+**Files:** all new files from T13–T23.
 
 **Subtasks:**
-- [ ] 26.1 Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for EACH new file created in T13–T25.
+- [ ] 26.1 Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for EACH new file created in T13–T23.
 - [ ] 26.2 Persist sub-loop stdout to per-file log under `.ai/plans/cert-18/outcome/quality-logs/` directory (NOT in repo root).
 - [ ] 26.3 For each failed check, apply the relevant fix following `frontend.instructions.md` and/or `tests.instructions.md` (per the AGENTS.md instruction file mapping).
 - [ ] 26.4 Cross-file violation follow-up reported to orchestrator per the "Fix-Or-Report" rule in root AGENTS.md.
@@ -1583,16 +1455,16 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 26.6 Final full-repo `bun quality-gate` run to confirm no regressions across tsgo → biome → lint → codescene.
 
 **Duration:** 8 hours
-**Dependencies:** All T13–T25 atomic files exist.
+**Dependencies:** All T13–T23 atomic files exist.
 
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T41.
+> **Parallelizable**: This task runs as a subagent in Wave 9.
 **Outcome file:** `.ai/plans/cert-18/outcome/T26-outcome.md`
 
 ---
 
 ### T27: Knowledge Propagation (Phase 2)
 
-**Goal:** Add patterns created in T13–T25 to the existing T12 knowledge base so future plans reuse them.
+**Goal:** Add patterns created in T13–T23 to the existing T12 knowledge base so future plans reuse them.
 
 **Subtasks:**
 - [ ] 27.1 Write detailed pattern: Detail Page two-column shell (`CertificateDetailPage`) — breadcrumb back-link caveat (C.7), header action cluster, responsive breakpoint collapse.
@@ -1610,7 +1482,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 2-3 hours
 **Dependencies:** All T13–T26 tasks complete.
 
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T42.
+> **Parallelizable**: This task runs as a subagent in Wave 10.
 **Outcome file:** `.ai/plans/cert-18/outcome/T27-outcome.md`
 
 ---
@@ -1645,7 +1517,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 10 hours
 **Dependencies:** T13 (CertificatePreviewViewer baseline), T23.1 (store viewer fields).
 
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T30, T31, T33, T34, T37, T38.
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T15, T30, T31, T33, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T28-outcome.md`
 
 ---
@@ -1708,7 +1580,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 8 hours
 **Dependencies:** T21 (PdfDownloadButton baseline), T06 (download plumbing), T02 (GraphQL documents).
 
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T31, T33, T34, T37, T38.
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T15, T28, T31, T33, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T30-outcome.md`
 
 ---
@@ -1739,7 +1611,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 8 hours
 **Dependencies:** T18 (AuditTimeline vertical), T09 (audit query plumbing), T23.3 (audit store fields).
 
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T33, T34, T37, T38.
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T15, T28, T30, T33, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T31-outcome.md`
 
 ---
@@ -1817,7 +1689,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 14 hours
 **Dependencies:** T22 (QrVerificationCard pattern), T01 (store), T10 (verify URL plumbing), C.13 base URL.
 
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T31, T34, T37, T38.
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T15, T28, T30, T31, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T33-outcome.md`
 
 ---
@@ -1845,7 +1717,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 6 hours
 **Dependencies:** T22 (QrVerificationCard baseline), T23 (store).
 
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T31, T33, T37, T38.
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T15, T28, T30, T31, T33, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T34-outcome.md`
 
 ---
@@ -1881,7 +1753,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 10 hours
 **Dependencies:** T28–T34 (all R4 components exist), shared/locale infrastructure.
 
-> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T24.
+> **Parallelizable**: This task runs as a subagent in Wave 7.
 **Outcome file:** `.ai/plans/cert-18/outcome/T35-outcome.md`
 
 ---
@@ -1936,7 +1808,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 6 hours
 **Dependencies:** T13 (preview viewer), T21 (download button), shared/locale infrastructure.
 
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T31, T33, T34, T38.
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T15, T28, T30, T31, T33, T34, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T37-outcome.md`
 
 ---
@@ -1967,7 +1839,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 10 hours
 **Dependencies:** T19 (DownloadHistoryTable baseline), T06 (download plumbing), shared/locale infrastructure.
 
-> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T31, T33, T34, T37.
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T15, T28, T30, T31, T33, T34, T37.
 **Outcome file:** `.ai/plans/cert-18/outcome/T38-outcome.md`
 
 ---
@@ -2042,65 +1914,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Duration:** 8 hours
 **Dependencies:** All R4 component tasks (T28–T38) for key exhaustion; shared/locale infrastructure.
 
-> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T25.
+> **Parallelizable**: This task runs as a subagent in Wave 8.
 **Outcome file:** `.ai/plans/cert-18/outcome/T40-outcome.md`
-
----
-
-### T41: R4 Component Tests (8 Test Files)
-
-**Goal:** Per-component Happy DOM tests covering R4 interactions and i18n.
-
-**Files:**
-- `test/ui/components/cert-detail/CertificateFullscreenViewer.test.tsx` (open/close, keyboard shortcuts, zoom slider)
-- `test/ui/components/cert-detail/DownloadFormatMenu.test.tsx` (format selection, QR toggle, JPEG quality slider, JSON export)
-- `test/ui/components/cert-detail/CertificateTimeline.test.tsx` (event rendering, filter, dense mode, zoom)
-- `test/ui/components/cert-detail/RevisionHistoryPanel.test.tsx` (revision list, before/after toggle, revert confirm)
-- `test/ui/components/cert-detail/RevisionCompareDialog.test.tsx` (side-by-side diff open/close)
-- `test/ui/components/cert-detail/ShareLinkDialog.test.tsx` (generate link, expiry, password, revoke)
-- `test/ui/components/cert-detail/QrVerificationCard.test.tsx` (SVG download, size change, overlay toggle — extends T24)
-- `test/ui/components/cert-detail/DownloadHistoryTable.test.tsx` (new columns, GDPR notice, consent checkbox)
-
-**Subtasks:**
-- [ ] 41.1 Each test mocks Apollo query/mutation via MSW or `MockedProvider`.
-- [ ] 41.2 Use `render-with-Intl` pattern from existing UI tests.
-- [ ] 41.3 Each test file includes ≥3 test cases for robust coverage.
-- [ ] 41.4 Test keyboard shortcuts for FullscreenViewer (simulate `keydown` events).
-- [ ] 41.5 Test consent checkbox state persistence via `localStorage` mock.
-- [ ] 41.6 Run all tests via `bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.tsx` per `tests.instructions.md`.
-- [ ] 41.7 Verify with `frontend/AGENTS.md` + `test/ui/AGENTS.md` + `tests.instructions.md` instructions.
-- [ ] 41.8 Quality loop per test file: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each file.
-- [ ] 41.9 Persist results to `.ai/plans/cert-18/outcome/quality-logs/T41-*.log`.
-
-**Duration:** 16 hours
-**Dependencies:** T28–T40 implementation tasks, T24 (existing cert-detail test pattern).
-
-> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T26.
-**Outcome file:** `.ai/plans/cert-18/outcome/T41-outcome.md`
-
----
-
-### T42: R4 End-to-End Tests (4 Tests)
-
-**Goal:** Playwright E2E covering R4 journeys — full-screen viewer, multi-format download, share link generation, revision revert.
-
-**Files:** `test/ui/e2e/cert-detail-18-r4.spec.ts`
-
-**Subtasks:**
-- [ ] 42.1 Build production bundle: `bun run build:test` (REQUIRED per `test/ui/AGENTS.md`).
-- [ ] 42.2 Test 1 — Full-screen viewer: click fullscreen button, assert `Dialog` fullScreen open, press `+` and assert zoom-% label change, press `Escape` to close.
-- [ ] 42.3 Test 2 — Multi-format download: click download menu, select PNG format, toggle QR OFF, assert network request with `format=PNG&withQr=false` params (mock via Playwright route intercept).
-- [ ] 42.4 Test 3 — Share link: click Share, select 7-day expiry, enable password, generate, assert URL textfield contains `/share/`, copy to clipboard (grant permissions), revoke button visible.
-- [ ] 42.5 Test 4 — Revision revert: switch to Revisions tab, select a previous revision, click Revert, confirm in dialog, assert success snackbar + certificate detail refetches.
-- [ ] 42.6 Each test seeds a fresh certificate via Playwright fixture (mirror Plan 16 fixture pattern).
-- [ ] 42.7 Quality loop per test file: `bun run scripts/health/sub-loop.ts test/ui/e2e/cert-detail-18-r4.spec.ts --lifecycle codescene`.
-- [ ] 42.8 Persist results to `.ai/plans/cert-18/outcome/quality-logs/T42-*.log`.
-
-**Duration:** 12 hours
-**Dependencies:** T28–T40 done + T41 component tests; production build.
-
-> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T27.
-**Outcome file:** `.ai/plans/cert-18/outcome/T42-outcome.md`
 
 ---
 
@@ -2108,10 +1923,10 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Goal:** Run `scripts/health/sub-loop.ts --lifecycle codescene` on every R4 new file before integration.
 
-**Files:** all new files from T28–T42.
+**Files:** all new files from T28–T40.
 
 **Subtasks:**
-- [ ] 43.1 Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for EACH new file in T28–T42.
+- [ ] 43.1 Run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for EACH new file in T28–T40.
 - [ ] 43.2 Persist sub-loop stdout to per-file log under `.ai/plans/cert-18/outcome/quality-logs/R4-T43-*.log` (NOT in repo root).
 - [ ] 43.3 For each failed check, apply fix per `frontend.instructions.md` and/or `tests.instructions.md` and/or `backend.instructions.md` (per AGENTS.md instruction file mapping).
 - [ ] 43.4 Cross-file violation follow-up reported to orchestrator per the "Fix-Or-Report" rule in root AGENTS.md.
@@ -2119,7 +1934,7 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 43.6 Final full-repo `bun quality-gate` run to confirm no regressions across tsgo → biome → lint → codescene.
 
 **Duration:** 8 hours
-**Dependencies:** All T28–T42 atomic files exist.
+**Dependencies:** All T28–T40 atomic files exist.
 
 > **Parallelizable**: This task runs as a subagent in Wave 11 (solo — no siblings, but waits for all Wave 10 subagents).
 **Outcome file:** `.ai/plans/cert-18/outcome/T43-outcome.md`
@@ -2142,7 +1957,6 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 44.9 Write pattern: Accessibility ARIA roles for MUI Dialog/Tabs/Toolbar — focus trap verification, reduced-motion `sx` media query.
 - [ ] 44.10 Write pattern: Skeleton + progressive image loading — `Skeleton` variant, LQIP blur-up, cross-fade to content.
 - [ ] 44.11 Write pattern: Performance budget measurement — `performance.mark/measure` + `logger.debug` (NEVER `console.log`); 60fps `requestAnimationFrame` throttle.
-- [ ] 44.12 Update `tests.instructions.md` companion guide with R4 test patterns (keyboard simulation, `localStorage` mock, MSW for share-link mutations).
 - [ ] 44.13 Document reusable `CertificateFullscreenViewer` for Plan 04 / 15 (generic viewer pattern — not cert-specific).
 
 **Duration:** 3 hours

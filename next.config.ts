@@ -123,12 +123,17 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
+            // Fallback CSP for paths the proxy doesn't cover (api/_next/static).
+            // Production drops 'unsafe-inline'/'unsafe-eval' and the blanket
+            // https: img wildcard; dev/HMR requires the relaxed values.
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              isDev ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
-              "img-src 'self' data: blob: https:",
+              isDev
+                ? "img-src 'self' data: blob: https:"
+                : "img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com https://*.blob.vercel-storage.com",
               "connect-src 'self' https://*.nr-data.net https://*.newrelic.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",

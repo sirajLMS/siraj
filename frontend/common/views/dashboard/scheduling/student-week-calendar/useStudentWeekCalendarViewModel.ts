@@ -17,7 +17,7 @@ export interface StudentClassRow {
   readonly executionState: string;
 }
 
-export function startOfWeek(date: Date): Date {
+function startOfWeek(date: Date): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() - d.getDay());

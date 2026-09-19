@@ -1383,7 +1383,6 @@ No per-item visibility state in the store — the overflow component derives vis
 | File | Description |
 |------|-------------|
 | `frontend/views/dashboard/cert/templates/editor/ToolbarOverflow.tsx` | Overflow wrapper + `useToolbarOverflow` hook |
-| `test/ui/components/editor/ToolbarOverflow.test.tsx` | Unit tests (see R4 tests) |
 
 ### R4.2 Panel Collapse/Expand Animations
 
@@ -1756,16 +1755,6 @@ partialize: (state) => ({
 | `frontend/views/dashboard/cert/templates/editor/EditorTabBar.tsx` | View | Tab bar with drag reorder |
 | `frontend/views/dashboard/cert/templates/editor/RecentTemplatesList.tsx` | View | Recent templates screen |
 | `frontend/views/dashboard/cert/templates/editor/EditorSkeletons.tsx` | View | Loading skeleton components |
-| `test/ui/components/editor/ToolbarOverflow.test.tsx` | Test | Overflow tests |
-| `test/ui/components/editor/UnsavedChangesDialog.test.tsx` | Test | Dialog tests |
-| `test/ui/components/editor/AutosaveIndicator.test.tsx` | Test | Indicator tests |
-| `test/ui/components/editor/useAutosave.test.ts` | Test | Auto-save hook tests |
-| `test/ui/components/editor/ShortcutManager.test.ts` | Test | Shortcut conflict tests |
-| `test/ui/components/editor/ConflictDialog.test.tsx` | Test | Conflict dialog tests |
-| `test/ui/components/editor/EditorTabBar.test.tsx` | Test | Tab bar tests |
-| `test/ui/components/editor/ErrorBoundaries.test.tsx` | Test | Error boundary tests |
-| `test/ui/components/editor/SrLiveRegion.test.tsx` | Test | SR live region tests |
-| `test/ui/e2e/editor-prod-hardening.spec.ts` | Test | E2E for overflow, autosave, unsaved guard |
 
 **Modified files:**
 

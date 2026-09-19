@@ -2,6 +2,12 @@ import { GraphQLError, GraphQLScalarType, Kind, type ValueNode } from "graphql";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 import { resolveExcludedIanaTimezoneId } from "@/shared/lib/timezone/excluded-iana-timezones";
+import { getServerTranslations } from "@/shared/locale";
+import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
+
+// Scalar parsers run outside the request context, so the fallback message uses
+// the default content locale; clients localize via `extensions.scalarCode`.
+const tErrors = getServerTranslations(DEFAULT_CONTENT_LOCALE).errorsTranslations;
 
 const IANA_TIMEZONE_ENUM_VALUES = new Set<string>(Object.values(IanaTimezone));
 
@@ -35,7 +41,7 @@ function parseIanaTimezoneValue(value: unknown): IanaTimezone {
     return parsed;
   }
 
-  throw new GraphQLError(`Invalid IanaTimezone: ${value}`, {
+  throw new GraphQLError(tErrors.invalidInput, {
     extensions: { code: "BAD_USER_INPUT", scalarCode: IanaTimezoneScalarError.InvalidValue },
   });
 }
@@ -52,7 +58,7 @@ function serializeIanaTimezone(value: unknown): IanaTimezone {
   if (typeof value === "string") {
     return parseIanaTimezoneValue(value);
   }
-  throw new GraphQLError(`Cannot serialize value as IanaTimezone: ${String(value)}`, {
+  throw new GraphQLError(tErrors.invalidInput, {
     extensions: { code: "INTERNAL_SERVER_ERROR", scalarCode: IanaTimezoneScalarError.CannotSerialize },
   });
 }

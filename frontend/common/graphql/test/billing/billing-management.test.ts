@@ -67,6 +67,7 @@ async function uploadProofFile(token: string): Promise<string> {
 /** Mutable test state shared between provision, test body, and cleanup phases. */
 interface BillingTestState {
   adminToken: string;
+  seedSuperAdminToken: string;
   superAdminToken: string;
   superAdminUserId: string;
   parentId: string;
@@ -87,15 +88,16 @@ async function provisionAndLogin(state: BillingTestState, prefix: string): Promi
   state.teacherUserId = r.teacherUserId;
   state.parentUserId = r.parentUserId;
   state.parentId = r.parentId;
+  state.seedSuperAdminToken = r.superAdminToken;
 
-  const sa = await provisionTestSuperAdmin(state.adminToken, `${prefix}SA`);
+  const sa = await provisionTestSuperAdmin(r.superAdminToken, `${prefix}SA`);
   state.superAdminToken = sa.token;
   state.superAdminUserId = sa.userId;
 }
 
 /** Cleans up all provisioned entities and the super admin created during setup. */
 async function cleanupAll(state: BillingTestState): Promise<void> {
-  await cleanupTestEntities(state.adminToken, {
+  await cleanupTestEntities(state.seedSuperAdminToken, {
     studentUserId: state.studentUserId,
     teacherUserId: state.teacherUserId,
     parentUserId: state.parentUserId,
@@ -111,6 +113,7 @@ describe("GraphQL: createManualInvoice mutation", () => {
 
   const state: BillingTestState = {
     adminToken: "",
+    seedSuperAdminToken: "",
     superAdminToken: "",
     superAdminUserId: "",
     parentId: "",
@@ -181,6 +184,7 @@ describe("GraphQL: markInvoicePaid and deleteInvoice mutations", () => {
 
   const state: BillingTestState = {
     adminToken: "",
+    seedSuperAdminToken: "",
     superAdminToken: "",
     superAdminUserId: "",
     parentId: "",

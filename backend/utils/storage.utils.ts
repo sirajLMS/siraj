@@ -239,7 +239,7 @@ export namespace StorageUtils {
     }
   ): Array<Types.FileInfo | Types.DirectoryInfo> => {
     logger.info("[StorageUtils] filterStorageItems", { filters });
-    logger.info("[StorageUtils] items", { items });
+    logger.debug("[StorageUtils] items", { items });
     const itemTypes = new Set<string>();
 
     let filtered = items;
@@ -285,9 +285,9 @@ export namespace StorageUtils {
       });
     }
 
-    logger.info("[StorageUtils] itemTypes", { itemTypes });
+    logger.debug("[StorageUtils] itemTypes", { itemTypes });
 
-    logger.info("[StorageUtils] filtered", { filtered });
+    logger.debug("[StorageUtils] filtered", { filtered });
 
     return filtered;
   };

@@ -11,7 +11,7 @@ import { CurrencyHedgeService } from "@/backend/services";
 gqlSchemaBuilder.mutationField("createCurrencyHedge", t =>
   t.field({
     type: CurrencyHedgePothosObject,
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true } },
     args: {
       currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
       amount: t.arg.string({ required: true, directives: { constraint: { maxLength: 64 } } }),
@@ -38,7 +38,7 @@ gqlSchemaBuilder.mutationField("createCurrencyHedge", t =>
 gqlSchemaBuilder.mutationField("updateCurrencyHedge", t =>
   t.field({
     type: CurrencyHedgePothosObject,
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true } },
     args: {
       id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       currency: t.arg({ type: CurrencyCodePothosObject, required: false }),
@@ -67,7 +67,7 @@ gqlSchemaBuilder.mutationField("updateCurrencyHedge", t =>
 gqlSchemaBuilder.mutationField("deleteCurrencyHedge", t =>
   t.field({
     type: "Boolean",
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true } },
     args: {
       id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },

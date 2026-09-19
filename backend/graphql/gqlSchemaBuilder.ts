@@ -49,8 +49,10 @@ const hasLoggedInFailure = (failure: unknown): boolean => {
  * when a field with `authScopes: { superAdmin: true }` is actually queried.
  * When the actor is the same as the logged-in user (no impersonation/group-sim),
  * it returns `ctx.isSuperAdmin` directly, avoiding a redundant `getUserContext`
- * DB call (3 queries). When the actor differs (impersonation/group-sim), it
- * fetches the real actor's super-admin status.
+ * DB call (3 queries). While impersonating, it also returns `ctx.isSuperAdmin` —
+ * the EFFECTIVE user's status — so the actor's super-admin powers do not carry
+ * into the impersonated session. For any other actor/context mismatch, it
+ * fetches that actor's super-admin status.
  *
  * Invariant: `ctx.isSuperAdmin` and `ctx.permissions` are populated by
  * `createContext` from `PermissionsService.getUserContext(userId)` (or
@@ -70,6 +72,12 @@ export function buildAuthScopes(
     loggedIn: !!ctx.user,
     permission: (key: AppPermission) => ctx.isSuperAdmin || ctx.permissions.includes(key),
     superAdmin: async () => {
+      // While impersonating, the effective (impersonated) user's status
+      // governs — the actor's super-admin powers must not follow them into
+      // the impersonated session.
+      if (ctx.isImpersonating) {
+        return ctx.isSuperAdmin;
+      }
       const actorUserId = ctx.realUserId ?? ctx.actorUserId ?? ctx.user?.id;
       if (!actorUserId || actorUserId === ctx.user?.id) {
         return ctx.isSuperAdmin;

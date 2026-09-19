@@ -20,7 +20,7 @@ import { BillingManagementService, resolveDisplayAmountFields } from "@/backend/
 gqlSchemaBuilder.mutationField("createManualInvoice", t =>
   t.field({
     type: ManualInvoiceResultRef,
-    authScopes: { permission: AppPermission.BILLING_CREATE_INVOICE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_CREATE_INVOICE, notImpersonating: true } },
     args: {
       parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       studentId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
@@ -67,7 +67,7 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
 gqlSchemaBuilder.mutationField("submitPaymentProof", t =>
   t.field({
     type: MarkInvoicePaidResultRef,
-    authScopes: { permission: AppPermission.BILLING_SUBMIT_PAYMENT_PROOF, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_SUBMIT_PAYMENT_PROOF, notImpersonating: true } },
     args: {
       invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       proofFileId: t.arg.id({ required: true }),
@@ -88,7 +88,7 @@ gqlSchemaBuilder.mutationField("submitPaymentProof", t =>
 gqlSchemaBuilder.mutationField("approvePaymentProof", t =>
   t.field({
     type: MarkInvoicePaidResultRef,
-    authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true } },
     args: {
       invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       expectedVersion: t.arg.int({ required: false }),
@@ -107,7 +107,7 @@ gqlSchemaBuilder.mutationField("approvePaymentProof", t =>
 gqlSchemaBuilder.mutationField("rejectPaymentProof", t =>
   t.field({
     type: MarkInvoicePaidResultRef,
-    authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true } },
     args: {
       invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       rejectionReason: t.arg.string({ required: false, directives: { constraint: { maxLength: 1000 } } }),
@@ -128,7 +128,7 @@ gqlSchemaBuilder.mutationField("rejectPaymentProof", t =>
 gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
   t.field({
     type: MarkInvoicePaidResultRef,
-    authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true } },
     args: {
       invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       expectedVersion: t.arg.int({ required: false }),
@@ -149,7 +149,7 @@ gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
 gqlSchemaBuilder.mutationField("deleteInvoice", t =>
   t.field({
     type: DeleteInvoiceResultRef,
-    authScopes: { permission: AppPermission.BILLING_DELETE_INVOICE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_DELETE_INVOICE, notImpersonating: true } },
     args: {
       invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
@@ -165,7 +165,7 @@ gqlSchemaBuilder.mutationField("deleteInvoice", t =>
 gqlSchemaBuilder.mutationField("sendPaymentReminder", t =>
   t.field({
     type: SendPaymentReminderResultRef,
-    authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true } },
     args: {
       studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },

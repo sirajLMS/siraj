@@ -3,7 +3,7 @@
 > **Feature**: Certificate Generation & Verification (Siraj)
 > **Plan**: 10 — Testing & Knowledge Propagation
 > **Depends on**: Plans 01–09 (ALL preceding plans must be complete)
-> **Patterns source**: `siraj_analysis/10-testing-quality-patterns.md`, `siraj_analysis/03-repository-patterns.md`, `siraj_analysis/04-services-graphql-patterns.md`, existing test suites (`backend/db/test/repo/billing/`, `backend/db/test/logic/billing/`, `frontend/common/graphql/test/billing/`)
+> **Patterns source**: `siraj_analysis/10-testing-quality-patterns.md`, `siraj_analysis/03-repository-patterns.md`, `siraj_analysis/04-services-graphql-patterns.md`, existing backend tests (`backend/db/test/repo/billing/`, `backend/db/test/logic/billing/`, `frontend/common/graphql/test/billing/`)
 
 ---
 

@@ -15,7 +15,7 @@ import { BaseFormDialogSection } from "@/frontend/common/components/ui/dialog";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
 import { MeetingConfigTypeFields } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
-import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
+import { MeetingProviderSelectContainer } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelectContainer";
 import type { UseMeetingConfigFormStateReturn } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
 import type { MeetingConfigEnhancementLabels } from "@/shared/locale/types/ui";
 
@@ -170,7 +170,7 @@ export function MeetingConfigFormDialogContent({
       >
         <Stack spacing={2.5} sx={{ pt: 1 }}>
           <TextField label={t.label} value={label} onChange={e => setLabel(e.target.value)} fullWidth size="small" />
-          <MeetingProviderSelect
+          <MeetingProviderSelectContainer
             value={provider}
             onChangeAction={setProvider}
             label={t.provider}

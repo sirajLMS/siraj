@@ -45,6 +45,21 @@ export async function resolvePreloadedSession(
   return preloadedSession !== undefined ? preloadedSession : await SessionRepository.findSessionById(rawSessionId);
 }
 
+/**
+ * Revokes the refresh-token owner's sessions when the session cookie is lost:
+ * without this, a stolen refresh token (session-bound) could mint a brand-new
+ * session up to its full expiry after the victim's logout.
+ */
+async function revokeSessionsFromRefreshToken(refreshToken: string | null | undefined): Promise<boolean> {
+  if (!refreshToken) return false;
+  const payload = await verifyToken(refreshToken);
+  if (payload?.type === "refresh" && payload.userId) {
+    const deletedCount = await SessionRepository.deleteByUserId(payload.userId);
+    return deletedCount > 0;
+  }
+  return false;
+}
+
 export namespace SessionService {
   /**
    * Validate a session, transparently migrating legacy SHA-256 hashes to HMAC.
@@ -168,9 +183,11 @@ export namespace SessionService {
    * expired/missing tokens still clear sessions owned by the validated session row.
    */
   export async function logoutUser(input: LogoutUserInput): Promise<boolean> {
-    const { sessionId, accessToken, ipAddress, locale = "ar" } = input;
+    const { sessionId, accessToken, refreshToken, ipAddress, locale = "ar" } = input;
     if (!sessionId) {
-      return false;
+      // The browser lost the session cookie — a stolen refresh token would
+      // still mint a new session, so revoke the token owner's sessions.
+      return revokeSessionsFromRefreshToken(refreshToken);
     }
 
     const session = await validateSession(sessionId);

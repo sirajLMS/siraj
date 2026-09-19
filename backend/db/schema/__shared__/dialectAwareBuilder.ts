@@ -275,19 +275,25 @@ const encryptedTextConfig = {
   dataType() {
     return "text" as const;
   },
-  toDriver(value: string | null): string {
-    if (value === null) return "";
+  // NULL passes through as SQL NULL (the underlying text column is nullable) so
+  // the not-set vs blank distinction survives on encrypted columns; a stored
+  // empty string reads back as null rather than through decryption.
+  toDriver(value: string | null): string | null {
+    if (value === null) return null;
     return encryptField(value);
   },
-  fromDriver(value: string): string | null {
+  fromDriver(value: string | null): string | null {
+    if (value === null || value === "") return null;
     return decryptField(value);
   },
 };
 
 export function encryptedText(name: string) {
   if (isSqlite()) {
-    const col = sqliteCustomType<{ data: string | null; driverData: string }>(encryptedTextConfig)(name);
-    return asDialectType<ReturnType<ReturnType<typeof pgCustomType<{ data: string | null; driverData: string }>>>>(col);
+    const col = sqliteCustomType<{ data: string | null; driverData: string | null }>(encryptedTextConfig)(name);
+    return asDialectType<
+      ReturnType<ReturnType<typeof pgCustomType<{ data: string | null; driverData: string | null }>>>
+    >(col);
   }
-  return pgCustomType<{ data: string | null; driverData: string }>(encryptedTextConfig)(name);
+  return pgCustomType<{ data: string | null; driverData: string | null }>(encryptedTextConfig)(name);
 }

@@ -7,7 +7,7 @@ import type {
   UserPaymentMethodInsertType,
   UserPaymentMethodReturnType,
   UserPaymentMethodSelectType,
-  UserPaymentMethodSubmitInput,
+  UserPaymentMethodUpdateInput,
 } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
@@ -49,6 +49,31 @@ async function selectByCondition(
   return (orderBy ? withWhere.orderBy(orderBy) : withWhere).then(rows => rows.map(toSelectType));
 }
 
+/**
+ * Guarded UPDATE-by-id shared by every mutating write on a saved payment method:
+ * applies `values`, requires the row to exist (localized recordNotFound
+ * otherwise), and projects the updated row through `toSelectType`.
+ */
+async function updateByIdReturning(
+  id: string,
+  values: Partial<UserPaymentMethodInsertType>,
+  tErrors: ErrorsLabels,
+  tx?: DBTransaction
+): Promise<UserPaymentMethodReturnType> {
+  const client = tx ?? db;
+  const [updated] = await client
+    .update(userPaymentMethods)
+    .set(values)
+    .where(eq(userPaymentMethods.id, id))
+    .returning();
+
+  if (!updated) {
+    throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
+  }
+
+  return toSelectType(updated);
+}
+
 export namespace UserPaymentMethodRepository {
   export async function listByUserId(userId: string, tx?: DBTransaction): Promise<UserPaymentMethodReturnType[]> {
     return selectByCondition(eq(userPaymentMethods.userId, userId), tx, asc(userPaymentMethods.createdAt));
@@ -61,7 +86,7 @@ export namespace UserPaymentMethodRepository {
   }
 
   export async function create(
-    input: UserPaymentMethodSubmitInput,
+    input: Omit<UserPaymentMethodInsertType, "verifiedAt" | "verifiedByUserId" | "createdAt" | "updatedAt">,
     tx?: DBTransaction,
     locale?: string
   ): Promise<UserPaymentMethodReturnType> {
@@ -86,22 +111,11 @@ export namespace UserPaymentMethodRepository {
 
   export async function update(
     id: string,
-    input: Partial<UserPaymentMethodInsertType>,
+    input: UserPaymentMethodUpdateInput,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
-    const client = tx ?? db;
-    const [updated] = await client
-      .update(userPaymentMethods)
-      .set({ ...input, updatedAt: input.updatedAt ?? new Date() })
-      .where(eq(userPaymentMethods.id, id))
-      .returning();
-
-    if (!updated) {
-      throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
-    }
-
-    return toSelectType(updated);
+    return updateByIdReturning(id, { ...input, updatedAt: input.updatedAt ?? new Date() }, tErrors, tx);
   }
 
   export async function deleteById(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<void> {
@@ -136,15 +150,8 @@ export namespace UserPaymentMethodRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
-    return update(
-      id,
-      {
-        verifiedAt: new Date(),
-        verifiedByUserId,
-      },
-      tErrors,
-      tx
-    );
+    const now = new Date();
+    return updateByIdReturning(id, { verifiedAt: now, verifiedByUserId, updatedAt: now }, tErrors, tx);
   }
 
   export async function findDefaultForSlot(

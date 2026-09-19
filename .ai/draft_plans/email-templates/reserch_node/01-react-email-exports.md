@@ -2,8 +2,6 @@
 
 **Verifier:** subagent (file search specialist)
 **Date:** 2026-08-01
-**Plan under review:** `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md`
-**Plan claims verified:** lines 75-83, 154-264, 520-538
 **Method:** Read installed `node_modules/react-email` + `node_modules/@react-email/render` `.d.mts` files; cross-checked against https://react.email/docs/utilities/render and the React Email 6.0.0 release notes (commit `d0a7a52`, "feat(react-email): unify all components into react-email (breaking change) #3248").
 
 ---
@@ -37,7 +35,7 @@ From `node_modules/react-email/package.json`:
 | `exports.require.default` | `./dist/index.cjs` |
 
 Notes:
-- The `exports` map has **no path keys** (no `"./*"` subpath wildcard). All exports are funneled through the bare `import` / `require` conditionals above, which Node's resolution treats as the `"."` entry. **There are no deep subpath imports** such as `react-email/components` — the plan must import everything from `"react-email"` (root).
+- The `exports` map has **no path keys** (no `"./*"` subpath wildcard). All exports are funneled through the bare `import` / `require` conditionals above, which Node's resolution treats as the `"."` entry. **There are no deep subpath imports** such as `react-email/components` — all imports must come from the `"react-email"` root.
 - Type declarations live at `dist/index.d.mts` (ESM) and `dist/index.d.cts` (CJS) — these are the only `.d.*ts` files at the package root. They `export * from "@react-email/render"` (line 25) and `export { ... }` (line 26) all primitives + utilities.
 - The components themselves also expose `dist/components/index.d.mts` for internal use, but it is **not** in the `exports` map — it is reachable only because `dist/index.d.mts` re-exports them.
 
@@ -45,7 +43,7 @@ Notes:
 
 ## 3. Primitive exports — VERIFIED
 
-All 15 primitives named in the plan (`Html`, `Head`, `Body`, `Container`, `Section`, `Column`, `Row`, `Button`, `Link`, `Text`, `Heading`, `Hr`, `Img`, `Tailwind`, `Preview`) are exported from the package root at `dist/index.d.mts:26`. Each is also declared as a `declare const` (or `declare function` for `Tailwind`) in its own component `.d.mts`. Exact line references:
+All 15 core primitives (`Html`, `Head`, `Body`, `Container`, `Section`, `Column`, `Row`, `Button`, `Link`, `Text`, `Heading`, `Hr`, `Img`, `Tailwind`, `Preview`) are exported from the package root at `dist/index.d.mts:26`. Each is also declared as a `declare const` (or `declare function` for `Tailwind`) in its own component `.d.mts`. Exact line references:
 
 | Primitive | Status | Declaration file:line | Type |
 |---|---|---|---|
@@ -65,8 +63,8 @@ All 15 primitives named in the plan (`Html`, `Head`, `Body`, `Container`, `Secti
 | `Preview` | VERIFIED | `dist/components/preview/preview.d.mts:12` | `…HTMLAttributes<HTMLDivElement> & {…}…` |
 | `Tailwind` | VERIFIED | `dist/components/tailwind/tailwind.d.mts:18` | `declare function Tailwind({...})` — takes `{ children, config?, theme?, utility? }` |
 
-Additional root-level exports present at `dist/index.d.mts:26` that the plan may want to note:
-- `CodeBlock`, `CodeInline` (+ `PrismLanguage`, several `Theme` prism themes such as `a11yDark`, `dracula`, `oneDark`, …) — not in the plan's primitive list, but available.
+Additional root-level exports present at `dist/index.d.mts:26`:
+- `CodeBlock`, `CodeInline` (+ `PrismLanguage`, several `Theme` prism themes such as `a11yDark`, `dracula`, `oneDark`, …) — additional components beyond the core primitives.
 - `Markdown` — renders markdown inside an email.
 - `Font` — `<Font>` for web-font preloading.
 - `TailwindConfig` (type, from `tailwind.d.mts:6` → `type TailwindConfig = Omit<Config,'content'>`), `EmailElementProps`, `TailwindProps`, `TailwindSetup`, `setupTailwind`, `pixelBasedPreset` (built-in Tailwind preset), `inlineStyles`, `sanitizeStyleSheet`.
@@ -92,11 +90,11 @@ Both Node and Browser variants have **identical** declarations for `render`, `pr
 | `plainTextSelectors` | (bonus) | `@react-email/render/dist/node/index.d.mts:43` (exported at line 53) | `declare const plainTextSelectors: SelectorDefinition[]` |
 | `unstableToPlainText` | (bonus, Node-only) | declared in `dist/node/index.d.mts`; **NOT** re-exported by the browser build (browser export is missing it). | `declare function unstableToPlainText(html: string): string` |
 
-Key finding confirming the plan's pipeline at lines 529-536:
-- `render` is **async** and returns `Promise<string>` — the plan's `await render(<Component />)` is correct.
-- `pretty` is **also async** → the plan must do `await pretty(await render(...))`, which is exactly what plan line 533 shows: `const html = await pretty(await render(...));`. ✅
-- `toPlainText` is **synchronous** and takes the rendered HTML string directly: `toPlainText(html: string)` — plan line 535 `const text = toPlainText(html);` is correct. ✅
-- The `Options` type for `render` lets you ask for `{ pretty?: boolean }` or `{ plainText?: true, htmlToTextOptions?: … }` in a single call instead of chaining `pretty`/`toPlainText`. The plan chooses the explicit-composition style (call `pretty` and `toPlainText` separately) — that's also valid and matches the official docs example at https://react.email/docs/utilities/render.
+Key findings for the render pipeline:
+- `render` is **async** and returns `Promise<string>` — `await render(<Component />)` is the correct usage.
+- `pretty` is **also async** → calls must be chained as `await pretty(await render(...))`, e.g. `const html = await pretty(await render(...));`. ✅
+- `toPlainText` is **synchronous** and takes the rendered HTML string directly: `toPlainText(html: string)` — e.g. `const text = toPlainText(html);`. ✅
+- The `Options` type for `render` lets you ask for `{ pretty?: boolean }` or `{ plainText?: true, htmlToTextOptions?: … }` in a single call instead of chaining `pretty`/`toPlainText`. The explicit-composition style (calling `pretty` and `toPlainText` separately) is also valid and matches the official docs example at https://react.email/docs/utilities/render.
 
 ---
 
@@ -115,19 +113,19 @@ $ grep -rnE "export[^;]*renderAsync|export\{[^}]*renderAsync" …/react-email/di
 (empty)
 ```
 
-**Confirmed:** `renderAsync` is NOT a public export. The plan's instruction at line 537 ("The historical `renderAsync` API was removed when `render` became async — don't reference it.") is accurate.
+**Confirmed:** `renderAsync` is NOT a public export — the historical `renderAsync` API was removed when `render` became async, so don't reference it.
 
 ---
 
-## 6. Other gotchas worth noting for the plan
+## 6. Other gotchas worth noting
 
-1. **`Column` not `Col`; `Img` not `Image`.** Verified: `dist/components/column/column.d.mts:5` exports `Column`; `dist/components/img/img.d.mts:5` exports `Img`. The plan's import statements at lines 160, 520 use `Column` and `Img` — correct.
-2. **`Heading` exports an `HeadingAs` union type** alongside it (`dist/components/heading/heading.d.mts`); plan can use `<Heading as="h1">`.
-3. **`Tailwind` is a `function`, not a `const`** (`tailwind.d.mts:18`). Its props `{ children, config?, theme?, utility? }` are typed by `TailwindProps`; the config type is `TailwindConfig = Omit<Config,'content'>` from `tailwindcss`. Plan line 524 mentions a theme palette → that's where the `config` prop threads in.
-4. **`Preview`** is a real component (literal `<Preview>`), not a directive — `preview.d.mts:12`. Exported alongside it is `renderWhiteSpace`, an internal JSX helper; plan does not need it.
-5. **No deep subpath imports.** The `exports` map has no `./*` wildcard, which means `import { … } from "react-email/components"` would **NOT** resolve under strict ESM. All imports must be from the root `"react-email"`. Plan lines 160, 520, 530 already do this — correct.
-6. **`@react-email/render` is still a runtime dependency** of `react-email@6.9.1` (declared at `react-email/package.json` deps: `"@react-email/render": ">=2.1.0"`). Even though the plan says (line 77) "drop `@react-email/render`", it is pulled in transitively — the plan's instruction to **not** add `@react-email/render` explicitly to `package.json` dependencies is fine; the user simply imports from `"react-email"`. ✅
-7. **`unstableToPlainText` exists** in the Node build of `@react-email/render` but is **not** re-exported by the browser build. Plan should use the stable `toPlainText`.
+1. **`Column` not `Col`; `Img` not `Image`.** Verified: `dist/components/column/column.d.mts:5` exports `Column`; `dist/components/img/img.d.mts:5` exports `Img`. Import them as `Column` and `Img`.
+2. **`Heading` exports an `HeadingAs` union type** alongside it (`dist/components/heading/heading.d.mts`); it can be used as `<Heading as="h1">`.
+3. **`Tailwind` is a `function`, not a `const`** (`tailwind.d.mts:18`). Its props `{ children, config?, theme?, utility? }` are typed by `TailwindProps`; the config type is `TailwindConfig = Omit<Config,'content'>` from `tailwindcss`. A theme palette threads in through the `config` prop.
+4. **`Preview`** is a real component (literal `<Preview>`), not a directive — `preview.d.mts:12`. Exported alongside it is `renderWhiteSpace`, an internal JSX helper; not needed for typical usage.
+5. **No deep subpath imports.** The `exports` map has no `./*` wildcard, which means `import { … } from "react-email/components"` would **NOT** resolve under strict ESM. All imports must be from the root `"react-email"`.
+6. **`@react-email/render` is still a runtime dependency** of `react-email@6.9.1` (declared at `react-email/package.json` deps: `"@react-email/render": ">=2.1.0"`). It is pulled in transitively, so there is no need to add `@react-email/render` explicitly to `package.json` dependencies — simply import from `"react-email"`. ✅
+7. **`unstableToPlainText` exists** in the Node build of `@react-email/render` but is **not** re-exported by the browser build. Use the stable `toPlainText`.
 
 ---
 
@@ -149,10 +147,10 @@ $ grep -rnE "export[^;]*renderAsync|export\{[^}]*renderAsync" …/react-email/di
 
 **VERIFIED.**
 
-The plan's claims at lines 75-83, 154-264, and 520-538 about the `react-email@6` package surface are **100% accurate** against the installed `react-email@6.9.1` and `@react-email/render@2.1.0` declaration files. Specifically:
+Findings about the `react-email@6` package surface are **100% accurate** against the installed `react-email@6.9.1` and `@react-email/render@2.1.0` declaration files. Specifically:
 
 - ✅ Single-package import: `import { Html, Head, Body, Container, Section, Img, Text, Button, Hr, render, pretty, toPlainText } from "react-email"` resolves correctly.
-- ✅ All 15 named primitives exist with the exact casing the plan uses.
+- ✅ All 15 named primitives exist with the exact casing listed above.
 - ✅ `render` is async, returns `Promise<string>`.
 - ✅ `pretty` is async, takes the rendered HTML string.
 - ✅ `toPlainText` is sync, takes the rendered HTML string.
@@ -160,4 +158,4 @@ The plan's claims at lines 75-83, 154-264, and 520-538 about the `react-email@6`
 - ✅ `@react-email/components` and `@react-email/render` are no longer needed as direct `package.json` dependencies (`@react-email/render` is still pulled in transitively by `react-email@6.9.1`).
 - ✅ No deep subpath imports are supported — every primitive + render utility comes from the package root.
 
-**Plan edits required: NONE.** The plan may proceed to implementation as written for the import/render-pipeline claims verified here.
+**Result: verified.** The import/render-pipeline findings above are confirmed against the installed packages.

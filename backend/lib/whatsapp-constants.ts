@@ -136,22 +136,6 @@ export async function resolveGraphApiVersion(): Promise<string> {
 }
 
 /**
- * Reads the error body from a non-2xx `Response`. Tries `response.json()`
- * first (structured Meta error envelope), falling back to `response.text()`
- * when the body is not valid JSON.
- *
- * Shared by `executeGraphApiFetch` (whatsapp-account.service) and
- * `handleHttpError` (MetaCloudApiAdapter) to avoid verbatim duplication.
- */
-export async function readErrorBody(response: Response): Promise<unknown> {
-  try {
-    return await response.json();
-  } catch {
-    return await response.text();
-  }
-}
-
-/**
  * Resolves the Graph API access-token and api-version from env-config, throwing
  * a localized error when the access token is missing.
  *

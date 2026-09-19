@@ -79,7 +79,7 @@ gqlSchemaBuilder.queryFields(t => ({
 gqlSchemaBuilder.mutationFields(t => ({
   startImpersonation: t.field({
     type: StartImpersonationResponsePothosObject,
-    authScopes: { superAdmin: true, notImpersonating: true, notSimulatingGroup: true },
+    authScopes: { $all: { superAdmin: true, notImpersonating: true, notSimulatingGroup: true } },
     args: {
       targetUserId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       reason: t.arg.string({ required: false, directives: { constraint: { maxLength: 1000 } } }),

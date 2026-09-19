@@ -902,7 +902,7 @@ Located at `server/drizzle/meta/` — Drizzle Kit metadata for tracking migratio
 1. **Add foreign key constraints** — CGVS has almost none (only `user_roles`). Siraj should define proper FKs.
 2. **Add certificate status lifecycle** — CGVS has no status (draft/issued/revoked/expired). Siraj needs this.
 3. **Add verification logic** — `verificationCode` column exists but no generation/query code. Siraj must implement.
-4. **Add `tx` parameter to repositories** — CGVS doesn't propagate transactions. Siraj requires this for testing with `runInRollback`.
+4. **Add `tx` parameter to repositories** — CGVS doesn't propagate transactions. Siraj mandates this for tests using `runInRollback`.
 5. **Consistent naming** — CGVS has mixed snake_case/camelCase/PascalCase. Siraj should standardize.
 6. **Add CertificateRepository** — completely missing in CGVS. Must be created from scratch.
 7. **Add certificate file storage** — CGVS schema has no column for generated PDF file path. Siraj needs this.

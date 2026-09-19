@@ -14,7 +14,7 @@ import { CurrencyCatalogService as CurrencyService } from "@/backend/services";
 gqlSchemaBuilder.mutationField("activateSupportedCurrency", t =>
   t.field({
     type: SupportedCurrencyPothosObject,
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCIES, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_MANAGE_CURRENCIES, notImpersonating: true } },
     args: {
       input: t.arg({ type: SupportedCurrencyUpsertInputPothos, required: true }),
     },
@@ -35,7 +35,7 @@ gqlSchemaBuilder.mutationField("activateSupportedCurrency", t =>
 gqlSchemaBuilder.mutationField("deactivateSupportedCurrency", t =>
   t.field({
     type: "Boolean",
-    authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCIES, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.BILLING_MANAGE_CURRENCIES, notImpersonating: true } },
     args: {
       code: t.arg({ type: CurrencyCodePothosObject, required: true }),
     },

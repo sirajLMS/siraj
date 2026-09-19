@@ -12,6 +12,7 @@ import type {
   UserOverrideInput,
   UserPermissionOverrideSelectType,
 } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE, isAppLocale, type LocalizedString } from "@/shared/types";
@@ -252,7 +253,7 @@ export namespace PermissionManagementService {
     const existingSlugs = await db
       .select({ slug: permissionGroups.slug })
       .from(permissionGroups)
-      .where(sql`${permissionGroups.slug} LIKE ${baseSlug + "%"}`);
+      .where(sql`${permissionGroups.slug} LIKE ${escapeLikeWildcards(baseSlug) + "%"}`);
 
     const existingSlugSet = new Set(existingSlugs.map(s => s.slug));
     let slug = baseSlug;

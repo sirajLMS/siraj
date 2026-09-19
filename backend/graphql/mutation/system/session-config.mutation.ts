@@ -13,7 +13,7 @@ import { SessionConfigService } from "@/backend/services";
 gqlSchemaBuilder.mutationField("upsertSessionConfig", t =>
   t.field({
     type: SessionConfigPothosObject,
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_SESSION, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.SETTINGS_EDIT_SESSION, notImpersonating: true } },
     description: "Creates or updates a per-role session configuration.",
     args: {
       input: t.arg({ type: SessionConfigUpsertInputPothosObject, required: true }),
@@ -29,7 +29,7 @@ gqlSchemaBuilder.mutationField("upsertSessionConfig", t =>
 gqlSchemaBuilder.mutationField("deleteSessionConfig", t =>
   t.field({
     type: "Boolean",
-    authScopes: { permission: AppPermission.SETTINGS_EDIT_SESSION, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.SETTINGS_EDIT_SESSION, notImpersonating: true } },
     description: "Deletes a per-role session configuration.",
     args: {
       roleName: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),

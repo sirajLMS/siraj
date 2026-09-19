@@ -16,9 +16,11 @@ This ledger tracks all work deferred from one task to another to ensure no defer
 
 | ID | Deferred Item | Source Task | Target Task | Status | Verified By | Notes |
 |---|---|---|---|---|---|---|
-| D1 | Example: `createManyDeliveries` bulk write | 6 | 13 | ✅ Done | R5 outcome | Implemented in Task 13.2 |
-| D2 | Example: Env-config key registration | 5 | 7 | ❌ Blocked | — | Never registered; breaks cache invalidation |
-| D3 | Example: `resetWhatsappChannel` cache completeness | 3 | 7 | ⚠️ Partial | R7 | Missing 3 keys until R7 fix |
+| D1 | UI component tests skipped per user instruction ("dont create any ui/e2e tests at all") | 4.6, 5.6, 7.2, 7.3 | — | ⚠️ Partial | User instruction 2026-09-16; 7.1-7.3 outcome | Dashboard/tab `.test.tsx` files NOT created; axe-core assertions (7.2) and RTL snapshot test (7.3) also skipped |
+| D2 | Playwright E2E test skipped per user instruction | 8.1 | — | ⚠️ Partial | User instruction 2026-09-16 | `e2e/accounting/profit-loss.spec.ts` NOT created |
+| D4 | Pre-existing WhatsApp journey failures (2 tests) | — | — | ⚠️ Partial | test:workflows 2026-09-17 | `whatsapp-conversations` free-text window + listConversations tests fail; NOT caused by this plan (no whatsapp files modified) |
+| D3 | Example: `createManyDeliveries` bulk write | 6 | 13 | ✅ Done | R5 outcome | Implemented in Task 13.2 (template example row) |
+| D4 | `ExpenseTypeChip` / `ExpenseSourceChip` standalone components (Plan 6) do not exist; P&L ExpensesTab renders local cells via shared `StatusBadge` (`category="expenseType"/"expenseSource"`, same palette + `dashboard.accounting.expenses` label catalog as the ledger grid) | 5.2 | 6 (chip extraction) | ⚠️ Partial | Task 5.2 outcome | Functional parity with the ledger grid; if Plan 6 later extracts real `ExpenseTypeChip`/`ExpenseSourceChip`, swap the local cells to the imports |
 
 ---
 

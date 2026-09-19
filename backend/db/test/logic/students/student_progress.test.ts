@@ -12,7 +12,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
-import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type {
   ClassInstanceSelectType,
@@ -30,7 +30,7 @@ async function insertUser(tx: DBTransaction, now: Date, name: string, prefix: st
     .values({
       name,
       email: `${prefix}-${randomUUID()}@x.com`,
-      password: `TestPass-${randomUUID().slice(0, 8)}!`,
+      password: generateTestPassword(),
       createdAt: now,
       updatedAt: now,
     })

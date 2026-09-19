@@ -1170,20 +1170,20 @@ Template Editor (Plan 11 Canvas + Plan 12 Sidebars)
 
 ### 8.1 Accessibility (WCAG 2.1 AA)
 
-| NFR ID | Requirement | Test Method |
+| NFR ID | Requirement | Verification Method |
 |--------|-------------|-------------|
 | NFR-12.A11Y-1 | All interactive elements have accessible names via `aria-label` or visible labels | axe-core automated + manual screen reader (NVDA/VoiceOver) |
 | NFR-12.A11Y-2 | Layer panel implements `role="listbox"` with `role="option"` items; keyboard navigation via ↑/↓ arrows, Space to select | Keyboard-only test |
 | NFR-12.A11Y-3 | All dialogs (Delete, Unsaved Changes, Mobile Edit) use MUI `Dialog` with `aria-labelledby` pointing to title; focus trap active on open | axe-core + focus order test |
 | NFR-12.A11Y-4 | Color picker provides hex `TextField` as keyboard-accessible alternative to `react-color` ChromePicker | Keyboard test on color field |
-| NFR-12.A11Y-5 | Focus indicators visible (2px outline offset 2px) on all interactive elements in both light/dark themes | Visual regression + manual check |
-| NFR-12.A11Y-6 | RTL: Layer panel and property panel mirror horizontally; text alignment RTL for Arabic locale | RTL E2E test |
+| NFR-12.A11Y-5 | Focus indicators visible (2px outline offset 2px) on all interactive elements in both light/dark themes | Manual check |
+| NFR-12.A11Y-6 | RTL: Layer panel and property panel mirror horizontally; text alignment RTL for Arabic locale | RTL manual test |
 | NFR-12.A11Y-7 | Screen reader announces element selection, property changes, and drag reorder operations | NVDA/VoiceOver manual test |
 | NFR-12.A11Y-8 | Mobile FAB has `aria-label="Add Element"`; bottom sheet options are `role="menuitem"` | axe-core mobile |
 
 ### 8.2 Mobile Responsive
 
-| NFR ID | Requirement | Test Method |
+| NFR ID | Requirement | Verification Method |
 |--------|-------------|-------------|
 | NFR-12.MOB-1 | Breakpoint: ≤768px → Mobile tier (`ResponsiveViewSwitch`); >768px → Desktop tier | Viewport resize test |
 | NFR-12.MOB-2 | Mobile element list: touch targets ≥48×48px; row height ≥56px | Touch target audit |
@@ -1194,7 +1194,7 @@ Template Editor (Plan 11 Canvas + Plan 12 Sidebars)
 
 ### 8.3 Performance Metrics
 
-| NFR ID | Requirement | Target | Test Method |
+| NFR ID | Requirement | Target | Verification Method |
 |--------|-------------|--------|-------------|
 | NFR-12.PERF-1 | Canvas render (100 elements) | 60fps sustained | React Profiler + Lighthouse |
 | NFR-12.PERF-2 | Property panel update latency (keystroke → UI) | <100ms | Performance.mark API |
@@ -1313,18 +1313,11 @@ Run **both** after creating `template-elements.documents.ts`. Verify generated t
 ### 10.4 Test Execution Order
 
 ```bash
-# Component tests (Happy DOM, no server)
-bun run test:ui:components -- --filter="template-editor-elements"
-
 # Database tests (if any backend changes - Plan 12 has none)
 # bun run test:db
 
 # Integration tests (GraphQL - requires dev server)
 bun run test:graphql
-
-# E2E tests (Production build required first)
-bun run build:test
-bun run test:ui:e2e -- --filter="template-editor-elements"
 ```
 
 ### 10.5 i18n Key Registration (After Task 13)

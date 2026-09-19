@@ -88,7 +88,7 @@ The `docs/certificates/` directory at the project root contains the following fi
 | `FRONTEND_PATTERNS.md` | Frontend | View organization, Apollo hooks, Zustand, MUI, i18n | 200–300 |
 | `STORAGE_PATTERNS.md` | Storage | Adapter pattern, signed URLs, orphan detection, quota, cache invalidation | 150–250 |
 | `CRON_PATTERNS.md` | Cron | Vercel Cron pattern, auth guard, Redis lock, failure isolation, idempotency, env config | 200–300 |
-| `TESTING_PATTERNS.md` | Testing | Entity-setup, runInRollback, test client, components, E2E, Storybook | 200–300 |
+| `TESTING_PATTERNS.md` | Testing | Entity-setup, runInRollback, test client | 200–300 |
 | `I18N_PATTERNS.md` | i18n | Namespace structure, sub-domains, pluralization, type schema, locale implementation | 150–250 |
 | `TEMPLATE_EDITOR.md` | Frontend | Canvas architecture, element types, variable system, preview/publish, versioning | 200–300 |
 | `VERIFICATION_SYSTEM.md` | Verification | Code generation, public page, log entries, retention, QR codes | 150–250 |
@@ -191,13 +191,10 @@ The `INDEX.md` file serves as the navigational entry point. It contains:
 | Section | Content |
 |---------|---------|
 | 1. Entity-Setup Helpers | Certificate helpers in `backend/db/test/entity-setup.ts`, signatures described in tables |
-| 2. Repository Tests | `runInRollback` pattern, `tx` propagation, 100% coverage requirement, test file locations, described in tables |
+| 2. Repository Tests | `runInRollback` pattern, `tx` propagation, 100% coverage rule, test file locations, described in tables |
 | 3. Service Tests | Mocked repos vs real DB, parallel test runner, described in prose |
 | 4. GraphQL Integration Tests | `testClient` usage, shared dev server, auth scope setup, described in tables |
-| 5. Component Tests | `renderWithWrapper`, MockLink, no server, described in tables |
-| 6. E2E Tests | Playwright, production server, cert flow fixtures, described in prose |
-| 7. Storybook Stories | Page-level and component-level stories, mock stores, described in tables |
-| 8. Cross-References | Links to `.agents/instructions/tests.instructions.md` |
+| 5. Cross-References | Links to `.agents/instructions/tests.instructions.md` |
 
 ### 2.11 I18N_PATTERNS.md Content
 
@@ -312,7 +309,7 @@ The `INDEX.md` file serves as the navigational entry point. It contains:
 |---------|---------|
 | Certificate Views (new section) | `frontend/views/dashboard/certificates/` organization, page component list |
 | Certificate Apollo Hooks (new subsection) | Query and mutation hook naming, cache update patterns |
-| Certificate Zustand Stores (new subsection) | Store naming, composition, mock store for Storybook |
+| Certificate Zustand Stores (new subsection) | Store naming, composition |
 | Certificate MUI Patterns (new subsection) | DataGrid for certificates, generation dialog, template editor canvas |
 | Certificate i18n (new subsection) | `useAppTranslation("certificates")` usage, sub-domain access |
 | Cross-Reference | Link to `docs/certificates/FRONTEND_PATTERNS.md` |
@@ -331,7 +328,6 @@ The `INDEX.md` file serves as the navigational entry point. It contains:
 | Section | Content |
 |---------|---------|
 | Certificate Stores (new section) | Certificate list store (filters, pagination, sort), generation dialog store (form state, step tracking), template editor store (element selection, canvas state, dirty flag) |
-| Mock Stores (new subsection) | Mock store pattern for Storybook, cert mock store naming |
 | Cross-Reference | Link to `docs/certificates/FRONTEND_PATTERNS.md` |
 
 ### 3.12 frontend/common/graphql/AGENTS.md
@@ -388,9 +384,6 @@ The `INDEX.md` file serves as the navigational entry point. It contains:
 | Certificate Entity-Setup | Helper names and signatures for cert, template, element, variable, group, group item, verification log |
 | Certificate Repository Tests | `runInRollback`, `tx` propagation, 100% coverage, file locations (`backend/db/test/repo/cert/`) |
 | Certificate GraphQL Tests | `testClient` usage, auth scope setup, file locations (`frontend/common/graphql/test/cert/`) |
-| Certificate Component Tests | `renderWithWrapper`, MockLink, fixture data, file locations (`test/ui/components/cert/`) |
-| Certificate E2E Tests | Playwright, production server, cert flow fixtures, file locations (`test/ui/e2e/cert/`) |
-| Certificate Storybook | Page-level and component-level stories, mock stores, file locations |
 | Certificate Test Gotchas | PDF render mocking (no real render in tests), storage adapter mocking (in-memory), cron route testing (mock auth, no real schedule) |
 
 ---
@@ -423,7 +416,6 @@ The quality gate skill's `sub-loop.ts` file path → instruction file mapping is
 | `frontend/common/graphql/sharedDocuments/*cert*.ts` | `frontend.instructions.md` | `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/AGENTS.md` |
 | `app/api/cron/cert-*/**/*.ts` | `backend.instructions.md` | `app/AGENTS.md`, `backend/AGENTS.md` |
 | `app/verify/**/*.tsx` | `frontend.instructions.md` | `app/AGENTS.md` |
-| `test/ui/**/cert/**/*.ts(x)` | `tests.instructions.md` | `test/ui/AGENTS.md` |
 | `shared/locale/**/certificates.ts` | (shared layer rules) | `shared/AGENTS.md` |
 
 ### 5.3 Coding Agent Skills
@@ -605,7 +597,7 @@ The following AGENTS.md files are updated by this plan. Each file requires readi
 | `backend/enum/AGENTS.md` | Enum naming, location | New "Certificate Enums" section |
 | `frontend/AGENTS.md` | Frontend patterns, MUI v9, Apollo, Zustand, i18n | New "Certificate Views" section with subsections |
 | `frontend/views/AGENTS.md` | View organization, page components | New "Certificate Page Components" section with subsections |
-| `frontend/common/stores/AGENTS.md` | Store naming, composition, mock stores | New "Certificate Stores" section with subsections |
+| `frontend/common/stores/AGENTS.md` | Store naming, composition | New "Certificate Stores" section with subsections |
 | `frontend/common/graphql/AGENTS.md` | Document conventions, naming, imports | New "Certificate GraphQL Documents" section |
 | `app/AGENTS.md` | Route conventions, server/client components | New "Certificate Routes" section with subsections |
 
@@ -662,7 +654,7 @@ Verified against the actual codebase at `/home/ahmed/Projects/siraj-cert/` on 20
 
 1. **Docs files — ALL SPECIFIED (P0 none).** The 13 `docs/certificates/*.md` files (INDEX, ARCHITECTURE, DATABASE_PATTERNS, SERVICE_PATTERNS, GRAPHQL_PATTERNS, FRONTEND_PATTERNS, STORAGE_PATTERNS, CRON_PATTERNS, TESTING_PATTERNS, I18N_PATTERNS, TEMPLATE_EDITOR, VERIFICATION_SYSTEM) are enumerated in design.md §2.1 with content tables. **Reality check:** `docs/certificates/` does NOT exist yet (verified — `docs/` currently has only `auth/`, `bun/`, `drizzle/`, `graphql/`, `services/`). The plan creates it. The existing canonical-doc precedent is `docs/services/entity-cache-service.md` and `docs/graphql/dataloader-batching.md` — these live in **per-domain subdirs** (`services/`, `graphql/`), NOT a per-feature flat dir. **Decision tension (P1):** the plan's DD-1 deliberately picks `docs/certificates/` (feature-flat) over the existing `docs/<domain>/` (domain-flat) convention. This is a defensible divergence (a feature spanning many domains needs a home), but it breaks the established pattern. **Fix/confirm:** add a one-line note in INDEX.md explaining the divergence ("certificate spans DB/services/GraphQL/frontend/storage/cron/i18n; a per-feature dir avoids spreading one feature across 7 domain dirs") and add a cross-link FROM each existing `docs/<domain>/` to relevant `docs/certificates/<LAYERS>.md` (e.g. `docs/graphql/` → `docs/certificates/GRAPHQL_PATTERNS.md`) so the canonical-domain indexes are not orphaned.
 2. **AGENTS.md updates — COMPREHENSIVE (P0 none).** §3 lists 13 AGENTS.md files: root, shared, backend/services, backend/graphql, backend/db/repo, backend/db/seeds, backend/types, backend/enum, frontend, frontend/views, **frontend/common/stores**, frontend/common/graphql, app. **Reality check:** the Reality-Check section already corrected `frontend/stores/` → `frontend/common/stores/` (verified `frontend/common/stores/AGENTS.md` is the canonical path; `frontend/stores/` does NOT exist). Good. But note: §3.11 references `frontend/common/stores/AGENTS.md` for Zustand cert stores; confirm the dashboard cert plans (16–18) actually created Zustand stores — if generation/dialog/template-editor state lives in form state or URL params instead of Zustand, §3.11 is moot and should be dropped or generalized. **P2)** Cross-check against Plans 16–18 before writing the AGENTS.md section.
-3. **Instruction files — ALL THREE COVERED.** §4 lists `frontend.instructions.md`, `backend.instructions.md`, `tests.instructions.md` (verified all three exist in `.agents/instructions/`). `mobile-desktop.instructions.md` is referenced in the Storybook row (§8.1) — correct, since cert template editor uses tier split. **Gap (P2):** `sonarqube_mcp.instructions.md` exists in `.agents/instructions/` but is not relevant to cert knowledge — correctly omitted. No `cron.instructions.md` exists — cron conventions go into `backend.instructions.md` (§4.2 lists "Certificate Cron Route Naming") — correct decision.
+3. **Instruction files — ALL THREE COVERED.** §4 lists `frontend.instructions.md`, `backend.instructions.md`, `tests.instructions.md` (verified all three exist in `.agents/instructions/`). `mobile-desktop.instructions.md` exists but is not referenced — acceptable, since cert template editor tier-split conventions are covered by the frontend patterns documentation. **Gap (P2):** `sonarqube_mcp.instructions.md` exists in `.agents/instructions/` but is not relevant to cert knowledge — correctly omitted. No `cron.instructions.md` exists — cron conventions go into `backend.instructions.md` (§4.2 lists "Certificate Cron Route Naming") — correct decision.
 4. **Skills — COVERED.** §5.1 (review-frontend, review-backend, review-types, review-config), §5.2 (quality-gate sub-loop file-pattern → instruction/AGENTS mapping — this is the critical skill update), §5.3 (coding-agent, troubleshooting). **Reality check:** the `.agents/skills/` directory contains exactly the referenced skills (verified: `review-frontend`, `review-backend`, `review-types`, `review-config`, `quality-gate`, `quality-loop`, `repo-review`, `quality-assurance`, `troubleshooting`, etc. all exist). The quality-gate `sub-loop.ts` file-pattern mapping in §5.2 must be EXTENSIONS to the existing mapping, not replacements — state this explicitly so the implementer appends cert patterns rather than overwriting. **P2)** confirm which files in each skill dir hold the pattern map (`sub-loop.ts` for quality-gate per the design — verify this filename exists in `.agents/skills/quality-gate/`).
 5. **completeness gaps — MISSING DOCS (P1):** Two high-value architectural documents are absent given the cert feature's scope:
    - **`PERMISSIONS_AUTH.md`** — cert introduces role gating (staff/admin/teacher scopes), manual-trigger admin mutations, public-query allow-list. There is `AUTH` spread across ARCHITECTURE/GRAPHQL_PATTERNS but a dedicated permissions doc is warranted (Siraj's security is permission-group based — verified `frontend/common/graphql/test/permissions/` exists). Either add this doc OR explicitly fold a strong Permissions section into GRAPHQL_PATTERNS §2 + a new ARCHITECTURE §"Security Boundaries".

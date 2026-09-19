@@ -4,11 +4,14 @@ import { db } from "@/backend/db";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { auditLogs } from "@/backend/db/schema";
 import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import { decryptField, encryptField, isEncryptedFieldValue } from "@/backend/lib";
 import { AuditService } from "@/backend/services/system/audit.service";
 import {
   auditEnvConfigChange,
   deleteEnvConfigOverride,
+  envConfigEncryptionContext,
   invalidateEnvConfigCache,
+  listEnvConfigEntries,
   preWarmEnvConfigCache,
   resolveEnvConfig,
   toEnvSettingDbKey,
@@ -18,6 +21,7 @@ import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants
 
 const TEST_KEY = "STORAGE_PROVIDER";
 const TEST_KEY_2 = "FX_PROVIDER";
+const PASSTHROUGH_ENV = "FIELD_ENCRYPTION_ALLOW_PLAINTEXT";
 
 const originalEnv: Record<string, string | undefined> = {};
 
@@ -170,6 +174,180 @@ describe("environment-config.service — pre-warm cache", () => {
     expect(spy).toHaveBeenCalled();
 
     spy.mockRestore();
+  });
+});
+
+// ─── Secret encryption at rest (write encrypts, read decrypts) ───────────────────
+
+const SECRET_TEST_KEY = "FIXER_API_KEY";
+const SECRET_DB_KEY = toEnvSettingDbKey(SECRET_TEST_KEY);
+const REDIS_URL_DB_KEY = toEnvSettingDbKey("REDIS_URL");
+
+/** Minimal `system_settings` row shape as returned by `SystemSettingsRepository.getByKey`. */
+function mockSettingRow(value: string) {
+  return {
+    key: "env::MOCK",
+    value,
+    dataType: SystemSettingDataType.String,
+    description: "mock row",
+    category: SystemSettingCategory.System,
+    updatedByUserId: null,
+    updatedAt: new Date(),
+  };
+}
+
+describe("environment-config.service — secret encryption at rest", () => {
+  beforeEach(() => {
+    saveEnv(SECRET_TEST_KEY);
+    saveEnv(PASSTHROUGH_ENV);
+    invalidateEnvConfigCache();
+  });
+
+  afterEach(() => {
+    restoreEnv();
+  });
+
+  test("upsertEnvConfigOverride stores isSecret overrides encrypted (not plaintext)", async () => {
+    await removeTestOverrideRow();
+
+    await runInRollback(async tx => {
+      await upsertEnvConfigOverride({ key: SECRET_TEST_KEY, value: "live-secret-value" }, tx);
+
+      const row = await SystemSettingsRepository.getByKey(SECRET_DB_KEY, tx);
+      expect(row?.value).not.toBe("live-secret-value");
+      expect(isEncryptedFieldValue(row?.value ?? "")).toBeTrue();
+      // The stored ciphertext decrypts back to the submitted value — with the
+      // SAME row context the write path bound into it.
+      expect(decryptField(row?.value ?? "", envConfigEncryptionContext(SECRET_TEST_KEY))).toBe("live-secret-value");
+    });
+
+    const afterRollback = await SystemSettingsRepository.getByKey(SECRET_DB_KEY);
+    expect(afterRollback).toBeNull();
+  });
+
+  test("resolveEnvConfig decrypts an encrypted isSecret DB override", async () => {
+    unsetEnv(SECRET_TEST_KEY);
+
+    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(
+      mockSettingRow(encryptField("resolved-secret-9876", envConfigEncryptionContext(SECRET_TEST_KEY)))
+    );
+
+    const result = await resolveEnvConfig(SECRET_TEST_KEY);
+
+    expect(result).toBe("resolved-secret-9876");
+    spy.mockRestore();
+  });
+
+  test("legacy plaintext isSecret DB override still resolves as-is while the passthrough window is open", async () => {
+    unsetEnv(SECRET_TEST_KEY);
+    process.env[PASSTHROUGH_ENV] = "1";
+
+    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(
+      mockSettingRow("legacy-plaintext-secret")
+    );
+
+    const result = await resolveEnvConfig(SECRET_TEST_KEY);
+
+    expect(result).toBe("legacy-plaintext-secret");
+    spy.mockRestore();
+  });
+
+  test("an undecryptable isSecret DB override falls back to process.env, never leaks ciphertext", async () => {
+    process.env[SECRET_TEST_KEY] = "env-fallback-value";
+    invalidateEnvConfigCache();
+
+    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(
+      mockSettingRow("0123456789abcdef01234567:0123:0123456789abcdef0123456789abcdef")
+    );
+
+    const result = await resolveEnvConfig(SECRET_TEST_KEY);
+
+    expect(result).toBe("env-fallback-value");
+    spy.mockRestore();
+  });
+
+  test("listEnvConfigEntries masks the DECRYPTED value for isSecret keys and fully masks REDIS_URL", async () => {
+    const spy = spyOn(SystemSettingsRepository, "getByKey").mockImplementation(async (key: string) => {
+      if (key === SECRET_DB_KEY) {
+        return mockSettingRow(encryptField("sk-listtest-6789"));
+      }
+      if (key === REDIS_URL_DB_KEY) {
+        // REDIS_URL is now an isSecret key — its DB override is stored encrypted.
+        return mockSettingRow(encryptField("redis://:hunter2@localhost:6379"));
+      }
+      return null;
+    });
+
+    try {
+      const entries = await listEnvConfigEntries();
+
+      const secretEntry = entries.find(entry => entry.key === SECRET_TEST_KEY);
+      expect(secretEntry).toBeDefined();
+      expect(secretEntry?.isSecret).toBe(true);
+      expect(secretEntry?.source).toBe("db");
+      expect(secretEntry?.hasDbOverride).toBe(true);
+      // Mask of the DECRYPTED value — the ciphertext never reaches the Settings UI.
+      expect(secretEntry?.value).toBe("••••••••6789");
+
+      const redisEntry = entries.find(entry => entry.key === "REDIS_URL");
+      expect(redisEntry).toBeDefined();
+      expect(redisEntry?.isSecret).toBe(true);
+      // The decrypted URL is fully masked: neither the password nor the raw URL leaks.
+      expect(redisEntry?.value).toBeDefined();
+      expect(redisEntry?.value).not.toContain("hunter2");
+      expect(redisEntry?.value).not.toContain("redis://");
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  test("REDIS_URL override is stored encrypted and resolves decrypted with its row context", async () => {
+    await SystemSettingsRepository.deleteSetting(REDIS_URL_DB_KEY);
+
+    await runInRollback(async tx => {
+      await upsertEnvConfigOverride({ key: "REDIS_URL", value: "redis://:s3cret@redis.internal:6379" }, tx);
+
+      const row = await SystemSettingsRepository.getByKey(REDIS_URL_DB_KEY, tx);
+      expect(row?.value).not.toBe("redis://:s3cret@redis.internal:6379");
+      expect(isEncryptedFieldValue(row?.value ?? "")).toBeTrue();
+      expect(decryptField(row?.value ?? "", envConfigEncryptionContext("REDIS_URL"))).toBe(
+        "redis://:s3cret@redis.internal:6379"
+      );
+    });
+
+    const afterRollback = await SystemSettingsRepository.getByKey(REDIS_URL_DB_KEY);
+    expect(afterRollback).toBeNull();
+  });
+
+  test("auditEnvConfigChange masks REDIS_URL (maskUrlCredentials + isSecret) values on both prior and new state", async () => {
+    const redisEntityId = toEnvSettingDbKey("REDIS_URL");
+    const outsideBefore = await db.select().from(auditLogs).where(eq(auditLogs.entityId, redisEntityId));
+
+    await runInRollback(async tx => {
+      const actor = await createTestUserWithDefaults(tx);
+
+      await auditEnvConfigChange(
+        actor.id,
+        "upsert",
+        "REDIS_URL",
+        "redis://user:old-pass@redis.internal:6379",
+        "redis://user:new-pass@redis.internal:6379",
+        tx
+      );
+
+      const inTx = await tx
+        .select()
+        .from(auditLogs)
+        .where(and(eq(auditLogs.entityId, redisEntityId), eq(auditLogs.actorUserId, actor.id)));
+      expect(inTx).toHaveLength(1);
+      // REDIS_URL is an isSecret key — raw values are never written to audit logs.
+      expect(inTx[0]?.previousState).toEqual({ value: "***" });
+      expect(inTx[0]?.newState).toEqual({ value: "***" });
+    });
+
+    // Rollback-proof: the tx rolled back → no audit row was persisted.
+    const afterRollback = await db.select().from(auditLogs).where(eq(auditLogs.entityId, redisEntityId));
+    expect(afterRollback).toHaveLength(outsideBefore.length);
   });
 });
 

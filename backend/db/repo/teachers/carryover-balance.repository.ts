@@ -9,6 +9,7 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
+import { DomainError } from "@/backend/lib/errors";
 import type {
   CarryoverBalanceInsertType,
   CarryoverBalanceItemInsertType,
@@ -249,7 +250,7 @@ export namespace CarryoverBalanceRepository {
     const executor = tx ?? db;
     const [row] = await executor.insert(carryoverBalances).values(input).returning();
     if (!row) {
-      throw new Error("carryover balance insert returned no rows");
+      throw new DomainError("CARRYOVER_BALANCE_INSERT_FAILED", "carryover balance insert returned no rows");
     }
     return row;
   }

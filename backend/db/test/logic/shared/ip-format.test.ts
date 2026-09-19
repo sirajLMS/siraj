@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { isSqlite } from "@/backend/db";
 import { adminAuditLogs, sessions, users } from "@/backend/db/schema";
 import { IP_ADDRESS_1 } from "@/backend/db/test/const";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import type { AdminAuditLogInsertType, SessionInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -20,7 +20,7 @@ describe("IP Address Formatting", () => {
         .values({
           name: "IP Test User",
           email,
-          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          password: generateTestPassword(),
           createdAt: now,
           updatedAt: now,
         })
@@ -49,7 +49,7 @@ describe("IP Address Formatting", () => {
         .values({
           name: "IP Test User 2",
           email,
-          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          password: generateTestPassword(),
           createdAt: now,
           updatedAt: now,
         })
@@ -89,7 +89,7 @@ describe("IP Address Formatting", () => {
         .values({
           name: "IP Test User 3",
           email,
-          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          password: generateTestPassword(),
           createdAt: now,
           updatedAt: now,
         })
@@ -118,7 +118,7 @@ describe("IP Address Formatting", () => {
         .values({
           name: "IP Test User 4",
           email,
-          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          password: generateTestPassword(),
           createdAt: now,
           updatedAt: now,
         })

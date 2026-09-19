@@ -21,6 +21,9 @@ const scheduling = {
   outOfQuota: "Out of quota.",
   leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
     `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`,
+  sessionLocked: ({ lockHours }: { lockHours: number }) =>
+    `Cannot modify session within ${lockHours} hours of start time.`,
+  leaveRequestNoLongerPending: "Request is no longer pending.",
   classInstanceNotFound: ({ id }: { id: string }) => `Class instance not found: ${id}`,
   originalClassNotFound: "Original class not found.",
   invalidTransition: "Invalid transition.",
@@ -427,6 +430,8 @@ export const errorsEn: ErrorsLabels = {
     publishFailed: "Failed to publish appearance settings.",
     resetFailed: "Failed to reset appearance draft.",
     unauthorized: "You are not authorized to manage site appearance.",
+    conflict:
+      "Appearance settings were modified by another admin. Reload to see their changes, or overwrite them with yours.",
   },
   serviceOutage: {
     title: "We're having trouble reaching our servers",
@@ -475,6 +480,8 @@ export const errorsEn: ErrorsLabels = {
   },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "Too many requests. Please try again later.",
+  anonymizationScrubIncomplete:
+    "Anonymization could not be applied to every record. No changes were saved — please retry or contact support.",
   duplicateRequest: "Duplicate request detected. This operation has already been processed.",
   internalServerError: "An unexpected error occurred. Please try again later.",
   requestTooLarge: "The request body is too large.",

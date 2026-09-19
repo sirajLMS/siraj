@@ -6,7 +6,7 @@ gqlSchemaBuilder.mutationField("deleteRecurringClass", t =>
   t.field({
     type: "Boolean",
     args: { classInstanceId: t.arg.id({ required: true }) },
-    authScopes: { superAdmin: true, notImpersonating: true },
+    authScopes: { $all: { superAdmin: true, notImpersonating: true } },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
@@ -19,7 +19,7 @@ gqlSchemaBuilder.mutationField("clearWeeklySchedule", t =>
   t.field({
     type: "Boolean",
     args: { teacherId: t.arg.id({ required: true }) },
-    authScopes: { superAdmin: true, notImpersonating: true },
+    authScopes: { $all: { superAdmin: true, notImpersonating: true } },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;

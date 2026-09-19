@@ -5,12 +5,29 @@ import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerUserContext, logger, resolveLocalStoragePath } from "@/backend/lib";
+import { getServerUserContext, logger, rateLimitLogId, resolveLocalStoragePath } from "@/backend/lib";
 import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
-import { isAllowedMimeType } from "@/backend/lib/storage/mime-allowlist";
+import { checkRateLimit, getClientIdentifier, storageUploadRateLimiter } from "@/backend/lib/ratelimit";
+import { isAllowedMimeType, verifyImageMagicBytes } from "@/backend/lib/storage/mime-allowlist";
 import { StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
+
+/**
+ * Error thrown while streaming an upload body to disk. Carries the HTTP
+ * status the route should respond with.
+ */
+class UploadStreamError extends Error {
+  constructor(
+    readonly status: number,
+    message: string
+  ) {
+    super(message);
+  }
+}
+
+const MAGIC_HEADER_BYTES = 16;
+const STREAM_SIZE_SLACK_BYTES = 1024n;
 
 /**
  * Bridge DOM ReadableStream to a Node Readable via async iteration.
@@ -67,19 +84,70 @@ function validateHeaders(request: NextRequest, signedUrl: SignedUrlData, tErrors
 }
 
 /**
- * Stream request body to file while calculating SHA-256
+ * Header checks that do not depend on the signed-URL row. Runs before the
+ * token is claimed so malformed requests do not burn the one-shot token.
+ */
+function validateRequestHeaders(request: NextRequest, tErrors: ErrorsLabels): NextResponse | null {
+  const contentType = request.headers.get("content-type");
+  const contentLength = request.headers.get("content-length");
+  const contentMd5 = request.headers.get("content-md5");
+
+  if (!request.body) {
+    return NextResponse.json({ error: tErrors.file.requestBodyRequired }, { status: 400 });
+  }
+
+  if (!contentType || !isAllowedMimeType(contentType)) {
+    return NextResponse.json({ error: tErrors.file.invalidFileType }, { status: 400 });
+  }
+
+  if (!contentLength || !/^\d+$/.test(contentLength) || BigInt(contentLength) === 0n) {
+    return NextResponse.json({ error: tErrors.file.contentLengthRequired }, { status: 411 });
+  }
+
+  if (!contentMd5) {
+    return NextResponse.json({ error: tErrors.file.contentMd5Required }, { status: 400 });
+  }
+
+  return null;
+}
+
+/**
+ * Stream request body to file while calculating SHA-256. Enforces the
+ * server-side byte cap on the actual streamed payload (the client's
+ * Content-Length is not trusted) and verifies the magic bytes of the first
+ * bytes for image content types.
  */
 async function streamToFile(
   stream: ReadableStream,
   filePath: string,
   expectedMd5: string,
-  hashMismatchMessage: string
+  options: {
+    maxSizeBytes: bigint;
+    contentType: string;
+    hashMismatchMessage: string;
+    magicMismatchMessage: string;
+    sizeExceededMessage: string;
+  }
 ): Promise<void> {
   const hash = crypto.createHash("sha256");
   const writeStream = createWriteStream(filePath);
 
+  let receivedBytes = 0n;
+  let headerBytes = Buffer.alloc(0);
+
   const hashTransform = new Transform({
     transform(chunk: Buffer, _encoding, callback) {
+      receivedBytes += BigInt(chunk.length);
+
+      if (receivedBytes > options.maxSizeBytes + STREAM_SIZE_SLACK_BYTES) {
+        callback(new UploadStreamError(413, options.sizeExceededMessage));
+        return;
+      }
+
+      if (headerBytes.length < MAGIC_HEADER_BYTES) {
+        headerBytes = Buffer.concat([headerBytes, chunk.subarray(0, MAGIC_HEADER_BYTES - headerBytes.length)]);
+      }
+
       hash.update(chunk);
       callback(null, chunk);
     },
@@ -88,10 +156,13 @@ async function streamToFile(
   try {
     await pipeline(toNodeReadable(stream), hashTransform, writeStream);
 
+    if (headerBytes.length > 0 && !verifyImageMagicBytes(options.contentType, headerBytes)) {
+      throw new UploadStreamError(400, options.magicMismatchMessage);
+    }
+
     const actualHash = hash.digest("base64");
     if (actualHash !== expectedMd5) {
-      await fs.unlink(filePath).catch(() => {});
-      throw new Error(hashMismatchMessage);
+      throw new Error(options.hashMismatchMessage);
     }
   } catch (error) {
     await fs.unlink(filePath).catch(() => {});
@@ -163,17 +234,32 @@ async function resolveUploadUserId(request: NextRequest): Promise<string | null>
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: tokenId } = await params;
+    const locale = resolveLocaleFromRequest(request);
+    const tErrors = getServerTranslations(locale).errorsTranslations;
+
+    // Rate limit keyed on the uploading user (IP fallback) before the
+    // one-shot token is touched.
+    const sessionUserId = await resolveUploadUserId(request);
+    const rateLimitKey = `storage-upload:${sessionUserId ?? getClientIdentifier(request)}`;
+    const rateLimit = await checkRateLimit(rateLimitKey, storageUploadRateLimiter);
+    if (!rateLimit.success) {
+      // rateLimitKey embeds the raw client IP — log only the hashed identifier.
+      logger.warn("Storage upload rate limit exceeded", { tokenId, rateLimitLogId: rateLimitLogId(rateLimitKey) });
+      return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
+    }
+
+    // Validate the request-independent headers first so a bad request does
+    // not burn the one-shot token; the claim below stays a single atomic
+    // operation.
+    const requestHeaderResponse = validateRequestHeaders(request, tErrors);
+    if (requestHeaderResponse) return requestHeaderResponse;
+
     const signedUrl = await StorageService.claimSignedUrl(tokenId);
 
     if (!signedUrl) {
       logger.warn("Invalid or expired signed URL token", { tokenId });
-      const locale = resolveLocaleFromRequest(request);
-      const tErrors = getServerTranslations(locale).errorsTranslations;
       return NextResponse.json({ error: tErrors.file.invalidOrExpiredToken }, { status: 403 });
     }
-
-    const locale = resolveLocaleFromRequest(request);
-    const tErrors = getServerTranslations(locale).errorsTranslations;
 
     // Signed URLs must be bound to their uploader at creation time; an unbound
     // session is rejected so any holder of the token cannot write the file.
@@ -182,7 +268,6 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: tErrors.file.invalidOrExpiredToken }, { status: 403 });
     }
 
-    const sessionUserId = await resolveUploadUserId(request);
     if (!sessionUserId || sessionUserId !== signedUrl.uploadedByUserId) {
       logger.warn("Signed URL user mismatch", {
         tokenId,
@@ -225,8 +310,18 @@ async function processUpload(
   }
 
   try {
-    await streamToFile(request.body, absolutePath, signedUrl.contentHash, tErrors.file.sha256HashMismatch);
+    await streamToFile(request.body, absolutePath, signedUrl.contentHash, {
+      maxSizeBytes: signedUrl.fileSize,
+      contentType: signedUrl.contentType,
+      hashMismatchMessage: tErrors.file.sha256HashMismatch,
+      magicMismatchMessage: tErrors.file.invalidFileType,
+      sizeExceededMessage: tErrors.file.contentLengthExceedsSize(signedUrl.fileSize.toString()),
+    });
   } catch (error) {
+    if (error instanceof UploadStreamError) {
+      logger.warn("Upload stream rejected", { tokenId, status: error.status, error });
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     logger.error("Failed to stream file to disk", { tokenId, error });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : tErrors.file.failedToWriteFile },

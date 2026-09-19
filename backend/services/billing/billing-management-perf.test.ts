@@ -229,6 +229,7 @@ await mock.module("@/backend/lib", () => ({
   },
   NotFoundError: class NotFoundError extends Error {},
   ForbiddenError: class ForbiddenError extends Error {},
+  assertUuidShape: () => undefined,
 }));
 
 await mock.module("@/shared/locale", () => ({

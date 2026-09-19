@@ -1,13 +1,12 @@
 # Email Template System — Complete Environment Keys Guide
 
 **Generated:** 2026-08-02
-**Purpose:** Everything you need to set up env keys (local + Vercel + CI) for the email template plan to run successfully, including live integration tests for all 5 email providers.
+**Purpose:** Everything you need to set up env keys (local + Vercel + CI) for the email template system to run successfully across all 5 email providers.
 
 **Conventions in this repo:**
 - **`.env`** — your local development env (gitignored)
 - **`.env.example`** — committed template with safe placeholders (everyone copies from this)
-- **`.env.test`** — gitignored; real credentials for **live** integration tests (loaded by `bun run test:live-comm`)
-- **`.env.redis`** — gitignored; Redis integration test override
+- **`.env.test`** — gitignored; secondary credentials file (e.g. for sandbox or trial providers)
 - **`environment.d.ts`** — TypeScript ambient declarations for every env var (provides autocomplete + type safety)
 - **`backend/lib/env.ts`** — runtime env loader (`buildEnvironmentConfig()` → `EnvironmentConfig` object)
 - **`backend/lib/env-config-keys.ts`** — canonical registry of keys eligible for **DB override** via the Settings → Environment Config admin UI (super_admin only)
@@ -19,22 +18,16 @@
 
 The repo currently supports only Resend. These keys are already declared in `environment.d.ts`, registered in `env-config-keys.ts`, and consumed in `EmailChannelFactory.ts`:
 
-| Env var | Required in prod | Required for live tests | Default | excludeFromDb | isSecret | How to obtain |
-|---|---|---|---|---|---|---|
-| `EMAIL_PROVIDER` | optional | no | `"resend"` | false | false | Free-text, set to provider name |
-| `RESEND_API_KEY` | **required** (adapter throws) | **yes** (gates `hasResend`) | — | false | true | https://resend.com/api-keys |
-| `RESEND_FROM_EMAIL` | **required** (adapter throws) | **yes** (gates `hasResend`) | — | false | false | Must be a verified sender in Resend |
-| `RESEND_TEST_TO_EMAIL` | never | optional (dev redirect only) | — | (not registered) | false | Your Resend account owner email |
-
-**Existing test gate** (`test/integration/preload/live-comm-preload.ts` line 5):
-```ts
-const hasResend = Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL);
-```
-If neither this nor Twilio nor Firebase is set, the preload throws: `test:live-comm requires at least one provider key triple in .env.test`.
+| Env var | Required in prod | Default | excludeFromDb | isSecret | How to obtain |
+|---|---|---|---|---|---|
+| `EMAIL_PROVIDER` | optional | `"resend"` | false | false | Free-text, set to provider name |
+| `RESEND_API_KEY` | **required** (adapter throws) | — | false | true | https://resend.com/api-keys |
+| `RESEND_FROM_EMAIL` | **required** (adapter throws) | — | false | false | Must be a verified sender in Resend |
+| `RESEND_TEST_TO_EMAIL` | never | — | (not registered) | false | Your Resend account owner email |
 
 ---
 
-## 2. New env keys to add (per the plan)
+## 2. New env keys to add (per the design)
 
 Every new key needs **4 edits** to register it properly:
 1. `environment.d.ts` — add the type declaration
@@ -42,7 +35,7 @@ Every new key needs **4 edits** to register it properly:
 3. `backend/lib/env.ts` — add `process.env.XXX` to `buildEnvironmentConfig()` (for non-secret keys used at boot)
 4. `.env.example` — add a commented-out placeholder line for documentation
 
-You can wire one provider at a time; missing providers simply skip during live tests (the `describeLiveWhen` gate turns the suite into a no-op).
+You can wire one provider at a time; the `EMAIL_PROVIDER` union below covers all of them.
 
 ### 2.1 Widen `EMAIL_PROVIDER` union
 
@@ -66,14 +59,14 @@ EMAIL_PROVIDER?: "resend" | "ses" | "postmark" | "mailgun" | "smtp";
 2. Verify your sending domain: https://resend.com/domains → Add domain → add the 3 DNS records (SPF, DKIM, DMARC) to your DNS provider
 3. Generate an API key: https://resend.com/api-keys → "Create API Key" → copy `re_...` value immediately (only shown once)
 4. Find your sender email: the verified `@domain` address (e.g. `noreply@yourdomain.com`)
-5. For trial-only testing: use `onboarding@resend.dev` as the `RESEND_FROM_EMAIL` — it's Resend's sandbox that only delivers to your account owner email. Set `RESEND_TEST_TO_EMAIL=your-account-owner@gmail.com` so the test redirect kicks in under `NODE_ENV=test`.
+5. For trial-only use: use `onboarding@resend.dev` as the `RESEND_FROM_EMAIL` — it's Resend's sandbox that only delivers to your account owner email. Set `RESEND_TEST_TO_EMAIL=your-account-owner@gmail.com` so the redirect kicks in.
 
 **Env vars to set:**
 ```bash
 EMAIL_PROVIDER=resend
 RESEND_API_KEY=re_your_real_api_key
 RESEND_FROM_EMAIL=noreply@yourdomain.com   # must match a verified sender
-RESEND_TEST_TO_EMAIL=your.account@gmail.com   # only for live-comm tests
+RESEND_TEST_TO_EMAIL=your.account@gmail.com   # dev redirect only
 ```
 
 **Where to get help:** https://resend.com/docs
@@ -82,7 +75,7 @@ RESEND_TEST_TO_EMAIL=your.account@gmail.com   # only for live-comm tests
 
 ### 🟡 3.2 Amazon SES (SESv2) — recommended for production volume
 
-SES has the **highest free tier** (62,000 emails/month if sent from EC2; 3,000/month from Lambda/Vercel) but the most complex setup. Plan uses the SESv2 API (`@aws-sdk/client-sesv2`).
+SES has the **highest free tier** (62,000 emails/month if sent from EC2; 3,000/month from Lambda/Vercel) but the most complex setup. The adapter uses the SESv2 API (`@aws-sdk/client-sesv2`).
 
 **Setup steps:**
 1. Sign up for AWS: https://aws.amazon.com → create an account (requires credit card, but free tier protects you)
@@ -105,7 +98,7 @@ SES has the **highest free tier** (62,000 emails/month if sent from EC2; 3,000/m
    - **Save the Access Key ID + Secret Access Key** (only shown once)
 6. **Optional — configuration set** for bounce/complaint webhooks:
    - SES → "Configuration sets" → "Create set"
-   - Add an SNS event destination for `send`, `bounce`, `complaint`, `delivery` events (creates an SNS topic SES will publish to; the plan's todo 20a wires the HTTP webhook from SNS to your `api/email/webhooks/ses` endpoint)
+   - Add an SNS event destination for `send`, `bounce`, `complaint`, `delivery` events (creates an SNS topic SES will publish to)
    - Note the configuration set name for `SES_CONFIGURATION_SET`
 
 **Env vars to set:**
@@ -119,18 +112,18 @@ SES_FROM_NAME="Siraj"                    # optional, display name in From header
 SES_CONFIGURATION_SET=siraj-prod        # optional, for bounce/complaint webhooks
 ```
 
-**Local dev shortcut (no AWS account needed):** Use **LocalStack** (free) for local SES integration tests:
+**Local dev shortcut (no AWS account needed):** Use **LocalStack** (free) for local SES:
 ```bash
 # Run localstack SES (one-time setup — instructions below)
 docker run -d -p 4566:4566 -e SERVICES=ses localstack/localstack
 # Then set:
 SES_REGION=us-east-1
-SES_ACCESS_KEY_ID=test
-SES_SECRET_ACCESS_KEY=test
+SES_ACCESS_KEY_ID=localstack
+SES_SECRET_ACCESS_KEY=localstack
 SES_FROM_EMAIL=noreply@localstack.local   # verify via localstack cli
 # SES_ENDPOINT override for adapter: http://localhost:4566
 ```
-You'll need to add a `SES_ENDPOINT` env var for localstack (not in the canonical list above). The adapter plan captures `SESv2Client` config — it can accept `endpoint` in the client config.
+You'll need to add a `SES_ENDPOINT` env var for localstack (not in the canonical list above). The adapter captures `SESv2Client` config — it can accept `endpoint` in the client config.
 
 **Where to get help:** https://docs.aws.amazon.com/ses/latest/dg/setting-up.html
 
@@ -156,7 +149,7 @@ POSTMARK_FROM_EMAIL=noreply@yourdomain.com   # must be a verified sender signatu
 POSTMARK_MESSAGE_STREAM=outbound              # optional; default is "outbound"
 ```
 
-**Local dev shortcut (no signup needed):** Postmark offers a **sandbox server** when you sign up — sends to any email address return a simulated bounce (no DNS verification required). Switch the `POSTMARK_SERVER_TOKEN` between your trial server and the sandbox server in `.env.test` vs `.env`.
+**Local dev shortcut (no signup needed):** Postmark offers a **sandbox server** when you sign up — sends to any email address return a simulated bounce (no DNS verification required). Switch the `POSTMARK_SERVER_TOKEN` between your trial server and the sandbox server as needed.
 
 **Where to get help:** https://postmarkapp.com/support
 
@@ -164,10 +157,10 @@ POSTMARK_MESSAGE_STREAM=outbound              # optional; default is "outbound"
 
 ### 🟡 3.4 Mailgun — good for bulk + transactional
 
-Mailgun has a generous free tier: 5,000 emails/month for 3 months (Flex plan), then pay-as-you-go.
+Mailgun has a generous free tier: 5,000 emails/month for 3 months (Flex design), then pay-as-you-go.
 
 **Setup steps:**
-1. Go to https://www.mailgun.com → sign up for Flex plan (no credit card for first 3 months)
+1. Go to https://www.mailgun.com → sign up for Flex design (no credit card for first 3 months)
 2. Verify a domain: https://app.mailgun.com/app/sending/log/domains → "Add custom domain" → enter `mail.yourdomain.com` (subdomain recommended) → add the 5 DNS records (SPF, DKIM, CNAME tracking, MX, return path). DNS propagation can take 15–60 minutes.
 3. Get API key: https://app.mailgun.com/app/account/security/api_keys → "Add API key" → copy the `key-...` value (or `pubkey-...` for public key, but the sending API key is the private one beginning `key-`)
 4. Note your domain: the one you just verified (e.g. `mail.yourdomain.com`)
@@ -182,13 +175,13 @@ MAILGUN_FROM_EMAIL=noreply@yourdomain.com        # must be on your verified doma
 MAILGUN_HOST=api.mailgun.net                     # or "api.eu.mailgun.net" for EU
 ```
 
-**Local dev shortcut (no DNS needed):** Mailgun provides a **sandbox domain** on signup (looks like `sandbox123abc.mailgun.org`). It lets you send to **authorized recipients only** (you can add up to 5 emails). Use it for `.env.test`:
+**Local dev shortcut (no DNS needed):** Mailgun provides a **sandbox domain** on signup (looks like `sandbox123abc.mailgun.org`). It lets you send to **authorized recipients only** (you can add up to 5 emails). Use it for local development:
 ```bash
 MAILGUN_DOMAIN=sandbox123abc.mailgun.org
 MAILGUN_FROM_EMAIL=postmaster@sandbox123abc.mailgun.org
 MAILGUN_TEST_RECIPIENT=your.email@gmail.com    # you must add this as authorized recipient
 ```
-Note: plan doesn't currently use `MAILGUN_TEST_RECIPIENT` — you'd add it as a new env var if you want the test redirect pattern to match Resend's `RESEND_TEST_TO_EMAIL`.
+Note: `MAILGUN_TEST_RECIPIENT` is not currently registered — you'd add it as a new env var if you want the redirect pattern to match Resend's `RESEND_TEST_TO_EMAIL`.
 
 **Where to get help:** https://documentation.mailgun.com
 
@@ -196,7 +189,7 @@ Note: plan doesn't currently use `MAILGUN_TEST_RECIPIENT` — you'd add it as a 
 
 ### 🟢 3.5 SMTP — the universal fallback
 
-SMTP is the most flexible: works with any provider that exposes SMTP (Gmail, AWS WorkMail, Exchange, on-pre Postfix, etc.). The plan now treats it as production-grade under the Vercel + Node.js runtime.
+SMTP is the most flexible: works with any provider that exposes SMTP (Gmail, AWS WorkMail, Exchange, on-pre Postfix, etc.). The design now treats it as production-grade under the Vercel + Node.js runtime.
 
 **Setup steps** (general):
 1. Get SMTP credentials from your email provider. Common providers + their SMTP hostnames:
@@ -220,16 +213,16 @@ SMTP_FROM_NAME="Siraj"                       # optional
 SMTP_SECURE=false                            # true for port 465 (implicit SSL); false for 587 (STARTTLS upgrade)
 ```
 
-**Local dev shortcut (no real SMTP needed):** Use **Ethereal (nodemailer test accounts)** — they're free, instant, and deliver to a web inbox (not real recipients). Created by nodemailer's author:
+**Local dev shortcut (no real SMTP needed):** Use **Ethereal (nodemailer throwaway accounts)** — they're free, instant, and deliver to a web inbox (not real recipients). Created by nodemailer's author:
 ```bash
-# Generate a one-time test account (no signup)
+# Generate a one-time account (no signup)
 ~/.bun/bin/bun -e "import nodemailer from 'nodemailer'; nodemailer.createTestAccount().then(a => console.log({SMTP_HOST: a.smtp.host, SMTP_PORT: a.smtp.port, SMTP_USERNAME: a.user, SMTP_PASSWORD: a.pass, SMTP_FROM_EMAIL: a.user + '@ethereal.email'}))"
 ```
 Output looks like:
 ```
 { host: 'smtp.ethereal.email', port: 587, user: 'random@ethereal.email', pass: '...' }
 ```
-Paste those into `.env` (or `.env.test`) and set `SMTP_FROM_EMAIL=random@ethereal.email`. To preview sent mail, the test helper can print `nodemailer.getTestMessageUrl(info)` after each send — gives you a URL like https://ethereal.email/message/XXXX.
+Paste those into `.env` and set `SMTP_FROM_EMAIL=random@ethereal.email`. To preview sent mail, print `nodemailer.getTestMessageUrl(info)` after each send — gives you a URL like https://ethereal.email/message/XXXX.
 
 **Where to get help:** https://nodemailer.com/smtp/
 
@@ -239,7 +232,7 @@ Paste those into `.env` (or `.env.test`) and set `SMTP_FROM_EMAIL=random@etherea
 
 ### 4.1 `EMAIL_TEMPLATES_ENABLED` (feature flag — CRITICAL)
 
-This is a Phase 3 gate (todo 21c). **MUST be `false` by default** so existing dispatcher passthrough email continues working until you're ready to cut over.
+**MUST be `false` by default** so existing dispatcher passthrough email continues working until you're ready to cut over.
 
 **CRITICAL BUG** found in v5 review (V5-2): `resolveEnvConfig()` returns `string | undefined` — the string `"false"` is truthy in JS. Must use `getBooleanEnv("EMAIL_TEMPLATES_ENABLED")` from `@/backend/lib/env` (returns `true` only when value literally `=== "true"`).
 
@@ -257,9 +250,9 @@ Used by templates that include links back to the app (e.g., password reset links
 **Vercel:** set to your production domain `https://your-app.vercel.app` or custom domain.
 **Local dev:** `http://localhost:3000`.
 
-### 4.3 Optional — preview-server dev-only env (Phase 2 only)
+### 4.3 Optional — preview-server dev-only env (dev only)
 
-If you want to use `react-email dev` (standalone preview server, todo 1's deferred optional dep `@react-email/ui`):
+If you want to use `react-email dev` (standalone preview server; uses the optional dep `@react-email/ui`):
 ```bash
 # Optional — only for developing email components in isolation outside the Next.js app
 # npm: @react-email/ui (not yet installed; install when ready)
@@ -268,9 +261,9 @@ REACT_EMAIL_PREVIEW_PORT=3001   # if launched on a different port
 
 ---
 
-## 5. Webhook configuration (todo 20a — Phase 3)
+## 5. Webhook configuration (production launch)
 
-For bounce/complaint webhook handling, you'll need to expose an HTTP webhook endpoint. The plan mentions `api/email/webhooks/<provider>/route.ts` (Vercel-compatible route handlers).
+For bounce/complaint webhook handling, you'll need to expose an HTTP webhook endpoint. The design mentions `api/email/webhooks/<provider>/route.ts` (Vercel-compatible route handlers).
 
 ### 5.1 SES SES → SNS → HTTP webhook
 1. In SES → Configuration sets → Event destinations → "Add destination" → SNS
@@ -296,7 +289,7 @@ For bounce/complaint webhook handling, you'll need to expose an HTTP webhook end
 5. No extra env needed — uses existing `MAILGUN_API_KEY`.
 
 ### 5.4 SMTP — no native webhooks
-SMTP doesn't have native bounce callbacks. You must parse bounce delivery receipts (DSN — Delivery Status Notification) from a monitored inbox, OR add a Return-Path domain to your From header that you monitor via IMAP. Plan marks this as out-of-scope for V1 — bookkeeping only.
+SMTP doesn't have native bounce callbacks. You must parse bounce delivery receipts (DSN — Delivery Status Notification) from a monitored inbox, OR add a Return-Path domain to your From header that you monitor via IMAP. This is out-of-scope for V1 — bookkeeping only.
 
 **Vercel webhook env (all providers):**
 ```bash
@@ -308,128 +301,11 @@ POSTMARK_WEBHOOK_SECRET=<random-32-hex>      # compared against X-Postmark-Webho
 
 ---
 
-## 6. Integration test setup
-
-The plan adds 4 new live integration test files + updates the preload:
-```
-test/integration/communication/ses.integration.test.ts
-test/integration/communication/postmark.integration.test.ts
-test/integration/communication/mailgun.integration.test.ts
-test/integration/communication/smtp.integration.test.ts
-test/integration/preload/live-comm-preload.ts   # extended
-```
-
-### 6.1 Pre-buy sanity check for each provider
-
-Each new `*.integration.test.ts` will look like:
-```ts
-// pattern from existing resend.integration.test.ts
-const hasSes = Boolean(process.env.SES_ACCESS_KEY_ID && process.env.SES_SECRET_ACCESS_KEY && process.env.SES_FROM_EMAIL);
-const describeLive = describeLiveWhen(hasSes, "SesEmailAdapter @live-comm");
-
-describeLive("SesEmailAdapter @live-comm", () => {
-  test("sends + records delivery row", async () => {
-    const adapter = new SesEmailAdapter({ apiKey, fromEmail, ... });
-    const result = await adapter.send(payload);
-    expect(result.messageId).toBeDefined();
-  });
-});
-```
-
-### 6.2 Live-comm preload extension
-
-**File:** `test/integration/preload/live-comm-preload.ts`
-After the existing `hasResend` line, add:
-```ts
-const hasSes = Boolean(process.env.SES_ACCESS_KEY_ID && process.env.SES_SECRET_ACCESS_KEY && process.env.SES_FROM_EMAIL);
-const hasPostmark = Boolean(process.env.POSTMARK_SERVER_TOKEN && process.env.POSTMARK_FROM_EMAIL);
-const hasMailgun = Boolean(process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN && process.env.MAILGUN_FROM_EMAIL);
-const hasSmtp = Boolean(process.env.SMTP_HOST && process.env.SMTP_FROM_EMAIL);
-
-if (!hasResend && !hasSes && !hasPostmark && !hasMailgun && !hasSmtp && !hasTwilio && !hasFirebase) {
-  throw new Error("test:live-comm requires at least one provider key triple in .env.test: RESEND_*, SES_*, POSTMARK_*, MAILGUN_*, SMTP_*, TWILIO_*, and/or FIREBASE_*");
-}
-```
-
-### 6.3 `.env.test` template — copy this to set up live tests
-
-Add these to your `.env.test` once you have credentials for each provider you want to test live:
-
-```bash
-# ============ Email Integration Tests ============
-# Only uncomment providers you're actively testing live.
-# Missing providers skip their tests cleanly via describeLiveWhen gate.
-
-# ---- Resend (already set up) ----
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=re_your_real_key
-RESEND_FROM_EMAIL=onboarding@resend.dev
-RESEND_TEST_TO_EMAIL=you@gmail.com   # for trial accounts that can only send to owner
-
-# ---- Amazon SES v2 ----
-# Requires AWS account + verified domain + IAM user with ses:SendEmail permission
-# EMAIL_PROVIDER=ses
-# SES_REGION=us-east-1
-# SES_ACCESS_KEY_ID=AKIAXXXXXXXX
-# SES_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-# SES_FROM_EMAIL=noreply@yourdomain.com
-# SES_CONFIGURATION_SET=siraj-prod   # only if you set up config set + SNS webhook
-
-# ---- Postmark ----
-# Sign up at https://postmarkapp.com — trial works without DNS verification
-# EMAIL_PROVIDER=postmark
-# POSTMARK_SERVER_TOKEN=deadbeef-1234567890abcdef12345678
-# POSTMARK_FROM_EMAIL=noreply@yourdomain.com
-# POSTMARK_MESSAGE_STREAM=outbound
-
-# ---- Mailgun ----
-# Sign up at https://mailgun.com — sandbox domain works for testing to authorized recipients
-# EMAIL_PROVIDER=mailgun
-# MAILGUN_API_KEY=key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-# MAILGUN_DOMAIN=sandbox123abc.mailgun.org   # sandbox for tests
-# MAILGUN_FROM_EMAIL=postmaster@sandbox123abc.mailgun.org
-# MAILGUN_HOST=api.mailgun.net
-
-# ---- SMTP ----
-# For live SMTP tests, use Ethereal (free fake SMTP server) — generate creds:
-#   bun -e "import nodemailer from 'nodemailer'; nodemailer.createTestAccount().then(a => console.log(a))"
-# EMAIL_PROVIDER=smtp
-# SMTP_HOST=smtp.ethereal.email
-# SMTP_PORT=587
-# SMTP_USERNAME=your.ethereal.user@ethereal.email
-# SMTP_PASSWORD=your.ethereal.password
-# SMTP_FROM_EMAIL=your.ethereal.user@ethereal.email
-# SMTP_SECURE=false
-
-# ============ Webhook tests (Phase 3, optional) ============
-# Generate random secrets: openssl rand -hex 32
-# SES_WEBHOOK_SECRET=
-# POSTMARK_WEBHOOK_SECRET=
-
-# ============ Feature flag (Phase 3) ============
-EMAIL_TEMPLATES_ENABLED=false   # MUST default to false; flip to "true" after Phase 3 cutover
-```
-
-### 6.4 Running live integration tests
-
-After populating `.env.test` with at least one provider:
-```bash
-bun run test:live-comm
-```
-The preload asserts **at least one** provider is set; missing providers are silently skipped.
-
-To run **all** provider tests including the new ones:
-```bash
-bun run test:integration
-```
-
----
-
-## 7. Repo edits checklist (per provider you wire up)
+## 6. Repo edits per provider (per provider you wire up)
 
 For each new key, you need these 4 edits:
 
-### 7.1 `environment.d.ts` (TypeScript ambient types)
+### 6.1 `environment.d.ts` (TypeScript ambient types)
 Add each new key as an optional interface field under `// Email Configuration` (around line 56). Example for SES:
 ```ts
 declare global {
@@ -451,7 +327,7 @@ declare global {
 }
 ```
 
-### 7.2 `backend/lib/env-config-keys.ts` (DB-override registry)
+### 6.2 `backend/lib/env-config-keys.ts` (DB-override registry)
 Add a descriptor per new key. Pattern (for SES):
 ```ts
 {
@@ -477,9 +353,9 @@ Add a descriptor per new key. Pattern (for SES):
   }
 },
 ```
-Use `excludeFromDb: true` for **boot-critical** secrets you never want editable via Settings UI. Plan recommendation: follow the existing Resend pattern (keep secrets DB-overridable for live config changes) unless security review says otherwise.
+Use `excludeFromDb: true` for **boot-critical** secrets you never want editable via Settings UI. Recommendation: follow the existing Resend pattern (keep secrets DB-overridable for live config changes) unless security review says otherwise.
 
-### 7.3 `backend/lib/env.ts` (runtime config builder)
+### 6.3 `backend/lib/env.ts` (runtime config builder)
 Add `process.env.XXX` to `buildEnvironmentConfig()`. Pattern:
 ```ts
 sesRegion: process.env.SES_REGION,
@@ -491,12 +367,12 @@ sesConfigurationSet: process.env.SES_CONFIGURATION_SET,
 ```
 Also add **secrets** (API keys + tokens + passwords) to the `validateNoPlaceholderSecrets()` array (lines 261–274) so a `<placeholder>` stays a placeholder in production.
 
-### 7.4 `.env.example` (committed documentation)
+### 6.4 `.env.example` (committed documentation)
 Add a sub-block per provider (mirroring the existing `# Resend API Key (get from ...)` block).
 
 ---
 
-## 8. Vercel deployment env setup
+## 7. Vercel deployment env setup
 
 For Vercel production deployment, set these via the Vercel dashboard or CLI:
 ```bash
@@ -507,7 +383,7 @@ NOTE: In Vercel, env vars are set by "Environment" scope: Production, Preview, D
 # — At least ONE provider's credentials (Resend is the simplest to start):
 vercel env add RESEND_API_KEY production
 vercel env add RESEND_FROM_EMAIL production
-# — Feature flag (V5-2 CRITICAL — must be "false" string until Phase 3)
+# — Feature flag (V5-2 CRITICAL — must be "false" string until production launch)
 vercel env add EMAIL_TEMPLATES_ENABLED production
 
 # Provider-specific (only when you pick a different EMAIL_PROVIDER):
@@ -516,7 +392,7 @@ vercel env add SES_SECRET_ACCESS_KEY production
 vercel env add SES_REGION production
 vercel env add SES_FROM_EMAIL production
 
-# Webhook secrets (Phase 3):
+# Webhook secrets (production launch):
 vercel env add POSTMARK_WEBHOOK_SECRET production
 vercel env add SES_WEBHOOK_SECRET production
 ```
@@ -528,9 +404,9 @@ vercel env add SES_WEBHOOK_SECRET production
 
 ---
 
-## 9. Local development trial-rank (easiest to hardest)
+## 8. Local development trial-rank (easiest to hardest)
 
-For FAST local testing without DNS work, this is the recommended order:
+For FAST local setup without DNS work, this is the recommended order:
 
 1. **SMTP + Ethereal** — zero signup. Generate creds in 2 seconds with the one-liner in §3.5.
 2. **Postmark trial** — 100 emails free, 30-day trial. Sandbox server works without DNS.
@@ -547,7 +423,7 @@ For **production launch**, the rank flips:
 
 ---
 
-## 10. Final verification — how to know your env is set up correctly
+## 9. Final verification — how to know your env is set up correctly
 
 After wiring all env vars, run this one-liner to sanity-check that everything resolves:
 
@@ -571,41 +447,38 @@ for (const k of keys) {
 "
 ```
 
-If you see a `✓` next to a key you set, you're good. If you see `— unset`, that provider will silently skip during live tests (which is fine — the gate is "at least one provider").
+If you see a `✓` next to a key you set, you're good. If you see a `— unset`, that provider is not yet wired up.
 
 ---
 
-## 11. Recommended phased rollout (do less first)
+## 10. Recommended phased rollout (do less first)
 
-You do NOT need all 5 providers set up at start. The plan is designed for incremental provider rollout.
+You do NOT need all 5 providers set up at start. The design is designed for incremental provider rollout.
 
-**Phase 1 (start here — minimum to develop the plan):**
+**Start here (minimum to develop the design):**
 - Resend (existing — no work needed)
 - `EMAIL_TEMPLATES_ENABLED=false` (add this as a new env var)
 
-**Phase 2 (test the other adapters in dev):**
+**Next (try the other adapters in dev):**
 - Pick **one** of: Postmark (easiest) OR SMTP+Ethereal (free + instant)
-- Set those env vars in `.env` and `.env.test`
+- Set those env vars in `.env`
 
-**Phase 3 (production launch):**
+**Production launch:**
 - Flip `EMAIL_TEMPLATES_ENABLED=true`
 - Whichever production provider you picked isn't enough: add SES (cheapest at volume) or Postmark (best DX)
 - Set webhook secrets once you wire bounce/complaint handling
 
-This keeps your cognitive load manageable. Each phase unlocks new tests + capabilities but doesn't break anything that worked before.
+This keeps your cognitive load manageable. Each phase unlocks new capabilities but doesn't break anything that worked before.
 
 ---
 
-## 12. Key references
+## 11. Key references
 
 - **Existing factory**: `backend/services/communication/channels/email/EmailChannelFactory.ts`
 - **Existing adapter pattern**: `backend/services/communication/channels/email/resend/ResendEmailAdapter.ts`
 - **Env resolver mechanism**: `backend/lib/env-config-resolver.ts` (DB-first / env-fallback with 5-min cache)
 - **Settings → Environment Config UI registry**: `backend/lib/env-config-keys.ts`
-- **Plan todo 21c**: `EMAIL_TEMPLATES_ENABLED` flag spec with `getBooleanEnv` mandate (V5-2 critical bug)
-- **Plan todo 20a**: bounce/complaint webhooks spec
-- **Phase 0 GO/NO-GO gate**: VERIFIED GREEN 2026-08-02 — `isomorphic-dompurify` works under Bun 1.3.14
-- **Plan v5 review**: `.ai/plans/email-templates/glm_swe/swe-review-v5.md`
-- **Node_modules research**: `.ai/plans/email-templates/reserch_node/FINAL-NODE-VERIFICATION-SUMMARY.md` + `15-newly-installed-packages-verification.md`
+- **Sanitization runtime**: VERIFIED GREEN 2026-08-02 — `isomorphic-dompurify` works under Bun 1.3.14
+- **Node_modules research**: `.ai/draft_plans/email-templates/reserch_node/FINAL-NODE-VERIFICATION-SUMMARY.md` + `15-newly-installed-packages-verification.md`
 
 For dns/dkim/spf issues with any provider, the canonical tool is https://mxtoolbox.com/dkim.aspx — paste your domain and see what each provider's DNS setup looks like.

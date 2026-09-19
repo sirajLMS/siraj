@@ -662,7 +662,10 @@ import {
 
 // ─── Certificate enums ──────────────────────────────────────
 gqlSchemaBuilder.enumType(CertificateStatus, { name: "CertificateStatus" });
-gqlSchemaBuilder.enumType(TemplateStatus, { name: "TemplateStatus" });
+gqlSchemaBuilder.enumType(
+  TemplateStatus,
+  { name: "TemplateStatus" },
+);
 gqlSchemaBuilder.enumType(TemplateElementType, { name: "TemplateElementType" });
 gqlSchemaBuilder.enumType(TemplateVariableType, { name: "TemplateVariableType" });
 gqlSchemaBuilder.enumType(CertificateOrientation, { name: "CertificateOrientation" });

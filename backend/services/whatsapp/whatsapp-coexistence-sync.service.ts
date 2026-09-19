@@ -19,12 +19,17 @@ import { WhatsappAccountRepository, WhatsappSyncRequestRepository } from "@/back
 import { WhatsappSyncRequestStatus, WhatsappSyncStatus, WhatsappSyncType } from "@/backend/enum/whatsapp";
 import { isValidSyncStatus, NotFoundError } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
-import { FETCH_TIMEOUT_MS, readErrorBody, resolveGraphApiVersion } from "@/backend/lib/whatsapp-constants";
+import { FETCH_TIMEOUT_MS, resolveGraphApiVersion } from "@/backend/lib/whatsapp-constants";
 import { GraphApiError } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import {
   buildSmbAppDataRequest,
   parseSmbAppDataResponse,
 } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests";
+import {
+  noFollowRedirectInit,
+  readJsonWithByteBudget,
+  readResponseBodyWithByteBudget,
+} from "@/backend/services/shared/outbound-fetch-guard";
 import type {
   DBTransaction,
   RequestSmbAppDataSyncType,
@@ -105,11 +110,15 @@ async function postSmbAppDataSync(
     { accessToken, apiVersion },
     { phoneNumberId, syncType: SYNC_TYPE_TO_WIRE[syncType] }
   );
-  const response = await fetch(url, { ...init, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+  const response = await fetch(url, {
+    ...init,
+    ...noFollowRedirectInit(),
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
   if (!response.ok) {
-    throw new GraphApiError(response.status, await readErrorBody(response));
+    throw new GraphApiError(response.status, await readResponseBodyWithByteBudget(response));
   }
-  const body = smbAppDataResponseSchema.parse(await response.json());
+  const body = smbAppDataResponseSchema.parse(await readJsonWithByteBudget(response));
   return parseSmbAppDataResponse(body).requestId;
 }
 

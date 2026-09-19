@@ -2,6 +2,7 @@ import { SignJWT } from "jose";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import {
+  fetchWithTimeout,
   isRecord,
   isTokenExpired,
   MeetingAdapterBase,
@@ -149,9 +150,13 @@ export class GoogleMeetAdapter extends MeetingAdapterBase {
   async disconnect(token?: { accessToken: string; refreshToken: string | null }): Promise<void> {
     if (token) {
       try {
-        await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(token.accessToken)}`, {
-          method: "POST",
-        });
+        await fetchWithTimeout(
+          `https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(token.accessToken)}`,
+          {
+            method: "POST",
+          },
+          this.providerSlug
+        );
       } catch (error) {
         logger.warn("GoogleMeetAdapter: token revocation failed", {
           message: error instanceof Error ? error.message : String(error),

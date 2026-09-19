@@ -4,6 +4,7 @@ import { db, queryDb } from "@/backend/db";
 import { isSqlite } from "@/backend/db/dialect";
 import { authRateLimits, passwordResetTokens } from "@/backend/db/schema";
 import { sanitizeIpAddress } from "@/backend/lib/ip-utils";
+import type { DBTransaction } from "@/backend/types";
 
 type RateLimitResult = { attempts: number; lockedUntil: Date | null; isLocked: boolean };
 
@@ -149,5 +150,15 @@ export namespace RateLimitRepository {
     }
     const pgDb = db as NodePgDatabase;
     await pgDb.execute(sql`SELECT cleanup_expired_security_data()`);
+  };
+
+  /**
+   * Right-to-be-forgotten scrub: delete the email-keyed security rows
+   * (auth rate-limit attempts and password-reset tokens) of the anonymized
+   * subject's pre-anonymization email. Runs inside the caller's transaction.
+   */
+  export const deleteEmailRemnants = async (email: string, tx: DBTransaction): Promise<void> => {
+    await tx.delete(authRateLimits).where(eq(authRateLimits.email, email));
+    await tx.delete(passwordResetTokens).where(eq(passwordResetTokens.email, email));
   };
 }

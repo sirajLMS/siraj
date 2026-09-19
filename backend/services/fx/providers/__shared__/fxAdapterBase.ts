@@ -1,5 +1,6 @@
 import { logger } from "@/backend/lib/logger";
 import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
+import { noFollowRedirectInit, readJsonWithByteBudget } from "@/backend/services/shared";
 import type { FxProviderFetchResult } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
@@ -127,16 +128,17 @@ export abstract class FxAdapterBase implements IFxRateProvider {
     const response = await fetch(url, {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: fetchHeaders,
+      ...noFollowRedirectInit(),
     });
 
     if (!response.ok) {
       throw new Error(`FX request failed for ${this.name}: HTTP ${response.status} ${response.statusText}`);
     }
 
-    // `response.json()` returns `any`; declare as unknown to ensure the
-    // Zod schemas inside subclasses narrow via parse / type guard (oxlint
-    // no-unsafe-type-assertion safety).
-    const parsed: unknown = await response.json();
+    // Bounded read + parse: a hostile or misbehaving provider must not be able
+    // to exhaust memory via an oversized body. `unknown` narrows via the Zod
+    // schemas inside subclasses (oxlint no-unsafe-type-assertion safety).
+    const parsed: unknown = await readJsonWithByteBudget(response);
 
     this.validateResponse(parsed);
 

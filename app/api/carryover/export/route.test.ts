@@ -84,6 +84,24 @@ const getReportMock = mock(
   ): Promise<CarryoverPage> => buildCarryoverPage([buildCarryoverRow()])
 );
 
+const checkRateLimitMock = mock(async () => ({
+  success: true,
+  limit: 10,
+  remaining: 9,
+  reset: Date.now() + 600_000,
+}));
+
+await mock.module("@/backend/lib/ratelimit", () => ({
+  checkRateLimit: checkRateLimitMock,
+  exportRateLimiter: {},
+  storageUploadRateLimiter: {},
+  apiRateLimiter: {},
+  graphqlRateLimiter: {},
+  authRateLimiter: {},
+  clientLogsRateLimiter: {},
+  getClientIdentifier: (request: Request) => request.headers.get("x-forwarded-for") ?? "test-ip",
+}));
+
 await mock.module("@/backend/lib", () => ({
   ForbiddenError,
   ValidationError,
@@ -164,6 +182,7 @@ beforeEach(() => {
   getServerUserContextMock.mockClear();
   requirePermissionMock.mockClear();
   getReportMock.mockClear();
+  checkRateLimitMock.mockClear();
 });
 
 // ---------------------------------------------------------------------------
@@ -205,6 +224,17 @@ describe("GET /api/carryover/export", () => {
       expect(requirePermissionMock).toHaveBeenCalledTimes(1);
       expect(requirePermissionMock.mock.calls[0]?.[0]).toBe(USER_ID);
       expect(requirePermissionMock.mock.calls[0]?.[1]).toBe(AppPermission.ACCOUNTING_CARRYOVER_VIEW);
+      expect(getReportMock).toHaveBeenCalledTimes(0);
+    });
+
+    test("returns 429 and never queries the report when the export rate limit is exceeded", async () => {
+      checkRateLimitMock.mockResolvedValueOnce({ success: false, limit: 10, remaining: 0, reset: Date.now() + 60_000 });
+
+      const response = await callExport();
+
+      expect(response.status).toBe(429);
+      expect(await readErrorBody(response)).toBe("Too many requests. Please try again later.");
+      expect(requirePermissionMock).toHaveBeenCalledTimes(0);
       expect(getReportMock).toHaveBeenCalledTimes(0);
     });
   });

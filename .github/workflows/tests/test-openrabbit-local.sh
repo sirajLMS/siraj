@@ -28,7 +28,22 @@ trap cleanup EXIT
 OPENRABBIT_DIR="/tmp/openrabbit-runner"
 if [ ! -d "$OPENRABBIT_DIR" ]; then
     echo "▶ 2. Cloning OpenRabbit repository into ${OPENRABBIT_DIR}..."
-    git clone --depth 1 https://github.com/aryanbrite/openrabbit "$OPENRABBIT_DIR" >/dev/null 2>&1
+
+    # Hard-pinned commit of aryanbrite/openrabbit for supply-chain safety
+    # (pinned on 2026-09-17, commit dated 2026-08-23). To upgrade, update this
+    # SHA after reviewing the upstream diff. Set OPENRABBIT_ALLOW_UNPINNED=1
+    # to bypass explicitly (local debugging only).
+    OPENRABBIT_SHA="a05dc7e11748a93a3518553c3de82a98eba9df0f"
+    if [ "${OPENRABBIT_ALLOW_UNPINNED:-0}" != "1" ]; then
+        echo "   Pinned to commit ${OPENRABBIT_SHA} (pinned 2026-09-17)"
+        git clone --depth 1 https://github.com/aryanbrite/openrabbit "$OPENRABBIT_DIR" >/dev/null 2>&1
+        git -C "$OPENRABBIT_DIR" fetch --depth 1 origin "$OPENRABBIT_SHA" >/dev/null 2>&1
+        git -C "$OPENRABBIT_DIR" checkout --detach "$OPENRABBIT_SHA" >/dev/null 2>&1
+    else
+        echo "   ⚠️ Warning: OPENRABBIT_ALLOW_UNPINNED=1 set — cloning at floating HEAD (unpinned)."
+        git clone --depth 1 https://github.com/aryanbrite/openrabbit "$OPENRABBIT_DIR" >/dev/null 2>&1
+    fi
+
     cd "$OPENRABBIT_DIR"
     echo "▶ Installing dependencies and building OpenRabbit..."
     npm install >/dev/null 2>&1

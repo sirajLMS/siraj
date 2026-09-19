@@ -4,7 +4,7 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { DBTransaction, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
@@ -24,7 +24,7 @@ async function createTestUser(tx: DBTransaction, name: string, emailPrefix: stri
     .values({
       name,
       email: `${emailPrefix}-${randomUUID()}@example.com`,
-      password: `TestPass-${randomUUID().slice(0, 8)}!`,
+      password: generateTestPassword(),
       createdAt: now,
       updatedAt: now,
     })
@@ -118,7 +118,6 @@ async function createTestClassInstance(args: {
       scheduledEndAt: typeof end === "string" ? new Date(end) : end,
       durationMinutes: 60,
       classType: "REGULAR",
-      quotaDeducted: false,
       idempotencyKey: randomUUID(),
     },
     tx

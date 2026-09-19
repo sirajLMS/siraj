@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@apollo/client/react";
 import Autocomplete, { type AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -11,7 +10,6 @@ import type {
   QuotaAutocompleteOption,
   QuotaAutocompleteSlotProps,
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
-import { studentOpenQuotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useRouter } from "@/shared/i18n/navigation";
 
 function formatValidUntil(dateStr: string): string {
@@ -23,6 +21,12 @@ function formatValidUntil(dateStr: string): string {
   }
 }
 
+export type QuotaAutocompleteProps = QuotaAutocompleteSlotProps & {
+  /** Open-quota options supplied by the caller (e.g. {@link QuotaAutocompleteContainer}). */
+  readonly options: readonly QuotaAutocompleteOption[];
+  readonly loading?: boolean;
+};
+
 export function QuotaAutocomplete({
   studentId,
   value,
@@ -33,28 +37,10 @@ export function QuotaAutocomplete({
   noOptionsText,
   noOptionsCta,
   optionLabel,
-}: Readonly<QuotaAutocompleteSlotProps>) {
+  options,
+  loading = false,
+}: Readonly<QuotaAutocompleteProps>) {
   const router = useRouter();
-
-  const { data, loading } = useQuery(studentOpenQuotasQueryDocument, {
-    variables: { studentId },
-    skip: !studentId,
-  });
-
-  const options = useMemo<readonly QuotaAutocompleteOption[]>(() => {
-    if (!data?.studentOpenQuotas) return [];
-    return data.studentOpenQuotas
-      .map(quota => {
-        if (!quota?.id) return null;
-        return {
-          id: quota.id,
-          name: quota.name ?? "",
-          remaining: quota.remaining ?? 0,
-          validUntil: quota.validUntil ?? "",
-        } satisfies QuotaAutocompleteOption;
-      })
-      .filter((opt): opt is QuotaAutocompleteOption => opt !== null);
-  }, [data]);
 
   const selectedOption = useMemo<QuotaAutocompleteOption | null>(() => {
     if (!value) return null;

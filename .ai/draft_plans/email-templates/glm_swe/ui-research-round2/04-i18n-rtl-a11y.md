@@ -2,7 +2,7 @@
 
 ## Summary
 
-**Overall Assessment**: The v6 plan is exceptionally detailed and production-ready for the structural/UI/UX layer, but contains **critical i18n completeness gaps** (the `common` namespace does NOT contain `confirm`/`delete`/`close` as claimed), **missing RTL coverage** for the editor and merge-tag picker, and **significant a11y depth gaps** beyond the §J checklist — particularly focus management, keyboard shortcut conflict matrix, aria-labels on icon buttons, landmark roles, and prefers-contrast coverage. The plan needs targeted v7 edits before implementation begins.
+**Overall Assessment**: The v6 design is exceptionally detailed and production-ready for the structural/UI/UX layer, but contains **critical i18n completeness gaps** (the `common` namespace does NOT contain `confirm`/`delete`/`close` as claimed), **missing RTL coverage** for the editor and merge-tag picker, and **significant a11y depth gaps** beyond the §J checklist — particularly focus management, keyboard shortcut conflict matrix, aria-labels on icon buttons, landmark roles, and prefers-contrast coverage. The design needs targeted v7 edits before implementation begins.
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### Missing keys (every user-facing string in §A-O without a catalogue entry)
 
-| Plan Location | User-Facing String | i18n Key Needed | Present in Catalogue? |
+| Design Location | User-Facing String | i18n Key Needed | Present in Catalogue? |
 |---------------|-------------------|-----------------|----------------------|
 | §A Line 833 | "Email Templates / {template.displayName}" | `dashboard.emailTemplates.pageTitle` (breadcrumbs) | ✅ `pageTitle` + `pageSubtitle` exist, but **no breadcrumb-specific keys** |
 | §A Line 834 | "back" (breadcrumb back link) | `common.back` or `dashboard.emailTemplates.breadcrumbBack` | ❌ **MISSING** |
@@ -53,7 +53,6 @@
 | §H Line 994 | Form helper text on error | Uses `FormHelperText` with validation message | Requires per-field error keys — **MISSING** |
 | §I Line 1002 | Status colors (no text) | N/A | N/A |
 | §J Line 1007 | Generic aria-labels on interactive elements | `common.cancel`, `common.save` (only 2 exist) | ⚠️ **INCOMPLETE** |
-| §K Line 1039 | RTL Storybook variant | No i18n key | N/A |
 | §N Line 1082 | StatusBadge labels | `status.draft`, `status.published`, `status.archived` | ✅ Present |
 | §O Line 1089 | Feature disabled tooltip | `featureDisabledTooltip` | ✅ Present |
 | §O Line 1090 | Disabled action tooltip | `featureDisabledTooltip` (reuse) | ✅ Present |
@@ -79,7 +78,7 @@ The catalogue correctly uses the `(count: number) => string` pattern for:
 - `column.allowedEditorGroups` — no pluralization needed
 - `emptyState` — no count
 
-**Gap**: `toast.rateLimited(limit: number)` receives a number but returns a bare string. It **should** be pluralized: `(limit: number) => string` where the function handles singular/plural. Currently the plan shows it as a function but no pluralization logic is specified.
+**Gap**: `toast.rateLimited(limit: number)` receives a number but returns a bare string. It **should** be pluralized: `(limit: number) => string` where the function handles singular/plural. Currently the design shows it as a function but no pluralization logic is defined.
 
 ### Interpolation placeholders missing
 
@@ -97,7 +96,7 @@ The catalogue correctly uses the `(count: number) => string` pattern for:
 
 ### Namespace boundaries (common vs dashboard.emailTemplates)
 
-**CRITICAL FINDING**: The plan §B Line 1174 states:
+**CRITICAL FINDING**: The design §B Line 1174 states:
 > **Misc reusable** — `loading`, `cancel`, `save`, `confirm`, `delete`, `close` — **reuse `common` namespace** (`shared/locale/en/common/index.ts:29-33`). DO NOT duplicate these in `dashboard.emailTemplates`.
 
 **This is INCORRECT**. The actual `common` namespace only contains:
@@ -117,7 +116,7 @@ Every existing dashboard domain (billing, permissions, classes, etc.) defines it
 
 ### Section-specific namespace references
 
-The plan correctly uses `dashboard.emailTemplates` prefix for most keys. However:
+The design correctly uses `dashboard.emailTemplates` prefix for most keys. However:
 - §B Line 1134: `dashboard.emailTemplates.navLabel` → should be in `DashboardNavigationLabels` in `core/nav.ts` (correctly noted)
 - §C Line 877: search placeholder → `dashboard.emailTemplates.filter.searchPlaceholder` (correct)
 - §D Line 909: subject help text → `dashboard.emailTemplates.helpText.defaultSubject` (correct)
@@ -138,7 +137,7 @@ All section references appear correct **except** the missing keys identified abo
 
 ### Drawer/Inspector direction
 
-| Element | v6 Spec | RTL Behavior Required | Gap |
+| Element | v6 Definition | RTL Behavior Required | Gap |
 |---------|---------|----------------------|-----|
 | Inspector panel (desktop) | Right-docked fixed 360px | Must become **left-docked** in RTL | **NOT MENTIONED** |
 | Inspector drawer (mobile) | Bottom-anchored | Bottom-anchored is fine (vertical) | OK |
@@ -152,7 +151,7 @@ The repo has `rtlFlipIconSx` helper (`frontend/common/utils/rtlFlipIconSx.ts`) t
 
 ### Toast position
 
-| Element | v6 Spec | RTL Behavior Required | Gap |
+| Element | v6 Definition | RTL Behavior Required | Gap |
 |---------|---------|----------------------|-----|
 | `@toolpad/core/useNotifications` Snackbar | Not mentioned | MUI `Snackbar` respects `anchorOrigin` — default is `vertical: "top", horizontal: "right"`. In RTL, should be `horizontal: "left"`. **No auto-flip in MUI Snackbar.** | **MISSING — must configure per locale** |
 
@@ -173,24 +172,24 @@ The repo has `rtlFlipIconSx` helper (`frontend/common/utils/rtlFlipIconSx.ts`) t
 
 ### Focus management gap list
 
-| Scenario | Current v6 Spec | Required Behavior | Gap |
+| Scenario | Current v6 Definition | Required Behavior | Gap |
 |----------|----------------|-------------------|-----|
-| Editor page loads | Not specified | Focus first focusable element in editor viewport (or Save Draft button in Inspector) | **MISSING** |
-| Inspector drawer opens (mobile) | Not specified | Focus first focusable element in drawer (Scope autocomplete) | **MISSING** |
-| History drawer opens | Not specified | Focus close button or first version row | **MISSING** |
-| Send Test Dialog opens | Not specified | Focus "To:" email input | **MISSING** |
-| Publish confirmation dialog opens | Not specified | Focus "Cancel" button (safe default) | **MISSING** |
-| Archive/Restore confirmation dialog opens | Not specified | Focus "Cancel" button | **MISSING** |
-| Unsaved changes dialog (in-app nav) | Not specified | Focus "Discard" or "Cancel" | **MISSING** |
-| Tab switch (Design/Preview/Code) | Not specified | Focus tab panel or first focusable in new tab | **MISSING** |
-| Toast appears | Not specified | **Do NOT steal focus** — MUI Snackbar default is correct | ✅ OK if using useNotifications |
-| After Save Draft success | Not specified | Return focus to editor viewport (or keep in Inspector) | **MISSING** |
-| After Publish success | Not specified | Return focus to editor viewport | **MISSING** |
-| After Send Test success + dialog close | Not specified | Return focus to Send Test button | **MISSING** |
+| Editor page loads | Not defined | Focus first focusable element in editor viewport (or Save Draft button in Inspector) | **MISSING** |
+| Inspector drawer opens (mobile) | Not defined | Focus first focusable element in drawer (Scope autocomplete) | **MISSING** |
+| History drawer opens | Not defined | Focus close button or first version row | **MISSING** |
+| Send Test Dialog opens | Not defined | Focus "To:" email input | **MISSING** |
+| Publish confirmation dialog opens | Not defined | Focus "Cancel" button (safe default) | **MISSING** |
+| Archive/Restore confirmation dialog opens | Not defined | Focus "Cancel" button | **MISSING** |
+| Unsaved changes dialog (in-app nav) | Not defined | Focus "Discard" or "Cancel" | **MISSING** |
+| Tab switch (Design/Preview/Code) | Not defined | Focus tab panel or first focusable in new tab | **MISSING** |
+| Toast appears | Not defined | **Do NOT steal focus** — MUI Snackbar default is correct | ✅ OK if using useNotifications |
+| After Save Draft success | Not defined | Return focus to editor viewport (or keep in Inspector) | **MISSING** |
+| After Publish success | Not defined | Return focus to editor viewport | **MISSING** |
+| After Send Test success + dialog close | Not defined | Return focus to Send Test button | **MISSING** |
 
 ### Screen-reader announcement gap list
 
-| Event | v6 Spec | Required Announcement | Gap |
+| Event | v6 Definition | Required Announcement | Gap |
 |-------|---------|----------------------|-----|
 | Save Draft succeeds | Toast via `useNotifications` | `aria-live="polite"` — ✅ MUI Snackbar default | ✅ Covered |
 | Publish succeeds | Toast + SuccessCheckMark | `aria-live="polite"` — ✅ | ✅ Covered |
@@ -199,12 +198,12 @@ The repo has `rtlFlipIconSx` helper (`frontend/common/utils/rtlFlipIconSx.ts`) t
 | Validation error on submit | `FormHelperText error` + red border | **Must also announce** — MUI TextField does NOT auto-announce helper text | **MISSING — needs `aria-live="assertive"` toast or `aria-describedby`** |
 | Mutation error (permission, network) | `FormErrorSnackbar` | `aria-live="assertive"` — MUI Snackbar default for `severity="error"` | ✅ Likely covered |
 | Rate limited (Send Test) | Inline error in dialog | **Not announced** — needs `aria-live="assertive"` region | **MISSING** |
-| Filter applied (list updates) | Not specified | Should announce "Results filtered, X items shown" | **MISSING** |
-| Sort changed | Not specified | Should announce sort direction | **MISSING** |
+| Filter applied (list updates) | Not defined | Should announce "Results filtered, X items shown" | **MISSING** |
+| Sort changed | Not defined | Should announce sort direction | **MISSING** |
 
 ### aria-label gap list (icon-only buttons)
 
-| Button Location | Icon | Required aria-label (i18n key) | v6 Spec | Gap |
+| Button Location | Icon | Required aria-label (i18n key) | v6 Definition | Gap |
 |----------------|------|-------------------------------|---------|-----|
 | List page: back breadcrumb link | `ArrowBack` | `common.back` or `dashboard.emailTemplates.breadcrumbBack` | ❌ Not mentioned | **MISSING** |
 | List page: search input adornment | `SearchOutlined` | `dashboard.emailTemplates.filter.searchPlaceholder` (placeholder doubles as label) | ✅ Implicit | OK |
@@ -248,15 +247,15 @@ The repo has `rtlFlipIconSx` helper (`frontend/common/utils/rtlFlipIconSx.ts`) t
 
 ### Landmark roles
 
-| Page Area | Semantic Element | Current v6 Spec | Required | Gap |
+| Page Area | Semantic Element | Current v6 Definition | Required | Gap |
 |-----------|------------------|-----------------|----------|-----|
-| List page main content | `<main>` | Not specified | Yes — wrap DataGrid | **MISSING** |
+| List page main content | `<main>` | Not defined | Yes — wrap DataGrid | **MISSING** |
 | List page header/navigation | `<header>` / `<nav>` | `PageHeader` component | `<nav>` for breadcrumbs | **MISSING** |
-| Editor page main content | `<main>` | Not specified | Yes — wrap editor viewport | **MISSING** |
+| Editor page main content | `<main>` | Not defined | Yes — wrap editor viewport | **MISSING** |
 | Inspector panel (desktop) | `<aside role="complementary">` | `SectionPanel` in CSS Grid | `role="complementary"` or `<aside>` | **MISSING** |
 | History drawer | `<aside role="complementary">` | `<Drawer>` | `role="complementary"` on Drawer | **MISSING** |
 | Send Test Dialog | `role="dialog"` | MUI `<Dialog>` | MUI provides | ✅ OK |
-| Preview tab iframe | `<iframe title="...">` | `title={t("previewTab")}` | ✅ Specified | OK |
+| Preview tab iframe | `<iframe title="...">` | `title={t("previewTab")}` | ✅ Defined | OK |
 
 The repo's `PageContainer` / `PageHeader` components may already include landmarks — need to verify. v6 does not explicitly require them.
 
@@ -264,7 +263,7 @@ The repo's `PageContainer` / `PageHeader` components may already include landmar
 
 | Element | Colors (per §I) | WCAG AA Requirement | Risk |
 |---------|----------------|--------------------|------|
-| Inspector panel header | Not specified (may be subtle on dark) | 4.5:1 text / 3:1 large | **HIGH — must verify** |
+| Inspector panel header | Not defined (may be subtle on dark) | 4.5:1 text / 3:1 large | **HIGH — must verify** |
 | StatusBadge Draft | `warning.main` on `background.paper` | 4.5:1 | Need to verify MUI warning contrast |
 | StatusBadge Published | `success.main` on `background.paper` | 4.5:1 | Need to verify MUI success contrast |
 | StatusBadge Archived | `action.disabled` / `text.disabled` on `background.paper` | 4.5:1 | `action.disabled` is `rgba(0,0,0,0.26)` — **LIKELY FAILS** on light mode |
@@ -289,7 +288,7 @@ The `THEME_PALETTE.md` uses MUI's palette system which should adapt, but v6 does
 
 ### Form field label-input pairing
 
-| Field | Component | Pairing Method | v6 Spec | Gap |
+| Field | Component | Pairing Method | v6 Definition | Gap |
 |-------|-----------|----------------|---------|-----|
 | displayName | `TextField` / `OutlinedInput` | MUI `FormControl` + `InputLabel` + `htmlFor`/`id` | Not explicitly stated | **MISSING — must mandate** |
 | slug | `TextField` | Same | Not explicit | **MISSING** |
@@ -308,7 +307,7 @@ The `THEME_PALETTE.md` uses MUI's palette system which should adapt, but v6 does
 
 ### Error announcement
 
-| Scenario | v6 Spec | Mechanism | Gap |
+| Scenario | v6 Definition | Mechanism | Gap |
 |----------|---------|-----------|-----|
 | Validation error on field | `FormHelperText error` + red border | Visual only | **MISSING aria-live** |
 | Form submit with errors | Focus first errored field | `focus()` in code | ✅ Documented |
@@ -317,7 +316,7 @@ The `THEME_PALETTE.md` uses MUI's palette system which should adapt, but v6 does
 
 ### Skip-to-content link
 
-| Page | v6 Spec | Required | Gap |
+| Page | v6 Definition | Required | Gap |
 |------|---------|----------|-----|
 | List page (`/email-templates`) | Not mentioned | "Skip to template list" link at top | **MISSING** |
 | Editor page (`/email-templates/[id]`) | Not mentioned | "Skip to editor" link at top | **MISSING** |
@@ -328,7 +327,7 @@ The repo may have a global skip link in `app/[locale]/layout.tsx` — need to ve
 
 ## Critical Gaps
 
-1. **common namespace missing `confirm`, `delete`, `close`** — Plan claims these exist in `common`; they do NOT. Every domain defines its own. Must add to `dashboard.emailTemplates` catalogue.
+1. **common namespace missing `confirm`, `delete`, `close`** — Design claims these exist in `common`; they do NOT. Every domain defines its own. Must add to `dashboard.emailTemplates` catalogue.
 
 2. **Missing dialog body interpolation keys**: `publishConfirmBody(scope, locale)`, `archiveConfirmBody(scope, locale)`, `restoreConfirmBody(version)`. Only titles exist.
 
@@ -340,11 +339,11 @@ The repo may have a global skip link in `app/[locale]/layout.tsx` — need to ve
 
 6. **Archived status color contrast** — `action.disabled` / `text.disabled` fails WCAG AA (2.3:1 on light). Must use different token.
 
-7. **No `prefers-contrast: more` handling** — Plan covers reduced-motion but not high-contrast mode.
+7. **No `prefers-contrast: more` handling** — Design covers reduced-motion but not high-contrast mode.
 
 8. **No skip-to-content links** on list/editor pages.
 
-9. **No focus management specification** for any dialog/drawer/tab transition.
+9. **No focus management definition** for any dialog/drawer/tab transition.
 
 10. **Keyboard shortcut `Ctrl+S` conflict** — Must verify `preventDefault()` works inside TipTap editor (which may capture keystrokes).
 
@@ -360,13 +359,13 @@ The repo may have a global skip link in `app/[locale]/layout.tsx` — need to ve
 
 4. **Merge-tag picker RTL behavior** — Autocomplete dropdown position, icon flip.
 
-5. **Inspector/History drawer RTL docking** — Must specify left-docked in RTL.
+5. **Inspector/History drawer RTL docking** — Must define left-docked in RTL.
 
 6. **Breadcrumb back link label** — `common.back` or domain key needed.
 
 7. **Send Test "Send to my own email" (Phase 2)** — Missing key.
 
-8. **`toast.rateLimited` pluralization** — Function receives number but no plural logic specified.
+8. **`toast.rateLimited` pluralization** — Function receives number but no plural logic defined.
 
 9. **Subject template interpolation placeholder** — `helpText.defaultSubject` should document the `{{fieldName}}` syntax.
 
@@ -396,13 +395,10 @@ The repo may have a global skip link in `app/[locale]/layout.tsx` — need to ve
 
 1. **`prefers-contrast: less` handling** — Rarely needed.
 
-2. **Windows High Contrast (`forced-colors`)** testing — Ensure no hardcoded colors break.
+2. **Windows High Contrast (`forced-colors`)** support — Ensure no hardcoded colors break.
 
 3. **Global skip link** — May already exist in layout; verify.
 
-4. **Storybook a11y addon** — Plan mentions `@storybook/addon-a11y` is registered (todo) — verify it's actually in `.storybook/main.ts`.
-
-5. **E2E a11y tests** — Phase 2 may add `@axe-core/playwright`; not in v6.
 
 ---
 
@@ -411,23 +407,23 @@ The repo may have a global skip link in `app/[locale]/layout.tsx` — need to ve
 | Item | Status | Evidence |
 |------|--------|----------|
 | Compile-time TS i18n system | ✅ Verified | `shared/AGENTS.md` lines 72-251 |
-| `dashboard.emailTemplates` namespace catalogue | ✅ Complete (except gaps above) | Plan lines 1129-1187 |
-| Lockstep rule (en + ar atomic) | ✅ Documented | Plan lines 1117, 1176 |
-| `emails.errors` sub-namespace | ✅ Specified | Plan lines 1105-1116 |
+| `dashboard.emailTemplates` namespace catalogue | ✅ Complete (except gaps above) | Design lines 1129-1187 |
+| Lockstep rule (en + ar atomic) | ✅ Documented | Design lines 1117, 1176 |
+| `emails.errors` sub-namespace | ✅ Defined | Design lines 1105-1116 |
 | `common` namespace contents | ✅ Verified | `shared/locale/en/common/index.ts` — only `cancel`, `save` |
 | Domain-specific confirm/delete/close pattern | ✅ Verified | `shared/locale/en/dashboard/billing/main.ts` has `deleteInvoiceDialog.confirm`, `close` |
 | `rtlFlipIconSx` helper exists | ✅ Verified | `frontend/common/utils/rtlFlipIconSx.ts` |
 | MUI `Snackbar` `aria-live` default | ✅ Verified | MUI source — `role="alert"` for error, `role="status"` for success |
-| `usePrefersReducedMotion` hook spec | ✅ In plan | Plan lines 964-981 |
-| `ScopedCssBaseline` for editor | ✅ In plan | Plan lines 820, 927 |
-| `EmailTheming` from `/plugins` | ✅ In plan | Plan lines 823, 928 |
-| `dnd-kit` installed but unused | ✅ Verified | Plan line 955; `package.json` |
+| `usePrefersReducedMotion` hook definition | ✅ In design | Design lines 964-981 |
+| `ScopedCssBaseline` for editor | ✅ In design | Design lines 820, 927 |
+| `EmailTheming` from `/plugins` | ✅ In design | Design lines 823, 928 |
+| `dnd-kit` installed but unused | ✅ Verified | Design line 955; `package.json` |
 | `StatusBadge` extension pattern | ✅ Verified | `frontend/common/components/ui/badge/StatusBadge.tsx` |
 | `EntityFormDialogActions` pattern | ✅ Verified | `frontend/common/views/dashboard/subjects/home/components/__shared__/EntityFormDialogActions.tsx` |
 | `TagInput` component exists | ✅ Verified | `frontend/common/components/ui/input/tagInput/TagInput.tsx` |
-| `PageContainer`/`PageHeader` exist | ✅ Referenced | Plan line 844 |
+| `PageContainer`/`PageHeader` exist | ✅ Referenced | Design line 844 |
 | `useAppTranslation` usage pattern | ✅ Verified | Multiple dashboard views |
-| `useNotifications` from `@toolpad/core` | ✅ Specified | Plan line 889 |
+| `useNotifications` from `@toolpad/core` | ✅ Defined | Design line 889 |
 
 ---
 
@@ -445,12 +441,12 @@ The repo may have a global skip link in `app/[locale]/layout.tsx` — need to ve
 | Theme palette tokens | `frontend/THEME_PALETTE.md` | M3 `on<Color>` tokens, contrast rules |
 | DeleteInvoiceDialog | `frontend/common/views/dashboard/admin/billing/components/DeleteInvoiceDialog.tsx` | Uses `BaseDeleteDialog` with domain `confirm`/`close` labels |
 | `useAppTranslation` pattern | Various dashboard views | Client-side namespace loading |
-| `useNotifications` pattern | Plan line 889 | Toast with severity |
-| `usePrefersReducedMotion` | Plan lines 964-981 (NEW) | Closes production gap |
+| `useNotifications` pattern | Design line 889 | Toast with severity |
+| `usePrefersReducedMotion` | Design lines 964-981 (NEW) | Closes production gap |
 
 ---
 
-## Recommended v7 Plan Edits
+## Recommended v7 Design Edits
 
 ### 1. Fix i18n catalogue (§B lines 1129-1187)
 
@@ -591,7 +587,7 @@ Add `aria-keyshortcuts="Control+S"` to Save Draft button, `aria-keyshortcuts="Co
 - **Archived status**: Replace `action.disabled`/`text.disabled` with dedicated token meeting 4.5:1 (e.g., `neutral[600]` on light, `neutral[400]` on dark)
 - **Inspector panel header**: Verify text contrast ≥ 4.5:1 on both themes
 - **Lock icon (feature flag)**: Verify 3:1 against background
-- **All StatusBadge colors**: Test Draft (warning), Published (success), Archived (new token) against `background.paper`
+- **All StatusBadge colors**: Verify Draft (warning), Published (success), Archived (new token) against `background.paper`
 
 **S.7 prefers-contrast: more**
 ```typescript

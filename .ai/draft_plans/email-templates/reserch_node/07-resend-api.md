@@ -40,7 +40,7 @@ Verified against `node_modules/resend@6.18.1` (installed in repo) + Resend onlin
 - **There is NO `export default Resend` anywhere** in the file.
 - **VERDICT: `Resend` is a NAMED EXPORT, not a default export.**
 - The existing repo adapter already imports it correctly: `import { Resend } from "resend";` (`ResendEmailAdapter.ts:1`).
-- **PLAN CLAIM "`Resend` class default export" is INCORRECT.** Correction: `import { Resend } from "resend"` (named). A default import would fail at type-check time.
+- **`Resend` is a NAMED export, not a default export** — `import { Resend } from "resend"`. A default import would fail at type-check time.
 
 ### Constructor signature — `dist/index.d.mts:2440`
 
@@ -79,11 +79,11 @@ declare class Emails {
 
 ### No `Emails.SendParams` type in the Node.js SDK
 
-The plan/research references an `Emails.SendParams` type. **In `resend@6.18.1`'s Node.js types there is NO `SendParams` name.** `Emails` is a class (not a namespace) at `dist/index.d.mts:1788`, and `send` takes `CreateEmailOptions`.
+Some references mention an `Emails.SendParams` type. **In `resend@6.18.1`'s Node.js types there is NO `SendParams` name.** `Emails` is a class (not a namespace) at `dist/index.d.mts:1788`, and `send` takes `CreateEmailOptions`.
 
 `SendParams` is the *Python SDK's* named type (per online docs `resend.Emails.SendParams`), and the online docs' Node snippet uses a plain object literal `resend.emails.send({ from, to, subject, html })`. The `SendParams` symbol does NOT exist in the TS `.d.ts`.
 
-**Correction for the plan**: rename "`Emails.SendParams`" → "`CreateEmailOptions`" (the actual TS type the Node SDK's `send` accepts).
+Use `CreateEmailOptions` (the actual TS type the Node SDK's `send` accepts) instead of `Emails.SendParams`.
 
 ### `CreateEmailOptions` full field list — `dist/index.d.mts:592–598`
 
@@ -134,13 +134,13 @@ interface Attachment {
 ```
 
 **Attachment field names are CAMELCASE in the SDK type:**
-| Field | Plan/research claim | Actual `Attachment` (`dist/index.d.mts:605–617`) |
+| Field | Claimed | Actual `Attachment` (`dist/index.d.mts:605–617`) |
 |-------|-------|-------|
 | `filename` | `filename` | `filename?: string | false | undefined` |
 | `content` | `content: string\|Buffer` | `content?: string | Buffer` (verbatim) |
 | `content_type` (snake) | claimed snake_case | **`contentType` (camelCase)** at line 611 |
 | `content_id` (snake) | claimed snake_case | **`contentId` (camelCase)** at line 617 |
-| `inline` | plan mentions `inline` flag | **NO `inline` boolean field** on `Attachment`. Inline behaviour is implicit when `contentId` is set (per the doc comment at line 613–616 and online docs). |
+| `inline` | claimed `inline` flag | **NO `inline` boolean field** on `Attachment`. Inline behaviour is implicit when `contentId` is set (per the doc comment at line 613–616 and online docs). |
 | `path` | — | `path?: string` (line 607) — host a remote attachment by URL |
 
 > The snake_case `content_type` / `content_id` names DO appear in the SDK, but on a *different* interface — `AttachmentData` (`dist/index.d.mts:22–30`), which is the **read-side** signed-URL shape returned by `GET /emails/{id}/attachments`, not the send-side `Attachment`. The send-side `Attachment` is camelCase.
@@ -218,22 +218,22 @@ Mapping: `EmailPayload.{to,subject,html}` → `CreateEmailOptions.{to,subject,ht
 
 ## 6. Verdict
 
-**NEEDS UPDATE** — the plan's two resend claims are not quite right, but the corrections are surgical:
+**Two claims about resend are incorrect, but the corrections are surgical:**
 
 1. **`Resend` is a NAMED export, not a default export.**
    - Evidence: `dist/index.d.mts:2454` is the only `export { ... }` and contains `Resend` as a named binding; there is no `export default` anywhere in the file.
    - Existing code already does it right: `import { Resend } from "resend";` (`ResendEmailAdapter.ts:1`).
-   - **Correction for the plan**: change "`Resend` class default export" → "`Resend` class named export (`import { Resend } from 'resend'`)". New SES/Postmark/Mailgun/SMTP adapters must NOT use default imports of resend (they use their own SDKs, but if any helper re-exports resend, keep it named).
+   - Use the named export form: `import { Resend } from 'resend'`. New SES/Postmark/Mailgun/SMTP adapters must NOT use default imports of resend (they use their own SDKs, but if any helper re-exports resend, keep it named).
 
 2. **The send payload type is `CreateEmailOptions`, NOT `Emails.SendParams`.**
    - Evidence: `dist/index.d.mts:1793` `send(payload: CreateEmailOptions, options?: CreateEmailRequestOptions)`. No `SendParams` symbol exists in the Node SDK types. `Emails` is a class, not a namespace (`dist/index.d.mts:1788`).
    - `SendParams` is the **Python SDK's** type name (per the online Python code example).
-   - **Correction for the plan**: every reference to "`Emails.SendParams`" → "`CreateEmailOptions`" (Node SDK) when discussing the TS adapter layer.
+   - Use `CreateEmailOptions` (Node SDK), never `Emails.SendParams`, in the TS adapter layer.
 
 3. **Attachment field case — VERIFIED CAMELCASE on the send path.**
    - `Attachment` (`dist/index.d.mts:605–617`): `filename`, `content: string | Buffer`, `path`, **`contentType`** (camel), **`contentId`** (camel). NO `inline` boolean field — inline behaviour is implicit when `contentId` is set.
    - The snake_case `content_type` / `content_id` names belong ONLY to `AttachmentData` (`dist/index.d.mts:22–30`, the **read-side** signed-URL shape) and `EmailApiAttachment` (`dist/index.d.mts:142–147`, used by `EmailApiOptions`, which `send` does NOT accept). Do not copy those onto the send path.
-   - **Correction for the plan**: the `EmailAttachmentInput` / `AttachmentInput` type planned for `backend/types/email/email.types.ts` (`plan.md:332–342`) already uses camelCase (`contentType`, `contentId`) — this is correct and matches the resend SDK send path. The plan prose claiming "snake_case `content_type`/`content_id`" must be updated to camelCase. Map directly: `AttachmentInput → resend Attachment` is a 1:1 field rename-free mapping.
+   - An `EmailAttachmentInput` / `AttachmentInput` type for `backend/types/email/email.types.ts` should use camelCase (`contentType`, `contentId`) to match the resend SDK send path. Map directly: `AttachmentInput → resend Attachment` is a 1:1 field rename-free mapping.
 
 4. **`@react-email/render` optional peer — VERIFIED.**
    - `package.json:44–52`: listed under `peerDependencies` (`"*"`) AND under `peerDependenciesMeta` with `"optional": true`. `react-email` is NOT a peer of resend. Research file 11's claim is correct.

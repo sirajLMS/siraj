@@ -10,8 +10,10 @@ gqlSchemaBuilder.mutationField("adminResetPassword", t =>
   t.field({
     type: AdminResetPasswordResultPothosObject,
     authScopes: {
-      permission: AppPermission.USER_ADMIN_RESET_PASSWORD,
-      notImpersonating: true,
+      $all: {
+        permission: AppPermission.USER_ADMIN_RESET_PASSWORD,
+        notImpersonating: true,
+      },
     },
     args: {
       input: t.arg({ type: AdminResetPasswordInputPothosObject, required: true }),

@@ -1,11 +1,11 @@
 import { DomainError } from "@/backend/lib";
 import {
   FETCH_TIMEOUT_MS,
-  readErrorBody,
   resolveGraphApiVersion,
   WHATSAPP_CREDENTIAL_PLACEHOLDER,
 } from "@/backend/lib/whatsapp-constants";
 import { GraphApiError } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
+import { noFollowRedirectInit, readResponseBodyWithByteBudget } from "@/backend/services/shared/outbound-fetch-guard";
 import type {
   GraphApiRequestContext,
   SendTemplateMessageResponseBody,
@@ -44,13 +44,14 @@ export async function accountGraphContext(
 export async function executeGraphApiCall<TBody>(request: { url: string; init: RequestInit }): Promise<TBody> {
   const response = await fetch(request.url, {
     ...request.init,
+    ...noFollowRedirectInit(),
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!response.ok) {
-    const errorBody = await readErrorBody(response);
+    const errorBody = await readResponseBodyWithByteBudget(response);
     throw new GraphApiError(response.status, errorBody);
   }
-  const body: TBody = await response.json();
+  const body: TBody = JSON.parse(await readResponseBodyWithByteBudget(response));
   return body;
 }
 

@@ -7,7 +7,7 @@ I have all the evidence I need. Here is the complete Round 4 audit report.
 
 # §T Performance Optimization — Round 4 Validation Report
 
-Audited v8 §T (lines 1464–1542) against the actual codebase. **Findings: 4 VALID, 4 PARTIAL, 2 INVALID.** The v8 spec is broadly directionally-correct, but contains wrong file paths, a React Compiler false-assumption, an impossible AbortController claim, and an Apollo `keyArgs` / `fetchPolicy` contradiction with §Q.
+Audited v8 §T (lines 1464–1542) against the actual codebase. **Findings: 4 VALID, 4 PARTIAL, 2 INVALID.** The v8 design is broadly directionally-correct, but contains wrong file paths, a React Compiler false-assumption, an impossible AbortController claim, and an Apollo `keyArgs` / `fetchPolicy` contradiction with §Q.
 
 ## 1. Validation Summary
 
@@ -18,9 +18,9 @@ Audited v8 §T (lines 1464–1542) against the actual codebase. **Findings: 4 VA
 | T3 | Lazy-Load Heavy Deps | **PARTIAL** | 3 | `next/dynamic` wrong tool for non-component imports (Prism grammars); `react-color` 1.1M / `@dnd-kit/sortable` 404K are light — not "heavy". `@react-email/editor` is NOT a CJS-module package and has no `main`/`module`. |
 | T4 | DB Indexes for List Query | **VALID** | 2 | `pg_trgm` IS already enabled (`backend/db/migration/1-extensions.sql:3`); `emailTemplates` table does not yet exist — no conflict possible. Drizzle `index()` precedent exists. |
 | T5 | N+1 DataLoader | **VALID** | 1 | `@pothos/plugin-dataloader@4.4.5` wired (`gqlSchemaBuilder.ts:3,84`); `loadable()` in-use pattern verified at `user.pothos.ts:49-74`. Repo asks `getRevisionsByTemplateIds(ids: string[]): Map`. |
-| T6 | Bundle Analyzer Wiring | **INVALID** | 2 | Spec's `require("@next/bundle-analyzer")(...)` + `module.exports =` is wrong for this codebase — `next.config.ts` uses ESM `export default`; `@next/bundle-analyzer@16.2.12` IS **incompatible with Turbopack** (warns + silently skips). `next.config.ts:62` enables `turbopack: {}`. |
+| T6 | Bundle Analyzer Wiring | **INVALID** | 2 | Design's `require("@next/bundle-analyzer")(...)` + `module.exports =` is wrong for this codebase — `next.config.ts` uses ESM `export default`; `@next/bundle-analyzer@16.2.12` IS **incompatible with Turbopack** (warns + silently skips). `next.config.ts:62` enables `turbopack: {}`. |
 | T7 | Zustand Selector Discipline | **VALID** | 1 | Pattern confirmed verbatim at `useAdminComplaintsViewModel.ts:68-82` — per-field `useAdminComplaintsStore(state => state.X)`; no immer/persist middleware on `adminComplaintsStore.ts:34`. |
-| T8 | URL.revokeObjectURL Cleanup | **VALID** | 0 | Pattern verified at `useImageUpload.ts:167-178,181-188`; spec's example matches actual code. |
+| T8 | URL.revokeObjectURL Cleanup | **VALID** | 0 | Pattern verified at `useImageUpload.ts:167-178,181-188`; design's example matches actual code. |
 | T9 | Apollo Cache Eviction | **VALID** | 1 | `cache.evict({id:"ROOT_QUERY",fieldName}) + cache.gc()` pattern live at `useCreateManagerOnboarding.ts:35-36`; needs `typePolicies` keyArgs fix from T2 to evict properly. |
 | T10 | Render Timeout | **INVALID** | 2 | `@react-email/render render()` signature is `(node, options?: Options) => Promise<string>` — **no `AbortSignal`** in `Options`. `Promise.race` is the ONLY viable path; v8 mentions both as if both work. |
 
@@ -38,16 +38,16 @@ Audited v8 §T (lines 1464–1542) against the actual codebase. **Findings: 4 VA
 **Gaps:**
 - **G1.1** RC status is mislabeled as "verify if enabled" — it is OFF; v9 must state "RC is disabled in `next.config.ts`; enable `experimental.reactCompiler: true` OR add manual memoization — pick one."
 - **G1.2** No file paths for the components to memoize (where is `EmailTemplateRow` defined? Not in `frontend/views/` — that path doesn't exist; layout is `frontend/common/views/dashboard/…`).
-- **G1.3** Spec doesn't acknowledge React 19 RC's rule-of-thumb: with RC on, manual `useMemo`/`useCallback` are largely redundant; *but* RC still does **not** wrap components in `React.memo` — that part of the spec is correct.
+- **G1.3** Design doesn't acknowledge React 19 RC's rule-of-thumb: with RC on, manual `useMemo`/`useCallback` are largely redundant; *but* RC still does **not** wrap components in `React.memo` — that part of the design is correct.
 - **G1.4** 300ms debounce quote for TipTap commit conflicts with T2's identical 300ms quote — both use the same debounce constant; v9 should centralize as `EDITOR_COMMIT_DEBOUNCE_MS = 300`.
 
 ### T2 — Preview Debounce + Render Cache (INVALID)
 **Codebase claims checked:**
-- `use-debounce@10.1.1` ✓ installed; `useDebouncedCallback` exists with signature `useDebouncedCallback<T extends (...args:any)=>ReturnType<T>>(func: T, wait?: number, options?: Options, forceUpdate?) => DebouncedState<T>` — spec's `useDebouncedCallback(300ms)` is **shape-correct but spec should add `Options`** and confirm `flushOnExit` for the save-on-unmount case. **G2.1** Missing options/fn细节.
+- `use-debounce@10.1.1` ✓ installed; `useDebouncedCallback` exists with signature `useDebouncedCallback<T extends (...args:any)=>ReturnType<T>>(func: T, wait?: number, options?: Options, forceUpdate?) => DebouncedState<T>` — design's `useDebouncedCallback(300ms)` is **shape-correct but design should add `Options`** and confirm `flushOnExit` for the save-on-unmount case. **G2.1** Missing options/fn细节.
 - v8 cites `useAudienceAutocomplete.ts:22,53,64` as the precedent. Actual file `frontend/common/hooks/userAutocomplete/useAudienceAutocomplete.ts` does NOT use `use-debounce` — it uses raw `setTimeout`/`clearTimeout` (lines 57-62). The `debouncedSearch` keyword appears but the hook is hand-rolled, **not `useDebouncedCallback`**. **G2.2** Cited precedent does not exist as described.
 - **Critical:** "Switch preview fetchPolicy from `network-only` to `cache-first` keyed on `(id, version, isDirty)`" — Apollo `cache-first` does not "key" on `(id,version,isDirty)`; the cache key is whatever the **`keyArgs`** of the type policy lists. §Q1 (line 960) declares `EmailTemplate.keyArgs: ["id"]` only. **`version` and `isDirty` are not in `keyArgs`, so they cannot differentiate cache entries.** Worse, `isDirty` is a Zustand store value (line 1518) — it is client state, never sent in the query variables, so it can never be part of any Apollo cache key at all.
 - §Q2 table (line 992) locks `PreviewEmailTemplateQueryDocument` → `network-only`. §T2 (line 1478) overrides to `cache-first`. **These directly conflict.** **G2.3** v9 must reconcile §Q2 and §T2 — either amend §Q2 to drop `network-only` or v9 must explicitly call out "supersedes §Q2 row 3."
-- Apollo does support dynamic `fetchPolicy` per render (passing `fetchPolicy` as a prop to `useQuery`), but toggling between two policies based on dirty state implies two cache behaviors that will fight — v9 must spec the toggle mechanic (e.g. `fetchPolicy={isDirty ? 'network-only' : 'cache-first'}`) and confirm `cache-first` returns a stale snapshot when the directory entry was never fetched on a clean preview.
+- Apollo does support dynamic `fetchPolicy` per render (passing `fetchPolicy` as a prop to `useQuery`), but toggling between two policies based on dirty state implies two cache behaviors that will fight — v9 must design the toggle mechanic (e.g. `fetchPolicy={isDirty ? 'network-only' : 'cache-first'}`) and confirm `cache-first` returns a stale snapshot when the directory entry was never fetched on a clean preview.
 
 ### T3 — Lazy-Load Heavy Deps (PARTIAL)
 - v8: "`@dnd-kit/sortable` (heavy)" — actual `du`: `@dnd-kit/sortable` 404K (incl. deps), `@dnd-kit/core` 1.7M. The sortable piece is the smaller of the two — core is the heavier dep. **G3.1** Bundle claim mis-sizes the dependency.
@@ -57,7 +57,7 @@ Audited v8 §T (lines 1464–1542) against the actual codebase. **Findings: 4 VA
 - `experimental.optimizePackageImports` is currently a 5-entry MUI list at `next.config.ts:64-70`. v8's additions are sensible **but `react-email` (19M) should NOT be in optimizePackageImports** — that flag is for tree-shaking laissez-faire huge packages with named exports; `react-email` re-exports `@react-email/render`'s `render`, so adding it risks double bundling. **G3.4** Drop `react-email` from the `optimizePackageImports` list.
 
 ### T4 — DB Indexes (VALID)
-- `pg_trgm` is **already enabled** at `backend/db/migration/1-extensions.sql:3` and drizzle-mirror `backend/drizzle/20260725202527_extensions/migration.sql:3`. v8 spec says "add `pg_trgm` extension" — **already done; v9 must say "reuse the existing `pg_trgm` enabled in `1-extensions.sql`."**
+- `pg_trgm` is **already enabled** at `backend/db/migration/1-extensions.sql:3` and drizzle-mirror `backend/drizzle/20260725202527_extensions/migration.sql:3`. v8 design says "add `pg_trgm` extension" — **already done; v9 must say "reuse the existing `pg_trgm` enabled in `1-extensions.sql`."**
 - The `emailTemplates` Drizzle schema **does not exist yet** (no match for `emailTemplate*` in `backend/db/schema/`); `backend/db/schema/index.ts` has no email barrels. So proposed indexes cannot conflict with an existing partial unique index — **G4.1** v8 says "compatible with existing partial unique index" but there is no table to compare against yet; v9 should reference the unique-constraint that §N/M will introduce (presumably `(scope, locale, status=ACTIVE)` WHERE uniqueness).
 - Drizzle `index(...).on(...)` precedent is solid (`backend/db/schema/teachers/teachers.ts:33-39`). Desc index: `drizzle-orm/pg-core` supports `.on(desc(table.updatedAt))` — v9 should show this exact call form.
 - Trgm GIN index precedent exists: `idx_students_name_trgm ON students USING gist (name gist_trgm_ops)` (migration `20260725202528_square_otto_octavius/migration.sql:1331`). v9 should mirror this verbatim for emailTemplates `name` + `slug`.
@@ -65,14 +65,14 @@ Audited v8 §T (lines 1464–1542) against the actual codebase. **Findings: 4 VA
 ### T5 — N+1 DataLoader (VALID)
 - `import DataloaderPlugin from "@pothos/plugin-dataloader"` at `gqlSchemaBuilder.ts:3`, wired in `plugins[...]` at line 84. ✓
 - **`loadable()` is in active use** — `backend/graphql/pothos/users/user.pothos.ts:49-74` shows the exact API: `t.loadable({ type, load: async (ids: string[]) => ids.map(...) , resolve: parent => parent.id })`. The `load()` returns an array **aligned-to-order** (Map lookup par-`ids.map`). v9 should lift this exact pattern.
-- `loadableObjectRef` also used (`student.pothos.ts:22`, `class-category.pothos.ts:6`). No need for inline loader — both inline (`loadable`) and ref (`loadableObjectRef`) APIs are available; v8's note "no `loadable` field is shown in the plan" is still true — none in the **email-templates** sections.
+- `loadableObjectRef` also used (`student.pothos.ts:22`, `class-category.pothos.ts:6`). No need for inline loader — both inline (`loadable`) and ref (`loadableObjectRef`) APIs are available; v8's note "no `loadable` field is shown in the design" is still true — none in the **email-templates** sections.
 
 **Gaps:**
 - **G5.1** v8 says "repo method `getRevisionsByTemplateIds(ids: string[])` Map-returning" — pattern matches existing `getUserContexts(ids)` returning `Map` (used at line 51). v9 must specify: returns `Map<templateId, LastRevisionRow | null>` and aligns to the `ids.map` order so Pothos `load` can map straight across.
 - v8 does NOT specify that the `createdBy` field is `editorName`-only — the resolved scalar should be `{ editorId, editorName }` (passes through `UserPothosObject` `loadableRef` if you want a nested user); otherwise two loaders stack (template→user→role). v9 should pick: scalar `editorName: String` `loadable` (simple) OR `createdBy: UserRef` reusing existing `UserPothosObject` (relational).
 
 ### T6 — Bundle Analyzer Wiring (INVALID)
-- v8 spec snippet:
+- v8 design snippet:
   ```ts
   const withBundleAnalyzer = require("@next/bundle-analyzer")({ enabled: process.env.NEXT_BUNDLE_ANALYZER === "enabled" });
   module.exports = withBundleAnalyzer(nextConfig);
@@ -116,7 +116,7 @@ Audited v8 §T (lines 1464–1542) against the actual codebase. **Findings: 4 VA
 
 ### T10 — Render Timeout (INVALID)
 - Verified `@react-email/render` (re-exported from `react-email` per `dist/index.d.mts:32`: `export * from "@react-email/render"`) — `render` signature is `declare const render: (node: React.ReactNode, options?: Options) => Promise<string>` where `Options = { pretty?: boolean; plainText?: false } | { plainText?: true; htmlToTextOptions?; unstableTextConversion? }`. **There is NO `AbortSignal` field, no `signal`, no timeout.**
-- Therefore v8's "Add `Promise.race([render(…), timeout(5000)])`" is **correct and the only viable path**, but the v8 **spec heading mentions `AbortController`** — `(§)` spec line 1539) mentioning it as an alternative is misleading because there is no AbortSignal-bearing API to thread it through. v9 must: "Use ONLY `Promise.race`; **AbortController cannot be threaded into `react-email` `render()`** since v6 does not expose a `signal` option."
+- Therefore v8's "Add `Promise.race([render(…), timeout(5000)])`" is **correct and the only viable path**, but the v8 **design heading mentions `AbortController`** — `(§)` design line 1539) mentioning it as an alternative is misleading because there is no AbortSignal-bearing API to thread it through. v9 must: "Use ONLY `Promise.race`; **AbortController cannot be threaded into `react-email` `render()`** since v6 does not expose a `signal` option."
 - The `safeRender` wrapper §M line 1275 returns `Promise<{ html, text }>`; S5 (line 1431-1436) extends to `{ html, text, degraded, error? }`. v8 line 1540 reuses the S5 signal — **but the timeout branch must return `RenderTimeoutError` typed as an `Error` subclass** so S5's `degraded: true` + `error` shape matches. **G10.1** v9 must declare `class RenderTimeoutError extends Error { readonly timeout: true }` to be discriminable from a thrown-component `Error` from S5's try/catch. Without it, two distinct error shapes collide inside one catch arm.
 - **G10.2** A bare `Promise.race` does NOT cancel the underlying `render()` promise — React Email's render allocates DOMPurify + prettier + html-to-text which keep running after the 5s race resolves. v9 must (a) acknowledge the orphaned promise continues consuming memory/CPU until it resolves, OR (b) chose shorter render deadlines (5s is very long for an email render — typical email render is <100ms; 5000ms enables pathological hung renders). Recommend v9 tighten to 2000ms.
 
@@ -140,7 +140,7 @@ Audited v8 §T (lines 1464–1542) against the actual codebase. **Findings: 4 VA
 
 8. **§Q1 `EmailTemplateVersions` has no `typePolicies` entry.** Used by §Q2 (`cache-first`) and §T9 (`cache.evict({ id: 'EmailTemplateVersions:' + id })`). Without a `keyArgs: ["id"]` policy on `EmailTemplateVersions`, the cache stores it under the default heuristic. v9 must add the missing typePolicy to §Q1 (cascading gap surfaced by T9).
 
-9. **T6 Turbopack incompatibility.** `@next/bundle-analyzer` no-ops (with only a console warning) under Turbopack; `next.config.ts:62` enables `turbopack: {}`. The `NEXT_BUNDLE_ANALYZER=enabled bun run build` (todo 20b) needs `next build --webpack` to actually produce a report. v9 must change todo 20b's command.
+9. **T6 Turbopack incompatibility.** `@next/bundle-analyzer` no-ops (with only a console warning) under Turbopack; `next.config.ts:62` enables `turbopack: {}`. The `NEXT_BUNDLE_ANALYZER=enabled bun run build` (item 20b) needs `next build --webpack` to actually produce a report. v9 must change item 20b's command.
 
 10. **Stale-data window opened by T2 `cache-first` on Preview.** When `isDirty:false` + `cache-first`, the preview shows the last-cached `compiledHtml` snapshot — but if a *different* user (or another tab on this user) edited the template, the version in DB has bumped and the stored preview is now outdated. The §Q1 `EmailTemplate.version` is the source of truth for staleness. v9 must add: "On preview mount, short-circuit `cache-first` to refresh-if-`version` differs: `nextFetchPolicy = (cachedVersion === dbVersion) ? 'cache-first' : 'network-only'`."
 
@@ -160,7 +160,7 @@ Audited v8 §T (lines 1464–1542) against the actual codebase. **Findings: 4 VA
      enabled: process.env.NEXT_BUNDLE_ANALYZER === "enabled",
    })(nextConfig);
    ```
-   and update todo 20b to: `NEXT_BUNDLE_ANALYZER=enabled next build --webpack` (not plain `bun run build`) so the non-no-op Webpack lane runs. Document the Turbopack warning explicitly in §T6.
+   and update item 20b to: `NEXT_BUNDLE_ANALYZER=enabled next build --webpack` (not plain `bun run build`) so the non-no-op Webpack lane runs. Document the Turbopack warning explicitly in §T6.
 
 4. **Add the missing `EmailTemplateVersions` typePolicy in §Q1 AND drop `isDirty` from the §T2 cache-key narrative.** Specifically add to §Q1:
    ```ts

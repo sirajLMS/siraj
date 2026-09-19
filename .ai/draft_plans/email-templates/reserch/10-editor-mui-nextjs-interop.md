@@ -1,25 +1,25 @@
 # `@react-email/editor` — Client-Component / React 19 / Next.js 16 / MUI v9 Interop Review
 
-## Verdict: VERIFIED (with two minor plan updates recommended)
+## Verdict: VERIFIED (with two minor updates recommended)
 
 All primary interop claims hold up against the official Resend/React Email v6
 docs (published April–July 2026) and the `@react-email/editor` README / npm
-metadata. The plan's `--re-*` CSS-cust-props assumption is confirmed exactly,
+metadata. The design's `--re-*` CSS-cust-props assumption is confirmed exactly,
 not speculative — the editor's Styling doc defines those custom properties by
-name. Two small plan deltas are flagged in §10 (React 19 peer deps are now
+name. Two small deltas are flagged in §10 (React 19 peer deps are now
 explicit at the editor level, and `next/dynamic({ssr:false})` is recommended
 even though the package pre-tags `'use client'`).
 
 ---
 
-## 0. Original plan claims (quoted verbatim)
+## 0. Original claims — quoted from the design
 
-From `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md`:
+From the design:
 
-- Line 51 (task `#16`):
+- Line 51:
   > "Build frontend/views/dashboard/email-templates/* (list page + editor page
   > mounting @react-email/editor) with desktop+mobile variants per tier
-  > architecture + Zustand store + Storybook stories"
+  > architecture + Zustand store"
 
 - Line 355 (Frontend section):
   > "`EmailTemplateEditorPage.tsx` — mounts `@react-email/editor` for visual
@@ -27,17 +27,17 @@ From `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_084
   > template editor, attachment rules, locale/version selector, allowed editor
   > groups (chip selector from `EmailEditorPermission` enum), preview button →
   > calls `previewEmailTemplate` mutation, renders in `<iframe sandbox>`,
-  > 'Send Test Email' actions button"
+  > 'Send Email' actions button"
 
 Relevant surrounding context:
-- The plan also uses MUI v9 + Socket/Zustand stores throughout the dashboard
+- The design also uses MUI v9 + Socket/Zustand stores throughout the dashboard
   (consistent with `AGENTS.md` — MUI v9 is the repo standard).
-- The plan mentions a preview iframe (`<iframe sandbox>`) for the rendered
+- The design mentions a preview iframe (`<iframe sandbox>`) for the rendered
   email — this is a separate concern from the editor itself (the editor is
   inline-DOM, not an iframe; only the preview uses an iframe).
-- The plan mentions planned CSS variables `--re-*` custom props for editor
+- The design mentions CSS variables `--re-*` custom props for editor
   theming, threading MUI theme palette into the editor chrome.
-- The plan implies (line 88) that the visual editor's serialized HTML is
+- The design implies (line 88) that the visual editor's serialized HTML is
   stored separately from typed template scaffolding, and that React 19 +
   Next.js 16 are the runtime targets (per `AGENTS.md`).
 
@@ -85,9 +85,9 @@ Relevant surrounding context:
   consumer must still add `'use client'` to the wrapper component** as the
   official guide does, to be safe and to satisfy Next.js App Router rules.
 
-**Finding:** Consumer wrapper must have `'use client'` at the top. The plan
+**Finding:** Consumer wrapper must have `'use client'` at the top. The design
 mounts the editor inside `EmailTemplateEditorPage.tsx` (a Client Component
-per the dashboard tier architecture), so this is already satisfied. No plan
+per the dashboard tier architecture), so this is already satisfied. No change needed
 edit required for this point.
 
 ---
@@ -115,9 +115,9 @@ React 19 and its release candidates:
 > "Updated peer dependencies to allow for React 19 release candidate and
 > React 19 itself"
 
-### TipTap — TipTap 3.x, not 2.x (minor plan ambiguity)
+### TipTap — TipTap 3.x, not 2.x (minor ambiguity)
 
-The plan described "TipTap 2.x peer?" — the actual editor pins
+The design described "TipTap 2.x peer?" — the actual editor pins
 `@tiptap/*: ^3.17.1`, not 2.x. This is worth noting because TipTap 3 is
 React-19-aware (TipTap bumped to 3.x partly for React 19 support). Direct
 deps from npm registry data (partial list):
@@ -165,7 +165,7 @@ Prism re-export top of file so lazy-load still works).
 
 This was committed as docs on 2026-07-28 (commit `3a995fb` "document prism.js
 dev-time compilation as a known editor limitation"). It is the single most
-important Next.js 16 + Turbopack gotcha for this plan.
+important Next.js 16 + Turbopack gotcha for this integration.
 
 ### MUI v9 — NO conflict
 
@@ -206,10 +206,10 @@ load and during render, which can throw `ReferenceError` during SSR.
 the editor subtree entirely and only mount it client-side, eliminating the
 SSR/`window` race.
 
-**Finding:** The plan as written does not call this out. Recommended plan
+**Finding:** The design as written does not call this out. Recommended change
 edit (line 355 area): wrap the `EmailEditor` import in `next/dynamic(...,
 { ssr: false })` so the editor is lazy-loaded and SSR-skipped. This also
-satisfies the plan's implicit "could be lazy-loaded if needed" aside.
+satisfies the design's implicit "could be lazy-loaded if needed" aside.
 
 ---
 
@@ -229,13 +229,13 @@ editor package itself.
   `@react-email/ui`. It defaults to `3000` because it's also a Next.js app,
   so teams run it on `3001` to avoid clashing with their Next.js dev server.
 
-**Finding relevant to the plan:** The plan's `EmailTemplateEditorPage.tsx`
+**Finding relevant to the design:** The design's `EmailTemplateEditorPage.tsx`
 calls `previewEmailTemplate` mutation and renders the result in
 `<iframe sandbox>` (line 355). That iframe is **rendered from the Next.js
 app's own GraphQL response** (or an in-app route), not from a Resend preview
 server. There is no port conflict as long as the iframe `src` points to the
 app's own domain (e.g. a same-origin data URL or blob), **not** to a fixed
-`localhost:3000/3001` host. If the plan ever wires the iframe to the
+`localhost:3000/3001` host. If the design ever wires the iframe to the
 `email dev` preview server it would need `--port 3001`, but that is not the
 designed path here.
 
@@ -243,12 +243,12 @@ designed path here.
 
 ## 6. Theming API — CSS vars vs JS theme object? Does `--re-*` match?
 
-**CONFIRMED.** The plan's `--re-*` CSS-cust-props approach matches the
+**CONFIRMED.** The design's `--re-*` CSS-cust-props approach matches the
 real editor API *exactly by name*. This was the highest-risk speculative
-claim in the plan, and it is verified.
+claim in the design, and it is verified.
 
 The React Email editor exposes **two distinct theming layers**, and the
-plan must keep them separate:
+design must keep them separate:
 
 ### Layer A — Editor chrome (UI surrounding the typing area)
 
@@ -350,11 +350,11 @@ Two built-in themes: `'basic'` (default, full styling) and `'minimal'`
 {...})`. Styles are **inlined** onto React Email components by
 `composeReactEmail`.
 
-**Plan alignment:** The plan's `--re-*` custom-props approach is correct
+****Alignment:**** The design's `--re-*` custom-props approach is correct
 **for editor chrome** (Layer A). It is NOT the right tool for styling the
 **sent email output** (Layer B) — that requires a JS theme object passed
 to `EmailTheming.configure({ theme })` and is applied at serialization time,
-not via CSS. The plan should be explicit that `--re-*` controls the
+not via CSS. The design should be explicit that `--re-*` controls the
 in-app editor UI (chrome) and the JS theme object controls the email HTML
 the server actually sends.
 
@@ -438,29 +438,29 @@ the server actually sends.
    under `.re-editor-shell .tiptap`. Avoid trying to redo editor content
    typography in MUI `sx` — that part is owned by the editor.
 
-**Plan edit recommended:** add a one-line note in the plan's Frontend
+****Recommended edit:**** add a one-line note in the design's Frontend
 section that the editor page mounts inside `ScopedCssBaseline` and that
 the bundled `@react-email/editor/themes/default.css` import order matters.
 
 ---
 
-## 8. Recommended plan-line edits
+## 8. Recommended line edits
 
-| Plan location | Suggested edit | Why |
+| Location | Suggested edit | Why |
 |---|---|---|
 | Line 355 (`EmailTemplateEditorPage.tsx`) | Add: "Import `EmailEditor` via `next/dynamic(() => import('@react-email/editor').then(m => m.EmailEditor), { ssr: false })`; the wrapper component is `'use client'`." | TipTap is browser-only; SSR pass would throw `window is not defined` even with `'use client'`. Matches the pattern the Resend docs and the public `Asymmetric-al/core` studio wrapper use. |
 | Line 355 | Add: "Wrap the editor subtree in `ScopedCssBaseline` and import `@react-email/editor/themes/default.css` after MUI's `CssBaseline` so global MUI box-sizing reset does not flatten `.tiptap` typography." | Prevents a real, common CSS regression. |
-| Line 88 / 355 area | Clarify two theming layers: (A) `--re-*` CSS variables for editor *chrome* (bubble menus, slash palette, Inspector) and (B) JS style objects via `EmailTheming.configure({ theme })` for the *emailed HTML output*. The plan currently only mentions `--re-*`. | The plan implies `--re-*` does both; in reality only Layer A uses `--re-*`. Layer B uses `extendTheme`/`createTheme`. |
+| Line 88 / 355 area | Clarify two theming layers: (A) `--re-*` CSS variables for editor *chrome* (bubble menus, slash palette, Inspector) and (B) JS style objects via `EmailTheming.configure({ theme })` for the *emailed HTML output*. The design currently only mentions `--re-*`. | The design implies `--re-*` does both; in reality only Layer A uses `--re-*`. Layer B uses `extendTheme`/`createTheme`. |
 | Tech notes | Note the editor's known Next.js dev compilation slow-down due to Prism.js grammars (overview doc). Optional `patch-package` escape hatch if dev compile times balloon on Turbopack. | Official known limitation, doc'd 2026-07-28. Most painful during iterative editor page work; worth flagging. |
 | Peer-dep clarification | Replace any "TipTap 2.x" framing with "TipTap 3.17.x" — the editor pins `@tiptap/*: ^3.17.1` as direct deps (not peers). | Removing consumer-side peer expectations avoids false alarms during `bun install`. |
 
-No other plan changes are needed. The core theses — `'use client'` on the
+No other changes are needed. The core theses — `'use client'` on the
 wrapper, `--re-*` for chrome theming, MUI palette threading via `sx`, iframe
 preview isolation — all hold.
 
 ---
 
-## 9. Single most important plan fix
+## 9. Single most important fix
 
 **Add `next/dynamic(..., { ssr: false })` for the editor import on line 355.**
 
@@ -469,8 +469,8 @@ still SSR-renders the client component on the first request, and TipTap
 touches `window`/`document` at module load. The community-verified pattern
 (dynamic import + `ssr: false`) is what the editor docs implicitly require
 and what every public integrator does. This is also the cheapest fix the
-plan can adopt and is prerequisite for keeping the lazy-load option open
-that the plan already implies.
+design can adopt and is prerequisite for keeping the lazy-load option open
+that the design already implies.
 
 ---
 
@@ -483,7 +483,7 @@ that the plan already implies.
 | TipTap 2.x peer dep | NEEDS UPDATE | It's TipTap 3.17.x, and it's a *direct* dep of the editor (not a peer of the consumer). |
 | React 19 supported | VERIFIED | Peer: `react ^18.0 || ^19.0 || ^19.0.0-rc`. Changelog says peer widened for React 19. |
 | Next.js 16 supported | VERIFIED | No `next` peer dep; only dev-time Prism.js compile slow-down documented. |
-| `--re-*` CSS variables for chrome theming | VERIFIED | Exact variable names match the plan; docs enumerate every var. |
+| `--re-*` CSS variables for chrome theming | VERIFIED | Exact variable names match the design; docs enumerate every var. |
 | `--re-*` for *email output* theming | NEEDS UPDATE | Output uses JS `extendTheme`/`createTheme` objects via `EmailTheming` plugin, not `--re-*`. |
 | MUI v9 `CssBaseline` conflict real | VERIFIED (interaction) | Use `ScopedCssBaseline` + import editor CSS after MUI. MUI docs confirm the pattern. |
 | Port conflict with dev server :3000 | NOT APPLICABLE to editor | Editor is inline-DOM. The :3000→:3001 advice is only for the `email dev` CLI preview server, not `@react-email/editor`. |

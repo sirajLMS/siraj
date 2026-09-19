@@ -1,14 +1,24 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import {
+  createAutocompletePaperSlotProps,
+  createAutocompletePopperSlotProps,
+} from "@/frontend/common/components/ui/input/autocompletePopperSlotProps";
+import { CurrencyAutocompleteShared } from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocompleteShared";
 import type { CurrencySelectProps } from "@/frontend/common/components/ui/input/currencySelect/types";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
-import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
+import { type CurrencyOption, getCurrencyByCode, getCurrencyOptions } from "@/frontend/common/lib/currency";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
-import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect/currencySelect.mobile";
+import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
+import { CurrencyOptionRowMobile } from "@/frontend/mobile/components/ui/input/currencySelect/currencyOptionRow.mobile";
 
+// Renders the presentational scaffold with the mobile slots (and the same
+// defaults the data-bound CurrencySelectMobile applies) plus a static
+// catalog so the story stays Apollo-free.
 function CurrencySelectStory({
   initialCurrencyCode,
+  setCurrencyAction: _setCurrencyAction,
   ...props
 }: Readonly<Partial<CurrencySelectProps> & { initialCurrencyCode?: CurrencyCode }>) {
   const [currency, setCurrency] = useState<CurrencyOption | null>(() =>
@@ -17,7 +27,22 @@ function CurrencySelectStory({
 
   return (
     <Box sx={{ width: 400, p: 2 }}>
-      <CurrencySelectMobile currency={currency} setCurrencyAction={setCurrency} fullWidth {...props} />
+      <CurrencyAutocompleteShared
+        currency={currency}
+        onChangeAction={setCurrency}
+        matchAnchorWidth
+        showSymbol
+        options={getCurrencyOptions()}
+        catalogLoaded
+        fullWidth
+        LocaleEmojiComponent={MobileLocaleEmoji}
+        CurrencyOptionRowComponent={CurrencyOptionRowMobile}
+        getPopperSlotProps={createAutocompletePopperSlotProps<CurrencyOption>}
+        getPaperSlotProps={createAutocompletePaperSlotProps<CurrencyOption>}
+        optionRowSx={{ px: 2, py: 1.25, minHeight: 48 }}
+        fullWidthDefault
+        {...props}
+      />
     </Box>
   );
 }

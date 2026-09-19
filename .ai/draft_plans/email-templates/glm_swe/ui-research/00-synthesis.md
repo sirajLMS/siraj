@@ -1,9 +1,9 @@
 # 00 — UI/UX Research Synthesis (email template system)
 
 > **Purpose:** single executive summary that reviewers consult first before diving into the
-> five deeper research files (`01`–`05`) in this same directory. It distills the top
-> recommendations per surface, surfaces the cross-cutting gaps the plan must close, and
-> reaffirms the locked v1–v5 technical decisions the rewritten UI/UX specification MUST
+> deeper research files (`01`–`04`) in this same directory. It distills the top
+> recommendations per surface, surfaces the cross-cutting gaps to close, and
+> reaffirms the locked technical decisions the UI/UX design MUST
 > preserve.
 
 ---
@@ -12,8 +12,8 @@
 
 ### 01 — Dashboard inventory
 - **Routes are `app/(dashboard)/…`, NOT `app/[locale]/…`** — locale comes from a cookie
-  (`getLocale()` reads `NEXT_LOCALE` → `Accept-Language`). The plan's `/email-templates` +
-  `/email-templates/[id]` shape (plan L833–834) is consistent with the codebase convention.
+  (`getLocale()` reads `NEXT_LOCALE` → `Accept-Language`). The `/email-templates` +
+  `/email-templates/[id]` shape is consistent with the codebase convention.
 - Reuse verbatim: `SidebarShell` + `navigationConfig.ts` `SIDEBAR_NAV_ITEMS` registry;
   `usePageBreadcrumbs({ currentTitle, overrides })`; `DesktopPageContainer` / `MobilePageContainer`
   + `DesktopPageHeader` / `MobilePageHeader` + `SectionPanel`; `AppDataGrid` (wraps MUI X DataGrid v9,
@@ -43,13 +43,14 @@
 - Variable/merge-tag picker: build a new `VariableMentionPicker` Autocomplete reusing the
   `useAudienceAutocomplete*` hook family. TipTap `extension-mention` is **transitively**
   available (via `@react-email/editor`) — an inline `@mention` UX is achievable without a new dep.
-- `@dnd-kit/core` + `@dnd-kit/sortable` are installed but **unused** — the email plan is the first
+- `@dnd-kit/core` + `@dnd-kit/sortable` are installed but **unused** — the email editor is the first
   consumer. `@dnd-kit/utilities` + `@dnd-kit/modifiers` are NOT installed and must be added.
 - `ScopedCssBaseline` is net-new (the codebase uses only the global `CssBaseline` in
-  `AppThemeProvider`). Plan line 817 is correct — wrap the editor in `ScopedCssBaseline` so the
+  `AppThemeProvider`). Wrap the editor in `ScopedCssBaseline` so the
   MUI reset doesn't break ProseMirror, and import editor CSS **after** MUI's CSS.
-- Sanitization: adopt the plan's `safeRender()` snippet verbatim with `isomorphic-dompurify`
-  + `ALLOWED_TAGS` / `ALLOWED_ATTR` (`isomorphic-dompurify` already installed, Phase 0 GREEN).
+- Sanitization: adopt the `safeRender()` snippet verbatim with `isomorphic-dompurify`
+  + `ALLOWED_TAGS` / `ALLOWED_ATTR` (`isomorphic-dompurify` already installed and verified working
+  under Bun).
 
 ### 03 — Animations
 - **framer-motion@^12.43.0** is installed but used in exactly 3 sibling `MetricCard` files
@@ -62,8 +63,8 @@
   unmountOnExit timeout={220}` — direction computed from tab index delta). `<Fade>/<Grow>/<Zoom>`
   are NOT authored; do NOT add custom `TransitionComponent` overrides on the 56 Dialogs / 11
   Drawers (use MUI defaults — Dialog=Fade, Drawer=Slide).
-- **`prefers-reduced-motion` is respected NOWHERE** — production-readiness gap the rewritten plan
-  closes via a new `usePrefersReducedMotion` helper in `frontend/common/lib/` wrapping every
+- **`prefers-reduced-motion` is respected NOWHERE** — production-readiness gap, closed via a new
+  `usePrefersReducedMotion` helper in `frontend/common/lib/` wrapping every
   custom animation (stagger, success-check, drag-settle). MUI Dialog/Drawer/Snackbar/Tooltip
   already honor the media query internally — only custom animations need the guard.
 - dnd-kit ships its own animation: `useSortable()` yields `transform` + `transition` applied as
@@ -86,35 +87,16 @@
 - The existing `emails` namespace covers only **2 of ~13 EmailScopes** (`complaintResponse`,
   `suggestionAcknowledged`) and has **no `errors` sub-namespace** and **zero UI labels**.
 - The admin management UI needs a **NEW `dashboard.emailTemplates` namespace** (proposed schema
-  at research file 04, lines 278–322 — verbatim in the plan). Two locales only (`["ar","en"]`,
+  at research file 04, lines 278–322). Two locales only (`["ar","en"]`,
   default `ar`); RTL via `dir` attr + `stylis-plugin-rtl` cache swap.
-- **Lockstep rule (V4-3):** `EmailsLabels` extension to `emailsEn` + `emailsAr` MUST be atomic
-  (a missing impl breaks the TS type → compile error → tests fail). The same lockstep applies to
+- **Lockstep rule:** `EmailsLabels` extension to `emailsEn` + `emailsAr` MUST be atomic
+  (a missing impl breaks the TS type → compile error). The same lockstep applies to
   the new `dashboardEmailTemplates{En,Ar}` modules. The 7 files that change atomically for the
   UI namespace are enumerated at research file 04, lines 326–333.
-- Storybook and tests get translations automatically through `LocaleProvider`; tests set locale
-  per-call via `renderWithWrapper({ locale })`.
-
-### 05 — Storybook & tests
-- **Runner is `bun:test`** for component tests (Happy DOM preload via
-  `test/ui/components/happydom-preload.ts`). Vitest is reserved for the Storybook
-  `@storybook/addon-vitest` project only.
-- No frontend 100%-coverage rule — the gap is enforced by the **tier-split testing convention**
-  (`frontend/common/components/ui/AGENTS.md:227-235`): test both mobile + desktop tier variants
-  separately, unit-test the ViewModel hook in isolation, test the switcher with mocked `useViewport`,
-  assert via rendered output (not implementation details), provide a Storybook story as visual
-  regression baseline. Chromatic (`@chromatic-com/storybook`) captures diffs at publish.
-- 15 new components × required story + component test + (single) E2E file
-  (`test/ui/e2e/email-templates.test.ts`) — full table at research file 05, lines 282–298.
-  Editor view tests must `mock.module`-stub `@react-email/editor` (TipTap doesn't render cleanly
-  under Happy DOM); the real save-flow E2E (getJSON → mutation → preview) is reserved for E2E
-  (plan L964).
-- a11y: `@storybook/addon-a11y` set to `test: "todo"` (warnings only — CI does not fail). No
-  `@axe-core/playwright` / `jest-axe`; visual a11y review is manual via the addon toolbar.
 
 ---
 
-## 2. Cross-cutting gaps the rewritten plan MUST close
+## 2. Cross-cutting gaps to close
 
 1. **Sidebar registration** — no `emailTemplates` nav label exists anywhere; add a `NavItem` to
    `SIDEBAR_NAV_ITEMS` under the Admin group + a `DashboardNavigationLabels.emailTemplates` key.
@@ -127,7 +109,7 @@
    `EditorShell` (desktop: left editor + right inspector; mobile: stacked with bottom-sheet `<Drawer>`).
 5. **Sandboxed iframe + CSP** — no preview iframe anywhere; net-new. `sandbox=""`, `srcDoc`,
    CSP `default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:`, server-side
-   `DOMPurify.sanitize` before serving (V5-3).
+   `DOMPurify.sanitize` before serving.
 6. **List filter toolbar** — no shared `FilterToolbar`/`SearchToolbar`; compose inline
    (`OutlinedInput` + `SearchOutlined` startAdornment) inside `SectionPanel.actions`; filter state
    in the editor store (survives viewport switching).
@@ -149,62 +131,58 @@
 
 ---
 
-## 3. Locked decisions the rewritten plan MUST preserve (verbatim from v1–v5)
+## 3. Locked technical decisions the UI/UX design MUST preserve
 
 - **`EmailEditorWrapper.tsx`** in the common layer centralizes `next/dynamic(() =>
   import('@react-email/editor').then(m => m.EmailEditor), { ssr: false })`. The `ssr: false` is a
   deliberate first-in-repo deviation (TipTap touches `window` at module load). Tier views import
   `EmailEditor` from the wrapper ONLY — never directly from `@react-email/editor`, never via a
-  second `next/dynamic` import. (Plan L802–815, V5-5.)
+  second `next/dynamic` import.
 - **RT/integer design** — `EmailEditorRef`: `getJSON(): JSONContent` sync + `getEmail():
   Promise<{html, text}>` async. Save flow is **atomic**: `getJSON` sync → `getEmail` async →
   single mutation accepting both `designJson` + `compiledHtml`. Files/Blobs live in `useRef`,
-  NOT in the Zustand store (non-serializable). (Plan L816, V5-5.)
+  NOT in the Zustand store (non-serializable).
 - **CSS layering** — wrap the editor in MUI v9's `ScopedCssBaseline`; import `@mui/material/styles`
   **before** `@react-email/editor/themes/default.css` so the MUI reset does not override
-  ProseMirror styling. (Plan L817.)
+  ProseMirror styling.
 - **Two theming layers** — Layer A: `--re-*` CSS custom properties for editor chrome (bubble
   menu / slash command / Inspector). Layer B: `EmailTheming.configure({ theme })` for the
   emailed HTML output, imported from the **`/plugins` subpath**
   (`import { EmailTheming, extendTheme } from '@react-email/editor/plugins'`) and passed as
   `extensions={[EmailTheming.configure({ theme })]}`. `--re-*` vars do NOT affect the emailed HTML.
-  (Plan L818–820, V4-7.)
 - **GraphQL documents** live in `frontend/common/graphql/sharedDocuments/email/`:
   `EmailTemplateQueryDocument`, `EmailTemplatesQueryDocument`, `EmailTemplateUpsertMutationDocument`,
   `PublishEmailTemplateMutationDocument`, `SendTestEmailMutationDocument`,
   `PreviewEmailTemplateQueryDocument`. Every selection set includes `id` (Apollo cache
   normalization). Hooks use `useQuery` from `@apollo/client/react` — **no `useLazyQuery`**. Run
-  `bun run generate:gqlSchema && bun codegen` after changes. (Plan L823–830.)
+  `bun run generate:gqlSchema && bun codegen` after changes.
 - **Admin routes** under `app/(dashboard)/email-templates/{page,[id]/page}.tsx`, locale from
-  cookie (NOT a `[locale]` URL segment). (Plan L832–836, `app/AGENTS.md:59`.)
+  cookie (NOT a `[locale]` URL segment). (`app/AGENTS.md:59`.)
 - **Zustand store** `frontend/common/stores/emailTemplateEditorStore.ts` holds serializable state
-  only (`isDirty`, `selectedScope`, locale/version selector, dialog open). (Plan L838.)
+  only (`isDirty`, `selectedScope`, locale/version selector, dialog open).
 - **`emails` namespace extension** — add the `errors: EmailsErrorLabels` sub-namespace
   (`templateNotFound`, `templateNotPublished`, `unauthorizedEditor`, `invalidDesignJson`,
   `attachmentTooLarge`, `invalidLocale`, `renderFailed`) to `EmailsLabels` plus per-scope
   `*EmailLabels` interfaces for the ~11 missing scopes; `emailsEn` + `emailsAr` MUST land
-  atomically (V4-3 lockstep). Service error strings use `getServerTranslations(locale).
+  atomically (lockstep). Service error strings use `getServerTranslations(locale).
   emailsTranslations.errors.<…>` (single-arg, sync — never the non-existent 2-arg form).
-  (Plan L846–867, V5-7, V4-3, V4-10.)
 - **Sanitization** — `safeRender()` with `isomorphic-dompurify` + explicit `ALLOWED_TAGS` /
   `ALLOWED_ATTR` is the belt-and-suspenders path; pair with TipTap schema validation at save.
-  Phase 0 is GREEN (`isomorphic-dompurify.sanitize()` strips `<script>` + `onerror` under Bun).
-  (Plan L882–922, V4-6.)
+  Verified: `isomorphic-dompurify.sanitize()` strips `<script>` + `onerror` under Bun.
 - **Orphan migration** — the existing `backend/services/communication/templates/email-templates.ts`
-  (hardcoded `#1976d2`/`#2e7d32`) is migrated (not overwritten) and deleted only in Phase 3.
-  (Plan L943, V5-4.)
+  (hardcoded `#1976d2`/`#2e7d32`) is migrated (not overwritten) and deleted only after the
+  dispatcher migration completes.
 - **Feature flag** — `getBooleanEnv("EMAIL_TEMPLATES_ENABLED")` from `@/backend/lib/env`
   (string-truthy bug; the bare `=== "true"` check is handled by the helper), registered in
-  `env-config-keys.ts` (V5-2, V4-9). (Plan todo 21c.)
+  `env-config-keys.ts`.
 
 ---
 
 ## 4. What this synthesis unlocks
 
-With the locked decisions fixed and the cross-cutting gaps enumerated, the rewritten Frontend +
-i18n sections of `.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md`
-become an exhaustive UI/UX specification: navigation, page layouts, list + editor views, preview
-tab, send-test dialog, animations (with reduced-motion a11y guard), forms/validation, theming/dark
-mode, a11y, storybook stories, tests/E2E, status-badge extension, feature-flag visual cue, and the
-complete `dashboard.emailTemplates` i18n key catalogue. Implementation can proceed without further
-design ambiguity.
+With the locked decisions fixed and the cross-cutting gaps enumerated, the Frontend +
+i18n work for the email template system becomes an exhaustive UI/UX design: navigation, page
+layouts, list + editor views, preview tab, send-test dialog, animations (with reduced-motion a11y
+guard), forms/validation, theming/dark mode, a11y, status-badge extension, feature-flag visual
+cue, and the complete `dashboard.emailTemplates` i18n key catalogue. Implementation can proceed
+without further design ambiguity.

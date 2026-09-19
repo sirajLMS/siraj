@@ -1,8 +1,8 @@
 # Round 5 Audit: §U — Security Hardening
 
 ## Summary
-- INVALID specs: 0 (v9 fixes all correct!)
-- PARTIAL specs: 5 (U1, U2, U4, U5', U6)
+- INVALID designs: 0 (v9 fixes all correct!)
+- PARTIAL designs: 5 (U1, U2, U4, U5', U6)
 - NEW gaps: 6
 - v9 fixes verified correct: 4/4 (U3 syntax ✓, U3 superAdmin+notImpersonating ✓, U7 atomicity ✓, U2 CRLF wording ✓)
 
@@ -16,7 +16,7 @@
 ## U2 — PARTIAL (scalar unchanged, sampleProps non-actionable)
 - v9 reworded CRLF stripping → "Rejects CRLF at schema layer via `validator`" ✓ (verified empirically)
 - `emailScalar.ts:14-23` still throws bare `TypeError` — NO `GraphQLError`, NO `extensions` → codeless error ships
-- Fix is forward-looking, not done; this is a GLOBAL scalar change (affects every `Email` field) — spec fails to flag blast radius
+- Fix is forward-looking, not done; this is a GLOBAL scalar change (affects every `Email` field) — design fails to flag blast radius
 - `sampleProps` zod mirror STILL non-actionable: `EmailPropsByScope` is a TS mapped type, erased at runtime — no runtime zod schema exists
 - Implementers must hand-write 9+ per-scope zod schemas with drift risk
 
@@ -38,14 +38,13 @@
 ## U5 — MISSING (bounce/complaint webhook)
 - bounce/complaint webhook topic entirely MISSING from §U
 - No webhook verification pattern in `app/api/**/route.ts`
-- No `sendgrid|bounceWebhook|complaint.*webhook|SNS.*webhook` references outside plan
-- Actionable gap: spec needs `app/api/email/events/route.ts`, HMAC verification, idempotency on event id, per-event rate limit
+- No `sendgrid|bounceWebhook|complaint.*webhook|SNS.*webhook` references outside design
+- Actionable gap: design needs `app/api/email/events/route.ts`, HMAC verification, idempotency on event id, per-event rate limit
 
 ## U5' — PARTIAL (DOMPurify re-sanitize)
 - Re-sanitize-on-read sound in principle ✓
 - NEW conflict: §U5 contradicts §T2 (cache-first reads) — must explicitly state "DOMPurify runs server-side before HTTP response; Apollo cache-first is CLIENT only"
 - `FORBID_TAGS: ['style']` good but no `FORBID_ATTR: ['style']` — combined with `style-src 'unsafe-inline'`, attacker gets inline-style exfil at CSP layer
-- Test vectors additions ✓
 
 ## U6 — PARTIAL (misapplied scalar + missing bidi marks)
 - Line 1800 "Enforce `Email` scalar on all email-address inputs" MISAPPLIED to non-email fields (`subject`, `replyTo`, `cc`, `bcc`)
@@ -60,7 +59,7 @@
 - **Dead code**: v9's "memory → accept non-atomic" branch — `CacheServiceFactory` has no memory provider (only redis/postgres)
 - **Missing interface work**: `IRedisService` has NO `eval`/`evalsha`/`script load` method — implementing Lua script requires extending `IRedisService` + both adapters
 - **Missing Postgres path**: `PostgresCacheAdapter` has no `pg_advisory_xact_lock` — brand-new pattern, not in codebase
-- `checkRateLimit` uses `limitSimple` — spec silent on whether email limiters bypass `checkRateLimit` or migrate it
+- `checkRateLimit` uses `limitSimple` — design silent on whether email limiters bypass `checkRateLimit` or migrate it
 
 ## v9 Fix Side-Effects
 1. U7 fix introduced dead code (memory branch has no provider)
@@ -71,5 +70,5 @@
 ## NEW gaps (not in audit prompt)
 1. SSRF prevention for preview rendering — `sampleProps` caller-supplied; no egress allowlist/private-IP block
 2. HTML email sanitization at render OUTPUT — no post-render sanitization before SMTP send
-3. Timing attacks on idempotency key — no `crypto.timingSafeEqual` spec
-4. Audit logging for template changes — no spec to log `updateEmailTemplate`/`publishEmailTemplate`/`deleteEmailTemplate` with actor, diff, timestamp
+3. Timing attacks on idempotency key — no `crypto.timingSafeEqual` design
+4. Audit logging for template changes — no design to log `updateEmailTemplate`/`publishEmailTemplate`/`deleteEmailTemplate` with actor, diff, timestamp

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import { adminAuditLogs, users } from "@/backend/db/schema";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Audit Log Immutability", () => {
@@ -18,7 +18,7 @@ describe("Audit Log Immutability", () => {
         .values({
           name: "Audit Log Actor",
           email,
-          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          password: generateTestPassword(),
           createdAt: now,
           updatedAt: now,
         })

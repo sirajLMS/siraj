@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
 
-const ENV_KEYS = ["NODE_ENV", "TEST_SERVER", "TEST_CI", "VERCEL_ENV"] as const;
+const ENV_KEYS = ["NODE_ENV", "TEST_SERVER", "TEST_CI", "VERCEL_ENV", "TEST_HARNESS_KEY"] as const;
 
 const originalEnv: Record<string, string | undefined> = {};
 
@@ -61,10 +61,24 @@ describe("isTestHelperEnabled", () => {
     expect(isTestHelperEnabled()).toBe(false);
   });
 
-  test("allows dedicated test server with production NODE_ENV", () => {
+  test("allows dedicated test server with production NODE_ENV and valid TEST_HARNESS_KEY", () => {
     setEnv("NODE_ENV", "production");
     setEnv("TEST_SERVER", "1");
+    setEnv("TEST_HARNESS_KEY", "a".repeat(32));
     expect(isTestHelperEnabled()).toBe(true);
+  });
+
+  test("blocks production NODE_ENV test server without TEST_HARNESS_KEY", () => {
+    setEnv("NODE_ENV", "production");
+    setEnv("TEST_SERVER", "1");
+    expect(isTestHelperEnabled()).toBe(false);
+  });
+
+  test("blocks production NODE_ENV test server with too-short TEST_HARNESS_KEY", () => {
+    setEnv("NODE_ENV", "production");
+    setEnv("TEST_SERVER", "1");
+    setEnv("TEST_HARNESS_KEY", "a".repeat(31));
+    expect(isTestHelperEnabled()).toBe(false);
   });
 
   test("blocks Vercel production even when TEST_SERVER is set", () => {

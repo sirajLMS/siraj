@@ -596,8 +596,8 @@ This plan adds certificate cron documentation to:
 
 | Test | File | Strategy |
 |------|------|----------|
-| Expiry detection end-to-end | `backend/db/test/logic/cert/cron/expiry-detection.test.ts` | `runInRollback`, create test certs with past expiry, run service, verify status + notification + audit |
-| Storage cleanup end-to-end | `backend/db/test/logic/cert/cron/storage-cleanup.test.ts` | `runInRollback`, create test orphans, run service, verify cleanup log + deletion |
+| Expiry detection full flow | `backend/db/test/logic/cert/cron/expiry-detection.test.ts` | `runInRollback`, create test certs with past expiry, run service, verify status + notification + audit |
+| Storage cleanup full flow | `backend/db/test/logic/cert/cron/storage-cleanup.test.ts` | `runInRollback`, create test orphans, run service, verify cleanup log + deletion |
 | Verification log cleanup | `backend/db/test/logic/cert/cron/verification-cleanup.test.ts` | `runInRollback`, create test logs, run service, verify aggregation + deletion |
 
 ---

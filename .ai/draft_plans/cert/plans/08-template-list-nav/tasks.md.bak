@@ -49,21 +49,18 @@
                     │                    │                                     │
                     │              T11 (Knowledge Propagation)                │
                     │                    │                                     │
-                    │              T12 (Testing — after T09)                  │
-                    │                    │                                     │
                     │              T13 (Feature Enhancements)                 │
                     └─────────────────────────────────────────────────────────┘
 ```
 
 **Chain:**
-- T01 → T02 → T03 → T04 → {T05, T06} → {T07, T08} → T09 → T10 → T11 → T12 → T13
+- T01 → T02 → T03 → T04 → {T05, T06} → {T07, T08} → T09 → T10 → T11 → T13
 - T04 is the critical-path gate: all view/interaction tasks depend on the container
 - T05 and T06 may run in parallel after T04
 - T07 and T08 may run in parallel after T05 (T08 has soft dependency on T06 for mobile action wiring)
 - T09 requires T05 (BulkActionBar component) and T08 (action handlers)
 - T10 requires T01 (i18n sidebar keys) and can run concurrent with T05–T09
 - T11 (knowledge propagation) depends on all prior tasks
-- T12 (testing) depends on T09 (all components created) — can run parallel with T10/T11
 - T13 (feature enhancements) depends on T05, T06, T08 (component files must exist)
 
 ---
@@ -83,7 +80,6 @@
 | T09 | Frontend Views (Bulk + Filter) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` | `frontend.instructions.md` |
 | T10 | App Router + Frontend (Sidebar) | `app/AGENTS.md`, `frontend/AGENTS.md` | `frontend.instructions.md` |
 | T11 | Cross-cutting (Docs) | Root `AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/common/graphql/AGENTS.md` | — |
-| T12 | Testing (UI + E2E) | `test/ui/components/AGENTS.md`, `test/ui/e2e/AGENTS.md` | `tests.instructions.md` |
 | T13 | Frontend Views (Enhancements) | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | `frontend.instructions.md` |
 
 > **IMPORTANT:** Before starting any task, read ALL listed AGENTS.md and instruction files. The `scripts/health/sub-loop.ts` script auto-discovers and prints applicable files — use it for verification.
@@ -349,9 +345,7 @@ These tasks build the infrastructure: i18n translations, GraphQL documents, and 
   - Does NOT reset filters or search
 
 - [ ] 3.6 Create mock store at `frontend/common/stores/__mocks__/templateListStore.ts`
-  - For Storybook usage
   - Pre-populated with sample state (grid mode, 3 selected IDs, filter panel open)
-  - Overrideable via Storybook args
 
 - [ ] 3.7 Run quality loop per file:
   ```bash
@@ -801,7 +795,7 @@ These tasks implement user interactions: the create template dialog, card action
     - Duplicate → calls `onDuplicate(id)` — requires `CERT_TEMPLATE_MANAGE`
     - Delete → calls `store.setDeleteTarget(id)` (opens DeleteConfirmDialog) — requires `CERT_TEMPLATE_MANAGE`
     - Generate from Template → `router.push('/[locale]/certificates/generate/{id}')` — requires `CERT_TEMPLATE_VIEW`, **only shown when template status is PUBLISHED**
-  - Each menu item: icon, label from `labels.actions.*`, `data-testid` for E2E
+  - Each menu item: icon, label from `labels.actions.*`, `data-testid`
   - Menu closes on item click
 
 - [ ] 8.2 Wire `CardActionMenu` into `TemplateCard` (desktop) and `MobileTemplateCard` (mobile):
@@ -1133,131 +1127,9 @@ These tasks add the sidebar navigation and capture all learnings in the knowledg
 
 ---
 
-## Phase 5: Testing & Verification (T12)
+## Phase 5: Feature Enhancements
 
-These tasks cover component testing (Happy DOM), E2E testing (Playwright), and incremental feature enrichment for patterns surfaced in the design review (sort selector, orientation filter, owned-by-me filter, Plan 17 feature flag, optimistic updates).
-
----
-
-### T12: Component Tests + E2E Tests
-
-**Goal:** Write and validate component tests (Happy DOM + mocked Apollo) for all view-layer components, and E2E tests (Playwright) for the full template list navigation flow.
-
-**Duration:** 6–8 hours
-
-**Requirements covered:** REQ-08-01 through REQ-08-10 (all UI requirements)
-
-**Dependencies:** All prior tasks (T01–T09 must be complete; component files must exist; T10 sidebar is not a gating dependency)
-
-**Subtasks:**
-
-- [ ] 12.1 Create `test/ui/components/templates/TemplateCard.test.tsx`:
-  - Test template card rendering: name, description, status badge, category, updated date
-  - Test permission-gated action visibility (publish/manage/view)
-  - Test status-variant rendering (draft/published/archived badge colors per theme palette)
-  - Test CardActionMenu integration (menu opens on click, items conditional on permissions)
-  - Test skeleton loading variant (`isLoading={true}`)
-  - Mock Apollo: wrap with `MockedProvider` per `test/ui/components/` conventions
-  - Use `render` from `@testing-library/react`
-
-- [ ] 12.2 Create `test/ui/components/templates/TemplateCardGrid.test.tsx`:
-  - Test grid layout at 3 columns desktop / 2 tablet / 1 mobile (via container `sx` prop)
-  - Test empty state: renders `EmptyState` with no-templates illustration
-  - Test "Load More" button visibility (hidden when `hasNextPage === false`)
-  - Test grid display with 20 items: verify all cards rendered
-
-- [ ] 12.3 Create `test/ui/components/templates/TemplateTable.test.tsx`:
-  - Test table layout: columns (name, status, category, orientation, last modified, actions)
-  - Test sort selector: clicking column header triggers `onSort` callback with sortBy/sortDirection
-  - Test "Select All" checkbox: toggles all row checkboxes
-  - Test row checkbox selection flow
-
-- [ ] 12.4 Create `test/ui/components/templates/FilterPanel.test.tsx`:
-  - Test filter open/close behavior (Popover for desktop, Drawer for mobile)
-  - Test status autocomplete: multi-select chips toggle
-  - Test category autocomplete: hierarchical grouping
-  - Test orientation ToggleButtonGroup: all / portrait / landscape
-  - Test "Owned by me" checkbox: toggle on/off
-  - Test "Clear all" resets all filters
-  - Test active filter badge count: 1 chip / 2 chips / etc.
-  - Test category graceful degradation (disabled autocomplete with tooltip when empty)
-
-- [ ] 12.5 Create `test/ui/components/templates/CreateTemplateDialog.test.tsx`:
-  - Test dialog open/close via `open` prop
-  - Test form validation: empty name → error, name > 100 chars → error
-  - Test category autocomplete population
-  - Test orientation radio group: portrait default, landscape selectable
-  - Test page size radio group: A4 default, letter, custom selectable
-  - Test create button disabled during mutation (loading state)
-  - Test cancel button resets form
-
-- [ ] 12.6 Create `test/ui/components/templates/DeleteConfirmDialog.test.tsx`:
-  - Test dialog open when `deleteTargetId !== null`
-  - Test draft message renders interpolated template name
-  - Test published message renders with status badge
-  - Test cancel button closes dialog
-  - Test confirm button: loading state, calls `onDelete(deleteTargetId)`
-
-- [ ] 12.7 Create `test/ui/components/templates/BulkActionBar.test.tsx`:
-  - Test selected count with Arabic 6-form pluralization (`selectedCount(0)` → "zero", `selectedCount(1)` → "one")
-  - Test action buttons visibility: Archive (permission-gated), Delete (permission-gated), Change Category (permission-gated)
-  - Test action button click calls correct handler
-  - Test "Clear" deselect button
-
-- [ ] 12.8 Create `test/ui/components/templates/MobileTemplateCard.test.tsx`:
-  - Test card rendering: name, description, status badge, updated date
-  - Test compact layout (MUI `Card`)
-  - Test truncated CardActionMenu (top 3 + More overflow)
-  - Test skeleton loading state
-  - Test swipe-left for quick actions (if implemented)
-
-- [ ] 12.9 Create `test/ui/e2e/templates-list.spec.ts` (Playwright E2E):
-  - Test full navigation flow: sidebar certificates → templates page loads
-  - Test search: type template name → 300ms debounce → searchParams URL update → results filtered
-  - Test filter: open filter panel → select status Published + category → URL updated → filtered results
-  - Test sort: press sort button → grid reordered → URL reflects sort
-  - Test grid/table toggle: switch view → persisted across refresh (localStorage)
-  - Test create template flow: create button → dialog → fill form → submit → navigate to editor
-  - Test card actions: ellipsis menu → edit → navigate to editor; duplicate → toast + new card
-  - Test delete: ellipsis → delete → confirmation dialog → confirm → toast + card removed
-  - Test bulk: select 3 cards → bulkArchiveBar appears → archive → toast + cards removed
-  - Test empty state: search for nonexistent template → no-results illustration
-  - Test error state: mock GraphQL error → error banner → retry button → re-fetch
-  - Test responsiveness: resize from desktop 1920 → 1024 → 768 → 480
-  - Test mobile: bottom MobileBulkActionBar, drawer filter, single-column list
-
-- [ ] 12.10 Run quality loop on all test files:
-  ```bash
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCard.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateCardGrid.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/FilterPanel.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/CreateTemplateDialog.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/DeleteConfirmDialog.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/BulkActionBar.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/MobileTemplateCard.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/components/templates/TemplateTable.test.tsx --lifecycle lint
-  bun run scripts/health/sub-loop.ts test/ui/e2e/templates-list.spec.ts --lifecycle lint
-  ```
-
-- [ ] 12.11 Write outcome file: `.ai/plans/cert-plan-08/outcome/T12-testing-outcome.md`
-  - Document test coverage: component tests (8 suites), E2E test (1 spec, ~13 scenarios)
-  - Report coverage gaps and edge-case handling
-
-**Files to create:**
-- `test/ui/components/templates/TemplateCard.test.tsx`
-- `test/ui/components/templates/TemplateCardGrid.test.tsx`
-- `test/ui/components/templates/TemplateTable.test.tsx`
-- `test/ui/components/templates/FilterPanel.test.tsx`
-- `test/ui/components/templates/CreateTemplateDialog.test.tsx`
-- `test/ui/components/templates/DeleteConfirmDialog.test.tsx`
-- `test/ui/components/templates/BulkActionBar.test.tsx`
-- `test/ui/components/templates/MobileTemplateCard.test.tsx`
-- `test/ui/e2e/templates-list.spec.ts`
-
-**Instruction verification:**
-- `test/ui/components/AGENTS.md` — Happy DOM patterns, MockedProvider
-- `test/ui/e2e/AGENTS.md` — Playwright patterns, login helpers
-- `.agents/instructions/tests.instructions.md`
+These tasks cover incremental feature enrichment for patterns surfaced in the design review (sort selector, orientation filter, owned-by-me filter, Plan 17 feature flag, optimistic updates).
 
 ---
 
@@ -1398,30 +1270,29 @@ showSorting `outlined` for inactive
 | AC-08-i18n-e | `TemplateListLabels` type schema registered in `Translation` enum constant | T01 | T04 (import) |
 | AC-08-i18n-f | Sidebar labels: `sidebar.certificates.*` keys with English and Arabic implementations | T01, T10 | — |
 | AC-08-i18n-g | Status badge labels: `statusLabel(draft)` / `(published)` / `(archived)` mapped via `Record<TemplateStatus, string>` | T01, T05 | — |
-| AC-08-a11y-a | All interactive elements keyboard-navigable (Tab, Enter, Escape, Arrow keys) | T05, T06, T07, T08, T09 | T12 (test coverage) |
-| AC-08-a11y-b | Focus indicators visible (theme `focusVisible` ring) | T05, T06, T07, T08, T09 | T12 (test coverage) |
-| AC-08-a11y-c | ARIA labels/roles on all icon-only buttons (Filter, Sort, Actions, Create) | T05, T06, T07, T08, T09 | T12 (test coverage) |
-| AC-08-a11y-d | Status badges use `role="status"` + `aria-label` with translated text | T05 | T12 (test coverage) |
-| AC-08-a11y-e | Table header cells use `scope="col"`; row checkboxes use `role="checkbox"` + `aria-checked` | T05, T12 | T12 (test coverage) |
-| AC-08-a11y-f | Dialogs trap focus (MUI `Dialog` default), Escape closes, modal on mobile | T07, T08, T09 | T12 (test coverage) |
-| AC-08-a11y-g | Color contrast ≥ 4.5:1 for text, ≥ 3:1 for UI components (MUI theme palette) | T05, T06, T12 | T12 (test coverage) |
-| AC-08-a11y-h | Live regions for toast/snackbar announcements (`aria-live="polite"`) | T04, T07, T08, T09 | T12 (test coverage) |
-| AC-08-a11y-i | RTL layout mirroring verified for Arabic locale | T05, T06, T12 | T12 (test coverage) |
-| AC-08-a11y-j | Minimum touch target 48×48dp on mobile | T06, T12 | T12 (test coverage) |
-| AC-08-a11y-k | Screen reader test with NVDA/VoiceOver for critical flows | T12 | — |
-| AC-08-mob-a | Mobile: bottom-sheet FilterPanel (Drawer), sticky MobileBulkActionBar | T06, T09 | T12 (E2E mobile flow) |
-| AC-08-mob-b | Mobile: single-column list (no table view), compact card with status badge inline | T06 | T12 (E2E mobile flow) |
-| AC-08-mob-c | Mobile: hamburger triggers sidebar (Plan 08 shared), mobile sort via popup | T06, T13 | T12 (E2E mobile flow) |
-| AC-08-mob-d | Mobile: create dialog full-screen (MUI `Dialog` fullScreen `smDown`) | T07 | T12 (E2E mobile flow) |
-| AC-08-mob-e | Orientation auto-rotation handled (no fixed orientation lock) | T07 | T12 (E2E mobile flow) |
+| AC-08-a11y-a | All interactive elements keyboard-navigable (Tab, Enter, Escape, Arrow keys) | T05, T06, T07, T08, T09 | — |
+| AC-08-a11y-b | Focus indicators visible (theme `focusVisible` ring) | T05, T06, T07, T08, T09 | — |
+| AC-08-a11y-c | ARIA labels/roles on all icon-only buttons (Filter, Sort, Actions, Create) | T05, T06, T07, T08, T09 | — |
+| AC-08-a11y-d | Status badges use `role="status"` + `aria-label` with translated text | T05 | — |
+| AC-08-a11y-e | Table header cells use `scope="col"`; row checkboxes use `role="checkbox"` + `aria-checked` | T05 | — |
+| AC-08-a11y-f | Dialogs trap focus (MUI `Dialog` default), Escape closes, modal on mobile | T07, T08, T09 | — |
+| AC-08-a11y-g | Color contrast ≥ 4.5:1 for text, ≥ 3:1 for UI components (MUI theme palette) | T05, T06 | — |
+| AC-08-a11y-h | Live regions for toast/snackbar announcements (`aria-live="polite"`) | T04, T07, T08, T09 | — |
+| AC-08-a11y-i | RTL layout mirroring verified for Arabic locale | T05, T06 | — |
+| AC-08-a11y-j | Minimum touch target 48×48dp on mobile | T06 | — |
+| AC-08-mob-a | Mobile: bottom-sheet FilterPanel (Drawer), sticky MobileBulkActionBar | T06, T09 | — |
+| AC-08-mob-b | Mobile: single-column list (no table view), compact card with status badge inline | T06 | — |
+| AC-08-mob-c | Mobile: hamburger triggers sidebar (Plan 08 shared), mobile sort via popup | T06, T13 | — |
+| AC-08-mob-d | Mobile: create dialog full-screen (MUI `Dialog` fullScreen `smDown`) | T07 | — |
+| AC-08-mob-e | Orientation auto-rotation handled (no fixed orientation lock) | T07 | — |
 | AC-08-mob-f | Pull-to-refresh not implemented (no native app wrapper) — use Load More | T06 | — |
 | AC-08-mob-g | Viewport meta tag correct (Next.js default) | T04 | — |
 | AC-08-p17-a | Plan 17 feature flag `CERT_TEMPLATE_GENERATE` gates Generate action in CardActionMenu | T08, T13 | T13 (feature flag wiring) |
 | AC-08-p17-b | Plan 17 feature flag gates Generate sidebar item | T10, T13 | T13 (feature flag wiring) |
 | AC-08-p17-c | Graceful degradation: flag disabled → Generate action hidden, route 404s | T08, T10, T13 | T13 (feature flag wiring) |
-| AC-08-opt-a | Create mutation: optimistic insert with PENDING status → replaced on success | T13 | T04 (mutation handler), T12 (test coverage) |
-| AC-08-opt-b | Duplicate mutation: optimistic insert with incremented name → replaced on success | T13 | T04 (mutation handler), T12 (test coverage) |
-| AC-08-opt-c | Delete mutation: optimistic eviction → refetch on failure | T13 | T04 (mutation handler), T12 (test coverage) |
+| AC-08-opt-a | Create mutation: optimistic insert with PENDING status → replaced on success | T13 | T04 (mutation handler) |
+| AC-08-opt-b | Duplicate mutation: optimistic insert with incremented name → replaced on success | T13 | T04 (mutation handler) |
+| AC-08-opt-c | Delete mutation: optimistic eviction → refetch on failure | T13 | T04 (mutation handler) |
 | AC-08-pag-a | Pagination uses cursor-based `after` with relay-style connection (not offset/limit) | T02, T04 | — |
 | AC-08-pag-b | Pagination contract deviation documented in design.md §6.7 (SWE Expert Review) | design.md | — |
 | AC-08-perm-a | Permission keys use codebase `CERT_TEMPLATE_*` (underscore) format | T04, T08, T09, T10 | — |
@@ -1444,7 +1315,6 @@ showSorting `outlined` for inactive
 | T09 | `components/FilterPanel.tsx`, `components/BulkChangeCategoryDialog.tsx`; Modify: Desktop + Mobile tier views, `components/BulkActionBar.tsx` | Frontend Views (Bulk + Filter) | `frontend.instructions.md` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md` |
 | T10 | Sidebar config file + sidebar component file | App Router + Frontend Navigation | `frontend.instructions.md` | `app/AGENTS.md`, `frontend/AGENTS.md` |
 | T11 | `docs/frontend/template-list-pattern.md`; Modify: `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, root `AGENTS.md` | Cross-cutting (Docs) | — | Root `AGENTS.md`, all layer AGENTS.md modified |
-| T12 | `test/ui/components/templates/TemplateCard.test.tsx`, `TemplateCardGrid.test.tsx`, `TemplateTable.test.tsx`, `FilterPanel.test.tsx`, `CreateTemplateDialog.test.tsx`, `DeleteConfirmDialog.test.tsx`, `BulkActionBar.test.tsx`, `MobileTemplateCard.test.tsx`; `test/ui/e2e/templates-list.spec.ts` | Testing (UI + E2E) | `tests.instructions.md` | `test/ui/components/AGENTS.md`, `test/ui/e2e/AGENTS.md` |
 | T13 | `CardActionMenu.tsx` (feature flag), `useTemplatesViewModel.ts` (filter vars), `FilterPanel.tsx` (orientation + ownedByMe), `TemplateToolbar.tsx` (sort selector), `MobileToolbar.tsx` (mobile sort), `TemplateListContainer.tsx` (optimistic), `template-list.documents.ts` (query vars) | Frontend Views (Enhancements) | `frontend.instructions.md` | `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` |
 
 ---
@@ -1459,20 +1329,19 @@ showSorting `outlined` for inactive
 | Phase 2: List Page | T04, T05, T06 | ~10–13 hours | T04 → T05, T06 (T05/T06 in parallel) |
 | Phase 3: Interactions | T07, T08, T09 | ~7–10 hours | T07, T08 parallel after T05; T09 after T08 |
 | Phase 4: Navigation & Knowledge | T10, T11 | ~4–5 hours | T10 can run parallel with T05–T09; T11 last |
-| Phase 5: Testing & Verification | T12, T13 | ~9–12 hours | T12 can run parallel with T11; T13 after T05/T06/T08 |
-| **Total** | **13 tasks** | **~38–50 hours** | — |
+| Phase 5: Feature Enhancements | T13 | ~5–7 hours | T13 after T05/T06/T08 |
+| **Total** | **12 tasks** | **~38–50 hours** | — |
 
 ### Critical Path
 
 ```
-T01 → T04 → T05 → T08 → T09 → T11 → T12
+T01 → T04 → T05 → T08 → T09 → T11
 ```
 
 - T01 (i18n) is the initial gate — blocks T02, T03, T04, T10
 - T04 (container) is the critical gate — blocks all view/interaction tasks
 - T05 (desktop view) blocks T07, T08, T09 (they need card components and BulkActionBar)
 - T11 (knowledge) depends on all others
-- T12 (testing) depends on T09 (all components created) — can run parallel with T11
 - T13 (feature enhancements) depends on T05, T06, T08
 
 ### Parallelization Opportunities
@@ -1481,8 +1350,7 @@ T01 → T04 → T05 → T08 → T09 → T11 → T12
 2. **T05 + T06** can run in parallel after T04 (separate sub-agents for desktop and mobile views)
 3. **T07 + T08** can run in parallel after T05 (create dialog and card actions are independent)
 4. **T10** can run in parallel with T05–T09 (sidebar only depends on T01)
-5. **T11 + T12** can run in parallel after T09 (knowledge propagation doesn't need test files; tests don't need docs)
-6. **T13** can run in parallel with T11/T12 after T05/T06/T08 complete
+5. **T13** can run in parallel with T11 after T05/T06/T08 complete
 
 ### Outcome File Directory
 
@@ -1501,7 +1369,6 @@ All outcome files are written to: `.ai/plans/cert-plan-08/outcome/`
 | T09 | `T09-bulk-filter-outcome.md` |
 | T10 | `T10-sidebar-nav-outcome.md` |
 | T11 | `T11-knowledge-propagation-outcome.md` |
-| T12 | `T12-testing-outcome.md` |
 | T13 | `T13-feature-enhancements-outcome.md` |
 
 ---
@@ -1982,223 +1849,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 ---
 
-### T20 — Component Tests (5 Test Files)
-
-**Description:** Write comprehensive component-level tests for each new UI component using the project's test conventions (Vitest + Happy DOM + mocked Apollo). Each component test file covers rendering, user interactions, and edge cases.
-
-**Files:**
-1. `test/ui/components/cert/templates/TemplateListPage.test.tsx` (new)
-2. `test/ui/components/cert/templates/TemplateCard.test.tsx` (new)
-3. `test/ui/components/cert/templates/TemplateListTable.test.tsx` (new)
-4. `test/ui/components/cert/templates/CreateTemplateDialog.test.tsx` (new)
-5. `test/ui/components/cert/templates/templateListStore.test.ts` (new — store unit test)
-
-**Sub-tasks:**
-
-#### Test File 1: TemplateListPage.test.tsx
-- Render with mocked Apollo provider returning a list of 3 templates.
-- Renders title, subtitle with count.
-- Renders search field, category select, status select, sort select.
-- Renders view-mode toggle.
-- Clicking "Create Template" button opens `CreateTemplateDialog`.
-- Changing search field updates store `searchQuery`.
-- Changing category filter updates store `categoryFilter`.
-- Switching view mode from grid to table renders `TemplateListTable`.
-- Renders error Alert when store error is set.
-- Renders loading skeleton when `loading=true`.
-- Reads URL params on mount (status=draft) and sets store filter.
-- Each test: mock Apollo `useQuery` to return controlled data, assert rendered output.
-
-#### Test File 2: TemplateCard.test.tsx
-- Render a single `TemplateCard` with a mock template.
-- Shows template name.
-- Shows category chip with correct color.
-- Shows status chip with correct color (Draft=warning, Published=success, Archived=default).
-- Shows last modified date formatted.
-- Shows variable count.
-- Click on card body calls `onEdit`.
-- Click on Edit IconButton calls `onEdit` (not card body click propagation).
-- Click on Duplicate IconButton calls `onDuplicate`.
-- Click on More menu opens menu with Preview, Export, Publish, Archive, Delete.
-- Click on Delete menu item opens confirmation dialog.
-- Confirm in delete dialog calls `onDelete`.
-- Hover effect sets elevation (optional — test via `data-testid` or mock).
-
-#### Test File 3: TemplateListTable.test.tsx
-- Render with a list of 5 templates.
-- Shows all 5 rows.
-- Header "select all" checkbox selects all rows.
-- Clicking individual row checkbox toggles selection.
-- Bulk actions bar appears when selection non-empty.
-- Bulk actions bar shows "{N} selected".
-- Clicking "Clear" in bulk bar clears selection.
-- Row click calls `onEdit`.
-- Sort on "Name" column toggles asc/desc sort icon.
-- Pagination changes page when clicking next page.
-- Changing rows per page updates the table.
-- Action buttons (Edit, Duplicate, More menu) render per row.
-
-#### Test File 4: CreateTemplateDialog.test.tsx
-- Render with `open=true`.
-- Shows all form fields: name, category, description, orientation toggle, size select.
-- Shows "Start From" radio group.
-- Validation: empty name shows error on blur.
-- Validation: name not unique shows "A template with this name already exists" error.
-- Validation: category required shows error.
-- Selecting "Custom" size reveals width and height fields.
-- Selecting "Copy Existing Template" reveals the template picker Autocomplete.
-- Fill + click "Create" calls `createTemplate` — shows loading spinner on button.
-- On success: `onCreated` callback called, dialog closed.
-- On error: error Alert shown within dialog.
-- Click "Cancel" closes dialog without calling create.
-
-#### Test File 5: templateListStore.test.ts
-- Initial state assertions (templates=[], loading=false, etc.).
-- `setSearchQuery('hello')` updates `searchQuery`.
-- `setCategoryFilter('academic')` updates `categoryFilter` and clears `selectedIds`.
-- `setStatusFilter('draft')` updates `statusFilter` and clears `selectedIds`.
-- `setSortBy('name-asc')` updates `sortBy`.
-- `setViewMode('table')` updates `viewMode`.
-- `toggleSelection('id1')` adds to selectedIds; calling again removes.
-- `clearSelection()` empties selectedIds.
-- `openCreateDialog()` sets `createDialogOpen=true`.
-- `closeCreateDialog()` sets `createDialogOpen=false`.
-- `loadTemplates` sets loading=true during fetch, sets templates on success, sets error on failure (mock Apollo client).
-- `createTemplate` adds to templates array and closes dialog.
-- `deleteTemplate` removes from templates (optimistic), rollback on error.
-- `duplicateTemplate` adds to templates.
-- `viewMode` persistence: verify `localStorage` key is read/written.
-- Use `renderHook` from `@testing-library/react` for Zustand store tests.
-
-**Dependencies:** T12, T13, T14, T16, T17.
-
-**Testing Conventions:**
-- Read `test/ui/AGENTS.md` before writing tests.
-- Use Vitest + Happy DOM + `@testing-library/react`.
-- Mock Apollo provider with `MockedProvider`.
-- No real server — all data mocked.
-- Test file location: `test/ui/components/cert/templates/`.
-
-**Verification:**
-```bash
-# Run all 5 test files together with log capture
-for test_file in \
-  test/ui/components/cert/templates/TemplateListPage.test.tsx \
-  test/ui/components/cert/templates/TemplateCard.test.tsx \
-  test/ui/components/cert/templates/TemplateListTable.test.tsx \
-  test/ui/components/cert/templates/CreateTemplateDialog.test.tsx \
-  test/ui/components/cert/templates/templateListStore.test.ts; do
-  bun run scripts/run-test/run-test.ts "$test_file"
-done
-```
-
----
-
-### T21 — E2E Tests (6 Test Files)
-
-**Description:** Write end-to-end (E2E) tests using Playwright against a production build server. Tests cover: creating a template (dialog flow), listing in grid view, listing in table view, filtering/searching, duplicating a template, and deleting a template. Each E2E test file uses the project's E2E conventions.
-
-**Prerequisites:** `bun run build:test` must be run before E2E tests to generate the production bundle in `.next-test-prod`.
-
-**Files:**
-1. `test/ui/e2e/cert/templates/create-template.spec.ts` (new)
-2. `test/ui/e2e/cert/templates/list-grid-view.spec.ts` (new)
-3. `test/ui/e2e/cert/templates/list-table-view.spec.ts` (new)
-4. `test/ui/e2e/cert/templates/filter-search.spec.ts` (new)
-5. `test/ui/e2e/cert/templates/duplicate-template.spec.ts` (new)
-6. `test/ui/e2e/cert/templates/delete-template.spec.ts` (new)
-
-**Sub-tasks:**
-
-#### E2E Test 1: create-template.spec.ts
-- Navigate to `/dashboard/cert/templates`.
-- Click "Create Template" button.
-- Verify dialog opens.
-- Fill in name "E2E Test Template".
-- Select category "Academic".
-- Select orientation "Landscape".
-- Select size "A4".
-- Click "Create" button.
-- Verify navigation to editor page.
-- Verify the template appears in the sidebar or template list.
-
-#### E2E Test 2: list-grid-view.spec.ts
-- Navigate to `/dashboard/cert/templates`.
-- Verify grid view is the default (or stored preference).
-- Verify template cards render.
-- Verify each card shows name, category chip, status chip, modified date, variable count.
-- Click on a card — verify navigation to editor page.
-- Verify hover effect (card elevation changes) — optional, via mouse hover.
-
-#### E2E Test 3: list-table-view.spec.ts
-- Navigate to `/dashboard/cert/templates`.
-- Switch to table (list) view using the toggle button.
-- Verify table renders with columns: checkbox, thumbnail, name, category, status, variables, modified, actions.
-- Verify pagination control is visible.
-- Click "select all" checkbox — verify all rows selected and bulk actions bar appears.
-- Click row — verify navigation to editor.
-- Change rows per page to 50 — verify table updates.
-
-#### E2E Test 4: filter-search.spec.ts
-- Navigate to `/dashboard/cert/templates`.
-- Type in search field — verify template list filters by name.
-- Select category filter — verify only templates of that category show.
-- Select status filter — verify only templates of that status show.
-- Change sort — verify order changes.
-- Navigate via sidebar to "Drafts" — verify status=draft filter applied.
-- Navigate via sidebar to "Published" — verify status=published filter applied.
-- Navigate via URL `?category=academic` — verify category filter applied on load.
-
-#### E2E Test 5: duplicate-template.spec.ts
-- Navigate to `/dashboard/cert/templates`.
-- Click "Duplicate" button on a template card (or table row).
-- Verify a new template appears with "(Copy)" or similar suffix in the name.
-- Verify the duplicate has the same category and size.
-- Verify the duplicate status is "Draft".
-- Verify a success snackbar/toast appears.
-
-#### E2E Test 6: delete-template.spec.ts
-- Navigate to `/dashboard/cert/templates`.
-- Click "More" menu on a template card, then click "Delete".
-- Verify confirmation dialog appears with the template name.
-- Click "Cancel" — verify dialog closes and template still exists.
-- Reopen delete dialog, click "Delete" confirm button.
-- Verify the template no longer appears in the list.
-- Verify success snackbar/toast appears.
-- Also test bulk delete: select multiple rows, click bulk "Delete", confirm, verify all deleted.
-
-**E2E Test Conventions:**
-- Read `test/ui/AGENTS.md` before writing E2E tests.
-- Use Playwright test runner against production server (`.next-test-prod`).
-- Run `bun run build:test` before the test suite.
-- Test files in `test/ui/e2e/cert/templates/`.
-- Use realistic seed data or create data via API/test setup.
-- Each test should be independent and idempotent — clean up created data.
-
-**Verification:**
-```bash
-# Build production bundle for E2E first
-bun run build:test
-
-# Run each E2E test file
-for test_file in \
-  test/ui/e2e/cert/templates/create-template.spec.ts \
-  test/ui/e2e/cert/templates/list-grid-view.spec.ts \
-  test/ui/e2e/cert/templates/list-table-view.spec.ts \
-  test/ui/e2e/cert/templates/filter-search.spec.ts \
-  test/ui/e2e/cert/templates/duplicate-template.spec.ts \
-  test/ui/e2e/cert/templates/delete-template.spec.ts; do
-  bun run scripts/run-test/run-test.ts "$test_file"
-done
-```
-
----
-
 ### T22 — Quality Loop Per File
 
-**Description:** For every file created or modified in T12–T21, run the project's per-file quality loop (`scripts/health/sub-loop.ts`) to ensure each file passes tsgo → biome → lint-queue-client → codescene progressively. Fix any failures before moving to the next file.
+**Description:** For every file created or modified in T12–T19, run the project's per-file quality loop (`scripts/health/sub-loop.ts`) to ensure each file passes tsgo → biome → lint-queue-client → codescene progressively. Fix any failures before moving to the next file.
 
-**Files:** All files created in T12–T21.
+**Files:** All files created in T12–T19.
 
 **Sub-tasks:**
 1. Start the lint queue server in background: `~/.bun/bin/bun run scripts/lint-queue-server.ts`.
@@ -2226,8 +1881,6 @@ done
 | T17 | `frontend/stores/cert/templateListStore.ts` |
 | T18 | sidebar config files (TBD) |
 | T19 | `frontend/views/dashboard/cert/templates/list/TemplateListPage.tsx` (modified) |
-| T20 | 5 test files in `test/ui/components/cert/templates/` |
-| T21 | 6 E2E test files in `test/ui/e2e/cert/templates/` |
 
 **Verification:**
 ```bash
@@ -2291,7 +1944,7 @@ bun quality-gate
    - This helps future plans know which routes exist and their permissions.
 
 7. **Lessons learned:**
-   - After T12–T21 are complete, document any interesting patterns, gotchas, or issues encountered in this section.
+   - After T12–T19 are complete, document any interesting patterns, gotchas, or issues encountered in this section.
    - Examples: "MUI DataGrid vs raw Table decision rationale for T15", "Optimistic delete rollback pattern in T17", "Mobile bottom sheet animation gotchas in T19".
 
 **Dependencies:** All prior tasks (T12–T22) should be complete or in progress.
@@ -2321,9 +1974,7 @@ T06 (types) ─────────────┼────────�
                          │         ├──> T12 (TemplateListPage) ──> T19 (Mobile)
                          │         │         │
                          │         ├──> T13 (TemplateCard) ────────┤
-                         │         │         │                       ├──> T20 (Component Tests)
                          │         ├──> T14 (TemplateListTable) ────┤       │
-                         │         │         │                       │       ├──> T21 (E2E Tests)
                          │         ├──> T15 (AppDataGrid) ───────────┘       │       │
                          │         │                                         │       │
                          │         ├──> T16 (CreateTemplateDialog) ──────────┘       │
@@ -2335,17 +1986,15 @@ T06 (types) ─────────────┼────────�
 
 | Task | Depends On | Blocks | Lifecycle |
 |------|-----------|--------|-----------|
-| T12 | T04, T05, T06 | T19, T20, T21 | UI |
-| T13 | T06, T07 | T12, T20, T21 | UI |
-| T14 | T06, T13 | T12, T15, T20, T21 | UI |
-| T15 | T14 | T20, T21 | UI |
-| T16 | T04, T06 | T12, T20, T21 | UI |
-| T17 | T05, T06 | T12, T16, T20 | Store |
-| T18 | (sidebar infra) | T21 | Navigation |
-| T19 | T12, T13, T14 | T21 | UI |
-| T20 | T12, T13, T14, T16, T17 | T22 | Testing |
-| T21 | T19, T16 | T22 | E2E |
-| T22 | T12–T21 | T23 | Quality |
+| T12 | T04, T05, T06 | T19 | UI |
+| T13 | T06, T07 | T12 | UI |
+| T14 | T06, T13 | T12, T15 | UI |
+| T15 | T14 | — | UI |
+| T16 | T04, T06 | T12 | UI |
+| T17 | T05, T06 | T12, T16 | Store |
+| T18 | (sidebar infra) | — | Navigation |
+| T19 | T12, T13, T14 | — | UI |
+| T22 | T12–T19 | T23 | Quality |
 | T23 | T22 | — | Documentation |
 
 ## Round 4 Enhancement Tasks
@@ -2456,44 +2105,6 @@ T06 (types) ─────────────┼────────�
   - `Delete` → archive selected (with confirmation)
   - Global keyboard handler with `useEffect` and event listener
   - Conflict prevention: check if focus is in input/textarea before triggering
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T10: Performance Budget Tests
-- [ ] Create `test/ui/components/template-list/Performance.test.tsx`
-  - Test: list of 100 items renders in < 16ms per item
-  - Test: filter apply completes in < 100ms
-  - Test: search debounced at 300ms
-  - Test: virtualized list renders only visible items (mock IntersectionObserver)
-  - Test: bundle import is < 50KB (bundle analyzer mock)
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T11: Component Tests for New States
-- [ ] Create `test/ui/components/template-list/LoadingStates.test.tsx`
-  - Test skeleton renders correct shape for card view
-  - Test skeleton renders correct shape for table view
-  - Test stale-while-revalidate shows old data during refetch
-  - Test optimistic update shows immediately
-  - Test optimistic rollback on error
-- [ ] Create `test/ui/components/template-list/EmptyStates.test.tsx`
-  - Test each empty state renders correct illustration and CTA
-  - Test CTA button triggers correct action
-  - Test clear filters button resets all filters
-  - Test retry button calls refetch
-- [ ] Create `test/ui/components/template-list/ErrorStates.test.tsx`
-  - Test error boundary catches render errors
-  - Test network error shows offline indicator
-  - Test retry queue stores failed requests
-  - Test toast notification appears on error
-  - **Quality loop**: tsgo + biome + lint
-
-### R4-T12: E2E Tests for Keyboard Shortcuts & Bulk Actions
-- [ ] Create `test/ui/e2e/template-list-keyboard.spec.ts`
-  - Navigate list with keyboard only
-  - Press `/` to focus search, type query, verify results
-  - Press `n` to open create dialog
-  - Press `Esc` to clear filters
-  - Select all with `Cmd+A`, verify count in toolbar
-  - Bulk archive, verify undo toast, click undo, verify restoration
   - **Quality loop**: tsgo + biome + lint
 
 ### R4-T13: Knowledge Propagation

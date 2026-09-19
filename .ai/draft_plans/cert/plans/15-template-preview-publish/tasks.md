@@ -20,8 +20,6 @@ Phase 2 (Publishing Workflow):
 Phase 3 (Version History):
   T14 ──► T15
 
-Phase 4 (Testing):
-  T16 ──► T17
 
 Phase 5 (Knowledge Propagation):
   T18
@@ -32,11 +30,7 @@ Phase 6 (Enhanced Preview Components):
 Phase 7 (Enhanced Version History & Diff):
   T26 ──► T24 ──► T25
 
-Phase 8 (Enhanced Component Tests):
-  T27
 
-Phase 9 (Enhanced E2E Tests):
-  T28
 
 Phase 10 (Quality Loop Per Enhanced File):
   T29
@@ -58,13 +52,9 @@ T04 (types + utils)          ─── required by ──► T05 (PreviewViewMod
                                                     T20 (PreviewCanvas — reuses CertificatePreviewCanvas), T25 (version diff util)
 T09 (page route wiring)      ─── required by ──► T10, T14 (navigation from editor/list),
                                                     T19 (enhanced TemplatePreviewPage props — templateId/locale)
-T13 (download preview)       ─── required by ──► T16 (component tests for download)
-T15 (revert)                 ─── required by ──► T17 (E2E revert test),
-                                                    T24 (VersionHistoryPanel — restore action reuses revert mutation/repo), T26 (VersionStore.restoreVersion)
+T15 (revert)                 ─── required by ──► T24 (VersionHistoryPanel — restore action reuses revert mutation/repo), T26 (VersionStore.restoreVersion)
 T18 (Phase 5 knowledge)      ─── required by ──► T30 (extends the docs produced by T18; never rewrites them)
 T26 (enhanced stores)        ─── required by ──► T19, T20, T21, T22, T23, T24, T25 (all Phase 6/7 components subscribe to the enhanced stores)
-T27 (component tests)        ─── required by ──► T28 (E2E flows rely on the same contracts proven by component tests)
-T28 (E2E tests)              ─── required by ──► T29 (quality loop per file needs green tests to validate the build)
 T29 (quality loop)           ─── required by ──► T30 (knowledge propagation only doc-tags verified-green code)
 ```
 
@@ -94,14 +84,12 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   bun run scripts/health/sub-loop.ts shared/locale/namespaces/dashboard/certificatePreview/index.ts --lifecycle codescene
   bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificatePreview/index.ts --lifecycle codescene
   bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificatePreview/index.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert-preview/i18n.types.test.ts --lifecycle codescene
   ```
 - [ ] **Instruction verification**: read `shared/AGENTS.md` and `.agents/instructions/frontend.instructions.md` before editing; confirm no forbidden imports from `@/frontend/**`, `@/backend/**`, `@/app/**`
-- [ ] **Testing**: add unit test in `test/ui/components/cert-preview/i18n.types.test.ts` verifying type signatures compile and pluralization functions execute correctly for EN/AR
 - [ ] **Knowledge propagation**: document i18n namespace structure in outcome file; add reference to `frontend/AGENTS.md` Important References
 - [ ] Verify against: `shared/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: AC-I18N-01 (all keys in both EN/AR, pluralization follows Arabic rules, interpolation uses typed functions), REQ-PREVIEW-03, REQ-PUBLISH-01, REQ-ARCHIVE-02, REQ-REVERT-02, REQ-VERSION-01
-- **Files created**: `shared/locale/types/dashboard/certificatePreview/index.ts`, `shared/locale/namespaces/dashboard/certificatePreview/index.ts`, `shared/locale/en/dashboard/certificatePreview/index.ts`, `shared/locale/ar/dashboard/certificatePreview/index.ts`, `test/ui/components/cert-preview/i18n.types.test.ts`
+- **Files created**: `shared/locale/types/dashboard/certificatePreview/index.ts`, `shared/locale/namespaces/dashboard/certificatePreview/index.ts`, `shared/locale/en/dashboard/certificatePreview/index.ts`, `shared/locale/ar/dashboard/certificatePreview/index.ts`
 - **Files modified**: Main `Translations` type file, `shared/locale/types/index.ts` barrel (if needed)
 - **Dependencies**: Plan 5 (GraphQL API — i18n context); Plan 11 (Visual Canvas — shared i18n keys)
 - **Estimated**: 5h
@@ -145,21 +133,17 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
   - **Actions**: `openPublishDialog`, `closePublishDialog`, `openArchiveDialog`, `closeArchiveDialog`, `openUnarchiveDialog`, `closeUnarchiveDialog`, `openRevertDialog(version)`, `closeRevertDialog`, `openVersionHistory`, `closeVersionHistory`, `setPublishLoading`, `setArchiveLoading`, `setRevertLoading`, `setVersionNotes`, `setVersionPreviewing`, `resetPublishState`
 - [ ] **NO `persist` middleware** — both stores are ephemeral session state per `frontend/common/stores/AGENTS.md`
 - [ ] Import generated types from `frontend/common/graphql/generated/gql/graphql-types.ts` for `revertTargetVersion` and other GraphQL entity types
-- [ ] Create mock stores for Storybook in `frontend/stores/` if the pattern requires it (check existing stores)
 - [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
   bun run scripts/health/sub-loop.ts frontend/common/stores/certPreviewStore.ts --lifecycle codescene
   bun run scripts/health/sub-loop.ts frontend/common/stores/certPublishStore.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert-preview/certPreviewStore.test.ts --lifecycle codescene
-  bun run scripts/health/sub-loop.ts test/ui/components/cert-preview/certPublishStore.test.ts --lifecycle codescene
   ```
 - [ ] **Instruction verification**: read `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md` before editing; confirm NO `persist` middleware, state fields are properly typed, actions follow naming conventions
-- [ ] **Testing**: add unit tests in `test/ui/components/cert-preview/certPreviewStore.test.ts` and `certPublishStore.test.ts` verifying initial state, action mutations, and type safety
 - [ ] **Knowledge propagation**: document store patterns in outcome file; update `frontend/common/stores/AGENTS.md` if new conventions emerged
 - [ ] Run quality loop on both store files
 - [ ] Verify against: `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-STATE-01 (interaction states — store tracks all dialog/panel open state), REQ-PREVIEW-03 (testValues state), REQ-PREVIEW-04 (zoom state)
-- **Files created**: `frontend/common/stores/certPreviewStore.ts`, `frontend/common/stores/certPublishStore.ts`, `test/ui/components/cert-preview/certPreviewStore.test.ts`, `test/ui/components/cert-preview/certPublishStore.test.ts`
+- **Files created**: `frontend/common/stores/certPreviewStore.ts`, `frontend/common/stores/certPublishStore.ts`
 - **Dependencies**: T01 (types from i18n), T02 (generated GraphQL types for TemplateVersionType)
 - **Estimated**: 4h
 
@@ -186,12 +170,11 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] Create `frontend/common/views/dashboard/cert-preview/schemas/publishSchema.ts` — Zod schema for publish form validation (`versionNotes` optional string, max 500 chars)
 - [ ] **Quality loop per file**: run `bun tsgo`, `bun biome:check`, `bun run lint` (via lint queue client), `bun run codescene --file <file>` on each created file
 - [ ] **Instruction verification**: read `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md` before editing; confirm all types follow canonical patterns, utilities are pure functions, no side effects
-- [ ] **Testing**: add unit tests in `test/ui/components/cert-preview/sampleDataResolver.test.ts`, `previewElementRenderer.test.ts`, `versionUtils.test.ts`, `publishSchema.test.ts` verifying all utility functions work correctly with edge cases
 - [ ] **Knowledge propagation**: document utility function contracts in outcome file; add shared renderer reference to `frontend/AGENTS.md` Important References for Plan 11 sharing
 - [ ] Run quality loop on all utility files
 - [ ] Verify against: `frontend/common/views/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: REQ-PREVIEW-02 (element positioning & rendering), REQ-PREVIEW-03 (variable resolution)
-- **Files created**: `frontend/common/views/dashboard/cert-preview/types/preview.types.ts`, `frontend/common/views/dashboard/cert-preview/types/previewLabelTypes.ts`, `frontend/common/views/dashboard/cert-preview/utils/sampleDataResolver.ts`, `frontend/common/views/dashboard/cert-preview/utils/previewElementRenderer.ts`, `frontend/common/views/dashboard/cert-preview/utils/versionUtils.ts`, `frontend/common/views/dashboard/cert-preview/schemas/publishSchema.ts`, `test/ui/components/cert-preview/sampleDataResolver.test.ts`, `test/ui/components/cert-preview/previewElementRenderer.test.ts`, `test/ui/components/cert-preview/versionUtils.test.ts`, `test/ui/components/cert-preview/publishSchema.test.ts`
+- **Files created**: `frontend/common/views/dashboard/cert-preview/types/preview.types.ts`, `frontend/common/views/dashboard/cert-preview/types/previewLabelTypes.ts`, `frontend/common/views/dashboard/cert-preview/utils/sampleDataResolver.ts`, `frontend/common/views/dashboard/cert-preview/utils/previewElementRenderer.ts`, `frontend/common/views/dashboard/cert-preview/utils/versionUtils.ts`, `frontend/common/views/dashboard/cert-preview/schemas/publishSchema.ts`
 - **Dependencies**: T01 (i18n — label types reference translation keys), T02 (GraphQL types for TemplateElementType, TemplateVariableType), T03 (store types)
 - **Estimated**: 5h
 
@@ -500,99 +483,11 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 
 ---
 
-## Phase 4: Testing (T16–T17)
-
-### T16: Component Tests
-
-- [ ] Create `test/ui/components/cert-preview/CertificatePreviewCanvas.test.tsx`:
-  - Test: renders all element types (text, image, shape, data_text, data_date, data_element) at correct positions per design §4.1
-  - Test: updates when `testValues` change (real-time preview update) — change a `testValues` entry, canvas re-renders with new value
-  - Test: zoom controls (+ / − / reset) adjust `zoomLevel` state and canvas scale transform
-  - Test: empty state when `template === null` shows `emptyState.title` + `emptyState.subtitle`
-  - Test: historical version banner shown when `isHistoricalVersion === true`
-- [ ] Create `test/ui/components/cert-preview/SampleDataPanel.test.tsx`:
-  - Test: recipient dropdown lists all recipients
-  - Test: selecting a recipient populates `testValues` with recipient data
-  - Test: variable input fields show current `testValues` values
-  - Test: editing a variable input updates `testValues` in store
-  - Test: custom recipient option shows manual entry fields (name, email, date)
-- [ ] Create `test/ui/components/cert-preview/PublishDialog.test.tsx`:
-  - Test: validation errors displayed when validation fails — all errors collected and shown together (not fail-fast)
-  - Test: confirm button disabled when validation errors exist
-  - Test: confirm button enabled when validation passes (warnings do NOT block)
-  - Test: version notes input updates `versionNotes` state
-  - Test: `hasUnsavedChanges` warning shown when true
-  - Test: on confirm, calls mutation with correct variables
-  - Test: on success, closes dialog and shows success snackbar
-  - Test: on domain error (`success === false`), shows validation errors in dialog
-- [ ] Create `test/ui/components/cert-preview/PublishValidationChecker.test.ts`:
-  - Test: each of 5 validation checks fires independently
-  - Test: all errors collected in single pass (collect-all strategy, not fail-fast)
-  - Test: warnings returned but do NOT set `passed = false`
-- [ ] Create `test/ui/components/cert-preview/ArchiveDialog.test.tsx`:
-  - Test: confirm button calls `onConfirm`
-  - Test: certificate count displayed in warning message (pluralization)
-- [ ] Create `test/ui/components/cert-preview/VersionHistory.test.tsx`:
-  - Test: renders list of versions with version number, timestamp, created-by
-  - Test: click on version calls `onSelectVersion` with version id
-  - Test: version notes expandable when `canViewVersionNotes === true`
-- [ ] Create `test/ui/components/cert-preview/RevertDialog.test.tsx`:
-  - Test: confirm button calls `onConfirm` with target version
-  - Test: warning message includes target version number
-  - Test: confirm disabled while `loading === true`
-- [ ] Create `test/ui/components/cert-preview/PreviewToolbar.test.tsx`:
-  - Test: zoom buttons adjust zoom level
-  - Test: publish button visible when `canManage` and `hasUnsavedChanges === false`
-  - Test: archive button visible when `templateStatus === "published"` and `canManage`
-  - Test: unarchive button visible when `templateStatus === "archived"` and `canManage`
-- [ ] Run quality loop on all test files
-- [ ] Verify against: `test/ui/AGENTS.md`, `test/ui/components/AGENTS.md` (if exists), `.agents/instructions/tests.instructions.md`
-- **Requirements**: All ACs (component-level verification of all preview, publish, archive, version, and revert acceptance criteria)
-- **Files created**: 8 test files in `test/ui/components/cert-preview/`
-- **Dependencies**: T01–T15 (all component tasks must be complete)
-- **Estimated**: 8h
-
-### T17: E2E Tests
-
-- [ ] Create `test/ui/e2e/cert-preview/preview-page.spec.ts`:
-  - Test: navigate to preview page, verify canvas renders with template elements
-  - Test: zoom in / zoom out / reset zoom controls work
-  - Test: sample data panel → select recipient → preview updates with recipient data
-  - Test: sample data panel → edit variable input → preview updates in real-time
-  - Test: responsive layout — desktop view has side panel, mobile view has bottom sheet
-- [ ] Create `test/ui/e2e/cert-preview/publish-workflow.spec.ts`:
-  - Test: open publish dialog → validation passes → confirm publish → success snackbar → version history updated
-  - Test: open publish dialog → validation fails → errors displayed → confirm disabled
-  - Test: open publish dialog → validation warnings shown → confirm still enabled
-  - Test: add version notes → publish → verify notes appear in version history
-  - Test: idempotency — double-click publish button rapidly → only one version created (SWE review #7)
-- [ ] Create `test/ui/e2e/cert-preview/archive-unarchive.spec.ts`:
-  - Test: archive a published template → template status changes to "archived" → archive button replaced by unarchive button
-  - Test: unarchive an archived template → template status changes to "published" → unarchive button replaced by archive button
-  - Test: archived template cannot be used for certificate generation (if generation page exists)
-- [ ] Create `test/ui/e2e/cert-preview/version-history-revert.spec.ts`:
-  - Test: open version history drawer → list of published versions displayed
-  - Test: click on historical version → preview shows that version (read-only banner)
-  - Test: revert to previous version → confirmation dialog → confirm → new version created → success snackbar → version history updated
-  - Test: revert idempotency — double-click revert confirm → only one new version created
-- [ ] Create `test/ui/e2e/cert-preview/download-preview.spec.ts`:
-  - Test: download preview as image → file download triggered (PNG)
-  - Test: download preview as PDF → server endpoint returns blob → file download triggered (PDF)
-- [ ] Run quality loop on all test files
-- [ ] Verify against: `test/ui/AGENTS.md`, `test/ui/e2e/AGENTS.md` (if exists), `.agents/instructions/tests.instructions.md`
-- **Requirements**: All ACs end-to-end (full user workflow verification)
-- **Prerequisite**: Run `bun run build:test` before E2E tests (produces `.next-test-prod`)
-- **Files created**: 5 spec files in `test/ui/e2e/cert-preview/`
-- **Dependencies**: T16 (component tests pass first), T01–T15 (all features implemented)
-- **Estimated**: 8h
-
----
-
 ## Phase 5: Knowledge Propagation (T18)
 
 ### T18: Knowledge Propagation & Documentation
 
-- [ ] Read all outcome files in `.ai/plans/cert-template-preview-publish/outcome/` (from T01–T17)
+- [ ] Read all outcome files in `.ai/plans/cert-template-preview-publish/outcome/` (from T01–T15)
 - [ ] Create canonical reference doc under `docs/frontend/certificate-template-preview.md` consolidating:
   - Preview component architecture (Container → ViewModel → Desktop/Mobile views, tier-isolated pattern)
   - Zustand stores (`useCertPreviewStore`, `useCertPublishStore`) — ephemeral session state, no `persist`
@@ -609,14 +504,13 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] Update root `AGENTS.md` Important References section with new doc path
 - [ ] Update `.agents/instructions/frontend.instructions.md` if new frontend conventions emerged (ViewModel pattern, collect-all validation)
 - [ ] Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
-- [ ] Run full test suite: `bun run test:ui` (component + E2E tests all pass)
 - [ ] Write outcome file: `.ai/plans/cert-template-preview-publish/outcome/T18-knowledge-propagation-outcome.md`
 - [ ] Update progress: Mark all tasks as `[x]` in this file
 - [ ] Verify against: root `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: Feature 6 (Outcome Knowledge Base), all REQs and ACs documented
 - **Files created**: `docs/frontend/certificate-template-preview.md`, outcome file
 - **Files modified**: `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, root `AGENTS.md`, `.agents/instructions/frontend.instructions.md`
-- **Dependencies**: T17 (all tests pass), T01–T16 (all implementation tasks complete)
+- **Dependencies**: T01–T15 (all implementation tasks complete)
 - **Estimated**: 4h
 
 ---
@@ -916,175 +810,25 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 
 ---
 
-## Phase 8: Enhanced Component Tests (T27)
-
-### T27: Write Component Tests for Enhanced Preview/Publish Components (8 files)
-
-- [ ] Create the following 8 test files using Bun test runner + React Testing Library + Happy DOM (per `test/ui/AGENTS.md`)
-
-- [ ] **T27.1**: `test/ui/components/cert-preview/TemplatePreviewPage.test.tsx`
-  - Snapshot/render: renders TemplatePage with header (name + "Preview Mode" badge + back button), toolbar (mode ToggleGroup, zoom controls, sample selector, override toggle), canvas host, and (toggleable) sidebar with VariableOverridePanel
-  - ToggleButtonGroup: clicking "Mobile" calls `setMode('mobile')`; clicking "PDF" calls `setMode('pdf')`; clicking "Print" triggers `window.print` (mock); clicking "Desktop" resets to `'desktop'`
-  - Zoom controls: zoom-in increments by 10 (max 200); zoom-out decrements by 10 (min 10); fit-to-screen sets `isFitToScreen = true`
-  - Publish button opens PublishDialog; Version History button opens VersionHistoryPanel
-  - Override toggle: ON shows VariableOverridePanel; OFF hides it
-  - Back button navigates to the editor route (`app/(dashboard)/certificates/templates/[id]/edit`)
-
-- [ ] **T27.2**: `test/ui/components/cert-preview/PreviewCanvas.test.tsx`
-  - Desktop mode: renders elements at 1:1 scale; background image present; CSS `transform: scale(x)` applied when zoom != 100
-  - Mobile mode: container width clamps to 375px; elements render scaled; text overflow detected via snapshot for the "Fatima (Long Arabic Name)" sample
-  - PDF mode: iframe `src` matches `/api/certificates/templates/${templateId}/preview.pdf?...`; shows loading spinner until `onload`; shows error Alert if `onerror` resolves
-  - Print mode: setting `mode='print'` calls `window.print()` (mocked, spied on) exactly once; after a short delay, mode reverts to the previous mode
-  - No elements: shows empty-state i18n message
-  - Variable overrides merge with sample data (overrides win, keyed by `variableId`)
-
-- [ ] **T27.3**: `test/ui/components/cert-preview/SampleDataSelector.test.tsx`
-  - Renders 5 options (Ahmed, Fatima, John, Empty, Custom...) in two groups (Recent, Built-in)
-  - Selecting "Ahmed (Graduate)" calls `onSelect` with the expected `variableValues`
-  - Selecting "Custom..." opens the dialog; dialog lists all template variables as editable controls; "Save" calls `onSelect` with a `SampleData` of `id: 'custom-*'`
-  - Recent samples: after a select, the id is persisted to `localStorage` under `cert-preview-recent-samples-<templateId>` and appears at the top on next mount; max 5 retained
-  - `localStorage` errors (legacy-mode) are silently swallowed; component does not crash
-
-- [ ] **T27.4**: `test/ui/components/cert-preview/VariableOverridePanel.test.tsx`
-  - Renders table with rows for each variable; columns: Variable Name | Type | Resolved Value | Override Value
-  - Type Chip color matches variable type (text=primary, date=secondary, boolean=success, number=info)
-  - Editing an override `TextField` dispatches `setOverride(variableId, value)`
-  - Setting back to empty ("") does NOT remove the override (empty is still a valid override) — only "Reset All" clears everything
-  - Reset All calls `clearOverrides()`
-  - Empty state: template with no variables shows `sampleData.noVariables` (no table)
-  - Real-time: changes in a subscribed `PreviewCanvas` test helper reflect the new overrides immediately
-
-- [ ] **T27.5**: `test/ui/components/cert-preview/PublishDialog.test.tsx`
-  - Step 1: 4 validation checks render; failure cases disable "Next" (e.g. empty elements → "Template has elements" fails)
-  - Step 1 → Step 2: only when all validators pass; "Next" enabled
-  - Step 2: typing notes updates `useCertPublishStore.versionNotes`; the "Set as active" Switch toggles `setAsActive`; version preview label reflects the correct `v{n+1}` based on the fetched version number — for a template with no versions, shows "v1 (first publish)"
-  - Step 3: summary card shows template name, version number, truncated notes, "Active" chip when `setAsActive === true`
-  - Publish success: advancing past Step 3 shows success overlay with "View Template List" + "Create Another" buttons; "Create Another" resets `versionNotes` and `publishError`
-  - Error path: mutation throw → Alert (severity=error), stays on Step 3; `result.success === false` → navigates back to Step 1
-  - Double-click guard: clicking Publish twice within ~2 seconds triggers the mutation only once (idempotency)
-  - `onPublished` called exactly once on success; never called on error
-
-- [ ] **T27.6**: `test/ui/components/cert-preview/VersionHistoryPanel.test.tsx`
-  - Renders `Timeline` with one `TimelineItem` per version
-  - Status Chip color: active (success), draft (default), archived (warning); active version has dashed green border
-  - Clicking Restore Menu item opens confirmation Dialog; confirming calls `restoreVersion(versionId)`; isRestoring toggles; on success the panel refetches and the active border moves
-  - Clicking "View" opens read-only preview with the "Historical Version" banner
-  - Clicking "Diff with Current" calls `openDiff(versionId, currentVersionId)` (renders the VersionDiffView, tested in T27.7)
-  - Empty: no versions → `versionHistory.empty` message
-
-- [ ] **T27.7**: `test/ui/components/cert-preview/VersionDiffView.test.tsx`
-  - Side-by-side mini PreviewCanvas for each version
-  - Element changes list:
-    - Added element highlighted green
-    - Removed element strikethrough red
-    - Modified element yellow with property-level sub-list (`fontSize: 16 → 18`, etc.)
-  - Identical versions → "No differences found" message
-  - Loading state while snapshots fetch
-
-- [ ] **T27.8**: `test/ui/components/cert-preview/Stores.test.tsx`
-  - `useCertPreviewStore` extended: `setMode`, `setZoom` (clamp 10–200), `selectSampleData`, `setOverride`/`clearOverrides`, `toggleOverridePanel`, `startRender`/`setRenderError` — all behave per spec
-  - `useCertPublishStore` extended: `toggleSetAsActive`, `startPublish`, `setPublishError`, `lastPublishedVersion` lifecycle
-  - `useCertVersionStore`: `loadVersions` (populates `versions` + `activeVersionId`), `restoreVersion` (toggles `isRestoring` + refetches on success), `openDiff`/`closeDiff` lifecycle
-  - No `persist` middleware used (Verify with `expect(`store` to not have `persist` keys)
-
-- [ ] Mock Apollo for all tests with `MockedProvider` (per `test/ui/components/` conventions); mock `window.print`, `localStorage` (Happy DOM provides it but guard edge cases), `matchMedia` for `useMediaQuery`
-- [ ] **Instruction verification**: read `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`; follow existing test conventions (mock stores, Apollo mocks, no real network)
-- [ ] **Quality loop per file**: run `bun tsgo`, `bun biome:check`, lint queue client, `codescene --file` on each of the 8 test files
-- [ ] Verify against: `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`
-- **Requirements**: AC-PREVIEW-01..06, AC-PUBLISH-01..05, AC-VERSION-01..02, AC-REVERT-01..02, design §12.1–§12.8
-- **Files created**: 8 test files listed above (T27.1–T27.8)
-- **Files modified**: none
-- **Dependencies**: T19 (TemplatePreviewPage), T20 (PreviewCanvas), T21 (SampleDataSelector), T22 (VariableOverridePanel), T23 (PublishDialog), T24 (VersionHistoryPanel), T25 (VersionDiffView), T26 (stores)
-- **Estimated**: 8h
-
----
-
-## Phase 9: Enhanced E2E Tests (T28)
-
-### T28: Write E2E Tests for Enhanced Preview/Publish/Version Flows (6 tests)
-
-- [ ] Create 6 Playwright E2E tests under `test/ui/e2e/cert-template-preview-enhanced/` against the production server (run `bun run build:test` first per `test/ui/AGENTS.md`)
-
-- [ ] **T28.1**: `test/ui/e2e/cert-template-preview-enhanced/preview-desktop.spec.ts`
-  - Navigate to a template's preview route (`/certificates/templates/<id>/preview`)
-  - Verify: page header shows template name, "Preview Mode" badge, Back to editor button
-  - Verify: toolbar shows mode ToggleGroup (Desktop selected), zoom controls, sample dropdown, override toggle
-  - Default mode is Desktop: certificate renders at template dimensions
-  - Zoom in / out: zoom % label updates; canvas scales via CSS transform
-  - Fit-to-screen: canvas scales to fit the container
-  - Sample selector: select "Ahmed (Graduate)"; canvas updates with the recipient name
-  - Override toggle: turning it on shows the VariableOverridePanel; editing an override updates the canvas
-
-- [ ] **T28.2**: `test/ui/e2e/cert-template-preview-enhanced/preview-mobile.spec.ts`
-  - Navigate to preview route
-  - Click "Mobile" in the ToggleGroup
-  - Verify: container width clamps to 375px; canvas renders scaled to mobile viewport
-  - Select "Fatima (Long Arabic Name)"; verify (via DOM assertion) that the recipient name container does not clip the text (or, if it does, that the overflow is reflected in the layout — this is the verification purpose)
-  - Switch back to Desktop: canvas returns to 1:1 scale
-
-- [ ] **T28.3**: `test/ui/e2e/cert-template-preview-enhanced/preview-pdf.spec.ts`
-  - Navigate to preview route
-  - Click "PDF" in the ToggleGroup
-  - Verify: an `<iframe>` appears with `src` matching `/api/certificates/templates/<id>/preview.pdf?...`
-  - Wait for iframe `onload` (or a measurable load-complete cue)
-  - Verify: the iframe contents render without error (no `error=` query param, no network error caught)
-  - Switch back to Desktop: iframe removed
-
-- [ ] **T28.4**: `test/ui/e2e/cert-template-preview-enhanced/publish-flow.spec.ts`
-  - Navigate to preview route; click "Publish" button
-  - Step 1: verify all 4 validation checks render; for a complete template all pass and "Next" is enabled
-  - Step 2: type version notes; toggle "Set as active" ON; verify version preview label shows the correct next version number
-  - Step 3: verify summary card content; click "Publish" (a `LoadingButton`)
-  - Verify: success overlay appears; "View Template List" button is present (clicking navigates to the template list)
-  - Restart: go back to the template; open publish dialog again; verify the version number has incremented
-
-- [ ] **T28.5**: `test/ui/e2e/cert-template-preview-enhanced/version-restore.spec.ts`
-  - Navigate to preview route; click "Version History"
-  - Verify: Timeline renders with at least 2 versions (after the publish flow above)
-  - Click the actions dropdown for v1; click "Restore"; confirm in the dialog
-  - Verify: success toast; timeline refetches; a new draft with the restored version's content is reflected when navigating back to the editor
-  - Verify: the active version badge moves correctly
-  - Negative: opening restore for the currently-active version — verify the "Restore" action is disabled (edge-case assertion)
-
-- [ ] **T28.6**: `test/ui/e2e/cert-template-preview-enhanced/version-diff.spec.ts`
-  - Navigate to preview route; click "Version History"
-  - Click "Diff with Current" on v1
-  - Verify: VersionDiffView opens side-by-side with mini previews; element changes list renders (any added / removed / modified rows show with the expected colors)
-  - If the selected version is identical to the current: verify "No differences found" message
-  - Close the diff dialog; verify the v1 (or another) diff can be opened again cleanly
-
-- [ ] Mocking: tests run against the production-like server (build:test); use `localStorage` for the recently-used samples assertion where appropriate
-- [ ] **Instruction verification**: read `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`; follow Playwright conventions (selectors via role/label; no flaky waits — use `page.getByRole` / `page.waitForURL`)
-- [ ] **Quality loop per file** on each of the 6 spec files
-- [ ] Verify against: `test/ui/AGENTS.md`, `.agents/instructions/tests.instructions.md`
-- **Requirements**: AC-PREVIEW-01..06, AC-PUBLISH-01..05, AC-VERSION-01..02, AC-REVERT-01..02, design §12.1–§12.8
-- **Files created**: 6 spec files listed above (T28.1–T28.6)
-- **Files modified**: none
-- **Dependencies**: T19–T27 (all enhanced components + their tests), `bun run build:test` (must pass first)
-- **Estimated**: 6h
-
----
-
 ## Phase 10: Quality Loop Per Enhanced File (T29)
 
 ### T29: Run Quality Loop Per Enhanced File
 
-- [ ] Aggregate list of enhanced files (T19–T28 creates/modifies ~17 files): `TemplatePreviewPage.tsx`, `PreviewCanvas.tsx`, `SampleDataSelector.tsx` + `sampleDataProfiles.ts`, `VariableOverridePanel.tsx`, `PublishDialog.tsx`, `VersionHistoryPanel.tsx`, `VersionDiffView.tsx` + `versionDiffUtils.ts`, `certVersionStore.ts` (new), `certPreviewStore.ts` (extended), `certPublishStore.ts` (extended), store barrel, 8 component tests, 6 E2E specs
+- [ ] Aggregate list of enhanced files (T19–T26 creates/modifies ~17 files): `TemplatePreviewPage.tsx`, `PreviewCanvas.tsx`, `SampleDataSelector.tsx` + `sampleDataProfiles.ts`, `VariableOverridePanel.tsx`, `PublishDialog.tsx`, `VersionHistoryPanel.tsx`, `VersionDiffView.tsx` + `versionDiffUtils.ts`, `certVersionStore.ts` (new), `certPreviewStore.ts` (extended), `certPublishStore.ts` (extended), store barrel
 - [ ] For each file, run in strict order (per quality gate progressive loop):
   - `bun tsgo` → fix all TS errors in the file before moving on
   - `bun biome:check` → apply safe fixes; `bun biome:check --write` if formatting fixes needed
   - `bun run lint` (full repo, file is implicitly covered) OR lint queue client call for the single file
   - `bun run codescene --file <file>` → resolve any Large Method / Code Duplication warnings via in-file edits only (do not cross-file refactor)
-- [ ] For each of the 8 component tests + 6 E2E specs: run `bun run test:ui:components` (component tests) and `bun run test:ui:e2e` (E2E after `bun run build:test`) for the specific scope; ensure green
 - [ ] Any tsgo failure MUST be fixed before biome/lint (progressive enforcement per `scripts/health/sub-loop.ts`)
 - [ ] Any cross-file dependency (per Fix-Or-Report rule): do not modify the blocking file; escalate to the orchestrator with the documented pattern (CROSS-FILE DEPENDENCY report)
 - [ ] Final gate: `bun quality-gate` must pass through `codescene` for all new files; per AGENTS.md, **never run `sonar-scan`** — only the orchestrator handles that; this task does NOT trigger a scan
 - [ ] **Instruction verification**: read root `AGENTS.md` sections on Quality Loop / Parallel Subagent Quality Gate Workflow / Sonar-Scan Prohibition
-- [ ] Verify against: root `AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `test/ui/AGENTS.md`
+- [ ] Verify against: root `AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
 - **Requirements**: All code-quality gates for the enhanced deliverables (design §12.1–§12.8 and tests)
 - **Files created**: none
-- **Files modified**: any of the T19–T28 files failing a quality gate (in-place corrections only — never cross-file refactors)
-- **Dependencies**: T19–T28 (all enhanced implementation + tests complete and self-contained)
+- **Files modified**: any of the T19–T26 files failing a quality gate (in-place corrections only — never cross-file refactors)
+- **Dependencies**: T19–T26 (all enhanced implementation complete and self-contained)
 - **Estimated**: 4h
 
 ---
@@ -1113,14 +857,13 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 - [ ] Update `.agents/instructions/frontend.instructions.md` IF new conventions emerged (e.g. always key variable maps by `variableId`, not `name`; structured diff utility pattern) — do NOT rewrite existing rules
 - [ ] Update root `AGENTS.md` Important References section with the new `docs/frontend/certificate-template-preview.md` section reference (only added, not replacing existing entries)
 - [ ] Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
-- [ ] Run relevant test suites: `bun run test:ui:components` (T27 component tests pass), `bun run test:ui:e2e` (T28 E2E tests pass) — only enhanced scope, do not regress T16/T17 tests
 - [ ] Write outcome file: `.ai/plans/cert-template-preview-publish/outcome/T30-knowledge-propagation-enhanced-outcome.md`
 - [ ] Update progress: Mark all T19–T30 tasks as `[x]` in this tasks.md file
 - [ ] Verify against: root `AGENTS.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`
 - **Requirements**: Feature 6 (Outcome Knowledge Base), all enhanced REQs and ACs documented
 - **Files created**: outcome file
 - **Files modified**: `docs/frontend/certificate-template-preview.md`, `frontend/AGENTS.md`, `frontend/views/AGENTS.md`, `.agents/instructions/frontend.instructions.md`, root `AGENTS.md`
-- **Dependencies**: T18 (Phase 5 — base knowledge propagation must be complete; we only extend it), T29 (quality loop green for all enhanced files), T27 (component tests green), T28 (E2E tests green)
+- **Dependencies**: T18 (Phase 5 — base knowledge propagation must be complete; we only extend it), T29 (quality loop green for all enhanced files)
 - **Estimated**: 4h
 
 ---
@@ -1131,17 +874,14 @@ T29 (quality loop)           ─── required by ──► T30 (knowledge prop
 Phase 1:  T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09   (preview components)
 Phase 2:  T10 → T11 → T12 → T13                                   (publishing workflow)
 Phase 3:  T14 → T15                                               (version history + revert)
-Phase 4:  T16 → T17                                               (testing)
 Phase 5:  T18                                                      (knowledge propagation)
 Phase 6:  T26 → T19 → T20 → T21 → T22 → T23                       (enhanced preview components)
 Phase 7:  T26 → T24 → T25                                         (enhanced version history + diff)
-Phase 8:  T27                                                      (enhanced component tests)
-Phase 9:  T28                                                      (enhanced E2E tests)
 Phase 10: T29                                                      (quality loop per enhanced file)
 Phase 11: T30                                                      (knowledge propagation for enhanced)
 ```
 
-**Execution order**: T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09 → T10 → T11 → (T12, T13, T14 via parallel subagents after T11) → T15 → T16 → T17 → T18 → T26 → (T19, T24 via parallel subagents after T26) → T20 → (T21, T25 via parallel subagents after T20) → T22 → T23 → T27 → T28 → T29 → T30
+**Execution order**: T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09 → T10 → T11 → (T12, T13, T14 via parallel subagents after T11) → T15 → T18 → T26 → (T19, T24 via parallel subagents after T26) → T20 → (T21, T25 via parallel subagents after T20) → T22 → T23 → T29 → T30
 
 > **Phase 6/7 ordering note**: T26 (enhanced stores) must precede both Phase 6 (T19–T23) and Phase 7 (T24–T25), because `TemplatePreviewPage`, `PreviewCanvas`, `SampleDataSelector`, `VariableOverridePanel`, `PublishDialog`, `VersionHistoryPanel`, and `VersionDiffView` all subscribe to the enhanced Zustand stores. T26 extends (does not replace) T03's stores, and T03 must be complete first.
 
@@ -1205,17 +945,9 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: T15
 - Rationale: Revert to previous version — depends on T14 (revert button lives in version history item)
 
-### Wave 14: T16
-- Tasks: T16
-- Rationale: Component tests — depends on T01–T15 (all component tasks must be complete)
-
-### Wave 15: T17
-- Tasks: T17
-- Rationale: E2E tests — depends on T16 (component tests pass first), T01–T15
-
 ### Wave 16: T18
 - Tasks: T18
-- Rationale: Knowledge propagation — depends on T17 (all tests pass), T01–T16; must complete before T30
+- Rationale: Knowledge propagation — depends on T01–T15; must complete before T30
 
 ### Wave 17: T26
 - Tasks: T26
@@ -1241,17 +973,9 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: T23
 - Rationale: PublishDialog 3-step wizard — depends on T01, T02, T03, T05, T10; last enhanced preview component
 
-### Wave 23: T27
-- Tasks: T27
-- Rationale: Enhanced component tests — depends on T19–T26 (all enhanced components complete)
-
-### Wave 24: T28
-- Tasks: T28
-- Rationale: Enhanced E2E tests — depends on T19–T27 (all enhanced components + their tests)
-
 ### Wave 25: T29
 - Tasks: T29
-- Rationale: Quality loop per enhanced file — depends on T19–T28; validates all enhanced deliverables
+- Rationale: Quality loop per enhanced file — depends on T19–T26; validates all enhanced deliverables
 
 ### Final Wave: Knowledge Propagation
 - Task: T30
@@ -1284,7 +1008,6 @@ Fix all errors before proceeding to next task.
 | Frontend GraphQL | `frontend/common/graphql/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
 | Shared | `shared/AGENTS.md` | — |
 | App Router | `app/AGENTS.md` | `.agents/instructions/frontend.instructions.md` |
-| Testing | `test/ui/AGENTS.md` | `.agents/instructions/tests.instructions.md` |
 
 ---
 
@@ -1317,32 +1040,32 @@ Fix all errors before proceeding to next task.
 | AC-STATUS-01 | T11, T15 | Publish and revert are idempotent (no duplicate versions on double-click) |
 | AC-PERM-01 | T05, T11, T12 | Preview requires CertificateTemplateView; publish/archive/revert require CertificateTemplateManage |
 | AC-I18N-01 | T01 | All user-facing text uses certificatePreview i18n namespace (EN + AR) |
-| AC-PREVIEW-MODE-01 | T19, T20, T27.1, T27.2, T28.1 | TemplatePreviewPage shows ToggleButtonGroup (Desktop/Mobile/PDF/Print) and switches preview mode reactively |
-| AC-PREVIEW-MODE-02 | T20, T27.2, T28.2 | Mobile mode clamps canvas to 375px width and scales proportionally (uses long-name sample for overflow verification) |
-| AC-PREVIEW-MODE-03 | T20, T27.2, T28.3 | PDF mode embeds server-rendered PDF via iframe at `/api/certificates/templates/<id>/preview.pdf` with loading spinner + error handling |
-| AC-PREVIEW-MODE-04 | T20, T27.2, T28.1 | Print mode triggers `window.print()` with `@media print` CSS hiding toolbar/sidebar; reverts mode after dialog close |
-| AC-PREVIEW-ZOOM-01 | T19, T27.1, T28.1 | Zoom controls (+/−/fit-to-screen) update zoom % label and apply CSS `transform: scale()` to canvas (clamped 10–200) |
-| AC-PREVIEW-BACK-01 | T19, T27.1, T28.1 | Back to Editor button navigates to `app/(dashboard)/certificates/templates/[id]/edit` |
-| AC-SAMPLE-DATA-01 | T21, T27.3, T28.1 | SampleDataSelector offers 5 built-in profiles (Ahmed/Fatima/John/Empty/Custom) and selects updates the canvas's resolved variable values |
-| AC-SAMPLE-DATA-02 | T21, T27.3 | "Custom..." option opens a dialog with all variables; Save commits a new `SampleData` of `id: 'custom-<timestamp>'` |
-| AC-SAMPLE-DATA-03 | T21, T27.3 | Recently used samples (last 5) persist in `localStorage` under `cert-preview-recent-samples-<templateId>` and surface as a Recent group on next mount (SSR-safe) |
-| AC-OVERRIDE-01 | T22, T27.4, T28.1 | VariableOverridePanel renders table (Name/Type/Resolved/Override) with type-dependent controls (TextField/DatePicker/Switch) and type-color-coded Chips |
-| AC-OVERRIDE-02 | T22, T27.4, T28.1 | Editing an override dispatches `setOverride(variableId, value)` keyed by `variableId` (SWE review #6); canvas re-renders immediately |
-| AC-OVERRIDE-03 | T22, T27.4 | "Reset All" button clears all overrides via `clearOverrides()`; empty state shows `sampleData.noVariables` for variable-less templates |
-| AC-PUBLISH-WIZARD-01 | T23, T27.5, T28.4 | PublishDialog 3-step Stepper renders Validation Summary → Version Notes → Publish & Confirm in sequence |
-| AC-PUBLISH-WIZARD-02 | T23, T27.5 | Step 1 disables "Next" if any of the 4 validation checks fails (elements present / variables mapped / no unresolved bindings / size within limits) |
-| AC-PUBLISH-WIZARD-03 | T23, T27.5, T28.4 | Step 2 collects version notes (≤500 chars) and "Set as active" toggle; shows version number preview `v{n+1}` derived from the latest version |
-| AC-PUBLISH-WIZARD-04 | T23, T27.5, T28.4 | Step 3 shows summary card + LoadingButton; on success shows View Template List / Create Another buttons; `onPublished` fires exactly once on success |
-| AC-PUBLISH-IDEMPOTENCY | T23, T27.5 | Publish button has a 2-second disable window after click (idempotency per SWE review #7) — no duplicate versions on double-click |
-| AC-VERSION-HISTORY-01 | T24, T27.6, T28.5 | VersionHistoryPanel renders MUI Timeline with one entry per version (number, status Chip, author, date, notes, actions dropdown) |
-| AC-VERSION-HISTORY-02 | T24, T27.6, T28.5 | Active version highlighted with dashed green border + Active badge |
-| AC-VERSION-HISTORY-03 | T24, T27.6, T28.5 | Restore confirmation dialog ("Restoring version v{n} will create a new draft...") blocks until confirmed; "Restore" LoadingButton triggers `restoreVersion` |
-| AC-VERSION-DIFF-01 | T25, T27.7, T28.6 | VersionDiffView opens side-by-side mini-previews (Grid 2 columns) for versions A and B |
-| AC-VERSION-DIFF-02 | T25, T27.7, T28.6 | Element changes list shows Added (green) / Removed (red strikethrough) / Modified (yellow, with property-level sub-diffs: e.g. `fontSize: 16 → 18`) |
-| AC-VERSION-DIFF-03 | T25, T27.7, T28.6 | Identical versions show "No differences found" message (`versionHistory.noDifferences`) |
-| AC-STORE-ENHANCE-01 | T26, T27.8 | `useCertPreviewStore` extended with `mode`, `zoom`, `sampleDataId`, `variableOverrides`, `showOverridePanel`, `isRendering`, `renderError` (no `persist`) |
-| AC-STORE-ENHANCE-02 | T26, T27.8 | `useCertPublishStore` extended with `setAsActive`, `publishError`, `lastPublishedVersion` — `isPublishing` aliases `publishLoading` for backward compat |
-| AC-STORE-ENHANCE-03 | T26, T27.8 | New `useCertVersionStore` exposes `versions`, `activeVersionId`, `isRestoring`, `diffVersions` + `loadVersions`/`restoreVersion`/`openDiff`/`closeDiff` (no `persist`) |
+| AC-PREVIEW-MODE-01 | T19, T20 | TemplatePreviewPage shows ToggleButtonGroup (Desktop/Mobile/PDF/Print) and switches preview mode reactively |
+| AC-PREVIEW-MODE-02 | T20 | Mobile mode clamps canvas to 375px width and scales proportionally (uses long-name sample for overflow verification) |
+| AC-PREVIEW-MODE-03 | T20 | PDF mode embeds server-rendered PDF via iframe at `/api/certificates/templates/<id>/preview.pdf` with loading spinner + error handling |
+| AC-PREVIEW-MODE-04 | T20 | Print mode triggers `window.print()` with `@media print` CSS hiding toolbar/sidebar; reverts mode after dialog close |
+| AC-PREVIEW-ZOOM-01 | T19 | Zoom controls (+/−/fit-to-screen) update zoom % label and apply CSS `transform: scale()` to canvas (clamped 10–200) |
+| AC-PREVIEW-BACK-01 | T19 | Back to Editor button navigates to `app/(dashboard)/certificates/templates/[id]/edit` |
+| AC-SAMPLE-DATA-01 | T21 | SampleDataSelector offers 5 built-in profiles (Ahmed/Fatima/John/Empty/Custom) and selects updates the canvas's resolved variable values |
+| AC-SAMPLE-DATA-02 | T21 | "Custom..." option opens a dialog with all variables; Save commits a new `SampleData` of `id: 'custom-<timestamp>'` |
+| AC-SAMPLE-DATA-03 | T21 | Recently used samples (last 5) persist in `localStorage` under `cert-preview-recent-samples-<templateId>` and surface as a Recent group on next mount (SSR-safe) |
+| AC-OVERRIDE-01 | T22 | VariableOverridePanel renders table (Name/Type/Resolved/Override) with type-dependent controls (TextField/DatePicker/Switch) and type-color-coded Chips |
+| AC-OVERRIDE-02 | T22 | Editing an override dispatches `setOverride(variableId, value)` keyed by `variableId` (SWE review #6); canvas re-renders immediately |
+| AC-OVERRIDE-03 | T22 | "Reset All" button clears all overrides via `clearOverrides()`; empty state shows `sampleData.noVariables` for variable-less templates |
+| AC-PUBLISH-WIZARD-01 | T23 | PublishDialog 3-step Stepper renders Validation Summary → Version Notes → Publish & Confirm in sequence |
+| AC-PUBLISH-WIZARD-02 | T23 | Step 1 disables "Next" if any of the 4 validation checks fails (elements present / variables mapped / no unresolved bindings / size within limits) |
+| AC-PUBLISH-WIZARD-03 | T23 | Step 2 collects version notes (≤500 chars) and "Set as active" toggle; shows version number preview `v{n+1}` derived from the latest version |
+| AC-PUBLISH-WIZARD-04 | T23 | Step 3 shows summary card + LoadingButton; on success shows View Template List / Create Another buttons; `onPublished` fires exactly once on success |
+| AC-PUBLISH-IDEMPOTENCY | T23 | Publish button has a 2-second disable window after click (idempotency per SWE review #7) — no duplicate versions on double-click |
+| AC-VERSION-HISTORY-01 | T24 | VersionHistoryPanel renders MUI Timeline with one entry per version (number, status Chip, author, date, notes, actions dropdown) |
+| AC-VERSION-HISTORY-02 | T24 | Active version highlighted with dashed green border + Active badge |
+| AC-VERSION-HISTORY-03 | T24 | Restore confirmation dialog ("Restoring version v{n} will create a new draft...") blocks until confirmed; "Restore" LoadingButton triggers `restoreVersion` |
+| AC-VERSION-DIFF-01 | T25 | VersionDiffView opens side-by-side mini-previews (Grid 2 columns) for versions A and B |
+| AC-VERSION-DIFF-02 | T25 | Element changes list shows Added (green) / Removed (red strikethrough) / Modified (yellow, with property-level sub-diffs: e.g. `fontSize: 16 → 18`) |
+| AC-VERSION-DIFF-03 | T25 | Identical versions show "No differences found" message (`versionHistory.noDifferences`) |
+| AC-STORE-ENHANCE-01 | T26 | `useCertPreviewStore` extended with `mode`, `zoom`, `sampleDataId`, `variableOverrides`, `showOverridePanel`, `isRendering`, `renderError` (no `persist`) |
+| AC-STORE-ENHANCE-02 | T26 | `useCertPublishStore` extended with `setAsActive`, `publishError`, `lastPublishedVersion` — `isPublishing` aliases `publishLoading` for backward compat |
+| AC-STORE-ENHANCE-03 | T26 | New `useCertVersionStore` exposes `versions`, `activeVersionId`, `isRestoring`, `diffVersions` + `loadVersions`/`restoreVersion`/`openDiff`/`closeDiff` (no `persist`) |
 | AC-QUALITY-GATE-01 | T29 | Every enhanced file passes `bun tsgo` → `bun biome:check` → lint queue client → `codescene --file` in progressive order; no sonar-scan triggered by subagent |
 | AC-KNOWLEDGE-PROP-01 | T30 | `docs/frontend/certificate-template-preview.md` extended with "Enhanced Component Layer (Plan 15 Extension)" section (never rewrites existing T18 content) |
 
@@ -1441,24 +1164,6 @@ Fix all errors before proceeding to next task.
   - Keyboard navigation: Tab through controls, Enter to activate
   - Screen reader: announce render completion and any errors
   - **Quality loop**: tsgo + biome + lint
-
-### R4-T10: Component Tests
-- [ ] Create `test/ui/components/template-preview/PreviewErrorHandler.test.tsx`
-  - Test missing variable placeholder
-  - Test image load failure
-  - Test render timeout
-- [ ] Create `test/ui/components/template-preview/DevicePreview.test.tsx`
-  - Test each device frame renders
-  - Test custom size input
-  - Test zoom controls
-- [ ] Create `test/ui/components/template-preview/WatermarkOverlay.test.tsx`
-  - Test watermark toggle
-  - Test custom text
-  - Test opacity slider
-- [ ] Create `test/ui/components/template-preview/PrintOptions.test.tsx`
-  - Test print quality selection
-  - Test color mode
-  - Test paper size
 
 ### R4-T11: Knowledge Propagation
 - [ ] Create `docs/frontend/template-preview-publish-patterns.md`

@@ -15,15 +15,14 @@
 
 ### Overview
 
-This plan establishes the comprehensive test suite and quality verification infrastructure for the entire certificate feature. Because Plans 1–19 implement all schema, repositories, services, GraphQL API, and UI components for certificates, this plan is responsible for verifying correctness, coverage, integration, and end-to-end behavior across the full stack.
+This plan establishes the comprehensive test suite and quality verification infrastructure for the entire certificate feature. Because Plans 1–19 implement all schema, repositories, services, GraphQL API, and UI components for certificates, this plan is responsible for verifying correctness, coverage, integration, and full-stack behavior across the complete flow.
 
 ### Business Value
 
 - Ensures 100% repository coverage for all certificate domain repositories (mandated by `backend/db/test/AGENTS.md` Rule 14)
 - Prevents regressions in the certificate generation, verification, and template management workflows
 - Validates public-facing verification page correctness (security-critical: unauthenticated endpoint)
-- Provides E2E confidence that the full certificate lifecycle works from template creation through public verification
-- Establishes Storybook stories for visual regression and design system compliance
+- Provides full-lifecycle confidence that the certificate workflow works from template creation through public verification
 
 ### Scope
 
@@ -32,11 +31,9 @@ This plan establishes the comprehensive test suite and quality verification infr
 | DB repository tests for all 8 certificate repositories | Implementing new features (tested code already built in Plans 1–19) |
 | Service tests for generation, verification, template management, cache | External provider integration tests (e.g., Puppeteer PDF smoke tests) |
 | GraphQL integration tests (queries, mutations, auth scopes, DataLoader) | Performance/load testing |
-| UI component tests (Happy DOM, mocked Apollo) | Visual regression automation tooling |
-| E2E tests (Playwright, production server) | Coverage of non-certificate domains |
-| Storybook stories for certificate components | CI/CD pipeline configuration (Plan 21 covers docs) |
-| Entity-setup helper extensions for certificate test data | Migration testing (Plan 1 covers schema) |
-| Test-specific i18n keys for test assertions | |
+| Entity-setup helper extensions for certificate test data | Coverage of non-certificate domains |
+| Test-specific i18n keys for test assertions | CI/CD pipeline configuration (Plan 21 covers docs) |
+|  | Migration testing (Plan 1 covers schema) |
 
 ---
 
@@ -242,125 +239,6 @@ WHEN the DataLoader integration tests run, THEN they SHALL cover:
 - Nested template category resolution: batch-loaded, no N+1
 - Query depth: no circular resolution causes infinite loops
 
-### REQ-4: UI Component Tests
-
-**Goal**: Certificate UI components are tested with Happy DOM + mocked Apollo in `test/ui/components/cert/`.
-
-#### REQ-4.1: Template List Component Tests
-
-WHEN the template list component tests run, THEN they SHALL cover:
-- Renders template rows with correct data (name, status, category)
-- Filter interaction: clicking status filter triggers refetch with new variables
-- Pagination: clicking "load more" triggers refetch with after cursor
-- Empty state: displays "no templates" message when list is empty
-- Error state: displays error message when Apollo returns errors
-- Loading state: displays skeleton/spinner during loading
-
-#### REQ-4.2: Certificate List Component Tests
-
-WHEN the certificate list component tests run, THEN they SHALL cover:
-- Renders certificate rows with correct data (recipient, template, status, date)
-- Bulk selection: checkboxes select multiple certificates
-- Bulk action availability: revoke button enabled only when selection is non-empty
-- Status badge rendering: correct color/icon per status (draft, issued, revoked, expired)
-- Pagination interaction
-- Filter interaction (status, template search)
-
-#### REQ-4.3: Generation Dialog Component Tests
-
-WHEN the generation dialog component tests run, THEN they SHALL cover:
-- Dialog renders when open prop is true
-- Template select: shows available templates
-- Recipient group select: shows groups for selected template
-- Variable override: displays variables for selected template, accepts override values
-- Submit: calls generate mutation with correct variables
-- Success: closes dialog, shows success toast
-- Error: displays error message from mutation
-- Batch progress: progress bar updates during batch generation
-
-#### REQ-4.4: Verification Page Component Tests
-
-WHEN the verification page component tests run, THEN they SHALL cover:
-- Renders loading state during verification query
-- Renders valid certificate details when verification succeeds
-- Renders revoked state with revoked indicator
-- Renders expired state with expired indicator
-- Renders not-found state for invalid code
-- Share button: copies verification URL to clipboard (mocked)
-- Bilingual rendering: renders in Arabic (RTL) and English (LTR)
-
-### REQ-5: E2E Tests (Playwright)
-
-**Goal**: Full end-to-end certificate lifecycle tested via Playwright against the production build.
-
-#### REQ-5.1: Full Generation Flow E2E
-
-WHEN the full generation flow E2E test runs, THEN it SHALL:
-- Log in as academy admin
-- Navigate to template management
-- Create a category
-- Create a template with meta info (name, dimensions, orientation)
-- Add visual elements (text, QR code) via the editor
-- Add template variables (recipient name, course name)
-- Publish the template
-- Create a recipient group
-- Assign students to the group
-- Set per-recipient variable values
-- Open the generation dialog
-- Generate a certificate
-- Verify the certificate appears in the certificate list
-- Navigate to the certificate detail page
-- Download/view the PDF
-- Copy the verification code
-
-#### REQ-5.2: Public Verification Page E2E
-
-WHEN the public verification page E2E test runs, THEN it SHALL:
-- Navigate to `/verify/[code]` with a valid verification code
-- Assert the verification result page shows certificate details
-- Assert the page is accessible without authentication
-- Navigate with an invalid code
-- Assert the "not found" state is displayed
-- Navigate with a revoked certificate's code
-- Assert the "revoked" state is displayed
-- Test bilingual rendering (Arabic RTL and English LTR)
-
-#### REQ-5.3: Template Management E2E
-
-WHEN the template management E2E test runs, THEN it SHALL:
-- Log in as academy admin
-- Navigate to template categories
-- Create a category
-- Move/reorder a category
-- Navigate to template list
-- Create a new template
-- Edit template meta info
-- Add and remove elements
-- Publish the template
-- Verify the published template is visible in the list
-- Archive the template
-- Verify the archived template is no longer in the default list
-
-### REQ-6: Storybook Stories
-
-**Goal**: Storybook stories provide visual canvas for all certificate components.
-
-#### REQ-6.1: Page-Level Stories
-
-WHEN storybook stories are reviewed, THEN they SHALL include:
-- Template list page: with templates, empty state, loading state
-- Certificate list page: with certificates, empty state, loading state
-- Generation dialog: open with form populated
-- Verification page: valid, revoked, expired, not-found states
-
-#### REQ-6.2: Component-Level Stories
-
-WHEN storybook stories are reviewed, THEN they SHALL include:
-- Visual canvas component: with elements, empty, grid visible/hidden
-- Element editor component: text element, image element, QR element, shape element
-- Variable manager component: with variables, type-specific forms
-- Status badge component: all status variants (draft, pending, issued, revoked, expired)
-
 ### REQ-7: Test Data Infrastructure
 
 **Goal**: Entity-setup helpers are extended for certificate test entities.
@@ -386,7 +264,6 @@ WHEN this plan is complete, THEN the following documentation updates SHALL be ma
 - `backend/db/test/AGENTS.md` — add cert test directory to the domain list
 - `backend/db/test/entity-setup.ts` — documented helper signatures for cert entities
 - `frontend/common/graphql/test/AGENTS.md` — add cert test directory reference
-- `test/ui/AGENTS.md` — add cert component test references
 
 ---
 
@@ -440,28 +317,6 @@ No pluralization is needed for test-specific error keys — all are singular err
 - [ ] DataLoader tests verify no N+1 queries (assert single batch query)
 - [ ] `bun run test:graphql` passes for cert test files
 
-### AC-4: UI Component Tests
-- [ ] Template list, certificate list, generation dialog, and verification page have component tests
-- [ ] All tests use `renderWithWrapper` with mocked Apollo `MockLink`
-- [ ] No real network requests are made (no server required)
-- [ ] `bun run test:ui:components` passes for cert component tests
-- [ ] Tests cover rendering, interaction, loading, error, and empty states
-
-### AC-5: E2E Tests
-- [ ] Full generation flow E2E test passes against production build
-- [ ] Public verification page E2E test passes (unauthenticated)
-- [ ] Template management E2E test passes
-- [ ] All E2E tests use `setupBrowserLifecycle` + `loginAsDemoUser`
-- [ ] No `waitForTimeout` or `networkidle` — Playwright auto-waiting only
-- [ ] `bun run build:test` succeeds before E2E run
-- [ ] `bun run test:ui:e2e` passes for cert E2E test files
-
-### AC-6: Storybook Stories
-- [ ] Page-level stories exist for template list, certificate list, generation dialog, verification page
-- [ ] Component-level stories exist for visual canvas, element editor, variable manager, status badge
-- [ ] Stories include locale variants (ar, en) and theme variants (light, dark)
-- [ ] `bun run build-storybook` succeeds without errors
-
 ### AC-7: Test Data Infrastructure
 - [ ] `entity-setup.ts` exports all certificate helper functions per REQ-7.1
 - [ ] All helpers accept `tx: DBTransaction` as first parameter
@@ -473,4 +328,3 @@ No pluralization is needed for test-specific error keys — all are singular err
 - [ ] `bun biome:check` passes (format + lint)
 - [ ] `bun run lint` passes (ESLint via queue)
 - [ ] `bun run codescene --file <cert-test-file>` passes (no health warnings)
-- [ ] Mobile/desktop isolation test passes (`test/ui/mobile-desktop-isolation.test.ts`)

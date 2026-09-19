@@ -197,7 +197,9 @@ export function ParentScheduleDataGridDesktop({
                 meetingUrlStatus={resolveMeetingUrlStatus(row)}
                 joinLabel={labels.schedule.joinVideo}
                 compact
-                onJoin={isJoinable ? () => window.open(row.meetingJoinUrl ?? "", "_blank") : undefined}
+                onJoin={
+                  isJoinable ? () => window.open(row.meetingJoinUrl ?? "", "_blank", "noopener,noreferrer") : undefined
+                }
               />
             </Box>
           );

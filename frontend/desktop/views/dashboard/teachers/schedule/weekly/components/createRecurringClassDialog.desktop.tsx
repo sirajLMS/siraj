@@ -7,7 +7,7 @@ import type {
   CreateRecurringClassStudentSelectSlotProps,
   CreateRecurringClassTimezoneSelectSlotProps,
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
-import { QuotaAutocomplete } from "@/frontend/common/components/ui/input/quotaSelect";
+import { QuotaAutocompleteContainer } from "@/frontend/common/components/ui/input/quotaSelect";
 import { useCreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/useCreateRecurringClassDialogProps";
 import type {
   CreateRecurringClassDialogProps,
@@ -86,7 +86,7 @@ function CreateRecurringClassDialogDesktopBody({
         DialogShell: DesktopDialogShell,
         StudentSelect: DesktopStudentSelect,
         TimezoneSelect: DesktopTimezoneSelect,
-        QuotaAutocomplete,
+        QuotaAutocomplete: QuotaAutocompleteContainer,
         layout: {
           fieldRowDirection: "row",
           dayItemDirection: "row",

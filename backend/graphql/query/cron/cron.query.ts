@@ -10,7 +10,7 @@ gqlSchemaBuilder.queryField("cronSchedule", t =>
   t.field({
     type: CronScheduleObject,
     nullable: true,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: {
       id: t.arg.id({ required: true }),
     },
@@ -28,7 +28,7 @@ gqlSchemaBuilder.queryField("cronRun", t =>
   t.field({
     type: CronRunObject,
     nullable: true,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: {
       id: t.arg.id({ required: true }),
     },

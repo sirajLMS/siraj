@@ -1,8 +1,8 @@
 # Round 5 Audit: §T — Performance
 
 ## Summary
-- INVALID specs: 1 (T2)
-- PARTIAL specs: 2 (T6, T10)
+- INVALID designs: 1 (T2)
+- PARTIAL designs: 2 (T6, T10)
 - NEW gaps: 3
 
 ## T2 — INVALID (v9 fix introduced reactivity bug)

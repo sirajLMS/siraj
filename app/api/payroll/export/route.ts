@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { AppPermission, CalculationStatus } from "@/backend/enum";
 import { ForbiddenError, getServerUserContext, logger, ValidationError } from "@/backend/lib";
+import { checkRateLimit, exportRateLimiter } from "@/backend/lib/ratelimit";
 import { PayrollCalculationService, requirePermission } from "@/backend/services";
 import type { PayrollReportFilters, PayrollReportRow } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -170,6 +171,19 @@ export async function GET(request: NextRequest): Promise<Response> {
   const { userId } = await getServerUserContext();
   if (!userId) {
     return NextResponse.json({ error: tErrors.unauthorized }, { status: 401 });
+  }
+
+  const rateLimit = await checkRateLimit(`export:${userId}`, exportRateLimiter);
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: tErrors.rateLimitExceeded },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.max(0, Math.ceil((rateLimit.reset - Date.now()) / 1000)).toString(),
+        },
+      }
+    );
   }
 
   try {

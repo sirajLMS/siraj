@@ -1,9 +1,10 @@
 import { BillingRepository, InvoicePaymentSubmissionRepository } from "@/backend/db/repo/billing";
 import { ParentRepository } from "@/backend/db/repo/parents";
+import { SignedUrlRepository } from "@/backend/db/repo/shared";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { InvoicePaymentSubmissionStatus } from "@/backend/enum/billing/billing.enum";
 import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import { NotFoundError } from "@/backend/lib";
+import { ForbiddenError, NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
 import type { DBTransaction, PaymentProofSnapshot, PaymentProofTransactionSnapshot } from "@/backend/types";
 import { INVOICE_FILE_USAGE } from "@/shared/constants/billing/invoice-file-usage";
@@ -26,12 +27,23 @@ function isInvoicePaymentSubmissionStatus(value: string): value is InvoicePaymen
 export async function validateProofFile(
   proofFileId: string,
   invoiceId: string,
+  actorUserId: string,
   tErrors: ErrorsLabels,
   tx: DBTransaction
 ): Promise<{ filePath: string; mimeType: string }> {
   const file = await StorageDbRepository.fileById(proofFileId);
   if (!file) {
     throw new NotFoundError("FILE", tErrors.file.fileNotFound);
+  }
+
+  // Upload provenance: the uploader bound to the file's signed-URL session must
+  // be the actor, so a caller cannot settle an invoice with a file id minted by
+  // someone else. Rows created before upload binding (uploadedByUserId null) or
+  // without a session record are grandfathered: the check applies when provenance
+  // data exists and is simply skipped when it does not.
+  const uploadSession = await SignedUrlRepository.getLatestByFilePath(file.path, tx);
+  if (uploadSession?.uploadedByUserId && uploadSession.uploadedByUserId !== actorUserId) {
+    throw new ForbiddenError(tErrors.insufficientPermissions);
   }
 
   const mimeType = inferMimeFromPath(file.path);

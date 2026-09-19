@@ -15,7 +15,7 @@ import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting
 import { ClassInstanceExpiryService } from "@/backend/services/session/class-instance-expiry.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type {
-  ClassInstanceInsertType,
+  ClassInstanceCreateInput,
   CreateAuditLogInput,
   CreateManualClassEntryInput,
   LogSupportRequestInput,
@@ -108,7 +108,7 @@ export namespace TeacherDashboardService {
     }
 
     const idempotencyKey = `manual-${userId}-${Date.now()}`;
-    const entry: Omit<ClassInstanceInsertType, "createdAt" | "updatedAt"> = {
+    const entry: ClassInstanceCreateInput = {
       studentId: input.studentId,
       teacherId: input.teacherId,
       subjectId: input.subjectId,
@@ -118,12 +118,15 @@ export namespace TeacherDashboardService {
       classType: input.classType ?? "REGULAR",
       executionState: "NOT_ACTIVATED",
       outcome: "PENDING",
-      quotaDeducted: true,
       idempotencyKey,
     };
 
     const createdInstance = await db.transaction(async tx => {
       const instance = await SchedulingRepository.createClassInstance(entry, tx);
+
+      // The manual booking deducts quota or credit below, so the instance is
+      // marked as quota-deducted through the dedicated billing write path.
+      await SchedulingRepository.setQuotaDeducted(instance.id, true, tx);
 
       const openQuota = await QuotaService.selectQuotaForBooking(input.studentId, tx, userId);
       if (openQuota) {

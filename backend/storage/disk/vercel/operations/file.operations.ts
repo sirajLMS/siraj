@@ -1,6 +1,7 @@
 import { copy, del, head, list } from "@vercel/blob";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
+import { resolveBlobAccess } from "@/backend/storage/disk/vercel/operations/upload.operations";
 import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import { getVercelBlobPath } from "@/backend/storage/disk/vercel/utils";
 import type * as Types from "@/backend/types";
@@ -133,7 +134,7 @@ export async function fileInfoByDbFileId(ctx: VercelContext, id: string): Promis
 async function moveVercelBlob(ctx: VercelContext, fromUrl: string, toPath: string): Promise<{ url: string }> {
   const newBlob = await copy(fromUrl, toPath, {
     token: ctx.token,
-    access: "public",
+    access: resolveBlobAccess(ctx.access, toPath),
   });
 
   try {

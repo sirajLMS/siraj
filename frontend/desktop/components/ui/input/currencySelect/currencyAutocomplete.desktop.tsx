@@ -6,6 +6,7 @@ import {
 } from "@/frontend/common/components/ui/input/autocompletePopperSlotProps";
 import { CurrencyAutocompleteShared } from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocompleteShared";
 import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/input/currencySelect/types";
+import { useCurrencyCatalog } from "@/frontend/common/hooks/useCurrencyCatalog";
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { CurrencyOptionRowDesktop } from "@/frontend/desktop/components/ui/input/currencySelect/currencyOptionRow.desktop";
@@ -13,9 +14,13 @@ import { CurrencyOptionRowDesktop } from "@/frontend/desktop/components/ui/input
 export const CurrencyAutocompleteDesktop: React.FC<CurrencyAutocompleteProps> = (
   props: Readonly<CurrencyAutocompleteProps>
 ): React.ReactNode => {
+  const { options, loaded } = useCurrencyCatalog();
+
   return (
     <CurrencyAutocompleteShared
       {...props}
+      options={options}
+      catalogLoaded={loaded}
       LocaleEmojiComponent={DesktopLocaleEmoji}
       CurrencyOptionRowComponent={CurrencyOptionRowDesktop}
       getPopperSlotProps={createAutocompletePopperSlotProps<CurrencyOption>}

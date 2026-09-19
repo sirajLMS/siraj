@@ -2,6 +2,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, creditTransactions, lessonReports, students } from "@/backend/db/schema";
 import { AppPermission, AttendanceEvaluation, CreditReason } from "@/backend/enum";
+import { isUuidShape } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { assertStudentReadAccess } from "@/backend/services/student/student-access.helpers";
@@ -168,6 +169,9 @@ export namespace StudentMonthlyReportService {
     locale?: string
   ): Promise<StudentMonthlyReportReturnType> {
     logger.info("StudentMonthlyReportService.getMonthlyReport", { actorUserId, studentId, year, month });
+    if (!isUuidShape(studentId)) {
+      throwStudentNotFound(studentId, locale);
+    }
     await assertCanViewMonthlyReport(actorUserId, studentId, locale);
 
     const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));

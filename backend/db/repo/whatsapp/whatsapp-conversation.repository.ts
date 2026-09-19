@@ -290,6 +290,21 @@ export namespace WhatsappConversationRepository {
     const row = await runWithTx(runner, tx);
     return row ? toReturnType(row) : null;
   }
+
+  /**
+   * Right-to-be-forgotten scrub: erase the identity and preview columns of
+   * every conversation whose `waId` (phone-based WhatsApp id) belongs to the
+   * anonymized subject. Nulled `waId` drops the row from the (account, waId)
+   * partial unique index, so no constraint conflicts are possible. Runs
+   * inside the caller's transaction.
+   */
+  export const anonymizeByWaIds = async (waIds: readonly string[], tx: DBTransaction): Promise<void> => {
+    if (waIds.length === 0) return;
+    await tx
+      .update(whatsappConversations)
+      .set({ waId: null, displayName: null, lastMessagePreview: null })
+      .where(inArray(whatsappConversations.waId, [...waIds]));
+  };
 }
 
 /**

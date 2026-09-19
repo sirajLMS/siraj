@@ -50,6 +50,13 @@ import { getServerTranslations } from "@/shared/locale/server-graphql";
 export namespace CronService {
   // ── Schedule CRUD ──
 
+  /**
+   * Hard cap for a persisted cron schedule payload — defense-in-depth on top
+   * of the GraphQL request-body cap, so a single field cannot monopolize
+   * storage with deeply nested JSON.
+   */
+  const MAX_CRON_PAYLOAD_BYTES = 64 * 1024;
+
   export async function createSchedule(
     input: CronScheduleSubmitInput,
     locale: string = "en",
@@ -60,6 +67,10 @@ export namespace CronService {
 
     if (!createdByUserId) {
       throw new UnauthorizedError(t.userContextRequired);
+    }
+
+    if (input.payload != null && Buffer.byteLength(JSON.stringify(input.payload)) > MAX_CRON_PAYLOAD_BYTES) {
+      throw new DomainError("CRON_PAYLOAD_TOO_LARGE", t.payloadTooLarge);
     }
 
     if (!validateCronExpression(input.cronExpression)) {
@@ -113,6 +124,10 @@ export namespace CronService {
 
     if (!updatedByUserId) {
       throw new UnauthorizedError(t.userContextRequired);
+    }
+
+    if (input.payload != null && Buffer.byteLength(JSON.stringify(input.payload)) > MAX_CRON_PAYLOAD_BYTES) {
+      throw new DomainError("CRON_PAYLOAD_TOO_LARGE", t.payloadTooLarge);
     }
 
     const existing = await CronRepository.getScheduleById(id);

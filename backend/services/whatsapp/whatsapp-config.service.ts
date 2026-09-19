@@ -8,7 +8,6 @@ import { DatabaseUnavailableError, isTransientError, ValidationError } from "@/b
 import { logger } from "@/backend/lib/logger";
 import {
   FETCH_TIMEOUT_MS,
-  readErrorBody,
   resolveGraphApiVersion,
   WHATSAPP_CONFIG_CONTROL_CHARS_PATTERN,
   WHATSAPP_CONFIG_DB_WRITABLE_ENV_SOURCES,
@@ -18,6 +17,11 @@ import {
 } from "@/backend/lib/whatsapp-constants";
 import { GraphApiError } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import { buildGetPhoneNumberRequest } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
+import {
+  noFollowRedirectInit,
+  readJsonWithByteBudget,
+  readResponseBodyWithByteBudget,
+} from "@/backend/services/shared/outbound-fetch-guard";
 import {
   auditEnvConfigChange,
   deleteEnvConfigOverride,
@@ -544,14 +548,18 @@ export namespace WhatsappConfigService {
           phoneNumberId: config.phoneNumberId,
         }
       );
-      const response = await fetch(request.url, { ...request.init, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+      const response = await fetch(request.url, {
+        ...request.init,
+        ...noFollowRedirectInit(),
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      });
       if (!response.ok) {
-        const errorBody = await readErrorBody(response);
+        const errorBody = await readResponseBodyWithByteBudget(response);
         throw new GraphApiError(response.status, errorBody);
       }
       // A 2xx response already proves the credentials work; the display
       // number is best-effort metadata, so an unparsable body stays a pass.
-      const body: unknown = await response.json().catch(() => null);
+      const body: unknown = await readJsonWithByteBudget(response).catch(() => null);
       const phoneNumber =
         isPhoneNumberResponseBody(body) && typeof body.display_phone_number === "string"
           ? body.display_phone_number

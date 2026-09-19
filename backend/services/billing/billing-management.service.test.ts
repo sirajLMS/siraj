@@ -372,6 +372,7 @@ await mock.module("@/backend/lib", () => ({
     }
   },
   ForbiddenError: class ForbiddenError extends Error {},
+  assertUuidShape: () => undefined,
 }));
 
 // --- Locale mock (the service imports `@/shared/locale` for type-only) ---

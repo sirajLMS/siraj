@@ -4,6 +4,7 @@ import {
   StudentSessionDetailPothosObject,
 } from "@/backend/graphql/pothos/students/student-history.pothos";
 import { resolveStudentIdFromArgsOrUser } from "@/backend/graphql/query/students/__shared__/resolveStudentIdFromArgsOrUser";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { StudentHistoryService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("studentClassHistory", t =>
@@ -16,10 +17,9 @@ gqlSchemaBuilder.queryField("studentClassHistory", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const userId = await requireAuth(ctx);
       const studentId = await resolveStudentIdFromArgsOrUser(args.studentId, ctx);
       const tErrors = ctx.t().errorsTranslations;
-      const userId = ctx.user?.id;
-      if (!userId) throw new Error(tErrors.unauthorized);
       return StudentHistoryService.getStudentClassHistory(userId, studentId, args.year, args.month, tErrors);
     },
   })

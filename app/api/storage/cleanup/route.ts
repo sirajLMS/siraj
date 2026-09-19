@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
+import { apiRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { SessionService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
@@ -66,6 +67,11 @@ export async function POST(request: NextRequest) {
     const authResult = await authenticateAdmin(request, tErrors, locale);
     if (authResult instanceof NextResponse) {
       return authResult;
+    }
+
+    const rateLimit = await checkRateLimit(`storage-cleanup:${authResult.userId}`, apiRateLimiter);
+    if (!rateLimit.success) {
+      return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
     }
 
     // Delete expired signed URLs

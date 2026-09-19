@@ -35,15 +35,6 @@
 | T16 | GraphQL certificate mutation integration tests | 3 | T1, Plan 5 |
 | T17 | GraphQL template + group + category mutation tests | 3 | T1, Plan 5 |
 | T18 | GraphQL auth scope + DataLoader tests | 2–3 | T14–T17 |
-| T19 | UI component tests — template list | 2–3 | Plans 8, 16 |
-| T20 | UI component tests — certificate list | 2–3 | Plan 16 |
-| T21 | UI component tests — generation dialog | 2–3 | Plan 17 |
-| T22 | UI component tests — verification page | 2 | Plan 19 |
-| T23 | E2E test — full generation flow | 3–4 | T1–T18 |
-| T24 | E2E test — public verification page | 2 | T1–T18 |
-| T25 | E2E test — template management | 2–3 | T1–T18 |
-| T26 | Storybook stories — page-level | 2–3 | Plans 8–19 |
-| T27 | Storybook stories — component-level | 2–3 | Plans 8–19 |
 | T28 | Full quality gate + test execution verification | 2–3 | All above |
 
 ---
@@ -106,7 +97,7 @@
 
 **Estimated**: 3–4 hours | **Depends On**: T1 | **Refs**: REQ-1.1
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -164,7 +155,7 @@
 
 **Estimated**: 2–3 hours | **Depends On**: T1 | **Refs**: REQ-1.2
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -206,7 +197,7 @@ Same pattern as T2.
 
 **Estimated**: 2 hours | **Depends On**: T1 | **Refs**: REQ-1.3
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -242,7 +233,7 @@ Same pattern as T2.
 
 **Estimated**: 2 hours | **Depends On**: T1 | **Refs**: REQ-1.4
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -260,7 +251,7 @@ Same pattern as T2.
   - date: defaultValue as ISO date string
   - select: options array field, defaultValue must be one of options
 
-- **T5.5**: Write required flag tests
+- **T5.5**: Write test cases for the isRequired flag
   - isRequired=true: assert constraint behavior
   - isRequired=false: assert nullable behavior
 
@@ -276,7 +267,7 @@ Same pattern as T2.
 
 **Estimated**: 2–3 hours | **Depends On**: T1 | **Refs**: REQ-1.5
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -311,7 +302,7 @@ Same pattern as T2.
 
 **Estimated**: 1–2 hours | **Depends On**: T1 | **Refs**: REQ-1.6
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T8, T10, T11, T12, T13, T14, T15, T16, T17.
 
 ### Subtasks
 
@@ -338,7 +329,7 @@ Same pattern as T2.
 
 **Estimated**: 2–3 hours | **Depends On**: T1 | **Refs**: REQ-1.7
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T10, T11, T12, T13, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -374,7 +365,7 @@ Same pattern as T2.
 
 **Estimated**: 3–4 hours | **Depends On**: T1–T8 | **Refs**: REQ-1.8
 
-> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T18, T23, T24, T25.
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T18.
 
 ### Subtasks
 
@@ -413,7 +404,7 @@ Same pattern as T2.
 
 **Estimated**: 2–3 hours | **Depends On**: T1, Plan 4 | **Refs**: REQ-2.1
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T11, T12, T13, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -454,7 +445,7 @@ Same pattern as T2.
 
 **Estimated**: 2 hours | **Depends On**: T1, Plan 4 | **Refs**: REQ-2.2
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T12, T13, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -485,7 +476,7 @@ Same as T10.
 
 **Estimated**: 2–3 hours | **Depends On**: T1, Plan 4 | **Refs**: REQ-2.3
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T13, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -515,7 +506,7 @@ Same as T10.
 
 **Estimated**: 2 hours | **Depends On**: T1, Plan 4 | **Refs**: REQ-2.4
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T14, T15, T16, T17
 
 ### Subtasks
 
@@ -546,7 +537,7 @@ Same as T10.
 
 **Estimated**: 3–4 hours | **Depends On**: T1, Plan 5 | **Refs**: REQ-3.1
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T15, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T15, T16, T17
 
 ### Subtasks
 
@@ -592,7 +583,7 @@ Same as T10.
 
 **Estimated**: 2–3 hours | **Depends On**: T1, Plan 5 | **Refs**: REQ-3.2
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T16, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T16, T17
 
 ### Subtasks
 
@@ -626,7 +617,7 @@ Same as T14.
 
 **Estimated**: 3 hours | **Depends On**: T1, Plan 5 | **Refs**: REQ-3.3
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T17, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T17
 
 ### Subtasks
 
@@ -656,7 +647,7 @@ Same as T14.
 
 **Estimated**: 3 hours | **Depends On**: T1, Plan 5 | **Refs**: REQ-3.4, REQ-3.5, REQ-3.6
 
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T19, T20, T21, T22, T26, T27.
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16
 
 ### Subtasks
 
@@ -691,7 +682,7 @@ Same as T14.
 
 **Estimated**: 2–3 hours | **Depends On**: T14–T17 | **Refs**: REQ-3.7, design.md §2.6
 
-> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T9, T23, T24, T25.
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T9.
 
 ### Subtasks
 
@@ -712,353 +703,6 @@ Same as T14.
 
 ---
 
-## T19: UI Component Tests — Template List
-
-**Estimated**: 2–3 hours | **Depends On**: Plans 8, 16 | **Refs**: REQ-4.1
-
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T20, T21, T22, T26, T27.
-
-### Subtasks
-
-- **T19.1**: Create `test/ui/components/cert/template-list.test.tsx`
-  - Import `renderWithWrapper` and `TestWrapper` from `@/test/ui/components/TestWrapper`
-  - Import `bun:test` `describe`, `test`, `expect`, `afterEach`
-  - Extend `expect` with `@testing-library/jest-dom/matchers`
-
-- **T19.2**: Write rendering tests
-  - Mock `certificateTemplatesQueryDocument` with N template rows → assert rows rendered with name, status, category
-  - Empty mock → assert "no templates" message visible
-  - Loading mock (delay) → assert skeleton/spinner visible
-  - Error mock → assert error message visible
-
-- **T19.3**: Write interaction tests
-  - Click status filter → assert new Apollo query variables include status filter
-  - Click "load more" → assert `after` cursor in variables
-  - `cleanup()` + `useUserStore.setState({ permissions: [] })` in `afterEach`
-
-### Quality Loop & Instruction Verification
-- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
-  ```bash
-  bun run scripts/health/sub-loop.ts test/ui/components/cert/template-list.test.tsx --lifecycle codescene
-  ```
-- Read: `AGENTS.md` (root), `test/ui/AGENTS.md`
-- Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`
-
----
-
-## T20: UI Component Tests — Certificate List
-
-**Estimated**: 2–3 hours | **Depends On**: Plan 16 | **Refs**: REQ-4.2
-
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T21, T22, T26, T27.
-
-### Subtasks
-
-- **T20.1**: Create `test/ui/components/cert/certificate-list.test.tsx`
-
-- **T20.2**: Write rendering tests
-  - Mock `certificatesQueryDocument` with N certificate rows → assert rendered with recipient, template, status, date
-  - Status badge: assert correct MUI color/label per status variant
-  - Empty → assert empty state message
-  - Error → assert error state
-
-- **T20.3**: Write bulk action tests
-  - Select multiple checkboxes → assert revoke button enabled
-  - Select none → assert revoke button disabled
-  - Click revoke → assert mutation called with selected IDs
-
-- **T20.4**: Write filter + pagination tests
-  - Filter by status → assert query variables changed
-  - Pagination → assert cursor-based fetch
-
-### Quality Loop & Instruction Verification
-Same as T19.
-
----
-
-## T21: UI Component Tests — Generation Dialog
-
-**Estimated**: 2–3 hours | **Depends On**: Plan 17 | **Refs**: REQ-4.3
-
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T22, T26, T27.
-
-### Subtasks
-
-- **T21.1**: Create `test/ui/components/cert/generation-dialog.test.tsx`
-
-- **T21.2**: Write dialog rendering tests
-  - `open=true` → assert dialog visible
-  - `open=false` → assert dialog not visible
-  - Assert template select renders available templates
-  - Assert recipient group select renders groups for selected template
-
-- **T21.3**: Write variable override tests
-  - Select template with variables → assert variable form displayed
-  - Type into variable input → assert state updated
-
-- **T21.4**: Write submit tests
-  - Click generate → assert mutation called with correct variables
-  - Success response → assert dialog closed, success toast visible
-  - Error response → assert error message in dialog
-
-- **T21.5**: Write batch progress tests
-  - Batch generation → assert progress bar rendered
-  - Progress updates → assert progress percentage changes
-
-### Quality Loop & Instruction Verification
-Same as T19.
-
----
-
-## T22: UI Component Tests — Verification Page
-
-**Estimated**: 2 hours | **Depends On**: Plan 19 | **Refs**: REQ-4.4
-
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T26, T27.
-
-### Subtasks
-
-- **T22.1**: Create `test/ui/components/cert/verification-page.test.tsx`
-
-- **T22.2**: Write state tests
-  - Loading mock → assert loading indicator
-  - Valid certificate mock → assert certificate details (recipient, template, issue date)
-  - Revoked mock → assert revoked indicator visible
-  - Expired mock → assert expired indicator visible
-  - Not-found mock → assert "not found" message visible
-
-- **T22.3**: Write bilingual tests
-  - `locale="ar"` (RTL) → assert Arabic text and `dir="rtl"`
-  - `locale="en"` (LTR) → assert English text and `dir="ltr"`
-
-- **T22.4**: Write share button tests
-  - Click share → assert `navigator.clipboard.writeText` called with verification URL
-  - Mock clipboard API for test environment
-
-### Quality Loop & Instruction Verification
-Same as T19.
-
----
-
-## T23: E2E Test — Full Generation Flow
-
-**Estimated**: 3–4 hours | **Depends On**: T1–T18 | **Refs**: REQ-5.1
-
-> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T9, T18, T24, T25.
-
-### Subtasks
-
-- **T23.1**: Create `test/ui/e2e/cert/generation-flow.test.ts`
-  - Import `setupBrowserLifecycle`, `createContext`, `createMobileContext` from `@/test/ui/e2e/lifecycle`
-  - Import `loginAsDemoUser`, `DEMO_USERS`, `closeE2eSession` from `@/test/ui/e2e/helpers`
-  - Call `setupBrowserLifecycle()` at suite level
-  - Use `describe.serial` for ordered test cases
-
-- **T23.2**: Write admin login + category creation
-  - Login as academy admin via `loginAsDemoUser`
-  - Navigate to template categories
-  - Create a category via UI interactions (fill form, click create)
-  - Assert category appears in tree
-
-- **T23.3**: Write template creation + element editing
-  - Navigate to template management
-  - Create a new template (name, dimensions, orientation)
-  - Navigate to editor
-  - Add a text element via canvas
-  - Add a QR code element
-  - Assert elements appear in element list
-
-- **T23.4**: Write variable management + publish
-  - Add template variables (recipientName, courseName)
-  - Set default values
-  - Publish template
-  - Assert template status changes to "Published"
-
-- **T23.5**: Write recipient group + generation
-  - Create a recipient group
-  - Assign students
-  - Set per-recipient variable values
-  - Open generation dialog
-  - Generate a certificate
-  - Assert certificate appears in certificate list
-
-- **T23.6**: Write certificate detail + verification
-  - Navigate to certificate detail page
-  - Assert PDF preview/download
-  - Copy verification code
-  - Navigate to `/verify/[code]`
-  - Assert verification page shows certificate details
-
-- **T23.7**: Add `afterEach` cleanup
-  - `closeE2eSession(page, context)`
-
-### Quality Loop & Instruction Verification
-- Requires `bun run build:test` first
-- [ ] Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
-  ```bash
-  bun run scripts/health/sub-loop.ts test/ui/e2e/cert/generation-flow.test.ts --lifecycle codescene
-  ```
-- Read: `AGENTS.md` (root), `test/ui/AGENTS.md`
-- Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/tests.instructions.md`
-- Verify: no `waitForTimeout`, no `networkidle` — Playwright auto-waiting only
-- Verify: bilingual selectors for Arabic-first UI
-- Verify: `describe.serial` for ordered flow
-
----
-
-## T24: E2E Test — Public Verification Page
-
-**Estimated**: 2 hours | **Depends On**: T1–T18 | **Refs**: REQ-5.2
-
-> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T9, T18, T23, T25.
-
-### Subtasks
-
-- **T24.1**: Create `test/ui/e2e/cert/verification-page.test.ts`
-  - Same lifecycle setup as T23
-
-- **T24.2**: Write valid verification test
-  - Provision a certificate with verification code (via GraphQL mutations or DB seed)
-  - Navigate to `/verify/[validCode]`
-  - Assert certificate details visible (recipient, template, issue date)
-  - Assert no authentication required (no login)
-
-- **T24.3**: Write invalid code test
-  - Navigate to `/verify/[invalidCode]`
-  - Assert "not found" state visible
-
-- **T24.4**: Write revoked certificate test
-  - Provision + revoke a certificate (via GraphQL mutation)
-  - Navigate to `/verify/[revokedCode]`
-  - Assert "revoked" indicator visible
-
-- **T24.5**: Write bilingual test
-  - Set locale to Arabic → assert RTL rendering, Arabic text
-  - Set locale to English → assert LTR rendering, English text
-  - Use bilingual selectors
-
-- **T24.6**: Add `afterEach` cleanup
-
-### Quality Loop & Instruction Verification
-Same as T23.
-
----
-
-## T25: E2E Test — Template Management
-
-**Estimated**: 2–3 hours | **Depends On**: T1–T18 | **Refs**: REQ-5.3
-
-> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T9, T18, T23, T24.
-
-### Subtasks
-
-- **T25.1**: Create `test/ui/e2e/cert/template-management.test.ts`
-
-- **T25.2**: Write category management
-  - Login as admin
-  - Navigate to template categories
-  - Create a category
-  - Move/reorder category
-  - Assert reordered list
-
-- **T25.3**: Write template CRUD via UI
-  - Navigate to template list
-  - Create a new template
-  - Edit template meta info (name, dimensions)
-  - Add and remove elements
-  - Assert changes in element list
-
-- **T25.4**: Write publish + archive
-  - Publish the template
-  - Assert template visible in published list
-  - Archive the template
-  - Assert archived template not in default list (or shown with archived filter)
-
-- **T25.5**: Add `afterEach` cleanup
-
-### Quality Loop & Instruction Verification
-Same as T23.
-
----
-
-## T26: Storybook Stories — Page-Level
-
-**Estimated**: 2–3 hours | **Depends On**: Plans 8–19 | **Refs**: REQ-6.1
-
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T27.
-
-### Subtasks
-
-- **T26.1**: Create `frontend/common/views/dashboard/certificates/template-list/template-list.stories.tsx`
-  - Stories: populated (N templates), empty, loading, error
-  - Locale variants: ar (RTL), en (LTR)
-  - Theme variants: light, dark
-  - MSW handlers for Apollo queries
-
-- **T26.2**: Create `frontend/common/views/dashboard/certificates/certificate-list/certificate-list.stories.tsx`
-  - Stories: populated, empty, loading, error
-  - Status badge variants visible
-  - Locale + theme variants
-
-- **T26.3**: Create `frontend/common/views/dashboard/certificates/generation-dialog/generation-dialog.stories.tsx`
-  - Stories: open-form (template + group selected), open-submitting (progress), open-success, open-error
-  - Locale + theme variants
-
-- **T26.4**: Create `frontend/common/views/dashboard/certificates/verification-page/verification-page.stories.tsx`
-  - Stories: valid, revoked, expired, not-found
-  - Locale + theme variants
-  - RTL/LTR rendering
-
-### Quality Loop & Instruction Verification
-- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
-  ```bash
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/template-list/template-list.stories.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/certificate-list/certificate-list.stories.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/generation-dialog/generation-dialog.stories.tsx --lifecycle codescene
-  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/verification-page/verification-page.stories.tsx --lifecycle codescene
-  ```
-- Read: `AGENTS.md` (root), `frontend/AGENTS.md`, `frontend/views/AGENTS.md`
-- Read: `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
-- Verify: `.storybook/main.ts` story glob pattern matches file paths
-- Verify: MSW handlers used for mocked Apollo (via `.storybook/msw-handlers.ts`)
-
----
-
-## T27: Storybook Stories — Component-Level
-
-**Estimated**: 2–3 hours | **Depends On**: Plans 8–19 | **Refs**: REQ-6.2
-
-> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26.
-
-### Subtasks
-
-- **T27.1**: Create visual canvas stories
-  - File: `frontend/desktop/views/certificates/template-editor/visual-canvas/visual-canvas.stories.tsx`
-  - Stories: with-elements (populated canvas), empty, grid-visible, grid-hidden
-  - Locale + theme variants
-
-- **T27.2**: Create element editor stories
-  - File: `frontend/common/views/dashboard/certificates/template-editor/element-editor/element-editor.stories.tsx`
-  - Stories: text element, image element, QR element, shape element
-  - Each with type-specific fields visible
-  - Locale + theme variants
-
-- **T27.3**: Create variable manager stories
-  - File: `frontend/common/views/dashboard/certificates/template-editor/variable-manager/variable-manager.stories.tsx`
-  - Stories: with-variables (text, number, date, select types), empty, type-specific forms
-  - Locale + theme variants
-
-- **T27.4**: Create status badge stories
-  - File: `frontend/common/components/ui/cert/status-badge/status-badge.stories.tsx`
-  - Stories: draft, pending, issued, revoked, expired
-  - Each with correct MUI color and icon
-  - Locale + theme variants
-
-### Quality Loop & Instruction Verification
-Same as T26.
-
----
-
 ## T28: Full Quality Gate + Test Execution Verification
 
 **Estimated**: 2–3 hours | **Depends On**: All above | **Refs**: AC-1 through AC-8
@@ -1074,16 +718,10 @@ Same as T26.
   - `bun run test:db` — DB repository + logic tests (parallel runner)
   - `bun run test:services` — Service tests (parallel runner)
   - `bun run test:graphql` — GraphQL integration tests (shared dev server)
-  - `bun run test:ui:components` — UI component tests (Happy DOM)
-  - `bun run build:test` then `bun run test:ui:e2e` — E2E tests (production build)
-  - `bun run build-storybook` — Storybook build
 
 - **T28.4**: Verify coverage
   - Run: `bun test --coverage backend/db/test/repo/cert/` — verify 100% on all cert repo files
   - If below 100%, add missing test cases and re-run
-
-- **T28.5**: Verify mobile/desktop isolation test
-  - `bun test test/ui/mobile-desktop-isolation.test.ts` — must still pass
 
 - **T28.6**: Verify all acceptance criteria from requirements.md
   - Walk through AC-1 through AC-8 checklist
@@ -1112,13 +750,6 @@ T1 (entity-setup)
 ├── T14 (cert GraphQL Q)   T15 (template GraphQL Q)
 ├── T16 (cert GraphQL M)   T17 (template+group+cat M)
 │   └── T18 (auth + DataLoader) ← depends on T14–T17
-├── T19 (UI: template list)
-├── T20 (UI: cert list)
-├── T21 (UI: gen dialog)
-├── T22 (UI: verify page)
-├── T23 (E2E: generation)  T24 (E2E: verify)  T25 (E2E: template mgmt)
-├── T26 (Storybook: page)
-├── T27 (Storybook: component)
 └── T28 (quality gate) ← depends on ALL
 ```
 
@@ -1126,7 +757,7 @@ T1 (entity-setup)
 
 ## Execution Order
 
-**Execution order**: T1 → (T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27 via parallel subagents after T1) → (T9, T18, T23, T24, T25 via parallel subagents after Wave 2) → T28
+**Execution order**: T1 → (T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17 via parallel subagents after T1) → (T9, T18 via parallel subagents after Wave 2) → T28
 
 ### Phase A: Test Infrastructure (Sequential)
 1. **T1** — Entity-setup helpers (blocks everything)
@@ -1151,21 +782,8 @@ T1 (entity-setup)
    - Run `bun run generate:gqlSchema` + `bun codegen` before any GraphQL test
    - Run `bun run test:graphql` to verify all cert GraphQL tests
 
-### Phase E: UI Component Tests (via parallel subagents)
-8. **T19, T20, T21, T22** — All 4 component test files (via parallel subagents)
-   - Run `bun run test:ui:components` to verify
-
-### Phase F: E2E Tests (After build:test)
-9. `bun run build:test` — Build production bundle (required before E2E)
-10. **T23, T24, T25** — All 3 E2E test files (via parallel subagents, each uses own browser context)
-    - Run `bun run test:ui:e2e` to verify
-
-### Phase G: Storybook Stories (via parallel subagents)
-11. **T26, T27** — Page-level and component-level stories (via parallel subagents)
-    - Run `bun run build-storybook` to verify
-
-### Phase H: Quality Gate (Sequential, last)
-12. **T28** — Full quality gate + test execution verification
+### Phase E: Quality Gate (Sequential, last)
+9. **T28** — Full quality gate + test execution verification
     - Start lint queue server (background, detached)
     - `bun quality-gate` — resume from last failed stage if needed
     - Run all test suites to verify
@@ -1182,12 +800,12 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 - Tasks: T1 (entity-setup helpers)
 - Rationale: T1 blocks all other tasks — no other task can start until test infrastructure helpers exist
 
-### Wave 2: T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17, T19, T20, T21, T22, T26, T27
-- Tasks: T2–T8 (DB repo tests), T10–T13 (service tests), T14–T17 (GraphQL integration tests), T19–T22 (UI component tests), T26–T27 (Storybook stories)
+### Wave 2: T2, T3, T4, T5, T6, T7, T8, T10, T11, T12, T13, T14, T15, T16, T17
+- Tasks: T2–T8 (DB repo tests), T10–T13 (service tests), T14–T17 (GraphQL integration tests)
 - Rationale: All depend only on T1 (or external plans already completed). No interdependencies among these tasks — each can be dispatched to a separate subagent concurrently
 
-### Wave 3: T9, T18, T23, T24, T25
-- Tasks: T9 (DB logic tests, depends on T2–T8), T18 (auth scope + DataLoader, depends on T14–T17), T23–T25 (E2E tests, depend on T1–T18)
+### Wave 3: T9, T18
+- Tasks: T9 (DB logic tests, depends on T2–T8), T18 (auth scope + DataLoader, depends on T14–T17)
 - Rationale: All depend on Wave 2 tasks completing first. No interdependencies among Wave 3 tasks themselves — they can run as parallel subagents concurrently
 
 ### Final Wave: T28
@@ -1203,6 +821,5 @@ Tasks grouped by wave (each wave runs as parallel subagents):
 All knowledge propagation tasks are deferred to Plan 21 (Knowledge Propagation). This plan's T28 quality gate verifies the tests pass and the code is clean. Plan 21 will:
 - Update `backend/db/test/AGENTS.md` with cert test directory references
 - Update `frontend/common/graphql/test/AGENTS.md` with cert test directory reference
-- Update `test/ui/AGENTS.md` with cert test references
 - Create `.ai/draft_plans/cert/plans/20-testing-quality/outcome/cert-testing-learnings.md` with outcomes from this plan (per the spec-driven-development skill outcome-protocol; `cert-testing-learnings.md` is a cross-task summary outcome doc)
 - Update `.agents/instructions/tests.instructions.md` if cert-specific test patterns emerge

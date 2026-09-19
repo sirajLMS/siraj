@@ -1,19 +1,15 @@
 import { describe, expect, test } from "bun:test";
-import { randomUUID } from "node:crypto";
+import { generateTestPassword } from "@/backend/db/test/test-utils";
 import { buildParentInsertPayload } from "@/backend/services/parent/__shared__/buildParentInsertPayload";
 import type { ParentOnboardingInput } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-
-function createDummyPassword(): string {
-  return `TestPass-${randomUUID().slice(0, 8)}!`;
-}
 
 describe("buildParentInsertPayload", () => {
   test("builds insert payload with custom provided fields", () => {
     const input: ParentOnboardingInput = {
       name: "John Doe",
       email: "john@example.com",
-      password: createDummyPassword(),
+      password: generateTestPassword(),
       status: "VIP",
       nationality: "American",
       address: "123 Main St",
@@ -46,7 +42,7 @@ describe("buildParentInsertPayload", () => {
     const input: ParentOnboardingInput = {
       name: "Jane Doe",
       email: "jane@example.com",
-      password: createDummyPassword(),
+      password: generateTestPassword(),
     };
     const userId = "usr_67890";
 
@@ -70,7 +66,7 @@ describe("buildParentInsertPayload", () => {
     const input: ParentOnboardingInput = {
       name: "Sam Smith",
       email: "sam@example.com",
-      password: createDummyPassword(),
+      password: generateTestPassword(),
       status: null,
       nationality: null,
       address: null,

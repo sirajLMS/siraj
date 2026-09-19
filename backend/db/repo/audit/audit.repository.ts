@@ -1,5 +1,6 @@
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import { db } from "@/backend/db";
+import { maskAuditPayload } from "@/backend/db/repo/audit/audit-masking.helpers";
 import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared";
 import { adminAuditLogs, auditLogs } from "@/backend/db/schema";
 import { sanitizeIpAddress } from "@/backend/lib/ip-utils";
@@ -41,9 +42,9 @@ export namespace AuditRepository {
       entityId: input.entityId,
       action: input.action,
       description: input.description ?? null,
-      previousState: input.previousState ?? null,
-      newState: input.newState ?? null,
-      changes: input.changes ?? null,
+      previousState: maskAuditPayload(input.previousState),
+      newState: maskAuditPayload(input.newState),
+      changes: maskAuditPayload(input.changes),
       ipAddress: sanitizeIpAddress(input.ipAddress),
       userAgent: input.userAgent ?? null,
       metadata: input.metadata ?? null,
@@ -112,8 +113,8 @@ export namespace AuditRepository {
       targetUserId: input.targetUserId ?? null,
       action: input.action,
       description: input.description ?? null,
-      previousState: input.previousState ?? null,
-      newState: input.newState ?? null,
+      previousState: maskAuditPayload(input.previousState),
+      newState: maskAuditPayload(input.newState),
       ipAddress: sanitizeIpAddress(input.ipAddress),
       createdAt: input.createdAt ?? now,
     }));

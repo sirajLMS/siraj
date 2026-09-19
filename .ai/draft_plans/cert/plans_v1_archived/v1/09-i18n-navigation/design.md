@@ -1118,7 +1118,7 @@ The patterns documented here serve as a template for any future dashboard featur
 | Dependency | Consumed From | Consumed By |
 |---|---|---|
 | `CertificateLabels` type | This plan (Plan 09) → `types/dashboard/certificates/main.ts` | Plans 07 (Template UI), 08 (Certificate UI) — import for component props |
-| `dashboardCertificatesEn`/`Ar` | This plan → `en/ar/dashboard/certificates/main.ts` | Plans 07, 08 — use as default label source for Storybook mock stores |
+| `dashboardCertificatesEn`/`Ar` | This plan → `en/ar/dashboard/certificates/main.ts` | Plans 07, 08 — use as default label source |
 | `PAGE_PERMISSIONS.certificates*` | This plan → `page-permissions.types.ts` | Plans 07, 08 — use for server-side `requirePermissionForPage()` + client `<RequirePermission>` |
 | Nav group `grp_certificates` | This plan → `navigationConfig.ts` | Sidebar component (existing) — auto-consumed |
 | `Translation.Dashboard.Certificates` | This plan → `namespaces/translation.ts` | Plans 07, 08 — use for `useAppTranslation()` client-side hook |

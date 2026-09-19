@@ -9,7 +9,8 @@ import {
 } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { type ReactNode, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { BaseCard, StatusBadge } from "@/frontend/common/components/ui";
 import {
   AppPermission,
@@ -359,6 +360,34 @@ interface ClassAuditPayrollCardProps {
   readonly onOverride: (() => void) | undefined;
 }
 
+/** Anchor id of the payroll card, targeted by the `?highlight=payroll` deep link. */
+const PAYROLL_HIGHLIGHT_PARAM = "highlight";
+const PAYROLL_HIGHLIGHT_VALUE = "payroll";
+const PAYROLL_SECTION_ID = "payroll-calculation";
+
+/**
+ * Deep-link focus for the payroll card: when the audit page is opened with
+ * `?highlight=payroll` (e.g. from the profit & loss Payments tab), the card
+ * scrolls into view and its outline stays emphasized until the operator
+ * interacts, so they land on the calculation that produced the revenue row
+ * they clicked.
+ */
+function usePayrollHighlight(): {
+  readonly sectionRef: React.RefObject<HTMLDivElement | null>;
+  readonly isHighlighted: boolean;
+} {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const searchParams = useSearchParams();
+  const isHighlighted = searchParams?.get(PAYROLL_HIGHLIGHT_PARAM) === PAYROLL_HIGHLIGHT_VALUE;
+
+  useEffect(() => {
+    if (!isHighlighted || sectionRef.current === null) return;
+    sectionRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [isHighlighted]);
+
+  return { sectionRef, isHighlighted };
+}
+
 function ClassAuditPayrollCard({ payroll, statusEvents, onOverride }: Readonly<ClassAuditPayrollCardProps>) {
   const locale = useAppLocale();
   const payrollLabels = useAppTranslation(DashboardBillingPayroll);
@@ -366,79 +395,90 @@ function ClassAuditPayrollCard({ payroll, statusEvents, onOverride }: Readonly<C
   const canOverride = onOverride !== undefined && hasPermission(AppPermission.AccountingPayrollManage);
   const overrideEvents = useMemo(() => selectOverrideEvents(statusEvents ?? []), [statusEvents]);
   const statusLabels = useMemo(() => buildStatusLabels(payrollLabels.status), [payrollLabels.status]);
+  const { sectionRef, isHighlighted } = usePayrollHighlight();
 
   return (
-    <BaseCard sx={{ p: 0, overflow: "hidden" }}>
-      <StyledPayrollSection>
-        <StyledPayrollHeaderRow>
-          <StyledPayrollTitleRow>
-            <StyledPayrollIcon />
-            <StyledSectionTitle variant="titleLg">{payrollLabels.audit.title}</StyledSectionTitle>
-          </StyledPayrollTitleRow>
-          {canOverride ? (
-            <Button size="small" variant="outlined" onClick={onOverride}>
-              {payrollLabels.override.action}
-            </Button>
-          ) : null}
-        </StyledPayrollHeaderRow>
-        <Box
-          sx={{
-            mt: 3,
-            display: { xs: "flex", md: "grid" },
-            flexDirection: "column",
-            gap: 3,
-            gridTemplateColumns: { md: "1fr 1fr" },
-          }}
-        >
-          <DetailField label={payrollLabels.column.status}>
-            {payroll.calculationStatus === null ? (
-              <StyledFieldValueText variant="bodyLg">—</StyledFieldValueText>
+    <Box
+      id={PAYROLL_SECTION_ID}
+      ref={sectionRef}
+      sx={theme => ({
+        outline: isHighlighted ? `2px solid ${theme.palette.primary.main}` : undefined,
+        outlineOffset: 2,
+        borderRadius: theme.shape.borderRadius,
+      })}
+    >
+      <BaseCard sx={{ p: 0, overflow: "hidden" }}>
+        <StyledPayrollSection>
+          <StyledPayrollHeaderRow>
+            <StyledPayrollTitleRow>
+              <StyledPayrollIcon />
+              <StyledSectionTitle variant="titleLg">{payrollLabels.audit.title}</StyledSectionTitle>
+            </StyledPayrollTitleRow>
+            {canOverride ? (
+              <Button size="small" variant="outlined" onClick={onOverride}>
+                {payrollLabels.override.action}
+              </Button>
+            ) : null}
+          </StyledPayrollHeaderRow>
+          <Box
+            sx={{
+              mt: 3,
+              display: { xs: "flex", md: "grid" },
+              flexDirection: "column",
+              gap: 3,
+              gridTemplateColumns: { md: "1fr 1fr" },
+            }}
+          >
+            <DetailField label={payrollLabels.column.status}>
+              {payroll.calculationStatus === null ? (
+                <StyledFieldValueText variant="bodyLg">—</StyledFieldValueText>
+              ) : (
+                <StatusBadge
+                  category="payrollCalculation"
+                  status={payroll.calculationStatus}
+                  label={statusLabels[payroll.calculationStatus]}
+                />
+              )}
+            </DetailField>
+            <DetailField label={payrollLabels.column.calculatedDuration}>
+              <StyledFieldValueText variant="bodyLg">{payroll.calculatedDuration ?? "—"}</StyledFieldValueText>
+            </DetailField>
+            <DetailField label={payrollLabels.column.paidAmount}>
+              <StyledFieldValueText variant="bodyLg">
+                {formatPaidAmount(payroll.teacherPaidAmount, payroll.teacherPaidCurrency)}
+              </StyledFieldValueText>
+            </DetailField>
+            {payroll.isPartialPercentage !== null ? (
+              <DetailField label={payrollLabels.column.partialPercentage}>
+                <StyledFieldValueText variant="bodyLg">{payroll.isPartialPercentage}</StyledFieldValueText>
+              </DetailField>
+            ) : null}
+            {payroll.payrollNote !== null && payroll.payrollNote !== "" ? (
+              <DetailField label={payrollLabels.column.note}>
+                <StyledFieldValueText variant="bodyLg">{payroll.payrollNote}</StyledFieldValueText>
+              </DetailField>
+            ) : null}
+          </Box>
+          <StyledOverrideHistorySection>
+            <StyledHistoryTitleRow>
+              <StyledAuditTrailIcon />
+              <StyledSectionTitle variant="titleLg">{payrollLabels.audit.overrideHistory}</StyledSectionTitle>
+            </StyledHistoryTitleRow>
+            {overrideEvents.length === 0 ? (
+              <StyledNoEventsText variant="bodyMd">{payrollLabels.audit.noOverrideEvents}</StyledNoEventsText>
             ) : (
-              <StatusBadge
-                category="payrollCalculation"
-                status={payroll.calculationStatus}
-                label={statusLabels[payroll.calculationStatus]}
-              />
+              overrideEvents.map(event => (
+                <StyledHistoryEntry key={event.id ?? `${event.createdAt ?? "event"}-${event.description ?? ""}`}>
+                  <StyledHistoryTimestamp variant="labelMd">
+                    {formatAuditTimestamp(event.createdAt, locale)}
+                  </StyledHistoryTimestamp>
+                  <StyledHistoryDescription variant="bodyMd">{event.description ?? "—"}</StyledHistoryDescription>
+                </StyledHistoryEntry>
+              ))
             )}
-          </DetailField>
-          <DetailField label={payrollLabels.column.calculatedDuration}>
-            <StyledFieldValueText variant="bodyLg">{payroll.calculatedDuration ?? "—"}</StyledFieldValueText>
-          </DetailField>
-          <DetailField label={payrollLabels.column.paidAmount}>
-            <StyledFieldValueText variant="bodyLg">
-              {formatPaidAmount(payroll.teacherPaidAmount, payroll.teacherPaidCurrency)}
-            </StyledFieldValueText>
-          </DetailField>
-          {payroll.isPartialPercentage !== null ? (
-            <DetailField label={payrollLabels.column.partialPercentage}>
-              <StyledFieldValueText variant="bodyLg">{payroll.isPartialPercentage}</StyledFieldValueText>
-            </DetailField>
-          ) : null}
-          {payroll.payrollNote !== null && payroll.payrollNote !== "" ? (
-            <DetailField label={payrollLabels.column.note}>
-              <StyledFieldValueText variant="bodyLg">{payroll.payrollNote}</StyledFieldValueText>
-            </DetailField>
-          ) : null}
-        </Box>
-        <StyledOverrideHistorySection>
-          <StyledHistoryTitleRow>
-            <StyledAuditTrailIcon />
-            <StyledSectionTitle variant="titleLg">{payrollLabels.audit.overrideHistory}</StyledSectionTitle>
-          </StyledHistoryTitleRow>
-          {overrideEvents.length === 0 ? (
-            <StyledNoEventsText variant="bodyMd">{payrollLabels.audit.noOverrideEvents}</StyledNoEventsText>
-          ) : (
-            overrideEvents.map(event => (
-              <StyledHistoryEntry key={event.id ?? `${event.createdAt ?? "event"}-${event.description ?? ""}`}>
-                <StyledHistoryTimestamp variant="labelMd">
-                  {formatAuditTimestamp(event.createdAt, locale)}
-                </StyledHistoryTimestamp>
-                <StyledHistoryDescription variant="bodyMd">{event.description ?? "—"}</StyledHistoryDescription>
-              </StyledHistoryEntry>
-            ))
-          )}
-        </StyledOverrideHistorySection>
-      </StyledPayrollSection>
-    </BaseCard>
+          </StyledOverrideHistorySection>
+        </StyledPayrollSection>
+      </BaseCard>
+    </Box>
   );
 }

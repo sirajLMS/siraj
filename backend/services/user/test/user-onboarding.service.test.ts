@@ -2,7 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
-import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -14,10 +14,6 @@ import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { errorsEn } from "@/shared/locale/en/errors";
 
 const tErrors = errorsEn;
-
-function generateTestPassword(): string {
-  return `TestPass-${randomUUID().slice(0, 8)}!`;
-}
 
 type CreateUserOptions<TExtension = { id: string; status: string }> =
   UserOnboardingService.CreateUserOfTypeOptions<TExtension>;

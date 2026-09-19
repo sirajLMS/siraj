@@ -163,6 +163,17 @@ export type UserPaymentMethodSubmitInput = Omit<
 export type UpdateUserPaymentMethodInput = Partial<Omit<UserPaymentMethodSubmitInput, "userId" | "type">>;
 
 /**
+ * Update input accepted by `UserPaymentMethodRepository.update`. Narrowed so
+ * callers can never mass-assign identity, verification, or audit columns:
+ * `userId` (ownership), `verifiedAt`/`verifiedByUserId` (verification state —
+ * writable only via `setVerified`, which carries the verifying actor), and
+ * `createdAt`. The repository self-manages `updatedAt`.
+ */
+export type UserPaymentMethodUpdateInput = Partial<
+  Omit<UserPaymentMethodInsertType, "userId" | "verifiedAt" | "verifiedByUserId" | "createdAt" | "updatedAt">
+> & { updatedAt?: Date };
+
+/**
  * GraphQL-specific submit input for user payment methods.
  * Re-typifies `details` as `PaymentMethodDetails` (instead of the JSONB column type)
  * and makes `isDefault` optional for GraphQL input flexibility.

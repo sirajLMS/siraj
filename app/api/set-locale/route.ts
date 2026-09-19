@@ -5,10 +5,13 @@ import { getServerTranslations } from "@/shared/locale";
 import { locales } from "@/shared/locale/AppLocale";
 
 const envConfig = getEnvironmentConfig();
+const isProduction = envConfig.nodeEnv === "production";
 const ALLOWED_ORIGINS = new Set(
-  [getEnv("NEXT_PUBLIC_BASE_URL", ""), envConfig.allowedOrigin, "http://localhost:3000"].filter(
-    (v): v is string => typeof v === "string" && v.length > 0
-  )
+  [
+    getEnv("NEXT_PUBLIC_BASE_URL", ""),
+    envConfig.allowedOrigin,
+    ...(isProduction ? [] : ["http://localhost:3000"]),
+  ].filter((v): v is string => typeof v === "string" && v.length > 0)
 );
 
 const LOCALE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year
@@ -85,6 +88,12 @@ export function resolveTrustedOrigin(request: NextRequest): string {
 export async function GET(request: NextRequest) {
   const locale = resolveLocaleFromRequest(request);
   const tErrors = getServerTranslations(locale).errorsTranslations;
+
+  // Same origin guard as POST — the full-navigation redirect must not be
+  // triggerable from a hostile origin.
+  if (!isAllowedOrigin(request)) {
+    return NextResponse.json({ error: tErrors.invalidOrigin }, { status: 403 });
+  }
 
   const localeParam = request.nextUrl.searchParams.get("locale");
   if (!localeParam || !isAppLocale(localeParam)) {

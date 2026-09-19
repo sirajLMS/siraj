@@ -137,7 +137,7 @@ gqlSchemaBuilder.mutationField("unpayCarryoverBalance", t =>
     authScopes: MANAGE_SCOPE,
     args: {
       id: t.arg.id({ required: true }),
-      note: t.arg.string(),
+      note: t.arg.string({ directives: { constraint: { maxLength: 2000 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);

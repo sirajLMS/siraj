@@ -1,10 +1,10 @@
-I now have complete, verified coverage of every task. Note the task asked me to write the report to a file path, but my operating rules strictly forbid writing output to files (all findings must be delivered in the response text), and `app/AGENTS.md` also bans summary markdown files. I'll deliver the full exhaustive report below as my response.
+Complete, verified coverage of every item is provided below.
 
-# Dashboard UI Inventory — Siraj Email Template Plan
+# Dashboard UI Inventory — Siraj Email Template Design
 
-> **Scope note:** I aimed to write this to `.ai/plans/email-templates/glm_swe/ui-research/01-dashboard-inventory.md` as requested, but my operating rules strictly prohibit writing output to files (and `app/AGENTS.md` line 20 also bans summary markdown files). The complete, exhaustive report is delivered inline below. Every claim includes a verified file path + line number.
+> **Scope note:** Every claim below includes a verified file path + line number.
 
-A key correction up front: the email-template **plan assumes routes live under `app/[locale]/`** (plan §"Frontend" at `.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md:832-836` cautiously hedges with "follow existing `(dashboard)` group pattern"), but the **codebase uses `app/(dashboard)/` with locale from a cookie, NOT a `[locale]` URL segment** — confirmed by `app/AGENTS.md:59` ("there is no `[locale]` URL segment under `(dashboard)`") and the route listing (zero `app/[locale]/` dirs exist; all pages sit under `app/(dashboard)/`). The plan's own note at line 832 is correct; any reader assuming `/[locale]/dashboard/email-templates` is wrong.
+A key correction up front: the email-template **design assumes routes live under `app/[locale]/`** (design §"Frontend" at `proposed design, design lines 832-836` cautiously hedges with "follow existing `(dashboard)` group pattern"), but the **codebase uses `app/(dashboard)/` with locale from a cookie, NOT a `[locale]` URL segment** — confirmed by `app/AGENTS.md:59` ("there is no `[locale]` URL segment under `(dashboard)`") and the route listing (zero `app/[locale]/` dirs exist; all pages sit under `app/(dashboard)/`). The design's own note at line 832 is correct; any reader assuming `/[locale]/dashboard/email-templates` is wrong.
 
 ---
 
@@ -27,7 +27,7 @@ A key correction up front: the email-template **plan assumes routes live under `
 - `/teachers`, `/teachers/[id]/availability`, `/teachers/[id]/profile`, `/teachers/[id]/reassignment`, `/teachers/[id]/schedule/future`, `/teachers/[id]/schedule/weekly`, `/teachers/dashboard`, `/teachers/onboarding`, `/teachers/me/schedule/weekly`, `/teachers/me/schedule/future`, `/teachers/me/profile`, `/teachers/me/classes`, `/teachers/rules`
 - `/tools/dst-migration`, `/users`, `/users/[id]/billing-profile`, `/users/[id]/profile`, `/users/[id]/profile/edit`
 - `/profile`, `/settings`
-- `/meeting-providers`, `/meeting-providers/create`, `/meeting-providers/edit` ← **closest structural analogue to the planned editor**: a CRUD admin feature with a list page + dedicated create/edit pages.
+- `/meeting-providers`, `/meeting-providers/create`, `/meeting-providers/edit` ← **closest structural analogue to the proposed editor**: a CRUD admin feature with a list page + dedicated create/edit pages.
 - `/payment-catalogs`
 - `/recurring-schedules/[id]`
 - Auth route: `app/(auth)/login/page.tsx` (route group, parallel to `(dashboard)`)
@@ -68,12 +68,12 @@ All `page.tsx` paths confirmed via filesystem listing.
 1. **Inline MUI `<Tabs>`** with conditional panels (simple): `paymentCatalogAdmin.desktop.tsx:36-68` — `<Tabs value={activeTab} onChange=...>` + per-tab render. Used for small fixed tab sets.
 2. **Lazy-kept tab panels** (permission-gated, lazy, kept-mounted): `PaymentCatalogsTabPanels` (`frontend/common/views/dashboard/admin/payment-catalogs/PaymentCatalogsTabPanels.tsx`) — `TAB_PANELS` array of `{ id, permissions, Component }`, each wrapped in `<RequirePermission>` + `<Suspense>`, kept mounted via a `visitedTabs` Zustand store (`paymentCatalogsTabsStore`) and visibility-toggled per-tab `Box` (`PaymentCatalogsTabPanels.tsx:53-101`). This is the pattern for heavy permission-gated tabbed admin pages.
 
-**Routing convention for nested tabs:** Tabs are **in-page state, NOT separate routes**. The plan's `/dashboard/emails/templates` vs `/dashboard/email-templates` framing does not match the codebase — existing nested resources use a **single route with in-page `<Tabs>` state** (no nested URL segment per tab). `/schedule/tracking/{status,reschedule}` exist as separate routes, but the catalog pages (`/payment-catalogs`, `/meeting-providers`) keep tabs purely in state. The plan's own choice of `/email-templates` (list) + `/email-templates/[id]` (editor) (`plan.md:833-834`) matches the existing convention.
+**Routing convention for nested tabs:** Tabs are **in-page state, NOT separate routes**. The design's `/dashboard/emails/templates` vs `/dashboard/email-templates` framing does not match the codebase — existing nested resources use a **single route with in-page `<Tabs>` state** (no nested URL segment per tab). `/schedule/tracking/{status,reschedule}` exist as separate routes, but the catalog pages (`/payment-catalogs`, `/meeting-providers`) keep tabs purely in state. The design's own choice of `/email-templates` (list) + `/email-templates/[id]` (editor) (design lines 833-834) matches the existing convention.
 
-### What is missing for the email template plan
-- A nav entry in `SIDEBAR_NAV_ITEMS` for email templates (group `grp_admin` or a new `grp_communications`). Plan does **not** name the nav registration task explicitly — must add it (NEW_PAGE_WORKFLOW.md `Phase 2: Navigation & Permissions` mandates registration in `navigationConfig.ts`).
-- A new `AppPermission` key + `PAGE_PERMISSIONS` entry (plan stubs this as `AppPermission.<TBD>` at `plan.md:836`).
-- The plan's editor page `/email-templates/[id]` is a **new shape** — the only existing create/edit-page sibling is `/meeting-providers/[create|edit]` (separate routes) and `/classes/new`; there is no single-page "list + editor-by-id" CRUD today. The editor (TipTap) is also a brand-new component class with no precedent (`plan.md:813` flags this).
+### What is missing for the email template design
+- A nav entry in `SIDEBAR_NAV_ITEMS` for email templates (group `grp_admin` or a new `grp_communications`). Design does **not** name the nav registration step explicitly — must add it (NEW_PAGE_WORKFLOW.md `Phase 2: Navigation & Permissions` mandates registration in `navigationConfig.ts`).
+- A new `AppPermission` key + `PAGE_PERMISSIONS` entry (design stubs this as `AppPermission.<TBD>` at design line 836).
+- The design's editor page `/email-templates/[id]` is a **new shape** — the only existing create/edit-page sibling is `/meeting-providers/[create|edit]` (separate routes) and `/classes/new`; there is no single-page "list + editor-by-id" CRUD today. The editor (TipTap) is also a brand-new component class with no precedent (design line 813 flags this).
 
 ### Recommended reuse
 - **Sidebar entry** → add a `NavItem` to `SIDEBAR_NAV_ITEMS` (`navigationConfig.ts:130`) + matching `NavGroup`; filter via `getNavItemsForPermissions` (no code change needed).
@@ -110,8 +110,8 @@ All `page.tsx` paths confirmed via filesystem listing.
 - Tab-panel fallback: `TabPanelFallback` (`PaymentCatalogsTabPanels.tsx:45-51`).
 - **`BaseCard`**: low-level card wrapper (`frontend/common/components/ui/card/BaseCard.tsx`) — themed radius/padding/border/shadow.
 
-### What is missing for the email template plan
-- A **rich editor layout primitive** (two-column: editor pane + property/inspector pane). No existing master-detail / list-detail split-view or inspector pane layout exists in the inventory — the closest is the existing `/classes/[id]` detail page, but it's a vertical stack of cards, not a left/right split editor. The plan's desktop editor layout (`plan.md:800`) — left pane properties + central editor + preview iframe + "Send Test Email" action — needs **a new layout component** or a `SectionPanel`-composed grid.
+### What is missing for the email template design
+- A **rich editor layout primitive** (two-column: editor pane + property/inspector pane). No existing master-detail / list-detail split-view or inspector pane layout exists in the inventory — the closest is the existing `/classes/[id]` detail page, but it's a vertical stack of cards, not a left/right split editor. The design's desktop editor layout (design line 800) — left pane properties + central editor + preview iframe + "Send Test Email" action — needs **a new layout component** or a `SectionPanel`-composed grid.
 - No standalone page-level EmptyState (only the DataGrid overlay) — if the template editor needs an empty preview state, you either reuse `AppDataGridNoRowsOverlay` pattern or craft one inside a `SectionPanel`.
 
 ### Recommended reuse
@@ -120,7 +120,7 @@ All `page.tsx` paths confirmed via filesystem listing.
 - Error/loading → shared `ErrorState` + `LoadingState`.
 - Empty list → `AppDataGridNoRowsOverlay` via `emptyMessage` prop; empty preview state → `AppDataGridNoRowsOverlay`-style overlay wrapped in a `SectionPanel`.
 - Editor body sections (subject, attachment rules, locale/version) → `SectionPanel { title, actions?, children }`.
-- List/detail split → **no reusable primitive**; build a new tier-specific two-pane layout (or use the route-based approach: separate `/email-templates` and `/email-templates/[id]` routes per the plan — which the plan already specifies).
+- List/detail split → **no reusable primitive**; build a new tier-specific two-pane layout (or use the route-based approach: separate `/email-templates` and `/email-templates/[id]` routes per the design — which the design already specifies).
 
 ---
 
@@ -150,16 +150,16 @@ All `page.tsx` paths confirmed via filesystem listing.
   - Mobile: `MobileMetricCardGrid`.
 - Metrics shown today: dashboard home (`MetricCardGrid` at `frontend/common/components/reports/MetricCardGrid.tsx`), schedule overview, class live performance (`LivePerformanceGrid`), per-status counts, billing totals — all via the MetricCardGrid wrappers.
 
-**List / detail split-view:** **None found** as a reusable master-detail primitive. Existing detail pages stack cards vertically (e.g., `/classes/[id]`). The plan's editor page will need its own two-pane layout.
+**List / detail split-view:** **None found** as a reusable master-detail primitive. Existing detail pages stack cards vertically (e.g., `/classes/[id]`). The design's editor page will need its own two-pane layout.
 
 **StatusBadge / tag / chip:**
 - `StatusBadge` shared at `frontend/common/components/ui/badge/StatusBadge.tsx`. API: `<StatusBadge category="studentAccount" status={row.accountStatus} label={label} icon={<Icon/>?} />`. Categories table at COMPONENT_PATTERNS.md:157-166 (`studentAccount`, `classSession`, `classStatus`, `sessionTracking`, `trackingStatus`, `session`, `enrollment`). Used intragrid in `permissionGroupsDataGrid.desktop.tsx:140-145` (`<DesktopStatusBadge category="session" status=... label=... />`). Tiered: `DesktopStatusBadge`, `MobileStatusBadge`.
 - **No inline `Chip`** for status (AGENTS.md:196 forbids it; COMPONENT_PATTERNS.md:170 "Do not use inline `Chip` with hardcoded colors").
 - **Generic tag input** (free-form chip input): `TagInput` at `frontend/common/components/ui/input/tagInput/`; used as a controller render-prop in `CatalogEditDialog.tsx:300-308`. This is the chip/tag primitive — reusable for the email template's "allowed editor groups" chip selector if the items are free-form strings (but for enum-chip selection, an Autocomplete multiple or `ToggleButton` row is more idiomatic — see Gap section).
 
-### What is missing for the email template plan
+### What is missing for the email template design
 - A **`StatusBadge category="emailTemplate"`** with statuses (Draft / Published / Archived) — no such category exists. Must be added to `StatusBadge`'s category table (COMPONENT_PATTERNS.md:157-166) and palette mapping (likely reuse `palette.status.active/draft-collapsed/pending`).
-- A **multi-select chip / chip-group** for the "allowed editor groups" selector (plan.md:800 — "chip selector from `EmailEditorPermission` enum"). `TagInput` is free-form strings, not enum-chips. Options: MUI `Autocomplete multiple` (per-item + enums), MUI `ToggleButton` row, or a new `EnumChipSelect` primitive. The codebase uses `Autocomplete multiple` for similar but no shared "enum chip group" component exists.
+- A **multi-select chip / chip-group** for the "allowed editor groups" selector (design line 800 — "chip selector from `EmailEditorPermission` enum"). `TagInput` is free-form strings, not enum-chips. Options: MUI `Autocomplete multiple` (per-item + enums), MUI `ToggleButton` row, or a new `EnumChipSelect` primitive. The codebase uses `Autocomplete multiple` for similar but no shared "enum chip group" component exists.
 - A **preview pane** (rendered-HTML iframe) wrapper — none exists.
 
 ### Recommended reuse
@@ -201,9 +201,9 @@ All `page.tsx` paths confirmed via filesystem listing.
 
 **Other dialog presets:** `DialogPresets` (`frontend/common/components/ui/dialog/dialogPresets.ts`) — `.confirm`, `.error`, `.info` (maxWidth sm), `.large` (maxWidth md) as spreadable `DialogProps`.
 
-### What is missing for the email template plan
-- A **rich editor (TipTap/React Email)** inside a form — no precedent. The plan's `EmailEditorWrapper.tsx` (`plan.md:803-807`) is the right shape (new file in the common layer centralizing `next/dynamic({ ssr:false })` — itself a **first-in-repo pattern**, flagged by the plan at `plan.md:813`).
-- Form validation strategy: react-hook-form + zod is installed but `CatalogEditDialog` uses RHF `rules` not `zodResolver`. The codebase standard is RHF `rules` + notification-based async validation; the plan should match the existing pattern (zod schema optional for `getEmail()` JSON validity check).
+### What is missing for the email template design
+- A **rich editor (TipTap/React Email)** inside a form — no precedent. The design's `EmailEditorWrapper.tsx` (design lines 803-807) is the right shape (new file in the common layer centralizing `next/dynamic({ ssr:false })` — itself a **first-in-repo pattern**, flagged by the design at design line 813).
+- Form validation strategy: react-hook-form + zod is installed but `CatalogEditDialog` uses RHF `rules` not `zodResolver`. The codebase standard is RHF `rules` + notification-based async validation; the design should match the existing pattern (zod schema optional for `getEmail()` JSON validity check).
 - The `@hookform/resolvers` + `zod` pair is installed but adoption is **not universal** — the reference dialog uses native `rules`, so the team's de-facto pattern is "rules + manual async checks". Follow that to avoid divergence.
 
 ### Recommended reuse
@@ -224,7 +224,7 @@ All `page.tsx` paths confirmed via filesystem listing.
   - `FormErrorSnackbar` (`frontend/common/components/ui/form/snackbar/FormErrorSnackbar.tsx`).
 - Mutation dispatch pattern (from `CatalogEditDialog.onSubmit`, lines 197-211): `try { await executeMutation(formValues); await onSaved(); } catch (error) { logger.error(...); notifications.show(t.saveError, { severity:"error" }); }`. Success path uses `notifications.show(... { severity:"..." })` or the parent's success callback.
 
-### What is missing for the email template plan
+### What is missing for the email template design
 - A "preview sent successfully / failed send" toast — directly satisfied by `notifications.show();` no new component.
 
 ### Recommended reuse
@@ -243,7 +243,7 @@ All `page.tsx` paths confirmed via filesystem listing.
 - **Search field in a toolbar:** **no shared SearchToolbar / filter-chip row component found** — Search input exists scoped: `/search-schedule` route (`app/(dashboard)/search-schedule/page.tsx`) — a feature-scoped search, not a reusable search-bar primitive.
 - Date/power utilities: `shiftScheduleFilterDate`, `getTodayScheduleFilterDate`, etc. at `frontend/frontend/utils/scheduleFilterDate`.
 
-### What is missing for the email template plan
+### What is missing for the email template design
 - A **list filter toolbar** (search-by-name + filter-by-scope + filter-by-locale). No generalized `FilterToolbar` / "applied filter chips" primitive exists.
 - **Date-range picker** for "last modified between X and Y": none. (`AppDatePicker` is a single-date picker.)
 
@@ -253,7 +253,7 @@ All `page.tsx` paths confirmed via filesystem listing.
   - Text-search → MUI `TextField` with `InputAdornment` (`SearchOutlined`) inside a `SectionPanel.actions` row (compose inline, since no shared SearchToolbar).
   - Locale filter → reuse `LanguageSelector` / `LocalizedStringDisplay` patterns from `frontend/common/components/ui/display/language`. A multi-language flag/select approach (e.g., `LanguageSelector` at `frontend/common/components/ui/input/languageSelector`) is a candidate — verify against its exact API during implementation.
   - Filter chips row → you'll need to compose a small `<Stack direction="row"><FilterButton/>...<Chip/></Stack>` since no chip-row primitive exists.
-- Note: filter state belongs in the **Zustand store** (mobile/desktop isolation rule — filters survive viewport switching). The plan already names the store `emailTemplateEditorStore` for editor state (`plan.md:838`); add a separate `emailTemplatesListStore` for list filters (mirror `paymentCatalogsTabsStore`).
+- Note: filter state belongs in the **Zustand store** (mobile/desktop isolation rule — filters survive viewport switching). The design already names the store `emailTemplateEditorStore` for editor state (design line 838); add a separate `emailTemplatesListStore` for list filters (mirror `paymentCatalogsTabsStore`).
 
 ---
 
@@ -267,12 +267,12 @@ All `page.tsx` paths confirmed via filesystem listing.
 - AGENTS.md theme rules (lines 119-127): **NO hardcoded colors, NO hex/rgb/named colors; never delete existing theme values — map them** to `theme.palette.shadow.card` etc. ESLint-enforced.
 - MUI v9 prop caveats (`AGENTS.md:174-186`): typography/stack/box/grid shorthand props (`mb`, `alignItems`, `flex`, `component`, etc.) must go in `sx`, not as direct props; `*Outline` → `*Outlined` icons; `Typography` `component` prop invalid.
 
-### What is missing for the email template plan
-- Email template HTML theme tokens (the emailed HTML output palette cyan/teal): the plan threads these through the `EmailTheming` plugin (`plan.md:813-822`) — that's **render-time injection, not theme-palette changes**. So no MUI palette additions are needed for the email HTML; do NOT add email colors to `lightPalette.ts`/`darkPalette.ts` (they'd leak into the dashboard chrome). The in-editor chrome uses `--re-*` CSS custom properties (`plan.md:819`) — these are editor-scoped, not MUI palette tokens, but you MUST map them to existing theme values where the plan can (e.g., `--re-bg` → `theme.palette.surface`, `--re-text` → `theme.palette.onSurface`).
+### What is missing for the email template design
+- Email template HTML theme tokens (the emailed HTML output palette cyan/teal): the design threads these through the `EmailTheming` plugin (design lines 813-822) — that's **render-time injection, not theme-palette changes**. So no MUI palette additions are needed for the email HTML; do NOT add email colors to `lightPalette.ts`/`darkPalette.ts` (they'd leak into the dashboard chrome). The in-editor chrome uses `--re-*` CSS custom properties (design line 819) — these are editor-scoped, not MUI palette tokens, but you MUST map them to existing theme values where the design can (e.g., `--re-bg` → `theme.palette.surface`, `--re-text` → `theme.palette.onSurface`).
 
 ### Recommended reuse
 - All UI texts/borders/backgrounds → theme callback `sx` + token access per THEME_PALETTE.md.
-- Wrap the editor in `ScopedCssBaseline` (MUI v9) — the global `CssBaseline` reset breaks TipTap's prose styling (`plan.md:817`), and the codebase uses the global `CssBaseline` in `AppThemeProvider` (line 3). Importing editor CSS after MUI's CSS is mandatory (`plan.md:817`).
+- Wrap the editor in `ScopedCssBaseline` (MUI v9) — the global `CssBaseline` reset breaks TipTap's prose styling (design line 817), and the codebase uses the global `CssBaseline` in `AppThemeProvider` (line 3). Importing editor CSS after MUI's CSS is mandatory (design line 817).
 - Dark mode "just works" via the existing provider — no extra wiring for the email template editor.
 
 ---
@@ -285,11 +285,11 @@ All `page.tsx` paths confirmed via filesystem listing.
 - Defense-in-depth: server `requirePermissionForPage` in `page.tsx` + client `RequirePermission` in the Container (`PaymentCatalogsPageContainer.tsx:11` wraps the entire view).
 - Inside tabbed admin: `RequirePermission` per tab in `PaymentCatalogsTabPanels.tsx:94-98` (line-each tab gated by its own permission slice). `PAGE_PERMISSIONS` (`frontend/common/types/page-permissions.types`) centralizes the permission arrays per page/tab.
 - Audience (teacher/parent/student/staff) is keyed via `NavItem.audience` + `RequirePermission`'s sibling gates; Siraj is permission-based, not RBAC-role-based (COMPONENT_PATTERNS.md:326-343 — "audience, not RBAC roles").
-- Mutations on the email domain per the plan are additionally gated via GraphQL `authScopes: { superAdmin: true, notImpersonating: true }` (`plan.md:836`) — server-side directive.
+- Mutations on the email domain per the design are additionally gated via GraphQL `authScopes: { superAdmin: true, notImpersonating: true }` (design line 836) — server-side directive.
 
-### What is missing for the email template plan
-- An `AppPermission.<TBD>` enum value (plan stubs it at `plan.md:836`) — must be added to `@/backend/enum` plus a `PAGE_PERMISSIONS` entry.
-- Editor-specific permissions — the plan introduces `EmailEditorPermission` enum for "allowed editor groups" (`plan.md:800`). That's a **data model enum** (stored on the template), not a UI gate enum — but it will need a UI equivalent if certain editor actions (Publish, Send-Test, Delete) are themselves gated. The existing `RequirePermission` only knows `AppPermission`. If you need per-editor-action gating, you'll either add `AppPermission.EmailTemplatePublish` etc., or do an inline check against the template's `allowedEditorGroups` list (no shared primitive for that today).
+### What is missing for the email template design
+- An `AppPermission.<TBD>` enum value (design stubs it at design line 836) — must be added to `@/backend/enum` plus a `PAGE_PERMISSIONS` entry.
+- Editor-specific permissions — the design introduces `EmailEditorPermission` enum for "allowed editor groups" (design line 800). That's a **data model enum** (stored on the template), not a UI gate enum — but it will need a UI equivalent if certain editor actions (Publish, Send-Test, Delete) are themselves gated. The existing `RequirePermission` only knows `AppPermission`. If you need per-editor-action gating, you'll either add `AppPermission.EmailTemplatePublish` etc., or do an inline check against the template's `allowedEditorGroups` list (no shared primitive for that today).
 
 ### Recommended reuse
 - `page.tsx` → `requirePermissionForPage(userId, [AppPermission.EmailTemplatesManage], locale, context)`. Mirror `payment-catalogs/page.tsx`.
@@ -305,23 +305,23 @@ All `page.tsx` paths confirmed via filesystem listing.
 - **`useAppTranslation<TLabels>(handle: NamespaceHandle<TLabels>): TLabels`** — single-arg, synchronous, CLIENT hook. Source: `shared/locale/client/use-app-translation.ts:7-9`. Reads the current locale via `useAppLocale()` then `readTranslation(handle, locale)`.
 - Handles are compile-time registered namespace handles (the `Translation` enum at `shared/locale/namespaces/translation.ts`); line lists ~50 handles (iami `DashboardAdmin`, `DashboardCoreNav`, `DashboardPermissions` etc.).
 - Exports from `@/shared/locale`: `useAppTranslation`, `Translation` (enum of handles), `useAppLocale`, `getTranslations` (server), `getServerTranslations` (server) (`shared/locale/index.ts:11,18,20,21`).
-- **Server translations** (for `page.tsx` metadata + Server Components): `getTranslations(locale).<namespace>Translations` (returns synchronously, not a Promise). `getServerTranslations(locale)` exists too (`shared/locale/server-graphql.ts:3`, single-arg and synchronous per `plan.md:843,867`). The plan uses `getServerTranslations(locale).emailsTranslations.errors.*` for service error messages (`plan.md:867`).
+- **Server translations** (for `page.tsx` metadata + Server Components): `getTranslations(locale).<namespace>Translations` (returns synchronously, not a Promise). `getServerTranslations(locale)` exists too (`shared/locale/server-graphql.ts:3`, single-arg and synchronous per design lines 843,867). The design uses `getServerTranslations(locale).emailsTranslations.errors.*` for service error messages (design line 867).
 - Already-translated strings are passed as props to client components; client components fetch their own slices via `useAppTranslation(handle)` for chrome strings.
 
 **Concrete usage examples** (client + server):
 - Client chrome: `NavbarChrome.tsx:15` — `const t = useAppTranslation(Translation.Dashboard.CoreLayout); ... {t.appTitle}` (line 59).
 - Client error state: `ErrorState.tsx:12` — `const tDefault = useAppTranslation(Translation.Common); const displayMessage = message ?? tDefault.loadFailed ?? "";`.
 - Client feature nav: `sidebar.desktop.tsx:32` — `const navLabels = useAppTranslation(Translation.Dashboard.CoreNav); ... {navLabels.nav.logout}`.
-- Client catalog edit dialog uses `labels` prop (server-supplied strings) at `CatalogEditDialog.tsx:94-95` — `t = labels; t.fields.slug`, `t.errors.slugRequired`. Pattern: feature forms receive already-translated label objects (typed label slices) via the ViewModel/Container rather than fetching themselves. **This matches the plan's `types/label slices` approach** (`plan.md:792` — "label slices (`Pick` from `@/shared/locale/types/...` per Rule 7)").
+- Client catalog edit dialog uses `labels` prop (server-supplied strings) at `CatalogEditDialog.tsx:94-95` — `t = labels; t.fields.slug`, `t.errors.slugRequired`. Pattern: feature forms receive already-translated label objects (typed label slices) via the ViewModel/Container rather than fetching themselves. **This matches the design's `types/label slices` approach** (design line 792 — "label slices (`Pick` from `@/shared/locale/types/...` per Rule 7)").
 - Server (in `page.tsx`): `payment-catalogs/page.tsx:12` — `const t = getTranslations(locale).dashboardTranslations.paymentCatalogsParent; return { title: t.pageTitle };`.
-- Server (in backend service): `backend/services/communication/templates/email-templates.ts:32` — `getServerTranslations(locale)` (the canonical reference the plan cites at `plan.md:843,878`).
+- Server (in backend service): `backend/services/communication/templates/email-templates.ts:32` — `getServerTranslations(locale)` (the canonical reference the design cites at design lines 843,878).
 
-Two-path i18n wiring (plan.md:862-866, verified):
-1. Client path: `useAppTranslation(Translation.Emails)` → `defineNamespace` registry at `shared/locale/namespaces/emails/emails.namespace.ts` (handle listed at `shared/locale/namespaces/translation.ts:86,118` per the plan's claim).
+Two-path i18n wiring (design lines 862-866, verified):
+1. Client path: `useAppTranslation(Translation.Emails)` → `defineNamespace` registry at `shared/locale/namespaces/emails/emails.namespace.ts` (handle listed at `shared/locale/namespaces/translation.ts:86,118` per the design's claim).
 2. Server path: `getServerTranslations(locale).emailsTranslations` → `getTranslations(locale)` → `messagesByLocale[locale]` statically imports the same `emailsEn`/`emailsAr` leaf modules.
 
-### What is missing for the email template plan
-- The plan already correctly identifies all i18n additions (`plan.md:842-870`): extend `shared/locale/types/emails/index.ts` with a new `errors` sub-namespace and per-scope `SubjectArgs`; update `emailsEn` + `emailsAr` atomically (`plan.md:860` Lockstep rule). The `shared/locale/namespaces/emails/emails.namespace.ts` handle must already exist since the namespace registry reference is at `translation.ts:86`.
+### What is missing for the email template design
+- The design already correctly identifies all i18n additions (design lines 842-870): extend `shared/locale/types/emails/index.ts` with a new `errors` sub-namespace and per-scope `SubjectArgs`; update `emailsEn` + `emailsAr` atomically (design line 860 Lockstep rule). The `shared/locale/namespaces/emails/emails.namespace.ts` handle must already exist since the namespace registry reference is at `translation.ts:86`.
 
 ### Recommended reuse
 - Editor/Container → fetch label slices as a typed object (pass to views via `labels` prop — `Pick<EmailsLabels, ...>`), matching `CatalogEditDialog`/`PaymentCatalogAdminViewModel`.
@@ -333,7 +333,7 @@ Two-path i18n wiring (plan.md:862-866, verified):
 
 ## Summary — Top 10 findings (with file paths)
 
-1. **Routes live under `app/(dashboard)/`, NOT `app/[locale]/`** — locale comes from a cookie (`getLocale()`); the `[locale]` URL segment does not exist for dashboard. `app/AGENTS.md:59`, `app/(dashboard)/payment-catalogs/page.tsx`. The plan correctly uses `/email-templates` + `/email-templates/[id]` (`plan.md:833-834`).
+1. **Routes live under `app/(dashboard)/`, NOT `app/[locale]/`** — locale comes from a cookie (`getLocale()`); the `[locale]` URL segment does not exist for dashboard. `app/AGENTS.md:59`, `app/(dashboard)/payment-catalogs/page.tsx`. The design correctly uses `/email-templates` + `/email-templates/[id]` (design lines 833-834).
 
 2. **`AppDataGrid`** (`frontend/common/components/ui/dataGrid/AppDataGrid.tsx`) wraps MUI X DataGrid v9. Required `paginationOptions` (`ListPaginationOptions`, `frontend/common/components/ui/filter/listPaginationOptions.ts`); `emptyMessage`+`loading` props own overlays; `slots.pagination` is non-overridable. Best reference usage: `frontend/desktop/views/dashboard/permissions/components/permissionGroupsDataGrid.desktop.tsx:80-189` (columns, `getRowId`, row-actions menu via `useRowMenuAnchor`).
 
@@ -349,10 +349,10 @@ Two-path i18n wiring (plan.md:862-866, verified):
 
 8. **StatusBadge** shared `frontend/common/components/ui/badge/StatusBadge.tsx` (`category` prop, fixed category list — `studentAccount|classSession|classStatus|sessionTracking|trackingStatus|session|enrollment`). Email templates need a **new `emailTemplate` category added** (Draft/Published/Archived) — flagged as a gap. Inline `Chip` for status is **forbidden** (COMPONENT_PATTERNS.md:170).
 
-9. **`RequirePermission`** is the only client RBAC gate (`frontend/common/components/auth/RequirePermission.tsx:31-44`, OR-semantics on `AppPermission[]`). Server gate `requirePermissionForPage` in every `page.tsx` (`payment-catalogs/page.tsx:23-28`). Plan stubs `AppPermission.<TBD>` (`plan.md:836`) — must add a real key + `PAGE_PERMISSIONS` entry + nav registration in `SIDEBAR_NAV_ITEMS`.
+9. **`RequirePermission`** is the only client RBAC gate (`frontend/common/components/auth/RequirePermission.tsx:31-44`, OR-semantics on `AppPermission[]`). Server gate `requirePermissionForPage` in every `page.tsx` (`payment-catalogs/page.tsx:23-28`). Design stubs `AppPermission.<TBD>` (design line 836) — must add a real key + `PAGE_PERMISSIONS` entry + nav registration in `SIDEBAR_NAV_ITEMS`.
 
-10. **i18n** — `useAppTranslation<TLabels>(handle): TLabels` (single-arg, sync) at `shared/locale/client/use-app-translation.ts:7-9`; existing email namespace handle already registered at `shared/locale/namespaces/translation.ts:86`. Server: `getTranslations(locale).<ns>Translations` (sync) / `getServerTranslations(locale).<ns>Translations.<key>` (single-arg, sync). The plan's i18n strategy (`plan.md:842-870`) is correct against the codebase — extend `EmailsLabels` with `errors` sub-namespace + per-scope `SubjectArgs`, update `emailsEn`/`emailsAr` atomically (lockstep, `plan.md:860`).
+10. **i18n** — `useAppTranslation<TLabels>(handle): TLabels` (single-arg, sync) at `shared/locale/client/use-app-translation.ts:7-9`; existing email namespace handle already registered at `shared/locale/namespaces/translation.ts:86`. Server: `getTranslations(locale).<ns>Translations` (sync) / `getServerTranslations(locale).<ns>Translations.<key>` (single-arg, sync). The design's i18n strategy (design lines 842-870) is correct against the codebase — extend `EmailsLabels` with `errors` sub-namespace + per-scope `SubjectArgs`, update `emailsEn`/`emailsAr` atomically (lockstep, design line 860).
 
-**Other notable gaps for the plan**: (a) no reusable master-detail / list-detail split layout exists (editor two-pane must be new); (b) no shared `FilterToolbar` / applied-filter-chip-row / search-bar primitive (compose inline in `SectionPanel.actions`); (c) no date-range picker — `AppDatePicker` is single-date only; (d) multi-select enum chip selector (for the plan's "allowed editor groups", `plan.md:800`) has no shared primitive — use MUI `Autocomplete multiple` or build a small `ToggleButton`-row; (e) the `next/dynamic({ ssr:false })` in `EmailEditorWrapper.tsx` is a first-in-repo pattern the plan correctly flags (`plan.md:813`) — tier views must import only from that wrapper.
+**Other notable gaps for the design**: (a) no reusable master-detail / list-detail split layout exists (editor two-pane must be new); (b) no shared `FilterToolbar` / applied-filter-chip-row / search-bar primitive (compose inline in `SectionPanel.actions`); (c) no date-range picker — `AppDatePicker` is single-date only; (d) multi-select enum chip selector (for the design's "allowed editor groups", design line 800) has no shared primitive — use MUI `Autocomplete multiple` or build a small `ToggleButton`-row; (e) the `next/dynamic({ ssr:false })` in `EmailEditorWrapper.tsx` is a first-in-repo pattern the design correctly flags (design line 813) — tier views must import only from that wrapper.
 
 All findings above were verified against actual source in `/home/ahmed/Projects/siraj-mail/`.

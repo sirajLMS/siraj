@@ -185,11 +185,11 @@ describe("Scheduling Repository — CRUD & Queries", () => {
         const [studentBefore] = await tx.select().from(students).where(eq(students.id, student.id));
         const instance = await createMockClassInstance(tx, student.id, teacher.id, { quotaDeducted: false });
 
-        await SchedulingRepository.updateClassInstance(instance.id, { quotaDeducted: true }, tx);
+        await SchedulingRepository.setQuotaDeducted(instance.id, true, tx);
         const [s1] = await tx.select().from(students).where(eq(students.id, student.id));
         expect(s1.classesRemaining).toBe(studentBefore.classesRemaining);
 
-        await SchedulingRepository.updateClassInstance(instance.id, { quotaDeducted: false }, tx);
+        await SchedulingRepository.setQuotaDeducted(instance.id, false, tx);
         const [s2] = await tx.select().from(students).where(eq(students.id, student.id));
         expect(s2.classesRemaining).toBe(studentBefore.classesRemaining);
       });

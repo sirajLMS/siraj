@@ -9,6 +9,7 @@ import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
   loginDemoUser,
+  loginSuperAdmin,
   provisionTestSuperAdmin,
   setupTestServerLifecycle,
   testClient,
@@ -92,8 +93,7 @@ describe("learningResources and uploadLearningResource GraphQL Integration Tests
   let superAdminUserId = "";
 
   test("provision super admin for resource operations", async () => {
-    const adminToken = await loginDemoUser("academy_admin");
-    const sa = await provisionTestSuperAdmin(adminToken, "LRTest");
+    const sa = await provisionTestSuperAdmin(await loginSuperAdmin(), "LRTest");
     expect(sa.token.length).toBeGreaterThan(0);
     expect(sa.userId.length).toBeGreaterThan(0);
     superAdminToken = sa.token;

@@ -3,7 +3,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { invoices, parents, payments, students, users } from "@/backend/db/schema";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type {
   DBTransaction,
@@ -22,7 +22,7 @@ async function createTestParent(args: { tx: DBTransaction; suffix: string; now: 
     .values({
       name: "Idempotency Test Parent",
       email: parentEmail,
-      password: `TestPass-${randomUUID().slice(0, 8)}!`,
+      password: generateTestPassword(),
       createdAt: now,
       updatedAt: now,
     })
@@ -48,7 +48,7 @@ async function createTestStudent(args: { tx: DBTransaction; parentId: string; su
     .values({
       name: "Idempotency Test Student User",
       email: `student-${suffix}@example.com`,
-      password: `TestPass-${randomUUID().slice(0, 8)}!`,
+      password: generateTestPassword(),
       createdAt: now,
       updatedAt: now,
     })

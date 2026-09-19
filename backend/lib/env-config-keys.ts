@@ -61,7 +61,11 @@ export interface EnvConfigKeyDescriptor {
   displayStrategy: EnvConfigDisplayStrategy;
   /** Bilingual description shown in the UI. */
   description: { en: string; ar: string };
-  /** True if the value is sensitive. Always paired with `displayStrategy: "db_with_mask_only"`. */
+  /**
+   * True if the value is sensitive. Paired with `displayStrategy: "db_with_mask_only"`
+   * (fully masked in the UI) or, for URL-shaped values, with `maskUrlCredentials`.
+   * Sensitive values are stored encrypted at rest and masked in the audit trail.
+   */
   isSecret: boolean;
   /**
    * True if the key MUST NOT be DB-managed (boot-critical / chicken-and-egg secrets).
@@ -73,6 +77,13 @@ export interface EnvConfigKeyDescriptor {
    * `excludeFromDb: true` and is filtered in the env-config service layer.
    */
   serverOnly?: boolean;
+  /**
+   * True for URL-shaped values that may embed credentials (e.g. `redis://user:pass@host`).
+   * The Settings list path masks the password component before surfacing the value
+   * (a key that is ALSO `isSecret` is fully masked), and the audit trail applies the
+   * same URL-credential sanitization to recorded prior/new values.
+   */
+  maskUrlCredentials?: boolean;
   /** Optional default value (typically undefined — the env var itself is the fallback). */
   defaultValue?: string;
 }
@@ -249,11 +260,12 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
     key: "REDIS_URL",
     category: "redis",
     displayStrategy: "plain",
+    maskUrlCredentials: true,
     description: {
-      en: "Connection URL for the local/self-hosted Redis instance.",
-      ar: "رابط الاتصال بنسخة Redis المحلية أو المستضافة ذاتيًا.",
+      en: "Connection URL for the local/self-hosted Redis instance. Stored encrypted at rest; credentials are masked in the Settings list and the audit trail.",
+      ar: "رابط الاتصال بنسخة Redis المحلية أو المستضافة ذاتيًا. يُخزَّن مشفّرًا؛ تُخفى بيانات الاعتماد في قائمة الإعدادات وسجل التدقيق.",
     },
-    isSecret: false,
+    isSecret: true,
     excludeFromDb: false,
   },
   {

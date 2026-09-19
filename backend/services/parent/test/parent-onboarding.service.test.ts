@@ -2,7 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
-import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
@@ -10,10 +10,6 @@ import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { errorsEn } from "@/shared/locale/en/errors";
 
 const tErrors = errorsEn;
-
-function generateTestPassword(): string {
-  return `TestPass-${randomUUID().slice(0, 8)}!`;
-}
 
 describe("ParentOnboardingService.createParent", () => {
   test("rejects unauthorized user", async () => {

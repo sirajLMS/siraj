@@ -1,8 +1,7 @@
 import { describe, expect, spyOn, test } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
-import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ManagerOnboardingService } from "@/backend/services/staff/manager-onboarding.service";
@@ -95,7 +94,7 @@ async function expectCreateManagerRejection({ context, name, email, assertError 
       {
         name,
         email,
-        password: `TestPass-${randomUUID().slice(0, 8)}!`,
+        password: generateTestPassword(),
         accountType: ManagerAccountType.manager,
       },
       "en"
@@ -121,7 +120,7 @@ describe("ManagerOnboardingService.createManager", () => {
       ManagerOnboardingService.createManager(DEFAULT_ACTOR_ID, {
         name: "Test",
         email: "test@test.com",
-        password: `TestPass-${randomUUID().slice(0, 8)}!`,
+        password: generateTestPassword(),
         accountType: ManagerAccountType.manager,
       })
     );
@@ -182,7 +181,7 @@ describe("ManagerOnboardingService.createManager", () => {
         {
           name: tc.name,
           email: tc.email,
-          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          password: generateTestPassword(),
           accountType: tc.accountType,
         },
         tc.expectedGroupSlug,
@@ -201,7 +200,7 @@ describe("ManagerOnboardingService.createManager", () => {
         {
           name: "Dup Manager",
           email: "existing@test.com",
-          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          password: generateTestPassword(),
           accountType: ManagerAccountType.manager,
         },
         "en"
@@ -226,7 +225,7 @@ describe("ManagerOnboardingService.createManager", () => {
       ManagerOnboardingService.createManager(DEFAULT_ACTOR_ID, {
         name: "Rollback Manager",
         email: createdEmail,
-        password: `TestPass-${randomUUID().slice(0, 8)}!`,
+        password: generateTestPassword(),
         accountType: ManagerAccountType.manager,
       })
     );

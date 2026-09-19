@@ -7,6 +7,10 @@ import { isTestCi } from "@/backend/lib/test-ci-env";
  * - Dedicated test servers (`TEST_SERVER=1`) running `next start` against `.next-test-prod`
  * - CI jobs (`TEST_CI=true`)
  *
+ * Additionally, when the process runs as production (`NODE_ENV=production`),
+ * enablement requires a `TEST_HARNESS_KEY` secret of at least 32 characters —
+ * a bare test flag must never be enough to expose test helpers in production.
+ *
  * Hard-disabled everywhere else — there is NO NODE_ENV fallback, so a plain `next dev`
  * server (or any process without an explicit test flag) never registers test-helper
  * mutations. Also hard-disabled on deployed Vercel environments (both `production` and
@@ -24,8 +28,19 @@ function isTestHarness(): boolean {
   return process.env.TEST_SERVER === "1" || isTestCi();
 }
 
+const TEST_HARNESS_KEY_MIN_LENGTH = 32;
+
+function hasValidTestHarnessKey(): boolean {
+  const key = process.env.TEST_HARNESS_KEY;
+  return typeof key === "string" && key.length >= TEST_HARNESS_KEY_MIN_LENGTH;
+}
+
 export function isTestHelperEnabled(): boolean {
   if (isRealProductionDeployment()) {
+    return false;
+  }
+
+  if (process.env.NODE_ENV === "production" && !hasValidTestHarnessKey()) {
     return false;
   }
 

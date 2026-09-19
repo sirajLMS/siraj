@@ -19,12 +19,20 @@ import {
 } from "@/shared/utils/appearance-logo-storage.utils";
 
 /**
- * Default short-lived cache control for general storage assets.
+ * Default short-lived cache control for general (public) storage assets.
  *
  * Kept as a named constant (rather than an inline string) so the contrast
  * with {@link APPEARANCE_LOGO_CACHE_CONTROL} is explicit at the call site.
  */
 const DEFAULT_STORAGE_CACHE_CONTROL = "public, max-age=3600";
+
+/**
+ * Cache control for authenticated files served outside the `public/` prefix.
+ *
+ * `private` keeps shared proxies/CDNs from caching access-controlled
+ * responses outside the per-request authorization check.
+ */
+const PRIVATE_STORAGE_CACHE_CONTROL = "private, max-age=60";
 
 /**
  * Resolve the `Cache-Control` header value for a served storage asset
@@ -33,11 +41,16 @@ const DEFAULT_STORAGE_CACHE_CONTROL = "public, max-age=3600";
  * Appearance logos (paths under `public/appearance/`) are served with the
  * long-lived immutable header ({@link APPEARANCE_LOGO_CACHE_CONTROL}) because
  * their storage keys are UUID-randomized — a re-upload produces a new URL,
- * so the bytes behind any given URL never change. All other assets keep the
- * short-lived `max-age=3600` default (they may be overwritten in place by
- * the storage pipeline).
+ * so the bytes behind any given URL never change. Other `public/` assets
+ * keep the short-lived `max-age=3600` default (they may be overwritten in
+ * place by the storage pipeline). Authenticated files outside `public/` are
+ * access-controlled and use the `private` directive so shared caches never
+ * store them.
  */
 function resolveCacheControl(relativePath: string): string {
+  if (!relativePath.startsWith("public/")) {
+    return PRIVATE_STORAGE_CACHE_CONTROL;
+  }
   return isAppearanceLogoStoragePath(relativePath) ? APPEARANCE_LOGO_CACHE_CONTROL : DEFAULT_STORAGE_CACHE_CONTROL;
 }
 

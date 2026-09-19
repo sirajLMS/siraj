@@ -82,6 +82,10 @@ function toMonthChangeState(month: string): Partial<ProfitLossFilterState> {
 
 const VALID_CURRENCIES = new Set<string>(Object.values(CurrencyCode));
 
+function isCurrencyCode(value: unknown): value is CurrencyCode {
+  return typeof value === "string" && VALID_CURRENCIES.has(value);
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -106,10 +110,7 @@ function mergePersistedState(persistedState: unknown, currentState: ProfitLossFi
   const month =
     typeof persisted.month === "string" && /^\d{4}-\d{2}$/.test(persisted.month) ? persisted.month : defaults.month;
 
-  const currency =
-    typeof persisted.currency === "string" && VALID_CURRENCIES.has(persisted.currency)
-      ? (persisted.currency as CurrencyCode)
-      : defaults.currency;
+  const currency = isCurrencyCode(persisted.currency) ? persisted.currency : defaults.currency;
 
   const activeTab = isProfitLossTab(persisted.activeTab) ? persisted.activeTab : defaults.activeTab;
 

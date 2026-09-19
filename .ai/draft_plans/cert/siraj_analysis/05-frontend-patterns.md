@@ -173,7 +173,7 @@ Barrel `frontend/common/components/ui/index.ts` exports:
 - **display**: `PersonProfileLink`, `PersonProfileLinkCell`, `TimezoneDisplay`, `MeetingJoinAction`.
 - **filter**: `DateNavigator`, `PaginationControls`, `buildServerPaginationOptions`, `ListPaginationOptions`.
 - **form**: `FormErrorSnackbar`, `FormSuccessSnackbar`.
-- **input**, **state** (loading/error states), **story** (Storybook page container).
+- **input**, **state** (loading/error states).
 
 Tier-specific barrels mirror these at `frontend/desktop/components/ui/index.ts` and `frontend/mobile/...` — e.g., `DesktopAppDataGrid`, `DesktopPageContainer`, `DesktopPageHeader`, `DesktopPrimaryPageAction`, `DesktopSectionPanel`, `DesktopPersonProfileLinkCell`.
 

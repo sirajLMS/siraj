@@ -1,6 +1,6 @@
 ### Frontend (UI/UX Specification)
 
-> **SWE Review v6 (UI/UX completeness):** expanded from ~60 lines to a complete UI/UX specification per research synthesis at [.ai/plans/email-templates/glm_swe/ui-research/00-synthesis.md](.ai/plans/email-templates/glm_swe/ui-research/00-synthesis.md). All existing v1-v5 technical decisions preserved; UI/UX gaps closed: navigation entry, page layouts, list view, editor view interactions, preview tab, send-test dialog, animations w/ prefers-reduced-motion a11y guard, forms/validation, theming/dark mode, a11y, storybook stories, tests, StatusBadge extension, feature-flag visual cue, complete i18n key catalogue.
+> **SWE Review v6 (UI/UX completeness):** expanded from ~60 lines to a complete UI/UX specification per research synthesis at [.ai/draft_plans/email-templates/glm_swe/ui-research/00-synthesis.md](.ai/draft_plans/email-templates/glm_swe/ui-research/00-synthesis.md). All existing v1-v5 technical decisions preserved; UI/UX gaps closed: navigation entry, page layouts, list view, editor view interactions, preview tab, send-test dialog, animations w/ prefers-reduced-motion a11y guard, forms/validation, theming/dark mode, a11y, StatusBadge extension, feature-flag visual cue, complete i18n key catalogue.
 
 Follow the tier-neutral ViewModel + switcher + Container pattern per [frontend/common/views/AGENTS.md](frontend/common/views/AGENTS.md) and [frontend/NEW_PAGE_WORKFLOW.md](frontend/NEW_PAGE_WORKFLOW.md). **`frontend/views/dashboard/` is DEPRECATED** — all new code goes under `frontend/common/views/dashboard/<domain>/` + tier files in `frontend/mobile/views/` and `frontend/desktop/views/`.
 
@@ -56,7 +56,7 @@ Follow the tier-neutral ViewModel + switcher + Container pattern per [frontend/c
   - Server: `requirePermissionForPage(userId, [AppPermission.EMAIL_TEMPLATES_MANAGE], locale, context)` in each `page.tsx`.
   - Client: `<RequirePermission permissions={["EMAIL_TEMPLATES_MANAGE"]} fallback={null}>` in the Container.
   - **New enum value**: add `EMAIL_TEMPLATES_MANAGE = "EMAIL_TEMPLATES_MANAGE"` to `AppPermission`. Add a `PAGE_PERMISSIONS.emailTemplates` entry to the registry.
-  - GraphQL mutations additionally gate via `authScopes: { superAdmin: true, notImpersonating: true }` (KEEP from plan L836).
+  - GraphQL mutations additionally gate via `authScopes: { superAdmin: true, notImpersonating: true }`.
 - **Deep-linking & middle-click** — editor URL `/email-templates/{id}` is shareable; MUI DataGrid default supports middle-click → new tab.
 
 #### B. Page Layouts
@@ -164,19 +164,19 @@ Follow the tier-neutral ViewModel + switcher + Container pattern per [frontend/c
 
 - **Dialog** — MUI `<Dialog>` + `EntityFormDialogActions` for actions bar. Title: i18n `dashboard.emailTemplates.dialog.sendTestTitle`.
 - **To: input** — `<OutlinedInput type="email">` with zod `z.string().email()` validation. Helper error text on invalid.
-- **Sample props** — collapsible `<TextareaAutosize>` (or MUI `<TextField multiline>`) pre-filled with scope-specific default JSON. Editable for advanced test cases.
-- **Rate-limit notice** — `<Typography variant="caption" color="text.secondary">` text "Max 5 test emails per minute per user" (from plan todo 12). If the mutation returns `RATE_LIMITED` error, render inline error text: `toast.sendTestRateLimited(limit)`.
+- **Sample props** — collapsible `<TextareaAutosize>` (or MUI `<TextField multiline>`) pre-filled with scope-specific default JSON. Editable for advanced payloads.
+- **Rate-limit notice** — `<Typography variant="caption" color="text.secondary">` text "Max 5 test emails per minute per user". If the mutation returns `RATE_LIMITED` error, render inline error text: `toast.sendTestRateLimited(limit)`.
 - **"Send to my own email" quick button** (Phase 2) — small `<Button>` that pre-fills the To field with the current user's email (from auth store).
 - **Submit** — `sendTestEmail` mutation. On success: `notifications.show(t("toast.testSent", { to }), { severity: "success" })` + optionally trigger the `SuccessCheckMark` animation (see §G) BEFORE closing the dialog. On failure: inline error in dialog body.
 - **Close behavior** — on close, prompt "Discard sample props changes?" if the sample JSON was modified and the email was not sent.
 
 #### G. Animations & Micro-interactions
 
-- **Libraries** — reuse only what's installed today: `framer-motion@^12.43.0` (used in exactly 3 sibling `MetricCard` files), `@dnd-kit/core@^6.3.1` + `@dnd-kit/sortable@^10.0.0` (installed but UNUSED in any source file — the email plan is the first consumer). DO NOT add Motion / GSAP / auto-animate / lottie / confetti.
+- **Libraries** — reuse only what's installed today: `framer-motion@^12.43.0` (used in exactly 3 sibling `MetricCard` files), `@dnd-kit/core@^6.3.1` + `@dnd-kit/sortable@^10.0.0` (installed but UNUSED in any source file — this feature is the first consumer). DO NOT add Motion / GSAP / auto-animate / lottie / confetti.
 - **Tab transitions** — reuse `<Slide>` idiom from `preferencesChannelTabs.mobile.tsx:140` (`direction` computed from index delta, `timeout={220}`). When `usePrefersReducedMotion()` returns true, render directly without slide.
 - **List entrance stagger** — mirror `MetricCard.tsx:84-88` framer-motion entrance: `initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: animationIndex * 0.04, ease: [0.25, 0.46, 0.45, 0.94] }}`. Apply to each DataGrid row wrapper (only if DataGrid supports slot rendering; otherwise apply to the named-row container). Cap `delay` so all rows animate in ≤400ms.
 - **Success animation** — NEW small component `SuccessCheckMark` in `frontend/common/components/ui/feedback/`. framer-motion SVG `<path>` with `pathLength` 0 → 1, ~600ms one-shot. Used in the Send Test success state + Publish confirmation. No confetti.
-- **Drag-and-drop reorder animation** — `@dnd-kit/sortable` `useSortable` ships CSS `transform` + `transition` built-in. Use `<DragOverlay dropAnimation>` for the lift/settle. The plan establishes the repo's first dnd-kit **usage convention**: helper components live in `frontend/common/components/ui/dnd/` (`SortableItem`, `SortableList`). **Install missing deps**: `@dnd-kit/utilities` + `@dnd-kit/modifiers` (`@dnd-kit/core` + `sortable` are already installed; utilities + modifiers are NOT). Do NOT add `react-dnd` or `@hello-pangea/dnd`.
+- **Drag-and-drop reorder animation** — `@dnd-kit/sortable` `useSortable` ships CSS `transform` + `transition` built-in. Use `<DragOverlay dropAnimation>` for the lift/settle. This establishes the repo's first dnd-kit **usage convention**: helper components live in `frontend/common/components/ui/dnd/` (`SortableItem`, `SortableList`). **Install missing deps**: `@dnd-kit/utilities` + `@dnd-kit/modifiers` (`@dnd-kit/core` + `sortable` are already installed; utilities + modifiers are NOT). Do NOT add `react-dnd` or `@hello-pangea/dnd`.
 - **Loading spinner** — standard `<CircularProgress size={20} color="inherit">` inside buttons (existing repo convention).
 - **Skeletons** — MUI `<Skeleton>` for `EmailEditorSkeleton` and `EmailTemplatesListSkeleton` (see §B).
 - **Drawer/Dialog motion** — MUI defaults: `Drawer` uses `Slide`, `Dialog` uses `Fade`. **Do NOT override `TransitionComponent`** on the 56 existing dialogs / 11 existing drawers — keep parity (research file 03).
@@ -229,60 +229,9 @@ Follow the tier-neutral ViewModel + switcher + Container pattern per [frontend/c
 - **Filter chips** — `<Chip>` filters carry `aria-label={t("filterByScope")}` etc.
 - **Dialog** — `aria-labelledby={titleId}` on `<Dialog>`, title's `<Typography id={titleId} variant="h6">`.
 - **Sandboxed preview iframe** — `title={t("previewTab")}` attribute (required for screen readers).
-- **Keyboard navigation** — editor toolbar buttons reachable via Tab; Drawer/Dialog trap focus (MUI default — no work). The Storybook addon-a11y toolbar surfaces any a11y warning per story.
-- **Color contrast** — WCAG AA minimum (4.5:1 text / 3:1 large text). Status badge colors must meet 4.5:1 against the row background. The Grid row default background is `theme.palette.background.paper` — verify each status palette slot.
-- **Reduced-motion** — `usePrefersReducedMotion()` guard (§G) — closes an existing gap.
-- **addon-a11y** — `@storybook/addon-a11y` is registered (todo only — warnings do not fail CI; visual a11y review is manual per story). Research file 05 confirms no `@axe-core/playwright` or `jest-axe` is installed — Phase 2 may add `@axe-core/playwright` for E2E assertions.
+- **Keyboard navigation** — editor toolbar buttons reachable via Tab; Drawer/Dialog trap focus (MUI default — no work).
 
-#### K. Storybook Stories (required file list, mirrors [research file 05](.ai/plans/email-templates/glm_swe/ui-research/05-storybook-tests.md) lines 282-298)
-
-Story pattern = CSF3 explicit `Meta<typeof C>` + `StoryObj<T>` type alias (`tags: ["autodocs"]`). Use `StoryWrapper` (handles locale + theme + user-store seeding globally) — no global Apollo/i18n/theme decorator registration. Apollo `MockedProvider` + `useXStore.setState({...})` per-story **inside a decorator** (reference: `frontend/common/views/dashboard/search-schedule/SearchScheduleContainer.stories.tsx:102-127`).
-
-| # | Component | Story file |
-|---|---|---|
-| 1 | `useEmailTemplatesListViewModel.ts` | (no story — covered by the.list view story below) |
-| 2 | `EmailTemplatesListView.tsx` switcher | `frontend/common/views/dashboard/email-templates/EmailTemplatesListView.stories.tsx` |
-| 3 | `EmailTemplatesListContainer.tsx` | `frontend/common/views/dashboard/email-templates/EmailTemplatesListContainer.stories.tsx` |
-| 4 | `emailTemplatesList.mobile.tsx` | `frontend/mobile/views/dashboard/email-templates/emailTemplatesList.mobile.stories.tsx` |
-| 5 | `emailTemplatesList.desktop.tsx` | `frontend/desktop/views/dashboard/email-templates/emailTemplatesList.desktop.stories.tsx` |
-| 6 | `useEmailTemplateEditorViewModel.ts` | (no story — covered by the editor view story below) |
-| 7 | `EmailTemplateEditorView.tsx` switcher | `frontend/common/views/dashboard/email-templates/EmailTemplateEditorView.stories.tsx` |
-| 8 | `EmailTemplateEditorContainer.tsx` | `frontend/common/views/dashboard/email-templates/EmailTemplateEditorContainer.stories.tsx` |
-| 9 | `emailTemplateEditor.mobile.tsx` | `frontend/mobile/views/dashboard/email-templates/emailTemplateEditor.mobile.stories.tsx` |
-| 10 | `emailTemplateEditor.desktop.tsx` | `frontend/desktop/views/dashboard/email-templates/emailTemplateEditor.desktop.stories.tsx` (mock `@react-email/editor` via storybook decorator — TipTap doesn't render in Storybook cleanly) |
-| 11 | `EmailEditorWrapper.tsx` | covered by editor view stories (don't add a separate story) |
-| 12 | `emailTemplateEditorStore.ts` Zustand | (no story — covered indirectly) |
-| 13 | GraphQL docs sub-dir | (no story) |
-| 14 | Admin routes page.tsx | (no story — server component) |
-| 15 | React Email scaffold components (L872+) | **optional** `frontend/**/emails/<Email>.stories.tsx` for visual baselines — Phase 2 |
-
-Each story provides default / empty / loading / error / RTL variants. RTL variant renders with `dir="rtl"` (StoryWrapper handles `stylis-plugin-rtl` cache swap).
-
-#### L. Component / E2E Tests (mirrors [research file 05](.ai/plans/email-templates/glm_swe/ui-research/05-storybook-tests.md))
-
-- **Runner** — `bun:test` + Happy DOM preload (`test/ui/components/happydom-preload.ts`). Vitest is reserved for the Storybook `@storybook/addon-vitest` project only. **No frontend 100%-coverage rule** (the 100% rule is for `backend/db/repo/` only).
-- **Tier-split testing convention** (`frontend/common/components/ui/AGENTS.md:227-235`): test both mobile + desktop tier variants separately; unit-test the ViewModel hook in isolation; test the switcher with mocked `useViewport`; assert via rendered output (NOT implementation details); Storybook story = visual baseline.
-- **Apollo mock** — `renderWithWrapper(ui, { mocks })` → `TestWrapper` builds ApolloClient with `MockLink` (`test/ui/components/TestWrapper.tsx:61-80`). i18n through `LocaleProvider`; tests set locale via `renderWithWrapper({ locale })`.
-- **Required test files**:
-
-| # | Component | Required component test file |
-|---|---|---|
-| 1 | `useEmailTemplatesListViewModel.ts` | `test/ui/components/email-templates/useEmailTemplatesListViewModel.test.ts` |
-| 2 | `EmailTemplatesListView.tsx` switcher | `test/ui/components/email-templates/EmailTemplatesListView.test.tsx` (mocked `useViewport`) |
-| 3 | `EmailTemplatesListContainer.tsx` | `test/ui/components/email-templates/EmailTemplatesListContainer.test.tsx` (permission gating) |
-| 4 | `emailTemplatesList.mobile.tsx` | `test/ui/components/email-templates/emailTemplatesList.mobile.test.tsx` |
-| 5 | `emailTemplatesList.desktop.tsx` | `test/ui/components/email-templates/emailTemplatesList.desktop.test.tsx` (the file plan L952 already names) |
-| 6 | `useEmailTemplateEditorViewModel.ts` | `test/ui/components/email-templates/useEmailTemplateEditorViewModel.test.ts` |
-| 7 | `EmailTemplateEditorView.tsx` switcher | `test/ui/components/email-templates/EmailTemplateEditorView.test.tsx` |
-| 8 | `EmailTemplateEditorContainer.tsx` | `test/ui/components/email-templates/EmailTemplateEditorContainer.test.tsx` |
-| 9 | `emailTemplateEditor.mobile.tsx` | `test/ui/components/email-templates/emailTemplateEditor.mobile.test.tsx` |
-| 10 | `emailTemplateEditor.desktop.tsx` | `test/ui/components/email-templates/emailTemplateEditor.desktop.test.tsx` (plan L952) |
-| 11 | `EmailEditorWrapper.tsx` | `test/ui/components/email-templates/EmailEditorWrapper.test.tsx` (asserts `ssr:false` lazy import behavior + that tier views import from wrapper, not `@react-email/editor` directly) |
-| 12 | `emailTemplateEditorStore.ts` Zustand | `test/ui/components/email-templates/emailTemplateEditorStore.test.ts` (dirty state, dialog open, serialization — File/Blob kept out) |
-
-- **Editor view tests must `mock.module`-stub `@react-email/editor`** because TipTap doesn't render cleanly under Happy DOM (research file 05 lines 302-303). Pattern mirrors the existing `mock.module` next/navigation stub. The real save-flow (getJSON → mutation → preview) is reserved for E2E.
-- **Single E2E file** — `test/ui/e2e/email-templates.test.ts` covering the admin happy path: login (loginAsDemoUser) → navigate to `/email-templates` → list renders → click "Create" → editor opens → save mutation → publish → preview iframe assertion. Mirrors `test/ui/e2e/admin-dashboard.test.ts` pattern (`setupBrowserLifecycle`, `gotoAppRoute`, `closeE2eSession`) — no page-object layer. Requires `bun run build:test` first.
-- **Bundle size verification** — KEEP from plan todo 20b: `NEXT_BUNDLE_ANALYZER=enabled bun run build` confirms the editor route's JS chunk is code-split from the main bundle (TipTap + Prism.js don't bloat the main bundle).
+- **Bundle size verification** — `NEXT_BUNDLE_ANALYZER=enabled bun run build` confirms the editor route's JS chunk is code-split from the main bundle (TipTap + Prism.js don't bloat the main bundle).
 
 #### M. GraphQL Documents (KEEP verbatim from v5)
 
@@ -300,11 +249,11 @@ Each story provides default / empty / loading / error / RTL variants. RTL varian
 - The shared `StatusBadge` (`frontend/common/components/ui/badge/StatusBadge.tsx`) has a fixed `category` prop today (`studentAccount|classSession|classStatus|...`).
 - **Add a new `emailTemplate` category** so list+history use the standard status badge (inline `<Chip>` is FORBIDDEN per `COMPONENT_PATTERNS.md:170`).
 - Map: `EmailTemplateStatus.DRAFT → theme.palette.warning`, `PUBLISHED → theme.palette.success`, `ARCHIVED → theme.palette.action.disabled / text.disabled`. Localized label per status via `dashboard.emailTemplates.status.*`.
-- Mirror the existing category implementation (the component switches on `category` to render the right palette slot) — add the new branch + tests.
+- Mirror the existing category implementation (the component switches on `category` to render the right palette slot) — add the new branch.
 
 #### O. Feature Flag Visual Cue
 
-- When `EMAIL_TEMPLATES_ENABLED === false` (using `getBooleanEnv` per todo 21c V5-2 - NEVER raw `resolveEnvConfig`):
+- When `EMAIL_TEMPLATES_ENABLED === false` (using `getBooleanEnv` — NEVER raw `resolveEnvConfig`):
   - **Admin pages still render** (for visual preview, since this is admin-only).
   - **Sidebar entry** displays a small `<LockOutlined fontSize="small" color="disabled" />` adjacent to the label, with a tooltip text explaining "Feature disabled — set EMAIL_TEMPLATES_ENABLED=true to send". Title from i18n `dashboard.emailTemplates.featureDisabledTooltip`.
   - **All "Send Test" + "Publish" actions** in the editor are **disabled** with the same tooltip + lock icon. The send mutation returns `EMAIL_TEMPLATES_DISABLED` GraphQL error code (mapped to a user-visible toast `toast.featureDisabled`).
@@ -312,7 +261,7 @@ Each story provides default / empty / loading / error / RTL variants. RTL varian
 
 #### Zustand Store (KEEP from v5)
 
-[`frontend/common/stores/emailTemplateEditorStore.ts`](frontend/common/stores/emailTemplateEditorStore.ts) — mutable editor state (filters, dialog open, locale/version selector, segmented control, sort, dirty flag, sampleProps). **Serialization rule**: do NOT store `File`/`Blob`/`FormData`/`Promise` in `persist`-enabled stores; keep non-serializable editor refs in `useRef` inside the ViewModel hook. There is NO separate `__mocks__` Storybook convention (research file 05 confirms) — use inline `create()` for the store; Storybook stories render containers with `args: {}` and no store override.
+[`frontend/common/stores/emailTemplateEditorStore.ts`](frontend/common/stores/emailTemplateEditorStore.ts) — mutable editor state (filters, dialog open, locale/version selector, segmented control, sort, dirty flag, sampleProps). **Serialization rule**: do NOT store `File`/`Blob`/`FormData`/`Promise` in `persist`-enabled stores; keep non-serializable editor refs in `useRef` inside the ViewModel hook. Use inline `create()` for the store.
 
 ### i18n (complete key catalogue)
 

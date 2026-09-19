@@ -149,6 +149,7 @@ interface CreateScheduleInputOverrides {
   name?: string;
   cronExpression?: string;
   timezone?: string;
+  payload?: Record<string, unknown> | null;
 }
 
 function makeCreateScheduleInput(overrides: CreateScheduleInputOverrides = {}): CronScheduleSubmitInput {
@@ -372,6 +373,7 @@ await mock.module("@/shared/locale/server-graphql", () => ({
           scheduleNotPaused: "Schedule is not paused",
           concurrencyConflict: "A run for this schedule is already in progress",
           invalidTimezone: (tz: string) => `Invalid timezone: ${tz}`,
+          payloadTooLarge: "The cron job payload is too large. Maximum allowed size is 64 KB.",
         },
       },
     },
@@ -442,11 +444,30 @@ describe("CronService", () => {
       expect(caughtErr.message).toContain("Invalid timezone: Not/A real timezone");
       expect(createScheduleCalls).toHaveLength(0);
     });
+
+    test("rejects an oversized payload without persisting", async () => {
+      const input = makeCreateScheduleInput({
+        name: "big-payload-schedule",
+        payload: { blob: "x".repeat(70_000) },
+      });
+      const caughtErr = await expectToThrow(() => CronService.createSchedule(input, "en", SERVICE_USER_ID));
+      expect(caughtErr.message).toContain("payload is too large");
+      expect(createScheduleCalls).toHaveLength(0);
+    });
   });
 
   // ── updateSchedule ──
 
   describe("updateSchedule", () => {
+    test("rejects an oversized payload without updating", async () => {
+      const caughtErr = await expectToThrow(() =>
+        CronService.updateSchedule("sched-1", { payload: { blob: "y".repeat(70_000) } }, "en", SERVICE_USER_ID)
+      );
+      expect(caughtErr.message).toContain("payload is too large");
+      expect(getScheduleByIdCalls).toHaveLength(0);
+      expect(updateScheduleCalls).toHaveLength(0);
+    });
+
     test("updates schedule and recomputes nextRunAt when cron changes", async () => {
       getScheduleByIdResult = makeScheduleRow({ cronExpression: "*/5 * * * *" });
       updateScheduleResult = makeScheduleRow();

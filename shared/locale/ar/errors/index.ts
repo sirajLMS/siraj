@@ -43,6 +43,8 @@ const scheduling = {
   outOfQuota: "نفدت الحصة.",
   leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
     `تم تجاوز حصة الإجازة: الحد الأقصى ${maxLeaves} إجازات مسموح بها.`,
+  sessionLocked: ({ lockHours }: { lockHours: number }) => `لا يمكن تعديل الجلسة خلال ${lockHours} ساعة من وقت البدء.`,
+  leaveRequestNoLongerPending: "الطلب لم يعد قيد الانتظار.",
   classInstanceNotFound: ({ id }: { id: string }) => `مثيل الفصل غير موجود: ${id}`,
   originalClassNotFound: "الفصل الأصلي غير موجود.",
   invalidTransition: "انتقال غير صالح.",
@@ -426,6 +428,7 @@ export const errorsAr: ErrorsLabels = {
     publishFailed: "فشل نشر إعدادات المظهر.",
     resetFailed: "فشل إعادة تعيين مسودة المظهر.",
     unauthorized: "ليس لديك صلاحية لإدارة مظهر الموقع.",
+    conflict: "تم تعديل إعدادات المظهر بواسطة مسؤول آخر. أعد التحميل لرؤية تغييراته، أو اكتب فوقها بتغييراتك.",
   },
   serviceOutage: {
     title: "تعذّر الوصول إلى خوادمنا حالياً",
@@ -470,6 +473,8 @@ export const errorsAr: ErrorsLabels = {
   },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
+  anonymizationScrubIncomplete:
+    "تعذّر تطبيق إخفاء الهوية على جميع السجلات. لم تُحفظ أي تغييرات — يرجى إعادة المحاولة أو التواصل مع الدعم.",
   duplicateRequest: "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",
   internalServerError: "حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.",
   requestTooLarge: "حجم الطلب كبير جداً.",

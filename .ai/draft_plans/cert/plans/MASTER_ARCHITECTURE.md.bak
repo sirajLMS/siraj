@@ -16,7 +16,7 @@
 - **Frontend**: React 19, MUI v9, Apollo Client v4, Zustand
 - **Backend**: Pothos GraphQL, Drizzle ORM, PostgreSQL
 - **i18n**: Custom compile-time TypeScript system in `shared/locale/` (NOT next-intl)
-- **Testing**: Bun test runner, Vitest for Storybook, Playwright for E2E
+- **Testing**: Bun test runner
 
 ## Critical Rule: NO Code Snippets in Spec Files
 
@@ -107,7 +107,7 @@ Client Component → Apollo Hook → GraphQL API → Pothos Resolver → Service
 
 | # | Plan | Depends On | Scope |
 |---|------|-----------|-------|
-| 20 | Testing & Quality | 1-19 | DB repo tests, service tests, GraphQL integration, E2E, Storybook |
+| 20 | Testing & Quality | 1-19 | DB repo tests, service tests, GraphQL integration |
 | 21 | Knowledge Propagation | 1-19 | docs/, AGENTS.md updates, skill updates, instruction files |
 | 22 | Cron Jobs & Cleanup | 4, 7 | Expired certificate detection, storage cleanup, orphan file removal, scheduled renders |
 

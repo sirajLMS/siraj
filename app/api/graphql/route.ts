@@ -18,6 +18,7 @@ import { cookies as nextCookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { createGraphQLContext } from "@/backend/graphql/gqlContextFactory";
 import { graphQLSchema } from "@/backend/graphql/gqlSchema";
+import { nodeCountLimit } from "@/backend/graphql/shared";
 import { ensureEnvironmentValidated, getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, graphqlRateLimiter } from "@/backend/lib/ratelimit";
@@ -31,6 +32,14 @@ ensureEnvironmentValidated();
 const envConfig = getEnvironmentConfig();
 const isProduction = envConfig.nodeEnv === "production";
 const MAX_GRAPHQL_DEPTH = 7;
+
+/**
+ * Maximum AST nodes (fields incl. aliases, inline fragments, fragment spreads)
+ * allowed in one GraphQL request document. A cheap static budget enforced
+ * BEFORE execution; stops alias-amplification abuse while staying far above
+ * any real dashboard query. See `nodeCountLimit` in `backend/graphql/shared`.
+ */
+const MAX_GRAPHQL_NODE_COUNT = 2000;
 
 /**
  * Maximum GraphQL operations allowed inside a single batched HTTP request
@@ -94,7 +103,7 @@ function createApolloServer(schema: typeof graphQLSchema) {
       // Enforce @constraint directive validation at query time
       createApollo4QueryValidationPlugin(),
     ],
-    validationRules: [depthLimit(MAX_GRAPHQL_DEPTH)],
+    validationRules: [depthLimit(MAX_GRAPHQL_DEPTH), nodeCountLimit(MAX_GRAPHQL_NODE_COUNT)],
     hideSchemaDetailsFromClientErrors: isProduction,
     includeStacktraceInErrorResponses: !isProduction,
     logger: logger,

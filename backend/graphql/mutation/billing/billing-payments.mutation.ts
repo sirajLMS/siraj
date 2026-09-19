@@ -16,7 +16,7 @@ import {
 gqlSchemaBuilder.mutationField("recordPayment", t =>
   t.field({
     type: PaymentPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { $all: { loggedIn: true, notImpersonating: true } },
     args: {
       invoiceId: t.arg.id({ required: true }),
       amount: t.arg.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
@@ -65,7 +65,7 @@ gqlSchemaBuilder.mutationField("recordPayment", t =>
 gqlSchemaBuilder.mutationField("createTeacherPayment", t =>
   t.field({
     type: TeacherPaymentPothosObject,
-    authScopes: { superAdmin: true, notImpersonating: true },
+    authScopes: { $all: { superAdmin: true, notImpersonating: true } },
     args: {
       teacherId: t.arg.id({ required: true }),
       amount: t.arg.string({ required: true, directives: { constraint: { maxLength: 20 } } }),

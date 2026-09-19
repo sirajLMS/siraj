@@ -225,6 +225,7 @@ export namespace UserRepository {
     readonly name?: string;
     readonly email?: string;
     readonly avatarUrl?: string | null;
+    readonly avatarFilePath?: string | null;
     readonly displayCurrency?: CurrencyCode | null;
     readonly phone?: string | null;
   };
@@ -262,6 +263,10 @@ export namespace UserRepository {
 
     if (input.avatarUrl !== undefined) {
       updateSet.avatarUrl = input.avatarUrl;
+    }
+
+    if (input.avatarFilePath !== undefined) {
+      updateSet.avatarFilePath = input.avatarFilePath;
     }
 
     if (input.displayCurrency !== undefined) {
@@ -344,6 +349,15 @@ export namespace UserRepository {
     locale?: string
   ): Promise<UserSelectType> => {
     return updateUserColumn(userId, { status }, tx, locale);
+  };
+
+  /**
+   * Right-to-be-forgotten scrub: null the security-remnant columns of the
+   * anonymized subject's user row (remember-token hash and email-verification
+   * timestamp). Runs inside the caller's transaction when provided.
+   */
+  export const scrubSecurityRemnants = async (userId: string, tx: DBTransaction): Promise<UserSelectType> => {
+    return updateUserColumn(userId, { rememberTokenHash: null, emailVerifiedAt: null }, tx);
   };
 
   type BootstrapUserUpsertInput = {

@@ -422,3 +422,141 @@ sequenceDiagram
   carryover->>db: sessions revert to snapshots and unlink - audit row preserved
   Note over carryover,notify: the whole journey dispatches no notifications
 ```
+
+## profit-loss-expense-visibility.test.ts
+
+The academy operator drives a session to CALCULATED, records a manual marketing expense through the real `ExpenseService.create`, and settles it via `CarryoverBalanceService.bulkCreateCarryoverBalances` + `bulkCarryoverToExpense` — which auto-generates a provenance-linked `Salaries` expense. The executive (real `academy_admin` membership, `ACCOUNTING_PROFITS_VIEW`) sees both rows in `ProfitLossService.getReport`'s Expenses tab for the expense month and no other month, with Total Expenses moved by both amounts and Net Profit recomputed as Total Payments − Total Expenses; a soft-delete drops only the manual row from the tab, the ledger VIEW-only actor without the profits permission is denied at the gate, and the read path dispatches no notifications.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant teacher as "teacher - teacher_default"
+  participant operator as "operator - academy_admin"
+  participant session as "ClassSessionService"
+  participant ledger as "ExpenseService"
+  participant carryover as "CarryoverBalanceService"
+  participant report as "ProfitLossService"
+  participant db as "Postgres - committed rows"
+  participant notify as "notification dispatch spy"
+  participant executive as "executive - ACCOUNTING_PROFITS_VIEW"
+  participant viewer as "expense ledger VIEW-only actor"
+
+  teacher->>session: activate then updateStatusStart on-time session
+  operator->>session: stop
+  session->>db: COMPLETED - payroll snapshot CALCULATED 120.00
+  session-->>notify: CLASS_COMPLETED to teacher
+
+  executive->>report: getReport current month
+  report-->>executive: baseline Total Expenses before journey writes
+
+  operator->>ledger: create marketing expense 75.00 expenseDate - this month
+  ledger->>db: manual row - sourceEntity null
+  Note over ledger,notify: the ledger write dispatches nothing
+
+  operator->>carryover: bulkCreateCarryoverBalances the session
+  carryover->>db: carryover payable 120.00 - session WAITING_PAID linked
+  operator->>carryover: bulkCarryoverToExpense paymentDate plus expenseDate
+  carryover->>db: carryover isPaid - session PAID - Salaries expense 120.00 with source linkage
+
+  executive->>report: getReport current month
+  report-->>executive: Expenses tab carries both rows - salary carries carryover sourceEntity and sourceEntityId
+  report-->>executive: Total Expenses at least baseline plus 195 - Net Profit equals Total Payments minus Total Expenses
+
+  executive->>report: getReport previous month
+  report-->>executive: neither row surfaces
+
+  viewer->>report: getReport without ACCOUNTING_PROFITS_VIEW
+  report-->>viewer: ForbiddenError insufficientPermissions before any read
+
+  operator->>ledger: softDelete the manual expense
+  ledger->>db: deletedAt stamped - row kept for audit
+  executive->>report: getReport current month
+  report-->>executive: manual row gone - settled salary stays - aggregates recomputed
+  Note over report,notify: the read path dispatches no notifications
+```
+
+## profit-loss-cash-in-visibility.test.ts
+
+The billing actor records a 250 SAR income payment through the real `AccountingPaymentService.recordPayment` (real invoice cascade, real idempotency keys), and the executive (real `academy_admin` membership, `ACCOUNTING_PROFITS_VIEW`) sees the row in `ProfitLossService.getReport`'s Income Payments tab for exactly the accounting month bucketed on the committed payment row's `createdAt` — with Total Income Payments moved by the amount and the sessions-based Net Profit identity (Total Payments − Total Expenses) untouched; the row never surfaces in a different month, the plain user without the profits permission is denied at the gate, and the report read path dispatches no notifications.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant billing as "billing - academy_admin"
+  participant payments as "AccountingPaymentService"
+  participant report as "ProfitLossService"
+  participant db as "Postgres - committed rows"
+  participant notify as "notification dispatch spy"
+  participant executive as "executive - ACCOUNTING_PROFITS_VIEW"
+  participant plain as "plain user - no group"
+
+  executive->>report: getReport current month
+  report-->>executive: baseline Total Income Payments before the payment lands
+
+  billing->>payments: recordPayment 250.00 SAR - creditHours 1 - paymentDate now
+  payments->>db: payment row - invoice cascade - hour-ledger purchase row - idempotency keys
+  payments-->>notify: payment notification fan-out to parent - drained async
+  billing->>db: read committed row - createdAt month = journey month
+
+  executive->>report: getReport journey month
+  report-->>executive: Income Payments tab carries the row - convertedAmount 250.00 - invoiceId linked
+  report-->>executive: Total Income Payments at least baseline plus 250
+  report-->>executive: Net Profit equals Total Payments minus Total Expenses - income adds to neither term
+
+  billing->>report: getReport journey month
+  report-->>billing: same row visible on the recorder's own read
+
+  executive->>report: getReport previous month
+  report-->>executive: the payment row does not surface
+
+  plain->>report: getReport without ACCOUNTING_PROFITS_VIEW
+  report-->>plain: ForbiddenError insufficientPermissions before any read
+
+  Note over report,notify: the report read path dispatches no notifications - this plan defers them
+```
+
+## profit-loss-earned-revenue.test.ts
+
+The teacher drives an on-time session through the real `ClassSessionService` state machine (activate → updateStatusStart → operator stop), and the payroll auto-calculation commits the SAR 120.00 snapshot; a session-linked manual subtract credit (30) is committed directly as a ledger row. The executive (real `academy_admin` membership, `ACCOUNTING_PROFITS_VIEW`) sees the calculated session in `ProfitLossService.getReport`'s Payments tab for its scheduled month with the session charge plus the subtract credit summed into Total Payments and Net Profit recomputed; never-calculated sessions (unattended, student-absent) do not surface, other months are unaffected, every actor without the profits permission — teacher, student, parent, plain — is denied at the gate, and the read path dispatches no notifications beyond the state machine's own lifecycle fan-out.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant teacher as "teacher - teacher_default"
+  participant operator as "operator - academy_admin"
+  participant session as "ClassSessionService"
+  participant report as "ProfitLossService"
+  participant db as "Postgres - committed rows"
+  participant notify as "notification dispatch spy"
+  participant executive as "executive - ACCOUNTING_PROFITS_VIEW"
+  participant denied as "teacher - student - parent - plain"
+
+  teacher->>session: activate then updateStatusStart on-time session
+  operator->>session: stop
+  session->>db: COMPLETED - payroll snapshot CALCULATED 120.00 SAR
+  session-->>notify: CLASS_COMPLETED to teacher - drained before the silence check
+
+  executive->>report: getReport scheduled month
+  report-->>executive: baseline Total Payments before the session is calculated
+
+  db->>db: session-linked subtract credit 30 committed - adjustmentType SUBTRACT
+
+  executive->>report: getReport scheduled month
+  report-->>executive: Payments tab carries the row - manualSubtractCredits 30 - teacherName and studentName set
+  report-->>executive: Total Payments at least baseline plus 150
+  report-->>executive: Net Profit equals Total Payments minus Total Expenses
+
+  operator->>report: getReport scheduled month
+  report-->>operator: same row visible cross-actor
+
+  executive->>report: getReport scheduled month
+  report-->>executive: unattended and student-absent sessions do not surface - never calculated
+
+  executive->>report: getReport previous month
+  report-->>executive: the completed session does not surface
+
+  denied->>report: getReport without ACCOUNTING_PROFITS_VIEW
+  report-->>denied: ForbiddenError FORBIDDEN insufficientPermissions before any read
+
+  Note over report,notify: the read path dispatches no notifications beyond the write-path fan-out
+```

@@ -1,6 +1,7 @@
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db, queryDb, queryWithPagination } from "@/backend/db";
-import { whatsappMessages } from "@/backend/db/schema";
+import { whatsappConversations, whatsappMessages } from "@/backend/db/schema";
+import { WhatsappMessageDirection } from "@/backend/enum";
 import { coerceJsonRecord, coerceMessageDirection } from "@/backend/lib";
 import type {
   DBTransaction,
@@ -205,4 +206,27 @@ export namespace WhatsappMessageRepository {
       .where(eq(whatsappMessages.conversationId, conversationId));
     return row?.value ?? 0;
   }
+
+  /**
+   * Right-to-be-forgotten scrub: delete the subject-authored message content
+   * of every conversation whose `waId` (phone-based WhatsApp id) belongs to
+   * the anonymized subject. `INBOUND` and `ECHO` messages are the subject's
+   * own content; `API_OUTBOUND` messages are academy-authored replies and
+   * stay. Runs inside the caller's transaction.
+   */
+  export const deleteSubjectContentByWaIds = async (waIds: readonly string[], tx: DBTransaction): Promise<void> => {
+    if (waIds.length === 0) return;
+    await tx.delete(whatsappMessages).where(
+      and(
+        inArray(
+          whatsappMessages.conversationId,
+          tx
+            .select({ id: whatsappConversations.id })
+            .from(whatsappConversations)
+            .where(inArray(whatsappConversations.waId, [...waIds]))
+        ),
+        inArray(whatsappMessages.direction, [WhatsappMessageDirection.ECHO, WhatsappMessageDirection.INBOUND])
+      )
+    );
+  };
 }

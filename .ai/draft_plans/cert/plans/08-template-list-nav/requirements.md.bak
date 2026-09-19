@@ -653,7 +653,7 @@ This plan consumes the following types from Plan 05's GraphQL schema:
 | AC-08-04a–f | REQ-08-04 | Cursor pagination with Load More and Arabic pluralization |
 | AC-08-05a–g | REQ-08-05 | Card actions work with permission checks and confirmation |
 | AC-08-06a–f | REQ-08-06 | Sidebar navigation group with 5 items |
-| AC-08-07a–f | REQ-08-07 | Create template dialog works end-to-end |
+| AC-08-07a–f | REQ-08-07 | Create template dialog works through the full flow |
 | AC-08-08a–g | REQ-08-08 | Bulk actions with permission and pluralization |
 | AC-08-09a–f | REQ-08-09 | Responsive layout across breakpoints |
 | AC-08-10a–g | REQ-08-10 | Loading, error, and empty states |

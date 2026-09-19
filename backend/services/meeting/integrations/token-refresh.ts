@@ -16,7 +16,14 @@
 
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import { ProviderReauthRequiredError } from "@/backend/services/meeting/channels/IMeetingChannel";
+import {
+  fetchWithTimeout,
+  REQUEST_TIMEOUT_MS,
+} from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
+import {
+  ProviderReauthRequiredError,
+  ProviderUnavailableError,
+} from "@/backend/services/meeting/channels/IMeetingChannel";
 import type { MeetingProvider, RefreshedToken } from "@/backend/types";
 
 // ============================================================================
@@ -93,6 +100,38 @@ function getProviderTokenConfig(providerSlug: MeetingProvider): ProviderTokenCon
 // ============================================================================
 
 /**
+ * Posts the refresh-grant body to the provider token endpoint. Timeouts and
+ * network failures propagate as ProviderUnavailableError so callers retry —
+ * only genuine transport-level request failures map to ProviderReauthRequiredError.
+ */
+async function postTokenRequest(
+  providerSlug: MeetingProvider,
+  tokenUrl: string,
+  body: URLSearchParams,
+  userId?: string
+): Promise<Response> {
+  try {
+    return await fetchWithTimeout(
+      tokenUrl,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+      },
+      providerSlug,
+      REQUEST_TIMEOUT_MS
+    );
+  } catch (error) {
+    if (error instanceof ProviderUnavailableError) throw error;
+    logger.warn("token-refresh: network error", {
+      providerSlug,
+      message: error instanceof Error ? error.message : String(error),
+    });
+    throw new ProviderReauthRequiredError(providerSlug, userId, error instanceof Error ? error.message : String(error));
+  }
+}
+
+/**
  * Exchange a stored refresh token for a new access token.
  *
  * @throws {ProviderReauthRequiredError} when the provider returns
@@ -117,20 +156,7 @@ export async function refreshAccessToken(
     client_secret: clientSecret,
   });
 
-  let response: Response;
-  try {
-    response = await fetch(tokenUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString(),
-    });
-  } catch (error) {
-    logger.warn("token-refresh: network error", {
-      providerSlug,
-      message: error instanceof Error ? error.message : String(error),
-    });
-    throw new ProviderReauthRequiredError(providerSlug, userId, error instanceof Error ? error.message : String(error));
-  }
+  const response = await postTokenRequest(providerSlug, tokenUrl, body, userId);
 
   if (!response.ok) {
     let errorBody: TokenEndpointError | null = null;

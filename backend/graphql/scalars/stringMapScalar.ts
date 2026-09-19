@@ -1,8 +1,14 @@
 import { GraphQLError, GraphQLScalarType, Kind, type ValueNode } from "graphql";
+import { getServerTranslations } from "@/shared/locale";
+import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 const MAX_ENTRIES = 100;
 const MAX_KEY_LENGTH = 64;
 const MAX_VALUE_LENGTH = 1024;
+
+// Scalar parsers run outside the request context, so the fallback message uses
+// the default content locale; clients localize via `extensions.scalarCode`.
+const tErrors = getServerTranslations(DEFAULT_CONTENT_LOCALE).errorsTranslations;
 
 /**
  * Machine-stable error codes for StringMap validation failures.
@@ -28,7 +34,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  */
 function validateStringMap(value: unknown): Record<string, string> {
   if (!isRecord(value)) {
-    throw new GraphQLError("StringMap must be an object", {
+    throw new GraphQLError(tErrors.invalidInput, {
       extensions: { code: "BAD_USER_INPUT", scalarCode: StringMapScalarError.NotObject },
     });
   }
@@ -36,7 +42,7 @@ function validateStringMap(value: unknown): Record<string, string> {
   const entries = Object.entries(value);
 
   if (entries.length > MAX_ENTRIES) {
-    throw new GraphQLError("StringMap exceeds maximum number of entries.", {
+    throw new GraphQLError(tErrors.invalidInput, {
       extensions: {
         code: "BAD_USER_INPUT",
         scalarCode: StringMapScalarError.TooManyEntries,
@@ -51,7 +57,7 @@ function validateStringMap(value: unknown): Record<string, string> {
   // Validate all values are strings with length constraints
   for (const [key, val] of entries) {
     if (key.length > MAX_KEY_LENGTH) {
-      throw new GraphQLError("StringMap key exceeds maximum length.", {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: {
           code: "BAD_USER_INPUT",
           scalarCode: StringMapScalarError.KeyTooLong,
@@ -61,12 +67,12 @@ function validateStringMap(value: unknown): Record<string, string> {
       });
     }
     if (typeof val !== "string") {
-      throw new GraphQLError("StringMap values must be strings.", {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: { code: "BAD_USER_INPUT", scalarCode: StringMapScalarError.ValueNotString, key },
       });
     }
     if (val.length > MAX_VALUE_LENGTH) {
-      throw new GraphQLError("StringMap value exceeds maximum length.", {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: {
           code: "BAD_USER_INPUT",
           scalarCode: StringMapScalarError.ValueTooLong,
@@ -101,7 +107,7 @@ export const StringMapScalar = new GraphQLScalarType({
   parseLiteral(ast: ValueNode): Record<string, string> {
     // Parse inline object literals from queries
     if (ast.kind !== Kind.OBJECT) {
-      throw new GraphQLError("StringMap must be an object", {
+      throw new GraphQLError(tErrors.invalidInput, {
         extensions: { code: "BAD_USER_INPUT", scalarCode: StringMapScalarError.NotObject },
       });
     }
@@ -123,7 +129,7 @@ export const StringMapScalar = new GraphQLScalarType({
       const key = field.name.value;
 
       if (key.length > MAX_KEY_LENGTH) {
-        throw new GraphQLError("StringMap key exceeds maximum length.", {
+        throw new GraphQLError(tErrors.invalidInput, {
           extensions: {
             code: "BAD_USER_INPUT",
             scalarCode: StringMapScalarError.KeyTooLong,
@@ -134,13 +140,13 @@ export const StringMapScalar = new GraphQLScalarType({
       }
 
       if (field.value.kind !== Kind.STRING) {
-        throw new GraphQLError("StringMap values must be strings.", {
+        throw new GraphQLError(tErrors.invalidInput, {
           extensions: { code: "BAD_USER_INPUT", scalarCode: StringMapScalarError.ValueNotString, key },
         });
       }
 
       if (field.value.value.length > MAX_VALUE_LENGTH) {
-        throw new GraphQLError("StringMap value exceeds maximum length.", {
+        throw new GraphQLError(tErrors.invalidInput, {
           extensions: {
             code: "BAD_USER_INPUT",
             scalarCode: StringMapScalarError.ValueTooLong,

@@ -1,5 +1,6 @@
 import {
   createTable,
+  encryptedText,
   index,
   textColumn,
   timestampColumn,
@@ -22,9 +23,9 @@ export const parents = createTable(
       .references(() => users.id, { onDelete: "restrict" }),
     status: parentStatusEnum("status").notNull(),
     nationality: countryCodeEnum("nationality"),
-    address: textColumn("address"),
+    address: encryptedText("address"),
     facebook: varcharColumn("facebook", { length: 512 }),
-    whatsapp: varcharColumn("whatsapp", { length: 50 }),
+    whatsapp: encryptedText("whatsapp"),
     twitter: varcharColumn("twitter", { length: 255 }),
     invoiceType: invoiceTypeEnum("invoice_type"),
     // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric semantics

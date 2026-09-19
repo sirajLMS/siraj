@@ -101,7 +101,7 @@ function isCustomJWTPayload(payload: JoseJWTPayload): payload is CustomJWTPayloa
  */
 export async function verifyToken(token: string): Promise<CustomJWTPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
     if (!isCustomJWTPayload(payload)) {
       return null;
     }

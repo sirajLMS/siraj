@@ -1529,7 +1529,7 @@ All empty states use MUI `IllustrationCard` (or `Box` + `Typography` + `Button`)
 
 2. **Keyboard navigation**: Tab focuses the tree; Arrow Up/Down moves between siblings; Arrow Right/Left expands/collapses; Enter selects (loads detail panel); Space toggles expansion. System categories with locked actions announce "disabled" via `aria-disabled`. The context menu opens via `Shift+F10` (per §12.2).
 
-3. **JAWS/NVDA compatibility**: Test with JAWS 2024+ and NVDA 2024+ during the T27/T28 test phases. All interactive elements must have `aria-label` or visible label text. The tree's `aria-label` = translated "Category Tree". The detail panel `aria-live="polite"` so screen readers announce content changes when a new category is selected.
+3. **JAWS/NVDA compatibility**: Test with JAWS 2024+ and NVDA 2024+ during manual verification. All interactive elements must have `aria-label` or visible label text. The tree's `aria-label` = translated "Category Tree". The detail panel `aria-live="polite"` so screen readers announce content changes when a new category is selected.
 
 4. **Focus management on expand/collapse**: When a node is expanded, focus stays on the node (not moved to first child). When collapsed, focus stays on the node. Arrow Down after expand moves to first child. This matches the WAI-ARIA Tree Pattern.
 
@@ -1571,17 +1571,15 @@ Already partially covered in §4/§11.6 and §12.1. This subsection documents th
 
 | Metric | Budget | Measurement |
 |--------|--------|-------------|
-| Tree render per node | < 16ms | React Profiler (`useRenderTime` hook in test) |
+| Tree render per node | < 16ms | React Profiler (manual profiling) |
 | Expand/collapse (500 children) | < 100ms | `performance.now()` around `onNodeToggle` |
 | API response (`categoryList`) | < 200ms | Apollo `link` request/response timing |
 | Bundle (category page chunk) | < 40KB gzipped | Next.js build report (`firstLoadJot`) |
 | Drag start → ghost render | < 50ms | `@dnd-kit` `onDragStart` → `DragOverlay` mount |
-| Search debounce → results | < 300ms (debounce) + < 200ms (query) | Combined end-to-end |
+| Search debounce → results | < 300ms (debounce) + < 200ms (query) | Combined full flow |
 | Virtualized tree scroll (1000 nodes) | 60fps | Chrome DevTools Performance tab |
 
 These budgets are enforced via:
-- **Component tests** (T27): each test includes a render-time assertion (less than budget for the given node count).
-- **E2E tests** (T28): the drag-drop spec includes a timing assertion on `reorderCategory` mutation round-trip.
 - **Build verification** (T29): `bun run build` output chunk size is checked for the `_app/dashboard/cert/templates/categories` route — must be under 40KB gzipped.
 
 ### 13.13 Store Expansion Summary (Round 4)

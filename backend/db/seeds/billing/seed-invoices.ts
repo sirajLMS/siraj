@@ -89,11 +89,11 @@ export async function seedOrGet(
       try {
         await seedEntityFile({
           assetRelativePath: "documents/sample-invoice.pdf",
-          bucketPath: `public/invoices/${inserted.idempotencyKey}.pdf`,
+          bucketPath: `invoices/${inserted.idempotencyKey}.pdf`,
           referenceTable: "invoices",
           referenceId: inserted.id,
           usageType: "invoice_pdf",
-          ensureParentDirs: ["public/invoices"],
+          ensureParentDirs: ["invoices"],
         });
       } catch (error) {
         logger.error(`Failed to seed invoice file for ${inserted.id}:`, error);

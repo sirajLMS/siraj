@@ -236,6 +236,7 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
       AppPermission.AccountingPayrollView,
       AppPermission.AccountingCarryoverView,
       AppPermission.AccountingExpensesView,
+      AppPermission.AccountingProfitsView,
     ],
     separator: true,
   },
@@ -638,6 +639,15 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     href: "/accounting/expenses",
     section: "main",
     permission: PAGE_PERMISSIONS.accountingExpensesView,
+    groupId: "grp_finance",
+  },
+  {
+    key: "accounting-profits",
+    labelKey: "accountingProfits",
+    iconKey: "assessment",
+    href: "/accounting/profits",
+    section: "main",
+    permission: PAGE_PERMISSIONS.accountingProfitsView,
     groupId: "grp_finance",
   },
 

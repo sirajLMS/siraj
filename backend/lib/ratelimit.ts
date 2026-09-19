@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { isIP } from "node:net";
 import { getBooleanEnv } from "@/backend/lib/env";
+import { sanitizeForwardedFor } from "@/backend/lib/ip-utils";
 import { logger } from "@/backend/lib/logger";
 import { isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
 import { cacheService } from "@/backend/services";
@@ -215,6 +216,54 @@ export const clientLogsRateLimiter = new RateLimiter(
 );
 
 /**
+ * Export rate limiter for CPU-heavy document generation (CSV/XLSX/PDF routes
+ * under app/api/*\/export). 10 exports per 10 minutes per user — generous for
+ * interactive reporting, tight enough to stop a compromised account from
+ * saturating server CPU with report jobs.
+ */
+export const exportRateLimiter = new RateLimiter(
+  "ratelimit:export",
+  10,
+  10 * 60 * 1000, // 10 minutes
+  false
+);
+
+/**
+ * Storage upload rate limiter. Applies at upload-token mint and at the signed
+ * upload PUT itself. 30 per minute per user — well above legitimate upload
+ * bursts, caps DB-row/Vercel-API amplification.
+ */
+export const storageUploadRateLimiter = new RateLimiter(
+  "ratelimit:storage-upload",
+  30,
+  60 * 1000, // 1 minute
+  false
+);
+
+/**
+ * OAuth callback rate limiter. Each callback hit triggers an outbound
+ * provider token exchange, so cap per-IP to prevent outbound-request
+ * amplification. 30 per 15 minutes per IP.
+ */
+export const oauthCallbackRateLimiter = new RateLimiter(
+  "ratelimit:oauth-callback",
+  30,
+  15 * 60 * 1000, // 15 minutes
+  true
+);
+
+/**
+ * Log-safe view of a rate-limit identifier: client IPs are PII, so they are
+ * logged as a short stable hash instead of in the clear.
+ */
+export function rateLimitLogId(identifier: string): string {
+  if (isIP(identifier)) {
+    return `ip:${crypto.createHash("sha256").update(identifier).digest("hex").slice(0, 12)}`;
+  }
+  return identifier;
+}
+
+/**
  * Helper function to check rate limit and return appropriate response
  */
 export async function checkRateLimit(
@@ -254,20 +303,24 @@ export async function checkRateLimit(
     if (isDev && !disableRateLimiting) {
       const enforceRateLimit = getBooleanEnv("TEST_ENFORCE_RATE_LIMIT");
       if (enforceRateLimit) {
-        logger.warn(`Rate limit exceeded for identifier: ${identifier} (TEST_ENFORCE_RATE_LIMIT=1, enforced in dev)`);
+        logger.warn(
+          `Rate limit exceeded for identifier: ${rateLimitLogId(identifier)} (TEST_ENFORCE_RATE_LIMIT=1, enforced in dev)`
+        );
         return { success, limit, remaining, reset };
       }
-      logger.warn(`Rate limit would have been exceeded for identifier: ${identifier} (development mode, not enforced)`);
+      logger.warn(
+        `Rate limit would have been exceeded for identifier: ${rateLimitLogId(identifier)} (development mode, not enforced)`
+      );
       return { success: true, limit, remaining, reset };
     }
 
-    logger.warn(`Rate limit exceeded for identifier: ${identifier}`);
+    logger.warn(`Rate limit exceeded for identifier: ${rateLimitLogId(identifier)}`);
     return { success, limit, remaining, reset };
   } catch (error) {
     logger.error("Rate limiting error:", error);
     if (!failOpen) {
       // Fail-closed: deny the request on cache errors (r6-sec-04)
-      logger.warn(`Rate limit check failed (fail-closed) for identifier: ${identifier}`);
+      logger.warn(`Rate limit check failed (fail-closed) for identifier: ${rateLimitLogId(identifier)}`);
       return { success: false, limit: 0, remaining: 0, reset: 0 };
     }
     return { success: true, limit: 0, remaining: 0, reset: 0 };
@@ -304,11 +357,13 @@ export async function checkRateLimit(
  * that only the platform itself sets, we prevent this spoofing vector.
  *
  * Fallback behavior (r7-018):
- * When no IP header is present, a static fallback collapses per-IP rate limiting —
- * all anonymous requests share the same bucket. To mitigate this, the fallback
- * includes a hash of `user-agent` and `accept-language` headers so clients with
- * different fingerprints are rate-limited separately. A `logger.warn` is emitted
- * so missing-IP conditions are observable in production logs.
+ * When no IP header is present, production uses a single shared anonymous
+ * bucket (fail-conservative — the header fingerprint is client-controlled
+ * and would allow unbounded bucket rotation). A `logger.warn` is emitted so
+ * missing-IP conditions are observable in production logs and operators can
+ * set TRUSTED_PROXY=true for per-IP buckets. Outside production the fallback
+ * includes a hash of `user-agent` and `accept-language` headers so dev/test
+ * clients with different fingerprints are rate-limited separately.
  */
 export function getClientIdentifier(request: Request): string {
   // Only trust platform-trusted headers when we know the deployment is on
@@ -318,18 +373,18 @@ export function getClientIdentifier(request: Request): string {
   const isBehindCloudflare = process.env.CLOUDFLARE === "1";
 
   if (isOnVercel) {
-    // x-vercel-forwarded-for is set by Vercel's edge and trusted only on Vercel
-    const vercelIp = request.headers.get("x-vercel-forwarded-for");
+    // x-vercel-forwarded-for is set by Vercel's edge and trusted only on Vercel;
+    // only a validated IP entry becomes a bucket key — a raw chain falls through.
+    const vercelIp = sanitizeForwardedFor(request.headers.get("x-vercel-forwarded-for"));
     if (vercelIp) {
-      return vercelIp.trim();
+      return vercelIp;
     }
   }
 
   if (isBehindCloudflare) {
-    // cf-connecting-ip is set by Cloudflare's edge and trusted only behind Cloudflare
-    const cfConnectingIp = request.headers.get("cf-connecting-ip");
+    const cfConnectingIp = sanitizeForwardedFor(request.headers.get("cf-connecting-ip"));
     if (cfConnectingIp) {
-      return cfConnectingIp.trim();
+      return cfConnectingIp;
     }
   }
 
@@ -359,9 +414,17 @@ export function getClientIdentifier(request: Request): string {
     }
   }
 
-  // r7-018: No IP header found — log a warning and generate a fallback
-  // identifier from request headers so clients with different fingerprints
-  // are rate-limited separately rather than sharing a single bucket.
+  // r7-018: No IP header found. In production the header fingerprint below is
+  // fully client-controlled (rotating user-agent/accept-language yields a
+  // fresh bucket per request), so fail conservative: all unknown-IP clients
+  // share one bucket. Set TRUSTED_PROXY=true (or deploy on Vercel/Cloudflare)
+  // for per-IP buckets. Outside production the fingerprint keeps dev/test
+  // clients separated.
+  if (process.env.NODE_ENV === "production") {
+    logger.warn("getClientIdentifier: no IP header found; using shared anonymous rate-limit bucket");
+    return "anon:unknown";
+  }
+
   logger.warn("getClientIdentifier: no IP header found; falling back to header-based fingerprint");
   const userAgent = request.headers.get("user-agent") ?? "";
   const acceptLanguage = request.headers.get("accept-language") ?? "";

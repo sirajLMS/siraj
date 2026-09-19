@@ -893,7 +893,7 @@ export namespace ClassSessionService {
         // Mirror the deduction against the newly created successor instance.
         if (quotaId) {
           await QuotaService.redeemForInstance(newInstance.studentId, newInstance.id, quotaId, userId, tx, locale);
-          await SchedulingRepository.updateClassInstance(newInstance.id, { quotaDeducted: true }, tx);
+          await SchedulingRepository.setQuotaDeducted(newInstance.id, true, tx);
         } else if (creditRefunded) {
           const deductIdempotencyKey = `credit-deduction:${newInstance.id}`;
           await CreditService.deductForBooking(
@@ -904,7 +904,7 @@ export namespace ClassSessionService {
             tx,
             tErrors
           );
-          await SchedulingRepository.updateClassInstance(newInstance.id, { quotaDeducted: true }, tx);
+          await SchedulingRepository.setQuotaDeducted(newInstance.id, true, tx);
         }
       }
 

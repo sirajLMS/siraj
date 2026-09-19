@@ -11,9 +11,12 @@ const LOGIN_PATH = "/login";
 
 const envConfig = getEnvironmentConfig();
 const ALLOWED_ORIGINS = new Set(
-  [getEnv("NEXT_PUBLIC_BASE_URL", ""), envConfig.allowedOrigin, "http://localhost:3000"].filter(
-    (v): v is string => typeof v === "string" && v.length > 0
-  )
+  [
+    getEnv("NEXT_PUBLIC_BASE_URL", ""),
+    envConfig.allowedOrigin,
+    // Local dev convenience only — must never be trusted in production.
+    ...(process.env.NODE_ENV !== "production" ? ["http://localhost:3000"] : []),
+  ].filter((v): v is string => typeof v === "string" && v.length > 0)
 );
 
 function resolveRequestOrigin(request: NextRequest): string {
@@ -62,6 +65,7 @@ async function handleLogout(request: NextRequest): Promise<NextResponse> {
     await SessionService.logoutUser({
       sessionId,
       accessToken,
+      refreshToken: request.cookies.get("refresh_token")?.value ?? null,
       ipAddress: getIpAddress(request),
       locale: getLocale(request),
     });
@@ -76,10 +80,18 @@ async function handleLogout(request: NextRequest): Promise<NextResponse> {
   return response;
 }
 
+/** Cross-site requests (third-party page, auto-submitted form) must not log the user out. */
+function rejectCrossSite(request: NextRequest): NextResponse | null {
+  // Absent, same-origin, and same-site values are all allowed.
+  const secFetchSite = request.headers.get("sec-fetch-site");
+  return secFetchSite === "cross-site" ? new NextResponse(null, { status: 403 }) : null;
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  return handleLogout(request);
+  // A third-party page can trigger GET /logout via an img/link (CSRF-style logout attack).
+  return rejectCrossSite(request) ?? handleLogout(request);
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  return handleLogout(request);
+  return rejectCrossSite(request) ?? handleLogout(request);
 }

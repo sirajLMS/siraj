@@ -29,6 +29,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: tErrors.internalServerError }, { status: 500 });
     }
 
+    // Security: files under public/ are served unauthenticated by the storage route,
+    // so invoice PDFs must never live there (they would bypass verifyInvoiceAccess).
+    if (pdfFile.filePath.startsWith("public/")) {
+      logger.error("Invoice PDF stored under public/ prefix — refusing unauthenticated storage redirect", {
+        invoiceId,
+      });
+      return NextResponse.json({ error: tErrors.internalServerError }, { status: 500 });
+    }
+
     return NextResponse.redirect(new URL(`/api/storage/files/${pdfFile.filePath}`, request.url));
   } catch (error) {
     if (error instanceof NotFoundError) {

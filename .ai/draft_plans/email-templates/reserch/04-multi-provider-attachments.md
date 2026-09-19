@@ -2,15 +2,15 @@
 
 ## Verdict: PARTIALLY VERIFIED / NEEDS UPDATE
 
-The plan at `/home/ahmed/.cursor/plans/email_template_system_(react_email_+_editor)_08419060.plan.md` proposes a multi-provider email registry with five adapters (Resend, AWS SES, Postmark, Mailgun, Nodemailer SMTP) and a unified `EmailAttachment` type. The package names and the general shape of each provider's attachment API are correct, but **several per-provider specifics are wrong or stale**:
+The design proposes a multi-provider email registry with five adapters (Resend, AWS SES, Postmark, Mailgun, Nodemailer SMTP) and a unified `EmailAttachment` type. The package names and the general shape of each provider's attachment API are correct, but **several per-provider specifics are wrong or stale**:
 
-1. **AWS SES** — The plan says `SendEmailCommand` with `Attachments`/`RawMessage`. The reality is split: SES v2's `SendEmailCommand` (`Content.Simple.Attachments[]`) supports attachments and inline images directly with a `ContentId` field — **but** the maximum message size for the v2 `Simple` path is **40 MB**, while the legacy `SendRawEmailCommand` (v1 API) is capped at **10 MB** and requires full raw-MIME construction. The plan conflates the two paths.
-2. **Mailgun** — The plan correctly identifies `mailgun.js` (not the deprecated `mailgun-js`) and the `inline` field. But the inline field is a **separate top-level message property** (not a `Content-ID` header the caller sets); the SDK sets the header from the attachment `filename`, and you reference it in HTML as `cid:<filename>`.
+1. **AWS SES** — The design says `SendEmailCommand` with `Attachments`/`RawMessage`. The reality is split: SES v2's `SendEmailCommand` (`Content.Simple.Attachments[]`) supports attachments and inline images directly with a `ContentId` field — **but** the maximum message size for the v2 `Simple` path is **40 MB**, while the legacy `SendRawEmailCommand` (v1 API) is capped at **10 MB** and requires full raw-MIME construction. The design conflates the two paths.
+2. **Mailgun** — The design correctly identifies `mailgun.js` (not the deprecated `mailgun-js`) and the `inline` field. But the inline field is a **separate top-level message property** (not a `Content-ID` header the caller sets); the SDK sets the header from the attachment `filename`, and you reference it in HTML as `cid:<filename>`.
 3. **Postmark** — Correctly identified. Attachment content is **base64-string only** (no Buffer support over the JSON API). `ContentID` must include the literal `cid:` prefix (e.g. `"cid:image.jpg"`).
 4. **Nodemailer** — Correctly identified. `attachments[]` supports `content` (string / Buffer / stream), `path`, and `cid`. Types ship via `@types/nodemailer` (DefinitelyTyped), not in-package.
 5. **Resend** — Already confirmed by a prior sub-agent. SDK ships in-package types; `attachments[].content` accepts `Buffer | string` (base64). Inline images use `attachments[].contentId` and reference `cid:<contentId>` in HTML.
 
-> The plan's claim that each adapter will mirror `ResendEmailAdapter` at ~80 LOC is **optimistic**: SES (raw-MIME path), Nodemailer (streaming + transporter setup), and Mailgun (FormData construction) each carry provider-specific setup that exceeds 80 LOC once attachments + inline images + delivery-row bookkeeping are included.
+> The design's claim that each adapter will mirror `ResendEmailAdapter` at ~80 LOC is **optimistic**: SES (raw-MIME path), Nodemailer (streaming + transporter setup), and Mailgun (FormData construction) each carry provider-specific setup that exceeds 80 LOC once attachments + inline images + delivery-row bookkeeping are included.
 
 ---
 
@@ -47,7 +47,7 @@ The five proposed adapters:
 | https://postmarkapp.com/developer/api/email-api | Postmark `/email` body: `Attachments[]` with `Name`, `Content` (**base64-string**), `ContentType`, and `ContentID` (with literal `cid:` prefix, e.g. `"cid:image.jpg"`). Batch payload max 50 MB including attachments; up to 500 messages per batch. |
 | https://www.npmjs.com/package/postmark | `postmark` v5.1.0, MIT, ActiveCampaign-maintained. Native Fetch (no axios dep). Node ≥ 18. |
 | https://github.com/mailgun/mailgun.js/tree/v12.7.0 | `mailgun.js` v12.7.0 (also v13.3.0 published 2026-07). Message params: `attachment` and `inline` are **separate top-level fields**; inline files must be referenced in HTML as `cid:<filename>`. `{ data, filename }` object form. |
-| https://github.com/mailgun/mailgun.js#readme | Same — `inline` field example: `messageParams.inline = { filename: 'test.jpg', data }`. |
+| https://github.com/mailgun/mailgun.js#readme | Same — `inline` field example: `messageParams.inline = { filename: 'photo.jpg', data }`. |
 | https://nodemailer.com/message/attachments/ | `attachments[]`: `filename`, `content` (string/Buffer/Stream), `path` (fs path / URL / data URI), `contentType`, `cid`, `encoding` (for base64 strings), `raw`. |
 | https://nodemailer.com/message/embedded-images/ | Inline images use `cid` field; reference `src="cid:unique@nodemailer"` in HTML; image content-type with `cid` auto-sets `Content-Disposition: inline`. |
 | https://www.npmjs.com/package/nodemailer | `nodemailer` v9.0.3 (2026-06-30). MIT-0. README explicitly says: "Nodemailer has official support for Node.js only. For anything related to TypeScript, you need to directly contact the authors of the type definitions (`@types/nodemailer`)." |
@@ -135,8 +135,8 @@ The five proposed adapters:
   - v2 `Simple` path: `Content.Simple.Attachments[].RawContent` is a **`Uint8Array`** (wrap a `Buffer` — `Buffer` is a `Uint8Array` subtype). Base64-encoding is handled by the SDK / SES itself when you set `ContentTransferEncoding: 'BASE64'`.
   - v1 / v2 `Raw` path: `Content.Raw.Data` is a single `Uint8Array` of the **complete raw MIME message** (headers + multipart body), already assembled by the client (typically via `nodemailer` or `mailcomposer`). The whole message must be base64-encoded on the wire.
 - **Inline images / `cid:`:** On the `Simple` path, set `ContentDisposition: 'INLINE'`, `ContentId: '<id>'`, `ContentTransferEncoding: 'BASE64'`, and reference `<img src="cid:<id>">` in the HTML body. On the `Raw` path, you construct the `multipart/related` MIME with a `Content-ID: <id>` header on the inline part yourself.
-- **Caveats (CRITICAL — the plan is wrong here):**
-  - **`SendEmailCommand` v2 `Simple` path DOES support attachments + inline images natively as of 2024+ SES API v2** — no raw-MIME construction required. The plan's implication that SES attachments always require `SendRawEmailCommand` is outdated.
+- **Caveats (CRITICAL — the design is wrong here):**
+  - **`SendEmailCommand` v2 `Simple` path DOES support attachments + inline images natively as of 2024+ SES API v2** — no raw-MIME construction required. The design's implication that SES attachments always require `SendRawEmailCommand` is outdated.
   - However, **`SendRawEmailCommand` (v1) max message size is 10 MB**, while **`SendEmail` v2 supports up to 40 MB** (matching Resend). Choose the command based on payload size, not capability.
   - Unsupported attachment MIME types list (executable, script, etc.) applies to both paths — see `docs.aws.amazon.com/ses/latest/dg/mime-types.html`.
   - Default `ContentTransferEncoding` is `SEVEN_BIT` — you must explicitly set `BASE64` for binary inline images to render correctly.
@@ -207,7 +207,7 @@ The five proposed adapters:
   {
     "From": "sender@example.com",
     "To": "receiver@example.com",
-    "Subject": "Test",
+    "Subject": "Hello",
     "HtmlBody": "<b>Hello</b> <img src=\"cid:image.jpg\"/>",
     "Attachments": [
       { "Name": "readme.txt", "Content": "dGVzdCBjb250ZW50", "ContentType": "text/plain" },
@@ -242,7 +242,7 @@ The five proposed adapters:
 - **Attachment field name + value type:**
   - `attachment` — a single object or an array of `{ filename, data }`. `data` can be a **Buffer, a readable Stream, or a Blob**. Must use `multipart/form-data` encoding (the SDK handles this when you pass Buffers/Streams).
   - `inline` — same shape, but a **separate top-level message field** for inline images.
-- **Inline images / `cid:`:** Mailgun sets the `Content-ID` header from the `filename` of the `inline` entry. Reference it in HTML as `cid:<filename>` (e.g. `filename: 'test.jpg'` → `<img src="cid:test.jpg">`). **Do not** set a `Content-ID` header manually — the SDK/HTTP API derives it from the filename.
+- **Inline images / `cid:`:** Mailgun sets the `Content-ID` header from the `filename` of the `inline` entry. Reference it in HTML as `cid:<filename>` (e.g. `filename: 'photo.jpg'` → `<img src="cid:photo.jpg">`). **Do not** set a `Content-ID` header manually — the SDK/HTTP API derives it from the filename.
 - **Caveats:**
   - You MUST pass a `FormData` constructor to `new Mailgun(FormData)` (the library is transport-agnostic). Use the global `FormData` (Node 18+) or the `form-data` npm package.
   - For **EU infrastructure**, pass `url: 'https://api.eu.mailgun.net'` to `mailgun.client(...)`.
@@ -257,9 +257,9 @@ The five proposed adapters:
   await mg.messages.create('sandbox-123.mailgun.org', {
     from: 'Excited User <mailgun@sandbox-123.mailgun.org>',
     to: ['test@example.com'],
-    subject: 'Test subject',
-    html: '<div><img alt="image" src="cid:test.jpg"/></div> Some extra text',
-    inline: { filename: 'test.jpg', data: await fsPromises.readFile(filepath) },
+    subject: 'Hello',
+    html: '<div><img alt="image" src="cid:photo.jpg"/></div> Some extra text',
+    inline: { filename: 'photo.jpg', data: await fsPromises.readFile(filepath) },
   });
   ```
 
@@ -325,7 +325,7 @@ The five proposed adapters:
 
 ## Unified `EmailAttachment` Type Mapping
 
-The plan proposes a single canonical type:
+The design proposes a single canonical type:
 
 ```ts
 export interface EmailAttachment {
@@ -338,13 +338,13 @@ export interface EmailAttachment {
 
 For each adapter, the conversion from `EmailAttachment` → provider-native shape is:
 
-| Plan field | Resend | AWS SES v2 `Simple` | Postmark | Mailgun | Nodemailer |
+| Field | Resend | AWS SES v2 `Simple` | Postmark | Mailgun | Nodemailer |
 |---|---|---|---|---|---|
 | `filename` | `attachments[].filename` (verbatim) | `Attachments[].FileName` (verbatim) | `Attachments[].Name` (verbatim) | `inline`/`attachment` entry's `filename` (verbatim; derives `Content-ID`) | `attachments[].filename` (verbatim) |
 | `content` (Buffer) | `attachments[].content` (Buffer pass-through; SDK accepts Buffer or base64) | `Attachments[].RawContent` (`new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)` — Buffer IS a Uint8Array so direct assignment works) | `Attachments[].Content` = `buffer.toString('base64')` (string only — adapter MUST base64-encode) | `inline`/`attachment` entry's `data` (Buffer or Stream pass-through) | `attachments[].content` (Buffer pass-through) OR `attachments[].path` for fs paths |
 | `content` (string) | Treat as base64 string; pass directly to `attachments[].content` (**strip any `data:...;base64,` prefix first**) | Wrap as `Buffer.from(string, 'base64')` then assign to `RawContent` | Pass string directly to `Attachments[].Content` (assumed already base64) | Pass string to `inline`/`attachment` `data` **with `encoding: 'base64'`** (or pre-convert to Buffer) | If `content` is a base64 string, set `attachments[].content = string` AND `attachments[].encoding = 'base64'` |
 | `contentType` | `attachments[].contentType` (optional; else derived from filename) | `Attachments[].ContentType` (optional; else SES derives it) | `Attachments[].ContentType` (recommended — Postmark defaults to `application/octet-stream`) | Not exposed via the `mailgun.js` message params — Mailgun derives from `filename` | `attachments[].contentType` (optional; else Nodemailer derives from filename extension) |
-| `contentId` (inline image) | `attachments[].contentId` (set raw id, e.g. `"logo123"`); reference `<img src="cid:logo123">` in HTML | `Attachments[].ContentId` (set raw id, e.g. `"logo123"`) **AND** `ContentDisposition: 'INLINE'` **AND** `ContentTransferEncoding: 'BASE64'`; reference `<img src="cid:logo123">` | `Attachments[].ContentID` — MUST include the literal `cid:` prefix, i.e. `"cid:image.jpg"`; reference `<img src="cid:image.jpg">` | Put the file under `inline` (NOT `attachment`); the SDK derives `Content-ID` from `filename`; reference `<img src="cid:<filename>">` in HTML (so `contentId` in the plan should equal `filename` — or the adapter should override `filename` to match `contentId`) | `attachments[].cid` (set raw id, e.g. `"unique@nodemailer"`); Nodemailer auto-sets `Content-Disposition: inline` for image types with a `cid`; reference `<img src="cid:unique@nodemailer">` |
+| `contentId` (inline image) | `attachments[].contentId` (set raw id, e.g. `"logo123"`); reference `<img src="cid:logo123">` in HTML | `Attachments[].ContentId` (set raw id, e.g. `"logo123"`) **AND** `ContentDisposition: 'INLINE'` **AND** `ContentTransferEncoding: 'BASE64'`; reference `<img src="cid:logo123">` | `Attachments[].ContentID` — MUST include the literal `cid:` prefix, i.e. `"cid:image.jpg"`; reference `<img src="cid:image.jpg">` | Put the file under `inline` (NOT `attachment`); the SDK derives `Content-ID` from `filename`; reference `<img src="cid:<filename>">` in HTML (so `contentId` in the design should equal `filename` — or the adapter should override `filename` to match `contentId`) | `attachments[].cid` (set raw id, e.g. `"unique@nodemailer"`); Nodemailer auto-sets `Content-Disposition: inline` for image types with a `cid`; reference `<img src="cid:unique@nodemailer">` |
 
 ### Adapter implementation notes (gotchas per provider)
 
@@ -352,19 +352,19 @@ For each adapter, the conversion from `EmailAttachment` → provider-native shap
 - **SES adapter:** the most complex. Decisions the adapter must make:
   1. SES Simple path vs Raw path. Default to **`SendEmailCommand` v2 `Simple`** for ≤40 MB; fall back to `SendRawEmailCommand` only for messages exceeding the v2 Simple limit or requiring hand-crafted MIME nesting.
   2. Always set `ContentDisposition`, `ContentId`, `ContentTransferEncoding`, and `ContentType` explicitly on inline-image attachments — SES defaults (`ATTACHMENT` / `SEVEN_BIT`) silently break inline rendering.
-  3. Buffer → `Uint8Array` conversion: a Node `Buffer` already satisfies `Uint8Array`, but if the plan's `content` is a base64 string, decode it: `Buffer.from(str, 'base64')`.
+  3. Buffer → `Uint8Array` conversion: a Node `Buffer` already satisfies `Uint8Array`, but if the design's `content` is a base64 string, decode it: `Buffer.from(str, 'base64')`.
 - **Postmark adapter:** MUST base64-encode Buffers (`buffer.toString('base64')`) before sending — there is no Buffer transport over JSON. The `ContentID` field conventionally includes the literal `cid:` prefix (the only provider in this set that does so).
-- **Mailgun adapter:** MUST separate inline images (`inline` field) from regular attachments (`attachment` field) at the message-params level. The `contentId` from the plan does NOT map directly — Mailgun derives the `Content-ID` header from `filename`. If the caller's `contentId` differs from `filename`, the adapter should override `filename` to match `contentId` (or normalise both to the same value). Passing Buffers requires `multipart/form-data`, which the SDK handles automatically only if you constructed the client with a `FormData` constructor.
-- **Nodemailer adapter:** distinguishes `content` (string/Buffer/Stream) from `path` (fs path / URL / data URI). If the plan's `content` is a string, the adapter must decide whether it's plain text or base64 — recommend adding an `encoding?: 'base64'` discriminator on `EmailAttachment` (or always normalising to Buffer in the registry layer). For inline images, set `cid` directly; Nodemailer handles `Content-Disposition: inline` automatically for image content types.
-- **Shared registry-layer concern:** the plan's `EmailAttachment.content: Buffer | string` is ambiguous for SES, Postmark, and Nodemailer (does the string mean base64? plain text? a file path?). Recommend **either** (a) tightening the type to `content: Buffer` with an optional `contentBase64?: string` discriminator, **or** (b) adding `encoding?: 'base64' | 'utf8' | 'binary'` so each adapter can interpret the string unambiguously. As written, adapters will have to guess.
+- **Mailgun adapter:** MUST separate inline images (`inline` field) from regular attachments (`attachment` field) at the message-params level. The `contentId` from the design does NOT map directly — Mailgun derives the `Content-ID` header from `filename`. If the caller's `contentId` differs from `filename`, the adapter should override `filename` to match `contentId` (or normalise both to the same value). Passing Buffers requires `multipart/form-data`, which the SDK handles automatically only if you constructed the client with a `FormData` constructor.
+- **Nodemailer adapter:** distinguishes `content` (string/Buffer/Stream) from `path` (fs path / URL / data URI). If the design's `content` is a string, the adapter must decide whether it's plain text or base64 — recommend adding an `encoding?: 'base64'` discriminator on `EmailAttachment` (or always normalising to Buffer in the registry layer). For inline images, set `cid` directly; Nodemailer handles `Content-Disposition: inline` automatically for image content types.
+- **Shared registry-layer concern:** the design's `EmailAttachment.content: Buffer | string` is ambiguous for SES, Postmark, and Nodemailer (does the string mean base64? plain text? a file path?). Recommend **either** (a) tightening the type to `content: Buffer` with an optional `contentBase64?: string` discriminator, **or** (b) adding `encoding?: 'base64' | 'utf8' | 'binary'` so each adapter can interpret the string unambiguously. As written, adapters will have to guess.
 
 ### "~80 LOC per adapter" claim
 
-The existing `ResendEmailAdapter` (at `backend/services/communication/channels/email/resend/ResendEmailAdapter.ts`) is ~230 LOC including delivery-row bookkeeping, recipient redirection for tests, exception handlers, and config validation — not 80. Adding attachments + inline images will push each new adapter to **250–350 LOC**:
+The existing `ResendEmailAdapter` (at `backend/services/communication/channels/email/resend/ResendEmailAdapter.ts`) is ~230 LOC including delivery-row bookkeeping, recipient redirection, exception handlers, and config validation — not 80. Adding attachments + inline images will push each new adapter to **250–350 LOC**:
 
 - SES: command construction + Buffer→Uint8Array + inline-disposition defaults + raw-MIME fallback wrapper.
 - Postmark: Buffer→base64 conversion + `cid:` prefix normalisation on `ContentID`.
 - Mailgun: `FormData` construction + `inline`/`attachment` split + filename/contentId reconciliation.
 - Nodemailer: transporter lifecycle + path-vs-content decision + encoding discriminator.
 
-The plan's "~80 LOC" estimate is roughly the size of just the **happy-path `send` method**; it undercounts the delivery-row persistence + error-handling surface each adapter reuses. The registry design is sound, but adapters should reuse shared helpers (delivery-row creation, status update, error mapping) from a common base rather than copy-pasting the `ResendEmailAdapter` skeleton.
+The design's "~80 LOC" estimate is roughly the size of just the **happy-path `send` method**; it undercounts the delivery-row persistence + error-handling surface each adapter reuses. The registry design is sound, but adapters should reuse shared helpers (delivery-row creation, status update, error mapping) from a common base rather than copy-pasting the `ResendEmailAdapter` skeleton.

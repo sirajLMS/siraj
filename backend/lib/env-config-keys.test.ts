@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { isEncryptedFieldValue } from "@/backend/lib/env-config.helpers";
 import { ENV_CONFIG_KEYS, isEnvConfigKeyExposedInSettings } from "@/backend/lib/env-config-keys";
 import { HIDDEN_ENV_CONFIG_KEYS } from "@/shared/constants/env-config-keys";
 
@@ -36,5 +37,28 @@ describe("env-config-keys", () => {
       return;
     }
     expect(isEnvConfigKeyExposedInSettings(storageProvider)).toBeTrue();
+  });
+
+  test("REDIS_URL is a secret that requests URL-credential masking in the Settings list path", () => {
+    const redisUrl = ENV_CONFIG_KEYS.find(entry => entry.key === "REDIS_URL");
+    expect(redisUrl).toBeDefined();
+    expect(redisUrl?.maskUrlCredentials).toBe(true);
+    expect(redisUrl?.isSecret).toBe(true);
+  });
+});
+
+describe("isEncryptedFieldValue", () => {
+  test("recognizes the encryptField ciphertext shape (versioned and legacy) and rejects plaintext", () => {
+    expect(
+      isEncryptedFieldValue("0123456789abcdef01234567:0123456789abcdef:0123456789abcdef0123456789abcdef")
+    ).toBeTrue();
+    expect(
+      isEncryptedFieldValue("v1:0123456789abcdef01234567:0123456789abcdef:0123456789abcdef0123456789abcdef")
+    ).toBeTrue();
+    expect(isEncryptedFieldValue("plain-legacy-secret")).toBeFalse();
+    expect(isEncryptedFieldValue("a:b:c")).toBeFalse();
+    expect(isEncryptedFieldValue("010:123:4567")).toBeFalse();
+    expect(isEncryptedFieldValue("v1:not-a-ciphertext")).toBeFalse();
+    expect(isEncryptedFieldValue("")).toBeFalse();
   });
 });

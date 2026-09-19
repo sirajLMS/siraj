@@ -1,20 +1,20 @@
-# Research: `@react-email/editor` Capabilities vs. Plan Claims
+# Research: `@react-email/editor` Capabilities vs. Claims
 
 ## Verdict: NEEDS UPDATE
 
-The plan's core architectural claim — that a "body-edit-only workflow" can **preserve the typed-props-scaffold pattern** while editing through `@react-email/editor` — is **not supported** by the actual API. The editor does serialize to React Email components and export HTML + plain text, but it operates on **TipTap JSON / HTML strings**, has no concept of typed per-template props, and design JSON carries zero type information. Plan-line 377's "Use Email/designJson ONLY for body overrides (props enforce type safety cross all variants)" cannot be mechanistically enforced by `@react-email/editor` — it must be enforced entirely by **application-layer discipline** (keeping typed props in the registered component + only letting the editor edit the body region).
+The design's core architectural claim — that a "body-edit-only workflow" can **preserve the typed-props-scaffold pattern** while editing through `@react-email/editor` — is **not supported** by the actual API. The editor does serialize to React Email components and export HTML + plain text, but it operates on **TipTap JSON / HTML strings**, has no concept of typed per-template props, and design JSON carries zero type information. line 377's "Use Email/designJson ONLY for body overrides (props enforce type safety cross all variants)" cannot be mechanistically enforced by `@react-email/editor` — it must be enforced entirely by **application-layer discipline** (keeping typed props in the registered component + only letting the editor edit the body region).
 
 ---
 
-## Original claims being verified (verbatim from the plan)
+## Original claims being verified (verbatim from the design)
 
-> Plan line 75: "`@react-email/editor@^1.6` (TipTap/ProseMirror visual editor that serializes to React Email components and exports email-ready HTML + plain text)"
+> Line 75: "`@react-email/editor@^1.6` (TipTap/ProseMirror visual editor that serializes to React Email components and exports email-ready HTML + plain text)"
 
-> Plan line 82: "Templates are stored in DB with `designJson` + compiled `htmlBody` (Strapi/Easy Email pattern from research), edited via GraphQL mutations, previewed before send. Admin body-edit-only workflow preserves the typed-props-scaffold pattern."
+> Line 82: "Templates are stored in DB with `designJson` + compiled `htmlBody` (Strapi/Easy Email pattern from research), edited via GraphQL mutations, previewed before send. Admin body-edit-only workflow preserves the typed-props-scaffold pattern."
 
-> Plan line 187: "`renderEmailTemplate` — if DB template record for this scope has a designJson and published htmlBody, rehydrate via @react-email/editor render; else render the registered component"
+> Line 187: "`renderEmailTemplate` — if DB template record for this scope has a designJson and published htmlBody, rehydrate via @react-email/editor render; else render the registered component"
 
-> Plan line 377: "Use Email/designJson ONLY for body overrides (props enforce type safety cross all variants)"
+> Line 377: "Use Email/designJson ONLY for body overrides (props enforce type safety cross all variants)"
 
 ---
 
@@ -31,7 +31,7 @@ The plan's core architectural claim — that a "body-edit-only workflow" can **p
 | https://github.com/resend/react-email/blob/main/skills/react-email/references/EDITOR.md | OK (via search) | Confirms entry points, ref methods mentioned include `export()`, `getJSON()`, `getHTML()`, `editor`. (Note: skill doc lists `export()` — the canonical published docs use `getEmail()` / `getEmailHTML()` / `getEmailText()`.) |
 | https://react.email/docs/editor/api-reference/email-node | OK (via search) | `EmailNode` extends TipTap `Node` with `renderToReactEmail()` — the per-node method called by `composeReactEmail`. `renderToReactEmail` props: `{ children, style, node, extension }`. |
 | https://react.email/docs/editor/advanced/custom-extensions | OK (via search) | `EmailNode.create({...})` and `EmailNode.from(existingTipTapNode, renderToReactEmail)`. Per-node control over in-editor render (`renderHTML`) vs. email-export render (`renderToReactEmail`). |
-| https://registry.npmjs.org/@react-email/editor | OK (via search) | **Version reality: published range is 1.0.0 → 1.1.2 (Apr 2026). The `^1.6` version in the plan does NOT exist as of Aug 2026.** First published Feb 18, 2026. 34 deps. |
+| https://registry.npmjs.org/@react-email/editor | OK (via search) | **Version reality: published range is 1.0.0 → 1.1.2 (Apr 2026). The `^1.6` version in the design does NOT exist as of Aug 2026.** First published Feb 18, 2026. 34 deps. |
 | https://www.npmjs.com/package/@react-email/editor | TIMEOUT | Skipped; npm registry above used instead. |
 | https://resend.com/blog/react-email-6 | OK (via search) | "The centerpiece of React Email 6 is a new open-source visual editor." `EmailNode` composable API; "Each custom node defines both its HTML representation and its React Email output via `renderToReactEmail`." |
 | https://github.com/resend/react-email/tree/main/packages/editor | not fetched | Search results confirmed structure: `core/`, `extensions/`, `plugins/`, `ui/`, `utils/`, `email-editor/`. |
@@ -82,7 +82,7 @@ The plan's core architectural claim — that a "body-edit-only workflow" can **p
 > ```
 
 - `getEmail()` returns both `html` and `text` in one call (confirmed by docs prose: "Serializes the current document to email-ready HTML and plain text in one call").
-- `getJSON()` returns the **TipTap JSON document** (this is what the plan calls `designJson` — and it is opaque, schema-defined by loaded extensions only, with no per-template type props).
+- `getJSON()` returns the **TipTap JSON document** (this is what the design calls `designJson` — and it is opaque, schema-defined by loaded extensions only, with no per-template type props).
 - `editor` is the raw Tiptap instance.
 
 **`composeReactEmail` (the serialization core)**
@@ -129,16 +129,16 @@ What it does **not** do: take an existing authored `MyTemplate.tsx` React Email 
 
 The closest you get to "typed" within the editor is: define a custom `EmailNode` whose node attributes have a TypeScript type, and serialize its `renderToReactEmail` JSX to typed React Email markup. But that typing is **node-extension-local**, not **template-component-global**; a React Email `<Template recipientName: string>` component's typed props do **not** pass through the editor.
 
-### 4. Can a "body-edit-only workflow" preserve the typed-props-scaffold pattern the plan assumes?
+### 4. Can a "body-edit-only workflow" preserve the typed-props-scaffold pattern the design assumes?
 
 **NO — not via the editor itself.** The typed-props-scaffold can only survive a body-edit-only workflow if you, the application, enforce these rules yourself (none of which `@react-email/editor` enforces):
 
 1. The **typed component** (`<WeeklyDigest items: Item[], recipientName: string>`) lives only in code as the canonical scaffold — it is never "edited" in the visual editor.
 2. The visual editor edits only the **body region** of one template; the editor's `content` is the HTML/TipTap-JSON of the inner body, never the template's surrounding typed-props container.
-3. `designJson` (what the plan calls the stored design) is just **`getJSON()` output — an opaque TipTap JSON doc whose schema is whatever extensions are loaded**. It carries no `Items[]` or `recipientName` typing. To preserve typed props, the `designJson` must be loaded back into the editor only for body re-render, **never** rehydrated back into typed component props.
-4. `renderEmailTemplate` (plan line 187): "rehydrate via @react-email/editor render" should be read as "feed `designJson` back into an `EmailEditor`/`composeReactEmail` to re-emit `htmlBody`." It is **not** "reconstruct the typed `<Template>` component from the designJson." The typed props still come exclusively from the code scaffold + per-send data; the visual editor's `designJson` only governs the body's look/structure.
+3. `designJson` (what the design calls the stored design) is just **`getJSON()` output — an opaque TipTap JSON doc whose schema is whatever extensions are loaded**. It carries no `Items[]` or `recipientName` typing. To preserve typed props, the `designJson` must be loaded back into the editor only for body re-render, **never** rehydrated back into typed component props.
+4. `renderEmailTemplate` (line 187): "rehydrate via @react-email/editor render" should be read as "feed `designJson` back into an `EmailEditor`/`composeReactEmail` to re-emit `htmlBody`." It is **not** "reconstruct the typed `<Template>` component from the designJson." The typed props still come exclusively from the code scaffold + per-send data; the visual editor's `designJson` only governs the body's look/structure.
 
-So: **typed props are confined to the code scaffold; the editor edits a separate, opaque TipTap JSON blob that never carried typed props.** The plan's belief that "props enforce type safety across all variants" while also allowing `designJson` body overrides is only achievable if the app keeps the two concerns strictly separate:
+So: **typed props are confined to the code scaffold; the editor edits a separate, opaque TipTap JSON blob that never carried typed props.** The design's belief that "props enforce type safety across all variants" while also allowing `designJson` body overrides is only achievable if the app keeps the two concerns strictly separate:
 - `designJson` controls body layout/styling (re-emitted to `htmlBody` via `composeReactEmail`).
 - Typed props are injected into the *registered component* version, and for the `designJson` variant you substitute the body block with `EmailNode`s that the editor manages — losing the typed-component body but keeping typed header/footer/props.
 
@@ -154,31 +154,31 @@ A pragmatic hybrid: render the **scaffold + typed props to static HTML** at send
 
 ### 6. Version reality
 
-- The plan specifies `@react-email/editor@^1.6`. **As of Aug 2026, the latest published version is 1.1.2 (Apr 2026).** `^1.6` does not match any released version; a `^1.6` range would resolve to no published package (or to whatever 1.6+ version ships later). Recommend `@react-email/editor@^1.1` (or `@react-email/editor@^1.0`) until the maintainer publishes 1.6+. First published Feb 18, 2026.
+- The design specifies `@react-email/editor@^1.6`. **As of Aug 2026, the latest published version is 1.1.2 (Apr 2026).** `^1.6` does not match any released version; a `^1.6` range would resolve to no published package (or to whatever 1.6+ version ships later). Recommend `@react-email/editor@^1.1` (or `@react-email/editor@^1.0`) until the maintainer publishes 1.6+. First published Feb 18, 2026.
 
 ---
 
-## Recommended adjustments to the plan
+## Recommended adjustments to the design
 
-- **Plan line 75** — version is wrong. Replace `@react-email/editor@^1.6` with `@react-email/editor@^1.1` (latest published is 1.1.2, Apr 2026). Keep the rest of the description: it is accurate that it is "TipTap/ProseMirror," "serializes to React Email components" (at the node level), and "exports email-ready HTML + plain text."
+- **Line 75** — version is wrong. Replace `@react-email/editor@^1.6` with `@react-email/editor@^1.1` (latest published is 1.1.2, Apr 2026). Keep the rest of the description: it is accurate that it is "TipTap/ProseMirror," "serializes to React Email components" (at the node level), and "exports email-ready HTML + plain text."
 
-- **Plan line 82** — "Strapi/Easy Email pattern" is an acceptable mental model for storage (`designJson` + `htmlBody`), **but** the Easy Email / Unlayer mental model implies a **typed design JSON** — `@react-email/editor`'s `getJSON()` is **not** typed; it is opaque TipTap JSON. Reword to: "stored designJson is opaque TipTap JSON (the output of `EmailEditorRef.getJSON()`); type safety lives only in the code scaffold + `EmailNode` extension definitions, not in the design blob."
+- **Line 82** — "Strapi/Easy Email pattern" is an acceptable mental model for storage (`designJson` + `htmlBody`), **but** the Easy Email / Unlayer mental model implies a **typed design JSON** — `@react-email/editor`'s `getJSON()` is **not** typed; it is opaque TipTap JSON. Reword to: "stored designJson is opaque TipTap JSON (the output of `EmailEditorRef.getJSON()`); type safety lives only in the code scaffold + `EmailNode` extension definitions, not in the design blob."
 
   The claim "Admin body-edit-only workflow preserves the typed-props-scaffold pattern" is **conditionally true only if the application** (a) forbids editing outside the body region, (b) keeps typed-props bind to a separate code component, and (c) substitutes the body section via `EmailNode` extensions. The editor itself does not enforce this. Add an explicit architectural rule line, e.g.:
   > "Body-edit-only is enforced at the application layer (route-level UI restriction + separate `EmailNode` set for the body), NOT by `@react-email/editor`. Typed `TemplateProps` never enter the editor; only the body's HTML/TipTap-JSON does."
 
-- **Plan line 187** — rephrase "rehydrate via @react-email/editor render" to be precise:
+- **Line 187** — rephrase "rehydrate via @react-email/editor render" to be precise:
   > "If a DB template record for this scope has a published `designJson` and `htmlBody`, re-render the body region by loading `designJson` into an `EmailEditor`/`composeReactEmail` call (NOT reconstructing the typed `<Template>` component from JSON). Type-typed props still come from the registered code scaffold + per-send data; `designJson` only governs the body's appearance."
 
-- **Plan line 377** — "Use Email/designJson ONLY for body overrides (props enforce type safety cross all variants)" — the parenthetical is **wishful**: `@react-email/editor` does NOT enforce type safety across variants. Recommend splitting the claim:
+- **Line 377** — "Use Email/designJson ONLY for body overrides (props enforce type safety cross all variants)" — the parenthetical is **wishful**: `@react-email/editor` does NOT enforce type safety across variants. Recommend splitting the claim:
   > "Use Email/designJson ONLY for body overrides. Typed `TemplateProps` are enforced **at the registered-component layer** (the code scaffold), NOT inside `@react-email/editor`. The editor's `getJSON` blob carries no per-template type information; type safety for non-body regions is the responsibility of the code scaffold, not the editor."
 
-- **New explicit architectural note** — Add to the plan a short callout describing the canonical publish flow:
+- **New explicit architectural note** — Add to the design a short callout describing the canonical publish flow:
   1. Author `<Template {...typedProps}>` in code as the scaffold (typed).
   2. (Optional) Open an `EmailEditor` with body-region HTML/TipTap-JSON as `content`, edit visually, call `ref.getEmail()` / `composeReactEmail` to get `{ html, text }`, persist `{ designJson: ref.getJSON(), htmlBody: html, textBody: text }`.
   3. At send: render the scaffold with `TemplateProps` to HTML for header/footer/props-bound regions; substitute the body region with the persisted `htmlBody` (re-emitted from `designJson` if changed). Alternatively, if the editor fully owns the body, render the entire email with `composeReactEmail` and inject per-send values via host-provided `EmailNode` attributes.
 
-- **Identifier corrections**: update any plan reference to `editor.export(ReactEmail)` → `ref.getEmail()`. Update `editor.getDesignJSON()` → `ref.getJSON()`. Ensure the component is named `EmailEditor` (not `Editor`/`ReactEmailEditor`).
+- **Identifier corrections**: update any design reference to `editor.export(ReactEmail)` → `ref.getEmail()`. Update `editor.getDesignJSON()` → `ref.getJSON()`. Ensure the component is named `EmailEditor` (not `Editor`/`ReactEmailEditor`).
 
 ---
 

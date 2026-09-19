@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { AppPermission } from "@/backend/enum";
-import { ForbiddenError, getServerUserContext, logger, ValidationError } from "@/backend/lib";
+import { ForbiddenError, getServerUserContext, isUuidShape, logger, ValidationError } from "@/backend/lib";
+import { checkRateLimit, exportRateLimiter } from "@/backend/lib/ratelimit";
 import {
   PermissionsService,
   requirePermission,
@@ -156,8 +157,8 @@ async function parseExportRequest(
     (await PermissionsService.hasPermission(userId, AppPermission.ACCOUNTING_REPORTS_MANAGE));
 
   const filters: SessionAuditReportFilters = {
-    teacherId: readTrimmedParam(searchParams, "teacherId"),
-    studentId: readTrimmedParam(searchParams, "studentId"),
+    teacherId: readValidatedParam(searchParams, "teacherId", isUuidShape, tErrors),
+    studentId: readValidatedParam(searchParams, "studentId", isUuidShape, tErrors),
     dateFrom: readValidatedParam(searchParams, "dateFrom", isCalendarDate, tErrors),
     dateTo: readValidatedParam(searchParams, "dateTo", isCalendarDate, tErrors),
     currentStatuses: parseCurrentStatuses(searchParams, tErrors),
@@ -185,6 +186,19 @@ export async function GET(request: NextRequest): Promise<Response> {
   const { userId } = await getServerUserContext();
   if (!userId) {
     return NextResponse.json({ error: tErrors.unauthorized }, { status: 401 });
+  }
+
+  const rateLimit = await checkRateLimit(`export:${userId}`, exportRateLimiter);
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: tErrors.rateLimitExceeded },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": Math.max(0, Math.ceil((rateLimit.reset - Date.now()) / 1000)).toString(),
+        },
+      }
+    );
   }
 
   try {

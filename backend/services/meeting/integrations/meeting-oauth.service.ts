@@ -8,11 +8,13 @@
  *
  * The "state" nonce returned by `connectProviderOAuth` is a signed JWT
  * (HS256, 10-minute expiry) carrying `userId`, `providerSlug`, `returnPath`,
- * and a random `nonce`. The callback handler verifies this JWT to prove the
- * round-trip originated from us before exchanging the authorization code.
+ * a random `nonce`, and the PKCE (RFC 7636) `codeVerifier`. The callback
+ * handler verifies this JWT to prove the round-trip originated from us before
+ * exchanging the authorization code — sending the matching `code_verifier`
+ * so only the flow that started the authorize request can redeem the code.
  */
 
-import { randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { GraphQLError } from "graphql";
 import { type JWTPayload as JoseJWTPayload, jwtVerify, SignJWT } from "jose";
 import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
@@ -22,6 +24,10 @@ import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
+import {
+  fetchWithTimeout,
+  REQUEST_TIMEOUT_MS,
+} from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type {
@@ -74,22 +80,27 @@ async function assertCanManageOwnMeetingConfigs(actorUserId: string, tErrors: Er
 // State JWT helpers
 // ============================================================================
 
-export type { MeetingOAuthStatePayload };
-
 const MEETING_PROVIDERS: readonly MeetingProvider[] = ["zoom", "google_meet", "microsoft_teams"];
 
 function isMeetingProvider(value: string): value is MeetingProvider {
   return (MEETING_PROVIDERS as readonly string[]).includes(value);
 }
 
-function isOAuthStatePayload(payload: JoseJWTPayload): payload is MeetingOAuthStatePayload {
+/** Payload shape after verification — the RFC 7636 code_verifier is required. */
+export type VerifiedOAuthState = MeetingOAuthStatePayload & { codeVerifier: string };
+
+function isOAuthStatePayload(payload: JoseJWTPayload): payload is VerifiedOAuthState {
   return (
     typeof payload.userId === "string" &&
     typeof payload.providerSlug === "string" &&
     isMeetingProvider(payload.providerSlug) &&
     typeof payload.returnPath === "string" &&
     typeof payload.nonce === "string" &&
-    typeof payload.sessionId === "string"
+    typeof payload.sessionId === "string" &&
+    // PKCE (S256): states minted since the PKCE fix carry a code_verifier.
+    // Require it — the 10-minute state TTL means legacy states without a
+    // verifier are already expired, so no overlap tolerance is needed.
+    typeof payload.codeVerifier === "string"
   );
 }
 
@@ -101,13 +112,29 @@ function getStateSigningSecret(): Uint8Array {
 /** H1 fix: single-use nonce window — matches OAUTH_STATE_EXPIRY (10m) in ms. */
 const OAUTH_STATE_NONCE_TTL_MS = 10 * 60 * 1000;
 
+/** PKCE (S256): base64url-encode bytes per RFC 7636 (unpadded). */
+function base64UrlEncode(bytes: Uint8Array): string {
+  const base64 = Buffer.from(bytes).toString("base64");
+  return base64.split("=")[0].split("+").join("-").split("/").join("_");
+}
+
+/** PKCE (S256): derives the code_challenge sent with the authorize request. */
+function pkceCodeChallenge(codeVerifier: string): string {
+  const digest = createHash("sha256").update(codeVerifier).digest();
+  return base64UrlEncode(digest);
+}
+
 async function signOAuthState(
   userId: string,
   providerSlug: MeetingProvider,
   returnPath: string,
   sessionId: string
-): Promise<string> {
+): Promise<{ state: string; codeVerifier: string }> {
   const nonce = randomUUID();
+  // PKCE (S256): 32 random bytes, base64url-encoded per RFC 7636 §4.1. Stored
+  // inside the signed state JWT so it travels with the session-bound,
+  // single-use state — no separate storage to race or leak.
+  const codeVerifier = base64UrlEncode(new Uint8Array(randomBytes(32)));
   // H1 fix: claim the nonce in the cache so collisions (a second state minted
   // with the same nonce) are rejected at signing time. setNx is atomic —
   // returns "OK" on success, null if the key already exists.
@@ -116,17 +143,19 @@ async function signOAuthState(
   if (claimed === null) {
     throw new GraphQLError("oauthStateCollision");
   }
-  return new SignJWT({
+  const state = await new SignJWT({
     userId,
     providerSlug,
     returnPath,
     nonce,
     sessionId,
+    codeVerifier,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(OAUTH_STATE_EXPIRY)
     .sign(getStateSigningSecret());
+  return { state, codeVerifier };
 }
 
 /**
@@ -145,9 +174,9 @@ async function signOAuthState(
 export async function verifyAndConsumeOAuthState(
   state: string,
   expectedSessionId: string | undefined
-): Promise<MeetingOAuthStatePayload | null> {
+): Promise<VerifiedOAuthState | null> {
   try {
-    const { payload } = await jwtVerify(state, getStateSigningSecret());
+    const { payload } = await jwtVerify(state, getStateSigningSecret(), { algorithms: ["HS256"] });
     if (!isOAuthStatePayload(payload)) return null;
     // H1 fix: bind state to the caller's session cookie. A state minted for
     // session A must not be redeemable by session B.
@@ -200,6 +229,7 @@ function buildOAuthParams(
   state: string,
   clientId: string,
   scope: string,
+  codeChallenge: string,
   extraParams?: Record<string, string>
 ): URLSearchParams {
   return new URLSearchParams({
@@ -208,42 +238,65 @@ function buildOAuthParams(
     redirect_uri: redirectUri,
     state,
     scope,
+    // PKCE (RFC 7636): S256 challenge — the verifier only travels back inside
+    // the signed state JWT and is sent at the token exchange step.
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
     ...extraParams,
   });
 }
 
-function buildZoomAuthorizeUrl(redirectUri: string, state: string): string {
+function buildZoomAuthorizeUrl(redirectUri: string, state: string, codeChallenge: string): string {
   const config = getEnvironmentConfig();
-  const params = buildOAuthParams(redirectUri, state, config.zoomClientId ?? "", ZOOM_SCOPES.join(" "));
+  const params = buildOAuthParams(redirectUri, state, config.zoomClientId ?? "", ZOOM_SCOPES.join(" "), codeChallenge);
   return `https://zoom.us/oauth/authorize?${params.toString()}`;
 }
 
-function buildGoogleMeetAuthorizeUrl(redirectUri: string, state: string): string {
+function buildGoogleMeetAuthorizeUrl(redirectUri: string, state: string, codeChallenge: string): string {
   const config = getEnvironmentConfig();
-  const params = buildOAuthParams(redirectUri, state, config.googleMeetClientId ?? "", GOOGLE_SCOPES.join(" "), {
-    access_type: "offline",
-    prompt: "consent",
-  });
+  const params = buildOAuthParams(
+    redirectUri,
+    state,
+    config.googleMeetClientId ?? "",
+    GOOGLE_SCOPES.join(" "),
+    codeChallenge,
+    {
+      access_type: "offline",
+      prompt: "consent",
+    }
+  );
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
-function buildMicrosoftTeamsAuthorizeUrl(redirectUri: string, state: string): string {
+function buildMicrosoftTeamsAuthorizeUrl(redirectUri: string, state: string, codeChallenge: string): string {
   const config = getEnvironmentConfig();
   const tenantId = config.msTeamsTenantId ?? "common";
-  const params = buildOAuthParams(redirectUri, state, config.msTeamsClientId ?? "", MS_TEAMS_SCOPES.join(" "), {
-    response_mode: "query",
-  });
+  const params = buildOAuthParams(
+    redirectUri,
+    state,
+    config.msTeamsClientId ?? "",
+    MS_TEAMS_SCOPES.join(" "),
+    codeChallenge,
+    {
+      response_mode: "query",
+    }
+  );
   return `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?${params.toString()}`;
 }
 
-function buildAuthorizeUrl(providerSlug: MeetingProvider, redirectUri: string, state: string): string {
+function buildAuthorizeUrl(
+  providerSlug: MeetingProvider,
+  redirectUri: string,
+  state: string,
+  codeChallenge: string
+): string {
   switch (providerSlug) {
     case "zoom":
-      return buildZoomAuthorizeUrl(redirectUri, state);
+      return buildZoomAuthorizeUrl(redirectUri, state, codeChallenge);
     case "google_meet":
-      return buildGoogleMeetAuthorizeUrl(redirectUri, state);
+      return buildGoogleMeetAuthorizeUrl(redirectUri, state, codeChallenge);
     case "microsoft_teams":
-      return buildMicrosoftTeamsAuthorizeUrl(redirectUri, state);
+      return buildMicrosoftTeamsAuthorizeUrl(redirectUri, state, codeChallenge);
   }
   throw new Error(`Unhandled case in buildAuthorizeUrl`);
 }
@@ -275,12 +328,16 @@ function isOAuthTokenResponse(value: unknown): value is OAuthTokenResponse {
 
 /**
  * Exchanges an authorization code for provider tokens at the provider's token
- * endpoint. Throws on non-2xx with the provider's error body for diagnostics.
+ * endpoint. Sends the PKCE `code_verifier` (bound to the S256 challenge sent
+ * at authorize time). Throws on non-2xx with a truncated excerpt of the
+ * provider's error body — the full upstream body may contain provider-internal
+ * detail and must never be embedded verbatim in thrown errors.
  */
 async function exchangeCodeForTokens(
   cfg: OAuthCallbackConfig,
   code: string,
-  redirectUri: string
+  redirectUri: string,
+  codeVerifier: string
 ): Promise<OAuthTokenResponse> {
   const config = getEnvironmentConfig();
 
@@ -290,6 +347,9 @@ async function exchangeCodeForTokens(
     redirect_uri: redirectUri,
     client_id: cfg.resolveClientId(config),
     client_secret: cfg.resolveClientSecret(config),
+    // PKCE (RFC 7636 §4.5): the provider verifies this against the
+    // code_challenge sent with the authorize request.
+    code_verifier: codeVerifier,
   });
 
   // Conditionally append provider-specific extra params to avoid creating an
@@ -302,22 +362,34 @@ async function exchangeCodeForTokens(
     }
   }
 
-  const res = await fetch(cfg.buildTokenUrl(config), {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params.toString(),
-  });
+  const res = await fetchWithTimeout(
+    cfg.buildTokenUrl(config),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+    },
+    cfg.providerSlug,
+    REQUEST_TIMEOUT_MS
+  );
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`${cfg.displayName} token exchange failed (${res.status}): ${body}`);
+    throw new Error(`${cfg.displayName} token exchange failed (${res.status}): ${truncateForError(body)}`);
   }
 
   const data: unknown = await res.json();
   if (!isOAuthTokenResponse(data)) {
-    throw new Error(`${cfg.displayName} token exchange returned unexpected shape: ${JSON.stringify(data)}`);
+    throw new Error(
+      `${cfg.displayName} token exchange returned unexpected shape: ${truncateForError(JSON.stringify(data))}`
+    );
   }
   return data;
+}
+
+/** Caps provider-response excerpts embedded in error messages (~200 chars). */
+function truncateForError(text: string): string {
+  return text.length > 200 ? `${text.slice(0, 200)}…[truncated]` : text;
 }
 
 /**
@@ -358,9 +430,9 @@ export namespace MeetingOAuthService {
       throw new GraphQLError(tErrors.unauthorizedAction);
     }
 
-    const state = await signOAuthState(actorUserId, input.providerSlug, input.returnPath, sessionId);
+    const { state, codeVerifier } = await signOAuthState(actorUserId, input.providerSlug, input.returnPath, sessionId);
     const redirectUri = buildRedirectUri(input.providerSlug);
-    const authorizeUrl = buildAuthorizeUrl(input.providerSlug, redirectUri, state);
+    const authorizeUrl = buildAuthorizeUrl(input.providerSlug, redirectUri, state, pkceCodeChallenge(codeVerifier));
 
     logger.info("Meeting OAuth: connect initiated", {
       actorUserId,
@@ -469,9 +541,10 @@ export namespace MeetingOAuthService {
     cfg: OAuthCallbackConfig,
     userId: string,
     code: string,
-    redirectUri: string
+    redirectUri: string,
+    codeVerifier: string
   ): Promise<MeetingProviderTokenSelectType> {
-    const tokenResponse = await exchangeCodeForTokens(cfg, code, redirectUri);
+    const tokenResponse = await exchangeCodeForTokens(cfg, code, redirectUri, codeVerifier);
     const expiresAt = new Date(Date.now() + tokenResponse.expires_in * 1000);
 
     const upsertInput: MeetingProviderTokenUpsertInput = {

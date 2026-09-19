@@ -17,8 +17,10 @@ gqlSchemaBuilder.mutationField("saveAppearanceDraft", t =>
   t.field({
     type: AppearanceSettingsPothosObject,
     authScopes: {
-      permission: AppPermission.SETTINGS_APPEARANCE_MANAGE,
-      notImpersonating: true,
+      $all: {
+        permission: AppPermission.SETTINGS_APPEARANCE_MANAGE,
+        notImpersonating: true,
+      },
     },
     args: {
       input: t.arg({ type: AppearanceDraftInputPothosRef, required: true }),
@@ -32,7 +34,7 @@ gqlSchemaBuilder.mutationField("saveAppearanceDraft", t =>
       const tErrors = resolveAppearanceErrors(ctx);
       const input = toAppearanceSubmitInput(args.input);
       const expectedUpdatedAt = args.expectedUpdatedAt ?? undefined;
-      return runAppearanceMutation(() =>
+      return runAppearanceMutation(tErrors, () =>
         AppearanceSettingsService.saveDraft(input, actorUserId, tErrors, undefined, expectedUpdatedAt)
       );
     },
@@ -48,8 +50,10 @@ gqlSchemaBuilder.mutationField("publishAppearance", t =>
   t.field({
     type: AppearanceSettingsPothosObject,
     authScopes: {
-      permission: AppPermission.SETTINGS_APPEARANCE_MANAGE,
-      notImpersonating: true,
+      $all: {
+        permission: AppPermission.SETTINGS_APPEARANCE_MANAGE,
+        notImpersonating: true,
+      },
     },
     args: {
       // AC-33 - same optimistic-concurrency guard as saveAppearanceDraft.
@@ -59,7 +63,7 @@ gqlSchemaBuilder.mutationField("publishAppearance", t =>
       const actorUserId = await requireAuth(ctx);
       const tErrors = resolveAppearanceErrors(ctx);
       const expectedUpdatedAt = args.expectedUpdatedAt ?? undefined;
-      return runAppearanceMutation(() =>
+      return runAppearanceMutation(tErrors, () =>
         AppearanceSettingsService.publish(actorUserId, tErrors, undefined, expectedUpdatedAt)
       );
     },
@@ -75,8 +79,10 @@ gqlSchemaBuilder.mutationField("resetAppearanceDraft", t =>
   t.field({
     type: AppearanceSettingsPothosObject,
     authScopes: {
-      permission: AppPermission.SETTINGS_APPEARANCE_MANAGE,
-      notImpersonating: true,
+      $all: {
+        permission: AppPermission.SETTINGS_APPEARANCE_MANAGE,
+        notImpersonating: true,
+      },
     },
     resolve: async (_root, _args, ctx) => {
       const actorUserId = await requireAuth(ctx);

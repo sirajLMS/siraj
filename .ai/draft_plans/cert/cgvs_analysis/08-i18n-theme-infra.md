@@ -955,7 +955,7 @@ Only exports `EmptyStateIllustration` (others are default exports, imported indi
 ### Forms & Inputs
 | Package | Version | Notes |
 |---------|---------|-------|
-| mui-tel-input | (latest) | Phone input component |
+| mui-tel-input | (current) | Phone input component |
 | google-libphonenumber | (latest) | Phone number validation |
 
 ### Files & Media

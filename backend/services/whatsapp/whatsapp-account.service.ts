@@ -25,7 +25,6 @@ import { logger } from "@/backend/lib/logger";
 import {
   FETCH_TIMEOUT_MS,
   MAX_CONCURRENT_CALLS,
-  readErrorBody,
   resolveGraphApiContextFromEnv,
   resolveGraphApiVersion,
 } from "@/backend/lib/whatsapp-constants";
@@ -56,6 +55,11 @@ import { resetWhatsappChannel } from "@/backend/services/communication/channels/
 import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
 import { NOTIFICATION_TEMPLATE_MAP } from "@/backend/services/notification/notification-payloads.builders";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
+import {
+  noFollowRedirectInit,
+  readJsonWithByteBudget,
+  readResponseBodyWithByteBudget,
+} from "@/backend/services/shared/outbound-fetch-guard";
 import { resolveEnvConfig, resolveEnvConfigMany } from "@/backend/services/system";
 import { AuditService } from "@/backend/services/system/audit.service";
 import { WhatsappCoexistenceSyncService } from "@/backend/services/whatsapp/whatsapp-coexistence-sync.service";
@@ -362,13 +366,14 @@ async function resolveGraphApiContext(tErrors: ErrorsLabels): Promise<{ ctx: Gra
 async function executeGraphApiFetch<T>(request: GraphApiRequestInit, schema: z.ZodType<T>): Promise<T> {
   const response = await fetch(request.url, {
     ...request.init,
+    ...noFollowRedirectInit(),
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!response.ok) {
-    const errorBody = await readErrorBody(response);
+    const errorBody = await readResponseBodyWithByteBudget(response);
     throw new GraphApiError(response.status, errorBody);
   }
-  const raw: unknown = await response.json();
+  const raw: unknown = await readJsonWithByteBudget(response);
   return schema.parse(raw);
 }
 

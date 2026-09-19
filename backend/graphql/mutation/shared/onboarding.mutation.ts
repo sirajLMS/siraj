@@ -129,7 +129,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   createManager: t.field({
     type: ManagerOnboardingResultPothosObject,
     description: "Create a new manager/staff account (System Admin only)",
-    authScopes: { superAdmin: true, notImpersonating: true },
+    authScopes: { $all: { superAdmin: true, notImpersonating: true } },
     args: {
       input: t.arg({ type: ManagerOnboardingInputPothosObject, required: true }),
     },
@@ -149,7 +149,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   createSupervisor: t.field({
     type: ManagerOnboardingResultPothosObject,
     description: "Create a new supervisor account with SUPERVISOR_DEFAULT permission group (System Admin only)",
-    authScopes: { superAdmin: true, notImpersonating: true },
+    authScopes: { $all: { superAdmin: true, notImpersonating: true } },
     args: {
       input: t.arg({ type: ManagerOnboardingInputPothosObject, required: true }),
     },

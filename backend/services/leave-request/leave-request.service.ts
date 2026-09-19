@@ -64,7 +64,7 @@ async function assertNotLocked(
   const lockThreshold = new Date(now.getTime() + lockHours * 60 * 60 * 1000);
 
   if (instance.scheduledStartAt <= lockThreshold) {
-    throw new ValidationError("SESSION_LOCKED", `Cannot modify session within ${lockHours} hours of start time.`);
+    throw new ValidationError("SESSION_LOCKED", tErrors.sessionLocked({ lockHours }));
   }
 }
 
@@ -219,7 +219,7 @@ export namespace LeaveRequestService {
       throw new NotFoundError("LEAVE_REQUEST", tErrors.notFound);
     }
     if (existing.status !== "PENDING") {
-      throw new ConflictError("Request is no longer pending");
+      throw new ConflictError(tErrors.leaveRequestNoLongerPending);
     }
 
     const [updated] = await db

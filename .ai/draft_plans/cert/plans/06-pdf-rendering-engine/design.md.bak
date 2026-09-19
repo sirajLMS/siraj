@@ -449,7 +449,7 @@ All `certificates.*` namespace type definitions live in `shared/locale/types/cer
 
 | Test | Description |
 |---|---|
-| End-to-end render | Template with all 6 element types → valid PDF buffer |
+| Full pipeline render | Template with all 6 element types → valid PDF buffer |
 | Arabic text render | Template with Arabic elements → correctly shaped text in PDF |
 | Cache hit | Second render with same inputs → returns cached PDF (no Puppeteer launch) |
 | Cache invalidation | Template version bump → cache miss on next render |

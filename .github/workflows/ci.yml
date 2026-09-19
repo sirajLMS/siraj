@@ -100,7 +100,7 @@ jobs:
       DB_PROVIDER: postgres
       # App config required at build/runtime validation
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL || 'admin@siraj.com' }}
-      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD || '12345678' }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
       STORAGE_PROVIDER: ${{ secrets.STORAGE_PROVIDER || 'local' }}
       CRON_SECRET: ${{ secrets.CRON_SECRET || 'your-secret-key-here-must-be-some-secret-key-32-chars' }}
       CACHE_PROVIDER: ${{ secrets.CACHE_PROVIDER || 'postgres' }}
@@ -119,6 +119,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Verify required secrets
+        run: |
+          if [ -z "${{ secrets.ADMIN_PASSWORD }}" ]; then
+            echo "::error::ADMIN_PASSWORD secret is missing — refusing to run with a committed fallback credential"
+            exit 1
+          fi
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2

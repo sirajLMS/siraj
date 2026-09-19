@@ -97,6 +97,11 @@ Apply domain-specific rules based on where the test failure occurs:
 #### 4. Cross-Actor Workflows (`test/workflows/`)
 - **Real DB & Services**: Real services + real DB, committed fixtures with tracked `afterAll` cleanup, NO `runInRollback`.
 - **Mermaid Diagrams**: Validate workflow diagram sync via `bun run validate:mermaid`.
+- **Test DB vs Dev DB Permission Migrations**: The test runner uses `.env.test` (a separate database). Permission/catalog migrations applied only to the dev DB do NOT propagate — journey tests that resolve group grants fail with `ForbiddenError`. Apply the migration file to the test database too (the file is idempotent; `ALTER TYPE ... ADD VALUE` cannot run inside a transaction block, so run the whole file as one batch).
+- **Notification Spy Scope**: Services that write (recordPayment, settlement flows) legitimately dispatch notifications; only read paths dispatch nothing. A journey asserting "no notifications" must clear the spy after the fixture steps and assert on the read path only — asserting on the whole journey count catches the fixture's legitimate dispatches and fails spuriously.
+- **FK RESTRICT Cleanup Order**: Delete children (instances, payments, expenses) before RESTRICT-referenced rows (`class_subjects`, `students`, `teachers`). Idempotency-key-based deletes (e.g. `WHERE idempotency_key LIKE 'prefix-%'`) survive partially-failed prior runs; date-range deletes do not.
+- **Timestamped Filters vs `createdAt` Stamping**: When a service stamps `createdAt` at submission time (ignoring a provided business date), a report filtered on `createdAt` only sees fixtures submitted "now" — use the current month in journey assertions, or write `createdAt` directly in the fixture.
+- **DB State-Machine CHECK Constraints**: Raw SQL fixtures must satisfy composite CHECK clauses (e.g. a COMPLETED row requires a non-PENDING outcome; a TAKEN outcome requires actual timestamps). The real service state-machine path handles them automatically — prefer driving fixtures through real services over raw SQL inserts.
 
 ---
 

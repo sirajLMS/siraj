@@ -11,7 +11,7 @@ const TEST_SECRET = "test-cron-secret-1234567890abcdef";
 
 // Set env before any import that transitively loads @/backend/services / env validation.
 function setEnv(key: string, value: string | undefined): void {
-  Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true });
+  Reflect.defineProperty(process.env, key, { value, writable: true, configurable: true, enumerable: true });
   resetEnvironmentCache();
 }
 

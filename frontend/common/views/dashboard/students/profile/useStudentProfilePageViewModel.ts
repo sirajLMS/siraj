@@ -139,6 +139,8 @@ function useStudentProfileTabState(
   return { activeTab, visibleTabs, onTabChange: handleTabChange, activeTabForQuery };
 }
 
+type StudentProfileRefetch = StudentProfileQueryState["refetch"];
+
 function useStudentProfileQueryState(
   studentId: string,
   activeTabForQuery: StudentProfileTab | null,
@@ -171,6 +173,22 @@ function useStudentProfileQueryState(
     refetch: async (variables?: { readonly year?: number | null; readonly month?: number | null }) =>
       refetch(variables ?? {}),
   };
+}
+
+function useStudentProfileHistoryRefresh(
+  activeTabForQuery: StudentProfileTab | null,
+  currentMonth: Date | null,
+  refetch: StudentProfileRefetch
+): void {
+  const historyYear = currentMonth ? currentMonth.getFullYear() : 0;
+  const historyMonth = currentMonth ? currentMonth.getMonth() + 1 : 0;
+
+  useEffect(() => {
+    if (activeTabForQuery !== "history") {
+      return;
+    }
+    void refetch({ year: historyYear, month: historyMonth });
+  }, [activeTabForQuery, historyYear, historyMonth, refetch]);
 }
 
 function useStudentProfilePresentation(
@@ -208,6 +226,32 @@ function useStudentProfilePresentation(
   return { header, statusBadge };
 }
 
+function buildStudentProfileContextValue(
+  studentId: string,
+  profile: StudentProfileQueryData | undefined,
+  loading: boolean,
+  refetch: StudentProfileRefetch
+): StudentProfileContextValue {
+  return {
+    studentId,
+    profile: profile ?? null,
+    loading,
+    refetch,
+  };
+}
+
+function buildStudentProfileLabelsBySection(t: StudentProfileTranslations): StudentProfilePageLabelsBySection {
+  return {
+    shell: {
+      title: t.title,
+      loading: t.loading,
+      notFoundTitle: t.notFoundTitle,
+      notFoundDescription: t.notFoundDescription,
+    },
+    tabs: t.tabs,
+  };
+}
+
 export function useStudentProfilePageViewModel(
   props: Readonly<UseStudentProfilePageViewModelProps>
 ): StudentProfilePageViewModel {
@@ -237,46 +281,22 @@ export function useStudentProfilePageViewModel(
     router
   );
 
-  const historyYear = safeCurrentMonth ? safeCurrentMonth.getFullYear() : 0;
-  const historyMonth = safeCurrentMonth ? safeCurrentMonth.getMonth() + 1 : 0;
-
   useEffect(() => {
     ensureInitialMonth();
   }, [ensureInitialMonth]);
 
-  useEffect(() => {
-    if (activeTabForQuery !== "history") {
-      return;
-    }
-    void refetch({ year: historyYear, month: historyMonth });
-  }, [activeTabForQuery, historyYear, historyMonth, refetch]);
+  useStudentProfileHistoryRefresh(activeTabForQuery, safeCurrentMonth, refetch);
 
   useDocumentTitle(profile?.name, Translation.Dashboard.StudentProfile, "title");
 
   const contextValue = useMemo<StudentProfileContextValue>(
-    () => ({
-      studentId,
-      profile: profile ?? null,
-      loading,
-      refetch,
-    }),
+    () => buildStudentProfileContextValue(studentId, profile, loading, refetch),
     [studentId, profile, loading, refetch]
   );
 
   const { header, statusBadge } = useStudentProfilePresentation(profile, access, tStatus, t);
 
-  const labelsBySection = useMemo<StudentProfilePageLabelsBySection>(
-    () => ({
-      shell: {
-        title: t.title,
-        loading: t.loading,
-        notFoundTitle: t.notFoundTitle,
-        notFoundDescription: t.notFoundDescription,
-      },
-      tabs: t.tabs,
-    }),
-    [t]
-  );
+  const labelsBySection = useMemo<StudentProfilePageLabelsBySection>(() => buildStudentProfileLabelsBySection(t), [t]);
 
   return {
     studentId,

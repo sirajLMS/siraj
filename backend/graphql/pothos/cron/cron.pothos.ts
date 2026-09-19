@@ -210,7 +210,7 @@ export function handleNotFoundError(result: unknown, id: string, tErrors: Errors
 gqlSchemaBuilder.queryFields(t => ({
   cronSchedules: t.field({
     type: CronPaginatedSchedulesObject,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: { input: t.arg({ type: CronScheduleListInput, required: false }) },
     description: "List cron schedules with optional filters.",
     resolve: async (_root, args) => {
@@ -226,7 +226,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
   cronRuns: t.field({
     type: CronPaginatedRunsObject,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: { input: t.arg({ type: CronRunListInputRef, required: false }) },
     description: "List cron runs with optional filters.",
     resolve: async (_root, args) => {
@@ -245,7 +245,7 @@ gqlSchemaBuilder.queryFields(t => ({
   }),
   cronQueueStats: t.field({
     type: CronQueueStatsObject,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     description: "Get queue statistics for the active queue backend.",
     resolve: async () => CronService.getQueueStats(),
   }),
@@ -256,7 +256,7 @@ gqlSchemaBuilder.queryFields(t => ({
 gqlSchemaBuilder.mutationFields(t => ({
   cronScheduleCreate: t.field({
     type: CronScheduleObject,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: { input: t.arg({ type: CronScheduleSubmitInputRef, required: true }) },
     description: "Create a new cron schedule.",
     resolve: async (_root, args, ctx) => {
@@ -279,7 +279,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   }),
   cronScheduleUpdate: t.field({
     type: CronScheduleObject,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: {
       id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       input: t.arg({ type: CronScheduleUpdateInputRef, required: true }),
@@ -307,7 +307,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   cronSchedulePause: t.field({
     type: CronScheduleObject,
     nullable: true,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: { id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Pause a cron schedule.",
     resolve: async (_root, args, ctx) => {
@@ -320,7 +320,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   cronScheduleResume: t.field({
     type: CronScheduleObject,
     nullable: true,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: { id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Resume a paused cron schedule.",
     resolve: async (_root, args, ctx) => {
@@ -331,7 +331,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
   }),
   cronScheduleDelete: t.boolean({
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: { input: t.arg({ type: CronScheduleDeleteInput, required: true }) },
     description: "Delete a cron schedule (soft by default, hard if specified).",
     resolve: async (_root, args, ctx) => {
@@ -342,7 +342,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   cronRunTrigger: t.field({
     type: CronRunObject,
     nullable: true,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: { input: t.arg({ type: CronRunTriggerInput, required: true }) },
     description: "Manually trigger a cron schedule to run immediately.",
     resolve: async (_root, args, ctx) => {
@@ -370,7 +370,7 @@ gqlSchemaBuilder.mutationFields(t => ({
   cronRunRetry: t.field({
     type: CronRunObject,
     nullable: true,
-    authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
+    authScopes: { $all: { permission: AppPermission.CRON_MANAGE, notImpersonating: true } },
     args: {
       input: t.arg({ type: CronRunRetryInput, required: true }),
     },

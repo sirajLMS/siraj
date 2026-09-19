@@ -3,6 +3,7 @@
 // every query file. This top-level barrel imports every sub-directory so
 // `import "@/backend/graphql/query"` (from gqlSchema.ts) registers all queries.
 
+import "./accounting";
 import "./auth";
 import "./billing";
 import "./classes";

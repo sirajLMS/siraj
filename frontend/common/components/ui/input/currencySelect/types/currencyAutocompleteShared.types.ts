@@ -40,4 +40,14 @@ interface CurrencyAutocompleteSlotProps {
   readonly fullWidthDefault?: boolean;
 }
 
-export type CurrencyAutocompleteSharedProps = CurrencyAutocompleteProps & CurrencyAutocompleteSlotProps;
+/** Catalog data supplied by the caller. Data-bound wrappers (`CurrencyAutocomplete`
+ *  and its tier variants) fetch it via `useCurrencyCatalog`; stories pass static lists. */
+interface CurrencyAutocompleteCatalogProps {
+  readonly options: readonly CurrencyOption[];
+  /** Whether the full catalog has loaded; while false only the selected currency is offered. */
+  readonly catalogLoaded?: boolean;
+}
+
+export type CurrencyAutocompleteSharedProps = CurrencyAutocompleteProps &
+  CurrencyAutocompleteSlotProps &
+  CurrencyAutocompleteCatalogProps;

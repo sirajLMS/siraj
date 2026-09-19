@@ -10,6 +10,7 @@ import {
 } from "@/backend/storage/disk/shared/move-operations.helper";
 import { fileExists, fileInfoByPath } from "@/backend/storage/disk/vercel/operations/file.operations";
 import { directoryInfoByPath } from "@/backend/storage/disk/vercel/operations/folder.operations";
+import { resolveBlobAccess } from "@/backend/storage/disk/vercel/operations/upload.operations";
 import { getBlobs, isDirectory } from "@/backend/storage/disk/vercel/shared";
 import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import type * as Types from "@/backend/types";
@@ -76,7 +77,7 @@ async function moveSingleFile(ctx: VercelContext, sourcePath: string, destPath: 
 
   const newBlob = await copy(sourceBlob.url, destPath, {
     token: ctx.token,
-    access: ctx.access,
+    access: resolveBlobAccess(ctx.access, destPath),
   });
 
   logger.info("📋 moveSingleFile: Copied blob", {
@@ -107,7 +108,7 @@ async function moveDirectory(ctx: VercelContext, sourcePath: string, destPath: s
       try {
         await copy(blob.url, newFilePath, {
           token: ctx.token,
-          access: ctx.access,
+          access: resolveBlobAccess(ctx.access, newFilePath),
         });
 
         await del(blob.url, { token: ctx.token });

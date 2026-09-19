@@ -5,6 +5,7 @@ import { SessionRepository } from "@/backend/db/repo/shared";
 import { type BaseContext, createContext } from "@/backend/graphql/gqlContext";
 import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import { getBooleanEnv } from "@/backend/lib/env";
+import { sanitizeForwardedFor } from "@/backend/lib/ip-utils";
 import { logger } from "@/backend/lib/logger";
 import { ImpersonationService, PermissionGroupSimulationService } from "@/backend/services";
 import type { SessionSelectType } from "@/backend/types";
@@ -129,8 +130,10 @@ function resolveTrustedProxyIp(headersList: Headers): string | null {
  * Extracts the client IP from request headers. Only trusts platform-trusted
  * headers (x-vercel-forwarded-for on Vercel, cf-connecting-ip behind Cloudflare)
  * when the deployment is on that platform. Raw x-forwarded-for / x-real-ip are
- * honored only behind an explicit TRUSTED_PROXY=true reverse proxy (M2). Uses a
- * UA+Accept-Language fingerprint if no valid IP is found so clients with
+ * honored only behind an explicit TRUSTED_PROXY=true reverse proxy (M2). With
+ * no trusted IP source, production falls back to a single shared anonymous
+ * bucket (fail-conservative — the fingerprint alternative is client-controlled);
+ * other environments use a UA+Accept-Language fingerprint so clients with
  * different fingerprints are rate-limited separately.
  */
 function getIpAddress(headersList: Headers): string {
@@ -138,16 +141,18 @@ function getIpAddress(headersList: Headers): string {
   const isBehindCloudflare = process.env.CLOUDFLARE === "1";
 
   if (isOnVercel) {
-    const vercelIp = headersList.get("x-vercel-forwarded-for");
+    // x-vercel-forwarded-for is set by Vercel's edge and trusted only on Vercel;
+    // only a validated IP entry becomes a bucket key — a raw chain falls through.
+    const vercelIp = sanitizeForwardedFor(headersList.get("x-vercel-forwarded-for"));
     if (vercelIp) {
-      return vercelIp.trim();
+      return vercelIp;
     }
   }
 
   if (isBehindCloudflare) {
-    const cfConnectingIp = headersList.get("cf-connecting-ip");
+    const cfConnectingIp = sanitizeForwardedFor(headersList.get("cf-connecting-ip"));
     if (cfConnectingIp) {
-      return cfConnectingIp.trim();
+      return cfConnectingIp;
     }
   }
 
@@ -159,9 +164,17 @@ function getIpAddress(headersList: Headers): string {
     }
   }
 
-  // No valid IP header found — generate a fallback identifier from request
-  // headers so clients with different fingerprints are rate-limited separately
-  // rather than sharing a single bucket.
+  // No valid IP header found. In production the header fingerprint below is
+  // fully client-controlled (rotating user-agent/accept-language yields a
+  // fresh bucket per request), so fail conservative: all unknown-IP clients
+  // share one bucket. Deployments behind a reverse proxy must set
+  // TRUSTED_PROXY=true (or run on Vercel/Cloudflare) for per-IP buckets.
+  // Outside production the fingerprint keeps dev/test clients separated.
+  if (process.env.NODE_ENV === "production") {
+    logger.warn("getIpAddress: no trusted IP source; using shared anonymous rate-limit bucket");
+    return "anon:unknown";
+  }
+
   const userAgent = headersList.get("user-agent") ?? "";
   const acceptLanguage = headersList.get("accept-language") ?? "";
   const fingerprint = createHash("sha256").update(`${userAgent}:${acceptLanguage}`).digest("hex").slice(0, 32);

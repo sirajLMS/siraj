@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications";
 import { UserRepository } from "@/backend/db/repo/users";
+import { generateTestPassword } from "@/backend/db/test/test-utils";
 import { AccountStatus, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import {
@@ -74,7 +75,7 @@ function mockUser(overrides?: ContactOverrides): UserSelectType {
     name: "Test User",
     email: overrides?.email ?? "test@example.com",
     emailVerifiedAt: null,
-    password: crypto.randomUUID(),
+    password: generateTestPassword(),
     rememberTokenHash: null,
     avatarFilePath: null,
     avatarUrl: null,

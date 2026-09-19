@@ -566,31 +566,10 @@ Transitions:
 
 ## 9. Testing Strategy
 
-### 9.1 Component Tests (Happy DOM, Vitest, bun test runner)
-Test files go in `test/ui/components/certificates/importExport/`
-
-| File | Description | Coverage |
-|------|-------------|----------|
-| `TemplateImportDesktop.test.tsx` | Desktop import — file select UI, formats detection | file selection, format detect, drop zone aria |
-| `TemplateExportActions.test.tsx` | Single + batch export actions | row action, checkbox bar, batch trigger |
-| `ImportPreviewModal.test.tsx` | Modal display, warnings/errors rendering | warnings, errors, import confirm |
-| `ImportStateMachine.spec.ts` | Zustand store transitions | all states and invalid transitions |
-| `ExportFileFormat.spec.ts` | Validate exported JSON against Zod schema | all schema variations |
-| `ImportFormatDetect.test.tsx` | File format detection algorithms | JSON, ZIP, JSON-not-JSON-corrupt |
-| `ZIP Downloads.spec.ts` | Generate and verify ZIP content | file structure, valid JSON |
-
-### 9.2 E2E Tests (Playwright)
-Test files: `test/ui/e2e/importExport/`
-
-| File | Description |
-|------|-------------|
-| `importExport-flow.spec.ts` | Single import & route to editor |
-| `importExport-batch.spec.ts` | Batch export → import → verify |
-
-### 9.3 Database Tests
+### 9.1 Database Tests
 - Backend-only: validate post-mutation data (before/after template tables)
 
-### 9.4 i18n Tests
+### 9.2 i18n Tests
 - English and Arabic keys render correctly
 - Plural rules for export/import counts
 
