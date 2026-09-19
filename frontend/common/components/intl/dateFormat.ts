@@ -35,20 +35,43 @@ function toDate(date: DateInput): Date {
 }
 
 /**
- * Global cache for Intl.DateTimeFormat instances.
+ * Dual-tier global cache for Intl.DateTimeFormat instances.
  * Creating new Intl.DateTimeFormat instances is computationally expensive (up to ~100x slower).
- * Caching by locale tag and options serialization eliminates repeated construction overhead
- * in high-frequency date formatting renders (e.g., DataGrid cells, list items, calendar grids).
+ *
+ * Tier 1: WeakMap keyed on options object identity (O(1) lookup, zero JSON.stringify overhead
+ * and zero string allocation on hot formatting paths for module-level/cached options).
+ * Tier 2: String-keyed Map fallback for inline/dynamically instantiated options objects.
  */
-const dtfCache = new Map<string, Intl.DateTimeFormat>();
+const weakDtfCache = new WeakMap<Intl.DateTimeFormatOptions, Map<string, Intl.DateTimeFormat>>();
+const stringDtfCache = new Map<string, Intl.DateTimeFormat>();
 
 function getDateTimeFormatter(localeTag: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
-  const cacheKey = `${localeTag}:${JSON.stringify(options)}`;
-  let dtf = dtfCache.get(cacheKey);
+  // Fast path: O(1) object identity lookup via WeakMap
+  let localeMap = weakDtfCache.get(options);
+  if (localeMap) {
+    const cached = localeMap.get(localeTag);
+    if (cached) {
+      return cached;
+    }
+  }
+
+  // Fallback path: JSON serialization key for dynamic options objects
+  const stringKey = `${localeTag}:${JSON.stringify(options)}`;
+  let dtf = stringDtfCache.get(stringKey);
   if (!dtf) {
     dtf = new Intl.DateTimeFormat(localeTag, options);
-    dtfCache.set(cacheKey, dtf);
+    stringDtfCache.set(stringKey, dtf);
   }
+
+  // Cache in WeakMap to accelerate future calls with the same options object reference
+  if (options && typeof options === "object") {
+    if (!localeMap) {
+      localeMap = new Map();
+      weakDtfCache.set(options, localeMap);
+    }
+    localeMap.set(localeTag, dtf);
+  }
+
   return dtf;
 }
 

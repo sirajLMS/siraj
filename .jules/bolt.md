@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-09-19 - Dual-tier WeakMap + Map caching for Intl.DateTimeFormat options
+
+**Learning:** `JSON.stringify(options)` string serialization on hot date formatting paths (such as DataGrid cells and schedule calendars) incurred non-trivial string allocation and CPU overhead on repeated calls.
+**Action:** Use a `WeakMap<Intl.DateTimeFormatOptions, Map<string, Intl.DateTimeFormat>>` as a Tier 1 O(1) object identity lookup before falling back to a string-keyed `Map` for dynamic options objects.
