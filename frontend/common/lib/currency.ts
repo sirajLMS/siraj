@@ -82,6 +82,39 @@ export function getCurrencySymbol(code: CurrencyCode | string): string {
   return getCurrencyByCode(code)?.symbol ?? code;
 }
 
+/** Pre-built Set for O(1) CurrencyCode enum validation without Object.values() array allocation. */
+const CURRENCY_CODES = new Set<string>(Object.values(CurrencyCode));
+
+/** Module-level cache for Intl.NumberFormat instances to avoid repeated instantiation overhead. */
+const numberFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getNumberFormatter(locale: string, currency: string, decimals: number): Intl.NumberFormat {
+  const cacheKey = `${locale}:${currency}:${decimals}`;
+  let formatter = numberFormatCache.get(cacheKey);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    numberFormatCache.set(cacheKey, formatter);
+  }
+  return formatter;
+}
+
+/** Module-level cache for Intl.DisplayNames currency instances. */
+const currencyDisplayNamesCache = new Map<string, Intl.DisplayNames>();
+
+function getCurrencyDisplayNamesFormatter(locale: string): Intl.DisplayNames {
+  let displayNames = currencyDisplayNamesCache.get(locale);
+  if (!displayNames) {
+    displayNames = new Intl.DisplayNames([locale], { type: "currency" });
+    currencyDisplayNamesCache.set(locale, displayNames);
+  }
+  return displayNames;
+}
+
 /** ISO 4217 minor-unit decimals for currencies that differ from the default (2). */
 const CURRENCY_DECIMALS: Partial<Record<CurrencyCode, number>> = {
   [CurrencyCode.Jpy]: 0,
@@ -97,7 +130,7 @@ const CURRENCY_DECIMALS: Partial<Record<CurrencyCode, number>> = {
 };
 
 function isCurrencyCode(code: string): code is CurrencyCode {
-  return (Object.values(CurrencyCode) as readonly string[]).includes(code);
+  return CURRENCY_CODES.has(code);
 }
 
 export function parseCurrencyCode(value: string | null | undefined): CurrencyCode | null {
@@ -121,25 +154,19 @@ export function formatLockedAmount(amount: string, currency: CurrencyCode, local
   if (!Number.isFinite(numeric)) {
     return amount;
   }
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  }).format(numeric);
+  return getNumberFormatter(locale, currency, decimals).format(numeric);
 }
 
 /**
  * Resolve a localized currency display name via `Intl.DisplayNames`.
  *
- * Falls back to the raw ISO 4217 code when the runtime does not support
- * currency display names or the code is unknown — matches the
- * `getCountryDisplayName` fallback pattern in `frontend/lib/locale/country`.
+ * Uses cached `Intl.DisplayNames` instances to avoid heavy ICU object
+ * construction overhead during rendering. Falls back to the raw ISO 4217
+ * code when the runtime does not support currency display names or the code is unknown.
  */
-export function getCurrencyDisplayName(code: CurrencyCode | string, locale?: string): string {
+export function getCurrencyDisplayName(code: CurrencyCode | string, locale = "en"): string {
   try {
-    const displayNames = new Intl.DisplayNames([locale ?? "en"], { type: "currency" });
-    return displayNames.of(code) ?? code;
+    return getCurrencyDisplayNamesFormatter(locale).of(code) ?? code;
   } catch {
     return code;
   }
