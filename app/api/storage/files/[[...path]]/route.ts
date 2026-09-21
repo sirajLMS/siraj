@@ -9,6 +9,7 @@ import {
   resolvePublicStoragePath,
   verifyToken,
 } from "@/backend/lib";
+import { apiRateLimiter, checkRateLimit, getClientIdentifier, rateLimitLogId } from "@/backend/lib/ratelimit";
 import { SessionService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
@@ -236,6 +237,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const tErrors = getServerTranslations(locale).errorsTranslations;
 
   try {
+    const rateLimitKey = `storage-file:${getClientIdentifier(request)}`;
+    const rateLimit = await checkRateLimit(rateLimitKey, apiRateLimiter);
+    if (!rateLimit.success) {
+      logger.warn("Storage file serving rate limit exceeded", { rateLimitLogId: rateLimitLogId(rateLimitKey) });
+      return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
+    }
+
     const relativePath = await getRelativePath(params);
 
     if (!relativePath) {
