@@ -2,6 +2,7 @@ import { type DayOfWeek, VacationRequestStatus } from "@/backend/enum";
 import { ValidationError } from "@/backend/lib/errors";
 import type { TeacherAvailabilityWindowSelectType, TeacherRecurringUnavailabilitySelectType } from "@/backend/types";
 import {
+  computeSlotBounds,
   dateToMinutes,
   getUtcDateString,
   getUtcDayOfWeek,
@@ -11,7 +12,7 @@ import {
 import { getServerTranslations } from "@/shared/locale";
 
 // Re-export shared utilities so existing consumers of this module are unaffected.
-export { getUtcDateString, timeToMinutes };
+export { computeSlotBounds, getUtcDateString, timeToMinutes };
 
 // ── Pure validation helpers (no DB, no error throws) ─────────────────────────
 
@@ -135,17 +136,6 @@ export function validateSlotInMemory(
     const { outsideAvailability } = getServerTranslations(locale ?? "en").errorsTranslations;
     throw new ValidationError(outsideAvailability);
   }
-}
-
-// ── Batch slot bounds ────────────────────────────────────────────────────────
-
-export function computeSlotBounds(slots: { startTime: Date; endTime: Date }[]): {
-  earliestStart: Date;
-  latestEnd: Date;
-} {
-  const earliestStart = new Date(Math.min(...slots.map(s => s.startTime.getTime())));
-  const latestEnd = new Date(Math.max(...slots.map(s => s.endTime.getTime())));
-  return { earliestStart, latestEnd };
 }
 
 // ── Vacation status validation ───────────────────────────────────────────────

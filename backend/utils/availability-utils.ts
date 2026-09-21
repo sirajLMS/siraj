@@ -90,6 +90,36 @@ export function getUtcDateString(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+/**
+ * Computes the earliest start time and latest end time across a set of slots.
+ * Performs a single O(N) pass without temporary array allocations (`.map`) or
+ * stack argument spreads (`Math.min/max`), preventing stack overflows on large inputs.
+ */
+export function computeSlotBounds(slots: { startTime: Date; endTime: Date }[]): {
+  earliestStart: Date;
+  latestEnd: Date;
+} {
+  if (slots.length === 0) {
+    return { earliestStart: new Date(0), latestEnd: new Date(0) };
+  }
+
+  let earliestMs = Infinity;
+  let latestMs = -Infinity;
+
+  for (let i = 0; i < slots.length; i++) {
+    const startMs = slots[i].startTime.getTime();
+    const endMs = slots[i].endTime.getTime();
+    if (startMs < earliestMs) {
+      earliestMs = startMs;
+    }
+    if (endMs > latestMs) {
+      latestMs = endMs;
+    }
+  }
+
+  return { earliestStart: new Date(earliestMs), latestEnd: new Date(latestMs) };
+}
+
 // ── Pure validation helpers (no DB, no error throws) ─────────────────────────
 
 export function isWithinEffectiveRange(

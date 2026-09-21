@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { DayOfWeek } from "@/backend/enum";
 import type { TeacherAvailabilityGap } from "@/backend/types";
 import {
+  computeSlotBounds,
   countAvailableDays,
   dateToTimeString,
   findGapsForCalendarDate,
@@ -141,5 +142,53 @@ describe("availability-utils optimized functions", () => {
     const gaps = findGapsForCalendarDate(options);
     expect(gaps).toEqual(buildExpectedGaps());
     expect(countAvailableDays(gaps)).toBe(1);
+  });
+
+  describe("computeSlotBounds", () => {
+    test("returns default dates for empty slots array", () => {
+      const result = computeSlotBounds([]);
+      expect(result.earliestStart.getTime()).toBe(0);
+      expect(result.latestEnd.getTime()).toBe(0);
+    });
+
+    test("correctly computes bounds for a single slot", () => {
+      const start = new Date("2026-03-15T10:00:00.000Z");
+      const end = new Date("2026-03-15T11:00:00.000Z");
+      const result = computeSlotBounds([{ startTime: start, endTime: end }]);
+      expect(result.earliestStart.getTime()).toBe(start.getTime());
+      expect(result.latestEnd.getTime()).toBe(end.getTime());
+    });
+
+    test("correctly computes bounds for multiple unsorted slots", () => {
+      const slot1 = {
+        startTime: new Date("2026-03-15T14:00:00.000Z"),
+        endTime: new Date("2026-03-15T15:00:00.000Z"),
+      };
+      const slot2 = {
+        startTime: new Date("2026-03-15T08:00:00.000Z"),
+        endTime: new Date("2026-03-15T09:00:00.000Z"),
+      };
+      const slot3 = {
+        startTime: new Date("2026-03-15T18:00:00.000Z"),
+        endTime: new Date("2026-03-15T20:00:00.000Z"),
+      };
+
+      const result = computeSlotBounds([slot1, slot2, slot3]);
+      expect(result.earliestStart.getTime()).toBe(slot2.startTime.getTime());
+      expect(result.latestEnd.getTime()).toBe(slot3.endTime.getTime());
+    });
+
+    test("handles large slot arrays without stack overflow", () => {
+      const baseMs = Date.parse("2026-01-01T00:00:00.000Z");
+      const numSlots = 10_000;
+      const slots = Array.from({ length: numSlots }, (_, i) => ({
+        startTime: new Date(baseMs + i * 3600_000),
+        endTime: new Date(baseMs + (i + 1) * 3600_000),
+      }));
+
+      const result = computeSlotBounds(slots);
+      expect(result.earliestStart.getTime()).toBe(baseMs);
+      expect(result.latestEnd.getTime()).toBe(baseMs + numSlots * 3600_000);
+    });
   });
 });
