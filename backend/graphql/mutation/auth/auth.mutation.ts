@@ -389,13 +389,16 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       // Defense-in-depth: hard-block demoLogin in real production deployments
       // even if IS_DEMO is accidentally set to a truthy value.
-      // Reject on ANY Vercel deployment (preview or production), not just production.
-      const isVercelDeploy = Boolean(process.env.VERCEL_ENV);
-      const isProductionDeployment = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
-      if (isVercelDeploy || isProductionDeployment) {
-        throw new GraphQLError(tErrors.auth.demoLoginNotEnabled, {
-          extensions: { code: "UNAUTHENTICATED" },
-        });
+      // Reject on ANY Vercel deployment (preview or production), unless ALLOW_VERCEL_DEMO=true is explicitly set.
+      const allowVercelDemo = getBooleanEnv("ALLOW_VERCEL_DEMO");
+      if (!allowVercelDemo) {
+        const isVercelDeploy = Boolean(process.env.VERCEL_ENV);
+        const isProductionDeployment = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
+        if (isVercelDeploy || isProductionDeployment) {
+          throw new GraphQLError(tErrors.auth.demoLoginNotEnabled, {
+            extensions: { code: "UNAUTHENTICATED" },
+          });
+        }
       }
 
       const { groupSlug } = args.input;

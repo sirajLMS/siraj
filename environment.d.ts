@@ -186,6 +186,7 @@ declare global {
       // guard — it must be "true" for demo login to work server-side.
       NEXT_PUBLIC_IS_DEMO?: string;
       IS_DEMO?: string;
+      ALLOW_VERCEL_DEMO?: string;
 
       /**
        * When "false", auth cookies (session_id, refresh_token, access_token) are
