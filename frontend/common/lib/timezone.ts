@@ -63,23 +63,33 @@ function getTimezonePartsFormatter(timeZone: string): Intl.DateTimeFormat {
   return dtf;
 }
 
+function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
+  let year = 0;
+  let month = 0;
+  let day = 0;
+  let hour = 0;
+  let minute = 0;
+  let second = 0;
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (p.type === "year") year = +p.value;
+    else if (p.type === "month") month = +p.value - 1;
+    else if (p.type === "day") day = +p.value;
+    else if (p.type === "hour") hour = +p.value === 24 ? 0 : +p.value;
+    else if (p.type === "minute") minute = +p.value;
+    else if (p.type === "second") second = +p.value;
+  }
+  return Date.UTC(year, month, day, hour, minute, second);
+}
+
 /**
  * Offset of `timeZone` from UTC in milliseconds at `date`, derived from
- * `formatToParts` wall-clock components instead of reparsing a formatted
- * string (whose shape is implementation-defined across engines).
+ * `formatToParts` wall-clock components via direct single-pass parsing
+ * to avoid array and Map allocations in hot offset paths.
  */
 function getTimezoneOffsetMs(timeZone: string, date: Date): number {
   const parts = getTimezonePartsFormatter(timeZone).formatToParts(date);
-  const values = new Map(parts.map(part => [part.type, part.value]));
-  const asUtc = Date.UTC(
-    Number(values.get("year")),
-    Number(values.get("month")) - 1,
-    Number(values.get("day")),
-    Number(values.get("hour")) === 24 ? 0 : Number(values.get("hour")),
-    Number(values.get("minute")),
-    Number(values.get("second"))
-  );
-  return asUtc - date.getTime();
+  return partsToEpochMs(parts) - date.getTime();
 }
 
 function normalizeIanaTimezoneId(value: string): string {
@@ -190,7 +200,7 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
       offsetMinutes,
       emoji: getTimezoneEmoji(id),
     };
-  }).toSorted((left, right) => {
+  }).sort((left, right) => {
     if (left.offsetMinutes !== right.offsetMinutes) {
       return left.offsetMinutes - right.offsetMinutes;
     }
