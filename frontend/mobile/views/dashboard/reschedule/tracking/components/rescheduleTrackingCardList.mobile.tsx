@@ -24,7 +24,15 @@ import { MobileCardList, MobileCardListItem, MobileEmptyState } from "@/frontend
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 
-function TrackingCardHeader({ row, onView }: Readonly<{ row: TrackingRow; onView: (id: string) => void }>) {
+function TrackingCardHeader({
+  row,
+  onView,
+  labels,
+}: Readonly<{
+  row: TrackingRow;
+  onView: (id: string) => void;
+  labels: RescheduleTrackingCardListProps["labels"];
+}>) {
   const rowId = row.id ?? "";
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
@@ -38,6 +46,7 @@ function TrackingCardHeader({ row, onView }: Readonly<{ row: TrackingRow; onView
       </Box>
       <IconButton
         id={`view-card-${rowId}`}
+        aria-label={labels.viewDetails}
         size="small"
         onClick={() => {
           onView(rowId);
@@ -185,7 +194,7 @@ export function RescheduleTrackingCardListMobile({
               width: 3,
             }}
           >
-            <TrackingCardHeader row={row} onView={onView} />
+            <TrackingCardHeader row={row} onView={onView} labels={labels} />
             <TrackingCardBody row={row} />
             <TrackingCardFooter row={row} labels={labels} isLeave={isLeave} />
           </MobileCardListItem>

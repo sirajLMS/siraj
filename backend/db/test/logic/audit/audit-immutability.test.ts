@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import { adminAuditLogs, users } from "@/backend/db/schema";
-import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
+import { adminAuditLogs, auditLogs, users } from "@/backend/db/schema";
+import { expectSavepointError, generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Audit Log Immutability", () => {
@@ -69,6 +69,53 @@ describe("Audit Log Immutability", () => {
       expect(deleteDidThrow).toBe(true);
 
       testLogger.info("Successfully verified update and delete blocks on admin_audit_logs.");
+    });
+  });
+
+  test("Maintenance window permits deletes only inside the opted-in transaction", async () => {
+    testLogger.info("Starting audit log maintenance window validation test...");
+    await runInRollback(async tx => {
+      const now = new Date();
+      const email = `audit-maintenance-${randomUUID()}@example.com`;
+
+      const [actorUser] = await tx
+        .insert(users)
+        .values({
+          name: "Audit Maintenance Actor",
+          email,
+          password: generateTestPassword(),
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+
+      const [auditRecord] = await tx
+        .insert(auditLogs)
+        .values({
+          actorUserId: actorUser.id,
+          actorType: "USER",
+          entityType: "TEST_ENTITY",
+          entityId: randomUUID(),
+          action: "INITIAL_INSERT",
+          createdAt: now,
+        })
+        .returning();
+      expect(auditRecord).toBeDefined();
+
+      // 1. Without the maintenance GUC the delete is still forbidden.
+      const blocked = await expectSavepointError(() => tx.delete(auditLogs).where(sql`id = ${auditRecord.id}`), tx);
+      const { cause } = blocked;
+      const detail = cause instanceof Error ? cause.message : blocked.message;
+      expect(detail).toContain("Modifying or deleting audit logs is forbidden");
+
+      // 2. Opting in via the transaction-local GUC opens the window for this
+      //    transaction only — concurrent sessions keep full enforcement.
+      await tx.execute(sql`SELECT set_config('app.audit_log_maintenance', 'on', true)`);
+      await tx.delete(auditLogs).where(sql`id = ${auditRecord.id}`);
+      const remaining = await tx.select({ id: auditLogs.id }).from(auditLogs).where(sql`id = ${auditRecord.id}`);
+      expect(remaining).toHaveLength(0);
+
+      testLogger.info("Successfully verified the transaction-scoped audit maintenance window.");
     });
   });
 });

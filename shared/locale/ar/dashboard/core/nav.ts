@@ -117,6 +117,8 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
     },
   },
   toggleGroupAriaLabel: label => `تبديل مجموعة ${label}`,
+  expandSidebar: "توسيع الشريط الجانبي",
+  collapseSidebar: "طي الشريط الجانبي",
   accountingPayments: "المدفوعات",
   accountingPackages: "الباقات",
   accountingPaymentsNew: "إضافة دفعة",

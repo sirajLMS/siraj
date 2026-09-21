@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { auditLogs, carryoverBalances, classInstances, expenses, users } from "@/backend/db/schema";
+import { carryoverBalances, classInstances, expenses, users } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { ExpenseType, NotificationEventType } from "@/backend/enum";
 import { ForbiddenError } from "@/backend/lib";
@@ -21,6 +21,7 @@ import {
   cleanupExpenseViewerExtras,
   cleanupPayrollJourneyCast,
   type DispatchSpy,
+  deleteAuditLogsByActorIds,
   type ExpenseViewerCastExtras,
   expectJourneyError,
   type PayrollJourneyCast,
@@ -94,29 +95,20 @@ async function cleanupExpenseVisibilityCast(
     await db.delete(expenses).where(eq(expenses.sourceEntityId, carryoverId));
     await db.delete(carryoverBalances).where(eq(carryoverBalances.id, carryoverId));
   }
-  await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-  try {
-    await db
-      .delete(auditLogs)
-      .where(
-        inArray(auditLogs.actorUserId, [
-          cast.payroll.operatorUser.id,
-          cast.payroll.teacherUser.id,
-          cast.payroll.parentUser.id,
-          cast.payroll.student.userId,
-          cast.executiveUser.id,
-          cast.viewerExtras.viewerUser.id,
-        ])
-      );
-    await cleanupExpenseViewerExtras(cast.viewerExtras);
-    await db.transaction(async tx => {
-      await revokeSystemGroupAssignments(tx, [cast.executiveAssignment]);
-      await tx.delete(users).where(eq(users.id, cast.executiveUser.id));
-    });
-    await cleanupPayrollJourneyCast(cast.payroll);
-  } finally {
-    await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-  }
+  await deleteAuditLogsByActorIds([
+    cast.payroll.operatorUser.id,
+    cast.payroll.teacherUser.id,
+    cast.payroll.parentUser.id,
+    cast.payroll.student.userId,
+    cast.executiveUser.id,
+    cast.viewerExtras.viewerUser.id,
+  ]);
+  await cleanupExpenseViewerExtras(cast.viewerExtras);
+  await db.transaction(async tx => {
+    await revokeSystemGroupAssignments(tx, [cast.executiveAssignment]);
+    await tx.delete(users).where(eq(users.id, cast.executiveUser.id));
+  });
+  await cleanupPayrollJourneyCast(cast.payroll);
 }
 
 function previousMonth(month: string): string {
@@ -148,7 +140,7 @@ describe("Profit & loss expense-visibility journey (manager → executive)", () 
   const PAGINATION = {
     paymentsLimit: 50,
     paymentsOffset: 0,
-    expensesLimit: 500,
+    expensesLimit: 200,
     expensesOffset: 0,
     incomePaymentsLimit: 50,
     incomePaymentsOffset: 0,

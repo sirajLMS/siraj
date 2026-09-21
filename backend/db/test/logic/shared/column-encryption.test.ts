@@ -39,7 +39,9 @@ async function insertTeacherDetails(args: { tx: DBTransaction; userId: string; p
 function verifyCiphertext(value: unknown, plaintext: string) {
   const valStr = String(value);
   expect(valStr).not.toBe(plaintext);
-  expect(valStr.split(":")).toHaveLength(3);
+  // Versioned ciphertext format: v1:iv:cipherText:authTag
+  expect(valStr.startsWith("v1:")).toBe(true);
+  expect(valStr.split(":")).toHaveLength(4);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

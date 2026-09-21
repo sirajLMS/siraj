@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { auditLogs, carryoverBalances, classInstances, expenses, users } from "@/backend/db/schema";
 import { AccountStatus, CalculationStatus, ExpenseType } from "@/backend/enum";
@@ -17,6 +17,7 @@ import {
   cleanupCarryoverExpenseExtras,
   cleanupExpenseViewerExtras,
   type DispatchSpy,
+  deleteAuditLogsByActorIds,
   type ExpenseViewerCastExtras,
   expectJourneyError,
   provisionCarryoverCreateCast,
@@ -124,31 +125,20 @@ describe("Carryover pay-to-expense-ledger journey (settlement → ledger row →
     // they go first (their teacher_id FK is SET NULL, so the cast cleanup
     // would otherwise strand them as orphans).
     await db.delete(expenses).where(inArray(expenses.teacherId, [cast.teacherA.id, cast.teacherB.id]));
-    // Committed audit rows reference this run's actors; the immutability
-    // trigger must be lifted for the sweep (same precedent as the accounting
-    // carryover journeys). INSERT traffic from concurrent suites is
-    // unaffected while the trigger is off.
-    await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-    try {
-      await db
-        .delete(auditLogs)
-        .where(
-          inArray(auditLogs.actorUserId, [
-            cast.operatorUser.id,
-            cast.teacherAUser.id,
-            cast.teacherBUser.id,
-            cast.parentUser.id,
-            carryoverExtras.secondOperatorUser.id,
-            carryoverExtras.viewerUser.id,
-            expenseViewer.viewerUser.id,
-          ])
-        );
-      await cleanupExpenseViewerExtras(expenseViewer);
-      await cleanupCarryoverExpenseExtras(carryoverExtras);
-      await cleanupCarryoverCreateCast(cast);
-    } finally {
-      await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-    }
+    // Committed audit rows reference this run's actors; sweep them through
+    // the transaction-scoped audit maintenance window.
+    await deleteAuditLogsByActorIds([
+      cast.operatorUser.id,
+      cast.teacherAUser.id,
+      cast.teacherBUser.id,
+      cast.parentUser.id,
+      carryoverExtras.secondOperatorUser.id,
+      carryoverExtras.viewerUser.id,
+      expenseViewer.viewerUser.id,
+    ]);
+    await cleanupExpenseViewerExtras(expenseViewer);
+    await cleanupCarryoverExpenseExtras(carryoverExtras);
+    await cleanupCarryoverCreateCast(cast);
   });
 
   /** Session ids aggregated under one teacher's carryover. */

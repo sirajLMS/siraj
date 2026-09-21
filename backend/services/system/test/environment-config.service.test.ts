@@ -269,11 +269,11 @@ describe("environment-config.service — secret encryption at rest", () => {
   test("listEnvConfigEntries masks the DECRYPTED value for isSecret keys and fully masks REDIS_URL", async () => {
     const spy = spyOn(SystemSettingsRepository, "getByKey").mockImplementation(async (key: string) => {
       if (key === SECRET_DB_KEY) {
-        return mockSettingRow(encryptField("sk-listtest-6789"));
+        return mockSettingRow(encryptField("sk-listtest-6789", envConfigEncryptionContext(SECRET_TEST_KEY)));
       }
       if (key === REDIS_URL_DB_KEY) {
         // REDIS_URL is now an isSecret key — its DB override is stored encrypted.
-        return mockSettingRow(encryptField("redis://:hunter2@localhost:6379"));
+        return mockSettingRow(encryptField("redis://:hunter2@localhost:6379", envConfigEncryptionContext("REDIS_URL")));
       }
       return null;
     });

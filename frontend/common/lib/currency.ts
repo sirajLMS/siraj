@@ -96,8 +96,11 @@ const CURRENCY_DECIMALS: Partial<Record<CurrencyCode, number>> = {
   [CurrencyCode.Tnd]: 3,
 };
 
+/** Pre-built Set for O(1) currency code validation without array allocations. */
+const CURRENCY_CODES = new Set<string>(Object.values(CurrencyCode));
+
 function isCurrencyCode(code: string): code is CurrencyCode {
-  return (Object.values(CurrencyCode) as readonly string[]).includes(code);
+  return CURRENCY_CODES.has(code);
 }
 
 export function parseCurrencyCode(value: string | null | undefined): CurrencyCode | null {
@@ -121,12 +124,37 @@ export function formatLockedAmount(amount: string, currency: CurrencyCode, local
   if (!Number.isFinite(numeric)) {
     return amount;
   }
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  }).format(numeric);
+  return getNumberFormat(locale, currency, decimals).format(numeric);
+}
+
+/** Cache of `Intl.NumberFormat` instances keyed by locale, currency, and decimals. */
+const numberFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getNumberFormat(locale: string, currency: string, decimals: number): Intl.NumberFormat {
+  const cacheKey = `${locale}:${currency}:${decimals}`;
+  let formatter = numberFormatCache.get(cacheKey);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    numberFormatCache.set(cacheKey, formatter);
+  }
+  return formatter;
+}
+
+/** Cache of currency `Intl.DisplayNames` instances keyed by locale tag. */
+const currencyDisplayNamesCache = new Map<string, Intl.DisplayNames>();
+
+function getCurrencyDisplayNames(locale: string): Intl.DisplayNames {
+  let displayNames = currencyDisplayNamesCache.get(locale);
+  if (!displayNames) {
+    displayNames = new Intl.DisplayNames([locale], { type: "currency" });
+    currencyDisplayNamesCache.set(locale, displayNames);
+  }
+  return displayNames;
 }
 
 /**
@@ -138,8 +166,7 @@ export function formatLockedAmount(amount: string, currency: CurrencyCode, local
  */
 export function getCurrencyDisplayName(code: CurrencyCode | string, locale?: string): string {
   try {
-    const displayNames = new Intl.DisplayNames([locale ?? "en"], { type: "currency" });
-    return displayNames.of(code) ?? code;
+    return getCurrencyDisplayNames(locale ?? "en").of(code) ?? code;
   } catch {
     return code;
   }

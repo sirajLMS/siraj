@@ -5,6 +5,7 @@ import { NotificationPreferencesRepository } from "@/backend/db/repo/notificatio
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AccountStatus, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { encryptBankTransferDetails } from "@/backend/lib/payment-method-jsonb";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
@@ -44,11 +45,12 @@ const baseMethodBankTransfer = {
   ...baseMethod,
   type: PaymentMethodType.BANK_TRANSFER,
   direction: PaymentDirection.PAYOUT,
-  details: {
+  // Stored rows keep the sensitive routing fields encrypted at rest.
+  details: encryptBankTransferDetails({
     beneficiaryName: "Default Teacher",
     bankName: "National Bank of Egypt",
     iban: "EG38001800000000001234567890",
-  },
+  }),
 };
 
 const mobileWalletCreateInput = {

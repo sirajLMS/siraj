@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { auditLogs, expenses } from "@/backend/db/schema";
 import { AppPermission, ExpenseType } from "@/backend/enum";
@@ -11,6 +11,7 @@ import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import {
   cleanupExpenseCrudCast,
+  deleteAuditLogsByActorIds,
   type ExpenseCrudCast,
   expectJourneyError,
   provisionExpenseCrudCast,
@@ -113,20 +114,13 @@ describe("Expense CRUD audit attribution journey (operator → auditor)", () => 
 
   afterAll(async () => {
     dispatchSpy.mockRestore();
-    // Committed expense audit rows reference the cast actors; the immutability
-    // trigger must be lifted for the sweep (carryover journey precedent).
-    await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-    try {
-      if (createdExpenseIds.length > 0) {
-        await db.delete(expenses).where(inArray(expenses.id, createdExpenseIds));
-      }
-      await db
-        .delete(auditLogs)
-        .where(inArray(auditLogs.actorUserId, [cast.operatorUser.id, cast.auditorUser.id, cast.outsiderUser.id]));
-      await cleanupExpenseCrudCast(cast);
-    } finally {
-      await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
+    // Committed expense audit rows reference the cast actors; sweep them
+    // through the transaction-scoped audit maintenance window.
+    if (createdExpenseIds.length > 0) {
+      await db.delete(expenses).where(inArray(expenses.id, createdExpenseIds));
     }
+    await deleteAuditLogsByActorIds([cast.operatorUser.id, cast.auditorUser.id, cast.outsiderUser.id]);
+    await cleanupExpenseCrudCast(cast);
   });
 
   test("step 1 — precondition: operator and auditor see an empty ledger window for this run", async () => {

@@ -49,7 +49,8 @@ bun run test:live-fx           # FX provider integration subset
 bun run test:services          # Backend services tests (parallel via test/scripts/run-services-tests-parallel.ts)
 bun run test:services:sequential # Backend services tests (sequential, for debugging)
 bun run test:graphql           # GraphQL integration tests (dev server via test/scripts/run-server-tests.ts)
-bun run test:workflows         # Cross-actor journey/workflow tests (test/workflows/; real services, committed fixtures)
+bun run test:workflows         # Cross-actor journey/workflow tests (parallel via test/scripts/run-workflows-tests-parallel.ts; real services, committed fixtures)
+bun run test:workflows:sequential # Workflow tests (sequential, for debugging)
 
 # Authenticate an agent-driven browser (agent-browser / Playwright) with .env credentials.
 # REQUIRED for super-admin flows — the AI layer redacts emails in prompts, so typing

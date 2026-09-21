@@ -54,6 +54,11 @@ describe("buildSocialLink", () => {
       });
     });
 
+    test("invalid or unsafe url returns null", () => {
+      expect(buildSocialLink("facebook", "javascript:alert(1)")).toBeNull();
+      expect(buildSocialLink("facebook", "https://\x00facebook.com/foo")).toBeNull();
+    });
+
     test("empty string returns null", () => {
       expect(buildSocialLink("facebook", "")).toBeNull();
     });

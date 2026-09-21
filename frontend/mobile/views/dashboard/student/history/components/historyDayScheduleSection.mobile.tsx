@@ -2,12 +2,16 @@
 
 import { Typography } from "@mui/material";
 import { useMemo } from "react";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { scheduleOverviewCardShellSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import { MobileCardList, MobileCardListItem, MobileContentInset } from "@/frontend/mobile/components/ui";
 import { HistoryDaySessionCardMobile } from "@/frontend/mobile/views/dashboard/student/history/components/historyDaySessionCard.mobile";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
+
+const WEEKDAY_SHORT_OPTIONS: Intl.DateTimeFormatOptions = { weekday: "short" };
+const MONTH_LONG_OPTIONS: Intl.DateTimeFormatOptions = { month: "long" };
 
 function buildScheduleHeader(
   currentMonth: Date,
@@ -17,8 +21,8 @@ function buildScheduleHeader(
 ): string {
   const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), effectiveSelectedDay);
   const localeTag = getLatnLocaleTag(locale);
-  const weekday = new Intl.DateTimeFormat(localeTag, { weekday: "short" }).format(date);
-  const month = new Intl.DateTimeFormat(localeTag, { month: "long" }).format(date);
+  const weekday = getDateTimeFormatter(localeTag, WEEKDAY_SHORT_OPTIONS).format(date);
+  const month = getDateTimeFormatter(localeTag, MONTH_LONG_OPTIONS).format(date);
   return scheduleFor(weekday, month, effectiveSelectedDay);
 }
 

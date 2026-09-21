@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   auditLogs,
@@ -36,6 +36,7 @@ import {
   assignSystemGroup,
   cleanupPayrollJourneyCast,
   type DispatchSpy,
+  deleteAuditLogsByActorIds,
   expectJourneyError,
   type PayrollJourneyCast,
   provisionPayrollJourneyCast,
@@ -279,38 +280,27 @@ describe("Carryover unpay journey (aggregate → to expense → unpay correction
   afterAll(async () => {
     dispatchSpy.mockRestore();
     const { cast, extras, firstInstance, secondInstance } = fixture;
-    // Append-only audit rows reference the run's actors; the immutability
-    // trigger must be lifted for the sweep (same precedent as the payroll
-    // settlement journey). INSERT traffic from concurrent suites is
-    // unaffected while the trigger is off.
-    await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-    try {
-      await db
-        .delete(auditLogs)
-        .where(
-          inArray(auditLogs.actorUserId, [
-            cast.operatorUser.id,
-            extras.viewerUser.id,
-            extras.staffUser.id,
-            cast.teacherUser.id,
-          ])
-        );
-      // The settlement wrote a real (soft-deleted) expense row for this run's
-      // carryover; remove it before the carryover rows below.
-      await db.delete(expenses).where(eq(expenses.sourceEntityId, carryoverId));
-      // Carryover rows (items cascade) before the teacher they RESTRICT to.
-      await db.delete(carryoverBalances).where(eq(carryoverBalances.teacherId, cast.teacher.id));
-      // The journey's own audited sessions and their transition events are
-      // outside the shared cast's tracked instance list; remove both here so
-      // the cast teardown below sees no dangling event rows.
-      const auditedInstanceIds = [firstInstance.id, secondInstance.id];
-      await db.delete(classStatusEvents).where(inArray(classStatusEvents.classInstanceId, auditedInstanceIds));
-      await db.delete(classInstances).where(inArray(classInstances.id, auditedInstanceIds));
-      await cleanupCarryoverViewerExtras(extras);
-      await cleanupPayrollJourneyCast(cast);
-    } finally {
-      await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-    }
+    // Append-only audit rows reference the run's actors; sweep them through
+    // the transaction-scoped audit maintenance window.
+    await deleteAuditLogsByActorIds([
+      cast.operatorUser.id,
+      extras.viewerUser.id,
+      extras.staffUser.id,
+      cast.teacherUser.id,
+    ]);
+    // The settlement wrote a real (soft-deleted) expense row for this run's
+    // carryover; remove it before the carryover rows below.
+    await db.delete(expenses).where(eq(expenses.sourceEntityId, carryoverId));
+    // Carryover rows (items cascade) before the teacher they RESTRICT to.
+    await db.delete(carryoverBalances).where(eq(carryoverBalances.teacherId, cast.teacher.id));
+    // The journey's own audited sessions and their transition events are
+    // outside the shared cast's tracked instance list; remove both here so
+    // the cast teardown below sees no dangling event rows.
+    const auditedInstanceIds = [firstInstance.id, secondInstance.id];
+    await db.delete(classStatusEvents).where(inArray(classStatusEvents.classInstanceId, auditedInstanceIds));
+    await db.delete(classInstances).where(inArray(classInstances.id, auditedInstanceIds));
+    await cleanupCarryoverViewerExtras(extras);
+    await cleanupPayrollJourneyCast(cast);
   });
 
   function sessionIds(): string[] {

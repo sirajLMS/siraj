@@ -6,7 +6,7 @@ import { alpha, type Theme } from "@mui/material/styles";
 import type { GridCellParams, GridColDef, GridSortModel, MuiEvent } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import { formatDateTime, parseDateInput } from "@/frontend/common/components/intl/dateFormat";
+import { formatDateTime, getDateTimeFormatter, parseDateInput } from "@/frontend/common/components/intl/dateFormat";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { usePageLocalRowSelection } from "@/frontend/common/components/ui/dataGrid/usePageLocalRowSelection";
@@ -67,7 +67,7 @@ function formatCompactSessionTime(
 ): string {
   const parsed = parseDateInput(value);
   if (parsed !== null) {
-    return new Intl.DateTimeFormat(getLatnLocaleTag(locale), COMPACT_SESSION_TIME_FORMAT).format(parsed);
+    return getDateTimeFormatter(getLatnLocaleTag(locale), COMPACT_SESSION_TIME_FORMAT).format(parsed);
   }
   if (typeof value === "string" && value.trim().length > 0) {
     return value.trim();

@@ -1,6 +1,6 @@
-import { inArray, sql } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { auditLogs, carryoverBalances, expenses } from "@/backend/db/schema";
+import { carryoverBalances, expenses } from "@/backend/db/schema";
 import {
   createMockClassInstance,
   createTestParent,
@@ -19,6 +19,7 @@ import type {
 } from "@/backend/types";
 import { SystemPermissionGroupSlug } from "@/shared/constants";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
+import { deleteAuditLogsByActorIds } from "@/test/workflows/helpers/audit-log-cleanup";
 import { createCastSubjectPair, purgeCastFixture } from "@/test/workflows/helpers/cast-scaffold";
 import { assignSystemGroup, type SystemGroupAssignment } from "@/test/workflows/helpers/permissions";
 
@@ -195,49 +196,41 @@ export async function provisionCarryoverDeleteCast(prefix: string): Promise<Carr
  * carryover services create: the real expense ledger rows any settlement
  * wrote for the cast teachers (they must go before the users/teachers they
  * reference — `expenses.created_by_user_id` is NOT NULL despite its SET NULL
- * FK), the append-only `audit_logs` rows (whose immutability trigger is
- * lifted for the sweep and restored in `finally`, mirroring the other
- * accounting journeys), any carryover rows left behind by the journey
+ * FK), the append-only `audit_logs` rows (swept through the transaction-scoped
+ * audit maintenance window), any carryover rows left behind by the journey
  * (surviving items cascade with them; session links settle to NULL via
  * `onDelete: set null`), and the per-session status events. System permission
  * groups are untouched — only this run's memberships are revoked.
  */
 export async function cleanupCarryoverDeleteCast(cast: CarryoverDeleteCast): Promise<void> {
-  await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-  try {
-    await db
-      .delete(auditLogs)
-      .where(inArray(auditLogs.actorUserId, [cast.operatorUser.id, cast.secondOperatorUser.id]));
-    await db.transaction(async tx => {
-      await tx.delete(expenses).where(inArray(expenses.teacherId, [cast.teacherA.id, cast.teacherB.id]));
-      await tx
-        .delete(carryoverBalances)
-        .where(inArray(carryoverBalances.teacherId, [cast.teacherA.id, cast.teacherB.id]));
-      await purgeCastFixture(tx, {
-        instanceIds: [
-          cast.aCalculatedInstance.id,
-          cast.aPartialInstance.id,
-          cast.bFirstInstance.id,
-          cast.bSecondInstance.id,
-        ],
-        studentId: cast.student.id,
-        parentId: cast.parent.id,
-        teacherIds: [cast.teacherA.id, cast.teacherB.id],
-        userIds: [
-          cast.operatorUser.id,
-          cast.secondOperatorUser.id,
-          cast.staffViewerUser.id,
-          cast.teacherAUser.id,
-          cast.teacherBUser.id,
-          cast.parentUser.id,
-          cast.student.userId,
-        ],
-        groupAssignments: cast.groupAssignments,
-        createdSubjectId: cast.createdSubjectId,
-        createdCategoryId: cast.createdCategoryId,
-      });
+  await deleteAuditLogsByActorIds([cast.operatorUser.id, cast.secondOperatorUser.id]);
+  await db.transaction(async tx => {
+    await tx.delete(expenses).where(inArray(expenses.teacherId, [cast.teacherA.id, cast.teacherB.id]));
+    await tx
+      .delete(carryoverBalances)
+      .where(inArray(carryoverBalances.teacherId, [cast.teacherA.id, cast.teacherB.id]));
+    await purgeCastFixture(tx, {
+      instanceIds: [
+        cast.aCalculatedInstance.id,
+        cast.aPartialInstance.id,
+        cast.bFirstInstance.id,
+        cast.bSecondInstance.id,
+      ],
+      studentId: cast.student.id,
+      parentId: cast.parent.id,
+      teacherIds: [cast.teacherA.id, cast.teacherB.id],
+      userIds: [
+        cast.operatorUser.id,
+        cast.secondOperatorUser.id,
+        cast.staffViewerUser.id,
+        cast.teacherAUser.id,
+        cast.teacherBUser.id,
+        cast.parentUser.id,
+        cast.student.userId,
+      ],
+      groupAssignments: cast.groupAssignments,
+      createdSubjectId: cast.createdSubjectId,
+      createdCategoryId: cast.createdCategoryId,
     });
-  } finally {
-    await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-  }
+  });
 }

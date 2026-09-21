@@ -5,7 +5,7 @@ import { isSqlite } from "@/backend/db";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { students } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
-import { expectSavepointError, runInRollback } from "@/backend/db/test/test-utils";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { OrderSortDirection, StudentStatus } from "@/backend/enum";
 import { StudentsOrderByColumn } from "@/backend/enum/students";
 import {
@@ -286,37 +286,27 @@ describe("StudentRepository.getDirectoryRows", () => {
       });
     });
 
-    test.skipIf(isSqlite())(
-      "an SQL-injection-shaped full-text term is bound as a parameter, not executed",
-      async () => {
-        await runInRollback(async tx => {
-          const tag = randomUUID().slice(0, 8);
-          const fixture = `DirInj${tag}Target`;
-          await setupStudent(tx, { name: "Inj Par", email: `inj-${randomUUID()}@t.com` }, {}, { name: fixture });
+    test.skipIf(isSqlite())("an SQL-injection-shaped full-text term is neutralized, not executed", async () => {
+      await runInRollback(async tx => {
+        const tag = randomUUID().slice(0, 8);
+        const fixture = `DirInj${tag}Target`;
+        await setupStudent(tx, { name: "Inj Par", email: `inj-${randomUUID()}@t.com` }, {}, { name: fixture });
 
-          // PG's tsquery parser rejects the crafted token stream — the query
-          // fails inside a SAVEPOINT. What matters is that the payload reached
-          // the server as a bound parameter value, never as executable SQL.
-          const error = await expectSavepointError(
-            () =>
-              StudentRepository.getDirectoryRows(
-                null,
-                studentFilters({ name: `'; DROP TABLE students; --` }),
-                null,
-                tx
-              ),
-            tx
-          );
-          expect(error).toBeInstanceOf(Error);
+        // The whitelist sanitizer strips the payload's tokens entirely —
+        // the term never reaches the server as SQL or as a tsquery, and the
+        // filter matches nothing rather than broadening to every row.
+        const result = await StudentRepository.getDirectoryRows(
+          null,
+          studentFilters({ name: `'; DROP TABLE students; --` }),
+          null,
+          tx
+        );
+        expect(result.rows.some(r => r.name === fixture)).toBe(false);
 
-          // The table must still be intact and readable in the same transaction.
-          const [stillThere] = await tx
-            .select({ name: students.name })
-            .from(students)
-            .where(eq(students.name, fixture));
-          expect(stillThere?.name).toBe(fixture);
-        });
-      }
-    );
+        // The table must still be intact and readable in the same transaction.
+        const [stillThere] = await tx.select({ name: students.name }).from(students).where(eq(students.name, fixture));
+        expect(stillThere?.name).toBe(fixture);
+      });
+    });
   });
 });

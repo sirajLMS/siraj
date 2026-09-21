@@ -147,7 +147,7 @@ describe("Profit & loss cash-in visibility journey (billing → executive)", () 
     paymentsOffset: 0,
     expensesLimit: 50,
     expensesOffset: 0,
-    incomePaymentsLimit: 500,
+    incomePaymentsLimit: 200,
     incomePaymentsOffset: 0,
   };
 

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { auditLogs, creditTransactions, parents, students, teachers, users } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestTeacher, createTestUser } from "@/backend/db/test/entity-setup";
@@ -22,6 +22,7 @@ import {
   expectJourneyError,
   revokeSystemGroupAssignments,
   type SystemGroupAssignment,
+  withAuditLogMaintenance,
 } from "@/test/workflows/helpers";
 
 /**
@@ -120,23 +121,17 @@ async function cleanupSecurityCast(cast: SecurityCast): Promise<void> {
   ];
 
   // Committed adjustments produce append-only audit rows referencing the
-  // operator as actor; the immutability trigger must be lifted for the sweep
-  // (same precedent as the permission-management logic test). INSERT traffic
-  // from concurrent suites is unaffected while the trigger is off.
-  await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-  try {
-    await db.transaction(async tx => {
-      await tx.delete(auditLogs).where(eq(auditLogs.actorUserId, cast.operatorUser.id));
-      await tx.delete(creditTransactions).where(inArray(creditTransactions.studentId, studentIds));
-      await revokeSystemGroupAssignments(tx, cast.groupAssignments);
-      await tx.delete(students).where(inArray(students.id, studentIds));
-      await tx.delete(parents).where(eq(parents.id, cast.parentActor.id));
-      await tx.delete(teachers).where(inArray(teachers.id, teacherIds));
-      await tx.delete(users).where(inArray(users.id, userIds));
-    });
-  } finally {
-    await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-  }
+  // operator as actor; the whole sweep runs in the transaction-scoped audit
+  // maintenance window.
+  await withAuditLogMaintenance(async tx => {
+    await tx.delete(auditLogs).where(eq(auditLogs.actorUserId, cast.operatorUser.id));
+    await tx.delete(creditTransactions).where(inArray(creditTransactions.studentId, studentIds));
+    await revokeSystemGroupAssignments(tx, cast.groupAssignments);
+    await tx.delete(students).where(inArray(students.id, studentIds));
+    await tx.delete(parents).where(eq(parents.id, cast.parentActor.id));
+    await tx.delete(teachers).where(inArray(teachers.id, teacherIds));
+    await tx.delete(users).where(inArray(users.id, userIds));
+  });
 }
 
 async function ledgerRowCount(studentId: string): Promise<number> {

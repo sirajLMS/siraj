@@ -32,11 +32,7 @@ export interface AuthLoginLabels {
   readonly showPassword: string;
   readonly hidePassword: string;
   readonly retrying: string;
-  // Password strength meter + Caps Lock indicator (UX improvement)
-  readonly passwordStrength: string;
-  readonly strengthWeak: string;
-  readonly strengthFair: string;
-  readonly strengthStrong: string;
+  // Caps Lock indicator (UX improvement)
   readonly capsLockOn: string;
   readonly forgotPasswordComingSoonTitle: string;
   readonly forgotPasswordComingSoonBody: string;

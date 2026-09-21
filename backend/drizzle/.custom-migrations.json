@@ -1,5 +1,5 @@
 {
-  "manifestHash": "02b11dea350f52f88b45115cee519920a343cc1ba967aeab6e17cc6790459353",
+  "manifestHash": "8ded025c774024ebe30f05d4bd88aaa4cf354ce5d3d1de87b234827f33e8ee64",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -227,7 +227,7 @@
     },
     {
       "file": "audit_log_immutability_trigger.sql",
-      "sha256": "31bcba9e6b49f059a287fd1f1526e7e6ef4924f4f105764daa51ae09466970a4"
+      "sha256": "013d2413a3d181c4c1ec999627c017afef9b2361e8d1266be3ec7d2901261de8"
     },
     {
       "file": "auth_rate_limiting.sql",
@@ -396,6 +396,7 @@
     "20260915082413_custom_6e-prune-view-other-defaults",
     "20260915212326_custom_48-storage-and-meeting-integrations-permissions",
     "20260915220953_custom_49-rls-guc-fail-closed",
-    "20260915233221_custom_50-accounting-profits-permissions"
+    "20260915233221_custom_50-accounting-profits-permissions",
+    "20260920232227_custom_audit_log_immutability_trigger"
   ]
 }

@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { auditLogs, classInstances, teacherDues, teacherPayments } from "@/backend/db/schema";
+import { classInstances, teacherDues, teacherPayments } from "@/backend/db/schema";
 import { AttendanceEvaluation, CalculationStatus, PaymentDirection, PaymentMethodType } from "@/backend/enum";
 import { ForbiddenError } from "@/backend/lib";
 import { SessionAuditService, serializeSessionAuditCsv } from "@/backend/services";
@@ -17,6 +17,7 @@ import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import {
   cleanupPayrollJourneyCast,
   type DispatchSpy,
+  deleteAuditLogsByActorIds,
   expectJourneyError,
   type PayrollJourneyCast,
   provisionPayrollJourneyCast,
@@ -139,23 +140,15 @@ describe("Session audit payroll visibility journey (override → report + CSV re
     dispatchSpy.mockRestore();
     await db.delete(teacherPayments).where(eq(teacherPayments.teacherId, cast.teacher.id));
     // Committed overrides mirror into append-only audit_logs rows referencing
-    // the cast actors; the immutability trigger must be lifted for the sweep.
-    await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-    try {
-      await db
-        .delete(auditLogs)
-        .where(
-          inArray(auditLogs.actorUserId, [
-            cast.operatorUser.id,
-            cast.teacherUser.id,
-            cast.parentUser.id,
-            cast.student.userId,
-          ])
-        );
-      await cleanupPayrollJourneyCast(cast);
-    } finally {
-      await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-    }
+    // the cast actors; sweep them through the transaction-scoped audit
+    // maintenance window.
+    await deleteAuditLogsByActorIds([
+      cast.operatorUser.id,
+      cast.teacherUser.id,
+      cast.parentUser.id,
+      cast.student.userId,
+    ]);
+    await cleanupPayrollJourneyCast(cast);
   });
 
   test("step 1 — before any calculation the report shows NOT_CALCULATED rows with empty payroll columns", async () => {

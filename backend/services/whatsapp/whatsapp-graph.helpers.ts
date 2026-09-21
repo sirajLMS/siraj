@@ -48,7 +48,16 @@ export async function executeGraphApiCall<TBody>(request: { url: string; init: R
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!response.ok) {
-    const errorBody = await readResponseBodyWithByteBudget(response);
+    // Parse Meta's JSON error envelope so consumers can read the Meta error
+    // code (`extractMetaErrorCode`); fall back to the raw text when the body
+    // is not JSON.
+    const errorText = await readResponseBodyWithByteBudget(response);
+    let errorBody: unknown;
+    try {
+      errorBody = JSON.parse(errorText) as unknown;
+    } catch {
+      errorBody = errorText;
+    }
     throw new GraphApiError(response.status, errorBody);
   }
   const body: TBody = JSON.parse(await readResponseBodyWithByteBudget(response));

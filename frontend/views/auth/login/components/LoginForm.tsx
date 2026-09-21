@@ -20,8 +20,7 @@ import {
 } from "@mui/material";
 import { alpha, styled, type Theme } from "@mui/material/styles";
 import { useCallback, useState } from "react";
-import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
-import { PasswordStrengthMeter } from "@/frontend/common/components/auth/__shared__/PasswordStrengthMeter";
+import { type Control, Controller, type FieldErrors, useForm } from "react-hook-form";
 import { createLoginSchema, type LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 import type { AuthLoginLabels } from "@/shared/locale/types/auth";
 
@@ -86,34 +85,33 @@ const StyledForgotPasswordLink = styled(Link)(({ theme }) => ({
   fontWeight: 500,
 }));
 
+// Submit button — flat fill aligned with the global MuiButton override (which kills
+// elevation), so no gradient or glow that would fight the design system or make a
+// disabled button look clickable. Interactive states are explicit: hover/active
+// darken the fill, focus-visible rings, disabled fully mutes.
 const StyledSubmitButton = styled(Button)(({ theme }) => ({
   paddingTop: 14,
   paddingBottom: 14,
   minHeight: 52,
-  borderRadius: theme.layout.radius.button,
   fontSize: theme.typography.bodyMd.fontSize,
   fontWeight: 700,
   letterSpacing: "0.08em",
   textTransform: "uppercase",
   color: theme.palette.onPrimary,
-  backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-  boxShadow: `0 8px 20px ${alpha(theme.palette.primary.main, 0.32)}, inset 0 1px 0 ${alpha(theme.palette.common.white, 0.2)}`,
-  transition: theme.transitions.create(["transform", "box-shadow", "filter"], {
+  backgroundColor: theme.palette.primary.main,
+  transition: theme.transitions.create(["background-color", "box-shadow"], {
     duration: theme.transitions.duration.short,
-    easing: theme.transitions.easing.easeOut,
   }),
   "&:hover": {
-    backgroundImage: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-    boxShadow: `0 14px 32px ${alpha(theme.palette.primary.main, 0.46)}, inset 0 1px 0 ${alpha(theme.palette.common.white, 0.28)}`,
-    transform: "translateY(-2px)",
-    filter: "brightness(1.06)",
+    backgroundColor: theme.palette.primary.dark,
   },
-  "&:active": {
-    transform: "translateY(0)",
-    boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.28)}, inset 0 1px 0 ${alpha(theme.palette.common.white, 0.16)}`,
+  "&:focus-visible": {
+    boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.3)}`,
   },
   "&.Mui-disabled": {
-    backgroundImage: "none",
+    color: theme.palette.action.disabled,
+    backgroundColor: theme.palette.action.disabledBackground,
+    boxShadow: "none",
   },
 }));
 
@@ -121,20 +119,18 @@ const FormFields = ({
   labels,
   control,
   errors,
-  isSubmitting,
+  disabled,
   showPassword,
   setShowPassword,
-  passwordValue,
   capsLockOn,
   onPasswordKeyDown,
 }: {
   labels: AuthLoginLabels;
   control: Control<LoginFormData>;
   errors: FieldErrors<LoginFormData>;
-  isSubmitting: boolean;
+  disabled: boolean;
   showPassword: boolean;
   setShowPassword: (show: boolean) => void;
-  passwordValue: string;
   capsLockOn: boolean;
   onPasswordKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }) => {
@@ -151,7 +147,7 @@ const FormFields = ({
             type="email"
             error={!!errors.email}
             helperText={errors.email?.message}
-            disabled={isSubmitting}
+            disabled={disabled}
             fullWidth
             slotProps={{
               input: {
@@ -171,58 +167,47 @@ const FormFields = ({
         name="password"
         control={control}
         render={({ field }) => (
-          <Box>
-            <TextField
-              {...field}
-              label={labels.password}
-              type={showPassword ? "text" : "password"}
-              error={!!errors.password || capsLockOn}
-              helperText={errors.password?.message ?? (capsLockOn ? labels.capsLockOn : undefined)}
-              disabled={isSubmitting}
-              fullWidth
-              onKeyDown={onPasswordKeyDown}
-              slotProps={{
-                formHelperText: {
-                  sx: { minHeight: theme.spacing(2.5) },
-                },
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <StyledLockIcon />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Tooltip title={showPassword ? labels.hidePassword : labels.showPassword}>
-                        <span>
-                          <IconButton
-                            onClick={() => {
-                              setShowPassword(!showPassword);
-                            }}
-                            edge="end"
-                            disabled={isSubmitting}
-                            aria-label={showPassword ? labels.hidePassword : labels.showPassword}
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={textFieldFocusSx(theme)}
-            />
-            <PasswordStrengthMeter
-              password={passwordValue}
-              labels={{
-                strength: labels.passwordStrength,
-                weak: labels.strengthWeak,
-                fair: labels.strengthFair,
-                strong: labels.strengthStrong,
-              }}
-            />
-          </Box>
+          <TextField
+            {...field}
+            label={labels.password}
+            type={showPassword ? "text" : "password"}
+            error={!!errors.password || capsLockOn}
+            helperText={errors.password?.message ?? (capsLockOn ? labels.capsLockOn : undefined)}
+            disabled={disabled}
+            fullWidth
+            onKeyDown={onPasswordKeyDown}
+            slotProps={{
+              formHelperText: {
+                sx: { minHeight: theme.spacing(2.5) },
+              },
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <StyledLockIcon />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Tooltip title={showPassword ? labels.hidePassword : labels.showPassword}>
+                      <span>
+                        <IconButton
+                          onClick={() => {
+                            setShowPassword(!showPassword);
+                          }}
+                          edge="end"
+                          disabled={disabled}
+                          aria-label={showPassword ? labels.hidePassword : labels.showPassword}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={textFieldFocusSx(theme)}
+          />
         )}
       />
     </>
@@ -270,7 +255,12 @@ export interface LoginFormProps {
   readonly isRetrying?: boolean;
 }
 
-export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetrying }: Readonly<LoginFormProps>) {
+export function LoginForm({
+  labels,
+  onSubmitAction,
+  externalLoginResult,
+  isRetrying = false,
+}: Readonly<LoginFormProps>) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [capsLockOn, setCapsLockOn] = useState(false);
@@ -297,10 +287,6 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
     },
   });
 
-  // Watch the password value so the strength meter updates live without
-  // re-rendering the whole form on every keystroke.
-  const passwordValue = useWatch({ control, name: "password" }) ?? "";
-
   // Caps Lock detector — fires on every keydown in the password field.
   // `getModifierState` is the spec-compliant way to read Caps Lock regardless
   // of the physical key (handles macOS + non-US layouts).
@@ -325,6 +311,10 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
   };
 
   const finalLoginResult = externalLoginResult ?? loginResult;
+  // While the success alert is visible the view model is hard-redirecting to the
+  // dashboard — keep the form in its busy state so nothing can be re-clicked.
+  const loginSucceeded = finalLoginResult?.type === "success";
+  const isBusy = isSubmitting || isRetrying || loginSucceeded;
 
   return (
     <form
@@ -350,25 +340,17 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetry
         labels={labels}
         control={control}
         errors={errors}
-        isSubmitting={isSubmitting}
+        disabled={isBusy}
         showPassword={showPassword}
         setShowPassword={setShowPassword}
-        passwordValue={passwordValue}
         capsLockOn={capsLockOn}
         onPasswordKeyDown={handlePasswordKeyDown}
       />
 
       <FormActions labels={labels} />
 
-      <StyledSubmitButton
-        type="submit"
-        variant="contained"
-        size="large"
-        disabled={isSubmitting || isRetrying}
-        fullWidth
-        sx={{ mt: 0.5 }}
-      >
-        {isSubmitting || isRetrying ? <CircularProgress size={24} color="inherit" /> : labels.signIn}
+      <StyledSubmitButton type="submit" variant="contained" size="large" disabled={isBusy} fullWidth sx={{ mt: 0.5 }}>
+        {isBusy ? <CircularProgress size={24} color="inherit" /> : labels.signIn}
       </StyledSubmitButton>
     </form>
   );

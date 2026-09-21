@@ -114,7 +114,10 @@ function snapshotConfigRows(): Promise<WhatsappConfigSelectType[]> {
  * plaintext — secrets must never rest unencrypted.
  */
 function isAesGcmCiphertext(value: string): boolean {
-  const parts = value.split(":");
+  // Versioned ciphertext format: v1:iv:cipherText:authTag (legacy rows store
+  // the same three parts un-prefixed).
+  const versioned = value.startsWith("v1:");
+  const parts = (versioned ? value.slice("v1:".length) : value).split(":");
   return (
     parts.length === 3 &&
     parts.every(part => /^[0-9a-f]+$/.test(part)) &&

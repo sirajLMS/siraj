@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { ForbiddenError, getServerUserContext, logger, NotFoundError } from "@/backend/lib";
+import { checkRateLimit, exportRateLimiter } from "@/backend/lib/ratelimit";
 import { BillingManagementService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -12,6 +13,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     return NextResponse.json({ error: tErrors.file.authenticationRequired }, { status: 401 });
+  }
+
+  const rateLimit = await checkRateLimit(`export:${userId}`, exportRateLimiter);
+  if (!rateLimit.success) {
+    return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
   }
 
   try {
@@ -38,7 +44,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: tErrors.internalServerError }, { status: 500 });
     }
 
-    return NextResponse.redirect(new URL(`/api/storage/files/${pdfFile.filePath}`, request.url));
+    const safeEncodedPath = pdfFile.filePath
+      .split("/")
+      .map(segment => encodeURIComponent(segment))
+      .join("/");
+
+    return NextResponse.redirect(new URL(`/api/storage/files/${safeEncodedPath}`, request.url));
   } catch (error) {
     if (error instanceof NotFoundError) {
       return NextResponse.json({ error: tErrors.invoiceNotFoundShort }, { status: 404 });

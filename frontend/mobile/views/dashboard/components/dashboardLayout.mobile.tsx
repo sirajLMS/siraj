@@ -150,6 +150,8 @@ export function DashboardLayoutMobile({
           avatarUrl={avatarUrl}
           logoutLabel={navLabels.nav.logout}
           toggleGroupAriaLabel={navLabels.toggleGroupAriaLabel}
+          expandSidebarLabel={navLabels.expandSidebar}
+          collapseSidebarLabel={navLabels.collapseSidebar}
         />
       )}
 

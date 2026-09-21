@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { auditLogs, carryoverBalances, classInstances, classStatusEvents, expenses } from "@/backend/db/schema";
 import { ExpenseType, NotificationEventType } from "@/backend/enum";
@@ -23,6 +23,7 @@ import {
   cleanupCarryoverExpenseExtras,
   cleanupPayrollJourneyCast,
   type DispatchSpy,
+  deleteAuditLogsByActorIds,
   expectJourneyError,
   type PayrollJourneyCast,
   provisionCarryoverExpenseExtras,
@@ -182,28 +183,18 @@ describe("Carryover to-expense settlement journey (audited sessions → carryove
     // delete) go before the cast cleanup deletes the teacher.
     await db.delete(carryoverBalances).where(eq(carryoverBalances.teacherId, cast.teacher.id));
     // Settlement mirrors into append-only audit_logs rows referencing these
-    // actors; the immutability trigger must be lifted for the sweep (same
-    // precedent as the payroll settlement journey). INSERT traffic from
-    // concurrent suites is unaffected while the trigger is off.
-    await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-    try {
-      await db
-        .delete(auditLogs)
-        .where(
-          inArray(auditLogs.actorUserId, [
-            cast.operatorUser.id,
-            cast.teacherUser.id,
-            cast.parentUser.id,
-            cast.student.userId,
-            extras.secondOperatorUser.id,
-            extras.viewerUser.id,
-          ])
-        );
-      await cleanupCarryoverExpenseExtras(extras);
-      await cleanupPayrollJourneyCast(cast);
-    } finally {
-      await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-    }
+    // actors; sweep them through the transaction-scoped audit maintenance
+    // window.
+    await deleteAuditLogsByActorIds([
+      cast.operatorUser.id,
+      cast.teacherUser.id,
+      cast.parentUser.id,
+      cast.student.userId,
+      extras.secondOperatorUser.id,
+      extras.viewerUser.id,
+    ]);
+    await cleanupCarryoverExpenseExtras(extras);
+    await cleanupPayrollJourneyCast(cast);
   });
 
   /** Builds the settle call payload; identical arguments reconstruct the idempotency key. */

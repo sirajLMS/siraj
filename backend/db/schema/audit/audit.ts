@@ -11,16 +11,23 @@ import {
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { users } from "@/backend/db/schema/users/users";
 
-// NOTE: This table is truly append-only. The following SQL trigger has been deployed via migrations:
-// CREATE FUNCTION prevent_audit_modification() RETURNS trigger AS $$
+// NOTE: This table is truly append-only. A database trigger deployed via
+// migrations (backend/db/migration/audit_log_immutability_trigger.sql)
+// raises on any UPDATE or DELETE:
+//
+// CREATE FUNCTION prevent_audit_log_modification() RETURNS trigger AS $$
 // BEGIN
+//     -- transaction-scoped maintenance escape hatch (fixture cleanup, GDPR
+//     -- erasure, retention pruning) via set_config('app.audit_log_maintenance','on',true)
+//     IF current_setting('app.audit_log_maintenance', true) = 'on' THEN
+//         RETURN CASE WHEN TG_OP = 'DELETE' THEN OLD ELSE NEW END;
+//     END IF;
 //     RAISE EXCEPTION 'Modifying or deleting audit logs is forbidden';
 // END;
 // $$ LANGUAGE plpgsql;
 //
-// CREATE TRIGGER prevent_audit_mod_trigger
-// BEFORE UPDATE OR DELETE ON admin_audit_logs
-// FOR EACH ROW EXECUTE FUNCTION prevent_audit_modification();
+// Normal traffic never sets the maintenance GUC, so the trigger fully enforces
+// immutability; the opt-in is transaction-local and cannot leak across sessions.
 //
 // PG-only: the immutability trigger above is a PostgreSQL plpgsql function. On
 // SQLite, audit-log immutability is enforced at the repository layer (no

@@ -63,7 +63,10 @@ function maskBankTransferDetails(details: PaymentMethodDetails, revealSensitive:
   if (!isBankTransferDetails(details)) {
     throw new Error("Bank transfer details have an unexpected shape");
   }
-  const plain = revealSensitive ? decryptBankTransferDetails(details) : details;
+  // Stored details arrive with the sensitive routing fields encrypted at rest;
+  // decrypt in both paths so the masked output masks the plaintext (masking
+  // raw ciphertext would surface meaningless ciphertext fragments).
+  const plain = decryptBankTransferDetails(details);
   if (revealSensitive) {
     return plain;
   }

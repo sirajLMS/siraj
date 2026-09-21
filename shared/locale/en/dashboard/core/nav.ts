@@ -117,6 +117,8 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
     },
   },
   toggleGroupAriaLabel: label => `Toggle ${label} group`,
+  expandSidebar: "Expand sidebar",
+  collapseSidebar: "Collapse sidebar",
   accountingPayments: "Payments",
   accountingPackages: "Packages",
   accountingPaymentsNew: "Add Payment",

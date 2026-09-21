@@ -47,6 +47,28 @@ export enum BookingStatus {
 type StringEnum<T extends string> = Record<string, T>;
 
 /**
+ * Cache Set instances of enum values to avoid repeated Object.values(enumObject)
+ * array allocations and linear O(N) scans during high-frequency enum parsing.
+ */
+const enumValueSetCache = new WeakMap<StringEnum<string>, Set<string>>();
+
+function getEnumValueSet<T extends string>(enumObject: StringEnum<T>): Set<string> {
+  let valueSet = enumValueSetCache.get(enumObject);
+  if (!valueSet) {
+    valueSet = new Set<string>(Object.values(enumObject));
+    enumValueSetCache.set(enumObject, valueSet);
+  }
+  return valueSet;
+}
+
+/**
+ * Type guard: checks whether a raw string is a value of the given string enum.
+ */
+function isEnumValue<T extends string>(enumObject: StringEnum<T>, value: string): value is T {
+  return getEnumValueSet(enumObject).has(value);
+}
+
+/**
  * Parses a string value against a string enum object.
  */
 function parseEnumValue<T extends string>(
@@ -58,10 +80,8 @@ function parseEnumValue<T extends string>(
     return fallback;
   }
 
-  const enumValues = Object.values(enumObject);
-  const match = enumValues.find(v => v === value);
-  if (match !== undefined) {
-    return match;
+  if (isEnumValue(enumObject, value)) {
+    return value;
   }
 
   return fallback;
@@ -255,17 +275,11 @@ export const parseBookingStatus: (value: string | null | undefined, fallback?: B
  * Parses a string value into a GroupClassAttendanceStatus enum with a fallback.
  * Backend AttendanceStatus values: pending, present, absent, late (lowercase in DB)
  */
-export const parseGroupClassAttendanceStatus = (
+export const parseGroupClassAttendanceStatus: (
   value: string | null | undefined,
-  fallback: GroupClassAttendanceStatus = GroupClassAttendanceStatus.PENDING
-): GroupClassAttendanceStatus => {
-  const validValues = Object.values(GroupClassAttendanceStatus);
-  if (value === null || value === undefined) {
-    return fallback;
-  }
-  const match = validValues.find(v => (v as string) === value);
-  return match ?? fallback;
-};
+  fallback?: GroupClassAttendanceStatus
+) => GroupClassAttendanceStatus = (value, fallback = GroupClassAttendanceStatus.PENDING) =>
+  withFallback(GroupClassAttendanceStatus, fallback)(value);
 
 /**
  * Type guard for AppLocale.

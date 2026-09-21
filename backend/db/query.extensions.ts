@@ -57,7 +57,10 @@ export function fullTextSearch(
   const tsQueryString = queryParts.join(" & ");
 
   if (!tsQueryString) {
-    return null;
+    // Every token was stripped (wildcard-only or punctuation-only input).
+    // Returning null here would drop the filter entirely and broaden the
+    // match to every row — bind a matches-nothing condition instead.
+    return sql`1 = 0`;
   }
 
   return sql`to_tsvector(${config}, ${column}) @@ to_tsquery(${config}, ${tsQueryString})`;

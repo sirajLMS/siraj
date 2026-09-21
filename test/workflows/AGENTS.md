@@ -13,6 +13,11 @@ through the real service layer against the real test database.
    committing `db.transaction(...)`. Track every created row id (including side-effect rows the
    services create: lesson reports, teacher dues, credit transactions, idempotency-keyed rows) and
    hard-delete all of them in `afterAll`, in FK-safe order, via the cast helper's cleanup function.
+   **Audit rows are cleaned through the transaction-scoped maintenance window** —
+   `deleteAuditLogsByActorIds` / `deleteAuditLogsByEntity` / `withAuditLogMaintenance` from
+   `helpers/audit-log-cleanup.ts` (backed by the `app.audit_log_maintenance` GUC in
+   `backend/db/migration/audit_log_immutability_trigger.sql`). NEVER `ALTER TABLE audit_logs
+   DISABLE/ENABLE TRIGGER` — that global DDL toggle races under the parallel runner.
 3. **Unique UUID prefixes.** Every suite derives a per-run prefix
    (`const prefix = \`jrn_<domain>_${randomUUID().slice(0, 8)}\``) used in names/notes so repeated
    or parallel runs never collide.
@@ -49,5 +54,8 @@ through the real service layer against the real test database.
 ## Running
 
 ```bash
-bun run test:workflows
+bun run test:workflows                 # Parallel TUI runner (compact output, bail on first failure)
+bun run test:workflows --no-bail       # Run all files even after a failure
+bun run test:workflows <filter>        # Only files matching <filter>, e.g. `bun run test:workflows accounting`
+bun run test:workflows:sequential      # Raw sequential bun test (for debugging)
 ```

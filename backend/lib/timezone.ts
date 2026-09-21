@@ -62,6 +62,24 @@ function getOffsetMs(ianaTimezone: string, d: Date): number {
   return partsToEpochMs(tzDtf.formatToParts(d)) - partsToEpochMs(utcDtf.formatToParts(d));
 }
 
+/** UTC offset in milliseconds at `d`; falls back to 0 (treated as UTC) for invalid timezones. */
+export function getOffsetMsSafe(ianaTimezone: string, d: Date): number {
+  try {
+    return getOffsetMs(ianaTimezone, d);
+  } catch {
+    return 0;
+  }
+}
+
+/** UTC offset in minutes at `d`; returns null for invalid timezones. */
+export function getOffsetMinutes(ianaTimezone: string, d: Date): number | null {
+  try {
+    return Math.round(getOffsetMs(ianaTimezone, d) / 60000);
+  } catch {
+    return null;
+  }
+}
+
 export function normalizeIanaTimezone(value: string): string {
   return resolveExcludedIanaTimezoneId(value);
 }

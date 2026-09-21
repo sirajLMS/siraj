@@ -3,6 +3,7 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teache
 import { VacationRequestStatus } from "@/backend/enum";
 import { ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
+import { getOffsetMsSafe } from "@/backend/lib/timezone";
 import {
   computeSlotBounds,
   getUtcDateString,
@@ -406,58 +407,6 @@ export namespace AvailabilityService {
   };
 }
 
-/**
- * Returns the timezone offset in milliseconds for the given IANA timezone
- * at the given point in time. Positive = ahead of UTC, negative = behind.
- * Uses Intl.DateTimeFormat to avoid depending on a full timezone library.
- *
- * Both formatters are cached per timezone — Intl.DateTimeFormat construction
- * is expensive and this function runs per candidate slot in availability search.
- */
-const dtfCache = new Map<string, Intl.DateTimeFormat>();
-const utcFormatter = new Intl.DateTimeFormat("en-US", {
-  timeZone: "UTC",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: false,
-});
-
-function getTzOffsetMs(timezone: string, date: Date): number {
-  let dtf = dtfCache.get(timezone);
-  if (!dtf) {
-    dtf = new Intl.DateTimeFormat("en-US", {
-      timeZone: timezone,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
-    dtfCache.set(timezone, dtf);
-  }
-  const asTz = partsToEpochMs(dtf.formatToParts(date));
-  const asUtc = partsToEpochMs(utcFormatter.formatToParts(date));
-  return asTz - asUtc;
-}
-
-function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
-  const map = new Map(parts.map(p => [p.type, p.value]));
-  return Date.UTC(
-    Number(map.get("year")),
-    Number(map.get("month")) - 1,
-    Number(map.get("day")),
-    Number(map.get("hour")) === 24 ? 0 : Number(map.get("hour")),
-    Number(map.get("minute")),
-    Number(map.get("second"))
-  );
-}
-
 const weekdayDtfCache = new Map<string, Intl.DateTimeFormat>();
 
 function getWeekdayDtf(timezone: string): Intl.DateTimeFormat {
@@ -515,13 +464,8 @@ function buildPatternOccurrences(
       const mStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
       const localStr = `${dateStr}T${hStr}:${mStr}:00`;
       const slotStart = new Date(localStr + "Z");
-      try {
-        const offsetMs = getTzOffsetMs(timezone, slotStart);
-        slotStart.setTime(slotStart.getTime() - offsetMs);
-      } catch (error) {
-        // Fallback: treat as UTC (original behavior)
-        logger.debug(error);
-      }
+      const offsetMs = getOffsetMsSafe(timezone, slotStart);
+      slotStart.setTime(slotStart.getTime() - offsetMs);
 
       const slotEnd = new Date(slotStart.getTime() + durationMs);
       occurrences.push({ start: slotStart, end: slotEnd });

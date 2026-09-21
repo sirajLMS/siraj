@@ -1,15 +1,9 @@
 import { afterAll, beforeAll, describe, expect, mock, spyOn, test } from "bun:test";
 import { createHash, randomUUID } from "node:crypto";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
-import {
-  auditLogs,
-  notificationDeliveries,
-  whatsappContacts,
-  whatsappConversations,
-  whatsappMessages,
-} from "@/backend/db/schema";
+import { notificationDeliveries, whatsappContacts, whatsappConversations, whatsappMessages } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import { WhatsappMessageDirection, WhatsappSyncStatus } from "@/backend/enum/whatsapp";
 import {
@@ -40,6 +34,7 @@ import type { CommunicationPayload } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import {
   cleanupWhatsappCast,
+  deleteAuditLogsByEntity,
   dispatchTargetsForEvent,
   expectJourneyError,
   provisionWhatsappCast,
@@ -227,21 +222,13 @@ describe("WhatsApp multi-number + coexistence journeys (real services, real DB)"
     redisGetSpy.mockRestore();
     redisSetSpy.mockRestore();
     // Append-only audit rows (purpose assignment + account_update lifecycle)
-    // reference the WABA accounts; sweep them with the immutability trigger
-    // lifted, mirroring the adjustment-journey precedent.
-    await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-    try {
-      await db
-        .delete(auditLogs)
-        .where(
-          and(
-            eq(auditLogs.entityType, "WHATSAPP_ACCOUNT"),
-            inArray(auditLogs.entityId, [cast.adsAccount.id, cast.studentsAccount.id, cast.coexistAccount.id])
-          )
-        );
-    } finally {
-      await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-    }
+    // reference the WABA accounts; sweep them through the transaction-scoped
+    // audit maintenance window.
+    await deleteAuditLogsByEntity("WHATSAPP_ACCOUNT", [
+      cast.adsAccount.id,
+      cast.studentsAccount.id,
+      cast.coexistAccount.id,
+    ]);
     await resetWhatsappChannel(); // drop journey-run adapters/credentials cache
     await cleanupWhatsappCast(cast, webhookHashes);
   });

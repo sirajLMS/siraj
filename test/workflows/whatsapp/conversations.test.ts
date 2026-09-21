@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, mock, test } from "bun:test";
 import { createHash, randomUUID } from "node:crypto";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { auditLogs, whatsappAccounts, whatsappConversations, whatsappMessages } from "@/backend/db/schema";
@@ -26,6 +26,7 @@ import type {
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import {
   cleanupWhatsappCast,
+  deleteAuditLogsByEntity,
   expectJourneyError,
   provisionWhatsappCast,
   type WhatsappJourneyCast,
@@ -91,6 +92,12 @@ describe("WhatsApp conversations journey (real services, real DB)", () => {
   let syncedAccount: WhatsappAccountReturnType | null = null;
   let recipientOne: WhatsappTestRecipientReturnType | null = null;
   let conversationId = "";
+  /**
+   * Meta is the authority on the 24h customer-service window (the service
+   * never gates free-text locally): the stub rejects free-text sends with
+   * Meta's 132047 out-of-window code until an inbound webhook is ingested.
+   */
+  let inboundWindowOpen = false;
 
   const recordedFetches: RecordedFetch[] = [];
   const webhookHashes: string[] = [];
@@ -99,7 +106,7 @@ describe("WhatsApp conversations journey (real services, real DB)", () => {
   const previousWabaEnv = process.env.WHATSAPP_WABA_ID;
   const previousTokenEnv = process.env.WHATSAPP_ACCESS_TOKEN;
 
-  function metaStub(url: string): Response {
+  function metaStub(url: string, body: unknown): Response {
     if (url.endsWith("/phone_numbers?limit=100")) {
       return graphJson({
         data: [{ id: PHONE_NUMBER_ID, display_phone_number: DISPLAY_PHONE, verified_name: "Test Number" }],
@@ -109,6 +116,22 @@ describe("WhatsApp conversations journey (real services, real DB)", () => {
       return graphJson({ data: [] });
     }
     if (url.includes(`/${PHONE_NUMBER_ID}/messages`)) {
+      const isFreeText = isRecord(body) && body.type === "text";
+      if (isFreeText && !inboundWindowOpen) {
+        // Simulate Meta's out-of-window rejection (code 132047) for free-text
+        // sends while the 24h customer-service window is closed.
+        return new Response(
+          JSON.stringify({
+            error: {
+              message: "Re-engagement required within the 24h customer-service window",
+              type: "OAuthException",
+              code: 132047,
+              fbtrace_id: "journey_window_probe",
+            },
+          }),
+          { status: 400, headers: { "content-type": "application/json" } }
+        );
+      }
       counters.wamid += 1;
       return graphJson({
         messaging_product: "whatsapp",
@@ -154,6 +177,7 @@ describe("WhatsApp conversations journey (real services, real DB)", () => {
 
   /** Persist + drain one inbound webhook through the durable queue. */
   async function ingestInbound(body: string): Promise<void> {
+    inboundWindowOpen = true;
     const value = {
       metadata: { phone_number_id: account().phoneNumberId },
       messages: [
@@ -202,7 +226,7 @@ describe("WhatsApp conversations journey (real services, real DB)", () => {
           method: init?.method ?? "GET",
           body: isRecord(parsed) ? parsed : null,
         });
-        return metaStub(url);
+        return metaStub(url, parsed);
       }),
       { preconnect: () => undefined }
     );
@@ -225,20 +249,8 @@ describe("WhatsApp conversations journey (real services, real DB)", () => {
     if (finalAccount) {
       // Append-only audit rows (registry + verify + sends + sync UPSERT, the
       // latter keyed by the env WABA id) reference the account; sweep them
-      // with the immutability trigger lifted, mirroring the sibling suite.
-      await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-      try {
-        await db
-          .delete(auditLogs)
-          .where(
-            and(
-              eq(auditLogs.entityType, "WHATSAPP_ACCOUNT"),
-              inArray(auditLogs.entityId, [finalAccount.id, finalAccount.wabaId])
-            )
-          );
-      } finally {
-        await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-      }
+      // through the transaction-scoped audit maintenance window.
+      await deleteAuditLogsByEntity("WHATSAPP_ACCOUNT", [finalAccount.id, finalAccount.wabaId]);
       // Cascades: recipients, conversations, messages, webhook-sync requests.
       await db.delete(whatsappAccounts).where(eq(whatsappAccounts.id, finalAccount.id));
     }

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import { encryptBankTransferDetails } from "@/backend/lib/payment-method-jsonb";
 import { buildMaskedPaymentMethod } from "@/backend/services/payment-method/payment-method-mask";
 import type { BankTransferDetails, PaymentMethodDetails, UserPaymentMethodReturnType } from "@/backend/types";
 
@@ -10,14 +11,14 @@ const baseMethod: UserPaymentMethodReturnType = {
   direction: PaymentDirection.PAYOUT,
   isDefault: true,
   label: "Primary payout",
-  details: {
+  details: encryptBankTransferDetails({
     beneficiaryName: "Jane Teacher",
     bankName: "National Bank",
     accountNumber: "1234567890",
     routingNumber: "021000021",
     iban: "EG123456789012345678901234",
     swiftBic: "NBEGEGCX",
-  },
+  }),
   verifiedAt: null,
   verifiedByUserId: null,
   createdAt: new Date("2026-01-01T00:00:00.000Z"),

@@ -15,11 +15,15 @@ function buildWhatsAppLink(value: string): SocialLink {
   };
 }
 
-function buildFacebookLink(value: string): SocialLink {
-  const hasProtocol = /^https?:\/\//.test(value);
+function buildFacebookLink(value: string): SocialLink | null {
+  const hasProtocol = /^https?:\/\//i.test(value);
   const normalized = hasProtocol ? value : `https://${value}`;
+  const safeUrl = isSafeUrl(normalized);
+  if (!safeUrl) {
+    return null;
+  }
   return {
-    href: normalized,
+    href: safeUrl,
     displayText: value,
   };
 }

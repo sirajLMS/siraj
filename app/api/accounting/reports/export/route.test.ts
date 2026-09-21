@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { NextRequest } from "next/server";
 
 import { AppPermission, CalculationStatus } from "@/backend/enum";
+import { isUuidShape } from "@/backend/lib/id-shape";
 import { serializeSessionAuditCsv } from "@/backend/services/accounting/session-audit-csv.serializer";
 import type { SessionAuditReportFilters, SessionAuditReportPage, SessionAuditReportRow } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -118,6 +119,7 @@ await mock.module("@/backend/lib", () => ({
   ForbiddenError,
   ValidationError,
   getServerUserContext: getServerUserContextMock,
+  isUuidShape,
   logger: { log: () => {}, info: () => {}, warn: () => {}, error: () => {}, debug: () => {} },
 }));
 
@@ -280,6 +282,8 @@ describe("GET /api/accounting/reports/export", () => {
       expect(response.status).toBe(200);
       expect(response.headers.get("Content-Type")).toBe("text/csv; charset=utf-8");
       expect(response.headers.get("Content-Disposition")).toBe('attachment; filename="session-audit-report.csv"');
+      expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+      expect(response.headers.get("Content-Security-Policy")).toBe("default-src 'none'; sandbox");
       expect(response.headers.get("X-Export-Truncated")).toBe("false");
 
       expect(getReportMock).toHaveBeenCalledTimes(1);

@@ -157,6 +157,8 @@ function buildCsvResponseHeaders(totalCount: number): Headers {
   const headers = new Headers();
   headers.set("Content-Type", "text/csv; charset=utf-8");
   headers.set("Content-Disposition", `attachment; filename="carryover-balances-${dateStamp}.csv"`);
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("Content-Security-Policy", "default-src 'none'; sandbox");
   headers.set("X-Export-Truncated", totalCount > EXPORT_ROW_LIMIT ? "true" : "false");
   return headers;
 }

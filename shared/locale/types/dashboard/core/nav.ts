@@ -126,6 +126,8 @@ export interface DashboardNavigationLabels {
     };
   };
   readonly toggleGroupAriaLabel: (label: string) => string;
+  readonly expandSidebar: string;
+  readonly collapseSidebar: string;
   readonly accountingPayments: string;
   readonly accountingPackages: string;
   readonly accountingPaymentsNew: string;

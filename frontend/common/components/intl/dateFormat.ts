@@ -35,20 +35,38 @@ function toDate(date: DateInput): Date {
 }
 
 /**
- * Global cache for Intl.DateTimeFormat instances.
+ * Dual-tier global cache for Intl.DateTimeFormat instances.
  * Creating new Intl.DateTimeFormat instances is computationally expensive (up to ~100x slower).
- * Caching by locale tag and options serialization eliminates repeated construction overhead
- * in high-frequency date formatting renders (e.g., DataGrid cells, list items, calendar grids).
+ *
+ * Tier 1: WeakMap keyed on options object identity — O(1) lookup with zero
+ * JSON.stringify serialization and string allocation for module-level option
+ * constants on hot formatting paths (e.g. DataGrid cells, list items, calendar grids).
+ * Tier 2: string-keyed Map fallback that deduplicates dynamically built option
+ * objects with an identical structure.
  */
-const dtfCache = new Map<string, Intl.DateTimeFormat>();
+const dtfWeakCache = new WeakMap<Intl.DateTimeFormatOptions, Map<string, Intl.DateTimeFormat>>();
+const dtfStringCache = new Map<string, Intl.DateTimeFormat>();
 
-function getDateTimeFormatter(localeTag: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+export function getDateTimeFormatter(localeTag: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  let localeMap = dtfWeakCache.get(options);
+  if (!localeMap) {
+    localeMap = new Map<string, Intl.DateTimeFormat>();
+    dtfWeakCache.set(options, localeMap);
+  }
+
+  let dtf = localeMap.get(localeTag);
+  if (dtf) {
+    return dtf;
+  }
+
   const cacheKey = `${localeTag}:${JSON.stringify(options)}`;
-  let dtf = dtfCache.get(cacheKey);
+  dtf = dtfStringCache.get(cacheKey);
   if (!dtf) {
     dtf = new Intl.DateTimeFormat(localeTag, options);
-    dtfCache.set(cacheKey, dtf);
+    dtfStringCache.set(cacheKey, dtf);
   }
+
+  localeMap.set(localeTag, dtf);
   return dtf;
 }
 

@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { auditLogs, classInstances, classStatusEvents, teacherDues, teacherPayments } from "@/backend/db/schema";
+import { classInstances, classStatusEvents, teacherDues, teacherPayments } from "@/backend/db/schema";
 import {
   AttendanceEvaluation,
   LessonReportStatus,
@@ -24,6 +24,7 @@ import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import {
   cleanupPayrollJourneyCast,
   type DispatchSpy,
+  deleteAuditLogsByActorIds,
   dispatchTargetsForEvent,
   expectJourneyError,
   type PayrollJourneyCast,
@@ -185,25 +186,15 @@ describe("Override-to-settlement lifecycle journey (operator override → lesson
     // run's payment fixture must go before the cast cleanup deletes the teacher.
     await db.delete(teacherPayments).where(eq(teacherPayments.teacherId, cast.teacher.id));
     // Committed overrides mirror into append-only audit_logs rows referencing
-    // the cast actors; the immutability trigger must be lifted for the sweep
-    // (same precedent as the billing credit-adjustment journey). INSERT traffic
-    // from concurrent suites is unaffected while the trigger is off.
-    await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-    try {
-      await db
-        .delete(auditLogs)
-        .where(
-          inArray(auditLogs.actorUserId, [
-            cast.operatorUser.id,
-            cast.teacherUser.id,
-            cast.parentUser.id,
-            cast.student.userId,
-          ])
-        );
-      await cleanupPayrollJourneyCast(cast);
-    } finally {
-      await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-    }
+    // the cast actors; sweep them through the transaction-scoped audit
+    // maintenance window.
+    await deleteAuditLogsByActorIds([
+      cast.operatorUser.id,
+      cast.teacherUser.id,
+      cast.parentUser.id,
+      cast.student.userId,
+    ]);
+    await cleanupPayrollJourneyCast(cast);
   });
 
   function buildSubmitInput(classInstanceId: string): LessonReportSubmitInput {

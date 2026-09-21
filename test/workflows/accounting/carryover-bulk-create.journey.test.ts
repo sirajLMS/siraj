@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   auditLogs,
@@ -20,6 +20,7 @@ import {
   type CarryoverExpenseCastExtras,
   cleanupCarryoverCreateCast,
   cleanupCarryoverExpenseExtras,
+  deleteAuditLogsByActorIds,
   expectJourneyError,
   provisionCarryoverCreateCast,
   provisionCarryoverExpenseExtras,
@@ -87,28 +88,18 @@ describe("Carryover bulk-create settlement journey (operator → operators/viewe
 
   afterAll(async () => {
     dispatchSpy.mockRestore();
-    // Committed CARRYOVER_CREATE audit rows reference the cast actors; the
-    // immutability trigger must be lifted for the sweep (same precedent as
-    // the billing credit-adjustment journey).
-    await db.execute(sql`ALTER TABLE audit_logs DISABLE TRIGGER prevent_audit_log_mod_trigger`);
-    try {
-      await db
-        .delete(auditLogs)
-        .where(
-          inArray(auditLogs.actorUserId, [
-            cast.operatorUser.id,
-            cast.teacherAUser.id,
-            cast.teacherBUser.id,
-            cast.parentUser.id,
-            extras.secondOperatorUser.id,
-            extras.viewerUser.id,
-          ])
-        );
-      await cleanupCarryoverCreateCast(cast);
-      await cleanupCarryoverExpenseExtras(extras);
-    } finally {
-      await db.execute(sql`ALTER TABLE audit_logs ENABLE TRIGGER prevent_audit_log_mod_trigger`);
-    }
+    // Committed CARRYOVER_CREATE audit rows reference the cast actors; sweep
+    // them through the transaction-scoped audit maintenance window.
+    await deleteAuditLogsByActorIds([
+      cast.operatorUser.id,
+      cast.teacherAUser.id,
+      cast.teacherBUser.id,
+      cast.parentUser.id,
+      extras.secondOperatorUser.id,
+      extras.viewerUser.id,
+    ]);
+    await cleanupCarryoverCreateCast(cast);
+    await cleanupCarryoverExpenseExtras(extras);
   });
 
   test("step 1 — precondition: audited sessions read CALCULATED on the audit grid; carryover report is empty", async () => {

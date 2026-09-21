@@ -238,6 +238,8 @@ describe("GET /api/payroll/export", () => {
       expect(response.headers.get("Content-Disposition")).toMatch(
         /^attachment; filename="payroll-report-\d{4}-\d{2}-\d{2}\.csv"$/
       );
+      expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+      expect(response.headers.get("Content-Security-Policy")).toBe("default-src 'none'; sandbox");
       expect(response.headers.get("X-Export-Truncated")).toBe("false");
 
       expect(getReportMock).toHaveBeenCalledTimes(1);
