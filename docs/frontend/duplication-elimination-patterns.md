@@ -2,6 +2,9 @@
 
 This document consolidates the patterns used to eliminate code duplication in the siraj codebase, based on the duplications plan (`.ai/plans/duplications/`).
 
+> [!IMPORTANT]
+> **Quality Gate Fails on Duplicates by Design**: `bun quality-gate` and `bun check:duplicates` strictly enforce zero duplicate code (`threshold: 0`, `--exit-code`). Quality gate failing on check:duplicates is **intended** whenever clones exist. All duplications must be eliminated by extraction using the patterns below; never increase the threshold or add `jscpd:ignore` comments.
+
 ## Pattern 1: Canonical Source with Direct Imports (Deletion)
 
 **When to use:** Two or more files contain identical or near-identical code, and one is clearly the canonical location.

@@ -28,6 +28,9 @@ const DUPLICATES_INSTRUCTIONS = `
  * DUPLICATES REMEDIATION PROMPT:
  * jscpd has detected code duplication (cross-file clones).
  *
+ * NOTE: Quality gate failing on check:duplicates is INTENDED behavior.
+ * Zero duplication is strictly enforced across the codebase (threshold: 0).
+ *
  * Fix options:
  *   1. Extract a shared scaffold — see docs/frontend/ui-shared-scaffold-pattern.md
  *   2. Extract a shared utility — see docs/frontend/duplication-elimination-patterns.md
@@ -141,6 +144,10 @@ function clearState(): void {
   if (existsSync(STATE_FILE)) unlinkSync(STATE_FILE);
 }
 
+function jscpdOutputHasClones(output: string): boolean {
+  return /Clone found/.test(output) || /Found [1-9]\d* clones/.test(output);
+}
+
 async function performStage(stage: QualityStage): Promise<boolean> {
   switch (stage) {
     case "BASIC_CHECKS": {
@@ -155,8 +162,10 @@ async function performStage(stage: QualityStage): Promise<boolean> {
     }
     case "DUPLICATES": {
       const check = await runCommand("bun", ["check:duplicates"]);
-      if (!check.success) {
-        console.warn("⚠️ Code duplication (cross-file clones) detected by jscpd.");
+      if (!check.success || jscpdOutputHasClones(check.output)) {
+        console.warn(
+          "⚠️ Code duplication (cross-file clones) detected by jscpd. Quality gate intentionally fails on duplicates."
+        );
         console.log("\x1b[36m%s\x1b[0m", DUPLICATES_INSTRUCTIONS);
         return false;
       }
@@ -192,7 +201,7 @@ async function recoverOwnership(state: QualityState): Promise<void> {
 
   if (state.owner === "duplicates") {
     const check = await runCommand("bun", ["check:duplicates"]);
-    if (check.success) resolved = true;
+    if (check.success && !jscpdOutputHasClones(check.output)) resolved = true;
   }
 
   if (state.owner === "unused") {

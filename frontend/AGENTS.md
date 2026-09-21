@@ -94,6 +94,7 @@ When eliminating desktop↔mobile code duplication, use the `*Shared.tsx` / `__s
 - Create options file `*Shared.options.ts` with `DESKTOP_OPTIONS` and `MOBILE_OPTIONS`
 - Desktop/mobile files become thin wrappers (1-5 lines) importing the scaffold + options
 - NEVER use `jscpd:ignore` — fix the root cause instead
+- **DUPLICATES failure is intended**: The quality gate strictly enforces zero duplication (`threshold: 0`, `--exit-code`). Failing on duplicate code is intended by design — all clones must be eliminated via scaffolds/utilities.
 
 ### New MUI v9 Patterns
 

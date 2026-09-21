@@ -16,7 +16,7 @@ sirajLMS/siraj (prod push)
   Vercel project (host only)
 ```
 
-`vercel.json` is **gitignored**. Prebuild on GitHub Actions generates it with `"ignoreCommand": "exit 0"`, `fluid`, and crons. Do not commit it.
+`vercel.json` is **gitignored**. Prebuild on GitHub Actions generates it with `"ignoreCommand": "exit 0"`, `git`, `fluid`, and crons. Do not commit it.
 
 Because the file is not in git, **you must** set each Vercel project's Ignored Build Step to **"Don't build anything"** so Git pushes never trigger a Vercel build.
 

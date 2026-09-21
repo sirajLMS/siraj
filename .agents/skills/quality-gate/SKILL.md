@@ -50,6 +50,8 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while BASIC_CHECK
    bun run scripts/lint-service.ts -f <file> --json --id quality-gate
    ```
 
+2. **DUPLICATES stage failure is intended**: The quality gate strictly enforces zero code duplication (`threshold: 0`, `--exit-code`). Failing on duplicate code is **intended** by design whenever clones are introduced or detected. Duplications must be eliminated via extraction into shared scaffolds or utilities; never raise the threshold, add `jscpd:ignore` comments, or widen `.jscpd.json` ignore patterns.
+
 3. **Each subagent calls `scripts/health/sub-loop.ts` for per-file verification:**
    ```bash
    bun run scripts/health/sub-loop.ts <file> --lifecycle <stage>
@@ -177,7 +179,7 @@ Map the failed stage to the correct remediation workflow:
 | Failed Stage | Owner | What to Do |
 |---|---|---|
 | `BASIC_CHECKS` | `quality-gate` | Fix tsgo (grouped parallel) → oxlint (parallel) → biome (parallel) → lint (parallel) |
-| `DUPLICATES` | `duplicates` | Fix cross-file duplications — dispatch parallel subagents per file. See `docs/frontend/duplication-elimination-patterns.md` and `docs/frontend/ui-shared-scaffold-pattern.md` for remediation patterns. Zero `jscpd:ignore` and zero `.jscpd.json` changes are hard rules. |
+| `DUPLICATES` | `duplicates` | Fix cross-file duplications — dispatch parallel subagents per file. Failing on duplicate code is **intended** (zero tolerance: `threshold: 0`, `--exit-code`). See `docs/frontend/duplication-elimination-patterns.md` and `docs/frontend/ui-shared-scaffold-pattern.md` for remediation patterns. Zero `jscpd:ignore` and zero `.jscpd.json` changes are hard rules. |
 | `UNUSED` | `unused` | Fix knip findings (unused files/exports/types/deps, duplicate exports, config hints) — `bun run check:unused` exits 1 on ANY finding, hints included. Fix code first; `knip.config.ts` ignore/entry additions only for genuine blind spots, with an explanatory comment. |
 | `CODESCENE` | `codescene` | Fix CodeScene warnings — dispatch parallel subagents per file |
 
@@ -302,6 +304,8 @@ architecture is gone. All lint is now in-process via `scripts/lint-service.ts`.
 The `DUPLICATES` stage runs `bun check:duplicates` (full-repo jscpd scan) and gates on cross-file
 clones. This is the only scan that catches cross-file duplication patterns (e.g., desktop/mobile
 scaffold pairs, re-export shims, parallel i18n implementations).
+
+**Intended Gate Failure**: The `DUPLICATES` stage is explicitly intended and designed to fail (`exit 1`) whenever any cross-file clones exist. The codebase enforces a strict `threshold: 0` policy with `--exit-code`. Never attempt to bypass this stage or raise the threshold — eliminate clones at the root cause.
 
 1. Run `bun check:duplicates` to get the jscpd report.
 

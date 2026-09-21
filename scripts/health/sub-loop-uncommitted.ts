@@ -320,9 +320,10 @@ function checkDuplicatesAll(files: string[]): BatchCheckResult {
   }
   logInfo(`Running check:duplicates (jscpd) on uncommitted files...`);
   // jscpd doesn't support per-file args well; run project-wide and filter
-  const result = runCommand("bunx", ["jscpd"]);
+  const result = runCommand("bunx", ["jscpd", "--exit-code"]);
+  const hasClones = /Clone found/.test(result.output) || /Found [1-9]\d* clones/.test(result.output);
 
-  if (exitCodePassed(result.exitCode)) {
+  if (exitCodePassed(result.exitCode) && !hasClones) {
     logPass("check:duplicates passed");
     return { name: "check:duplicates", passed: true, output: "", failedFiles: [] };
   }

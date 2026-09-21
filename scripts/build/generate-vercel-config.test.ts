@@ -31,6 +31,9 @@ function runScript(env: Record<string, string | undefined> = {}): {
 
 function readConfig(): {
   ignoreCommand?: string;
+  git?: {
+    deploymentEnabled?: Record<string, boolean>;
+  };
   fluid: boolean;
   crons: Array<{ path: string; schedule: string }>;
 } | null {
@@ -42,6 +45,11 @@ function readConfig(): {
 const COMMITTED_CONFIG = {
   $schema: "https://openapi.vercel.sh/vercel.json",
   ignoreCommand: "exit 0",
+  git: {
+    deploymentEnabled: {
+      dev: false,
+    },
+  },
   fluid: true,
   crons: [
     { path: "/api/fx/refresh", schedule: "0 6 * * *" },
@@ -56,7 +64,10 @@ function cleanup(): void {
 }
 
 function writeSeedConfig(): void {
-  writeFileSync(OUTPUT_PATH, `${JSON.stringify({ ignoreCommand: "exit 0", fluid: true, crons: [] }, null, 2)}\n`);
+  writeFileSync(
+    OUTPUT_PATH,
+    `${JSON.stringify({ ignoreCommand: "exit 0", git: { deploymentEnabled: { dev: false } }, fluid: true, crons: [] }, null, 2)}\n`
+  );
 }
 
 describe("generate-vercel-config", () => {
@@ -77,6 +88,11 @@ describe("generate-vercel-config", () => {
     expect(config).not.toBeNull();
     if (!config) return;
     expect(config.ignoreCommand).toBe("exit 0");
+    expect(config.git).toEqual({
+      deploymentEnabled: {
+        dev: false,
+      },
+    });
     expect(config.fluid).toBe(true);
     expect(config.crons).toHaveLength(ALWAYS_INCLUDE_CRONS.length);
     expect(config.crons.map(c => c.path).toSorted((a, b) => a.localeCompare(b))).toEqual([...ALWAYS_INCLUDE_CRONS]);
@@ -227,5 +243,33 @@ describe("generate-vercel-config", () => {
     expect(result.exitCode).toBe(0);
     const config = readConfig();
     expect(config?.ignoreCommand).toBe("exit 0");
+  });
+
+  test("generates git deploymentEnabled configuration by default", () => {
+    writeFileSync(OUTPUT_PATH, `${JSON.stringify({ ignoreCommand: "exit 0", fluid: true, crons: [] }, null, 2)}\n`);
+    const result = runScript({ CRON_EXECUTION_MODE: "vercel-daily" });
+    expect(result.exitCode).toBe(0);
+    const config = readConfig();
+    expect(config?.git).toEqual({
+      deploymentEnabled: {
+        dev: false,
+      },
+    });
+  });
+
+  test("preserves git settings from existing vercel.json", () => {
+    writeFileSync(
+      OUTPUT_PATH,
+      `${JSON.stringify({ ignoreCommand: "exit 0", git: { deploymentEnabled: { dev: false, preview: false } }, fluid: true, crons: [] }, null, 2)}\n`
+    );
+    const result = runScript({ CRON_EXECUTION_MODE: "vercel-daily" });
+    expect(result.exitCode).toBe(0);
+    const config = readConfig();
+    expect(config?.git).toEqual({
+      deploymentEnabled: {
+        dev: false,
+        preview: false,
+      },
+    });
   });
 });

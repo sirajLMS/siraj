@@ -379,7 +379,7 @@ function checkDuplicates(filePath: string): CheckResult {
   }
 
   logInfo(`Running check:duplicates (jscpd, intra-file only) on ${relPath}...`);
-  const result = runCommand("bunx", ["jscpd", "-c", ".jscpd.json", relPath]);
+  const result = runCommand("bunx", ["jscpd", "--exit-code", "-c", ".jscpd.json", relPath]);
   const hasClones = jscpdFoundIntraFileClones(result.output);
   const passed = exitCodePassed(result.exitCode) && !hasClones;
 

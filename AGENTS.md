@@ -190,7 +190,7 @@ All layers use types from `backend/types/{entity}.types.ts`:
 
 After making changes:
 1. Run `bun quality-gate` - it handles tsgo, oxlint, biome, lint, duplicates, unused (knip), codescene sequentially
-2. If DUPLICATES fails: run `bun run check:duplicates` to see cross-file clones. Fix by extracting shared scaffolds/utilities. NEVER add `jscpd:ignore` comments or modify `.jscpd.json`.
+2. If DUPLICATES fails: run `bun run check:duplicates` to see cross-file clones. **Quality gate failing on check:duplicates is INTENDED** — the codebase strictly enforces zero code duplication (`threshold: 0`, `--exit-code`). Any detected duplicate clones will block the quality gate by design. Fix by extracting shared scaffolds/utilities. NEVER add `jscpd:ignore` comments, and NEVER modify `.jscpd.json` to raise the threshold or ignore code files.
 3. If UNUSED fails: run `bun run check:unused` to see knip findings (unused files/exports/deps, config hints). Fix the code first; only extend `knip.config.ts` ignores for genuine blind spots (side-effect imports, tool-loaded files) with a comment explaining why.
 4. If CODESCENE fails: run `bun run codescene --file <path>` to fix
 5. Re-run `bun quality-gate` to resume from last failed stage
@@ -306,6 +306,7 @@ within each lifecycle stage. Key rules:
 - Subagents are dispatched **per lifecycle stage only** — no mixing stages in the same wave
 - Each stage must fully complete before advancing to the next
 - Stage order: `tsgo` → `oxlint` → `biome:check` → `lint` → `duplicates` → `unused` (knip) → `codescene`
+- **DUPLICATES failure is intended**: The `duplicates` stage runs `bun check:duplicates` (jscpd) with zero clone tolerance (`threshold: 0`, `--exit-code`). Quality gate failing on duplicate code is strictly intended by design — never bypass it; resolve all clones via extraction.
 
 ### Subagent Dispatch Model
 

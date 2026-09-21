@@ -124,6 +124,8 @@ type checking), which catches `sonarjs/different-types-comparison`, `sonarjs/cog
 type-dependent rules. These commonly surface after oxlint fixes and must be resolved in the same
 subagent session.
 
+Note: The `duplicates` and `codescene` lifecycle stages run `check:duplicates` (jscpd). Quality checks failing on duplicate code is **intended** by design (`threshold: 0`, `--exit-code`) — zero clone tolerance is enforced. All duplications must be fixed via extraction.
+
 For batch verification of ALL uncommitted files (staged or unstaged):
 
 ```bash

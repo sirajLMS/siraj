@@ -115,7 +115,7 @@ jobs:
 
 ## Build-Time Generation
 
-`vercel.json` is **gitignored** and generated during `prebuild` / GHA `vercel build` by `scripts/build/generate-vercel-config.ts` (`ignoreCommand: "exit 0"`, `fluid`, crons). Builds run only on GitHub Actions — see [vercel-prebuilt.md](./vercel-prebuilt.md). On each Vercel project set **Ignored Build Step → Don't build anything**.
+`vercel.json` is **gitignored** and generated during `prebuild` / GHA `vercel build` by `scripts/build/generate-vercel-config.ts` (`ignoreCommand: "exit 0"`, `git`, `fluid`, crons). Builds run only on GitHub Actions — see [vercel-prebuilt.md](./vercel-prebuilt.md). On each Vercel project set **Ignored Build Step → Don't build anything**.
 
 Hobby-safe by default (`CRON_EXECUTION_MODE` unset or `vercel-daily`). Cron expressions are validated with `cron-parser` and the build **fails fast** on invalid input:
 
@@ -137,6 +137,11 @@ Expected output for `vercel-daily`:
 ```json
 {
   "ignoreCommand": "exit 0",
+  "git": {
+    "deploymentEnabled": {
+      "dev": false
+    }
+  },
   "fluid": true,
   "crons": [
     { "path": "/api/fx/refresh", "schedule": "0 6 * * *" },
@@ -151,6 +156,11 @@ Expected output for `vercel`:
 ```json
 {
   "ignoreCommand": "exit 0",
+  "git": {
+    "deploymentEnabled": {
+      "dev": false
+    }
+  },
   "fluid": true,
   "crons": [
     { "path": "/api/fx/refresh", "schedule": "0 6 * * *" },
