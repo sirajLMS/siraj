@@ -147,7 +147,10 @@
       "logoFileTooLarge": "حجم ملف الشعار يتجاوز 2 ميجابايت",
       "logoLoadFailed": "فشل تحميل الشعار",
       "primaryColor": "أساسي",
-      "secondaryColor": "ثانوي"
+      "secondaryColor": "ثانوي",
+      "siteName": "اسم الموقع",
+      "siteTitle": "عنوان الموقع",
+      "siteDescription": "وصف الموقع"
     }
   },
   "environment": {

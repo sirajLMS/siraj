@@ -147,7 +147,10 @@
       "logoFileTooLarge": "Logo file exceeds 2MB limit",
       "logoLoadFailed": "Logo load failed",
       "primaryColor": "Primary",
-      "secondaryColor": "Secondary"
+      "secondaryColor": "Secondary",
+      "siteName": "Site Name",
+      "siteTitle": "Site Title",
+      "siteDescription": "Site Description"
     }
   },
   "environment": {

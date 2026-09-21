@@ -24,6 +24,8 @@
     "generate:gqlSchema": "TEST_SERVER=1 bun run backend/graphql/generateGqlSchema.ts",
     "generate:iana-timezones": "bun run scripts/generate-iana-timezone-enum.ts",
     "generate:jwt-secrets": "bun run scripts/generate-jwt-secrets.ts",
+    "generate:encryption-key": "bun run scripts/generate-encryption-key.ts",
+    "generate:keys": "bun run scripts/generate-keys.ts",
     "codegen": "graphql-codegen",
     "codegen:watch": "graphql-codegen --watch",
     "test": "bun run scripts/lib/run-locked-cmd.ts test bun --env-file=.env.test test --timeout=60000",

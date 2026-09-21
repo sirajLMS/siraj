@@ -19,10 +19,7 @@
   },
   "json.schemas": [
     {
-      "fileMatch": [
-        "*appearance*.json",
-        ".brand.json"
-      ],
+      "fileMatch": ["*appearance*.json", ".brand.json"],
       "url": "./shared/schemas/appearance.schema.json"
     }
   ]

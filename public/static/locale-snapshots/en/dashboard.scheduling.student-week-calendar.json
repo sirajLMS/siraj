@@ -1,0 +1,8 @@
+{
+  "pageTitle": "Weekly Schedule",
+  "today": "Today",
+  "previousWeek": "Previous week",
+  "nextWeek": "Next week",
+  "failedToLoad": "Failed to load schedule.",
+  "defaultSubject": "Session"
+}

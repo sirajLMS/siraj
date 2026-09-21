@@ -12,5 +12,6 @@
   "fileTooLarge": {
     "__fn": "maxMb=>`File exceeds ${maxMb} MB.`"
   },
-  "uploadFailed": "Image upload failed. Please try again."
+  "uploadFailed": "Image upload failed. Please try again.",
+  "readFailed": "Failed to read file as data URL"
 }

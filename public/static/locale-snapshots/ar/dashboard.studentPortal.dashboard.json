@@ -34,5 +34,30 @@
   },
   "durationMinutesShort": {
     "__fn": "minutes=>`${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
+  },
+  "widgets": {
+    "quickAction": {
+      "complaints": "الشكاوى",
+      "payments": "المدفوعات",
+      "calendar": "التقويم",
+      "appraisals": "التقييمات"
+    },
+    "openRequests": {
+      "title": "الطلبات المفتوحة",
+      "emptyState": "لا توجد طلبات بعد",
+      "emptyStateDescription": "لم تقدّم أي طلب تأجيل أو إلغاء حتى الآن.",
+      "viewAll": "عرض جميع الطلبات",
+      "requestType": {
+        "delay": "تأجيل",
+        "cancel": "إلغاء"
+      },
+      "status": {
+        "pending": "قيد الانتظار",
+        "approved": "مقبول",
+        "rejected": "مرفوض",
+        "rescheduled": "معاد جدولته",
+        "cancelled": "ملغى"
+      }
+    }
   }
 }

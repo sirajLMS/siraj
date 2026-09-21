@@ -61,6 +61,7 @@
     "description": "Try a different month or check back later."
   },
   "error": {
-    "monthInvalid": "Month must be in YYYY-MM format."
+    "monthInvalid": "Month must be in YYYY-MM format.",
+    "paginationInvalid": "Page size and offset must be positive numbers within the allowed range."
   }
 }
