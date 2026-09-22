@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { alpha, type Theme } from "@mui/material/styles";
 import { useState } from "react";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { SessionActions } from "@/frontend/common/views/dashboard/scheduling/session-actions/SessionActions";
 import {
   addDays,
@@ -26,8 +27,15 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 7);
 
+// Cached DateTimeFormat options objects at module level for Tier-1 WeakMap cache lookup in getDateTimeFormatter
+const WEEKDAY_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { weekday: "short" };
+const CELL_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" };
+const HOUR_LABEL_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { hour: "numeric", hour12: true };
+const RANGE_DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { month: "long", day: "numeric" };
+const RANGE_END_DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = { month: "long", day: "numeric", year: "numeric" };
+
 function formatHour(hour: number, locale: string): string {
-  return new Date(0, 0, 0, hour).toLocaleTimeString(locale, { hour: "numeric", hour12: true });
+  return getDateTimeFormatter(locale, HOUR_LABEL_FORMAT_OPTIONS).format(new Date(0, 0, 0, hour));
 }
 
 function OutcomeChip({ outcome }: Readonly<{ outcome: string }>) {
@@ -78,7 +86,7 @@ function SessionCard({
               variant="caption"
               sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700, fontSize: "0.7rem" })}
             >
-              {startDate.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
+              {getDateTimeFormatter(locale, CELL_TIME_FORMAT_OPTIONS).format(startDate)}
             </Typography>
             <Typography
               variant="caption"
@@ -128,7 +136,7 @@ function WeekGrid({
   defaultSubject,
 }: Readonly<{ classes: readonly StudentClassRow[]; weekStart: Date; locale: string; defaultSubject: string }>) {
   const now = new Date();
-  const dayFormatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
+  const dayFormatter = getDateTimeFormatter(locale, WEEKDAY_FORMAT_OPTIONS);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: 600 }}>
       <Box sx={theme => ({ display: "flex", borderBottom: `1px solid ${gridLineColor(theme)}` })}>
@@ -251,8 +259,8 @@ export function StudentWeekCalendarContainer() {
           <ChevronLeftOutlined />
         </IconButton>
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          {weekStart.toLocaleDateString(locale, { month: "long", day: "numeric" })} —{" "}
-          {addDays(weekStart, 6).toLocaleDateString(locale, { month: "long", day: "numeric", year: "numeric" })}
+          {getDateTimeFormatter(locale, RANGE_DATE_FORMAT_OPTIONS).format(weekStart)} —{" "}
+          {getDateTimeFormatter(locale, RANGE_END_DATE_FORMAT_OPTIONS).format(addDays(weekStart, 6))}
         </Typography>
         <IconButton onClick={goToNextWeek} aria-label={labels.nextWeek}>
           <ChevronRightOutlined />
