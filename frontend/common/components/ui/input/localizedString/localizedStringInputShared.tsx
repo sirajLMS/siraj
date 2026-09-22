@@ -1,7 +1,7 @@
 "use client";
 
 import { EditOutlined } from "@mui/icons-material";
-import { Box, Button, FormHelperText, IconButton, TextField } from "@mui/material";
+import { Box, Button, FormHelperText, IconButton, TextField, Tooltip } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { type ReactNode, useRef } from "react";
 import type {
@@ -40,15 +40,17 @@ type EditDrawerControlProps = {
 function renderEditDrawerControl({ t, isCompact, disabled, onOpen }: EditDrawerControlProps): ReactNode {
   if (isCompact) {
     return (
-      <IconButton
-        aria-label={t.editTranslations}
-        onClick={onOpen}
-        disabled={disabled}
-        size="small"
-        sx={{ flexShrink: 0 }}
-      >
-        <EditOutlined fontSize="small" />
-      </IconButton>
+      <Tooltip title={t.editTranslations}>
+        <IconButton
+          aria-label={t.editTranslations}
+          onClick={onOpen}
+          disabled={disabled}
+          size="small"
+          sx={{ flexShrink: 0 }}
+        >
+          <EditOutlined fontSize="small" />
+        </IconButton>
+      </Tooltip>
     );
   }
   return (
