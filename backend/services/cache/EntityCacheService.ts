@@ -55,14 +55,25 @@ export function stableStringify(value: unknown): string {
     return JSON.stringify(value);
   }
   if (Array.isArray(value)) {
-    const items = value.map(stableStringify).join(",");
-    return `[${items}]`;
+    const len = value.length;
+    const items: string[] = new Array(len);
+    for (let i = 0; i < len; i++) {
+      const s = stableStringify(value[i]);
+      items[i] = s === undefined ? "" : s;
+    }
+    return "[" + items.join(",") + "]";
   }
-  const entries = Object.entries(value)
-    .toSorted((a, b) => a[0].localeCompare(b[0]))
-    .map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`)
-    .join(",");
-  return `{${entries}}`;
+  // In-place sort of Object.keys() avoids Object.entries() tuple allocations and .map() array copies
+  const keys = Object.keys(value).sort((a, b) => a.localeCompare(b));
+  const len = keys.length;
+  const parts: string[] = new Array(len);
+  for (let i = 0; i < len; i++) {
+    const k = keys[i];
+    if (k !== undefined) {
+      parts[i] = JSON.stringify(k) + ":" + stableStringify((value as Record<string, unknown>)[k]);
+    }
+  }
+  return "{" + parts.join(",") + "}";
 }
 
 /** Parses a tag index JSON array from a cache string, returning null on failure. */
