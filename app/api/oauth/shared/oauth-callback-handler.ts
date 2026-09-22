@@ -68,6 +68,13 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
     return NextResponse.json({ error: tErrors.missingCodeOrState }, { status: 400 });
   }
 
+  // Security: validate state query param format (compact JWT base64url: header.payload.signature)
+  // before attempting signature verification and cache lookups.
+  const JWT_COMPACT_REGEX = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/;
+  if (!JWT_COMPACT_REGEX.test(state)) {
+    return NextResponse.json({ error: tErrors.invalidOrExpiredOAuthState }, { status: 400 });
+  }
+
   const statePayload = await verifyAndConsumeOAuthState(state, request.cookies.get("session_id")?.value);
   if (!statePayload) {
     return NextResponse.json({ error: tErrors.invalidOrExpiredOAuthState }, { status: 400 });
