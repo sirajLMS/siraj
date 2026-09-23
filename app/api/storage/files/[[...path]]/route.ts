@@ -9,6 +9,7 @@ import {
   resolvePublicStoragePath,
   verifyToken,
 } from "@/backend/lib";
+import { apiRateLimiter, checkRateLimit, getClientIdentifier } from "@/backend/lib/ratelimit";
 import { SessionService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
@@ -234,6 +235,11 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path?: string[] }> }) {
   const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
   const tErrors = getServerTranslations(locale).errorsTranslations;
+
+  const rateLimit = await checkRateLimit(getClientIdentifier(request), apiRateLimiter);
+  if (!rateLimit.success) {
+    return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
+  }
 
   try {
     const relativePath = await getRelativePath(params);
