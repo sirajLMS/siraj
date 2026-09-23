@@ -58,13 +58,15 @@ export function DateNavigatorMobile({
   return (
     <StyledDateControls>
       <Tooltip title={previousDayLabel}>
-        <StyledDateNavButton
-          size="small"
-          aria-label={previousDayLabel}
-          onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, -1))}
-        >
-          <ChevronLeft fontSize="small" sx={rtlFlipIconSx} />
-        </StyledDateNavButton>
+        <span>
+          <StyledDateNavButton
+            size="small"
+            aria-label={previousDayLabel}
+            onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, -1))}
+          >
+            <ChevronLeft fontSize="small" sx={rtlFlipIconSx} />
+          </StyledDateNavButton>
+        </span>
       </Tooltip>
 
       <MobileAppDatePicker
@@ -86,30 +88,36 @@ export function DateNavigatorMobile({
       />
 
       <Tooltip title={nextDayLabel}>
-        <StyledDateNavButton
-          size="small"
-          aria-label={nextDayLabel}
-          onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, 1))}
-        >
-          <ChevronRight fontSize="small" sx={rtlFlipIconSx} />
-        </StyledDateNavButton>
+        <span>
+          <StyledDateNavButton
+            size="small"
+            aria-label={nextDayLabel}
+            onClick={() => onDateChange(shiftScheduleFilterDate(dateValue, 1))}
+          >
+            <ChevronRight fontSize="small" sx={rtlFlipIconSx} />
+          </StyledDateNavButton>
+        </span>
       </Tooltip>
 
-      <Button
-        variant="text"
-        size="small"
-        disabled={isTodaySelected}
-        onClick={() => onDateChange(getTodayScheduleFilterDate())}
-        sx={{
-          flexShrink: 0,
-          minWidth: "auto",
-          px: 0.75,
-          height: 36,
-          whiteSpace: "nowrap",
-        }}
-      >
-        {todayLabel}
-      </Button>
+      <Tooltip title={todayLabel}>
+        <span>
+          <Button
+            variant="text"
+            size="small"
+            disabled={isTodaySelected}
+            onClick={() => onDateChange(getTodayScheduleFilterDate())}
+            sx={{
+              flexShrink: 0,
+              minWidth: "auto",
+              px: 0.75,
+              height: 36,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {todayLabel}
+          </Button>
+        </span>
+      </Tooltip>
     </StyledDateControls>
   );
 }
