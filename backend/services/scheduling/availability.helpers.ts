@@ -139,13 +139,28 @@ export function validateSlotInMemory(
 
 // ── Batch slot bounds ────────────────────────────────────────────────────────
 
+/**
+ * Computes the earliest start and latest end dates across an array of slots.
+ * Uses a single-pass O(N) loop to eliminate array allocations from `.map()`
+ * and prevent stack depth overflow from `Math.min`/`Math.max` argument spreads.
+ */
 export function computeSlotBounds(slots: { startTime: Date; endTime: Date }[]): {
   earliestStart: Date;
   latestEnd: Date;
 } {
-  const earliestStart = new Date(Math.min(...slots.map(s => s.startTime.getTime())));
-  const latestEnd = new Date(Math.max(...slots.map(s => s.endTime.getTime())));
-  return { earliestStart, latestEnd };
+  let minStart = Infinity;
+  let maxEnd = -Infinity;
+  for (let i = 0; i < slots.length; i++) {
+    const slot = slots[i];
+    const startMs = slot.startTime.getTime();
+    const endMs = slot.endTime.getTime();
+    if (startMs < minStart) minStart = startMs;
+    if (endMs > maxEnd) maxEnd = endMs;
+  }
+  return {
+    earliestStart: new Date(minStart),
+    latestEnd: new Date(maxEnd),
+  };
 }
 
 // ── Vacation status validation ───────────────────────────────────────────────
