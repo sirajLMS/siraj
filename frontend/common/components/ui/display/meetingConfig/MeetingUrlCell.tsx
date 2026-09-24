@@ -1,16 +1,15 @@
 "use client";
 
-import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import { Button, IconButton, Stack, Tooltip } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import type * as React from "react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig/CopyMeetingUrlButton";
 import {
   type MeetingUrlStatus,
   MeetingUrlStatusBadge,
 } from "@/frontend/common/components/ui/display/meetingConfig/MeetingUrlStatusBadge";
-import { logger } from "@/frontend/common/utils/logger";
 import { Link } from "@/shared/i18n";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { MeetingUrlStatusLabels } from "@/shared/locale/types/dashboard/meeting-url-status";
@@ -51,50 +50,6 @@ function mapStatus(status: string | null | undefined, hasUrl: boolean): MeetingU
   if (status === "pending") return "pending";
   if (hasUrl && (status === "generated" || !status)) return "generated";
   return "pending";
-}
-
-// ---------------------------------------------------------------------------
-// Internal: copy URL icon button
-// ---------------------------------------------------------------------------
-
-function CopyButton({
-  url,
-  labels,
-  iconButtonSize = "small",
-}: {
-  readonly url: string;
-  readonly labels: MeetingUrlStatusLabels;
-  readonly iconButtonSize?: "small" | "medium";
-}): React.ReactElement {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      logger.warn("Clipboard write failed for meeting URL");
-    }
-  }, [url]);
-
-  const isSmall = iconButtonSize === "small";
-
-  return (
-    <Tooltip title={labels.copyUrl}>
-      <IconButton
-        size={iconButtonSize}
-        onClick={handleCopy}
-        aria-label={labels.copyUrl}
-        aria-pressed={copied}
-        sx={theme => ({
-          color: copied ? theme.palette.success.main : theme.palette.text.secondary,
-        })}
-      >
-        <ContentCopyOutlinedIcon fontSize={isSmall ? "small" : "medium"} />
-      </IconButton>
-    </Tooltip>
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -156,7 +111,7 @@ function renderCompactCell(
       {status === "generated" ? (
         <>
           <JoinButton url={meetingUrl} label={joinLabel} onJoin={onJoin} />
-          {canCopyUrl ? <CopyButton url={meetingUrl} labels={labels} iconButtonSize="small" /> : null}
+          {canCopyUrl ? <CopyMeetingUrlButton meetingUrl={meetingUrl} size="small" /> : null}
         </>
       ) : null}
       {status === "failed" && onRetry ? (
@@ -219,7 +174,7 @@ function renderFullLayout(
       {status === "generated" ? (
         <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
           <JoinButton url={meetingUrl} label={joinLabel} onJoin={onJoin} variant="outlined" buttonSize="medium" />
-          {canCopyUrl ? <CopyButton url={meetingUrl} labels={labels} iconButtonSize="medium" /> : null}
+          {canCopyUrl ? <CopyMeetingUrlButton meetingUrl={meetingUrl} size="medium" /> : null}
         </Stack>
       ) : null}
       {status === "failed" && onRetry ? (
