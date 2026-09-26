@@ -70,6 +70,13 @@ function linearizeChannel(c: number): number {
 }
 
 /**
+ * Module-level cache for relative luminance results by hex color string.
+ * Avoids repeated regex matching, string slicing, parseInt, and channel
+ * linearization math on hot execution paths (e.g. theme updates, badge rendering).
+ */
+const luminanceCache = new Map<string, number>();
+
+/**
  * Compute the WCAG 2.1 relative luminance of a `#RRGGBB` color.
  *
  * Returns a value in `[0, 1]` where:
@@ -84,8 +91,14 @@ function linearizeChannel(c: number): number {
  * relativeLuminance("#1976d2") // → ~0.18 (MUI default primary)
  */
 function relativeLuminance(hex: string): number {
+  const cached = luminanceCache.get(hex);
+  if (cached !== undefined) {
+    return cached;
+  }
   const { r, g, b } = parseHex(hex);
-  return 0.2126 * linearizeChannel(r) + 0.7152 * linearizeChannel(g) + 0.0722 * linearizeChannel(b);
+  const lum = 0.2126 * linearizeChannel(r) + 0.7152 * linearizeChannel(g) + 0.0722 * linearizeChannel(b);
+  luminanceCache.set(hex, lum);
+  return lum;
 }
 
 /**
@@ -158,7 +171,12 @@ const CONTRAST_WHITE = "#ffffff";
 const CONTRAST_BLACK = "#000000";
 
 export function pickOnPrimary(primaryMain: string): "#ffffff" | "#000000" {
-  const againstWhite = contrastRatio(primaryMain, CONTRAST_WHITE);
-  const againstBlack = contrastRatio(primaryMain, CONTRAST_BLACK);
+  // Optimization: calculate relative luminance of primaryMain once, and compute
+  // contrast ratios directly against pure white (L=1.0) and pure black (L=0.0).
+  // This avoids calling contrastRatio twice, eliminating redundant hex parsing,
+  // regex tests, and channel linearizations for white and black constants.
+  const lPrimary = relativeLuminance(primaryMain);
+  const againstWhite = 1.05 / (lPrimary + 0.05);
+  const againstBlack = (lPrimary + 0.05) / 0.05;
   return againstBlack > againstWhite ? CONTRAST_BLACK : CONTRAST_WHITE;
 }
