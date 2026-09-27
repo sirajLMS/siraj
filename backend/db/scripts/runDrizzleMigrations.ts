@@ -234,6 +234,14 @@ export async function runDrizzleMigrations(db: PgMigratorDatabase, config: Drizz
     } else {
       logger.log(`Re-applied migration (content changed): ${migrationName}`);
     }
+
+    // On a fresh database, enum types do not exist yet when ensureEnumValuesCommitted()
+    // runs before migrations start. When a migration creates an enum type, re-run
+    // ensureEnumValuesCommitted() so that any future enum values across all migration
+    // folders are pre-committed for that newly created type.
+    if (migration.sql.some(stmt => /\bCREATE\s+TYPE\b/i.test(stmt))) {
+      await ensureEnumValuesCommitted();
+    }
   };
 
   await migrationsToRun.reduce<Promise<unknown>>(

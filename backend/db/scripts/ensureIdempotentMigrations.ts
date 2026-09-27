@@ -311,11 +311,18 @@ export function extractEnumAddValueStatementsFromSql(content: string): string[] 
   return statements;
 }
 
+const existingEnumTypesCache = new Set<string>();
+
 async function enumTypeExists(typeName: string): Promise<boolean> {
+  if (existingEnumTypesCache.has(typeName)) return true;
   const { db } = await import("@/backend/db/drizzleDb");
   const { sql } = await import("drizzle-orm");
   const result = await db.execute(sql`SELECT 1 FROM pg_type WHERE typname = ${typeName} LIMIT 1`);
-  return result.rows.length > 0;
+  const exists = result.rows.length > 0;
+  if (exists) {
+    existingEnumTypesCache.add(typeName);
+  }
+  return exists;
 }
 
 /**
@@ -359,10 +366,25 @@ export async function preCommitEnumStatementsForMigrationFile(migrationPath: str
   const statements = extractEnumAddValueStatementsFromSql(content);
   if (statements.length === 0) return;
 
+  const statementMatches = statements.map(stmt => ({
+    stmt,
+    typeName: /\bALTER\s+TYPE\s+("?(\w+)"?)\s+ADD\s+VALUE/i.exec(stmt)?.[2],
+  }));
+
+  const uniqueTypeNames = [...new Set(statementMatches.map(m => m.typeName).filter((t): t is string => Boolean(t)))];
+  const typeExistence = await Promise.all(uniqueTypeNames.map(async t => [t, await enumTypeExists(t)] as const));
+  const existingTypes = new Set(typeExistence.filter(([, exists]) => exists).map(([t]) => t));
+
+  const applicableStatements = statementMatches
+    .filter(m => m.typeName && existingTypes.has(m.typeName))
+    .map(m => m.stmt);
+
+  if (applicableStatements.length === 0) return;
+
   logger.log(
-    `Ensure Enum Values Committed: Pre-executing ${statements.length} enum addition(s) from ${migrationPath}...`
+    `Ensure Enum Values Committed: Pre-executing ${applicableStatements.length} enum addition(s) from ${migrationPath}...`
   );
-  await preCommitEnumStatements(statements);
+  await preCommitEnumStatements(applicableStatements);
 }
 
 /**
