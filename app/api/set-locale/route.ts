@@ -70,16 +70,21 @@ function resolveLocaleFromRequest(request: NextRequest): string {
 export function resolveTrustedOrigin(request: NextRequest): string {
   const candidateHost = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
   if (candidateHost) {
-    const candidateHostName = candidateHost.split(":")[0];
-    const isTrusted =
-      candidateHost === request.nextUrl.host ||
-      candidateHostName === request.nextUrl.hostname ||
-      ALLOWED_ORIGINS.has(candidateHost) ||
-      ALLOWED_ORIGINS.has(`http://${candidateHost}`) ||
-      ALLOWED_ORIGINS.has(`https://${candidateHost}`);
-    if (isTrusted) {
-      const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "");
-      return `${proto}://${candidateHost}`;
+    const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "");
+    try {
+      const candidateUrl = new URL(`${proto}://${candidateHost}`);
+      const candidateOrigin = candidateUrl.origin;
+      const isTrusted =
+        candidateUrl.host === request.nextUrl.host ||
+        candidateUrl.hostname === request.nextUrl.hostname ||
+        ALLOWED_ORIGINS.has(candidateOrigin) ||
+        ALLOWED_ORIGINS.has(candidateHost) ||
+        ALLOWED_ORIGINS.has(candidateUrl.host);
+      if (isTrusted) {
+        return candidateOrigin;
+      }
+    } catch {
+      // Return fallback below on invalid host/proto header URL formatting
     }
   }
   return request.nextUrl.origin;
