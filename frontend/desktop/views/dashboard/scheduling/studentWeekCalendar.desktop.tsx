@@ -14,7 +14,8 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha, type Theme } from "@mui/material/styles";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { formatTime, getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { SessionActions } from "@/frontend/common/views/dashboard/scheduling/session-actions/SessionActions";
 import {
   addDays,
@@ -23,11 +24,19 @@ import {
   useStudentWeekCalendarViewModel,
 } from "@/frontend/common/views/dashboard/scheduling/student-week-calendar/useStudentWeekCalendarViewModel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 7);
 
+// Module-level options objects so getDateTimeFormatter hits its WeakMap
+// tier-1 cache by options identity instead of allocating fresh instances.
+const HOUR_NUMERIC_OPTIONS: Intl.DateTimeFormatOptions = { hour: "numeric", hour12: true };
+const WEEKDAY_SHORT_OPTIONS: Intl.DateTimeFormatOptions = { weekday: "short" };
+const MONTH_DAY_OPTIONS: Intl.DateTimeFormatOptions = { month: "long", day: "numeric" };
+const MONTH_DAY_YEAR_OPTIONS: Intl.DateTimeFormatOptions = { month: "long", day: "numeric", year: "numeric" };
+
 function formatHour(hour: number, locale: string): string {
-  return new Date(0, 0, 0, hour).toLocaleTimeString(locale, { hour: "numeric", hour12: true });
+  return getDateTimeFormatter(getLatnLocaleTag(locale), HOUR_NUMERIC_OPTIONS).format(new Date(0, 0, 0, hour));
 }
 
 function OutcomeChip({ outcome }: Readonly<{ outcome: string }>) {
@@ -78,7 +87,7 @@ function SessionCard({
               variant="caption"
               sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700, fontSize: "0.7rem" })}
             >
-              {startDate.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
+              {formatTime(startDate, locale)}
             </Typography>
             <Typography
               variant="caption"
@@ -128,7 +137,25 @@ function WeekGrid({
   defaultSubject,
 }: Readonly<{ classes: readonly StudentClassRow[]; weekStart: Date; locale: string; defaultSubject: string }>) {
   const now = new Date();
-  const dayFormatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
+  const dayFormatter = getDateTimeFormatter(getLatnLocaleTag(locale), WEEKDAY_SHORT_OPTIONS);
+
+  // Group classes by local calendar day so each day column resolves its
+  // sessions with a single map lookup instead of filtering the full list.
+  const classesByDayKey = useMemo(() => {
+    const map = new Map<string, StudentClassRow[]>();
+    for (const cls of classes) {
+      const parsed = new Date(cls.scheduledStartAt);
+      if (Number.isNaN(parsed.getTime())) continue;
+      const key = `${parsed.getFullYear()}-${parsed.getMonth()}-${parsed.getDate()}`;
+      let list = map.get(key);
+      if (!list) {
+        list = [];
+        map.set(key, list);
+      }
+      list.push(cls);
+    }
+    return map;
+  }, [classes]);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: 600 }}>
       <Box sx={theme => ({ display: "flex", borderBottom: `1px solid ${gridLineColor(theme)}` })}>
@@ -197,7 +224,8 @@ function WeekGrid({
         </Box>
         {Array.from({ length: 7 }, (_, idx) => {
           const dayDate = addDays(weekStart, idx);
-          const dayClasses = classes.filter(c => sameDay(new Date(c.scheduledStartAt), dayDate));
+          const dayKey = `${dayDate.getFullYear()}-${dayDate.getMonth()}-${dayDate.getDate()}`;
+          const dayClasses = classesByDayKey.get(dayKey) ?? [];
           return (
             <Box
               key={dayDate.toISOString()}
@@ -251,8 +279,8 @@ export function StudentWeekCalendarContainer() {
           <ChevronLeftOutlined />
         </IconButton>
         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          {weekStart.toLocaleDateString(locale, { month: "long", day: "numeric" })} —{" "}
-          {addDays(weekStart, 6).toLocaleDateString(locale, { month: "long", day: "numeric", year: "numeric" })}
+          {getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_DAY_OPTIONS).format(weekStart)} —{" "}
+          {getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_DAY_YEAR_OPTIONS).format(addDays(weekStart, 6))}
         </Typography>
         <IconButton onClick={goToNextWeek} aria-label={labels.nextWeek}>
           <ChevronRightOutlined />

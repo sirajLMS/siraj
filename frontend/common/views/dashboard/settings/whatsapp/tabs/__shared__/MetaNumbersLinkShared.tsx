@@ -12,6 +12,20 @@ const META_PHONE_NUMBERS_SETTINGS_URL = "https://business.facebook.com/latest/wh
 /** Feedback window after a successful copy, matching MeetingUrlCell. */
 const COPY_FEEDBACK_MS = 2000;
 
+/** Visually-hidden style for the screen-reader live region announcing copy feedback. */
+const visuallyHiddenSx = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  margin: -1,
+  padding: 0,
+  border: 0,
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  whiteSpace: "nowrap",
+} as const;
+
 export type MetaNumbersLinkLabels = Pick<
   WhatsappLabels,
   | "metaNumbersHelpTitle"
@@ -96,6 +110,10 @@ export function MetaNumbersLinkShared({ labels }: Readonly<{ readonly labels: Me
           </Tooltip>
         </Stack>
       </Stack>
+
+      <Box component="output" aria-live="polite" sx={visuallyHiddenSx}>
+        {copied ? labels.metaNumbersCopied : ""}
+      </Box>
 
       <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
         {labels.metaNumbersHelpBody}

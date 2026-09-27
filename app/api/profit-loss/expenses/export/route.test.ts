@@ -252,6 +252,8 @@ describe("GET /api/profit-loss/expenses/export", () => {
       expect(response.headers.get("Content-Disposition")).toBe(
         `attachment; filename="profit-loss-expenses-${MONTH}.csv"`
       );
+      expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+      expect(response.headers.get("Content-Security-Policy")).toBe("default-src 'none'; sandbox");
       expect(response.headers.get("X-Export-Truncated")).toBe("false");
 
       expect(getReportMock).toHaveBeenCalledTimes(1);

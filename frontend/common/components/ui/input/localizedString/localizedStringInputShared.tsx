@@ -1,9 +1,10 @@
 "use client";
 
 import { EditOutlined } from "@mui/icons-material";
-import { Box, Button, FormHelperText, IconButton, TextField } from "@mui/material";
+import { Box, Button, FormHelperText, TextField } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 import { type ReactNode, useRef } from "react";
+import { TooltipIconButton } from "@/frontend/common/components/ui";
 import type {
   LocaleAdornmentSwitchProps,
   LocalizedStringDrawerProps,
@@ -40,15 +41,14 @@ type EditDrawerControlProps = {
 function renderEditDrawerControl({ t, isCompact, disabled, onOpen }: EditDrawerControlProps): ReactNode {
   if (isCompact) {
     return (
-      <IconButton
-        aria-label={t.editTranslations}
+      <TooltipIconButton
+        label={t.editTranslations}
         onClick={onOpen}
         disabled={disabled}
         size="small"
+        icon={<EditOutlined fontSize="small" />}
         sx={{ flexShrink: 0 }}
-      >
-        <EditOutlined fontSize="small" />
-      </IconButton>
+      />
     );
   }
   return (

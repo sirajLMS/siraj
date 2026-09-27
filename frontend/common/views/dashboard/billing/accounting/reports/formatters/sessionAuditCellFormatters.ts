@@ -66,6 +66,19 @@ export function formatDurationMinutes(minutes: number | null | undefined, labels
   return String(Math.round(minutes));
 }
 
+/** Cache of percentage `Intl.NumberFormat` instances keyed by locale tag. */
+const percentageNumberFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getPercentageNumberFormat(locale: string): Intl.NumberFormat {
+  const key = getLatnLocaleTag(locale);
+  let formatter = percentageNumberFormatCache.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(key, { maximumFractionDigits: 0 });
+    percentageNumberFormatCache.set(key, formatter);
+  }
+  return formatter;
+}
+
 /**
  * Partial-completion cell for the payroll column: a localized whole percentage
  * with a trailing percent sign, or the "not calculated" em-dash placeholder for
@@ -79,7 +92,7 @@ export function formatPartialPercentage(
   if (percentage == null || !Number.isFinite(percentage)) {
     return labels.notCalculated;
   }
-  const value = new Intl.NumberFormat(getLatnLocaleTag(locale), { maximumFractionDigits: 0 }).format(percentage);
+  const value = getPercentageNumberFormat(locale).format(percentage);
   return `${value}%`;
 }
 

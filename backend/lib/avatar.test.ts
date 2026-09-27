@@ -17,4 +17,29 @@ describe("resolveClassAvatarUrl", () => {
     expect(resolveClassAvatarUrl(null, null)).toBeNull();
     expect(resolveClassAvatarUrl(undefined, undefined)).toBeNull();
   });
+
+  test("allows safe relative paths starting with a single slash", () => {
+    expect(resolveClassAvatarUrl("/api/storage/files/recurring.png", "/images/subject.png")).toBe(
+      "/api/storage/files/recurring.png"
+    );
+    expect(resolveClassAvatarUrl(null, "/images/subject.png")).toBe("/images/subject.png");
+  });
+
+  test("rejects unsafe recurring avatar and falls back to safe subject avatar", () => {
+    expect(resolveClassAvatarUrl("javascript:alert(1)", "https://example.com/subject.png")).toBe(
+      "https://example.com/subject.png"
+    );
+    expect(resolveClassAvatarUrl("data:text/html,<script>alert(1)</script>", "/images/subject.png")).toBe(
+      "/images/subject.png"
+    );
+    expect(resolveClassAvatarUrl("//evil.com/avatar.png", "https://example.com/subject.png")).toBe(
+      "https://example.com/subject.png"
+    );
+  });
+
+  test("returns null when both recurring and subject avatars are unsafe", () => {
+    expect(resolveClassAvatarUrl("javascript:alert(1)", "data:text/html,x")).toBeNull();
+    expect(resolveClassAvatarUrl("//evil.com/a.png", "vbscript:msgbox(1)")).toBeNull();
+    expect(resolveClassAvatarUrl("/\\evil.com", "javascript:void(0)")).toBeNull();
+  });
 });

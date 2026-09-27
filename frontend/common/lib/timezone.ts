@@ -64,22 +64,36 @@ function getTimezonePartsFormatter(timeZone: string): Intl.DateTimeFormat {
 }
 
 /**
+ * Single-pass parsing of `Intl.DateTimeFormatPart[]` into UTC epoch milliseconds.
+ * Direct iteration avoids the intermediate array and `Map` allocations that
+ * `.map()` + `new Map()` would create on hot paths like `getTimezoneOptions`.
+ */
+function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
+  let year = 0;
+  let month = 0;
+  let day = 0;
+  let hour = 0;
+  let minute = 0;
+  let second = 0;
+  for (const part of parts) {
+    if (part.type === "year") year = Number(part.value);
+    else if (part.type === "month") month = Number(part.value) - 1;
+    else if (part.type === "day") day = Number(part.value);
+    else if (part.type === "hour") hour = Number(part.value) === 24 ? 0 : Number(part.value);
+    else if (part.type === "minute") minute = Number(part.value);
+    else if (part.type === "second") second = Number(part.value);
+  }
+  return Date.UTC(year, month, day, hour, minute, second);
+}
+
+/**
  * Offset of `timeZone` from UTC in milliseconds at `date`, derived from
  * `formatToParts` wall-clock components instead of reparsing a formatted
  * string (whose shape is implementation-defined across engines).
  */
 function getTimezoneOffsetMs(timeZone: string, date: Date): number {
   const parts = getTimezonePartsFormatter(timeZone).formatToParts(date);
-  const values = new Map(parts.map(part => [part.type, part.value]));
-  const asUtc = Date.UTC(
-    Number(values.get("year")),
-    Number(values.get("month")) - 1,
-    Number(values.get("day")),
-    Number(values.get("hour")) === 24 ? 0 : Number(values.get("hour")),
-    Number(values.get("minute")),
-    Number(values.get("second"))
-  );
-  return asUtc - date.getTime();
+  return partsToEpochMs(parts) - date.getTime();
 }
 
 function normalizeIanaTimezoneId(value: string): string {

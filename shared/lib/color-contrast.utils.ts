@@ -70,6 +70,14 @@ function linearizeChannel(c: number): number {
 }
 
 /**
+ * Module-level cache for relative luminance results by hex color string.
+ * Avoids repeated regex matching, string slicing, parseInt, and channel
+ * linearization math on warm execution paths (e.g. live color-picker
+ * previews and theme updates).
+ */
+const luminanceCache = new Map<string, number>();
+
+/**
  * Compute the WCAG 2.1 relative luminance of a `#RRGGBB` color.
  *
  * Returns a value in `[0, 1]` where:
@@ -84,8 +92,14 @@ function linearizeChannel(c: number): number {
  * relativeLuminance("#1976d2") // → ~0.18 (MUI default primary)
  */
 function relativeLuminance(hex: string): number {
+  const cached = luminanceCache.get(hex);
+  if (cached !== undefined) {
+    return cached;
+  }
   const { r, g, b } = parseHex(hex);
-  return 0.2126 * linearizeChannel(r) + 0.7152 * linearizeChannel(g) + 0.0722 * linearizeChannel(b);
+  const lum = 0.2126 * linearizeChannel(r) + 0.7152 * linearizeChannel(g) + 0.0722 * linearizeChannel(b);
+  luminanceCache.set(hex, lum);
+  return lum;
 }
 
 /**
@@ -142,14 +156,16 @@ export function wcagGrade(ratio: number): "AAA" | "AA" | "AA Large" | "Fail" {
  * contrast ratio of `primaryMain` against pure white and pure black, then
  * returns whichever produces the higher ratio.
  *
- * Ties (when both ratios are equal — e.g. mid-gray primaries with luminance
- * ≈ 0.5) prefer white, matching the MUI default `palette.primary.contrastText`
+ * Ties (when both ratios are exactly equal — i.e. a primary with luminance
+ * ≈ 0.179, right at the white/black crossover around `#757575`/`#767676`)
+ * prefer white, matching the MUI default `palette.primary.contrastText`
  * convention and keeping small-button text legible on most brand colors.
  *
  * @example
  * pickOnPrimary("#1976d2") // → "#ffffff" (dark blue → white text)
  * pickOnPrimary("#ffd600") // → "#000000" (yellow → black text)
- * pickOnPrimary("#767676") // → "#ffffff" (tie → default white)
+ * pickOnPrimary("#757575") // → "#ffffff" (just below the crossover → white)
+ * pickOnPrimary("#767676") // → "#000000" (just above the crossover → black)
  */
 // theme-token-allow: contrast-math only; never use in sx or styled()
 // WCAG computation constants — not UI colors. Used internally by pickOnPrimary
@@ -158,7 +174,11 @@ const CONTRAST_WHITE = "#ffffff";
 const CONTRAST_BLACK = "#000000";
 
 export function pickOnPrimary(primaryMain: string): "#ffffff" | "#000000" {
-  const againstWhite = contrastRatio(primaryMain, CONTRAST_WHITE);
-  const againstBlack = contrastRatio(primaryMain, CONTRAST_BLACK);
+  // Compute contrast directly against pure white (L = 1.0) and pure black
+  // (L = 0.0) using the primary's cached luminance, avoiding the redundant
+  // hex parsing and channel linearization of two full contrastRatio calls.
+  const lPrimary = relativeLuminance(primaryMain);
+  const againstWhite = 1.05 / (lPrimary + 0.05);
+  const againstBlack = (lPrimary + 0.05) / 0.05;
   return againstBlack > againstWhite ? CONTRAST_BLACK : CONTRAST_WHITE;
 }

@@ -186,11 +186,13 @@ function buildProfitLossCsvFilename(tab: string, month: string): string {
   return `attachment; filename="profit-loss-${tab}-${month}.csv"`;
 }
 
-/** Response headers for one P&L CSV export: content type, attachment filename, truncation flag. */
+/** Response headers for one P&L CSV export: content type, attachment filename, security headers, truncation flag. */
 export function buildProfitLossCsvHeaders(tab: string, month: string, truncated: boolean): Headers {
   const headers = new Headers();
   headers.set("Content-Type", "text/csv; charset=utf-8");
   headers.set("Content-Disposition", buildProfitLossCsvFilename(tab, month));
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("Content-Security-Policy", "default-src 'none'; sandbox");
   headers.set("X-Export-Truncated", truncated ? "true" : "false");
   return headers;
 }
