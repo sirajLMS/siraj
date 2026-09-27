@@ -70,13 +70,23 @@ function formatLedgerDate(isoDate: string, locale: AppLocale): string {
   return formatDate(date, locale, MISSING_VALUE);
 }
 
+/** Cache of `Intl.NumberFormat` instances for ledger amounts keyed by locale tag. */
+const ledgerNumberFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getLedgerNumberFormat(locale: string): Intl.NumberFormat {
+  let formatter = ledgerNumberFormatCache.get(locale);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    ledgerNumberFormatCache.set(locale, formatter);
+  }
+  return formatter;
+}
+
 /** Money amounts are decimal strings from the API; always render two fraction digits. */
 function formatLedgerAmount(amount: string | null, currency: string | null, locale: AppLocale): string {
   const rawAmount = amount?.trim() ?? "";
   const numeric = rawAmount === "" ? Number.NaN : Number(rawAmount);
-  const formatted = Number.isFinite(numeric)
-    ? new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric)
-    : MISSING_VALUE;
+  const formatted = Number.isFinite(numeric) ? getLedgerNumberFormat(locale).format(numeric) : MISSING_VALUE;
   const currencyCode = currency?.trim() ?? "";
   return currencyCode ? `${formatted} ${currencyCode}` : formatted;
 }

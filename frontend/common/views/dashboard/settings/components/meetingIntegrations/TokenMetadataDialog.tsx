@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { useId } from "react";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getProviderLabel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/connectedAccounts.helpers";
 import {
@@ -24,14 +25,17 @@ import {
 import type { MeetingIntegrationConnectedAccount } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
+const TOKEN_METADATA_DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  dateStyle: "medium",
+  timeStyle: "short",
+};
+
 function formatDate(date: Date | null | undefined, locale: "en" | "ar"): string {
   if (!date) {
     return "—";
   }
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
+  const localeTag = locale === "ar" ? "ar" : "en";
+  return getDateTimeFormatter(localeTag, TOKEN_METADATA_DATE_OPTIONS).format(date);
 }
 
 const labelUppercaseSx = (theme: Theme) => ({

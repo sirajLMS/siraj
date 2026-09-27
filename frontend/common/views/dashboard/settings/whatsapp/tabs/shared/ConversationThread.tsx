@@ -3,6 +3,7 @@
 import { ArrowBackOutlined, BlockOutlined, HideImageOutlined, LockOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, IconButton, Stack, type Theme, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { WhatsappMessageDirection } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappMessageRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappInboxView.types";
 import { getWhatsappMessageDirectionLabel } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappInboxDirectionLabel";
@@ -16,6 +17,7 @@ export interface ConversationThreadProps {
   readonly labels: WhatsappInboxLabels;
   readonly loading: boolean;
   readonly formatTimestamp: (iso: string | null) => string;
+  readonly locale?: string;
   /** When provided, a back button renders (mobile single-pane flow). */
   readonly onBack?: () => void;
 }
@@ -41,6 +43,8 @@ function isSameDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
+const DAY_DIVIDER_DATE_OPTIONS: Intl.DateTimeFormatOptions = { dateStyle: "medium" };
+
 function dayKey(sentAt: string | null): string | null {
   if (sentAt === null) {
     return null;
@@ -49,7 +53,7 @@ function dayKey(sentAt: string | null): string | null {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 
-function dayDividerLabel(sentAt: string | null, labels: WhatsappInboxLabels): string {
+function dayDividerLabel(sentAt: string | null, labels: WhatsappInboxLabels, locale?: string): string {
   if (sentAt === null) {
     return "";
   }
@@ -63,7 +67,8 @@ function dayDividerLabel(sentAt: string | null, labels: WhatsappInboxLabels): st
   if (isSameDay(date, yesterday)) {
     return labels.dayYesterday;
   }
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
+  const localeTag = locale === "ar" ? "ar" : (locale ?? "en");
+  return getDateTimeFormatter(localeTag, DAY_DIVIDER_DATE_OPTIONS).format(date);
 }
 
 /** Centered date pill dividing message groups by send day. */
@@ -193,7 +198,8 @@ interface ThreadBodyProps {
 function renderMessagesWithDayDividers(
   messages: readonly WhatsappMessageRow[],
   labels: WhatsappInboxLabels,
-  formatTimestamp: (iso: string | null) => string
+  formatTimestamp: (iso: string | null) => string,
+  locale?: string
 ): ReactNode[] {
   const nodes: ReactNode[] = [];
   let lastDay: string | null = null;
@@ -201,14 +207,22 @@ function renderMessagesWithDayDividers(
     const day = dayKey(message.sentAt);
     if (day !== null && day !== lastDay) {
       lastDay = day;
-      nodes.push(<DayDivider key={`day-${day}-${message.id}`} label={dayDividerLabel(message.sentAt, labels)} />);
+      nodes.push(
+        <DayDivider key={`day-${day}-${message.id}`} label={dayDividerLabel(message.sentAt, labels, locale)} />
+      );
     }
     nodes.push(<MessageBubble key={message.id} message={message} labels={labels} formatTimestamp={formatTimestamp} />);
   }
   return nodes;
 }
 
-function ThreadBody({ messages, labels, loading, formatTimestamp }: Readonly<ThreadBodyProps>) {
+function ThreadBody({
+  messages,
+  labels,
+  loading,
+  formatTimestamp,
+  locale,
+}: Readonly<ThreadBodyProps & { readonly locale?: string }>) {
   if (loading) {
     return (
       <Box component="output" sx={{ display: "flex", justifyContent: "center", py: 4 }} aria-busy>
@@ -223,7 +237,7 @@ function ThreadBody({ messages, labels, loading, formatTimestamp }: Readonly<Thr
       </Typography>
     );
   }
-  return <>{renderMessagesWithDayDividers(messages, labels, formatTimestamp)}</>;
+  return <>{renderMessagesWithDayDividers(messages, labels, formatTimestamp, locale)}</>;
 }
 
 /**
@@ -239,6 +253,7 @@ export function ConversationThread({
   labels,
   loading,
   formatTimestamp,
+  locale,
   onBack,
 }: Readonly<ConversationThreadProps>) {
   const lastMessageId = messages.length > 0 ? (messages[messages.length - 1]?.id ?? null) : null;
@@ -268,7 +283,13 @@ export function ConversationThread({
         sx={{ pt: 2, px: 2, pb: 3, minHeight: 240, maxHeight: 520, overflowY: "auto" }}
         component="section"
       >
-        <ThreadBody messages={messages} labels={labels} loading={loading} formatTimestamp={formatTimestamp} />
+        <ThreadBody
+          messages={messages}
+          labels={labels}
+          loading={loading}
+          formatTimestamp={formatTimestamp}
+          locale={locale}
+        />
       </Stack>
       <Stack
         direction="row"
