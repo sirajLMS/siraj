@@ -33,9 +33,17 @@ export type EditableTypographySlotProps = {
 };
 
 const HoverTypography = styled(Typography)(({ theme }) => ({
+  cursor: "pointer",
+  borderRadius: Number(theme.shape.borderRadius),
+  paddingInline: theme.spacing(0.5),
+  marginInline: theme.spacing(-0.5),
+  transition: theme.transitions.create(["background-color", "outline"]),
   "&:hover": {
-    cursor: "text",
     background: theme.palette.action.hover,
+  },
+  "&:focus-visible": {
+    outline: `2px solid ${theme.palette.primary.main}`,
+    outlineOffset: 2,
   },
 }));
 
@@ -63,6 +71,7 @@ function EditableTypographyEditField({
   return (
     <TextField
       {...textField}
+      autoFocus
       size={defaultTextFieldSize ? (textField.size ?? "small") : textField.size}
       sx={textFieldSx}
       value={inputValue}
@@ -178,6 +187,13 @@ export function EditableTypographyShared({
     [handleSave, handleCancel]
   );
 
+  const handleDisplayKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setIsEditing(true);
+    }
+  }, []);
+
   const endAdornment = useMemo(
     () => (
       <InputAdornment position="end">
@@ -217,15 +233,23 @@ export function EditableTypographyShared({
     );
   }
 
+  const editHint = doubleClickToEdit ? t.doubleClickToEdit : t.clickToEdit;
+
   return (
-    <HoverTypography
-      {...typography}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      {value}
-    </HoverTypography>
+    <Tooltip title={editHint}>
+      <HoverTypography
+        {...typography}
+        tabIndex={0}
+        role="button"
+        aria-label={`${value} (${editHint})`}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onKeyDown={handleDisplayKeyDown}
+      >
+        {value}
+      </HoverTypography>
+    </Tooltip>
   );
 }

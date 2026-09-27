@@ -1,4 +1,6 @@
 {
   "save": "Save",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "clickToEdit": "Click to edit",
+  "doubleClickToEdit": "Double-click to edit"
 }

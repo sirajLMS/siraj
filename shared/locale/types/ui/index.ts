@@ -369,6 +369,8 @@ export interface PaymentMethodLabels {
 export interface EditableTypographyLabels {
   readonly save: string;
   readonly cancel: string;
+  readonly clickToEdit: string;
+  readonly doubleClickToEdit: string;
 }
 
 export interface PhoneInputLabels {
