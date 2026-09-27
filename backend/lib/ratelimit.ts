@@ -172,9 +172,22 @@ class RateLimiter {
 export const graphqlRateLimiter = new RateLimiter("ratelimit:graphql", 100, 60 * 1000, true);
 
 /**
+ * Parses a positive integer env override. Returns the fallback when unset or
+ * invalid, so a typo in configuration can never disable or zero a limiter.
+ */
+function getPositiveIntEnv(name: string, fallback: number): number {
+  const raw = process.env[name];
+  const parsed = raw ? Number.parseInt(raw, 10) : Number.NaN;
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+/**
  * Authentication endpoints rate limiter (more restrictive)
- * Allows 10 login attempts per 15 minutes per IP address
+ * Defaults to 10 login attempts per 15 minutes per IP address
  * Prevents brute force attacks.
+ *
+ * Overridable via `AUTH_RATE_LIMIT_MAX` / `AUTH_RATE_LIMIT_WINDOW_MS`
+ * (milliseconds) for demo deployments that share one egress IP among many testers.
  *
  * Security note (r10-004): failOpen is set to FALSE so that if the cache
  * backend (Redis/PostgreSQL) is unavailable, authentication rate limiting
@@ -183,8 +196,8 @@ export const graphqlRateLimiter = new RateLimiter("ratelimit:graphql", 100, 60 *
  */
 export const authRateLimiter = new RateLimiter(
   "ratelimit:auth",
-  10,
-  15 * 60 * 1000, // 15 minutes
+  getPositiveIntEnv("AUTH_RATE_LIMIT_MAX", 10),
+  getPositiveIntEnv("AUTH_RATE_LIMIT_WINDOW_MS", 15 * 60 * 1000),
   false
 );
 

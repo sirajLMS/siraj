@@ -5,5 +5,24 @@
     "deploymentEnabled": {
       "dev": false
     }
-  }
+  },
+  "fluid": true,
+  "crons": [
+    {
+      "path": "/api/fx/refresh",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/class-reminders",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-sync-sweep",
+      "schedule": "13 6 * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-webhook-sweep",
+      "schedule": "18 6 * * *"
+    }
+  ]
 }
