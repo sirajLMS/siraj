@@ -23,30 +23,14 @@ describe("M5 — password policy", () => {
   // oxlint's `await-thenable` rule mis-flags the bun:test resolves/rejects
   // matcher chain as non-Promise-like.
 
-  test("rejects passwords shorter than 12 characters", async () => {
+  test.each([
+    ["passwords shorter than 12 characters", "Ab1!abcd"],
+    ["single-class lowercase-only passwords", "aaaaaaaaaaaa"],
+    ["single-class digits-only passwords", "123456789012"],
+  ])("rejects %s", async (_, invalidPassword) => {
     let threw = false;
     try {
-      await validatePasswordStrength("Ab1!abcd"); // 8 chars, was the old minimum
-    } catch {
-      threw = true;
-    }
-    expect(threw).toBe(true);
-  });
-
-  test("rejects single-class lowercase-only passwords", async () => {
-    let threw = false;
-    try {
-      await validatePasswordStrength("aaaaaaaaaaaa"); // 12 chars, 1 class
-    } catch {
-      threw = true;
-    }
-    expect(threw).toBe(true);
-  });
-
-  test("rejects single-class digits-only passwords", async () => {
-    let threw = false;
-    try {
-      await validatePasswordStrength("123456789012"); // 12 chars, 1 class
+      await validatePasswordStrength(invalidPassword);
     } catch {
       threw = true;
     }
@@ -197,16 +181,20 @@ describe("M11 — storage file responses are sandboxed", () => {
 });
 
 describe("H5 — host-header injection defense on redirect routes", () => {
-  test("set-locale and logout routes never redirect to a client-supplied unknown host", async () => {
+  test("set-locale, logout, and OAuth callback routes never redirect to a client-supplied unknown host", async () => {
     const setLocaleSrc = await readSrc("app/api/set-locale/route.ts");
     const logoutSrc = await readSrc("app/logout/route.ts");
+    const oauthHandlerSrc = await readSrc("app/api/oauth/shared/oauth-callback-handler.ts");
 
-    // Both must gate candidate host headers against nextUrl host / allowlist.
+    // All must gate candidate host headers against nextUrl host / allowlist.
     expect(setLocaleSrc).toContain("resolveTrustedOrigin");
     expect(setLocaleSrc).toContain("ALLOWED_ORIGINS.has");
     expect(logoutSrc).toContain("ALLOWED_ORIGINS.has");
-    // Raw host header must not be interpolated into the redirect without a trust check.
+    expect(oauthHandlerSrc).toContain("resolveTrustedOrigin");
+    expect(oauthHandlerSrc).toContain("ALLOWED_ORIGINS.has");
+    // Raw host header or unvalidated url.origin must not be interpolated into redirect targets directly.
     expect(logoutSrc).not.toMatch(/return host \? `\$\{proto\}:\/\/\$\{host\}`/);
+    expect(oauthHandlerSrc).not.toContain("NextResponse.redirect(new URL(returnPath, url.origin)");
   });
 
   test("logout route sanitizes client IP via the shared ratelimit identifier chain", async () => {

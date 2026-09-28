@@ -16,7 +16,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { getServerUserContext } from "@/backend/lib";
-import { ensureEnvironmentValidated } from "@/backend/lib/env";
+import { ensureEnvironmentValidated, getEnv, getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, oauthCallbackRateLimiter } from "@/backend/lib/ratelimit";
 import { buildCallbackRedirectUri, MeetingOAuthService, verifyAndConsumeOAuthState } from "@/backend/services";
@@ -29,6 +29,34 @@ import { getServerTranslations } from "@/shared/locale";
 // module continue to work without changing their import paths.
 
 ensureEnvironmentValidated();
+
+const envConfig = getEnvironmentConfig();
+const isProduction = envConfig.nodeEnv === "production";
+const ALLOWED_ORIGINS = new Set(
+  [
+    getEnv("NEXT_PUBLIC_BASE_URL", ""),
+    envConfig.allowedOrigin,
+    ...(isProduction ? [] : ["http://localhost:3000"]),
+  ].filter((v): v is string => typeof v === "string" && v.length > 0)
+);
+
+export function resolveTrustedOrigin(request: NextRequest): string {
+  const candidateHost = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  if (candidateHost) {
+    const candidateHostName = candidateHost.split(":")[0];
+    const isTrusted =
+      candidateHost === request.nextUrl.host ||
+      candidateHostName === request.nextUrl.hostname ||
+      ALLOWED_ORIGINS.has(candidateHost) ||
+      ALLOWED_ORIGINS.has(`http://${candidateHost}`) ||
+      ALLOWED_ORIGINS.has(`https://${candidateHost}`);
+    if (isTrusted) {
+      const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "");
+      return `${proto}://${candidateHost}`;
+    }
+  }
+  return request.nextUrl.origin;
+}
 
 /**
  * Runs the full OAuth callback GET flow for a single provider and returns the
@@ -113,5 +141,5 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
     return NextResponse.json({ error: tErrors.failedToCompleteOAuthTokenExchange }, { status: 502 });
   }
 
-  return NextResponse.redirect(new URL(returnPath, url.origin), 302);
+  return NextResponse.redirect(new URL(returnPath, resolveTrustedOrigin(request)), 302);
 }
