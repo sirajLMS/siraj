@@ -112,11 +112,20 @@ function summarizeSelection(
       leadingCount = count;
     }
   }
-  const totalAmount = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(total);
+  const totalAmount = getAmountNumberFormat(locale).format(total);
   return { count: carryoverIds.length, totalAmount, currency };
+}
+
+/** Cache of fixed-2 decimal Intl.NumberFormat instances keyed by locale tag. */
+const amountNumberFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getAmountNumberFormat(locale: string): Intl.NumberFormat {
+  let formatter = amountNumberFormatCache.get(locale);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    amountNumberFormatCache.set(locale, formatter);
+  }
+  return formatter;
 }
 
 function getGraphQLErrorCode(error: unknown): string | undefined {

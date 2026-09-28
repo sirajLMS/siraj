@@ -83,14 +83,25 @@ const SESSIONS_TABLE_SX = (theme: Theme) => ({
   "& tr:last-child td": { borderBottom: "none" },
 });
 
+/** Cache of max-2 fraction digit Intl.NumberFormat instances keyed by locale tag. */
+const sessionHoursNumberFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getSessionHoursNumberFormat(locale: string): Intl.NumberFormat {
+  const key = getLatnLocaleTag(locale);
+  let formatter = sessionHoursNumberFormatCache.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(key, { maximumFractionDigits: 2 });
+    sessionHoursNumberFormatCache.set(key, formatter);
+  }
+  return formatter;
+}
+
 /** Session duration cell: minutes converted to locale-formatted hours, mirroring the billable-hours convention of the summary duration field. */
 function formatSessionHours(minutes: number | null, locale: string, notSet: string): string {
   if (minutes === null || !Number.isFinite(minutes)) {
     return notSet;
   }
-  return new Intl.NumberFormat(getLatnLocaleTag(locale), { maximumFractionDigits: 2 }).format(
-    minutes / MINUTES_PER_HOUR
-  );
+  return getSessionHoursNumberFormat(locale).format(minutes / MINUTES_PER_HOUR);
 }
 
 /** Link-time snapshot amount paired with its snapshot currency; the pair is null-safe together. */

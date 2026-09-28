@@ -155,9 +155,21 @@ function summarizeTotals(rows: readonly SessionAuditReportRow[], groups: readonl
   };
 }
 
+/** Cache of max-1 fraction digit Intl.NumberFormat instances keyed by locale tag. */
+const hoursNumberFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getHoursNumberFormat(locale: string): Intl.NumberFormat {
+  let formatter = hoursNumberFormatCache.get(locale);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: HOURS_FRACTION_DIGITS });
+    hoursNumberFormatCache.set(locale, formatter);
+  }
+  return formatter;
+}
+
 /** Renders minutes as locale-aware hours matching the "Duration (h)" header. */
 function formatHours(minutes: number, locale: string): string {
-  return new Intl.NumberFormat(locale, { maximumFractionDigits: HOURS_FRACTION_DIGITS }).format(minutes / 60);
+  return getHoursNumberFormat(locale).format(minutes / 60);
 }
 
 /** Money cell: currency snapshot when known, the shared muted dash otherwise. */
