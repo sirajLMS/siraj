@@ -7,6 +7,18 @@ import { TeacherDueService } from "@/backend/services/teacher/teacher-due.servic
 import type { SupervisorDashboardReturnType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
+const MONTH_YEAR_OPTIONS: Intl.DateTimeFormatOptions = { month: "long", year: "numeric" };
+const dtfCache = new Map<string, Intl.DateTimeFormat>();
+
+function getMonthYearDtf(locale: string): Intl.DateTimeFormat {
+  let dtf = dtfCache.get(locale);
+  if (!dtf) {
+    dtf = new Intl.DateTimeFormat(locale, MONTH_YEAR_OPTIONS);
+    dtfCache.set(locale, dtf);
+  }
+  return dtf;
+}
+
 const MONTH_NAMES_EN = [
   "January",
   "February",
@@ -28,9 +40,7 @@ export namespace SupervisorDashboardService {
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
     const label =
-      locale && locale !== "en"
-        ? new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(now)
-        : `${MONTH_NAMES_EN[month - 1]} ${year}`;
+      locale && locale !== "en" ? getMonthYearDtf(locale).format(now) : `${MONTH_NAMES_EN[month - 1]} ${year}`;
     return { year, month, label };
   }
 

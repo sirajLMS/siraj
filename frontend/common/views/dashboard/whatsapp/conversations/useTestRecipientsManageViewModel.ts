@@ -3,6 +3,7 @@
 import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import { AppPermission, WhatsappTestRecipientStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   addWhatsappTestRecipientMutationDocument,
@@ -22,6 +23,11 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 import { useAppLocale } from "@/shared/locale/localeContext";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { WhatsappConversationsLabels } from "@/shared/locale/types/whatsappConversations";
+
+const TIMESTAMP_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  dateStyle: "medium",
+  timeStyle: "short",
+};
 
 const RECIPIENT_LIMIT = 5;
 
@@ -149,10 +155,7 @@ export function useTestRecipientsManageViewModel(accountId: string): TestRecipie
       if (!iso) {
         return "";
       }
-      return new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(new Date(iso));
+      return getDateTimeFormatter(locale === "ar" ? "ar" : "en", TIMESTAMP_FORMAT_OPTIONS).format(new Date(iso));
     },
     [locale]
   );

@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-09-28 - Reusing getDateTimeFormatter for View-Model Date Formatting
+
+**Learning:** Direct instantiation of `new Intl.DateTimeFormat(...)` inside date formatting callbacks (`formatTimestamp`, `formatDate`, `dayDividerLabel`) causes repeated JS runtime ICU object instantiation across list renderings and view-model hook re-computations.
+**Action:** Leverage `@/frontend/common/components/intl/dateFormat`'s `getDateTimeFormatter` and lift `Intl.DateTimeFormatOptions` out of function scope to reuse cached `Intl.DateTimeFormat` instances across render cycles.
