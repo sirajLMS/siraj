@@ -386,9 +386,22 @@ function buildRecipientViewRow(
   };
 }
 
+/** Cache of `Intl.RelativeTimeFormat` instances keyed by locale tag to avoid CPU and GC overhead in view-model renders. */
+const relativeTimeFormatCache = new Map<string, Intl.RelativeTimeFormat>();
+
+function getRelativeTimeFormat(locale: string): Intl.RelativeTimeFormat {
+  const lang = locale === "ar" ? "ar" : "en";
+  let formatter = relativeTimeFormatCache.get(lang);
+  if (!formatter) {
+    formatter = new Intl.RelativeTimeFormat(lang, { numeric: "always" });
+    relativeTimeFormatCache.set(lang, formatter);
+  }
+  return formatter;
+}
+
 function formatWindowRemaining(remainingMs: number, locale: string): string {
   const totalMinutes = Math.max(1, Math.ceil(remainingMs / 60_000));
-  const formatter = new Intl.RelativeTimeFormat(locale === "ar" ? "ar" : "en", { numeric: "always" });
+  const formatter = getRelativeTimeFormat(locale);
   if (totalMinutes >= 60) {
     return formatter.format(Math.ceil(totalMinutes / 60), "hour");
   }
