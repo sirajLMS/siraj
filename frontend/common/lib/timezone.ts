@@ -189,14 +189,22 @@ export function getTimezoneSelectLabel(ianaTimezone: string, locale?: string, da
   return `${pathLabel} (${offsetLabel})`;
 }
 
+const enCollator = new Intl.Collator("en");
+const arCollator = new Intl.Collator("ar");
+
 export function getTimezoneOptions(locale?: string, date = new Date()): TimezoneOption[] {
-  return IANA_TIMEZONE_IDS_STRINGS.map(id => {
+  const collator = locale === "ar" ? arCollator : enCollator;
+  const len = IANA_TIMEZONE_IDS_STRINGS.length;
+  const options: TimezoneOption[] = new Array(len);
+
+  for (let i = 0; i < len; i++) {
+    const id = IANA_TIMEZONE_IDS_STRINGS[i];
     const pathLabel = getTimezonePathLabel(id, locale);
     // Compute the offset once per timezone and derive the label from it
     const offsetMinutes = getTimezoneOffsetMinutes(id, date);
     const offsetLabel = formatOffsetFromMinutes(offsetMinutes);
     const timezoneId = toIanaTimezone(id);
-    return {
+    options[i] = {
       id: timezoneId,
       label: `${pathLabel} (${offsetLabel})`,
       pathLabel,
@@ -204,11 +212,15 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
       offsetMinutes,
       emoji: getTimezoneEmoji(id),
     };
-  }).toSorted((left, right) => {
+  }
+
+  // Use cached Intl.Collator instance and in-place .sort() to avoid ~400+ localeCompare
+  // collator initializations and intermediate array allocations during timezone selection
+  return options.sort((left, right) => {
     if (left.offsetMinutes !== right.offsetMinutes) {
       return left.offsetMinutes - right.offsetMinutes;
     }
-    return left.pathLabel.localeCompare(right.pathLabel, locale === "ar" ? "ar" : "en");
+    return collator.compare(left.pathLabel, right.pathLabel);
   });
 }
 
