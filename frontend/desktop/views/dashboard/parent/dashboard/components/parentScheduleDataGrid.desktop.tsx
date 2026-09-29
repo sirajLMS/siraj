@@ -6,6 +6,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   ParentBookingStatus,
@@ -197,9 +198,7 @@ export function ParentScheduleDataGridDesktop({
                 meetingUrlStatus={resolveMeetingUrlStatus(row)}
                 joinLabel={labels.schedule.joinVideo}
                 compact
-                onJoin={
-                  isJoinable ? () => window.open(row.meetingJoinUrl ?? "", "_blank", "noopener,noreferrer") : undefined
-                }
+                onJoin={isJoinable ? () => safeOpenWindow(row.meetingJoinUrl) : undefined}
               />
             </Box>
           );
