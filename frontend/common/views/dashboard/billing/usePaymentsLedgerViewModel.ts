@@ -70,13 +70,28 @@ function formatLedgerDate(isoDate: string, locale: AppLocale): string {
   return formatDate(date, locale, MISSING_VALUE);
 }
 
+/**
+ * Module-level cache for `Intl.NumberFormat` instances keyed by locale tag.
+ * Constructing `Intl.NumberFormat` instances repeatedly inside render loops or array mappings
+ * is computationally expensive (~100x slower). Caching instances here eliminates CPU overhead
+ * and garbage collection allocations when mapping ledger rows.
+ */
+const numberFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getLedgerNumberFormat(locale: AppLocale): Intl.NumberFormat {
+  let formatter = numberFormatCache.get(locale);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    numberFormatCache.set(locale, formatter);
+  }
+  return formatter;
+}
+
 /** Money amounts are decimal strings from the API; always render two fraction digits. */
 function formatLedgerAmount(amount: string | null, currency: string | null, locale: AppLocale): string {
   const rawAmount = amount?.trim() ?? "";
   const numeric = rawAmount === "" ? Number.NaN : Number(rawAmount);
-  const formatted = Number.isFinite(numeric)
-    ? new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numeric)
-    : MISSING_VALUE;
+  const formatted = Number.isFinite(numeric) ? getLedgerNumberFormat(locale).format(numeric) : MISSING_VALUE;
   const currencyCode = currency?.trim() ?? "";
   return currencyCode ? `${formatted} ${currencyCode}` : formatted;
 }
