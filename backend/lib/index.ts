@@ -20,5 +20,6 @@ export * from "./sanitize";
 export * from "./server";
 export * from "./storage";
 export * from "./timezone";
+export * from "./trusted-origin";
 export * from "./whatsapp-coercion";
 export * from "./whatsapp-sanitize";

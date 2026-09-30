@@ -189,7 +189,15 @@ export function getTimezoneSelectLabel(ianaTimezone: string, locale?: string, da
   return `${pathLabel} (${offsetLabel})`;
 }
 
+/**
+ * Cached `Intl.Collator` instances for the timezone sort. `String.prototype.localeCompare`
+ * constructs a collator per comparison, which dominates sorting ~420 timezone labels.
+ */
+const enCollator = new Intl.Collator("en");
+const arCollator = new Intl.Collator("ar");
+
 export function getTimezoneOptions(locale?: string, date = new Date()): TimezoneOption[] {
+  const collator = locale === "ar" ? arCollator : enCollator;
   return IANA_TIMEZONE_IDS_STRINGS.map(id => {
     const pathLabel = getTimezonePathLabel(id, locale);
     // Compute the offset once per timezone and derive the label from it
@@ -208,7 +216,7 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
     if (left.offsetMinutes !== right.offsetMinutes) {
       return left.offsetMinutes - right.offsetMinutes;
     }
-    return left.pathLabel.localeCompare(right.pathLabel, locale === "ar" ? "ar" : "en");
+    return collator.compare(left.pathLabel, right.pathLabel);
   });
 }
 

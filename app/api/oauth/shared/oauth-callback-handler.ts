@@ -15,7 +15,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { getServerUserContext } from "@/backend/lib";
+import { getServerUserContext, resolveTrustedOrigin } from "@/backend/lib";
 import { ensureEnvironmentValidated } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { checkRateLimit, getClientIdentifier, oauthCallbackRateLimiter } from "@/backend/lib/ratelimit";
@@ -113,5 +113,5 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
     return NextResponse.json({ error: tErrors.failedToCompleteOAuthTokenExchange }, { status: 502 });
   }
 
-  return NextResponse.redirect(new URL(returnPath, url.origin), 302);
+  return NextResponse.redirect(new URL(returnPath, resolveTrustedOrigin(request)), 302);
 }

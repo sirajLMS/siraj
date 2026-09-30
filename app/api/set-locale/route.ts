@@ -1,18 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getEnv, getEnvironmentConfig } from "@/backend/lib/env";
+import { ALLOWED_ORIGINS, resolveTrustedOrigin } from "@/backend/lib";
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import { isRelativeSafePath } from "@/frontend/common/lib/safeRedirect";
 import { getServerTranslations } from "@/shared/locale";
 import { locales } from "@/shared/locale/AppLocale";
 
 const envConfig = getEnvironmentConfig();
-const isProduction = envConfig.nodeEnv === "production";
-const ALLOWED_ORIGINS = new Set(
-  [
-    getEnv("NEXT_PUBLIC_BASE_URL", ""),
-    envConfig.allowedOrigin,
-    ...(isProduction ? [] : ["http://localhost:3000"]),
-  ].filter((v): v is string => typeof v === "string" && v.length > 0)
-);
 
 const LOCALE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year
 
@@ -60,29 +53,6 @@ function isAllowedOrigin(request: NextRequest): boolean {
  */
 function resolveLocaleFromRequest(request: NextRequest): string {
   return request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
-}
-
-/**
- * Resolve redirect origin, preferring Host / X-Forwarded-* only when the host
- * is trusted (matches the request URL's own host or an ALLOWED_ORIGINS entry)
- * so a hostile client cannot inject an arbitrary host into the redirect target.
- */
-export function resolveTrustedOrigin(request: NextRequest): string {
-  const candidateHost = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
-  if (candidateHost) {
-    const candidateHostName = candidateHost.split(":")[0];
-    const isTrusted =
-      candidateHost === request.nextUrl.host ||
-      candidateHostName === request.nextUrl.hostname ||
-      ALLOWED_ORIGINS.has(candidateHost) ||
-      ALLOWED_ORIGINS.has(`http://${candidateHost}`) ||
-      ALLOWED_ORIGINS.has(`https://${candidateHost}`);
-    if (isTrusted) {
-      const proto = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "");
-      return `${proto}://${candidateHost}`;
-    }
-  }
-  return request.nextUrl.origin;
 }
 
 export async function GET(request: NextRequest) {

@@ -32,10 +32,29 @@ export type EditableTypographySlotProps = {
   readonly defaultTextFieldSize?: boolean;
 };
 
-const HoverTypography = styled(Typography)(({ theme }) => ({
+/**
+ * Display control. It renders as a native `<button>` so keyboard users get Enter/Space
+ * activation for free; the resets keep the surrounding text flow intact.
+ */
+const HoverButton = styled("button")(({ theme }) => ({
+  cursor: "pointer",
+  font: "inherit",
+  color: "inherit",
+  textAlign: "inherit",
+  background: "none",
+  border: 0,
+  borderRadius: Number(theme.shape.borderRadius),
+  paddingBlock: 0,
+  paddingInline: theme.spacing(0.5),
+  marginBlock: 0,
+  marginInline: theme.spacing(-0.5),
+  transition: theme.transitions.create(["background-color", "outline"]),
   "&:hover": {
-    cursor: "text",
     background: theme.palette.action.hover,
+  },
+  "&:focus-visible": {
+    outline: `2px solid ${theme.palette.primary.main}`,
+    outlineOffset: 2,
   },
 }));
 
@@ -63,6 +82,7 @@ function EditableTypographyEditField({
   return (
     <TextField
       {...textField}
+      autoFocus
       size={defaultTextFieldSize ? (textField.size ?? "small") : textField.size}
       sx={textFieldSx}
       value={inputValue}
@@ -217,15 +237,20 @@ export function EditableTypographyShared({
     );
   }
 
+  const editHint = doubleClickToEdit ? t.doubleClickToEdit : t.clickToEdit;
+
   return (
-    <HoverTypography
-      {...typography}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      {value}
-    </HoverTypography>
+    <Tooltip title={editHint}>
+      <HoverButton
+        type="button"
+        aria-label={`${value} (${editHint})`}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <Typography {...typography}>{value}</Typography>
+      </HoverButton>
+    </Tooltip>
   );
 }

@@ -1,4 +1,6 @@
 export const uiEditableTypographyAr = {
   save: "حفظ",
   cancel: "إلغاء",
+  clickToEdit: "انقر للتعديل",
+  doubleClickToEdit: "انقر مرتين للتعديل",
 };

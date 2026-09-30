@@ -10,6 +10,7 @@ import {
   type MeetingUrlStatus,
   MeetingUrlStatusBadge,
 } from "@/frontend/common/components/ui/display/meetingConfig/MeetingUrlStatusBadge";
+import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import { Link } from "@/shared/i18n";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { MeetingUrlStatusLabels } from "@/shared/locale/types/dashboard/meeting-url-status";
@@ -73,7 +74,7 @@ function JoinButton({
     if (onJoin) {
       onJoin();
     } else {
-      window.open(url, "_blank", "noopener,noreferrer");
+      safeOpenWindow(url);
     }
   }, [onJoin, url]);
 

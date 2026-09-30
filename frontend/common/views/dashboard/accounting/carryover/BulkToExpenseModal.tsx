@@ -82,6 +82,18 @@ interface BulkSelectionSummary {
   readonly currency: CurrencyCode | null;
 }
 
+/** Cache of `Intl.NumberFormat` instances keyed by locale tag to avoid CPU and GC overhead in selection summaries. */
+const summaryNumberFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getSummaryNumberFormat(locale: string): Intl.NumberFormat {
+  let formatter = summaryNumberFormatCache.get(locale);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    summaryNumberFormatCache.set(locale, formatter);
+  }
+  return formatter;
+}
+
 /**
  * Count, total, and currency line for the selection. The currency follows the
  * list aggregate convention (most rows win, ties go to the earliest-seen
@@ -112,10 +124,7 @@ function summarizeSelection(
       leadingCount = count;
     }
   }
-  const totalAmount = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(total);
+  const totalAmount = getSummaryNumberFormat(locale).format(total);
   return { count: carryoverIds.length, totalAmount, currency };
 }
 

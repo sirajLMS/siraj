@@ -197,16 +197,23 @@ describe("M11 — storage file responses are sandboxed", () => {
 });
 
 describe("H5 — host-header injection defense on redirect routes", () => {
-  test("set-locale and logout routes never redirect to a client-supplied unknown host", async () => {
+  test("redirect routes resolve their origin through the shared trusted-origin helper", async () => {
+    const helperSrc = await readSrc("backend/lib/trusted-origin.ts");
     const setLocaleSrc = await readSrc("app/api/set-locale/route.ts");
     const logoutSrc = await readSrc("app/logout/route.ts");
+    const oauthHandlerSrc = await readSrc("app/api/oauth/shared/oauth-callback-handler.ts");
 
-    // Both must gate candidate host headers against nextUrl host / allowlist.
+    // The helper owns the gating against nextUrl host / allowlist.
+    expect(helperSrc).toContain("ALLOWED_ORIGINS.has");
+    expect(helperSrc).toContain("request.nextUrl.origin");
+    // Every redirect route must go through it rather than interpolating a raw host.
     expect(setLocaleSrc).toContain("resolveTrustedOrigin");
     expect(setLocaleSrc).toContain("ALLOWED_ORIGINS.has");
-    expect(logoutSrc).toContain("ALLOWED_ORIGINS.has");
-    // Raw host header must not be interpolated into the redirect without a trust check.
+    expect(logoutSrc).toContain("resolveTrustedOrigin");
+    expect(oauthHandlerSrc).toContain("resolveTrustedOrigin");
+    // Raw host header or unvalidated url.origin must not be interpolated into redirect targets.
     expect(logoutSrc).not.toMatch(/return host \? `\$\{proto\}:\/\/\$\{host\}`/);
+    expect(oauthHandlerSrc).not.toContain("NextResponse.redirect(new URL(returnPath, url.origin)");
   });
 
   test("logout route sanitizes client IP via the shared ratelimit identifier chain", async () => {

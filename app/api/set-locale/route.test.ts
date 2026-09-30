@@ -8,6 +8,7 @@ describe("Host Header Injection Defense in Redirects", () => {
     test("rejects spoofed X-Forwarded-Host header and falls back to safe request.nextUrl.origin", async () => {
       const req = new NextRequest("http://localhost:3000/api/set-locale?locale=en&redirect=/dashboard", {
         headers: {
+          origin: "http://localhost:3000",
           "x-forwarded-host": "evil-attacker.com",
         },
       });
@@ -22,7 +23,53 @@ describe("Host Header Injection Defense in Redirects", () => {
     test("accepts valid host matching request.nextUrl.host", async () => {
       const req = new NextRequest("http://localhost:3000/api/set-locale?locale=en&redirect=/dashboard", {
         headers: {
+          origin: "http://localhost:3000",
           host: "localhost:3000",
+        },
+      });
+
+      const res = await setLocaleGET(req);
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toBe("http://localhost:3000/dashboard");
+    });
+
+    test("accepts TLS-terminated request with X-Forwarded-Proto https when host matches request.nextUrl.host", async () => {
+      const req = new NextRequest("http://localhost:3000/api/set-locale?locale=en&redirect=/dashboard", {
+        headers: {
+          origin: "http://localhost:3000",
+          host: "localhost:3000",
+          "x-forwarded-proto": "https",
+        },
+      });
+
+      const res = await setLocaleGET(req);
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toBe("https://localhost:3000/dashboard");
+    });
+
+    test("falls back safely to nextUrl.origin when X-Forwarded-Host contains invalid URL characters", async () => {
+      const req = new NextRequest("http://localhost:3000/api/set-locale?locale=en&redirect=/dashboard", {
+        headers: {
+          origin: "http://localhost:3000",
+          "x-forwarded-host": "invalid host with spaces.com",
+        },
+      });
+
+      const res = await setLocaleGET(req);
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location");
+      expect(location).toBe("http://localhost:3000/dashboard");
+      expect(location).not.toContain("invalid host");
+    });
+
+    test("falls back safely to nextUrl.origin when X-Forwarded-Proto is not http(s)", async () => {
+      const req = new NextRequest("http://localhost:3000/api/set-locale?locale=en&redirect=/dashboard", {
+        headers: {
+          origin: "http://localhost:3000",
+          host: "localhost:3000",
+          "x-forwarded-proto": "javascript",
         },
       });
 

@@ -8,15 +8,22 @@ const IANA_TIMEZONE_SET = new Set<string>(IANA_TIMEZONE_IDS);
 /**
  * Cache Intl.DateTimeFormat instances to avoid expensive JS runtime ICU / DateTimeFormat
  * object instantiation on every date formatting or offset calculation call.
+ * Primary cache is keyed on options object identity (WeakMap) to avoid JSON.stringify
+ * serialization overhead on hot formatting and offset calculation paths.
  */
-const dtfCache = new Map<string, Intl.DateTimeFormat>();
+const optionsWeakCache = new WeakMap<Intl.DateTimeFormatOptions, Map<string, Intl.DateTimeFormat>>();
 
 function getDtf(locale: string, timeZone: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
-  const key = `${locale}:${timeZone}:${JSON.stringify(options)}`;
-  let dtf = dtfCache.get(key);
+  let localeMap = optionsWeakCache.get(options);
+  if (!localeMap) {
+    localeMap = new Map<string, Intl.DateTimeFormat>();
+    optionsWeakCache.set(options, localeMap);
+  }
+  const key = `${locale}:${timeZone}`;
+  let dtf = localeMap.get(key);
   if (!dtf) {
     dtf = new Intl.DateTimeFormat(locale, { timeZone, ...options });
-    dtfCache.set(key, dtf);
+    localeMap.set(key, dtf);
   }
   return dtf;
 }
@@ -58,8 +65,10 @@ function partsToEpochMs(parts: Intl.DateTimeFormatPart[]): number {
 
 function getOffsetMs(ianaTimezone: string, d: Date): number {
   const tzDtf = getDtf("en-US", ianaTimezone, OFFSET_PARTS_OPTIONS);
-  const utcDtf = getDtf("en-US", "UTC", OFFSET_PARTS_OPTIONS);
-  return partsToEpochMs(tzDtf.formatToParts(d)) - partsToEpochMs(utcDtf.formatToParts(d));
+  // d is a UTC Date instance; wall-clock UTC epoch ms truncated to seconds equals d.getTime() - d.getUTCMilliseconds().
+  // Eliminating utcDtf.formatToParts(d) avoids extra Intl.DateTimeFormat execution and array allocations.
+  const utcMs = d.getTime() - d.getUTCMilliseconds();
+  return partsToEpochMs(tzDtf.formatToParts(d)) - utcMs;
 }
 
 /** UTC offset in milliseconds at `d`; falls back to 0 (treated as UTC) for invalid timezones. */
@@ -89,22 +98,23 @@ export function isValidIanaTimezone(value: string): boolean {
   return !isExcludedIanaTimezoneId(normalized) && IANA_TIMEZONE_SET.has(normalized);
 }
 
+const TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+};
+
 export function formatInstantInTimezone(date: Date, ianaTimezone: string, locale?: string): string {
   const localeTag = locale ? getLatnLocaleTag(locale) : "en-US";
-  const formatOptions: Intl.DateTimeFormatOptions = {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  };
   try {
-    return getDtf(localeTag, ianaTimezone, formatOptions).format(date);
+    return getDtf(localeTag, ianaTimezone, TIME_FORMAT_OPTIONS).format(date);
   } catch (error) {
     logger.error("Failed to format date in timezone, falling back to UTC", {
       error,
       ianaTimezone,
       date: Number.isNaN(date.getTime()) ? "Invalid Date" : date.toISOString(),
     });
-    return getDtf(localeTag, "UTC", formatOptions).format(date);
+    return getDtf(localeTag, "UTC", TIME_FORMAT_OPTIONS).format(date);
   }
 }
 
