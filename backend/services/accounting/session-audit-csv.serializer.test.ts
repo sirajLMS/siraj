@@ -105,6 +105,8 @@ describe("serializeSessionAuditCsv", () => {
     ["formula at sign", "@SUM(A1)", "'@SUM(A1)"],
     ["leading tab", "\t=CMD()", "'\t=CMD()"],
     ["leading carriage return", "\r=1+1", `"'\r=1+1"`],
+    ["leading space before formula", "  =1+1", "'  =1+1"],
+    ["leading space before plus formula", "  +cmd|'/c calc'!A0", "'  +cmd|'/c calc'!A0"],
   ])("neutralizes spreadsheet formula injection (%s)", (_label, raw, expected) => {
     const csv = serializeSessionAuditCsv([buildRow({ payrollNote: raw })]);
     const lines = csv.split("\r\n");

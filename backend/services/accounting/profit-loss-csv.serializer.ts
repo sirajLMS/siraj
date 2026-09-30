@@ -20,9 +20,10 @@ interface CsvColumn<Row> {
   readonly pick: (row: Row) => string;
 }
 
-/** RFC 4180 escaping plus formula neutralization: cells starting with `=`, `+`, `-`, `@`, a tab or a CR get a `'` prefix. */
+/** RFC 4180 escaping plus formula neutralization: cells starting with `=`, `+`, `-`, `@`, a tab or a CR (including after leading whitespace) get a `'` prefix. */
 function toCsvCell(value: string): string {
-  const startsFormula = value.length > 0 && CSV_FORMULA_PREFIXES.some(prefix => value.startsWith(prefix));
+  const trimmed = value.trimStart();
+  const startsFormula = trimmed.length > 0 && CSV_FORMULA_PREFIXES.some(prefix => trimmed.startsWith(prefix));
   const hardened = startsFormula ? `'${value}` : value;
   if (hardened.includes(",") || hardened.includes('"') || hardened.includes("\n") || hardened.includes("\r")) {
     return `"${hardened.replaceAll('"', '""')}"`;
