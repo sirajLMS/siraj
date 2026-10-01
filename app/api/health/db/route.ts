@@ -1,7 +1,8 @@
 import { sql } from "drizzle-orm";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { queryDb } from "@/backend/db";
 import { logger } from "@/backend/lib/logger";
+import { apiRateLimiter, checkRateLimit, getClientIdentifier } from "@/backend/lib/ratelimit";
 
 /**
  * Lightweight database liveness probe consumed by the full-screen
@@ -18,7 +19,14 @@ function probeTimeout(): Promise<never> {
   });
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const ip = getClientIdentifier(request);
+  const rateLimit = await checkRateLimit(`health-db:${ip}`, apiRateLimiter);
+  if (!rateLimit.success) {
+    logger.warn(`DB health probe rate limit exceeded for ${ip}`);
+    return NextResponse.json({ status: "unavailable" }, { status: 429, headers: NO_STORE });
+  }
+
   try {
     await Promise.race([queryDb().execute(sql`SELECT 1`), probeTimeout()]);
     return NextResponse.json({ status: "ok" }, { headers: NO_STORE });
