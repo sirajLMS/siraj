@@ -2,7 +2,7 @@
 
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import { Alert, Box, IconButton, Typography } from "@mui/material";
+import { Alert, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -58,15 +58,17 @@ export function TimezoneWarningBanner({
       severity="warning"
       sx={mergeSx({ mb: { xs: 0, lg: 3 } }, edgeToEdgeSx, classDetailsContentPaddingSx)}
       action={
-        <IconButton
-          aria-label={tCommon.ariaClose}
-          color="inherit"
-          size="small"
-          onClick={onDismiss}
-          sx={{ opacity: 0.6, "&:hover": { opacity: 1 } }}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
+        <Tooltip title={tCommon.ariaClose}>
+          <IconButton
+            aria-label={tCommon.ariaClose}
+            color="inherit"
+            size="small"
+            onClick={onDismiss}
+            sx={{ opacity: 0.6, "&:hover": { opacity: 1 } }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       }
     >
       <Box>
