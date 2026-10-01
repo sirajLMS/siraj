@@ -2,6 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
+import { getDateTimeFormatter } from "@/frontend/common/components/intl/dateFormat";
 import type { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { logger } from "@/frontend/common/utils/logger";
@@ -14,10 +15,14 @@ import {
   buildRedemptionByType,
   computeInsightsMetrics,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaInsights.helpers";
+import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { useAppLocale } from "@/shared/locale";
 import { useAppTranslation } from "@/shared/locale/client";
 import { DashboardBillingQuota } from "@/shared/locale/namespaces";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
+
+/** Cache options object for Intl.DateTimeFormat to utilize getDateTimeFormatter WeakMap cache. */
+const MONTH_SHORT_OPTIONS: Intl.DateTimeFormatOptions = { month: "short" };
 
 type InsightsDateRange = "all" | "month" | "quarter" | "year";
 
@@ -139,7 +144,8 @@ export function useQuotaInsightsViewModel(): QuotaInsightsViewModel {
     [allQuotas, dateRange, kind, status, studentId]
   );
 
-  const monthFormatter = useMemo(() => new Intl.DateTimeFormat(locale, { month: "short" }), [locale]);
+  // Use getDateTimeFormatter to reuse cached Intl.DateTimeFormat instances and eliminate instantiation overhead
+  const monthFormatter = useMemo(() => getDateTimeFormatter(getLatnLocaleTag(locale), MONTH_SHORT_OPTIONS), [locale]);
 
   const metrics = useMemo(() => computeInsightsMetrics(filteredQuotas), [filteredQuotas]);
 
