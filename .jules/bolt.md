@@ -7,3 +7,8 @@
 
 **Learning:** Generating options for ~420 timezones in `getTimezoneOptions` previously called `date.toLocaleString("en-US", { timeZone: ... })` twice per timezone, instantiating ~840 heavy JS runtime `Intl.DateTimeFormat` objects and performing O(N) array scans (`includes`) on validity checks. This took ~1.1s per `getTimezoneOptions` call.
 **Action:** Cache `Intl.DateTimeFormat` instances in a `Map`, reuse computed `offsetMinutes` for `offsetLabel`, and use a `Set` for `isValidIanaTimezoneId`.
+
+## 2026-09-10 - Caching Intl.DateTimeFormat in batch schedule materialization
+
+**Learning:** In `scripts/ondemand-instance-generator.ts`, generating candidate class instances across 500 active schedules over a 2-week window instantiated `Intl.DateTimeFormat` objects inline up to 3 times per date iteration per schedule, triggering thousands of redundant V8/ICU runtime object allocations.
+**Action:** Cache `Intl.DateTimeFormat` instances in module-level `Map` objects keyed by IANA timezone ID (`shortWeekdayDtfCache`, `datePartsDtfCache`, `tzOffsetDtfCache`).
